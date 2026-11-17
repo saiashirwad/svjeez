@@ -89,21 +89,162 @@ export const align = (
   return out;
 };
 
-/** Every text run under an item, but none under a box that turned: those can't slide on their own. */
-export const runsOf = (it: Item, out: TextRun[] = []): TextRun[] => {
+/**
+ * Every text run under an item, but none under a box that turned (those can't slide on their own) or under a box in
+ * `skip`.
+ */
+export const runsOf = (it: Item, out: TextRun[] = [], skip?: ReadonlySet<Box>): TextRun[] => {
   if (it.kind === "text") out.push(it);
-  else if (it.kind === "box" && !it.transform) for (const child of it.children) runsOf(child, out);
+  else if (it.kind === "box" && !it.transform && !skip?.has(it))
+    for (const child of it.children) runsOf(child, out, skip);
 
   return out;
 };
 
-/** An item without the runs in `drop`, or nothing when it is one of them. */
-export const without = (it: Item, drop: ReadonlySet<TextRun>): Item | undefined => {
+/** Every box under an item, itself included, but none under a box that turned. */
+const boxesOf = (it: Item, out: Box[] = []): Box[] => {
+  if (it.kind !== "box") return out;
+
+  out.push(it);
+
+  if (!it.transform) for (const child of it.children) boxesOf(child, out);
+
+  return out;
+};
+
+/** An item without the runs in `drop` and the boxes in `boxes`, or nothing when it is one of them. */
+export const without = (
+  it: Item,
+  drop: ReadonlySet<TextRun>,
+  boxes: ReadonlySet<Box> = new Set(),
+): Item | undefined => {
   if (it.kind === "text") return drop.has(it) ? undefined : it;
 
-  if (it.kind !== "box" || it.transform || !runsOf(it).some((r) => drop.has(r))) return it;
+  if (it.kind === "box" && boxes.has(it)) return undefined;
 
-  return { ...it, children: it.children.flatMap((c) => without(c, drop) ?? []) };
+  if (
+    it.kind !== "box" ||
+    it.transform ||
+    (!runsOf(it).some((r) => drop.has(r)) && !boxesOf(it).some((b) => boxes.has(b)))
+  )
+    return it;
+
+  return { ...it, children: it.children.flatMap((c) => without(c, drop, boxes) ?? []) };
+};
+
+/** The boxes in `boxes` under an item, outermost only, in drawing order. */
+export const insideOf = (it: Item, boxes: ReadonlySet<Box>, out: Box[] = []): Box[] => {
+  if (it.kind !== "box") return out;
+
+  if (boxes.has(it)) out.push(it);
+  else if (!it.transform) for (const child of it.children) insideOf(child, boxes, out);
+
+  return out;
+};
+
+/**
+ * Keyed elements that changed parent in one transition: `data-key` names one element page-wide, so the element
+ * that leaves one parent and the one with its key that arrives in another are the same, and it moves rather than
+ * fading out in one place and in at the other. `carried` maps each arrival to what left; `left` is what left.
+ * Only elements that would otherwise fade count, so siblings that pair in place keep doing so, and an element
+ * inside one that moves goes with it.
+ */
+export interface Carried {
+  readonly carried: ReadonlyMap<Box, Box>;
+  readonly left: ReadonlySet<Box>;
+  /**
+   * Arrivals drawn over the whole page while they move, as a dragged element is: inside its new parent, siblings
+   * that come later would cover it on its way. Only those whose ancestors, old and new, neither clip nor fade.
+   */
+  readonly above: ReadonlySet<Box>;
+}
+
+/** The boxes from `root` (left out) down to `target`'s parent, or undefined when it isn't under `root`. */
+const ancestors = (root: Box, target: Box): Box[] | undefined => {
+  for (const child of root.children) {
+    if (child.kind !== "box") continue;
+
+    if (child === target) return [];
+
+    const below = ancestors(child, target);
+
+    if (below) return [child, ...below];
+  }
+
+  return undefined;
+};
+
+/** A box that draws its children as they are: no clip, no fade, no blend, no mask. */
+const plain = (b: Box) =>
+  !b.clip && b.opacity >= 1 && b.darkOpacity === undefined && !b.blend && !b.isolate && !b.mask;
+
+export const carriedOf = (a: Box, b: Box, pairBy?: PairBy): Carried => {
+  const gone: Box[] = [];
+  const came: Box[] = [];
+
+  const visit = (x: Box, y: Box) => {
+    for (const [old, it] of align(x.children, y.children, pairBy)) {
+      if (old?.kind === "box" && it?.kind === "box") {
+        if (sameTransform(old, it)) visit(old, it);
+      } else {
+        if (old) boxesOf(old, gone);
+
+        if (it) boxesOf(it, came);
+      }
+    }
+  };
+
+  visit(a, b);
+
+  // A key the page uses twice names no one element.
+  const count = (root: Box) => {
+    const seen = new Map<string, number>();
+
+    for (const box of boxesOf(root))
+      if (box.key !== undefined) seen.set(box.key, (seen.get(box.key) ?? 0) + 1);
+
+    return seen;
+  };
+
+  const inA = count(a);
+  const inB = count(b);
+
+  const byKey = new Map(
+    gone.flatMap((box) => (box.key !== undefined ? [[box.key, box] as const] : [])),
+  );
+
+  const carried = new Map<Box, Box>();
+  const left = new Set<Box>();
+  // Boxes inside a pair already taken, which move with it.
+  const taken = new Set<Box>();
+
+  for (const box of came) {
+    const key = box.key;
+    const old = key === undefined ? undefined : byKey.get(key);
+
+    if (
+      !old ||
+      taken.has(box) ||
+      taken.has(old) ||
+      inA.get(key!) !== 1 ||
+      inB.get(key!) !== 1 ||
+      !sameTransform(old, box)
+    )
+      continue;
+
+    carried.set(box, old);
+    left.add(old);
+
+    for (const inner of [...boxesOf(box), ...boxesOf(old)]) taken.add(inner);
+  }
+
+  const above = new Set(
+    [...carried].flatMap(([box, old]) =>
+      [...(ancestors(b, box) ?? [b]), ...(ancestors(a, old) ?? [a])].every(plain) ? [box] : [],
+    ),
+  );
+
+  return { carried, left, above };
 };
 
 export const sameFace = (a: TextRun, b: TextRun): boolean =>
@@ -129,7 +270,8 @@ export interface Moves {
 }
 
 /** The moves from `a` to `b`, found on the same walk the drawing makes, among the runs it would fade out and in. */
-export const movesOf = (a: Box, b: Box, pairBy?: PairBy): Moves => {
+export const movesOf = (a: Box, b: Box, pairBy?: PairBy, carried?: Carried): Moves => {
+  const skip = new Set<Box>([...(carried?.left ?? []), ...(carried?.carried.keys() ?? [])]);
   const olds: TextRun[] = [];
   const news: TextRun[] = [];
   // Text a field lost whole (it shows its placeholder now): it may have gone anywhere, so it can land far away.
@@ -149,8 +291,8 @@ export const movesOf = (a: Box, b: Box, pairBy?: PairBy): Moves => {
           olds.push(old);
           emptied.add(old);
         }
-      } else if (old) runsOf(old, olds);
-      else if (it) runsOf(it, news);
+      } else if (old) runsOf(old, olds, skip);
+      else if (it) runsOf(it, news, skip);
     }
   };
 

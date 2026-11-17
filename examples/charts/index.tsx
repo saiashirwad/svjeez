@@ -104,10 +104,10 @@ export default function build(): string {
         {key(330, blue, "merged", 0.5)}
         {heading(532, "Time to first review", "Median hours, by week", 0.8)}
         <g animation={enter({ at: 0.4, over: 0.6 })}>{volume.node}</g>
-        {open.node}
-        {done.node}
+        {open}
+        {done}
         <g animation={enter({ at: 0.9, over: 0.6 })}>{turnaround.node}</g>
-        {wait.node}
+        {wait}
         <g animation={rise(2.8)}>
           <line
             x1={ships}

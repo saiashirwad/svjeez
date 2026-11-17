@@ -15,8 +15,14 @@ export const params = {
 };
 
 export default (p = defaults(params)) => {
-  const sunrise = motion({ y: 160 }).to({ y: 0 }, 1.4, p.rise).at(5.2).to({ y: 160 }, 0.8, ease.in);
-  const pulse = motion({ scale: 1 }).to({ scale: 1.3 }, 0.12).to({ scale: 1 }, 0.4).loop(p.beat);
+  const sunrise = motion({ y: 160 })
+    .to({ y: 0 }, span(0, 1.4), p.rise)
+    .to({ y: 160 }, span(5.2, 0.8), ease.in);
+
+  const pulse = motion({ scale: 1 })
+    .to({ scale: 1.3 }, span(0, 0.12))
+    .to({ scale: 1 }, span(0, 0.12).next(0.4))
+    .loop(p.beat);
 
   return render(
     { width: 480, height: 300, duration: 6, title: "Meadow" },
@@ -29,8 +35,7 @@ export default (p = defaults(params)) => {
             animation={motion({ y: 120 })
               .label("flower")
               .to({ y: 0 }, grow, p.pop)
-              .at(4.8)
-              .to({ y: 120 }, 0.4, ease.in)}
+              .to({ y: 120 }, span(4.8, 0.4), ease.in)}
           >
             <path d="M0 0V-64" stroke={p.grass} strokeWidth={5} strokeLinecap="round" />
             <circle cy={-70} r={16} fill={p.petal} animation={pulse} />

@@ -53,7 +53,7 @@ export default function build(): string {
     <>
       <rect width={WIDTH} height={HEIGHT} fill={theme.base00} />
       <g transform={fit(login.bounds.w, login.bounds.h)}>
-        {login.node}
+        {login}
         <circle
           r={4}
           fill={theme.base09}

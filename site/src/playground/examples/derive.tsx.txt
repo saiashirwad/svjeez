@@ -32,7 +32,7 @@ export default function build(): string {
     },
     <>
       <rect width={320} height={110} fill={theme.base00} />
-      {d.node}
+      {d}
     </>,
   );
 }

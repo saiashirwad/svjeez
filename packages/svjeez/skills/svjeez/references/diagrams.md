@@ -1,6 +1,6 @@
 # Diagrams
 
-`flowchart`, `sequence`, `stateMachine`, `tree` and `lanes` take a typed spec, so a misspelled id is a compile error: `Type '"c"' is not assignable to type '"a" | "b"'`. They are in `@svjeez/diagrams`, a separate package: `npm i -D @svjeez/diagrams`. `flow` and `travel` are in `svjeez`. Each returns `{ node, span, bounds, parts, part(id) }`, the shape every svjeez package returns, plus helpers. The parts are the nodes (and a flowchart's groups, a sequence's actor heads, the lanes of `lanes()`): `part("build").box` is where one sits and `part("build").span` when it appears, the instant 0 for one there from the start. `part` takes only the spec's ids.
+`flowchart`, `sequence`, `stateMachine`, `tree` and `lanes` take a typed spec, so a misspelled id is a compile error: `Type '"c"' is not assignable to type '"a" | "b"'`. They are in `@svjeez/diagrams`, a separate package: `npm i -D @svjeez/diagrams`. `flow` and `travel` are in `svjeez`. Each returns `{ node, span, bounds, parts, part(id) }`, the shape every svjeez package returns, plus helpers. Put the result itself in the scene, `{chart}`. The parts are the nodes (and a flowchart's groups, a sequence's actor heads, the lanes of `lanes()`): `part("build").box` is where one sits and `part("build").span` when it appears, the instant 0 for one there from the start. Edges are parts too, by `"from->to"`: a flowchart's edges, a tree's from parent to child, and a state machine's transitions. An edge's `box` covers its line and label, and its `span` is when it draws on. Two edges between the same nodes share an id, and `part` finds the first. `part` takes only the spec's ids and edges.
 
 Options common to all: `theme`, `x`, `y`, `anchor` (`"top-left"`, `"center"` or an edge, which part of `bounds` lands on `x, y`), `fontSize`, `font` and `class`. Size the canvas from `bounds`, not a guess. `flowchart`, `tree` and `stateMachine` take `direction: "TB" | "LR"`. A node `role` picks its shape and color: `task`, `input`, `output`, `tool`, `decision`, `store`. `tints: { tool: theme.base09 }` recolors a role, so a scene can hold to two or three hues. A `stateMachine` state takes a `role` too, which tints its box and stroke.
 
@@ -68,10 +68,10 @@ const agent = stateMachine(
   },
   { direction: "LR" },
 );
-const walk = agent.walk(["idle", "working", "plan", "act", "done"], { at: 1, dwell: 0.8 }); // { node, spans, span }
+const walk = agent.walk(["idle", "working", "plan", "act", "done"], { at: 1, dwell: 0.8 }); // a Drawn, plus spans
 ```
 
-`walk` lights each state in turn and runs a token along the transition between them. `at` is a start time or one time per state. `dwell` (default 1) is how long each state stays lit and `speed` (default 220 px/s) moves the token. `token` takes the `flow` options except `at`, `over` and `speed`. It returns `node` to draw, `spans` (when each state is lit) and `span`, from the first state lit to when the last goes dark. It throws `walk() has no way from "a" to "b".` when no transition connects two states. `edge(from, to)` gives the drawn line.
+`walk` lights each state in turn and runs a token along the transition between them. `at` is a start time or one time per state. `dwell` (default 1) is how long each state stays lit and `speed` (default 220 px/s) moves the token. `token` takes the `flow` options except `at`, `over` and `speed`. It returns a `Drawn` to put in the scene with the machine: `spans` (when each state is lit), `span`, from the first state lit to when the last goes dark, and `parts`, one per leg by `"idle->working"`, whose `span` is when the token is on it. It throws `walk() has no way from "a" to "b".` when no transition connects two states. `edge(from, to)` gives the drawn line.
 
 ## Tree
 

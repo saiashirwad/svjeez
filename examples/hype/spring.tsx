@@ -59,7 +59,7 @@ export const springShot = (over: number) => {
 
   return (
     <>
-      {formula.write(written).node}
+      {formula.write(written)}
       <Brace
         target={formula.part("decay").box}
         side="below"
@@ -88,7 +88,7 @@ export const springShot = (over: number) => {
             y={REST - 32 + 139 * 0.45}
             size={0.45}
             blinks={[run.at + 1.6]}
-            look={motion({ x: 0, y: 0 }).at(run.at).to({ x: 0, y: 6 }, 0.3)}
+            look={motion({ x: 0, y: 0 }).to({ x: 0, y: 6 }, span(run.at, 0.3))}
           />
         </g>
       </g>

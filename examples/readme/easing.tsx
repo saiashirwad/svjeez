@@ -1,4 +1,4 @@
-import { ease, motion, render, type Ease } from "svjeez";
+import { ease, motion, render, span, type Ease } from "svjeez";
 import { css, mono, theme } from "../style";
 
 const curves: [string, Ease][] = [
@@ -15,6 +15,9 @@ const curves: [string, Ease][] = [
 const ROW = 26;
 const X0 = 110;
 const X1 = 380;
+
+/** Every dot crosses in the same span, then cuts back home after a beat. */
+const CROSS = span(0.4, 1.6);
 
 export default function build(): string {
   return render(
@@ -52,10 +55,8 @@ export default function build(): string {
               r={6}
               fill={theme.base09}
               animation={motion({ x: 0 })
-                .at(0.4)
-                .to({ x: X1 - X0 }, 1.6, curve)
-                .wait(0.6)
-                .set({ x: 0 })}
+                .to({ x: X1 - X0 }, CROSS, curve)
+                .set({ x: 0 }, CROSS.end + 0.6)}
             />
           </>
         );

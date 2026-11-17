@@ -78,10 +78,9 @@ const BENDS = stagger(POLY.next(0.8, 0.4), DEGREES.length - 1, 1);
 const past = (stages: readonly Span[], t: number) =>
   stages.filter((s) => s.at + s.over / 2 <= t).length;
 
-const cosine = waveGraph.plot(Math.cos, {
+const cosine = waveGraph.plot({ at: 6.6, over: 1.2 }, Math.cos, {
   color: theme.base0D,
   strokeWidth: 2,
-  animation: draw({ at: 6.6, over: 1.2 }),
 });
 
 const poly = waveGraph.morph(BENDS, DEGREES.map(taylor), {
@@ -124,19 +123,13 @@ export default function build(): string {
         ),
         heading(2, String.raw`\cos x = \sum_{k} \frac{(-1)^k x^{2k}}{(2k)!}`),
       ].map((h, i) => (
-        <g animation={enter(HEADINGS[i]!)}>{h.node}</g>
+        <g animation={enter(HEADINGS[i]!)}>{h}</g>
       ))}
       {[slopeGraph, areaGraph, waveGraph].map((ax, i) => (
         <g animation={enter(PANELS[i]!)}>{ax.node}</g>
       ))}
 
-      {
-        slopeGraph.plot(f, {
-          color: theme.base0D,
-          strokeWidth: 2,
-          animation: draw({ at: 0.8, over: 1.2 }),
-        }).node
-      }
+      {slopeGraph.plot({ at: 0.8, over: 1.2 }, f, { color: theme.base0D, strokeWidth: 2 })}
       <g animation={enter(SECANT)}>{secant.node}</g>
       <g animation={enter(SECANT)}>
         {readout(
@@ -149,13 +142,7 @@ export default function build(): string {
         )}
       </g>
 
-      {
-        areaGraph.plot(g, {
-          color: theme.base0D,
-          strokeWidth: 2,
-          animation: draw({ at: 2.6, over: 1 }),
-        }).node
-      }
+      {areaGraph.plot({ at: 2.6, over: 1 }, g, { color: theme.base0D, strokeWidth: 2 })}
       <g animation={[enter(SUMS), exit(AREA)]}>{sums.node}</g>
       <g animation={enter(AREA)}>{exact.node}</g>
       <g animation={enter(SUMS)}>
@@ -172,7 +159,7 @@ export default function build(): string {
         )}
       </g>
 
-      {cosine.node}
+      {cosine}
       {poly.node}
       <g animation={enter(POLY.first(0.5))}>
         {readout(

@@ -61,7 +61,19 @@ describe("paramFor", () => {
       min: 0,
       unit: "s",
     });
-    expect(paramFor(number("m.at(2).to({ x: 9 }, 0.6)", 2))).toMatchObject({ min: 0, unit: "s" });
+    expect(paramFor(number("m.to({ x: 9 }, span(2, 0.6))", 1))).toMatchObject({
+      min: 0,
+      unit: "s",
+    });
+    expect(paramFor(number("m.to({ x: 9 }, span(2, 0.6))", 2))).toMatchObject({
+      min: 0,
+      unit: "s",
+    });
+    expect(paramFor(number("m.to({ x: 9 }, up.next(0.6, 0.25))", 1))).toMatchObject({ unit: "s" });
+    expect(paramFor(number("m.to({ x: 9 }, up.next(0.6, 0.25))", 2))).toMatchObject({ unit: "s" });
+    expect(paramFor(number("m.set({ x: 9 }, 3.5)", 1))).toMatchObject({ min: 0, unit: "s" });
+    expect(paramFor(number("chain(up, 0.2, 0.4, 0.3)", 2))).toMatchObject({ min: 0, unit: "s" });
+    expect(paramFor(number("m.to({ x: 9 }, span(2, 0.6))", 0)).unit).toBeUndefined();
     expect(paramFor(number("<circle r={16.5} />"))).toMatchObject({ min: 0, max: 33, step: 0.1 });
   });
 

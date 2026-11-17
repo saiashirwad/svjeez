@@ -37,7 +37,7 @@ Edit the source instead when the change is structural: a new element or beat, a 
 | `legs.1.over` | Inside a top-level const, by its path: `over` of item 1 of `legs`. |
 | `default:circle.cx` | The `cx` attribute of a `<circle>` in the default export. A named function or const is its own name, as in `Wheel:circle.cx`. |
 | `default:enter.0.at` | `at` in argument 0 of a call to `enter(…)`. |
-| `default:to.1` | Argument 1 of `.to(…)`, its span or length. `default:stagger.2` is a stagger's step. |
+| `default:span.1` | Argument 1 of a call to `span(…)`, its `over`, as in `.to(values, span(1, 0.5))`. `default:stagger.2` is a stagger's step. |
 | `default:r` | A const inside the function. |
 | `…#1`, `…#2` | The second and third literal held the same way in that function, in source order. |
 | `default#3` | The fourth literal in that function that nothing nameable holds: a ternary's branch, a return value. |

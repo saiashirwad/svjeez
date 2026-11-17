@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   Clip,
   Once,
+  chain,
   code,
   def,
   ease,
@@ -54,6 +55,28 @@ const keys = (svg: string, property: string, duration = DURATION): Held[] => {
 const rect = (animation: Motion<any>) => <rect width={10} height={10} animation={animation} />;
 
 describe("span()", () => {
+  test("chain() puts spans end to end, one length after another", () => {
+    const [crouch, launch, rise] = chain(span(0.1, 0.3), 0.12, 0.25);
+
+    expect([crouch.at, crouch.over]).toEqual([0.1, 0.3]);
+    expect([launch.at, launch.over]).toEqual([crouch.end, 0.12]);
+    expect([rise.at, rise.over]).toEqual([launch.end, 0.25]);
+    expect(chain({ at: 2, over: 1 })).toHaveLength(1);
+    expect(() => chain(span(1, 1), -1)).toThrow("next() needs a length of 0 or more, got -1.");
+
+    // A motion built on chain() matches one built span by span, key for key.
+    const byHand = motion({ x: 0 })
+      .to({ x: 5 }, span(0.1, 0.3))
+      .to({ x: 9 }, span(0.1, 0.3).next(0.12))
+      .to({ x: 0 }, span(0.1, 0.3).next(0.12).next(0.25));
+
+    const chained = motion({ x: 0 }).to({ x: 5 }, crouch).to({ x: 9 }, launch).to({ x: 0 }, rise);
+
+    expect(scene(<rect width={10} height={10} animation={chained} />)).toBe(
+      scene(<rect width={10} height={10} animation={byHand} />),
+    );
+  });
+
   test("a span knows its end, and shifts, chains and pads into new spans", () => {
     const reach = span(0, 0.7);
     const grab = reach.next(1, 0.2);
@@ -119,7 +142,7 @@ describe("span()", () => {
 });
 
 describe("<Clip>", () => {
-  const slide = motion({ x: 0 }).to({ x: 50 }, 2, ease.linear);
+  const slide = motion({ x: 0 }).to({ x: 50 }, span(0, 2), ease.linear);
 
   test("draws nothing, and a clip at 0 changes no byte", () => {
     expect(scene(<Clip at={0}>{rect(slide)}</Clip>)).toBe(scene(rect(slide)));
@@ -196,7 +219,7 @@ describe("<Clip>", () => {
       "A motion on <rect> runs until 11s (2s into <Clip at={9}>), past the 10s scene.",
     );
 
-    expect(() => scene(rect(motion({ x: 0 }).at(9).to({ x: 5 }, 2)))).toThrow(
+    expect(() => scene(rect(motion({ x: 0 }).to({ x: 5 }, span(9, 2))))).toThrow(
       "A motion on <rect> runs until 11s, past the 10s scene.",
     );
   });
@@ -221,7 +244,7 @@ describe("<Clip>", () => {
     expect(() =>
       scene(
         <Clip at={2} over={4}>
-          <Clip at={1}>{rect(motion({ x: 0 }).to({ x: 5 }, 4))}</Clip>
+          <Clip at={1}>{rect(motion({ x: 0 }).to({ x: 5 }, span(0, 4)))}</Clip>
         </Clip>,
       ),
     ).toThrow("A motion on <rect> runs until 5s, past the 4s <Clip at={2} over={4}>.");
@@ -237,7 +260,7 @@ describe("<Clip>", () => {
       {},
       <feGaussianBlur
         stdDeviation={0}
-        animation={motion({ stdDeviation: 0 }).to({ stdDeviation: 4 }, 1)}
+        animation={motion({ stdDeviation: 0 }).to({ stdDeviation: 4 }, span(0, 1))}
       />,
     );
 
@@ -276,7 +299,7 @@ describe("<Clip>", () => {
 });
 
 describe(".repeat()", () => {
-  const spin = motion({ rotate: 0 }).to({ rotate: 360 }, 2, ease.linear);
+  const spin = motion({ rotate: 0 }).to({ rotate: 360 }, span(0, 2), ease.linear);
 
   test("a count plays the passage that many times, each from the initial values", () => {
     const svg = scene(rect(spin.repeat(3)));
@@ -296,15 +319,34 @@ describe(".repeat()", () => {
     expect(scene(rect(spin.repeat(1)))).toBe(scene(rect(spin)));
   });
 
-  test("the passage runs from its first transition to the cursor, so a wait is part of it", () => {
-    const svg = scene(rect(motion({ x: 0 }).at(1).to({ x: 10 }, 1, ease.linear).wait(1).repeat(2)));
+  test("the passage runs from the earliest step's start to the latest step's end", () => {
+    const svg = scene(rect(motion({ x: 0 }).to({ x: 10 }, span(1, 1), ease.linear).repeat(2)));
 
-    expect(keys(svg, "translate").map((key) => key.t)).toEqual([0, 1, 2, 3, 4, 10]);
+    // The second pass cuts back to 0 the instant the first ends, and plays from 2s to 3s.
+    expect(keys(svg, "translate").map((key) => Math.round(key.t * 1000) / 1000)).toEqual([
+      0, 1, 2, 2, 3, 10,
+    ]);
+
+    const late = scene(
+      rect(
+        motion({ x: 0 })
+          .to({ x: 0 }, span(3, 1), ease.linear)
+          .to({ x: 10 }, span(1, 1), ease.linear)
+          .repeat(2),
+      ),
+    );
+
+    expect(keys(late, "translate").map((key) => key.t)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 10]);
   });
 
   test("a passage that ends where it began restarts without a cut", () => {
     const svg = scene(
-      rect(motion({ x: 0 }).to({ x: 10 }, 1, ease.linear).to({ x: 0 }, 1, ease.linear).repeat(3)),
+      rect(
+        motion({ x: 0 })
+          .to({ x: 10 }, span(0, 1), ease.linear)
+          .to({ x: 0 }, span(0, 1).next(1), ease.linear)
+          .repeat(3),
+      ),
     );
 
     expect(keys(svg, "translate").map((key) => key.value)).toEqual([0, 10, 0, 10, 0, 10, 0, 0]);
@@ -327,7 +369,10 @@ describe(".repeat()", () => {
   });
 
   test("a transition cut partway ends on the value the whole transition passed through there", () => {
-    const svg = scene(rect(motion({ x: 0 }).to({ x: 100 }, 2, ease.out).repeat({ until: 3 })));
+    const svg = scene(
+      rect(motion({ x: 0 }).to({ x: 100 }, span(0, 2), ease.out).repeat({ until: 3 })),
+    );
+
     const held = keys(svg, "translate");
 
     expect(held.at(-2)?.t).toBe(3);
@@ -336,7 +381,7 @@ describe(".repeat()", () => {
 
   test("a cut transition keeps the shape of the curve, not a straight line to the cut", () => {
     const svg = scene(
-      rect(motion({ x: 0 }).to({ x: 100 }, 2, ease.inOut).repeat({ until: 3 })),
+      rect(motion({ x: 0 }).to({ x: 100 }, span(0, 2), ease.inOut).repeat({ until: 3 })),
       10,
     );
 
@@ -346,14 +391,16 @@ describe(".repeat()", () => {
   });
 
   test("a later step may follow the repeat", () => {
-    const svg = scene(rect(spin.repeat({ until: 4 }).at(5).to({ rotate: 90 }, 1, ease.linear)));
+    const svg = scene(rect(spin.repeat({ until: 4 }).to({ rotate: 90 }, span(5, 1), ease.linear)));
 
     expect(keys(svg, "rotate").at(-2)).toEqual({ t: 6, value: 90 });
   });
 
   test("two channels restart together, each from its own initial value", () => {
     const svg = scene(
-      rect(motion({ x: 5, opacity: 0.5 }).to({ x: 25, opacity: 1 }, 1, ease.linear).repeat(2)),
+      rect(
+        motion({ x: 5, opacity: 0.5 }).to({ x: 25, opacity: 1 }, span(0, 1), ease.linear).repeat(2),
+      ),
     );
 
     expect(keys(svg, "translate").map((key) => key.value)).toEqual([5, 25, 5, 25, 25]);
@@ -364,7 +411,9 @@ describe(".repeat()", () => {
     expect(() => spin.repeat(0)).toThrow(/whole number of plays/);
     expect(() => spin.repeat(1.5)).toThrow(/whole number of plays/);
     expect(() => motion({ x: 0 }).repeat(2)).toThrow(/needs a passage to repeat/);
-    expect(() => motion({ x: 0 }).set({ x: 5 }).repeat(2)).toThrow(/needs a passage with a length/);
+    expect(() => motion({ x: 0 }).set({ x: 5 }, 0).repeat(2)).toThrow(
+      /needs a passage with a length/,
+    );
     expect(() => spin.repeat({ until: 2 })).toThrow(/needs a time after the passage ends, at 2s/);
     expect(() => spin.repeat({ until: Infinity })).toThrow(/finite until/);
   });
@@ -374,7 +423,7 @@ describe(".repeat()", () => {
     expect(() =>
       render(
         { width: 10, height: 10, title: "t", duration: 3000 },
-        rect(motion({ x: 0 }).to({ x: 1 }, 1, ease.linear).repeat(1500)),
+        rect(motion({ x: 0 }).to({ x: 1 }, span(0, 1), ease.linear).repeat(1500)),
       ),
     ).toThrow(
       /has 3\d{3} keys; the cap is 2000. repeat\(\) unrolls every pass, so use .loop\(period\)/,
@@ -382,7 +431,7 @@ describe(".repeat()", () => {
   });
 
   test("stopping a steps() transition off a step edge throws, and on one it cuts cleanly", () => {
-    const stepped = motion({ x: 0 }).to({ x: 100 }, 2, ease.steps(4));
+    const stepped = motion({ x: 0 }).to({ x: 100 }, span(0, 2), ease.steps(4));
 
     expect(() => scene(rect(stepped.repeat({ until: 3.2 })))).toThrow(
       /repeat\(\{ until \}\) cuts a steps\(4\) transition between two of its steps/,
@@ -393,7 +442,7 @@ describe(".repeat()", () => {
   });
 
   test("stopping a colour transition partway throws, but a colour that holds there is fine", () => {
-    const tint = motion({ fill: "#000000" }).to({ fill: "#ffffff" }, 2, ease.linear);
+    const tint = motion({ fill: "#000000" }).to({ fill: "#ffffff" }, span(0, 2), ease.linear);
 
     expect(() =>
       scene(<rect width={10} height={10} animation={tint.repeat({ until: 3 })} />),
@@ -404,10 +453,10 @@ describe(".repeat()", () => {
   });
 
   test("nothing follows rewind(), and a repeat can't follow it", () => {
-    const rewound = motion({ x: 0 }).to({ x: 10 }, 1).rewind(1);
+    const rewound = motion({ x: 0 }).to({ x: 10 }, span(0, 1)).rewind(1);
 
     expect(() => rewound.repeat(2)).toThrow(/can't follow rewind/);
-    expect(() => rewound.to({ x: 1 }, 1)).toThrow(/can't follow rewind/);
+    expect(() => rewound.to({ x: 1 }, span(2, 1))).toThrow(/can't follow rewind/);
     expect(() => rewound.rewind(1)).toThrow(/can't follow rewind/);
   });
 
@@ -423,7 +472,7 @@ describe(".repeat()", () => {
 });
 
 describe(".rewind()", () => {
-  const out = motion({ x: 0 }).to({ x: 50 }, 2, ease.linear);
+  const out = motion({ x: 0 }).to({ x: 50 }, span(0, 2), ease.linear);
 
   test("glides every channel back to its initial value, ending at the scene's end", () => {
     expect(keys(scene(rect(out.rewind(1))), "translate")).toEqual([
@@ -459,14 +508,14 @@ describe(".rewind()", () => {
   });
 
   test("adds nothing to a motion that is already home, and uses the ease it is given", () => {
-    const home = motion({ x: 0 }).to({ x: 5 }, 1).to({ x: 0 }, 1);
+    const home = motion({ x: 0 }).to({ x: 5 }, span(0, 1)).to({ x: 0 }, span(0, 1).next(1));
 
     expect(scene(rect(home.rewind(1)))).toBe(scene(rect(home)));
     expect(scene(rect(out.rewind(1, ease.linear)))).not.toBe(scene(rect(out.rewind(1))));
   });
 
   test("needs the room: a motion still running when the rewind must start throws", () => {
-    expect(() => scene(rect(motion({ x: 0 }).at(8).to({ x: 9 }, 1.5).rewind(1)))).toThrow(
+    expect(() => scene(rect(motion({ x: 0 }).to({ x: 9 }, span(8, 1.5)).rewind(1)))).toThrow(
       /rewind\(1\) on <rect> needs the last 1s of its 10s clock, but the motion runs until 9.5s/,
     );
   });
@@ -477,7 +526,7 @@ describe(".rewind()", () => {
         width={10}
         height={10}
         fill="#123"
-        animation={motion().to({ fill: "#fff" }, 1).rewind(1)}
+        animation={motion().to({ fill: "#fff" }, span(0, 1)).rewind(1)}
       />,
     );
 
@@ -487,7 +536,7 @@ describe(".rewind()", () => {
 
 describe(".loop() inside a clip", () => {
   const P = 5;
-  const spin = motion({ rotate: 0 }).to({ rotate: 360 }, 2, ease.linear).loop(P);
+  const spin = motion({ rotate: 0 }).to({ rotate: 360 }, span(0, 2), ease.linear).loop(P);
 
   test("only changes the phase: the loop starts counting where the clip starts", () => {
     const svg = scene(<Clip at={2.5}>{rect(spin)}</Clip>);
@@ -561,7 +610,7 @@ describe(".loop() inside a clip", () => {
 });
 
 describe("clips, loops and repeats together", () => {
-  const spin = motion({ rotate: 0 }).to({ rotate: 360 }, 2, ease.linear).loop(5);
+  const spin = motion({ rotate: 0 }).to({ rotate: 360 }, span(0, 2), ease.linear).loop(5);
 
   test("a loop inside nested clips takes the sum of their starts as its phase", () => {
     const nested = scene(
@@ -575,7 +624,7 @@ describe("clips, loops and repeats together", () => {
 
   test("a repeat that stops mid-pass moves every channel it touches to where that pass had got", () => {
     const both = motion({ x: 0, opacity: 0 })
-      .to({ x: 100, opacity: 1 }, 2, ease.linear)
+      .to({ x: 100, opacity: 1 }, span(0, 2), ease.linear)
       .repeat({ until: 5 });
 
     const svg = scene(rect(both));
@@ -587,7 +636,7 @@ describe("clips, loops and repeats together", () => {
   test("a repeat of a path morph can stop partway too", () => {
     // SAFETY: both literals start with M, as PathData requires.
     const [from, to] = ["M0 0L10 0", "M0 0L30 0"] as [`M${string}`, `M${string}`];
-    const morph = motion({ d: from }).to({ d: to }, 2, ease.linear);
+    const morph = motion({ d: from }).to({ d: to }, span(0, 2), ease.linear);
 
     const svg = scene(<path d="M0 0L10 0" animation={morph.repeat({ until: 3 })} />);
 
@@ -598,7 +647,7 @@ describe("clips, loops and repeats together", () => {
     expect(() =>
       scene(
         <Clip at={1} over={3}>
-          {rect(motion({ x: 0 }).to({ x: 1 }, 2).repeat(2))}
+          {rect(motion({ x: 0 }).to({ x: 1 }, span(0, 2)).repeat(2))}
         </Clip>,
       ),
     ).toThrow("A motion on <rect> runs until 4s, past the 3s <Clip at={1} over={3}>.");
@@ -745,7 +794,7 @@ describe("one clock in the tools", () => {
   const faster = (rate: number) =>
     render(
       { width: 10, height: 10, title: "Test", duration: 4, playbackRate: rate },
-      rect(motion({ x: 0 }).to({ x: 4 }, 4, ease.linear)),
+      rect(motion({ x: 0 }).to({ x: 4 }, span(0, 4), ease.linear)),
     );
 
   test("a scene played at another rate says so on its root, and one at rate 1 stays as it was", () => {

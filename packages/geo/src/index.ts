@@ -21,6 +21,7 @@ import type {
 } from "topojson-specification";
 import { type Point, type Rect } from "svjeez";
 import { rect } from "svjeez/geometry";
+import { idOf } from "./globe.ts";
 import { Writer } from "./writer.ts";
 
 export type LonLat = readonly [lon: number, lat: number];
@@ -130,8 +131,6 @@ const topologyObject = (
 
   return object;
 };
-
-const idOf = (f: Feature, index: number) => String(f.id ?? f.properties?.name ?? index);
 
 /** The largest polygon of a feature, by area on the sphere. */
 const largest = (f: Feature, area: (o: GeoPermissibleObjects) => number): Feature => {
@@ -429,11 +428,13 @@ export {
   type Traffic,
   type TrafficLine,
   type TrafficOptions,
+  type TrafficRoute,
 } from "./traffic.tsx";
 
 export {
   globe,
   type Globe,
+  type GlobeRegion,
   type GlobeOptions,
   type Riding,
   type Spin,

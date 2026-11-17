@@ -1,4 +1,4 @@
-import { ease, enter, motion, render, wiggle } from "svjeez";
+import { ease, enter, motion, render, span, wiggle } from "svjeez";
 import { css, theme } from "../style";
 
 export default function build(): string {
@@ -22,7 +22,7 @@ export default function build(): string {
           strokeWidth={5}
           strokeLinecap="round"
           strokeDasharray="50 101"
-          animation={motion({ rotate: 0 }).to({ rotate: 360 }, 2, ease.linear).loop(2)}
+          animation={motion({ rotate: 0 }).to({ rotate: 360 }, span(0, 2), ease.linear).loop(2)}
         />
       </g>
       <circle

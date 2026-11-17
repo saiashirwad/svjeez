@@ -158,7 +158,9 @@ export const mount = (host: HTMLElement, initial: string, only?: readonly string
     svg = nextSvg;
     // Safari shows an <img> SVG in the OS's scheme whatever the stage's color-scheme says, so the other one is pinned.
     url = URL.createObjectURL(
-      new Blob([scheme === systemScheme() ? svg : pinScheme(svg, scheme)], { type: "image/svg+xml" }),
+      new Blob([scheme === systemScheme() ? svg : pinScheme(svg, scheme)], {
+        type: "image/svg+xml",
+      }),
     );
     img.src = url;
 

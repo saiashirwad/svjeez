@@ -2,7 +2,6 @@
 /** @jsxRuntime automatic */
 import {
   ease as eases,
-  show,
   type Ease,
   type FontValue,
   type Stack,
@@ -10,10 +9,12 @@ import {
   type TagChannels,
 } from "svjeez";
 import { num } from "svjeez/geometry";
-import { timeline, type Step } from "../timeline.ts";
+import { duration, timeline, type Step } from "../timeline.ts";
 import type { Snapshot, TextRun } from "../tree.ts";
 import type { PairBy } from "./pairing.ts";
 import { painter, type GroupStack, type Parts } from "./painter.tsx";
+import { runsByFamily } from "./faces.ts";
+import { hold } from "./hold.ts";
 import type { Tween } from "./tween.ts";
 
 export interface DomProps {
@@ -57,11 +58,17 @@ export function Dom({
 }: DomProps): SvgNode {
   const { snaps, moves } = timeline(states);
 
+  // The runs each family draws, so a given font the page set without ligatures can cut down to its glyphs.
+  const drawn = new Map<string, TextRun[]>();
+
+  for (const s of snaps) runsByFamily(s.root, drawn);
+
   const paint = painter(
     fonts,
     snaps.flatMap((s) => s.fonts ?? []),
     parts,
     pair,
+    drawn,
   );
 
   if (snaps.length === 0) throw new Error("<Dom> needs at least one state.");
@@ -80,24 +87,28 @@ export function Dom({
     // Where each hand-over happens: halfway between one transition's end and the next one's start.
     const cuts = tweens.slice(1).map((next, i) => (tweens[i]!.at + tweens[i]!.over + next.at) / 2);
 
-    segments = tweens.map((tween, i) => {
-      const drawn = paint.root(snaps[i + 1]!.root, { a: snaps[i]!.root, tween });
+    const drawings = tweens.map((tween, i) =>
+      paint.root(snaps[i + 1]!.root, { a: snaps[i]!.root, tween }),
+    );
 
-      if (tweens.length === 1) return drawn;
+    // Transitions `from` through `to` show from the cut before the first to the cut after the last.
+    // The same transitions drawn shape by shape, as one drawing each: what holding must not run more animations than.
+    const plain = tweens.map((tween, i) =>
+      paint.root(snaps[i + 1]!.root, { a: snaps[i]!.root, tween }, undefined, false),
+    );
 
-      const from = i === 0 ? 0 : cuts[i - 1]!;
-      const to = i === cuts.length ? undefined : cuts[i]!;
+    segments = hold(
+      drawings,
+      plain,
+      (from, to) => {
+        const start = from === 0 ? 0 : cuts[from - 1]!;
 
-      return (
-        <g
-          animation={show(to === undefined ? { at: from } : { at: from, over: to - from }, {
-            fade: 0,
-          })}
-        >
-          {drawn}
-        </g>
-      );
-    });
+        if (to === cuts.length) return start === 0 ? undefined : { at: start };
+
+        return { at: start, over: cuts[to]! - start };
+      },
+      duration(states),
+    );
   }
 
   return (

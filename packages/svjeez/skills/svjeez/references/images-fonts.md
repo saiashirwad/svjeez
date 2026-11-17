@@ -5,13 +5,13 @@ Both load as bytes and embed as data URIs, so the output stays one file. GitHub 
 ## Images
 
 ```tsx
-import { Picture, ease, fx, motion, picture } from "svjeez";
+import { Picture, ease, fx, motion, picture, span } from "svjeez";
 
 const photo = await picture.load(new URL("./harbor.jpg", import.meta.url)); // path, file: or http(s) URL
 const logo = picture('<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18"/></svg>');   // bytes or SVG markup, sync
 
 const framed = <Picture src={photo} x={20} y={20} width={240} radius={16} fit="cover" alt="A harbor at dusk" filter={fx.duotone({ dark: "#1b1464", light: "#ffb36b" })} />;
-const kenBurns = <Picture src={logo} x={20} y={20} width={240} height={160} animation={motion({ scale: 1 }).to({ scale: 1.3 }, 6, ease.inOut)} />;
+const kenBurns = <Picture src={logo} x={20} y={20} width={240} height={160} animation={motion({ scale: 1 }).to({ scale: 1.3 }, span(0, 6), ease.inOut)} />;
 ```
 
 `picture()` sniffs the format from the bytes (svg, png, jpeg, gif, webp), never the extension, and reads the size from the header after EXIF rotation. It throws on anything else.

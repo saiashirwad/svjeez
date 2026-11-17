@@ -1,4 +1,4 @@
-import { ease, motion, sampled } from "svjeez";
+import { chain, ease, motion, sampled, span } from "svjeez";
 import { r1, type Cx } from "./look";
 import { MELT, meltScale } from "./motions";
 import { INK } from "./palette";
@@ -36,6 +36,7 @@ export const drips = (cx: Cx) => {
       const p = lay.melt(fr.p);
       const at = MELT.at + 0.8 + i * 0.55;
       const fall = Math.max(16, lay.floor - p.y + G * 0.2);
+      const [form, drop, pop] = chain(span(at, 0.25), 0.45, 0.15);
 
       return (
         <circle
@@ -46,10 +47,9 @@ export const drips = (cx: Cx) => {
           stroke={ink}
           strokeWidth={1.5}
           animation={motion({ opacity: 0, y: 0, scale: 0.4 })
-            .at(at)
-            .to({ opacity: 1, scale: 1 }, 0.25)
-            .to({ y: r1(fall) }, 0.45, ease.in)
-            .to({ opacity: 0, scale: 1.6 }, 0.15)}
+            .to({ opacity: 1, scale: 1 }, form)
+            .to({ y: r1(fall) }, drop, ease.in)
+            .to({ opacity: 0, scale: 1.6 }, pop)}
         />
       );
     })

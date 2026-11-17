@@ -254,7 +254,7 @@ export function buildSeries(f: Frame) {
             height={round(long)}
             rx={radiusPx}
             fill={color}
-            animation={from.at(start).to(to, growth, curve)}
+            animation={from.to(to, spanOf(start, growth), curve)}
           />,
         );
 
@@ -439,7 +439,7 @@ export function buildSeries(f: Frame) {
         y={bounds.y}
         width={bounds.w}
         height={bounds.h}
-        animation={motion({ width: 0 }).at(at).to({ width: bounds.w }, over, ease.linear)}
+        animation={motion({ width: 0 }).to({ width: bounds.w }, { at, over }, ease.linear)}
       />,
     );
 

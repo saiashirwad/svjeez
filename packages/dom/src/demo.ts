@@ -4,8 +4,28 @@ import { props, type Action, type Flow, type Patch } from "./flow.ts";
 export const PAD = 16;
 
 // The flow's words, from here too: a demo file runs in the browser, so it imports nothing that pulls in Chromium.
-// `props` isn't among them: a demo's script gets one typed to its component.
-export { click, fill, hover, move, press, snap, wait, type Flow } from "./flow.ts";
+// `props` isn't among them: a demo's script gets one typed to its component. Nor is `html`, which replaces a mounted
+// card's markup and would throw the component away.
+export {
+  act,
+  click,
+  drag,
+  fill,
+  hover,
+  move,
+  press,
+  snap,
+  wait,
+  type Act,
+  type Action,
+  type DragOptions,
+  type Flow,
+  type Instruction,
+  type PageAction,
+  type Snap,
+  type Timing,
+  type Wait,
+} from "./flow.ts";
 
 export interface Layout {
   /** Width the component lays out at, in px. Without one it takes the width it wants. */
@@ -17,7 +37,8 @@ export interface Layout {
 }
 
 /** Where the demo starts: the component's props, required when the component has required ones. */
-export type DemoOptions<P> = Layout & ({} extends P ? { readonly props?: P } : { readonly props: P });
+export type DemoOptions<P> = Layout &
+  ({} extends P ? { readonly props?: P } : { readonly props: P });
 
 /** What a demo's script gets: `props`, typed to the component, re-renders it with a patch merged over its props. */
 export interface Script<P> {

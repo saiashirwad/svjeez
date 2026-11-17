@@ -150,8 +150,8 @@ export function choropleth(
             if (i === 0 && fromStart) return m;
 
             return i === 0 && cut
-              ? m.at(spans[0]!.at).set({ fill: color })
-              : m.at(spans[i]!.at).to({ fill: color }, spans[i]!.over, curve);
+              ? m.set({ fill: color }, spans[0]!.at)
+              : m.to({ fill: color }, spanOf(spans[i]!.at, spans[i]!.over), curve);
           },
           motion({ fill: fromStart ? colors[0]! : scale.empty }),
         );

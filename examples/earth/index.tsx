@@ -1,6 +1,17 @@
 import { night, project, sun, type LonLat, type Topology } from "@svjeez/geo";
 import { geoOrthographic } from "d3-geo";
-import { css, def, ease, fx, motion, random, render, type SvgNode } from "svjeez";
+import {
+  css,
+  def,
+  ease,
+  fx,
+  motion,
+  random,
+  render,
+  span,
+  type Spanned,
+  type SvgNode,
+} from "svjeez";
 import { rect } from "svjeez/geometry";
 import { createRequire } from "node:module";
 import {
@@ -63,7 +74,7 @@ const yaw = css.property("yaw", { syntax: "angle", inherits: true, initial: 0 })
 const lat = css.property("lat", { syntax: "angle", inherits: true, initial: 0 });
 const lon = css.property("lon", { syntax: "angle", inherits: false, initial: 0 });
 
-const spin = motion({ [yaw]: -middle }).to({ [yaw]: 360 - middle }, D, ease.linear);
+const spin = motion({ [yaw]: -middle }).to({ [yaw]: 360 - middle }, span(0, D), ease.linear);
 
 const style = css`
   ${paletteCss}
@@ -280,20 +291,19 @@ function Stars(): SvgNode {
         const size = 0.4 + rand() * 0.9;
         const shine = 0.25 + rand() * 0.5;
 
+        // Dims, then brightens back right after.
+        const twinkle = (dim: Spanned) =>
+          motion({ opacity: shine })
+            .to({ opacity: 0.08 }, dim, ease.inOut)
+            .to({ opacity: shine }, dim.next(1.2), ease.inOut);
+
         return far ? (
           <circle
             cx={x}
             cy={y}
             r={size}
             opacity={shine}
-            animation={
-              i % 6 === 0
-                ? motion({ opacity: shine })
-                    .at(rand() * 10)
-                    .to({ opacity: 0.08 }, 1.2, ease.inOut)
-                    .to({ opacity: shine }, 1.2, ease.inOut)
-                : undefined
-            }
+            animation={i % 6 === 0 ? twinkle(span(rand() * 10, 1.2)) : undefined}
           />
         ) : null;
       })}
@@ -315,12 +325,10 @@ function Clock(): SvgNode {
           letterSpacing={-1}
           animation={
             h === 0
-              ? motion({ opacity: 1 }).at(1).set({ opacity: 0 })
+              ? motion({ opacity: 1 }).set({ opacity: 0 }, 1)
               : motion({ opacity: 0 })
-                  .at(h)
-                  .set({ opacity: 1 })
-                  .at(Math.min(h + 1, D - 0.001))
-                  .set({ opacity: h === 23 ? 1 : 0 })
+                  .set({ opacity: 1 }, h)
+                  .set({ opacity: h === 23 ? 1 : 0 }, Math.min(h + 1, D - 0.001))
           }
         >
           {label}

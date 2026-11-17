@@ -133,9 +133,7 @@ function Intro(): SvgNode {
           d={r.d}
           stroke={C.line}
           animation={[
-            motion({ fill: C.sea })
-              .at(start(r.centroid.x) + 0.4)
-              .to({ fill: C.land }, 0.6),
+            motion({ fill: C.sea }).to({ fill: C.land }, span(start(r.centroid.x) + 0.4, 0.6)),
             draw({ at: start(r.centroid.x), over: 0.8 }),
           ]}
         />
@@ -154,9 +152,10 @@ function Visited(): SvgNode {
         <path
           d={map.part(country).d}
           fill={C.lit}
-          animation={motion({ opacity: 0 })
-            .at(when.get(country) ?? INTRO)
-            .to({ opacity: 1 }, 0.5)}
+          animation={motion({ opacity: 0 }).to(
+            { opacity: 1 },
+            span(when.get(country) ?? INTRO, 0.5),
+          )}
         />
       ))}
     </g>
@@ -172,10 +171,8 @@ function Marker({ stop, at }: { stop: Stop; at: number }): SvgNode {
     <Camera frame={rect(0, 0, W, H)} stops={stops} over={PAN} steady origin={{ x, y }}>
       <g
         animation={motion({ opacity: 0, scale: 0.4 })
-          .at(at)
-          .to({ opacity: 1, scale: 1 }, 0.4, ease.pop)
-          .at(BACK - 0.2)
-          .to({ opacity: 0 }, 0.5)}
+          .to({ opacity: 1, scale: 1 }, span(at, 0.4), ease.pop)
+          .to({ opacity: 0 }, span(BACK - 0.2, 0.5))}
         style={origin}
       >
         <circle cx={x} cy={y} r={8} fill={C.route} opacity={0.22} />
@@ -212,9 +209,7 @@ function Flights(): SvgNode {
           opacity={0.75}
           animation={[
             draw({ at: leave, over: FLIGHT }, ease.inOut),
-            motion()
-              .at(BACK - 0.2)
-              .to({ opacity: 0 }, 0.5),
+            motion().to({ opacity: 0 }, span(BACK - 0.2, 0.5)),
           ]}
         />
       ))}
@@ -238,9 +233,7 @@ function Flights(): SvgNode {
 
 /** The whole route at world scale, once the camera has pulled back. */
 function Summary(): SvgNode {
-  const appear = motion({ opacity: 0 })
-    .at(BACK + 0.3)
-    .to({ opacity: 1 }, 0.8);
+  const appear = motion({ opacity: 0 }).to({ opacity: 1 }, span(BACK + 0.3, 0.8));
 
   return (
     <g animation={appear}>
@@ -266,9 +259,11 @@ function Caption(): SvgNode {
   return (
     <g
       fontFamily="system-ui, sans-serif"
-      animation={motion({ opacity: 0, y: 8 })
-        .at(BACK + 0.8)
-        .to({ opacity: 1, y: 0 }, 0.6, ease.out)}
+      animation={motion({ opacity: 0, y: 8 }).to(
+        { opacity: 1, y: 0 },
+        span(BACK + 0.8, 0.6),
+        ease.out,
+      )}
     >
       <text x={40} y={H - 66} fontSize={24} fontWeight={700} fill={C.text}>
         The Kangaroo Route
@@ -298,10 +293,10 @@ export default function build(): string {
         <path d={map.sphere} fill={C.sea} />
         <path d={map.graticule(15)} fill="none" stroke={C.grid} strokeWidth={0.4} />
       </Follow>
-      <g animation={motion({ opacity: 1 }).at(INTRO).set({ opacity: 0 })}>
+      <g animation={motion({ opacity: 1 }).set({ opacity: 0 }, INTRO)}>
         <Intro />
       </g>
-      <g animation={motion({ opacity: 0 }).at(INTRO).set({ opacity: 1 })}>
+      <g animation={motion({ opacity: 0 }).set({ opacity: 1 }, INTRO)}>
         <Follow>
           <path d={map.land} fill={C.land} />
           <path

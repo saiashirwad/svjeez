@@ -1,4 +1,4 @@
-import { css, ease, motion, render } from "svjeez";
+import { css, ease, motion, render, span } from "svjeez";
 import { palette } from "../style";
 
 const theme = palette.dark;
@@ -24,7 +24,7 @@ export default function build(): string {
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
       <circle cx={100} cy={100} r={60} fill="none" stroke={theme.base02} strokeWidth={1.5} />
-      <g animation={motion().to({ [yaw]: 360 }, 4, ease.linear)}>
+      <g animation={motion().to({ [yaw]: 360 }, span(0, 4), ease.linear)}>
         <circle class="dot" r={8} fill={theme.base0E} style={{ [px]: 1 }} />
       </g>
     </>,

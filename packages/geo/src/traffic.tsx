@@ -1,11 +1,14 @@
 /** @jsxImportSource svjeez */
-import type { Color, Point, Span, SvgNode } from "svjeez";
-import { random, span as spanOf, type Spanned } from "svjeez";
+import type { Color, Drawn, Part, Point, Rect, Span } from "svjeez";
+import { random, span as spanOf } from "svjeez";
+import { rect } from "svjeez/geometry";
 import { flow, type FlowOptions } from "svjeez";
 import type { GeoMap, LonLat } from "./index.ts";
 
 /** A route for `traffic()`, with how much of the traffic takes it and, if it differs, its color. */
 export interface TrafficLine {
+  /** The route's id as a part. Default its index in the list, `"0"`, `"1"`, … */
+  readonly id?: string;
   readonly points: readonly Point[];
   /** This route's share of the departures, against the others'. Default 1. */
   readonly weight?: number;
@@ -24,13 +27,31 @@ export interface TrafficOptions extends Omit<
   readonly back?: number;
 }
 
-export interface Traffic {
-  readonly node: SvgNode;
+/**
+ * One route of `traffic()`. Its box covers its points, and its span runs from the first departure on it to the last
+ * arrival, or is the instant 0 when no particle took it.
+ */
+export interface TrafficRoute extends Part {
+  readonly points: readonly Point[];
+  /** How many particles took this route. */
+  readonly count: number;
+}
+
+/**
+ * Its parts are the routes, in the order given. `span` runs from the start of the departure window to when the last
+ * particle arrives.
+ */
+export interface Traffic extends Drawn<TrafficRoute> {
   /** How many particles leave. */
   readonly count: number;
-  /** From the first departure window to when the last one arrives. */
-  readonly span: Spanned;
 }
+
+const boxOf = (points: readonly Point[]): Rect => {
+  const [xs, ys] = [points.map((p) => p.x), points.map((p) => p.y)];
+  const [left, top] = [Math.min(...xs), Math.min(...ys)];
+
+  return rect(left, top, Math.max(...xs) - left, Math.max(...ys) - top);
+};
 
 /**
  * Many particles along many routes: flights, trade, migration. `rate` departures a second over the span `during`, each on a
@@ -62,20 +83,57 @@ export function traffic(
   const next = random(seed);
   const count = Math.max(1, Math.round(rate * during.over));
   let end = during.at;
+  /** Each route's first departure, last arrival and particle count. */
+  const used = routes.map(() => ({ first: Infinity, last: -Infinity, count: 0 }));
 
   const nodes = Array.from({ length: count }, (_, k) => {
     const at = during.at + ((k + next()) / count) * during.over;
     let pick = next() * sum;
-    const index = weights.findIndex((w) => (pick -= w) < 0);
-    const route = routes[index < 0 ? routes.length - 1 : index]!;
+    const found = weights.findIndex((w) => (pick -= w) < 0);
+    const index = found < 0 ? routes.length - 1 : found;
+    const route = routes[index]!;
     const points = next() < back ? [...route.points].reverse() : route.points;
     const run = flow(points, { ...token, color: route.color ?? token.color, at });
     end = Math.max(end, run.span.end);
+    const use = used[index]!;
+    [use.first, use.last, use.count] = [
+      Math.min(use.first, at),
+      Math.max(use.last, run.span.end),
+      use.count + 1,
+    ];
 
     return run.node;
   });
 
-  return { node: <g>{nodes}</g>, count, span: spanOf(during.at, end - during.at) };
+  const parts = routes.map((route, i): TrafficRoute => ({
+    id: route.id ?? String(i),
+    box: boxOf(route.points),
+    span:
+      used[i]!.count > 0 ? spanOf(used[i]!.first, used[i]!.last - used[i]!.first) : spanOf(0, 0),
+    points: route.points,
+    count: used[i]!.count,
+  }));
+
+  return {
+    node: <g>{nodes}</g>,
+    count,
+    span: spanOf(during.at, end - during.at),
+    bounds: parts.map((p) => p.box).reduce((a, b) => a.union(b)),
+    parts,
+    part(id) {
+      const found = parts.find((p) => p.id === id);
+
+      if (!found)
+        throw new Error(
+          `traffic() has no route ${JSON.stringify(id)}. Its routes are ${parts
+            .slice(0, 6)
+            .map((p) => JSON.stringify(p.id))
+            .join(", ")}${parts.length > 6 ? ", …" : ""}.`,
+        );
+
+      return found;
+    },
+  };
 }
 
 export interface ArcOptions {

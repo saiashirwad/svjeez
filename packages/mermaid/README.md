@@ -33,11 +33,11 @@ const chart = mermaid(
 export default () =>
   render(
     { width: chart.bounds.w + 80, height: chart.bounds.h + 80, duration: 6, title: "Review" },
-    chart.node,
+    chart,
   );
 ```
 
-`mermaid(text, options)` returns the svjeez diagram, plus `kind` and the parsed `doc`. Every kind has `span`, `bounds`, `parts` and `part(id)`, where a part is a node by its Mermaid id, with its `box` and the `span` it appears in. Narrow on `kind` to reach what only one diagram has:
+`mermaid(text, options)` returns the svjeez diagram, plus `kind` and the parsed `doc`. Every kind has `span`, `bounds`, `parts` and `part(id)`, where a part is a node by its Mermaid id, with its `box` and the `span` it appears in. A flowchart's edges and a state diagram's transitions are parts too, by `"A->B"`. Put the diagram itself in the scene. Narrow on `kind` to reach what only one diagram has:
 
 ```ts
 const d = mermaid(text);

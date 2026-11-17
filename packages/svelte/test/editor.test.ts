@@ -135,7 +135,7 @@ describe("editing a scene with no annotations", () => {
     await page.mouse.up();
 
     expect(await page.locator(".sj-pop-text").textContent()).toMatch(/^ease\.bezier\(/);
-    expect(await source(page)).toMatch(/to\(\{ rotate: 90 \}, 1\.5, ease\.bezier\(/);
+    expect(await source(page)).toMatch(/to\(\{ rotate: 90 \}, span\(0\.5, 1\.5\), ease\.bezier\(/);
 
     await page.keyboard.press("Escape");
     await page.locator(".sj-pop").waitFor({ state: "detached" });

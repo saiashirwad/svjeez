@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { motion, render } from "svjeez";
+import { motion, render, span } from "svjeez";
 import { Fragment, jsxDEV } from "svjeez/jsx-dev-runtime";
 
 const options = { width: 100, height: 60, duration: 2, title: "Sources" };
@@ -16,7 +16,7 @@ const scene = () =>
       jsxDEV(
         "g",
         {
-          animation: motion({ y: 10 }).to({ y: 0 }, 1),
+          animation: motion({ y: 10 }).to({ y: 0 }, span(0, 1)),
           children: jsxDEV("circle", { r: 4 }, undefined, false, { fileName: "", lineNumber: 5 }),
         },
         undefined,

@@ -1,4 +1,10 @@
-import { createEditor, type Editor, type EditorOptions, type Input, type State } from "@svjeez/live";
+import {
+  createEditor,
+  type Editor,
+  type EditorOptions,
+  type Input,
+  type State,
+} from "@svjeez/live";
 import { createSubscriber } from "svelte/reactivity";
 
 /**

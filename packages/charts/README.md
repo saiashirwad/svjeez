@@ -41,8 +41,8 @@ export default () =>
     { width: 440, height: 260, duration: 6, title: "Sales by quarter" },
     <>
       {c.node}
-      {bars.node}
-      {trend.node}
+      {bars}
+      {trend}
     </>,
   );
 ```

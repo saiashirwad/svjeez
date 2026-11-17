@@ -382,6 +382,12 @@ describe("errors name the call, the constraint and the value", () => {
       "Callout needs some text, got an empty string.",
     ],
     [
+      "Arrow draw outside show",
+      () =>
+        Arrow({ from: { x: 0, y: 0 }, to: { x: 5, y: 5 }, show: span, draw: { at: 1, over: 2 } }),
+      "Arrow draw must lie inside show",
+    ],
+    [
       "reveal blocks",
       () => reveal(code("a"), { at: 0, blocks: [] }),
       "reveal() needs at least one block of lines, got none.",

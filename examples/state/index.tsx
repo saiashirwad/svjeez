@@ -29,7 +29,8 @@ export const agent = stateMachine(
       ["waiting", "working", "reply"],
       ["working", "done", "finish"],
       ["working", "failed", "error"],
-      ["working", "cancelled", "cancel"],    ],
+      ["working", "cancelled", "cancel"],
+    ],
   },
   {
     theme,
@@ -82,8 +83,8 @@ export default function build(): string {
     <>
       <rect width={WIDTH} height={HEIGHT} fill={theme.base00} />
       <g transform={fit(agent.bounds.w, agent.bounds.h)}>
-        {agent.node}
-        {walk.node}
+        {agent}
+        {walk}
       </g>
     </>,
   );

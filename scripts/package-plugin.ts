@@ -48,7 +48,10 @@ const exports = Object.fromEntries(
 
     if (!/\.tsx?$/.test(path)) return (copy(target, path), [key, path]);
 
-    return [key, { types: path.replace(/\.tsx?$/, ".d.ts"), default: path.replace(/\.tsx?$/, ".js") }];
+    return [
+      key,
+      { types: path.replace(/\.tsx?$/, ".d.ts"), default: path.replace(/\.tsx?$/, ".js") },
+    ];
   }),
 );
 

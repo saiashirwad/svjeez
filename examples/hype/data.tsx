@@ -49,8 +49,8 @@ export const dataShot = () => {
   return (
     <>
       <g animation={enter({ at: 0.15, over: 0.5 }, { opacity: 0 })}>{plot.node}</g>
-      {bars.node}
-      {trend.node}
+      {bars}
+      {trend}
       <Blip
         x={perch.x}
         y={perch.y}

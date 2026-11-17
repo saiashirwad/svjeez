@@ -280,6 +280,15 @@ describe("mermaid", () => {
     expect(d.doc.nodes).toHaveLength(4);
   });
 
+  test("goes into a scene as it is, whatever its kind, with its edges as parts", () => {
+    const flow = mermaid("flowchart TD\nA --> B");
+    const seq = mermaid("sequenceDiagram\nA->>B: hi");
+
+    expect(svg(flow)).toBe(svg(flow.node));
+    expect(svg(seq)).toBe(svg(seq.node));
+    expect(flow.part("A->B").box.h).toBeGreaterThan(0);
+  });
+
   test("LR lays out left to right, and options.direction overrides the text", () => {
     const text = "flowchart TD\nA --> B";
     const down = mermaid(text);

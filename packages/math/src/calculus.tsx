@@ -4,6 +4,7 @@ import {
   easeAt,
   motion,
   sampled,
+  span,
   tint,
   type Attrs,
   type Base16,
@@ -255,7 +256,7 @@ const stagesOf = (
   return ds
     .slice(1)
     .reduce<Motion<"d" | "stroke">>(
-      (track, _, i) => track.at(spans[i]!.at).to(values(i + 1), spans[i]!.over, curve),
+      (track, _, i) => track.to(values(i + 1), span(spans[i]!.at, spans[i]!.over), curve),
       motion(values(0)),
     );
 };

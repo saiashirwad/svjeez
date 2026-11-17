@@ -412,9 +412,11 @@ export function epicycles(
       <g transform={`translate(${tenth(offset[0])} ${tenth(offset[1])})`}>
         <g
           style={{ transformOrigin: "0 0", transformBox: "view-box" }}
-          animation={motion({ rotate: 0 })
-            .at(at)
-            .to({ rotate: 360 * spin }, over, ease.linear)}
+          animation={motion({ rotate: 0 }).to(
+            { rotate: 360 * spin },
+            spanOf(at, over),
+            ease.linear,
+          )}
         >
           {i < circles
             ? [
@@ -443,9 +445,9 @@ export function epicycles(
   const entry = Math.min(0.5, over / 4);
 
   const visible = (() => {
-    const shown = motion({ opacity: 0 }).at(at).to({ opacity: 1 }, entry);
+    const shown = motion({ opacity: 0 }).to({ opacity: 1 }, spanOf(at, entry));
 
-    return fade > 0 ? shown.at(at + over).to({ opacity: 0 }, fade) : shown;
+    return fade > 0 ? shown.to({ opacity: 0 }, spanOf(at + over, fade)) : shown;
   })();
 
   return {
@@ -455,9 +457,10 @@ export function epicycles(
           <path
             d={d}
             fill={options.fill}
-            animation={motion({ opacity: 0 })
-              .at(at + over)
-              .to({ opacity: 1 }, Math.max(fade, 0.4))}
+            animation={motion({ opacity: 0 }).to(
+              { opacity: 1 },
+              spanOf(at + over, Math.max(fade, 0.4)),
+            )}
           />
         ) : (
           []

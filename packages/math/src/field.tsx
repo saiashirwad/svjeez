@@ -4,6 +4,7 @@ import {
   draw,
   ease,
   motion,
+  stagger,
   tint,
   type Base16,
   type Color,
@@ -523,9 +524,15 @@ export function contourSweep(
   });
 
   const matched = matchPaths(drawn, { precision: 1 });
-  let track: Motion<"d"> = motion({ d: matched[0]! }).at(at);
+  const step = over / (frames - 1);
+  const sweeps = stagger({ at, over: step }, frames - 1, step);
 
-  for (const d of matched.slice(1)) track = track.to({ d }, over / (frames - 1), ease.linear);
+  const track = matched
+    .slice(1)
+    .reduce<Motion<"d">>(
+      (m, d, i) => m.to({ d }, sweeps[i]!, ease.linear),
+      motion({ d: matched[0]! }),
+    );
 
   return { d: matched[0]!, animation: track };
 }

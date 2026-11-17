@@ -30,7 +30,7 @@ export default function build(): string {
     },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
-      {login.node}
+      {login}
     </>,
   );
 }

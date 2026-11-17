@@ -1,11 +1,12 @@
 import { geoContains } from "d3-geo";
-import type { Feature, FeatureCollection } from "geojson";
+import type { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from "geojson";
 import { feature, merge, mesh } from "topojson-client";
 import type { GeometryObject, MultiPolygon, Polygon } from "topojson-specification";
 import {
   sampled,
   span as spanOf,
   type Motion,
+  type Part,
   type PathData,
   type Point,
   type Rect,
@@ -13,6 +14,7 @@ import {
   type Span,
   type Spanned,
 } from "svjeez";
+import { rect } from "svjeez/geometry";
 import type { GeoData, LonLat } from "./index.ts";
 import { sun } from "./sun.ts";
 import {
@@ -68,9 +70,28 @@ export interface Riding {
   readonly animation: Motion<"x" | "y" | "opacity">;
 }
 
+/**
+ * One region of a globe, as `project()` gives them. Its box is where the region sits when the turn ends: what faces the
+ * viewer then, with anything behind pressed onto the rim. Its span is the globe's, since it turns all along.
+ */
+export interface GlobeRegion extends Part {
+  /** The feature's `id`, else its `properties.name`, else its index. */
+  readonly id: string;
+  readonly properties: GeoJsonProperties;
+  readonly feature: Feature;
+  /** The region alone, as turning paths, to fill or outline it over the land. */
+  path(): Turning[];
+}
+
 export interface Globe {
   readonly center: Point;
   readonly radius: number;
+  /** The disc of the globe. */
+  readonly bounds: Rect;
+  /** Every region, one per feature, in the data's order. */
+  readonly parts: readonly GlobeRegion[];
+  /** The region whose id or `properties.name` is `key`. */
+  part(key: string | number): GlobeRegion;
   /** When every motion on the globe runs: the span `globe()` was given. */
   readonly span: Spanned;
   /** The outline of the globe, for the sea, a rim, and the clip every turning path needs. */
@@ -166,6 +187,30 @@ const features = (data: GeoData, object: string | undefined): Feature[] => {
   return "features" in read ? read.features : [read];
 };
 
+/** A feature's id as `project()` and `globe()` give it: its `id`, else its `properties.name`, else its index. */
+export const idOf = (f: Feature, index: number): string =>
+  String(f.id ?? f.properties?.name ?? index);
+
+/** Every position in a geometry. */
+const positions = (g: Geometry | null): Position[] => {
+  if (!g) return [];
+
+  switch (g.type) {
+    case "Point":
+      return [g.coordinates];
+    case "MultiPoint":
+    case "LineString":
+      return g.coordinates;
+    case "MultiLineString":
+    case "Polygon":
+      return g.coordinates.flat();
+    case "MultiPolygon":
+      return g.coordinates.flat(2);
+    case "GeometryCollection":
+      return g.geometries.flatMap(positions);
+  }
+};
+
 /**
  * A turning globe whose land, borders, grid, routes and night are real paths, each a `sampled.path()` with a fixed point count.
  * Every motion runs during `when`, and every time a function here takes, such as `facing(t)` and a `night` date function, is
@@ -210,7 +255,9 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
     center.y - radius * y,
   ];
 
-  const all = features(data, options.object).filter((f) => options.filter?.(f) ?? true);
+  const listed = features(data, options.object).map((f, index) => ({ f, id: idOf(f, index) }));
+  const chosen = listed.filter(({ f }) => options.filter?.(f) ?? true);
+  const all = chosen.map(({ f }) => f);
 
   const collection: FeatureCollection = { type: "FeatureCollection", features: all };
 
@@ -453,9 +500,54 @@ export function globe(when: Span, data: GeoData, options: GlobeOptions): Globe {
     return vec([lon + 180, -lat]);
   };
 
+  /** Where a region sits when the turn ends: what faces the viewer, with anything behind pressed onto the rim. */
+  const settled = (f: Feature): Rect => {
+    const v = view(over);
+
+    const points = positions(f.geometry).map((at) => {
+      const p = vec([at[0]!, at[1]!]);
+      const [x, y, z] = [dot(p, v.right), dot(p, v.up), dot(p, v.toward)];
+      const r = z >= 0 ? 1 : Math.hypot(x, y) || 1;
+
+      return screen(x / r, y / r);
+    });
+
+    if (points.length === 0) return rect(center.x, center.y, 0, 0);
+    const [xs, ys] = [points.map(([x]) => x), points.map(([, y]) => y)];
+    const [left, top] = [Math.min(...xs), Math.min(...ys)];
+
+    return rect(left, top, Math.max(...xs) - left, Math.max(...ys) - top);
+  };
+
+  const regions = chosen.map(({ f, id }): GlobeRegion => ({
+    id,
+    properties: f.properties,
+    feature: f,
+    get box() {
+      return settled(f);
+    },
+    span: spanOf(start, over),
+    path: () => path(f),
+  }));
+
   return {
     center,
     radius,
+    bounds: rect(center.x - radius, center.y - radius, 2 * radius, 2 * radius),
+    parts: regions,
+    part(key) {
+      const found = regions.find((r) => r.id === String(key) || r.properties?.name === key);
+
+      if (!found)
+        throw new Error(
+          `globe() has no region ${JSON.stringify(key)}. Regions are found by id or properties.name, as in ${regions
+            .slice(0, 3)
+            .map((r) => JSON.stringify(r.id))
+            .join(", ")}.`,
+        );
+
+      return found;
+    },
     span: spanOf(start, over),
     sphere: `M${fmt(center.x - radius)} ${fmt(center.y)}a${fmt(radius)} ${fmt(radius)} 0 1 0 ${fmt(2 * radius)} 0a${fmt(radius)} ${fmt(radius)} 0 1 0 ${fmt(-2 * radius)} 0Z`,
     facing,

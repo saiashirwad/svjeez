@@ -90,14 +90,10 @@ const slide = motion({ x: startX })
   .to({ x: 0 }, flight(HOPS[1]!), ease.linear);
 
 const look = motion({ x: -5, y: 0 })
-  .at(3.4)
-  .to({ x: -6, y: 4 }, 0.3, ease.inOut)
-  .at(5.2)
-  .to({ x: 5, y: -5 }, 0.35, ease.inOut)
-  .at(6.6)
-  .to({ x: -4, y: 3 }, 0.35, ease.inOut)
-  .at(D - 0.4)
-  .to({ x: -5, y: 0 }, 0.3);
+  .to({ x: -6, y: 4 }, span(3.4, 0.3), ease.inOut)
+  .to({ x: 5, y: -5 }, span(5.2, 0.35), ease.inOut)
+  .to({ x: -4, y: 3 }, span(6.6, 0.35), ease.inOut)
+  .to({ x: -5, y: 0 }, span(D - 0.4, 0.3));
 
 /** The note and its arrow, above the title and pointing down at Blip. */
 const NOTE = "that's one <img>!";
@@ -106,7 +102,7 @@ const note = casual.path(NOTE, { size: noteSize, x: SPOT.x - 330 * (noteSize / 3
 const head = { x: SPOT.x + 12, y: SPOT.y - size * 0.95 - 8 };
 const tail = { x: SPOT.x - 30, y: top - 46 };
 // The shaft bows 34px sideways at its middle, whatever the title's size puts between tail and head.
-// Arrow draws its shaft over 0.6s, then the head, so it starts 0.2s early to be whole by about 5.25s.
+// The shaft draws from 4.75s to 5.05s and the head lands as it ends, as in the original hero.
 
 export default () =>
   render(
@@ -157,6 +153,8 @@ export default () =>
           head={14}
           theme={theme}
           show={span(4.5).until(D)}
+          draw={span(4.75, 0.3)}
+          ease={ease.inOut}
         />
       </g>
     </>,

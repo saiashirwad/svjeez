@@ -8,6 +8,7 @@ import {
   type SvgNode,
   appWindow,
   code,
+  span,
   typewriter,
   type CodePiece,
 } from "svjeez";
@@ -167,8 +168,8 @@ const dot = (row: number, color: Color, pending?: { until: number }) =>
         r={4}
         fill={C.muted}
         animation={motion({ opacity: 1 })
-          .to({ opacity: 0.25 }, 0.25)
-          .to({ opacity: 1 }, 0.25)
+          .to({ opacity: 0.25 }, span(0, 0.25))
+          .to({ opacity: 1 }, span(0, 0.25).next(0.25))
           .loop(0.5)}
       />
       <circle cx={left + 4} cy={mid(row)} r={4} fill={color} animation={show(pending.until)} />
@@ -310,9 +311,11 @@ const follow = (y: (t: number) => number, over = 0.25): Motion<"y"> =>
   beats.reduce(
     (track, t, i) =>
       i > 0 && y(t) !== y(beats[i - 1]!)
-        ? track
-            .at(t)
-            .to({ y: y(t) }, Math.min(over, (beats[i + 1] ?? Infinity) - t - 0.02), ease.out)
+        ? track.to(
+            { y: y(t) },
+            span(t, Math.min(over, (beats[i + 1] ?? Infinity) - t - 0.02)),
+            ease.out,
+          )
         : track,
     motion({ y: y(welcomeAt) }),
   );
@@ -325,7 +328,7 @@ const inputBox = (
       strokeOpacity={0.7}
     />
     <g transform={`translate(0 ${ROW * 0.25})`}>
-      <g animation={motion({ opacity: 1 }).at(SENT).set({ opacity: 0 })}>{ask.node}</g>
+      <g animation={motion({ opacity: 1 }).set({ opacity: 0 }, SENT)}>{ask.node}</g>
       <g animation={show(SENT)}>{sayAt([["muted", ">"]], -(shell.body.y + 12) / ROW, left)}</g>
     </g>
     {sayAt([["muted", "? for shortcuts"]], 1.6 - (shell.body.y + 12) / ROW, left + 2)}
@@ -335,15 +338,15 @@ const inputBox = (
 const spinner = (
   <g
     animation={[
-      show(SENT).at(DONE_AT).set({ opacity: 0 }),
+      show(SENT).set({ opacity: 0 }, DONE_AT),
       follow((t) => top(spinnerRow(t)) - top(0)),
     ]}
   >
     {asterisk(left + 4, mid(0), [
-      motion({ rotate: 0 }).to({ rotate: 180 }, 1.5, ease.linear).loop(1.5),
+      motion({ rotate: 0 }).to({ rotate: 180 }, span(0, 1.5), ease.linear).loop(1.5),
       motion({ scale: 1 })
-        .to({ scale: 0.6 }, 0.375, ease.inOut)
-        .to({ scale: 1 }, 0.375, ease.inOut)
+        .to({ scale: 0.6 }, span(0, 0.375), ease.inOut)
+        .to({ scale: 1 }, span(0, 0.375).next(0.375), ease.inOut)
         .loop(0.75),
     ])}
     {say(

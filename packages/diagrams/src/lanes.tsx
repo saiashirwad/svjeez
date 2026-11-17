@@ -172,7 +172,11 @@ export function lanes<const L extends Record<string, Labelled>>(
             stroke={tint}
             animation={
               play
-                ? motion({ width: 0 }).at(when(s.at)).to({ width: b.w }, s.over, ease.linear)
+                ? motion({ width: 0 }).to(
+                    { width: b.w },
+                    { at: when(s.at), over: s.over },
+                    ease.linear,
+                  )
                 : undefined
             }
           />
@@ -240,7 +244,7 @@ export function lanes<const L extends Record<string, Labelled>>(
         d={`M${track.x} ${track.y}V${track.y + track.h}`}
         stroke={theme.base09}
         strokeWidth={1.5}
-        animation={motion({ x: 0 }).at(when(0)).to({ x: track.w }, out.end, ease.linear)}
+        animation={motion({ x: 0 }).to({ x: track.w }, { at: when(0), over: out.end }, ease.linear)}
       />
     ),
   ]);

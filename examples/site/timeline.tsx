@@ -9,20 +9,23 @@ import { mono, theme } from "../style";
 // `tall` stacks the three for a phone: the chain, Blip, then the tracks.
 const BAR = 40;
 
-const shown = `motion({ opacity: 0, y: 40 })
-  .at(0.5)
-  .to({ opacity: 1, y: 0 }, 0.6, ease.pop)
-  .wait(1.5)
-  .to({ scale: 1.4, rotate: -12 }, 0.5)
-  .to({ scale: 1, rotate: 0 }, 0.4, ease.inOut)`;
+const shown = `const pop = span(0.5, 0.6);
+const tilt = pop.next(0.5, 1.5);
+motion({ opacity: 0, y: 40 })
+  .to({ opacity: 1, y: 0 }, pop, ease.pop)
+  .to({ scale: 1.4, rotate: -12 }, tilt)
+  .to({ scale: 1, rotate: 0 }, tilt.next(0.4))`;
 
-const chain = (t0: number) =>
-  motion({ opacity: 0, y: 40 })
-    .at(t0 + 0.5)
-    .to({ opacity: 1, y: 0 }, 0.6, ease.pop)
-    .wait(1.5)
-    .to({ scale: 1.4, rotate: -12 }, 0.5)
-    .to({ scale: 1, rotate: 0 }, 0.4, ease.inOut);
+/** What `shown` writes, on a clock that starts at `t0`. */
+const obey = (t0: number) => {
+  const pop = span(t0 + 0.5, 0.6);
+  const tilt = pop.next(0.5, 1.5);
+
+  return motion({ opacity: 0, y: 40 })
+    .to({ opacity: 1, y: 0 }, pop, ease.pop)
+    .to({ scale: 1.4, rotate: -12 }, tilt)
+    .to({ scale: 1, rotate: 0 }, tilt.next(0.4));
+};
 
 export const make = (tall = false): string => {
   const W = tall ? 358 : 1032;
@@ -48,8 +51,8 @@ export const make = (tall = false): string => {
   const T0 = 0.9;
 
   const lit = [
-    { show: { at: T0 + 0.5, over: 0.6 }, target: src.lines(2, 3).pad(6) },
-    { show: { at: T0 + 1.1, over: 1.5 }, target: src.lines(4, 4).pad(6) },
+    { show: { at: T0 + 0.5, over: 0.6 }, target: src.lines(4, 4).pad(6) },
+    { show: { at: T0 + 1.1, over: 1.5 }, target: src.lines(2, 2).pad(6) },
     { show: { at: T0 + 2.6, over: 0.5 }, target: src.lines(5, 5).pad(6) },
     { show: { at: T0 + 3.1, over: 0.4 }, target: src.lines(6, 6).pad(6) },
   ];
@@ -111,7 +114,7 @@ export const make = (tall = false): string => {
           rx={10}
           fill={theme.base01}
         />
-        <g animation={chain(T0)}>
+        <g animation={obey(T0)}>
           <g
             transform={`translate(${panel.x + panel.w / 2} ${panel.y + panel.h / 2 + 34}) scale(0.48) translate(${-GROUND.x} ${-GROUND.y})`}
           >
@@ -171,9 +174,11 @@ export const make = (tall = false): string => {
           </g>
         ))}
         <g
-          animation={motion({ x: 0 })
-            .at(T0)
-            .to({ x: AXIS.w * (3.5 / AXIS.span) }, 3.5, ease.linear)}
+          animation={motion({ x: 0 }).to(
+            { x: AXIS.w * (3.5 / AXIS.span) },
+            span(T0, 3.5),
+            ease.linear,
+          )}
         >
           <path
             d={`M${AXIS.x} ${lineTop}V${rowY(3) + 24}`}

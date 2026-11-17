@@ -11,9 +11,9 @@ import {
   type Base16,
 } from "svjeez";
 
-import { type Color, type Rect } from "svjeez";
+import { type Color, type Drawn, type Part } from "svjeez";
 import { rect } from "svjeez/geometry";
-import { span as spanOf, type Spanned } from "svjeez";
+import { span as spanOf } from "svjeez";
 import { tex, type Tex } from "./index.ts";
 
 /** One line of a derivation: TeX, and what was done to reach it. */
@@ -44,15 +44,16 @@ export interface DeriveOptions {
   readonly color?: Color;
 }
 
-export interface Derivation {
-  readonly node: SvgNode;
-  /** From the first line to when the last change settles. */
-  readonly span: Spanned;
-  /** Every line as typeset, aligned. */
-  readonly lines: readonly Tex[];
-  /** Everything the derivation can draw, notes included. */
-  readonly bounds: Rect;
+/** One line of a derivation, by its TeX. Its box is where it sits, and its span runs from when it appears to when its change settles. */
+export interface DeriveLine extends Part {
+  /** The line's TeX. Two lines with the same TeX share an id, and `part()` finds the first. */
+  readonly id: string;
+  /** The line as typeset and aligned, to find a glyph or a `\cssId` part inside it. */
+  readonly tex: Tex;
 }
+
+/** Its parts are the lines, in order. `span` runs from the first line to when the last change settles, and `bounds` covers everything it can draw, notes included. */
+export interface Derivation extends Drawn<DeriveLine> {}
 
 const isText = (v: string | DeriveStep): v is string => typeof v === "string";
 
@@ -137,13 +138,14 @@ export function derive(
     const head = fontSize * 0.14;
 
     const track = (() => {
-      const shown = motion({ opacity: 0 })
-        .at(start(i) + over / 2)
-        .to({ opacity: 1 }, over / 2);
+      const shown = motion({ opacity: 0 }).to(
+        { opacity: 1 },
+        spanOf(start(i) + over / 2, over / 2),
+      );
 
       return stack || i === list.length - 1
         ? shown
-        : shown.at(start(i + 1) - 0.01).to({ opacity: 0 }, Math.min(0.3, over / 2));
+        : shown.to({ opacity: 0 }, spanOf(start(i + 1) - 0.01, Math.min(0.3, over / 2)));
     })();
 
     return (
@@ -166,17 +168,19 @@ export function derive(
         <g
           animation={
             i === 0
-              ? motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over)
-              : motion({ opacity: 0, y: -fontSize * 0.3 })
-                  .at(start(i))
-                  .to({ opacity: 1, y: 0 }, over, ease.out)
+              ? motion({ opacity: 0 }).to({ opacity: 1 }, spanOf(at, over))
+              : motion({ opacity: 0, y: -fontSize * 0.3 }).to(
+                  { opacity: 1, y: 0 },
+                  spanOf(start(i), over),
+                  ease.out,
+                )
           }
         >
           {line.node}
         </g>
       ))
     : [
-        <g animation={motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over)}>
+        <g animation={motion({ opacity: 0 }).to({ opacity: 1 }, spanOf(at, over))}>
           {
             morph(lines, {
               at: lines.slice(1).map((_, i) => start(i + 1)),
@@ -190,6 +194,13 @@ export function derive(
   const box = lines.map((l) => l.bounds).reduce((p, q) => p.union(q));
   const full = noteBoxes.length > 0 ? box.union(rect(right, box.y, fontSize * 8, box.h)) : box;
 
+  const parts = lines.map((line, i): DeriveLine => ({
+    id: list[i]!.tex,
+    box: line.bounds,
+    span: spanOf(start(i), over),
+    tex: line,
+  }));
+
   return {
     node: (
       <g>
@@ -198,7 +209,20 @@ export function derive(
       </g>
     ),
     span: spanOf(at, total),
-    lines,
     bounds: full,
+    parts,
+    part(id) {
+      const found = parts.find((p) => p.id === id);
+
+      if (!found)
+        throw new Error(
+          `derive() has no line ${JSON.stringify(id)}. Its lines are ${parts
+            .slice(0, 4)
+            .map((p) => JSON.stringify(p.id))
+            .join(", ")}${parts.length > 4 ? ", …" : ""}.`,
+        );
+
+      return found;
+    },
   };
 }

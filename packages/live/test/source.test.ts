@@ -65,13 +65,17 @@ describe("literals", () => {
   });
 
   test("call arguments know the method and their place", () => {
-    const at = numbers("motion({ y: 1 }).at(0.8 + i).to({ y: 0 }, 0.6);").map((l) => l.role);
+    const at = numbers("motion({ y: 1 }).to({ y: 0 }, span(0.8 + i, 0.6)).set({ y: 1 }, 2);").map(
+      (l) => l.role,
+    );
 
     expect(at).toEqual([
       { kind: "property", name: "y" },
-      { kind: "argument", callee: "at", index: 0 },
       { kind: "property", name: "y" },
-      { kind: "argument", callee: "to", index: 1 },
+      { kind: "argument", callee: "span", index: 0 },
+      { kind: "argument", callee: "span", index: 1 },
+      { kind: "property", name: "y" },
+      { kind: "argument", callee: "set", index: 1 },
     ]);
   });
 
@@ -237,10 +241,15 @@ describe("linking", () => {
 
     const steps = callsIn(source, sun, "to").map(([from]) => source.lineAt(from));
 
+    const lines = source.text.split("\n");
+
+    const [from, to] = [
+      lines.findIndex((l) => l.includes("const sunrise")) + 1,
+      lines.findIndex((l) => l.includes("const pulse")) + 1,
+    ];
+
     expect(steps.length).toBe(2);
-    expect(steps.every((n) => source.text.split("\n")[n - 1]!.includes("const sunrise"))).toBe(
-      true,
-    );
+    expect(steps.every((n) => n >= from && n < to)).toBe(true);
 
     const flower = source.elements.find(
       (e) => e.tag === "g" && e.attributes.some((a) => a.name === "animation"),
@@ -279,7 +288,7 @@ export default function build() {
   const r = 5;
   return (
     <g>
-      <circle cx={40} r={r} animation={enter({ at: 1.2, over: 0.5 }).to({ x: 9 }, 0.4)} />
+      <circle cx={40} r={r} animation={enter({ at: 1.2, over: 0.5 }).to({ x: 9 }, span(1.7, 0.4))} />
       <circle cx={80} />
       {cond ? 1 : 2}
     </g>
@@ -295,7 +304,8 @@ export default function build() {
       ["default:enter.0.at", "1.2"],
       ["default:enter.0.over", "0.5"],
       ["default:to.0.x", "9"],
-      ["default:to.1", "0.4"],
+      ["default:span.0", "1.7"],
+      ["default:span.1", "0.4"],
       ["default:circle.cx#1", "80"],
       ["default#0", "1"],
       ["default#1", "2"],

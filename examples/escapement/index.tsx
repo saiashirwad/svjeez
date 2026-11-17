@@ -144,7 +144,11 @@ const steps = sampled(
   { step: STEP, tolerance: { [stepping]: 0.04 }, precision: 2 },
 ).loop(SWING_TIME);
 
-const advancing = motion({ [advance]: 0 }).to({ [advance]: (PITCH / 2) * BEATS }, D, ease.linear);
+const advancing = motion({ [advance]: 0 }).to(
+  { [advance]: (PITCH / 2) * BEATS },
+  span(0, D),
+  ease.linear,
+);
 
 const rocking = sampled(
   { at: 0, over: SWING_TIME },

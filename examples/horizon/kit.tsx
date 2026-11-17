@@ -101,11 +101,12 @@ export const glow = (
     </>,
   );
 
-export const on = (at: number): Motion<"opacity"> =>
-  motion({ opacity: 0 }).at(at).set({ opacity: 1 });
+export const on = (at: number): Motion<"opacity"> => motion({ opacity: 0 }).set({ opacity: 1 }, at);
 
 export const envelope = (at: number, off: number, over = 0.4): Motion<"opacity"> =>
-  motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over).at(off).to({ opacity: 0 }, over, ease.in);
+  motion({ opacity: 0 })
+    .to({ opacity: 1 }, span(at, over))
+    .to({ opacity: 0 }, span(off, over), ease.in);
 
 export const phased = <K extends Channel>(
   period: number,
@@ -138,7 +139,7 @@ export const phased = <K extends Channel>(
 
     if (cut && wrap < period) {
       // SAFETY: same ChannelValues<K> to Target widening as the first frame
-      track = track.set(at(0) as ChannelValues);
+      track = track.set(at(0) as ChannelValues, to);
     }
   }
 

@@ -1,5 +1,5 @@
 import { tex } from "@svjeez/math";
-import { draw, ease, enter, motion, render, sampled, type Color, morph } from "svjeez";
+import { draw, ease, enter, motion, render, sampled, type Color, morph, span } from "svjeez";
 
 import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
@@ -97,7 +97,7 @@ export default function build(): string {
         <g animation={enter({ at: 0.3, over: 0.6 })}>
           <line x1={CX - R - 22} y1={CY} x2={CX + R + 22} y2={CY} stroke={theme.base02} />
           <line x1={CX} y1={CY - R - 22} x2={CX} y2={CY + R + 22} stroke={theme.base02} />
-          {one.node}
+          {one}
         </g>
         <circle
           cx={CX}
@@ -126,14 +126,13 @@ export default function build(): string {
               stroke={PI}
               strokeWidth={2}
               animation={motion({ opacity: 0, scale: 1 })
-                .at(8.1)
-                .to({ opacity: 0.9 }, 0.1)
-                .to({ opacity: 0, scale: 3.4 }, 1, ease.out)}
+                .to({ opacity: 0.9 }, span(8.1, 0.1))
+                .to({ opacity: 0, scale: 3.4 }, span(8.1, 0.1).next(1), ease.out)}
             />
             <circle r={5.5} fill={theme.base07} />
           </g>
         </g>
-        <g animation={enter({ at: 8.1, over: 0.5 }, { opacity: 0, x: 6 })}>{minusOne.node}</g>
+        <g animation={enter({ at: 8.1, over: 0.5 }, { opacity: 0, x: 6 })}>{minusOne}</g>
         <g animation={enter({ at: 1, over: 0.7 }, { opacity: 0, y: 8 })}>{m.node}</g>
         <g class="sans" animation={enter({ at: 1.8, over: 0.6 })}>
           <text x={238} y={H - 30} fontSize={12} fill={theme.base03}>

@@ -2,7 +2,29 @@ import type { ComponentType } from "react";
 import { demoOf, type Demo, type DemoOptions, type Script } from "./demo.ts";
 import type { Flow } from "./flow.ts";
 
-export { click, fill, hover, move, press, snap, wait, type Demo, type DemoOptions, type Flow, type Script } from "./demo.ts";
+export {
+  act,
+  click,
+  drag,
+  fill,
+  hover,
+  move,
+  press,
+  snap,
+  wait,
+  type Act,
+  type Action,
+  type Demo,
+  type DemoOptions,
+  type DragOptions,
+  type Flow,
+  type Instruction,
+  type PageAction,
+  type Script,
+  type Snap,
+  type Timing,
+  type Wait,
+} from "./demo.ts";
 
 /**
  * A demo of a real React component: the component, where it starts, and a script of what happens to it. The script

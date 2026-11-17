@@ -1,4 +1,4 @@
-import { ease, motion, render, sampled, show, type Color } from "svjeez";
+import { chain, ease, motion, render, sampled, show, span, type Color } from "svjeez";
 import { flowchart } from "@svjeez/diagrams";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
@@ -152,7 +152,7 @@ export const make = (tall = false): string => {
         <g
           animation={[
             show({ at, over }, { fade: 0.15 }),
-            motion({ scale: 0.4 }).at(at).to({ scale: 1 }, 0.35, ease.pop),
+            motion({ scale: 0.4 }).to({ scale: 1 }, span(at, 0.35), ease.pop),
           ]}
         >
           <rect x={0} y={0} width={w} height={26} rx={13} fill={color} />
@@ -177,19 +177,18 @@ export const make = (tall = false): string => {
   const puzzled = until(5);
   const sure = until(13);
 
-  const tilt = motion({ rotate: 0 })
-    .at(puzzled + 0.1)
-    .to({ rotate: -12 }, 0.2, ease.out)
-    .to({ rotate: 10 }, 0.3, ease.inOut)
-    .to({ rotate: -6 }, 0.3, ease.inOut)
-    .to({ rotate: 0 }, 0.25, ease.inOut);
+  const tilt = chain(span(puzzled + 0.1, 0.2), 0.3, 0.3, 0.25).reduce(
+    (m, swing, i) => m.to({ rotate: [-12, 10, -6, 0][i]! }, swing, i ? ease.inOut : ease.out),
+    motion({ rotate: 0 }),
+  );
+
+  const [hop, land, again, down] = chain(span(sure + 0.1, 0.15), 0.15, 0.12, 0.12);
 
   const bounce = motion({ y: 0 })
-    .at(sure + 0.1)
-    .to({ y: -10 }, 0.15, ease.out)
-    .to({ y: 0 }, 0.15, ease.in)
-    .to({ y: -6 }, 0.12, ease.out)
-    .to({ y: 0 }, 0.12, ease.in);
+    .to({ y: -10 }, hop, ease.out)
+    .to({ y: 0 }, land, ease.in)
+    .to({ y: -6 }, again, ease.out)
+    .to({ y: 0 }, down, ease.in);
 
   return render(
     {

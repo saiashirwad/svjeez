@@ -6,6 +6,20 @@ import { given, message, story } from "@svjeez/dom/story";
 import { demo as svelteDemo } from "@svjeez/dom/svelte";
 import { recordings } from "@svjeez/dom/vite";
 
-export const used = [browser, Dom, duration, snap, snapshots, fidelity, click, reactDemo, given, message, story, svelteDemo, recordings];
+export const used = [
+  browser,
+  Dom,
+  duration,
+  snap,
+  snapshots,
+  fidelity,
+  click,
+  reactDemo,
+  given,
+  message,
+  story,
+  svelteDemo,
+  recordings,
+];
 
 export type Steps = Step[];

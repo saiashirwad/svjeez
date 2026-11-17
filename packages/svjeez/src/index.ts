@@ -4,6 +4,7 @@ export { motion, ease, type Motion, type Stack, type Seconds, type Ease } from "
 
 export {
   span,
+  chain,
   stagger,
   type Span,
   type OpenSpan,

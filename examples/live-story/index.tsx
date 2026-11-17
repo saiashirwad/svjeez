@@ -15,7 +15,7 @@ import { view } from "./view.tsx";
 // for is answered the way the runtime would answer it, so the code, the picture and the clock are the real ones.
 const here = (name: string) => fileURLToPath(new URL(name, import.meta.url));
 
-const ball = `import { ease, motion, render } from "svjeez";
+const ball = `import { ease, motion, render, span } from "svjeez";
 
 export default function build() {
   return render(
@@ -23,7 +23,7 @@ export default function build() {
     <circle
       cx={40} cy={60} r={18} fill="#e8590c"
       animation={motion({ x: 0 })
-        .to({ x: 160 }, 1.2, ease.inOut)}
+        .to({ x: 160 }, span(0, 1.2), ease.inOut)}
     />,
   );
 }`;

@@ -1,4 +1,4 @@
-import { ease, motion, code, shot, typewriter } from "svjeez";
+import { ease, motion, code, shot, span, typewriter } from "svjeez";
 
 import { mono, theme } from "../style";
 import { jumps } from "../site/lib/blip";
@@ -29,11 +29,11 @@ const cheer = jumps([
   { land: enterAt + 1.35, height: 30 },
 ]);
 
-const watch = motion({ x: -6, y: 4 }).at(opening.span.end).to({ x: 0, y: 0 }, 0.3, ease.inOut);
+const watch = motion({ x: -6, y: 4 }).to({ x: 0, y: 0 }, span(opening.span.end, 0.3), ease.inOut);
 
 export const coldOpen = (
   <g animation={shot(COLD, { exit: "rise" })}>
-    <g animation={motion({ y: 0 }).at(enterAt).to({ y: -28 }, 0.5, ease.inOut)}>
+    <g animation={motion({ y: 0 }).to({ y: -28 }, span(enterAt, 0.5), ease.inOut)}>
       <Blip
         x={W / 2}
         y={H / 2 - 64}

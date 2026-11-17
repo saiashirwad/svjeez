@@ -7,11 +7,15 @@ import charts from "@examples/site/charts.tsx";
 import chartsArea from "@examples/site/charts-area.tsx";
 import chartsLines from "@examples/site/charts-lines.tsx";
 import explainer from "@examples/site/explainer.tsx";
+import fonts from "@examples/site/fonts.tsx";
 import geo from "@examples/site/geo.tsx";
 import handshake from "@examples/site/handshake.tsx";
 import handshakeTall from "@examples/site/handshake-tall.tsx";
+import icons from "@examples/site/icons.tsx";
+import ink from "@examples/site/ink.tsx";
 import math from "@examples/site/math.tsx";
 import mathFourier from "@examples/site/math-fourier.tsx";
+import nojsxTall from "@examples/site/nojsx-tall.tsx";
 import pipeline from "@examples/site/pipeline.tsx";
 import pipelineTall from "@examples/site/pipeline-tall.tsx";
 import recording from "@examples/site/recording.tsx";
@@ -20,7 +24,7 @@ import timelineTall from "@examples/site/timeline-tall.tsx";
 import whereDocs from "@examples/site/where-docs.tsx";
 import whereReadme from "@examples/site/where-readme.tsx";
 import metrics from "@examples/metrics/index.tsx";
-import zoom from "@examples/zoom/index.tsx";
+import board from "@examples/board/index.tsx";
 import DayNight from "../components/DayNight.astro";
 import Hero from "../components/Hero.astro";
 import LiveScene from "../components/LiveScene.astro";
@@ -34,7 +38,7 @@ import { REPO } from "../examples";
 import { shikiTheme } from "../styles/code";
 
 const s = {
-  zoom: live(zoom),
+  board: live(board),
   timeline: live(timeline),
   timelineTall: live(timelineTall),
   pipeline: live(pipeline),
@@ -118,16 +122,61 @@ const tiles = {
   ],
 } as const;
 
+// What fits no section above. Four small tiles, so each scene draws well under its own size: the phone cut of the
+// no-JSX scene stands in for the wide one.
+const more = [
+  {
+    name: "icons",
+    scene: live(icons),
+    cost: 24,
+    label: "8,000 icons",
+    from: "@svjeez/icons",
+    href: pkg("icons"),
+    alt: "Eight icons arrive in eight ways: a rocket draws on, a heart pops, a box drops, a gear spins in, an eye comes into focus, wifi bars cascade, a sun swaps for a moon and a bell rings.",
+  },
+  {
+    name: "ink",
+    scene: live(ink),
+    cost: 17,
+    label: "Handwriting",
+    from: "svjeez",
+    href: reference("ink"),
+    alt: "The word hello is handwritten stroke by stroke, then a brush swash is inked underneath.",
+  },
+  {
+    name: "fonts",
+    scene: live(fonts),
+    cost: 20,
+    label: "Your fonts",
+    from: "@svjeez/fonts",
+    href: pkg("fonts"),
+    alt: "The words Aa Type draw on as outlines in an embedded display font, with real italic text below.",
+  },
+  {
+    name: "no-jsx",
+    scene: live(nojsxTall),
+    cost: 30,
+    label: "No JSX",
+    from: "svjeez",
+    href: reference("without-jsx"),
+    alt: "A scene written with jsx() calls, lit block by block, beside a preview where an arc draws and a dot pops onto it.",
+  },
+] as const;
+
 // What the film section shows beside the recording: the demo it was filmed from, cut to the steps that matter.
-const demo = `// cards.demo.tsx, next to the component
-export const signIn = demo(SignIn, { width: 360 }, ({ props }) => [
-  snap("idle"),
-  fill("email", "sai@example.com"),
-  snap("email", { over: 0.9 }),
-  fill("password", "hunter2hunter2"),
-  snap("password", { over: 0.7 }),
-  props({ error: "Unable to sign in." }),
-  snap("failed", { over: 0.25 }),
+const demo = `// board.demo.tsx, next to the app
+export const board = demo(Board, layout, () => [
+  press("ControlOrMeta+k"),
+  snap("palette", { over: 0.35 }),
+  fill("query", "new iss"),
+  snap("narrowed", { over: 0.4 }),
+  click("cmd-new-issue"),
+  snap("dialog", { over: 0.3 }),
+  fill("title", "Save drafts offline"),
+  snap("titled", { over: 1.1 }),
+  click("create"),
+  snap("created", { over: 0.6 }),
+  ...drag("ENG-143", "progress"),
 ]);`;
 
 const adaptive = `const { theme, css } = adaptive({
@@ -147,7 +196,7 @@ npx svjeez svg scene.tsx --out scene.svg`;
 
 // Every file this page shows as an <img>, counted once each: the scenes, their phone cuts, the tiles and the hero.
 const files = new Map<string, FileFacts>(
-  [...Object.values(s), ...tiles.math.map((tile) => tile.scene), ...tiles.data.map((tile) => tile.scene)].map(
+  [...Object.values(s), ...tiles.math.map((tile) => tile.scene), ...tiles.data.map((tile) => tile.scene), ...more.map((tile) => tile.scene)].map(
     (scene) => [scene.src, facts(scene)],
   ),
 );
@@ -173,9 +222,9 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
 
     <section class="wrap sec g" id="film">
       <h2 class="c1-8 xl"><a class="anchor" href="#film">Film your real components.</a></h2>
-      <p class="sub c1-8">Write a demo that types into and clicks a React or Svelte component, and <a href={pkg("dom")}>@svjeez/dom</a> records it in Chromium as an animated SVG. The recording is kept in a JSON file and made again only when the demo or a file it imports changes.</p>
-      <figure class="c1-6"><div class="win"><LiveScene scene={s.zoom} cost={30} name="sign-in" bar={0} alt="A sign-in form, filmed from its React demo. The camera zooms into the email field as it is typed, moves to the password and the sign-in button, then pulls back to show the error from the server." /></div></figure>
-      <Code class="code side c7-12" code={demo} lang="tsx" theme={shikiTheme} />
+      <p class="sub c1-8">This is a React app, recorded: a demo file presses keys, types, clicks and drags in Chromium, and <a href={pkg("dom")}>@svjeez/dom</a> turns every state into one SVG where cards slide to their new places and counts tick over. The recording is kept in a JSON file and made again only when the demo or a file it imports changes.</p>
+      <figure class="c1-8"><div class="win"><LiveScene scene={s.board} cost={40} name="board" bar={0} alt="A project board, filmed from its React demo. A command palette opens and narrows to New issue as it is typed into, then turns into a dialog where a title is typed and a label and assignee are picked. The new card lands in Todo, is dragged to In progress and marked done, while the counts, the cycle's progress and the sidebar update and a toast confirms." /></div></figure>
+      <Code class="code side c9-12" code={demo} lang="tsx" theme={shikiTheme} />
     </section>
 
     <section class="wrap sec g" id="play">
@@ -276,6 +325,22 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
         </div>
       </section>
     </div>
+
+    <section class="wrap sec g" id="more">
+      <h2 class="c1-8"><a class="anchor" href="#more">Also in the box.</a></h2>
+      <div class="wall small c1-12">
+        {
+          more.map((tile) => (
+            <figure class="tile">
+              <div class="win"><LiveScene scene={tile.scene} cost={tile.cost} name={tile.name} alt={tile.alt} /></div>
+              <figcaption>
+                <b>{tile.label}</b> <a href={tile.href}>{tile.from}</a>
+              </figcaption>
+            </figure>
+          ))
+        }
+      </div>
+    </section>
 
     <section class="wrap close" id="start">
       <h2><a class="anchor" href="#start">Everything you just watched was an <code>&lt;img&gt;</code>.</a></h2>

@@ -42,8 +42,7 @@ export default function build(): string {
   const cards = PICTURES.map((picture, i) => {
     const fan = motion({ rotate: 0, x: 0 })
       .to({ rotate: fans[i]!, x: (i - 1) * 26 }, dealt[i]!, ease.pop)
-      .at(4.9)
-      .to({ rotate: 0, x: 0 }, 0.45, ease.inOut);
+      .to({ rotate: 0, x: 0 }, span(4.9, 0.45), ease.inOut);
 
     return (
       <Pivot origin={{ x: DECK.x, y: DECK.y }} animation={fan}>
@@ -70,10 +69,8 @@ export default function build(): string {
   ]);
 
   const look = motion({ x: 0, y: 0 })
-    .at(0.4)
-    .to({ x: 6, y: -3 }, 0.3)
-    .at(4.8)
-    .to({ x: 0, y: 0 }, 0.3);
+    .to({ x: 6, y: -3 }, span(0.4, 0.3))
+    .to({ x: 0, y: 0 }, span(4.8, 0.3));
 
   return render(
     {

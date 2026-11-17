@@ -24,7 +24,13 @@ export default function build(): string {
     },
     <Once>
       {strokes.map((s) => (
-        <Ink d={s.d} tool={marker} fill="currentColor" draw={{ at: s.at, over: s.over }} ease={ease.linear} />
+        <Ink
+          d={s.d}
+          tool={marker}
+          fill="currentColor"
+          draw={{ at: s.at, over: s.over }}
+          ease={ease.linear}
+        />
       ))}
     </Once>,
   );

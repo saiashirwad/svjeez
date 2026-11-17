@@ -1,7 +1,7 @@
 import { pathLength, type Point } from "../geometry";
 import type { ChannelValues } from "../channels";
 import { ease, motion, type Motion, type Seconds, type Span } from "../motion";
-import { span as makeSpan, stagger, type Spanned, type When } from "../span";
+import { chain, span as makeSpan, stagger, type Spanned, type When } from "../span";
 
 export type Timeline<K extends string> = { readonly [P in K]: Spanned } & {
   /** When the last scene ends. */
@@ -53,9 +53,9 @@ export const show = (
   if (fade === 0)
     return merged.reduce(
       (track, [a, b], i) => {
-        const on = i === 0 && a === 0 ? track : track.at(a).set({ opacity: 1 });
+        const on = i === 0 && a === 0 ? track : track.set({ opacity: 1 }, a);
 
-        return b === Infinity ? on : on.at(b).set({ opacity: 0 });
+        return b === Infinity ? on : on.set({ opacity: 0 }, b);
       },
       motion({ opacity: merged[0]![0] === 0 ? 1 : 0 }),
     );
@@ -63,9 +63,9 @@ export const show = (
   return merged.reduce(
     (track, [a, b]) => {
       const f = Math.min(fade, (b - a) / 2);
-      const on = track.at(a).to({ opacity: 1 }, f);
+      const on = track.to({ opacity: 1 }, makeSpan(a, f));
 
-      return b === Infinity ? on : on.at(b - f).to({ opacity: 0 }, f);
+      return b === Infinity ? on : on.to({ opacity: 0 }, makeSpan(b - f, f));
     },
     motion({ opacity: 0 }),
   );
@@ -126,12 +126,12 @@ export const shot = (
     start.opacity === 1
       ? track
       : enter === "cut"
-        ? track.at(at).set({ opacity: 1 })
-        : track.at(at).to({ ...still, opacity: 1 }, f, ease.out);
+        ? track.set({ opacity: 1 }, at)
+        : track.to({ ...still, opacity: 1 }, makeSpan(at, f), ease.out);
 
   return exit === "cut"
-    ? shown.at(at + over).set({ opacity: 0 })
-    : shown.at(at + over - f).to(to, f, ease.in);
+    ? shown.set({ opacity: 0 }, at + over)
+    : shown.to(to, makeSpan(at + over - f, f), ease.in);
 };
 
 /** The leaving side of a move: what rose in from below lifts away above, what grew in keeps growing. */
@@ -245,7 +245,10 @@ export function travel(
 
   if (heading !== undefined) first.rotate = turns[0]!;
 
-  const start: Motion<Heading> = motion<TokenStart>(first).at(at).set({ opacity: 1 });
+  const start: Motion<Heading> = motion<TokenStart>(first).set({ opacity: 1 }, at);
+
+  // The legs run end to end from `at`, each for its share of the length.
+  const [, ...runs] = chain(makeSpan(at, 0), ...legs.map((leg) => (duration * leg.length) / total));
 
   return legs
     .reduce((track, leg, i) => {
@@ -253,11 +256,11 @@ export function travel(
 
       return track.to(
         heading === undefined ? to : { ...to, rotate: turns[i + 1]! },
-        (duration * leg.length) / total,
+        runs[i]!,
         ease.linear,
       );
     }, start)
-    .set({ opacity: 0 });
+    .set({ opacity: 0 }, runs.at(-1)?.end ?? at);
 }
 
 export type Travel = "x" | "y" | "opacity";

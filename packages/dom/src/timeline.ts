@@ -96,11 +96,7 @@ export const loop = (
 
   const { wait, ...move } = timing;
 
-  return [
-    ...steps,
-    [first, move],
-    ...(wait ? [{ wait }] : []),
-  ];
+  return [...steps, [first, move], ...(wait ? [{ wait }] : [])];
 };
 
 /** The picture's size: the largest of the states, so one frame holds them all. */

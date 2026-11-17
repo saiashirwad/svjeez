@@ -1,5 +1,5 @@
 import { plane, tex } from "@svjeez/math";
-import { draw, motion, render, Brace, morph } from "svjeez";
+import { motion, render, Brace, morph, span } from "svjeez";
 import { rect } from "svjeez/geometry";
 import { HEIGHT, MARGIN, WIDTH, css, hue, leave, mono, theme } from "../gallery-style";
 
@@ -31,10 +31,7 @@ const graph = plane({
   fontSize: 16,
 });
 
-const curve = graph.plot((a) => (a + 1) ** 2, {
-  color: hue.blue,
-  animation: draw({ at: 0.6, over: 1.6 }),
-});
+const curve = graph.plot({ at: 0.6, over: 1.6 }, (a) => (a + 1) ** 2, { color: hue.blue });
 
 const name = tex(String.raw`b = 1:\ (a+1)^2`, {
   ...graph.point(-3.2, 8.2),
@@ -58,7 +55,7 @@ export default function build(): string {
     <>
       <rect width={W} height={H} fill={theme.base00} />
       <g animation={leave(D)}>
-        <g animation={motion({ opacity: 0 }).at(0.2).to({ opacity: 1 }, 0.5)}>{m.node}</g>
+        <g animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(0.2, 0.5))}>{m.node}</g>
         <Brace
           theme={theme}
           target={expanded.part("cross").box}
@@ -67,11 +64,11 @@ export default function build(): string {
           fontSize={18}
           show={{ at: 3.2, over: 2.5 }}
         />
-        <g animation={motion({ opacity: 0 }).at(0.2).to({ opacity: 1 }, 0.5)}>
+        <g animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(0.2, 0.5))}>
           {graph.node}
-          {name.node}
+          {name}
         </g>
-        {curve.node}
+        {curve}
       </g>
     </>,
   );

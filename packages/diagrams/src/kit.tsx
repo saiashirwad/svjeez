@@ -396,7 +396,7 @@ export const arrow = (
           at === undefined
             ? undefined
             : look.dashed
-              ? motion({ opacity: 0 }).at(at).to({ opacity: 1 }, over)
+              ? motion({ opacity: 0 }).to({ opacity: 1 }, span(at, over))
               : draw({ at, over })
         }
       />
@@ -406,9 +406,7 @@ export const arrow = (
         animation={
           at === undefined
             ? undefined
-            : motion({ opacity: 0 })
-                .at(at + over * 0.85)
-                .to({ opacity: 1 }, over * 0.15)
+            : motion({ opacity: 0 }).to({ opacity: 1 }, span(at + over * 0.85, over * 0.15))
         }
       />
     </g>
@@ -477,14 +475,46 @@ export const placer = (
   };
 };
 
-/** A part for each box, in the map's order, appearing during `when(id)`, and `part(id)` over them. */
+/**
+ * The id of the edge from `F` to `T` as a part, such as `"pr->post"`. An edge from a list of edges in the spec gets
+ * one id per pair, so TypeScript checks `part("pr->post")` against the edges written.
+ */
+export type EdgeId<E> = E extends readonly [
+  infer F extends string,
+  infer T extends string,
+  ...unknown[],
+]
+  ? `${F}->${T}`
+  : never;
+
+/** The part id of the edge from `from` to `to`. */
+export const edgeId = (from: string, to: string): string => `${from}->${to}`;
+
+/** The box around a line's points, and around its label when it has one. */
+export const lineBox = (points: readonly Point[], label?: Box): Rect => {
+  const xs = points.map((p) => p.x);
+  const ys = points.map((p) => p.y);
+  const [left, top] = [Math.min(...xs), Math.min(...ys)];
+  const box = rect(left, top, Math.max(...xs) - left, Math.max(...ys) - top);
+
+  return label ? box.union(rect(label.x, label.y, label.w, label.h)) : box;
+};
+
+/**
+ * A part for each box, in order, appearing during `when(id)`, and `part(id)` over them. Two parts may share an id, as
+ * two edges between the same nodes do; `part(id)` finds the first.
+ */
 export const partsOf = <Id extends string>(
   what: string,
-  boxes: ReadonlyMap<string, Rect>,
-  when: (id: string) => Spanned = () => INSTANT,
+  boxes: Iterable<readonly [string, Rect]>,
+  when: (id: string, index: number) => Spanned = () => INSTANT,
 ) => {
   // SAFETY: the boxes are keyed by the spec's ids, which the diagram's signature types as Id
-  const parts = [...boxes].map(([id, box]): Part<Id> => ({ id: id as Id, box, span: when(id) }));
+  const parts = [...boxes].map(([id, box], i): Part<Id> => ({
+    id: id as Id,
+    box,
+    span: when(id, i),
+  }));
 
   return {
     parts,

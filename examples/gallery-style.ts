@@ -5,6 +5,7 @@ import {
   ease,
   enter,
   motion,
+  span,
   type Color,
   type Css,
   type FontValue,
@@ -117,9 +118,7 @@ export const nth = (at: number, n: number, over: number = motions.over) =>
 
 /** Fade the content, never the background, at the end of the loop. Put it on a group around everything but the background. */
 export const leave = (duration: number) =>
-  motion({ opacity: 1 })
-    .at(duration - motions.fade)
-    .to({ opacity: 0 }, motions.fade, ease.in);
+  motion({ opacity: 1 }).to({ opacity: 0 }, span(duration - motions.fade, motions.fade), ease.in);
 
 /** The transform that centers a `w` by `h` drawing inside the margins, scaled down to fit and up to at most 1.5x. */
 export const fit = (w: number, h: number): string => {

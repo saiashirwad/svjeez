@@ -119,11 +119,10 @@ const fly = (from: ReturnType<typeof label>, id: string, start: number) => {
   return (
     <g
       animation={motion({ opacity: 0, x: 0, y: 0 })
-        .at(start)
-        .set({ opacity: 1 })
-        .to({ x: dx, y: dy }, 1.1, ease.inOut)}
+        .set({ opacity: 1 }, start)
+        .to({ x: dx, y: dy }, span(start, 1.1), ease.inOut)}
     >
-      {from.node}
+      {from}
     </g>
   );
 };
@@ -168,10 +167,8 @@ export default function build(): string {
           fill={CC}
           fillOpacity={0.2}
           animation={motion({ opacity: 0 })
-            .at(3.2)
-            .to({ opacity: 1 }, 0.6)
-            .at(5.1)
-            .to({ opacity: 0 }, 0.5)}
+            .to({ opacity: 1 }, span(3.2, 0.6))
+            .to({ opacity: 0 }, span(5.1, 0.5))}
         />
         <rect
           x={X0}
@@ -205,9 +202,11 @@ export default function build(): string {
                 animation={[
                   enter(arrive[i]!, { opacity: 0, scale: 0.6 }, ease.pop),
                   t.at > 0 &&
-                    motion({ x: 0, y: 0 })
-                      .at(t.at)
-                      .to({ x: t.to[0] - cx, y: t.to[1] - cy }, 1.3, ease.inOut),
+                    motion({ x: 0, y: 0 }).to(
+                      { x: t.to[0] - cx, y: t.to[1] - cy },
+                      span(t.at, 1.3),
+                      ease.inOut,
+                    ),
                 ]}
               >
                 <polygon
@@ -223,17 +222,17 @@ export default function build(): string {
           );
         })}
         <g animation={exit({ at: 4.8, over: 0.4 })}>
-          {legA.write({ at: 2.2, over: 0.5 }).node}
-          {legB.write({ at: 2.5, over: 0.5 }).node}
-          {hyp.write({ at: 2.8, over: 0.5 }).node}
+          {legA.write({ at: 2.2, over: 0.5 })}
+          {legB.write({ at: 2.5, over: 0.5 })}
+          {hyp.write({ at: 2.8, over: 0.5 })}
         </g>
-        <g animation={exit({ at: 5.1, over: 0.5 })}>{c2.write({ at: 3.5, over: 0.7 }).node}</g>
-        {a2.write({ at: 7.8, over: 0.6 }).node}
-        {b2.write({ at: 8.0, over: 0.6 }).node}
+        <g animation={exit({ at: 5.1, over: 0.5 })}>{c2.write({ at: 3.5, over: 0.7 })}</g>
+        {a2.write({ at: 7.8, over: 0.6 })}
+        {b2.write({ at: 8.0, over: 0.6 })}
         {fly(c2, "c", 4.1)}
         {fly(a2, "a", 8.7)}
         {fly(b2, "b", 8.9)}
-        {plusEquals.write({ at: 9.9, over: 0.6 }).node}
+        {plusEquals.write({ at: 9.9, over: 0.6 })}
         <g class="sans" animation={enter({ at: 1.8, over: 0.6 })}>
           <text x={EX} y={H - 30} fontSize={12} fill={theme.base03} textAnchor="middle">
             {"c2.write({ at: 3.5, over: 0.7 })"}

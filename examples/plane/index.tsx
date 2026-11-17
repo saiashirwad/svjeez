@@ -112,7 +112,7 @@ export default function build(): string {
           fill={theme.base00}
           fillOpacity={0.85}
         />
-        {matrix.node}
+        {matrix}
       </g>
       <g animation={enter({ at: 3, over: 0.4 })}>
         <rect
@@ -125,7 +125,7 @@ export default function build(): string {
           fillOpacity={0.85}
         />
       </g>
-      {eigen.write({ at: 3.2, over: 1.6 }).node}
+      {eigen.write({ at: 3.2, over: 1.6 })}
       <g clipPath={right}>
         <g animation={enter({ at: 7.4, over: 0.6 })}>{backdrop.background}</g>
         <g animation={enter({ at: 7.6, over: 0.8 })}>
@@ -137,7 +137,7 @@ export default function build(): string {
           {complex.label([0.45, 1.5], circle, { color: theme.base0A })}
         </g>
       </g>
-      {map.write({ at: 8, over: 1 }).node}
+      {map.write({ at: 8, over: 1 })}
     </>,
   );
 }

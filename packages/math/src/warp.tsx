@@ -4,6 +4,7 @@ import {
   type Motion,
   type Point,
   sampled,
+  span,
   type Color,
   type Paint,
   type Ease,
@@ -134,13 +135,13 @@ export function warp(start: Placement, moves: readonly Move[], spacing: number):
 
   const morph = (ds: readonly PathData[]): Motion<"d"> =>
     moves.reduce(
-      (m, step, i) => m.at(step.at).to({ d: ds[i + 1]! }, step.over, step.ease),
+      (m, step, i) => m.to({ d: ds[i + 1]! }, span(step.at, step.over), step.ease),
       motion({ d: ds[0]! }),
     );
 
   const travel = (spots: readonly Point[]): Motion<"x" | "y"> =>
     moves.reduce(
-      (m, step, i) => m.at(step.at).to(spots[i + 1]!, step.over, step.ease),
+      (m, step, i) => m.to(spots[i + 1]!, span(step.at, step.over), step.ease),
       motion({ x: spots[0]!.x, y: spots[0]!.y }),
     );
 

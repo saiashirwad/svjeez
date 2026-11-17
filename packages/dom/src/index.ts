@@ -11,6 +11,7 @@ export {
 export {
   act,
   click,
+  drag,
   fill,
   hover,
   html,
@@ -21,6 +22,7 @@ export {
   wait,
   type Act,
   type Action,
+  type DragOptions,
   type Flow,
   type Instruction,
   type PageAction,

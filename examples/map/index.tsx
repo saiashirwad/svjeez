@@ -64,10 +64,10 @@ export default function build(): string {
     },
     <>
       <rect width={W} height={H} fill={C.paper} />
-      <g animation={motion({ opacity: 1 }).at(SWAP).set({ opacity: 0 })}>
+      <g animation={motion({ opacity: 1 }).set({ opacity: 0 }, SWAP)}>
         <Atlas play={PLAY} />
       </g>
-      <g animation={motion({ opacity: 0 }).at(SWAP).set({ opacity: 1 })}>
+      <g animation={motion({ opacity: 0 }).set({ opacity: 1 }, SWAP)}>
         <Follow>
           <Atlas play={STILL} />
         </Follow>

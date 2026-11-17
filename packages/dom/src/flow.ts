@@ -2,7 +2,13 @@ import type { Page } from "playwright-core";
 import type { Ease } from "svjeez";
 
 /** A value that can cross into the page as JSON. */
-export type Json = string | number | boolean | null | readonly Json[] | { readonly [key: string]: Json };
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly Json[]
+  | { readonly [key: string]: Json };
 
 /** New props for a mounted component, by name. */
 export type Patch = { readonly [prop: string]: Json };
@@ -17,6 +23,18 @@ export type Action =
   | { readonly hover: string }
   | { readonly press: string }
   | { readonly move: readonly [x: number, y: number] }
+  /**
+   * The mouse: move it to a point in a target (`at` is a fraction of its box, the middle by default) over `steps`
+   * moves, then press or release its button. `drag()` writes these.
+   */
+  | {
+      readonly pointer: {
+        readonly to?: string;
+        readonly at?: readonly [x: number, y: number];
+        readonly steps?: number;
+        readonly button?: "down" | "up";
+      };
+    }
   /** New markup for a mounted card, as `card.html`. Hover and focus don't carry over. */
   | { readonly html: string }
   /**
@@ -89,3 +107,51 @@ export const hover = (target: string): Action => ({ hover: target });
 export const press = (key: string): Action => ({ press: key });
 export const move = (x: number, y: number): Action => ({ move: [x, y] });
 export const props = (patch: Patch): Action => ({ props: patch });
+
+export interface DragOptions {
+  /** Where the pointer takes hold of `from`, as fractions of its box. Default `[0.5, 0.5]`, the middle. */
+  readonly grab?: readonly [x: number, y: number];
+  /** Where on `to` it lets go, as fractions of its box. Default `[0.5, 0.5]`. */
+  readonly release?: readonly [x: number, y: number];
+  /** Pointer moves on the way, each one a `pointermove` the page sees. Default 10. */
+  readonly steps?: number;
+  /** A snap after the button goes down, to show the lift. Default none. */
+  readonly lifted?: Snap | false;
+  /** A snap while it is held over `to`, to show the slide. Default `snap({ over: 0.6 })`. */
+  readonly carried?: Snap | false;
+  /** A snap after it lets go. Default `snap({ over: 0.2 })`. */
+  readonly dropped?: Snap | false;
+}
+
+/**
+ * Drags `from` onto `to` (part names or CSS selectors) with the real mouse: down on `from`, moves to `to` in
+ * steps, up. Snaps in between show the lift and the slide. Spread it into a flow: `...drag("card", "done")`.
+ *
+ * ```ts
+ * ...drag("card-42", "lane-done", { carried: snap("carried", { over: 0.6 }), dropped: snap("dropped") })
+ * ```
+ */
+export const drag = (from: string, to: string, options: DragOptions = {}): Flow => {
+  const {
+    grab,
+    release,
+    steps = 10,
+    lifted = false,
+    carried = snap({ over: 0.6 }),
+    dropped = snap({ over: 0.2 }),
+  } = options;
+
+  if (!(Number.isInteger(steps) && steps >= 1))
+    throw new Error(`drag() needs a whole number of steps, 1 or more, got ${steps}.`);
+
+  const point = (at: readonly [number, number] | undefined) => (at ? { at } : {});
+
+  return [
+    { pointer: { to: from, ...point(grab), button: "down" } },
+    ...(lifted ? [lifted] : []),
+    { pointer: { to, ...point(release), steps } },
+    ...(carried ? [carried] : []),
+    { pointer: { button: "up" } },
+    ...(dropped ? [dropped] : []),
+  ];
+};

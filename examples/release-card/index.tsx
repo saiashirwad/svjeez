@@ -3,17 +3,7 @@
 import { ease, enter, motion, render, span, stagger } from "svjeez";
 import { defaults, list, text, type Values } from "svjeez/params";
 
-import {
-  color,
-  css,
-  geist,
-  HEIGHT,
-  MARGIN,
-  mono,
-  RADIUS,
-  rise,
-  WIDTH,
-} from "../gallery-style";
+import { color, css, geist, HEIGHT, MARGIN, mono, RADIUS, rise, WIDTH } from "../gallery-style";
 
 export const params = {
   version: text("0.8.0", { maxLength: 12, label: "version" }),
@@ -42,8 +32,13 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
   const heading = tag.next(0.6, -0.2);
   const rows = stagger(heading.next(0.5, 0.1), p.highlights.length, 0.18);
   const tagWidth = 28 + p.version.length * 13;
+
   // The card is as tall as its content, centered on the page, and rows close up when five would overflow.
-  const row = Math.min(54, (HEIGHT - 2 * MARGIN - FIRST - PAD) / Math.max(1, p.highlights.length - 1));
+  const row = Math.min(
+    54,
+    (HEIGHT - 2 * MARGIN - FIRST - PAD) / Math.max(1, p.highlights.length - 1),
+  );
+
   const height = FIRST + (p.highlights.length - 1) * row + PAD;
   const CARD = { x: MARGIN, y: (HEIGHT - height) / 2, width: BOX_WIDTH, height };
   const top = CARD.y + FIRST;

@@ -54,12 +54,12 @@ describe("compileScene", () => {
 
   test("a runtime error keeps svjeez's message and carries the skill's fix", async () => {
     const result = await compileScene(
-      `import { motion, render } from "svjeez";\nexport default () => render({ width: 10, height: 10, duration: 1, title: "x" }, <rect width={1} height={1} animation={motion({ x: 0 }).to({ x: 1 }, 0)} />);`,
+      `import { motion, render } from "svjeez";\nexport default () => render({ width: 10, height: 10, duration: 1, title: "x" }, <rect width={1} height={1} animation={motion({ x: 0 }).to({ x: 1 }, { at: 0, over: 0 })} />);`,
     );
 
     expect(result.ok ? undefined : result.error).toMatchObject({
       kind: "runtime",
-      fix: "Use `.set()` for an instant change",
+      fix: "Use `.set(values, at)` for an instant change",
     });
     expect(result.ok ? "" : result.error.message).toContain("to() needs a positive duration");
   });

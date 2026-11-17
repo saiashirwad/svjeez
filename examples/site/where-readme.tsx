@@ -42,7 +42,7 @@ const bars = Array.from({ length: COLS }, (_, c) => {
   for (let t = 0.25; t < D - 0.25; t += 0.25) {
     const v = level(c, t);
 
-    if (v !== last) m = m.at(t).set({ height: v * CELL });
+    if (v !== last) m = m.set({ height: v * CELL }, t);
     last = v;
   }
 
@@ -52,7 +52,7 @@ const bars = Array.from({ length: COLS }, (_, c) => {
       width={CELL}
       height={first * CELL}
       fill={on}
-      animation={last === first ? m : m.at(D - 0.25).set({ height: first * CELL })}
+      animation={last === first ? m : m.set({ height: first * CELL }, D - 0.25)}
     />
   );
 });

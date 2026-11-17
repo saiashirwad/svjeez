@@ -69,17 +69,20 @@ npx svjeez frames scene.tsx --times 0,0.5,1.2,3 --sheet --out frames/
 Every motion is written on a clock that starts at 0. The scene is the root clock, `0` to `duration`; a `<Clip>` starts another. A span is a plain `{ at, over }` on the clock around it, and a span without `over` runs to the end. Recipes, `show`, `<Clip>` and the results of `typewriter`, `terminal`, `reveal`, `morph` and `flow` take or return spans. Attach motions with the `animation` prop.
 
 ```tsx
-motion({ opacity: 0 })              // initial values, held until the first transition
-  .to({ opacity: 1 }, span(1, 0.5)) // during the span, 1s to 1.5s; the cursor is now 1.5
-  .wait(2)                          // values hold; the cursor is now 3.5
-  .to({ opacity: 0, scale: 0.8 }, 0.4, ease.in) // a number: from the cursor, this long
-  .set({ scale: 1 })                // hard cut at the cursor
-  .loop(6);                         // repeat every 6s, forever; snapped to divide duration
+const fadeIn = span(1, 0.5);
+const fadeOut = fadeIn.next(0.4, 2);    // 0.4s long, starting 2s after fadeIn ends
+
+motion({ opacity: 0 })                  // initial values, held until the first transition
+  .to({ opacity: 1 }, fadeIn)           // during the span, 1s to 1.5s
+  .to({ opacity: 0, scale: 0.8 }, fadeOut, ease.in) // 3.5s to 3.9s; values hold before it
+  .set({ scale: 1 }, fadeOut.end)       // a hard cut at 3.9s
+  .loop(6);                             // repeat every 6s, forever; snapped to divide duration
 ```
 
-- `.to(values, when, ease?)`: a span places the transition on the clock and plays it during the span. A number is a length from the cursor, never an end time, for transitions that follow each other. Default ease is `ease.out`. Between transitions every value holds.
-- `.at(t)` moves the cursor, for a `.set()` cut at a time.
-- `.repeat(3)` plays the passage written so far three times in all; `.repeat({ until: 10 })` repeats it until 10s, cutting the last pass short, then holds. Each pass starts from the initial values. Passes become keyframes, so a spin that never stops is `.loop()`, and a long repeat hits the key cap.
+- `.to(values, span, ease?)`: the transition plays during the span. Default ease is `ease.out`. Between transitions every value holds. There is no cursor: a step right after another is the next span, `a.next(over)`, and a run of them is `const [up, down, settle] = chain(span(0.4, 0.3), 0.2, 0.4)`.
+- `.set(values, at)`: a hard cut at `at` seconds. A cut has no length, so it takes a time, as in `.set({ opacity: 1 }, beat.end)`.
+- Steps may be written in any order; each lane plays them in time order. Two transitions that move one lane at the same time throw.
+- `.repeat(3)` plays the passage written so far three times in all; the passage runs from the earliest step's start to the latest step's end; `.repeat({ until: 10 })` repeats it until 10s, cutting the last pass short, then holds. Each pass starts from the initial values. Passes become keyframes, so a spin that never stops is `.loop()`, and a long repeat hits the key cap.
 - `.rewind(0.8)` glides every channel back to its initial value, ending at the end of the clock: the scene's, a `<Clip>`'s, or a loop's period. It is how a loop closes without a hand-written reset. Nothing can follow it.
 - `.label(name)` names the keyframes. It changes nothing else.
 - Eases: `ease.linear` (spins), `in`, `out`, `inOut`, `pop` (overshoots), `hold`, `steps(n)`, `bezier(x1, y1, x2, y2)`. Motions are immutable, so chain or reassign. `easeAt(curve, progress)` gives an ease's value at a progress from 0 to 1, to reuse it inside `sampled()` or draw it beside the scene.
@@ -117,9 +120,10 @@ grab.until(down.end);            // starts with grab, ends when down ends
 grab.first(0.3); grab.last(0.3); // the first and the last 0.3s of grab
 span(5);                         // from 5s to the end of the clock; its end is Infinity
 stagger(span(1, 0.5), 4, 0.1);   // a cascade: four 0.5s spans, each 0.1s after the one before
+chain(span(1, 0.3), 0.1, 0.5);   // end to end: 1s to 1.3s, 1.3s to 1.4s, 1.4s to 1.9s
 ```
 
-A `span` is a plain `{ at, over }` that also has `.end`, `.shift(dt)`, `.next(over, gap?)`, `.pad(before, after?)`, `.until(end)`, `.first(over)` and `.last(over)`. A span without `over` has `.shift`, `.pad`, `.until` and `.first`. `at` is 0 or later and `over` is positive; `span(at, 0)` is allowed as a point to chain from. `stagger(first, count, step)` returns `count` spans as long as `first`, `step` apart: map items over it, as in `items.map((item, i) => <g animation={enter(cascade[i]!)}>…</g>)`, and `cascade.at(-1)!.end` is when the last one settles. `typewriter`, `terminal`, `reveal`, `morph` and `flow` return `.span`, so `typed.span.next(1)` is the next beat and `typed.span.end` is when it lands. `timeline({ intro: 4, demo: 6 }, { gap, pace, at })` lays out named scenes as spans, with `.end` for the total.
+A `span` is a plain `{ at, over }` that also has `.end`, `.shift(dt)`, `.next(over, gap?)`, `.pad(before, after?)`, `.until(end)`, `.first(over)` and `.last(over)`. A span without `over` has `.shift`, `.pad`, `.until` and `.first`. `at` is 0 or later and `over` is positive; `span(at, 0)` is allowed as a point to chain from. `stagger(first, count, step)` returns `count` spans as long as `first`, `step` apart: map items over it, as in `items.map((item, i) => <g animation={enter(cascade[i]!)}>…</g>)`, and `cascade.at(-1)!.end` is when the last one settles. `chain(first, ...overs)` returns `first` and one span per length, each starting when the one before ends: the steps of a motion that play one after another, destructured into names. `typewriter`, `terminal`, `reveal`, `morph` and `flow` return `.span`, so `typed.span.next(1)` is the next beat and `typed.span.end` is when it lands. `timeline({ intro: 4, demo: 6 }, { gap, pace, at })` lays out named scenes as spans, with `.end` for the total.
 
 ### Clips
 
@@ -197,21 +201,21 @@ Also in `svjeez/geometry`: `polylinePath(points, { closed?, precision? })` write
 
 ## Drawn results
 
-Charts, maps, formulas and diagrams (`@svjeez/charts`, `geo`, `math`, `diagrams`, `mermaid`) all return a `Drawn`: `node` to put in the scene, `span` for when it all plays, `bounds`, `parts` and `part(id)`. A part is a bar, region, node or glyph run with an `id`, a `box` (a `Rect`, where it rests) and its own `span`. Time what comes after a part from `part.span` and place it with `part.box`, so a callout follows the chart when the chart's timing changes:
+Charts, maps, formulas and diagrams (`@svjeez/charts`, `geo`, `math`, `diagrams`, `mermaid`) all return a `Drawn`: `node`, `span` for when it all plays, `bounds`, `parts` and `part(id)`. Put the result itself in the scene, `{bars}`: JSX takes a `Drawn` as a child and draws its `node`. A part is a bar, region, diagram node or edge, route, formula line or glyph run with an `id`, a `box` (a `Rect`, where it rests) and its own `span`. Time what comes after a part from `part.span` and place it with `part.box`, so a callout follows the chart when the chart's timing changes:
 
 ```tsx
 const bars = c.bars({ at: 0.8, over: 1.5 }, sales);
 const q3 = bars.part("Q3"); // throws, naming ids that exist, when there is none
 
 <>
-  {bars.node}
+  {bars}
   <text x={q3.box.top.x} y={q3.box.top.y - 8} textAnchor="middle" animation={enter(q3.span.next(0.4))}>
     {q3.value}
   </text>
 </>;
 ```
 
-Each package adds its own fields to its parts (a bar's `value`, a line point's `point`). Their references say which, and what a part's `span` means there. `span.end` of the whole result is where the next beat starts.
+Each package adds its own fields to its parts (a bar's `value`, a line point's `point`, a derivation line's `tex`). Their references say which, and what a part's `span` means there. `span.end` of the whole result is where the next beat starts.
 
 ## Errors and fixes
 
@@ -223,7 +227,10 @@ Type errors from `tsc`:
 | `Motion<"draw"> is not assignable to type 'Stack<TagChannels<"g">>` | The tag cannot animate that channel. See the table |
 | `Ref<"linearGradient"> is not assignable to type 'Ref<"clipPath">'` | A def in the wrong slot. Use `def.clipPath` or `def.mask` |
 | `'duration' does not exist in type 'Span'` | Recipes take `{ at, over }` |
-| `Argument of type 'OpenSpanned' is not assignable to parameter of type 'number \| Span'` on `.to` | A transition needs an end: `span(a, over)` or `span(a).until(b)`, not `span(a)` |
+| `Argument of type 'number' is not assignable to parameter of type 'Span'` on `.to` | `.to` takes a span, never a length: `.to(values, span(at, over))`, or `prev.next(over)` for the step after `prev` |
+| `Argument of type 'OpenSpanned' is not assignable to parameter of type 'Span'` on `.to` | A transition needs an end: `span(a, over)` or `span(a).until(b)`, not `span(a)` |
+| `Property 'at' does not exist on type 'Motion<…>'`, or `'wait'` | The cursor is gone. Place each step with a span: `.at(t).to(v, d)` is `.to(v, span(t, d))`, `.at(t).set(v)` is `.set(v, t)` |
+| `Expected 2 arguments, but got 1` on `.set` | `.set(values, at)` needs the time of the cut |
 | `No overload matches this call` on `enter` or `exit` | A non-rest channel such as `fill`. Use `motion().to()` |
 | `Expected 2 arguments` on `wiggle` | `wiggle(amplitude, { seed: "name" })` |
 | `Property 'title' is missing` | `render` needs `title` |
@@ -247,7 +254,9 @@ Runtime errors. `…` stands for a value the message fills in.
 | `d on <path> moves between paths with different commands, so it would jump. Write them through matchPaths() first.` | `matchPaths([a, b])` and animate between its results |
 | `sampled.path() returned a path with different commands at t=… than at t=0.` | Write every sample with the same points, or through `matchPaths()` |
 | `… on <…> has … keys; the cap is ….` | Raise `tolerance`, or shorten it |
-| `to() needs a positive duration, got …. Use set() for a cut.` | Use `.set()` for an instant change |
+| `to() needs a positive duration, got …. Use set() for a cut.` | Use `.set(values, at)` for an instant change |
+| `to() takes a span, got …. Write .to(values, span(at, over)); a step right after another is span.next(over).` | Plain JavaScript passed a length; pass a span |
+| `set() takes the time of the cut in seconds, got …. Write .set(values, at).` | Pass the time of the cut |
 | `<…> has no attribute "…".` | camelCase: `strokeWidth`, not `stroke-width` |
 | `A def ref is not a string. Pass it as the attribute value itself.` | `fill={grad}`, never `url(#id)` |
 | `… was never declared with css.property().` | Declare the property before animating it |

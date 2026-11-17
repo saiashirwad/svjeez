@@ -101,7 +101,7 @@ export default function build(): string {
           height={2}
           rx={1}
           fill={hue.orange}
-          animation={motion({ scale: 0 }).at(2.6).to({ scale: 1 }, 0.6, ease.out)}
+          animation={motion({ scale: 0 }).to({ scale: 1 }, span(2.6, 0.6), ease.out)}
         />
         <Name name="ABeeZee" y={420} at={2.8} />
       </g>

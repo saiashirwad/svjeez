@@ -20,7 +20,7 @@ const m = morph([square, expanded, square], { at: [1.5, 4], over: 1 });
 ```
 
 - `x` and `y` are the top-left of the formula's box. `anchor: [0.5, 0.5]` puts its center there instead, which suits a label on a side or inside an area. `fontSize` is the pixels in one em, default 32. `theme` paints the formula with its `plain` color, and `color` overrides that. `display: false` sets inline style.
-- `.node` draws the formula. `.write({ at, over })` writes it on glyph by glyph, each outline drawing and then filling, and it stays once written; put its `.node` in the scene. `.bounds`, `.width` and `.height` give its box.
+- Put the formula in the scene as it is, `{f}`. `.write({ at, over })` writes it on glyph by glyph, each outline drawing and then filling, and it stays once written; put what it returns in the scene the same way, `{f.write({ at: 1, over: 2 })}`. `.bounds`, `.width` and `.height` give its box.
 - The formula and what `.write()` returns have `span`, `bounds`, `parts` and `part(id)`, the shape every svjeez package returns. The parts are what `\cssId{name}{…}` wraps: `.part("mid").box` is the box of everything under `\cssId{mid}{…}`, a `Rect` for `Brace` (give its label a `fontSize` to match the formula), `Underline`, `Callout`, `Marker`, `Focus` and `Camera`. On `tex()` a part's `span` is the instant 0; on a `write()` it is when its glyphs write, so `enter(written.part("mid").span.next(0.4))` lands a note right after.
 - `.find("2ab")` is a part for the consecutive glyphs that spell it, with `"2ab"` as its id, and `.find("2", 2)` takes the second match.
 - `.words` lists the glyphs and bars in reading order. A glyph has `char`, `size`, `d`, `matrix`, `fill`, `bounds` and the `text`, `x`, `y` and `id` that `morph()` uses.
@@ -30,7 +30,7 @@ const m = morph([square, expanded, square], { at: [1.5, 4], over: 1 });
 `morph()` takes any `tex()` formulas. A glyph carries over when the next version has the same character at the same size, and moves to its new place. Everything else fades: glyphs only in the old version fade out and glyphs only in the new version fade in. `morph` translates and cannot scale, so a superscript `2` never pairs with a full-size `2`, and a fraction bar pairs only with a bar of the same length.
 
 - Place every version at the same `x` and `y`, so a glyph's move is the move in the algebra.
-- To write a formula and then morph it, cut from `write().node` to `morph().node` at one instant after the writing ends. Both draw the same glyphs in the same places, so the cut does not show.
+- To write a formula and then morph it, cut from the `write()` result to `morph().node` at one instant after the writing ends. Both draw the same glyphs in the same places, so the cut does not show.
 - Wrap a part in `\cssId{name}{…}` in both versions to pair it by name, even when its glyphs change. Pieces under an id also give you `part(name)`.
 - `gutter` is for `code()`. It is a type error with formulas.
 - Bold, italic and upright forms of one letter share a key, so `\mathbf{a}` can pair with `a` and jump in shape. Name both with the same `\cssId` instead.
@@ -81,7 +81,7 @@ const d = derive(
 - By default one line transforms into the next with `morph()`, so glyphs the lines share slide into place and the rest fade. Wrap a part in `\cssId{name}{…}` in both lines to pair it by name. With `stack: true` every line stays and each new one fades in below, `lineHeight` pixels lower.
 - `align` is what the lines line up on: `"="` (the default), the first equals sign, or the id of a `\cssId` in each line. `x` is where that point sits, as its center, and `y` is the top of the first line. `fontSize` defaults to 36.
 - A step's `note` is TeX set small beside the line after an arrow, such as `\div 2 \text{ both sides}`. In place it fades with the next change, and in a stack it stays.
-- The span covers the whole derivation. The changes are spaced evenly so the last one ends with it, and `change` is how long each takes, default 0.9. The span must give every line its `change`, so at least `change` times the number of lines. The result has `node`, `span`, `lines` (every line as a `tex()`, aligned) and `bounds`.
+- The span covers the whole derivation. The changes are spaced evenly so the last one ends with it, and `change` is how long each takes, default 0.9. The span must give every line its `change`, so at least `change` times the number of lines. The result is a `Drawn`: put `{d}` in the scene. Its `bounds` covers the notes too, and its parts are the lines, by their TeX: `d.part("x = 3")` has the line's `box`, its `span`, from when it appears to when its change settles, and `tex`, the line as a `tex()`, aligned, to find a glyph or a `\cssId` part in it.
 
 ## Counters
 
@@ -102,7 +102,7 @@ const counting = counter({ at: 0, over: 10 }, (t) => 144 * Math.min(1, t / 3), {
 
 ## Constructions
 
-`construct()` draws compass-and-straightedge geometry in the order you write it. Build the figure on the builder, then render `g.node`. Every element draws on in turn: compass circles sweep from the point they pass through, lines grow from their first point, points pop and labels fade in.
+`construct()` draws compass-and-straightedge geometry in the order you write it. Build the figure on the builder, then put `g` in the scene. Every element draws on in turn: compass circles sweep from the point they pass through, lines grow from their first point, points pop and labels fade in.
 
 ```tsx
 import { construct } from "@svjeez/math";
@@ -121,7 +121,7 @@ g.settle(); // the compass circles fade back to faint
 g.polygon([A, B, C]);
 g.angle(B, A, C, { label: "60^\\circ" });
 
-<>{g.node}</>;
+<>{g}</>;
 ```
 
 - `construct({ theme, unit, origin, fontSize, start, pace, faint })`. `unit` is pixels per unit, default 1, and `origin` is a point in the scene px where the origin sits, default `{ x: 0, y: 0 }`. Coordinates have y up. `pace` overrides the seconds each kind of element takes.
@@ -132,6 +132,7 @@ g.angle(B, A, C, { label: "60^\\circ" });
 - Labels are `tex()` formulas. Each sits off its point, away from the lines and circles that meet there, and away from the figure's center when nothing does. Segment and line labels sit beside the middle on the outer side.
 - Every element takes `at` and `over`, `color`, and `aid`. Without `at` it starts when the one before it ends. `together(() => { … })` starts what it holds at once. `step(pause?)` waits and returns when the next beat starts, as does reading `g.time`. `g.span.end` is when the last element finishes, so `duration` can follow it.
 - `settle()` fades every aid made so far, to `faint` opacity. Mark compass arcs and helper points with `aid: true`.
+- The builder is a `Drawn` once the last element is made. Points, lines and circles are its parts, and what `point()`, `segment()`, `circle()`, `intersect()` and the rest return is that part, with a `box` and a `span` from when it starts to draw until its label is in. A point's id is its label, else `(x, y)`; a line's is its label, else its two points' names, as `AB`; a circle's is `circle A`. So `enter(C.span.next(0.3))` lands a caption once C is found, and `g.part("C").box` places it.
 
 Time the text beside the figure from `g.time`, read before the elements it explains. `examples/construct/index.tsx` does so with `tex().write()`.
 
@@ -161,7 +162,8 @@ render({ ..., css: css`${p.css}` },
 - Steps chain, and each returns a new plane. Draw everything from the last one. `apply(span, matrix, { ease })` moves the plane by a matrix written by rows, as on paper: `[[a, b], [c, d]]` sends (x, y) to (ax + by, cx + dy), and a third number in a row translates. Each step applies on top of the steps before it. `reset(span)` moves every point home. `ease` defaults to `ease.inOut`. Steps must not overlap.
 - Pass `p.css` to `render`'s `css`. Without it the matrix steps do not move anything.
 - `background` is the grid at the ticks as it was, and it stays put, as does `node`, the axes with their ticks and numbers. `grid` is the moving lines without the axes, and `axes` is the two axis lines.
-- `plot(f)` drawn from a plane with steps follows them and takes no `animation`. The calculus methods draw at rest, so call them on the plane before its first step.
+- `plot(f)` drawn from a plane with steps follows them. `plot(span, f)` draws the curve on during `span`, on a plane without steps. The calculus methods draw at rest, so call them on the plane before its first step.
+- `plot()`, `vector()`, `basis()`, `polygon()`, `line()` and `label()` each return a `Drawn`: put it in the scene as it is. Its `bounds` is where it sits after every step, and its `span` runs from when it starts to draw on to when the last step moving it ends, the instant 0 for one that never moves. `basis()` has the parts `"i"` and `"j"`; the others draw one thing and have no parts.
 - `vector(to, { color, width, label, from })` draws an arrow. Its head stays a proper arrowhead however the plane shears, and its label stays just past the tip, turned off the arrow's line. `label` is TeX source or a `tex()` formula. `vector(span, to, options)` grows the shaft over the span, then shows the head and label. `basis()` draws î and ĵ, and `basis(span)` grows them in the span, ĵ starting 0.2s after î.
 - `polygon(points)` fills a shape whose corners move with the plane, so the unit square's area shows the determinant. `line(direction)` is the line through the origin along a vector: an eigenvector's line stays on itself.
 - `label(at, content)` centers TeX, a `tex()` formula or a node on a point of the plane and moves it with the point.
@@ -208,7 +210,7 @@ When every step is a matrix, the scene carries one CSS transform driven by regis
 | `plane() needs a frame with a positive width and height, got … and ….` | Pass a `frame` whose width and height are above 0. |
 | `plane() needs a positive … tick step, got ….` | Pass `ticks` above 0. |
 | `plane() would draw … ticks. Raise the step … to draw at most ….` | Raise the tick step. |
-| `plot() cannot draw on a plane that has steps. …` | Plot on the plane before its first step, or leave out `animation`. |
+| `plot() cannot draw on a plane that has steps. …` | Plot on the plane before its first step, or leave out the span. |
 | `plane.…() draws on a plane that does not move. …` | Call `dot`, `tangent`, `secant`, `area`, `riemann`, `morph`, `parametric` and `polar` on the plane before its first step. |
 | `plane.apply() needs finite numbers in its matrix, got …` | Every entry must be a finite number. |
 | `plane.applyFunction() sent (…, …) to (…, …), which is not a finite point.` | The function divides by zero or overflows somewhere on the grid. Shrink the range to avoid that point, or guard the function. |

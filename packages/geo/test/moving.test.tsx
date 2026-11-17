@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { geoContains, geoEqualEarth, geoMercator, geoNaturalEarth1, geoOrthographic } from "d3-geo";
-import { motion, render } from "svjeez";
+import { motion, render, span } from "svjeez";
 import { rect } from "svjeez/geometry";
 import { feature } from "topojson-client";
 import { createRequire } from "node:module";
@@ -177,6 +177,35 @@ describe("globe()", () => {
     expect(earth.facing(3)).toEqual([30, 0]);
   });
 
+  test("its parts are the regions, as project() gives them, where they sit when the turn ends", () => {
+    const earth = globe({ at: 1, over: 4 }, world, {
+      frame,
+      tilt: 22,
+      spin: { from: 0, to: -360 },
+    });
+
+    const france = earth.part("France");
+    const { point } = earth.locate([2.3, 46.6], 4);
+
+    expect(earth.parts.map((r) => r.id)).toEqual(project(world, { frame }).parts.map((r) => r.id));
+    expect(france.span).toMatchObject({ at: 1, over: 4 });
+    expect(point.x).toBeGreaterThan(france.box.x);
+    expect(point.x).toBeLessThan(france.box.x + france.box.w);
+    expect(point.y).toBeGreaterThan(france.box.y);
+    expect(point.y).toBeLessThan(france.box.y + france.box.h);
+    expect(france.path().length).toBeGreaterThan(0);
+
+    // Australia is behind the globe at the end, so its box is pressed onto the rim, inside the disc's box.
+    const { box } = earth.part("Australia");
+
+    expect(earth.locate([134, -25], 4).z).toBeLessThan(0);
+    expect(box.x).toBeGreaterThanOrEqual(earth.bounds.x - 0.01);
+    expect(box.x + box.w).toBeLessThanOrEqual(earth.bounds.x + earth.bounds.w + 0.01);
+    expect(box.y + box.h).toBeLessThanOrEqual(earth.bounds.y + earth.bounds.h + 0.01);
+    expect(earth.bounds).toMatchObject({ x: frame.x, w: frame.w });
+    expect(() => earth.part("Atlantis")).toThrow('globe() has no region "Atlantis"');
+  });
+
   test("needs a span with a length", () => {
     expect(() => globe({ at: 0, over: 0 }, world, { frame, spin })).toThrow(
       "globe() needs a span that starts at 0 or later and lasts longer than 0",
@@ -204,7 +233,7 @@ describe("reproject()", () => {
 
     const svg = render(
       { width: 400, height: 400, duration: 2, title: "Morph" },
-      <path d={a!} animation={motion({ d: a! }).to({ d: b! }, 1)} />,
+      <path d={a!} animation={motion({ d: a! }).to({ d: b! }, span(0, 1))} />,
     );
 
     expect(svg).toContain('attributeName="d"');

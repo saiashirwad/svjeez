@@ -1,17 +1,21 @@
 import { draw, ease, enter, motion, render, span, stagger } from "svjeez";
 
-const rise = motion({ y: 90, opacity: 0 })
-  .at(0.3)
-  .to({ y: 0, opacity: 1 }, 1.6, ease.bezier(0.2, 0.7, 0.2, 1));
+const rise = motion({ y: 90, opacity: 0 }).to(
+  { y: 0, opacity: 1 },
+  span(0.3, 1.6),
+  ease.bezier(0.2, 0.7, 0.2, 1),
+);
 
 const bob = (at: number) =>
-  motion({ y: 0 }).at(at).to({ y: -14 }, 1.1, ease.inOut).to({ y: 0 }, 1.1, ease.inOut).loop(4);
+  motion({ y: 0 })
+    .to({ y: -14 }, span(at, 1.1), ease.inOut)
+    .to({ y: 0 }, span(at, 1.1).next(1.1), ease.inOut)
+    .loop(4);
 
 const glow = (at: number) =>
   motion({ scale: 1, opacity: 0.45 })
-    .at(at)
-    .to({ scale: 1.5, opacity: 0.85 }, 0.5, ease.pop)
-    .to({ scale: 1, opacity: 0.45 }, 0.9, ease.out)
+    .to({ scale: 1.5, opacity: 0.85 }, span(at, 0.5), ease.pop)
+    .to({ scale: 1, opacity: 0.45 }, span(at, 0.5).next(0.9), ease.out)
     .loop(4);
 
 const lanterns = [

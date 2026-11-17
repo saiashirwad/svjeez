@@ -63,9 +63,7 @@ export const mapShot = (over: number) => {
       y={0}
       width={0}
       height={H}
-      animation={motion({ width: 0 })
-        .at(0.1)
-        .to({ width: map.frame.w + 20 }, 0.9, ease.inOut)}
+      animation={motion({ width: 0 }).to({ width: map.frame.w + 20 }, span(0.1, 0.9), ease.inOut)}
     />,
   );
 
@@ -118,7 +116,7 @@ export const mapShot = (over: number) => {
           animation={motion({ draw: 0 }).to({ draw: 1 }, drawn[i]!, ease.inOut)}
         />
       ))}
-      {flights.node}
+      {flights}
       {CITIES.map((city, i) => {
         const p = map.point(city);
 

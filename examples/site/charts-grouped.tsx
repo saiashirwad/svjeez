@@ -68,8 +68,8 @@ export default function build(): string {
         <g animation={enter({ at: 0.2, over: 0.5 })}>{c.node}</g>
         {key(64, tint(theme, "comment"), "opened", 0.4)}
         {key(140, blue, "merged", open.span.end - 0.2)}
-        {open.node}
-        {done.node}
+        {open}
+        {done}
         <g animation={enter({ at: done.span.end, over: 0.6 }, { opacity: 0, y: 6 })}>
           <text
             x={W / 2}

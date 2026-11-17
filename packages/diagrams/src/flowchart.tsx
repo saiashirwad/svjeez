@@ -19,7 +19,9 @@ import {
   drawNode,
   labelOf,
   labelSize,
+  edgeId,
   INSTANT,
+  lineBox,
   look,
   onOutline,
   partsOf,
@@ -31,6 +33,7 @@ import {
   spanOfReveals,
   type Diagram,
   type DiagramOptions,
+  type EdgeId,
   type Labelled,
   type NodeRole,
   type PlayAt,
@@ -57,8 +60,16 @@ export interface FlowchartOptions<N extends string = string> extends DiagramOpti
   readonly play?: { readonly at: PlayAt<N>; readonly step?: Seconds };
 }
 
-/** Its parts are the nodes, then the groups. */
-export interface Flowchart<N extends string, G extends string> extends Diagram<N | G> {
+/**
+ * Its parts are the nodes, then the groups, then the edges, by ids such as `"pr->post"`. An edge's box covers its line
+ * and label, and its span is when it draws on, label included. Two edges between the same nodes share an id, and
+ * `part()` finds the first.
+ */
+export interface Flowchart<
+  N extends string,
+  G extends string,
+  E extends string = `${N}->${N}`,
+> extends Diagram<N | G | E> {
   /** The drawn line of the first edge `from` → `to`. */
   edge(from: N, to: N): Point[];
   /** The shortest directed path through edges, as one polyline through each node on the way. */
@@ -83,15 +94,16 @@ interface Laid<N extends string> {
 
 export function flowchart<
   const N extends Record<string, Labelled>,
+  const E extends readonly FlowchartEdge<NoInfer<keyof N & string>>[],
   const G extends Record<string, FlowchartGroup<NoInfer<keyof N & string>>> = {},
 >(
   spec: {
     readonly nodes: N;
     readonly groups?: G;
-    readonly edges: readonly FlowchartEdge<NoInfer<keyof N & string>>[];
+    readonly edges: E;
   },
   options: FlowchartOptions<NoInfer<keyof N & string>> = {},
-): Flowchart<keyof N & string, keyof G & string> {
+): Flowchart<keyof N & string, keyof G & string, EdgeId<E[number]>> {
   type Id = keyof N & string;
 
   const { direction, play } = options;
@@ -193,9 +205,10 @@ export function flowchart<
           edges[i]!.label!,
           small,
           play &&
-            motion({ opacity: 0 })
-              .at(drawAt(line.from, line.to) + drawOver)
-              .to({ opacity: 1 }, labelOver),
+            motion({ opacity: 0 }).to(
+              { opacity: 1 },
+              spanOf(drawAt(line.from, line.to) + drawOver, labelOver),
+            ),
         ),
     ),
   ]);
@@ -239,10 +252,24 @@ export function flowchart<
     ),
     layers: { under, over },
     bounds: laid.bounds,
-    ...partsOf<Id | (keyof G & string)>(
+    ...partsOf<Id | (keyof G & string) | EdgeId<E[number]>>(
       "flowchart()",
-      new Map([...laid.boxes, ...laid.groups]),
-      appears,
+      [
+        ...laid.boxes,
+        ...laid.groups,
+        ...laid.lines.map(
+          (line) => [edgeId(line.from, line.to), lineBox(line.points, line.label)] as const,
+        ),
+      ],
+      (id, i) => {
+        const line = laid.lines[i - laid.boxes.size - laid.groups.size];
+
+        if (!line) return appears(id);
+
+        if (!play) return INSTANT;
+
+        return spanOf(drawAt(line.from, line.to), drawOver + (line.label ? labelOver : 0));
+      },
     ),
     ...paths(laid.lines, laid.boxes),
   };

@@ -1,4 +1,4 @@
-import { ease, motion, render, sampled, shake, spline } from "svjeez";
+import { ease, motion, render, sampled, shake, span, spline } from "svjeez";
 
 type Point = [x: number, y: number];
 
@@ -94,11 +94,9 @@ export default () =>
               t === undefined
                 ? undefined
                 : motion({ opacity: 1 })
-                    .at(t)
-                    .to({ x: 40 + 20 * k, y: -110 - 14 * k, opacity: 0 }, 1.2, ease.in)
-                    .at(duration - 0.5)
-                    .set({ x: 0, y: 0 })
-                    .to({ opacity: 1 }, 0.4)
+                    .to({ x: 40 + 20 * k, y: -110 - 14 * k, opacity: 0 }, span(t, 1.2), ease.in)
+                    .set({ x: 0, y: 0 }, duration - 0.5)
+                    .to({ opacity: 1 }, span(duration - 0.5, 0.4))
             }
           />
         );
@@ -110,9 +108,8 @@ export default () =>
           r={5}
           fill="#FFFFFF"
           animation={motion({ opacity: 0, scale: 0.5 })
-            .at(t)
-            .to({ opacity: 0.9, scale: 1 }, 0.1)
-            .to({ opacity: 0, scale: 2.4 }, 1)}
+            .to({ opacity: 0.9, scale: 1 }, span(t, 0.1))
+            .to({ opacity: 0, scale: 2.4 }, span(t, 0.1).next(1))}
         />
       ))}
       <g

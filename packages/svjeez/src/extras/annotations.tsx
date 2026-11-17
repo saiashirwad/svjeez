@@ -1,9 +1,10 @@
 /** @jsxImportSource svjeez */
 import type { Color } from "../attributes";
 import type { Edge, Point, Rect } from "../geometry";
-import { motion } from "../motion";
+import { motion, type Ease } from "../motion";
 import { textWidth, type FontValue } from "../font/font";
 import { draw } from "../recipes";
+import type { Span } from "../span";
 import type { SvgNode } from "../svg";
 import { defaultDark, type Base16 } from "./theme";
 import { show as showing, type Shown } from "./timeline";
@@ -31,6 +32,8 @@ export function Arrow({
   bend = 0,
   width = 1.5,
   head = 8,
+  draw: drawing,
+  ease: shaftEase,
   show,
   theme = defaultDark,
   color = theme.base09,
@@ -43,8 +46,19 @@ export function Arrow({
   readonly width?: number;
   /** Length of the head's barbs in px. Default 8. */
   readonly head?: number;
+  /** When the shaft draws; the head lands as it ends. Must lie inside `show`. Default: from the start of `show`, over 0.6s or half of it, whichever is shorter. */
+  readonly draw?: Span;
+  /** The shaft's ease. Default `ease.out`, as `draw()`. */
+  readonly ease?: Ease;
 }): SvgNode {
   const span = show;
+  const shaft = drawing ?? { at: span.at, over: Math.min(0.6, span.over / 2) };
+
+  // A shaft that outlives `show` would be cut off mid-stroke, so say so rather than clip it.
+  if (shaft.at < span.at - 1e-9 || shaft.at + shaft.over > span.at + span.over + 1e-9)
+    throw new Error(
+      `Arrow draw must lie inside show: draw runs ${shaft.at} to ${shaft.at + shaft.over}s, show runs ${span.at} to ${span.at + span.over}s. Start draw no earlier than show and end it no later.`,
+    );
 
   const [cx, cy] = [
     (from.x + to.x) / 2 - (to.y - from.y) * bend,
@@ -56,23 +70,25 @@ export function Arrow({
   const barb = (a: number) =>
     `${to.x - head * Math.cos(angle + a)} ${to.y - head * Math.sin(angle + a)}`;
 
-  const stroke = Math.min(0.6, span.over / 2);
-
   return (
     <g class={cls} animation={showing(span, { fade: 0.2 })}>
       <path
         d={`M${from.x} ${from.y}Q${cx} ${cy} ${to.x} ${to.y}`}
         {...ink(color)}
         strokeWidth={width}
-        animation={draw({ at: span.at, over: stroke })}
+        animation={draw(shaft, shaftEase)}
       />
       <path
         d={`M${barb(0.45)}L${to.x} ${to.y}L${barb(-0.45)}`}
         {...ink(color)}
         strokeWidth={width}
-        animation={motion({ opacity: 0, scale: 0.5 })
-          .at(span.at + stroke)
-          .to({ opacity: 1, scale: 1 }, Math.min(0.15, span.over - stroke))}
+        animation={motion({ opacity: 0, scale: 0.5 }).to(
+          { opacity: 1, scale: 1 },
+          {
+            at: shaft.at + shaft.over,
+            over: Math.min(0.15, span.at + span.over - shaft.at - shaft.over),
+          },
+        )}
       />
     </g>
   );

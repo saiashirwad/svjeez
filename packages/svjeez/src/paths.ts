@@ -1,6 +1,6 @@
 import { num } from "./format";
 import { segments } from "./pathTokens";
-import { checkWindow, type Span } from "./span";
+import { span, checkWindow, type Span } from "./span";
 import { NUDGE, ease, motion, type Motion, type Seconds } from "./motion";
 
 /** SVG path data, as a `<path d>` takes it. */
@@ -492,7 +492,7 @@ export function samplePath(
 
   for (let j = 1; j < kept.length; j++) {
     const [a, b] = [kept[j - 1]!, kept[j]!];
-    track = track.at(from + times[a]!).to({ d: rounded(b) }, times[b]! - times[a]!, ease.linear);
+    track = track.to({ d: rounded(b) }, span(from + times[a]!, times[b]! - times[a]!), ease.linear);
   }
 
   return track;

@@ -182,9 +182,7 @@ function morphs<P extends Morphing>(
       <path
         d={start}
         fill={isPainter(fill) ? fill(region, value) : fill}
-        animation={motion({ d: start })
-          .at(at + i * stagger)
-          .to({ d: end }, each, curve)}
+        animation={motion({ d: start }).to({ d: end }, spanOf(at + i * stagger, each), curve)}
       />
     );
   });
@@ -212,7 +210,7 @@ function morphs<P extends Morphing>(
       return found;
     },
     node: (
-      <g class={options.class} animation={motion({ opacity: 0 }).at(at).set({ opacity: 1 })}>
+      <g class={options.class} animation={motion({ opacity: 0 }).set({ opacity: 1 }, at)}>
         {paths}
       </g>
     ),

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import { draw, ease, motion, render, wiggle, type Child } from "svjeez";
+import { draw, ease, motion, render, span, wiggle, type Child } from "svjeez";
 import { checkScene, renderFrames, type CheckRule, type Finding } from "svjeez/frames";
 import { jsx } from "svjeez/jsx-runtime";
 import { startTrace, stopTrace } from "../src/traced";
@@ -51,7 +51,7 @@ describe.if(browser)("checkScene", () => {
             width={20}
             height={20}
             fill="#fff"
-            animation={motion({ x: -300 }).at(0.5).to({ x: 0 }, 1)}
+            animation={motion({ x: -300 }).to({ x: 0 }, span(0.5, 1))}
           />
         </>,
       ),
@@ -110,13 +110,13 @@ describe.if(browser)("checkScene", () => {
       scene(
         <>
           {BG}
-          <g animation={motion({ x: 0 }).to({ x: 40 }, 1)} />
+          <g animation={motion({ x: 0 }).to({ x: 40 }, span(0, 1))} />
           <rect
             x={50}
             width={20}
             height={20}
             fill="#fff"
-            animation={motion({ x: 0 }).to({ x: 40 }, 1)}
+            animation={motion({ x: 0 }).to({ x: 40 }, span(0, 1))}
           />
         </>,
       ),
@@ -146,14 +146,16 @@ describe.if(browser)("checkScene", () => {
             width={20}
             height={20}
             fill="#fff"
-            animation={motion({ opacity: 1 }).at(1).set({ opacity: 0 }).to({ opacity: 1 }, 0.5)}
+            animation={motion({ opacity: 1 })
+              .set({ opacity: 0 }, 1)
+              .to({ opacity: 1 }, span(1, 0.5))}
           />
           <rect
             x={50}
             width={20}
             height={20}
             fill="#fff"
-            animation={motion({ opacity: 0 }).at(1).to({ opacity: 1 }, 0.5)}
+            animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(1, 0.5))}
           />
           <rect
             x={100}
@@ -161,10 +163,8 @@ describe.if(browser)("checkScene", () => {
             height={20}
             fill="#fff"
             animation={motion({ opacity: 1 })
-              .at(0.4)
-              .set({ opacity: 0 })
-              .at(1)
-              .to({ opacity: 1 }, 0.5)}
+              .set({ opacity: 0 }, 0.4)
+              .to({ opacity: 1 }, span(1, 0.5))}
           />
         </>,
       ),
@@ -196,14 +196,14 @@ describe.if(browser)("checkScene", () => {
             width={20}
             height={20}
             fill="#fff"
-            animation={motion({ x: 0 }).to({ x: 60 }, 1)}
+            animation={motion({ x: 0 }).to({ x: 60 }, span(0, 1))}
           />
           <rect
             y={60}
             width={20}
             height={20}
             fill="#fff"
-            animation={motion({ x: 0 }).to({ x: 60 }, 1).rewind(0.5)}
+            animation={motion({ x: 0 }).to({ x: 60 }, span(0, 1)).rewind(0.5)}
           />
         </>,
       ),
@@ -226,7 +226,7 @@ describe.if(browser)("checkScene", () => {
             width={5}
             height={5}
             fill="#fff"
-            animation={motion({ x: 0 }).to({ x: 1 }, 6).rewind(6)}
+            animation={motion({ x: 0 }).to({ x: 1 }, span(0, 6)).rewind(6)}
           />
         </>,
         12,
@@ -245,7 +245,7 @@ describe.if(browser)("checkScene", () => {
         ),
       ).toHaveLength(0);
     // A step that happens once in the loop is not periodic: dim to 0.5 at 6s, then back to full at the restart.
-    const once = motion({ opacity: 1 }).at(6).to({ opacity: 0.5 }, 0.1, ease.hold);
+    const once = motion({ opacity: 1 }).to({ opacity: 0.5 }, span(6, 0.1), ease.hold);
 
     expect(
       await findings(

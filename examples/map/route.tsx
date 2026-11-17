@@ -8,6 +8,7 @@ import {
   type Rect,
   type SvgNode,
   Camera,
+  span,
   travel,
   type CameraStop,
 } from "svjeez";
@@ -82,9 +83,10 @@ function Route(): SvgNode {
             .map((p, i) => `${i ? "L" : "M"}${n(p.x)} ${n(p.y)}`)
             .join("")}
           strokeDashoffset={-n(len[k * piece]!)}
-          animation={motion({ opacity: 0 })
-            .at(JOURNEY.at + (JOURNEY.over * len[k * piece]!) / total)
-            .set({ opacity: 1 })}
+          animation={motion({ opacity: 0 }).set(
+            { opacity: 1 },
+            JOURNEY.at + (JOURNEY.over * len[k * piece]!) / total,
+          )}
         />
       ))}
     </g>
@@ -113,8 +115,8 @@ function Smoke(): SvgNode {
         ry={52}
         fill={glow}
         animation={motion({ opacity: 0.55 })
-          .to({ opacity: 1 }, 1.1, ease.inOut)
-          .to({ opacity: 0.55 }, 1.1, ease.inOut)
+          .to({ opacity: 1 }, span(0, 1.1), ease.inOut)
+          .to({ opacity: 0.55 }, span(0, 1.1).next(1.1), ease.inOut)
           .loop(2.2)}
       />
       {[0, 1, 2].map((i) => (
@@ -124,9 +126,12 @@ function Smoke(): SvgNode {
           r={6}
           fill={C.faded}
           animation={motion({ opacity: 0, y: 0, x: 0, scale: 0.5 })
-            .at(i * 1.1)
-            .to({ opacity: 0.55 }, 0.3)
-            .to({ opacity: 0, y: -38, x: 12 + i * 3, scale: 2 }, 1.8, ease.out)
+            .to({ opacity: 0.55 }, span(i * 1.1, 0.3))
+            .to(
+              { opacity: 0, y: -38, x: 12 + i * 3, scale: 2 },
+              span(i * 1.1, 0.3).next(1.8),
+              ease.out,
+            )
             .loop(4.4)}
         />
       ))}
@@ -158,9 +163,11 @@ export function Live(): SvgNode {
         stroke={C.red}
         strokeWidth={2.6}
         strokeLinecap="round"
-        animation={motion({ opacity: 0, scale: 0.3 })
-          .at(reach(CINDER))
-          .to({ opacity: 1, scale: 1 }, 0.5, ease.pop)}
+        animation={motion({ opacity: 0, scale: 0.3 }).to(
+          { opacity: 1, scale: 1 },
+          span(reach(CINDER), 0.5),
+          ease.pop,
+        )}
       />
     </Follow>
   );

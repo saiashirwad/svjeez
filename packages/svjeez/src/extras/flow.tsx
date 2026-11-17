@@ -128,9 +128,7 @@ const one = (points: readonly Point[], options: FlowOptions): FlowResult => {
             strokeLinecap="round"
             strokeLinejoin="round"
             animation={[
-              motion()
-                .at(end + 0.15)
-                .to({ opacity: 0 }, 0.6),
+              motion().to({ opacity: 0 }, span(end + 0.15, 0.6)),
               draw({ at, over }, ease.linear),
             ]}
           />,
@@ -180,9 +178,8 @@ const one = (points: readonly Point[], options: FlowOptions): FlowResult => {
       stroke={color}
       strokeWidth={1.5}
       animation={motion({ opacity: 0, scale: 0.5 })
-        .at(end)
-        .set({ opacity: 0.9 })
-        .to({ opacity: 0, scale: 3 }, 0.7)}
+        .set({ opacity: 0.9 }, end)
+        .to({ opacity: 0, scale: 3 }, span(end, 0.7))}
     />
   );
 
@@ -243,7 +240,7 @@ const many = (lines: readonly (readonly Point[])[], options: FlowOptions): FlowR
     );
 
   const node = (
-    <g class={cls} animation={motion({ opacity: 0 }).at(at).to({ opacity: 1 }, FADE_IN)}>
+    <g class={cls} animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(at, FADE_IN))}>
       {lines.flatMap((line, i) => {
         const points = simplify(line, tolerance);
         const length = pathLength(points);

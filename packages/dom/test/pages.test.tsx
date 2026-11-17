@@ -1,14 +1,7 @@
 /** @jsxImportSource svjeez */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { render } from "svjeez";
-import {
-  browser,
-  Dom,
-  size,
-  type Browser,
-  type Item,
-  type TextRun,
-} from "../src/index.ts";
+import { browser, Dom, size, type Browser, type Item, type TextRun } from "../src/index.ts";
 
 let dom: Browser;
 
@@ -111,7 +104,7 @@ describe("real pages", () => {
     const json = JSON.stringify(state.root);
 
     expect(json).toContain("data:image/webp");
-    expect(json).toContain('width=\'40\'');
+    expect(json).toContain("width='40'");
   });
 
   test("a painted canvas is drawn as a WebP still", async () => {
@@ -152,7 +145,8 @@ describe("real pages", () => {
 
     const state = await card.snap(async (page) => {
       await page.evaluate(() => {
-        document.getElementById("t")!.attachShadow({ mode: "open" }).innerHTML = "<b>2 weeks ago</b>";
+        document.getElementById("t")!.attachShadow({ mode: "open" }).innerHTML =
+          "<b>2 weeks ago</b>";
       });
     });
 

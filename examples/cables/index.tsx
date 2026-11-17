@@ -287,7 +287,7 @@ const laid: Laid[] = CABLES.map((cable, i) => {
 const DRAW = 1.4;
 
 /** The whole map leaves together before the loop starts over. */
-const leave = motion().at(OUT).to({ opacity: 0 }, 0.8, ease.inOut);
+const leave = motion().to({ opacity: 0 }, span(OUT, 0.8), ease.inOut);
 
 const grain = def.pattern(
   { width: 5.5, height: 5.5, patternUnits: "userSpaceOnUse" },
@@ -377,9 +377,11 @@ function Packet({ piece, track, at, color }: PacketProps): SvgNode {
   const cap = 2 / total;
 
   const run = (dash: number) =>
-    motion({ [offset]: dash + cap })
-      .at(at)
-      .to({ [offset]: dash - 1 - tail - cap }, total / SPEED, ease.linear);
+    motion({ [offset]: dash + cap }).to(
+      { [offset]: dash - 1 - tail - cap },
+      span(at, total / SPEED),
+      ease.linear,
+    );
 
   return (
     <>
@@ -497,7 +499,7 @@ const TRIP = 2.8;
 
 /** A ring of the token's own color that breathes out from it twice a second while it rides. */
 const pulse = motion({ opacity: 0.55, scale: 1 })
-  .to({ opacity: 0, scale: 2.1 }, 0.5, ease.out)
+  .to({ opacity: 0, scale: 2.1 }, span(0, 0.5), ease.out)
   .loop(0.5);
 
 /** Light in glass covers about 204,000 km a second. */
@@ -551,9 +553,8 @@ function Ride({ journey }: { journey: Journey }): SvgNode {
         strokeWidth={2}
         style={{ transformOrigin: `${end.x}px ${end.y}px` }}
         animation={motion({ opacity: 0, scale: 1 })
-          .at(at)
-          .set({ opacity: 1 })
-          .to({ opacity: 0, scale: 4 }, 0.9, ease.out)}
+          .set({ opacity: 1 }, at)
+          .to({ opacity: 0, scale: 4 }, span(at, 0.9), ease.out)}
       />
     </g>
   );
@@ -571,10 +572,8 @@ function Readout({ journey, until }: { journey: Journey; until: number }): SvgNo
   return (
     <g
       animation={motion({ opacity: 0, x: -6 })
-        .at(journey.at - 0.3)
-        .to({ opacity: 1, x: 0 }, 0.5, ease.out)
-        .at(until - 0.4)
-        .to({ opacity: 0 }, 0.4)}
+        .to({ opacity: 1, x: 0 }, span(journey.at - 0.3, 0.5), ease.out)
+        .to({ opacity: 0 }, span(until - 0.4, 0.4))}
     >
       <rect x={x} y={y} width={2} height={h} fill={color} />
       <Icon icon={journey.icon} x={x + 16} y={y + 1} size={14} stroke={color} strokeWidth={2} />

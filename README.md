@@ -17,9 +17,9 @@
 
 ## What it's for
 
-**Film your real UI.** Write a demo that clicks and types into a React or Svelte component, and [`@svjeez/dom`](https://github.com/saiashirwad/svjeez/tree/main/packages/dom) records it in Chromium as an animated SVG. The recording is kept in a JSON file and made again only when the demo or a file it imports changes.
+**Film your real UI.** This is a React app, recorded: a demo presses keys, types, clicks and drags in Chromium, and [`@svjeez/dom`](https://github.com/saiashirwad/svjeez/tree/main/packages/dom) turns every state into one SVG where cards slide to their new places and counts tick over. The recording is kept in a JSON file and made again only when the demo or a file it imports changes.
 
-<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/zoom.svg" width="480" alt="A sign-in form, filmed: the camera follows the email and password as they are typed, then pulls back to show the error from the server." />
+<img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/board.svg" width="640" alt="A project board, filmed from its React demo: a command palette turns into a new-issue dialog, the new card is dragged to In progress and marked done, and the counts, progress bar and sidebar update." />
 
 **Explain how something works.** Code, terminal sessions, diagrams and math go on one timeline. This one walks a circuit breaker through its code, its state machine and a sequence diagram, in one file.
 

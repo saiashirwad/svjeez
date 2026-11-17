@@ -33,9 +33,11 @@ function Pop({ icon, index }: { icon: IconData; index: number }) {
   return (
     <g
       style={{ transformOrigin: `${x + SIZE / 2}px ${y + SIZE / 2}px` }}
-      animation={motion({ opacity: 0, scale: 0.3 })
-        .at(POP)
-        .to({ opacity: 1, scale: 1 }, 0.55, ease.pop)}
+      animation={motion({ opacity: 0, scale: 0.3 }).to(
+        { opacity: 1, scale: 1 },
+        span(POP, 0.55),
+        ease.pop,
+      )}
     >
       <Icon icon={icon} x={x} y={y} size={SIZE} fill={C.accent} alt="Heart" />
     </g>

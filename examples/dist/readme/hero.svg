@@ -55,10 +55,10 @@ svg{--base00:#090A0C;--base01:#18181B;--base02:#27272A;--base03:#7C7C82;--base04
 .m16{animation-name:k20;animation-timing-function:steps(1)}
 @keyframes k21{0%{visibility:hidden}47%,100%{visibility:visible}}
 .m17{animation-name:k21;animation-timing-function:steps(1)}
-@keyframes k22{0%,45%{stroke-dashoffset:1;visibility:hidden}51%,100%{stroke-dashoffset:0;visibility:visible}}
-.m18{animation-name:k22}
-@keyframes k23{0%,51%{opacity:0}52.5%,100%{opacity:1}}
-@keyframes k24{0%,51%{scale:0.5}52.5%,100%{scale:1}}
+@keyframes k22{0%,47.5%{stroke-dashoffset:1;visibility:hidden}50.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m18{animation-name:k22;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k23{0%,50.5%{opacity:0}52%,100%{opacity:1}}
+@keyframes k24{0%,50.5%{scale:0.5}52%,100%{scale:1}}
 .m19{animation-name:k23,k24}
 @keyframes k25{0%,45%,100%{opacity:0}47%,98%{opacity:1}}
 .m20{animation-name:k25}

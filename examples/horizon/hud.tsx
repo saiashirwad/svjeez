@@ -56,7 +56,7 @@ function Wheel({
     <g clipPath={window}>
       <g
         animation={motion({ y: 0 })
-          .to({ y: -count * LINE }, period, ease.steps(count))
+          .to({ y: -count * LINE }, span(0, period), ease.steps(count))
           .loop(period)}
       >
         {[...labels, labels[0]!].map((label, k) => (
@@ -129,12 +129,9 @@ function Scan(): SvgNode {
       height={1.5}
       fill={sweep}
       animation={motion({ y: 0, opacity: 0 })
-        .at(T.hud - 0.1)
-        .to({ y: H }, 0.8, ease.inOut)
-        .at(T.hud - 0.1)
-        .to({ opacity: 1 }, 0.1)
-        .at(T.hud + 0.55)
-        .to({ opacity: 0 }, 0.15)}
+        .to({ y: H }, span(T.hud - 0.1, 0.8), ease.inOut)
+        .to({ opacity: 1 }, span(T.hud - 0.1, 0.1))
+        .to({ opacity: 0 }, span(T.hud + 0.55, 0.15))}
     />
   );
 }
@@ -184,14 +181,14 @@ export function Reticle(): SvgNode {
         strokeWidth={1}
         strokeDasharray="1 5"
         opacity={0.5}
-        animation={motion({ rotate: 0 }).to({ rotate: 90 }, D, ease.linear)}
+        animation={motion({ rotate: 0 }).to({ rotate: 90 }, span(0, D), ease.linear)}
       />
       <circle
         r={190}
         strokeWidth={0.6}
         strokeDasharray="40 8 2 8"
         opacity={0.3}
-        animation={motion({ rotate: 0 }).to({ rotate: -60 }, D, ease.linear)}
+        animation={motion({ rotate: 0 }).to({ rotate: -60 }, span(0, D), ease.linear)}
       />
       {ticks.map((d, i) => (
         <path d={d} strokeWidth={1.2} animation={draw(ticked[i]!)} />
@@ -229,9 +226,14 @@ export function Title(): SvgNode {
             fontSize={30}
             fill={C.white}
             textAnchor="middle"
-            animation={enter({ at: T.title + spread, over: 1.1 }, { opacity: 0, blur: 12, y: 10 })
-              .at(T.collapse - 0.3 + spread / 2)
-              .to({ opacity: 0, blur: 14, y: -6 }, 0.6, ease.in)}
+            animation={enter(
+              { at: T.title + spread, over: 1.1 },
+              { opacity: 0, blur: 12, y: 10 },
+            ).to(
+              { opacity: 0, blur: 14, y: -6 },
+              span(T.collapse - 0.3 + spread / 2, 0.6),
+              ease.in,
+            )}
           >
             {letter}
           </text>
@@ -248,9 +250,8 @@ export function Flash(): SvgNode {
       height={H}
       fill={C.white}
       animation={motion({ opacity: 0 })
-        .at(T.ignite)
-        .to({ opacity: 0.3 }, 0.04)
-        .to({ opacity: 0 }, 0.6)}
+        .to({ opacity: 0.3 }, span(T.ignite, 0.04))
+        .to({ opacity: 0 }, span(T.ignite, 0.04).next(0.6))}
     />
   );
 }

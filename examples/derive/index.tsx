@@ -1,5 +1,5 @@
 import { derive, counter, tex } from "@svjeez/math";
-import { motion, render, tint } from "svjeez";
+import { motion, render, span, tint } from "svjeez";
 
 import { css, theme } from "../style";
 
@@ -63,9 +63,9 @@ export default function build(): string {
       reducedMotion: { at: 14 },
     },
     <>
-      {proof.node}
-      <g animation={motion({ opacity: 0 }).at(0.6).to({ opacity: 1 }, 0.6)}>
-        {label.node}
+      {proof}
+      <g animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(0.6, 0.6))}>
+        {label}
         {value.node}
       </g>
     </>,

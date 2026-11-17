@@ -28,8 +28,8 @@ const trend = c.line({ at: bars.span.end, over: 1.2 }, Object.entries(sales), {
 
 <>
   <g animation={enter({ at: 0.2, over: 0.6 })}>{c.node}</g>
-  {bars.node}
-  {trend.node}
+  {bars}
+  {trend}
 </>;
 ```
 
@@ -39,7 +39,7 @@ const trend = c.line({ at: bars.span.end, over: 1.2 }, Object.entries(sales), {
 - `.bars(span, record, { stagger, ease, color, group, radius, values })` grows each bar up from the baseline, `stagger` seconds apart, so the last one lands at the end of `span` and each grows for `over - (bars - 1) * stagger`. `stagger` defaults to 0.08, or less when the span is short. `ease` defaults to `ease.out` and `radius` to 3. `record` may also be `[key, value]` pairs. `group: { index, count }` puts several series side by side in each band. `values: true` writes each number at its bar, or pass a `(value) => string`. Band scales only.
 - `.line(span, points, { color, curve, dots, strokeWidth, label })` draws on over `span`. `curve` is `"linear"`, `"monotone"` or `"step"`. `dots` is `true` (radius 4) or a radius, and they pop in as the stroke reaches them. `strokeWidth` defaults to 2.5. `label` is written past the last point, so leave room on the right. It also returns `d`, the path data.
 - `.area(span, points, { ...line options, baseline, line })` wipes a gradient fill in with the line. `baseline` is the y the fill reaches down to, default 0. `line: false` leaves the top edge unstroked. It also returns `fill`, the path data of the shape.
-- Every series returns `node`, `span`, `bounds`, `parts` and `part(id)`, the shape every svjeez package returns. For `line()` and `area()` the span runs to when the label has appeared, and for `bars()` it is the span you passed. Start the next series at `span.end`.
+- Every series returns `node`, `span`, `bounds`, `parts` and `part(id)`, the shape every svjeez package returns. Put the series itself in the scene, `{bars}`. For `line()` and `area()` the span runs to when the label has appeared, and for `bars()` it is the span you passed. Start the next series at `span.end`.
 - A bar's part is `{ id, value, box, span }`: `id` is its category, `box` where it rests, and `span` its staggered window, so a callout can land right after one bar: `enter(bars.part("Q3").span.next(0.4))`. A point of a line or area is `{ id, value, point, box, span }`, its `id` the x value as a string (`"Q3"`, `"2019"`); `span` starts when the stroke reaches it, and `box` is its dot. `color` defaults to the theme's next accent, so give two series that must match across charts an explicit one.
 
 A series whose data lies outside the chart's domain throws, so pass all of it to `data` or set `domain`.

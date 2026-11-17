@@ -10,6 +10,7 @@ import {
   type Hex,
   type SvgNode,
   morph,
+  span,
 } from "svjeez";
 import { polylinePath } from "svjeez/geometry";
 
@@ -172,7 +173,7 @@ export const build = ({ outline, n, before, freshFrom, loop: D }: Frame): string
       <g transform={`translate(${from[0]!.toFixed(2)} ${from[1]!.toFixed(2)})`}>
         <g
           style={{ transformOrigin: "0 0", transformBox: "view-box" }}
-          animation={motion({ rotate: 0 }).to({ rotate: -360 * turns }, D, ease.linear)}
+          animation={motion({ rotate: 0 }).to({ rotate: -360 * turns }, span(0, D), ease.linear)}
         >
           {big && (
             <Once
@@ -274,8 +275,8 @@ export const build = ({ outline, n, before, freshFrom, loop: D }: Frame): string
       <Once>{swap.node}</Once>
       <line x1={606} x2={934} y1={SY + 0.5} y2={SY + 0.5} stroke="#ffffff" strokeOpacity={0.18} />
       {bars}
-      {zero.node}
-      {kLabel.node}
+      {zero}
+      {kLabel}
     </>,
   );
 };

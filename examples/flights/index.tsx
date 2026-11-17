@@ -239,7 +239,7 @@ export default function build(): string {
       <Plane />
       <g
         fontFamily={SANS}
-        animation={motion({ opacity: 0, y: 6 }).at(0.3).to({ opacity: 1, y: 0 }, 0.7, ease.out)}
+        animation={motion({ opacity: 0, y: 6 }).to({ opacity: 1, y: 0 }, span(0.3, 0.7), ease.out)}
       >
         <text x={40} y={50} fontSize={24} fontWeight={700} fill={C.text}>
           Twelve hubs, one sky

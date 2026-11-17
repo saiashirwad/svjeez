@@ -150,7 +150,7 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
           );
         })}
         <g animation={enter(axes)}>{plot.node}</g>
-        {bars.node}
+        {bars}
       </g>
     </>,
   );

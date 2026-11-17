@@ -7,6 +7,7 @@ import {
   appWindow,
   code,
   reveal,
+  span,
   terminal,
   type CodeTokens,
 } from "svjeez";
@@ -149,11 +150,7 @@ export const make = (tall = false): string => {
       {shell.node}
       {shadowed(agent.x, agent.y, agent.w, agent.h)}
       {agentWin.node}
-      <g
-        animation={motion({ opacity: 1 })
-          .at(D - 0.5)
-          .to({ opacity: 0 }, 0.5)}
-      >
+      <g animation={motion({ opacity: 1 }).to({ opacity: 0 }, span(D - 0.5, 0.5))}>
         {session.node}
         {shown.node}
         <g
@@ -166,7 +163,9 @@ export const make = (tall = false): string => {
           <rect x={spin.x} y={spin.y} width={120} height={84} rx={10} fill={theme.base01} />
           <g transform={`translate(${spin.x + 60} ${spin.y + 42})`}>
             <circle r={18} fill="none" stroke={theme.base02} strokeWidth={5} />
-            <g animation={motion({ rotate: 0 }).at(0).to({ rotate: 360 }, 1, ease.linear).loop(1)}>
+            <g
+              animation={motion({ rotate: 0 }).to({ rotate: 360 }, span(0, 1), ease.linear).loop(1)}
+            >
               <circle
                 r={18}
                 fill="none"

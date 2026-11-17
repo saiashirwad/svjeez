@@ -1,5 +1,5 @@
 import { defaults, easing, number, type Values } from "svjeez/params";
-import { ease, motion, render, sampled } from "svjeez";
+import { ease, motion, render, sampled, span } from "svjeez";
 import { COLORS, lightAt, skyAt } from "./feel";
 import { spring } from "./physics";
 
@@ -71,12 +71,13 @@ export default (feel: Feel = defaults(params)): string => {
       tolerance: { translate: 0.4 },
     });
 
-    const hop = motion({ y: 0 }).at(launch).to({ y: -150 }, beat, rise).to({ y: 0 }, beat, fall);
+    const hop = motion({ y: 0 })
+      .to({ y: -150 }, span(launch, beat), rise)
+      .to({ y: 0 }, span(launch, beat).next(beat), fall);
 
     const shadow = motion({ scale: 1, opacity: 0.3 })
-      .at(launch)
-      .to({ scale: 0.4, opacity: 0.1 }, beat, rise)
-      .to({ scale: 1, opacity: 0.3 }, beat, fall);
+      .to({ scale: 0.4, opacity: 0.1 }, span(launch, beat), rise)
+      .to({ scale: 1, opacity: 0.3 }, span(launch, beat).next(beat), fall);
 
     return (
       <g>

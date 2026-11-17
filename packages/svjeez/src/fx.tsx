@@ -4,6 +4,7 @@ import { hexBytes, hexOf, type Hex } from "./color";
 import { def, type Ref } from "./defs";
 import { num } from "./format";
 import { ease, motion } from "./motion";
+import { span } from "./span";
 
 /** Neon bloom: a blurred copy merged under the source. */
 const glow = ({ blur = 5 }: { readonly blur?: number } = {}): Ref<"filter"> =>
@@ -56,7 +57,7 @@ const boil = ({
         numOctaves={2}
         result="noise"
         animation={motion({ seed: start })
-          .to({ seed: start + BOIL_FRAMES }, period, ease.steps(BOIL_FRAMES))
+          .to({ seed: start + BOIL_FRAMES }, span(0, period), ease.steps(BOIL_FRAMES))
           .loop(period)}
       />
       <feDisplacementMap

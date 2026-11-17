@@ -5,6 +5,7 @@ import type { Color } from "../attributes";
 import { defaultDark } from "./theme";
 import type { SvgNode } from "../svg";
 import type { Shown } from "./timeline";
+import { span } from "../span";
 
 /**
  * A soft box that glides between the targets of `stops`. It appears at the first stop's `show.at` and moves at each
@@ -32,13 +33,13 @@ export function Marker({
     opacity: start > 0 ? 0 : 1,
   });
 
-  if (start > 0) size = size.at(start).to({ opacity: 1 }, over);
+  if (start > 0) size = size.to({ opacity: 1 }, span(start, over));
 
   for (const stop of stops.slice(1)) {
     const { target } = stop;
     const { at } = stop.show;
-    position = position.at(at).to({ x: target.x - first.x, y: target.y - first.y }, over);
-    size = size.at(at).to({ width: target.w, height: target.h }, over);
+    position = position.to({ x: target.x - first.x, y: target.y - first.y }, span(at, over));
+    size = size.to({ width: target.w, height: target.h }, span(at, over));
   }
 
   return (

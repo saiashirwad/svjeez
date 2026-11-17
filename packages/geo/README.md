@@ -82,10 +82,10 @@ Every path is written for the scene, not the source data. Coordinates round to 0
 Chromium keeps each animated element on its own raster, and when a camera scales hundreds of them it falls behind and flashes blank tiles. Draw a map in with one animated path per region, then hand over to a still copy built from `land` and `lines`, two paths that the camera zooms:
 
 ```tsx
-<g animation={motion({ opacity: 1 }).at(SWAP).set({ opacity: 0 })}>
+<g animation={motion({ opacity: 1 }).set({ opacity: 0 }, SWAP)}>
   {map.parts.map((r) => <path d={r.d} animation={draw({ at: 0.5, over: 1 })} />)}
 </g>
-<g animation={motion({ opacity: 0 }).at(SWAP).set({ opacity: 1 })}>
+<g animation={motion({ opacity: 0 }).set({ opacity: 1 }, SWAP)}>
   <Camera frame={frame} stops={stops}>
     <path d={map.land} />
     <path d={map.lines} />
@@ -124,7 +124,7 @@ The shapes start as the outline and hide until the span starts. Keep the map und
 
 ## Traffic
 
-`traffic(span, lines, { rate, seed, speed, style, color, size, back })` sends `rate` particles a second over `span`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns `{ node, count, span }`.
+`traffic(span, lines, { rate, seed, speed, style, color, size, back })` sends `rate` particles a second over `span`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns a `Drawn` with `count`, the particles sent. Its parts are the routes, by `id` (a line takes `{ points, id }`, and the default is its index, `"0"`), each with its `points`, `count`, `box` and a `span` from the first departure on it to the last arrival.
 
 `arc(map, from, to, { height })` returns a curved route for a flat map, bowed up the page by `height` px, as points for `traffic()`, `flow()` and `travel()`. `from` and `to` are `[lon, lat]` or points.
 
@@ -149,7 +149,7 @@ const earth = globe({ at: 0, over: 24 }, world, { frame, tilt: 22, spin: { from:
 <g {...earth.place([-0.13, 51.5])}><circle r={3} /></g>
 ```
 
-`land()`, `borders()`, `graticule(step)` and `path(geojson)` come back in pieces 30 degrees of longitude wide, so a piece behind the globe holds still. `route(from, to)`, `circle(center, radius)`, `night(date)` and `terminator(date)` come back as one path. `spin` turns across the whole span; give it `(t) => [lon, lat]` instead to hold or ease, with `t` in seconds since the span starts (as in `facing(t)`, `locate(at, t)` and a `night` date function). `place(at)` moves a group's `x`, `y` and `opacity` so a marker rides the globe and fades at the horizon. Outlines are simplified on the sphere to `simplify` degrees (default 0.6), and `tolerance` (default 1px) sets how closely each replay follows the turn. [`examples/globe`](https://github.com/saiashirwad/svjeez/tree/main/examples/globe), one turn of 110m land with night and eight cities at `simplify: 0.8`, is 585 KB.
+`land()`, `borders()`, `graticule(step)` and `path(geojson)` come back in pieces 30 degrees of longitude wide, so a piece behind the globe holds still. `route(from, to)`, `circle(center, radius)`, `night(date)` and `terminator(date)` come back as one path. `spin` turns across the whole span; give it `(t) => [lon, lat]` instead to hold or ease, with `t` in seconds since the span starts (as in `facing(t)`, `locate(at, t)` and a `night` date function). `place(at)` moves a group's `x`, `y` and `opacity` so a marker rides the globe and fades at the horizon. `parts` are the regions, as `project()` gives them, and `part("France")` finds one by id or name: its `box` is where it sits when the turn ends, its `span` the globe's, and `path()` the region alone as turning pieces, to light it up. `bounds` is the disc. Outlines are simplified on the sphere to `simplify` degrees (default 0.6), and `tolerance` (default 1px) sets how closely each replay follows the turn. [`examples/globe`](https://github.com/saiashirwad/svjeez/tree/main/examples/globe), one turn of 110m land with night and eight cities at `simplify: 0.8`, is 585 KB.
 
 ## Changing projection
 

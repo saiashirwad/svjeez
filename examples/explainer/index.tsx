@@ -1,5 +1,14 @@
 import { highlight } from "@svjeez/code";
-import { code, css as cssTag, ease, motion, render, type CodeTokens, type Motion } from "svjeez";
+import {
+  code,
+  css as cssTag,
+  ease,
+  motion,
+  render,
+  span,
+  type CodeTokens,
+  type Motion,
+} from "svjeez";
 
 import { PERIOD, boing, flash, flip, glance, kick } from "./moves";
 
@@ -19,8 +28,8 @@ const M = 64;
 /** The hop and the render call as scene.tsx writes them, for the shown part of the file. */
 const start = [
   "const hop = motion({ y: 100 })",
-  "  .at(0.4).to({ y: 10 }, 0.4, ease.out)",
-  "  .to({ y: 100 }, 0.4, ease.in);",
+  "  .to({ y: 10 }, span(0.4, 0.4), ease.out)",
+  "  .to({ y: 100 }, span(0.8, 0.4), ease.in);",
   "",
   "render(frame, blip({",
   "  body: hop,",
@@ -60,6 +69,7 @@ export const states: readonly State[] = edits.reduce<State[]>(
 export const propsOf = ({ lines }: State) =>
   new Function(
     "motion",
+    "span",
     "ease",
     "frame",
     "blip",
@@ -74,6 +84,7 @@ export const propsOf = ({ lines }: State) =>
       .replace(/\)\);\s*$/, ");"),
   )(
     motion,
+    span,
     ease,
     frame,
     (props: BlipMotions) => props,
@@ -160,14 +171,11 @@ const lineOf = (text: string) => {
 
   const move = (at: number, from: number, to: number) => {
     if (from >= 0 && to >= 0) {
-      if (from !== to) m = m.at(at).to({ y: y(to) }, FADE, ease.out);
+      if (from !== to) m = m.to({ y: y(to) }, span(at, FADE), ease.out);
     } else if (from >= 0) {
-      m = m.at(at).to({ opacity: 0, y: y(from) - DRIFT }, FADE, ease.out);
+      m = m.to({ opacity: 0, y: y(from) - DRIFT }, span(at, FADE), ease.out);
     } else if (to >= 0) {
-      m = m
-        .at(at)
-        .set({ y: y(to) + DRIFT })
-        .to({ opacity: 1, y: y(to) }, FADE, ease.out);
+      m = m.set({ y: y(to) + DRIFT }, at).to({ opacity: 1, y: y(to) }, span(at, FADE), ease.out);
     }
   };
 
@@ -196,10 +204,8 @@ const bar = ({ lines, changed }: State, at: number) => {
       rx={6}
       fill={accent}
       animation={motion({ opacity: 0 })
-        .at(at)
-        .to({ opacity: 0.2 }, FADE, ease.out)
-        .at(at + 2.6)
-        .to({ opacity: 0 }, FADE, ease.out)}
+        .to({ opacity: 0.2 }, span(at, FADE), ease.out)
+        .to({ opacity: 0 }, span(at + 2.6, FADE), ease.out)}
     />
   );
 };
@@ -207,12 +213,12 @@ const bar = ({ lines, changed }: State, at: number) => {
 /** The file line replaces the code once the edits are done. */
 const file = code([[fileLine]], { ...style, fontSize: 32, lineHeight: 1.4, y: H / 2 - 22 });
 
+const leave = span(BACK - 0.3, 0.3);
+
 const fileMotion = motion({ opacity: 0, y: DRIFT })
-  .at(FILE + 0.2)
-  .to({ opacity: 1, y: 0 }, FADE, ease.out)
-  .at(BACK - 0.3)
-  .to({ opacity: 0, y: -DRIFT }, 0.3, ease.out)
-  .set({ y: DRIFT });
+  .to({ opacity: 1, y: 0 }, span(FILE + 0.2, FADE), ease.out)
+  .to({ opacity: 0, y: -DRIFT }, leave, ease.out)
+  .set({ y: DRIFT }, leave.end);
 
 /** Each state's blip is on from its edit until the next, and swaps at the hops' rest. The last gives way to the first as the code returns. */
 const blips = states.map((state, i) => {
@@ -221,10 +227,10 @@ const blips = states.map((state, i) => {
 
   let on = motion({ opacity: i === 0 ? 1 : 0 });
 
-  if (i > 0) on = on.at(from).set({ opacity: 1 });
-  on = on.at(to).set({ opacity: 0 });
+  if (i > 0) on = on.set({ opacity: 1 }, from);
+  on = on.set({ opacity: 0 }, to);
 
-  if (i === 0) on = on.at(BACK).set({ opacity: 1 });
+  if (i === 0) on = on.set({ opacity: 1 }, BACK);
 
   return <g animation={on}>{blipOf(state)}</g>;
 });

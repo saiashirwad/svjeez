@@ -300,6 +300,22 @@ describe("traffic()", () => {
   test("rejects a rate it can't use", () => {
     expect(() => traffic({ at: 0, over: 1 }, lines, { rate: 0 })).toThrow("positive rate");
   });
+
+  test("its parts are the routes, each spanning its first departure to its last arrival", () => {
+    const idle = { id: "idle", points: [{ x: 0, y: 0 }], weight: 0 };
+    const run = traffic({ at: 1, over: 4 }, [...lines, idle], { rate: 5, seed: 7 });
+
+    expect(run.parts.map((p) => p.id)).toEqual(["0", "1", "idle"]);
+    expect(run.parts.reduce((sum, p) => sum + p.count, 0)).toBe(run.count);
+    expect(Math.min(...run.parts.slice(0, 2).map((p) => p.span.at))).toBeGreaterThanOrEqual(1);
+    expect(Math.max(...run.parts.map((p) => p.span.end))).toBeCloseTo(run.span.end, 9);
+    expect(run.part("1").box).toMatchObject({ x: 0, y: 50, w: 100, h: 30 });
+    expect(run.part("idle")).toMatchObject({ count: 0, span: { at: 0, over: 0 } });
+    expect(run.bounds).toMatchObject({ x: 0, y: 0, w: 100, h: 80 });
+    expect(() => run.part("2")).toThrow(
+      'traffic() has no route "2". Its routes are "0", "1", "idle".',
+    );
+  });
 });
 
 describe("arc()", () => {

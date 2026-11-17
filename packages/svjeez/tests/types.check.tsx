@@ -23,15 +23,15 @@ const tint = css.property("tint", { syntax: "color", inherits: false, initial: "
 
 export const valid = [
   <Clip at={3.1} over={2}>
-    <rect animation={[motion({ x: 0 }).to({ x: 5 }, 1).repeat(2).rewind(0.5), show([span(1), { at: 2, over: 1 }])]} />
+    <rect animation={[motion({ x: 0 }).to({ x: 5 }, span(0, 1)).repeat(2).rewind(0.5), show([span(1), { at: 2, over: 1 }])]} />
   </Clip>,
   <circle r={2} animation={sampled({ at: 1, over: 2 }, (t) => ({ x: t }), { tolerance: { translate: 1 } })} />,
   <rect fill={bg} filter={glow} animation={[enter({ at: 0, over: 1 }), draw({ at: 1, over: 1 })]} />,
-  <feTurbulence animation={motion({ seed: 1 }).to({ seed: 4 }, 0.4, ease.steps(3)).loop(0.4)} />,
+  <feTurbulence animation={motion({ seed: 1 }).to({ seed: 4 }, span(0, 0.4), ease.steps(3)).loop(0.4)} />,
   <text data-role="caption" aria-hidden="true" class={["mono", false]} style={{ letterSpacing: 2 }} animation={wiggle({ x: 1 }, { seed: 1 })} />,
   <circle r={2} animation={sampled({ at: 0, over: 1 }, (t) => ({ x: t, y: t, opacity: 1 }), { tolerance: { translate: 1, opacity: 0.02 } })} />,
   <circle r={2} animation={sampled({ at: 0, over: 1 }, (t) => ({ x: t, [px]: t }), { tolerance: { translate: 1, [px]: 0.01 } })} />,
-  <g animation={motion().to({ [yaw]: 360, opacity: 1 }, 12, ease.linear)}>
+  <g animation={motion().to({ [yaw]: 360, opacity: 1 }, span(0, 12), ease.linear)}>
     <circle r={2} style={{ [px]: 0.5, [py]: -0.5, [tint]: "#f80" }} />
   </g>,
   css`.dot{translate:calc(${px} * cos(${yaw}) * ${60}px) 0}`,
@@ -40,8 +40,14 @@ export const valid = [
 export const syntax: SyntaxOf<typeof yaw> = "angle";
 
 export const invalid = [
-  // @ts-expect-error a transition takes a length or a span with an end, not an open span
+  // @ts-expect-error a transition takes a span with an end, not an open span
   <rect animation={motion({ x: 0 }).to({ x: 5 }, span(1))} />,
+  // @ts-expect-error a transition takes a span, not a length from a cursor
+  <rect animation={motion({ x: 0 }).to({ x: 5 }, 1)} />,
+  // @ts-expect-error there is no cursor to move
+  <rect animation={motion({ x: 0 }).at(1)} />,
+  // @ts-expect-error a cut needs its time
+  <rect animation={motion({ x: 0 }).set({ x: 5 })} />,
   // @ts-expect-error misspelled attribute
   <path strokeLineCap="round" />,
   // @ts-expect-error a string url() where a ref is required
@@ -53,11 +59,11 @@ export const invalid = [
   // @ts-expect-error feTurbulence takes no CSS channels
   <feTurbulence animation={enter({ at: 0, over: 1 })} />,
   // @ts-expect-error feDisplacementMap animates displace, not the CSS scale channel
-  <feDisplacementMap animation={motion().to({ scale: 2 }, 1)} />,
+  <feDisplacementMap animation={motion().to({ scale: 2 }, span(0, 1))} />,
   // @ts-expect-error duotone takes hex colors, not named ones
   fx.duotone({ dark: "red", light: "#fff" }),
   // @ts-expect-error misspelled channel
-  motion().to({ opcity: 1 }, 1),
+  motion().to({ opcity: 1 }, span(0, 1)),
   // @ts-expect-error wiggle needs a seed
   wiggle({ x: 2 }, { rate: 8 }),
   // @ts-expect-error scale is sampled but has no tolerance
@@ -71,13 +77,13 @@ export const invalid = [
   // @ts-expect-error a color property cannot be sampled
   sampled({ at: 0, over: 1 }, () => ({ [tint]: "#fff" }), { tolerance: { [tint]: 1 } }),
   // @ts-expect-error a color into an angle property
-  motion().to({ [yaw]: "#fff" }, 1),
+  motion().to({ [yaw]: "#fff" }, span(0, 1)),
   // @ts-expect-error a color into an angle property, set statically
   <g style={{ [yaw]: "#fff" }} />,
   // @ts-expect-error a number into a color property
   <g style={{ [tint]: 1 }} />,
   // @ts-expect-error filter primitives animate through SMIL, which cannot reach a property
-  <feFlood animation={motion().to({ [yaw]: 1 }, 1)} />,
+  <feFlood animation={motion().to({ [yaw]: 1 }, span(0, 1))} />,
   // @ts-expect-error the initial value must match the syntax
   css.property("bad", { syntax: "angle", inherits: true, initial: "#fff" }),
   // @ts-expect-error a css hole takes a property, a number, or css, not a string

@@ -8,6 +8,7 @@ import {
   code,
   flow,
   morph,
+  span,
   timeline,
   reveal,
   show,
@@ -281,10 +282,8 @@ const segments = names.map((name) => {
   const w = (over / tl.end) * BAR.w;
 
   const lit = motion({ fill: theme.base03 })
-    .at(at)
-    .set({ fill: theme.base05 })
-    .at(at + over)
-    .set({ fill: theme.base03 });
+    .set({ fill: theme.base05 }, at)
+    .set({ fill: theme.base03 }, at + over);
 
   return (
     <>
@@ -296,9 +295,7 @@ const segments = names.map((name) => {
         height={BAR.h}
         rx={2}
         fill={theme.base0A}
-        animation={motion({ width: 0 })
-          .at(at)
-          .to({ width: w - 2 }, over, ease.linear)}
+        animation={motion({ width: 0 }).to({ width: w - 2 }, span(at, over), ease.linear)}
       />
       <text x={x + 2} y={BAR.y + 22} fontSize={12} fill={theme.base03} animation={lit}>
         {name}
@@ -330,9 +327,7 @@ export default function build(): string {
       <rect width={W} height={H} fill={theme.base00} />
 
       <g
-        animation={motion({ opacity: 1 })
-          .at(tl.title.over - 0.3)
-          .to({ opacity: 0 }, 0.3)}
+        animation={motion({ opacity: 1 }).to({ opacity: 0 }, span(tl.title.over - 0.3, 0.3))}
         class="sans"
       >
         <text
@@ -352,7 +347,7 @@ export default function build(): string {
           d={`M${W / 2 - 120} 390h240`}
           stroke={theme.base0A}
           strokeWidth={2}
-          animation={motion({ draw: 0 }).at(0.6).to({ draw: 1 }, 1.2)}
+          animation={motion({ draw: 0 }).to({ draw: 1 }, span(0.6, 1.2))}
         />
       </g>
 
@@ -399,8 +394,8 @@ export default function build(): string {
 
       <Heading scene="machine">Three states, four transitions</Heading>
       <g animation={show(tl.machine)}>
-        {machine.node}
-        {walk.node}
+        {machine}
+        {walk}
         <g class="sans">
           {(["closed", "open", "half"] as const).map((s, i) => (
             <text
@@ -424,9 +419,9 @@ export default function build(): string {
 
       <Heading scene="together">The same story, message by message</Heading>
       <g animation={show(tl.together)}>
-        {story.node}
-        {mini.node}
-        {synced.node}
+        {story}
+        {mini}
+        {synced}
       </g>
 
       <Heading scene="backoff">Backoff is a two-line change</Heading>

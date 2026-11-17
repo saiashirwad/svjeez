@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { blendPaths, commandsOf } from "../src/paths";
-import { ease, motion, render, sampled, type Motion } from "svjeez";
+import { ease, motion, render, sampled, span, type Motion } from "svjeez";
 import { matchPaths } from "svjeez/geometry";
 
 const scene = (animation: Motion<"d">, reducedMotion?: false) =>
@@ -41,7 +41,7 @@ describe("matchPaths", () => {
 describe("the d channel", () => {
   test("animates through SMIL with a still twin for reduced motion", () => {
     const [a, b] = matchPaths(["M0 0H10V10Z", "M5 0L10 10H0Z"]);
-    const svg = scene(motion({ d: a! }).at(1).to({ d: b! }, 1));
+    const svg = scene(motion({ d: a! }).to({ d: b! }, span(1, 1)));
 
     expect(svg).toContain('attributeName="d"');
     expect(svg).toMatch(/<path[^>]*class="[^"]*ds"[^>]*display="none"/);
@@ -53,7 +53,7 @@ describe("the d channel", () => {
       { width: 100, height: 100, duration: 4, title: "Test", reducedMotion: { at: 2 } },
       <path
         d="M0 0H10"
-        animation={motion({ d: "M0 0H10" }).at(1).to({ d: "M0 10H20" }, 2, ease.linear)}
+        animation={motion({ d: "M0 0H10" }).to({ d: "M0 10H20" }, span(1, 2), ease.linear)}
       />,
     );
 
@@ -63,11 +63,13 @@ describe("the d channel", () => {
   test("needs no twin when reduced motion is off", () => {
     const [a, b] = matchPaths(["M0 0H10V10Z", "M5 0L10 10H0Z"]);
 
-    expect(scene(motion({ d: a! }).to({ d: b! }, 1), false)).not.toContain('display="none"');
+    expect(scene(motion({ d: a! }).to({ d: b! }, span(0, 1)), false)).not.toContain(
+      'display="none"',
+    );
   });
 
   test("rejects paths with different commands", () => {
-    expect(() => scene(motion({ d: "M0 0H10V10Z" }).to({ d: "M0 0L10 10Z" }, 1))).toThrow(
+    expect(() => scene(motion({ d: "M0 0H10V10Z" }).to({ d: "M0 0L10 10Z" }, span(0, 1)))).toThrow(
       "d on <path> moves between paths with different commands, so it would jump. Write them through matchPaths() first.",
     );
   });

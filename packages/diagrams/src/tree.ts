@@ -6,7 +6,9 @@ import {
   drawNode,
   isBareLabel,
   labelOf,
+  edgeId,
   INSTANT,
+  lineBox,
   look,
   partsOf,
   placer,
@@ -37,7 +39,18 @@ export interface TreeOptions<N extends string = string> extends DiagramOptions {
   readonly play?: { readonly at: PlayAt<N>; readonly step?: Seconds };
 }
 
-export interface Tree<N extends string> extends Diagram<N> {
+/** The id of each edge as a part, `"parent->child"`, from a spec's nodes. */
+type TreeEdges<N> = {
+  [K in keyof N & string]: N[K] extends { readonly parent: infer P extends string }
+    ? `${P}->${K}`
+    : never;
+}[keyof N & string];
+
+/**
+ * Its parts are the nodes, then the edges by ids such as `"root->leaf"`, parent first. An edge's box covers its line,
+ * and its span is when it draws on.
+ */
+export interface Tree<N extends string, E extends string = `${N}->${N}`> extends Diagram<N | E> {
   /** Up from `from` to the nearest common ancestor, then down to `to`, along the drawn edges. */
   route(from: N, to: N): Point[];
 }
@@ -45,7 +58,7 @@ export interface Tree<N extends string> extends Diagram<N> {
 export function tree<const N extends Record<string, TreeSpec<string>>>(
   spec: { readonly nodes: N & { readonly [K in keyof N]: TreeSpec<Exclude<keyof N & string, K>> } },
   options: TreeOptions<NoInfer<keyof N & string>> = {},
-): Tree<keyof N & string> {
+): Tree<keyof N & string, TreeEdges<N>> {
   type Id = keyof N & string;
 
   const { play, direction } = options;
@@ -120,8 +133,19 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
     node,
     span,
     bounds: at.bounds,
-    ...partsOf<Id>("tree()", boxes, (id) =>
-      play && shown.get(id)! >= 0 ? spanOf(shown.get(id)!, POP) : INSTANT,
+    ...partsOf<Id | TreeEdges<N>>(
+      "tree()",
+      [
+        ...boxes,
+        ...out.edges.map((e) => [edgeId(e.from, e.to), lineBox(edges.get(e.to)!)] as const),
+      ],
+      (id, i) => {
+        const e = out.edges[i - boxes.size];
+
+        if (e) return play ? spanOf(drawAt(e), over) : INSTANT;
+
+        return play && shown.get(id)! >= 0 ? spanOf(shown.get(id)!, POP) : INSTANT;
+      },
     ),
     route: (from: Id, to: Id): Point[] => {
       const [a, b] = [up(from), up(to)];

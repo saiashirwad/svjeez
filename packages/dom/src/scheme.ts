@@ -29,7 +29,10 @@ const mergeVector = (light: Vector, dark: Vector, differ: Differ): Vector =>
           Object.entries(light.attrs).map(([k, v]) => {
             const other = dark.attrs[k];
 
-            return [k, (k === "fill" || k === "stroke") && other ? paint(plain(v), plain(other)) : v];
+            return [
+              k,
+              (k === "fill" || k === "stroke") && other ? paint(plain(v), plain(other)) : v,
+            ];
           }),
         ),
         children: light.children.map((c, i) => mergeVector(c, dark.children[i]!, differ)),
@@ -116,6 +119,8 @@ export const merge = (light: Box, dark: Box, differ: Differ): Box => {
     shadows: mergeShadows(light.shadows, dark.shadows),
     gradients: gradients.length > 0 ? gradients : undefined,
     insets: insets.length > 0 ? insets : undefined,
-    children: same ? light.children.map((c, i) => mergeItem(c, dark.children[i]!, differ)) : light.children,
+    children: same
+      ? light.children.map((c, i) => mergeItem(c, dark.children[i]!, differ))
+      : light.children,
   };
 };

@@ -6,7 +6,11 @@ function Counter({ label = "Count" }: { label?: string }) {
   const [n, setN] = useState(0);
 
   return (
-    <button data-part="add" onClick={() => setN(n + 1)} style={{ font: "16px sans-serif", padding: 8 }}>
+    <button
+      data-part="add"
+      onClick={() => setN(n + 1)}
+      style={{ font: "16px sans-serif", padding: 8 }}
+    >
       {label}: {n}
     </button>
   );

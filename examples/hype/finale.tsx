@@ -10,7 +10,19 @@ import {
   video,
   world,
 } from "@svjeez/icons/tabler";
-import { Clip, Glyphs, Icon, draw, ease, enter, motion, code, span, typewriter } from "svjeez";
+import {
+  Clip,
+  Glyphs,
+  Icon,
+  chain,
+  draw,
+  ease,
+  enter,
+  motion,
+  code,
+  span,
+  typewriter,
+} from "svjeez";
 
 import { mono, theme } from "../style";
 import { hopAcross, jumps } from "../site/lib/blip";
@@ -139,23 +151,24 @@ const sizeAt = chipsAt + PACKAGES.length * 0.06 + 0.5;
 // Blip drops onto the end of the wordmark, and cheers when the install line has typed.
 const perch = { x: logoX + display.measure(LOGO, 190) - 46, y: 186 };
 
+const [fall, bounce, land] = chain(span(1.2, 0.45), 0.15, 0.15);
+
 const drop = motion({ y: -260, opacity: 0 })
-  .at(1.2)
-  .set({ opacity: 1 })
-  .to({ y: 0 }, 0.45, ease.in)
-  .to({ y: -14 }, 0.15, ease.out)
-  .to({ y: 0 }, 0.15, ease.in);
+  .set({ opacity: 1 }, fall.at)
+  .to({ y: 0 }, fall, ease.in)
+  .to({ y: -14 }, bounce, ease.out)
+  .to({ y: 0 }, land, ease.in);
 
 const cheer = jumps([
   { land: install.span.end + 0.3, height: 60 },
   { land: install.span.end + 1.4, height: 36 },
 ]);
 
+const light = install.span.next(0.15, 0.1);
+
 const glow = motion({ fill: "#FFC21A" })
-  .at(install.span.end + 0.1)
-  .to({ fill: "#FFF3B0" }, 0.15)
-  .wait(0.8)
-  .to({ fill: "#FFC21A" }, 0.4);
+  .to({ fill: "#FFF3B0" }, light)
+  .to({ fill: "#FFC21A" }, light.next(0.4, 0.8));
 
 /** The scene's length: the finale holds three seconds after the size line. */
 export const D = END_AT + sizeAt + 3;
@@ -191,7 +204,7 @@ export const finale = (size: string) => (
         height={3}
         rx={1.5}
         fill={C.accent}
-        animation={motion({ scale: 0 }).at(1.1).to({ scale: 1 }, 0.7, ease.inOut)}
+        animation={motion({ scale: 0 }).to({ scale: 1 }, span(1.1, 0.7), ease.inOut)}
       />
       <g animation={drop}>
         <Blip

@@ -68,14 +68,11 @@ const bars = toBars({ at: BARS, over: MORPH + 9 * 0.07 }, map, POPULATION, {
 
 /** The map stays under the shapes and fades while they take over, so no region pops. */
 const mapShown = motion({ opacity: 1 })
-  .at(CARTOGRAM)
-  .to({ opacity: 0 }, MORPH * 0.6)
-  .at(BARS - 0.8)
-  .to({ opacity: 1 }, 0.6)
-  .at(BARS)
-  .to({ opacity: 0 }, MORPH * 0.6);
+  .to({ opacity: 0 }, span(CARTOGRAM, MORPH * 0.6))
+  .to({ opacity: 1 }, span(BARS - 0.8, 0.6))
+  .to({ opacity: 0 }, span(BARS, MORPH * 0.6));
 
-const fadeOut = motion({ opacity: 1 }).at(OUT).to({ opacity: 0 }, 0.7);
+const fadeOut = motion({ opacity: 1 }).to({ opacity: 0 }, span(OUT, 0.7));
 
 const Heading = (): SvgNode => (
   <g fontFamily={SANS}>
@@ -151,9 +148,7 @@ const Labels = (): SvgNode => (
   <g
     fontFamily={SANS}
     fontSize={12}
-    animation={motion({ opacity: 0 })
-      .at(BARS + MORPH + 0.7)
-      .to({ opacity: 1 }, 0.5)}
+    animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(BARS + MORPH + 0.7, 0.5))}
   >
     {bars.parts.map(({ region, value, box: r }) => (
       <>
@@ -183,18 +178,9 @@ export default function build(): string {
       <rect width={W} height={H} fill="#0b1118" />
       <Heading />
       <Year />
-      <g animation={[mapShown, fadeOut]}>{years.node}</g>
-      <g
-        animation={[
-          fadeOut,
-          motion()
-            .at(BARS - 1)
-            .to({ opacity: 0 }, 0.7),
-        ]}
-      >
-        {circles.node}
-      </g>
-      <g animation={fadeOut}>{bars.node}</g>
+      <g animation={[mapShown, fadeOut]}>{years}</g>
+      <g animation={[fadeOut, motion().to({ opacity: 0 }, span(BARS - 1, 0.7))]}>{circles}</g>
+      <g animation={fadeOut}>{bars}</g>
       <Names />
       <Labels />
       <g animation={show({ at: 0, over: OUT + 0.7 }, { fade: 0.5 })}>

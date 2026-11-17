@@ -1,4 +1,4 @@
-import { Pivot, ease, motion, render, type Child } from "svjeez";
+import { Pivot, chain, ease, motion, render, span, type Child } from "svjeez";
 
 // The header's icons, drawn with svjeez and inlined in the page. Each loops a little bit of business, and the page
 // keeps it paused until the pointer is over its button, so they come alive only when you go to use them.
@@ -22,11 +22,10 @@ export const github = () =>
     <>
       <Pivot
         origin={{ x: 14, y: 26 }}
-        animation={motion({ rotate: 0 })
-          .to({ rotate: -12 }, 0.2, ease.out)
-          .to({ rotate: 10 }, 0.3, ease.inOut)
-          .to({ rotate: -5 }, 0.25, ease.inOut)
-          .to({ rotate: 0 }, 0.25, ease.inOut)}
+        animation={chain(span(0, 0.2), 0.3, 0.25, 0.25).reduce(
+          (m, swing, i) => m.to({ rotate: [-12, 10, -5, 0][i]! }, swing, i ? ease.inOut : ease.out),
+          motion({ rotate: 0 }),
+        )}
       >
         <path d={OCTOCAT} transform="translate(2 3)" fill="currentColor" />
       </Pivot>
@@ -35,9 +34,8 @@ export const github = () =>
           d={STAR}
           fill="#FFC21A"
           animation={motion({ scale: 0, rotate: 0 })
-            .at(0.15)
-            .to({ scale: 1.2, rotate: 90 }, 0.35, ease.pop)
-            .to({ scale: 0, rotate: 180 }, 0.4, ease.in)}
+            .to({ scale: 1.2, rotate: 90 }, span(0.15, 0.35), ease.pop)
+            .to({ scale: 0, rotate: 180 }, span(0.15, 0.35).next(0.4), ease.in)}
         />
       </g>
     </>,
@@ -59,9 +57,8 @@ export const dots = () =>
           stroke="var(--bg)"
           strokeWidth={1.5}
           animation={motion({ y: 0 })
-            .at(i * 0.15)
-            .to({ y: -7 }, 0.22, ease.out)
-            .to({ y: 0 }, 0.22, ease.in)}
+            .to({ y: -7 }, span(i * 0.15, 0.22), ease.out)
+            .to({ y: 0 }, span(i * 0.15, 0.22).next(0.22), ease.in)}
         />
       ))}
     </>,
@@ -79,15 +76,15 @@ export const sun = () =>
     <g fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
       <Pivot
         origin={{ x: 12, y: 12 }}
-        animation={motion({ rotate: 0 }).to({ rotate: 90 }, D, ease.inOut)}
+        animation={motion({ rotate: 0 }).to({ rotate: 90 }, span(0, D), ease.inOut)}
       >
         <path d={RAYS} />
       </Pivot>
       <Pivot
         origin={{ x: 12, y: 12 }}
         animation={motion({ scale: 1 })
-          .to({ scale: 1.25 }, D / 2, ease.out)
-          .to({ scale: 1 }, D / 2, ease.in)}
+          .to({ scale: 1.25 }, span(0, D / 2), ease.out)
+          .to({ scale: 1 }, span(0, D / 2).next(D / 2), ease.in)}
       >
         <circle cx={12} cy={12} r={4} />
       </Pivot>
@@ -103,10 +100,10 @@ export const moon = () =>
     <>
       <Pivot
         origin={{ x: 12, y: 20 }}
-        animation={motion({ rotate: 0 })
-          .to({ rotate: -14 }, D / 3, ease.inOut)
-          .to({ rotate: 10 }, D / 3, ease.inOut)
-          .to({ rotate: 0 }, D / 3, ease.inOut)}
+        animation={chain(span(0, D / 3), D / 3, D / 3).reduce(
+          (m, rock, i) => m.to({ rotate: [-14, 10, 0][i]! }, rock, ease.inOut),
+          motion({ rotate: 0 }),
+        )}
       >
         <path
           d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"
@@ -121,9 +118,8 @@ export const moon = () =>
           d={STAR}
           fill="#FFC21A"
           animation={motion({ scale: 0 })
-            .at(0.2)
-            .to({ scale: 1 }, 0.3, ease.pop)
-            .to({ scale: 0 }, 0.4, ease.in)}
+            .to({ scale: 1 }, span(0.2, 0.3), ease.pop)
+            .to({ scale: 0 }, span(0.2, 0.3).next(0.4), ease.in)}
         />
       </g>
     </>,
@@ -138,9 +134,8 @@ export const system = () =>
     <>
       <g
         animation={motion({ y: 6 })
-          .to({ y: 0 }, 0.3, ease.pop)
-          .wait(0.5)
-          .to({ y: 6 }, 0.3, ease.in)}
+          .to({ y: 0 }, span(0, 0.3), ease.pop)
+          .to({ y: 6 }, span(0, 0.3).next(0.3, 0.5), ease.in)}
       >
         <path d="M12 4V0.5" stroke="#E3A100" strokeWidth={1.6} strokeLinecap="round" />
         <circle cx={12} cy={0.8} r={1.6} fill="#FFC21A" />

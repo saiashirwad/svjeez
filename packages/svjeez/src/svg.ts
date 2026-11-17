@@ -1,11 +1,21 @@
 import { attributeName } from "./attributes";
 import { isRef, type AnyRef } from "./defs";
+import type { Drawn } from "./drawn";
 import { isFontValue, type FontValue } from "./font/font";
 import { escapeAttr, escapeText, kebab, num } from "./format";
 import { isMotion, type Motion, type Stack } from "./motion";
 import { Css, formatProperty, isCss, isProperty, type CssPart } from "./properties";
 
-export type Child = SvgNode | string | number | boolean | null | undefined | readonly Child[];
+/** What JSX takes as a child. A `Drawn` (a chart, a diagram, a formula) stands for its `node`. */
+export type Child =
+  | SvgNode
+  | Drawn
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | readonly Child[];
 
 export type AttrValue = string | AnyRef | Css | FontValue;
 
@@ -66,6 +76,14 @@ export const raw = (value: string): SvgNode => ({ kind: "raw", value });
 const isNode = (value: Child): value is SvgNode =>
   value !== null && typeof value === "object" && "kind" in value;
 
+/** A package's drawn result, which goes into the scene as its `node`. */
+const isDrawn = (value: Child): value is Drawn =>
+  value !== null &&
+  typeof value === "object" &&
+  !Array.isArray(value) &&
+  "node" in value &&
+  isNode(value.node);
+
 /** Text is a string, or a number that `num` writes out. */
 const isText = (value: Prop): value is string | number =>
   typeof value === "string" || typeof value === "number";
@@ -79,6 +97,9 @@ export const children = (input: Child, preserveWhitespace = false): SvgNode[] =>
     if (value === null || value === undefined || value === false || value === true) return;
 
     if (Array.isArray(value)) return value.forEach(visit);
+
+    // Before nodes, because a Drawn may carry a `kind` of its own, as a Mermaid diagram does.
+    if (isDrawn(value)) return visit(value.node);
 
     if (isNode(value))
       return value.kind === "fragment" ? value.children.forEach(visit) : void out.push(value);

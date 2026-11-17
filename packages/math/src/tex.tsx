@@ -251,17 +251,17 @@ export function tex(source: string, options: TexOptions = {}): Tex {
                 strokeWidth={round(1.2 / Math.hypot(g.matrix[0], g.matrix[1]))}
                 strokeLinejoin="round"
                 animation={motion({ draw: 0, opacity: 1 })
-                  .at(start)
-                  .to({ draw: 1 }, stroke * 0.7, ease.inOut)
-                  .to({ opacity: 0 }, stroke * 0.3)}
+                  .to({ draw: 1 }, spanOf(start, stroke * 0.7), ease.inOut)
+                  .to({ opacity: 0 }, spanOf(start, stroke * 0.7).next(stroke * 0.3))}
               />
               <path
                 d={g.d}
                 transform={transform}
                 fill={paint}
-                animation={motion({ opacity: 0 })
-                  .at(start + stroke * 0.5)
-                  .to({ opacity: 1 }, stroke * 0.5)}
+                animation={motion({ opacity: 0 }).to(
+                  { opacity: 1 },
+                  spanOf(start + stroke * 0.5, stroke * 0.5),
+                )}
               />
             </g>
           );

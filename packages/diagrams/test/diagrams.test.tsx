@@ -156,6 +156,20 @@ describe("state", () => {
     expect(walk.spans.idle[0]!.over).toBeCloseTo(4 - 0.35, 9);
     expect(walk.spans.run[0]!.over).toBeCloseTo(1 - 0.35, 9);
     expect(walk.span.end).toBe(8);
+    expect(walk.parts.map((p) => p.id)).toEqual(["idle->run", "run->done"]);
+    expect([walk.part("idle->run").span.at, walk.part("idle->run").span.end]).toEqual([
+      expect.closeTo(4.65, 9),
+      5,
+    ]);
+    expect(walk.part("run->done").span.end).toBe(6);
+    const { x, y, w, h } = walk.bounds.union(machine.part("done").box);
+    expect({ x, y, w, h }).toMatchObject({
+      x: walk.bounds.x,
+      y: walk.bounds.y,
+      w: walk.bounds.w,
+      h: walk.bounds.h,
+    });
+    expect(() => walk.part("done->idle")).toThrow('walk() has no leg "done->idle"');
     expect(() => machine.walk(["idle", "run"], { at: [2, 1] })).toThrow();
   });
 
@@ -442,7 +456,7 @@ describe("parts", () => {
   test("each node's span is when it pops in, and the first rank's is the instant 0", () => {
     const chart = flowchart(chain, { play: { at: 1, step: 0.5 } });
 
-    expect(chart.parts.map((p) => p.id)).toEqual(["a", "b", "c", "pair"]);
+    expect(chart.parts.map((p) => p.id)).toEqual(["a", "b", "c", "pair", "a->b", "b->c"]);
     expect(window(chart.part("a").span)).toEqual([0, 0]);
     expect(window(chart.part("b").span)).toEqual([1, 1.35]);
     expect(window(chart.part("c").span)).toEqual([1.5, 1.85]);
@@ -487,8 +501,58 @@ describe("parts", () => {
 
     // @ts-expect-error: "d" is not a node or group
     expect(() => chart.part("d")).toThrow(
-      'flowchart() has no "d". Its parts are "a", "b", "c", "pair".',
+      'flowchart() has no "d". Its parts are "a", "b", "c", "pair", "a->b", "b->c".',
     );
+  });
+
+  test("a flowchart's edges are parts, each box around its line and each span when it draws on", () => {
+    const chart = flowchart(chain, { play: { at: 1, step: 0.5 } });
+
+    expect(window(chart.part("a->b").span)).toEqual([0.6, 1]);
+    expect(window(chart.part("b->c").span)).toEqual([1.1, 1.5]);
+
+    for (const p of chart.edge("a", "b")) {
+      const box = chart.part("a->b").box.pad(0.01);
+
+      expect(p.x >= box.x && p.x <= box.x + box.w && p.y >= box.y && p.y <= box.y + box.h).toBe(
+        true,
+      );
+    }
+
+    expect(window(flowchart(chain).part("a->b").span)).toEqual([0, 0]);
+    // @ts-expect-error: there is no edge from a to c
+    expect(() => chart.part("a->c")).toThrow('flowchart() has no "a->c"');
+  });
+
+  test("a tree's edges are parts by parent and child, drawing on as the child appears", () => {
+    const team = tree(
+      { nodes: { r: "R", k: { label: "K", parent: "r" }, j: { label: "J", parent: "r" } } },
+      { play: { at: 1, step: 0.5 } },
+    );
+
+    expect(team.parts.map((p) => p.id)).toEqual(["r", "k", "j", "r->k", "r->j"]);
+    // An edge draws on just before its child pops in.
+    expect(team.part("r->k").span.end).toBeCloseTo(team.part("k").span.at, 6);
+    expect(team.part("r->j").box.y).toBeGreaterThanOrEqual(team.part("r").box.y);
+    // @ts-expect-error: k is not j's parent
+    expect(() => team.part("k->j")).toThrow('tree() has no "k->j"');
+  });
+
+  test("a state machine's transitions are parts, there from the start", () => {
+    const machine = stateMachine({
+      states: { idle: "Idle", run: "Run" },
+      initial: "idle",
+      transitions: [
+        ["idle", "run", "go"],
+        ["run", "idle"],
+      ],
+    });
+
+    expect(machine.parts.map((p) => p.id)).toEqual(["idle", "run", "idle->run", "run->idle"]);
+    expect(window(machine.part("idle->run").span)).toEqual([0, 0]);
+    expect(machine.part("idle->run").box.w).toBeGreaterThan(0);
+    // @ts-expect-error: no transition goes from idle to idle
+    expect(() => machine.part("idle->idle")).toThrow('stateMachine() has no "idle->idle"');
   });
 
   test("a lane's span covers what plays on it", () => {

@@ -46,7 +46,7 @@ export default function build(): string {
     <>
       {win.node}
       <g animation={outro(D)}>
-        {team.node}
+        {team}
         <g
           animation={[
             show({ at: 2.8, over: 3.9 }, { fade: 0.2 }),

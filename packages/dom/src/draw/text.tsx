@@ -1,6 +1,15 @@
 /** @jsxImportSource svjeez */
 /** @jsxRuntime automatic */
-import { def, motion, show, type Color, type Stack, type SvgNode, type TagChannels } from "svjeez";
+import {
+  def,
+  motion,
+  show,
+  span,
+  type Color,
+  type Stack,
+  type SvgNode,
+  type TagChannels,
+} from "svjeez";
 import { num } from "svjeez/geometry";
 import { jsx } from "svjeez/jsx-runtime";
 import type { Paint, Rect, TextRun } from "../tree.ts";
@@ -63,17 +72,16 @@ export const typing = (ink: Ink, a: TextRun, b: TextRun, tween: Tween): SvgNode 
   const lengths = times.map((_, i) => (to > from ? from + i + 1 : from - i - 1));
 
   const reveal = times.reduce(
-    (m, t, i) => m.at(t).set({ width: width(lengths[i]!) }),
+    (m, t, i) => m.set({ width: width(lengths[i]!) }, t),
     motion({ width: width(from) }),
   );
 
   const caret = times
     .reduce(
-      (m, t, i) => m.at(t).set({ x: edge(lengths[i]!), opacity: 1 }),
+      (m, t, i) => m.set({ x: edge(lengths[i]!), opacity: 1 }, t),
       motion({ x: edge(from), opacity: 0 }),
     )
-    .at(tween.at + tween.over)
-    .set({ opacity: 0 });
+    .set({ opacity: 0 }, tween.at + tween.over);
 
   const dx = a.x - b.x;
   const dy = a.y - b.y;
@@ -92,16 +100,18 @@ export const typing = (ink: Ink, a: TextRun, b: TextRun, tween: Tween): SvgNode 
 
   return (
     <>
-      {a.placeholder && text(a, motion({ opacity: 1 }).at(tween.at).set({ opacity: 0 }))}
-      {b.placeholder && text(b, motion({ opacity: 0 }).at(times.at(-1)!).set({ opacity: 1 }))}
+      {a.placeholder && text(a, motion({ opacity: 1 }).set({ opacity: 0 }, tween.at))}
+      {b.placeholder && text(b, motion({ opacity: 0 }).set({ opacity: 1 }, times.at(-1)!))}
       <g animation={dx || dy ? slideIn(tween, dx, dy) : undefined}>
         <g clipPath={clip}>
           {text(
             { ...long, x: b.x, y: b.y },
             recolor
-              ? motion({ fill: v(a.color) })
-                  .at(tween.at)
-                  .to({ fill: v(b.color) }, tween.over, tween.ease)
+              ? motion({ fill: v(a.color) }).to(
+                  { fill: v(b.color) },
+                  span(tween.at, tween.over),
+                  tween.ease,
+                )
               : undefined,
           )}
         </g>

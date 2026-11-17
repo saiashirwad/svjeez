@@ -52,7 +52,8 @@ const span = (v: number, least: number) => Math.max(Math.abs(v) * 2, least);
 
 /**
  * What a number means, by the name it is given or the call it is passed to. svjeez's own API is the most common place a
- * literal lands, so its names say the most: `at`, `over` and `.to(…, over)` are seconds, `opacity` runs 0 to 1.
+ * literal lands, so its names say the most: `at`, `over`, both numbers of `span(at, over)`, what the span helpers
+ * take and the time of a `.set(values, at)` cut are seconds, `opacity` runs 0 to 1.
  */
 const MEANINGS: readonly {
   readonly names: readonly string[];
@@ -75,10 +76,20 @@ const MEANINGS: readonly {
       "period",
       "stagger",
       "each",
-      "at#0",
-      "wait#0",
+      "span#0",
+      "span#1",
+      "next#0",
+      "next#1",
+      "until#0",
+      "first#0",
+      "last#0",
+      "shift#0",
+      "pad#0",
+      "pad#1",
+      "chain#*",
+      "stagger#2",
+      "set#1",
       "loop#0",
-      "to#1",
       "seconds#0",
     ],
     range: (v) => ({ min: 0, max: span(v, 4), step: 0.05, unit: "s" }),
@@ -103,7 +114,15 @@ export const paramFor = (literal: LiteralOf<"number">, schema: Schema = {}): Num
   const v = literal.value;
   const places = decimalsOf(literal.text);
   const written = places ? 10 ** -places : 1;
-  const range = MEANING.get(nameOf(literal.role))?.(v) ?? {};
+  const role = literal.role;
+
+  // `chain(first, ...overs)` takes any number of lengths, so every place after the first means seconds.
+  const range =
+    (
+      MEANING.get(nameOf(role)) ??
+      (role.kind === "argument" ? MEANING.get(`${role.callee}#*`) : undefined)
+    )?.(v) ?? {};
+
   const step = Math.min(written, range.step ?? written);
   const min = Math.min(range.min ?? v - span(v, 10), v);
   const max = Math.max(range.max ?? v + span(v, 10), v);

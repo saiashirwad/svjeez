@@ -284,9 +284,11 @@ function Photo(): SvgNode {
           strokeWidth={0.75}
         />
         <g
-          animation={motion({ scale: 0.8, opacity: 0 })
-            .at(2.9)
-            .to({ scale: 1, opacity: 1 }, 0.8, ease.out)}
+          animation={motion({ scale: 0.8, opacity: 0 }).to(
+            { scale: 1, opacity: 1 },
+            span(2.9, 0.8),
+            ease.out,
+          )}
         >
           <circle cx={cx} cy={cy} r={r} fill={C.paper} />
           <circle cx={cx} cy={cy} r={r} fill={halftone} />

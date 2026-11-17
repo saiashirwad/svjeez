@@ -1,4 +1,4 @@
-import { def, ease, motion, random, wiggle, type Color, type SvgNode } from "svjeez";
+import { chain, def, ease, motion, random, span, wiggle, type Color, type SvgNode } from "svjeez";
 import { C, D, H, T, W, pivot } from "./kit";
 
 const depth = def.linearGradient(
@@ -14,10 +14,10 @@ const cloud = (cx: number, cy: number, colors: readonly [Color, Color, Color], o
     <stop
       offset={0}
       stopOpacity={opacity}
-      animation={motion({ stopColor: colors[0] })
-        .to({ stopColor: colors[1] }, D / 3, ease.inOut)
-        .to({ stopColor: colors[2] }, D / 3, ease.inOut)
-        .to({ stopColor: colors[0] }, D / 3, ease.inOut)}
+      animation={chain(span(0, D / 3), D / 3, D / 3).reduce(
+        (m, third, i) => m.to({ stopColor: colors[(i + 1) % 3]! }, third, ease.inOut),
+        motion({ stopColor: colors[0] }),
+      )}
     />,
     <stop offset={1} stopColor={C.void} stopOpacity={0} />,
   ]);
@@ -119,11 +119,9 @@ export function Warp(): SvgNode {
         <g
           style={pivot}
           animation={motion({ scale: 1, opacity: 0 })
-            .at(at)
-            .to({ scale: 8 }, over, ease.in)
-            .at(at)
-            .to({ opacity: 0.9 }, 0.12)
-            .to({ opacity: 0 }, over - 0.12, ease.in)}
+            .to({ scale: 8 }, span(at, over), ease.in)
+            .to({ opacity: 0.9 }, span(at, 0.12))
+            .to({ opacity: 0 }, span(at, 0.12).next(over - 0.12), ease.in)}
         >
           {streaks.map(({ cos, sin, from, to, width }) => (
             <line

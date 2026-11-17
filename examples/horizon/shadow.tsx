@@ -1,4 +1,4 @@
-import { def, draw, ease, motion, wiggle, type SvgNode } from "svjeez";
+import { def, draw, ease, motion, span, wiggle, type SvgNode } from "svjeez";
 import { C, D, H, T, envelope, glow, pivot } from "./kit";
 
 const SHADOW = 57;
@@ -20,13 +20,10 @@ const arch = (rx: number, ry: number, over: boolean): string =>
 
 export function Shadow(): SvgNode {
   const life = motion({ scale: 0.01, opacity: 0 })
-    .at(T.open)
-    .set({ opacity: 1 })
-    .to({ scale: 1 }, 0.9, ease.pop)
-    .at(T.fall)
-    .to({ scale: 13 }, 1.1, ease.in)
-    .at(T.dawn)
-    .to({ opacity: 0 }, 1, ease.inOut);
+    .set({ opacity: 1 }, T.open)
+    .to({ scale: 1 }, span(T.open, 0.9), ease.pop)
+    .to({ scale: 13 }, span(T.fall, 1.1), ease.in)
+    .to({ opacity: 0 }, span(T.dawn, 1), ease.inOut);
 
   return (
     <g style={pivot} animation={life}>
@@ -95,7 +92,7 @@ function Jet({ dir }: { dir: 1 | -1 }): SvgNode {
         stroke={C.white}
         strokeDasharray={`16 ${PITCH - 16}`}
         animation={motion({ y: 0 })
-          .to({ y: dir * PITCH }, 0.1, ease.linear)
+          .to({ y: dir * PITCH }, span(0, 0.1), ease.linear)
           .loop(0.1)}
       />
     </g>

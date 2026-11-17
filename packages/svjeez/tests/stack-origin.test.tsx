@@ -1,9 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { ease, motion, render } from "svjeez";
+import { ease, motion, render, span } from "svjeez";
 import { renderFrames } from "svjeez/frames";
 
 const origin = { transformOrigin: "0 0", transformBox: "view-box" } as const;
-const turn = (degrees: number) => motion({ rotate: 0 }).to({ rotate: degrees }, 1, ease.linear);
+
+const turn = (degrees: number) =>
+  motion({ rotate: 0 }).to({ rotate: degrees }, span(0, 1), ease.linear);
 
 const scene = (animation: readonly ReturnType<typeof turn>[]) =>
   render(

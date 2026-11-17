@@ -1,4 +1,15 @@
-import { draw, ease, enter, fx, motion, render, wiggle, type Child, type Color } from "svjeez";
+import {
+  draw,
+  ease,
+  enter,
+  fx,
+  motion,
+  render,
+  span,
+  wiggle,
+  type Child,
+  type Color,
+} from "svjeez";
 
 import { HEIGHT, MARGIN, RADIUS, WIDTH, color, css, hue, mono, size, wash } from "../gallery-style";
 
@@ -40,7 +51,14 @@ function Tile({
   return (
     <g transform={`translate(${MARGIN + col * (TILE.w + GAP)} ${MARGIN + row * (TILE.h + GAP)})`}>
       <rect width={TILE.w} height={TILE.h} rx={RADIUS} fill={C.tile} />
-      <rect width={TILE.w} height={TILE.h} rx={RADIUS} {...wash(tint, 0.1)} stroke={tint} strokeOpacity={0.4} />
+      <rect
+        width={TILE.w}
+        height={TILE.h}
+        rx={RADIUS}
+        {...wash(tint, 0.1)}
+        stroke={tint}
+        strokeOpacity={0.4}
+      />
       <g transform={`translate(${(TILE.w - 200 * ZOOM) / 2} 4) scale(${ZOOM})`}>{children}</g>
       <text x={16} y={TILE.h - 16} fontFamily={mono} fontSize={size.label} fill={C.label}>
         {label}
@@ -71,9 +89,10 @@ export function buildEffects(): string {
           fontSize={40}
           fill={C.blue}
           textAnchor="middle"
-          animation={enter({ at: 0.4, over: 0.9 }, { opacity: 0, blur: 10 })
-            .at(6.4)
-            .to({ opacity: 0, blur: 10 }, 0.9)}
+          animation={enter({ at: 0.4, over: 0.9 }, { opacity: 0, blur: 10 }).to(
+            { opacity: 0, blur: 10 },
+            span(6.4, 0.9),
+          )}
         >
           Blur
         </text>
@@ -138,7 +157,7 @@ export function buildEffects(): string {
           strokeWidth={6}
           strokeLinecap="round"
           strokeDasharray="70 150"
-          animation={motion().to({ rotate: 360 }, 1.5, ease.linear).loop(1.5)}
+          animation={motion().to({ rotate: 360 }, span(0, 1.5), ease.linear).loop(1.5)}
         />
         <circle
           cx={100}
@@ -146,8 +165,8 @@ export function buildEffects(): string {
           r={7}
           fill={C.orange}
           animation={motion({ scale: 1 })
-            .to({ scale: 1.6 }, 0.375, ease.inOut)
-            .to({ scale: 1 }, 0.375, ease.inOut)
+            .to({ scale: 1.6 }, span(0, 0.375), ease.inOut)
+            .to({ scale: 1 }, span(0, 0.375).next(0.375), ease.inOut)
             .loop(0.75)}
         />
       </Tile>

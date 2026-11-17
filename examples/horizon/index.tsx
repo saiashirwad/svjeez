@@ -7,8 +7,7 @@ import { Backdrop, Nebula, Stars, Warp } from "./sky";
 
 const push = motion({ scale: 1 })
   .to({ scale: 1.1 }, span(T.hud).until(T.collapse), ease.inOut)
-  .at(T.black)
-  .set({ scale: 1 });
+  .set({ scale: 1 }, T.black);
 
 const kick = shake({ at: T.ignite, over: 0.9 }, { x: 9, y: 6, rotate: 0.8 }, { rate: 22 });
 

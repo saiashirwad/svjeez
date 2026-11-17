@@ -11,7 +11,16 @@ import {
 import { PAD } from "./demo.ts";
 import type { Action } from "./flow.ts";
 import { dataUri, families, fontFace, formatOf, isWholeFile, sources, unwrap } from "./fonts.ts";
-import { embed, preload, shrink, stills, svgUri, unpack, type Fetched, type Size } from "./images.ts";
+import {
+  embed,
+  preload,
+  shrink,
+  stills,
+  svgUri,
+  unpack,
+  type Fetched,
+  type Size,
+} from "./images.ts";
 import { merge } from "./scheme.ts";
 import type { Box, Face, Snapshot } from "./tree.ts";
 import { shoot } from "./shot.ts";
@@ -399,9 +408,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
 
     if (need.length === 0) return;
 
-    const list = await page.evaluateHandle(
-      () => globalThis.__svjeezCanvases ?? [],
-    );
+    const list = await page.evaluateHandle(() => globalThis.__svjeezCanvases ?? []);
 
     for (const i of need) {
       const handle = (await list.evaluateHandle((all, i) => all[i]!, i)).asElement();
@@ -589,6 +596,25 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
       if ("press" in action) return page.keyboard.press(action.press);
 
       if ("move" in action) return page.mouse.move(...action.move);
+
+      if ("pointer" in action) {
+        const { to, at = [0.5, 0.5], steps = 1, button } = action.pointer;
+
+        if (to !== undefined) {
+          const el = await target(page, selector, parts, to);
+          const box = await (el ?? page.locator(to).first()).boundingBox();
+
+          if (!box) throw new Error(`drag(): "${to}" isn't on the page, or isn't drawn.`);
+
+          await page.mouse.move(box.x + box.width * at[0], box.y + box.height * at[1], { steps });
+        }
+
+        if (button === "down") await page.mouse.down();
+
+        if (button === "up") await page.mouse.up();
+
+        return;
+      }
 
       if ("html" in action) return render(action.html);
 

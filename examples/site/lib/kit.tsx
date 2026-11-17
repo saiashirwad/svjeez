@@ -1,4 +1,4 @@
-import { motion, type Color, type SvgNode, appWindow } from "svjeez";
+import { motion, type Color, type SvgNode, appWindow, span } from "svjeez";
 import { rect } from "svjeez/geometry";
 
 import { css, mono, theme } from "../../style";
@@ -33,9 +33,7 @@ export const chrome = (
 
 /** Fade everything out just before the loop restarts, so the jump back to the first frame is not seen. */
 export const outro = (duration: number) =>
-  motion({ opacity: 1 })
-    .at(duration - 0.5)
-    .to({ opacity: 0 }, 0.5);
+  motion({ opacity: 1 }).to({ opacity: 0 }, span(duration - 0.5, 0.5));
 
 /** Gray bars standing in for lines of text. */
 export const skeleton = (

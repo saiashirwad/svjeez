@@ -5,7 +5,9 @@ import { timeline, type Step } from "./timeline.ts";
 import type { Snapshot } from "./tree.ts";
 
 /** What the camera frames at a snapshot: a part, or the whole snapshot. */
-export type Shot = string | { readonly part: string; readonly index?: number; readonly zoom?: number };
+export type Shot =
+  | string
+  | { readonly part: string; readonly index?: number; readonly zoom?: number };
 
 const named = (shot: Shot): shot is string => typeof shot === "string";
 
@@ -64,7 +66,8 @@ export const shots = (
     const { part, index = 0, zoom: most = zoom } = named(shot) ? { part: shot } : shot;
     const box = partRect(snap, part, index);
 
-    if (!box) throw new Error(`shots(): no part "${part}" in the snapshot "${snap.name ?? "unnamed"}".`);
+    if (!box)
+      throw new Error(`shots(): no part "${part}" in the snapshot "${snap.name ?? "unnamed"}".`);
 
     const padded = rect(box.x, box.y, box.width, box.height).pad(margin);
 
@@ -79,7 +82,10 @@ export const shots = (
 
     if (i === 0) cuts.push({ at: 0, target: target(snap, shot ?? "all") });
     else if (shot !== undefined)
-      cuts.push({ at: Math.max(moves[i - 1]!.at, cuts.at(-1)!.at + over), target: target(snap, shot) });
+      cuts.push({
+        at: Math.max(moves[i - 1]!.at, cuts.at(-1)!.at + over),
+        target: target(snap, shot),
+      });
   });
 
   // Each shot holds until the next one starts, the last to the end of the steps.

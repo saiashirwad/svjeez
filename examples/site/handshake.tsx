@@ -33,11 +33,10 @@ const arc = (
   over: number,
   lift: number,
 ) => [
-  motion({ x: from.x, y: from.y }).at(at).to({ x: to.x, y: to.y }, over, ease.inOut),
+  motion({ x: from.x, y: from.y }).to({ x: to.x, y: to.y }, span(at, over), ease.inOut),
   motion({ y: 0 })
-    .at(at)
-    .to({ y: -lift }, over / 2, ease.out)
-    .to({ y: 0 }, over / 2, ease.in),
+    .to({ y: -lift }, span(at, over / 2), ease.out)
+    .to({ y: 0 }, span(at, over / 2).next(over / 2), ease.in),
 ];
 
 const stage = () => {
@@ -49,39 +48,26 @@ const stage = () => {
   ]);
 
   const look = motion({ x: 0, y: 0 })
-    .at(beat(0) + 0.1)
-    .to({ x: 6, y: 2 }, 0.25)
-    .at(beat(1))
-    .to({ x: 6, y: -6 }, 0.25)
-    .at(beat(2) + 0.3)
-    .to({ x: 6, y: 2 }, 0.25)
-    .at(beat(4))
-    .to({ x: 0, y: 0 }, 0.25);
+    .to({ x: 6, y: 2 }, span(beat(0) + 0.1, 0.25))
+    .to({ x: 6, y: -6 }, span(beat(1), 0.25))
+    .to({ x: 6, y: 2 }, span(beat(2) + 0.3, 0.25))
+    .to({ x: 0, y: 0 }, span(beat(4), 0.25));
 
   const glow = motion({ fill: "#FFC21A" })
-    .at(beat(3) + 0.2)
-    .to({ fill: "#FFF3B0" }, 0.15)
-    .wait(0.6)
-    .to({ fill: "#FFC21A" }, 0.4);
+    .to({ fill: "#FFF3B0" }, span(beat(3) + 0.2, 0.15))
+    .to({ fill: "#FFC21A" }, span(beat(3) + 0.2, 0.15).next(0.4, 0.6));
 
   // The README unfolds from the floor.
-  const unfold = motion({ scale: 0 })
-    .at(beat(0) + 0.05)
-    .to({ scale: 1 }, 0.45, ease.pop);
+  const unfold = motion({ scale: 0 }).to({ scale: 1 }, span(beat(0) + 0.05, 0.45), ease.pop);
 
   // The cloud dozes until it is asked, then wakes.
-  const asleep = motion({ opacity: 1 })
-    .at(beat(1) + 0.75)
-    .to({ opacity: 0 }, 0.1);
+  const asleep = motion({ opacity: 1 }).to({ opacity: 0 }, span(beat(1) + 0.75, 0.1));
 
-  const awake = motion({ opacity: 0 })
-    .at(beat(1) + 0.75)
-    .to({ opacity: 1 }, 0.1);
+  const awake = motion({ opacity: 0 }).to({ opacity: 1 }, span(beat(1) + 0.75, 0.1));
 
   const startle = motion({ y: 0 })
-    .at(beat(1) + 0.75)
-    .to({ y: -8 }, 0.12, ease.out)
-    .to({ y: 0 }, 0.35, ease.pop);
+    .to({ y: -8 }, span(beat(1) + 0.75, 0.12), ease.out)
+    .to({ y: 0 }, span(beat(1) + 0.75, 0.12).next(0.35), ease.pop);
 
   const request = [
     show({ at: beat(1) + 0.1, over: 0.75 }, { fade: 0.1 }),
@@ -100,7 +86,7 @@ const stage = () => {
   const spin = motion({ rotate: 0 }).to({ rotate: 180 }, PLAY.pad(0, -0.1), ease.linear);
 
   const ball = stagger(span(PLAY.at + 0.1, 0.3), 4, 0.6).reduce(
-    (m, bounce) => m.to({ y: -26 }, bounce, ease.out).to({ y: 0 }, 0.3, ease.in),
+    (m, bounce) => m.to({ y: -26 }, bounce, ease.out).to({ y: 0 }, bounce.next(0.3), ease.in),
     motion({ y: 0 }),
   );
 
@@ -115,11 +101,10 @@ const stage = () => {
         r={4}
         fill={i % 2 ? theme.base0A : theme.base0B}
         animation={motion({ x: 0, y: 0, opacity: 0 })
-          .at(beat(4) + 0.4)
-          .set({ opacity: 1 })
+          .set({ opacity: 1 }, beat(4) + 0.4)
           .to(
             { x: +(44 * Math.cos(a)).toFixed(1), y: +(44 * Math.sin(a)).toFixed(1), opacity: 0 },
-            0.5,
+            span(beat(4) + 0.4, 0.5),
             ease.out,
           )}
       />
@@ -273,7 +258,7 @@ export const make = (tall = false): string => {
       {win.node}
       <path d={tall ? `M0 ${BAR + 300}H${W}` : `M${SPLIT} ${BAR}V${H}`} stroke={theme.base02} />
       <g animation={outro(D)}>
-        {login.node}
+        {login}
         <g transform={place}>{stage()}</g>
       </g>
     </>,

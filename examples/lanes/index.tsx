@@ -33,7 +33,8 @@ const run = lanes(
       { from: "lead", to: "search", at: 1 },
       { from: "lead", to: "build", at: 2.6 },
       { from: "search", to: "lead", at: 4.6 },
-      { from: "build", to: "lead", at: 7.2 },    ],
+      { from: "build", to: "lead", at: 7.2 },
+    ],
   },
   {
     theme,
@@ -70,7 +71,7 @@ export default function build(): string {
     },
     <>
       <rect width={WIDTH} height={HEIGHT} fill={theme.base00} />
-      <g transform={fit(run.bounds.w, run.bounds.h)}>{run.node}</g>
+      <g transform={fit(run.bounds.w, run.bounds.h)}>{run}</g>
     </>,
   );
 }

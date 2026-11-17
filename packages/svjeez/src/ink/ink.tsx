@@ -309,9 +309,9 @@ export function Ink({
       <use
         href={symbol}
         mask={reveal}
-        animation={motion({ opacity: 1 }).at(end).set({ opacity: 0 })}
+        animation={motion({ opacity: 1 }).set({ opacity: 0 }, end)}
       />
-      <use href={symbol} animation={motion({ opacity: 0 }).at(end).set({ opacity: 1 })} />
+      <use href={symbol} animation={motion({ opacity: 0 }).set({ opacity: 1 }, end)} />
     </g>
   );
 }

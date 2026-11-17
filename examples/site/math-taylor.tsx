@@ -1,5 +1,5 @@
 import { plane, tex } from "@svjeez/math";
-import { def, draw, enter, motion, render, type Color, morph } from "svjeez";
+import { def, draw, enter, motion, render, type Color, morph, span } from "svjeez";
 import { rect } from "svjeez/geometry";
 import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
@@ -79,11 +79,7 @@ const WRITE = { at: 1.2, over: 1 };
 const m = morph(versions, { at: stages.slice(1).map((s) => s.at - 0.3), over: 0.7 });
 const handoff = WRITE.at + WRITE.over + 0.2;
 
-const cosine = graph.plot(Math.cos, {
-  color: COS,
-  strokeWidth: 2.5,
-  animation: draw({ at: 0.5, over: 1.4 }),
-});
+const cosine = graph.plot({ at: 0.5, over: 1.4 }, Math.cos, { color: COS, strokeWidth: 2.5 });
 
 const origin = graph.point(0, 1);
 
@@ -119,14 +115,14 @@ export default function build(): string {
           {graph.node}
           {ticks.map((t) => t.node)}
         </g>
-        {cosine.node}
+        {cosine}
         <g clipPath={clip}>
           {stages.map((s, i) => {
             const f = taylor(s.n);
             const next = stages[i + 1];
 
             const fade = next
-              ? motion({ opacity: 1 }).at(next.at).to({ opacity: 0 }, 0.6)
+              ? motion({ opacity: 1 }).to({ opacity: 0 }, span(next.at, 0.6))
               : undefined;
 
             return (
@@ -153,15 +149,15 @@ export default function build(): string {
             animation={enter({ at: 2.2, over: 0.4 }, { opacity: 0, scale: 0 })}
           />
         </g>
-        <g animation={motion({ opacity: 1 }).at(handoff).set({ opacity: 0 })}>
-          {versions[0]!.write(WRITE).node}
+        <g animation={motion({ opacity: 1 }).set({ opacity: 0 }, handoff)}>
+          {versions[0]!.write(WRITE)}
         </g>
         <g class="sans" animation={enter({ at: 2.6, over: 0.6 })}>
           <text x={W / 2} y={H - 18} fontSize={12} textAnchor="middle" fill={theme.base03}>
             {"tex(cos).write({ at: 1.2, over: 1 })"}
           </text>
         </g>
-        <g animation={motion({ opacity: 0 }).at(handoff).set({ opacity: 1 })}>{m.node}</g>
+        <g animation={motion({ opacity: 0 }).set({ opacity: 1 }, handoff)}>{m.node}</g>
       </g>
     </>,
   );

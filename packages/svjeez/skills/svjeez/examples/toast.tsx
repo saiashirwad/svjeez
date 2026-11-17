@@ -1,6 +1,6 @@
 /** @jsxImportSource svjeez */
 /** @jsxRuntime automatic */
-import { draw, ease, enter, motion, render, shake } from "svjeez";
+import { draw, ease, enter, motion, render, shake, span } from "svjeez";
 
 // A toast slides up, a check draws on, the badge shakes, then it all leaves and the loop restarts.
 export default function build(): string {
@@ -17,10 +17,8 @@ export default function build(): string {
       <rect width={320} height={120} fill="#111318" />
       <g
         animation={motion({ opacity: 0, y: 24 })
-          .at(0.3)
-          .to({ opacity: 1, y: 0 }, 0.5, ease.pop)
-          .at(4)
-          .to({ opacity: 0, y: -12 }, 0.4, ease.in)}
+          .to({ opacity: 1, y: 0 }, span(0.3, 0.5), ease.pop)
+          .to({ opacity: 0, y: -12 }, span(4, 0.4), ease.in)}
       >
         <rect
           x={40}

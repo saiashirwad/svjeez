@@ -11,6 +11,7 @@ import {
 } from "@svjeez/icons/tabler";
 import {
   Icon,
+  chain,
   draw,
   ease,
   enter,
@@ -18,11 +19,12 @@ import {
   motion,
   render,
   shake,
+  span,
   type Color,
   type Each,
   type IconData,
+  type Motion,
   type Stack,
-  span,
 } from "svjeez";
 import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
@@ -38,6 +40,17 @@ const SIZE = 40;
 const CELL = W / 4;
 const ROWS = [BAR + 44, BAR + 156];
 const at = (index: number) => 0.5 + index * 0.24;
+
+/** Two quick beats, a strong one and a softer echo, from `start`. */
+const heartbeat = (m: Motion<"scale">, start: number) => {
+  const [beat, back, echo, settle] = chain(span(start, 0.12), 0.16, 0.12, 0.3);
+
+  return m
+    .to({ scale: 1.2 }, beat)
+    .to({ scale: 1 }, back)
+    .to({ scale: 1.14 }, echo)
+    .to({ scale: 1 }, settle);
+};
 
 type Rest = Stack<"opacity" | "x" | "y" | "scale" | "rotate" | "blur">;
 
@@ -65,17 +78,7 @@ const cells: readonly (readonly Cell[])[] = [
       color: theme.base08,
       motion: [
         enter({ at: at(1), over: 0.6 }, { opacity: 0, scale: 0 }, ease.pop),
-        motion({ scale: 1 })
-          .at(3)
-          .to({ scale: 1.2 }, 0.12)
-          .to({ scale: 1 }, 0.16)
-          .to({ scale: 1.14 }, 0.12)
-          .to({ scale: 1 }, 0.3)
-          .at(5.4)
-          .to({ scale: 1.2 }, 0.12)
-          .to({ scale: 1 }, 0.16)
-          .to({ scale: 1.14 }, 0.12)
-          .to({ scale: 1 }, 0.3),
+        heartbeat(heartbeat(motion({ scale: 1 }), 3), 5.4),
       ],
     },
     {
@@ -110,8 +113,7 @@ const cells: readonly (readonly Cell[])[] = [
 
         return motion({ opacity: 0 })
           .to({ opacity: 1 }, lit)
-          .at(4.6)
-          .to({ opacity: each.index ? 0.15 : 1 }, 0.25)
+          .to({ opacity: each.index ? 0.15 : 1 }, span(4.6, 0.25))
           .to({ opacity: 1 }, span(5 + each.index * 0.18, 0.2));
       },
     },

@@ -1,5 +1,5 @@
 import { construct, tex } from "@svjeez/math";
-import { motion, render, tint } from "svjeez";
+import { motion, render, span, tint } from "svjeez";
 
 import { css, theme } from "../style";
 
@@ -73,40 +73,32 @@ export default function build(): string {
       <rect width="100%" height="100%" fill={theme.base00} />
       <g
         fill={tint(theme, "muted")}
-        animation={motion({ opacity: 0 }).at(0.2).to({ opacity: 1 }, 0.6)}
+        animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(0.2, 0.6))}
       >
-        {
-          tex(String.raw`\text{Euclid I.1}`, {
-            x: 690,
-            y: 100,
-            fontSize: 28,
-            theme,
-            color: tint(theme, "blue"),
-            display: false,
-          }).node
-        }
+        {tex(String.raw`\text{Euclid I.1}`, {
+          x: 690,
+          y: 100,
+          fontSize: 28,
+          theme,
+          color: tint(theme, "blue"),
+          display: false,
+        })}
       </g>
-      {g.node}
-      {
-        note(String.raw`AC = AB \quad (\text{circle } A)`, 190).write({
-          at: tCircles + 1.4,
-          over: 1,
-        }).node
-      }
-      {
-        note(String.raw`BC = AB \quad (\text{circle } B)`, 240).write({
-          at: tCircles + 2.6,
-          over: 1,
-        }).node
-      }
-      {note(String.raw`AB = AC = BC`, 302).write({ at: tSides + 2.4, over: 1 }).node}
-      {
-        note(String.raw`\angle A = \angle B = \angle C = 60^\circ`, 352).write({
-          at: tAngles + 0.6,
-          over: 1.2,
-        }).node
-      }
-      {note(String.raw`CM \perp AB, \; AM = MB`, 440).write({ at: tDone, over: 1 }).node}
+      {g}
+      {note(String.raw`AC = AB \quad (\text{circle } A)`, 190).write({
+        at: tCircles + 1.4,
+        over: 1,
+      })}
+      {note(String.raw`BC = AB \quad (\text{circle } B)`, 240).write({
+        at: tCircles + 2.6,
+        over: 1,
+      })}
+      {note(String.raw`AB = AC = BC`, 302).write({ at: tSides + 2.4, over: 1 })}
+      {note(String.raw`\angle A = \angle B = \angle C = 60^\circ`, 352).write({
+        at: tAngles + 0.6,
+        over: 1.2,
+      })}
+      {note(String.raw`CM \perp AB, \; AM = MB`, 440).write({ at: tDone, over: 1 })}
     </>,
   );
 }

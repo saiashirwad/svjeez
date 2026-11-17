@@ -49,7 +49,7 @@ export default function build(): string {
       {win.node}
       <g animation={outro(D)}>
         <g animation={enter({ at: 0.2, over: 0.5 })}>{c.node}</g>
-        {wait.node}
+        {wait}
         <g animation={enter({ at: wait.span.end, over: 0.6 }, { opacity: 0, y: -6 })}>
           <line
             x1={ships}

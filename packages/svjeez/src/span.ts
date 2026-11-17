@@ -172,6 +172,23 @@ export function span(at: Seconds, over?: Seconds): Spanned | OpenSpanned {
 }
 
 /**
+ * Spans end to end: `first`, then one span for each length in `overs`, each starting when the one before ends. The
+ * steps of a motion that play one after another: `const [crouch, leap, land] = chain(span(0.1, 0.3), 0.12, 0.25)`.
+ * A pause between two is `.next(over, gap)` on the one before.
+ */
+export function chain<const O extends readonly Seconds[]>(
+  first: Span,
+  ...overs: O
+): [Spanned, ...{ -readonly [K in keyof O]: Spanned }] {
+  const out: Spanned[] = [build(first.at, first.over, "chain()")];
+
+  for (const over of overs) out.push(out[out.length - 1]!.next(over));
+
+  // SAFETY: out holds first and one span per entry of overs, in order, which is the tuple the signature names.
+  return out as [Spanned, ...{ -readonly [K in keyof O]: Spanned }];
+}
+
+/**
  * `count` spans as long as `first`, each starting `step` seconds after the one before: a cascade of entrances. The
  * last one's `end` is when the cascade settles.
  */

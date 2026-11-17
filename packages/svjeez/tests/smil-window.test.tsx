@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ease, motion, render } from "svjeez";
+import { ease, motion, render, span } from "svjeez";
 import { renderFrames } from "svjeez/frames";
 import { restyle } from "svjeez/page";
 
@@ -26,7 +26,7 @@ const attrsOf = (svg: string, tag: string) => svg.match(new RegExp(`<${tag}\\b[^
 /** A morph that rests on A, runs to B and stays there for the rest of a 10 second loop. */
 const morph = render(
   { ...size, duration: 10 },
-  <path d={A} fill="red" animation={motion({ d: A }).at(2).to({ d: B }, 1, ease.linear)} />,
+  <path d={A} fill="red" animation={motion({ d: A }).to({ d: B }, span(2, 1), ease.linear)} />,
 );
 
 /** A morph that returns to where it started. */
@@ -36,16 +36,14 @@ const there = render(
     d={A}
     fill="red"
     animation={motion({ d: A })
-      .at(2)
-      .to({ d: B }, 1, ease.linear)
-      .at(8)
-      .to({ d: A }, 1, ease.linear)}
+      .to({ d: B }, span(2, 1), ease.linear)
+      .to({ d: A }, span(8, 1), ease.linear)}
   />,
 );
 
 const blur = render(
   { ...size, duration: 10, playbackRate: 2 },
-  <g animation={motion({ blur: 6 }).at(1).to({ blur: 0 }, 2, ease.linear)}>
+  <g animation={motion({ blur: 6 }).to({ blur: 0 }, span(1, 2), ease.linear)}>
     <rect width={9} height={9} />
   </g>,
 );
@@ -85,7 +83,7 @@ describe("windowed SMIL markup", () => {
   test("the element holds the last value and the reduced-motion twin keeps the still frame", () => {
     const svg = render(
       { ...size, duration: 10, reducedMotion: { at: 0.5 } },
-      <path d={A} animation={motion({ d: A }).at(2).to({ d: B }, 1, ease.linear)} />,
+      <path d={A} animation={motion({ d: A }).to({ d: B }, span(2, 1), ease.linear)} />,
     );
 
     expect(svg).toContain(`<path d="${B}" class="dm">`);
@@ -93,7 +91,7 @@ describe("windowed SMIL markup", () => {
 
     const filter = render(
       { ...size, duration: 10, reducedMotion: { at: 0.5 } },
-      <g animation={motion({ blur: 6 }).at(2).to({ blur: 0 }, 1, ease.linear)} />,
+      <g animation={motion({ blur: 6 }).to({ blur: 0 }, span(2, 1), ease.linear)} />,
     );
 
     expect(filter).toContain('<feGaussianBlur stdDeviation="0">');
@@ -109,8 +107,8 @@ describe("windowed SMIL markup", () => {
     const svg = render(
       { ...size, duration: 10, prefix: "x" },
       <>
-        <path d={A} animation={motion({ d: A }).at(2).to({ d: B }, 1, ease.linear)} />
-        <path d={A} animation={motion({ d: A }).at(3).to({ d: B }, 1, ease.linear)} />
+        <path d={A} animation={motion({ d: A }).to({ d: B }, span(2, 1), ease.linear)} />
+        <path d={A} animation={motion({ d: A }).to({ d: B }, span(3, 1), ease.linear)} />
       </>,
     );
 
@@ -122,7 +120,7 @@ describe("windowed SMIL markup", () => {
   test("a motion that fills the loop is left as it was", () => {
     const svg = render(
       { ...size, duration: 10 },
-      <path d={A} animation={motion({ d: A }).at(1).to({ d: B }, 8, ease.linear)} />,
+      <path d={A} animation={motion({ d: A }).to({ d: B }, span(1, 8), ease.linear)} />,
     );
 
     expect(attrsOf(svg, "animate")[0]).toContain('repeatCount="indefinite"');
@@ -132,7 +130,7 @@ describe("windowed SMIL markup", () => {
   test("loop: false and Once keep the plain animate", () => {
     const still = render(
       { ...size, duration: 10, loop: false },
-      <path d={A} animation={motion({ d: A }).at(2).to({ d: B }, 1, ease.linear)} />,
+      <path d={A} animation={motion({ d: A }).to({ d: B }, span(2, 1), ease.linear)} />,
     );
 
     expect(attrsOf(still, "animate")[0]).not.toContain("w1");

@@ -1,4 +1,4 @@
-import { draw, ease, motion, render } from "svjeez";
+import { draw, ease, motion, render, span } from "svjeez";
 import { color, count, defaults, number, type Handles, type Values } from "svjeez/params";
 
 export const params = {
@@ -29,10 +29,9 @@ export default (p: Values<typeof params> = defaults(params)) => {
       const y = Math.sin(angle) * p.reach * ring.size;
 
       const fly = motion({ x: 0, y: 0, opacity: 0, scale: 1 })
-        .at(ring.at)
-        .set({ opacity: 1 })
-        .to({ x, y }, 0.7, ease.out)
-        .to({ y: y + p.fall, opacity: 0, scale: 0.2 }, 1, ease.in);
+        .set({ opacity: 1 }, ring.at)
+        .to({ x, y }, span(ring.at, 0.7), ease.out)
+        .to({ y: y + p.fall, opacity: 0, scale: 0.2 }, span(ring.at, 0.7).next(1), ease.in);
 
       return <circle cx={burst.x} cy={burst.y} r={6 - r * 2} fill={ring.fill} animation={fly} />;
     }),
@@ -40,13 +39,12 @@ export default (p: Values<typeof params> = defaults(params)) => {
 
   const rocket = [
     draw({ at: 0, over: 0.8 }, ease.in),
-    motion({ opacity: 1 }).at(0.8).to({ opacity: 0 }, 0.2),
+    motion({ opacity: 1 }).to({ opacity: 0 }, span(0.8, 0.2)),
   ];
 
   const flash = motion({ opacity: 0, scale: 0.2 })
-    .at(0.8)
-    .to({ opacity: 0.35, scale: 1 }, 0.1)
-    .to({ opacity: 0 }, 0.4);
+    .to({ opacity: 0.35, scale: 1 }, span(0.8, 0.1))
+    .to({ opacity: 0 }, span(0.8, 0.1).next(0.4));
 
   return render(
     { width: 560, height: 360, duration: 3, title: "A firework" },

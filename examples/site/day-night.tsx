@@ -1,4 +1,15 @@
-import { Pivot, css as cssTag, ease, motion, render, sampled, variables, wiggle } from "svjeez";
+import {
+  Pivot,
+  chain,
+  css as cssTag,
+  ease,
+  motion,
+  render,
+  sampled,
+  span,
+  variables,
+  wiggle,
+} from "svjeez";
 import { mono } from "../style";
 import { BLIP, GROUND, SQUASH, blip, jumps } from "./lib/blip";
 
@@ -51,16 +62,18 @@ export default function build(): string {
   );
 
   const flap = motion({ scale: 1 })
-    .to({ scale: 0.3 }, 0.12, ease.inOut)
-    .to({ scale: 1 }, 0.12, ease.inOut)
+    .to({ scale: 0.3 }, span(0, 0.12), ease.inOut)
+    .to({ scale: 1 }, span(0, 0.12).next(0.12), ease.inOut)
     .loop(0.24);
 
   // Night: Blip breathes slowly in its sleep, and Zs drift up from it.
+  const [inhale, exhale, again, out] = chain(span(0, D / 4), D / 4, D / 4, D / 4);
+
   const breathe = motion({ scale: 1 })
-    .to({ scale: 1.035 }, D / 4, ease.inOut)
-    .to({ scale: 1 }, D / 4, ease.inOut)
-    .to({ scale: 1.035 }, D / 4, ease.inOut)
-    .to({ scale: 1 }, D / 4, ease.inOut);
+    .to({ scale: 1.035 }, inhale, ease.inOut)
+    .to({ scale: 1 }, exhale, ease.inOut)
+    .to({ scale: 1.035 }, again, ease.inOut)
+    .to({ scale: 1 }, out, ease.inOut);
 
   const head = at(150, 70);
 
@@ -76,9 +89,8 @@ export default function build(): string {
         fontWeight={700}
         fill="#cfd8ff"
         animation={motion({ x: 0, y: 0, opacity: 0 })
-          .at(t)
-          .to({ x: 30, y: -50, opacity: 1 }, 0.8, ease.out)
-          .to({ x: 70, y: -130, opacity: 0 }, 1.2, ease.in)}
+          .to({ x: 30, y: -50, opacity: 1 }, span(t, 0.8), ease.out)
+          .to({ x: 70, y: -130, opacity: 0 }, span(t, 0.8).next(1.2), ease.in)}
       >
         z
       </text>
@@ -88,8 +100,8 @@ export default function build(): string {
   const bulb = at(104, 38);
 
   const halo = motion({ opacity: 0.25, scale: 0.9 })
-    .to({ opacity: 0.5, scale: 1.1 }, D / 2, ease.inOut)
-    .to({ opacity: 0.25, scale: 0.9 }, D / 2, ease.inOut);
+    .to({ opacity: 0.5, scale: 1.1 }, span(0, D / 2), ease.inOut)
+    .to({ opacity: 0.25, scale: 0.9 }, span(0, D / 2).next(D / 2), ease.inOut);
 
   const fireflies = [
     [700, 330],
@@ -106,9 +118,8 @@ export default function build(): string {
       animation={[
         wiggle({ x: 30, y: 24 }, { seed: `fly-${i}`, rate: 0.5 }),
         motion({ opacity: 0.2 })
-          .at(i * 0.8)
-          .to({ opacity: 1 }, 0.6, ease.inOut)
-          .to({ opacity: 0.2 }, 0.9, ease.inOut),
+          .to({ opacity: 1 }, span(i * 0.8, 0.6), ease.inOut)
+          .to({ opacity: 0.2 }, span(i * 0.8, 0.6).next(0.9), ease.inOut),
       ]}
     />
   ));
@@ -128,9 +139,8 @@ export default function build(): string {
       r={2.5}
       fill="#eef1ff"
       animation={motion({ opacity: 1 })
-        .at(i * 0.7)
-        .to({ opacity: 0.3 }, 0.4)
-        .to({ opacity: 1 }, 0.6)}
+        .to({ opacity: 0.3 }, span(i * 0.7, 0.4))
+        .to({ opacity: 1 }, span(i * 0.7, 0.4).next(0.6))}
     />
   ));
 

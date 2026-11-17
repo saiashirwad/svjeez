@@ -82,10 +82,8 @@ const edit = ({ from, to, role }: (typeof EDITS)[number], i: number) => {
         rx={4}
         fill={C.accent}
         animation={motion({ opacity: 0 })
-          .at(at)
-          .to({ opacity: 0.3 }, 0.12)
-          .at(applied(i))
-          .set({ opacity: 0 })}
+          .to({ opacity: 0.3 }, span(at, 0.12))
+          .set({ opacity: 0 }, applied(i))}
       />
       <rect
         x={box.x}
@@ -95,9 +93,8 @@ const edit = ({ from, to, role }: (typeof EDITS)[number], i: number) => {
         rx={4}
         fill={C.green}
         animation={motion({ opacity: 0 })
-          .at(applied(i))
-          .set({ opacity: 0.3 })
-          .to({ opacity: 0 }, 0.8)}
+          .set({ opacity: 0.3 }, applied(i))
+          .to({ opacity: 0 }, span(applied(i), 0.8))}
       />
     </>
   );
@@ -127,18 +124,12 @@ const previewArt = (
       strokeWidth={4}
       strokeLinecap="round"
       animation={motion({ draw: 0 })
-        .at(landed(6))
-        .to({ draw: 1 }, 1.2, ease.inOut)
-        .at(react(3))
-        .set({ draw: 0 })
-        .to({ draw: 1 }, 0.4, ease.inOut)}
+        .to({ draw: 1 }, span(landed(6), 1.2), ease.inOut)
+        .set({ draw: 0 }, react(3))
+        .to({ draw: 1 }, span(react(3), 0.4), ease.inOut)}
     />
     <g transform={`translate(${P.x} ${P.y - 50})`}>
-      <g
-        animation={motion({ scale: 1 })
-          .at(react(0))
-          .to({ scale: 32 / 18 }, 0.45, ease.pop)}
-      >
+      <g animation={motion({ scale: 1 }).to({ scale: 32 / 18 }, span(react(0), 0.45), ease.pop)}>
         <circle
           r={16}
           fill={C.ink}
@@ -147,7 +138,7 @@ const previewArt = (
         <circle
           r={16}
           fill={theme.base0D}
-          animation={motion({ opacity: 0 }).at(react(1)).to({ opacity: 1 }, 0.3)}
+          animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(react(1), 0.3))}
         />
       </g>
       <g animation={[enter({ at: spinAt, over: 0.5 }, { opacity: 0, scale: 0.6 }), spin]}>
@@ -182,10 +173,8 @@ export const codeShot = (
       {editor.node}
       <g
         animation={motion({ opacity: 0 })
-          .at(landed(6) - 0.05)
-          .set({ opacity: 1 })
-          .at(runAt)
-          .to({ opacity: 0 }, 0.3)}
+          .set({ opacity: 1 }, landed(6) - 0.05)
+          .to({ opacity: 0 }, span(runAt, 0.3))}
       >
         <Marker
           color={C.accent}
@@ -210,7 +199,8 @@ export const codeShot = (
         r={4}
         fill={C.green}
         animation={EDITS.reduce(
-          (m, _, i) => m.at(applied(i)).set({ opacity: 0.15 }).to({ opacity: 1 }, 0.5),
+          (m, _, i) =>
+            m.set({ opacity: 0.15 }, applied(i)).to({ opacity: 1 }, span(applied(i), 0.5)),
           motion({ opacity: 1 }),
         )}
       />

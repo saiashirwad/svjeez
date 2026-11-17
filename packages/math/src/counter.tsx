@@ -6,6 +6,7 @@ import {
   type Span,
   type SvgNode,
   defaultDark,
+  span,
   tint,
   type Base16,
 } from "svjeez";
@@ -177,14 +178,17 @@ export function counter(
 
       for (const [from, to] of intervals) {
         if (roll) {
-          if (from! > list[0]!.at) track = track.at(from!).to({ opacity: 1, y: 0 }, roll);
+          if (from! > list[0]!.at) track = track.to({ opacity: 1, y: 0 }, span(from!, roll));
 
-          if (to !== undefined)
-            track = track.at(to).to({ opacity: 0, y: -lift }, roll).set({ y: lift });
+          if (to !== undefined) {
+            const out = span(to, roll);
+
+            track = track.to({ opacity: 0, y: -lift }, out).set({ y: lift }, out.end);
+          }
         } else {
-          if (from! > list[0]!.at) track = track.at(from!).set({ opacity: 1 });
+          if (from! > list[0]!.at) track = track.set({ opacity: 1 }, from!);
 
-          if (to !== undefined) track = track.at(to).set({ opacity: 0 });
+          if (to !== undefined) track = track.set({ opacity: 0 }, to);
         }
       }
 

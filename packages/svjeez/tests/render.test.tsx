@@ -8,6 +8,7 @@ import {
   exit,
   motion,
   render,
+  span,
   valuesAt,
   wiggle,
   type Child,
@@ -27,7 +28,9 @@ describe("motion timing", () => {
       <rect
         width={10}
         height={10}
-        animation={motion().at(1).to({ opacity: 0 }, 1, ease.inOut).at(5).to({ opacity: 1 }, 1)}
+        animation={motion()
+          .to({ opacity: 0 }, span(1, 1), ease.inOut)
+          .to({ opacity: 1 }, span(5, 1))}
       />,
     );
 
@@ -40,19 +43,23 @@ describe("motion timing", () => {
       <rect
         width={10}
         height={10}
-        animation={motion({ opacity: 0 }).at(2).to({ opacity: 1 }, 1)}
+        animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(2, 1))}
       />,
     );
 
     expect(keyframes(svg)).toEqual(["0%,20%{opacity:0}30%,100%{opacity:1}"]);
   });
 
-  test("a span places a transition: it moves the cursor to the start and plays for the length", () => {
-    const placed = motion({ opacity: 0 }).to({ opacity: 1 }, { at: 2, over: 1 }).to({ x: 5 }, 1);
-    const cursor = motion({ opacity: 0 }).at(2).to({ opacity: 1 }, 1).to({ x: 5 }, 1);
+  test("a span places a transition: a plain { at, over } and span() place it alike", () => {
+    const plain = motion({ opacity: 0 })
+      .to({ opacity: 1 }, { at: 2, over: 1 })
+      .to({ x: 5 }, { at: 3, over: 1 });
 
-    expect(scene(<rect width={10} height={10} animation={placed} />)).toBe(
-      scene(<rect width={10} height={10} animation={cursor} />),
+    const fade = span(2, 1);
+    const spanned = motion({ opacity: 0 }).to({ opacity: 1 }, fade).to({ x: 5 }, fade.next(1));
+
+    expect(scene(<rect width={10} height={10} animation={plain} />)).toBe(
+      scene(<rect width={10} height={10} animation={spanned} />),
     );
     expect(() => motion().to({ x: 1 }, { at: -1, over: 1 })).toThrow(
       "to() needs a finite, non-negative number of seconds, got -1.",
@@ -62,9 +69,45 @@ describe("motion timing", () => {
     );
   });
 
+  test("a step takes a span or a time, never a length from a cursor", () => {
+    // The types stop each of these; plain JavaScript gets the same advice at run time.
+    // @ts-expect-error a length is not a span
+    expect(() => motion({ x: 0 }).to({ x: 1 }, 0.5)).toThrow(
+      "to() takes a span, got 0.5. Write .to(values, span(at, over)); a step right after another is span.next(over).",
+    );
+    // @ts-expect-error a cut needs its time
+    expect(() => motion({ x: 0 }).set({ x: 1 })).toThrow(
+      "set() takes the time of the cut in seconds, got none. Write .set(values, at).",
+    );
+    // @ts-expect-error a cut has no length, so it takes a time, not a span
+    expect(() => motion({ x: 0 }).set({ x: 1 }, span(1, 1))).toThrow(
+      /set\(\) takes the time of the cut/,
+    );
+    expect(() => motion({ x: 0 }).set({ x: 1 }, -1)).toThrow(
+      "set() needs a finite, non-negative number of seconds, got -1.",
+    );
+  });
+
+  test("steps may be written in any order: each lane plays them in time order", () => {
+    const [go, back] = [span(1, 1), span(3, 1)];
+    const inOrder = motion({ x: 0 }).set({ opacity: 0.5 }, 2).to({ x: 10 }, go).to({ x: 0 }, back);
+    const shuffled = motion({ x: 0 }).to({ x: 0 }, back).set({ opacity: 0.5 }, 2).to({ x: 10 }, go);
+
+    expect(scene(<rect width={10} height={10} animation={shuffled} />)).toBe(
+      scene(<rect width={10} height={10} animation={inOrder} />),
+    );
+    expect(() => motion({ x: 0 }).to({ x: 0 }, back).to({ x: 10 }, span(2.5, 1))).toThrow(
+      "Two transitions move `translate` between 3s and 3.5s.",
+    );
+  });
+
   test("a cut right after a transition that ends the scene lands on 100%", () => {
     const svg = scene(
-      <rect width={10} height={10} animation={motion({ x: 0 }).to({ x: 50 }, 10).set({ x: 0 })} />,
+      <rect
+        width={10}
+        height={10}
+        animation={motion({ x: 0 }).to({ x: 50 }, span(0, 10)).set({ x: 0 }, 10)}
+      />,
     );
 
     expect(keyframes(svg)).toEqual([
@@ -77,7 +120,7 @@ describe("motion timing", () => {
       <rect
         width={10}
         height={10}
-        animation={motion({ opacity: 1 }).at(0.55).set({ opacity: 0 }).loop(1.1)}
+        animation={motion({ opacity: 1 }).set({ opacity: 0 }, 0.55).loop(1.1)}
       />,
     );
 
@@ -87,7 +130,7 @@ describe("motion timing", () => {
 
   test("a step 0/1 opacity is a visibility toggle, so the browser skips painting it", () => {
     const svg = scene(
-      <rect width={10} height={10} animation={motion({ opacity: 0 }).at(2).set({ opacity: 1 })} />,
+      <rect width={10} height={10} animation={motion({ opacity: 0 }).set({ opacity: 1 }, 2)} />,
     );
 
     expect(keyframes(svg)[0]).toContain("visibility:hidden");
@@ -96,7 +139,7 @@ describe("motion timing", () => {
   });
 
   test("a cut inside a cut cannot show through its hidden parent", () => {
-    const cut = (at: number) => motion({ opacity: 0 }).at(at).set({ opacity: 1 });
+    const cut = (at: number) => motion({ opacity: 0 }).set({ opacity: 1 }, at);
 
     const nested = scene(
       <g animation={cut(5)}>
@@ -118,7 +161,7 @@ describe("motion timing", () => {
       <rect
         width={10}
         height={10}
-        animation={motion({ opacity: 0 }).at(2).to({ opacity: 1 }, 1)}
+        animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(2, 1))}
       />,
     );
 
@@ -126,7 +169,7 @@ describe("motion timing", () => {
       <rect
         width={10}
         height={10}
-        animation={motion({ opacity: 0 }).at(2).to({ opacity: 1 }, 1, ease.steps(4))}
+        animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(2, 1), ease.steps(4))}
       />,
     );
 
@@ -135,7 +178,7 @@ describe("motion timing", () => {
         width={10}
         height={10}
         opacity={0.5}
-        animation={motion({ opacity: 0 }).at(2).set({ opacity: 1 })}
+        animation={motion({ opacity: 0 }).set({ opacity: 1 }, 2)}
       />,
     );
 
@@ -181,7 +224,7 @@ describe("stacking", () => {
       <rect
         width={10}
         height={10}
-        animation={[enter({ at: 0, over: 1 }), motion().at(2).to({ scale: 2 }, 1)]}
+        animation={[enter({ at: 0, over: 1 }), motion().to({ scale: 2 }, span(2, 1))]}
       />,
     );
 
@@ -202,14 +245,14 @@ describe("stacking", () => {
   });
 
   test("two motions on one replace lane are an error", () => {
-    const fill = (at: number) => motion().at(at).to({ fill: "#fff" }, 1);
+    const fill = (at: number) => motion().to({ fill: "#fff" }, span(at, 1));
     expect(() =>
       scene(<rect width={10} height={10} fill="#000" animation={[fill(1), fill(5)]} />),
     ).toThrow(/fill/);
   });
 
   test("scale on text pivots on a wrapper, since WebKit ignores fill-box on <text>", () => {
-    const svg = scene(<text animation={motion().to({ scale: 2 }, 1)}>hi</text>);
+    const svg = scene(<text animation={motion().to({ scale: 2 }, span(0, 1))}>hi</text>);
     expect(body(svg)).toMatch(/<g class="a m1 fb">\s*<text>hi<\/text>/);
   });
 
@@ -219,7 +262,7 @@ describe("stacking", () => {
         width={10}
         height={10}
         transform="rotate(45)"
-        animation={motion().to({ scale: 2 }, 1)}
+        animation={motion().to({ scale: 2 }, span(0, 1))}
       />,
     );
 
@@ -291,7 +334,7 @@ describe("effects", () => {
       {},
       <feTurbulence
         baseFrequency={0.04}
-        animation={motion({ seed: 1 }).to({ seed: 5 }, 0.4, ease.steps(4)).loop(0.4)}
+        animation={motion({ seed: 1 }).to({ seed: 5 }, span(0, 0.4), ease.steps(4)).loop(0.4)}
       />,
     );
 
@@ -309,7 +352,7 @@ describe("effects", () => {
       <feDisplacementMap
         in="SourceGraphic"
         scale={3}
-        animation={motion().at(1).to({ displace: 9 }, 1, ease.linear)}
+        animation={motion().to({ displace: 9 }, span(1, 1), ease.linear)}
       />,
     );
 
@@ -330,7 +373,7 @@ describe("effects", () => {
 
   test("the reduced-motion still of a blur is the blur valuesAt() reads at that moment, mid-transition included", () => {
     for (const curve of [ease.linear, ease.out, ease.pop, ease.steps(4)]) {
-      const blur = motion({ blur: 0 }).at(1).to({ blur: 4 }, 3, curve);
+      const blur = motion({ blur: 0 }).to({ blur: 4 }, span(1, 3), curve);
 
       const svg = render(
         { width: 100, height: 100, duration: 6, title: "Still", reducedMotion: { at: 3 } },
@@ -365,7 +408,7 @@ describe("properties", () => {
   const yaw = css.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
   const px = css.property("px", { syntax: "number", inherits: false, initial: 0 });
   const tint = css.property("tint", { syntax: "color", inherits: false, initial: "#000" });
-  const spin = () => motion().to({ [yaw]: 90 }, 1, ease.linear);
+  const spin = () => motion().to({ [yaw]: 90 }, span(0, 1), ease.linear);
 
   test("an animated property is registered once and keyframed under its render name", () => {
     const svg = scene(
@@ -424,24 +467,22 @@ describe("properties", () => {
 
   test("an undeclared property key is refused when the motion is built", () => {
     // SAFETY: the key is deliberately undeclared, so the cast lets it reach motion(), which must refuse it at runtime.
-    expect(() => motion().to({ ["--nope:angle" as typeof yaw]: 1 }, 1)).toThrow(/never declared/);
+    expect(() => motion().to({ ["--nope:angle" as typeof yaw]: 1 }, span(0, 1))).toThrow(
+      /never declared/,
+    );
   });
 
   test("a property lives on its element: two motions on it are an error, and filter primitives cannot take one", () => {
-    expect(() =>
-      scene(
-        <g
-          animation={[
-            spin(),
-            motion()
-              .at(5)
-              .to({ [yaw]: 0 }, 1),
-          ]}
-        />,
-      ),
-    ).toThrow(/--yaw:angle/);
+    expect(() => scene(<g animation={[spin(), motion().to({ [yaw]: 0 }, span(5, 1))]} />)).toThrow(
+      /--yaw:angle/,
+    );
+
     // SAFETY: a filter primitive cannot take a motion, which is the error under test, so the cast gets past its prop type.
-    const flood = def.filter({}, <feFlood animation={motion().to({ [yaw]: 1 }, 1) as never} />);
+    const flood = def.filter(
+      {},
+      <feFlood animation={motion().to({ [yaw]: 1 }, span(0, 1)) as never} />,
+    );
+
     expect(() => scene(<rect width={1} height={1} filter={flood} />)).toThrow(
       /cannot animate --yaw:angle/,
     );
@@ -471,9 +512,8 @@ describe("output", () => {
 describe("timeline", () => {
   test("a move that starts just after the previous one ends still renders", () => {
     const track = motion({ opacity: 0 })
-      .to({ opacity: 1 }, 0.333333)
-      .at(1 / 3)
-      .to({ opacity: 0 }, 0.5);
+      .to({ opacity: 1 }, span(0, 0.333333))
+      .to({ opacity: 0 }, span(1 / 3, 0.5));
 
     expect(() => scene(<rect animation={track} />, 2)).not.toThrow();
   });
@@ -487,10 +527,14 @@ describe("loop", () => {
         <rect
           width={10}
           height={10}
-          animation={motion({ opacity: 0 }).at(1).to({ opacity: 1 }, 1)}
+          animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(1, 1))}
         />
-        <circle r={4} animation={motion({ rotate: 0 }).to({ rotate: 90 }, 1).loop(2)} />
-        <path d="M0 0H10" stroke="#fff" animation={motion({ blur: 0 }).at(2).to({ blur: 4 }, 1)} />
+        <circle r={4} animation={motion({ rotate: 0 }).to({ rotate: 90 }, span(0, 1)).loop(2)} />
+        <path
+          d="M0 0H10"
+          stroke="#fff"
+          animation={motion({ blur: 0 }).to({ blur: 4 }, span(2, 1))}
+        />
       </>,
     );
 
@@ -532,13 +576,13 @@ describe("playbackRate", () => {
           <rect
             width={10}
             height={10}
-            animation={motion({ opacity: 0 }).at(1).to({ opacity: 1 }, 1)}
+            animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(1, 1))}
           />
-          <circle r={4} animation={motion({ rotate: 0 }).to({ rotate: 90 }, 1).loop(4)} />
+          <circle r={4} animation={motion({ rotate: 0 }).to({ rotate: 90 }, span(0, 1)).loop(4)} />
           <path
             d="M0 0H10"
             stroke="#fff"
-            animation={motion({ blur: 0 }).at(2).to({ blur: 4 }, 1)}
+            animation={motion({ blur: 0 }).to({ blur: 4 }, span(2, 1))}
           />
         </>,
       );

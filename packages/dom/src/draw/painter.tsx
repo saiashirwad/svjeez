@@ -4,6 +4,8 @@ import {
   def,
   motion,
   Style,
+  span,
+  type Attrs,
   type Child,
   type Color,
   type FontValue,
@@ -34,8 +36,11 @@ const SYSTEM =
   /^(system-ui|ui-[\w-]+|-apple-system|BlinkMacSystemFont|sans-serif|serif|monospace|cursive|fantasy)$/;
 
 import { typefaces } from "./faces.ts";
+import { defines, keyOf, moving, settles } from "./hold.ts";
 import {
   borderRing,
+  morphable,
+  offset,
   outlineRing,
   matrix,
   paddingBox,
@@ -47,12 +52,15 @@ import {
 import { paintServers } from "./gradients.ts";
 import {
   align,
+  carriedOf,
   movesOf,
   runsOf,
   sameFace,
   sameTransform,
+  insideOf,
   without,
   type Boxed,
+  type Carried,
   type Moves,
   type PairBy,
 } from "./pairing.ts";
@@ -119,6 +127,7 @@ export const painter = (
   captured: readonly Face[],
   parts: Parts,
   pairBy?: PairBy,
+  drawn?: ReadonlyMap<string, readonly TextRun[]>,
 ) => {
   // The variables the drawn paints need, so the scene defines those and no others.
   const used = new Map<string, Pair<string>>();
@@ -134,11 +143,15 @@ export const painter = (
     return `var(--${name})`;
   };
 
-  const { byName, rules } = typefaces(fonts, captured);
+  const { byName, rules } = typefaces(fonts, captured, drawn);
   const embedded = new Set([...byName.keys(), ...captured.map((f) => f.family)]);
   const server = paintServers(v);
   // How many boxes of each part are drawn so far, so a part's function gets each one's index.
   const seen = new Map<string, number>();
+  // Whether a box that only moved is slid whole; off, it is drawn shape by shape as before `hold` existed.
+  let rigid = true;
+  // Keyed elements that change parent in the transition being drawn.
+  let carry: Carried = { carried: new Map(), left: new Set(), above: new Set() };
   // Text that moves between elements in the transition being drawn.
   let moves: Moves = { moved: new Map(), gone: new Set() };
 
@@ -152,6 +165,42 @@ export const painter = (
     const m = parts[b.part];
 
     return m instanceof Function ? m(index) : m;
+  };
+
+  // Clips and masks by what they hold, so a box drawn the same in two transitions uses the same def in both, and the
+  // two drawings come out equal for `hold` to draw once.
+  const clips = new Map<number, Ref<"clipPath">>();
+  const masks = new Map<string, Ref<"mask">>();
+
+  const clipOf = (content: SvgNode): Ref<"clipPath"> => {
+    const k = keyOf(content);
+
+    if (k === undefined) return defines(def.clipPath({}, content), [content]);
+
+    let ref = clips.get(k);
+
+    if (!ref) {
+      ref = defines(def.clipPath({}, content), [content]);
+      clips.set(k, ref);
+    }
+
+    return ref;
+  };
+
+  const maskOf = (attrs: Attrs<"mask">, list: readonly SvgNode[]): Ref<"mask"> => {
+    const ks = list.map(keyOf);
+
+    if (ks.some((k) => k === undefined)) return defines(def.mask(attrs, list), list);
+
+    const key = `m${JSON.stringify(attrs)}${ks.join(",")}`;
+    let ref = masks.get(key);
+
+    if (!ref) {
+      ref = defines(def.mask(attrs, list), list);
+      masks.set(key, ref);
+    }
+
+    return ref;
   };
 
   // An image file is defined once however many times it is drawn, scaled into each place it is used.
@@ -184,7 +233,7 @@ export const painter = (
     const inside = b.pictures.every((p) => p.tiles.every((r) => within(r, b.box)));
 
     return b.radii.some((r) => r > 0) || !inside ? (
-      <g clipPath={def.clipPath({}, <path d={rounded(b.box, b.radii)} />)}>{all}</g>
+      <g clipPath={clipOf(<path d={rounded(b.box, b.radii)} />)}>{all}</g>
     ) : (
       all
     );
@@ -194,7 +243,7 @@ export const painter = (
   const masked = (b: Box, drawn: SvgNode): SvgNode => {
     if (!b.mask) return drawn;
 
-    const mask = def.mask(
+    const mask = maskOf(
       {
         maskUnits: "userSpaceOnUse",
         maskType: "alpha",
@@ -250,7 +299,7 @@ export const painter = (
 
     return mask ? (
       <g
-        mask={def.mask(
+        mask={maskOf(
           {},
           mask.map((c) => vector(c, back)),
         )}
@@ -270,18 +319,21 @@ export const painter = (
     tween?: Tween,
     extra: Extra = {},
   ): SvgNode => {
-    const moving = from && tween && (from.d !== d || from.fill !== fill);
+    const still = jsx("path", { d, fill, ...extra });
 
-    return jsx("path", {
-      d: moving ? from.d : d,
-      fill: moving ? from.fill : fill,
-      ...extra,
-      animation: moving
-        ? motion({ d: from.d, fill: from.fill })
-            .at(tween.at)
-            .to({ d, fill }, tween.over, tween.ease)
-        : undefined,
-    });
+    if (!from || !tween || (from.d === d && from.fill === fill)) return still;
+
+    const [start, end] = morphable(from.d, d);
+
+    return moving(
+      {
+        from: { d: start, fill: from.fill },
+        steps: [{ to: { d: end, fill }, ...tween }],
+        draw: (f, animation) => jsx("path", { d: f.d, fill: f.fill, ...extra, animation }),
+      },
+      jsx("path", { d: from.d, fill: from.fill, ...extra }),
+      still,
+    );
   };
 
   const item = (it: Item, textMotion?: TextMotion): SvgNode => {
@@ -301,7 +353,7 @@ export const painter = (
       case "image": {
         const clip =
           it.radii.some((r) => r > 0) || it.fit
-            ? def.clipPath({}, <path d={rounded(it.box, it.radii)} />)
+            ? clipOf(<path d={rounded(it.box, it.radii)} />)
             : undefined;
 
         const image = tile(it.href, it.fit ?? it.box);
@@ -332,11 +384,19 @@ export const painter = (
     )
       return dx === 0 && dy === 0 && v(a.color) === v(b.color)
         ? text(b)
-        : text(
-            b,
-            motion({ x: dx, y: dy, fill: v(a.color) })
-              .at(tween.at)
-              .to({ x: 0, y: 0, fill: v(b.color) }, tween.over, tween.ease),
+        : moving(
+            {
+              from: { x: dx, y: dy, fill: v(a.color) },
+              steps: [{ to: { x: 0, y: 0, fill: v(b.color) }, ...tween }],
+              // SAFETY: this recipe moves x, y and fill, all channels a <text> takes.
+              draw: (_, animation) => text(b, animation as Stack<TagChannels<"text">>),
+              origin: { x: b.x, y: b.y },
+            },
+            // It starts as the old text only when nothing else about the two differs.
+            keyOf(text({ ...b, x: a.x, y: a.y, color: a.color })) === keyOf(text(a))
+              ? text(a)
+              : undefined,
+            text(b),
           );
 
     if (a.kind === "text" && b.kind === "text" && sameFace(a, b)) {
@@ -353,7 +413,13 @@ export const painter = (
       JSON.stringify(a.children) === JSON.stringify(b.children) &&
       sameTransform(a, b)
     )
-      return animated(slideIn(tween, dx, dy), item(b));
+      return dx === 0 && dy === 0
+        ? item(b)
+        : settles(
+            animated(slideIn(tween, dx, dy), item(b)),
+            a.box.width === b.box.width && a.box.height === b.box.height ? item(a) : undefined,
+            item(b),
+          );
 
     // Glyphs one over the other read as noise, so text and icons leave before the new ones come in.
     const [out, into] =
@@ -363,7 +429,7 @@ export const painter = (
       <>
         {animated(
           [
-            motion({ x: 0, y: 0 }).at(tween.at).to({ x: -dx, y: -dy }, tween.over, tween.ease),
+            motion({ x: 0, y: 0 }).to({ x: -dx, y: -dy }, span(tween.at, tween.over), tween.ease),
             fade(tween, out),
           ],
           item(a),
@@ -457,16 +523,23 @@ export const painter = (
           ),
         ];
 
+      const paint = gradientOf(p.fill, color);
+      const still = jsx("path", { d: p.d, fill: paint, ...extra });
+
+      if (!before || !tween || before.d === p.d) return [still];
+
+      const [start, end] = morphable(before.d, p.d);
+
       return [
-        jsx("path", {
-          d: before && tween ? before.d : p.d,
-          fill: gradientOf(p.fill, color),
-          ...extra,
-          animation:
-            before && tween && before.d !== p.d
-              ? motion({ d: before.d }).at(tween.at).to({ d: p.d }, tween.over, tween.ease)
-              : undefined,
-        }),
+        moving(
+          {
+            from: { d: start },
+            steps: [{ to: { d: end }, ...tween }],
+            draw: (f, animation) => jsx("path", { d: f.d, fill: paint, ...extra, animation }),
+          },
+          jsx("path", { d: before.d, fill: paint, ...extra }),
+          still,
+        ),
       ];
     });
 
@@ -496,19 +569,36 @@ export const painter = (
       if (morphs(start, end, p.color, s.color))
         return pieces(end, s.color, { pieces: start, color: p.color }, tween);
 
-      /** One side's shadow on both boxes, morphing when it can. */
-      const follow = (shadow: Shadow) => {
+      /**
+       * One side's shadow on both boxes, following the box from one shape to the other. When its fades differ
+       * between the two (a box shrunk below its blur), the outgoing copy keeps the old fades and the incoming one the
+       * new, each stretched over the moving pieces, so neither stands still while the box resizes.
+       */
+      const follow = (shadow: Shadow, keep: "start" | "end") => {
         const from = piecesOf(a, shadow);
         const to = piecesOf(b, shadow);
+        const c = shadow.color;
 
-        return morphs(from, to, shadow.color, shadow.color)
-          ? pieces(to, shadow.color, { pieces: from, color: shadow.color }, tween)
-          : pieces(to, shadow.color);
+        if (morphs(from, to, c, c)) return pieces(to, c, { pieces: from, color: c }, tween);
+
+        if (from.length !== to.length) return pieces(keep === "start" ? from : to, c);
+
+        /** `paint`'s pieces where `spots` lie. */
+        const over = (paint: readonly Piece[], spots: readonly Piece[]): Piece[] =>
+          paint.map((q, i) => ({
+            ...q,
+            d: spots[i]!.d,
+            empty: q.empty && spots[i]!.empty ? true : undefined,
+          }));
+
+        return keep === "start"
+          ? pieces(over(from, to), c, { pieces: from, color: c }, tween)
+          : pieces(to, c, { pieces: over(to, from), color: c }, tween);
       };
 
       return [
-        !invisible(p.color) && animated(fade(tween, shown ? "swapOut" : "out"), follow(p)),
-        shown && animated(fade(tween, invisible(p.color) ? "in" : "swapIn"), follow(s)),
+        !invisible(p.color) && animated(fade(tween, shown ? "swapOut" : "out"), follow(p, "start")),
+        shown && animated(fade(tween, invisible(p.color) ? "in" : "swapIn"), follow(s, "end")),
       ].filter((n): n is SvgNode => Boolean(n));
     });
 
@@ -526,7 +616,7 @@ export const painter = (
 
     const mask =
       seeThrough && reach
-        ? def.mask(
+        ? maskOf(
             {
               maskUnits: "userSpaceOnUse",
               x: reach.x,
@@ -534,9 +624,11 @@ export const painter = (
               width: reach.width,
               height: reach.height,
             },
-            path(outside(b, reach), "#fff", a && { d: outside(a, reach), fill: "#fff" }, tween, {
-              fillRule: "evenodd",
-            }),
+            [
+              path(outside(b, reach), "#fff", a && { d: outside(a, reach), fill: "#fff" }, tween, {
+                fillRule: "evenodd",
+              }),
+            ],
           )
         : undefined;
 
@@ -558,7 +650,7 @@ export const painter = (
 
     if (insets.length === 0) return null;
 
-    const clip = def.clipPath({}, padding());
+    const clip = clipOf(padding());
 
     const drawn = cast(b, insets, a, from?.insets, tween, insetPieces);
 
@@ -601,12 +693,14 @@ export const painter = (
     const from = rounded(a.box, a.radii);
     const same = now.length === before.length && now.every((s, i) => s.key === before[i]!.key);
 
+    const [start, end] = morphable(from, d);
+
     const layered = (fill: (typeof now)[number]["ref"], opacity?: ReturnType<typeof fade>) =>
       jsx("path", {
-        d: from,
+        d: start,
         fill,
         animation: [
-          from !== d && motion({ d: from }).at(tween.at).to({ d }, tween.over, tween.ease),
+          from !== d && motion({ d: start }).to({ d: end }, span(tween.at, tween.over), tween.ease),
           opacity,
         ],
       });
@@ -638,7 +732,16 @@ export const painter = (
         return was ? [pair(was, r, tween)] : [];
       });
 
-    return align(a.children, b.children, pairBy).map(([old, it]) => {
+    const aligned = align(a.children, b.children, pairBy);
+
+    // Nothing pairs and both sides have something: the content is replaced whole, and hands over rather than
+    // leaving the box empty halfway.
+    const replaced =
+      aligned.every(([old, it]) => !old || !it) &&
+      aligned.some(([old]) => old) &&
+      aligned.some(([, it]) => it);
+
+    return aligned.map(([old, it]) => {
       if (!it) {
         // Text that moved to another element slides there, drawn where it arrives.
         if (old!.kind === "text" && gone.has(old!)) return null;
@@ -650,9 +753,12 @@ export const painter = (
           if (typable(old!, empty)) return typing(ink, old!, empty, tween);
         }
 
-        const left = without(old!, gone);
+        // A keyed element that moved to another parent is drawn there.
+        if (old!.kind === "box" && carry.left.has(old!)) return null;
 
-        return left && animated(fade(tween, "exit"), item(left));
+        const left = without(old!, gone, carry.left);
+
+        return left && animated(fade(tween, replaced ? "handOut" : "exit"), item(left));
       }
 
       if (!old) {
@@ -665,12 +771,21 @@ export const painter = (
           if (typable(empty, it)) return typing(ink, empty, it, tween);
         }
 
-        const came = without(it, arrived);
+        const was = it.kind === "box" ? carry.carried.get(it) : undefined;
+
+        // A keyed element that came from another parent moves here from where it was, or over the page.
+        if (it.kind === "box" && was)
+          return carry.above.has(it) ? null : box(it, { a: was, tween });
+
+        const came = without(it, arrived, new Set(carry.carried.keys()));
 
         return (
           <>
-            {came && animated(fade(tween, "enter"), item(came))}
+            {came && animated(fade(tween, replaced ? "handIn" : "enter"), item(came))}
             {slides(it)}
+            {insideOf(it, new Set(carry.carried.keys()))
+              .filter((c) => !carry.above.has(c))
+              .map((c) => box(c, { a: carry.carried.get(c)!, tween }))}
           </>
         );
       }
@@ -698,6 +813,36 @@ export const painter = (
   const box = (b: Box, from?: { a: Box; tween: Tween }, textMotion?: TextMotion): SvgNode => {
     const a = from?.a;
     const tween = from?.tween;
+    const shift = a && !textMotion && offset(a, b);
+
+    // A box that only moved is drawn once where it lands and slid there whole: its shapes, text and clips stay still
+    // inside one moving group, so the next transition draws it the same and the two are one element. Text that moves
+    // to or from another element is drawn by the walk instead.
+    if (
+      rigid &&
+      shift &&
+      tween &&
+      !runsOf(b).some((r) => moves.moved.has(r)) &&
+      !runsOf(a).some((r) => moves.gone.has(r))
+    ) {
+      const still = box(b);
+
+      if (drawsNothing(still)) return still;
+
+      return moving(
+        {
+          from: { x: -shift.dx, y: -shift.dy },
+          steps: [{ to: { x: 0, y: 0 }, ...tween }],
+          // SAFETY: this recipe moves x and y, which a <g> takes.
+          draw: (_, animation) => <g animation={animation as GroupStack}>{still}</g>,
+          origin: { x: b.box.x, y: b.box.y },
+        },
+        // Drawing `a` again would count its parts twice.
+        Object.keys(parts).length === 0 ? box(a) : undefined,
+        still,
+      );
+    }
+
     const inner = paddingBox(b);
     const innerFrom = a && paddingBox(a);
     const clipD = rounded(inner.rect, inner.radii);
@@ -712,15 +857,17 @@ export const painter = (
         tween,
       );
 
-    const clip = spills(b) || (a ? spills(a) : false) ? def.clipPath({}, padding()) : undefined;
+    const clip = spills(b) || (a ? spills(a) : false) ? clipOf(padding()) : undefined;
     const shadows = outerShadows(b, a, tween);
     const kids = children(b, a, tween, textMotion);
 
     const opacity =
       a && tween && a.opacity !== b.opacity
-        ? motion({ opacity: a.opacity })
-            .at(tween.at)
-            .to({ opacity: b.opacity }, tween.over, tween.ease)
+        ? motion({ opacity: a.opacity }).to(
+            { opacity: b.opacity },
+            span(tween.at, tween.over),
+            tween.ease,
+          )
         : undefined;
 
     const motions = [...[partMotion(b)].flat(), opacity].filter(Boolean);
@@ -779,12 +926,26 @@ export const painter = (
   };
 
   /** A whole tree, as `b`, or as `a` turning into `b`. */
-  const root = (b: Box, from?: { a: Box; tween: Tween }, textMotion?: TextMotion) => {
+  const root = (b: Box, from?: { a: Box; tween: Tween }, textMotion?: TextMotion, whole = true) => {
     seen.clear();
+    rigid = whole;
 
-    if (from) moves = movesOf(from.a, b, pairBy);
+    carry = from
+      ? carriedOf(from.a, b, pairBy)
+      : { carried: new Map(), left: new Set(), above: new Set() };
 
-    return box(b, from, textMotion);
+    if (from) moves = movesOf(from.a, b, pairBy, carry);
+
+    const drawn = box(b, from, textMotion);
+
+    if (!from || carry.above.size === 0) return drawn;
+
+    return (
+      <>
+        {drawn}
+        {[...carry.above].map((c) => box(c, { a: carry.carried.get(c)!, tween: from.tween }))}
+      </>
+    );
   };
 
   return { root, style };

@@ -29,7 +29,7 @@ const map = project(world, {
 
 Don't zoom a camera over one animated path per country: Chromium flashes blank tiles. Animate the per-region paths for the intro, then at a fixed time hide them and show a still copy of `map.land` and `map.lines` inside the `Camera`. Put markers and routes in a second `Camera` with the same stops. `examples/world` in the svjeez repository does this.
 
-Animate a region's color with `motion({ fill: "#123" }).to({ fill: "#456" }, 0.6)`; `fillOpacity` is not a channel.
+Animate a region's color with `motion({ fill: "#123" }).to({ fill: "#456" }, span(1, 0.6))`; `fillOpacity` is not a channel.
 
 ## Turning dots
 
@@ -55,6 +55,7 @@ const clip = def.clipPath({}, <path d={earth.sphere} />);
 - `route(from, to)`, `circle(center, degrees)`, `night(date)` and `terminator(date)` return one path each. `date` is a `Date` or a function of the seconds since the span starts.
 - `place(at)` gives a `<g>` a moving `x`, `y` and `opacity`, so a marker rides the globe and fades out at the horizon. Draw its content at the origin.
 - `simplify` (default 0.6 degrees) and `tolerance` (default 1px) set the file size. One turn of 110m land in 24s with a 226px radius is about 500 KB at `simplify: 0.8`. Tilt the globe 20 degrees or more so its hidden pole holds the fold; an upright globe needs more keys.
+- `earth.parts` are the regions, as `project()` gives them, and `earth.part("France")` finds one by id or name. Its `box` is where it sits when the turn ends, a region behind the globe pressed onto the rim; its `span` is the globe's; and `path()` returns the region alone as turning pieces, to fill or outline it over the land. `earth.bounds` is the disc.
 - `spin` also takes `(t) => [lon, lat]`, with `t` in seconds since the span starts. `facing(t)` and `locate(at, t)` read the same clock, and `earth.span` is the span.
 
 `examples/globe` in the svjeez repository turns a day this way. The dot globe stays smaller for a long loop.
@@ -100,7 +101,7 @@ The shapes start as the outline and hide until the span starts. Keep the map und
 
 ## Traffic
 
-`traffic(span, lines, { rate, seed, speed, style, color, size, back })` sends `rate` particles a second over `span`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns `{ node, count, span }`.
+`traffic(span, lines, { rate, seed, speed, style, color, size, back })` sends `rate` particles a second over `span`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns a `Drawn` with `count`, the particles sent; put it in the scene as it is. Its parts are the routes, by `id` (a line takes `{ points, id }`, and the default is its index, `"0"`), each with its `points`, `count`, `box` and a `span` from the first departure on it to the last arrival.
 
 `arc(map, from, to, { height })` returns a curved route for a flat map, bowed up the page by `height` px, as points for `traffic()`, `flow()` and `travel()`. `from` and `to` are `[lon, lat]` or points.
 

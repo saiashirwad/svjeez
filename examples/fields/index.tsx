@@ -133,7 +133,7 @@ export default function build(): string {
         strokeLinejoin="round"
         fill="none"
         opacity={0.5}
-        animation={motion({ opacity: 0 }).at(0.3).to({ opacity: 0.5 }, 1)}
+        animation={motion({ opacity: 0 }).to({ opacity: 0.5 }, span(0.3, 1))}
       >
         <path d={arrows.d} />
       </g>
@@ -151,7 +151,7 @@ export default function build(): string {
           stroke={blue}
           strokeWidth={2.5}
           strokeLinejoin="round"
-          animation={[sweep.animation, motion({ opacity: 0 }).at(4.8).to({ opacity: 1 }, 0.4)]}
+          animation={[sweep.animation, motion({ opacity: 0 }).to({ opacity: 1 }, span(4.8, 0.4))]}
         />
         <path
           d={rim!.d}
@@ -159,7 +159,7 @@ export default function build(): string {
           stroke={orange}
           strokeWidth={1.5}
           strokeDasharray="4 4"
-          animation={motion({ opacity: 0 }).at(7.6).to({ opacity: 1 }, 0.6)}
+          animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(7.6, 0.6))}
         />
       </g>
       {label(660, 40, "(x² + y² − 1)³ − x²y³ = c, c rising to 0", 4.5)}
@@ -172,7 +172,7 @@ export default function build(): string {
           stroke={muted}
           strokeWidth={1.25}
           strokeLinecap="round"
-          animation={motion({ opacity: 0 }).at(8).to({ opacity: 1 }, 0.8)}
+          animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(8, 0.8))}
         />
         {solutions.map(({ d }, i) => (
           <path

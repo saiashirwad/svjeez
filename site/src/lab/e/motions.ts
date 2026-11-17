@@ -73,8 +73,8 @@ export const breathing = (cx: Cx) => {
           .to({ [breath]: 1.3 }, MELT, ease.inOut)
           .to({ [breath]: 1 }, REBOUND, ease.pop)
       : motion({ [breath]: 1 })
-          .to({ [breath]: 1.07 }, 2, ease.inOut)
-          .to({ [breath]: 1 }, 2, ease.inOut)
+          .to({ [breath]: 1.07 }, span(0, 2), ease.inOut)
+          .to({ [breath]: 1 }, span(0, 2).next(2), ease.inOut)
           .loop(4);
 
   return { breath, motion: motionOf };

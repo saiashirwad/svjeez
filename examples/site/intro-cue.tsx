@@ -1,4 +1,4 @@
-import { Ink, Once, Pivot, css as cssTag, ease, motion, render } from "svjeez";
+import { Ink, Once, Pivot, chain, css as cssTag, ease, motion, render, span } from "svjeez";
 import { css, theme } from "../style";
 import { lettering, marker } from "./cue";
 import { BLIP, GROUND, SQUASH, blip, jumps } from "./lib/blip";
@@ -21,48 +21,41 @@ export default function build(): string {
   const strokes = lettering("watch the intro");
 
   // The bulb flickers on like an old projector, holds, and dims before the loop ends.
+  const [on, off, again] = chain(span(0.4, 0.06), 0.06, 0.06);
+  const dim = again.next(0.3, 4.3);
+
   const glow = motion({ fill: BLIP.yellow })
-    .at(0.4)
-    .to({ fill: "#FFF3B0" }, 0.06)
-    .to({ fill: BLIP.yellow }, 0.06)
-    .to({ fill: "#FFF3B0" }, 0.06)
-    .wait(4.3)
-    .to({ fill: BLIP.yellow }, 0.3);
+    .to({ fill: "#FFF3B0" }, on)
+    .to({ fill: BLIP.yellow }, off)
+    .to({ fill: "#FFF3B0" }, again)
+    .to({ fill: BLIP.yellow }, dim);
 
   const beam = motion({ opacity: 0 })
-    .at(0.4)
-    .to({ opacity: 0.5 }, 0.06)
-    .to({ opacity: 0 }, 0.06)
-    .to({ opacity: 0.5 }, 0.06)
-    .wait(4.3)
-    .to({ opacity: 0 }, 0.3);
+    .to({ opacity: 0.5 }, on)
+    .to({ opacity: 0 }, off)
+    .to({ opacity: 0.5 }, again)
+    .to({ opacity: 0 }, dim);
 
-  const play = motion({ scale: 1 })
-    .at(0.8)
-    .to({ scale: 1.2 }, 0.3, ease.out)
-    .to({ scale: 1 }, 0.4, ease.inOut)
-    .wait(0.6)
-    .to({ scale: 1.2 }, 0.3, ease.out)
-    .to({ scale: 1 }, 0.4, ease.inOut)
-    .wait(0.6)
-    .to({ scale: 1.2 }, 0.3, ease.out)
-    .to({ scale: 1 }, 0.4, ease.inOut);
+  // The play button pulses three times, 0.6s apart.
+  let pulse = span(0.8, 0.3);
+  let play = motion({ scale: 1 });
+
+  for (let i = 0; i < 3; i++) {
+    const settle = pulse.next(0.4);
+
+    play = play.to({ scale: 1.2 }, pulse, ease.out).to({ scale: 1 }, settle, ease.inOut);
+    pulse = settle.next(0.3, 0.6);
+  }
 
   // It bobs to the show, glancing at the screen, then hops when it ends.
-  const bob = motion({ rotate: 0 })
-    .at(0.9)
-    .to({ rotate: 5 }, 0.5, ease.inOut)
-    .to({ rotate: -5 }, 0.5, ease.inOut)
-    .to({ rotate: 5 }, 0.5, ease.inOut)
-    .to({ rotate: -5 }, 0.5, ease.inOut)
-    .to({ rotate: 5 }, 0.5, ease.inOut)
-    .to({ rotate: 0 }, 0.5, ease.inOut);
+  const bob = chain(span(0.9, 0.5), 0.5, 0.5, 0.5, 0.5, 0.5).reduce(
+    (m, sway, i) => m.to({ rotate: [5, -5, 5, -5, 5, 0][i]! }, sway, ease.inOut),
+    motion({ rotate: 0 }),
+  );
 
   const look = motion({ x: 0, y: 0 })
-    .at(0.5)
-    .to({ x: 6, y: -5 }, 0.3)
-    .at(4.7)
-    .to({ x: 0, y: 0 }, 0.3);
+    .to({ x: 6, y: -5 }, span(0.5, 0.3))
+    .to({ x: 0, y: 0 }, span(4.7, 0.3));
 
   const hops = jumps([{ land: 5.4, height: 50 }]);
 

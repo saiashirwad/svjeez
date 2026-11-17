@@ -3,6 +3,7 @@ import type { Point, Rect } from "../geometry";
 import { ease, motion, type Motion, type Seconds } from "../motion";
 import type { Child, SvgNode } from "../svg";
 import type { Shown } from "./timeline";
+import { span } from "../span";
 
 export type CameraStop = Shown & {
   /** Fit and center this region in the frame. `"all"` leaves the content unmoved. */
@@ -66,13 +67,12 @@ export function Camera({
   if (steady) {
     const hold = stops.reduce<Motion<"scale">>(
       (t, stop) => {
-        const span = stop.show;
-        const { target } = stop;
-        const scale = 1 / fit(frame, target).scale;
+        const { at } = stop.show;
+        const scale = 1 / fit(frame, stop.target).scale;
 
-        return span.at === 0
-          ? t.set({ scale })
-          : t.at(span.at).to({ scale }, stop.over ?? over, ease.inOut);
+        return at === 0
+          ? t.set({ scale }, at)
+          : t.to({ scale }, span(at, stop.over ?? over), ease.inOut);
       },
       motion({ scale: 1 }),
     );
@@ -89,8 +89,8 @@ export function Camera({
       const { at } = stop.show;
 
       return at === 0
-        ? t.set(fit(frame, stop.target))
-        : t.at(at).to(fit(frame, stop.target), stop.over ?? over, ease.inOut);
+        ? t.set(fit(frame, stop.target), at)
+        : t.to(fit(frame, stop.target), span(at, stop.over ?? over), ease.inOut);
     },
     motion({ x: 0, y: 0, scale: 1 }),
   );

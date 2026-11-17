@@ -1,5 +1,5 @@
 import { highlight } from "@svjeez/code";
-import { ease, motion, render, code, morph } from "svjeez";
+import { ease, motion, render, code, morph, span } from "svjeez";
 
 import { HEIGHT, MARGIN, WIDTH, RADIUS, boxed, css, hue, mono, theme } from "../gallery-style";
 
@@ -71,9 +71,11 @@ const m = morph([...versions, versions[0]!], { at, over: OVER });
 /** The active chip's background, sliding to each language as its code morphs in. */
 const slide = at.reduce(
   (chain, start, i) =>
-    chain
-      .at(start)
-      .to({ x: chipX(i + 1 === SOURCES.length ? 0 : i + 1) - chipX(0) }, OVER, ease.inOut),
+    chain.to(
+      { x: chipX(i + 1 === SOURCES.length ? 0 : i + 1) - chipX(0) },
+      span(start, OVER),
+      ease.inOut,
+    ),
   motion({ x: 0 }),
 );
 
