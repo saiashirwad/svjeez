@@ -3,7 +3,7 @@
   import { Code, Picture, SceneEditor, Transport } from "@svjeez/svelte";
   import { onDestroy } from "svelte";
   import "../lab/sj.css";
-  import text from "./firework.tsx?raw";
+  import text from "./wave.tsx?raw";
 
   let { first }: { first: First } = $props();
 
@@ -22,7 +22,7 @@
       {#each stats as stat (stat.label)}<span class="sj-stat"><b>{stat.value}</b> {stat.label}</span>{/each}
     </p>
   </div>
-  <div class="codebox"><Code editor={scene} file="firework.tsx" /></div>
+  <div class="codebox"><Code editor={scene} file="wave.tsx" /></div>
 </div>
 
 <style>
@@ -36,6 +36,11 @@
     gap: 0.875rem;
     align-content: start;
     min-inline-size: 0;
+  }
+
+  /* The scene draws no background of its own, so it sits on the same panel as the code in either theme. */
+  .side :global(.sj-picture) {
+    background: var(--win-bg);
   }
 
   .sj-stats {

@@ -56,7 +56,7 @@ describe("paramFor", () => {
       unit: "°",
     });
     expect(paramFor(number("draw({ at: 0.2, over: 1.2 })", 1))).toMatchObject({
-      min: 0,
+      min: 0.05,
       unit: "s",
     });
     expect(paramFor(number("m.to({ x: 9 }, span(2, 0.6))", 1))).toMatchObject({
@@ -64,15 +64,23 @@ describe("paramFor", () => {
       unit: "s",
     });
     expect(paramFor(number("m.to({ x: 9 }, span(2, 0.6))", 2))).toMatchObject({
-      min: 0,
+      min: 0.05,
       unit: "s",
     });
     expect(paramFor(number("m.to({ x: 9 }, up.next(0.6, 0.25))", 1))).toMatchObject({ unit: "s" });
     expect(paramFor(number("m.to({ x: 9 }, up.next(0.6, 0.25))", 2))).toMatchObject({ unit: "s" });
     expect(paramFor(number("m.set({ x: 9 }, 3.5)", 1))).toMatchObject({ min: 0, unit: "s" });
-    expect(paramFor(number("chain(up, 0.2, 0.4, 0.3)", 2))).toMatchObject({ min: 0, unit: "s" });
+    expect(paramFor(number("chain(up, 0.2, 0.4, 0.3)", 2))).toMatchObject({ min: 0.05, unit: "s" });
     expect(paramFor(number("m.to({ x: 9 }, span(2, 0.6))", 0)).unit).toBeUndefined();
     expect(paramFor(number("<circle r={16.5} />"))).toMatchObject({ min: 0, max: 33, step: 0.1 });
+  });
+
+  test("no drag reaches a value svjeez throws on", () => {
+    expect(paramFor(number("stagger(up, 12, 0.1)", 0))).toMatchObject({ min: 1, max: 24, step: 1 });
+    expect(paramFor(number("motion({ draw: 0.2 })"))).toMatchObject({ min: 0, max: 1, step: 0.01 });
+    expect(paramFor(number("render({ width: 480, height: 280 })"))).toMatchObject({ min: 1 });
+    expect(paramFor(number("m.to({ x: 9 }, up.next(0.6, 0.25))", 1))).toMatchObject({ min: 0.05 });
+    expect(paramFor(number("m.to({ x: 9 }, up.next(0.6, 0.25))", 2))).toMatchObject({ min: 0 });
   });
 
   test("any other number gets room on both sides, zero and negatives included", () => {

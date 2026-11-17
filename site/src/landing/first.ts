@@ -1,9 +1,9 @@
 import { getScene } from "@svjeez/astro/scene";
 import type { First } from "@svjeez/live";
 import { facts } from "../proof";
-import firework from "./firework.tsx";
+import wave from "./wave.tsx";
 
-const scene = getScene(firework);
+const scene = getScene(wave);
 
 export const first: First = {
   src: scene.src,

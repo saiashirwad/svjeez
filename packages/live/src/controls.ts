@@ -50,7 +50,7 @@ const MEANINGS: readonly {
   readonly range: (v: number) => Meaning;
 }[] = [
   {
-    names: ["opacity", "fillOpacity", "strokeOpacity", "stopOpacity", "offset", "progress"],
+    names: ["opacity", "fillOpacity", "strokeOpacity", "stopOpacity", "offset", "progress", "draw"],
     range: () => ({ min: 0, max: 1, step: 0.01 }),
   },
   {
@@ -60,32 +60,41 @@ const MEANINGS: readonly {
   {
     names: [
       "at",
-      "over",
       "delay",
-      "duration",
-      "period",
       "stagger",
       "each",
       "span#0",
-      "span#1",
-      "next#0",
       "next#1",
       "until#0",
-      "first#0",
-      "last#0",
       "shift#0",
       "pad#0",
       "pad#1",
-      "chain#*",
       "stagger#2",
       "set#1",
-      "loop#0",
       "seconds#0",
     ],
     range: (v) => ({ min: 0, max: span(v, 4), step: 0.05, unit: "s" }),
   },
   {
-    names: ["r", "rx", "ry", "width", "height", "size", "radius", "strokeWidth", "fontSize", "gap"],
+    // A length of 0 is a cut, which `.to()` and `render()` reject, so a drag stops one step short of it.
+    names: [
+      "over",
+      "duration",
+      "period",
+      "span#1",
+      "next#0",
+      "first#0",
+      "last#0",
+      "chain#*",
+      "loop#0",
+    ],
+    range: (v) => ({ min: 0.05, max: span(v, 4), step: 0.05, unit: "s" }),
+  },
+  // A canvas of 0 throws in `render()`, and a stagger of no items draws nothing.
+  { names: ["width", "height"], range: (v) => ({ min: 1, max: span(v, 10) }) },
+  { names: ["stagger#1"], range: (v) => ({ min: 1, max: span(v, 10), step: 1 }) },
+  {
+    names: ["r", "rx", "ry", "size", "radius", "strokeWidth", "fontSize", "gap"],
     range: (v) => ({ min: 0, max: span(v, 10) }),
   },
   { names: ["scale", "scaleX", "scaleY"], range: (v) => ({ min: 0, max: span(v, 2), step: 0.01 }) },
