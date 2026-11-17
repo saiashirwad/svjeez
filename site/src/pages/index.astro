@@ -99,15 +99,6 @@ const tiles = {
       alt: "Build minutes over eight releases. A green monotone line for linux draws first, then a blue straight-segment line for macos, then an orange step line for windows, and each writes its name past its last point. All three fall release by release.",
     },
     {
-      name: "map",
-      scene: live(geo),
-      cost: 20,
-      label: "Maps",
-      from: "@svjeez/geo",
-      href: pkg("geo"),
-      alt: "The world's countries fill in from west to east. Great-circle routes then arc out of London to New York, São Paulo, Lagos, Mumbai, Singapore and Tokyo, and each city is labelled as its flight lands.",
-    },
-    {
       name: "area",
       scene: live(chartsArea),
       cost: 10,
@@ -179,7 +170,7 @@ npx svjeez check scene.tsx
 npx svjeez svg scene.tsx --out scene.svg`;
 
 const files = new Map<string, FileFacts>(
-  [...Object.values(s), ...tiles.math.map((tile) => tile.scene), ...tiles.data.map((tile) => tile.scene), ...more.map((tile) => tile.scene)].map(
+  [...Object.values(s), ...tiles.math.map((tile) => tile.scene), ...tiles.data.map((tile) => tile.scene), live(geo), ...more.map((tile) => tile.scene)].map(
     (scene) => [scene.src, facts(scene)],
   ),
 );
@@ -268,6 +259,14 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
             <b>Templates</b> <a href={reference("params")}>svjeez/params</a>
           </figcaption>
         </figure>
+        <figure class="tile strip">
+          <div class="win"><LiveScene scene={live(geo)} cost={20} name="map" bar={0} alt="The world's countries fill in from west to east. Great-circle routes then arc out of London to New York, São Paulo, Lagos, Mumbai, Singapore and Tokyo, and each city is labelled as its flight lands." /></div>
+          <figcaption>
+            <b>Maps</b> <a href={pkg("geo")}>@svjeez/geo</a>
+          </figcaption>
+        </figure>
+      </div>
+      <div class="wall small c1-12">
         {
           tiles.data.map((tile) => (
             <figure class="tile">
