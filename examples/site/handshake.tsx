@@ -238,7 +238,7 @@ export const make = (tall = false): string => {
       duration: D,
       title: "A sequence diagram, acted out",
       desc: "A sequence diagram plays message by message while Blip acts it out beside it: it opens a README, sends GET hello.svg up to a sleepy CDN cloud that wakes up, catches the file as it drops into the README, watches it play, and cheers.",
-      css: css(Object.assign([CSS, ""], { raw: [CSS, ""] }), SQUASH),
+      css: css`${css.text(CSS)}${SQUASH}`,
       reducedMotion: { at: D - 1 },
     },
     <>

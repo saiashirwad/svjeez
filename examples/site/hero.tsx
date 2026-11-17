@@ -141,8 +141,7 @@ const squiggle = (x0: number, x1: number, y: number) => {
   return d;
 };
 
-const withText = (text: string, rest: ReturnType<typeof css>) =>
-  css(Object.assign([text, ""], { raw: [text, ""] }), rest);
+const withText = (text: string, rest: ReturnType<typeof css>) => css`${css.text(text)}${rest}`;
 
 export default function build(): string {
   const words = PIECES.map((p) => listing.find(p.word));

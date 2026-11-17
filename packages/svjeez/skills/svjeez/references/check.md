@@ -13,9 +13,11 @@ scene.tsx:31:9  text-overflow  warning: <text "Quarterly revenue"> runs 14 past 
 0 errors, 1 warning; loop 4s, measured at 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 3.96
 ```
 
-It exits 1 when any finding is an error, so a script can gate on it. Without `--times` it measures 0, seven times spread across the loop and just before the end. `--json` prints `{ duration, times, findings }`, each finding `{ rule, severity, message, times, element, source }`. `--color-scheme light` or `dark` picks the side of an adaptive theme. An `.svg` file works too, without sources.
+It exits 1 when any finding is an error, so a script can gate on it. Without `--times` it measures 0, seven times spread across the loop and just before the end. For scene modules, it adds up to 48 sample times from clips, parts and transition windows. `--json` prints `{ duration, times, findings }`, each finding `{ rule, severity, message, times, element, source }`. `--color-scheme light` or `dark` picks the side of an adaptive theme. An `.svg` file works too, without sources.
 
 Fix errors first. Warnings are likely faults: open a frame at the times a warning names before you change anything, and leave it when the frame shows it is what you meant.
+
+In `svjeez dev`, open **Timeline**, then click **Check layout**. A finding seeks the preview to the first reported time. `svjeez svg scene.tsx --json` also returns the compiled timeline and validation warnings as JSON and runs without Chromium. For programmatic rendering, pass `onWarning` to `render()` to receive those warnings.
 
 ## Rules
 

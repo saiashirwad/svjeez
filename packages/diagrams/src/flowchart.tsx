@@ -41,7 +41,13 @@ import {
 
 export type FlowchartEdge<N extends string> =
   | readonly [from: N, to: N]
-  | readonly [from: N, to: N, label: string];
+  | readonly [from: N, to: N, label: string]
+  | readonly [from: N, to: N, label: string | undefined, options: FlowchartEdgeOptions];
+
+export interface FlowchartEdgeOptions {
+  readonly line?: "solid" | "dotted" | "thick";
+  readonly head?: "filled" | "none";
+}
 
 export interface FlowchartGroup<N extends string> {
   readonly label: string;
@@ -115,7 +121,7 @@ export function flowchart<
   }));
 
   const roles = new Map(nodes.map((n) => [n.id, n.role]));
-  const edges = spec.edges.map(([from, to, label]) => ({ from, to, label }));
+  const edges = spec.edges.map(([from, to, label, style]) => ({ from, to, label, style }));
   // SAFETY: G's values are FlowchartGroup<keyof N & string>, and the {} default has no values to mismatch
   const groups = Object.entries((spec.groups ?? {}) as Record<string, FlowchartGroup<Id>>);
 
@@ -185,8 +191,13 @@ export function flowchart<
         </g>
       );
     }),
-    laid.lines.map((line) =>
-      arrow(line.points, { ...l, at: play && drawAt(line.from, line.to), over: drawOver }),
+    laid.lines.map((line, i) =>
+      arrow(line.points, {
+        ...l,
+        ...edges[i]!.style,
+        at: play && drawAt(line.from, line.to),
+        over: drawOver,
+      }),
     ),
   ]);
 

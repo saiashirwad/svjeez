@@ -164,6 +164,13 @@ export interface Face {
   readonly src: string;
 }
 
+export interface CaptureDiagnostic {
+  readonly code: "background" | "mask" | "backdrop" | "font-features" | "font-fallback";
+  readonly element: string;
+  readonly message: string;
+  readonly family?: string;
+}
+
 export interface Snapshot {
   readonly name?: string;
   /** Size of the picture: the element plus `pad` on every side. */
@@ -175,4 +182,6 @@ export interface Snapshot {
   readonly root: Box;
   /** The page's own web fonts that its text used. Fonts given to `browser()` aren't repeated here. */
   readonly fonts?: readonly Face[];
+  /** Known approximations, recorded only when screenshots are enabled. */
+  readonly diagnostics?: Readonly<Partial<Record<"light" | "dark", readonly CaptureDiagnostic[]>>>;
 }

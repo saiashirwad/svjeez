@@ -12,6 +12,7 @@ export {
   type Flowchart,
   type FlowchartOptions,
   type FlowchartEdge,
+  type FlowchartEdgeOptions,
   type FlowchartGroup,
 } from "./flowchart.tsx";
 

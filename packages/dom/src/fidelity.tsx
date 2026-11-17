@@ -7,6 +7,7 @@ import { launch } from "./chromium.ts";
 import { Dom } from "./draw/dom.tsx";
 import { shotName, type Recording } from "./snapshots.ts";
 import { duration, size, steady, timeline } from "./timeline.ts";
+import type { CaptureDiagnostic } from "./tree.ts";
 
 export interface FidelityOptions {
   /** How far a pixel's channel may be off (0 to 255) before it counts as different. Default 16. */
@@ -15,6 +16,10 @@ export interface FidelityOptions {
   readonly reach?: number;
   /** The share of painted pixels allowed to differ before a state fails. Default 0.01. */
   readonly threshold?: number;
+  /** Compare only snapshots with this name. */
+  readonly name?: string;
+  /** Write side-by-side images for passing states too, when out is set. */
+  readonly includePassing?: boolean;
   /** A folder for a side-by-side and diff image of each state that fails. Nothing is written without it. */
   readonly out?: string;
   readonly executablePath?: string;
@@ -29,6 +34,7 @@ export interface StateFidelity {
   readonly mismatch: number;
   readonly failed: boolean;
   readonly image?: string;
+  readonly diagnostics?: readonly CaptureDiagnostic[];
 }
 
 const SCHEMES = ["light", "dark"] as const;
@@ -151,7 +157,15 @@ const fontOf = ({ href, ...face }: Recording["fonts"][number]): FontValue => {
 
 export const fidelity = async (
   dir: string,
-  { tolerance = 16, reach = 1, threshold = 0.01, out, executablePath }: FidelityOptions = {},
+  {
+    tolerance = 16,
+    reach = 1,
+    threshold = 0.01,
+    name,
+    includePassing,
+    out,
+    executablePath,
+  }: FidelityOptions = {},
 ): Promise<StateFidelity[]> => {
   const recording: Recording = JSON.parse(await readFile(join(dir, "recording.json"), "utf8"));
   const fonts = recording.fonts.map(fontOf);
@@ -169,6 +183,12 @@ export const fidelity = async (
       const times = steady(steps);
       const { snaps } = timeline(steps);
 
+      const selected = snaps.flatMap((snap, index) =>
+        name === undefined || (snap.name ?? `#${index}`) === name ? [index] : [],
+      );
+
+      if (selected.length === 0) continue;
+
       const svg = render(
         { ...size(steps), duration: Math.max(duration(steps), 1), title: "fidelity" },
         <Dom states={steps} fonts={fonts} />,
@@ -179,20 +199,23 @@ export const fidelity = async (
 
         try {
           shots = await Promise.all(
-            snaps.map((_, i) => readFile(join(dir, shotName(card, i, scheme)))),
+            selected.map((index) => readFile(join(dir, shotName(card, index, scheme)))),
           );
         } catch {
           continue;
         }
 
         const { frames } = await renderFrames(svg, {
-          times,
+          times: selected.map((index) => times[index]!),
           colorScheme: scheme,
           background: "transparent",
           executablePath,
         });
 
         for (const [i, shot] of shots.entries()) {
+          const index = selected[i]!;
+          const snapshot = snaps[index]!;
+
           const { painted, wrong, png } = await page.evaluate(compare, {
             a: Buffer.from(shot).toString("base64"),
             b: Buffer.from(frames[i]!.png).toString("base64"),
@@ -203,11 +226,11 @@ export const fidelity = async (
 
           const mismatch = painted === 0 ? 0 : wrong / painted;
           const failed = mismatch > threshold;
-          const name = snaps[i]!.name ?? `#${i}`;
+          const name = snapshot.name ?? `#${index}`;
           let image: string | undefined;
 
-          if (failed && out && png) {
-            image = join(out, `${card}-${i}-${name.replace(/\W+/g, "_")}-${scheme}.png`);
+          if ((failed || includePassing) && out && png) {
+            image = join(out, `${card}-${index}-${name.replace(/\W+/g, "_")}-${scheme}.png`);
             await writeFile(image, Buffer.from(png, "base64"));
           }
 
@@ -215,11 +238,12 @@ export const fidelity = async (
             card,
             name,
             scheme,
-            time: times[i]!,
+            time: times[index]!,
             painted,
             mismatch,
             failed,
             image,
+            ...(snapshot.diagnostics?.[scheme] && { diagnostics: snapshot.diagnostics[scheme] }),
           });
         }
       }

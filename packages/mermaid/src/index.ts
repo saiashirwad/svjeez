@@ -12,7 +12,8 @@ import {
   type StateSpec,
   type StateTransition,
 } from "@svjeez/diagrams";
-import { parseMermaid } from "./parse.ts";
+import { fail, type Line } from "./errors.ts";
+import { readDocument } from "./parse.ts";
 import type { FlowchartDoc, FlowForm, SequenceDoc, StateDoc, StateNode } from "./types.ts";
 
 export { MermaidSyntaxError } from "./errors.ts";
@@ -52,11 +53,12 @@ const FORM_ROLES: Record<FlowForm, NodeRole> = {
   cylinder: "store",
 };
 
-const flow = (doc: FlowchartDoc, options: MermaidOptions): MermaidFlowchart => {
+const flow = (doc: FlowchartDoc, options: MermaidOptions, header: Line): MermaidFlowchart => {
   const direction = options.direction ?? (doc.direction === "TD" ? "TB" : doc.direction);
 
   if (direction === "BT" || direction === "RL")
-    throw new Error(
+    fail(
+      header,
       `mermaid() cannot draw direction ${direction}: svjeez lays flowcharts out TB or LR. Write TD or LR, or pass { direction }.`,
     );
 
@@ -68,8 +70,9 @@ const flow = (doc: FlowchartDoc, options: MermaidOptions): MermaidFlowchart => {
       groups: Object.fromEntries(
         doc.subgraphs.map((g) => [g.id, { label: g.title, nodes: g.nodes }]),
       ),
-      edges: doc.edges.map((e) =>
-        e.label === undefined ? ([e.from, e.to] as const) : ([e.from, e.to, e.label] as const),
+      edges: doc.edges.map(
+        (e) =>
+          [e.from, e.to, e.label, { line: e.line, head: e.arrow ? "filled" : "none" }] as const,
       ),
     },
     { ...options, direction },
@@ -90,7 +93,7 @@ const sequenceOf = (doc: SequenceDoc, options: MermaidOptions): MermaidSequence 
       messages: doc.items.map((m) =>
         m.kind === "note"
           ? { note: m.actor, text: m.text }
-          : ([m.from, m.to, m.text, { reply: m.line === "dashed" }] as const),
+          : ([m.from, m.to, m.text, { reply: m.line === "dashed", head: m.head }] as const),
       ),
     },
     options,
@@ -134,11 +137,11 @@ const stateOf = (doc: StateDoc, options: MermaidOptions): MermaidState => {
  * diagram's own: `theme`, `font`, `fontSize`, `x`, `y`, `anchor`, `direction` and `play`.
  */
 export function mermaid(text: string, options: MermaidOptions = {}): MermaidDiagram {
-  const doc = parseMermaid(text);
+  const { header, doc } = readDocument(text);
 
   switch (doc.kind) {
     case "flowchart":
-      return flow(doc, options);
+      return flow(doc, options, header);
     case "sequence":
       return sequenceOf(doc, options);
     case "state":

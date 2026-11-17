@@ -1,69 +1,29 @@
 # @svjeez/live
 
-Edit a [svjeez](https://www.npmjs.com/package/svjeez) scene through its own source. Every number, color and ease in the file becomes a control: drag a number sideways, pick a color, bend an ease. Each change rewrites only that literal, compiles the file in a worker, and swaps in the new picture at the moment the old one had reached. The file stays the one its author, or an AI, wrote.
-
-This package is the store and the control math, with no framework in it. [`@svjeez/svelte`](https://www.npmjs.com/package/@svjeez/svelte) and [`@svjeez/react`](https://www.npmjs.com/package/@svjeez/react) render it.
-
-## Install
+Build a source-based scene editor with a framework-free store. A change rewrites a literal in the TypeScript, compiles it in a worker and keeps the preview at its current time.
 
 ```sh
 npm i @svjeez/live svjeez
 ```
 
-A scene can import `@svjeez/charts`, `@svjeez/code`, `@svjeez/diagrams`, `@svjeez/geo`, `@svjeez/icons`, `@svjeez/math`, `@svjeez/mermaid` and `world-atlas`'s maps when the page installs them. Each loads the first time a scene imports it.
-
-## Use
-
 ```ts
 import { createEditor } from "@svjeez/live";
 
 const editor = createEditor({ text: sceneSource });
-
-editor.subscribe((state) => {
-  // state.text is the file, state.values its controls, state.picture.url the picture to show
+const unsubscribe = editor.subscribe((state) => {
+  // Render state.text, state.values and state.picture.url.
 });
 
-editor.send({ type: "set", key: "default:circle.cx", value: 64 }); // a dial, a drag or an agent
-editor.send({ type: "replace", text: rewritten }); // typing, or an AI rewrite
+editor.send({ type: "set", key: "default:circle.cx", value: 64 });
 editor.send({ type: "undo" });
+
+// When the view is disposed:
+unsubscribe();
+editor.destroy();
 ```
 
-The editor compiles nothing until something subscribes, so a server can render the code panel from `getState()` without starting a worker. When its last listener unsubscribes it pauses: it stops the worker and holds what it was asked to do, and the next subscribe carries on from there. `destroy()` ends it for good and frees its last picture.
+Read editable keys from `state.values`. Use `editor.send()` to replace source, select a control or move the clock. Compilation starts on subscription. To edit literals in a shell, use `svjeez values scene.tsx` and `svjeez set scene.tsx key=value`.
 
-### Values
+Use [@svjeez/react](https://www.npmjs.com/package/@svjeez/react) or [@svjeez/svelte](https://www.npmjs.com/package/@svjeez/svelte) for ready-made controls and `@svjeez/live/editor.css` for their styles.
 
-`state.values` lists every literal a control can edit, in source order. Each has a `key` that stays with its literal as other values change: `params.swing` for a param, `legs.1.over` for a literal inside a top-level const, else its top-level declaration and what holds it there: `default:circle.cx` for an attribute, `default:enter.0.at` for `at` in the first argument of `enter(…)`, `default:r` for a local const. A second literal held the same way gets `#1`, and one nothing nameable holds (a ternary's branch, say) is counted as in `default#3`. Adding a literal renumbers only those held the same way after it. No two literals share a key.
-
-A number's `param` gives the range a drag moves it through. A scene can declare it with `export const params` from `svjeez/params`; otherwise it is read from where the number sits, so `opacity` runs 0 to 1, `rotate` −360 to 360, and an `at`, an `over`, either number of `span(at, over)` or the time passed to `.set()` is in seconds.
-
-### Messages
-
-| Message | What it does |
-| --- | --- |
-| `{ type: "set", key, value, continues? }` | Writes a value into its literal. `continues` marks a step of a drag already under way, so undo takes the whole drag. |
-| `{ type: "replace", text }` | Replaces the file. The selected value stays selected when its key survives. |
-| `{ type: "undo" }`, `{ type: "redo" }` | Steps through the file's history. |
-| `{ type: "select", key }` | Marks the value a control has focus on, or `null`. |
-| `{ type: "play" }`, `{ type: "pause" }`, `{ type: "seek", at }` | Moves the picture's clock. The picture is shown again from that moment. |
-
-`update(state, msg)` is the same logic as a pure function, returning the next state and the commands it asks for.
-
-### Handles
-
-A scene that exports `handles` from `svjeez/params` gets a handle on its picture for each number param. `state.grips[key]` says where it sits and which way it moves, and `handleAt(grip, value)` places it for a value. A number with no declared handle gets a measured one while it is selected.
-
-### Stats
-
-`state.stats` is what the newest good compile measured: `gzip` bytes, `keyframes`, `scriptBytes` and the `ms` it took. Pass `first.stats` (`gzip`, `keyframes`, `scriptBytes`) with a picture built ahead of time and it reads those, with `ms` null, until the first compile. `statsOf(stats)` turns it into labelled values for a readout.
-
-### Gestures
-
-`scrubbing`, `following`, `bending`, `arrowNumber` and `arrowEase` turn a drag or an arrow key into `set` messages that make one undo step, and `selection(editor, key)` selects a value while its control has focus. Each framework's controls only read the DOM events and call these. `stroke(editor, key)` is the primitive under them, for a control of your own.
-
-### From a shell
-
-`svjeez values <scene.tsx>` and `svjeez set <scene.tsx> key=value …` are these values for an agent or a script, with no browser: `values` lists each key with its kind, value, range and `file:line:column` (`--json`, `--filter text`), and `set` writes through the same splice a `set` message makes, checks each value against its kind, and prints the lines it changed (`--dry-run` writes nothing). svjeez's CLI loads them from `@svjeez/live/commands`, so install this package beside it. `listValues`, `setValues` and `readSetting` there are the same steps as functions. `editFor(value, v)` from `@svjeez/live` is the edit a `set` message makes.
-
-### Styles
-
-`@svjeez/live/editor.css` styles the components both framework packages render. Theme it with the `--sj-*` custom properties it lists at the top.
+[API reference](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/edit.md)

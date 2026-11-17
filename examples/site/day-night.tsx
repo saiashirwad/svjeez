@@ -147,7 +147,7 @@ export default function build(): string {
       title: "Blip by day and by night",
       desc: "In light mode Blip bounces beside an open flower under the sun while a butterfly loops around. In dark mode, in the same file, it sleeps under the moon with its bulb as a night-light, Zs drifting up, the flower closed and fireflies blinking.",
       reducedMotion: { at: 0.3 },
-      css: cssTag(Object.assign([paint + MOODS, ""], { raw: [paint + MOODS, ""] }), SQUASH),
+      css: cssTag`${cssTag.text(paint + MOODS)}${SQUASH}`,
     },
     <>
       <rect width={W} height={H} fill={vars.sky} />

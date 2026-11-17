@@ -77,7 +77,7 @@ export default function build(): string {
       duration: D,
       title: "Planes and transformations",
       desc: "Left: a grid with the eigenvectors of A = [[3, 1], [0, 2]] and their spans. A moves the grid, the eigenvectors stretch by 3 and 2 along their own lines, then the grid moves back. Right: a grid of the strip from −1.25 to 0.75 bends under w = e^z, vertical lines rolling into circles and horizontal ones into rays.",
-      css: join`${join(Object.assign([css], { raw: [css] }))}${linear.css}`,
+      css: join`${join.text(css)}${linear.css}`,
       reducedMotion: { at: 13.5 },
     },
     <>

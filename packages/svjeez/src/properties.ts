@@ -125,4 +125,8 @@ const cssTag = (
  * Template tag for CSS that names registered properties, and `css.property(name, { syntax, inherits, initial })`, which
  * registers one with @property. The returned key animates like a channel and works in `style` and in `css`.
  */
-export const css = Object.assign(cssTag, { property });
+export const css = Object.assign(cssTag, {
+  property,
+  /** Compose existing CSS text into a template without interpreting it as a registered property. */
+  text: (text: string): Css => new Css([text]),
+});

@@ -5,7 +5,7 @@ import type { Seconds } from "./motion";
 import type { Css } from "./properties";
 import { children, element, raw, serialize, type Child } from "./svg";
 import { withSources } from "./sources";
-import { tracing } from "./traced";
+import { traceOf, type TimelineTrack } from "./traced";
 import { validateSvg } from "./validate";
 
 export interface RenderOptions {
@@ -33,6 +33,8 @@ export interface RenderOptions {
    * code. Default false, and the output is unchanged.
    */
   readonly sources?: boolean;
+  /** Receives SVG validation warnings from this render. */
+  readonly onWarning?: (warning: string) => void;
 }
 
 /** Compile motions and refs, serialize, and validate. Throws on invalid output. */
@@ -64,11 +66,14 @@ export const render = (options: RenderOptions, content: Child): string => {
       : Math.max(0, Math.min(duration, options.reducedMotion?.at ?? duration * 0.85));
 
   const nodes = children(content);
+  const trace = traceOf();
+  const timeline: TimelineTrack[] | undefined = trace?.within ? [] : undefined;
 
   const { css, ...compiled } = compile(
-    (options.sources ?? tracing()) ? nodes.map(withSources) : nodes,
+    (options.sources ?? trace?.sources) ? nodes.map(withSources) : nodes,
     { width, height, duration, playbackRate, prefix, stillAt, loop: options.loop ?? true },
     options.css,
+    timeline,
   );
 
   const rootAttributes = {
@@ -92,7 +97,7 @@ export const render = (options: RenderOptions, content: Child): string => {
   ]);
 
   const source = serialize(root);
-  const { errors } = validateSvg(source);
+  const { errors, warnings } = validateSvg(source);
 
   if (errors.length > 0)
     throw new Error(
@@ -106,5 +111,16 @@ export const render = (options: RenderOptions, content: Child): string => {
       `render() comment can't contain "--" or end in "-", since XML comments can't: got "${comment}".`,
     );
 
-  return `${comment ? `<!-- ${comment} -->\n` : ""}${source}\n`;
+  const svg = `${comment ? `<!-- ${comment} -->\n` : ""}${source}\n`;
+
+  if (options.onWarning) for (const warning of warnings) options.onWarning(warning);
+
+  trace?.onRender(svg, {
+    warnings,
+    duration,
+    loop: options.loop ?? true,
+    timeline: timeline ?? [],
+  });
+
+  return svg;
 };

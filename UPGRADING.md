@@ -1,6 +1,6 @@
 # Upgrading svjeez from 0.5 or 0.6 to 0.7
 
-Instructions for a coding agent. 0.7 is breaking and keeps no aliases: every old name below is gone. Do the steps in order, search with the quoted identifiers, and change only what the project uses.
+0.7 replaces several older APIs. Apply the steps that match your scenes, including the final 0.7 API section for motion chains and component results.
 
 ## How to use this
 
@@ -97,7 +97,7 @@ Needs judgment: `show` takes one span or a list, merges overlaps, and keeps both
 
 **13. `def.property` is `css.property`.** Same arguments. `def` keeps gradients, clips, masks, markers, symbols and filters.
 
-**14. `calc` is gone.** Search `calc.` and `calc` imported from `svjeez`. Write the CSS `calc()`, `clamp()`, `sin()` yourself inside `css`, with properties and numbers in the holes. A hole is never a string.
+**14. `calc` is gone.** Search `calc.` and `calc` imported from `svjeez`. Write the CSS `calc()`, `clamp()`, `sin()` yourself inside `css`, with properties and numbers in the holes. Wrap existing CSS text in `css.text()` when composing it with registered properties.
 
 ```ts
 - const { add, mul, length, cos } = calc;
@@ -233,7 +233,6 @@ Smaller breaking changes, in the order a typecheck will find them.
 + google.family("Geist", [{ weight: 400 }, { weight: 600, style: "italic" }], { ligatures: false })
 ```
 
-- `.to(values, span, ease?)` is gone: `.to` takes a length. Search `.to(` with a span as the second argument and write `.at(span.at).to(values, span.over, ease)`.
 - `defaultLight` is gone (use `systemLight`), and `inkPath` is no longer exported from `svjeez`.
 - `@svjeez/code`: the palettes (`tomorrow`, `solarizedDark` and the rest) come from `@svjeez/code/palettes` only, and the root no longer re-exports `CodePiece`, `CodeRole` or `CodeTokens`: import those types from `svjeez`. Importing the package no longer loads Shiki until `highlight()` runs.
 - `@svjeez/icons`: the package root is gone, so `import type { IconData } from "@svjeez/icons"` is `import type { IconData } from "svjeez"`. The `/tabler` and `/lucide` paths stay. `svjeez` is now a peer dependency, for that type.
@@ -248,7 +247,7 @@ Smaller breaking changes, in the order a typecheck will find them.
 - New exports, for typing what functions return: `FlowResult`, `TerminalResult`, `RevealResult`, `TypewriterResult`, `AppWindowResult`, `MorphResult`, `AdaptiveResult`, `VariablesResult`, `Shown`, `Heading` and `Travel`.
 - These now throw: NaN or infinite `number`, `count` and `seconds` values and bounds; non-integer `count` bounds; duplicate `choice` options; a `color()` that is not hex; a `shake` or `wiggle` `rate` that is not positive; `restyle` `at` or `onceAt` below 0 or not finite; a non-finite `valuesAt` `duration`; `<Camera>` with no stops; `fx.boil` with a `seed` that is not a whole number of 1 or more or a `rate` that is not positive; `fx.grayscale` outside 0 to 1; `readingTime` with a non-positive `wps`. `recipes` and `sampled` say `needs a positive over` where they said `positive duration`.
 
-## From 0.7 to the next release
+## Final 0.7 API
 
 ### Time is spans, and motions have no cursor
 

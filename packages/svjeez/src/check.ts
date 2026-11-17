@@ -1,4 +1,5 @@
 import type { Seconds } from "./motion";
+import type { TimelineTrack } from "./traced";
 import { openScene, type SceneOptions } from "./frames";
 import {
   measure,
@@ -28,6 +29,8 @@ export interface Finding {
 
 export interface CheckOptions extends SceneOptions {
   readonly times?: readonly Seconds[];
+  /** Extra times in the scene clock when no explicit times are supplied. */
+  readonly cues?: readonly Seconds[];
 }
 
 export interface CheckReport {
@@ -65,6 +68,44 @@ export const sampleTimes = (duration: Seconds): Seconds[] => [
   duration - Math.min(0.05, duration / 100),
 ];
 
+export const timelineCues = (timeline: readonly TimelineTrack[], duration: Seconds): Seconds[] => {
+  const samples = new Set<Seconds>();
+  const limit = 48;
+
+  const add = (t: Seconds) => {
+    const time = round(t);
+
+    if (time >= 0 && time < duration) samples.add(time);
+  };
+
+  for (const track of timeline) {
+    const period = track.period ?? duration;
+    const cycles = Math.min(limit, Math.ceil(duration / period));
+
+    for (let i = 0; i < cycles; i++) {
+      const offset = i * period;
+      let previousEnd: Seconds | undefined;
+
+      for (const { at, over } of track.spans) {
+        if (previousEnd !== undefined && previousEnd < at) add(offset + (previousEnd + at) / 2);
+        add(offset + at);
+        add(offset + at + over / 2);
+        add(offset + at + over);
+        previousEnd = at + over;
+      }
+    }
+  }
+
+  const sorted = [...samples].sort((a, b) => a - b);
+
+  return sorted.length <= limit
+    ? sorted
+    : Array.from(
+        { length: limit },
+        (_, i) => sorted[Math.round((i * (sorted.length - 1)) / (limit - 1))]!,
+      );
+};
+
 /**
  * Lint a rendered scene by measuring it in headless Chromium: elements off the canvas, text running out of its box or
  * over other text, motions that never change anything, elements showing at 0 before their entrance, and jumps at the
@@ -72,7 +113,7 @@ export const sampleTimes = (duration: Seconds): Seconds[] => [
  * Render with `sources: true` so each finding names the line that wrote the element. Needs `playwright-core`.
  */
 export const checkScene = async (svg: string, options: CheckOptions = {}): Promise<CheckReport> => {
-  for (const time of options.times ?? [])
+  for (const time of options.times ?? options.cues ?? [])
     if (!(Number.isFinite(time) && time >= 0))
       throw new Error(`checkScene() needs finite, non-negative times, got ${time}.`);
 
@@ -84,7 +125,13 @@ export const checkScene = async (svg: string, options: CheckOptions = {}): Promi
   try {
     const { duration } = scene;
     const page = await scene.evaluate(setup, undefined);
-    const times = [...new Set(options.times ?? sampleTimes(duration))];
+
+    const times = options.times
+      ? [...new Set(options.times)]
+      : [...new Set([...sampleTimes(duration), ...(options.cues ?? [])])]
+          .filter((time) => time >= 0 && (time < duration || time === 0))
+          .sort((a, b) => a - b);
+
     const step = Math.min(0.05, duration / 100);
     const boxes: PageBox[][] = [];
 

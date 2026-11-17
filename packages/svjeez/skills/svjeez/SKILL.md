@@ -10,10 +10,13 @@ svjeez turns a scene written in TypeScript into one self-contained animated SVG.
 ## Setup
 
 ```sh
+npm init -y
+npm pkg set type=module
 npm i svjeez
+npm i -D tsx typescript
 ```
 
-Add `"jsx": "react-jsx", "jsxImportSource": "svjeez", "strict": true` to `compilerOptions`, or put `/** @jsxImportSource svjeez */` and `/** @jsxRuntime automatic */` at the top of one file. A scene module exports a default function that returns the SVG string. The CLI and the preview load modules of this shape.
+For a new Node project, use the commands above. Under Bun, install only `svjeez` with `bun add svjeez`. Add `"jsx": "react-jsx", "jsxImportSource": "svjeez", "strict": true` to `compilerOptions`, or put `/** @jsxImportSource svjeez */` and `/** @jsxRuntime automatic */` at the top of one file. A scene module exports a default function that returns the SVG string. The CLI and the preview load modules of this shape.
 
 ```tsx
 import { draw, ease, enter, render } from "svjeez";
@@ -277,6 +280,7 @@ Read the one that matches the task. `svjeez skill --install` copies them.
 | Photos, web fonts, text measuring, outlined text | [`references/images-fonts.md`](references/images-fonts.md) |
 | Hand-drawn strokes, handwriting | [`references/ink.md`](references/ink.md) |
 | Code walkthroughs, terminals, annotations, camera, themes, recoloring, planes, axes and calculus (`@svjeez/math`), pausing or scrubbing a rendered SVG from a page | [`references/explainers.md`](references/explainers.md) |
+| Record and compare real HTML, React or Svelte (`@svjeez/dom`) | [`references/dom.md`](references/dom.md) |
 | Flowchart, sequence, state, tree, lanes (`@svjeez/diagrams`), `flow` | [`references/diagrams.md`](references/diagrams.md) |
 | Tabler and Lucide icons, drawn on stroke by stroke (`@svjeez/icons`) | [`references/icons.md`](references/icons.md) |
 | Real maps: countries, places, great-circle routes (`@svjeez/geo`) | [`references/geo.md`](references/geo.md) |

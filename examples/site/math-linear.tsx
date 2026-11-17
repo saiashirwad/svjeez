@@ -40,7 +40,7 @@ const area = (n: string) =>
 
 const areas = morph([area("1"), area("3")], { at: [7], over: 0.5 });
 
-const base = css(Object.assign([CSS], { raw: [CSS] }));
+const base = css.text(CSS);
 
 const fade = def.linearGradient(
   { x1: 250, x2: 312, y1: 0, y2: 0, gradientUnits: "userSpaceOnUse" },

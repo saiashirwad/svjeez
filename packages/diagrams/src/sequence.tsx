@@ -21,6 +21,7 @@ import {
   sizeOf,
   slots,
   spanOfReveals,
+  type ArrowHead,
   type DiagramOptions,
   type Diagram,
   type Labelled,
@@ -29,7 +30,12 @@ import {
 /** `[from, to, label]`, dashed with `{ reply: true }`; a message to its own sender loops on the right. */
 export type SequenceMessage<A extends string> =
   | readonly [from: A, to: A, label: string]
-  | readonly [from: A, to: A, label: string, options: { readonly reply?: boolean }]
+  | readonly [
+      from: A,
+      to: A,
+      label: string,
+      options: { readonly reply?: boolean; readonly head?: ArrowHead },
+    ]
   | { readonly note: A; readonly text: string };
 
 export interface SequenceOptions extends DiagramOptions {
@@ -75,6 +81,7 @@ export function sequence<const A extends Record<string, Labelled>>(
           to: m[1],
           text: m[2],
           reply: m[3]?.reply ?? false,
+          head: m[3]?.head,
           label: labelSize(m[2], small, font),
         },
   );
@@ -144,6 +151,7 @@ export function sequence<const A extends Record<string, Labelled>>(
           {arrow(points, {
             ...l,
             dashed: row.reply,
+            head: row.head,
             at: play && span(i).at,
             over: drawOver(i),
           })}

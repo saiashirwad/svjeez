@@ -18,8 +18,7 @@ const lines = (text: string): Line[] =>
     return trimmed === "" || trimmed.startsWith("%%") ? [] : [l];
   });
 
-/** Reads Mermaid text into a plain model, with no svjeez involved. Throws a `MermaidSyntaxError` that names the line. */
-export function parseMermaid(text: string): MermaidDoc {
+export function readDocument(text: string) {
   const all = lines(text);
   const first = all[0];
 
@@ -29,12 +28,17 @@ export function parseMermaid(text: string): MermaidDoc {
     );
   const word = /^[\w-]+/.exec(first.text)?.[0];
 
-  if (word === "flowchart" || word === "graph") return parseFlowchart(first, all.slice(1));
+  if (word === "flowchart" || word === "graph")
+    return { header: first, doc: parseFlowchart(first, all.slice(1)) };
 
-  if (word === "sequenceDiagram" && first.text === word) return parseSequence(first, all.slice(1));
+  if (word === "sequenceDiagram" && first.text === word)
+    return { header: first, doc: parseSequence(first, all.slice(1)) };
 
   if ((word === "stateDiagram" || word === "stateDiagram-v2") && first.text === word)
-    return parseState(first, all.slice(1));
+    return { header: first, doc: parseState(first, all.slice(1)) };
 
   return fail(first, `the first line must name a diagram type. ${KINDS}`);
 }
+
+/** Reads Mermaid text into a plain model, with no svjeez involved. Throws a `MermaidSyntaxError` that names the line. */
+export const parseMermaid = (text: string): MermaidDoc => readDocument(text).doc;

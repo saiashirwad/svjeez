@@ -1,70 +1,26 @@
 # @svjeez/code
 
-Syntax highlighting for [svjeez](https://www.npmjs.com/package/svjeez) scenes. `highlight()` tokenizes source text with Shiki while the scene compiles and gives back runs tagged with a role, such as `keyword`, `string` or `fn`. `code()` and `terminal()` color those roles from the scene's theme, so a highlighted snippet follows `adaptive()` and `variables()` between light and dark, and the SVG it ends up in is still one file with no JavaScript.
-
-<p align="center">
-  <a href="https://github.com/saiashirwad/svjeez/tree/main/examples/code"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/code.svg" width="640" alt="A Fibonacci function morphs between TypeScript, Python, Rust and Go, highlighted by role from the scene's theme." /></a>
-  <br /><sub>One function in four languages, highlighted by role</sub>
-</p>
-
-Shiki's own tokens carry fixed hex colors. Those ignore the scene's theme, which is why this package emits roles instead.
-
-## Install
+Highlight code at build time. Tokens carry roles such as `keyword` and `string`, so svjeez colors them with the scene’s palette.
 
 ```sh
 npm i -D @svjeez/code svjeez
 ```
 
-## Use
-
-```tsx
+```ts
 import { highlight } from "@svjeez/code";
-import { render, code, defaultDark } from "svjeez";
+import { tomorrow, tomorrowNight } from "@svjeez/code/palettes";
+import { adaptive, code, render } from "svjeez";
 
-
-const source = `export const greet = (name: string) => \`hello \${name}\`;`;
-const snippet = code(highlight(source, "ts"), { x: 24, y: 24, fontSize: 20, theme: defaultDark });
+const { theme, css } = adaptive({ light: tomorrow, dark: tomorrowNight });
+const tokens = highlight("export const greet = (name: string) => 'hello ' + name;", "ts");
+const snippet = code(tokens, { x: 20, y: 16, fontSize: 16, theme });
 
 export default () =>
-  render({ width: 640, height: 72, duration: 1, title: "Greeting" }, snippet.node);
+  render({ width: 680, height: 60, duration: 1, title: "Greeting", css }, snippet.node);
 ```
 
-`highlight(source, lang, options)` returns `CodeTokens`: one array per line, each piece either a bare string for plain text or a `[role, text]` pair. Neighbouring runs of the same role are merged. `highlight()` is synchronous, so a scene stays `export default () => render(...)`.
+Pass the tokens to `code()` or to a highlighted terminal command. Common languages are bundled. Supply additional Shiki grammars through `highlight(source, lang, { grammars })`.
 
-The options are:
+<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/code"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/code.svg" width="540" alt="A function morphs between four languages." /></a>
 
-- `tabSize`, the spaces per tab stop. `code()` lays out one column per character, so tabs become spaces. It defaults to 2.
-- `grammars`, extra Shiki grammars for languages the package does not bundle.
-
-## Palettes
-
-The editor palettes are base16 themes for `code()`, `terminal()` and `adaptive()`: `tomorrow` and `tomorrowNight`, `solarizedLight` and `solarizedDark`, `gruvboxLight` and `gruvboxDark`, `rosePineDawn` and `rosePine`. Import them from `@svjeez/code/palettes`.
-
-```tsx
-import { tomorrow, tomorrowNight } from "@svjeez/code/palettes";
-import { adaptive } from "svjeez";
-
-const { theme, css } = adaptive({ dark: tomorrowNight, light: tomorrow });
-```
-
-## Languages
-
-These names, and their aliases, work out of the box: `ts`, `tsx`, `js`, `jsx`, `json`, `css`, `html`, `bash` (also `sh`, `shell`, `zsh`), `python`, `rust`, `go`, `sql`, `yaml`, `md` and `diff`. HTML highlights its embedded CSS and JavaScript, and Markdown highlights the fenced code blocks it can resolve.
-
-For any other language, import its grammar from Shiki and pass it in:
-
-```ts
-import toml from "shiki/langs/toml.mjs";
-
-highlight('name = "svjeez"', "toml", { grammars: [toml] });
-```
-
-A name that is neither bundled nor passed throws `highlight() does not know the language "…". It knows: …`.
-
-## Roles
-
-`src/scopes.ts` is one table from TextMate scope prefix to role, and the longest matching prefix wins. A token that no row matches is plain. The roles are the ones `svjeez` defines: `plain`, `comment`, `punct`, `keyword`, `fn`, `string`, `number`, `constant`, `type`, `variable` and `tag`, plus `red`, `green`, `yellow` and `cyan` for diffs. A theme that wants a different look changes the colors of its slots, and a theme cannot tell the roles apart if it gives two slots one color.
-
-## Notes
-
-The package runs Shiki's JavaScript regex engine, so there is no WebAssembly to load, and it works on Node 20 and later and in bundlers. Importing it loads the default grammars, which takes a few hundred milliseconds once.
+[API reference](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/code.md)

@@ -1,10 +1,11 @@
 import { attributeName } from "./attributes";
 import { isRef, type AnyRef } from "./defs";
-import type { Drawn } from "./drawn";
+import type { Drawn, Part } from "./drawn";
 import { isFontValue, type FontValue } from "./font/font";
 import { escapeAttr, escapeText, kebab, num } from "./format";
 import { isMotion, type Motion, type Stack } from "./motion";
 import { Css, formatProperty, isCss, isProperty, type CssPart } from "./properties";
+import { traceOf } from "./traced";
 
 /** What JSX takes as a child. A `Drawn` (a chart, a diagram, a formula) stands for its `node`. */
 export type Child =
@@ -41,7 +42,11 @@ export type SvgNode =
     }
   | { readonly kind: "text"; readonly value: string }
   | { readonly kind: "raw"; readonly value: string }
-  | { readonly kind: "fragment"; readonly children: readonly SvgNode[] }
+  | {
+      readonly kind: "fragment";
+      readonly children: readonly SvgNode[];
+      readonly parts?: readonly Part[];
+    }
   | {
       readonly kind: "clip";
       readonly at: number;
@@ -87,10 +92,18 @@ export const children = (input: Child, preserveWhitespace = false): SvgNode[] =>
 
     if (Array.isArray(value)) return value.forEach(visit);
 
-    if (isDrawn(value)) return visit(value.node);
+    if (isDrawn(value)) {
+      if (traceOf()?.within)
+        out.push({ kind: "fragment", children: [value.node], parts: value.parts });
+      else visit(value.node);
+
+      return;
+    }
 
     if (isNode(value))
-      return value.kind === "fragment" ? value.children.forEach(visit) : void out.push(value);
+      return value.kind === "fragment" && !value.parts
+        ? value.children.forEach(visit)
+        : void out.push(value);
 
     if (!isText(value)) throw new Error(`Unsupported SVG child: ${String(value)}`);
 

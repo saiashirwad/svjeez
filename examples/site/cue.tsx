@@ -108,7 +108,7 @@ export default function build(): string {
       title: "Play with svjeez",
       desc: "The words play with svjeez are handwritten while Blip, the svjeez mascot, waddles, hops and spins, trips and picks itself up above them.",
       reducedMotion: { at: D - 0.01 },
-      css: cssTag(Object.assign([css, ""], { raw: [css, ""] }), SQUASH),
+      css: cssTag`${cssTag.text(css)}${SQUASH}`,
     },
     <>
       <Once>
