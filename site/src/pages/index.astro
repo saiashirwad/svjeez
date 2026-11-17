@@ -215,14 +215,14 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
 
     <section class="wrap sec g" id="film">
       <h2 class="c1-8 xl"><a class="anchor" href="#film">Film your real components.</a></h2>
-      <p class="sub c1-8">This is a React app, recorded: a demo file presses keys, types, clicks and drags in Chromium, and <a href={pkg("dom")}>@svjeez/dom</a> turns every state into one SVG where cards slide to their new places and counts tick over. The recording is kept in a JSON file and made again only when the demo or a file it imports changes.</p>
+      <p class="sub c1-8">A real React app, recorded by <a href={pkg("dom")}>@svjeez/dom</a>.</p>
       <figure class="c1-8"><div class="win"><LiveScene scene={s.board} cost={40} name="board" bar={0} alt="A project board, filmed from its React demo. A command palette opens and narrows to New issue as it is typed into, then turns into a dialog where a title is typed and a label and assignee are picked. The new card lands in Todo, is dragged to In progress and marked done, while the counts, the cycle's progress and the sidebar update and a toast confirms." /></div></figure>
       <Code class="code side c9-12" code={demo} lang="tsx" theme={shikiTheme} />
     </section>
 
     <section class="wrap sec g" id="play">
       <h2 class="c1-8"><a class="anchor" href="#play">Change a number, watch it move.</a></h2>
-      <p class="sub c1-8">Every value in the code has a control. Drag one and the picture changes as you drag.</p>
+      <p class="sub c1-8">Every value has a control. Drag one.</p>
       <div class="c1-12">
         <Editor client:visible first={first} />
         <p class="playlink"><a href="/play">Open the playground</a></p>
@@ -238,7 +238,7 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
     <div class="tint">
       <section class="wrap sec g" id="explain">
         <h2 class="c1-8 xl"><a class="anchor" href="#explain">Explain code, diagrams and math on one timeline.</a></h2>
-        <p class="sub c1-8">Highlight source with <a href={pkg("code")}>@svjeez/code</a>, lay out flowcharts, sequence diagrams and state machines with <a href={pkg("diagrams")}>@svjeez/diagrams</a> or from Mermaid text with <a href={pkg("mermaid")}>@svjeez/mermaid</a>, and typeset TeX with <a href={pkg("math")}>@svjeez/math</a>. They all play on the scene's one clock.</p>
+        <p class="sub c1-8"><a href={pkg("code")}>Code</a>, <a href={pkg("diagrams")}>diagrams</a>, <a href={pkg("mermaid")}>Mermaid</a> and <a href={pkg("math")}>TeX</a>, on one clock.</p>
         <div class="big c1-12">
           <div class="win">
             <LiveScene class="wide" scene={s.pipeline} cost={44} name="pipeline" alt="A flowchart from prompt to finished SVG. Blip hops along it, is puzzled at Frames ok? the first time, walks the no line back, then says yes and reaches the SVG." />
@@ -270,7 +270,7 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
 
     <section class="wrap sec g" id="data">
       <h2 class="c1-8 xl"><a class="anchor" href="#data">Draw from your data.</a></h2>
-      <p class="sub c1-8">Charts and maps are drawn from your data when the scene compiles. A scene that exports params is a template: <code>svjeez svg scene.tsx --params data.json</code> draws this week's numbers into the same picture.</p>
+      <p class="sub c1-8">One scene, new numbers: <code>svjeez svg scene.tsx --params data.json</code></p>
       <div class="wall c1-12">
         <figure class="tile strip">
           <div class="win"><LiveScene scene={s.metrics} cost={25} name="metrics" bar={0} alt="Four KPI tiles count up to their figures, then a bar chart of eight weeks of signups grows in." /></div>
@@ -301,15 +301,15 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
 
     <section class="wrap sec g" id="where">
       <h2 class="c1-8"><a class="anchor" href="#where">It plays wherever an image does.</a></h2>
-      <p class="sub c1-8">Put it in a GitHub README, a docs site or any web page with an <code>&lt;img&gt;</code> tag. For everywhere else, <code>svjeez video</code> writes the same scene as MP4 or WebM.</p>
-      <figure class="c1-6"><div class="win"><LiveScene scene={s.whereReadme} cost={8} name="readme" bar={36} alt="A README page with an animated dot-matrix image in the middle." /></div><h3>READMEs</h3><p>Add an animated SVG to a GitHub README with an <code>&lt;img&gt;</code> tag.</p></figure>
-      <figure class="c7-12"><div class="win"><LiveScene scene={s.whereDocs} cost={4} name="docs" bar={36} alt="A docs page with a diagram in which a packet travels between two boxes." /></div><h3>Docs and blogs</h3><p>Add a scene to a page as an image, without a separate player or script.</p></figure>
+      <p class="sub c1-8">READMEs, docs, any web page. <code>svjeez video</code> for the rest.</p>
+      <figure class="c1-6"><div class="win"><LiveScene scene={s.whereReadme} cost={8} name="readme" bar={36} alt="A README page with an animated dot-matrix image in the middle." /></div><h3>READMEs</h3></figure>
+      <figure class="c7-12"><div class="win"><LiveScene scene={s.whereDocs} cost={4} name="docs" bar={36} alt="A docs page with a diagram in which a packet travels between two boxes." /></div><h3>Docs and blogs</h3></figure>
     </section>
 
     <div class="tint">
       <section class="wrap sec g" id="agents">
         <h2 class="c1-8"><a class="anchor" href="#agents">Your agent can write these.</a></h2>
-        <p class="sub c1-8"><code>npx svjeez skill --install</code> gives it the scene-writing skill. <code>svjeez check</code> reports layout and timing faults as text it can read, and <code>svjeez frames --sheet</code> shows it what it made.</p>
+        <p class="sub c1-8"><code>npx svjeez skill --install</code></p>
         <div class="big c1-12">
           <div class="win desk">
             <LiveScene class="wide" scene={s.agents} cost={52} name="agents" bar={0} alt="On a desktop, a terminal installs the svjeez skill. Beside it an agent reads the skill, writes a scene, renders frames, checks them and reports the result, and a small spinner it made turns." />
@@ -337,26 +337,25 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
 
     <section class="wrap close" id="start">
       <h2><a class="anchor" href="#start">Everything you just watched was an <code>&lt;img&gt;</code>.</a></h2>
-      <p class="tally"><b>{files.size}</b> SVG files, <b>{Math.round(total("gzip") / 1024)} KB</b> gzipped all together, counting every phone cut. <b>{total("script")}</b> bytes of JavaScript inside any of them.</p>
+      <p class="tally"><b>{files.size}</b> SVG files, <b>{Math.round(total("gzip") / 1024)} KB</b> gzipped, <b>{total("script")}</b> bytes of JavaScript.</p>
       <div class="ways">
         <div class="way">
           <h3>Start yourself</h3>
           <pre class="code">{start}</pre>
-          <p>Or build scenes into your site with <a href={pkg("vite")}>@svjeez/vite</a> or <a href={pkg("astro")}>@svjeez/astro</a>, and export them as MP4 or WebM with <a href={pkg("video")}>@svjeez/video</a>.</p>
+          <p>Also: <a href={pkg("vite")}>Vite</a>, <a href={pkg("astro")}>Astro</a>, <a href={pkg("video")}>video</a>.</p>
         </div>
         <div class="way">
           <h3>Or hand it to your agent</h3>
           <pre class="code">npx svjeez skill --install</pre>
-          <p>Puts the scene-writing guide, its references and worked examples in <code>.claude/skills</code>.</p>
-        </div>
+                  </div>
       </div>
       <p class="more"><a class="btn primary" href="/examples/">Explore the examples</a><a class="btn" href="/intro">Watch the one-minute intro</a></p>
       <aside class="fine" id="fine-print" aria-labelledby="fine-print-title">
         <h3 id="fine-print-title">The fine print</h3>
         <ul>
-          <li>The core needs Node 20 or newer, or Bun. On Node, install <code>tsx</code> to load <code>.tsx</code> scenes.</li>
-          <li>Rendering frames to check your work needs <code>playwright-core</code> and Chromium, installed once per machine.</li>
-          <li>An SVG in an <code>&lt;img&gt;</code> loads nothing from outside itself, so fonts and photos are embedded into the file.</li>
+          <li>Node 20+ or Bun. On Node, install <code>tsx</code>.</li>
+          <li>Frames need <code>playwright-core</code> and Chromium.</li>
+          <li>Fonts and images are embedded in the file.</li>
         </ul>
       </aside>
     </section>
