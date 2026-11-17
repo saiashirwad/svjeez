@@ -1,6 +1,6 @@
 import { contours, plane, tex } from "@svjeez/math";
 import { tickStep, quantile } from "d3-array";
-import { draw, enter, render, span } from "svjeez";
+import { draw, enter, render, span, type Drawn } from "svjeez";
 import { rect, type Rect } from "svjeez/geometry";
 import { choice, defaults, number, text, type Values } from "svjeez/params";
 
@@ -15,6 +15,7 @@ import {
   mono,
   theme,
 } from "../../../examples/gallery-style";
+import { block } from "../block";
 import { expression, FUNCTIONS, type Expression } from "../expression";
 
 const WINDOW = { min: -1_000_000, max: 1_000_000 };
@@ -65,12 +66,15 @@ export const params = {
 
 type Kind = Values<typeof params>["kind"];
 
+/** The plot's values: everything but the heading above it. */
+export type PlotValues = Omit<Values<typeof params>, "title">;
+
 type Range = readonly [number, number];
 
 type Point = readonly [number, number];
 
 const D = 8;
-const TEX = { top: 104, size: 30 };
+const TEX = 30;
 const SAMPLES = 600;
 const PAD = 0.08;
 
@@ -91,15 +95,12 @@ const padded = ([lo, hi]: Range): Range => {
 
 const extent = (values: readonly number[]): Range => [Math.min(...values), Math.max(...values)];
 
-/** Ranges that keep one graph unit the same length on both axes, centered on `x` and `y`, filling `frame`. */
-const equal = (x: Range, y: Range, frame: Rect): [Range, Range] => {
-  const unit = Math.max((x[1] - x[0]) / frame.w, (y[1] - y[0]) / frame.h);
-  const [cx, cy] = [(x[0] + x[1]) / 2, (y[0] + y[1]) / 2];
+/** The largest frame inside `room` with one graph unit the same length on both axes, centered in it. */
+const equal = (x: Range, y: Range, room: Rect): Rect => {
+  const unit = Math.max((x[1] - x[0]) / room.w, (y[1] - y[0]) / room.h);
+  const [w, h] = [(x[1] - x[0]) / unit, (y[1] - y[0]) / unit];
 
-  return [
-    [cx - (unit * frame.w) / 2, cx + (unit * frame.w) / 2],
-    [cy - (unit * frame.h) / 2, cy + (unit * frame.h) / 2],
-  ];
+  return rect(room.x + (room.w - w) / 2, room.y + (room.h - h) / 2, w, h);
 };
 
 /** The y values worth showing: all of them, unless a few run off toward an asymptote. */
@@ -129,7 +130,7 @@ interface Curve {
   readonly equalAspect: boolean;
 }
 
-const curveOf = (p: Values<typeof params>, f: Expression, g: Expression | undefined): Curve => {
+const curveOf = (p: PlotValues, f: Expression, g: Expression | undefined): Curve => {
   const xr: Range = [p.xMin, p.xMax];
   const yr: Range = [p.yMin, p.yMax];
 
@@ -206,21 +207,23 @@ const grid = (x: Range, y: Range, frame: Rect) =>
     fontSize: 13,
   });
 
-export default function build(p: Values<typeof params> = defaults(params)): string {
+/** The equation typeset along the top of `box`, when there is one, and its graph filling the rest, drawing in. */
+export const plotBlock = (p: PlotValues, box: Rect): Drawn => {
   const f = expression(p.expression, "expression", examples[p.kind]);
   const g = p.kind === "parametric" ? expression(p.y, "y", "13*cos(t) - 5*cos(2*t)") : undefined;
-  const measured = tex(p.tex, { fontSize: TEX.size });
-  const size = Math.min(TEX.size, (TEX.size * (WIDTH - 2 * MARGIN)) / measured.width);
-  const typeset = tex(p.tex, { x: MARGIN, y: TEX.top, fontSize: size, theme });
-  const top = TEX.top + typeset.height + 28;
-  const room = rect(MARGIN + 40, top, WIDTH - 2 * MARGIN - 40, HEIGHT - MARGIN - 24 - top);
+  const measured = p.tex ? tex(p.tex, { fontSize: TEX }) : undefined;
+  const size = measured ? Math.min(TEX, (TEX * box.w) / measured.width) : 0;
+  const typeset = p.tex ? tex(p.tex, { x: box.x, y: box.y, fontSize: size, theme }) : undefined;
+  const top = typeset ? box.y + typeset.height + 28 : box.y;
+  const room = rect(box.x + 40, top, box.w - 40, box.y + box.h - 24 - top);
   const curve = curveOf(p, f, g);
-  const [x, y] = curve.equalAspect ? equal(curve.x, curve.y, room) : [curve.x, curve.y];
+  const frame = curve.equalAspect ? equal(curve.x, curve.y, room) : room;
+  const [x, y] = [curve.x, curve.y];
   const traced = { at: 1, over: 2.4 };
   const stroke = { color: color.accent, strokeWidth: 2.5, samples: SAMPLES };
 
   const shown = (() => {
-    const axes = grid(x, y, room);
+    const axes = grid(x, y, frame);
 
     if (p.kind === "function")
       return { axes, line: axes.plot(traced, (at) => f({ x: at }), stroke).node };
@@ -258,13 +261,27 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
     };
   })();
 
+  return block(
+    <>
+      {typeset && <g animation={enter(span(0.3, 0.5))}>{typeset.node}</g>}
+      <g animation={enter(span(0.5, 0.5))}>{shown.axes.node}</g>
+      {shown.line}
+    </>,
+    span(0.3, traced.at + traced.over - 0.3),
+    box,
+  );
+};
+
+export default function build(p: Values<typeof params> = defaults(params)): string {
+  const drawn = plotBlock(p, rect(MARGIN, 104, WIDTH - 2 * MARGIN, HEIGHT - MARGIN - 104));
+
   return render(
     {
       width: WIDTH,
       height: HEIGHT,
       duration: D,
       title: p.title,
-      desc: `${p.title}: the graph of ${p.tex}, drawn on a coordinate plane.`,
+      desc: `${p.title}: the graph of ${p.tex || p.expression}, drawn on a coordinate plane.`,
       reducedMotion: { at: D - 1 },
       css,
     },
@@ -272,9 +289,7 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
       <rect width="100%" height="100%" fill={color.bg} />
       <g animation={leave(D)}>
         <Title title={p.title} />
-        <g animation={enter(span(0.3, 0.5))}>{typeset.node}</g>
-        <g animation={enter(span(0.5, 0.5))}>{shown.axes.node}</g>
-        {shown.line}
+        {drawn.node}
       </g>
     </>,
   );

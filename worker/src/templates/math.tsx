@@ -1,8 +1,10 @@
 import { tex } from "@svjeez/math";
-import { render, span } from "svjeez";
+import { render, span, type Drawn } from "svjeez";
+import { rect, type Rect } from "svjeez/geometry";
 import { defaults, list, text, type Values } from "svjeez/params";
 
 import { HEIGHT, MARGIN, WIDTH, Title, css, leave, theme } from "../../../examples/gallery-style";
+import { block } from "../block";
 
 export const params = {
   title: text("Completing the square", {
@@ -37,25 +39,34 @@ const SMALLEST = 30;
 const GAP = 0.45;
 const STEP = 1.2;
 
-export default function build(p: Values<typeof params> = defaults(params)): string {
-  const measured = p.steps.map((step) => tex(step, { fontSize: BASE }));
+/** The steps written out one under another from the top of `box`, growing taller than it when they need to. */
+export const mathBlock = (steps: readonly string[], box: Rect): Drawn => {
+  const measured = steps.map((step) => tex(step, { fontSize: BASE }));
   const widest = Math.max(...measured.map((step) => step.width));
   const pitch = Math.max(...measured.map((step) => step.height)) * (1 + GAP);
-  const room = { w: WIDTH - 2 * MARGIN, h: HEIGHT - MARGIN - TOP };
 
   const fontSize = Math.min(
-    (BASE * room.w) / widest,
-    Math.max(SMALLEST, Math.min(LARGEST, (BASE * room.h) / (pitch * measured.length))),
+    (BASE * box.w) / widest,
+    Math.max(SMALLEST, Math.min(LARGEST, (BASE * box.h) / (pitch * measured.length))),
   );
 
   const row = (pitch * fontSize) / BASE;
-  const height = Math.max(HEIGHT, Math.ceil(TOP + row * measured.length + MARGIN));
 
-  const placed = p.steps.map((step, i) =>
-    tex(step, { x: MARGIN, y: TOP + i * row, fontSize, theme }),
+  const placed = steps.map((step, i) =>
+    tex(step, { x: box.x, y: box.y + i * row, fontSize, theme }),
   );
 
-  const D = 0.6 + placed.length * STEP + 3;
+  return block(
+    <>{placed.map((step, i) => step.write(span(0.6 + i * STEP, 1)).node)}</>,
+    span(0.6, (placed.length - 1) * STEP + 1),
+    rect(box.x, box.y, box.w, row * placed.length),
+  );
+};
+
+export default function build(p: Values<typeof params> = defaults(params)): string {
+  const drawn = mathBlock(p.steps, rect(MARGIN, TOP, WIDTH - 2 * MARGIN, HEIGHT - MARGIN - TOP));
+  const height = Math.max(HEIGHT, Math.ceil(TOP + drawn.bounds.h + MARGIN));
+  const D = 0.6 + p.steps.length * STEP + 3;
 
   return render(
     {
@@ -71,7 +82,7 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
       <rect width="100%" height="100%" fill={theme.base00} />
       <g animation={leave(D)}>
         <Title title={p.title} />
-        {placed.map((step, i) => step.write(span(0.6 + i * STEP, 1)).node)}
+        {drawn.node}
       </g>
     </>,
   );

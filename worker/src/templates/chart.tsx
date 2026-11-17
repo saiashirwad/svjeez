@@ -1,6 +1,6 @@
 import { chart } from "@svjeez/charts";
-import { enter, render, span, type Color } from "svjeez";
-import { rect } from "svjeez/geometry";
+import { enter, render, span, type Color, type Drawn } from "svjeez";
+import { rect, type Rect } from "svjeez/geometry";
 import { choice, defaults, list, number, text, type Values } from "svjeez/params";
 
 import {
@@ -16,6 +16,7 @@ import {
   rise,
   theme,
 } from "../../../examples/gallery-style";
+import { block } from "../block";
 
 const VALUE = { min: -1_000_000_000, max: 1_000_000_000 };
 
@@ -68,16 +69,20 @@ export const params = {
 
 const D = 9;
 
-const Key = ({ x, fill, name }: { x: number; fill: Color; name: string }) => (
+const Key = ({ x, y, fill, name }: { x: number; y: number; fill: Color; name: string }) => (
   <g>
-    <rect x={x} y={136} width={10} height={10} rx={3} fill={fill} />
-    <text x={x + 16} y={145} fontFamily={geist} fontSize={13} fill={color.dim}>
+    <rect x={x} y={y} width={10} height={10} rx={3} fill={fill} />
+    <text x={x + 16} y={y + 9} fontFamily={geist} fontSize={13} fill={color.dim}>
       {name}
     </text>
   </g>
 );
 
-export default function build(p: Values<typeof params> = defaults(params)): string {
+/** The chart's values: everything but the heading above it. */
+export type ChartValues = Pick<Values<typeof params>, "kind" | "series" | "compare" | "data">;
+
+/** The legend, when there is a second series, along the top of `box` and the chart below it, growing in. */
+export const chartBlock = (p: ChartValues, box: Rect): Drawn => {
   const labels = p.data.map((point) => point.label);
 
   if (new Set(labels).size !== labels.length)
@@ -93,7 +98,7 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
     font: mono,
     fontSize: 14,
     grid: true,
-    frame: rect(MARGIN + 72, 170, WIDTH - 2 * MARGIN - 88, 300),
+    frame: rect(box.x + 72, box.y + 34, box.w - 88, box.h - 34),
     x: { kind: "band", domain: labels },
     y: { ticks: 4 },
     data: [...first, ...second],
@@ -113,13 +118,33 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
       : plot.area(over, points, { color: fill, dots: 4 });
   };
 
+  return block(
+    <>
+      {second.length > 0 && (
+        <g animation={rise(0.5)}>
+          <Key x={box.x} y={box.y} fill={one!} name={p.series} />
+          <Key x={box.x + 40 + p.series.length * 8} y={box.y} fill={two!} name={p.compare} />
+        </g>
+      )}
+      <g animation={enter(span(0.6, 0.5))}>{plot.node}</g>
+      {draw(first, one, 0, grow.at)}
+      {second.length > 0 && draw(second, two, 1, grow.at + 0.2)}
+    </>,
+    span(0.5, grow.end + (second.length ? 0.2 : 0) - 0.5),
+    box,
+  );
+};
+
+export default function build(p: Values<typeof params> = defaults(params)): string {
+  const drawn = chartBlock(p, rect(MARGIN, 136, WIDTH - 2 * MARGIN, 334));
+
   return render(
     {
       width: WIDTH,
       height: HEIGHT,
       duration: D,
       title: p.title,
-      desc: `${p.subtitle} A ${p.kind} chart: ${p.data.map((point) => `${point.label} ${point.value}${second.length ? ` and ${point.other}` : ""}`).join(", ")}.`,
+      desc: `${p.subtitle} A ${p.kind} chart: ${p.data.map((point) => `${point.label} ${point.value}${p.compare ? ` and ${point.other}` : ""}`).join(", ")}.`,
       reducedMotion: { at: D - 1 },
       css,
     },
@@ -127,15 +152,7 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
       <rect width="100%" height="100%" fill={color.bg} />
       <g animation={leave(D)}>
         <Title title={p.title} subtitle={p.subtitle || undefined} />
-        {second.length > 0 && (
-          <g animation={rise(0.5)}>
-            <Key x={MARGIN} fill={one!} name={p.series} />
-            <Key x={MARGIN + 40 + p.series.length * 8} fill={two!} name={p.compare} />
-          </g>
-        )}
-        <g animation={enter(span(0.6, 0.5))}>{plot.node}</g>
-        {draw(first, one, 0, grow.at)}
-        {second.length > 0 && draw(second, two, 1, grow.at + 0.2)}
+        {drawn.node}
       </g>
     </>,
   );

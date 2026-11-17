@@ -1,8 +1,9 @@
-import { appWindow, render, terminal, type TerminalCommand } from "svjeez";
-import { rect } from "svjeez/geometry";
+import { appWindow, render, terminal, type Drawn, type TerminalCommand } from "svjeez";
+import { rect, type Rect } from "svjeez/geometry";
 import { choice, defaults, list, text, type Values } from "svjeez/params";
 
 import { HEIGHT, MARGIN, WIDTH, css, mono, theme } from "../../../examples/gallery-style";
+import { block } from "../block";
 
 export const params = {
   title: text("~/app", {
@@ -62,14 +63,16 @@ const session = (lines: readonly Line[]): TerminalCommand[] => {
   return commands;
 };
 
-export default function build(p: Values<typeof params> = defaults(params)): string {
-  const height = Math.max(HEIGHT, Math.ceil(2 * MARGIN + BAR + 32 + p.lines.length * LINE));
+/** The session typed into a window that fills `box`, growing taller when it has more lines. */
+export const terminalBlock = (p: Values<typeof params>, box: Rect): Drawn => {
+  const frame = rect(
+    box.x,
+    box.y,
+    box.w,
+    Math.max(box.h, Math.ceil(BAR + 32 + p.lines.length * LINE)),
+  );
 
-  const shell = appWindow(rect(MARGIN, MARGIN, WIDTH - 2 * MARGIN, height - 2 * MARGIN), {
-    theme,
-    title: p.title,
-    dots: "traffic",
-  });
+  const shell = appWindow(frame, { theme, title: p.title, dots: "traffic" });
 
   const typed = terminal(session(p.lines), {
     theme,
@@ -81,7 +84,20 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
     cps: Math.max(24, p.lines.reduce((sum, line) => sum + line.text.length, 0) / 8),
   });
 
-  const D = typed.span.end + 3;
+  return block(
+    <>
+      <g fontFamily={mono}>{shell.node}</g>
+      {typed.node}
+    </>,
+    typed.span,
+    frame,
+  );
+};
+
+export default function build(p: Values<typeof params> = defaults(params)): string {
+  const drawn = terminalBlock(p, rect(MARGIN, MARGIN, WIDTH - 2 * MARGIN, HEIGHT - 2 * MARGIN));
+  const height = drawn.bounds.h + 2 * MARGIN;
+  const D = drawn.span.end + 3;
 
   return render(
     {
@@ -90,13 +106,12 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
       duration: D,
       title: `Terminal session in ${p.title}`,
       desc: `A terminal session typed out line by line: ${p.lines.map((line) => line.text).join("; ")}.`,
-      reducedMotion: { at: typed.span.end + 1 },
+      reducedMotion: { at: drawn.span.end + 1 },
       css,
     },
     <>
       <rect width="100%" height="100%" fill={theme.base00} />
-      <g fontFamily={mono}>{shell.node}</g>
-      {typed.node}
+      {drawn.node}
     </>,
   );
 }

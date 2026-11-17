@@ -172,6 +172,21 @@ describe("in workerd", () => {
       )}`,
     ],
     ["math", "title=Pythagoras&steps=a%5E2%20%2B%20b%5E2%20%3D%20c%5E2&steps=c%20%3D%205"],
+    [
+      "deck",
+      `params=${encodeURIComponent(
+        JSON.stringify({
+          slides: [
+            { kind: "title", heading: "Hello", body: "A two-slide deck", language: "typescript" },
+            { kind: "bullets", heading: "Points", body: "One\nTwo", language: "typescript" },
+          ],
+        }),
+      )}`,
+    ],
+    [
+      "map",
+      `params=${encodeURIComponent(JSON.stringify({ title: "Two cities", measure: "", countries: [{ name: "France", value: 0 }], markers: [{ label: "Paris", lat: 48.86, lon: 2.35 }], routes: [] }))}`,
+    ],
     ["plot", "kind=function&expression=sin(x)%2Fx&y=&tex=y%20%3D%20%5Csin%20x%20%2F%20x"],
   ];
 
@@ -201,6 +216,33 @@ describe("in workerd", () => {
     expect(await response.text()).toContain(
       'expression "foo(x)" cannot be evaluated: Undefined function foo',
     );
+  });
+
+  test("a malformed deck slide is a 400 that names the slide and the format", async () => {
+    const slides = [
+      { kind: "title", heading: "Bad", body: "", language: "typescript" },
+      { kind: "chart", heading: "Broken", body: "Q1 is 42", language: "typescript" },
+    ];
+
+    const response = await get(
+      `/deck.svg?params=${encodeURIComponent(JSON.stringify({ slides }))}`,
+    );
+
+    expect(response.status).toBe(400);
+    expect(await response.text()).toContain(
+      'Slide 2 (chart): line 1 "Q1 is 42" is not "label: value".',
+    );
+  });
+
+  test("an unknown country is a 400 that suggests atlas names", async () => {
+    const countries = [{ name: "Untied States", value: 0 }];
+
+    const response = await get(
+      `/map.svg?params=${encodeURIComponent(JSON.stringify({ countries }))}`,
+    );
+
+    expect(response.status).toBe(400);
+    expect(await response.text()).toContain('Did you mean "United States of America"?');
   });
 
   test("the index puts the build on every thumbnail, and ?v= alone renders the defaults", async () => {
