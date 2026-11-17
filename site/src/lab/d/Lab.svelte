@@ -27,7 +27,6 @@
     padding-block: 0.25rem 2rem;
   }
 
-  /* Wide screens: the picture as large as the screen's height allows, the controls in a column beside it. */
   @media (width >= 60rem) {
     main {
       grid-template-columns: minmax(0, calc((100dvh - 8.5rem) * 16 / 9)) 15rem;

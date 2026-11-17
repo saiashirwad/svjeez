@@ -145,7 +145,6 @@ const lineOf = (frame: Frame, x1: number, y1: number, x2: number, y2: number, st
   />
 );
 
-/** Faint lines across the plot at the ticks. */
 export function faintGrid(frame: Frame): SvgNode {
   const { bounds, xs, ys, point } = frame;
 
@@ -157,7 +156,6 @@ export function faintGrid(frame: Frame): SvgNode {
   );
 }
 
-/** The axis lines, their ticks and the numbers at them, drawn at rest. */
 export function furniture(frame: Frame): SvgNode {
   const { bounds, xs, ys, point, cross, fontSize, font } = frame;
   const { x, y } = point(cross[0], cross[1]);

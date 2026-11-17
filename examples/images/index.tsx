@@ -32,7 +32,6 @@ const D = 10;
 const photo = await picture.load(new URL("./hills.jpg", import.meta.url));
 const emblem = await picture.load(new URL("./emblem.svg", import.meta.url));
 
-/** Four tiles across, two rows, inside the margins. The last tile spans two columns. */
 const SIZE = 168;
 const GAP = (W - 2 * MARGIN - 4 * SIZE) / 3;
 const col = (i: number) => MARGIN + i * (SIZE + GAP);
@@ -66,7 +65,6 @@ function Slot({
   );
 }
 
-/** A slow pan and zoom inside a fixed frame, out and back. */
 const pan = motion({ scale: 1, x: 0 })
   .to({ scale: 1.35, x: -24 }, span(0.5, (D - 2.6) / 2), ease.inOut)
   .to({ scale: 1, x: 0 }, span(0.5, (D - 2.6) / 2).next((D - 2.6) / 2), ease.inOut);

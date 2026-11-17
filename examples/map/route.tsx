@@ -37,7 +37,6 @@ const POINTS: Point[] = [
 const ROUTE = trace(POINTS, STEPS);
 const JOURNEY = { at: 6, over: 9.5 };
 
-/** When the traveller reaches one of the route's points. */
 const reach = (p: Point) =>
   JOURNEY.at + (JOURNEY.over * ROUTE.len[POINTS.indexOf(p) * STEPS]!) / ROUTE.total;
 
@@ -59,7 +58,6 @@ const STOPS: CameraStop[] = [
   { show: { at: 18.2, over: PAN }, target: "all" },
 ];
 
-/** The camera. The map and what moves over it each ride one, so they zoom together. */
 export const Follow = ({ children }: { children: Child }): SvgNode => (
   <Camera frame={rect(0, 0, W, H)} stops={STOPS} over={PAN}>
     {children}
@@ -93,7 +91,6 @@ function Route(): SvgNode {
   );
 }
 
-/** The glow and smoke over Mount Cinder, which loop forever. */
 function Smoke(): SvgNode {
   const { x, y } = CINDER;
   const top = y - 54;

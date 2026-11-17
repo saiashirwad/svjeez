@@ -3,10 +3,6 @@ import { css, theme } from "../style";
 import { lettering, marker } from "./cue";
 import { BLIP, GROUND, SQUASH, blip, jumps } from "./lib/blip";
 
-// The way from the home page's hero to the examples. "browse examples" is hand-lettered once, and above it Blip
-// deals out a little hand of picture cards: they fan out one by one, Blip hops onto the middle one, and the fan
-// folds back up for the next round.
-
 const W = 420;
 const H = 148;
 const D = 6;
@@ -14,7 +10,6 @@ const S = 0.38;
 const HOME = { x: 120, y: 84 };
 const DECK = { x: 270, y: 80 };
 
-/** Each card's picture: a little sun, a wave and a bar chart. */
 const PICTURES = [
   <>
     <circle cx={0} cy={-26} r={8} fill={BLIP.yellow} />

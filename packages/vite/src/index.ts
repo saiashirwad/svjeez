@@ -1,7 +1,3 @@
-// A Vite plugin for svjeez scenes. Import a scene's .tsx with `?svjeez` and get its URL and size. The scene compiles in
-// Node while the app builds, so the browser bundle never holds svjeez or the scene's code. `?svjeez&posters` adds a still
-// frame per color scheme, which needs playwright-core and a Chromium build. The dev server serves every file under
-// /_svjeez/, and the build emits each one as an asset.
 import { basename, extname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import type { Plugin, ResolvedConfig } from "vite";
@@ -91,7 +87,6 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
       if (config.command === "serve")
         return `export default ${JSON.stringify({ src, width, height, title, desc, posters } satisfies SceneModule)}`;
 
-      // A build emits each file, and Vite names it and writes its URL.
       const name = basename(file, extname(file));
 
       const emit = (fileName: string, source: string | Uint8Array) =>

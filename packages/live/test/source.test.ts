@@ -148,7 +148,6 @@ describe("edits", () => {
 
         const text = set(source, { ...literal, value });
 
-        // The file is valid JavaScript and holds the string.
         expect(new Function(`${text.replace("const s =", "return")}`)()).toBe(value);
         expect(parse(text).literals[0]).toMatchObject({ kind: "string", value });
       }

@@ -1,5 +1,3 @@
-// Scene source text in, SVG and stats out, in the browser or under bun. A page runs it in a worker, so a scene that
-// never returns costs the worker, not the page.
 import { transform } from "sucrase";
 import * as svjeez from "svjeez";
 import * as jsxDevRuntime from "svjeez/jsx-dev-runtime";
@@ -20,7 +18,6 @@ const modules = new Map<string, object>([
   ["svjeez/params", params],
 ]);
 
-// What a scene's module object holds once its code has run.
 interface SceneModule {
   default?: unknown;
   params?: unknown;
@@ -82,7 +79,6 @@ const json = async (name: string, load: () => Promise<{ default: unknown }>) => 
     : (await load()).default,
 });
 
-// The @svjeez packages and the map data load only when a scene imports them, so the worker starts small.
 const packages = new Map<string, () => Promise<object>>([
   ["@svjeez/charts", () => import("@svjeez/charts")],
   ["@svjeez/code", () => import("@svjeez/code")],
@@ -210,7 +206,6 @@ const run = async (source: string, sources: boolean): Promise<Built> => {
   await load(code);
   let scene: SceneSize | undefined;
 
-  // The scene's own render() call, read for its size and length, and with `sources` turned on when asked.
   const watched = {
     ...svjeez,
     render: (...[options, content]: Parameters<typeof svjeez.render>) => {

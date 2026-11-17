@@ -18,7 +18,6 @@ const R = 226;
 const DAY = Date.UTC(2026, 5, 21);
 const at = (t: number) => new Date(DAY + t * 3_600_000);
 
-/** The globe turns with the sun, so night stays on the right while the Earth turns under it. */
 const middle = sun(at(0))[0] + 72;
 
 const earth = globe({ at: 0, over: D }, countries, {

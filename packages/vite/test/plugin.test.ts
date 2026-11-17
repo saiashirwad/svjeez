@@ -9,7 +9,6 @@ const scratch = mkdtempSync(join(import.meta.dirname, ".scratch-"));
 
 afterAll(() => rmSync(scratch, { recursive: true, force: true }));
 
-// hero.tsx has no JSX pragma, so this also checks that a scene compiles as svjeez inside a React app.
 test("a build emits the scene and its posters, and the bundle holds only their URLs", async () => {
   const outDir = join(scratch, "dist");
   await build({ ...appConfig(), build: { outDir, emptyOutDir: true } });

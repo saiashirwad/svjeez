@@ -1,6 +1,3 @@
-// What each literal in a scene is as a control: a number with the range a drag moves it through, a color, an ease,
-// one of a choice param's options, or a text param's line. A declared param says exactly; any other literal is read from where it sits, so a
-// scene nobody annotated still gets sensible controls.
 import { ease, easeAt, type Ease, type Hex, type Point } from "svjeez";
 import type { NumberParam, Schema } from "svjeez/params";
 import { fit } from "./fit.ts";
@@ -165,8 +162,6 @@ export const valuesOf = (source: Source, schema: Schema = {}): Value[] =>
           : [];
     }
   });
-
-// ----- gestures, shared by every framework's controls
 
 /** How far a sideways drag of `dx` pixels carries a number that started at `from`. Fine drags go a fifth as far. */
 export const scrub = (param: NumberParam, from: number, dx: number, fine = false): number =>

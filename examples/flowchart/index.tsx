@@ -43,7 +43,6 @@ export const chart = flowchart(
     font: mono,
     fontSize: 16,
     play: { at: 0.2, step: 0.3 },
-    // Blue for the flow, purple for tools and memory, orange for the decision and the token.
     tints: {
       task: hue.blue,
       input: hue.blue,

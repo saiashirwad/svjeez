@@ -17,7 +17,6 @@ export const maxOf = (values: readonly number[]): number => {
   return max;
 };
 
-/** The smallest of `values`, or Infinity when there are none. */
 export const minOf = (values: readonly number[]): number => {
   let min = Infinity;
 

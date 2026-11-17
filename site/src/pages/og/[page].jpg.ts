@@ -1,5 +1,3 @@
-// Link-preview cards, one per page, each a still svjeez scene starring Blip (examples/site/lib/og.tsx). An example's
-// card shows that example's own still in a window.
 import type { APIRoute, GetStaticPaths } from "astro";
 import { renderFrames } from "svjeez/frames";
 import { card, exampleCard, type Mood } from "@examples/site/lib/og.tsx";
@@ -13,7 +11,6 @@ export const getStaticPaths = (() => [
   ...examples.map(({ name }) => ({ params: { page: `ex-${name}` } })),
 ]) satisfies GetStaticPaths;
 
-/** A scene's reduced-motion frame, the one it holds as its still, as a base64 PNG. */
 const still = async (svg: string) => {
   const held = Number(/animation-delay:-([\d.]+)s!important/.exec(svg)?.[1] ?? 0);
   const { frames } = await renderFrames(svg, { times: [held], colorScheme: "light", scale: 1 });

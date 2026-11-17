@@ -16,7 +16,6 @@ const ROW = 26;
 const X0 = 110;
 const X1 = 380;
 
-/** Every dot crosses in the same span, then cuts back home after a beat. */
 const CROSS = span(0.4, 1.6);
 
 export default function build(): string {

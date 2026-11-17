@@ -3,7 +3,6 @@ import { pts, smooth, trace } from "./curve";
 import { C, H, W, Y, n, pathSymbol, type Play } from "./kit";
 import { CINDER } from "./places";
 
-/** A coastline: an ellipse pushed in and out by a few seeded waves. */
 const shore = (
   cx: number,
   cy: number,
@@ -41,7 +40,6 @@ const LAND = [
 const landSymbol = pathSymbol(LAND);
 const landClip = def.clipPath({}, <path d={LAND} />);
 
-/** A broad nib for coasts, a fine pen for peaks, a brush for rivers and lava. */
 const COAST = tool.nib({ size: 2.6, angle: 40, thin: 0.35 });
 const PEN = tool.pen({ size: 1.05, seed: 4 });
 const CONE = tool.pen({ size: 1.5, seed: 8 });
@@ -56,11 +54,9 @@ const RIPPLES = [
   { width: 13, color: C.faded, opacity: 0.35 },
   { width: 9, color: C.sea, opacity: 1 },
 ];
-/** The shallows ripple in from the outermost ring. */
 
 const RIPPLED = stagger(span(0.2, 0.8), RIPPLES.length, 0.15);
 
-/** The sea, the rippled shallows, the land and its inked shore. */
 function Coast({ play }: { play: Play }): SvgNode {
   return (
     <>
@@ -92,7 +88,6 @@ const RIVERS: Point[][] = [
 
 const FLOWING = stagger(span(1.8, 1.4), RIVERS.length, 0.3);
 
-/** Rivers, and the lake where two of them meet, kept inside the coast. */
 function Rivers({ play }: { play: Play }): SvgNode {
   return (
     <g clipPath={landClip}>
@@ -126,7 +121,6 @@ const WOODS: Wood[] = [
   { cx: 420, cy: Y(520), rx: 40, ry: 18, seed: 26, at: 2.2 },
 ];
 
-/** Lollipop trees scattered inside an ellipse, in four bands that fade in one after another. */
 function Forest({ cx, cy, rx, ry, seed, at, play }: Wood & { play: Play }): SvgNode {
   const rand = random(seed);
   const trees: Point[] = [];
@@ -208,7 +202,6 @@ const CHAINS: Chain[] = [
   },
 ];
 
-/** A range of peaks along a line, each a little inked tent with hatching down its shadowed side. */
 function Range({ spine, seed, size = 22, spacing, at, play }: Chain & { play: Play }): SvgNode {
   const rand = random(seed);
   const line = trace(spine, 24);
@@ -262,7 +255,6 @@ function Range({ spine, seed, size = 22, spacing, at, play }: Chain & { play: Pl
   );
 }
 
-/** Mount Cinder: a cone with a rim, hatching down its flank and two lava runs. */
 function Volcano({ at, play }: { at: number; play: Play }): SvgNode {
   const { x, y } = CINDER;
   const rim = { l: x - 9, r: x + 9, y: y - 54 };
@@ -288,7 +280,6 @@ function Volcano({ at, play }: { at: number; play: Play }): SvgNode {
   );
 }
 
-/** Land, water and everything drawn on it: coast, rivers, forests, ranges and the volcano. */
 export function Terrain({ play }: { play: Play }): SvgNode {
   return (
     <>

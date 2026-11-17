@@ -2,7 +2,6 @@ import { def, motion, render, type Color } from "svjeez";
 import { CSS, chrome, skeleton } from "./lib/kit";
 import { theme } from "../style";
 
-// A README with an animated image in it: the meter plays right inside the page.
 const W = 328;
 const H = 264;
 const D = 6;

@@ -1,4 +1,3 @@
-// Serves the scroll demo on http://localhost:4826. Each request runs page.ts in a fresh process, so edits show on reload.
 const page = import.meta.dir + "/page.ts";
 
 Bun.serve({

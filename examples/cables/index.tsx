@@ -44,7 +44,6 @@ const W = WIDTH;
 const H = HEIGHT;
 const D = 18;
 
-/** When the map lets go of the loop: everything fades, and the cables draw in again from the start. */
 const OUT = D - 1;
 
 const map = project(countries, {
@@ -63,7 +62,6 @@ const C = {
   dim: theme.base04,
 } as const;
 
-/** The five cable colors, in a fixed order: the palette's own hues, so each cable stays its own and the land stays quiet. */
 const HUES = [hue.blue, hue.orange, hue.purple, hue.cyan, hue.red] as const;
 
 const cableHue = (i: number) => HUES[i % HUES.length]!;
@@ -71,7 +69,6 @@ const cableHue = (i: number) => HUES[i % HUES.length]!;
 interface Station {
   readonly name: string;
   readonly at: LonLat;
-  /** Which side of the dot its name sits on, if it shows one. */
   readonly label?: keyof typeof LABEL;
 }
 
@@ -107,12 +104,10 @@ const BOCA_RATON = station("Boca Raton", [-80.1, 26.35]);
 interface Cable {
   readonly name: string;
   readonly from: Station;
-  /** The turns the cable takes at sea, between its landings. */
   readonly via: readonly LonLat[];
   readonly to: Station;
 }
 
-/** Real systems, simplified to a few turns each. */
 const CABLES: readonly Cable[] = [
   { name: "MAREA", from: VIRGINIA_BEACH, via: [[-40, 41]], to: BILBAO },
   { name: "Grace Hopper", from: NEW_YORK, via: [[-30, 47.5]], to: BUDE },
@@ -260,12 +255,9 @@ const length = (points: readonly Point[]) =>
 interface Laid {
   readonly cable: Cable;
   readonly color: (typeof HUES)[number];
-  /** One list of points per piece: a cable across the Pacific leaves one edge of the map and comes back at the other. */
   readonly pieces: Point[][];
-  /** Each piece once, for the packets to `<use>`, with a path length of 1 so a dash is a fraction of it. */
   readonly tracks: Ref<"symbol">[];
   readonly length: number;
-  /** When it starts to draw. */
   readonly at: number;
 }
 
@@ -286,7 +278,6 @@ const laid: Laid[] = CABLES.map((cable, i) => {
 
 const DRAW = 1.4;
 
-/** The whole map leaves together before the loop starts over. */
 const leave = motion().to({ opacity: 0 }, span(OUT, 0.8), ease.inOut);
 
 const grain = def.pattern(
@@ -306,7 +297,6 @@ function Land(): SvgNode {
   );
 }
 
-/** Each cable draws on along its whole length, piece after piece, with a soft glow under it. */
 function Cables(): SvgNode {
   return (
     <g fill="none" strokeLinecap="round" strokeLinejoin="round" animation={leave}>
@@ -341,10 +331,6 @@ function Cables(): SvgNode {
   );
 }
 
-/**
- * Packets are dashes on a copy of the cable. With `pathLength` 1 a dash is a fraction of the piece, and moving its
- * offset from the start to past the end runs it along. The head and its tail share a timing and an end point.
- */
 const offset = css.property("offset", { syntax: "number", inherits: false, initial: 0 });
 
 const packetCss = css`
@@ -353,7 +339,6 @@ const packetCss = css`
   }
 `;
 
-/** A seeded random number, so the traffic is the same on every build. */
 const rand = random(11);
 
 const SPEED = 140;
@@ -373,7 +358,6 @@ function Packet({ piece, track, at, color }: PacketProps): SvgNode {
   const tail = TAIL / total;
   const head = HEAD / total;
 
-  // A round cap pokes past its dash, so each dash starts and ends a cap's width off the piece.
   const cap = 2 / total;
 
   const run = (dash: number) =>
@@ -406,7 +390,6 @@ function Packet({ piece, track, at, color }: PacketProps): SvgNode {
   );
 }
 
-/** Traffic on every cable: a packet crosses each piece in turn, and a few leave each cable while the map is up. */
 function Traffic(): SvgNode {
   return (
     <g fill="none" strokeLinecap="round" animation={leave}>
@@ -485,7 +468,6 @@ interface Journey {
   readonly icon: IconData;
   readonly cable: string;
   readonly at: number;
-  /** Runs the cable from its last landing to its first. */
   readonly reverse?: true;
 }
 
@@ -520,7 +502,6 @@ const ride = (journey: Journey) => {
   };
 };
 
-/** A journey's own trip: the cable lights up behind an icon that rides it, piece by piece, and rings where it lands. */
 function Ride({ journey }: { journey: Journey }): SvgNode {
   const { pieces, length: total, color, to } = ride(journey);
   const end = map.point(to.at);
@@ -560,10 +541,8 @@ function Ride({ journey }: { journey: Journey }): SvgNode {
   );
 }
 
-/** Where the readout for the journey under way sits, under the map on the right. */
 const READOUT = rect(W - MARGIN - 348, MARGIN, 348, 64);
 
-/** The journey under way: a colored rule, what it carries and where, and the time light takes, set large. */
 function Readout({ journey, until }: { journey: Journey; until: number }): SvgNode {
   const { color, from, to, km } = ride(journey);
   const { x, y, w, h } = READOUT;

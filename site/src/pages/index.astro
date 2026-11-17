@@ -59,8 +59,6 @@ const pkg = (name: string) => `${REPO}/tree/main/packages/${name}`;
 
 const reference = (name: string) => `${REPO}/blob/main/packages/svjeez/skills/svjeez/references/${name}.md`;
 
-// Tiles: two equal columns, so every 504-wide scene draws at close to its own size and their title bars, chips and
-// code lines all match. Each section's tiles pair up by subject.
 const tiles = {
   math: [
     {
@@ -122,8 +120,6 @@ const tiles = {
   ],
 } as const;
 
-// What fits no section above. Four small tiles, so each scene draws well under its own size: the phone cut of the
-// no-JSX scene stands in for the wide one.
 const more = [
   {
     name: "icons",
@@ -163,7 +159,6 @@ const more = [
   },
 ] as const;
 
-// What the film section shows beside the recording: the demo it was filmed from, cut to the steps that matter.
 const demo = `// board.demo.tsx, next to the app
 export const board = demo(Board, layout, () => [
   press("ControlOrMeta+k"),
@@ -184,7 +179,6 @@ const adaptive = `const { theme, css } = adaptive({
   light: systemLight,
 });
 
-// theme colors are CSS variables
 render({ css },
   <rect fill={theme.base00} />,
 );`;
@@ -194,7 +188,6 @@ npx svjeez dev scene.tsx
 npx svjeez check scene.tsx
 npx svjeez svg scene.tsx --out scene.svg`;
 
-// Every file this page shows as an <img>, counted once each: the scenes, their phone cuts, the tiles and the hero.
 const files = new Map<string, FileFacts>(
   [...Object.values(s), ...tiles.math.map((tile) => tile.scene), ...tiles.data.map((tile) => tile.scene), ...more.map((tile) => tile.scene)].map(
     (scene) => [scene.src, facts(scene)],

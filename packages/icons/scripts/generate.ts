@@ -1,5 +1,3 @@
-// Reads the upstream SVG files of @tabler/icons and lucide-static from node_modules and writes src/tabler.ts and
-// src/lucide.ts, one `export const name: IconData` per icon. Rerunning it produces no diff.
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { IconData } from "svjeez";

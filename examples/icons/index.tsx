@@ -5,7 +5,6 @@ const W = 640;
 const H = 360;
 const D = 5;
 
-/** Each color is a CSS variable, so the card follows the viewer's light or dark mode. */
 const { vars: C, css } = variables({
   dark: { page: "#10151C", card: "#18202A", line: "#26323F", ink: "#E8EEF4", accent: "#FF6B57" },
   light: { page: "#EEF1F4", card: "#FFFFFF", line: "#D5DCE3", ink: "#1B2530", accent: "#E5432D" },
@@ -17,7 +16,6 @@ const CELL = 128;
 const LEFT = (W - COLUMNS * CELL) / 2;
 const TOP = 52;
 
-/** Seven outlines draw in, left to right and top to bottom, a path at a time. */
 const outlines: readonly IconData[] = [rocket, bolt, bell, cloud, moon, search, mail];
 
 const place = (index: number) => ({

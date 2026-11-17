@@ -23,7 +23,6 @@ const W = 960;
 const H = 540;
 const D = 22;
 
-/** Each color is a CSS variable, so the map follows the viewer's light or dark mode. */
 const { vars: C, css } = variables({
   dark: {
     night: "#08121C",
@@ -58,11 +57,9 @@ interface Stop {
   readonly city: string;
   readonly country: string;
   readonly at: LonLat;
-  /** Which side of the dot the label sits on. */
   readonly side: 1 | -1;
 }
 
-/** The Kangaroo Route, Qantas and Imperial Airways' London to Sydney service, by its classic stops. */
 const STOPS: readonly Stop[] = [
   { city: "London", country: "United Kingdom", at: [-0.13, 51.5], side: -1 },
   { city: "Cairo", country: "Egypt", at: [31.24, 30.04], side: -1 },
@@ -76,7 +73,6 @@ const PAN = 1.2;
 const FLIGHT = 2.1;
 const PAUSE = 0.5;
 
-/** Each leg: where the camera frames it, how far it zooms, and when the flight leaves and lands. */
 const legs = STOPS.slice(1).map((to, i) => {
   const from = STOPS[i]!;
   const target = map.bounds([from.at, to.at], 46);
@@ -115,7 +111,6 @@ const Follow = ({ children }: { children: Child }): SvgNode => (
   </Camera>
 );
 
-/** West to east, the order each country starts to draw. */
 const west = Math.min(...map.parts.map((r) => r.centroid.x));
 const east = Math.max(...map.parts.map((r) => r.centroid.x));
 const start = (x: number) => 0.2 + (2 * (x - west)) / (east - west);
@@ -142,7 +137,6 @@ function Intro(): SvgNode {
   );
 }
 
-/** Each country on the route lights up as the plane lands in it. */
 function Visited(): SvgNode {
   const when = new Map(legs.map((leg) => [leg.to.country, leg.land]));
 
@@ -162,7 +156,6 @@ function Visited(): SvgNode {
   );
 }
 
-/** A dot and name that keep their size on screen while the camera zooms, gone by the time it pulls back. */
 function Marker({ stop, at }: { stop: Stop; at: number }): SvgNode {
   const { x, y } = map.point(stop.at);
   const origin = { transformOrigin: `${x}px ${y}px` };
@@ -231,7 +224,6 @@ function Flights(): SvgNode {
   );
 }
 
-/** The whole route at world scale, once the camera has pulled back. */
 function Summary(): SvgNode {
   const appear = motion({ opacity: 0 }).to({ opacity: 1 }, span(BACK + 0.3, 0.8));
 

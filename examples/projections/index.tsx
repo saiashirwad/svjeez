@@ -35,7 +35,6 @@ const mercator = geoMercator();
 
 const maps = reproject(countries, [mercator, geoEqualEarth()], { frame, filter });
 
-/** The same Mercator projection, left as reproject() fitted it, so the sliding outline lands on the map. */
 const flat = project(countries, { frame, projection: mercator, fit: false, filter });
 
 const greenland = maps.part("Greenland");

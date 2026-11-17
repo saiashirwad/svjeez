@@ -117,10 +117,7 @@ const load = async (
     const cached = await readFile(path);
 
     if (isFont(cached)) return cached;
-    // A torn or corrupt file: fetch it again and write it over.
-  } catch {
-    // Cold cache: fall through to the network.
-  }
+  } catch {}
 
   let bytes: Uint8Array;
 

@@ -1,7 +1,3 @@
-// The geometry and the kinematics of a Swiss lever escapement, with no drawing in it. The balance swings as a sine of
-// the beat count, its impulse pin carries the fork, and the escape wheel turns as far as the pallets let it: its angle
-// is found by testing the teeth against the two stones, so lock, impulse and drop come out of the shapes.
-
 export type P = readonly [number, number];
 
 const RAD = Math.PI / 180;
@@ -16,31 +12,23 @@ export const turn = ([x, y]: P, deg: number, [cx, cy]: P = [0, 0]): P => {
   return [cx + (x - cx) * c - (y - cy) * s, cy + (x - cx) * s + (y - cy) * c];
 };
 
-/** Teeth on the escape wheel, and the angle from one to the next. */
 export const TEETH = 15;
 export const PITCH = 360 / TEETH;
 
-/** The radius the heel of a tooth sweeps. Everything here is drawn around the escape wheel's center. */
 export const R = 60;
 const TOE = R - 2.6;
 
-/** The fork's pivot sits where the tangents at 30° either side of the line of centers cross. */
 export const FORK: P = [0, -R / Math.cos(30 * RAD)];
 
-/** From the fork's pivot to the balance staff. */
 export const REACH = 85;
 export const BALANCE: P = [0, FORK[1] - REACH];
 
-/** The impulse pin's distance from the balance staff. */
 export const PIN = 16.05;
 
-/** The fork banks this far either side of the line of centers. */
 export const BANK = 5.5;
 
-/** How far the balance swings each way. */
 export const SWING = 250;
 
-/** One tooth in the wheel's frame, pointing up: toe (the locking corner), heel, then down the back and up the front. */
 export const tooth: readonly P[] = [
   polar(TOE, 1.6),
   polar(R, -3.2),
@@ -57,7 +45,6 @@ const stone = (lock: P, letOff: P, lean: number): readonly P[] => {
   return [lock, letOff, [letOff[0] + vx, letOff[1] + vy], [lock[0] + vx, lock[1] + vy]];
 };
 
-/** The two pallet stones with the fork on the line of centers: locking corner, let-off corner, then the body. */
 export const entry = stone(polar(59.6, -32.85), polar(57.3, -27.15), -17);
 export const exit = stone(polar(59.6, 27.15), polar(57.3, 32.85), 43);
 
@@ -91,7 +78,6 @@ const overlap = (a: readonly P[], b: readonly P[]) =>
 const blocked = (w: number, psi: number) => {
   const stones = [entry, exit].map((s) => s.map((p) => turn(p, psi, FORK)));
 
-  // Only the teeth near the top can reach a stone.
   for (let k = 0; k < TEETH; k++) {
     const at = ((((w + k * PITCH + 180) % 360) + 360) % 360) - 180;
 
@@ -104,13 +90,11 @@ const blocked = (w: number, psi: number) => {
   return false;
 };
 
-/** The balance's angle at a beat count: it crosses the line of centers on every whole beat. */
 export const balanceAt = (beat: number) => SWING * Math.sin(Math.PI * beat);
 
 const lift = (theta: number) =>
   Math.atan2(PIN * Math.sin(theta * RAD), REACH - PIN * Math.cos(theta * RAD)) / RAD;
 
-/** Past this angle the pin has left the fork. */
 const ENGAGED = (() => {
   let t = 0;
 
@@ -123,14 +107,12 @@ const ENGAGED = (() => {
 export const forkAt = (theta: number) =>
   Math.abs(theta) >= ENGAGED ? -Math.sign(theta) * BANK : -lift(theta);
 
-/** Samples in the table of two beats, one full swing there and back. */
 const N = 8000;
 
 /** The wheel is light but not weightless: free of the stones it turns no faster than this, in degrees per beat. */
 const FREE = 900;
 const STEP = 0.01;
 
-/** The wheel's angle over two beats, starting half a beat before the tick on the entry stone. It gains one tooth. */
 const table = (() => {
   let w = -40;
   const out: number[] = [];
@@ -147,7 +129,6 @@ const table = (() => {
     }
   };
 
-  // Two beats to settle from wherever it starts, then the two that are kept.
   for (let i = -N; i <= N; i++) {
     const beat = 0.5 + (i / N) * 2;
     settle(forkAt(balanceAt(beat)), i === -N ? 60 : (FREE * 2) / N);
@@ -168,8 +149,6 @@ export const wheelAt = (beat: number) => {
   return table[i]! + (table[i + 1]! - table[i]!) * (at - i) + turns * span - table[0]!;
 };
 
-/** The wheel's angle at beat 0.5, which the drawing starts from. */
 export const WHEEL0 = table[0]!;
 
-/** What two beats turn the wheel by: one tooth, if the escapement works. */
 export const GAIN = table[N]! - table[0]!;

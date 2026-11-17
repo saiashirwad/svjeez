@@ -249,7 +249,6 @@ export function lanes<const L extends Record<string, Labelled>>(
     ),
   ]);
 
-  // The playhead crosses the whole track, so it is the last thing to finish.
   const span = spanOfReveals(play ? [{ at: when(0), over: out.end }] : []);
 
   /** What plays on `lane`, in scene time: its bars, its events popping in, and the links that start or end on it. */

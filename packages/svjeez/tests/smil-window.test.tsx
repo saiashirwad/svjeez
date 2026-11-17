@@ -48,7 +48,6 @@ const blur = render(
   </g>,
 );
 
-/** The same scene with the plain looping `<animate>` the compiler used to write. */
 const plain = (svg: string, values: string, keyTimes: string, dur: string, attribute = "d") =>
   svg.replace(
     /<animate id="[^"]*"[^>]*\/>(?:\s*<set[^>]*\/>)*/,
@@ -152,7 +151,6 @@ describe.if(browser)("windowed SMIL renders as the plain animate did", () => {
         expect(same(a.frames[index]!.png, b.frames[index]!.png), `at ${time}s`).toBe(true);
       });
 
-      // The scene moves, so the check compares pictures that differ.
       expect(a.frames.some((frame) => !same(frame.png, a.frames[0]!.png))).toBe(true);
     });
 

@@ -2,8 +2,6 @@ import { ease, motion, render, sampled, shake, span, spline } from "svjeez";
 
 type Point = [x: number, y: number];
 
-// A paper plane's flight, leg by leg: fly to `to` in `over` seconds.
-// feel > 0 leaves fast and lands slow; feel < 0 leaves slow and lands fast.
 const launch = 0.4;
 const from: Point = [-30, 215];
 
@@ -25,7 +23,6 @@ const trees: Point[] = [
 
 const curve = (u: number, f: number) => (f < 0 ? u ** (1 - 3 * f) : 1 - (1 - u) ** (1 + 3 * f));
 
-// A smooth route through the points: leg i runs from position i to i + 1.
 const route = spline([from, ...legs.map((leg) => leg.to)].map(([x, y]) => ({ x, y })));
 
 const fly = (t: number) => {
@@ -40,7 +37,6 @@ const fly = (t: number) => {
   return { x, y, rotate: route.angle(i + u) };
 };
 
-/** When the plane first reaches `x`, if it does. */
 const when = (x: number) => {
   for (let t = 0; t < duration - 2; t += 0.02) if (fly(t).x >= x) return t;
 

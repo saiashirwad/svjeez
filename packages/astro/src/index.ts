@@ -1,7 +1,3 @@
-// An Astro integration for svjeez scenes, built on @svjeez/vite. Import a scene's .tsx into a page and hand it to
-// <Scene> from "@svjeez/astro/Scene.astro" or getScene() from "@svjeez/astro/scene", or import it with `?svjeez`. The
-// dev server compiles it on request and reloads when it changes, and the build writes each SVG and its poster stills
-// under /_svjeez/, named by content. Posters need playwright-core and a Chromium build.
 import { dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import svjeez, { ROUTE, writeScenes } from "@svjeez/vite";

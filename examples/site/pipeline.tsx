@@ -8,7 +8,6 @@ const BAR = 40;
 
 type Point = { readonly x: number; readonly y: number };
 
-/** One leg of Blip's trip: a hop in an arc, a walk along a line, or a pause. */
 type Leg =
   | { readonly kind: "hop"; readonly to: Point; readonly over: number }
   | { readonly kind: "walk"; readonly along: readonly Point[]; readonly over: number }
@@ -39,7 +38,6 @@ const placeOf =
         return { x: at.x + (leg.to.x - at.x) * e, y: at.y + (leg.to.y - at.y) * u - lift };
       }
 
-      // A walk keeps an even pace along the line and bobs with each step.
       const runs = leg.along.slice(1).map((p, i) => ({
         a: leg.along[i]!,
         b: p,
@@ -67,7 +65,6 @@ const placeOf =
     return at;
   };
 
-/** `tall` stacks the chart top to bottom for a phone. */
 export const make = (tall = false): string => {
   const W = tall ? 358 : 1032;
   const H = tall ? 560 : 300;
@@ -101,8 +98,6 @@ export const make = (tall = false): string => {
     },
   );
 
-  // Blip follows the flow: up the chart node by node, puzzled at the decision the first time, back round the
-  // "no" line to try again, and the second time it nods and walks the "yes" line to the finished SVG.
   const top = (id: "prompt" | "agent" | "frames" | "ok" | "ship"): Point => chart.part(id).box.top;
   const no = chart.edge("ok", "agent");
   const yes = chart.edge("ok", "ship");
@@ -142,7 +137,6 @@ export const make = (tall = false): string => {
 
   const D = Math.ceil(START + length) + 3;
 
-  // The bubbles over the decision: "???" the first time, "yes!" the second.
   const bubble = (text: string, at: number, over: number, color: Color) => {
     const w = text.length * 8 + 22;
     const { x, y } = top("ok");
@@ -173,7 +167,6 @@ export const make = (tall = false): string => {
     );
   };
 
-  // A puzzled wobble at the first visit, and a happy bounce at the second.
   const puzzled = until(5);
   const sure = until(13);
 

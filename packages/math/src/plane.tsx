@@ -125,7 +125,6 @@ export type PlotOptions = SampleOptions;
 export interface Plane extends Calculus {
   /** The axis lines, ticks and numbers, and the grid when `grid` is set. It stays put through every step. */
   readonly node: SvgNode;
-  /** The plot area. */
   readonly bounds: Rect;
   /** Scene pixels of a point before any step. */
   point(x: number, y: number): Point;
@@ -246,7 +245,6 @@ const rules = (frame: Frame, bare: boolean): Vec2[][] => {
   ];
 };
 
-/** The two axis lines in graph units. */
 const axisLines = (frame: Frame): Vec2[][] => [
   [
     [frame.cross[0], frame.y[0]],
@@ -427,7 +425,6 @@ const centered = (
   ];
 };
 
-/** The box around scene points. */
 const around = (points: readonly Point[]): Rect => {
   const [xs, ys] = [points.map((p) => p.x), points.map((p) => p.y)];
   const [left, top] = [Math.min(...xs), Math.min(...ys)];

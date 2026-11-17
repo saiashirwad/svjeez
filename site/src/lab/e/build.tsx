@@ -9,7 +9,6 @@ import { breathing } from "./motions";
 import { PAPER } from "./palette";
 import { magicHat, quirkWord, stage, unitBar } from "./stage";
 
-/** The animated SVG for a genome. Parts draw in a fixed order, because each takes its random numbers in turn. */
 export const build = (g: Genome): string => {
   const cx = newCx(g);
   const { lay } = cx;

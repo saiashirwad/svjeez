@@ -36,7 +36,6 @@ export const add = (a: Vec3, b: Vec3): Vec3 => [a[0] + b[0], a[1] + b[1], a[2] +
 
 export const unit = (a: Vec3): Vec3 => scale(a, 1 / Math.hypot(...a));
 
-/** Radians between two points on the sphere. */
 export const angle = (a: Vec3, b: Vec3) => Math.atan2(Math.hypot(...cross(a, b)), dot(a, b));
 
 /** The great circle from `a` to `b`, `u` of the way along. */

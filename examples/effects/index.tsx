@@ -17,12 +17,10 @@ const W = WIDTH;
 const H = HEIGHT;
 const D = 8;
 
-/** Six tiles in a 3 by 2 grid inside the margins. Each effect is drawn in a 200 by 180 box and scaled up to fill its tile. */
 const GAP = 12;
 const TILE = { w: (W - 2 * MARGIN - 2 * GAP) / 3, h: (H - 2 * MARGIN - GAP) / 2 };
 const ZOOM = 1.15;
 
-/** Three hues: each tile is washed in its own, and its effect is drawn in the same one. */
 const C = {
   bg: color.bg,
   tile: color.panel,

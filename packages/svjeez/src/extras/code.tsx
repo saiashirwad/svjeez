@@ -102,7 +102,6 @@ export const text = (
   </text>
 );
 
-/** Line number `n`, right-aligned in the gutter. */
 export const number = (
   n: number,
   m: CodeMetrics,

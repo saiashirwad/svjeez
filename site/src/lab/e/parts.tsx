@@ -144,7 +144,6 @@ export const heads = (cx: Cx) => {
   });
 };
 
-/** A headless specimen still has something to say. */
 export const headless = (cx: Cx) => {
   const { g, lay } = cx;
   const mid = lay.frames[Math.floor(lay.frames.length / 2)]!;

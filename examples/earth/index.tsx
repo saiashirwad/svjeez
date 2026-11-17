@@ -44,7 +44,6 @@ const TILT = 22;
 /** Where the sun sits from the middle of the globe, in degrees of longitude. Negative is west, so night falls on the right. */
 const SUN_OFFSET = -72;
 
-/** The June solstice, at midnight UTC. */
 const DAY = Date.UTC(2026, 5, 21);
 const R = 190;
 
@@ -65,11 +64,6 @@ const RAD = Math.PI / 180;
 const SIN_T = Math.sin(TILT * RAD);
 const COS_T = Math.cos(TILT * RAD);
 
-/**
- * The globe turns through one custom property. `yaw` runs a full turn on the group that holds every dot, and each dot
- * reads it with its own `lat` and `lon` to find where it is, how far it faces the viewer and how much sun it gets.
- * The sun stays put relative to the viewer, so the night shading and the terminator below never move.
- */
 const yaw = css.property("yaw", { syntax: "angle", inherits: true, initial: 0 });
 const lat = css.property("lat", { syntax: "angle", inherits: true, initial: 0 });
 const lon = css.property("lon", { syntax: "angle", inherits: false, initial: 0 });
@@ -104,7 +98,6 @@ const C = {
   space: theme.base00,
   sea: theme.base01,
   deep: theme.base00,
-  /** Land is cyan, the dusk band is purple and the city lights are orange. Graticule and rim stay neutral. */
   land: hue.cyan,
   grid: theme.base05,
   dawn: hue.purple,
@@ -125,7 +118,6 @@ interface City {
   readonly label?: true;
 }
 
-/** The fifty largest cities by metro population, give or take. The labelled ones name themselves as night reaches them. */
 const CITIES: readonly City[] = [
   { name: "Tokyo", at: [139.69, 35.69], label: true },
   { name: "Delhi", at: [77.21, 28.61], label: true },
@@ -190,7 +182,6 @@ const glow = def.radialGradient(
   </>,
 );
 
-/** The sun's direction on screen, from the globe's middle, so the ocean can be lit from that side. */
 const light = map.point([sunLon, sunLat]);
 
 const ocean = def.radialGradient(
@@ -278,7 +269,6 @@ function Globe(): SvgNode {
   );
 }
 
-/** A seeded scatter of stars, a few of them breathing. */
 function Stars(): SvgNode {
   const rand = random(7);
 
@@ -291,7 +281,6 @@ function Stars(): SvgNode {
         const size = 0.4 + rand() * 0.9;
         const shine = 0.25 + rand() * 0.5;
 
-        // Dims, then brightens back right after.
         const twinkle = (dim: Spanned) =>
           motion({ opacity: shine })
             .to({ opacity: 0.08 }, dim, ease.inOut)

@@ -1,6 +1,3 @@
-// Checks the plugin package in the current directory the way users install it. It builds and lints package-dist/,
-// packs it with svjeez and every workspace package it depends on, directly or through another, installs the tarballs into a copy of
-// test/consumer/, and runs that project's `check` script, which builds the project and reads what the build wrote.
 import { execFileSync } from "node:child_process";
 import { cpSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";

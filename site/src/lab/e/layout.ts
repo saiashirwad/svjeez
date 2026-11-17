@@ -1,5 +1,3 @@
-// Where everything on a specimen sits. Pure math: the page lays the overlay's handles out from the same numbers
-// the worker draws the file from.
 import { random } from "svjeez";
 import { resample } from "svjeez/geometry";
 import { clamp } from "../util";
@@ -9,7 +7,6 @@ import type { Genome } from "./genome";
 import { add, sub, unit, W, type Pt } from "./geometry";
 import { QUIRK } from "./quirk";
 
-/** Where a tail of `length` ends, before its rotation: it curls up from 0,0 and leans right. */
 export const tailTip = (length: number): Pt => ({ x: length * 0.242, y: -length });
 
 /** One cat of body, in px before fitting. */
@@ -19,16 +16,13 @@ const FIT = { x0: 18, x1: W - 18, y0: 14, y1: 352 };
 export interface Frame {
   readonly p: Pt;
   readonly t: Pt;
-  /** The belly side. */
   readonly n: Pt;
 }
 
 export interface Head {
   readonly at: Pt;
   readonly r: number;
-  /** 1 faces right, -1 faces left. */
   readonly face: number;
-  /** Where a neck meets the body, for heads that sprout from the back. */
   readonly neck?: Pt;
 }
 
@@ -52,7 +46,6 @@ export interface Layout {
   readonly bodyEyes: readonly (Pt & { readonly r: number })[];
   readonly center: Pt;
   readonly orbit?: { readonly rx: number; readonly ry: number };
-  /** Catoid space to the 640×400 frame. */
   readonly scale: number;
   readonly ox: number;
   readonly oy: number;
@@ -62,7 +55,6 @@ export interface Layout {
 
 const WORDS = ["mrrp", "mrow", "mlem", "prrt", "nyeh", "meep", "mau", "brrp", "mreow", "hhhh"];
 
-/** What head i says. Long bodies drag the r out. */
 export const wordFor = (g: Genome, i: number) => {
   const w = WORDS[(g.seed + i * 3) % WORDS.length]!;
 
@@ -76,7 +68,6 @@ export const speechSize = (r: number) => Math.min(24, Math.max(12, r * 0.62));
 const legAngle = (d: Pt) => (Math.atan2(-d.x, d.y) * 180) / Math.PI;
 const tailAngle = (d: Pt) => (Math.atan2(d.x, -d.y) * 180) / Math.PI;
 
-/** Each spine point with its tangent and belly normal. Closed plans point the normal inward. */
 const bodyFrames = (g: Genome, spine: readonly Pt[], center: Pt): Frame[] => {
   const frames: Frame[] = spine.map((p, i) => {
     const t = unit(sub(spine[Math.min(i + 1, spine.length - 1)]!, spine[Math.max(i - 1, 0)]!));
@@ -208,7 +199,6 @@ const placeBodyEyes = ({ g, G, at }: Body): (Pt & { r: number })[] => {
 
 type Mark = Pt & { r: number };
 
-/** The parts that decide how big the specimen is, and where it sits on the floor. */
 interface Parts extends Body {
   readonly spine: readonly Pt[];
   readonly heads: readonly Head[];
@@ -217,7 +207,6 @@ interface Parts extends Body {
   readonly hr: number;
 }
 
-/** Circles around everything that can be drawn, so the fit leaves nothing outside the frame. */
 const fitFrame = (p: Parts) => {
   const { g, f, G, spine, heads, legs, tails, center, at, hr } = p;
   const marks: Mark[] = [];
@@ -300,7 +289,6 @@ const fitFrame = (p: Parts) => {
   const ys = spine.map((q) => q.y);
   const floor = Math.max(...ys) + G * 0.5 + 6;
   const top = Math.min(...ys);
-  // A melted catoid slumps to where its paws were and spreads out.
   const paws = Math.max(0, ...legs.map((l) => l.length * Math.cos((l.angle * Math.PI) / 180)));
   const puddle = floor + paws * 0.85;
 

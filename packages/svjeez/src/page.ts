@@ -52,7 +52,6 @@ export const loopLength = (root: Document | Element = document): Seconds => {
   // Emitted durations are rounded to a millisecond, so a period such as 12 / 7 = 1714.2857ms
   // arrives as 1714ms. Each of the `loop / period` cycles then drifts by up to half a
   // millisecond, and `loop` fits the period when the whole drift stays inside that budget.
-  // The helper lives in here because the function is serialized into the page.
   const fits = (loop: number, period: number): boolean => {
     const cycles = Math.round(loop / period);
 

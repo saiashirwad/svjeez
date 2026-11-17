@@ -1,6 +1,3 @@
-// The fix for a svjeez runtime error, from the "Errors and fixes" table in svjeez's scene-writing skill, so an editor
-// only ever suggests a fix the skill itself gives. The table is the data: agents read it there, and `bun run generate`
-// copies it into skill-errors.ts.
 import table from "./skill-errors.ts";
 
 export interface ErrorFix {

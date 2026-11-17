@@ -1,7 +1,4 @@
-// `svjeez dev`: a page that plays a scene with a scrubber, and builds it again when a file it may import changes.
-// Each build runs `svjeez svg` in a fresh process, because Node keeps every module it has imported: a new process is
-// the only way to read the scene, and whatever it imports, as they are now. Node's own http, fs.watch and server-sent
-// events carry the rest, so the CLI keeps no dependencies.
+// Each build runs `svjeez svg` in a fresh process: Node keeps every module it has imported, so only a new process rereads the scene.
 import { spawn } from "node:child_process";
 import { watch } from "node:fs";
 import { writeFile } from "node:fs/promises";

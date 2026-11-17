@@ -593,7 +593,6 @@ describe("playbackRate", () => {
     const [normal, fast] = [scene(1), scene(2)];
     expect(durations(normal).sort()).toEqual([1, 2, 3, 3, 6]);
     expect(durations(fast)).toEqual(durations(normal).map((d) => d / 2));
-    // The root also says what rate it plays at, for the tools that take scene seconds.
     expect(fast).toContain('data-playback-rate="2"');
     expect(fast.replace(' data-playback-rate="2"', "").replace(strip, "")).toBe(
       normal.replace(strip, ""),

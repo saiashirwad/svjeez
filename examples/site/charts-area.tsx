@@ -5,7 +5,6 @@ import { rect } from "svjeez/geometry";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
-// An area wipes on from the left, then a marker shows where the curve turned.
 const W = 504;
 const H = 340;
 const BAR = 40;

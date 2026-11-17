@@ -10,9 +10,6 @@ import { restyle } from "svjeez/page";
 import { mono, palette } from "../style.ts";
 import { view } from "./view.tsx";
 
-// The scene editor from @svjeez/live, driven by the messages a drag, a click or an agent would send, and drawn by
-// @svjeez/react's own components. Each message runs through live's pure update, and every compile and picture it asks
-// for is answered the way the runtime would answer it, so the code, the picture and the clock are the real ones.
 const here = (name: string) => fileURLToPath(new URL(name, import.meta.url));
 
 const ball = `import { ease, motion, render, span } from "svjeez";
@@ -28,12 +25,10 @@ export default function build() {
   );
 }`;
 
-/** The key of the value whose literal reads `text`, the way a control knows its own. */
 const key = (state: State, text: string) => state.values.find((v) => v.literal.text === text)!.key;
 
 const svgUri = (svg: string) => `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 
-// The clock never moves on its own here, so every message happens at page time 0.
 const resolve = async (cmd: Cmd): Promise<Msg[]> => {
   if (cmd.type === "compile")
     return [{ type: "compiled", text: cmd.text, result: await compileScene(cmd.text), now: 0 }];
@@ -44,7 +39,6 @@ const resolve = async (cmd: Cmd): Promise<Msg[]> => {
     return [{ type: "shown", picture: { ...cmd.picture, url }, now: 0 }];
   }
 
-  // Measuring a grip needs the picture in a browser; the story leaves the handles out.
   return [];
 };
 
@@ -71,7 +65,6 @@ const { html, flow } = await story(
   { hold: 0.6 },
 );
 
-/** Every `--sj-*` color the stylesheet reads, from the examples' one code palette. */
 const ROLES = {
   fg: "plain",
   muted: "muted",

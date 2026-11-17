@@ -1,6 +1,4 @@
-// Scenes run in a Vite environment of their own, apart from the app's. The app may compile .tsx as React, and a scene's
-// JSX has to compile as svjeez. The environment resolves imports the way the app's server environment does, and
-// getScene() runs inside it too, so the poster renderer uses the svjeez that the scene resolved.
+// Scenes run in their own Vite environment because the app may compile .tsx as React; getScene() runs inside it too.
 import { fileURLToPath } from "node:url";
 import {
   createRunnableDevEnvironment,

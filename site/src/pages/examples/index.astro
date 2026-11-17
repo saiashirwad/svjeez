@@ -89,10 +89,6 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
   import { type Frame, frozen, palette, PALETTECHANGE, playing, replay, show } from "../../scripts/palette";
   import { calm, scheme, THEMECHANGE } from "../../scripts/scheme";
 
-  // A card shows a still until you hover it (or, on a touch screen, until it is mostly in view).
-  // Only then does its SVG download, and it goes back to the still when you leave.
-  // The still is in the HTML, a lazy <picture> the browser sizes and fetches by itself. This script takes the card over
-  // (drops the srcset) only to swap it: to play, to rest, or when the scheme or palette is not the one the HTML shows.
   const shots = document.querySelectorAll<HTMLElement>(".shot[data-live]");
   const image = (shot: HTMLElement) => shot.querySelector("img")!;
   const systemScheme = () => (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
@@ -154,7 +150,6 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
       const proof = card.querySelector<HTMLElement>(".proof")!;
       const later = () => (clearTimeout(timer), (timer = setTimeout(() => run(shot), 150)));
 
-      // The size chip and its menu belong to the card but are not a way into the scene, so pointing at them never starts it.
       card.addEventListener("pointerenter", later);
       card.addEventListener("pointerleave", () => (clearTimeout(timer), rest(shot)));
       proof.addEventListener("pointerenter", () => clearTimeout(timer));
@@ -181,8 +176,6 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
     shots.forEach((shot) => seen.observe(shot));
   }
 
-  // The HTML shows the system's scheme and the default palette. A card near the screen gets its still redone when the
-  // reader's choice differs, and a card far from it waits until it comes near, so a change costs only what is in view.
   for (const shot of shots) shot.dataset.key = image(shot).dataset.themed === undefined ? systemScheme() : `${systemScheme()} ${DEFAULT_PALETTE}`;
 
   const near = new IntersectionObserver(

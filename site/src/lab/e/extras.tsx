@@ -3,7 +3,6 @@ import { r1, type Cx } from "./look";
 import { MELT, meltScale } from "./motions";
 import { INK } from "./palette";
 
-/** In 4D the body leaves a faint copy of itself wandering through the slice. */
 export const ghost = (cx: Cx, bodyD: string) =>
   cx.f.four && (
     <path
@@ -24,7 +23,6 @@ export const ghost = (cx: Cx, bodyD: string) =>
     />
   );
 
-/** Drops that fall off a melting body. */
 export const drips = (cx: Cx) => {
   const { lay, pal, ink, rand } = cx;
   const { G, frames } = lay;

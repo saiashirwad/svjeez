@@ -16,7 +16,6 @@ import { css, mono, theme } from "../style";
 const W = 960;
 const H = 540;
 
-/** The flow: a clockwise and a counterclockwise vortex, a source feeding a sink, and a light wind from the left. */
 const vortices = [
   { x: 190, y: 190, spin: 5200 },
   { x: 400, y: 330, spin: -6200 },

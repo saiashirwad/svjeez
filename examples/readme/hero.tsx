@@ -18,10 +18,6 @@ import {
 import { css as codeCss, theme } from "../style";
 import { GROUND, SQUASH, blip, flight, jumps } from "../site/lib/blip";
 
-// The README's hero, the share card come to life. The title sets itself, a highlighter swipes under "TypeScript", and
-// Blip hops in from the right to stand in for the full stop. A note inks on to point out that the whole thing is
-// one <img>, Blip looks the title over, and it all clears for the next round. It follows light and dark.
-
 const W = 960;
 const H = 400;
 const D = 10;
@@ -37,19 +33,16 @@ const LINES = ["Animated SVGs", "from TypeScript"];
 const LEAD = 0.96;
 const last = LINES.length - 1;
 
-// As large as fits, with Blip, about one em wide, at the end of the last line.
 const size = fitText(display, LINES, { width: W - 2 * X, max: 120, tail: 0.98 });
 
 const top = (H - size * 0.72 - last * size * LEAD) / 2 + 22;
 const base = (i: number) => top + size * 0.72 + i * size * LEAD;
 const scale = size / 150;
 
-/** Where Blip stands: the full stop's place. */
 const SPOT = { x: X + display.measure(LINES[last]!, size) + size * 0.56, y: base(last) };
 
 const leave = motion({ opacity: 1 }).to({ opacity: 0 }, span(D - 1, 0.5));
 
-/** Each word rises into place, one after another. */
 const rise = stagger(span(0.2, 0.5), LINES.join(" ").split(" ").length, 0.14);
 let next = 0;
 
@@ -69,12 +62,10 @@ const words = LINES.flatMap((line, i) => {
   });
 });
 
-/** The highlighter swipe under "TypeScript", drawn on left to right as one fat stroke. */
 const from = X + display.measure("from ", size);
 const swipeW = display.measure("TypeScript", size);
 const swipeY = base(1) - size * 0.27;
 
-/** Blip hops in from off the right edge, two hops, and lands on the spot. */
 const HOPS = [
   { land: 2.0, height: 70 },
   { land: 3.05, height: 46 },
@@ -84,7 +75,6 @@ const hop = jumps(HOPS);
 const startX = (W + 120 - SPOT.x) / scale;
 const midX = (W - 60 - SPOT.x) / scale;
 
-/** Blip drifts left only while it is in the air. */
 const slide = motion({ x: startX })
   .to({ x: midX }, flight(HOPS[0]!), ease.linear)
   .to({ x: 0 }, flight(HOPS[1]!), ease.linear);
@@ -95,14 +85,11 @@ const look = motion({ x: -5, y: 0 })
   .to({ x: -4, y: 3 }, span(6.6, 0.35), ease.inOut)
   .to({ x: -5, y: 0 }, span(D - 0.4, 0.3));
 
-/** The note and its arrow, above the title and pointing down at Blip. */
 const NOTE = "that's one <img>!";
 const noteSize = 34;
 const note = casual.path(NOTE, { size: noteSize, x: SPOT.x - 330 * (noteSize / 38), y: top - 34 });
 const head = { x: SPOT.x + 12, y: SPOT.y - size * 0.95 - 8 };
 const tail = { x: SPOT.x - 30, y: top - 46 };
-// The shaft bows 34px sideways at its middle, whatever the title's size puts between tail and head.
-// The shaft draws from 4.75s to 5.05s and the head lands as it ends, as in the original hero.
 
 export default () =>
   render(

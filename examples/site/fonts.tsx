@@ -3,7 +3,6 @@ import { Glyphs, draw, ease, enter, render, span } from "svjeez";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
-// Two real fonts embedded in one file. Each is cut down to the glyphs this card uses.
 const W = 504;
 const H = 340;
 const BAR = 40;

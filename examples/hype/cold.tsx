@@ -23,7 +23,6 @@ const opening = typewriter(
 const enterAt = opening.span.end + 0.35;
 export const COLD = { at: 0, over: enterAt + 1.9 };
 
-// Blip pops up over the prompt, watches the command type, and jumps for joy when the install lands.
 const cheer = jumps([
   { land: enterAt + 0.25, height: 60 },
   { land: enterAt + 1.35, height: 30 },

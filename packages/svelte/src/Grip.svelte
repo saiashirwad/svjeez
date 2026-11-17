@@ -28,7 +28,6 @@
     e.preventDefault();
     e.currentTarget.focus();
     e.currentTarget.setPointerCapture(e.pointerId);
-    // The picture keeps its size for the drag, so measure it once rather than on every move.
     const picture = e.currentTarget.parentElement;
     const scale = picture ? scene.width / picture.clientWidth : 1;
     drag = following(editor, value, grip, { x: e.clientX, y: e.clientY }, scale);

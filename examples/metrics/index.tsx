@@ -1,5 +1,3 @@
-// A KPI row and a bar chart as a template: the figures and the series are list params, so the same scene draws any
-// week's numbers. `svjeez svg metrics/index.tsx --params metrics/data.json` renders the ones in data.json.
 import { chart } from "@svjeez/charts";
 import { easeAt, ease, enter, motion, readout, render, span, stagger } from "svjeez";
 import { rect } from "svjeez/geometry";
@@ -58,7 +56,6 @@ const D = 9;
 const GAP = 16;
 const TILE = { y: 132, height: 104 };
 
-/** A figure as a person writes it: grouped thousands, one decimal only where the value has one. */
 const figure = (value: number, decimals: number) =>
   value.toLocaleString("en-US", {
     minimumFractionDigits: decimals,
@@ -68,7 +65,6 @@ const figure = (value: number, decimals: number) =>
 export default function build(p: Values<typeof params> = defaults(params)): string {
   const width = (WIDTH - 2 * MARGIN - GAP * (p.kpis.length - 1)) / p.kpis.length;
   const tiles = stagger(span(0.5, 0.5), p.kpis.length, 0.12);
-  // One clock for everything that grows: the figures count up while the bars rise, and they land together.
   const grow = span(0.9, 1.6);
   const axes = span(0.8, 0.5);
   const out = motion({ opacity: 1 }).to({ opacity: 0 }, span(D - 1.4, 1), ease.inOut);
@@ -76,7 +72,6 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
   const plot = chart({
     theme,
     font: mono,
-    // 16px at 960 wide is about 14px in a README, the smallest that reads.
     fontSize: 16,
     grid: true,
     frame: rect(MARGIN + 56, 272, WIDTH - 2 * MARGIN - 72, 184),

@@ -43,7 +43,6 @@ export function Compass({ x, y, play }: { x: number; y: number; play: Play }): S
 
 const RULE = tool.brush({ size: 2.4, taper: 0.45, seed: 12 });
 
-/** The title set straight on the map, left-aligned at the margin. */
 export function Cartouche({ play }: { play: Play }): SvgNode {
   const title = "The Western Reaches";
   const size = 32;

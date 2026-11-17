@@ -52,7 +52,6 @@ export interface FlowOptions {
 
 const TAIL = 8;
 
-/** Px of path the comet's tail covers. */
 const REACH = 36;
 
 export interface FlowResult {
@@ -223,7 +222,6 @@ const cut = (points: readonly Point[], distance: number): [Point[], Point[]] => 
   return [[...points], [points.at(-1)!]];
 };
 
-/** Seconds the group of particles takes to fade in. */
 const FADE_IN = 0.6;
 
 const many = (lines: readonly (readonly Point[])[], options: FlowOptions): FlowResult => {

@@ -420,7 +420,6 @@ const raysAt = (world: World, p: ConstructSpot): Vec[] => {
   return rays;
 };
 
-/** The box around scene points. */
 const around = (points: readonly { x: number; y: number }[]): Rect => {
   const [xs, ys] = [points.map((p) => p.x), points.map((p) => p.y)];
   const [left, top] = [Math.min(...xs), Math.min(...ys)];
@@ -438,7 +437,6 @@ const stand = (
   const reach =
     clearance + Math.abs(direction[0]) * (box.w / 2) + Math.abs(direction[1]) * (box.h / 2);
 
-  // Scene y points down, construction y points up.
   return { x: from.x + direction[0] * reach, y: from.y - direction[1] * reach };
 };
 

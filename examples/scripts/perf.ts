@@ -135,7 +135,6 @@ const summarize = (path: string) => {
   };
 };
 
-/** Slows the page's main thread by `rate` over CDP, and checks that it took. Returns what closes the connection. */
 const slowDown = async (rate: number) => {
   const browser = await chromium.connectOverCDP(run("get", "cdp-url").trim());
 
@@ -161,7 +160,6 @@ const KEYS = ["main", "style", "smil", "paint", "worst", "fps", "p95", "dropped"
 
 type Metrics = Record<(typeof KEYS)[number], number>;
 
-/** Each metric of `rows`, combined by `how`. */
 const combine = (rows: readonly Metrics[], how: (values: number[]) => number): Metrics =>
   // SAFETY: the entries are every key of Metrics, each with a number.
   Object.fromEntries(KEYS.map((key) => [key, how(rows.map((row) => row[key]))])) as Metrics;
@@ -172,7 +170,6 @@ const worst = (values: number[]) => Math.max(...values);
 const median = (values: number[]) =>
   [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)]!;
 
-/** One run: the mean of each metric over the windows, except that the longest task and p95 are the worst of them. */
 const playOnce = async (file: string, tag: string) => {
   const copy = join(work, `${tag}-${basename(file)}`);
   cpSync(file, copy);
@@ -214,7 +211,6 @@ const playOnce = async (file: string, tag: string) => {
   };
 };
 
-/** The median over `runs` runs, since noise only ever adds time. */
 const measure = async (file: string, tag: string) => {
   const all: Awaited<ReturnType<typeof playOnce>>[] = [];
 
@@ -235,13 +231,11 @@ const measure = async (file: string, tag: string) => {
 
 type Row = Awaited<ReturnType<typeof measure>>;
 
-/** `now`, with how it compares to `was` when that differs by 5% or more. */
 const delta = (now: number, was: number | undefined, unit = "") =>
   was === undefined || Math.abs(now - was) < 0.05 * Math.max(1, was)
     ? `${Math.round(now)}${unit}`
     : `${Math.round(now)}${unit} (${now < was ? "" : "+"}${Math.round(((now - was) / Math.max(was, 1e-9)) * 100)}%)`;
 
-/** `was → now`, or just `now` when there is no `was`. */
 const change = (now: number, was: number | undefined, digits = 0) =>
   was === undefined ? now.toFixed(digits) : `${was.toFixed(digits)} → ${now.toFixed(digits)}`;
 

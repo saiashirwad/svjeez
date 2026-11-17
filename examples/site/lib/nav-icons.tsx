@@ -1,8 +1,5 @@
 import { Pivot, chain, ease, motion, render, span, type Child } from "svjeez";
 
-// The header's icons, drawn with svjeez and inlined in the page. Each loops a little bit of business, and the page
-// keeps it paused until the pointer is over its button, so they come alive only when you go to use them.
-
 const D = 1.2;
 
 const icon = (prefix: string, title: string, size: number, children: Child) =>

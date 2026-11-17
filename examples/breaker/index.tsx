@@ -28,7 +28,6 @@ const TOKEN =
 
 const ROLES = ["comment", "string", "keyword", "number", "type", "fn", "punct"] as const;
 
-/** Just enough TypeScript highlighting for the slides. `«id:text»` names a run. */
 const highlight = (source: string): CodeTokens =>
   source.split("\n").map((line) =>
     [...line.matchAll(TOKEN)].map(({ 0: text, groups: g = {} }): CodePiece => {
@@ -87,7 +86,6 @@ const D = Math.ceil(tl.end + 1);
 
 const STAGE = rect(0, 0, W, H - 70);
 
-/** Every slide's heading, in the same place. */
 const Heading = ({
   scene,
   children,
@@ -108,7 +106,6 @@ const Heading = ({
   </text>
 );
 
-// --- code: the skeleton, then each member a block at a time, then its two halves called out
 const TOP = 110;
 const BAR_H = 40;
 
@@ -145,7 +142,6 @@ const shown = reveal(source, {
   step: 0.8,
 });
 
-// --- machine: the four states, walked once
 const machineSpec = {
   states: {
     closed: "Closed",
@@ -176,7 +172,6 @@ const walk = machine.walk(["closed", "open", "half", "open", "half", "closed"], 
   token: { style: "comet" },
 });
 
-// --- together: a sequence on the left, the machine beside it lighting as messages land
 const story = sequence(
   {
     actors: {
@@ -216,13 +211,11 @@ const synced = mini.walk(["closed", "open", "half", "closed"], {
   dwell: tl.together.at + tl.together.over - msg(10),
 });
 
-// --- backoff: v1 morphs into v2
 const before = listing(v1);
 const after = listing(v2);
 const change = tl.backoff.at + 1.5;
 const morphed = morph([before, after], { at: [change], over: 1, gutter: true });
 
-// --- recap: what call() does, as a flowchart with a request traced through it
 const recapSpec = {
   nodes: {
     call: { label: "call(fn)", role: "input" },

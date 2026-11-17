@@ -5,7 +5,6 @@ import { rect } from "svjeez/geometry";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
-// Three lines draw one after another, each in its own curve, and write their names at the end.
 const W = 504;
 const H = 340;
 const BAR = 40;

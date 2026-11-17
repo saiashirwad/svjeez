@@ -121,7 +121,6 @@ export interface ChartArea extends ChartLine {
 export interface Chart<K extends XScale["kind"] = XScale["kind"]> {
   /** The axes, ticks, labels and grid. They are drawn at once; wrap them in a motion to fade them in. */
   readonly node: SvgNode;
-  /** The plot area. */
   readonly bounds: Rect;
   /** A band's center, or a linear value, in scene px. */
   x(value: XValue<K>): number;

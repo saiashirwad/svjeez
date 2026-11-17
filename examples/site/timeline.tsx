@@ -5,8 +5,6 @@ import { CSS, chrome, outro } from "./lib/kit";
 import { GROUND, blip } from "./lib/blip";
 import { mono, theme } from "../style";
 
-// A motion() chain on the left, the same chain drawn as tracks on the right, and Blip obeying it.
-// `tall` stacks the three for a phone: the chain, Blip, then the tracks.
 const BAR = 40;
 
 const shown = `const pop = span(0.5, 0.6);
@@ -16,7 +14,6 @@ motion({ opacity: 0, y: 40 })
   .to({ scale: 1.4, rotate: -12 }, tilt)
   .to({ scale: 1, rotate: 0 }, tilt.next(0.4))`;
 
-/** What `shown` writes, on a clock that starts at `t0`. */
 const obey = (t0: number) => {
   const pop = span(t0 + 0.5, 0.6);
   const tilt = pop.next(0.5, 1.5);

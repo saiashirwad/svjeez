@@ -16,7 +16,6 @@ export const handles: Handles<typeof params> = (p) => ({
 });
 
 export default (p: Values<typeof params> = defaults(params)) => {
-  // Two rings of sparks: the outer one in your color, the inner one coral and a beat later.
   const rings = [
     { size: 1, fill: p.color, at: 0.8 },
     { size: 0.55, fill: "#FF8C6B" as const, at: 0.9 },

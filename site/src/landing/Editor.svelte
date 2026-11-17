@@ -7,11 +7,8 @@
 
   let { first }: { first: First } = $props();
 
-  // The editor reads its first picture once, when the page makes it.
-  // svelte-ignore state_referenced_locally
   const scene = new SceneEditor(text, { first });
 
-  // The readout's numbers.
   const stats = $derived(scene.state.stats ? statsOf(scene.state.stats) : []);
 
   onDestroy(scene.destroy);
@@ -67,7 +64,6 @@
       gap: var(--gap);
     }
 
-    /* The whole source shows; the picture stays in view beside it while the page scrolls. */
     .side {
       position: sticky;
       inset-block-start: 1rem;

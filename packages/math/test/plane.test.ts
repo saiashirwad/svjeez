@@ -187,7 +187,6 @@ describe("what a plane draws", () => {
     expect(near(moved.bounds, shear.map(0, 1))).toBe(true);
     expect([moved.span.at, moved.span.end]).toEqual([1, 3]);
     expect([grown.span.at, grown.span.end]).toEqual([1, expect.closeTo(4.6, 9)]);
-    // The label sits past the tip, turned up off the shaft.
     expect(grown.bounds.y).toBeLessThan(still.bounds.y);
     expect(still.parts).toEqual([]);
   });

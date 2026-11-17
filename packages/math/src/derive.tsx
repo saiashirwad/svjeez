@@ -18,7 +18,6 @@ import { tex, type Tex } from "./index.ts";
 
 /** One line of a derivation: TeX, and what was done to reach it. */
 export interface DeriveStep {
-  /** The line's TeX. */
   readonly tex: string;
   /** TeX typeset small beside the line with an arrow, such as `\div 2 \text{ both sides}`. Ignored on the first line. */
   readonly note?: string;
@@ -99,7 +98,6 @@ export function derive(
   const lineHeight = options.lineHeight ?? fontSize * 1.9;
   const list = steps.map((s): DeriveStep => (isText(s) ? { tex: s } : s));
 
-  // The changes are spaced so the last one ends with the span; a single line just fades in.
   const every = list.length > 1 ? (total - over) / (list.length - 1) : total;
 
   if (list.length === 0 || !(every >= over) || !(over > 0) || !(fontSize > 0))

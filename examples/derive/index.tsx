@@ -17,7 +17,6 @@ const steps = [
   { tex: String.raw`x = 2 \pm 3`, note: String.raw`+ 2 \text{ both sides}` },
 ];
 
-// Six changes two seconds apart, the last one 0.8s long.
 const proof = derive({ at: 0.6, over: 12.8 }, steps, {
   change: 0.8,
   x: 330,

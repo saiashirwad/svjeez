@@ -3,20 +3,14 @@ import { ease, motion, render, sampled, span } from "svjeez";
 import { COLORS, lightAt, skyAt } from "./feel";
 import { spring } from "./physics";
 
-/** The feel the instruments set. */
 export const params = {
   bpm: number(104, { min: 50, max: 200, step: 1 }),
-  /** Beats between one gummy's hop and the next. Negative runs right to left. */
   stagger: number(0.25, { min: -0.8, max: 0.8 }),
-  /** How far a landing squashes. */
   squash: number(0.34, { min: 0.04, max: 0.6 }),
   /** The landing spring's natural frequency in wobbles per second. */
   hz: number(3.2, { min: 0.8, max: 8, step: 0.1 }),
-  /** Damping ratio, from jelly to dead. */
   damping: number(0.16, { min: 0.03, max: 0.9 }),
-  /** The fall. The rise is the same curve run backwards. */
   fall: easing(ease.bezier(0.5, 0, 0.9, 0.5)),
-  /** Hour of the day. */
   hour: number(14, { min: 0, max: 24 }),
 };
 
@@ -26,7 +20,6 @@ const W = 64;
 const H = 64;
 const GROUND = 300;
 
-/** The five gummies hopping in turn, as the instruments set them. */
 export default (feel: Feel = defaults(params)): string => {
   const beat = 60 / feel.bpm;
   const stagger = feel.stagger * beat;
@@ -36,7 +29,6 @@ export default (feel: Feel = defaults(params)): string => {
   const rise = ease.bezier(1 - x2, 1 - y2, 1 - x1, 1 - y1);
   const light = lightAt(feel.hour);
 
-  /** Squash at time t: anticipation, stretch in the air, then the landing spring. */
   const squash = (t: number, launch: number, land: number) => {
     if (t < launch - beat / 4) return 0;
 

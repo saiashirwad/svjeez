@@ -68,7 +68,6 @@ describe("google", () => {
     for (const family of ["Open Sans", "Open-Sans", "Open_Sans"])
       await google(family).catch(() => {});
 
-    // Each family's error names its own path
     const paths = new Set<string>();
 
     for (const family of ["Open Sans", "Open-Sans", "Open_Sans"])

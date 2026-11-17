@@ -3,8 +3,6 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-// Checks the packed tarball the way users install it: lint the manifest, check type resolution, then type-check and load a consumer.
-// CI runs it on Node 20 and 22 through tsx.
 const ROOT = join(import.meta.dirname, "..");
 const BIN = join(ROOT, "node_modules/.bin");
 
@@ -18,7 +16,6 @@ const ENTRIES = [
   "svjeez/geometry",
 ];
 
-// The @ts-expect-error fails the check if css holes stop being checked.
 const CONSUMER = `import { css, ease, enter, render } from "svjeez";
 import { renderFrames } from "svjeez/frames";
 

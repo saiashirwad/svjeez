@@ -2,7 +2,6 @@
 import { click, demo, drag, fill, press, snap, wait } from "@svjeez/dom/react";
 import { Board } from "./app.tsx";
 
-// The app fills the picture edge to edge: it draws its own border and corners.
 const layout = { width: 800, pad: 0 };
 
 export const board = demo(Board, layout, () => [
@@ -29,7 +28,6 @@ export const board = demo(Board, layout, () => [
   click("create"),
   snap("created", { over: 0.6 }),
   wait(0.9),
-  // Held a little above its middle and let go near the top of In progress: the board reorders under it.
   ...drag("card-ENG-143", "lane-progress", {
     grab: [0.55, 0.35],
     release: [0.5, 0.2],

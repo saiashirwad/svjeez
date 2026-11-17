@@ -4,19 +4,14 @@ import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 import { GROUND, SQUASH, blip, jumps } from "./lib/blip";
 
-// A sequence diagram on one side, and on the other Blip acting it out: it opens a README, asks a sleepy
-// CDN cloud for hello.svg, catches the file as it drops, watches it play, and cheers. `tall` stacks the two.
-
 const BAR = 40;
 const STEP = 1.25;
 const AT = 0.6;
 
-/** When the diagram plays its `i`th message or note. */
 const beat = (i: number) => AT + i * STEP;
 
 const D = Math.ceil(beat(4) + 3);
 
-/** The stage, in its own coordinates: 440 wide, 280 tall, with the floor at 250. */
 const FLOOR = 250;
 const PAGE = { x: 150, y: 96, w: 150, h: 154 };
 const FRAME = { x: 166, y: 150, w: 118, h: 80 };
@@ -57,10 +52,8 @@ const stage = () => {
     .to({ fill: "#FFF3B0" }, span(beat(3) + 0.2, 0.15))
     .to({ fill: "#FFC21A" }, span(beat(3) + 0.2, 0.15).next(0.4, 0.6));
 
-  // The README unfolds from the floor.
   const unfold = motion({ scale: 0 }).to({ scale: 1 }, span(beat(0) + 0.05, 0.45), ease.pop);
 
-  // The cloud dozes until it is asked, then wakes.
   const asleep = motion({ opacity: 1 }).to({ opacity: 0 }, span(beat(1) + 0.75, 0.1));
 
   const awake = motion({ opacity: 0 }).to({ opacity: 1 }, span(beat(1) + 0.75, 0.1));
@@ -79,7 +72,6 @@ const stage = () => {
     ...arc(CDN, SLOT, beat(2) + 0.1, 0.8, 30),
   ];
 
-  // Once the file lands it plays: a sun turns and a ball bounces inside the frame.
   const PLAY = span(beat(3) + 0.1).until(D - 0.5);
   const playing = show(PLAY, { fade: 0.2 });
 
@@ -90,7 +82,6 @@ const stage = () => {
     motion({ y: 0 }),
   );
 
-  // Sparks when it cheers.
   const sparks = [-150, -110, -70, -30].map((deg, i) => {
     const a = (deg * Math.PI) / 180;
 
@@ -129,7 +120,6 @@ const stage = () => {
 
   return (
     <>
-      {/* The CDN, a cloud that naps until it is asked for a file. */}
       <g transform={`translate(${CDN.x} ${CDN.y})`}>
         <g animation={startle}>
           <path d={CLOUD} fill={theme.base0C} fillOpacity={0.22} />
@@ -152,7 +142,6 @@ const stage = () => {
         </g>
       </g>
 
-      {/* The README, unfolding with an empty image frame in it. */}
       <Pivot origin={{ x: PAGE.x + PAGE.w / 2, y: FLOOR }} animation={unfold}>
         <rect x={PAGE.x} y={PAGE.y} width={PAGE.w} height={PAGE.h} rx={10} fill={theme.base01} />
         <text x={PAGE.x + 14} y={PAGE.y + 22} fontFamily={mono} fontSize={11} fill={theme.base04}>
@@ -191,7 +180,6 @@ const stage = () => {
         </g>
       </Pivot>
 
-      {/* The request flies up to the cloud, and the file drops back down into the frame. */}
       <g animation={request}>{chip("GET", theme.base0D, 46)}</g>
       <g animation={reply}>{chip("hello.svg", theme.base0B, 88)}</g>
 
@@ -211,7 +199,6 @@ const stage = () => {
   );
 };
 
-/** `tall` stacks the diagram over the stage for a phone. */
 export const make = (tall = false): string => {
   const W = tall ? 358 : 1032;
   const H = tall ? 640 : 360;

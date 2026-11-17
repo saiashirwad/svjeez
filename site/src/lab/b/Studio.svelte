@@ -49,8 +49,6 @@
     gap: 0.75rem;
   }
 
-  /* On a wide screen the stage takes the top left, two instruments stack beside it and three line up underneath, so
-     everything fits in one screen. The cards join the studio's grid directly. */
   @media (width >= 70rem) {
     .studio {
       grid-template-columns: repeat(3, minmax(0, 1fr));

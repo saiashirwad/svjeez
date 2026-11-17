@@ -5,7 +5,6 @@ import { rect } from "svjeez/geometry";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
-// Two series side by side in each month: opened grows first, merged catches up and writes its count.
 const W = 504;
 const H = 340;
 const BAR = 40;

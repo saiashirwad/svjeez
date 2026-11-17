@@ -24,7 +24,6 @@ const options = {
   threshold: flags.threshold === undefined ? undefined : Number(flags.threshold),
 };
 
-/** Examples that use @svjeez/dom, as `bun run build` names them. */
 const users = async (): Promise<string[]> => {
   const found: string[] = [];
 

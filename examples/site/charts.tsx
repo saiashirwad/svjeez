@@ -4,7 +4,6 @@ import { rect } from "svjeez/geometry";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
-// Bars grow month by month, then a line draws across their tops.
 const W = 504;
 const H = 340;
 const BAR = 40;

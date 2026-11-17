@@ -9,7 +9,6 @@ import { montage, SHOTS } from "./montage";
 import { TERM, terminalShot } from "./session";
 import { HAND, handwriting } from "./write";
 
-/** A hairline progress bar along the bottom edge, one tick per shot. */
 const progress = (): SvgNode => {
   const ticks = [
     TERM.at,
@@ -72,7 +71,6 @@ const scene = (size: string) =>
     </g>,
   );
 
-/** The finale names the file's own size, so render to measure it. */
 export default function build(): string {
   const kb = (svg: string) => `${Math.round(new TextEncoder().encode(svg).length / 1024)} KB`;
 

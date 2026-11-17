@@ -6,7 +6,6 @@ import build, { fileKb, fileLine, propsOf, states } from "../explainer/index.tsx
 import scene, { frame } from "../explainer/scene.tsx";
 import { blip } from "../site/lib/blip";
 
-// The explainer shows scene.tsx's hop, edited five times. Each state's lines are run to make the Blip that plays.
 describe("the explainer's code is what plays", () => {
   const squash = (text: string) => text.replace(/\s+/g, "");
   const styleOf = (svg: string) => squash(svg.match(/<style>[\s\S]*<\/style>/)![0]);
@@ -55,7 +54,6 @@ describe("the explainer's code is what plays", () => {
 
     expect(played).toContain("cubic-bezier(.34,1.56,.64,1)");
 
-    // Every edit changes what plays.
     const motions = states.map((s) => styleOf(render(frame, blip(propsOf(s)))));
 
     expect(new Set(motions).size).toBe(states.length);

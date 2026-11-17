@@ -7,14 +7,12 @@ import { createRequire } from "node:module";
 import { CSS, chrome, outro } from "./lib/kit";
 import { mono, theme } from "../style";
 
-// The world's countries fill in from west to east, then great-circle flights leave London for six cities.
 const W = 504;
 const H = 340;
 const BAR = 40;
 const D = 10;
 const win = chrome(W, H, "map.tsx");
 
-/** Geist SemiBold alone, since every label is bold: the family would embed the regular face too. */
 const geist = await google("Geist", { weight: 600, ligatures: false });
 
 const countries: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
@@ -22,11 +20,9 @@ const countries: Topology = createRequire(import.meta.url)("world-atlas/countrie
 const map = project(countries, {
   frame: rect(28, BAR + 22, W - 56, H - BAR - 84),
   tolerance: 1,
-  // Fiji straddles the antimeridian and would stretch the fit across the whole frame.
   filter: (f) => !["Antarctica", "Fiji"].includes(f.properties?.name),
 });
 
-/** Countries fade in by band of longitude, one path and one animation per band. */
 const BANDS = 14;
 
 const band = (x: number) =>
@@ -38,7 +34,6 @@ const bands = Array.from({ length: BANDS }, (_, i) =>
     .map((r) => r.d)
     .join(""),
 );
-/** The countries fill in from west to east, a band at a time. */
 
 const filled = stagger(span(0.3, 0.6), bands.length, 0.08);
 
@@ -48,7 +43,6 @@ const HOME: LonLat = [-0.13, 51.5];
 interface City {
   readonly name: string;
   readonly at: LonLat;
-  /** Where the label sits, from the dot. */
   readonly dx: number;
   readonly dy: number;
   readonly anchor: "start" | "middle" | "end";
@@ -79,7 +73,6 @@ const line = (points: readonly Point[]) =>
 
 const home = map.point(HOME);
 
-/** A label with a halo in the window's color, so it stays legible over land and routes. */
 function Label(props: { x: number; y: number; anchor: City["anchor"]; children: string }) {
   return (
     <text

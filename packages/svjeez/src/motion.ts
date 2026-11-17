@@ -143,8 +143,6 @@ const isUntil = (
 
 const isNumeric = (value: TargetValue | undefined): value is number => typeof value === "number";
 
-// Plain JavaScript can still pass what the types rule out: the old `.to(values, seconds)`, which no longer has a cursor
-// to start from, and `.set(values)` with no time.
 const isSpan = (when: Span | Seconds | null | undefined): when is Span =>
   typeof when === "object" && when !== null;
 

@@ -1,4 +1,3 @@
-// The flight the lab edits, read from and written back into the scene source, and the same math the source runs.
 import { apply, literalAt, parse, write, type Edit, type PathStep } from "@svjeez/live/source";
 import { spline } from "svjeez";
 import plane from "./plane.tsx?raw";
@@ -41,7 +40,6 @@ export const DURATION = numberAt(["duration"]).value;
 export const LATEST_END = DURATION - 1.2;
 export const MIN_OVER = 0.25;
 
-/** The flight plane.tsx is written with. */
 export const INITIAL: Flight = {
   launch: numberAt(["launch"]).value,
   from: pointAt(["from"]),
@@ -54,7 +52,6 @@ export const INITIAL: Flight = {
     })),
 };
 
-/** plane.tsx with `flight` written into it, and every other byte as the file has it. */
 export const sourceOf = (flight: Flight): string => {
   const edits: Edit[] = [];
 
@@ -79,7 +76,6 @@ export const sourceOf = (flight: Flight): string => {
   return apply(plane, edits);
 };
 
-/** Whether a literal at `path` is one the lab edits: the launch, the start or a leg. */
 export const isFlight = (path: readonly PathStep[] | undefined) =>
   path?.[0] === "launch" || path?.[0] === "from" || path?.[0] === "legs";
 
@@ -88,7 +84,6 @@ export const curve = (u: number, f: number) =>
 
 export const points = (flight: Flight): Pt[] => [flight.from, ...flight.legs.map((leg) => leg.to)];
 
-/** The smooth route through the points: leg i runs from position i to i + 1. */
 export const route = (flight: Flight) => spline(points(flight).map(([x, y]) => ({ x, y })));
 
 export const starts = (flight: Flight) => {

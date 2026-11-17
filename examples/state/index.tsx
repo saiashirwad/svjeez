@@ -39,7 +39,6 @@ export const agent = stateMachine(
     direction: "LR",
     font: mono,
     fontSize: 16,
-    // Blue and purple for the run, orange where it acts or waits on someone, cyan for done and red for failed.
     tints: {
       task: hue.blue,
       store: hue.purple,

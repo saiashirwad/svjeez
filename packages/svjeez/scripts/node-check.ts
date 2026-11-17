@@ -2,7 +2,6 @@ import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { validateSvg } from "svjeez/frames";
 
-// Renders the skill's examples on the running runtime; CI runs it on Node 20 and 22 through tsx.
 const ROOT = join(import.meta.dirname, "..");
 
 const scenes = (await readdir(join(ROOT, "skills/svjeez/examples")))
@@ -19,7 +18,6 @@ for (const scene of scenes) {
 
     if (errors.length > 0) throw new Error(errors.join("\n"));
 
-    // The skill tests ask the same of these examples.
     if (!svg.includes("@keyframes")) throw new Error("the scene has no animation.");
     console.log(`✓ ${scene}`);
   } catch (error) {

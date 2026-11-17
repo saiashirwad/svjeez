@@ -23,7 +23,6 @@ const SOURCE = [
   `);`,
 ];
 
-// Everything here is written from 0, on the clock of a <Shot> that starts when the terminal ends.
 const editor = appWindow(rect(40, 96, 810, 568), { theme, title: "launch.tsx" });
 const preview = appWindow(rect(870, 96, 370, 568), { theme, title: "dist/launch.svg" });
 
@@ -40,7 +39,6 @@ const typed = typewriter(src, { at: 0.45, cps: 150, cursor: C.accent, blink: fal
 const landed = (n: number) => typed.spans[n - 1]!.at + typed.spans[n - 1]!.over;
 const runAt = typed.span.end + 0.25;
 
-/** Live edits after the first run: each swaps one value in the source, and the preview follows a beat later. */
 const EDITS = [
   { from: "18", to: "32", role: "number" },
   { from: "ink", to: "sky", role: "plain" },
@@ -106,7 +104,6 @@ const RING = 60;
 const spinAt = landed(9);
 const react = (i: number) => applied(i) + 0.1;
 
-// The ring turns at 180°/s until the edit doubles it, then at 360°/s to the cut.
 const slow = span(spinAt).until(react(2));
 const fast = span(react(2)).until(OVER);
 const turned = 180 * slow.over;
@@ -214,7 +211,6 @@ export const codeShot = (
         CSS keyframes · no runtime · 2.1 KB
       </text>
     </g>
-    {/* Blip sits in the preview's corner and hops every time an edit lands. */}
     <Blip
       x={preview.body.right.x - 40}
       y={preview.body.bottom.y - 54}

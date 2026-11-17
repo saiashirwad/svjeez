@@ -176,14 +176,12 @@ const pt = (p: Point): string => `${round(p.x)} ${round(p.y)}`;
 const polyline = ([first, ...rest]: readonly Point[], close = ""): PathData =>
   `M${pt(first!)}${rest.map((p) => `L${pt(p)}`).join("")}${close}`;
 
-/** Subpaths written one after another as one path. */
 const joined = ([first, ...rest]: readonly PathData[]): PathData =>
   rest.reduce<PathData>((d, next) => `${d}${next}`, first!);
 
 const sweepsOf = (m: Moving): readonly Sweep[] =>
   m instanceof Object ? ("from" in m ? [m] : m) : [];
 
-/** `m` as a function of scene time. */
 const valueOf = (m: Moving, what: string): ((t: Seconds) => number) => {
   const sweeps = sweepsOf(m);
 

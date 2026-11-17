@@ -42,7 +42,6 @@ const { light, dark } = scene.posters!;
 
   follow(document.querySelector(".plate img")!);
 
-  // The arrow keys step through the examples, like the buttons under the scene.
   const [prev, next] = document.querySelectorAll<HTMLAnchorElement>(".step a");
 
   addEventListener("keydown", (event: KeyboardEvent) => {

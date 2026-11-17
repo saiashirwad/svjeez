@@ -1,4 +1,3 @@
-// The palettes a reader can pick in the header. Scenes that paint with the base16 variables, the page and its code all follow the pick.
 import { systemDark, systemLight, type Base16 } from "svjeez";
 import {
   gruvboxDark,
@@ -28,5 +27,4 @@ export type PaletteId = (typeof PALETTES)[number]["id"];
 
 export const DEFAULT_PALETTE: PaletteId = PALETTES[0].id;
 
-/** Whether a rendered scene paints with the base16 variables, so a palette can recolor it. */
 export const themed = (svg: string) => svg.includes("var(--base");

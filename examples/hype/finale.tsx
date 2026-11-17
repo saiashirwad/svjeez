@@ -35,11 +35,9 @@ const FACTS = [
   { lead: "CSS + SMIL.", rest: " That's it." },
 ] as const;
 
-// Each shot below is written from 0, on the clock of a <Shot> that starts when the one before it ends.
 const FACT = 64;
 export const FACTS_SPAN = { at: HAND.at + HAND.over, over: 3.4 };
 
-// Blip hops down the facts, landing on the end of each one as it rises.
 const factEnds = FACTS.map((fact, i) => ({
   x: (W + display.measure(fact.lead + fact.rest, FACT)) / 2 + 40,
   y: 270 + i * 110,
@@ -73,9 +71,6 @@ export const facts = (
   </Shot>
 );
 
-// ─── Shot 6: the logo, the install line, and the reveal. ─────────────────────
-
-/** Where the finale starts on the scene's clock. Everything after this is written from 0. */
 export const END_AT = FACTS_SPAN.at + FACTS_SPAN.over;
 const LOGO = "svjeez";
 const logoX = centered(LOGO, 190);
@@ -111,7 +106,6 @@ const chipW = (name: string) => CHIP.pad * 2 + CHIP.icon + 8 + mono.measure(name
 const rowW = PACKAGES.reduce((w, [name]) => w + chipW(name), 0) + CHIP.gap * (PACKAGES.length - 1);
 const chipsAt = install.span.end + 0.25;
 
-/** The family, one chip per package, left to right. */
 const chips = PACKAGES.map(([name, icon], i) => {
   const x = (W - rowW) / 2 + PACKAGES.slice(0, i).reduce((w, [n]) => w + chipW(n) + CHIP.gap, 0);
   const y = 530;
@@ -148,7 +142,6 @@ const chips = PACKAGES.map(([name, icon], i) => {
 
 const sizeAt = chipsAt + PACKAGES.length * 0.06 + 0.5;
 
-// Blip drops onto the end of the wordmark, and cheers when the install line has typed.
 const perch = { x: logoX + display.measure(LOGO, 190) - 46, y: 186 };
 
 const [fall, bounce, land] = chain(span(1.2, 0.45), 0.15, 0.15);

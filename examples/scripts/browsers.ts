@@ -24,11 +24,9 @@ const BLUR = 0.1;
 /** Room on a box beyond a pixel, as a share of its size: text is shaped by each engine's own rasterizer and fallback font. */
 const TEXT = 0.2;
 
-/** A rotated shape's bounds can be 41% larger around its box than around the shape. */
 const ROTATED = 0.45;
 const CURVES = 0.02;
 
-/** How many scene times one file is checked at, and how many pages one browser works on at once. */
 const TIMES = 60;
 const PAGES = 4;
 
@@ -60,7 +58,6 @@ type Snapshot = Record<string, string>;
 
 type Run = {
   times: number[];
-  /** Which elements the engine runs an animation on, as their positions in the document. */
   animated: number[];
   labels: string[];
   texty: string[];
@@ -75,7 +72,6 @@ declare global {
   }
 }
 
-/** Runs in the page: the scene times to check, from the SMIL windows in the file. */
 const plan = ({ loop, count }: { loop: number; count: number }): number[] => {
   const marks = new Set<number>();
 
@@ -107,7 +103,6 @@ const plan = ({ loop, count }: { loop: number; count: number }): number[] => {
   for (let k = 0; k < 4; k++) add(loop + (loop * k) / 4 + 0.007);
   add(0);
   add(loop - 0.04);
-  // Not at the loop itself: where one interval ends and the next begins, engines may pick either, and no frame lands there.
   add(loop + 0.002);
   add(loop + 0.04);
   add(loop * 2 - 0.04);
@@ -116,7 +111,6 @@ const plan = ({ loop, count }: { loop: number; count: number }): number[] => {
 
   if (all.length <= count) return all;
 
-  // Evenly through the sorted list, keeping the first and last.
   const picked = Array.from(
     { length: count },
     (_, k) => all[Math.round((k * (all.length - 1)) / (count - 1))]!,
@@ -125,7 +119,6 @@ const plan = ({ loop, count }: { loop: number; count: number }): number[] => {
   return picked.filter((time, k) => picked.indexOf(time) === k);
 };
 
-/** Runs in the page: set each time with seek, forward then backward, and read every animated element at each. */
 const probe = ({ times, indices }: { times: number[]; indices?: number[] }) => {
   const targets = new Set<Element>();
 
@@ -177,7 +170,6 @@ const probe = ({ times, indices }: { times: number[]; indices?: number[] }) => {
       // Elements in a mask or a clip path aren't laid out on their own: Firefox has no box for them.
       const unlaidOut = element.closest("mask, clipPath") !== null;
 
-      // What SMIL has set on a rect's size (aw, ah), which is all there is to read inside a clip path.
       if (element instanceof SVGRectElement || element instanceof SVGImageElement) {
         const { width, height } = element;
 
@@ -203,9 +195,6 @@ const probe = ({ times, indices }: { times: number[]; indices?: number[] }) => {
         }
       }
 
-      // Where the element ends up on the page, with the transform attribute, CSS transforms and every ancestor's.
-      // A group's bounds depend on how each engine counts what it holds, so the shapes inside it are measured instead.
-      // A line has no area, and engines disagree on the bounds of one that is turned.
       if (!unlaidOut && !element.matches("g, svg, use, line")) {
         const bounds = element.getBoundingClientRect();
         const nothing = round(bounds.width) === "0" || round(bounds.height) === "0";
@@ -276,7 +265,6 @@ const diff = (reference: Run, run: Run, skip: string[]): Mismatch[] => {
   const found: Mismatch[] = [];
   const lacks = reference.animated.filter((index) => !run.animated.includes(index));
 
-  // The elements an engine runs animations on: one that leaves some out, or adds some, plays differently.
   if (lacks.length || run.animated.length !== reference.animated.length)
     found.push({
       when: "targets",
@@ -294,7 +282,6 @@ const diff = (reference: Run, run: Run, skip: string[]): Mismatch[] => {
         if (!(key in have)) continue;
         const prop = key.slice(key.lastIndexOf(" ") + 1);
         const label = key.slice(0, key.lastIndexOf(" "));
-        // Text is measured by each engine's own shaping, so the box around it, and around a group holding it, gets room.
         const box = ["x", "y", "width", "height", "bcx", "bcy", "bw", "bh"].includes(prop);
 
         const size = Math.max(
@@ -323,7 +310,6 @@ const diff = (reference: Run, run: Run, skip: string[]): Mismatch[] => {
   return found;
 };
 
-/** One line per kind of difference, with the first time it shows and how many there are. */
 const describeMismatches = (found: Mismatch[]) => {
   const kinds = new Map<string, Mismatch[]>();
 
@@ -345,7 +331,6 @@ const describeMismatches = (found: Mismatch[]) => {
 };
 
 const open = async (browser: Browser, svg: string): Promise<Page> => {
-  // The same color scheme everywhere: engines differ in which one a headless page starts in.
   const page = await browser.newPage({ colorScheme: "light" });
 
   await page.setContent(

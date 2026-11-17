@@ -1,4 +1,3 @@
-// The code palette as CSS custom properties, from the same palette the example scenes use, and the page in every other palette.
 import type { Code } from "astro:components";
 import type { ComponentProps } from "astro/types";
 import { tint, type CodeRole, type Slot } from "svjeez";
@@ -25,7 +24,6 @@ type Pair = Pick<Palette, "light" | "dark">;
 const roles = ({ light, dark }: Pair) =>
   ROLES.map((role) => `--code-${role}:${pair(tint(light, role), tint(dark, role))}`);
 
-/** The page tokens of site.css, drawn from a palette's slots. */
 const TOKENS = {
   bg: "base00",
   surface: "base01",
@@ -55,7 +53,6 @@ const scope = (scopes: string[], role: CodeRole) => ({
   settings: { foreground: `var(--code-${role})` },
 });
 
-/** A Shiki theme that colors tokens the way the playground's editor and the scenes do, through the same variables. */
 export const shikiTheme: ComponentProps<typeof Code>["theme"] = {
   name: "svjeez",
   type: "dark",

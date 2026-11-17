@@ -1,4 +1,3 @@
-// The page side of a compile worker: one promise per job, and a queue that keeps only the newest job.
 import type { Compiled } from "./compile.ts";
 
 /**
@@ -58,7 +57,6 @@ export const createCompiler = ({ sources = false, timeout = 10_000 } = {}) => {
 
   let worker = start();
   let stopped = false;
-  /** Every job the current worker owes an answer, with the timer that gives up on it. */
   const waiting = new Map<(result: Compiled) => void, ReturnType<typeof setTimeout>>();
 
   const settleAll = (result: Compiled) => {

@@ -4,7 +4,6 @@ import { Fragment, jsxDEV } from "svjeez/jsx-dev-runtime";
 
 const options = { width: 100, height: 60, duration: 2, title: "Sources" };
 
-// What a development JSX transform writes for this file, called by hand so the positions are known.
 const scene = () =>
   jsxDEV(Fragment, {
     children: [

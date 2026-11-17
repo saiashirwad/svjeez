@@ -7,7 +7,6 @@
 
   const selected = $derived(editor.state.selected === value.key);
 
-  /** The pick under way, so undo takes it whole. */
   let pick: ReturnType<typeof stroke<"color">> | null = null;
 
   const picked = (e: Event & { currentTarget: HTMLInputElement }) =>

@@ -32,7 +32,6 @@
     {title}
     <output data-readout={name}>{readout}</output>
   </h2>
-  <!-- svelte-ignore a11y_no_noninteractive_element_interactions, a11y_no_noninteractive_tabindex -->
   <svg
     data-instrument={name}
     class={{ clip }}

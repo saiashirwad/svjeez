@@ -71,7 +71,6 @@ export const show = (
   );
 };
 
-/** When a thing is on screen. */
 export interface Shown {
   readonly show: Span;
 }
@@ -301,7 +300,6 @@ const facings = (angles: readonly number[], offset: true | number): number[] => 
   return turned.map((angle) => angle + shift);
 };
 
-/** `angle` brought into -180 to 180. */
 const wrap = (angle: number) => angle - 360 * Math.round(angle / 360);
 
 export interface ReadingOptions {

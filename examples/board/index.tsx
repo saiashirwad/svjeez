@@ -5,9 +5,6 @@ import { fileURLToPath } from "node:url";
 import { Camera, def, ease, motion, render, span, variables, type Point } from "svjeez";
 import { rect } from "svjeez/geometry";
 
-// A project board, a real React app (app.tsx), filmed from its demo (board.demo.tsx): a command palette opens and
-// filters as it's typed into, turns into the new-issue dialog, and the new card is dragged to In progress and marked
-// done. Cards are keyed, so each slides to its new place, into another column too. The camera follows the action and a cursor shows each click.
 const here = (name: string) => fileURLToPath(new URL(name, import.meta.url));
 
 const inter = await google.family("Inter", [{ weight: 500 }, { weight: 600 }]);
@@ -17,7 +14,6 @@ const demos = await recordings<typeof import("./board.demo.tsx")>(here("board.de
   fonts: [inter],
 });
 
-// It ends back where it started, so the loop has no jump.
 const steps = loop(demos.board, { over: 0.9, wait: 0.4 });
 const app = size(steps);
 const frame = rect(0, 0, app.width, app.height);
@@ -31,7 +27,6 @@ const camera = shots(
 const nameOf = (step: Step) =>
   "wait" in step ? undefined : "root" in step ? step.name : step[0].name;
 
-/** When the timeline starts moving into the snapshot with this name: the moment the click that caused it lands. */
 const when = (name: string, last = false): number => {
   const i = last
     ? steps.findLastIndex((step) => nameOf(step) === name)
@@ -42,7 +37,6 @@ const when = (name: string, last = false): number => {
   return duration(steps.slice(0, i));
 };
 
-/** Where a part sits in a snapshot, at a point inside it. */
 const spot = (snapshot: string, part: string, dx = 0.5, dy = 0.5): Point => {
   const box = partRect(find(steps, snapshot)!, part);
 
@@ -53,7 +47,6 @@ const spot = (snapshot: string, part: string, dx = 0.5, dy = 0.5): Point => {
 
 const REST: Point = { x: 680, y: 410 };
 
-// Each click: where the pointer lands, read from the snapshot before it, and when, from the snapshot it causes.
 const clicks = [
   { at: when("dialog"), to: spot("narrowed", "cmd-new-issue", 0.3) },
   { at: when("labelled"), to: spot("titled", "label-feature") },
@@ -66,7 +59,6 @@ const clicks = [
 
 const carried = { at: when("carried"), to: spot("carried", "card-ENG-143", 0.55, 0.35) };
 
-// The way back into the first snapshot, which loop() added.
 const home = when("idle", true);
 
 const path = clicks.reduce(
@@ -75,7 +67,6 @@ const path = clicks.reduce(
     const start = Math.max(before + 0.15, click.at - 0.6);
     const moved = m.to(click.to, span(start).until(click.at), ease.inOut);
 
-    // The drag carries the pointer with the card.
     return i === 4 ? moved.to(carried.to, span(carried.at, 0.6), ease.inOut) : moved;
   },
   motion({ x: REST.x, y: REST.y }),
@@ -97,7 +88,6 @@ const Cursor = () => (
   />
 );
 
-/** A ring where a click lands. */
 const Ripple = ({ at, to }: { at: number; to: Point }) => (
   <circle
     cx={to.x}

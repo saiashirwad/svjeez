@@ -1,5 +1,3 @@
-// Writes src/skill-errors.ts: the "Runtime errors." table from svjeez's scene-writing skill, as text, so the published
-// package carries the fixes without reaching into svjeez's files. A test fails when the skill and this copy differ.
 import { readFileSync, writeFileSync } from "node:fs";
 import { errorTable } from "../src/fixes";
 

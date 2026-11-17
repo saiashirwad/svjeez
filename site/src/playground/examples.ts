@@ -16,7 +16,6 @@ import sequence from "./examples/sequence.tsx.txt?raw";
 export interface PlaygroundExample {
   readonly id: string;
   readonly label: string;
-  /** The package the scene shows off, or "svjeez" for the core. The menu groups by it. */
   readonly from: string;
   readonly source: string;
 }

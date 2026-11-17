@@ -19,19 +19,10 @@ import { css as codeCss, mono, theme } from "../style";
 import { chrome } from "./lib/kit";
 import { BLIP, GROUND, SQUASH, blip, jumps } from "./lib/blip";
 
-// The home page's hero. A scene's source fills in line by line, and Blip hops down it like the ball over karaoke
-// lyrics. Each word it lands on pops into the picture beside it as what it names: a sun (a moon at night), hills, a
-// kite and a cloud. Blip jumps into the picture it made, holds the kite string, and the loop starts over. A
-// selection marquee around the whole file says it is all one image.
-//
-// Flat shapes only, no outlines, to match Blip.
-
-/** The scene is drawn on a 960 by 420 page and shown cropped to the cards, with room above for Blip. */
 const CROP = { x: 12, y: -44 };
 const W = 960 - 2 * CROP.x;
 const H = 408 - CROP.y;
 
-/** A design tool's selection around the whole picture, ants marching, with a handle at each corner: all of it is one image. */
 const MARQUEE = { x: CROP.x + 5, y: CROP.y + 5, width: W - 10, height: H - 10 };
 const ANTS = `.ants{stroke-dasharray:7 5;animation:ants .9s linear infinite}@keyframes ants{to{stroke-dashoffset:-12}}@media (prefers-reduced-motion:reduce){.ants{animation:none}}`;
 const D = 14;
@@ -74,12 +65,10 @@ const CORAL = BLIP.cheek;
 const YELLOW = BLIP.yellow;
 const LIT = "#FFF3B0";
 
-/** The two cards: the source on the left, the picture on the right. */
 const SOURCE = { x: 40, y: 60, width: 420, height: 320 };
 const PICTURE = { x: 500, y: 60, width: 420, height: 320 };
 const HEADER = 40;
 
-/** The window's corner, less its 1px border, so the sky fits inside it. */
 const R = 11;
 
 const layout = (src: string) =>
@@ -92,13 +81,11 @@ const layout = (src: string) =>
     font: mono,
   });
 
-// At night the source says Moon, and the picture draws one. The file carries both and the viewer's scheme picks.
 const listing = layout(SRC);
 const nightly = layout(SRC.replace("<Sun", "<Moon"));
 
 const SCHEME = `.night{display:none}@media (prefers-color-scheme:dark){.day{display:none}.night{display:inline}}`;
 
-/** Blip, drawn at this size, stands on a word's letters. */
 const SIZE = 0.4;
 
 const stand = (word: { center: { x: number; y: number } }) => ({
@@ -106,7 +93,6 @@ const stand = (word: { center: { x: number; y: number } }) => ({
   y: word.center.y - 8,
 });
 
-// What each word Blip lands on turns into, and where it goes in the picture.
 const sky = {
   x: PICTURE.x + 1,
   y: PICTURE.y + HEADER,
@@ -119,7 +105,6 @@ const FLOOR = sky.y + sky.height;
 const HILL = `M${sky.x + R} ${FLOOR}Q${sky.x} ${FLOOR} ${sky.x} ${FLOOR - R}L${sky.x} ${FLOOR - 58}C${sky.x + 70} ${FLOOR - 100} ${sky.x + 150} ${FLOOR - 104} ${sky.x + 230} ${FLOOR - 70}C${sky.x + 300} ${FLOOR - 42} ${sky.x + 360} ${FLOOR - 50} ${sky.x + sky.width} ${FLOOR - 66}L${sky.x + sky.width} ${FLOOR - R}Q${sky.x + sky.width} ${FLOOR} ${sky.x + sky.width - R} ${FLOOR}Z`;
 const FAR = `M${sky.x} ${FLOOR - 40}C${sky.x + 120} ${FLOOR - 70} ${sky.x + 220} ${FLOOR - 130} ${sky.x + 330} ${FLOOR - 112}C${sky.x + 380} ${FLOOR - 104} ${sky.x + 400} ${FLOOR - 96} ${sky.x + sky.width} ${FLOOR - 92}L${sky.x + sky.width} ${FLOOR}L${sky.x} ${FLOOR}Z`;
 
-/** The top of the near hill, where Blip ends up. */
 const SUMMIT = { x: sky.x + 150, y: FLOOR - 95 };
 
 const circle = (r: number) => `M${-r} 0A${r} ${r} 0 1 0 ${r} 0A${r} ${r} 0 1 0 ${-r} 0Z`;
@@ -132,9 +117,7 @@ const CLOUD =
 interface Piece {
   readonly word: string;
   readonly color: Color;
-  /** Where the piece's middle ends up. */
   readonly to: { x: number; y: number };
-  /** Its outline, drawn about its middle. */
   readonly outline: string;
 }
 
@@ -145,7 +128,6 @@ const PIECES: readonly Piece[] = [
   { word: "drift", color: "var(--cloud)", to: { x: sky.x + 220, y: sky.y + 54 }, outline: CLOUD },
 ];
 
-/** A wavy underline from x0 to x1 along y, one bump every 7px or so. */
 const squiggle = (x0: number, x1: number, y: number) => {
   const n = Math.max(2, Math.round((x1 - x0) / 7));
   const step = (x1 - x0) / n;
@@ -159,7 +141,6 @@ const squiggle = (x0: number, x1: number, y: number) => {
   return d;
 };
 
-/** Plain CSS text ahead of CSS that names registered properties. */
 const withText = (text: string, rest: ReturnType<typeof css>) =>
   css(Object.assign([text, ""], { raw: [text, ""] }), rest);
 
@@ -167,8 +148,6 @@ export default function build(): string {
   const words = PIECES.map((p) => listing.find(p.word));
   const moon = nightly.find("Moon");
 
-  // Blip starts on the source card's top edge and lands on one word per line. Each line drops into the source
-  // just before Blip jumps for it.
   const lands = [2.2, 3.6, 5.0, 6.4];
   const appear = lands.map((t) => t - 0.95);
   const start = { x: SOURCE.x + SOURCE.width - 60, y: SOURCE.y };
@@ -178,7 +157,6 @@ export default function build(): string {
   const times = [...lands, finale];
   const HOP = 90;
 
-  // Two happy hops on the hill while the picture plays.
   const hops = jumps([
     ...times.map((land, i) => ({
       land,
@@ -188,7 +166,6 @@ export default function build(): string {
     { land: finale + 3.5, height: 40 },
   ]);
 
-  // Between landings Blip travels in a straight line while its hop arcs it up and over.
   const travel = times.reduce(
     (m, land, i) => {
       const air =
@@ -209,7 +186,6 @@ export default function build(): string {
     .to({ scale: 1 }, span(0.05, 0.35), ease.pop)
     .to({ scale: 0 }, span(OUT + 0.15, 0.25), ease.in);
 
-  // The bulb flashes on every word, as if it read it.
   const glow = times
     .slice(0, -1)
     .reduce(
@@ -217,7 +193,6 @@ export default function build(): string {
       motion({ fill: YELLOW }),
     );
 
-  // It watches each piece fly off to the right, and looks up at the sun from the hill.
   const look = times.reduce(
     (m, t, i) =>
       i === times.length - 1
@@ -228,7 +203,6 @@ export default function build(): string {
     motion({ x: 0, y: 2 }),
   );
 
-  // Each word pops into the picture where it belongs, a moment after Blip lands on it.
   const popAt = (i: number) => lands[i]! + 0.12;
 
   const popIn = (i: number) =>
@@ -236,12 +210,10 @@ export default function build(): string {
       .to({ scale: 1 }, span(popAt(i), 0.45), ease.pop)
       .to({ scale: 0 }, span(OUT + i * 0.06, 0.3), ease.in);
 
-  // The underline under each word fades with the rest of the source at the end of the loop.
   const mark = () => motion({ opacity: 1 }).to({ opacity: 0 }, span(OUT, 0.3));
 
   const fade = motion({ opacity: 1 }).to({ opacity: 0 }, span(OUT, 0.4), ease.in);
 
-  // A little burst of sparks under Blip's feet on every word.
   const burstAt = lands.reduce(
     (m, t, i) => m.set({ x: spots[i]!.x, y: spots[i]!.y }, t),
     motion({ x: spots[0]!.x, y: spots[0]!.y }),
@@ -260,7 +232,6 @@ export default function build(): string {
       motion({ x: 0, y: 0, opacity: 0 }),
     );
 
-  // A ring of sparks where each piece pops in.
   const popBurstAt = PIECES.reduce(
     (m, p, i) => m.set({ x: p.to.x, y: p.to.y }, popAt(i)),
     motion({ x: PIECES[0]!.to.x, y: PIECES[0]!.to.y }),
@@ -279,7 +250,6 @@ export default function build(): string {
       motion({ x: 0, y: 0, opacity: 0 }),
     );
 
-  // Once each piece is in, it starts doing what its word says.
   const settle = (i: number) => popAt(i) + 0.3;
   const rays = motion({ rotate: 0 }).to({ rotate: 36 }, span(0, D), ease.linear);
 
@@ -302,7 +272,6 @@ export default function build(): string {
     .to({ y: 0 }, span(settle(1), 0.6), ease.pop)
     .to({ y: 160 }, span(OUT, 0.5), ease.in);
 
-  // render(<> and </>) are there from the start; each line in between opens a gap, pushing the closing line down.
   const row = listing.metrics.height;
 
   const wordsOf = (c: typeof listing, n: number) =>
@@ -378,7 +347,6 @@ export default function build(): string {
             strokeWidth={1.5}
           />
         ))}
-        {/* Two windows in the reader's palette: the source, and the picture it draws. */}
         <g transform={`translate(${SOURCE.x} ${SOURCE.y})`}>
           {chrome(SOURCE.width, SOURCE.height, "scene.tsx", { bar: HEADER, mono: true }).node}
         </g>
@@ -406,7 +374,6 @@ export default function build(): string {
         })}
         <g animation={fade}>{source}</g>
 
-        {/* The picture card. */}
         <g transform={`translate(${PICTURE.x} ${PICTURE.y})`}>
           {chrome(PICTURE.width, PICTURE.height, "scene.svg", { bar: HEADER, mono: true }).node}
         </g>
@@ -415,7 +382,6 @@ export default function build(): string {
           fill={vars.sky}
         />
 
-        {/* The hills come up out of the ground, the far one just after the near one. */}
         <g clipPath={def.clipPath({}, <rect {...sky} />)}>
           <g animation={far}>
             <path d={FAR} fill={vars.far} />
@@ -425,7 +391,6 @@ export default function build(): string {
           </g>
         </g>
 
-        {/* The sun, its rays, and at night a bite of sky that makes it a moon, with a few stars. */}
         <g transform={`translate(${PIECES[0]!.to.x} ${PIECES[0]!.to.y})`}>
           <g animation={[beam, motion({ opacity: 1 }).to({ opacity: 0 }, span(OUT, 0.3))]}>
             <g animation={rays}>
@@ -465,7 +430,6 @@ export default function build(): string {
           />
         ))}
 
-        {/* The kite swings from the end of its string, and the string runs down to the hill. */}
         <g animation={motion({ opacity: 1 }).to({ opacity: 0 }, span(OUT, 0.3))}>
           <path
             d={`M${PIECES[2]!.to.x} ${PIECES[2]!.to.y + KITE_TAIL}C${PIECES[2]!.to.x + 10} ${PIECES[2]!.to.y + 90} ${PIECES[2]!.to.x + 50} ${PIECES[2]!.to.y + 110} ${SUMMIT.x - 10} ${SUMMIT.y - 10}`}
@@ -502,7 +466,6 @@ export default function build(): string {
           ))}
         </g>
 
-        {/* Blip. */}
         <g animation={travel}>
           <g transform={`scale(${SIZE}) translate(${-GROUND.x} ${-GROUND.y})`}>
             <Pivot origin={GROUND} animation={pop}>

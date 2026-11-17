@@ -1,4 +1,3 @@
-// Demos of the app's real components: what happens to each, as data. recordings() films them.
 import { click, demo, fill, hover, snap, wait } from "@svjeez/dom/react";
 import { PullRequest, SignIn } from "./ui.tsx";
 
@@ -14,7 +13,6 @@ export const signIn = demo(SignIn, { width: 360 }, ({ props }) => [
   hover("submit"),
   snap("hover", { over: 0.15 }),
   wait(0.3),
-  // The server says no: the parent re-renders the form with an error. What was typed stays.
   props({ error: "Unable to sign in." }),
   snap("failed", { over: 0.25 }),
   wait(1.8),

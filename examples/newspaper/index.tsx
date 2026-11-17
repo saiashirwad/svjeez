@@ -20,7 +20,6 @@ const W = 1280;
 const H = 720;
 const D = 9;
 
-/** The page fills the canvas, inside a 64px margin (48px at 960 wide). */
 const EDGE = 64;
 
 const blackletter = await google("UnifrakturMaguntia", { fallback: ["serif"] });
@@ -39,7 +38,6 @@ const INNER = { x: EDGE, w: W - 2 * EDGE };
 const centered = (face: Font, text: string, size: number) =>
   INNER.x + (INNER.w - face.measure(text, size)) / 2;
 
-/** A ruled line that draws on from the left. */
 const rule = (y: number, at: number, weight = 1, x1 = INNER.x, x2 = INNER.x + INNER.w): Child => (
   <path
     d={`M${x1} ${y}H${x2}`}
@@ -51,7 +49,6 @@ const rule = (y: number, at: number, weight = 1, x1 = INNER.x, x2 = INNER.x + IN
 
 type Line = { text: string; x: number }[];
 
-/** Greedy line breaking measured in the real font, justified by spreading words across the column. A paragraph's last line stays ragged. */
 const justify = (text: string, width: number, size: number): Line[] => {
   const space = body.measure(" ", size);
   const indent = size * 1.2;
@@ -114,7 +111,6 @@ The astronauts are to lift off from the Moon later today and return to Earth for
 Continued on page A2.
 `;
 
-// Five columns: the story runs down the first four under the headline, and the photo stands in the fifth.
 const COLUMN = { y: 318, gap: 22, size: 14, leading: 21.5 };
 const BOTTOM = H - EDGE;
 const columnWidth = (INNER.w - 4 * COLUMN.gap) / 5;

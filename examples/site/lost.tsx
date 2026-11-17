@@ -3,14 +3,9 @@ import { CSS, chrome } from "./lib/kit";
 import { BLIP, blip } from "./lib/blip";
 import { theme } from "../style";
 
-// The 404 page: Blip hops along a timeline behind its playhead. The track ends, Blip skids to a stop at the
-// edge, and the playhead sails on into the empty space past it. Blip looks around, lights its antenna bulb like a
-// flashlight, and finds the playhead out in the dark, parked at 404s. `tall` is the same story on a shorter track.
-
 const D = 10;
 const BAR = 40;
 
-// Beats, in seconds.
 const WALK = span(0.4, 3.6);
 const STOP = WALK.end;
 const LIGHT = 6;
@@ -26,7 +21,6 @@ interface Stage {
   readonly x0: number;
   readonly gap: number;
   readonly seconds: number;
-  /** Where the playhead ends up, out past the track. */
   readonly lost: number;
   readonly scale: number;
   readonly fontSize: number;
@@ -59,7 +53,6 @@ export const make = (tall = false): string => {
   const y = Math.round(BAR + (H - BAR) * 0.63);
   const x1 = x0 + gap * seconds;
 
-  // Blip starts behind the 0s tick and stops with its toes over the end of the track.
   const start = x0 - 66 * s - 6;
   const stop = x1 - 50 * s;
   const bulb = { x: stop, y: y + (38 - 162) * s };
@@ -77,14 +70,12 @@ export const make = (tall = false): string => {
     .to({ y: -14 }, span(FOUND + 0.15, 0.16), ease.out)
     .to({ y: 0 }, span(FOUND + 0.15, 0.16).next(0.18), ease.in);
 
-  // A lean forward as it brakes, then upright.
   const lean = span(STOP, 0.12);
 
   const brake = motion({ rotate: 0 })
     .to({ rotate: 12 }, lean, ease.out)
     .to({ rotate: 0 }, lean.next(0.6), ease.pop);
 
-  // Glances right, left and right again, 0.4s apart, then back once the light goes.
   const right = span(4.7, 0.2);
   const left = right.next(0.3, 0.4);
 
@@ -106,7 +97,6 @@ export const make = (tall = false): string => {
     .to({ fill: "#FFF6C2" }, span(LIGHT, 0.2))
     .to({ fill: BLIP.yellow }, span(DARK, 0.4));
 
-  // The playhead keeps going past the end, slows, and fades into the dark until the beam finds it.
   const playhead = motion({ x: 0 })
     .to({ x: x1 - x0 }, WALK, ease.linear)
     .to({ x: lost - x0 }, WALK.next(1.6), ease.out);
@@ -115,13 +105,9 @@ export const make = (tall = false): string => {
     .to({ opacity: 0.18 }, span(STOP, 1))
     .to({ opacity: 1 }, span(FOUND, 0.3));
 
-  // The 404s label waits in the tick labels' gray, and turns orange when the beam finds it.
   const unlit = motion({ opacity: 1 }).to({ opacity: 0 }, span(FOUND, 0.3));
   const found = motion({ opacity: 0 }).to({ opacity: 1 }, span(FOUND, 0.3));
 
-  // The beam is drawn along +x from the bulb and sweeps down onto the playhead. A mirrored copy with no paint makes the
-  // group's box centered on the bulb, so it turns about the bulb. It reaches past the playhead but stops short of the
-  // window's right edge.
   const target = { x: lost, y: y - 30 };
   const angle = (Math.atan2(target.y - bulb.y, target.x - bulb.x) * 180) / Math.PI;
 

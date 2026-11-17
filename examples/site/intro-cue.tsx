@@ -3,24 +3,18 @@ import { css, theme } from "../style";
 import { lettering, marker } from "./cue";
 import { BLIP, GROUND, SQUASH, blip, jumps } from "./lib/blip";
 
-// The way from the home page's hero to the intro reel. "watch the intro" is hand-lettered once, and above it Blip
-// plays projector: its antenna bulb flickers on, a beam of light opens onto a little screen, and a play button pulses
-// there while Blip bobs along to the show. It hops when the reel "ends" and the loop starts over.
-
 const W = 420;
 const H = 148;
 const D = 6;
 const S = 0.38;
 const HOME = { x: 130, y: 84 };
 
-/** Where the bulb sits on the page, so the beam starts from it. */
 const BULB = { x: HOME.x, y: HOME.y - (162 - 38) * S };
 const SCREEN = { x: 216, y: 10, w: 104, h: 64 };
 
 export default function build(): string {
   const strokes = lettering("watch the intro");
 
-  // The bulb flickers on like an old projector, holds, and dims before the loop ends.
   const [on, off, again] = chain(span(0.4, 0.06), 0.06, 0.06);
   const dim = again.next(0.3, 4.3);
 
@@ -36,7 +30,6 @@ export default function build(): string {
     .to({ opacity: 0.5 }, again)
     .to({ opacity: 0 }, dim);
 
-  // The play button pulses three times, 0.6s apart.
   let pulse = span(0.8, 0.3);
   let play = motion({ scale: 1 });
 
@@ -47,7 +40,6 @@ export default function build(): string {
     pulse = settle.next(0.3, 0.6);
   }
 
-  // It bobs to the show, glancing at the screen, then hops when it ends.
   const bob = chain(span(0.9, 0.5), 0.5, 0.5, 0.5, 0.5, 0.5).reduce(
     (m, sway, i) => m.to({ rotate: [5, -5, 5, -5, 5, 0][i]! }, sway, ease.inOut),
     motion({ rotate: 0 }),

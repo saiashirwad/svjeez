@@ -7,7 +7,6 @@ const W = 960;
 const H = 540;
 const D = 15;
 
-/** Left: a matrix with two eigenvectors. Each one's span stays on itself while the rest of the grid turns. */
 const M = [
   [3, 1],
   [0, 2],
@@ -38,7 +37,6 @@ const linear = view({ x: 200, y: 320 }, 40, [-9, 9], [-9, 9], 1)
   .apply({ at: 2.4, over: 2.4 }, M)
   .reset({ at: 6.4, over: 1.6 });
 
-/** Right: w = e^z, which rolls vertical lines into circles and horizontal lines into rays. */
 const exp = (x: number, y: number) =>
   [Math.exp(x) * Math.cos(y), Math.exp(x) * Math.sin(y)] as const;
 

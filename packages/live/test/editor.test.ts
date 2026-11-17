@@ -215,7 +215,6 @@ describe("update", () => {
     const state = play([]).state;
     const eased = state.values.find((v) => v.kind === "ease");
 
-    // An ease that is neither named nor a bezier has no code to write.
     expect(play([{ type: "set", key: eased?.key ?? "", value: ease.hold }]).state.text).toBe(
       state.text,
     );

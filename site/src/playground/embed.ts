@@ -1,14 +1,3 @@
-/**
- * Upgrades every [data-playground] container on the page.
- *
- * data-playground    first example, by id from examples.ts.
- * data-examples      optional comma list that limits the menu, e.g. "toast,chart".
- * data-eager         optional. Load now instead of near the viewport or on click (the /play page uses it).
- *
- * This module holds only the loader. The editor and the worker (transpiler and library) load when the container
- * comes within 600px of the viewport, or when its button is pressed.
- * Style it from outside with --pg-* custom properties (see playground.css). It reads --bg, --ink and --accent when the page sets them.
- */
 import "./playground.css";
 
 const load = async (host: HTMLElement) => {

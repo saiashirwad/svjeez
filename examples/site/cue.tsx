@@ -14,10 +14,6 @@ import {
 import { css, theme } from "../style";
 import { BLIP, GROUND, SQUASH, blip, jumps, waddle } from "./lib/blip";
 
-// The way down from the home page's hero to its editor. Blip plays on top, "play with svjeez" is hand-lettered
-// once under it. Blip: it waddles off, hops and spins,
-// waddles the other way, trips on nothing and picks itself up, hops again and waddles home, in an 8 second loop.
-
 const W = 420;
 const H = 148;
 const D = 8;
@@ -40,7 +36,6 @@ const lengthOf = (d: string) => {
   return sum;
 };
 
-/** The words, centered in `width`, split into pen strokes one after another, paced by length. */
 export const lettering = (text: string, width = W, y = 128) => {
   const probe = casual.path(text, { size: 40, x: 0, y: 0 }).d;
   const xs = (probe.match(/-?[\d.]+/g) ?? []).map(Number).filter((_, i) => i % 2 === 0);
@@ -77,14 +72,12 @@ export default function build(): string {
     { land: 6.0, height: 36 },
   ]);
 
-  // A full turn at the top of the first hop.
   const turn = span(2.15, 0.42);
 
   const spin = motion({ rotate: 0 })
     .to({ rotate: 360 }, turn, ease.inOut)
     .set({ rotate: 0 }, turn.end);
 
-  // Trips over nothing, face down, and bounces back up.
   const [fall, bounce] = chain(span(4.55, 0.2), 0.1);
 
   const trip = motion({ rotate: 0 })
@@ -92,7 +85,6 @@ export default function build(): string {
     .to({ rotate: -64 }, bounce, ease.out)
     .to({ rotate: 0 }, bounce.next(0.45, 0.35), ease.pop);
 
-  // It looks where it is going, down at the words when it stops, and down at the ground after the trip.
   const look = motion({ x: 0, y: 0 })
     .to({ x: 6, y: 0 }, span(0.2, 0.2))
     .to({ x: -2, y: 5 }, span(1.6, 0.2))

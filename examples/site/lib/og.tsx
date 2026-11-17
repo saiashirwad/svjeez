@@ -16,10 +16,6 @@ import { systemLight } from "svjeez";
 import { mono } from "../../style";
 import { BLIP, GROUND, blip } from "./blip";
 
-// Link-preview cards for the site, one per page, each starring Blip doing that page's job. Every card is a still
-// svjeez scene at 1200 by 630 in the site's default palette: a white background, the title in big type on the left, a hand-lettered aside, and
-// Blip in its little set piece on the right.
-
 const W = 1200;
 const H = 630;
 const display = await google("Inter Tight", { weight: 800 });
@@ -114,10 +110,8 @@ const set = (
 ) => {
   const last = lines.length - 1;
 
-  // The last line carries Blip, about one em wide with its gap.
   const size = fitText(display, lines, { width: W - 2 * X, max, tail: 0.98 });
 
-  // From the cap height of the first line down to the baseline of the last.
   const block = size * 0.72 + last * size * LEAD;
   const top = (H - block) / 2 + nudge;
   const base = (i: number) => top + size * 0.72 + i * size * LEAD;
@@ -140,7 +134,6 @@ const set = (
     })();
 
   return {
-    // Where Blip's antenna tops out, for an arrow to point at.
     top,
     blip: { x: end, y: base(last), head: base(last) - size * 0.95 },
     scale,

@@ -3,7 +3,6 @@ import { draw, ease, enter, exit, motion, render, type Color, span, stagger } fr
 import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
-// The rearrangement proof: four copies of one right triangle fill a square of side a + b twice over. One way they leave a tilted square c², the other way two squares a² and b², so a² + b² = c².
 const W = 504;
 const H = 340;
 const BAR = 40;
@@ -24,7 +23,6 @@ const CC = theme.base0A;
 
 type Point = readonly [number, number];
 
-/** A triangle by its corners in square coordinates, and where its box center goes when the triangles rearrange. */
 interface Triangle {
   readonly corners: readonly [Point, Point, Point];
   readonly to: Point;
@@ -38,7 +36,6 @@ const center = (corners: readonly Point[]): Point => {
   return [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2];
 };
 
-// The tilted square's corners sit a along each side, turning clockwise. The second arrangement puts a² top left and b² bottom right, and every triangle only slides.
 const TOP_RIGHT: Point = [A + B / 2, A / 2];
 const BOTTOM_LEFT: Point = [A / 2, A + B / 2];
 
@@ -86,7 +83,6 @@ const arrive = stagger(span(1, 0.6), triangles.length, 0.25);
 const label = (source: string, x: number, y: number, color: Color, fontSize = 20) =>
   tex(source, { x: X0 + x, y: Y0 + y, fontSize, color, anchor: [0.5, 0.5], display: false });
 
-// Legs and hypotenuse of the top-left triangle, the hypotenuse's label pushed off its midpoint toward the square's center.
 const legA = label("a", A / 2, -13, AA);
 const legB = label("b", -13, B / 2, BB);
 const hyp = label("c", A / 2 + (13 * B) / C, B / 2 + (13 * A) / C, CC);
@@ -110,7 +106,6 @@ const plusEquals = tex(String.raw`\phantom{a^2} + \phantom{b^2} = \phantom{c^2}`
   color: theme.base05,
 });
 
-/** A copy of an area label lifts off and settles into its place in the equation. */
 const fly = (from: ReturnType<typeof label>, id: string, start: number) => {
   const to = equation.part(id).box;
   const dx = to.x + to.w / 2 - (from.bounds.x + from.bounds.w / 2);

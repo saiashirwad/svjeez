@@ -2,7 +2,6 @@ import { ease, enter, exit, motion, type Stack } from "svjeez";
 import { r1, type Cx } from "./look";
 import { INK } from "./palette";
 
-/** When an eye closes for its two blinks of the loop. */
 export type Blink = readonly [number, number];
 
 export const blinkAt = (cx: Cx): Blink => {

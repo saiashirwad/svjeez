@@ -16,7 +16,6 @@ import { rect } from "svjeez/geometry";
 import { CSS } from "./lib/kit";
 import { mono, theme } from "../style";
 
-// A desktop: a soft wallpaper, a menu bar, a terminal installing the skill, and an agent writing a scene with it.
 const MENU = 30;
 
 const wallpaper = def.linearGradient(
@@ -43,7 +42,6 @@ const shadowed = (x: number, y: number, w: number, h: number) =>
     />
   ));
 
-/** `tall` stacks the terminal over the agent for a phone. */
 export const make = (tall = false): string => {
   const W = tall ? 358 : 1032;
   const H = tall ? 578 : 560;

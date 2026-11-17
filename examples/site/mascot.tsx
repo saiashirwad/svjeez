@@ -7,7 +7,6 @@ import { BLIP, blip } from "./lib/blip";
 
 const D = 12;
 
-// A crouch, up, and down.
 const [crouch, up, down] = chain(span(5.8, 0.14), 0.2, 0.2);
 
 const body = motion({ y: 0 })
@@ -15,7 +14,6 @@ const body = motion({ y: 0 })
   .to({ y: -5 }, up, ease.out)
   .to({ y: 0 }, down, ease.in);
 
-// The bulb lags a beat behind the body on its stem and wobbles to rest after the landing.
 const [sag, rise, drop, settle] = chain(span(5.94, 0.16), 0.22, 0.12, 0.45);
 
 const bulb = motion({ y: 0 })

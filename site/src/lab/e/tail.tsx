@@ -4,7 +4,6 @@ import { Face } from "./face";
 import { tailTip } from "./layout";
 import { r1, type Cx } from "./look";
 
-/** A tail and what's on the end of it, pointing up from 0,0 before its rotation. */
 export const Tail = ({
   cx,
   length: Lt,

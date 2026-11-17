@@ -1,6 +1,3 @@
-// `svjeez values` and `svjeez set`: the editor's controls for an agent with a shell. Both read the file the way the
-// editor does (source.ts for the literals, controls.ts for what each is), and `set` writes through `editFor`, the same
-// splice a drag makes, so a value set here lands exactly as one set in the editor would. No browser, no compile.
 import { readFile, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { join, resolve } from "node:path";
@@ -83,7 +80,6 @@ export const listValues = (source: Source, schema: Schema = {}): Listed[] =>
     }
   });
 
-/** Edit distance, for suggesting the key that was meant. */
 const distance = (a: string, b: string) => {
   let row = Array.from({ length: b.length + 1 }, (_, j) => j);
 
@@ -325,8 +321,6 @@ export const diffOf = (
     .join("\n");
 };
 
-// ----- the commands
-
 const isSchema = (value: unknown): value is Schema =>
   value instanceof Object && Object.values(value).every((p) => p instanceof Object && "kind" in p);
 
@@ -403,7 +397,6 @@ const show = (listed: Listed): string => {
   return listed.maxLength === undefined ? "" : `at most ${listed.maxLength} characters`;
 };
 
-/** Rows of cells as aligned text. */
 const table = (rows: readonly (readonly string[])[]) => {
   const widths = rows[0]?.map((_, i) => Math.max(...rows.map((r) => r[i]!.length))) ?? [];
 

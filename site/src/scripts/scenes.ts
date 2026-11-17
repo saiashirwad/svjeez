@@ -1,9 +1,6 @@
-// Scenes: every one is an <img>. Off screen it is a still; it plays only while it is on screen, and goes back to its still when it leaves.
-// A scene near the viewport gets its still first, so scrolling never meets an empty box.
 import { frozen, PALETTECHANGE, playing, replay, show } from "./palette";
 import { calm, scheme, THEMECHANGE } from "./scheme";
 
-// A scene plays once this much of it is on screen, so a screen full of half-cut cards does not animate them all.
 const SHOWN = 0.3;
 
 // Main-thread milliseconds per second the scenes on screen may cost together while they play, measured in headless
@@ -13,7 +10,6 @@ const COST = 30;
 
 const posterOf = (img: HTMLImageElement) => img.dataset[img.dataset.scheme ?? scheme()];
 
-// Under another palette a still is the recolored scene held at its still frame, which follows light and dark by itself.
 export const still = (img: HTMLImageElement, { fade = false } = {}) => {
   img.dataset.want = "still";
   img.dataset.state = "still";
@@ -45,7 +41,6 @@ const near = new IntersectionObserver(
   { rootMargin: "500px 0px" },
 );
 
-// The scenes most on screen, nearest the middle of it, play first. The rest wait as stills.
 const ratio = new Map<HTMLImageElement, number>();
 
 const balance = () => {
@@ -66,8 +61,6 @@ const balance = () => {
       .filter((img) => {
         const cost = Number(img.dataset.cost ?? COST);
 
-        // The scene most on screen always plays, however much it costs, so a page whose big scene is alone in view
-        // still shows it moving. It leaves nothing for the rest.
         if (spent > 0 && spent + cost > BUDGET) return false;
         spent += cost;
 
@@ -100,9 +93,6 @@ scenes.forEach((img) => {
   if (!("manual" in img.dataset)) view.observe(img);
 });
 
-// Once the page has loaded, every scene and its still in the page's scheme download together in the background, so a
-// scene is in the cache before it is scrolled to or switched to. A fetch fills the HTTP cache without loading the SVG
-// as an image, which would start its clock. Readers who ask to save data are skipped.
 const warm = () => {
   // SAFETY: the Network Information API is missing from lib.dom, and Chromium is the only engine that has it, so every
   // field is optional.

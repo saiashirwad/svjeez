@@ -4,7 +4,6 @@ import { rect } from "svjeez/geometry";
 import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
-// Taylor polynomials of cos x around 0: each new term bends the polynomial to hug the curve a little further out.
 const W = 504;
 const H = 340;
 const D = 12;
@@ -23,7 +22,6 @@ const graph = plane({
 const { x: bx, y: by, w: bw, h: bh } = graph.bounds;
 const clip = def.clipPath({}, <rect x={bx} y={by} width={bw} height={bh} />);
 
-/** One polynomial per stage: its degree, its color, the TeX for the term it adds, and when it draws in. */
 const stages: { n: number; color: Color; op?: string; term: string; at: number }[] = [
   { n: 0, color: theme.base0A, term: "1", at: 2.4 },
   { n: 2, color: theme.base0B, op: "-", term: String.raw`\frac{x^2}{2!}`, at: 4.0 },
@@ -44,7 +42,6 @@ const taylor =
     return sum;
   };
 
-/** The half of P_n from 0 out towards `to`, stopping once it leaves the plot well behind. */
 const half = (f: (x: number) => number, to: number): string => {
   const steps = 160;
   let d = "";

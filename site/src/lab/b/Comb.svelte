@@ -38,7 +38,6 @@
     move: (p, from) => {
       const s = fit(params.stagger, anchor + (p.x - from.x) / (BEAT * 4));
 
-      // Near zero snaps to all at once.
       lab.update({ stagger: Math.abs(s) < 0.02 ? 0 : s });
     },
   });

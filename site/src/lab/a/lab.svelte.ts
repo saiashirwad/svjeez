@@ -1,4 +1,3 @@
-// Direction A: the scene's source is the control panel. Every edit recompiles a real svjeez SVG in a worker.
 import { createContext, untrack } from "svelte";
 import { seek, restyle } from "svjeez/page";
 import type { Compiled } from "@svjeez/live/compile";
@@ -14,7 +13,6 @@ import { readTimeline, type Bar, type Timeline } from "./timeline";
 interface Hot {
   readonly keys: ReadonlySet<string>;
   readonly lines: ReadonlySet<number>;
-  /** Where the `.to(…)` of the timeline bar under the pointer is in the source. */
   readonly step: number | null;
 }
 
@@ -52,10 +50,8 @@ declare global {
   }
 }
 
-/** What the panel turns into controls: every number, color and ease but a param's own options. */
 const live = (literal: Literal) => literal.kind !== "string" && !literal.param?.option;
 
-/** The keys of the elements line `n` shapes, read from the first thing written on it. */
 const keysForLine = (scene: Source, n: number): Set<string> => {
   const start = scene.lineStart(n);
   const line = scene.text.slice(start, scene.lineStart(n + 1));
@@ -66,7 +62,6 @@ const keysForLine = (scene: Source, n: number): Set<string> => {
   return new Set(madeBy(scene, start + indent).map((e) => e.key));
 };
 
-/** The lines of the opening tags of the elements with these keys. */
 const linesFor = (scene: Source, keys: Iterable<string>) => {
   const wanted = new Set(keys);
   const out = new Set<number>();
@@ -80,23 +75,18 @@ const linesFor = (scene: Source, keys: Iterable<string>) => {
 
 const NO_HOT: Hot = { keys: new Set(), lines: new Set(), step: null };
 
-/** Before the first compile there is no file to read a timeline from. */
 const NO_TIMELINE: Timeline = { duration: 6, rows: [] };
 
 type Compile = (source: string) => Promise<Compiled>;
 
-/** The download is the file render() writes without `sources`: the same bytes minus the one attribute it adds. */
 const strip = (svg: string) => svg.replaceAll(/ data-source="[^"]*"/g, "");
 
 export class Lab {
-  /** What the worker compiles. Every step of a drag edits it. */
   source = $state.raw(initial);
-  /** What the code panel shows: the source as of the last gesture's end, so a drag never rebuilds the token under the pointer. */
   shown = $state.raw(initial);
   #scene = $derived(parse(this.shown));
   lines = $derived(linesOf(this.#scene, live));
 
-  /** The last file that compiled, with `data-source` on every element, and the source it came from. */
   compiled = $state.raw({ svg: "", source: initial });
   svg = $derived(strip(this.compiled.svg));
   #timeline = $derived(
@@ -107,7 +97,6 @@ export class Lab {
 
   error = $state<string | null>(null);
   stats = $state.raw<Stats | null>(null);
-  /** The meadow compiled at build time, until the first file from the worker replaces it. */
   imgSrc = $state(meadow.src);
 
   /** The file's clock in seconds, and the page's in milliseconds, both set once a frame. */
@@ -116,7 +105,6 @@ export class Lab {
   paused = $state(false);
   /** Where the dots on every ease ride, 0 to 1, resting at the end for a beat before the next lap. */
   ride = $derived(clamp((((this.#ms / 1400) % 1.25) / 1.25) * 1.25, 0, 1));
-  /** The source lines of the steps under the playhead. */
   live = $derived.by(() => {
     const out = new Set<number>();
 
@@ -129,13 +117,10 @@ export class Lab {
   hot = $state.raw<Hot>(NO_HOT);
   hud = $state.raw<Hud | null>(null);
   ease = $state.raw<EaseEditor | null>(null);
-  /** A number or swatch is being dragged, which turns the whole page's cursor. */
   scrubbing = $state(false);
 
-  /** The paused twin of the picture, in a shadow root, for hit tests and highlight boxes. */
   ghost: ShadowRoot | undefined;
   #root: HTMLElement | undefined;
-  /** Any drag in the panel or the ease editor; hover linking waits for it to end. */
   #dragging = false;
   #seeking = false;
   #origin = 0;
@@ -146,7 +131,6 @@ export class Lab {
   #latencies: Latency[] = [];
   #queue: ((source: string) => void) | undefined;
 
-  /** Attach to the lab's root: starts the compiler and the frame loop. */
   start = (root: HTMLElement) =>
     untrack(() => {
       this.#root = root;
@@ -181,15 +165,11 @@ export class Lab {
     this.#ms = ms;
   }
 
-  // ----- editing
-
-  /** Replace `len` characters at `start` in the source and recompile. */
   edit(start: number, len: number, text: string) {
     this.source = this.source.slice(0, start) + text + this.source.slice(start + len);
     this.#schedule();
   }
 
-  /** The gesture ended: the panel re-reads the source, so every offset is fresh. */
   commit() {
     this.shown = this.source;
   }
@@ -228,8 +208,6 @@ export class Lab {
     this.hud = null;
   }
 
-  // ----- the ease editor
-
   openEase(anchor: Element, get: () => readonly number[], set: (p: number[]) => void) {
     this.closeEase();
     const W = 200;
@@ -252,12 +230,9 @@ export class Lab {
     this.commit();
   }
 
-  /** A handle in the ease editor is held. */
   holdEase(held: boolean) {
     this.#dragging = held;
   }
-
-  // ----- linking: lines, elements and timeline rows
 
   #setHot(keys: ReadonlySet<string>, lines: ReadonlySet<number>, step: number | null = null) {
     this.hot = keys.size || lines.size ? { keys, lines, step } : NO_HOT;
@@ -300,8 +275,6 @@ export class Lab {
     if (!this.#seeking) this.clearHot();
   }
 
-  // ----- clock: scrubbing the timeline pauses the file at that moment
-
   seekStart() {
     this.#seeking = true;
     this.paused = true;
@@ -323,8 +296,6 @@ export class Lab {
     this.paused = p;
     void this.#paintImg(this.#pausedAt);
   }
-
-  // ----- compile loop
 
   #schedule() {
     this.#editedAt = this.#editedAt || performance.now();
@@ -352,7 +323,6 @@ export class Lab {
     void this.#stats(result.ms);
   }
 
-  /** Swap the picture for a new file, starting it at the current moment so a drag never rewinds the loop. */
   #paintImg(t: number) {
     return new Promise<void>((resolve) => {
       const previous = this.#url;

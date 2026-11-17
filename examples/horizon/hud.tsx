@@ -2,13 +2,11 @@ import { def, draw, ease, enter, motion, type SvgNode, span, stagger } from "svj
 import { geist, mono } from "../gallery-style";
 import { C, D, H, T, W, envelope, on } from "./kit";
 
-/** The HUD is 12px JetBrains Mono, which advances 0.6em. */
 const SIZE = 12;
 const ADVANCE = 7.2;
 const LINE = 17;
 const EDGE = 48;
 
-/** The right-hand readouts are one block, left-aligned at the width of the longest line. */
 const RIGHT = W - EDGE - 29 * ADVANCE;
 
 function Typed({

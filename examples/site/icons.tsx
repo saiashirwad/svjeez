@@ -29,7 +29,6 @@ import {
 import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
-// Eight Tabler icons, each arriving its own way, then a few of them keep moving.
 const W = 504;
 const H = 340;
 const BAR = 40;
@@ -41,7 +40,6 @@ const CELL = W / 4;
 const ROWS = [BAR + 44, BAR + 156];
 const at = (index: number) => 0.5 + index * 0.24;
 
-/** Two quick beats, a strong one and a softer echo, from `start`. */
 const heartbeat = (m: Motion<"scale">, start: number) => {
   const [beat, back, echo, settle] = chain(span(start, 0.12), 0.16, 0.12, 0.3);
 
@@ -58,9 +56,7 @@ interface Cell {
   readonly label: string;
   readonly icon: IconData;
   readonly color: Color;
-  /** Moves the whole icon. */
   readonly motion?: Rest;
-  /** Runs on each path of the icon. */
   readonly paths?: (d: string, each: Each) => Stack<"opacity" | "draw">;
 }
 
@@ -136,7 +132,6 @@ const cells: readonly (readonly Cell[])[] = [
   ],
 ];
 
-/** The moon that the sun swaps for, in the same place. */
 const swapIn: Cell = {
   label: "",
   icon: moon,

@@ -1,5 +1,3 @@
-// Scene source as data, from one Lezer TSX parse: the literals an editor can change and what each one means, the JSX
-// elements, the consts and their uses, highlighting runs, and exact text edits that keep the rest of the file as it is.
 import type { SyntaxNode, Tree } from "@lezer/common";
 import { highlightTree, tagHighlighter, tags, type Tag } from "@lezer/highlight";
 import { parser as js } from "@lezer/javascript";
@@ -8,8 +6,6 @@ import { ease, type Ease, type Hex } from "svjeez";
 const parser = js.configure({ dialect: "jsx ts" });
 
 export type Range = readonly [from: number, to: number];
-
-// ----- highlighting
 
 /** The highlight classes, with the Lezer tags each covers. The most specific tag on a token wins. */
 export const KINDS = {
@@ -52,8 +48,6 @@ const runsOf = (tree: Tree): Run[] => {
 
   return out;
 };
-
-// ----- literals
 
 /** Where a literal sits, read from the node around it. Arithmetic around it (`-70`, `0.8 + i`) still sits there. */
 export type Role =
@@ -202,7 +196,6 @@ const pathOf = (src: string, literal: SyntaxNode): PathStep[] | undefined => {
     if (up.name === "ArrayExpression") path.unshift(items(up).findIndex((n) => n.from === at.from));
     else if (up.name === "Property") path.unshift(nameOfProperty(src, up));
     else if (up.name === "VariableDeclaration") {
-      // A const in a function is not unique to the file, so only a top-level one is a path's start.
       if (!isTopLevel(up)) return undefined;
       path.unshift(textOf(src, up.getChild("VariableDefinition")));
 
@@ -459,8 +452,6 @@ const literalsOf = (src: string, tree: Tree): Literal[] => {
   return keyed(out.sort((a, b) => a.range[0] - b.range[0]));
 };
 
-// ----- elements and consts
-
 export interface Attribute {
   readonly name: string;
   readonly range: Range;
@@ -593,8 +584,6 @@ export const parse = (text: string): Source => {
   };
 };
 
-// ----- lines for a code panel
-
 export type Piece =
   | { readonly kind: Kind; readonly start: number; readonly text: string }
   | {
@@ -661,8 +650,6 @@ export const linesOf = (
 
   return lines;
 };
-
-// ----- writing values back
 
 /** `v` to `decimals` places, with trailing zeros kept when `exact`. */
 const numberText = (v: number, decimals: number, exact = false) => {
@@ -795,8 +782,6 @@ export const literalAt = (source: Source, path: readonly PathStep[]): Literal | 
 export const paramLiteral = (source: Source, key: string): Literal | undefined =>
   source.literals.find((l) => l.param?.key === key && l.param.option === undefined);
 
-// ----- linking code to the elements it shapes
-
 const own = (source: Source, node: SyntaxNode) =>
   source.elements.filter((e) => e.builtin && e.range[0] >= node.from && e.range[1] <= node.to);
 
@@ -824,7 +809,6 @@ const made = (source: Source, node: SyntaxNode, seen: Set<string>): Element[] =>
   const params = paramsObject(source.text, source.tree);
   const key = paramEntry(source, node, params);
 
-  // A param is used wherever the scene reads `p.key`.
   if (key !== undefined) {
     if (seen.has(`params.${key}`)) return [];
     seen.add(`params.${key}`);
@@ -879,8 +863,6 @@ const made = (source: Source, node: SyntaxNode, seen: Set<string>): Element[] =>
 export const madeBy = (source: Source, offset: number): Element[] => [
   ...new Set(made(source, source.tree.resolveInner(offset, 1), new Set())),
 ];
-
-// ----- an element's motion
 
 /** Where a call's name sits: every call in a chain starts where the chain does, so this orders them. */
 const nameAt = (call: SyntaxNode) => call.firstChild!.lastChild!.from;

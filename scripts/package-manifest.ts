@@ -1,5 +1,3 @@
-// What every workspace package's build writes into package-dist/ beside its code: the package.json npm publishes, the
-// README and the LICENSE.
 import { copyFileSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 

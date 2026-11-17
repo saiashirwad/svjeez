@@ -9,7 +9,6 @@ const D = 9;
 
 const at = { x: MARGIN, y: 280, fontSize: 60, theme } as const;
 
-/** The square, then its expansion with the cross term named: a is blue, b is purple, and the 2 in the cross term is orange. */
 const paint = (c: string, s: string) => String.raw`\textcolor{${c}}{${s}}`;
 const [a, b] = [(s: string) => paint(hue.blue, s), (s: string) => paint(hue.purple, s)];
 const square = tex(String.raw`(${a("a")}+${b("b")})^2`, at);
@@ -19,7 +18,6 @@ const expanded = tex(
   at,
 );
 
-/** The square as a curve, with b fixed at 1. */
 const graph = plane({
   xRange: [-4, 2],
   yRange: [0, 9],

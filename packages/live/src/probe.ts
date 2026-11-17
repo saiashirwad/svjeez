@@ -1,5 +1,3 @@
-// What a number moves on the picture, found by drawing the file twice, once with the number nudged, and comparing where
-// each shape lands. It needs no annotation, so any scene gets a handle on whatever its numbers place or size.
 import { type Point } from "svjeez";
 import { restyle } from "svjeez/page";
 

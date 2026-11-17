@@ -12,7 +12,6 @@ const REST = 400;
 const BOB = 300;
 const PLOT = { x: 450, w: 700 };
 
-/** The spring and its plot share one function of time, so the weight and the playhead never drift apart. */
 /** The spring shot, written from 0 and lasting `over` seconds. */
 export const springShot = (over: number) => {
   const written = span(0.25, 0.9);
@@ -29,7 +28,6 @@ export const springShot = (over: number) => {
     .map((t, i) => `${i ? "L" : "M"}${plotX(t).toFixed(1)} ${(REST + spring(t)).toFixed(1)}`)
     .join("");
 
-  /** From the start of the shot until the weight has settled. */
   const swing = span(0).until(run.end + 0.05);
 
   const weight = sampled(swing, (t) => ({ y: spring(t) }), {
@@ -42,7 +40,6 @@ export const springShot = (over: number) => {
     tolerance,
   });
 
-  // The plot reveals left to right with time, so its tip stays under the playhead.
   const traced = def.clipPath(
     {},
     <rect
@@ -82,7 +79,6 @@ export const springShot = (over: number) => {
       <g clipPath={hung}>
         <g animation={weight}>
           <path d={`M${BOB} ${REST - 400}V${REST - 30}`} stroke={C.muted} strokeWidth={2} />
-          {/* The weight is Blip, bungee-jumping by its antenna. */}
           <Blip
             x={BOB}
             y={REST - 32 + 139 * 0.45}

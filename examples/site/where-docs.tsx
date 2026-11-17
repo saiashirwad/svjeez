@@ -2,7 +2,6 @@ import { ease, motion, render, span } from "svjeez";
 import { CSS, chrome, skeleton } from "./lib/kit";
 import { theme } from "../style";
 
-// A docs page: sidebar, text, and a diagram image whose packet keeps travelling.
 const W = 328;
 const H = 264;
 const D = 4;

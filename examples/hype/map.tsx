@@ -14,7 +14,6 @@ const map = project(countries, {
   filter: (f) => f.properties?.name !== "Antarctica",
 });
 
-// Every dot of land in one path: a zero-length run with a round cap draws a dot.
 const land = map
   .dots(2.4)
   .flatMap(({ point }) => (point ? [`M${point.x.toFixed(1)} ${point.y.toFixed(1)}h0`] : []))

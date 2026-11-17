@@ -1,4 +1,3 @@
-// What a readout under the picture says about the file the newest compile made, as labelled values.
 import type { PictureStats } from "./editor.ts";
 
 export interface Stat {

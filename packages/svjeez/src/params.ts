@@ -216,8 +216,6 @@ export type Handles<S extends Schema> = (values: Values<S>) => {
   readonly [K in NumberKeys<S>]?: Point;
 };
 
-// ----- reading untrusted values
-
 /** What JSON.parse returns: the shape untrusted values arrive in. */
 export type Json = null | boolean | number | string | readonly Json[] | JsonObject;
 

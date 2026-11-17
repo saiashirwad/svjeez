@@ -71,7 +71,6 @@ export interface DiagramOptions {
 
 export type Labelled = string | { readonly label: string; readonly role?: NodeRole };
 
-/** Whether a spec is a bare label, with no options to read. */
 export const isBareLabel = (spec: string | { readonly label: string }): spec is string =>
   typeof spec === "string";
 
@@ -95,7 +94,6 @@ export const tintOf = (
   tints?: Partial<Record<NodeRole, Color>>,
 ): Color => tints?.[role] ?? theme[SLOT[role]];
 
-/** The box a role needs around `label`. */
 export const sizeOf = (role: NodeRole, label: string, fontSize: number, font?: FontValue): Size => {
   const [w, h] = [textWidth(label, fontSize, font) + fontSize * 2.2, Math.round(fontSize * 2.8)];
 
@@ -126,10 +124,8 @@ export const POP = 0.35;
 export const popIn = (at: Seconds): Motion<"opacity" | "y"> =>
   enter({ at, over: POP }, { opacity: 0, y: 6 }, ease.out);
 
-/** Whether `play.at` is a start or a list, rather than a time per node. */
 const isBeats = (at: PlayAt<string>): at is Beats => typeof at === "number" || Array.isArray(at);
 
-/** What a part that is there from the start plays in. */
 export const INSTANT: Spanned = span(0, 0);
 
 /**
@@ -434,13 +430,11 @@ export const chip = (
   </g>
 );
 
-/** The knockout box an inline edge label needs. */
 export const labelSize = (text: string, fontSize: number, font?: FontValue): Size => ({
   w: textWidth(text, fontSize, font) + 10,
   h: Math.round(fontSize * 1.5),
 });
 
-/** The top-left corner that puts `anchor` of a `w` by `h` box on `(x, y)`. */
 export const corner = (
   w: number,
   h: number,
@@ -460,7 +454,6 @@ export const corner = (
   return { x: x - point.x, y: y - point.y };
 };
 
-/** Shifts layout geometry so `bounds` lands where `options` place it. */
 export const placer = (
   bounds: Box,
   options: { readonly x?: number; readonly y?: number; readonly anchor?: Anchor },
@@ -487,7 +480,6 @@ export type EdgeId<E> = E extends readonly [
   ? `${F}->${T}`
   : never;
 
-/** The part id of the edge from `from` to `to`. */
 export const edgeId = (from: string, to: string): string => `${from}->${to}`;
 
 /** The box around a line's points, and around its label when it has one. */

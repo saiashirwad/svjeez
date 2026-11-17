@@ -24,7 +24,6 @@ const state = (text: string): StateDoc => {
   return doc;
 };
 
-/** The message of the error that `parse` throws for `text`. */
 const message = (text: string): string => {
   try {
     parseMermaid(text);

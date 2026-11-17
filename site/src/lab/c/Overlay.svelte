@@ -4,10 +4,8 @@
   import { end, fly, HEIGHT, points, route, WIDTH } from "./flight";
   import { fmt, ghostTimes, legColor, trailPath } from "./view";
 
-  // The whole flight at once: a trail per leg, a dot every twelfth of a second, a handle on each point.
   const bench = getBench();
 
-  // Overlay units per CSS pixel, so handles and labels keep their size on a phone.
   let width = $state(736);
   const scale = $derived(Math.max(1, 736 / Math.max(1, width)));
 

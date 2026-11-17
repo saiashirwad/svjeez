@@ -21,7 +21,6 @@ const regular = body.face(400);
 const lineWidth = regular.measure(LINE, LINE_SIZE);
 const italicWidth = body.face(400, "italic").measure(ITALIC, LINE_SIZE);
 
-/** A face's name, small and centered under what is set in it. */
 const Name = ({ name, y, at }: { name: string; y: number; at: number }) => (
   <text
     x={W / 2}

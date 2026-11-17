@@ -1,6 +1,3 @@
-// A scene file being edited, as one state, the messages that change it and the work each change asks for, in the Elm
-// shape: `update` is pure and returns the next state with the commands to run, and `createEditor` runs them. Every
-// framework binds the same store, and an agent drives it with the same messages a drag sends.
 import { type Point } from "svjeez";
 import { restyle } from "svjeez/page";
 import type { Schema } from "svjeez/params";
@@ -356,7 +353,6 @@ export const update = (state: State, msg: Msg): [State, Cmd[]] => {
       // SAFETY: a message's value is typed by its key's kind, which is the kind of the value found by that key.
       const edit = value && editFor(value, msg.value as Settable[typeof value.kind]);
 
-      // What has no code to write leaves the file as it is.
       return edit ? edited(state, apply(state.text, [edit]), msg.continues) : [state, []];
     }
 
@@ -385,10 +381,8 @@ export const update = (state: State, msg: Msg): [State, Cmd[]] => {
     }
 
     case "select": {
-      // Selecting the selected value again keeps its measured grip.
       if (msg.key === state.selected) return [state, []];
 
-      // A key the file has no value for selects nothing.
       if (msg.key !== null && !valueOf(state, msg.key)) return [state, []];
       const selected = { ...state, selected: msg.key, grips: onlyDeclared(state.grips) };
 
@@ -404,7 +398,6 @@ export const update = (state: State, msg: Msg): [State, Cmd[]] => {
         ? reshown(state, { playing: false, at: timeAt(state.clock, msg.now) }, msg.now)
         : [state, []];
     case "seek": {
-      // A time before the start, or one that is not a number, is the start or nothing.
       if (Number.isNaN(msg.at)) return [state, []];
       const at = Math.max(0, msg.at);
 
@@ -462,8 +455,6 @@ export const update = (state: State, msg: Msg): [State, Cmd[]] => {
     }
   }
 };
-
-// ----- the runtime
 
 /** What a page can send: any message but the runtime's own, with the clock's `now` stamped on arrival. */
 export type Input =

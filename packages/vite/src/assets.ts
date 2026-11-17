@@ -1,8 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 
-// The files getScene() hands out URLs for. Scenes fill it as they compile, and the dev server and the build read it.
 // It lives on globalThis because the plugin and the pages that call getScene() load this module through different module graphs.
-// Each file carries its own way to make its bytes, so a poster renders only when something asks for it.
 
 export interface Asset {
   readonly type: string;

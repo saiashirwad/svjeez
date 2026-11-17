@@ -4,7 +4,6 @@ import { draw, ease, enter, motion, render, sampled, type Color, morph, span } f
 import { CSS, chrome, outro } from "./lib/kit";
 import { theme } from "../style";
 
-// Euler's formula: a point turns once round the unit circle, then stops at π, and the formula follows it to e^{iπ} + 1 = 0.
 const W = 504;
 const H = 340;
 const BAR = 40;
@@ -19,7 +18,6 @@ const COS = theme.base0D;
 const SIN = theme.base0B;
 const PI = theme.base09;
 
-/** The angle at time t: one full turn, then half a turn more to 3π, which is π. */
 const theta = (t: number): number => {
   const span = (from: number, over: number) => {
     const u = Math.min(1, Math.max(0, (t - from) / over));

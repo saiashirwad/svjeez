@@ -5,7 +5,6 @@ import { Labels } from "./labels";
 import { Follow, Live } from "./route";
 import { Terrain } from "./terrain";
 
-/** Everything that settles before the camera first moves. */
 function Atlas({ play }: { play: Play }): SvgNode {
   return (
     <>

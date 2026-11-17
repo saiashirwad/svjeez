@@ -311,7 +311,6 @@ describe.if(browser)("checkScene", () => {
       jsx("circle", { cx: 300, cy: 30, r: 6, fill: "#fff" }),
     );
 
-    // Without the development runtime there is no source to carry.
     expect((await checkScene(svg)).findings[0]?.source).toBeUndefined();
   });
 

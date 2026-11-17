@@ -15,11 +15,6 @@ import {
   type TagChannels,
 } from "svjeez";
 
-// Blip, from the site's favicon (site/public/favicon.svg), in the favicon's own coordinates: the body sits on y 162
-// and is centered on x 104, the antenna bulb on 104,38. Scenes place it with a transform and bring their own motions,
-// written on the clock around Blip, so a scene starts it with <Clip at> and never counts seconds inside it.
-// Feet are drawn only when a scene gives them motions.
-
 export const BLIP = {
   yellow: "#FFC21A",
   belly: "#F2A900",
@@ -86,7 +81,6 @@ export const blip = ({
   feet,
   cheek = BLIP.cheek,
 }: BlipMotions = {}) => {
-  // A blink swaps the open eye for a shut one, which costs a few bytes of keyframes where a morph costs a kilobyte.
   const open = blinks.reduce(
     (m, at) =>
       m.to({ opacity: 0 }, span(at, 0.04)).to({ opacity: 1 }, span(at, 0.04).next(0.08, 0.12)),
@@ -211,7 +205,6 @@ export const jumps = (hops: readonly Hop[]): Jumps => {
       .to({ [sx]: 0.95, [sy]: 1.07 }, rebound, ease.out)
       .to({ [sx]: 1, [sy]: 1 }, settle, ease.pop);
 
-    // The bulb lags the body on takeoff, then wobbles to rest on landing.
     const lag = span(start + 0.22, 0.08);
     const wobble = chain(span(land - 0.06, 0.06), 0.05, 0.08, 0.08, 0.08, 0.08);
 
@@ -251,7 +244,6 @@ export const waddle = (span: Span, dx: number, dy: number, steps: number): Walk 
 
   const travel = motion({ x: 0, y: 0 }).to({ x: dx, y: dy }, span, ease.linear);
 
-  // The body bobs up and down on every step, and rocks side to side, settling after the last.
   const halves = from(each.flatMap(() => [half, half]));
 
   const bob = each.reduce(
@@ -268,7 +260,6 @@ export const waddle = (span: Span, dx: number, dy: number, steps: number): Walk 
     )
     .to({ rotate: 0 }, strides[steps - 1]!.next(0.15));
 
-  // The feet take turns: the left lifts on even steps and stands through odd ones, the right the other way round.
   const foot = (side: number) => {
     const moves = each.flatMap((i): { over: number; y?: number; curve?: Ease }[] =>
       i % 2 === side

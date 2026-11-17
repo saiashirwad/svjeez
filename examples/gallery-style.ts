@@ -1,5 +1,3 @@
-// One look for every scene in the examples gallery. Scenes import from here so the cards read as one set.
-// Palette, fonts and the type scale come first, then the rules for layout and motion.
 import {
   css as cssTag,
   ease,

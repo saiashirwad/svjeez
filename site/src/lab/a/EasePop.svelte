@@ -8,7 +8,6 @@
   let { editor }: { editor: EaseEditor } = $props();
   const lab = getLab();
 
-  // Two handles, the curve, a dot riding it, and a ball that moves with only the eased value.
   const W = 200;
   const H = 240;
   const X = (u: number) => 20 + u * (W - 60);

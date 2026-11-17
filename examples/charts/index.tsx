@@ -22,10 +22,8 @@ const look = { theme, font: mono, fontSize: 12, grid: true } as const;
 const plain = tint(theme, "plain");
 const muted = tint(theme, "muted");
 
-// Opened is orange and merged is blue; the review time is purple, so each series has its own hue.
 const [orange, blue, violet] = [hue.orange, hue.blue, hue.purple];
 
-/** Left: pull requests opened and merged, side by side in each month. */
 const volume = chart({
   ...look,
   frame: rect(84, 196, 380, 290),
@@ -34,7 +32,6 @@ const volume = chart({
   data: [...pairs(months, opened), ...pairs(months, merged)],
 });
 
-/** Right: hours until the first review, by week. */
 const turnaround = chart({
   ...look,
   frame: rect(568, 196, 300, 290),

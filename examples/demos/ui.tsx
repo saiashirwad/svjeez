@@ -1,5 +1,4 @@
 /** @jsxImportSource react */
-// shadcn/ui components (MIT), trimmed to plain class strings, as an app would have them. Stateful, like real ones.
 import { AlertCircle, ArrowRight, Check, GitPullRequest } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import "../shadcn.css";
@@ -87,7 +86,6 @@ const Input = ({
   />
 );
 
-/** A sign-in form. Typing is its own state; the parent says when the server turned it down. */
 export function SignIn({ error }: { error?: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -139,7 +137,6 @@ export function SignIn({ error }: { error?: string }) {
   );
 }
 
-/** A pull request. Auto-merge is a switch the user flips; merging comes from outside. */
 export function PullRequest({ merged = false }: { merged?: boolean }) {
   const [auto, setAuto] = useState(false);
 

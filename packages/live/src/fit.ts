@@ -1,5 +1,3 @@
-// The math a control shares with a scene's params: where a value sits on a slider, how far a drag moves it, and
-// keeping a value in its range. The scene-facing kinds are in svjeez/params.
 import type { Point } from "svjeez";
 import type { NumberParam, Param, Schema, Values } from "svjeez/params";
 

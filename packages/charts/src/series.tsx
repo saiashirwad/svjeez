@@ -91,7 +91,6 @@ const finder =
     return found;
   };
 
-/** The box around every part. */
 const around = (parts: readonly Part[]): Rect =>
   parts.map((p) => p.box).reduce((a, b) => a.union(b));
 

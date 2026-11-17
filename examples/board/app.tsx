@@ -1,6 +1,4 @@
 /** @jsxImportSource react */
-// A small project board, as a team would ship it: a sidebar of projects, a cycle's progress, and a board of issues
-// with a command palette, a new-issue dialog, drag and drop and a status menu. All of it is real React state.
 import {
   Check,
   CircleDashed,
@@ -34,7 +32,6 @@ interface Issue {
   readonly label: Label;
   readonly who: string;
   readonly status: Status;
-  /** Order within a column, lowest first. */
   readonly rank: number;
 }
 
@@ -139,9 +136,7 @@ interface State {
   readonly issues: readonly Issue[];
   readonly palette?: string;
   readonly draft?: Draft;
-  /** The issue being dragged, and the column it is over. */
   readonly drag?: { readonly id: string; readonly over: Status };
-  /** The issue whose status menu is open. */
   readonly menu?: string;
   readonly toast?: string;
 }
@@ -162,7 +157,6 @@ type Msg =
 const matches = (query: string) =>
   COMMANDS.filter((c) => c.name.toLowerCase().includes(query.trim().toLowerCase()));
 
-/** Puts an issue on top of a column. */
 const moveTo = (issues: readonly Issue[], id: string, status: Status): Issue[] => {
   const top = Math.min(0, ...issues.flatMap((i) => (i.status === status ? [i.rank] : [])));
 
@@ -491,11 +485,9 @@ const Project = ({
   </div>
 );
 
-/** The board: a column per status, each with its cards. A card keeps its `data-key` wherever it goes, so it slides. */
 export function Board(): ReactNode {
   const [state, send] = useReducer(update, { issues: ISSUES });
 
-  // ⌘K anywhere opens the palette.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
@@ -509,7 +501,6 @@ export function Board(): ReactNode {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // While a card is held, the column under the pointer takes it, and letting go drops it there.
   const dragging = state.drag !== undefined;
 
   useEffect(() => {
@@ -541,7 +532,6 @@ export function Board(): ReactNode {
   const statusOf = (issue: Issue): Status =>
     state.drag?.id === issue.id ? state.drag.over : issue.status;
 
-  /** A column's cards, top first. A held card goes on top of the column it is over. */
   const cardsIn = (status: Status): Issue[] => {
     const rank = (i: Issue) =>
       state.drag?.id === i.id && i.status !== status ? -Infinity : i.rank;
@@ -664,6 +654,5 @@ export function Board(): ReactNode {
   );
 }
 
-/** Where the held card started, so its old column isn't marked as a drop target. */
 const statusOfIssue = (state: State): Status | undefined =>
   state.issues.find((i) => i.id === state.drag?.id)?.status;

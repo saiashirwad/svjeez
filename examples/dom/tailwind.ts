@@ -9,7 +9,6 @@ const decode = (text: string) =>
     (_, e: string) => ({ amp: "&", gt: ">", lt: "<", quot: '"', "#x27": "'", "#39": "'" })[e]!,
   );
 
-/** Builds the shadcn theme with Tailwind 4 for exactly the classes in `html`. */
 export const tailwind = async (html: readonly string[]): Promise<string> => {
   const dir = dirname(fileURLToPath(import.meta.url));
 

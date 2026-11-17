@@ -19,5 +19,4 @@ export const PLACES = {
   gull: { name: "Gullreach", at: { x: 700, y: Y(486) }, side: "right", kind: "port" },
 } as const satisfies Record<string, Place>;
 
-/** Mount Cinder, where the road ends. */
 export const CINDER: Point = { x: 772, y: Y(336) };

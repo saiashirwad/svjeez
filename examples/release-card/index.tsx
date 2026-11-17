@@ -1,5 +1,3 @@
-// A release announcement as a template: the version, a title and the highlights are params, so the same scene draws
-// every release. `svjeez svg release-card/index.tsx --params release-card/data.json` renders the one in data.json.
 import { ease, enter, motion, render, span, stagger } from "svjeez";
 import { defaults, list, text, type Values } from "svjeez/params";
 
@@ -22,7 +20,6 @@ export const params = {
 const D = 8;
 const PAD = 48;
 
-/** From the card's top edge: the first highlight's baseline. */
 const FIRST = 230;
 const BOX_WIDTH = WIDTH - 2 * MARGIN;
 
@@ -33,7 +30,6 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
   const rows = stagger(heading.next(0.5, 0.1), p.highlights.length, 0.18);
   const tagWidth = 28 + p.version.length * 13;
 
-  // The card is as tall as its content, centered on the page, and rows close up when five would overflow.
   const row = Math.min(
     54,
     (HEIGHT - 2 * MARGIN - FIRST - PAD) / Math.max(1, p.highlights.length - 1),
@@ -61,7 +57,6 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
           {...CARD}
           rx={RADIUS}
           fill={color.panel}
-          // A hairline `edge` vanishes against a light page; `faint` shows the card's outline in both schemes.
           stroke={color.faint}
           strokeWidth={1.5}
           animation={enter(card, { opacity: 0, scale: 0.98 }, ease.out)}

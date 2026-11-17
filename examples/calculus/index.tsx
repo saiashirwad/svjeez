@@ -3,8 +3,6 @@ import { draw, enter, exit, render, readout, span, stagger, type Span } from "sv
 import { rect } from "svjeez/geometry";
 import { css, mono, theme } from "../style";
 
-// Three ideas of calculus on three sets of axes: a secant collapsing into the tangent, Riemann sums refining
-// into the area, and one curve bending through the Taylor polynomials of cos x.
 const W = 960;
 const H = 540;
 const D = 15;
@@ -28,11 +26,9 @@ const heading = (i: number, formula: string) =>
 
 const fixed = (n: number) => (Math.abs(n) < 0.005 ? 0 : n).toFixed(2);
 
-/** The derivative: the secant through x and x + h, with h shrinking to 0, then the tangent sliding along. */
 const f = (x: number) => 2 + Math.sin(1.1 * x) + 0.15 * x;
 const slopeGraph = panel(0, [-3, 3], [0, 4]);
 const SECANT = span(1.8, 0.5);
-/** h shrinks to 0, then a beat later x slides along the curve. */
 
 const SHRINK = span(2.4, 3);
 const SLIDE = SHRINK.next(2.2, 1);
@@ -44,7 +40,6 @@ const secant = slopeGraph.secant(
   { length: 150, color: theme.base08 },
 );
 
-/** The integral: rectangles that split in two each stage, then the exact area under them. */
 const g = (x: number) => 0.4 + 0.3 * x * x;
 const areaGraph = panel(1, [0, 3], [0, 3.2]);
 const N = [2, 4, 8, 16, 32];
@@ -58,7 +53,6 @@ const sums = areaGraph.riemann(SPLITS, g, { from: 0.4, to: 2.8, n: N, color: the
 
 const exact = areaGraph.area(g, 0.4, 2.8, { color: theme.base0A, opacity: 0.45 });
 
-/** Taylor polynomials of cos x around 0, as one curve that bends into each next one. */
 const factorial = (k: number): number => (k <= 1 ? 1 : k * factorial(k - 1));
 
 const taylor = (n: number) => (x: number) => {
@@ -74,7 +68,6 @@ const DEGREES = [0, 2, 4, 6, 8, 10];
 const POLY = span(7.6, 0.6);
 const BENDS = stagger(POLY.next(0.8, 0.4), DEGREES.length - 1, 1);
 
-/** How many of `stages` are past halfway at `t`: the readouts change as each morph does. */
 const past = (stages: readonly Span[], t: number) =>
   stages.filter((s) => s.at + s.over / 2 <= t).length;
 
@@ -89,7 +82,6 @@ const poly = waveGraph.morph(BENDS, DEGREES.map(taylor), {
   animation: draw(POLY),
 });
 
-/** The headings and the axes arrive one panel after another. */
 const HEADINGS = stagger(span(0.3, 0.6), 3, 0.25);
 const PANELS = stagger(span(0.2, 0.6), 3, 0.25);
 

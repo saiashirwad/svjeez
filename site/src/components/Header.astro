@@ -11,7 +11,6 @@ interface Props {
 
 const { current, wide } = Astro.props;
 
-// Blip, from the favicon, alive: it blinks and hops on a long loop, and holds still for a reader who asks for less motion.
 const blip = getScene(mascot);
 
 const links = [
@@ -19,7 +18,6 @@ const links = [
   { href: "https://github.com/saiashirwad/svjeez", label: "GitHub" },
 ];
 
-// On the playground page the extra link would crowd a phone, so GitHub gives way.
 const optional = current === "play" ? ["GitHub"] : [];
 const SWATCH = ["base00", "base08", "base0B", "base0D", "base0E"] as const;
 const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}: light-dark(${light[slot]}, ${dark[slot]})`).join("; ");
@@ -39,7 +37,6 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
       ))
     }
     <div class="controls">
-      {/* Four palettes, one little color wheel each: click one to wear it. */}
       <div class="palettes" role="radiogroup" aria-label="Color palette">
         {
           PALETTES.map((p) => (
@@ -49,7 +46,6 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
           ))
         }
       </div>
-      {/* Light, system and dark on a slider, with Blip riding the knob. */}
       <div class="scheme" role="radiogroup" aria-label="Color scheme" data-at="system">
         <span class="knob" aria-hidden="true"><img src={blip.src} width="26" height="26" alt="" /></span>
         <button type="button" role="radio" aria-checked="false" data-scheme="light" aria-label="Light" title="Light"><span class="nav-ico" aria-hidden="true" set:html={sun()} /></button>
@@ -65,8 +61,6 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
   import { choose, palette } from "../scripts/palette";
   import { scheme, THEMECHANGE } from "../scripts/scheme";
 
-  // Each header icon is a svjeez scene held at its first frame. Pointing at its button plays it, and it always finishes
-  // the loop it is in before it rests, so it never freezes halfway. Every few seconds one of them plays on its own.
   const icons = [...document.querySelectorAll<HTMLElement>(".top .nav-ico")];
   const calm = matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -77,7 +71,6 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
   for (const icon of icons) {
     const host = icon.closest("a, button")!;
     host.addEventListener("pointerenter", () => play(icon));
-    // A loop has come round to its first frame: rest there unless the pointer is still on the button.
     icon.addEventListener("animationiteration", () => {
       if (!host.matches(":hover")) icon.removeAttribute("data-on");
     });
@@ -131,7 +124,6 @@ const swatches = ({ light, dark }: Palette) => SWATCH.map((slot, i) => `--s${i}:
     if (scheme() !== before) dispatchEvent(new Event(THEMECHANGE));
   });
 
-  // The palettes: a click wears one, and its wheel gives a happy spin.
   const wheels = [...document.querySelectorAll<HTMLButtonElement>(".palettes [data-palette]")];
   const mark = () => wheels.forEach((wheel) => wheel.setAttribute("aria-checked", String(wheel.dataset.palette === palette())));
 

@@ -86,7 +86,6 @@ const LABELS: Label[] = [
   },
 ];
 
-/** A label whose letters sit on a curve, each glyph turned to the curve's direction. */
 function Curved({
   text,
   size,
@@ -124,7 +123,6 @@ function Curved({
   );
 }
 
-/** A town, tower or port: its sign and its name, on the side that has room. */
 function Marker({ place, at, play }: { place: Place; at: number; play: Play }): SvgNode {
   const { x, y } = place.at;
 
@@ -163,7 +161,6 @@ function Marker({ place, at, play }: { place: Place; at: number; play: Play }): 
   );
 }
 
-/** Every name on the map. */
 export function Labels({ play }: { play: Play }): SvgNode {
   return (
     <>

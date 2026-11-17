@@ -1,5 +1,3 @@
-// A leaderboard as a template: the rows are a list param, sorted here, so any standings draw the same way.
-// `svjeez svg leaderboard/index.tsx --params leaderboard/data.json` renders the ones in data.json.
 import { ease, motion, readout, easeAt, render, span, stagger } from "svjeez";
 import { defaults, list, number, text, type Values } from "svjeez/params";
 
@@ -47,7 +45,6 @@ export default function build(p: Values<typeof params> = defaults(params)): stri
   const height = Math.min(56, (BOTTOM - TOP) / rows.length);
   const best = Math.max(1, rows[0]!.score);
   const arrive = stagger(span(0.6, 0.5), rows.length, 0.12);
-  // A row's bar and score start counting as the row arrives, so nothing sits at 0 waiting its turn.
   const grow = arrive.map((row) => span(row.at, 1.3));
   const out = motion({ opacity: 1 }).to({ opacity: 0 }, span(D - 1.4, 1), ease.inOut);
 

@@ -12,7 +12,6 @@ const SOURCE = `flowchart TD
   look -->|no| scene
   look -->|yes| svg((ship it))`;
 
-// Mermaid has no grammar in @svjeez/code, so one regex with a group per role colors this screen of it.
 const TOKEN =
   /(?<keyword>^flowchart|\bTD\b)|(?<string>\|[^|]*\|)|(?<punct>-->)|(?<fn>[([{]+[^)\]}]*[)\]}]+)/gm;
 
@@ -48,7 +47,6 @@ export const pipelineShot = (over: number) => {
     { at: 0.35, cps: 120, cursor: C.accent, blink: false },
   );
 
-  // The first node arrives with the line that names it; the rest follow `STEP` apart.
   const shown = typed.spans[1]!.at + typed.spans[1]!.over - 0.15;
 
   const chart = mermaid(SOURCE, {

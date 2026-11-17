@@ -1,11 +1,9 @@
-// The timeline, read back from the compiled file's CSS through the browser's own CSS parser, so it is the file's clock.
 import { callsIn, type Source } from "@svjeez/live/source";
 
 export interface Bar {
   readonly from: number;
   readonly to: number;
   readonly ease: readonly number[] | null;
-  /** Where the `.to(…)` that made this step is in the source, and its line. */
   readonly at: number;
   readonly line: number;
 }
@@ -22,7 +20,6 @@ export interface Timeline {
   readonly rows: readonly Row[];
 }
 
-/** CSSOM gives timing functions only as text, so the control points are read out of `cubic-bezier(…)`. */
 const easeOf = (timing: string): number[] | null => {
   if (timing === "linear") return [0, 0, 1, 1];
   const inside = /^cubic-bezier\((.*)\)$/.exec(timing)?.[1];
@@ -33,14 +30,12 @@ const easeOf = (timing: string): number[] | null => {
 const elementAt = (scene: Source, key: string) =>
   scene.elements.find((e) => e.builtin && e.key === key);
 
-/** Where each `.to(…)` in the element's animation is, and its line, in the order they run. */
 const stepsOf = (scene: Source, key: string) => {
   const el = elementAt(scene, key);
 
   return el ? callsIn(scene, el, "to").map(([at]) => ({ at, line: scene.lineAt(at) })) : [];
 };
 
-/** A row's name: the motion's `.label(…)`, else the name the element's fill reads, else its tag. */
 const nameOf = (scene: Source, key: string): string => {
   const el = elementAt(scene, key);
 
@@ -60,7 +55,6 @@ const nameOf = (scene: Source, key: string): string => {
 
 const seconds = (value: string) => (value ? parseFloat(value) : NaN);
 
-/** A keyframe's values, without its timing function, so two keyframes compare by what they show. */
 const valueOf = (style: CSSStyleDeclaration) =>
   [...style]
     .flatMap((p) =>
@@ -74,10 +68,6 @@ interface Stop {
   readonly ease: string;
 }
 
-/**
- * One row per animated class in `svg`, a file compiled with `render({ sources: true })` from `scene`, so each element
- * says which line of the scene made it.
- */
 export const readTimeline = (svg: string, scene: Source): Timeline => {
   const doc = new DOMParser().parseFromString(svg, "image/svg+xml");
   const sheet = new CSSStyleSheet();
@@ -148,7 +138,6 @@ export const readTimeline = (svg: string, scene: Source): Timeline => {
     rows.push({ cls, keys, label: nameOf(scene, key), bars });
   }
 
-  // Copies a map() made run on classes of their own, so rows that share an element are numbered.
   return {
     duration,
     rows: rows.map((r) => {

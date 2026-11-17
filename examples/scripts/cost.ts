@@ -8,7 +8,6 @@ const attr = (tag: string, name: string): string | undefined =>
 
 export const costOf = (svg: string): number => {
   const styles = [...svg.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]!).join("\n");
-  // The number of keyframes each class runs.
   const counts = new Map<string, number>();
 
   for (const m of styles.matchAll(/\.([\w-]+)\{animation-name:([^;}]*)/g))

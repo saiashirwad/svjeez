@@ -78,7 +78,6 @@ export interface Flowchart<
   readonly layers: { readonly under: SvgNode; readonly over: SvgNode };
 }
 
-/** Laid-out boxes and lines, shifted into place. */
 interface Laid<N extends string> {
   readonly boxes: ReadonlyMap<string, Rect>;
   readonly lines: readonly {
@@ -277,7 +276,6 @@ export function flowchart<
 
 const cross = (b: Rect, direction: Direction = "TB") => (direction === "TB" ? b.x : b.y);
 
-/** Layered layout, shifted to `x`/`y`, with each edge's ends moved onto its nodes' outlines. */
 const lay = <N extends string>(
   input: Parameters<typeof layered>[0],
   roles: ReadonlyMap<string, NodeRole>,
@@ -311,7 +309,6 @@ const lay = <N extends string>(
   };
 };
 
-/** `edge` and `route` over laid-out lines. */
 const paths = <N extends string>(lines: Laid<N>["lines"], boxes: ReadonlyMap<string, Rect>) => {
   const edge = (from: N, to: N): Point[] => {
     const line = lines.find((l) => l.from === from && l.to === to);

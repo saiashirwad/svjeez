@@ -5,7 +5,6 @@ import type { Genome } from "./genome";
 import type { Layout } from "./layout";
 import { r1, type Cx } from "./look";
 
-/** When the specimen melts, and when it springs back. */
 export const MELT = span(0.6, 2.4);
 const REBOUND = span(5.2, 1.4);
 
@@ -14,11 +13,9 @@ export const meltMotion = (d: Pt) =>
     .to({ x: r1(d.x), y: r1(d.y) }, MELT, ease.inOut)
     .to({ x: 0, y: 0 }, REBOUND, ease.pop);
 
-/** A scale that shrinks while the specimen melts and comes back with the rebound. */
 export const meltScale = (to: number) =>
   motion({ scale: 1 }).to({ scale: to }, MELT, ease.inOut).to({ scale: 1 }, REBOUND, ease.pop);
 
-/** Visibility of a part at w in the fourth dimension as the slice sweeps through it. */
 export const sliceAt = (slice: number, w: number, t: number) => {
   const plane = (slice * 2 - 1) * 0.7 + 0.75 * Math.sin((Math.PI * 2 * t) / DURATION);
 
@@ -46,15 +43,12 @@ export const walk = (g: Genome, i: number) => {
   ).loop(1);
 };
 
-/** Tail `i` sways about its root. */
 export const wag = (g: Genome, i: number) =>
   wiggle({ rotate: 13 }, { seed: `tail${g.seed}-${i}`, rate: 1.1, period: 4 });
 
-/** The part's own motions: melting toward the floor, or flickering through the slice. */
 export const partMotion = (cx: Cx, p: Pt, w: number) =>
   cx.f.liquid ? meltMotion(meltBy(cx.lay, p)) : cx.f.four ? sliced(cx.g.slice, w) : undefined;
 
-/** The body's thickness is a registered property, so one motion on it swells every stroke at once. */
 export const breathing = (cx: Cx) => {
   const breath = css.property("breath", { syntax: "number", inherits: true, initial: 1 });
   const { f, g } = cx;

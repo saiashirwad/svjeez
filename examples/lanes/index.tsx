@@ -44,7 +44,6 @@ const run = lanes(
     scale: 100,
     fontSize: 16,
     play: { at: 0.2 },
-    // The lead is blue, the workers purple and cyan, and the test lane's checks orange.
     tints: {
       input: hue.blue,
       task: hue.purple,

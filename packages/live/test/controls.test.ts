@@ -29,8 +29,6 @@ describe("data params", () => {
       ),
     });
 
-    // The title is the one string a control edits; a list's strings are data, edited in the source. The list's own min
-    // and max are options of a param, so they are left out.
     expect(values.filter((v) => v.kind !== "number")).toMatchObject([
       { kind: "text", key: "params.title", label: "title", maxLength: 24 },
     ]);

@@ -37,7 +37,6 @@ interface Op {
   readonly label?: string;
 }
 
-/** The node at the start of `s`, and what is left after it. */
 const readRef = (l: Line, s: string): [Ref, string] => {
   const id = /^\w+/.exec(s)?.[0];
 

@@ -5,7 +5,6 @@
   import { easePoints } from "./util";
   import { ease, type Ease } from "svjeez";
 
-  // One control per param a scene declares, drawn from the schema alone. Sliders run on the param's own scale.
   let {
     schema,
     values,

@@ -1,9 +1,6 @@
 import { Ink, Once, ease, render } from "svjeez";
 import { lettering, marker } from "./cue";
 
-// "your agent", handwritten in the examples page's headline after "you" is scratched out. The site inlines it and colors
-// it with the accent: the ink is `currentColor`.
-
 const W = 200;
 const H = 60;
 const DELAY = 1.05;

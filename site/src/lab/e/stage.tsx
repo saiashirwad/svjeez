@@ -69,7 +69,6 @@ export const stage = (cx: Cx, creature: () => Child): Child => {
   return creature();
 };
 
-/** The hat that drops over the first head. */
 export const magicHat = (cx: Cx) => {
   const { g, lay } = cx;
   const first = lay.heads[0];
@@ -133,7 +132,6 @@ export const quirkWord = (cx: Cx) => {
   );
 };
 
-/** The scale bar in the corner. */
 export const unitBar = (cx: Cx) => {
   const bar = CAT * cx.lay.scale;
   const x = W - 22 - bar;

@@ -20,7 +20,6 @@ const quarter = motion({ rotate: 0 }).to({ rotate: 90 }, span(0, 1), ease.linear
 const scene = (child: Child) =>
   render({ width: 100, height: 100, duration: 2, title: "Pivot" }, child);
 
-/** Where the box's center lands at `time`, in the scene's px. */
 const centerAt = async (svg: string, time: number) => {
   const page = await openScene(svg);
 

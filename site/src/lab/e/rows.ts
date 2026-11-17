@@ -12,7 +12,6 @@ import {
 import type { Part } from "./edit";
 import { PALETTES } from "./palette";
 
-/** Each part's icon in the bin, drawn in a 32×32 box. The carried copy uses the same path. */
 export const PART_ICONS: Record<Part, string> = {
   heads: "M7 20a9 8 0 1 0 18 0a9 8 0 1 0-18 0M8 15l1-9 6 5M24 15l-1-9-6 5",
   ears: "M9 24l7-16 7 16z",
@@ -63,7 +62,6 @@ const swatch = (fur: Fur) => {
   return base;
 };
 
-/** How an option button shows its value: the word, an icon path in a 24×24 box, or a fur swatch's background. */
 type Face =
   | { readonly kind: "word" }
   | { readonly kind: "icon"; readonly d: string }
@@ -78,7 +76,6 @@ interface Row {
   readonly gene: ChoiceKey;
   readonly label: string;
   readonly options: readonly Option[];
-  /** The number genes scrubbed beside the row's buttons. */
   readonly scrub: readonly NumericKey[];
 }
 
@@ -93,7 +90,6 @@ const swatches: Option[] = SPEC.fur.options.map((value) => ({
   face: { kind: "swatch", background: swatch(value) },
 }));
 
-/** One row per choice gene. */
 export const ROWS: readonly Row[] = [
   {
     gene: "plan",
@@ -131,9 +127,7 @@ const UNITS: Partial<Record<NumericKey, (v: number, g: Genome) => string>> = {
   ink: (v) => (v < 0.05 ? "steady line" : `${v.toFixed(1)} boil`),
 };
 
-/** A scrub's readout. */
 export const readout = (key: NumericKey, g: Genome) => UNITS[key]?.(g[key], g) ?? String(g[key]);
 
-/** A scrub that means nothing for this genome is off: the w slice outside 4D, oidness on a plain cat. */
 export const scrubOff = (key: NumericKey, g: Genome) =>
   (key === "slice" && g.dimension !== "4d") || (key === "oidness" && g.oid === "cat");

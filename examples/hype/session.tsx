@@ -18,7 +18,6 @@ import { mono, theme } from "../style";
 import { COLD } from "./cold";
 import { C, Blip, Shot, show } from "./kit";
 
-// Everything here is written from 0, on the clock of a <Shot> that starts when the cold open ends.
 const FS = 15;
 const ROW = FS * 1.6;
 
@@ -52,7 +51,6 @@ const bold = (content: string, color: Color = C.ink): CodePiece => ({
 
 const width = (text: string) => mono.measure(text, FS);
 
-/** Claude's spinner glyph: a six-spoke asterisk that breathes as it turns. */
 const asterisk = (x: number, y: number, animation?: Stack<"rotate" | "scale">) => (
   <g transform={`translate(${x} ${y})`}>
     <path
@@ -71,7 +69,6 @@ const split = BOX.x + BOX.w * 0.56;
 const centerAt = (text: string, row: number, piece: (text: string) => CodePiece = (t) => t) =>
   sayAt([piece(text)], row, BOX.x + (split - BOX.x) / 2 - width(text) / 2);
 
-/** The welcome card's mascot is Blip, blinking up at the reader. */
 const mascot = (row: number) => (
   <Blip
     x={BOX.x + (split - BOX.x) / 2}
@@ -153,7 +150,6 @@ const ask = typewriter(
 
 const SENT = ask.span.end + 0.3;
 
-/** One transcript line: where it sits, when it shows, what it draws. */
 type Line = { row: number; at: number; node: SvgNode };
 
 const lines: Line[] = [];
@@ -292,7 +288,6 @@ reply(R + 14.2, DONE_AT, [
 
 export const TERM = { at: COLD.at + COLD.over, over: DONE_AT + 1.6 };
 
-// The input box follows the transcript down, and the whole session scrolls once it outgrows the window.
 const spinning = (t: number) => t >= SENT && t < DONE_AT;
 
 const bottom = (t: number) =>
@@ -306,7 +301,6 @@ const beats = [...new Set([welcomeAt, SENT, ...lines.map((l) => l.at), DONE_AT])
   .filter((t) => t >= welcomeAt)
   .sort((a, b) => a - b);
 
-// Every follower eases over the same span, so the input box holds still on screen while the session scrolls under it.
 const follow = (y: (t: number) => number, over = 0.25): Motion<"y"> =>
   beats.reduce(
     (track, t, i) =>

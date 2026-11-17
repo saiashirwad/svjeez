@@ -1,4 +1,3 @@
-// A demo of the app's real Svelte component: what happens to it, as data. recordings() films it.
 import { click, demo, hover, snap, wait } from "@svjeez/dom/svelte";
 import Notifications from "./Notifications.svelte";
 
@@ -17,7 +16,6 @@ export const notifications = demo(Notifications, { width: 380 }, ({ props }) => 
   hover("save"),
   snap("hover", { over: 0.15 }),
   wait(0.3),
-  // The server confirms: the parent passes `saved`, and the switches keep their state.
   props({ saved: true }),
   snap("saved", { over: 0.25 }),
   wait(1.6),

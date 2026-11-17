@@ -470,7 +470,6 @@ describe("parts", () => {
     expect(window(chart.part("c").span)).toEqual([1, 1.35]);
     expect(window(chart.part("a").span)).toEqual([2, 2.35]);
     expect(window(chart.part("b").span)).toEqual([0, 0]);
-    // The edge from a to b draws on as a appears, which ends the reveal.
     expect(chart.span.end).toBeCloseTo(2.4, 6);
     expect(
       render({ width: 400, height: 400, duration: 3, title: "Schedule" }, [chart.node]),
@@ -531,7 +530,6 @@ describe("parts", () => {
     );
 
     expect(team.parts.map((p) => p.id)).toEqual(["r", "k", "j", "r->k", "r->j"]);
-    // An edge draws on just before its child pops in.
     expect(team.part("r->k").span.end).toBeCloseTo(team.part("k").span.at, 6);
     expect(team.part("r->j").box.y).toBeGreaterThanOrEqual(team.part("r").box.y);
     // @ts-expect-error: k is not j's parent

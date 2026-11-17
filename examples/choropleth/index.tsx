@@ -29,7 +29,6 @@ const map = project(countries, {
   filter: (f) => f.properties?.name !== "Antarctica",
 });
 
-/** Classes five years wide from 35 to 85, so each edge of the legend is a round number. */
 const scale = sequential(palettes.viridis, { domain: [35, 85], steps: 10, empty: "#2a343f" });
 
 const FIRST = 0.6;
@@ -58,7 +57,6 @@ const circles = cartogram({ at: CARTOGRAM, over: MORPH }, map, POPULATION, {
   fill: (region) => scale(lifeNow[region.id] ?? NaN),
 });
 
-// Ten bars start 0.07s apart, each taking MORPH, so the last lands 9 * 0.07s after the first.
 const bars = toBars({ at: BARS, over: MORPH + 9 * 0.07 }, map, POPULATION, {
   stagger: 0.07,
   frame: rect(580, 150, 300, 300),
@@ -66,7 +64,6 @@ const bars = toBars({ at: BARS, over: MORPH + 9 * 0.07 }, map, POPULATION, {
   fill: (region) => scale(lifeNow[region.id] ?? NaN),
 });
 
-/** The map stays under the shapes and fades while they take over, so no region pops. */
 const mapShown = motion({ opacity: 1 })
   .to({ opacity: 0 }, span(CARTOGRAM, MORPH * 0.6))
   .to({ opacity: 1 }, span(BARS - 0.8, 0.6))
@@ -123,7 +120,6 @@ const Year = (): SvgNode => (
   </g>
 );
 
-/** Names on the biggest circles, once they have landed. */
 const Names = (): SvgNode => (
   <g
     fontFamily={SANS}
