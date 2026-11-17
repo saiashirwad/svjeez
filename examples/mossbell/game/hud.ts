@@ -1,36 +1,8 @@
+import { createSprite, framed, type Paint } from "@svjeez/play";
 import { CROPS, type CropKind } from "../art/crops";
-import type { Look } from "../art/character";
-import { createSprite } from "../play/sprite";
-import { el, frameOf } from "./dom";
+import { KINDS, type Hud, type Msg } from "./rules";
 import { cropIcon, villagerSheet } from "./sheets";
-
-export const KINDS: readonly CropKind[] = ["turnip", "carrot", "pumpkin"];
-
-export interface Pack {
-  readonly coins: number;
-  readonly crops: { readonly [K in CropKind]: number };
-}
-
-export interface Hud {
-  clock(hour: number, day: number): void;
-  pack(pack: Pack): void;
-  seed(kind: CropKind): void;
-  /** What the action key would do, or nothing to hide the hint. */
-  prompt(text: string | undefined): void;
-  /** A line of narration that fades on its own. */
-  toast(text: string): void;
-  /** Open a conversation. The lines show one at a time, and `advance` moves on. */
-  say(name: string, look: Look, lines: readonly string[]): void;
-  talking(): boolean;
-  /** Finish typing the line, show the next, or close after the last. */
-  advance(): void;
-  show(visible: boolean): void;
-}
-
-export interface HudActions {
-  pickSeed(kind: CropKind): void;
-  openWardrobe(): void;
-}
+import { el, openWardrobe } from "./wardrobe";
 
 const hourText = (hour: number): string => {
   const whole = Math.floor(hour);
@@ -40,9 +12,24 @@ const hourText = (hour: number): string => {
 };
 
 const icon = (kind: CropKind): SVGSVGElement =>
-  frameOf(createSprite(cropIcon(kind)).node, "-24 -24 48 48");
+  framed(createSprite(cropIcon(kind)), { x: -24, y: -24, width: 48, height: 48 });
 
-export const createHud = (host: HTMLElement, actions: HudActions): Hud => {
+/** Call `change` with a value only when it differs from the last one given. */
+const onChange = <Value>(change: (value: Value) => void): ((value: Value) => void) => {
+  let last: { readonly value: Value } | undefined;
+
+  return (value) => {
+    if (last && last.value === value) return;
+    last = { value };
+    change(value);
+  };
+};
+
+/**
+ * The page around the world: the clock, the pack, the seeds, hints, talk and the wardrobe. It is built once, and what
+ * it returns paints a frame's hud, touching only the parts whose data changed.
+ */
+export const createHud = (host: HTMLElement, send: (msg: Msg) => void): Paint<Hud> => {
   const time = el("span", "");
   const sky = el("span", "sky");
   const coins = el("span", "");
@@ -54,17 +41,14 @@ export const createHud = (host: HTMLElement, actions: HudActions): Hud => {
   const face = el("div", "face");
   const who = el("div", "who");
   const line = el("p", "");
-  const more = el("span", "more", "E");
-  const dialog = el("div", "dialog", face, el("div", "words", who, line), more);
+  const dialog = el("div", "dialog", face, el("div", "words", who, line), el("span", "more"));
   const wardrobe = el("button", "chip button", "Wardrobe");
-  let lines: readonly string[] = [];
+  const hotbar = el("div", "hotbar");
   let typed = 0;
   let typing = 0;
-  let fading = 0;
+  let panel: HTMLElement | undefined;
 
-  wardrobe.addEventListener("click", actions.openWardrobe);
-
-  const hotbar = el("div", "hotbar");
+  wardrobe.addEventListener("click", () => send({ type: "wardrobe" }));
 
   for (const [index, kind] of KINDS.entries()) {
     const slot = el(
@@ -75,7 +59,7 @@ export const createHud = (host: HTMLElement, actions: HudActions): Hud => {
       el("span", "name", `${CROPS[kind].name} seeds`),
     );
 
-    slot.addEventListener("click", () => actions.pickSeed(kind));
+    slot.addEventListener("click", () => send({ type: "seed", kind }));
     slots.set(kind, slot);
     hotbar.append(slot);
   }
@@ -107,80 +91,91 @@ export const createHud = (host: HTMLElement, actions: HudActions): Hud => {
 
   host.append(root);
 
-  const type = (): void => {
-    const text = lines[0] ?? "";
+  const clock = onChange((text: string) => {
+    time.textContent = text;
+  });
 
-    typed = Math.min(text.length, typed + 2);
-    line.textContent = text.slice(0, typed);
+  const night = onChange((dark: boolean) => sky.classList.toggle("night", dark));
 
-    if (typed >= text.length) clearInterval(typing);
-  };
+  const pack = onChange((held: Hud["pack"]) => {
+    coins.textContent = String(held.coins);
 
-  const open = (): void => {
-    typed = 0;
+    for (const kind of KINDS) {
+      const count = counts.get(kind);
+
+      if (count) count.textContent = String(held.crops[kind]);
+    }
+  });
+
+  const seed = onChange((picked: CropKind) => {
+    for (const [kind, slot] of slots) slot.classList.toggle("picked", kind === picked);
+  });
+
+  const prompt = onChange((text: string | undefined) => {
+    hint.classList.toggle("shown", text !== undefined);
+
+    if (text !== undefined) hintText.textContent = text;
+  });
+
+  const told = onChange((text: string | undefined) => {
+    toast.classList.toggle("shown", text !== undefined);
+
+    if (text !== undefined) toast.textContent = text;
+  });
+
+  const speaker = onChange((name: string | undefined) => {
+    dialog.classList.toggle("shown", name !== undefined);
+
+    if (name !== undefined) who.textContent = name;
+  });
+
+  const portrait = onChange((look: string | undefined) => {
+    if (look === undefined) return;
+    const sprite = createSprite(villagerSheet(JSON.parse(look)));
+
+    sprite.show("idle-down");
+    face.replaceChildren(framed(sprite, { x: -27, y: -96, width: 54, height: 54 }));
+  });
+
+  const speech = onChange((text: string | undefined) => {
     clearInterval(typing);
+    typed = 0;
+
+    if (text === undefined) return;
+
+    const type = (): void => {
+      typed = Math.min(text.length, typed + 2);
+      line.textContent = text.slice(0, typed);
+
+      if (typed >= text.length) clearInterval(typing);
+    };
+
     typing = window.setInterval(type, 24);
     type();
-  };
+  });
 
-  return {
-    clock(hour, day) {
-      const night = hour < 5.5 || hour >= 20.5;
+  const dressing = onChange((open: boolean) => root.classList.toggle("hidden", open));
 
-      time.textContent = `Day ${day} · ${hourText(hour)}`;
-      sky.classList.toggle("night", night);
-    },
-    pack(pack) {
-      coins.textContent = String(pack.coins);
+  return (hud) => {
+    clock(`Day ${hud.day} · ${hourText(hud.hour)}`);
+    night(hud.hour < 5.5 || hud.hour >= 20.5);
+    pack(hud.pack);
+    seed(hud.seed);
+    prompt(hud.prompt);
+    told(hud.toast);
+    speaker(hud.talk?.name);
+    portrait(hud.talk && JSON.stringify(hud.talk.look));
+    speech(hud.talk?.text);
+    dressing(hud.wardrobe !== undefined);
 
-      for (const kind of KINDS) {
-        const count = counts.get(kind);
+    if (hud.wardrobe && !panel)
+      panel = openWardrobe(host, hud.wardrobe.villager, hud.wardrobe.first, (villager) =>
+        send({ type: "dress", villager }),
+      );
 
-        if (count) count.textContent = String(pack.crops[kind]);
-      }
-    },
-    seed(kind) {
-      for (const [of, slot] of slots) slot.classList.toggle("picked", of === kind);
-    },
-    prompt(text) {
-      hint.classList.toggle("shown", text !== undefined);
-
-      if (text !== undefined) hintText.textContent = text;
-    },
-    toast(text) {
-      toast.textContent = text;
-      toast.classList.add("shown");
-      clearTimeout(fading);
-      fading = window.setTimeout(() => toast.classList.remove("shown"), 2600);
-    },
-    say(name, look, said) {
-      const portrait = createSprite(villagerSheet(look));
-
-      portrait.show("idle-down");
-      face.replaceChildren(frameOf(portrait.node, "-27 -96 54 54"));
-      who.textContent = name;
-      lines = said;
-      dialog.classList.add("shown");
-      open();
-    },
-    talking: () => lines.length > 0,
-    advance() {
-      const text = lines[0] ?? "";
-
-      if (typed < text.length) {
-        typed = text.length;
-        type();
-
-        return;
-      }
-
-      lines = lines.slice(1);
-
-      if (lines.length > 0) open();
-      else dialog.classList.remove("shown");
-    },
-    show(visible) {
-      root.classList.toggle("hidden", !visible);
-    },
+    if (!hud.wardrobe && panel) {
+      panel.remove();
+      panel = undefined;
+    }
   };
 };

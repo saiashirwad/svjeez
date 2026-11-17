@@ -40,3 +40,16 @@ export const walk = (from: Point, by: Point, terrain: Terrain): Point => {
 };
 
 export const distance = (a: Point, b: Point): number => Math.hypot(a.x - b.x, a.y - b.y);
+
+/** True when a point is in an area. The left and top edges are in, the right and bottom are out. */
+export const within = ({ x, y, width, height }: Area, at: Point): boolean =>
+  at.x >= x && at.x < x + width && at.y >= y && at.y < y + height;
+
+/** A seeded number from 0 up to 1, and the seed for the next one. Pure, so a model can carry its own luck. */
+export const roll = (seed: number): readonly [value: number, next: number] => {
+  const next = (seed + 0x6d2b79f5) | 0;
+  const mixed = Math.imul(next ^ (next >>> 15), 1 | next);
+  const again = (mixed + Math.imul(mixed ^ (mixed >>> 7), 61 | mixed)) ^ mixed;
+
+  return [((again ^ (again >>> 14)) >>> 0) / 4294967296, next];
+};

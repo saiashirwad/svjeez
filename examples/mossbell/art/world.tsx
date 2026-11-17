@@ -13,7 +13,7 @@ import {
   type Point,
   type SvgNode,
 } from "svjeez";
-import type { Area } from "../play/walk";
+import type { Area, World as Backdrop } from "@svjeez/play";
 import { shade, type Hex } from "./color";
 import { DAY, daylight } from "./daylight";
 import { canvas, Flipbook, Pixels, PX, sketch, type Canvas } from "./pixel";
@@ -96,13 +96,8 @@ interface Thing {
   readonly lights?: readonly (readonly [x: number, y: number, r: number])[];
 }
 
-/** A rendered world and what the game needs to know about it. */
-export interface World {
-  readonly svg: string;
-  readonly width: number;
-  readonly height: number;
-  /** Everything that blocks walking: water and the foot of each thing. */
-  readonly solids: readonly Area[];
+/** Mossbell as a world to play in, and what the game needs to know about it. */
+export interface World extends Backdrop {
   /** The top left corner of every square of soil. */
   readonly soil: readonly Point[];
   readonly places: {

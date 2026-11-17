@@ -1,0 +1,33 @@
+{
+  "name": "@svjeez/play",
+  "version": "0.6.1",
+  "private": true,
+  "description": "Small games on svjeez scenes: a pure update over a model, a view that returns sprites as data, and a runtime that draws them into a rendered world.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/play"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "bun test --conditions @svjeez/source",
+    "typecheck": "tsc --noEmit",
+    "build:package": "bun ../../scripts/package-plugin.ts",
+    "test:package": "bun ../../scripts/package-plugin-check.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "svjeez": "workspace:*",
+    "typescript": "latest"
+  },
+  "peerDependencies": {
+    "svjeez": ">=0.6.0 <1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

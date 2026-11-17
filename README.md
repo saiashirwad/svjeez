@@ -97,6 +97,7 @@ Each package runs while the scene compiles, so the SVG still carries no script.
 - [`@svjeez/icons`](https://github.com/saiashirwad/svjeez/tree/main/packages/icons): Tabler and Lucide icons
 - [`@svjeez/video`](https://github.com/saiashirwad/svjeez/tree/main/packages/video): MP4 or WebM from a scene
 - [`@svjeez/vite`](https://github.com/saiashirwad/svjeez/tree/main/packages/vite), [`@svjeez/astro`](https://github.com/saiashirwad/svjeez/tree/main/packages/astro): scenes compiled into a Vite app or Astro site
+- [`@svjeez/play`](https://github.com/saiashirwad/svjeez/tree/main/packages/play): small games on svjeez scenes, with a pure update and a view that returns sprites as data
 - [`@svjeez/live`](https://github.com/saiashirwad/svjeez/tree/main/packages/live), [`@svjeez/react`](https://github.com/saiashirwad/svjeez/tree/main/packages/react), [`@svjeez/svelte`](https://github.com/saiashirwad/svjeez/tree/main/packages/svelte): the scene editor, with a control on every value
 
 ## Where it plays

@@ -27,6 +27,7 @@
         "@svjeez/live": "workspace:*",
         "@svjeez/math": "workspace:*",
         "@svjeez/mermaid": "workspace:*",
+        "@svjeez/play": "workspace:*",
         "@svjeez/react": "workspace:*",
         "@svjeez/video": "workspace:*",
         "@tailwindcss/node": "^4.3.5",
@@ -258,6 +259,18 @@
       "dependencies": {
         "@svjeez/diagrams": "workspace:*",
       },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "svjeez": "workspace:*",
+        "typescript": "latest",
+      },
+      "peerDependencies": {
+        "svjeez": ">=0.6.0 <1",
+      },
+    },
+    "packages/play": {
+      "name": "@svjeez/play",
+      "version": "0.6.1",
       "devDependencies": {
         "@types/bun": "latest",
         "svjeez": "workspace:*",
@@ -899,6 +912,8 @@
     "@svjeez/math": ["@svjeez/math@workspace:packages/math"],
 
     "@svjeez/mermaid": ["@svjeez/mermaid@workspace:packages/mermaid"],
+
+    "@svjeez/play": ["@svjeez/play@workspace:packages/play"],
 
     "@svjeez/react": ["@svjeez/react@workspace:packages/react"],
 

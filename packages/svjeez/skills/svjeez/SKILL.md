@@ -288,6 +288,7 @@ Read the one that matches the task. `svjeez skill --install` copies them.
 | Lint a scene by measuring it: off-canvas parts, text overflow and overlap, dead motions, loop seams (`svjeez check`) | [`references/check.md`](references/check.md) |
 | Small revisions to a scene ("slow the second beat", "a warmer orange"): list its values by key and set them, then check and look (`svjeez values`, `svjeez set`) | [`references/edit.md`](references/edit.md) |
 | MP4 or WebM video of a finished scene (`@svjeez/video`) | [`references/video.md`](references/video.md) |
+| A small game: sprites with states, a world to walk in, keys and clicks (`@svjeez/play`) | [`references/play.md`](references/play.md) |
 | `.ts` files, frameworks, several scenes in one page | [`references/without-jsx.md`](references/without-jsx.md) |
 | A scene as a template: text, lists, counts, times, colors, eases and choices it takes from `--params data.json`, an editor or your build (`svjeez/params`) | [`references/params.md`](references/params.md) |
 

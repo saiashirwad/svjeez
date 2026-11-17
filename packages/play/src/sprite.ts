@@ -1,5 +1,6 @@
 import type { Point } from "svjeez";
-import type { Sheet } from "./sheet";
+import type { Sheet } from "./sheet.tsx";
+import type { Area } from "./walk.ts";
 
 const SVG = "http://www.w3.org/2000/svg";
 
@@ -78,4 +79,17 @@ export const createSprite = (sheet: Sheet): Sprite => {
       place();
     },
   };
+};
+
+/**
+ * A sprite in an `<svg>` of its own, for the page around the world: a portrait, an icon, a preview. `box` is the part
+ * that shows, measured from the sprite's anchor.
+ */
+export const framed = (sprite: Sprite, { x, y, width, height }: Area): SVGSVGElement => {
+  const frame = document.createElementNS(SVG, "svg");
+
+  frame.setAttribute("viewBox", `${x} ${y} ${width} ${height}`);
+  frame.append(sprite.node);
+
+  return frame;
 };

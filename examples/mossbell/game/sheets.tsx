@@ -1,5 +1,6 @@
 /** @jsxImportSource svjeez */
-import type { Child } from "svjeez";
+import { memo, sheet, type Effect, type Sheet } from "@svjeez/play";
+import type { Child, Point } from "svjeez";
 import {
   Character,
   CHARACTER,
@@ -13,92 +14,96 @@ import type { Hex } from "../art/color";
 import { Crop, CROP, CropIcon, type CropKind, type Growth } from "../art/crops";
 import { Burst, BURST, FLOAT, Floater, Heart, HEART } from "../art/effects";
 import { PX } from "../art/pixel";
-import { sheet, type Sheet } from "../play/sheet";
-
-let made = 0;
-
-/** A prefix no other sheet on the page has. */
-const unique = (name: string): string => `${name}${made++}-`;
 
 const GAITS: readonly Gait[] = ["idle", "walk"];
 const FACINGS: readonly Facing[] = ["down", "up", "side"];
 
-/** A villager's six states, named `idle-down`, `walk-side` and so on. */
-export const villagerSheet = (look: Look): Sheet =>
-  sheet(
-    {
-      prefix: unique("v"),
-      width: CHARACTER.width,
-      height: CHARACTER.height,
-      anchor: CHARACTER.feet,
-      duration: CHARACTER_LOOP,
-      grid: PX,
-    },
-    GAITS.flatMap((gait) =>
-      FACINGS.map(
-        (facing) =>
-          [`${gait}-${facing}`, <Character look={look} facing={facing} gait={gait} />] as const,
+/** A villager's six states, named `idle-down`, `walk-side` and so on. One sheet for each look, however often it is asked for. */
+export const villagerSheet = memo(
+  (look: Look): Sheet =>
+    sheet(
+      {
+        width: CHARACTER.width,
+        height: CHARACTER.height,
+        anchor: CHARACTER.feet,
+        duration: CHARACTER_LOOP,
+        grid: PX,
+      },
+      GAITS.flatMap((gait) =>
+        FACINGS.map(
+          (facing) =>
+            [`${gait}-${facing}`, <Character look={look} facing={facing} gait={gait} />] as const,
+        ),
       ),
     ),
-  );
+  (look) => JSON.stringify(look),
+);
 
-export const chickenSheet = (): Sheet =>
-  sheet(
-    {
-      prefix: unique("h"),
-      width: CHICKEN.width,
-      height: CHICKEN.height,
-      anchor: CHICKEN.feet,
-      duration: 6,
-      grid: PX,
-    },
+let hen: Sheet | undefined;
+
+/** A hen's two states, `idle` and `walk`. */
+export const henSheet = (): Sheet =>
+  (hen ??= sheet(
+    { width: CHICKEN.width, height: CHICKEN.height, anchor: CHICKEN.feet, duration: 6, grid: PX },
     GAITS.map((gait) => [gait, <Chicken gait={gait} />] as const),
-  );
+  ));
 
-export const cropSheet = (kind: CropKind, growth: Growth): Sheet =>
-  sheet(
-    {
-      prefix: unique("c"),
-      width: CROP.width,
-      height: CROP.height,
-      anchor: CROP.root,
-      duration: 6,
-      grid: PX,
-    },
-    [["crop", <Crop kind={kind} growth={growth} />]],
-  );
+export const cropSheet = memo(
+  ([kind, growth]: readonly [CropKind, Growth]): Sheet =>
+    sheet({ width: CROP.width, height: CROP.height, anchor: CROP.root, duration: 6, grid: PX }, [
+      ["crop", <Crop kind={kind} growth={growth} />],
+    ]),
+  ([kind, growth]) => `${kind}-${growth}`,
+);
 
-export const cropIcon = (kind: CropKind): Sheet =>
-  sheet({ prefix: unique("i"), width: 48, height: 48, anchor: { x: 24, y: 24 }, duration: 1 }, [
-    ["icon", <CropIcon kind={kind} />],
-  ]);
+export const cropIcon = memo(
+  (kind: CropKind): Sheet =>
+    sheet({ width: 48, height: 48, anchor: { x: 24, y: 24 }, duration: 1 }, [
+      ["icon", <CropIcon kind={kind} />],
+    ]),
+  (kind) => kind,
+);
 
 /** A sheet that plays once, and the seconds it runs. */
-export interface Effect {
+interface Once {
   readonly sheet: Sheet;
   readonly seconds: number;
 }
 
-const once = (seconds: number, picture: Child): Effect => ({
+const once = (seconds: number, picture: Child): Once => ({
   seconds,
   sheet: sheet(
-    {
-      prefix: unique("e"),
-      width: 2,
-      height: 2,
-      anchor: { x: 0, y: 0 },
-      duration: seconds,
-      loop: false,
-      grid: PX,
-    },
+    { width: 2, height: 2, anchor: { x: 0, y: 0 }, duration: seconds, loop: false, grid: PX },
     [["effect", picture]],
   ),
 });
 
-export const burst = (color: Hex, star = false): Effect =>
-  once(BURST, <Burst color={color} seed={`burst-${made}`} star={star} />);
+const bursts = memo(
+  ([color, star]: readonly [Hex, boolean]) =>
+    once(BURST, <Burst color={color} seed={color} star={star} />),
+  ([color, star]) => `${color}-${star}`,
+);
 
-export const floater = (text: string, color: Hex = "#5b3a26"): Effect =>
-  once(FLOAT, <Floater text={text} color={color} />);
+const floaters = memo(
+  ([text, color]: readonly [string, Hex]) => once(FLOAT, <Floater text={text} color={color} />),
+  ([text, color]) => `${text}-${color}`,
+);
 
-export const heart = (): Effect => once(HEART, <Heart />);
+let hearts: Once | undefined;
+
+const flash = ({ sheet: played, seconds }: Once, at: Point): Effect => ({
+  type: "flash",
+  sheet: played,
+  at,
+  seconds,
+});
+
+/** Bits flung out from a point: dust, water or, as stars, sparks. */
+export const burst = (at: Point, color: Hex, star = false): Effect =>
+  flash(bursts([color, star]), at);
+
+/** A word that rises from a point and goes. */
+export const floater = (at: Point, text: string, color: Hex = "#5b3a26"): Effect =>
+  flash(floaters([text, color]), at);
+
+export const heart = (at: Point): Effect => flash((hearts ??= once(HEART, <Heart />)), at);

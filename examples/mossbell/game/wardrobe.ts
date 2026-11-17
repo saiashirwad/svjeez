@@ -1,13 +1,22 @@
+import { createSprite, framed, type Sprite } from "@svjeez/play";
 import { random } from "svjeez";
 import { OPTIONS, randomLook, type Look } from "../art/character";
-import { createSprite, type Sprite } from "../play/sprite";
-import { el, frameOf } from "./dom";
+import type { Villager } from "./rules";
 import { villagerSheet } from "./sheets";
 
-export interface Villager {
-  readonly name: string;
-  readonly look: Look;
-}
+/** Make an element with a class, some text, and children. */
+export const el = <K extends keyof HTMLElementTagNameMap>(
+  tag: K,
+  className: string,
+  ...children: readonly (Node | string)[]
+): HTMLElementTagNameMap[K] => {
+  const node = document.createElement(tag);
+
+  node.className = className;
+  node.append(...children);
+
+  return node;
+};
 
 const FIELDS: readonly (readonly [key: keyof Look, label: string])[] = [
   ["skin", "Skin"],
@@ -30,14 +39,15 @@ const TURNS: readonly (readonly [facing: string, mirrored: boolean])[] = [
 
 /**
  * The character maker: a live preview beside every choice in the wardrobe. Each change renders the villager again,
- * in the page, so what you see is the sprite the game will walk around.
+ * in the page, so what you see is the sprite the game will walk around. It stays up until whoever opened it removes
+ * the element it returns.
  */
 export const openWardrobe = (
   host: HTMLElement,
   from: Villager,
   first: boolean,
   done: (villager: Villager) => void,
-): void => {
+): HTMLElement => {
   let look = from.look;
   let turn = 0;
   let walking = true;
@@ -57,7 +67,7 @@ export const openWardrobe = (
   const dress = (): void => {
     sprite = createSprite(villagerSheet(look));
     pose();
-    stand.replaceChildren(frameOf(sprite.node, "-42 -99 84 111"));
+    stand.replaceChildren(framed(sprite, { x: -42, y: -99, width: 84, height: 111 }));
 
     for (const [button, key, value] of buttons)
       button.classList.toggle("picked", look[key] === value);
@@ -143,11 +153,9 @@ export const openWardrobe = (
     ),
   );
 
-  go.addEventListener("click", () => {
-    panel.remove();
-    done({ name: name.value.trim() || "Farmer", look });
-  });
-
+  go.addEventListener("click", () => done({ name: name.value.trim() || "Farmer", look }));
   dress();
   host.append(panel);
+
+  return panel;
 };

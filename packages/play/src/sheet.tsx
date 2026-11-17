@@ -1,8 +1,7 @@
-/** @jsxImportSource svjeez */
 import { render, type Child, type Point } from "svjeez";
 
 /**
- * A sprite sheet with no pixels: one rendered scene holding a group for each state a sprite can be in. The page shows
+ * A sprite sheet with no pixels: one rendered scene holding a group for each state a sprite can be in. The runtime shows
  * one group at a time, and every group's motions loop on the scene's clock.
  */
 export interface Sheet {
@@ -16,8 +15,6 @@ export interface Sheet {
 }
 
 export interface SheetOptions {
-  /** Unique on the page: it keeps this sheet's keyframes apart from every other scene's. */
-  readonly prefix: string;
   readonly width: number;
   readonly height: number;
   readonly anchor: Point;
@@ -27,21 +24,52 @@ export interface SheetOptions {
   readonly loop?: boolean;
   /** The side of one art pixel, when the pictures are pixel art. */
   readonly grid?: number;
+  /** Put in front of every generated name. Default one no other sheet has, so sheets can share a page. */
+  readonly prefix?: string;
 }
 
 export type States = readonly (readonly [name: string, picture: Child])[];
+
+let made = 0;
 
 /** Render states into one sheet. A sprite shows the first state until told otherwise. */
 export const sheet = (
   { prefix, width, height, anchor, duration, loop, grid }: SheetOptions,
   states: States,
-): Sheet => ({
-  width,
-  height,
-  anchor,
-  grid,
-  svg: render(
-    { width, height, duration, prefix, loop, title: prefix, reducedMotion: false },
-    states.map(([name, picture]) => <g data-state={name}>{picture}</g>),
-  ),
-});
+): Sheet => {
+  const name = prefix ?? `s${made++}-`;
+
+  return {
+    width,
+    height,
+    anchor,
+    grid,
+    svg: render(
+      { width, height, duration, prefix: name, loop, title: name, reducedMotion: false },
+      states.map(([state, picture]) => <g data-state={state}>{picture}</g>),
+    ),
+  };
+};
+
+/**
+ * Remember what a function made for each input, by a name for the input. A view runs every frame, so it asks for a
+ * sheet by what it should show, and the sheet is rendered the first time only.
+ */
+export const memo = <Input, Made>(
+  make: (input: Input) => Made,
+  nameOf: (input: Input) => string,
+): ((input: Input) => Made) => {
+  const kept = new Map<string, Made>();
+
+  return (input) => {
+    const name = nameOf(input);
+    const found = kept.get(name);
+
+    if (found !== undefined) return found;
+    const fresh = make(input);
+
+    kept.set(name, fresh);
+
+    return fresh;
+  };
+};

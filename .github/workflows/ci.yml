@@ -101,6 +101,8 @@ jobs:
       - run: npm run test:package
         working-directory: packages/live
       - run: npm run test:package
+        working-directory: packages/play
+      - run: npm run test:package
         working-directory: packages/svelte
       - run: npm run test:package
         working-directory: packages/react
