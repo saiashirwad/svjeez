@@ -6,6 +6,8 @@
     "build": "bun run scripts/build.ts",
     "dev": "bun run ../packages/svjeez/src/cli.ts dev",
     "scroll": "bun run scroll/serve.ts",
+    "mossbell": "vite --config mossbell/vite.config.ts",
+    "mossbell:deploy": "cd mossbell && alchemy deploy",
     "render-png": "bun run ../packages/svjeez/src/cli.ts frames",
     "fidelity": "bun run scripts/fidelity.ts",
     "perf": "bun run scripts/perf.ts",
@@ -16,6 +18,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@alchemy.run/cloudflare": "2.0.0-beta.87",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@svjeez/charts": "workspace:*",
     "@svjeez/code": "workspace:*",
@@ -36,7 +39,9 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "alchemy": "2.0.0-beta.87",
     "d3-geo": "^3.1.1",
+    "effect": "^4.1.4",
     "lucide-react": "^1.73.0",
     "playwright-core": "^1.64.1",
     "react": "^19.3.1",
