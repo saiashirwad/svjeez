@@ -2,10 +2,12 @@ import { describe, expect, test } from "bun:test";
 import { ease } from "svjeez";
 import { choice } from "svjeez/params";
 import { nudge } from "../src/controls";
-import type { Compiled } from "../src/compile";
+import { compileScene, type Compiled } from "../src/compile";
 import {
   createEditor,
+  elementOf,
   init,
+  nodeAt,
   timeAt,
   update,
   valueOf,
@@ -528,5 +530,46 @@ describe("createEditor when things go wrong", () => {
     expect(editor.getState().picture?.text).toBe("export default () => 2;");
     expect(editor.getState().picture?.svg).toContain("() => 2");
     editor.destroy();
+  });
+});
+
+describe("picking", () => {
+  const model = `/** @jsxImportSource svjeez/scene */
+import { Group, Shape, rect, scene } from "svjeez/scene";
+
+export default scene({ size: [200, 120], duration: 1, title: "x" }, () => (
+  <Group>
+    <Shape key="back" geometry={rect(200, 120)} />
+    <Group key="card" at={[50, 40]}>
+      <Shape key="face" geometry={rect(40, 30)} />
+    </Group>
+  </Group>
+));
+`;
+
+  test("a point on a scene model's picture finds its node, and the node its element in the file", async () => {
+    const result = await compileScene(model);
+
+    const compiled = play(
+      [{ type: "compiled", text: model, result, now: 0 }],
+      init({ text: model, now: 0 })[0],
+    );
+
+    const [show] = compiled.cmds;
+
+    if (show?.type !== "show") throw new Error("a compiled file is shown");
+
+    const { state } = play(
+      [{ type: "shown", picture: { ...show.picture, url: "blob:a" }, now: 0 }],
+      compiled.state,
+    );
+
+    const face = nodeAt(state, { x: 60, y: 50 });
+
+    expect(face?.key).toBe("card/face");
+    expect(elementOf(state, face!)?.tag).toBe("Shape");
+    expect(elementOf(state, face!)?.key).toBe("8");
+    expect(nodeAt(state, { x: 5, y: 5 })?.key).toBe("back");
+    expect(nodeAt(init({ text: model, now: 0 })[0], { x: 60, y: 50 })).toBeUndefined();
   });
 });

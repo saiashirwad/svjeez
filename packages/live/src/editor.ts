@@ -1,5 +1,6 @@
 import { type Point } from "svjeez";
 import { restyle } from "svjeez/page";
+import { hitTest, type Placed } from "svjeez/scene";
 import type { Schema } from "svjeez/params";
 import { createCompiler, latestWins } from "./client.ts";
 import type { Compiled, SceneSize, SourceError } from "./compile.ts";
@@ -12,6 +13,7 @@ import {
   parse,
   write,
   type Edit,
+  type Element,
   type Line,
   type Literal,
   type Source,
@@ -23,6 +25,8 @@ export interface PictureState {
   /** The compiled file and the source it came from. A picture made at build time has neither until the first compile. */
   readonly svg?: string;
   readonly text?: string;
+  /** For a scene model, where each node sits at rest and the line that wrote it; empty for an SVG string. */
+  readonly nodes?: readonly Placed[];
 }
 
 export type CompiledFile = Required<Omit<PictureState, "url">>;
@@ -112,6 +116,24 @@ export type Cmd =
       readonly by: number;
       readonly at: number;
     };
+
+/**
+ * The node of a scene model under `point`, in the scene's coordinates, in the picture on screen: the deepest and
+ * topmost one, with its key, box and source. Undefined for an SVG string, or where nothing is drawn.
+ */
+export const nodeAt = (state: State, point: Point): Placed | undefined =>
+  hitTest(state.picture?.nodes ?? [], [point.x, point.y]);
+
+/** The JSX element in the file being edited that wrote `node`. Undefined for a node written in another file. */
+export const elementOf = (state: State, node: Placed): Element | undefined => {
+  const { source } = node;
+
+  if (!source || source.file !== "" || state.picture?.text !== state.text) return undefined;
+  const on = state.source.elements.filter((element) => element.key === String(source.line));
+  const start = state.source.lineStart(source.line) + (source.column ?? 1) - 1;
+
+  return on.find((element) => element.range[0] === start) ?? on[0];
+};
 
 /** Where the clock reads at page time `now`, in seconds. */
 export const timeAt = (clock: Clock, now: number): number =>
@@ -383,6 +405,7 @@ export const update = (state: State, msg: Msg): [State, Cmd[]] => {
         scene: scene ?? state.picture?.scene ?? { width: 0, height: 0, duration: 0, title: "" },
         svg,
         text: msg.text,
+        nodes: msg.result.nodes ?? [],
       };
 
       const next = read({
