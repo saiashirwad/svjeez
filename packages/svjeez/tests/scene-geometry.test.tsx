@@ -65,7 +65,22 @@ const css = (build: () => SceneElement): string => svg.emit(made(build)).split("
 const morphs = (out: string): string[] =>
   /attributeName="d" values="([^"]*)"/.exec(out)?.[1]?.split(";") ?? [];
 
-const commands = (d: string): string => d.replace(/[-\d.]+/g, "#").replace(/\s+/g, "");
+const commands = (d: string): string => d.replace(/[^A-Za-z]/g, "");
+
+/** Where relative path data ends: its `M` and every step after it, added up. */
+const ends = (d: string): [number, number] => {
+  const at: [number, number] = [0, 0];
+
+  for (const [, command, list] of d.matchAll(/([A-Za-z])([^A-Za-z]*)/g)) {
+    const numbers = (list!.match(/-?[\d.]+/g) ?? []).map(Number);
+
+    if (command === "M") [at[0], at[1]] = [numbers[0]!, numbers[1]!];
+    else if (command === "c" || command === "l")
+      [at[0], at[1]] = [at[0] + numbers.at(-2)!, at[1] + numbers.at(-1)!];
+  }
+
+  return at;
+};
 
 describe("animated geometry", () => {
   test("keys of one parametric kind stay that kind, and the box and origin are the first key's", () => {
@@ -226,16 +241,149 @@ describe("animated geometry", () => {
     expect(new Set(values.map(commands)).size).toBe(1);
   });
 
-  test("a radius moves through d too", () => {
-    const values = morphs(
-      body(() => <Shape geometry={track(circle(4)).to(circle(20), span(0, 1))} fill="#FF0000" />),
+  test("an unstroked radius is a CSS scale of the widest circle, around its center", () => {
+    const out = svg.emit(
+      made(() => <Shape geometry={track(circle(4)).to(circle(20), span(0, 1))} fill="#FF0000" />),
     );
 
-    expect(values[0]).toStartWith("M4 0C");
-    expect(values.at(-1)).toStartWith("M20 0C");
+    expect(out).toContain('<circle r="20" fill="#FF0000" class="a m1 fb"/>');
+    expect(out).toContain("scale:0.2");
+    expect(out).not.toContain("<animate");
   });
 
-  test("an opening arc stays on its circle between keys, not on a blend between two paths", () => {
+  test("a stroked radius animates r, since a scale would scale the stroke too", () => {
+    const out = body(() => (
+      <Shape geometry={track(circle(4)).to(circle(20), span(0, 1))} stroke={{ color: "#FF0000" }} />
+    ));
+
+    expect(out).toContain('attributeName="r" values="4;20"');
+    expect(out).not.toContain('attributeName="d"');
+  });
+
+  test("a stroked rect animates its own width, height and radius, and only those that change", () => {
+    const out = body(() => (
+      <Shape
+        geometry={track(rect(10, 10, { radius: 2 })).to(rect(40, 10, { radius: 4 }), span(0, 1))}
+        stroke={{ color: "#FF0000" }}
+      />
+    ));
+
+    expect(out).toContain('<rect width="40" height="10" rx="4"');
+    expect(out).toContain('attributeName="width"');
+    expect(out).toContain('attributeName="rx"');
+    expect(out).not.toContain('attributeName="height"');
+    expect(out).not.toContain('attributeName="d"');
+  });
+
+  test("a line with one moving end animates that end, and one with more moves d", () => {
+    const one = body(() => (
+      <Shape
+        geometry={track(line([0, 0], [10, 0])).to(line([0, 0], [30, 0]), span(0, 1))}
+        stroke={{ color: "#FF0000" }}
+      />
+    ));
+
+    const both = morphs(
+      body(() => (
+        <Shape
+          geometry={track(line([0, 0], [10, 0])).to(line([5, 5], [30, 20]), span(0, 1))}
+          stroke={{ color: "#FF0000" }}
+        />
+      )),
+    );
+
+    expect(one).toContain('attributeName="x2" values="10;30"');
+    expect(both.map(commands)).toEqual(["Ml", "Ml"]);
+  });
+
+  test("a geometry that only moves is drawn still, with a CSS translate", () => {
+    const style = svg.emit(
+      made(() => (
+        <Shape
+          geometry={track(
+            polygon([
+              [0, 0],
+              [10, 0],
+              [5, 8],
+            ]),
+          ).to(
+            polygon([
+              [20, 10],
+              [30, 10],
+              [25, 18],
+            ]),
+            span(0, 1),
+          )}
+          stroke={{ color: "#FF0000" }}
+        />
+      )),
+    );
+
+    expect(style).toContain('<polygon points="0 0 10 0 5 8"');
+    expect(style).toContain("translate:20px 10px");
+    expect(style).not.toContain("<animate");
+  });
+
+  test("an arc on one circle is its widest arc, opened and turned by a CSS dash", () => {
+    const style = css(() => (
+      <Shape
+        geometry={track(arc({ radius: 40, start: 0, sweep: 90 })).to(
+          arc({ radius: 40, start: 90, sweep: 180 }),
+          span(0, 1),
+        )}
+        stroke={{ color: "#FF0000", width: 2 }}
+      />
+    ));
+
+    const out = body(() => (
+      <Shape
+        geometry={track(arc({ radius: 40, start: 0, sweep: 90 })).to(
+          arc({ radius: 40, start: 90, sweep: 180 }),
+          span(0, 1),
+        )}
+        stroke={{ color: "#FF0000", width: 2 }}
+      />
+    ));
+
+    expect(out).toContain('<path d="M40 0A40 40 0 1 1 0 -40"');
+    expect(out).not.toContain("<animate");
+    expect(style).toContain("stroke-dasharray:0.333 2;stroke-dashoffset:0");
+    expect(style).toContain("stroke-dasharray:0.667 2;stroke-dashoffset:-0.333");
+    expect(style).not.toContain("visibility");
+  });
+
+  test("a dashed arc with round caps keeps its dot at no length, as a still arc of no sweep draws one", () => {
+    const style = css(() => (
+      <Shape
+        geometry={track(arc({ radius: 40, sweep: 0 })).to(
+          arc({ radius: 40, sweep: 300 }),
+          span(0, 1),
+        )}
+        stroke={{ color: "#FF0000", width: 2, cap: "round" }}
+      />
+    ));
+
+    expect(style).toContain("stroke-dasharray:0 2;stroke-dashoffset:0");
+    expect(style).not.toContain("visibility");
+  });
+
+  test("a sweep that changes direction can't be one dash, so it moves d", () => {
+    const values = morphs(
+      body(() => (
+        <Shape
+          geometry={track(arc({ radius: 40, sweep: -90 })).to(
+            arc({ radius: 40, sweep: 90 }),
+            span(0, 1),
+          )}
+          stroke={{ color: "#FF0000" }}
+        />
+      )),
+    );
+
+    expect(values.length).toBeGreaterThan(2);
+  });
+
+  test("an arc whose path moves stays on its circle between keys, not on a blend between two paths", () => {
     const values = morphs(
       body(() => (
         <Shape
@@ -243,7 +391,7 @@ describe("animated geometry", () => {
             arc({ radius: 40, sweep: 350 }),
             span(0, 2),
           )}
-          stroke={{ color: "#FF0000", width: 2 }}
+          stroke={{ color: "#FF0000", width: 2, dash: [4, 4] }}
         />
       )),
     );
@@ -252,17 +400,16 @@ describe("animated geometry", () => {
     expect(new Set(values.map(commands)).size).toBe(1);
 
     for (const d of values) {
-      const numbers = d.match(/[-\d.]+/g)!.map(Number);
-      const [x, y] = numbers.slice(-2);
+      const [x, y] = ends(d);
 
-      expect(Math.hypot(x!, y!)).toBeCloseTo(40, 1);
+      expect(Math.hypot(x, y)).toBeCloseTo(40, 1);
     }
   });
 
   test("an ease in steps is written as cuts, since SMIL can't blend path data in steps", () => {
     const out = body(() => (
       <Shape
-        geometry={track(rect(10, 10)).to(rect(40, 10), span(0, 1), ease.steps(3))}
+        geometry={track(rect(10, 10)).to(circle(10), span(0, 1), ease.steps(3))}
         fill="#FF0000"
       />
     ));
@@ -324,19 +471,33 @@ describe("strokes, scales and trims", () => {
     ).toContain('<circle r="10" fill="none"/>');
   });
 
-  test("a moving trim on a filled shape strokes an element of its own, so hiding it keeps the fill", () => {
-    const out = body(() => (
+  test("a moving trim with a butt cap needs no visibility, so a filled shape stays one element", () => {
+    const style = css(() => (
       <Shape
         geometry={rect(10, 10)}
-        at={[5, 5]}
         fill="#00FF00"
         stroke={{ color: "#FF0000" }}
         trim={track<Vec>([0, 0]).to([0, 1], span(0, 1))}
       />
     ));
 
+    expect(style).toContain("stroke-dashoffset:1}");
+    expect(style).not.toContain("visibility");
+  });
+
+  test("a moving trim on a filled shape strokes an element of its own when its caps must hide, so hiding them keeps the fill", () => {
+    const out = body(() => (
+      <Shape
+        geometry={rect(10, 10)}
+        at={[5, 5]}
+        fill="#00FF00"
+        stroke={{ color: "#FF0000", cap: "round" }}
+        trim={track<Vec>([0, 0]).to([0, 1], span(0, 1))}
+      />
+    ));
+
     expect(out).toMatch(
-      /<g transform="translate\(5 5\)">\s*<rect width="10" height="10" fill="#00FF00"\/>\s*<rect width="10" height="10" fill="none" stroke="#FF0000"/,
+      /<g transform="translate\(5 5\)">\s*<rect width="10" height="10" fill="#00FF00"\/>\s*<rect width="10" height="10" fill="none" stroke="#FF0000" stroke-linecap="round"/,
     );
   });
 
@@ -345,7 +506,7 @@ describe("strokes, scales and trims", () => {
       <Group opacity={show(span(1, 2), { fade: 0 })}>
         <Shape
           geometry={circle(10)}
-          stroke={{ color: "#FF0000" }}
+          stroke={{ color: "#FF0000", cap: "round" }}
           trim={track<Vec>([0, 0]).to([0, 1], span(0, 1))}
         />
       </Group>

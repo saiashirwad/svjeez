@@ -1,21 +1,20 @@
 import type { Color as CssColor } from "../attributes";
 import type { Backend as Route, Target, TargetValues } from "../channels";
 import type { Lane as CssLane } from "../compile";
-import { easeAt, splitEase } from "../ease-at";
+import type { Emit } from "../css";
 import { num } from "../format";
 import type { Key as Held } from "../keys";
-import { EPSILON, ease, type Ease } from "../motion";
-import type { PathData } from "../paths";
+import { EPSILON, ease } from "../motion";
 import { render } from "../render";
 import { element, type AttrValue, type SvgNode } from "../svg";
 import { admit, type Backend, type Feature, type Support } from "./backend";
-import { arcPieces, contoursOf, mixGeometry } from "./geometry";
+import { foldLayers } from "./fold";
+import { drawMoving, type GeometrySlot } from "./svg-geometry";
 import type {
   Animated,
   Color,
   Contour,
   Geometry,
-  Key,
   Lane,
   Layer,
   Paint,
@@ -26,7 +25,6 @@ import type {
   Vec,
 } from "./ir";
 import { isLane } from "./lane";
-import { same } from "./steps";
 import { onCircle } from "./values";
 
 /**
@@ -64,8 +62,8 @@ const supports: Readonly<Record<Feature, Support>> = {
 interface Ctx {
   readonly scene: Scene;
   readonly prefix: string;
-  /** Whether a node or anything under it has a trim that moves, by key. */
-  readonly trims: Map<string, boolean>;
+  /** Whether a node or anything under it hides its stroke with `visibility`, by key. */
+  readonly hides: Map<string, boolean>;
 }
 
 const isRgba = (color: Color): color is Rgba => Array.isArray(color);
@@ -151,6 +149,10 @@ interface Drawn {
   readonly attrs: Record<string, AttrValue>;
   /** Whether `at` went into the element's own coordinates, so the fill box sits where the node does. */
   readonly placed: boolean;
+  /** A CSS scale of the element around its frame's origin, under every layer. */
+  readonly scale?: Lane<Vec>;
+  /** A CSS translate of the element, under every layer. */
+  readonly offset?: Lane<Vec>;
 }
 
 const moved = ([x, y]: Vec): Record<string, AttrValue> =>
@@ -292,10 +294,14 @@ const isCut = (keys: readonly Held[]): boolean =>
 /** A lane for the emitter. Its channels are the names its values carry. An opacity cut hides with `visibility` unless `cuts` is false. */
 const cssLane = <T>(
   ctx: Ctx,
-  slot: Slot,
+  slot: Slot | GeometrySlot,
   lane: Lane<T>,
   values: (value: T) => TargetValues,
-  { route = "css", cuts = true }: { readonly route?: Route; readonly cuts?: boolean } = {},
+  {
+    route = "css",
+    cuts = true,
+    emit,
+  }: { readonly route?: Route; readonly cuts?: boolean; readonly emit?: Emit } = {},
 ): CssLane => {
   const { keys, period } = held(lane, ctx.scene.duration, values);
 
@@ -308,7 +314,7 @@ const cssLane = <T>(
     period,
     snapped: period,
     nest: false,
-    emit: cuts && slot === "opacity" && isCut(keys) ? "visibility" : "value",
+    emit: emit ?? (cuts && slot === "opacity" && isCut(keys) ? "visibility" : "value"),
   };
 };
 
@@ -321,6 +327,8 @@ interface Shell {
   rank: number;
   opacity?: number;
   pivots: boolean;
+  /** Where this shell turns and scales, when that is not the node's origin. Nothing else joins such a shell. */
+  origin?: Vec;
 }
 
 const RANK: Partial<Record<Slot, number>> = { translate: 0, rotate: 1, scale: 2 };
@@ -331,7 +339,11 @@ const open = (shells: Shell[], slot: Slot): Shell => {
   const rank = RANK[slot];
   let current = shells.at(-1)!;
 
-  if (current.taken.has(slot) || (rank !== undefined && rank >= current.rank)) {
+  if (
+    current.origin !== undefined ||
+    current.taken.has(slot) ||
+    (rank !== undefined && rank >= current.rank)
+  ) {
     current = shell();
     shells.push(current);
   }
@@ -460,8 +472,12 @@ const stroked = (
     const moving = trim.keys.some((key) => key.value[0] !== 0);
 
     lanes.push(
-      cssLane(ctx, "draw", trim, ([from, to]) =>
-        moving ? { draw: to, drawStart: from } : { draw: to },
+      cssLane(
+        ctx,
+        "draw",
+        trim,
+        ([from, to]) => (moving ? { draw: to, drawStart: from } : { draw: to }),
+        trimHides(node) ? {} : { emit: "dash" },
       ),
     );
   } else if (trim[0] !== 0 || trim[1] !== 1) {
@@ -471,157 +487,35 @@ const stroked = (
   }
 };
 
-/** How far, in px, the path SMIL blends between two of an arc's keys may stray from the true arc. */
-const ARC_TOLERANCE = 0.1;
-
-/** The part of `curve` between two points of its progress, as an ease of its own. */
-const portion = (curve: Ease, from: number, to: number, where: string): Ease => {
-  const tail = from > 0 ? splitEase(curve, from, where)[1] : curve;
-
-  return to < 1 ? splitEase(tail, (to - from) / (1 - from), where)[0] : tail;
-};
-
 /**
- * Where to cut a transition between two arcs so the path blend between cuts stays within ARC_TOLERANCE of the arc: an
- * end that turns by δ radians strays about r·δ²/8 from the circle. The cuts follow the ease, so they bunch where it is fast.
+ * The shape's own element, with its paint, stroke and lanes. A geometry drawn still may move or scale as a whole. The
+ * route is the one `routed` takes, so the two parts of a split shape move as one.
  */
-const arcCuts = (curve: Ease, turn: number, radius: number): number[] => {
-  const most = Math.sqrt((8 * ARC_TOLERANCE) / Math.max(radius, 1e-9));
-  const cuts: number[] = [];
-
-  const visit = (a: number, b: number, depth: number): void => {
-    const seen = Array.from({ length: 17 }, (_, i) => easeAt(curve, a + ((b - a) * i) / 16));
-
-    if ((Math.max(...seen) - Math.min(...seen)) * turn <= most || depth > 10) return;
-    const middle = (a + b) / 2;
-
-    visit(a, middle, depth + 1);
-    cuts.push(middle);
-    visit(middle, b, depth + 1);
-  };
-
-  visit(0, 1, 0);
-
-  return cuts;
-};
-
-/**
- * A geometry lane with the keys SMIL needs to draw it exactly. SMIL blends path data point by point, which is exact for
- * every kind whose points move in step with its parameters (rects, ellipses, lines, polygons, matched paths). An arc's
- * ends move around a circle, so a transition between arcs is cut finely enough that each blend stays on the circle.
- * SMIL can't blend path data in steps, so `ease.steps(n)` is written as n cuts.
- */
-const blendable = (lane: Lane<Geometry>, key: string): Lane<Geometry> => {
-  const where = `geometry on "${key}"`;
-  const [head, ...tail] = lane.keys;
-  const keys: Key<Geometry>[] = [head];
-
-  tail.forEach((to, index) => {
-    const from = index === 0 ? head : tail[index - 1]!;
-    const curve = to.ease ?? ease.out;
-    const [a, b] = [from.value, to.value];
-    const at = (progress: number): number => from.t + (to.t - from.t) * progress;
-
-    if (same(a, b)) {
-      keys.push(to);
-
-      return;
-    }
-
-    if (curve.kind === "steps" && curve.count > 1) {
-      for (let step = 1; step < curve.count; step++)
-        keys.push({
-          t: at(step / curve.count),
-          value: mixGeometry(a, b, step / curve.count, where),
-          ease: ease.hold,
-        });
-      keys.push({ ...to, ease: ease.hold });
-
-      return;
-    }
-
-    if (a.kind !== "arc" || b.kind !== "arc" || curve.kind === "steps") {
-      keys.push(to);
-
-      return;
-    }
-
-    const turn =
-      (Math.max(Math.abs(b.start - a.start), Math.abs(b.start + b.sweep - a.start - a.sweep)) *
-        Math.PI) /
-      180;
-
-    const cuts = [0, ...arcCuts(curve, turn, Math.max(a.radius, b.radius)), 1];
-
-    for (let i = 1; i < cuts.length; i++) {
-      const [p, q] = [cuts[i - 1]!, cuts[i]!];
-
-      keys.push({
-        t: at(q),
-        value: q === 1 ? b : mixGeometry(a, b, easeAt(curve, q), where),
-        ease: portion(curve, p, q, where),
-      });
-    }
-  });
-
-  return { ...lane, keys: [head, keys[1]!, ...keys.slice(2)] };
-};
-
-/** Path data with one `C` for every curve, so every key of a lane has the same commands and SMIL can blend them. */
-const blendData = (contours: readonly Contour[], key: string): PathData => {
-  if (contours.length === 0)
-    throw new Error(
-      `"${key}" animates a geometry with no outline. Give every key a point at least.`,
-    );
-
-  // SAFETY: each contour is written from M, so the whole is path data.
-  return contours
-    .map(
-      (contour) =>
-        `M${pt(contour.start)}${contour.curves.map((curve) => `C${curve.map(pt).join(" ")}`).join("")}${contour.closed ? "Z" : ""}`,
-    )
-    .join("") as PathData;
-};
-
-/**
- * A geometry that moves is drawn as a `<path>` whose `d` animates through SMIL: the route ../channels.ts gives `d`,
- * since CSS `d` is not animated in Safari and CSS geometry properties (`r`, `rx`, `width`) are not applied in
- * Firefox. Every kind takes this one route, radii included, and the emitter writes the still twin for reduced motion.
- */
-const morphing = (
+const shapeElement = (
   ctx: Ctx,
   node: ShapeNode,
-  lane: Lane<Geometry>,
   at: Vec,
   lanes: CssLane[],
+  routed: ShapeNode = node,
 ): Drawn => {
-  const written = blendable(lane, node.key);
+  const moving = isLane(routed.geometry) ? drawMoving(routed, routed.geometry, at) : undefined;
+  let drawn: Drawn;
 
-  const pieces = Math.max(
-    ...written.keys.map((key) => (key.value.kind === "arc" ? arcPieces(key.value.sweep) : 1)),
-  );
+  if (!isLane(node.geometry)) drawn = outline(node.geometry, at);
+  else if (moving?.kind === "element") {
+    drawn = { tag: moving.tag, attrs: { ...moving.attrs }, placed: moving.placed };
 
-  const data = (value: Geometry): PathData => blendData(contoursOf(value, pieces), node.key);
-  const first = lane.keys[0].value;
+    for (const { slot, lane, route, emit } of moving.lanes)
+      lanes.push(cssLane(ctx, slot, lane, (value) => value, { route, ...(emit && { emit }) }));
+  } else {
+    const still = moving?.kind === "still" ? moving : undefined;
 
-  lanes.push(cssLane(ctx, "d", written, (value) => ({ d: data(value) }), { route: "smil" }));
-
-  return {
-    tag: "path",
-    attrs: {
-      d: data(first),
-      ...(first.kind === "path" && first.rule === "evenodd" && { "fill-rule": "evenodd" }),
-      ...moved(at),
-    },
-    placed: false,
-  };
-};
-
-/** The shape's own element, with its paint, stroke and lanes. */
-const shapeElement = (ctx: Ctx, node: ShapeNode, at: Vec, lanes: CssLane[]): Drawn => {
-  const drawn = isLane(node.geometry)
-    ? morphing(ctx, node, node.geometry, at, lanes)
-    : outline(node.geometry, at);
+    drawn = {
+      ...outline(still?.geometry ?? node.geometry.keys[0].value, at),
+      ...(still?.scale && { scale: still.scale }),
+      ...(still?.offset && { offset: still.offset }),
+    };
+  }
 
   painted(ctx, "fill", node.fill, drawn.attrs, lanes);
   stroked(ctx, node, drawn.attrs, lanes);
@@ -629,20 +523,28 @@ const shapeElement = (ctx: Ctx, node: ShapeNode, at: Vec, lanes: CssLane[]): Dra
   return drawn;
 };
 
-/** Whether a node, or anything it draws, has a trim that moves. */
-const hasMovingTrim = (ctx: Ctx, node: SceneNode): boolean => {
-  const known = ctx.trims.get(node.key);
+/** Whether a trim's stroke must hide while it has no length: a round or square cap draws a dot there. */
+const trimHides = (node: ShapeNode): boolean =>
+  node.stroke !== undefined &&
+  node.trim !== undefined &&
+  isLane(node.trim) &&
+  node.stroke.cap !== "butt" &&
+  node.trim.keys.some(({ value: [from, to] }) => to - from <= 0);
+
+/** Whether a node, or anything it draws, hides its stroke with `visibility` while the stroke has no length. */
+const hidesStroke = (ctx: Ctx, node: SceneNode): boolean => {
+  const known = ctx.hides.get(node.key);
 
   if (known !== undefined) return known;
 
   const found =
     node.kind === "shape"
-      ? node.stroke !== undefined && node.trim !== undefined && isLane(node.trim)
+      ? trimHides(node)
       : node.kind === "group"
-        ? node.children.some((child) => hasMovingTrim(ctx, child))
-        : node.kind === "instance" && hasMovingTrim(ctx, ctx.scene.symbols[node.symbol]!);
+        ? node.children.some((child) => hidesStroke(ctx, child))
+        : node.kind === "instance" && hidesStroke(ctx, ctx.scene.symbols[node.symbol]!);
 
-  ctx.trims.set(node.key, found);
+  ctx.hides.set(node.key, found);
 
   return found;
 };
@@ -663,7 +565,7 @@ const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
     case "shape": {
       // A moving trim hides its stroke with `visibility` while it has no length. With a fill, the stroke is drawn as
       // an element of its own over the fill, so hiding it never hides the fill.
-      if (node.fill === undefined || !hasMovingTrim(ctx, node)) {
+      if (node.fill === undefined || !hidesStroke(ctx, node)) {
         drawn = shapeElement(ctx, node, at, lanes);
         break;
       }
@@ -674,7 +576,9 @@ const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
         { ...node, fill: undefined },
       ].map((part) => {
         const own: CssLane[] = [];
-        const { tag, attrs } = shapeElement(ctx, part, [0, 0], own);
+        const { tag, attrs, offset } = shapeElement(ctx, part, [0, 0], own, node);
+
+        if (offset) own.push(cssLane(ctx, "translate", offset, ([x, y]) => ({ x, y })));
 
         return { ...element(tag, attrs, []), ...(own.length > 0 && { lanes: own }) };
       });
@@ -728,13 +632,30 @@ const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
   }
 
   const shells = [shell()];
-  const cuts = !hasMovingTrim(ctx, node);
+  const cuts = !hidesStroke(ctx, node);
+  const [ox, oy] = [at[0] + node.origin[0], at[1] + node.origin[1]];
 
-  for (const layer of [...node.layers].reverse()) place(ctx, shells, layer, cuts);
+  // A geometry drawn still and scaled scales around its frame's origin, under every layer. A shell of its own holds
+  // it when that is not where the layers turn.
+  if (drawn.scale) {
+    const even = drawn.scale.keys.every((key) => isUniform(key.value));
+    const own = open(shells, "scale");
+
+    own.lanes.push(
+      cssLane(ctx, "scale", drawn.scale, ([x, y]) =>
+        even ? { scale: x } : { scale: x, scaleY: y },
+      ),
+    );
+
+    if (Math.abs(ox - at[0]) > 1e-9 || Math.abs(oy - at[1]) > 1e-9) own.origin = at;
+  }
+
+  if (drawn.offset) travel(ctx, shells, drawn.offset);
+
+  for (const layer of [...foldLayers(node.layers)].reverse()) place(ctx, shells, layer, cuts);
 
   if (isLane(node.at)) travel(ctx, shells, node.at);
 
-  const [ox, oy] = [at[0] + node.origin[0], at[1] + node.origin[1]];
   const { box } = node;
 
   const centered =
@@ -744,6 +665,7 @@ const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
   // The fill box is exact, and shorter to write, when one element carries everything and its own coordinates place it.
   const fillBox =
     shells.length === 1 &&
+    shells[0]!.origin === undefined &&
     drawn.placed &&
     centered &&
     node.kind === "shape" &&
@@ -751,7 +673,9 @@ const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
 
   const dress = (own: Shell) => {
     const style = [
-      ...(own.pivots && !fillBox ? [`transform-origin:${num(ox)}px ${num(oy)}px`] : []),
+      ...(own.pivots && !fillBox
+        ? [`transform-origin:${num(own.origin?.[0] ?? ox)}px ${num(own.origin?.[1] ?? oy)}px`]
+        : []),
       ...own.style,
     ];
 
@@ -795,7 +719,7 @@ export const svg: Backend<string, SvgOptions> = {
   supports,
   emit: (scene, options = {}) => {
     admit(scene, svg, options.onWarning);
-    const ctx: Ctx = { scene, prefix: options.prefix ?? "", trims: new Map() };
+    const ctx: Ctx = { scene, prefix: options.prefix ?? "", hides: new Map() };
     const names = Object.keys(scene.symbols);
 
     // Each symbol is drawn once in <defs>, and each instance is a <use> of it. CSS and SMIL animations inside run in

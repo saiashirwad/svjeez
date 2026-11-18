@@ -206,10 +206,26 @@ describe("the SVG backend", () => {
     expect(nested).toMatch(/<g style="transform-origin:0px 0px" class="a m\d">\s*<circle/);
   });
 
-  test("an entrance and the node's own opacity nest, since both are opacity", () => {
+  test("an entrance folds into the node's own opacity, so no wrapper draws it", () => {
+    const out = svg.emit(
+      made(() => <Shape geometry={circle(4)} opacity={0.5} motion={enter(span(0, 1))} />),
+    );
+
+    expect(out).toContain('<circle r="4" fill="none" class="a m1"/>');
+    expect(out).toContain("opacity:0.5");
+    expect(out).not.toContain("<g");
+  });
+
+  test("two layers that move at once nest, since one lane can't hold their product", () => {
     expect(
-      body(() => <Shape geometry={circle(4)} opacity={0.5} motion={enter(span(0, 1))} />),
-    ).toMatch(/<g class="a m1">\s*<circle r="4" fill="none" opacity="0.5"\/>/);
+      body(() => (
+        <Shape
+          geometry={circle(4)}
+          opacity={track(1).to(0.5, span(0, 2))}
+          motion={enter(span(0, 1))}
+        />
+      )),
+    ).toMatch(/<g class="a m\d">\s*<circle r="4" fill="none" class="a m\d"\/>/);
   });
 
   test("a feature the backend can't draw is named with its node, before anything is written", () => {
