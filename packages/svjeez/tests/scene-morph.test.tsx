@@ -222,6 +222,33 @@ describe("morph", () => {
     ]);
   });
 
+  test("text whose words come back in a chain reuses the run that drew them", () => {
+    const label = (words: string) => (
+      <Text key="t" font={mono} size={10} fill="#ffffff" at={[0, 20]}>
+        {words}
+      </Text>
+    );
+
+    const model = made(() =>
+      morph.between(["one", "two", "one", "two"].map(label), [
+        span(0, 1),
+        span(1.5, 1),
+        span(3, 0.5),
+      ]),
+    );
+
+    const group = find(model, "t");
+
+    if (group.kind !== "group") throw new Error("expected a group");
+    expect(group.children.map((child) => child.key)).toEqual(["t/0", "t/1"]);
+    expect(
+      group.children.map((child) => lane(child.layers[0]!.opacity).keys.map((key) => key.value)),
+    ).toEqual([
+      [1, 0, 0, 1, 1, 0, 0],
+      [0, 1, 1, 0, 0, 1, 1],
+    ]);
+  });
+
   test("a chain of states goes through each in turn, and inside a Sequence on its clock", () => {
     const at = (x: number) => <Shape fill="#000000" key="a" geometry={rect(1, 1)} at={[x, 0]} />;
 

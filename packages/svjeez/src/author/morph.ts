@@ -752,11 +752,7 @@ const textOf = (plan: Plan, entry: Entry): TextNode | GroupNode => {
     };
   }
 
-  const runs: number[] = [];
-
-  texts.forEach((node, s) =>
-    runs.push(s > 0 && wording(node) === wording(texts[s - 1]!) ? runs.at(-1)! : s),
-  );
+  const runs = texts.map((node) => texts.findIndex((other) => wording(other) === wording(node)));
 
   const children = [...new Set(runs)].map((run): TextNode => {
     const own = texts[run]!;
