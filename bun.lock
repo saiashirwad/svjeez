@@ -190,14 +190,15 @@
     "packages/mermaid": {
       "name": "@svjeez/mermaid",
       "version": "0.8.0-next.0",
+      "dependencies": {
+        "@svjeez/diagrams": "workspace:^",
+      },
       "devDependencies": {
-        "@svjeez/diagrams": "workspace:*",
         "@types/bun": "latest",
         "svjeez": "workspace:*",
         "typescript": "latest",
       },
       "peerDependencies": {
-        "@svjeez/diagrams": "workspace:^",
         "svjeez": "workspace:^",
       },
     },

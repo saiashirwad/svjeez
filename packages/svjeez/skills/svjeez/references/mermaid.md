@@ -1,6 +1,6 @@
 # Mermaid
 
-`@svjeez/mermaid` (`npm i @svjeez/mermaid@next @svjeez/diagrams@next`) reads Mermaid text and draws it with `@svjeez/diagrams`. `mermaid(text, options)` returns the same diagram `flowchart()`, `sequence()` or `stateMachine()` would, so everything in [`references/diagrams.md`](diagrams.md) applies to it: `node`, `with`, `size`, `part`, `when`, `route`, `walk`.
+`@svjeez/mermaid` (`npm i @svjeez/mermaid@next`) reads Mermaid text and draws it with `@svjeez/diagrams`. `mermaid(text, options)` returns the same diagram `flowchart()`, `sequence()` or `stateMachine()` would, so everything in [`references/diagrams.md`](diagrams.md) applies to it: `node`, `with`, `size`, `part`, `when`, `route`, `walk`.
 
 ```tsx
 /** @jsxImportSource svjeez */

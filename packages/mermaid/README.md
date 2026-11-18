@@ -3,7 +3,7 @@
 Draw Mermaid text as a svjeez diagram: flowcharts, sequence diagrams and state diagrams.
 
 ```sh
-npm i -D @svjeez/mermaid @svjeez/diagrams svjeez
+npm i -D @svjeez/mermaid svjeez
 ```
 
 ```ts

@@ -19,14 +19,15 @@
     "build:package": "bun ../../scripts/package-plugin.ts",
     "test:package": "bun ../../scripts/package-plugin-check.ts"
   },
+  "dependencies": {
+    "@svjeez/diagrams": "workspace:^"
+  },
   "devDependencies": {
-    "@svjeez/diagrams": "workspace:*",
     "@types/bun": "latest",
     "svjeez": "workspace:*",
     "typescript": "latest"
   },
   "peerDependencies": {
-    "@svjeez/diagrams": "workspace:^",
     "svjeez": "workspace:^"
   },
   "engines": {
