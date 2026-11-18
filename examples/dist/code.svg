@@ -25,7 +25,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m7{animation-name:k8;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k9{0%,46.341%{opacity:0}53.659%,100%{opacity:1}}
 .m8{animation-name:k9;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k10{0%,46.341%{opacity:1}53.659%,100%{opacity:0}}
+@keyframes k10{0%,46.341%,80.488%,100%{opacity:1}53.659%,73.171%{opacity:0}}
 .m9{animation-name:k10;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k11{0%,19.512%{opacity:0}26.829%,100%{opacity:1}}
 .m10{animation-name:k11;animation-timing-function:cubic-bezier(.77,0,.175,1)}
@@ -64,7 +64,6 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     <g transform="translate(0 54)" class="a m10">
       <text font-size="18" xml:space="preserve" fill="var(--tomorrow-keyword)" class="a m9"><tspan y="18.36">        return </tspan><tspan x="162" fill="var(--tomorrow-plain)">n</tspan></text>
       <text font-size="18" xml:space="preserve" fill="var(--tomorrow-keyword)" class="a m6"><tspan y="18.36">        return </tspan><tspan x="162" fill="var(--tomorrow-plain)">n</tspan><tspan x="172.8" fill="var(--tomorrow-punctuation)">;</tspan></text>
-      <text font-size="18" xml:space="preserve" fill="var(--tomorrow-keyword)" class="a m7"><tspan y="18.36">        return </tspan><tspan x="162" fill="var(--tomorrow-plain)">n</tspan></text>
     </g>
     <text y="99.36" font-size="18" xml:space="preserve" fill="var(--tomorrow-punctuation)" class="a m8">    }</text>
     <g class="a m11">
