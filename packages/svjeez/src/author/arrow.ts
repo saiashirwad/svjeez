@@ -363,7 +363,13 @@ export const Arrow = (props: ArrowProps): SceneElement => {
 
   return {
     type: "group",
-    props: common,
+    props: {
+      ...common,
+      forward:
+        size > 0
+          ? { trim: "shaft", stroke: ["shaft", "head"] }
+          : { trim: "shaft", stroke: "shaft" },
+    },
     children: [
       {
         type: "shape",

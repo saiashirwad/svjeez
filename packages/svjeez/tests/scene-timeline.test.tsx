@@ -428,24 +428,111 @@ describe("tracks", () => {
     );
   });
 
-  test("a prop a track already moves can't be moved by a verb too", () => {
+  test("a verb and a track on one prop take turns", () => {
+    const model = made(() => {
+      const dot = ref("dot");
+
+      dot.to({ opacity: 0 }, span(0, 1), ease.linear);
+
+      return (
+        <Shape
+          fill="#000000"
+          ref={dot}
+          geometry={circle(4)}
+          opacity={track(1).to(0.5, span(2, 1), ease.linear)}
+        />
+      );
+    });
+
+    const opacity = own(find(model, "dot")).opacity;
+
+    expect(valueAt(opacity, 0.5, blendNumber)).toBeCloseTo(0.5, 5);
+    expect(valueAt(opacity, 1.5, blendNumber)).toBeCloseTo(0, 5);
+    expect(valueAt(opacity, 2.5, blendNumber)).toBeCloseTo(0.25, 5);
+    expect(valueAt(opacity, 4, blendNumber)).toBeCloseTo(0.5, 5);
+  });
+
+  test("a verb that moves a prop while its track does throws, naming both times", () => {
     expect(() =>
       made(() => {
         const dot = ref("dot");
 
-        dot.to({ opacity: 0 }, span(0, 1));
+        dot.to({ opacity: 0 }, span(2.5, 1));
 
         return (
           <Shape
             fill="#000000"
             ref={dot}
             geometry={circle(4)}
-            anchor="center"
             opacity={track(1).to(0.5, span(2, 1))}
           />
         );
       }),
-    ).toThrow('dot.to() moves opacity on <Shape> "dot", which a track already moves');
+    ).toThrow(
+      'dot.to() moves opacity on <Shape> "dot" from 2.5s to 3.5s, while the track written on it moves it from 2s to 3s. A verb and a track take turns on one prop: start dot.to() at 3s or later, or end it by 2s.',
+    );
+  });
+
+  test("a group's forward says which parts a verb on it moves", () => {
+    const Underline = ({ name }: { readonly name: ReturnType<typeof ref> }): SceneElement => (
+      <Group ref={name} forward={{ trim: "line", stroke: ["line", "tick"] }}>
+        <Shape key="line" geometry={rect(40, 0)} stroke={{ color: "#000000" }} trim={[0, 0]} />
+        <Shape key="tick" geometry={rect(0, 4)} stroke={{ color: "#000000" }} />
+      </Group>
+    );
+
+    const model = made(() => {
+      const mark = ref("mark");
+
+      mark.to({ trim: [0, 1] }, span(0, 1), ease.linear);
+      mark.to({ stroke: { color: "#ff0000" } }, span(1, 1));
+
+      return <Underline name={mark} />;
+    });
+
+    const line = find(model, "mark/line");
+    const tick = find(model, "mark/tick");
+
+    if (line.kind !== "shape" || tick.kind !== "shape") throw new Error("not shapes");
+    expect(valueAt(line.trim!, 0.5, blendVec)).toEqual([0, 0.5]);
+    expect(isLane(line.stroke!.color)).toBe(true);
+    expect(isLane(tick.stroke!.color)).toBe(true);
+    expect(tick.trim).toBeUndefined();
+  });
+
+  test("a forward to a part that isn't there throws, naming the group and the part", () => {
+    expect(() =>
+      made(() => {
+        const mark = ref("mark");
+
+        mark.to({ trim: [0, 1] }, span(0, 1));
+
+        return (
+          <Group ref={mark} forward={{ trim: "lin" }}>
+            <Shape key="line" geometry={rect(40, 0)} stroke={{ color: "#000000" }} />
+          </Group>
+        );
+      }),
+    ).toThrow('forwards a verb to its part "lin", but no node inside it is keyed "lin".');
+  });
+
+  test("a verb can't join a track that loops", () => {
+    expect(() =>
+      made(() => {
+        const dot = ref("dot");
+
+        dot.to({ opacity: 0 }, span(3, 1));
+
+        return (
+          <Shape
+            fill="#000000"
+            ref={dot}
+            geometry={circle(4)}
+            opacity={track(1).to(0.5, span(0, 1)).loop(1)}
+          />
+        );
+      }),
+    ).toThrow("whose track loops forever");
   });
 });
 

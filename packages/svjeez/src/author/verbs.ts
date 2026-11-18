@@ -51,6 +51,33 @@ const isName = (name: string): name is keyof Moves => NAMES.some((known) => know
 
 export type Point = Place | Vec;
 
+/** Which keyed parts a verb on this node moves, per prop: { trim: "line", stroke: ["line", "head"] }. */
+export type Forward = { readonly [K in keyof Moves]?: string | readonly string[] };
+
+const propsOf = (name: keyof Moves): readonly Prop[] =>
+  name === "stroke" ? ["stroke", "strokeWidth"] : [name];
+
+const routesOf = (forward: Forward, where: string): ReadonlyMap<Prop, readonly string[]> => {
+  const routes = new Map<Prop, readonly string[]>();
+
+  for (const [name, parts] of Object.entries(forward)) {
+    if (!isName(name))
+      throw new SceneError(
+        `${where} forwards "${name}", which no verb moves. It forwards ${NAMES.join(", ")}.`,
+      );
+    const paths = [parts ?? []].flat();
+
+    if (paths.length === 0 || paths.some((path) => path.split("/").includes("")))
+      throw new SceneError(
+        `${where} forwards ${name} to ${JSON.stringify(parts)}. Name the parts by key, joined by "/" for a deeper one, as in forward={{ ${name}: "line" }}.`,
+      );
+
+    for (const prop of propsOf(name)) routes.set(prop, paths);
+  }
+
+  return routes;
+};
+
 export interface MoveOptions {
   readonly point?: Point;
 }
@@ -211,8 +238,6 @@ export type NodeElement = Exclude<
 
 const FOR_ALL: readonly NodeElement["type"][] = ["group", "shape", "text", "image", "instance"];
 
-const DRAWN: ReadonlySet<Prop> = new Set(["trim", "stroke", "strokeWidth"]);
-
 const KINDS: Readonly<Record<Prop, readonly NodeElement["type"][]>> = {
   at: FOR_ALL,
   rotate: FOR_ALL,
@@ -234,6 +259,8 @@ const UNWRITTEN: Readonly<Partial<Record<Prop, Value>>> = {
 };
 
 type Written = Value | Anchor | Track<Value> | Derived<Value> | undefined;
+
+type Start = Value | Track<Value>;
 
 const writtenOf = (el: NodeElement, prop: Prop): Written => {
   switch (prop) {
@@ -270,12 +297,12 @@ const names = (target: Ref, el: NodeElement, key: string, refs: Notes["refs"]): 
 };
 
 const written = (
-  initial: Value,
+  initial: Start,
   moves: readonly Move[],
   goal: (move: Move, before: Value) => Value,
 ): Track<Value> => {
-  let out = track<Value>(initial);
-  let before = initial;
+  let out = isTrack(initial) ? initial : track<Value>(initial);
+  let before = isTrack(initial) ? passageOf(initial).data.initial.value! : initial;
 
   for (const move of moves) {
     const value = goal(move, before);
@@ -301,7 +328,9 @@ const pointIn = (point: Point, box: Box, home: Vec, verb: string): Vec =>
 export class Cues {
   readonly #moves: readonly Move[];
   readonly #met = new Set<Move>();
-  readonly #forwarded = new Map<string, readonly Move[]>();
+  readonly #forwarded = new Map<string, Move[]>();
+  readonly #routed = new Map<string, { readonly from: string; readonly path: string }>();
+  readonly #reached = new Set<string>();
   readonly applied: { verb: string; key: string; start: Seconds; over: Seconds }[] = [];
   get refs(): readonly Ref[] {
     return this.#moves.map((item) => item.target.within?.ref ?? item.target);
@@ -315,15 +344,27 @@ export class Cues {
     const owned = this.#moves.filter((item) => names(item.target, el, key, notes.refs));
     let mine = [...owned, ...(this.#forwarded.get(key) ?? [])];
 
-    if (el.type === "group" && el.settle?.kind === "connect") {
-      const passed = mine.filter((item) => DRAWN.has(item.prop));
+    this.#reached.add(key);
 
-      mine = mine.filter((each) => !passed.includes(each));
-      this.#forwarded.set(`${key}/shaft`, passed);
-      this.#forwarded.set(
-        `${key}/head`,
-        passed.filter((item) => item.prop !== "trim"),
-      );
+    if (el.type === "group" && el.props.forward) {
+      const routes = routesOf(el.props.forward, named(key));
+
+      for (const item of mine) {
+        const paths = routes.get(item.prop);
+
+        if (!paths) continue;
+
+        for (const path of paths) {
+          const part = `${key}/${path}`;
+
+          this.#forwarded.set(part, [...(this.#forwarded.get(part) ?? []), item]);
+          this.#routed.set(part, { from: key, path });
+        }
+
+        this.#met.add(item);
+      }
+
+      mine = mine.filter((item) => !routes.has(item.prop));
     }
 
     if (mine.length === 0) return el;
@@ -349,6 +390,9 @@ export class Cues {
       const initial = this.#initial(el, prop, moves[0]!, key, notes, parent);
 
       conflicts(moves, prop, key, timing.clock.offset);
+
+      if (initial !== undefined && isTrack(initial))
+        takesTurns(moves, initial, prop, key, timing.clock.offset);
       const onAnchor = moves.some((move) => move.goal.kind === "anchor");
 
       if (prop === "at" && onAnchor) notes.onAnchor.add(key);
@@ -422,7 +466,7 @@ export class Cues {
     key: string,
     notes: Notes,
     parent: string,
-  ): Value | undefined {
+  ): Start | undefined {
     const { verb } = first;
 
     const painted = prop === "fill" || prop === "stroke";
@@ -433,10 +477,26 @@ export class Cues {
       );
     const value = writtenOf(el, prop);
 
-    if (isTrack(value) || isDerived(value))
+    if (isDerived(value))
       throw new SceneError(
-        `${verb} moves ${prop} on ${named(key)}, which a track already moves. Move it in one place: write the track's steps as actions, or the actions as track steps.`,
+        `${verb} moves ${prop} on ${named(key)}, which follows other tracks through map() or with(). A verb can't add to a value worked out from others: move what it follows, or give the prop a track of its own.`,
       );
+
+    if (isTrack(value)) {
+      const { data } = passageOf(value);
+
+      if (data.period !== undefined)
+        throw new SceneError(
+          `${verb} moves ${prop} on ${named(key)}, whose track loops forever, so there is no time left for a verb.`,
+          `End the loop with repeat({ until }), or put the loop in a motion layer, which adds on top of the prop.`,
+        );
+
+      if (data.rewind)
+        throw new SceneError(
+          `${verb} moves ${prop} on ${named(key)}, whose track rewinds at the end of the clock.`,
+          `Drop rewind() and end with a step back to the start, so the verb can take its turn.`,
+        );
+    }
 
     if (value instanceof Anchor)
       throw new SceneError(
@@ -450,7 +510,7 @@ export class Cues {
       );
 
     if (prop === "at") return value;
-    const start = value ?? UNWRITTEN[prop];
+    const start: Start | undefined = value ?? UNWRITTEN[prop];
 
     if (start === undefined)
       throw new SceneError(
@@ -472,6 +532,14 @@ export class Cues {
   }
 
   finish(): void {
+    for (const [part, { from, path }] of this.#routed)
+      if (!this.#reached.has(part))
+        throw new SceneError(
+          `${named(from)} forwards a verb to its part "${path}", but no node inside it is keyed "${path}".`,
+          "Key the part, or fix the path in forward={…}.",
+          whereOf(from),
+        );
+
     for (const item of this.#moves) {
       if (this.#met.has(item)) continue;
       const { target } = item;
@@ -526,6 +594,42 @@ const conflicts = (moves: readonly Move[], prop: Prop, key: string, offset: Seco
       if (overlap && !cut) throw collision(a, b, prop, key, offset);
     }
   });
+};
+
+const takesTurns = (
+  moves: readonly Move[],
+  written: Track<Value>,
+  prop: Prop,
+  key: string,
+  offset: Seconds,
+): void => {
+  for (const step of passageOf(written).data.steps) {
+    const stop = Math.min(step.start + step.over, step.until ?? Infinity);
+
+    for (const move of moves) {
+      const overlap =
+        step.over === 0 && move.over === 0
+          ? Math.abs(step.start - move.start) <= EPSILON
+          : move.start < stop - EPSILON && step.start < end(move) - EPSILON;
+
+      const cut =
+        (isSpring(step.ease) && step.start < move.start - EPSILON) ||
+        (isSpring(move.curve) && move.start < step.start - EPSILON);
+
+      if (!overlap || cut) continue;
+
+      const theirs =
+        step.over === 0
+          ? `at ${num(offset + step.start)}s`
+          : `from ${num(offset + step.start)}s to ${num(offset + stop)}s`;
+
+      throw new SceneError(
+        `${move.verb} moves ${prop} on ${named(key)} ${when(move, offset)}, while the track written on it moves it ${theirs}.`,
+        `A verb and a track take turns on one prop: start ${move.verb} at ${num(offset + stop)}s or later, or end it by ${num(offset + step.start)}s.`,
+        { ...whereOf(key), ...(move.source && { source: move.source }) },
+      );
+    }
+  }
 };
 
 const withTracks = (el: NodeElement, tracks: ReadonlyMap<Prop, Track<Value>>): NodeElement => {

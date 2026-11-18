@@ -484,7 +484,13 @@ export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
   const tip = drawn && span(drawn.start + drawn.over * 0.85, drawn.over * 0.15);
 
   return (
-    <Group key={e.key}>
+    <Group
+      key={e.key}
+      forward={{
+        trim: "line",
+        stroke: head === "none" || head === "filled" ? "line" : ["line", "head"],
+      }}
+    >
       <Shape
         key="line"
         geometry={curve(points).geometry}

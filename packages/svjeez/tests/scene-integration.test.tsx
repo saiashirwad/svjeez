@@ -793,7 +793,7 @@ describe("derived tracks feed every kind of value", () => {
         );
       }),
     ).toThrow(
-      'dot.move() moves at on <Shape> "dot", which a track already moves. Move it in one place',
+      'dot.move() moves at on <Shape> "dot", which follows other tracks through map() or with().',
     );
   });
 });

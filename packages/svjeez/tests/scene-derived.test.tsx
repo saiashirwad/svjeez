@@ -312,7 +312,7 @@ describe("derived tracks", () => {
           />
         );
       }),
-    ).toThrow("which a track already moves");
+    ).toThrow("which follows other tracks through map() or with()");
   });
 
   test("an anchor can be mapped in the frame of the box it is on", () => {

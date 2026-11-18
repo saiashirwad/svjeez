@@ -249,7 +249,7 @@ const Line = ({
   const along = reaches(points);
 
   return (
-    <Group key={options.name}>
+    <Group key={options.name} forward={stroked ? { trim: "line", stroke: "line" } : undefined}>
       {fill}
       {stroked && (
         <Shape

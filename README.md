@@ -61,6 +61,17 @@ npx svjeez dev scene.tsx
 
 Open `hello.svg` in a browser or embed it with `<img src="hello.svg" alt="A curve draws on, then a dot pops in">`. With Bun, use `bun add svjeez@next` and `bunx --bun svjeez` with the same scene and JSX config.
 
+## Four ways to move something
+
+Each has one job, and they combine by one rule: a prop takes one move at a time.
+
+- **A track** on the prop says what it does over time: `opacity={track(0).to(1, span(1, 0.3))}`.
+- **A motion layer** is a passing effect on top of the prop, such as an entrance, an exit or a wobble: `motion={enter(span(1, 0.3))}`. Layers always stack.
+- **A verb** on a ref is choreography, where one node answers another: `dot.move(card.right, card.to({ opacity: 1 }, span(1, 0.3)).next(0.5))`. A verb takes turns with the prop's track, before or after its steps.
+- **A morph** says the picture changes from one state to another, and moves whatever differs.
+
+A component says what a verb on it means with `<Group forward={{ trim: "line", stroke: ["line", "head"] }}>`, so `arrow.to({ trim: [0, 1] }, when)` draws an `<Arrow>`, a chart's line or a diagram's edge without naming their parts.
+
 ## Check a scene
 
 ```sh
