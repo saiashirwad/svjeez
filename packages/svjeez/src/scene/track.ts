@@ -4,6 +4,7 @@ import type { Vec } from "./ir";
 import type { Curve } from "./spring";
 import type { Geometry } from "./values";
 import { Passage } from "./steps";
+import { mappedTrack, type DeriveOptions, type Derived } from "./derived";
 
 /**
  * One value over time, on the clock it sits in: the scene's, or a `<Sequence>`'s. Steps may be written in any order,
@@ -19,9 +20,14 @@ export interface Track<T> {
   repeat(times: number | { readonly until: Seconds }): Track<T>;
   /** At the end of the clock, glide back to the first value. Nothing can follow. */
   rewind(over: Seconds, curve?: Curve): Track<T>;
+  /**
+   * A track that is `fn` of this one at every moment: `theta.map((t) => -t * 2)`. Its source must be numbers or
+   * points; the result may be any value a prop takes.
+   */
+  map<U>(fn: (value: T) => U, options?: DeriveOptions): Derived<U>;
 }
 
-export type Anim<T> = T | Track<T>;
+export type Anim<T> = T | Track<T> | Derived<T>;
 
 export class ValueTrack<T> implements Track<T> {
   constructor(readonly passage: Passage<{ readonly value: T }>) {}
@@ -44,6 +50,10 @@ export class ValueTrack<T> implements Track<T> {
 
   rewind(over: Seconds, curve: Curve = ease.out): ValueTrack<T> {
     return new ValueTrack(this.passage.rewind(over, curve));
+  }
+
+  map<U>(fn: (value: T) => U, options: DeriveOptions = {}): Derived<U> {
+    return mappedTrack(this, fn, options);
   }
 }
 

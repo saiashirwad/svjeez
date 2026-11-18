@@ -45,6 +45,8 @@ import {
   type Timing,
 } from "./steps";
 import { isTrack, layersOf, passageOf, type Anim, type LayerMotion } from "./track";
+import { derivedOf, isDerived } from "./derived";
+import { collect, type Cues } from "./timeline";
 import {
   boxOf,
   outlineOf,
@@ -78,6 +80,8 @@ interface Ctx {
   readonly symbols: Map<string, SymbolEntry>;
   /** What the second pass places: anchors, layout and connectors. */
   readonly notes: Notes;
+  /** The timelines the scene made, applied node by node. */
+  readonly cues: Cues;
 }
 
 interface SymbolEntry {
@@ -99,6 +103,8 @@ const animated = <A, T>(
   mix: Mix<T>,
   where: string,
 ): Animated<T> => {
+  if (isDerived(value)) return derivedOf(value, change, timing, where);
+
   if (!isTrack(value)) return change(value);
   // SAFETY: a value that is not undefined is an A, and undefined is itself one when A allows it, so change() takes it either way.
   const data = mapped(passageOf(value).data, "value", (given) => change(given as A));
@@ -186,6 +192,8 @@ const geometryOf = (
   timing: Timing,
   where: string,
 ): Animated<Outline> => {
+  if (isDerived(value)) return derivedOf(value, outlineOf, timing, `geometry on ${where}`);
+
   if (!isTrack(value)) return outlineOf(value);
   const { data } = passageOf(value);
 
@@ -390,12 +398,18 @@ const lowerAll = (
   parent: string,
   taken: Set<string> = new Set(),
 ): SceneNode[] =>
-  elements.flatMap((el): SceneNode[] => {
-    if (el.type === "fragment") return lowerAll(ctx, el.children, timing, parent, taken);
+  elements.flatMap((given): SceneNode[] => {
+    if (given.type === "fragment") return lowerAll(ctx, given.children, timing, parent, taken);
 
-    if (el.type === "sequence")
-      return lowerAll(ctx, el.children, inside(timing, el.at, el.over), parent, taken);
-    const name = el.props.key ?? el.props.ref?.key;
+    if (given.type === "sequence") {
+      const clocked = inside(timing, given.at, given.over);
+
+      if (given.timeline) ctx.cues.claim(given.timeline, clocked.clock);
+
+      return lowerAll(ctx, given.children, clocked, parent, taken);
+    }
+
+    const name = given.props.key ?? given.props.ref?.key;
 
     if (name !== undefined && taken.has(name))
       throw new Error(`Two nodes are both keyed "${name}"${parent && ` inside "${parent}"`}.`);
@@ -407,6 +421,7 @@ const lowerAll = (
       if (!taken.has(String(index))) own = String(index);
     taken.add(own);
     const key = parent ? `${parent}/${own}` : own;
+    const el = ctx.cues.apply(given, key, timing, ctx.notes, parent);
 
     note(ctx.notes, key, el.props, el.type === "group" ? el.settle : undefined);
 
@@ -446,6 +461,8 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
   if (options.reducedMotion && !Number.isFinite(options.reducedMotion.at))
     throw new Error(`scene() needs a finite reducedMotion.at, got ${options.reducedMotion.at}.`);
 
+  const [top, cues] = collect(() => within(size, build));
+
   const ctx: Ctx = {
     tokens: new Map(),
     fonts: new Map(),
@@ -453,10 +470,10 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
     duration,
     symbols: new Map(),
     notes: notes(),
+    cues,
   };
 
   for (const token of Object.values(options.theme ?? {})) colorOf(ctx, token, "scene()");
-  const top = within(size, build);
 
   const children = lowerAll(
     ctx,
@@ -476,6 +493,7 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
     children,
   };
 
+  cues.finish();
   const root = settle(drafted, ctx.notes, duration);
 
   const still =

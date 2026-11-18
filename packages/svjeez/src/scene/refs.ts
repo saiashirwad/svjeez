@@ -1,4 +1,8 @@
+import type { Seconds } from "../motion";
 import type { Box, Vec } from "./ir";
+import type { Curve } from "./spring";
+import { verbs, type Action, type Moves, type MoveToOptions } from "./timeline";
+import type { Paint } from "./values";
 
 /** A side of a box. */
 export type Edge = "left" | "right" | "top" | "bottom";
@@ -36,6 +40,11 @@ export class Anchor {
   /** The point, given the box it is on, in that box's frame. */
   on(box: Box): Vec {
     return this.#point(box);
+  }
+
+  /** Another point, `fn` of this one in the frame of the box it is on: `card.right.map(([x, y]) => [x + 8, y])`. */
+  map(fn: (point: Vec) => Vec): Anchor {
+    return new Anchor(this.of, `${this.label}.map(…)`, (box) => fn(this.#point(box)));
   }
 }
 
@@ -135,6 +144,91 @@ export class Ref {
 
   get bottomRight(): Anchor {
     return this.#corner("bottomRight", [1, 1]);
+  }
+
+  /*
+   * Motion verbs: each returns an action for a timeline, starting from the node's own value. A curve defaults to
+   * ease.out and may be a spring.
+   */
+
+  /** Every prop in `values` goes to its value over `over` seconds: the general form of the verbs below. */
+  to(values: Moves, over: Seconds, curve?: Curve): Action {
+    return verbs.to(this, values, over, curve);
+  }
+
+  /** A cut: every prop in `values` jumps to it. It takes no time. */
+  set(values: Moves): Action {
+    return verbs.set(this, values);
+  }
+
+  /** The node's `at` goes to `to`, a point in its parent's frame. */
+  move(to: Vec, over: Seconds, curve?: Curve): Action {
+    return verbs.move(this, to, over, curve);
+  }
+
+  /**
+   * The node moves so that a point of it, `[0, 0]` unless `options.point` says, lands on an anchor (a ref is its
+   * center) where that anchor is when the move ends, whatever moves it.
+   */
+  moveTo(to: Ref | Anchor, over: Seconds, curve?: Curve, options?: MoveToOptions): Action {
+    return verbs.moveTo(this, to, over, curve, options);
+  }
+
+  /** The node moves by `by` from where the move before left it. */
+  moveBy(by: Vec, over: Seconds, curve?: Curve): Action {
+    return verbs.moveBy(this, by, over, curve);
+  }
+
+  /** Turns to `to` degrees, clockwise. */
+  rotate(to: number, over: Seconds, curve?: Curve): Action {
+    return verbs.rotate(this, to, over, curve);
+  }
+
+  scale(to: number | Vec, over: Seconds, curve?: Curve): Action {
+    return verbs.scale(this, to, over, curve);
+  }
+
+  /** Opacity to `to`. */
+  fade(to: number, over: Seconds, curve?: Curve): Action {
+    return verbs.fade(this, to, over, curve);
+  }
+
+  /** Opacity to 1. */
+  show(over: Seconds, curve?: Curve): Action {
+    return verbs.show(this, over, curve);
+  }
+
+  /** Opacity to 0. */
+  hide(over: Seconds, curve?: Curve): Action {
+    return verbs.hide(this, over, curve);
+  }
+
+  /** A shape's or a text's fill to `to`. */
+  fill(to: Paint, over: Seconds, curve?: Curve): Action {
+    return verbs.fill(this, to, over, curve);
+  }
+
+  /** A shape's stroke color to `to`. */
+  stroke(to: Paint, over: Seconds, curve?: Curve): Action {
+    return verbs.stroke(this, to, over, curve);
+  }
+
+  /** The drawn part of a shape's stroke to `to`, two fractions of its length. */
+  trim(to: Vec, over: Seconds, curve?: Curve): Action {
+    return verbs.trim(this, to, over, curve);
+  }
+
+  /** Strokes the outline on from nothing: the trim cuts to `[0, 0]` and goes to `[0, 1]`. */
+  draw(over: Seconds, curve?: Curve): Action {
+    return verbs.draw(this, over, curve);
+  }
+
+  /**
+   * Everything the timeline moves on this node glides back to where it started over the last `over` seconds of the
+   * timeline's clock. It takes no time in a `seq`: it always runs at the end.
+   */
+  rewind(over: Seconds, curve?: Curve): Action {
+    return verbs.rewind(this, over, curve);
   }
 }
 

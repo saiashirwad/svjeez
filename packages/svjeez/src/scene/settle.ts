@@ -43,12 +43,22 @@ interface Note {
   readonly settle?: Settle;
 }
 
+/**
+ * A node whose `at` is written toward anchors, as a timeline's `moveTo` is: given how to read an anchor in the node's
+ * parent's frame, and the node once measured, its `at`.
+ */
+export type Aim = (
+  read: (anchor: Anchor) => Animated<Vec>,
+  self: () => { readonly box: Box; readonly origin: Vec; readonly layers: readonly Layer[] },
+) => Animated<Vec>;
+
 export interface Notes {
   readonly nodes: Map<string, Note>;
   readonly refs: Map<Ref, string>;
+  readonly aims: Map<string, Aim>;
 }
 
-export const notes = (): Notes => ({ nodes: new Map(), refs: new Map() });
+export const notes = (): Notes => ({ nodes: new Map(), refs: new Map(), aims: new Map() });
 
 interface Written {
   readonly ref?: Ref;
@@ -150,7 +160,13 @@ const turns = (layer: Layer): boolean =>
 const DEG = Math.PI / 180;
 
 /** A point in a node's frame, in its parent's: the rule at the top of ir.ts. */
-const outward = (p: Vec, at: Vec, origin: Vec, layers: readonly Layer[], t: Seconds): Vec => {
+export const outward = (
+  p: Vec,
+  at: Vec,
+  origin: Vec,
+  layers: readonly Layer[],
+  t: Seconds,
+): Vec => {
   let [x, y] = p;
 
   for (const layer of [...layers].reverse()) {
@@ -201,7 +217,7 @@ const TOLERANCE = 0.05;
 /** Places every node the first pass could not, and gives the scene's root back with every box and `at` final. */
 export const settle = <G extends SceneNode & { readonly kind: "group" }>(
   root: G,
-  { nodes, refs }: Notes,
+  { nodes, refs, aims }: Notes,
   duration: Seconds,
 ): G => {
   const top = draft(root, undefined, nodes);
@@ -319,7 +335,18 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
     const { anchor } = d.note ?? {};
 
+    const aim = aims.get(d.node.key);
+
     if (anchor) d.at = resolve(anchor, d.parent!);
+    else if (aim)
+      d.at = aim(
+        (to) => resolve(to, d.parent!),
+        () => {
+          measure(d);
+
+          return { box: d.box, origin: d.origin, layers: d.node.layers };
+        },
+      );
     d.placing = 2;
   };
 
