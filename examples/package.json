@@ -16,9 +16,11 @@
   "devDependencies": {
     "@svjeez/charts": "workspace:*",
     "@svjeez/code": "workspace:*",
+    "@svjeez/diagrams": "workspace:*",
     "@svjeez/fonts": "workspace:*",
     "@svjeez/geo": "workspace:*",
     "@svjeez/icons": "workspace:*",
+    "@svjeez/math": "workspace:*",
     "@svjeez/video": "workspace:*",
     "@types/bun": "latest",
     "playwright-core": "^1.64.1",
