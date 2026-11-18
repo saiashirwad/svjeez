@@ -1,4 +1,4 @@
-import type { Backend as Route, Target, TargetValues } from "./channels";
+import type { Backend as Route, Channel, ChannelValues } from "./channels";
 import type { Canvas, Lane as CssLane } from "./compile";
 import type { Emit } from "./css";
 import { num } from "../model/format";
@@ -267,7 +267,7 @@ const outline = (geometry: Geometry, at: Vec): Drawn => {
   }
 };
 
-const held = <T>(lane: Lane<T>, duration: number, values: (value: T) => TargetValues) => {
+const held = <T>(lane: Lane<T>, duration: number, values: (value: T) => ChannelValues) => {
   const period = lane.period ?? duration;
 
   const keys = lane.keys.map((key, index): Held => ({
@@ -319,7 +319,7 @@ const cssLane = <T>(
   ctx: Ctx,
   slot: Slot | GeometrySlot | (string & {}),
   lane: Lane<T>,
-  values: (value: T) => TargetValues,
+  values: (value: T) => ChannelValues,
   {
     route = "css",
     cuts = true,
@@ -331,8 +331,8 @@ const cssLane = <T>(
   return {
     key: slot,
     backend: route,
-    // SAFETY: every values() above returns a TargetValues, so the names of its first key are Targets.
-    channels: Object.keys(keys[0]!.values) as Target[],
+    // SAFETY: every values() above returns a ChannelValues, so the names of its first key are Targets.
+    channels: Object.keys(keys[0]!.values) as Channel[],
     keys,
     period,
     snapped: period,

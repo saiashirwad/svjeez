@@ -1,4 +1,4 @@
-import type { TargetValues } from "./channels";
+import type { ChannelValues } from "./channels";
 import type { Emit } from "./css";
 import { easeAt, splitEase } from "../model/ease-at";
 import { num } from "../model/format";
@@ -35,7 +35,7 @@ export type GeometrySlot =
 /** A lane for the emitter, its values already named the way the emitter reads them. */
 export interface Written {
   readonly slot: GeometrySlot;
-  readonly lane: Lane<TargetValues>;
+  readonly lane: Lane<ChannelValues>;
   readonly route: "css" | "smil";
   readonly emit?: Emit;
 }
@@ -63,7 +63,7 @@ export type Moving =
  * SMIL reads a lane's values under its first channel and writes the attribute the lane's key names. A number SMIL
  * animates on a rect, a circle, an ellipse or a line rides under `width`, the channel the old API animates the same way.
  */
-const smilNumber = (value: number): TargetValues => ({ width: value });
+const smilNumber = (value: number): ChannelValues => ({ width: value });
 
 const close = (a: number, b: number, size: number): boolean =>
   Math.abs(a - b) <= 1e-9 * Math.max(1, size);
@@ -222,7 +222,7 @@ const dashed = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving | undefi
   const dots = stroke.cap !== "butt" && spans.some((each) => each.length === 0);
   const grows = !dots && spans.every((each) => each.low === low);
 
-  const values = spans.map((each): TargetValues => {
+  const values = spans.map((each): ChannelValues => {
     const [from, to] = [(each.low - low) / widest, (each.low + each.length - low) / widest];
 
     return grows ? { draw: to } : { draw: to, drawStart: from };
@@ -501,7 +501,7 @@ const morph = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving => {
         slot: "d",
         lane: along(
           written,
-          data.map((d): TargetValues => ({ d })),
+          data.map((d): ChannelValues => ({ d })),
         ),
         route: "smil",
       },

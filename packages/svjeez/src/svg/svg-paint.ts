@@ -1,5 +1,5 @@
 import type { Color as CssColor } from "../model/color";
-import type { TargetValues } from "./channels";
+import type { ChannelValues } from "./channels";
 import type { Canvas, Lane as CssLane } from "./compile";
 import { num } from "../model/format";
 import { animate } from "./smil";
@@ -42,7 +42,7 @@ export interface Defs {
   readonly lane: <T>(
     slot: string,
     lane: Lane<T>,
-    values: (value: T) => TargetValues,
+    values: (value: T) => ChannelValues,
     route: "css" | "smil",
   ) => CssLane;
   /** The emitter's own node, for a clip's outline and a mask's content. */

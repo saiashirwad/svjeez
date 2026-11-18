@@ -1,4 +1,4 @@
-import { formatValue, valueOf, type Target, type TargetValues } from "./channels";
+import { formatValue, valueOf, type Channel, type ChannelValues } from "./channels";
 import type { Canvas } from "./compile";
 import { num } from "../model/format";
 import { foldKeys, moving, type Key } from "./keys";
@@ -66,7 +66,7 @@ export const cssKeyframes = (lane: string, emit: Emit, all: readonly Key[], peri
   };
 };
 
-export const cssDeclarations = (lane: string, emit: Emit, values: TargetValues): string => {
+export const cssDeclarations = (lane: string, emit: Emit, values: ChannelValues): string => {
   if (emit === "visibility") return `visibility:${values.opacity === 0 ? "hidden" : "visible"}`;
 
   if (values.drawStart !== undefined) {
@@ -97,8 +97,8 @@ export const cssDeclarations = (lane: string, emit: Emit, values: TargetValues):
     }
 
     default: {
-      // SAFETY: values is a TargetValues, keyed by Target names, so its first key is a Target.
-      const [target] = Object.keys(values) as Target[];
+      // SAFETY: values is a ChannelValues, keyed by Channel names, so its first key is a Channel.
+      const [target] = Object.keys(values) as Channel[];
 
       if (!target) throw new Error(`Lane ${lane} has no value.`);
       const value = valueOf(values, target)!;

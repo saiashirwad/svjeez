@@ -1,6 +1,7 @@
 import { hexOf, type Hex } from "./model/color";
-import type { Point } from "./layout/box";
 import { ease, type Ease } from "./model/time";
+
+type Point = { readonly x: number; readonly y: number };
 
 interface Labelled {
   readonly label?: string;

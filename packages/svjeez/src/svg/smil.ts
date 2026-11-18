@@ -1,4 +1,4 @@
-import { formatValue, type Channel, type Target, type ChannelValues } from "./channels";
+import { formatValue, type Channel, type ChannelValues } from "./channels";
 import type { Canvas } from "./compile";
 import { num } from "../model/format";
 import { moving, type Key } from "./keys";
@@ -173,7 +173,7 @@ export const animate = (
   canvas: Canvas,
   attribute: string,
   lane: {
-    readonly channels: readonly Target[];
+    readonly channels: readonly Channel[];
     readonly keys: readonly Key[];
     readonly period: Seconds;
     readonly snapped: Seconds;

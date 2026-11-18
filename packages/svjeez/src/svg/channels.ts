@@ -58,16 +58,12 @@ export type Channel = keyof Table;
 
 export type ChannelValues<K extends Channel = Channel> = { readonly [P in K]?: Table[P]["value"] };
 
-export type Target = Channel;
+export type ChannelValue = number | Color | PathData;
 
-export type TargetValues = ChannelValues;
-
-export type TargetValue = number | Color | PathData;
-
-export const valueOf = (values: TargetValues, target: Target): TargetValue | undefined =>
+export const valueOf = (values: ChannelValues, target: Channel): ChannelValue | undefined =>
   values[target];
 
-export const spec = (target: Target): Spec => CHANNELS[target];
+export const spec = (target: Channel): Spec => CHANNELS[target];
 
 /** How a lane is animated: CSS keyframes, or SMIL where CSS would not do (`d`, `width`, `height`, filter primitives). */
 export type Backend = "css" | "smil";

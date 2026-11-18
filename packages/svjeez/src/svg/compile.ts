@@ -1,4 +1,4 @@
-import { formatValue, spec, valueOf, type Backend, type Channel, type Target } from "./channels";
+import { formatValue, spec, valueOf, type Backend, type Channel } from "./channels";
 import { baseRule, classBody, cssDeclarations, cssKeyframes, freezeRule, type Emit } from "./css";
 import { fontFaces, isFontValue, type Font, type FontValue } from "../font/font";
 import {
@@ -38,7 +38,7 @@ export interface Canvas {
 export interface Lane {
   readonly key: string;
   readonly backend: Backend;
-  readonly channels: readonly Target[];
+  readonly channels: readonly Channel[];
   readonly keys: readonly Key[];
   readonly period: number;
   readonly snapped: number;
