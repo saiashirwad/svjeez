@@ -27,8 +27,6 @@ const USAGE = `usage:
   svjeez dev <file> [--port 5173] [--out file.svg] [params]
   svjeez frames <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
   svjeez check <file> [--no-browser] [--times 0,0.5,1] [--at 0,1.5] [--json] [--color-scheme system|light|dark] [params]
-  svjeez values <file> [--json] [--filter text]
-  svjeez set <file> key=value [key=value ...] [--dry-run]
   svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
   svjeez skill [--install [--dir .claude/skills]]
 
@@ -48,9 +46,6 @@ per line, file:line:column  code  severity: message, with what to change on a hi
 model only, at once. --at 0,1.5 also describes what is on screen at those times. --json prints
 { errors, warnings, info, frames?, timeline? }. It exits 1 when any finding is an error, the scene failing to build
 included. Without --times the browser measures 0, seven times across the loop, just before the end, and the scene's keys.
-values lists every number, color, ease and param in the scene's source that the editor shows a control for, with its key;
-set writes key=value into those literals and changes nothing else. Both read the source without running a browser,
-through @svjeez/live.
 skill prints the agent skill for writing svjeez scenes; --install copies it, with its references and examples, into <dir>/svjeez.`;
 
 const SCHEMES = ["system", "light", "dark"] as const;
@@ -363,7 +358,7 @@ interface VideoModule {
 
 const VIDEO = "@svjeez/video";
 
-const loadOptional = async (name: string, command: string, pkg = name): Promise<object> => {
+const loadOptional = async (name: string, command: string): Promise<object> => {
   const from = (base: string) => {
     try {
       return pathToFileURL(createRequire(base).resolve(name)).href;
@@ -375,32 +370,12 @@ const loadOptional = async (name: string, command: string, pkg = name): Promise<
   const url =
     from(join(process.cwd(), "package.json")) ??
     from(fileURLToPath(import.meta.url)) ??
-    fail(`svjeez ${command} needs ${pkg}. Install it with \`npm i -D ${pkg}\`.`);
+    fail(`svjeez ${command} needs ${name}. Install it with \`npm i -D ${name}\`.`);
 
   return import(url);
 };
 
 const loadVideo = (): Promise<VideoModule> => loadOptional(VIDEO, "video");
-
-type LiveCommand = (args: string[]) => Promise<number>;
-
-interface LiveModule {
-  readonly values?: LiveCommand;
-  readonly set?: LiveCommand;
-}
-
-const liveCommand =
-  (name: "values" | "set") =>
-  async (args: string[]): Promise<void> => {
-    const live: LiveModule = await loadOptional("@svjeez/live/commands", name, "@svjeez/live");
-
-    const run =
-      live[name] ?? fail(`@svjeez/live has no ${name} command. Update it to match svjeez.`);
-
-    process.exitCode = await run(args).catch((error: Error) =>
-      error.name === "SetError" ? fail(error.message) : Promise.reject(error),
-    );
-  };
 
 const videoCommand = async (args: string[]): Promise<void> => {
   const { values, positionals } = parseArgs({
@@ -809,8 +784,6 @@ const COMMANDS = new Map([
   ["dev", devCommand],
   ["check", checkCommand],
   ["frames", framesCommand],
-  ["values", liveCommand("values")],
-  ["set", liveCommand("set")],
   ["video", videoCommand],
   ["skill", skillCommand],
 ]);

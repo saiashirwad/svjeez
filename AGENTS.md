@@ -18,17 +18,14 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/fonts/` is `@svjeez/fonts`, which loads Google Fonts by family name into a `Font`.
 - `packages/geo/` is `@svjeez/geo`, which projects GeoJSON and TopoJSON into scenes through `d3-geo`.
 - `packages/icons/` is `@svjeez/icons`, the Tabler and Lucide icons as path data for `<Icon>`.
-- `packages/live/` is `@svjeez/live`, the scene editor's core with no framework in it. `createEditor` is an Elm-style store: `update` is pure, every edit is a message (a drag, a keystroke or an agent sends the same ones), and the runtime compiles in a worker and shows each picture from where the clock was. It also parses scene source into literals with stable keys, picks a control for each, and measures what a number moves on the picture. `@svjeez/live/fit` has the control math for params (`fit`, `positionOf`, `valueAt`, `follow`); the scene-facing kinds stay in `svjeez/params`.
-- `packages/svelte/` is `@svjeez/svelte` and `packages/react/` is `@svjeez/react`: the editor's components (the code with a control on every value, the picture with handles, a transport) for each framework. Both render the same markup and share `@svjeez/live/editor.css`, so neither carries styles of its own.
 - `packages/math/` is `@svjeez/math`, which typesets TeX into glyph paths through MathJax and draws coordinate planes (axes, plots, moving grids), calculus on them, vector fields and contour lines.
 - `packages/mermaid/` is `@svjeez/mermaid`, which reads Mermaid flowcharts, sequence diagrams and state diagrams into svjeez diagrams.
 - `packages/video/` is `@svjeez/video`, which encodes a scene as MP4 or WebM through Mediabunny in headless Chromium.
 - `examples/` holds the example scenes and their committed output in `examples/dist/`. It is private and never published.
-- `site/` is the Astro site at svjeez.texoport.in.
 
 Run `bun install` once at the root. From the root, `bun run typecheck` and `bun run test` run every workspace's script, `bun run build:examples` rebuilds `examples/dist/`, and `bun run typecheck` also checks `scripts/` through the root `tsconfig.json`. Every other command runs inside its workspace.
 
-The workspace packages depend on `svjeez` through `workspace:*`. Its exports carry an `@svjeez/source` condition that points at `src/`. The site and the plugins' tests turn that condition on, so they run the library's source and never need `package-dist/`.
+The workspace packages depend on `svjeez` through `workspace:*`. Its exports carry an `@svjeez/source` condition that points at `src/`. The plugins' tests turn that condition on, so they run the library's source and never need `package-dist/`.
 
 Every other package points its exports at TypeScript source in the workspace, because Astro loads a config's integrations without the `@svjeez/source` condition. In each, `bun run build:package` writes `package-dist/` with the package.json that npm publishes, and `bun run test:package` installs the packed tarball into a copy of `test/consumer/` and checks it on plain Node. Both use the scripts in the root `scripts/` folder Packages with a third-party dependency stay out of `svjeez` so the core keeps none.
 
@@ -44,7 +41,7 @@ bun run test:package              # packs the tarball, lints it, and type-checks
 bun run build:package             # the npm build into package-dist/, with the root README and LICENSE beside it
 bun run dev <file.tsx>            # svjeez dev: live preview with reload and a scrubber (--port, --params data.json)
 bun run render-png <file> --sheet  # svjeez frames: frames/ with sheet.png (--times 0,1,2, --out dir)
-bun run svjeez <command> ...      # any CLI command from source: svg, dev, frames, check, values, set, video, skill
+bun run svjeez <command> ...      # any CLI command from source: svg, dev, frames, check, video, skill
 ```
 
 `examples/` has its own `build`, `dev`, `render-png`, `render-video`, `test`, `test:node` and `typecheck`. `bun run build [name ...]` there writes `examples/dist/`, as in `bun run build readme/hero`. Its `tsconfig.json` maps `svjeez` to the library's `src/`, so the examples always run the source.
@@ -73,10 +70,6 @@ Each package's source explains its own internals. These are the rules that aren'
 - `@svjeez/fonts` is the only package that touches the network. The examples load every font through it, and the library's own tests read the TTFs in `packages/svjeez/tests/fixtures/`.
 - A package that scene writers use has an example scene in `examples/` and a reference in `skills/svjeez/references/`.
 
-## Site
-
-`site/` imports scenes straight from `examples/` through the `@examples/*` path. Run `bun run dev`, `bun run build`, `bun run typecheck` and `bun run test` inside `site/`. `bun run deploy` builds and deploys through Alchemy's `Cloudflare.Website.Astro` (`site/alchemy.run.ts`). The site pins TypeScript 6, because `astro check` does not support TypeScript 7.
-
 ## Rules
 
 - Import `svjeez`, `svjeez/frames`, `svjeez/page` and `svjeez/params`. Scenes, examples, packages and docs write JSX, or call `jsx` from `svjeez/jsx-runtime`. `restyle` is in `svjeez/page` and `validateSvg` in `svjeez/frames`. In `packages/svjeez/` the tsconfig maps them to `src/`.
@@ -98,7 +91,7 @@ Each package's source explains its own internals. These are the rules that aren'
 Every package shares one version. To release, bump them together and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-for p in svjeez vite astro charts code diagrams dom fonts geo icons live math mermaid react svelte video; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
+for p in svjeez vite astro charts code diagrams dom fonts geo icons math mermaid video; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
 bun install && bun run build:examples && git add -A examples && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 
