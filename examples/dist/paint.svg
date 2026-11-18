@@ -64,7 +64,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     <filter id="f1s" filterUnits="userSpaceOnUse" x="447" y="3" width="186" height="186" color-interpolation-filters="sRGB">
       <feGaussianBlur stdDeviation="0"/>
     </filter>
-    <filter id="f2" filterUnits="userSpaceOnUse" x="603" y="9" width="178" height="188" color-interpolation-filters="sRGB">
+    <filter id="f2" filterUnits="userSpaceOnUse" x="603" y="9" width="179" height="189" color-interpolation-filters="sRGB">
       <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.45" flood-color="#000000">
         <animate id="s6" attributeName="dy" values="2;12;12;2" keyTimes="0;0.25;0.75;1" calcMode="spline" keySplines="0.23 1 0.32 1;0 0 1 1;0.23 1 0.32 1" begin="1s;s6.begin+6s" dur="3.2s" fill="freeze" data-loop="6s"/>
         <set attributeName="dy" to="2" begin="0s" dur="1s" fill="freeze" data-loop="6s"/>
@@ -72,7 +72,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
         <set attributeName="stdDeviation" to="2" begin="0s" dur="1s" fill="freeze" data-loop="6s"/>
       </feDropShadow>
     </filter>
-    <filter id="f2s" filterUnits="userSpaceOnUse" x="603" y="9" width="178" height="188" color-interpolation-filters="sRGB">
+    <filter id="f2s" filterUnits="userSpaceOnUse" x="603" y="9" width="179" height="189" color-interpolation-filters="sRGB">
       <feDropShadow dx="0" dy="12" stdDeviation="10" flood-opacity="0.45" flood-color="#000000"/>
     </filter>
   </defs>
@@ -96,6 +96,6 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
   <text x="341.2" y="196" font-size="12" fill="var(--muted)">masked reveal</text>
   <rect x="484" y="40" width="112" height="112" rx="14" fill="var(--green)" filter="url(#f1)" class="a m5"/>
   <text x="514.8" y="196" font-size="12" fill="var(--muted)">blur-in</text>
-  <rect x="636" y="40" width="112" height="112" rx="14" fill="var(--surface)" stroke="var(--border)" filter="url(#f2)" class="a m6 fb"/>
+  <rect x="636.5" y="40.5" width="112" height="112" rx="14" fill="var(--surface)" stroke="var(--border)" filter="url(#f2)" class="a m6 fb"/>
   <text x="648.8" y="196" font-size="12" fill="var(--muted)">shadow grows</text>
 </svg>

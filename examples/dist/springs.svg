@@ -18,7 +18,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 ]]></style>
   <rect width="520" height="300" fill="var(--background)"/>
   <g transform="translate(24 24)">
-    <rect width="320" height="116" rx="10" fill="var(--surface)" stroke="var(--border)"/>
+    <rect x="0.5" y="0.5" width="320" height="116" rx="10" fill="var(--surface)" stroke="var(--border)"/>
     <text x="12" y="20" font-size="12" fill="var(--muted)">ease.spring</text>
     <circle cx="24" cy="60" r="9" fill="none" stroke="var(--border)" stroke-width="1.5"/>
     <circle cx="130" cy="22" r="9" fill="none" stroke="var(--border)" stroke-width="1.5"/>
@@ -27,7 +27,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     <circle r="7" fill="var(--blue)" class="a m1"/>
   </g>
   <g transform="translate(24 160)">
-    <rect width="320" height="116" rx="10" fill="var(--surface)" stroke="var(--border)"/>
+    <rect x="0.5" y="0.5" width="320" height="116" rx="10" fill="var(--surface)" stroke="var(--border)"/>
     <text x="12" y="20" font-size="12" fill="var(--muted)">ease.out</text>
     <circle cx="24" cy="60" r="9" fill="none" stroke="var(--border)" stroke-width="1.5"/>
     <circle cx="130" cy="22" r="9" fill="none" stroke="var(--border)" stroke-width="1.5"/>
@@ -35,8 +35,8 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     <circle cx="296" cy="40" r="9" fill="none" stroke="var(--border)" stroke-width="1.5"/>
     <circle r="7" fill="var(--blue)" class="a m2"/>
   </g>
-  <g transform="translate(380 92)" style="transform-origin:440px 140px" class="a m3">
-    <rect width="120" height="96" rx="10" fill="var(--raised)" stroke="var(--border)" stroke-width="1.5"/>
+  <g transform="translate(380 92)" style="transform-origin:440.75px 140.75px" class="a m3">
+    <rect x="0.75" y="0.75" width="120" height="96" rx="10" fill="var(--raised)" stroke="var(--border)" stroke-width="1.5"/>
     <circle cx="26" cy="28" r="12" fill="var(--magenta)"/>
     <rect x="46" y="20" width="56" height="6" rx="3" fill="var(--text)"/>
     <rect x="46" y="32" width="40" height="6" rx="3" fill="var(--muted)"/>

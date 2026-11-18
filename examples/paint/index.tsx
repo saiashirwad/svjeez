@@ -135,7 +135,7 @@ export default scene(
 
       <Shape
         geometry={card}
-        at={[corner(4)[0] - 0.5, corner(4)[1] - 0.5]}
+        at={corner(4)}
         fill={theme.surface}
         stroke={{ color: theme.border, width: 1 }}
         scale={track(1).to(1.06, span(1, 0.8), ease.out).to(1, span(3.4, 0.8), ease.inOut)}

@@ -89,14 +89,14 @@ export default scene(
       />
       <Label i={1}>arc opens</Label>
 
-      <Group at={center(2)}>
-        <Shape
-          geometry={track(star)
-            .to(heart, span(0.6, 1.2), ease.inOut)
-            .to(star, span(2.8, 1.2), ease.inOut)}
-          fill={theme.magenta}
-        />
-      </Group>
+      <Shape
+        geometry={track(star)
+          .to(heart, span(0.6, 1.2), ease.inOut)
+          .to(star, span(2.8, 1.2), ease.inOut)}
+        at={center(2)}
+        anchor="center"
+        fill={theme.magenta}
+      />
       <Label i={2}>star to heart</Label>
 
       <Shape

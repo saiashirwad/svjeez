@@ -11,26 +11,26 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m1{animation-name:k1}
 @keyframes k2{0%,100%{translate:28px 36px}21.111%{translate:28px 36px;animation-timing-function:cubic-bezier(.77,0,.175,1)}32.222%,91.111%{translate:150px 110px}}
 .m2{animation-name:k2}
-@keyframes k3{0%,11.111%,40.556%,100%{translate:244px 196px}18.889%,21.111%{translate:80px 45px}32.222%,35%{translate:202px 119px}}
+@keyframes k3{0%,11.111%,40.556%,100%{translate:244.6px 196.6px}18.889%,21.111%{translate:80.6px 45.6px}32.222%,35%{translate:202.6px 119.6px}}
 .m3{animation-name:k3;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k4{0%,57.222%,71.667%,100%{opacity:0}58.111%,70.778%{opacity:1}}
 .m4{animation-name:k4}
 @keyframes k5{0%,100%{translate:28px 96px}58.889%{translate:28px 96px;animation-timing-function:cubic-bezier(.77,0,.175,1)}70%,91.111%{translate:150px 36px}}
 .m5{animation-name:k5}
-@keyframes k6{0%,48.889%,78.333%,100%{translate:244px 196px}56.667%,58.889%{translate:80px 105px}70%,72.778%{translate:202px 45px}}
+@keyframes k6{0%,48.889%,78.333%,100%{translate:244.6px 196.6px}56.667%,58.889%{translate:80.6px 105.6px}70%,72.778%{translate:202.6px 45.6px}}
 .m6{animation-name:k6;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-2s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="640" height="300" fill="var(--background)"/>
   <g transform="translate(20 30)">
-    <rect width="290" height="240" rx="14" fill="var(--background)" stroke="var(--raised)" stroke-width="1.5"/>
+    <rect x="0.75" y="0.75" width="290" height="240" rx="14" fill="var(--background)" stroke="var(--raised)" stroke-width="1.5"/>
     <g transform="translate(16 184)">
-      <rect width="48" height="40" rx="9" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
-      <rect width="48" height="40" rx="9" fill="var(--raised)" stroke="var(--blue)" stroke-width="2" class="a m1"/>
+      <rect x="0.75" y="0.75" width="48" height="40" rx="9" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+      <rect x="1" y="1" width="48" height="40" rx="9" fill="var(--raised)" stroke="var(--blue)" stroke-width="2" class="a m1"/>
       <text x="11.4" y="25" font-size="14" fill="var(--text)">opt</text>
     </g>
     <g class="a m2">
-      <rect width="104" height="72" rx="7" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+      <rect x="0.75" y="0.75" width="104" height="72" rx="7" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
       <path d="M7 0H97A7 7 0 0 1 104 7V18H0V7A7 7 0 0 1 7 0Z" fill="var(--raised)"/>
       <circle cx="13" cy="9" r="3" fill="var(--red)"/>
       <circle cx="24" cy="9" r="3" fill="var(--yellow)"/>
@@ -41,14 +41,14 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     <path d="M0 0L0 16L4.2 12.2L7.2 19L10 17.8L7 11.2L12 11.2Z" fill="var(--text)" stroke="var(--background)" stroke-width="1.2" stroke-linejoin="round" class="a m3"/>
   </g>
   <g transform="translate(330 30)">
-    <rect width="290" height="240" rx="14" fill="var(--background)" stroke="var(--raised)" stroke-width="1.5"/>
+    <rect x="0.75" y="0.75" width="290" height="240" rx="14" fill="var(--background)" stroke="var(--raised)" stroke-width="1.5"/>
     <g transform="translate(16 184)">
-      <rect width="48" height="40" rx="9" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
-      <rect width="48" height="40" rx="9" fill="var(--raised)" stroke="var(--blue)" stroke-width="2" class="a m4"/>
+      <rect x="0.75" y="0.75" width="48" height="40" rx="9" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+      <rect x="1" y="1" width="48" height="40" rx="9" fill="var(--raised)" stroke="var(--blue)" stroke-width="2" class="a m4"/>
       <text x="11.4" y="25" font-size="14" fill="var(--text)">opt</text>
     </g>
     <g class="a m5">
-      <rect width="104" height="72" rx="7" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
+      <rect x="0.75" y="0.75" width="104" height="72" rx="7" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
       <path d="M7 0H97A7 7 0 0 1 104 7V18H0V7A7 7 0 0 1 7 0Z" fill="var(--raised)"/>
       <circle cx="13" cy="9" r="3" fill="var(--red)"/>
       <circle cx="24" cy="9" r="3" fill="var(--yellow)"/>

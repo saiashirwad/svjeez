@@ -24,10 +24,8 @@ import { mono, theme } from "../theme";
 
 const IDLE: Vec = [244, 196];
 
-/** A rect whose 1.5px outline is centered on its edge: its painted box starts half the outline out. */
 const outlined = (width: number, height: number, radius: number) => ({
   geometry: rect(width, height, { radius }),
-  at: [-0.75, -0.75] as const,
   stroke: { color: theme.border, width: 1.5 },
 });
 
@@ -46,7 +44,6 @@ const keycap = (label: string) => {
         <Shape
           key="lit"
           geometry={rect(48, 40, { radius: 9 })}
-          at={[-1, -1]}
           fill={theme.raised}
           stroke={{ color: theme.blue, width: 2 }}
           opacity={0}
@@ -91,7 +88,6 @@ const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
     <Group at={[x, 30]}>
       <Shape
         geometry={rect(290, 240, { radius: 14 })}
-        at={[-0.75, -0.75]}
         fill={theme.background}
         stroke={{ color: theme.raised, width: 1.5 }}
       />
@@ -114,13 +110,13 @@ const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
             <Shape geometry={rect(44, 5, { radius: 2.5 })} fill={theme.border} />
           </Stack>
         </Group>
-        <Group ref={cursor} at={IDLE}>
-          <Shape
-            geometry={pathData("M0 0V16l4.2-3.8 3 6.8 2.8-1.2-3-6.6H12Z")}
-            fill={theme.text}
-            stroke={{ color: theme.background, width: 1.2, join: "round" }}
-          />
-        </Group>
+        <Shape
+          ref={cursor}
+          geometry={pathData("M0 0V16l4.2-3.8 3 6.8 2.8-1.2-3-6.6H12Z")}
+          fill={theme.text}
+          stroke={{ color: theme.background, width: 1.2, join: "round" }}
+          at={IDLE}
+        />
       </Sequence>
     </Group>
   );

@@ -56,7 +56,6 @@ const Lane = ({
   <Group at={[24, y]}>
     <Shape
       geometry={rect(320, 116, { radius: 10 })}
-      at={[-0.5, -0.5]}
       fill={theme.surface}
       stroke={{ color: theme.border, width: 1 }}
     />
@@ -86,7 +85,6 @@ const Card = (): SceneElement => (
   >
     <Shape
       geometry={rect(120, 96, { radius: 10 })}
-      at={[-0.75, -0.75]}
       fill={theme.raised}
       stroke={{ color: theme.border, width: 1.5 }}
     />
