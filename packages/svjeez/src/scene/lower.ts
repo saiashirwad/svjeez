@@ -1,6 +1,6 @@
 import type { Font } from "../font/font";
 import { num } from "../format";
-import { EPSILON, type Seconds } from "../motion";
+import { EPSILON, type Seconds } from "../time";
 import { checkWindow } from "./span";
 import { matched, mixGeometry } from "./geometry";
 import { identified } from "./identity";

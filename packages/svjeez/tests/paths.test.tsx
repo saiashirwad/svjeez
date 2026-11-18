@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { Shape, ease, pathData, sampled, scene, span, track, type SceneElement } from "svjeez";
 import { svg } from "svjeez/tools";
-import { blendPaths, commandsOf, matchPaths } from "../src/paths";
+import { blendPaths, commandsOf, matchRings, ringsOf, type Ring } from "../src/paths";
 
 const emit = (build: () => SceneElement, reducedMotion?: number | false) =>
   svg.emit(
@@ -22,30 +22,39 @@ const commands = (d: string) => d.replace(/[^A-Za-z]/g, "");
 const morphs = (out: string): string[] =>
   /attributeName="d" values="([^"]*)"/.exec(out)?.[1]?.split(";") ?? [];
 
-describe("matchPaths", () => {
-  test("rewrites shapes with different commands to the same commands", () => {
-    const [square, circle, star] = matchPaths([
-      "M0 0H10V10H0Z",
-      "M5 0A5 5 0 1 1 5 10A5 5 0 1 1 5 0Z",
-      "m5 0 2 3h3l-2 3 1 4-4-2-4 2 1-4-2-3h3z",
-    ]);
+/** Each ring's shape: how many curves it has, and whether it closes. */
+const shape = (rings: readonly Ring[]) => rings.map((ring) => [ring.curves.length, ring.closed]);
 
-    expect(commands(square!)).toBe(commands(circle!));
-    expect(commands(circle!)).toBe(commands(star!));
+const ends = (ring: Ring) => ring.curves.map(([, , to]) => to.join(" "));
+
+describe("matchRings", () => {
+  test("gives shapes with different commands the same rings and curve counts", () => {
+    const [square, circle, star] = matchRings(
+      [
+        "M0 0H10V10H0Z",
+        "M5 0A5 5 0 1 1 5 10A5 5 0 1 1 5 0Z",
+        "m5 0 2 3h3l-2 3 1 4-4-2-4 2 1-4-2-3h3z",
+      ].map(ringsOf),
+    );
+
+    expect(shape(square!)).toEqual(shape(circle!));
+    expect(shape(circle!)).toEqual(shape(star!));
   });
 
-  test("grows a missing subpath from a point", () => {
-    const [one, two] = matchPaths(["M0 0H10V10Z", "M0 0H10V10ZM20 20H30V30Z"]);
+  test("grows a missing ring from a point", () => {
+    const [one, two] = matchRings(["M0 0H10V10Z", "M0 0H10V10ZM20 20H30V30Z"].map(ringsOf));
 
-    expect(one!.match(/M/g)).toHaveLength(2);
-    expect(commands(one!)).toBe(commands(two!));
-    expect(one!).toContain("M25 25");
+    expect(one).toHaveLength(2);
+    expect(shape(one!)).toEqual(shape(two!));
+    expect(one![1]!.start).toEqual([25, 25]);
   });
 
   test("keeps the corners of a polygon it splits", () => {
-    const [square] = matchPaths(["M0 0H10V10H0Z", "M0 0L1 0L2 0L3 0L4 0L5 0L6 0L7 0L8 0Z"]);
+    const [square] = matchRings(
+      ["M0 0H10V10H0Z", "M0 0L1 0L2 0L3 0L4 0L5 0L6 0L7 0L8 0Z"].map(ringsOf),
+    );
 
-    for (const corner of ["10 0", "10 10", "0 10"]) expect(square).toContain(corner);
+    for (const corner of ["10 0", "10 10", "0 10"]) expect(ends(square![0]!)).toContain(corner);
   });
 });
 

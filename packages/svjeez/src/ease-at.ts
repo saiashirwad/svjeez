@@ -1,4 +1,4 @@
-import { ease, type Ease } from "./motion";
+import { ease, type Ease } from "./time";
 
 const cubic = (a: number, b: number, u: number) =>
   3 * a * u * (1 - u) ** 2 + 3 * b * u * u * (1 - u) + u ** 3;

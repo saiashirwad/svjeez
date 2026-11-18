@@ -1,6 +1,6 @@
 import { valueOf, type Target, type TargetValue, type TargetValues } from "./channels";
-import { easeAt, splitEase } from "./ease-at";
-import { EPSILON, NUDGE, ease, type Ease, type Seconds, type Step } from "./motion";
+import { easeAt } from "./ease-at";
+import { EPSILON, type Ease, type Seconds } from "./time";
 import { blendPaths } from "./paths";
 
 export const MAX_KEYS = 2000;
@@ -17,42 +17,6 @@ export const snapPeriod = (period: Seconds, duration: Seconds): Seconds =>
 // SAFETY: a and b are TargetValues, so their keys are Target names.
 const same = (a: TargetValues, b: TargetValues): boolean =>
   (Object.keys(a) as Target[]).every((target) => valueOf(a, target) === valueOf(b, target));
-
-export const keysOf = (
-  initial: TargetValues,
-  segments: readonly Step[],
-  period: Seconds,
-): Key[] => {
-  const keys: Key[] = [{ t: 0, values: initial, ease: ease.out }];
-  const nudge = period * NUDGE;
-  let current = initial;
-
-  for (const segment of segments) {
-    const next = { ...current, ...segment.values };
-    const last = keys.at(-1)!;
-    const contiguous = segment.start < last.t + nudge;
-
-    if (segment.over >= nudge) {
-      if (contiguous) keys[keys.length - 1] = { ...last, ease: segment.ease };
-      else keys.push({ t: segment.start, values: current, ease: segment.ease });
-      keys.push({ t: segment.start + segment.over, values: next, ease: ease.out });
-    } else if (keys.length === 1 && segment.start === 0) {
-      keys[0] = { ...last, values: next };
-    } else if (contiguous && last.t + nudge > period + EPSILON) {
-      keys[keys.length - 1] = { ...last, t: last.t - nudge, ease: ease.hold };
-      keys.push({ t: period, values: next, ease: ease.out });
-    } else {
-      keys[keys.length - 1] = { ...last, ease: ease.hold };
-      keys.push({ t: contiguous ? last.t + nudge : segment.start, values: next, ease: ease.out });
-    }
-
-    current = next;
-  }
-
-  if (keys.at(-1)!.t < period - EPSILON) keys.push({ t: period, values: current, ease: ease.out });
-
-  return keys;
-};
 
 const FOLD_LANES = new Set(["translate", "rotate", "width", "height"]);
 const FOLD_TOLERANCE = 0.1;
@@ -116,24 +80,6 @@ export const moving = (keys: readonly Key[], index: number): boolean => {
 export const isNumber = (value: TargetValue | undefined): value is number =>
   typeof value === "number";
 
-export const blendStrict = (
-  target: Target,
-  a: TargetValue,
-  b: TargetValue | undefined,
-  amount: number,
-  where: string,
-): TargetValue => {
-  if (b === undefined || a === b) return a;
-
-  if (isNumber(a) && isNumber(b)) return a + (b - a) * amount;
-
-  if (target === "d") return blendPaths(String(a), String(b), amount);
-
-  throw new Error(
-    `${where} stops ${target} partway through a transition from ${a} to ${b}, and only numbers and paths can be cut there. Cut it between transitions.`,
-  );
-};
-
 const blend = (
   target: Target,
   a: TargetValue,
@@ -161,61 +107,4 @@ export const valueAt = (keys: readonly Key[], t: Seconds): TargetValues => {
       blend(target, valueOf(from.values, target)!, valueOf(to.values, target), amount),
     ]),
   ) as TargetValues;
-};
-
-const splitAt = (keys: readonly Key[], t: Seconds, where: string): Key[] => {
-  const index = keys.findLastIndex((key) => key.t <= t + EPSILON);
-  const from = keys[index]!;
-  const to = keys[index + 1];
-
-  if (!to || Math.abs(from.t - t) <= EPSILON) return [...keys];
-
-  const progress = (t - from.t) / (to.t - from.t);
-  const movesTo = !same(from.values, to.values);
-  const [first, second] = movesTo ? splitEase(from.ease, progress, where) : [from.ease, from.ease];
-  const amount = easeAt(from.ease, progress);
-
-  // SAFETY: the entries are from's own targets, each paired with a TargetValue from blendStrict, so the result is a TargetValues.
-  const values = Object.fromEntries(
-    (Object.keys(from.values) as Target[]).map((target) => [
-      target,
-      blendStrict(target, valueOf(from.values, target)!, valueOf(to.values, target), amount, where),
-    ]),
-  ) as TargetValues;
-
-  return [
-    ...keys.slice(0, index),
-    { ...from, ease: first },
-    { t, values, ease: second },
-    ...keys.slice(index + 1),
-  ];
-};
-
-export const rotateKeys = (
-  keys: readonly Key[],
-  shift: Seconds,
-  period: Seconds,
-  where: string,
-): Key[] => {
-  const nudge = period * NUDGE;
-  const by = ((shift % period) + period) % period;
-
-  if (by < nudge * 4 || period - by < nudge * 4) return [...keys];
-
-  const wrap = period - by;
-  const split = splitAt(keys, wrap, where);
-
-  const tail = split
-    .filter((key) => key.t >= wrap - EPSILON)
-    .map((key) => ({ ...key, t: key.t - wrap }));
-
-  const front = split
-    .filter((key) => key.t <= wrap + EPSILON)
-    .map((key) => ({ ...key, t: key.t + by }));
-
-  const [joinEnd, joinStart] = [tail.at(-1)!, front[0]!];
-
-  if (same(joinEnd.values, joinStart.values)) return [...tail.slice(0, -1), ...front];
-
-  return [...tail.slice(0, -1), { ...joinEnd, t: by - nudge, ease: ease.hold }, ...front];
 };

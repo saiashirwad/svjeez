@@ -1,4 +1,4 @@
-import type { Seconds } from "./motion";
+import type { Seconds } from "./time";
 import type { TimelineTrack } from "./traced";
 import { openScene, type SceneOptions } from "./frames";
 import {
@@ -522,7 +522,7 @@ const visibleAtZero = (
           element,
           [0],
           `${name(element)} shows from 0s, cuts to hidden at ${at(cut)}s, and comes straight back in by ${at(rise)}s.`,
-          "Start its motion from the hidden values, as in motion({ opacity: 0 }).",
+          "Start it hidden, as in opacity={track(0).to(1, span(…))}, or bring it in with enter().",
         ),
       ];
 
@@ -536,7 +536,7 @@ const visibleAtZero = (
           element,
           [0],
           `${name(element)} has its fill showing at 0s while its stroke only draws in by ${at(full)}s.`,
-          'Set fill="none", or fade the fill in after the draw.',
+          "Leave the fill off, or fade the fill in after the draw.",
         ),
       ];
 

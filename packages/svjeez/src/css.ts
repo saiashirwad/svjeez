@@ -2,8 +2,7 @@ import { formatValue, valueOf, type Target, type TargetValues } from "./channels
 import type { Canvas } from "./compile";
 import { num } from "./format";
 import { foldKeys, moving, type Key } from "./keys";
-import { ease, type Ease, type Seconds } from "./motion";
-import { formatProperty, isProperty } from "./properties";
+import { ease, type Ease, type Seconds } from "./time";
 
 export type Emit = "value" | "visibility" | "dash";
 
@@ -104,7 +103,7 @@ export const cssDeclarations = (lane: string, emit: Emit, values: TargetValues):
       if (!target) throw new Error(`Lane ${lane} has no value.`);
       const value = valueOf(values, target)!;
 
-      return `${lane}:${isProperty(target) ? formatProperty(target, value) : formatValue(value)}`;
+      return `${lane}:${formatValue(value)}`;
     }
   }
 };
@@ -132,9 +131,6 @@ export const classBody = (
 
 export const baseRule = (canvas: Canvas): string =>
   `.${canvas.prefix}a{animation-duration:${seconds(canvas, canvas.duration)};animation-iteration-count:${canvas.loop ? "infinite" : 1};animation-fill-mode:both;animation-timing-function:${BASE_TIMING};animation-delay:var(--t0,0s)}`;
-
-export const onceRule = (canvas: Canvas): string =>
-  `.${canvas.prefix}o{animation-iteration-count:1;animation-delay:var(--t1,var(--t0,0s))}`;
 
 export const REDUCED_MOTION = "@media (prefers-reduced-motion:reduce){";
 

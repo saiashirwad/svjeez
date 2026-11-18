@@ -1,4 +1,4 @@
-import { ease, type Seconds } from "../motion";
+import { ease, type Seconds } from "../time";
 import type { Span } from "./span";
 import type { Vec } from "./ir";
 import type { Curve } from "./spring";

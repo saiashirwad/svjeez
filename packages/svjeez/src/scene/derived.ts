@@ -1,4 +1,4 @@
-import { EPSILON, type Seconds } from "../motion";
+import { EPSILON, type Seconds } from "../time";
 import type { Animated, Key, Lane, Vec } from "./ir";
 import { isLane } from "./lane";
 import type { Anchor } from "./refs";

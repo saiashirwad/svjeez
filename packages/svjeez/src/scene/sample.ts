@@ -1,5 +1,5 @@
 import { easeAt } from "../ease-at";
-import { EPSILON, NUDGE, ease, type Ease, type Seconds } from "../motion";
+import { EPSILON, NUDGE, ease, type Ease, type Seconds } from "../time";
 import { alongCurve, fitControls, hermiteControls, onCurve, type Controls } from "./curve";
 import { portion } from "./fold";
 import type { Animated, Key, Lane, Vec } from "./ir";

@@ -1,4 +1,4 @@
-import type { Seconds } from "../motion";
+import type { Seconds } from "../time";
 
 /**
  * Time on a clock. A span is a stretch of it, `over` seconds long from `start`; `end` is where it stops. `at` is

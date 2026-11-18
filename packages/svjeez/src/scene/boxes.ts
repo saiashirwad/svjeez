@@ -1,4 +1,4 @@
-import type { Seconds } from "../motion";
+import type { Seconds } from "../time";
 import { mixGeometry } from "./geometry";
 import type { Animated, Box, Geometry, Layer, Scene, SceneNode, Source, Vec } from "./ir";
 import { valueAt as sampleAt } from "./sample";

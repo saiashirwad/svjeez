@@ -2,10 +2,8 @@ import { compile } from "./compile";
 import type { FontStyle, FontValue } from "./font/font";
 import { RATE_ATTR } from "./rate";
 import { num } from "./format";
-import type { Seconds } from "./motion";
-import type { Css } from "./properties";
-import { children, element, raw, serialize, type Child } from "./svg";
-import { withSources } from "./sources";
+import type { Seconds } from "./time";
+import { element, raw, serialize, text, type SvgNode } from "./svg";
 import { traceOf, type TimelineTrack } from "./traced";
 import { validateSvg } from "./validate";
 
@@ -15,7 +13,7 @@ export interface RenderOptions {
   readonly title: string;
   readonly desc?: string;
   readonly duration: Seconds;
-  readonly css?: string | Css;
+  readonly css?: string;
   /** Playback rate: 2 plays twice as fast. `duration` and `reducedMotion.at` stay in scene seconds. Default 1. */
   readonly playbackRate?: number;
   /**
@@ -27,15 +25,6 @@ export interface RenderOptions {
   readonly reducedMotion?: { readonly at: Seconds } | false;
   /** False plays the scene once and holds its last frame. Default true. */
   readonly loop?: boolean;
-  readonly comment?: string;
-  /**
-   * Write `data-source` on every element made by the development JSX runtime (`svjeez/jsx-dev-runtime`): where it was
-   * written, as `file:line:column` with the parts the JSX transform reports. For tools that link a picture back to its
-   * code. Default false, and the output is unchanged.
-   */
-  readonly sources?: boolean;
-  /** Receives SVG validation warnings from this render. */
-  readonly onWarning?: (warning: string) => void;
   /**
    * Font properties on the root `<svg>`, which every text inherits unless it says otherwise: a family embeds as one
    * written on a text does. Default none.
@@ -49,40 +38,31 @@ export interface RootFont {
   readonly style?: FontStyle;
 }
 
-/** Compile motions and refs, serialize, and validate. Throws on invalid output. */
-export const render = (options: RenderOptions, content: Child): string => {
+/** The SVG backend's last step: compile the emitted nodes' lanes, wrap them in the root, serialize, and validate. */
+export const render = (options: RenderOptions, nodes: readonly SvgNode[]): string => {
   const { width, height, duration } = options;
 
-  if (!(width > 0 && width < Infinity) || !(height > 0 && height < Infinity))
-    throw new Error(`render() needs a positive width and height, got ${width} by ${height}.`);
-
-  if (!(duration > 0 && duration < Infinity))
-    throw new Error(`render() needs a positive duration, got ${duration}.`);
   const playbackRate = options.playbackRate ?? 1;
 
   if (!(playbackRate > 0 && Number.isFinite(playbackRate)))
-    throw new Error(`render() needs a positive, finite playbackRate, got ${playbackRate}.`);
+    throw new Error(`svg.emit() needs a positive, finite playbackRate, got ${playbackRate}.`);
   const prefix = options.prefix ?? "";
 
   if (prefix !== "" && !/^[A-Za-z][\w-]*$/.test(prefix))
     throw new Error(
-      `render() needs a prefix of letters, digits, _ and -, starting with a letter, got ${JSON.stringify(prefix)}.`,
+      `svg.emit() needs a prefix of letters, digits, _ and -, starting with a letter, got ${JSON.stringify(prefix)}.`,
     );
-
-  if (options.reducedMotion && !Number.isFinite(options.reducedMotion.at))
-    throw new Error(`render() needs a finite reducedMotion.at, got ${options.reducedMotion.at}.`);
 
   const stillAt =
     options.reducedMotion === false
       ? undefined
       : Math.max(0, Math.min(duration, options.reducedMotion?.at ?? duration * 0.85));
 
-  const nodes = children(content);
   const trace = traceOf();
   const timeline: TimelineTrack[] | undefined = trace?.within ? [] : undefined;
 
   const { css, ...compiled } = compile(
-    (options.sources ?? trace?.sources) ? nodes.map(withSources) : nodes,
+    nodes,
     { width, height, duration, playbackRate, prefix, stillAt, loop: options.loop ?? true },
     options.css,
     timeline,
@@ -109,9 +89,8 @@ export const render = (options: RenderOptions, content: Child): string => {
   };
 
   const root = element("svg", prefix ? { ...rated, class: `${prefix}root` } : rated, [
-    element("title", { id: `${prefix}t` }, children(options.title, true)),
-    ...(options.desc ? [element("desc", { id: `${prefix}d` }, children(options.desc, true))] : []),
-    ...(compiled.defs.length > 0 ? [element("defs", {}, compiled.defs)] : []),
+    element("title", { id: `${prefix}t` }, [text(options.title)]),
+    ...(options.desc ? [element("desc", { id: `${prefix}d` }, [text(options.desc)])] : []),
     ...(css ? [element("style", {}, [raw(`\n${css}\n`)])] : []),
     ...compiled.body,
   ]);
@@ -124,16 +103,7 @@ export const render = (options: RenderOptions, content: Child): string => {
       `Generated SVG is invalid:\n${errors.map((error) => `  - ${error}`).join("\n")}`,
     );
 
-  const { comment } = options;
-
-  if (comment !== undefined && (comment.includes("--") || comment.endsWith("-")))
-    throw new Error(
-      `render() comment can't contain "--" or end in "-", since XML comments can't: got "${comment}".`,
-    );
-
-  const svg = `${comment ? `<!-- ${comment} -->\n` : ""}${source}\n`;
-
-  if (options.onWarning) for (const warning of warnings) options.onWarning(warning);
+  const svg = `${source}\n`;
 
   trace?.onRender(svg, {
     warnings,

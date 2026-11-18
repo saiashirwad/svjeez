@@ -3,7 +3,7 @@ import type { Canvas, Lane as CssLane } from "../compile";
 import type { Emit } from "../css";
 import { num } from "../format";
 import type { Key as Held } from "../keys";
-import { EPSILON, ease } from "../motion";
+import { EPSILON, ease } from "../time";
 import { render } from "../render";
 import { element, type AttrValue, type SvgNode } from "../svg";
 import { admit, type Backend, type Feature, type Support } from "./backend";
@@ -336,7 +336,6 @@ const cssLane = <T>(
     keys,
     period,
     snapped: period,
-    nest: false,
     emit: emit ?? (cuts && slot === "opacity" && isCut(keys) ? "visibility" : "value"),
   };
 };

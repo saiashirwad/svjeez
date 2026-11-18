@@ -1,5 +1,5 @@
 import { easeAt, splitEase } from "../ease-at";
-import { EPSILON, ease, type Ease } from "../motion";
+import { EPSILON, ease, type Ease } from "../time";
 import { isCurved, onCurve } from "./curve";
 import type { Animated, Key, Lane, Layer, Vec } from "./ir";
 import { isLane } from "./lane";

@@ -1,4 +1,4 @@
-import type { Seconds } from "./motion";
+import type { Seconds } from "./time";
 
 export { restyle, type RestyleOptions } from "./restyle";
 

@@ -1,4 +1,4 @@
-import type { Seconds } from "../motion";
+import type { Seconds } from "../time";
 import type { Box, Vec } from "./ir";
 import type { Curve } from "./spring";
 import { verbs, type Action, type MoveOptions, type Moves, type StrokeMoves } from "./timeline";

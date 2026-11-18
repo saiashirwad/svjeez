@@ -1,13 +1,11 @@
-import { remember, type JsxSource } from "./sources";
-import type { Span } from "./span";
-import type { SvgNode } from "./svg";
+import type { JsxSource } from "./sources";
 
 export const TRACE: unique symbol = Symbol.for("svjeez.sources");
 
 export interface TimelineTrack {
   readonly label: string;
   readonly source?: string;
-  readonly spans: readonly Span[];
+  readonly spans: readonly { readonly at: number; readonly over: number }[];
   readonly period?: number;
 }
 
@@ -73,10 +71,4 @@ export const caller = (): JsxSource | undefined => {
   }
 
   return undefined;
-};
-
-export const traced = (node: SvgNode): SvgNode => {
-  const source = caller();
-
-  return source ? remember(node, source) : node;
 };

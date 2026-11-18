@@ -1,4 +1,4 @@
-import type { Color as CssColor } from "../attributes";
+import type { Color as CssColor } from "../color";
 import type { TargetValues } from "../channels";
 import type { Canvas, Lane as CssLane } from "../compile";
 import { num } from "../format";

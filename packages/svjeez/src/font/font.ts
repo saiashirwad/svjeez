@@ -279,13 +279,6 @@ export type FontValue = Font | FontFamily;
 export const isFontValue = (value: unknown): value is FontValue =>
   value instanceof Font || value instanceof FontFamily;
 
-export const regularFace = (value: FontValue): Font =>
-  value instanceof Font ? value : value.face();
-
-/** `text` measured with the font when there is one, else assumed monospace at 0.6em per character. */
-export const textWidth = (text: string, fontSize: number, font?: FontValue): number =>
-  font ? regularFace(font).measure(text, fontSize) : text.length * fontSize * 0.6;
-
 const escapeControl = (char: string): string => {
   const code = char.charCodeAt(0);
 

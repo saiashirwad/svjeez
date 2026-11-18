@@ -1,4 +1,4 @@
-import type { Seconds } from "../motion";
+import type { Seconds } from "../time";
 import { diagnose, type Backend } from "./backend";
 import { valueAt, type Placed } from "./boxes";
 import { contoursOf, mixGeometry } from "./geometry";

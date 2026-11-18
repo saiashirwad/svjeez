@@ -1,6 +1,6 @@
 import { easeAt, splitEase } from "../ease-at";
 import { MAX_KEYS, snapPeriod } from "../keys";
-import { EPSILON, NUDGE, ease, type Ease, type Seconds } from "../motion";
+import { EPSILON, NUDGE, ease, type Ease, type Seconds } from "../time";
 import type { Span } from "./span";
 import { num } from "../format";
 import { isCurved, splitCurve, type Controls } from "./curve";

@@ -1,4 +1,4 @@
-import { ease as eases, type Ease, type Seconds } from "../motion";
+import { ease as eases, type Ease, type Seconds } from "../time";
 import { alongCurve, curveLength, fitControls, hermiteControls, type Controls } from "./curve";
 import type { Vec } from "./ir";
 

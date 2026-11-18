@@ -1,4 +1,4 @@
-import type { Seconds } from "../motion";
+import type { Seconds } from "../time";
 import type { Placed } from "./boxes";
 import type { Animated, Paint, Scene, SceneNode, Vec } from "./ir";
 import { isLane } from "./lane";

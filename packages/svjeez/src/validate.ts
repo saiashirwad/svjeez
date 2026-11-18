@@ -87,7 +87,7 @@ const embeddedFonts = (source: string): string[] =>
   [...source.matchAll(/@font-face\{[^}]*?url\((data:[^)]*)\)/g)].flatMap(([, uri = ""]) =>
     uri.length > EMBED_WARN_BYTES
       ? [
-          `An embedded font is ${Math.round(uri.length / 1024)} KB, and the whole file downloads before the first frame. Use a smaller font, or draw short titles with <Glyphs>, which embeds no font.`,
+          `An embedded font is ${Math.round(uri.length / 1024)} KB, and the whole file downloads before the first frame. Use a smaller font.`,
         ]
       : [],
   );

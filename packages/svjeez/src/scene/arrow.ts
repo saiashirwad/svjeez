@@ -1,4 +1,4 @@
-import { EPSILON, type Seconds } from "../motion";
+import { EPSILON, type Seconds } from "../time";
 import type { Animated, Geometry, Key, Lane, Layer, ShapeNode, Vec } from "./ir";
 import { atRest, isLane } from "./lane";
 import type { Common, SceneElement, StrokeProps } from "./nodes";

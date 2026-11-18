@@ -1,4 +1,4 @@
-import { NUDGE, ease, type Ease, type Seconds } from "../motion";
+import { NUDGE, ease, type Ease, type Seconds } from "../time";
 import { random } from "../random";
 import { checkWindow, span, type Span } from "./span";
 import { contoursOf } from "./geometry";

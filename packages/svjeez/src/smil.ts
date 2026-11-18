@@ -2,7 +2,7 @@ import { formatValue, type Channel, type Target, type ChannelValues } from "./ch
 import type { Canvas } from "./compile";
 import { num } from "./format";
 import { moving, type Key } from "./keys";
-import type { Seconds } from "./motion";
+import type { Seconds } from "./time";
 import { element, type SvgNode } from "./svg";
 
 const isNumeric = (value: ChannelValues[Channel]): value is number => typeof value === "number";

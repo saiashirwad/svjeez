@@ -1,7 +1,5 @@
 import { num } from "./format";
 import { segments } from "./pathTokens";
-import { span, checkWindow, type Span } from "./span";
-import { NUDGE, ease, motion, type Motion, type Seconds } from "./motion";
 
 export type PathData = `M${string}` | `m${string}`;
 
@@ -292,21 +290,6 @@ const middle = (ring: Ring): Vec => {
   return [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2];
 };
 
-const pt = ([x, y]: Vec, places: number) => `${num(x, places)} ${num(y, places)}`;
-
-const write = (rings: readonly Ring[], places: number): PathData =>
-  // SAFETY: every ring is written starting with M, so the joined string is path data.
-  rings
-    .map(
-      (ring) =>
-        `M${pt(ring.start, places)}C${ring.curves.map((c) => c.map((p) => pt(p, places)).join(" ")).join(" ")}${ring.closed ? "Z" : ""}`,
-    )
-    .join("") as PathData;
-
-export interface MatchOptions {
-  readonly precision?: number;
-}
-
 /**
  * Outlines with the same rings and the same curve count in each ring, so each can blend into the next point by point.
  * A ring one outline lacks grows from the middle of another's; curves split where they are longest; each closed ring
@@ -343,22 +326,6 @@ export const matchRings = (parsed: readonly (readonly Ring[])[]): Ring[][] => {
   return even;
 };
 
-export function matchPaths(paths: readonly string[], options: MatchOptions = {}): PathData[] {
-  const places = options.precision ?? 2;
-
-  if (paths.length === 0) return [];
-
-  const parsed = paths.map((d) => {
-    const rings = parse(d);
-
-    if (rings.length === 0) throw new Error(`matchPaths() found no shape in "${d}".`);
-
-    return rings;
-  });
-
-  return matchRings(parsed).map((rings) => write(rings, places));
-}
-
 export const blendPaths = (a: string, b: string, amount: number): PathData => {
   const to = segments(b).flatMap((s) => s.numbers);
   let k = 0;
@@ -375,109 +342,3 @@ export const commandsOf = (d: string): string =>
   segments(d)
     .map((s) => s.letter + "#".repeat(s.numbers.length))
     .join("");
-
-const numbers = (d: string): number[] => segments(d).flatMap((s) => s.numbers);
-
-export type SampledPathOptions = {
-  readonly step?: Seconds;
-  readonly tolerance: number;
-  readonly precision?: number;
-  readonly slack?: (x: number, y: number) => number;
-};
-
-export function samplePath(
-  window: Span,
-  sample: (t: Seconds) => string,
-  options: SampledPathOptions,
-): Motion<"d"> {
-  const { step = 0.05, tolerance } = options;
-  const places = options.precision ?? 1;
-  const { at: from, over: duration } = window;
-  checkWindow(from, duration, "sampled.path()");
-
-  if (!Number.isFinite(step) || step <= 0)
-    throw new Error(`sampled.path() needs a positive step, got ${step}.`);
-
-  if (!(tolerance >= 0))
-    throw new Error(`sampled.path() needs a non-negative tolerance, got ${tolerance}.`);
-  const edge = duration * NUDGE;
-
-  const times = Array.from(
-    { length: Math.ceil((duration - edge) / step) },
-    (_, i) => i * step,
-  ).concat(duration);
-
-  const frames = times.map(sample);
-  const commands = commandsOf(frames[0]!);
-  frames.forEach((d, i) => {
-    if (commandsOf(d) !== commands)
-      throw new Error(
-        `sampled.path() returned a path with different commands at t=${num(times[i]!)} than at t=0. Write every sample through matchPaths() or with the same points.`,
-      );
-  });
-  const values = frames.map(numbers);
-  const { slack } = options;
-
-  const room = slack
-    ? values.map((v) =>
-        Float64Array.from({ length: v.length >> 1 }, (_, k) => slack(v[2 * k]!, v[2 * k + 1]!)),
-      )
-    : undefined;
-
-  const miss = (a: number, b: number, i: number) => {
-    const u = (times[i]! - times[a]!) / (times[b]! - times[a]!);
-    let worst = 0;
-
-    for (let k = 0; k + 1 < values[i]!.length; k += 2) {
-      const x = values[a]![k]! + (values[b]![k]! - values[a]![k]!) * u - values[i]![k]!;
-
-      const y =
-        values[a]![k + 1]! + (values[b]![k + 1]! - values[a]![k + 1]!) * u - values[i]![k + 1]!;
-
-      worst = room
-        ? Math.max(worst, Math.hypot(x, y) - room[i]![k >> 1]!)
-        : Math.max(worst, x * x + y * y);
-    }
-
-    return room ? worst : Math.sqrt(worst);
-  };
-
-  const kept = [0, frames.length - 1];
-
-  const divide = (a: number, b: number): void => {
-    let worst = -1;
-    let error = tolerance;
-
-    for (let i = a + 1; i < b; i++) {
-      const m = miss(a, b, i);
-
-      if (m > error) [worst, error] = [i, m];
-    }
-
-    if (worst < 0) return;
-    kept.push(worst);
-    divide(a, worst);
-    divide(worst, b);
-  };
-
-  divide(0, frames.length - 1);
-  kept.sort((a, b) => a - b);
-
-  const rounded = (i: number) => {
-    let k = 0;
-
-    // SAFETY: every command letter is kept, so the result is path data like the sample.
-    return segments(frames[i]!)
-      .map((s) => s.letter + s.numbers.map(() => num(values[i]![k++]!, places)).join(" "))
-      .join("") as PathData;
-  };
-
-  let track: Motion<"d"> = motion({ d: rounded(0) });
-
-  for (let j = 1; j < kept.length; j++) {
-    const [a, b] = [kept[j - 1]!, kept[j]!];
-    track = track.to({ d: rounded(b) }, span(from + times[a]!, times[b]! - times[a]!), ease.linear);
-  }
-
-  return track;
-}

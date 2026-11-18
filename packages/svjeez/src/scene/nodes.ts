@@ -1,5 +1,5 @@
 import type { FontValue } from "../font/font";
-import type { Seconds } from "../motion";
+import type { Seconds } from "../time";
 import type { PictureData } from "../picture";
 import type { Authored, Vec } from "./ir";
 import type { Anchor, Place, Ref } from "./refs";

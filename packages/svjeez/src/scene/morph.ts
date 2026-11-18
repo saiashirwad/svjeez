@@ -1,5 +1,5 @@
 import { num } from "../format";
-import { EPSILON, type Seconds } from "../motion";
+import { EPSILON, type Seconds } from "../time";
 import { checkWindow, span, type Span } from "./span";
 import { matched, mixGeometry } from "./geometry";
 import { isPlaced, placedLike } from "./identity";

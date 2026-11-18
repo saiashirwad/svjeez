@@ -15,16 +15,3 @@ export const escapeText = (value: string): string =>
   value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
 export const escapeAttr = (value: string): string => escapeText(value).replaceAll('"', "&quot;");
-
-export const kebab = (property: string): string => {
-  if (property.startsWith("--") || property.includes("-")) return property;
-
-  return property.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
-};
-
-export const significant = (value: number): string => {
-  if (!Number.isFinite(value)) throw new Error(`Expected a finite number, received ${value}`);
-  const digits = value === 0 ? 6 : Math.floor(Math.log10(Math.abs(value))) + 4;
-
-  return String(Number(value.toPrecision(Math.min(100, Math.max(6, digits)))));
-};

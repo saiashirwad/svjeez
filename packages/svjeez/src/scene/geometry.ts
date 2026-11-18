@@ -1,5 +1,5 @@
 import { easeAt, easeBetween } from "../ease-at";
-import { ease, type Ease } from "../motion";
+import { ease, type Ease } from "../time";
 import { matchRings } from "../paths";
 import type { Contour, Cubic, Geometry, Key, Lane, Vec } from "./ir";
 import { curveLength } from "./curve";

@@ -1,5 +1,5 @@
 import type { FontFamily } from "../font/font";
-import type { Ease, Seconds } from "../motion";
+import type { Ease, Seconds } from "../time";
 
 /**
  * The scene model: what a scene means, with nothing of any one target in it. The authoring API lowers into it, and

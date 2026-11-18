@@ -1,5 +1,5 @@
 import { num } from "../format";
-import { EPSILON, type Seconds } from "../motion";
+import { EPSILON, type Seconds } from "../time";
 import { span, type Span, type Spanned } from "./span";
 import type { Animated, Box, Vec } from "./ir";
 import type { SceneElement } from "./nodes";

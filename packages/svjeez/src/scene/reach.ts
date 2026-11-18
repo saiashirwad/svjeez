@@ -1,4 +1,4 @@
-import type { Ease } from "../motion";
+import type { Ease } from "../time";
 import { mixGeometry } from "./geometry";
 import type { Animated, Box, Effect, Geometry, Layer, SceneNode, Vec } from "./ir";
 import { isLane } from "./lane";

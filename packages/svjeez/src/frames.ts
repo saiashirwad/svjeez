@@ -1,4 +1,4 @@
-import type { Seconds } from "./motion";
+import type { Seconds } from "./time";
 import { loopLength, seek } from "./page";
 import { rateOf } from "./rate";
 import { systemColorScheme } from "./scheme";

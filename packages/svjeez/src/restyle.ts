@@ -1,14 +1,12 @@
 import { REDUCED_MOTION } from "./css";
 import { num } from "./format";
-import type { Seconds } from "./motion";
+import type { Seconds } from "./time";
 import { rateOf } from "./rate";
 
 export interface RestyleOptions {
   readonly css?: string;
   /** Start this many scene seconds in, as if the copy had been playing that long. */
   readonly at?: Seconds;
-  /** Where the parts inside `<Once>` start, or are held with `paused`. Default `at`, as if they had played as long as the rest: `onceAt: 0` plays them from the top while the rest starts `at` seconds in. */
-  readonly onceAt?: Seconds;
   /** Hold the frame at `at` (default 0) instead of playing on from it, whatever the viewer's reduced-motion setting. Animations of your own CSS pause where they start. */
   readonly paused?: boolean;
   /** Hold the reduced-motion still frame whatever the viewer's setting, ignoring `at` and `paused`. Animations of your own CSS pause where they start, and so does every motion of a scene rendered with `reducedMotion: false`, which has no still frame. */
@@ -16,15 +14,11 @@ export interface RestyleOptions {
   /**
    * Scrub the scene with a scroll or view timeline instead of playing it on the clock: a dashed ident the page declares
    * (`"--story"`, with `view-timeline-name` or `scroll-timeline-name`), or a timeline function (`"view()"`, `"scroll(root)"`). A function timeline is made per element, so `view()` gives every part its own range: use a name for a shared one.
-   * The whole loop spans the timeline's range once. CSS animations follow it; browsers without `animation-timeline` and
-   * viewers who ask for reduced motion keep what the scene does without it. `at`, `onceAt` and `paused` have no effect
-   * on what follows the timeline, and a `<Once>` part with a duration shorter than the loop spreads over the whole range.
+   * The whole loop spans the timeline's range once. Browsers without `animation-timeline` and viewers who ask for
+   * reduced motion keep what the scene does without it. `at` and `paused` have no effect on what follows the timeline.
    *
-   * Parts inside `<Ambient>` stay on the clock: they keep their durations, loops and delays, so they play on while the
-   * page stands still, and `at` and `paused` still apply to them. `seek()` and `frames` know nothing of the split and
-   * set every animation to one scene time.
-   *
-   * SMIL cannot follow a timeline, so a scene with `<animate>` outside `<Ambient>` throws: drive it with `seek()` instead.
+   * A morph, a geometry that changes size and an animated effect only play on the clock, so a scene with one throws:
+   * drive it with `seek()` instead.
    */
   readonly timeline?: string;
   /** The `animation-range` the timeline's scene spans, such as `"contain"` for a tall section holding a sticky scene. Default the timeline's whole range. */
@@ -96,9 +90,9 @@ const timelineCss = (svg: string, timeline: string, range: string | undefined): 
       `restyle() needs a timeline that is a dashed name such as "--story" or a function such as "view()", got ${JSON.stringify(timeline)}.`,
     );
 
-  if (/<animate\b(?![^>]*\sdata-ambient=)/.test(svg))
+  if (/<animate\b/.test(svg))
     throw new Error(
-      "restyle() cannot make SMIL follow a timeline, and this scene has <animate> outside <Ambient>. Call seek() from svjeez/page on scroll instead.",
+      "restyle() can't put this scene on a timeline: it morphs, resizes a geometry or animates an effect, which only play on the clock. Call seek() from svjeez/page on scroll instead.",
     );
 
   const root = /^<svg\b[^>]*\sclass="([^"]*)root"/.exec(svg)?.[1] ?? "";
@@ -108,7 +102,6 @@ const timelineCss = (svg: string, timeline: string, range: string | undefined): 
   if (!base) return "";
 
   const loop = parseFloat(base[1]!);
-  const scrubbed = `:not(.${root}c)`;
   const rules: string[] = [];
 
   const own = new RegExp(
@@ -118,32 +111,24 @@ const timelineCss = (svg: string, timeline: string, range: string | undefined): 
 
   for (const [, name, durations] of svg.matchAll(own))
     rules.push(
-      `.${name}${scrubbed}{animation-iteration-count:${secondsOf(durations!)
+      `.${name}{animation-iteration-count:${secondsOf(durations!)
         .map((d) => num(loop / d))
         .join(",")}}`,
     );
 
   const rangeRule = range === undefined ? "" : `;animation-range:${range}`;
-  const head = `.${root}a${scrubbed}{animation-timeline:${timeline};animation-delay:0s;animation-iteration-count:1${rangeRule}}`;
+  const head = `.${root}a{animation-timeline:${timeline};animation-delay:0s;animation-iteration-count:1${rangeRule}}`;
 
-  const once = svg.includes(`.${root}o{`)
-    ? `.${root}o${scrubbed}{animation-delay:0s;animation-iteration-count:1}`
-    : "";
-
-  return `@supports (animation-timeline:scroll()){@media (prefers-reduced-motion:no-preference){${head}${rules.join("")}${once}}}`;
+  return `@supports (animation-timeline:scroll()){@media (prefers-reduced-motion:no-preference){${head}${rules.join("")}}}`;
 };
 
 /** A copy of a rendered SVG with more CSS, started or held `at` seconds in, or held at its still frame. A page uses it to recolor or pause an `<img>` without restarting it. */
 export const restyle = (
   svg: string,
-  { css, at, onceAt, paused, still, timeline, range }: RestyleOptions,
+  { css, at, paused, still, timeline, range }: RestyleOptions,
 ): string => {
-  for (const [name, value] of [
-    ["at", at],
-    ["onceAt", onceAt],
-  ] as const)
-    if (value !== undefined && !(Number.isFinite(value) && value >= 0))
-      throw new Error(`restyle() needs ${name} of 0 or more, got ${value}.`);
+  if (at !== undefined && !(Number.isFinite(at) && at >= 0))
+    throw new Error(`restyle() needs at of 0 or more, got ${at}.`);
 
   let out = svg;
   const rate = rateOf(svg);
@@ -157,10 +142,9 @@ export const restyle = (
     .join("\n");
 
   if (still) out = out.replaceAll(REDUCED_MOTION, "@media all{");
-  else if (at || paused || onceAt !== undefined) {
+  else if (at || paused) {
     const loop = (at ?? 0) / rate;
-    const once = (onceAt ?? at ?? 0) / rate;
-    const clocks = `--t0:-${num(loop)}s${onceAt === undefined ? "" : `;--t1:-${num(once)}s`}`;
+    const clocks = `--t0:-${num(loop)}s`;
     out = out.replace(/<svg\b[^>]*>/, (root) =>
       /\sstyle="/.test(root)
         ? root.replace(/\sstyle="/, `$&${clocks};`)
@@ -170,14 +154,13 @@ export const restyle = (
       windowedAt(tag, sets, loop % (parseFloat(attr(tag, "data-loop")) || Infinity), paused),
     );
     out = out.replace(/<animate\b(?![^>]*\sbegin=)[^>]*>/g, (tag) => {
-      const clock = /\sdata-once=/.test(tag) ? once : loop;
       // Chromium drops `fill="freeze"` when the whole interval ended before the copy started, so an animation that
       // repeats a set number of times ends no earlier than just after the start.
       const runs = activeDuration(tag);
 
       const begin = paused
-        ? HOLD - Math.max(Math.min(clock, runs), HOLD)
-        : -Math.min(clock, runs - HOLD);
+        ? HOLD - Math.max(Math.min(loop, runs), HOLD)
+        : -Math.min(loop, runs - HOLD);
 
       const hold = paused
         ? ` end="${num(HOLD)}s"${/\sfill=/.test(tag) ? "" : ' fill="freeze"'}`

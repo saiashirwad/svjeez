@@ -76,7 +76,7 @@ export {
   type TextPiece,
 } from "./scene/text";
 
-export type { Ease, Seconds } from "./motion";
+export type { Ease, Seconds } from "./time";
 
 export type { Spring, SpringOptions } from "./scene/spring";
 

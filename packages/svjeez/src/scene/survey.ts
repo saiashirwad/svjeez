@@ -1,5 +1,5 @@
 import { easeAt } from "../ease-at";
-import { EPSILON, ease, type Seconds } from "../motion";
+import { EPSILON, ease, type Seconds } from "../time";
 import { placements, type Matrix, type Placed } from "./boxes";
 import type {
   Animated,
@@ -382,10 +382,6 @@ export const isClear = (scene: Scene, paint: Paint): boolean =>
     : paint.stops.every((stop) =>
         SCHEMES.every((scheme) => rgbaIn(scene, stop.color, scheme)[3] <= 0),
       );
-
-/** Whether a paint is one color that hides what is behind it, in both schemes. */
-export const isOpaqueColor = (scene: Scene, paint: Paint): paint is Color =>
-  isColor(paint) && SCHEMES.every((scheme) => rgbaIn(scene, paint, scheme)[3] >= 1);
 
 /** Whether every value an animated paint takes shows nothing. */
 export const clearThroughout = (scene: Scene, paint: Animated<Paint> | undefined): boolean =>

@@ -2,7 +2,7 @@ import type { TargetValues } from "../channels";
 import type { Emit } from "../css";
 import { easeAt, splitEase } from "../ease-at";
 import { num } from "../format";
-import { ease, type Ease } from "../motion";
+import { ease, type Ease } from "../time";
 import type { PathData } from "../paths";
 import type { AttrValue } from "../svg";
 import { arcPieces, contoursOf, mixGeometry, smilSafe } from "./geometry";

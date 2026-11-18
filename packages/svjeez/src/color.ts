@@ -1,4 +1,23 @@
-import type { Color } from "./attributes";
+/** A color as the emitter writes it. */
+export type Color =
+  | `#${string}`
+  | `rgb(${string})`
+  | `rgba(${string})`
+  | `hsl(${string})`
+  | `hsla(${string})`
+  | `oklch(${string})`
+  | `var(--${string})`
+  | "currentColor"
+  | "black"
+  | "white"
+  | "red"
+  | "green"
+  | "blue"
+  | "yellow"
+  | "orange"
+  | "purple"
+  | "gray"
+  | "transparent";
 
 export type Hex = Extract<Color, `#${string}`>;
 

@@ -15,8 +15,6 @@ import {
 } from "svjeez";
 import { svg, type Motion } from "svjeez/tools";
 import { easeAt } from "../src/ease-at";
-import { keysOf, rotateKeys, valueAt } from "../src/keys";
-import { chain, span, stagger } from "../src/span";
 
 const DURATION = 10;
 
@@ -56,14 +54,14 @@ const box = (layer: Motion, duration = DURATION): string =>
 const x = (value: number): [number, number] => [value, 0];
 
 describe("span()", () => {
-  test("chain() puts spans end to end, one length after another", () => {
-    const [crouch, launch, rise] = chain(span(0.1, 0.3), 0.12, 0.25);
+  test(".chain() puts spans end to end, one length after another", () => {
+    const [crouch, launch, rise] = clock(0.1, 0.3).chain(0.12, 0.25);
 
-    expect([crouch.at, crouch.over]).toEqual([0.1, 0.3]);
-    expect([launch.at, launch.over]).toEqual([crouch.end, 0.12]);
-    expect([rise.at, rise.over]).toEqual([launch.end, 0.25]);
-    expect(chain({ at: 2, over: 1 })).toHaveLength(1);
-    expect(() => chain(span(1, 1), -1)).toThrow("next() needs a length of 0 or more, got -1.");
+    expect([crouch.start, crouch.over]).toEqual([0.1, 0.3]);
+    expect([launch.start, launch.over]).toEqual([crouch.end, 0.12]);
+    expect([rise.start, rise.over]).toEqual([launch.end, 0.25]);
+    expect(clock(2, 1).chain()).toHaveLength(1);
+    expect(() => clock(1, 1).chain(-1)).toThrow("next() needs a length of 0 or more, got -1.");
 
     const [a, b, c] = clock(0.1, 0.3).chain(0.12, 0.25);
 
@@ -81,66 +79,68 @@ describe("span()", () => {
   });
 
   test("a span knows its end, and shifts, chains and pads into new spans", () => {
-    const reach = span(0, 0.7);
+    const reach = clock(0, 0.7);
     const grab = reach.next(1, 0.2);
     const down = grab.pad(0.15);
 
     expect(reach.end).toBeCloseTo(0.7, 9);
-    expect([grab.at, grab.over, grab.end]).toEqual([0.9, 1, 1.9].map((n) => expect.closeTo(n, 9)));
-    expect(down.at).toBeCloseTo(0.75, 9);
+    expect([grab.start, grab.over, grab.end]).toEqual(
+      [0.9, 1, 1.9].map((n) => expect.closeTo(n, 9)),
+    );
+    expect(down.start).toBeCloseTo(0.75, 9);
     expect(down.over).toBeCloseTo(1.3, 9);
-    expect(span(1, 2).shift(2)).toMatchObject({ at: 3, over: 2 });
-    expect(span(1, 2).next(1)).toMatchObject({ at: 3, over: 1 });
-    expect(span(1, 2).pad(1, 0)).toMatchObject({ at: 0, over: 3 });
-    expect(span(1, 2).pad(-0.5)).toMatchObject({ at: 1.5, over: 1 });
+    expect(clock(1, 2).shift(2)).toMatchObject({ start: 3, over: 2 });
+    expect(clock(1, 2).next(1)).toMatchObject({ start: 3, over: 1 });
+    expect(clock(1, 2).pad(1, 0)).toMatchObject({ start: 0, over: 3 });
+    expect(clock(1, 2).pad(-0.5)).toMatchObject({ start: 1.5, over: 1 });
   });
 
   test("a span is not a thenable, so awaiting or returning one from an async function works", async () => {
-    expect("then" in span(1, 2)).toBe(false);
-    expect("then" in span(1)).toBe(false);
-    expect(await span(1, 2)).toMatchObject({ at: 1, over: 2 });
-    expect(await (async () => span(1, 2).next(1))()).toMatchObject({ at: 3, over: 1 });
+    expect("then" in clock(1, 2)).toBe(false);
+    expect("then" in clock(1)).toBe(false);
+    expect(await clock(1, 2)).toMatchObject({ start: 1, over: 2 });
+    expect(await (async () => clock(1, 2).next(1))()).toMatchObject({ start: 3, over: 1 });
   });
 
   test("a span without over runs to the end, and never ends", () => {
-    const open = span(2);
+    const open = clock(2);
 
     expect(open.over).toBeUndefined();
     expect(open.end).toBe(Infinity);
-    expect(open.shift(1).at).toBe(3);
-    expect(open.pad(1).at).toBe(1);
+    expect(open.shift(1).start).toBe(3);
+    expect(open.pad(1).start).toBe(1);
   });
 
   test("until runs a span to an end time; first and last start or end with another", () => {
-    expect(span(2).until(3.5)).toMatchObject({ at: 2, over: 1.5 });
-    expect(span(1, 4).until(2)).toMatchObject({ at: 1, over: 1 });
-    expect(span(1, 4).first(0.5)).toMatchObject({ at: 1, over: 0.5 });
-    expect(span(2).first(0.5)).toMatchObject({ at: 2, over: 0.5 });
-    expect(span(1, 4).last(0.5)).toMatchObject({ at: 4.5, over: 0.5 });
-    expect(() => span(2).until(1)).toThrow("until() needs a length of 0 or more, got -1.");
-    expect(() => span(1, 1).until(Infinity)).toThrow("until() needs a finite number of seconds");
-    expect(() => span(1, 1).last(3)).toThrow("last() needs a start of 0 or later, got -1.");
+    expect(clock(2).until(3.5)).toMatchObject({ start: 2, over: 1.5 });
+    expect(clock(1, 4).until(2)).toMatchObject({ start: 1, over: 1 });
+    expect(clock(1, 4).first(0.5)).toMatchObject({ start: 1, over: 0.5 });
+    expect(clock(2).first(0.5)).toMatchObject({ start: 2, over: 0.5 });
+    expect(clock(1, 4).last(0.5)).toMatchObject({ start: 4.5, over: 0.5 });
+    expect(() => clock(2).until(1)).toThrow("until() needs a length of 0 or more, got -1.");
+    expect(() => clock(1, 1).until(Infinity)).toThrow("until() needs a finite number of seconds");
+    expect(() => clock(1, 1).last(3)).toThrow("last() needs a start of 0 or later, got -1.");
   });
 
-  test("stagger lays out spans step apart, each as long as the first", () => {
-    const cascade = stagger(span(1, 0.5), 3, 0.25);
+  test(".cascade() lays out spans step apart, each as long as the first", () => {
+    const cascade = clock(1, 0.5).cascade(3, 0.25);
 
-    expect(cascade.map((s) => [s.at, s.over])).toEqual([
+    expect(cascade.map((s) => [s.start, s.over])).toEqual([
       [1, 0.5],
       [1.25, 0.5],
       [1.5, 0.5],
     ]);
     expect(cascade.at(-1)!.end).toBe(2);
-    expect(stagger({ at: 0, over: 1 }, 2, 0)[1]).toMatchObject({ at: 0, over: 1 });
+    expect(clock(0, 1).cascade(2, 0)[1]).toMatchObject({ start: 0, over: 1 });
   });
 
   test("a span before 0, with a negative or infinite length, or padded out of the clock throws", () => {
-    expect(() => span(-1, 1)).toThrow(/start of 0 or later/);
-    expect(() => span(1, -1)).toThrow(/length of 0 or more/);
-    expect(() => span(1, Infinity)).toThrow(/length of 0 or more/);
-    expect(() => span(Number.NaN)).toThrow(/start of 0 or later/);
-    expect(() => span(1, 2).pad(2)).toThrow(/pad\(\) needs a start of 0 or later/);
-    expect(() => span(1, 2).pad(-2)).toThrow(/pad\(\) needs a length/);
+    expect(() => clock(-1, 1)).toThrow(/start of 0 or later/);
+    expect(() => clock(1, -1)).toThrow(/length of 0 or more/);
+    expect(() => clock(1, Infinity)).toThrow(/length of 0 or more/);
+    expect(() => clock(Number.NaN)).toThrow(/start of 0 or later/);
+    expect(() => clock(1, 2).pad(2)).toThrow(/pad\(\) needs a start of 0 or later/);
+    expect(() => clock(1, 2).pad(-2)).toThrow(/pad\(\) needs a length/);
   });
 });
 
@@ -384,51 +384,6 @@ describe(".rewind()", () => {
   });
 });
 
-describe("rotating keys for a loop's phase", () => {
-  test("rotating keys draws what the unrotated keys draw, whichever ease crosses the wrap", () => {
-    const eases = [ease.linear, ease.out, ease.inOut, ease.pop, ease.in];
-
-    for (const curve of eases) {
-      const original = keysOf({ x: 0 }, [{ start: 1, over: 3, ease: curve, values: { x: 80 } }], 6);
-
-      for (const shift of [0.5, 1.7, 2.5, 3.9, 5.2]) {
-        const rotated = rotateKeys(original, shift, 6, "test");
-
-        for (let t = 0; t <= 6; t += 0.07) {
-          const want = Number(valueAt(original, (((t - shift) % 6) + 6) % 6).x);
-          // A glide that is cut also moves its key one nudge early, so allow the width of a nudge.
-          const got = Number(valueAt(rotated, t).x);
-
-          expect(Math.abs(got - want)).toBeLessThan(0.08 + Math.abs(want) * 0.002);
-        }
-      }
-    }
-  });
-
-  test("a steps() transition cut off a step edge by the phase throws; on an edge it rotates", () => {
-    const original = keysOf(
-      { x: 0 },
-      [{ start: 0, over: 4, ease: ease.steps(4), values: { x: 40 } }],
-      6,
-    );
-
-    expect(() => rotateKeys(original, 6 - 1.5, 6, "A loop")).toThrow(
-      /cuts a steps\(4\) transition/,
-    );
-    expect(() => rotateKeys(original, 6 - 2, 6, "A loop")).not.toThrow();
-  });
-
-  test("a colour mid-glide at the wrap can't be split", () => {
-    const original = keysOf(
-      { fill: "#000000" },
-      [{ start: 1, over: 3, ease: ease.linear, values: { fill: "#ffffff" } }],
-      6,
-    );
-
-    expect(() => rotateKeys(original, 6 - 2, 6, "A loop")).toThrow(/stops fill partway/);
-  });
-});
-
 describe("sampled() with a window", () => {
   test("plays from the window's start, hands the function time from 0 to over, and holds either side", () => {
     const seen: number[] = [];
@@ -493,6 +448,5 @@ describe("one clock in the tools", () => {
   test("restyle starts a copy at scene seconds, whatever the rate", () => {
     expect(restyle(faster(1), { at: 2 })).toContain("--t0:-2s");
     expect(restyle(faster(2), { at: 2 })).toContain("--t0:-1s");
-    expect(restyle(faster(2), { at: 2, onceAt: 0.5 })).toContain("--t0:-1s;--t1:-0.25s");
   });
 });
