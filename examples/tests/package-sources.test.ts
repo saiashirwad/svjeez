@@ -31,3 +31,22 @@ test("every package .tsx source carries the jsxImportSource pragma", async () =>
 
   expect(missing).toEqual([]);
 });
+
+test("package sources and tests build nodes with JSX, not component calls", async () => {
+  const offenders: string[] = [];
+
+  const call =
+    /(?<![.\w<]|function\s)(Group|Shape|Text|Run|Image|Instance|Sequence|Arrow|Stack|Grid|Center|Align|Node|Edge|Chip|Icon)\(\s*[{a-z]/;
+
+  const files = [...new Glob("*/{src,test}/**/*.{ts,tsx}").scanSync(packages)].filter(
+    (file) => !file.startsWith("svjeez/") && !file.includes("/consumer/"),
+  );
+
+  for (const file of files) {
+    const text = await Bun.file(join(packages, file)).text();
+
+    if (call.test(text)) offenders.push(file);
+  }
+
+  expect(offenders).toEqual([]);
+});

@@ -28,6 +28,7 @@ import {
   labelSize,
   look,
   mix,
+  type Look,
   partsOf,
   spanOf,
   type Diagram,
@@ -88,6 +89,49 @@ interface Node {
   readonly depth: number;
   readonly inner?: Scope;
 }
+
+interface StateBoxProps {
+  readonly key: string;
+  readonly look: Look;
+  readonly node: Node;
+  readonly box: Box;
+  readonly header: number;
+  readonly ground: Color;
+}
+
+const StateBox = ({ look: l, node: n, box: b, header, ground }: StateBoxProps): SceneElement => {
+  const tint = n.role && l.tint(n.role);
+  const radius = n.inner ? 10 : 8;
+
+  return (
+    <Group key={n.id} at={[b.x, b.y]}>
+      <Shape
+        key="shape"
+        geometry={rect(b.w, b.h, { radius })}
+        fill={n.role ? mix(l.tint(n.role), ground, n.inner ? 0.1 : 0.22) : ground}
+        stroke={{ color: tint ?? l.colors.line, width: tint ? 1.5 : 1 }}
+      />
+      {n.inner && (
+        <Shape
+          key="rule"
+          geometry={line([0, header], [b.w, header])}
+          stroke={{ color: tint ?? l.colors.line, width: 1 }}
+        />
+      )}
+      <Text
+        key="label"
+        font={l.font}
+        size={l.size}
+        weight={l.weight}
+        fill={l.colors.text}
+        anchor="center"
+        at={[b.w / 2, n.inner ? header / 2 : b.h / 2]}
+      >
+        {n.label}
+      </Text>
+    </Group>
+  );
+};
 
 interface Scope {
   readonly owner?: string;
@@ -322,48 +366,20 @@ export function stateMachine<
 
   const handle = partsOf<Id | EdgeId<T[number]>>(WHAT, options.name ?? "state", parts);
 
-  const drawState = (n: Node): SceneElement => {
-    const b = boxes.get(n.id)!;
-    const tint = n.role && l.tint(n.role);
-    const radius = n.inner ? 10 : 8;
-
-    return (
-      <Group key={n.id} at={[b.x, b.y]}>
-        <Shape
-          key="shape"
-          geometry={rect(b.w, b.h, { radius })}
-          fill={
-            n.role
-              ? mix(l.tint(n.role), ground(n.depth + 1), n.inner ? 0.1 : 0.22)
-              : ground(n.depth + 1)
-          }
-          stroke={{ color: tint ?? l.colors.line, width: tint ? 1.5 : 1 }}
-        />
-        {n.inner && (
-          <Shape
-            key="rule"
-            geometry={line([0, header], [b.w, header])}
-            stroke={{ color: tint ?? l.colors.line, width: 1 }}
-          />
-        )}
-        <Text
-          key="label"
-          font={l.font}
-          size={l.size}
-          weight={l.weight}
-          fill={l.colors.text}
-          anchor="center"
-          at={[b.w / 2, n.inner ? header / 2 : b.h / 2]}
-        >
-          {n.label}
-        </Text>
-      </Group>
-    );
-  };
-
   const draw = (between?: Child): SceneElement => (
     <Group ref={handle.ref}>
-      {[...nodes.values()].sort((a, b) => a.depth - b.depth).map(drawState)}
+      {[...nodes.values()]
+        .sort((a, b) => a.depth - b.depth)
+        .map((n) => (
+          <StateBox
+            key={n.id}
+            look={l}
+            node={n}
+            box={boxes.get(n.id)!}
+            header={header}
+            ground={ground(n.depth + 1)}
+          />
+        ))}
       {local.lines.map((x) => (
         <Edge
           key={

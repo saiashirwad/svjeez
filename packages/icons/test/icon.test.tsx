@@ -11,7 +11,7 @@ const two: IconData = { grid: 10, kind: "stroke", paths: ["M0 5h10", "M5 0v10"] 
 const solid: IconData = { grid: 10, kind: "fill", paths: ["M0 0h10v10z"] };
 
 const draws = (...children: SceneElement[]): Model.Scene =>
-  scene({ size: [200, 100], duration: 3, title: "Icons", theme }, () => Group({ children }));
+  scene({ size: [200, 100], duration: 3, title: "Icons", theme }, () => <Group>{children}</Group>);
 
 const icon = (props: IconProps, line = 1): SceneElement =>
   jsxDEV(Icon, props, undefined, false, {
@@ -78,17 +78,12 @@ describe("Icon", () => {
   });
 
   test("a layout container places an icon by the size it is drawn at", () => {
-    const row = scene({ size: [200, 100], duration: 1, title: "Row", theme }, () =>
-      Stack({
-        key: "row",
-        direction: "row",
-        gap: 0,
-        children: [
-          icon({ icon: two, color: "#111111", size: 40, key: "a" }),
-          icon({ icon: two, color: "#111111", size: 40, key: "b" }),
-        ],
-      }),
-    );
+    const row = scene({ size: [200, 100], duration: 1, title: "Row", theme }, () => (
+      <Stack key="row" direction="row" gap={0}>
+        {icon({ icon: two, color: "#111111", size: 40, key: "a" })}
+        {icon({ icon: two, color: "#111111", size: 40, key: "b" })}
+      </Stack>
+    ));
 
     const boxes = boxesOf(row, 0);
 
