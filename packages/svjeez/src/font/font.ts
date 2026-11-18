@@ -188,10 +188,14 @@ export class Font {
     return this.#typeset(text, "advances()").map((glyph) => glyph.advance * scale);
   }
 
+  get outlines(): boolean {
+    return this.format === "ttf" && this.#sfnt !== undefined;
+  }
+
   path(text: string, { size, x = 0, y = 0 }: PathOptions): TextPath {
     const font = this.#readable("path()");
 
-    if (this.format === "otf")
+    if (!this.outlines)
       throw new SceneError(
         "path() reads TrueType outlines. This OTF stores CFF outlines, which path() does not read yet.",
       );

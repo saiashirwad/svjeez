@@ -331,6 +331,33 @@ describe("runs", () => {
     ).toThrow(`<Text> "t" holds a <Group>. A <Text> holds strings and <Run>s`);
   });
 
+  test("a font svjeez can't outline draws as text and is named for a backend that needs outlines", async () => {
+    const bytes = new Uint8Array(await Bun.file(fixture("SpaceMono-Regular")).arrayBuffer());
+
+    bytes.set([0x4f, 0x54, 0x54, 0x4f], 0);
+    const otf = font(bytes);
+
+    expect([otf.format, otf.outlines, regular.outlines]).toEqual(["otf", false, true]);
+
+    const model = made(() => (
+      <Text key="t" font={otf} size={10} fill="#000000">
+        Hi
+      </Text>
+    ));
+
+    expect(textOf(model).lines[0]!.runs[0]!.outline).toBeUndefined();
+    expect(emit(model)).toContain(">Hi<");
+
+    const needs = {
+      name: "Outlines",
+      supports: { ...svg.supports, unoutlinedText: { level: "none", note: "x" } as const },
+    };
+
+    expect(diagnose(model, needs).map((each) => each.message)).toEqual([
+      "<Text> \"t\" uses text in a font svjeez can't outline, which Outlines can't draw: x",
+    ]);
+  });
+
   test("a backend that needs outlines checks every run", () => {
     const model = made(() => (
       <Text key="t" font={space} size={10} fill="#000000">

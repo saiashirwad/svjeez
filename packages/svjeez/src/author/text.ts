@@ -213,13 +213,7 @@ export const layoutRuns = <S>(
     const runs = parts.map((part): LaidRun<S> => {
       const { text, face, style } = part;
 
-      const outlined = (() => {
-        try {
-          return face.path(text, { size, x, y });
-        } catch {
-          return undefined;
-        }
-      })();
+      const outlined = face.outlines ? face.path(text, { size, x, y }) : undefined;
 
       const run: LaidRun<S> = {
         text,
