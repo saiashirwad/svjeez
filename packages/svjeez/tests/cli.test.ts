@@ -159,7 +159,9 @@ test("svjeez svg emits a scene model default export, and --json reports its buil
     cli("svg", file, "--json").stdout.toString(),
   );
 
-  expect(build.svg).toBe(out.stdout.toString());
+  // A traced build marks each node with its key and the line that wrote it, and is otherwise the same picture.
+  expect(build.svg).toContain(`data-key="1" data-source="${file}:`);
+  expect(build.svg.replace(/ data-(key|source)="[^"]*"/g, "")).toBe(out.stdout.toString());
   expect(build).toMatchObject({ duration: 2, loop: true, warnings: [] });
 });
 

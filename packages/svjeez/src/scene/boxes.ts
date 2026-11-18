@@ -1,0 +1,188 @@
+import { easeAt } from "../ease-at";
+import type { Seconds } from "../motion";
+import { mixGeometry } from "./geometry";
+import type { Animated, Box, Geometry, Layer, Scene, SceneNode, Source, Vec } from "./ir";
+import { isLane } from "./lane";
+import { mixNumber, mixVec, type Mix } from "./steps";
+import { boxOf } from "./values";
+
+/**
+ * Where every node of a scene is, by the transform rule at the top of ir.ts: what an editor needs to draw handles
+ * and to find the node under a point. Pure math on the model, so it runs anywhere, a worker included.
+ */
+
+/** An affine map: x' = a·x + c·y + e, y' = b·x + d·y + f, as SVG writes one. */
+export type Matrix = readonly [a: number, b: number, c: number, d: number, e: number, f: number];
+
+/** One node, placed in the scene. Plain data, so it survives a worker's message. */
+export interface Placed {
+  readonly key: string;
+  readonly kind: SceneNode["kind"];
+  readonly source?: Source;
+  /** The smallest upright box around the node, in the scene's coordinates. A group's holds its children. */
+  readonly box: Box;
+  /** The node's box in its own frame. */
+  readonly frame: Box;
+  /** From the node's own frame to the scene's. */
+  readonly matrix: Matrix;
+  /** How opaque it is, with every group around it: 0 is hidden. */
+  readonly opacity: number;
+  /** 0 for the root, 1 for its children, and so on. */
+  readonly depth: number;
+}
+
+const IDENTITY: Matrix = [1, 0, 0, 1, 0, 0];
+
+const times = (m: Matrix, n: Matrix): Matrix => [
+  m[0] * n[0] + m[2] * n[1],
+  m[1] * n[0] + m[3] * n[1],
+  m[0] * n[2] + m[2] * n[3],
+  m[1] * n[2] + m[3] * n[3],
+  m[0] * n[4] + m[2] * n[5] + m[4],
+  m[1] * n[4] + m[3] * n[5] + m[5],
+];
+
+const moveBy = ([x, y]: Vec): Matrix => [1, 0, 0, 1, x, y];
+
+const apply = (m: Matrix, [x, y]: Vec): Vec => [
+  m[0] * x + m[2] * y + m[4],
+  m[1] * x + m[3] * y + m[5],
+];
+
+const inverse = (m: Matrix): Matrix | undefined => {
+  const det = m[0] * m[3] - m[1] * m[2];
+
+  if (Math.abs(det) < 1e-12) return undefined;
+
+  return [
+    m[3] / det,
+    -m[1] / det,
+    -m[2] / det,
+    m[0] / det,
+    (m[2] * m[5] - m[3] * m[4]) / det,
+    (m[1] * m[4] - m[0] * m[5]) / det,
+  ];
+};
+
+/** What an animated value is at `t` seconds on the scene's clock, as a backend would draw it. */
+export const valueAt = <T>(value: Animated<T>, t: Seconds, mix: Mix<T>, where = "a lane"): T => {
+  if (!isLane(value)) return value;
+  const { keys, period } = value;
+  const time = period ? ((t % period) + period) % period : t;
+  const next = keys.findIndex((key) => key.t > time);
+
+  if (next === 0) return keys[0].value;
+
+  if (next < 0) return keys.at(-1)!.value;
+  const [from, to] = [keys[next - 1]!, keys[next]!];
+  const progress = (time - from.t) / (to.t - from.t);
+
+  return to.ease ? mix(from.value, to.value, easeAt(to.ease, progress), where) : to.value;
+};
+
+const number = (value: Animated<number>, t: Seconds): number => valueAt(value, t, mixNumber);
+
+const vec = (value: Animated<Vec>, t: Seconds): Vec => valueAt(value, t, mixVec);
+
+const layerMatrix = (layer: Layer, origin: Vec, t: Seconds): Matrix => {
+  const angle = (number(layer.rotate, t) * Math.PI) / 180;
+  const [sx, sy] = vec(layer.scale, t);
+  const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
+  const turn: Matrix = [cos * sx, sin * sx, -sin * sy, cos * sy, 0, 0];
+  const [ox, oy] = origin;
+
+  return [moveBy(vec(layer.offset, t)), moveBy(origin), turn, moveBy([-ox, -oy])].reduce(times);
+};
+
+const corners = ({ x, y, width, height }: Box): Vec[] => [
+  [x, y],
+  [x + width, y],
+  [x + width, y + height],
+  [x, y + height],
+];
+
+const around = (points: readonly Vec[]): Box => {
+  const xs = points.map(([x]) => x);
+  const ys = points.map(([, y]) => y);
+  const [x, y] = [Math.min(...xs), Math.min(...ys)];
+
+  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+};
+
+const frameAt = (node: SceneNode, t: Seconds): Box =>
+  node.kind === "shape" && isLane(node.geometry)
+    ? boxOf(valueAt<Geometry>(node.geometry, t, mixGeometry, `"${node.key}"`))
+    : node.box;
+
+/**
+ * Every node of `scene` at `at` seconds (0, the picture at rest, unless you say), placed in the scene, in the order
+ * they paint: each group before what it holds, the root first. A symbol's content is not listed; its instances are.
+ */
+export const placements = (scene: Scene, at: Seconds = 0): Placed[] => {
+  const out: Placed[] = [];
+
+  const visit = (node: SceneNode, parent: Matrix, shown: number, depth: number): Placed => {
+    const own = node.layers.reduce(
+      (matrix, layer) => times(matrix, layerMatrix(layer, node.origin, at)),
+      times(parent, moveBy(vec(node.at, at))),
+    );
+
+    const opacity = node.layers.reduce((sum, layer) => sum * number(layer.opacity, at), shown);
+    const frame = frameAt(node, at);
+    const index = out.length;
+
+    out.push({
+      key: node.key,
+      kind: node.kind,
+      ...(node.source && { source: node.source }),
+      box: around(corners(frame).map((point) => apply(own, point))),
+      frame,
+      matrix: own,
+      opacity,
+      depth,
+    });
+
+    if (node.kind !== "group" || node.children.length === 0) return out[index]!;
+    const inside = node.children.map((child) => visit(child, own, opacity, depth + 1));
+
+    // The root's box is the canvas; another group's holds wherever its children are now.
+    if (depth > 0)
+      out[index] = { ...out[index]!, box: around(inside.flatMap((child) => corners(child.box))) };
+
+    return out[index]!;
+  };
+
+  visit(scene.root, IDENTITY, 1, 0);
+
+  return out;
+};
+
+/** Each node's box in the scene's coordinates at `at` seconds, by key. */
+export const boxesOf = (scene: Scene, at: Seconds = 0): Record<string, Box> =>
+  Object.fromEntries(placements(scene, at).map((placed) => [placed.key, placed.box]));
+
+const inside = ({ x, y, width, height }: Box, [px, py]: Vec): boolean =>
+  px >= x && px <= x + width && py >= y && py <= y + height;
+
+/**
+ * The deepest, topmost node whose box holds `point` (in the scene's coordinates), with its key and where it was
+ * written: what a click on the picture selects. Hidden nodes and the root are never hit. Takes a scene, or the
+ * placements a worker sent, which are already at a time.
+ */
+export const hitTest = (
+  scene: Scene | readonly Placed[],
+  point: Vec,
+  at: Seconds = 0,
+): Placed | undefined => {
+  const list = isPlacedList(scene) ? scene : placements(scene, at);
+
+  return list.findLast((placed) => {
+    if (placed.depth === 0 || placed.opacity <= 1e-6) return false;
+    const back = inverse(placed.matrix);
+
+    return back !== undefined && inside(placed.frame, apply(back, point));
+  });
+};
+
+const isPlacedList = (value: Scene | readonly Placed[]): value is readonly Placed[] =>
+  Array.isArray(value);

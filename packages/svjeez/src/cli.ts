@@ -7,7 +7,7 @@ import { parseArgs } from "node:util";
 import { checkScene, renderFrames, type FrameTimes } from "./frames";
 import { parse, type Json, type JsonObject, type Param, type Schema, type Values } from "./params";
 import { isScene, svg, type Diagnostic, type Scene } from "./scene";
-import { startTrace, stopTrace, type BuildReport } from "./traced";
+import { startTrace, stopTrace, traceOf, type BuildReport } from "./traced";
 import { timelineCues } from "./check";
 import { validateSvg } from "./validate";
 
@@ -204,7 +204,8 @@ const loadSvg = async (
     ? await (values === undefined ? module.default() : module.default(values))
     : module.default;
 
-  if (isScene(value)) return svg.emit(value, { onWarning });
+  // A traced build (`svg --json`, `check`, the dev server) marks each node with its key and the line that wrote it.
+  if (isScene(value)) return svg.emit(value, { onWarning, sources: Boolean(traceOf()?.within ?? traceOf()?.sources) });
 
   if (isText(value)) return value;
 

@@ -2,6 +2,7 @@ import type { FontValue } from "../font/font";
 import type { Seconds } from "../motion";
 import type { PictureData } from "../picture";
 import type { Vec } from "./ir";
+import type { MorphElement } from "./morph";
 import type { Anim, Stack } from "./track";
 import { rect, type Geometry, type Paint } from "./values";
 
@@ -116,7 +117,8 @@ export type SceneElement =
       readonly over?: Seconds;
       readonly children: readonly SceneElement[];
     }
-  | { readonly type: "fragment"; readonly children: readonly SceneElement[] };
+  | { readonly type: "fragment"; readonly children: readonly SceneElement[] }
+  | MorphElement;
 
 export type Child = SceneElement | false | null | undefined | readonly Child[];
 
