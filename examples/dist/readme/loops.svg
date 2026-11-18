@@ -9,7 +9,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @keyframes k1{0%{rotate:0deg}100%{rotate:360deg}}
 .m1{animation-name:k1;animation-duration:2s;animation-timing-function:linear}
 @keyframes k2{0%,100%{translate:-1.938px -2.323px}6.25%{translate:0.979px 3.147px}12.5%{translate:-0.22px -1.398px}18.75%{translate:3.884px 3.896px}25%{translate:1.822px 1.557px}31.25%{translate:-2.139px -1.048px}37.5%{translate:2.052px -0.299px}43.75%{translate:-1.062px 1.157px}50%{translate:0.768px -1.366px}56.25%{translate:2.733px -1.265px}62.5%{translate:2.235px -2.91px}68.75%{translate:3.599px -2.388px}75%{translate:3.805px -3.959px}81.25%{translate:0.269px 0.014px}87.5%{translate:0.717px -2.734px}93.75%{translate:-2.004px -1.527px}}
-@keyframes k3{0%{opacity:0}15%,100%{opacity:1}}
+@keyframes k3{0%,100%{opacity:0}15%,85%{opacity:1}}
 .m2{animation-name:k2,k3;animation-duration:2s,4s;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-1s!important;animation-play-state:paused!important}}
 ]]></style>

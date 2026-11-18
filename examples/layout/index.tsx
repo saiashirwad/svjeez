@@ -14,6 +14,7 @@ import {
   ref,
   scene,
   span,
+  track,
   type Paint,
   type Ref,
   type SceneElement,
@@ -79,33 +80,35 @@ export default scene(
   () => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
-      <Align place="center">
-        <Stack direction="row" gap={50}>
-          <Card handle={measure} title="Measure" dot={theme.yellow} when={first}>
-            Every node has a box the compiler knows, its text included.
-          </Card>
-          <Card handle={place} title="Place" dot={theme.green} when={second}>
-            Stacks and grids put each box in its slot, wherever its origin is.
-          </Card>
-          <Card handle={follow} title="Follow" dot={theme.cyan} when={third} drift>
-            Arrows attach to edges and follow the node when it moves.
-          </Card>
-        </Stack>
-      </Align>
-      <Arrow
-        from={measure.right}
-        to={place.left}
-        inset={6}
-        stroke={{ color: theme.blue }}
-        trim={draw(span(1.5, 0.5))}
-      />
-      <Arrow
-        from={place.right}
-        to={follow.left}
-        inset={6}
-        stroke={{ color: theme.blue }}
-        trim={draw(span(1.9, 0.5))}
-      />
+      <Group opacity={track(1).to(0, span(6.4, 0.5))}>
+        <Align place="center">
+          <Stack direction="row" gap={50}>
+            <Card handle={measure} title="Measure" dot={theme.yellow} when={first}>
+              Every node has a box the compiler knows, its text included.
+            </Card>
+            <Card handle={place} title="Place" dot={theme.green} when={second}>
+              Stacks and grids put each box in its slot, wherever its origin is.
+            </Card>
+            <Card handle={follow} title="Follow" dot={theme.cyan} when={third} drift>
+              Arrows attach to edges and follow the node when it moves.
+            </Card>
+          </Stack>
+        </Align>
+        <Arrow
+          from={measure.right}
+          to={place.left}
+          inset={6}
+          stroke={{ color: theme.blue }}
+          trim={draw(span(1.5, 0.5))}
+        />
+        <Arrow
+          from={place.right}
+          to={follow.left}
+          inset={6}
+          stroke={{ color: theme.blue }}
+          trim={draw(span(1.9, 0.5))}
+        />
+      </Group>
       <Align place="bottom" inset={22}>
         <Text font={mono} size={11} fill={theme.border}>
           each arrow is attached to two cards' edges, not to coordinates

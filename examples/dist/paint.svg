@@ -18,10 +18,12 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @keyframes k4{0%,6.667%,83.333%,100%{scale:1}40%,56.667%{scale:0.85}}
 @keyframes k5{0%,6.667%,83.333%,100%{rotate:0deg}40%,56.667%{rotate:30deg}}
 .m4{animation-name:k4,k5;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k6{0%,6.667%{opacity:0}26.667%,100%{opacity:1}}
+@keyframes k6{0%,6.667%,33.333%,100%{opacity:0}26.667%{opacity:1;animation-timing-function:steps(1)}}
 .m5{animation-name:k6}
-@keyframes k7{0%,16.667%,70%,100%{scale:1}30%{scale:1.06}56.667%{scale:1.06;animation-timing-function:cubic-bezier(.77,0,.175,1)}}
+@keyframes k7{0%,28.333%,100%{opacity:0}33.333%,90%{opacity:1}}
 .m6{animation-name:k7}
+@keyframes k8{0%,16.667%,70%,100%{scale:1}30%{scale:1.06}56.667%{scale:1.06;animation-timing-function:cubic-bezier(.77,0,.175,1)}}
+.m7{animation-name:k8}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-2.2s!important;animation-play-state:paused!important}}
 ]]></style>
   <defs>
@@ -56,13 +58,13 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <rect width="160" height="112" fill="url(#g3)" class="a m3"/>
     </mask>
     <filter id="f1" filterUnits="userSpaceOnUse" x="447" y="3" width="186" height="186" color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="0">
-        <animate id="s5" attributeName="stdDeviation" values="12;0" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="0.4s;s5.begin+6s" dur="1.6s" fill="freeze" data-loop="6s"/>
+      <feGaussianBlur stdDeviation="1.5">
+        <animate id="s5" attributeName="stdDeviation" values="12;1.5" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="0.4s;s5.begin+6s" dur="1.4s" fill="freeze" data-loop="6s"/>
         <set attributeName="stdDeviation" to="12" begin="0s;s5.begin+5.6s" dur="0.4s" fill="freeze" data-loop="6s"/>
       </feGaussianBlur>
     </filter>
     <filter id="f1s" filterUnits="userSpaceOnUse" x="447" y="3" width="186" height="186" color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="0"/>
+      <feGaussianBlur stdDeviation="1.5"/>
     </filter>
     <filter id="f2" filterUnits="userSpaceOnUse" x="603" y="9" width="179" height="189" color-interpolation-filters="sRGB">
       <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.45" flood-color="#000000">
@@ -95,7 +97,8 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
   </g>
   <text x="341.2" y="196" font-size="12" fill="var(--muted)">masked reveal</text>
   <rect x="484" y="40" width="112" height="112" rx="14" fill="var(--green)" filter="url(#f1)" class="a m5"/>
+  <rect x="484" y="40" width="112" height="112" rx="14" fill="var(--green)" class="a m6"/>
   <text x="514.8" y="196" font-size="12" fill="var(--muted)">blur-in</text>
-  <rect x="636.5" y="40.5" width="112" height="112" rx="14" fill="var(--surface)" stroke="var(--border)" filter="url(#f2)" class="a m6 fb"/>
+  <rect x="636.5" y="40.5" width="112" height="112" rx="14" fill="var(--surface)" stroke="var(--border)" filter="url(#f2)" class="a m7 fb"/>
   <text x="648.8" y="196" font-size="12" fill="var(--muted)">shadow grows</text>
 </svg>

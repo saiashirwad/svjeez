@@ -9,6 +9,7 @@ export default scene(
     desc: "A curve draws itself, then a dot pops in above it.",
     theme,
     reducedMotion: 3,
+    loop: false,
   },
   () => (
     <Group>

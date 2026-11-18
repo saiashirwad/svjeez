@@ -29,34 +29,38 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m7{animation-name:k12}
 @keyframes k13{0%{visibility:hidden}27.143%,100%{visibility:visible}}
 .m8{animation-name:k11,k13;animation-timing-function:cubic-bezier(.333,.007,.667,.17),steps(1)}
+@keyframes k14{0%,91.429%{opacity:1}98.571%,100%{opacity:0}}
+.m9{animation-name:k14}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-2.4s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="640" height="300" fill="var(--background)"/>
-  <g transform="translate(320 150)">
-    <g transform="translate(-284 -56)" class="a m1">
-      <rect x="0.75" y="0.75" width="154.5" height="110.5" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
-      <circle cx="19.5" cy="24.08" r="4" fill="var(--yellow)"/>
-      <text x="31.5" y="28.76" font-size="13" fill="var(--text)">Measure</text>
-      <text font-family="'Geist'" font-size="12.5" fill="var(--muted)"><tspan x="15.5" y="55.223">Every node has a box</tspan><tspan x="15.5" y="72.723">the compiler knows,</tspan><tspan x="15.5" y="90.223">its text included.</tspan></text>
+  <g class="a m9">
+    <g transform="translate(320 150)">
+      <g transform="translate(-284 -56)" class="a m1">
+        <rect x="0.75" y="0.75" width="154.5" height="110.5" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
+        <circle cx="19.5" cy="24.08" r="4" fill="var(--yellow)"/>
+        <text x="31.5" y="28.76" font-size="13" fill="var(--text)">Measure</text>
+        <text font-family="'Geist'" font-size="12.5" fill="var(--muted)"><tspan x="15.5" y="55.223">Every node has a box</tspan><tspan x="15.5" y="72.723">the compiler knows,</tspan><tspan x="15.5" y="90.223">its text included.</tspan></text>
+      </g>
+      <g transform="translate(-78 -56)" class="a m2">
+        <rect x="0.75" y="0.75" width="154.5" height="110.5" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
+        <circle cx="19.5" cy="24.08" r="4" fill="var(--green)"/>
+        <text x="31.5" y="28.76" font-size="13" fill="var(--text)">Place</text>
+        <text font-family="'Geist'" font-size="12.5" fill="var(--muted)"><tspan x="15.5" y="55.223">Stacks and grids put</tspan><tspan x="15.5" y="72.723">each box in its slot,</tspan><tspan x="15.5" y="90.223">wherever its origin is.</tspan></text>
+      </g>
+      <g transform="translate(128 -56)" class="a m3">
+        <rect x="0.75" y="0.75" width="154.5" height="110.5" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
+        <circle cx="19.5" cy="24.08" r="4" fill="var(--cyan)"/>
+        <text x="31.5" y="28.76" font-size="13" fill="var(--text)">Follow</text>
+        <text font-family="'Geist'" font-size="12.5" fill="var(--muted)"><tspan x="15.5" y="55.223">Arrows attach to</tspan><tspan x="15.5" y="72.723">edges and follow the</tspan><tspan x="15.5" y="90.223">node when it moves.</tspan></text>
+      </g>
     </g>
-    <g transform="translate(-78 -56)" class="a m2">
-      <rect x="0.75" y="0.75" width="154.5" height="110.5" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
-      <circle cx="19.5" cy="24.08" r="4" fill="var(--green)"/>
-      <text x="31.5" y="28.76" font-size="13" fill="var(--text)">Place</text>
-      <text font-family="'Geist'" font-size="12.5" fill="var(--muted)"><tspan x="15.5" y="55.223">Stacks and grids put</tspan><tspan x="15.5" y="72.723">each box in its slot,</tspan><tspan x="15.5" y="90.223">wherever its origin is.</tspan></text>
+    <line x1="198" y1="150" x2="236" y2="150" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <polyline points="-7.204 -3.48 0 0 -7.204 3.48" transform="translate(192 150)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m5"/>
+    <line x1="404" y1="150" x2="467.073" y2="150" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:398px 150px" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
+    <g style="transform-origin:398px 150px" class="a m8">
+      <polyline points="-7.204 -3.48 0 0 -7.204 3.48" transform="translate(398 150)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m7"/>
     </g>
-    <g transform="translate(128 -56)" class="a m3">
-      <rect x="0.75" y="0.75" width="154.5" height="110.5" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
-      <circle cx="19.5" cy="24.08" r="4" fill="var(--cyan)"/>
-      <text x="31.5" y="28.76" font-size="13" fill="var(--text)">Follow</text>
-      <text font-family="'Geist'" font-size="12.5" fill="var(--muted)"><tspan x="15.5" y="55.223">Arrows attach to</tspan><tspan x="15.5" y="72.723">edges and follow the</tspan><tspan x="15.5" y="90.223">node when it moves.</tspan></text>
-    </g>
-  </g>
-  <line x1="198" y1="150" x2="236" y2="150" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
-  <polyline points="-7.204 -3.48 0 0 -7.204 3.48" transform="translate(192 150)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m5"/>
-  <line x1="404" y1="150" x2="467.073" y2="150" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:398px 150px" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
-  <g style="transform-origin:398px 150px" class="a m8">
-    <polyline points="-7.204 -3.48 0 0 -7.204 3.48" transform="translate(398 150)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m7"/>
   </g>
   <text x="115.4" y="274.7" font-size="11" fill="var(--border)">each arrow is attached to two cards' edges, not to coordinates</text>
 </svg>

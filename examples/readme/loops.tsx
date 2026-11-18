@@ -1,4 +1,4 @@
-import { Group, Shape, arc, canvas, circle, enter, scene, span, spin, wiggle } from "svjeez";
+import { Group, Shape, arc, canvas, circle, enter, exit, scene, span, spin, wiggle } from "svjeez";
 import { theme } from "../theme";
 
 export default scene(
@@ -25,7 +25,11 @@ export default scene(
         at={[140, 60]}
         anchor="center"
         fill={theme.magenta}
-        motion={[enter(span(0, 0.6)), wiggle({ offset: [4, 4] }, { seed: "dot" })]}
+        motion={[
+          enter(span(0, 0.6)),
+          exit(span(3.4, 0.6)),
+          wiggle({ offset: [4, 4] }, { seed: "dot" }),
+        ]}
       />
     </Group>
   ),

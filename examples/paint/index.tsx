@@ -120,8 +120,14 @@ export default scene(
         geometry={card}
         at={corner(3)}
         fill={theme.green}
-        opacity={track(0).to(1, span(0.4, 1.2))}
-        effects={[blur(track(12).to(0, span(0.4, 1.6), ease.out))]}
+        opacity={track(0).to(1, span(0.4, 1.2)).set(0, 2)}
+        effects={[blur(track(12).to(1.5, span(0.4, 1.4), ease.out))]}
+      />
+      <Shape
+        geometry={card}
+        at={corner(3)}
+        fill={theme.green}
+        opacity={track(0).to(1, span(1.7, 0.3)).to(0, span(5.4, 0.6))}
       />
       <Label i={3}>blur-in</Label>
 
