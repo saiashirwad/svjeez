@@ -182,7 +182,7 @@ export const mixGeometry = (a: Geometry, b: Geometry, amount: number, where: str
 
       return { kind: "polygon", points: mixAll(a.points, b.points, u), closed: a.closed };
     case "path":
-      if (b.kind !== "path" || !same(a.contours, b.contours)) break;
+      if (b.kind !== "path" || a.rule !== b.rule || !same(a.contours, b.contours)) break;
 
       return {
         kind: "path",
@@ -199,8 +199,8 @@ export const mixGeometry = (a: Geometry, b: Geometry, amount: number, where: str
       };
   }
 
-  throw new SceneError(
-    `${where} blends a ${a.kind} into a ${b.kind} that has another structure. Lower geometry keys through matched() first.`,
+  throw new Error(
+    `${where} blends a ${a.kind} into a ${b.kind} of another structure, which lowering never writes. This is a bug in svjeez; please report it with the scene.`,
   );
 };
 

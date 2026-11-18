@@ -7,6 +7,7 @@ import {
   circle,
   ease,
   morph,
+  pathData,
   rect,
   scene,
   span,
@@ -14,7 +15,17 @@ import {
   type SceneElement,
   font,
 } from "svjeez";
-import { boxesOf, hitTest, isLane, svg, type Model } from "svjeez/tools";
+import {
+  boxesOf,
+  describe as describeScene,
+  hitTest,
+  inspect,
+  isLane,
+  svg,
+  valueAt,
+  type Model,
+} from "svjeez/tools";
+import { mixGeometry } from "../src/model/geometry";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
 import { jsx } from "svjeez/jsx-runtime";
 import { readFileSync } from "node:fs";
@@ -371,6 +382,78 @@ describe("morph", () => {
 
     expect(out).toContain('attributeName="d"');
     expect(out).toContain("@keyframes");
+  });
+});
+
+describe("different paths", () => {
+  const one = pathData("M0 0 C5 5 10 5 10 0 L10 10 Z");
+  const two = pathData("M0 0 L10 0 L10 10 Z M20 20 L30 20 L30 30 L20 30 Z");
+  const times = [0, 0.5, 1, 1.5, 2, 2.5, 3, 4];
+
+  const readers = (model: Model.Scene, key: string) => {
+    const node = shape(model, key);
+
+    for (const t of times) {
+      const drawn = valueAt(node.geometry, t, mixGeometry);
+
+      expect(drawn.kind).toBe("path");
+      expect(boxesOf(model, t)[key]!.width).toBeGreaterThan(0);
+    }
+
+    expect(() => describeScene(model, times)).not.toThrow();
+    expect(() => inspect(model)).not.toThrow();
+    expect(() => svg.emit(model)).not.toThrow();
+  };
+
+  test("a morph between two paths of other shapes blends at every time", () => {
+    readers(
+      made(() =>
+        morph(
+          <Shape key="a" geometry={one} fill="#ff0000" />,
+          <Shape key="a" geometry={two} fill="#0000ff" />,
+          span(1, 2),
+        ),
+      ),
+      "a",
+    );
+  });
+
+  test("a track through paths, a rect and a circle blends at every time, stepped too", () => {
+    readers(
+      made(() => (
+        <Shape
+          key="a"
+          geometry={track(rect(10, 10))
+            .to(two, span(0, 1))
+            .to(circle(5), span(1, 1), ease.steps(3))
+            .to(one, span(2, 1))}
+          fill="#ff0000"
+        />
+      )),
+      "a",
+    );
+  });
+
+  test("paths with other fill rules don't blend", () => {
+    const contours: Model.Contour[] = [
+      {
+        start: [0, 0],
+        curves: [
+          [
+            [1, 0],
+            [2, 0],
+            [3, 0],
+          ],
+        ],
+        closed: true,
+      },
+    ];
+
+    const nonzero: Model.Geometry = { kind: "path", rule: "nonzero", contours };
+
+    expect(() => mixGeometry(nonzero, { ...nonzero, rule: "evenodd" }, 0.5, "a")).toThrow(
+      "This is a bug in svjeez",
+    );
   });
 });
 
