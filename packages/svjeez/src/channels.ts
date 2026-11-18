@@ -143,6 +143,17 @@ export const CHANNELS = {
     attr: "d",
     backend: "smil",
   },
+  /**
+   * How far along its `offset-path` an element is, as a percent of the path's length: the scene model's curved
+   * motion. The path itself is a still style on the element.
+   */
+  offsetDistance: {
+    value: number,
+    tags: GRAPHICS,
+    lane: "offset-distance",
+    composition: "replace",
+    range: [0, 100],
+  },
   fill: { value: color, tags: PAINTED, lane: "fill", composition: "replace", attr: "fill" },
   stroke: { value: color, tags: PAINTED, lane: "stroke", composition: "replace", attr: "stroke" },
   color: {

@@ -4,6 +4,7 @@ import { checkWindow, span, type Span } from "../span";
 import { matched, mixGeometry } from "./geometry";
 import { isPlaced, placedLike } from "./identity";
 import type {
+  Lane,
   Animated,
   Geometry,
   GroupNode,
@@ -15,7 +16,7 @@ import type {
   TextNode,
   Vec,
 } from "./ir";
-import { isLane, mapLane, pair } from "./lane";
+import { isLane, pair } from "./lane";
 import { flat, type Child, type SceneElement } from "./nodes";
 import { ease, isSpring, type Curve } from "./spring";
 import { Passage, laneOf, mixNumber, mixVec, noMix, same, type Mix, type Timing } from "./steps";
@@ -322,9 +323,20 @@ const rebased = (entry: Entry, node: SceneNode, origin: Vec): readonly Layer[] =
 
     return {
       ...layer,
-      offset: isLane(layer.offset) ? mapLane(layer.offset, move) : move(layer.offset),
+      offset: isLane(layer.offset) ? shifted(layer.offset, move) : move(layer.offset),
     };
   });
+};
+
+/** A lane of points moved by `move`, a curve's controls with it. */
+const shifted = (lane: Lane<Vec>, move: (value: Vec) => Vec): Lane<Vec> => {
+  const [head, next, ...rest] = lane.keys.map((key) => ({
+    ...key,
+    value: move(key.value),
+    ...(key.via && { via: [move(key.via[0]), move(key.via[1])] as const }),
+  }));
+
+  return { ...lane, keys: [head!, next!, ...rest] };
 };
 
 const presence = (plan: Plan, entry: Entry, enter: Fixed, exit: Fixed): Layer | undefined => {

@@ -112,8 +112,9 @@ const animated = <A, T>(
   timing: Timing,
   mix: Mix<T>,
   where: string,
+  curves = false,
 ): Animated<T> => {
-  if (isDerived(value)) return derivedOf(value, change, timing, where);
+  if (isDerived(value)) return derivedOf(value, change, timing, where, curves);
 
   if (!isTrack(value)) return change(value);
   // SAFETY: a value that is not undefined is an A, and undefined is itself one when A allows it, so change() takes it either way.
@@ -177,7 +178,7 @@ const base = (props: Common, box: Box, key: string, timing: Timing) => {
     box,
     at: isAnchor(props.at)
       ? NOWHERE
-      : animated<Vec, Vec>(props.at ?? [0, 0], keep, timing, mixVec, `at on ${where}`),
+      : animated<Vec, Vec>(props.at ?? [0, 0], keep, timing, mixVec, `at on ${where}`, true),
     origin: originOf(props.origin, box),
     layers: [...layersOf(props.motion).map((layer) => layerOf(layer, timing, where)), own].filter(
       (layer) => !same(layer, IDLE),

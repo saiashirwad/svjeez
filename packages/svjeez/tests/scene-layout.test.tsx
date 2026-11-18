@@ -16,6 +16,7 @@ import {
   ease,
   isLane,
   motion,
+  placements,
   rect,
   ref,
   scene,
@@ -23,6 +24,7 @@ import {
   spin,
   svg,
   track,
+  valueAt,
   type Model,
   type SceneElement,
 } from "svjeez/scene";
@@ -72,9 +74,18 @@ const sampled =
 
 const lerp = (p: number, q: number, u: number): number => p + (q - p) * u;
 
-const at = sampled<Model.Vec>((a, b, u) => [lerp(a[0], b[0], u), lerp(a[1], b[1], u)]);
+/** A point lane read back as every backend draws it, curved keys included. */
+const at = (value: Model.Animated<Model.Vec>, t: number): Model.Vec =>
+  valueAt(value, t, (a, b, u): Model.Vec => [lerp(a[0], b[0], u), lerp(a[1], b[1], u)]);
 
 const angleAt = sampled<number>(lerp);
+
+/** Where a node's own origin is in the scene at `t`, through every layer: an arrow head's tip. */
+const tip = (model: Model.Scene, key: string, t: number): Model.Vec => {
+  const { matrix } = placements(model, t).find((placed) => placed.key === key)!;
+
+  return [matrix[4], matrix[5]];
+};
 
 describe("text", () => {
   test("one line is measured with the font, from ascent to descent", () => {
@@ -363,10 +374,17 @@ describe("anchors", () => {
 
     const pin = find(model, "pin").at;
 
-    for (const t of [0, 0.5, 1, 2.3, 3.7]) {
-      const [x, y] = at(pin, t);
+    // A turn is a curve: a few curved keys, not a polygon of straight ones.
+    expect(isLane(pin) && pin.keys.some((key) => key.via)).toBe(true);
+    expect(isLane(pin) && pin.keys.length).toBeLessThan(10);
 
-      expect(Math.hypot(x - 100, y - 50)).toBeCloseTo(30, 0);
+    for (let t = 0; t <= 4; t += 0.05) {
+      const [x, y] = at(pin, t);
+      const angle = (t / 4) * 2 * Math.PI;
+
+      expect(
+        Math.hypot(x - 100 - 30 * Math.cos(angle), y - 50 - 30 * Math.sin(angle)),
+      ).toBeLessThan(0.06);
     }
   });
 
@@ -463,8 +481,9 @@ describe("arrows", () => {
       (Math.atan2(60, 80) * 180) / Math.PI,
       1,
     );
-    const [x, y] = at(head.at, 4);
+    const [x, y] = tip(model, "link/head", 4);
 
+    expect(isLane(head.at)).toBe(false);
     expect(x).toBeCloseTo(100, 1);
     expect(y).toBeCloseTo(70, 1);
     expect(svg.emit(model)).toContain("<line");
@@ -495,6 +514,21 @@ describe("arrows", () => {
     });
   });
 
+  test("an arrow holds still while it is hidden, so an end that moves before it draws writes nothing", () => {
+    const model = made(() => (
+      <Group>
+        <Shape ref={a} geometry={rect(20, 20)} />
+        <Shape ref={b} geometry={rect(20, 20)} at={track([100, 0]).to([100, 60], span(0, 1))} />
+        <Arrow key="link" from={a.right} to={b.left} color="#000000" trim={draw(span(2, 1))} />
+      </Group>
+    ));
+
+    const shaft = find(model, "link/shaft");
+
+    expect(shaft.layers.every((layer) => !isLane(layer.rotate))).toBe(true);
+    expect(isLane(shaft.at)).toBe(false);
+  });
+
   test("the head rides a drawing shaft, hidden until it starts", () => {
     const model = made(() => (
       <Group>
@@ -515,7 +549,7 @@ describe("arrows", () => {
       [0, 0],
       [1, 1],
     ]);
-    expect(at(head.at, 1.5)[0]).toBeCloseTo(50, 1);
-    expect(at(head.at, 3)[0]).toBeCloseTo(100, 1);
+    expect(tip(model, "link/head", 1.5)[0]).toBeCloseTo(50, 1);
+    expect(tip(model, "link/head", 3)[0]).toBeCloseTo(100, 1);
   });
 });

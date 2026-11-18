@@ -48,51 +48,43 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 ]]></style>
   <rect width="640" height="280" fill="var(--background)"/>
   <rect x="48" y="236" width="512" height="1.5" fill="var(--border)"/>
-  <g>
-    <g transform="translate(64 40)">
-      <text x="0" y="0" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="14" fill="var(--text)" class="a m1">Revenue, Q1</text>
-      <text x="0" y="0" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="14" fill="var(--text)" class="a m2">Revenue, Q2</text>
-      <text x="0" y="0" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="14" fill="var(--text)" class="a m3">Revenue, Q3</text>
-      <text x="0" y="0" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="14" fill="var(--text)" class="a m4">Revenue, Q1</text>
-    </g>
-    <g style="transform-origin:96px 217.8px" class="a m6">
-      <rect width="64" height="96" rx="6" fill="var(--blue)" class="a m5 dm">
-        <animate attributeName="height" values="60;60;96;96;60" keyTimes="0;0.17949;0.33333;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" dur="7.8s" repeatCount="indefinite"/>
-      </rect>
-      <rect width="64" height="96" rx="6" fill="var(--blue)" class="a m5 ds" display="none"/>
-      <text x="78" y="256" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--muted)">north</text>
-    </g>
-    <g>
-      <rect width="64" height="86.996" rx="6" fill="var(--blue)" class="a m7 dm">
-        <animate attributeName="height" values="108;108;72;72;87;87;108" keyTimes="0;0.17949;0.33333;0.52821;0.64359;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" dur="7.8s" repeatCount="indefinite"/>
-      </rect>
-      <rect width="64" height="86.996" rx="6" fill="var(--blue)" class="a m7 ds" display="none"/>
-      <text x="-14.4" y="0" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--muted)" class="a m8">east</text>
-    </g>
-    <g>
-      <rect width="64" height="149.935" rx="6" fill="var(--blue)" class="a m9 dm">
-        <animate attributeName="height" values="82.5;82.5;135;135;150;150;82.5" keyTimes="0;0.17949;0.33333;0.5359;0.65128;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" dur="7.8s" repeatCount="indefinite"/>
-      </rect>
-      <rect width="64" height="149.935" rx="6" fill="var(--blue)" class="a m9 ds" display="none"/>
-      <text x="-18" y="0" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--muted)" class="a m10">south</text>
-    </g>
-    <g style="transform-origin:408px 225.3px" class="a m13">
-      <rect width="64" height="114" rx="6" fill="var(--cyan)" class="a m11 dm">
-        <animate id="w1" attributeName="height" values="45;114" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="4.24s;w1.begin+7.8s" dur="0.9s" fill="freeze" data-loop="7.8s"/>
-        <set attributeName="height" to="45" begin="0s;w1.begin+3.56s" dur="4.24s" fill="freeze" data-loop="7.8s"/>
-      </rect>
-      <rect width="64" height="113.001" rx="6" fill="var(--cyan)" class="a m11 ds" display="none"/>
-      <text x="-14.4" y="0" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--muted)" class="a m12">west</text>
-    </g>
-    <g>
-      <path d="M96 10c0 6.67 0 13.33 0 20c0 5.52 -4.48 10 -10 10c-25.33 0 -50.67 0 -76 0c-5.52 0 -10 -4.48 -10 -10c0 -6.67 0 -13.33 0 -20c0 -5.52 4.48 -10 10 -10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z" fill="var(--raised)" class="a m14 dm">
-        <animate attributeName="d" values="M14 0c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1c2.53 2.53 4.1 6.03 4.1 9.9z;M14 0c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1c2.53 2.53 4.1 6.03 4.1 9.9z;M96 10c0 6.67 0 13.33 0 20c0 5.52-4.48 10-10 10c-25.33 0-50.67 0-76 0c-5.52 0-10-4.48-10-10c0-6.67 0-13.33 0-20c0-5.52 4.48-10 10-10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z;M96 10c0 6.67 0 13.33 0 20c0 5.52-4.48 10-10 10c-25.33 0-50.67 0-76 0c-5.52 0-10-4.48-10-10c0-6.67 0-13.33 0-20c0-5.52 4.48-10 10-10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z;M9.9-9.9c2.53 2.53 4.1 6.03 4.1 9.9c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1z" keyTimes="0;0.17949;0.33333;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" dur="7.8s" repeatCount="indefinite"/>
-      </path>
-      <path d="M96 10c0 6.67 0 13.33 0 20c0 5.52 -4.48 10 -10 10c-25.33 0 -50.67 0 -76 0c-5.52 0 -10 -4.48 -10 -10c0 -6.67 0 -13.33 0 -20c0 -5.52 4.48 -10 10 -10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z" fill="var(--raised)" class="a m14 ds" display="none"/>
-      <g transform="translate(520 116)" style="transform-origin:520px 110.24px" class="a m13">
-        <text x="-19.2" y="0" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="16" fill="var(--text)" class="a m15">+18%</text>
-        <text x="-19.2" y="0" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="16" fill="var(--text)" class="a m16">+31%</text>
-      </g>
-    </g>
+  <g transform="translate(64 40)">
+    <text font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="14" fill="var(--text)" class="a m1">Revenue, Q1</text>
+    <text font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="14" fill="var(--text)" class="a m2">Revenue, Q2</text>
+    <text font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="14" fill="var(--text)" class="a m3">Revenue, Q3</text>
+    <text font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="14" fill="var(--text)" class="a m4">Revenue, Q1</text>
+  </g>
+  <g style="transform-origin:96px 217.8px" class="a m6">
+    <rect width="64" height="96" rx="6" fill="var(--blue)" class="a m5 dm">
+      <animate attributeName="height" values="60;60;96;96;60" keyTimes="0;0.17949;0.33333;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" dur="7.8s" repeatCount="indefinite"/>
+    </rect>
+    <rect width="64" height="96" rx="6" fill="var(--blue)" class="a m5 ds" display="none"/>
+    <text x="78" y="256" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--muted)">north</text>
+  </g>
+  <rect width="64" height="86.996" rx="6" fill="var(--blue)" class="a m7 dm">
+    <animate attributeName="height" values="108;108;72;72;87;87;108" keyTimes="0;0.17949;0.33333;0.52821;0.64359;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" dur="7.8s" repeatCount="indefinite"/>
+  </rect>
+  <rect width="64" height="86.996" rx="6" fill="var(--blue)" class="a m7 ds" display="none"/>
+  <text x="-14.4" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--muted)" class="a m8">east</text>
+  <rect width="64" height="149.935" rx="6" fill="var(--blue)" class="a m9 dm">
+    <animate attributeName="height" values="82.5;82.5;135;135;150;150;82.5" keyTimes="0;0.17949;0.33333;0.5359;0.65128;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" dur="7.8s" repeatCount="indefinite"/>
+  </rect>
+  <rect width="64" height="149.935" rx="6" fill="var(--blue)" class="a m9 ds" display="none"/>
+  <text x="-18" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--muted)" class="a m10">south</text>
+  <g style="transform-origin:408px 225.3px" class="a m13">
+    <rect width="64" height="114" rx="6" fill="var(--cyan)" class="a m11 dm">
+      <animate id="w1" attributeName="height" values="45;114" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="4.24s;w1.begin+7.8s" dur="0.9s" fill="freeze" data-loop="7.8s"/>
+      <set attributeName="height" to="45" begin="0s;w1.begin+3.56s" dur="4.24s" fill="freeze" data-loop="7.8s"/>
+    </rect>
+    <rect width="64" height="113.001" rx="6" fill="var(--cyan)" class="a m11 ds" display="none"/>
+    <text x="-14.4" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--muted)" class="a m12">west</text>
+  </g>
+  <path d="M96 10c0 6.67 0 13.33 0 20c0 5.52 -4.48 10 -10 10c-25.33 0 -50.67 0 -76 0c-5.52 0 -10 -4.48 -10 -10c0 -6.67 0 -13.33 0 -20c0 -5.52 4.48 -10 10 -10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z" fill="var(--raised)" class="a m14 dm">
+    <animate attributeName="d" values="M14 0c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1c2.53 2.53 4.1 6.03 4.1 9.9z;M14 0c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1c2.53 2.53 4.1 6.03 4.1 9.9z;M96 10c0 6.67 0 13.33 0 20c0 5.52-4.48 10-10 10c-25.33 0-50.67 0-76 0c-5.52 0-10-4.48-10-10c0-6.67 0-13.33 0-20c0-5.52 4.48-10 10-10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z;M96 10c0 6.67 0 13.33 0 20c0 5.52-4.48 10-10 10c-25.33 0-50.67 0-76 0c-5.52 0-10-4.48-10-10c0-6.67 0-13.33 0-20c0-5.52 4.48-10 10-10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z;M9.9-9.9c2.53 2.53 4.1 6.03 4.1 9.9c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1z" keyTimes="0;0.17949;0.33333;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" dur="7.8s" repeatCount="indefinite"/>
+  </path>
+  <path d="M96 10c0 6.67 0 13.33 0 20c0 5.52 -4.48 10 -10 10c-25.33 0 -50.67 0 -76 0c-5.52 0 -10 -4.48 -10 -10c0 -6.67 0 -13.33 0 -20c0 -5.52 4.48 -10 10 -10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z" fill="var(--raised)" class="a m14 ds" display="none"/>
+  <g transform="translate(520 116)" style="transform-origin:520px 110.24px" class="a m13">
+    <text x="-19.2" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="16" fill="var(--text)" class="a m15">+18%</text>
+    <text x="-19.2" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="16" fill="var(--text)" class="a m16">+31%</text>
   </g>
 </svg>

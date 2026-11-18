@@ -75,6 +75,14 @@ export interface Key<T> {
   readonly value: T;
   /** Shapes the way from the key before to this one. `ease.hold` is a cut at `t`. The first key has none. */
   readonly ease?: Ease;
+  /**
+   * Only in a lane of points (`at` or a layer's `offset`), and never on a cut: the way from the key before to this
+   * one is the cubic Bézier from that key's value through these two control points to this one, not a straight line.
+   * The ease shapes the share of the curve's length covered, as it shapes the share of a straight line's, so the
+   * point keeps to the curve. In a lane with a curve, every ease stays between 0 and 1, so no point leaves its own
+   * key's curve. Lowering writes curves where they take fewer keys than lines; authors never do.
+   */
+  readonly via?: readonly [control1: Vec, control2: Vec];
 }
 
 export type Animated<T> = T | Lane<T>;

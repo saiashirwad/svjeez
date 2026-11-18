@@ -24,6 +24,7 @@ import type {
   ShapeNode,
   Vec,
 } from "./ir";
+import { curveLength, isCurved } from "./curve";
 import { labelled } from "./identity";
 import { isLane } from "./lane";
 import { onCircle } from "./values";
@@ -63,6 +64,7 @@ const supports: Readonly<Record<Feature, Support>> = {
   radialGradient: NONE,
   nonScalingStroke: EXACT,
   liveTokens: EXACT,
+  curvedMotion: EXACT,
 };
 
 interface Ctx {
@@ -275,6 +277,7 @@ const held = <T>(lane: Lane<T>, duration: number, values: (value: T) => TargetVa
 };
 
 type Slot =
+  | "offset-distance"
   | "translate"
   | "rotate"
   | "scale"
@@ -346,10 +349,12 @@ const open = (shells: Shell[], slot: Slot): Shell => {
   const rank = RANK[slot];
   let current = shells.at(-1)!;
 
+  // A motion path's element (see `along`) takes nothing that turns or scales: its own scale is fixed.
   if (
     current.origin !== undefined ||
     current.taken.has(slot) ||
-    (rank !== undefined && rank >= current.rank)
+    (rank !== undefined && rank >= current.rank) ||
+    ((slot === "rotate" || slot === "scale") && current.taken.has("offset-distance"))
   ) {
     current = shell();
     shells.push(current);
@@ -400,8 +405,90 @@ const place = (ctx: Ctx, shells: Shell[], layer: Layer, cuts: boolean): void => 
   else if (opacity !== 1) open(shells, "opacity").opacity = opacity;
 };
 
+/**
+ * How much larger a motion path is written than it is drawn. Chromium walks a path by straight pieces that stray up to
+ * half a unit of its coordinates, about 0.15px on our examples; written this much larger inside a wrapper scaled this
+ * much smaller, that is a hundredth of a pixel, as in Firefox and WebKit.
+ */
+const PATH_SCALE = 16;
+
+/**
+ * A lane with curved keys as a CSS motion path: the keys joined into one path, a line for a straight key and a cubic
+ * for a curved one (a cut crosses a line it never shows), and `offset-distance` keyframed to each key's share of the
+ * path's length. The lane's eases run on those shares unchanged, which is what `Key.via` means: each ease shapes the
+ * share of its own piece's length covered. The percent is of the whole path, so each engine's measure of the length
+ * cancels out, and `offset-rotate` keeps the element upright.
+ *
+ * The path moves an element by its transform-origin, after its own translate, rotate and scale, so it gets an element
+ * that turns and scales nothing else: a wrapper scaled down by `PATH_SCALE`, its path written that much larger, around
+ * content scaled back up as the outermost thing it does.
+ */
+const along = (ctx: Ctx, shells: Shell[], lane: Lane<Vec>): void => {
+  const [first, ...rest] = lane.keys;
+  const big = ([x, y]: Vec): string => `${num(x * PATH_SCALE, 1)} ${num(y * PATH_SCALE, 1)}`;
+  const lengths = [0];
+  let d = `M${big(first.value)}`;
+
+  rest.forEach((key, i) => {
+    const from = lane.keys[i]!.value;
+    const hold = key.ease?.kind === "steps";
+
+    const length =
+      key.via && !hold
+        ? curveLength(from, key.via, key.value)
+        : Math.hypot(key.value[0] - from[0], key.value[1] - from[1]);
+
+    if (key.via && !hold) d += `C${big(key.via[0])} ${big(key.via[1])} ${big(key.value)}`;
+    else if (length > 0) d += `L${big(key.value)}`;
+    lengths.push(lengths[i]! + length);
+
+    if (
+      key.ease?.kind === "bezier" &&
+      key.ease.points.some((value, c) => c % 2 === 1 && (value < 0 || value > 1))
+    )
+      throw new Error(
+        `A curved lane reached the SVG backend with an ease that leaves 0 to 1 at ${num(key.t)}s, which a motion path can't draw: lowering writes curves only with eases inside it.`,
+      );
+  });
+
+  const total = lengths.at(-1)!;
+
+  const [head, next, ...others] = lane.keys.map((key, i) => ({
+    t: key.t,
+    value: total > 0 ? (lengths[i]! / total) * 100 : 0,
+    ...(key.ease && { ease: key.ease }),
+  }));
+
+  const inner = shells.at(-1)!;
+  const transforms: readonly Slot[] = ["translate", "rotate", "scale"];
+  const bare = transforms.every((slot) => !inner.taken.has(slot));
+
+  const holder = bare && !inner.pivots && inner.origin === undefined ? inner : shell();
+
+  if (holder !== inner) shells.push(holder);
+  holder.style.push(`scale:${PATH_SCALE}`);
+  holder.taken.add("scale");
+
+  const own = shell();
+
+  shells.push(own);
+  own.taken.add("offset-distance");
+  own.taken.add("scale");
+  own.style.push(
+    `scale:${num(1 / PATH_SCALE, 4).replace(/^0\./, ".")}`,
+    `offset-path:path('${d}')`,
+    "offset-rotate:0deg",
+  );
+  own.lanes.push(
+    cssLane(ctx, "offset-distance", { ...lane, keys: [head!, next!, ...others] }, (value) => ({
+      offsetDistance: value,
+    })),
+  );
+};
+
 const travel = (ctx: Ctx, shells: Shell[], by: Animated<Vec>): void => {
-  if (isLane(by))
+  if (isLane(by) && isCurved(by.keys)) along(ctx, shells, by);
+  else if (isLane(by))
     open(shells, "translate").lanes.push(cssLane(ctx, "translate", by, ([x, y]) => ({ x, y })));
   else if (by[0] !== 0 || by[1] !== 0)
     open(shells, "translate").style.push(`translate:${num(by[0])}px ${num(by[1])}px`);
@@ -621,7 +708,11 @@ const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
     case "text": {
       // Every line is placed where layout put it, so no browser anchors or wraps it.
       const [line, ...more] = node.lines;
-      const where = (point: Vec) => ({ x: num(at[0] + point[0]), y: num(at[1] + point[1]) });
+
+      const where = ([px, py]: Vec) => ({
+        ...(at[0] + px !== 0 && { x: num(at[0] + px) }),
+        ...(at[1] + py !== 0 && { y: num(at[1] + py) }),
+      });
 
       drawn = {
         tag: "text",
@@ -719,7 +810,17 @@ const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
     first,
   );
 
-  return ctx.sources ? labelled(node, out) : out;
+  if (ctx.sources) return labelled(node, out);
+
+  // A group with nothing of its own (no placement, opacity or lanes) changes nothing it holds: paint order, paint and
+  // place are all the parent's. Its children stand in its place, so a layout container costs no element.
+  return node.kind === "group" &&
+    out.kind === "element" &&
+    out.tag === "g" &&
+    out.lanes === undefined &&
+    Object.keys(out.attrs).length === 0
+    ? { kind: "fragment", children: out.children }
+    : out;
 };
 
 const tokenCss = (scene: Scene, prefix: string): string => {
