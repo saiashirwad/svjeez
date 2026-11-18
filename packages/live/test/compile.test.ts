@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { validateSvg } from "svjeez/frames";
+import { Group, scene } from "svjeez/scene";
+import { jsx } from "svjeez/scene/jsx-runtime";
 import { compileBuild, compileScene } from "../src/compile";
 import { errorFixes, errorTable, FIXES, fixFor } from "../src/fixes";
 import generated from "../src/skill-errors";
@@ -46,6 +48,24 @@ describe("compileScene", () => {
     expect(result.ok && result.svg).toContain("Topology");
   });
 
+  test("a scene model compiles under its file's @jsxImportSource, and reports its size", async () => {
+    const result = await compileScene(
+      `/** @jsxImportSource svjeez/scene */\nimport { Shape, circle, enter, rect, scene, span } from "svjeez/scene";\n\nexport default scene({ size: [200, 120], duration: 4, title: "Hello" }, () => (\n  <>\n    <Shape geometry={rect(200, 120)} fill="#101010" />\n    <Shape geometry={circle(8)} at={[100, 40]} fill="#3EE6D6" motion={enter(span(1.2, 0.5), { scale: 0 })} />\n  </>\n));\n`,
+    );
+
+    if (!result.ok) throw new Error(result.error.message);
+    expect(validateSvg(result.svg).errors).toEqual([]);
+    expect(result.svg).toContain('<title id="t">Hello</title>');
+    expect(result.scene).toEqual({ width: 200, height: 120, duration: 4, title: "Hello" });
+    expect(result.stats.keyframes).toBeGreaterThan(0);
+  });
+
+  test("a default export that is neither a scene nor a function says what to write", async () => {
+    const result = await compileScene("export default 42;");
+
+    expect(result.ok ? undefined : result.error.message).toContain("export default scene(");
+  });
+
   test("a syntax error reports line and column", async () => {
     const result = await compileScene("const a = 1;\nconst b = ;\nexport default () => a;");
 
@@ -73,6 +93,11 @@ describe("compileScene", () => {
 
   test("compileBuild measures what a build returns, or reports what it throws", async () => {
     expect(await compileBuild(() => "<svg/>")).toMatchObject({ ok: true, stats: { bytes: 6 } });
+    expect(
+      await compileBuild(() =>
+        scene({ size: [10, 20], duration: 1, title: "x" }, () => jsx(Group, {})),
+      ),
+    ).toMatchObject({ ok: true, scene: { width: 10, height: 20, duration: 1, title: "x" } });
     expect(
       await compileBuild(() => {
         throw new Error("nope");

@@ -1,9 +1,11 @@
 import { createHash } from "node:crypto";
 import { gzipSync } from "node:zlib";
+import { isScene, svg as backend, type Scene } from "svjeez/scene";
 import { register, ROUTE } from "./assets.ts";
 import { poster, type PosterOptions, type Scheme } from "./posters.ts";
 
-export type SceneSource = string | (() => string);
+/** A scene's default export: a scene from `svjeez/scene`, an SVG string, or a function that returns either. */
+export type SceneSource = string | Scene | (() => string | Scene);
 
 export interface SceneImage {
   readonly src: string;
@@ -26,15 +28,17 @@ const unescape = (text: string) =>
     .replace(/&apos;/g, "'")
     .replace(/&amp;/g, "&");
 
-const compiled = new WeakMap<() => string, string>();
+const compiled = new WeakMap<object, string>();
 
 const isSvgText = (scene: SceneSource): scene is string => typeof scene === "string";
+
+const emit = (made: string | Scene) => (isSvgText(made) ? made : backend.emit(made));
 
 const compile = (scene: SceneSource) => {
   if (isSvgText(scene)) return scene;
   let svg = compiled.get(scene);
 
-  if (svg === undefined) compiled.set(scene, (svg = scene()));
+  if (svg === undefined) compiled.set(scene, (svg = emit(isScene(scene) ? scene : scene())));
 
   return svg;
 };

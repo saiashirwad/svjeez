@@ -4,6 +4,9 @@ import * as jsxDevRuntime from "svjeez/jsx-dev-runtime";
 import * as jsxRuntime from "svjeez/jsx-runtime";
 import * as geometry from "svjeez/geometry";
 import * as params from "svjeez/params";
+import * as sceneModel from "svjeez/scene";
+import * as sceneJsxDevRuntime from "svjeez/scene/jsx-dev-runtime";
+import * as sceneJsxRuntime from "svjeez/scene/jsx-runtime";
 import type { Point } from "svjeez";
 import type { Schema } from "svjeez/params";
 import { fixFor } from "./fixes.ts";
@@ -16,6 +19,9 @@ const modules = new Map<string, object>([
   ["svjeez/jsx-dev-runtime", jsxDevRuntime],
   ["svjeez/geometry", geometry],
   ["svjeez/params", params],
+  ["svjeez/scene", sceneModel],
+  ["svjeez/scene/jsx-runtime", sceneJsxRuntime],
+  ["svjeez/scene/jsx-dev-runtime", sceneJsxDevRuntime],
 ]);
 
 interface SceneModule {
@@ -119,7 +125,9 @@ const requireModule = (name: string): object => {
   return found;
 };
 
-const isBuild = (value: unknown): value is () => string => typeof value === "function";
+const isBuild = (value: unknown): value is () => string | sceneModel.Scene =>
+  typeof value === "function";
+
 const isText = (value: unknown): value is string => typeof value === "string";
 
 const parseSyntax = (error: Error): SourceError => {
@@ -178,6 +186,20 @@ const handlesOf = (schema: Schema, handles: params.Handles<Schema>) => {
   );
 };
 
+/** The comments before a file's first statement, where a `@jsxImportSource` pragma goes. */
+const LEADING = /^(?:\s*(?:\/\/[^\n]*|\/\*[\s\S]*?\*\/))*/;
+
+/** Sucrase reads no pragma comments, so a file's `@jsxImportSource` is found here and handed to it. */
+const importSourceOf = (source: string): string =>
+  /@jsxImportSource\s+([^\s*]+)/.exec(LEADING.exec(source)?.[0] ?? "")?.[1] ?? "svjeez";
+
+const sizeOf = (scene: sceneModel.Scene): SceneSize => ({
+  width: scene.size[0],
+  height: scene.size[1],
+  duration: scene.duration,
+  title: scene.title,
+});
+
 interface Built extends Declared {
   readonly svg: string;
   readonly scene?: SceneSize;
@@ -187,7 +209,7 @@ const run = async (source: string, sources: boolean): Promise<Built> => {
   const { code } = transform(source, {
     transforms: ["typescript", "jsx", "imports"],
     jsxRuntime: "automatic",
-    jsxImportSource: "svjeez",
+    jsxImportSource: importSourceOf(source),
     production: !sources,
   });
 
@@ -214,13 +236,17 @@ const run = async (source: string, sources: boolean): Promise<Built> => {
     exports,
   );
 
-  if (!isBuild(exports.default))
-    throw new Error(
-      "The scene needs a default export: export default function build(): string { return render(...) }",
-    );
-  const svg: unknown = exports.default();
+  const made: unknown = isBuild(exports.default) ? exports.default() : exports.default;
 
-  if (!isText(svg)) throw new Error("build() should return the string from render().");
+  if (sceneModel.isScene(made)) scene = sizeOf(made);
+  const svg: unknown = sceneModel.isScene(made) ? sceneModel.svg.emit(made) : made;
+
+  if (!isText(svg))
+    throw new Error(
+      isBuild(exports.default)
+        ? "The default export should return a scene from scene(), or the string from render()."
+        : "The scene needs a default export: export default scene({ ... }, () => ...), or a function that returns the string from render().",
+    );
   const declared = isSchema(exports.params) ? exports.params : undefined;
 
   return {
@@ -264,5 +290,11 @@ export const compileScene = (source: string, { sources = false } = {}): Promise<
   outcome(() => run(source, sources));
 
 /** For a page that ships its scene as code instead of source text: calls `build` and measures what it returns. */
-export const compileBuild = (build: () => string): Promise<Compiled> =>
-  outcome(async () => ({ svg: build() }));
+export const compileBuild = (build: () => string | sceneModel.Scene): Promise<Compiled> =>
+  outcome(async () => {
+    const made = build();
+
+    return sceneModel.isScene(made)
+      ? { svg: sceneModel.svg.emit(made), scene: sizeOf(made) }
+      : { svg: made };
+  });

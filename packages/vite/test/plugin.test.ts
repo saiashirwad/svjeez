@@ -2,6 +2,8 @@ import { afterAll, expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { build, createServer, type HotPayload } from "vite";
+import { Group, scene } from "svjeez/scene";
+import { jsx } from "svjeez/scene/jsx-runtime";
 import { getScene } from "../src/scene.ts";
 import { appConfig } from "./app/config.ts";
 
@@ -99,6 +101,48 @@ export default () => render({ width: ${size}, height: 100, duration: 1, title: l
     await server.close();
   }
 }, 60_000);
+
+test("a scene model default export, under its file's @jsxImportSource, is served as its SVG", async () => {
+  const dir = join(scratch, "model");
+  mkdirSync(dir);
+  writeFileSync(join(dir, "main.ts"), `export { default } from "./scene.tsx?svjeez";`);
+  writeFileSync(
+    join(dir, "scene.tsx"),
+    `/** @jsxImportSource svjeez/scene */
+import { Shape, circle, rect, scene } from "svjeez/scene";
+export default scene({ size: [120, 80], duration: 1, title: "Model" }, () => (
+  <>
+    <Shape geometry={rect(120, 80)} fill="#101010" />
+    <Shape geometry={circle(10)} at={[60, 40]} fill="#3EE6D6" />
+  </>
+));`,
+  );
+
+  const server = await createServer({
+    ...appConfig(dir),
+    server: { port: 0, fs: { allow: [join(import.meta.dirname, "../..")] } },
+  });
+
+  try {
+    await server.listen();
+    const origin = server.resolvedUrls!.local[0]!.replace(/\/$/, "");
+    const main = await (await fetch(`${origin}/main.ts`)).text();
+    const module = await (await fetch(origin + /from "([^"]+[?&]svjeez)"/.exec(main)![1]!)).text();
+    expect(module).toContain(`"title": "Model"`);
+    expect(module).toContain(`"width": 120`);
+    const src = /"src":\s*"([^"]+)"/.exec(module)![1]!;
+    expect(await (await fetch(origin + src)).text()).toContain('<circle cx="60" cy="40" r="10"');
+  } finally {
+    await server.close();
+  }
+}, 60_000);
+
+test("getScene() takes a scene model, or a function that returns one", () => {
+  const model = scene({ size: [30, 20], duration: 1, title: "Made" }, () => jsx(Group, {}));
+
+  expect(getScene(model)).toMatchObject({ width: 30, height: 20, title: "Made" });
+  expect(getScene(() => model).svg).toBe(getScene(model).svg);
+});
 
 test("a scene imports a CommonJS package when the server environment bundles everything", async () => {
   const dir = join(scratch, "bundled");
