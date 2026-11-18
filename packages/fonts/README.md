@@ -17,7 +17,7 @@ const mono = await google("JetBrains Mono", {
 const body = await google.family("Geist", [{ weight: 400 }, { weight: 600 }]);
 ```
 
-Pass a font to svjeez text, `Glyphs` or a component that accepts `font`. Weight defaults to 400 and style to normal. `google.family()` groups faces so text can choose a weight or style.
+Pass a font to `<Text font={…}>`. Weight defaults to 400 and style to normal. `google.family()` groups faces so a `<Text>` or `<Run>` can choose a weight or style.
 
 A build downloads a face on cache miss. Set `SVJEEZ_FONTS_CACHE` to share a cache in CI. It otherwise uses `$XDG_CACHE_HOME/svjeez/fonts` or `~/.cache/svjeez/fonts`.
 

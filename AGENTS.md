@@ -19,7 +19,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 
 Run `bun install` once at the root. From the root, `bun run typecheck` and `bun run test` run every workspace's script, `bun run build:examples` rebuilds `examples/dist/`, and `bun run typecheck` also checks `scripts/` through the root `tsconfig.json`. Every other command runs inside its workspace.
 
-The workspace packages depend on `svjeez` through `workspace:*`. Its exports carry an `@svjeez/source` condition that points at `src/`. The plugins' tests turn that condition on, so they run the library's source and never need `package-dist/`.
+The workspace packages depend on `svjeez` through `workspace:*` in development and `workspace:^` as a peer, which the published manifest turns into `^` of the current version, so a prerelease such as `0.8.0-next.0` satisfies it. Its exports carry an `@svjeez/source` condition that points at `src/`. The plugins' tests turn that condition on, so they run the library's source and never need `package-dist/`.
 
 Every other package points its exports at TypeScript source in the workspace, because Astro loads a config's integrations without the `@svjeez/source` condition. In each, `bun run build:package` writes `package-dist/` with the package.json that npm publishes, and `bun run test:package` installs the packed tarball into a copy of `test/consumer/` and checks it on plain Node. Both use the scripts in the root `scripts/` folder. Packages with a third-party dependency stay out of `svjeez` so the core keeps none.
 
@@ -46,10 +46,12 @@ Frame rendering needs Chromium once per machine: `bunx playwright-core install c
 
 Paths in this section are relative to `packages/svjeez/`.
 
-- `src/` holds the core: `motion.ts` (timeline), `span.ts` and `clip.ts` (spans, and `<Clip>`, a clock of its own), `recipes.ts`, `channels.ts` (the channel table), `keys.ts` (keyframe math, including cutting and rotating keys), `resolve.ts` (a lane's `.repeat` and `.rewind` steps written out), `css.ts` and `smil.ts` (emit CSS and SMIL), `compile.ts` and `render.ts` (orchestrate them; compile adds a clip's offset to every motion inside it, so the output stays on one clock), `validate.ts`.
-- `src/extras/` holds timeline, code, terminal, annotations and themes, all exported from the root `svjeez` entry.
-- `src/layout/` holds pure layout math. It imports nothing outside `src/layout`, and a test enforces this.
-- `src/cli.ts` is the `svjeez` CLI, and `src/dev.ts` its `dev` server (node:http and fs.watch, no dependencies). `src/frames.ts` and `src/cli.ts` rasterize frames. They and `src/page.ts`, the functions they run inside the page, are the only code that touches a browser.
+- The entries: `src/index.ts` is `svjeez`, what a scene imports. `src/tools.ts` is `svjeez/tools`, what tools need and authors don't: the SVG backend (`svg.emit`), `inspect`, `describe`, `boxesOf`, `hitTest`, `placements`, `valueAt` and every type. `src/jsx-runtime.ts` and `src/jsx-dev-runtime.ts` build scene nodes; there are no lowercase tags. `frames.ts`, `page.ts` and `params.ts` are `svjeez/frames`, `svjeez/page` and `svjeez/params`.
+- `src/scene/` is the scene model. `nodes.ts` has the components, `values.ts`, `paint.ts` and `effects.ts` the geometry and paint values, `track.ts`, `recipes.ts`, `timeline.ts`, `spring.ts`, `morph.ts` and `derived.ts` time, and `layout.ts`, `arrow.ts`, `refs.ts` and `pin.ts` placement. `lower.ts` turns `scene(options, build)` into the model in `ir.ts`, where every node keeps its key, its source and its measured box. `svg.ts`, `svg-geometry.ts` and `svg-paint.ts` are the SVG backend: they turn the model into elements with lanes.
+- The emitter under `src/` writes what the backend hands it: `compile.ts` turns each element's lanes into CSS classes and keyframes (`css.ts`) or SMIL (`smil.ts`), resolves fonts and writes the reduced-motion still; `keys.ts` is keyframe math, `channels.ts` the values a lane carries, `svg.ts` the element tree and its serializer, and `render.ts` the root, validation (`validate.ts`) and the trace the CLI reads. `time.ts` has `Seconds` and `ease`. `render()` is internal: authors call `svg.emit`.
+- `src/font/` parses, measures, shapes and subsets fonts. `src/layout/box.ts` is the `Point` that `svjeez/params` uses.
+- `src/cli.ts` is the `svjeez` CLI, and `src/dev.ts` its `dev` server (node:http and fs.watch, no dependencies). `src/check.ts` and `src/check-page.ts` are `svjeez check`, and `src/restyle.ts` is `restyle` in `svjeez/page`. `src/frames.ts` and `src/cli.ts` rasterize frames. They and `src/page.ts`, the functions they run inside the page, are the only code that touches a browser.
+- Nothing under `src/` is unreachable from the entries. When a feature goes, its emitter path goes with it.
 - `skills/svjeez/` holds the scene-writing skill, its references and its examples, published with the package. `tests/skill.test.ts` renders the examples, checks that every `examples/` and `references/` path the skill mentions exists, and checks that every runtime error in the error table appears in `src/`. Quote an error there with `…` for each value the message fills in. The examples carry their own JSX pragmas so they compile wherever `svjeez skill --install` puts them.
 
 ## Packages
@@ -62,15 +64,17 @@ Each package's source explains its own internals. These are the rules that aren'
 
 ## Rules
 
-- Import `svjeez`, `svjeez/frames`, `svjeez/page` and `svjeez/params`. Scenes, examples, packages and docs write JSX, or call `jsx` from `svjeez/jsx-runtime`. `restyle` is in `svjeez/page` and `validateSvg` in `svjeez/frames`. In `packages/svjeez/` the tsconfig maps them to `src/`.
+- Import `svjeez`, `svjeez/tools`, `svjeez/frames`, `svjeez/page` and `svjeez/params`. Scenes, examples, packages and docs write JSX with `"jsxImportSource": "svjeez"`, or call `jsx` from `svjeez/jsx-runtime`. `restyle` is in `svjeez/page` and `validateSvg` in `svjeez/frames`. In `packages/svjeez/` the tsconfig maps them to `src/`.
 - Keep the library dependency-free and runnable on Node 20. Don't use APIs newer than Node 20, such as `Map.groupBy` or `Set.prototype.union`. `bun run test:node` under Node 20 catches these.
 - Don't change the behavior of an existing public function without being asked.
 - After changing an example or the compiler, rebuild the affected `examples/dist/` files and commit them with the change.
 - Keep the library free of Astro. Astro code belongs in `packages/astro/`.
 - Example scenes take `theme` and `mono` from `examples/theme.ts`, so they share one palette and one embedded mono font.
-- Time is spans on clocks: write `show`, `<Clip>` and `{ at, over }`, never absolute seconds inside a component. `frames`, `restyle` and `seek` take scene seconds, so `render` writes `data-playback-rate` on the root and they read it.
+- Time is spans on clocks: write `span(start, over)`, tracks, timelines and `<Sequence>`, never absolute seconds worked out inside a component. `frames`, `restyle` and `seek` take scene seconds, so the backend writes `data-playback-rate` on the root and they read it.
 - Check visual changes with `bun run svjeez check <file>`, which reports layout and timing faults as text, then by looking at frames: run `bun run render-png <file> --sheet` and open `sheet.png`. Passing tests don't show timing or layout bugs.
-- A package that lays something out returns a `Drawn` (`src/drawn.ts`): `node`, `span`, `bounds`, `parts` and `part(id)`, where each part has a `box` and its own `span`. Don't add another name for the same thing.
+- Keep what an editor needs: every node's key, source and measured box, `boxesOf`, `hitTest`, `placements`, `valueAt`, `inspect` and `describe` with their tests, and the backend's `sources` option (`data-key` and `data-source`). The live editor will be rebuilt on them.
+- Every target means the same thing: a scene draws the same picture through CSS, SMIL and the reduced-motion still, and a backend that can't draw something says so, never silently differs. Don't raise the budgets in `examples/tests/scene-size.test.ts`; prove visual changes with frames.
+- No message an author sees names SVG or CSS internals: say what to change in the scene, in its own words.
 
 ## Releasing
 
@@ -81,7 +85,7 @@ Each package's source explains its own internals. These are the rules that aren'
 Every package shares one version. To release, bump them together and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-for p in svjeez vite astro fonts video; do (cd packages/$p && bun pm version minor --no-git-tag-version); done   # or patch, major, prerelease --preid beta
+for p in svjeez vite astro fonts video; do (cd packages/$p && bun pm version prerelease --preid next --no-git-tag-version); done   # on next; main uses minor, patch or major
 bun install && bun run build:examples && git add -A examples && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 

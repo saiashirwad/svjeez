@@ -26,7 +26,7 @@
     },
     "packages/astro": {
       "name": "@svjeez/astro",
-      "version": "0.7.1",
+      "version": "0.8.0-next.0",
       "dependencies": {
         "@svjeez/vite": "workspace:*",
       },
@@ -40,7 +40,7 @@
     },
     "packages/fonts": {
       "name": "@svjeez/fonts",
-      "version": "0.7.1",
+      "version": "0.8.0-next.0",
       "devDependencies": {
         "@types/bun": "latest",
         "svjeez": "workspace:*",
@@ -52,7 +52,7 @@
     },
     "packages/svjeez": {
       "name": "svjeez",
-      "version": "0.7.1",
+      "version": "0.8.0-next.0",
       "bin": {
         "svjeez": "./package-dist/cli.js",
       },
@@ -76,7 +76,7 @@
     },
     "packages/video": {
       "name": "@svjeez/video",
-      "version": "0.7.1",
+      "version": "0.8.0-next.0",
       "dependencies": {
         "mediabunny": "1.63.0",
       },
@@ -93,7 +93,7 @@
     },
     "packages/vite": {
       "name": "@svjeez/vite",
-      "version": "0.7.1",
+      "version": "0.8.0-next.0",
       "devDependencies": {
         "@types/bun": "latest",
         "@types/react": "^19.0.0",

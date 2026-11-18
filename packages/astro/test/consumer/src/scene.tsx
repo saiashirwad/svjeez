@@ -1,3 +1,5 @@
+// Astro also imports this file outside the ?svjeez environment, with React's JSX by default.
+/** @jsxImportSource svjeez */
 import { Shape, circle, ease, enter, scene, span } from "svjeez";
 
 export default scene({ size: [320, 120], duration: 2, title: "Hello" }, () => (
