@@ -31,11 +31,11 @@ A name that is a reserved word or starts with a digit gets an `icon` prefix, as 
 | `size` | the side of its grid square in px; the grid (24 for both sets) if left out |
 | `width` | outline icons only: the stroke width in the icon's own grid units, 2 if left out. It scales with `size`, so a 48px icon strokes at 4px. |
 | `trim` | outline icons only: a `draw()` or a track of `[from, to]`, or `(piece, pieces) => track` to give each piece its own |
-| `shared` | draw the icon once for every shared `<Icon>` with the same icon, color and width, and place it many times |
+| `shared` | draw the icon once for every shared `<Icon>` with the same icon, color, width and size, and place it many times |
 
 ## Placing
 
-An icon's box is what it paints, like every node's, so `at` places the drawn glyph, not the 24-unit square around it, and glyphs of different shapes differ in size. To line icons up in a row or a grid, wrap each in a `<Center width={…} height={…}>` of one size, or place them by `anchor="center"`.
+An icon's box is what it paints at its `size`, like every node's, so `at` and `anchor` place the drawn glyph, not the 24-unit square around it, and a `<Stack>` or `<Grid>` lays out the size it is drawn at. Glyphs of different shapes differ in size: to line icons up in a row or a grid, wrap each in a `<Center width={…} height={…}>` of one size.
 
 ## Animating
 

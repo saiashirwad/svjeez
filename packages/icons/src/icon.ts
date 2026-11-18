@@ -1,6 +1,6 @@
 import { Group, Instance, Shape, pathData, symbol } from "svjeez";
-import type { Anim, Paint, SceneElement, Vec } from "svjeez";
-import { SceneError, type Color, type Common, type SceneSymbol } from "svjeez/tools";
+import type { Anim, Geometry, Paint, SceneElement, Vec } from "svjeez";
+import { SceneError, type Color, type Common, type Model, type SceneSymbol } from "svjeez/tools";
 
 export interface IconData {
   readonly grid: number;
@@ -98,19 +98,37 @@ const check = (icon: IconData, size: number, props: IconProps): void => {
     );
 };
 
-const shares = new WeakMap<IconData, Map<Color, Map<number, SceneSymbol>>>();
+const shares = new WeakMap<IconData, Map<Color, Map<string, SceneSymbol>>>();
+
+const isOutline = (geometry: Geometry): geometry is Model.Geometry => "kind" in geometry;
+
+const scaled = (d: string, by: number): Geometry => {
+  const geometry = pathData(d);
+
+  if (by === 1 || !isOutline(geometry) || geometry.kind !== "path") return geometry;
+  const grow = ([x, y]: Vec): Vec => [x * by, y * by];
+
+  return {
+    ...geometry,
+    contours: geometry.contours.map((contour) => ({
+      ...contour,
+      start: grow(contour.start),
+      curves: contour.curves.map(([a, b, to]): Model.Cubic => [grow(a), grow(b), grow(to)]),
+    })),
+  };
+};
 
 const piece = (
   icon: IconData,
-  d: string,
   index: number,
   color: Anim<Paint>,
   width: number,
+  by: number,
   trim: Anim<Vec> | undefined,
 ): SceneElement =>
   Shape({
     key: `piece-${index + 1}`,
-    geometry: pathData(d),
+    geometry: scaled(icon.paths[index]!, by),
     ...(icon.kind === "stroke"
       ? { stroke: { color, width, cap: "round", join: "round" } }
       : { fill: color }),
@@ -121,21 +139,23 @@ const drawn = (
   icon: IconData,
   color: Anim<Paint>,
   width: number,
+  by: number,
   trim: IconTrim | undefined,
 ): SceneElement[] =>
-  icon.paths.map((d, index) =>
-    piece(icon, d, index, color, width, isPerPiece(trim) ? trim(index, icon.paths.length) : trim),
+  icon.paths.map((_, index) =>
+    piece(icon, index, color, width, by, isPerPiece(trim) ? trim(index, icon.paths.length) : trim),
   );
 
-const sharedSymbol = (icon: IconData, color: Color, width: number): SceneSymbol => {
-  const byColor = shares.get(icon) ?? new Map<Color, Map<number, SceneSymbol>>();
-  const byWidth = byColor.get(color) ?? new Map<number, SceneSymbol>();
+const sharedSymbol = (icon: IconData, color: Color, width: number, by: number): SceneSymbol => {
+  const byColor = shares.get(icon) ?? new Map<Color, Map<string, SceneSymbol>>();
+  const bySize = byColor.get(color) ?? new Map<string, SceneSymbol>();
+  const name = `${width}/${by}`;
 
   const made =
-    byWidth.get(width) ?? symbol(() => Group({ children: drawn(icon, color, width, undefined) }));
+    bySize.get(name) ?? symbol(() => Group({ children: drawn(icon, color, width, by, undefined) }));
 
-  byWidth.set(width, made);
-  byColor.set(color, byWidth);
+  bySize.set(name, made);
+  byColor.set(color, bySize);
   shares.set(icon, byColor);
 
   return made;
@@ -145,12 +165,11 @@ export function Icon(props: IconProps): SceneElement {
   const { icon, size = icon?.grid, width, color: _c, trim: _t, shared: _s, ...placement } = props;
 
   check(icon, size, props);
-  const scale = size / icon.grid;
-  const stroke = width ?? WIDTH;
+  const by = size / icon.grid;
+  const stroke = (width ?? WIDTH) * by;
 
-  const body = props.shared
-    ? Instance({ of: sharedSymbol(icon, props.color, stroke), scale, origin: [0, 0] })
-    : Group({ scale, origin: [0, 0], children: drawn(icon, props.color, stroke, props.trim) });
+  if (props.shared)
+    return Instance({ ...placement, of: sharedSymbol(icon, props.color, stroke, by) });
 
-  return Group({ ...placement, children: [body] });
+  return Group({ ...placement, children: drawn(icon, props.color, stroke, by, props.trim) });
 }

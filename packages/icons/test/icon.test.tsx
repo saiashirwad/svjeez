@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Group, draw, enter, scene, span, tokens, track, type SceneElement } from "svjeez";
+import { Group, Stack, draw, enter, scene, span, tokens, track, type SceneElement } from "svjeez";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
 import { SceneError, boxesOf, svg, type Model } from "svjeez/tools";
 import { Icon, type IconData, type IconProps } from "../src/index.ts";
@@ -75,6 +75,25 @@ describe("Icon", () => {
 
     expect(big.width).toBeCloseTo(small.width * 4, 3);
     expect(big.height).toBeCloseTo(small.height * 4, 3);
+  });
+
+  test("a layout container places an icon by the size it is drawn at", () => {
+    const row = scene({ size: [200, 100], duration: 1, title: "Row", theme }, () =>
+      Stack({
+        key: "row",
+        direction: "row",
+        gap: 0,
+        children: [
+          icon({ icon: two, color: "#111111", size: 40, key: "a" }),
+          icon({ icon: two, color: "#111111", size: 40, key: "b" }),
+        ],
+      }),
+    );
+
+    const boxes = boxesOf(row, 0);
+
+    expect(boxes["row/a"]!.width).toBeCloseTo(48, 0);
+    expect(boxes["row/b"]!.x).toBeCloseTo(boxes["row/a"]!.x + boxes["row/a"]!.width, 3);
   });
 
   test("a trim function gets each piece's place and a trim can animate", () => {
