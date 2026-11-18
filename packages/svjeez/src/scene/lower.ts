@@ -34,8 +34,17 @@ import {
   type ShapeProps,
   type TextProps,
 } from "./nodes";
-import { isAnchor } from "./refs";
-import { arrangeState, around, note, notes, originOf, settle, type Notes } from "./settle";
+import { isAnchor, type Anchor } from "./refs";
+import {
+  arrangeState,
+  around,
+  note,
+  notes,
+  originOf,
+  sameAnchors,
+  settle,
+  type Notes,
+} from "./settle";
 import {
   laneOf,
   mapped,
@@ -389,10 +398,18 @@ const lowerAll = (
       return lowerAll(ctx, given.children, clocked, parent, taken);
     }
 
-    if (given.type === "morph")
-      return morphed(given, timing, taken, (state, names) =>
-        arrangeState(lowerAll(ctx, state, timing, parent, names), ctx.notes),
-      );
+    if (given.type === "morph") {
+      const seen = new Map<string, Anchor | undefined>();
+
+      return morphed(given, timing, taken, (state, names) => {
+        const nodes = arrangeState(lowerAll(ctx, state, timing, parent, names), ctx.notes);
+
+        sameAnchors(nodes, ctx.notes, seen);
+
+        return nodes;
+      });
+    }
+
     const name = given.props.key ?? given.props.ref?.key;
 
     if (name !== undefined && taken.has(name))

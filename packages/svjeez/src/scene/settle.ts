@@ -500,3 +500,38 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
 
   return list.map(arranged);
 };
+
+/** How a node's `at` was written, for an error: an anchor's label, or a point. */
+const placing = (anchor: Anchor | undefined): string =>
+  anchor ? `at ${anchor.label}` : "at a point";
+
+/**
+ * Checks that every node in one state of a morph is placed the way the states before placed it, given what those
+ * states noted in `seen`. A morph blends points; an anchor is resolved only in the second pass, after the states are
+ * merged, so a node anchored in one state and not in another would keep one placement for good.
+ */
+export const sameAnchors = (
+  list: readonly SceneNode[],
+  { nodes }: Notes,
+  seen: Map<string, Anchor | undefined>,
+): void => {
+  const visit = (node: SceneNode): void => {
+    const anchor = nodes.get(node.key)?.anchor;
+
+    if (seen.has(node.key)) {
+      const before = seen.get(node.key);
+
+      const alike =
+        before === anchor || (before?.of === anchor?.of && before?.label === anchor?.label);
+
+      if (!alike)
+        throw new Error(
+          `"${node.key}" is placed ${placing(before)} in one morph() state and ${placing(anchor)} in another. A morph blends points, not anchors: place it the same way in every state, or put it in a <Group> placed at the anchor in every state and move it inside.`,
+        );
+    } else seen.set(node.key, anchor);
+
+    if (node.kind === "group") node.children.forEach(visit);
+  };
+
+  list.forEach(visit);
+};

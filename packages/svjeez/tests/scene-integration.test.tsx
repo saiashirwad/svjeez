@@ -279,6 +279,53 @@ describe("morph between states that hold layout, text, connectors, images and in
     ).toThrow('A <Stack> in a morph() state holds "s/l", which is placed by an anchor');
   });
 
+  test("a node anchored in one state and placed at a point in another says how to write it", () => {
+    const state = (at: Vec | "anchor") =>
+      made(() => {
+        const a = ref("a");
+
+        const dot = (where: Vec | "anchor") => (
+          <Shape
+            key="d"
+            geometry={circle(2)}
+            at={where === "anchor" ? a.right : where}
+            fill={blue}
+          />
+        );
+
+        return (
+          <Group>
+            <Shape ref={a} geometry={rect(10, 10)} at={[100, 50]} fill={red} />
+            {morph(dot(at), dot(at === "anchor" ? [10, 10] : "anchor"), span(1, 1))}
+          </Group>
+        );
+      });
+
+    expect(() => state("anchor")).toThrow(
+      '"d" is placed at a.right in one morph() state and at a point in another. A morph blends points, not anchors',
+    );
+    expect(() => state([10, 10])).toThrow(
+      '"d" is placed at a point in one morph() state and at a.right',
+    );
+  });
+
+  // Layout reads boxes at rest, so a container around a morph places its children where the first state has them.
+  // Put the container inside the morph to reflow it, as the test above does.
+  test.failing("a Stack around a morph reflows when a child grows in the morph", () => {
+    const model = made(() => (
+      <Stack direction="row" gap={2}>
+        {morph(
+          <Shape key="a" geometry={rect(10, 10)} fill={red} />,
+          <Shape key="a" geometry={rect(40, 10)} fill={red} />,
+          span(1, 1),
+        )}
+        <Shape key="b" geometry={rect(10, 10)} fill={red} />
+      </Stack>
+    ));
+
+    expect(boxesOf(model, 3)["0/b"]?.x).toBe(42);
+  });
+
   test("text that rewraps crossfades between its two layouts", () => {
     const model = made(() =>
       morph(
