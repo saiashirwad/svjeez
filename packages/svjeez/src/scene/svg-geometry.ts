@@ -5,7 +5,7 @@ import { num } from "../format";
 import { ease, type Ease } from "../motion";
 import type { PathData } from "../paths";
 import type { AttrValue } from "../svg";
-import { arcPieces, contoursOf, mixGeometry } from "./geometry";
+import { arcPieces, contoursOf, mixGeometry, smilSafe } from "./geometry";
 import type { Contour, Cubic, Geometry, Key, Lane, Paint, ShapeNode, Vec } from "./ir";
 import { isLane } from "./lane";
 import { same } from "./steps";
@@ -596,7 +596,10 @@ export const drawMoving = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Movi
       ? { kind: "still", geometry: keys[0]! }
       : { kind: "still", geometry: keys[0]!, offset: along(lane, moves) };
 
-  if (keys[0]!.kind === "arc") return dashed(node, lane, at) ?? morph(node, lane, at);
+  // What is left animates through SMIL, which can't write an ease that overshoots.
+  const smil = smilSafe(lane, `geometry on "${node.key}"`);
+
+  if (keys[0]!.kind === "arc") return dashed(node, lane, at) ?? morph(node, smil, at);
 
   if (scalable(node)) {
     const base = keys.reduce((best, key) =>
@@ -608,5 +611,5 @@ export const drawMoving = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Movi
     if (by) return { kind: "still", geometry: base, scale: along(lane, by) };
   }
 
-  return ownAttributes(lane, at) ?? morph(node, lane, at);
+  return ownAttributes(smil, at) ?? morph(node, smil, at);
 };

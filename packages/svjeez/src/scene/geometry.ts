@@ -1,5 +1,7 @@
+import { easeAt, easeBetween } from "../ease-at";
+import { ease, type Ease } from "../motion";
 import { matchRings } from "../paths";
-import type { Contour, Cubic, Geometry, Vec } from "./ir";
+import type { Contour, Cubic, Geometry, Key, Lane, Vec } from "./ir";
 import { onCircle } from "./values";
 
 /**
@@ -273,4 +275,51 @@ export const matched = (values: readonly Geometry[], where: string): Geometry[] 
     rule: rule ?? "nonzero",
     contours: each.map((ring, r) => ({ ...ring, closed: ring.closed && !open[r] })),
   }));
+};
+
+/** Whether SMIL can write `curve`: keySplines take control points from 0 to 1 only, and drop the whole animation otherwise. */
+const smilWritable = (curve: Ease | undefined): boolean =>
+  curve?.kind !== "bezier" || [curve.points[1], curve.points[3]].every((y) => y >= 0 && y <= 1);
+
+/** How many pieces a transition SMIL can't write is cut into. Each piece keeps its part of the curve when it can. */
+const PIECES = 8;
+
+/**
+ * `lane` as SMIL can write it: each transition whose ease overshoots (`ease.back`, or the keys a spring or a followed
+ * anchor is fitted with) is cut into pieces, each with its own part of the ease, or a straight line where that part
+ * still overshoots. The values at the cuts are the lane's own, so the path is the same where it is cut.
+ */
+export const smilSafe = (lane: Lane<Geometry>, where: string): Lane<Geometry> => {
+  if (lane.keys.every((key) => smilWritable(key.ease))) return lane;
+  const [first] = lane.keys;
+  const keys: Key<Geometry>[] = [first];
+
+  lane.keys.slice(1).forEach((key, i) => {
+    const from = lane.keys[i]!;
+    const curve = key.ease;
+
+    if (!curve || smilWritable(curve)) {
+      keys.push(key);
+
+      return;
+    }
+
+    for (let piece = 1; piece <= PIECES; piece++) {
+      const [start, end] = [(piece - 1) / PIECES, piece / PIECES];
+      const part = easeBetween(curve, start, end, where);
+
+      keys.push({
+        t: from.t + (key.t - from.t) * end,
+        value:
+          piece === PIECES
+            ? key.value
+            : mixGeometry(from.value, key.value, easeAt(curve, end), where),
+        ease: smilWritable(part) ? part : ease.linear,
+      });
+    }
+  });
+
+  const [head, next, ...rest] = keys;
+
+  return { ...lane, keys: [head!, next!, ...rest] };
 };

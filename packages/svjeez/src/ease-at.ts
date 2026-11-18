@@ -104,3 +104,10 @@ export const splitEase = (curve: Ease, progress: number, where: string): readonl
     }
   }
 };
+
+/** The part of `curve` between two points of its progress, `from` and `to` from 0 to 1, as an ease of its own. */
+export const easeBetween = (curve: Ease, from: number, to: number, where: string): Ease => {
+  const tail = from > 0 ? splitEase(curve, from, where)[1] : curve;
+
+  return to < 1 ? splitEase(tail, (to - from) / (1 - from), where)[0] : tail;
+};
