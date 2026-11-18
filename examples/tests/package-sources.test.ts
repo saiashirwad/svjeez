@@ -3,6 +3,7 @@ import { Glob } from "bun";
 import { join } from "node:path";
 
 const packages = join(import.meta.dir, "../../packages");
+
 const sources = [...new Glob("*/src/**/*.{ts,tsx}").scanSync(packages)].filter(
   (file) => !file.startsWith("svjeez/"),
 );
