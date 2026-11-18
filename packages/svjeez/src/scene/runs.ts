@@ -1,13 +1,13 @@
 import { Font, FontFamily, type FontValue } from "../font/font";
 import type { Face } from "./ir";
-import type { RunStyle, SceneElement, SpanProps, TextChild } from "./nodes";
+import type { RunProps, RunStyle, SceneElement, TextChild } from "./nodes";
 
-/** What a stretch of text asks to be drawn in: the `<Text>`'s own props, with each `<Span>` around it laid over. */
-export type Asked = RunStyle & Required<Pick<RunStyle, "font" | "fill">>;
+/** What a stretch of text asks to be drawn in: the `<Text>`'s own props, with each `<Run>` around it laid over. */
+export type Asked = RunStyle & Required<Pick<RunStyle, "font">>;
 
 export interface AskedPiece {
   readonly text: string;
-  /** One object for every piece of one span, so a caller can lower each style once. */
+  /** One object for every piece of one run, so a caller can lower each style once. */
   readonly asked: Asked;
 }
 
@@ -16,21 +16,20 @@ const isList = (child: TextChild): child is readonly TextChild[] => Array.isArra
 const isWords = (child: TextChild): child is string | number =>
   typeof child === "string" || typeof child === "number";
 
-const isSpan = (
-  child: SceneElement,
-): child is { readonly type: "span"; readonly props: SpanProps } => child.type === "span";
+const isRun = (child: SceneElement): child is { readonly type: "run"; readonly props: RunProps } =>
+  child.type === "run";
 
 const isElement = (child: TextChild): child is SceneElement =>
   typeof child === "object" && child !== null && !isList(child);
 
-/** `style` with what `span` says laid over it. */
-const over = (style: Asked, span: SpanProps): Asked => ({
+/** `style` with what `run` says laid over it. */
+const over = (style: Asked, run: RunProps): Asked => ({
   ...style,
-  ...(span.font !== undefined && { font: span.font }),
-  ...(span.weight !== undefined && { weight: span.weight }),
-  ...(span.italic !== undefined && { italic: span.italic }),
-  ...(span.fill !== undefined && { fill: span.fill }),
-  ...(span.opacity !== undefined && { opacity: span.opacity }),
+  ...(run.font !== undefined && { font: run.font }),
+  ...(run.weight !== undefined && { weight: run.weight }),
+  ...(run.italic !== undefined && { italic: run.italic }),
+  ...(run.fill !== undefined && { fill: run.fill }),
+  ...(run.opacity !== undefined && { opacity: run.opacity }),
 });
 
 /** A text's children as pieces of text, in order, each with the style it asks for. */
@@ -41,11 +40,11 @@ export const piecesOf = (children: TextChild, style: Asked, where: string): Aske
 
   if (isList(children)) return children.flatMap((child) => piecesOf(child, style, where));
 
-  if (isElement(children) && isSpan(children))
+  if (isElement(children) && isRun(children))
     return piecesOf(children.props.children, over(style, children.props), where);
 
   throw new Error(
-    `Text ${where} holds ${isElement(children) ? `a <${children.type[0]!.toUpperCase()}${children.type.slice(1)}>` : String(children)}. A <Text> holds strings and <Span>s; put other nodes beside it, in a <Group> or a <Stack>.`,
+    `Text ${where} holds ${isElement(children) ? `a <${children.type[0]!.toUpperCase()}${children.type.slice(1)}>` : String(children)}. A <Text> holds strings and <Run>s; put other nodes beside it, in a <Group> or a <Stack>.`,
   );
 };
 

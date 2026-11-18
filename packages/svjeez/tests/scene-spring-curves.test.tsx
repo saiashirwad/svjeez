@@ -5,26 +5,21 @@ import {
   Group,
   Sequence,
   Shape,
-  boxesOf,
   circle,
   ease,
-  isLane,
   morph,
   motion,
-  placements,
   rect,
   ref,
   scene,
   span,
-  svg,
   timeline,
   track,
   type Curve,
-  type Model,
   type SceneElement,
-  type Spanned,
   type Vec,
 } from "svjeez/scene";
+import { boxesOf, isLane, placements, svg, type Model, type Spanned } from "svjeez/scene/tools";
 import { alongCurve, curveLength, splitCurve } from "../src/scene/curve";
 import { blendVec, valueAt } from "../src/scene/sample";
 
@@ -114,7 +109,7 @@ const both = ({ start, legs, finish = {}, inside, duration = 4 }: Route) => {
   if (finish.loop !== undefined) [at, layer] = [at.loop(finish.loop), layer.loop(finish.loop)];
 
   const placed = (dot: SceneElement): SceneElement =>
-    inside === undefined ? dot : <Sequence at={inside}>{dot}</Sequence>;
+    inside === undefined ? dot : <Sequence start={inside}>{dot}</Sequence>;
 
   const model = made(
     () => (
@@ -253,7 +248,7 @@ describe("springs that turn write curved keys", () => {
       start: [0, 0],
       legs: thrown.legs.map(([to, when, curve]): Leg => [
         to,
-        span(when.at, Math.min(when.over, 1.6)),
+        span(when.start, Math.min(when.over, 1.6)),
         curve,
       ]),
       finish: { repeat: { until: 3 } },
@@ -339,7 +334,7 @@ describe("readers of a curved spring agree with it", () => {
               .to([200, 100], span(0.5, 3), swing)}
             fill={red}
           />
-          <Arrow key="arrow" from={[380, 280]} to={dot.right} color={red} />
+          <Arrow key="arrow" from={[380, 280]} to={dot.right} stroke={{ color: red }} />
         </Group>
       );
     });

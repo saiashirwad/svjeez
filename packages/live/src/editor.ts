@@ -1,6 +1,6 @@
 import { type Point } from "svjeez";
 import { restyle } from "svjeez/page";
-import { hitTest, type Placed } from "svjeez/scene";
+import { hitTest, type Placed } from "svjeez/scene/tools";
 import type { Schema } from "svjeez/params";
 import { createCompiler, latestWins } from "./client.ts";
 import type { Compiled, SceneSize, SourceError } from "./compile.ts";

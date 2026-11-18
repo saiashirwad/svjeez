@@ -1,5 +1,5 @@
 /** @jsxImportSource svjeez/scene */
-import { Group, Shape, Span, Stack, Text, canvas, rect, scene, span, track } from "svjeez/scene";
+import { Group, Run, Shape, Stack, Text, canvas, rect, scene, span, track } from "svjeez/scene";
 import { geistText } from "../fonts/faces";
 import { mono, theme } from "../theme";
 
@@ -29,23 +29,23 @@ export default scene({ size: [480, 300], duration: 6, theme, title: "Type, measu
       </Text>
       <Text font={geistText} size={14} lineHeight={1.5} width={WIDTH} fill={theme.muted}>
         Every run is measured with its own face when the scene compiles, so{" "}
-        <Span weight={600} fill={theme.text}>
+        <Run weight={600} fill={theme.text}>
           semibold words
-        </Span>{" "}
-        and <Span italic>an italic aside</Span> wrap with the text around them, a{" "}
-        <Span fill={theme.green}>colored phrase keeps its place</Span>, and this word{" "}
-        <Span weight={600} fill={glowing}>
+        </Run>{" "}
+        and <Run italic>an italic aside</Run> wrap with the text around them, a{" "}
+        <Run fill={theme.green}>colored phrase keeps its place</Run>, and this word{" "}
+        <Run weight={600} fill={glowing}>
           glows
-        </Span>{" "}
+        </Run>{" "}
         without moving a letter.
       </Text>
       <Text font={mono} size={13} fill={theme.text}>
-        <Span fill={theme.magenta}>const</Span> <Span fill={theme.blue}>total</Span> ={" "}
-        <Span fill={theme.orange}>42</Span>;
+        <Run fill={theme.magenta}>const</Run> <Run fill={theme.blue}>total</Run> ={" "}
+        <Run fill={theme.orange}>42</Run>;
       </Text>
       <Text font={geistText} size={14} fill={theme.text}>
         {WORDS.map((word, i) => (
-          <Span opacity={appear(i)}>{i === 0 ? word : ` ${word}`}</Span>
+          <Run opacity={appear(i)}>{i === 0 ? word : ` ${word}`}</Run>
         ))}
       </Text>
     </Stack>

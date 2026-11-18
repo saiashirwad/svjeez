@@ -11,33 +11,26 @@ import {
   Group,
   Image,
   Instance,
-  Line,
   Sequence,
   Shape,
   Stack,
   Text,
-  boxesOf,
   circle,
-  derive,
   ease,
-  hitTest,
-  isLane,
   morph,
-  placements,
   polygon,
   rect,
   ref,
   scene,
   span,
-  svg,
   symbol,
   timeline,
   track,
-  type Model,
   type Paint,
   type SceneElement,
   type Vec,
 } from "svjeez/scene";
+import { boxesOf, hitTest, isLane, placements, svg, type Model } from "svjeez/scene/tools";
 import { blendVec, valueAt } from "../src/scene/sample";
 import { startTrace, stopTrace } from "../src/traced";
 import integration from "./fixtures/scene/integration";
@@ -104,7 +97,7 @@ describe("timelines reach a node wherever it sits", () => {
     const model = made(() => {
       const grid = ref("grid");
 
-      timeline(grid.part("b").fade(0.25, 1, ease.linear));
+      timeline(grid.part("b").to({ opacity: 0.25 }, 1, ease.linear));
 
       return (
         <Grid ref={grid} columns={2} gap={4}>
@@ -137,7 +130,7 @@ describe("timelines reach a node wherever it sits", () => {
   test("inside a symbol, every instance moves in step", () => {
     const model = made(() => {
       const spoke = ref("spoke");
-      const wheel = symbol("wheel", () => <Shape ref={spoke} geometry={rect(2, 10)} fill={red} />);
+      const wheel = symbol(() => <Shape ref={spoke} geometry={rect(2, 10)} fill={red} />);
 
       timeline(spoke.rotate(90, 1));
 
@@ -149,7 +142,7 @@ describe("timelines reach a node wherever it sits", () => {
       );
     });
 
-    expect(isLane(own(find(model, "#wheel/spoke")).rotate)).toBe(true);
+    expect(isLane(own(find(model, "#one/spoke")).rotate)).toBe(true);
     expect(placements(model, 1).find((node) => node.key === "two")?.kind).toBe("instance");
   });
 
@@ -157,7 +150,7 @@ describe("timelines reach a node wherever it sits", () => {
     const model = made(() => {
       const dot = ref("dot");
 
-      timeline(dot.fade(0.5, 1));
+      timeline(dot.to({ opacity: 0.5 }, 1));
 
       return morph(
         <Shape ref={dot} geometry={circle(4)} fill={red} />,
@@ -178,8 +171,8 @@ describe("timelines reach a node wherever it sits", () => {
       const nested = timeline(dot.moveBy([10, 0], 1, ease.linear));
 
       return (
-        <Sequence at={1}>
-          <Sequence at={0.5} timeline={nested}>
+        <Sequence start={1}>
+          <Sequence start={0.5} timeline={nested}>
             <Shape ref={dot} geometry={circle(4)} fill={red} />
           </Sequence>
         </Sequence>
@@ -266,10 +259,10 @@ describe("morph between states that hold layout, text, connectors, images and in
             <Shape ref={a} geometry={rect(10, 10)} fill={red} />
             {morph(
               <Stack key="s">
-                <Line key="l" from={[0, 0]} to={a.right} color={red} />
+                <Arrow head="none" key="l" from={[0, 0]} to={a.right} stroke={{ color: red }} />
               </Stack>,
               <Stack key="s" gap={4}>
-                <Line key="l" from={[0, 0]} to={a.right} color={red} />
+                <Arrow head="none" key="l" from={[0, 0]} to={a.right} stroke={{ color: red }} />
               </Stack>,
               span(1, 1),
             )}
@@ -345,13 +338,17 @@ describe("morph between states that hold layout, text, connectors, images and in
     // SAFETY: what a scene written without types hands over: a track where TypeScript would refuse it.
     const untyped = moving as never;
 
-    expect(() => made(() => <Arrow key="arrow" from={[0, 0]} to={untyped} color={blue} />)).toThrow(
+    expect(() =>
+      made(() => <Arrow key="arrow" from={[0, 0]} to={untyped} stroke={{ color: blue }} />),
+    ).toThrow(
       'The <Arrow> "arrow" is given a track for its to, but an end is a point or an anchor. To move an end, attach it to a ref\'s anchor, as in to={card.left}, and move the node it is attached to.',
     );
 
-    expect(() => made(() => <Line key="line" from={untyped} to={[9, 9]} color={blue} />)).toThrow(
-      'The <Line> "line" is given a track for its from',
-    );
+    expect(() =>
+      made(() => (
+        <Arrow head="none" key="line" from={untyped} to={[9, 9]} stroke={{ color: blue }} />
+      )),
+    ).toThrow('The <Arrow> "line" is given a track for its from');
   });
 
   test("a Stack around a morph that only moves or recolors its children still lays it out", () => {
@@ -405,7 +402,7 @@ describe("morph between states that hold layout, text, connectors, images and in
       return (
         <Group>
           {morph(state(0), state(60), span(1, 1))}
-          <Arrow key="arrow" from={a.right} to={b.left} color={blue} />
+          <Arrow key="arrow" from={a.right} to={b.left} stroke={{ color: blue }} />
         </Group>
       );
     });
@@ -422,7 +419,7 @@ describe("morph between states that hold layout, text, connectors, images and in
   test("an image and an instance move between states, and a picture that changes is refused", () => {
     const badge = picture('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="10"/>');
     const other = picture('<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/>');
-    const star = symbol("star", () => <Shape geometry={circle(4)} fill={red} />);
+    const star = symbol(() => <Shape geometry={circle(4)} fill={red} />);
 
     const model = made(() =>
       morph(
@@ -683,10 +680,10 @@ describe("derived tracks feed every kind of value", () => {
           <Shape
             ref={dot}
             geometry={circle(2)}
-            at={derive([angle], (u): Vec => [100 + 50 * u, 50])}
+            at={angle.map((u): Vec => [100 + 50 * u, 50])}
             fill={red}
           />
-          <Line key="tie" from={[100, 0]} to={dot.top} color={blue} />
+          <Arrow head="none" key="tie" from={[100, 0]} to={dot.top} stroke={{ color: blue }} />
         </Group>
       );
     });
@@ -732,12 +729,12 @@ describe("derived tracks feed every kind of value", () => {
 /** Every node kind, in layout, a morph and a symbol. */
 const everyKind = (options: { readonly loop?: boolean } = {}): Model.Scene => {
   const badge = picture('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="10"/>');
-  const star = symbol("star", () => <Shape key="body" geometry={circle(4)} fill={red} />);
+  const star = symbol(() => <Shape key="body" geometry={circle(4)} fill={red} />);
 
   return scene({ size: [200, 100], duration: 4, title: "Every kind", ...options }, () => {
     const moved = ref("moved");
 
-    timeline(moved.fade(0.5, 1));
+    timeline(moved.to({ opacity: 0.5 }, 1));
 
     return (
       <Group>
@@ -782,8 +779,8 @@ describe("identity and output for every node kind", () => {
       "stack/cell",
       "morph",
       "morph/m",
-      "#star",
-      "#star/body",
+      "#instance",
+      "#instance/body",
     ]);
   });
 
@@ -800,7 +797,7 @@ describe("identity and output for every node kind", () => {
       "stack/cell",
       "morph",
       "morph/m",
-      "#star/body",
+      "#instance/body",
     ])
       expect(out).toMatch(
         new RegExp(`data-key="${key}"[^>]*data-source="[^"]*scene-integration\\.test\\.tsx:\\d+`),
@@ -945,11 +942,11 @@ describe("errors a newcomer meets first", () => {
       made(() => {
         const ghost = ref("ghost");
 
-        timeline(ghost.fade(0, 1));
+        timeline(ghost.to({ opacity: 0 }, 1));
 
         return <Shape geometry={circle(4)} fill={red} />;
       }),
-    ).toThrow('ghost.fade() moves the ref "ghost", which is on no node.');
+    ).toThrow('ghost.to() moves the ref "ghost", which is on no node.');
   });
 
   test("a span past the end of the scene names the prop and the node", () => {
@@ -961,14 +958,21 @@ describe("errors a newcomer meets first", () => {
 
     expect(() =>
       made(() => (
-        <Sequence at={3} over={2}>
+        <Sequence start={3} over={2}>
           <Shape geometry={circle(4)} fill={red} />
         </Sequence>
       )),
-    ).toThrow("A <Sequence at={3} over={2}> runs until 5s, past the 4s scene.");
+    ).toThrow("A <Sequence start={3} over={2}> runs until 5s, past the 4s scene.");
 
     expect(() =>
-      made(() => <Shape key="late" geometry={circle(4)} opacity={track(0).to(1, span(3.5, 1))} />),
+      made(() => (
+        <Shape
+          fill="#000000"
+          key="late"
+          geometry={circle(4)}
+          opacity={track(0).to(1, span(3.5, 1))}
+        />
+      )),
     ).toThrow(
       'opacity on "late" runs until 4.5s, past the 4s scene. End it by then, or give scene() a longer duration.',
     );
@@ -977,7 +981,7 @@ describe("errors a newcomer meets first", () => {
       made(() => {
         const dot = ref("dot");
 
-        timeline(dot.fade(0, 5));
+        timeline(dot.to({ opacity: 0 }, 5));
 
         return <Shape ref={dot} geometry={circle(4)} fill={red} />;
       }),

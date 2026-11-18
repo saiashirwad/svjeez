@@ -1,38 +1,33 @@
 import { EPSILON, type Seconds } from "../motion";
 import type { Animated, Geometry, Key, Lane, Layer, ShapeNode, Vec } from "./ir";
 import { atRest, isLane } from "./lane";
-import type { Common, SceneElement } from "./nodes";
+import type { Common, SceneElement, StrokeProps } from "./nodes";
 import type { Anchor } from "./refs";
 import { blendVec, breaksOf, follow, laneFrom, unrolled, valueAt } from "./sample";
 import { ease } from "./spring";
 import type { Connect } from "./settle";
 import type { Anim } from "./track";
-import { boxOf, type Paint } from "./values";
+import { boxOf } from "./values";
 
 /**
- * Connectors: a line or an arrow between two points, each a point in the connector's frame or an anchor on a node. It
+ * An arrow, or a plain line, between two points, each a point in the arrow's frame or an anchor on a node. It
  * lowers to shapes. The shaft starts at `from` and is turned to point at `to`, so an end that follows a moving
  * node moves and turns it; a straight shaft that also stretches is drawn at its longest and trimmed to length, so
  * only a bent one that stretches needs its geometry to move.
  */
-export interface LineProps extends Omit<Common, "at" | "origin" | "rotate" | "scale"> {
+export interface ArrowProps extends Omit<Common, "at" | "origin" | "rotate" | "scale"> {
   readonly from: Vec | Anchor;
   readonly to: Vec | Anchor;
-  readonly color: Anim<Paint>;
-  /** Stroke width. Default 1.5. */
-  readonly width?: number;
+  /** As a shape's stroke, with a width of 1.5 and round caps and joins unless you say. */
+  readonly stroke: StrokeProps;
   /** How far the middle bows out sideways, as a share of the length: positive bows to the right of the way it goes. Default 0. */
   readonly bend?: number;
-  /** Room left free at each end, so the line stops short of what it joins. Default 0. */
-  readonly gap?: number;
-  /** The part of the line that is drawn, as two fractions of its length. An arrow's head rides the drawn end. */
+  /** Room left free at each end, so the arrow stops short of what it joins. Default 0. */
+  readonly inset?: number;
+  /** The part of the line that is drawn, as two fractions of its length. The head rides the drawn end. */
   readonly trim?: Anim<Vec>;
-  readonly dash?: readonly number[];
-}
-
-export interface ArrowProps extends LineProps {
-  /** How long the head's two strokes are. Default 8. */
-  readonly head?: number;
+  /** How long the head's two strokes are, in px, or `"none"` for a plain line. Default 8. */
+  readonly head?: number | "none";
 }
 
 /** The head's strokes open this far either side of the shaft, in radians: the look of the annotations' Arrow. */
@@ -217,7 +212,7 @@ interface Pose {
 }
 
 const connect =
-  (bend: number, size: number, gap: number): Connect =>
+  (bend: number, size: number, inset: number): Connect =>
   ([from, to], children, duration) => {
     // SAFETY: a connector's children are the shapes it lowered itself: its shaft, then its head when it has one.
     const [shaft, head] = children as readonly ShapeNode[];
@@ -231,9 +226,9 @@ const connect =
       const [ux, uy] = distance > EPSILON ? [dx / distance, dy / distance] : [1, 0];
 
       return {
-        start: [a[0] + ux * gap, a[1] + uy * gap],
+        start: [a[0] + ux * inset, a[1] + uy * inset],
         angle: Math.atan2(uy, ux) * DEG,
-        length: Math.max(0, distance - gap * 2),
+        length: Math.max(0, distance - inset * 2),
       };
     };
 
@@ -290,7 +285,7 @@ const connect =
     const posed = (t: Seconds): Pose => pose(seen(t));
 
     // The shaft's frame sits on `from` and turns there, so a far end that moves turns it without moving its start:
-    // the gap is part of the drawing, and only the angle and the length are lanes, each of one number.
+    // the inset is part of the drawing, and only the angle and the length are lanes, each of one number.
     const at = steadyWhileHidden(from!, seen, breaks);
 
     const stretch = follow((t) => [posed(t).length], breaks, NEAR, [], ends);
@@ -298,14 +293,14 @@ const connect =
     const fixed = laneFrom(stretch, ([value]) => value!);
 
     // An angle is as close as the far end of the arrow needs: within NEAR there, and never looser than ANGLE.
-    const turning = Math.max(ANGLE, (NEAR / (gap + longest + size)) * DEG);
+    const turning = Math.max(ANGLE, (NEAR / (inset + longest + size)) * DEG);
 
     const angle = laneFrom(
       follow((t) => [posed(t).angle], breaks, turning, [0], ends),
       ([value]) => value!,
     );
 
-    const start: Vec = [gap, 0];
+    const start: Vec = [inset, 0];
 
     const [geometry, rest] = !isLane(fixed)
       ? [shaftOf(bend, fixed, start, 0), shaft!.trim]
@@ -337,7 +332,7 @@ const connect =
       const { length } = posed(t);
       const reached = path(valueAt(trim, t, blendVec)[1]);
 
-      return [[gap + reached.at[0] * length, reached.at[1] * length], reached.heading];
+      return [[inset + reached.at[0] * length, reached.at[1] * length], reached.heading];
     };
 
     // The head turns with the shaft, around the same point, and rides out along it: a move inside the turn.
@@ -366,19 +361,33 @@ const connect =
     ];
   };
 
-const connector = (label: string, props: ArrowProps, size: number): SceneElement => {
-  const { from, to, color, width = 1.5, bend = 0, gap = 0, trim, dash, head: _, ...common } = props;
+const isNumber = (value: Anim<number>): value is number => typeof value === "number";
+
+/** A straight or bent arrow between two points or anchors, or a plain line with `head="none"`. The head rides the drawn end, so a `trim` that draws the line on carries it. */
+export const Arrow = (props: ArrowProps): SceneElement => {
+  const label = "<Arrow>";
+  const { from, to, stroke, bend = 0, inset = 0, trim, head = 8, ...common } = props;
 
   if ("at" in common) throw new Error(`${label} is placed by its from and to, so it takes no at.`);
 
-  if (!(width >= 0 && Number.isFinite(width)))
-    throw new Error(`${label} needs a width of 0 or more, got ${width}.`);
+  if (head !== "none" && !(head > 0 && Number.isFinite(head)))
+    throw new Error(
+      `${label} needs a head longer than 0, got ${String(head)}. For a plain line, write head="none".`,
+    );
 
-  if (!(gap >= 0 && Number.isFinite(gap)))
-    throw new Error(`${label} needs a gap of 0 or more, got ${gap}.`);
+  if (stroke === undefined || stroke.color === undefined)
+    throw new Error(`${label} needs a stroke with a color, as in stroke={{ color: theme.text }}.`);
+  const { width = 1.5, cap = "round", join = "round", ...rest } = stroke;
+
+  if (isNumber(width) && !(width >= 0 && Number.isFinite(width)))
+    throw new Error(`${label} needs a stroke width of 0 or more, got ${width}.`);
+
+  if (!(inset >= 0 && Number.isFinite(inset)))
+    throw new Error(`${label} needs an inset of 0 or more, got ${inset}.`);
 
   if (!Number.isFinite(bend)) throw new Error(`${label} needs a finite bend, got ${bend}.`);
-  const stroke = { color, width, cap: "round", join: "round", ...(dash && { dash }) } as const;
+  const drawn: StrokeProps = { ...rest, width, cap, join };
+  const size = head === "none" ? 0 : head;
 
   return {
     type: "group",
@@ -389,7 +398,7 @@ const connector = (label: string, props: ArrowProps, size: number): SceneElement
         props: {
           key: "shaft",
           geometry: { kind: "line", from: [0, 0], to: [1, 0] },
-          stroke,
+          stroke: drawn,
           ...(trim !== undefined && { trim }),
         },
       },
@@ -397,24 +406,11 @@ const connector = (label: string, props: ArrowProps, size: number): SceneElement
         ? [
             {
               type: "shape",
-              props: { key: "head", geometry: headOf(size, [0, 0], 0), stroke },
+              props: { key: "head", geometry: headOf(size, [0, 0], 0), stroke: drawn },
             } as const,
           ]
         : []),
     ],
-    settle: { kind: "connect", label, ends: [from, to], connect: connect(bend, size, gap) },
+    settle: { kind: "connect", label, ends: [from, to], connect: connect(bend, size, inset) },
   };
-};
-
-/** A straight or bent line between two points or anchors. */
-export const Line = (props: LineProps): SceneElement => connector("<Line>", props, 0);
-
-/** A line with an open head at `to`. The head rides the drawn end, so a `trim` that draws the line on carries it. */
-export const Arrow = (props: ArrowProps): SceneElement => {
-  const { head = 8 } = props;
-
-  if (!(head >= 0 && Number.isFinite(head)))
-    throw new Error(`<Arrow> needs a head of 0 or more, got ${head}.`);
-
-  return connector("<Arrow>", props, head);
 };

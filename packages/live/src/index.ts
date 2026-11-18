@@ -55,7 +55,7 @@ export { fit, fitValues, follow, positionOf, valueAt, withValues } from "./fit.t
 
 export type { Move } from "./probe.ts";
 
-export type { Placed } from "svjeez/scene";
+export type { Placed } from "svjeez/scene/tools";
 
 export { sizeOf, statsOf, type Stat } from "./stats.ts";
 

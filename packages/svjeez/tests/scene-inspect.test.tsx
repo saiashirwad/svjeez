@@ -7,23 +7,18 @@ import {
   Text,
   blur,
   circle,
-  describe,
   draw,
-  inspect,
   linear,
   rect,
   scene,
   span,
   spin,
-  svg,
   tokens,
   track,
-  type Code,
-  type Finding,
-  type Model,
   type Paint,
   type SceneElement,
 } from "svjeez/scene";
+import { describe, inspect, svg, type Code, type Finding, type Model } from "svjeez/scene/tools";
 
 const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
 
@@ -80,9 +75,12 @@ group("never-visible", () => {
     expect(found.map((f) => f.key)).toEqual(["g"]);
   });
 
-  test("a shape that paints nothing: no paint, clear paint, a stroke 0 wide", () => {
+  test("a shape that paints nothing: clear paint, a stroke 0 wide; no paint at all doesn't compile", () => {
+    expect(() => made(() => <Shape key="bare" geometry={rect(10, 10)} />)).toThrow(
+      '<Shape> "bare" paints nothing: it has no fill and no stroke.',
+    );
+
     for (const shape of [
-      <Shape geometry={rect(10, 10)} />,
       <Shape geometry={rect(10, 10)} fill="#FF000000" />,
       <Shape geometry={rect(10, 10)} stroke={{ color: "#FF0000", width: 0 }} />,
     ])

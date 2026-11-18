@@ -5,20 +5,16 @@ import {
   Sequence,
   Shape,
   Text,
-  boxesOf,
   circle,
   ease,
-  hitTest,
-  isLane,
   morph,
   rect,
   scene,
   span,
-  svg,
   track,
-  type Model,
   type SceneElement,
 } from "svjeez/scene";
+import { boxesOf, hitTest, isLane, svg, type Model } from "svjeez/scene/tools";
 import { jsxDEV } from "svjeez/scene/jsx-dev-runtime";
 import { jsx } from "svjeez/scene/jsx-runtime";
 import { readFileSync } from "node:fs";
@@ -110,8 +106,8 @@ describe("morph", () => {
   test("rotate and scale come from each state, around the first state's origin", () => {
     const model = made(() =>
       morph(
-        <Shape key="a" geometry={rect(10, 10)} />,
-        <Shape key="a" geometry={rect(20, 10)} rotate={90} />,
+        <Shape fill="#000000" key="a" geometry={rect(10, 10)} />,
+        <Shape fill="#000000" key="a" geometry={rect(20, 10)} rotate={90} />,
         span(0, 1),
       ),
     );
@@ -131,8 +127,8 @@ describe("morph", () => {
   test("a node only in after enters, one only in before exits, by the recipes given", () => {
     const model = made(() =>
       morph(
-        <Shape key="old" geometry={rect(10, 10)} />,
-        <Shape key="new" geometry={rect(10, 10)} />,
+        <Shape fill="#000000" key="old" geometry={rect(10, 10)} />,
+        <Shape fill="#000000" key="new" geometry={rect(10, 10)} />,
         span(1, 1),
         { enter: { opacity: 0, scale: 0.5 } },
       ),
@@ -153,8 +149,14 @@ describe("morph", () => {
   test("paint order follows after, with each exiting node kept where it was", () => {
     const model = made(() =>
       morph(
-        [<Shape key="a" geometry={rect(1, 1)} />, <Shape key="gone" geometry={rect(1, 1)} />],
-        [<Shape key="b" geometry={rect(1, 1)} />, <Shape key="a" geometry={rect(1, 1)} />],
+        [
+          <Shape fill="#000000" key="a" geometry={rect(1, 1)} />,
+          <Shape fill="#000000" key="gone" geometry={rect(1, 1)} />,
+        ],
+        [
+          <Shape fill="#000000" key="b" geometry={rect(1, 1)} />,
+          <Shape fill="#000000" key="a" geometry={rect(1, 1)} />,
+        ],
         span(0, 1),
       ),
     );
@@ -166,10 +168,10 @@ describe("morph", () => {
     const model = made(() =>
       morph(
         <Group key="g">
-          <Shape key="dot" geometry={circle(2)} at={[0, 0]} />
+          <Shape fill="#000000" key="dot" geometry={circle(2)} at={[0, 0]} />
         </Group>,
         <Group key="g" at={[10, 0]}>
-          <Shape key="dot" geometry={circle(2)} at={[5, 5]} />
+          <Shape fill="#000000" key="dot" geometry={circle(2)} at={[5, 5]} />
         </Group>,
         span(0, 1),
       ),
@@ -212,7 +214,7 @@ describe("morph", () => {
   });
 
   test("a chain of states goes through each in turn, and inside a Sequence on its clock", () => {
-    const at = (x: number) => <Shape key="a" geometry={rect(1, 1)} at={[x, 0]} />;
+    const at = (x: number) => <Shape fill="#000000" key="a" geometry={rect(1, 1)} at={[x, 0]} />;
 
     const chain = shape(
       made(() => morph.between([at(0), at(10), at(20)], [span(0, 1), span(2, 1)]), 4),
@@ -228,7 +230,7 @@ describe("morph", () => {
     ]);
 
     const placed = shape(
-      made(() => <Sequence at={1}>{morph(at(0), at(10), span(1, 1))}</Sequence>),
+      made(() => <Sequence start={1}>{morph(at(0), at(10), span(1, 1))}</Sequence>),
       "a",
     );
 
@@ -258,8 +260,8 @@ describe("morph", () => {
     const bars = (h: number) =>
       ["a", "b", "c"].map((key) => (
         <Group key={key}>
-          <Shape key="bar" geometry={rect(5, h)} />
-          <Shape key="dot" geometry={circle(h / 4)} />
+          <Shape fill="#000000" key="bar" geometry={rect(5, h)} />
+          <Shape fill="#000000" key="dot" geometry={circle(h / 4)} />
         </Group>
       ));
 
@@ -280,8 +282,8 @@ describe("morph", () => {
     const kept = shape(
       made(() =>
         morph(
-          <Shape key="a" geometry={rect(1, 1)} rotate={spin} />,
-          <Shape key="a" geometry={rect(1, 1)} rotate={spin} at={[5, 0]} />,
+          <Shape fill="#000000" key="a" geometry={rect(1, 1)} rotate={spin} />,
+          <Shape fill="#000000" key="a" geometry={rect(1, 1)} rotate={spin} at={[5, 0]} />,
           span(2, 1),
         ),
       ),
@@ -293,8 +295,8 @@ describe("morph", () => {
     expect(() =>
       made(() =>
         morph(
-          <Shape key="a" geometry={rect(1, 1)} rotate={spin} />,
-          <Shape key="a" geometry={rect(1, 1)} rotate={45} />,
+          <Shape fill="#000000" key="a" geometry={rect(1, 1)} rotate={spin} />,
+          <Shape fill="#000000" key="a" geometry={rect(1, 1)} rotate={45} />,
           span(2, 1),
         ),
       ),
@@ -305,7 +307,7 @@ describe("morph", () => {
     expect(() =>
       made(() =>
         morph(
-          <Shape key="a" geometry={rect(1, 1)} />,
+          <Shape fill="#000000" key="a" geometry={rect(1, 1)} />,
           <Text key="a" font={mono} size={10} fill="#ffffff">
             x
           </Text>,
@@ -317,7 +319,7 @@ describe("morph", () => {
     expect(() =>
       made(() =>
         morph(
-          <Shape geometry={rect(1, 1)} />,
+          <Shape fill="#000000" geometry={rect(1, 1)} />,
           <Text font={mono} size={10} fill="#ffffff">
             x
           </Text>,
@@ -329,8 +331,11 @@ describe("morph", () => {
     expect(() =>
       made(() =>
         morph(
-          [<Shape geometry={rect(1, 1)} />],
-          [<Shape geometry={rect(1, 1)} />, <Shape geometry={rect(2, 2)} />],
+          [<Shape fill="#000000" geometry={rect(1, 1)} />],
+          [
+            <Shape fill="#000000" geometry={rect(1, 1)} />,
+            <Shape fill="#000000" geometry={rect(2, 2)} />,
+          ],
           span(0, 1),
         ),
       ),
@@ -347,7 +352,10 @@ describe("morph", () => {
     ).toThrow(`morph() can't blend "a": its stroke's cap`);
 
     expect(() =>
-      morph.between([<Shape geometry={rect(1, 1)} />, null, null], [span(0, 2), span(1, 1)]),
+      morph.between(
+        [<Shape fill="#000000" geometry={rect(1, 1)} />, null, null],
+        [span(0, 2), span(1, 1)],
+      ),
     ).toThrow("span 2 starts at 1s, before span 1 ends at 2s");
     expect(() => morph.between([null, null], [])).toThrow("one span per transition");
   });
@@ -372,13 +380,14 @@ describe("boxes and hit tests", () => {
   const picture = () =>
     made(() => (
       <Group>
-        <Shape key="back" geometry={rect(200, 100)} />
+        <Shape fill="#000000" key="back" geometry={rect(200, 100)} />
         <Group key="card" at={[50, 20]}>
-          <Shape key="face" geometry={rect(40, 40)} />
-          <Shape key="pip" geometry={circle(5)} at={[20, 20]} />
+          <Shape fill="#000000" key="face" geometry={rect(40, 40)} />
+          <Shape fill="#000000" key="pip" geometry={circle(5)} at={[20, 20]} />
         </Group>
-        <Shape key="ghost" geometry={rect(200, 100)} opacity={0} />
+        <Shape fill="#000000" key="ghost" geometry={rect(200, 100)} opacity={0} />
         <Shape
+          fill="#000000"
           key="mover"
           geometry={rect(10, 10)}
           at={track<Model.Vec>([150, 10]).to([150, 70], span(0, 1))}
@@ -414,8 +423,8 @@ describe("source locations", () => {
     made(() =>
       jsxDEV(Group, {
         children: [
-          jsxDEV(Shape, { geometry: rect(1, 1) }, "a", false, source),
-          jsx(Shape, { geometry: rect(1, 1) }, "b"),
+          jsxDEV(Shape, { fill: "#000000", geometry: rect(1, 1) }, "a", false, source),
+          jsx(Shape, { fill: "#000000", geometry: rect(1, 1) }, "b"),
         ],
       }),
     );
@@ -440,8 +449,11 @@ describe("source locations", () => {
   test("a morph's node keeps the source of the first state it is in", () => {
     const model = made(() =>
       morph(
-        jsxDEV(Shape, { geometry: rect(1, 1) }, "a", false, source),
-        jsxDEV(Shape, { geometry: rect(2, 2) }, "a", false, { ...source, lineNumber: 9 }),
+        jsxDEV(Shape, { fill: "#000000", geometry: rect(1, 1) }, "a", false, source),
+        jsxDEV(Shape, { fill: "#000000", geometry: rect(2, 2) }, "a", false, {
+          ...source,
+          lineNumber: 9,
+        }),
         span(0, 1),
       ),
     );

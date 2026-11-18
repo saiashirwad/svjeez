@@ -5,6 +5,7 @@ import * as jsxRuntime from "svjeez/jsx-runtime";
 import * as geometry from "svjeez/geometry";
 import * as params from "svjeez/params";
 import * as sceneModel from "svjeez/scene";
+import * as sceneTools from "svjeez/scene/tools";
 import * as sceneJsxDevRuntime from "svjeez/scene/jsx-dev-runtime";
 import * as sceneJsxRuntime from "svjeez/scene/jsx-runtime";
 import type { Point } from "svjeez";
@@ -20,6 +21,7 @@ const modules = new Map<string, object>([
   ["svjeez/geometry", geometry],
   ["svjeez/params", params],
   ["svjeez/scene", sceneModel],
+  ["svjeez/scene/tools", sceneTools],
   ["svjeez/scene/jsx-runtime", sceneJsxRuntime],
   ["svjeez/scene/jsx-dev-runtime", sceneJsxDevRuntime],
 ]);
@@ -67,9 +69,9 @@ export type Compiled =
       readonly scene?: SceneSize;
       /**
        * A scene model's nodes at rest, placed in the scene, in paint order: each one's key, box and, from source,
-       * the line that wrote it. `hitTest` from `svjeez/scene` finds the node under a point. Absent for an SVG string.
+       * the line that wrote it. `hitTest` from `svjeez/scene/tools` finds the node under a point. Absent for an SVG string.
        */
-      readonly nodes?: readonly sceneModel.Placed[];
+      readonly nodes?: readonly sceneTools.Placed[];
       readonly ms: number;
     } & Declared)
   | { readonly ok: false; readonly error: SourceError; readonly ms: number };
@@ -130,7 +132,7 @@ const requireModule = (name: string): object => {
   return found;
 };
 
-const isBuild = (value: unknown): value is () => string | sceneModel.Scene =>
+const isBuild = (value: unknown): value is () => string | sceneTools.Scene =>
   typeof value === "function";
 
 const isText = (value: unknown): value is string => typeof value === "string";
@@ -198,7 +200,7 @@ const LEADING = /^(?:\s*(?:\/\/[^\n]*|\/\*[\s\S]*?\*\/))*/;
 const importSourceOf = (source: string): string =>
   /@jsxImportSource\s+([^\s*]+)/.exec(LEADING.exec(source)?.[0] ?? "")?.[1] ?? "svjeez";
 
-const sizeOf = (scene: sceneModel.Scene): SceneSize => ({
+const sizeOf = (scene: sceneTools.Scene): SceneSize => ({
   width: scene.size[0],
   height: scene.size[1],
   duration: scene.duration,
@@ -208,16 +210,16 @@ const sizeOf = (scene: sceneModel.Scene): SceneSize => ({
 interface Built extends Declared {
   readonly svg: string;
   readonly scene?: SceneSize;
-  readonly nodes?: readonly sceneModel.Placed[];
+  readonly nodes?: readonly sceneTools.Placed[];
 }
 
 const SCENE_MODEL = "svjeez/scene";
 
 /** A scene model's picture, its size and where each of its nodes is. */
-const modelled = (made: sceneModel.Scene, sources: boolean): Built => ({
-  svg: sceneModel.svg.emit(made, { sources }),
+const modelled = (made: sceneTools.Scene, sources: boolean): Built => ({
+  svg: sceneTools.svg.emit(made, { sources }),
   scene: sizeOf(made),
-  nodes: sceneModel.placements(made),
+  nodes: sceneTools.placements(made),
 });
 
 const run = async (source: string, sources: boolean): Promise<Built> => {
@@ -257,7 +259,7 @@ const run = async (source: string, sources: boolean): Promise<Built> => {
 
   const made: unknown = isBuild(exports.default) ? exports.default() : exports.default;
 
-  const model = sceneModel.isScene(made) ? modelled(made, sources) : undefined;
+  const model = sceneTools.isScene(made) ? modelled(made, sources) : undefined;
   const svg: unknown = model ? model.svg : made;
 
   if (!isText(svg))
@@ -309,9 +311,9 @@ export const compileScene = (source: string, { sources = false } = {}): Promise<
   outcome(() => run(source, sources));
 
 /** For a page that ships its scene as code instead of source text: calls `build` and measures what it returns. */
-export const compileBuild = (build: () => string | sceneModel.Scene): Promise<Compiled> =>
+export const compileBuild = (build: () => string | sceneTools.Scene): Promise<Compiled> =>
   outcome(async () => {
     const made = build();
 
-    return sceneModel.isScene(made) ? modelled(made, false) : { svg: made };
+    return sceneTools.isScene(made) ? modelled(made, false) : { svg: made };
   });

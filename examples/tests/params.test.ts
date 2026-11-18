@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { validateSvg } from "svjeez/frames";
 import { defaults, parse, type Schema, type Values } from "svjeez/params";
-import { isScene, svg as backend, type Scene } from "svjeez/scene";
+import { isScene, svg as backend, type Scene } from "svjeez/scene/tools";
 
 // The template scenes render their defaults in the build and the data beside them through --params; both must draw.
 const EXAMPLES = join(import.meta.dir, "..");

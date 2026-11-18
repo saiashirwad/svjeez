@@ -11,7 +11,7 @@ import { isTrack, passageOf, type Anim, type Track } from "./track";
  * lowering writes each as an ordinary lane. When the mapping is affine along every move of its sources, each key maps
  * to one key with the same ease, so the lane is as small as its source; otherwise it is sampled and fitted to few keys.
  */
-export interface DeriveOptions {
+export interface MapOptions {
   /**
    * How far a sampled lane may stray from the mapping, in the value's own units: px for a point. Default: a
    * thousandth of how far the value moves, and at most 0.05.
@@ -43,12 +43,19 @@ export class Derived<T> {
   }
 
   /** Another track, `fn` of this one's value at every moment. */
-  map<U>(fn: (value: T) => U, options: DeriveOptions = {}): Derived<U> {
+  map<U>(fn: (value: T) => U, options: MapOptions = {}): Derived<U> {
     return new Derived(
       this.sources,
       (values) => fn(this.read(values)),
       options.tolerance ?? this.tolerance,
     );
+  }
+
+  /** This track read together with others, to `map` them into one: `x.with(y).map((x, y) => [x, y])`. */
+  with<const S extends readonly Source[]>(...others: S): Together<[T, ...ValuesOf<S>]> {
+    // SAFETY: a derived track of anything but numbers or points is refused when it is lowered, where it is read, and
+    // its value comes first, as the tuple says.
+    return together([this as Derived<number>, ...others]) as Together<[T, ...ValuesOf<S>]>;
   }
 }
 
@@ -60,11 +67,25 @@ const isDerivedSource = (source: Source): source is Derived<number> | Derived<Ve
 
 type ValueOf<S> = S extends Track<infer T> ? T : S extends Derived<infer T> ? T : S;
 
-/** A track computed from several: `derive([x, y], (x, y) => [x, y * 2])`. Each source may itself be derived. */
-export const derive = <const S extends readonly Source[], U>(
+/** The values of a list of sources, in order. */
+export type ValuesOf<S extends readonly unknown[]> = { -readonly [K in keyof S]: ValueOf<S[K]> };
+
+/** Tracks read together, as `a.with(b)` makes them: `map` turns them into one. */
+export interface Together<V extends readonly unknown[]> {
+  /** A track that is `fn` of the sources' values at every moment. */
+  map<U>(fn: (...values: V) => U, options?: MapOptions): Derived<U>;
+}
+
+/** Sources read together, each of them a track, a derived track or a still value. */
+export const together = <const S extends readonly Source[]>(sources: S): Together<ValuesOf<S>> => ({
+  map: (fn, options = {}) => derive(sources, fn, options),
+});
+
+/** A track computed from several. Each source may itself be derived. */
+const derive = <const S extends readonly Source[], U>(
   sources: S,
-  fn: (...values: { -readonly [K in keyof S]: ValueOf<S[K]> }) => U,
-  options: DeriveOptions = {},
+  fn: (...values: ValuesOf<S>) => U,
+  options: MapOptions,
 ): Derived<U> => {
   const flat: Base[] = [];
 
@@ -86,10 +107,7 @@ export const derive = <const S extends readonly Source[], U>(
   return new Derived(
     flat,
     // SAFETY: each reader gives the value of the source in its place, so the list is the tuple S names.
-    (values) =>
-      fn(
-        ...(readers.map((reader) => reader(values)) as { -readonly [K in keyof S]: ValueOf<S[K]> }),
-      ),
+    (values) => fn(...(readers.map((reader) => reader(values)) as ValuesOf<S>)),
     options.tolerance,
   );
 };
@@ -98,7 +116,7 @@ export const derive = <const S extends readonly Source[], U>(
 export const mappedTrack = <T, U>(
   source: Track<T>,
   fn: (value: T) => U,
-  options: DeriveOptions,
+  options: MapOptions,
 ): Derived<U> =>
   new Derived(
     // SAFETY: a track of anything but numbers or points is refused when it is lowered, where its values are read.

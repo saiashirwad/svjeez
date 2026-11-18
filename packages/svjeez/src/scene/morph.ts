@@ -1,6 +1,6 @@
 import { num } from "../format";
 import { EPSILON, type Seconds } from "../motion";
-import { checkWindow, span, type Span } from "../span";
+import { checkWindow, span, type Span } from "./span";
 import { matched, mixGeometry } from "./geometry";
 import { isPlaced, placedLike } from "./identity";
 import type {
@@ -67,13 +67,13 @@ const between = (
       `morph.between() takes one span per transition: ${states.length} states need ${states.length - 1} spans, got ${spans.length}.`,
     );
 
-  spans.forEach(({ at, over }, i) => {
-    checkWindow(at, over, "morph()");
+  spans.forEach(({ start, over }, i) => {
+    checkWindow(start, over, "morph()");
     const before = spans[i - 1];
 
-    if (before && at < before.at + before.over - EPSILON)
+    if (before && start < before.start + before.over - EPSILON)
       throw new Error(
-        `morph.between()'s spans must follow one another: span ${i + 1} starts at ${num(at)}s, before span ${i} ends at ${num(before.at + before.over)}s.`,
+        `morph.between()'s spans must follow one another: span ${i + 1} starts at ${num(start)}s, before span ${i} ends at ${num(before.start + before.over)}s.`,
       );
   });
 
@@ -198,7 +198,7 @@ const preorder = (list: readonly Entry[]): Entry[] =>
   list.flatMap((entry) => [entry, ...preorder(entry.children)]);
 
 interface Window {
-  readonly at: Seconds;
+  readonly start: Seconds;
   readonly over: Seconds;
 }
 
@@ -242,10 +242,10 @@ const travel = <T>(
   let passage = new Passage<{ readonly value: T }>({ initial: { value: initial }, steps: [] });
   let current = initial;
 
-  windows.forEach(({ at, over }, i) => {
-    if (!same(current, from[i]!)) passage = passage.set({ value: from[i]! }, at);
+  windows.forEach(({ start, over }, i) => {
+    if (!same(current, from[i]!)) passage = passage.set({ value: from[i]! }, start);
 
-    if (!same(from[i]!, to[i]!)) passage = passage.to({ value: to[i]! }, span(at, over), curve);
+    if (!same(from[i]!, to[i]!)) passage = passage.to({ value: to[i]! }, span(start, over), curve);
     current = to[i]!;
   });
 
@@ -896,7 +896,7 @@ export const merge = (
   const windows = new Map<Entry, Window[]>();
   const all = preorder(top);
 
-  spans.forEach(({ at, over }, i) => {
+  spans.forEach(({ start, over }, i) => {
     const moving = units(top, i);
     const length = over - stagger * (moving.length - 1);
 
@@ -913,7 +913,9 @@ export const merge = (
       const own = windows.get(entry) ?? [];
       const wait = (rank.get(entry) ?? 0) * stagger;
 
-      own.push(stagger > 0 && moving.length > 1 ? { at: at + wait, over: length } : { at, over });
+      own.push(
+        stagger > 0 && moving.length > 1 ? { start: start + wait, over: length } : { start, over },
+      );
       windows.set(entry, own);
     }
   });

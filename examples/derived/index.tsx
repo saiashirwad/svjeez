@@ -48,7 +48,7 @@ export default scene(
     title: "Derived tracks",
     desc: "One angle track turns a spoke round a dial, carries a point round its rim and along a sine wave, and fills a bar as it goes, then winds them all back.",
     theme,
-    reducedMotion: { at: 2 },
+    reducedMotion: 2,
   },
   () => (
     <Group>

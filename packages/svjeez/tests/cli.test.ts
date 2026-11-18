@@ -149,7 +149,7 @@ test("svjeez svg says what is wrong with a param, naming its path", () => {
 test("svjeez svg emits a scene model default export, and --json reports its build", async () => {
   const file = join(import.meta.dir, "fixtures/scene/model.tsx");
   const { default: model } = await import(file);
-  const { svg } = await import("svjeez/scene");
+  const { svg } = await import("svjeez/scene/tools");
   const out = cli("svg", file);
 
   expect(out.stderr.toString()).toBe("");

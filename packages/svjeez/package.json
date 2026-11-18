@@ -23,6 +23,9 @@
       "scene": [
         "package-dist/scene/index.d.ts"
       ],
+      "scene/tools": [
+        "package-dist/scene/tools.d.ts"
+      ],
       "*": [
         "package-dist/*.d.ts"
       ]
@@ -48,6 +51,11 @@
       "@svjeez/source": "./src/scene/index.ts",
       "types": "./package-dist/scene/index.d.ts",
       "default": "./package-dist/scene/index.js"
+    },
+    "./scene/tools": {
+      "@svjeez/source": "./src/scene/tools.ts",
+      "types": "./package-dist/scene/tools.d.ts",
+      "default": "./package-dist/scene/tools.js"
     },
     "./scene/jsx-runtime": {
       "@svjeez/source": "./src/scene/jsx-runtime.ts",

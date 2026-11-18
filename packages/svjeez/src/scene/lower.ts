@@ -1,7 +1,7 @@
 import type { Font } from "../font/font";
 import { num } from "../format";
 import { EPSILON, type Seconds } from "../motion";
-import { checkWindow } from "../span";
+import { checkWindow } from "./span";
 import { matched, mixGeometry } from "./geometry";
 import { identified } from "./identity";
 import type {
@@ -94,8 +94,8 @@ export interface SceneOptions {
   readonly theme?: Theme;
   /** False plays the scene once and holds its last frame. Default true. */
   readonly loop?: boolean;
-  /** The frame held for a viewer who asked for reduced motion. Default: 85% through. */
-  readonly reducedMotion?: { readonly at: Seconds } | false;
+  /** The time, in seconds, whose frame is held for a viewer who asked for reduced motion. Default: 85% through. */
+  readonly reducedMotion?: Seconds | false;
 }
 
 interface Ctx {
@@ -103,8 +103,10 @@ interface Ctx {
   readonly fonts: FontBook;
   readonly size: Vec;
   readonly duration: Seconds;
-  /** Each symbol an instance has placed, lowered once. */
+  /** Each symbol an instance has placed, lowered once, by its name in the model. */
   readonly symbols: Map<string, SymbolEntry>;
+  /** The name each symbol took when its first instance was lowered. */
+  readonly named: Map<SceneSymbol, string>;
   /** What the second pass places: anchors, layout and connectors. */
   readonly notes: Notes;
   /** The timelines the scene made, applied node by node. */
@@ -241,6 +243,11 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
 
   if (props.geometry === undefined)
     throw new Error(`<Shape> ${where} needs a geometry, such as geometry={rect(40, 20)}.`);
+
+  if (props.fill === undefined && props.stroke === undefined)
+    throw new Error(
+      `<Shape> ${where} paints nothing: it has no fill and no stroke. Give it a fill, as in fill={theme.text}, or a stroke, as in stroke={{ color: theme.text }}.`,
+    );
   const geometry = geometryOf(props.geometry, timing, where);
   const box = boxOf(atRest(geometry));
   const paint = (value: Paint) => colorOf(ctx, value, where, box);
@@ -283,24 +290,30 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
     ...(props.italic !== undefined && { italic: props.italic }),
   };
 
-  const styles = new Map<Asked, RunLook>();
+  const styles = new Map<Asked, RunLook | undefined>();
   const looks = new Map<string, RunLook>();
 
-  // Each span's style is lowered once, and two that come out the same are one, so their runs join.
-  const lookOf = (asked: Asked): RunLook => {
-    const known = styles.get(asked);
-
-    if (known) return known;
+  // Each run's style is lowered once, and two that come out the same are one, so their runs join.
+  const lookOf = (asked: Asked): RunLook | undefined => {
+    if (styles.has(asked)) return styles.get(asked);
 
     const { face, font } = ctx.fonts.add(
       asked.font,
       faceOf(asked.font, asked.weight, asked.italic, where),
     );
 
+    const given = asked.fill;
+
+    if (given === undefined) {
+      styles.set(asked, undefined);
+
+      return undefined;
+    }
+
     const fill = (box: Box): Animated<ModelPaint> =>
       blendable(
         animated(
-          asked.fill,
+          given,
           (value: Paint) => colorOf(ctx, value, where, box),
           timing,
           mixPaint,
@@ -312,7 +325,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
     const opacity =
       asked.opacity === undefined
         ? undefined
-        : animated(asked.opacity, keep, timing, mixNumber, `opacity of a <Span> in ${where}`);
+        : animated(asked.opacity, keep, timing, mixNumber, `opacity of a <Run> in ${where}`);
 
     const made = { face, font, fill, ...(opacity !== undefined && opacity !== 1 && { opacity }) };
     const id = JSON.stringify([face, fill(PROBE), made.opacity]);
@@ -324,8 +337,30 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
     return look;
   };
 
-  const pieces = piecesOf(props.children, own, where).map(({ text: words, asked }) => {
-    const look = lookOf(asked);
+  const asked = piecesOf(props.children, own, where);
+  const found = asked.map((piece) => lookOf(piece.asked));
+
+  /** A piece with no fill of its own: only white space, which takes the look of a piece beside it in the same face. */
+  const borrowed = (i: number): RunLook => {
+    const { text: words, asked: wanted } = asked[i]!;
+
+    if (words.trim() !== "")
+      throw new Error(
+        `<Text> ${where} draws "${words.trim()}" with no fill, so it paints nothing. Give the <Text> a fill, as in fill={theme.text}, or the <Run> around these words one.`,
+      );
+    const face = faceOf(wanted.font, wanted.weight, wanted.italic, where);
+
+    const beside = [...found.slice(0, i).reverse(), ...found.slice(i + 1)].find(
+      (look) => look !== undefined && look.font === face,
+    );
+
+    if (beside) return beside;
+
+    return lookOf({ ...wanted, fill: "#00000000" })!;
+  };
+
+  const pieces = asked.map(({ text: words }, i) => {
+    const look = found[i] ?? borrowed(i);
 
     return { text: words, face: look.font, style: look };
   });
@@ -391,21 +426,44 @@ const image = (props: ImageProps, key: string, timing: Timing): ImageNode => {
 /** Whether anything in a lowered tree moves. */
 const moves = (node: SceneNode): boolean => JSON.stringify(node).includes('"kind":"lane"');
 
+/**
+ * The name a symbol takes in the model: the last key of its first instance, made of letters, digits, _ and - and
+ * unique among the scene's symbols. It is stable while that instance keeps its key.
+ */
+const symbolName = (ctx: Ctx, key: string): string => {
+  const stem = key
+    .split("/")
+    .at(-1)!
+    .replace(/[^\w-]/g, "_");
+
+  let name = stem;
+
+  for (let n = 2; ctx.symbols.has(name); n++) name = `${stem}-${n}`;
+
+  return name;
+};
+
 const instance = (ctx: Ctx, props: InstanceProps, key: string, timing: Timing): InstanceNode => {
   const { of } = props;
-  const known = ctx.symbols.get(of.name);
 
-  if (known && known.of !== of)
-    throw new Error(`Two different symbols are both named "${of.name}". Give one another name.`);
+  if (of?.kind !== "symbol")
+    throw new Error(`<Instance> "${key}" needs of={…}, a symbol from symbol(() => …).`);
+  const named = ctx.named.get(of);
+  const known = named === undefined ? undefined : ctx.symbols.get(named);
 
   if (known && !known.node)
-    throw new Error(`Symbol "${of.name}" places an instance of itself, so it would never end.`);
+    throw new Error(
+      `The symbol that <Instance> "${key}" places holds an instance of itself, so it would never end.`,
+    );
+
+  const name = named ?? symbolName(ctx, key);
 
   if (!known) {
     const entry: SymbolEntry = { of };
 
-    ctx.symbols.set(of.name, entry);
-    const root = `#${of.name}`;
+    ctx.named.set(of, name);
+    ctx.symbols.set(name, entry);
+    const root = `#${name}`;
 
     // A symbol is drawn once and shared, so it is lowered on the scene's own clock, wherever an instance sits.
     const children = lowerAll(
@@ -428,15 +486,15 @@ const instance = (ctx: Ctx, props: InstanceProps, key: string, timing: Timing): 
     entry.moves = moves(entry.node);
   }
 
-  const { node, moves: moving } = ctx.symbols.get(of.name)!;
+  const { node, moves: moving } = ctx.symbols.get(name)!;
   const clip = timing.clock.clips.at(-1);
 
   if (moving && timing.clock.offset > EPSILON)
     throw new Error(
-      `Instance "${key}" of symbol "${of.name}" sits inside ${clip?.label ?? "a sequence"}, but the symbol moves, and a symbol's tracks run on the scene's clock for every instance. Move the instance instead, or draw the content without a symbol.`,
+      `Instance "${key}" sits inside ${clip?.label ?? "a sequence"}, but its symbol moves, and a symbol's tracks run on the scene's clock for every instance. Move the instance instead, or draw the content without a symbol.`,
     );
 
-  return { ...base(props, node!.box, key, timing), kind: "instance", symbol: of.name };
+  return { ...base(props, node!.box, key, timing), kind: "instance", symbol: name };
 };
 
 const sceneTiming = ({ duration }: Ctx): Timing => ({
@@ -444,15 +502,15 @@ const sceneTiming = ({ duration }: Ctx): Timing => ({
   clock: { offset: 0, end: duration, clips: [] },
 });
 
-const label = (at: Seconds, over: Seconds | undefined): string =>
-  `<Sequence at={${num(at)}}${over === undefined ? "" : ` over={${num(over)}}`}>`;
+const label = (begin: Seconds, over: Seconds | undefined): string =>
+  `<Sequence start={${num(begin)}}${over === undefined ? "" : ` over={${num(over)}}`}>`;
 
-const inside = (timing: Timing, at: Seconds, over: Seconds | undefined): Timing => {
-  checkWindow(at, over ?? 1, "<Sequence>");
+const inside = (timing: Timing, begin: Seconds, over: Seconds | undefined): Timing => {
+  checkWindow(begin, over ?? 1, "<Sequence>");
   const parent = timing.clock;
-  const start = parent.offset + at;
+  const start = parent.offset + begin;
   const end = over === undefined ? parent.end : start + over;
-  const name = label(at, over);
+  const name = label(begin, over);
 
   if (start > parent.end + EPSILON || end > parent.end + EPSILON)
     throw new Error(
@@ -482,7 +540,7 @@ const lowerAll = (
     if (given.type === "fragment") return lowerAll(ctx, given.children, timing, parent, taken);
 
     if (given.type === "sequence") {
-      const clocked = inside(timing, given.at, given.over);
+      const clocked = inside(timing, given.start, given.over);
 
       if (given.timeline) ctx.cues.claim(given.timeline, clocked.clock);
 
@@ -598,7 +656,7 @@ const maskOf = (ctx: Ctx, mask: Child, key: string, timing: Timing): GroupNode |
 
     if (placed !== undefined)
       throw new Error(
-        `"${placed}" is in the mask of "${key}" and is placed by an anchor, a timeline's moveTo or as a connector. A mask is drawn in its node's frame and is never part of the layout: place what is in it with at.`,
+        `"${placed}" is in the mask of "${key}" and is placed by an anchor, a timeline's move to an anchor, or as an arrow's end. A mask is drawn in its node's frame and is never part of the layout: place what is in it with at.`,
       );
   }
 
@@ -646,8 +704,14 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
   if (!(duration > 0 && duration < Infinity))
     throw new Error(`scene() needs a positive duration, got ${duration}.`);
 
-  if (options.reducedMotion && !Number.isFinite(options.reducedMotion.at))
-    throw new Error(`scene() needs a finite reducedMotion.at, got ${options.reducedMotion.at}.`);
+  if (
+    options.reducedMotion !== undefined &&
+    options.reducedMotion !== false &&
+    !Number.isFinite(options.reducedMotion)
+  )
+    throw new Error(
+      `scene() needs reducedMotion as a time in seconds, or false, got ${String(options.reducedMotion)}.`,
+    );
 
   const [top, cues] = collect(() => sceneElement(within(size, build), "scene()'s callback"));
 
@@ -657,6 +721,7 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
     size,
     duration,
     symbols: new Map(),
+    named: new Map(),
     notes: notes(),
     cues,
   };
@@ -687,7 +752,7 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
   const still =
     options.reducedMotion === false
       ? undefined
-      : Math.max(0, Math.min(duration, options.reducedMotion?.at ?? duration * 0.85));
+      : Math.max(0, Math.min(duration, options.reducedMotion ?? duration * 0.85));
 
   return {
     size,

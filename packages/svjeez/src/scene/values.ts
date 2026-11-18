@@ -142,7 +142,7 @@ export const arc = ({ radius, start = 0, sweep }: ArcOptions): Geometry => {
   return { kind: "arc", radius: positive(radius, "arc()"), start, sweep };
 };
 
-/** A straight segment in the shape's frame. It has no fill. To join two nodes, use `<Line>` or `<Arrow>`. */
+/** A straight segment in the shape's frame. It has no fill. To join two nodes, use `<Arrow>`. */
 export const line = (from: Vec, to: Vec): Geometry => ({ kind: "line", from, to });
 
 /** A closed outline through `points`, in the shape's frame. */
@@ -162,8 +162,11 @@ export const polyline = (points: readonly Vec[]): Geometry => ({
 /** A path built step by step: `path().moveTo([0, 0]).lineTo([10, 0]).close()`. */
 export const path = (): PathBuilder => new PathBuilder();
 
-/** Reads SVG path data into a geometry at compile time: the way in for icons and traced artwork. */
-export const svgPath = (d: string): Geometry => ({
+/**
+ * A geometry from path data, the `d` string icon sets and drawing tools write (`"M0 0L10 0Z"`), read when the scene
+ * compiles: the way in for icons and traced artwork. To build a path in code, use `path()`.
+ */
+export const pathData = (d: string): Geometry => ({
   kind: "path",
   contours: ringsOf(d),
   rule: "nonzero",
@@ -278,7 +281,9 @@ export const tokens = <const K extends string>(values: {
 
   for (const name of names) {
     if (!/^[A-Za-z_][\w-]*$/.test(name))
-      throw new Error(`tokens() needs CSS identifiers for names, got "${name}".`);
+      throw new Error(
+        `tokens() needs names made of letters, digits, _ and -, starting with a letter or _, got "${name}".`,
+      );
 
     if (values.light[name] === undefined)
       throw new Error(`tokens() has a dark "${name}" and no light one.`);

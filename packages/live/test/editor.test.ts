@@ -539,9 +539,9 @@ import { Group, Shape, rect, scene } from "svjeez/scene";
 
 export default scene({ size: [200, 120], duration: 1, title: "x" }, () => (
   <Group>
-    <Shape key="back" geometry={rect(200, 120)} />
+    <Shape key="back" geometry={rect(200, 120)} fill="#101010" />
     <Group key="card" at={[50, 40]}>
-      <Shape key="face" geometry={rect(40, 30)} />
+      <Shape key="face" geometry={rect(40, 30)} fill="#3EE6D6" />
     </Group>
   </Group>
 ));

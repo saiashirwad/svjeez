@@ -3,17 +3,13 @@ import { describe, expect, test } from "bun:test";
 import { font } from "svjeez";
 import {
   Group,
+  Run,
   Shape,
-  Span,
   Stack,
   Text,
   blur,
-  boxesOf,
   circle,
-  diagnose,
   ease,
-  hitTest,
-  isLane,
   linear,
   morph,
   polygon,
@@ -24,14 +20,13 @@ import {
   shadow,
   span,
   subtract,
-  svg,
   tokens,
   track,
-  type Model,
   type Paint,
   type SceneElement,
   type Vec,
 } from "svjeez/scene";
+import { boxesOf, diagnose, hitTest, isLane, svg, type Model } from "svjeez/scene/tools";
 
 const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
 
@@ -46,7 +41,7 @@ const made = (build: () => SceneElement, duration = 4, still: number | false = 2
       size: [200, 100],
       duration,
       title: "Test",
-      reducedMotion: still === false ? false : { at: still },
+      reducedMotion: still,
     },
     build,
   );
@@ -122,18 +117,40 @@ describe("gradients", () => {
     );
   });
 
-  test("a track blends gradients of one kind and stop count, and nothing else", () => {
+  test("a track blends a color into a gradient and gradients of one kind with any stops, and not two kinds", () => {
     const g = (x: number) => linear({ from: [0, 0], to: [x, 0], stops: ["#000000", "#FFFFFF"] });
+    const three = linear({ from: [0, 0], to: [5, 0], stops: ["#000000", "#808080", "#FFFFFF"] });
 
-    expect(() =>
+    const bar = only(
       made(() => (
         <Shape
           key="bar"
           geometry={rect(10, 10)}
-          fill={track<Paint>(g(10)).to("#FF0000", span(0, 1))}
+          fill={track<Paint>(g(10)).to("#FF0000", span(0, 1)).to(three, span(1, 1))}
         />
       )),
-    ).toThrow('fill on "bar" moves from a linear gradient of 2 stops to a color');
+    );
+
+    const keys =
+      bar.kind === "shape" && bar.fill !== undefined && isLane(bar.fill) ? bar.fill.keys : [];
+
+    const red: Model.Rgba = [1, 0, 0, 1];
+
+    expect(keys.every(({ value }) => "stops" in value && value.stops.length === 3)).toBe(true);
+    expect(keys[0]!.value).toMatchObject({
+      to: [10, 0],
+      stops: [{ offset: 0 }, { offset: 1 }, { offset: 1 }],
+    });
+    expect(keys.map(({ value }) => value)).toContainEqual({
+      kind: "linear",
+      from: [0, 0],
+      to: [5, 0],
+      stops: [
+        { offset: 0, color: red },
+        { offset: 0.5, color: red },
+        { offset: 1, color: red },
+      ],
+    });
     expect(() =>
       made(() => (
         <Shape
@@ -145,7 +162,7 @@ describe("gradients", () => {
           )}
         />
       )),
-    ).toThrow("radial gradient");
+    ).toThrow("a linear gradient to a radial one, and the two kinds don't blend");
   });
 
   test("SVG writes one gradient for every use of it, its points moved to where the element's coordinates put the frame", () => {
@@ -263,8 +280,7 @@ describe("gradients on text", () => {
     const out = emitted(
       made(() => (
         <Text font={mono} size={10} at={[20, 30]} fill="#000000">
-          a{" "}
-          <Span fill={linear({ from: [0, 0], to: [40, 0], stops: ["#FF0000", "#0000FF"] })}>b</Span>
+          a <Run fill={linear({ from: [0, 0], to: [40, 0], stops: ["#FF0000", "#0000FF"] })}>b</Run>
         </Text>
       )),
     );
@@ -278,7 +294,7 @@ describe("gradients on text", () => {
 
     const model = made(() => (
       <Text font={mono} size={10} fill={linear.across({ stops })}>
-        ab <Span fill={radial.across({ stops })}>cd</Span>
+        ab <Run fill={radial.across({ stops })}>cd</Run>
       </Text>
     ));
 
@@ -307,8 +323,8 @@ describe("gradients on text", () => {
     const node = only(
       made(() => (
         <Text font={mono} size={10} fill="#000000">
-          <Span fill={g}>ab</Span>
-          <Span fill={g}>cd</Span>
+          <Run fill={g}>ab</Run>
+          <Run fill={g}>cd</Run>
         </Text>
       )),
     );
@@ -319,7 +335,7 @@ describe("gradients on text", () => {
   test("diagnose names the gradients a text draws with", () => {
     const model = made(() => (
       <Text font={mono} size={10} fill={linear.across({ stops: ["#000000", "#FFFFFF"] })}>
-        a <Span fill={radial.across({ stops: ["#000000", "#FFFFFF"] })}>b</Span>
+        a <Run fill={radial.across({ stops: ["#000000", "#FFFFFF"] })}>b</Run>
       </Text>
     ));
 
@@ -334,7 +350,7 @@ describe("gradients on text", () => {
     const out = emitted(
       made(() => (
         <Text font={mono} size={10} fill={track(g(10)).to(g(40), span(0, 1))}>
-          a <Span opacity={track(0).to(1, span(0, 1))}>b</Span>
+          a <Run opacity={track(0).to(1, span(0, 1))}>b</Run>
         </Text>
       )),
     );
@@ -407,7 +423,7 @@ describe("gradients on text", () => {
           span(0, 1),
         ),
       ),
-    ).toThrow("only colors, or gradients of one kind with as many stops, blend");
+    ).not.toThrow();
   });
 });
 
@@ -529,7 +545,7 @@ describe("clips and masks", () => {
     expect(() =>
       made(() => (
         <Group>
-          <Shape ref={dot} geometry={circle(2)} at={[50, 50]} />
+          <Shape fill="#000000" ref={dot} geometry={circle(2)} at={[50, 50]} />
           <Group mask={<Shape key="spot" geometry={circle(4)} at={dot.center} fill="#000000" />}>
             <Shape geometry={rect(30, 10)} fill="#FF0000" />
           </Group>
@@ -640,9 +656,9 @@ describe("effects", () => {
   });
 
   test("an effect's lengths are checked, and a non-scaling stroke can't be bounded under one", () => {
-    expect(() => made(() => <Shape key="a" geometry={rect(4, 4)} effects={[blur(-1)]} />)).toThrow(
-      'blur on "a" needs a finite length of 0 or more, got -1.',
-    );
+    expect(() =>
+      made(() => <Shape fill="#000000" key="a" geometry={rect(4, 4)} effects={[blur(-1)]} />),
+    ).toThrow('blur on "a" needs a finite length of 0 or more, got -1.');
     expect(() =>
       emitted(
         made(() => (
@@ -658,7 +674,9 @@ describe("effects", () => {
   });
 
   test("SVG draws blur and shadow close to exact, and says how they differ", () => {
-    const model = made(() => <Shape key="a" geometry={rect(4, 4)} effects={[blur(1)]} />);
+    const model = made(() => (
+      <Shape fill="#000000" key="a" geometry={rect(4, 4)} effects={[blur(1)]} />
+    ));
 
     expect(diagnose(model, svg).map((entry) => [entry.severity, entry.feature])).toEqual([
       ["warning", "blur"],
@@ -696,12 +714,12 @@ describe("morph", () => {
     expect(isLane(shown) && [shown.keys[0].value, shown.keys.at(-1)!.value]).toEqual([0, 0.5]);
   });
 
-  test("a gradient fades in from clear, and two kinds of paint or of effect don't blend", () => {
+  test("a gradient fades in from a clear color, a color blends into a gradient, and two kinds of effect don't", () => {
     const g = linear({ from: [0, 0], to: [10, 0], stops: ["#000000", "#FFFFFF"] });
 
     const model = made(() =>
       morph(
-        <Shape key="a" geometry={rect(4, 4)} />,
+        <Shape fill="#00000000" key="a" geometry={rect(4, 4)} />,
         <Shape key="a" geometry={rect(4, 4)} fill={g} />,
         span(0, 1),
       ),
@@ -723,12 +741,17 @@ describe("morph", () => {
           span(0, 1),
         ),
       ),
-    ).toThrow("only colors, or gradients of one kind with as many stops, blend");
+    ).not.toThrow();
     expect(() =>
       made(() =>
         morph(
-          <Shape key="a" geometry={rect(4, 4)} effects={[blur(2)]} />,
-          <Shape key="a" geometry={rect(4, 4)} effects={[shadow({ color: "#000000" })]} />,
+          <Shape fill="#000000" key="a" geometry={rect(4, 4)} effects={[blur(2)]} />,
+          <Shape
+            fill="#000000"
+            key="a"
+            geometry={rect(4, 4)}
+            effects={[shadow({ color: "#000000" })]}
+          />,
           span(0, 1),
         ),
       ),

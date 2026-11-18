@@ -1,13 +1,12 @@
 import type { FontValue } from "../font/font";
 import type { Seconds } from "../motion";
-import type { Span as TimeSpan } from "../span";
 import type { PictureData } from "../picture";
 import type { Vec } from "./ir";
 import type { Anchor, Ref } from "./refs";
 import type { Settle } from "./settle";
 import type { MorphElement } from "./morph";
 import type { Timeline } from "./timeline";
-import type { Anim, Stack } from "./track";
+import type { Anim, Layers } from "./track";
 import type { Effect } from "./effects";
 import { rect, type Geometry, type Paint } from "./values";
 
@@ -28,9 +27,16 @@ export interface Common {
   /** Degrees, clockwise. */
   readonly rotate?: Anim<number>;
   readonly scale?: Anim<number> | Anim<Vec>;
+  /**
+   * The node's own opacity, 0 to 1. A prop is the node's own value; a motion layer (`enter`, `exit`, `motion()`)
+   * wraps it and multiplies; a timeline verb (`ref.show`, `ref.hide`, `ref.to`) writes this prop's track.
+   */
   readonly opacity?: Anim<number>;
-  /** Layers of motion around the node, the first outermost. */
-  readonly motion?: Stack;
+  /**
+   * Layers of motion around the node, the first outermost: `enter()`, `exit()`, `wiggle()`, `motion()`. A layer's
+   * `offset` moves the node from where `at` puts it, on top of it.
+   */
+  readonly motion?: Layers;
   /**
    * Only what lies inside this outline is drawn. It is in the node's own frame, so it moves, turns and scales with the
    * node, and a track reshapes it as it does a shape's geometry. The node's box stays its content's.
@@ -67,7 +73,7 @@ export interface ShapeProps extends Common {
 }
 
 /**
- * What a run of text is drawn in. A `<Span>` takes these from the `<Text>` or `<Span>` around it unless it says
+ * What a run of text is drawn in. A `<Run>` takes these from the `<Text>` or `<Run>` around it unless it says
  * otherwise.
  */
 export interface RunStyle {
@@ -86,7 +92,7 @@ export interface RunStyle {
   readonly opacity?: Anim<number>;
 }
 
-/** What `<Text>` and `<Span>` hold: strings, numbers, spans, and lists of them. Line breaks start new lines. */
+/** What `<Text>` and `<Run>` hold: strings, numbers, runs, and lists of them. Line breaks start new lines. */
 export type TextChild =
   | string
   | number
@@ -97,8 +103,8 @@ export type TextChild =
   | readonly TextChild[];
 
 /** Part of a text in another face or paint. It lays out with the text around it, so a line wraps through it. */
-export interface SpanProps extends Omit<RunStyle, "opacity"> {
-  /** Multiplies the fill's alpha, 0 to 1, of this span alone: a span in a faded text fades with it. Default 1. */
+export interface RunProps extends Omit<RunStyle, "opacity"> {
+  /** Multiplies the fill's alpha, 0 to 1, of this run alone: a run in a faded text fades with it. Default 1. */
   readonly opacity?: Anim<number>;
   readonly children?: TextChild;
 }
@@ -111,8 +117,8 @@ export interface TextProps extends Common {
   /** The italic face of `font`. Default false, or whether a single face is italic. */
   readonly italic?: boolean;
   readonly size: number;
-  /** Every run's fill, unless a `<Span>` says otherwise. */
-  readonly fill: Anim<Paint>;
+  /** Every run's fill, unless a `<Run>` says otherwise. Text with no fill anywhere draws nothing, which is an error. */
+  readonly fill?: Anim<Paint>;
   /**
    * How lines sit in their column, and so which point of the first baseline `at` names: its start, middle or end.
    * Default `start`.
@@ -122,7 +128,7 @@ export interface TextProps extends Common {
   readonly width?: number;
   /** Baseline to baseline, in multiples of `size`. Default: the font's own line height. */
   readonly lineHeight?: number;
-  /** Strings and `<Span>`s. Line breaks in them start new lines. */
+  /** Strings and `<Run>`s. Line breaks in them start new lines. */
   readonly children?: TextChild;
 }
 
@@ -144,30 +150,24 @@ export interface ImageProps extends Common {
  */
 export interface SceneSymbol {
   readonly kind: "symbol";
-  readonly name: string;
   readonly build: () => Child;
 }
 
 /**
- * A symbol named `name`, unique in the scene. Its tracks run on the scene's clock and are shared by every instance, so
+ * Content drawn once and placed many times. Its tracks run on the scene's clock and are shared by every instance, so
  * every instance moves in step; move the instances themselves (`at`, `opacity`, `motion`) to set them apart. An
  * instance of a symbol that moves can't sit inside a `<Sequence>` that starts later, since its clock would not apply.
  */
-export const symbol = (name: string, build: () => Child): SceneSymbol => {
-  if (!/^[A-Za-z_][\w-]*$/.test(name))
-    throw new Error(`symbol() needs a name made of letters, digits, _ and -, got "${name}".`);
-
-  return { kind: "symbol", name, build };
-};
+export const symbol = (build: () => Child): SceneSymbol => ({ kind: "symbol", build });
 
 /** One placement of a symbol. */
 export interface InstanceProps extends Common {
   readonly of: SceneSymbol;
 }
 
-/** A local clock: `at` and `over` are seconds on the clock around it, as a span's are. */
+/** A local clock: `start` and `over` are seconds on the clock around it, as a span's are. */
 export interface SequenceProps {
-  readonly at: Seconds;
+  readonly start: Seconds;
   readonly over?: Seconds;
   /** A timeline that runs on this sequence's clock, so the nodes inside it are choreographed from its start. */
   readonly timeline?: Timeline;
@@ -185,12 +185,12 @@ export type SceneElement =
     }
   | { readonly type: "shape"; readonly props: ShapeProps }
   | { readonly type: "text"; readonly props: TextProps }
-  | { readonly type: "span"; readonly props: SpanProps }
+  | { readonly type: "run"; readonly props: RunProps }
   | { readonly type: "image"; readonly props: ImageProps }
   | { readonly type: "instance"; readonly props: InstanceProps }
   | {
       readonly type: "sequence";
-      readonly at: Seconds;
+      readonly start: Seconds;
       readonly over?: Seconds;
       readonly timeline?: Timeline;
       readonly children: readonly SceneElement[];
@@ -230,19 +230,19 @@ const svgTag = (value: SceneElement): string | undefined =>
  * The element as lowering takes it, or the error a newcomer needs: a lowercase SVG tag, or JSX that svjeez's SVG
  * runtime built because the file doesn't say `@jsxImportSource svjeez/scene`.
  */
-/** Whether a value is an element lowering places: any but a span, which only a text holds. */
+/** Whether a value is an element lowering places: any but a run, which only a text holds. */
 const isPlaceable = (
   value: SceneElement,
-): value is Exclude<SceneElement, { readonly type: "span" }> =>
-  isObject(value) && value.type !== "span" && TYPES.has(value.type);
+): value is Exclude<SceneElement, { readonly type: "run" }> =>
+  isObject(value) && value.type !== "run" && TYPES.has(value.type);
 
 export const sceneElement = (
   value: SceneElement,
   where: string,
-): Exclude<SceneElement, { readonly type: "span" }> => {
-  if (isObject(value) && value.type === "span")
+): Exclude<SceneElement, { readonly type: "run" }> => {
+  if (isObject(value) && value.type === "run")
     throw new Error(
-      `${where} holds a <Span>, which draws only inside a <Text>. Put it in one, as in <Text font={…} size={…} fill={…}>a <Span weight={600}>bold</Span> word</Text>.`,
+      `${where} holds a <Run>, which draws only inside a <Text>. Put it in one, as in <Text font={…} size={…} fill={…}>a <Run weight={600}>bold</Run> word</Text>.`,
     );
 
   if (isPlaceable(value)) return value;
@@ -282,16 +282,10 @@ export const Shape = (props: ShapeProps): SceneElement => ({ type: "shape", prop
 export const Text = (props: TextProps): SceneElement => ({ type: "text", props });
 
 /**
- * A stretch of time, as `span()` makes one. It shares its name with the `<Span>` component below, which is a value:
- * one import brings both.
- */
-export type Span = TimeSpan;
-
-/**
  * Part of a `<Text>` in another weight, style, font or fill, laid out with the text around it. It is not a node of
  * its own: it has no key, place or motion, only what it is drawn in.
  */
-export const Span = (props: SpanProps): SceneElement => ({ type: "span", props });
+export const Run = (props: RunProps): SceneElement => ({ type: "run", props });
 
 /** A picture in a frame of its own size, from its top-left corner. */
 export const Image = (props: ImageProps): SceneElement => ({ type: "image", props });
@@ -300,12 +294,12 @@ export const Image = (props: ImageProps): SceneElement => ({ type: "image", prop
 export const Instance = (props: InstanceProps): SceneElement => ({ type: "instance", props });
 
 /**
- * A clock of its own: every track inside counts from `at`, so a component is written from 0 and placed anywhere, and
- * sequences inside sequences add up. With `over` the tracks inside must end by then. It draws nothing.
+ * A clock of its own: every track inside counts from `start`, so a component is written from 0 and placed anywhere,
+ * and sequences inside sequences add up. With `over` the tracks inside must end by then. It draws nothing.
  */
-export const Sequence = ({ at, over, timeline, children }: SequenceProps): SceneElement => ({
+export const Sequence = ({ start, over, timeline, children }: SequenceProps): SceneElement => ({
   type: "sequence",
-  at,
+  start,
   ...(over !== undefined && { over }),
   ...(timeline && { timeline }),
   children: flat(children),

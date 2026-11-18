@@ -7,11 +7,11 @@ import {
   canvas,
   circle,
   ease,
+  pathData,
   polygon,
   rect,
   scene,
   span,
-  svgPath,
   track,
   type SceneElement,
   type Vec,
@@ -45,7 +45,7 @@ const star = polygon(
   }),
 );
 
-const heart = svgPath(
+const heart = pathData(
   "M0 -14C8 -34 42 -28 34 0C29 16 10 26 0 36C-10 26 -29 16 -34 0C-42 -28 -8 -34 0 -14Z",
 );
 
@@ -56,7 +56,7 @@ export default scene(
     title: "Animated geometry",
     desc: "A rect grows and rounds its corners, an arc opens around its circle, a star morphs into a heart, a ring's stroke swells, and a trimmed window travels around a circle.",
     theme,
-    reducedMotion: { at: 2.5 },
+    reducedMotion: 2.5,
   },
   () => (
     <Group>

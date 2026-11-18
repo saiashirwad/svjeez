@@ -9,7 +9,7 @@ export default scene(
     title: "Loops and stacking",
     desc: "A ring spins on a two second loop beside a dot that fades in and then wanders.",
     theme,
-    reducedMotion: { at: 1 },
+    reducedMotion: 1,
   },
   () => (
     <Group>

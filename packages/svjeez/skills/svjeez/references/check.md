@@ -34,7 +34,7 @@ In `svjeez dev`, open **Timeline**, then click **Check layout**. A finding seeks
 | `loop-seam` | warning | An element seen on both sides of the loop's end that moves more than 3 or changes opacity by more than 0.3 when the loop restarts, beyond where its motion just before the end was taking it. |
 | `overlap` | warning | Two different `<text>` elements whose middles overlap by more than 30% of the smaller, both visible and at rest. A copy of the same words (a shadow or an outline) and a text covered by an opaque shape drawn between them are left alone. |
 
-For a scene model, these come first, read from the model with no browser (`inspect()` from `svjeez/scene` returns the same list). A rule both read is reported once, as the model says it.
+For a scene model, these come first, read from the model with no browser (`inspect()` from `svjeez/scene/tools` returns the same list). A rule both read is reported once, as the model says it.
 
 | Code | Severity | Reports |
 | --- | --- | --- |

@@ -5,9 +5,7 @@ import {
   Sequence,
   Shape,
   circle,
-  derive,
   ease,
-  isLane,
   rect,
   ref,
   scene,
@@ -15,10 +13,10 @@ import {
   spin,
   timeline,
   track,
-  type Model,
   type SceneElement,
   type Vec,
 } from "svjeez/scene";
+import { isLane, type Model } from "svjeez/scene/tools";
 import { easeAt } from "../src/ease-at";
 import { blendNumber, blendVec, valueAt } from "../src/scene/sample";
 
@@ -37,11 +35,14 @@ const progress = track(0).to(1, span(0.5, 2), ease.inOut).to(0.25, span(3, 0.5))
 describe("affine mappings", () => {
   test("keep their source's keys and eases one to one", () => {
     const node = only(
-      made(() => <Shape geometry={circle(2)} at={progress.map((p): Vec => [p * 200, 40])} />),
+      made(() => (
+        <Shape fill="#000000" geometry={circle(2)} at={progress.map((p): Vec => [p * 200, 40])} />
+      )),
     );
 
     const source = keysOf(
-      own(only(made(() => <Shape geometry={circle(2)} opacity={progress} />))).opacity,
+      own(only(made(() => <Shape fill="#000000" geometry={circle(2)} opacity={progress} />)))
+        .opacity,
     );
 
     expect(keysOf(node.at).map((key) => [key.t, key.value, key.ease])).toEqual(
@@ -54,7 +55,11 @@ describe("affine mappings", () => {
 
     const node = only(
       made(() => (
-        <Shape geometry={circle(2)} rotate={theta.map((t) => -t * 2).map((t) => t + 10)} />
+        <Shape
+          fill="#000000"
+          geometry={circle(2)}
+          rotate={theta.map((t) => -t * 2).map((t) => t + 10)}
+        />
       )),
     );
 
@@ -66,7 +71,13 @@ describe("affine mappings", () => {
 
   test("a mapping that bends inside a move is not affine", () => {
     const node = only(
-      made(() => <Shape geometry={circle(2)} opacity={progress.map((p) => Math.min(p, 0.5))} />),
+      made(() => (
+        <Shape
+          fill="#000000"
+          geometry={circle(2)}
+          opacity={progress.map((p) => Math.min(p, 0.5))}
+        />
+      )),
     );
 
     // The clamp bends inside the first move, so the mapping is sampled, and stays close.
@@ -89,7 +100,13 @@ describe("affine mappings", () => {
     const b = track(5).to(-5, span(1, 1));
 
     const node = only(
-      made(() => <Shape geometry={circle(2)} at={derive([a, b], (x, y): Vec => [x + y, x - y])} />),
+      made(() => (
+        <Shape
+          fill="#000000"
+          geometry={circle(2)}
+          at={a.with(b).map((x, y): Vec => [x + y, x - y])}
+        />
+      )),
     );
 
     expect(keysOf(node.at).map((key) => key.value)).toEqual([
@@ -101,7 +118,9 @@ describe("affine mappings", () => {
   });
 
   test("geometry can be derived, keeping its kind", () => {
-    const node = only(made(() => <Shape geometry={progress.map((p) => rect(10 + p * 90, 20))} />));
+    const node = only(
+      made(() => <Shape fill="#000000" geometry={progress.map((p) => rect(10 + p * 90, 20))} />),
+    );
 
     expect(
       node.kind === "shape" &&
@@ -126,7 +145,10 @@ describe("sampled mappings", () => {
   const angle = track(0).to(360, span(0, 4), ease.inOut);
 
   test("are fitted to few keys that stay within the tolerance", () => {
-    const node = only(made(() => <Shape geometry={circle(2)} at={angle.map(around)} />));
+    const node = only(
+      made(() => <Shape fill="#000000" geometry={circle(2)} at={angle.map(around)} />),
+    );
+
     const keys = keysOf(node.at);
 
     // A point's keys are joined by straight lines, so a circle within 0.05px takes about a hundred.
@@ -143,7 +165,7 @@ describe("sampled mappings", () => {
 
   test("a looping source is sampled over one period and keeps it", () => {
     const node = only(
-      made(() => <Shape geometry={circle(2)} at={spin({ every: 2 }).map(around)} />),
+      made(() => <Shape fill="#000000" geometry={circle(2)} at={spin({ every: 2 }).map(around)} />),
     );
 
     expect(isLane(node.at) && node.at.period).toBe(2);
@@ -152,11 +174,15 @@ describe("sampled mappings", () => {
 
   test("a looser tolerance gives fewer keys", () => {
     const tight = keysOf(
-      only(made(() => <Shape geometry={circle(2)} at={angle.map(around)} />)).at,
+      only(made(() => <Shape fill="#000000" geometry={circle(2)} at={angle.map(around)} />)).at,
     ).length;
 
     const loose = keysOf(
-      only(made(() => <Shape geometry={circle(2)} at={angle.map(around, { tolerance: 1 })} />)).at,
+      only(
+        made(() => (
+          <Shape fill="#000000" geometry={circle(2)} at={angle.map(around, { tolerance: 1 })} />
+        )),
+      ).at,
     ).length;
 
     expect(loose).toBeLessThan(tight);
@@ -167,7 +193,13 @@ describe("sampled mappings", () => {
     const b = track(0).to(10, span(1, 2), ease.linear);
 
     const node = only(
-      made(() => <Shape geometry={circle(2)} opacity={derive([a, b], (x, y) => (x + y) / 20)} />),
+      made(() => (
+        <Shape
+          fill="#000000"
+          geometry={circle(2)}
+          opacity={a.with(b).map((x, y) => (x + y) / 20)}
+        />
+      )),
     );
 
     for (const t of [0.5, 1.5, 2.5])
@@ -182,8 +214,9 @@ describe("derived tracks", () => {
   test("follow their sources inside a sequence", () => {
     const node = only(
       made(() => (
-        <Sequence at={1}>
+        <Sequence start={1}>
           <Shape
+            fill="#000000"
             geometry={circle(2)}
             opacity={track(0)
               .to(1, span(0, 1), ease.linear)
@@ -203,7 +236,15 @@ describe("derived tracks", () => {
 
   test("of still values are still values", () => {
     const node = only(
-      made(() => <Shape geometry={circle(2)} opacity={derive([0.25, 2], (a, b) => a * b)} />),
+      made(() => (
+        <Shape
+          fill="#000000"
+          geometry={circle(2)}
+          opacity={track(0.25)
+            .with(2)
+            .map((a, b) => a * b)}
+        />
+      )),
     );
 
     expect(node.layers[0]?.opacity).toBe(0.5);
@@ -224,6 +265,7 @@ describe("derived tracks", () => {
     expect(() =>
       made(() => (
         <Shape
+          fill="#000000"
           geometry={track(0)
             .to(1, span(0, 1))
             .map((p) => (p < 0.5 ? rect(10, 10) : circle(4)))}
@@ -237,9 +279,11 @@ describe("derived tracks", () => {
       made(() => {
         const dot = ref("dot");
 
-        timeline(dot.fade(0, 1));
+        timeline(dot.to({ opacity: 0 }, 1));
 
-        return <Shape ref={dot} geometry={circle(2)} opacity={progress.map((p) => p)} />;
+        return (
+          <Shape fill="#000000" ref={dot} geometry={circle(2)} opacity={progress.map((p) => p)} />
+        );
       }),
     ).toThrow("which a track already moves");
   });
@@ -250,8 +294,12 @@ describe("derived tracks", () => {
 
       return (
         <Group>
-          <Shape ref={card} geometry={rect(20, 10)} at={[10, 10]} />
-          <Shape geometry={circle(2)} at={card.right.map(([x, y]): Vec => [x + 5, y])} />
+          <Shape fill="#000000" ref={card} geometry={rect(20, 10)} at={[10, 10]} />
+          <Shape
+            fill="#000000"
+            geometry={circle(2)}
+            at={card.right.map(([x, y]): Vec => [x + 5, y])}
+          />
         </Group>
       );
     });

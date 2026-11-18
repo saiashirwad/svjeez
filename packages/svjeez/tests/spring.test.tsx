@@ -9,18 +9,15 @@ import {
   circle,
   ease,
   enter,
-  isLane,
   motion,
   rect,
   scene,
   span,
-  svg,
   tokens,
   track,
-  type Model,
   type SceneElement,
-  type Spring,
 } from "svjeez/scene";
+import { isLane, svg, type Model, type Spring } from "svjeez/scene/tools";
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Test" }, build);
@@ -137,6 +134,7 @@ describe("spring steps", () => {
   test("a spring step follows the simulated spring, overshoot and all, in a few keys", () => {
     const model = made(() => (
       <Shape
+        fill="#000000"
         geometry={circle(4)}
         at={track([0, 0]).to([300, 0], span(0.5, bouncy.settle), bouncy)}
       />
@@ -160,7 +158,11 @@ describe("spring steps", () => {
 
     const node = only(
       made(() => (
-        <Shape geometry={rect(10, 10)} motion={enter(span(0, pop.settle), { scale: 0 }, pop)} />
+        <Shape
+          fill="#000000"
+          geometry={rect(10, 10)}
+          motion={enter(span(0, pop.settle), { from: { scale: 0 }, curve: pop })}
+        />
       )),
     );
 
@@ -178,6 +180,7 @@ describe("spring steps", () => {
     expect(() =>
       made(() => (
         <Shape
+          fill="#000000"
           key="dot"
           geometry={circle(4)}
           at={track([0, 0]).to([100, 0], span(0, 0.5), bouncy)}
@@ -192,6 +195,7 @@ describe("spring steps", () => {
     const lane = atOf(
       made(() => (
         <Shape
+          fill="#000000"
           geometry={circle(4)}
           at={track([0, 0]).to([200, 0], span(0, 2), bouncy).to([60, 0], span(0.3, 2), bouncy)}
         />
@@ -212,6 +216,7 @@ describe("spring steps", () => {
     const lane = atOf(
       made(() => (
         <Shape
+          fill="#000000"
           geometry={circle(4)}
           at={track([0, 0]).to([200, 0], span(0, 2), bouncy).to([200, 120], span(0.4, 2), bouncy)}
         />
@@ -242,6 +247,7 @@ describe("spring steps", () => {
     const lane = atOf(
       made(() => (
         <Shape
+          fill="#000000"
           geometry={circle(4)}
           at={track([0, 0]).to([100, 0], span(0, 1), ease.linear).to([150, 0], span(1, 2), bouncy)}
         />
@@ -258,6 +264,7 @@ describe("spring steps", () => {
       atOf(
         made(() => (
           <Shape
+            fill="#000000"
             geometry={circle(4)}
             at={track([0, 0])
               .to([100, 0], span(0, 1), curve)
@@ -276,6 +283,7 @@ describe("spring steps", () => {
     const cut = atOf(
       made(() => (
         <Shape
+          fill="#000000"
           geometry={circle(4)}
           at={track([0, 0]).to([100, 0], span(0, 2), bouncy).to([0, 0], span(0.5, 0.5))}
         />
@@ -313,8 +321,9 @@ describe("spring steps", () => {
     const motionOf = (at: number) => {
       const model = made(() => (
         <Group>
-          <Sequence at={at}>
+          <Sequence start={at}>
             <Shape
+              fill="#000000"
               geometry={circle(4)}
               at={track([0, 0]).to([80, 0], span(0, bouncy.settle), bouncy)}
             />
@@ -337,6 +346,7 @@ describe("spring steps", () => {
     const lane = atOf(
       made(() => (
         <Shape
+          fill="#000000"
           geometry={circle(4)}
           at={track([0, 0]).to([50, 0], span(0, 1.5), bouncy).repeat(2)}
         />
@@ -352,6 +362,7 @@ describe("spring steps", () => {
     expect(() =>
       made(() => (
         <Shape
+          fill="#000000"
           key="dot"
           geometry={circle(4)}
           rotate={track(0).to(90, span(0, 0.5), bouncy).loop(0.5)}
@@ -361,6 +372,7 @@ describe("spring steps", () => {
 
     const model = made(() => (
       <Shape
+        fill="#000000"
         geometry={circle(4)}
         rotate={track(0).to(90, span(0, 1.5), bouncy).to(0, span(1.5, 0.5)).loop(2)}
       />
@@ -373,6 +385,7 @@ describe("spring steps", () => {
     const node = only(
       made(() => (
         <Shape
+          fill="#000000"
           geometry={circle(4)}
           motion={motion()
             .to({ offset: [40, 20] }, span(0, 1.5), bouncy)
@@ -391,6 +404,7 @@ describe("spring steps", () => {
     const out = svg.emit(
       made(() => (
         <Shape
+          fill="#000000"
           geometry={circle(4)}
           at={track([0, 0]).to([100, 0], span(0, bouncy.settle), bouncy)}
         />

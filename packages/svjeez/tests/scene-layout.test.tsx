@@ -6,7 +6,6 @@ import {
   Arrow,
   Grid,
   Group,
-  Line,
   Shape,
   Stack,
   Text,
@@ -14,20 +13,16 @@ import {
   circle,
   draw,
   ease,
-  isLane,
   motion,
-  placements,
   rect,
   ref,
   scene,
   span,
   spin,
-  svg,
   track,
-  valueAt,
-  type Model,
   type SceneElement,
 } from "svjeez/scene";
+import { isLane, placements, svg, valueAt, type Model } from "svjeez/scene/tools";
 
 const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
 
@@ -187,9 +182,9 @@ describe("containers", () => {
   test("a row places each child's box in its slot, wherever its origin is", () => {
     const model = made(() => (
       <Stack key="row" direction="row" gap={5} align="center" at={[10, 20]}>
-        <Shape key="a" geometry={circle(3)} />
-        <Shape key="b" geometry={rect(10, 20)} />
-        <Shape key="c" geometry={arc({ radius: 4, sweep: 90 })} />
+        <Shape fill="#000000" key="a" geometry={circle(3)} />
+        <Shape fill="#000000" key="b" geometry={rect(10, 20)} />
+        <Shape fill="#000000" key="c" geometry={arc({ radius: 4, sweep: 90 })} />
       </Stack>
     ));
 
@@ -203,10 +198,10 @@ describe("containers", () => {
   test("padding is inside a column's box, and containers nest", () => {
     const model = made(() => (
       <Stack key="col" padding={[4, 6]} gap={2}>
-        <Shape key="a" geometry={rect(10, 10)} />
+        <Shape fill="#000000" key="a" geometry={rect(10, 10)} />
         <Stack key="inner" direction="row" gap={1}>
-          <Shape key="b" geometry={rect(3, 3)} />
-          <Shape key="c" geometry={rect(3, 5)} />
+          <Shape fill="#000000" key="b" geometry={rect(3, 3)} />
+          <Shape fill="#000000" key="c" geometry={rect(3, 5)} />
         </Stack>
       </Stack>
     ));
@@ -219,9 +214,9 @@ describe("containers", () => {
   test("a grid sizes columns and rows to their largest child and aligns each in its cell", () => {
     const model = made(() => (
       <Grid key="g" columns={2} gap={[2, 4]} justify="end" align="center">
-        <Shape key="a" geometry={rect(10, 4)} />
-        <Shape key="b" geometry={rect(4, 8)} />
-        <Shape key="c" geometry={rect(6, 6)} />
+        <Shape fill="#000000" key="a" geometry={rect(10, 4)} />
+        <Shape fill="#000000" key="b" geometry={rect(4, 8)} />
+        <Shape fill="#000000" key="c" geometry={rect(6, 6)} />
       </Grid>
     ));
 
@@ -235,7 +230,7 @@ describe("containers", () => {
     const model = made(() => (
       <Group key="moved" at={[30, 40]}>
         <Align key="corner" place="bottom-right" inset={5}>
-          <Shape key="dot" geometry={circle(4)} />
+          <Shape fill="#000000" key="dot" geometry={circle(4)} />
         </Align>
       </Group>
     ));
@@ -252,9 +247,14 @@ describe("containers", () => {
 
     const model = made(() => (
       <Group>
-        <Shape ref={card} geometry={rect(20, 10)} at={track([0, 0]).to([100, 0], span(0, 2))} />
+        <Shape
+          fill="#000000"
+          ref={card}
+          geometry={rect(20, 10)}
+          at={track([0, 0]).to([100, 0], span(0, 2))}
+        />
         <Align key="label" to={card} place="top">
-          <Shape key="dot" geometry={circle(2)} />
+          <Shape fill="#000000" key="dot" geometry={circle(2)} />
         </Align>
       </Group>
     ));
@@ -271,7 +271,7 @@ describe("containers", () => {
       expect(() =>
         made(() => (
           <Stack key="s">
-            <Shape key="a" geometry={circle(3)} at={where} />
+            <Shape fill="#000000" key="a" geometry={circle(3)} at={where} />
           </Stack>
         )),
       ).toThrow('"s/a" has an at of its own, but the <Stack> it sits in places it');
@@ -280,8 +280,9 @@ describe("containers", () => {
   test("a child turns around where it was placed, since layout reads its box at rest", () => {
     const model = made(() => (
       <Stack key="s" direction="row">
-        <Shape key="a" geometry={rect(10, 10)} />
+        <Shape fill="#000000" key="a" geometry={rect(10, 10)} />
         <Shape
+          fill="#000000"
           key="b"
           geometry={rect(10, 10)}
           rotate={spin({ every: 2 })}
@@ -304,10 +305,15 @@ describe("anchors", () => {
     const model = made(() => (
       <Group>
         <Group key="left" at={[5, 5]}>
-          <Shape key="pin" geometry={circle(1)} at={target.part("box").bottomRight} />
+          <Shape
+            fill="#000000"
+            key="pin"
+            geometry={circle(1)}
+            at={target.part("box").bottomRight}
+          />
         </Group>
         <Group ref={target} at={[50, 20]}>
-          <Shape key="box" geometry={rect(20, 10)} at={[3, 4]} />
+          <Shape fill="#000000" key="box" geometry={rect(20, 10)} at={[3, 4]} />
         </Group>
       </Group>
     ));
@@ -321,9 +327,9 @@ describe("anchors", () => {
     const model = made(() => (
       <Group>
         <Group at={[100, 50]} rotate={90} scale={2} origin={[0, 0]}>
-          <Shape ref={target} geometry={rect(10, 4)} />
+          <Shape fill="#000000" ref={target} geometry={rect(10, 4)} />
         </Group>
-        <Shape key="pin" geometry={circle(1)} at={target.right} />
+        <Shape fill="#000000" key="pin" geometry={circle(1)} at={target.right} />
       </Group>
     ));
 
@@ -339,10 +345,10 @@ describe("anchors", () => {
     const model = made(() => (
       <Group>
         <Group at={track([0, 0]).to([100, 40], span(1, 2), ease.inOut)}>
-          <Shape ref={target} geometry={rect(10, 10)} />
+          <Shape fill="#000000" ref={target} geometry={rect(10, 10)} />
         </Group>
         <Group key="other" at={[7, 3]}>
-          <Shape key="pin" geometry={circle(1)} at={target.center} />
+          <Shape fill="#000000" key="pin" geometry={circle(1)} at={target.center} />
         </Group>
       </Group>
     ));
@@ -369,9 +375,9 @@ describe("anchors", () => {
     const model = made(() => (
       <Group>
         <Group at={[100, 50]} rotate={spin({ every: 4 })} origin={[0, 0]}>
-          <Shape ref={target} geometry={circle(2)} at={[30, 0]} />
+          <Shape fill="#000000" ref={target} geometry={circle(2)} at={[30, 0]} />
         </Group>
-        <Shape key="pin" geometry={circle(1)} at={target.center} />
+        <Shape fill="#000000" key="pin" geometry={circle(1)} at={target.center} />
       </Group>
     ));
 
@@ -395,16 +401,16 @@ describe("anchors", () => {
     const lost = ref("lost");
     const card = ref("card");
 
-    expect(() => made(() => <Shape geometry={circle(1)} at={lost.center} />)).toThrow(
-      'lost.center names the ref "lost", which is on no node',
-    );
+    expect(() =>
+      made(() => <Shape fill="#000000" geometry={circle(1)} at={lost.center} />),
+    ).toThrow('lost.center names the ref "lost", which is on no node');
     expect(() =>
       made(() => (
         <Group>
           <Group ref={card}>
-            <Shape key="title" geometry={rect(1, 1)} />
+            <Shape fill="#000000" key="title" geometry={rect(1, 1)} />
           </Group>
-          <Shape geometry={circle(1)} at={card.part("body").center} />
+          <Shape fill="#000000" geometry={circle(1)} at={card.part("body").center} />
         </Group>
       )),
     ).toThrow(
@@ -413,9 +419,9 @@ describe("anchors", () => {
     expect(() =>
       made(() => (
         <Group>
-          <Shape ref={card} geometry={circle(1)} />
+          <Shape fill="#000000" ref={card} geometry={circle(1)} />
           <Group>
-            <Shape ref={card} geometry={circle(1)} />
+            <Shape fill="#000000" ref={card} geometry={circle(1)} />
           </Group>
         </Group>
       )),
@@ -428,8 +434,8 @@ describe("anchors", () => {
     expect(() =>
       made(() => (
         <Group ref={card}>
-          <Shape key="a" geometry={rect(10, 10)} />
-          <Shape key="b" geometry={circle(1)} at={card.right} />
+          <Shape fill="#000000" key="a" geometry={rect(10, 10)} />
+          <Shape fill="#000000" key="b" geometry={circle(1)} at={card.right} />
         </Group>
       )),
     ).toThrow("depends on itself");
@@ -443,9 +449,9 @@ describe("arrows", () => {
   test("between two still nodes it is still geometry, stopping gap short of each edge", () => {
     const model = made(() => (
       <Group>
-        <Shape ref={a} geometry={rect(20, 20)} at={[0, 0]} />
-        <Shape ref={b} geometry={rect(20, 20)} at={[100, 0]} />
-        <Arrow key="link" from={a.right} to={b.left} gap={5} color="#000000" />
+        <Shape fill="#000000" ref={a} geometry={rect(20, 20)} at={[0, 0]} />
+        <Shape fill="#000000" ref={b} geometry={rect(20, 20)} at={[100, 0]} />
+        <Arrow key="link" from={a.right} to={b.left} inset={5} stroke={{ color: "#000000" }} />
       </Group>
     ));
 
@@ -467,9 +473,14 @@ describe("arrows", () => {
   test("an end on a moving node turns and moves the shaft, and trims a straight one to length", () => {
     const model = made(() => (
       <Group>
-        <Shape ref={a} geometry={rect(20, 20)} />
-        <Shape ref={b} geometry={rect(20, 20)} at={track([100, 0]).to([100, 60], span(1, 1))} />
-        <Arrow key="link" from={a.right} to={b.left} color="#000000" />
+        <Shape fill="#000000" ref={a} geometry={rect(20, 20)} />
+        <Shape
+          fill="#000000"
+          ref={b}
+          geometry={rect(20, 20)}
+          at={track([100, 0]).to([100, 60], span(1, 1))}
+        />
+        <Arrow key="link" from={a.right} to={b.left} stroke={{ color: "#000000" }} />
       </Group>
     ));
 
@@ -495,9 +506,21 @@ describe("arrows", () => {
   test("a bent shaft that stretches writes its geometry as a lane of matching paths", () => {
     const model = made(() => (
       <Group>
-        <Shape ref={a} geometry={rect(20, 20)} />
-        <Shape ref={b} geometry={rect(20, 20)} at={track([100, 0]).to([160, 0], span(1, 1))} />
-        <Line key="link" from={a.right} to={b.left} bend={0.3} color="#000000" />
+        <Shape fill="#000000" ref={a} geometry={rect(20, 20)} />
+        <Shape
+          fill="#000000"
+          ref={b}
+          geometry={rect(20, 20)}
+          at={track([100, 0]).to([160, 0], span(1, 1))}
+        />
+        <Arrow
+          head="none"
+          key="link"
+          from={a.right}
+          to={b.left}
+          bend={0.3}
+          stroke={{ color: "#000000" }}
+        />
       </Group>
     ));
 
@@ -520,9 +543,20 @@ describe("arrows", () => {
   test("an arrow holds still while it is hidden, so an end that moves before it draws writes nothing", () => {
     const model = made(() => (
       <Group>
-        <Shape ref={a} geometry={rect(20, 20)} />
-        <Shape ref={b} geometry={rect(20, 20)} at={track([100, 0]).to([100, 60], span(0, 1))} />
-        <Arrow key="link" from={a.right} to={b.left} color="#000000" trim={draw(span(2, 1))} />
+        <Shape fill="#000000" ref={a} geometry={rect(20, 20)} />
+        <Shape
+          fill="#000000"
+          ref={b}
+          geometry={rect(20, 20)}
+          at={track([100, 0]).to([100, 60], span(0, 1))}
+        />
+        <Arrow
+          key="link"
+          from={a.right}
+          to={b.left}
+          stroke={{ color: "#000000" }}
+          trim={draw(span(2, 1))}
+        />
       </Group>
     ));
 
@@ -539,8 +573,8 @@ describe("arrows", () => {
           key="link"
           from={[0, 0]}
           to={[100, 0]}
-          color="#000000"
-          trim={draw(span(1, 1), ease.linear)}
+          stroke={{ color: "#000000" }}
+          trim={draw(span(1, 1), { curve: ease.linear })}
         />
       </Group>
     ));

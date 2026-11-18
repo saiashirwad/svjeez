@@ -1,35 +1,40 @@
-export { scene, type SceneOptions } from "./lower";
+/**
+ * Write a scene: components (`<Shape>`, `<Text>`, `<Group>`, layout and `<Arrow>`), typed values for geometry and
+ * paint, tracks and motion layers for time, and timelines of verbs on refs. Tools that read or draw a scene are in
+ * `svjeez/scene/tools`.
+ *
+ * One rule orders every argument list: what, then when, then how. `track(0).to(1, span(0.2, 0.5), ease.out)`,
+ * `card.move([40, 0], 0.5, ease.inOut)`, `enter(span(0, 0.4), { from: { scale: 0 }, curve: ease.pop })`. A recipe
+ * whose "what" has a default takes it in its options, after the when.
+ *
+ * `at` is always a place, never a time: a node's own position in its parent. A motion layer's `offset` moves the node
+ * from there, on top of it, and a timeline's `moveBy` moves its `at` by an amount. Time is a span: `span(start, over)`.
+ *
+ * Opacity: a prop is the node's own value; a motion layer (`enter`, `exit`, `motion()`) wraps it and multiplies;
+ * a timeline verb (`ref.show`, `ref.hide`, `ref.to`) writes the prop's track.
+ */
 
-export { svg, type SvgOptions } from "./svg";
-
-export { diagnose, type Backend, type Diagnostic, type Feature, type Support } from "./backend";
+export { scene } from "./lower";
 
 export {
   Group,
   Image,
   Instance,
-  Ref,
+  Run,
   Sequence,
   Shape,
-  Span,
   Text,
   canvas,
   ref,
   symbol,
-  type Child,
-  type Common,
-  type ImageProps,
-  type InstanceProps,
-  type SceneSymbol,
   type SceneElement,
-  type SequenceProps,
-  type RunStyle,
-  type ShapeProps,
-  type SpanProps,
-  type StrokeProps,
-  type TextChild,
-  type TextProps,
 } from "./nodes";
+
+export type { Ref } from "./refs";
+
+export { Align, Grid, Stack } from "./layout";
+
+export { Arrow } from "./arrow";
 
 export {
   arc,
@@ -37,138 +42,35 @@ export {
   ellipse,
   line,
   path,
+  pathData,
   polygon,
   polyline,
   rect,
-  svgPath,
   tokens,
-  type ArcOptions,
-  type Color,
   type Geometry,
-  type Hex,
   type Paint,
-  type PathBuilder,
-  type RectOptions,
-  type Theme,
-  type Token,
 } from "./values";
-
-export {
-  motion,
-  track,
-  type Anim,
-  type LayerValues,
-  type Motion,
-  type Stack as MotionStack,
-  type Track,
-} from "./track";
-
-export {
-  draw,
-  enter,
-  exit,
-  sampled,
-  shake,
-  show,
-  spin,
-  wiggle,
-  type SampledMotionOptions,
-  type SampledOptions,
-  type ShakeAmplitude,
-  type WiggleOptions,
-} from "./recipes";
-
-export { picture, type PictureData } from "../picture";
-
-export { font, type FontValue } from "../font/font";
-
-export { Anchor, type Edge, type Place } from "./refs";
-
-export {
-  Align,
-  Grid,
-  Stack,
-  type AlignProps,
-  type Alignment,
-  type GridProps,
-  type StackProps,
-} from "./layout";
-
-export { Arrow, Line, type ArrowProps, type LineProps } from "./arrow";
-
-export {
-  layoutRuns,
-  layoutText,
-  type LaidLine,
-  type LaidRun,
-  type TextAlign,
-  type TextLayout,
-  type TextLayoutOptions,
-  type TextPiece,
-} from "./text";
-
-export type { Ease, Seconds } from "../motion";
-
-export { ease, type Curve, type Spring, type SpringOptions } from "./spring";
-
-export { span, chain, type Spanned, type When } from "../span";
-
-export {
-  Action,
-  Timeline,
-  par,
-  seq,
-  stagger,
-  timeline,
-  wait,
-  type MoveToOptions,
-  type Moves,
-  type Point,
-} from "./timeline";
-
-export { derive, type DeriveOptions, type Derived, type Source } from "./derived";
-
-export { isLane } from "./lane";
-
-export {
-  linear,
-  radial,
-  type Gradient,
-  type LinearAcrossOptions,
-  type LinearOptions,
-  type RadialAcrossOptions,
-  type RadialOptions,
-  type Stops,
-} from "./paint";
-
-export { blur, shadow, type Effect, type ShadowOptions } from "./effects";
 
 export { subtract } from "./holes";
 
-export { morph, type MorphOptions } from "./morph";
+export { linear, radial } from "./paint";
 
-export { boxesOf, hitTest, placements, valueAt, type Matrix, type Placed } from "./boxes";
+export { blur, shadow } from "./effects";
 
-export { isScene } from "./is-scene";
+export { motion, track, type Anim, type Track } from "./track";
 
-export {
-  inspect,
-  RULES,
-  type Code,
-  type Finding,
-  type InspectOptions,
-  type Related,
-  type Severity,
-} from "./inspect";
+export { draw, enter, exit, sampled, shake, spin, wiggle } from "./recipes";
 
-export {
-  describe,
-  type Description,
-  type DescribedFrame,
-  type DescribedNode,
-  type NodeTimeline,
-} from "./describe";
+export { ease, type Curve } from "./spring";
 
-export type * as Model from "./ir";
+export { span, type Span } from "./span";
 
-export type { Scene, Vec } from "./ir";
+export { par, seq, stagger, timeline, wait, type Action } from "./timeline";
+
+export { morph } from "./morph";
+
+export { picture } from "../picture";
+
+export { font } from "../font/font";
+
+export type { Vec } from "./ir";

@@ -8,12 +8,12 @@ import {
   circle,
   ease,
   linear,
+  pathData,
   radial,
   rect,
   scene,
   shadow,
   span,
-  svgPath,
   track,
   type SceneElement,
   type Vec,
@@ -47,7 +47,7 @@ const Label = ({
 
 /** A circle of radius `r` around `[x, y]`, as a path, so a clip can move it. */
 const disc = ([x, y]: Vec, r: number) =>
-  svgPath(`M${x + r} ${y}A${r} ${r} 0 1 1 ${x - r} ${y}A${r} ${r} 0 1 1 ${x + r} ${y}Z`);
+  pathData(`M${x + r} ${y}A${r} ${r} 0 1 1 ${x - r} ${y}A${r} ${r} 0 1 1 ${x + r} ${y}Z`);
 
 const card = rect(CARD[0], CARD[1], { radius: 14 });
 
@@ -85,7 +85,7 @@ export default scene(
     title: "Paint and effects",
     desc: "A card whose gradient turns and warms, stripes seen through a moving round window while they turn, a soft masked wipe that reveals a card, a card that comes into focus, and a shadow that grows as a card lifts.",
     theme,
-    reducedMotion: { at: 2.2 },
+    reducedMotion: 2.2,
   },
   () => (
     <Group>
