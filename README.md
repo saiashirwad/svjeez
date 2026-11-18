@@ -78,6 +78,7 @@ Each package runs while the scene compiles, so the SVG still carries no script.
 
 - [`svjeez`](https://github.com/saiashirwad/svjeez/tree/main/packages/svjeez): scenes, layout, text, timelines, the SVG backend and the CLI
 - [`@svjeez/fonts`](https://github.com/saiashirwad/svjeez/tree/main/packages/fonts): Google Fonts by name, subset and embedded
+- [`@svjeez/code`](https://github.com/saiashirwad/svjeez/tree/main/packages/code): highlighted code that types itself and morphs
 - [`@svjeez/video`](https://github.com/saiashirwad/svjeez/tree/main/packages/video): MP4 or WebM from a scene
 - [`@svjeez/vite`](https://github.com/saiashirwad/svjeez/tree/main/packages/vite), [`@svjeez/astro`](https://github.com/saiashirwad/svjeez/tree/main/packages/astro): scenes compiled into a Vite app or Astro site
 
