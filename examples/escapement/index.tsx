@@ -373,7 +373,7 @@ const fork = (() => {
   );
 
   const local = (p: P): P => [p[0] - FORK[0], p[1] - FORK[1]];
-  const mid = (s: readonly P[]): P => local([(s[2]![0] + s[3]![0]) / 2, (s[2]![1] + s[3]![1]) / 2]);
+  const mid = (s: typeof entry): P => local([(s[2][0] + s[3][0]) / 2, (s[2][1] + s[3][1]) / 2]);
 
   const anchor = pathData(
     "M" +
@@ -411,12 +411,12 @@ const WIDE = view(487, 505, 790);
 const [, ...moves] = span(0, 4).chain(5, 5, 5, 5, 5, 5, 4, 4, 4, 5, 6);
 
 const tour = {
-  barrel: { move: moves[0]!, view: view(424, 556, 560) },
-  train: { move: moves[2]!, view: view(646, 612, 430) },
-  escapement: { move: moves[4]!, view: view(768, 398, 350) },
-  pin: { move: moves[6]!, view: view(761, 352, 120) },
-  stones: { move: moves[8]!, view: view(761, 432, 140) },
-  close: { move: moves[10]!, view: WIDE },
+  barrel: { move: moves[0], view: view(424, 556, 560) },
+  train: { move: moves[2], view: view(646, 612, 430) },
+  escapement: { move: moves[4], view: view(768, 398, 350) },
+  pin: { move: moves[6], view: view(761, 352, 120) },
+  stones: { move: moves[8], view: view(761, 432, 140) },
+  close: { move: moves[10], view: WIDE },
 };
 
 type Stop = keyof typeof tour;
@@ -568,13 +568,13 @@ const notes: readonly Note[] = [
   {
     name: "Entry stone",
     at: [697, 386],
-    to: add(ESCAPE, add(entry[3]!, [-0.5, 2])),
+    to: add(ESCAPE, add(entry[3], [-0.5, 2])),
     stop: "stones",
   },
   {
     name: "Exit stone",
     at: [825, 386],
-    to: add(ESCAPE, add(exitStone[2]!, [0.5, 1])),
+    to: add(ESCAPE, add(exitStone[2], [0.5, 1])),
     stop: "stones",
     after: 0.5,
     end: true,

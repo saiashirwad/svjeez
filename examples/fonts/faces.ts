@@ -14,5 +14,3 @@ export const geistText = await google.family(
   [{ weight: 400 }, { weight: 600 }, { weight: 400, style: "italic" }],
   { ligatures: false },
 );
-
-export const geistMono = await google("Geist Mono", { weight: 500, ligatures: false });

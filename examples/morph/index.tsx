@@ -23,7 +23,7 @@ interface Quarter {
   readonly change: string;
 }
 
-const quarters: readonly Quarter[] = [
+const quarters: readonly [Quarter, ...Quarter[]] = [
   {
     name: "Q1",
     bars: [
@@ -146,7 +146,7 @@ export default scene(
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Shape geometry={rect(512, 1.5)} at={[48, BASE]} fill={theme.border} />
       {morph.between(
-        [...quarters, quarters[0]!].map((quarter) => <Revenue {...quarter} />),
+        [...quarters, quarters[0]].map((quarter) => <Revenue {...quarter} />),
         [span(STEP - 1.2, 1.2), span(STEP * 2 - 1.2, 1.2), span(STEP * 3 - 1.2, 1.2)],
         { stagger: 0.06, enter: { opacity: 0, scale: 0.6 }, exit: { opacity: 0, scale: 0.6 } },
       )}
