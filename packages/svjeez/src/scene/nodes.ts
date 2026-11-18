@@ -136,6 +136,42 @@ export type SceneElement =
 
 export type Child = SceneElement | false | null | undefined | readonly Child[];
 
+const TYPES: ReadonlySet<string> = new Set([
+  "group",
+  "shape",
+  "text",
+  "image",
+  "instance",
+  "sequence",
+  "fragment",
+  "morph",
+]);
+
+/** Whether a value JSX handed over as a scene element is an object at all: text children are strings. */
+const isObject = (value: SceneElement): value is SceneElement =>
+  typeof value === "object" && value !== null;
+
+/** What a lowercase tag that svjeez's SVG runtime built is called, as JSX writes it. */
+const svgTag = (value: SceneElement): string | undefined =>
+  isObject(value) && "kind" in value && value.kind === "element" && "tag" in value
+    ? `<${String(value.tag)}>`
+    : undefined;
+
+/**
+ * The element as lowering takes it, or the error a newcomer needs: a lowercase SVG tag, or JSX that svjeez's SVG
+ * runtime built because the file doesn't say `@jsxImportSource svjeez/scene`.
+ */
+export const sceneElement = (value: SceneElement, where: string): SceneElement => {
+  if (isObject(value) && TYPES.has(value.type)) return value;
+  const tag = svgTag(value);
+
+  throw new Error(
+    tag
+      ? `${where} holds ${tag}, an SVG tag, which a scene doesn't draw: every node is a component, such as <Shape geometry={rect(w, h)} />. If the file has no \`/** @jsxImportSource svjeez/scene */\` at its top, add it.`
+      : `${where} holds ${isObject(value) ? "JSX that svjeez's SVG runtime built" : String(value)}, not a scene node. Put \`/** @jsxImportSource svjeez/scene */\` at the top of the file, so its JSX builds scene nodes.`,
+  );
+};
+
 const isList = (child: Child): child is readonly Child[] => Array.isArray(child);
 
 export const flat = (child: Child): SceneElement[] => {

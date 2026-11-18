@@ -1,8 +1,8 @@
-import { easeAt } from "../ease-at";
 import type { Seconds } from "../motion";
 import { mixGeometry } from "./geometry";
 import type { Animated, Box, Geometry, Layer, Scene, SceneNode, Source, Vec } from "./ir";
 import { isLane } from "./lane";
+import { valueAt as sampleAt } from "./sample";
 import { mixNumber, mixVec, type Mix } from "./steps";
 import { boxOf } from "./values";
 
@@ -65,20 +65,8 @@ const inverse = (m: Matrix): Matrix | undefined => {
 };
 
 /** What an animated value is at `t` seconds on the scene's clock, as a backend would draw it. */
-export const valueAt = <T>(value: Animated<T>, t: Seconds, mix: Mix<T>, where = "a lane"): T => {
-  if (!isLane(value)) return value;
-  const { keys, period } = value;
-  const time = period ? ((t % period) + period) % period : t;
-  const next = keys.findIndex((key) => key.t > time);
-
-  if (next === 0) return keys[0].value;
-
-  if (next < 0) return keys.at(-1)!.value;
-  const [from, to] = [keys[next - 1]!, keys[next]!];
-  const progress = (time - from.t) / (to.t - from.t);
-
-  return to.ease ? mix(from.value, to.value, easeAt(to.ease, progress), where) : to.value;
-};
+export const valueAt = <T>(value: Animated<T>, t: Seconds, mix: Mix<T>, where = "a lane"): T =>
+  sampleAt(value, t, (a, b, amount) => mix(a, b, amount, where));
 
 const number = (value: Animated<number>, t: Seconds): number => valueAt(value, t, mixNumber);
 
@@ -144,10 +132,22 @@ export const placements = (scene: Scene, at: Seconds = 0): Placed[] => {
 
     if (node.kind !== "group" || node.children.length === 0) return out[index]!;
     const inside = node.children.map((child) => visit(child, own, opacity, depth + 1));
+    const back = inverse(own);
 
-    // The root's box is the canvas; another group's holds wherever its children are now.
+    // The root's box is the canvas; another group's holds wherever its children are now, in its frame too, so a
+    // group whose children have moved away is hit where they are, not where they were.
     if (depth > 0)
-      out[index] = { ...out[index]!, box: around(inside.flatMap((child) => corners(child.box))) };
+      out[index] = {
+        ...out[index]!,
+        box: around(inside.flatMap((child) => corners(child.box))),
+        ...(back && {
+          frame: around(
+            inside.flatMap((child) =>
+              corners(child.frame).map((point) => apply(back, apply(child.matrix, point))),
+            ),
+          ),
+        }),
+      };
 
     return out[index]!;
   };

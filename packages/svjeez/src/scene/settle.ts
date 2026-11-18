@@ -2,7 +2,9 @@ import { EPSILON, type Seconds } from "../motion";
 import type { Animated, Box, Layer, SceneNode, Vec } from "./ir";
 import { isLane } from "./lane";
 import { isAnchor, type Anchor, type Ref } from "./refs";
+import { mixGeometry } from "./geometry";
 import { blendNumber, blendVec, breaksOf, follow, laneFrom, valueAt } from "./sample";
+import { boxOf } from "./values";
 
 /**
  * The second pass of lowering. The first lowers every node where it stands; this one places what could only be placed
@@ -37,6 +39,8 @@ export type Settle =
 /** What the first pass noted about how a node was written. */
 interface Note {
   readonly anchor?: Anchor;
+  /** A container a morph state already arranged: its children's `at` and its box are final. */
+  readonly arranged?: true;
   /** Whether the node was given an `at` of its own. */
   readonly placed: boolean;
   readonly origin: "center" | "top-left" | Vec | undefined;
@@ -77,7 +81,8 @@ export const note = (into: Notes, key: string, props: Written, settle?: Settle):
       );
     const taken = into.refs.get(ref);
 
-    if (taken !== undefined)
+    // A morph lowers each state in the same place, so one ref on one key in two states is one node.
+    if (taken !== undefined && taken !== key)
       throw new Error(
         `The ref "${ref.key}" is on two nodes, "${taken}" and "${key}". A ref names one node: make another with ref().`,
       );
@@ -126,7 +131,10 @@ const draft = (node: SceneNode, parent: Draft | undefined, nodes: Notes["nodes"]
 
 const rest = <T>(value: Animated<T>): T => (isLane(value) ? value.keys[0].value : value);
 
-const around = (children: readonly Draft[]): Box => {
+/** The box around `children` where they rest, in their parent's frame. */
+export const around = (
+  children: readonly { readonly at: Animated<Vec>; readonly box: Box }[],
+): Box => {
   if (children.length === 0) return { x: 0, y: 0, width: 0, height: 0 };
   const xs: number[] = [];
   const ys: number[] = [];
@@ -313,7 +321,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
         measure(child);
       }
 
-      d.box = around(d.children);
+      d.box = d.note?.arranged ? d.node.box : around(d.children);
     }
 
     d.origin = originOf(d.note?.origin, d.box);
@@ -371,6 +379,15 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
     measure(node);
     const point = anchor.on(node.box);
+    const shape = node.node;
+    // A shape whose geometry moves takes its box along: an anchor on a bar that grows follows its end.
+    const outline = shape.kind === "shape" && isLane(shape.geometry) ? shape.geometry : undefined;
+
+    const pointAt = (t: Seconds): Vec =>
+      outline
+        ? anchor.on(boxOf(valueAt(outline, t, (a, b, u) => mixGeometry(a, b, u, `"${shape.key}"`))))
+        : point;
+
     const above = new Set(chain(frame, undefined));
     const common = chain(node, undefined).find((d) => above.has(d));
     const up = chain(node, common);
@@ -379,7 +396,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     for (const d of [...up, ...down]) ready(d);
 
     const at = (t: Seconds): Vec => {
-      let p = point;
+      let p = pointAt(t);
 
       for (const d of up) p = outward(p, valueAt(d.at, t, blendVec), d.origin, d.node.layers, t);
 
@@ -389,10 +406,13 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
       return p;
     };
 
-    const moving = [...up, ...down].flatMap((d) => [
-      d.at,
-      ...d.node.layers.flatMap((layer) => [layer.offset, layer.rotate, layer.scale]),
-    ]);
+    const moving: Animated<unknown>[] = [
+      ...(outline ? [outline] : []),
+      ...[...up, ...down].flatMap((d) => [
+        d.at,
+        ...d.node.layers.flatMap((layer) => [layer.offset, layer.rotate, layer.scale]),
+      ]),
+    ];
 
     if (!moving.some(isLane)) return at(0);
 
@@ -412,4 +432,72 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
   // SAFETY: the root is drafted from a group and built back from that draft, so it is still the same kind of group.
   return build(top) as G;
+};
+
+/** The first anchor, timeline target or connector under `node`: what a state's layout can't settle on its own. */
+const outsider = (node: SceneNode, notes: Notes): string | undefined => {
+  const own = notes.nodes.get(node.key);
+
+  if (own?.anchor || own?.settle?.kind === "connect" || notes.aims.has(node.key)) return node.key;
+
+  if (node.kind !== "group") return undefined;
+
+  for (const child of node.children) {
+    const found = outsider(child, notes);
+
+    if (found !== undefined) return found;
+  }
+
+  return undefined;
+};
+
+/**
+ * The layout containers in one state of a morph, arranged in that state. The states are merged by key before the
+ * second pass, so a container arranged there would place every state's children together; arranged here, each child
+ * sits where its own state puts it, and the morph moves it from one slot to the next.
+ */
+export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode[] => {
+  const arranged = (node: SceneNode): SceneNode => {
+    if (node.kind !== "group") return node;
+    const children = node.children.map(arranged);
+    const note = into.nodes.get(node.key);
+    const asked = note?.settle;
+
+    if (asked?.kind !== "arrange") {
+      const box = around(children);
+
+      return { ...node, children, box, origin: originOf(note?.origin, box) };
+    }
+
+    for (const child of children) {
+      if (into.nodes.get(child.key)?.placed)
+        throw new Error(
+          `"${child.key}" has an at of its own, but the ${asked.label} it sits in places it. Drop its at; to nudge it, give it a motion layer with an offset.`,
+        );
+      const inside = outsider(child, into);
+
+      if (inside !== undefined)
+        throw new Error(
+          `A ${asked.label} in a morph() state holds "${inside}", which is placed by an anchor, a timeline's moveTo or as a connector. A morph arranges each state on its own, before anchors are known: attach it outside the ${asked.label}, or outside the morph.`,
+        );
+    }
+
+    const { slots, box } = asked.arrange(children.map((child) => child.box));
+
+    const { settle: _arranged, ...kept } = note!;
+
+    into.nodes.set(node.key, { ...kept, arranged: true });
+
+    return {
+      ...node,
+      box,
+      origin: originOf(note!.origin, box),
+      children: children.map((child, i) => ({
+        ...child,
+        at: [slots[i]![0] - child.box.x, slots[i]![1] - child.box.y],
+      })),
+    };
+  };
+
+  return list.map(arranged);
 };

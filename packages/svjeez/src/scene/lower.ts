@@ -24,6 +24,7 @@ import { isLane, pair } from "./lane";
 import { morphed } from "./morph";
 import {
   flat,
+  sceneElement,
   within,
   type Common,
   type ImageProps,
@@ -34,7 +35,7 @@ import {
   type TextProps,
 } from "./nodes";
 import { isAnchor } from "./refs";
-import { note, notes, settle, type Notes } from "./settle";
+import { arrangeState, around, note, notes, settle, type Notes } from "./settle";
 import {
   laneOf,
   mapped,
@@ -349,25 +350,6 @@ const sceneTiming = ({ duration }: Ctx): Timing => ({
   clock: { offset: 0, end: duration, clips: [] },
 });
 
-const around = (children: readonly SceneNode[]): Box => {
-  if (children.length === 0) return { x: 0, y: 0, width: 0, height: 0 };
-
-  const corners = children.map(({ at, box }) => {
-    const [x, y] = rest(at);
-
-    return [x + box.x, y + box.y, x + box.x + box.width, y + box.y + box.height] as const;
-  });
-
-  const [x, y] = [Math.min(...corners.map((c) => c[0])), Math.min(...corners.map((c) => c[1]))];
-
-  return {
-    x,
-    y,
-    width: Math.max(...corners.map((c) => c[2])) - x,
-    height: Math.max(...corners.map((c) => c[3])) - y,
-  };
-};
-
 const label = (at: Seconds, over: Seconds | undefined): string =>
   `<Sequence at={${num(at)}}${over === undefined ? "" : ` over={${num(over)}}`}>`;
 
@@ -400,7 +382,9 @@ const lowerAll = (
   parent: string,
   taken: Set<string> = new Set(),
 ): SceneNode[] =>
-  elements.flatMap((given): SceneNode[] => {
+  elements.flatMap((element): SceneNode[] => {
+    const given = sceneElement(element, parent ? `"${parent}"` : "The scene");
+
     if (given.type === "fragment") return lowerAll(ctx, given.children, timing, parent, taken);
 
     if (given.type === "sequence") {
@@ -413,7 +397,7 @@ const lowerAll = (
 
     if (given.type === "morph")
       return morphed(given, timing, taken, (state, names) =>
-        lowerAll(ctx, state, timing, parent, names),
+        arrangeState(lowerAll(ctx, state, timing, parent, names), ctx.notes),
       );
     const name = given.props.key ?? given.props.ref?.key;
 
@@ -433,13 +417,13 @@ const lowerAll = (
 
     switch (el.type) {
       case "shape":
-        return [identified(el, name, shape(ctx, el.props, key, timing))];
+        return [identified(given, name, shape(ctx, el.props, key, timing))];
       case "text":
-        return [identified(el, name, text(ctx, el.props, key, timing))];
+        return [identified(given, name, text(ctx, el.props, key, timing))];
       case "image":
-        return [identified(el, name, image(el.props, key, timing))];
+        return [identified(given, name, image(el.props, key, timing))];
       case "instance":
-        return [identified(el, name, instance(ctx, el.props, key, timing))];
+        return [identified(given, name, instance(ctx, el.props, key, timing))];
       case "group": {
         const children = lowerAll(ctx, el.children, timing, key);
 
@@ -449,13 +433,15 @@ const lowerAll = (
           children,
         };
 
-        return [identified(el, name, node)];
+        return [identified(given, name, node)];
       }
     }
   });
 
+/** A fragment, or a group with nothing to say: no props and no layout, so it is the root itself. */
 const isBare = (el: SceneElement): boolean =>
-  el.type === "fragment" || (el.type === "group" && Object.keys(el.props).length === 0);
+  el.type === "fragment" ||
+  (el.type === "group" && Object.keys(el.props).length === 0 && el.settle === undefined);
 
 /**
  * Runs `build`, measures and lowers what it returns, and gives back the scene model. A bare `<Group>` at the top is
@@ -473,7 +459,7 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
   if (options.reducedMotion && !Number.isFinite(options.reducedMotion.at))
     throw new Error(`scene() needs a finite reducedMotion.at, got ${options.reducedMotion.at}.`);
 
-  const [top, cues] = collect(() => within(size, build));
+  const [top, cues] = collect(() => sceneElement(within(size, build), "scene()'s callback"));
 
   const ctx: Ctx = {
     tokens: new Map(),

@@ -82,6 +82,14 @@ const isDrawn = (value: Child): value is Drawn =>
   "node" in value &&
   isNode(value.node);
 
+/** A node from svjeez/scene's JSX runtime, which has a `type` where an SVG node has a `kind`. */
+const isSceneNode = (value: Child): value is Child & { readonly type: string } =>
+  value !== null &&
+  typeof value === "object" &&
+  !Array.isArray(value) &&
+  "type" in value &&
+  typeof value.type === "string";
+
 const isText = (value: Prop): value is string | number =>
   typeof value === "string" || typeof value === "number";
 
@@ -108,7 +116,12 @@ export const children = (input: Child, preserveWhitespace = false): SvgNode[] =>
         ? value.children.forEach(visit)
         : void out.push(value);
 
-    if (!isText(value)) throw new Error(`Unsupported SVG child: ${String(value)}`);
+    if (!isText(value))
+      throw new Error(
+        isSceneNode(value)
+          ? `A ${value.type} from svjeez/scene sits in JSX that svjeez's SVG runtime built. Put \`/** @jsxImportSource svjeez/scene */\` at the top of the file, so all of its JSX builds scene nodes.`
+          : `Unsupported SVG child: ${String(value)}`,
+      );
 
     const text = isNumber(value) ? num(value) : value;
 
