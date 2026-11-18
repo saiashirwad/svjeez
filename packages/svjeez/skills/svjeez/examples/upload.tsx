@@ -1,5 +1,6 @@
 /** @jsxImportSource svjeez */
 import {
+  Center,
   Group,
   Align,
   Shape,
@@ -13,7 +14,6 @@ import {
   motion,
   path,
   rect,
-  ref,
   scene,
   span,
   track,
@@ -23,7 +23,6 @@ import { sans, theme } from "./style";
 
 const RADIUS = 26;
 const BAR = 180;
-const ring = ref("ring");
 const pop = ease.spring({ stiffness: 260, damping: 12 });
 
 const upload = span(0.4, 2.8);
@@ -51,12 +50,8 @@ export default scene(
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Align>
         <Stack direction="row" gap={22} align="center">
-          <Group>
-            <Shape
-              ref={ring}
-              geometry={circle(RADIUS)}
-              stroke={{ color: theme.raised, width: 6 }}
-            />
+          <Center>
+            <Shape geometry={circle(RADIUS)} stroke={{ color: theme.raised, width: 6 }} />
             <Shape
               key="progress"
               geometry={circle(RADIUS)}
@@ -64,19 +59,17 @@ export default scene(
               stroke={{ color: theme.blue, width: 6, cap: "round" }}
               trim={progress.map((p): Vec => [0, p])}
             />
-            <Align to={ring}>
-              <Shape
-                key="check"
-                geometry={path().moveTo([0, 7]).lineTo([7, 14]).lineTo([20, 0])}
-                stroke={{ color: theme.green, width: 4, cap: "round", join: "round" }}
-                trim={draw(done.first(0.3))}
-                motion={[
-                  motion({ scale: 0.4 }).to({ scale: 1 }, done.first(pop.settle), pop),
-                  exit(reset.first(0.3)),
-                ]}
-              />
-            </Align>
-          </Group>
+            <Shape
+              key="check"
+              geometry={path().moveTo([0, 7]).lineTo([7, 14]).lineTo([20, 0])}
+              stroke={{ color: theme.green, width: 4, cap: "round", join: "round" }}
+              trim={draw(done.first(0.3))}
+              motion={[
+                motion({ scale: 0.4 }).to({ scale: 1 }, done.first(pop.settle), pop),
+                exit(reset.first(0.3)),
+              ]}
+            />
+          </Center>
           <Stack gap={10}>
             <Text font={sans} weight={600} size={15} fill={theme.text}>
               scene.svg
@@ -89,14 +82,13 @@ export default scene(
                 Uploaded
               </Text>
             </Group>
-            <Group>
-              <Shape geometry={rect(BAR, 6, { radius: 3 })} fill={theme.raised} />
+            <Stack width={BAR} radius={3} fill={theme.raised}>
               <Shape
                 key="bar"
                 geometry={progress.map((p) => rect(6 + p * (BAR - 6), 6, { radius: 3 }))}
                 fill={theme.blue}
               />
-            </Group>
+            </Stack>
           </Stack>
         </Stack>
       </Align>

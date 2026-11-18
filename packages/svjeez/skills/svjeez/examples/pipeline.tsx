@@ -2,6 +2,7 @@
 import {
   Align,
   Arrow,
+  Center,
   Group,
   Shape,
   Stack,
@@ -13,7 +14,6 @@ import {
   enter,
   exit,
   par,
-  rect,
   ref,
   scene,
   seq,
@@ -35,29 +35,26 @@ const Node = ({
   readonly handle: Ref;
   readonly when: Span;
   readonly children: string;
-}): SceneElement => {
-  const box = handle.part("box");
-
-  return (
-    <Group ref={handle} motion={enter(when)}>
-      <Shape
-        key="box"
-        geometry={rect(112, 44, { radius: 10 })}
-        fill={theme.surface}
-        stroke={{ color: theme.border, width: 1.5 }}
-      />
-      <Align to={box}>
-        <Text font={sans} weight={600} size={14} fill={theme.text}>
-          {children}
-        </Text>
-      </Align>
-    </Group>
-  );
-};
+}): SceneElement => (
+  <Center
+    ref={handle}
+    width={112}
+    height={44}
+    radius={10}
+    fill={theme.surface}
+    stroke={{ color: theme.border, width: 1.5 }}
+    motion={enter(when)}
+  >
+    <Text font={sans} weight={600} size={14} fill={theme.text}>
+      {children}
+    </Text>
+  </Center>
+);
 
 const FIRST = span(0.3, 0.4);
-const links = FIRST.next(0.35).cascade(4, 0.4);
-const arrivals = links.map((link) => link.next(0.3, -0.05));
+const LINK = FIRST.next(0.35);
+const [toModel, toSvg, toFrames, toVideo] = LINK.cascade(4, 0.4);
+const [atModel, atSvg, atFrames, atVideo] = LINK.next(0.3, -0.05).cascade(4, 0.4);
 const LEAVE = span(6.8, 0.5);
 
 export default scene(
@@ -77,7 +74,11 @@ export default scene(
     const video = ref("video");
     const dot = ref("dot");
 
-    const targets = [svg, frames, video];
+    const targets = [
+      [svg, toSvg],
+      [frames, toFrames],
+      [video, toVideo],
+    ] as const;
 
     const deliver = (target: Ref): Action =>
       seq(
@@ -88,10 +89,10 @@ export default scene(
         dot.set({ at: model.right }),
         dot.show(0.1),
         dot.move(target.left, 0.35, ease.out),
-        par(dot.hide(0.15), target.part("box").stroke({ color: theme.blue }, 0.2)),
+        par(dot.hide(0.15), target.stroke({ color: theme.blue }, 0.2)),
       );
 
-    timeline(wait(arrivals.at(-1)!.end + 0.3), seq(...targets.map(deliver)));
+    timeline(wait(atVideo.end + 0.3), seq(...targets.map(([target]) => deliver(target))));
 
     return (
       <Group>
@@ -102,17 +103,17 @@ export default scene(
               <Node handle={source} when={FIRST}>
                 scene.tsx
               </Node>
-              <Node handle={model} when={arrivals[0]!}>
+              <Node handle={model} when={atModel}>
                 model
               </Node>
               <Stack gap={12}>
-                <Node handle={svg} when={arrivals[1]!}>
+                <Node handle={svg} when={atSvg}>
                   SVG
                 </Node>
-                <Node handle={frames} when={arrivals[2]!}>
+                <Node handle={frames} when={atFrames}>
                   frames
                 </Node>
-                <Node handle={video} when={arrivals[3]!}>
+                <Node handle={video} when={atVideo}>
                   video
                 </Node>
               </Stack>
@@ -123,15 +124,15 @@ export default scene(
             to={model.left}
             inset={6}
             stroke={{ color: theme.muted }}
-            trim={draw(links[0]!)}
+            trim={draw(toModel)}
           />
-          {targets.map((target, i) => (
+          {targets.map(([target, link]) => (
             <Arrow
               from={model.right}
               to={target.left}
               inset={6}
               stroke={{ color: theme.muted }}
-              trim={draw(links[i + 1]!)}
+              trim={draw(link)}
             />
           ))}
           <Shape ref={dot} geometry={circle(5)} anchor="center" opacity={0} fill={theme.blue} />

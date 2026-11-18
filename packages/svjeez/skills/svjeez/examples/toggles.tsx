@@ -19,13 +19,11 @@ import {
   timeline,
   wait,
   type Action,
-  type Ref,
   type SceneElement,
   type Vec,
 } from "svjeez";
 import { sans, theme } from "./style";
 
-const ROW: Vec = [300, 52];
 const IDLE: Vec = [400, 230];
 const flick = ease.spring({ stiffness: 320, damping: 22 });
 
@@ -42,28 +40,28 @@ const toggle = (name: string) => {
         <Shape key="knob" geometry={circle(9)} at={[3, 3]} fill="#FFFFFF" />
       </Group>
     ),
-    on: par(knob.moveBy([20, 0], flick.settle, flick), groove.fill(theme.blue, 0.2)),
-    off: par(knob.rewind(0.5), groove.rewind(0.5)),
+    on: par(knob.moveBy([20, 0], flick), groove.fill(theme.blue, 0.2)),
+    off: handle.rewind(0.5),
   };
 };
 
-const Row = ({ label, children }: { readonly label: string; readonly children: SceneElement }) => {
-  const row: Ref = ref("row");
-
-  return (
-    <Group>
-      <Shape ref={row} geometry={rect(ROW[0], ROW[1], { radius: 10 })} fill={theme.surface} />
-      <Align to={row} place="left" inset={16}>
-        <Text font={sans} size={14} fill={theme.text}>
-          {label}
-        </Text>
-      </Align>
-      <Align to={row} place="right" inset={14}>
-        {children}
-      </Align>
-    </Group>
-  );
-};
+const Row = ({ label, children }: { readonly label: string; readonly children: SceneElement }) => (
+  <Stack
+    direction="row"
+    justify="space-between"
+    align="center"
+    width={300}
+    height={52}
+    padding={[16, 0]}
+    radius={10}
+    fill={theme.surface}
+  >
+    <Text font={sans} size={14} fill={theme.text}>
+      {label}
+    </Text>
+    {children}
+  </Stack>
+);
 
 export default scene(
   {

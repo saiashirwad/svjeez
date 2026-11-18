@@ -32,7 +32,7 @@ morph.between([q1, q2, q3, q1].map(chart), [span(1.6, 1), span(4.2, 1), span(6.8
 The whole example is [`examples/chart.tsx`](../examples/chart.tsx).
 
 - **Key every node that comes, goes or changes**, by what it is (`region`), never by index. Unkeyed siblings pair up by position, and a morph whose states have unkeyed nodes throws. A `ref` is a key too.
-- **Containers go inside the states.** A `<Stack>` in each state reflows: each child moves from its slot in one state to its slot in the next. A `<Stack>` around a morph can't make room for a box the morph grows, and says so.
+- **Containers reflow.** A `<Stack>` in each state, or a `<Stack>`, `<Grid>`, `<Center>` or `<Align>` around a morph (however deep inside it the morph sits), lays out each state on its own: each child moves from its slot in one state to its slot in the next, nodes that enter take room only once they are in, and a container's own fill grows with it. Morphs inside one container share their spans and options. Only a morph inside a `<Sequence>` inside the container can't reflow it, and says so.
 - Options: `curve` (default `ease.inOut`; a spring moves numbers, points and geometry, colors take `ease.inOut`), `enter`, `exit` (layer values, as `enter()` takes), `stagger` (seconds between each changing node's start, in paint order; all still end with the span).
 - A node keeps its kind across states. A prop that a track moves inside a state must be the same in every state. Clip, effects and stroke style must have the same shape in every state.
 - Paint order is the last state's, with each exiting node kept where it was.

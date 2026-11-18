@@ -6,15 +6,13 @@ Every node has a box, the area it paints with its stroke included, known when th
 
 ```tsx
 /** @jsxImportSource svjeez */
-import { Align, Grid, Group, Shape, Stack, Text, canvas, circle, enter, rect, ref, scene, span } from "svjeez";
+import { Align, Center, Grid, Group, Shape, Stack, Text, canvas, circle, enter, rect, scene, span } from "svjeez";
 import { sans, theme } from "./style";
-
-const badge = ref("badge");
 
 export default scene({ size: [360, 200], duration: 2, title: "Containers", theme }, () => (
   <Group>
     <Shape geometry={canvas.rect} fill={theme.background} />
-    <Stack direction="row" gap={12} align="center" padding={16}>
+    <Stack direction="row" gap={12} align="center" padding={16} radius={12} fill={theme.surface}>
       <Shape geometry={circle(14)} fill={theme.blue} />
       <Stack gap={2}>
         <Text font={sans} weight={600} size={14} fill={theme.text}>Ada Lovelace</Text>
@@ -27,23 +25,23 @@ export default scene({ size: [360, 200], duration: 2, title: "Containers", theme
       ))}
     </Grid>
     <Align place="bottom-right" inset={16}>
-      <Group motion={enter(span(0.2, 0.4), { from: { opacity: 0, scale: 0.8 } })}>
-        <Shape ref={badge} geometry={rect(72, 28, { radius: 14 })} fill={theme.raised} />
-        <Align to={badge}>
-          <Text font={sans} weight={600} size={12} fill={theme.text}>NEW</Text>
-        </Align>
-      </Group>
+      <Center width={72} height={28} radius={14} fill={theme.raised} motion={enter(span(0.2, 0.4), { from: { opacity: 0, scale: 0.8 } })}>
+        <Text font={sans} weight={600} size={12} fill={theme.text}>NEW</Text>
+      </Center>
     </Align>
   </Group>
 ));
 ```
 
-- `<Stack direction="row" | "column" gap align padding>`: children one after another. `align` (`start`, `center`, `end`) places each across the stack: in a row, `end` lines up their bottoms. `padding` is one length or `[across, down]`, inside the stack's box.
+- `<Stack direction="row" | "column" gap align justify padding width height>`: children one after another. `align` (`start`, `center`, `end`, `stretch`) places each across the stack: in a row, `end` lines up their bottoms; `stretch` makes each container child as wide (or tall) as the stack's inside. `width` and `height` fix the stack's size, and `justify` (`start`, `center`, `end`, `space-between`) spends the room left along it: a label left and a switch right is `<Stack direction="row" justify="space-between" width={300}>`. `padding` is one length or `[across, down]`, inside the stack's box. A stack too small for its children says how much they need.
+- `<Center padding width height>`: lays its children over each other, each centered on the others. A label on a shape is `<Center><Shape …/><Text>…</Text></Center>`; a pill is `<Center width={64} height={24} radius={12} fill={…}><Text>…</Text></Center>`.
+- `<Stack>`, `<Grid>` and `<Center>` draw themselves: `fill`, `stroke={{ color, width }}` and `radius` (one number or four corners) paint a rect exactly as big as the container, under its children, sized to its content unless `width` and `height` say otherwise. The stroke counts in the box and its padding, so a child never sits under it; a full-width title bar in a window is a child of `<Stack align="stretch" stroke={…}>` with corners `radius - width / 2`. The rect is the part `"background"`, and a timeline's `fill` and `stroke` on the container's ref recolor it.
 - `<Grid columns gap justify align padding>`: rows of `columns` cells; each column is as wide as its widest child, each row as tall as its tallest. `justify` places a child across its cell, `align` down it.
 - `<Align to place inset>`: places its children against `to`, which is the canvas (default), a box `{ x, y, width, height }` in the parent's frame, or a ref. `place` names the point of `to` and the same point of each child (`"center"` by default), `inset` moves in from the edges. Against a ref that moves, the children move with it. `<Align>` places itself, so it takes no `at`.
 - A child in a container takes no `at` or `anchor`. To nudge it, give it a motion layer with an `offset`. Its `rotate`, `scale` and motion still apply, around where it was placed, since layout reads the box at rest.
 - A container is a group: give it `at` and `anchor` to place it, `motion` to move it, `ref` to point at it. `anchor="bottom-left"` on a row of bars keeps their baseline still while they grow.
-- Containers cost nothing in the output: they become plain placements.
+- Containers cost nothing in the output: they become plain placements, plus one rect for one that draws itself.
+- A container around a `morph()` reflows with it: see [morph.md](morph.md).
 
 The nine places, for `anchor`, `origin`, `place` and `radial.across({ center })`: `top-left`, `top`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom`, `bottom-right`. `anchor` also takes fractions of the box, `[0.5, 1]`, and `origin` a point measured from the box's top-left, `[20, 0]`.
 

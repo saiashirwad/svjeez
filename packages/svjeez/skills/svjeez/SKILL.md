@@ -57,8 +57,8 @@ export default scene({ size: [240, 140], duration: 4, title: "Hello", theme, red
 3. **Nothing is inherited.** A shape with no fill has none; a text needs its own `font`, `size` and `fill`. Share styles by spreading objects or writing components.
 4. **Every prop takes a value or a track**: `opacity={track(0).to(1, span(0.5, 0.3))}`. Geometry, paint, stroke width, trim, clip and effects animate the same way.
 5. **Time is spans on clocks.** `span(start, over)` is when; build each beat from the one before (`a.next(0.4)`, `a.cascade(3, 0.1)`). `<Sequence start={…}>` starts a clock of its own.
-6. **Layout containers place children.** `<Stack>`, `<Grid>` and `<Align>` measure boxes and set each child's place; a child in one takes no `at`. Prefer them to coordinates you compute.
-7. **Refs name nodes.** `const card = ref("card")`, `<Group ref={card}>`, then `card.right`, `card.center`, `card.part("title")` from anywhere: arrows attach to them, `<Align to={card}>` centers on them, and a `timeline()` moves them.
+6. **Layout containers place children.** `<Stack>`, `<Grid>`, `<Center>` and `<Align>` measure boxes and set each child's place; a child in one takes no `at`. `<Stack>`, `<Grid>` and `<Center>` also draw their own background, sized to what they hold. Prefer them to coordinates you compute.
+7. **Refs name nodes.** `const card = ref("card")`, `<Group ref={card}>`, then `card.right`, `card.center`, `card.part("title")` from anywhere: arrows attach to them, `<Align to={card}>` places against them, and a `timeline()` moves them.
 8. **Morph goes between keyed states.** `morph.between([a, b, c], spans)` matches nodes by `key`: one in both states moves, resizes and recolors; one only in the later state enters; one only in the earlier exits.
 
 ## Vocabulary
@@ -82,7 +82,7 @@ Every node also takes `key`, `ref`, `at`, `anchor`, `origin`, `rotate` (degrees,
 | `line(a, b)`, `polygon(points)`, `polyline(points)` | stay where their points are unless given `at` |
 | `path().moveTo(p).lineTo(p).curveTo(c1, c2, p).quadTo(c, p).close()` | build a path in code |
 | `pathData("M0 0L10 0Z")` | read path data from an icon set or drawing tool |
-| `subtract(base, ...cuts)`, `canvas.rect`, `canvas.size`, `canvas.center` | holes; the scene's own rect and size |
+| `subtract(base, ...cuts)`, `moved(geometry, [x, y])`, `canvas.rect`, `canvas.size`, `canvas.center` | holes; a geometry somewhere else; the scene's own rect and size |
 
 | Paint | |
 | --- | --- |
@@ -90,7 +90,7 @@ Every node also takes `key`, `ref`, `at`, `anchor`, `origin`, `rotate` (degrees,
 | `"#RRGGBB"`, `"#RRGGBBAA"` | a color that is the same in both schemes |
 | `linear.across({ angle, stops })`, `radial.across({ center, stops })` | gradients spread over the node's box |
 | `linear({ from, to, stops })`, `radial({ center, radius, stops })` | gradients at points in the node's frame |
-| `clip={geometry}`, `mask={<Shape …/>}`, `effects={[blur(r), shadow({ color, offset, blur })]}` | in the node's own frame; [`references/paint.md`](references/paint.md) |
+| `clip={geometry}`, `mask={<Shape …/>}`, `effects={[blur(r), shadow({ color, offset, blur })]}` | in the node's own frame; `clip={(own) => moved(circle(20), own.center)}` and `mask={(own) => …}` are sized by the node's box; [`references/paint.md`](references/paint.md) |
 
 | Motion | |
 | --- | --- |
@@ -98,16 +98,18 @@ Every node also takes `key`, `ref`, `at`, `anchor`, `origin`, `rotate` (degrees,
 | `motion={[enter(span, { from }), exit(span, { to }), wiggle(amp, { seed }), shake(amp, span)]}` | layers around the node, first outermost: `offset`, `rotate`, `scale`, `opacity` |
 | `motion({ offset: [0, 8] }).to({ offset: [0, 0] }, span)` | a layer of your own |
 | `draw(span)` for `trim`, `spin({ every })` for `rotate` | recipes that return tracks |
-| `ease.linear in out inOut pop hold steps(n) bezier(…)`, `ease.spring({ stiffness, damping })` | curves; a spring's `.settle` is how long it needs |
+| `ease.linear in out inOut pop hold steps(n) bezier(…)`, `ease.spring({ stiffness, damping })` | curves; a spring's `.settle` is how long it needs, and a verb given a spring for its length lasts that long |
 | `theta.map((t) => …)`, `a.with(b).map((a, b) => …)` | derived tracks: one value drives many props |
 | `sampled((t) => value, span, { tolerance })` | any function of time, fitted to few keys |
-| `timeline(seq(…), par(…), stagger(step, …), wait(s))` with `ref.move`, `moveBy`, `rotate`, `scale`, `show`, `hide`, `fill`, `stroke`, `draw`, `to`, `set`, `rewind` | choreography over refs |
+| `timeline(seq(…), par(…), stagger(step, …), wait(s))` with `ref.move`, `moveBy`, `rotate`, `scale`, `show`, `hide`, `fill`, `stroke`, `draw`, `to`, `set`, `rewind` | choreography over refs; `rewind` on a component's ref rewinds every part inside it |
 | `morph(before, after, span)`, `morph.between(states, spans, { stagger, enter, exit, curve })` | state to state by key |
 
 | Layout | |
 | --- | --- |
-| `<Stack direction gap align padding>` | children one after another; `align` places them across: `start`, `center`, `end` |
+| `<Stack direction gap align justify padding width height>` | children one after another; `align` places them across (`start`, `center`, `end`, `stretch`), `justify` along a fixed `width` or `height` (`space-between` too) |
 | `<Grid columns gap justify align padding>` | rows of cells as wide as their widest child |
+| `<Center padding width height>` | children laid over each other, centered: a label on a shape, a pill |
+| `fill stroke radius` on `<Stack>`, `<Grid>`, `<Center>` | a background as big as the container, its stroke inside the box: a card, a window, a row |
 | `<Align to place inset>` | places children against the canvas (default), a box, or a ref: `place="top-right"` puts each child's top-right on that corner |
 
 Anchors on a ref: `center`, `left`, `right`, `top`, `bottom`, `topLeft`, `topRight`, `bottomLeft`, `bottomRight`, `side(edge, t)` and `.map(([x, y]) => …)`.
@@ -119,7 +121,8 @@ Anchors on a ref: `center`, `left`, `right`, `top`, `bottom`, `topLeft`, `topRig
 - **Several nodes act in an order that depends on each other** (a cursor reaches a button, then it presses): a `timeline()` of verbs on refs, written as a script. A component can return its refs' verbs as actions (`toggle.on`).
 - **Two layouts of the same picture** (chart values, before/after code, a reflowing list): `morph` between keyed states, not hand-written tracks per node.
 - **One number drives many props**: one track and `.map()` from it, not parallel tracks that can drift apart.
-- **Centering a label on a shape**: `<Align to={shapeRef}>`, not `at` arithmetic.
+- **A card, a pill, a row with a background**: give the `<Stack>` or `<Center>` a `fill`, `stroke` and `radius`, not a rect of a size you worked out.
+- **Centering a label on a shape**: `<Center>` around both, not `at` arithmetic.
 - **A prop moves in one place only**: a track, a timeline verb or a morph, never two of them. Each says so if you mix them.
 
 ## Render, look, fix
@@ -172,16 +175,16 @@ Each one renders, passes `check` with no warnings, and is the bar for idiomatic 
 
 | File | Teaches |
 | --- | --- |
-| [`examples/card.tsx`](examples/card.tsx) | a card from `Stack`s, wrapped text with `<Run>`s, rows entering on a cascade of spans, `<Align to>` |
-| [`examples/toggles.tsx`](examples/toggles.tsx) | a timeline of verbs on refs: a cursor turns switches on; components that return their own actions; a spring |
+| [`examples/card.tsx`](examples/card.tsx) | a card that draws itself from `Stack`s, wrapped text with `<Run>`s, rows entering on a cascade of spans, `<Center>` pills |
+| [`examples/toggles.tsx`](examples/toggles.tsx) | a timeline of verbs on refs: a cursor turns switches on; components that return their own actions; a spring; rows spread with `justify="space-between"` |
 | [`examples/chart.tsx`](examples/chart.tsx) | `morph.between` keyed states: bars grow, recolor, trade places, enter and leave |
 | [`examples/pipeline.tsx`](examples/pipeline.tsx) | a diagram: arrows attached to refs, staggered draws, a dot carried along anchors |
 | [`examples/upload.tsx`](examples/upload.tsx) | one progress track mapped to a ring's trim and a bar's geometry; a spring pop; two labels crossfading |
-| [`examples/reveal.tsx`](examples/reveal.tsx) | gradients, a growing clip, a soft mask wipe on gradient text, `subtract`, `spin` |
+| [`examples/reveal.tsx`](examples/reveal.tsx) | gradients, a growing clip, a soft mask wipe sized by the text's box, `subtract`, `spin` |
 
 ## Size
 
-The SVG carries what the model needs and no more. What costs bytes: each font face a text uses (a subset of its glyphs, usually most of the file), sampled and derived curves that don't map key for key, springs (a few keys per move), and many nodes moving on lanes of their own. What is free: layout containers, refs, keys, anchors and `<Align>` (they are resolved when the scene compiles), groups that only place, and a still value. Use one or two faces, let one track drive many props by `.map()`, and prefer an `<Instance>` for content drawn many times.
+The SVG carries what the model needs and no more. What costs bytes: each font face a text uses (a subset of its glyphs, usually most of the file), sampled and derived curves that don't map key for key, springs (a few keys per move), and many nodes moving on lanes of their own. What is free: layout containers (one rect for one that draws itself), refs, keys, anchors and `<Align>` (they are resolved when the scene compiles), groups that only place, and a still value. Use one or two faces, let one track drive many props by `.map()`, and prefer an `<Instance>` for content drawn many times.
 
 ## Errors
 
@@ -232,7 +235,10 @@ Runtime errors. `…` stands for a value the message fills in.
 | `loop(…) is shorter than the motion, which runs until …s.` | a longer period |
 | `morph() matches nodes by key, and … the states have … nodes with no key, so they would pair up by their place.` | `key` every node that comes, goes or changes |
 | `morph() can't turn "…" from a … into a …: a node keeps its kind across states.` | another key for the other kind |
-| `The … "…" lays out "…", whose box a morph() changes, but layout reads each box at rest, so it would not make room.` | put the container inside each state |
+| `The … "…" lays out "…", which a morph() resizes, brings in or takes away inside a <Sequence>, so the … can't make room for it.` | put the container inside the `<Sequence>` |
+| `The … … is … …, but its children… and padding need ….` | a larger `width` or `height`, or leave it out |
+| `… is given a spring for its length and a curve as well.` | pass the spring once, in place of the length |
+| `The … of "…" is sized by its box, but "…" inside it is placed by an anchor…` | size the clip with numbers, or move that node out |
 | `subtract() cuts holes that lie wholly inside the base or wholly outside it, and … crosses or touches the base's edge.` | draw that outline with `path()` |
 | `… has …, which spreads over the node's box, and this paint has no box to spread over.` | give the gradient points: `linear({ from, to, stops })` |
 

@@ -1,6 +1,7 @@
 /** @jsxImportSource svjeez */
 import {
   Align,
+  Center,
   Group,
   Shape,
   Stack,
@@ -12,7 +13,6 @@ import {
   linear,
   radial,
   rect,
-  ref,
   scene,
   span,
   spin,
@@ -30,14 +30,7 @@ const leave = span(5.3, 0.5);
 
 const ring = subtract(circle(30), circle(20));
 
-const soft = linear({
-  from: [300, 0],
-  to: [360, 0],
-  stops: [
-    [0, "#000000"],
-    [1, "#00000000"],
-  ],
-});
+const FEATHER = 60;
 
 export default scene(
   {
@@ -48,48 +41,51 @@ export default scene(
     theme,
     reducedMotion: 3,
   },
-  () => {
-    const card = ref("card");
-
-    return (
-      <Group>
-        <Shape geometry={canvas.rect} fill={theme.background} />
-        <Align>
-          <Stack gap={20} align="center" motion={exit(leave)}>
-            <Group key="art" clip={track(circle(0)).to(circle(260), iris, ease.inOut)}>
+  () => (
+    <Group>
+      <Shape geometry={canvas.rect} fill={theme.background} />
+      <Align>
+        <Stack gap={20} align="center" motion={exit(leave)}>
+          <Center
+            key="art"
+            width={CARD[0]}
+            height={CARD[1]}
+            radius={16}
+            fill={radial.across({ center: "top-left", stops: [theme.cyan, theme.blue] })}
+            clip={track(circle(0)).to(circle(260), iris, ease.inOut)}
+          >
+            <Shape
+              key="ring"
+              geometry={ring}
+              rotate={spin({ every: 3 })}
+              fill={linear.across({ angle: 90, stops: ["#FFFFFF", "#FFFFFF33"] })}
+            />
+          </Center>
+          <Text
+            key="title"
+            font={sans}
+            weight={600}
+            size={30}
+            fill={linear.across({ stops: [theme.blue, theme.magenta] })}
+            mask={(own) => (
               <Shape
-                ref={card}
-                geometry={rect(CARD[0], CARD[1], { radius: 16 })}
-                fill={radial.across({ center: "top-left", stops: [theme.cyan, theme.blue] })}
+                geometry={rect(own.width + FEATHER, own.height)}
+                at={track<Vec>([-own.width - FEATHER, 0]).to([0, 0], wipe, ease.inOut)}
+                fill={linear({
+                  from: [own.width, 0],
+                  to: [own.width + FEATHER, 0],
+                  stops: [
+                    [0, "#000000"],
+                    [1, "#00000000"],
+                  ],
+                })}
               />
-              <Align to={card}>
-                <Shape
-                  key="ring"
-                  geometry={ring}
-                  rotate={spin({ every: 3 })}
-                  fill={linear.across({ angle: 90, stops: ["#FFFFFF", "#FFFFFF33"] })}
-                />
-              </Align>
-            </Group>
-            <Text
-              key="title"
-              font={sans}
-              weight={600}
-              size={30}
-              fill={linear.across({ stops: [theme.blue, theme.magenta] })}
-              mask={
-                <Shape
-                  geometry={rect(360, 60)}
-                  at={track<Vec>([-360, -10]).to([0, -10], wipe, ease.inOut)}
-                  fill={soft}
-                />
-              }
-            >
-              Paint and masks
-            </Text>
-          </Stack>
-        </Align>
-      </Group>
-    );
-  },
+            )}
+          >
+            Paint and masks
+          </Text>
+        </Stack>
+      </Align>
+    </Group>
+  ),
 );

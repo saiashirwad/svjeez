@@ -24,7 +24,7 @@ scale={track(1).to(0.8, shrink, ease.in).set(1, shrink.end)}
 - A track of geometry morphs: `track(rect(36, 36)).to(rect(96, 64, { radius: 20 }), span(0.4, 1))`. Rects stay rects, arcs stay arcs (`sweep` opens an arc), and any other pair is matched point for point.
 - A track of paint blends colors, and gradients of one kind (see [paint.md](paint.md)).
 
-Spans: `span(start, over)`; `span(start)` runs to the end of the clock. `.end`, `.next(over, gap?)`, `.shift(dt)`, `.pad(before, after?)`, `.until(end)`, `.first(over)`, `.last(over)`, `.chain(...overs)` (end to end: `const [crouch, leap, land] = span(0.1, 0.3).chain(0.12, 0.25)`), and `.cascade(count, step)` (the same length, `step` apart: entrances). Build each beat from the one before, so moving one moves the rest.
+Spans: `span(start, over)`; `span(start)` runs to the end of the clock. `.end`, `.next(over, gap?)`, `.shift(dt)`, `.pad(before, after?)`, `.until(end)`, `.first(over)`, `.last(over)`, `.chain(...overs)` (end to end: `const [crouch, leap, land] = span(0.1, 0.3).chain(0.12, 0.25)`), and `.cascade(count, step)` (the same length, `step` apart: entrances; `const [a, b, c] = s.cascade(3, 0.1)` is typed as three spans, so no `!`). Build each beat from the one before, so moving one moves the rest.
 
 ## Layers
 
