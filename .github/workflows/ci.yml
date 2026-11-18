@@ -79,6 +79,8 @@ jobs:
       - run: npm run test:package
         working-directory: packages/fonts
       - run: npm run test:package
+        working-directory: packages/math
+      - run: npm run test:package
         working-directory: packages/vite
       - run: npm run test:package
         working-directory: packages/video

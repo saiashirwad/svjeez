@@ -6,7 +6,7 @@ To write a scene, read [`packages/svjeez/skills/svjeez/SKILL.md`](packages/svjee
 
 ## Workspace
 
-`next` is the scene-model rewrite. `main` stays on 0.7.x and keeps everything `next` deleted: the site, the live editor (`@svjeez/live`, `@svjeez/react`, `@svjeez/svelte`), and the charts, code, diagrams, dom, geo, icons, math and mermaid packages. Each comes back by porting it from `main` (`git show main:<path>`) onto the scene model, never by restoring it as it was.
+`next` is the scene-model rewrite. `main` stays on 0.7.x and keeps everything `next` deleted: the site, the live editor (`@svjeez/live`, `@svjeez/react`, `@svjeez/svelte`), and the charts, code, diagrams, dom, geo, icons and mermaid packages. Each comes back by porting it from `main` (`git show main:<path>`) onto the scene model, never by restoring it as it was.
 
 The repository is a Bun workspace. The root `package.json` is private and lists the workspaces:
 
@@ -14,6 +14,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/vite/` is `@svjeez/vite`, the Vite plugin.
 - `packages/astro/` is `@svjeez/astro`, the Astro integration, built on `@svjeez/vite`.
 - `packages/fonts/` is `@svjeez/fonts`, which loads Google Fonts by family name into a `Font`.
+- `packages/math/` is `@svjeez/math`, which typesets TeX into glyph shapes through MathJax and draws plots, constructions and plane transformations as geometry.
 - `packages/video/` is `@svjeez/video`, which encodes a scene as MP4 or WebM through Mediabunny in headless Chromium.
 - `examples/` holds the scene-model example scenes and their committed output in `examples/dist/`. `examples/golden/` keeps the SVGs the 0.7 examples built, as references for frame diffs when a feature is ported; nothing builds or tests them. It is private and never published.
 
@@ -88,7 +89,7 @@ These are the rules that aren't visible from one file:
 Every package shares one version. To release, bump them together and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-for p in svjeez vite astro fonts video; do (cd packages/$p && bun pm version prerelease --preid next --no-git-tag-version); done   # on next; main uses minor, patch or major
+for p in svjeez vite astro fonts math video; do (cd packages/$p && bun pm version prerelease --preid next --no-git-tag-version); done   # on next; main uses minor, patch or major
 bun install && bun run build:examples && git add -A examples && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 
