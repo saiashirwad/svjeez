@@ -26,5 +26,7 @@ const svg = backend.emit(
 const paths = svg.match(/<path/g)?.length ?? 0;
 
 assert.ok(paths >= 6, `expected glyph paths, got ${paths}`);
+
 assert.doesNotMatch(svg, /<text/);
+
 console.log(`typeset a fraction and a root into ${paths} paths`);
