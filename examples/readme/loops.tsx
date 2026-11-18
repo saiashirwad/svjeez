@@ -1,5 +1,4 @@
-/** @jsxImportSource svjeez/scene */
-import { Group, Shape, arc, canvas, circle, enter, scene, span, spin, wiggle } from "svjeez/scene";
+import { Group, Shape, arc, canvas, circle, enter, scene, span, spin, wiggle } from "svjeez";
 import { theme } from "../theme";
 
 export default scene(

@@ -1,7 +1,6 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
-import { Group, Run, Text, font, scene, type SceneElement } from "svjeez/scene";
-import { svg } from "svjeez/scene/tools";
+import { Group, Run, Text, font, scene, type SceneElement } from "svjeez";
+import { svg } from "svjeez/tools";
 
 const fixture = (name: string) => new URL(`./fixtures/${name}.ttf`, import.meta.url);
 const regular = await font.load(fixture("SpaceMono-Regular"));

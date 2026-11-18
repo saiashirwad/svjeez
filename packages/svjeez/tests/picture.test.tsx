@@ -1,7 +1,6 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
-import { Group, Image, picture, scene } from "svjeez/scene";
-import { svg } from "svjeez/scene/tools";
+import { Group, Image, picture, scene } from "svjeez";
+import { svg } from "svjeez/tools";
 import { validateSvg } from "svjeez/frames";
 
 const isText = (part: number | string): part is string => typeof part === "string";

@@ -16,9 +16,9 @@ npm i svjeez@next @svjeez/fonts@next && npm i -D tsx typescript playwright-core 
 Under Bun: `bun add svjeez@next @svjeez/fonts@next` and run the CLI with `bunx --bun svjeez`. In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `"strict": true`, or start each scene file with the pragma below. Every import comes from `svjeez`.
 
 ```tsx
-/** @jsxImportSource svjeez/scene */
+/** @jsxImportSource svjeez */
 import { google } from "@svjeez/fonts";
-import { Group, Shape, Text, canvas, circle, draw, ease, enter, path, scene, span, tokens } from "svjeez/scene";
+import { Group, Shape, Text, canvas, circle, draw, ease, enter, path, scene, span, tokens } from "svjeez";
 
 const theme = tokens({
   light: { background: "#F6F7F9", text: "#161A21", accent: "#2F6FEB" },

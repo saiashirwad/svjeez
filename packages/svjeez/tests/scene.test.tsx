@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import {
   Group,
@@ -17,8 +16,8 @@ import {
   tokens,
   track,
   type SceneElement,
-} from "svjeez/scene";
-import { diagnose, isLane, isScene, svg, type Model } from "svjeez/scene/tools";
+} from "svjeez";
+import { diagnose, isLane, isScene, svg, type Model } from "svjeez/tools";
 
 const theme = tokens({ light: { ink: "#111111" }, dark: { ink: "#EEEEEE" } });
 

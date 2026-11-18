@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import { restyle } from "svjeez/page";
 import {
@@ -13,8 +12,8 @@ import {
   track,
   type Paint,
   type SceneElement,
-} from "svjeez/scene";
-import { svg, type Motion } from "svjeez/scene/tools";
+} from "svjeez";
+import { svg, type Motion } from "svjeez/tools";
 import { easeAt } from "../src/ease-at";
 import { keysOf, rotateKeys, valueAt } from "../src/keys";
 import { chain, span, stagger } from "../src/span";

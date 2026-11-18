@@ -1,10 +1,7 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
-import { font, picture } from "svjeez";
-import { renderFrames } from "svjeez/frames";
-import { jsx as svgJsx, Fragment as SvgFragment } from "svjeez/jsx-runtime";
-import { restyle } from "svjeez/page";
 import {
+  font,
+  picture,
   Align,
   Arrow,
   Grid,
@@ -29,8 +26,11 @@ import {
   type Paint,
   type SceneElement,
   type Vec,
-} from "svjeez/scene";
-import { boxesOf, hitTest, isLane, placements, svg, type Model } from "svjeez/scene/tools";
+} from "svjeez";
+import { renderFrames } from "svjeez/frames";
+import { jsx } from "svjeez/jsx-runtime";
+import { restyle } from "svjeez/page";
+import { boxesOf, hitTest, isLane, placements, svg, type Model } from "svjeez/tools";
 import { blendVec, valueAt } from "../src/scene/sample";
 import { startTrace, stopTrace } from "../src/traced";
 import integration from "./fixtures/scene/integration";
@@ -902,17 +902,15 @@ describe("the SVG backend", () => {
 });
 
 describe("errors a newcomer meets first", () => {
-  test("a file without the scene pragma says to add it", () => {
-    expect(() =>
-      // SAFETY: what svjeez's SVG runtime is handed when a file without the pragma nests scene nodes in a fragment.
-      svgJsx(SvgFragment, {
-        children: [<Shape geometry={circle(4)} anchor="center" fill={red} />] as never,
-      }),
-    ).toThrow("Put `/** @jsxImportSource svjeez/scene */` at the top of the file");
+  test("a lowercase tag, or JSX another runtime built, says what to write", () => {
+    // SAFETY: what an untyped file hands the runtime for a lowercase tag.
+    expect(() => jsx("rect" as never, { width: 4, height: 4 })).toThrow(
+      "JSX holds <rect>, an SVG tag, which a scene doesn't draw",
+    );
 
-    // SAFETY: what scene() is handed when a file without the pragma writes a lowercase tag.
-    expect(() => made(() => svgJsx("rect", { width: 4, height: 4 }) as never)).toThrow(
-      "scene()'s callback holds <rect>, an SVG tag, which a scene doesn't draw",
+    // SAFETY: what scene() is handed when a file's JSX is another library's, such as React's.
+    expect(() => made(() => ({ $$typeof: "react.element", props: {} }) as never)).toThrow(
+      "scene()'s callback holds JSX that another runtime built, not a scene node. Put `/** @jsxImportSource svjeez */` at the top of the file",
     );
   });
 

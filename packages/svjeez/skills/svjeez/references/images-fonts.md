@@ -6,7 +6,7 @@ Text is measured with its real font when the scene compiles, so every `<Text>` n
 
 ```ts
 import { google } from "@svjeez/fonts";
-import { font } from "svjeez/scene";
+import { font } from "svjeez";
 
 const inter = await google("Inter");                                        // one face, 400
 const geist = await google.family("Geist", [{ weight: 400 }, { weight: 600 }, { weight: 400, style: "italic" }]);

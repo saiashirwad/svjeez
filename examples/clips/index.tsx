@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import {
   Group,
   Sequence,
@@ -19,7 +18,7 @@ import {
   type Action,
   type SceneElement,
   type Vec,
-} from "svjeez/scene";
+} from "svjeez";
 import { mono, theme } from "../theme";
 
 const IDLE: Vec = [244, 196];

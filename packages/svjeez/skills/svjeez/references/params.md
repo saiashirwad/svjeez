@@ -3,8 +3,8 @@
 A scene can be a function of its params. It exports a schema from `svjeez/params` as `params`, and its default export takes the values and returns the scene. The CLI and your own build call it with values of their own.
 
 ```tsx
-/** @jsxImportSource svjeez/scene */
-import { Group, Shape, Text, canvas, enter, rect, scene, span } from "svjeez/scene";
+/** @jsxImportSource svjeez */
+import { Group, Shape, Text, canvas, enter, rect, scene, span } from "svjeez";
 import { defaults, list, number, text, type Values } from "svjeez/params";
 import { sans, theme } from "./style";
 

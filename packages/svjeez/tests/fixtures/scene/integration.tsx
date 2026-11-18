@@ -1,6 +1,6 @@
-/** @jsxImportSource svjeez/scene */
-import { font, picture } from "svjeez";
 import {
+  font,
+  picture,
   Align,
   Arrow,
   Grid,
@@ -26,7 +26,7 @@ import {
   timeline,
   tokens,
   track,
-} from "svjeez/scene";
+} from "svjeez";
 
 /**
  * Every node kind and every slice at once: a timeline moving a node inside a Grid and a nested Sequence, a morph

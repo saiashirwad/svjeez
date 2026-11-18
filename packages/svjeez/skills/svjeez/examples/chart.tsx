@@ -1,4 +1,4 @@
-/** @jsxImportSource svjeez/scene */
+/** @jsxImportSource svjeez */
 import {
   Group,
   Shape,
@@ -12,7 +12,7 @@ import {
   span,
   type Paint,
   type SceneElement,
-} from "svjeez/scene";
+} from "svjeez";
 import { sans, theme } from "./style";
 
 /** One state of the chart: a bar per region, in the order they stand. */

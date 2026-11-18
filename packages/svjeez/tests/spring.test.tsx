@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import { easeAt } from "../src/ease-at";
 import { alongCurve } from "../src/scene/curve";
@@ -16,8 +15,8 @@ import {
   tokens,
   track,
   type SceneElement,
-} from "svjeez/scene";
-import { isLane, svg, type Model, type Spring } from "svjeez/scene/tools";
+} from "svjeez";
+import { isLane, svg, type Model, type Spring } from "svjeez/tools";
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Test" }, build);

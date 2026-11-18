@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import {
   Group,
   Shape,
@@ -13,7 +12,7 @@ import {
   span,
   track,
   type Vec,
-} from "svjeez/scene";
+} from "svjeez";
 import { mono, theme } from "../theme";
 
 /** One angle drives everything below: the spoke turns with it, and the rest are mappings of it. */

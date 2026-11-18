@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
-import { ease, easeAt } from "svjeez";
+import { ease } from "svjeez";
+import { easeAt } from "../src/ease-at";
 import { splitEase } from "../src/ease-at";
 
 test("linear returns its progress, clamped to the transition", () => {

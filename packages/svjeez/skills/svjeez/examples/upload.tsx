@@ -1,4 +1,4 @@
-/** @jsxImportSource svjeez/scene */
+/** @jsxImportSource svjeez */
 import {
   Group,
   Align,
@@ -18,7 +18,7 @@ import {
   span,
   track,
   type Vec,
-} from "svjeez/scene";
+} from "svjeez";
 import { sans, theme } from "./style";
 
 const RADIUS = 26;

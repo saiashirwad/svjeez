@@ -1,8 +1,7 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import { ALL_FORMATS, BufferSource, EncodedPacketSink, Input } from "mediabunny";
-import { Shape, rect, scene as made, span, track } from "svjeez/scene";
-import { svg } from "svjeez/scene/tools";
+import { Shape, rect, scene as made, span, track } from "svjeez";
+import { svg } from "svjeez/tools";
 import { video } from "@svjeez/video";
 
 const scene = (width: number, height: number) =>

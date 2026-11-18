@@ -1,5 +1,4 @@
-/** @jsxImportSource svjeez/scene */
-import { Group, Shape, rect, scene, span, track } from "svjeez/scene";
+import { Group, Shape, rect, scene, span, track } from "svjeez";
 
 // A scene-model scene with one fault for `svjeez check`: a square that never comes onto the canvas.
 export default scene({ size: [100, 60], duration: 2, title: "Model" }, () => (

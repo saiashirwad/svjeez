@@ -34,8 +34,7 @@ Save this as `tsconfig.json`:
 Save this as `scene.tsx`:
 
 ```tsx
-/** @jsxImportSource svjeez/scene */
-import { Group, Shape, circle, draw, ease, enter, path, scene, span } from "svjeez/scene";
+import { Group, Shape, circle, draw, ease, enter, path, scene, span } from "svjeez";
 
 export default scene({ size: [200, 120], duration: 4, title: "Hello" }, () => (
   <Group>

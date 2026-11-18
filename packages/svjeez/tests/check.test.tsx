@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { checkScene, renderFrames, type CheckRule, type Finding } from "svjeez/frames";
@@ -18,8 +17,8 @@ import {
   track,
   wiggle,
   type SceneElement,
-} from "svjeez/scene";
-import { svg, type Hex } from "svjeez/scene/tools";
+} from "svjeez";
+import { svg, type Hex } from "svjeez/tools";
 import { startTrace, stopTrace } from "../src/traced";
 
 const made = (build: () => SceneElement, duration = 2, sources = false): string =>
@@ -339,7 +338,7 @@ describe.if(browser)("checkScene", () => {
 
     expect(result.exitCode).toBe(1);
     expect(out).toMatch(
-      /offscreen-scene\.tsx:8:5 {2}off-canvas {2}error: shape "dot" is outside the 100×60 canvas/,
+      /offscreen-scene\.tsx:7:5 {2}off-canvas {2}error: shape "dot" is outside the 100×60 canvas/,
     );
     expect(out).toContain("\n    hint: Move it onto the canvas, or remove it.");
     expect(out).toContain("1 error, 0 warnings");
@@ -355,7 +354,7 @@ describe.if(browser)("checkScene", () => {
       expect.objectContaining({
         code: "off-canvas",
         key: "lost",
-        source: expect.objectContaining({ line: 8 }),
+        source: expect.objectContaining({ line: 7 }),
         hint: "Move it onto the canvas, or remove it.",
       }),
     ]);
@@ -387,7 +386,7 @@ describe.if(browser)("checkScene", () => {
         code: "compile-error",
         key: "",
         message: "width is not known yet",
-        source: expect.objectContaining({ line: 6 }),
+        source: expect.objectContaining({ line: 5 }),
       }),
     ]);
   });

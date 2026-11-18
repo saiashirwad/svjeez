@@ -1,5 +1,4 @@
-/** @jsxImportSource svjeez/scene */
-import { Group, Run, Shape, Stack, Text, canvas, rect, scene, span, track } from "svjeez/scene";
+import { Group, Run, Shape, Stack, Text, canvas, rect, scene, span, track } from "svjeez";
 import { geistText } from "../fonts/faces";
 import { mono, theme } from "../theme";
 

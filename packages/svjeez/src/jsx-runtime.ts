@@ -1,45 +1,58 @@
-import type { Attrs, Tag } from "./attributes";
-import type { AnimatedTag, TagChannels } from "./channels";
-import type { Stack } from "./motion";
-import { children, node, type Child, type Props, type SvgNode } from "./svg";
-import { traced } from "./traced";
+import { caller } from "./traced";
+import { remember } from "./scene/identity";
+import { flat, type Child, type SceneElement } from "./scene/nodes";
 
-export type ElementProps<T extends Tag> = Attrs<T> &
-  (T extends AnimatedTag ? { readonly animation?: Stack<TagChannels<T>> } : {});
+export const Fragment = Symbol.for("svjeez.scene.fragment");
 
-export const Fragment = Symbol.for("svjeez.fragment");
+type Component<P> = (props: P) => SceneElement;
 
-type Component = (props: Props) => SvgNode | null;
+const isFragment = <P>(type: Given<P>): type is typeof Fragment => type === Fragment;
 
-const isComponent = (type: string | typeof Fragment | Component): type is Component =>
-  typeof type === "function";
+/** The runtime's input, with the lowercase tag an untyped file can still hand it. */
+type Given<P> = Component<P> | typeof Fragment | string;
 
-export const jsx = (type: string | typeof Fragment | Component, props: Props | null): SvgNode => {
-  const values = props ?? {};
+const isTag = <P>(type: Given<P>): type is string => typeof type === "string";
 
-  if (type === Fragment) return { kind: "fragment", children: children(values.children) };
+export const build = <P extends { readonly children?: Child }>(
+  type: Given<P>,
+  props: P,
+  key?: string,
+): SceneElement => {
+  if (isFragment(type)) return { type: "fragment", children: flat(props.children) };
 
-  if (isComponent(type)) return type(values) ?? { kind: "fragment", children: [] };
+  if (isTag(type))
+    throw new Error(
+      `JSX holds <${type}>, an SVG tag, which a scene doesn't draw: every node is a component, such as <Shape geometry={rect(w, h)} />.`,
+    );
 
-  return traced(node(type, values));
+  return type(key === undefined ? props : { ...props, key });
 };
 
-export const jsxs = jsx;
+export function jsx(
+  type: typeof Fragment,
+  props: { readonly children?: Child },
+  key?: string,
+): SceneElement;
+export function jsx<P>(type: Component<P>, props: P, key?: string): SceneElement;
+export function jsx<P extends { readonly children?: Child }>(
+  type: Component<P> | typeof Fragment,
+  props: P,
+  key?: string,
+): SceneElement {
+  // Records nothing unless the CLI is tracing a file, which reads the line from the stack.
+  return remember(build(type, props, key), caller());
+}
 
-export const jsxDEV = jsx;
+export { jsx as jsxs, jsx as jsxDEV };
 
-type Intrinsic<T extends Tag> = ElementProps<T> & {
-  readonly children?: Child;
-  readonly key?: string | number;
-};
-
+/** No lowercase tags: every node is a component. */
 export namespace JSX {
-  export type Element = SvgNode;
+  export type Element = SceneElement;
   export interface IntrinsicAttributes {
-    key?: string | number;
+    key?: string;
   }
   export interface ElementChildrenAttribute {
     children: {};
   }
-  export type IntrinsicElements = { [T in Tag]: Intrinsic<T> };
+  export interface IntrinsicElements {}
 }

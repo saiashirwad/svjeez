@@ -1,7 +1,6 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
-import { Shape, rect, scene, wiggle } from "svjeez/scene";
-import { svg } from "svjeez/scene/tools";
+import { Shape, rect, scene, wiggle } from "svjeez";
+import { svg } from "svjeez/tools";
 import { random } from "../src/random";
 
 const draw = (next: () => number, count = 50) => Array.from({ length: count }, next);

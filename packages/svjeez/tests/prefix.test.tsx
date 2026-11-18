@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import { validateSvg } from "svjeez/frames";
 import {
@@ -15,8 +14,8 @@ import {
   scene,
   span,
   track,
-} from "svjeez/scene";
-import { svg } from "svjeez/scene/tools";
+} from "svjeez";
+import { svg } from "svjeez/tools";
 
 const model = scene(
   { size: [100, 100], duration: 4, title: "P", desc: "D", reducedMotion: 1 },

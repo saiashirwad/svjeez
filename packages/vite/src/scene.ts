@@ -1,10 +1,10 @@
 import { createHash } from "node:crypto";
 import { gzipSync } from "node:zlib";
-import { isScene, svg as backend, type Scene } from "svjeez/scene/tools";
+import { isScene, svg as backend, type Scene } from "svjeez/tools";
 import { register, ROUTE } from "./assets.ts";
 import { poster, type PosterOptions, type Scheme } from "./posters.ts";
 
-/** A scene's default export: a scene from `svjeez/scene`, an SVG string, or a function that returns either. */
+/** A scene's default export: a scene from `svjeez`, an SVG string, or a function that returns either. */
 export type SceneSource = string | Scene | (() => string | Scene);
 
 export interface SceneImage {

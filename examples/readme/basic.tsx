@@ -1,5 +1,4 @@
-/** @jsxImportSource svjeez/scene */
-import { Group, Shape, canvas, circle, draw, ease, enter, path, scene, span } from "svjeez/scene";
+import { Group, Shape, canvas, circle, draw, ease, enter, path, scene, span } from "svjeez";
 import { theme } from "../theme";
 
 export default scene(

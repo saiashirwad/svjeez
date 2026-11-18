@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import {
   Group,
   Shape,
@@ -16,7 +15,7 @@ import {
   type Curve,
   type SceneElement,
   type Vec,
-} from "svjeez/scene";
+} from "svjeez";
 import { mono, theme } from "../theme";
 
 const wobble = ease.spring({ stiffness: 150, damping: 11 });

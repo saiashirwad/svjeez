@@ -15,14 +15,10 @@
     "paths": {
       "svjeez": ["../packages/svjeez/src/index.ts"],
       "svjeez/jsx-runtime": ["../packages/svjeez/src/jsx-runtime.ts"],
-      "svjeez/scene": ["../packages/svjeez/src/scene/index.ts"],
-      "svjeez/scene/tools": ["../packages/svjeez/src/scene/tools.ts"],
-      "svjeez/scene/jsx-dev-runtime": ["../packages/svjeez/src/scene/jsx-dev-runtime.ts"],
-      "svjeez/scene/jsx-runtime": ["../packages/svjeez/src/scene/jsx-runtime.ts"],
+      "svjeez/tools": ["../packages/svjeez/src/tools.ts"],
       "svjeez/jsx-dev-runtime": ["../packages/svjeez/src/jsx-dev-runtime.ts"],
       "svjeez/page": ["../packages/svjeez/src/page.ts"],
       "svjeez/params": ["../packages/svjeez/src/params.ts"],
-      "svjeez/geometry": ["../packages/svjeez/src/geometry.ts"],
       "svjeez/frames": ["../packages/svjeez/src/frames.ts"]
     }
   },

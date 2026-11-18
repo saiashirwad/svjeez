@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import {
   Arrow,
@@ -18,8 +17,8 @@ import {
   type Curve,
   type SceneElement,
   type Vec,
-} from "svjeez/scene";
-import { boxesOf, isLane, placements, svg, type Model, type Spanned } from "svjeez/scene/tools";
+} from "svjeez";
+import { boxesOf, isLane, placements, svg, type Model, type Spanned } from "svjeez/tools";
 import { alongCurve, curveLength, splitCurve } from "../src/scene/curve";
 import { blendVec, valueAt } from "../src/scene/sample";
 

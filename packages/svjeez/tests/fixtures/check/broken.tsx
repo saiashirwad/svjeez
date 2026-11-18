@@ -1,5 +1,4 @@
-/** @jsxImportSource svjeez/scene */
-import { Shape, rect, scene } from "svjeez/scene";
+import { Shape, rect, scene } from "svjeez";
 
 // A scene that throws while it builds, for `svjeez check` to report as a finding.
 const width = (): number => {

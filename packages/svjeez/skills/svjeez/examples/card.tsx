@@ -1,4 +1,4 @@
-/** @jsxImportSource svjeez/scene */
+/** @jsxImportSource svjeez */
 import {
   Align,
   Group,
@@ -17,7 +17,7 @@ import {
   type Paint,
   type SceneElement,
   type Span,
-} from "svjeez/scene";
+} from "svjeez";
 import { sans, theme } from "./style";
 
 /**

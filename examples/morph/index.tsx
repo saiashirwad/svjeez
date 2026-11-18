@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import {
   Group,
   Shape,
@@ -11,7 +10,7 @@ import {
   span,
   type Paint,
   type SceneElement,
-} from "svjeez/scene";
+} from "svjeez";
 import { mono, theme } from "../theme";
 
 /** One quarter of the chart: a bar per region, in the order they stand, and the badge's change. */

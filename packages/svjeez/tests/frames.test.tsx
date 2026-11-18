@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import { deflateSync } from "node:zlib";
 import { openScene, renderFrames } from "svjeez/frames";
@@ -23,8 +22,8 @@ import {
   tokens,
   track,
   type SceneElement,
-} from "svjeez/scene";
-import { svg, type SceneOptions, type SvgOptions } from "svjeez/scene/tools";
+} from "svjeez";
+import { svg, type SceneOptions, type SvgOptions } from "svjeez/tools";
 import { systemColorScheme } from "../src/scheme";
 
 const emit = (

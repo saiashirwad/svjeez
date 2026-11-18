@@ -1,5 +1,4 @@
-/** @jsxImportSource svjeez/scene */
-import { Group, Text, font, scene, track } from "svjeez/scene";
+import { Group, Text, font, scene, track } from "svjeez";
 
 const sans = await font.load(new URL("../ABeeZee-Regular.ttf", import.meta.url));
 

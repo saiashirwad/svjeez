@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import {
   Group,
@@ -23,8 +22,8 @@ import {
   track,
   type SceneElement,
   type Vec,
-} from "svjeez/scene";
-import { diagnose, isLane, svg, type Model } from "svjeez/scene/tools";
+} from "svjeez";
+import { diagnose, isLane, svg, type Model } from "svjeez/tools";
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Test" }, build);

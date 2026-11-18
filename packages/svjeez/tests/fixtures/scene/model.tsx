@@ -1,5 +1,4 @@
-/** @jsxImportSource svjeez/scene */
-import { Shape, circle, rect, scene, span, track } from "svjeez/scene";
+import { Shape, circle, rect, scene, span, track } from "svjeez";
 
 // The fragment proves the pragma: svjeez's own runtime makes a different fragment, which scene() refuses.
 export default scene({ size: [100, 60], duration: 2, title: "Model" }, () => (

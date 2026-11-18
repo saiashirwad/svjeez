@@ -1,8 +1,7 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
-import { Group, Run, Text, font, scene, type SceneElement } from "svjeez/scene";
-import { svg, type FontValue } from "svjeez/scene/tools";
+import { Group, Run, Text, font, scene, type SceneElement } from "svjeez";
+import { svg, type FontValue } from "svjeez/tools";
 import { validateSvg } from "svjeez/frames";
 import { contours, pathData } from "../src/font/glyf";
 import { sfnt } from "../src/font/sfnt";

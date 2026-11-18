@@ -766,13 +766,6 @@ const walk = (
     }
 
     case "fragment":
-      if (state.timeline && node.parts)
-        for (const { id, span } of node.parts)
-          state.timeline.push({
-            label: id,
-            spans: [{ at: state.clock.offset + span.at, over: span.over }],
-          });
-
       return {
         ...node,
         children: node.children.map((child) => walk(state, child, veiled, within, font)),

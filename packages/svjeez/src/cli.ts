@@ -17,7 +17,7 @@ import {
   type Related,
   type Scene,
   type Severity,
-} from "./scene/tools";
+} from "./tools";
 import { momentsOf, sourcesOf } from "./scene/survey";
 import { startTrace, stopTrace, traceOf, type BuildReport } from "./traced";
 import { validateSvg } from "./validate";
@@ -30,7 +30,7 @@ const USAGE = `usage:
   svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
   svjeez skill [--install [--dir .claude/skills]]
 
-<file> is an .svg, or a module whose default export is a scene from svjeez/scene, an SVG string, or a function
+<file> is an .svg, or a module whose default export is a scene from svjeez, an SVG string, or a function
 returning either.
 [params] is --params data.json and any number of --param key=value. They fill the module's exported \`params\` schema
 (from svjeez/params), are checked against it, and are passed to the default export; a key left out keeps its default.

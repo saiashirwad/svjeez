@@ -105,7 +105,7 @@ test("svg --json reports compiled timing with the line that wrote each track", (
   const build: BuildReport & { svg: string } = JSON.parse(output.stdout.toString());
 
   const track = build.timeline.find((track) => track.label.endsWith(" · opacity"));
-  expect(track?.source).toContain("cue-scene.tsx:12:");
+  expect(track?.source).toContain("cue-scene.tsx:11:");
   expect(track?.spans).toHaveLength(2);
   expect(track?.spans[0]?.at).toBeCloseTo(0.213);
   expect(track?.spans[1]?.at).toBeCloseTo(0.413);
@@ -143,7 +143,7 @@ test("svjeez svg says what is wrong with a param, naming its path", () => {
 test("svjeez svg emits a scene model default export, and --json reports its build", async () => {
   const file = join(import.meta.dir, "fixtures/scene/model.tsx");
   const { default: model } = await import(file);
-  const { svg } = await import("svjeez/scene/tools");
+  const { svg } = await import("svjeez/tools");
   const out = cli("svg", file);
 
   expect(out.stderr.toString()).toBe("");

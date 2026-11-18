@@ -1,4 +1,4 @@
-/** @jsxImportSource svjeez/scene */
+/** @jsxImportSource svjeez */
 import {
   Align,
   Arrow,
@@ -24,7 +24,7 @@ import {
   type Ref,
   type SceneElement,
   type Span,
-} from "svjeez/scene";
+} from "svjeez";
 import { sans, theme } from "./style";
 
 /** A labelled box that fades in during `when`. */

@@ -5,8 +5,8 @@ Every node has a box, the area it paints with its stroke included, known when th
 ## Containers
 
 ```tsx
-/** @jsxImportSource svjeez/scene */
-import { Align, Grid, Group, Shape, Stack, Text, canvas, circle, enter, rect, ref, scene, span } from "svjeez/scene";
+/** @jsxImportSource svjeez */
+import { Align, Grid, Group, Shape, Stack, Text, canvas, circle, enter, rect, ref, scene, span } from "svjeez";
 import { sans, theme } from "./style";
 
 const badge = ref("badge");

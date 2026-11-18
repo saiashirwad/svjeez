@@ -1,4 +1,4 @@
-import { font, tokens } from "svjeez/scene";
+import { font, tokens } from "svjeez";
 
 /**
  * What every example shares: one palette as tokens, so each color has a light and a dark value and the SVG follows

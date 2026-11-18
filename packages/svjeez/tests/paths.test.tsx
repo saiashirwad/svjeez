@@ -1,16 +1,6 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
-import {
-  Shape,
-  ease,
-  pathData,
-  sampled,
-  scene,
-  span,
-  track,
-  type SceneElement,
-} from "svjeez/scene";
-import { svg } from "svjeez/scene/tools";
+import { Shape, ease, pathData, sampled, scene, span, track, type SceneElement } from "svjeez";
+import { svg } from "svjeez/tools";
 import { blendPaths, commandsOf, matchPaths } from "../src/paths";
 
 const emit = (build: () => SceneElement, reducedMotion?: number | false) =>

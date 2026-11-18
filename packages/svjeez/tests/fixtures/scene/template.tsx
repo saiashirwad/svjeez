@@ -1,6 +1,5 @@
-/** @jsxImportSource svjeez/scene */
 import { defaults, number, text, type Values } from "svjeez/params";
-import { Shape, circle, scene } from "svjeez/scene";
+import { Shape, circle, scene } from "svjeez";
 
 export const params = {
   title: text("Dot", { maxLength: 12 }),

@@ -238,16 +238,6 @@ const isObject = (value: SceneElement): value is SceneElement =>
 const isText = (value: SceneElement | string | number): value is string | number =>
   typeof value === "string" || typeof value === "number";
 
-/** What a lowercase tag that svjeez's SVG runtime built is called, as JSX writes it. */
-const svgTag = (value: SceneElement): string | undefined =>
-  isObject(value) && "kind" in value && value.kind === "element" && "tag" in value
-    ? `<${String(value.tag)}>`
-    : undefined;
-
-/**
- * The element as lowering takes it, or the error a newcomer needs: a lowercase SVG tag, or JSX that svjeez's SVG
- * runtime built because the file doesn't say `@jsxImportSource svjeez/scene`.
- */
 /** Whether a value is an element lowering places: any but a run, which only a text holds. */
 const isPlaceable = (
   value: SceneElement,
@@ -264,14 +254,11 @@ export const sceneElement = (
     );
 
   if (isPlaceable(value)) return value;
-  const tag = svgTag(value);
 
   throw new Error(
-    tag
-      ? `${where} holds ${tag}, an SVG tag, which a scene doesn't draw: every node is a component, such as <Shape geometry={rect(w, h)} />. If the file has no \`/** @jsxImportSource svjeez/scene */\` at its top, add it.`
-      : isText(value)
-        ? `${where} holds the bare text "${String(value)}". Write text in a <Text font={…} size={…} fill={…}>.`
-        : `${where} holds ${isObject(value) ? "JSX that svjeez's SVG runtime built" : String(value)}, not a scene node. Put \`/** @jsxImportSource svjeez/scene */\` at the top of the file, so its JSX builds scene nodes.`,
+    isText(value)
+      ? `${where} holds the bare text "${String(value)}". Write text in a <Text font={…} size={…} fill={…}>.`
+      : `${where} holds ${isObject(value) ? "JSX that another runtime built" : String(value)}, not a scene node. Put \`/** @jsxImportSource svjeez */\` at the top of the file, so its JSX builds scene nodes.`,
   );
 };
 

@@ -1,7 +1,6 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
-import { font } from "svjeez";
 import {
+  font,
   Align,
   Arrow,
   Group,
@@ -28,7 +27,7 @@ import {
   timeline,
   track,
   type SceneElement,
-} from "svjeez/scene";
+} from "svjeez";
 import {
   boxesOf,
   describe as described,
@@ -36,7 +35,7 @@ import {
   isLane,
   type Model,
   type StrokeProps,
-} from "svjeez/scene/tools";
+} from "svjeez/tools";
 
 const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
 

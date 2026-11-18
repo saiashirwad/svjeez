@@ -1,5 +1,4 @@
-/** @jsxImportSource svjeez/scene */
-import { Shape, circle, ease, enter, scene, span } from "svjeez/scene";
+import { Shape, circle, ease, enter, scene, span } from "svjeez";
 
 export default scene({ size: [320, 120], duration: 2, title: "Hello" }, () => (
   <Shape

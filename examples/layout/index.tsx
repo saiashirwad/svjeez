@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import {
   Align,
   Arrow,
@@ -20,7 +19,7 @@ import {
   type Ref,
   type SceneElement,
   type Span,
-} from "svjeez/scene";
+} from "svjeez";
 import { geist } from "../fonts/faces";
 import { mono, theme } from "../theme";
 

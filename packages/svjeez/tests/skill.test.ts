@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { validateSvg } from "svjeez/frames";
-import { isScene, svg as backend, type Scene } from "svjeez/scene/tools";
+import { isScene, svg as backend, type Scene } from "svjeez/tools";
 
 const root = join(import.meta.dir, "../skills/svjeez");
 const examples = join(root, "examples");

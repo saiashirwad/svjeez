@@ -2,8 +2,8 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
-import { font } from "svjeez/scene";
-import type { Font, FontFamily, FontOptions, FontStyle } from "svjeez/scene/tools";
+import { font } from "svjeez";
+import type { Font, FontFamily, FontOptions, FontStyle } from "svjeez/tools";
 
 export type GoogleOptions = Omit<FontOptions, "family" | "weight" | "style"> & {
   /** Default 400. */

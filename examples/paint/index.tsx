@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import {
   Group,
   Shape,
@@ -17,7 +16,7 @@ import {
   track,
   type SceneElement,
   type Vec,
-} from "svjeez/scene";
+} from "svjeez";
 import { mono, theme } from "../theme";
 
 const TILE = 136;

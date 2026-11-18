@@ -1,5 +1,4 @@
-/** @jsxImportSource svjeez/scene */
-import { Group, Shape, canvas, ease, rect, scene, span, track } from "svjeez/scene";
+import { Group, Shape, canvas, ease, rect, scene, span, track } from "svjeez";
 import { theme } from "../theme";
 
 const fadeIn = span(1, 0.5);

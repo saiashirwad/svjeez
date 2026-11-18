@@ -3,9 +3,9 @@ import { mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { google } from "@svjeez/fonts";
-import { Text, scene } from "svjeez/scene";
-import { jsx } from "svjeez/scene/jsx-runtime";
-import { svg as backend } from "svjeez/scene/tools";
+import { Text, scene } from "svjeez";
+import { jsx } from "svjeez/jsx-runtime";
+import { svg as backend } from "svjeez/tools";
 
 const cache = mkdtempSync(join(tmpdir(), "svjeez-fonts-consumer-"));
 

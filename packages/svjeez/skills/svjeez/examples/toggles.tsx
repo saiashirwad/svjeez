@@ -1,4 +1,4 @@
-/** @jsxImportSource svjeez/scene */
+/** @jsxImportSource svjeez */
 import {
   Align,
   Group,
@@ -22,7 +22,7 @@ import {
   type Ref,
   type SceneElement,
   type Vec,
-} from "svjeez/scene";
+} from "svjeez";
 import { sans, theme } from "./style";
 
 const ROW: Vec = [300, 52];

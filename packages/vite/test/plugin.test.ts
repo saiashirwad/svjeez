@@ -2,8 +2,8 @@ import { afterAll, expect, test } from "bun:test";
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { build, createServer, type HotPayload } from "vite";
-import { Group, scene } from "svjeez/scene";
-import { jsx } from "svjeez/scene/jsx-runtime";
+import { Group, scene } from "svjeez";
+import { jsx } from "svjeez/jsx-runtime";
 import { getScene } from "../src/scene.ts";
 import { appConfig } from "./app/config.ts";
 
@@ -44,8 +44,7 @@ test("the dev server serves a scene and reloads it when the scene or a file it i
   writeFileSync(join(scratch, "label.ts"), `export const label = "first";`);
 
   const scene = (size: number) =>
-    `/** @jsxImportSource svjeez/scene */
-import { Shape, rect, scene } from "svjeez/scene";
+    `import { Shape, rect, scene } from "svjeez";
 import { label } from "./label";
 export default () => scene({ size: [${size}, 100], duration: 1, title: label }, () => <Shape geometry={rect(10, 10)} fill="#3EE6D6" />);`;
 
@@ -109,8 +108,7 @@ test("a scene model default export, under its file's @jsxImportSource, is served
   writeFileSync(join(dir, "main.ts"), `export { default } from "./scene.tsx?svjeez";`);
   writeFileSync(
     join(dir, "scene.tsx"),
-    `/** @jsxImportSource svjeez/scene */
-import { Shape, circle, rect, scene } from "svjeez/scene";
+    `import { Shape, circle, rect, scene } from "svjeez";
 export default scene({ size: [120, 80], duration: 1, title: "Model" }, () => (
   <>
     <Shape geometry={rect(120, 80)} fill="#101010" />
@@ -159,8 +157,7 @@ test("a scene imports a CommonJS package when the server environment bundles eve
   writeFileSync(join(dir, "main.ts"), `export { default } from "./scene.tsx?svjeez";`);
   writeFileSync(
     join(dir, "scene.tsx"),
-    `/** @jsxImportSource svjeez/scene */
-import { Shape, rect, scene } from "svjeez/scene";
+    `import { Shape, rect, scene } from "svjeez";
 import { label } from "cjs-label";
 export default () => scene({ size: [100, 100], duration: 1, title: label }, () => <Shape geometry={rect(10, 10)} fill="#3EE6D6" />);`,
   );

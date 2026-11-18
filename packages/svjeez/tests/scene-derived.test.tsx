@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import {
   Group,
@@ -15,8 +14,8 @@ import {
   track,
   type SceneElement,
   type Vec,
-} from "svjeez/scene";
-import { isLane, type Model } from "svjeez/scene/tools";
+} from "svjeez";
+import { isLane, type Model } from "svjeez/tools";
 import { easeAt } from "../src/ease-at";
 import { blendNumber, blendVec, valueAt } from "../src/scene/sample";
 

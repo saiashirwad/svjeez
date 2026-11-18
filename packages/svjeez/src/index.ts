@@ -1,187 +1,76 @@
-export { render, type RenderOptions } from "./render";
+/**
+ * Write a scene: components (`<Shape>`, `<Text>`, `<Group>`, layout and `<Arrow>`), typed values for geometry and
+ * paint, tracks and motion layers for time, and timelines of verbs on refs. Tools that read or draw a scene are in
+ * `svjeez/tools`.
+ *
+ * One rule orders every argument list: what, then when, then how. `track(0).to(1, span(0.2, 0.5), ease.out)`,
+ * `card.move([40, 0], 0.5, ease.inOut)`, `enter(span(0, 0.4), { from: { scale: 0 }, curve: ease.pop })`. A recipe
+ * whose "what" has a default takes it in its options, after the when.
+ *
+ * `at` is always a place, never a time: a node's own position in its parent. A motion layer's `offset` moves the node
+ * from there, on top of it, and a timeline's `moveBy` moves its `at` by an amount. Time is a span: `span(start, over)`.
+ *
+ * Opacity: a prop is the node's own value; a motion layer (`enter`, `exit`, `motion()`) wraps it and multiplies;
+ * a timeline verb (`ref.show`, `ref.hide`, `ref.to`) writes the prop's track.
+ */
 
-export { motion, ease, type Motion, type Stack, type Seconds, type Ease } from "./motion";
-
-export {
-  span,
-  chain,
-  stagger,
-  type Span,
-  type OpenSpan,
-  type Spanned,
-  type OpenSpanned,
-  type When,
-} from "./span";
-
-export { Clip, type ClipProps } from "./clip";
-
-export { easeAt } from "./ease-at";
-
-export { valuesAt, type ValuesAtOptions } from "./valuesAt";
-
-export { random } from "./random";
-
-export { Pivot, type PivotProps } from "./pivot";
+export { scene } from "./scene/lower";
 
 export {
-  enter,
-  exit,
-  draw,
-  shake,
-  wiggle,
-  sampled,
-  type WiggleOptions,
-  type SampledOptions,
-} from "./recipes";
+  Group,
+  Image,
+  Instance,
+  Run,
+  Sequence,
+  Shape,
+  Text,
+  canvas,
+  ref,
+  symbol,
+  type SceneElement,
+} from "./scene/nodes";
 
-export { def, type Ref, type DefTag } from "./defs";
+export type { Ref } from "./scene/refs";
 
-export { css, type Css, type Property, type Syntax, type SyntaxOf } from "./properties";
+export { Align, Grid, Stack } from "./scene/layout";
 
-export { fx } from "./fx";
-
-export { picture, Picture, type ImageFormat, type PictureData, type PictureProps } from "./picture";
-
-export {
-  font,
-  type Font,
-  type FontFamily,
-  type FontFormat,
-  type FontMetrics,
-  type FontOptions,
-  type FontStyle,
-  type GlyphPath,
-  type PathOptions,
-  type TextPath,
-  type FontValue,
-  textWidth,
-} from "./font/font";
-
-export { fitText, type FitTextOptions } from "./font/fit";
-
-export { strokeFont, type StrokeFont } from "./font/stroke";
-
-export type { Each } from "./each";
-
-export { Glyphs, type GlyphsProps } from "./glyphs";
-
-export { Icon, type IconData, type IconProps } from "./icon";
-
-export { Ambient, type AmbientProps } from "./ambient";
-
-export { Once, type OnceProps } from "./once";
-
-export { Style, type StyleProps } from "./style";
-
-export { spline, type Spline } from "./spline";
+export { Arrow } from "./scene/arrow";
 
 export {
-  Ink,
-  tool,
-  type Tool,
-  type InkProps,
-  type PenOptions,
-  type BrushOptions,
-  type NibOptions,
-  type PencilOptions,
-} from "./ink/ink";
+  arc,
+  circle,
+  ellipse,
+  line,
+  path,
+  pathData,
+  polygon,
+  polyline,
+  rect,
+  tokens,
+  type Geometry,
+  type Paint,
+} from "./scene/values";
 
-export type { ElementProps } from "./jsx-runtime";
+export { subtract } from "./scene/holes";
 
-export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
+export { linear, radial } from "./scene/paint";
 
-export { type Hex } from "./color";
+export { blur, shadow } from "./scene/effects";
 
-export type { Channel, ChannelValues, TagChannels } from "./channels";
+export { motion, track, type Anim, type Track } from "./scene/track";
 
-export type { SvgNode, Child } from "./svg";
+export { draw, enter, exit, sampled, shake, spin, wiggle } from "./scene/recipes";
 
-export type { Point, Rect, Edge } from "./geometry";
+export { ease, type Curve } from "./scene/spring";
 
-export type { Drawn, Part } from "./drawn";
+export { span, type Span } from "./scene/span";
 
-export type { PathData } from "./paths";
+export { par, seq, stagger, timeline, wait, type Action } from "./scene/timeline";
 
-export type { Box, Size } from "./layout/box";
+export { morph } from "./scene/morph";
 
-export {
-  timeline,
-  show,
-  shot,
-  type ShowOptions,
-  type ShotMove,
-  type ShotOptions,
-  readingTime,
-  type ReadingOptions,
-  travel,
-  type Beats,
-  type Heading,
-  type Travel,
-  type Shown,
-  type HeadingOptions,
-  type TravelOptions,
-  type Timeline,
-  type TimelineOptions,
-} from "./extras/timeline";
+export { picture } from "./picture";
 
-export {
-  code,
-  type Code,
-  type CodeOptions,
-  type CodeToken,
-  type CodeTokens,
-  type CodeRun,
-  type CodePiece,
-  type CodeWord,
-  type CodeMetrics,
-} from "./extras/code";
+export { font } from "./font/font";
 
-export { readout, type ReadoutOptions } from "./extras/readout";
-
-export {
-  morph,
-  type MorphResult,
-  type MorphOptions,
-  type Morphable,
-  type MorphPiece,
-} from "./extras/morph";
-
-export { typewriter, type TypewriterOptions, type TypewriterResult } from "./extras/typewriter";
-
-export { reveal, type RevealOptions, type RevealResult } from "./extras/reveal";
-
-export { Focus, type FocusStop } from "./extras/focus";
-
-export { Arrow, Callout, Brace, Underline } from "./extras/annotations";
-
-export { Marker } from "./extras/marker";
-
-export { Camera, type CameraProps, type CameraStop } from "./extras/camera";
-
-export {
-  base16,
-  tint,
-  adaptive,
-  variables,
-  defaultDark,
-  systemLight,
-  systemDark,
-  type Base16,
-  type AdaptiveResult,
-  type VariablesResult,
-  type Slot,
-  type CodeRole,
-} from "./extras/theme";
-
-export { appWindow, type WindowOptions, type AppWindowResult } from "./extras/window";
-
-export {
-  terminal,
-  type TerminalCommand,
-  type TerminalOptions,
-  type TerminalResult,
-} from "./extras/terminal";
-
-export { flow, type FlowOptions, type FlowResult, type FlowStyle } from "./extras/flow";
-
-export type { Direction } from "./layout/box";
+export type { Vec } from "./scene/ir";

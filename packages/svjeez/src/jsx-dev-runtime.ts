@@ -1,13 +1,34 @@
-import { Fragment, jsx } from "./jsx-runtime";
-import { remember, type JsxSource } from "./sources";
-import type { Props, SvgNode } from "./svg";
+import type { JsxSource } from "./sources";
+import { caller } from "./traced";
+import { remember } from "./scene/identity";
+import { Fragment, build, jsx, type JSX } from "./jsx-runtime";
+import type { Child, SceneElement } from "./scene/nodes";
 
-export { Fragment };
+export { Fragment, jsx, jsx as jsxs, type JSX };
 
-export const jsxDEV = (
-  type: Parameters<typeof jsx>[0],
-  props: Props | null,
-  _key?: string | number,
+type Component<P> = (props: P) => SceneElement;
+
+export function jsxDEV(
+  type: typeof Fragment,
+  props: { readonly children?: Child },
+  key?: string,
+  isStaticChildren?: boolean,
+  source?: JsxSource,
+): SceneElement;
+export function jsxDEV<P>(
+  type: Component<P>,
+  props: P,
+  key?: string,
+  isStaticChildren?: boolean,
+  source?: JsxSource,
+): SceneElement;
+/** The development transform's call: the element `jsx` makes, remembering where it was written. */
+export function jsxDEV<P extends { readonly children?: Child }>(
+  type: Component<P> | typeof Fragment,
+  props: P,
+  key?: string,
   _isStaticChildren?: boolean,
   source?: JsxSource,
-): SvgNode => remember(jsx(type, props), source);
+): SceneElement {
+  return remember(build(type, props, key), source ?? caller());
+}

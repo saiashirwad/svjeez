@@ -10,19 +10,14 @@ const ENTRIES = [
   "svjeez",
   "svjeez/jsx-runtime",
   "svjeez/jsx-dev-runtime",
-  "svjeez/scene",
-  "svjeez/scene/tools",
-  "svjeez/scene/jsx-runtime",
-  "svjeez/scene/jsx-dev-runtime",
+  "svjeez/tools",
   "svjeez/frames",
   "svjeez/page",
   "svjeez/params",
-  "svjeez/geometry",
 ];
 
-const CONSUMER = `/** @jsxImportSource svjeez/scene */
-import { Shape, circle, ease, enter, scene, span } from "svjeez/scene";
-import { svg as backend } from "svjeez/scene/tools";
+const CONSUMER = `import { Shape, circle, ease, enter, scene, span } from "svjeez";
+import { svg as backend } from "svjeez/tools";
 import { renderFrames } from "svjeez/frames";
 
 // @ts-expect-error a circle's radius is a number

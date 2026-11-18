@@ -20,12 +20,6 @@
   "types": "./package-dist/index.d.ts",
   "typesVersions": {
     "*": {
-      "scene": [
-        "package-dist/scene/index.d.ts"
-      ],
-      "scene/tools": [
-        "package-dist/scene/tools.d.ts"
-      ],
       "*": [
         "package-dist/*.d.ts"
       ]
@@ -47,25 +41,10 @@
       "types": "./package-dist/jsx-dev-runtime.d.ts",
       "default": "./package-dist/jsx-dev-runtime.js"
     },
-    "./scene": {
-      "@svjeez/source": "./src/scene/index.ts",
-      "types": "./package-dist/scene/index.d.ts",
-      "default": "./package-dist/scene/index.js"
-    },
-    "./scene/tools": {
-      "@svjeez/source": "./src/scene/tools.ts",
-      "types": "./package-dist/scene/tools.d.ts",
-      "default": "./package-dist/scene/tools.js"
-    },
-    "./scene/jsx-runtime": {
-      "@svjeez/source": "./src/scene/jsx-runtime.ts",
-      "types": "./package-dist/scene/jsx-runtime.d.ts",
-      "default": "./package-dist/scene/jsx-runtime.js"
-    },
-    "./scene/jsx-dev-runtime": {
-      "@svjeez/source": "./src/scene/jsx-dev-runtime.ts",
-      "types": "./package-dist/scene/jsx-dev-runtime.d.ts",
-      "default": "./package-dist/scene/jsx-dev-runtime.js"
+    "./tools": {
+      "@svjeez/source": "./src/tools.ts",
+      "types": "./package-dist/tools.d.ts",
+      "default": "./package-dist/tools.js"
     },
     "./frames": {
       "@svjeez/source": "./src/frames.ts",
@@ -76,11 +55,6 @@
       "@svjeez/source": "./src/page.ts",
       "types": "./package-dist/page.d.ts",
       "default": "./package-dist/page.js"
-    },
-    "./geometry": {
-      "@svjeez/source": "./src/geometry.ts",
-      "types": "./package-dist/geometry.d.ts",
-      "default": "./package-dist/geometry.js"
     },
     "./params": {
       "@svjeez/source": "./src/params.ts",

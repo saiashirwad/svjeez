@@ -1,4 +1,3 @@
-/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import {
   Group,
@@ -13,12 +12,12 @@ import {
   span,
   track,
   type SceneElement,
-} from "svjeez/scene";
-import { boxesOf, hitTest, isLane, svg, type Model } from "svjeez/scene/tools";
-import { jsxDEV } from "svjeez/scene/jsx-dev-runtime";
-import { jsx } from "svjeez/scene/jsx-runtime";
+  font,
+} from "svjeez";
+import { boxesOf, hitTest, isLane, svg, type Model } from "svjeez/tools";
+import { jsxDEV } from "svjeez/jsx-dev-runtime";
+import { jsx } from "svjeez/jsx-runtime";
 import { readFileSync } from "node:fs";
-import { font } from "svjeez";
 
 const mono = font(readFileSync(new URL("./fixtures/JetBrainsMono.ttf", import.meta.url)));
 

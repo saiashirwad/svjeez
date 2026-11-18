@@ -4,9 +4,9 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ALL_FORMATS, BufferSource, Input } from "mediabunny";
-import { Shape, rect, scene, span, track } from "svjeez/scene";
-import { jsx } from "svjeez/scene/jsx-runtime";
-import { svg as backend } from "svjeez/scene/tools";
+import { Shape, rect, scene, span, track } from "svjeez";
+import { jsx } from "svjeez/jsx-runtime";
+import { svg as backend } from "svjeez/tools";
 import { video } from "@svjeez/video";
 
 const svg = backend.emit(
