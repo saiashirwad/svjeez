@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 158" width="440" height="158" role="img" aria-labelledby="title">
+  <title id="title">Three staggered bars finish at 2.16 seconds, when the caption starts</title>
+  <rect width="440" height="158" rx="10" fill="#f6f8fa"/>
+  <g font-family="system-ui,sans-serif" font-size="14" fill="#24292f">
+    <text x="16" y="26" font-weight="600">Sales series</text>
+    <text x="16" y="53">Jan</text><text x="16" y="79">Feb</text><text x="16" y="105">Mar</text>
+    <text x="78" y="133" text-anchor="middle">1s</text><text x="326" y="133" text-anchor="middle">2.16s</text>
+    <text x="326" y="151" text-anchor="middle">caption starts</text>
+  </g>
+  <g fill="#2563eb"><rect x="78" y="42" width="214" height="12" rx="4"/><rect x="95" y="68" width="214" height="12" rx="4"/><rect x="112" y="94" width="214" height="12" rx="4"/></g>
+  <path d="M326 35v82" stroke="#a04700" stroke-width="2" stroke-dasharray="4 3"/>
+</svg>
