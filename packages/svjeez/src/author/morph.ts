@@ -22,7 +22,8 @@ import type {
   TextRun,
   Vec,
 } from "../model/ir";
-import { isLane, pair } from "../model/lane";
+import { isLane, mapLane, pair } from "../model/lane";
+import { blendNumber, breaksOf, follow, laneFrom, valueAt } from "../model/sample";
 import { flat, type Child, type SceneElement } from "./nodes";
 import { ease, isSpring, type Curve } from "./spring";
 import {
@@ -749,8 +750,101 @@ const blendedLines = (plan: Plan, entry: Entry, states: readonly TextNode[]): Te
 
 const FADE: Fixed = { ...IDLE, opacity: 0 };
 
+const close = (a: number, b: number): boolean => Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(b));
+
+const closeVec = (a: Vec, b: Vec, k: number): boolean =>
+  close(a[0] * k, b[0]) && close(a[1] * k, b[1]);
+
+/** Two layouts of the same words at different sizes: every position grows by the ratio of the sizes. */
+const resized = (a: TextNode, b: TextNode): boolean => {
+  const k = b.size / a.size;
+
+  return (
+    a.lines.length === b.lines.length &&
+    a.lines.every((line, l) => {
+      const other = b.lines[l]!;
+
+      return (
+        closeVec(line.at, other.at, k) &&
+        line.runs.length === other.runs.length &&
+        line.runs.every((run, r) => {
+          const theirs = other.runs[r]!;
+
+          return (
+            run.text === theirs.text &&
+            same(run.face, theirs.face) &&
+            closeVec(run.at, theirs.at, k) &&
+            run.advances.length === theirs.advances.length &&
+            run.advances.every((advance, i) => close(advance * k, theirs.advances[i]!))
+          );
+        })
+      );
+    })
+  );
+};
+
+const STROKE_NEAR = 0.01;
+
+/** Text whose size changes between states grows by a scale, with its stroke held at the width it was given. */
+const grownText = (plan: Plan, entry: Entry, texts: readonly TextNode[]): TextNode | undefined => {
+  const [rest] = texts;
+
+  if (!rest || texts.every((node) => node.size === rest.size)) return undefined;
+
+  if (!texts.every((node) => resized(rest, node))) return undefined;
+
+  const grow = blend(
+    plan,
+    entry,
+    texts.map((node) => node.size / rest.size),
+    mixNumber,
+    "size",
+  );
+
+  if (!isLane(grow)) return undefined;
+  const [ox, oy] = rest.origin;
+  const stroke = strokeOf(plan, entry, texts);
+
+  const width =
+    stroke && !isLane(stroke.width)
+      ? ((w: number) =>
+          laneFrom(
+            follow(
+              (t) => [w / valueAt(grow, t, blendNumber)],
+              breaksOf([grow], plan.timing.duration),
+              STROKE_NEAR,
+              [],
+              [grow],
+            ),
+            ([value]) => value!,
+          ))(stroke.width)
+      : stroke?.width;
+
+  const placedHere = placed(plan, entry);
+
+  return {
+    ...placedHere,
+    layers: [
+      ...placedHere.layers,
+      {
+        offset: mapLane(grow, (value): Vec => [(value - 1) * ox, (value - 1) * oy]),
+        rotate: 0,
+        scale: mapLane(grow, (value): Vec => [value, value]),
+        opacity: 1,
+      },
+    ],
+    kind: "text",
+    size: rest.size,
+    ...(stroke && { stroke: { ...stroke, width: width! } }),
+    lines: blendedLines(plan, entry, texts),
+  };
+};
+
 const textOf = (plan: Plan, entry: Entry): TextNode | GroupNode => {
   const texts = entry.filled.filter((node): node is TextNode => node.kind === "text");
+  const grown = grownText(plan, entry, texts);
+
+  if (grown) return grown;
 
   if (texts.every((node) => wording(node) === wording(texts[0]!))) {
     const rest = texts[0]!;

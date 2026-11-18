@@ -28,7 +28,7 @@ import type {
   TokenValue,
   Vec,
 } from "../model/ir";
-import { atRest, isLane, mapLane, pair } from "../model/lane";
+import { atRest, isLane, pair } from "../model/lane";
 import { morphed, type MorphElement } from "./morph";
 import {
   flat,
@@ -315,35 +315,6 @@ const strokeOf = (
   nonScaling: written.nonScaling ?? false,
 });
 
-/** An animated size lays the text out at the size it starts at, and scales it from its anchor. */
-const grownBy = (
-  given: TextProps["size"],
-  size: number,
-  timing: Timing,
-  where: string,
-): ((node: SceneNode, home: Vec) => SceneNode) => {
-  const lane = animated(given, keep, timing, mixNumber, `size on ${where}`);
-
-  if (!isLane(lane)) return (node) => node;
-
-  if (lane.keys.some((each) => !(each.value >= 0)))
-    throw new SceneError(`${where} needs a size of 0 or more at every time.`);
-
-  return (node, [x, y]) => {
-    const [hx, hy] = [x - node.origin[0], y - node.origin[1]];
-    const share = (value: number): number => value / size;
-
-    const layer: Layer = {
-      offset: mapLane(lane, (value): Vec => [(1 - share(value)) * hx, (1 - share(value)) * hy]),
-      rotate: 0,
-      scale: mapLane(lane, (value): Vec => [share(value), share(value)]),
-      opacity: 1,
-    };
-
-    return { ...node, layers: [...node.layers, layer] };
-  };
-};
-
 const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNode => {
   const where = named(key);
   const size = restOf(props.size);
@@ -353,7 +324,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
       `${where} needs a size above 0 at the start, got ${size}.`,
       "To grow text in from nothing, start from its size and scale it in with motion={enter(…, { from: { scale: 0 } })}.",
     );
-  const grown = grownBy(props.size, size, timing, where);
+  const width = props.width === undefined ? undefined : restOf(props.width);
   const counting = countingIn(props.children, where);
 
   const own: Asked = {
@@ -459,23 +430,21 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
       ticks,
     );
 
-    const home = pinned(props.anchor, box, where, baseline);
-
     const stroke =
       props.stroke && strokeOf(ctx, { join: "round", ...props.stroke }, timing, where, box);
 
+    const painted = outset(box, stroke);
+    const home = pinned(props.anchor, painted, where, baseline);
+
     return {
-      node: grown(
-        {
-          ...base(props, box, key, timing, home),
-          authored: {
-            count: { ticks: ticks.map(({ t, text }) => ({ t, text: before + text + after })) },
-          },
-          kind: "group",
-          children: [stroke ? stroked(node, stroke) : node],
+      node: {
+        ...base(props, painted, key, timing, home),
+        authored: {
+          count: { ticks: ticks.map(({ t, text }) => ({ t, text: before + text + after })) },
         },
-        home,
-      ),
+        kind: "group",
+        children: [stroke ? stroked(node, stroke) : node],
+      },
     };
   })();
 
@@ -516,7 +485,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     pieces,
     {
       size,
-      ...(props.width !== undefined && { width: props.width }),
+      ...(width !== undefined && { width }),
       ...(props.lineHeight !== undefined && { lineHeight: props.lineHeight }),
       ...(props.align !== undefined && { align: props.align }),
     },
@@ -533,32 +502,48 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     return known;
   };
 
-  const home = pinned(props.anchor, box, where, lines[0]?.at[1] ?? 0);
+  const stroke =
+    props.stroke && strokeOf(ctx, { join: "round", ...props.stroke }, timing, where, box);
 
-  return grown(
-    {
-      ...base(props, box, key, timing, home),
-      ...(props.width !== undefined && { authored: { wrap: { width: props.width, cuts } } }),
-      kind: "text",
-      size,
-      ...(props.stroke && {
-        stroke: strokeOf(ctx, { join: "round", ...props.stroke }, timing, where, box),
-      }),
-      lines: lines.map((line): TextLine => ({
-        at: line.at,
-        runs: line.runs.map(({ text: words, at, advances, outline, style }): TextRun => ({
-          text: words,
-          at,
-          advances,
-          face: style.face,
-          fill: fillOf(style),
-          ...(style.opacity !== undefined && { opacity: style.opacity }),
-          ...(outline && { outline }),
-        })),
+  const painted = outset(box, stroke);
+  const home = pinned(props.anchor, painted, where, lines[0]?.at[1] ?? 0);
+
+  return {
+    ...base(props, painted, key, timing, home),
+    ...(width !== undefined && { authored: { wrap: { width, cuts } } }),
+    kind: "text",
+    size,
+    ...(stroke && { stroke }),
+    lines: lines.map((line): TextLine => ({
+      at: line.at,
+      runs: line.runs.map(({ text: words, at, advances, outline, style }): TextRun => ({
+        text: words,
+        at,
+        advances,
+        face: style.face,
+        fill: fillOf(style),
+        ...(style.opacity !== undefined && { opacity: style.opacity }),
+        ...(outline && { outline }),
       })),
-    },
-    home,
-  );
+    })),
+  };
+};
+
+/** A stroke reaches half its width past the glyphs, as it does past a shape's outline. */
+const outset = (box: Box, stroke: Stroke | undefined): Box => {
+  if (!stroke) return box;
+
+  const half =
+    Math.max(
+      ...(isLane(stroke.width) ? stroke.width.keys.map((each) => each.value) : [stroke.width]),
+    ) / 2;
+
+  return {
+    x: box.x - half,
+    y: box.y - half,
+    width: box.width + half * 2,
+    height: box.height + half * 2,
+  };
 };
 
 const stroked = (node: SceneNode, stroke: Stroke): SceneNode =>

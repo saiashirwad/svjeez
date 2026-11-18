@@ -11,6 +11,7 @@ import { isWhen, type When } from "./span";
 import type { Anim, Layers } from "./track";
 import type { Effect } from "./effects";
 import type { Forward } from "./verbs";
+import { reflowed } from "./reflow";
 import type { TextContent } from "./count";
 import { rect, type Geometry, type Paint } from "./values";
 
@@ -91,7 +92,7 @@ export interface TextProps extends Omit<Common, "anchor"> {
   readonly fill?: Anim<Paint>;
   readonly stroke?: StrokeProps;
   readonly align?: "start" | "center" | "end";
-  readonly width?: number;
+  readonly width?: Anim<number>;
   readonly lineHeight?: number;
   readonly children?: TextContent;
 }
@@ -213,7 +214,7 @@ export const Group = ({
 
 export const Shape = (props: ShapeProps): SceneElement => ({ type: "shape", props });
 
-export const Text = (props: TextProps): SceneElement => ({ type: "text", props });
+export const Text = (props: TextProps): SceneElement => reflowed(props) ?? { type: "text", props };
 
 export const Run = (props: RunProps): SceneElement => ({ type: "run", props });
 
