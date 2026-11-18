@@ -13,6 +13,7 @@ export type Feature =
   | "mask"
   | "blur"
   | "shadow"
+  | "softBlur"
   | "linearGradient"
   | "radialGradient"
   | "nonScalingStroke"
@@ -48,6 +49,14 @@ const paints = (paint: Animated<Paint> | undefined): Paint[] => {
   return isLane(paint) ? paint.keys.map((key) => key.value) : [paint];
 };
 
+const SOFT = 1.5;
+
+const softens = (radius: Animated<number>): boolean => {
+  const values = isLane(radius) ? radius.keys.map((key) => key.value) : [radius];
+
+  return Math.min(...values) < SOFT && Math.max(...values) > 0;
+};
+
 const runsOf = (node: TextNode): TextRun[] => node.lines.flatMap((line) => line.runs);
 
 const featuresOf = (node: SceneNode): Feature[] => {
@@ -67,7 +76,11 @@ const featuresOf = (node: SceneNode): Feature[] => {
 
   if (node.mask) used.push("mask");
 
-  for (const effect of node.effects) used.push(effect.kind);
+  for (const effect of node.effects) {
+    used.push(effect.kind);
+
+    if (softens(effect.kind === "blur" ? effect.radius : effect.blur)) used.push("softBlur");
+  }
 
   for (const paint of painted) {
     if (Array.isArray(paint)) continue;

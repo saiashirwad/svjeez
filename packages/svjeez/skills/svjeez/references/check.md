@@ -62,7 +62,7 @@ In code, `inspect(scene)` and `describe(scene, times)` from `svjeez/tools` retur
 | `unattached-ref` | warning | a ref the scene made that no node takes |
 | `hidden-target` | warning | a timeline moves a node that is never visible |
 | `unsupported` | error | a feature the SVG backend can't draw |
-| `approximate` | warning | a feature the SVG backend draws a little differently (blur and shadow) |
+| `approximate` | warning | a feature the SVG backend draws a little differently (a blur or shadow that goes below about 1.5) |
 | `compile-warning` | warning | a warning from writing an SVG string; only `svjeez check` |
 
 Fix errors first. For a warning, look at a frame at the times it names; fix the scene unless the frame shows what you meant. The browser pass adds what only pixels show, measured at 0, seven times across the loop, just before the end and at the scene's keys (`--times` to choose): elements off the canvas, text over text, motion that changes nothing, and jumps at the loop seam. It needs `playwright-core` and `npx playwright-core install chromium-headless-shell`.

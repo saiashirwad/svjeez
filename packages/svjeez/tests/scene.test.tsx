@@ -404,7 +404,15 @@ describe("the SVG backend", () => {
     const warned: string[] = [];
 
     svg.emit(blurred, { onWarning: (warning) => warned.push(`${warning.feature} ${warning.key}`) });
-    expect(warned).toEqual(["blur dot"]);
+    expect(warned).toEqual([]);
+
+    const faint: Model.Scene = {
+      ...model,
+      root: { ...model.root, children: [{ ...dot, effects: [{ kind: "blur", radius: 1 }] }] },
+    };
+
+    svg.emit(faint, { onWarning: (warning) => warned.push(`${warning.feature} ${warning.key}`) });
+    expect(warned).toEqual(["softBlur dot"]);
   });
 });
 

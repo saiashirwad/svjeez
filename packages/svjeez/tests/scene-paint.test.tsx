@@ -26,7 +26,7 @@ import {
   type SceneElement,
   type Vec,
 } from "svjeez";
-import { boxesOf, diagnose, hitTest, isLane, svg, type Model } from "svjeez/tools";
+import { boxesOf, diagnose, hitTest, isLane, svg, type Effect, type Model } from "svjeez/tools";
 
 const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
 
@@ -781,13 +781,20 @@ describe("effects", () => {
     ).toThrow('"a" has a non-scaling stroke inside the effects of "a"');
   });
 
-  test("SVG draws blur and shadow close to exact, and says how they differ", () => {
-    const model = made(() => (
-      <Shape fill="#000000" key="a" geometry={rect(4, 4)} effects={[blur(1)]} />
-    ));
+  test("SVG draws blur and shadow exactly, and warns only for a blur under 1.5", () => {
+    const warned = (effect: Effect) =>
+      diagnose(
+        made(() => <Shape fill="#000000" key="a" geometry={rect(4, 4)} effects={[effect]} />),
+        svg,
+      ).map((entry) => [entry.severity, entry.feature]);
 
-    expect(diagnose(model, svg).map((entry) => [entry.severity, entry.feature])).toEqual([
-      ["warning", "blur"],
+    expect(warned(blur(1))).toEqual([["warning", "softBlur"]]);
+    expect(warned(blur(2))).toEqual([]);
+    expect(warned(blur(0))).toEqual([]);
+    expect(warned(blur(track(4).to(0, span(0, 1))))).toEqual([["warning", "softBlur"]]);
+    expect(warned(shadow({ color: "#000000", blur: 3, opacity: 0.5 }))).toEqual([]);
+    expect(warned(shadow({ color: "#000000", blur: 1, opacity: 0.5 }))).toEqual([
+      ["warning", "softBlur"],
     ]);
   });
 });

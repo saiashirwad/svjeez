@@ -45,4 +45,4 @@ The whole example is [`examples/reveal.tsx`](../examples/reveal.tsx).
 
 ## What each target can draw
 
-Every backend declares what it supports, and `svjeez check` reports the difference as a finding, never silently. The SVG backend draws everything above. `blur` and `shadow` are reported as `approximate` in SVG: WebKit draws a blur under about 1.5 units softer than it is, while Chromium and Firefox draw it exactly. Keep them if that is fine, or leave them out where the scene must be exact. Frames and video render the SVG in Chromium, so they match it.
+Every backend declares what it supports, and `svjeez check` reports the difference as a finding, never silently. The SVG backend draws everything above. A blur or shadow is reported as `approximate` only when its blur goes below about 1.5 units (a still blur of 1, or one easing to 0): WebKit draws those softer than they are, while Chromium and Firefox draw them exactly. A blur of 1.5 or more is exact everywhere. Keep it if that is fine, or end a blur-to-zero on a short crossfade from the blurred copy to the sharp one. Frames and video render the SVG in Chromium, so they match it.
