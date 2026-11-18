@@ -171,6 +171,7 @@ npx svjeez frames scene.tsx --sheet --out frames/   # look: open frames/sheet.pn
 - Icons (`@svjeez/icons`): [`references/icons.md`](references/icons.md)
 - Bar, line and area charts on shared axes (`@svjeez/charts`): [`references/charts.md`](references/charts.md)
 - Highlighted code that types itself and morphs (`@svjeez/code`): [`references/code.md`](references/code.md)
+- Maps and turning globes with `@svjeez/geo`: [`references/geo.md`](references/geo.md)
 
 ## Examples
 
@@ -251,4 +252,4 @@ Runtime errors. `…` stands for a value the message fills in.
 
 ## References
 
-[`references/layout-text.md`](references/layout-text.md), [`references/motion.md`](references/motion.md), [`references/timeline.md`](references/timeline.md), [`references/morph.md`](references/morph.md), [`references/paint.md`](references/paint.md), [`references/check.md`](references/check.md), [`references/params.md`](references/params.md), [`references/images-fonts.md`](references/images-fonts.md), [`references/icons.md`](references/icons.md), [`references/charts.md`](references/charts.md), [`references/code.md`](references/code.md), [`references/render.md`](references/render.md).
+[`references/layout-text.md`](references/layout-text.md), [`references/motion.md`](references/motion.md), [`references/timeline.md`](references/timeline.md), [`references/morph.md`](references/morph.md), [`references/paint.md`](references/paint.md), [`references/check.md`](references/check.md), [`references/params.md`](references/params.md), [`references/images-fonts.md`](references/images-fonts.md), [`references/icons.md`](references/icons.md), [`references/charts.md`](references/charts.md), [`references/code.md`](references/code.md), [`references/geo.md`](references/geo.md), [`references/render.md`](references/render.md).

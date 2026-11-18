@@ -85,6 +85,8 @@ jobs:
       - run: npm run test:package
         working-directory: packages/code
       - run: npm run test:package
+        working-directory: packages/geo
+      - run: npm run test:package
         working-directory: packages/vite
       - run: npm run test:package
         working-directory: packages/video
