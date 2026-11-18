@@ -553,27 +553,6 @@ group("what the model keeps of how the scene was written", () => {
       'ref "spare" is made, but no node takes it as ref={…}, so it points at nothing.',
     ]);
   });
-
-  test("a verb that moves a node no one sees is reported; one that moves a seen node is not", () => {
-    const moved = (opacity: number) =>
-      made(() => {
-        const dot = ref("dot");
-
-        dot.move([60, 20], span(0, 1));
-
-        return <Dot ref={dot} opacity={opacity} />;
-      });
-
-    const model = moved(0);
-
-    expect(model.authored?.actions).toEqual([
-      { verb: "dot.move()", key: "dot", start: 0, over: 1 },
-    ]);
-    expect(only(model, "hidden-target")[0]?.message).toBe(
-      'dot.move() moves "dot", which is never visible, so no one sees the move.',
-    );
-    expect(codes(moved(1))).not.toContain("hidden-target");
-  });
 });
 
 group("describe", () => {

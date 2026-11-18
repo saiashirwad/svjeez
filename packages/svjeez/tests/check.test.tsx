@@ -468,11 +468,11 @@ describe("svjeez check when the scene does not build", () => {
     ]);
   });
 
-  test("two actions on one prop point at the second call", () => {
+  test("two steps on one track point at the second call", () => {
     const out = cli(fixture("overlap"), "--no-browser").stdout.toString();
 
     expect(out).toMatch(
-      /overlap\.tsx:7:\d+ {2}compile-error {2}error: dot\.set\(\) sets at on <Shape> "dot" at 0\.5s/,
+      /overlap\.tsx:7:\d+ {2}compile-error {2}error: Two steps move this track at once: one from 0s to 1s, and another at 0\.5s/,
     );
   });
 

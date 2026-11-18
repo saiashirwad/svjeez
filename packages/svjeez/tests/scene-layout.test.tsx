@@ -409,22 +409,13 @@ describe("containers that draw themselves", () => {
     expect(find(fitted, "c").box).toEqual({ x: 0, y: 0, width: 22, height: 14 });
   });
 
-  test("a grid draws its background too, and verbs recolor a container's fill and stroke", () => {
+  test("a grid draws its background too, and tracks recolor a container's fill and stroke", () => {
     const model = made(() => {
-      const grid = ref("grid");
-
-      grid.to({ fill: "#ff0000" }, span(0, 1));
-      grid.to({ stroke: { color: "#00ff00" } }, span(0, 1));
+      const fill = track<`#${string}`>("#000000").to("#ff0000", span(0, 1));
+      const color = track<`#${string}`>("#ffffff").to("#00ff00", span(0, 1));
 
       return (
-        <Grid
-          ref={grid}
-          columns={2}
-          gap={2}
-          padding={2}
-          fill="#000000"
-          stroke={{ color: "#ffffff" }}
-        >
+        <Grid key="grid" columns={2} gap={2} padding={2} fill={fill} stroke={{ color }}>
           <Shape fill="#000000" key="a" geometry={rect(10, 10)} />
           <Shape fill="#000000" key="b" geometry={rect(10, 10)} />
         </Grid>

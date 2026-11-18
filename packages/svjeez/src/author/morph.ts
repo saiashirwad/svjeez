@@ -250,7 +250,7 @@ const blend = <T>(
 
   if (values.some(isLane))
     throw new SceneError(
-      `morph() can't blend the ${what} of ${named(entry.key)}: it moves in a state (a track, a recipe or a verb) and also differs between states. Write it the same in every state, or let the morph move it.`,
+      `morph() can't blend the ${what} of ${named(entry.key)}: it moves in a state (a track or a recipe) and also differs between states. Write it the same in every state, or let the morph move it.`,
     );
 
   // SAFETY: no value is a lane, so each is a T.

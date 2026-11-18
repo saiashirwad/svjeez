@@ -1,4 +1,5 @@
 import {
+  type Vec,
   font,
   picture,
   Align,
@@ -46,29 +47,29 @@ const star = symbol(() => (
 export default scene({ size: [320, 200], duration: 4, title: "Integration", theme }, () => {
   const grid = ref("grid");
   const card = ref("card");
-  const mover = ref("mover");
-  const late = ref("late");
   const dot = ref("dot");
   const angle = track(0).to(270, span(0.5, 2.5), ease.inOut);
+  const dim = track(1).to(0.3, span(0, 0.6));
+  const cardAt = track<Vec>([60, 110]);
+  const turn = track(0);
+  const lateAt = track<Vec>([90, 170]);
 
-  grid.part("b").to({ opacity: 0.3 }, span(0, 0.6));
-  const landed = card.move([200, 110], span(0, 1.2), ease.spring({ stiffness: 120, damping: 14 }));
-
-  mover.to({ rotate: 45 }, landed.next(0.8));
-  late.move([130, 170], span(0, 0.8), ease.inOut);
+  cardAt.to([200, 110], span(0, 1.2), ease.spring({ stiffness: 120, damping: 14 }));
+  turn.to(45, cardAt.span.next(0.8));
+  lateAt.to([130, 170], span(0, 0.8), ease.inOut);
 
   return (
     <Group>
       <Shape geometry={rect(320, 200)} fill={theme.paper} />
       <Grid ref={grid} columns={2} gap={4} at={[12, 12]}>
         <Shape key="a" geometry={rect(16, 16)} fill={theme.cool} />
-        <Shape key="b" geometry={rect(16, 16)} fill={theme.accent} />
-        <Group ref={mover}>
+        <Shape key="b" geometry={rect(16, 16)} fill={theme.accent} opacity={dim} />
+        <Group rotate={turn}>
           <Shape geometry={rect(16, 16)} fill={theme.ink} />
         </Group>
         <Image src={badge} width={16} />
       </Grid>
-      <Group ref={card} offset={[60, 110]}>
+      <Group ref={card} offset={cardAt}>
         <Shape geometry={rect(70, 40, { radius: 6 })} fill={theme.soft} />
         <Text font={mono} size={11} width={60} at={[6, 16]} anchor="baseline-left" fill={theme.ink}>
           {"a card that wraps"}
@@ -114,13 +115,7 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
       <Instance of={star} offset={[44, 170]} scale={1.5} />
       <Sequence when={span(1)}>
         <Sequence when={span(0.5)}>
-          <Shape
-            ref={late}
-            geometry={circle(6)}
-            at={[90, 170]}
-            anchor="center"
-            fill={theme.accent}
-          />
+          <Shape geometry={circle(6)} at={lateAt} anchor="center" fill={theme.accent} />
         </Sequence>
       </Sequence>
       <Align place="bottom-right" inset={6}>

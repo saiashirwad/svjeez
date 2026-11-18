@@ -365,10 +365,6 @@ export const Arrow = (props: ArrowProps): SceneElement => {
     type: "group",
     props: {
       ...common,
-      forward:
-        size > 0
-          ? { trim: "shaft", stroke: ["shaft", "head"] }
-          : { trim: "shaft", stroke: "shaft" },
     },
     children: [
       {

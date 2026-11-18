@@ -1,17 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-  ease,
-  font,
-  Group,
-  Run,
-  Text,
-  morph,
-  ref,
-  scene,
-  span,
-  track,
-  type SceneElement,
-} from "svjeez";
+import { ease, font, Group, Run, Text, morph, scene, span, track, type SceneElement } from "svjeez";
 import { boxesOf, diagnose, isLane, svg, type Model } from "svjeez/tools";
 
 const fixture = (name: string) => new URL(`./fixtures/${name}.ttf`, import.meta.url);
@@ -540,20 +528,13 @@ describe("morph", () => {
 });
 
 describe("text strokes and animated size", () => {
-  test("a stroke on text draws under its fill, and a verb can change it", () => {
+  test("a stroke on text draws under its fill, and a track can change it", () => {
     const model = made(() => {
-      const label = ref("t");
-
-      label.to({ stroke: { color: "#ff0000", width: 3 } }, span(1, 1));
+      const color = track<`#${string}`>("#ffffff").to("#ff0000", span(1, 1));
+      const width = track(2).to(3, span(1, 1));
 
       return (
-        <Text
-          ref={label}
-          font={space}
-          size={20}
-          fill="#000000"
-          stroke={{ color: "#ffffff", width: 2 }}
-        >
+        <Text key="t" font={space} size={20} fill="#000000" stroke={{ color, width }}>
           Hi
         </Text>
       );

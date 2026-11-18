@@ -1,5 +1,5 @@
 import { walkScene } from "../model/walk";
-import { add, isGone, type Survey } from "./inspect-context";
+import { add, type Survey } from "./inspect-context";
 
 export const unusedSymbols = (survey: Survey): void => {
   const used = new Set<string>();
@@ -30,25 +30,6 @@ export const unattachedRefs = (survey: Survey): void => {
       key: root.key,
       message: `ref "${key}" is made, but no node takes it as ref={…}, so it points at nothing.`,
       hint: "Give the node it is for ref={…}, or remove the ref.",
-    });
-  }
-};
-
-export const hiddenTargets = (survey: Survey): void => {
-  const byKey = new Map(survey.entries.map((entry) => [entry.node.key, entry]));
-  const said = new Set<string>();
-
-  for (const { verb, key } of survey.scene.authored?.actions ?? []) {
-    const entry = byKey.get(key);
-
-    if (!entry || !isGone(survey, entry) || said.has(`${verb}\u0000${key}`)) continue;
-    said.add(`${verb}\u0000${key}`);
-    add(survey, {
-      code: "hidden-target",
-      severity: "warning",
-      key,
-      message: `${verb} moves "${key}", which is never visible, so no one sees the move.`,
-      hint: "Show the node at some time, or move the node that is seen.",
     });
   }
 };

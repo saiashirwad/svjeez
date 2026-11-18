@@ -48,7 +48,6 @@ import {
 } from "./nodes";
 import { declaring, isAnchor, type Anchor } from "./refs";
 import {
-  aimNow,
   arrangeState,
   around,
   note,
@@ -72,9 +71,10 @@ import {
   type Mix,
   type Timing,
 } from "../model/steps";
-import { isTrack, layersOf, passageOf, type Anim, type LayerMotion } from "./track";
+import { isTrack, layersOf, readOf, reading, type Anim, type LayerMotion } from "./track";
 import { derivedOf, isDerived, restOf } from "./derived";
-import { collect, type Cues, type NodeElement } from "./verbs";
+import { withGoals } from "./goals";
+import type { NodeElement } from "./nodes";
 import {
   outlineOf,
   polygon,
@@ -88,7 +88,7 @@ import {
 } from "./values";
 import { FontBook, charName, faceOf, piecesOf, type Asked } from "./runs";
 import { lookOf, paintedBoxOf } from "../model/painted";
-import { homeOf, minus, pinned } from "./pin";
+import { minus, pinned } from "./pin";
 import { layoutRuns } from "./text";
 import { countedNodes, countingIn, formatOf, ticksOf } from "./count";
 import { blendable, gradientOf, isWrittenGradient, mixPaint } from "./paint";
@@ -121,7 +121,6 @@ interface Ctx {
   readonly symbols: Map<string, SymbolEntry>;
   readonly named: Map<SceneSymbol, string>;
   readonly notes: Notes;
-  readonly cues: Cues;
 }
 
 interface SymbolEntry {
@@ -144,7 +143,7 @@ const animated = <A, T>(
 
   if (!isTrack(value)) return change(value);
   // SAFETY: a value that is not undefined is an A, and undefined is itself one when A allows it, so change() takes it either way.
-  const data = mapped(passageOf(value).data, "value", (given) => change(given as A));
+  const data = mapped(readOf(value, timing, where).data, "value", (given) => change(given as A));
 
   return laneOf(data, data.initial.value!, timing, mix, where, curves);
 };
@@ -168,8 +167,9 @@ const solidOf = (ctx: Ctx, paint: Hex | Token, where: string): Color => {
 
 const isHex = (paint: Hex | Token): paint is Hex => typeof paint === "string";
 
-const layerOf = ({ passage }: LayerMotion, timing: Timing, where: string): Layer => {
-  const { data } = passage;
+const layerOf = (layer: LayerMotion, timing: Timing, where: string): Layer => {
+  layer.readBy(where);
+  const { data } = layer.passage;
 
   const slot = <K extends "offset" | "rotate" | "scale" | "opacity", T>(
     name: K,
@@ -233,7 +233,7 @@ const geometryOf = (
   if (isDerived(value)) return derivedOf(value, outlineOf, timing, `${what} on ${where}`);
 
   if (!isTrack(value)) return outlineOf(value);
-  const { data } = passageOf(value);
+  const { data } = readOf(value, timing, `${what} on ${where}`);
 
   const authored = [data.initial, ...data.steps.map((step) => step.values)].flatMap(
     (values): Geometry[] => (values.value === undefined ? [] : [values.value]),
@@ -794,7 +794,7 @@ const lowered = (
   timing: Timing,
   parent: string,
 ): SceneNode[] => {
-  const el = ctx.cues.apply(given, key, timing, ctx.notes, parent);
+  const el = withGoals(given, key, timing, ctx.notes, parent);
   const backdrop = el.type === "group" ? backdropOf(ctx, el.props, key, timing) : undefined;
   const offset = el.type === "group" || el.type === "instance" ? el.props.offset : undefined;
 
@@ -811,17 +811,7 @@ const lowered = (
   );
 
   const aimed = (node: SceneNode): SceneNode => {
-    const aim = ctx.notes.aims.get(key);
-
-    if (still && el.props.origin === "at") return { ...node, origin: [0, 0] };
-
-    if (!aim || el.type === "group" || ctx.notes.onAnchor.has(key)) return node;
-    ctx.notes.aims.delete(key);
-
-    return {
-      ...node,
-      at: aimNow(aim, node, homeOf(el.type, node, el.props.anchor, node.box, offset !== undefined)),
-    };
+    return still && el.props.origin === "at" ? { ...node, origin: [0, 0] } : node;
   };
 
   const done = (node: SceneNode): SceneNode[] => [
@@ -977,7 +967,7 @@ const maskOf = (ctx: Ctx, mask: Child, key: string, timing: Timing): GroupNode |
 
     if (placed !== undefined)
       throw new SceneError(
-        `${named(placed)} is in the mask of ${named(key)} and is placed by an anchor, a move() onto an anchor, or as an arrow's end. A mask is drawn in its node's frame and is never part of the layout.`,
+        `${named(placed)} is in the mask of ${named(key)} and is placed by an anchor, a track going to an anchor, or as an arrow's end. A mask is drawn in its node's frame and is never part of the layout.`,
         "Place what is in it with at.",
         whereOf(placed),
       );
@@ -1051,7 +1041,7 @@ const sized = (ctx: Ctx, props: Omit<Common, "anchor">, node: SceneNode): SceneN
 
     if (placed !== undefined)
       throw new SceneError(
-        `The ${what} of ${named(node.key)} is sized by its box, but ${named(placed)} inside it is placed by an anchor, a move() onto an anchor, or as an arrow's end, so its box isn't known yet.`,
+        `The ${what} of ${named(node.key)} is sized by its box, but ${named(placed)} inside it is placed by an anchor, a track going to an anchor, or as an arrow's end, so its box isn't known yet.`,
         `Size the ${what} with numbers, or move that node out.`,
       );
   }
@@ -1146,7 +1136,7 @@ const isBare = (el: SceneElement): boolean =>
   (el.type === "group" && Object.keys(el.props).length === 0 && el.settle === undefined);
 
 export const scene = (options: SceneOptions, build: () => SceneElement): Scene =>
-  naming(() => lowerScene(options, build));
+  naming(() => reading(() => lowerScene(options, build)));
 
 const lowerScene = (options: SceneOptions, build: () => SceneElement): Scene => {
   const { size, duration } = options;
@@ -1168,9 +1158,7 @@ const lowerScene = (options: SceneOptions, build: () => SceneElement): Scene => 
       `scene() needs reducedMotion as a time in seconds, or false, got ${String(options.reducedMotion)}.`,
     );
 
-  const [[top, cues], declared] = declaring(() =>
-    collect(() => sceneElement(within(size, build), "scene()'s callback")),
-  );
+  const [top, declared] = declaring(() => sceneElement(within(size, build), "scene()'s callback"));
 
   const ctx: Ctx = {
     tokens: new Map(),
@@ -1180,7 +1168,6 @@ const lowerScene = (options: SceneOptions, build: () => SceneElement): Scene => 
     symbols: new Map(),
     named: new Map(),
     notes: notes(),
-    cues,
   };
 
   for (const token of Object.values(options.theme ?? {})) colorOf(ctx, token, "scene()");
@@ -1203,9 +1190,8 @@ const lowerScene = (options: SceneOptions, build: () => SceneElement): Scene => 
     children,
   };
 
-  cues.finish();
   const root = settle(drafted, ctx.notes, duration);
-  const refs = [...new Set([...declared, ...ctx.notes.refs.keys(), ...cues.refs])];
+  const refs = [...new Set([...declared, ...ctx.notes.refs.keys()])];
 
   const still =
     options.reducedMotion === false
@@ -1223,10 +1209,9 @@ const lowerScene = (options: SceneOptions, build: () => SceneElement): Scene => 
     fonts: ctx.fonts.families(),
     symbols: Object.fromEntries([...ctx.symbols].map(([name, entry]) => [name, entry.node!])),
     root,
-    ...((refs.length > 0 || cues.applied.length > 0) && {
+    ...(refs.length > 0 && {
       authored: {
         refs: refs.map((each) => ({ key: each.key, attached: ctx.notes.refs.has(each) })),
-        actions: cues.applied,
       },
     }),
   };

@@ -24,6 +24,7 @@ import {
   span,
   symbol,
   track,
+  type Vec,
   type SceneElement,
 } from "svjeez";
 import {
@@ -382,22 +383,18 @@ describe("a box is what the shape paints", () => {
   });
 });
 
-describe("verbs move the anchor point", () => {
-  test("move takes the point at names to the point given; move to an anchor lands it, or a point measured from it", () => {
-    const dot = ref("dot");
+describe("tracks move the anchor point", () => {
+  test("a track to a point moves the point at names there; to an anchor lands it", () => {
     const pin = ref("pin");
 
     const model = made(() => {
-      const [one, two, three] = span(0, 1).chain(1, 1);
-
-      dot.move([100, 50], one);
-      dot.move(pin, two);
-      dot.move(pin, three, undefined, { point: [5, 0] });
+      const [one, two] = span(0, 1).chain(1);
+      const dot = track<Vec>([20, 20]).to([100, 50], one).to(pin.center, two);
 
       return (
         <Group>
           <Shape fill="#000000" ref={pin} geometry={rect(20, 20)} at={[150, 10]} />
-          <Shape fill="#000000" ref={dot} geometry={circle(5)} at={[20, 20]} anchor="center" />
+          <Shape fill="#000000" key="dot" geometry={circle(5)} at={dot} anchor="center" />
         </Group>
       );
     });
@@ -410,18 +407,16 @@ describe("verbs move the anchor point", () => {
 
     expect(at(1)).toEqual([95, 45]);
     expect(at(2)).toEqual([155, 15]);
-    expect(at(3)).toEqual([150, 15]);
   });
 
-  test("a path drawn by its coordinates starts a move from where they put its box", () => {
-    const mark = ref("mark");
-
+  test("a path drawn by its coordinates starts a track from where they put its box", () => {
     const model = made(() => {
-      mark.move([50, 40], span(0, 1));
+      const mark = track<Vec>([40, 40]).to([50, 40], span(0, 1));
 
       return (
         <Shape
-          ref={mark}
+          key="mark"
+          at={mark}
           geometry={path().moveTo([40, 40]).lineTo([60, 50])}
           stroke={{ color: "#000000", width: 0 }}
         />

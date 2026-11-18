@@ -295,26 +295,6 @@ describe("derived tracks", () => {
     ).toThrow("derived to values of different shapes");
   });
 
-  test("a verb can't move a prop a derived track moves", () => {
-    expect(() =>
-      made(() => {
-        const dot = ref("dot");
-
-        dot.to({ opacity: 0 }, span(0, 1));
-
-        return (
-          <Shape
-            fill="#000000"
-            ref={dot}
-            geometry={circle(2)}
-            anchor="center"
-            opacity={progress.map((p) => p)}
-          />
-        );
-      }),
-    ).toThrow("which follows other tracks through map() or with()");
-  });
-
   test("an anchor can be mapped in the frame of the box it is on", () => {
     const model = made(() => {
       const card = ref("card");

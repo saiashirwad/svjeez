@@ -10,7 +10,6 @@ import type { MorphElement } from "./morph";
 import { isWhen, type When } from "./span";
 import type { Anim, Layers } from "./track";
 import type { Effect } from "./effects";
-import type { Forward } from "./verbs";
 import type { TextContent } from "./count";
 import { rect, type Geometry, type Paint } from "./values";
 
@@ -113,12 +112,7 @@ export interface Framed {
   readonly offset?: Anim<Vec> | Anchor;
 }
 
-export interface Forwards {
-  /** What a verb on this group means: the parts it moves, per prop, as in { trim: "line" }. */
-  readonly forward?: Forward;
-}
-
-export interface GroupProps extends Common, Framed, Backdrop, Forwards {}
+export interface GroupProps extends Common, Framed, Backdrop {}
 
 export interface InstanceProps extends Common, Framed {
   readonly of: SceneSymbol;
@@ -151,6 +145,11 @@ export type SceneElement =
     }
   | { readonly type: "fragment"; readonly children: readonly SceneElement[] }
   | MorphElement;
+
+export type NodeElement = Exclude<
+  SceneElement,
+  { readonly type: "fragment" | "sequence" | "morph" | "run" }
+>;
 
 export type Child = SceneElement | false | null | undefined | readonly Child[];
 
@@ -205,7 +204,7 @@ export const flat = (child: Child): SceneElement[] => {
 export const Group = ({
   children,
   ...props
-}: Common & Framed & Forwards & { readonly children?: Child }): SceneElement => ({
+}: Common & Framed & { readonly children?: Child }): SceneElement => ({
   type: "group",
   props,
   children: flat(children),

@@ -17,12 +17,6 @@ export interface Scene {
 
 export interface SceneAuthored {
   readonly refs: readonly { readonly key: string; readonly attached: boolean }[];
-  readonly actions: readonly {
-    readonly verb: string;
-    readonly key: string;
-    readonly start: Seconds;
-    readonly over: Seconds;
-  }[];
 }
 
 export interface Authored {

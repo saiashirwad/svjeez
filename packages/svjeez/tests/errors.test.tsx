@@ -11,7 +11,9 @@ import {
   ref,
   scene,
   span,
+  track,
   type SceneElement,
+  type Vec,
 } from "svjeez";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
 import { SceneError, type Model } from "svjeez/tools";
@@ -161,42 +163,42 @@ describe("SceneError", () => {
   });
 });
 
-describe("two actions on one prop", () => {
-  test("a set() inside a move names both calls, the time, and how to fix it", () => {
+describe("two steps on one track", () => {
+  test("a set() inside a step names the time of both and how to fix it", () => {
     const error = thrown(() =>
       made(() => {
-        const dot = ref("dot");
+        const dot = track<Vec>([10, 30]);
 
-        dot.move([60, 30], span(0, 1));
-        dot.set({ at: [10, 10] }, span(0.5));
+        dot.to([60, 30], span(0, 1));
+        dot.set([10, 10], span(0.5));
 
-        return <Shape ref={dot} geometry={circle(4)} at={[10, 30]} fill="#FF0000" />;
+        return <Shape geometry={circle(4)} at={dot} fill="#FF0000" />;
       }),
     );
 
     expect(error.problem).toBe(
-      'dot.set() sets at on <Shape> "dot" at 0.5s, while dot.move() is still moving it from 0s to 1s.',
+      "Two steps move this track at once: one from 0s to 1s, and another at 0.5s, before the first ends.",
     );
     expect(error.fix).toBe(
-      "Set it once dot.move() ends, at 1s or later, or end dot.move() by 0.5s.",
+      "Start the later step at 1s or later: the first step's span.next(over) starts where it ends.",
     );
   });
 
-  test("two moves that overlap say when the second may start", () => {
+  test("two steps that overlap say when the second may start", () => {
     const error = thrown(() =>
       made(() => {
-        const dot = ref("dot");
+        const dot = track<Vec>([10, 30]);
 
-        dot.move([60, 30], span(0, 2));
-        dot.move([70, 30], span(1, 2));
+        dot.to([60, 30], span(0, 2));
+        dot.to([70, 30], span(1, 2));
 
-        return <Shape ref={dot} geometry={circle(4)} at={[10, 30]} fill="#FF0000" />;
+        return <Shape geometry={circle(4)} at={dot} fill="#FF0000" />;
       }),
     );
 
     expect(error.problem).toBe(
-      'dot.move() moves at on <Shape> "dot" from 0s to 2s, and dot.move() moves it too from 1s to 3s, before the first one ends.',
+      "Two steps move this track at once: one from 0s to 2s, and another from 1s to 3s, before the first ends.",
     );
-    expect(error.fix).toStartWith("Start dot.move() at 2s or later");
+    expect(error.fix).toStartWith("Start the later step at 2s or later");
   });
 });

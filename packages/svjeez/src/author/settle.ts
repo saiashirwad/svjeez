@@ -98,19 +98,6 @@ export const notes = (): Notes => ({
   resized: new Set(),
 });
 
-export const aimNow = (aim: Aim, node: SceneNode, home: Vec): Animated<Vec> =>
-  homed(
-    aim(
-      () => {
-        throw new SceneError(
-          `${named(node.key)} is moved onto an anchor before anchors are known.`,
-        );
-      },
-      () => ({ box: node.box, origin: node.origin, layers: node.layers, home }),
-    ),
-    home,
-  );
-
 export const noteResized = (
   into: Notes,
   merged: readonly SceneNode[],
@@ -723,16 +710,11 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
 
     const pin = (box: Box): Animated<Vec> => {
       if (note?.framed || note?.anchor || outsider(node, into) !== undefined) return node.at;
-      const aim = into.aims.get(node.key);
 
-      if (!note?.placed && !aim) return node.at;
+      if (!note?.placed) return node.at;
       into.nodes.set(node.key, { ...into.nodes.get(node.key)!, pinned: true });
-      const home = pinned(note?.pin, box, `${named(node.key)}`);
 
-      if (!aim) return homed(node.at, home);
-      into.aims.delete(node.key);
-
-      return aimNow(aim, { ...node, box }, home);
+      return homed(node.at, pinned(note?.pin, box, `${named(node.key)}`));
     };
 
     if (asked?.kind !== "arrange") {
@@ -755,7 +737,7 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
 
       if (inside !== undefined)
         throw new SceneError(
-          `A ${asked.label} in a morph() state holds ${named(inside)}, which is placed by an anchor, a move() onto an anchor, or as an arrow's end. A morph arranges each state on its own, before anchors are known.`,
+          `A ${asked.label} in a morph() state holds ${named(inside)}, which is placed by an anchor, a track going to an anchor, or as an arrow's end. A morph arranges each state on its own, before anchors are known.`,
           `Attach it outside the ${asked.label}, or outside the morph.`,
           whereOf(inside),
         );

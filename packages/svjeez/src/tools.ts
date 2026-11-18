@@ -78,8 +78,6 @@ export type { Spring, SpringOptions } from "./author/spring";
 
 export type { OpenSpanned, Spanned, When } from "./author/span";
 
-export type { MoveOptions, Moves, Point, StrokeMoves } from "./author/verbs";
-
 export type { Derived, MapOptions, Source, Together } from "./author/derived";
 
 export { isLane } from "./model/lane";

@@ -4,7 +4,7 @@ import type { Seconds } from "../model/time";
 import { add, type Finding, type Related, type Severity, type Survey } from "./inspect-context";
 import { lowContrast } from "./inspect-contrast";
 import { layoutOverlap, missingGlyphs, overlap, wideLines, wordCuts } from "./inspect-layout";
-import { hiddenTargets, unattachedRefs, unusedSymbols } from "./inspect-references";
+import { unattachedRefs, unusedSymbols } from "./inspect-references";
 import { loopSeam, timing } from "./inspect-timing";
 import { neverVisible, offCanvas } from "./inspect-visibility";
 import { entriesOf, framesOf, hiddenOf, momentsOf, namesOf, sourcesOf } from "./survey";
@@ -115,7 +115,6 @@ export const inspect = (scene: Scene, options: InspectOptions = {}): Finding[] =
   layoutOverlap(survey);
   wordCuts(survey);
   unattachedRefs(survey);
-  hiddenTargets(survey);
   capabilities(survey, options.backend);
 
   const order = new Map(entries.map((entry) => [entry.node.key, entry.order]));

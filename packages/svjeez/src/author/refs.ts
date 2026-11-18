@@ -1,8 +1,5 @@
 import { SceneError } from "../model/scene-error";
 import type { Box, Vec } from "../model/ir";
-import type { Curve } from "./spring";
-import { verbs, type MoveOptions, type Moves } from "./verbs";
-import type { Span, Spanned, When } from "./span";
 import { PLACE_LIST, PLACES } from "./pin";
 
 export type Edge = "left" | "right" | "top" | "bottom";
@@ -127,18 +124,6 @@ export class Ref {
 
   get bottomRight(): Anchor {
     return this.#place("bottom-right");
-  }
-
-  to(values: Moves, when: Span, curve?: Curve): Spanned {
-    return verbs.to(this, values, when, curve);
-  }
-
-  set(values: Moves, when: When): Spanned {
-    return verbs.set(this, values, when);
-  }
-
-  move(to: Vec | Anchor | Ref, when: Span, curve?: Curve, options?: MoveOptions): Spanned {
-    return verbs.move(this, to, when, curve, options);
   }
 }
 

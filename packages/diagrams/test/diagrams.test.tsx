@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Align, Group, Shape, circle, font, scene, span } from "svjeez";
-import { SceneError, inspect, isLane, svg, type Child, type Model } from "svjeez/tools";
+import { SceneError, inspect, svg, type Child } from "svjeez/tools";
 import {
   flowchart,
   lanes,
@@ -114,30 +114,6 @@ describe("flowchart", () => {
     );
 
     expect(svg.emit(placed)).toContain("<svg");
-  });
-
-  test("a verb on an edge draws its line, without naming the line", () => {
-    const model = scene({ size: [1200, 800], duration: 4, title: "Diagram" }, () => {
-      const chart = review();
-      const edge = chart.part("pr->lint");
-
-      edge.set({ trim: [0, 0] }, span(0));
-      edge.to({ trim: [0, 1] }, span(1, 1));
-
-      return chart.node;
-    });
-
-    const lines: Model.SceneNode[] = [];
-
-    const visit = (node: Model.SceneNode): void => {
-      if (node.key.endsWith("pr->lint/line")) lines.push(node);
-
-      if (node.kind === "group") node.children.forEach(visit);
-    };
-
-    visit(model.root);
-    expect(lines.length).toBe(1);
-    expect(lines[0]!.kind === "shape" && isLane(lines[0]!.trim!)).toBe(true);
   });
 
   test("route runs edge to edge, and says so when no edges join the two", () => {

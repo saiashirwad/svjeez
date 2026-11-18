@@ -51,6 +51,19 @@ const names = <V extends object>(values: Partial<V>): (keyof V)[] =>
 const cuts = <V>(spring: Step<V>, later: Step<V>): boolean =>
   isSpring(spring.ease) && spring.start < later.start - EPSILON;
 
+const when = <V>(step: Step<V>): string =>
+  step.over === 0 ? `at ${num(step.start)}s` : `from ${num(step.start)}s to ${num(end(step))}s`;
+
+const collision = <V>(shared: keyof V, a: Step<V>, b: Step<V>): SceneError => {
+  const [first, second] = a.start <= b.start ? [a, b] : [b, a];
+  const what = shared === "value" ? "this track" : `\`${String(shared)}\` on this motion`;
+
+  return new SceneError(
+    `Two steps move ${what} at once: one ${when(first)}, and another ${when(second)}, before the first ends.`,
+    `Start the later step at ${num(end(first))}s or later: the first step's span.next(over) starts where it ends.`,
+  );
+};
+
 export class Passage<V extends object> {
   constructor(readonly data: PassageData<V>) {}
 
@@ -185,9 +198,7 @@ export class Passage<V extends object> {
         !cuts(other, step) &&
         !cuts(step, other)
       )
-        throw new SceneError(
-          `Two transitions move \`${String(shared)}\` between ${Math.max(step.start, other.start)}s and ${Math.min(end(step), end(other))}s. Move them in one .to(), or stack two motions. Only a spring can be cut by a step that starts while it moves.`,
-        );
+        throw collision(shared, other, step);
     }
 
     return this.#with({ steps: [...this.data.steps, step] });

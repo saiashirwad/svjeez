@@ -5,7 +5,7 @@ import { isLane } from "../model/lane";
 import type { Anchor } from "./refs";
 import { breaksOf, follow, laneFrom, valueAt } from "../model/sample";
 import { laneOf, mixNumber, mixVec, type Mix, type Parts, type Timing } from "../model/steps";
-import { isTrack, passageOf, type Anim, type Track } from "./track";
+import { isTrack, passageOf, readOf, type Anim, type Track } from "./track";
 
 export interface MapOptions {
   readonly tolerance?: number;
@@ -354,7 +354,7 @@ export const derivedOf = <A, T>(
 ): Animated<T> => {
   const lanes = value.sources.map((source): Animated<Read> => {
     if (!isBaseTrack(source)) return source;
-    const { data } = passageOf<Read>(source);
+    const { data } = readOf<Read>(source, timing, `a track that ${where} is derived from`);
     const first = data.initial.value;
 
     if (first === undefined || !readable(first))

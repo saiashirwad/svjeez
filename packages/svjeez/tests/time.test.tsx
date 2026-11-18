@@ -126,10 +126,10 @@ describe("span()", () => {
 });
 
 describe(".repeat()", () => {
-  const spin = motion({ rotate: 0 }).to({ rotate: 360 }, clock(0, 2), ease.linear);
+  const spin = () => motion({ rotate: 0 }).to({ rotate: 360 }, clock(0, 2), ease.linear);
 
   test("a count plays the passage that many times, each from the initial values", () => {
-    expect(keys(box(spin.repeat(3)), "rotate")).toEqual([
+    expect(keys(box(spin().repeat(3)), "rotate")).toEqual([
       { t: 0, value: 0 },
       { t: 2, value: 360 },
       { t: 2.0001, value: 0 },
@@ -141,7 +141,7 @@ describe(".repeat()", () => {
   });
 
   test("repeat(1) changes nothing", () => {
-    expect(box(spin.repeat(1))).toBe(box(spin));
+    expect(box(spin().repeat(1))).toBe(box(spin()));
   });
 
   test("the passage runs from the earliest step's start to the latest step's end", () => {
@@ -177,7 +177,7 @@ describe(".repeat()", () => {
   });
 
   test("until repeats to that time, cutting the last pass short, and holds the value it reached", () => {
-    const held = keys(box(spin.repeat({ until: 7 })), "rotate");
+    const held = keys(box(spin().repeat({ until: 7 })), "rotate");
 
     expect(held.at(-2)).toEqual({ t: 7, value: 180 });
     expect(held.at(-1)).toEqual({ t: 10, value: 180 });
@@ -185,8 +185,8 @@ describe(".repeat()", () => {
   });
 
   test("until on a pass boundary plays whole passes", () => {
-    expect(keys(box(spin.repeat({ until: 6 })), "rotate").at(-2)).toEqual({ t: 6, value: 360 });
-    expect(box(spin.repeat({ until: 6 }))).toBe(box(spin.repeat(3)));
+    expect(keys(box(spin().repeat({ until: 6 })), "rotate").at(-2)).toEqual({ t: 6, value: 360 });
+    expect(box(spin().repeat({ until: 6 }))).toBe(box(spin().repeat(3)));
   });
 
   test("a transition cut partway ends on the value the whole transition passed through there", () => {
@@ -214,7 +214,7 @@ describe(".repeat()", () => {
   });
 
   test("a later step may follow the repeat", () => {
-    const out = box(spin.repeat({ until: 4 }).to({ rotate: 90 }, clock(5, 1), ease.linear));
+    const out = box(spin().repeat({ until: 4 }).to({ rotate: 90 }, clock(5, 1), ease.linear));
 
     expect(keys(out, "rotate").at(-2)).toEqual({ t: 6, value: 90 });
   });
@@ -231,20 +231,20 @@ describe(".repeat()", () => {
   });
 
   test("asks for a whole number of plays, a passage, a length and an until after the passage", () => {
-    expect(() => spin.repeat(0)).toThrow(/whole number of plays/);
-    expect(() => spin.repeat(1.5)).toThrow(/whole number of plays/);
+    expect(() => spin().repeat(0)).toThrow(/whole number of plays/);
+    expect(() => spin().repeat(1.5)).toThrow(/whole number of plays/);
     expect(() => motion({ offset: x(0) }).repeat(2)).toThrow(/needs a passage to repeat/);
     expect(() =>
       motion({ offset: x(0) })
         .set({ offset: x(5) }, clock(0))
         .repeat(2),
     ).toThrow(/needs a passage with a length/);
-    expect(() => spin.repeat({ until: 2 })).toThrow(/needs a time after the passage ends, at 2s/);
-    expect(() => spin.repeat({ until: Infinity })).toThrow(/finite until/);
+    expect(() => spin().repeat({ until: 2 })).toThrow(/needs a time after the passage ends, at 2s/);
+    expect(() => spin().repeat({ until: Infinity })).toThrow(/finite until/);
   });
 
   test("a runaway count fails before it unrolls, and a lane past its key cap says why", () => {
-    expect(() => spin.repeat(100000)).toThrow(/would unroll 100000 passes/);
+    expect(() => spin().repeat(100000)).toThrow(/would unroll 100000 passes/);
     expect(() =>
       box(
         motion({ offset: x(0) })
@@ -258,28 +258,29 @@ describe(".repeat()", () => {
   });
 
   test("stopping a steps() transition off a step edge throws, and on one it cuts cleanly", () => {
-    const stepped = motion({ offset: x(0) }).to({ offset: x(100) }, clock(0, 2), ease.steps(4));
+    const stepped = () =>
+      motion({ offset: x(0) }).to({ offset: x(100) }, clock(0, 2), ease.steps(4));
 
-    expect(() => box(stepped.repeat({ until: 3.2 }))).toThrow(
+    expect(() => box(stepped().repeat({ until: 3.2 }))).toThrow(
       /repeat\(\{ until \}\) cuts a steps\(4\) transition between two of its steps/,
     );
 
-    expect(keys(box(stepped.repeat({ until: 3 })), "translate").at(-2)).toEqual({
+    expect(keys(box(stepped().repeat({ until: 3 })), "translate").at(-2)).toEqual({
       t: 3,
       value: 50,
     });
   });
 
   test("stopping a colour transition partway throws, but a colour that holds there is fine", () => {
-    const tint = track<Paint>("#000000").to("#FFFFFF", clock(0, 2), ease.linear);
+    const tint = () => track<Paint>("#000000").to("#FFFFFF", clock(0, 2), ease.linear);
 
-    const painted = (fill: typeof tint) =>
+    const painted = (fill: ReturnType<typeof tint>) =>
       emit(() => <Shape geometry={rect(10, 10)} fill={fill} />);
 
-    expect(() => painted(tint.repeat({ until: 3 }))).toThrow(
+    expect(() => painted(tint().repeat({ until: 3 }))).toThrow(
       /repeat\(\{ until \}\) is cut partway through a transition, and only numbers and points can be cut/,
     );
-    expect(painted(tint.repeat({ until: 4 }))).toContain("fill");
+    expect(painted(tint().repeat({ until: 4 }))).toContain("fill");
   });
 
   test("nothing follows rewind(), and a repeat can't follow it", () => {
@@ -293,7 +294,7 @@ describe(".repeat()", () => {
   });
 
   test("a loop shorter than the repeated passages throws", () => {
-    expect(() => spin.repeat(3).loop(5)).toThrow(/shorter than the motion/);
+    expect(() => spin().repeat(3).loop(5)).toThrow(/shorter than the motion/);
   });
 
   test("a repeat that stops mid-pass moves every channel it touches to where that pass had got", () => {
@@ -319,10 +320,10 @@ describe(".repeat()", () => {
 });
 
 describe(".rewind()", () => {
-  const out = motion({ offset: x(0) }).to({ offset: x(50) }, clock(0, 2), ease.linear);
+  const out = () => motion({ offset: x(0) }).to({ offset: x(50) }, clock(0, 2), ease.linear);
 
   test("glides every channel back to its initial value, ending at the scene's end", () => {
-    expect(keys(box(out.rewind(1)), "translate")).toEqual([
+    expect(keys(box(out().rewind(1)), "translate")).toEqual([
       { t: 0, value: 0 },
       { t: 2, value: 50 },
       { t: 9, value: 50 },
@@ -331,7 +332,7 @@ describe(".rewind()", () => {
   });
 
   test("a loop's clock ends at its period, so the loop closes", () => {
-    const held = keys(box(out.loop(5).rewind(1)), "translate", 5);
+    const held = keys(box(out().loop(5).rewind(1)), "translate", 5);
 
     expect(held.at(0)).toEqual({ t: 0, value: 0 });
     expect(held.at(-1)).toEqual({ t: 5, value: 0 });
@@ -339,12 +340,13 @@ describe(".rewind()", () => {
   });
 
   test("adds nothing to a motion that is already home, and uses the ease it is given", () => {
-    const home = motion({ offset: x(0) })
-      .to({ offset: x(5) }, clock(0, 1))
-      .to({ offset: x(0) }, clock(0, 1).next(1));
+    const home = () =>
+      motion({ offset: x(0) })
+        .to({ offset: x(5) }, clock(0, 1))
+        .to({ offset: x(0) }, clock(0, 1).next(1));
 
-    expect(box(home.rewind(1))).toBe(box(home));
-    expect(box(out.rewind(1, ease.linear))).not.toBe(box(out.rewind(1)));
+    expect(box(home().rewind(1))).toBe(box(home()));
+    expect(box(out().rewind(1, ease.linear))).not.toBe(box(out().rewind(1)));
   });
 
   test("needs the room: a motion still running when the rewind must start throws", () => {

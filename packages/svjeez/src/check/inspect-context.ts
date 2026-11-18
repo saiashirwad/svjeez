@@ -30,7 +30,6 @@ export const RULES = {
   "layout-overlap": "Two children of a <Stack> or <Grid> overlap: motion carried one onto another.",
   "word-cut": "A word wider than the width its text wraps to, cut across two lines.",
   "unattached-ref": "A ref the scene made that no node takes.",
-  "hidden-target": "A timeline moves a node that is never visible.",
   unsupported: "A feature the chosen backend can't draw.",
   approximate: "A feature the chosen backend draws differently from the model.",
 } as const;

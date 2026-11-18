@@ -12,6 +12,7 @@ import {
   ref,
   scene,
   span,
+  track,
   type SceneElement,
   type Span,
   type Vec,
@@ -29,19 +30,18 @@ const outlined = (width: number, height: number, radius: number) => ({
 });
 
 const keycap = (label: string) => {
-  const cap = ref("key");
-  const lit = cap.part("lit");
+  const lit = track(0);
 
   return {
     node: (
-      <Group ref={cap} offset={[16, 184]}>
+      <Group offset={[16, 184]}>
         <Shape {...outlined(48, 40, 9)} fill={theme.surface} />
         <Shape
           key="lit"
           geometry={rect(48, 40, { radius: 9 })}
           fill={theme.raised}
           stroke={{ color: theme.blue, width: 2 }}
-          opacity={0}
+          opacity={lit}
         />
         <Text font={mono} size={14} at={[24, 25]} anchor="baseline" fill={theme.text}>
           {label}
@@ -49,8 +49,7 @@ const keycap = (label: string) => {
       </Group>
     ),
     press: (held: Span): void => {
-      lit.to({ opacity: 1 }, span(held.start, 0.08));
-      lit.to({ opacity: 0 }, span(held.start + held.over - 0.08, 0.08));
+      lit.to(1, span(held.start, 0.08)).to(0, span(held.start + held.over - 0.08, 0.08));
     },
   };
 };
@@ -67,16 +66,15 @@ const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
   const cursor = ref("cursor");
   const grip = win.part("titlebar");
   const key = keycap("opt");
-
-  const reach = cursor.move(grip, span(0, 0.7), ease.inOut);
-  const held = reach.next(1.3, 0.05);
+  const winAt = track<Vec>(from);
+  const cursorAt = track<Vec>(IDLE).to(grip.center, span(0, 0.7), ease.inOut);
+  const held = cursorAt.span.next(1.3, 0.05);
   const drag = span(held.start + 0.15, 1);
 
   key.press(held);
-  win.move(to, drag, ease.inOut);
-  cursor.move(grip, drag, ease.inOut);
-  cursor.move(IDLE, held.next(0.5, 0.1), ease.inOut);
-  win.move(from, span(DURATION - start - 0.8, 0.8), ease.out);
+  winAt.to(to, drag, ease.inOut);
+  cursorAt.to(grip.center, drag, ease.inOut).to(IDLE, held.next(0.5, 0.1), ease.inOut);
+  winAt.to(from, span(DURATION - start - 0.8, 0.8), ease.out);
 
   return (
     <Group offset={[x, 30]}>
@@ -89,7 +87,7 @@ const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
         {key.node}
         <Stack
           ref={win}
-          at={from}
+          at={winAt}
           width={104}
           height={72}
           align="stretch"
@@ -119,7 +117,7 @@ const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
           geometry={pathData("M0 0V16l4.2-3.8 3 6.8 2.8-1.2-3-6.6H12Z")}
           fill={theme.text}
           stroke={{ color: theme.background, width: 1.2, join: "round" }}
-          at={IDLE}
+          at={cursorAt}
         />
       </Sequence>
     </Group>

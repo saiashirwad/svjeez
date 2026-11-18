@@ -374,15 +374,14 @@ describe("readers of a curved spring agree with it", () => {
 
   test("a move after a cut spring carries on from where the curved spring was cut", () => {
     const model = made(() => {
-      const dot = ref("dot");
-
+      const dot = track<Vec>([0, 0]);
       const [slide, drop, back] = span(0, 0.5).chain(0.4, 1);
 
-      dot.move([200, 0], slide, ease.linear);
-      dot.move([200, 100], drop, swing);
-      dot.move([150, 100], back);
+      dot.to([200, 0], slide, ease.linear);
+      dot.to([200, 100], drop, swing);
+      dot.to([150, 100], back);
 
-      return <Shape ref={dot} geometry={circle(4)} anchor="center" fill={red} />;
+      return <Shape key="dot" geometry={circle(4)} anchor="center" at={dot} fill={red} />;
     });
 
     const lane = laneOf(find(model, "dot").at);
