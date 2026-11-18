@@ -3,7 +3,9 @@ import { MAX_KEYS, snapPeriod } from "../keys";
 import { EPSILON, NUDGE, ease, type Ease, type Seconds } from "../motion";
 import type { Span } from "../span";
 import { num } from "../format";
+import { isCurved, splitCurve, type Controls } from "./curve";
 import type { Animated, Key, Lane, Vec } from "./ir";
+import { isLane } from "./lane";
 import { endSlope, isSpring, type Curve, type Spring } from "./spring";
 
 /**
@@ -295,6 +297,8 @@ interface Held<T> {
   readonly value: T;
   /** Shapes the way from this key to the next. */
   readonly ease: Ease;
+  /** The curve from this key to the next, as `Key.via`; never on a cut. */
+  readonly via?: Controls;
 }
 
 interface Segment<T> {
@@ -302,6 +306,8 @@ interface Segment<T> {
   readonly over: Seconds;
   readonly ease: Ease;
   readonly value: T;
+  /** The curve from the value before, as `Key.via`. */
+  readonly via?: Controls;
 }
 
 interface Written<T> {
@@ -331,6 +337,7 @@ const segmentsOf = <T>(
   clockEnd: Seconds,
   mix: Mix<T>,
   where: string,
+  curves: boolean,
 ): Written<T> => {
   const out: Segment<T>[] = [];
   let current = initial;
@@ -367,7 +374,7 @@ const segmentsOf = <T>(
     const carried =
       moving && Math.abs(moving.at - start) <= EPSILON ? moving.velocity() : from.map(() => 0);
 
-    const run = curve.run(from, parts.split(value), carried, stop - start);
+    const run = curve.run(from, parts.split(value), carried, stop - start, curves);
 
     if (ends && !run.settled)
       throw new Error(
@@ -382,6 +389,7 @@ const segmentsOf = <T>(
         over: key.t - before.t,
         ease: key.ease ?? ease.linear,
         value: parts.join(key.values),
+        ...(key.via && { via: key.via }),
       });
     });
 
@@ -447,8 +455,11 @@ const heldOf = <T>(initial: T, segments: readonly Segment<T>[], period: Seconds)
     const contiguous = segment.start < last.t + nudge;
 
     if (segment.over >= nudge) {
-      if (contiguous) keys[keys.length - 1] = { ...last, ease: segment.ease };
-      else keys.push({ t: segment.start, value: current, ease: segment.ease });
+      const via = segment.via && { via: segment.via };
+
+      if (contiguous)
+        keys[keys.length - 1] = { t: last.t, value: last.value, ease: segment.ease, ...via };
+      else keys.push({ t: segment.start, value: current, ease: segment.ease, ...via });
       keys.push({ t: segment.start + segment.over, value: segment.value, ease: ease.out });
     } else if (keys.length === 1 && segment.start === 0) {
       keys[0] = { ...last, value: segment.value };
@@ -485,8 +496,23 @@ const splitAt = <T>(
   if (!to || Math.abs(from.t - t) <= EPSILON) return [...keys];
 
   const progress = (t - from.t) / (to.t - from.t);
-  const moves = !same(from.value, to.value);
+  const moves = from.via !== undefined || !same(from.value, to.value);
   const [first, second] = moves ? splitEase(from.ease, progress, where) : [from.ease, from.ease];
+
+  if (from.via) {
+    // SAFETY: only a lane of points has a curve (ir.ts), so both values are points, and so is the one between.
+    const [a, b] = [from.value as Vec, to.value as Vec];
+    const [head, at, tail] = splitCurve(a, from.via, b, easeAt(from.ease, progress));
+
+    return [
+      ...keys.slice(0, index),
+      { ...from, ease: first, via: head },
+      // SAFETY: as above, T is Vec.
+      { t, value: at as T, ease: second, via: tail },
+      ...keys.slice(index + 1),
+    ];
+  }
+
   const value = moves ? mix(from.value, to.value, easeAt(from.ease, progress), where) : from.value;
 
   return [
@@ -562,16 +588,54 @@ export interface Timing {
   readonly clock: Clock;
 }
 
+/** Whether a key's ease stays within 0 and 1, as every ease in a lane with a curve must (ir.ts). */
+const within = (key: Key<unknown>): boolean =>
+  key.ease?.kind !== "bezier" ||
+  [key.ease.points[1], key.ease.points[3]].every((y) => y >= 0 && y <= 1);
+
+/** What a lane costs to write: a curved key carries two more points than a straight one, so it counts as one and a half. */
+const costOf = (value: Animated<unknown>): number =>
+  isLane(value) ? value.keys.reduce((sum, key) => sum + (key.via ? 1.5 : 1), 0) : 0;
+
 /**
  * One value's steps as a lane on the scene's clock, or as the value itself when it never changes. `initial` is
- * what the value is before its first step when the passage doesn't say.
+ * what the value is before its first step when the passage doesn't say. With `curves`, the value is a point (`at`)
+ * and its springs may write curved keys (`Key.via`), when the lane takes fewer that way, weighed as `sample.ts`
+ * weighs them; never when another step's ease leaves 0 to 1, which a lane with a curve can't hold.
  */
 export const laneOf = <T>(
+  data: PassageData<{ readonly value: T }>,
+  initial: T,
+  timing: Timing,
+  mix: Mix<T>,
+  where: string,
+  curves = false,
+): Animated<T> => {
+  const straight = written(data, initial, timing, mix, where, false);
+
+  if (
+    !curves ||
+    (!data.steps.some((step) => isSpring(step.ease)) &&
+      !(data.rewind && isSpring(data.rewind.ease)))
+  )
+    return straight;
+  const curved = written(data, initial, timing, mix, where, true);
+
+  return isLane(curved) &&
+    isCurved(curved.keys) &&
+    curved.keys.every(within) &&
+    costOf(curved) < costOf(straight)
+    ? curved
+    : straight;
+};
+
+const written = <T>(
   data: PassageData<{ readonly value: T }>,
   initial: T,
   { duration, clock }: Timing,
   mix: Mix<T>,
   where: string,
+  curves: boolean,
 ): Animated<T> => {
   const first = data.initial.value ?? initial;
   const looped = data.period !== undefined;
@@ -585,11 +649,12 @@ export const laneOf = <T>(
     looped ? period : clock.end - clock.offset,
     mix,
     where,
+    curves,
   );
 
   reach(clock, !looped, offset + last, duration, period, where);
 
-  const written = heldOf(
+  const held = heldOf(
     first,
     segments.map((segment) => ({ ...segment, start: segment.start + offset })),
     period,
@@ -598,28 +663,35 @@ export const laneOf = <T>(
   const keys =
     looped && clock.offset > 0
       ? rotated(
-          written,
+          held,
           ((clock.offset % snapped) / snapped) * period,
           period,
           mix,
           `A loop on ${where} inside ${clock.clips.at(-1)?.label ?? "a sequence"}`,
         )
-      : written;
+      : held;
 
   if (keys.length > MAX_KEYS)
     throw new Error(
       `${where} has ${keys.length} keys; the cap is ${MAX_KEYS}.${data.repeated ? " repeat() unrolls every pass, so use .loop(period) for a motion that never stops." : ""}`,
     );
 
-  if (keys.every((key) => same(key.value, first))) return first;
+  if (keys.every((key) => !key.via && same(key.value, first))) return first;
 
   const scale = snapped / period;
 
-  const [head, next, ...rest] = keys.map((key, index): Key<T> =>
-    index === 0
-      ? { t: key.t * scale, value: key.value }
-      : { t: key.t * scale, value: key.value, ease: keys[index - 1]!.ease },
-  );
+  const [head, next, ...rest] = keys.map((key, index): Key<T> => {
+    const before = keys[index - 1];
+
+    return before
+      ? {
+          t: key.t * scale,
+          value: key.value,
+          ease: before.ease,
+          ...(before.via && { via: before.via }),
+        }
+      : { t: key.t * scale, value: key.value };
+  });
 
   const lane: Lane<T> = { kind: "lane", keys: [head!, next!, ...rest] };
 

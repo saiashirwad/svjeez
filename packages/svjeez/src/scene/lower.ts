@@ -45,6 +45,7 @@ import {
   arrangeState,
   around,
   note,
+  noteResized,
   notes,
   originOf,
   outsider,
@@ -133,7 +134,7 @@ const animated = <A, T>(
   // SAFETY: a value that is not undefined is an A, and undefined is itself one when A allows it, so change() takes it either way.
   const data = mapped(passageOf(value).data, "value", (given) => change(given as A));
 
-  return laneOf(data, data.initial.value!, timing, mix, where);
+  return laneOf(data, data.initial.value!, timing, mix, where, curves);
 };
 
 /**
@@ -490,14 +491,20 @@ const lowerAll = (
 
     if (given.type === "morph") {
       const seen = new Map<string, Anchor | undefined>();
+      const states: SceneNode[][] = [];
 
-      return morphed(given, timing, taken, (state, names) => {
+      const merged = morphed(given, timing, taken, (state, names) => {
         const nodes = arrangeState(lowerAll(ctx, state, timing, parent, names), ctx.notes);
 
         sameAnchors(nodes, ctx.notes, seen);
+        states.push(nodes);
 
         return nodes;
       });
+
+      noteResized(ctx.notes, merged, states);
+
+      return merged;
     }
 
     const name = given.props.key ?? given.props.ref?.key;

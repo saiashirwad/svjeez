@@ -654,7 +654,7 @@ export class Cues {
             return value;
           });
 
-          return laneOf(lane, lane.initial.value!, timing, mixVec, `at on "${key}"`);
+          return laneOf(lane, lane.initial.value!, timing, mixVec, `at on "${key}"`, true);
         });
 
         continue;

@@ -309,21 +309,64 @@ describe("morph between states that hold layout, text, connectors, images and in
     );
   });
 
-  // Layout reads boxes at rest, so a container around a morph places its children where the first state has them.
-  // Put the container inside the morph to reflow it, as the test above does.
-  test.failing("a Stack around a morph reflows when a child grows in the morph", () => {
+  // Layout reads boxes at rest, so a container around a morph that resizes a child can't make room for it. That is an
+  // error that names the container: put the container inside the morph, as the test above does.
+  test("a Stack around a morph that grows a child is an error that names the Stack", () => {
+    expect(() =>
+      made(() => (
+        <Stack key="row" direction="row" gap={2}>
+          {morph(
+            <Shape key="a" geometry={rect(10, 10)} fill={red} />,
+            <Shape key="a" geometry={rect(40, 10)} fill={red} />,
+            span(1, 1),
+          )}
+          <Shape key="b" geometry={rect(10, 10)} fill={red} />
+        </Stack>
+      )),
+    ).toThrow(
+      'The <Stack> "row" lays out "row/a", whose box a morph() changes, but layout reads each box at rest, so it would not make room. Put the <Stack> inside the morph\'s states instead',
+    );
+
+    expect(() =>
+      made(() => (
+        <Align key="middle">
+          {morph(
+            <Shape key="a" geometry={rect(10, 10)} fill={red} />,
+            <Shape key="a" geometry={rect(40, 10)} fill={red} />,
+            span(1, 1),
+          )}
+        </Align>
+      )),
+    ).toThrow('The <Align> "middle" lays out "middle/a"');
+  });
+
+  test("a Line or Arrow end given a track is an error that names the connector", () => {
+    const moving = track<Vec>([0, 0]).to([50, 0], span(0, 1));
+    // SAFETY: what a scene written without types hands over: a track where TypeScript would refuse it.
+    const untyped = moving as never;
+
+    expect(() => made(() => <Arrow key="arrow" from={[0, 0]} to={untyped} color={blue} />)).toThrow(
+      'The <Arrow> "arrow" is given a track for its to, but an end is a point or an anchor. To move an end, attach it to a ref\'s anchor, as in to={card.left}, and move the node it is attached to.',
+    );
+
+    expect(() => made(() => <Line key="line" from={untyped} to={[9, 9]} color={blue} />)).toThrow(
+      'The <Line> "line" is given a track for its from',
+    );
+  });
+
+  test("a Stack around a morph that only moves or recolors its children still lays it out", () => {
     const model = made(() => (
       <Stack direction="row" gap={2}>
         {morph(
           <Shape key="a" geometry={rect(10, 10)} fill={red} />,
-          <Shape key="a" geometry={rect(40, 10)} fill={red} />,
+          <Shape key="a" geometry={rect(10, 10)} fill={blue} />,
           span(1, 1),
         )}
         <Shape key="b" geometry={rect(10, 10)} fill={red} />
       </Stack>
     ));
 
-    expect(boxesOf(model, 3)["0/b"]?.x).toBe(42);
+    expect(boxesOf(model, 3)["0/b"]?.x).toBe(12);
   });
 
   test("text that rewraps crossfades between its two layouts", () => {
