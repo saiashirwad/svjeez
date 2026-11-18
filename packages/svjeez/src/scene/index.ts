@@ -151,6 +151,24 @@ export { boxesOf, hitTest, placements, valueAt, type Matrix, type Placed } from 
 
 export { isScene } from "./is-scene";
 
+export {
+  inspect,
+  RULES,
+  type Code,
+  type Finding,
+  type InspectOptions,
+  type Related,
+  type Severity,
+} from "./inspect";
+
+export {
+  describe,
+  type Description,
+  type DescribedFrame,
+  type DescribedNode,
+  type NodeTimeline,
+} from "./describe";
+
 export type * as Model from "./ir";
 
 export type { Scene, Vec } from "./ir";

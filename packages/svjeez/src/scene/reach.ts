@@ -172,7 +172,7 @@ const throughLayer = (box: Box, layer: Layer, origin: Vec): Box => {
 };
 
 /** Where a child that covers `box` in its own frame may be in its parent's. */
-const placed = (box: Box | undefined, node: SceneNode): Box | undefined =>
+export const placed = (box: Box | undefined, node: SceneNode): Box | undefined =>
   box &&
   swept(
     [...node.layers]
