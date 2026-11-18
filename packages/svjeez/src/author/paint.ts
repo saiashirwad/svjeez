@@ -1,3 +1,5 @@
+import { boxCorners } from "../model/geometry";
+import { lerpPoint } from "../model/curve";
 import { SceneError } from "../model/scene-error";
 import type {
   Animated,
@@ -117,13 +119,6 @@ export const radial = Object.assign(
 
 const DEG = Math.PI / 180;
 
-const corners = ({ x, y, width, height }: Box): Vec[] => [
-  [x, y],
-  [x + width, y],
-  [x + width, y + height],
-  [x, y + height],
-];
-
 export const isGradient = (paint: ModelPaint): paint is ModelGradient => "stops" in paint;
 
 export const isWrittenGradient = (paint: Gradient | Color): paint is Gradient =>
@@ -181,7 +176,7 @@ export const gradientOf = (
     kind: "radial",
     center,
     radius: Math.max(
-      ...corners(area).map(([px, py]) => Math.hypot(px - center[0], py - center[1])),
+      ...boxCorners(area).map(([px, py]) => Math.hypot(px - center[0], py - center[1])),
     ),
     stops: pairs,
   };
@@ -237,11 +232,6 @@ export const blendable = <P extends Animated<ModelPaint> | undefined>(
   return { ...paint, keys } as P;
 };
 
-const mixPoint = (a: Vec, b: Vec, u: number): Vec => [
-  a[0] + (b[0] - a[0]) * u,
-  a[1] + (b[1] - a[1]) * u,
-];
-
 export const mixPaint: Mix<ModelPaint> = (a, b, amount, where) => {
   if (!isGradient(a) || !isGradient(b)) return noMix(a, b, amount, where);
 
@@ -253,15 +243,15 @@ export const mixPaint: Mix<ModelPaint> = (a, b, amount, where) => {
   if (a.kind === "linear" && b.kind === "linear")
     return {
       kind: "linear",
-      from: mixPoint(a.from, b.from, amount),
-      to: mixPoint(a.to, b.to, amount),
+      from: lerpPoint(a.from, b.from, amount),
+      to: lerpPoint(a.to, b.to, amount),
       stops,
     };
 
   if (a.kind === "radial" && b.kind === "radial")
     return {
       kind: "radial",
-      center: mixPoint(a.center, b.center, amount),
+      center: lerpPoint(a.center, b.center, amount),
       radius: a.radius + (b.radius - a.radius) * amount,
       stops,
     };

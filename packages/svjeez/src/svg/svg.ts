@@ -34,9 +34,9 @@ import { placeOf } from "../model/scene-error";
 import { isLane, mapLane } from "../model/lane";
 import { same } from "../model/steps";
 import { homed } from "../author/pin";
-import { lengthOf, onCircle } from "../model/geometry";
+import { growBox, lengthOf, onCircle } from "../model/geometry";
 import { blendable, isGradient } from "../author/paint";
-import { grown, reachOf } from "../model/reach";
+import { reachOf } from "../model/reach";
 import { walkScene } from "../model/walk";
 import {
   clipUrl,
@@ -849,7 +849,7 @@ const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Dra
 
     if (node.mask) {
       const reach = reachOf(node.mask, scene.symbols, `the mask of "${node.key}"`);
-      const region = reach ? moved(grown(reach, 1), shift) : { x: 0, y: 0, width: 0, height: 0 };
+      const region = reach ? moved(growBox(reach, 1), shift) : { x: 0, y: 0, width: 0, height: 0 };
 
       own.attrs.mask = maskUrl(ctx.defs, node.mask, region, shift);
     }
@@ -863,7 +863,7 @@ const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Dra
   if (!reach) return;
   const { own, shift } = holder();
 
-  own.attrs.filter = filterUrl(ctx.defs, effects, moved(grown(reach, 1), shift), node.key);
+  own.attrs.filter = filterUrl(ctx.defs, effects, moved(growBox(reach, 1), shift), node.key);
 };
 
 const symbolId = (ctx: Ctx, name: string): string => `${ctx.prefix}symbol-${name}`;

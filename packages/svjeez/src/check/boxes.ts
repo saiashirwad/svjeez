@@ -1,5 +1,5 @@
 import type { Seconds } from "../model/time";
-import { mixGeometry, outlineBoxOf } from "../model/geometry";
+import { boundsOfPoints, boxCorners, mixGeometry, outlineBoxOf } from "../model/geometry";
 import type { Animated, Box, Geometry, Layer, Scene, SceneNode, Source, Vec } from "../model/ir";
 import { valueAt as sampleAt } from "../model/sample";
 import { mixNumber, mixVec, type Mix } from "../model/steps";
@@ -68,21 +68,6 @@ const layerMatrix = (layer: Layer, origin: Vec, t: Seconds): Matrix => {
   return [moveBy(vec(layer.offset, t)), moveBy(origin), turn, moveBy([-ox, -oy])].reduce(times);
 };
 
-const corners = ({ x, y, width, height }: Box): Vec[] => [
-  [x, y],
-  [x + width, y],
-  [x + width, y + height],
-  [x, y + height],
-];
-
-const around = (points: readonly Vec[]): Box => {
-  const xs = points.map(([x]) => x);
-  const ys = points.map(([, y]) => y);
-  const [x, y] = [Math.min(...xs), Math.min(...ys)];
-
-  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
-};
-
 const geometryAt = (geometry: Animated<Geometry>, t: Seconds, where: string): Box =>
   outlineBoxOf(valueAt(geometry, t, mixGeometry, where));
 
@@ -125,7 +110,7 @@ export const placements = (scene: Scene, at: Seconds = 0): Placed[] => {
       key: node.key,
       kind: node.kind,
       ...(node.source && { source: node.source }),
-      box: around(corners(frame).map((point) => apply(own, point))),
+      box: boundsOfPoints(boxCorners(frame).map((point) => apply(own, point))),
       frame,
       matrix: own,
       opacity,
@@ -140,15 +125,15 @@ export const placements = (scene: Scene, at: Seconds = 0): Placed[] => {
     if (depth === 0 || node.authored?.count) return initial;
 
     const back = inverse(own);
-    const childBounds = around(children.flatMap((child) => corners(child.box)));
+    const childBounds = boundsOfPoints(children.flatMap((child) => boxCorners(child.box)));
 
     const groupFrame =
       back &&
       clipped(
         node,
-        around(
+        boundsOfPoints(
           children.flatMap((child) =>
-            corners(child.frame).map((point) => apply(back, apply(child.matrix, point))),
+            boxCorners(child.frame).map((point) => apply(back, apply(child.matrix, point))),
           ),
         ),
         at,
@@ -158,7 +143,7 @@ export const placements = (scene: Scene, at: Seconds = 0): Placed[] => {
       ...initial,
       box:
         groupFrame && node.clip !== undefined
-          ? around(corners(groupFrame).map((point) => apply(own, point)))
+          ? boundsOfPoints(boxCorners(groupFrame).map((point) => apply(own, point)))
           : childBounds,
       ...(groupFrame && { frame: groupFrame }),
     };

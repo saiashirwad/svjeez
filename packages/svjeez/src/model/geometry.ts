@@ -8,6 +8,28 @@ import { curveLength, lerpPoint, lineCubic } from "./curve";
 const DEG = Math.PI / 180;
 const KAPPA = (4 / 3) * Math.tan(Math.PI / 8);
 
+export const boxCorners = ({ x, y, width, height }: Box): [Vec, Vec, Vec, Vec] => [
+  [x, y],
+  [x + width, y],
+  [x + width, y + height],
+  [x, y + height],
+];
+
+export const growBox = ({ x, y, width, height }: Box, by: number): Box => ({
+  x: x - by,
+  y: y - by,
+  width: width + by * 2,
+  height: height + by * 2,
+});
+
+export const boundsOfPoints = (points: readonly Vec[]): Box => {
+  const xs = points.map(([x]) => x);
+  const ys = points.map(([, y]) => y);
+  const [x, y] = [Math.min(...xs), Math.min(...ys)];
+
+  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+};
+
 export const onCircle = (radius: number, angle: number): Vec => [
   radius * Math.cos(angle * DEG),
   radius * Math.sin(angle * DEG),
