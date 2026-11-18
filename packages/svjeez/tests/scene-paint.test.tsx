@@ -1,0 +1,673 @@
+/** @jsxImportSource svjeez/scene */
+import { describe, expect, test } from "bun:test";
+import { font } from "svjeez";
+import {
+  Group,
+  Shape,
+  Stack,
+  Text,
+  blur,
+  boxesOf,
+  circle,
+  diagnose,
+  ease,
+  hitTest,
+  isLane,
+  linear,
+  morph,
+  polygon,
+  radial,
+  rect,
+  ref,
+  scene,
+  shadow,
+  span,
+  subtract,
+  svg,
+  tokens,
+  track,
+  type Model,
+  type Paint,
+  type SceneElement,
+  type Vec,
+} from "svjeez/scene";
+
+const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
+
+const theme = tokens({
+  light: { ink: "#111111", sky: "#2266FF" },
+  dark: { ink: "#EEEEEE", sky: "#88AAFF" },
+});
+
+const made = (build: () => SceneElement, duration = 4, still: number | false = 2): Model.Scene =>
+  scene(
+    {
+      size: [200, 100],
+      duration,
+      title: "Test",
+      reducedMotion: still === false ? false : { at: still },
+    },
+    build,
+  );
+
+const only = (model: Model.Scene): Model.SceneNode => model.root.children[0]!;
+
+const count = (text: string, part: string): number => text.split(part).length - 1;
+
+/** The SVG backend's output with the indents between tags taken out, so tests can read it as one line. */
+const emitted = (model: Model.Scene): string => svg.emit(model).replace(/>\s+</g, "><");
+
+describe("gradients", () => {
+  test("a gradient's stops spread evenly unless they say, and its points stay in the node's frame", () => {
+    const node = only(
+      made(() => (
+        <Shape
+          geometry={rect(40, 20)}
+          at={[10, 10]}
+          fill={linear({ from: [0, 0], to: [40, 0], stops: ["#FF0000", theme.sky, "#0000FF"] })}
+        />
+      )),
+    );
+
+    expect(node.kind === "shape" && node.fill).toEqual({
+      kind: "linear",
+      from: [0, 0],
+      to: [40, 0],
+      stops: [
+        { offset: 0, color: [1, 0, 0, 1] },
+        { offset: 0.5, color: { kind: "token", name: "sky" } },
+        { offset: 1, color: [0, 0, 1, 1] },
+      ],
+    });
+  });
+
+  test("across forms are measured on the node's box: corner to corner along the angle, and out to the farthest corner", () => {
+    const [across, round] = made(() => (
+      <Group>
+        <Shape
+          geometry={rect(40, 20)}
+          fill={linear.across({ angle: 90, stops: ["#000000", "#FFFFFF"] })}
+        />
+        <Shape
+          geometry={rect(30, 40)}
+          fill={radial.across({ center: "top-left", stops: ["#000000", "#FFFFFF"] })}
+        />
+      </Group>
+    )).root.children;
+
+    const fill = (node: Model.SceneNode | undefined) =>
+      node?.kind === "shape" ? node.fill : undefined;
+
+    expect(fill(across)).toMatchObject({ from: [20, 0], to: [20, 20] });
+    expect(fill(round)).toMatchObject({ center: [0, 0], radius: 50 });
+  });
+
+  test("a gradient is checked where it is written", () => {
+    expect(() => linear({ from: [0, 0], to: [1, 0], stops: ["#000000"] })).toThrow(
+      "two stops or more",
+    );
+    expect(() =>
+      linear({
+        from: [0, 0],
+        to: [1, 0],
+        stops: [
+          [0.6, "#000000"],
+          [0.2, "#FFFFFF"],
+        ],
+      }),
+    ).toThrow("never decrease");
+    expect(() => radial({ center: [0, 0], radius: 0, stops: ["#000000", "#FFFFFF"] })).toThrow(
+      "positive radius",
+    );
+  });
+
+  test("a track blends gradients of one kind and stop count, and nothing else", () => {
+    const g = (x: number) => linear({ from: [0, 0], to: [x, 0], stops: ["#000000", "#FFFFFF"] });
+
+    expect(() =>
+      made(() => (
+        <Shape
+          key="bar"
+          geometry={rect(10, 10)}
+          fill={track<Paint>(g(10)).to("#FF0000", span(0, 1))}
+        />
+      )),
+    ).toThrow('fill on "bar" moves from a linear gradient of 2 stops to a color');
+    expect(() =>
+      made(() => (
+        <Shape
+          key="bar"
+          geometry={rect(10, 10)}
+          fill={track(g(10)).to(
+            radial({ center: [0, 0], radius: 4, stops: ["#000000", "#FFFFFF"] }),
+            span(0, 1),
+          )}
+        />
+      )),
+    ).toThrow("radial gradient");
+  });
+
+  test("SVG writes one gradient for every use of it, its points moved to where the element's coordinates put the frame", () => {
+    const sky = linear({ from: [0, 0], to: [40, 0], stops: [theme.ink, theme.sky] });
+
+    const out = emitted(
+      made(() => (
+        <Group>
+          <Shape geometry={rect(40, 20)} at={[10, 10]} fill={sky} />
+          <Shape geometry={rect(40, 20)} at={[10, 10]} stroke={{ color: sky }} />
+          <Shape geometry={rect(40, 20, { radius: [4, 0, 0, 0] })} at={[10, 10]} fill={sky} />
+        </Group>
+      )),
+    );
+
+    expect(count(out, "<linearGradient")).toBe(2);
+    expect(out).toContain(
+      '<linearGradient id="g1" gradientUnits="userSpaceOnUse" x1="10" y1="10" x2="50" y2="10">',
+    );
+    expect(out).toContain('<linearGradient id="g2" gradientUnits="userSpaceOnUse" x2="40">');
+    expect(out).toContain('<stop stop-color="var(--ink)"/>');
+    expect(out).toContain('stroke="url(#g1)"');
+    expect(out).toContain('transform="translate(10 10)" fill="url(#g2)"');
+  });
+
+  test("a moving gradient moves its points by SMIL and its colors by CSS, with a still twin for reduced motion", () => {
+    const g = (x: number, end: Model.Color | "#FF0000" | "#00FF00") =>
+      linear({
+        from: [0, 0],
+        to: [x, 0],
+        stops: ["#000000", end === "#FF0000" || end === "#00FF00" ? end : "#000000"],
+      });
+
+    const out = emitted(
+      made(() => (
+        <Shape
+          geometry={rect(40, 20)}
+          fill={track(g(10, "#FF0000")).to(g(40, "#00FF00"), span(1, 1))}
+        />
+      )),
+    );
+
+    expect(out).toContain('attributeName="x2" values="10;40"');
+    expect(out).toMatch(/@keyframes k1\{[^}]*stop-color:#FF0000/);
+    expect(out).toContain('<linearGradient id="g1s" gradientUnits="userSpaceOnUse" x2="40"');
+    expect(out).toContain(
+      '@media (prefers-reduced-motion:reduce){[fill="url(#g1)"]{fill:url(#g1s)}}',
+    );
+
+    const once = emitted(
+      made(
+        () => (
+          <Shape
+            geometry={rect(40, 20)}
+            fill={track(g(10, "#FF0000")).to(g(40, "#FF0000"), span(1, 1))}
+          />
+        ),
+        4,
+        false,
+      ),
+    );
+
+    expect(once).not.toContain("g1s");
+    expect(once).not.toContain("@keyframes");
+  });
+
+  test("a shape whose geometry moves as a whole doesn't take its gradient with it", () => {
+    const out = emitted(
+      made(() => (
+        <Shape
+          geometry={track(
+            polygon([
+              [0, 0],
+              [10, 0],
+              [0, 10],
+            ]),
+          ).to(
+            polygon([
+              [20, 0],
+              [30, 0],
+              [20, 10],
+            ]),
+            span(0, 1),
+          )}
+          fill={linear({ from: [0, 0], to: [30, 0], stops: ["#000000", "#FFFFFF"] })}
+        />
+      )),
+    );
+
+    expect(out).not.toContain("translate:");
+    expect(out).toContain('attributeName="d"');
+  });
+});
+
+describe("gradients on text", () => {
+  test("text takes a gradient with points, laid out where its baseline starts", () => {
+    const out = emitted(
+      made(() => (
+        <Text
+          font={mono}
+          size={10}
+          at={[20, 30]}
+          fill={linear({ from: [0, 0], to: [40, 0], stops: ["#000000", "#FFFFFF"] })}
+        >
+          Hi
+        </Text>
+      )),
+    );
+
+    expect(out).toContain('x1="20" y1="30" x2="60" y2="30"');
+    expect(out).toMatch(/<text x="20" y="30"[^>]*fill="url\(#g1\)"/);
+  });
+
+  test("a gradient across the box needs a box the paint can see, which a text fill has none of yet", () => {
+    expect(() =>
+      made(() => (
+        <Text font={mono} size={10} fill={linear.across({ stops: ["#000000", "#FFFFFF"] })}>
+          Hi
+        </Text>
+      )),
+    ).toThrow("which spreads over the node's box, and this paint has no box to spread over");
+  });
+});
+
+describe("clips and masks", () => {
+  test("a clip is a clipPath in the element's own coordinates, inside every layer, with its fill rule as clip-rule", () => {
+    const model = made(() => (
+      <Group
+        key="card"
+        at={[20, 10]}
+        rotate={30}
+        clip={subtract(
+          rect(60, 40),
+          polygon([
+            [20, 10],
+            [40, 10],
+            [30, 30],
+          ]),
+        )}
+      >
+        <Shape geometry={rect(60, 40)} fill="#FF0000" />
+      </Group>
+    ));
+
+    const out = emitted(model);
+
+    expect(diagnose(model, svg)).toEqual([]);
+    expect(out).toContain(
+      '<clipPath id="c1"><path d="M0 0L60 0L60 40L0 40ZM20 10L40 10L30 30Z" clip-rule="evenodd"/>',
+    );
+    expect(out).toContain('clip-rule="evenodd"');
+    expect(out).not.toMatch(/<clipPath[^>]*><[^>]*fill=/);
+    expect(out).toMatch(
+      /<g transform="translate\(20 10\)" clip-path="url\(#c1\)" style="transform-origin:50px 30px;rotate:30deg">/,
+    );
+  });
+
+  test("a shape placed by its own coordinates takes its clip moved there", () => {
+    const out = emitted(
+      made(() => (
+        <Shape geometry={rect(40, 20)} at={[10, 10]} fill="#FF0000" clip={rect(20, 20)} />
+      )),
+    );
+
+    expect(out).toContain(
+      '<clipPath id="c1"><rect x="10" y="10" width="20" height="20"/></clipPath>',
+    );
+    expect(out).toContain(
+      '<rect x="10" y="10" width="40" height="20" fill="#FF0000" clip-path="url(#c1)"/>',
+    );
+  });
+
+  test("a clip that moves takes a geometry's routes, inside its clipPath", () => {
+    const out = emitted(
+      made(() => (
+        <Shape
+          geometry={rect(40, 20)}
+          fill="#FF0000"
+          clip={track(rect(10, 20)).to(rect(40, 20), span(0, 1))}
+        />
+      )),
+    );
+
+    expect(out).toContain(
+      '<clipPath id="c1"><rect width="40" height="20" style="transform-origin:0px 0px" class="a m1"/></clipPath>',
+    );
+    expect(out).toContain("@keyframes k1{0%{scale:0.25 1}25%,100%{scale:1 1}}");
+  });
+
+  test("a mask is alpha, drawn in the node's frame, over a region that holds all its content ever covers", () => {
+    const model = made(() => (
+      <Group
+        key="card"
+        at={[50, 20]}
+        mask={
+          <Shape
+            geometry={rect(30, 30)}
+            at={track<Vec>([-30, 0]).to([0, 0], span(0, 1))}
+            fill="#000000"
+          />
+        }
+      >
+        <Shape geometry={rect(30, 30)} fill={theme.ink} />
+      </Group>
+    ));
+
+    const out = emitted(model);
+
+    expect(only(model).mask?.key).toBe("card#mask");
+    expect(out).toContain(
+      '<mask id="m1" maskUnits="userSpaceOnUse" x="-31" y="-1" width="62" height="32" mask-type="alpha">',
+    );
+    expect(out).toContain('mask="url(#m1)"');
+  });
+
+  test("a mask's content is laid out where it stands, and can't be placed from outside", () => {
+    const model = made(() => (
+      <Group
+        mask={
+          <Stack direction="row" gap={4}>
+            <Shape geometry={rect(10, 10)} fill="#000000" />
+            <Shape geometry={rect(10, 10)} fill="#000000" />
+          </Stack>
+        }
+      >
+        <Shape geometry={rect(30, 10)} fill="#FF0000" />
+      </Group>
+    ));
+
+    const row = only(model).mask?.kind === "group" ? only(model).mask : undefined;
+    const stack = row?.kind === "group" ? row.children[0] : undefined;
+
+    expect(stack?.kind === "group" && stack.children.map((child) => child.at)).toEqual([
+      [0, 0],
+      [14, 0],
+    ]);
+
+    const dot = ref("dot");
+
+    expect(() =>
+      made(() => (
+        <Group>
+          <Shape ref={dot} geometry={circle(2)} at={[50, 50]} />
+          <Group mask={<Shape key="spot" geometry={circle(4)} at={dot.center} fill="#000000" />}>
+            <Shape geometry={rect(30, 10)} fill="#FF0000" />
+          </Group>
+        </Group>
+      )),
+    ).toThrow('"1#mask/spot" is in the mask of "1"');
+  });
+
+  test("hit tests and boxes stop at a clip's box", () => {
+    const model = made(() => (
+      <Shape key="bar" geometry={rect(100, 20)} at={[0, 0]} fill="#FF0000" clip={rect(30, 20)} />
+    ));
+
+    expect(boxesOf(model).bar).toEqual({ x: 0, y: 0, width: 30, height: 20 });
+    expect(hitTest(model, [20, 10])?.key).toBe("bar");
+    expect(hitTest(model, [60, 10])).toBeUndefined();
+  });
+});
+
+describe("effects", () => {
+  test("a filter holds the effects in order, over the node's reach and the effects' own", () => {
+    const out = emitted(
+      made(() => (
+        <Shape
+          geometry={rect(40, 20)}
+          at={[10, 10]}
+          fill="#FF0000"
+          effects={[blur(2), shadow({ color: theme.ink, offset: [0, 4], blur: 3, opacity: 0.5 })]}
+        />
+      )),
+    );
+
+    expect(out).toContain(
+      '<filter id="f1" filterUnits="userSpaceOnUse" x="-6" y="-2" width="72" height="52" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="2"/><feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.5" flood-color="var(--ink)"/></filter>',
+    );
+    expect(out).toContain('filter="url(#f1)"');
+  });
+
+  test("a filter's region holds a child that turns and grows, wherever its turn takes it", () => {
+    const out = emitted(
+      made(() => (
+        <Group effects={[blur(1)]}>
+          <Shape
+            geometry={rect(20, 20)}
+            at={[40, 40]}
+            fill="#FF0000"
+            rotate={track(0).to(45, span(0, 1))}
+            scale={track(1).to(2, span(0, 1))}
+          />
+        </Group>
+      )),
+    );
+
+    // Around the rect's center, (50, 50), anything within its half diagonal at twice its size, 28.3, can be drawn.
+    expect(out).toContain('x="17" y="17" width="66" height="66"');
+  });
+
+  test("an effect that changes nothing writes no filter", () => {
+    const out = emitted(
+      made(() => (
+        <Shape
+          geometry={rect(40, 20)}
+          fill="#FF0000"
+          effects={[blur(0), shadow({ color: "#00000000", blur: 4 })]}
+        />
+      )),
+    );
+
+    expect(out).not.toContain("<filter");
+  });
+
+  test("effects come after the clip, on an element around it, and turn with the node's layers", () => {
+    const out = emitted(
+      made(() => (
+        <Shape
+          geometry={rect(40, 20)}
+          fill="#FF0000"
+          clip={rect(20, 20)}
+          rotate={track(0).to(90, span(0, 1))}
+          effects={[shadow({ color: "#000000", offset: [2, 2], blur: 2 })]}
+        />
+      )),
+    );
+
+    expect(out).toMatch(
+      /<g filter="url\(#f1\)"[^>]*class="a m1"><rect width="40" height="20" fill="#FF0000" clip-path="url\(#c1\)"\/><\/g>/,
+    );
+    // The region holds the clipped content, 20 by 20, its shadow 2 over and 6 out, and a unit of room on each side.
+    expect(out).toContain('x="-5" y="-5" width="34" height="34"');
+  });
+
+  test("a blur that moves animates its filter by SMIL, with a still twin a reduced-motion viewer sees", () => {
+    const out = emitted(
+      made(() => (
+        <Shape
+          geometry={rect(40, 20)}
+          fill="#FF0000"
+          effects={[blur(track(8).to(0, span(0, 1), ease.linear))]}
+        />
+      )),
+    );
+
+    expect(out).toContain('attributeName="stdDeviation" values="8;0"');
+    expect(out).toContain('<filter id="f1s"');
+    expect(out).toContain('[filter="url(#f1)"]{filter:url(#f1s)}');
+    // The region holds the widest the blur gets.
+    expect(out).toContain('x="-25" y="-25" width="90" height="70"');
+  });
+
+  test("an effect's lengths are checked, and a non-scaling stroke can't be bounded under one", () => {
+    expect(() => made(() => <Shape key="a" geometry={rect(4, 4)} effects={[blur(-1)]} />)).toThrow(
+      'blur on "a" needs a finite length of 0 or more, got -1.',
+    );
+    expect(() =>
+      emitted(
+        made(() => (
+          <Shape
+            key="a"
+            geometry={rect(4, 4)}
+            stroke={{ color: "#000000", nonScaling: true }}
+            effects={[blur(1)]}
+          />
+        )),
+      ),
+    ).toThrow('"a" has a non-scaling stroke inside the effects of "a"');
+  });
+
+  test("SVG draws blur and shadow close to exact, and says how they differ", () => {
+    const model = made(() => <Shape key="a" geometry={rect(4, 4)} effects={[blur(1)]} />);
+
+    expect(diagnose(model, svg).map((entry) => [entry.severity, entry.feature])).toEqual([
+      ["warning", "blur"],
+    ]);
+  });
+});
+
+describe("morph", () => {
+  test("gradients, clips and effects blend between states", () => {
+    const g = (x: number) => linear({ from: [0, 0], to: [x, 0], stops: ["#000000", "#FFFFFF"] });
+
+    const model = made(() =>
+      morph(
+        <Shape key="card" geometry={rect(40, 20)} fill={g(10)} clip={rect(10, 20)} />,
+        <Shape
+          key="card"
+          geometry={rect(40, 20)}
+          fill={g(40)}
+          clip={rect(40, 20)}
+          effects={[shadow({ color: "#000000", blur: 4, opacity: 0.5 })]}
+        />,
+        span(1, 1),
+      ),
+    );
+
+    const card = only(model);
+
+    if (card.kind !== "shape") throw new Error("a shape");
+    expect(card.fill && "kind" in card.fill && card.fill.kind).toBe("lane");
+    expect(card.clip && "kind" in card.clip && card.clip.kind).toBe("lane");
+    expect(card.effects[0]).toMatchObject({ kind: "shadow", blur: 4, opacity: { kind: "lane" } });
+
+    const shown = card.effects[0]!.kind === "shadow" ? card.effects[0]!.opacity : 0;
+
+    expect(isLane(shown) && [shown.keys[0].value, shown.keys.at(-1)!.value]).toEqual([0, 0.5]);
+  });
+
+  test("a gradient fades in from clear, and two kinds of paint or of effect don't blend", () => {
+    const g = linear({ from: [0, 0], to: [10, 0], stops: ["#000000", "#FFFFFF"] });
+
+    const model = made(() =>
+      morph(
+        <Shape key="a" geometry={rect(4, 4)} />,
+        <Shape key="a" geometry={rect(4, 4)} fill={g} />,
+        span(0, 1),
+      ),
+    );
+
+    const a = only(model);
+
+    expect(
+      a.kind === "shape" && a.fill !== undefined && isLane(a.fill) && a.fill.keys[0].value,
+    ).toMatchObject({
+      stops: [{ color: [0, 0, 0, 0] }, { color: [0, 0, 0, 0] }],
+    });
+
+    expect(() =>
+      made(() =>
+        morph(
+          <Shape key="a" geometry={rect(4, 4)} fill="#FF0000" />,
+          <Shape key="a" geometry={rect(4, 4)} fill={g} />,
+          span(0, 1),
+        ),
+      ),
+    ).toThrow("only colors, or gradients of one kind with as many stops, blend");
+    expect(() =>
+      made(() =>
+        morph(
+          <Shape key="a" geometry={rect(4, 4)} effects={[blur(2)]} />,
+          <Shape key="a" geometry={rect(4, 4)} effects={[shadow({ color: "#000000" })]} />,
+          span(0, 1),
+        ),
+      ),
+    ).toThrow('can\'t blend the effects of "a"');
+  });
+});
+
+describe("subtract", () => {
+  test("cuts holes inside the base as one even-odd path, and drops cuts that miss it", () => {
+    const ring = subtract(
+      circle(20),
+      circle(10),
+      polygon([
+        [12, -2],
+        [16, -2],
+        [14, 2],
+      ]),
+    );
+
+    expect(ring.kind === "path" && ring.rule).toBe("evenodd");
+    expect(ring.kind === "path" && ring.contours.length).toBe(3);
+    expect(
+      subtract(
+        rect(10, 10),
+        polygon([
+          [50, 50],
+          [60, 50],
+          [55, 60],
+        ]),
+      ),
+    ).toMatchObject({ contours: [{}] });
+  });
+
+  test("a hole in a hole already cut keeps cutting, and anything a single even-odd path would draw wrong is an error", () => {
+    const card = subtract(
+      rect(100, 40),
+      polygon([
+        [10, 10],
+        [20, 10],
+        [15, 20],
+      ]),
+    );
+
+    expect(
+      subtract(
+        card,
+        polygon([
+          [60, 10],
+          [80, 10],
+          [70, 30],
+        ]),
+      ),
+    ).toMatchObject({ contours: [{}, {}, {}] });
+    expect(() => subtract(rect(10, 10), rect(20, 5))).toThrow("crosses or touches the base's edge");
+    expect(() => subtract(rect(10, 10), rect(10, 10))).toThrow("crosses or touches");
+    expect(() =>
+      subtract(
+        rect(40, 40),
+        polygon([
+          [5, 5],
+          [20, 5],
+          [20, 20],
+        ]),
+        polygon([
+          [10, 6],
+          [25, 6],
+          [25, 30],
+        ]),
+      ),
+    ).toThrow("overlaps or touches cut 1");
+    expect(() => subtract(rect(10, 10), circle(50))).toThrow("covers the whole base");
+    expect(() =>
+      subtract(
+        polygon([
+          [0, 0],
+          [10, 10],
+          [10, 0],
+          [0, 10],
+        ]),
+        circle(1),
+      ),
+    ).toThrow("never crosses itself");
+  });
+});

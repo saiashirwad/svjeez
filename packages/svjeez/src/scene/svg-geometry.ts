@@ -512,15 +512,16 @@ const morph = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving => {
 /** Whether a paint is a gradient, laid out in the shape's frame. */
 const isGradient = (paint: Paint): boolean => !Array.isArray(paint) && "stops" in paint;
 
+/** Whether a gradient is laid out in the shape's frame, so moving or scaling the outline as a whole would move it too. */
+const framed = (node: ShapeNode): boolean =>
+  [node.fill, node.stroke?.color].some(
+    (paint) =>
+      paint !== undefined &&
+      (isLane(paint) ? paint.keys.map((key) => key.value) : [paint]).some(isGradient),
+  );
+
 /** Whether scaling the shape scales nothing but its outline: no stroke, and no gradient laid out in its frame. */
-const scalable = (node: ShapeNode): boolean => {
-  const { fill } = node;
-
-  const paints =
-    fill === undefined ? [] : isLane(fill) ? fill.keys.map((key) => key.value) : [fill];
-
-  return node.stroke === undefined && !paints.some(isGradient);
-};
+const scalable = (node: ShapeNode): boolean => node.stroke === undefined && !framed(node);
 
 type Arc = Extract<Geometry, { kind: "arc" }>;
 
@@ -591,7 +592,7 @@ export const drawMoving = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Movi
   const keys = lane.keys.map((key) => key.value);
   const moves = shifts(keys);
 
-  if (moves)
+  if (moves && !framed(node))
     return moves.every(([x, y]) => x === 0 && y === 0)
       ? { kind: "still", geometry: keys[0]! }
       : { kind: "still", geometry: keys[0]!, offset: along(lane, moves) };
