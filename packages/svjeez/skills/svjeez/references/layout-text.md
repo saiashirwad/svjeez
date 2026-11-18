@@ -65,4 +65,27 @@ The nine places, for `anchor`, `origin`, `place` and `radial.across({ center })`
 - `lineHeight` is baseline to baseline in multiples of `size`. Default: the font's own.
 - The box runs from the tallest ascent to the deepest descent, so `at` places the top of the text. `anchor="baseline-left"`, `"baseline"` or `"baseline-right"` names a point on the first line's baseline, to line text up with other text or a rule.
 - `<Run>` changes `font`, `weight`, `italic`, `fill` and `opacity` for part of a text and inherits the rest from the text around it. A run's `opacity` and `fill` take tracks, which is how words appear one by one without moving.
-- A `<Text>` holds strings, numbers and `<Run>`s only. Its words can't change over time: to change a label, crossfade two texts, or `morph` between states that key the same `<Text>` (it crossfades when its words change).
+- A `<Text>` holds strings, numbers and `<Run>`s, or one `count()` (below). Its words can't change over time: to change a label, crossfade two texts, or `morph` between states that key the same `<Text>` (it crossfades when its words change).
+
+## Numbers that count
+
+`count(value, format?)` inside a `<Text>` shows a number that changes: `value` is a number, a track or a derived value, and the text shows it at every moment, rounded to its `decimals`.
+
+```tsx
+<Text font={sans} weight={600} size={28} fill={theme.text}>
+  ${count(track(0).to(1284500, span(0.5, 2), ease.out))}
+</Text>
+<Text font={sans} size={12} fill={theme.muted} align="end">
+  {count(progress.map((p) => p * 100))}%
+</Text>
+<Text font={sans} size={14} fill={theme.text}>
+  {count(track(0).to(9.5, span(0, 1.5)), { decimals: 1, point: ",", separator: "." })} km
+</Text>
+```
+
+- Format: `decimals` (default `0`), `separator` between thousands (default `","`, `""` for none, `" "` for a space), `point` before the decimals (default `"."`), `pad` (the fewest integer digits, filled with zeros: `pad: 2` shows `07`), and `rate` (default `30`), the most times a second the number changes. A slow count changes exactly when its rounded value does.
+- Strings before and after the `count()` go with it: `${count(…)}` and `{count(…)}%`. A counting `<Text>` draws one line in one style: no `<Run>`s, no `width`, one `count()`.
+- Digits are set in slots as wide as the font's widest digit, so the number doesn't jitter. The box is as wide as the widest number it shows, so a container lays it out once; `align` says which edge holds still when it gains a digit (`start` by default, `end` for numbers lined up on the right).
+- Every target shows the same digits at the same time, and the reduced-motion still shows the number at the still's moment. `check --at` prints the number on screen; a looping count that doesn't come back to where it started is a `loop-seam`: `.rewind()` its track, or fade the text out.
+- Each digit is a column that steps through the glyphs it shows, a few bytes per change. A count that runs over several seconds at a high rate costs more; keep the counting span short or lower `rate`.
+- In a `morph`, a counting `<Text>` keyed in every state keeps the same `count()` in each.

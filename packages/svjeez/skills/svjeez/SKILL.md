@@ -67,6 +67,7 @@ export default scene({ size: [240, 140], duration: 4, title: "Hello", theme, red
 | --- | --- |
 | `<Shape geometry fill stroke trim>` | `stroke={{ color, width, cap, join, dash }}`; `trim={[from, to]}` draws part of the outline |
 | `<Text font size fill weight italic width lineHeight align>` | strings and `<Run weight fill italic opacity>` inside; `width` wraps |
+| `<Text …>${count(value, { decimals, separator, pad })}</Text>` | a number that counts: `value` is a track or derived number, shown rounded at every moment |
 | `<Group>` | a frame that moves its children together |
 | `<Image src={picture(…)} width height>` | a PNG, JPEG, GIF, WebP or SVG embedded |
 | `<Instance of={symbol(() => …)}>` | content drawn once, placed many times |
@@ -120,6 +121,7 @@ Anchors on a ref: `center`, `left`, `right`, `top`, `bottom`, `topLeft`, `topRig
 - **A node arrives, leaves, wobbles or drifts**: a motion layer in `motion`. Layers multiply opacity and add offsets on top of the node's own props, so an entrance never fights a prop's track.
 - **Several nodes act in an order that depends on each other** (a cursor reaches a button, then it presses): a `timeline()` of verbs on refs, written as a script. A component can return its refs' verbs as actions (`toggle.on`).
 - **Two layouts of the same picture** (chart values, before/after code, a reflowing list): `morph` between keyed states, not hand-written tracks per node.
+- **A number that changes** (a total, a percentage, a timer): `count()` in a `<Text>`, never texts crossfaded per value.
 - **One number drives many props**: one track and `.map()` from it, not parallel tracks that can drift apart.
 - **A card, a pill, a row with a background**: give the `<Stack>` or `<Center>` a `fill`, `stroke` and `radius`, not a rect of a size you worked out.
 - **Centering a label on a shape**: `<Center>` around both, not `at` arithmetic.
@@ -183,7 +185,7 @@ Each one renders, passes `check` with no warnings, and is the bar for idiomatic 
 | [`examples/toggles.tsx`](examples/toggles.tsx) | a timeline of verbs on refs: a cursor turns switches on; components that return their own actions; a spring; rows spread with `justify="space-between"` |
 | [`examples/chart.tsx`](examples/chart.tsx) | `morph.between` keyed states: bars grow, recolor, trade places, enter and leave |
 | [`examples/pipeline.tsx`](examples/pipeline.tsx) | a diagram: arrows attached to refs, staggered draws, a dot carried along anchors |
-| [`examples/upload.tsx`](examples/upload.tsx) | one progress track mapped to a ring's trim and a bar's geometry; a spring pop; two labels crossfading |
+| [`examples/upload.tsx`](examples/upload.tsx) | one progress track mapped to a ring's trim, a bar's geometry and a percentage that counts; a spring pop; two labels crossfading |
 | [`examples/reveal.tsx`](examples/reveal.tsx) | gradients, a growing clip, a soft mask wipe sized by the text's box, `subtract`, `spin` |
 
 ## Size
@@ -247,6 +249,11 @@ Runtime errors. `…` stands for a value the message fills in.
 | `A … holds morphs on different spans or with different options, and it reflows with one morph at a time.` | the same states, spans and options for every morph in one container |
 | `… is given a spring for its length and a curve as well.` | pass the spring once, in place of the length |
 | `The … of … is sized by its box, but … inside it is placed by an anchor…` | size the clip with numbers, or move that node out |
+| `… holds … count()s, and a <Text> counts one number.` | a `<Text>` per number, side by side in a `<Stack direction="row">` |
+| `… counts, so it holds strings around its count() and no <Run>s.` | style the whole `<Text>` |
+| `count() in … takes decimals from 0 to 10, got ….` | a whole number of decimals |
+| `count() in … marks its decimals with … and groups thousands with it too, so the two can't be told apart.` | another `separator`, as in `{ point: ",", separator: "." }` |
+| `morph() can't blend …: it counts, and what it counts differs between states.` | the same `count()` in every state, or another key per state |
 | `subtract() cuts holes that lie wholly inside the base or wholly outside it, and … crosses or touches the base's edge.` | draw that outline with `path()` |
 | `… has …, which spreads over the node's box, and this paint has no box to spread over.` | give the gradient points: `linear({ from, to, stops })` |
 

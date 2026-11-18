@@ -8,6 +8,7 @@ import {
   Text,
   canvas,
   circle,
+  count,
   draw,
   ease,
   exit,
@@ -41,7 +42,7 @@ export default scene(
     size: [420, 180],
     duration: 6,
     title: "Uploading",
-    desc: "A ring and a bar fill together as a file uploads, then a check mark springs into the ring and the label turns to Uploaded, before everything winds back.",
+    desc: "A ring, a bar and a percentage fill together as a file uploads, then a check mark springs into the ring and the label turns to Uploaded, before everything winds back.",
     theme,
     reducedMotion: 4.4,
   },
@@ -71,9 +72,14 @@ export default scene(
             />
           </Center>
           <Stack gap={10}>
-            <Text font={sans} weight={600} size={15} fill={theme.text}>
-              scene.svg
-            </Text>
+            <Stack direction="row" justify="space-between" align="end" width={BAR}>
+              <Text font={sans} weight={600} size={15} fill={theme.text}>
+                scene.svg
+              </Text>
+              <Text font={sans} size={12} fill={theme.muted} align="end">
+                {count(progress.map((p) => p * 100))}%
+              </Text>
+            </Stack>
             <Group>
               <Text key="busy" font={sans} size={12} fill={theme.muted} opacity={swap(1)}>
                 Uploading…
