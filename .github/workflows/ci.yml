@@ -86,6 +86,8 @@ jobs:
         working-directory: packages/vite
       - run: npm run test:package
         working-directory: packages/video
+      - run: npm run test:package
+        working-directory: packages/dom
       # Astro 7 needs Node 22.
       - run: npm run test:package
         if: matrix.node != 20
