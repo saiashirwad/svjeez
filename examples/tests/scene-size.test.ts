@@ -24,6 +24,7 @@ const budgets = {
   layout: { bytes: 11000, elements: 43, stops: 80, smil: 0, cost: 15 },
   morph: { bytes: 10000, elements: 32, stops: 48, smil: 6, cost: 37 },
   derived: { bytes: 9300, elements: 21, stops: 46, smil: 1, cost: 5 },
+  type: { bytes: 3900, elements: 35, stops: 20, smil: 0, cost: 10 },
 } satisfies Record<string, Budget>;
 
 /** What a file costs to send and to play. */
