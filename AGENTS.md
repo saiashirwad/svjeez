@@ -4,6 +4,8 @@ svjeez is a TypeScript library that compiles scenes written in TypeScript into o
 
 To write a scene, read [`packages/svjeez/skills/svjeez/SKILL.md`](packages/svjeez/skills/svjeez/SKILL.md) and the references it points to. It ships in the npm package, and `svjeez skill --install` copies it into a project. This file covers working on the repository.
 
+NOTE: very SPARSE comments only, just the MOST ESSENTIAL ONES. if you encounter comments, proactively delete them if they're not ABSOLUTELY ESSENTIAL
+
 ## Workspace
 
 `next` is the scene-model rewrite. `main` stays on 0.7.x and keeps everything `next` deleted: the site, the live editor (`@svjeez/live`, `@svjeez/react`, `@svjeez/svelte`), and the charts, code, diagrams, dom, geo, icons, math and mermaid packages. Each comes back by porting it from `main` (`git show main:<path>`) onto the scene model, never by restoring it as it was.
