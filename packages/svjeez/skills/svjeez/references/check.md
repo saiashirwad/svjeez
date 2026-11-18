@@ -1,86 +1,72 @@
-# Checking a scene with numbers
+# Check and describe
 
-`svjeez check` prints the faults a number can find, one per line, each naming the line of the scene that wrote it, with what to change on a `hint:` line below. For a scene from `svjeez/scene` it first reads the scene model, with no browser, and names each node by its key; then it measures the scene in headless Chromium. The browser needs what frames need: `npm i -D playwright-core` and `npx playwright-core install chromium-headless-shell`, and `tsx` for `.tsx` on Node. `--no-browser` reads the model only, and answers at once.
+`svjeez check` is the feedback loop. It reads the scene model, with no browser, and reports what a number can find: each finding names the line that wrote the node, the node's key, what is wrong in the scene's terms (seconds, units, colors by token name), and what to change.
 
 ```sh
-npx svjeez check scene.tsx
-npx svjeez check scene.tsx --times 0,1.2,2.5 --json
-npx svjeez check scene.tsx --no-browser --at 0,1.5
+npx svjeez check scene.tsx --no-browser             # the model only, at once
+npx svjeez check scene.tsx --no-browser --at 0,1.5,3 # and what is on screen at those times
+npx svjeez check scene.tsx --no-browser --json       # for a script
+npx svjeez check scene.tsx                           # the model, then the SVG measured in headless Chromium
 ```
 
 ```
-scene.tsx:24:7  off-canvas  error: shape "badge" is outside the 200×120 canvas at every time: it stays within x 230 to 250, y 10 to 30.
-    hint: Move it onto the canvas, or remove it.
-scene.tsx:31:9  low-contrast  warning: text "title" ("Quarterly revenue") is hard to see: muted on surface is 2.1:1 in the dark scheme (4.8:1 in light), under the 4.5:1 text this size needs.
-    hint: Pick a fill farther from surface in both schemes, or make the text larger.
-1 error, 1 warning, 0 info; loop 4s, measured at 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 3.96
+card.tsx:44:9  low-contrast  info: text "1/0/1/2/0/1/0" ("+128") is hard to see: green on raised is 3.70:1 in the light scheme (6.59:1 in dark), under the 4.5:1 text this size needs.
+    hint: Pick a fill farther from raised in both schemes, or make the text larger.
+0 errors, 0 warnings, 1 info; model only
 ```
 
-It exits 1 when any finding is an error, a scene that throws while it builds included, so a script can gate on it. Without `--times` the browser measures 0, seven times spread across the loop and just before the end, plus up to 48 times from the scene's keys. `--json` prints `{ errors, warnings, info }`, each finding `{ code, severity, key, source, message, hint, times, related }`; `key` is empty when no node is known. `--at 0,1.5` adds `describe()`'s picture at those times: `frames` and `timeline` in JSON, and a short text after the findings, with what shows where, in which color, and what is moving it. `--color-scheme light` or `dark` picks the side of an adaptive theme. An `.svg` file works too, without sources.
+A node's key is the keys from the root down, joined by `/`; a node with no `key` or `ref` is named by its index among its siblings. Key the nodes you will want to read. A scene that throws while it builds is one `compile-error` finding with the message. `check` exits 1 on any error. `--params` and `--param` work as for every command ([params.md](params.md)); `--color-scheme` picks the scheme the browser pass measures.
 
-Fix errors first. Warnings are likely faults: open a frame at the times a warning names before you change anything, and leave it when the frame shows it is what you meant.
+## Reading what is on screen
 
-In `svjeez dev`, open **Timeline**, then click **Check layout**. A finding seeks the preview to the first reported time. `svjeez svg scene.tsx --json` also returns the compiled timeline and validation warnings as JSON and runs without Chromium. For programmatic rendering, pass `onWarning` to `render()` to receive those warnings.
+`--at` adds a description of the scene: first a timeline of each node that ever hides or changes, then each time asked for, every node in paint order with its key, kind, box (`width×height at x,y` in scene units), paint and what is changing it (`~ at 1.4s–2s`). Repeated siblings fold into one line.
+
+```
+timeline:
+  1/0/0/progress: shown throughout; trim 0.4s–3.2s, 5.4s–end
+  1/0/1/1/done: shown 3.2s–5.5s; opacity 3.2s–3.5s, 5.2s–5.5s
+at 4s:
+  1/0/0/ring shape ellipse 58×58 at 80,61 stroke raised/6
+  1/0/0/2/check shape path 24×18 at 97,81 stroke green/4 ~ scale 3.2s–4.365s
+  1/0/1/1/done text 53×16 at 160,89 fill green "Uploaded"
+```
+
+Use it to confirm a beat before rendering frames: where a node landed, whether it is showing, what is still moving. "Shown" reads opacity and scale; a stroke trimmed to nothing still counts as shown.
+
+## JSON
+
+`--json` prints `{ errors, warnings, info }`, and with `--at` also `frames` and `timeline`. A finding is `{ code, severity, key, source: { file, line, column }, message, hint, times?, related? }`; `key` is empty when the scene didn't build, `times` lists the seconds it was seen at, `related` names other nodes involved. A frame is `{ t, nodes }`, each node `{ key, kind, depth, box: [x, y, width, height], geometry?, text?, fill?, stroke?, rotate?, opacity?, changing?: [{ value, from, to }] }`.
+
+In code, `inspect(scene)` and `describe(scene, times)` from `svjeez/tools` return the same, and `RULES` lists every code.
 
 ## Rules
 
-| Rule | Severity | Reports |
-| --- | --- | --- |
-| `off-canvas` | error | A visible element outside the canvas at every time it shows, and still there. A part that slides in from off the canvas is on it at some time, and one that moves out there is not judged. |
-| `off-canvas` | warning | A small element (under half the canvas) cut by the canvas edge by less than a quarter of its size, while it rests, in the same place at every time. Bigger bleeds, backgrounds, gradient glows and anything a camera carries are left alone. |
-| `text-overflow` | warning | A `<text>` that runs past the canvas edge while it rests, or past the sides of the smallest `<rect>` drawn under its middle by more than a quarter of its height. |
-| `static` | warning | An element whose animation never changes any value across the loop, or that carries an animation but draws nothing. |
-| `visible-at-zero` | error | An element shown from 0 that cuts to hidden and comes straight back in, an entrance whose hidden start is missing (`motion({ opacity: 0 })`); or a stroke that draws in later while its fill already shows at 0. A part that is hidden for a while before it returns is not reported. |
-| `loop-seam` | warning | An element seen on both sides of the loop's end that moves more than 3 or changes opacity by more than 0.3 when the loop restarts, beyond where its motion just before the end was taking it. |
-| `overlap` | warning | Two different `<text>` elements whose middles overlap by more than 30% of the smaller, both visible and at rest. A copy of the same words (a shadow or an outline) and a text covered by an opaque shape drawn between them are left alone. |
-
-For a scene model, these come first, read from the model with no browser (`inspect()` from `svjeez/scene/tools` returns the same list). A rule both read is reported once, as the model says it.
-
 | Code | Severity | Reports |
 | --- | --- | --- |
-| `never-visible` | warning | A node hidden at every time (opacity or scale 0), painting nothing, cut away by an empty clip, or covered at every time by an opaque, still, upright rect drawn after it. |
-| `zero-size` | warning | Geometry, text or an image with no size at any time. |
-| `off-canvas` | error, warning | Outside the canvas at every time it could be, or cut by an edge at rest. |
-| `text-overflow` | warning | Text past the canvas at rest, or a character wider than the width it wraps to. |
-| `overlap` | warning | Two different texts over each other while both rest and neither fades. |
-| `missing-glyph` | error | Characters the text's face has no glyph for. |
-| `low-contrast` | warning, info | Text, or a thin unfilled line, too close to the one flat color behind it, in either scheme: under 3:1 is a warning, under 4.5:1 for text under 24 units is info. Silent over a gradient, an image, or anything not one color. |
-| `loop-seam` | warning | A value that ends somewhere other than where it starts, on a node seen on both sides of the seam: how far it moves, which colors it jumps between. |
-| `visible-at-zero` | error | As the browser rule, read from the lanes. |
-| `wasted-motion` | info | A value that changes before the node is first seen, or after it is gone for good. |
-| `nothing-enters`, `static` | info, warning | Everything on screen from 0s with nothing entering; nothing moving at all, or a change only after the end. |
-| `layout-overlap` | warning | Two children of a `<Stack>` or `<Grid>` over each other: the container placed them apart, and a motion, rotate or scale carried one onto the other. |
-| `word-cut` | warning | A word wider than the width its text wraps to, cut across two lines; the message marks each cut with `\|`. |
-| `unattached-ref` | warning | A ref the scene made that no node takes as `ref={…}`. |
-| `hidden-target` | warning | A timeline verb that moves a node that is never visible. |
-| `unsupported`, `approximate` | error, warning | What the SVG backend can't draw, or draws differently. |
-| `compile-error` | error | The scene threw while it was built: the message, at the line that threw. |
+| `compile-error` | error | the scene threw while it was built; only `svjeez check` reports it |
+| `never-visible` | warning | a node hidden at every time (opacity or scale 0), painting nothing, cut away by an empty clip, or covered at every time by an opaque, still rect drawn after it |
+| `zero-size` | warning | geometry, text or an image with no size at any time |
+| `off-canvas` | error, warning | outside the canvas at every time (error), or cut by its edge at rest (warning); backgrounds that bleed are left alone |
+| `text-overflow` | warning | text past the canvas at rest, or a line wider than the width it wraps to |
+| `overlap` | warning | two different texts over each other while both are fully shown |
+| `missing-glyph` | error | characters the text's face has no glyph for; no other font fills in |
+| `low-contrast` | warning, info | text or a thin line too close to the flat color behind it, in either scheme |
+| `loop-seam` | warning | a looping scene jumps when it starts again: a value ends where it didn't start, by how far |
+| `visible-at-zero` | error | shown at 0s and cut straight back in, or filled while its stroke draws in |
+| `nothing-enters` | info | everything is on screen from 0s and nothing enters |
+| `wasted-motion` | info | a value changes before the node is first seen, or after it is gone for good |
+| `static` | warning, info | nothing in the scene moves, or a value changes only after the scene ends |
+| `unused-symbol` | info | a symbol no instance draws |
+| `layout-overlap` | warning | two children of a `<Stack>` or `<Grid>` overlap: motion carried one onto another |
+| `word-cut` | warning | a word wider than the width its text wraps to, cut across two lines |
+| `unattached-ref` | warning | a ref the scene made that no node takes |
+| `hidden-target` | warning | a timeline moves a node that is never visible |
+| `unsupported` | error | a feature the SVG backend can't draw |
+| `approximate` | warning | a feature the SVG backend draws a little differently (blur and shadow) |
+| `compile-warning` | warning | a warning from writing an SVG string; only `svjeez check` |
 
-Units are the scene's viewBox units. Each rule reports once per place in the source, so a component's twenty labels make one line ending "and 19 more written here".
+Fix errors first. For a warning, look at a frame at the times it names; fix the scene unless the frame shows what you meant. The browser pass adds what only pixels show, measured at 0, seven times across the loop, just before the end and at the scene's keys (`--times` to choose): elements off the canvas, text over text, motion that changes nothing, and jumps at the loop seam. It needs `playwright-core` and `npx playwright-core install chromium-headless-shell`.
 
-## Sources
+## What check can't see
 
-For a module, `svjeez check` renders the scene with every element marked with the line that wrote it. The scene's own `render()` call does this; you need not pass `sources`. An element built inside a library component (a chart, a diagram, `code()`) points at the line of the scene that called it. The places come from the call stack, so a bundled or minified scene reports no lines, and under Bun an element a small arrow function returns may point at the line that called it. For an `.svg`, or from `checkScene()`, render with `render({ sources: true })` under the development JSX runtime to get them.
-
-## In code
-
-```ts
-import { checkScene } from "svjeez/frames";
-
-const { duration, times, findings } = await checkScene(svg, { times: [0, 1, 2] });
-const errors = findings.filter((found) => found.severity === "error");
-```
-
-It takes the options of `renderFrames` that set up the page (`colorScheme`, `scale`, `background`, `executablePath`) and `times`. It throws `checkScene() needs finite, non-negative times, got …` and `checkScene() needs at least one time, got an empty list.` before it starts a browser.
-
-## What it cannot see
-
-It reads boxes, opacity and computed style, never pixels. A clean run is not a finished scene. Use a contact sheet for:
-
-- Color and contrast, legibility in both color schemes, and whether the picture reads well.
-- Anything a `mask` hides, and occlusion: a shape drawn over text, or text in the same color as what is under it. Text under a mask is skipped by `overlap` and `loop-seam`.
-- Timing that falls between the measured times. Rules that follow a value across the loop sample it 96 times; the box rules see only the measured times. Pass `--times` at each beat when a fault hides between them.
-- Turning. `loop-seam` compares each element's middle and size, not its angle, so a wheel back at an equal angle passes, and so does a needle that should have come back and did not.
-- Stepped and jittering motion at the seam, which is skipped because it jumps anyway. A `ease.hold` blink or wiggle that cycles a whole number of times in the loop (two or more) is not a seam at all, and is skipped on purpose.
-- A whole scene that builds up and cuts back to its start. That is a choice, so parts that vanish or pop in at the seam are not reported. Look at the last frame and the first, and fade out before the end, or pass `render({ loop: false })`, when the cut is not wanted.
-- Whether the right thing moves. `static` only knows that nothing changed.
+Whether the picture says what you meant: a label beside the wrong bar, a beat too fast to read, colors that clash, a step that happens off cue. Render frames and look ([render.md](render.md)).
