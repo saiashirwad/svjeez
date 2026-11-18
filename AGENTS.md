@@ -38,7 +38,7 @@ bun run render-png <file> --sheet  # svjeez frames: frames/ with sheet.png (--ti
 bun run svjeez <command> ...      # any CLI command from source: svg, dev, frames, check, video, skill
 ```
 
-`examples/` has its own `build`, `dev`, `render-png`, `render-video`, `test`, `test:node` and `typecheck`. `bun run build [name ...]` there writes `examples/dist/`, as in `bun run build readme/basic`. Its `tsconfig.json` maps `svjeez` to the library's `src/`, so the examples always run the source.
+`examples/` has its own `build`, `dev`, `render-png`, `render-video`, `test`, `test:node` and `typecheck`. `bun run build [name ...]` there writes `examples/dist/`, as in `bun run build readme/basic`. Its `tsconfig.json` maps `svjeez` to the library's `src/`, so the examples always run the source. `bun run test:browsers` there plays and seeks every SVG in `dist/` in Chromium, Firefox and WebKit and compares each engine to Chromium; locally it skips an engine that isn't installed, and in CI it fails. Install them inside `packages/svjeez/` with `bun run playwright-core install --with-deps chromium-headless-shell firefox webkit`.
 
 Frame rendering needs Chromium once per machine: `bunx playwright-core install chromium-headless-shell`.
 
@@ -47,16 +47,18 @@ Frame rendering needs Chromium once per machine: `bunx playwright-core install c
 Paths in this section are relative to `packages/svjeez/`.
 
 - The entries: `src/index.ts` is `svjeez`, what a scene imports. `src/tools.ts` is `svjeez/tools`, what tools need and authors don't: the SVG backend (`svg.emit`), `inspect`, `describe`, `boxesOf`, `hitTest`, `placements`, `valueAt` and every type. `src/jsx-runtime.ts` and `src/jsx-dev-runtime.ts` build scene nodes; there are no lowercase tags. `frames.ts`, `page.ts` and `params.ts` are `svjeez/frames`, `svjeez/page` and `svjeez/params`.
-- `src/scene/` is the scene model. `nodes.ts` has the components, `values.ts`, `paint.ts` and `effects.ts` the geometry and paint values, `track.ts`, `recipes.ts`, `timeline.ts`, `spring.ts`, `morph.ts` and `derived.ts` time, and `layout.ts`, `arrow.ts`, `refs.ts` and `pin.ts` placement. `lower.ts` turns `scene(options, build)` into the model in `ir.ts`, where every node keeps its key, its source and its measured box. `svg.ts`, `svg-geometry.ts` and `svg-paint.ts` are the SVG backend: they turn the model into elements with lanes.
-- The emitter under `src/` writes what the backend hands it: `compile.ts` turns each element's lanes into CSS classes and keyframes (`css.ts`) or SMIL (`smil.ts`), resolves fonts and writes the reduced-motion still; `keys.ts` is keyframe math, `channels.ts` the values a lane carries, `svg.ts` the element tree and its serializer, and `render.ts` the root, validation (`validate.ts`) and the trace the CLI reads. `time.ts` has `Seconds` and `ease`. `render()` is internal: authors call `svg.emit`.
-- `src/font/` parses, measures, shapes and subsets fonts. `src/layout/box.ts` is the `Point` that `svjeez/params` uses.
-- `src/cli.ts` is the `svjeez` CLI, and `src/dev.ts` its `dev` server (node:http and fs.watch, no dependencies). `src/check.ts` and `src/check-page.ts` are `svjeez check`, and `src/restyle.ts` is `restyle` in `svjeez/page`. `src/frames.ts` and `src/cli.ts` rasterize frames. They and `src/page.ts`, the functions they run inside the page, are the only code that touches a browser.
+- `src/model/` is the scene model and its math, with nothing of any one target in it. `ir.ts` is the model: plain data that survives JSON, where every node keeps its key, its source and its measured box, and every backend reads only it. `lane.ts`, `curve.ts`, `steps.ts`, `sample.ts` and `fold.ts` are values over time, `geometry.ts`, `painted.ts` and `reach.ts` outlines and boxes, and `time.ts` has `Seconds` and `ease`.
+- `src/author/` is what scene authors call and its lowering. `nodes.ts` has the components, `values.ts`, `paint.ts`, `effects.ts` and `holes.ts` the geometry and paint values, `track.ts`, `recipes.ts`, `timeline.ts`, `span.ts`, `spring.ts`, `morph.ts` and `derived.ts` time, `layout.ts`, `arrow.ts`, `refs.ts`, `pin.ts` and `settle.ts` placement, and `text.ts`, `runs.ts` and `picture.ts` text and images. `lower.ts` turns `scene(options, build)` into the model.
+- `src/svg/` is the SVG backend and the emitter it writes through. `svg.ts`, `svg-geometry.ts` and `svg-paint.ts` turn the model into elements with lanes, and `backend.ts` says what a backend can draw. `compile.ts` turns each element's lanes into CSS classes and keyframes (`css.ts`) or SMIL (`smil.ts`), resolves fonts and writes the reduced-motion still; `keys.ts` is keyframe math, `channels.ts` the values a lane carries, `tree.ts` the element tree and its serializer, and `render.ts` the root, validation (`validate.ts`) and the trace the CLI reads (`traced.ts`). `render()` is internal: authors call `svg.emit`.
+- `src/check/` reads a built scene: `inspect.ts`, `describe.ts`, `boxes.ts` (`boxesOf`, `hitTest`, `placements`, `valueAt`) and `survey.ts`, and `check.ts` and `check-page.ts`, which are `svjeez check`.
+- `src/font/` parses, measures, shapes and subsets fonts.
+- `src/cli.ts` is the `svjeez` CLI, and `src/dev.ts` its `dev` server (node:http and fs.watch, no dependencies). `src/restyle.ts` is `restyle` in `svjeez/page`. `src/frames.ts` and `src/cli.ts` rasterize frames. They, `src/check/check-page.ts` and `src/page.ts`, the functions they run inside the page, are the only code that touches a browser.
 - Nothing under `src/` is unreachable from the entries. When a feature goes, its emitter path goes with it.
 - `skills/svjeez/` holds the scene-writing skill, its references and its examples, published with the package. `tests/skill.test.ts` renders the examples, checks that every `examples/` and `references/` path the skill mentions exists, and checks that every runtime error in the error table appears in `src/`. Quote an error there with `…` for each value the message fills in. The examples carry their own JSX pragmas so they compile wherever `svjeez skill --install` puts them.
 
 ## Packages
 
-Each package's source explains its own internals. These are the rules that aren't visible from one file:
+These are the rules that aren't visible from one file:
 
 - `@svjeez/vite` and `@svjeez/astro` never import svjeez. Scenes run in a Vite environment of their own that compiles JSX as svjeez. Run `bun run test` in `packages/vite/` to build and serve the React app in `test/app/`, and `bun run dev` there to open it.
 - `@svjeez/fonts` is the only package that touches the network. The examples load every font through it, and the library's own tests read the TTFs in `packages/svjeez/tests/fixtures/`.
@@ -75,6 +77,7 @@ Each package's source explains its own internals. These are the rules that aren'
 - Keep what an editor needs: every node's key, source and measured box, `boxesOf`, `hitTest`, `placements`, `valueAt`, `inspect` and `describe` with their tests, and the backend's `sources` option (`data-key` and `data-source`). The live editor will be rebuilt on them.
 - Every target means the same thing: a scene draws the same picture through CSS, SMIL and the reduced-motion still, and a backend that can't draw something says so, never silently differs. Don't raise the budgets in `examples/tests/scene-size.test.ts`; prove visual changes with frames.
 - No message an author sees names SVG or CSS internals: say what to change in the scene, in its own words.
+- Write no comments in code. Keep only what a tool requires (`// SAFETY:` lines, `@ts-expect-error` and similar directives, licence headers, JSX pragmas in copied examples). Author knowledge lives in the skill, repo rules here.
 
 ## Releasing
 
