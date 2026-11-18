@@ -71,18 +71,9 @@ Open **Timeline** in the dev preview to inspect clips and motion tracks. **Check
 Each package runs while the scene compiles, so the SVG still carries no script.
 
 - [`svjeez`](https://github.com/saiashirwad/svjeez/tree/main/packages/svjeez): the compiler, timelines, recipes, text, ink and the CLI
-- [`@svjeez/charts`](https://github.com/saiashirwad/svjeez/tree/main/packages/charts): bar, line and area charts
-- [`@svjeez/geo`](https://github.com/saiashirwad/svjeez/tree/main/packages/geo): maps, routes and globes from GeoJSON and TopoJSON
-- [`@svjeez/diagrams`](https://github.com/saiashirwad/svjeez/tree/main/packages/diagrams): flowcharts, sequence diagrams, state machines, trees and swimlanes
-- [`@svjeez/mermaid`](https://github.com/saiashirwad/svjeez/tree/main/packages/mermaid): Mermaid text as svjeez diagrams
-- [`@svjeez/math`](https://github.com/saiashirwad/svjeez/tree/main/packages/math): TeX, coordinate planes and plots
-- [`@svjeez/code`](https://github.com/saiashirwad/svjeez/tree/main/packages/code): Shiki highlighting in the scene's theme
-- [`@svjeez/dom`](https://github.com/saiashirwad/svjeez/tree/main/packages/dom): real HTML, React and Svelte, filmed in Chromium
 - [`@svjeez/fonts`](https://github.com/saiashirwad/svjeez/tree/main/packages/fonts): Google Fonts by name, subset and embedded
-- [`@svjeez/icons`](https://github.com/saiashirwad/svjeez/tree/main/packages/icons): Tabler and Lucide icons
 - [`@svjeez/video`](https://github.com/saiashirwad/svjeez/tree/main/packages/video): MP4 or WebM from a scene
 - [`@svjeez/vite`](https://github.com/saiashirwad/svjeez/tree/main/packages/vite), [`@svjeez/astro`](https://github.com/saiashirwad/svjeez/tree/main/packages/astro): scenes compiled into a Vite app or Astro site
-- [`@svjeez/live`](https://github.com/saiashirwad/svjeez/tree/main/packages/live), [`@svjeez/react`](https://github.com/saiashirwad/svjeez/tree/main/packages/react), [`@svjeez/svelte`](https://github.com/saiashirwad/svjeez/tree/main/packages/svelte): the scene editor, with a control on every value
 
 ## Contributing
 

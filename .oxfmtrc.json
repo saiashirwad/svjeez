@@ -3,19 +3,14 @@
   "embeddedLanguageFormatting": "off",
   "proseWrap": "preserve",
   "ignorePatterns": [
-    "packages/icons/src/lucide.ts",
-    "packages/icons/src/tabler.ts",
     ".claude/**",
     ".opencode/**",
     ".preview/**",
     "**/*.astro",
     "**/*.md",
     "packages/svjeez/tests/types.check.tsx",
-    "packages/diagrams/test/types.check.tsx",
     "**/dist/**",
-    "**/snapshots.json",
     "**/package-dist/**",
-    "**/.svelte-kit/**",
     "tools/oxlint/anti-slop/**"
   ]
 }
