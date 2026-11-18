@@ -323,7 +323,9 @@ describe("springs, arrows and parts", () => {
           </Group>
         );
       }),
-    ).toThrow('still.rewind() rewinds "still", but no timeline moves it or anything inside it.');
+    ).toThrow(
+      'still.rewind() rewinds <Group> "still", but no timeline moves it or anything inside it.',
+    );
   });
 
   test("cascade() returns as many spans as it is asked for, typed as a tuple", () => {

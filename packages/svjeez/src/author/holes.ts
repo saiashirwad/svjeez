@@ -123,7 +123,7 @@ export const moved = (geometry: Geometry, by: Vec): Outline => {
   const outline = outlineOf(geometry);
 
   if (!by.every((n) => Number.isFinite(n)))
-    throw new Error(`moved() needs a finite point to move by, got ${JSON.stringify(by)}.`);
+    throw new SceneError(`moved() needs a finite point to move by, got ${JSON.stringify(by)}.`);
 
   switch (outline.kind) {
     case "line":

@@ -1,5 +1,6 @@
 import { named, namedAt, whereOf } from "./names";
-import { SceneError } from "../model/scene-error";
+import { SceneError, located } from "../model/scene-error";
+
 import { EPSILON, type Seconds } from "../model/time";
 import type { Animated, Box, Layer, SceneNode, Vec } from "../model/ir";
 import { atRest, isLane } from "../model/lane";
@@ -10,6 +11,14 @@ import { blendNumber, blendVec, breaksOf, follow, laneFrom, valueAt } from "../m
 import { isTrack } from "./track";
 import { lookOf, paintedBoxOf } from "../model/painted";
 import { PLACE_LIST, PLACES, homed, homeOf, pinned, type TextAnchorPlace } from "./pin";
+
+const laidOut = <T>(key: string, run: () => T): T => {
+  try {
+    return run();
+  } catch (error) {
+    throw error instanceof Error ? located(error, whereOf(key)) : error;
+  }
+};
 
 export interface Size {
   readonly width?: number;
@@ -421,9 +430,11 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
         measure(child);
       }
 
-      const { slots, box, sizes } = asked.arrange(
-        d.children.map((child) => child.box),
-        `"${d.node.key}"`,
+      const { slots, box, sizes } = laidOut(d.node.key, () =>
+        asked.arrange(
+          d.children.map((child) => child.box),
+          named(d.node.key),
+        ),
       );
 
       d.children.forEach((child, i) => {
@@ -699,9 +710,11 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
         );
     }
 
-    const { slots, box, sizes } = asked.arrange(
-      children.map((child) => child.box),
-      `"${node.key}"`,
+    const { slots, box, sizes } = laidOut(node.key, () =>
+      asked.arrange(
+        children.map((child) => child.box),
+        named(node.key),
+      ),
     );
 
     const { settle: _arranged, backdrop, ...kept } = note!;

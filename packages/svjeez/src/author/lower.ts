@@ -862,8 +862,9 @@ const sized = (ctx: Ctx, props: Omit<Common, "anchor">, node: SceneNode): SceneN
     const placed = outsider(child, ctx.notes);
 
     if (placed !== undefined)
-      throw new Error(
-        `The ${what} of "${node.key}" is sized by its box, but "${placed}" inside it is placed by an anchor, a timeline's move to an anchor, or as an arrow's end, so its box isn't known yet. Size the ${what} with numbers, or move that node out.`,
+      throw new SceneError(
+        `The ${what} of ${named(node.key)} is sized by its box, but ${named(placed)} inside it is placed by an anchor, a timeline's move to an anchor, or as an arrow's end, so its box isn't known yet.`,
+        `Size the ${what} with numbers, or move that node out.`,
       );
   }
 
@@ -927,8 +928,10 @@ const lifted = (container: SceneElement & { readonly type: "group" }): MorphElem
   const label = container.settle?.label ?? "container";
 
   if (found.some((other) => !alike(other, first)))
-    throw new Error(
-      `A ${label} holds morphs on different spans or with different options, and it reflows with one morph at a time. Give them the same states count, spans and options, or put each in a ${label} of its own.`,
+    throw new SceneError(
+      `A ${label} holds morphs on different spans or with different options, and it reflows with one morph at a time.`,
+      `Give them the same states count, spans and options, or put each in a ${label} of its own.`,
+      { node: label, ...(writtenAt(container) && { source: writtenAt(container)! }) },
     );
 
   const pinned = (s: number) => {

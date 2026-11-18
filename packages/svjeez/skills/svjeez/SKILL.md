@@ -237,9 +237,12 @@ Runtime errors. `…` stands for a value the message fills in.
 | `morph() matches nodes by key, and … the states have … nodes with no key, so they would pair up by their place.` | `key` every node that comes, goes or changes |
 | `morph() can't turn the node keyed "…" from a … into a …: a node keeps its kind across states.` | another key for the other kind |
 | `… lays out …, which a morph() resizes, brings in or takes away inside a <Sequence>, so the … can't make room for it.` | put the container inside the `<Sequence>` |
-| `The … … is … …, but its children… and padding need ….` | a larger `width` or `height`, or leave it out |
+| `… is … …, but its children… and padding need ….` | a larger `width` or `height`, or leave it out |
+| `A child of … is keyed "background", which names the container's own fill and stroke.` | give the child another key |
+| `… rewinds …, but no timeline moves it or anything inside it.` | move it or a part of it before rewinding, or drop the rewind |
+| `A … holds morphs on different spans or with different options, and it reflows with one morph at a time.` | the same states, spans and options for every morph in one container |
 | `… is given a spring for its length and a curve as well.` | pass the spring once, in place of the length |
-| `The … of "…" is sized by its box, but "…" inside it is placed by an anchor…` | size the clip with numbers, or move that node out |
+| `The … of … is sized by its box, but … inside it is placed by an anchor…` | size the clip with numbers, or move that node out |
 | `subtract() cuts holes that lie wholly inside the base or wholly outside it, and … crosses or touches the base's edge.` | draw that outline with `path()` |
 | `… has …, which spreads over the node's box, and this paint has no box to spread over.` | give the gradient points: `linear({ from, to, stops })` |
 

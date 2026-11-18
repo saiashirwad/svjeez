@@ -384,7 +384,7 @@ describe("containers that draw themselves", () => {
 
     expect(placed(find(end, "col/a"))).toEqual({ x: 0, y: 40, width: 10, height: 10 });
     expect(() => row(30)).toThrow(
-      'The <Stack> "row" is 30 wide, but its children, gaps and padding need 40. Make it wider, or leave out width so it fits them.',
+      '<Stack> "row" is 30 wide, but its children, gaps and padding need 40. Make it wider, or leave out width so it fits them.',
     );
   });
 
@@ -466,7 +466,7 @@ describe("containers that draw themselves", () => {
           <Shape fill="#000000" key="background" geometry={rect(10, 10)} />
         </Stack>
       )),
-    ).toThrow('A child of "s" is keyed "background"');
+    ).toThrow('A child of <Stack> "s" is keyed "background"');
   });
 
   test("the background follows the container's own motion and is drawn first in the SVG", () => {

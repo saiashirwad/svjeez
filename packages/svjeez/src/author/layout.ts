@@ -47,7 +47,7 @@ const run = (sizes: readonly number[], from: number, space: number) => {
 
 const size = (value: number | undefined, what: string): number | undefined => {
   if (value !== undefined && !(value >= 0 && Number.isFinite(value)))
-    throw new Error(`${what} needs a finite length of 0 or more, got ${value}.`);
+    throw new SceneError(`${what} needs a finite length of 0 or more, got ${value}.`);
 
   return value;
 };
@@ -57,7 +57,7 @@ const paint = (label: string, { fill, stroke, radius }: Backdrop, padding: numbe
   const line = stroke === undefined ? 0 : (stroke.width ?? 1);
 
   if (!(line >= 0 && Number.isFinite(line)))
-    throw new Error(`${label} needs a stroke width of 0 or more, got ${line}.`);
+    throw new SceneError(`${label} needs a stroke width of 0 or more, got ${line}.`);
 
   return {
     backdrop: {
@@ -79,8 +79,9 @@ const fits = (
   if (given === undefined) return need;
 
   if (given < need - EPSILON)
-    throw new Error(
-      `The ${label} ${where} is ${given} ${side}, but its children${label === "<Stack>" ? ", gaps" : ""} and padding need ${Math.ceil(need * 100) / 100}. Make it ${side === "wide" ? "wider" : "taller"}, or leave out ${side === "wide" ? "width" : "height"} so it fits them.`,
+    throw new SceneError(
+      `${where} is ${given} ${side}, but its children${label === "<Stack>" ? ", gaps" : ""} and padding need ${Math.ceil(need * 100) / 100}.`,
+      `Make it ${side === "wide" ? "wider" : "taller"}, or leave out ${side === "wide" ? "width" : "height"} so it fits them.`,
     );
 
   return given;

@@ -200,8 +200,9 @@ const timed = (over: Over, curve: Curve | undefined, verb: string): readonly [Se
   if (!(over instanceof Spring)) return [length(over, verb), curve ?? DEFAULT_CURVE];
 
   if (curve !== undefined)
-    throw new Error(
-      `${verb} is given a spring for its length and a curve as well. A spring sets its own length: pass it once, as in ${verb.slice(0, -1)}…, spring).`,
+    throw new SceneError(
+      `${verb} is given a spring for its length and a curve as well.`,
+      `A spring sets its own length: pass it once, as in ${verb.slice(0, -1)}…, spring).`,
     );
 
   return [over.settle, over];
@@ -797,8 +798,10 @@ export class Cues {
       const owner = this.#keyOf(item.target, notes.refs);
 
       if (!this.#met.has(item) && owner !== undefined)
-        throw new Error(
-          `${item.verb} rewinds "${owner}", but no timeline moves it or anything inside it.`,
+        throw new SceneError(
+          `${item.verb} rewinds ${named(owner)}, but no timeline moves it or anything inside it.`,
+          "Move it, or something inside it, before the rewind, or drop the rewind.",
+          { ...whereOf(owner), ...(item.source && { source: item.source }) },
         );
     }
 

@@ -672,7 +672,9 @@ describe("clips and masks sized by the node's box", () => {
           </Group>
         </Group>
       )),
-    ).toThrow('The clip of "g" is sized by its box, but "g/dot" inside it is placed by an anchor');
+    ).toThrow(
+      'The clip of <Group> "g" is sized by its box, but <Shape> "dot" inside it is placed by an anchor',
+    );
   });
 });
 

@@ -27,10 +27,15 @@ export const remember = (
 export const sourced = (from: SceneElement, to: SceneElement): SceneElement => {
   const source = written.get(from);
 
+  const component = components.get(from);
+
   if (source) written.set(to, source);
+
+  if (component) components.set(to, component);
 
   return to;
 };
+
 export const writtenAt = (element: SceneElement): Source | undefined => written.get(element);
 
 export const componentOf = (element: SceneElement): string | undefined => components.get(element);
