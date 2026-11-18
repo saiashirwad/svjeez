@@ -1,5 +1,4 @@
-import { place, type JsxSource } from "./sources";
-import type { SvgNode } from "../svg/tree";
+import type { JsxSource } from "./sources";
 import type { SceneNode, Source } from "../model/ir";
 import type { SceneElement } from "./nodes";
 
@@ -69,22 +68,3 @@ export const placedLike = <N extends SceneNode>(node: N, from: SceneNode): N => 
 
   return node;
 };
-
-export const sourceText = ({ file, line, column }: Source): string =>
-  place({
-    fileName: file,
-    lineNumber: line,
-    ...(column !== undefined && { columnNumber: column }),
-  });
-
-export const labelled = (node: SceneNode, out: SvgNode): SvgNode =>
-  out.kind === "element"
-    ? {
-        ...out,
-        attrs: {
-          ...out.attrs,
-          "data-key": node.key,
-          ...(node.source && { "data-source": sourceText(node.source) }),
-        },
-      }
-    : out;

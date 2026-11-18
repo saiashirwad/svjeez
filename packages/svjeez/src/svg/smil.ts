@@ -65,15 +65,13 @@ const smilPoints = (keys: readonly Key[], channel: Channel) => {
   return { points, discrete };
 };
 
-export const smilAttributes = (
+const smilAttributes = (
   attribute: string,
-  channel: Channel,
-  keys: readonly Key[],
+  { points, discrete }: ReturnType<typeof smilPoints>,
   period: Seconds,
   duration: Seconds,
   repeats?: number,
 ) => {
-  const { points, discrete } = smilPoints(keys, channel);
   const spline = !discrete && points.slice(0, -1).some((point) => point.spline !== "0 0 1 1");
 
   return {
@@ -166,6 +164,14 @@ const windowed = (
   ];
 };
 
+export const windowEnd = (nodes: readonly SvgNode[]): string | undefined => {
+  const [first] = nodes;
+
+  return first?.kind === "element" && first.attrs["data-loop"] !== undefined
+    ? String(first.attrs.values).split(";").at(-1)
+    : undefined;
+};
+
 export const animate = (
   canvas: Canvas,
   attribute: string,
@@ -181,7 +187,8 @@ export const animate = (
   const channel = lane.channels[0] as Channel;
   const duration = lane.snapped / canvas.playbackRate;
 
-  const { points, discrete } = smilPoints(lane.keys, channel);
+  const motion = smilPoints(lane.keys, channel);
+  const { points, discrete } = motion;
   const first = formatValue(points[0]!.value);
 
   if (points.every((point) => formatValue(point.value) === first)) return [];
@@ -197,8 +204,7 @@ export const animate = (
       "animate",
       smilAttributes(
         attribute,
-        channel,
-        lane.keys,
+        motion,
         lane.period,
         duration,
         canvas.loop ? undefined : Math.round(canvas.duration / lane.snapped),

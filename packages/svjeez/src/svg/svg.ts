@@ -5,10 +5,10 @@ import { num } from "../model/format";
 import type { Key as Held } from "./keys";
 import { DEFAULT_EASE, EPSILON, isHold } from "../model/time";
 import { render } from "./render";
-import { element, type AttrValue, type SvgNode } from "./tree";
+import { element, type AttrValue, type Element, type SvgNode } from "./tree";
 import { admit, type Backend, type Feature, type Support } from "../model/backend";
 import { foldLayers } from "../model/fold";
-import { drawMoving, type GeometrySlot } from "./svg-geometry";
+import { drawMoving, isStraight, type GeometrySlot } from "./svg-geometry";
 import type {
   Animated,
   Box,
@@ -30,7 +30,7 @@ import type {
   Vec,
 } from "../model/ir";
 import { curveLength, isCurved } from "../model/curve";
-import { labelled } from "../author/identity";
+import { placeOf } from "../model/scene-error";
 import { isLane, mapLane } from "../model/lane";
 import { same } from "../model/steps";
 import { homed } from "../author/pin";
@@ -90,27 +90,11 @@ interface Ctx {
   readonly sources: boolean;
   readonly around: Partial<Face>;
   readonly defs: Defs;
-  frame: Vec;
-  key: string;
 }
 
 const isColor = (paint: Paint): paint is Color => !isGradient(paint);
 
 const pt = ([x, y]: Vec): string => `${num(x)} ${num(y)}`;
-
-const isStraight = (from: Vec, [c1, c2, to]: Contour["curves"][number]): boolean =>
-  [
-    [c1, 1 / 3],
-    [c2, 2 / 3],
-  ].every(([control, share]) => {
-    // SAFETY: each entry above is a control point paired with its share of the way, in that order.
-    const [point, u] = [control as Vec, share as number];
-
-    return (
-      Math.abs(from[0] + (to[0] - from[0]) * u - point[0]) < 1e-6 &&
-      Math.abs(from[1] + (to[1] - from[1]) * u - point[1]) < 1e-6
-    );
-  });
 
 const contourData = (contour: Contour): string => {
   let from = contour.start;
@@ -131,19 +115,22 @@ const contourData = (contour: Contour): string => {
   return contour.closed ? `${d}Z` : d;
 };
 
-const roundedRect = ([w, h]: Vec, [tl, tr, br, bl]: readonly number[]): string => {
+const roundedRect = ({
+  size: [w, h],
+  radius: [tl, tr, br, bl],
+}: Extract<Geometry, { kind: "rect" }>): string => {
   const corner = (r: number, x: number, y: number): string =>
     r > 0 ? `A${num(r)} ${num(r)} 0 0 1 ${num(x)} ${num(y)}` : "";
 
   return [
-    `M${num(tl!)} 0H${num(w - tr!)}`,
-    corner(tr!, w, tr!),
-    `V${num(h - br!)}`,
-    corner(br!, w - br!, h),
-    `H${num(bl!)}`,
-    corner(bl!, 0, h - bl!),
-    `V${num(tl!)}`,
-    corner(tl!, tl!, 0),
+    `M${num(tl)} 0H${num(w - tr)}`,
+    corner(tr, w, tr),
+    `V${num(h - br)}`,
+    corner(br, w - br, h),
+    `H${num(bl)}`,
+    corner(bl, 0, h - bl),
+    `V${num(tl)}`,
+    corner(tl, tl, 0),
     "Z",
   ].join("");
 };
@@ -170,7 +157,7 @@ const outline = (geometry: Geometry, at: Vec): Drawn => {
       if (geometry.radius.some((radius) => radius !== r))
         return {
           tag: "path",
-          attrs: { d: roundedRect(geometry.size, geometry.radius), ...moved(at) },
+          attrs: { d: roundedRect(geometry), ...moved(at) },
           placed: false,
         };
 
@@ -488,8 +475,8 @@ const painted = (
   paint: Animated<Paint> | undefined,
   attrs: Record<string, AttrValue>,
   lanes: CssLane[],
-  shift: Vec = ctx.frame,
-  key = ctx.key,
+  shift: Vec,
+  key: string,
 ): void => {
   if (paint === undefined) {
     if (slot === "fill") attrs.fill = "none";
@@ -781,16 +768,14 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
   if (single)
     return { drawn, children: line?.runs[0] ? [{ kind: "text", value: line.runs[0].text }] : [] };
 
-  const glyphs = node.lines.flatMap((each) => each.runs);
-
   if (
     node.lines.every((each) => each.runs.length === 1) &&
-    glyphs.every((run) => [...run.text].length === 1 && lookOf(run) === lookOf(base!))
+    runs.every((run) => base && [...run.text].length === 1 && lookOf(run) === lookOf(base))
   ) {
-    drawn.attrs.x = glyphs.map((run) => num(at[0] + run.at[0])).join(" ");
-    drawn.attrs.y = glyphs.map((run) => num(at[1] + run.at[1])).join(" ");
+    drawn.attrs.x = runs.map((run) => num(at[0] + run.at[0])).join(" ");
+    drawn.attrs.y = runs.map((run) => num(at[1] + run.at[1])).join(" ");
 
-    return { drawn, children: [{ kind: "text", value: glyphs.map((run) => run.text).join("") }] };
+    return { drawn, children: [{ kind: "text", value: runs.map((run) => run.text).join("") }] };
   }
 
   let first = true;
@@ -963,8 +948,6 @@ const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
 
   const at: Vec = isLane(node.at) ? [0, 0] : node.at;
 
-  ctx.frame = at;
-  ctx.key = node.key;
   const lanes: CssLane[] = [];
   let drawn: Drawn;
   let children: SvgNode[] = [];
@@ -1083,12 +1066,12 @@ const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
   const [inner, ...outer] = shells;
   const innerLanes = [...lanes, ...inner!.lanes];
 
-  const first: SvgNode = {
+  const first: Element = {
     ...element(drawn.tag, { ...drawn.attrs, ...dress(inner!) }, children),
     ...(innerLanes.length > 0 && { lanes: innerLanes }),
   };
 
-  const out = outer.reduce<SvgNode>(
+  const out = outer.reduce<Element>(
     (content, own) => ({
       ...element("g", dress(own), [content]),
       ...(own.lanes.length > 0 && { lanes: own.lanes }),
@@ -1096,10 +1079,17 @@ const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
     first,
   );
 
-  if (ctx.sources) return labelled(node, out);
+  if (ctx.sources)
+    return {
+      ...out,
+      attrs: {
+        ...out.attrs,
+        "data-key": node.key,
+        ...(node.source && { "data-source": placeOf(node.source) }),
+      },
+    };
 
   return node.kind === "group" &&
-    out.kind === "element" &&
     out.tag === "g" &&
     out.lanes === undefined &&
     Object.keys(out.attrs).length === 0
@@ -1177,8 +1167,6 @@ export const svg: Backend<string, SvgOptions> = {
         lane: (slot, lane, values, route) => cssLane(ctx, slot, lane, values, { route }),
         draw: (node) => emitNode(ctx, node),
       },
-      frame: [0, 0],
-      key: "",
     };
 
     const names = Object.keys(scene.symbols);

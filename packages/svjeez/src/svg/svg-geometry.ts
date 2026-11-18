@@ -288,19 +288,17 @@ const blendable = (lane: Lane<Geometry>, key: string): Lane<Geometry> => {
 
 type Command = "" | "l" | "h" | "v" | "c";
 
-const isStraight = (from: Vec, [c1, c2, to]: Cubic): boolean =>
-  [
-    [c1, 1 / 3],
-    [c2, 2 / 3],
-  ].every(([control, share]) => {
-    // SAFETY: each entry above is a control point paired with its share of the way, in that order.
-    const [point, u] = [control as Vec, share as number];
-
-    return (
+export const isStraight = (from: Vec, [c1, c2, to]: Cubic): boolean =>
+  (
+    [
+      [c1, 1 / 3],
+      [c2, 2 / 3],
+    ] as const
+  ).every(
+    ([point, u]) =>
       Math.abs(from[0] + (to[0] - from[0]) * u - point[0]) < 1e-6 &&
-      Math.abs(from[1] + (to[1] - from[1]) * u - point[1]) < 1e-6
-    );
-  });
+      Math.abs(from[1] + (to[1] - from[1]) * u - point[1]) < 1e-6,
+  );
 
 const isPoint = (from: Vec, curve: Cubic): boolean =>
   curve.every(
@@ -363,7 +361,7 @@ const writeData = (
     const own = commands[c]!;
     const at: [number, number] = [round(contour.start[0]), round(contour.start[1])];
 
-    const step = ([x, y]: Vec): string[] => [
+    const step = ([x, y]: Vec): [string, string] => [
       num(round(x) - at[0], places),
       num(round(y) - at[1], places),
     ];
@@ -379,12 +377,12 @@ const writeData = (
 
       d +=
         command === "c"
-          ? `c${joined([...step(curve[0]), ...step(curve[1]), dx!, dy!])}`
+          ? `c${joined([...step(curve[0]), ...step(curve[1]), dx, dy])}`
           : command === "h"
             ? `h${dx}`
             : command === "v"
               ? `v${dy}`
-              : `l${joined([dx!, dy!])}`;
+              : `l${joined([dx, dy])}`;
       [at[0], at[1]] = [round(to[0]), round(to[1])];
     });
 

@@ -6,6 +6,7 @@ import { matched, mixGeometry, outlineBoxOf } from "../model/geometry";
 import { componentOf, identified, sourced, writtenAt } from "./identity";
 import { entryOf, named, nameNode, naming, quoted, whereOf, wordsOf, type Named } from "./names";
 import { SceneError, located } from "../model/scene-error";
+import { tagOf } from "../model/naming";
 import type {
   Animated,
   Box,
@@ -770,14 +771,6 @@ const lowered = (
   }
 };
 
-const TAGS = {
-  group: "Group",
-  shape: "Shape",
-  text: "Text",
-  image: "Image",
-  instance: "Instance",
-} as const;
-
 const nameFor = (given: NodeElement, name: string | undefined, parent: string): Named => {
   const above = parent ? entryOf(parent) : undefined;
   const component = componentOf(given);
@@ -788,7 +781,7 @@ const nameFor = (given: NodeElement, name: string | undefined, parent: string): 
       short: name === undefined ? above.short : `"${name}"`,
       ...(above.source && { source: above.source }),
     };
-  const tag = `<${component ?? TAGS[given.type]}>`;
+  const tag = component === undefined ? tagOf(given.type) : `<${component}>`;
   const words = given.type === "text" ? wordsOf(given.props.children).trim() : "";
   const written = writtenAt(given);
 
