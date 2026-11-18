@@ -3,7 +3,7 @@
 Load Google Fonts by family name for measuring text, drawing glyph outlines or embedding font data in an SVG.
 
 ```sh
-npm i -D @svjeez/fonts svjeez
+npm i -D @svjeez/fonts@next svjeez@next
 ```
 
 ```ts
@@ -21,4 +21,4 @@ Pass a font to `<Text font={…}>`. Weight defaults to 400 and style to normal. 
 
 A build downloads a face on cache miss. Set `SVJEEZ_FONTS_CACHE` to share a cache in CI. It otherwise uses `$XDG_CACHE_HOME/svjeez/fonts` or `~/.cache/svjeez/fonts`.
 
-[API reference](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/images-fonts.md)
+[API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/images-fonts.md)

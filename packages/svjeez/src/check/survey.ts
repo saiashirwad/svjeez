@@ -21,6 +21,7 @@ import { isLane, mapLane } from "../model/lane";
 import { breaksOf, segmentAt, unrolled } from "../model/sample";
 import { same } from "../model/steps";
 import { nodeName } from "../model/naming";
+import { walkScene } from "../model/walk";
 
 export interface Entry {
   readonly node: SceneNode;
@@ -56,16 +57,9 @@ export const countAt = (count: NonNullable<Authored["count"]>, t: Seconds): stri
 export const sourcesOf = (scene: Scene): Map<string, Source> => {
   const out = new Map<string, Source>();
 
-  const visit = (node: SceneNode): void => {
+  walkScene(scene, (node) => {
     if (node.source) out.set(node.key, node.source);
-
-    if (node.kind === "group") node.children.forEach(visit);
-
-    if (node.mask) visit(node.mask);
-  };
-
-  visit(scene.root);
-  Object.values(scene.symbols).forEach(visit);
+  });
 
   return out;
 };
@@ -73,16 +67,9 @@ export const sourcesOf = (scene: Scene): Map<string, Source> => {
 export const namesOf = (scene: Scene): Map<string, string> => {
   const out = new Map<string, string>();
 
-  const visit = (node: SceneNode): void => {
+  walkScene(scene, (node) => {
     out.set(node.key, nodeName(node));
-
-    if (node.kind === "group") node.children.forEach(visit);
-
-    if (node.mask) visit(node.mask);
-  };
-
-  visit(scene.root);
-  Object.values(scene.symbols).forEach(visit);
+  });
 
   return out;
 };
@@ -245,16 +232,9 @@ export const shownOf = (hidden: readonly Stretch[], duration: Seconds): Stretch[
 export const lanesOf = (scene: Scene): Lane<unknown>[] => {
   const out: Lane<unknown>[] = [];
 
-  const visit = (node: SceneNode): void => {
+  walkScene(scene, (node) => {
     for (const { value } of valuesOf(node)) if (isLane(value)) out.push(value);
-
-    if (node.kind === "group") node.children.forEach(visit);
-
-    if (node.mask) visit(node.mask);
-  };
-
-  visit(scene.root);
-  Object.values(scene.symbols).forEach(visit);
+  });
 
   return out;
 };
@@ -285,8 +265,16 @@ export const momentsOf = (scene: Scene, extra: readonly Seconds[] = []): Seconds
   );
 };
 
-export const framesOf = (scene: Scene, times: readonly Seconds[]): Map<string, Placed>[] =>
-  times.map((t) => new Map(placements(scene, t).map((placed) => [placed.key, placed])));
+export interface SampledFrame {
+  readonly t: Seconds;
+  readonly frame: ReadonlyMap<string, Placed>;
+}
+
+export const frameAt = (scene: Scene, t: Seconds): SampledFrame["frame"] =>
+  new Map(placements(scene, t).map((placed) => [placed.key, placed]));
+
+export const framesOf = (scene: Scene, times: readonly Seconds[]): SampledFrame[] =>
+  times.map((t) => ({ t, frame: frameAt(scene, t) }));
 
 export const scaleOf = (m: Matrix): number => Math.sqrt(Math.abs(m[0] * m[3] - m[1] * m[2]));
 

@@ -1,4 +1,4 @@
-import { i16, name, required, table, u16, u32, type Sfnt } from "./sfnt";
+import { i16, name, required, requiredTable, table, u16, u32, type Sfnt } from "./sfnt";
 import type { Typesetter } from "./shape";
 
 class Writer {
@@ -317,9 +317,9 @@ export const subset = (
   });
 
   const copy = (tag: string): Uint8Array => {
-    const at = required(f, tag);
+    const { offset, length } = requiredTable(f, tag);
 
-    return Uint8Array.from(bytes.subarray(at, at + f.lengths.get(tag)!));
+    return Uint8Array.from(bytes.subarray(offset, offset + length));
   };
 
   const head = copy("head");

@@ -40,15 +40,9 @@ export interface TextLayout<S = Font> {
 
 const SHARE: Readonly<Record<TextAlign, number>> = { start: 0, center: 0.5, end: 1 };
 
-interface Part<S> {
-  readonly text: string;
-  readonly face: Font;
-  readonly style: S;
-}
-
 const isBlank = (text: string): boolean => /^\s+$/.test(text);
 
-const joined = <S>(parts: readonly Part<S>[], part: Part<S>): Part<S>[] => {
+const joined = <S>(parts: readonly TextPiece<S>[], part: TextPiece<S>): TextPiece<S>[] => {
   const last = parts.at(-1);
 
   if (part.text === "") return [...parts];
@@ -63,12 +57,13 @@ const joined = <S>(parts: readonly Part<S>[], part: Part<S>): Part<S>[] => {
     : [...parts, part];
 };
 
-const concat = <S>(parts: readonly Part<S>[], more: readonly Part<S>[]): Part<S>[] =>
-  more.reduce<Part<S>[]>(joined, [...parts]);
+const concat = <S>(parts: readonly TextPiece<S>[], more: readonly TextPiece<S>[]): TextPiece<S>[] =>
+  more.reduce<TextPiece<S>[]>(joined, [...parts]);
 
-const textOf = <S>(parts: readonly Part<S>[]): string => parts.map((part) => part.text).join("");
+const textOf = <S>(parts: readonly TextPiece<S>[]): string =>
+  parts.map((part) => part.text).join("");
 
-const trimmed = <S>(parts: readonly Part<S>[]): Part<S>[] => {
+const trimmed = <S>(parts: readonly TextPiece<S>[]): TextPiece<S>[] => {
   const out = [...parts];
 
   while (out.length > 0) {
@@ -86,8 +81,8 @@ const trimmed = <S>(parts: readonly Part<S>[]): Part<S>[] => {
   return out;
 };
 
-const tokens = <S>(paragraph: readonly Part<S>[]): Part<S>[][] => {
-  const out: Part<S>[][] = [];
+const tokens = <S>(paragraph: readonly TextPiece<S>[]): TextPiece<S>[][] => {
+  const out: TextPiece<S>[][] = [];
 
   for (const part of paragraph)
     for (const text of part.text.split(/(\s+)/)) {
@@ -104,11 +99,11 @@ const tokens = <S>(paragraph: readonly Part<S>[]): Part<S>[][] => {
 };
 
 const cutWord = <S>(
-  word: readonly Part<S>[],
-  fits: (parts: readonly Part<S>[]) => boolean,
-): Part<S>[][] => {
-  const pieces: Part<S>[][] = [];
-  let piece: Part<S>[] = [];
+  word: readonly TextPiece<S>[],
+  fits: (parts: readonly TextPiece<S>[]) => boolean,
+): TextPiece<S>[][] => {
+  const pieces: TextPiece<S>[][] = [];
+  let piece: TextPiece<S>[] = [];
 
   for (const part of word)
     for (const char of part.text) {
@@ -124,12 +119,12 @@ const cutWord = <S>(
 };
 
 const wrap = <S>(
-  paragraph: readonly Part<S>[],
-  fits: (parts: readonly Part<S>[]) => boolean,
-  cut: Set<readonly Part<S>[]>,
-): Part<S>[][] => {
-  const lines: Part<S>[][] = [];
-  let line: Part<S>[] = [];
+  paragraph: readonly TextPiece<S>[],
+  fits: (parts: readonly TextPiece<S>[]) => boolean,
+  cut: Set<readonly TextPiece<S>[]>,
+): TextPiece<S>[][] => {
+  const lines: TextPiece<S>[][] = [];
+  let line: TextPiece<S>[] = [];
 
   for (const token of tokens(paragraph)) {
     const next = concat(line, token);
@@ -156,8 +151,8 @@ const wrap = <S>(
   return [...lines, trimmed(line)];
 };
 
-const paragraphs = <S>(pieces: readonly TextPiece<S>[]): Part<S>[][] => {
-  const out: Part<S>[][] = [[]];
+const paragraphs = <S>(pieces: readonly TextPiece<S>[]): TextPiece<S>[][] => {
+  const out: TextPiece<S>[][] = [[]];
 
   for (const piece of pieces)
     piece.text.split(/\r?\n/).forEach((text, index) => {
@@ -191,13 +186,13 @@ export const layoutRuns = <S>(
   const { ascent, descent, lineGap } = base.metrics;
   const step = (lineHeight ?? ascent + descent + lineGap) * size;
 
-  const measure = (parts: readonly Part<S>[]): number =>
+  const measure = (parts: readonly TextPiece<S>[]): number =>
     parts.reduce((sum, part) => sum + part.face.measure(part.text, size), 0);
 
-  const fits = (parts: readonly Part<S>[]): boolean =>
+  const fits = (parts: readonly TextPiece<S>[]): boolean =>
     width === undefined || measure(parts) <= width;
 
-  const cut = new Set<readonly Part<S>[]>();
+  const cut = new Set<readonly TextPiece<S>[]>();
   const broken = paragraphs(pieces).flatMap((paragraph) => wrap(paragraph, fits, cut));
   const measured = broken.map(measure);
   const column = width ?? Math.max(0, ...measured);

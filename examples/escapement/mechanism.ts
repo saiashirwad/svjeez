@@ -38,7 +38,7 @@ export const tooth: readonly [P, P, P, P, P, P, P] = [
   polar(48, -3.4),
 ];
 
-const stone = (lock: P, letOff: P, lean: number): readonly P[] => {
+const stone = (lock: P, letOff: P, lean: number): readonly [P, P, P, P] => {
   const [vx, vy] = polar(17, lean);
 
   return [lock, letOff, [letOff[0] + vx, letOff[1] + vy], [lock[0] + vx, lock[1] + vy]];

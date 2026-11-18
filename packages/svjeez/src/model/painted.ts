@@ -1,6 +1,6 @@
 import type { Box, Cubic, Geometry, ShapeNode, Stroke, Vec } from "./ir";
 import { atRest } from "./lane";
-import { boxOf, onCircle } from "../author/values";
+import { boundsOfPoints, growBox, onCircle, outlineBoxOf } from "./geometry";
 
 export const MITER_LIMIT = 4;
 
@@ -26,21 +26,6 @@ const unit = (v: Vec): Vec | undefined => {
 };
 
 const normal = ([x, y]: Vec): Vec => [-y, x];
-
-const around = (points: readonly Vec[]): Box => {
-  const xs = points.map(([x]) => x);
-  const ys = points.map(([, y]) => y);
-  const [x, y] = [Math.min(...xs), Math.min(...ys)];
-
-  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
-};
-
-const grown = ({ x, y, width, height }: Box, by: number): Box => ({
-  x: x - by,
-  y: y - by,
-  width: width + by * 2,
-  height: height + by * 2,
-});
 
 const corners = ({ x, y, width, height }: Box): Vec[] => [
   [x, y],
@@ -174,7 +159,7 @@ const contourReach = (
     const dot = start ?? segments[0]?.from;
 
     return dot !== undefined && cap !== "butt"
-      ? corners(grown({ x: dot[0], y: dot[1], width: 0, height: 0 }, h))
+      ? corners(growBox({ x: dot[0], y: dot[1], width: 0, height: 0 }, h))
       : [];
   }
 
@@ -263,22 +248,22 @@ const contourReach = (
 };
 
 export const paintedBoxOf = (outline: Geometry, stroke: StrokeLook | undefined): Box => {
-  const bare = boxOf(outline);
+  const bare = outlineBoxOf(outline);
 
   if (!stroke || !(stroke.width > 0)) return bare;
   const h = stroke.width / 2;
 
   const loose =
     stroke.cut && stroke.cap !== "butt"
-      ? corners(grown(bare, stroke.cap === "square" ? h * Math.SQRT2 : h))
+      ? corners(growBox(bare, stroke.cap === "square" ? h * Math.SQRT2 : h))
       : [];
 
   switch (outline.kind) {
     case "rect":
     case "ellipse":
-      return grown(bare, h);
+      return growBox(bare, h);
     case "arc": {
-      if (stroke.cap !== "square" || Math.abs(outline.sweep) >= 360) return grown(bare, h);
+      if (stroke.cap !== "square" || Math.abs(outline.sweep) >= 360) return growBox(bare, h);
 
       const ends = [outline.start, outline.start + outline.sweep].flatMap((angle, i): Vec[] => {
         const at = onCircle(outline.radius, angle);
@@ -288,13 +273,13 @@ export const paintedBoxOf = (outline: Geometry, stroke: StrokeLook | undefined):
         return [1, -1].map((side) => add(add(at, times(radial, side * h)), times(ahead, h)));
       });
 
-      return around([...corners(grown(bare, h)), ...ends, ...loose]);
+      return boundsOfPoints([...corners(growBox(bare, h)), ...ends, ...loose]);
     }
 
     default: {
       const points = contoursOf(outline).flatMap((run) => contourReach(run, h, stroke));
 
-      return points.length === 0 ? bare : around([...points, ...loose]);
+      return points.length === 0 ? bare : boundsOfPoints([...points, ...loose]);
     }
   }
 };

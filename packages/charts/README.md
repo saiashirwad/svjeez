@@ -3,7 +3,7 @@
 Bar, line and area charts on shared axes for a svjeez scene. Scales are fitted to the data while the scene builds, and each series grows or draws on over a span you give it.
 
 ```sh
-npm i -D @svjeez/charts svjeez
+npm i -D @svjeez/charts@next @svjeez/fonts@next svjeez@next
 ```
 
 ```tsx
@@ -38,4 +38,4 @@ export default scene({ size: [440, 260], duration: 4, title: "Sales by quarter",
 
 To change the data over time, write one `<Chart>` per state and `morph.between` them.
 
-[API reference](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/charts.md)
+[API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/charts.md)

@@ -1,4 +1,5 @@
 import type { Feature, FeatureCollection, Geometry, Polygon, Position } from "geojson";
+import { simplifyPoints } from "./simplify.ts";
 
 export type Outline = Geometry | Feature | FeatureCollection;
 
@@ -94,35 +95,16 @@ export const units = (object: Outline): Unit[] => {
   }
 };
 
-const simplifyPoints = (points: readonly Vec3[], degrees: number): Vec3[] => {
+const simplifyStrand = (points: readonly Vec3[], degrees: number): Vec3[] => {
   if (points.length < 3 || degrees <= 0) return [...points];
   const epsilon = Math.sin(degrees * RAD);
-  const keep = new Uint8Array(points.length);
-  const stack: [number, number][] = [[0, points.length - 1]];
-  keep[0] = keep[points.length - 1] = 1;
 
-  while (stack.length > 0) {
-    const [first, last] = stack.pop()!;
-    const [a, b] = [points[first]!, points[last]!];
+  return simplifyPoints(points, epsilon, (a, b) => {
     const normal = cross(a, b);
     const length = Math.hypot(...normal);
-    let far = 0;
-    let index = 0;
 
-    for (let i = first + 1; i < last; i++) {
-      const p = points[i]!;
-      const distance = length > 1e-12 ? Math.abs(dot(p, normal)) / length : Math.sin(angle(p, a));
-
-      if (distance > far) [far, index] = [distance, i];
-    }
-
-    if (far > epsilon) {
-      keep[index] = 1;
-      stack.push([first, index], [index, last]);
-    }
-  }
-
-  return points.filter((_, i) => keep[i]);
+    return (p) => (length > 1e-12 ? Math.abs(dot(p, normal)) / length : Math.sin(angle(p, a)));
+  });
 };
 
 const densify = (points: readonly Vec3[], closed: boolean, degrees: number): Vec3[] => {
@@ -147,7 +129,7 @@ const dedupe = (points: readonly Vec3[]): Vec3[] =>
 const ready = (strand: Strand, simplify: number, step: number): Strand[] => {
   const kept = dedupe(strand.points.filter((p) => Math.abs(p[2]) < 1 - 1e-9));
   const loop = strand.closed && kept.length > 1 && angle(kept[0]!, kept.at(-1)!) < 1e-7;
-  const points = simplifyPoints(loop ? kept.slice(0, -1) : kept, simplify);
+  const points = simplifyStrand(loop ? kept.slice(0, -1) : kept, simplify);
 
   if (points.length < (strand.closed ? 3 : 2)) return [];
 

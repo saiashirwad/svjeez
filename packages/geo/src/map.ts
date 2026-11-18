@@ -14,7 +14,15 @@ import {
 import type { Feature, GeoJsonProperties, Polygon } from "geojson";
 import { polyline, type Geometry, type Vec } from "svjeez";
 import { SceneError } from "svjeez/tools";
-import { finder, lonLat, read, type GeoData, type LonLat, type ReadOptions } from "./data.ts";
+import {
+  finder,
+  lonLat,
+  positive,
+  read,
+  type GeoData,
+  type LonLat,
+  type ReadOptions,
+} from "./data.ts";
 import { Outline } from "./outline.ts";
 
 export interface Box {
@@ -82,13 +90,6 @@ export const arcPoints = (from: LonLat, to: LonLat): [number, number][] => {
   const along = geoInterpolate([...from], [...to]);
 
   return Array.from({ length: count + 1 }, (_, i) => along(i / count));
-};
-
-const positive = (value: number, what: string, fix: string): number => {
-  if (!(Number.isFinite(value) && value > 0))
-    throw new SceneError(`${what} needs a positive number, got ${value}.`, fix);
-
-  return value;
 };
 
 export function project(data: GeoData, options: MapOptions): GeoMap {

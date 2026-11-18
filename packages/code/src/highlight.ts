@@ -71,7 +71,7 @@ const expandTabs = (line: string, tabSize: number): string => {
   return out;
 };
 
-export const checkTabSize = (tabSize: number): void => {
+const checkTabSize = (tabSize: number): void => {
   if (!Number.isInteger(tabSize) || tabSize < 1)
     throw new SceneError(
       `tabSize is ${tabSize}.`,

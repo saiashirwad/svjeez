@@ -75,9 +75,8 @@ export function flowchart<
     label,
     style,
   }));
-  // SAFETY: G's values are FlowchartGroup<keyof N & string>, and the {} default has none
 
-  const groups = Object.entries((spec.groups ?? {}) as Record<string, FlowchartGroup<string>>);
+  const groups = Object.entries<FlowchartGroup<string>>(spec.groups ?? {});
   checkIds(groups.length === 0 ? ["-"] : groups.map(([id]) => id), WHAT, "group");
   const member = new Map<string, string>();
 

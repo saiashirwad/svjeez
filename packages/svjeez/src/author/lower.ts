@@ -2,10 +2,11 @@ import type { Font } from "../font/font";
 import { num } from "../model/format";
 import { EPSILON, type Seconds } from "../model/time";
 import { checkWindow } from "./span";
-import { matched, mixGeometry } from "../model/geometry";
+import { matched, mixGeometry, outlineBoxOf } from "../model/geometry";
 import { componentOf, identified, sourced, writtenAt } from "./identity";
 import { entryOf, named, nameNode, naming, quoted, whereOf, wordsOf, type Named } from "./names";
 import { SceneError, located } from "../model/scene-error";
+import { tagOf } from "../model/naming";
 import type {
   Animated,
   Box,
@@ -71,7 +72,6 @@ import { isTrack, layersOf, passageOf, type Anim, type LayerMotion } from "./tra
 import { derivedOf, isDerived } from "./derived";
 import { collect, type Cues, type NodeElement } from "./timeline";
 import {
-  boxOf,
   outlineOf,
   polygon,
   rect,
@@ -258,7 +258,7 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
     );
   const geometry = geometryOf(props.geometry, timing, where);
   const rest = atRest(geometry);
-  const outline = boxOf(rest);
+  const outline = outlineBoxOf(rest);
   const paint = (value: Paint) => colorOf(ctx, value, where, outline);
   const { stroke: written } = props;
 
@@ -771,14 +771,6 @@ const lowered = (
   }
 };
 
-const TAGS = {
-  group: "Group",
-  shape: "Shape",
-  text: "Text",
-  image: "Image",
-  instance: "Instance",
-} as const;
-
 const nameFor = (given: NodeElement, name: string | undefined, parent: string): Named => {
   const above = parent ? entryOf(parent) : undefined;
   const component = componentOf(given);
@@ -789,7 +781,7 @@ const nameFor = (given: NodeElement, name: string | undefined, parent: string): 
       short: name === undefined ? above.short : `"${name}"`,
       ...(above.source && { source: above.source }),
     };
-  const tag = `<${component ?? TAGS[given.type]}>`;
+  const tag = component === undefined ? tagOf(given.type) : `<${component}>`;
   const words = given.type === "text" ? wordsOf(given.props.children).trim() : "";
   const written = writtenAt(given);
 

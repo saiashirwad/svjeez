@@ -15,7 +15,7 @@ import {
   type FontUse,
 } from "../font/usage";
 import { moving, valueAt, type Key } from "./keys";
-import { animate } from "./smil";
+import { animate, windowEnd } from "./smil";
 import type { TimelineTrack } from "./traced";
 import { element, type AttrValue, type Element, type SvgNode } from "./tree";
 
@@ -119,14 +119,6 @@ const keyframesName = (state: State, body: string): string => {
   state.rules.push(`@keyframes ${name}{${body}}`);
 
   return name;
-};
-
-const windowEnd = (nodes: readonly SvgNode[]): string | undefined => {
-  const first = nodes[0];
-
-  return first?.kind === "element" && first.attrs["data-loop"] !== undefined
-    ? String(first.attrs.values).split(";").at(-1)
-    : undefined;
 };
 
 const className = (state: State, lanes: readonly Lane[]): string => {
@@ -346,18 +338,15 @@ const walk = (
         children: node.children.map((child) => walk(state, child, hides, inherited)),
       };
 
+      const [first, ...rest] = shells;
+
+      if (!first) return el;
       const pivot = String(bare.attrs.style ?? "").match(/transform-(?:box|origin)\s*:[^;]*/g);
       const wrapper: Record<string, AttrValue> = pivot ? { style: pivot.join(";") } : {};
 
-      return shells.reduce<SvgNode>(
-        (inner, lanes, index) =>
-          // SAFETY: only the first shell can carry `d` and come back as a fragment, and every later shell wraps it in a <g>.
-          emitShell(
-            state,
-            index === 0 ? (inner as Element) : element("g", wrapper, [inner]),
-            lanes,
-          ),
-        el,
+      return rest.reduce<SvgNode>(
+        (inner, lanes) => emitShell(state, element("g", wrapper, [inner]), lanes),
+        emitShell(state, el, first),
       );
     }
   }

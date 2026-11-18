@@ -102,7 +102,7 @@ export default () => scene({ size: [${size}, 100], duration: 1, title: label }, 
   }
 }, 60_000);
 
-test("a scene model default export, under its file's @jsxImportSource, is served as its SVG", async () => {
+test("serves a scene model default export as its SVG", async () => {
   const dir = join(scratch, "model");
   mkdirSync(dir);
   writeFileSync(join(dir, "main.ts"), `export { default } from "./scene.tsx?svjeez";`);

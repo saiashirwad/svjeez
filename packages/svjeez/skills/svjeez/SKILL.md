@@ -5,7 +5,7 @@ description: Write animated SVGs with svjeez, a TypeScript library that compiles
 
 # svjeez
 
-A scene is a TypeScript file whose default export is `scene(options, build)`. `build` returns a tree of nodes (`<Shape>`, `<Text>`, `<Group>`, layout containers, `<Arrow>`); every prop takes a value or a track over time. svjeez lays it out, measures its text, checks it, and writes one animated SVG that plays with no JavaScript, in light and dark. You never write SVG: no transforms, ids, defs, path strings for shapes, or CSS.
+A scene is a TypeScript file whose default export is `scene(options, build)`. `build` returns a tree of nodes such as `<Shape>`, `<Text>`, `<Group>`, layout containers and `<Arrow>`. Animated props take a value or a track over time. svjeez lays it out, measures its text, checks it, and writes one animated SVG that plays with no JavaScript, in light and dark. You never write SVG: no transforms, ids, defs, path strings for shapes, or CSS.
 
 ## Setup
 
@@ -13,7 +13,7 @@ A scene is a TypeScript file whose default export is `scene(options, build)`. `b
 npm i svjeez@next @svjeez/fonts@next && npm i -D tsx typescript playwright-core && npx playwright-core install chromium-headless-shell
 ```
 
-Under Bun: `bun add svjeez@next @svjeez/fonts@next` and run the CLI with `bunx --bun svjeez`. In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `"strict": true`, or start each scene file with the pragma below. Every import comes from `svjeez`.
+Under Bun: `bun add svjeez@next @svjeez/fonts@next` and run the CLI with `bunx --bun svjeez`. In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `"strict": true`, or start each scene file with the pragma below. Import the scene API from `svjeez` and add the companion packages your scene uses.
 
 ```tsx
 /** @jsxImportSource svjeez */
@@ -55,7 +55,7 @@ export default scene({ size: [240, 140], duration: 4, title: "Hello", theme, red
 1. **Every node has a box**: what it paints, its stroke included, measured when the scene compiles. Text too.
 2. **`at` places the node's `anchor`**, the box's top-left unless `anchor` names another point (`"center"`, `"bottom-right"`, `[0.5, 1]`, and for text `"baseline"`, `"baseline-left"`, `"baseline-right"`). A `<Group>` is a frame: its `at` is where its children's `[0, 0]` goes. A line, polygon or path with no `at` stays where its coordinates are. `rotate` and `scale` turn around `origin`, `"center"` of the box by default; `origin="at"` turns around the point `at` places, a group's `[0, 0]`.
 3. **Nothing is inherited.** A shape with no fill has none; a text needs its own `font`, `size` and `fill`. Share styles by spreading objects or writing components.
-4. **Every prop takes a value or a track**: `opacity={track(0).to(1, span(0.5, 0.3))}`. Geometry, paint, stroke width, trim, clip and effects animate the same way.
+4. **Animated props take a value or a track**: `opacity={track(0).to(1, span(0.5, 0.3))}`. Geometry, paint, stroke width, trim, clip and effects animate the same way.
 5. **Time is spans on clocks.** `span(start, over)` is when; build each beat from the one before (`a.next(0.4)`, `a.cascade(3, 0.1)`). `<Sequence start={…}>` starts a clock of its own.
 6. **Layout containers place children.** `<Stack>`, `<Grid>`, `<Center>` and `<Align>` measure boxes and set each child's place; a child in one takes no `at`. `<Stack>`, `<Grid>` and `<Center>` also draw their own background, sized to what they hold. Prefer them to coordinates you compute.
 7. **Refs name nodes.** `const card = ref("card")`, `<Group ref={card}>`, then `card.right`, `card.center`, `card.part("title")` from anywhere: arrows attach to them, `<Align to={card}>` places against them, and a `timeline()` moves them.

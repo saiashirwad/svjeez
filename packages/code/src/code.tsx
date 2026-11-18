@@ -1,7 +1,7 @@
 /** @jsxImportSource svjeez */
 import { Group, Run, Text, ease, rect, track, type Span } from "svjeez";
 import { SceneError, type Common, type FontValue } from "svjeez/tools";
-import { checkTabSize, highlight, type Grammar, type Highlighted, type Lang } from "./highlight.ts";
+import { highlight, type Grammar, type Highlighted, type Lang } from "./highlight.ts";
 import type { Palette } from "./roles.ts";
 
 export interface CodeProps extends Common {
@@ -52,8 +52,6 @@ export const Code = ({
   if (!(lineHeight > 0 && Number.isFinite(lineHeight)))
     throw new SceneError(`<Code> needs a positive lineHeight, got ${lineHeight}.`);
 
-  if (tabSize !== undefined) checkTabSize(tabSize);
-
   const lines = highlight(children, lang, {
     ...(tabSize !== undefined && { tabSize }),
     ...(grammars && { grammars }),
@@ -65,14 +63,13 @@ export const Code = ({
       "Give one key per line, empty lines included.",
     );
 
-  const total = lines.reduce((sum, line) => sum + lengthOf(line), 0);
+  const rows = lines.map((line) => ({ line, chars: lengthOf(line) }));
+  const total = rows.reduce((sum, { chars }) => sum + chars, 0);
   let typed = 0;
 
   return (
     <Group {...common}>
-      {lines.map((line, index) => {
-        const chars = lengthOf(line);
-
+      {rows.map(({ line, chars }, index) => {
         if (chars === 0) return null;
 
         const when = typing && {

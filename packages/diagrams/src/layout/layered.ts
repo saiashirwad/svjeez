@@ -50,7 +50,6 @@ interface Vertex {
   group: number;
   readonly up: number[];
   readonly down: number[];
-  readonly ins: number[];
   readonly outs: number[];
   readonly anchor?: number;
   readonly back?: number;
@@ -118,7 +117,6 @@ export function layered(input: LayeredInput): LayeredLayout {
     group: groupOf[i]!,
     up: [],
     down: [],
-    ins: [],
     outs: [],
     loop: 0,
   }));
@@ -135,7 +133,6 @@ export function layered(input: LayeredInput): LayeredLayout {
       group,
       up: [],
       down: [],
-      ins: [],
       outs: [],
       loop: 0,
       anchor,
@@ -165,7 +162,6 @@ export function layered(input: LayeredInput): LayeredLayout {
       vertices[a]!.down.push(v);
       vertices[a]!.outs.push(id);
       vertices[v]!.up.push(a);
-      vertices[v]!.ins.push(id);
 
       return id;
     });
@@ -402,7 +398,7 @@ export function layered(input: LayeredInput): LayeredLayout {
     BEND,
   );
 
-  const out = <T extends Box | Point>(value: T): T => (lr ? flip(value) : value);
+  const out = (value: Box): Box => (lr ? flip(value) : value);
 
   const laid = edges.map(({ i }, k): LayeredEdge => {
     const label = loops[k] ?? free[k];
@@ -410,7 +406,7 @@ export function layered(input: LayeredInput): LayeredLayout {
     return {
       from: input.edges[i]!.from,
       to: input.edges[i]!.to,
-      points: routes[k]!.map(out),
+      points: routes[k]!.map((point) => (lr ? flip(point) : point)),
       label: label && out(label),
     };
   });

@@ -25,11 +25,7 @@ const UNSUPPORTED = /^(classDef|class|style|linkStyle|click|direction|accTitle|a
 const LABELLED = /^(?:--|-\.|==)\s+(.+?)\s+(-{2,}>|-{3,}|\.+->|\.+-|={2,}>|={3,})/;
 const PLAIN = /^(-{2,}>|-{3,}|-\.+->|-\.+-|={2,}>|={3,})\s*(?:\|([^|]*)\|)?/;
 
-interface Ref {
-  readonly id: string;
-  readonly form?: FlowForm;
-  readonly label?: string;
-}
+type Ref = { readonly id: string } | MermaidFlowNode;
 
 interface Op {
   readonly line: MermaidFlowEdge["line"];
@@ -132,13 +128,8 @@ export const parseFlowchart = (header: Line, body: readonly Line[]): FlowchartDo
   const owned = new Set<string>();
 
   const touch = (ref: Ref) => {
-    const known = nodes.get(ref.id);
-
-    if (!known) nodes.set(ref.id, { label: ref.label ?? ref.id, form: ref.form ?? "rect" });
-    else if (ref.form) {
-      known.label = ref.label!;
-      known.form = ref.form;
-    }
+    if ("form" in ref) nodes.set(ref.id, { label: ref.label, form: ref.form });
+    else if (!nodes.has(ref.id)) nodes.set(ref.id, { label: ref.id, form: "rect" });
 
     if (open && !owned.has(ref.id)) {
       owned.add(ref.id);

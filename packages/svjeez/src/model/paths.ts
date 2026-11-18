@@ -1,18 +1,12 @@
 import { SceneError } from "./scene-error";
+import { lineCubic, quadraticCubic, splitCurveAtParameter } from "./curve";
 import { num } from "./format";
+import type { Contour, Cubic, Vec } from "./ir";
 import { segments } from "./pathTokens";
 
 export type PathData = `M${string}` | `m${string}`;
 
-type Vec = readonly [number, number];
-
-type Cubic = readonly [Vec, Vec, Vec];
-
-export interface Ring {
-  readonly start: Vec;
-  readonly curves: readonly Cubic[];
-  readonly closed: boolean;
-}
+export type Ring = Contour;
 
 const ARITY = new Map([
   ["M", 2],
@@ -27,13 +21,6 @@ const ARITY = new Map([
   ["Z", 0],
 ]);
 
-const lerp = (a: Vec, b: Vec, u: number): Vec => [
-  a[0] + (b[0] - a[0]) * u,
-  a[1] + (b[1] - a[1]) * u,
-];
-
-const line = (a: Vec, b: Vec): Cubic => [lerp(a, b, 1 / 3), lerp(a, b, 2 / 3), b];
-
 const arc = (
   from: Vec,
   rx: number,
@@ -43,7 +30,8 @@ const arc = (
   sweep: boolean,
   to: Vec,
 ): Cubic[] => {
-  if (rx === 0 || ry === 0 || (from[0] === to[0] && from[1] === to[1])) return [line(from, to)];
+  if (rx === 0 || ry === 0 || (from[0] === to[0] && from[1] === to[1]))
+    return [lineCubic(from, to)];
   const phi = (angle * Math.PI) / 180;
   const [cos, sin] = [Math.cos(phi), Math.sin(phi)];
   const dx = (from[0] - to[0]) / 2;
@@ -123,7 +111,7 @@ const parse = (d: string): Ring[] => {
     const relative = letter !== upper;
 
     if (upper === "Z") {
-      if (open && (pen[0] !== start[0] || pen[1] !== start[1])) curves.push(line(pen, start));
+      if (open && (pen[0] !== start[0] || pen[1] !== start[1])) curves.push(lineCubic(pen, start));
       pen = start;
       finish(true);
       control = quad = undefined;
@@ -161,17 +149,17 @@ const parse = (d: string): Ring[] => {
 
           if (upper === "T") {
             const q: Vec = quad ? [2 * pen[0] - quad[0], 2 * pen[1] - quad[1]] : pen;
-            curves.push([lerp(pen, q, 2 / 3), lerp(next, q, 2 / 3), next]);
+            curves.push(quadraticCubic(pen, q, next));
             lastQuad = q;
-          } else curves.push(line(pen, next));
+          } else curves.push(lineCubic(pen, next));
           break;
         case "H":
           next = [relative ? pen[0] + v[0]! : v[0]!, pen[1]];
-          curves.push(line(pen, next));
+          curves.push(lineCubic(pen, next));
           break;
         case "V":
           next = [pen[0], relative ? pen[1] + v[0]! : v[0]!];
-          curves.push(line(pen, next));
+          curves.push(lineCubic(pen, next));
           break;
         case "C": {
           const c1 = abs(v[0]!, v[1]!);
@@ -194,7 +182,7 @@ const parse = (d: string): Ring[] => {
         case "Q": {
           const q = abs(v[0]!, v[1]!);
           next = abs(v[2]!, v[3]!);
-          curves.push([lerp(pen, q, 2 / 3), lerp(next, q, 2 / 3), next]);
+          curves.push(quadraticCubic(pen, q, next));
           lastQuad = q;
           break;
         }
@@ -218,23 +206,18 @@ const parse = (d: string): Ring[] => {
 export const ringsOf = (d: string): Ring[] => parse(d);
 
 const halve = (from: Vec, [c1, c2, to]: Cubic): [Cubic, Cubic] => {
-  const a = lerp(from, c1, 0.5);
-  const b = lerp(c1, c2, 0.5);
-  const c = lerp(c2, to, 0.5);
-  const ab = lerp(a, b, 0.5);
-  const bc = lerp(b, c, 0.5);
-  const mid = lerp(ab, bc, 0.5);
+  const [head, at, tail] = splitCurveAtParameter(from, [c1, c2], to, 0.5);
 
   return [
-    [a, ab, mid],
-    [bc, c, to],
+    [...head, at],
+    [...tail, to],
   ];
 };
 
 const chord = (from: Vec, curve: Cubic) => Math.hypot(curve[2][0] - from[0], curve[2][1] - from[1]);
 
 const split = (ring: Ring, count: number): Ring => {
-  const curves = ring.curves.length > 0 ? [...ring.curves] : [line(ring.start, ring.start)];
+  const curves = ring.curves.length > 0 ? [...ring.curves] : [lineCubic(ring.start, ring.start)];
 
   while (curves.length < count) {
     let longest = 0;

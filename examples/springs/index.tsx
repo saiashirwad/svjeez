@@ -14,6 +14,7 @@ import {
   track,
   type Curve,
   type SceneElement,
+  type Span,
   type Vec,
 } from "svjeez";
 import { mono, theme } from "../theme";
@@ -23,21 +24,18 @@ const pop = ease.spring({ stiffness: 260, damping: 14 });
 
 const HOME: Vec = [24, 60];
 
-const STOPS: readonly Vec[] = [
-  [130, 22],
-  [220, 92],
-  [296, 40],
+const STOPS: readonly (readonly [point: Vec, move: Span])[] = [
+  [[130, 22], span(0.4, 0.6)],
+  [[220, 92], span(1, 0.6)],
+  [[296, 40], span(1.6, wobble.settle)],
 ];
 
-const MOVES = [span(0.4, 0.6), span(1, 0.6), span(1.6, wobble.settle)];
 const BACK = span(4.2, wobble.settle);
 
 const route = (curve: Curve) => {
   let at = track(HOME);
 
-  STOPS.forEach((stop, i) => {
-    at = at.to(stop, MOVES[i]!, curve);
-  });
+  for (const [stop, move] of STOPS) at = at.to(stop, move, curve);
 
   return at.to(HOME, BACK, curve);
 };
@@ -60,7 +58,7 @@ const Lane = ({
     <Text font={mono} size={12} at={[12, 20]} anchor="baseline-left" fill={theme.muted}>
       {label}
     </Text>
-    {[HOME, ...STOPS].map((stop) => (
+    {[HOME, ...STOPS.map(([point]) => point)].map((stop) => (
       <Shape
         geometry={circle(9)}
         at={stop}

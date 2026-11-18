@@ -233,17 +233,7 @@ const straightKeys = (samples: readonly Sample[], tolerance: number): RunKey[] =
   let from = 0;
 
   while (from < last) {
-    let [reach, beyond] = [from + 1, last + 1];
-
-    if (strays(samples, from, last) <= tolerance) reach = last;
-    else
-      while (beyond - reach > 1) {
-        const middle = Math.floor((reach + beyond) / 2);
-
-        if (strays(samples, from, middle) <= tolerance) reach = middle;
-        else beyond = middle;
-      }
-
+    const reach = reachOf(last, from, (to) => strays(samples, from, to), tolerance);
     const to = samples[reach]!;
 
     keys.push({

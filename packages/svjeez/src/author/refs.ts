@@ -209,16 +209,7 @@ export const declaring = <T>(build: () => T): readonly [T, readonly Ref[]] => {
   }
 };
 
-export type Place =
-  | "center"
-  | "top"
-  | "bottom"
-  | "left"
-  | "right"
-  | "top-left"
-  | "top-right"
-  | "bottom-left"
-  | "bottom-right";
+export type Place = keyof typeof PLACES;
 
 export const fractionOf = (place: Place, what: string): Fraction => {
   const where = Object.hasOwn(PLACES, place) ? PLACES[place] : undefined;

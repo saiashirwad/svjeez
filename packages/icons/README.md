@@ -3,7 +3,7 @@
 Tabler and Lucide icons for svjeez scenes: an `<Icon>` that draws each piece, recolors, scales and moves like any node.
 
 ```sh
-npm i @svjeez/icons@next
+npm i @svjeez/icons@next svjeez@next
 ```
 
 ```tsx

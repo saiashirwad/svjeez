@@ -1,9 +1,8 @@
 import type { Seconds } from "../model/time";
-import { mixGeometry } from "../model/geometry";
+import { boundsOfPoints, boxCorners, mixGeometry, outlineBoxOf } from "../model/geometry";
 import type { Animated, Box, Geometry, Layer, Scene, SceneNode, Source, Vec } from "../model/ir";
 import { valueAt as sampleAt } from "../model/sample";
 import { mixNumber, mixVec, type Mix } from "../model/steps";
-import { boxOf } from "../author/values";
 import { lookOf, paintedBoxOf } from "../model/painted";
 
 export type Matrix = readonly [a: number, b: number, c: number, d: number, e: number, f: number];
@@ -69,23 +68,8 @@ const layerMatrix = (layer: Layer, origin: Vec, t: Seconds): Matrix => {
   return [moveBy(vec(layer.offset, t)), moveBy(origin), turn, moveBy([-ox, -oy])].reduce(times);
 };
 
-const corners = ({ x, y, width, height }: Box): Vec[] => [
-  [x, y],
-  [x + width, y],
-  [x + width, y + height],
-  [x, y + height],
-];
-
-const around = (points: readonly Vec[]): Box => {
-  const xs = points.map(([x]) => x);
-  const ys = points.map(([, y]) => y);
-  const [x, y] = [Math.min(...xs), Math.min(...ys)];
-
-  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
-};
-
 const geometryAt = (geometry: Animated<Geometry>, t: Seconds, where: string): Box =>
-  boxOf(valueAt(geometry, t, mixGeometry, where));
+  outlineBoxOf(valueAt(geometry, t, mixGeometry, where));
 
 const frameAt = (node: SceneNode, t: Seconds): Box =>
   clipped(
@@ -122,47 +106,51 @@ export const placements = (scene: Scene, at: Seconds = 0): Placed[] => {
     const frame = frameAt(node, at);
     const index = out.length;
 
-    out.push({
+    const initial: Placed = {
       key: node.key,
       kind: node.kind,
       ...(node.source && { source: node.source }),
-      box: around(corners(frame).map((point) => apply(own, point))),
+      box: boundsOfPoints(boxCorners(frame).map((point) => apply(own, point))),
       frame,
       matrix: own,
       opacity,
       depth,
-    });
+    };
 
-    if (node.kind !== "group" || node.children.length === 0) return out[index]!;
-    const inside = node.children.map((child) => visit(child, own, opacity, depth + 1));
+    out.push(initial);
+
+    if (node.kind !== "group" || node.children.length === 0) return initial;
+    const children = node.children.map((child) => visit(child, own, opacity, depth + 1));
+
+    if (depth === 0 || node.authored?.count) return initial;
+
     const back = inverse(own);
+    const childBounds = boundsOfPoints(children.flatMap((child) => boxCorners(child.box)));
 
-    if (depth > 0 && !(node.kind === "group" && node.authored?.count)) {
-      const held = around(inside.flatMap((child) => corners(child.box)));
-
-      const frame =
-        back &&
-        clipped(
-          node,
-          around(
-            inside.flatMap((child) =>
-              corners(child.frame).map((point) => apply(back, apply(child.matrix, point))),
-            ),
+    const groupFrame =
+      back &&
+      clipped(
+        node,
+        boundsOfPoints(
+          children.flatMap((child) =>
+            boxCorners(child.frame).map((point) => apply(back, apply(child.matrix, point))),
           ),
-          at,
-        );
+        ),
+        at,
+      );
 
-      out[index] = {
-        ...out[index]!,
-        box:
-          frame && node.clip !== undefined
-            ? around(corners(frame).map((p) => apply(own, p)))
-            : held,
-        ...(frame && { frame }),
-      };
-    }
+    const finalized: Placed = {
+      ...initial,
+      box:
+        groupFrame && node.clip !== undefined
+          ? boundsOfPoints(boxCorners(groupFrame).map((point) => apply(own, point)))
+          : childBounds,
+      ...(groupFrame && { frame: groupFrame }),
+    };
 
-    return out[index]!;
+    out[index] = finalized;
+
+    return finalized;
   };
 
   visit(scene.root, IDENTITY, 1, 0);

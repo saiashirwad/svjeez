@@ -23,7 +23,7 @@ interface Quarter {
   }[];
 }
 
-const quarters: readonly Quarter[] = [
+const quarters: readonly [Quarter, ...Quarter[]] = [
   {
     name: "Q1",
     bars: [
@@ -93,7 +93,7 @@ export default scene(
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Group>
         {morph.between(
-          [...quarters, quarters[0]!].map((quarter) => <Signups {...quarter} />),
+          [...quarters, quarters[0]].map((quarter) => <Signups {...quarter} />),
           turns,
           {
             stagger: 0.05,

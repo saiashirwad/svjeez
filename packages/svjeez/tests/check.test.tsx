@@ -59,6 +59,28 @@ const label = (x: number, y: number, size: number, text: string, fill: Hex = "#F
 );
 
 describe.if(browser)("checkScene", () => {
+  test("samples animations inside a nested SVG on the checked scene's clock", async () => {
+    const picture = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90" width="160" height="90" data-playback-rate="2">
+      <style>
+        @keyframes appear {
+          0%, 39%, 60%, 100% { opacity: 0 }
+          40%, 59% { opacity: 1 }
+        }
+        .animated { animation: appear 1s step-end infinite }
+        text { font-family: sans-serif; font-size: 18px }
+      </style>
+      <text x="10" y="30" data-key="fixed">First label</text>
+      <svg width="160" height="90">
+        <text x="12" y="32" class="animated" data-key="moving">Second label</text>
+      </svg>
+    </svg>`;
+
+    const report = await checkScene(picture, { times: [0, 0.5, 0.9], colorScheme: "light" });
+    const overlaps = report.findings.filter(({ rule }) => rule === "overlap");
+
+    expect(overlaps.map(({ times }) => times)).toEqual([[0.9]]);
+  });
+
   test("off-canvas: an error for a part the canvas never shows, nothing for one that slides in", async () => {
     const lost = await findings(
       made(() => (

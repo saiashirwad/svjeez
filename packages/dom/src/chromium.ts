@@ -27,7 +27,7 @@ import { paletteCss } from "./palette.ts";
 import { merge } from "./scheme.ts";
 import type { Box, Face, Snapshot } from "./tree.ts";
 import { shoot } from "./shot.ts";
-import { walk, type Marks } from "./walk.ts";
+import { walk, type Marks, type RangeMarks } from "./walk.ts";
 
 type Scheme = "light" | "dark";
 
@@ -240,7 +240,7 @@ const markRanges = async (session: CDPSession, page: Page) => {
   if (owners.length === 0) return;
   await session.send("CSS.enable");
 
-  const part = async (n: N) => {
+  const part = async (n: N): Promise<RangeMarks["track"]> => {
     const [{ model }, { computedStyle }] = await Promise.all([
       session.send("DOM.getBoxModel", { nodeId: n.nodeId }),
       session.send("CSS.getComputedStyleForNode", { nodeId: n.nodeId }),
@@ -263,7 +263,7 @@ const markRanges = async (session: CDPSession, page: Page) => {
   };
 
   for (const { id, track, thumb } of owners) {
-    const marks = { track: await part(track), thumb: await part(thumb) };
+    const marks: RangeMarks = { track: await part(track), thumb: await part(thumb) };
     const { object } = await session.send("DOM.resolveNode", { nodeId: id });
 
     if (!object.objectId) continue;

@@ -49,16 +49,18 @@ const sky = track(linear.across({ angle: 0, stops: [theme.blue, theme.magenta] }
   .to(linear.across({ angle: 90, stops: [theme.blue, theme.orange] }), span(0.4, 1.6), ease.inOut)
   .to(linear.across({ angle: 0, stops: [theme.blue, theme.magenta] }), span(3.4, 1.6), ease.inOut);
 
-const stripes = Array.from({ length: 7 }, (_, k) => (
-  <Shape
-    geometry={rect(16, CARD[1])}
-    at={[k * 16, 0]}
-    fill={
-      [theme.cyan, theme.green, theme.yellow, theme.orange, theme.red, theme.magenta, theme.blue][
-        k
-      ]!
-    }
-  />
+const stripeColors = [
+  theme.cyan,
+  theme.green,
+  theme.yellow,
+  theme.orange,
+  theme.red,
+  theme.magenta,
+  theme.blue,
+];
+
+const stripes = stripeColors.map((color, k) => (
+  <Shape geometry={rect(16, CARD[1])} at={[k * 16, 0]} fill={color} />
 ));
 
 const FEATHER = 48;

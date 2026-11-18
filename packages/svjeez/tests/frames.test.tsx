@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
+import assert from "node:assert/strict";
 import { deflateSync } from "node:zlib";
-import { openScene, renderFrames } from "svjeez/frames";
+import { checkScene, openScene, renderFrames } from "svjeez/frames";
 import { loopLength, seek, restyle } from "svjeez/page";
 import {
   Group,
@@ -119,19 +120,16 @@ const flooded = () => (
 
 describe.if(browser)("renderFrames", () => {
   test("frames at different times differ, and holds between transitions render the same", async () => {
-    const { frames } = await renderFrames(fade, { times: [0, 1.5, 2.5, 3.5] });
+    const times = [0, 1.5, 2.5, 3.5];
+    const { frames } = await renderFrames(fade, { times });
 
-    // SAFETY: renderFrames returns one frame for each of the four times passed above.
-    const [before, middle, after, later] = frames.map((frame) => frame.png) as [
-      Uint8Array,
-      Uint8Array,
-      Uint8Array,
-      Uint8Array,
-    ];
+    expect(frames.map((frame) => frame.time)).toEqual(times);
+    const [before, middle, after, later] = frames;
+    assert(before && middle && after && later);
 
-    expect(same(before, middle)).toBe(false);
-    expect(same(middle, after)).toBe(false);
-    expect(same(after, later)).toBe(true);
+    expect(same(before.png, middle.png)).toBe(false);
+    expect(same(middle.png, after.png)).toBe(false);
+    expect(same(after.png, later.png)).toBe(true);
   });
 
   test("a curve starting to draw shows no round-cap dot at its far end", async () => {
@@ -146,10 +144,14 @@ describe.if(browser)("renderFrames", () => {
       </Group>
     ));
 
-    const { frames } = await renderFrames(curve, { times: [0, 0.004, 0.008, 0.012], scale: 2 });
-    const [blank, ...early] = frames.map((frame) => frame.png);
+    const times = [0, 0.004, 0.008, 0.012];
+    const { frames } = await renderFrames(curve, { times, scale: 2 });
 
-    for (const frame of early) expect(same(frame, blank!)).toBe(true);
+    expect(frames.map((frame) => frame.time)).toEqual(times);
+    const [blank, ...early] = frames;
+    assert(blank);
+
+    for (const frame of early) expect(same(frame.png, blank.png)).toBe(true);
   });
 
   test("the same time renders the same pixels every run", async () => {
@@ -744,6 +746,58 @@ describe.if(browser)("seek and loopLength on an inline <svg>", () => {
       expect([opened.duration, opened.playbackRate]).toEqual([4, 2]);
     } finally {
       await opened.close();
+    }
+  });
+
+  test("frames and layout checks seek CSS and SMIL to the same scene seconds at different rates", async () => {
+    const picture = (body: string, rate = 1) =>
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 50" width="100" height="50" data-playback-rate="${rate}">${body}</svg>`;
+
+    const colorScheme = "light";
+
+    const still = async (body: string) => {
+      const { frames } = await renderFrames(picture(body), { times: [0], colorScheme });
+
+      return frames[0]!.png;
+    };
+
+    const [empty, clipped] = await Promise.all([
+      still(""),
+      still('<rect x="-4" y="10" width="20" height="20"/>'),
+    ]);
+
+    for (const rate of [1, 2]) {
+      const out = picture(
+        `<style>
+           @keyframes show { 0%, 50%, 100% { opacity: 0 } 25% { opacity: 1 } }
+           .window { animation: show ${4 / rate}s steps(1, end) infinite }
+         </style>
+         <rect class="window" x="-4" y="10" width="4" height="20" data-key="window">
+           <animate attributeName="width" values="4;20;4" keyTimes="0;.375;.625"
+             calcMode="discrete" dur="${4 / rate}s" repeatCount="indefinite"/>
+         </rect>`,
+        rate,
+      );
+
+      const times = [0.75, 1.75, 2.25];
+
+      const [rendered, checked] = await Promise.all([
+        renderFrames(out, { times: [...times, 1.25], colorScheme }),
+        checkScene(out, { times, colorScheme }),
+      ]);
+
+      expect(rendered.duration).toBe(4);
+      expect(rendered.frames.map(({ png }, i) => same(png, i === 1 ? clipped : empty))).toEqual([
+        true,
+        true,
+        true,
+        true,
+      ]);
+
+      expect(checked.duration).toBe(4);
+      expect(checked.findings.filter(({ rule }) => rule === "off-canvas")).toEqual([
+        expect.objectContaining({ key: "window", times: [1.75], severity: "warning" }),
+      ]);
     }
   });
 });

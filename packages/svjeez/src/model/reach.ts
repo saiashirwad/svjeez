@@ -1,6 +1,8 @@
 import { SceneError } from "./scene-error";
 import { DEFAULT_EASE, type Ease } from "./time";
-import { mixGeometry } from "./geometry";
+import { boundsOfPoints, boxCorners, growBox, mixGeometry } from "./geometry";
+import { lerpPoint } from "./curve";
+import { MITER_LIMIT } from "./painted";
 import type { Animated, Box, Effect, Geometry, Layer, SceneNode, Vec } from "./ir";
 import { isLane } from "./lane";
 
@@ -29,7 +31,7 @@ const reached = <T>(value: Animated<T>, mix: (a: T, b: T, u: number) => T): T[] 
 const numbers = (value: Animated<number>): number[] => reached(value, (a, b, u) => a + (b - a) * u);
 
 const points = (value: Animated<Vec>): Vec[] => [
-  ...reached(value, (a, b, u): Vec => [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u]),
+  ...reached(value, lerpPoint),
   ...(isLane(value) ? value.keys.flatMap((key) => key.via ?? []) : []),
 ];
 
@@ -38,24 +40,10 @@ const range = (values: readonly number[]): readonly [number, number] => [
   Math.max(...values),
 ];
 
-const around = (list: readonly Vec[]): Box => {
-  const [x0, x1] = range(list.map(([x]) => x));
-  const [y0, y1] = range(list.map(([, y]) => y));
-
-  return { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
-};
-
-const corners = ({ x, y, width, height }: Box): Vec[] => [
-  [x, y],
-  [x + width, y],
-  [x + width, y + height],
-  [x, y + height],
-];
-
 const union = (boxes: readonly (Box | undefined)[]): Box | undefined => {
   const all = boxes.filter((box): box is Box => box !== undefined);
 
-  return all.length === 0 ? undefined : around(all.flatMap(corners));
+  return all.length === 0 ? undefined : boundsOfPoints(all.flatMap(boxCorners));
 };
 
 const intersect = (a: Box | undefined, b: Box | undefined): Box | undefined => {
@@ -66,13 +54,6 @@ const intersect = (a: Box | undefined, b: Box | undefined): Box | undefined => {
 
   return right < x || bottom < y ? undefined : { x, y, width: right - x, height: bottom - y };
 };
-
-export const grown = ({ x, y, width, height }: Box, by: number): Box => ({
-  x: x - by,
-  y: y - by,
-  width: width + by * 2,
-  height: height + by * 2,
-});
 
 const swept = (box: Box, by: readonly Vec[]): Box => {
   const [x0, x1] = range(by.map(([x]) => x));
@@ -111,7 +92,7 @@ const hull = (geometry: Geometry): Vec[] => {
 const outlines = (value: Animated<Geometry>, where: string): Box | undefined => {
   const list = reached(value, (a, b, u) => mixGeometry(a, b, u, where)).flatMap(hull);
 
-  return list.length === 0 ? undefined : around(list);
+  return list.length === 0 ? undefined : boundsOfPoints(list);
 };
 
 const strokeReach = (node: Extract<SceneNode, { kind: "shape" }>, inside: string): number => {
@@ -125,7 +106,9 @@ const strokeReach = (node: Extract<SceneNode, { kind: "shape" }>, inside: string
     );
   const width = Math.max(0, ...numbers(stroke.width).map(Math.abs));
 
-  return (width / 2) * (stroke.join === "miter" ? 4 : stroke.cap === "square" ? Math.SQRT2 : 1);
+  return (
+    (width / 2) * (stroke.join === "miter" ? MITER_LIMIT : stroke.cap === "square" ? Math.SQRT2 : 1)
+  );
 };
 
 const throughLayer = (box: Box, layer: Layer, origin: Vec): Box => {
@@ -133,7 +116,7 @@ const throughLayer = (box: Box, layer: Layer, origin: Vec): Box => {
   const [sx0, sx1] = range(scales.map(([x]) => x));
   const [sy0, sy1] = range(scales.map(([, y]) => y));
 
-  const scaled = corners(box).flatMap(([x, y]): Vec[] =>
+  const scaled = boxCorners(box).flatMap(([x, y]): Vec[] =>
     [sx0, sx1].flatMap((sx) =>
       [sy0, sy1].map((sy): Vec => [(x - origin[0]) * sx, (y - origin[1]) * sy]),
     ),
@@ -149,7 +132,7 @@ const throughLayer = (box: Box, layer: Layer, origin: Vec): Box => {
     const angle = (layer.rotate * Math.PI) / 180;
     const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
 
-    turned = around(scaled.map(([x, y]): Vec => [x * cos - y * sin, x * sin + y * cos]));
+    turned = boundsOfPoints(scaled.map(([x, y]): Vec => [x * cos - y * sin, x * sin + y * cos]));
   }
 
   return swept(
@@ -171,10 +154,10 @@ const throughEffects = (box: Box | undefined, effects: readonly Effect[]): Box |
   effects.reduce<Box | undefined>((inner, effect) => {
     if (!inner) return inner;
 
-    if (effect.kind === "blur") return grown(inner, 3 * Math.max(0, ...numbers(effect.radius)));
+    if (effect.kind === "blur") return growBox(inner, 3 * Math.max(0, ...numbers(effect.radius)));
     const soft = 3 * Math.max(0, ...numbers(effect.blur));
 
-    return union([inner, grown(swept(inner, points(effect.offset)), soft)]);
+    return union([inner, growBox(swept(inner, points(effect.offset)), soft)]);
   }, box);
 
 export const reachOf = (
@@ -189,7 +172,7 @@ export const reachOf = (
       case "shape": {
         const outline = outlines(node.geometry, `geometry on ${where}`);
 
-        return outline && grown(outline, strokeReach(node, inside));
+        return outline && growBox(outline, strokeReach(node, inside));
       }
 
       case "group":
@@ -201,7 +184,7 @@ export const reachOf = (
       }
 
       case "text":
-        return grown(node.box, node.size / 2);
+        return growBox(node.box, node.size / 2);
       case "image":
         return node.box;
     }

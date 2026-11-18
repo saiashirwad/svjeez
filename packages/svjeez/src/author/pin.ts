@@ -18,7 +18,7 @@ export const PLACES = {
   "bottom-left": [0, 1],
   bottom: [0.5, 1],
   "bottom-right": [1, 1],
-} as const satisfies Readonly<Record<Place, readonly [number, number]>>;
+} as const satisfies Readonly<Record<string, Vec>>;
 
 export const PLACE_LIST = Object.keys(PLACES)
   .map((name) => `"${name}"`)

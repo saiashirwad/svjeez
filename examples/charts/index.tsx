@@ -15,9 +15,15 @@ import {
 import { geist } from "../fonts/faces";
 import { mono, theme } from "../theme";
 
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
-const opened = [42, 48, 51, 57, 63, 70];
-const merged = [31, 38, 44, 55, 64, 72];
+const counts = [
+  ["Jan", 42, 31],
+  ["Feb", 48, 38],
+  ["Mar", 51, 44],
+  ["Apr", 57, 55],
+  ["May", 63, 64],
+  ["Jun", 70, 72],
+] as const;
+
 const hours = [26, 28, 25, 27, 29, 26, 24, 15, 11, 9, 8, 7];
 
 const look = { font: mono, fontSize: 12, axis: theme.border, label: theme.muted, grid: true };
@@ -73,12 +79,12 @@ export default scene(
           {...look}
           at={[84, 196]}
           size={[380, 290]}
-          x={{ kind: "band", domain: months }}
+          x={{ kind: "band", domain: counts.map(([month]) => month) }}
           y={{ ticks: 4 }}
           axesIn={span(0.4, 0.6)}
           series={[
             bars(
-              opened.map((v, i) => [months[i]!, v] as const),
+              counts.map(([month, opened]) => [month, opened] as const),
               {
                 name: "opened",
                 color: theme.orange,
@@ -86,7 +92,7 @@ export default scene(
               },
             ),
             bars(
-              merged.map((v, i) => [months[i]!, v] as const),
+              counts.map(([month, , merged]) => [month, merged] as const),
               {
                 name: "merged",
                 color: theme.blue,

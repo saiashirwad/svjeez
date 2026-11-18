@@ -143,6 +143,13 @@ export const finder = <T extends { readonly id: string; readonly name: string | 
   };
 };
 
+export const positive = (value: number, what: string, fix: string): number => {
+  if (!(Number.isFinite(value) && value > 0))
+    throw new SceneError(`${what} needs a positive number, got ${value}.`, fix);
+
+  return value;
+};
+
 export const lonLat = (at: LonLat, caller: string): [number, number] => {
   const [lon, lat] = at;
 

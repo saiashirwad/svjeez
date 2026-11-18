@@ -29,7 +29,7 @@ export { renderFrames };
 const COMPILERS = [
   { name: "TypeScript 5.4", tsc: ["npx", "--yes", "--package", "typescript@5.4", "tsc"] },
   { name: "TypeScript latest", tsc: [join(BIN, "tsc")] },
-];
+] satisfies readonly { name: string; tsc: readonly [command: string, ...args: string[]] }[];
 
 const RESOLUTIONS = [
   { moduleResolution: "node10", module: "commonjs", type: "commonjs" },
@@ -91,7 +91,7 @@ try {
     name,
     tsc: [command, ...args],
   } of COMPILERS) {
-    const version = run(command!, [...args, "--version"]).trim();
+    const version = run(command, [...args, "--version"]).trim();
 
     for (const { moduleResolution, module, type } of RESOLUTIONS) {
       if (moduleResolution === "node10" && !version.startsWith("Version 5.")) continue;
@@ -115,7 +115,7 @@ try {
           join(consumer, "tsconfig.json"),
           JSON.stringify({ compilerOptions, files: ["index.tsx"] }),
         );
-        run(command!, [...args, "-p", consumer]);
+        run(command, [...args, "-p", consumer]);
       });
     }
   }

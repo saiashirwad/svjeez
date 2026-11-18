@@ -3,7 +3,7 @@
 Draw Mermaid text as a svjeez diagram: flowcharts, sequence diagrams and state diagrams.
 
 ```sh
-npm i -D @svjeez/mermaid svjeez
+npm i -D @svjeez/mermaid@next svjeez@next
 ```
 
 ```ts
@@ -22,4 +22,4 @@ const chart = mermaid(
 
 The reader supports a subset of Mermaid. Syntax outside it, such as styling directives, activation bars and sequence blocks, throws a `SceneError` that names the line and what to write instead.
 
-[API reference](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/mermaid.md)
+[API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/mermaid.md)

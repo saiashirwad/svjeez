@@ -136,17 +136,14 @@ export function mermaid(text: string, options: MermaidOptions): MermaidDiagram {
   const { reveal: _, ...stateOptions } = diagramOptions;
 
   return drawn(
-    // SAFETY: the parser guarantees every composite's initial is one of its own states
-    stateMachine(
+    stateMachine<Record<string, StateSpec>, readonly StateTransition<string>[]>(
       {
         states: Object.fromEntries(doc.states.map((s) => [s.id, stateSpec(s)])),
         initial: doc.initial,
         transitions: doc.transitions.map((t) =>
           t.label === undefined ? ([t.from, t.to] as const) : ([t.from, t.to, t.label] as const),
         ),
-      } as Parameters<
-        typeof stateMachine<Record<string, StateSpec>, readonly StateTransition<string>[]>
-      >[0],
+      },
       { ...stateOptions, direction: asked ?? doc.direction },
     ),
     "state",

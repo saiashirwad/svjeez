@@ -141,7 +141,7 @@ export class Font {
   embed(texts: readonly string[]): `data:${string}` {
     const font = this.#sfnt;
 
-    if (!font || !this.subset || font.tables.get("glyf") === undefined) return this.href;
+    if (!font || !this.subset || !font.tables.has("glyf")) return this.href;
 
     const key =
       [...new Set(texts.flatMap((text) => [...text]))].sort().join("") +

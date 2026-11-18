@@ -1,6 +1,5 @@
 import { SceneError } from "./scene-error";
 import { easeAt, splitEase, staysInside } from "./ease-at";
-import { MAX_KEYS, snapPeriod } from "../svg/keys";
 import { DEFAULT_EASE, EPSILON, NUDGE, ease, type Ease, type Seconds } from "./time";
 import type { Span } from "../author/span";
 import { num } from "./format";
@@ -600,6 +599,11 @@ export const laneOf = <T>(
     ? curved
     : straight;
 };
+
+const MAX_KEYS = 2000;
+
+const snapPeriod = (period: Seconds, duration: Seconds): Seconds =>
+  duration / Math.max(1, Math.round(duration / period));
 
 const written = <T>(
   data: PassageData<{ readonly value: T }>,

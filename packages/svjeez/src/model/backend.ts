@@ -3,6 +3,7 @@ import { nodeName } from "./naming";
 import { SceneError } from "./scene-error";
 import { isCurved } from "./curve";
 import { isLane } from "./lane";
+import { walkScene } from "./walk";
 
 export type Feature =
   | "text"
@@ -136,7 +137,7 @@ export const diagnose = (
 ): Diagnostic[] => {
   const out: Diagnostic[] = [];
 
-  const visit = (node: SceneNode): void => {
+  walkScene(scene, (node) => {
     for (const feature of featuresOf(node)) {
       const support = backend.supports[feature];
 
@@ -150,14 +151,7 @@ export const diagnose = (
         ...(node.source && { source: node.source }),
       });
     }
-
-    if (node.kind === "group") node.children.forEach(visit);
-
-    if (node.mask) visit(node.mask);
-  };
-
-  visit(scene.root);
-  Object.values(scene.symbols).forEach(visit);
+  });
 
   return out;
 };

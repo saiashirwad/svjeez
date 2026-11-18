@@ -1,6 +1,23 @@
-import type { Key, Vec } from "./ir";
+import type { Cubic, Key, Vec } from "./ir";
 
 export type Controls = readonly [control1: Vec, control2: Vec];
+
+export const lerpPoint = (a: Vec, b: Vec, u: number): Vec => [
+  a[0] + (b[0] - a[0]) * u,
+  a[1] + (b[1] - a[1]) * u,
+];
+
+export const lineCubic = (from: Vec, to: Vec): Cubic => [
+  lerpPoint(from, to, 1 / 3),
+  lerpPoint(from, to, 2 / 3),
+  to,
+];
+
+export const quadraticCubic = (from: Vec, control: Vec, to: Vec): Cubic => [
+  lerpPoint(from, control, 2 / 3),
+  lerpPoint(to, control, 2 / 3),
+  to,
+];
 
 const point = (p0: Vec, [p1, p2]: Controls, p3: Vec, s: number): Vec => {
   const r = 1 - s;
@@ -73,19 +90,21 @@ const paramAt = (from: Vec, via: Controls, to: Vec, share: number): number => {
 export const alongCurve = (from: Vec, via: Controls, to: Vec, share: number): Vec =>
   point(from, via, to, paramAt(from, via, to, share));
 
-export const splitCurve = (
+export const splitCurveAtParameter = (
   from: Vec,
   via: Controls,
   to: Vec,
-  share: number,
+  parameter: number,
 ): readonly [head: Controls, at: Vec, tail: Controls] => {
-  const s = paramAt(from, via, to, share);
-  const lerp = (a: Vec, b: Vec): Vec => [a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s];
+  const lerp = (a: Vec, b: Vec): Vec => lerpPoint(a, b, parameter);
   const [a, b, c] = [lerp(from, via[0]), lerp(via[0], via[1]), lerp(via[1], to)];
   const [d, e] = [lerp(a, b), lerp(b, c)];
 
   return [[a, d], lerp(d, e), [e, c]];
 };
+
+export const splitCurve = (from: Vec, via: Controls, to: Vec, share: number) =>
+  splitCurveAtParameter(from, via, to, paramAt(from, via, to, share));
 
 export const hermiteControls = (from: Vec, leave: Vec, arrive: Vec, to: Vec): Controls => [
   [from[0] + leave[0] / 3, from[1] + leave[1] / 3],

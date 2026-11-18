@@ -2,18 +2,12 @@ import { easeBetween } from "./ease-at";
 import { DEFAULT_EASE, EPSILON, ease, isHold } from "./time";
 import { isCurved } from "./curve";
 import type { Animated, Key, Lane, Layer, Vec } from "./ir";
-import { isLane } from "./lane";
+import { isLane, mapLane } from "./lane";
 import { mixNumber, mixVec, same, type Mix } from "./steps";
 import { valueAt as sampleAt } from "./sample";
 
 const valueAt = <T>(lane: Lane<T>, t: number, mix: Mix<T>): T =>
   sampleAt(lane, t, (a, b, amount) => mix(a, b, amount, "a folded layer"));
-
-export const mapped = <T, U>(lane: Lane<T>, change: (value: T) => U): Lane<U> => {
-  const [head, next, ...rest] = lane.keys.map((key) => ({ ...key, value: change(key.value) }));
-
-  return { ...lane, keys: [head!, next!, ...rest] };
-};
 
 const windows = <T>(lane: Lane<T>): (readonly [number, number])[] =>
   lane.keys.slice(1).flatMap((key, i) => {
@@ -53,13 +47,17 @@ const joined = <T>(
   op: (a: T, b: T) => T,
   mix: Mix<T>,
 ): Animated<T> | undefined => {
-  if (!isLane(a) && !isLane(b)) return op(a, b);
+  if (!isLane(a)) {
+    if (!isLane(b)) return op(a, b);
 
-  if ((isLane(a) && isCurved(a.keys)) || (isLane(b) && isCurved(b.keys))) return undefined;
+    return isCurved(b.keys) ? undefined : mapLane(b, (value) => op(a, value));
+  }
 
-  if (!isLane(a)) return isLane(b) ? mapped(b, (value) => op(a, value)) : op(a, b);
+  if (isCurved(a.keys)) return undefined;
 
-  if (!isLane(b)) return mapped(a, (value) => op(value, b));
+  if (!isLane(b)) return mapLane(a, (value) => op(value, b));
+
+  if (isCurved(b.keys)) return undefined;
 
   if (a.period !== b.period || !apart(a, b)) return undefined;
 

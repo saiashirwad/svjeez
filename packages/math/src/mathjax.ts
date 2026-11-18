@@ -1,4 +1,4 @@
-import type { LiteElement } from "mathjax-full/js/adaptors/lite/Element.js";
+import { LiteElement } from "mathjax-full/js/adaptors/lite/Element.js";
 import { liteAdaptor } from "mathjax-full/js/adaptors/liteAdaptor.js";
 import { RegisterHTMLHandler } from "mathjax-full/js/handlers/html.js";
 import { TeX } from "mathjax-full/js/input/tex.js";
@@ -62,16 +62,14 @@ const isBox = (ring: Ring): boolean =>
     return !via && (to[0] === from[0] || to[1] === from[1]);
   });
 
-const clipped = (
-  rings: readonly Ring[],
-  [x0, y0, x1, y1]: readonly number[],
-  quoted: string,
-): Ring[] =>
+type ClipRect = readonly [x0: number, y0: number, x1: number, y1: number];
+
+const clipped = (rings: readonly Ring[], [x0, y0, x1, y1]: ClipRect, quoted: string): Ring[] =>
   rings.map((ring) => {
     const points = pointsOf(ring);
 
     const inside = points.every(
-      ([x, y]) => x >= x0! - 1e-6 && x <= x1! + 1e-6 && y >= y0! - 1e-6 && y <= y1! + 1e-6,
+      ([x, y]) => x >= x0 - 1e-6 && x <= x1 + 1e-6 && y >= y0 - 1e-6 && y <= y1 + 1e-6,
     );
 
     if (inside) return ring;
@@ -81,8 +79,8 @@ const clipped = (
         `<Tex> can't draw ${quoted}: a stretched symbol in it is built from pieces it can't cut.`,
         "Write it without that stretchy command, or with a fixed-size symbol.",
       );
-    const xs = points.map(([x]) => Math.min(Math.max(x, x0!), x1!));
-    const ys = points.map(([, y]) => Math.min(Math.max(y, y0!), y1!));
+    const xs = points.map(([x]) => Math.min(Math.max(x, x0), x1));
+    const ys = points.map(([, y]) => Math.min(Math.max(y, y0), y1));
     const [left, top] = [Math.min(...xs), Math.min(...ys)];
 
     return boxRing(left, top, Math.max(...xs) - left, Math.max(...ys) - top);
@@ -121,7 +119,7 @@ interface Inherited {
   readonly matrix: Matrix;
   readonly color?: string;
   readonly parts: readonly string[];
-  readonly clip?: { readonly matrix: Matrix; readonly rect: readonly number[] };
+  readonly clip?: { readonly matrix: Matrix; readonly rect: ClipRect };
 }
 
 export function typeset(source: string, display: boolean): Typeset {
@@ -136,8 +134,13 @@ export function typeset(source: string, display: boolean): Typeset {
     );
   }
 
-  // SAFETY: MathJax's container holds elements, and the walk skips text nodes by their kind.
-  const svg = (adaptor.childNodes(container) as Node[]).find((n) => adaptor.kind(n) === "svg");
+  const svg = adaptor
+    .childNodes(container)
+    .find(
+      (node): node is LiteElement & { kind: "svg" } =>
+        node instanceof LiteElement && node.kind === "svg",
+    );
+
   const view = (svg ? (adaptor.getAttribute(svg, "viewBox") ?? "") : "").split(/\s+/).map(Number);
 
   if (!svg || view.length !== 4 || view.some(Number.isNaN))
@@ -148,11 +151,9 @@ export function typeset(source: string, display: boolean): Typeset {
   const marks: Mark[] = [];
 
   const walk = (parent: Node, inherited: Inherited) => {
-    // SAFETY: a LiteNode is a LiteElement or a LiteText, and the loop skips text by its kind.
-    for (const node of adaptor.childNodes(parent) as Node[]) {
-      const kind = adaptor.kind(node);
-
-      if (kind === "#text" || kind === "title" || kind === "#comment") continue;
+    for (const node of adaptor.childNodes(parent)) {
+      if (!(node instanceof LiteElement) || node.kind === "title") continue;
+      const kind = node.kind;
       const error = adaptor.getAttribute(node, "data-mjx-error");
 
       if (error !== undefined) throw new SceneError(`<Tex> can't read ${quoted}: ${error}`);

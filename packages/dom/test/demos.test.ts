@@ -3,6 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { snapshotOf, type Step } from "../src/timeline.ts";
 import type { Item, Snapshot } from "../src/tree.ts";
 import { recordings } from "../src/vite.ts";
 
@@ -23,12 +24,11 @@ const texts = (snapshot: Snapshot): string[] => {
   return out;
 };
 
-const states = (steps: readonly unknown[]) =>
-  steps.flatMap((s) => {
-    // SAFETY: a step is a snapshot, or a snapshot and its timing, or a wait, which has no root.
-    const state = (Array.isArray(s) ? s[0] : s) as Snapshot;
+const states = (steps: readonly Step[]) =>
+  steps.flatMap((step) => {
+    const state = snapshotOf(step);
 
-    return "root" in state ? [state] : [];
+    return state === undefined ? [] : [state];
   });
 
 test("a demo keeps state across clicks and re-renders with new props", async () => {

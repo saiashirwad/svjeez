@@ -3,6 +3,3 @@ export interface JsxSource {
   readonly lineNumber: number;
   readonly columnNumber?: number;
 }
-
-export const place = ({ fileName, lineNumber, columnNumber }: JsxSource): string =>
-  [fileName || undefined, lineNumber, columnNumber].filter((part) => part !== undefined).join(":");

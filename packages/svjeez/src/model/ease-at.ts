@@ -1,5 +1,6 @@
 import { SceneError } from "./scene-error";
 import { EPSILON, ease, isHold, type Ease } from "./time";
+import { splitCurveAtParameter } from "./curve";
 
 const cubic = (a: number, b: number, u: number) =>
   3 * a * u * (1 - u) ** 2 + 3 * b * u * u * (1 - u) + u ** 3;
@@ -28,13 +29,6 @@ export const easeAt = (curve: Ease, progress: number): number => {
     }
   }
 };
-
-type Pair = readonly [number, number];
-
-const mix = (a: Pair, b: Pair, s: number): Pair => [
-  a[0] + (b[0] - a[0]) * s,
-  a[1] + (b[1] - a[1]) * s,
-];
 
 const unit = (x: number): number => Math.min(1, Math.max(0, x));
 
@@ -69,16 +63,16 @@ export const splitEase = (curve: Ease, progress: number, where: string): readonl
 
       const s = (lo + hi) / 2;
 
-      const [p0, p1, p2, p3]: [Pair, Pair, Pair, Pair] = [
+      const [[a, d], f, [e, c]] = splitCurveAtParameter(
         [0, 0],
-        [x1, y1],
-        [x2, y2],
+        [
+          [x1, y1],
+          [x2, y2],
+        ],
         [1, 1],
-      ];
+        s,
+      );
 
-      const [a, b, c] = [mix(p0, p1, s), mix(p1, p2, s), mix(p2, p3, s)];
-      const [d, e] = [mix(a, b, s), mix(b, c, s)];
-      const f = mix(d, e, s);
       const rise = f[1];
       const rest = 1 - f[1];
 

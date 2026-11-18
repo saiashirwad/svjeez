@@ -2,18 +2,111 @@ import { SceneError } from "./scene-error";
 import { easeAt, easeBetween, staysInside } from "./ease-at";
 import { ease } from "./time";
 import { matchRings } from "./paths";
-import type { Contour, Cubic, Geometry, Key, Lane, Vec } from "./ir";
-import { curveLength } from "./curve";
-import { onCircle } from "../author/values";
+import type { Box, Contour, Cubic, Geometry, Key, Lane, Vec } from "./ir";
+import { curveLength, lerpPoint, lineCubic } from "./curve";
 
-const lerp = (a: Vec, b: Vec, u: number): Vec => [
-  a[0] + (b[0] - a[0]) * u,
-  a[1] + (b[1] - a[1]) * u,
+const DEG = Math.PI / 180;
+const KAPPA = (4 / 3) * Math.tan(Math.PI / 8);
+
+export const boxCorners = ({ x, y, width, height }: Box): [Vec, Vec, Vec, Vec] => [
+  [x, y],
+  [x + width, y],
+  [x + width, y + height],
+  [x, y + height],
 ];
 
-const straight = (from: Vec, to: Vec): Cubic => [lerp(from, to, 1 / 3), lerp(from, to, 2 / 3), to];
+export const growBox = ({ x, y, width, height }: Box, by: number): Box => ({
+  x: x - by,
+  y: y - by,
+  width: width + by * 2,
+  height: height + by * 2,
+});
 
-const KAPPA = (4 / 3) * Math.tan(Math.PI / 8);
+export const boundsOfPoints = (points: readonly Vec[]): Box => {
+  const xs = points.map(([x]) => x);
+  const ys = points.map(([, y]) => y);
+  const [x, y] = [Math.min(...xs), Math.min(...ys)];
+
+  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+};
+
+export const onCircle = (radius: number, angle: number): Vec => [
+  radius * Math.cos(angle * DEG),
+  radius * Math.sin(angle * DEG),
+];
+
+const extremes = (a: number, b: number, c: number, d: number): number[] => {
+  const [p, q, r] = [-a + 3 * b - 3 * c + d, 2 * (a - 2 * b + c), -a + b];
+
+  const roots =
+    Math.abs(p) < 1e-12
+      ? Math.abs(q) < 1e-12
+        ? []
+        : [-r / q]
+      : [1, -1].map((sign) => (-q + sign * Math.sqrt(Math.max(0, q * q - 4 * p * r))) / (2 * p));
+
+  return [a, d].concat(
+    roots
+      .filter((t) => t > 0 && t < 1 && q * q - 4 * p * r >= 0)
+      .map((t) => {
+        const s = 1 - t;
+
+        return s * s * s * a + 3 * s * s * t * b + 3 * s * t * t * c + t * t * t * d;
+      }),
+  );
+};
+
+const around = (xs: readonly number[], ys: readonly number[]): Box => {
+  if (xs.length === 0) return { x: 0, y: 0, width: 0, height: 0 };
+  const [x, y] = [Math.min(...xs), Math.min(...ys)];
+
+  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+};
+
+export const outlineBoxOf = (outline: Geometry): Box => {
+  switch (outline.kind) {
+    case "rect":
+      return { x: 0, y: 0, width: outline.size[0], height: outline.size[1] };
+    case "ellipse": {
+      const [rx, ry] = outline.radius;
+
+      return { x: -rx, y: -ry, width: rx * 2, height: ry * 2 };
+    }
+
+    case "arc": {
+      const r = outline.radius;
+
+      return { x: -r, y: -r, width: r * 2, height: r * 2 };
+    }
+
+    case "line":
+      return around([outline.from[0], outline.to[0]], [outline.from[1], outline.to[1]]);
+    case "polygon":
+      return around(
+        outline.points.map((point) => point[0]),
+        outline.points.map((point) => point[1]),
+      );
+    case "path": {
+      const xs: number[] = [];
+      const ys: number[] = [];
+
+      for (const contour of outline.contours) {
+        let from = contour.start;
+
+        xs.push(from[0]);
+        ys.push(from[1]);
+
+        for (const [c1, c2, to] of contour.curves) {
+          xs.push(...extremes(from[0], c1[0], c2[0], to[0]));
+          ys.push(...extremes(from[1], c1[1], c2[1], to[1]));
+          from = to;
+        }
+      }
+
+      return around(xs, ys);
+    }
+  }
+};
 
 export const arcPieces = (sweep: number): number =>
   Math.max(1, Math.ceil(Math.abs(sweep) / 90 - 1e-9));
@@ -42,8 +135,8 @@ export const contoursOf = (geometry: Geometry, pieces?: number): Contour[] => {
       const [tl, tr, br, bl] = geometry.radius;
 
       const round = (from: Vec, to: Vec, bend: Vec): Cubic => [
-        lerp(from, bend, KAPPA),
-        lerp(to, bend, KAPPA),
+        lerpPoint(from, bend, KAPPA),
+        lerpPoint(to, bend, KAPPA),
         to,
       ];
 
@@ -71,7 +164,7 @@ export const contoursOf = (geometry: Geometry, pieces?: number): Contour[] => {
         const [from, to] = [points[side * 2]!, points[side * 2 + 1]!];
         const next = points[(side * 2 + 2) % 8]!;
 
-        curves.push(straight(from, to), round(to, next, bends[side]!));
+        curves.push(lineCubic(from, to), round(to, next, bends[side]!));
       }
 
       return [{ start: points[0]!, curves, closed: true }];
@@ -107,14 +200,14 @@ export const contoursOf = (geometry: Geometry, pieces?: number): Contour[] => {
 
     case "line":
       return [
-        { start: geometry.from, curves: [straight(geometry.from, geometry.to)], closed: false },
+        { start: geometry.from, curves: [lineCubic(geometry.from, geometry.to)], closed: false },
       ];
     case "polygon": {
       const [first, ...rest] = geometry.points;
 
       if (!first) return [];
       const ends = geometry.closed ? [...rest, first] : rest;
-      const curves = ends.map((to, i) => straight(i === 0 ? first : rest[i - 1]!, to));
+      const curves = ends.map((to, i) => lineCubic(i === 0 ? first : rest[i - 1]!, to));
 
       return [{ start: first, curves, closed: geometry.closed }];
     }
@@ -125,12 +218,12 @@ export const contoursOf = (geometry: Geometry, pieces?: number): Contour[] => {
 };
 
 const mixAll = (a: readonly Vec[], b: readonly Vec[], u: number): Vec[] =>
-  a.map((point, i) => lerp(point, b[i]!, u));
+  a.map((point, i) => lerpPoint(point, b[i]!, u));
 
 const mixCurve = (a: Cubic, b: Cubic, u: number): Cubic => [
-  lerp(a[0], b[0], u),
-  lerp(a[1], b[1], u),
-  lerp(a[2], b[2], u),
+  lerpPoint(a[0], b[0], u),
+  lerpPoint(a[1], b[1], u),
+  lerpPoint(a[2], b[2], u),
 ];
 
 const same = (a: readonly Contour[], b: readonly Contour[]): boolean =>
@@ -151,7 +244,7 @@ export const mixGeometry = (a: Geometry, b: Geometry, amount: number, where: str
 
       return {
         kind: "rect",
-        size: lerp(a.size, b.size, u),
+        size: lerpPoint(a.size, b.size, u),
         radius: [
           mixNumber(a.radius[0], b.radius[0], u),
           mixNumber(a.radius[1], b.radius[1], u),
@@ -162,7 +255,7 @@ export const mixGeometry = (a: Geometry, b: Geometry, amount: number, where: str
     case "ellipse":
       if (b.kind !== "ellipse") break;
 
-      return { kind: "ellipse", radius: lerp(a.radius, b.radius, u) };
+      return { kind: "ellipse", radius: lerpPoint(a.radius, b.radius, u) };
     case "arc":
       if (b.kind !== "arc") break;
 
@@ -175,7 +268,7 @@ export const mixGeometry = (a: Geometry, b: Geometry, amount: number, where: str
     case "line":
       if (b.kind !== "line") break;
 
-      return { kind: "line", from: lerp(a.from, b.from, u), to: lerp(a.to, b.to, u) };
+      return { kind: "line", from: lerpPoint(a.from, b.from, u), to: lerpPoint(a.to, b.to, u) };
     case "polygon":
       if (b.kind !== "polygon" || b.points.length !== a.points.length || b.closed !== a.closed)
         break;
@@ -191,7 +284,7 @@ export const mixGeometry = (a: Geometry, b: Geometry, amount: number, where: str
           const other = b.contours[i]!;
 
           return {
-            start: lerp(contour.start, other.start, u),
+            start: lerpPoint(contour.start, other.start, u),
             curves: contour.curves.map((curve, k) => mixCurve(curve, other.curves[k]!, u)),
             closed: contour.closed,
           };

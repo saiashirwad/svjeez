@@ -1,6 +1,17 @@
 import { describe, expect, test } from "bun:test";
-import { Shape, ease, pathData, sampled, scene, span, track, type SceneElement } from "svjeez";
+import {
+  Shape,
+  ease,
+  path,
+  pathData,
+  sampled,
+  scene,
+  span,
+  track,
+  type SceneElement,
+} from "svjeez";
 import { svg } from "svjeez/tools";
+import { contoursOf } from "../src/model/geometry";
 import { blendPaths, commandsOf, matchRings, ringsOf, type Ring } from "../src/model/paths";
 
 const emit = (build: () => SceneElement, reducedMotion?: number | false) =>
@@ -24,6 +35,17 @@ const morphs = (out: string): string[] =>
 const shape = (rings: readonly Ring[]) => rings.map((ring) => [ring.curves.length, ring.closed]);
 
 const ends = (ring: Ring) => ring.curves.map(([, , to]) => to.join(" "));
+
+test("paths, parsed commands, and normalized lines use the same cubic segments", () => {
+  const from = [-3, 2] as const;
+  const to = [8, -4] as const;
+  const drawn = path().moveTo(from).lineTo(to).quadTo([11, 9], [16, 3]).close();
+  const parsed = ringsOf("M-3 2L8 -4Q11 9 16 3Z");
+  const line = contoursOf({ kind: "line", from, to });
+
+  expect(drawn.contours).toEqual(parsed);
+  expect(line[0]?.curves[0]).toEqual(parsed[0]?.curves[0]);
+});
 
 describe("matchRings", () => {
   test("gives shapes with different commands the same rings and curve counts", () => {

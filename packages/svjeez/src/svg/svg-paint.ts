@@ -2,9 +2,9 @@ import type { Color as CssColor } from "../model/color";
 import type { ChannelValues } from "./channels";
 import type { Canvas, Lane as CssLane } from "./compile";
 import { num } from "../model/format";
-import { animate } from "./smil";
+import { animate, windowEnd } from "./smil";
 import { element, type SvgNode } from "./tree";
-import { smilSafeWith } from "../model/geometry";
+import { outlineBoxOf, smilSafeWith } from "../model/geometry";
 import type {
   Animated,
   Box,
@@ -22,7 +22,6 @@ import type {
 import { atRest, isLane, mapLane } from "../model/lane";
 import { blendNumber, valueAt } from "../model/sample";
 import { mixNumber, same } from "../model/steps";
-import { boxOf } from "../author/values";
 
 export interface Defs {
   readonly scene: Scene;
@@ -48,11 +47,10 @@ const byte = (unit: number): string =>
     .padStart(2, "0")
     .toUpperCase();
 
-// SAFETY: a "#" and hex digits, or var() of a token name, is a color as the attribute types spell one.
 export const colorText = (color: Color): CssColor =>
-  (isRgba(color)
+  isRgba(color)
     ? `#${byte(color[0])}${byte(color[1])}${byte(color[2])}${color[3] < 1 ? byte(color[3]) : ""}`
-    : `var(--${color.name})`) as CssColor;
+    : `var(--${color.name})`;
 
 const nextId = (defs: Defs, base: string): string => {
   const count = (defs.counts.get(base) ?? 0) + 1;
@@ -67,14 +65,6 @@ interface Moving {
   readonly still: string;
   readonly nodes: readonly SvgNode[];
 }
-
-const windowEnd = (nodes: readonly SvgNode[]): string | undefined => {
-  const [first] = nodes;
-
-  return first?.kind === "element" && first.attrs["data-loop"] !== undefined
-    ? String(first.attrs.values).split(";").at(-1)
-    : undefined;
-};
 
 const settled = <T>(value: Animated<T>): Animated<T> =>
   isLane(value) && value.keys.every((key) => same(key.value, value.keys[0].value))
@@ -374,7 +364,7 @@ export const clipUrl = (defs: Defs, clip: Animated<Geometry>, shift: Vec, key: s
     const outline: ShapeNode = {
       kind: "shape",
       key: `${key}#clip`,
-      box: boxOf(atRest(clip)),
+      box: outlineBoxOf(atRest(clip)),
       at: shift,
       origin: [0, 0],
       layers: [],
