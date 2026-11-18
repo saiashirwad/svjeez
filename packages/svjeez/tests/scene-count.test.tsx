@@ -373,7 +373,7 @@ describe("misuse", () => {
     [
       count(track(0).to(Number.NaN, span(0, 1))),
       {},
-      'count() in <Text> "n" reads NaN at 0s, which isn\'t a number it can show.',
+      'count() in <Text> "n" reads NaN at 0.033s, which isn\'t a number it can show.',
     ],
   ])("%#: says what is wrong and where", (children, props, problem) => {
     const error = thrown(() => text(children, props));
