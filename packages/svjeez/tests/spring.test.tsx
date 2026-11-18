@@ -163,7 +163,11 @@ describe("spring steps", () => {
 
     const scale = laneOf(node.layers[0]!.scale);
 
-    expect(Math.max(...scale.keys.map((key) => key.value[0]))).toBeGreaterThan(1.2);
+    const peak = Math.max(
+      ...Array.from({ length: 101 }, (_, i) => valueAt(scale, (pop.settle * i) / 100)[0]!),
+    );
+
+    expect(peak).toBeGreaterThan(1.2);
     expect(scale.keys.length).toBeLessThan(16);
   });
 
