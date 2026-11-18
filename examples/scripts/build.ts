@@ -1,6 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { validateSvg } from "svjeez/frames";
+import { isScene, svg as backend, type Scene } from "svjeez/scene";
 
 const ROOT = join(import.meta.dir, "..");
 const OUT = join(ROOT, "dist");
@@ -23,6 +24,17 @@ if (unknown.length > 0) {
   process.exit(1);
 }
 
+type Made = string | Scene;
+
+const isBuild = (value: Made | (() => Made)): value is () => Made => typeof value === "function";
+
+/** A scene module's default export as SVG: a scene, an SVG string, or a function that returns either. */
+const svgOf = (exported: Made | (() => Made)): string => {
+  const made = isBuild(exported) ? exported() : exported;
+
+  return isScene(made) ? backend.emit(made) : made;
+};
+
 const xmllint = Bun.which("xmllint");
 
 const lint = (svg: string): string | undefined => {
@@ -34,11 +46,11 @@ const lint = (svg: string): string | undefined => {
 
 const build = async (name: string): Promise<boolean> => {
   try {
-    const { default: make }: { default: () => string } = await import(
+    const { default: exported }: { default: Made | (() => Made) } = await import(
       join(ROOT, name.includes("/") ? `${name}.tsx` : join(name, "index.tsx"))
     );
 
-    const svg = make();
+    const svg = svgOf(exported);
     const { warnings } = validateSvg(svg);
     const problem = lint(svg);
 

@@ -1,11 +1,11 @@
 /** @jsxImportSource svjeez/scene */
-import { Group, Shape, canvas, ease, rect, scene, span, svg, track } from "svjeez/scene";
+import { Group, Shape, canvas, ease, rect, scene, span, track } from "svjeez/scene";
 import { theme } from "../theme";
 
 const fadeIn = span(1, 0.5);
 const shrink = fadeIn.next(0.4, 2);
 
-const square = scene(
+export default scene(
   {
     size: [200, 120],
     duration: 5,
@@ -27,7 +27,3 @@ const square = scene(
     </Group>
   ),
 );
-
-export default function build(): string {
-  return svg.emit(square);
-}

@@ -1,20 +1,8 @@
 /** @jsxImportSource svjeez/scene */
-import {
-  Group,
-  Shape,
-  canvas,
-  circle,
-  draw,
-  ease,
-  enter,
-  path,
-  scene,
-  span,
-  svg,
-} from "svjeez/scene";
+import { Group, Shape, canvas, circle, draw, ease, enter, path, scene, span } from "svjeez/scene";
 import { theme } from "../theme";
 
-const hello = scene(
+export default scene(
   {
     size: [200, 120],
     duration: 4,
@@ -40,7 +28,3 @@ const hello = scene(
     </Group>
   ),
 );
-
-export default function build(): string {
-  return svg.emit(hello);
-}

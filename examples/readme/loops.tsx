@@ -1,20 +1,8 @@
 /** @jsxImportSource svjeez/scene */
-import {
-  Group,
-  Shape,
-  arc,
-  canvas,
-  circle,
-  enter,
-  scene,
-  span,
-  spin,
-  svg,
-  wiggle,
-} from "svjeez/scene";
+import { Group, Shape, arc, canvas, circle, enter, scene, span, spin, wiggle } from "svjeez/scene";
 import { theme } from "../theme";
 
-const loops = scene(
+export default scene(
   {
     size: [200, 120],
     duration: 4,
@@ -41,7 +29,3 @@ const loops = scene(
     </Group>
   ),
 );
-
-export default function build(): string {
-  return svg.emit(loops);
-}

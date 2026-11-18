@@ -11,7 +11,6 @@ import {
   scene,
   show,
   span,
-  svg,
   svgPath,
   track,
   type SceneElement,
@@ -115,7 +114,7 @@ const Desktop = ({ x, at, from, to }: DesktopProps): SceneElement => (
   </Group>
 );
 
-const gesture = scene(
+export default scene(
   {
     size: [640, 300],
     duration: 9,
@@ -132,7 +131,3 @@ const gesture = scene(
     </Group>
   ),
 );
-
-export default function build(): string {
-  return svg.emit(gesture);
-}

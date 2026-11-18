@@ -1,4 +1,4 @@
-import { getScene, type SceneImage } from "@svjeez/astro/scene";
+import { getScene, type SceneImage, type SceneSource } from "@svjeez/astro/scene";
 
 export const REPO = "https://github.com/saiashirwad/svjeez";
 
@@ -41,7 +41,7 @@ export interface Example {
 }
 
 // The dom example is not in the gallery, and it imports Tailwind, whose native binary the site's bundle cannot load.
-const modules = import.meta.glob<() => string>(
+const modules = import.meta.glob<SceneSource>(
   ["../../examples/*/index.tsx", "!../../examples/dom/index.tsx"],
   {
     eager: true,

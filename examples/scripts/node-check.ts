@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { validateSvg } from "svjeez/frames";
+import { isScene, svg as backend, type Scene } from "svjeez/scene";
 
 const ROOT = join(import.meta.dirname, "..");
 
@@ -18,12 +19,24 @@ const scenes = [
   ...(await flat("site")),
 ];
 
+type Made = string | Scene;
+
+const isBuild = (value: Made | (() => Made)): value is () => Made => typeof value === "function";
+
+/** A scene module's default export as SVG: a scene, an SVG string, or a function that returns either. */
+const svgOf = (exported: Made | (() => Made)): string => {
+  const made = isBuild(exported) ? exported() : exported;
+
+  return isScene(made) ? backend.emit(made) : made;
+};
+
 let failed = 0;
 
 for (const scene of scenes) {
   try {
-    const { default: build }: { default: () => string } = await import(join(ROOT, scene));
-    const { errors } = validateSvg(build());
+    const { default: exported }: { default: Made | (() => Made) } = await import(join(ROOT, scene));
+
+    const { errors } = validateSvg(svgOf(exported));
 
     if (errors.length > 0) throw new Error(errors.join("\n"));
     console.log(`✓ ${scene}`);
