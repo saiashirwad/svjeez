@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { Shape, rect, scene, wiggle } from "svjeez";
 import { svg } from "svjeez/tools";
-import { random } from "../src/random";
+import { random } from "../src/author/random";
 
 const draw = (next: () => number, count = 50) => Array.from({ length: count }, next);
 

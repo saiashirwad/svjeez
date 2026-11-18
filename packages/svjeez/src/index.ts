@@ -14,7 +14,7 @@
  * a timeline verb (`ref.show`, `ref.hide`, `ref.to`) writes the prop's track.
  */
 
-export { scene } from "./scene/lower";
+export { scene } from "./author/lower";
 
 export {
   Group,
@@ -28,13 +28,13 @@ export {
   ref,
   symbol,
   type SceneElement,
-} from "./scene/nodes";
+} from "./author/nodes";
 
-export type { Ref } from "./scene/refs";
+export type { Ref } from "./author/refs";
 
-export { Align, Grid, Stack } from "./scene/layout";
+export { Align, Grid, Stack } from "./author/layout";
 
-export { Arrow } from "./scene/arrow";
+export { Arrow } from "./author/arrow";
 
 export {
   arc,
@@ -49,28 +49,28 @@ export {
   tokens,
   type Geometry,
   type Paint,
-} from "./scene/values";
+} from "./author/values";
 
-export { subtract } from "./scene/holes";
+export { subtract } from "./author/holes";
 
-export { linear, radial } from "./scene/paint";
+export { linear, radial } from "./author/paint";
 
-export { blur, shadow } from "./scene/effects";
+export { blur, shadow } from "./author/effects";
 
-export { motion, track, type Anim, type Track } from "./scene/track";
+export { motion, track, type Anim, type Track } from "./author/track";
 
-export { draw, enter, exit, sampled, shake, spin, wiggle } from "./scene/recipes";
+export { draw, enter, exit, sampled, shake, spin, wiggle } from "./author/recipes";
 
-export { ease, type Curve } from "./scene/spring";
+export { ease, type Curve } from "./author/spring";
 
-export { span, type Span } from "./scene/span";
+export { span, type Span } from "./author/span";
 
-export { par, seq, stagger, timeline, wait, type Action } from "./scene/timeline";
+export { par, seq, stagger, timeline, wait, type Action } from "./author/timeline";
 
-export { morph } from "./scene/morph";
+export { morph } from "./author/morph";
 
-export { picture } from "./picture";
+export { picture } from "./author/picture";
 
 export { font } from "./font/font";
 
-export type { Vec } from "./scene/ir";
+export type { Vec } from "./model/ir";

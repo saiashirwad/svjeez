@@ -1,4 +1,4 @@
-import type { Seconds } from "./time";
+import type { Seconds } from "./model/time";
 
 export { restyle, type RestyleOptions } from "./restyle";
 

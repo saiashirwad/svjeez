@@ -1,5 +1,5 @@
 import { fontFaceRule, fontFaces, isFontValue, type Font } from "./font";
-import type { AttrValue, Element } from "../svg";
+import type { AttrValue, Element } from "../svg/tree";
 
 interface Face {
   readonly name: string;

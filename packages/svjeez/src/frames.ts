@@ -1,9 +1,9 @@
-import type { Seconds } from "./time";
+import type { Seconds } from "./model/time";
 import { loopLength, seek } from "./page";
-import { rateOf } from "./rate";
+import { rateOf } from "./svg/rate";
 import { systemColorScheme } from "./scheme";
 
-export { validateSvg, type ValidationResult } from "./validate";
+export { validateSvg, type ValidationResult } from "./svg/validate";
 
 export {
   checkScene,
@@ -11,7 +11,7 @@ export {
   type CheckReport,
   type CheckRule,
   type Finding,
-} from "./check";
+} from "./check/check";
 
 export type ColorScheme = "light" | "dark";
 

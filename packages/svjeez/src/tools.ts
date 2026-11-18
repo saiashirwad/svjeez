@@ -3,7 +3,7 @@
  * description, boxes and hit-testing for editors, text layout, and every type behind the authoring API.
  */
 
-export { svg, type SvgOptions } from "./scene/svg";
+export { svg, type SvgOptions } from "./svg/svg";
 
 export {
   diagnose,
@@ -11,9 +11,9 @@ export {
   type Diagnostic,
   type Feature,
   type Support,
-} from "./scene/backend";
+} from "./svg/backend";
 
-export type { SceneOptions } from "./scene/lower";
+export type { SceneOptions } from "./author/lower";
 
 export type {
   Child,
@@ -28,7 +28,7 @@ export type {
   StrokeProps,
   TextChild,
   TextProps,
-} from "./scene/nodes";
+} from "./author/nodes";
 
 export type {
   ArcOptions,
@@ -38,9 +38,9 @@ export type {
   RectOptions,
   Theme,
   Token,
-} from "./scene/values";
+} from "./author/values";
 
-export type { LayerValues, Layers, Motion } from "./scene/track";
+export type { LayerValues, Layers, Motion } from "./author/track";
 
 export type {
   DrawOptions,
@@ -51,19 +51,19 @@ export type {
   ShakeAmplitude,
   ShakeOptions,
   WiggleOptions,
-} from "./scene/recipes";
+} from "./author/recipes";
 
-export type { PictureData } from "./picture";
+export type { PictureData } from "./author/picture";
 
 export type { Font, FontFamily, FontOptions, FontStyle, FontValue } from "./font/font";
 
-export type { Anchor, Edge, Place } from "./scene/refs";
+export type { Anchor, Edge, Place } from "./author/refs";
 
-export type { AnchorPlace, TextAnchorPlace } from "./scene/pin";
+export type { AnchorPlace, TextAnchorPlace } from "./author/pin";
 
-export type { AlignProps, Alignment, GridProps, StackProps } from "./scene/layout";
+export type { AlignProps, Alignment, GridProps, StackProps } from "./author/layout";
 
-export type { ArrowProps } from "./scene/arrow";
+export type { ArrowProps } from "./author/arrow";
 
 export {
   layoutRuns,
@@ -74,19 +74,19 @@ export {
   type TextLayout,
   type TextLayoutOptions,
   type TextPiece,
-} from "./scene/text";
+} from "./author/text";
 
-export type { Ease, Seconds } from "./time";
+export type { Ease, Seconds } from "./model/time";
 
-export type { Spring, SpringOptions } from "./scene/spring";
+export type { Spring, SpringOptions } from "./author/spring";
 
-export type { OpenSpanned, Spanned, When } from "./scene/span";
+export type { OpenSpanned, Spanned, When } from "./author/span";
 
-export type { MoveOptions, Moves, Point, StrokeMoves, Timeline } from "./scene/timeline";
+export type { MoveOptions, Moves, Point, StrokeMoves, Timeline } from "./author/timeline";
 
-export type { Derived, MapOptions, Source, Together } from "./scene/derived";
+export type { Derived, MapOptions, Source, Together } from "./author/derived";
 
-export { isLane } from "./scene/lane";
+export { isLane } from "./model/lane";
 
 export type {
   Gradient,
@@ -95,15 +95,15 @@ export type {
   RadialAcrossOptions,
   RadialOptions,
   Stops,
-} from "./scene/paint";
+} from "./author/paint";
 
-export type { Effect, ShadowOptions } from "./scene/effects";
+export type { Effect, ShadowOptions } from "./author/effects";
 
-export type { MorphOptions } from "./scene/morph";
+export type { MorphOptions } from "./author/morph";
 
-export { boxesOf, hitTest, placements, valueAt, type Matrix, type Placed } from "./scene/boxes";
+export { boxesOf, hitTest, placements, valueAt, type Matrix, type Placed } from "./check/boxes";
 
-export { isScene } from "./scene/is-scene";
+export { isScene } from "./model/is-scene";
 
 export {
   inspect,
@@ -113,7 +113,7 @@ export {
   type InspectOptions,
   type Related,
   type Severity,
-} from "./scene/inspect";
+} from "./check/inspect";
 
 export {
   describe,
@@ -121,8 +121,8 @@ export {
   type DescribedFrame,
   type DescribedNode,
   type NodeTimeline,
-} from "./scene/describe";
+} from "./check/describe";
 
-export type * as Model from "./scene/ir";
+export type * as Model from "./model/ir";
 
-export type { Scene } from "./scene/ir";
+export type { Scene } from "./model/ir";

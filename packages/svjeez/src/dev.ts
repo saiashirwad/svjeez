@@ -4,8 +4,8 @@ import { writeFile } from "node:fs/promises";
 import { createServer, type ServerResponse } from "node:http";
 import { basename, dirname, resolve } from "node:path";
 import { loopLength, seek } from "./page";
-import { escapeText } from "./format";
-import type { BuildReport } from "./traced";
+import { escapeText } from "./model/format";
+import type { BuildReport } from "./svg/traced";
 
 export interface DevOptions {
   readonly file: string;

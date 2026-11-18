@@ -19,8 +19,8 @@ import {
   type Vec,
 } from "svjeez";
 import { boxesOf, isLane, placements, svg, type Model, type Spanned } from "svjeez/tools";
-import { alongCurve, curveLength, splitCurve } from "../src/scene/curve";
-import { blendVec, valueAt } from "../src/scene/sample";
+import { alongCurve, curveLength, splitCurve } from "../src/model/curve";
+import { blendVec, valueAt } from "../src/model/sample";
 
 /**
  * A spring that turns, written as curved keys (`Key.via`): fewer keys than straight ones, the same motion through

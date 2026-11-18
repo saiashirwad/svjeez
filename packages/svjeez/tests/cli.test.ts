@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { BuildReport } from "../src/traced";
+import type { BuildReport } from "../src/svg/traced";
 
 const cli = (...args: string[]) =>
   Bun.spawnSync([process.execPath, join(import.meta.dir, "../src/cli.ts"), ...args]);

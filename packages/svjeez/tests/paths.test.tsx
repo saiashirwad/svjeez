@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { Shape, ease, pathData, sampled, scene, span, track, type SceneElement } from "svjeez";
 import { svg } from "svjeez/tools";
-import { blendPaths, commandsOf, matchRings, ringsOf, type Ring } from "../src/paths";
+import { blendPaths, commandsOf, matchRings, ringsOf, type Ring } from "../src/model/paths";
 
 const emit = (build: () => SceneElement, reducedMotion?: number | false) =>
   svg.emit(

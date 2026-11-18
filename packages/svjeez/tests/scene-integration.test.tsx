@@ -31,8 +31,8 @@ import { renderFrames } from "svjeez/frames";
 import { jsx } from "svjeez/jsx-runtime";
 import { restyle } from "svjeez/page";
 import { boxesOf, hitTest, isLane, placements, svg, type Model } from "svjeez/tools";
-import { blendVec, valueAt } from "../src/scene/sample";
-import { startTrace, stopTrace } from "../src/traced";
+import { blendVec, valueAt } from "../src/model/sample";
+import { startTrace, stopTrace } from "../src/svg/traced";
 import integration from "./fixtures/scene/integration";
 
 /**

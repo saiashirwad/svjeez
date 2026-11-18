@@ -16,8 +16,8 @@ import {
   type Vec,
 } from "svjeez";
 import { isLane, type Model } from "svjeez/tools";
-import { easeAt } from "../src/ease-at";
-import { blendNumber, blendVec, valueAt } from "../src/scene/sample";
+import { easeAt } from "../src/model/ease-at";
+import { blendNumber, blendVec, valueAt } from "../src/model/sample";
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Test" }, build);

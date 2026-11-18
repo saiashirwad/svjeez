@@ -13,7 +13,7 @@ import {
   type Metrics,
   type Sfnt,
 } from "./sfnt";
-import { readSource } from "../source";
+import { readSource } from "../author/source";
 
 export type FontFormat = "ttf" | "otf" | "woff" | "woff2";
 

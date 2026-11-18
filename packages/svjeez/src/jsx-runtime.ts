@@ -1,6 +1,6 @@
-import { caller } from "./traced";
-import { remember } from "./scene/identity";
-import { flat, type Child, type SceneElement } from "./scene/nodes";
+import { caller } from "./svg/traced";
+import { remember } from "./author/identity";
+import { flat, type Child, type SceneElement } from "./author/nodes";
 
 export const Fragment = Symbol.for("svjeez.scene.fragment");
 

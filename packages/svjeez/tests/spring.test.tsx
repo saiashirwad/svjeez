@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { easeAt } from "../src/ease-at";
-import { alongCurve } from "../src/scene/curve";
+import { easeAt } from "../src/model/ease-at";
+import { alongCurve } from "../src/model/curve";
 import {
   Group,
   Sequence,

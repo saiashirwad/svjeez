@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-import { timelineCues, type Finding as BrowserFinding } from "./check";
+import { timelineCues, type Finding as BrowserFinding } from "./check/check";
 import { checkScene, renderFrames, type FrameTimes } from "./frames";
 import { parse, type Json, type JsonObject, type Param, type Schema, type Values } from "./params";
 import {
@@ -18,9 +18,9 @@ import {
   type Scene,
   type Severity,
 } from "./tools";
-import { momentsOf, sourcesOf } from "./scene/survey";
-import { startTrace, stopTrace, traceOf, type BuildReport } from "./traced";
-import { validateSvg } from "./validate";
+import { momentsOf, sourcesOf } from "./check/survey";
+import { startTrace, stopTrace, traceOf, type BuildReport } from "./svg/traced";
+import { validateSvg } from "./svg/validate";
 
 const USAGE = `usage:
   svjeez svg <file> [--out file.svg] [--json] [params]

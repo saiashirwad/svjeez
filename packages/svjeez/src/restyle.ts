@@ -1,7 +1,7 @@
-import { REDUCED_MOTION } from "./css";
-import { num } from "./format";
-import type { Seconds } from "./time";
-import { rateOf } from "./rate";
+import { REDUCED_MOTION } from "./svg/css";
+import { num } from "./model/format";
+import type { Seconds } from "./model/time";
+import { rateOf } from "./svg/rate";
 
 export interface RestyleOptions {
   readonly css?: string;

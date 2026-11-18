@@ -14,7 +14,7 @@ import {
   type SceneElement,
 } from "svjeez";
 import { svg, type Motion } from "svjeez/tools";
-import { easeAt } from "../src/ease-at";
+import { easeAt } from "../src/model/ease-at";
 
 const DURATION = 10;
 

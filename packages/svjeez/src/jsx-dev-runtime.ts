@@ -1,8 +1,8 @@
-import type { JsxSource } from "./sources";
-import { caller } from "./traced";
-import { remember } from "./scene/identity";
+import type { JsxSource } from "./author/sources";
+import { caller } from "./svg/traced";
+import { remember } from "./author/identity";
 import { Fragment, build, jsx, type JSX } from "./jsx-runtime";
-import type { Child, SceneElement } from "./scene/nodes";
+import type { Child, SceneElement } from "./author/nodes";
 
 export { Fragment, jsx, jsx as jsxs, type JSX };
 

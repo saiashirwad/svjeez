@@ -19,7 +19,7 @@ import {
   type SceneElement,
 } from "svjeez";
 import { svg, type Hex } from "svjeez/tools";
-import { startTrace, stopTrace } from "../src/traced";
+import { startTrace, stopTrace } from "../src/svg/traced";
 
 const made = (build: () => SceneElement, duration = 2, sources = false): string =>
   svg.emit(scene({ size: [200, 100], duration, title: "Check" }, build), { sources });

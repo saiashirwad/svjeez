@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { ease } from "svjeez";
-import { easeAt } from "../src/ease-at";
-import { splitEase } from "../src/ease-at";
+import { easeAt } from "../src/model/ease-at";
+import { splitEase } from "../src/model/ease-at";
 
 test("linear returns its progress, clamped to the transition", () => {
   expect(easeAt(ease.linear, 0.3)).toBe(0.3);
