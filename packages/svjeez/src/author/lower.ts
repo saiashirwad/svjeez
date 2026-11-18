@@ -918,11 +918,16 @@ const nameFor = (given: NodeElement, name: string | undefined, parent: string): 
   return { name: placed, short, ...(written && { source: written }) };
 };
 
-const lengthOf = (value: Anim<number>, timing: Timing, where: string): Animated<number> => {
+const lengthOf = (
+  value: Anim<number>,
+  timing: Timing,
+  where: string,
+  noun = "length",
+): Animated<number> => {
   const out = animated(value, keep, timing, mixNumber, where);
 
   if (!isLane(out) && !(out >= 0 && Number.isFinite(out)))
-    throw new SceneError(`${where} needs a finite length of 0 or more, got ${out}.`);
+    throw new SceneError(`${where} needs a finite ${noun} of 0 or more, got ${out}.`);
 
   return out;
 };
@@ -931,9 +936,47 @@ const effectOf = (ctx: Ctx, effect: EffectProps, timing: Timing, where: string):
   if (effect.kind === "blur")
     return { kind: "blur", radius: lengthOf(effect.radius, timing, `blur on ${where}`) };
 
+  if (effect.kind === "adjust") {
+    const hue = animated(effect.hue, keep, timing, mixNumber, `adjust hue on ${where}`);
+
+    if (!isLane(hue) && !Number.isFinite(hue))
+      throw new SceneError(`adjust hue on ${where} needs a finite number of degrees, got ${hue}.`);
+
+    const amount = (value: Anim<number>, name: string) =>
+      lengthOf(value, timing, `adjust ${name} on ${where}`, "number");
+
+    return {
+      kind: "adjust",
+      saturate: amount(effect.saturate, "saturate"),
+      hue,
+      brightness: amount(effect.brightness, "brightness"),
+      contrast: amount(effect.contrast, "contrast"),
+    };
+  }
+
+  if (effect.kind === "displace") {
+    const { seed, octaves } = effect;
+
+    if (!Number.isInteger(seed))
+      throw new SceneError(`displace seed on ${where} needs a whole number, got ${seed}.`);
+
+    if (!Number.isInteger(octaves) || octaves < 1)
+      throw new SceneError(
+        `displace octaves on ${where} needs a whole number of 1 or more, got ${octaves}.`,
+      );
+
+    return {
+      kind: "displace",
+      scale: lengthOf(effect.scale, timing, `displace scale on ${where}`),
+      frequency: lengthOf(effect.frequency, timing, `displace frequency on ${where}`, "number"),
+      seed,
+      octaves,
+    };
+  }
+
   if (effect.kind !== "shadow")
     throw new SceneError(
-      `effects on ${where} takes blur() and shadow(), got ${JSON.stringify(effect)}.`,
+      `effects on ${where} takes blur(), shadow(), adjust() and displace(), got ${JSON.stringify(effect)}.`,
     );
   const opacity = animated(effect.opacity, keep, timing, mixNumber, `shadow opacity on ${where}`);
 

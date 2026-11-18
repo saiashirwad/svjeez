@@ -155,6 +155,10 @@ const throughEffects = (box: Box | undefined, effects: readonly Effect[]): Box |
     if (!inner) return inner;
 
     if (effect.kind === "blur") return growBox(inner, 3 * Math.max(0, ...numbers(effect.radius)));
+
+    if (effect.kind === "adjust") return inner;
+
+    if (effect.kind === "displace") return growBox(inner, Math.max(0, ...numbers(effect.scale)));
     const soft = 3 * Math.max(0, ...numbers(effect.blur));
 
     return union([inner, growBox(swept(inner, points(effect.offset)), soft)]);

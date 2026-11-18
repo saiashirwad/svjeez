@@ -91,7 +91,7 @@ export type {
   Stops,
 } from "./author/paint";
 
-export type { Effect, ShadowOptions } from "./author/effects";
+export type { AdjustOptions, DisplaceOptions, Effect, ShadowOptions } from "./author/effects";
 
 export type { MorphOptions } from "./author/morph";
 

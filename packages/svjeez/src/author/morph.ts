@@ -439,11 +439,24 @@ const clipOf = (plan: Plan, entry: Entry): Animated<Geometry> | undefined => {
   return outlinesOf(plan, entry, given, "clip");
 };
 
-const absent = (effect: Effect): Effect =>
-  effect.kind === "blur" ? { kind: "blur", radius: 0 } : { ...effect, opacity: 0 };
+const absent = (effect: Effect): Effect => {
+  switch (effect.kind) {
+    case "blur":
+      return { kind: "blur", radius: 0 };
+    case "adjust":
+      return { ...effect, saturate: 1, hue: 0, brightness: 1, contrast: 1 };
+    case "displace":
+      return { ...effect, scale: 0 };
+    case "shadow":
+      return { ...effect, opacity: 0 };
+  }
+};
 
 const kinds = (effects: readonly Effect[]): string =>
   effects.map((effect) => effect.kind).join(", ");
+
+const ofKind = <K extends Effect["kind"]>(states: readonly Effect[], kind: K) =>
+  states.filter((each): each is Extract<Effect, { kind: K }> => each.kind === kind);
 
 const effectsOf = (plan: Plan, entry: Entry): Effect[] => {
   const lists = entry.filled.map((node) => node.effects);
@@ -455,56 +468,100 @@ const effectsOf = (plan: Plan, entry: Entry): Effect[] => {
       `morph() can't blend the effects of ${named(entry.key)}: one state has ${kinds(odd)} and another ${kinds(template)}. List the same effects in the same order in every state, or none.`,
     );
   const filled = lists.map((list) => (list.length === 0 ? template.map(absent) : list));
-  const what = (name: string) => `${name} of an effect`;
+
+  const number = (name: string, values: readonly Animated<number>[]) =>
+    blend(plan, entry, values, mixNumber, `${name} of an effect`);
 
   return template.map((effect, i): Effect => {
     const states = filled.map((list) => list[i]!);
 
-    if (effect.kind === "blur")
-      return {
-        kind: "blur",
-        radius: blend(
-          plan,
-          entry,
-          states.map((each) => (each.kind === "blur" ? each.radius : 0)),
-          mixNumber,
-          what("blur radius"),
-        ),
-      };
-    const shadows = states.flatMap((each) => (each.kind === "shadow" ? [each] : []));
+    switch (effect.kind) {
+      case "blur":
+        return {
+          kind: "blur",
+          radius: number(
+            "blur radius",
+            ofKind(states, "blur").map((each) => each.radius),
+          ),
+        };
+      case "adjust": {
+        const adjusts = ofKind(states, "adjust");
 
-    return {
-      kind: "shadow",
-      offset: blend(
-        plan,
-        entry,
-        shadows.map((each) => each.offset),
-        mixVec,
-        what("shadow offset"),
-      ),
-      blur: blend(
-        plan,
-        entry,
-        shadows.map((each) => each.blur),
-        mixNumber,
-        what("shadow blur"),
-      ),
-      color: blend(
-        plan,
-        entry,
-        shadows.map((each) => each.color),
-        noMix,
-        what("shadow color"),
-        paintCurve(plan),
-      ),
-      opacity: blend(
-        plan,
-        entry,
-        shadows.map((each) => each.opacity),
-        mixNumber,
-        what("shadow opacity"),
-      ),
-    };
+        return {
+          kind: "adjust",
+          saturate: number(
+            "adjust saturate",
+            adjusts.map((each) => each.saturate),
+          ),
+          hue: number(
+            "adjust hue",
+            adjusts.map((each) => each.hue),
+          ),
+          brightness: number(
+            "adjust brightness",
+            adjusts.map((each) => each.brightness),
+          ),
+          contrast: number(
+            "adjust contrast",
+            adjusts.map((each) => each.contrast),
+          ),
+        };
+      }
+
+      case "displace": {
+        const displaces = ofKind(states, "displace");
+
+        if (displaces.some((each) => each.seed !== effect.seed || each.octaves !== effect.octaves))
+          throw new SceneError(
+            `morph() can't blend the displace of ${named(entry.key)}: its seed or octaves differ between states. Give every state the same seed and octaves, and blend scale and frequency.`,
+          );
+
+        return {
+          kind: "displace",
+          scale: number(
+            "displace scale",
+            displaces.map((each) => each.scale),
+          ),
+          frequency: number(
+            "displace frequency",
+            displaces.map((each) => each.frequency),
+          ),
+          seed: effect.seed,
+          octaves: effect.octaves,
+        };
+      }
+
+      case "shadow": {
+        const shadows = ofKind(states, "shadow");
+
+        return {
+          kind: "shadow",
+          offset: blend(
+            plan,
+            entry,
+            shadows.map((each) => each.offset),
+            mixVec,
+            "shadow offset of an effect",
+          ),
+          blur: number(
+            "shadow blur",
+            shadows.map((each) => each.blur),
+          ),
+          color: blend(
+            plan,
+            entry,
+            shadows.map((each) => each.color),
+            noMix,
+            "shadow color of an effect",
+            paintCurve(plan),
+          ),
+          opacity: number(
+            "shadow opacity",
+            shadows.map((each) => each.opacity),
+          ),
+        };
+      }
+    }
   });
 };
 

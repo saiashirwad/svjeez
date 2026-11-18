@@ -14,6 +14,8 @@ export type Feature =
   | "mask"
   | "blur"
   | "shadow"
+  | "adjust"
+  | "displace"
   | "softBlur"
   | "linearGradient"
   | "radialGradient"
@@ -31,6 +33,8 @@ export const FEATURES: Readonly<Record<Feature, string>> = {
   mask: "a mask",
   blur: "a blur",
   shadow: "a shadow",
+  adjust: "a color adjustment",
+  displace: "a noise displacement",
   softBlur: "a blur under 1.5 units",
   linearGradient: "a linear gradient",
   radialGradient: "a radial gradient",
@@ -101,7 +105,10 @@ const featuresOf = (node: SceneNode): Feature[] => {
   for (const effect of node.effects) {
     used.push(effect.kind);
 
-    if (softens(effect.kind === "blur" ? effect.radius : effect.blur)) used.push("softBlur");
+    const soft =
+      effect.kind === "blur" ? effect.radius : effect.kind === "shadow" ? effect.blur : undefined;
+
+    if (soft !== undefined && softens(soft)) used.push("softBlur");
   }
 
   for (const paint of painted) {

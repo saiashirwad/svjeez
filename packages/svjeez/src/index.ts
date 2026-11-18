@@ -40,7 +40,7 @@ export { moved, subtract } from "./author/holes";
 
 export { linear, radial } from "./author/paint";
 
-export { blur, shadow } from "./author/effects";
+export { adjust, blur, displace, shadow } from "./author/effects";
 
 export { motion, track, type Anim, type Track } from "./author/track";
 
