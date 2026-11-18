@@ -16,7 +16,9 @@ import {
   picture,
   polygon,
   rect,
+  sampled,
   scene,
+  shake,
   show,
   span,
   svg,
@@ -430,5 +432,92 @@ describe("images and instances", () => {
         </Group>
       )),
     ).toThrow('Two different symbols are both named "dot"');
+  });
+});
+
+describe("shake and sampled", () => {
+  test("shake swings, shrinks and settles at rest", () => {
+    const node = only(
+      made(() => <Shape geometry={circle(4)} motion={shake(span(0, 1), { offset: [10, 0] })} />),
+    );
+
+    const offset = node.layers[0]!.offset;
+
+    expect(isLane(offset)).toBe(true);
+
+    if (!isLane(offset)) return;
+
+    expect(offset.keys[1]!.value[0]).toBeCloseTo(-10 * (1 - 1 / 12));
+    expect(offset.keys.at(-1)!.value).toEqual([0, 0]);
+  });
+
+  test("sampled keeps two keys for a straight line and cuts at a jump", () => {
+    const linear = only(
+      made(() => (
+        <Shape
+          geometry={circle(4)}
+          rotate={sampled(span(0, 2), (t) => t * 90, { tolerance: 0.1 })}
+        />
+      )),
+    );
+
+    const stepped = only(
+      made(() => (
+        <Shape
+          geometry={circle(4)}
+          rotate={sampled(span(0, 2), (t) => (t < 1 ? 0 : 90), { tolerance: 0.1 })}
+        />
+      )),
+    );
+
+    const rotate = linear.layers[0]!.rotate;
+    const jumped = stepped.layers[0]!.rotate;
+
+    expect(isLane(rotate) && rotate.keys.map((key) => [key.t, key.value])).toEqual([
+      [0, 0],
+      [2, 180],
+      [4, 180],
+    ]);
+    expect(isLane(jumped) && jumped.keys.some((key) => key.ease?.kind === "steps")).toBe(true);
+  });
+
+  test("sampled geometry keeps its kind", () => {
+    const lane = geometryLane(
+      made(() => (
+        <Shape
+          geometry={sampled(span(0, 1), (t) => arc({ radius: 10, sweep: 30 + 300 * t * t }), {
+            tolerance: 0.2,
+          })}
+          stroke={{ color: "#FF0000" }}
+        />
+      )),
+    );
+
+    expect(lane.keys.every((key) => key.value.kind === "arc")).toBe(true);
+    expect(lane.keys.length).toBeGreaterThan(3);
+  });
+
+  test("sampled.motion simplifies each value with its own tolerance", () => {
+    const node = only(
+      made(() => (
+        <Shape
+          geometry={circle(4)}
+          motion={sampled.motion(span(0, 1), (t) => ({ offset: [t * 10, 0], opacity: 1 - t / 2 }), {
+            tolerance: { offset: 0.1, opacity: 0.01 },
+          })}
+        />
+      )),
+    );
+
+    const [layer] = node.layers;
+
+    expect(isLane(layer!.offset) && layer!.offset.keys[1]!.value).toEqual([10, 0]);
+    expect(isLane(layer!.opacity) && layer!.opacity.keys[1]!.value).toBe(0.5);
+  });
+
+  test("sampled throws on a geometry that changes its structure", () => {
+    expect(() =>
+      sampled(span(0, 1), (t) => (t < 0.5 ? rect(1, 1) : circle(1)), { tolerance: 0.1 }),
+    ).toThrow("doesn't match the first sample");
   });
 });

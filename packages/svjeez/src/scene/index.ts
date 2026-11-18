@@ -63,9 +63,14 @@ export {
   draw,
   enter,
   exit,
+  sampled,
+  shake,
   show,
   spin,
   wiggle,
+  type SampledMotionOptions,
+  type SampledOptions,
+  type ShakeAmplitude,
   type WiggleOptions,
 } from "./recipes";
 
