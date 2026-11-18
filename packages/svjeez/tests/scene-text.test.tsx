@@ -1,6 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { ease, font, Group, Run, Text, morph, scene, span, track, type SceneElement } from "svjeez";
-import { boxesOf, diagnose, isLane, svg, type Model } from "svjeez/tools";
+import {
+  font,
+  Group,
+  rect,
+  Run,
+  Shape,
+  Text,
+  morph,
+  scene,
+  span,
+  track,
+  type SceneElement,
+} from "svjeez";
+import { boxesOf, diagnose, isLane, svg, type Model, type StrokeProps } from "svjeez/tools";
 
 const fixture = (name: string) => new URL(`./fixtures/${name}.ttf`, import.meta.url);
 const regular = await font.load(fixture("SpaceMono-Regular"));
@@ -527,62 +539,76 @@ describe("morph", () => {
   });
 });
 
-describe("text strokes and animated size", () => {
-  test("a stroke on text draws under its fill, and a track can change it", () => {
+describe("text strokes", () => {
+  const stroked = (stroke: Partial<StrokeProps>, props: { scale?: number } = {}) => (
+    <Text
+      key="t"
+      font={space}
+      size={20}
+      fill="#000000"
+      at={[50, 50]}
+      stroke={{ color: "#ff0000", ...stroke }}
+      {...props}
+    >
+      Hi
+    </Text>
+  );
+
+  test("a track can change a text's stroke, and nothing is drawn under the fill unless asked", () => {
     const model = made(() => {
       const color = track<`#${string}`>("#ffffff").to("#ff0000", span(1, 1));
       const width = track(2).to(3, span(1, 1));
 
-      return (
-        <Text key="t" font={space} size={20} fill="#000000" stroke={{ color, width }}>
-          Hi
-        </Text>
-      );
+      return stroked({ color, width });
     });
 
     const node = textOf(model);
 
     expect(isLane(node.stroke!.color)).toBe(true);
     expect(isLane(node.stroke!.width)).toBe(true);
+    expect(node.stroke).toMatchObject({ join: "miter", under: false });
 
     const out = emit(model);
 
-    expect(out).toContain('paint-order="stroke"');
-    expect(out).toContain('stroke-width="2"');
+    expect(out).not.toContain("paint-order");
+    expect(out).not.toContain("stroke-linejoin");
   });
 
-  test("an animated size lays out at the size it starts at and grows from its anchor", () => {
-    const model = made(() => (
-      <Text
-        key="t"
-        font={space}
-        size={track(10).to(20, span(0, 1), ease.linear)}
-        fill="#000000"
-        at={[50, 50]}
-        anchor="bottom-left"
-      >
-        Hi
-      </Text>
-    ));
+  test("under draws the stroke below the fill, on text and shapes alike", () => {
+    const text = emit(made(() => stroked({ under: true })));
 
-    const node = textOf(model);
+    const shape = emit(
+      made(() => <Shape geometry={rect(10, 10)} stroke={{ color: "#ff0000", under: true }} />),
+    );
 
-    expect(node.size).toBe(10);
-
-    const [start, end] = [boxesOf(model, 0)["t"]!, boxesOf(model, 1)["t"]!];
-
-    expect(end.width).toBeCloseTo(start.width * 2, 3);
-    expect(end.x).toBeCloseTo(start.x, 3);
-    expect(end.y + end.height).toBeCloseTo(start.y + start.height, 3);
+    expect(text).toContain('paint-order="stroke"');
+    expect(shape).toContain('paint-order="stroke"');
   });
 
-  test("a size that starts at 0 says to scale the text in instead", () => {
+  test("under is the same in every state of a morph", () => {
     expect(() =>
-      made(() => (
-        <Text font={space} size={track(0).to(20, span(0, 1))} fill="#000000">
-          Hi
-        </Text>
-      )),
-    ).toThrow("needs a size above 0 at the start, got 0.");
+      made(() => morph(stroked({ under: true }), stroked({ under: false }), span(1, 1))),
+    ).toThrow("cap, join, dash, nonScaling or under differs");
+  });
+
+  test("a non-scaling stroke on scaled text keeps its width", () => {
+    const out = emit(made(() => stroked({ nonScaling: true }, { scale: 2 })));
+
+    expect(out).toContain('vector-effect="non-scaling-stroke"');
+  });
+
+  test("the stroke is part of the text's box", () => {
+    const bare = boxesOf(
+      made(() => stroked({ width: 0 })),
+      0,
+    )["t"]!;
+
+    const box = boxesOf(
+      made(() => stroked({ width: 4 })),
+      0,
+    )["t"]!;
+
+    expect(box.width).toBeCloseTo(bare.width + 4, 6);
+    expect(box.height).toBeCloseTo(bare.height + 4, 6);
   });
 });

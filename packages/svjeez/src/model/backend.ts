@@ -110,7 +110,8 @@ const featuresOf = (node: SceneNode): Feature[] => {
     if ("kind" in paint) used.push(paint.kind === "token" ? "liveTokens" : `${paint.kind}Gradient`);
   }
 
-  if (node.kind === "shape" && node.stroke?.nonScaling) used.push("nonScalingStroke");
+  if ((node.kind === "shape" || node.kind === "text") && node.stroke?.nonScaling)
+    used.push("nonScalingStroke");
 
   if (
     node.kind === "shape" &&

@@ -638,13 +638,21 @@ const strokeOf = (
 
   const styles = strokes.flatMap((stroke) =>
     stroke
-      ? [{ cap: stroke.cap, join: stroke.join, dash: stroke.dash, nonScaling: stroke.nonScaling }]
+      ? [
+          {
+            cap: stroke.cap,
+            join: stroke.join,
+            dash: stroke.dash,
+            nonScaling: stroke.nonScaling,
+            under: stroke.under,
+          },
+        ]
       : [],
   );
 
   if (styles.some((each) => !same(each, styles[0])))
     throw new SceneError(
-      `morph() can't blend ${named(entry.key)}: its stroke's cap, join, dash or nonScaling differs between states, and those don't animate. Give the stroke the same style in every state.`,
+      `morph() can't blend ${named(entry.key)}: its stroke's cap, join, dash, nonScaling or under differs between states, and those don't animate. Give the stroke the same style in every state.`,
     );
 
   return {

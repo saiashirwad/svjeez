@@ -128,6 +128,7 @@ export interface Stroke {
   readonly join: "miter" | "round" | "bevel";
   readonly dash?: readonly number[];
   readonly nonScaling: boolean;
+  readonly under: boolean;
 }
 
 export interface Layer {

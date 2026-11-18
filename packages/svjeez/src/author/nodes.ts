@@ -37,6 +37,8 @@ export interface StrokeProps {
   readonly join?: "miter" | "round" | "bevel";
   readonly dash?: readonly number[];
   readonly nonScaling?: boolean;
+  /** Draw the stroke under the fill. */
+  readonly under?: boolean;
 }
 
 export interface Bounds extends Box {
@@ -86,7 +88,7 @@ export interface TextProps extends Omit<Common, "anchor"> {
   readonly font: FontValue;
   readonly weight?: number;
   readonly italic?: boolean;
-  readonly size: Anim<number>;
+  readonly size: number;
   readonly fill?: Anim<Paint>;
   readonly stroke?: StrokeProps;
   readonly align?: "start" | "center" | "end";
