@@ -10,6 +10,8 @@ import {
   Chip,
   Edge,
   Node,
+  checkDraws,
+  drawnBy,
   edgeKey,
   extent,
   keyed,
@@ -166,6 +168,7 @@ export function flowchart<
 
   const edgeKeys = keyed(lines.map((e) => edgeKey(e.from, e.to)));
   const timed = lines.map((e) => drawn(e.from, e.to));
+  checkDraws(options.draw, edgeKeys, WHAT);
 
   const parts = new Map<string, Spanned | undefined>([
     ...order.map((id) => [id, shown.get(id)] as const),
@@ -204,7 +207,7 @@ export function flowchart<
           key={edgeKeys[i]!}
           look={l}
           points={e.points}
-          drawn={timed[i]}
+          draw={drawnBy(options.draw, edgeKeys[i]!, timed[i], WHAT)}
           dash={e.style?.line === "dotted" ? [2, 4] : undefined}
           width={e.style?.line === "thick" ? 3 : undefined}
           head={e.style?.head}

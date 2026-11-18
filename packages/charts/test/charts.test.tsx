@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Group, font, morph, scene, span, tokens, type SceneElement } from "svjeez";
+import { Group, font, morph, scene, span, tokens, track, type SceneElement } from "svjeez";
 import { SceneError, boxesOf, inspect, svg, type Scene } from "svjeez/tools";
 import { Chart, area, bars, line, type Plot } from "../src/index.ts";
 
@@ -115,9 +115,12 @@ describe("drawing", () => {
         series={[
           bars(
             { Jan: 10, Feb: 40, Mar: 25 },
-            { name: "a", color: theme.blue, span: span(0.2, 1), values: true },
+            { name: "a", color: theme.blue, draw: track(0).to(1, span(0.2, 1)), values: true },
           ),
-          bars({ Jan: 20, Feb: 10, Mar: 5 }, { name: "b", color: theme.red, span: span(0.4, 1) }),
+          bars(
+            { Jan: 20, Feb: 10, Mar: 5 },
+            { name: "b", color: theme.red, draw: track(0).to(1, span(0.4, 1)) },
+          ),
         ]}
       />
     ));
@@ -142,7 +145,7 @@ describe("drawing", () => {
         series={[
           bars(
             { Jan: 10, Feb: 40, Mar: 25 },
-            { color: theme.blue, span: span(0.2, 1), values: true },
+            { color: theme.blue, draw: track(0).to(1, span(0.2, 1)), values: true },
           ),
           area(
             [
@@ -150,7 +153,13 @@ describe("drawing", () => {
               ["Feb", 40],
               ["Mar", 25],
             ],
-            { name: "trend", color: theme.red, span: span(1, 1), dots: true, label: "trend" },
+            {
+              name: "trend",
+              color: theme.red,
+              draw: track(0).to(1, span(1, 1)),
+              dots: true,
+              label: "trend",
+            },
           ),
         ]}
       />

@@ -62,7 +62,7 @@ const checkSeries = (series: readonly Series[], x: XScale): void => {
 
   for (const s of series) {
     const label = labelOf(s);
-    const { name, span } = s.options;
+    const { name } = s.options;
 
     if (names.has(name))
       fail(
@@ -70,12 +70,6 @@ const checkSeries = (series: readonly Series[], x: XScale): void => {
         `Give each series of one chart its own name: ${s.kind}(data, { name: "…", color }).`,
       );
     names.add(name);
-
-    if (span && (!(span.over > 0) || !Number.isFinite(span.start + span.over)))
-      fail(
-        `${label} has a span of ${span.start}s for ${span.over}s.`,
-        "Give it span(start, over) with a positive over.",
-      );
 
     if (s.kind === "bars" && x.kind !== "band")
       fail(

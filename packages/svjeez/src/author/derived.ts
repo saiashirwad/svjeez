@@ -48,6 +48,10 @@ export class Derived<T> {
 export const isDerived = <T>(value: Anim<T> | Anchor | undefined): value is Derived<T> =>
   value instanceof Derived;
 
+/** A value, track or derived track read through fn: a plain value is mapped now, a timeline stays one. */
+export const through = <T, U>(value: Anim<T>, fn: (value: T) => U): Anim<U> =>
+  isTrack(value) || isDerived(value) ? value.map(fn) : fn(value);
+
 const startOf = (source: Base): Read =>
   // SAFETY: a source track holds numbers or points, the values read() takes.
   isTrack(source) ? (passageOf(source as Track<Read>).data.initial.value as Read) : source;

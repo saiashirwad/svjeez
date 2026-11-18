@@ -11,7 +11,6 @@ import {
   Text,
   arc,
   circle,
-  draw,
   ease,
   enter,
   morph,
@@ -735,7 +734,7 @@ describe("arrows", () => {
           from={a.right}
           to={b.left}
           stroke={{ color: "#000000" }}
-          trim={draw(span(2, 1))}
+          draw={track(0).to(1, span(2, 1))}
         />
       </Group>
     ));
@@ -754,7 +753,7 @@ describe("arrows", () => {
           from={[0, 0]}
           to={[100, 0]}
           stroke={{ color: "#000000" }}
-          trim={draw(span(1, 1), { curve: ease.linear })}
+          draw={track(0).to(1, span(1, 1), ease.linear)}
         />
       </Group>
     ));

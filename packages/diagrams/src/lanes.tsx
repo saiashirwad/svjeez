@@ -20,6 +20,8 @@ import {
   checkIds,
   Chip,
   Edge,
+  checkDraws,
+  drawnBy,
   extent,
   known,
   labelOf,
@@ -128,6 +130,12 @@ export function lanes<const L extends Record<string, Labelled>>(
   const when = (t: number): number => (reveal?.start ?? 0) + t * rate;
   const at = (t: number, over: number): Spanned => span(when(t), over * rate);
   const role = (lane: string) => rows.find((r) => r.id === lane)!.role;
+  checkDraws(
+    options.draw,
+    links.map((_, i) => `link-${i + 1}`),
+    WHAT,
+  );
+
   const area = { x: out.track.x + dx, y: out.track.y + dy, w: out.track.w, h: out.track.h };
   const stripe = mix(l.colors.line, l.colors.background, 0.08);
 
@@ -248,7 +256,12 @@ export function lanes<const L extends Record<string, Labelled>>(
 
         return (
           <Group key={`link-${i + 1}`}>
-            <Edge key="arrow" look={l} points={points} drawn={reveal && fire} />
+            <Edge
+              key="arrow"
+              look={l}
+              points={points}
+              draw={drawnBy(options.draw, `link-${i + 1}`, reveal && fire, WHAT)}
+            />
             {reveal && (
               <Shape
                 key="pulse"

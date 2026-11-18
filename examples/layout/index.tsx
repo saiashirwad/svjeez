@@ -7,7 +7,6 @@ import {
   Text,
   canvas,
   circle,
-  draw,
   ease,
   enter,
   motion,
@@ -99,14 +98,14 @@ export default scene(
           to={place.left}
           inset={6}
           stroke={{ color: theme.blue }}
-          trim={draw(span(1.5, 0.5))}
+          draw={track(0).to(1, span(1.5, 0.5))}
         />
         <Arrow
           from={place.right}
           to={follow.left}
           inset={6}
           stroke={{ color: theme.blue }}
-          trim={draw(span(1.9, 0.5))}
+          draw={track(0).to(1, span(1.9, 0.5))}
         />
       </Group>
       <Align place="bottom" inset={22}>
