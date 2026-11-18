@@ -16,7 +16,8 @@ import type { Ease, Seconds } from "../motion";
  * 1. A node draws in a frame of its own, where its geometry's coordinates are: a rect from `[0, 0]`, a circle, an
  *    ellipse or an arc around it, a text with its box's top-left there. `box` is what it paints in that frame.
  * 2. `at` puts that frame's origin in the parent's frame. Then each layer, the outermost first, moves by its
- *    `offset`, rotates and scales, all around `origin`, a fixed point in the node's frame.
+ *    `offset`, rotates and scales, all around `origin`, a fixed point in the node's frame. The author names it on the
+ *    box, as `anchor` is named, so it means the same point whatever the node's kind.
  * 3. Nothing is inherited. A node with no fill has no fill.
  * 4. A node is drawn in this order: its own content (a group's children, the first underneath), then cut to `clip`,
  *    then masked by `mask`, then each of `effects` in turn, and only then placed by `at` and the layers, whose
@@ -249,7 +250,10 @@ interface Base {
    */
   readonly box: Box;
   readonly at: Animated<Vec>;
-  /** The point the layers turn and scale around, in the node's own frame. */
+  /**
+   * The point the layers turn and scale around, in the node's own frame. An author writes it on the box, as a place or
+   * a point from the box's top-left, and lowering puts it in the frame.
+   */
   readonly origin: Vec;
   /** The outermost first. The node's own `rotate`, `scale` and `opacity` are the last. A layer that changes nothing is left out. */
   readonly layers: readonly Layer[];

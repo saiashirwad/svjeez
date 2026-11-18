@@ -65,8 +65,10 @@ export default scene(
       />
       <Shape geometry={wave} stroke={{ color: theme.raised, width: 2, join: "round" }} />
       <Shape
-        geometry={line(CENTER, [CENTER[0] + RADIUS, CENTER[1]])}
-        origin={CENTER}
+        geometry={line([0, 0], [RADIUS, 0])}
+        at={CENTER}
+        anchor="left"
+        origin="left"
         rotate={theta.map((t) => -t)}
         stroke={{ color: theme.text, width: 2, cap: "round" }}
       />

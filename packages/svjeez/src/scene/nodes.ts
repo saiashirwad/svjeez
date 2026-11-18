@@ -2,7 +2,7 @@ import type { FontValue } from "../font/font";
 import type { Seconds } from "../motion";
 import type { PictureData } from "../picture";
 import type { Authored, Vec } from "./ir";
-import type { Anchor, Ref } from "./refs";
+import type { Anchor, Place, Ref } from "./refs";
 import type { AnchorPlace, TextAnchorPlace } from "./pin";
 import type { Settle } from "./settle";
 import type { MorphElement } from "./morph";
@@ -32,8 +32,11 @@ export interface Common {
    * instance's default is its frame's origin.
    */
   readonly anchor?: AnchorPlace;
-  /** What `rotate` and `scale` turn around, in the node's own frame: the center of its box unless you say. */
-  readonly origin?: "center" | "top-left" | Vec;
+  /**
+   * What `rotate` and `scale` turn around: a place on the node's box, as `anchor` names one, or a point measured from
+   * the box's top-left, as `[20, 0]`. The box is what the node paints, a stroke included. Default `"center"`.
+   */
+  readonly origin?: Place | Vec;
   /** Degrees, clockwise. */
   readonly rotate?: Anim<number>;
   readonly scale?: Anim<number> | Anim<Vec>;

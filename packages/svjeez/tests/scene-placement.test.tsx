@@ -561,6 +561,78 @@ describe("the nine places", () => {
   });
 });
 
+describe("origin is named on the box, as anchor is", () => {
+  /** Each node's origin, in its own frame, by key. */
+  const origins = (build: () => SceneElement): Record<string, Model.Vec> =>
+    Object.fromEntries(made(build).root.children.map((node) => [node.key, node.origin]));
+
+  test("a place or a point from the box's top-left, the same for every kind", () => {
+    const dot = symbol(() => <Shape geometry={rect(10, 10)} at={[5, 5]} fill="#FF0000" />);
+
+    const found = origins(() => (
+      <Group>
+        <Shape
+          key="rect"
+          geometry={rect(20, 10)}
+          stroke={{ color: "#000000", width: 2 }}
+          origin={[0, 0]}
+        />
+        <Shape key="circle" geometry={circle(5)} at={[50, 50]} fill="#000000" origin={[0, 0]} />
+        <Shape key="ring" geometry={circle(5)} fill="#000000" />
+        <Shape
+          key="line"
+          geometry={line([10, 50], [90, 50])}
+          stroke={{ color: "#000000" }}
+          origin="left"
+        />
+        <Text key="text" font={mono} size={10} fill="#000000" origin="bottom-right">
+          Hi
+        </Text>
+        <Image key="image" src={pic} origin={[10, 5]} />
+        <Instance key="instance" of={dot} origin="top-left" />
+        <Group key="group" origin={[2, 0]}>
+          <Shape geometry={rect(10, 10)} at={[5, 5]} fill="#000000" />
+        </Group>
+      </Group>
+    ));
+
+    // A stroked rect's frame starts at its outline, half the stroke inside the box.
+    expect(found.rect).toEqual([-1, -1]);
+    // A circle's frame is around its center, but its origin is still read from its box.
+    expect(found.circle).toEqual([-5, -5]);
+    expect(found.ring).toEqual([0, 0]);
+    expect(found.line).toEqual([10, 50]);
+    expect(found.image).toEqual([10, 5]);
+    expect(found.instance).toEqual([5, 5]);
+    expect(found.group).toEqual([7, 5]);
+
+    const text = made(() => (
+      <Text key="text" font={mono} size={10} fill="#000000">
+        Hi
+      </Text>
+    )).root.children[0]!.box;
+
+    expect(found.text).toEqual([text.width, text.height]);
+  });
+
+  test("a turn around the center keeps a circle where it is", () => {
+    const found = boxes(() => (
+      <Shape key="dot" geometry={circle(5)} at={[20, 20]} rotate={180} fill="#000000" />
+    ));
+
+    expect(found.dot).toEqual([20, 20, 10, 10]);
+  });
+
+  test("a wrong origin is told what to write", () => {
+    expect(() =>
+      // @ts-expect-error: "middle" is not a place.
+      made(() => <Shape key="s" geometry={rect(10, 10)} fill="#000000" origin="middle" />),
+    ).toThrow(
+      'origin on "s" takes a place, one of "top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right", or a point measured from its box\'s top-left, such as [20, 0], got "middle".',
+    );
+  });
+});
+
 describe("errors say what to write", () => {
   test("an unknown anchor, a baseline off text, and an anchor on an empty box", () => {
     expect(() =>

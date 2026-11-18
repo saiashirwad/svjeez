@@ -2,12 +2,12 @@ import { EPSILON, type Seconds } from "../motion";
 import type { Animated, Box, Layer, SceneNode, Vec } from "./ir";
 import { atRest, isLane } from "./lane";
 import { isDerived } from "./derived";
-import { isAnchor, type Anchor, type Ref } from "./refs";
+import { isAnchor, type Anchor, type Place, type Ref } from "./refs";
 import { mixGeometry } from "./geometry";
 import { blendNumber, blendVec, breaksOf, follow, laneFrom, valueAt } from "./sample";
 import { isTrack } from "./track";
 import { lookOf, paintedBoxOf } from "./painted";
-import { homed, homeOf, pinned, type TextAnchorPlace } from "./pin";
+import { PLACE_LIST, PLACES, homed, homeOf, pinned, type TextAnchorPlace } from "./pin";
 
 /**
  * The second pass of lowering. The first lowers every node where it stands; this one places what could only be placed
@@ -54,7 +54,7 @@ interface Note {
   readonly pin?: TextAnchorPlace;
   /** A group whose anchor a morph state already applied, with its box in that state. */
   readonly pinned?: true;
-  readonly origin: "center" | "top-left" | Vec | undefined;
+  readonly origin: Place | Vec | undefined;
   readonly settle?: Settle;
 }
 
@@ -112,7 +112,7 @@ interface Written {
   readonly ref?: Ref;
   readonly at?: unknown;
   readonly anchor?: TextAnchorPlace;
-  readonly origin?: "center" | "top-left" | Vec;
+  readonly origin?: Place | Vec;
 }
 
 /** Notes a node as the first pass lowers it, with the kind it was written as, and the ref it carries. */
@@ -208,11 +208,25 @@ export const around = (
 };
 
 /** The point a node turns and scales around, in its frame: the center of its box unless it says. */
-export const originOf = (origin: Note["origin"], box: Box): Vec => {
-  if (origin === undefined || origin === "center")
-    return [box.x + box.width / 2, box.y + box.height / 2];
+/**
+ * The point a node turns and scales around, in its own frame, from `origin` as written: a place on its box, or a
+ * point measured from the box's top-left. The center of the box unless it says. `key` names the node, for errors.
+ */
+/** Whether an origin is written as a point from the box's top-left, not as a place. */
+const isOffset = (origin: Place | Vec): origin is Vec => Array.isArray(origin);
 
-  return origin === "top-left" ? [box.x, box.y] : origin;
+export const originOf = (origin: Note["origin"], box: Box, key: string): Vec => {
+  if (origin === undefined) return [box.x + box.width / 2, box.y + box.height / 2];
+
+  if (isOffset(origin)) return [box.x + origin[0], box.y + origin[1]];
+
+  if (!Object.hasOwn(PLACES, origin))
+    throw new Error(
+      `origin on "${key}" takes a place, one of ${PLACE_LIST}, or a point measured from its box's top-left, such as [20, 0], got ${JSON.stringify(origin)}.`,
+    );
+  const [u, v] = PLACES[origin];
+
+  return [box.x + box.width * u, box.y + box.height * v];
 };
 
 const turns = (layer: Layer): boolean =>
@@ -409,7 +423,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
       d.box = d.note?.arranged ? d.node.box : around(d.children);
     }
 
-    d.origin = originOf(d.note?.origin, d.box);
+    d.origin = originOf(d.note?.origin, d.box, d.node.key);
     d.measuring = 2;
   };
 
@@ -459,7 +473,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
   const ready = (d: Draft): void => {
     place(d);
 
-    if (d.node.layers.some(turns) && !Array.isArray(d.note?.origin)) measure(d);
+    if (d.node.layers.some(turns)) measure(d);
   };
 
   const chain = (from: Draft, to: Draft | undefined): Draft[] => {
@@ -580,7 +594,13 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
     if (asked?.kind !== "arrange") {
       const box = around(children);
 
-      return { ...node, children, box, at: pin(box), origin: originOf(note?.origin, box) };
+      return {
+        ...node,
+        children,
+        box,
+        at: pin(box),
+        origin: originOf(note?.origin, box, node.key),
+      };
     }
 
     for (const child of children) {
@@ -603,7 +623,7 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
       ...node,
       box,
       at: pin(box),
-      origin: originOf(note!.origin, box),
+      origin: originOf(note!.origin, box, node.key),
       children: children.map((child, i) => ({
         ...child,
         at: [slots[i]![0] - child.box.x, slots[i]![1] - child.box.y],

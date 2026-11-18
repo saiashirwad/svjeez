@@ -217,7 +217,7 @@ const base = (props: Omit<Common, "anchor">, box: Box, key: string, timing: Timi
           `at on ${where}`,
           true,
         ),
-    origin: originOf(props.origin, box),
+    origin: originOf(props.origin, box, key),
     layers: [...layersOf(props.motion).map((layer) => layerOf(layer, timing, where)), own].filter(
       (layer) => !same(layer, IDLE),
     ),

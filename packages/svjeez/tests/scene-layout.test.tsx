@@ -382,8 +382,9 @@ describe("anchors", () => {
 
     const model = made(() => (
       <Group>
-        <Group at={[100, 50]} rotate={spin({ every: 4 })} origin={[0, 0]}>
+        <Group at={[100, 50]} rotate={spin({ every: 4 })}>
           <Shape fill="#000000" ref={target} geometry={circle(2)} anchor="center" at={[30, 0]} />
+          <Shape fill="#000000" geometry={circle(2)} anchor="center" at={[-30, 0]} />
         </Group>
         <Shape fill="#000000" key="pin" geometry={circle(1)} anchor="center" at={target.center} />
       </Group>
