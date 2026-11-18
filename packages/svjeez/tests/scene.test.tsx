@@ -17,7 +17,7 @@ import {
   track,
   type SceneElement,
 } from "svjeez";
-import { diagnose, isLane, isScene, svg, type Model } from "svjeez/tools";
+import { diagnose, isLane, isScene, svg, type Layers, type Model } from "svjeez/tools";
 import { FEATURES } from "../src/model/backend";
 
 const theme = tokens({ light: { ink: "#111111" }, dark: { ink: "#EEEEEE" } });
@@ -46,6 +46,64 @@ describe("lowering", () => {
       "card/title",
       "card/1",
     ]);
+  });
+
+  test("a component key follows the instance when siblings change order", () => {
+    const Badge = ({ width }: { width: number }) => (
+      <Shape fill="#111111" geometry={rect(width, 5)} />
+    );
+
+    const keys = (names: string[]) =>
+      made(() => (
+        <Group>
+          {names.map((name) => (
+            <Badge key={name} width={name === "alice" ? 10 : 20} />
+          ))}
+        </Group>
+      )).root.children.map(({ key, box }) => [key, box.width]);
+
+    expect(keys(["alice", "bob"])).toEqual([
+      ["alice", 10],
+      ["bob", 20],
+    ]);
+    expect(keys(["bob", "alice"])).toEqual([
+      ["bob", 20],
+      ["alice", 10],
+    ]);
+  });
+
+  test("a keyed fragment scopes its children without adding a layout node", () => {
+    const Pair = () => (
+      <>
+        <Shape key="left" geometry={rect(10, 5)} fill="#111111" />
+        <Shape key="right" geometry={rect(10, 5)} fill="#111111" />
+      </>
+    );
+
+    const model = made(() => (
+      <Group>
+        <Pair key="a" />
+        <Pair key="b" />
+      </Group>
+    ));
+
+    expect(model.root.children.map(({ key }) => key)).toEqual([
+      "a/left",
+      "a/right",
+      "b/left",
+      "b/right",
+    ]);
+  });
+
+  test("a component can combine its motion with a caller's layers", () => {
+    const turn = motion({ rotate: 5 });
+    const slide = motion({ offset: [3, 2] });
+    const fade = motion({ opacity: 0.5 });
+
+    const layers = (stack: Layers) =>
+      only(made(() => <Shape fill="#111111" geometry={rect(10, 5)} motion={stack} />)).layers;
+
+    expect(layers([turn, [false, slide, [undefined, fade]]])).toEqual(layers([turn, slide, fade]));
   });
 
   test("two siblings with one key throw", () => {

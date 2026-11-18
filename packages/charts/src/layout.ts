@@ -11,7 +11,7 @@ export interface Tick {
 }
 
 export interface Layout {
-  readonly plot: Plot;
+  readonly plot: Omit<Plot, "when">;
   readonly width: number;
   readonly height: number;
   readonly yTicks: readonly Tick[];

@@ -28,7 +28,7 @@ Spans: `span(start, over)`; `span(start)` runs to the end of the clock. `.end`, 
 
 ## Layers
 
-`motion` takes one layer or a list, the first outermost. A layer moves `offset` (from where `at` put the node), `rotate`, `scale` and `opacity`, all around the node's `origin`; layers multiply opacity and add offsets on top of the node's own props.
+`motion` takes one layer or a nested list, the first outermost. A component can combine its entrance with caller-supplied layers using `motion={[enter(intro), props.motion]}`. A layer moves `offset` (from where `at` put the node), `rotate`, `scale` and `opacity`, all around the node's `origin`; layers multiply opacity and add offsets on top of the node's own props.
 
 - `enter(span, { from, curve })` arrives from `from` (default `{ opacity: 0 }`) to rest; `exit(span, { to, curve })` leaves rest for `to`.
 - `wiggle(amplitude, { seed, rate, period, curve })`: seeded noise around rest that loops seamlessly. Change `seed` to reroll.

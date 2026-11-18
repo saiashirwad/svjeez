@@ -122,6 +122,40 @@ describe("drawing", () => {
       />
     ));
 
+  test("an overlay can follow the last animated mark in a series", () => {
+    const points = [
+      ["Jan", 2],
+      ["Mar", 4],
+    ] as const;
+
+    const options = { color: theme.blue, span: span(1, 0.2) };
+
+    sceneOf(() => (
+      <Chart
+        {...look}
+        size={[300, 200]}
+        x={band}
+        series={[
+          bars(points, { ...options, values: true }),
+          line(points, { ...options, dots: true }),
+          area(points, { ...options, label: "sales" }),
+          bars({ Jan: 1 }, { name: "static", color: theme.red }),
+        ]}
+      >
+        {({ when }) => {
+          expect(when("bars").start).toBe(1);
+          expect(when("bars").end).toBeCloseTo(1.16 + 0.12 + 0.35);
+          expect(when("line").end).toBeCloseTo(1.5);
+          expect(when("area").next(0.3).start).toBeCloseTo(1.6);
+          expect(when("static")).toEqual(span(0, 0));
+          expect(() => when("typo")).toThrow('no series named "typo"');
+
+          return <Group />;
+        }}
+      </Chart>
+    ));
+  });
+
   test("bars side by side share a band, and stay on the canvas", () => {
     const view = sample();
     const boxes = Object.entries(boxesOf(view, 4));

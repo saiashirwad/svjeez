@@ -623,24 +623,57 @@ const inside = (timing: Timing, begin: Seconds, over: Seconds | undefined): Timi
   };
 };
 
+const claimKey = (
+  name: string | undefined,
+  parent: string,
+  taken: Set<string>,
+  element: SceneElement,
+): string => {
+  if (name !== undefined && taken.has(name))
+    throw new SceneError(
+      `Two nodes are both keyed "${name}"${parent && ` inside ${named(parent)}`}.`,
+      "Give each a key of its own.",
+      { node: `"${name}"`, ...(writtenAt(element) && { source: writtenAt(element)! }) },
+    );
+
+  if (name?.includes("/"))
+    throw new SceneError(`A key can't contain "/", got "${name}".`, "Join words with - or _.", {
+      ...(writtenAt(element) && { source: writtenAt(element)! }),
+    });
+  let own = name;
+
+  for (let index = taken.size; own === undefined; index++)
+    if (!taken.has(String(index))) own = String(index);
+  taken.add(own);
+
+  return parent ? `${parent}/${own}` : own;
+};
+
 const lowerAll = (
   ctx: Ctx,
   elements: readonly SceneElement[],
   timing: Timing,
   parent: string,
   taken: Set<string> = new Set(),
+  scope = parent,
 ): SceneNode[] =>
   elements.flatMap((element): SceneNode[] => {
     const given = sceneElement(element, parent ? named(parent) : "The scene");
 
-    if (given.type === "fragment") return lowerAll(ctx, given.children, timing, parent, taken);
+    if (given.type === "fragment") {
+      if (given.key === undefined)
+        return lowerAll(ctx, given.children, timing, parent, taken, scope);
+      const key = claimKey(given.key, scope, taken, given);
+
+      return lowerAll(ctx, given.children, timing, parent, new Set(), key);
+    }
 
     if (given.type === "sequence") {
       const clocked = inside(timing, given.start, given.over);
 
       if (given.timeline) ctx.cues.claim(given.timeline, clocked.clock);
 
-      return lowerAll(ctx, given.children, clocked, parent, taken);
+      return lowerAll(ctx, given.children, clocked, parent, taken, scope);
     }
 
     if (given.type === "morph" && given.only !== undefined) {
@@ -648,7 +681,7 @@ const lowerAll = (
         const names = new Set(taken);
 
         return {
-          nodes: arrangeState(lowerAll(ctx, state, timing, parent, names), ctx.notes),
+          nodes: arrangeState(lowerAll(ctx, state, timing, parent, names, scope), ctx.notes),
           names,
         };
       });
@@ -661,7 +694,7 @@ const lowerAll = (
     if (given.type === "group" && given.settle?.kind === "arrange") {
       const reflowed = lifted(given);
 
-      if (reflowed) return lowerAll(ctx, [reflowed], timing, parent, taken);
+      if (reflowed) return lowerAll(ctx, [reflowed], timing, parent, taken, scope);
     }
 
     if (given.type === "morph") {
@@ -669,7 +702,7 @@ const lowerAll = (
       const states: SceneNode[][] = [];
 
       const merged = morphed(given, timing, taken, (state, names) => {
-        const nodes = arrangeState(lowerAll(ctx, state, timing, parent, names), ctx.notes);
+        const nodes = arrangeState(lowerAll(ctx, state, timing, parent, names, scope), ctx.notes);
 
         sameAnchors(nodes, ctx.notes, seen);
         states.push(nodes);
@@ -684,23 +717,7 @@ const lowerAll = (
 
     const name = given.props.key ?? given.props.ref?.key;
 
-    if (name !== undefined && taken.has(name))
-      throw new SceneError(
-        `Two nodes are both keyed "${name}"${parent && ` inside ${named(parent)}`}.`,
-        "Give each a key of its own.",
-        { node: `"${name}"`, ...(writtenAt(given) && { source: writtenAt(given)! }) },
-      );
-
-    if (name?.includes("/"))
-      throw new SceneError(`A key can't contain "/", got "${name}".`, "Join words with - or _.", {
-        ...(writtenAt(given) && { source: writtenAt(given)! }),
-      });
-    let own = name;
-
-    for (let index = taken.size; own === undefined; index++)
-      if (!taken.has(String(index))) own = String(index);
-    taken.add(own);
-    const key = parent ? `${parent}/${own}` : own;
+    const key = claimKey(name, scope, taken, given);
     const entry = nameFor(given, name, parent);
 
     nameNode(key, entry);
@@ -1011,7 +1028,7 @@ const lifted = (container: SceneElement & { readonly type: "group" }): MorphElem
 };
 
 const isBare = (el: SceneElement): boolean =>
-  el.type === "fragment" ||
+  (el.type === "fragment" && el.key === undefined) ||
   (el.type === "group" && Object.keys(el.props).length === 0 && el.settle === undefined);
 
 export const scene = (options: SceneOptions, build: () => SceneElement): Scene =>

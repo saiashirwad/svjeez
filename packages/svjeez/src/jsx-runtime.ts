@@ -1,5 +1,5 @@
 import { caller, thrownFrom } from "./svg/traced";
-import { remember, sourceFrom } from "./author/identity";
+import { remember, sourced, sourceFrom } from "./author/identity";
 import { flat, type Child, type SceneElement } from "./author/nodes";
 import { SceneError, located } from "./model/scene-error";
 import type { JsxSource } from "./author/sources";
@@ -17,13 +17,20 @@ const isTag = <P>(type: Given<P>): type is string => typeof type === "string";
 export const componentName = <P>(type: Given<P>): string | undefined =>
   isFragment(type) || isTag(type) || !type.name ? undefined : type.name;
 
-export const build = <P extends { readonly children?: Child }>(
+const keyed = <N extends { readonly props: object }>(node: N, key: string): N => ({
+  ...node,
+  props: { ...node.props, key },
+});
+
+export const build = <P extends { readonly key?: string; readonly children?: Child }>(
   type: Given<P>,
   props: P,
   key: string | undefined,
   source: JsxSource | undefined,
 ): SceneElement => {
-  if (isFragment(type)) return { type: "fragment", children: flat(props.children) };
+  key ??= props.key;
+
+  if (isFragment(type)) return { type: "fragment", key, children: flat(props.children) };
   const at = source && sourceFrom(source);
 
   if (isTag(type))
@@ -34,7 +41,15 @@ export const build = <P extends { readonly children?: Child }>(
     );
 
   try {
-    return type(key === undefined ? props : { ...props, key });
+    const element = type(key === undefined ? props : { ...props, key });
+
+    if (key === undefined || element.type === "run") return element;
+
+    if (element.type === "fragment" && element.key === key) return element;
+
+    if (!("props" in element)) return { type: "fragment", key, children: [element] };
+
+    return element.props.key === key ? element : sourced(element, keyed(element, key));
   } catch (error) {
     if (!(error instanceof Error)) throw error;
     const thrown = thrownFrom(error);

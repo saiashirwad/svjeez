@@ -42,6 +42,8 @@ The whole example is [`examples/charts`](../../../../../examples/charts/index.ts
 | `key` | key the chart when you morph between states |
 | children | a function `({ x, y, bandwidth, size }) => nodes`: annotations in the plot's own coordinates, where `x(value)` is a band's center or a linear value and `y(value)` a y value |
 
+Inside the overlay, `plot.when("sales")` gives the span from the first animated mark in that series to the last, including dots and labels. Use `plot.when("sales").next(0.3)` for a caption that follows it. A static series returns `span(0, 0)`.
+
 A domain you leave out is fitted to every series. A fitted y domain includes 0 when the chart has bars or an area, and not for lines alone; `y.zero` overrides it. A domain you give is never stretched: a value outside it is an error.
 
 ## Series

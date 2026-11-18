@@ -144,7 +144,11 @@ export type SceneElement =
       readonly timeline?: Timeline;
       readonly children: readonly SceneElement[];
     }
-  | { readonly type: "fragment"; readonly children: readonly SceneElement[] }
+  | {
+      readonly type: "fragment";
+      readonly key?: string | undefined;
+      readonly children: readonly SceneElement[];
+    }
   | MorphElement;
 
 export type Child = SceneElement | false | null | undefined | readonly Child[];

@@ -1,5 +1,5 @@
 import type { Paint, Span, Vec } from "svjeez";
-import type { Child, Ease, FontValue } from "svjeez/tools";
+import type { Child, Ease, FontValue, Spanned } from "svjeez/tools";
 
 export type LineCurve = "linear" | "monotone" | "step";
 
@@ -67,6 +67,7 @@ export interface Plot {
   readonly bandwidth: number;
   x(value: string | number): number;
   y(value: number): number;
+  when(name: string): Spanned;
 }
 
 export interface ChartProps {

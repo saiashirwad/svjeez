@@ -15,6 +15,7 @@ import {
   span,
   track,
   type SceneElement,
+  type Span,
   type Vec,
 } from "svjeez";
 import { SceneError, type PathBuilder } from "svjeez/tools";
@@ -132,10 +133,15 @@ const Axes = ({ look: { chart, layout, size } }: { readonly look: Look }): Scene
   );
 };
 
+interface SeriesTiming {
+  readonly name: string;
+  during(start: number, over: number): Span;
+}
+
 interface BarsProps {
   readonly look: Look;
   readonly data: readonly (readonly [string, number])[];
-  readonly options: BarsOptions & { readonly name: string };
+  readonly options: BarsOptions & SeriesTiming;
   readonly slot: { readonly index: number; readonly count: number };
 }
 
@@ -175,7 +181,7 @@ const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps)
         at={[x, zero]}
         anchor={up ? "bottom-left" : "top-left"}
         origin={up ? "bottom" : "top"}
-        scale={when && track<Vec>([1, 0]).to([1, 1], span(start, when.over), curve)}
+        scale={when && track<Vec>([1, 0]).to([1, 1], options.during(start, when.over), curve)}
         fill={color}
       />
     );
@@ -193,7 +199,7 @@ const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps)
         fill={chart.label}
         motion={
           when &&
-          enter(span(start + when.over * 0.6, 0.35), {
+          enter(options.during(start + when.over * 0.6, 0.35), {
             from: { opacity: 0, offset: [0, up ? 4 : -4] },
           })
         }
@@ -223,7 +229,7 @@ const reaches = (points: readonly Vec[]): readonly number[] => {
 interface LineProps {
   readonly look: Look;
   readonly data: readonly (readonly [string | number, number])[];
-  readonly options: LineOptions & { readonly name: string };
+  readonly options: LineOptions & SeriesTiming;
   readonly fill?: SceneElement;
   readonly stroked?: boolean;
 }
@@ -257,7 +263,7 @@ const Line = ({
           key="line"
           geometry={pathData(d!)}
           stroke={{ color, width, cap: "round", join: "round" }}
-          trim={when && draw(when, { curve: ease.linear })}
+          trim={when && draw(options.during(when.start, when.over), { curve: ease.linear })}
         />
       )}
       {radius > 0 &&
@@ -270,7 +276,7 @@ const Line = ({
             fill={color}
             motion={
               when &&
-              enter(span(when.start + when.over * along[i]!, DOT_POP), {
+              enter(options.during(when.start + when.over * along[i]!, DOT_POP), {
                 from: { scale: 0 },
                 curve: ease.pop,
               })
@@ -287,7 +293,9 @@ const Line = ({
           fill={color}
           motion={
             when &&
-            enter(span(when.start + when.over, LABEL_IN), { from: { opacity: 0, offset: [-8, 0] } })
+            enter(options.during(when.start + when.over, LABEL_IN), {
+              from: { opacity: 0, offset: [-8, 0] },
+            })
           }
         >
           {label}
@@ -300,7 +308,7 @@ const Line = ({
 interface AreaProps {
   readonly look: Look;
   readonly data: readonly (readonly [string | number, number])[];
-  readonly options: AreaOptions & { readonly name: string };
+  readonly options: AreaOptions & SeriesTiming;
 }
 
 const Area = ({ look, data, options }: AreaProps): SceneElement => {
@@ -348,7 +356,11 @@ const Area = ({ look, data, options }: AreaProps): SceneElement => {
       mask={fade}
       clip={
         when &&
-        track(rect(0, height)).to(rect(width, height), span(when.start, when.over), ease.linear)
+        track(rect(0, height)).to(
+          rect(width, height),
+          options.during(when.start, when.over),
+          ease.linear,
+        )
       }
     />
   );
@@ -367,8 +379,21 @@ export const Chart = (props: ChartProps): SceneElement => {
   const count = series.filter((s) => s.kind === "bars").length;
   let placed = 0;
 
+  const spans = new Map<string, { start: number; end: number }>();
+
   const drawn = series.map((s: Series) => {
-    const options = { ...s.options, name: s.options.name! };
+    const name = s.options.name ?? s.kind;
+    const extent = { start: Infinity, end: 0 };
+    spans.set(name, extent);
+
+    const during = (start: number, over: number): Span => {
+      extent.start = Math.min(extent.start, start);
+      extent.end = Math.max(extent.end, start + over);
+
+      return span(start, over);
+    };
+
+    const options = { ...s.options, name, during };
 
     if (s.kind === "bars")
       return <Bars look={look} data={s.data} options={options} slot={{ index: placed++, count }} />;
@@ -382,7 +407,18 @@ export const Chart = (props: ChartProps): SceneElement => {
     <Group key={props.key} at={at}>
       <Axes look={look} />
       {drawn}
-      {props.children?.(layout.plot)}
+      {props.children?.({
+        ...layout.plot,
+        when(name) {
+          const extent = spans.get(name);
+
+          if (!extent) throw new SceneError(`plot.when() has no series named "${name}".`);
+
+          return extent.start === Infinity
+            ? span(0, 0)
+            : span(extent.start, extent.end - extent.start);
+        },
+      })}
     </Group>
   );
 };

@@ -92,7 +92,7 @@ export interface Motion {
   rewind(over: Seconds, curve?: Curve): Motion;
 }
 
-export type Layers = Motion | readonly (Motion | false | null | undefined)[];
+export type Layers = Motion | readonly (Layers | false | null | undefined)[];
 
 export class LayerMotion implements Motion {
   constructor(readonly passage: Passage<LayerValues>) {}
@@ -121,17 +121,12 @@ export class LayerMotion implements Motion {
 export const motion = (initial: LayerValues = {}): Motion =>
   new LayerMotion(new Passage({ initial, steps: [] }));
 
-export const layersOf = (stack: Layers | undefined): LayerMotion[] => {
-  const list: readonly (Motion | false | null | undefined)[] = Array.isArray(stack)
-    ? stack
-    : [stack];
+export const layersOf = (stack: Layers | false | null | undefined): LayerMotion[] => {
+  if (!stack) return [];
 
-  return list.filter((entry): entry is LayerMotion => {
-    if (!entry) return false;
+  if (Array.isArray(stack)) return stack.flatMap(layersOf);
 
-    if (!(entry instanceof LayerMotion))
-      throw new SceneError("motion takes layers built with motion() or a recipe.");
+  if (stack instanceof LayerMotion) return [stack];
 
-    return true;
-  });
+  throw new SceneError("motion takes layers built with motion() or a recipe.");
 };
