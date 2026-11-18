@@ -101,12 +101,23 @@ const releases = (): readonly string[] =>
     .split("\n")
     .filter(Boolean);
 
+/** The branch release.yml runs on. Only main releases a stable version, so `next` can never publish to `latest`. */
+const branch = process.env.GITHUB_REF_NAME ?? run("git", ["branch", "--show-current"]);
+
 const pending = async (): Promise<Pending[]> => {
   const tags = releases();
   const out: Pending[] = [];
 
   for (const pkg of packages()) {
     const { name, version } = pkg.manifest;
+
+    if (branch !== "main" && !version.includes("-")) {
+      warn(
+        `${name} ${version} is a stable version on ${branch}, so it isn't released. Only main releases stable versions.`,
+      );
+      continue;
+    }
+
     const versions = await published(name);
 
     if (!versions) {

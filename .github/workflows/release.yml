@@ -1,10 +1,11 @@
 name: release
 
-# Every push to main runs CI, then releases each package under packages/ whose version isn't on npm and GitHub yet.
+# Every push to main or next runs CI, then releases each package under packages/ whose version isn't on npm and GitHub yet.
+# On next, scripts/release.ts releases only prerelease versions, which go to npm's next dist-tag.
 # scripts/release.ts decides which ones. npm's trusted publisher for every package names this file and the npm environment.
 on:
   push:
-    branches: [main]
+    branches: [main, next]
   workflow_dispatch:
 
 jobs:
