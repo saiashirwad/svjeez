@@ -24,7 +24,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/math/` is `@svjeez/math`, which typesets TeX into glyph shapes through MathJax and draws plots, constructions and plane transformations as geometry.
 - `packages/diagrams/` is `@svjeez/diagrams`, which lays out and reveals flowcharts, sequence diagrams, state machines, trees and swimlanes.- `packages/mermaid/` is `@svjeez/mermaid`, which reads Mermaid text and draws it with `@svjeez/diagrams`: `mermaid()` returns the matching flowchart, sequence diagram or state machine.
 - `packages/video/` is `@svjeez/video`, which encodes a scene as MP4 or WebM through Mediabunny in headless Chromium.
-- `examples/` holds the scene-model example scenes and their committed output in `examples/dist/`. `examples/golden/` keeps the SVGs the 0.7 examples built, as references for frame diffs when a feature is ported; nothing builds or tests them. It is private and never published.
+- `examples/` holds the scene-model example scenes and their committed output in `examples/dist/`.7 examples built, as references for frame diffs when a feature is ported; nothing builds or tests them. It is private and never published.
 
 Run `bun install` once at the root. From the root, `bun run typecheck` and `bun run test` run every workspace's script, `bun run build:examples` rebuilds `examples/dist/`, and `bun run typecheck` also checks `scripts/` through the root `tsconfig.json`. Every other command runs inside its workspace.
 

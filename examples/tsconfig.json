@@ -23,5 +23,5 @@
     }
   },
   "include": [".", "../packages/*/src"],
-  "exclude": ["dist", "golden", "node_modules"]
+  "exclude": ["dist", "node_modules"]
 }
