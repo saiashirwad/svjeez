@@ -32,6 +32,7 @@ import { labelled } from "./identity";
 import { isLane, mapLane } from "./lane";
 import { same } from "./steps";
 import { onCircle } from "./values";
+import { homed } from "./pin";
 import { blendable, isGradient } from "./paint";
 import { grown, reachOf } from "./reach";
 import {
@@ -898,7 +899,37 @@ const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Dra
 
 const symbolId = (ctx: Ctx, name: string): string => `${ctx.prefix}symbol-${name}`;
 
-const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
+/**
+ * A group that holds one node and does nothing but place it, as the frame around a path drawn by its own coordinates
+ * does, written as that node placed by both: one element fewer. Its layers go to the node when the node has none,
+ * turned around the same point. With sources asked for, every node keeps its own element, so its key is on it.
+ */
+const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
+  if (ctx.sources || node.kind !== "group" || node.children.length !== 1) return node;
+  const [child] = node.children;
+
+  if (
+    node.clip !== undefined ||
+    node.mask !== undefined ||
+    node.effects.length > 0 ||
+    isLane(child!.at) ||
+    (node.layers.length > 0 && child!.layers.length > 0)
+  )
+    return node;
+  const [x, y] = child!.at;
+
+  return lifted(ctx, {
+    ...child!,
+    at: homed(node.at, [-x, -y]),
+    ...(node.layers.length > 0 && {
+      layers: node.layers,
+      origin: [node.origin[0] - x, node.origin[1] - y],
+    }),
+  });
+};
+
+const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
+  const node = lifted(ctx, given);
   const at: Vec = isLane(node.at) ? [0, 0] : node.at;
 
   ctx.frame = at;

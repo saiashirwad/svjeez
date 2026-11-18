@@ -202,6 +202,19 @@ describe("the SVG backend", () => {
     ).toContain('<g transform="translate(50 50)" style="transform-origin:60px 55px" class="a m1">');
   });
 
+  test("a group that only places one node is written as that node, placed by both", () => {
+    const out = body(() => (
+      <Group at={[50, 50]} rotate={spin({ every: 2 })}>
+        <Shape geometry={path().moveTo([0, 0]).lineTo([20, 10])} stroke={{ color: "#FF0000" }} />
+      </Group>
+    ));
+
+    expect(out).not.toContain("<g");
+    expect(out).toContain(
+      '<path d="M0 0L20 10" transform="translate(50 50)" fill="none" stroke="#FF0000" style="transform-origin:60px 55px" class="a m1"/>',
+    );
+  });
+
   test("layers share an element while that keeps their order, and nest when it would not", () => {
     const shared = body(() => (
       <Shape
