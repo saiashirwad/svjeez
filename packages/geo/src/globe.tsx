@@ -67,7 +67,7 @@ export interface Turning {
 }
 
 export interface Riding {
-  readonly at: Anim<Vec>;
+  readonly offset: Anim<Vec>;
   readonly opacity: Anim<number>;
 }
 
@@ -639,7 +639,7 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
 
       const shown = (t: number) => Math.min(1, Math.max(0, dot(p, view(t).toward) / fade));
 
-      if (!turn) return { at: where(0), opacity: shown(0) };
+      if (!turn) return { offset: where(0), opacity: shown(0) };
       const seen = times.filter((t) => shown(t) > 0);
 
       const held = (t: number): Vec => {
@@ -649,7 +649,7 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
       };
 
       return {
-        at: sampled(held, turn.over, { tolerance }),
+        offset: sampled(held, turn.over, { tolerance }),
         opacity: sampled(shown, turn.over, { tolerance: 0.02 }),
       };
     },

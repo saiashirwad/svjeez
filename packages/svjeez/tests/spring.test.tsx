@@ -315,7 +315,6 @@ describe("spring steps", () => {
         <Shape
           key="dot"
           geometry={circle(4)}
-          anchor="center"
           fill={track(theme.a).to(theme.b, span(0, 2), bouncy)}
         />
       )),
@@ -374,7 +373,6 @@ describe("spring steps", () => {
           fill="#000000"
           key="dot"
           geometry={circle(4)}
-          anchor="center"
           rotate={track(0).to(90, span(0, 0.5), bouncy).loop(0.5)}
         />
       )),
@@ -384,7 +382,6 @@ describe("spring steps", () => {
       <Shape
         fill="#000000"
         geometry={circle(4)}
-        anchor="center"
         rotate={track(0).to(90, span(0, 1.5), bouncy).to(0, span(1.5, 0.5)).loop(2)}
       />
     ));
@@ -398,7 +395,6 @@ describe("spring steps", () => {
         <Shape
           fill="#000000"
           geometry={circle(4)}
-          anchor="center"
           motion={motion()
             .to({ offset: [40, 20] }, span(0, 1.5), bouncy)
             .rewind(1.5, bouncy)}

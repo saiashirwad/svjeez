@@ -51,7 +51,7 @@ const boxes = (build: () => SceneElement, at = 0): Record<string, readonly numbe
 const pic = picture('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"/>');
 
 describe("at places the anchor point of the box", () => {
-  test("a shape's box goes top-left at at, whatever its geometry, and anchor names another point", () => {
+  test("a shape's box goes top-left at at, whatever its geometry, anchor names another point, and with no at it stays where its geometry is", () => {
     const found = boxes(() => (
       <Group>
         <Shape fill="#000000" key="rect" geometry={rect(20, 10)} at={[10, 10]} />
@@ -88,7 +88,7 @@ describe("at places the anchor point of the box", () => {
     expect(found.corner).toEqual([80, 40, 20, 10]);
     expect(found.share).toEqual([90, 40, 20, 10]);
     expect(found.arc).toEqual([32, 32, 16, 16]);
-    expect(found.none).toEqual([0, 0, 10, 10]);
+    expect(found.none).toEqual([-5, -5, 10, 10]);
   });
 
   test("a line, polygon or path with no at stays where its coordinates are; with one, at places its box", () => {
@@ -167,17 +167,23 @@ describe("at places the anchor point of the box", () => {
     expect(found.right!.y + found.right!.height).toBeCloseTo(50);
   });
 
-  test("an image is placed by its box, an instance and a group by their frames unless they have an anchor", () => {
+  test("an image, an instance and a group are placed by their boxes; offset places an instance's or group's [0, 0] instead", () => {
     const dot = symbol(() => <Shape geometry={rect(10, 10)} at={[5, 5]} fill="#FF0000" />);
 
     const found = boxes(() => (
       <Group>
         <Image key="image" src={pic} at={[10, 10]} anchor="center" />
-        <Instance key="frame" of={dot} at={[50, 50]} />
+        <Instance key="boxed" of={dot} at={[50, 50]} />
         <Instance key="centered" of={dot} at={[50, 50]} anchor="center" />
+        <Instance key="frame" of={dot} offset={[50, 50]} />
+        <Instance key="home" of={dot} />
         <Group key="group" at={[20, 30]}>
-          <Shape fill="#000000" key="a" geometry={rect(10, 10)} />
-          <Shape fill="#000000" key="b" geometry={rect(10, 10)} at={[30, 10]} />
+          <Shape fill="#000000" key="a" geometry={rect(10, 10)} at={[5, 5]} />
+          <Shape fill="#000000" key="b" geometry={rect(10, 10)} at={[35, 15]} />
+        </Group>
+        <Group key="framed" offset={[20, 30]}>
+          <Shape fill="#000000" key="a" geometry={rect(10, 10)} at={[5, 5]} />
+          <Shape fill="#000000" key="b" geometry={rect(10, 10)} at={[35, 15]} />
         </Group>
         <Group key="middle" at={[100, 50]} anchor="center">
           <Shape fill="#000000" key="a" geometry={rect(10, 10)} at={[5, 5]} />
@@ -187,10 +193,14 @@ describe("at places the anchor point of the box", () => {
     ));
 
     expect(found.image).toEqual([-10, 0, 40, 20]);
-    expect(found.frame).toEqual([55, 55, 10, 10]);
+    expect(found.boxed).toEqual([50, 50, 10, 10]);
     expect(found.centered).toEqual([45, 45, 10, 10]);
+    expect(found.frame).toEqual([55, 55, 10, 10]);
+    expect(found.home).toEqual([5, 5, 10, 10]);
     expect(found["group/a"]).toEqual([20, 30, 10, 10]);
     expect(found["group/b"]).toEqual([50, 40, 10, 10]);
+    expect(found["framed/a"]).toEqual([25, 35, 10, 10]);
+    expect(found["framed/b"]).toEqual([55, 45, 10, 10]);
     expect(found.middle).toEqual([80, 40, 40, 20]);
   });
 
@@ -281,8 +291,8 @@ describe("a box is what the shape paints", () => {
   ) =>
     boxes(() => <Shape key="s" geometry={geometry} stroke={{ color: "#000000", ...stroke }} />).s!;
 
-  test("a stroke grows the box by half its width, so at places the painted corner", () => {
-    expect(stroked(rect(20, 10), { width: 4 })).toEqual([0, 0, 24, 14]);
+  test("a stroke grows the box by half its width: at places the painted corner, and with no at the shape stays put", () => {
+    expect(stroked(rect(20, 10), { width: 4 })).toEqual([-2, -2, 24, 14]);
     expect(
       boxes(() => (
         <Shape
@@ -293,13 +303,13 @@ describe("a box is what the shape paints", () => {
         />
       )).s,
     ).toEqual([10, 10, 24, 14]);
-    expect(stroked(circle(10), { width: 2 })).toEqual([0, 0, 22, 22]);
+    expect(stroked(circle(10), { width: 2 })).toEqual([-11, -11, 22, 22]);
 
     const model = made(() => (
       <Shape geometry={rect(20, 10)} stroke={{ color: "#000000", width: 4 }} />
     ));
 
-    expect(model.root.children[0]!.at).toEqual([2, 2]);
+    expect(model.root.children[0]!.at).toEqual([0, 0]);
   });
 
   test("caps: butt stops at the ends, square and round reach half the width past them", () => {
@@ -597,7 +607,7 @@ describe("origin is named on the box, as anchor is", () => {
   test('"at" turns around the point at places: a group\'s [0, 0], or its anchor', () => {
     const found = origins(() => (
       <Group>
-        <Group key="frame" at={[40, 40]} origin="at">
+        <Group key="frame" offset={[40, 40]} origin="at">
           <Shape geometry={rect(30, 10)} at={[10, 10]} fill="#000000" />
         </Group>
         <Group key="anchored" at={[40, 40]} anchor="bottom-right" origin="at">
@@ -631,7 +641,7 @@ describe("origin is named on the box, as anchor is", () => {
     expect(found.row).toEqual([20, 20]);
 
     const turned = boxes(() => (
-      <Group key="arm" at={[100, 100]} rotate={90} origin="at">
+      <Group key="arm" offset={[100, 100]} rotate={90} origin="at">
         <Shape key="bar" geometry={rect(40, 4)} at={[0, -2]} fill="#000000" />
       </Group>
     ));
@@ -660,8 +670,10 @@ describe("origin is named on the box, as anchor is", () => {
 describe("errors say what to write", () => {
   test("an unknown anchor, a baseline off text, and an anchor on an empty box", () => {
     expect(() =>
-      // @ts-expect-error: "middle" is not a place.
-      made(() => <Shape fill="#000000" key="s" geometry={rect(10, 10)} anchor="middle" />),
+      made(() => (
+        // @ts-expect-error: "middle" is not a place.
+        <Shape fill="#000000" key="s" geometry={rect(10, 10)} at={[0, 0]} anchor="middle" />
+      )),
     ).toThrow(
       'anchor on <Shape> "s" takes a place, one of "top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right", or two fractions of the box such as [0.5, 1], got "middle".',
     );
@@ -675,6 +687,30 @@ describe("errors say what to write", () => {
     );
     expect(() => made(() => <Group key="g" at={[10, 10]} anchor="center" />)).toThrow(
       'anchor on <Group> "g" names a point of its box, but the box is empty: it draws nothing at rest. Drop anchor and place it by at alone.',
+    );
+  });
+
+  test("offset takes no at or anchor, and a container's child takes no offset", () => {
+    expect(() => made(() => <Group key="g" at={[0, 0]} offset={[10, 10]} />)).toThrow(
+      '<Group> "g" has both at and offset. at places a point of its box; offset places its children\'s [0, 0].',
+    );
+    expect(() =>
+      made(() => (
+        <Group key="g" offset={[10, 10]} anchor="center">
+          <Shape fill="#000000" geometry={rect(10, 10)} />
+        </Group>
+      )),
+    ).toThrow('<Group> "g" has anchor="center" and offset');
+    expect(() =>
+      made(() => (
+        <Stack key="col">
+          <Group key="g" offset={[10, 10]}>
+            <Shape fill="#000000" geometry={rect(10, 10)} />
+          </Group>
+        </Stack>
+      )),
+    ).toThrow(
+      '<Group> "g" has its own offset, but the <Stack> it sits in places it. Drop its offset',
     );
   });
 
@@ -726,6 +762,8 @@ describe("symbols", () => {
       </Stack>
     ));
 
-    expect(boxes(() => <Instance key="i" of={row} at={[100, 50]} />).i).toEqual([89, 45, 22, 10]);
+    expect(boxes(() => <Instance key="i" of={row} offset={[100, 50]} />).i).toEqual([
+      89, 45, 22, 10,
+    ]);
   });
 });

@@ -416,6 +416,7 @@ export function Axes({
   ticks = 1,
   grid,
   labels,
+  at,
   ...common
 }: AxesProps): SceneElement {
   const [tx, ty] = pairOf(ticks);
@@ -461,7 +462,7 @@ export function Axes({
     );
 
   return (
-    <Group {...common}>
+    <Group {...common} {...(at !== undefined && { offset: at })}>
       {grid && <Shape key="grid" geometry={p.grid([tx!, ty!])} stroke={grid} />}
       <Shape key="axes" geometry={p.axes()} stroke={stroke} />
       <Shape key="ticks" geometry={marks} stroke={stroke} />

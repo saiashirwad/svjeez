@@ -231,7 +231,7 @@ describe("containers", () => {
 
   test("Align places against the canvas wherever it sits in the tree", () => {
     const model = made(() => (
-      <Group key="moved" at={[30, 40]}>
+      <Group key="moved" offset={[30, 40]}>
         <Align key="corner" place="bottom-right" inset={5}>
           <Shape fill="#000000" key="dot" geometry={circle(4)} />
         </Align>
@@ -277,7 +277,7 @@ describe("containers", () => {
             <Shape fill="#000000" key="a" geometry={circle(3)} anchor="center" at={where} />
           </Stack>
         )),
-      ).toThrow('<Shape> "a" has an at of its own, but the <Stack> it sits in places it');
+      ).toThrow('<Shape> "a" has its own at, but the <Stack> it sits in places it');
   });
 
   test("a child turns around where it was placed, since layout reads its box at rest", () => {
@@ -487,7 +487,7 @@ describe("anchors", () => {
 
     const model = made(() => (
       <Group>
-        <Group key="left" at={[5, 5]}>
+        <Group key="left" offset={[5, 5]}>
           <Shape
             fill="#000000"
             key="pin"
@@ -496,7 +496,7 @@ describe("anchors", () => {
             at={target.part("box").bottomRight}
           />
         </Group>
-        <Group ref={target} at={[50, 20]}>
+        <Group ref={target} offset={[50, 20]}>
           <Shape fill="#000000" key="box" geometry={rect(20, 10)} at={[3, 4]} />
         </Group>
       </Group>
@@ -510,7 +510,7 @@ describe("anchors", () => {
 
     const model = made(() => (
       <Group>
-        <Group at={[100, 50]} rotate={90} scale={2} origin={[0, 0]}>
+        <Group offset={[100, 50]} rotate={90} scale={2} origin={[0, 0]}>
           <Shape fill="#000000" ref={target} geometry={rect(10, 4)} />
         </Group>
         <Shape fill="#000000" key="pin" geometry={circle(1)} anchor="center" at={target.right} />
@@ -528,10 +528,10 @@ describe("anchors", () => {
 
     const model = made(() => (
       <Group>
-        <Group at={track([0, 0]).to([100, 40], span(1, 2), ease.inOut)}>
+        <Group offset={track([0, 0]).to([100, 40], span(1, 2), ease.inOut)}>
           <Shape fill="#000000" ref={target} geometry={rect(10, 10)} />
         </Group>
-        <Group key="other" at={[7, 3]}>
+        <Group key="other" offset={[7, 3]}>
           <Shape fill="#000000" key="pin" geometry={circle(1)} anchor="center" at={target.center} />
         </Group>
       </Group>
@@ -558,7 +558,7 @@ describe("anchors", () => {
 
     const model = made(() => (
       <Group>
-        <Group at={[100, 50]} rotate={track(0).to(360, span(0, 4), ease.linear).loop(4)}>
+        <Group offset={[100, 50]} rotate={track(0).to(360, span(0, 4), ease.linear).loop(4)}>
           <Shape fill="#000000" ref={target} geometry={circle(2)} anchor="center" at={[30, 0]} />
           <Shape fill="#000000" geometry={circle(2)} anchor="center" at={[-30, 0]} />
         </Group>
@@ -608,9 +608,9 @@ describe("anchors", () => {
     expect(() =>
       made(() => (
         <Group>
-          <Shape fill="#000000" ref={card} geometry={circle(1)} anchor="center" />
+          <Shape fill="#000000" ref={card} geometry={circle(1)} />
           <Group>
-            <Shape fill="#000000" ref={card} geometry={circle(1)} anchor="center" />
+            <Shape fill="#000000" ref={card} geometry={circle(1)} />
           </Group>
         </Group>
       )),

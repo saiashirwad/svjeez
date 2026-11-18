@@ -101,9 +101,9 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-10s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="489" height="872" fill="var(--background)"/>
-  <g transform="translate(40.229 39.625)" class="a m37">
+  <g transform="translate(40.479 40)" class="a m37">
     <g transform="translate(80.4 395.74)" class="a m1">
-      <rect x="0.5" y="0.5" width="328.2" height="324.26" rx="10" fill="none" stroke="var(--border)" stroke-dasharray="4 3"/>
+      <rect width="328.2" height="324.26" rx="10" fill="none" stroke="var(--border)" stroke-dasharray="4 3"/>
       <text x="12" y="17.271" font-size="11.05" fill="var(--muted)">Release</text>
     </g>
     <path d="M87.63 41L87.63 54C87.63 70 103.09 70 103.09 85L103.09 87" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
@@ -132,7 +132,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <text x="26.9" y="22.68" font-size="13" fill="var(--text)">Push to main</text>
     </g>
     <g transform="translate(45.89 94)" class="a m22">
-      <rect x="0.75" y="0.75" width="114.4" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <rect width="114.4" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
       <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Build image</text>
     </g>
     <g transform="translate(30.51 178)" class="a m23">
@@ -144,7 +144,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <text x="26.9" y="22.68" font-size="13" fill="var(--text)">Notify author</text>
     </g>
     <g transform="translate(191.2 341)" class="a m25">
-      <rect x="0.75" y="0.75" width="106.6" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <rect width="106.6" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
       <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Scan image</text>
     </g>
     <g transform="translate(197.33 0)" class="a m26">
@@ -153,7 +153,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <text x="14.3" y="30.18" font-size="13" fill="var(--text)">Registry</text>
     </g>
     <g transform="translate(163.9 425)" class="a m27">
-      <rect x="0.75" y="0.75" width="161.2" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <rect width="161.2" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
       <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Deploy to staging</text>
     </g>
     <g transform="translate(156.29 509)" class="a m28">
@@ -161,16 +161,16 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <text x="45.305" y="33.18" font-size="13" fill="var(--text)">Smoke test?</text>
     </g>
     <g transform="translate(92.4 672)" class="a m29">
-      <rect x="0.75" y="0.75" width="153.4" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <rect width="153.4" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
       <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Roll out to prod</text>
     </g>
     <g transform="translate(281.8 672)" class="a m30">
-      <rect x="0.75" y="0.75" width="114.8" height="36" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+      <rect width="114.8" height="36" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
       <path d="M8 0L8 36M106.8 0L106.8 36" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
       <text x="22.3" y="22.68" font-size="13" fill="var(--text)">Roll back</text>
     </g>
     <g transform="translate(132 756)" class="a m31">
-      <rect x="0.75" y="0.75" width="74.2" height="36" rx="18" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <rect width="74.2" height="36" rx="18" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
       <text x="21.5" y="22.68" font-size="13" fill="var(--text)">Live</text>
     </g>
     <g class="a m32">

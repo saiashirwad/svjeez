@@ -77,6 +77,20 @@ describe("Icon", () => {
     expect(big.height).toBeCloseTo(small.height * 4, 3);
   });
 
+  test("at places the drawn box, as on every node; offset places the grid square's top-left", () => {
+    const placed = (where: Pick<IconProps, "at" | "offset" | "anchor">) =>
+      boxesOf(draws(icon({ icon: two, color: "#111111", size: 40, key: "i", ...where })), 0)["i"]!;
+
+    const byAt = placed({ at: [20, 20] });
+    const byOffset = placed({ offset: [20, 20] });
+    const centered = placed({ at: [100, 50], anchor: "center" });
+
+    expect([byAt.x, byAt.y]).toEqual([20, 20]);
+    expect(byOffset.x).toBeCloseTo(20 - (byOffset.width - 40) / 2, 3);
+    expect(centered.x + centered.width / 2).toBeCloseTo(100, 3);
+    expect(centered.y + centered.height / 2).toBeCloseTo(50, 3);
+  });
+
   test("a layout container places an icon by the size it is drawn at", () => {
     const row = scene({ size: [200, 100], duration: 1, title: "Row", theme }, () => (
       <Stack key="row" direction="row" gap={0}>

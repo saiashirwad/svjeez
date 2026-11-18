@@ -49,7 +49,7 @@ const Lane = ({
   readonly label: string;
   readonly curve: Curve;
 }): SceneElement => (
-  <Group at={[24, y]}>
+  <Group offset={[24, y]}>
     <Shape
       geometry={rect(320, 116, { radius: 10 })}
       fill={theme.surface}
@@ -72,7 +72,7 @@ const Lane = ({
 
 const Card = (): SceneElement => (
   <Group
-    at={[380, 92]}
+    offset={[380, 92]}
     motion={[
       enter(span(0.5, 0.2)),
       motion({ scale: 0.2 }).to({ scale: 1 }, span(0.5, pop.settle), pop),

@@ -348,7 +348,7 @@ export const Align = ({
 
   return {
     type: "group",
-    props: { ...props, at },
+    props: { ...props, offset: at },
     children: flat(children),
     settle: { kind: "arrange", label: "<Align>", arrange },
     layout: { container: "align" },

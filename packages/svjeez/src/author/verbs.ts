@@ -238,6 +238,7 @@ type Written = Value | Anchor | Track<Value> | Derived<Value> | undefined;
 const writtenOf = (el: NodeElement, prop: Prop): Written => {
   switch (prop) {
     case "at":
+      return framed(el) ? el.props.offset : el.props.at;
     case "rotate":
     case "scale":
     case "opacity":
@@ -255,6 +256,9 @@ const writtenOf = (el: NodeElement, prop: Prop): Written => {
       return el.type === "shape" ? el.props[prop] : undefined;
   }
 };
+
+const framed = (el: NodeElement): el is NodeElement & { readonly type: "group" | "instance" } =>
+  (el.type === "group" || el.type === "instance") && el.props.offset !== undefined;
 
 const end = (move: Move): Seconds => move.start + move.over;
 
@@ -307,14 +311,7 @@ export class Cues {
     this.#moves = moves;
   }
 
-  apply(
-    el: NodeElement,
-    key: string,
-    timing: Timing,
-    notes: Notes,
-    parent: string,
-    home: () => Vec = () => [0, 0],
-  ): NodeElement {
+  apply(el: NodeElement, key: string, timing: Timing, notes: Notes, parent: string): NodeElement {
     const owned = this.#moves.filter((item) => names(item.target, el, key, notes.refs));
     let mine = [...owned, ...(this.#forwarded.get(key) ?? [])];
 
@@ -349,11 +346,15 @@ export class Cues {
 
     for (const [prop, list] of byProp) {
       const moves = [...list].sort((a, b) => a.start - b.start || a.over - b.over);
-      const initial = this.#initial(el, prop, moves[0]!, key, notes, parent, home);
+      const initial = this.#initial(el, prop, moves[0]!, key, notes, parent);
 
       conflicts(moves, prop, key, timing.clock.offset);
+      const onAnchor = moves.some((move) => move.goal.kind === "anchor");
 
-      if (moves.some((move) => move.goal.kind === "anchor")) {
+      if (prop === "at" && onAnchor) notes.onAnchor.add(key);
+      else if (prop === "at") notes.onAnchor.delete(key);
+
+      if (prop === "at" && (onAnchor || initial === undefined)) {
         notes.aims.set(key, (read, self) => {
           try {
             return aimed(read, self);
@@ -388,7 +389,7 @@ export class Cues {
             return [x - dx + node.home[0], y - dy + node.home[1]];
           };
 
-          const { data } = passageOf(written(initial, moves, land));
+          const { data } = passageOf(written(initial ?? self().home, moves, land));
 
           const lane = mapped(data, "value", (value): Vec => {
             if (!isVec(value))
@@ -405,7 +406,7 @@ export class Cues {
 
       tracks.set(
         prop,
-        written(initial, moves, (move, before) =>
+        written(initial!, moves, (move, before) =>
           move.goal.kind === "value" ? move.goal.value : before,
         ),
       );
@@ -421,8 +422,7 @@ export class Cues {
     key: string,
     notes: Notes,
     parent: string,
-    home: () => Vec,
-  ): Value {
+  ): Value | undefined {
     const { verb } = first;
 
     const painted = prop === "fill" || prop === "stroke";
@@ -448,7 +448,9 @@ export class Cues {
       throw new SceneError(
         `${verb} moves ${named(key)}, but the ${container.label} it sits in places it. Wrap it in a <Group> for the container to place, and move the node inside.`,
       );
-    const start = value ?? (prop === "at" ? home() : UNWRITTEN[prop]);
+
+    if (prop === "at") return value;
+    const start = value ?? UNWRITTEN[prop];
 
     if (start === undefined)
       throw new SceneError(
@@ -530,7 +532,11 @@ const withTracks = (el: NodeElement, tracks: ReadonlyMap<Prop, Track<Value>>): N
   if (tracks.size === 0) return el;
 
   const own = Object.fromEntries(
-    [...tracks].filter(([prop]) => prop !== "stroke" && prop !== "strokeWidth"),
+    [...tracks].flatMap(([prop, value]) =>
+      prop === "stroke" || prop === "strokeWidth"
+        ? []
+        : [[prop === "at" && framed(el) ? "offset" : prop, value] as const],
+    ),
   );
 
   const color = tracks.get("stroke");

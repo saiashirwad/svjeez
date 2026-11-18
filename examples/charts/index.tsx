@@ -31,7 +31,7 @@ const look = { font: mono, fontSize: 12, axis: theme.border, label: theme.muted,
 const rise = (at: number) => enter(span(at, 0.6), { from: { opacity: 0, offset: [0, 10] } });
 
 const heading = (x: number, title: string, note: string, at: number) => (
-  <Group at={[x, 124]} motion={rise(at)}>
+  <Group offset={[x, 124]} motion={rise(at)}>
     <Text font={geist} weight={600} size={18} fill={theme.text}>
       {title}
     </Text>
@@ -42,7 +42,7 @@ const heading = (x: number, title: string, note: string, at: number) => (
 );
 
 const legend = (x: number, color: Paint, name: string) => (
-  <Group at={[x, 144]}>
+  <Group offset={[x, 144]}>
     <Shape geometry={rect(10, 10, { radius: 3 })} fill={color} />
     <Text font={geist} size={12} at={[16, 5]} anchor="left" fill={theme.muted}>
       {name}

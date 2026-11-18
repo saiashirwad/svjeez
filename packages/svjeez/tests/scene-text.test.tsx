@@ -462,13 +462,13 @@ describe("SVG", () => {
     const out = emit(
       made(() => (
         <Group>
-          <Text font={space} size={10} anchor="baseline-left" fill="#000000">
+          <Text font={space} size={10} fill="#000000">
             a
           </Text>
-          <Text font={space} weight={700} size={10} anchor="baseline-left" fill="#000000">
+          <Text font={space} weight={700} size={10} fill="#000000">
             b
           </Text>
-          <Text font={abeezee} size={10} anchor="baseline-left" fill="#000000">
+          <Text font={abeezee} size={10} fill="#000000">
             c
           </Text>
         </Group>
@@ -478,7 +478,7 @@ describe("SVG", () => {
     expect(out).toContain('aria-labelledby="t" font-family="\'Space Mono\'" font-weight="400">');
     expect(out.match(/font-family="'Space Mono'/g)).toHaveLength(1);
     expect(out).toContain('font-weight="700" font-size="10"');
-    expect(out).toContain('<text font-family="\'ABeeZee\'" font-size="10"');
+    expect(out).toContain('y="9.2" font-family="\'ABeeZee\'" font-size="10"');
   });
 
   test("a run's animated fill and opacity land on its tspan", () => {

@@ -34,7 +34,7 @@ const keycap = (label: string) => {
 
   return {
     node: (
-      <Group ref={cap} at={[16, 184]}>
+      <Group ref={cap} offset={[16, 184]}>
         <Shape {...outlined(48, 40, 9)} fill={theme.surface} />
         <Shape
           key="lit"
@@ -79,7 +79,7 @@ const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
   win.move(from, span(DURATION - start - 0.8, 0.8), ease.out);
 
   return (
-    <Group at={[x, 30]}>
+    <Group offset={[x, 30]}>
       <Shape
         geometry={rect(290, 240, { radius: 14 })}
         fill={theme.background}

@@ -174,13 +174,11 @@ const Chain = ({ from }: { readonly from: number }): SceneElement => {
 
   return (
     <Group
-      at={at}
+      offset={at}
       origin="at"
       rotate={track(0).to(360 * (k - (before?.k ?? 0)), drawing, ease.linear)}
     >
-      {from < CIRCLES && (
-        <Shape geometry={circle(tenth(r))} anchor="center" stroke={ring} opacity={0.4} />
-      )}
+      {from < CIRCLES && <Shape geometry={circle(tenth(r))} stroke={ring} opacity={0.4} />}
       {from < CIRCLES && (
         <Shape geometry={line([0, 0], arm)} stroke={{ ...ring, width: 1.25 }} opacity={0.8} />
       )}

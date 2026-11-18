@@ -47,4 +47,4 @@ const dot = symbol(() => <Shape geometry={circle(6)} fill={theme.blue} />);
 </Stack>
 ```
 
-`symbol(build)` is drawn once; each `<Instance of={…}>` places it, with its own `at`, `opacity`, `motion` and the rest. Tracks inside the symbol run on the scene's clock and are shared by every instance, so instances move in step: set them apart by moving the instances themselves. Use a symbol for content repeated many times (icons, dots, tiles), where it saves bytes.
+`symbol(build)` is drawn once; each `<Instance of={…}>` places it, with its own `at` (its box) or `offset` (the symbol's `[0, 0]`), `opacity`, `motion` and the rest. Tracks inside the symbol run on the scene's clock and are shared by every instance, so instances move in step: set them apart by moving the instances themselves. Use a symbol for content repeated many times (icons, dots, tiles), where it saves bytes.

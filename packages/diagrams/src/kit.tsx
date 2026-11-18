@@ -402,7 +402,7 @@ export const Node = ({ look: l, ...n }: NodeProps): SceneElement => {
   const detail = detailOf(n.role, w, h);
 
   return (
-    <Group key={n.key} at={[round(n.box.x), round(n.box.y)]} motion={n.motion}>
+    <Group key={n.key} offset={[round(n.box.x), round(n.box.y)]} motion={n.motion}>
       <Shape
         key="shape"
         geometry={outline(n.role, w, h)}

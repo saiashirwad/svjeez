@@ -187,7 +187,7 @@ export function flowchart<
         const at = groupAt(g);
 
         return (
-          <Group key={id} at={[b.x, b.y]} motion={at && pop(at)}>
+          <Group key={id} offset={[b.x, b.y]} motion={at && pop(at)}>
             <Shape
               key="frame"
               geometry={rect(b.w, b.h, { radius: 10 })}

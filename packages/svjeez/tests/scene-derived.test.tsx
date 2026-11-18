@@ -45,13 +45,8 @@ describe("affine mappings", () => {
     );
 
     const source = keysOf(
-      own(
-        only(
-          made(() => (
-            <Shape fill="#000000" geometry={circle(2)} anchor="center" opacity={progress} />
-          )),
-        ),
-      ).opacity,
+      own(only(made(() => <Shape fill="#000000" geometry={circle(2)} opacity={progress} />)))
+        .opacity,
     );
 
     expect(keysOf(node.at).map((key) => [key.t, key.value, key.ease])).toEqual(
@@ -67,7 +62,6 @@ describe("affine mappings", () => {
         <Shape
           fill="#000000"
           geometry={circle(2)}
-          anchor="center"
           rotate={theta.map((t) => -t * 2).map((t) => t + 10)}
         />
       )),
@@ -85,7 +79,6 @@ describe("affine mappings", () => {
         <Shape
           fill="#000000"
           geometry={circle(2)}
-          anchor="center"
           opacity={progress.map((p) => Math.min(p, 0.5))}
         />
       )),
@@ -225,7 +218,6 @@ describe("sampled mappings", () => {
         <Shape
           fill="#000000"
           geometry={circle(2)}
-          anchor="center"
           opacity={a.with(b).map((x, y) => (x + y) / 20)}
         />
       )),
@@ -247,7 +239,6 @@ describe("derived tracks", () => {
           <Shape
             fill="#000000"
             geometry={circle(2)}
-            anchor="center"
             opacity={track(0)
               .to(1, span(0, 1), ease.linear)
               .map((p) => 1 - p)}
@@ -270,7 +261,6 @@ describe("derived tracks", () => {
         <Shape
           fill="#000000"
           geometry={circle(2)}
-          anchor="center"
           opacity={track(0.25)
             .with(2)
             .map((a, b) => a * b)}
@@ -286,7 +276,6 @@ describe("derived tracks", () => {
       made(() => (
         <Shape
           geometry={circle(2)}
-          anchor="center"
           fill={track<"#000000" | "#ffffff">("#000000")
             .to("#ffffff", span(0, 1))
             .map((c) => c)}

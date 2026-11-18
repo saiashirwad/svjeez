@@ -206,7 +206,7 @@ export function lanes<const L extends Record<string, Labelled>>(
         const tint = l.tint(s.role ?? role(s.lane));
 
         return (
-          <Group key={`span-${i + 1}`} at={[b.x + dx, b.y + dy]}>
+          <Group key={`span-${i + 1}`} offset={[b.x + dx, b.y + dy]}>
             <Shape
               key="bar"
               geometry={

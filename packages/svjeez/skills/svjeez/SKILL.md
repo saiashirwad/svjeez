@@ -53,7 +53,7 @@ export default scene({ size: [240, 140], duration: 4, title: "Hello", theme, red
 ## The model in eight rules
 
 1. **Every node has a box**: what it paints, its stroke included, measured when the scene compiles. Text too.
-2. **`at` places the node's `anchor`**, the box's top-left unless `anchor` names another point (`"center"`, `"bottom-right"`, `[0.5, 1]`, and for text `"baseline"`, `"baseline-left"`, `"baseline-right"`). A `<Group>` is a frame: its `at` is where its children's `[0, 0]` goes. A line, polygon or path with no `at` stays where its coordinates are. `rotate` and `scale` turn around `origin`, `"center"` of the box by default; `origin="at"` turns around the point `at` places, a group's `[0, 0]`.
+2. **`at` places the node's `anchor`**, the box's top-left unless `anchor` names another point (`"center"`, `"bottom-right"`, `[0.5, 1]`, and for text `"baseline"`, `"baseline-left"`, `"baseline-right"`). That holds for every node, groups and instances too. A node with no `at` stays where its coordinates put it: a `circle(r)` around `[0, 0]`, a line on its points; `anchor` without `at` is an error, unless a verb moves the node. To place a `<Group>` or `<Instance>` as a frame, give it `offset` instead: where its children's `[0, 0]` goes (a point, a track or a ref's anchor), never together with `at` or `anchor`. `rotate` and `scale` turn around `origin`, `"center"` of the box by default; `origin="at"` turns around the point `at` places, the `offset` point, or with neither the node's `[0, 0]`.
 3. **Nothing is inherited.** A shape with no fill has none; a text needs its own `font`, `size` and `fill`. Share styles by spreading objects or writing components.
 4. **Animated props take a value or a track**: `opacity={track(0).to(1, span(0.5, 0.3))}`. Geometry, paint, stroke width, trim, clip and effects animate the same way.
 5. **Time is spans on clocks.** `span(start, over)` is when; build each beat from the one before (`a.next(0.4)`, `a.cascade(3, 0.1)`). A plain number is only ever a length. `<Sequence when={span(…)}>` starts a clock of its own.
@@ -68,9 +68,9 @@ export default scene({ size: [240, 140], duration: 4, title: "Hello", theme, red
 | `<Shape geometry fill stroke trim>` | `stroke={{ color, width, cap, join, dash }}`; `trim={[from, to]}` draws part of the outline |
 | `<Text font size fill weight italic width lineHeight align>` | strings and `<Run weight fill italic opacity>` inside; `width` wraps |
 | `<Text …>${count(value, { decimals, separator, pad })}</Text>` | a number that counts: `value` is a track or derived number, shown rounded at every moment |
-| `<Group>` | a frame that moves its children together |
+| `<Group offset>` | moves its children together; `offset` is where their `[0, 0]` goes |
 | `<Image src={picture(…)} width height>` | a PNG, JPEG, GIF, WebP or SVG embedded |
-| `<Instance of={symbol(() => …)}>` | content drawn once, placed many times |
+| `<Instance of={symbol(() => …)} offset>` | content drawn once, placed many times; `offset` as on `<Group>` |
 | `<Sequence when={span}>` | a local clock: tracks and verbs inside count from the span's start |
 | `<Arrow from to stroke bend inset head trim>` | a line or arrow between points or anchors; follows them as they move |
 
@@ -80,7 +80,7 @@ Every node also takes `key`, `ref`, `at`, `anchor`, `origin`, `rotate` (degrees,
 | --- | --- |
 | `rect(w, h, { radius })` | frame starts at its top-left; `radius` is one number or four corners |
 | `circle(r)`, `ellipse(rx, ry)`, `arc({ radius, start, sweep })` | drawn around their own `[0, 0]`; angles are degrees clockwise from three o'clock |
-| `line(a, b)`, `polygon(points)`, `polyline(points)` | stay where their points are unless given `at` |
+| `line(a, b)`, `polygon(points)`, `polyline(points)` | stay where their points are unless given `at`, as every geometry does |
 | `path().moveTo(p).lineTo(p).curveTo(c1, c2, p).quadTo(c, p).close()` | build a path in code |
 | `pathData("M0 0L10 0Z")` | read path data from an icon set or drawing tool |
 | `subtract(base, ...cuts)`, `moved(geometry, [x, y])`, `canvas.rect`, `canvas.size`, `canvas.center` | holes; a geometry somewhere else; the scene's own rect and size |
@@ -219,10 +219,12 @@ Runtime errors. `…` stands for a value the message fills in.
 | `… draws "…" with no fill, so it paints nothing.` | `fill` on the `<Text>` or the `<Run>` |
 | `… draws … in …, which has no glyph for ….` | a font that has the character, or leave it out |
 | `… asks for …, which its family doesn't have: it has ….` | load that weight or style into `font.family(…)` |
-| `… has an at of its own, but the … it sits in places it.` | a container places its children: drop `at`, or nudge it with a motion layer's offset |
+| `… has its own …, but the … it sits in places it.` | a container places its children: drop `at` or `offset`, or nudge it with a motion layer's offset |
 | `<Align> places itself against its to, so it takes no ….` | move it with `inset` and `place` |
 | `… takes a place, one of …, got "…".` | one of the nine places, such as `"top-left"` |
-| `anchor on … names the point its at places, but it has no at, so it stays where its coordinates put it.` | give a line, polygon or path an `at`, or drop `anchor` |
+| `anchor on … names the point its at places, but it has no at, so it stays where its coordinates put it.` | give the node an `at`, or drop `anchor` |
+| `… has both at and offset. at places a point of its box; offset places its children's [0, 0].` | keep one: `offset` for a frame, `at` for its box |
+| `… has anchor=… and offset, but anchor names the point at places, …` | `at` with `anchor`, or `offset` alone |
 | `… names the ref "…", which is on no node.` | put the ref on a node |
 | `… moves the ref "…", which is on no node.` | put the ref on a node the scene draws |
 | `The ref "…" is on two nodes, … and ….` | one ref per node |

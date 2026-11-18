@@ -13,6 +13,7 @@ export type { SceneOptions } from "./author/lower";
 export type {
   Child,
   Common,
+  Framed,
   ImageProps,
   InstanceProps,
   RunProps,

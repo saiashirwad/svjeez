@@ -234,6 +234,7 @@ export function Tex({
   fill,
   colors = {},
   write,
+  at,
   ...common
 }: TexProps): SceneElement {
   const source = sourceOf(children);
@@ -314,7 +315,7 @@ export function Tex({
   const glyphs = build(treeOf(laid.marks, source));
 
   return (
-    <Group {...common}>
+    <Group {...common} {...(at !== undefined && { offset: at })}>
       {glyphs}
       {write && <Group key="writing">{outlines}</Group>}
     </Group>

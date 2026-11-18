@@ -82,7 +82,7 @@ export default scene(
       <Label i={0}>gradient shifts</Label>
 
       <Group
-        at={corner(1)}
+        offset={corner(1)}
         rotate={track(0).to(30, span(0.4, 2), ease.inOut).to(0, span(3.4, 1.6), ease.inOut)}
         scale={track(1).to(0.85, span(0.4, 2), ease.inOut).to(1, span(3.4, 1.6), ease.inOut)}
         clip={track(moved(circle(28), [30, 34]))
@@ -94,7 +94,7 @@ export default scene(
       <Label i={1}>moving clip</Label>
 
       <Group
-        at={corner(2)}
+        offset={corner(2)}
         mask={(own) => (
           <Shape
             geometry={rect(own.width + FEATHER, own.height)}

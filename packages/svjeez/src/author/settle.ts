@@ -60,6 +60,8 @@ interface Note {
   readonly anchor?: Anchor;
   readonly arranged?: true;
   readonly placed: boolean;
+  readonly framed?: true;
+  readonly still?: true;
   readonly kind: Kind;
   readonly pin?: TextAnchorPlace;
   readonly pinned?: true;
@@ -84,6 +86,7 @@ export interface Notes {
   readonly nodes: Map<string, Note>;
   readonly refs: Map<Ref, string>;
   readonly aims: Map<string, Aim>;
+  readonly onAnchor: Set<string>;
   readonly resized: Set<string>;
 }
 
@@ -91,8 +94,22 @@ export const notes = (): Notes => ({
   nodes: new Map(),
   refs: new Map(),
   aims: new Map(),
+  onAnchor: new Set(),
   resized: new Set(),
 });
+
+export const aimNow = (aim: Aim, node: SceneNode, home: Vec): Animated<Vec> =>
+  homed(
+    aim(
+      () => {
+        throw new SceneError(
+          `${named(node.key)} is moved onto an anchor before anchors are known.`,
+        );
+      },
+      () => ({ box: node.box, origin: node.origin, layers: node.layers, home }),
+    ),
+    home,
+  );
 
 export const noteResized = (
   into: Notes,
@@ -117,6 +134,8 @@ const sameBox = (a: Box, b: Box): boolean =>
 interface Written {
   readonly ref?: Ref;
   readonly at?: unknown;
+  readonly offset?: unknown;
+  readonly still?: boolean;
   readonly anchor?: TextAnchorPlace;
   readonly origin?: Origin;
 }
@@ -130,6 +149,7 @@ export const note = (
   backdrop?: BackdropOf,
 ): void => {
   const { ref } = props;
+  const point = props.at ?? props.offset;
 
   if (ref) {
     if (ref.within)
@@ -150,8 +170,10 @@ export const note = (
   }
 
   into.nodes.set(key, {
-    ...(isAnchor(props.at) && { anchor: props.at }),
-    placed: props.at !== undefined,
+    ...(isAnchor(point) && { anchor: point }),
+    placed: props.at !== undefined || props.offset !== undefined,
+    ...(props.offset !== undefined && { framed: true }),
+    ...(props.still && { still: true }),
     kind,
     ...(props.anchor !== undefined && { pin: props.anchor }),
     origin: props.origin,
@@ -205,7 +227,7 @@ const draft = (node: SceneNode, parent: Draft | undefined, nodes: Notes["nodes"]
     at: node.at,
     box: node.box,
     origin: node.origin,
-    homed: note?.kind !== "group" || note.pin === undefined || note.pinned === true,
+    homed: note?.kind !== "group" || !note.placed || note.framed === true || note.pinned === true,
     placing: 0,
     measuring: node.kind === "group" ? 0 : 2,
   };
@@ -499,7 +521,8 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
       d.note?.origin,
       d.box,
       d.node.key,
-      () => pivot ?? homeOf(d.note?.kind ?? d.node.kind, d.node, d.note?.pin, d.box),
+      () =>
+        pivot ?? homeOf(d.note?.kind ?? d.node.kind, d.node, d.note?.pin, d.box, unmoved(d.note)),
     );
     d.measuring = 2;
   };
@@ -524,7 +547,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     const home = (): Vec => {
       measure(d);
 
-      return homeOf(d.note?.kind ?? d.node.kind, d.node, d.note?.pin, d.box);
+      return homeOf(d.note?.kind ?? d.node.kind, d.node, d.note?.pin, d.box, unmoved(d.note));
     };
 
     if (anchor) d.at = homed(resolve(anchor, d.parent!), home());
@@ -663,7 +686,8 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 export const outsider = (node: SceneNode, notes: Notes): string | undefined => {
   const own = notes.nodes.get(node.key);
 
-  if (own?.anchor || own?.settle?.kind === "connect" || notes.aims.has(node.key)) return node.key;
+  if (own?.anchor || own?.settle?.kind === "connect" || notes.onAnchor.has(node.key))
+    return node.key;
 
   if (node.kind !== "group") return undefined;
 
@@ -698,10 +722,17 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
     ).map((child) => arranged(child));
 
     const pin = (box: Box): Animated<Vec> => {
-      if (note?.pin === undefined || outsider(node, into) !== undefined) return node.at;
-      into.nodes.set(node.key, { ...into.nodes.get(node.key)!, pinned: true });
+      if (note?.framed || note?.anchor || outsider(node, into) !== undefined) return node.at;
+      const aim = into.aims.get(node.key);
 
-      return homed(node.at, pinned(note.pin, box, `${named(node.key)}`));
+      if (!note?.placed && !aim) return node.at;
+      into.nodes.set(node.key, { ...into.nodes.get(node.key)!, pinned: true });
+      const home = pinned(note?.pin, box, `${named(node.key)}`);
+
+      if (!aim) return homed(node.at, home);
+      into.aims.delete(node.key);
+
+      return aimNow(aim, { ...node, box }, home);
     };
 
     if (asked?.kind !== "arrange") {
@@ -713,7 +744,7 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
         box,
         at: pin(box),
         origin: originOf(note?.origin, box, node.key, () =>
-          homeOf(node.kind, node, note?.pin, box),
+          homeOf(node.kind, node, note?.pin, box, unmoved(note)),
         ),
       };
     }
@@ -756,7 +787,9 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
       ...node,
       box,
       at: pin(box),
-      origin: originOf(note!.origin, box, node.key, () => homeOf(node.kind, node, note!.pin, box)),
+      origin: originOf(note!.origin, box, node.key, () =>
+        homeOf(node.kind, node, note!.pin, box, unmoved(note)),
+      ),
       children: [
         ...behind(backdrop, node, box),
         ...placed.map((child, i) => ({
@@ -770,13 +803,18 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
   return list.map((node) => arranged(node));
 };
 
+const unmoved = (note: Note | undefined): boolean => note?.framed === true || note?.still === true;
+
 const placedInside = (key: string, note: Note | undefined, label: string): void => {
-  if (note?.placed)
+  if (note?.placed) {
+    const prop = note.framed ? "offset" : "at";
+
     throw new SceneError(
-      `${named(key)} has an at of its own, but the ${label} it sits in places it.`,
-      "Drop its at; to nudge it, give it a motion layer with an offset.",
+      `${named(key)} has its own ${prop}, but the ${label} it sits in places it.`,
+      `Drop its ${prop}; to nudge it, give it a motion layer with an offset.`,
       whereOf(key),
     );
+  }
 
   if (note?.pin !== undefined)
     throw new SceneError(

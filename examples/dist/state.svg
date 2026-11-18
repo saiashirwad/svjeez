@@ -28,38 +28,38 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 ]]></style>
   <rect width="960" height="540" fill="var(--background)"/>
   <g transform="translate(480 270)" class="a m8">
-    <g transform="translate(-584.535 -155)" style="transform-origin:0px 0px;scale:0.77">
+    <g transform="translate(-584.535 -154.75)" style="transform-origin:0px 0px;scale:0.77">
       <g transform="translate(62 157.497)">
-        <rect x="0.75" y="0.75" width="67.2" height="39" rx="8" fill="var(--blue-22-muted-8-background)" stroke="var(--blue)" stroke-width="1.5"/>
+        <rect width="67.2" height="39" rx="8" fill="var(--blue-22-muted-8-background)" stroke="var(--blue)" stroke-width="1.5"/>
         <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Idle</text>
       </g>
       <g transform="translate(278.32 100.999)">
-        <rect x="0.75" y="0.75" width="486.72" height="152" rx="10" fill="var(--magenta-10-muted-8-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+        <rect width="486.72" height="152" rx="10" fill="var(--magenta-10-muted-8-background)" stroke="var(--magenta)" stroke-width="1.5"/>
         <line x1="0" y1="36" x2="486.72" y2="36" fill="none" stroke="var(--magenta)"/>
         <text x="213.96" y="23.04" font-size="14" fill="var(--text)">Working</text>
       </g>
       <g transform="translate(942.72 45)">
-        <rect x="0.75" y="0.75" width="159.6" height="39" rx="8" fill="var(--orange-22-muted-8-background)" stroke="var(--orange)" stroke-width="1.5"/>
+        <rect width="159.6" height="39" rx="8" fill="var(--orange-22-muted-8-background)" stroke="var(--orange)" stroke-width="1.5"/>
         <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Waiting on user</text>
       </g>
       <g transform="translate(988.92 120)">
-        <rect x="0.75" y="0.75" width="67.2" height="39" rx="8" fill="var(--cyan-22-muted-8-background)" stroke="var(--cyan)" stroke-width="1.5"/>
+        <rect width="67.2" height="39" rx="8" fill="var(--cyan-22-muted-8-background)" stroke="var(--cyan)" stroke-width="1.5"/>
         <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Done</text>
       </g>
       <g transform="translate(980.52 195)">
-        <rect x="0.75" y="0.75" width="84" height="39" rx="8" fill="var(--red-22-muted-8-background)" stroke="var(--red)" stroke-width="1.5"/>
+        <rect width="84" height="39" rx="8" fill="var(--red-22-muted-8-background)" stroke="var(--red)" stroke-width="1.5"/>
         <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Failed</text>
       </g>
       <g transform="translate(967.92 270)">
-        <rect x="0.5" y="0.5" width="109.2" height="39" rx="8" fill="var(--muted-8-background)" stroke="var(--muted)"/>
+        <rect width="109.2" height="39" rx="8" fill="var(--muted-8-background)" stroke="var(--muted)"/>
         <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Cancelled</text>
       </g>
       <g transform="translate(356.32 152.999)">
-        <rect x="0.75" y="0.75" width="100.8" height="39" rx="8" fill="var(--blue-22-muted-16-background)" stroke="var(--blue)" stroke-width="1.5"/>
+        <rect width="100.8" height="39" rx="8" fill="var(--blue-22-muted-16-background)" stroke="var(--blue)" stroke-width="1.5"/>
         <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Planning</text>
       </g>
       <g transform="translate(606.24 152.999)">
-        <rect x="0.75" y="0.75" width="142.8" height="39" rx="8" fill="var(--orange-22-muted-16-background)" stroke="var(--orange)" stroke-width="1.5"/>
+        <rect width="142.8" height="39" rx="8" fill="var(--orange-22-muted-16-background)" stroke="var(--orange)" stroke-width="1.5"/>
         <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Calling tools</text>
       </g>
       <path d="M14 177L55 177" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>

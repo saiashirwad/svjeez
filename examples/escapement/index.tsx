@@ -234,7 +234,7 @@ const Axle = ({
   readonly by: number;
   readonly children: Child;
 }): SceneElement => (
-  <Group at={gear.c} origin="at" rotate={advance.map((a) => a * by)}>
+  <Group offset={gear.c} origin="at" rotate={advance.map((a) => a * by)}>
     <Group origin="at" rotate={stepping.map((s) => s * by)}>
       {children}
     </Group>
@@ -265,7 +265,6 @@ const Wheel = ({
 const Bevel = ({ gear }: { readonly gear: Gear }): SceneElement => (
   <Shape
     geometry={circle(Number(n(gear.r - (2.6 * gear.r) / gear.teeth - 1.6)))}
-    anchor="center"
     stroke={{ color: "#F3E2B48C", width: 0.7 }}
   />
 );
@@ -277,7 +276,7 @@ const Pinion = ({ gear }: { readonly gear: Gear }): SceneElement => (
       fill={STEEL}
       stroke={{ color: STEEL_EDGE, width: 0.5, join: "round" }}
     />
-    <Shape geometry={circle(gear.r * 0.3)} anchor="center" fill={STEEL_EDGE} />
+    <Shape geometry={circle(gear.r * 0.3)} fill={STEEL_EDGE} />
   </Group>
 );
 
@@ -291,14 +290,9 @@ const Shade = ({ c, r }: { readonly c: Vec; readonly r: number }): SceneElement 
 );
 
 const Jewel = ({ c, r = 4.2 }: { readonly c: Vec; readonly r?: number }): SceneElement => (
-  <Group at={c}>
-    <Shape
-      geometry={circle(r)}
-      anchor="center"
-      fill={RUBY}
-      stroke={{ color: RUBY_EDGE, width: 0.5 }}
-    />
-    <Shape geometry={circle(r * 0.36)} anchor="center" fill={STEEL} />
+  <Group offset={c}>
+    <Shape geometry={circle(r)} fill={RUBY} stroke={{ color: RUBY_EDGE, width: 0.5 }} />
+    <Shape geometry={circle(r * 0.36)} fill={STEEL} />
   </Group>
 );
 
@@ -338,7 +332,7 @@ const hairspring = Array.from({ length: SLICES + 1 }, (_, j) => {
   const angle = (u: number): number => 62 + 360 * COILS * u;
 
   return (
-    <Group at={STAFF} origin="at" rotate={theta.map((v) => (v * j) / SLICES)}>
+    <Group offset={STAFF} origin="at" rotate={theta.map((v) => (v * j) / SLICES)}>
       <Shape
         geometry={pathData(spiral(radius(u0), radius(u1), angle(u0), angle(u1), 2))}
         stroke={{ color: "#6F8FE8", width: 0.8, cap: "round" }}
@@ -617,7 +611,7 @@ export default scene(
   () => (
     <Group>
       <Shape geometry={canvas.rect} fill={GROUND} />
-      <Group at={camera.at} scale={camera.scale} origin="at">
+      <Group offset={camera.at} scale={camera.scale} origin="at">
         <Axle gear={escapePinion} by={1}>
           <Pinion gear={{ ...escapePinion, c: [0, 0] }} />
         </Axle>
@@ -633,20 +627,14 @@ export default scene(
           />
           <Shape
             geometry={circle(barrel.r * 0.88)}
-            anchor="center"
             fill="#17191E"
             stroke={{ color: BRASS_EDGE, width: 1 }}
           />
           {Array.from({ length: 9 }, (_, i) => (
             <Instance of={arm} rotate={i * 40} origin="at" />
           ))}
-          <Shape
-            geometry={circle(24)}
-            anchor="center"
-            fill={STEEL}
-            stroke={{ color: STEEL_EDGE, width: 0.8 }}
-          />
-          <Shape geometry={circle(8)} anchor="center" fill={STEEL_EDGE} />
+          <Shape geometry={circle(24)} fill={STEEL} stroke={{ color: STEEL_EDGE, width: 0.8 }} />
+          <Shape geometry={circle(8)} fill={STEEL_EDGE} />
         </Axle>
         <Shade c={ESCAPE} r={60 / 0.94 / 1.9} />
         <Axle gear={escapePinion} by={1}>
@@ -660,14 +648,14 @@ export default scene(
         </Axle>
         <Jewel c={third.c} />
         <Jewel c={fourth.c} />
-        <Group at={STAFF} origin="at" rotate={theta}>
+        <Group offset={STAFF} origin="at" rotate={theta}>
           <Shape geometry={balanceWheel} fill={GILT} stroke={{ color: BRASS_EDGE, width: 0.5 }} />
         </Group>
         {hairspring}
         <Pin c={at(STAFF, 41, 62)} />
         <Pin c={add(PIVOT, [-8.6, -30])} />
         <Pin c={add(PIVOT, [8.6, -30])} />
-        <Group at={PIVOT} origin="at" rotate={rocking}>
+        <Group offset={PIVOT} origin="at" rotate={rocking}>
           <Shape geometry={fork.anchor} stroke={{ color: STEEL_EDGE, width: 9.8, cap: "round" }} />
           <Shape geometry={fork.anchor} stroke={{ color: STEEL, width: 9, cap: "round" }} />
           <Shape
@@ -688,10 +676,9 @@ export default scene(
         </Group>
         <Jewel c={PIVOT} r={3.4} />
         <Jewel c={ESCAPE} r={3.4} />
-        <Group at={STAFF} origin="at" rotate={theta}>
+        <Group offset={STAFF} origin="at" rotate={theta}>
           <Shape
             geometry={circle(PIN + 4.5)}
-            anchor="center"
             fill="#B4BCC847"
             stroke={{ color: STEEL, width: 0.6 }}
           />

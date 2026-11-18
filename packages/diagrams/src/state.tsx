@@ -104,7 +104,7 @@ const StateBox = ({ look: l, node: n, box: b, header, ground }: StateBoxProps): 
   const radius = n.inner ? 10 : 8;
 
   return (
-    <Group key={n.id} at={[b.x, b.y]}>
+    <Group key={n.id} offset={[b.x, b.y]}>
       <Shape
         key="shape"
         geometry={rect(b.w, b.h, { radius })}
@@ -403,7 +403,7 @@ export function stateMachine<
         />
       ))}
       {local.ends.map((d, k) => (
-        <Group key={`final-${k + 1}`} at={centerOf(d)}>
+        <Group key={`final-${k + 1}`} offset={centerOf(d)}>
           <Shape
             geometry={circle(RING / 2)}
             anchor="center"

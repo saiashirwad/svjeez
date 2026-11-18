@@ -90,11 +90,11 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <text x="33.35" y="28.26" font-size="16" fill="var(--text)">Browser</text>
     </g>
     <g transform="translate(165.9 5)">
-      <rect x="0.75" y="0.75" width="102.4" height="45" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <rect width="102.4" height="45" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
       <text x="17.6" y="28.26" font-size="16" fill="var(--text)">Gateway</text>
     </g>
     <g transform="translate(300.3 5)">
-      <rect x="0.75" y="0.75" width="64" height="45" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <rect width="64" height="45" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
       <text x="17.6" y="28.26" font-size="16" fill="var(--text)">API</text>
     </g>
     <g transform="translate(422.46 0)">
@@ -103,7 +103,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <text x="17.6" y="35.76" font-size="16" fill="var(--text)">Redis</text>
     </g>
     <g transform="translate(537.66 5)">
-      <rect x="0.75" y="0.75" width="89.6" height="45" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+      <rect width="89.6" height="45" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
       <path d="M8 0L8 45M81.6 0L81.6 45" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
       <text x="25.6" y="28.26" font-size="16" fill="var(--text)">Auth</text>
     </g>

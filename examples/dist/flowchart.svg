@@ -89,9 +89,9 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 ]]></style>
   <rect width="960" height="540" fill="var(--background)"/>
   <g transform="translate(480 270)" class="a m32">
-    <g transform="translate(-480.9 -168.88)" style="transform-origin:0px 0px;scale:0.936">
+    <g transform="translate(-480.65 -168.505)" style="transform-origin:0px 0px;scale:0.936">
       <g transform="translate(166 72)" class="a m1">
-        <rect x="0.5" y="0.5" width="795.55" height="221.26" rx="10" fill="none" stroke="var(--border)" stroke-dasharray="4 3"/>
+        <rect width="795.55" height="221.26" rx="10" fill="none" stroke="var(--border)" stroke-dasharray="4 3"/>
         <text x="12" y="17.271" font-size="11.05" fill="var(--muted)">Review agent</text>
       </g>
       <path d="M123.85 182.26L138 182.26C154 182.26 154 119.26 170 119.26L174.9 119.26" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
@@ -127,22 +127,22 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
         <text x="14.3" y="30.18" font-size="13" fill="var(--text)">Review memory</text>
       </g>
       <g transform="translate(181.9 101.26)" class="a m21">
-        <rect x="0.75" y="0.75" width="130.4" height="36" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+        <rect width="130.4" height="36" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
         <path d="M8 0L8 36M122.4 0L122.4 36" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
         <text x="22.3" y="22.68" font-size="13" fill="var(--text)">Run linters</text>
       </g>
       <g transform="translate(189.7 173.26)" class="a m22">
-        <rect x="0.75" y="0.75" width="114.8" height="36" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+        <rect width="114.8" height="36" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
         <path d="M8 0L8 36M106.8 0L106.8 36" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
         <text x="22.3" y="22.68" font-size="13" fill="var(--text)">Run tests</text>
       </g>
       <g transform="translate(178 245.26)" class="a m23">
-        <rect x="0.75" y="0.75" width="138.2" height="36" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+        <rect width="138.2" height="36" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
         <path d="M8 0L8 36M130.2 0L130.2 36" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
         <text x="22.3" y="22.68" font-size="13" fill="var(--text)">Scan secrets</text>
       </g>
       <g transform="translate(364.2 173.26)" class="a m24">
-        <rect x="0.75" y="0.75" width="145.6" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+        <rect width="145.6" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
         <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Analyze changes</text>
       </g>
       <g transform="translate(557.8 162.76)" class="a m25">
@@ -150,11 +150,11 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
         <text x="38.285" y="33.18" font-size="13" fill="var(--text)">Issues?</text>
       </g>
       <g transform="translate(827.95 173.26)" class="a m26">
-        <rect x="0.75" y="0.75" width="114.4" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+        <rect width="114.4" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
         <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Draft fixes</text>
       </g>
       <g transform="translate(820.75 0)" class="a m27">
-        <rect x="0.75" y="0.75" width="128.8" height="36" rx="18" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+        <rect width="128.8" height="36" rx="18" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
         <text x="21.5" y="22.68" font-size="13" fill="var(--text)">Post review</text>
       </g>
       <g class="a m28">

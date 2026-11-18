@@ -388,7 +388,7 @@ export const Chart = (props: ChartProps): SceneElement => {
   });
 
   return (
-    <Group key={props.key} at={at}>
+    <Group key={props.key} offset={at}>
       <Axes look={look} />
       {drawn}
       {props.children?.(layout.plot)}

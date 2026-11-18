@@ -42,7 +42,7 @@ export default scene(
   () => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
-      <Group at={[656, 270]}>
+      <Group offset={[656, 270]}>
         <Shape
           geometry={circle(RADIUS + 14)}
           at={[0, 0]}
@@ -70,7 +70,7 @@ export default scene(
           </Group>
         ))}
       </Group>
-      <Group at={[64, 200]}>
+      <Group offset={[64, 200]}>
         <Text {...label} size={11} fill={theme.orange} at={[0, 10]} anchor="baseline-left">
           21 JUNE 2026
         </Text>

@@ -147,9 +147,9 @@ describe("globe", () => {
 
   test("a still globe draws static outlines", () => {
     for (const piece of still.land.pieces) expect(piece).toMatchObject({ kind: "path" });
-    const { at, opacity } = still.place([0, 20]);
+    const { offset, opacity } = still.place([0, 20]);
 
-    expect(at).toEqual([0, expect.closeTo(0, 9)]);
+    expect(offset).toEqual([0, expect.closeTo(0, 9)]);
     expect(opacity).toBe(1);
   });
 
@@ -164,7 +164,7 @@ describe("globe", () => {
   test("draws turning outlines clipped to its disc", () => {
     const out = emit(
       () => (
-        <Group at={[200, 150]}>
+        <Group offset={[200, 150]}>
           <Shape geometry={turning.sphere} fill="#102030" />
           <GlobeShape of={turning.land} fill="#88AACC" />
           <GlobeShape

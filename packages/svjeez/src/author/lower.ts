@@ -46,6 +46,7 @@ import {
 } from "./nodes";
 import { declaring, isAnchor, type Anchor } from "./refs";
 import {
+  aimNow,
   arrangeState,
   around,
   note,
@@ -84,7 +85,7 @@ import {
 } from "./values";
 import { FontBook, charName, faceOf, piecesOf, type Asked } from "./runs";
 import { lookOf, paintedBoxOf } from "../model/painted";
-import { hasCoordinates, minus, pinned } from "./pin";
+import { homeOf, minus, pinned } from "./pin";
 import { layoutRuns } from "./text";
 import { countedNodes, countingIn, formatOf, ticksOf } from "./count";
 import { blendable, gradientOf, isWrittenGradient, mixPaint } from "./paint";
@@ -205,7 +206,7 @@ const base = (props: Omit<Common, "anchor">, box: Box, key: string, timing: Timi
     at: isAnchor(props.at)
       ? NOWHERE
       : animated<Vec, Vec>(
-          props.at ?? [0, 0],
+          props.at ?? home,
           (point) => minus(point, home),
           timing,
           mixVec,
@@ -283,16 +284,9 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
       : animated<Vec, Vec>(props.trim, keep, timing, mixVec, `trim on ${where}`);
 
   const box = paintedBoxOf(rest, lookOf({ stroke, trim }));
-  const free = props.at === undefined && hasCoordinates(rest.kind);
-
-  if (free && props.anchor !== undefined)
-    throw new SceneError(
-      `anchor on ${where} names the point its at places, but it has no at, so it stays where its coordinates put it.`,
-      "Give it an at, or drop anchor.",
-    );
 
   return {
-    ...base(props, box, key, timing, free ? [0, 0] : pinned(props.anchor, box, where)),
+    ...base(props, box, key, timing, pinned(props.anchor, box, where)),
     kind: "shape",
     geometry,
     ...(props.fill !== undefined && { fill: painted(props.fill, "fill") }),
@@ -587,10 +581,14 @@ const instance = (ctx: Ctx, props: InstanceProps, key: string, timing: Timing): 
       "Move the instance instead, or draw the content without a symbol.",
     );
 
-  const home: Vec =
-    props.anchor === undefined ? [0, 0] : pinned(props.anchor, node!.box, named(key));
+  const framed = props.offset !== undefined;
+  const home: Vec = framed ? [0, 0] : pinned(props.anchor, node!.box, named(key));
 
-  return { ...base(props, node!.box, key, timing, home), kind: "instance", symbol: name };
+  return {
+    ...base(framed ? { ...props, at: props.offset } : props, node!.box, key, timing, home),
+    kind: "instance",
+    symbol: name,
+  };
 };
 
 const sceneTiming = ({ duration }: Ctx): Timing => ({
@@ -716,23 +714,41 @@ const lowered = (
   timing: Timing,
   parent: string,
 ): SceneNode[] => {
-  const home = (): Vec => {
-    if (given.type !== "shape" || given.props.at !== undefined) return [0, 0];
-    const drawn = shape(ctx, given.props, key, timing);
-
-    return hasCoordinates(atRest(drawn.geometry).kind) ? [drawn.box.x, drawn.box.y] : [0, 0];
-  };
-
-  const el = ctx.cues.apply(given, key, timing, ctx.notes, parent, home);
+  const el = ctx.cues.apply(given, key, timing, ctx.notes, parent);
   const backdrop = el.type === "group" ? backdropOf(ctx, el.props, key, timing) : undefined;
+  const offset = el.type === "group" || el.type === "instance" ? el.props.offset : undefined;
 
-  note(ctx.notes, key, el.props, el.type, el.type === "group" ? el.settle : undefined, backdrop);
+  placement(ctx, el.props, offset, key, parent);
+  const still = el.props.at === undefined && offset === undefined && !ctx.notes.aims.has(key);
+
+  note(
+    ctx.notes,
+    key,
+    { ...el.props, offset, still },
+    el.type,
+    el.type === "group" ? el.settle : undefined,
+    backdrop,
+  );
+
+  const aimed = (node: SceneNode): SceneNode => {
+    const aim = ctx.notes.aims.get(key);
+
+    if (still && el.props.origin === "at") return { ...node, origin: [0, 0] };
+
+    if (!aim || el.type === "group" || ctx.notes.onAnchor.has(key)) return node;
+    ctx.notes.aims.delete(key);
+
+    return {
+      ...node,
+      at: aimNow(aim, node, homeOf(el.type, node, el.props.anchor, node.box, offset !== undefined)),
+    };
+  };
 
   const done = (node: SceneNode): SceneNode[] => [
     identified(
       given,
       name,
-      dressed(ctx, el.props, sized(ctx, el.props, node), timing),
+      dressed(ctx, el.props, sized(ctx, el.props, aimed(node)), timing),
       entryOf(key),
     ),
   ];
@@ -756,7 +772,13 @@ const lowered = (
         );
 
       const node: GroupNode = {
-        ...base(el.props, around(children), key, timing, [0, 0]),
+        ...base(
+          offset === undefined ? el.props : { ...el.props, at: offset },
+          around(children),
+          key,
+          timing,
+          [0, 0],
+        ),
         ...(el.layout && { authored: { layout: el.layout } }),
         kind: "group",
         children,
@@ -765,6 +787,41 @@ const lowered = (
       return done(node);
     }
   }
+};
+
+const placement = (
+  ctx: Ctx,
+  props: TextProps | Common,
+  offset: Anim<Vec> | Anchor | undefined,
+  key: string,
+  parent: string,
+): void => {
+  const where = named(key);
+
+  if (offset !== undefined && props.at !== undefined)
+    throw new SceneError(
+      `${where} has both at and offset. at places a point of its box; offset places its children's [0, 0].`,
+      "Keep one of them.",
+    );
+
+  if (offset !== undefined && props.anchor !== undefined)
+    throw new SceneError(
+      `${where} has anchor=${JSON.stringify(props.anchor)} and offset, but anchor names the point at places, and offset places its children's [0, 0], not a point of its box.`,
+      "Place it with at and anchor, or drop anchor.",
+    );
+
+  const contained = ctx.notes.nodes.get(parent)?.settle?.kind === "arrange";
+
+  if (
+    props.anchor !== undefined &&
+    props.at === undefined &&
+    !contained &&
+    !ctx.notes.aims.has(key)
+  )
+    throw new SceneError(
+      `anchor on ${where} names the point its at places, but it has no at, so it stays where its coordinates put it.`,
+      "Give it an at, or drop anchor.",
+    );
 };
 
 const nameFor = (given: NodeElement, name: string | undefined, parent: string): Named => {

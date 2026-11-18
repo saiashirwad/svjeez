@@ -71,7 +71,7 @@ A node is a label or `{ label, role }`; `role` (`task`, `input`, `output`, `tool
 
 ## What a diagram gives back
 
-- `node`: the drawing, with its top-left at `[0, 0]` of its frame. Place it with `<Align>`, a `<Group at>` or a container, and scale it with the group's `scale`.
+- `node`: the drawing, with its top-left at `[0, 0]` of its frame. Place it with `<Align>`, a `<Group offset>` or a container, and scale it with the group's `scale`.
 - `with(child)`: the drawing with `child` over the edges and under the nodes and labels, for a trace along a route.
 - `size`: `[width, height]`, to size the canvas or a scale.
 - `part(id)`: a ref to a node, a group, an actor, a lane or an edge (`"pr->lint"`), for `<Align to>`, `<Arrow from to>` and timeline verbs. Inside a node, `"shape"` and `"label"` are parts too: `chart.part("lint").part("shape").fill(theme.red, 0.3)`.

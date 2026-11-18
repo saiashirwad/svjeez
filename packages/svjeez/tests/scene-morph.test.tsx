@@ -99,7 +99,7 @@ describe("morph", () => {
     const a = shape(
       made(() =>
         morph(
-          <Shape key="a" geometry={circle(10)} anchor="center" fill="#ff0000" />,
+          <Shape key="a" geometry={circle(10)} fill="#ff0000" />,
           <Shape key="a" geometry={rect(40, 20, { radius: 6 })} fill="#ff0000" />,
           span(0, 1),
         ),
@@ -179,7 +179,7 @@ describe("morph", () => {
         <Group key="g">
           <Shape fill="#000000" key="dot" geometry={circle(2)} anchor="center" at={[0, 0]} />
         </Group>,
-        <Group key="g" at={[10, 0]}>
+        <Group key="g" offset={[10, 0]}>
           <Shape fill="#000000" key="dot" geometry={circle(2)} anchor="center" at={[5, 5]} />
         </Group>,
         span(0, 1),
@@ -277,7 +277,7 @@ describe("morph", () => {
     const a = shape(
       made(() =>
         morph(
-          <Shape key="a" geometry={circle(10)} anchor="center" fill="#ff0000" />,
+          <Shape key="a" geometry={circle(10)} fill="#ff0000" />,
           <Shape key="a" geometry={rect(30, 20)} at={[40, 0]} fill="#00ff00" />,
           span(0, 3),
           { curve: ease.spring({ stiffness: 170, damping: 14 }) },
@@ -297,7 +297,7 @@ describe("morph", () => {
       ["a", "b", "c"].map((key) => (
         <Group key={key}>
           <Shape fill="#000000" key="bar" geometry={rect(5, h)} />
-          <Shape fill="#000000" key="dot" geometry={circle(h / 4)} anchor="center" />
+          <Shape fill="#000000" key="dot" geometry={circle(h / 4)} />
         </Group>
       ));
 
@@ -489,7 +489,7 @@ describe("boxes and hit tests", () => {
     made(() => (
       <Group>
         <Shape fill="#000000" key="back" geometry={rect(200, 100)} />
-        <Group key="card" at={[50, 20]}>
+        <Group key="card" offset={[50, 20]}>
           <Shape fill="#000000" key="face" geometry={rect(40, 40)} />
           <Shape fill="#000000" key="pip" geometry={circle(5)} anchor="center" at={[20, 20]} />
         </Group>

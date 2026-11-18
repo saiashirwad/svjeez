@@ -1,7 +1,14 @@
 /** @jsxImportSource svjeez */
 import { Group, Instance, Shape, pathData, symbol } from "svjeez";
 import type { Anim, Geometry, Paint, SceneElement, Vec } from "svjeez";
-import { SceneError, type Color, type Common, type Model, type SceneSymbol } from "svjeez/tools";
+import {
+  SceneError,
+  type Color,
+  type Common,
+  type Framed,
+  type Model,
+  type SceneSymbol,
+} from "svjeez/tools";
 
 export interface IconData {
   readonly grid: number;
@@ -13,7 +20,7 @@ type PerPiece = (piece: number, pieces: number) => Anim<Vec>;
 
 export type IconTrim = Anim<Vec> | PerPiece;
 
-interface Base extends Common {
+interface Base extends Common, Framed {
   readonly icon: IconData;
   readonly size?: number;
   readonly width?: number;

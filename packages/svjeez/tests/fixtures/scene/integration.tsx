@@ -68,7 +68,7 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
         </Group>
         <Image src={badge} width={16} />
       </Grid>
-      <Group ref={card} at={[60, 110]}>
+      <Group ref={card} offset={[60, 110]}>
         <Shape geometry={rect(70, 40, { radius: 6 })} fill={theme.soft} />
         <Text font={mono} size={11} width={60} at={[6, 16]} anchor="baseline-left" fill={theme.ink}>
           {"a card that wraps"}
@@ -81,7 +81,7 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
         bend={0.2}
         inset={4}
       />
-      <Group at={[150, 20]}>
+      <Group offset={[150, 20]}>
         {morph(
           <Stack key="row" direction="row" gap={6} align="center">
             <Shape key="x" geometry={rect(20, 20)} fill={theme.cool} />
@@ -110,8 +110,8 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
         at={angle.map((a) => [250 + a / 6, 186] as const)}
       />
       <Arrow head="none" from={[250, 160]} to={dot.top} stroke={{ color: theme.cool }} />
-      <Instance of={star} at={[20, 170]} />
-      <Instance of={star} at={[44, 170]} scale={1.5} />
+      <Instance of={star} offset={[20, 170]} />
+      <Instance of={star} offset={[44, 170]} scale={1.5} />
       <Sequence when={span(1)}>
         <Sequence when={span(0.5)}>
           <Shape

@@ -186,12 +186,12 @@ describe("verbs", () => {
 
       return (
         <Group>
-          <Group ref={target} at={[100, 50]}>
+          <Group ref={target} offset={[100, 50]}>
             <Shape fill="#000000" geometry={rect(20, 10)} />
             <Shape fill="#000000" key="pin" geometry={rect(4, 4)} at={[30, 30]} />
           </Group>
           <Shape fill="#000000" ref={a} geometry={circle(2)} anchor="center" />
-          <Group at={[10, 10]}>
+          <Group offset={[10, 10]}>
             <Shape fill="#000000" ref={b} geometry={rect(6, 6)} />
           </Group>
         </Group>
@@ -327,7 +327,7 @@ describe("spans", () => {
       return (
         <Group>
           {dots.map((dot) => (
-            <Shape fill="#000000" ref={dot} geometry={circle(2)} anchor="center" opacity={0} />
+            <Shape fill="#000000" ref={dot} geometry={circle(2)} opacity={0} />
           ))}
         </Group>
       );
@@ -344,9 +344,7 @@ describe("spans", () => {
       const bulb = ref("bulb");
 
       return {
-        node: (
-          <Shape ref={bulb} geometry={circle(4)} anchor="center" fill="#000000" opacity={0.2} />
-        ),
+        node: <Shape ref={bulb} geometry={circle(4)} fill="#000000" opacity={0.2} />,
         blink: (at: number) => {
           const on = bulb.to({ opacity: 1 }, span(at, 0.1));
 
@@ -477,7 +475,7 @@ describe("errors", () => {
     throws(() => {
       ref("ghost").to({ opacity: 1 }, span(0, 1));
 
-      return <Shape fill="#000000" geometry={circle(2)} anchor="center" />;
+      return <Shape fill="#000000" geometry={circle(2)} />;
     }, 'ghost.to() moves the ref "ghost", which is on no node');
 
     throws(() => {

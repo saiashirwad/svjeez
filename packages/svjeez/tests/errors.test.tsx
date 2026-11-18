@@ -95,9 +95,7 @@ describe("SceneError", () => {
       ),
     );
 
-    expect(error.problem).toBe(
-      '<Shape> "a" has an at of its own, but the <Stack> it sits in places it.',
-    );
+    expect(error.problem).toBe('<Shape> "a" has its own at, but the <Stack> it sits in places it.');
     expect(error.source?.line).toBe(9);
   });
 

@@ -431,7 +431,7 @@ describe("clips and masks", () => {
     const model = made(() => (
       <Group
         key="card"
-        at={[20, 10]}
+        offset={[20, 10]}
         rotate={30}
         clip={subtract(
           rect(60, 40),
@@ -495,7 +495,7 @@ describe("clips and masks", () => {
     const model = made(() => (
       <Group
         key="card"
-        at={[50, 20]}
+        offset={[50, 20]}
         mask={
           <Shape
             geometry={rect(30, 30)}

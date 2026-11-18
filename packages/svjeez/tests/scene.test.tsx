@@ -30,7 +30,7 @@ describe("lowering", () => {
   test("a node is keyed by its place, its key or its ref, under its parent", () => {
     const model = made(() => (
       <Group>
-        <Shape fill="#000000" geometry={circle(4)} anchor="center" />
+        <Shape fill="#000000" geometry={circle(4)} />
         <Group key="card">
           <Shape fill="#000000" key="title" geometry={rect(10, 4)} />
           <Shape fill="#000000" geometry={rect(10, 4)} />
@@ -51,8 +51,8 @@ describe("lowering", () => {
     expect(() =>
       made(() => (
         <Group>
-          <Shape fill="#000000" key="a" geometry={circle(4)} anchor="center" />
-          <Shape fill="#000000" key="a" geometry={circle(4)} anchor="center" />
+          <Shape fill="#000000" key="a" geometry={circle(4)} />
+          <Shape fill="#000000" key="a" geometry={circle(4)} />
         </Group>
       )),
     ).toThrow('Two nodes are both keyed "a"');
@@ -60,7 +60,7 @@ describe("lowering", () => {
 
   test("boxes are measured in the node's own frame, and a group covers its children where they rest", () => {
     const model = made(() => (
-      <Group at={[50, 50]}>
+      <Group offset={[50, 50]}>
         <Shape fill="#000000" geometry={rect(20, 10)} at={[5, 5]} />
         <Shape
           fill="#000000"
@@ -89,9 +89,7 @@ describe("lowering", () => {
 
   test("an arc's box is its whole circle's, so it turns around the center", () => {
     const ring = only(
-      made(() => (
-        <Shape fill="#000000" geometry={arc({ radius: 10, sweep: 90 })} anchor="center" />
-      )),
+      made(() => <Shape fill="#000000" geometry={arc({ radius: 10, sweep: 90 })} />),
     );
 
     expect(ring.origin).toEqual([0, 0]);
@@ -104,7 +102,6 @@ describe("lowering", () => {
           <Shape
             fill="#000000"
             geometry={circle(4)}
-            anchor="center"
             opacity={track(0).to(1, span(0.5, 1), ease.linear)}
           />
         </Sequence>
@@ -129,7 +126,6 @@ describe("lowering", () => {
         <Shape
           fill="#000000"
           geometry={circle(4)}
-          anchor="center"
           opacity={track(1)}
           motion={motion({ rotate: 0 })}
         />
@@ -146,7 +142,6 @@ describe("lowering", () => {
           <Shape
             fill="#000000"
             geometry={circle(4)}
-            anchor="center"
             rotate={track(0).to(360, span(0, 1.5), ease.linear).loop(1.5)}
           />
         ),
@@ -163,19 +158,14 @@ describe("lowering", () => {
     expect(() =>
       made(() => (
         <Sequence when={span(1, 1)}>
-          <Shape
-            fill="#000000"
-            geometry={circle(4)}
-            anchor="center"
-            opacity={track(0).to(1, span(0.5, 1))}
-          />
+          <Shape fill="#000000" geometry={circle(4)} opacity={track(0).to(1, span(0.5, 1))} />
         </Sequence>
       )),
     ).toThrow("past the 1s <Sequence when={span(1, 1)}>");
   });
 
   test("tokens the scene uses are declared with both values", () => {
-    const model = made(() => <Shape geometry={circle(4)} anchor="center" fill={theme.ink} />);
+    const model = made(() => <Shape geometry={circle(4)} fill={theme.ink} />);
 
     expect(model.tokens.ink).toEqual({
       light: [17 / 255, 17 / 255, 17 / 255, 1],
@@ -192,15 +182,13 @@ describe("the SVG backend", () => {
     svg.emit(made(build)).split("</style>").at(-1)!;
 
   test("nothing is inherited: a shape with no fill says so", () => {
-    expect(
-      body(() => <Shape geometry={circle(4)} anchor="center" stroke={{ color: "#FF0000" }} />),
-    ).toContain('<circle r="4" fill="none" stroke="#FF0000"/>');
+    expect(body(() => <Shape geometry={circle(4)} stroke={{ color: "#FF0000" }} />)).toContain(
+      '<circle r="4" fill="none" stroke="#FF0000"/>',
+    );
   });
 
   test("a token is a CSS variable with a light and a dark value", () => {
-    const out = svg.emit(
-      made(() => <Shape geometry={circle(4)} anchor="center" fill={theme.ink} />),
-    );
+    const out = svg.emit(made(() => <Shape geometry={circle(4)} fill={theme.ink} />));
 
     expect(out).toContain("svg{--ink:#EEEEEE}");
     expect(out).toContain("@media (prefers-color-scheme:light){svg{--ink:#111111}}");
@@ -223,7 +211,7 @@ describe("the SVG backend", () => {
   test("anything else turns around its origin, written out", () => {
     expect(
       body(() => (
-        <Group at={[50, 50]} rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}>
+        <Group offset={[50, 50]} rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}>
           <Shape fill="#000000" geometry={rect(20, 10)} />
           <Shape fill="#000000" geometry={rect(4, 4)} at={[16, 6]} />
         </Group>
@@ -233,7 +221,7 @@ describe("the SVG backend", () => {
 
   test("a group that only places one node is written as that node, placed by both", () => {
     const out = body(() => (
-      <Group at={[50, 50]} rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}>
+      <Group offset={[50, 50]} rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}>
         <Shape geometry={path().moveTo([0, 0]).lineTo([20, 10])} stroke={{ color: "#FF0000" }} />
       </Group>
     ));
@@ -249,7 +237,6 @@ describe("the SVG backend", () => {
       <Shape
         fill="#000000"
         geometry={circle(4)}
-        anchor="center"
         rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}
         motion={motion({ offset: [0, 0] }).to({ offset: [10, 0] }, span(0, 1))}
       />
@@ -259,7 +246,6 @@ describe("the SVG backend", () => {
       <Shape
         fill="#000000"
         geometry={circle(4)}
-        anchor="center"
         motion={[
           motion({ rotate: 0 }).to({ rotate: 90 }, span(0, 1)),
           motion({ offset: [0, 0] }).to({ offset: [10, 0] }, span(0, 1)),
@@ -274,13 +260,7 @@ describe("the SVG backend", () => {
   test("an entrance folds into the node's own opacity, so no wrapper draws it", () => {
     const out = svg.emit(
       made(() => (
-        <Shape
-          fill="#000000"
-          geometry={circle(4)}
-          anchor="center"
-          opacity={0.5}
-          motion={enter(span(0, 1))}
-        />
+        <Shape fill="#000000" geometry={circle(4)} opacity={0.5} motion={enter(span(0, 1))} />
       )),
     );
 
@@ -295,7 +275,6 @@ describe("the SVG backend", () => {
         <Shape
           fill="#000000"
           geometry={circle(4)}
-          anchor="center"
           opacity={track(1).to(0.5, span(0, 2))}
           motion={enter(span(0, 1))}
         />
@@ -307,7 +286,7 @@ describe("the SVG backend", () => {
     const build = () => (
       <Group>
         <Group key="row">
-          <Shape fill="#000000" geometry={circle(4)} anchor="center" />
+          <Shape fill="#000000" geometry={circle(4)} />
           <Shape fill="#000000" geometry={circle(4)} anchor="center" at={[10, 0]} />
         </Group>
       </Group>
@@ -346,9 +325,7 @@ describe("the SVG backend", () => {
   });
 
   test("a curved lane whose ease leaves 0 to 1 is refused, not drawn off its path", () => {
-    const model = made(() => (
-      <Shape fill="#000000" key="dot" geometry={circle(3)} anchor="center" />
-    ));
+    const model = made(() => <Shape fill="#000000" key="dot" geometry={circle(3)} />);
 
     const dot = only(model);
 
@@ -383,9 +360,7 @@ describe("the SVG backend", () => {
   });
 
   test("a feature the backend can't draw is named with its node, before anything is written", () => {
-    const model = made(() => (
-      <Shape fill="#000000" key="dot" geometry={circle(4)} anchor="center" />
-    ));
+    const model = made(() => <Shape fill="#000000" key="dot" geometry={circle(4)} />);
 
     const dot = only(model);
 
@@ -432,7 +407,7 @@ describe("the SVG backend", () => {
 
 describe("isScene", () => {
   test("knows a scene model by its shape, and nothing else", () => {
-    const model = made(() => <Shape geometry={circle(4)} anchor="center" fill="#FF0000" />);
+    const model = made(() => <Shape geometry={circle(4)} fill="#FF0000" />);
 
     expect(isScene(model)).toBe(true);
     expect(isScene(structuredClone({ ...model, fonts: {} }))).toBe(true);

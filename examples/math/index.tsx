@@ -58,7 +58,7 @@ export default scene(
             cross term
           </Text>
         </Stack>
-        <Group at={[462, 84]}>
+        <Group offset={[462, 84]}>
           <Axes
             plane={graph}
             ticks={[1, 3]}

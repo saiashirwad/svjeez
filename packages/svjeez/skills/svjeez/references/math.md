@@ -31,7 +31,7 @@ The math example scene in the svjeez repository puts this beside a plot and a br
 
 ## Planes
 
-`plane({ x: [min, max], y: [min, max], size: [width, height] })` maps math coordinates into a frame whose top-left is `[0, 0]` and whose y goes up. Put what you draw on it in one `<Group at={…}>`.
+`plane({ x: [min, max], y: [min, max], size: [width, height] })` maps math coordinates into a frame whose top-left is `[0, 0]` and whose y goes up. Put what you draw on it in one `<Group offset={…}>`, so the plane's `[0, 0]` lands there. `<Axes at>` does the same.
 
 | Call | Gives |
 | --- | --- |
@@ -51,7 +51,7 @@ Every call returns geometry, so the scene styles and moves it:
 ```tsx
 const amount = track(0).to(1, span(2, 2), ease.inOut).rewind(1.5);
 
-<Group at={[40, 70]} clip={rect(400, 400)}>
+<Group offset={[40, 70]} clip={rect(400, 400)}>
   <Shape geometry={amount.map((t) => p.transform([[3, 1], [0, 2]], t).grid(1))} stroke={{ color: theme.border }} />
   <Shape geometry={amount.map((t) => p.transform([[3, 1], [0, 2]], t).vector([1, 0]))} fill={theme.yellow} />
 </Group>

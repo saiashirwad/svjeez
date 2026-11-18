@@ -202,7 +202,6 @@ describe("animated geometry", () => {
           geometry={track(arc({ radius: 10, sweep: 0 }))
             .to(arc({ radius: 10, sweep: 200 }), span(0, 2), ease.linear)
             .repeat({ until: 3 })}
-          anchor="center"
         />
       )),
     );
@@ -251,13 +250,7 @@ describe("animated geometry", () => {
 
   test("an unstroked radius is a CSS scale of the widest circle, around its center", () => {
     const out = svg.emit(
-      made(() => (
-        <Shape
-          geometry={track(circle(4)).to(circle(20), span(0, 1))}
-          anchor="center"
-          fill="#FF0000"
-        />
-      )),
+      made(() => <Shape geometry={track(circle(4)).to(circle(20), span(0, 1))} fill="#FF0000" />),
     );
 
     expect(out).toContain('<circle r="20" fill="#FF0000" class="a m1 fb"/>');
@@ -267,11 +260,7 @@ describe("animated geometry", () => {
 
   test("a stroked radius animates r, since a scale would scale the stroke too", () => {
     const out = body(() => (
-      <Shape
-        geometry={track(circle(4)).to(circle(20), span(0, 1))}
-        anchor="center"
-        stroke={{ color: "#FF0000" }}
-      />
+      <Shape geometry={track(circle(4)).to(circle(20), span(0, 1))} stroke={{ color: "#FF0000" }} />
     ));
 
     expect(out).toContain('attributeName="r" values="4;20"');
@@ -286,7 +275,7 @@ describe("animated geometry", () => {
       />
     ));
 
-    expect(out).toContain('<rect x="0.5" y="0.5" width="40" height="10" rx="4"');
+    expect(out).toContain('<rect width="40" height="10" rx="4"');
     expect(out).toContain('attributeName="width"');
     expect(out).toContain('attributeName="rx"');
     expect(out).not.toContain('attributeName="height"');
@@ -349,7 +338,6 @@ describe("animated geometry", () => {
           arc({ radius: 40, start: 90, sweep: 180 }),
           span(0, 1),
         )}
-        anchor="center"
         stroke={{ color: "#FF0000", width: 2 }}
       />
     ));
@@ -360,7 +348,6 @@ describe("animated geometry", () => {
           arc({ radius: 40, start: 90, sweep: 180 }),
           span(0, 1),
         )}
-        anchor="center"
         stroke={{ color: "#FF0000", width: 2 }}
       />
     ));
@@ -379,7 +366,6 @@ describe("animated geometry", () => {
           arc({ radius: 40, sweep: 300 }),
           span(0, 1),
         )}
-        anchor="center"
         stroke={{ color: "#FF0000", width: 2, cap: "round" }}
       />
     ));
@@ -396,7 +382,6 @@ describe("animated geometry", () => {
             arc({ radius: 40, sweep: 90 }),
             span(0, 1),
           )}
-          anchor="center"
           stroke={{ color: "#FF0000" }}
         />
       )),
@@ -413,7 +398,6 @@ describe("animated geometry", () => {
             arc({ radius: 40, sweep: 350 }),
             span(0, 2),
           )}
-          anchor="center"
           stroke={{ color: "#FF0000", width: 2, dash: [4, 4] }}
         />
       )),
@@ -447,7 +431,6 @@ describe("strokes, scales and trims", () => {
     const style = css(() => (
       <Shape
         geometry={circle(10)}
-        anchor="center"
         stroke={{ color: "#FF0000", width: track(2).to(8, span(0, 1)) }}
       />
     ));
@@ -473,7 +456,6 @@ describe("strokes, scales and trims", () => {
     const style = css(() => (
       <Shape
         geometry={circle(10)}
-        anchor="center"
         stroke={{ color: "#FF0000", width: 3, cap: "round" }}
         trim={track<Vec>([0, 0]).to([0.2, 0.7], span(0, 1)).to([1, 1], span(2, 1))}
       />
@@ -489,7 +471,6 @@ describe("strokes, scales and trims", () => {
       body(() => (
         <Shape
           geometry={circle(10)}
-          anchor="center"
           stroke={{ color: "#FF0000", cap: "round" }}
           trim={[0.5, 0.5]}
         />
@@ -532,7 +513,6 @@ describe("strokes, scales and trims", () => {
       <Group opacity={track(0).set(1, span(1)).set(0, span(3))}>
         <Shape
           geometry={circle(10)}
-          anchor="center"
           stroke={{ color: "#FF0000", cap: "round" }}
           trim={track<Vec>([0, 0]).to([0, 1], span(0, 1))}
         />
@@ -637,12 +617,12 @@ describe("images and instances", () => {
   });
 
   test("a symbol is lowered once, drawn once in defs, and used by every instance", () => {
-    const dot = symbol(() => <Shape geometry={circle(4)} anchor="center" fill="#FF0000" />);
+    const dot = symbol(() => <Shape geometry={circle(4)} fill="#FF0000" />);
 
     const model = made(() => (
       <Group>
-        <Instance key="dot" of={dot} at={[10, 10]} />
-        <Instance of={dot} at={[30, 10]} scale={2} />
+        <Instance key="dot" of={dot} offset={[10, 10]} />
+        <Instance of={dot} offset={[30, 10]} scale={2} />
       </Group>
     ));
 
@@ -659,7 +639,7 @@ describe("images and instances", () => {
   });
 
   test("a prefix keeps two scenes' symbols apart", () => {
-    const dot = symbol(() => <Shape geometry={circle(4)} anchor="center" fill="#FF0000" />);
+    const dot = symbol(() => <Shape geometry={circle(4)} fill="#FF0000" />);
 
     expect(
       svg.emit(
@@ -684,8 +664,8 @@ describe("images and instances", () => {
   });
 
   test("a symbol is named for its first instance's key, and two that would share a name don't", () => {
-    const a = symbol(() => <Shape fill="#000000" geometry={circle(4)} anchor="center" />);
-    const b = symbol(() => <Shape fill="#000000" geometry={circle(5)} anchor="center" />);
+    const a = symbol(() => <Shape fill="#000000" geometry={circle(4)} />);
+    const b = symbol(() => <Shape fill="#000000" geometry={circle(5)} />);
 
     const model = made(() => (
       <Group>
@@ -711,7 +691,6 @@ describe("sampled", () => {
         <Shape
           fill="#000000"
           geometry={circle(4)}
-          anchor="center"
           rotate={sampled((t) => t * 90, span(0, 2), { tolerance: 0.1 })}
         />
       )),
@@ -722,7 +701,6 @@ describe("sampled", () => {
         <Shape
           fill="#000000"
           geometry={circle(4)}
-          anchor="center"
           rotate={sampled((t) => (t < 1 ? 0 : 90), span(0, 2), { tolerance: 0.1 })}
         />
       )),
@@ -761,7 +739,6 @@ describe("sampled", () => {
         <Shape
           fill="#000000"
           geometry={circle(4)}
-          anchor="center"
           motion={sampled.motion((t) => ({ offset: [t * 10, 0], opacity: 1 - t / 2 }), span(0, 1), {
             tolerance: { offset: 0.1, opacity: 0.01 },
           })}

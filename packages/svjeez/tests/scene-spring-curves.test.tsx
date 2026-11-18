@@ -103,9 +103,7 @@ const both = ({ start, legs, finish = {}, inside, duration = 4 }: Route) => {
     () => (
       <Group>
         {placed(<Shape key="curved" geometry={circle(4)} anchor="center" at={at} fill={red} />)}
-        {placed(
-          <Shape key="straight" geometry={circle(4)} anchor="center" motion={layer} fill={red} />,
-        )}
+        {placed(<Shape key="straight" geometry={circle(4)} motion={layer} fill={red} />)}
       </Group>
     ),
     duration,
@@ -349,7 +347,7 @@ describe("readers of a curved spring agree with it", () => {
         <Group key="g">
           <Shape key="dot" geometry={circle(4)} anchor="center" at={route()} fill={red} />
         </Group>,
-        <Group key="g" at={[30, 20]}>
+        <Group key="g" offset={[30, 20]}>
           <Shape key="dot" geometry={circle(4)} anchor="center" at={route()} fill={red} />
         </Group>,
         span(1, 2),

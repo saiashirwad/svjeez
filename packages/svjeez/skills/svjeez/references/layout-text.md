@@ -43,11 +43,13 @@ export default scene({ size: [360, 200], duration: 2, title: "Containers", theme
 - Containers cost nothing in the output: they become plain placements, plus one rect for one that draws itself.
 - A container around a `morph()` reflows with it: see [morph.md](morph.md).
 
-The nine places, for `anchor`, `origin`, `place` and `radial.across({ center })`: `top-left`, `top`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom`, `bottom-right`. `anchor` also takes fractions of the box, `[0.5, 1]`, and `origin` a point measured from the box's top-left, `[20, 0]`, or `"at"`, the point `at` places: a gear drawn around its group's `[0, 0]` turns about its axle with `<Group at={axle} rotate={…} origin="at">`.
+The nine places, for `anchor`, `origin`, `place` and `radial.across({ center })`: `top-left`, `top`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom`, `bottom-right`. `anchor` also takes fractions of the box, `[0.5, 1]`, and `origin` a point measured from the box's top-left, `[20, 0]`, or `"at"`, the point `at` (or `offset`) places: a gear drawn around its group's `[0, 0]` turns about its axle with `<Group offset={axle} rotate={…} origin="at">`.
 
 ## Placing without a container
 
-`at` puts the node's `anchor` point (top-left by default) at a point of its parent's frame. A `<Group>` is a frame: `at` is where its children's `[0, 0]` goes, unless it has an `anchor`. Circles, ellipses and arcs are drawn around their own `[0, 0]`, so `<Shape geometry={circle(8)} at={[60, 40]} anchor="center" />` centers one on a point. Lines, polygons and paths with no `at` stay where their points are.
+`at` puts the node's `anchor` point (top-left by default) at a point of its parent's frame. It means that on every node: a `<Group>`'s or `<Instance>`'s `at` places the box of what it holds. A node with no `at` is not moved: it stays where its coordinates put it. Circles, ellipses and arcs are drawn around their own `[0, 0]`, so `<Shape geometry={circle(8)} at={[60, 40]} anchor="center" />` centers one on a point, and `<Shape geometry={circle(8)} />` sits centered on `[0, 0]`; lines, polygons and paths stay on their points; a stroke grows the box both ways and moves nothing. `anchor` without `at` is an error, unless a verb moves the node.
+
+To use a `<Group>` or `<Instance>` as a frame, give it `offset`: where its children's `[0, 0]` goes, a point, a track or an anchor such as `card.center`. `offset` takes no `at` or `anchor`; a verb that moves `at` on such a node moves its `offset`. `move()` on a node with no `at` starts from where its box is.
 
 `at` also takes an anchor on another node, which it follows when that node moves: `at={card.bottomRight}`, or `at={card.right.map(([x, y]) => [x + 8, y])}` for a point beside it. The node is placed where it sits in the tree, after everything is laid out, so the ref can point at a node drawn later.
 

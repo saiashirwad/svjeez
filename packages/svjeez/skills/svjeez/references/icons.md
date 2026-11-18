@@ -22,7 +22,7 @@ A name that is a reserved word or starts with a digit gets an `icon` prefix, as 
 
 ## Props
 
-`<Icon>` takes every prop a node takes (`key`, `ref`, `at`, `anchor`, `origin`, `rotate`, `scale`, `opacity`, `motion`, `clip`, `mask`, `effects`) and moves as one node.
+`<Icon>` takes every prop a node takes (`key`, `ref`, `at`, `anchor`, `offset`, `origin`, `rotate`, `scale`, `opacity`, `motion`, `clip`, `mask`, `effects`) and moves as one node.
 
 | Prop | |
 | --- | --- |
@@ -35,7 +35,7 @@ A name that is a reserved word or starts with a digit gets an `icon` prefix, as 
 
 ## Placing
 
-An icon's box is what it paints at its `size`, like every node's, so `at` and `anchor` place the drawn glyph, not the 24-unit square around it, and a `<Stack>` or `<Grid>` lays out the size it is drawn at. Glyphs of different shapes differ in size: to line icons up in a row or a grid, wrap each in a `<Center width={…} height={…}>` of one size.
+An icon's box is what it paints at its `size`, like every node's, so `at` and `anchor` place the drawn glyph, not the grid square around it, and a `<Stack>` or `<Grid>` lays out the size it is drawn at. To place the square instead, give `offset`: where the square's top-left goes, as on a `<Group>`. Glyphs of different shapes differ in size: to line icons up in a row or a grid, wrap each in a `<Center width={…} height={…}>` of one size, or place each by `offset`.
 
 ## Animating
 

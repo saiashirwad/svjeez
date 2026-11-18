@@ -30,7 +30,7 @@ A verb moves a node from outside it, at a span, like a track step does. Call ver
 | --- | --- |
 | `to({ at, rotate, scale, opacity, fill, stroke, trim, geometry }, span, curve?)` | any of the node's props, from wherever it was; `curve` defaults to `ease.out`, and a spring works with `span(start, spring.settle)` |
 | `set({ … }, span)` | a cut at the span's start |
-| `move(to, span, curve?, { point })` | `at` to a point, or onto an anchor (a ref means its center) where that anchor is when the move ends, even while it moves; `point` says which point of the node lands there, by default the one its `at` places |
+| `move(to, span, curve?, { point })` | `at` to a point, or onto an anchor (a ref means its center) where that anchor is when the move ends, even while it moves; `point` says which point of the node lands there, by default the one its `at` places; a node with no `at` starts from where its box is |
 
 Every verb writes the node's own prop track, starting from the node's own value, so a node a container places can't `move`: wrap it in a `<Group>` and move what is inside. A prop has one writer: a track, verbs, a derived value or a morph. Two verbs moving one prop at once throw, naming both calls, when each runs, and when the second may start. A verb's span counts on the clock of the node it moves, so a node inside `<Sequence when={span(4)}>` is moved with spans from 0.
 

@@ -27,7 +27,7 @@ const draw = (child: Child, duration = 6) =>
   scene({ size: [1200, 800], duration, title: "Diagram", loop: false }, () => (
     <Group>
       <Shape geometry={circle(1)} at={[0, 0]} fill="#FFFFFF" />
-      <Group at={[20, 20]}>{child}</Group>
+      <Group offset={[20, 20]}>{child}</Group>
     </Group>
   ));
 

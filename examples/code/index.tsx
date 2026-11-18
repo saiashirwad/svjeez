@@ -115,7 +115,7 @@ export default scene(
         geometry={rect(CHIP.width, CHIP.height, { radius: 8 })}
         fill={theme.raised}
       />
-      <Group at={[0, 28]}>
+      <Group offset={[0, 28]}>
         {FIB.map(({ label }, i) => (
           <Center key={label} at={[chipX(i), 0]} width={CHIP.width} height={CHIP.height}>
             <Text font={sans} size={14} fill={theme.text}>

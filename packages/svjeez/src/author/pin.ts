@@ -75,21 +75,16 @@ export const pinned = (
   return [box.x + box.width * u, box.y + box.height * v];
 };
 
-export const hasCoordinates = (kind: string): boolean =>
-  kind === "line" || kind === "polygon" || kind === "path";
-
 export const homeOf = (
   kind: SceneNode["kind"],
   node: SceneNode,
   anchor: TextAnchorPlace | undefined,
   box: Box,
+  framed = false,
 ): Vec => {
-  const where = `${named(node.key)}`;
+  if (framed) return [0, 0];
 
-  if (kind === "group" || kind === "instance")
-    return anchor === undefined ? [0, 0] : pinned(anchor, box, where);
-
-  return pinned(anchor, box, where, kind === "text" ? baselineOf(node) : undefined);
+  return pinned(anchor, box, named(node.key), kind === "text" ? baselineOf(node) : undefined);
 };
 
 export const baselineOf = (node: SceneNode): number => {

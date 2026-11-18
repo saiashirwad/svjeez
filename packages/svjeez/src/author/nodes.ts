@@ -111,7 +111,13 @@ export interface SceneSymbol {
 
 export const symbol = (build: () => Child): SceneSymbol => ({ kind: "symbol", build });
 
-export interface InstanceProps extends Common {
+export interface Framed {
+  readonly offset?: Anim<Vec> | Anchor;
+}
+
+export interface GroupProps extends Common, Framed, Backdrop {}
+
+export interface InstanceProps extends Common, Framed {
   readonly of: SceneSymbol;
 }
 
@@ -123,7 +129,7 @@ export interface SequenceProps {
 export type SceneElement =
   | {
       readonly type: "group";
-      readonly props: Common & Backdrop;
+      readonly props: GroupProps;
       readonly children: readonly SceneElement[];
       readonly settle?: Settle;
       readonly layout?: Authored["layout"];
@@ -196,7 +202,7 @@ export const flat = (child: Child): SceneElement[] => {
 export const Group = ({
   children,
   ...props
-}: Common & { readonly children?: Child }): SceneElement => ({
+}: Common & Framed & { readonly children?: Child }): SceneElement => ({
   type: "group",
   props,
   children: flat(children),
