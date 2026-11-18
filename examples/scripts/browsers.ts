@@ -149,7 +149,11 @@ const probe = ({ times, indices }: { times: number[]; indices?: number[] }) => {
           snapshot[key + " ah"] = round(height.animVal.value);
       }
 
-      if (!unlaidOut && element instanceof SVGGraphicsElement && !element.matches("g, svg, use, tspan")) {
+      if (
+        !unlaidOut &&
+        element instanceof SVGGraphicsElement &&
+        !element.matches("g, svg, use, tspan")
+      ) {
         try {
           const box = element.getBBox();
           const empty = round(box.width) === "0" || round(box.height) === "0";

@@ -301,9 +301,13 @@ describe("mermaid", () => {
     const seq = mermaid("sequenceDiagram\nactor U\nU->>API: GET\nAPI--xU: no\nNote over API: hm", {
       font: mono,
     });
-    const machine = mermaid("stateDiagram-v2\ndirection LR\n[*] --> Idle\nIdle --> Run : go\nRun --> [*]", {
-      font: mono,
-    });
+
+    const machine = mermaid(
+      "stateDiagram-v2\ndirection LR\n[*] --> Idle\nIdle --> Run : go\nRun --> [*]",
+      {
+        font: mono,
+      },
+    );
 
     expect(seq.kind).toBe("sequence");
     expect(seq.kind === "sequence" && seq.message(0).route).toBeDefined();

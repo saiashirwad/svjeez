@@ -57,20 +57,20 @@ export default scene(
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Align motion={exit(LEAVE)}>
         <Group>
-        {chart.with(
+          {chart.with(
+            <Shape
+              geometry={route.geometry}
+              stroke={{ color: theme.orange, width: 2.5, cap: "round" }}
+              trim={draw(trip, { curve: ease.linear })}
+            />,
+          )}
           <Shape
-            geometry={route.geometry}
-            stroke={{ color: theme.orange, width: 2.5, cap: "round" }}
-            trim={draw(trip, { curve: ease.linear })}
-          />,
-        )}
-        <Shape
-          geometry={circle(5)}
-          anchor="center"
-          fill={theme.orange}
-          at={route.travel(trip)}
-          opacity={track(0).to(1, trip.first(0.15)).to(0, trip.last(0.2))}
-        />
+            geometry={circle(5)}
+            anchor="center"
+            fill={theme.orange}
+            at={route.travel(trip)}
+            opacity={track(0).to(1, trip.first(0.15)).to(0, trip.last(0.2))}
+          />
         </Group>
       </Align>
     </Group>
