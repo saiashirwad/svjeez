@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-labelledby="t d">
+  <title id="t">Icons</title>
+  <desc id="d">Seven Tabler outline icons draw themselves one stroke at a time, a filled heart pops into the last place in the grid, and five shared stars pop in below.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0}}
+
+.a{animation-duration:5s;animation-iteration-count:1;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,6%{stroke-dashoffset:1;visibility:hidden}20%,100%{stroke-dashoffset:0;visibility:visible}}
+.m1{animation-name:k1}
+@keyframes k2{0%,11%{stroke-dashoffset:1;visibility:hidden}25%,100%{stroke-dashoffset:0;visibility:visible}}
+.m2{animation-name:k2}
+@keyframes k3{0%,16%{stroke-dashoffset:1;visibility:hidden}30%,100%{stroke-dashoffset:0;visibility:visible}}
+.m3{animation-name:k3}
+@keyframes k4{0%,12%{stroke-dashoffset:1;visibility:hidden}26%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k4}
+@keyframes k5{0%,18%{stroke-dashoffset:1;visibility:hidden}32%,100%{stroke-dashoffset:0;visibility:visible}}
+.m5{animation-name:k5}
+@keyframes k6{0%,23%{stroke-dashoffset:1;visibility:hidden}37%,100%{stroke-dashoffset:0;visibility:visible}}
+.m6{animation-name:k6}
+@keyframes k7{0%,24%{stroke-dashoffset:1;visibility:hidden}38%,100%{stroke-dashoffset:0;visibility:visible}}
+.m7{animation-name:k7}
+@keyframes k8{0%,30%{stroke-dashoffset:1;visibility:hidden}44%,100%{stroke-dashoffset:0;visibility:visible}}
+.m8{animation-name:k8}
+@keyframes k9{0%,36%{stroke-dashoffset:1;visibility:hidden}50%,100%{stroke-dashoffset:0;visibility:visible}}
+.m9{animation-name:k9}
+@keyframes k10{0%,41%{stroke-dashoffset:1;visibility:hidden}55%,100%{stroke-dashoffset:0;visibility:visible}}
+.m10{animation-name:k10}
+@keyframes k11{0%,42%{stroke-dashoffset:1;visibility:hidden}56%,100%{stroke-dashoffset:0;visibility:visible}}
+.m11{animation-name:k11}
+@keyframes k12{0%,47%{stroke-dashoffset:1;visibility:hidden}61%,100%{stroke-dashoffset:0;visibility:visible}}
+.m12{animation-name:k12}
+@keyframes k13{0%,64%{scale:0.3}75%,100%{scale:1}}
+@keyframes k14{0%,64%{opacity:0}75%,100%{opacity:1}}
+.m13{animation-name:k13,k14;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k15{0%,67%{scale:0.3}78%,100%{scale:1}}
+@keyframes k16{0%,67%{opacity:0}78%,100%{opacity:1}}
+.m14{animation-name:k15,k16;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k17{0%,70%{scale:0.3}81%,100%{scale:1}}
+@keyframes k18{0%,70%{opacity:0}81%,100%{opacity:1}}
+.m15{animation-name:k17,k18;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k19{0%,73%{scale:0.3}84%,100%{scale:1}}
+@keyframes k20{0%,73%{opacity:0}84%,100%{opacity:1}}
+.m16{animation-name:k19,k20;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k21{0%,76%{scale:0.3}87%,100%{scale:1}}
+@keyframes k22{0%,76%{opacity:0}87%,100%{opacity:1}}
+.m17{animation-name:k21,k22;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k23{0%,79%{scale:0.3}90%,100%{scale:1}}
+@keyframes k24{0%,79%{opacity:0}90%,100%{opacity:1}}
+.m18{animation-name:k23,k24;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-4.5s!important;animation-play-state:paused!important}}
+]]></style>
+  <defs>
+    <g id="symbol-0">
+      <path d="M8.243 7.34L1.863 8.265L1.75 8.288C1.402 8.38 1.13 8.653 1.039 9.002C0.948 9.35 1.051 9.721 1.31 9.972L5.932 14.471L4.842 20.826L4.829 20.936C4.808 21.296 4.982 21.64 5.285 21.836C5.589 22.031 5.974 22.048 6.293 21.88L11.999 18.88L17.692 21.88L17.792 21.926C18.128 22.058 18.509 21.999 18.79 21.771C19.07 21.543 19.205 21.182 19.144 20.826L18.053 14.471L22.677 9.971L22.755 9.886C22.982 9.607 23.041 9.227 22.91 8.892C22.779 8.557 22.478 8.318 22.122 8.266L15.742 7.34L12.89 1.56C12.722 1.218 12.374 1.002 11.993 1.002C11.612 1.002 11.264 1.218 11.096 1.56L8.243 7.34Z" fill="var(--yellow)"/>
+    </g>
+  </defs>
+  <rect width="640" height="360" fill="var(--background)"/>
+  <g transform="translate(55 38.503)">
+    <rect x="0.5" y="0.5" width="529" height="249" rx="20" fill="var(--surface)" stroke="var(--raised)"/>
+    <g transform="translate(61.025 54.975)" style="transform-origin:64.1px 58.1px;scale:2.667">
+      <path d="M4 13C7.67 13.436 10.564 16.33 11 20C12.797 18.964 13.932 17.073 14 15C17.434 13.792 19.802 10.635 20 7C20 5.343 18.657 4 17 4C13.365 4.198 10.208 6.566 9 10C6.927 10.068 5.036 11.203 4 13" fill="none" stroke="var(--text)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
+      <path d="M7 14C4.871 15.202 3.684 17.576 4 20C6.424 20.316 8.798 19.129 10 17" fill="none" stroke="var(--text)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
+      <path d="M14 9C14 9.552 14.448 10 15 10C15.552 10 16 9.552 16 9C16 8.448 15.552 8 15 8C14.448 8 14 8.448 14 9" fill="none" stroke="var(--text)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m3"/>
+    </g>
+    <path d="M13 3L13 10L19 10L11 21L11 14L5 14L13 3" transform="translate(189 55)" fill="none" stroke="var(--text)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:193.125px 57.125px;scale:2.667" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <g transform="translate(317 55)" style="transform-origin:320.125px 57.125px;scale:2.667">
+      <path d="M10 5C10 3.895 10.895 3 12 3C13.105 3 14 3.895 14 5C16.34 6.107 17.879 8.414 18 11L18 14C18.153 15.261 18.895 16.374 20 17L4 17C5.105 16.374 5.847 15.261 6 14L6 11C6.121 8.414 7.66 6.107 10 5" fill="none" stroke="var(--text)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m5"/>
+      <path d="M9 17L9 18C9 19.657 10.343 21 12 21C13.657 21 15 19.657 15 18L15 17" fill="none" stroke="var(--text)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
+    </g>
+    <path d="M6.657 18C4.085 18 2 15.993 2 13.517C2 11.042 4.085 9.035 6.657 9.035C7.05 7.273 8.451 5.835 10.332 5.262C12.212 4.69 14.288 5.069 15.776 6.262C17.264 7.452 17.938 9.269 17.546 11.031L18.536 11.031C20.449 11.031 22 12.591 22 14.517C22 16.444 20.449 18.004 18.535 18.004L6.657 18.004" transform="translate(445 55.498)" fill="none" stroke="var(--text)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:446.125px 59.623px;scale:2.667" pathLength="1" stroke-dasharray="1 2" class="a m7"/>
+    <path d="M12 3C12.132 3 12.263 3 12.393 3C9.742 5.463 9.228 9.468 11.171 12.521C13.113 15.574 16.959 16.804 20.313 15.446C18.58 19.615 14.027 21.855 9.667 20.684C5.306 19.512 2.489 15.291 3.079 10.815C3.67 6.339 7.485 2.993 12 2.992L12 3" transform="translate(61.343 171.007)" fill="none" stroke="var(--text)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:63.469px 173.124px;scale:2.667" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
+    <g transform="translate(189 171)" style="transform-origin:191.125px 173.125px;scale:2.667">
+      <path d="M3 10C3 13.866 6.134 17 10 17C13.866 17 17 13.866 17 10C17 6.134 13.866 3 10 3C6.134 3 3 6.134 3 10" fill="none" stroke="var(--text)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m9"/>
+      <path d="M21 21L15 15" fill="none" stroke="var(--text)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m10"/>
+    </g>
+    <g transform="translate(317 171)" style="transform-origin:319.125px 175.125px;scale:2.667">
+      <path d="M3 7C3 5.895 3.895 5 5 5L19 5C20.105 5 21 5.895 21 7L21 17C21 18.105 20.105 19 19 19L5 19C3.895 19 3 18.105 3 17L3 7" fill="none" stroke="var(--text)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m11"/>
+      <path d="M3 7L12 13L21 7" fill="none" stroke="var(--text)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m12"/>
+    </g>
+    <g transform="translate(445.008 171.006)" style="transform-origin:457px 183px" class="a m13">
+      <path d="M6.979 3.074C8.772 2.769 10.606 3.293 11.967 4.499L12.004 4.532L12.038 4.502C13.335 3.364 15.06 2.839 16.771 3.062L17.017 3.098C19.189 3.473 20.981 5.009 21.683 7.099C22.386 9.188 21.886 11.495 20.381 13.106L20.201 13.291L20.153 13.332L12.703 20.711C12.347 21.063 11.787 21.098 11.39 20.793L11.296 20.711L3.803 13.289C2.184 11.714 1.587 9.364 2.258 7.207C2.928 5.051 4.753 3.453 6.979 3.074Z" fill="var(--red)" style="transform-origin:1.987px 2.989px;scale:2.667"/>
+    </g>
+  </g>
+  <g transform="translate(55 38.503)">
+    <use href="#symbol-0" transform="translate(197.063 260.998)" style="transform-origin:209.056px 272.497px" class="a m14"/>
+    <use href="#symbol-0" transform="translate(225.035 260.998)" style="transform-origin:237.028px 272.497px" class="a m15"/>
+    <use href="#symbol-0" transform="translate(253.007 260.998)" style="transform-origin:265px 272.497px" class="a m16"/>
+    <use href="#symbol-0" transform="translate(280.98 260.998)" style="transform-origin:292.972px 272.497px" class="a m17"/>
+    <use href="#symbol-0" transform="translate(308.952 260.998)" style="transform-origin:320.944px 272.497px" class="a m18"/>
+  </g>
+</svg>
