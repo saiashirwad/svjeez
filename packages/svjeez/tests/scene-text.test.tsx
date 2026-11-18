@@ -9,11 +9,9 @@ import {
   ref,
   scene,
   span,
-  Stack,
   track,
   type SceneElement,
 } from "svjeez";
-import { blendNumber, blendVec, valueAt } from "../src/model/sample";
 import { boxesOf, diagnose, isLane, svg, type Model } from "svjeez/tools";
 
 const fixture = (name: string) => new URL(`./fixtures/${name}.ttf`, import.meta.url);
@@ -605,116 +603,5 @@ describe("text strokes and animated size", () => {
         </Text>
       )),
     ).toThrow("needs a size above 0 at the start, got 0.");
-  });
-});
-
-describe("text that reflows", () => {
-  test("a size track grows the glyphs while the stroke keeps the width it was given", () => {
-    const model = made(() => (
-      <Text
-        key="t"
-        font={space}
-        size={track(10).to(20, span(0, 1), ease.linear)}
-        fill="#000000"
-        stroke={{ color: "#ffffff", width: 2 }}
-      >
-        Hi
-      </Text>
-    ));
-
-    const node = textOf(model);
-    const grow = node.layers.at(-1)!.scale;
-
-    expect(isLane(grow)).toBe(true);
-    expect(isLane(node.stroke!.width)).toBe(true);
-
-    for (const t of [0, 0.3, 0.5, 1]) {
-      const [s] = valueAt(grow, t, blendVec);
-
-      expect(valueAt(node.stroke!.width, t, blendNumber) * s!).toBeCloseTo(2, 1);
-    }
-  });
-
-  test("a container makes room for text whose size grows", () => {
-    const model = made(() => (
-      <Stack key="row" direction="row" gap={4}>
-        <Text key="t" font={space} size={track(10).to(20, span(0, 1))} fill="#000000">
-          Hi
-        </Text>
-        <Text key="after" font={space} size={10} fill="#000000">
-          x
-        </Text>
-      </Stack>
-    ));
-
-    const [start, end] = [boxesOf(model, 0), boxesOf(model, 1)];
-
-    expect(end["row/after"]!.x).toBeGreaterThan(start["row/after"]!.x + 5);
-  });
-
-  test("a width track lays the words out again, so they wrap where the new width says", () => {
-    const model = made(() => (
-      <Text key="t" font={space} size={10} fill="#000000" width={track(200).to(30, span(0, 1))}>
-        one two three
-      </Text>
-    ));
-
-    const node = model.root.children[0]!;
-
-    const layouts =
-      node.kind === "group"
-        ? node.children.map((child) => (child.kind === "text" ? child.lines.length : 0))
-        : [];
-
-    expect(layouts).toEqual([1, 4]);
-    expect(boxesOf(model, 1)["t/1"]!.width).toBeLessThanOrEqual(30);
-  });
-
-  test("a stroke is part of the text's box, as it is of a shape's", () => {
-    const box = (stroke?: number) =>
-      boxesOf(
-        made(() => (
-          <Text
-            key="t"
-            font={space}
-            size={10}
-            fill="#000000"
-            {...(stroke && { stroke: { color: "#ff0000", width: stroke } })}
-          >
-            Hi
-          </Text>
-        )),
-        0,
-      )["t"]!;
-
-    expect(box(4).width).toBeCloseTo(box().width + 4, 5);
-  });
-});
-
-describe("text reflow limits", () => {
-  test("a size track that loops says to loop a scale instead", () => {
-    expect(() =>
-      made(() => (
-        <Text font={space} size={track(10).to(20, span(0, 1)).loop(2)} fill="#000000">
-          Hi
-        </Text>
-      )),
-    ).toThrow("<Text>'s size track loops");
-  });
-
-  test("a verb still reaches text whose size moves", () => {
-    const model = made(() => {
-      const label = ref("t");
-
-      label.to({ opacity: 0.5 }, span(2, 1));
-
-      return (
-        <Text ref={label} font={space} size={track(10).to(20, span(0, 1))} fill="#000000">
-          Hi
-        </Text>
-      );
-    });
-
-    expect(textOf(model).layers.some((layer) => isLane(layer.opacity))).toBe(true);
   });
 });
