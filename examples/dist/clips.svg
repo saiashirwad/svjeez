@@ -32,11 +32,15 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     <g class="a m2">
       <rect width="104" height="72" rx="7" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
       <path d="M7 0H97A7 7 0 0 1 104 7V18H0V7A7 7 0 0 1 7 0Z" fill="var(--raised)"/>
-      <circle cx="13" cy="9" r="3" fill="var(--red)"/>
-      <circle cx="24" cy="9" r="3" fill="var(--yellow)"/>
-      <circle cx="35" cy="9" r="3" fill="var(--green)"/>
-      <rect x="14" y="30" width="60" height="5" rx="2.5" fill="var(--border)"/>
-      <rect x="14" y="42" width="44" height="5" rx="2.5" fill="var(--border)"/>
+      <g>
+        <circle cx="13" cy="9" r="3" fill="var(--red)"/>
+        <circle cx="24" cy="9" r="3" fill="var(--yellow)"/>
+        <circle cx="35" cy="9" r="3" fill="var(--green)"/>
+      </g>
+      <g>
+        <rect x="14" y="30" width="60" height="5" rx="2.5" fill="var(--border)"/>
+        <rect x="14" y="42" width="44" height="5" rx="2.5" fill="var(--border)"/>
+      </g>
     </g>
     <path d="M0 0L0 16L4.2 12.2L7.2 19L10 17.8L7 11.2L12 11.2Z" fill="var(--text)" stroke="var(--background)" stroke-width="1.2" stroke-linejoin="round" class="a m3"/>
   </g>
@@ -50,11 +54,15 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     <g class="a m5">
       <rect width="104" height="72" rx="7" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
       <path d="M7 0H97A7 7 0 0 1 104 7V18H0V7A7 7 0 0 1 7 0Z" fill="var(--raised)"/>
-      <circle cx="13" cy="9" r="3" fill="var(--red)"/>
-      <circle cx="24" cy="9" r="3" fill="var(--yellow)"/>
-      <circle cx="35" cy="9" r="3" fill="var(--green)"/>
-      <rect x="14" y="30" width="60" height="5" rx="2.5" fill="var(--border)"/>
-      <rect x="14" y="42" width="44" height="5" rx="2.5" fill="var(--border)"/>
+      <g>
+        <circle cx="13" cy="9" r="3" fill="var(--red)"/>
+        <circle cx="24" cy="9" r="3" fill="var(--yellow)"/>
+        <circle cx="35" cy="9" r="3" fill="var(--green)"/>
+      </g>
+      <g>
+        <rect x="14" y="30" width="60" height="5" rx="2.5" fill="var(--border)"/>
+        <rect x="14" y="42" width="44" height="5" rx="2.5" fill="var(--border)"/>
+      </g>
     </g>
     <path d="M0 0L0 16L4.2 12.2L7.2 19L10 17.8L7 11.2L12 11.2Z" fill="var(--text)" stroke="var(--background)" stroke-width="1.2" stroke-linejoin="round" class="a m6"/>
   </g>

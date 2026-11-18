@@ -3,6 +3,7 @@ import {
   Group,
   Sequence,
   Shape,
+  Stack,
   Text,
   canvas,
   circle,
@@ -42,12 +43,16 @@ interface WindowProps {
 const Window = ({ from, to, drag }: WindowProps): SceneElement => (
   <Group at={track(from).to(to, drag, ease.inOut).rewind(0.8)}>
     <Shape {...outlined(104, 72, 7)} fill={theme.surface} />
-    <Shape geometry={rect(104, 18, { radius: [7, 7, 0, 0] })} fill={theme.raised} />
-    <Shape geometry={circle(3)} at={[13, 9]} fill={theme.red} />
-    <Shape geometry={circle(3)} at={[24, 9]} fill={theme.yellow} />
-    <Shape geometry={circle(3)} at={[35, 9]} fill={theme.green} />
-    <Shape geometry={rect(60, 5, { radius: 2.5 })} at={[14, 30]} fill={theme.border} />
-    <Shape geometry={rect(44, 5, { radius: 2.5 })} at={[14, 42]} fill={theme.border} />
+    <Shape key="titlebar" geometry={rect(104, 18, { radius: [7, 7, 0, 0] })} fill={theme.raised} />
+    <Stack direction="row" gap={5} at={[10, 6]}>
+      <Shape geometry={circle(3)} fill={theme.red} />
+      <Shape geometry={circle(3)} fill={theme.yellow} />
+      <Shape geometry={circle(3)} fill={theme.green} />
+    </Stack>
+    <Stack gap={7} at={[14, 30]}>
+      <Shape geometry={rect(60, 5, { radius: 2.5 })} fill={theme.border} />
+      <Shape geometry={rect(44, 5, { radius: 2.5 })} fill={theme.border} />
+    </Stack>
   </Group>
 );
 
