@@ -92,7 +92,7 @@ These are the rules that aren't visible from one file:
 Every package shares one version. To release, bump them together and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-for p in svjeez vite astro fonts charts video; do (cd packages/$p && bun pm version prerelease --preid next --no-git-tag-version); done   # on next; main uses minor, patch or major
+for p in svjeez vite astro fonts icons charts video; do (cd packages/$p && bun pm version prerelease --preid next --no-git-tag-version); done   # on next; main uses minor, patch or major
 bun install && bun run build:examples && git add -A examples && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 
