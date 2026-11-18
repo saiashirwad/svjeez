@@ -409,7 +409,7 @@ export const timeline = (...list: readonly Action[]): Timeline => {
 /** A node element: what lowering gives a key. */
 export type NodeElement = Exclude<
   SceneElement,
-  { readonly type: "fragment" | "sequence" | "morph" }
+  { readonly type: "fragment" | "sequence" | "morph" | "span" }
 >;
 
 const FOR_ALL: readonly NodeElement["type"][] = ["group", "shape", "text", "image", "instance"];

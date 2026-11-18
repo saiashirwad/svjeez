@@ -1,4 +1,4 @@
-import { regularFace, type FontValue } from "../font/font";
+import type { Font } from "../font/font";
 import { num } from "../format";
 import { EPSILON, type Seconds } from "../motion";
 import { checkWindow } from "../span";
@@ -16,7 +16,10 @@ import type {
   Scene,
   SceneNode,
   ShapeNode,
+  Face,
+  TextLine,
   TextNode,
+  TextRun,
   TokenValue,
   Vec,
 } from "./ir";
@@ -68,7 +71,16 @@ import {
   type Paint,
   type Theme,
 } from "./values";
-import { layoutText } from "./text";
+import { FontBook, faceOf, piecesOf, type Asked } from "./runs";
+import { layoutRuns } from "./text";
+
+/** A run's face and paints, lowered. */
+interface RunLook {
+  readonly face: Face;
+  readonly font: Font;
+  readonly fill: Animated<Color>;
+  readonly opacity?: Animated<number>;
+}
 
 /** What `scene()` is told about the whole scene. */
 export interface SceneOptions {
@@ -86,7 +98,7 @@ export interface SceneOptions {
 
 interface Ctx {
   readonly tokens: Map<string, TokenValue>;
-  readonly fonts: Map<string, FontValue>;
+  readonly fonts: FontBook;
   readonly size: Vec;
   readonly duration: Seconds;
   /** Each symbol an instance has placed, lowered once. */
@@ -246,16 +258,60 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
 
 const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode => {
   const where = `"${key}"`;
-  const face = regularFace(props.font);
-  const known = ctx.fonts.get(face.family);
 
-  if (known && known !== props.font)
-    throw new Error(`Two different fonts are both the family "${face.family}".`);
-  ctx.fonts.set(face.family, props.font);
+  const own: Asked = {
+    font: props.font,
+    fill: props.fill,
+    ...(props.weight !== undefined && { weight: props.weight }),
+    ...(props.italic !== undefined && { italic: props.italic }),
+  };
 
-  const { lines, box } = layoutText(
-    face,
-    props.children,
+  const styles = new Map<Asked, RunLook>();
+  const looks = new Map<string, RunLook>();
+
+  // Each span's style is lowered once, and two that come out the same are one, so their runs join.
+  const lookOf = (asked: Asked): RunLook => {
+    const known = styles.get(asked);
+
+    if (known) return known;
+
+    const { face, font } = ctx.fonts.add(
+      asked.font,
+      faceOf(asked.font, asked.weight, asked.italic, where),
+    );
+
+    const fill = animated(
+      asked.fill,
+      (value: Paint) => colorOf(ctx, value, where),
+      timing,
+      noMix,
+      `fill on ${where}`,
+    );
+
+    const opacity =
+      asked.opacity === undefined
+        ? undefined
+        : animated(asked.opacity, keep, timing, mixNumber, `opacity of a <Span> in ${where}`);
+
+    const made = { face, font, fill, ...(opacity !== undefined && opacity !== 1 && { opacity }) };
+    const id = JSON.stringify([face, fill, made.opacity]);
+    const look = looks.get(id) ?? made;
+
+    looks.set(id, look);
+    styles.set(asked, look);
+
+    return look;
+  };
+
+  const pieces = piecesOf(props.children, own, where).map(({ text: words, asked }) => {
+    const look = lookOf(asked);
+
+    return { text: words, face: look.font, style: look };
+  });
+
+  const { lines, box } = layoutRuns(
+    faceOf(props.font, props.weight, props.italic, where),
+    pieces,
     {
       size: props.size,
       ...(props.width !== undefined && { width: props.width }),
@@ -268,16 +324,19 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
   return {
     ...base(props, box, key, timing),
     kind: "text",
-    family: face.family,
     size: props.size,
-    lines,
-    fill: animated(
-      props.fill,
-      (value: Paint) => colorOf(ctx, value, where),
-      timing,
-      noMix,
-      `fill on ${where}`,
-    ),
+    lines: lines.map((line): TextLine => ({
+      at: line.at,
+      runs: line.runs.map(({ text: words, at, advances, outline, style }): TextRun => ({
+        text: words,
+        at,
+        advances,
+        face: style.face,
+        fill: style.fill,
+        ...(style.opacity !== undefined && { opacity: style.opacity }),
+        ...(outline && { outline }),
+      })),
+    })),
   };
 };
 
@@ -475,7 +534,7 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
 
   const ctx: Ctx = {
     tokens: new Map(),
-    fonts: new Map(),
+    fonts: new FontBook(),
     size,
     duration,
     symbols: new Map(),
@@ -519,7 +578,7 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
     loop: options.loop ?? true,
     ...(still !== undefined && { still }),
     tokens: Object.fromEntries(ctx.tokens),
-    fonts: Object.fromEntries(ctx.fonts),
+    fonts: ctx.fonts.families(),
     symbols: Object.fromEntries([...ctx.symbols].map(([name, entry]) => [name, entry.node!])),
     root,
   };

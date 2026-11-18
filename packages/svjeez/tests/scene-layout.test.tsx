@@ -72,6 +72,9 @@ const sampled =
     return blend(a.value, b.value, (t - a.t) / (b.t - a.t));
   };
 
+/** What a line says, its runs joined. */
+const said = (line: Model.TextLine): string => line.runs.map((run) => run.text).join("");
+
 const lerp = (p: number, q: number, u: number): number => p + (q - p) * u;
 
 /** A point lane read back as every backend draws it, curved keys included. */
@@ -115,16 +118,16 @@ describe("text", () => {
       "t",
     );
 
-    expect(node.kind === "text" && node.lines.map((line) => [line.text, line.at[1]])).toEqual([
+    expect(node.kind === "text" && node.lines.map((line) => [said(line), line.at[1]])).toEqual([
       ["one", 0],
       ["two", 15],
       ["", 30],
       ["four", 45],
     ]);
-    expect(node.kind === "text" && node.lines[0]!.advances.reduce((a, b) => a + b)).toBeCloseTo(
-      mono.measure("one", 10),
-    );
-    expect(node.kind === "text" && node.lines[3]!.outline!.length).toBeGreaterThan(0);
+    expect(
+      node.kind === "text" && node.lines[0]!.runs[0]!.advances.reduce((a, b) => a + b),
+    ).toBeCloseTo(mono.measure("one", 10));
+    expect(node.kind === "text" && node.lines[3]!.runs[0]!.outline!.length).toBeGreaterThan(0);
   });
 
   test("a width wraps at spaces, cuts a word too long for a line, and is the column's width", () => {
@@ -139,8 +142,8 @@ describe("text", () => {
 
     if (node.kind !== "text") throw new Error("not text");
 
-    expect(node.lines.map((line) => line.text)).toEqual(["aa bb", "cc dd", "abcdef", "ghij"]);
-    expect(node.lines.every((line) => mono.measure(line.text, 10) <= 40)).toBe(true);
+    expect(node.lines.map(said)).toEqual(["aa bb", "cc dd", "abcdef", "ghij"]);
+    expect(node.lines.every((line) => mono.measure(said(line), 10) <= 40)).toBe(true);
     expect(node.box.width).toBe(40);
   });
 

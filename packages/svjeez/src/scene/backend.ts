@@ -1,4 +1,4 @@
-import type { Animated, Paint, Scene, SceneNode } from "./ir";
+import type { Animated, Paint, Scene, SceneNode, TextNode, TextRun } from "./ir";
 import { isCurved } from "./curve";
 import { isLane } from "./lane";
 
@@ -52,16 +52,18 @@ const paints = (paint: Animated<Paint> | undefined): Paint[] => {
   return isLane(paint) ? paint.keys.map((key) => key.value) : [paint];
 };
 
+const runsOf = (node: TextNode): TextRun[] => node.lines.flatMap((line) => line.runs);
+
 const featuresOf = (node: SceneNode): Feature[] => {
   const used: Feature[] = [];
 
   const painted = [
     ...(node.kind === "shape" ? [...paints(node.fill), ...paints(node.stroke?.color)] : []),
-    ...(node.kind === "text" ? paints(node.fill) : []),
+    ...(node.kind === "text" ? runsOf(node).flatMap((run) => paints(run.fill)) : []),
   ];
 
   if (node.kind === "text")
-    used.push(node.lines.every((line) => line.outline) ? "text" : "outlinedText");
+    used.push(runsOf(node).every((run) => run.outline) ? "text" : "outlinedText");
 
   if (node.kind === "image" || node.kind === "instance") used.push(node.kind);
 

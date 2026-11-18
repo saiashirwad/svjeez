@@ -1,4 +1,4 @@
-import type { FontValue } from "../font/font";
+import type { FontFamily } from "../font/font";
 import type { Ease, Seconds } from "../motion";
 
 /**
@@ -25,8 +25,11 @@ export interface Scene {
   readonly still?: Seconds;
   /** Every color token the scene uses, with both of its values. */
   readonly tokens: Readonly<Record<string, TokenValue>>;
-  /** The font files text nodes name, by family. The one member that is not plain data. */
-  readonly fonts: Readonly<Record<string, FontValue>>;
+  /**
+   * The font files text runs name: each family with exactly the faces some run uses, each face once. A run's `face`
+   * picks one by family, weight and style. The one member that is not plain data.
+   */
+  readonly fonts: Readonly<Record<string, FontFamily>>;
   /** What `instance` nodes draw, by name. Their lanes are on the scene's clock, shared by every instance. */
   readonly symbols: Readonly<Record<string, SceneNode>>;
   readonly root: GroupNode;
@@ -212,23 +215,44 @@ export interface ShapeNode extends Base {
   readonly trim?: Animated<Vec>;
 }
 
-/** One line of text, already laid out: where each glyph sits is decided here, not by the viewer. */
-export interface TextLine {
+/** One face of a font: a family in `Scene.fonts`, and the weight and style of one of its files there. */
+export interface Face {
+  readonly family: string;
+  /** 1 to 1000, as CSS writes it: 400 is regular, 700 bold. */
+  readonly weight: number;
+  readonly style: "normal" | "italic";
+}
+
+/**
+ * Text in one face and one paint, on one line, already laid out: where each glyph sits is decided here, not by the
+ * viewer. Kerning and ligatures apply inside a run, never across two.
+ */
+export interface TextRun {
   readonly text: string;
-  /** Where the line's baseline starts. */
+  /** Where the run's first glyph starts on the baseline, in the text's frame. */
   readonly at: Vec;
-  /** How far each glyph moves the pen. */
+  /** How far each glyph moves the pen. They add up to the run's width. */
   readonly advances: readonly number[];
-  /** The same line as outlines, for a target with no fonts. Absent when the font's outlines can't be read. */
+  readonly face: Face;
+  readonly fill: Animated<Paint>;
+  /** Multiplies the alpha of the run's fill, 0 to 1. Absent is 1. */
+  readonly opacity?: Animated<number>;
+  /** The same run as outlines, for a target with no fonts. Absent when the face's outlines can't be read. */
   readonly outline?: readonly Contour[];
 }
 
+/** One line of text: its runs from start to end. A line with no runs is an empty line, and still takes its place. */
+export interface TextLine {
+  /** Where the line's baseline starts, before its first run. */
+  readonly at: Vec;
+  readonly runs: readonly TextRun[];
+}
+
+/** Text in one size, on lines of runs. Its box runs from the tallest ascent of its faces to the deepest descent. */
 export interface TextNode extends Base {
   readonly kind: "text";
-  readonly family: string;
   readonly size: number;
   readonly lines: readonly TextLine[];
-  readonly fill?: Animated<Paint>;
 }
 
 export interface ImageNode extends Base {

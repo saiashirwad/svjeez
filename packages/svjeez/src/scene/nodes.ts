@@ -1,5 +1,6 @@
 import type { FontValue } from "../font/font";
 import type { Seconds } from "../motion";
+import type { Span as TimeSpan } from "../span";
 import type { PictureData } from "../picture";
 import type { Vec } from "./ir";
 import type { Anchor, Ref } from "./refs";
@@ -52,10 +53,52 @@ export interface ShapeProps extends Common {
   readonly trim?: Anim<Vec>;
 }
 
+/**
+ * What a run of text is drawn in. A `<Span>` takes these from the `<Text>` or `<Span>` around it unless it says
+ * otherwise.
+ */
+export interface RunStyle {
+  /**
+   * One face, from `font()` or `google()`, or a family of them, from `font.family()` or `google.family()`. Text is
+   * measured with the real face when the scene compiles, so the face asked for must be loaded: the browser never
+   * makes up a bold or a slant.
+   */
+  readonly font?: FontValue;
+  /** Which face of the family: 400 is regular, 600 semibold. Default 400, or a single face's own weight. */
+  readonly weight?: number;
+  /** The family's italic face. Default false, or whether a single face is italic. */
+  readonly italic?: boolean;
+  readonly fill?: Anim<Paint>;
+  /** Multiplies the fill's alpha, 0 to 1: how words appear one by one without leaving their line. Default 1. */
+  readonly opacity?: Anim<number>;
+}
+
+/** What `<Text>` and `<Span>` hold: strings, numbers, spans, and lists of them. Line breaks start new lines. */
+export type TextChild =
+  | string
+  | number
+  | SceneElement
+  | false
+  | null
+  | undefined
+  | readonly TextChild[];
+
+/** Part of a text in another face or paint. It lays out with the text around it, so a line wraps through it. */
+export interface SpanProps extends Omit<RunStyle, "opacity"> {
+  /** Multiplies the fill's alpha, 0 to 1, of this span alone: a span in a faded text fades with it. Default 1. */
+  readonly opacity?: Anim<number>;
+  readonly children?: TextChild;
+}
+
 /** Text laid out when the scene compiles, so its box is known and the same in every target. */
 export interface TextProps extends Common {
   readonly font: FontValue;
+  /** Which face of `font`: 400 is regular, 600 semibold. Default 400, or a single face's own weight. */
+  readonly weight?: number;
+  /** The italic face of `font`. Default false, or whether a single face is italic. */
+  readonly italic?: boolean;
   readonly size: number;
+  /** Every run's fill, unless a `<Span>` says otherwise. */
   readonly fill: Anim<Paint>;
   /**
    * How lines sit in their column, and so which point of the first baseline `at` names: its start, middle or end.
@@ -66,8 +109,8 @@ export interface TextProps extends Common {
   readonly width?: number;
   /** Baseline to baseline, in multiples of `size`. Default: the font's own line height. */
   readonly lineHeight?: number;
-  /** Line breaks in it start new lines. */
-  readonly children: string;
+  /** Strings and `<Span>`s. Line breaks in them start new lines. */
+  readonly children?: TextChild;
 }
 
 /** A picture from `picture()`. */
@@ -129,6 +172,7 @@ export type SceneElement =
     }
   | { readonly type: "shape"; readonly props: ShapeProps }
   | { readonly type: "text"; readonly props: TextProps }
+  | { readonly type: "span"; readonly props: SpanProps }
   | { readonly type: "image"; readonly props: ImageProps }
   | { readonly type: "instance"; readonly props: InstanceProps }
   | {
@@ -173,8 +217,22 @@ const svgTag = (value: SceneElement): string | undefined =>
  * The element as lowering takes it, or the error a newcomer needs: a lowercase SVG tag, or JSX that svjeez's SVG
  * runtime built because the file doesn't say `@jsxImportSource svjeez/scene`.
  */
-export const sceneElement = (value: SceneElement, where: string): SceneElement => {
-  if (isObject(value) && TYPES.has(value.type)) return value;
+/** Whether a value is an element lowering places: any but a span, which only a text holds. */
+const isPlaceable = (
+  value: SceneElement,
+): value is Exclude<SceneElement, { readonly type: "span" }> =>
+  isObject(value) && value.type !== "span" && TYPES.has(value.type);
+
+export const sceneElement = (
+  value: SceneElement,
+  where: string,
+): Exclude<SceneElement, { readonly type: "span" }> => {
+  if (isObject(value) && value.type === "span")
+    throw new Error(
+      `${where} holds a <Span>, which draws only inside a <Text>. Put it in one, as in <Text font={…} size={…} fill={…}>a <Span weight={600}>bold</Span> word</Text>.`,
+    );
+
+  if (isPlaceable(value)) return value;
   const tag = svgTag(value);
 
   throw new Error(
@@ -209,6 +267,18 @@ export const Shape = (props: ShapeProps): SceneElement => ({ type: "shape", prop
 
 /** Text whose frame starts on its first baseline, at the point `align` names. */
 export const Text = (props: TextProps): SceneElement => ({ type: "text", props });
+
+/**
+ * A stretch of time, as `span()` makes one. It shares its name with the `<Span>` component below, which is a value:
+ * one import brings both.
+ */
+export type Span = TimeSpan;
+
+/**
+ * Part of a `<Text>` in another weight, style, font or fill, laid out with the text around it. It is not a node of
+ * its own: it has no key, place or motion, only what it is drawn in.
+ */
+export const Span = (props: SpanProps): SceneElement => ({ type: "span", props });
 
 /** A picture in a frame of its own size, from its top-left corner. */
 export const Image = (props: ImageProps): SceneElement => ({ type: "image", props });

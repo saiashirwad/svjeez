@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 300" width="520" height="300" role="img" aria-labelledby="t d">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 300" width="520" height="300" role="img" aria-labelledby="t d" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
   <title id="t">Springs</title>
   <desc id="d">A dot springs between three targets, each move starting before the last lands, beside the same moves with ease.out. A card pops in on a springy scale.</desc>
   <style><![CDATA[
@@ -19,7 +19,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
   <rect width="520" height="300" fill="var(--background)"/>
   <g transform="translate(24 24)">
     <rect width="320" height="116" rx="10" fill="var(--surface)" stroke="var(--border)"/>
-    <text x="12" y="20" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--muted)">ease.spring</text>
+    <text x="12" y="20" font-size="12" fill="var(--muted)">ease.spring</text>
     <circle cx="24" cy="60" r="9" fill="none" stroke="var(--border)" stroke-width="1.5"/>
     <circle cx="130" cy="22" r="9" fill="none" stroke="var(--border)" stroke-width="1.5"/>
     <circle cx="220" cy="92" r="9" fill="none" stroke="var(--border)" stroke-width="1.5"/>
@@ -28,7 +28,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
   </g>
   <g transform="translate(24 160)">
     <rect width="320" height="116" rx="10" fill="var(--surface)" stroke="var(--border)"/>
-    <text x="12" y="20" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="12" fill="var(--muted)">ease.out</text>
+    <text x="12" y="20" font-size="12" fill="var(--muted)">ease.out</text>
     <circle cx="24" cy="60" r="9" fill="none" stroke="var(--border)" stroke-width="1.5"/>
     <circle cx="130" cy="22" r="9" fill="none" stroke="var(--border)" stroke-width="1.5"/>
     <circle cx="220" cy="92" r="9" fill="none" stroke="var(--border)" stroke-width="1.5"/>

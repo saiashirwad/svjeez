@@ -11,6 +11,7 @@ export {
   Ref,
   Sequence,
   Shape,
+  Span,
   Text,
   canvas,
   ref,
@@ -22,8 +23,11 @@ export {
   type SceneSymbol,
   type SceneElement,
   type SequenceProps,
+  type RunStyle,
   type ShapeProps,
+  type SpanProps,
   type StrokeProps,
+  type TextChild,
   type TextProps,
 } from "./nodes";
 
@@ -92,13 +96,22 @@ export {
 
 export { Arrow, Line, type ArrowProps, type LineProps } from "./arrow";
 
-export { layoutText, type TextAlign, type TextLayout, type TextLayoutOptions } from "./text";
+export {
+  layoutRuns,
+  layoutText,
+  type LaidLine,
+  type LaidRun,
+  type TextAlign,
+  type TextLayout,
+  type TextLayoutOptions,
+  type TextPiece,
+} from "./text";
 
 export type { Ease, Seconds } from "../motion";
 
 export { ease, type Curve, type Spring, type SpringOptions } from "./spring";
 
-export { span, chain, type Span, type Spanned, type When } from "../span";
+export { span, chain, type Spanned, type When } from "../span";
 
 export {
   Action,

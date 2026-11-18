@@ -13,7 +13,9 @@ import type {
   SceneNode,
   ShapeNode,
   Stroke,
+  TextLine,
   TextNode,
+  TextRun,
   Vec,
 } from "./ir";
 import { isLane, pair } from "./lane";
@@ -614,7 +616,48 @@ const shapeOf = (plan: Plan, entry: Entry): ShapeNode => {
   };
 };
 
-const wording = (node: TextNode): string => JSON.stringify([node.family, node.size, node.lines]);
+/** What a text says, in which faces and where: two states that word it the same blend their runs' paints. */
+const wording = (node: TextNode): string =>
+  JSON.stringify([
+    node.size,
+    node.lines.map((line) => [
+      line.at,
+      line.runs.map(({ text, at, advances, face }) => [text, at, advances, face]),
+    ]),
+  ]);
+
+/** The lines of `states`, which all word the text the same, with each run's fill and opacity blended through them. */
+const blendedLines = (plan: Plan, entry: Entry, states: readonly TextNode[]): TextLine[] =>
+  states[0]!.lines.map((line, l) => ({
+    at: line.at,
+    runs: line.runs.map((run, r): TextRun => {
+      const runs = states.map((node) => node.lines[l]!.runs[r]!);
+      const { opacity: _, ...rest } = run;
+
+      const opacity = runs.every((each) => each.opacity === undefined)
+        ? undefined
+        : blend(
+            plan,
+            entry,
+            runs.map((each) => each.opacity ?? 1),
+            mixNumber,
+            "opacity of a run",
+          );
+
+      return {
+        ...rest,
+        fill: blend(
+          plan,
+          entry,
+          runs.map((each) => each.fill),
+          noMix,
+          "fill",
+          paintCurve(plan),
+        ),
+        ...(opacity !== undefined && opacity !== 1 && { opacity }),
+      };
+    }),
+  }));
 
 const FADE: Fixed = { ...IDLE, opacity: 0 };
 
@@ -625,24 +668,14 @@ const FADE: Fixed = { ...IDLE, opacity: 0 };
 const textOf = (plan: Plan, entry: Entry): TextNode | GroupNode => {
   const texts = entry.filled.filter((node): node is TextNode => node.kind === "text");
 
-  const fill = (states: readonly TextNode[]) =>
-    paints(
-      plan,
-      entry,
-      states.map((node) => node.fill),
-      "fill",
-    );
-
   if (texts.every((node) => wording(node) === wording(texts[0]!))) {
     const rest = texts[0]!;
 
     return {
       ...placed(plan, entry),
       kind: "text",
-      family: rest.family,
       size: rest.size,
-      lines: rest.lines,
-      ...(fill(texts) !== undefined && { fill: fill(texts) }),
+      lines: blendedLines(plan, entry, texts),
     };
   }
 
@@ -671,13 +704,6 @@ const textOf = (plan: Plan, entry: Entry): TextNode | GroupNode => {
     const local: Plan = { ...plan, windows: new Map([[part, windows]]) };
     const shown = presence(local, part, FADE, FADE);
 
-    const paint = paints(
-      local,
-      part,
-      filled.map((node) => node.fill),
-      "fill",
-    );
-
     return {
       kind: "text",
       key: part.key,
@@ -687,10 +713,8 @@ const textOf = (plan: Plan, entry: Entry): TextNode | GroupNode => {
       origin: own.origin,
       layers: shown ? [shown] : [],
       effects: [],
-      family: own.family,
       size: own.size,
-      lines: own.lines,
-      ...(paint !== undefined && { fill: paint }),
+      lines: blendedLines(local, part, filled),
     };
   });
 

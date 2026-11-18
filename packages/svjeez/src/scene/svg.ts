@@ -20,13 +20,17 @@ import type {
   Paint,
   Rgba,
   Scene,
+  Face,
   SceneNode,
   ShapeNode,
+  TextNode,
+  TextRun,
   Vec,
 } from "./ir";
 import { curveLength, isCurved } from "./curve";
 import { labelled } from "./identity";
 import { isLane } from "./lane";
+import { same } from "./steps";
 import { onCircle } from "./values";
 
 /**
@@ -73,6 +77,8 @@ interface Ctx {
   /** Whether a node or anything under it hides its stroke with `visibility`, by key. */
   readonly hides: Map<string, boolean>;
   readonly sources: boolean;
+  /** What the root `<svg>` states for every text in it, so each text writes only what differs. */
+  readonly around: Partial<Face>;
 }
 
 const isRgba = (color: Color): color is Rgba => Array.isArray(color);
@@ -286,6 +292,7 @@ type Slot =
   | "fill"
   | "stroke"
   | "stroke-width"
+  | "fill-opacity"
   | "d";
 
 const isCut = (keys: readonly Held[]): boolean =>
@@ -643,6 +650,146 @@ const hidesStroke = (ctx: Ctx, node: SceneNode): boolean => {
   return found;
 };
 
+/** A text's element, and the runs inside it. */
+interface DrawnText {
+  readonly drawn: Drawn;
+  readonly children: SvgNode[];
+}
+
+/** A run's face and paints, as a key: two runs with the same one draw alike. */
+const lookOf = (run: TextRun): string => JSON.stringify([run.face, run.fill, run.opacity ?? 1]);
+
+/** The look most runs share, the first of them on a tie: the `<text>` states it, and each run only what differs. */
+const commonest = (runs: readonly TextRun[]): TextRun | undefined => {
+  const counts = new Map<string, { run: TextRun; count: number }>();
+
+  for (const run of runs) {
+    const known = counts.get(lookOf(run)) ?? { run, count: 0 };
+
+    known.count++;
+    counts.set(lookOf(run), known);
+  }
+
+  return [...counts.values()].reduce<{ run: TextRun; count: number } | undefined>(
+    (best, each) => (best === undefined || each.count > best.count ? each : best),
+    undefined,
+  )?.run;
+};
+
+/**
+ * One `<text>` with a `<tspan>` for each run, each where layout put it, so no browser anchors or wraps it. The
+ * `<text>` states the look most runs share and each `<tspan>` only what differs, so every run's face is known to
+ * the emitter, which puts its characters into that face's subset and no other.
+ */
+const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): DrawnText => {
+  const { fonts } = ctx.scene;
+  const runs = node.lines.flatMap((line) => line.runs);
+  const base = commonest(runs);
+  const [line, ...more] = node.lines;
+  const single = more.length === 0 && (line?.runs.length ?? 0) <= 1;
+
+  const where = ([px, py]: Vec, x: boolean, y: boolean) => ({
+    ...(x && { x: num(at[0] + px) }),
+    ...(y && { y: num(at[1] + py) }),
+  });
+
+  // Where nothing around says, a weight or style is written unless it is the browser's own, 400 and normal, and the
+  // family has no other: the emitter must know each text's face to put its characters in that face's subset.
+  const facing = (face: Face, around: Partial<Face>) => {
+    const { faces } = fonts[face.family]!;
+
+    const weight =
+      around.weight === undefined
+        ? face.weight !== 400 || faces.some((each) => each.weight !== face.weight)
+        : face.weight !== around.weight;
+
+    const style =
+      around.style === undefined
+        ? face.style !== "normal" || faces.some((each) => each.style !== face.style)
+        : face.style !== around.style;
+
+    return {
+      ...(face.family !== around.family && { "font-family": fonts[face.family]! }),
+      ...(weight && { "font-weight": num(face.weight) }),
+      ...(style && { "font-style": face.style }),
+    };
+  };
+
+  const opacity = (run: TextRun, attrs: Record<string, AttrValue>, own: CssLane[]): void => {
+    const value = run.opacity ?? 1;
+
+    if (!isLane(value)) {
+      attrs["fill-opacity"] = num(value);
+
+      return;
+    }
+
+    attrs["fill-opacity"] = num(value.keys[0].value);
+    own.push(cssLane(ctx, "fill-opacity", value, (each) => ({ fillOpacity: each })));
+  };
+
+  const firstLine = line?.at ?? [0, 0];
+  const start = line?.runs[0]?.at ?? firstLine;
+
+  const drawn: Drawn = {
+    tag: "text",
+    placed: true,
+    attrs: {
+      ...(single && where(start, start[0] + at[0] !== 0, start[1] + at[1] !== 0)),
+      ...(base && facing(base.face, ctx.around)),
+      "font-size": num(node.size),
+      ...(node.lines.some((each) =>
+        /^\s|\s$|\s\s/.test(each.runs.map((run) => run.text).join("")),
+      ) && {
+        "xml:space": "preserve",
+      }),
+    },
+  };
+
+  if (base) {
+    painted(ctx, "fill", base.fill, drawn.attrs, lanes);
+
+    if (base.opacity !== undefined) opacity(base, drawn.attrs, lanes);
+  } else drawn.attrs.fill = "none";
+
+  if (single)
+    return { drawn, children: line?.runs[0] ? [{ kind: "text", value: line.runs[0].text }] : [] };
+
+  // The first tspan starts where the text does, at 0 0 of its frame unless it says; every later one says where.
+  let first = true;
+
+  const children = node.lines.flatMap((each) =>
+    each.runs.map((run, index): SvgNode => {
+      const own: CssLane[] = [];
+
+      const placed = where(
+        run.at,
+        !first || at[0] + run.at[0] !== 0,
+        index === 0 && (!first || at[1] + run.at[1] !== 0),
+      );
+
+      const tspan: Drawn = {
+        tag: "tspan",
+        placed: true,
+        attrs: { ...placed, ...facing(run.face, base!.face) },
+      };
+
+      first = false;
+
+      if (!same(run.fill, base!.fill)) painted(ctx, "fill", run.fill, tspan.attrs, own);
+
+      if (!same(run.opacity ?? 1, base!.opacity ?? 1)) opacity(run, tspan.attrs, own);
+
+      return {
+        ...element("tspan", tspan.attrs, [{ kind: "text", value: run.text }]),
+        ...(own.length > 0 && { lanes: own }),
+      };
+    }),
+  );
+
+  return { drawn, children };
+};
+
 const symbolId = (ctx: Ctx, name: string): string => `${ctx.prefix}symbol-${name}`;
 
 const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
@@ -705,39 +852,9 @@ const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
       };
       break;
 
-    case "text": {
-      // Every line is placed where layout put it, so no browser anchors or wraps it.
-      const [line, ...more] = node.lines;
-
-      const where = ([px, py]: Vec) => ({
-        ...(at[0] + px !== 0 && { x: num(at[0] + px) }),
-        ...(at[1] + py !== 0 && { y: num(at[1] + py) }),
-      });
-
-      drawn = {
-        tag: "text",
-        attrs: {
-          ...(more.length === 0 && where(line?.at ?? [0, 0])),
-          "font-family": ctx.scene.fonts[node.family]!,
-          "font-size": num(node.size),
-          ...(node.lines.some((each) => /^\s|\s$|\s\s/.test(each.text)) && {
-            "xml:space": "preserve",
-          }),
-        },
-        placed: true,
-      };
-
-      painted(ctx, "fill", node.fill, drawn.attrs, lanes);
-      children =
-        more.length === 0
-          ? [{ kind: "text", value: line?.text ?? "" }]
-          : node.lines
-              .filter((each) => each.text !== "")
-              .map((each) =>
-                element("tspan", where(each.at), [{ kind: "text", value: each.text }]),
-              );
+    case "text":
+      ({ drawn, children } = textElement(ctx, node, at, lanes));
       break;
-    }
   }
 
   const shells = [shell()];
@@ -835,17 +952,54 @@ const tokenCss = (scene: Scene, prefix: string): string => {
   return `${scope}{${declared("dark")}}\n@media (prefers-color-scheme:light){${scope}{${declared("light")}}}`;
 };
 
+/**
+ * What the root `<svg>` states for the texts in it: the family most of them are drawn in, when two or more are, and
+ * weight 400 and style normal when a family has others, so a text in the regular face need not say so.
+ */
+const aroundOf = (scene: Scene): Partial<Face> => {
+  const counts = new Map<string, number>();
+
+  const visit = (node: SceneNode): void => {
+    if (node.kind === "text") {
+      const family = commonest(node.lines.flatMap((line) => line.runs))?.face.family;
+
+      if (family !== undefined) counts.set(family, (counts.get(family) ?? 0) + 1);
+    }
+
+    if (node.kind === "group") node.children.forEach(visit);
+
+    if (node.mask) visit(node.mask);
+  };
+
+  visit(scene.root);
+  Object.values(scene.symbols).forEach(visit);
+  const [best] = [...counts].sort((a, b) => b[1] - a[1]);
+  const faces = Object.values(scene.fonts).map((family) => family.faces);
+
+  return {
+    ...(best && best[1] >= 2 && { family: best[0] }),
+    ...(faces.some((each) => each.some((face) => face.weight !== each[0]!.weight)) && {
+      weight: 400,
+    }),
+    ...(faces.some((each) => each.some((face) => face.style !== each[0]!.style)) && {
+      style: "normal" as const,
+    }),
+  };
+};
+
 export const svg: Backend<string, SvgOptions> = {
   name: "SVG",
   supports,
   emit: (scene, options = {}) => {
     admit(scene, svg, options.onWarning);
+    const around = aroundOf(scene);
 
     const ctx: Ctx = {
       scene,
       prefix: options.prefix ?? "",
       hides: new Map(),
       sources: options.sources ?? false,
+      around,
     };
 
     const names = Object.keys(scene.symbols);
@@ -876,6 +1030,15 @@ export const svg: Backend<string, SvgOptions> = {
         reducedMotion: scene.still === undefined ? false : { at: scene.still },
         ...(options.prefix !== undefined && { prefix: options.prefix }),
         ...(options.playbackRate !== undefined && { playbackRate: options.playbackRate }),
+        // Font properties inherit, so what the root states reaches every text, and the emitter still knows each
+        // text's face, so each face's subset holds only what is drawn in it.
+        ...(Object.keys(around).length > 0 && {
+          font: {
+            ...(around.family !== undefined && { family: scene.fonts[around.family]! }),
+            ...(around.weight !== undefined && { weight: around.weight }),
+            ...(around.style !== undefined && { style: around.style }),
+          },
+        }),
       },
       [
         ...(defs.length > 0 ? [element("defs", {}, defs)] : []),
