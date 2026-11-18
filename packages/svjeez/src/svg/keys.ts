@@ -3,16 +3,11 @@ import { easeAt } from "../model/ease-at";
 import { EPSILON, type Ease, type Seconds } from "../model/time";
 import { blendPaths } from "../model/paths";
 
-export const MAX_KEYS = 2000;
-
 export interface Key {
   readonly t: Seconds;
   readonly values: ChannelValues;
   readonly ease: Ease;
 }
-
-export const snapPeriod = (period: Seconds, duration: Seconds): Seconds =>
-  duration / Math.max(1, Math.round(duration / period));
 
 // SAFETY: a and b are ChannelValues, so their keys are Channel names.
 const same = (a: ChannelValues, b: ChannelValues): boolean =>
