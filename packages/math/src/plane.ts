@@ -10,6 +10,7 @@ import {
   type SceneElement,
   type Vec,
 } from "svjeez";
+import { jsx } from "svjeez/jsx-runtime";
 import {
   SceneError,
   type Common,
@@ -95,7 +96,7 @@ const finite = (...values: readonly number[]): boolean => values.every(Number.is
 
 const isMatrix = (map: PlaneMap): map is Matrix2 => Array.isArray(map);
 
-const isNumber = <T,>(value: number | T): value is number => typeof value === "number";
+const isNumber = <T>(value: number | T): value is number => typeof value === "number";
 
 const pairOf = (step: number | Vec): Vec => (isNumber(step) ? [step, step] : step);
 
@@ -445,41 +446,46 @@ export function Axes({
     }),
   ]);
 
-  return (
-    <Group {...common}>
-      {grid && <Shape key="grid" geometry={p.grid([tx!, ty!])} stroke={grid} />}
-      <Shape key="axes" geometry={p.axes()} stroke={stroke} />
-      <Shape key="ticks" geometry={marks} stroke={stroke} />
-      {labels && (
-        <Group key="labels">
-          {xs.map((k) => (
-            <Text
-              key={`x ${label(k)}`}
-              font={labels.font}
-              size={labels.size}
-              fill={labels.fill}
-              at={[p.point([k, cy])[0], p.point([k, cy])[1] + tick + 2]}
-              anchor="top"
-            >
-              {label(k)}
-            </Text>
-          ))}
-          {ys
-            .filter((k) => k !== cy)
-            .map((k) => (
-              <Text
-                key={`y ${label(k)}`}
-                font={labels.font}
-                size={labels.size}
-                fill={labels.fill}
-                at={[p.point([cx, k])[0] - tick - 2, p.point([cx, k])[1]]}
-                anchor="right"
-              >
-                {label(k)}
-              </Text>
-            ))}
-        </Group>
-      )}
-    </Group>
-  );
+  const number = (key: string, at: Vec, anchor: "top" | "right", value: number) =>
+    labels &&
+    jsx(
+      Text,
+      {
+        font: labels.font,
+        size: labels.size,
+        fill: labels.fill,
+        at,
+        anchor,
+        children: label(value),
+      },
+      key,
+    );
+
+  return jsx(Group, {
+    ...common,
+    children: [
+      grid && jsx(Shape, { geometry: p.grid([tx!, ty!]), stroke: grid }, "grid"),
+      jsx(Shape, { geometry: p.axes(), stroke }, "axes"),
+      jsx(Shape, { geometry: marks, stroke }, "ticks"),
+      labels &&
+        jsx(
+          Group,
+          {
+            children: [
+              ...xs.map((k) => {
+                const [px, py] = p.point([k, cy]);
+
+                return number(`x ${label(k)}`, [px, py + tick + 2], "top", k);
+              }),
+              ...ys.flatMap((k) => {
+                const [px, py] = p.point([cx, k]);
+
+                return k === cy ? [] : [number(`y ${label(k)}`, [px - tick - 2, py], "right", k)];
+              }),
+            ],
+          },
+          "labels",
+        ),
+    ],
+  });
 }
