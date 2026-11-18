@@ -5,6 +5,7 @@ import type { Vec } from "./ir";
 import type { Anchor, Ref } from "./refs";
 import type { Settle } from "./settle";
 import type { MorphElement } from "./morph";
+import type { Timeline } from "./timeline";
 import type { Anim, Stack } from "./track";
 import { rect, type Geometry, type Paint } from "./values";
 
@@ -105,6 +106,8 @@ export interface InstanceProps extends Common {
 export interface SequenceProps {
   readonly at: Seconds;
   readonly over?: Seconds;
+  /** A timeline that runs on this sequence's clock, so the nodes inside it are choreographed from its start. */
+  readonly timeline?: Timeline;
   readonly children?: Child;
 }
 
@@ -125,6 +128,7 @@ export type SceneElement =
       readonly type: "sequence";
       readonly at: Seconds;
       readonly over?: Seconds;
+      readonly timeline?: Timeline;
       readonly children: readonly SceneElement[];
     }
   | { readonly type: "fragment"; readonly children: readonly SceneElement[] }
@@ -163,10 +167,13 @@ export const Instance = (props: InstanceProps): SceneElement => ({ type: "instan
  * A clock of its own: every track inside counts from `at`, so a component is written from 0 and placed anywhere, and
  * sequences inside sequences add up. With `over` the tracks inside must end by then. It draws nothing.
  */
-export const Sequence = ({ at, over, children }: SequenceProps): SceneElement =>
-  over === undefined
-    ? { type: "sequence", at, children: flat(children) }
-    : { type: "sequence", at, over, children: flat(children) };
+export const Sequence = ({ at, over, timeline, children }: SequenceProps): SceneElement => ({
+  type: "sequence",
+  at,
+  ...(over !== undefined && { over }),
+  ...(timeline && { timeline }),
+  children: flat(children),
+});
 
 let building: Vec | undefined;
 

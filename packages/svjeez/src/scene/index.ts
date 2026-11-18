@@ -96,7 +96,22 @@ export type { Ease, Seconds } from "../motion";
 
 export { ease, type Curve, type Spring, type SpringOptions } from "./spring";
 
-export { span, chain, stagger, type Span, type Spanned, type When } from "../span";
+export { span, chain, type Span, type Spanned, type When } from "../span";
+
+export {
+  Action,
+  Timeline,
+  par,
+  seq,
+  stagger,
+  timeline,
+  wait,
+  type MoveToOptions,
+  type Moves,
+  type Point,
+} from "./timeline";
+
+export { derive, type DeriveOptions, type Derived, type Source } from "./derived";
 
 export { isLane } from "./lane";
 
