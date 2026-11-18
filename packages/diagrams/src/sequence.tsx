@@ -1,5 +1,5 @@
 import { Center, Group, Shape, Text, line, span, type SceneElement, type Span } from "svjeez";
-import { SceneError, type Child } from "svjeez/tools";
+import { SceneError, type Child, type Spanned } from "svjeez/tools";
 import { sequence as layout } from "./layout/sequence.ts";
 import type { Box } from "./layout/box.ts";
 import {
@@ -29,7 +29,7 @@ export interface SequenceOptions extends DiagramOptions {
 }
 
 export interface Sequence<A extends string> extends Diagram<A> {
-  message(index: number): { readonly span: Span | undefined; readonly route: Route };
+  message(index: number): { readonly span: Spanned | undefined; readonly route: Route };
 }
 
 const WHAT = "sequence()";
@@ -95,7 +95,7 @@ export function sequence<const A extends Record<string, Labelled>>(
   const beat =
     reveal === undefined || isList(reveal) ? undefined : spanOf(reveal, `${WHAT} reveal`);
 
-  const beats: readonly (Span | undefined)[] = rows.map((_, i) =>
+  const beats: readonly (Spanned | undefined)[] = rows.map((_, i) =>
     isList(reveal)
       ? spanOf(reveal[i], `${WHAT} reveal for message ${i + 1}`)
       : beat && beatOf(beat, i),
@@ -162,7 +162,7 @@ export function sequence<const A extends Record<string, Labelled>>(
     </Group>
   );
 
-  const parts = new Map<string, Span | undefined>(ids.map((id) => [id, undefined]));
+  const parts = new Map<string, Spanned | undefined>(ids.map((id) => [id, undefined]));
   const handle = partsOf<Id>(WHAT, options.name ?? "sequence", parts);
 
   return {

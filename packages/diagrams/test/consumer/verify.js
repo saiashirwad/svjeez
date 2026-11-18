@@ -22,15 +22,21 @@ const out = svg.emit(
 );
 
 assert.match(out, /^<svg[\s\S]*@keyframes/);
+
 assert.throws(
   () => flowchart({ nodes: { a: "A" }, edges: [["a", "c"]] }, o),
   (error) => error instanceof SceneError && /"c"/.test(error.message),
 );
+
 assert.ok(sequence({ actors: { u: "U", a: "A" }, messages: [["u", "a", "hi"]] }, o).size[0] > 0);
+
 assert.ok(stateMachine({ states: { a: "A" }, initial: "a", transitions: [] }, o).size[0] > 0);
+
 assert.ok(tree({ nodes: { root: "Root" } }, o).size[0] > 0);
+
 assert.ok(
-  lanes({ lanes: { a: "A" }, spans: [{ lane: "a", at: 0, over: 1 }] }, { ...o, scale: 10 }).size[0] > 0,
+  lanes({ lanes: { a: "A" }, spans: [{ lane: "a", at: 0, over: 1 }] }, { ...o, scale: 10 })
+    .size[0] > 0,
 );
 
 console.log(`rendered a flowchart into ${(out.length / 1024).toFixed(1)} KB`);

@@ -12,7 +12,7 @@ import {
   type Span,
   type Vec,
 } from "svjeez";
-import { SceneError, type Child, type Color } from "svjeez/tools";
+import { SceneError, type Child, type Color, type Spanned } from "svjeez/tools";
 import { layered } from "./layout/layered.ts";
 import type { Box, Point } from "./layout/box.ts";
 import {
@@ -56,8 +56,8 @@ export interface WalkOptions {
 
 export interface Walk<S extends string> {
   readonly node: SceneElement;
-  readonly span: Span;
-  readonly spans: Readonly<Record<S, readonly Span[]>>;
+  readonly span: Spanned;
+  readonly spans: Readonly<Record<S, readonly Spanned[]>>;
 }
 
 export interface StateMachine<S extends string, T extends string = `${S}->${S}`> extends Diagram<
@@ -300,7 +300,7 @@ export function stateMachine<
 
   const transitionKeys = keyed(transitions.map((t) => edgeKey(t.source, t.target)));
 
-  const parts = new Map<string, Span | undefined>([
+  const parts = new Map<string, Spanned | undefined>([
     ...ids.map((id) => [id, undefined] as const),
     ...transitionKeys.map((key) => [key, undefined] as const),
   ]);
@@ -363,14 +363,20 @@ export function stateMachine<
         <Shape
           key={`initial-${k + 1}`}
           geometry={circle(DOT / 2)}
+          anchor="center"
           at={centerOf(d)}
           fill={l.colors.text}
         />
       ))}
       {local.ends.map((d, k) => (
         <Group key={`final-${k + 1}`} at={centerOf(d)}>
-          <Shape geometry={circle(RING / 2)} stroke={{ color: l.colors.text, width: 1.5 }} />
-          <Shape geometry={circle(RING / 2 - 4)} fill={l.colors.text} />
+          <Shape
+            geometry={circle(RING / 2)}
+            anchor="center"
+            at={[0, 0]}
+            stroke={{ color: l.colors.text, width: 1.5 }}
+          />
+          <Shape geometry={circle(RING / 2 - 4)} anchor="center" at={[0, 0]} fill={l.colors.text} />
         </Group>
       ))}
       {between}
@@ -452,7 +458,7 @@ export function stateMachine<
         );
 
       const first = isList(at) ? undefined : spanOf(at, "walk() at");
-      const lit: Span[] = [];
+      const lit: Spanned[] = [];
       const runs: { readonly route: Route; readonly when: Span }[] = [];
 
       path.forEach((_, k) => {
@@ -489,7 +495,7 @@ export function stateMachine<
             lit[k - 1] = span(prev.start, Math.max(0.05, runs[k - 1]!.when.start - prev.start));
         }
 
-      const byState = new Map<string, Span[]>();
+      const byState = new Map<string, Spanned[]>();
       path.forEach((s, k) => byState.set(s, [...(byState.get(s) ?? []), lit[k]!]));
 
       const highlights = [...byState].map(([s, spans]) => {
@@ -540,6 +546,7 @@ export function stateMachine<
             <Shape
               key="token"
               geometry={circle(5)}
+              anchor="center"
               at={sampled(where, span(from, to - from), { tolerance: 0.5 })}
               fill={l.colors.highlight}
               opacity={opacity}
@@ -550,7 +557,7 @@ export function stateMachine<
       // SAFETY: ids are exactly the states of S, and each gets an entry, empty when the walk never lights it
       const spans = Object.fromEntries(ids.map((s) => [s, byState.get(s) ?? []])) as Record<
         Id,
-        Span[]
+        Spanned[]
       >;
 
       return {

@@ -29,6 +29,7 @@ import {
   type FontValue,
   type Hex,
   type Layers,
+  type Spanned,
   type PathBuilder,
   type Token,
 } from "svjeez/tools";
@@ -59,9 +60,9 @@ export interface Diagram<Id extends string> {
   with(between: Child): SceneElement;
   readonly size: Vec;
   readonly ref: Ref;
-  readonly span: Span | undefined;
+  readonly span: Spanned | undefined;
   part(id: Id): Ref;
-  when(id: Id): Span | undefined;
+  when(id: Id): Spanned | undefined;
 }
 
 export type Reveal<Id extends string> = Span | Readonly<Partial<Record<Id, Span>>>;
@@ -534,7 +535,7 @@ const isSpan = (value: Reveal<string>): value is Span =>
 const given = (value: Span | undefined): value is Span =>
   typeof value === "object" && value !== null && isSpan(value);
 
-export const spanOf = (value: Span | undefined, what: string): Span => {
+export const spanOf = (value: Span | undefined, what: string): Spanned => {
   if (!given(value))
     throw new SceneError(`${what} needs a span, got ${String(value)}.`, "Write span(start, over).");
 
@@ -554,15 +555,15 @@ const quoted = (ids: readonly string[]): string =>
         .join(", ")}, …`
     : ids.map((id) => `"${id}"`).join(", ");
 
-export const beatOf = (beat: Span, i: number): Span =>
+export const beatOf = (beat: Span, i: number): Spanned =>
   span(Math.round((beat.start + i * beat.over) * 1e6) / 1e6, beat.over);
 
 export const schedule = (
   reveal: Reveal<string> | undefined,
   order: readonly string[],
   what: string,
-): Map<string, Span | undefined> => {
-  const shown = new Map<string, Span | undefined>(order.map((id) => [id, undefined]));
+): Map<string, Spanned | undefined> => {
+  const shown = new Map<string, Spanned | undefined>(order.map((id) => [id, undefined]));
 
   if (reveal === undefined) return shown;
 
@@ -586,7 +587,7 @@ export const schedule = (
   return shown;
 };
 
-export const extent = (spans: readonly (Span | undefined)[]): Span | undefined => {
+export const extent = (spans: readonly (Span | undefined)[]): Spanned | undefined => {
   const known = spans.filter((s): s is Span => s !== undefined);
 
   if (known.length === 0) return undefined;
@@ -648,13 +649,13 @@ export const keyed = (ids: readonly string[]): string[] => {
 export interface Parts<Id extends string> {
   readonly ref: Ref;
   part(id: Id): Ref;
-  when(id: Id): Span | undefined;
+  when(id: Id): Spanned | undefined;
 }
 
 export const partsOf = <Id extends string>(
   what: string,
   name: string,
-  parts: ReadonlyMap<string, Span | undefined>,
+  parts: ReadonlyMap<string, Spanned | undefined>,
 ): Parts<Id> => {
   const handle = ref(name);
 

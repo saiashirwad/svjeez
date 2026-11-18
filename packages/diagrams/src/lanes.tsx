@@ -11,9 +11,8 @@ import {
   span,
   track,
   type SceneElement,
-  type Span,
 } from "svjeez";
-import { SceneError, type Child } from "svjeez/tools";
+import { SceneError, type Child, type Spanned } from "svjeez/tools";
 import { lanes as layout } from "./layout/lanes.ts";
 import {
   Route,
@@ -124,12 +123,12 @@ export function lanes<const L extends Record<string, Labelled>>(
     );
   const rate = reveal?.over === undefined ? 1 : reveal.over / out.end;
   const when = (t: number): number => (reveal?.start ?? 0) + t * rate;
-  const at = (t: number, over: number): Span => span(when(t), over * rate);
+  const at = (t: number, over: number): Spanned => span(when(t), over * rate);
   const role = (lane: string) => rows.find((r) => r.id === lane)!.role;
   const area = { x: out.track.x + dx, y: out.track.y + dy, w: out.track.w, h: out.track.h };
   const stripe = mix(l.colors.line, l.colors.background, 0.08);
 
-  const busy = (lane: string): Span | undefined =>
+  const busy = (lane: string): Spanned | undefined =>
     reveal &&
     extent([
       ...bars.filter((s) => s.lane === lane).map((s) => at(s.at, s.over)),
@@ -137,7 +136,7 @@ export function lanes<const L extends Record<string, Labelled>>(
       ...links.filter((k) => k.from === lane || k.to === lane).map((k) => at(k.at, 0.3)),
     ]);
 
-  const parts = new Map<string, Span | undefined>(ids.map((id) => [id, busy(id)]));
+  const parts = new Map<string, Spanned | undefined>(ids.map((id) => [id, busy(id)]));
   const handle = partsOf<Id>(WHAT, options.name ?? "lanes", parts);
 
   const draw = (between?: Child): SceneElement => (
@@ -160,6 +159,7 @@ export function lanes<const L extends Record<string, Labelled>>(
             <Shape
               key="dot"
               geometry={circle(4)}
+              anchor="center"
               at={[label.x + dx + 5, label.y + dy]}
               fill={l.tint(r.role)}
             />
@@ -252,6 +252,7 @@ export function lanes<const L extends Record<string, Labelled>>(
               <Shape
                 key="pulse"
                 geometry={circle(4)}
+                anchor="center"
                 fill={l.colors.highlight}
                 at={new Route([points]).travel(fire)}
                 opacity={track(0)
@@ -278,6 +279,7 @@ export function lanes<const L extends Record<string, Labelled>>(
                 [0, r],
                 [-r, 0],
               ])}
+              anchor="center"
               at={[p.x + dx, p.y + dy]}
               fill={tint}
               stroke={{ color: l.colors.background, width: 1 }}
