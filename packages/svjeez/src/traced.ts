@@ -1,4 +1,4 @@
-import { remember } from "./sources";
+import { remember, type JsxSource } from "./sources";
 import type { Span } from "./span";
 import type { SvgNode } from "./svg";
 
@@ -50,10 +50,11 @@ const pathOf = (raw: string): string =>
 
 const slash = (path: string): string => path.replace(/\\/g, "/");
 
-export const traced = (node: SvgNode): SvgNode => {
+/** Where the code that called in was written, when a trace inspects files under its `within` directory. */
+export const caller = (): JsxSource | undefined => {
   const directory = scope[TRACE]?.within;
 
-  if (!directory) return node;
+  if (!directory) return undefined;
   const within = slash(directory).replace(/\/?$/, "/");
   const limit = Error.stackTraceLimit;
   Error.stackTraceLimit = 80;
@@ -68,12 +69,14 @@ export const traced = (node: SvgNode): SvgNode => {
 
     if (!fileName.startsWith(within) || fileName.includes("/node_modules/")) continue;
 
-    return remember(node, {
-      fileName,
-      lineNumber: Number(match[2]),
-      columnNumber: Number(match[3]),
-    });
+    return { fileName, lineNumber: Number(match[2]), columnNumber: Number(match[3]) };
   }
 
-  return node;
+  return undefined;
+};
+
+export const traced = (node: SvgNode): SvgNode => {
+  const source = caller();
+
+  return source ? remember(node, source) : node;
 };

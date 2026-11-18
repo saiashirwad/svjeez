@@ -25,6 +25,7 @@ import type {
   ShapeNode,
   Vec,
 } from "./ir";
+import { labelled } from "./identity";
 import { isLane } from "./lane";
 import { same } from "./steps";
 import { onCircle } from "./values";
@@ -40,6 +41,11 @@ export interface SvgOptions {
   readonly prefix?: string;
   /** 2 plays twice as fast. Default 1. */
   readonly playbackRate?: number;
+  /**
+   * Write each node's key on its outermost element as `data-key`, and where it was written as `data-source` when
+   * the model knows, as the old API's `sources` does: what editors and `svjeez check` read. Default false.
+   */
+  readonly sources?: boolean;
 }
 
 const LATER = "the SVG backend doesn't write it yet.";
@@ -66,6 +72,7 @@ interface Ctx {
   readonly prefix: string;
   /** Whether a node or anything under it has a trim that moves, by key. */
   readonly trims: Map<string, boolean>;
+  readonly sources: boolean;
 }
 
 const isRgba = (color: Color): color is Rgba => Array.isArray(color);
@@ -780,13 +787,15 @@ const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
     ...(innerLanes.length > 0 && { lanes: innerLanes }),
   };
 
-  return outer.reduce<SvgNode>(
+  const out = outer.reduce<SvgNode>(
     (content, own) => ({
       ...element("g", dress(own), [content]),
       ...(own.lanes.length > 0 && { lanes: own.lanes }),
     }),
     first,
   );
+
+  return ctx.sources ? labelled(node, out) : out;
 };
 
 const tokenCss = (scene: Scene, prefix: string): string => {
@@ -806,7 +815,14 @@ export const svg: Backend<string, SvgOptions> = {
   supports,
   emit: (scene, options = {}) => {
     admit(scene, svg, options.onWarning);
-    const ctx: Ctx = { scene, prefix: options.prefix ?? "", trims: new Map() };
+
+    const ctx: Ctx = {
+      scene,
+      prefix: options.prefix ?? "",
+      trims: new Map(),
+      sources: options.sources ?? false,
+    };
+
     const names = Object.keys(scene.symbols);
 
     // Each symbol is drawn once in <defs>, and each instance is a <use> of it. CSS and SMIL animations inside run in

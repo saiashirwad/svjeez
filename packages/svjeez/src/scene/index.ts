@@ -100,6 +100,10 @@ export { span, chain, stagger, type Span, type Spanned, type When } from "../spa
 
 export { isLane } from "./lane";
 
+export { morph, type MorphOptions } from "./morph";
+
+export { boxesOf, hitTest, placements, valueAt, type Matrix, type Placed } from "./boxes";
+
 export { isScene } from "./is-scene";
 
 export type * as Model from "./ir";

@@ -14,7 +14,8 @@ export const remember = (node: SvgNode, source: JsxSource | undefined): SvgNode 
   return node;
 };
 
-const place = ({ fileName, lineNumber, columnNumber }: JsxSource): string =>
+/** A source as `data-source` writes it: file, line and column, leaving out the parts that are unknown. */
+export const place = ({ fileName, lineNumber, columnNumber }: JsxSource): string =>
   [fileName || undefined, lineNumber, columnNumber].filter((part) => part !== undefined).join(":");
 
 export const sourceOf = (node: SvgNode): string | undefined => {

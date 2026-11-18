@@ -1,8 +1,10 @@
 export {
   createEditor,
   editFor,
+  elementOf,
   handleAt,
   init,
+  nodeAt,
   timeAt,
   update,
   valueOf,
@@ -52,6 +54,8 @@ export {
 export { fit, fitValues, follow, positionOf, valueAt, withValues } from "./fit.ts";
 
 export type { Move } from "./probe.ts";
+
+export type { Placed } from "svjeez/scene";
 
 export { sizeOf, statsOf, type Stat } from "./stats.ts";
 

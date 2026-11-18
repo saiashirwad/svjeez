@@ -65,6 +65,11 @@ export type Compiled =
       readonly stats: SceneStats;
       /** Read from the scene's own `render` call, so only a compile from source knows it. */
       readonly scene?: SceneSize;
+      /**
+       * A scene model's nodes at rest, placed in the scene, in paint order: each one's key, box and, from source,
+       * the line that wrote it. `hitTest` from `svjeez/scene` finds the node under a point. Absent for an SVG string.
+       */
+      readonly nodes?: readonly sceneModel.Placed[];
       readonly ms: number;
     } & Declared)
   | { readonly ok: false; readonly error: SourceError; readonly ms: number };
@@ -203,14 +208,28 @@ const sizeOf = (scene: sceneModel.Scene): SceneSize => ({
 interface Built extends Declared {
   readonly svg: string;
   readonly scene?: SceneSize;
+  readonly nodes?: readonly sceneModel.Placed[];
 }
 
+const SCENE_MODEL = "svjeez/scene";
+
+/** A scene model's picture, its size and where each of its nodes is. */
+const modelled = (made: sceneModel.Scene, sources: boolean): Built => ({
+  svg: sceneModel.svg.emit(made, { sources }),
+  scene: sizeOf(made),
+  nodes: sceneModel.placements(made),
+});
+
 const run = async (source: string, sources: boolean): Promise<Built> => {
+  const importSource = importSourceOf(source);
+
+  // A scene model always records the line of each element: it only reaches the picture with `sources`, and the
+  // nodes carry it for the editor.
   const { code } = transform(source, {
     transforms: ["typescript", "jsx", "imports"],
     jsxRuntime: "automatic",
-    jsxImportSource: importSourceOf(source),
-    production: !sources,
+    jsxImportSource: importSource,
+    production: !sources && importSource !== SCENE_MODEL,
   });
 
   await load(code);
@@ -238,8 +257,8 @@ const run = async (source: string, sources: boolean): Promise<Built> => {
 
   const made: unknown = isBuild(exports.default) ? exports.default() : exports.default;
 
-  if (sceneModel.isScene(made)) scene = sizeOf(made);
-  const svg: unknown = sceneModel.isScene(made) ? sceneModel.svg.emit(made) : made;
+  const model = sceneModel.isScene(made) ? modelled(made, sources) : undefined;
+  const svg: unknown = model ? model.svg : made;
 
   if (!isText(svg))
     throw new Error(
@@ -251,7 +270,7 @@ const run = async (source: string, sources: boolean): Promise<Built> => {
 
   return {
     svg,
-    ...(scene && { scene }),
+    ...(model ? { scene: model.scene, nodes: model.nodes } : scene && { scene }),
     ...(declared && { params: declared }),
     ...(declared &&
       isHandles(exports.handles) && { handles: handlesOf(declared, exports.handles) }),
@@ -294,7 +313,5 @@ export const compileBuild = (build: () => string | sceneModel.Scene): Promise<Co
   outcome(async () => {
     const made = build();
 
-    return sceneModel.isScene(made)
-      ? { svg: sceneModel.svg.emit(made), scene: sizeOf(made) }
-      : { svg: made };
+    return sceneModel.isScene(made) ? modelled(made, false) : { svg: made };
   });

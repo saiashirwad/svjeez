@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { validateSvg } from "svjeez/frames";
-import { Group, scene } from "svjeez/scene";
+import { Group, hitTest, scene } from "svjeez/scene";
 import { jsx } from "svjeez/scene/jsx-runtime";
 import { compileBuild, compileScene } from "../src/compile";
 import { errorFixes, errorTable, FIXES, fixFor } from "../src/fixes";
@@ -58,6 +58,23 @@ describe("compileScene", () => {
     expect(result.svg).toContain('<title id="t">Hello</title>');
     expect(result.scene).toEqual({ width: 200, height: 120, duration: 4, title: "Hello" });
     expect(result.stats.keyframes).toBeGreaterThan(0);
+  });
+
+  test("a scene model reports each node's box and the line that wrote it, and writes them with sources", async () => {
+    const text = `/** @jsxImportSource svjeez/scene */\nimport { Shape, rect, scene } from "svjeez/scene";\n\nexport default scene({ size: [200, 120], duration: 1, title: "x" }, () => (\n  <>\n    <Shape key="back" geometry={rect(200, 120)} />\n    <Shape key="dot" geometry={rect(10, 10)} at={[50, 40]} />\n  </>\n));\n`;
+    const result = await compileScene(text);
+
+    if (!result.ok) throw new Error(result.error.message);
+    expect(result.svg).not.toContain("data-key");
+    const dot = hitTest(result.nodes ?? [], [55, 45]);
+
+    expect(dot).toMatchObject({ key: "dot", box: { x: 50, y: 40, width: 10, height: 10 } });
+    expect(dot?.source).toEqual({ file: "", line: 7 });
+    expect(structuredClone(result.nodes)).toEqual(result.nodes);
+
+    const traced = await compileScene(text, { sources: true });
+
+    expect(traced.ok && traced.svg).toContain('data-key="dot" data-source="7"');
   });
 
   test("a default export that is neither a scene nor a function says what to write", async () => {

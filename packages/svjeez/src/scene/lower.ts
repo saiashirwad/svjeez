@@ -3,6 +3,7 @@ import { num } from "../format";
 import { EPSILON, type Seconds } from "../motion";
 import { checkWindow } from "../span";
 import { matched, mixGeometry } from "./geometry";
+import { identified } from "./identity";
 import type {
   Animated,
   Box,
@@ -20,6 +21,7 @@ import type {
   Vec,
 } from "./ir";
 import { isLane, pair } from "./lane";
+import { morphed } from "./morph";
 import {
   flat,
   within,
@@ -395,6 +397,11 @@ const lowerAll = (
 
     if (el.type === "sequence")
       return lowerAll(ctx, el.children, inside(timing, el.at, el.over), parent, taken);
+
+    if (el.type === "morph")
+      return morphed(el, timing, taken, (state, names) =>
+        lowerAll(ctx, state, timing, parent, names),
+      );
     const name = el.props.key ?? el.props.ref?.key;
 
     if (name !== undefined && taken.has(name))
@@ -412,17 +419,23 @@ const lowerAll = (
 
     switch (el.type) {
       case "shape":
-        return [shape(ctx, el.props, key, timing)];
+        return [identified(el, name, shape(ctx, el.props, key, timing))];
       case "text":
-        return [text(ctx, el.props, key, timing)];
+        return [identified(el, name, text(ctx, el.props, key, timing))];
       case "image":
-        return [image(el.props, key, timing)];
+        return [identified(el, name, image(el.props, key, timing))];
       case "instance":
-        return [instance(ctx, el.props, key, timing)];
+        return [identified(el, name, instance(ctx, el.props, key, timing))];
       case "group": {
         const children = lowerAll(ctx, el.children, timing, key);
 
-        return [{ ...base(el.props, around(children), key, timing), kind: "group", children }];
+        const node: GroupNode = {
+          ...base(el.props, around(children), key, timing),
+          kind: "group",
+          children,
+        };
+
+        return [identified(el, name, node)];
       }
     }
   });

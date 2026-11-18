@@ -164,9 +164,11 @@ export type Effect =
 
 /** Where a node was written, so an editor can go from the picture back to the code. */
 export interface Source {
+  /** Empty when the code had no file, as in an editor. */
   readonly file: string;
   readonly line: number;
-  readonly column: number;
+  /** Absent when the JSX transform didn't say. */
+  readonly column?: number;
 }
 
 interface Base {
