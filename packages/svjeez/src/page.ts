@@ -1,27 +1,9 @@
+import { seek as seekBrowser } from "./browser-seek";
 import type { Seconds } from "./model/time";
 
 export { restyle, type RestyleOptions } from "./restyle";
 
-export const seek = (time: Seconds, root: Document | Element = document): void => {
-  const rateAt = (element: Element | null | undefined): number =>
-    parseFloat(element?.closest("svg")?.getAttribute("data-playback-rate") ?? "") || 1;
-
-  const animations =
-    root instanceof Element ? root.getAnimations({ subtree: true }) : root.getAnimations();
-
-  for (const animation of animations) {
-    const target = animation.effect instanceof KeyframeEffect ? animation.effect.target : null;
-    animation.pause();
-    animation.currentTime = (time / rateAt(target)) * 1000;
-  }
-
-  const svgs = [...root.querySelectorAll("svg"), ...(root instanceof SVGSVGElement ? [root] : [])];
-
-  for (const svg of svgs) {
-    svg.pauseAnimations();
-    svg.setCurrentTime(time / rateAt(svg));
-  }
-};
+export const seek: (time: Seconds, root?: Document | Element) => void = seekBrowser;
 
 export const loopLength = (root: Document | Element = document): Seconds => {
   const svg =

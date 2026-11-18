@@ -1,4 +1,4 @@
-import { seek } from "../page";
+import { seek } from "../browser-seek";
 
 export interface PageElement {
   readonly tag: string;
@@ -259,7 +259,7 @@ const setupPage = (seekPage: typeof seek): PageSetup => {
   }));
 
   const scope: Scope = window;
-  scope.__svjeezCheck = { seek: (time) => seekPage(time, svg), svg, leaves, animated };
+  scope.__svjeezCheck = { seek: (time) => seekPage(time, document, svg), svg, leaves, animated };
   const box = svg.viewBox.baseVal;
 
   return {
