@@ -7,13 +7,12 @@ import {
   Group,
   Image,
   Instance,
-  Line,
   Sequence,
   Shape,
   Stack,
   Text,
+  arc,
   circle,
-  derive,
   ease,
   morph,
   par,
@@ -27,7 +26,6 @@ import {
   timeline,
   tokens,
   track,
-  arc,
 } from "svjeez/scene";
 
 /**
@@ -45,7 +43,7 @@ const badge = picture(
   '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="20" height="20" rx="4" fill="#2F7FD0"/><circle cx="10" cy="10" r="5" fill="#F4F1EA"/></svg>',
 );
 
-const star = symbol("star", () => (
+const star = symbol(() => (
   <Shape geometry={rect(12, 12, { radius: 3 })} fill={theme.accent} rotate={spin({ every: 2 })} />
 ));
 
@@ -60,7 +58,7 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
   timeline(
     seq(
       par(
-        grid.part("b").fade(0.3, 0.6),
+        grid.part("b").to({ opacity: 0.3 }, 0.6),
         card.move([200, 110], 1.2, ease.spring({ stiffness: 120, damping: 14 })),
       ),
       mover.rotate(45, 0.8),
@@ -86,7 +84,13 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
           {"a card that wraps"}
         </Text>
       </Group>
-      <Arrow from={grid.right} to={card.left} color={theme.ink} width={1.5} bend={0.2} gap={4} />
+      <Arrow
+        from={grid.right}
+        to={card.left}
+        stroke={{ color: theme.ink, width: 1.5 }}
+        bend={0.2}
+        inset={4}
+      />
       <Group at={[150, 20]}>
         {morph(
           <Stack key="row" direction="row" gap={6} align="center">
@@ -113,13 +117,13 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
         geometry={circle(3)}
         fill={theme.cool}
         anchor="center"
-        at={derive([angle], (a) => [250 + a / 6, 186] as const)}
+        at={angle.map((a) => [250 + a / 6, 186] as const)}
       />
-      <Line from={[250, 160]} to={dot.top} color={theme.cool} />
+      <Arrow head="none" from={[250, 160]} to={dot.top} stroke={{ color: theme.cool }} />
       <Instance of={star} at={[20, 170]} />
       <Instance of={star} at={[44, 170]} scale={1.5} />
-      <Sequence at={1}>
-        <Sequence at={0.5} timeline={nested}>
+      <Sequence start={1}>
+        <Sequence start={0.5} timeline={nested}>
           <Shape
             ref={late}
             geometry={circle(6)}

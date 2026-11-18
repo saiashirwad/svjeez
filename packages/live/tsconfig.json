@@ -21,6 +21,7 @@
       "svjeez/page": ["../svjeez/src/page.ts"],
       "svjeez/params": ["../svjeez/src/params.ts"],
       "svjeez/scene": ["../svjeez/src/scene/index.ts"],
+      "svjeez/scene/tools": ["../svjeez/src/scene/tools.ts"],
       "svjeez/scene/jsx-runtime": ["../svjeez/src/scene/jsx-runtime.ts"],
       "svjeez/scene/jsx-dev-runtime": ["../svjeez/src/scene/jsx-dev-runtime.ts"],
       "svjeez/geometry": ["../svjeez/src/geometry.ts"],

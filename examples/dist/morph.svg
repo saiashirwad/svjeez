@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 280" width="640" height="280" role="img" aria-labelledby="t d" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 280" width="640" height="280" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
   <title id="t">Morph</title>
   <desc id="d">A bar chart moves through three quarters and back: bars grow, shrink, recolor and trade places, a new region enters, one leaves, the badge turns from a dot into a label, and the heading crossfades.</desc>
   <style><![CDATA[

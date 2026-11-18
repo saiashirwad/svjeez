@@ -120,7 +120,7 @@ export const circle = (radius: number): Geometry => ({
   radius: [positive(radius, "circle()"), radius],
 });
 
-/** Centered on its frame's origin, `rx` across and `ry` down. */
+/** Drawn around its own `[0, 0]`, `rx` across and `ry` down: `at` places its box, `anchor="center"` its center. */
 export const ellipse = (rx: number, ry: number): Geometry => ({
   kind: "ellipse",
   radius: [positive(rx, "ellipse()"), positive(ry, "ellipse()")],
@@ -144,7 +144,7 @@ export const arc = ({ radius, start = 0, sweep }: ArcOptions): Geometry => {
 
 /**
  * A straight segment between two points. Without `at` it stays where they are; with one, `at` places its box. It
- * has no fill. To join two nodes, use `<Line>` or `<Arrow>`.
+ * has no fill. To join two nodes, use `<Arrow>`.
  */
 export const line = (from: Vec, to: Vec): Geometry => ({ kind: "line", from, to });
 
@@ -168,8 +168,11 @@ export const polyline = (points: readonly Vec[]): Geometry => ({
  */
 export const path = (): PathBuilder => new PathBuilder();
 
-/** Reads SVG path data into a geometry at compile time: the way in for icons and traced artwork. */
-export const svgPath = (d: string): Geometry => ({
+/**
+ * A geometry from path data, the `d` string icon sets and drawing tools write (`"M0 0L10 0Z"`), read when the scene
+ * compiles: the way in for icons and traced artwork. To build a path in code, use `path()`.
+ */
+export const pathData = (d: string): Geometry => ({
   kind: "path",
   contours: ringsOf(d),
   rule: "nonzero",
@@ -284,7 +287,9 @@ export const tokens = <const K extends string>(values: {
 
   for (const name of names) {
     if (!/^[A-Za-z_][\w-]*$/.test(name))
-      throw new Error(`tokens() needs CSS identifiers for names, got "${name}".`);
+      throw new Error(
+        `tokens() needs names made of letters, digits, _ and -, starting with a letter or _, got "${name}".`,
+      );
 
     if (values.light[name] === undefined)
       throw new Error(`tokens() has a dark "${name}" and no light one.`);

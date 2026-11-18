@@ -427,7 +427,7 @@ export const clipUrl = (defs: Defs, clip: Animated<Geometry>, shift: Vec, key: s
 
     if (drawn.kind !== "element" || drawn.tag === "g")
       throw new Error(
-        `The clip on "${key}" was drawn as more than one shape, which a <clipPath> can't hold.`,
+        `The clip on "${key}" moves in a way its outline can't carry on its own, which lowering never writes. This is a bug in svjeez; please report it with the scene.`,
       );
     // A clip path takes its outline only: no paint, and its own name for the fill rule.
     const { fill: _fill, "fill-rule": rule, ...attrs } = drawn.attrs;

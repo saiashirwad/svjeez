@@ -16,6 +16,7 @@ import type {
   Vec,
 } from "./ir";
 import { isLane } from "./lane";
+import { FontBook, charName } from "./runs";
 import { placed, reachOf } from "./reach";
 import { mixNumber, mixVec, same } from "./steps";
 import {
@@ -75,6 +76,10 @@ import { boxOf } from "./values";
  * | `wasted-motion`   | info                  | A value changes before the node is first seen, or after it is gone for good.   |
  * | `static`          | warning, info         | Nothing in the scene moves, or a value changes only after the scene ends.      |
  * | `unused-symbol`   | info                  | A symbol no instance draws.                                                    |
+ * | `layout-overlap`  | warning               | Two children of a `<Stack>` or `<Grid>` overlap: motion carried one onto another. |
+ * | `word-cut`        | warning               | A word wider than the width its text wraps to, cut across two lines.          |
+ * | `unattached-ref`  | warning               | A ref the scene made that no node takes.                                       |
+ * | `hidden-target`   | warning               | A timeline moves a node that is never visible.                                 |
  * | `unsupported`     | error                 | A feature the chosen backend can't draw.                                       |
  * | `approximate`     | warning               | A feature the chosen backend draws differently from the model.                |
  */
@@ -94,6 +99,10 @@ export const RULES = {
   "wasted-motion": "A value changes before the node is first seen, or after it is gone for good.",
   static: "Nothing in the scene moves, or a value changes only after the scene ends.",
   "unused-symbol": "A symbol no instance draws.",
+  "layout-overlap": "Two children of a <Stack> or <Grid> overlap: motion carried one onto another.",
+  "word-cut": "A word wider than the width its text wraps to, cut across two lines.",
+  "unattached-ref": "A ref the scene made that no node takes.",
+  "hidden-target": "A timeline moves a node that is never visible.",
   unsupported: "A feature the chosen backend can't draw.",
   approximate: "A feature the chosen backend draws differently from the model.",
 } as const;
@@ -740,28 +749,14 @@ const missingGlyphs = (survey: Survey): void => {
         family.faces.find((f) => f.weight === run.face.weight && f.style === run.face.style) ??
         family.face(run.face.weight, run.face.style);
 
-      for (const char of run.text) {
-        if (/\s/.test(char)) continue;
-
-        const has = ((): boolean => {
-          try {
-            return face.has(char);
-          } catch {
-            return true;
-          }
-        })();
-
-        if (has) continue;
+      for (const char of FontBook.missing(face, run.text)) {
         const name = `${run.face.family} ${run.face.weight}${run.face.style === "italic" ? " italic" : ""}`;
         missing.set(name, (missing.get(name) ?? new Set()).add(char));
       }
     }
 
     for (const [face, chars] of missing) {
-      const shown = [...chars].map(
-        (char) =>
-          `"${char}" (U+${char.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")})`,
-      );
+      const shown = [...chars].map(charName);
 
       add(survey, {
         code: "missing-glyph",
@@ -1536,6 +1531,138 @@ const folded = (findings: readonly Finding[]): Finding[] => {
 
 const RANK: Readonly<Record<Severity, number>> = { error: 0, warning: 1, info: 2 };
 
+// ---------------------------------------------------------------------------------------------------------------
+// layout-overlap, word-cut, unattached-ref, hidden-target: what the model keeps of how the scene was written
+
+const CONTAINERS = { stack: "<Stack>", grid: "<Grid>" } as const;
+
+/** How far two boxes overlap across and down, or undefined when they only touch or are apart. */
+const overlapOf = (a: Box, b: Box): Vec | undefined => {
+  const across = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x);
+  const down = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
+
+  return across > 0.5 && down > 0.5 ? [across, down] : undefined;
+};
+
+/** Where an entry's box is at each time it shows, by time. */
+const boxesShown = (survey: Survey, entry: Entry): ReadonlyMap<Seconds, Box> =>
+  new Map(
+    survey.times.flatMap((t, i): [Seconds, Box][] => {
+      const at = survey.frames[i]!.get(entry.node.key);
+
+      return at && at.opacity > VISIBLE && !inside(survey.hidden.get(entry.node.key) ?? [], t)
+        ? [[t, at.box]]
+        : [];
+    }),
+  );
+
+/** A stack or a grid places its children apart; one that ends up over another was carried there by motion. */
+const layoutOverlap = (survey: Survey): void => {
+  for (const entry of survey.entries) {
+    const { node } = entry;
+    const container = node.authored?.layout?.container;
+
+    if (node.kind !== "group" || container === undefined || container === "align") continue;
+
+    if (isGone(survey, entry)) continue;
+
+    const children = survey.entries
+      .filter((each) => each.ancestors.at(-1) === node && !isGone(survey, each))
+      .map((each) => ({ entry: each, boxes: boxesShown(survey, each) }));
+
+    children.forEach((a, i) => {
+      for (const b of children.slice(i + 1)) {
+        let most: Vec = [0, 0];
+
+        const times = survey.times.filter((t) => {
+          const [x, y] = [a.boxes.get(t), b.boxes.get(t)];
+          const by = x && y ? overlapOf(x, y) : undefined;
+
+          if (by && by[0] * by[1] > most[0] * most[1]) most = by;
+
+          return by !== undefined;
+        });
+
+        if (times.length === 0) continue;
+        add(survey, {
+          code: "layout-overlap",
+          severity: "warning",
+          key: a.entry.node.key,
+          message: `${label(a.entry.node)} and ${label(b.entry.node)} overlap by up to ${units(most[0])} by ${units(most[1])} in the ${CONTAINERS[container]} "${node.key}", at ${list(times)}. It placed them apart; a motion, rotate or scale carried one over the other.`,
+          hint: `Give the ${CONTAINERS[container]} a larger gap, or move, turn or grow the child less.`,
+          times,
+          related: [b.entry.node.key],
+        });
+      }
+    });
+  }
+};
+
+/** The text of one laid-out line. */
+const lineText = (node: TextNode, index: number): string =>
+  node.lines[index]?.runs.map((run) => run.text).join("") ?? "";
+
+/** A word cut in two by a line break reads as two words: report each place the width did that. */
+const wordCuts = (survey: Survey): void => {
+  for (const entry of survey.entries) {
+    const { node } = entry;
+
+    if (node.kind !== "text" || isGone(survey, entry)) continue;
+    const wrap = node.authored?.wrap;
+
+    if (!wrap || wrap.cuts.length === 0) continue;
+
+    const words = wrap.cuts.map(
+      (index) =>
+        `"${lineText(node, index).split(/\s+/).at(-1)}|${lineText(node, index + 1).split(/\s+/)[0]}"`,
+    );
+
+    add(survey, {
+      code: "word-cut",
+      severity: "warning",
+      key: node.key,
+      message: `${label(node)} ("${short(textOf(node))}") wraps to ${units(wrap.width)} wide, and a word wider than that is cut across lines where | marks: ${words.join(", ")}.`,
+      hint: "Give it a wider width to wrap to, a smaller size, or a shorter word.",
+    });
+  }
+};
+
+/** A ref no node takes points at nothing: most often a node that was meant to have `ref={…}` and doesn't. */
+const unattachedRefs = (survey: Survey): void => {
+  const { root, authored } = survey.scene;
+
+  for (const { key, attached } of authored?.refs ?? []) {
+    if (attached) continue;
+    add(survey, {
+      code: "unattached-ref",
+      severity: "warning",
+      key: root.key,
+      message: `ref "${key}" is made, but no node takes it as ref={…}, so it points at nothing.`,
+      hint: "Give the node it is for ref={…}, or remove the ref.",
+    });
+  }
+};
+
+/** A move on a node no one ever sees is work the scene does for nothing, or a sign the wrong node is moved. */
+const hiddenTargets = (survey: Survey): void => {
+  const byKey = new Map(survey.entries.map((entry) => [entry.node.key, entry]));
+  const said = new Set<string>();
+
+  for (const { verb, key } of survey.scene.authored?.actions ?? []) {
+    const entry = byKey.get(key);
+
+    if (!entry || !isGone(survey, entry) || said.has(`${verb}\u0000${key}`)) continue;
+    said.add(`${verb}\u0000${key}`);
+    add(survey, {
+      code: "hidden-target",
+      severity: "warning",
+      key,
+      message: `${verb} moves "${key}", which is never visible, so no one sees the move.`,
+      hint: "Show the node at some time, or move the node that is seen.",
+    });
+  }
+};
+
 /**
  * What is wrong with `scene`, read from the model alone: no browser, the same findings every time, errors first. Each
  * finding names a node by its key and where it was written, says what is wrong in the scene's terms, and what to
@@ -1565,6 +1692,10 @@ export const inspect = (scene: Scene, options: InspectOptions = {}): Finding[] =
   loopSeam(survey);
   timing(survey);
   unusedSymbols(survey);
+  layoutOverlap(survey);
+  wordCuts(survey);
+  unattachedRefs(survey);
+  hiddenTargets(survey);
   capabilities(survey, options.backend);
 
   const order = new Map(entries.map((entry) => [entry.node.key, entry.order]));

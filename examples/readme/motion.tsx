@@ -12,7 +12,7 @@ export default scene(
     title: "Motion",
     desc: "A square fades in, holds, then shrinks away and cuts back to full size.",
     theme,
-    reducedMotion: { at: 2 },
+    reducedMotion: 2,
   },
   () => (
     <Group>

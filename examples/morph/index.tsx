@@ -9,8 +9,8 @@ import {
   rect,
   scene,
   span,
+  type Paint,
   type SceneElement,
-  type Token,
 } from "svjeez/scene";
 import { mono, theme } from "../theme";
 
@@ -20,7 +20,7 @@ interface Quarter {
   readonly bars: readonly {
     readonly region: string;
     readonly value: number;
-    readonly color: Token;
+    readonly color: Paint;
   }[];
   readonly change: string;
 }
@@ -145,7 +145,7 @@ export default scene(
     title: "Morph",
     desc: "A bar chart moves through three quarters and back: bars grow, shrink, recolor and trade places, a new region enters, one leaves, the badge turns from a dot into a label, and the heading crossfades.",
     theme,
-    reducedMotion: { at: STEP * 2 - 0.2 },
+    reducedMotion: STEP * 2 - 0.2,
   },
   () => (
     <Group>

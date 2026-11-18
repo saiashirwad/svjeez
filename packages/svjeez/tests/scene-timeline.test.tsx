@@ -7,7 +7,6 @@ import {
   Stack,
   circle,
   ease,
-  isLane,
   par,
   rect,
   ref,
@@ -19,9 +18,9 @@ import {
   track,
   wait,
   type Action,
-  type Model,
   type SceneElement,
 } from "svjeez/scene";
+import { isLane, type Model } from "svjeez/scene/tools";
 import { blendNumber, blendVec, valueAt } from "../src/scene/sample";
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
@@ -55,10 +54,19 @@ describe("verbs", () => {
       timeline(
         dot.move([50, 20], 1, ease.linear),
         dot.moveBy([10, 0], 0.5, ease.linear),
-        par(dot.rotate(90, 1), dot.scale(2, 1), dot.fade(0.5, 1)),
+        par(dot.rotate(90, 1), dot.scale(2, 1), dot.to({ opacity: 0.5 }, 1)),
       );
 
-      return <Shape ref={dot} geometry={circle(4)} anchor="center" at={[10, 20]} rotate={15} />;
+      return (
+        <Shape
+          fill="#000000"
+          ref={dot}
+          geometry={circle(4)}
+          anchor="center"
+          at={[10, 20]}
+          rotate={15}
+        />
+      );
     });
 
     const dot = find(model, "dot");
@@ -86,8 +94,8 @@ describe("verbs", () => {
       timeline(
         box.show(0.5),
         box.fill("#ff0000", 0.5),
-        box.stroke("#00ff00", 0.5),
-        box.trim([0, 0.5], 0.5),
+        box.stroke({ color: "#00ff00" }, 0.5),
+        box.to({ trim: [0, 0.5] }, 0.5),
         box.hide(0.5),
       );
 
@@ -147,7 +155,7 @@ describe("verbs", () => {
         dot.set({ at: [0, 0] }),
       );
 
-      return <Shape ref={dot} geometry={circle(4)} anchor="center" />;
+      return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
     });
 
     const dot = find(model, "dot");
@@ -164,7 +172,7 @@ describe("verbs", () => {
 
       timeline(par(dot.move([40, 0], 1), dot.rotate(90, 1)), dot.rewind(0.5, ease.linear));
 
-      return <Shape ref={dot} geometry={circle(4)} anchor="center" />;
+      return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
     });
 
     const dot = find(model, "dot");
@@ -187,20 +195,20 @@ describe("verbs", () => {
 
       timeline(
         par(
-          a.moveTo(target, 1),
-          b.moveTo(target.part("pin").topLeft, 1, ease.out, { point: "center" }),
+          a.move(target, 1),
+          b.move(target.part("pin").topLeft, 1, ease.out, { point: "center" }),
         ),
       );
 
       return (
         <Group>
           <Group ref={target} at={[100, 50]}>
-            <Shape geometry={rect(20, 10)} />
-            <Shape key="pin" geometry={rect(4, 4)} at={[30, 30]} />
+            <Shape fill="#000000" geometry={rect(20, 10)} />
+            <Shape fill="#000000" key="pin" geometry={rect(4, 4)} at={[30, 30]} />
           </Group>
-          <Shape ref={a} geometry={circle(2)} anchor="center" />
+          <Shape fill="#000000" ref={a} geometry={circle(2)} anchor="center" />
           <Group at={[10, 10]}>
-            <Shape ref={b} geometry={rect(6, 6)} />
+            <Shape fill="#000000" ref={b} geometry={rect(6, 6)} />
           </Group>
         </Group>
       );
@@ -215,12 +223,12 @@ describe("verbs", () => {
       const card = ref("card");
       const dot = ref("dot");
 
-      timeline(par(card.move([100, 0], 2, ease.linear), dot.moveTo(card.right, 1, ease.linear)));
+      timeline(par(card.move([100, 0], 2, ease.linear), dot.move(card.right, 1, ease.linear)));
 
       return (
         <Group>
-          <Shape ref={card} geometry={rect(20, 10)} />
-          <Shape ref={dot} geometry={circle(2)} anchor="center" />
+          <Shape fill="#000000" ref={card} geometry={rect(20, 10)} />
+          <Shape fill="#000000" ref={dot} geometry={circle(2)} anchor="center" />
         </Group>
       );
     });
@@ -239,7 +247,7 @@ describe("combinators", () => {
 
       timeline(build(dot));
 
-      return <Shape ref={dot} geometry={circle(4)} anchor="center" />;
+      return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
     }, 10);
 
     return times(find(model, "dot").at).map(([t]) => t);
@@ -265,7 +273,7 @@ describe("combinators", () => {
       return (
         <Group>
           {dots.map((dot) => (
-            <Shape ref={dot} geometry={circle(2)} anchor="center" opacity={0} />
+            <Shape fill="#000000" ref={dot} geometry={circle(2)} anchor="center" opacity={0} />
           ))}
         </Group>
       );
@@ -275,7 +283,11 @@ describe("combinators", () => {
       times(own(find(model, key)).opacity).find(([, value]) => value === 1)![0];
 
     expect(["a", "b", "c"].map(lit)).toEqual([1, 1.25, 1.5]);
-    expect(stagger(span(0, 1), 3, 0.5).map((each) => each.at)).toEqual([0, 0.5, 1]);
+    expect(
+      span(0, 1)
+        .cascade(3, 0.5)
+        .map((each) => each.start),
+    ).toEqual([0, 0.5, 1]);
   });
 
   test("labels read spans back on the timeline's clock, and end is when the last action ends", () => {
@@ -289,10 +301,10 @@ describe("combinators", () => {
         seq(wait(0.2), dot.move([2, 0], 1).as("grab")).as("tail"),
       );
 
-      return <Shape ref={dot} geometry={circle(4)} anchor="center" />;
+      return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
     });
 
-    expect(read!.span("grab").at).toBeCloseTo(0.7);
+    expect(read!.span("grab").start).toBeCloseTo(0.7);
     expect(read!.span("grab").over).toBe(1);
     expect(read!.span("tail").end).toBeCloseTo(1.7);
     expect(read!.end).toBeCloseTo(1.7);
@@ -308,7 +320,7 @@ describe("combinators", () => {
         node: (
           <Shape ref={bulb} geometry={circle(4)} anchor="center" fill="#000000" opacity={0.2} />
         ),
-        blink: (): Action => seq(bulb.show(0.1), wait(0.3), bulb.fade(0.2, 0.1)),
+        blink: (): Action => seq(bulb.show(0.1), wait(0.3), bulb.to({ opacity: 0.2 }, 0.1)),
       };
     };
 
@@ -342,15 +354,16 @@ describe("tracks", () => {
           card.move([80, 40], 1, ease.inOut),
           card.rotate(30, 1, ease.spring({ stiffness: 300, damping: 30 })),
         ),
-        card.fade(0.4, 0.5),
+        card.to({ opacity: 0.4 }, 0.5),
         card.rewind(1, ease.linear),
       );
 
-      return <Shape ref={card} geometry={rect(20, 10)} at={[10, 10]} />;
+      return <Shape fill="#000000" ref={card} geometry={rect(20, 10)} at={[10, 10]} />;
     });
 
     const byHand = made(() => (
       <Shape
+        fill="#000000"
         key="card"
         geometry={rect(20, 10)}
         at={track([10, 10]).to([80, 40], span(0.25, 1), ease.inOut).rewind(1, ease.linear)}
@@ -371,7 +384,7 @@ describe("tracks", () => {
 
       timeline(par(dot.move([100, 0], 2, spring), seq(wait(0.3), dot.move([0, 50], 2, spring))));
 
-      return <Shape ref={dot} geometry={circle(4)} anchor="center" />;
+      return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
     });
 
     expect(valueAt(find(model, "dot").at, 4, blendVec)).toEqual([0, 50]);
@@ -384,7 +397,7 @@ describe("tracks", () => {
 
         timeline(par(dot.move([1, 0], 1), seq(wait(0.5), dot.moveBy([1, 1], 1))));
 
-        return <Shape ref={dot} geometry={circle(4)} anchor="center" />;
+        return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
       }),
     ).toThrow('dot.move() and dot.moveBy() both move at on "dot" between 0.5s and 1s');
   });
@@ -394,10 +407,11 @@ describe("tracks", () => {
       made(() => {
         const dot = ref("dot");
 
-        timeline(dot.fade(0, 1));
+        timeline(dot.to({ opacity: 0 }, 1));
 
         return (
           <Shape
+            fill="#000000"
             ref={dot}
             geometry={circle(4)}
             anchor="center"
@@ -405,7 +419,7 @@ describe("tracks", () => {
           />
         );
       }),
-    ).toThrow('dot.fade() moves opacity on "dot", which a track already moves');
+    ).toThrow('dot.to() moves opacity on "dot", which a track already moves');
   });
 
   test("a rewind that runs into the actions throws as a track's does", () => {
@@ -415,7 +429,7 @@ describe("tracks", () => {
 
         timeline(dot.move([1, 0], 3.5), dot.rewind(1));
 
-        return <Shape ref={dot} geometry={circle(4)} anchor="center" />;
+        return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
       }),
     ).toThrow('rewind(1) on at on "dot" needs the last 1s');
   });
@@ -437,9 +451,9 @@ describe("errors", () => {
     throws(() => {
       const s = ref("s");
 
-      timeline(s.stroke("#ffffff", 1));
+      timeline(s.stroke({ color: "#ffffff" }, 1));
 
-      return <Shape ref={s} geometry={circle(2)} anchor="center" />;
+      return <Shape fill="#000000" ref={s} geometry={circle(2)} anchor="center" />;
     }, 'changes the stroke of "s", which has none');
   });
 
@@ -447,7 +461,7 @@ describe("errors", () => {
     throws(() => {
       timeline(ref("ghost").show(1));
 
-      return <Shape geometry={circle(2)} anchor="center" />;
+      return <Shape fill="#000000" geometry={circle(2)} anchor="center" />;
     }, 'ghost.show() moves the ref "ghost", which is on no node');
 
     throws(() => {
@@ -468,7 +482,7 @@ describe("errors", () => {
       return (
         <Group>
           <Stack>
-            <Shape ref={dot} geometry={circle(2)} anchor="center" />
+            <Shape fill="#000000" ref={dot} geometry={circle(2)} anchor="center" />
           </Stack>
         </Group>
       );
@@ -494,8 +508,8 @@ describe("clocks", () => {
       const steps = timeline(dot.move([10, 0], 1, ease.linear));
 
       return (
-        <Sequence at={1.5} timeline={steps}>
-          <Shape ref={dot} geometry={circle(2)} anchor="center" />
+        <Sequence start={1.5} timeline={steps}>
+          <Shape fill="#000000" ref={dot} geometry={circle(2)} anchor="center" />
         </Sequence>
       );
     });
@@ -516,12 +530,12 @@ describe("clocks", () => {
         timeline(dot.show(1));
 
         return (
-          <Sequence at={1}>
-            <Shape ref={dot} geometry={circle(2)} anchor="center" />
+          <Sequence start={1}>
+            <Shape fill="#000000" ref={dot} geometry={circle(2)} anchor="center" />
           </Sequence>
         );
       }),
-    ).toThrow("Give the timeline to that sequence: <Sequence at={…} timeline={…}>");
+    ).toThrow("Give the timeline to that sequence: <Sequence start={…} timeline={…}>");
 
     expect(() =>
       made(() => {
@@ -530,8 +544,8 @@ describe("clocks", () => {
 
         return (
           <Group>
-            <Shape ref={dot} geometry={circle(2)} anchor="center" />
-            <Sequence at={1} timeline={steps} />
+            <Shape fill="#000000" ref={dot} geometry={circle(2)} anchor="center" />
+            <Sequence start={1} timeline={steps} />
           </Group>
         );
       }),

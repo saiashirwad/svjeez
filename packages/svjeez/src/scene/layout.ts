@@ -106,6 +106,7 @@ export const Stack = ({
     props,
     children: flat(children),
     settle: { kind: "arrange", label: "<Stack>", arrange },
+    layout: { container: "stack", direction, gap: row ? [space, 0] : [0, space] },
   };
 };
 
@@ -173,6 +174,7 @@ export const Grid = ({
     props,
     children: flat(children),
     settle: { kind: "arrange", label: "<Grid>", arrange },
+    layout: { container: "grid", gap: [gx, gy] },
   };
 };
 
@@ -232,5 +234,6 @@ export const Align = ({
     props: { ...props, at },
     children: flat(children),
     settle: { kind: "arrange", label: "<Align>", arrange },
+    layout: { container: "align" },
   };
 };

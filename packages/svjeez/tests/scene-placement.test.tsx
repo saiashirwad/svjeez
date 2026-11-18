@@ -11,12 +11,8 @@ import {
   Stack,
   Text,
   arc,
-  boxesOf,
   circle,
   ease,
-  describe as described,
-  hitTest,
-  isLane,
   line,
   morph,
   path,
@@ -31,10 +27,16 @@ import {
   symbol,
   timeline,
   track,
-  type Model,
   type SceneElement,
-  type StrokeProps,
 } from "svjeez/scene";
+import {
+  boxesOf,
+  describe as described,
+  hitTest,
+  isLane,
+  type Model,
+  type StrokeProps,
+} from "svjeez/scene/tools";
 
 const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
 
@@ -56,13 +58,31 @@ describe("at places the anchor point of the box", () => {
   test("a shape's box goes top-left at at, whatever its geometry, and anchor names another point", () => {
     const found = boxes(() => (
       <Group>
-        <Shape key="rect" geometry={rect(20, 10)} at={[10, 10]} />
-        <Shape key="circle" geometry={circle(5)} at={[10, 10]} />
-        <Shape key="centered" geometry={circle(5)} at={[10, 10]} anchor="center" />
-        <Shape key="corner" geometry={rect(20, 10)} at={[100, 50]} anchor="bottom-right" />
-        <Shape key="share" geometry={rect(20, 10)} at={[100, 50]} anchor={[0.5, 1]} />
-        <Shape key="arc" geometry={arc({ radius: 8, sweep: 90 })} at={[40, 40]} anchor="center" />
-        <Shape key="none" geometry={circle(5)} />
+        <Shape fill="#000000" key="rect" geometry={rect(20, 10)} at={[10, 10]} />
+        <Shape fill="#000000" key="circle" geometry={circle(5)} at={[10, 10]} />
+        <Shape fill="#000000" key="centered" geometry={circle(5)} at={[10, 10]} anchor="center" />
+        <Shape
+          fill="#000000"
+          key="corner"
+          geometry={rect(20, 10)}
+          at={[100, 50]}
+          anchor="bottom-right"
+        />
+        <Shape
+          fill="#000000"
+          key="share"
+          geometry={rect(20, 10)}
+          at={[100, 50]}
+          anchor={[0.5, 1]}
+        />
+        <Shape
+          fill="#000000"
+          key="arc"
+          geometry={arc({ radius: 8, sweep: 90 })}
+          at={[40, 40]}
+          anchor="center"
+        />
+        <Shape fill="#000000" key="none" geometry={circle(5)} />
       </Group>
     ));
 
@@ -82,11 +102,18 @@ describe("at places the anchor point of the box", () => {
 
     const found = boxes(() => (
       <Group>
-        <Shape key="kept" geometry={curve} />
-        <Shape key="placed" geometry={curve} at={[0, 0]} />
-        <Shape key="line" geometry={line([10, 50], [90, 50])} />
-        <Shape key="moved" geometry={line([10, 50], [90, 50])} at={[0, 0]} anchor="left" />
+        <Shape fill="#000000" key="kept" geometry={curve} />
+        <Shape fill="#000000" key="placed" geometry={curve} at={[0, 0]} />
+        <Shape fill="#000000" key="line" geometry={line([10, 50], [90, 50])} />
         <Shape
+          fill="#000000"
+          key="moved"
+          geometry={line([10, 50], [90, 50])}
+          at={[0, 0]}
+          anchor="left"
+        />
+        <Shape
+          fill="#000000"
           key="poly"
           geometry={polygon([
             [5, 5],
@@ -148,7 +175,7 @@ describe("at places the anchor point of the box", () => {
   });
 
   test("an image is placed by its box, an instance and a group by their frames unless they have an anchor", () => {
-    const dot = symbol("dot", () => <Shape geometry={rect(10, 10)} at={[5, 5]} fill="#FF0000" />);
+    const dot = symbol(() => <Shape geometry={rect(10, 10)} at={[5, 5]} fill="#FF0000" />);
 
     const found = boxes(() => (
       <Group>
@@ -156,12 +183,12 @@ describe("at places the anchor point of the box", () => {
         <Instance key="frame" of={dot} at={[50, 50]} />
         <Instance key="centered" of={dot} at={[50, 50]} anchor="center" />
         <Group key="group" at={[20, 30]}>
-          <Shape key="a" geometry={rect(10, 10)} />
-          <Shape key="b" geometry={rect(10, 10)} at={[30, 10]} />
+          <Shape fill="#000000" key="a" geometry={rect(10, 10)} />
+          <Shape fill="#000000" key="b" geometry={rect(10, 10)} at={[30, 10]} />
         </Group>
         <Group key="middle" at={[100, 50]} anchor="center">
-          <Shape key="a" geometry={rect(10, 10)} at={[5, 5]} />
-          <Shape key="b" geometry={rect(10, 10)} at={[35, 15]} />
+          <Shape fill="#000000" key="a" geometry={rect(10, 10)} at={[5, 5]} />
+          <Shape fill="#000000" key="b" geometry={rect(10, 10)} at={[35, 15]} />
         </Group>
       </Group>
     ));
@@ -178,8 +205,8 @@ describe("at places the anchor point of the box", () => {
   test("a layout container is placed by its box like any group, and its anchor reads the box it lays out", () => {
     const found = boxes(() => (
       <Stack key="row" direction="row" gap={4} at={[100, 50]} anchor="center">
-        <Shape geometry={rect(10, 10)} />
-        <Shape geometry={rect(10, 20)} />
+        <Shape fill="#000000" geometry={rect(10, 10)} />
+        <Shape fill="#000000" geometry={rect(10, 20)} />
       </Stack>
     ));
 
@@ -189,6 +216,7 @@ describe("at places the anchor point of the box", () => {
   test("a moving at moves the anchor point", () => {
     const model = made(() => (
       <Shape
+        fill="#000000"
         key="dot"
         geometry={circle(5)}
         anchor="center"
@@ -206,6 +234,7 @@ describe("at places the anchor point of the box", () => {
     const found = boxes(
       () => (
         <Shape
+          fill="#000000"
           key="box"
           geometry={rect(10, 10)}
           at={track<Model.Vec>([20, 20]).to([120, 60], span(0, 2))}
@@ -227,6 +256,7 @@ describe("curved motion keeps its curve when the anchor point is not the frame's
     const model = made(() => (
       <Group>
         <Shape
+          fill="#000000"
           ref={dot}
           geometry={rect(6, 6)}
           anchor="center"
@@ -235,7 +265,7 @@ describe("curved motion keeps its curve when the anchor point is not the frame's
             50 + 40 * Math.sin((a * Math.PI) / 180),
           ])}
         />
-        <Shape key="tag" geometry={rect(10, 4)} anchor="center" at={dot.center} />
+        <Shape fill="#000000" key="tag" geometry={rect(10, 4)} anchor="center" at={dot.center} />
       </Group>
     ));
 
@@ -346,7 +376,7 @@ describe("a box is what the shape paints", () => {
           at={[10, 10]}
           stroke={{ color: "#000000", width: 6 }}
         />
-        <Shape key="tag" geometry={rect(4, 4)} at={card.right} anchor="left" />
+        <Shape fill="#000000" key="tag" geometry={rect(4, 4)} at={card.right} anchor="left" />
       </Group>
     ));
 
@@ -357,7 +387,7 @@ describe("a box is what the shape paints", () => {
 });
 
 describe("timelines move the anchor point", () => {
-  test("move takes the point at names to the point given; moveTo lands it, or a point measured from it", () => {
+  test("move takes the point at names to the point given; move to an anchor lands it, or a point measured from it", () => {
     const dot = ref("dot");
     const pin = ref("pin");
 
@@ -365,15 +395,15 @@ describe("timelines move the anchor point", () => {
       timeline(
         seq(
           dot.move([100, 50], 1),
-          dot.moveTo(pin, 1),
-          dot.moveTo(pin, 1, undefined, { point: [5, 0] }),
+          dot.move(pin, 1),
+          dot.move(pin, 1, undefined, { point: [5, 0] }),
         ),
       );
 
       return (
         <Group>
-          <Shape ref={pin} geometry={rect(20, 20)} at={[150, 10]} />
-          <Shape ref={dot} geometry={circle(5)} at={[20, 20]} anchor="center" />
+          <Shape fill="#000000" ref={pin} geometry={rect(20, 20)} at={[150, 10]} />
+          <Shape fill="#000000" ref={dot} geometry={circle(5)} at={[20, 20]} anchor="center" />
         </Group>
       );
     });
@@ -420,8 +450,8 @@ describe("morph and describe follow the rule", () => {
   test("a node whose anchor changes between states moves so each state's anchor point is where it says", () => {
     const model = made(() =>
       morph(
-        <Shape key="dot" geometry={rect(10, 10)} at={[50, 50]} />,
-        <Shape key="dot" geometry={rect(20, 20)} at={[50, 50]} anchor="center" />,
+        <Shape fill="#000000" key="dot" geometry={rect(10, 10)} at={[50, 50]} />,
+        <Shape fill="#000000" key="dot" geometry={rect(20, 20)} at={[50, 50]} anchor="center" />,
         span(0, 1),
       ),
     );
@@ -434,11 +464,11 @@ describe("morph and describe follow the rule", () => {
     const model = made(() =>
       morph(
         <Group key="g" at={[100, 50]} anchor="center">
-          <Shape key="a" geometry={rect(10, 10)} />
+          <Shape fill="#000000" key="a" geometry={rect(10, 10)} />
         </Group>,
         <Group key="g" at={[100, 50]} anchor="center">
-          <Shape key="a" geometry={rect(10, 10)} />
-          <Shape key="b" geometry={rect(10, 10)} at={[30, 0]} />
+          <Shape fill="#000000" key="a" geometry={rect(10, 10)} />
+          <Shape fill="#000000" key="b" geometry={rect(10, 10)} at={[30, 0]} />
         </Group>,
         span(0, 1),
       ),
@@ -476,13 +506,15 @@ describe("errors say what to write", () => {
   test("an unknown anchor, a baseline off text, and an anchor on an empty box", () => {
     expect(() =>
       // @ts-expect-error: "middle" is not a place.
-      made(() => <Shape key="s" geometry={rect(10, 10)} anchor="middle" />),
+      made(() => <Shape fill="#000000" key="s" geometry={rect(10, 10)} anchor="middle" />),
     ).toThrow(
       'anchor on "s" takes a place such as "top-left", "center" or "bottom-right", or two fractions of the box such as [0.5, 1], got "middle".',
     );
     expect(() =>
-      // @ts-expect-error: only text has a baseline.
-      made(() => <Shape key="s" geometry={rect(10, 10)} at={[0, 0]} anchor="baseline" />),
+      made(() => (
+        // @ts-expect-error: only text has a baseline.
+        <Shape fill="#000000" key="s" geometry={rect(10, 10)} at={[0, 0]} anchor="baseline" />
+      )),
     ).toThrow(
       'anchor="baseline" on "s" names a baseline, which only a <Text> has. Use a place on the box, such as "bottom".',
     );
@@ -507,7 +539,7 @@ describe("errors say what to write", () => {
     expect(() =>
       made(() => (
         <Stack key="col">
-          <Shape key="a" geometry={rect(10, 10)} anchor="center" />
+          <Shape fill="#000000" key="a" geometry={rect(10, 10)} anchor="center" />
         </Stack>
       )),
     ).toThrow('"col/a" has anchor="center", but the <Stack> it sits in lines up its box itself.');
@@ -515,23 +547,25 @@ describe("errors say what to write", () => {
       made(() => (
         // @ts-expect-error: Align places itself.
         <Align anchor="center">
-          <Shape geometry={rect(10, 10)} />
+          <Shape fill="#000000" geometry={rect(10, 10)} />
         </Align>
       )),
     ).toThrow("<Align> places itself against its to, so it takes no anchor.");
     expect(() =>
-      // @ts-expect-error: a connector is placed by its ends.
-      made(() => <Arrow from={[0, 0]} to={[10, 10]} color="#000000" anchor="center" />),
+      made(() => (
+        // @ts-expect-error: a connector is placed by its ends.
+        <Arrow from={[0, 0]} to={[10, 10]} stroke={{ color: "#000000" }} anchor="center" />
+      )),
     ).toThrow("<Arrow> is placed by its from and to, so it takes no anchor.");
   });
 });
 
 describe("symbols", () => {
   test("a layout container inside a symbol is laid out, and a group's anchor applies there", () => {
-    const row = symbol("row", () => (
+    const row = symbol(() => (
       <Stack direction="row" gap={2} at={[0, 0]} anchor="center">
-        <Shape geometry={rect(10, 10)} />
-        <Shape geometry={rect(10, 10)} />
+        <Shape fill="#000000" geometry={rect(10, 10)} />
+        <Shape fill="#000000" geometry={rect(10, 10)} />
       </Stack>
     ));
 

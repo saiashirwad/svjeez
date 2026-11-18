@@ -59,7 +59,7 @@ interface Note {
 }
 
 /**
- * A node whose `at` is written toward anchors, as a timeline's `moveTo` is: given how to read an anchor in the node's
+ * A node whose `at` is written toward anchors, as a timeline's `move` to an anchor is: given how to read an anchor in the node's
  * parent's frame, and the node once measured, its `at`.
  */
 export type Aim = (
@@ -159,7 +159,7 @@ interface Draft {
   at: Animated<Vec>;
   box: Box;
   origin: Vec;
-  /** Whether `at` names the frame's origin yet: a group's anchor waits for its box, and an anchor or a moveTo for the second pass. */
+  /** Whether `at` names the frame's origin yet: a group's anchor waits for its box, and an anchor or a move to one for the second pass. */
   homed: boolean;
   /** 0 not yet, 1 under way, 2 done: one under way that is asked for again is a loop. */
   placing: 0 | 1 | 2;
@@ -589,7 +589,7 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
 
       if (inside !== undefined)
         throw new Error(
-          `A ${asked.label} in a morph() state holds "${inside}", which is placed by an anchor, a timeline's moveTo or as a connector. A morph arranges each state on its own, before anchors are known: attach it outside the ${asked.label}, or outside the morph.`,
+          `A ${asked.label} in a morph() state holds "${inside}", which is placed by an anchor, a timeline's move to an anchor, or as an arrow's end. A morph arranges each state on its own, before anchors are known: attach it outside the ${asked.label}, or outside the morph.`,
         );
     }
 

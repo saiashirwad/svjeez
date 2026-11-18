@@ -7,10 +7,10 @@ import type { Vec } from "./ir";
  * is a step's curve, not an ease in the model: lowering writes it out as keys, so every backend only interpolates.
  */
 export interface SpringOptions {
-  /** How hard the spring pulls toward the target. Higher is faster. */
-  readonly stiffness: number;
-  /** How much each swing loses. Below critical damping it overshoots and bounces. */
-  readonly damping: number;
+  /** How hard the spring pulls toward the target. Higher is faster. Default 170. */
+  readonly stiffness?: number;
+  /** How much each swing loses. Below critical damping it overshoots and bounces. Default 26, just short of critical. */
+  readonly damping?: number;
   /** Default 1. Heavier is slower and bouncier. */
   readonly mass?: number;
 }
@@ -318,7 +318,7 @@ export class Spring {
   readonly zeta: number;
   #settle: Seconds | undefined;
 
-  constructor({ stiffness, damping, mass = 1 }: SpringOptions) {
+  constructor({ stiffness = 170, damping = 26, mass = 1 }: SpringOptions) {
     this.stiffness = finite(stiffness, "stiffness");
     this.damping = finite(damping, "damping");
     this.mass = finite(mass, "mass");
@@ -504,5 +504,5 @@ export const ease = {
    * A damped spring toward the step's value. The span is the window it has: it must settle inside it unless a later
    * step cuts in. `ease.spring(options).settle` is how long it needs from rest.
    */
-  spring: (options: SpringOptions): Spring => new Spring(options),
+  spring: (options: SpringOptions = {}): Spring => new Spring(options),
 } as const;

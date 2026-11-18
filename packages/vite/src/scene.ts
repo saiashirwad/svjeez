@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { gzipSync } from "node:zlib";
-import { isScene, svg as backend, type Scene } from "svjeez/scene";
+import { isScene, svg as backend, type Scene } from "svjeez/scene/tools";
 import { register, ROUTE } from "./assets.ts";
 import { poster, type PosterOptions, type Scheme } from "./posters.ts";
 

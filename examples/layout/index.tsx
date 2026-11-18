@@ -16,8 +16,7 @@ import {
   ref,
   scene,
   span,
-  stagger,
-  type Color,
+  type Paint,
   type Ref,
   type SceneElement,
   type Span,
@@ -34,7 +33,7 @@ const PAD = 14;
 interface CardProps {
   readonly handle: Ref;
   readonly title: string;
-  readonly dot: Color;
+  readonly dot: Paint;
   readonly when: Span;
   readonly children: string;
   readonly drift?: boolean;
@@ -45,7 +44,7 @@ const Card = ({ handle, title, dot, when, children, drift }: CardProps): SceneEl
   <Group
     ref={handle}
     motion={[
-      enter(when, { opacity: 0, offset: [0, 10] }),
+      enter(when, { from: { opacity: 0, offset: [0, 10] } }),
       drift &&
         motion()
           .to({ offset: [0, 56] }, span(3.2, 1.1), ease.inOut)
@@ -73,7 +72,7 @@ const Card = ({ handle, title, dot, when, children, drift }: CardProps): SceneEl
 );
 
 const [measure, place, follow] = [ref("measure"), ref("place"), ref("follow")];
-const [first, second, third] = stagger(span(0.3, 0.5), 3, 0.25);
+const [first, second, third] = span(0.3, 0.5).cascade(3, 0.25);
 
 export default scene(
   {
@@ -82,7 +81,7 @@ export default scene(
     title: "Layout",
     desc: "Three cards in a row, each with a title and wrapped text laid out inside it. Arrows join them by their edges, and when the last card drifts down and back, the arrow into it follows.",
     theme,
-    reducedMotion: { at: 2.4 },
+    reducedMotion: 2.4,
   },
   () => (
     <Group>
@@ -103,15 +102,15 @@ export default scene(
       <Arrow
         from={measure.right}
         to={place.left}
-        gap={5.25}
-        color={theme.blue}
+        inset={5.25}
+        stroke={{ color: theme.blue }}
         trim={draw(span(1.5, 0.5))}
       />
       <Arrow
         from={place.right}
         to={follow.left}
-        gap={5.25}
-        color={theme.blue}
+        inset={5.25}
+        stroke={{ color: theme.blue }}
         trim={draw(span(1.9, 0.5))}
       />
       <Align place="bottom" inset={22}>

@@ -1,10 +1,18 @@
 import { ease, type Seconds } from "../motion";
-import type { Span } from "../span";
+import type { Span } from "./span";
 import type { Vec } from "./ir";
 import type { Curve } from "./spring";
 import type { Geometry } from "./values";
 import { Passage } from "./steps";
-import { mappedTrack, type DeriveOptions, type Derived } from "./derived";
+import {
+  mappedTrack,
+  together,
+  type Derived,
+  type MapOptions,
+  type Source,
+  type Together,
+  type ValuesOf,
+} from "./derived";
 
 /**
  * One value over time, on the clock it sits in: the scene's, or a `<Sequence>`'s. Steps may be written in any order,
@@ -13,7 +21,7 @@ import { mappedTrack, type DeriveOptions, type Derived } from "./derived";
 export interface Track<T> {
   to(value: T, when: Span, curve?: Curve): Track<T>;
   /** A hard cut. It has no length, so it takes a time, not a span. */
-  set(value: T, at: Seconds): Track<T>;
+  set(value: T, time: Seconds): Track<T>;
   /** Repeat every `period` seconds, forever. The period is snapped so it divides the scene. */
   loop(period: Seconds): Track<T>;
   /** Play the passage so far again, a number of times or until a time. */
@@ -24,7 +32,9 @@ export interface Track<T> {
    * A track that is `fn` of this one at every moment: `theta.map((t) => -t * 2)`. Its source must be numbers or
    * points; the result may be any value a prop takes.
    */
-  map<U>(fn: (value: T) => U, options?: DeriveOptions): Derived<U>;
+  map<U>(fn: (value: T) => U, options?: MapOptions): Derived<U>;
+  /** This track read together with others, to `map` them into one: `x.with(y).map((x, y) => [x, y])`. */
+  with<const S extends readonly Source[]>(...others: S): Together<[T, ...ValuesOf<S>]>;
 }
 
 /** What every prop that can move takes: a still value, a track, or a track derived from others. */
@@ -37,8 +47,8 @@ export class ValueTrack<T> implements Track<T> {
     return new ValueTrack(this.passage.to({ value }, when, curve));
   }
 
-  set(value: T, at: Seconds): ValueTrack<T> {
-    return new ValueTrack(this.passage.set({ value }, at));
+  set(value: T, time: Seconds): ValueTrack<T> {
+    return new ValueTrack(this.passage.set({ value }, time));
   }
 
   loop(period: Seconds): ValueTrack<T> {
@@ -53,8 +63,13 @@ export class ValueTrack<T> implements Track<T> {
     return new ValueTrack(this.passage.rewind(over, curve));
   }
 
-  map<U>(fn: (value: T) => U, options: DeriveOptions = {}): Derived<U> {
+  map<U>(fn: (value: T) => U, options: MapOptions = {}): Derived<U> {
     return mappedTrack(this, fn, options);
+  }
+
+  with<const S extends readonly Source[]>(...others: S): Together<[T, ...ValuesOf<S>]> {
+    // SAFETY: a track of anything but numbers or points is refused when it is lowered, where its values are read.
+    return together([this as Track<number>, ...others]) as Together<[T, ...ValuesOf<S>]>;
   }
 }
 
@@ -91,14 +106,14 @@ export interface LayerValues {
  */
 export interface Motion {
   to(values: LayerValues, when: Span, curve?: Curve): Motion;
-  set(values: LayerValues, at: Seconds): Motion;
+  set(values: LayerValues, time: Seconds): Motion;
   loop(period: Seconds): Motion;
   repeat(times: number | { readonly until: Seconds }): Motion;
   rewind(over: Seconds, curve?: Curve): Motion;
 }
 
-/** What a node's `motion` takes: one layer, or several, the first outermost. Exported as `MotionStack`. */
-export type Stack = Motion | readonly (Motion | false | null | undefined)[];
+/** What a node's `motion` takes: one layer, or several, the first outermost. */
+export type Layers = Motion | readonly (Motion | false | null | undefined)[];
 
 export class LayerMotion implements Motion {
   constructor(readonly passage: Passage<LayerValues>) {}
@@ -107,8 +122,8 @@ export class LayerMotion implements Motion {
     return new LayerMotion(this.passage.to(values, when, curve));
   }
 
-  set(values: LayerValues, at: Seconds): LayerMotion {
-    return new LayerMotion(this.passage.set(values, at));
+  set(values: LayerValues, time: Seconds): LayerMotion {
+    return new LayerMotion(this.passage.set(values, time));
   }
 
   loop(period: Seconds): LayerMotion {
@@ -128,7 +143,7 @@ export class LayerMotion implements Motion {
 export const motion = (initial: LayerValues = {}): Motion =>
   new LayerMotion(new Passage({ initial, steps: [] }));
 
-export const layersOf = (stack: Stack | undefined): LayerMotion[] => {
+export const layersOf = (stack: Layers | undefined): LayerMotion[] => {
   const list: readonly (Motion | false | null | undefined)[] = Array.isArray(stack)
     ? stack
     : [stack];

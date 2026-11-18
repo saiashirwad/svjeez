@@ -9,16 +9,15 @@ import {
   circle,
   ease,
   par,
+  pathData,
   rect,
   ref,
   scene,
   seq,
-  svgPath,
   timeline,
   wait,
   type Action,
   type SceneElement,
-  type Seconds,
   type Vec,
 } from "svjeez/scene";
 import { mono, theme } from "../theme";
@@ -32,7 +31,10 @@ const outlined = (width: number, height: number, radius: number) => ({
   stroke: { color: theme.border, width: 1.5 },
 });
 
-/** A key that lights up while it is held: the node, and the verb that presses it. */
+/**
+ * A key that lights up while it is held: the node, and the verb that presses it. Lit, it is ringed in blue on a raised
+ * face, which its legend reads on in both schemes.
+ */
 const keycap = (label: string) => {
   const cap = ref("key");
   const lit = cap.part("lit");
@@ -41,37 +43,44 @@ const keycap = (label: string) => {
     node: (
       <Group ref={cap} at={[16, 184]}>
         <Shape {...outlined(48, 40, 9)} fill={theme.surface} />
-        <Shape key="lit" geometry={rect(48, 40, { radius: 9 })} fill={theme.blue} opacity={0} />
+        <Shape
+          key="lit"
+          geometry={rect(48, 40, { radius: 9 })}
+          at={[-1, -1]}
+          fill={theme.raised}
+          stroke={{ color: theme.blue, width: 2 }}
+          opacity={0}
+        />
         <Text font={mono} size={14} at={[24, 25]} anchor="baseline" fill={theme.text}>
           {label}
         </Text>
       </Group>
     ),
     /** Held for `hold` seconds, lit and unlit in the first and last 0.08. */
-    press: (hold: Seconds): Action => seq(lit.show(0.08), wait(hold - 0.16), lit.hide(0.08)),
+    press: (hold: number): Action => seq(lit.show(0.08), wait(hold - 0.16), lit.hide(0.08)),
   };
 };
 
 interface DesktopProps {
   readonly x: number;
-  readonly at: number;
+  readonly start: number;
   readonly from: Vec;
   readonly to: Vec;
 }
 
 /** One desktop: a cursor takes the window by its title bar and drags it while the key is held. */
-const Desktop = ({ x, at, from, to }: DesktopProps): SceneElement => {
+const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
   const win = ref("window");
   const cursor = ref("cursor");
   const grip = win.part("titlebar");
   const key = keycap("opt");
 
   const gesture = timeline(
-    cursor.moveTo(grip, 0.7, ease.inOut),
+    cursor.move(grip, 0.7, ease.inOut),
     wait(0.05),
     par(
       key.press(1.3),
-      seq(wait(0.15), par(win.move(to, 1, ease.inOut), cursor.moveTo(grip, 1, ease.inOut))),
+      seq(wait(0.15), par(win.move(to, 1, ease.inOut), cursor.move(grip, 1, ease.inOut))),
     ),
     wait(0.1),
     cursor.move(IDLE, 0.5, ease.inOut),
@@ -86,7 +95,7 @@ const Desktop = ({ x, at, from, to }: DesktopProps): SceneElement => {
         fill={theme.background}
         stroke={{ color: theme.raised, width: 1.5 }}
       />
-      <Sequence at={at} timeline={gesture}>
+      <Sequence start={start} timeline={gesture}>
         {key.node}
         <Group ref={win} at={from}>
           <Shape {...outlined(104, 72, 7)} fill={theme.surface} />
@@ -107,7 +116,7 @@ const Desktop = ({ x, at, from, to }: DesktopProps): SceneElement => {
         </Group>
         <Group ref={cursor} at={IDLE}>
           <Shape
-            geometry={svgPath("M0 0V16l4.2-3.8 3 6.8 2.8-1.2-3-6.6H12Z")}
+            geometry={pathData("M0 0V16l4.2-3.8 3 6.8 2.8-1.2-3-6.6H12Z")}
             fill={theme.text}
             stroke={{ color: theme.background, width: 1.2, join: "round" }}
           />
@@ -124,13 +133,13 @@ export default scene(
     title: "A clip",
     desc: "Two desktops play one gesture a few seconds apart: a cursor takes a window by its title bar and drags it while a key is held, then the window goes back.",
     theme,
-    reducedMotion: { at: 2 },
+    reducedMotion: 2,
   },
   () => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
-      <Desktop x={20} at={1} from={[28, 36]} to={[150, 110]} />
-      <Desktop x={330} at={4.4} from={[28, 96]} to={[150, 36]} />
+      <Desktop x={20} start={1} from={[28, 36]} to={[150, 110]} />
+      <Desktop x={330} start={4.4} from={[28, 96]} to={[150, 36]} />
     </Group>
   ),
 );

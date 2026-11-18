@@ -15,6 +15,7 @@
       "svjeez": ["./src/index.ts"],
       "svjeez/jsx-runtime": ["./src/jsx-runtime.ts"],
       "svjeez/scene": ["./src/scene/index.ts"],
+      "svjeez/scene/tools": ["./src/scene/tools.ts"],
       "svjeez/scene/jsx-dev-runtime": ["./src/scene/jsx-dev-runtime.ts"],
       "svjeez/scene/jsx-runtime": ["./src/scene/jsx-runtime.ts"],
       "svjeez/jsx-dev-runtime": ["./src/jsx-dev-runtime.ts"],

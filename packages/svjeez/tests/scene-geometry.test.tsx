@@ -8,27 +8,23 @@ import {
   Shape,
   arc,
   circle,
-  diagnose,
   ease,
   ellipse,
-  isLane,
   line,
+  pathData,
   picture,
   polygon,
   rect,
   sampled,
   scene,
   shake,
-  show,
   span,
-  svg,
-  svgPath,
   symbol,
   track,
-  type Model,
   type SceneElement,
   type Vec,
 } from "svjeez/scene";
+import { diagnose, isLane, svg, type Model } from "svjeez/scene/tools";
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Test" }, build);
@@ -85,7 +81,10 @@ const ends = (d: string): [number, number] => {
 describe("animated geometry", () => {
   test("keys of one parametric kind stay that kind, and the box and origin are the first key's", () => {
     const model = made(() => (
-      <Shape geometry={track(rect(10, 10)).to(rect(40, 20, { radius: 4 }), span(0, 1))} />
+      <Shape
+        fill="#000000"
+        geometry={track(rect(10, 10)).to(rect(40, 20, { radius: 4 }), span(0, 1))}
+      />
     ));
 
     const lane = geometryLane(model);
@@ -100,9 +99,10 @@ describe("animated geometry", () => {
     const lane = geometryLane(
       made(() => (
         <Shape
+          fill="#000000"
           geometry={track(rect(20, 20))
             .to(ellipse(10, 6), span(0, 1))
-            .to(svgPath("M0 0L10 0L5 8Z M20 0L30 0L25 8Z"), span(1, 1))}
+            .to(pathData("M0 0L10 0L5 8Z M20 0L30 0L25 8Z"), span(1, 1))}
         />
       )),
     );
@@ -123,6 +123,7 @@ describe("animated geometry", () => {
     const same = geometryLane(
       made(() => (
         <Shape
+          fill="#000000"
           geometry={track(tri).to(
             polygon([
               [0, 0],
@@ -138,6 +139,7 @@ describe("animated geometry", () => {
     const other = geometryLane(
       made(() => (
         <Shape
+          fill="#000000"
           geometry={track(tri).to(
             polygon([
               [0, 0],
@@ -157,7 +159,12 @@ describe("animated geometry", () => {
 
   test("a contour closed in one key and open in another is open in all", () => {
     const lane = geometryLane(
-      made(() => <Shape geometry={track(rect(20, 20)).to(line([0, 0], [20, 20]), span(0, 1))} />),
+      made(() => (
+        <Shape
+          fill="#000000"
+          geometry={track(rect(20, 20)).to(line([0, 0], [20, 20]), span(0, 1))}
+        />
+      )),
     );
 
     expect(
@@ -185,7 +192,9 @@ describe("animated geometry", () => {
     };
 
     expect(() =>
-      made(() => <Shape geometry={track(svgPath("M0 0L2 0L2 2Z")).to(evenodd, span(0, 1))} />),
+      made(() => (
+        <Shape fill="#000000" geometry={track(pathData("M0 0L2 0L2 2Z")).to(evenodd, span(0, 1))} />
+      )),
     ).toThrow("morphs between a nonzero and an evenodd path");
   });
 
@@ -193,6 +202,7 @@ describe("animated geometry", () => {
     const lane = geometryLane(
       made(() => (
         <Shape
+          fill="#000000"
           geometry={track(arc({ radius: 10, sweep: 0 }))
             .to(arc({ radius: 10, sweep: 200 }), span(0, 2), ease.linear)
             .repeat({ until: 3 })}
@@ -212,8 +222,9 @@ describe("animated geometry", () => {
   test("a looped morph inside a sequence is rotated with a real geometry at the seam", () => {
     const lane = geometryLane(
       made(() => (
-        <Sequence at={0.5}>
+        <Sequence start={0.5}>
           <Shape
+            fill="#000000"
             geometry={track(rect(10, 10))
               .to(rect(30, 10), span(0, 1), ease.linear)
               .to(rect(10, 10), span(1, 1), ease.linear)
@@ -523,7 +534,7 @@ describe("strokes, scales and trims", () => {
 
   test("an opacity cut over a moving trim writes opacity, so the trim's own visibility can't show through", () => {
     const style = css(() => (
-      <Group opacity={show(span(1, 2), { fade: 0 })}>
+      <Group opacity={track(0).set(1, 1).set(0, 3)}>
         <Shape
           geometry={circle(10)}
           anchor="center"
@@ -535,6 +546,81 @@ describe("strokes, scales and trims", () => {
 
     expect(style).toContain("opacity:0");
     expect(style).not.toContain("visibility:hidden;}");
+  });
+});
+
+describe("a dash under a trim", () => {
+  test("a still trim keeps the dashes inside it, each cut at its ends, as one dash array", () => {
+    const out = body(() => (
+      <Shape
+        geometry={line([0, 0], [100, 0])}
+        stroke={{ color: "#000000", width: 2, dash: [10, 5] }}
+        trim={[0.12, 0.5]}
+      />
+    ));
+
+    expect(out).toContain('stroke-dasharray="10 5 10 5 5 101" stroke-dashoffset="-15"');
+    expect(out).not.toContain("pathLength");
+  });
+
+  test("a dash of no length is a dot where it lies, and a trim that keeps no dash draws no stroke", () => {
+    expect(
+      body(() => (
+        <Shape
+          geometry={line([0, 0], [100, 0])}
+          stroke={{ color: "#000000", cap: "round", dash: [0, 10] }}
+          trim={[0.15, 0.4]}
+        />
+      )),
+    ).toContain('stroke-dasharray="0 10 0 10 0 101" stroke-dashoffset="-20"');
+    expect(
+      body(() => (
+        <Shape
+          geometry={line([0, 0], [100, 0])}
+          fill="#00FF00"
+          stroke={{ color: "#000000", dash: [10, 20] }}
+          trim={[0.11, 0.29]}
+        />
+      )),
+    ).not.toContain("stroke=");
+  });
+
+  test("a moving trim masks the dashed stroke with the trimmed one, and leaves the fill whole", () => {
+    const model = made(() => (
+      <Shape
+        key="ring"
+        geometry={circle(10)}
+        at={[50, 50]}
+        fill="#00FF00"
+        stroke={{ color: "#000000", width: 2, dash: [4, 2], cap: "round" }}
+        trim={track<Vec>([0, 0]).to([0, 1], span(0, 2))}
+      />
+    ));
+
+    const out = svg.emit(model);
+
+    expect(out).toMatch(
+      /<mask id="m\d*"[^>]*>\s*<circle r="10" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/,
+    );
+    expect(out).toMatch(/<circle r="10" fill="#00FF00"\/>/);
+    expect(out).toMatch(
+      /<circle r="10" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 2" mask="url\(#m\d*\)"/,
+    );
+    expect(diagnose(model, svg)).toEqual([
+      expect.objectContaining({ feature: "movingDashedTrim", key: "ring", severity: "warning" }),
+    ]);
+  });
+
+  test("with butt caps a moving trim over a dash is exact", () => {
+    const model = made(() => (
+      <Shape
+        geometry={circle(10)}
+        stroke={{ color: "#000000", dash: [4, 2] }}
+        trim={track<Vec>([0, 0]).to([0, 1], span(0, 2))}
+      />
+    ));
+
+    expect(diagnose(model, svg)).toEqual([]);
   });
 });
 
@@ -556,11 +642,11 @@ describe("images and instances", () => {
   });
 
   test("a symbol is lowered once, drawn once in defs, and used by every instance", () => {
-    const dot = symbol("dot", () => <Shape geometry={circle(4)} anchor="center" fill="#FF0000" />);
+    const dot = symbol(() => <Shape geometry={circle(4)} anchor="center" fill="#FF0000" />);
 
     const model = made(() => (
       <Group>
-        <Instance of={dot} at={[10, 10]} />
+        <Instance key="dot" of={dot} at={[10, 10]} />
         <Instance of={dot} at={[30, 10]} scale={2} />
       </Group>
     ));
@@ -578,42 +664,48 @@ describe("images and instances", () => {
   });
 
   test("a prefix keeps two scenes' symbols apart", () => {
-    const dot = symbol("dot", () => <Shape geometry={circle(4)} anchor="center" fill="#FF0000" />);
+    const dot = symbol(() => <Shape geometry={circle(4)} anchor="center" fill="#FF0000" />);
 
     expect(
       svg.emit(
-        made(() => <Instance of={dot} />),
+        made(() => <Instance key="dot" of={dot} />),
         { prefix: "x-" },
       ),
     ).toContain('href="#x-symbol-dot"');
   });
 
   test("a symbol that moves can't be placed inside a sequence that starts later", () => {
-    const spinner = symbol("spinner", () => (
+    const spinner = symbol(() => (
       <Shape geometry={rect(4, 4)} rotate={track(0).to(90, span(0, 1))} fill="#FF0000" />
     ));
 
     expect(() =>
       made(() => (
-        <Sequence at={1}>
+        <Sequence start={1}>
           <Instance of={spinner} />
         </Sequence>
       )),
     ).toThrow("a symbol's tracks run on the scene's clock");
   });
 
-  test("two symbols with one name throw", () => {
-    const a = symbol("dot", () => <Shape geometry={circle(4)} anchor="center" />);
-    const b = symbol("dot", () => <Shape geometry={circle(5)} anchor="center" />);
+  test("a symbol is named for its first instance's key, and two that would share a name don't", () => {
+    const a = symbol(() => <Shape fill="#000000" geometry={circle(4)} anchor="center" />);
+    const b = symbol(() => <Shape fill="#000000" geometry={circle(5)} anchor="center" />);
 
-    expect(() =>
-      made(() => (
-        <Group>
-          <Instance of={a} />
-          <Instance of={b} />
+    const model = made(() => (
+      <Group>
+        <Group key="left">
+          <Instance key="dot" of={a} />
         </Group>
-      )),
-    ).toThrow('Two different symbols are both named "dot"');
+        <Group key="right">
+          <Instance key="dot" of={b} />
+          <Instance key="again" of={a} />
+        </Group>
+      </Group>
+    ));
+
+    expect(Object.keys(model.symbols)).toEqual(["dot", "dot-2"]);
+    expect(svg.emit(model).match(/<use href="#symbol-dot"/g)).toHaveLength(2);
   });
 });
 
@@ -622,9 +714,10 @@ describe("shake and sampled", () => {
     const node = only(
       made(() => (
         <Shape
+          fill="#000000"
           geometry={circle(4)}
           anchor="center"
-          motion={shake(span(0, 1), { offset: [10, 0] })}
+          motion={shake({ offset: [10, 0] }, span(0, 1))}
         />
       )),
     );
@@ -643,9 +736,10 @@ describe("shake and sampled", () => {
     const linear = only(
       made(() => (
         <Shape
+          fill="#000000"
           geometry={circle(4)}
           anchor="center"
-          rotate={sampled(span(0, 2), (t) => t * 90, { tolerance: 0.1 })}
+          rotate={sampled((t) => t * 90, span(0, 2), { tolerance: 0.1 })}
         />
       )),
     );
@@ -653,9 +747,10 @@ describe("shake and sampled", () => {
     const stepped = only(
       made(() => (
         <Shape
+          fill="#000000"
           geometry={circle(4)}
           anchor="center"
-          rotate={sampled(span(0, 2), (t) => (t < 1 ? 0 : 90), { tolerance: 0.1 })}
+          rotate={sampled((t) => (t < 1 ? 0 : 90), span(0, 2), { tolerance: 0.1 })}
         />
       )),
     );
@@ -675,7 +770,7 @@ describe("shake and sampled", () => {
     const lane = geometryLane(
       made(() => (
         <Shape
-          geometry={sampled(span(0, 1), (t) => arc({ radius: 10, sweep: 30 + 300 * t * t }), {
+          geometry={sampled((t) => arc({ radius: 10, sweep: 30 + 300 * t * t }), span(0, 1), {
             tolerance: 0.2,
           })}
           stroke={{ color: "#FF0000" }}
@@ -691,9 +786,10 @@ describe("shake and sampled", () => {
     const node = only(
       made(() => (
         <Shape
+          fill="#000000"
           geometry={circle(4)}
           anchor="center"
-          motion={sampled.motion(span(0, 1), (t) => ({ offset: [t * 10, 0], opacity: 1 - t / 2 }), {
+          motion={sampled.motion((t) => ({ offset: [t * 10, 0], opacity: 1 - t / 2 }), span(0, 1), {
             tolerance: { offset: 0.1, opacity: 0.01 },
           })}
         />
@@ -708,7 +804,7 @@ describe("shake and sampled", () => {
 
   test("sampled throws on a geometry that changes its structure", () => {
     expect(() =>
-      sampled(span(0, 1), (t) => (t < 0.5 ? rect(1, 1) : circle(1)), { tolerance: 0.1 }),
+      sampled((t) => (t < 0.5 ? rect(1, 1) : circle(1)), span(0, 1), { tolerance: 0.1 }),
     ).toThrow("doesn't match the first sample");
   });
 });

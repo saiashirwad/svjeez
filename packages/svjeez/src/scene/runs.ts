@@ -1,13 +1,13 @@
 import { Font, FontFamily, type FontValue } from "../font/font";
 import type { Face } from "./ir";
-import type { RunStyle, SceneElement, SpanProps, TextChild } from "./nodes";
+import type { RunProps, RunStyle, SceneElement, TextChild } from "./nodes";
 
-/** What a stretch of text asks to be drawn in: the `<Text>`'s own props, with each `<Span>` around it laid over. */
-export type Asked = RunStyle & Required<Pick<RunStyle, "font" | "fill">>;
+/** What a stretch of text asks to be drawn in: the `<Text>`'s own props, with each `<Run>` around it laid over. */
+export type Asked = RunStyle & Required<Pick<RunStyle, "font">>;
 
 export interface AskedPiece {
   readonly text: string;
-  /** One object for every piece of one span, so a caller can lower each style once. */
+  /** One object for every piece of one run, so a caller can lower each style once. */
   readonly asked: Asked;
 }
 
@@ -16,21 +16,20 @@ const isList = (child: TextChild): child is readonly TextChild[] => Array.isArra
 const isWords = (child: TextChild): child is string | number =>
   typeof child === "string" || typeof child === "number";
 
-const isSpan = (
-  child: SceneElement,
-): child is { readonly type: "span"; readonly props: SpanProps } => child.type === "span";
+const isRun = (child: SceneElement): child is { readonly type: "run"; readonly props: RunProps } =>
+  child.type === "run";
 
 const isElement = (child: TextChild): child is SceneElement =>
   typeof child === "object" && child !== null && !isList(child);
 
-/** `style` with what `span` says laid over it. */
-const over = (style: Asked, span: SpanProps): Asked => ({
+/** `style` with what `run` says laid over it. */
+const over = (style: Asked, run: RunProps): Asked => ({
   ...style,
-  ...(span.font !== undefined && { font: span.font }),
-  ...(span.weight !== undefined && { weight: span.weight }),
-  ...(span.italic !== undefined && { italic: span.italic }),
-  ...(span.fill !== undefined && { fill: span.fill }),
-  ...(span.opacity !== undefined && { opacity: span.opacity }),
+  ...(run.font !== undefined && { font: run.font }),
+  ...(run.weight !== undefined && { weight: run.weight }),
+  ...(run.italic !== undefined && { italic: run.italic }),
+  ...(run.fill !== undefined && { fill: run.fill }),
+  ...(run.opacity !== undefined && { opacity: run.opacity }),
 });
 
 /** A text's children as pieces of text, in order, each with the style it asks for. */
@@ -41,11 +40,11 @@ export const piecesOf = (children: TextChild, style: Asked, where: string): Aske
 
   if (isList(children)) return children.flatMap((child) => piecesOf(child, style, where));
 
-  if (isElement(children) && isSpan(children))
+  if (isElement(children) && isRun(children))
     return piecesOf(children.props.children, over(style, children.props), where);
 
   throw new Error(
-    `Text ${where} holds ${isElement(children) ? `a <${children.type[0]!.toUpperCase()}${children.type.slice(1)}>` : String(children)}. A <Text> holds strings and <Span>s; put other nodes beside it, in a <Group> or a <Stack>.`,
+    `Text ${where} holds ${isElement(children) ? `a <${children.type[0]!.toUpperCase()}${children.type.slice(1)}>` : String(children)}. A <Text> holds strings and <Run>s; put other nodes beside it, in a <Group> or a <Stack>.`,
   );
 };
 
@@ -99,7 +98,6 @@ interface Picked {
 }
 
 interface Family {
-  readonly fallback: readonly string[];
   readonly faces: Font[];
 }
 
@@ -110,7 +108,7 @@ export class FontBook {
   /** `face`, picked from `value`, as runs name it. Two different files can't be one family's same face. */
   add(value: FontValue, face: Font): Picked {
     const family = nameOf(value);
-    const known = this.#families.get(family) ?? { fallback: value.fallback, faces: [] };
+    const known = this.#families.get(family) ?? { faces: [] };
 
     const same = known.faces.find(
       (each) => each.weight === face.weight && each.style === face.style,
@@ -127,12 +125,37 @@ export class FontBook {
     return { face: { family, weight: face.weight, style: face.style }, font: same ?? face };
   }
 
+  /**
+   * Each family with no fallback: text is measured with the face it names and every character it draws is in that
+   * face, so no other face ever draws one.
+   */
   families(): Record<string, FontFamily> {
     return Object.fromEntries(
-      [...this.#families].map(([name, { fallback, faces }]) => [
-        name,
-        new FontFamily(name, faces, fallback),
-      ]),
+      [...this.#families].map(([name, { faces }]) => [name, new FontFamily(name, faces, [])]),
     );
   }
+
+  /**
+   * The characters of `text` that `font` has no glyph for. White space, control and format characters and variation
+   * selectors draw nothing of their own, so they are never missing.
+   */
+  static missing(font: Font, text: string): string[] {
+    return [...new Set([...text].filter((char) => !drawsNothing(char) && !hasGlyph(font, char)))];
+  }
 }
+
+/** Whether a character draws nothing of its own: white space, a control or format character, a variation selector. */
+const drawsNothing = (char: string): boolean => /^[\s\p{Cc}\p{Cf}\u{FE00}-\u{FE0F}]$/u.test(char);
+
+/** Whether `font` has a glyph for `char`. A face whose glyph table can't be read is taken at its word. */
+const hasGlyph = (font: Font, char: string): boolean => {
+  try {
+    return font.has(char);
+  } catch {
+    return true;
+  }
+};
+
+/** How a character reads in an error: itself and its code point. */
+export const charName = (char: string): string =>
+  `"${char}" (U+${char.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")})`;

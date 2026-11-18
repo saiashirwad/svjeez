@@ -11,6 +11,7 @@ const ENTRIES = [
   "svjeez/jsx-runtime",
   "svjeez/jsx-dev-runtime",
   "svjeez/scene",
+  "svjeez/scene/tools",
   "svjeez/scene/jsx-runtime",
   "svjeez/scene/jsx-dev-runtime",
   "svjeez/frames",

@@ -213,32 +213,62 @@ export const gradientOf = (
   };
 };
 
-const describe = (paint: ModelPaint): string =>
-  isGradient(paint) ? `a ${paint.kind} gradient of ${paint.stops.length} stops` : "a color";
+/** `gradient` with `count` stops: its last stop repeated, which draws the same gradient. */
+const padded = (gradient: ModelGradient, count: number): ModelGradient => {
+  const last = gradient.stops.at(-1)!;
+
+  return {
+    ...gradient,
+    stops: [
+      ...gradient.stops,
+      ...Array.from({ length: count - gradient.stops.length }, () => last),
+    ],
+  };
+};
+
+/** A color as a gradient shaped like `like`: every stop that color, which draws the color. */
+const lifted = (color: ModelColor, like: ModelGradient): ModelGradient => ({
+  ...like,
+  stops: like.stops.map((stop) => ({ offset: stop.offset, color })),
+});
 
 /**
- * Checks that a paint lane can blend: all colors, or all gradients of one kind with as many stops. Gives it back, so
- * lowering can pass a paint through.
+ * A paint lane whose keys all blend: all colors, or all gradients of one kind with as many stops. A color among
+ * gradients becomes a gradient shaped like the nearest one, every stop that color, and a gradient with fewer stops
+ * repeats its last, so neither changes what is drawn at its key. A linear and a radial gradient don't blend.
  */
 export const blendable = <P extends Animated<ModelPaint> | undefined>(
   paint: P,
   where: string,
 ): P => {
   if (paint === undefined || !isLane(paint)) return paint;
-  const [first, ...rest] = paint.keys.map((key) => key.value);
+  const values = paint.keys.map((key) => key.value);
+  const gradients = values.filter(isGradient);
 
-  const odd = rest.find((value) =>
-    isGradient(first!)
-      ? !isGradient(value) || value.kind !== first.kind || value.stops.length !== first.stops.length
-      : isGradient(value),
-  );
+  if (gradients.length === 0) return paint;
+  const kind = gradients[0]!.kind;
+  const odd = gradients.find((value) => value.kind !== kind);
 
   if (odd !== undefined)
     throw new Error(
-      `${where} moves from ${describe(first!)} to ${describe(odd)}, and only colors, or gradients of one kind with as many stops, blend. Give every key the same kind of paint; to fade a gradient in, move a stop's color.`,
+      `${where} moves from a ${kind} gradient to a ${odd.kind} one, and the two kinds don't blend. Give every key a ${kind} gradient, or draw two shapes and fade one into the other.`,
     );
 
-  return paint;
+  const count = Math.max(...gradients.map((value) => value.stops.length));
+
+  /** The gradient a color at key `i` takes its shape from: the next one, or else the one before. */
+  const near = (i: number): ModelGradient =>
+    values.slice(i + 1).find(isGradient) ?? values.slice(0, i).reverse().find(isGradient)!;
+
+  const keys = paint.keys.map((key, i) => ({
+    ...key,
+    value: isGradient(key.value)
+      ? padded(key.value, count)
+      : lifted(key.value, padded(near(i), count)),
+  }));
+
+  // SAFETY: the lane is the one given, each key's value a paint of the same lane, so P holds it.
+  return { ...paint, keys } as P;
 };
 
 const mixPoint = (a: Vec, b: Vec, u: number): Vec => [

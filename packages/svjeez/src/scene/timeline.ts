@@ -1,6 +1,6 @@
 import { num } from "../format";
 import { EPSILON, type Seconds } from "../motion";
-import { span, stagger as staggered, type Span, type Spanned } from "../span";
+import { span, type Span, type Spanned } from "./span";
 import type { Animated, Box, Vec } from "./ir";
 import type { SceneElement } from "./nodes";
 import { Anchor, placeIn, type Place, type Ref } from "./refs";
@@ -18,7 +18,13 @@ import type { Geometry, Paint } from "./values";
  * (node, property) it moves as the one track a hand-written `track()` would be, starting from the node's own value.
  */
 
-/** What an action can move on a node, and the value each one goes to. */
+/** A shape's stroke as a verb moves it: its color, its width, or both. */
+export interface StrokeMoves {
+  readonly color?: Paint;
+  readonly width?: number;
+}
+
+/** What an action can move on a node, and the value each one goes to: the props of the same names. */
 export interface Moves {
   /** Where the node goes in its parent, as its own `at` says it: a point, or an anchor its `at` point lands on. */
   readonly at?: Vec | Anchor;
@@ -28,38 +34,38 @@ export interface Moves {
   readonly opacity?: number;
   /** A shape's or a text's fill. */
   readonly fill?: Paint;
-  /** A shape's stroke color. */
-  readonly stroke?: Paint;
-  readonly strokeWidth?: number;
+  /** A shape's stroke: the parts of it named. */
+  readonly stroke?: StrokeMoves;
   readonly trim?: Vec;
   readonly geometry?: Geometry;
 }
 
-type Prop = keyof Moves;
+/** One property a move writes: a stroke's color and width are two. */
+type Prop = Exclude<keyof Moves, "stroke"> | "stroke" | "strokeWidth";
 
-/** A value one of `Moves` takes, once anchors are read. */
-type Value = Vec | number | Paint | Geometry;
-
-const PROPS: readonly Prop[] = [
+/** The names `Moves` takes. */
+const NAMES: readonly (keyof Moves)[] = [
   "at",
   "rotate",
   "scale",
   "opacity",
   "fill",
   "stroke",
-  "strokeWidth",
   "trim",
   "geometry",
 ];
 
-const isProp = (name: string): name is Prop => PROPS.some((prop) => prop === name);
+/** A value one of `Moves` takes, once anchors are read. */
+type Value = Vec | number | Paint | Geometry;
 
-/** The point of a node that `moveTo` lands: a place on its box, or a point in its own frame. */
+const isName = (name: string): name is keyof Moves => NAMES.some((known) => known === name);
+
+/** The point of a node that `move` lands on an anchor: a place on its box, or a point measured from its `at` point. */
 export type Point = Place | Vec;
 
-export interface MoveToOptions {
+export interface MoveOptions {
   /**
-   * Which point of the node lands on the anchor: a place on its box, or a point measured from the one its `at`
+   * Which point of the node lands on an anchor: a place on its box, or a point measured from the one its `at`
    * places. Default `[0, 0]`: the point its `at` places, its box's top-left unless its `anchor` says.
    */
   readonly point?: Point;
@@ -124,7 +130,7 @@ export class Action {
       this.length,
       this.moves,
       this.rewinds,
-      new Map([...this.labels, [name, { at: 0, over: this.length }]]),
+      new Map([...this.labels, [name, { start: 0, over: this.length }]]),
     );
   }
 }
@@ -147,12 +153,12 @@ const together = (placed: readonly (readonly [Action, Seconds])[], length?: Seco
   const labels = new Map<string, Span>();
 
   for (const [action, at] of placed)
-    for (const [name, { at: start, over }] of action.labels) {
+    for (const [name, { start, over }] of action.labels) {
       if (labels.has(name))
         throw new Error(
           `Two spans in one timeline are both named "${name}". Give one another name.`,
         );
-      labels.set(name, { at: at + start, over });
+      labels.set(name, { start: at + start, over });
     }
 
   return new Action(
@@ -193,38 +199,18 @@ export const wait = (seconds: Seconds): Action => {
   return new Action(seconds);
 };
 
-const isTime = (value: Seconds | Span | Action | undefined): value is Seconds =>
-  typeof value === "number";
-
 /**
- * Actions that start `step` seconds apart: a cascade. It lasts until the last one ends. Given a span, a count and a
- * step instead, it is the spans' `stagger`: `count` spans like `first`, `step` apart.
+ * Actions that start `step` seconds apart. It lasts until the last one ends. For spans that start a step apart, use
+ * `span.cascade(count, step)`.
  */
-export function stagger(step: Seconds, ...list: readonly Action[]): Action;
-export function stagger(first: Span, count: number, step: Seconds): Spanned[];
-export function stagger(
-  first: Seconds | Span,
-  ...rest: readonly (Action | Seconds)[]
-): Action | Spanned[] {
-  if (!isTime(first)) {
-    const [count, step] = rest;
-
-    if (!isTime(count) || !isTime(step))
-      throw new Error("stagger() takes a span, a count and a step, or a step and actions.");
-
-    return staggered(first, count, step);
-  }
-
-  if (!Number.isFinite(first)) throw new Error(`stagger() needs a finite step, got ${first}.`);
-  const list = actions(rest.filter(isAction), "stagger()");
-
-  if (list.length !== rest.length)
+export const stagger = (step: Seconds, ...list: readonly Action[]): Action => {
+  if (!Number.isFinite(step))
     throw new Error(
-      "stagger() takes a step and then actions, such as stagger(0.1, a.show(), b.show()).",
+      "stagger() takes a step in seconds and then actions, such as stagger(0.1, a.show(0.3), b.show(0.3)). For spans a step apart, write span(…).cascade(count, step).",
     );
 
-  return together(list.map((action, i) => [action, i * first]));
-}
+  return together(actions(list, "stagger()").map((action, i) => [action, i * step]));
+};
 
 /** A positive length for a transition, or the error that says how to write a cut. */
 const length = (over: Seconds, verb: string): Seconds => {
@@ -238,30 +224,58 @@ const length = (over: Seconds, verb: string): Seconds => {
 
 const DEFAULT_CURVE: Curve = ease.out;
 
-const one = (target: Ref, verb: string, values: Moves, over: Seconds, curve: Curve): Action => {
-  const names = Object.keys(values);
-  const unknown = names.find((name) => !isProp(name));
+/** Each property `values` names, with the value it goes to: a stroke's color and width apart. */
+const flatValues = (values: Moves, verb: string): (readonly [Prop, Value | Anchor])[] => {
+  const unknown = Object.keys(values).find((name) => !isName(name));
 
   if (unknown !== undefined)
-    throw new Error(`${verb} can't move "${unknown}". It moves ${PROPS.join(", ")}.`);
+    throw new Error(`${verb} can't move "${unknown}". It moves ${NAMES.join(", ")}.`);
 
-  const moves = names.filter(isProp).flatMap((prop): Move[] => {
-    const value = values[prop];
+  return Object.keys(values)
+    .filter(isName)
+    .flatMap((name): (readonly [Prop, Value | Anchor])[] => {
+      if (name !== "stroke") {
+        const value = values[name];
 
-    if (value === undefined) return [];
+        return value === undefined ? [] : [[name, value]];
+      }
 
-    const goal: Goal =
-      value instanceof Anchor
-        ? { kind: "anchor", anchor: value, point: [0, 0] }
-        : { kind: "value", value };
+      const { stroke } = values;
 
-    return [{ target, prop, start: 0, over, curve, goal, verb }];
-  });
+      if (stroke === undefined) return [];
 
-  return new Action(over, moves);
+      if (!isStrokeMoves(stroke))
+        throw new Error(
+          `${verb} takes stroke as the prop does, an object: { stroke: { color: …, width: … } }.`,
+        );
+
+      return [
+        ...(stroke.color === undefined ? [] : [["stroke", stroke.color] as const]),
+        ...(stroke.width === undefined ? [] : [["strokeWidth", stroke.width] as const]),
+      ];
+    });
 };
 
+const one = (target: Ref, verb: string, values: Moves, over: Seconds, curve: Curve): Action =>
+  new Action(
+    over,
+    flatValues(values, verb).map(([prop, value]): Move => {
+      const goal: Goal =
+        value instanceof Anchor
+          ? { kind: "anchor", anchor: value, point: [0, 0] }
+          : { kind: "value", value };
+
+      return { target, prop, start: 0, over, curve, goal, verb };
+    }),
+  );
+
 const label = (target: Ref, name: string): string => `${target.label}.${name}()`;
+
+const isPoint = (to: Vec | Anchor | Ref): to is Vec => Array.isArray(to);
+
+/** Whether a verb was given a stroke as the prop writes it, not a bare paint. */
+const isStrokeMoves = (stroke: StrokeMoves | Paint): stroke is StrokeMoves =>
+  typeof stroke === "object" && !Array.isArray(stroke) && !("kind" in stroke);
 
 /** The verbs every ref has, as functions of the ref: `Ref`'s methods call these. */
 export const verbs = {
@@ -272,31 +286,29 @@ export const verbs = {
   },
   set: (target: Ref, values: Moves): Action =>
     one(target, label(target, "set"), values, 0, ease.hold),
-  move: (target: Ref, to: Vec, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
-    const verb = label(target, "move");
-
-    return one(target, verb, { at: to }, length(over, verb), curve);
-  },
-  moveTo: (
+  move: (
     target: Ref,
-    to: Ref | Anchor,
+    to: Vec | Anchor | Ref,
     over: Seconds,
     curve: Curve = DEFAULT_CURVE,
-    { point = [0, 0] }: MoveToOptions = {},
+    options: MoveOptions = {},
   ): Action => {
-    const verb = label(target, "moveTo");
+    const verb = label(target, "move");
+
+    if (isPoint(to)) {
+      if (options.point !== undefined)
+        throw new Error(
+          `${verb} lands a point of the node on an anchor, such as card.left, but ${JSON.stringify(to)} is a point in the parent. Move the node's at there without a point, or give an anchor.`,
+        );
+
+      return one(target, verb, { at: to }, length(over, verb), curve);
+    }
+
     const anchor = to instanceof Anchor ? to : to.center;
+    const goal: Goal = { kind: "anchor", anchor, point: options.point ?? [0, 0] };
 
     return new Action(length(over, verb), [
-      {
-        target,
-        prop: "at",
-        start: 0,
-        over,
-        curve,
-        goal: { kind: "anchor", anchor, point },
-        verb,
-      },
+      { target, prop: "at", start: 0, over, curve, goal, verb },
     ]);
   },
   moveBy: (target: Ref, by: Vec, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
@@ -316,11 +328,6 @@ export const verbs = {
 
     return one(target, verb, { scale: to }, length(over, verb), curve);
   },
-  fade: (target: Ref, to: number, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
-    const verb = label(target, "fade");
-
-    return one(target, verb, { opacity: to }, length(over, verb), curve);
-  },
   show: (target: Ref, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
     const verb = label(target, "show");
 
@@ -336,15 +343,10 @@ export const verbs = {
 
     return one(target, verb, { fill: to }, length(over, verb), curve);
   },
-  stroke: (target: Ref, to: Paint, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
+  stroke: (target: Ref, to: StrokeMoves, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
     const verb = label(target, "stroke");
 
     return one(target, verb, { stroke: to }, length(over, verb), curve);
-  },
-  trim: (target: Ref, to: Vec, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
-    const verb = label(target, "trim");
-
-    return one(target, verb, { trim: to }, length(over, verb), curve);
   },
   draw: (target: Ref, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
     const verb = label(target, "draw");
@@ -386,7 +388,7 @@ export class Timeline {
       );
     }
 
-    return span(found.at, found.over);
+    return span(found.start, found.over);
   }
 }
 
@@ -394,7 +396,7 @@ let open: Timeline[] | undefined;
 
 /**
  * Plays actions one after another on the scene's clock, or on a `<Sequence>`'s when given to it as
- * `<Sequence at={…} timeline={…}>`. Call it inside `scene()`'s callback or a component the scene renders. Every
+ * `<Sequence start={…} timeline={…}>`. Call it inside `scene()`'s callback or a component the scene renders. Every
  * node it moves must sit on that clock.
  */
 export const timeline = (...list: readonly Action[]): Timeline => {
@@ -412,7 +414,7 @@ export const timeline = (...list: readonly Action[]): Timeline => {
 /** A node element: what lowering gives a key. */
 export type NodeElement = Exclude<
   SceneElement,
-  { readonly type: "fragment" | "sequence" | "morph" | "span" }
+  { readonly type: "fragment" | "sequence" | "morph" | "run" }
 >;
 
 const FOR_ALL: readonly NodeElement["type"][] = ["group", "shape", "text", "image", "instance"];
@@ -532,6 +534,14 @@ export class Cues {
   readonly #claimed = new Set<Timeline>();
   readonly #clocks = new Map<Timeline, Clock>();
   readonly #met = new Set<Move | Rewind>();
+  /** Each move applied, on the scene's clock, with the key of the node it moved. */
+  readonly applied: { verb: string; key: string; start: Seconds; over: Seconds }[] = [];
+  /** Each ref a timeline names, whether or not a node has it. */
+  get refs(): readonly Ref[] {
+    return [...this.#moves, ...this.#rewinds].map(
+      ({ item }) => item.target.within?.ref ?? item.target,
+    );
+  }
 
   constructor(timelines: readonly Timeline[], top: SceneElement) {
     this.#moves = timelines.flatMap((timeline) =>
@@ -583,7 +593,7 @@ export class Cues {
     throw new Error(
       clock
         ? `${verb} moves "${key}", which runs on ${clockName(here)}'s clock, but its timeline runs on ${clockName(clock)}'s. A timeline moves only nodes on its own clock.`
-        : `${verb} moves "${key}", which sits inside ${clockName(here)}, but its timeline runs on the scene's clock. Give the timeline to that sequence: <Sequence at={…} timeline={…}>.`,
+        : `${verb} moves "${key}", which sits inside ${clockName(here)}, but its timeline runs on the scene's clock. Give the timeline to that sequence: <Sequence start={…} timeline={…}>.`,
     );
   }
 
@@ -608,6 +618,14 @@ export class Cues {
       this.#onClock(timeline, key, item.verb, timing);
       this.#met.add(item);
     }
+
+    for (const { item } of mine)
+      this.applied.push({
+        verb: item.verb,
+        key,
+        start: timing.clock.offset + item.start,
+        over: item.over,
+      });
 
     const [rewind, twice] = back.map(({ item }) => item);
 
@@ -720,7 +738,7 @@ export class Cues {
 
     if (value instanceof Anchor)
       throw new Error(
-        `${verb} moves "${key}", which is placed at ${value.label}. Place it at a point and moveTo() the anchor instead.`,
+        `${verb} moves "${key}", which is placed at ${value.label}. Place it at a point and move() it to the anchor instead.`,
       );
     const container = notes.nodes.get(parent)?.settle;
 

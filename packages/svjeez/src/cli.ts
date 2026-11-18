@@ -17,7 +17,7 @@ import {
   type Related,
   type Scene,
   type Severity,
-} from "./scene";
+} from "./scene/tools";
 import { momentsOf, sourcesOf } from "./scene/survey";
 import { startTrace, stopTrace, traceOf, type BuildReport } from "./traced";
 import { validateSvg } from "./validate";

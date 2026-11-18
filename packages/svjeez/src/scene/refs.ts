@@ -1,7 +1,7 @@
 import type { Seconds } from "../motion";
 import type { Box, Vec } from "./ir";
 import type { Curve } from "./spring";
-import { verbs, type Action, type Moves, type MoveToOptions } from "./timeline";
+import { verbs, type Action, type MoveOptions, type Moves, type StrokeMoves } from "./timeline";
 import type { Paint } from "./values";
 
 /** A side of a box. */
@@ -147,8 +147,8 @@ export class Ref {
   }
 
   /*
-   * Motion verbs: each returns an action for a timeline, starting from the node's own value. A curve defaults to
-   * ease.out and may be a spring.
+   * Motion verbs: each returns an action for a timeline and writes the track of the prop it names, starting from the
+   * node's own value. Each takes what, then how long, then the curve, which defaults to ease.out and may be a spring.
    */
 
   /** Every prop in `values` goes to its value over `over` seconds: the general form of the verbs below. */
@@ -161,17 +161,13 @@ export class Ref {
     return verbs.set(this, values);
   }
 
-  /** The node's `at` goes to `to`, a point in its parent's frame. */
-  move(to: Vec, over: Seconds, curve?: Curve): Action {
-    return verbs.move(this, to, over, curve);
-  }
-
   /**
-   * The node moves so that a point of it, `[0, 0]` unless `options.point` says, lands on an anchor (a ref is its
-   * center) where that anchor is when the move ends, whatever moves it.
+   * The node's `at` goes to `to`: a point in its parent's frame, or an anchor (a ref is its center) where that anchor
+   * is when the move ends, whatever moves it. On an anchor, `options.point` is the point of the node that lands there:
+   * `[0, 0]` unless you say.
    */
-  moveTo(to: Ref | Anchor, over: Seconds, curve?: Curve, options?: MoveToOptions): Action {
-    return verbs.moveTo(this, to, over, curve, options);
+  move(to: Vec | Anchor | Ref, over: Seconds, curve?: Curve, options?: MoveOptions): Action {
+    return verbs.move(this, to, over, curve, options);
   }
 
   /** The node moves by `by` from where the move before left it. */
@@ -188,12 +184,7 @@ export class Ref {
     return verbs.scale(this, to, over, curve);
   }
 
-  /** Opacity to `to`. */
-  fade(to: number, over: Seconds, curve?: Curve): Action {
-    return verbs.fade(this, to, over, curve);
-  }
-
-  /** Opacity to 1. */
+  /** Opacity to 1. For another opacity, `to({ opacity }, over)`. */
   show(over: Seconds, curve?: Curve): Action {
     return verbs.show(this, over, curve);
   }
@@ -208,17 +199,12 @@ export class Ref {
     return verbs.fill(this, to, over, curve);
   }
 
-  /** A shape's stroke color to `to`. */
-  stroke(to: Paint, over: Seconds, curve?: Curve): Action {
+  /** A shape's stroke to `to`: its color, its width, or both, as the `stroke` prop names them. */
+  stroke(to: StrokeMoves, over: Seconds, curve?: Curve): Action {
     return verbs.stroke(this, to, over, curve);
   }
 
-  /** The drawn part of a shape's stroke to `to`, two fractions of its length. */
-  trim(to: Vec, over: Seconds, curve?: Curve): Action {
-    return verbs.trim(this, to, over, curve);
-  }
-
-  /** Strokes the outline on from nothing: the trim cuts to `[0, 0]` and goes to `[0, 1]`. */
+  /** Strokes the outline on from nothing, as `trim={draw(when)}` does: the trim cuts to `[0, 0]` and goes to `[0, 1]`. */
   draw(over: Seconds, curve?: Curve): Action {
     return verbs.draw(this, over, curve);
   }
@@ -232,8 +218,30 @@ export class Ref {
   }
 }
 
+let declared: Ref[] | undefined;
+
 /** A ref to give one node, as `ref={win}`. Its key is the node's key unless the node has its own. */
-export const ref = (key: string): Ref => new Ref(key);
+export const ref = (key: string): Ref => {
+  const made = new Ref(key);
+
+  declared?.push(made);
+
+  return made;
+};
+
+/** Runs a scene's build, and gives back what it built and the refs made while it ran. */
+export const declaring = <T>(build: () => T): readonly [T, readonly Ref[]] => {
+  const outer = declared;
+  const made: Ref[] = [];
+
+  declared = made;
+
+  try {
+    return [build(), made];
+  } finally {
+    declared = outer;
+  }
+};
 
 /** Where a placement lands in a box: a corner, the middle of an edge, or the center. */
 export type Place =

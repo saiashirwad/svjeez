@@ -1,21 +1,8 @@
 /** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import { font } from "svjeez";
-import {
-  Group,
-  Span,
-  Text,
-  boxesOf,
-  diagnose,
-  isLane,
-  morph,
-  scene,
-  span,
-  svg,
-  track,
-  type Model,
-  type SceneElement,
-} from "svjeez/scene";
+import { Group, Run, Text, morph, scene, span, track, type SceneElement } from "svjeez/scene";
+import { boxesOf, diagnose, isLane, svg, type Model } from "svjeez/scene/tools";
 
 const fixture = (name: string) => new URL(`./fixtures/${name}.ttf`, import.meta.url);
 const regular = await font.load(fixture("SpaceMono-Regular"));
@@ -128,7 +115,7 @@ describe("faces", () => {
     expect(() =>
       made(() => (
         <Text key="t" font={regular} size={10} fill="#000000">
-          a <Span weight={700}>b</Span>
+          a <Run weight={700}>b</Run>
         </Text>
       )),
     ).toThrow(`Text "t" asks for Space Mono 700, but its font is the one face Space Mono 400.`);
@@ -172,7 +159,7 @@ describe("runs", () => {
     const node = textOf(
       made(() => (
         <Text key="t" font={space} size={10} fill="#000000">
-          Total <Span weight={700}>42</Span> items
+          Total <Run weight={700}>42</Run> items
         </Text>
       )),
     );
@@ -199,12 +186,12 @@ describe("runs", () => {
     const node = textOf(
       made(() => (
         <Text key="t" font={space} size={10} fill="#000000">
-          a<Span fill="#000000">b</Span>
+          a<Run fill="#000000">b</Run>
           {3}
-          <Span weight={700}>
-            c<Span fill="#ff0000">d</Span>
-          </Span>
-          {String(3).length > 1 && <Span>never</Span>}
+          <Run weight={700}>
+            c<Run fill="#ff0000">d</Run>
+          </Run>
+          {String(3).length > 1 && <Run>never</Run>}
         </Text>
       )),
     );
@@ -220,7 +207,7 @@ describe("runs", () => {
     const node = textOf(
       made(() => (
         <Text key="t" font={space} size={10} fill="#000000">
-          <Span fill="#ff0000">x</Span> <Span fill="#ff0000">y</Span> <Span fill="#00ff00">z</Span>
+          <Run fill="#ff0000">x</Run> <Run fill="#ff0000">y</Run> <Run fill="#00ff00">z</Run>
         </Text>
       )),
     );
@@ -232,7 +219,7 @@ describe("runs", () => {
     const node = textOf(
       made(() => (
         <Text key="t" font={space} size={10} width={50} fill="#000000">
-          aa <Span weight={700}>bb cc dd</Span> e<Span fill="#ff0000">ff</Span> gg
+          aa <Run weight={700}>bb cc dd</Run> e<Run fill="#ff0000">ff</Run> gg
         </Text>
       )),
     );
@@ -255,7 +242,7 @@ describe("runs", () => {
     const node = textOf(
       made(() => (
         <Text key="t" font={space} size={10} lineHeight={2} fill="#000000">
-          a <Span weight={700}>{"b\nc"}</Span> d
+          a <Run weight={700}>{"b\nc"}</Run> d
         </Text>
       )),
     );
@@ -278,12 +265,12 @@ describe("runs", () => {
       made(() => (
         <Text key="t" font={space} size={10} fill="#000000">
           a{" "}
-          <Span
+          <Run
             fill={track<`#${string}`>("#000000").to("#ff0000", span(1, 1))}
             opacity={track(0).to(1, span(0, 1))}
           >
             b
-          </Span>
+          </Run>
         </Text>
       )),
     );
@@ -303,7 +290,7 @@ describe("runs", () => {
     const node = textOf(
       made(() => (
         <Text key="t" font={space} size={10} fill="#000000">
-          a <Span font={abeezee}>b</Span>
+          a <Run font={abeezee}>b</Run>
         </Text>
       )),
     );
@@ -318,7 +305,7 @@ describe("runs", () => {
       boxesOf(
         made(() => (
           <Text key="t" font={space} size={10} fill="#000000" at={[5, 50]}>
-            a <Span font={abeezee}>b</Span>
+            a <Run font={abeezee}>b</Run>
           </Text>
         )),
       ).t!.y,
@@ -327,7 +314,7 @@ describe("runs", () => {
       boxesOf(
         made(() => (
           <Text key="t" font={space} size={10} fill="#000000" at={[5, 50]} anchor="baseline-left">
-            a <Span font={abeezee}>b</Span>
+            a <Run font={abeezee}>b</Run>
           </Text>
         )),
       ).t!.y,
@@ -335,8 +322,8 @@ describe("runs", () => {
   });
 
   test("a Text holds strings and Spans, and a Span draws only inside a Text", () => {
-    expect(() => made(() => <Span weight={700}>x</Span>)).toThrow(
-      "holds a <Span>, which draws only inside a <Text>",
+    expect(() => made(() => <Run weight={700}>x</Run>)).toThrow(
+      "holds a <Run>, which draws only inside a <Text>",
     );
     expect(() =>
       made(() => (
@@ -344,13 +331,13 @@ describe("runs", () => {
           a <Group />
         </Text>
       )),
-    ).toThrow(`Text "t" holds a <Group>. A <Text> holds strings and <Span>s`);
+    ).toThrow(`Text "t" holds a <Group>. A <Text> holds strings and <Run>s`);
   });
 
   test("a backend that needs outlines checks every run", () => {
     const model = made(() => (
       <Text key="t" font={space} size={10} fill="#000000">
-        a <Span weight={700}>b</Span>
+        a <Run weight={700}>b</Run>
       </Text>
     ));
 
@@ -385,9 +372,9 @@ describe("SVG", () => {
       made(() => (
         <Text font={space} size={10} at={[10, 20]} anchor="baseline-left" fill="#000000">
           Total{" "}
-          <Span weight={700} fill="#ff0000">
+          <Run weight={700} fill="#ff0000">
             42
-          </Span>{" "}
+          </Run>{" "}
           items
         </Text>
       )),
@@ -395,9 +382,7 @@ describe("SVG", () => {
 
     const text = out.match(/<text[^>]*>.*<\/text>/)![0];
 
-    expect(text).toContain(
-      '<text font-family="\'Space Mono\', monospace" font-size="10" fill="#000000">',
-    );
+    expect(text).toContain('<text font-family="\'Space Mono\'" font-size="10" fill="#000000">');
     expect(text).toContain('<tspan x="10" y="20">Total </tspan>');
     expect(text).toMatch(/<tspan x="[\d.]+" font-weight="700" fill="#FF0000">42<\/tspan>/);
     expect(text).toMatch(/<tspan x="[\d.]+"> items<\/tspan>/);
@@ -411,7 +396,7 @@ describe("SVG", () => {
         made(() => (
           <Group>
             <Text font={space} size={10} fill="#000000">
-              abc <Span weight={700}>XYZ</Span>
+              abc <Run weight={700}>XYZ</Run>
             </Text>
             <Text font={space} weight={700} size={10} fill="#000000">
               Q
@@ -456,20 +441,18 @@ describe("SVG", () => {
       )),
     );
 
-    expect(out).toContain(
-      'aria-labelledby="t" font-family="\'Space Mono\', monospace" font-weight="400">',
-    );
+    expect(out).toContain('aria-labelledby="t" font-family="\'Space Mono\'" font-weight="400">');
     expect(out.match(/font-family="'Space Mono'/g)).toHaveLength(1);
     expect(out).toContain('font-weight="700" font-size="10"');
-    expect(out).toContain('<text font-family="\'ABeeZee\', sans-serif" font-size="10"');
+    expect(out).toContain('<text font-family="\'ABeeZee\'" font-size="10"');
   });
 
   test("a run's animated fill and opacity land on its tspan", () => {
     const out = emit(
       made(() => (
         <Text font={space} size={10} fill="#000000">
-          a <Span fill={track<`#${string}`>("#000000").to("#ff0000", span(1, 1))}>b</Span>{" "}
-          <Span opacity={track(0).to(1, span(0, 1))}>c</Span>
+          a <Run fill={track<`#${string}`>("#000000").to("#ff0000", span(1, 1))}>b</Run>{" "}
+          <Run opacity={track(0).to(1, span(0, 1))}>c</Run>
         </Text>
       )),
     );
@@ -484,7 +467,7 @@ describe("SVG", () => {
 describe("morph", () => {
   const label = (color: `#${string}`, words = "b") => (
     <Text key="t" font={space} size={10} fill="#000000">
-      a <Span fill={color}>{words}</Span>
+      a <Run fill={color}>{words}</Run>
     </Text>
   );
 

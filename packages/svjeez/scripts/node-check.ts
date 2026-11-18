@@ -1,7 +1,7 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { validateSvg } from "svjeez/frames";
-import { isScene, svg as backend, type Scene } from "svjeez/scene";
+import { isScene, svg as backend, type Scene } from "svjeez/scene/tools";
 
 const ROOT = join(import.meta.dirname, "..");
 

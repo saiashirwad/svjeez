@@ -2,6 +2,7 @@ import { easeAt, easeBetween } from "../ease-at";
 import { ease, type Ease } from "../motion";
 import { matchRings } from "../paths";
 import type { Contour, Cubic, Geometry, Key, Lane, Vec } from "./ir";
+import { curveLength } from "./curve";
 import { onCircle } from "./values";
 
 /**
@@ -327,4 +328,42 @@ export const smilSafeWith = <T>(
   const [head, next, ...rest] = keys;
 
   return { ...lane, keys: [head!, next!, ...rest] };
+};
+
+/**
+ * How long an outline is, every contour end to end, closing segments included: what a trim's fractions and a dash
+ * pattern are measured along. Circles, arcs and rounded corners are measured as circles, not as their cubics.
+ */
+export const lengthOf = (geometry: Geometry): number => {
+  switch (geometry.kind) {
+    case "rect": {
+      const [w, h] = geometry.size;
+      const corners = geometry.radius.reduce((sum, r) => sum + r * (Math.PI / 2 - 2), 0);
+
+      return 2 * (w + h) + corners;
+    }
+
+    case "ellipse": {
+      const [a, b] = geometry.radius;
+      const k = ((a - b) / (a + b)) ** 2;
+
+      // Ramanujan's second approximation: exact for a circle.
+      return a + b === 0 ? 0 : Math.PI * (a + b) * (1 + (3 * k) / (10 + Math.sqrt(4 - 3 * k)));
+    }
+
+    case "arc":
+      return (geometry.radius * Math.abs(geometry.sweep) * Math.PI) / 180;
+    default:
+      return contoursOf(geometry).reduce((sum, { start, curves, closed }) => {
+        let from = start;
+        let length = 0;
+
+        for (const [c1, c2, to] of curves) {
+          length += curveLength(from, [c1, c2], to);
+          from = to;
+        }
+
+        return sum + length + (closed ? Math.hypot(start[0] - from[0], start[1] - from[1]) : 0);
+      }, 0);
+  }
 };

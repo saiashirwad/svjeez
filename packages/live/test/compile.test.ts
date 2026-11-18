@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { validateSvg } from "svjeez/frames";
-import { Group, hitTest, scene } from "svjeez/scene";
+import { Group, scene } from "svjeez/scene";
+import { hitTest } from "svjeez/scene/tools";
 import { jsx } from "svjeez/scene/jsx-runtime";
 import { compileBuild, compileScene } from "../src/compile";
 import { errorFixes, errorTable, FIXES, fixFor } from "../src/fixes";
@@ -50,7 +51,7 @@ describe("compileScene", () => {
 
   test("a scene model compiles under its file's @jsxImportSource, and reports its size", async () => {
     const result = await compileScene(
-      `/** @jsxImportSource svjeez/scene */\nimport { Shape, circle, enter, rect, scene, span } from "svjeez/scene";\n\nexport default scene({ size: [200, 120], duration: 4, title: "Hello" }, () => (\n  <>\n    <Shape geometry={rect(200, 120)} fill="#101010" />\n    <Shape geometry={circle(8)} at={[100, 40]} anchor="center" fill="#3EE6D6" motion={enter(span(1.2, 0.5), { scale: 0 })} />\n  </>\n));\n`,
+      `/** @jsxImportSource svjeez/scene */\nimport { Shape, circle, enter, rect, scene, span } from "svjeez/scene";\n\nexport default scene({ size: [200, 120], duration: 4, title: "Hello" }, () => (\n  <>\n    <Shape geometry={rect(200, 120)} fill="#101010" />\n    <Shape geometry={circle(8)} at={[100, 40]} anchor="center" fill="#3EE6D6" motion={enter(span(1.2, 0.5), { from: { scale: 0 } })} />\n  </>\n));\n`,
     );
 
     if (!result.ok) throw new Error(result.error.message);
@@ -61,7 +62,7 @@ describe("compileScene", () => {
   });
 
   test("a scene model reports each node's box and the line that wrote it, and writes them with sources", async () => {
-    const text = `/** @jsxImportSource svjeez/scene */\nimport { Shape, rect, scene } from "svjeez/scene";\n\nexport default scene({ size: [200, 120], duration: 1, title: "x" }, () => (\n  <>\n    <Shape key="back" geometry={rect(200, 120)} />\n    <Shape key="dot" geometry={rect(10, 10)} at={[50, 40]} />\n  </>\n));\n`;
+    const text = `/** @jsxImportSource svjeez/scene */\nimport { Shape, rect, scene } from "svjeez/scene";\n\nexport default scene({ size: [200, 120], duration: 1, title: "x" }, () => (\n  <>\n    <Shape key="back" geometry={rect(200, 120)} fill="#101010" />\n    <Shape key="dot" geometry={rect(10, 10)} at={[50, 40]} fill="#3EE6D6" />\n  </>\n));\n`;
     const result = await compileScene(text);
 
     if (!result.ok) throw new Error(result.error.message);

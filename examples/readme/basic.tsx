@@ -9,7 +9,7 @@ export default scene(
     title: "Hello",
     desc: "A curve draws itself, then a dot pops in above it.",
     theme,
-    reducedMotion: { at: 3 },
+    reducedMotion: 3,
   },
   () => (
     <Group>
@@ -24,7 +24,7 @@ export default scene(
         at={[100, 40]}
         anchor="center"
         fill="#3EE6D6"
-        motion={enter(span(1.2, 0.5), { scale: 0 }, ease.pop)}
+        motion={enter(span(1.2, 0.5), { from: { scale: 0 }, curve: ease.pop })}
       />
     </Group>
   ),

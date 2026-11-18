@@ -1,7 +1,7 @@
 import { easeAt, splitEase } from "../ease-at";
 import { MAX_KEYS, snapPeriod } from "../keys";
 import { EPSILON, NUDGE, ease, type Ease, type Seconds } from "../motion";
-import type { Span } from "../span";
+import type { Span } from "./span";
 import { num } from "../format";
 import { isCurved, splitCurve, type Controls } from "./curve";
 import type { Animated, Key, Lane, Vec } from "./ir";
@@ -70,9 +70,9 @@ export class Passage<V extends object> {
   to(values: Partial<V>, when: Span, curve: Curve = ease.out): Passage<V> {
     if (!isSpan(when))
       throw new Error(
-        `to() takes a span, got ${String(when)}. Write .to(value, span(at, over)); a step right after another is span.next(over).`,
+        `to() takes a span, got ${String(when)}. Write .to(value, span(start, over)); a step right after another is span.next(over).`,
       );
-    const start = time(when.at, "to()");
+    const start = time(when.start, "to()");
 
     if (!(time(when.over, "to()") > 0))
       throw new Error(`to() needs a positive duration, got ${when.over}. Use set() for a cut.`);
