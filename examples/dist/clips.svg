@@ -26,7 +26,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     <rect width="290" height="240" rx="14" fill="var(--background)" stroke="var(--raised)" stroke-width="1.5"/>
     <g transform="translate(16 184)">
       <rect width="48" height="40" rx="9" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
-      <rect width="48" height="40" rx="9" fill="var(--blue)" class="a m1"/>
+      <rect width="48" height="40" rx="9" fill="var(--raised)" stroke="var(--blue)" stroke-width="2" class="a m1"/>
       <text x="11.4" y="25" font-size="14" fill="var(--text)">opt</text>
     </g>
     <g class="a m2">
@@ -44,7 +44,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     <rect width="290" height="240" rx="14" fill="var(--background)" stroke="var(--raised)" stroke-width="1.5"/>
     <g transform="translate(16 184)">
       <rect width="48" height="40" rx="9" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
-      <rect width="48" height="40" rx="9" fill="var(--blue)" class="a m4"/>
+      <rect width="48" height="40" rx="9" fill="var(--raised)" stroke="var(--blue)" stroke-width="2" class="a m4"/>
       <text x="11.4" y="25" font-size="14" fill="var(--text)">opt</text>
     </g>
     <g class="a m5">

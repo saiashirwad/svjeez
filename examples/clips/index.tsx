@@ -29,7 +29,10 @@ const outlined = (width: number, height: number, radius: number) => ({
   stroke: { color: theme.border, width: 1.5 },
 });
 
-/** A key that lights up while it is held: the node, and the verb that presses it. */
+/**
+ * A key that lights up while it is held: the node, and the verb that presses it. Lit, it is ringed in blue on a raised
+ * face, which its legend reads on in both schemes.
+ */
 const keycap = (label: string) => {
   const cap = ref("key");
   const lit = cap.part("lit");
@@ -38,7 +41,13 @@ const keycap = (label: string) => {
     node: (
       <Group ref={cap} at={[16, 184]}>
         <Shape {...outlined(48, 40, 9)} fill={theme.surface} />
-        <Shape key="lit" geometry={rect(48, 40, { radius: 9 })} fill={theme.blue} opacity={0} />
+        <Shape
+          key="lit"
+          geometry={rect(48, 40, { radius: 9 })}
+          fill={theme.raised}
+          stroke={{ color: theme.blue, width: 2 }}
+          opacity={0}
+        />
         <Text font={mono} size={14} at={[24, 25]} align="center" fill={theme.text}>
           {label}
         </Text>
