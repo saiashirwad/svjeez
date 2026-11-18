@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { Group, font, morph, scene, span, tokens, type SceneElement } from "svjeez";
 import { SceneError, boxesOf, inspect, svg, type Scene } from "svjeez/tools";
-import { Chart, area, bars, line, type Plot } from "../src/index.ts";
+import { Chart, area, bars, line, type Plot, type Series, type XScale } from "../src/index.ts";
 
 const theme = tokens({
   light: { bg: "#FFFFFF", ink: "#111111", soft: "#888888", blue: "#0A6CFF", red: "#E5453B" },
@@ -19,27 +19,22 @@ const band = { kind: "band", domain: months } as const;
 const sceneOf = (build: () => SceneElement): Scene =>
   scene({ size: [400, 300], duration: 4, title: "chart", theme }, () => <Group>{build()}</Group>);
 
-const planOf = (build: (plot: Plot) => SceneElement): Plot => {
-  let seen: Plot | undefined;
+const plotOf = (
+  series: readonly Series[] = [bars({ Jan: 10, Feb: 40, Mar: 25 }, { color: theme.blue })],
+  x: XScale = band,
+): Plot => {
+  let plot: Plot | undefined;
+  sceneOf(() => (
+    <Chart {...look} size={[300, 200]} x={x} series={series}>
+      {(value) => {
+        plot = value;
 
-  svg.emit(
-    sceneOf(() => (
-      <Chart
-        {...look}
-        size={[300, 200]}
-        x={band}
-        series={[bars({ Jan: 10, Feb: 40, Mar: 25 }, { color: theme.blue })]}
-      >
-        {(plot) => {
-          seen = plot;
+        return null;
+      }}
+    </Chart>
+  ));
 
-          return build(plot);
-        }}
-      </Chart>
-    )),
-  );
-
-  return seen!;
+  return plot!;
 };
 
 const errorOf = (make: () => SceneElement): SceneError => {
@@ -56,7 +51,7 @@ const errorOf = (make: () => SceneElement): SceneError => {
 
 describe("scales", () => {
   test("a chart with bars fits y to the data and includes zero", () => {
-    const plot = planOf(() => <Group />);
+    const plot = plotOf();
 
     expect(plot.y(0)).toBe(200);
     expect(plot.y(40)).toBe(0);
@@ -65,39 +60,25 @@ describe("scales", () => {
   });
 
   test("a line alone fits tightly, so zero stays out", () => {
-    let plot: Plot | undefined;
-
-    svg.emit(
-      sceneOf(() => (
-        <Chart
-          {...look}
-          size={[300, 200]}
-          x={{ kind: "linear" }}
-          series={[
-            line(
-              [
-                [1, 90],
-                [2, 100],
-              ],
-              { color: theme.blue },
-            ),
-          ]}
-        >
-          {(p) => {
-            plot = p;
-
-            return <Group />;
-          }}
-        </Chart>
-      )),
+    const plot = plotOf(
+      [
+        line(
+          [
+            [1, 90],
+            [2, 100],
+          ],
+          { color: theme.blue },
+        ),
+      ],
+      { kind: "linear" },
     );
 
-    expect(plot!.y(100)).toBe(0);
-    expect(plot!.y(90)).toBe(200);
+    expect(plot.y(100)).toBe(0);
+    expect(plot.y(90)).toBe(200);
   });
 
   test("x() names the categories when asked for another", () => {
-    const plot = planOf(() => <Group />);
+    const plot = plotOf();
 
     expect(() => plot.x("Apr")).toThrow(
       'plot.x() got "Apr", which is not in x.domain (Jan, Feb, Mar)',
@@ -130,30 +111,19 @@ describe("drawing", () => {
 
     const options = { color: theme.blue, span: span(1, 0.2) };
 
-    sceneOf(() => (
-      <Chart
-        {...look}
-        size={[300, 200]}
-        x={band}
-        series={[
-          bars(points, { ...options, values: true }),
-          line(points, { ...options, dots: true }),
-          area(points, { ...options, label: "sales" }),
-          bars({ Jan: 1 }, { name: "static", color: theme.red }),
-        ]}
-      >
-        {({ when }) => {
-          expect(when("bars").start).toBe(1);
-          expect(when("bars").end).toBeCloseTo(1.16 + 0.12 + 0.35);
-          expect(when("line").end).toBeCloseTo(1.5);
-          expect(when("area").next(0.3).start).toBeCloseTo(1.6);
-          expect(when("static")).toEqual(span(0, 0));
-          expect(() => when("typo")).toThrow('no series named "typo"');
+    const { when } = plotOf([
+      bars(points, { ...options, values: true }),
+      line(points, { ...options, dots: true }),
+      area(points, { ...options, label: "sales" }),
+      bars({ Jan: 1 }, { name: "static", color: theme.red }),
+    ]);
 
-          return <Group />;
-        }}
-      </Chart>
-    ));
+    expect(when("bars").start).toBe(1);
+    expect(when("bars").end).toBeCloseTo(1.63);
+    expect(when("line").end).toBeCloseTo(1.5);
+    expect(when("area").next(0.3).start).toBeCloseTo(1.6);
+    expect(when("static")).toEqual(span(0, 0));
+    expect(() => when("typo")).toThrow('no series named "typo"');
   });
 
   test("bars side by side share a band, and stay on the canvas", () => {

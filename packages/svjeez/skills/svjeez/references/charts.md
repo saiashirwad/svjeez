@@ -40,7 +40,7 @@ The whole example is [`examples/charts`](../../../../../examples/charts/index.ts
 | `grid` | faint lines across the plot at the ticks |
 | `axesIn` | a span the axes fade in over; without it they are there from the start |
 | `key` | key the chart when you morph between states |
-| children | a function `({ x, y, bandwidth, size }) => nodes`: annotations in the plot's own coordinates, where `x(value)` is a band's center or a linear value and `y(value)` a y value |
+| children | a function `({ x, y, bandwidth, size, when }) => nodes`: annotations in the plot's own coordinates, where `x(value)` is a band's center or a linear value and `y(value)` a y value |
 
 Inside the overlay, `plot.when("sales")` gives the span from the first animated mark in that series to the last, including dots and labels. Use `plot.when("sales").next(0.3)` for a caption that follows it. A static series returns `span(0, 0)`.
 

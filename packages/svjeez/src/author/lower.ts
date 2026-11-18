@@ -623,32 +623,6 @@ const inside = (timing: Timing, begin: Seconds, over: Seconds | undefined): Timi
   };
 };
 
-const claimKey = (
-  name: string | undefined,
-  parent: string,
-  taken: Set<string>,
-  element: SceneElement,
-): string => {
-  if (name !== undefined && taken.has(name))
-    throw new SceneError(
-      `Two nodes are both keyed "${name}"${parent && ` inside ${named(parent)}`}.`,
-      "Give each a key of its own.",
-      { node: `"${name}"`, ...(writtenAt(element) && { source: writtenAt(element)! }) },
-    );
-
-  if (name?.includes("/"))
-    throw new SceneError(`A key can't contain "/", got "${name}".`, "Join words with - or _.", {
-      ...(writtenAt(element) && { source: writtenAt(element)! }),
-    });
-  let own = name;
-
-  for (let index = taken.size; own === undefined; index++)
-    if (!taken.has(String(index))) own = String(index);
-  taken.add(own);
-
-  return parent ? `${parent}/${own}` : own;
-};
-
 const lowerAll = (
   ctx: Ctx,
   elements: readonly SceneElement[],
@@ -660,13 +634,8 @@ const lowerAll = (
   elements.flatMap((element): SceneNode[] => {
     const given = sceneElement(element, parent ? named(parent) : "The scene");
 
-    if (given.type === "fragment") {
-      if (given.key === undefined)
-        return lowerAll(ctx, given.children, timing, parent, taken, scope);
-      const key = claimKey(given.key, scope, taken, given);
-
-      return lowerAll(ctx, given.children, timing, parent, new Set(), key);
-    }
+    if (given.type === "fragment" && given.key === undefined)
+      return lowerAll(ctx, given.children, timing, parent, taken, scope);
 
     if (given.type === "sequence") {
       const clocked = inside(timing, given.start, given.over);
@@ -715,9 +684,31 @@ const lowerAll = (
       return merged;
     }
 
-    const name = given.props.key ?? given.props.ref?.key;
+    const name = given.type === "fragment" ? given.key : (given.props.key ?? given.props.ref?.key);
+    const source = writtenAt(given);
 
-    const key = claimKey(name, scope, taken, given);
+    if (name !== undefined && taken.has(name))
+      throw new SceneError(
+        `Two nodes are both keyed "${name}"${scope && ` inside ${named(scope)}`}.`,
+        "Give each a key of its own.",
+        { node: `"${name}"`, ...(source && { source }) },
+      );
+
+    if (name?.includes("/"))
+      throw new SceneError(`A key can't contain "/", got "${name}".`, "Join words with - or _.", {
+        ...(source && { source }),
+      });
+
+    let own = name;
+
+    for (let index = taken.size; own === undefined; index++)
+      if (!taken.has(String(index))) own = String(index);
+    taken.add(own);
+    const key = scope ? `${scope}/${own}` : own;
+
+    if (given.type === "fragment")
+      return lowerAll(ctx, given.children, timing, parent, new Set(), key);
+
     const entry = nameFor(given, name, parent);
 
     nameNode(key, entry);

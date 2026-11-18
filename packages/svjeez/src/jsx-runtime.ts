@@ -17,11 +17,6 @@ const isTag = <P>(type: Given<P>): type is string => typeof type === "string";
 export const componentName = <P>(type: Given<P>): string | undefined =>
   isFragment(type) || isTag(type) || !type.name ? undefined : type.name;
 
-const keyed = <N extends { readonly props: object }>(node: N, key: string): N => ({
-  ...node,
-  props: { ...node.props, key },
-});
-
 export const build = <P extends { readonly key?: string; readonly children?: Child }>(
   type: Given<P>,
   props: P,
@@ -45,11 +40,17 @@ export const build = <P extends { readonly key?: string; readonly children?: Chi
 
     if (key === undefined || element.type === "run") return element;
 
-    if (element.type === "fragment" && element.key === key) return element;
+    if (element.type === "fragment" && (element.key === undefined || element.key === key))
+      return sourced(element, { ...element, key });
 
     if (!("props" in element)) return { type: "fragment", key, children: [element] };
 
-    return element.props.key === key ? element : sourced(element, keyed(element, key));
+    if (element.props.key === key) return element;
+
+    const keyed = { ...element };
+    keyed.props = { ...element.props, key };
+
+    return sourced(element, keyed);
   } catch (error) {
     if (!(error instanceof Error)) throw error;
     const thrown = thrownFrom(error);

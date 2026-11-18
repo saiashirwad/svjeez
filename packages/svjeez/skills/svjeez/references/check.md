@@ -15,7 +15,9 @@ card.tsx:44:9  low-contrast  info: <Text> "+128" is hard to see: green on raised
 0 errors, 0 warnings, 1 info; model only
 ```
 
-A node's key is the keys from the root down, joined by `/`; a node with no `key` or `ref` is named by its index among its siblings. Messages name a node by its component and its key, as `<Shape> "dot"`, or by its words for a text with no key, and a part an `<Arrow>` draws is named after the arrow. A JSX key on a component names its returned node. When a component returns a fragment, the key prefixes its children. Key the nodes you will want to read. A scene that throws while it builds is one `compile-error` finding: its `source` is the line of the node or the call that is wrong, its message says what is wrong and its hint what to change. Until the scene builds, `--at` has nothing to describe. `check` exits 1 on any error. `--params` and `--param` work as for every command ([params.md](params.md)); `--color-scheme` picks the scheme the browser pass measures.
+A node’s key is its path from the root, with each name joined by `/`. A component’s JSX key names the node it returns. If it returns a fragment, the key prefixes each child’s path. A node with no `key` or `ref` gets a numeric name among its siblings.
+
+Messages name a node by its component and its key, as `<Shape> "dot"`, or by its words for a text with no key, and a part an `<Arrow>` draws is named after the arrow. Key the nodes you will want to read. A scene that throws while it builds is one `compile-error` finding: its `source` is the line of the node or the call that is wrong, its message says what is wrong and its hint what to change. Until the scene builds, `--at` has nothing to describe. `check` exits 1 on any error. `--params` and `--param` work as for every command ([params.md](params.md)); `--color-scheme` picks the scheme the browser pass measures.
 
 ## Reading what is on screen
 

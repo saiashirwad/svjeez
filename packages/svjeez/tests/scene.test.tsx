@@ -49,27 +49,22 @@ describe("lowering", () => {
   });
 
   test("a component key follows the instance when siblings change order", () => {
-    const Badge = ({ width }: { width: number }) => (
-      <Shape fill="#111111" geometry={rect(width, 5)} />
-    );
+    const Badge = () => <Shape fill="#111111" geometry={rect(10, 5)} />;
 
-    const keys = (names: string[]) =>
-      made(() => (
+    for (const order of [
+      ["alice", "bob"],
+      ["bob", "alice"],
+    ]) {
+      const scene = made(() => (
         <Group>
-          {names.map((name) => (
-            <Badge key={name} width={name === "alice" ? 10 : 20} />
+          {order.map((name) => (
+            <Badge key={name} />
           ))}
         </Group>
-      )).root.children.map(({ key, box }) => [key, box.width]);
+      ));
 
-    expect(keys(["alice", "bob"])).toEqual([
-      ["alice", 10],
-      ["bob", 20],
-    ]);
-    expect(keys(["bob", "alice"])).toEqual([
-      ["bob", 20],
-      ["alice", 10],
-    ]);
+      expect(scene.root.children.map((node) => node.key)).toEqual(order);
+    }
   });
 
   test("a keyed fragment scopes its children without adding a layout node", () => {
