@@ -1,3 +1,5 @@
+import { seek } from "../page";
+
 export interface PageElement {
   readonly tag: string;
   readonly key?: string;
@@ -57,22 +59,10 @@ interface Scope {
   __svjeezCheck?: State;
 }
 
-export const setup = (): PageSetup => {
+const setupPage = (seekPage: typeof seek): PageSetup => {
   const svg = document.querySelector("svg");
 
   if (!svg) throw new Error("checkScene() found no <svg> in the page.");
-
-  const seek = (time: number): void => {
-    const rate = parseFloat(svg.getAttribute("data-playback-rate") ?? "") || 1;
-
-    for (const animation of document.getAnimations()) {
-      animation.pause();
-      animation.currentTime = (time / rate) * 1000;
-    }
-
-    svg.pauseAnimations();
-    svg.setCurrentTime(time / rate);
-  };
 
   const UNPAINTED = new Set([
     "defs",
@@ -269,7 +259,7 @@ export const setup = (): PageSetup => {
   }));
 
   const scope: Scope = window;
-  scope.__svjeezCheck = { seek, svg, leaves, animated };
+  scope.__svjeezCheck = { seek: (time) => seekPage(time, svg), svg, leaves, animated };
   const box = svg.viewBox.baseVal;
 
   return {
@@ -279,6 +269,9 @@ export const setup = (): PageSetup => {
     animated: animated.map(({ el }) => describe(el)),
   };
 };
+
+// SAFETY: Playwright serializes this callback, including both function bodies and no imports.
+export const setup = new Function(`return (${setupPage})(${seek});`) as () => PageSetup;
 
 export const measure = ({ time, before }: { time: number; before: number }): PageBox[] => {
   const scope: Scope = window;

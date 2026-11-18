@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { deflateSync } from "node:zlib";
-import { openScene, renderFrames } from "svjeez/frames";
+import { checkScene, openScene, renderFrames } from "svjeez/frames";
 import { loopLength, seek, restyle } from "svjeez/page";
 import {
   Group,
@@ -744,6 +744,58 @@ describe.if(browser)("seek and loopLength on an inline <svg>", () => {
       expect([opened.duration, opened.playbackRate]).toEqual([4, 2]);
     } finally {
       await opened.close();
+    }
+  });
+
+  test("frames and layout checks seek CSS and SMIL to the same scene seconds at different rates", async () => {
+    const picture = (body: string, rate = 1) =>
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 50" width="100" height="50" data-playback-rate="${rate}">${body}</svg>`;
+
+    const colorScheme = "light";
+
+    const still = async (body: string) => {
+      const { frames } = await renderFrames(picture(body), { times: [0], colorScheme });
+
+      return frames[0]!.png;
+    };
+
+    const [empty, clipped] = await Promise.all([
+      still(""),
+      still('<rect x="-4" y="10" width="20" height="20"/>'),
+    ]);
+
+    for (const rate of [1, 2]) {
+      const out = picture(
+        `<style>
+           @keyframes show { 0%, 50%, 100% { opacity: 0 } 25% { opacity: 1 } }
+           .window { animation: show ${4 / rate}s steps(1, end) infinite }
+         </style>
+         <rect class="window" x="-4" y="10" width="4" height="20" data-key="window">
+           <animate attributeName="width" values="4;20;4" keyTimes="0;.375;.625"
+             calcMode="discrete" dur="${4 / rate}s" repeatCount="indefinite"/>
+         </rect>`,
+        rate,
+      );
+
+      const times = [0.75, 1.75, 2.25];
+
+      const [rendered, checked] = await Promise.all([
+        renderFrames(out, { times: [...times, 1.25], colorScheme }),
+        checkScene(out, { times, colorScheme }),
+      ]);
+
+      expect(rendered.duration).toBe(4);
+      expect(rendered.frames.map(({ png }, i) => same(png, i === 1 ? clipped : empty))).toEqual([
+        true,
+        true,
+        true,
+        true,
+      ]);
+
+      expect(checked.duration).toBe(4);
+      expect(checked.findings.filter(({ rule }) => rule === "off-canvas")).toEqual([
+        expect.objectContaining({ key: "window", times: [1.75], severity: "warning" }),
+      ]);
     }
   });
 });
