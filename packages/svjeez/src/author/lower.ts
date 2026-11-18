@@ -25,6 +25,7 @@ import type {
   Layer,
   Effect,
   Paint as ModelPaint,
+  Pattern as ModelPattern,
   Scene,
   SceneNode,
   ShapeNode,
@@ -97,7 +98,14 @@ import { lookOf, paintedBoxOf } from "../model/painted";
 import { minus, pinned } from "./pin";
 import { layoutRuns, setAlong } from "./text";
 import { countedNodes, countingIn, formatOf, ticksOf } from "./count";
-import { blendable, gradientOf, isWrittenGradient, mixPaint } from "./paint";
+import {
+  blendable,
+  gradientOf,
+  isWrittenGradient,
+  isWrittenPattern,
+  mixPaint,
+  type Pattern,
+} from "./paint";
 import type { Effect as EffectProps } from "./effects";
 
 interface RunLook {
@@ -127,6 +135,7 @@ interface Ctx {
   readonly symbols: Map<string, SymbolEntry>;
   readonly named: Map<SceneSymbol, string>;
   readonly notes: Notes;
+  readonly patterns: Map<Pattern, ModelPattern>;
 }
 
 interface SymbolEntry {
@@ -154,10 +163,39 @@ const animated = <A, T>(
   return laneOf(data, data.initial.value!, timing, mix, where, curves);
 };
 
-const colorOf = (ctx: Ctx, paint: Paint, where: string, box?: Box): ModelPaint =>
-  isWrittenGradient(paint)
+const colorOf = (ctx: Ctx, paint: Paint, where: string, timing: Timing, box?: Box): ModelPaint => {
+  if (isWrittenPattern(paint)) return patternOf(ctx, paint, where, timing);
+
+  return isWrittenGradient(paint)
     ? gradientOf(paint, box, (color) => solidOf(ctx, color, where), where)
     : solidOf(ctx, paint, where);
+};
+
+/** A pattern is lowered once, however many nodes it paints, so its tile is one def in SVG. */
+const patternOf = (ctx: Ctx, given: Pattern, where: string, timing: Timing): ModelPattern => {
+  const known = ctx.patterns.get(given);
+
+  if (known) return known;
+  const root = `pattern${ctx.patterns.size + 1}`;
+  const tile = groupOf(ctx, given.children, root, `a pattern painting ${where}`, timing);
+
+  if (tile === undefined)
+    throw new SceneError(
+      `The pattern painting ${where} has nothing to draw.`,
+      "Give pattern() children, such as <Shape geometry={circle(3)} fill={theme.ink} />.",
+    );
+
+  const made: ModelPattern = {
+    kind: "pattern",
+    size: given.size,
+    offset: animated<Vec, Vec>(given.offset, keep, timing, mixVec, `pattern offset on ${where}`),
+    tile,
+  };
+
+  ctx.patterns.set(given, made);
+
+  return made;
+};
 
 const solidOf = (ctx: Ctx, paint: Hex | Token, where: string): Color => {
   if (isHex(paint)) return rgbaOf(paint, where);
@@ -269,7 +307,7 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
   const geometry = geometryOf(props.geometry, timing, where);
   const rest = atRest(geometry);
   const outline = outlineBoxOf(rest);
-  const paint = (value: Paint) => colorOf(ctx, value, where, outline);
+  const paint = (value: Paint) => colorOf(ctx, value, where, timing, outline);
   const { stroke: written } = props;
 
   const painted = (value: Anim<Paint>, what: string) =>
@@ -320,7 +358,7 @@ const strokeOf = (
     color: blendable(
       animated(
         written.color,
-        (value: Paint) => colorOf(ctx, value, where, box),
+        (value: Paint) => colorOf(ctx, value, where, timing, box),
         timing,
         mixPaint,
         `stroke on ${where}`,
@@ -380,7 +418,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
       blendable(
         animated(
           given,
-          (value: Paint) => colorOf(ctx, value, where, box),
+          (value: Paint) => colorOf(ctx, value, where, timing, box),
           timing,
           mixPaint,
           `fill on ${where}`,
@@ -1037,11 +1075,16 @@ const effectOf = (ctx: Ctx, effect: EffectProps, timing: Timing, where: string):
   };
 };
 
-const maskOf = (ctx: Ctx, mask: Child, key: string, timing: Timing): GroupNode | undefined => {
-  const elements = flat(mask);
+const groupOf = (
+  ctx: Ctx,
+  content: Child,
+  root: string,
+  owner: string,
+  timing: Timing,
+): GroupNode | undefined => {
+  const elements = flat(content);
 
   if (elements.length === 0) return undefined;
-  const root = `${key}#mask`;
   const children = arrangeState(lowerAll(ctx, elements, timing, root), ctx.notes);
 
   for (const child of children) {
@@ -1049,7 +1092,7 @@ const maskOf = (ctx: Ctx, mask: Child, key: string, timing: Timing): GroupNode |
 
     if (placed !== undefined)
       throw new SceneError(
-        `${named(placed)} is in the mask of ${named(key)} and is placed by an anchor, a track going to an anchor, or as an arrow's end. A mask is drawn in its node's frame and is never part of the layout.`,
+        `${named(placed)} is in ${owner} and is placed by an anchor, a track going to an anchor, or as an arrow's end. What is drawn there is never part of the layout.`,
         "Place what is in it with at.",
         whereOf(placed),
       );
@@ -1078,7 +1121,11 @@ const dressed = (
   const { effects = [], blend } = props;
   const clip = byBox(props.clip) ? props.clip(own) : props.clip;
   const asked = byBox(props.mask) ? props.mask(own) : props.mask;
-  const mask = asked === undefined ? undefined : maskOf(ctx, asked, node.key, timing);
+
+  const mask =
+    asked === undefined
+      ? undefined
+      : groupOf(ctx, asked, `${node.key}#mask`, `the mask of ${named(node.key)}`, timing);
 
   return {
     ...node,
@@ -1251,9 +1298,10 @@ const lowerScene = (options: SceneOptions, build: () => SceneElement): Scene => 
     symbols: new Map(),
     named: new Map(),
     notes: notes(),
+    patterns: new Map(),
   };
 
-  for (const token of Object.values(options.theme ?? {})) colorOf(ctx, token, "scene()");
+  for (const token of Object.values(options.theme ?? {})) solidOf(ctx, token, "scene()");
 
   const children = lowerAll(
     ctx,

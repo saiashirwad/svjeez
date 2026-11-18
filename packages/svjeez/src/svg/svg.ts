@@ -19,6 +19,7 @@ import type {
   Lane,
   Layer,
   Paint,
+  Pattern,
   Scene,
   Face,
   GroupNode,
@@ -37,6 +38,7 @@ import { mixNumber, same } from "../model/steps";
 import { homed } from "../author/pin";
 import { growBox, lengthOf, onCircle, smilSafeWith } from "../model/geometry";
 import { blendable, isGradient } from "../author/paint";
+import { isColor } from "../model/painted";
 import { reachOf } from "../model/reach";
 import { walkScene } from "../model/walk";
 import {
@@ -46,6 +48,7 @@ import {
   gradientUrl,
   maskUrl,
   pathId,
+  patternUrl,
   working,
   type Defs,
 } from "./svg-paint";
@@ -78,6 +81,7 @@ const supports: Readonly<Record<Feature, Support>> = {
   softBlur: SOFT_BLUR,
   linearGradient: EXACT,
   radialGradient: EXACT,
+  pattern: EXACT,
   nonScalingStroke: EXACT,
   liveTokens: EXACT,
   curvedMotion: EXACT,
@@ -95,8 +99,6 @@ interface Ctx {
   readonly around: Partial<Face>;
   readonly defs: Defs;
 }
-
-const isColor = (paint: Paint): paint is Color => !isGradient(paint);
 
 const pt = ([x, y]: Vec): string => `${num(x)} ${num(y)}`;
 
@@ -467,12 +469,23 @@ const asColor = (paint: Paint, where: string): Color => {
 };
 
 const asGradient = (paint: Paint, where: string): Gradient => {
-  if (!isColor(paint)) return paint;
+  if (isGradient(paint)) return paint;
 
   throw new Error(
-    `${where} holds a color and a gradient in one lane, which lowering never writes. This is a bug in svjeez; please report it with the scene.`,
+    `${where} holds a gradient and another kind of paint in one lane, which lowering never writes. This is a bug in svjeez; please report it with the scene.`,
   );
 };
+
+const urlOf = (
+  ctx: Ctx,
+  paint: Gradient | Pattern,
+  slot: "fill" | "stroke",
+  shift: Vec,
+  key: string,
+): string =>
+  paint.kind === "pattern"
+    ? patternUrl(ctx.defs, paint, shift, slot, key)
+    : gradientUrl(ctx.defs, paint, shift, slot, key);
 
 const painted = (
   ctx: Ctx,
@@ -490,9 +503,7 @@ const painted = (
   }
 
   if (!isLane(paint)) {
-    attrs[slot] = isColor(paint)
-      ? colorText(paint)
-      : gradientUrl(ctx.defs, paint, shift, slot, key);
+    attrs[slot] = isColor(paint) ? colorText(paint) : urlOf(ctx, paint, slot, shift, key);
 
     return;
   }
@@ -501,10 +512,19 @@ const painted = (
 
   blendable(paint, where);
 
-  if (!isColor(paint.keys[0].value)) {
-    const gradients = mapLane(paint, (value) => asGradient(value, where));
+  const first = paint.keys[0].value;
 
-    attrs[slot] = gradientUrl(ctx.defs, gradients, shift, slot, key);
+  if (!isColor(first)) {
+    attrs[slot] =
+      first.kind === "pattern"
+        ? urlOf(ctx, first, slot, shift, key)
+        : gradientUrl(
+            ctx.defs,
+            mapLane(paint, (value) => asGradient(value, where)),
+            shift,
+            slot,
+            key,
+          );
 
     return;
   }

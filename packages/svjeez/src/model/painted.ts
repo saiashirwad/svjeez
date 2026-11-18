@@ -1,8 +1,11 @@
-import type { Box, Cubic, Geometry, ShapeNode, Stroke, Vec } from "./ir";
+import type { Box, Color, Cubic, Geometry, Paint, ShapeNode, Stroke, Vec } from "./ir";
 import { atRest } from "./lane";
 import { boundsOfPoints, growBox, onCircle, outlineBoxOf } from "./geometry";
 
 export const MITER_LIMIT = 4;
+
+export const isColor = (paint: Paint): paint is Color =>
+  !("kind" in paint) || paint.kind === "token";
 
 export interface StrokeLook {
   readonly width: number;

@@ -19,6 +19,7 @@ export type Feature =
   | "softBlur"
   | "linearGradient"
   | "radialGradient"
+  | "pattern"
   | "nonScalingStroke"
   | "liveTokens"
   | "curvedMotion"
@@ -38,6 +39,7 @@ export const FEATURES: Readonly<Record<Feature, string>> = {
   softBlur: "a blur under 1.5 units",
   linearGradient: "a linear gradient",
   radialGradient: "a radial gradient",
+  pattern: "a pattern",
   nonScalingStroke: "a stroke that keeps its width when scaled",
   liveTokens: "light and dark colors",
   curvedMotion: "a curved path of motion",
@@ -112,9 +114,11 @@ const featuresOf = (node: SceneNode): Feature[] => {
   }
 
   for (const paint of painted) {
-    if (Array.isArray(paint)) continue;
+    if (!("kind" in paint)) continue;
 
-    if ("kind" in paint) used.push(paint.kind === "token" ? "liveTokens" : `${paint.kind}Gradient`);
+    if (paint.kind === "token") used.push("liveTokens");
+    else if (paint.kind === "pattern") used.push("pattern");
+    else used.push(`${paint.kind}Gradient`);
   }
 
   if ((node.kind === "shape" || node.kind === "text") && node.stroke?.nonScaling)

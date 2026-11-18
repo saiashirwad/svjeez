@@ -3,7 +3,7 @@ import { hexBytes, hexOf, type Hex } from "../model/color";
 import { lineCubic, quadraticCubic } from "../model/curve";
 import { ringsOf } from "../model/paths";
 import type { Contour, Cubic, Geometry as Outline, Rgba, Vec } from "../model/ir";
-import type { Gradient } from "./paint";
+import type { Gradient, Pattern } from "./paint";
 
 export type { Hex };
 
@@ -158,7 +158,7 @@ export interface Token {
 
 export type Color = Hex | Token;
 
-export type Paint = Color | Gradient;
+export type Paint = Color | Gradient | Pattern;
 
 export type Theme<K extends string = string> = { readonly [N in K]: Token };
 

@@ -119,7 +119,14 @@ export type Gradient =
       readonly stops: readonly Stop[];
     };
 
-export type Paint = Color | Gradient;
+export interface Pattern {
+  readonly kind: "pattern";
+  readonly size: Vec;
+  readonly offset: Animated<Vec>;
+  readonly tile: GroupNode;
+}
+
+export type Paint = Color | Gradient | Pattern;
 
 /** How a node composites onto what is drawn beneath it inside its group. Normal is the absence of one. */
 export type Blend =

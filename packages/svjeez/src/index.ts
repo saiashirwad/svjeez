@@ -38,7 +38,7 @@ export {
 
 export { moved, subtract } from "./author/holes";
 
-export { linear, radial } from "./author/paint";
+export { linear, pattern, radial } from "./author/paint";
 
 export { adjust, blur, displace, shadow } from "./author/effects";
 

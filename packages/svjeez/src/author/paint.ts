@@ -7,13 +7,17 @@ import type {
   Color as ModelColor,
   Gradient as ModelGradient,
   Paint as ModelPaint,
+  Pattern as ModelPattern,
   Stop,
   Vec,
 } from "../model/ir";
 import { isLane } from "../model/lane";
 import { placeIn, type Place } from "./refs";
-import { noMix, type Mix } from "../model/steps";
-import type { Color } from "./values";
+import { isColor } from "../model/painted";
+import { noMix, same, type Mix } from "../model/steps";
+import type { Child } from "./nodes";
+import type { Anim } from "./track";
+import type { Color, Paint } from "./values";
 
 export type Stops = readonly Color[] | readonly (readonly [offset: number, color: Color])[];
 
@@ -27,6 +31,19 @@ export type Gradient =
       readonly stops: Stops;
     }
   | { readonly kind: "radial"; readonly around: Place; readonly stops: Stops };
+
+export interface Pattern {
+  readonly kind: "pattern";
+  readonly size: Vec;
+  readonly children: Child;
+  readonly offset: Anim<Vec>;
+}
+
+export interface PatternOptions {
+  readonly size: Vec;
+  readonly children: Child;
+  readonly offset?: Anim<Vec>;
+}
 
 export interface LinearOptions {
   readonly from: Vec;
@@ -117,12 +134,27 @@ export const radial = Object.assign(
   },
 );
 
+export const pattern = ({ size, children, offset = [0, 0] }: PatternOptions): Pattern => {
+  if (!size.every((side) => side > 0 && Number.isFinite(side)))
+    throw new SceneError(
+      `pattern() needs a tile size of two positive numbers, got [${size.join(", ")}].`,
+    );
+
+  return { kind: "pattern", size, children, offset };
+};
+
 const DEG = Math.PI / 180;
+
+const isPattern = (paint: ModelPaint): paint is ModelPattern =>
+  "kind" in paint && paint.kind === "pattern";
 
 export const isGradient = (paint: ModelPaint): paint is ModelGradient => "stops" in paint;
 
-export const isWrittenGradient = (paint: Gradient | Color): paint is Gradient =>
-  typeof paint === "object" && paint.kind !== "token";
+export const isWrittenGradient = (paint: Paint): paint is Gradient =>
+  typeof paint === "object" && (paint.kind === "linear" || paint.kind === "radial");
+
+export const isWrittenPattern = (paint: Paint): paint is Pattern =>
+  typeof paint === "object" && paint.kind === "pattern";
 
 export const gradientOf = (
   given: Gradient,
@@ -205,6 +237,16 @@ export const blendable = <P extends Animated<ModelPaint> | undefined>(
 ): P => {
   if (paint === undefined || !isLane(paint)) return paint;
   const values = paint.keys.map((key) => key.value);
+
+  if (values.some(isPattern)) {
+    if (values.some((value) => !same(value, values[0])))
+      throw new SceneError(
+        `${where} would blend a pattern with a different paint, and a pattern blends with nothing but itself. Keep the same pattern on every key, or draw two shapes and fade one into the other.`,
+      );
+
+    return paint;
+  }
+
   const gradients = values.filter(isGradient);
 
   if (gradients.length === 0) return paint;
@@ -223,9 +265,11 @@ export const blendable = <P extends Animated<ModelPaint> | undefined>(
 
   const keys = paint.keys.map((key, i) => ({
     ...key,
-    value: isGradient(key.value)
-      ? padded(key.value, count)
-      : lifted(key.value, padded(near(i), count)),
+    value: isColor(key.value)
+      ? lifted(key.value, padded(near(i), count))
+      : isGradient(key.value)
+        ? padded(key.value, count)
+        : key.value,
   }));
 
   // SAFETY: the lane is the one given, each key's value a paint of the same lane, so P holds it.
