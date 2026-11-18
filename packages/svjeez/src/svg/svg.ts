@@ -38,6 +38,7 @@ import { homed } from "../author/pin";
 import { lengthOf } from "../model/geometry";
 import { blendable, isGradient } from "../author/paint";
 import { grown, reachOf } from "../model/reach";
+import { walkScene } from "../model/walk";
 import {
   clipUrl,
   colorText,
@@ -1122,20 +1123,12 @@ const tokenCss = (scene: Scene, prefix: string): string => {
 const aroundOf = (scene: Scene): Partial<Face> => {
   const counts = new Map<string, number>();
 
-  const visit = (node: SceneNode): void => {
-    if (node.kind === "text") {
-      const family = commonest(node.lines.flatMap((line) => line.runs))?.face.family;
+  walkScene(scene, (node) => {
+    if (node.kind !== "text") return;
+    const family = commonest(node.lines.flatMap((line) => line.runs))?.face.family;
 
-      if (family !== undefined) counts.set(family, (counts.get(family) ?? 0) + 1);
-    }
-
-    if (node.kind === "group") node.children.forEach(visit);
-
-    if (node.mask) visit(node.mask);
-  };
-
-  visit(scene.root);
-  Object.values(scene.symbols).forEach(visit);
+    if (family !== undefined) counts.set(family, (counts.get(family) ?? 0) + 1);
+  });
   const [best] = [...counts].sort((a, b) => b[1] - a[1]);
   const faces = Object.values(scene.fonts).map((family) => family.faces);
 

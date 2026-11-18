@@ -20,6 +20,7 @@ import { isLane } from "../model/lane";
 import { FontBook, charName } from "../author/runs";
 import { placed, reachOf } from "../model/reach";
 import { mixNumber, mixVec, same } from "../model/steps";
+import { walkScene } from "../model/walk";
 import {
   SCHEMES,
   area,
@@ -1439,16 +1440,9 @@ const wasted = (
 const unusedSymbols = (survey: Survey): void => {
   const used = new Set<string>();
 
-  const visit = (node: SceneNode): void => {
+  walkScene(survey.scene, (node) => {
     if (node.kind === "instance") used.add(node.symbol);
-
-    if (node.kind === "group") node.children.forEach(visit);
-
-    if (node.mask) visit(node.mask);
-  };
-
-  visit(survey.scene.root);
-  Object.values(survey.scene.symbols).forEach(visit);
+  });
 
   for (const [name, root] of Object.entries(survey.scene.symbols))
     if (!used.has(name))
