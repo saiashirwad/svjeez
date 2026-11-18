@@ -1,5 +1,5 @@
 import { SceneError } from "../model/scene-error";
-import { EPSILON, type Seconds } from "../model/time";
+import { EPSILON, ease, type Seconds } from "../model/time";
 import type { Animated, Key, Lane, Vec } from "../model/ir";
 import { isLane } from "../model/lane";
 import type { Anchor } from "./refs";
@@ -281,6 +281,55 @@ const sampledLane = <T>(
   return period === undefined || !isLane(lane) ? lane : { ...lane, period };
 };
 
+const COLOR = /^\[0,0,0,0\]$|^\{"kind":"token","name":".*"\}$/;
+
+const steppedLane = <T>(
+  lanes: readonly Animated<Read>[],
+  out: (values: readonly Read[]) => T,
+  window: Seconds,
+  period: Seconds | undefined,
+  where: string,
+): Animated<T> | undefined => {
+  const at = (t: Seconds): T => out(lanes.map((lane) => valueAt(lane, t, blendRead)));
+  const count = Math.max(2, Math.ceil(window * MEASURE));
+  const times = Array.from({ length: count + 1 }, (_, i) => (window * i) / count);
+  const values = times.map(at);
+  const ids = values.map((value) => JSON.stringify(value));
+  const changes = ids.flatMap((id, i) => (i > 0 && id !== ids[i - 1] ? [i] : []));
+
+  if (changes.length === 0 || changes.length > count / 8) return undefined;
+  const shape = flatten(values[0], where).shape;
+
+  if (
+    !values.every((value) => {
+      const own = flatten(value, where).shape;
+
+      return own === shape || (COLOR.test(own) && COLOR.test(shape));
+    })
+  )
+    return undefined;
+
+  const keys = changes.map((i): Key<T> => {
+    let [low, high] = [times[i - 1]!, times[i]!];
+
+    for (let step = 0; step < 40 && high - low > EPSILON; step++) {
+      const mid = (low + high) / 2;
+
+      if (JSON.stringify(at(mid)) === ids[i - 1]) low = mid;
+      else high = mid;
+    }
+
+    return { t: high, value: values[i]!, ease: ease.hold };
+  });
+
+  const [next, ...rest] = keys;
+
+  if (!next) return undefined;
+  const lane: Lane<T> = { kind: "lane", keys: [{ t: 0, value: values[0]! }, next, ...rest] };
+
+  return period === undefined ? lane : { ...lane, period };
+};
+
 const isBaseTrack = (source: Base): source is Track<number> | Track<Vec> => isTrack(source);
 
 export const derivedOf = <A, T>(
@@ -312,6 +361,16 @@ export const derivedOf = <A, T>(
   if (kept !== undefined) return kept;
   const period = moving[0]!.period;
   const shared = period !== undefined && moving.every((lane) => lane.period === period);
+
+  const stepped = steppedLane(
+    lanes,
+    out,
+    shared ? period : timing.duration,
+    shared ? period : undefined,
+    where,
+  );
+
+  if (stepped !== undefined) return stepped;
 
   return sampledLane(
     lanes,

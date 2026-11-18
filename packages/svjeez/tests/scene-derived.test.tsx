@@ -11,11 +11,13 @@ import {
   span,
   spin,
   timeline,
+  tokens,
   track,
+  type Paint,
   type SceneElement,
   type Vec,
 } from "svjeez";
-import { isLane, type Model } from "svjeez/tools";
+import { isLane, svg, type Model } from "svjeez/tools";
 import { easeAt } from "../src/model/ease-at";
 import { blendNumber, blendVec, valueAt } from "../src/model/sample";
 
@@ -344,5 +346,58 @@ describe("derived tracks", () => {
     });
 
     expect(model.root.children[1]!.at).toEqual([35, 15]);
+  });
+});
+
+describe("a derived value that switches", () => {
+  const theme = tokens({
+    light: { on: "#FF0000", off: "#0000FF" },
+    dark: { on: "#00FF00", off: "#000000" },
+  });
+
+  const switched = (on: Paint, off: Paint): readonly Model.Key<Model.Paint>[] => {
+    const node = only(
+      made(() => <Shape geometry={circle(4)} fill={progress.map((p) => (p > 0.5 ? on : off))} />),
+    );
+
+    return node.kind === "shape" && node.fill ? keysOf(node.fill) : [];
+  };
+
+  test("holds each color and cuts at the moment it switches", () => {
+    const keys = switched("#FF0000", "#0000FF");
+
+    expect(keys.map((key) => key.value)).toEqual([
+      [0, 0, 1, 1],
+      [1, 0, 0, 1],
+      [0, 0, 1, 1],
+    ]);
+    expect(keys.slice(1).map((key) => key.ease === ease.hold)).toEqual([true, true]);
+
+    const opacity = own(
+      only(made(() => <Shape fill="#000000" geometry={circle(2)} opacity={progress} />)),
+    ).opacity;
+
+    expect(valueAt(opacity, keys[1]!.t - 1e-6, blendNumber)).toBeLessThanOrEqual(0.5);
+    expect(valueAt(opacity, keys[1]!.t + 1e-6, blendNumber)).toBeGreaterThan(0.5);
+  });
+
+  test("switches between tokens the same way, and draws", () => {
+    const keys = switched(theme.on, theme.off);
+
+    expect(keys.map((key) => key.value)).toEqual([
+      { kind: "token", name: "off" },
+      { kind: "token", name: "on" },
+      { kind: "token", name: "off" },
+    ]);
+    expect(
+      svg.emit(
+        made(() => (
+          <Shape
+            geometry={circle(4)}
+            fill={progress.map((p) => (p > 0.5 ? theme.on : theme.off))}
+          />
+        )),
+      ),
+    ).toContain("@keyframes");
   });
 });

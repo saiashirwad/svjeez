@@ -58,7 +58,7 @@ geometry={progress.map((p) => rect(6 + p * 174, 6, { radius: 3 }))}
 at={angle.with(radius).map((a, r): Vec => [r * Math.cos(a), r * Math.sin(a)])}
 ```
 
-`.map(fn)` makes a value that follows its source at every moment; `a.with(b).map((a, b) => …)` reads several. Sources are tracks of numbers or points; the result may be any prop's value. A mapping that is a straight scale and shift of its source costs no more than the source; any other is sampled and fitted to few keys within `{ tolerance }` (default a thousandth of the move, at most 0.05). A derived value takes no steps of its own, and a timeline can't move a prop one writes: move its source.
+`.map(fn)` makes a value that follows its source at every moment; `a.with(b).map((a, b) => …)` reads several. Sources are tracks of numbers or points; the result may be any prop's value. A mapping that is a straight scale and shift of its source costs no more than the source; one that switches between a few values, such as `p > 0.5 ? theme.on : theme.off`, holds each value and cuts at the moment it switches; any other is sampled and fitted to few keys within `{ tolerance }` (default a thousandth of the move, at most 0.05). A derived value takes no steps of its own, and a timeline can't move a prop one writes: move its source.
 
 ## Sampled
 
