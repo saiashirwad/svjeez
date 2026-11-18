@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 300" width="520" height="300" role="img" aria-labelledby="t d" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 300" width="520" height="300" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
   <title id="t">Springs</title>
   <desc id="d">A dot springs between three targets, each move starting before the last lands, beside the same moves with ease.out. A card pops in on a springy scale.</desc>
   <style><![CDATA[

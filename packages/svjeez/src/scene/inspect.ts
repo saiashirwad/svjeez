@@ -16,6 +16,7 @@ import type {
   Vec,
 } from "./ir";
 import { isLane } from "./lane";
+import { FontBook, charName } from "./runs";
 import { placed, reachOf } from "./reach";
 import { mixNumber, mixVec, same } from "./steps";
 import {
@@ -740,28 +741,14 @@ const missingGlyphs = (survey: Survey): void => {
         family.faces.find((f) => f.weight === run.face.weight && f.style === run.face.style) ??
         family.face(run.face.weight, run.face.style);
 
-      for (const char of run.text) {
-        if (/\s/.test(char)) continue;
-
-        const has = ((): boolean => {
-          try {
-            return face.has(char);
-          } catch {
-            return true;
-          }
-        })();
-
-        if (has) continue;
+      for (const char of FontBook.missing(face, run.text)) {
         const name = `${run.face.family} ${run.face.weight}${run.face.style === "italic" ? " italic" : ""}`;
         missing.set(name, (missing.get(name) ?? new Set()).add(char));
       }
     }
 
     for (const [face, chars] of missing) {
-      const shown = [...chars].map(
-        (char) =>
-          `"${char}" (U+${char.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")})`,
-      );
+      const shown = [...chars].map(charName);
 
       add(survey, {
         code: "missing-glyph",

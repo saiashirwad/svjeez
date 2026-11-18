@@ -299,15 +299,13 @@ group("text", () => {
     for (const scene of near) expect(codes(made(() => scene))).not.toContain("overlap");
   });
 
-  test("characters the face has no glyph for are an error that names them", () => {
-    const [found] = only(
-      made(() => say("a日b", [20, 50])),
+  test("characters the face has no glyph for are an error that names them, and space never is", () => {
+    expect(() => made(() => say("a日b", [20, 50]))).toThrow(
+      'draws "a日b" in Space Mono 400, which has no glyph for "日" (U+65E5).',
+    );
+    expect(codes(made(() => say("plain\ttext\u200d\ufe0f", [20, 50])))).not.toContain(
       "missing-glyph",
     );
-
-    expect(found!.severity).toBe("error");
-    expect(found!.message).toContain('"日" (U+65E5)');
-    expect(codes(made(() => say("plain text", [20, 50])))).not.toContain("missing-glyph");
   });
 });
 

@@ -67,7 +67,7 @@ import {
   type Theme,
   type Token,
 } from "./values";
-import { FontBook, faceOf, piecesOf, type Asked } from "./runs";
+import { FontBook, charName, faceOf, piecesOf, type Asked } from "./runs";
 import { layoutRuns } from "./text";
 import { blendable, gradientOf, isWrittenGradient, mixPaint } from "./paint";
 import type { Effect as EffectProps } from "./effects";
@@ -361,6 +361,15 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
 
   const pieces = asked.map(({ text: words }, i) => {
     const look = found[i] ?? borrowed(i);
+    const missing = FontBook.missing(look.font, words);
+
+    if (missing.length > 0) {
+      const { family, weight, style } = look.face;
+
+      throw new Error(
+        `<Text> ${where} draws ${JSON.stringify(words.trim())} in ${family} ${weight}${style === "italic" ? " italic" : ""}, which has no glyph for ${missing.map(charName).join(", ")}. Use a font that has ${missing.length === 1 ? "it" : "them"}, or leave ${missing.length === 1 ? "it" : "them"} out: no other font fills in.`,
+      );
+    }
 
     return { text: words, face: look.font, style: look };
   });

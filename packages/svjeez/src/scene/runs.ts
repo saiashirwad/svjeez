@@ -98,7 +98,6 @@ interface Picked {
 }
 
 interface Family {
-  readonly fallback: readonly string[];
   readonly faces: Font[];
 }
 
@@ -109,7 +108,7 @@ export class FontBook {
   /** `face`, picked from `value`, as runs name it. Two different files can't be one family's same face. */
   add(value: FontValue, face: Font): Picked {
     const family = nameOf(value);
-    const known = this.#families.get(family) ?? { fallback: value.fallback, faces: [] };
+    const known = this.#families.get(family) ?? { faces: [] };
 
     const same = known.faces.find(
       (each) => each.weight === face.weight && each.style === face.style,
@@ -126,12 +125,37 @@ export class FontBook {
     return { face: { family, weight: face.weight, style: face.style }, font: same ?? face };
   }
 
+  /**
+   * Each family with no fallback: text is measured with the face it names and every character it draws is in that
+   * face, so no other face ever draws one.
+   */
   families(): Record<string, FontFamily> {
     return Object.fromEntries(
-      [...this.#families].map(([name, { fallback, faces }]) => [
-        name,
-        new FontFamily(name, faces, fallback),
-      ]),
+      [...this.#families].map(([name, { faces }]) => [name, new FontFamily(name, faces, [])]),
     );
   }
+
+  /**
+   * The characters of `text` that `font` has no glyph for. White space, control and format characters and variation
+   * selectors draw nothing of their own, so they are never missing.
+   */
+  static missing(font: Font, text: string): string[] {
+    return [...new Set([...text].filter((char) => !drawsNothing(char) && !hasGlyph(font, char)))];
+  }
 }
+
+/** Whether a character draws nothing of its own: white space, a control or format character, a variation selector. */
+const drawsNothing = (char: string): boolean => /^[\s\p{Cc}\p{Cf}\u{FE00}-\u{FE0F}]$/u.test(char);
+
+/** Whether `font` has a glyph for `char`. A face whose glyph table can't be read is taken at its word. */
+const hasGlyph = (font: Font, char: string): boolean => {
+  try {
+    return font.has(char);
+  } catch {
+    return true;
+  }
+};
+
+/** How a character reads in an error: itself and its code point. */
+export const charName = (char: string): string =>
+  `"${char}" (U+${char.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")})`;

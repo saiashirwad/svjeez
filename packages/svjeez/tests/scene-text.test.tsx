@@ -372,9 +372,7 @@ describe("SVG", () => {
 
     const text = out.match(/<text[^>]*>.*<\/text>/)![0];
 
-    expect(text).toContain(
-      '<text font-family="\'Space Mono\', monospace" font-size="10" fill="#000000">',
-    );
+    expect(text).toContain('<text font-family="\'Space Mono\'" font-size="10" fill="#000000">');
     expect(text).toContain('<tspan x="10" y="20">Total </tspan>');
     expect(text).toMatch(/<tspan x="[\d.]+" font-weight="700" fill="#FF0000">42<\/tspan>/);
     expect(text).toMatch(/<tspan x="[\d.]+"> items<\/tspan>/);
@@ -433,12 +431,10 @@ describe("SVG", () => {
       )),
     );
 
-    expect(out).toContain(
-      'aria-labelledby="t" font-family="\'Space Mono\', monospace" font-weight="400">',
-    );
+    expect(out).toContain('aria-labelledby="t" font-family="\'Space Mono\'" font-weight="400">');
     expect(out.match(/font-family="'Space Mono'/g)).toHaveLength(1);
     expect(out).toContain('font-weight="700" font-size="10"');
-    expect(out).toContain('<text font-family="\'ABeeZee\', sans-serif" font-size="10"');
+    expect(out).toContain('<text font-family="\'ABeeZee\'" font-size="10"');
   });
 
   test("a run's animated fill and opacity land on its tspan", () => {
