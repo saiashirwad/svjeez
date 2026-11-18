@@ -3,7 +3,7 @@ import { num } from "../model/format";
 import { EPSILON, type Seconds } from "../model/time";
 import { checkWindow } from "./span";
 import { matched, mixGeometry } from "../model/geometry";
-import { identified } from "./identity";
+import { identified, sourced } from "./identity";
 import type {
   Animated,
   Box,
@@ -26,11 +26,13 @@ import type {
   Vec,
 } from "../model/ir";
 import { atRest, isLane, pair } from "../model/lane";
-import { morphed } from "./morph";
+import { morphed, type MorphElement } from "./morph";
 import {
   flat,
   sceneElement,
   within,
+  type Backdrop,
+  type Bounds,
   type Child,
   type Common,
   type ImageProps,
@@ -51,6 +53,7 @@ import {
   outsider,
   sameAnchors,
   settle,
+  type BackdropOf,
   type Notes,
 } from "./settle";
 import {
@@ -69,6 +72,8 @@ import { collect, type Cues } from "./timeline";
 import {
   boxOf,
   outlineOf,
+  polygon,
+  rect,
   rgbaOf,
   type Geometry,
   type Hex,
@@ -566,6 +571,27 @@ const lowerAll = (
       return lowerAll(ctx, given.children, clocked, parent, taken);
     }
 
+    if (given.type === "morph" && given.only !== undefined) {
+      const states = given.states.map((state) => {
+        const names = new Set(taken);
+
+        return {
+          nodes: arrangeState(lowerAll(ctx, state, timing, parent, names), ctx.notes),
+          names,
+        };
+      });
+
+      for (const { names } of states) for (const each of names) taken.add(each);
+
+      return states[given.only]!.nodes;
+    }
+
+    if (given.type === "group" && given.settle?.kind === "arrange") {
+      const reflowed = lifted(given);
+
+      if (reflowed) return lowerAll(ctx, [reflowed], timing, parent, taken);
+    }
+
     if (given.type === "morph") {
       const seen = new Map<string, Anchor | undefined>();
       const states: SceneNode[][] = [];
@@ -605,11 +631,12 @@ const lowerAll = (
     };
 
     const el = ctx.cues.apply(given, key, timing, ctx.notes, parent, home);
+    const backdrop = el.type === "group" ? backdropOf(ctx, el.props, key, timing) : undefined;
 
-    note(ctx.notes, key, el.props, el.type, el.type === "group" ? el.settle : undefined);
+    note(ctx.notes, key, el.props, el.type, el.type === "group" ? el.settle : undefined, backdrop);
 
     const done = (node: SceneNode): SceneNode[] => [
-      identified(given, name, dressed(ctx, el.props, node, timing)),
+      identified(given, name, dressed(ctx, el.props, sized(ctx, el.props, node), timing)),
     ];
 
     switch (el.type) {
@@ -623,6 +650,11 @@ const lowerAll = (
         return done(instance(ctx, el.props, key, timing));
       case "group": {
         const children = lowerAll(ctx, el.children, timing, key);
+
+        if (backdrop && children.some((child) => child.key === `${key}/background`))
+          throw new Error(
+            `A child of "${key}" is keyed "background", which names the container's own fill and stroke. Give the child another key.`,
+          );
 
         const node: GroupNode = {
           ...base(el.props, around(children), key, timing, [0, 0]),
@@ -702,14 +734,139 @@ const dressed = (
   timing: Timing,
 ): SceneNode => {
   const where = `"${node.key}"`;
-  const { clip, effects = [] } = props;
-  const mask = props.mask === undefined ? undefined : maskOf(ctx, props.mask, node.key, timing);
+  const own = boundsOf(node.box);
+  const { effects = [] } = props;
+  const clip = byBox(props.clip) ? props.clip(own) : props.clip;
+  const asked = byBox(props.mask) ? props.mask(own) : props.mask;
+  const mask = asked === undefined ? undefined : maskOf(ctx, asked, node.key, timing);
 
   return {
     ...node,
     ...(clip !== undefined && { clip: geometryOf(clip, timing, where, "clip") }),
     ...(mask && { mask }),
     effects: effects.map((effect) => effectOf(ctx, effect, timing, where)),
+  };
+};
+
+const boundsOf = (box: Box): Bounds => {
+  const { x, y, width, height } = box;
+
+  return {
+    x,
+    y,
+    width,
+    height,
+    size: [width, height],
+    center: [x + width / 2, y + height / 2],
+    rect:
+      x === 0 && y === 0
+        ? rect(width, height)
+        : polygon([
+            [x, y],
+            [x + width, y],
+            [x + width, y + height],
+            [x, y + height],
+          ]),
+  };
+};
+
+const byBox = <T>(value: T | ((own: Bounds) => T)): value is (own: Bounds) => T =>
+  value instanceof Function;
+
+const sized = (ctx: Ctx, props: Omit<Common, "anchor">, node: SceneNode): SceneNode => {
+  const what = byBox(props.clip) ? "clip" : byBox(props.mask) ? "mask" : undefined;
+
+  if (node.kind !== "group" || what === undefined) return node;
+
+  for (const child of node.children) {
+    const placed = outsider(child, ctx.notes);
+
+    if (placed !== undefined)
+      throw new Error(
+        `The ${what} of "${node.key}" is sized by its box, but "${placed}" inside it is placed by an anchor, a timeline's move to an anchor, or as an arrow's end, so its box isn't known yet. Size the ${what} with numbers, or move that node out.`,
+      );
+  }
+
+  return arrangeState([node], ctx.notes)[0]!;
+};
+
+const backdropOf = (
+  ctx: Ctx,
+  { fill, stroke, radius }: Backdrop,
+  key: string,
+  timing: Timing,
+): BackdropOf | undefined => {
+  if (fill === undefined && stroke === undefined) return undefined;
+  const line = stroke === undefined ? 0 : (stroke.width ?? 1);
+
+  return (box) => ({
+    ...shape(
+      ctx,
+      {
+        geometry: rect(
+          Math.max(0, box.width - line),
+          Math.max(0, box.height - line),
+          radius === undefined ? {} : { radius },
+        ),
+        at: [box.x, box.y],
+        ...(fill !== undefined && { fill }),
+        ...(stroke && { stroke }),
+      },
+      `${key}/background`,
+      timing,
+    ),
+    authored: { backdrop: true },
+  });
+};
+
+const morphsIn = (el: SceneElement): MorphElement[] =>
+  el.type === "morph"
+    ? el.only === undefined
+      ? [el]
+      : []
+    : el.type === "group" || el.type === "fragment"
+      ? el.children.flatMap(morphsIn)
+      : [];
+
+const alike = (a: MorphElement, b: MorphElement): boolean =>
+  a.states.length === b.states.length &&
+  same(
+    a.spans.map(({ start, over }) => [start, over]),
+    b.spans.map(({ start, over }) => [start, over]),
+  ) &&
+  a.options.curve === b.options.curve &&
+  a.options.stagger === b.options.stagger &&
+  same(a.options.enter ?? null, b.options.enter ?? null) &&
+  same(a.options.exit ?? null, b.options.exit ?? null);
+
+const lifted = (container: SceneElement & { readonly type: "group" }): MorphElement | undefined => {
+  const found = container.children.flatMap(morphsIn);
+  const [first] = found;
+
+  if (!first) return undefined;
+  const label = container.settle?.label ?? "container";
+
+  if (found.some((other) => !alike(other, first)))
+    throw new Error(
+      `A ${label} holds morphs on different spans or with different options, and it reflows with one morph at a time. Give them the same states count, spans and options, or put each in a ${label} of its own.`,
+    );
+
+  const pinned = (s: number) => {
+    const swap = (el: SceneElement): SceneElement =>
+      el.type === "morph" && found.includes(el)
+        ? { ...el, only: s }
+        : el.type === "group" || el.type === "fragment"
+          ? sourced(el, { ...el, children: el.children.map(swap) })
+          : el;
+
+    return [swap(container)];
+  };
+
+  return {
+    type: "morph",
+    states: first.states.map((_, s) => pinned(s)),
+    spans: first.spans,
+    options: first.options,
   };
 };
 

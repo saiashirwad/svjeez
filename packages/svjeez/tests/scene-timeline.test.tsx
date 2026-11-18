@@ -445,7 +445,7 @@ describe("errors", () => {
       timeline(g.fill("#ffffff", 1));
 
       return <Group ref={g} />;
-    }, 'g.fill() moves fill on "g", a group, which has none. Only shape or text nodes have fill.');
+    }, 'g.fill() moves fill on "g", a group, which has none. Only shape or text or container nodes have fill.');
 
     throws(() => {
       const s = ref("s");

@@ -38,6 +38,7 @@ export interface MorphElement {
   readonly states: readonly (readonly SceneElement[])[];
   readonly spans: readonly Span[];
   readonly options: MorphOptions;
+  readonly only?: number;
 }
 
 const between = (

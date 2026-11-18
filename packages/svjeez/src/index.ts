@@ -11,12 +11,13 @@ export {
   canvas,
   ref,
   symbol,
+  type Bounds,
   type SceneElement,
 } from "./author/nodes";
 
 export type { Ref } from "./author/refs";
 
-export { Align, Grid, Stack } from "./author/layout";
+export { Align, Center, Grid, Stack } from "./author/layout";
 
 export { Arrow } from "./author/arrow";
 
@@ -35,7 +36,7 @@ export {
   type Paint,
 } from "./author/values";
 
-export { subtract } from "./author/holes";
+export { moved, subtract } from "./author/holes";
 
 export { linear, radial } from "./author/paint";
 

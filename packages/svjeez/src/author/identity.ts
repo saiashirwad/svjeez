@@ -16,6 +16,14 @@ export const remember = (element: SceneElement, source: JsxSource | undefined): 
   return element;
 };
 
+export const sourced = (from: SceneElement, to: SceneElement): SceneElement => {
+  const source = written.get(from);
+
+  if (source) written.set(to, source);
+
+  return to;
+};
+
 const keyedByPlace = new WeakSet<SceneNode>();
 
 export const identified = <N extends SceneNode>(

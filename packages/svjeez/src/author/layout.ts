@@ -1,9 +1,12 @@
 import type { Box, Vec } from "../model/ir";
-import { flat, type Child, type Common, type SceneElement } from "./nodes";
+import { EPSILON } from "../model/time";
+import { flat, type Backdrop, type Child, type Common, type SceneElement } from "./nodes";
 import { Anchor, canvasAnchor, fractionOf, placeIn, Ref, type Place } from "./refs";
-import type { Arrange } from "./settle";
+import type { Arrange, Size } from "./settle";
 
 export type Alignment = "start" | "center" | "end";
+
+export type Justify = Alignment | "space-between";
 
 const SHARE: Readonly<Record<Alignment, number>> = { start: 0, center: 0.5, end: 1 };
 
@@ -41,11 +44,55 @@ const run = (sizes: readonly number[], from: number, space: number) => {
   return { starts, end: sizes.length === 0 ? from : at - space };
 };
 
-export interface StackProps extends Common {
+const size = (value: number | undefined, what: string): number | undefined => {
+  if (value !== undefined && !(value >= 0 && Number.isFinite(value)))
+    throw new Error(`${what} needs a finite length of 0 or more, got ${value}.`);
+
+  return value;
+};
+
+const paint = (label: string, { fill, stroke, radius }: Backdrop, padding: number | Vec) => {
+  const [px, py] = room(padding, `${label} padding`);
+  const line = stroke === undefined ? 0 : (stroke.width ?? 1);
+
+  if (!(line >= 0 && Number.isFinite(line)))
+    throw new Error(`${label} needs a stroke width of 0 or more, got ${line}.`);
+
+  return {
+    backdrop: {
+      ...(fill !== undefined && { fill }),
+      ...(stroke !== undefined && { stroke }),
+      ...(radius !== undefined && { radius }),
+    },
+    inset: [px + line, py + line] satisfies Vec,
+  };
+};
+
+const fits = (
+  label: string,
+  where: string,
+  side: "wide" | "tall",
+  given: number | undefined,
+  need: number,
+): number => {
+  if (given === undefined) return need;
+
+  if (given < need - EPSILON)
+    throw new Error(
+      `The ${label} ${where} is ${given} ${side}, but its children${label === "<Stack>" ? ", gaps" : ""} and padding need ${Math.ceil(need * 100) / 100}. Make it ${side === "wide" ? "wider" : "taller"}, or leave out ${side === "wide" ? "width" : "height"} so it fits them.`,
+    );
+
+  return given;
+};
+
+export interface StackProps extends Common, Backdrop {
   readonly direction?: "row" | "column";
   readonly gap?: number;
-  readonly align?: Alignment;
+  readonly align?: Alignment | "stretch";
+  readonly justify?: Justify;
   readonly padding?: number | Vec;
+  readonly width?: number;
+  readonly height?: number;
   readonly children?: Child;
 }
 
@@ -53,48 +100,81 @@ export const Stack = ({
   direction = "column",
   gap = 0,
   align = "start",
+  justify = "start",
   padding = 0,
+  width,
+  height,
+  fill,
+  stroke,
+  radius,
   children,
   ...props
 }: StackProps): SceneElement => {
+  const label = "<Stack>";
+
   if (direction !== "row" && direction !== "column")
     throw new Error(`<Stack> takes direction "row" or "column", got "${String(direction)}".`);
   const [space] = room(gap, "<Stack> gap");
-  const [px, py] = room(padding, "<Stack> padding");
-  const cross = share(align, "<Stack> align");
+  const { backdrop, inset } = paint(label, { fill, stroke, radius }, padding);
+  const stretch = align === "stretch";
+  const cross = stretch ? 0 : share(align, '<Stack> align, or "stretch",');
+  const between = justify === "space-between";
+  const along = between ? 0 : share(justify, '<Stack> justify, or "space-between",');
   const row = direction === "row";
+  const [wide, tall] = [size(width, "<Stack> width"), size(height, "<Stack> height")];
 
-  const arrange: Arrange = (boxes) => {
-    const mains = boxes.map((box) => (row ? box.width : box.height));
-    const sides = boxes.map((box) => (row ? box.height : box.width));
-    const across = Math.max(0, ...sides);
-    const [lead, edge] = row ? [px, py] : [py, px];
-    const { starts, end } = run(mains, lead, space);
+  const sized = (given: Size): Arrange => {
+    const [fixedMain, fixedCross] = row ? [given.width, given.height] : [given.height, given.width];
 
-    const slots = starts.map((start, i): Vec => {
-      const side = edge + (across - sides[i]!) * cross;
+    return (boxes, where) => {
+      const mains = boxes.map((box) => (row ? box.width : box.height));
+      const sides = boxes.map((box) => (row ? box.height : box.width));
+      const [lead, edge] = row ? inset : [inset[1], inset[0]];
+      const content = run(mains, 0, space).end;
+      const widest = Math.max(0, ...sides);
+      const [mainSide, crossSide] = row ? (["wide", "tall"] as const) : (["tall", "wide"] as const);
+      const length = fits(label, where, mainSide, fixedMain, content + lead * 2);
+      const breadth = fits(label, where, crossSide, fixedCross, widest + edge * 2);
+      const free = length - lead * 2 - content;
+      const across = breadth - edge * 2;
+      const spread = between && boxes.length > 1 ? free / (boxes.length - 1) : 0;
+      const { starts } = run(mains, lead + (between ? 0 : free * along), space + spread);
 
-      return row ? [start, side] : [side, start];
-    });
+      const slots = starts.map((start, i): Vec => {
+        const side = edge + (across - sides[i]!) * cross;
 
-    const [length, breadth] = [end + lead, across + edge * 2];
+        return row ? [start, side] : [side, start];
+      });
 
-    return {
-      slots,
-      box: { x: 0, y: 0, width: row ? length : breadth, height: row ? breadth : length },
+      return {
+        slots,
+        box: { x: 0, y: 0, width: row ? length : breadth, height: row ? breadth : length },
+        ...(stretch && { sizes: boxes.map(() => (row ? { height: across } : { width: across })) }),
+      };
     };
+  };
+
+  const own: Size = {
+    ...(wide !== undefined && { width: wide }),
+    ...(tall !== undefined && { height: tall }),
   };
 
   return {
     type: "group",
-    props,
+    props: { ...props, ...backdrop },
     children: flat(children),
-    settle: { kind: "arrange", label: "<Stack>", arrange },
+    settle: {
+      kind: "arrange",
+      label,
+      arrange: sized(own),
+      resize: (size) => sized({ ...size, ...own }),
+    },
     layout: { container: "stack", direction, gap: row ? [space, 0] : [0, space] },
+    paints: true,
   };
 };
 
-export interface GridProps extends Common {
+export interface GridProps extends Common, Backdrop {
   readonly columns: number;
   readonly gap?: number | Vec;
   readonly justify?: Alignment;
@@ -109,13 +189,17 @@ export const Grid = ({
   justify = "start",
   align = "start",
   padding = 0,
+  fill,
+  stroke,
+  radius,
   children,
   ...props
 }: GridProps): SceneElement => {
   if (!(Number.isInteger(columns) && columns >= 1))
     throw new Error(`<Grid> needs a whole number of columns, 1 or more, got ${columns}.`);
   const [gx, gy] = room(gap, "<Grid> gap");
-  const [px, py] = room(padding, "<Grid> padding");
+  const { backdrop, inset } = paint("<Grid>", { fill, stroke, radius }, padding);
+  const [px, py] = inset;
   const [u, v] = [share(justify, "<Grid> justify"), share(align, "<Grid> align")];
 
   const arrange: Arrange = (boxes) => {
@@ -147,10 +231,76 @@ export const Grid = ({
 
   return {
     type: "group",
-    props,
+    props: { ...props, ...backdrop },
     children: flat(children),
     settle: { kind: "arrange", label: "<Grid>", arrange },
     layout: { container: "grid", gap: [gx, gy] },
+    paints: true,
+  };
+};
+
+export interface CenterProps extends Common, Backdrop {
+  readonly padding?: number | Vec;
+  readonly width?: number;
+  readonly height?: number;
+  readonly children?: Child;
+}
+
+export const Center = ({
+  padding = 0,
+  width,
+  height,
+  fill,
+  stroke,
+  radius,
+  children,
+  ...props
+}: CenterProps): SceneElement => {
+  const label = "<Center>";
+  const { backdrop, inset } = paint(label, { fill, stroke, radius }, padding);
+
+  const own: Size = {
+    ...(width !== undefined && { width: size(width, "<Center> width") }),
+    ...(height !== undefined && { height: size(height, "<Center> height") }),
+  };
+
+  const sized =
+    (given: Size): Arrange =>
+    (boxes, where) => {
+      const w = fits(
+        label,
+        where,
+        "wide",
+        given.width,
+        Math.max(0, ...boxes.map((box) => box.width)) + inset[0] * 2,
+      );
+
+      const h = fits(
+        label,
+        where,
+        "tall",
+        given.height,
+        Math.max(0, ...boxes.map((box) => box.height)) + inset[1] * 2,
+      );
+
+      return {
+        slots: boxes.map((box): Vec => [(w - box.width) / 2, (h - box.height) / 2]),
+        box: { x: 0, y: 0, width: w, height: h },
+      };
+    };
+
+  return {
+    type: "group",
+    props: { ...props, ...backdrop },
+    children: flat(children),
+    settle: {
+      kind: "arrange",
+      label,
+      arrange: sized(own),
+      resize: (size) => sized({ ...size, ...own }),
+    },
+    layout: { container: "center" },
+    paints: true,
   };
 };
 

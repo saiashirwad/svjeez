@@ -1,7 +1,7 @@
 import type { FontValue } from "../font/font";
 import type { Seconds } from "../model/time";
 import type { PictureData } from "./picture";
-import type { Authored, Vec } from "../model/ir";
+import type { Authored, Box, Vec } from "../model/ir";
 import type { Anchor, Place, Ref } from "./refs";
 import type { AnchorPlace, TextAnchorPlace } from "./pin";
 import type { Settle } from "./settle";
@@ -23,8 +23,8 @@ export interface Common {
   readonly scale?: Anim<number> | Anim<Vec>;
   readonly opacity?: Anim<number>;
   readonly motion?: Layers;
-  readonly clip?: Anim<Geometry>;
-  readonly mask?: Child;
+  readonly clip?: Anim<Geometry> | ((own: Bounds) => Anim<Geometry>);
+  readonly mask?: Child | ((own: Bounds) => Child);
   readonly effects?: readonly Effect[];
 }
 
@@ -35,6 +35,24 @@ export interface StrokeProps {
   readonly join?: "miter" | "round" | "bevel";
   readonly dash?: readonly number[];
   readonly nonScaling?: boolean;
+}
+
+export interface Bounds extends Box {
+  readonly size: Vec;
+  readonly center: Vec;
+  readonly rect: Geometry;
+}
+
+export type Radius = number | readonly [number, number, number, number];
+
+export interface ContainerStroke extends Omit<StrokeProps, "width" | "nonScaling"> {
+  readonly width?: number;
+}
+
+export interface Backdrop {
+  readonly fill?: Anim<Paint>;
+  readonly stroke?: ContainerStroke;
+  readonly radius?: Radius;
 }
 
 export interface ShapeProps extends Common {
@@ -106,10 +124,11 @@ export interface SequenceProps {
 export type SceneElement =
   | {
       readonly type: "group";
-      readonly props: Common;
+      readonly props: Common & Backdrop;
       readonly children: readonly SceneElement[];
       readonly settle?: Settle;
       readonly layout?: Authored["layout"];
+      readonly paints?: true;
     }
   | { readonly type: "shape"; readonly props: ShapeProps }
   | { readonly type: "text"; readonly props: TextProps }

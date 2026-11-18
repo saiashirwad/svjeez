@@ -298,33 +298,95 @@ describe("morph between states that hold layout, text, connectors, images and in
     );
   });
 
-  test("a Stack around a morph that grows a child is an error that names the Stack", () => {
+  test("a container around a morph reflows: its other children make room as the morph resizes", () => {
+    const xAt = (model: Model.Scene, key: string, t: number): number =>
+      placements(model, t).find((placed) => placed.key === key)!.matrix[4];
+
+    const model = made(() => (
+      <Stack key="row" direction="row" gap={2} fill={red}>
+        {morph(
+          <Shape key="a" geometry={rect(10, 10)} fill={red} />,
+          <Shape key="a" geometry={rect(40, 10)} fill={red} />,
+          span(1, 1),
+          { curve: ease.linear },
+        )}
+        <Shape key="b" geometry={rect(10, 10)} fill={red} />
+      </Stack>
+    ));
+
+    expect(xAt(model, "row/b", 0)).toBeCloseTo(12, 6);
+    expect(xAt(model, "row/b", 1.5)).toBeCloseTo(27, 6);
+    expect(xAt(model, "row/b", 3)).toBeCloseTo(42, 6);
+
+    const row = model.root.children[0]!;
+    const background = row.kind === "group" ? row.children[0] : undefined;
+
+    expect(background?.key).toBe("row/background");
+    expect(background?.kind === "shape" && isLane(background.geometry)).toBe(true);
+  });
+
+  test("a morph deep inside a container, or one whose nodes enter, reflows the container too", () => {
+    const yAt = (model: Model.Scene, key: string, t: number): number =>
+      placements(model, t).find((placed) => placed.key === key)!.matrix[5];
+
+    const model = made(() => (
+      <Align key="middle">
+        <Stack key="col" gap={2}>
+          <Group key="g">
+            {morph(
+              [<Shape key="a" geometry={rect(10, 10)} fill={red} />],
+              [
+                <Shape key="a" geometry={rect(10, 10)} fill={red} />,
+                <Shape key="c" geometry={rect(10, 10)} at={[0, 20]} fill={red} />,
+              ],
+              span(1, 1),
+            )}
+          </Group>
+          <Shape key="b" geometry={rect(10, 10)} fill={red} />
+        </Stack>
+      </Align>
+    ));
+
+    expect(yAt(model, "middle/col/g/a", 3) - yAt(model, "middle/col/g/a", 0)).toBeCloseTo(-10, 6);
+    expect(yAt(model, "middle/col/b", 3) - yAt(model, "middle/col/b", 0)).toBeCloseTo(10, 6);
+  });
+
+  test("a container that can't reflow, around a morph inside a Sequence, is an error that names it", () => {
     expect(() =>
       made(() => (
-        <Stack key="row" direction="row" gap={2}>
-          {morph(
-            <Shape key="a" geometry={rect(10, 10)} fill={red} />,
-            <Shape key="a" geometry={rect(40, 10)} fill={red} />,
-            span(1, 1),
-          )}
+        <Stack key="row" direction="row">
+          <Sequence start={1}>
+            <Group key="g">
+              {morph(
+                <Shape key="a" geometry={rect(10, 10)} fill={red} />,
+                <Shape key="a" geometry={rect(40, 10)} fill={red} />,
+                span(0, 1),
+              )}
+            </Group>
+          </Sequence>
           <Shape key="b" geometry={rect(10, 10)} fill={red} />
         </Stack>
       )),
     ).toThrow(
-      'The <Stack> "row" lays out "row/a", whose box a morph() changes, but layout reads each box at rest, so it would not make room. Put the <Stack> inside the morph\'s states instead',
+      'The <Stack> "row" lays out "row/g/a", which a morph() resizes, brings in or takes away inside a <Sequence>',
     );
 
     expect(() =>
       made(() => (
-        <Align key="middle">
+        <Stack key="row" direction="row">
           {morph(
             <Shape key="a" geometry={rect(10, 10)} fill={red} />,
             <Shape key="a" geometry={rect(40, 10)} fill={red} />,
+            span(0, 1),
+          )}
+          {morph(
+            <Shape key="b" geometry={rect(10, 10)} fill={red} />,
+            <Shape key="b" geometry={rect(40, 10)} fill={red} />,
             span(1, 1),
           )}
-        </Align>
+        </Stack>
       )),
-    ).toThrow('The <Align> "middle" lays out "middle/a"');
+    ).toThrow("A <Stack> holds morphs on different spans or with different options");
   });
 
   test("a Line or Arrow end given a track is an error that names the connector", () => {

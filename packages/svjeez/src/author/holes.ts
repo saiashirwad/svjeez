@@ -116,6 +116,34 @@ const closed = (outline: Outline, what: string): Contour[] => {
   return contours;
 };
 
+const plus = ([x, y]: Vec, [dx, dy]: Vec): Vec => [x + dx, y + dy];
+
+export const moved = (geometry: Geometry, by: Vec): Outline => {
+  const outline = outlineOf(geometry);
+
+  if (!by.every((n) => Number.isFinite(n)))
+    throw new Error(`moved() needs a finite point to move by, got ${JSON.stringify(by)}.`);
+
+  switch (outline.kind) {
+    case "line":
+      return { ...outline, from: plus(outline.from, by), to: plus(outline.to, by) };
+    case "polygon":
+      return { ...outline, points: outline.points.map((point) => plus(point, by)) };
+    default:
+      return {
+        kind: "path",
+        contours: contoursOf(outline).map((contour) => ({
+          start: plus(contour.start, by),
+          curves: contour.curves.map(
+            ([c1, c2, to]) => [plus(c1, by), plus(c2, by), plus(to, by)] as const,
+          ),
+          closed: contour.closed,
+        })),
+        rule: outline.kind === "path" ? outline.rule : "nonzero",
+      };
+  }
+};
+
 export const subtract = (base: Geometry, ...cuts: readonly Geometry[]): Outline => {
   const outline = outlineOf(base);
   const [outer, ...holes] = closed(outline, "the base");

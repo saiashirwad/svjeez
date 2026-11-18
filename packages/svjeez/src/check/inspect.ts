@@ -1444,12 +1444,21 @@ const layoutOverlap = (survey: Survey): void => {
     const { node } = entry;
     const container = node.authored?.layout?.container;
 
-    if (node.kind !== "group" || container === undefined || container === "align") continue;
+    if (
+      node.kind !== "group" ||
+      container === undefined ||
+      container === "align" ||
+      container === "center"
+    )
+      continue;
 
     if (isGone(survey, entry)) continue;
 
     const children = survey.entries
-      .filter((each) => each.ancestors.at(-1) === node && !isGone(survey, each))
+      .filter(
+        (each) =>
+          each.ancestors.at(-1) === node && !each.node.authored?.backdrop && !isGone(survey, each),
+      )
       .map((each) => ({ entry: each, boxes: boxesShown(survey, each) }));
 
     children.forEach((a, i) => {

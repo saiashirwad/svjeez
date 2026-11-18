@@ -374,8 +374,8 @@ const KINDS: Readonly<Record<Prop, readonly NodeElement["type"][]>> = {
   rotate: FOR_ALL,
   scale: FOR_ALL,
   opacity: FOR_ALL,
-  fill: ["shape", "text"],
-  stroke: ["shape"],
+  fill: ["shape", "text", "group"],
+  stroke: ["shape", "group"],
   strokeWidth: ["shape"],
   trim: ["shape"],
   geometry: ["shape"],
@@ -399,9 +399,11 @@ const writtenOf = (el: NodeElement, prop: Prop): Written => {
     case "opacity":
       return el.props[prop];
     case "fill":
-      return el.type === "shape" || el.type === "text" ? el.props.fill : undefined;
+      return el.type === "shape" || el.type === "text" || el.type === "group"
+        ? el.props.fill
+        : undefined;
     case "stroke":
-      return el.type === "shape" ? el.props.stroke?.color : undefined;
+      return el.type === "shape" || el.type === "group" ? el.props.stroke?.color : undefined;
     case "strokeWidth":
       return el.type === "shape" ? el.props.stroke?.width : undefined;
     case "trim":
@@ -659,9 +661,11 @@ export class Cues {
   ): Value {
     const { verb } = first;
 
-    if (!KINDS[prop].includes(el.type))
+    const painted = prop === "fill" || prop === "stroke";
+
+    if (!KINDS[prop].includes(el.type) || (el.type === "group" && painted && !el.paints))
       throw new Error(
-        `${verb} moves ${prop} on "${key}", a ${el.type}, which has none. Only ${KINDS[prop].join(" or ")} nodes have ${prop}.`,
+        `${verb} moves ${prop} on "${key}", a ${el.type}, which has none. Only ${KINDS[prop].map((kind) => (kind === "group" && painted ? "container" : kind)).join(" or ")} nodes have ${prop}.`,
       );
     const value = writtenOf(el, prop);
 
@@ -689,7 +693,11 @@ export class Cues {
           : `${verb} changes the stroke of "${key}", which has none. Give it stroke={{ color: … }}.`,
       );
 
-    if ((prop === "stroke" || prop === "strokeWidth") && el.type === "shape" && !el.props.stroke)
+    if (
+      (prop === "stroke" || prop === "strokeWidth") &&
+      (el.type === "shape" || el.type === "group") &&
+      !el.props.stroke
+    )
       throw new Error(
         `${verb} changes the stroke of "${key}", which has none. Give it stroke={{ color: … }}.`,
       );
@@ -736,7 +744,7 @@ const withTracks = (el: NodeElement, tracks: ReadonlyMap<Prop, Track<Value>>): N
   const width = tracks.get("strokeWidth");
 
   const stroke =
-    el.type === "shape" && el.props.stroke && (color || width)
+    (el.type === "shape" || el.type === "group") && el.props.stroke && (color || width)
       ? { stroke: { ...el.props.stroke, ...(color && { color }), ...(width && { width }) } }
       : undefined;
 

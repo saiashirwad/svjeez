@@ -27,11 +27,12 @@ export interface SceneAuthored {
 
 export interface Authored {
   readonly layout?: {
-    readonly container: "stack" | "grid" | "align";
+    readonly container: "stack" | "grid" | "center" | "align";
     readonly direction?: "row" | "column";
     readonly gap?: Vec;
   };
   readonly wrap?: { readonly width: number; readonly cuts: readonly number[] };
+  readonly backdrop?: true;
 }
 
 export type { Ease, Seconds };

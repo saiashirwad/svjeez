@@ -9,9 +9,18 @@ import { isTrack } from "./track";
 import { lookOf, paintedBoxOf } from "../model/painted";
 import { PLACE_LIST, PLACES, homed, homeOf, pinned, type TextAnchorPlace } from "./pin";
 
-export type Arrange = (boxes: readonly Box[]) => {
+export interface Size {
+  readonly width?: number;
+  readonly height?: number;
+}
+
+export type Arrange = (
+  boxes: readonly Box[],
+  where: string,
+) => {
   readonly slots: readonly Vec[];
   readonly box: Box;
+  readonly sizes?: readonly (Size | undefined)[];
 };
 
 export type Connect = (
@@ -21,7 +30,12 @@ export type Connect = (
 ) => SceneNode[];
 
 export type Settle =
-  | { readonly kind: "arrange"; readonly label: string; readonly arrange: Arrange }
+  | {
+      readonly kind: "arrange";
+      readonly label: string;
+      readonly arrange: Arrange;
+      readonly resize?: (size: Size) => Arrange;
+    }
   | {
       readonly kind: "connect";
       readonly label: string;
@@ -40,7 +54,10 @@ interface Note {
   readonly pinned?: true;
   readonly origin: Place | Vec | undefined;
   readonly settle?: Settle;
+  readonly backdrop?: BackdropOf;
 }
+
+export type BackdropOf = (box: Box) => SceneNode;
 
 export type Aim = (
   read: (anchor: Anchor) => Animated<Vec>,
@@ -76,7 +93,8 @@ export const noteResized = (
       state.filter((node) => node.key === key).map((node) => node.box),
     );
 
-    if (boxes.some((box) => !sameBox(box, boxes[0]!))) into.resized.add(key);
+    if (boxes.length < states.length || boxes.some((box) => !sameBox(box, boxes[0]!)))
+      into.resized.add(key);
   }
 };
 
@@ -98,6 +116,7 @@ export const note = (
   props: Written,
   kind: Kind,
   settle?: Settle,
+  backdrop?: BackdropOf,
 ): void => {
   const { ref } = props;
 
@@ -122,13 +141,35 @@ export const note = (
     ...(props.anchor !== undefined && { pin: props.anchor }),
     origin: props.origin,
     ...(settle && { settle }),
+    ...(backdrop && { backdrop }),
   });
+};
+
+const behind = (backdrop: BackdropOf | undefined, node: SceneNode, box: Box): SceneNode[] => {
+  if (!backdrop) return [];
+  const drawn = backdrop(box);
+
+  return [{ ...drawn, ...(node.source && { source: node.source }) }];
+};
+
+const resizedWithin = (node: SceneNode, resized: ReadonlySet<string>): string | undefined => {
+  if (resized.has(node.key)) return node.key;
+
+  if (node.kind !== "group") return undefined;
+
+  for (const child of node.children) {
+    const found = resizedWithin(child, resized);
+
+    if (found !== undefined) return found;
+  }
+
+  return undefined;
 };
 
 interface Draft {
   readonly node: SceneNode;
   readonly parent: Draft | undefined;
-  readonly note: Note | undefined;
+  note: Note | undefined;
   children: Draft[];
   at: Animated<Vec>;
   box: Box;
@@ -342,16 +383,33 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
       d.box = around(d.children);
     } else if (asked?.kind === "arrange") {
       for (const child of d.children) {
-        if (resized.has(child.node.key))
+        const changing = resizedWithin(child.node, resized);
+
+        if (changing !== undefined)
           throw new Error(
-            `The ${asked.label} "${d.node.key}" lays out "${child.node.key}", whose box a morph() changes, but layout reads each box at rest, so it would not make room. Put the ${asked.label} inside the morph's states instead, so each state is laid out on its own.`,
+            `The ${asked.label} "${d.node.key}" lays out "${changing}", which a morph() resizes, brings in or takes away inside a <Sequence>, so the ${asked.label} can't make room for it. Put the ${asked.label} inside the <Sequence>, or inside the morph's states, so each state is laid out on its own.`,
           );
 
         placedInside(child.node.key, child.note, asked.label);
         measure(child);
       }
 
-      const { slots, box } = asked.arrange(d.children.map((child) => child.box));
+      const { slots, box, sizes } = asked.arrange(
+        d.children.map((child) => child.box),
+        `"${d.node.key}"`,
+      );
+
+      d.children.forEach((child, i) => {
+        const want = sizes?.[i];
+        const own = child.note?.settle;
+
+        if (!want || own?.kind !== "arrange" || !own.resize) return;
+        child.note = { ...child.note!, settle: { ...own, arrange: own.resize(want) } };
+        child.children = child.children.filter((each) => !each.node.authored?.backdrop);
+        child.measuring = 0;
+        measure(child);
+      });
+
       const folded = folds(d);
 
       const home =
@@ -366,6 +424,15 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
         child.placing = 2;
       });
       d.box = { ...box, x: box.x + x, y: box.y + y };
+
+      const backdrops = behind(d.note?.backdrop, d.node, d.box).map((node) => ({
+        ...draft(node, d, nodes),
+        placing: 2 as const,
+        measuring: 2 as const,
+      }));
+
+      backdrops.forEach(index);
+      d.children = [...backdrops, ...d.children];
 
       if (folded) d.at = [0, 0];
     } else {
@@ -494,10 +561,35 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     measure(d);
   }
 
+  const contains = (d: Draft | undefined): boolean =>
+    d?.note?.settle?.kind === "arrange" || d?.note?.arranged === true;
+
+  const flattens = (d: Draft): d is Draft & { at: Vec } =>
+    contains(d) &&
+    contains(d.parent) &&
+    !isLane(d.at) &&
+    (d.at[0] !== 0 || d.at[1] !== 0) &&
+    d.node.layers.length === 0 &&
+    d.node.effects.length === 0 &&
+    d.node.clip === undefined &&
+    d.node.mask === undefined;
+
   const build = (d: Draft): SceneNode => {
     const placed = { ...d.node, at: d.at, box: d.box, origin: d.origin };
 
-    return placed.kind === "group" ? { ...placed, children: d.children.map(build) } : placed;
+    if (placed.kind !== "group") return placed;
+    const children = d.children.map(build);
+
+    if (!flattens(d)) return { ...placed, children };
+    const [x, y] = d.at;
+
+    return {
+      ...placed,
+      at: [0, 0],
+      box: { ...d.box, x: d.box.x + x, y: d.box.y + y },
+      origin: [d.origin[0] + x, d.origin[1] + y],
+      children: children.map((child) => ({ ...child, at: homed(child.at, [-x, -y]) })),
+    };
   };
 
   // SAFETY: the root is drafted from a group and built back from that draft, so it is still the same kind of group.
@@ -521,11 +613,25 @@ export const outsider = (node: SceneNode, notes: Notes): string | undefined => {
 };
 
 export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode[] => {
-  const arranged = (node: SceneNode): SceneNode => {
+  const first = new Map<string, Note | undefined>();
+
+  const arranged = (node: SceneNode, size?: Size): SceneNode => {
     if (node.kind !== "group") return node;
-    const children = node.children.map(arranged);
-    const note = into.nodes.get(node.key);
-    const asked = note?.settle;
+
+    if (!first.has(node.key)) first.set(node.key, into.nodes.get(node.key));
+    const note = first.get(node.key);
+    const given = note?.settle;
+
+    const asked =
+      size && given?.kind === "arrange" && given.resize
+        ? { ...given, arrange: given.resize(size) }
+        : given;
+
+    const children = (
+      asked?.kind === "arrange"
+        ? node.children.filter((child) => !child.authored?.backdrop)
+        : node.children
+    ).map((child) => arranged(child));
 
     const pin = (box: Box): Animated<Vec> => {
       if (note?.pin === undefined || outsider(node, into) !== undefined) return node.at;
@@ -556,25 +662,42 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
         );
     }
 
-    const { slots, box } = asked.arrange(children.map((child) => child.box));
+    const { slots, box, sizes } = asked.arrange(
+      children.map((child) => child.box),
+      `"${node.key}"`,
+    );
 
-    const { settle: _arranged, ...kept } = note!;
+    const { settle: _arranged, backdrop, ...kept } = note!;
 
     into.nodes.set(node.key, { ...kept, arranged: true });
+
+    const placed = children.map((child, i) => {
+      const want = sizes?.[i];
+
+      return want
+        ? arranged(
+            node.children.find((raw) => raw.key === child.key)!,
+            want,
+          )
+        : child;
+    });
 
     return {
       ...node,
       box,
       at: pin(box),
       origin: originOf(note!.origin, box, node.key),
-      children: children.map((child, i) => ({
-        ...child,
-        at: [slots[i]![0] - child.box.x, slots[i]![1] - child.box.y],
-      })),
+      children: [
+        ...behind(backdrop, node, box),
+        ...placed.map((child, i) => ({
+          ...child,
+          at: [slots[i]![0] - child.box.x, slots[i]![1] - child.box.y] as const,
+        })),
+      ],
     };
   };
 
-  return list.map(arranged);
+  return list.map((node) => arranged(node));
 };
 
 const placedInside = (key: string, note: Note | undefined, label: string): void => {

@@ -11,6 +11,7 @@ import {
   ease,
   linear,
   morph,
+  moved,
   polygon,
   radial,
   rect,
@@ -570,6 +571,108 @@ describe("clips and masks", () => {
     expect(boxesOf(model).bar).toEqual({ x: 0, y: 0, width: 30, height: 20 });
     expect(hitTest(model, [20, 10])?.key).toBe("bar");
     expect(hitTest(model, [60, 10])).toBeUndefined();
+  });
+});
+
+describe("clips and masks sized by the node's box", () => {
+  test("a clip given as a function of the box gets the node's box, its center and its rect", () => {
+    const seen: Model.Box[] = [];
+
+    const model = made(() => (
+      <Stack
+        key="s"
+        padding={3}
+        clip={(own) => {
+          seen.push(own);
+
+          return moved(circle(5), own.center);
+        }}
+      >
+        <Shape key="a" geometry={rect(10, 10)} fill="#000000" />
+        <Shape key="b" geometry={rect(10, 10)} fill="#000000" />
+      </Stack>
+    ));
+
+    const clip = only(model).clip;
+
+    expect(seen[0]).toMatchObject({ x: 0, y: 0, width: 16, height: 26, center: [8, 13] });
+    expect(clip !== undefined && !isLane(clip) && clip.kind).toBe("path");
+    expect(
+      clip !== undefined && !isLane(clip) && clip.kind === "path" && clip.contours[0]!.start,
+    ).toEqual([13, 13]);
+  });
+
+  test("a mask given as a function of the box covers text of any width", () => {
+    const model = made(() => (
+      <Text
+        key="t"
+        font={mono}
+        size={12}
+        fill="#000000"
+        mask={(own) => (
+          <Shape
+            geometry={own.rect}
+            at={track<Vec>([-own.width, 0]).to([0, 0], span(0, 1))}
+            fill="#000000"
+          />
+        )}
+      >
+        any words at all
+      </Text>
+    ));
+
+    const { box, mask } = only(model);
+    const wipe = mask?.kind === "group" ? mask.children[0] : undefined;
+
+    expect(wipe?.box).toEqual({ x: 0, y: 0, width: box.width, height: box.height });
+    expect(wipe && isLane(wipe.at) && wipe.at.keys[0].value).toEqual([-box.width, 0]);
+  });
+
+  test("moved() shifts any geometry, so a moving round window needs no path data", () => {
+    const disc = moved(circle(10), [30, 40]);
+
+    const model = made(() => (
+      <Group key="g" clip={track(disc).to(moved(circle(10), [60, 40]), span(0, 1))}>
+        <Shape geometry={rect(100, 100)} fill="#000000" />
+      </Group>
+    ));
+
+    expect(disc.kind === "path" && disc.contours[0]!.start).toEqual([40, 40]);
+    expect(moved(rect(4, 2), [1, 1])).toMatchObject({ kind: "path" });
+    expect(
+      moved(
+        polygon([
+          [0, 0],
+          [1, 0],
+          [0, 1],
+        ]),
+        [2, 3],
+      ),
+    ).toEqual({
+      kind: "polygon",
+      points: [
+        [2, 3],
+        [3, 3],
+        [2, 4],
+      ],
+      closed: true,
+    });
+    expect(isLane(only(model).clip!)).toBe(true);
+  });
+
+  test("a box-sized clip on a group that holds an anchored node says its box isn't known yet", () => {
+    const card = ref("card");
+
+    expect(() =>
+      made(() => (
+        <Group>
+          <Shape ref={card} geometry={rect(10, 10)} at={[50, 50]} fill="#000000" />
+          <Group key="g" clip={(own) => own.rect}>
+            <Shape key="dot" geometry={circle(2)} at={card.center} fill="#000000" />
+          </Group>
+        </Group>
+      )),
+    ).toThrow('The clip of "g" is sized by its box, but "g/dot" inside it is placed by an anchor');
   });
 });
 

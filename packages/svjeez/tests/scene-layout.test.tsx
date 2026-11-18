@@ -3,6 +3,7 @@ import {
   font,
   Align,
   Arrow,
+  Center,
   Grid,
   Group,
   Shape,
@@ -12,12 +13,15 @@ import {
   circle,
   draw,
   ease,
+  enter,
+  morph,
   motion,
   rect,
   ref,
   scene,
   span,
   spin,
+  timeline,
   track,
   type SceneElement,
 } from "svjeez";
@@ -209,7 +213,7 @@ describe("containers", () => {
 
     expect(find(model, "col").box).toEqual({ x: 0, y: 0, width: 18, height: 29 });
     expect(placed(find(model, "col/inner"))).toEqual({ x: 4, y: 18, width: 7, height: 5 });
-    expect(placed(find(model, "col/inner/c"))).toEqual({ x: 4, y: 0, width: 3, height: 5 });
+    expect(placed(find(model, "col/inner/c"))).toEqual({ x: 8, y: 18, width: 3, height: 5 });
   });
 
   test("a grid sizes columns and rows to their largest child and aligns each in its cell", () => {
@@ -296,6 +300,185 @@ describe("containers", () => {
 
     expect(placed(b)).toEqual({ x: 10, y: 0, width: 10, height: 10 });
     expect(b.origin).toEqual([5, 5]);
+  });
+});
+
+describe("containers that draw themselves", () => {
+  test("a stack with a fill and a stroke draws a background sized to its content, under it", () => {
+    const model = made(() => (
+      <Stack
+        key="card"
+        padding={4}
+        gap={2}
+        fill="#eeeeee"
+        stroke={{ color: "#000000", width: 2 }}
+        radius={3}
+        at={[10, 10]}
+      >
+        <Shape fill="#000000" key="a" geometry={rect(20, 10)} />
+        <Shape fill="#000000" key="b" geometry={rect(10, 10)} />
+      </Stack>
+    ));
+
+    const card = find(model, "card");
+    const background = find(model, "card/background");
+
+    expect(card.kind === "group" && card.children[0]?.key).toBe("card/background");
+    expect(card.box).toEqual({ x: 10, y: 10, width: 32, height: 34 });
+    expect(placed(background)).toEqual(card.box);
+    expect(background.kind === "shape" && background.geometry).toEqual({
+      kind: "rect",
+      size: [30, 32],
+      radius: [3, 3, 3, 3],
+    });
+    expect(background.authored?.backdrop).toBe(true);
+    expect(placed(find(model, "card/a"))).toEqual({ x: 16, y: 16, width: 20, height: 10 });
+  });
+
+  test("an unstroked child starts at the stroke's inner edge, never under it", () => {
+    const model = made(() => (
+      <Stack key="window" fill="#ffffff" stroke={{ color: "#000000", width: 1.5 }}>
+        <Shape fill="#000000" key="bar" geometry={rect(40, 10)} />
+      </Stack>
+    ));
+
+    const outline = find(model, "window/background");
+    const bar = placed(find(model, "window/bar"));
+    const geometry = outline.kind === "shape" ? rest(outline.geometry) : undefined;
+    const [x] = rest(outline.at);
+
+    expect(geometry?.kind === "rect" && x + geometry.size[0] + 0.75).toBe(bar.x + bar.width + 1.5);
+    expect(bar).toEqual({ x: 1.5, y: 1.5, width: 40, height: 10 });
+  });
+
+  test("justify spreads a row of fixed width, and a row too narrow for its children says so", () => {
+    const row = (width: number) =>
+      made(() => (
+        <Stack
+          key="row"
+          direction="row"
+          justify="space-between"
+          align="center"
+          width={width}
+          height={20}
+          padding={[5, 0]}
+        >
+          <Shape fill="#000000" key="a" geometry={rect(10, 10)} />
+          <Shape fill="#000000" key="b" geometry={rect(10, 6)} />
+          <Shape fill="#000000" key="c" geometry={rect(10, 10)} />
+        </Stack>
+      ));
+
+    const model = row(100);
+
+    expect(placed(find(model, "row/a"))).toEqual({ x: 5, y: 5, width: 10, height: 10 });
+    expect(placed(find(model, "row/b"))).toEqual({ x: 45, y: 7, width: 10, height: 6 });
+    expect(placed(find(model, "row/c"))).toEqual({ x: 85, y: 5, width: 10, height: 10 });
+    expect(find(model, "row").box).toEqual({ x: 0, y: 0, width: 100, height: 20 });
+
+    const end = made(() => (
+      <Stack key="col" justify="end" height={50}>
+        <Shape fill="#000000" key="a" geometry={rect(10, 10)} />
+      </Stack>
+    ));
+
+    expect(placed(find(end, "col/a"))).toEqual({ x: 0, y: 40, width: 10, height: 10 });
+    expect(() => row(30)).toThrow(
+      'The <Stack> "row" is 30 wide, but its children, gaps and padding need 40. Make it wider, or leave out width so it fits them.',
+    );
+  });
+
+  test("Center lays its children over each other, centered, and can draw a pill around them", () => {
+    const model = made(() => (
+      <Center key="pill" width={60} height={24} radius={12} fill="#cccccc" at={[20, 30]}>
+        <Shape fill="#000000" key="dot" geometry={circle(4)} />
+        <Shape fill="#000000" key="bar" geometry={rect(30, 2)} />
+      </Center>
+    ));
+
+    expect(find(model, "pill").box).toEqual({ x: 20, y: 30, width: 60, height: 24 });
+    expect(placed(find(model, "pill/dot"))).toEqual({ x: 46, y: 38, width: 8, height: 8 });
+    expect(placed(find(model, "pill/bar"))).toEqual({ x: 35, y: 41, width: 30, height: 2 });
+    expect(placed(find(model, "pill/background"))).toEqual(find(model, "pill").box);
+
+    const fitted = made(() => (
+      <Center key="c" padding={[6, 2]}>
+        <Shape fill="#000000" key="a" geometry={rect(10, 4)} />
+        <Shape fill="#000000" key="b" geometry={rect(4, 10)} />
+      </Center>
+    ));
+
+    expect(find(fitted, "c").box).toEqual({ x: 0, y: 0, width: 22, height: 14 });
+  });
+
+  test("a grid draws its background too, and a timeline recolors a container's fill and stroke", () => {
+    const model = made(() => {
+      const grid = ref("grid");
+
+      timeline(grid.fill("#ff0000", 1), grid.stroke({ color: "#00ff00" }, 1));
+
+      return (
+        <Grid
+          ref={grid}
+          columns={2}
+          gap={2}
+          padding={2}
+          fill="#000000"
+          stroke={{ color: "#ffffff" }}
+        >
+          <Shape fill="#000000" key="a" geometry={rect(10, 10)} />
+          <Shape fill="#000000" key="b" geometry={rect(10, 10)} />
+        </Grid>
+      );
+    });
+
+    const background = find(model, "grid/background");
+
+    expect(find(model, "grid").box).toEqual({ x: 0, y: 0, width: 28, height: 16 });
+    expect(background.kind === "shape" && isLane(background.fill!)).toBe(true);
+    expect(background.kind === "shape" && isLane(background.stroke!.color)).toBe(true);
+  });
+
+  test("align stretch widens each container child to the stack's inner width, in a morph too", () => {
+    const window = () => (
+      <Stack key="w" align="stretch" fill="#ffffff" stroke={{ color: "#000000", width: 2 }}>
+        <Stack key="bar" direction="row" padding={2} fill="#cccccc">
+          <Shape fill="#000000" key="dot" geometry={circle(2)} />
+        </Stack>
+        <Shape fill="#000000" key="body" geometry={rect(40, 10)} />
+      </Stack>
+    );
+
+    const model = made(window);
+
+    expect(placed(find(model, "w/bar"))).toEqual({ x: 2, y: 2, width: 40, height: 8 });
+    expect(placed(find(model, "w/bar/background"))).toEqual({ x: 2, y: 2, width: 40, height: 8 });
+
+    const morphed = made(() => morph(window(), window(), span(1, 1)));
+
+    expect(placed(find(morphed, "w/bar"))).toEqual({ x: 2, y: 2, width: 40, height: 8 });
+  });
+
+  test("a child keyed background in a painted container is an error that names it", () => {
+    expect(() =>
+      made(() => (
+        <Stack key="s" fill="#000000">
+          <Shape fill="#000000" key="background" geometry={rect(10, 10)} />
+        </Stack>
+      )),
+    ).toThrow('A child of "s" is keyed "background"');
+  });
+
+  test("the background follows the container's own motion and is drawn first in the SVG", () => {
+    const model = made(() => (
+      <Stack key="s" fill="#123456" motion={enter(span(0, 1))} padding={4}>
+        <Shape fill="#000000" key="a" geometry={rect(10, 10)} />
+      </Stack>
+    ));
+
+    const out = svg.emit(model);
+
+    expect(out.indexOf("#123456")).toBeLessThan(out.indexOf("#000000"));
   });
 });
 
