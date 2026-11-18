@@ -19,54 +19,50 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m3{animation-name:k5,k6;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
 @keyframes k7{0%,21.429%{stroke-dashoffset:1;visibility:hidden}28.571%,100%{stroke-dashoffset:0;visibility:visible}}
 .m4{animation-name:k7}
-@keyframes k8{0%{translate:6px 0px;animation-timing-function:linear}21.429%{translate:6px 0px}28.571%,100%{translate:44px 0px}}
+@keyframes k8{0%{translate:5.25px 0px;animation-timing-function:linear}21.429%{translate:5.25px 0px}28.571%,100%{translate:43.25px 0px}}
 @keyframes k9{0%{visibility:hidden}21.429%,100%{visibility:visible}}
 .m5{animation-name:k8,k9;animation-timing-function:cubic-bezier(.23,1,.32,1),steps(1)}
-@keyframes k10{0%{stroke-dashoffset:1;visibility:hidden;animation-timing-function:linear}27.143%{stroke-dashoffset:1;visibility:visible}34.286%,90%,100%{stroke-dashoffset:0.398;visibility:visible}45.714%{stroke-dashoffset:0.398;visibility:visible;animation-timing-function:cubic-bezier(.333,0,.667,-.845)}50.322%{stroke-dashoffset:0.394;visibility:visible;animation-timing-function:cubic-bezier(.333,.102,.667,.168)}52.095%{stroke-dashoffset:0.372;visibility:visible;animation-timing-function:cubic-bezier(.333,.158,.667,.415)}53.04%{stroke-dashoffset:0.308;visibility:visible;animation-timing-function:cubic-bezier(.333,.297,.667,.696)}53.749%{stroke-dashoffset:0.215;visibility:visible;animation-timing-function:cubic-bezier(.333,.564,.667,.81)}55.639%{stroke-dashoffset:0.08;visibility:visible;animation-timing-function:cubic-bezier(.333,.628,.667,.854)}58.829%{stroke-dashoffset:0.011;visibility:visible;animation-timing-function:cubic-bezier(.333,.748,.667,.988)}61.429%{stroke-dashoffset:0;visibility:visible}74.286%{stroke-dashoffset:0;visibility:visible;animation-timing-function:cubic-bezier(.333,.006,.667,.131)}78.539%{stroke-dashoffset:0.042;visibility:visible;animation-timing-function:cubic-bezier(.333,.19,.667,.438)}80.548%{stroke-dashoffset:0.134;visibility:visible;animation-timing-function:cubic-bezier(.333,.238,.667,.565)}81.493%{stroke-dashoffset:0.235;visibility:visible;animation-timing-function:cubic-bezier(.333,.366,.667,.761)}82.202%{stroke-dashoffset:0.326;visibility:visible;animation-timing-function:cubic-bezier(.333,.672,.667,.856)}83.383%{stroke-dashoffset:0.379;visibility:visible;animation-timing-function:cubic-bezier(.333,.917,.667,.921)}85.747%{stroke-dashoffset:0.396;visibility:visible;animation-timing-function:cubic-bezier(.333,1.693,.667,1)}}
-@keyframes k11{0%,45.714%,90%,100%{rotate:0deg}49.377%{rotate:2.842deg;animation-timing-function:cubic-bezier(.333,.2,.667,.472)}51.267%{rotate:8.937deg;animation-timing-function:cubic-bezier(.333,.194,.667,.458)}52.803%{rotate:22.416deg;animation-timing-function:cubic-bezier(.333,.319,.667,.717)}53.512%{rotate:32.996deg;animation-timing-function:cubic-bezier(.333,.575,.667,.816)}54.694%{rotate:41.662deg;animation-timing-function:cubic-bezier(.333,.552,.667,.801)}56.348%{rotate:45.694deg;animation-timing-function:cubic-bezier(.333,.7,.667,.89)}59.774%{rotate:48.063deg;animation-timing-function:cubic-bezier(.333,.717,.667,.979)}61.429%{rotate:48.24deg}74.286%{rotate:48.24deg;animation-timing-function:cubic-bezier(.333,.007,.667,.125)}78.185%{rotate:46.719deg;animation-timing-function:cubic-bezier(.333,.184,.667,.421)}80.075%{rotate:43.215deg;animation-timing-function:cubic-bezier(.333,.203,.667,.457)}81.139%{rotate:37.597deg;animation-timing-function:cubic-bezier(.333,.256,.667,.587)}81.611%{rotate:32.313deg;animation-timing-function:cubic-bezier(.333,.31,.667,.69)}82.202%{rotate:23.514deg;animation-timing-function:cubic-bezier(.333,.546,.667,.805)}83.856%{rotate:9.528deg;animation-timing-function:cubic-bezier(.333,.533,.667,.802)}85.983%{rotate:2.962deg;animation-timing-function:cubic-bezier(.333,.827,.667,.993)}}
+@keyframes k10{0%{stroke-dashoffset:1;visibility:hidden;animation-timing-function:linear}27.143%{stroke-dashoffset:1;visibility:visible}34.286%,90%,100%{stroke-dashoffset:0.402;visibility:visible}45.714%{stroke-dashoffset:0.402;visibility:visible;animation-timing-function:cubic-bezier(.333,0,.667,-.845)}50.322%{stroke-dashoffset:0.399;visibility:visible;animation-timing-function:cubic-bezier(.333,.102,.667,.169)}52.095%{stroke-dashoffset:0.376;visibility:visible;animation-timing-function:cubic-bezier(.333,.159,.667,.416)}53.04%{stroke-dashoffset:0.311;visibility:visible;animation-timing-function:cubic-bezier(.333,.297,.667,.696)}53.749%{stroke-dashoffset:0.216;visibility:visible;animation-timing-function:cubic-bezier(.333,.551,.667,.804)}55.521%{stroke-dashoffset:0.085;visibility:visible;animation-timing-function:cubic-bezier(.333,.617,.667,.847)}58.593%{stroke-dashoffset:0.013;visibility:visible;animation-timing-function:cubic-bezier(.333,.758,.667,.989)}61.429%{stroke-dashoffset:0;visibility:visible}74.286%{stroke-dashoffset:0;visibility:visible;animation-timing-function:cubic-bezier(.333,.006,.667,.141)}78.421%{stroke-dashoffset:0.04;visibility:visible;animation-timing-function:cubic-bezier(.333,.192,.667,.443)}80.43%{stroke-dashoffset:0.126;visibility:visible;animation-timing-function:cubic-bezier(.333,.228,.667,.549)}81.493%{stroke-dashoffset:0.237;visibility:visible;animation-timing-function:cubic-bezier(.333,.366,.667,.761)}82.202%{stroke-dashoffset:0.329;visibility:visible;animation-timing-function:cubic-bezier(.333,.671,.667,.855)}83.383%{stroke-dashoffset:0.384;visibility:visible;animation-timing-function:cubic-bezier(.333,.916,.667,.921)}85.747%{stroke-dashoffset:0.401;visibility:visible;animation-timing-function:cubic-bezier(.333,1.693,.667,1)}}
+@keyframes k11{0%,45.714%,90%,100%{rotate:0deg}49.377%{rotate:2.929deg;animation-timing-function:cubic-bezier(.333,.2,.667,.472)}51.267%{rotate:9.208deg;animation-timing-function:cubic-bezier(.333,.195,.667,.461)}52.803%{rotate:23.038deg;animation-timing-function:cubic-bezier(.333,.32,.667,.719)}53.512%{rotate:33.798deg;animation-timing-function:cubic-bezier(.333,.578,.667,.817)}54.694%{rotate:42.53deg;animation-timing-function:cubic-bezier(.333,.554,.667,.802)}56.348%{rotate:46.566deg;animation-timing-function:cubic-bezier(.333,.701,.667,.89)}59.774%{rotate:48.929deg;animation-timing-function:cubic-bezier(.333,.717,.667,.979)}61.429%{rotate:49.105deg}74.286%{rotate:49.105deg;animation-timing-function:cubic-bezier(.333,.007,.667,.124)}78.185%{rotate:47.59deg;animation-timing-function:cubic-bezier(.333,.184,.667,.42)}80.075%{rotate:44.086deg;animation-timing-function:cubic-bezier(.333,.217,.667,.488)}81.02%{rotate:39.401deg;animation-timing-function:cubic-bezier(.333,.238,.667,.561)}81.611%{rotate:33.106deg;animation-timing-function:cubic-bezier(.333,.309,.667,.689)}82.202%{rotate:24.159deg;animation-timing-function:cubic-bezier(.333,.543,.667,.805)}83.856%{rotate:9.817deg;animation-timing-function:cubic-bezier(.333,.532,.667,.802)}85.983%{rotate:3.054deg;animation-timing-function:cubic-bezier(.333,.827,.667,.993)}}
 .m6{animation-name:k10,k11;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.333,.007,.667,.17)}
-@keyframes k12{0%{translate:6px 0px;animation-timing-function:linear}27.143%{translate:6px 0px}34.286%,90%,100%{translate:44px 0px}45.714%{translate:44px 0px;animation-timing-function:cubic-bezier(.333,0,.667,-.845)}50.322%{translate:44.204px 0px;animation-timing-function:cubic-bezier(.333,.102,.667,.168)}52.095%{translate:45.629px 0px;animation-timing-function:cubic-bezier(.333,.158,.667,.415)}53.04%{translate:49.625px 0px;animation-timing-function:cubic-bezier(.333,.297,.667,.696)}53.749%{translate:55.534px 0px;animation-timing-function:cubic-bezier(.333,.564,.667,.81)}55.639%{translate:64.032px 0px;animation-timing-function:cubic-bezier(.333,.628,.667,.854)}58.829%{translate:68.382px 0px;animation-timing-function:cubic-bezier(.333,.748,.667,.988)}61.429%{translate:69.073px 0px}74.286%{translate:69.073px 0px;animation-timing-function:cubic-bezier(.333,.006,.667,.131)}78.539%{translate:66.397px 0px;animation-timing-function:cubic-bezier(.333,.19,.667,.438)}80.548%{translate:60.628px 0px;animation-timing-function:cubic-bezier(.333,.238,.667,.565)}81.493%{translate:54.225px 0px;animation-timing-function:cubic-bezier(.333,.366,.667,.761)}82.202%{translate:48.528px 0px;animation-timing-function:cubic-bezier(.333,.672,.667,.856)}83.383%{translate:45.152px 0px;animation-timing-function:cubic-bezier(.333,.917,.667,.921)}85.747%{translate:44.089px 0px;animation-timing-function:cubic-bezier(.333,1.693,.667,1)}}
+@keyframes k12{0%{translate:5.25px 0px;animation-timing-function:linear}27.143%{translate:5.25px 0px}34.286%,90%,100%{translate:43.25px 0px}45.714%{translate:43.25px 0px;animation-timing-function:cubic-bezier(.333,0,.667,-.845)}50.322%{translate:43.46px 0px;animation-timing-function:cubic-bezier(.333,.102,.667,.169)}52.095%{translate:44.928px 0px;animation-timing-function:cubic-bezier(.333,.159,.667,.416)}53.04%{translate:49.031px 0px;animation-timing-function:cubic-bezier(.333,.297,.667,.696)}53.749%{translate:55.071px 0px;animation-timing-function:cubic-bezier(.333,.551,.667,.804)}55.521%{translate:63.402px 0px;animation-timing-function:cubic-bezier(.333,.617,.667,.847)}58.593%{translate:67.98px 0px;animation-timing-function:cubic-bezier(.333,.758,.667,.989)}61.429%{translate:68.833px 0px}74.286%{translate:68.833px 0px;animation-timing-function:cubic-bezier(.333,.006,.667,.141)}78.421%{translate:66.311px 0px;animation-timing-function:cubic-bezier(.333,.192,.667,.443)}80.43%{translate:60.819px 0px;animation-timing-function:cubic-bezier(.333,.228,.667,.549)}81.493%{translate:53.736px 0px;animation-timing-function:cubic-bezier(.333,.366,.667,.761)}82.202%{translate:47.906px 0px;animation-timing-function:cubic-bezier(.333,.671,.667,.855)}83.383%{translate:44.437px 0px;animation-timing-function:cubic-bezier(.333,.916,.667,.921)}85.747%{translate:43.342px 0px;animation-timing-function:cubic-bezier(.333,1.693,.667,1)}}
 .m7{animation-name:k12}
 @keyframes k13{0%{visibility:hidden}27.143%,100%{visibility:visible}}
 .m8{animation-name:k11,k13;animation-timing-function:cubic-bezier(.333,.007,.667,.17),steps(1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-2.4s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="640" height="300" fill="var(--background)"/>
-  <g transform="translate(320 150)">
-    <g transform="translate(-284 -56)">
-      <g class="a m1">
-        <rect width="156" height="112" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
-        <g transform="translate(14 14)">
-          <circle cx="4" cy="8.58" r="4" fill="var(--yellow)"/>
-          <text x="16" y="13.26" font-size="13" fill="var(--text)">Measure</text>
-        </g>
-        <text font-family="'Geist', sans-serif" font-size="12.5" fill="var(--muted)"><tspan x="14" y="53.723">Every node has a box</tspan><tspan x="14" y="71.223">the compiler knows,</tspan><tspan x="14" y="88.723">its text included.</tspan></text>
+  <g transform="translate(35.25 93.25)">
+    <g transform="translate(0.75 0.75)" class="a m1">
+      <rect width="156" height="112" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
+      <g transform="translate(14 14)">
+        <circle cx="4" cy="8.58" r="4" fill="var(--yellow)"/>
+        <text x="16" y="13.26" font-size="13" fill="var(--text)">Measure</text>
       </g>
-      <g transform="translate(206 0)" class="a m2">
-        <rect width="156" height="112" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
-        <g transform="translate(14 14)">
-          <circle cx="4" cy="8.58" r="4" fill="var(--green)"/>
-          <text x="16" y="13.26" font-size="13" fill="var(--text)">Place</text>
-        </g>
-        <text font-family="'Geist', sans-serif" font-size="12.5" fill="var(--muted)"><tspan x="14" y="53.723">Stacks and grids put</tspan><tspan x="14" y="71.223">each box in its slot,</tspan><tspan x="14" y="88.723">wherever its origin is.</tspan></text>
+      <text font-family="'Geist', sans-serif" font-size="12.5" fill="var(--muted)"><tspan x="14" y="53.723">Every node has a box</tspan><tspan x="14" y="71.223">the compiler knows,</tspan><tspan x="14" y="88.723">its text included.</tspan></text>
+    </g>
+    <g transform="translate(206.75 0.75)" class="a m2">
+      <rect width="156" height="112" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
+      <g transform="translate(14 14)">
+        <circle cx="4" cy="8.58" r="4" fill="var(--green)"/>
+        <text x="16" y="13.26" font-size="13" fill="var(--text)">Place</text>
       </g>
-      <g transform="translate(412 0)" class="a m3">
-        <rect width="156" height="112" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
-        <g transform="translate(14 14)">
-          <circle cx="4" cy="8.58" r="4" fill="var(--cyan)"/>
-          <text x="16" y="13.26" font-size="13" fill="var(--text)">Follow</text>
-        </g>
-        <text font-family="'Geist', sans-serif" font-size="12.5" fill="var(--muted)"><tspan x="14" y="53.723">Arrows attach to</tspan><tspan x="14" y="71.223">edges and follow the</tspan><tspan x="14" y="88.723">node when it moves.</tspan></text>
+      <text font-family="'Geist', sans-serif" font-size="12.5" fill="var(--muted)"><tspan x="14" y="53.723">Stacks and grids put</tspan><tspan x="14" y="71.223">each box in its slot,</tspan><tspan x="14" y="88.723">wherever its origin is.</tspan></text>
+    </g>
+    <g transform="translate(412.75 0.75)" class="a m3">
+      <rect width="156" height="112" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
+      <g transform="translate(14 14)">
+        <circle cx="4" cy="8.58" r="4" fill="var(--cyan)"/>
+        <text x="16" y="13.26" font-size="13" fill="var(--text)">Follow</text>
       </g>
+      <text font-family="'Geist', sans-serif" font-size="12.5" fill="var(--muted)"><tspan x="14" y="53.723">Arrows attach to</tspan><tspan x="14" y="71.223">edges and follow the</tspan><tspan x="14" y="88.723">node when it moves.</tspan></text>
     </g>
   </g>
   <line x1="198" y1="150" x2="236" y2="150" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
-  <polyline points="-7.204 -3.48 0 0 -7.204 3.48" transform="translate(192 150)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m5"/>
-  <line x1="404" y1="150" x2="467.073" y2="150" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:398px 150px" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
-  <g style="transform-origin:398px 150px" class="a m8">
-    <polyline points="-7.204 -3.48 0 0 -7.204 3.48" transform="translate(398 150)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m7"/>
+  <polyline points="-7.204 -3.48 0 0 -7.204 3.48" transform="translate(192.75 150)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m5"/>
+  <line x1="404" y1="150" x2="467.583" y2="150" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:398.75px 150px" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
+  <g style="transform-origin:398.75px 150px" class="a m8">
+    <polyline points="-7.204 -3.48 0 0 -7.204 3.48" transform="translate(398.75 150)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m7"/>
   </g>
-  <g transform="translate(320 278)">
-    <text x="-204.6" y="-3.3" font-size="11" fill="var(--border)">each arrow is attached to two cards' edges, not to coordinates</text>
-  </g>
+  <text x="115.4" y="274.7" font-size="11" fill="var(--border)">each arrow is attached to two cards' edges, not to coordinates</text>
 </svg>

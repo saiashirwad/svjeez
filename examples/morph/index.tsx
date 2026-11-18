@@ -68,7 +68,14 @@ const SCALE = 1.5;
  */
 const chart = ({ name, bars, change }: Quarter): SceneElement => (
   <Group>
-    <Text key="quarter" font={mono} size={14} at={[LEFT, 40]} fill={theme.text}>
+    <Text
+      key="quarter"
+      font={mono}
+      size={14}
+      at={[LEFT, 40]}
+      anchor="baseline-left"
+      fill={theme.text}
+    >
       {`Revenue, ${name}`}
     </Text>
     {bars.map(({ region, value, color }, i) => {
@@ -88,7 +95,7 @@ const chart = ({ name, bars, change }: Quarter): SceneElement => (
             font={mono}
             size={12}
             at={[x + WIDTH / 2, BASE + 20]}
-            align="center"
+            anchor="baseline"
             fill={theme.muted}
           >
             {region}
@@ -98,7 +105,13 @@ const chart = ({ name, bars, change }: Quarter): SceneElement => (
     })}
     <Group key="badge">
       {change === "" ? (
-        <Shape key="shape" geometry={circle(14)} at={[520, 110]} fill={theme.raised} />
+        <Shape
+          key="shape"
+          geometry={circle(14)}
+          at={[520, 110]}
+          anchor="center"
+          fill={theme.raised}
+        />
       ) : (
         <Shape
           key="shape"
@@ -108,7 +121,14 @@ const chart = ({ name, bars, change }: Quarter): SceneElement => (
         />
       )}
       {change !== "" && (
-        <Text key="change" font={mono} size={16} at={[520, 116]} align="center" fill={theme.text}>
+        <Text
+          key="change"
+          font={mono}
+          size={16}
+          at={[520, 116]}
+          anchor="baseline"
+          fill={theme.text}
+        >
           {change}
         </Text>
       )}

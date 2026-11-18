@@ -56,16 +56,22 @@ const Lane = ({
   <Group at={[24, y]}>
     <Shape
       geometry={rect(320, 116, { radius: 10 })}
+      at={[-0.5, -0.5]}
       fill={theme.surface}
       stroke={{ color: theme.border, width: 1 }}
     />
-    <Text font={mono} size={12} at={[12, 20]} fill={theme.muted}>
+    <Text font={mono} size={12} at={[12, 20]} anchor="baseline-left" fill={theme.muted}>
       {label}
     </Text>
     {[HOME, ...STOPS].map((stop) => (
-      <Shape geometry={circle(9)} at={stop} stroke={{ color: theme.border, width: 1.5 }} />
+      <Shape
+        geometry={circle(9)}
+        at={stop}
+        anchor="center"
+        stroke={{ color: theme.border, width: 1.5 }}
+      />
     ))}
-    <Shape geometry={circle(7)} at={route(curve)} fill={theme.blue} />
+    <Shape geometry={circle(7)} at={route(curve)} anchor="center" fill={theme.blue} />
   </Group>
 );
 
@@ -80,10 +86,11 @@ const Card = (): SceneElement => (
   >
     <Shape
       geometry={rect(120, 96, { radius: 10 })}
+      at={[-0.75, -0.75]}
       fill={theme.raised}
       stroke={{ color: theme.border, width: 1.5 }}
     />
-    <Shape geometry={circle(12)} at={[26, 28]} fill={theme.magenta} />
+    <Shape geometry={circle(12)} at={[26, 28]} anchor="center" fill={theme.magenta} />
     <Shape geometry={rect(56, 6, { radius: 3 })} at={[46, 20]} fill={theme.text} />
     <Shape geometry={rect(40, 6, { radius: 3 })} at={[46, 32]} fill={theme.muted} />
     <Shape geometry={rect(96, 6, { radius: 3 })} at={[12, 58]} fill={theme.border} />

@@ -25,8 +25,10 @@ import { mono, theme } from "../theme";
 
 const IDLE: Vec = [244, 196];
 
+/** A rect whose 1.5px outline is centered on its edge: its painted box starts half the outline out. */
 const outlined = (width: number, height: number, radius: number) => ({
   geometry: rect(width, height, { radius }),
+  at: [-0.75, -0.75] as const,
   stroke: { color: theme.border, width: 1.5 },
 });
 
@@ -40,7 +42,7 @@ const keycap = (label: string) => {
       <Group ref={cap} at={[16, 184]}>
         <Shape {...outlined(48, 40, 9)} fill={theme.surface} />
         <Shape key="lit" geometry={rect(48, 40, { radius: 9 })} fill={theme.blue} opacity={0} />
-        <Text font={mono} size={14} at={[24, 25]} align="center" fill={theme.text}>
+        <Text font={mono} size={14} at={[24, 25]} anchor="baseline" fill={theme.text}>
           {label}
         </Text>
       </Group>
@@ -80,6 +82,7 @@ const Desktop = ({ x, at, from, to }: DesktopProps): SceneElement => {
     <Group at={[x, 30]}>
       <Shape
         geometry={rect(290, 240, { radius: 14 })}
+        at={[-0.75, -0.75]}
         fill={theme.background}
         stroke={{ color: theme.raised, width: 1.5 }}
       />
@@ -102,13 +105,13 @@ const Desktop = ({ x, at, from, to }: DesktopProps): SceneElement => {
             <Shape geometry={rect(44, 5, { radius: 2.5 })} fill={theme.border} />
           </Stack>
         </Group>
-        <Shape
-          ref={cursor}
-          geometry={svgPath("M0 0V16l4.2-3.8 3 6.8 2.8-1.2-3-6.6H12Z")}
-          fill={theme.text}
-          stroke={{ color: theme.background, width: 1.2, join: "round" }}
-          at={IDLE}
-        />
+        <Group ref={cursor} at={IDLE}>
+          <Shape
+            geometry={svgPath("M0 0V16l4.2-3.8 3 6.8 2.8-1.2-3-6.6H12Z")}
+            fill={theme.text}
+            stroke={{ color: theme.background, width: 1.2, join: "round" }}
+          />
+        </Group>
       </Sequence>
     </Group>
   );

@@ -38,7 +38,7 @@ const Label = ({
     font={mono}
     size={12}
     at={[GAP + i * (TILE + GAP) + TILE / 2, 196]}
-    align="center"
+    anchor="baseline"
     fill={theme.muted}
   >
     {children}
@@ -120,7 +120,7 @@ export default scene(
           geometry={card}
           fill={radial.across({ center: "top-left", stops: [theme.yellow, theme.red] })}
         />
-        <Shape geometry={circle(18)} at={[56, 56]} fill={theme.background} />
+        <Shape geometry={circle(18)} at={[56, 56]} anchor="center" fill={theme.background} />
       </Group>
       <Label i={2}>masked reveal</Label>
 
@@ -135,7 +135,7 @@ export default scene(
 
       <Shape
         geometry={card}
-        at={corner(4)}
+        at={[corner(4)[0] - 0.5, corner(4)[1] - 0.5]}
         fill={theme.surface}
         stroke={{ color: theme.border, width: 1 }}
         scale={track(1).to(1.06, span(1, 0.8), ease.out).to(1, span(3.4, 0.8), ease.inOut)}

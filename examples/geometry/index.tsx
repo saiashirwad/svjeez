@@ -31,7 +31,7 @@ const Label = ({
   readonly i: number;
   readonly children: string;
 }): SceneElement => (
-  <Text font={mono} size={12} at={[center(i)[0], 186]} align="center" fill={theme.muted}>
+  <Text font={mono} size={12} at={[center(i)[0], 186]} anchor="baseline" fill={theme.muted}>
     {children}
   </Text>
 );
@@ -76,6 +76,7 @@ export default scene(
       <Shape
         geometry={arc({ radius: 38, start: -90, sweep: 300 })}
         at={center(1)}
+        anchor="center"
         stroke={{ color: theme.raised, width: 8, cap: "round" }}
       />
       <Shape
@@ -83,22 +84,25 @@ export default scene(
           .to(arc({ radius: 38, start: -90, sweep: 300 }), span(0.4, 1.8), ease.inOut)
           .rewind(0.8, ease.inOut)}
         at={center(1)}
+        anchor="center"
         stroke={{ color: theme.cyan, width: 8, cap: "round" }}
       />
       <Label i={1}>arc opens</Label>
 
-      <Shape
-        geometry={track(star)
-          .to(heart, span(0.6, 1.2), ease.inOut)
-          .to(star, span(2.8, 1.2), ease.inOut)}
-        at={center(2)}
-        fill={theme.magenta}
-      />
+      <Group at={center(2)}>
+        <Shape
+          geometry={track(star)
+            .to(heart, span(0.6, 1.2), ease.inOut)
+            .to(star, span(2.8, 1.2), ease.inOut)}
+          fill={theme.magenta}
+        />
+      </Group>
       <Label i={2}>star to heart</Label>
 
       <Shape
         geometry={circle(30)}
         at={center(3)}
+        anchor="center"
         stroke={{
           color: theme.green,
           width: track(2).to(18, span(0.4, 1.4), ease.inOut).rewind(1.2, ease.inOut),
@@ -106,10 +110,16 @@ export default scene(
       />
       <Label i={3}>stroke swells</Label>
 
-      <Shape geometry={circle(36)} at={center(4)} stroke={{ color: theme.raised, width: 6 }} />
       <Shape
         geometry={circle(36)}
         at={center(4)}
+        anchor="center"
+        stroke={{ color: theme.raised, width: 6 }}
+      />
+      <Shape
+        geometry={circle(36)}
+        at={center(4)}
+        anchor="center"
         rotate={-90}
         stroke={{ color: theme.orange, width: 6, cap: "round" }}
         trim={track<Vec>([0, 0])

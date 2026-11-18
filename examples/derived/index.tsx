@@ -53,22 +53,26 @@ export default scene(
   () => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
-      <Shape geometry={circle(RADIUS)} at={CENTER} stroke={{ color: theme.border, width: 1.5 }} />
+      <Shape
+        geometry={circle(RADIUS)}
+        at={CENTER}
+        anchor="center"
+        stroke={{ color: theme.border, width: 1.5 }}
+      />
       <Shape
         geometry={line([WAVE.x, WAVE.y], [WAVE.x + WAVE.width, WAVE.y])}
         stroke={{ color: theme.border, width: 1 }}
       />
       <Shape geometry={wave} stroke={{ color: theme.raised, width: 2, join: "round" }} />
       <Shape
-        geometry={line([0, 0], [RADIUS, 0])}
-        at={CENTER}
-        origin={[0, 0]}
+        geometry={line(CENTER, [CENTER[0] + RADIUS, CENTER[1]])}
+        origin={CENTER}
         rotate={theta.map((t) => -t)}
         stroke={{ color: theme.text, width: 2, cap: "round" }}
       />
-      <Shape geometry={circle(4)} at={CENTER} fill={theme.text} />
-      <Shape geometry={circle(7)} at={theta.map(onDial)} fill={theme.blue} />
-      <Shape geometry={circle(7)} at={theta.map(onWave)} fill={theme.orange} />
+      <Shape geometry={circle(4)} at={CENTER} anchor="center" fill={theme.text} />
+      <Shape geometry={circle(7)} at={theta.map(onDial)} anchor="center" fill={theme.blue} />
+      <Shape geometry={circle(7)} at={theta.map(onWave)} anchor="center" fill={theme.orange} />
       <Shape
         geometry={rect(WAVE.width, 10, { radius: 5 })}
         at={[WAVE.x, 262]}
@@ -79,10 +83,16 @@ export default scene(
         at={[WAVE.x, 262]}
         fill={theme.green}
       />
-      <Text font={mono} size={12} at={[WAVE.x, 252]} fill={theme.muted}>
+      <Text font={mono} size={12} at={[WAVE.x, 252]} anchor="baseline-left" fill={theme.muted}>
         {"0°"}
       </Text>
-      <Text font={mono} size={12} at={[WAVE.x + WAVE.width, 252]} align="end" fill={theme.muted}>
+      <Text
+        font={mono}
+        size={12}
+        at={[WAVE.x + WAVE.width, 252]}
+        anchor="baseline-right"
+        fill={theme.muted}
+      >
         {"360°"}
       </Text>
     </Group>

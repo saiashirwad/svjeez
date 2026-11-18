@@ -23,16 +23,16 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @keyframes k8{0%,52.821%,100%{fill:var(--blue)}64.359%,84.615%{fill:var(--orange)}}
 @keyframes k9{0%,17.949%,100%{translate:168px 128px}33.333%,52.821%{translate:168px 164px}64.359%,84.615%{translate:272px 149px}}
 .m7{animation-name:k8,k9;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k10{0%,52.821%,100%{translate:200px 256px}64.359%,84.615%{translate:304px 256px}}
+@keyframes k10{0%,52.821%,100%{translate:185.6px 243.76px}64.359%,84.615%{translate:289.6px 243.76px}}
 .m8{animation-name:k10;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k11{0%,17.949%,100%{fill:var(--blue)}33.333%,84.615%{fill:var(--green)}}
 @keyframes k12{0%,17.949%,100%{translate:272px 153.5px}33.333%,53.59%{translate:272px 101px}65.128%,84.615%{translate:64px 86px}}
 .m9{animation-name:k11,k12;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k13{0%,53.59%,100%{translate:304px 256px}65.128%,84.615%{translate:96px 256px}}
+@keyframes k13{0%,53.59%,100%{translate:286px 243.76px}65.128%,84.615%{translate:78px 243.76px}}
 .m10{animation-name:k13;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k14{0%,54.359%{translate:376px 191px}65.897%,100%{translate:168px 122px}}
 .m11{animation-name:k14;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k15{0%,54.359%{translate:408px 256px}65.897%,100%{translate:200px 256px}}
+@keyframes k15{0%,54.359%{translate:393.6px 243.76px}65.897%,100%{translate:185.6px 243.76px}}
 .m12{animation-name:k15;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k16{0%,17.949%,100%{scale:0.6}33.333%,84.615%{scale:1}}
 @keyframes k17{0%,17.949%,100%{opacity:0}33.333%,84.615%{opacity:1}}
@@ -48,11 +48,11 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 ]]></style>
   <rect width="640" height="280" fill="var(--background)"/>
   <rect x="48" y="236" width="512" height="1.5" fill="var(--border)"/>
-  <g transform="translate(64 40)">
-    <text font-size="14" fill="var(--text)" class="a m1">Revenue, Q1</text>
-    <text font-size="14" fill="var(--text)" class="a m2">Revenue, Q2</text>
-    <text font-size="14" fill="var(--text)" class="a m3">Revenue, Q3</text>
-    <text font-size="14" fill="var(--text)" class="a m4">Revenue, Q1</text>
+  <g transform="translate(64 25.72)">
+    <text y="14.28" font-size="14" fill="var(--text)" class="a m1">Revenue, Q1</text>
+    <text y="14.28" font-size="14" fill="var(--text)" class="a m2">Revenue, Q2</text>
+    <text y="14.28" font-size="14" fill="var(--text)" class="a m3">Revenue, Q3</text>
+    <text y="14.28" font-size="14" fill="var(--text)" class="a m4">Revenue, Q1</text>
   </g>
   <g style="transform-origin:96px 217.8px" class="a m6">
     <rect width="64" height="96" rx="6" fill="var(--blue)" class="a m5 dm">
@@ -65,26 +65,26 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     <animate attributeName="height" values="108;108;72;72;87;87;108" keyTimes="0;0.17949;0.33333;0.52821;0.64359;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" dur="7.8s" repeatCount="indefinite"/>
   </rect>
   <rect width="64" height="86.996" rx="6" fill="var(--blue)" class="a m7 ds" display="none"/>
-  <text x="-14.4" font-size="12" fill="var(--muted)" class="a m8">east</text>
+  <text y="12.24" font-size="12" fill="var(--muted)" class="a m8">east</text>
   <rect width="64" height="149.935" rx="6" fill="var(--blue)" class="a m9 dm">
     <animate attributeName="height" values="82.5;82.5;135;135;150;150;82.5" keyTimes="0;0.17949;0.33333;0.5359;0.65128;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" dur="7.8s" repeatCount="indefinite"/>
   </rect>
   <rect width="64" height="149.935" rx="6" fill="var(--blue)" class="a m9 ds" display="none"/>
-  <text x="-18" font-size="12" fill="var(--muted)" class="a m10">south</text>
+  <text y="12.24" font-size="12" fill="var(--muted)" class="a m10">south</text>
   <g style="transform-origin:408px 225.3px" class="a m13">
     <rect width="64" height="114" rx="6" fill="var(--cyan)" class="a m11 dm">
       <animate id="w1" attributeName="height" values="45;114" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="4.24s;w1.begin+7.8s" dur="0.9s" fill="freeze" data-loop="7.8s"/>
       <set attributeName="height" to="45" begin="0s;w1.begin+3.56s" dur="4.24s" fill="freeze" data-loop="7.8s"/>
     </rect>
     <rect width="64" height="113.001" rx="6" fill="var(--cyan)" class="a m11 ds" display="none"/>
-    <text x="-14.4" font-size="12" fill="var(--muted)" class="a m12">west</text>
+    <text y="12.24" font-size="12" fill="var(--muted)" class="a m12">west</text>
   </g>
   <path d="M96 10c0 6.67 0 13.33 0 20c0 5.52 -4.48 10 -10 10c-25.33 0 -50.67 0 -76 0c-5.52 0 -10 -4.48 -10 -10c0 -6.67 0 -13.33 0 -20c0 -5.52 4.48 -10 10 -10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z" fill="var(--raised)" class="a m14 dm">
     <animate attributeName="d" values="M14 0c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1c2.53 2.53 4.1 6.03 4.1 9.9z;M14 0c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1c2.53 2.53 4.1 6.03 4.1 9.9z;M96 10c0 6.67 0 13.33 0 20c0 5.52-4.48 10-10 10c-25.33 0-50.67 0-76 0c-5.52 0-10-4.48-10-10c0-6.67 0-13.33 0-20c0-5.52 4.48-10 10-10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z;M96 10c0 6.67 0 13.33 0 20c0 5.52-4.48 10-10 10c-25.33 0-50.67 0-76 0c-5.52 0-10-4.48-10-10c0-6.67 0-13.33 0-20c0-5.52 4.48-10 10-10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z;M9.9-9.9c2.53 2.53 4.1 6.03 4.1 9.9c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1z" keyTimes="0;0.17949;0.33333;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" dur="7.8s" repeatCount="indefinite"/>
   </path>
   <path d="M96 10c0 6.67 0 13.33 0 20c0 5.52 -4.48 10 -10 10c-25.33 0 -50.67 0 -76 0c-5.52 0 -10 -4.48 -10 -10c0 -6.67 0 -13.33 0 -20c0 -5.52 4.48 -10 10 -10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z" fill="var(--raised)" class="a m14 ds" display="none"/>
-  <g transform="translate(520 116)" style="transform-origin:520px 110.24px" class="a m13">
-    <text x="-19.2" font-size="16" fill="var(--text)" class="a m15">+18%</text>
-    <text x="-19.2" font-size="16" fill="var(--text)" class="a m16">+31%</text>
+  <g transform="translate(500.8 99.68)" style="transform-origin:520px 110.24px" class="a m13">
+    <text y="16.32" font-size="16" fill="var(--text)" class="a m15">+18%</text>
+    <text y="16.32" font-size="16" fill="var(--text)" class="a m16">+31%</text>
   </g>
 </svg>

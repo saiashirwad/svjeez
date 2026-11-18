@@ -54,6 +54,7 @@ const Card = ({ handle, title, dot, when, children, drift }: CardProps): SceneEl
   >
     <Shape
       geometry={rect(WIDTH, 112, { radius: 10 })}
+      at={[-0.75, -0.75]}
       fill={theme.surface}
       stroke={{ color: theme.raised, width: 1.5 }}
     />
@@ -87,7 +88,7 @@ export default scene(
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Align place="center">
-        <Stack direction="row" gap={50}>
+        <Stack direction="row" gap={48.5}>
           <Card handle={measure} title="Measure" dot={theme.yellow} when={first!}>
             Every node has a box the compiler knows, its text included.
           </Card>
@@ -102,19 +103,19 @@ export default scene(
       <Arrow
         from={measure.right}
         to={place.left}
-        gap={6}
+        gap={5.25}
         color={theme.blue}
         trim={draw(span(1.5, 0.5))}
       />
       <Arrow
         from={place.right}
         to={follow.left}
-        gap={6}
+        gap={5.25}
         color={theme.blue}
         trim={draw(span(1.9, 0.5))}
       />
       <Align place="bottom" inset={22}>
-        <Text font={mono} size={11} fill={theme.border} align="center">
+        <Text font={mono} size={11} fill={theme.border}>
           each arrow is attached to two cards' edges, not to coordinates
         </Text>
       </Align>
