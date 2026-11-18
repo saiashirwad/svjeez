@@ -719,7 +719,17 @@ const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
     first,
   );
 
-  return ctx.sources ? labelled(node, out) : out;
+  if (ctx.sources) return labelled(node, out);
+
+  // A group with nothing of its own (no placement, opacity or lanes) changes nothing it holds: paint order, paint and
+  // place are all the parent's. Its children stand in its place, so a layout container costs no element.
+  return node.kind === "group" &&
+    out.kind === "element" &&
+    out.tag === "g" &&
+    out.lanes === undefined &&
+    Object.keys(out.attrs).length === 0
+    ? { kind: "fragment", children: out.children }
+    : out;
 };
 
 const tokenCss = (scene: Scene, prefix: string): string => {

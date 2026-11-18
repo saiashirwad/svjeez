@@ -38,44 +38,34 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     <g transform="translate(-284 -56)">
       <g class="a m1">
         <rect width="156" height="112" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
-        <g>
-          <g transform="translate(14 14)">
-            <circle cx="4" cy="8.58" r="4" fill="var(--yellow)"/>
-            <text x="16" y="13.26" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--text)">Measure</text>
-          </g>
-          <text font-family="'Geist', sans-serif" font-size="12.5" fill="var(--muted)"><tspan x="14" y="53.723">Every node has a box</tspan><tspan x="14" y="71.223">the compiler knows,</tspan><tspan x="14" y="88.723">its text included.</tspan></text>
+        <g transform="translate(14 14)">
+          <circle cx="4" cy="8.58" r="4" fill="var(--yellow)"/>
+          <text x="16" y="13.26" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--text)">Measure</text>
         </g>
+        <text font-family="'Geist', sans-serif" font-size="12.5" fill="var(--muted)"><tspan x="14" y="53.723">Every node has a box</tspan><tspan x="14" y="71.223">the compiler knows,</tspan><tspan x="14" y="88.723">its text included.</tspan></text>
       </g>
       <g transform="translate(206 0)" class="a m2">
         <rect width="156" height="112" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
-        <g>
-          <g transform="translate(14 14)">
-            <circle cx="4" cy="8.58" r="4" fill="var(--green)"/>
-            <text x="16" y="13.26" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--text)">Place</text>
-          </g>
-          <text font-family="'Geist', sans-serif" font-size="12.5" fill="var(--muted)"><tspan x="14" y="53.723">Stacks and grids put</tspan><tspan x="14" y="71.223">each box in its slot,</tspan><tspan x="14" y="88.723">wherever its origin is.</tspan></text>
+        <g transform="translate(14 14)">
+          <circle cx="4" cy="8.58" r="4" fill="var(--green)"/>
+          <text x="16" y="13.26" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--text)">Place</text>
         </g>
+        <text font-family="'Geist', sans-serif" font-size="12.5" fill="var(--muted)"><tspan x="14" y="53.723">Stacks and grids put</tspan><tspan x="14" y="71.223">each box in its slot,</tspan><tspan x="14" y="88.723">wherever its origin is.</tspan></text>
       </g>
       <g transform="translate(412 0)" class="a m3">
         <rect width="156" height="112" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
-        <g>
-          <g transform="translate(14 14)">
-            <circle cx="4" cy="8.58" r="4" fill="var(--cyan)"/>
-            <text x="16" y="13.26" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--text)">Follow</text>
-          </g>
-          <text font-family="'Geist', sans-serif" font-size="12.5" fill="var(--muted)"><tspan x="14" y="53.723">Arrows attach to</tspan><tspan x="14" y="71.223">edges and follow the</tspan><tspan x="14" y="88.723">node when it moves.</tspan></text>
+        <g transform="translate(14 14)">
+          <circle cx="4" cy="8.58" r="4" fill="var(--cyan)"/>
+          <text x="16" y="13.26" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="13" fill="var(--text)">Follow</text>
         </g>
+        <text font-family="'Geist', sans-serif" font-size="12.5" fill="var(--muted)"><tspan x="14" y="53.723">Arrows attach to</tspan><tspan x="14" y="71.223">edges and follow the</tspan><tspan x="14" y="88.723">node when it moves.</tspan></text>
       </g>
     </g>
   </g>
-  <g>
-    <line x1="0" y1="0" x2="38.925" y2="0" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:0px 0px" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
-    <polyline points="-7.204 -3.48 0 0 -7.204 3.48" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:0px 0px" class="a m5"/>
-  </g>
-  <g>
-    <line x1="0" y1="0" x2="63.073" y2="0" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:0px 0px" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
-    <polyline points="-7.204 -3.48 0 0 -7.204 3.48" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:0px 0px" class="a m7"/>
-  </g>
+  <line x1="0" y1="0" x2="38.925" y2="0" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:0px 0px" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+  <polyline points="-7.204 -3.48 0 0 -7.204 3.48" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:0px 0px" class="a m5"/>
+  <line x1="0" y1="0" x2="63.073" y2="0" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:0px 0px" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
+  <polyline points="-7.204 -3.48 0 0 -7.204 3.48" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:0px 0px" class="a m7"/>
   <g transform="translate(320 278)">
     <text x="-204.6" y="-3.3" font-family="'JetBrains Mono', ui-monospace, Menlo, monospace" font-size="11" fill="var(--border)">each arrow is attached to two cards' edges, not to coordinates</text>
   </g>

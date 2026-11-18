@@ -228,6 +228,20 @@ describe("the SVG backend", () => {
     ).toMatch(/<g class="a m\d">\s*<circle r="4" fill="none" class="a m\d"\/>/);
   });
 
+  test("a group with nothing of its own writes no element, but keeps one when asked for keys", () => {
+    const build = () => (
+      <Group>
+        <Group key="row">
+          <Shape geometry={circle(4)} />
+          <Shape geometry={circle(4)} at={[10, 0]} />
+        </Group>
+      </Group>
+    );
+
+    expect(body(build)).not.toContain("<g");
+    expect(svg.emit(made(build), { sources: true })).toContain('<g data-key="row">');
+  });
+
   test("a feature the backend can't draw is named with its node, before anything is written", () => {
     const model = made(() => <Shape key="dot" geometry={circle(4)} />);
     const dot = only(model);
