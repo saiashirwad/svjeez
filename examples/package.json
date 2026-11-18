@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@svjeez/charts": "workspace:*",
+    "@svjeez/code": "workspace:*",
     "@svjeez/fonts": "workspace:*",
     "@svjeez/icons": "workspace:*",
     "@svjeez/video": "workspace:*",

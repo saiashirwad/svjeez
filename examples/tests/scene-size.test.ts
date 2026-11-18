@@ -27,6 +27,7 @@ const budgets = {
   paint: { bytes: 8800, elements: 52, stops: 18, smil: 14, cost: 14 },
   epicycles: { bytes: 45200, elements: 145, stops: 119, smil: 0, cost: 84 },
   escapement: { bytes: 51500, elements: 143, stops: 128, smil: 0, cost: 49 },
+  code: { bytes: 11600, elements: 152, stops: 32, smil: 0, cost: 23 },
 } satisfies Record<string, Budget>;
 
 const measure = (svg: string): Budget => {

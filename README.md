@@ -81,6 +81,7 @@ Each package runs while the scene compiles, so the SVG still carries no script.
 - [`@svjeez/icons`](https://github.com/saiashirwad/svjeez/tree/main/packages/icons): Tabler and Lucide icons as an `<Icon>` node
 - [`@svjeez/charts`](https://github.com/saiashirwad/svjeez/tree/main/packages/charts): bar, line and area charts on shared axes
 - [`@svjeez/dom`](https://github.com/saiashirwad/svjeez/tree/main/packages/dom): HTML, React or Svelte states recorded in Chromium as snapshot data
+- [`@svjeez/code`](https://github.com/saiashirwad/svjeez/tree/main/packages/code): highlighted code that types itself and morphs
 - [`@svjeez/video`](https://github.com/saiashirwad/svjeez/tree/main/packages/video): MP4 or WebM from a scene
 - [`@svjeez/vite`](https://github.com/saiashirwad/svjeez/tree/main/packages/vite), [`@svjeez/astro`](https://github.com/saiashirwad/svjeez/tree/main/packages/astro): scenes compiled into a Vite app or Astro site
 

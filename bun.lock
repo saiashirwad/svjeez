@@ -16,6 +16,7 @@
       "name": "svjeez-examples",
       "devDependencies": {
         "@svjeez/charts": "workspace:*",
+        "@svjeez/code": "workspace:*",
         "@svjeez/fonts": "workspace:*",
         "@svjeez/icons": "workspace:*",
         "@svjeez/video": "workspace:*",
@@ -51,6 +52,21 @@
         "@types/bun": "latest",
         "@types/d3-scale": "4.0.9",
         "@types/d3-shape": "3.2.0",
+        "svjeez": "workspace:*",
+        "typescript": "latest",
+      },
+      "peerDependencies": {
+        "svjeez": "workspace:^",
+      },
+    },
+    "packages/code": {
+      "name": "@svjeez/code",
+      "version": "0.8.0-next.0",
+      "dependencies": {
+        "shiki": "4.5.0",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
         "svjeez": "workspace:*",
         "typescript": "latest",
       },
@@ -526,6 +542,8 @@
     "@svjeez/astro": ["@svjeez/astro@workspace:packages/astro"],
 
     "@svjeez/charts": ["@svjeez/charts@workspace:packages/charts"],
+
+    "@svjeez/code": ["@svjeez/code@workspace:packages/code"],
 
     "@svjeez/dom": ["@svjeez/dom@workspace:packages/dom"],
 

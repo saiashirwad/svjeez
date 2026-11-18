@@ -1,0 +1,38 @@
+{
+  "name": "@svjeez/code",
+  "version": "0.8.0-next.0",
+  "private": true,
+  "description": "Syntax-highlighted code for svjeez scenes: a <Code> node that colors Shiki tokens from the scene's palette and can type itself in.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/code"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./palettes": "./src/palettes.ts"
+  },
+  "scripts": {
+    "test": "bun test --conditions @svjeez/source",
+    "typecheck": "tsc --noEmit",
+    "build:package": "bun ../../scripts/package-plugin.ts",
+    "test:package": "bun ../../scripts/package-plugin-check.ts"
+  },
+  "dependencies": {
+    "shiki": "4.5.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "svjeez": "workspace:*",
+    "typescript": "latest"
+  },
+  "peerDependencies": {
+    "svjeez": "workspace:^"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
