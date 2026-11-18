@@ -14,6 +14,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/vite/` is `@svjeez/vite`, the Vite plugin.
 - `packages/astro/` is `@svjeez/astro`, the Astro integration, built on `@svjeez/vite`.
 - `packages/fonts/` is `@svjeez/fonts`, which loads Google Fonts by family name into a `Font`.
+- `packages/dom/` is `@svjeez/dom`, which records HTML, React or Svelte states in headless Chromium as snapshot data. It reads and records only; drawing a snapshot as a scene is not ported yet.
 - `packages/video/` is `@svjeez/video`, which encodes a scene as MP4 or WebM through Mediabunny in headless Chromium.
 - `examples/` holds the scene-model example scenes and their committed output in `examples/dist/`. `examples/golden/` keeps the SVGs the 0.7 examples built, as references for frame diffs when a feature is ported; nothing builds or tests them. It is private and never published.
 
