@@ -1,17 +1,6 @@
-/**
- * What tools need from a scene and authors don't: the SVG backend, capability checks, the model check and
- * description, boxes and hit-testing for editors, text layout, and every type behind the authoring API.
- */
-
 export { svg, type SvgOptions } from "./svg/svg";
 
-export {
-  diagnose,
-  type Backend,
-  type Diagnostic,
-  type Feature,
-  type Support,
-} from "./svg/backend";
+export { diagnose, type Backend, type Diagnostic, type Feature, type Support } from "./svg/backend";
 
 export type { SceneOptions } from "./author/lower";
 

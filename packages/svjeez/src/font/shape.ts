@@ -357,7 +357,6 @@ export interface Typesetter {
   readonly beyond: (runs: readonly (readonly number[])[]) => boolean;
 }
 
-/** No bidi, contextual alternates or mark positioning, so complex scripts will not match the browser. */
 export const typesetter = (f: Sfnt, withLigatures = true): Typesetter => {
   const map = charMap(f);
 

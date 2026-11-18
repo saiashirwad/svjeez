@@ -45,14 +45,12 @@ const find = (model: Model.Scene, key: string): Model.SceneNode => {
 
 const rest = <T,>(value: Model.Animated<T>): T => (isLane(value) ? value.keys[0].value : value);
 
-/** Where a node's box lands in its parent's frame, at rest. */
 const placed = (node: Model.SceneNode): Model.Box => {
   const [x, y] = rest(node.at);
 
   return { ...node.box, x: x + node.box.x, y: y + node.box.y };
 };
 
-/** A lane read back at `t`, eased linearly: close enough between densely fitted keys. */
 const sampled =
   <T,>(blend: (a: T, b: T, u: number) => T) =>
   (value: Model.Animated<T>, t: number): T => {
@@ -66,18 +64,15 @@ const sampled =
     return blend(a.value, b.value, (t - a.t) / (b.t - a.t));
   };
 
-/** What a line says, its runs joined. */
 const said = (line: Model.TextLine): string => line.runs.map((run) => run.text).join("");
 
 const lerp = (p: number, q: number, u: number): number => p + (q - p) * u;
 
-/** A point lane read back as every backend draws it, curved keys included. */
 const at = (value: Model.Animated<Model.Vec>, t: number): Model.Vec =>
   valueAt(value, t, (a, b, u): Model.Vec => [lerp(a[0], b[0], u), lerp(a[1], b[1], u)]);
 
 const angleAt = sampled<number>(lerp);
 
-/** Where a node's own origin is in the scene at `t`, through every layer: an arrow head's tip. */
 const tip = (model: Model.Scene, key: string, t: number): Model.Vec => {
   const { matrix } = placements(model, t).find((placed) => placed.key === key)!;
 
@@ -391,7 +386,6 @@ describe("anchors", () => {
 
     const pin = find(model, "pin").at;
 
-    // A turn is a curve: a few curved keys, not a polygon of straight ones.
     expect(isLane(pin) && pin.keys.some((key) => key.via)).toBe(true);
     expect(isLane(pin) && pin.keys.length).toBeLessThan(10);
 

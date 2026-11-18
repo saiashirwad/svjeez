@@ -21,11 +21,8 @@ export type CheckRule =
 export interface Finding {
   readonly rule: CheckRule;
   readonly severity: "error" | "warning";
-  /** What is wrong, then `hint`. */
   readonly message: string;
-  /** What to change: the last sentence of `message`. */
   readonly hint: string;
-  /** The key of the scene-model node that drew the element, when the scene was rendered with sources. */
   readonly key?: string;
   readonly times: readonly Seconds[];
   readonly source?: string;
@@ -34,7 +31,6 @@ export interface Finding {
 
 export interface CheckOptions extends SceneOptions {
   readonly times?: readonly Seconds[];
-  /** Extra times in the scene clock when no explicit times are supplied. */
   readonly cues?: readonly Seconds[];
 }
 
@@ -52,7 +48,6 @@ const HOLD = 0.1;
 
 const round = (time: Seconds): Seconds => Number(time.toFixed(3));
 
-/** What a scene-model node's element is, by the tag the backend drew it as. */
 const kindOf = (tag: string): string =>
   tag === "text" ? "text" : tag === "image" ? "image" : tag === "use" ? "instance" : "shape";
 
@@ -117,12 +112,6 @@ export const timelineCues = (timeline: readonly TimelineTrack[], duration: Secon
       );
 };
 
-/**
- * Lint a rendered scene by measuring it in headless Chromium: elements off the canvas, text running out of its box or
- * over other text, motions that never change anything, elements showing at 0 before their entrance, and jumps at the
- * loop seam. It reads boxes and computed styles, never pixels, so it cannot judge color, contrast, legibility or taste.
- * Render with `sources: true` so each finding names the line that wrote the element. Needs `playwright-core`.
- */
 export const checkScene = async (svg: string, options: CheckOptions = {}): Promise<CheckReport> => {
   for (const time of options.times ?? options.cues ?? [])
     if (!(Number.isFinite(time) && time >= 0))

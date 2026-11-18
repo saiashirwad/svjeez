@@ -6,28 +6,16 @@ import { mixNumber, mixVec, type Mix } from "../model/steps";
 import { boxOf } from "../author/values";
 import { lookOf, paintedBoxOf } from "../model/painted";
 
-/**
- * Where every node of a scene is, by the transform rule at the top of ir.ts: what an editor needs to draw handles
- * and to find the node under a point. Pure math on the model, so it runs anywhere, a worker included.
- */
-
-/** An affine map: x' = a·x + c·y + e, y' = b·x + d·y + f, as SVG writes one. */
 export type Matrix = readonly [a: number, b: number, c: number, d: number, e: number, f: number];
 
-/** One node, placed in the scene. Plain data, so it survives a worker's message. */
 export interface Placed {
   readonly key: string;
   readonly kind: SceneNode["kind"];
   readonly source?: Source;
-  /** The smallest upright box around the node, in the scene's coordinates. A group's holds its children. */
   readonly box: Box;
-  /** The node's box in its own frame. */
   readonly frame: Box;
-  /** From the node's own frame to the scene's. */
   readonly matrix: Matrix;
-  /** How opaque it is, with every group around it: 0 is hidden. */
   readonly opacity: number;
-  /** 0 for the root, 1 for its children, and so on. */
   readonly depth: number;
 }
 
@@ -64,7 +52,6 @@ const inverse = (m: Matrix): Matrix | undefined => {
   ];
 };
 
-/** What an animated value is at `t` seconds on the scene's clock, as a backend would draw it. */
 export const valueAt = <T>(value: Animated<T>, t: Seconds, mix: Mix<T>, where = "a lane"): T =>
   sampleAt(value, t, (a, b, amount) => mix(a, b, amount, where));
 
@@ -100,7 +87,6 @@ const around = (points: readonly Vec[]): Box => {
 const geometryAt = (geometry: Animated<Geometry>, t: Seconds, where: string): Box =>
   boxOf(valueAt(geometry, t, mixGeometry, where));
 
-/** What a node covers in its frame at `t`: what it paints, a stroke included, cut to its clip's box when it has one. */
 const frameAt = (node: SceneNode, t: Seconds): Box =>
   clipped(
     node,
@@ -113,7 +99,6 @@ const frameAt = (node: SceneNode, t: Seconds): Box =>
     t,
   );
 
-/** `content` cut to the box of `node`'s clip at `t`: a box test is as far as a hit test goes. */
 const clipped = (node: SceneNode, content: Box, t: Seconds): Box => {
   if (node.clip === undefined) return content;
   const clip = geometryAt(node.clip, t, `clip on "${node.key}"`);
@@ -124,10 +109,6 @@ const clipped = (node: SceneNode, content: Box, t: Seconds): Box => {
   return { x, y, width: Math.max(0, right - x), height: Math.max(0, bottom - y) };
 };
 
-/**
- * Every node of `scene` at `at` seconds (0, the picture at rest, unless you say), placed in the scene, in the order
- * they paint: each group before what it holds, the root first. A symbol's content is not listed; its instances are.
- */
 export const placements = (scene: Scene, at: Seconds = 0): Placed[] => {
   const out: Placed[] = [];
 
@@ -156,8 +137,6 @@ export const placements = (scene: Scene, at: Seconds = 0): Placed[] => {
     const inside = node.children.map((child) => visit(child, own, opacity, depth + 1));
     const back = inverse(own);
 
-    // The root's box is the canvas; another group's holds wherever its children are now, in its frame too, so a
-    // group whose children have moved away is hit where they are, not where they were.
     if (depth > 0) {
       const held = around(inside.flatMap((child) => corners(child.box)));
 
@@ -175,7 +154,6 @@ export const placements = (scene: Scene, at: Seconds = 0): Placed[] => {
 
       out[index] = {
         ...out[index]!,
-        // A clip cuts what the group holds, so its box in the scene is its cut frame's.
         box:
           frame && node.clip !== undefined
             ? around(corners(frame).map((p) => apply(own, p)))
@@ -192,18 +170,12 @@ export const placements = (scene: Scene, at: Seconds = 0): Placed[] => {
   return out;
 };
 
-/** Each node's box in the scene's coordinates at `at` seconds, by key. */
 export const boxesOf = (scene: Scene, at: Seconds = 0): Record<string, Box> =>
   Object.fromEntries(placements(scene, at).map((placed) => [placed.key, placed.box]));
 
 const inside = ({ x, y, width, height }: Box, [px, py]: Vec): boolean =>
   px >= x && px <= x + width && py >= y && py <= y + height;
 
-/**
- * The deepest, topmost node whose box holds `point` (in the scene's coordinates), with its key and where it was
- * written: what a click on the picture selects. Hidden nodes and the root are never hit. Takes a scene, or the
- * placements a worker sent, which are already at a time.
- */
 export const hitTest = (
   scene: Scene | readonly Placed[],
   point: Vec,

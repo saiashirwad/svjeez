@@ -28,10 +28,6 @@ const outlined = (width: number, height: number, radius: number) => ({
   stroke: { color: theme.border, width: 1.5 },
 });
 
-/**
- * A key that lights up while it is held: the node, and the verb that presses it. Lit, it is ringed in blue on a raised
- * face, which its legend reads on in both schemes.
- */
 const keycap = (label: string) => {
   const cap = ref("key");
   const lit = cap.part("lit");
@@ -52,7 +48,6 @@ const keycap = (label: string) => {
         </Text>
       </Group>
     ),
-    /** Held for `hold` seconds, lit and unlit in the first and last 0.08. */
     press: (hold: number): Action => seq(lit.show(0.08), wait(hold - 0.16), lit.hide(0.08)),
   };
 };
@@ -64,7 +59,6 @@ interface DesktopProps {
   readonly to: Vec;
 }
 
-/** One desktop: a cursor takes the window by its title bar and drags it while the key is held. */
 const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
   const win = ref("window");
   const cursor = ref("cursor");

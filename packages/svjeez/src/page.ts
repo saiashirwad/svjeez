@@ -2,11 +2,6 @@ import type { Seconds } from "./model/time";
 
 export { restyle, type RestyleOptions } from "./restyle";
 
-/**
- * Runs in the page: pause every CSS and SMIL animation in `root`, the whole document by default, at `time` scene
- * seconds, the clock the scene's motions are written on. A scene rendered with a `playbackRate` is sought at
- * `time / playbackRate` seconds of playback. Pass an inline `<svg>` to scrub that picture alone.
- */
 export const seek = (time: Seconds, root: Document | Element = document): void => {
   const rateAt = (element: Element | null | undefined): number =>
     parseFloat(element?.closest("svg")?.getAttribute("data-playback-rate") ?? "") || 1;
@@ -28,7 +23,6 @@ export const seek = (time: Seconds, root: Document | Element = document): void =
   }
 };
 
-/** Runs in the page: one loop of the scene in `root`, the whole document by default, the least common multiple of every CSS and SMIL period, in scene seconds. */
 export const loopLength = (root: Document | Element = document): Seconds => {
   const svg =
     root instanceof Element

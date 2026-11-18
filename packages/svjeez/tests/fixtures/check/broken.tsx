@@ -1,6 +1,5 @@
 import { Shape, rect, scene } from "svjeez";
 
-// A scene that throws while it builds, for `svjeez check` to report as a finding.
 const width = (): number => {
   throw new Error("width is not known yet");
 };

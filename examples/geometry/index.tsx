@@ -20,7 +20,6 @@ import { mono, theme } from "../theme";
 const CELL = 128;
 const MIDDLE = 92;
 
-/** Where the i-th cell's center is. */
 const center = (i: number): Vec => [CELL * i + CELL / 2, MIDDLE];
 
 const Label = ({

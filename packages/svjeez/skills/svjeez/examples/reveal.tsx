@@ -28,14 +28,8 @@ const iris = span(0.3, 1.2);
 const wipe = iris.next(1, -0.4);
 const leave = span(5.3, 0.5);
 
-/** A ring with a hole: subtract cuts the inner circle out of the outer one, as one shape a gradient can fill. */
 const ring = subtract(circle(30), circle(20));
 
-/**
- * The mask that wipes the title on: opaque up to its last 60px, which fade to clear. A mask shows its node where
- * it is opaque, whatever its colors, so black and clear black are all it needs. It slides from left of the title
- * until it covers it.
- */
 const soft = linear({
   from: [300, 0],
   to: [360, 0],

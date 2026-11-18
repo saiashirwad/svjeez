@@ -91,7 +91,6 @@ describe("affine mappings", () => {
       )),
     );
 
-    // The clamp bends inside the first move, so the mapping is sampled, and stays close.
     expect(keysOf(own(node).opacity).length).toBeGreaterThan(5);
 
     for (let t = 0; t <= 4; t += 0.05)
@@ -165,7 +164,6 @@ describe("sampled mappings", () => {
 
     const keys = keysOf(node.at);
 
-    // A point's keys are joined by straight lines, so a circle within 0.05px takes about a hundred.
     expect(keys.length).toBeGreaterThan(4);
     expect(keys.length).toBeLessThan(120);
 

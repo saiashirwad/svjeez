@@ -22,7 +22,6 @@ export function jsxDEV<P>(
   isStaticChildren?: boolean,
   source?: JsxSource,
 ): SceneElement;
-/** The development transform's call: the element `jsx` makes, remembering where it was written. */
 export function jsxDEV<P extends { readonly children?: Child }>(
   type: Component<P> | typeof Fragment,
   props: P,

@@ -21,13 +21,6 @@ import {
   type Stretch,
 } from "./survey";
 
-/**
- * What is on screen, in words, for an author who can't see it: each node that shows at a time, where, how and what
- * is moving it, and a line per node saying when it shows and what of it animates when. Plain data, and a short text
- * with repeated siblings folded together and defaults left out.
- */
-
-/** One value partway through a change at a time, and the change's stretch. */
 export interface Changing {
   readonly value: string;
   readonly from: Seconds;
@@ -37,21 +30,13 @@ export interface Changing {
 export interface DescribedNode {
   readonly key: string;
   readonly kind: SceneNode["kind"];
-  /** 0 for the root's children, 1 for theirs, and so on. */
   readonly depth: number;
-  /** A shape's geometry kind: rect, ellipse, arc, line, polygon or path. */
   readonly geometry?: string;
-  /** A text's first characters. */
   readonly text?: string;
-  /** Left, top, width and height in the scene, rounded. */
   readonly box: readonly [x: number, y: number, width: number, height: number];
-  /** How opaque, with every group around it, when not 1. */
   readonly opacity?: number;
-  /** Degrees, with every group around it, when not 0. */
   readonly rotate?: number;
-  /** Across and down, with every group around it, when not 1. */
   readonly scale?: Vec;
-  /** A token's name, hex, or the kind of gradient. */
   readonly fill?: string;
   readonly stroke?: string;
   readonly changing?: readonly Changing[];
@@ -59,31 +44,25 @@ export interface DescribedNode {
 
 export interface DescribedFrame {
   readonly t: Seconds;
-  /** What shows, in paint order. */
   readonly nodes: readonly DescribedNode[];
 }
 
-/** One value's changes over the scene. */
 export interface Animates {
   readonly value: string;
   readonly spans: readonly Stretch[];
-  /** It repeats every this many seconds. */
   readonly every?: Seconds;
 }
 
 export interface NodeTimeline {
   readonly key: string;
   readonly kind: SceneNode["kind"];
-  /** When it can be seen, by its layers and its groups'. */
   readonly shown: readonly Stretch[];
   readonly animates: readonly Animates[];
 }
 
 export interface Description {
   readonly frames: readonly DescribedFrame[];
-  /** Each node that ever hides or animates. The rest show throughout and never change. */
   readonly timeline: readonly NodeTimeline[];
-  /** The same, as text an agent reads: the timeline, then each frame. */
   readonly text: string;
 }
 
@@ -97,13 +76,11 @@ const paintAt = (paint: Animated<Paint>, t: Seconds): string => {
   return amount >= 0.5 ? paintName(to) : paintName(from);
 };
 
-/** The changes of `node`'s own values in progress at `t`. */
 const changingAt = (node: SceneNode, t: Seconds, duration: Seconds): Changing[] => {
   const out: Changing[] = [];
 
   for (const { name, value } of valuesOf(node)) {
     if (!isLane(value)) continue;
-    // Keys a sampled motion was written as join into the one change they make.
 
     const span = merged(changesOf(value, duration)).find(
       ([a, b]) => b > a && t > a + 1e-6 && t < b - 1e-6,
@@ -192,16 +169,11 @@ const timelineOf = (entry: Entry, duration: Seconds): NodeTimeline | undefined =
     });
   }
 
-  // What its groups show and hide is said on their lines.
   if (ownHidden(entry.node, duration).length === 0 && animates.length === 0) return undefined;
 
   return { key: entry.node.key, kind: entry.node.kind, shown: shownOf(hidden, duration), animates };
 };
 
-/**
- * What `scene` shows at each of `times` (scene seconds), and when each of its nodes shows and moves. Pure and
- * deterministic: the same scene and times give the same description.
- */
 export const describe = (scene: Scene, times: readonly Seconds[]): Description => {
   for (const t of times)
     if (!(Number.isFinite(t) && t >= 0))
@@ -220,7 +192,6 @@ export const describe = (scene: Scene, times: readonly Seconds[]): Description =
       return at !== undefined && at.opacity > 0.005 && !inside(hidden.get(entry.node.key) ?? [], t);
     };
 
-    // A group is listed only while something in it shows.
     const visible = entries.filter((entry) =>
       entry.node.kind === "group"
         ? entries.some(
@@ -245,9 +216,6 @@ export const describe = (scene: Scene, times: readonly Seconds[]): Description =
   return { frames, timeline, text: textFor(scene, entries, frames, timeline) };
 };
 
-// ---------------------------------------------------------------------------------------------------------------
-// The text form
-
 const span = ([a, b]: Stretch, duration: Seconds): string =>
   a === b ? `at ${seconds(a)}` : `${seconds(a)}–${b >= duration - 1e-6 ? "end" : seconds(b)}`;
 
@@ -259,7 +227,6 @@ const timelineText = (line: NodeTimeline, duration: Seconds): string => {
         ? "shown throughout"
         : `shown ${line.shown.map((s) => span(s, duration)).join(", ")}`;
 
-  // Values that change over the same spans read as one.
   const together = new Map<string, string[]>();
 
   for (const a of line.animates) {
@@ -274,11 +241,9 @@ const timelineText = (line: NodeTimeline, duration: Seconds): string => {
   return [shown, ...[...together].map(([when, names]) => `${names.join(", ")} ${when}`)].join("; ");
 };
 
-/** The last part of `key` below `parent`'s. */
 const relative = (key: string, parent: string | undefined): string =>
   parent !== undefined && key.startsWith(`${parent}/`) ? key.slice(parent.length + 1) : key;
 
-/** Keys written together: `a/{0,1,2}` when they share all but their last part. */
 const keysText = (keys: readonly string[]): string => {
   if (keys.length === 1) return keys[0]!;
   const parts = keys.map((key) => key.split("/"));
@@ -290,7 +255,6 @@ const keysText = (keys: readonly string[]): string => {
   return `{${keys.join(",")}}`;
 };
 
-/** A node's line, without its key and its place. */
 const look = (node: DescribedNode, around: DescribedNode | undefined): string =>
   [
     `${node.geometry ? `${node.kind} ${node.geometry}` : node.kind} ${node.box[2]}×${node.box[3]} × `,
@@ -308,10 +272,6 @@ const look = (node: DescribedNode, around: DescribedNode | undefined): string =>
     .filter((part) => part !== false && part !== undefined)
     .join(" ");
 
-/**
- * A group is written out only when it says something its children don't: it is named rather than numbered, or it
- * moves, turns, scales, fades, clips or masks what it holds.
- */
 const worthALine = (node: SceneNode): boolean =>
   node.kind !== "group" ||
   !/^\d+$/.test(node.key.split("/").at(-1)!) ||
@@ -321,7 +281,6 @@ const worthALine = (node: SceneNode): boolean =>
   node.mask !== undefined ||
   node.effects.length > 0;
 
-/** A look with where it is put after its size. */
 const place = (look: string, at: string): string => {
   const [kind, ...rest] = look.split(" × ");
 
@@ -343,13 +302,11 @@ const frameText = (frame: DescribedFrame, byKey: ReadonlyMap<string, Entry>): st
       indent: parents.length,
       parent,
       key: relative(node.key, parent || undefined),
-      // Opacity, rotation and scale are said where they change: a group's carry to what it holds.
       look: look(node, described.get(parent)),
       at: `${node.box[0]},${node.box[1]}`,
     });
   }
 
-  // Siblings that look the same apart from where they are fold into one line.
   const out: string[] = [];
 
   for (let i = 0; i < lines.length;) {
@@ -389,7 +346,6 @@ const textFor = (
   const [width, height] = scene.size;
   const lines = [`scene ${width}×${height}, ${seconds(duration)}${scene.loop ? ", loops" : ""}`];
 
-  // Siblings with the same timeline fold into one line too.
   const said: { keys: string[]; text: string }[] = [];
 
   for (const line of timeline) {

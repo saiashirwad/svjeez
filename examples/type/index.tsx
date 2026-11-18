@@ -4,13 +4,11 @@ import { mono, theme } from "../theme";
 
 const WIDTH = 392;
 
-/** The one word that changes color: it lights up, holds, and comes back, every three seconds. */
 const glowing = track(theme.text)
   .to(theme.magenta, span(0.6, 0.5))
   .to(theme.text, span(2.2, 0.5))
   .loop(3);
 
-/** Each word of the last line fades in after the one before it. */
 const WORDS = ["One", "word", "at", "a", "time,", "on", "one", "line."];
 
 const appear = (i: number) =>

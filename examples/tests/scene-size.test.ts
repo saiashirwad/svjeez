@@ -3,9 +3,6 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { costOf } from "../scripts/cost";
 
-// The scene-model examples may not grow: a change that writes more bytes, elements, keyframes or animations for the
-// same scene fails here. Bytes leave out the embedded font, whose subset follows the text. Each budget is a little over
-// what the file is now; lower it when a change makes the file smaller.
 interface Budget {
   readonly bytes: number;
   readonly elements: number;
@@ -28,7 +25,6 @@ const budgets = {
   paint: { bytes: 8800, elements: 52, stops: 18, smil: 14, cost: 14 },
 } satisfies Record<string, Budget>;
 
-/** What a file costs to send and to play. */
 const measure = (svg: string): Budget => {
   const tags = [...svg.matchAll(/<([a-zA-Z]+)[\s>/]/g)].map((match) => match[1]!);
   const smil = tags.filter((tag) => tag === "animate" || tag === "set").length;

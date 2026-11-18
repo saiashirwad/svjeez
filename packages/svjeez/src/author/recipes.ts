@@ -23,15 +23,11 @@ const named = (values: LayerValues): (keyof LayerValues)[] =>
 const rest = (values: LayerValues): LayerValues =>
   Object.fromEntries(named(values).map((name) => [name, REST[name]]));
 
-/** How `enter()` arrives. */
 export interface EnterOptions {
-  /** Where it arrives from, as a layer's values. Default `{ opacity: 0 }`: a fade-in. */
   readonly from?: LayerValues;
-  /** Default `ease.out`. */
   readonly curve?: Curve;
 }
 
-/** A motion layer that arrives from `from` to rest during `when`. Without `from` it is a fade-in. */
 export const enter = (
   when: Span,
   { from = { opacity: 0 }, curve = ease.out }: EnterOptions = {},
@@ -41,15 +37,11 @@ export const enter = (
   return motion(from).to(rest(from), span(start, over), curve);
 };
 
-/** How `exit()` leaves. */
 export interface ExitOptions {
-  /** Where it goes, as a layer's values. Default `{ opacity: 0 }`: a fade-out. */
   readonly to?: LayerValues;
-  /** Default `ease.out`. */
   readonly curve?: Curve;
 }
 
-/** A motion layer that leaves rest for `to` during `when`. Without `to` it is a fade-out. */
 export const exit = (
   when: Span,
   { to = { opacity: 0 }, curve = ease.out }: ExitOptions = {},
@@ -60,17 +52,12 @@ export const exit = (
 };
 
 export interface WiggleOptions {
-  /** Pins the noise. Change it to reroll. */
   readonly seed: string | number;
-  /** Samples per second. Default 8. */
   readonly rate?: number;
-  /** Shape between samples. `ease.inOut` (default) drifts; `ease.hold` jitters. */
   readonly curve?: Ease;
-  /** Loop length, snapped to divide the scene. Default 2s. */
   readonly period?: Seconds;
 }
 
-/** Seeded noise around rest, looping seamlessly. Values are baked at call time, so output is reproducible. */
 export const wiggle = (amplitude: LayerValues, options: WiggleOptions): Motion => {
   const period = options.period ?? 2;
   const rate = options.rate ?? 8;
@@ -114,23 +101,16 @@ export const wiggle = (amplitude: LayerValues, options: WiggleOptions): Motion =
   return layer.loop(period);
 };
 
-/** How `draw()` strokes the outline on. */
 export interface DrawOptions {
-  /** Default `ease.out`. */
   readonly curve?: Curve;
 }
 
-/**
- * A `trim` that strokes the outline on during `when`, from nothing to all of it. In a timeline, `ref.draw(over)`
- * does the same.
- */
 export const draw = (when: Span, { curve = ease.out }: DrawOptions = {}): Track<Vec> => {
   const { start, over } = closed(when, "draw()");
 
   return track([0, 0]).to([0, 1], span(start, over), curve);
 };
 
-/** A `rotate` that turns once every `every` seconds, forever. */
 export const spin = ({ every }: { readonly every: Seconds }): Track<number> => {
   if (!(every > 0 && Number.isFinite(every)))
     throw new Error(`spin() needs a positive every, got ${every}.`);
@@ -139,19 +119,14 @@ export const spin = ({ every }: { readonly every: Seconds }): Track<number> => {
 };
 
 export interface ShakeAmplitude {
-  /** How far it swings first, across and down. */
   readonly offset?: Vec;
-  /** How far it turns first, in degrees. */
   readonly rotate?: number;
 }
 
-/** How `shake()` swings. */
 export interface ShakeOptions {
-  /** Swings back and forth this many times a second. Default 12. */
   readonly rate?: number;
 }
 
-/** A motion layer that swings around rest by `amplitude` during `when`, damped, settling at rest by its end. */
 export const shake = (
   amplitude: ShakeAmplitude,
   when: Span,
@@ -187,18 +162,11 @@ export const shake = (
 };
 
 export interface SampledOptions {
-  /** Seconds between samples before simplifying. Default 0.05. */
   readonly step?: Seconds;
-  /**
-   * How far the straight run between two kept keys may stray from a sample, in the value's own units: px for a point,
-   * and for a geometry the farthest any of its points strays.
-   */
   readonly tolerance: number;
-  /** Decimal places a number or point is rounded to before simplifying. Default none. */
   readonly precision?: number;
 }
 
-/** One kept step: a transition over `over` seconds, or a cut when `over` is 0. */
 interface Kept<T> {
   readonly start: Seconds;
   readonly over: Seconds;
@@ -216,14 +184,12 @@ interface Sample<T> {
   readonly points: readonly (readonly number[])[];
 }
 
-/** How far `b`'s farthest point is from `a`'s. */
 const apart = (a: Sample<unknown>, b: Sample<unknown>): number =>
   Math.max(
     0,
     ...a.points.map((point, i) => Math.hypot(...point.map((v, c) => v - b.points[i]![c]!))),
   );
 
-/** The samples to keep so straight runs between them stay within `tolerance` of every sample. */
 const ramerDouglasPeucker = <T>(run: readonly Sample<T>[], tolerance: number): number[] => {
   const kept = [0, run.length - 1];
 
@@ -259,7 +225,6 @@ const ramerDouglasPeucker = <T>(run: readonly Sample<T>[], tolerance: number): n
   return kept.sort((a, b) => a - b);
 };
 
-/** Narrows a jump between two samples down to the two closest moments either side of it, or none if it is a slope. */
 const jump = <T>(
   a: Sample<T>,
   b: Sample<T>,
@@ -279,10 +244,6 @@ const jump = <T>(
   return [lo, hi];
 };
 
-/**
- * Samples a function densely and keeps only the steps a viewer can tell apart: morphs come out dense, holds sparse, and
- * a jump comes out as a cut. `points` reads a value as points to measure, and throws on one that can't follow the first.
- */
 const simplified = <T>(
   window: Span,
   read: (t: Seconds) => T,
@@ -357,21 +318,14 @@ const isScalar = (value: number | Vec): value is number => typeof value === "num
 
 const isVec = (value: Vec | Geometry): value is Vec => Array.isArray(value);
 
-/** A geometry as contours to measure. An arc always has four pieces, so arcs of any sweep compare point by point. */
 const measured = (outline: ReturnType<typeof outlineOf>) =>
   contoursOf(outline, outline.kind === "arc" ? 4 : undefined);
 
-/** A geometry's kind and the shape of its contours: two samples with the same one blend point by point. */
 const structure = (outline: ReturnType<typeof outlineOf>): string =>
   `${outline.kind}:${measured(outline)
     .map((contour) => `${contour.curves.length}${contour.closed ? "z" : ""}`)
     .join(",")}`;
 
-/**
- * A track sampled from a function of time: `sample` gets time from 0 to the span's `over`, and the track plays it from
- * the span's start, holding the first value before and the last after. Only the keys the tolerance needs are kept, as
- * linear steps, and a jump becomes a cut. A geometry sample keeps its kind and its number of points throughout.
- */
 export function sampled(
   sample: (t: Seconds) => number,
   window: Span,
@@ -441,20 +395,13 @@ export function sampled(
 }
 
 export interface SampledMotionOptions {
-  /** Seconds between samples before simplifying. Default 0.05. */
   readonly step?: Seconds;
-  /** One tolerance for each value the function returns, in its own units: px for `offset`, degrees for `rotate`. */
   readonly tolerance: { readonly [K in keyof LayerValues]?: number };
-  /** Decimal places each value is rounded to before simplifying. Default none. */
   readonly precision?: number;
 }
 
 const LAYER_NAMES = ["offset", "rotate", "scale", "opacity"] as const;
 
-/**
- * A motion layer sampled from a function of time, each value it returns simplified with its own tolerance, as
- * `sampled()` does for one track.
- */
 sampled.motion = (
   sample: (t: Seconds) => LayerValues,
   window: Span,

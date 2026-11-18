@@ -26,27 +26,13 @@ import { Passage, laneOf, mixNumber, mixVec, same, type Mix, type Timing } from 
 import { blendable, isGradient, mixPaint } from "./paint";
 import type { LayerValues } from "./track";
 
-/**
- * State-to-state morphing. Each state is a whole picture; `morph` lowers every state in the same place and merges
- * them by key, so a node in two states moves, resizes, reshapes and recolors between them, one in a later state
- * enters, and one that leaves exits. Keys are what match, so give every node that changes a `key` (or a `ref`):
- * an unkeyed node is matched by its place among its siblings, which breaks as soon as a sibling comes or goes.
- */
 export interface MorphOptions {
-  /** How each transition moves. A spring moves numbers, points and geometry; colors take `ease.inOut` over the span. Default `ease.inOut`. */
   readonly curve?: Curve;
-  /** Where an entering node comes from, as `enter()` takes it. Default `{ opacity: 0 }`, a fade. */
   readonly enter?: LayerValues;
-  /** Where an exiting node goes, as `exit()` takes it. Default `{ opacity: 0 }`, a fade. */
   readonly exit?: LayerValues;
-  /**
-   * Seconds between one changing node's start and the next's, in paint order, within each transition. Every node
-   * still ends by the end of the span, so each takes the span less the stagger it waits for at most. Default 0.
-   */
   readonly stagger?: Seconds;
 }
 
-/** What `morph` builds: lowering merges the states into one tree of nodes. */
 export interface MorphElement {
   readonly type: "morph";
   readonly states: readonly (readonly SceneElement[])[];
@@ -85,17 +71,12 @@ const between = (
   return { type: "morph", states: states.map(flat), spans, options };
 };
 
-/**
- * One element that is `before` until `when`, then becomes `after` over it. `morph.between([a, b, c], [s1, s2])`
- * goes through a chain of states, one span per transition.
- */
 export const morph = Object.assign(
   (before: Child, after: Child, when: Span, options: MorphOptions = {}): SceneElement =>
     between([before, after], [when], options),
   { between },
 );
 
-/** One key across the states: the node in each state where it is, and in the others the nearest one that is. */
 interface Entry {
   readonly key: string;
   readonly present: readonly boolean[];
@@ -105,7 +86,6 @@ interface Entry {
 
 const keysOf = (nodes: readonly SceneNode[]): string[] => nodes.map((node) => node.key);
 
-/** `after`'s order, with each key only in `before` kept just after the key it followed there. */
 const ordered = (before: readonly string[], after: readonly string[]): string[] => {
   const out = [...after];
   const kept = new Set(after);
@@ -168,7 +148,6 @@ const entries = (lists: readonly (readonly SceneNode[])[]): Entry[] => {
 const childrenOf = (node: SceneNode): readonly SceneNode[] =>
   node.kind === "group" ? node.children : [];
 
-/** A node's own drawing, without what it holds or where it was written, to tell whether it changes. */
 const drawing = (node: SceneNode): string => {
   const { source: _source, box: _box, ...rest } = node;
 
@@ -182,11 +161,6 @@ const changes = (entry: Entry, i: number): boolean =>
 const changesWithin = (entry: Entry, i: number): boolean =>
   changes(entry, i) || entry.children.some((child) => changesWithin(child, i));
 
-/**
- * What a stagger orders in transition `i`: the siblings that change, or hold something that does, each moving as
- * one with all it holds. A lone such sibling that doesn't change itself is looked into, so a chart's bars stagger
- * though one group holds them all.
- */
 const units = (list: readonly Entry[], i: number): Entry[] => {
   const moving = list.filter((entry) => changesWithin(entry, i));
   const [only] = moving;
@@ -207,11 +181,9 @@ interface Plan {
   readonly curve: Curve;
   readonly enter: Fixed;
   readonly exit: Fixed;
-  /** Each entry's window for each transition, staggered. */
   readonly windows: ReadonlyMap<Entry, readonly Window[]>;
 }
 
-/** A layer with nothing moving in it. */
 interface Fixed {
   readonly offset: Vec;
   readonly rotate: number;
@@ -228,7 +200,6 @@ const layerOf = (values: LayerValues): Fixed => ({
   opacity: values.opacity ?? 1,
 });
 
-/** A value's way through the transitions: from `from[i]` to `to[i]` over window `i`, cut where one ends short of the next. */
 const travel = <T>(
   plan: Plan,
   windows: readonly Window[],
@@ -252,7 +223,6 @@ const travel = <T>(
   return laneOf(passage.data, initial, plan.timing, mix, where);
 };
 
-/** One value per state, as a lane through the transitions: kept as it is when every state agrees. */
 const blend = <T>(
   plan: Plan,
   entry: Entry,
@@ -285,7 +255,6 @@ const blend = <T>(
   );
 };
 
-/** Asks every state to agree on something that doesn't animate. */
 const agreed = <T>(entry: Entry, read: (node: SceneNode) => T, what: string): T => {
   const values = entry.filled.filter((_, s) => entry.present[s]).map(read);
   const other = values.find((value) => !same(value, values[0]));
@@ -307,10 +276,6 @@ const rotateScale = (layer: Layer, [x, y]: Vec): Vec => {
   return [cos * sx * x - sin * sy * y, sin * sx * x + cos * sy * y];
 };
 
-/**
- * A node's layers turned around `origin` instead of its own: the same picture, since turning around one point is
- * turning around another and moving by the difference.
- */
 const rebased = (entry: Entry, node: SceneNode, origin: Vec): readonly Layer[] => {
   const [dx, dy] = [node.origin[0] - origin[0], node.origin[1] - origin[1]];
 
@@ -332,7 +297,6 @@ const rebased = (entry: Entry, node: SceneNode, origin: Vec): readonly Layer[] =
   });
 };
 
-/** A lane of points moved by `move`, a curve's controls with it. */
 const shifted = (lane: Lane<Vec>, move: (value: Vec) => Vec): Lane<Vec> => {
   const [head, next, ...rest] = lane.keys.map((key) => ({
     ...key,
@@ -376,7 +340,6 @@ const presence = (plan: Plan, entry: Entry, enter: Fixed, exit: Fixed): Layer | 
   };
 };
 
-/** Layers index by index, the shorter stacks padded with layers that change nothing. */
 const layersOf = (plan: Plan, entry: Entry, origin: Vec): Layer[] => {
   const stacks = entry.filled.map((node) => rebased(entry, node, origin));
   const depth = Math.max(...stacks.map((stack) => stack.length));
@@ -424,7 +387,6 @@ const layersOf = (plan: Plan, entry: Entry, origin: Vec): Layer[] => {
 
 const firstPresent = (entry: Entry): SceneNode => entry.filled[entry.present.indexOf(true)]!;
 
-/** Where a node sits and how it is placed, shared by every kind: the first state it is in gives its rest. */
 const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed = plan.exit) => {
   const rest = firstPresent(entry);
   const shown = presence(plan, entry, enter, exit);
@@ -450,7 +412,6 @@ const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed
   };
 };
 
-/** A clip reshapes between states as a geometry does. A state with no clip draws everything, which no outline can blend to. */
 const clipOf = (plan: Plan, entry: Entry): Animated<Geometry> | undefined => {
   const clips = entry.filled.map((node) => node.clip);
 
@@ -466,17 +427,12 @@ const clipOf = (plan: Plan, entry: Entry): Animated<Geometry> | undefined => {
   return outlinesOf(plan, entry, given, "clip");
 };
 
-/** What an effect is when a state has none of it: a blur of 0, or the same shadow with no opacity. */
 const absent = (effect: Effect): Effect =>
   effect.kind === "blur" ? { kind: "blur", radius: 0 } : { ...effect, opacity: 0 };
 
 const kinds = (effects: readonly Effect[]): string =>
   effects.map((effect) => effect.kind).join(", ");
 
-/**
- * Effects blend one by one between states that list the same kinds in the same order. A state with none takes the
- * others' with nothing in them, so a shadow fades in and a blur sharpens.
- */
 const effectsOf = (plan: Plan, entry: Entry): Effect[] => {
   const lists = entry.filled.map((node) => node.effects);
   const template = lists.reduce((most, list) => (list.length > most.length ? list : most));
@@ -543,13 +499,11 @@ const effectsOf = (plan: Plan, entry: Entry): Effect[] => {
 
 const NONE: Paint = [0, 0, 0, 0];
 
-/** A paint with nothing showing that blends with `like`: a gradient keeps its points with every stop clear. */
 const clear = (like: Animated<Paint> | undefined): Paint =>
   like !== undefined && !isLane(like) && isGradient(like)
     ? { ...like, stops: like.stops.map((stop) => ({ ...stop, color: NONE })) }
     : NONE;
 
-/** A paint's colors never spring: under a spring they take `ease.inOut` over the span. */
 const paintCurve = (plan: Plan): Curve | undefined =>
   isSpring(plan.curve) ? ease.inOut : undefined;
 
@@ -575,7 +529,6 @@ const paints = (
   );
 };
 
-/** Every number in a geometry, in order, so a spring can move them one by one. */
 const numbersOf = (geometry: Geometry): number[] => {
   switch (geometry.kind) {
     case "rect":
@@ -593,7 +546,6 @@ const numbersOf = (geometry: Geometry): number[] => {
   }
 };
 
-/** `numbersOf` backwards, into the structure of `template`. */
 const rebuilt = (template: Geometry, values: readonly number[]): Geometry => {
   let next = 0;
   const take = (): number => values[next++]!;
@@ -639,7 +591,6 @@ const geometryOf = (plan: Plan, entry: Entry, shapes: readonly ShapeNode[]): Ani
     "geometry",
   );
 
-/** One outline per state, matched so any two blend, as a lane through the transitions. */
 const outlinesOf = (
   plan: Plan,
   entry: Entry,
@@ -680,7 +631,6 @@ const strokeOf = (plan: Plan, entry: Entry, shapes: readonly ShapeNode[]): Strok
 
   return {
     ...given,
-    // A state with no stroke draws it with no width, in the color of the others.
     color: blendable(
       blend(
         plan,
@@ -735,7 +685,6 @@ const shapeOf = (plan: Plan, entry: Entry): ShapeNode => {
   };
 };
 
-/** What a text says, in which faces and where: two states that word it the same blend their runs' paints. */
 const wording = (node: TextNode): string =>
   JSON.stringify([
     node.size,
@@ -745,7 +694,6 @@ const wording = (node: TextNode): string =>
     ]),
   ]);
 
-/** The lines of `states`, which all word the text the same, with each run's fill and opacity blended through them. */
 const blendedLines = (plan: Plan, entry: Entry, states: readonly TextNode[]): TextLine[] =>
   states[0]!.lines.map((line, l) => ({
     at: line.at,
@@ -783,10 +731,6 @@ const blendedLines = (plan: Plan, entry: Entry, states: readonly TextNode[]): Te
 
 const FADE: Fixed = { ...IDLE, opacity: 0 };
 
-/**
- * Text whose words change between states can't blend letter by letter, so it crossfades: a group that moves as the
- * text would, holding one text for each run of states that say the same thing.
- */
 const textOf = (plan: Plan, entry: Entry): TextNode | GroupNode => {
   const texts = entry.filled.filter((node): node is TextNode => node.kind === "text");
 
@@ -880,11 +824,6 @@ const build = (plan: Plan, entry: Entry): SceneNode => {
   return placedLike(node, rest);
 };
 
-/**
- * The states' nodes merged into one list by key, each value a lane through the transitions. `spans` are on the
- * clock `timing` says, one per transition. Paint order is the last state's, with each node that has left kept
- * where it was.
- */
 export const merge = (
   states: readonly (readonly SceneNode[])[],
   spans: readonly Span[],
@@ -931,7 +870,6 @@ export const merge = (
   return top.map((entry) => build(plan, entry));
 };
 
-/** Lowers each state of `element` in the same place, then merges them. Keys the states use are taken in the parent. */
 export const morphed = (
   element: MorphElement,
   timing: Timing,

@@ -14,21 +14,10 @@ export interface RenderOptions {
   readonly desc?: string;
   readonly duration: Seconds;
   readonly css?: string;
-  /** Playback rate: 2 plays twice as fast. `duration` and `reducedMotion.at` stay in scene seconds. Default 1. */
   readonly playbackRate?: number;
-  /**
-   * Put in front of every generated id, class, keyframe name, custom property and font family, so two scenes can share one HTML page.
-   * Letters, digits, `_` and `-`, starting with a letter. Default none.
-   */
   readonly prefix?: string;
-  /** Freeze frame for prefers-reduced-motion. Default: 85% through. */
   readonly reducedMotion?: { readonly at: Seconds } | false;
-  /** False plays the scene once and holds its last frame. Default true. */
   readonly loop?: boolean;
-  /**
-   * Font properties on the root `<svg>`, which every text inherits unless it says otherwise: a family embeds as one
-   * written on a text does. Default none.
-   */
   readonly font?: RootFont;
 }
 
@@ -38,7 +27,6 @@ export interface RootFont {
   readonly style?: FontStyle;
 }
 
-/** The SVG backend's last step: compile the emitted nodes' lanes, wrap them in the root, serialize, and validate. */
 export const render = (options: RenderOptions, nodes: readonly SvgNode[]): string => {
   const { width, height, duration } = options;
 

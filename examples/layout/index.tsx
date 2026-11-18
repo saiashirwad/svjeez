@@ -38,7 +38,6 @@ interface CardProps {
   readonly drift?: boolean;
 }
 
-/** A card whose size is set and whose text is laid out inside it: a dot and a title in a row, then a wrapped body. */
 const Card = ({ handle, title, dot, when, children, drift }: CardProps): SceneElement => (
   <Group
     ref={handle}

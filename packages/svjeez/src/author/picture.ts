@@ -4,7 +4,6 @@ export type ImageFormat = "svg" | "png" | "jpeg" | "gif" | "webp";
 
 export interface PictureData {
   readonly href: `data:${string}`;
-  /** Intrinsic width in px, after EXIF rotation. For SVG, the root width, else derived from the viewBox. */
   readonly width: number;
   readonly height: number;
   readonly format: ImageFormat;
@@ -191,10 +190,6 @@ const SUPPORTED = Object.keys(FORMATS).join(", ");
 const isText = (source: Uint8Array | ArrayBuffer | string): source is string =>
   typeof source === "string";
 
-/**
- * Embed an image as a data URI. The format comes from the bytes, never the file extension; a string is SVG markup.
- * Pure and synchronous. See `picture.load` for files and URLs.
- */
 export const picture = Object.assign(
   (source: Uint8Array | ArrayBuffer | string): PictureData => {
     const bytes = isText(source)
@@ -228,7 +223,6 @@ export const picture = Object.assign(
     return { href, ...size, format, bytes: href.length };
   },
   {
-    /** Read an http(s) URL with fetch, or a path or file: URL from disk. The format comes from the content. */
     load: async (source: string | URL): Promise<PictureData> => picture(await readSource(source)),
   },
 );

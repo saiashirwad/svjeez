@@ -21,25 +21,13 @@ import { isLane, mapLane } from "../model/lane";
 import { breaksOf, unrolled } from "../model/sample";
 import { same } from "../model/steps";
 
-/**
- * What `inspect` and `describe` both read off a scene: its nodes in paint order with what holds each, every animated
- * value by the name an author knows it by, when each node can't be seen, and colors as each scheme draws them.
- */
-
-/** One node drawn in the scene, with the groups that hold it. */
 export interface Entry {
   readonly node: SceneNode;
-  /** The groups around it, the root first. */
   readonly ancestors: readonly SceneNode[];
-  /** Its place in paint order: a later entry draws over an earlier one. */
   readonly order: number;
   readonly depth: number;
 }
 
-/**
- * Every node the scene draws, in paint order, the root first: a group before what it holds. A mask's drawing and a
- * symbol's content are never shown themselves, so they are left out; an instance stands for its symbol.
- */
 export const entriesOf = (scene: Scene): Entry[] => {
   const out: Entry[] = [];
 
@@ -55,7 +43,6 @@ export const entriesOf = (scene: Scene): Entry[] => {
   return out;
 };
 
-/** Where each node was written, by key, symbols' and masks' nodes included. */
 export const sourcesOf = (scene: Scene): Map<string, Source> => {
   const out = new Map<string, Source>();
 
@@ -73,17 +60,14 @@ export const sourcesOf = (scene: Scene): Map<string, Source> => {
   return out;
 };
 
-/** What kind of value a name holds, which says how to read it between keys. */
 export type ValueKind = "number" | "vec" | "geometry" | "paint";
 
-/** One value of a node, under the name an author writes it with. */
 export type Named =
   | { readonly name: string; readonly kind: "number"; readonly value: Animated<number> }
   | { readonly name: string; readonly kind: "vec"; readonly value: Animated<Vec> }
   | { readonly name: string; readonly kind: "geometry"; readonly value: Animated<Geometry> }
   | { readonly name: string; readonly kind: "paint"; readonly value: Animated<Paint> };
 
-/** Every value of `node` that could move: its placement, each layer, its clip and effects, and its paint. */
 export const valuesOf = (node: SceneNode): Named[] => {
   const out: Named[] = [{ name: "at", kind: "vec", value: node.at }];
 
@@ -134,24 +118,17 @@ export const valuesOf = (node: SceneNode): Named[] => {
 export const runsOf = (node: TextNode): TextNode["lines"][number]["runs"][number][] =>
   node.lines.flatMap((line) => line.runs);
 
-/** What a text says, its lines joined by a space. */
 export const textOf = (node: TextNode): string =>
   node.lines
     .map((line) => line.runs.map((run) => run.text).join(""))
     .join(" ")
     .trim();
 
-/** A lane's keys across the scene's clock: a periodic lane's written out pass by pass. */
 export const keysOver = <T>(lane: Lane<T>, duration: Seconds): readonly Key<T>[] =>
   lane.period === undefined ? lane.keys : unrolled(lane, duration);
 
-/** A stretch of the scene's clock, from and to, in seconds. */
 export type Stretch = readonly [from: Seconds, to: Seconds];
 
-/**
- * When `value` changes, on the scene's clock: each pair of neighbouring keys whose values differ. A cut changes at
- * one moment, so its stretch has no length.
- */
 export const changesOf = (value: Animated<unknown>, duration: Seconds): Stretch[] => {
   if (!isLane(value)) return [];
   const keys = keysOver(value, duration);
@@ -167,11 +144,9 @@ export const changesOf = (value: Animated<unknown>, duration: Seconds): Stretch[
   return out;
 };
 
-/** A key reached by a cut: the value before holds until its time, then jumps. */
 export const isCut = (key: Key<unknown>): boolean =>
   key.ease !== undefined && key.ease.kind === "steps" && key.ease.count === 1;
 
-/** Stretches sorted and joined where they touch. */
 export const merged = (stretches: readonly Stretch[]): Stretch[] => {
   const sorted = [...stretches].sort((a, b) => a[0] - b[0]);
   const out: [Seconds, Seconds][] = [];
@@ -186,18 +161,12 @@ export const merged = (stretches: readonly Stretch[]): Stretch[] => {
   return out;
 };
 
-/** Whether `stretches` cover all of `from` to `to`. */
 export const covers = (stretches: readonly Stretch[], from: Seconds, to: Seconds): boolean =>
   merged(stretches).some(([a, b]) => a <= from + 1e-6 && b >= to - 1e-6);
 
-/** Whether `t` lies in one of `stretches`. */
 export const inside = (stretches: readonly Stretch[], t: Seconds): boolean =>
   stretches.some(([a, b]) => t >= a - 1e-6 && t <= b + 1e-6);
 
-/**
- * When a number is exactly 0, on the scene's clock: before a first key of 0, between two keys of 0 (any ease keeps 0
- * between them), from a key of 0 to a cut, and after a last key of 0. Exact where it speaks, and never too much.
- */
 export const zerosOf = (value: Animated<number>, duration: Seconds): Stretch[] => {
   if (!isLane(value)) return value === 0 ? [[0, duration]] : [];
   const keys = keysOver(value, duration);
@@ -220,7 +189,6 @@ export const zerosOf = (value: Animated<number>, duration: Seconds): Stretch[] =
 const axis = (value: Animated<Vec>, index: 0 | 1): Animated<number> =>
   isLane(value) ? mapLane(value, (v) => v[index]) : value[index];
 
-/** When `node`'s own layers hide it: an opacity of 0, or a scale of 0 across or down. */
 export const ownHidden = (node: SceneNode, duration: Seconds): Stretch[] =>
   merged(
     node.layers.flatMap((layer) => [
@@ -230,11 +198,9 @@ export const ownHidden = (node: SceneNode, duration: Seconds): Stretch[] =>
     ]),
   );
 
-/** When `entry` can't be seen because it or a group around it is hidden by its layers. */
 export const hiddenOf = (entry: Entry, duration: Seconds): Stretch[] =>
   merged([...entry.ancestors, entry.node].flatMap((node) => ownHidden(node, duration)));
 
-/** The stretches of `[0, duration]` that `hidden` leaves. */
 export const shownOf = (hidden: readonly Stretch[], duration: Seconds): Stretch[] => {
   const out: Stretch[] = [];
   let from = 0;
@@ -250,7 +216,6 @@ export const shownOf = (hidden: readonly Stretch[], duration: Seconds): Stretch[
   return out;
 };
 
-/** Every value of every node, the symbols' included: whatever moves anywhere in the scene. */
 export const lanesOf = (scene: Scene): Lane<unknown>[] => {
   const out: Lane<unknown>[] = [];
 
@@ -268,13 +233,8 @@ export const lanesOf = (scene: Scene): Lane<unknown>[] => {
   return out;
 };
 
-/** How many moments a check reads at most: enough to land on every key of a busy scene, few enough to stay fast. */
 const MOMENTS = 160;
 
-/**
- * The times worth reading a scene at: 0, the end, every key of every lane, and halfway between each two. Thinned
- * evenly when there are more than a check needs.
- */
 export const momentsOf = (scene: Scene, extra: readonly Seconds[] = []): Seconds[] => {
   const { duration } = scene;
 
@@ -299,24 +259,19 @@ export const momentsOf = (scene: Scene, extra: readonly Seconds[] = []): Seconds
   );
 };
 
-/** The scene at each of `times`, each node placed, by key. */
 export const framesOf = (scene: Scene, times: readonly Seconds[]): Map<string, Placed>[] =>
   times.map((t) => new Map(placements(scene, t).map((placed) => [placed.key, placed])));
 
-/** How much a matrix scales lengths, on average across its two axes. */
 export const scaleOf = (m: Matrix): number => Math.sqrt(Math.abs(m[0] * m[3] - m[1] * m[2]));
 
-/** Whether a matrix keeps a box's edges upright: no turn and no skew. */
 export const isUpright = (m: Matrix): boolean => Math.abs(m[1]) < 1e-9 && Math.abs(m[2]) < 1e-9;
 
-/** Where a lane is at a time: the values of the keys on each side, and how far the ease has carried it between them. */
 export interface Between<T> {
   readonly from: T;
   readonly to: T;
   readonly amount: number;
 }
 
-/** Where `value` is at `t`. */
 export const between = <T>(value: Animated<T>, t: Seconds): Between<T> => {
   if (!isLane(value)) return { from: value, to: value, amount: 0 };
   const { keys, period } = value;
@@ -338,7 +293,6 @@ export const between = <T>(value: Animated<T>, t: Seconds): Between<T> => {
   };
 };
 
-/** Whether `value` is partway between two keys that differ at `t`. */
 export const movingAt = (value: Animated<unknown>, t: Seconds): boolean => {
   if (!isLane(value)) return false;
   const { from, to, amount } = between(value, t);
@@ -352,13 +306,11 @@ export const SCHEMES: readonly Scheme[] = ["light", "dark"];
 
 const isRgba = (color: Color): color is Rgba => Array.isArray(color);
 
-/** A color as `scheme` draws it. A token the scene doesn't list is drawn as nothing. */
 export const rgbaIn = (scene: Scene, color: Color, scheme: Scheme): Rgba =>
   isRgba(color) ? color : (scene.tokens[color.name]?.[scheme] ?? [0, 0, 0, 0]);
 
 const isColor = (paint: Paint): paint is Color => !("stops" in paint);
 
-/** The flat color `paint` is at `t` in `scheme`, blended in sRGB; undefined for a gradient. */
 export const colorAt = (
   scene: Scene,
   paint: Animated<Paint>,
@@ -375,7 +327,6 @@ export const colorAt = (
   return [mix(0), mix(1), mix(2), mix(3)];
 };
 
-/** Whether a paint shows nothing in either scheme. */
 export const isClear = (scene: Scene, paint: Paint): boolean =>
   isColor(paint)
     ? SCHEMES.every((scheme) => rgbaIn(scene, paint, scheme)[3] <= 0)
@@ -383,7 +334,6 @@ export const isClear = (scene: Scene, paint: Paint): boolean =>
         SCHEMES.every((scheme) => rgbaIn(scene, stop.color, scheme)[3] <= 0),
       );
 
-/** Whether every value an animated paint takes shows nothing. */
 export const clearThroughout = (scene: Scene, paint: Animated<Paint> | undefined): boolean =>
   paint === undefined ||
   (isLane(paint) ? paint.keys.every((key) => isClear(scene, key.value)) : isClear(scene, paint));
@@ -394,17 +344,14 @@ const hex = (n: number): string =>
     .padStart(2, "0")
     .toUpperCase();
 
-/** A color as an author reads it: a token's name, or hex. */
 export const colorName = (color: Color): string =>
   isRgba(color)
     ? `#${hex(color[0])}${hex(color[1])}${hex(color[2])}${color[3] < 1 ? hex(color[3]) : ""}`
     : color.name;
 
-/** A paint as an author reads it: a color's name, or the kind of gradient. */
 export const paintName = (paint: Paint): string =>
   isColor(paint) ? colorName(paint) : `${paint.kind} gradient`;
 
-/** How far a shape's stroke reaches past its outline on screen at `t`: half its width, scaled with the node. */
 export const strokeReachAt = (node: ShapeNode, placed: Placed, t: Seconds): number => {
   if (!node.stroke) return 0;
   const { from, to, amount } = between(node.stroke.width, t);
@@ -415,15 +362,12 @@ export const strokeReachAt = (node: ShapeNode, placed: Placed, t: Seconds): numb
 
 export const area = (box: Box): number => Math.max(0, box.width) * Math.max(0, box.height);
 
-/** How much of two boxes lies in both. */
 export const sharedArea = (a: Box, b: Box): number =>
   Math.max(0, Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x)) *
   Math.max(0, Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y));
 
-/** A number of seconds as a reader wants it: no more digits than it has, up to three. */
 export const seconds = (t: Seconds): string => `${Number(t.toFixed(3))}s`;
 
-/** A length in scene units, rounded as far as the eye can tell. */
 export const units = (n: number): string => {
   const rounded = Math.abs(n) >= 10 ? Math.round(n) : Number(n.toFixed(1));
 

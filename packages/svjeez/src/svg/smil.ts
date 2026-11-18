@@ -159,9 +159,6 @@ const windowed = (
       attributeName: attribute,
       to: values[0]!,
       begin: `0s${again}`,
-      // It stays active until the window opens: WebKit drops a frozen value on setCurrentTime, so a set that ended at
-      // once would show the attribute (the last value) when seeking before the window. Frozen, so no frame falls
-      // between the set ending and the window opening.
       dur: `${start}s`,
       fill: "freeze",
       "data-loop": `${loop}s`,

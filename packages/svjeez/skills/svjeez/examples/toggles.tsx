@@ -29,10 +29,6 @@ const ROW: Vec = [300, 52];
 const IDLE: Vec = [400, 230];
 const flick = ease.spring({ stiffness: 320, damping: 22 });
 
-/**
- * A switch and the verb that flips it on. A component makes its own refs and returns the actions that move them,
- * so the scene's timeline reads as a script: move there, press, flip.
- */
 const toggle = (name: string) => {
   const handle = ref(name);
   const knob = handle.part("knob");
@@ -47,12 +43,10 @@ const toggle = (name: string) => {
       </Group>
     ),
     on: par(knob.moveBy([20, 0], flick.settle, flick), groove.fill(theme.blue, 0.2)),
-    /** Back off at the end of the clock: a rewind takes no time in a seq, it always runs last. */
     off: par(knob.rewind(0.5), groove.rewind(0.5)),
   };
 };
 
-/** A settings row: its label at the left edge, its switch at the right, both centered down the row. */
 const Row = ({ label, children }: { readonly label: string; readonly children: SceneElement }) => {
   const row: Ref = ref("row");
 
@@ -85,7 +79,6 @@ export default scene(
     const dark = toggle("dark");
     const alerts = toggle("alerts");
 
-    /** A click: the cursor dips and comes back. */
     const press = (): Action => seq(cursor.scale(0.85, 0.08), cursor.scale(1, 0.12));
 
     timeline(

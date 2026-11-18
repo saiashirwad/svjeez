@@ -42,7 +42,6 @@ const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Test" }, build);
 
-/** Where each node's box is in the scene, at rest, rounded to a hundredth. */
 const boxes = (build: () => SceneElement, at = 0): Record<string, readonly number[]> =>
   Object.fromEntries(
     Object.entries(boxesOf(made(build), at)).map(([key, { x, y, width, height }]) => [
@@ -90,9 +89,7 @@ describe("at places the anchor point of the box", () => {
     expect(found.centered).toEqual([5, 5, 10, 10]);
     expect(found.corner).toEqual([80, 40, 20, 10]);
     expect(found.share).toEqual([90, 40, 20, 10]);
-    // An arc's box is its whole circle's.
     expect(found.arc).toEqual([32, 32, 16, 16]);
-    // Without at, the anchor point sits at the parent's origin.
     expect(found.none).toEqual([0, 0, 10, 10]);
   });
 
@@ -166,7 +163,6 @@ describe("at places the anchor point of the box", () => {
     expect([found.top!.x, found.top!.y]).toEqual([10, 20]);
     expect(found.base!.x).toBe(10);
     expect(found.base!.y).toBeCloseTo(20 - ascent * 10);
-    // A baseline anchor names the middle of the column, whatever align does with the lines in it.
     expect(found.mid!.x).toBeCloseTo(80);
     expect(found.mid!.width).toBe(40);
     expect(found.right!.x + found.right!.width).toBeCloseTo(100);
@@ -195,7 +191,6 @@ describe("at places the anchor point of the box", () => {
     expect(found.image).toEqual([-10, 0, 40, 20]);
     expect(found.frame).toEqual([55, 55, 10, 10]);
     expect(found.centered).toEqual([45, 45, 10, 10]);
-    // A child at [0, 0] lands where the group's at is.
     expect(found["group/a"]).toEqual([20, 30, 10, 10]);
     expect(found["group/b"]).toEqual([50, 40, 10, 10]);
     expect(found.middle).toEqual([80, 40, 40, 20]);
@@ -275,7 +270,6 @@ describe("curved motion keeps its curve when the anchor point is not the frame's
     for (const t of [0, 0.4, 0.9, 1.3, 2]) {
       const { dot: one, tag } = boxesOf(model, t);
 
-      // The dot's center keeps to the circle, and the tag's center to the dot's.
       expect(Math.abs(Math.hypot(one!.x + 3 - 100, one!.y + 3 - 50) - 40)).toBeLessThan(0.1);
       expect(Math.hypot(one!.x + 3 - (tag!.x + 5), one!.y + 3 - (tag!.y + 2))).toBeLessThan(0.1);
     }
@@ -303,7 +297,6 @@ describe("a box is what the shape paints", () => {
     ).toEqual([10, 10, 24, 14]);
     expect(stroked(circle(10), { width: 2 })).toEqual([0, 0, 22, 22]);
 
-    // The model keeps the outline's own frame: the rect starts half the stroke in.
     const model = made(() => (
       <Shape geometry={rect(20, 10)} stroke={{ color: "#000000", width: 4 }} />
     ));
@@ -317,7 +310,6 @@ describe("a box is what the shape paints", () => {
       -5, -5, 110, 10,
     ]);
     expect(stroked(line([0, 0], [100, 0]), { width: 10, cap: "round" })).toEqual([-5, -5, 110, 10]);
-    // A slanted butt end reaches only as far as its corners.
     expect(stroked(line([0, 0], [100, 100]), { width: 10 })).toEqual([
       -3.54, -3.54, 107.07, 107.07,
     ]);
@@ -330,12 +322,10 @@ describe("a box is what the shape paints", () => {
       [50, 100],
     ]);
 
-    // The apex's miter: half the width over sin(26.6°) below it.
     expect(stroked(triangle, { width: 10 })[3]).toBeCloseTo(116.18, 1);
     expect(stroked(triangle, { width: 10, join: "round" })).toEqual([-5, -5, 110, 110]);
     expect(stroked(triangle, { width: 10, join: "bevel" })[3]).toBeCloseTo(107.24, 1);
 
-    // A spike too sharp for the limit is beveled, so its tip adds nothing.
     const spike = polyline([
       [0, 0],
       [100, 5],
@@ -380,7 +370,6 @@ describe("a box is what the shape paints", () => {
     ));
 
     expect(boxesOf(model).tag).toEqual({ x: 56, y: 21, width: 4, height: 4 });
-    // On the stroke, outside the outline.
     expect(hitTest(model, [11, 11])?.key).toBe("card");
   });
 });
@@ -413,7 +402,6 @@ describe("timelines move the anchor point", () => {
       return [Math.round(x * 1000) / 1000, Math.round(y * 1000) / 1000];
     };
 
-    // The dot's center goes to the point, then onto the pin's center, then its right edge does.
     expect(at(1)).toEqual([95, 45]);
     expect(at(2)).toEqual([155, 15]);
     expect(at(3)).toEqual([150, 15]);
@@ -532,7 +520,6 @@ describe("the nine places", () => {
       </Group>
     ));
 
-    // The tag's place lands on the card's point of the same name, so a tag of the card's size covers it.
     for (const [place] of PLACES) expect(found[place]).toEqual([60, 30, 40, 20]);
   });
 
@@ -561,7 +548,6 @@ describe("the nine places", () => {
 });
 
 describe("origin is named on the box, as anchor is", () => {
-  /** Each node's origin, in its own frame, by key. */
   const origins = (build: () => SceneElement): Record<string, Model.Vec> =>
     Object.fromEntries(made(build).root.children.map((node) => [node.key, node.origin]));
 
@@ -595,9 +581,7 @@ describe("origin is named on the box, as anchor is", () => {
       </Group>
     ));
 
-    // A stroked rect's frame starts at its outline, half the stroke inside the box.
     expect(found.rect).toEqual([-1, -1]);
-    // A circle's frame is around its center, but its origin is still read from its box.
     expect(found.circle).toEqual([-5, -5]);
     expect(found.ring).toEqual([0, 0]);
     expect(found.line).toEqual([10, 50]);

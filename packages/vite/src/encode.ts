@@ -22,7 +22,6 @@ const open = (): Promise<Page> => {
   return page;
 };
 
-/** Encode a PNG. WebP keeps transparency; JPEG paints it white. */
 export const encode = async (
   png: Uint8Array,
   format: Format,

@@ -8,16 +8,11 @@ import type { Animated, Key, Lane, Vec } from "./ir";
 import { isLane } from "./lane";
 import { endSlope, isSpring, type Curve, type Spring } from "../author/spring";
 
-/**
- * Steps over a set of named values, and the lanes they become. The builder is today's `motion()`, and the
- * resolution is `resolve.ts` and `keys.ts`, both for any value instead of the SVG channel table.
- */
 export interface Step<V> {
   readonly start: Seconds;
   readonly over: Seconds;
   readonly ease: Curve;
   readonly values: Partial<V>;
-  /** A cut back to the first value of each of these, between two passes of a repeat. */
   readonly restore?: readonly (keyof V)[];
   readonly until?: Seconds;
 }
@@ -55,11 +50,9 @@ const isTime = (at: Seconds | Span | undefined): at is Seconds => typeof at === 
 const names = <V extends object>(values: Partial<V>): (keyof V)[] =>
   Object.keys(values) as (keyof V)[];
 
-/** Whether `later` may start while `spring` still moves: it cuts the spring there and takes over from it. */
 const cuts = <V>(spring: Step<V>, later: Step<V>): boolean =>
   isSpring(spring.ease) && spring.start < later.start - EPSILON;
 
-/** The steps of one track or one motion layer. Immutable: every method returns a new passage. */
 export class Passage<V extends object> {
   constructor(readonly data: PassageData<V>) {}
 
@@ -199,7 +192,6 @@ export class Passage<V extends object> {
   }
 }
 
-/** The same passage with every value of `name` passed through `change`: how lowering turns authored values into the model's. */
 export const mapped = <V extends object, K extends keyof V, U>(
   data: PassageData<V>,
   name: K,
@@ -231,7 +223,6 @@ export const mapped = <V extends object, K extends keyof V, U>(
   };
 };
 
-/** Whether a passage says anything about `name`. */
 export const touches = <V extends object>(data: PassageData<V>, name: keyof V): boolean =>
   name in data.initial || data.steps.some((step) => name in step.values);
 
@@ -242,23 +233,19 @@ export interface ClipFrame {
   readonly open: boolean;
 }
 
-/** The clock a passage is written on: where its zero is on the scene's clock, and when it ends. */
 export interface Clock {
   readonly offset: Seconds;
   readonly end: Seconds;
   readonly clips: readonly ClipFrame[];
 }
 
-/** A value as numbers a spring can move one by one, and back. */
 export interface Parts<T> {
   split(value: T): readonly number[];
   join(values: readonly number[]): T;
 }
 
-/** How to stop between two values, for a cut that lands inside a transition. */
 export type Mix<T> = (a: T, b: T, amount: number, where: string) => T;
 
-/** A mix whose values a spring can move: numbers and points. */
 type Springy<T> = Mix<T> & { readonly parts: Parts<T> };
 
 const isSpringy = <T>(mix: Mix<T>): mix is Springy<T> => "parts" in mix;
@@ -283,7 +270,6 @@ export const mixVec: Springy<Vec> = Object.assign(
 
 export const same = <T>(a: T, b: T): boolean => a === b || JSON.stringify(a) === JSON.stringify(b);
 
-/** For values with nothing between them that could be drawn, such as two tokens. */
 export const noMix = <T>(a: T, b: T, _amount: number, where: string): T => {
   if (same(a, b)) return a;
 
@@ -295,9 +281,7 @@ export const noMix = <T>(a: T, b: T, _amount: number, where: string): T => {
 interface Held<T> {
   readonly t: Seconds;
   readonly value: T;
-  /** Shapes the way from this key to the next. */
   readonly ease: Ease;
-  /** The curve from this key to the next, as `Key.via`; never on a cut. */
   readonly via?: Controls;
 }
 
@@ -306,17 +290,14 @@ interface Segment<T> {
   readonly over: Seconds;
   readonly ease: Ease;
   readonly value: T;
-  /** The curve from the value before, as `Key.via`. */
   readonly via?: Controls;
 }
 
 interface Written<T> {
   readonly segments: readonly Segment<T>[];
-  /** When the last step's window ends: a spring that settles early still holds its span. */
   readonly last: Seconds;
 }
 
-/** How a value moves where the step before it ended, for a spring that starts there. */
 interface Moving {
   readonly at: Seconds;
   readonly velocity: () => readonly number[];
@@ -366,7 +347,6 @@ const segmentsOf = <T>(
         : undefined;
   };
 
-  /** A spring from the current value toward `value`, from `start` until `stop`; `ends` when its span ends there. */
   const spring = (curve: Spring, start: Seconds, stop: Seconds, value: T, ends: boolean): void => {
     const parts = componentsOf(mix, where);
     const from = parts.split(current);
@@ -414,7 +394,6 @@ const segmentsOf = <T>(
       const close = step.start + step.over;
       const stop = Math.min(close, cut, step.until ?? Infinity);
 
-      // A step that starts as the span ends takes over too: span.next() hands off without a gap.
       spring(curve, step.start, stop, value, stop === close && cut > close + EPSILON);
     } else if (step.until !== undefined && step.until < step.start + step.over - EPSILON) {
       const progress = (step.until - step.start) / step.over;
@@ -588,21 +567,13 @@ export interface Timing {
   readonly clock: Clock;
 }
 
-/** Whether a key's ease stays within 0 and 1, as every ease in a lane with a curve must (ir.ts). */
 const within = (key: Key<unknown>): boolean =>
   key.ease?.kind !== "bezier" ||
   [key.ease.points[1], key.ease.points[3]].every((y) => y >= 0 && y <= 1);
 
-/** What a lane costs to write: a curved key carries two more points than a straight one, so it counts as one and a half. */
 const costOf = (value: Animated<unknown>): number =>
   isLane(value) ? value.keys.reduce((sum, key) => sum + (key.via ? 1.5 : 1), 0) : 0;
 
-/**
- * One value's steps as a lane on the scene's clock, or as the value itself when it never changes. `initial` is
- * what the value is before its first step when the passage doesn't say. With `curves`, the value is a point (`at`)
- * and its springs may write curved keys (`Key.via`), when the lane takes fewer that way, weighed as `sample.ts`
- * weighs them; never when another step's ease leaves 0 to 1, which a lane with a curve can't hold.
- */
 export const laneOf = <T>(
   data: PassageData<{ readonly value: T }>,
   initial: T,

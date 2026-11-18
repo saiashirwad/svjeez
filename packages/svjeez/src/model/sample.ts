@@ -7,10 +7,6 @@ import { isLane } from "./lane";
 import { fitted, fittedCurves, keyCost, type RunKey, type Sample } from "../author/spring";
 import { same } from "./steps";
 
-/**
- * Reading lanes back at any time, and writing a value that is only known by sampling (a point that follows a moving
- * node) as a lane of few keys.
- */
 export type Blend<T> = (a: T, b: T, amount: number) => T;
 
 export const blendNumber: Blend<number> = (a, b, u) => a + (b - a) * u;
@@ -20,11 +16,9 @@ export const blendVec: Blend<Vec> = (a, b, u) => [
   a[1] + (b[1] - a[1]) * u,
 ];
 
-/** Where a lane's period puts a time on the scene's clock. The end of a period is its own last moment, not the next one's first. */
 const local = (t: Seconds, period: Seconds | undefined): Seconds =>
   period === undefined ? t : t - period * Math.max(0, Math.ceil(t / period - EPSILON) - 1);
 
-/** The value at `t`, as every backend draws it: the later key's ease shapes the way between two keys. */
 export const valueAt = <T>(value: Animated<T>, t: Seconds, blend: Blend<T>): T => {
   if (!isLane(value)) return value;
   const { keys } = value;
@@ -40,7 +34,6 @@ export const valueAt = <T>(value: Animated<T>, t: Seconds, blend: Blend<T>): T =
   return onCurve(from, to, amount) ?? blend(from.value, to.value, amount);
 };
 
-/** Every time in `[0, duration]` where one of `values` has a key: the joins a sampled lane must keep. */
 export const breaksOf = (values: readonly Animated<unknown>[], duration: Seconds): Seconds[] => {
   const times = [0, duration];
 
@@ -59,7 +52,6 @@ export const breaksOf = (values: readonly Animated<unknown>[], duration: Seconds
     .filter((t, index, all) => index === 0 || t - all[index - 1]! > EPSILON);
 };
 
-/** Samples a second between two joins. Enough that a fitted ease never misses a turn. */
 const RATE = 120;
 
 const far = (a: readonly number[], b: readonly number[], tolerance: number): boolean =>
@@ -81,7 +73,6 @@ const withVelocity = (
     };
   });
 
-/** How the lanes a value reads move between two neighbouring joins. */
 type Between =
   | { readonly kind: "still" }
   | { readonly kind: "eased"; readonly curve: Ease }
@@ -89,11 +80,6 @@ type Between =
 
 const isHold = (curve: Ease): boolean => curve.kind === "steps" && curve.count === 1;
 
-/**
- * Whether every lane that moves from `start` to `end` moves by one ease, the same in each: then a value that reads
- * only them is a fixed function of that ease's progress there. A cut, a steps ease, or two different eases is
- * `other`.
- */
 const between = (
   lanes: readonly (readonly Key<unknown>[])[],
   start: Seconds,
@@ -126,7 +112,6 @@ const between = (
   return found ? { kind: "eased", curve: found } : { kind: "still" };
 };
 
-/** Where in time `curve` reaches `progress`, as a part of its span; undefined when it turns back or overshoots. */
 const timeOf = (curve: Ease): ((progress: number) => number) | undefined => {
   if (curve.kind === "linear") return (progress) => progress;
 
@@ -154,13 +139,10 @@ const timeOf = (curve: Ease): ((progress: number) => number) | undefined => {
 
 const pointOf = (values: readonly number[]): Vec => [values[0]!, values[1]!];
 
-/** Points of progress each eased stretch is read at, to place its keys. */
 const GRID = 96;
 
-/** How many times denser than `RATE` a stretch whose keys stray between samples may be sampled. */
 const DENSER = 8;
 
-/** Whether keys drawn at `t` are farther than `tolerance` from `want`; angles in `turns` compare a whole turn apart. */
 const strayed = (
   keys: readonly RunKey[],
   t: Seconds,
@@ -187,13 +169,10 @@ const strayed = (
   return Math.hypot(...off) > tolerance;
 };
 
-/** An eased stretch with more keys than this is fitted from samples too, and the shorter kept. */
 const SAMPLE_PAST = 8;
 
-/** Keys closer than this in time are not worth the split: the stretch is sampled instead. */
 const CLOSEST = 0.002;
 
-/** How far a straight key from `a` to `b` strays from the values between, at the worst one. */
 const strayFromLine = (
   progress: readonly number[],
   values: readonly (readonly number[])[],
@@ -218,12 +197,6 @@ const strayFromLine = (
   return worst;
 };
 
-/**
- * A stretch moved by one ease, as keys that keep it: the value is read at even steps of the ease's progress, and each
- * key reaches as far as a straight line in that progress stays within `tolerance`. Each key's ease is the part of
- * `curve` it spans, cut exactly, so the keys run on the original ease and only the value's bends are approximated.
- * Undefined when that would not hold: an ease that turns back, keys too close, or a value that strays between them.
- */
 const easedRun = (
   read: (t: Seconds) => readonly number[],
   start: Seconds,
@@ -240,7 +213,6 @@ const easedRun = (
   const values = share.map((u) => read(start + (end - start) * u));
   const keys: RunKey[] = [{ t: start, values: values[0]! }];
 
-  // How fast the value moves with progress at each grid point, for a curved key's controls.
   const pace = values.map((_, i) => {
     const [a, b] = [Math.max(0, i - 1), Math.min(GRID, i + 1)];
 
@@ -249,7 +221,6 @@ const easedRun = (
     );
   });
 
-  /** The curve from grid point `a` to `b` that strays least, and how far: Hermite handles, or fitted ones. */
   const curveOf = (a: number, b: number): { readonly via: Controls; readonly strays: number } => {
     const width = progress[b]! - progress[a]!;
     const [p, q] = [pointOf(values[a]!), pointOf(values[b]!)];
@@ -310,7 +281,6 @@ const easedRun = (
     from = reach;
   }
 
-  // The grid can step over a bend: every key is checked against the value between its grid points too.
   for (let k = 1; k < keys.length; k++) {
     const [a, b] = [keys[k - 1]!, keys[k]!];
 
@@ -330,14 +300,6 @@ const easedRun = (
   return keys;
 };
 
-/**
- * A value known only at each moment, written as keys over the whole scene that stay within `tolerance` of it.
- * Components listed in `turns` are angles in degrees, kept continuous rather than wrapped. When `lanes` are the
- * lanes the value reads, a stretch where they all move by one ease keeps that ease, cut into parts at the value's
- * bends (see `easedRun`); anything else between two joins is sampled densely and fitted with eases. At a join where
- * it jumps, the keys cut. With `curves`, the value is a point and its keys may be curved (`Key.via`), when that takes
- * fewer.
- */
 export const follow = (
   at: (t: Seconds) => readonly number[],
   breaks: readonly Seconds[],
@@ -387,7 +349,6 @@ const keysOf = (
     let run: RunKey[] | undefined;
 
     if (moves.kind === "eased") {
-      // The value just before a join, so a jump there cuts rather than slides.
       const inside = (t: Seconds) => read(!final && t >= end - EPSILON ? end - nudge : t);
 
       run = easedRun(inside, start, end, moves.curve, tolerance, bends);
@@ -405,14 +366,10 @@ const keysOf = (
       ];
     }
 
-    // Cut eases keep the motion's timing exactly, but a value that bends all the way needs a key at every bend: then
-    // fitting fresh eases to samples can take fewer.
     if (!run || run.length > SAMPLE_PAST) {
       const kept = last;
       let sampled: RunKey[] = [];
 
-      // Keys are checked at the samples only, so a fast bend can stray between two: the run is read back halfway
-      // between each pair, and sampled twice as densely while it strays there.
       for (let rate = RATE; rate <= RATE * DENSER; rate *= 2) {
         last = from;
         const count = Math.max(2, Math.ceil((end - start) * rate));
@@ -465,7 +422,6 @@ const keysOf = (
   });
 };
 
-/** Keys as a lane of `T`, or the value itself when nothing changes. */
 export const laneFrom = <T>(
   keys: readonly RunKey[],
   join: (values: readonly number[]) => T,
@@ -489,7 +445,6 @@ export const laneFrom = <T>(
   return lane;
 };
 
-/** A lane's keys on the scene's clock across the whole scene, its period written out. */
 export const unrolled = <T>(lane: Lane<T>, duration: Seconds): Key<T>[] => {
   const period = lane.period ?? duration;
   const out: Key<T>[] = [];

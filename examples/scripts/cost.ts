@@ -1,8 +1,3 @@
-/**
- * The animations an SVG asks the browser to run on every frame, counted from the file alone so it does not wobble like
- * a timing. Chrome ticks every running animation each frame, even while its value holds: each CSS animation on an
- * element (they all loop), and each SMIL `<animate>` or `<set>` for the share of the loop its interval covers.
- */
 const attr = (tag: string, name: string): string | undefined =>
   new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1];
 

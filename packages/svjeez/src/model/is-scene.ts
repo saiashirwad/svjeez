@@ -2,10 +2,6 @@ import type { Scene } from "./ir";
 
 const isObject = (value: unknown): value is object => typeof value === "object" && value !== null;
 
-/**
- * Whether `value` is a scene model, as `scene()` returns it. It checks the shape, not a class, so a scene that another
- * copy of svjeez made still counts. Loaders use it to tell `export default scene(...)` from an SVG string.
- */
 export const isScene = (value: unknown): value is Scene =>
   isObject(value) &&
   "size" in value &&

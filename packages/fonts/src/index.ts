@@ -6,7 +6,6 @@ import { font } from "svjeez";
 import type { Font, FontFamily, FontOptions, FontStyle } from "svjeez/tools";
 
 export type GoogleOptions = Omit<FontOptions, "family" | "weight" | "style"> & {
-  /** Default 400. */
   readonly weight?: number;
   readonly style?: FontStyle;
 };
@@ -19,7 +18,6 @@ const cacheDir = (): string => {
   return join(XDG_CACHE_HOME || join(homedir(), ".cache"), "svjeez", "fonts");
 };
 
-// Google serves WOFF2 to browsers and static TTF to a user agent it doesn't recognize.
 const HEADERS = { "user-agent": "svjeez-fonts" };
 
 const slug = (family: string): string => {
@@ -141,10 +139,6 @@ const load = async (
   return bytes;
 };
 
-/**
- * Loads a Google Fonts family at one weight and style as a svjeez `Font`. The file is cached on disk, so only the first
- * run on a machine needs the network. Remaining options go to `font()`.
- */
 export const google = Object.assign(
   async (family: string, options: GoogleOptions = {}): Promise<Font> => {
     const { weight = 400, style = "normal", ...rest } = options;
@@ -152,10 +146,6 @@ export const google = Object.assign(
     return font(await bytesOf(family, weight, style), { ...rest, family, weight, style });
   },
   {
-    /**
-     * Several weights and styles under one family name. `faces` lists them, each with the options `google()` takes;
-     * `options` applies to every face and a face's own win. The first face's `fallback` is the family's.
-     */
     family: async (
       family: string,
       faces: readonly [GoogleOptions, ...GoogleOptions[]],

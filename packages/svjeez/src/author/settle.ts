@@ -9,27 +9,17 @@ import { isTrack } from "./track";
 import { lookOf, paintedBoxOf } from "../model/painted";
 import { PLACE_LIST, PLACES, homed, homeOf, pinned, type TextAnchorPlace } from "./pin";
 
-/**
- * The second pass of lowering. The first lowers every node where it stands; this one places what could only be placed
- * once everything was lowered: children of layout containers, nodes whose `at` is an anchor, and connectors, whose
- * ends are anchors. An anchor may name any node in the scene, so each is resolved on demand, after whatever it
- * depends on, and a loop between two is an error that names them.
- */
-
-/** Where each child's box goes, its top-left corner in the container's frame, and the box the container takes. */
 export type Arrange = (boxes: readonly Box[]) => {
   readonly slots: readonly Vec[];
   readonly box: Box;
 };
 
-/** Redraws a connector's children once its ends are known, in its own frame, on the scene's clock. */
 export type Connect = (
   ends: readonly Animated<Vec>[],
   children: readonly SceneNode[],
   duration: Seconds,
 ) => SceneNode[];
 
-/** What a group element asks of the second pass. */
 export type Settle =
   | { readonly kind: "arrange"; readonly label: string; readonly arrange: Arrange }
   | {
@@ -41,34 +31,23 @@ export type Settle =
 
 type Kind = SceneNode["kind"];
 
-/** What the first pass noted about how a node was written. */
 interface Note {
   readonly anchor?: Anchor;
-  /** A container a morph state already arranged: its children's `at` and its box are final. */
   readonly arranged?: true;
-  /** Whether the node was given an `at` of its own. */
   readonly placed: boolean;
-  /** What the node was written as: a morph may lower a text into a group, which still places as a text. */
   readonly kind: Kind;
-  /** The node's `anchor`, as written: which point of its box its `at` names. */
   readonly pin?: TextAnchorPlace;
-  /** A group whose anchor a morph state already applied, with its box in that state. */
   readonly pinned?: true;
   readonly origin: Place | Vec | undefined;
   readonly settle?: Settle;
 }
 
-/**
- * A node whose `at` is written toward anchors, as a timeline's `move` to an anchor is: given how to read an anchor in the node's
- * parent's frame, and the node once measured, its `at`.
- */
 export type Aim = (
   read: (anchor: Anchor) => Animated<Vec>,
   self: () => {
     readonly box: Box;
     readonly origin: Vec;
     readonly layers: readonly Layer[];
-    /** The point of the node's frame that its `at` names. */
     readonly home: Vec;
   },
 ) => Animated<Vec>;
@@ -77,7 +56,6 @@ export interface Notes {
   readonly nodes: Map<string, Note>;
   readonly refs: Map<Ref, string>;
   readonly aims: Map<string, Aim>;
-  /** Nodes a morph gives a different box in another state. */
   readonly resized: Set<string>;
 }
 
@@ -88,7 +66,6 @@ export const notes = (): Notes => ({
   resized: new Set(),
 });
 
-/** Notes each node a morph made whose box differs between the states it is in, as each state lowered it. */
 export const noteResized = (
   into: Notes,
   merged: readonly SceneNode[],
@@ -115,7 +92,6 @@ interface Written {
   readonly origin?: Place | Vec;
 }
 
-/** Notes a node as the first pass lowers it, with the kind it was written as, and the ref it carries. */
 export const note = (
   into: Notes,
   key: string,
@@ -132,7 +108,6 @@ export const note = (
       );
     const taken = into.refs.get(ref);
 
-    // A morph lowers each state in the same place, so one ref on one key in two states is one node.
     if (taken !== undefined && taken !== key)
       throw new Error(
         `The ref "${ref.key}" is on two nodes, "${taken}" and "${key}". A ref names one node: make another with ref().`,
@@ -150,7 +125,6 @@ export const note = (
   });
 };
 
-/** A node while the second pass works on it. */
 interface Draft {
   readonly node: SceneNode;
   readonly parent: Draft | undefined;
@@ -159,9 +133,7 @@ interface Draft {
   at: Animated<Vec>;
   box: Box;
   origin: Vec;
-  /** Whether `at` names the frame's origin yet: a group's anchor waits for its box, and an anchor or a move to one for the second pass. */
   homed: boolean;
-  /** 0 not yet, 1 under way, 2 done: one under way that is asked for again is a loop. */
   placing: 0 | 1 | 2;
   measuring: 0 | 1 | 2;
 }
@@ -187,7 +159,6 @@ const draft = (node: SceneNode, parent: Draft | undefined, nodes: Notes["nodes"]
   return own;
 };
 
-/** The box around `children` where they rest, in their parent's frame. */
 export const around = (
   children: readonly { readonly at: Animated<Vec>; readonly box: Box }[],
 ): Box => {
@@ -207,12 +178,6 @@ export const around = (
   return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
 };
 
-/** The point a node turns and scales around, in its frame: the center of its box unless it says. */
-/**
- * The point a node turns and scales around, in its own frame, from `origin` as written: a place on its box, or a
- * point measured from the box's top-left. The center of the box unless it says. `key` names the node, for errors.
- */
-/** Whether an origin is written as a point from the box's top-left, not as a place. */
 const isOffset = (origin: Place | Vec): origin is Vec => Array.isArray(origin);
 
 export const originOf = (origin: Note["origin"], box: Box, key: string): Vec => {
@@ -238,7 +203,6 @@ const turns = (layer: Layer): boolean =>
 
 const DEG = Math.PI / 180;
 
-/** A point in a node's frame, in its parent's: the rule at the top of ir.ts. */
 export const outward = (
   p: Vec,
   at: Vec,
@@ -261,7 +225,6 @@ export const outward = (
   return [x + at[0], y + at[1]];
 };
 
-/** A point in a node's parent's frame, in the node's own. */
 const inward = (
   p: Vec,
   at: Vec,
@@ -290,14 +253,11 @@ const inward = (
   return [x, y];
 };
 
-/** How far a followed point may stray from where it really is, in px. */
 const TOLERANCE = 0.05;
 
-/** Whether a connector's end, as an untyped caller may write it, is a point. */
 const isPoint = (end: unknown): end is Vec =>
   Array.isArray(end) && end.length === 2 && end.every((n) => Number.isFinite(n));
 
-/** Places every node the first pass could not, and gives the scene's root back with every box and `at` final. */
 export const settle = <G extends SceneNode & { readonly kind: "group" }>(
   root: G,
   { nodes, refs, aims, resized }: Notes,
@@ -344,11 +304,6 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     );
   };
 
-  /**
-   * Whether `d` is a container whose `at` is written as a still point. That point is folded into its children's, so
-   * layout adds no transform: the container's frame is its parent's, and its box sits where `at` put it. A clip or a
-   * mask is in the container's own frame, so a container with one keeps it.
-   */
   const folds = (d: Draft): boolean =>
     d.note?.settle?.kind === "arrange" &&
     !d.note.anchor &&
@@ -399,7 +354,6 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
       const { slots, box } = asked.arrange(d.children.map((child) => child.box));
       const folded = folds(d);
 
-      // A folded container's own anchor is on the box its children make, which is known only now.
       const home =
         folded && !d.homed ? pinned(d.note?.pin, box, `"${d.node.key}"`) : ([0, 0] as const);
 
@@ -444,7 +398,6 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
     const aim = aims.get(d.node.key);
 
-    /** The point of `d`'s frame that its `at` names, once its box is final. */
     const home = (): Vec => {
       measure(d);
 
@@ -469,7 +422,6 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     d.placing = 2;
   };
 
-  /** What moving a point out of `d`'s frame needs: its `at`, and its origin when a layer turns or scales around it. */
   const ready = (d: Draft): void => {
     place(d);
 
@@ -484,14 +436,12 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     return out;
   };
 
-  /** `anchor` in `frame`'s own frame: a point, or a lane when anything between the two moves. */
   const resolve = (anchor: Anchor, frame: Draft): Animated<Vec> => {
     const node = target(anchor);
 
     measure(node);
     const point = anchor.on(node.box);
     const shape = node.node;
-    // A shape whose geometry moves takes its box along: an anchor on a bar that grows follows its end.
     const outline = shape.kind === "shape" && isLane(shape.geometry) ? shape.geometry : undefined;
     const look = shape.kind === "shape" ? lookOf(shape) : undefined;
 
@@ -554,7 +504,6 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
   return build(top) as G;
 };
 
-/** The first anchor, timeline target or connector under `node`: what a state's layout can't settle on its own. */
 export const outsider = (node: SceneNode, notes: Notes): string | undefined => {
   const own = notes.nodes.get(node.key);
 
@@ -571,11 +520,6 @@ export const outsider = (node: SceneNode, notes: Notes): string | undefined => {
   return undefined;
 };
 
-/**
- * The layout containers in one state of a morph, arranged in that state. The states are merged by key before the
- * second pass, so a container arranged there would place every state's children together; arranged here, each child
- * sits where its own state puts it, and the morph moves it from one slot to the next.
- */
 export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode[] => {
   const arranged = (node: SceneNode): SceneNode => {
     if (node.kind !== "group") return node;
@@ -583,7 +527,6 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
     const note = into.nodes.get(node.key);
     const asked = note?.settle;
 
-    /** The group's own anchor, applied on its box in this state, unless something in it is placed only later. */
     const pin = (box: Box): Animated<Vec> => {
       if (note?.pin === undefined || outsider(node, into) !== undefined) return node.at;
       into.nodes.set(node.key, { ...into.nodes.get(node.key)!, pinned: true });
@@ -634,7 +577,6 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
   return list.map(arranged);
 };
 
-/** A child a container places: it can't place itself as well. */
 const placedInside = (key: string, note: Note | undefined, label: string): void => {
   if (note?.placed)
     throw new Error(
@@ -647,15 +589,9 @@ const placedInside = (key: string, note: Note | undefined, label: string): void 
     );
 };
 
-/** How a node's `at` was written, for an error: an anchor's label, or a point. */
 const placing = (anchor: Anchor | undefined): string =>
   anchor ? `at ${anchor.label}` : "at a point";
 
-/**
- * Checks that every node in one state of a morph is placed the way the states before placed it, given what those
- * states noted in `seen`. A morph blends points; an anchor is resolved only in the second pass, after the states are
- * merged, so a node anchored in one state and not in another would keep one placement for good.
- */
 export const sameAnchors = (
   list: readonly SceneNode[],
   { nodes }: Notes,

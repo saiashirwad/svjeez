@@ -1,10 +1,5 @@
 import type { Key, Vec } from "./ir";
 
-/**
- * The curved keys of a lane of points (`Key.via`): a cubic Bézier from the key before to the key, walked by share of
- * its length. Every reader of a lane goes through `alongCurve`, so a backend, the editor's boxes and the fitter
- * that wrote the key all agree on where the point is.
- */
 export type Controls = readonly [control1: Vec, control2: Vec];
 
 const point = (p0: Vec, [p1, p2]: Controls, p3: Vec, s: number): Vec => {
@@ -17,13 +12,11 @@ const point = (p0: Vec, [p1, p2]: Controls, p3: Vec, s: number): Vec => {
   ];
 };
 
-/** Steps of the parameter a curve's length is measured over: well under a thousandth of a pixel off on any key. */
 const STEPS = 256;
 
 interface Table {
   readonly from: Vec;
   readonly to: Vec;
-  /** The length walked by each step of the parameter, from the start. */
   readonly lengths: Float64Array;
 }
 
@@ -57,11 +50,9 @@ const tableOf = (from: Vec, via: Controls, to: Vec): Table => {
   return table;
 };
 
-/** How long the curve from `from` through `via` to `to` is. */
 export const curveLength = (from: Vec, via: Controls, to: Vec): number =>
   tableOf(from, via, to).lengths[STEPS]!;
 
-/** The parameter of the cubic at `share` (0 to 1) of the way along the curve, by length. */
 const paramAt = (from: Vec, via: Controls, to: Vec, share: number): number => {
   const { lengths } = tableOf(from, via, to);
   const goal = Math.min(1, Math.max(0, share)) * lengths[STEPS]!;
@@ -79,15 +70,9 @@ const paramAt = (from: Vec, via: Controls, to: Vec, share: number): number => {
   return (lo + (span > 0 ? (goal - lengths[lo]!) / span : 0)) / STEPS;
 };
 
-/** The point `share` (0 to 1) of the way along the curve, by length. */
 export const alongCurve = (from: Vec, via: Controls, to: Vec, share: number): Vec =>
   point(from, via, to, paramAt(from, via, to, share));
 
-/**
- * The curve cut `share` (0 to 1) of the way along its length, exactly (de Casteljau): the controls of the part before,
- * the point where it is cut, which is `alongCurve` there, and the controls of the part after. An ease that shapes the
- * share of the whole length covered, cut at the same moment, shapes the share of each part's length.
- */
 export const splitCurve = (
   from: Vec,
   via: Controls,
@@ -102,16 +87,11 @@ export const splitCurve = (
   return [[a, d], lerp(d, e), [e, c]];
 };
 
-/** The controls of the cubic from `from` to `to` that leaves and arrives at these speeds, per whole curve. */
 export const hermiteControls = (from: Vec, leave: Vec, arrive: Vec, to: Vec): Controls => [
   [from[0] + leave[0] / 3, from[1] + leave[1] / 3],
   [to[0] - arrive[0] / 3, to[1] - arrive[1] / 3],
 ];
 
-/**
- * Where a lane is `share` of the way from key `from` to key `to` when `to` is curved, and undefined when it is not:
- * readers blend a straight key their own way.
- */
 export const onCurve = <T>(from: Key<T>, to: Key<T>, share: number): T | undefined => {
   if (!to.via) return undefined;
   // SAFETY: only a lane of points has a key with `via` (ir.ts), so both values are points and so is the result.
@@ -121,15 +101,9 @@ export const onCurve = <T>(from: Key<T>, to: Key<T>, share: number): T | undefin
   return alongCurve(a, to.via, b, share) as T;
 };
 
-/** Whether a lane has a curved key. */
 export const isCurved = (keys: readonly Key<unknown>[]): boolean =>
   keys.some((key) => key.via !== undefined);
 
-/**
- * The controls of the cubic from `from` to `to` that leaves along `leave` and arrives along `arrive` (directions only)
- * and passes nearest `points`, each at its parameter in `params`: the least-squares fit of the two handle lengths
- * (Schneider's). Undefined when no positive pair fits.
- */
 export const fitControls = (
   from: Vec,
   leave: Vec,
@@ -141,8 +115,6 @@ export const fitControls = (
   let found = handles(from, leave, arrive, to, points, params);
   let at = params;
 
-  // Each point's parameter is moved to where the curve passes nearest it, and the handles fitted again (a Newton step
-  // each time): the parameters given are only a first guess at where the curve is.
   for (let round = 0; round < REFITS && found; round++) {
     const via = found;
 
@@ -153,10 +125,8 @@ export const fitControls = (
   return found;
 };
 
-/** Rounds of moving the parameters and fitting again. */
 const REFITS = 6;
 
-/** The parameter near `u` where the curve passes nearest `target`, by one Newton step. */
 const nearest = (from: Vec, [c1, c2]: Controls, to: Vec, target: Vec, u: number): number => {
   const r = 1 - u;
   const at = point(from, [c1, c2], to, u);

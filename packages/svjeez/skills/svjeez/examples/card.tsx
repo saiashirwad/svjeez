@@ -20,11 +20,6 @@ import {
 } from "svjeez";
 import { sans, theme } from "./style";
 
-/**
- * A card that arrives, then fills in row by row. Layout containers place every box, text is measured when the scene
- * compiles, and the rows enter on spans cascaded from one beat, so moving that beat moves them all.
- */
-
 const WIDTH = 340;
 const PAD = 20;
 
@@ -32,10 +27,8 @@ const arrive = span(0.3, 0.6);
 const [header, body, footer] = arrive.next(0.45, -0.25).cascade(3, 0.15);
 const leave = span(4.4, 0.4);
 
-/** A row's entrance: it rises 8px into place as it fades in. */
 const rise = (when: Span) => enter(when, { from: { opacity: 0, offset: [0, 8] } });
 
-/** A label centered on a rounded rect: `<Align to={…}>` puts the label's center on the rect's. */
 const Pill = ({
   label,
   color,

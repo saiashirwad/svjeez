@@ -73,7 +73,6 @@ try {
   const playwright = manifest(join(ROOT, "packages/svjeez/node_modules/playwright-core")).version;
   const consumer = join(tmp, "consumer");
   cpSync(join(dir, "test/consumer"), consumer, { recursive: true });
-  // npm 10, which Node 20 ships, can't install Vite 8 even on its own: arborist fails on Vite's optional peers. npm 11 can.
   run(
     "npx",
     [

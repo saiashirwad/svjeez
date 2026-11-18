@@ -6,30 +6,17 @@ import { breaksOf, follow, laneFrom, valueAt } from "../model/sample";
 import { laneOf, mixNumber, mixVec, type Mix, type Parts, type Timing } from "../model/steps";
 import { isTrack, passageOf, type Anim, type Track } from "./track";
 
-/**
- * Derived tracks: one value computed from others, such as a spoke's end from an angle. The model has no such thing:
- * lowering writes each as an ordinary lane. When the mapping is affine along every move of its sources, each key maps
- * to one key with the same ease, so the lane is as small as its source; otherwise it is sampled and fitted to few keys.
- */
 export interface MapOptions {
-  /**
-   * How far a sampled lane may stray from the mapping, in the value's own units: px for a point. Default: a
-   * thousandth of how far the value moves, and at most 0.05.
-   */
   readonly tolerance?: number;
 }
 
-/** What a derived track reads: a track of numbers or points, one derived from them, or a still value. */
 export type Source = number | Vec | Track<number> | Track<Vec> | Derived<number> | Derived<Vec>;
 
-/** A source's value at one moment. */
 type Read = number | Vec;
 
 type Base = number | Vec | Track<number> | Track<Vec>;
 
-/** A value that follows its sources. It takes no steps of its own: move the sources instead. */
 export class Derived<T> {
-  /** Tracks and still values, never another derived track: those are read through. */
   readonly sources: readonly Base[];
   readonly read: (values: readonly Read[]) => T;
   readonly tolerance: number | undefined;
@@ -42,7 +29,6 @@ export class Derived<T> {
     this.tolerance = tolerance;
   }
 
-  /** Another track, `fn` of this one's value at every moment. */
   map<U>(fn: (value: T) => U, options: MapOptions = {}): Derived<U> {
     return new Derived(
       this.sources,
@@ -51,7 +37,6 @@ export class Derived<T> {
     );
   }
 
-  /** This track read together with others, to `map` them into one: `x.with(y).map((x, y) => [x, y])`. */
   with<const S extends readonly Source[]>(...others: S): Together<[T, ...ValuesOf<S>]> {
     // SAFETY: a derived track of anything but numbers or points is refused when it is lowered, where it is read, and
     // its value comes first, as the tuple says.
@@ -67,21 +52,16 @@ const isDerivedSource = (source: Source): source is Derived<number> | Derived<Ve
 
 type ValueOf<S> = S extends Track<infer T> ? T : S extends Derived<infer T> ? T : S;
 
-/** The values of a list of sources, in order. */
 export type ValuesOf<S extends readonly unknown[]> = { -readonly [K in keyof S]: ValueOf<S[K]> };
 
-/** Tracks read together, as `a.with(b)` makes them: `map` turns them into one. */
 export interface Together<V extends readonly unknown[]> {
-  /** A track that is `fn` of the sources' values at every moment. */
   map<U>(fn: (...values: V) => U, options?: MapOptions): Derived<U>;
 }
 
-/** Sources read together, each of them a track, a derived track or a still value. */
 export const together = <const S extends readonly Source[]>(sources: S): Together<ValuesOf<S>> => ({
   map: (fn, options = {}) => derive(sources, fn, options),
 });
 
-/** A track computed from several. Each source may itself be derived. */
 const derive = <const S extends readonly Source[], U>(
   sources: S,
   fn: (...values: ValuesOf<S>) => U,
@@ -112,7 +92,6 @@ const derive = <const S extends readonly Source[], U>(
   );
 };
 
-/** A track's `map`: the one source is the track itself. */
 export const mappedTrack = <T, U>(
   source: Track<T>,
   fn: (value: T) => U,
@@ -152,7 +131,6 @@ const mixRead: Mix<Read> & { readonly parts: Parts<Read> } = Object.assign(
 const blendRead = (a: Read, b: Read, amount: number): Read =>
   mixRead(a, b, amount, "a derived track");
 
-/** A value as its numbers, and its shape with the numbers taken out: two values of one shape blend number by number. */
 interface Flat {
   readonly numbers: readonly number[];
   readonly shape: string;
@@ -174,7 +152,6 @@ const flatten = <T>(value: T, where: string): Flat => {
   return { numbers, shape };
 };
 
-/** The value of shape `shape` with `numbers` in it, in the order `flatten` took them out. */
 const rebuild = <T>(shape: string, numbers: readonly number[]): T => {
   let next = 0;
   const value: T = JSON.parse(shape, (_key, part) => (isNumber(part) ? numbers[next++]! : part));
@@ -191,7 +168,6 @@ const sameKeys = (a: Lane<Read>, b: Lane<Read>): boolean =>
       JSON.stringify(key.ease) === JSON.stringify(b.keys[i]!.ease),
   );
 
-/** Where between two keys the line must be checked: every step of a steps ease, or eighths. */
 const probes = (key: Key<Read>): number[] => {
   const curve = key.ease;
   const count = curve?.kind === "steps" ? curve.count : 8;
@@ -202,7 +178,6 @@ const probes = (key: Key<Read>): number[] => {
 const near = (a: number, b: number): boolean =>
   Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(a), Math.abs(b));
 
-/** The lane with each key mapped, when the mapping is affine along every move: then it keeps the keys and their eases. */
 const affine = <T>(
   lanes: readonly Animated<Read>[],
   out: (values: readonly Read[]) => T,
@@ -255,7 +230,6 @@ const affine = <T>(
   return first.period === undefined ? lane : { ...lane, period: first.period };
 };
 
-/** Samples a second when measuring how far a sampled value moves. */
 const MEASURE = 60;
 
 const sampledLane = <T>(
@@ -306,11 +280,6 @@ const sampledLane = <T>(
 
 const isBaseTrack = (source: Base): source is Track<number> | Track<Vec> => isTrack(source);
 
-/**
- * A derived track as the model's value: a lane on the scene's clock, or a still value when nothing it reads moves.
- * `change` turns what the mapping gives into the model's value, as it does for a hand-written prop. `curves` says the
- * value is a position, which a sampled lane may draw with curved keys.
- */
 export const derivedOf = <A, T>(
   value: Derived<A>,
   change: (value: A) => T,

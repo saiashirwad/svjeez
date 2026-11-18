@@ -1,7 +1,6 @@
 import { tokens } from "svjeez";
 import { mono } from "./fonts/faces";
 
-/** The examples' palette as tokens, named for what they are for: white and system gray by day, near-black by night, with the system accent colors. */
 export const theme = tokens({
   light: {
     background: "#FFFFFF",

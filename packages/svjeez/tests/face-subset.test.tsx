@@ -13,7 +13,6 @@ const slanted = font.family(sans, sansItalic);
 const emit = (build: () => SceneElement) =>
   svg.emit(scene({ size: [200, 100], duration: 1, title: "Faces" }, build));
 
-/** Each embedded face, by weight and style, read back as a font. */
 const embeds = (out: string) =>
   new Map(
     [

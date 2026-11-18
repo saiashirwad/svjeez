@@ -27,7 +27,6 @@ import {
 } from "svjeez";
 import { sans, theme } from "./style";
 
-/** A labelled box that fades in during `when`. */
 const Node = ({
   handle,
   when,
@@ -56,7 +55,6 @@ const Node = ({
   );
 };
 
-/** The scene file arrives first; then each arrow draws, and the box it points to arrives as it lands. */
 const FIRST = span(0.3, 0.4);
 const links = FIRST.next(0.35).cascade(4, 0.4);
 const arrivals = links.map((link) => link.next(0.3, -0.05));
@@ -81,7 +79,6 @@ export default scene(
 
     const targets = [svg, frames, video];
 
-    /** A dot runs along both arrows to a target, and the target lights up as it lands. */
     const deliver = (target: Ref): Action =>
       seq(
         dot.set({ at: source.right }),

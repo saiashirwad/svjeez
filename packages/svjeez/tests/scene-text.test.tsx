@@ -28,14 +28,11 @@ const textOf = (model: Model.Scene, key = "t"): Model.TextNode => {
   return found;
 };
 
-/** Each line's runs as [text, weight, style]. */
 const runs = (node: Model.TextNode) =>
   node.lines.map((line) => line.runs.map((run) => [run.text, run.face.weight, run.face.style]));
 
-/** An SVG without its embedded fonts, short enough to read in a failure. */
 const emit = (model: Model.Scene): string => svg.emit(model).replace(/@font-face\{[^}]*\}/g, "");
 
-/** The faces a file embeds, by weight and style, read back as fonts. */
 const embeds = (out: string) =>
   new Map(
     [

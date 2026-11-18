@@ -53,7 +53,16 @@ import {
   settle,
   type Notes,
 } from "./settle";
-import { laneOf, mapped, mixNumber, mixVec, same, touches, type Mix, type Timing } from "../model/steps";
+import {
+  laneOf,
+  mapped,
+  mixNumber,
+  mixVec,
+  same,
+  touches,
+  type Mix,
+  type Timing,
+} from "../model/steps";
 import { isTrack, layersOf, passageOf, type Anim, type LayerMotion } from "./track";
 import { derivedOf, isDerived } from "./derived";
 import { collect, type Cues } from "./timeline";
@@ -74,29 +83,22 @@ import { layoutRuns } from "./text";
 import { blendable, gradientOf, isWrittenGradient, mixPaint } from "./paint";
 import type { Effect as EffectProps } from "./effects";
 
-/** A run's face and paints, lowered. */
 interface RunLook {
   readonly face: Face;
   readonly font: Font;
-  /** The fill, lowered once the text's box is known: an `across` gradient spreads over the whole text's box. */
   readonly fill: (box: Box) => Animated<ModelPaint>;
   readonly opacity?: Animated<number>;
 }
 
-/** What a span's fill is lowered against to tell two apart before the text is laid out. Places are fractions of a box, so two `across` gradients that differ do here too. */
 const PROBE: Box = { x: 0, y: 0, width: 1, height: 1 };
 
-/** What `scene()` is told about the whole scene. */
 export interface SceneOptions {
   readonly size: Vec;
   readonly duration: Seconds;
   readonly title: string;
   readonly desc?: string;
-  /** Tokens to declare whether or not the scene uses them, so a page can restyle it. */
   readonly theme?: Theme;
-  /** False plays the scene once and holds its last frame. Default true. */
   readonly loop?: boolean;
-  /** The time, in seconds, whose frame is held for a viewer who asked for reduced motion. Default: 85% through. */
   readonly reducedMotion?: Seconds | false;
 }
 
@@ -105,19 +107,14 @@ interface Ctx {
   readonly fonts: FontBook;
   readonly size: Vec;
   readonly duration: Seconds;
-  /** Each symbol an instance has placed, lowered once, by its name in the model. */
   readonly symbols: Map<string, SymbolEntry>;
-  /** The name each symbol took when its first instance was lowered. */
   readonly named: Map<SceneSymbol, string>;
-  /** What the second pass places: anchors, layout and connectors. */
   readonly notes: Notes;
-  /** The timelines the scene made, applied node by node. */
   readonly cues: Cues;
 }
 
 interface SymbolEntry {
   readonly of: SceneSymbol;
-  /** Absent while the symbol's own content is being lowered. */
   node?: GroupNode;
   moves?: boolean;
 }
@@ -141,10 +138,6 @@ const animated = <A, T>(
   return laneOf(data, data.initial.value!, timing, mix, where, curves);
 };
 
-/**
- * A paint in the model: a color, or a gradient whose points `box` gives when it spreads across one. Without a box,
- * such a gradient is an error.
- */
 const colorOf = (ctx: Ctx, paint: Paint, where: string, box?: Box): ModelPaint =>
   isWrittenGradient(paint)
     ? gradientOf(paint, box, (color) => solidOf(ctx, color, where), where)
@@ -185,15 +178,10 @@ const layerOf = ({ passage }: LayerMotion, timing: Timing, where: string): Layer
   };
 };
 
-/** Where a node placed in the second pass waits during the first. */
 const NOWHERE: Vec = [0, 0];
 
 const IDLE: Layer = { offset: [0, 0], rotate: 0, scale: [1, 1], opacity: 1 };
 
-/**
- * What every node has, with `home`, the point of its frame that its `at` names: `at` is moved so that point, not the
- * frame's origin, lands where the author said. A group's anchor is applied in the second pass, once its box is known.
- */
 const base = (props: Omit<Common, "anchor">, box: Box, key: string, timing: Timing, home: Vec) => {
   const where = `"${key}"`;
 
@@ -225,10 +213,6 @@ const base = (props: Omit<Common, "anchor">, box: Box, key: string, timing: Timi
   };
 };
 
-/**
- * A geometry track as a lane whose keys all blend: `matched` keeps keys of one kind as they are and turns any other
- * mix into paths with the same points. A key written twice becomes one value, so a shape that comes back is the same.
- */
 const geometryOf = (
   value: ShapeProps["geometry"],
   timing: Timing,
@@ -263,7 +247,6 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
     );
   const geometry = geometryOf(props.geometry, timing, where);
   const rest = atRest(geometry);
-  // A gradient spreads across the outline; the stroke is drawn over its edge.
   const outline = boxOf(rest);
   const paint = (value: Paint) => colorOf(ctx, value, where, outline);
   const { stroke: written } = props;
@@ -319,7 +302,6 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
   const styles = new Map<Asked, RunLook | undefined>();
   const looks = new Map<string, RunLook>();
 
-  // Each run's style is lowered once, and two that come out the same are one, so their runs join.
   const styleOf = (asked: Asked): RunLook | undefined => {
     if (styles.has(asked)) return styles.get(asked);
 
@@ -366,7 +348,6 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
   const asked = piecesOf(props.children, own, where);
   const found = asked.map((piece) => styleOf(piece.asked));
 
-  /** A piece with no fill of its own: only white space, which takes the look of a piece beside it in the same face. */
   const borrowed = (i: number): RunLook => {
     const { text: words, asked: wanted } = asked[i]!;
 
@@ -461,13 +442,8 @@ const image = (props: ImageProps, key: string, timing: Timing): ImageNode => {
   };
 };
 
-/** Whether anything in a lowered tree moves. */
 const moves = (node: SceneNode): boolean => JSON.stringify(node).includes('"kind":"lane"');
 
-/**
- * The name a symbol takes in the model: the last key of its first instance, made of letters, digits, _ and - and
- * unique among the scene's symbols. It is stable while that instance keeps its key.
- */
 const symbolName = (ctx: Ctx, key: string): string => {
   const stem = key
     .split("/")
@@ -503,7 +479,6 @@ const instance = (ctx: Ctx, props: InstanceProps, key: string, timing: Timing): 
     ctx.symbols.set(name, entry);
     const root = `#${name}`;
 
-    // A symbol is drawn once and shared, so it is lowered on the scene's own clock, wherever an instance sits.
     const children = arrangeState(
       lowerAll(
         ctx,
@@ -622,7 +597,6 @@ const lowerAll = (
     taken.add(own);
     const key = parent ? `${parent}/${own}` : own;
 
-    // A shape drawn by its own coordinates starts a timeline's move from where they put its box.
     const home = (): Vec => {
       if (given.type !== "shape" || given.props.at !== undefined) return [0, 0];
       const drawn = shape(ctx, given.props, key, timing);
@@ -662,7 +636,6 @@ const lowerAll = (
     }
   });
 
-/** A length an effect takes: a still one below 0 is a mistake, and one a lane passes below 0 draws as 0. */
 const lengthOf = (value: Anim<number>, timing: Timing, where: string): Animated<number> => {
   const out = animated(value, keep, timing, mixNumber, where);
 
@@ -694,10 +667,6 @@ const effectOf = (ctx: Ctx, effect: EffectProps, timing: Timing, where: string):
   };
 };
 
-/**
- * A mask's content, lowered in the node's frame as children would be and arranged where it stands. Nothing in it can
- * be placed from outside, since the second pass places only what the scene draws.
- */
 const maskOf = (ctx: Ctx, mask: Child, key: string, timing: Timing): GroupNode | undefined => {
   const elements = flat(mask);
 
@@ -726,7 +695,6 @@ const maskOf = (ctx: Ctx, mask: Child, key: string, timing: Timing): GroupNode |
   };
 };
 
-/** `node` with the clip, mask and effects `props` ask for, all in its own frame. */
 const dressed = (
   ctx: Ctx,
   props: Omit<Common, "anchor">,
@@ -745,15 +713,10 @@ const dressed = (
   };
 };
 
-/** A fragment, or a group with nothing to say: no props and no layout, so it is the root itself. */
 const isBare = (el: SceneElement): boolean =>
   el.type === "fragment" ||
   (el.type === "group" && Object.keys(el.props).length === 0 && el.settle === undefined);
 
-/**
- * Runs `build`, measures and lowers what it returns, and gives back the scene model. A bare `<Group>` at the top is
- * the scene's root itself.
- */
 export const scene = (options: SceneOptions, build: () => SceneElement): Scene => {
   const { size, duration } = options;
 

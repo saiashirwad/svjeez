@@ -13,9 +13,7 @@ export interface NumberParam extends Labelled {
   readonly min: number;
   readonly max: number;
   readonly step: number;
-  /** Printed after the value, as in `s` for seconds. */
   readonly unit?: string;
-  /** `log` gives every small value as much room on a slider as every large one. Needs a positive `min`. */
   readonly scale?: "linear" | "log";
 }
 
@@ -38,7 +36,6 @@ export interface ChoiceParam<T extends string = string> extends Labelled {
 export interface TextParam extends Labelled {
   readonly kind: "text";
   readonly value: string;
-  /** The most characters a value may have, so a template's layout can count on it. */
   readonly maxLength?: number;
 }
 
@@ -54,7 +51,6 @@ export interface ListParam<I extends ScalarParam | Fields = ScalarParam | Fields
   readonly kind: "list";
   readonly item: I;
   readonly value: readonly ItemValue<I>[];
-  /** The fewest items, 0 by default. */
   readonly min: number;
   readonly max?: number;
 }
@@ -87,11 +83,9 @@ const check = (name: string, p: NumberParam): NumberParam => {
   return p;
 };
 
-/** Any number in `[min, max]`, in steps of `step` (default 0.01). */
 export const number = (value: number, options: Range & Extras): NumberParam =>
   check("number", { kind: "number", value, step: 0.01, ...options });
 
-/** A whole number from `min` (default 0) to `max`. */
 export const count = (
   value: number,
   options: Partial<Range> & Pick<Range, "max"> & Omit<Extras, "step">,
@@ -106,7 +100,6 @@ export const count = (
   return check("count", { kind: "number", value, min: 0, ...options, step: 1 });
 };
 
-/** A time in seconds from `min` (default 0) to `max`, in steps of `step` (default 0.01). */
 export const seconds = (
   value: number,
   options: Partial<Range> & Pick<Range, "max"> & Extras,
@@ -141,7 +134,6 @@ export const choice = <const T extends string>(
   return { kind: "choice", value, options, ...extras };
 };
 
-/** A line of text, at most `maxLength` characters when given. */
 export const text = (
   value: string,
   options: Labelled & Pick<TextParam, "maxLength"> = {},
@@ -156,11 +148,6 @@ export const text = (
   return { kind: "text", value, ...options };
 };
 
-/**
- * A list of items, each a scalar or a record of scalars: `list(text(""), ["a", "b"])`, or
- * `list({ label: text("Q1"), value: number(4, { min: 0, max: 100 }) }, [{ label: "Q1", value: 4 }])`. A record's
- * field values are what a partial item from `parse` falls back to. `min` (default 0) and `max` bound the length.
- */
 export const list = <const I extends ScalarParam | Fields>(
   item: I,
   value: readonly NoInfer<ItemValue<I>>[],
@@ -328,11 +315,6 @@ const fieldsOf = (fields: Fields, v: Json | undefined, path: string) => {
   );
 };
 
-/**
- * Values for `schema` read from untrusted input: a JSON string, or what `JSON.parse` returned. Every value is checked
- * against its param (type, range, options, length), a key the schema does not declare throws, and a param the input
- * leaves out keeps its default. Errors name the path, as in `highlights[2].label`.
- */
 export const parse = <S extends Schema>(schema: S, json: Json): Values<S> => {
   let input = json;
 

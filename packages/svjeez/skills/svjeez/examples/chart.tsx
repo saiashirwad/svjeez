@@ -15,7 +15,6 @@ import {
 } from "svjeez";
 import { sans, theme } from "./style";
 
-/** One state of the chart: a bar per region, in the order they stand. */
 interface Quarter {
   readonly name: string;
   readonly bars: readonly {
@@ -55,10 +54,6 @@ const quarters: readonly Quarter[] = [
 
 const PX_PER_UNIT = 1.4;
 
-/**
- * One whole picture of the chart. The morph matches nodes across states by key, so every node that changes has one:
- * a region's column keeps its key wherever it stands, and the stack places it in its new slot.
- */
 const chart = ({ name, bars }: Quarter): SceneElement => (
   <Group>
     <Text key="title" font={sans} weight={600} size={16} at={[40, 28]} fill={theme.text}>
@@ -83,7 +78,6 @@ const chart = ({ name, bars }: Quarter): SceneElement => (
 const STEP = 2.6;
 const TURN = 1;
 
-/** One span per transition, each ending a beat before the next state is due. */
 const turns = [1, 2, 3].map((i) => span(STEP * i - TURN, TURN));
 
 export default scene(

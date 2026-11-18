@@ -1,62 +1,38 @@
 import type { Seconds } from "../model/time";
 
-/**
- * Time on a clock. A span is a stretch of it, `over` seconds long from `start`; `end` is where it stops. `at` is
- * never a time in a scene: it is where a node sits.
- */
 export interface Span {
   readonly start: Seconds;
   readonly over: Seconds;
 }
 
-/** A span with no end: it runs to the end of its clock. */
 export interface OpenSpan {
   readonly start: Seconds;
   readonly over?: undefined;
 }
 
-/** A span, or one that runs to the end of its clock. */
 export interface When {
   readonly start: Seconds;
   readonly over?: Seconds;
 }
 
-/** What `span()` makes: a span with the ways to make others from it. */
 export interface Spanned extends Span {
   readonly end: Seconds;
-  /** The same span, `dt` seconds later. */
   shift(dt: Seconds): Spanned;
-  /** The next span: `over` long, starting `gap` seconds after this one ends. */
   next(over: Seconds, gap?: Seconds): Spanned;
-  /** Grow it `before` seconds earlier and `after` (default `before`) seconds later. Negative shrinks. */
   pad(before: Seconds, after?: Seconds): Spanned;
-  /** From the same start to `end`, a time on the same clock: `a.until(b.end)` ends when `b` does. */
   until(end: Seconds): Spanned;
-  /** The first `over` seconds: a span that starts with this one. `over` may run past its end. */
   first(over: Seconds): Spanned;
-  /** The last `over` seconds: a span that ends with this one. */
   last(over: Seconds): Spanned;
-  /**
-   * This span, then one for each length in `overs`, each starting when the one before ends: the steps of a motion
-   * that play one after another. `const [crouch, leap, land] = span(0.1, 0.3).chain(0.12, 0.25)`.
-   */
   chain<const O extends readonly Seconds[]>(
     ...overs: O
   ): [Spanned, ...{ -readonly [K in keyof O]: Spanned }];
-  /**
-   * `count` spans as long as this one, each starting `step` seconds after the one before: a cascade of entrances.
-   * The last one's `end` is when the cascade settles.
-   */
   cascade(count: number, step: Seconds): Spanned[];
 }
 
-/** What `span(start)` makes: a span that runs to the end of its clock. */
 export interface OpenSpanned extends OpenSpan {
   readonly end: number;
   shift(dt: Seconds): OpenSpanned;
-  /** Start `before` seconds earlier. Negative starts later. */
   pad(before: Seconds): OpenSpanned;
-  /** From the same start to `end`: `span(a).until(b)` is the span from `a` to `b`. */
   until(end: Seconds): Spanned;
   first(over: Seconds): Spanned;
 }
@@ -177,11 +153,6 @@ function build(start: Seconds, over: Seconds | undefined, what: string): Range |
   return new Range(start, over);
 }
 
-/**
- * The one rule for a start and an `over`: the start is finite and 0 or later, `over` is finite and positive. Whatever
- * plays in the window (a recipe, `sampled`, a `<Sequence>`) needs time to play in, so `over: 0` throws. `span()`
- * alone passes `empty`, since a zero-length span is a point on the clock that `.next` and `.pad` can start from.
- */
 export const checkWindow = (start: Seconds, over: Seconds, what: string, empty = false): void => {
   if (!Number.isFinite(start) || start < 0)
     throw new Error(`${what} needs a start of 0 or later, got ${start}.`);
@@ -194,11 +165,6 @@ export const checkWindow = (start: Seconds, over: Seconds, what: string, empty =
     );
 };
 
-/**
- * A span of a clock, `over` seconds long from `start`. Without `over` it runs to the end. Spans chain:
- * `span(0, 0.7).next(1, 0.2)` starts a gap after the first ends, `.pad(0.15)` grows one on both sides, and
- * `span(2).until(3.5)` runs from a start to an end.
- */
 export function span(start: Seconds, over: Seconds): Spanned;
 export function span(start: Seconds): OpenSpanned;
 export function span(start: Seconds, over?: Seconds): Spanned | OpenSpanned {

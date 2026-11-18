@@ -49,27 +49,14 @@ import {
 } from "./svg-paint";
 import { REDUCED_MOTION } from "./css";
 
-/**
- * The SVG backend. It decides where each lane lands (a CSS property, or a wrapper group when two lanes would
- * collide or apply in the wrong order) and hands elements with placed lanes to the emitter the old API uses, so
- * every browser workaround there (visibility for cuts, SMIL twins, font subsets, the reduced-motion freeze) holds
- * here too.
- */
 export interface SvgOptions {
-  /** Put in front of every generated id, class, keyframe name and font family, so two scenes can share a page. */
   readonly prefix?: string;
-  /** 2 plays twice as fast. Default 1. */
   readonly playbackRate?: number;
-  /**
-   * Write each node's key on its outermost element as `data-key`, and where it was written as `data-source` when
-   * the model knows, as the old API's `sources` does: what editors and `svjeez check` read. Default false.
-   */
   readonly sources?: boolean;
 }
 
 const EXACT: Support = { level: "exact" };
 
-/** Measured against Chromium and Firefox, which draw a small blur as small as it is. */
 const SOFT_BLUR: Support = {
   level: "close",
   note: "WebKit draws any blur under about 1.5 units about that soft, so a blur that eases out to 0 looks softer there in its last moments. Chromium and Firefox draw it exactly.",
@@ -98,16 +85,11 @@ const supports: Readonly<Record<Feature, Support>> = {
 interface Ctx {
   readonly scene: Scene;
   readonly prefix: string;
-  /** Whether a node or anything under it hides its stroke with `visibility`, by key. */
   readonly hides: Map<string, boolean>;
   readonly sources: boolean;
-  /** What the root `<svg>` states for every text in it, so each text writes only what differs. */
   readonly around: Partial<Face>;
-  /** Gradients, clips, masks and filters, written once each. */
   readonly defs: Defs;
-  /** Where the node being drawn has its frame in its element's own coordinates: what a gradient's points move by. */
   frame: Vec;
-  /** The key of the node being drawn, for errors. */
   key: string;
 }
 
@@ -168,11 +150,8 @@ const roundedRect = ([w, h]: Vec, [tl, tr, br, bl]: readonly number[]): string =
 interface Drawn {
   readonly tag: string;
   readonly attrs: Record<string, AttrValue>;
-  /** Whether `at` went into the element's own coordinates, so the fill box sits where the node does. */
   readonly placed: boolean;
-  /** A CSS scale of the element around its frame's origin, under every layer. */
   readonly scale?: Lane<Vec>;
-  /** A CSS translate of the element, under every layer. */
   readonly offset?: Lane<Vec>;
 }
 
@@ -314,7 +293,6 @@ const isCut = (keys: readonly Held[]): boolean =>
     );
   });
 
-/** A lane for the emitter. Its channels are the names its values carry. An opacity cut hides with `visibility` unless `cuts` is false. */
 const cssLane = <T>(
   ctx: Ctx,
   slot: Slot | GeometrySlot | (string & {}),
@@ -331,7 +309,7 @@ const cssLane = <T>(
   return {
     key: slot,
     backend: route,
-    // SAFETY: every values() above returns a ChannelValues, so the names of its first key are Targets.
+    // SAFETY: every values() above returns a ChannelValues, so the names of its first key are Channels.
     channels: Object.keys(keys[0]!.values) as Channel[],
     keys,
     period,
@@ -340,18 +318,14 @@ const cssLane = <T>(
   };
 };
 
-/** One element's worth of placement: the lanes and still values that can share it without changing the order they apply in. */
 interface Shell {
   readonly lanes: CssLane[];
   readonly style: string[];
   readonly taken: Set<Slot>;
-  /** A clip, a mask or a filter: what the element does to what it holds, before its own transforms. */
   readonly attrs: Record<string, AttrValue>;
-  /** The outermost of translate (0), rotate (1) and scale (2) already here. A new one must come before it. */
   rank: number;
   opacity?: number;
   pivots: boolean;
-  /** Where this shell turns and scales, when that is not the node's origin. Nothing else joins such a shell. */
   origin?: Vec;
 }
 
@@ -370,7 +344,6 @@ const open = (shells: Shell[], slot: Slot): Shell => {
   const rank = RANK[slot];
   let current = shells.at(-1)!;
 
-  // A motion path's element (see `along`) takes nothing that turns or scales: its own scale is fixed.
   if (
     current.origin !== undefined ||
     current.taken.has(slot) ||
@@ -392,11 +365,6 @@ const open = (shells: Shell[], slot: Slot): Shell => {
 
 const isUniform = ([x, y]: Vec): boolean => Math.abs(x - y) < 1e-9;
 
-/**
- * One layer onto the shells. A scale that differs across and down writes both into one CSS `scale`. `cuts` is false
- * over a moving trim, whose own `visibility` hides its dot: an opacity cut there writes `opacity`, so the two never
- * override each other.
- */
 const place = (ctx: Ctx, shells: Shell[], layer: Layer, cuts: boolean): void => {
   const { scale, rotate, offset, opacity } = layer;
 
@@ -426,24 +394,8 @@ const place = (ctx: Ctx, shells: Shell[], layer: Layer, cuts: boolean): void => 
   else if (opacity !== 1) open(shells, "opacity").opacity = opacity;
 };
 
-/**
- * How much larger a motion path is written than it is drawn. Chromium walks a path by straight pieces that stray up to
- * half a unit of its coordinates, about 0.15px on our examples; written this much larger inside a wrapper scaled this
- * much smaller, that is a hundredth of a pixel, as in Firefox and WebKit.
- */
 const PATH_SCALE = 16;
 
-/**
- * A lane with curved keys as a CSS motion path: the keys joined into one path, a line for a straight key and a cubic
- * for a curved one (a cut crosses a line it never shows), and `offset-distance` keyframed to each key's share of the
- * path's length. The lane's eases run on those shares unchanged, which is what `Key.via` means: each ease shapes the
- * share of its own piece's length covered. The percent is of the whole path, so each engine's measure of the length
- * cancels out, and `offset-rotate` keeps the element upright.
- *
- * The path moves an element by its transform-origin, after its own translate, rotate and scale, so it gets an element
- * that turns and scales nothing else: a wrapper scaled down by `PATH_SCALE`, its path written that much larger, around
- * content scaled back up as the outermost thing it does.
- */
 const along = (ctx: Ctx, shells: Shell[], lane: Lane<Vec>): void => {
   const [first, ...rest] = lane.keys;
   const big = ([x, y]: Vec): string => `${num(x * PATH_SCALE, 1)} ${num(y * PATH_SCALE, 1)}`;
@@ -515,7 +467,6 @@ const travel = (ctx: Ctx, shells: Shell[], by: Animated<Vec>): void => {
     open(shells, "translate").style.push(`translate:${num(by[0])}px ${num(by[1])}px`);
 };
 
-/** One key of a paint lane that `blendable` passed, as the kind its first key is. */
 const asColor = (paint: Paint, where: string): Color => {
   if (isColor(paint)) return paint;
 
@@ -532,10 +483,6 @@ const asGradient = (paint: Paint, where: string): Gradient => {
   );
 };
 
-/**
- * A fill or stroke. A gradient is laid out in the node's frame, which sits at `shift` in the element's own
- * coordinates: where the node's frame is for the element being drawn, unless the caller says.
- */
 const painted = (
   ctx: Ctx,
   slot: "fill" | "stroke",
@@ -581,15 +528,9 @@ const painted = (
   );
 };
 
-/** Whether a static trim leaves nothing of the outline. Such a stroke is left out, so no cap draws a dot. */
 const emptyTrim = (trim: ShapeNode["trim"]): boolean =>
   trim !== undefined && !isLane(trim) && trim[1] - trim[0] <= 0;
 
-/**
- * The dashes of `dash`, laid from the start of an outline `length` long, that lie inside `trim`: each cut at the
- * trim's ends, as one dash array from the first and the offset that puts the first in place. Undefined when no dash
- * lies inside. A pattern of no length is a solid line.
- */
 export const trimmedDash = (
   dash: readonly number[],
   length: number,
@@ -606,7 +547,6 @@ export const trimmedDash = (
     const piece = pattern[i % pattern.length]!;
     const [a, b] = [Math.max(at, start), Math.min(at + piece, end)];
 
-    // A dash that is a dot is kept where it lies; one cut down to nothing is not.
     if (i % 2 === 0 && (piece === 0 ? at >= start : b > a)) kept.push([a, b]);
     at += piece;
   }
@@ -622,7 +562,6 @@ export const trimmedDash = (
   };
 };
 
-/** Whether a dashed stroke under a still trim on a still outline keeps no dash at all. */
 const noDashLeft = (node: ShapeNode): boolean =>
   node.stroke?.dash !== undefined &&
   node.trim !== undefined &&
@@ -661,8 +600,6 @@ const stroked = (
 
   if (trim === undefined || !stroke) return;
 
-  // A dash under a still trim on a still outline is one dash array: the dashes inside the trim, each cut at its ends.
-  // `dashedTrim` draws any other dash and trim before this is reached.
   if (stroke.dash && !isLane(trim) && !isLane(node.geometry)) {
     const { array, offset } = trimmedDash(stroke.dash, lengthOf(node.geometry), trim)!;
 
@@ -673,8 +610,6 @@ const stroked = (
     return;
   }
 
-  // A trim that grows from the start moves only the dash offset, as the old `draw` does. One whose start moves writes
-  // the dash too. Either way `visibility` hides the stroke while it has no length, so a round cap draws no dot.
   if (isLane(trim)) {
     const moving = trim.keys.some((key) => key.value[0] !== 0);
 
@@ -694,10 +629,6 @@ const stroked = (
   }
 };
 
-/**
- * The shape's own element, with its paint, stroke and lanes. A geometry drawn still may move or scale as a whole. The
- * route is the one `routed` takes, so the two parts of a split shape move as one.
- */
 const shapeElement = (
   ctx: Ctx,
   node: ShapeNode,
@@ -732,7 +663,6 @@ const shapeElement = (
   return drawn;
 };
 
-/** Whether a trim's stroke must hide while it has no length: a round or square cap draws a dot there. */
 const trimHides = (node: ShapeNode): boolean =>
   node.stroke !== undefined &&
   node.trim !== undefined &&
@@ -740,7 +670,6 @@ const trimHides = (node: ShapeNode): boolean =>
   node.stroke.cap !== "butt" &&
   node.trim.keys.some(({ value: [from, to] }) => to - from <= 0);
 
-/** Whether a node, or anything it draws, hides its stroke with `visibility` while the stroke has no length. */
 const hidesStroke = (ctx: Ctx, node: SceneNode): boolean => {
   const known = ctx.hides.get(node.key);
 
@@ -758,16 +687,13 @@ const hidesStroke = (ctx: Ctx, node: SceneNode): boolean => {
   return found;
 };
 
-/** A text's element, and the runs inside it. */
 interface DrawnText {
   readonly drawn: Drawn;
   readonly children: SvgNode[];
 }
 
-/** A run's face and paints, as a key: two runs with the same one draw alike. */
 const lookOf = (run: TextRun): string => JSON.stringify([run.face, run.fill, run.opacity ?? 1]);
 
-/** The look most runs share, the first of them on a tie: the `<text>` states it, and each run only what differs. */
 const commonest = (runs: readonly TextRun[]): TextRun | undefined => {
   const counts = new Map<string, { run: TextRun; count: number }>();
 
@@ -784,11 +710,6 @@ const commonest = (runs: readonly TextRun[]): TextRun | undefined => {
   )?.run;
 };
 
-/**
- * One `<text>` with a `<tspan>` for each run, each where layout put it, so no browser anchors or wraps it. The
- * `<text>` states the look most runs share and each `<tspan>` only what differs, so every run's face is known to
- * the emitter, which puts its characters into that face's subset and no other.
- */
 const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): DrawnText => {
   const { fonts } = ctx.scene;
   const runs = node.lines.flatMap((line) => line.runs);
@@ -801,8 +722,6 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
     ...(y && { y: num(at[1] + py) }),
   });
 
-  // Where nothing around says, a weight or style is written unless it is the browser's own, 400 and normal, and the
-  // family has no other: the emitter must know each text's face to put its characters in that face's subset.
   const facing = (face: Face, around: Partial<Face>) => {
     const { faces } = fonts[face.family]!;
 
@@ -863,7 +782,6 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
   if (single)
     return { drawn, children: line?.runs[0] ? [{ kind: "text", value: line.runs[0].text }] : [] };
 
-  // The first tspan starts where the text does, at 0 0 of its frame unless it says; every later one says where.
   let first = true;
 
   const children = node.lines.flatMap((each) =>
@@ -899,17 +817,11 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
   return { drawn, children };
 };
 
-/** The element that takes a clip, a mask or a filter, and where the node's frame sits in its coordinates. */
 interface Holder {
   readonly own: Shell;
   readonly shift: Vec;
 }
 
-/**
- * Clip and mask on one element, then effects on one around it, inside every layer: the order rule 4 of ir.ts sets.
- * The element drawn takes them itself when nothing else is on it yet, and a group of their own holds them otherwise.
- * Each is laid out in its element's own coordinates, where the node's frame sits at `shift`.
- */
 const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Drawn): void => {
   const holder = (): Holder => {
     const current = shells.at(-1)!;
@@ -952,7 +864,6 @@ const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Dra
   if (effects.length === 0) return;
   const reach = reachOf({ ...node, effects }, scene.symbols, `the effects of "${node.key}"`);
 
-  // A node that draws nothing has nothing for its effects to work on.
   if (!reach) return;
   const { own, shift } = holder();
 
@@ -961,11 +872,6 @@ const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Dra
 
 const symbolId = (ctx: Ctx, name: string): string => `${ctx.prefix}symbol-${name}`;
 
-/**
- * A group that holds one node and does nothing but place it, as the frame around a path drawn by its own coordinates
- * does, written as that node placed by both: one element fewer. Its layers go to the node when the node has none,
- * turned around the same point. With sources asked for, every node keeps its own element, so its key is on it.
- */
 const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
   if (ctx.sources || node.kind !== "group" || node.children.length !== 1) return node;
   const [child] = node.children;
@@ -990,14 +896,8 @@ const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
   });
 };
 
-/** Opaque white, what a mask's content is drawn in: only its alpha counts. */
 const OPAQUE: Rgba = [1, 1, 1, 1];
 
-/**
- * A dashed stroke whose trim or outline moves, as a group that draws the same: the fill on its own, then the dashed
- * stroke masked by the trimmed stroke undashed. With butt caps it is exact; with round or square ones, a dash that
- * starts just past a moving end can show a sliver of its cap, which `diagnose` reports.
- */
 const dashedTrim = (node: SceneNode): GroupNode | undefined => {
   if (node.kind !== "shape" || !node.stroke?.dash || node.trim === undefined) return undefined;
 
@@ -1064,8 +964,6 @@ const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
       children = node.children.map((child) => emitNode(ctx, child));
       break;
     case "shape": {
-      // A moving trim hides its stroke with `visibility` while it has no length. With a fill, the stroke is drawn as
-      // an element of its own over the fill, so hiding it never hides the fill.
       if (node.fill === undefined || !hidesStroke(ctx, node)) {
         drawn = shapeElement(ctx, node, at, lanes);
         break;
@@ -1121,8 +1019,6 @@ const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
   const cuts = !hidesStroke(ctx, node);
   const [ox, oy] = [at[0] + node.origin[0], at[1] + node.origin[1]];
 
-  // A geometry drawn still and scaled scales around its frame's origin, under every layer. A shell of its own holds
-  // it when that is not where the layers turn.
   if (drawn.scale) {
     const even = drawn.scale.keys.every((key) => isUniform(key.value));
     const own = open(shells, "scale");
@@ -1150,7 +1046,6 @@ const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
     Math.abs(node.origin[0] - (box.x + box.width / 2)) < 1e-9 &&
     Math.abs(node.origin[1] - (box.y + box.height / 2)) < 1e-9;
 
-  // The fill box is exact, and shorter to write, when one element carries everything and its own coordinates place it.
   const fillBox =
     shells.length === 1 &&
     shells[0]!.origin === undefined &&
@@ -1192,8 +1087,6 @@ const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
 
   if (ctx.sources) return labelled(node, out);
 
-  // A group with nothing of its own (no placement, opacity or lanes) changes nothing it holds: paint order, paint and
-  // place are all the parent's. Its children stand in its place, so a layout container costs no element.
   return node.kind === "group" &&
     out.kind === "element" &&
     out.tag === "g" &&
@@ -1215,10 +1108,6 @@ const tokenCss = (scene: Scene, prefix: string): string => {
   return `${scope}{${declared("dark")}}\n@media (prefers-color-scheme:light){${scope}{${declared("light")}}}`;
 };
 
-/**
- * What the root `<svg>` states for the texts in it: the family most of them are drawn in, when two or more are, and
- * weight 400 and style normal when a family has others, so a text in the regular face need not say so.
- */
 const aroundOf = (scene: Scene): Partial<Face> => {
   const counts = new Map<string, number>();
 
@@ -1291,8 +1180,6 @@ export const svg: Backend<string, SvgOptions> = {
 
     const names = Object.keys(scene.symbols);
 
-    // Each symbol is drawn once in <defs>, and each instance is a <use> of it. CSS and SMIL animations inside run in
-    // every copy at once, which is what the model means: a symbol's tracks are on the scene's clock.
     const defs = names.map((name) => {
       const root = scene.symbols[name]!;
 
@@ -1323,8 +1210,6 @@ export const svg: Backend<string, SvgOptions> = {
         reducedMotion: scene.still === undefined ? false : { at: scene.still },
         ...(options.prefix !== undefined && { prefix: options.prefix }),
         ...(options.playbackRate !== undefined && { playbackRate: options.playbackRate }),
-        // Font properties inherit, so what the root states reaches every text, and the emitter still knows each
-        // text's face, so each face's subset holds only what is drawn in it.
         ...(Object.keys(around).length > 0 && {
           font: {
             ...(around.family !== undefined && { family: scene.fonts[around.family]! }),

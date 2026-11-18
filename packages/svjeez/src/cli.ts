@@ -149,7 +149,6 @@ const valuesFor = async (
 
 const warn = (warning: Diagnostic): void => console.warn(`warning: ${warning.message}`);
 
-/** What a file's default export builds: a scene model, or SVG text. */
 const loadValue = async (
   file: string,
   flags: ParamFlags = {},
@@ -187,7 +186,6 @@ const loadValue = async (
 
         if (!entry) throw error;
 
-        // createRequire resolves the CommonJS branch, whose loader registration fails on Node 20.
         return import(new URL(isText(entry) ? entry : entry.default, pathToFileURL(manifest)).href);
       })
       .catch(() =>
@@ -198,7 +196,6 @@ const loadValue = async (
 
     register();
 
-    // Node 20 remembers the failed import at the original URL.
     return import(new URL("?svjeez-tsx", url).href);
   });
 
@@ -222,7 +219,6 @@ const loadValue = async (
   );
 };
 
-/** A scene model's diagnostics go to `onWarning`; an SVG string's warnings are the caller's to read. */
 const loadSvg = async (
   file: string,
   flags: ParamFlags = {},
@@ -230,7 +226,6 @@ const loadSvg = async (
 ): Promise<string> => {
   const value = await loadValue(file, flags);
 
-  // A traced build (`svg --json`, `check`, the dev server) marks each node with its key and the line that wrote it.
   if (isScene(value))
     return svg.emit(value, {
       onWarning,
@@ -501,11 +496,9 @@ const skillCommand = async (args: string[]): Promise<void> => {
   console.log(`installed the svjeez skill in ${relative(process.cwd(), target) || "."}`);
 };
 
-/** A finding of `svjeez check`, from the model or the browser, with its place relative to the working directory. */
 interface CheckFinding {
   readonly code: string;
   readonly severity: Severity;
-  /** The node's key; empty when no node is known, as for a scene that didn't build or an SVG file. */
   readonly key: string;
   readonly source?: Source;
   readonly message: string;
@@ -514,7 +507,6 @@ interface CheckFinding {
   readonly related?: readonly Related[];
 }
 
-/** The browser checks at most this many times besides its own, from the scene's keys. */
 const CUES = 48;
 
 const parseTimes = (flag: string, text: string): number[] =>
@@ -526,7 +518,6 @@ const parseTimes = (flag: string, text: string): number[] =>
       : fail(`--${flag} needs seconds from 0, separated by commas, got "${text}".`);
   });
 
-/** A `data-source` string, `file:line:column`, as a source. */
 const sourceOf = (text: string | undefined): Source | undefined => {
   const match = text === undefined ? null : /^(.*?):(\d+)(?::(\d+))?$/.exec(text);
 
@@ -539,7 +530,6 @@ const sourceOf = (text: string | undefined): Source | undefined => {
     : undefined;
 };
 
-/** Where in `file` an error was thrown: the first frame of its stack in the scene's folder, not a dependency. */
 const thrownAt = (error: Error, file: string): Source | undefined => {
   const stack = error.stack ?? "";
   const folder = dirname(resolve(file));
@@ -573,7 +563,6 @@ const compileError = (error: Error, file: string): CheckFinding => {
   };
 };
 
-/** A browser finding in the model's terms: the node's key and source, and its hint apart from its message. */
 const fromBrowser = (found: BrowserFinding, sources: ReadonlyMap<string, Source>): CheckFinding => {
   const source =
     (found.key !== undefined ? sources.get(found.key) : undefined) ?? sourceOf(found.source);
@@ -637,11 +626,9 @@ const checkCommand = async (args: string[]): Promise<void> => {
       found.push(...inspect(value, { backend: svg, ...(times && { times }) }));
     }
 
-    // The model's own findings say what the SVG backend can't draw; emitting would throw them again.
     if (!values["no-browser"] && !found.some((f) => f.code === "unsupported"))
       svgText = isScene(value) ? svg.emit(value, { sources: true }) : value;
 
-    // What the old compiler warned about while it wrote an SVG string.
     if (isText(value))
       for (const warning of rendered?.warnings ?? validateSvg(value).warnings)
         found.push({
@@ -674,7 +661,6 @@ const checkCommand = async (args: string[]): Promise<void> => {
     });
 
     measured = { duration: report.duration, times: report.times };
-    // A rule both read is said once, as the model says it.
     const said = new Set(found.map((f) => `${f.code} ${f.key}`));
 
     for (const browser of report.findings) {

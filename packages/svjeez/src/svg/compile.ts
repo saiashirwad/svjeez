@@ -17,21 +17,13 @@ import { animate } from "./smil";
 import type { TimelineTrack } from "./traced";
 import { element, type AttrValue, type Element, type SvgNode } from "./tree";
 
-/**
- * The emitter's last pass over what the scene backend drew: each element's lanes become CSS classes and keyframes or
- * SMIL animations, fonts are resolved to the faces they embed, and the reduced-motion still is written.
- */
-
 export interface Canvas {
   readonly width: number;
   readonly height: number;
   readonly duration: number;
-  /** Playback rate. Every emitted duration is divided by it; the timeline stays in scene seconds. */
   readonly playbackRate: number;
-  /** Put in front of every generated id, class, keyframe name, custom property and font family. */
   readonly prefix: string;
   readonly stillAt?: number;
-  /** False plays once and holds the last frame. */
   readonly loop: boolean;
 }
 
@@ -372,7 +364,6 @@ const walk = (
 export interface Compiled {
   readonly body: readonly SvgNode[];
   readonly css: string;
-  /** `rootAttrs` resolved, for the root `<svg>`. */
   readonly root: Readonly<Record<string, AttrValue>>;
 }
 
@@ -397,7 +388,6 @@ export const compile = (
     pivot: false,
   };
 
-  // Every element inherits the root's font properties, so a family written there embeds and reaches every text.
   const root = resolveAttrs(state, rootAttrs);
   const font = fontOf(canvas.prefix, rootAttrs, root, UNKNOWN_FONT);
   const body = content.map((node) => walk(state, node, false, font));

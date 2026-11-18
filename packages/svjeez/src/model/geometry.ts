@@ -5,12 +5,6 @@ import type { Contour, Cubic, Geometry, Key, Lane, Vec } from "./ir";
 import { curveLength } from "./curve";
 import { onCircle } from "../author/values";
 
-/**
- * Geometry as values that move: every kind written as contours of cubic curves, the way between two geometries, and
- * the matching that makes any two geometries blend. Lowering runs `matched` over a track's keys, so a lane holds one
- * kind and a backend only interpolates.
- */
-
 const lerp = (a: Vec, b: Vec, u: number): Vec => [
   a[0] + (b[0] - a[0]) * u,
   a[1] + (b[1] - a[1]) * u,
@@ -18,10 +12,8 @@ const lerp = (a: Vec, b: Vec, u: number): Vec => [
 
 const straight = (from: Vec, to: Vec): Cubic => [lerp(from, to, 1 / 3), lerp(from, to, 2 / 3), to];
 
-/** How far a cubic's control points sit along the tangent to follow a quarter circle of radius 1. */
 const KAPPA = (4 / 3) * Math.tan(Math.PI / 8);
 
-/** The pieces an arc's contour has unless a caller asks for more: one cubic for each quarter turn or less. */
 export const arcPieces = (sweep: number): number =>
   Math.max(1, Math.ceil(Math.abs(sweep) / 90 - 1e-9));
 
@@ -32,7 +24,6 @@ const arcCurves = (radius: number, start: number, sweep: number, pieces: number)
   return Array.from({ length: pieces }, (_, i): Cubic => {
     const [a, b] = [start + i * step, start + (i + 1) * step];
     const [from, to] = [onCircle(radius, a), onCircle(radius, b)];
-    // The tangent at angle θ, clockwise, is (-sin θ, cos θ).
     const [ta, tb] = [onCircle(1, a + 90), onCircle(1, b + 90)];
 
     return [
@@ -43,19 +34,12 @@ const arcCurves = (radius: number, start: number, sweep: number, pieces: number)
   });
 };
 
-/**
- * The same outline as contours of cubics, starting where SVG starts drawing that shape so a trim means the same on
- * both. Every geometry of one kind gives the same structure: a rect always has four sides and four corners (a sharp
- * corner is a curve of no length), an ellipse four quarters, an arc `pieces` cubics.
- */
 export const contoursOf = (geometry: Geometry, pieces?: number): Contour[] => {
   switch (geometry.kind) {
     case "rect": {
       const [w, h] = geometry.size;
       const [tl, tr, br, bl] = geometry.radius;
 
-      // A quarter circle from `from` to `to` around the corner `bend`. Its points move in step with the radius, so
-      // two rects blend into the rect between them.
       const round = (from: Vec, to: Vec, bend: Vec): Cubic => [
         lerp(from, bend, KAPPA),
         lerp(to, bend, KAPPA),
@@ -157,10 +141,6 @@ const same = (a: readonly Contour[], b: readonly Contour[]): boolean =>
 
 const mixNumber = (a: number, b: number, u: number): number => a + (b - a) * u;
 
-/**
- * The geometry `amount` of the way from `a` to `b`, by parameter: a rect between two rects, an arc between two arcs.
- * Both are one kind with one structure, as `matched` leaves every key of a lane.
- */
 export const mixGeometry = (a: Geometry, b: Geometry, amount: number, where: string): Geometry => {
   const u = amount;
 
@@ -241,12 +221,6 @@ const alike = (values: readonly Geometry[]): boolean => {
   });
 };
 
-/**
- * The keys of one geometry lane, made blendable. Keys of one parametric kind (and polygons with as many points) stay
- * that kind and blend by parameter, and paths that already match stay as written. Anything else becomes paths whose
- * points `matchRings` pairs up. A contour that is closed in one key and open in another is open in all: its last
- * curve still runs back to the start, so only the join at the start becomes two caps.
- */
 export const matched = (values: readonly Geometry[], where: string): Geometry[] => {
   if (values.length === 0 || alike(values)) return [...values];
   const rules = new Set(values.flatMap((value) => (value.kind === "path" ? [value.rule] : [])));
@@ -278,22 +252,14 @@ export const matched = (values: readonly Geometry[], where: string): Geometry[] 
   }));
 };
 
-/** Whether SMIL can write `curve`: keySplines take control points from 0 to 1 only, and drop the whole animation otherwise. */
 const smilWritable = (curve: Ease | undefined): boolean =>
   curve?.kind !== "bezier" || [curve.points[1], curve.points[3]].every((y) => y >= 0 && y <= 1);
 
-/** How many pieces a transition SMIL can't write is cut into. Each piece keeps its part of the curve when it can. */
 const PIECES = 8;
 
-/**
- * `lane` as SMIL can write it: each transition whose ease overshoots (`ease.back`, or the keys a spring or a followed
- * anchor is fitted with) is cut into pieces, each with its own part of the ease, or a straight line where that part
- * still overshoots. The values at the cuts are the lane's own, so the path is the same where it is cut.
- */
 export const smilSafe = (lane: Lane<Geometry>, where: string): Lane<Geometry> =>
   smilSafeWith(lane, mixGeometry, where);
 
-/** `smilSafe` for a lane of any value that `mix` blends. */
 export const smilSafeWith = <T>(
   lane: Lane<T>,
   mix: (a: T, b: T, amount: number, where: string) => T,
@@ -330,10 +296,6 @@ export const smilSafeWith = <T>(
   return { ...lane, keys: [head!, next!, ...rest] };
 };
 
-/**
- * How long an outline is, every contour end to end, closing segments included: what a trim's fractions and a dash
- * pattern are measured along. Circles, arcs and rounded corners are measured as circles, not as their cubics.
- */
 export const lengthOf = (geometry: Geometry): number => {
   switch (geometry.kind) {
     case "rect": {
@@ -347,7 +309,6 @@ export const lengthOf = (geometry: Geometry): number => {
       const [a, b] = geometry.radius;
       const k = ((a - b) / (a + b)) ** 2;
 
-      // Ramanujan's second approximation: exact for a circle.
       return a + b === 0 ? 0 : Math.PI * (a + b) * (1 + (3 * k) / (10 + Math.sqrt(4 - 3 * k)));
     }
 

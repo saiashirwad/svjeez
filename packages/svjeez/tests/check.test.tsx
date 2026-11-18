@@ -214,7 +214,6 @@ describe.if(browser)("checkScene", () => {
           <Group>
             <BG />
             {square(0, 10, { motion: layer })}
-            {/* The loop is as long as its longest motion: this one makes it 12s. */}
             <Shape
               geometry={rect(5, 5)}
               fill="#FFFFFF"
@@ -338,7 +337,7 @@ describe.if(browser)("checkScene", () => {
 
     expect(result.exitCode).toBe(1);
     expect(out).toMatch(
-      /offscreen-scene\.tsx:7:5 {2}off-canvas {2}error: shape "dot" is outside the 100×60 canvas/,
+      /offscreen-scene\.tsx:6:5 {2}off-canvas {2}error: shape "dot" is outside the 100×60 canvas/,
     );
     expect(out).toContain("\n    hint: Move it onto the canvas, or remove it.");
     expect(out).toContain("1 error, 0 warnings");
@@ -354,7 +353,7 @@ describe.if(browser)("checkScene", () => {
       expect.objectContaining({
         code: "off-canvas",
         key: "lost",
-        source: expect.objectContaining({ line: 7 }),
+        source: expect.objectContaining({ line: 6 }),
         hint: "Move it onto the canvas, or remove it.",
       }),
     ]);
@@ -386,7 +385,7 @@ describe.if(browser)("checkScene", () => {
         code: "compile-error",
         key: "",
         message: "width is not known yet",
-        source: expect.objectContaining({ line: 5 }),
+        source: expect.objectContaining({ line: 4 }),
       }),
     ]);
   });

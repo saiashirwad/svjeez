@@ -22,7 +22,6 @@ type Made = string | Scene;
 
 const isBuild = (value: Made | (() => Made)): value is () => Made => typeof value === "function";
 
-/** A scene module's default export as SVG: a scene, an SVG string, or a function that returns either. */
 const svgOf = (exported: Made | (() => Made)): string => {
   const made = isBuild(exported) ? exported() : exported;
 

@@ -28,10 +28,6 @@ import {
   track,
 } from "svjeez";
 
-/**
- * Every node kind and every slice at once: a timeline moving a node inside a Grid and a nested Sequence, a morph
- * between two Stacks, a spring, a derived track, an arrow on a moving ref, an image and two instances.
- */
 const mono = await font.load(new URL("../SpaceMono-Regular.ttf", import.meta.url));
 
 const theme = tokens({

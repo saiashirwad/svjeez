@@ -4,7 +4,6 @@ import { isScene, svg as backend, type Scene } from "svjeez/tools";
 import { register, ROUTE } from "./assets.ts";
 import { poster, type PosterOptions, type Scheme } from "./posters.ts";
 
-/** A scene's default export: a scene from `svjeez`, an SVG string, or a function that returns either. */
 export type SceneSource = string | Scene | (() => string | Scene);
 
 export interface SceneImage {
@@ -43,7 +42,6 @@ const compile = (scene: SceneSource) => {
   return svg;
 };
 
-/** Compiles a scene and gives it a URL, plus poster stills when asked. The files are served in dev and written by the build. */
 export const getScene = (
   scene: SceneSource,
   options: { posters?: boolean | PosterOptions } = {},

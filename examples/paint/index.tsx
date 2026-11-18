@@ -23,7 +23,6 @@ const TILE = 136;
 const GAP = 16;
 const CARD: Vec = [112, 112];
 
-/** Where the i-th tile's card starts. */
 const corner = (i: number): Vec => [GAP + i * (TILE + GAP) + (TILE - CARD[0]) / 2, 40];
 
 const Label = ({
@@ -44,13 +43,11 @@ const Label = ({
   </Text>
 );
 
-/** A circle of radius `r` around `[x, y]`, as a path, so a clip can move it. */
 const disc = ([x, y]: Vec, r: number) =>
   pathData(`M${x + r} ${y}A${r} ${r} 0 1 1 ${x - r} ${y}A${r} ${r} 0 1 1 ${x + r} ${y}Z`);
 
 const card = rect(CARD[0], CARD[1], { radius: 14 });
 
-/** The gradient's way turns a quarter and back, and its last stop warms from magenta to orange. */
 const sky = track(linear.across({ angle: 0, stops: [theme.blue, theme.magenta] }))
   .to(linear.across({ angle: 90, stops: [theme.blue, theme.orange] }), span(0.4, 1.6), ease.inOut)
   .to(linear.across({ angle: 0, stops: [theme.blue, theme.magenta] }), span(3.4, 1.6), ease.inOut);
@@ -67,7 +64,6 @@ const stripes = Array.from({ length: 7 }, (_, k) => (
   />
 ));
 
-/** A soft wipe: a band that is opaque up to its last 48px, which fade out, sliding across. */
 const wipe = linear({
   from: [CARD[0], 0],
   to: [CARD[0] + 48, 0],

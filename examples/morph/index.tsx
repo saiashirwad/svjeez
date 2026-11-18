@@ -13,7 +13,6 @@ import {
 } from "svjeez";
 import { mono, theme } from "../theme";
 
-/** One quarter of the chart: a bar per region, in the order they stand, and the badge's change. */
 interface Quarter {
   readonly name: string;
   readonly bars: readonly {
@@ -61,10 +60,6 @@ const SLOT = 104;
 const WIDTH = 64;
 const SCALE = 1.5;
 
-/**
- * One state of the picture. Every node that changes has a key, which is how the morph knows a bar in one quarter
- * from the same bar in the next.
- */
 const chart = ({ name, bars, change }: Quarter): SceneElement => (
   <Group>
     <Text

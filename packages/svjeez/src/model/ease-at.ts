@@ -3,10 +3,6 @@ import { ease, type Ease } from "./time";
 const cubic = (a: number, b: number, u: number) =>
   3 * a * u * (1 - u) ** 2 + 3 * b * u * u * (1 - u) + u ** 3;
 
-/**
- * How far along `curve` is at `progress` (0 to 1), the value the browser would draw there. A `pop` returns more than
- * 1 while it overshoots. Use it to reuse an ease inside `sampled()`, or to draw the curve beside the scene.
- */
 export const easeAt = (curve: Ease, progress: number): number => {
   const x = Math.min(1, Math.max(0, progress));
 
@@ -105,7 +101,6 @@ export const splitEase = (curve: Ease, progress: number, where: string): readonl
   }
 };
 
-/** The part of `curve` between two points of its progress, `from` and `to` from 0 to 1, as an ease of its own. */
 export const easeBetween = (curve: Ease, from: number, to: number, where: string): Ease => {
   const tail = from > 0 ? splitEase(curve, from, where)[1] : curve;
 

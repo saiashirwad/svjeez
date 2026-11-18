@@ -64,7 +64,6 @@ const simple = (f: Sfnt, at: number, contours: number): Contour[] => {
 
 const MORE = 0x20;
 
-/** A real glyph has a handful of components. A hostile font can fan them out exponentially through nesting. */
 const MAX_COMPONENTS = 4096;
 
 export const contours = (

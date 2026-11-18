@@ -35,11 +35,6 @@ import { blendVec, valueAt } from "../src/model/sample";
 import { startTrace, stopTrace } from "../src/svg/traced";
 import integration from "./fixtures/scene/integration";
 
-/**
- * Scenes that combine what the slices of the scene model built one at a time: timelines, layout, symbols, morphs,
- * springs, derived tracks and anchors, and the SVG they make.
- */
-
 const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
@@ -303,8 +298,6 @@ describe("morph between states that hold layout, text, connectors, images and in
     );
   });
 
-  // Layout reads boxes at rest, so a container around a morph that resizes a child can't make room for it. That is an
-  // error that names the container: put the container inside the morph, as the test above does.
   test("a Stack around a morph that grows a child is an error that names the Stack", () => {
     expect(() =>
       made(() => (
@@ -611,8 +604,6 @@ describe("springs across slices", () => {
     const dot = find(model, "dot");
     const speed = (from: number, to: number) => (at(dot, to)[0] - at(dot, from)[0]) / (to - from);
 
-    // The first spring is still short of x = 60 when the second cuts in. The second goes to x = 60 too, so x would stop
-    // dead there if its speed were dropped; it carries on instead.
     expect(at(dot, 0.4)[0]).toBeLessThan(59);
     expect(speed(0.38, 0.4)).toBeGreaterThan(15);
     expect(speed(0.4, 0.42)).toBeGreaterThan(10);
@@ -719,7 +710,6 @@ describe("derived tracks feed every kind of value", () => {
     expect(isLane(pick("lamp", "fill"))).toBe(true);
     expect(boxesOf(model, 2)["bar"]?.width).toBeCloseTo(50, 5);
 
-    // The line's shaft starts at its from and is turned toward the dot's top wherever the dot is.
     for (const t of [0, 1, 2]) {
       const dot = boxesOf(model, t).dot!;
       const shaft = placements(model, t).find((node) => node.key === "tie/shaft")!;
@@ -752,7 +742,6 @@ describe("derived tracks feed every kind of value", () => {
   });
 });
 
-/** Every node kind, in layout, a morph and a symbol. */
 const everyKind = (options: { readonly loop?: boolean } = {}): Model.Scene => {
   const badge = picture('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="10"/>');
   const star = symbol(() => <Shape key="body" geometry={circle(4)} anchor="center" fill={red} />);
@@ -787,7 +776,6 @@ const everyKind = (options: { readonly loop?: boolean } = {}): Model.Scene => {
 };
 
 describe("identity and output for every node kind", () => {
-  // Tracing is how the CLI learns where each node was written when the JSX transform doesn't say.
   startTrace({ within: import.meta.dir, onRender: () => undefined });
   const model = everyKind();
 
@@ -837,7 +825,6 @@ describe("identity and output for every node kind", () => {
   test("hitTest finds each kind at rest and at a time, under rotate and scale", () => {
     const hit = (point: Vec, t = 0) => hitTest(model, point, t)?.key;
 
-    // The rect is turned 30 degrees around its center, so its unturned corner is empty.
     expect(hit([20, 15])).toBe("shape");
     expect(hit([10.5, 10.5])).toBeUndefined();
     expect(hit([45, 15])).toBe("text");
@@ -1039,10 +1026,6 @@ const browser = await renderFrames(
 
 const same = (a: Uint8Array, b: Uint8Array) => Buffer.from(a).equals(Buffer.from(b));
 
-/**
- * A screenshot of `markup` in a page, as a viewer who does or doesn't ask for reduced motion sees it. Inline, since
- * headless Chromium doesn't tell an SVG in an <img> that the viewer asked for reduced motion.
- */
 const shot = async (
   markup: string,
   reducedMotion: "reduce" | "no-preference",

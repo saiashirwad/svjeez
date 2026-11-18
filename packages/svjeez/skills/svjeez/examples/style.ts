@@ -1,10 +1,5 @@
 import { font, tokens } from "svjeez";
 
-/**
- * What every example shares: one palette as tokens, so each color has a light and a dark value and the SVG follows
- * the viewer's scheme, and one font family, loaded from files beside this one so the examples work offline.
- * Geist is cut down to Latin text; see fonts/Geist-OFL.txt.
- */
 export const theme = tokens({
   light: {
     background: "#F6F7F9",
@@ -38,5 +33,4 @@ export const theme = tokens({
 
 const face = (file: string) => font.load(new URL(`./fonts/${file}`, import.meta.url));
 
-/** Geist at 400 and 600: `weight={600}` on a `<Text>` or a `<Run>` picks the bold face. */
 export const sans = font.family(await face("Geist-400.ttf"), await face("Geist-600.ttf"));

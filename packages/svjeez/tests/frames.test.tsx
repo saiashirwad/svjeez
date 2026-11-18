@@ -113,7 +113,6 @@ const fade = emit([40, 20], 4, () => (
   <Shape geometry={rect(40, 20)} fill="#3EE6D6" opacity={track(0).to(1, span(1, 1), ease.linear)} />
 ));
 
-/** A square whose blur is cut from 0 to 3 at 1s: drawn by SMIL on its filter primitive. */
 const flooded = () => (
   <Shape geometry={rect(10, 10)} at={[5, 5]} fill="#FF0000" effects={[blur(track(0).set(3, 1))]} />
 );
@@ -548,8 +547,6 @@ describe("restyle", () => {
       expect(same(await paint(themed, 0), red)).toBe(false);
     });
 
-    // The scene backend writes its SMIL stills in a reduced-motion block of their own, ahead of the CSS freeze, so
-    // restyle() has to turn on every such block.
     test("still holds the reduced-motion frame, SMIL included", async () => {
       const out = made(2.5);
       expect(same(await paint(restyle(out, { still: true }), 0), await paint(out, 2.5))).toBe(true);

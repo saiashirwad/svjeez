@@ -10,7 +10,7 @@ Paint is a color or a gradient, written as a value and animated by a track like 
 
 ## Clip, mask, effects
 
-All three are in the node's own frame, so they move, turn and scale with it, and they never change its box. A node is drawn, then clipped, then masked, then each effect applies in order, then it is placed and its layers fade it.
+All three are in the node's own frame, so they move, turn and scale with it, and they never change its box. An effect's lengths scale with the node too: a blur or a shadow's offset on a node scaled by 2 is twice as long. A node is drawn, then clipped, then masked, then each effect applies in order, then it is placed and its layers fade it.
 
 ```tsx
 <Group clip={track(circle(0)).to(circle(260), span(0.3, 1.2), ease.inOut)}>…</Group>

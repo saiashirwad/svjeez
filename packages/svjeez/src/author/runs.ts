@@ -2,12 +2,10 @@ import { Font, FontFamily, type FontValue } from "../font/font";
 import type { Face } from "../model/ir";
 import type { RunProps, RunStyle, SceneElement, TextChild } from "./nodes";
 
-/** What a stretch of text asks to be drawn in: the `<Text>`'s own props, with each `<Run>` around it laid over. */
 export type Asked = RunStyle & Required<Pick<RunStyle, "font">>;
 
 export interface AskedPiece {
   readonly text: string;
-  /** One object for every piece of one run, so a caller can lower each style once. */
   readonly asked: Asked;
 }
 
@@ -22,7 +20,6 @@ const isRun = (child: SceneElement): child is { readonly type: "run"; readonly p
 const isElement = (child: TextChild): child is SceneElement =>
   typeof child === "object" && child !== null && !isList(child);
 
-/** `style` with what `run` says laid over it. */
 const over = (style: Asked, run: RunProps): Asked => ({
   ...style,
   ...(run.font !== undefined && { font: run.font }),
@@ -32,7 +29,6 @@ const over = (style: Asked, run: RunProps): Asked => ({
   ...(run.opacity !== undefined && { opacity: run.opacity }),
 });
 
-/** A text's children as pieces of text, in order, each with the style it asks for. */
 export const piecesOf = (children: TextChild, style: Asked, where: string): AskedPiece[] => {
   if (children === undefined || children === null || children === false) return [];
 
@@ -53,10 +49,6 @@ const nameOf = (value: FontValue): string => (value instanceof Font ? value.fami
 const faceName = (family: string, weight: number, style: Face["style"]): string =>
   `${family} ${weight}${style === "italic" ? " italic" : ""}`;
 
-/**
- * The face `weight` and `italic` pick from `value`, which must have it: text is measured with the real face, so
- * there is no nearest match and no bold or slant the browser makes up.
- */
 export const faceOf = (
   value: FontValue,
   weight: number | undefined,
@@ -91,7 +83,6 @@ export const faceOf = (
   );
 };
 
-/** A face as runs name it, and the file the scene embeds for it. */
 interface Picked {
   readonly face: Face;
   readonly font: Font;
@@ -101,11 +92,9 @@ interface Family {
   readonly faces: Font[];
 }
 
-/** The faces a scene's text uses, each once, by family: what `Scene.fonts` holds. */
 export class FontBook {
   readonly #families = new Map<string, Family>();
 
-  /** `face`, picked from `value`, as runs name it. Two different files can't be one family's same face. */
   add(value: FontValue, face: Font): Picked {
     const family = nameOf(value);
     const known = this.#families.get(family) ?? { faces: [] };
@@ -125,29 +114,19 @@ export class FontBook {
     return { face: { family, weight: face.weight, style: face.style }, font: same ?? face };
   }
 
-  /**
-   * Each family with no fallback: text is measured with the face it names and every character it draws is in that
-   * face, so no other face ever draws one.
-   */
   families(): Record<string, FontFamily> {
     return Object.fromEntries(
       [...this.#families].map(([name, { faces }]) => [name, new FontFamily(name, faces, [])]),
     );
   }
 
-  /**
-   * The characters of `text` that `font` has no glyph for. White space, control and format characters and variation
-   * selectors draw nothing of their own, so they are never missing.
-   */
   static missing(font: Font, text: string): string[] {
     return [...new Set([...text].filter((char) => !drawsNothing(char) && !hasGlyph(font, char)))];
   }
 }
 
-/** Whether a character draws nothing of its own: white space, a control or format character, a variation selector. */
 const drawsNothing = (char: string): boolean => /^[\s\p{Cc}\p{Cf}\u{FE00}-\u{FE0F}]$/u.test(char);
 
-/** Whether `font` has a glyph for `char`. A face whose glyph table can't be read is taken at its word. */
 const hasGlyph = (font: Font, char: string): boolean => {
   try {
     return font.has(char);
@@ -156,6 +135,5 @@ const hasGlyph = (font: Font, char: string): boolean => {
   }
 };
 
-/** How a character reads in an error: itself and its code point. */
 export const charName = (char: string): string =>
   `"${char}" (U+${char.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")})`;

@@ -33,7 +33,6 @@ const codes = (model: Model.Scene): Code[] => inspect(model).map((found) => foun
 const only = (model: Model.Scene, code: Code): Finding[] =>
   inspect(model).filter((found) => found.code === code);
 
-/** A filled square, the thing most rules look at. */
 const Dot = (props: Partial<Parameters<typeof Shape>[0]>): SceneElement => (
   <Shape geometry={rect(10, 10)} fill="#FF0000" at={[20, 20]} {...props} />
 );

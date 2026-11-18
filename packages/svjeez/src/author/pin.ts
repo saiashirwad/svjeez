@@ -2,16 +2,10 @@ import type { Animated, Box, SceneNode, Vec } from "../model/ir";
 import { isLane } from "../model/lane";
 import type { Place } from "./refs";
 
-/**
- * Which point of a node `at` names: a place on its box, or two fractions of it, across and down, so `[0.5, 1]` is
- * the middle of the bottom edge. The box is what the node paints, a shape's stroke included.
- */
 export type AnchorPlace = Place | readonly [across: number, down: number];
 
-/** What a text's `anchor` also takes: a point on its first line's baseline, at the start, middle or end of its column. */
 export type TextAnchorPlace = AnchorPlace | "baseline-left" | "baseline" | "baseline-right";
 
-/** The nine places on a box, as fractions across and down. A ref names the same points: `"top-left"` is `card.topLeft`. */
 export const PLACES = {
   "top-left": [0, 0],
   top: [0.5, 0],
@@ -24,7 +18,6 @@ export const PLACES = {
   "bottom-right": [1, 1],
 } as const satisfies Readonly<Record<Place, readonly [number, number]>>;
 
-/** Every place, quoted and listed, for an error that says what to write. */
 export const PLACE_LIST = Object.keys(PLACES)
   .map((name) => `"${name}"`)
   .join(", ");
@@ -49,10 +42,6 @@ const isName = (
   value: TextAnchorPlace | undefined,
 ): value is Exclude<TextAnchorPlace, readonly number[]> => typeof value === "string";
 
-/**
- * The point of a node's own frame that `anchor` names on `box`, the top-left when it names none. `baseline` is where a text's first baseline is
- * down its frame; only a text has one. `where` names the node, as `"card"`.
- */
 export const pinned = (
   anchor: TextAnchorPlace | undefined,
   box: Box,
@@ -60,7 +49,6 @@ export const pinned = (
   baseline?: number,
 ): Vec => {
   if (anchor === undefined) return [box.x, box.y];
-  // An untyped caller may write anything, so each form is checked for what it is.
   const named = isName(anchor) && isPlace(anchor) ? PLACES[anchor] : undefined;
   const along = isName(anchor) && isBaseline(anchor) ? BASELINE[anchor] : undefined;
 
@@ -85,14 +73,9 @@ export const pinned = (
   return [box.x + box.width * u, box.y + box.height * v];
 };
 
-/** Whether an outline has coordinates of its own, which stay where they are written when the shape has no `at`. */
 export const hasCoordinates = (kind: string): boolean =>
   kind === "line" || kind === "polygon" || kind === "path";
 
-/**
- * The point of a node's frame that its `at` names, given the kind it was written as, its `anchor` and its final `box`: a point of the
- * box, the top-left unless `anchor` says, or for a group or an instance with no anchor, the frame's own origin.
- */
 export const homeOf = (
   kind: SceneNode["kind"],
   node: SceneNode,
@@ -107,7 +90,6 @@ export const homeOf = (
   return pinned(anchor, box, where, kind === "text" ? baselineOf(node) : undefined);
 };
 
-/** How far down its frame a text's first baseline is: a morph's crossfade holds texts in a group, each in its frame. */
 export const baselineOf = (node: SceneNode): number => {
   if (node.kind === "text") return node.lines[0]?.at[1] ?? 0;
 
@@ -116,13 +98,11 @@ export const baselineOf = (node: SceneNode): number => {
 
 export const minus = ([x, y]: Vec, [dx, dy]: Vec): Vec => [x - dx, y - dy];
 
-/** An `at` that puts the point `home` of the node's frame where it said, moved to put the frame's origin there. */
 export const homed = (at: Animated<Vec>, home: Vec): Animated<Vec> => {
   if (home[0] === 0 && home[1] === 0) return at;
 
   if (!isLane(at)) return minus(at, home);
 
-  // A curved key's control points move with it, so the curve keeps its shape.
   const [head, next, ...rest] = at.keys.map((key) => ({
     ...key,
     value: minus(key.value, home),

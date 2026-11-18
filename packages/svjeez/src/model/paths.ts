@@ -214,7 +214,6 @@ const parse = (d: string): Ring[] => {
   return rings;
 };
 
-/** Path data as rings of cubic curves: every command, relative or not, written out. */
 export const ringsOf = (d: string): Ring[] => parse(d);
 
 const halve = (from: Vec, [c1, c2, to]: Cubic): [Cubic, Cubic] => {
@@ -290,11 +289,6 @@ const middle = (ring: Ring): Vec => {
   return [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2];
 };
 
-/**
- * Outlines with the same rings and the same curve count in each ring, so each can blend into the next point by point.
- * A ring one outline lacks grows from the middle of another's; curves split where they are longest; each closed ring
- * turns to start nearest where the ring before it starts.
- */
 export const matchRings = (parsed: readonly (readonly Ring[])[]): Ring[][] => {
   const count = Math.max(...parsed.map((rings) => rings.length));
 

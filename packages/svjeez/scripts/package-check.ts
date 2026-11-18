@@ -26,7 +26,6 @@ export const svg: string = backend.emit(scene({ size: [10, 10], duration: 1, tit
 export { renderFrames };
 `;
 
-// TypeScript 5.4 is the oldest supported compiler, and the newest that still has node10.
 const COMPILERS = [
   { name: "TypeScript 5.4", tsc: ["npx", "--yes", "--package", "typescript@5.4", "tsc"] },
   { name: "TypeScript latest", tsc: [join(BIN, "tsc")] },

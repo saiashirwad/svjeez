@@ -19,7 +19,6 @@ const positive = (value: number, what: string): number => {
   return value;
 };
 
-/** A path under construction. Every method returns a new one, so a path can be shared and extended. */
 export class PathBuilder {
   readonly #done: readonly Contour[];
   readonly #open: Contour | undefined;
@@ -66,7 +65,6 @@ export class PathBuilder {
     return this.#add([lerp(from, control, 2 / 3), lerp(to, control, 2 / 3), to], "quadTo()");
   }
 
-  /** Close the contour back to where it started. The next command needs a moveTo(). */
   close(): PathBuilder {
     const open = this.#pen("close()");
     const end = open.curves.at(-1)?.[2] ?? open.start;
@@ -79,7 +77,6 @@ export class PathBuilder {
   }
 }
 
-/** A shape's outline, built by `rect`, `circle`, `arc`, `path` and the rest. Never a string. */
 export type Geometry = Outline | PathBuilder;
 
 export const outlineOf = (geometry: Geometry): Outline =>
@@ -88,7 +85,6 @@ export const outlineOf = (geometry: Geometry): Outline =>
     : geometry;
 
 export interface RectOptions {
-  /** One radius, or top-left, top-right, bottom-right, bottom-left. */
   readonly radius?: number | readonly [number, number, number, number];
 }
 
@@ -96,7 +92,6 @@ const isEach = (
   radius: number | readonly [number, number, number, number],
 ): radius is readonly [number, number, number, number] => Array.isArray(radius);
 
-/** Its frame starts at the top-left corner. */
 export const rect = (width: number, height: number, options: RectOptions = {}): Geometry => {
   const radius = options.radius ?? 0;
   const each = isEach(radius) ? radius : ([radius, radius, radius, radius] as const);
@@ -114,13 +109,11 @@ export const rect = (width: number, height: number, options: RectOptions = {}): 
   };
 };
 
-/** Drawn around its own `[0, 0]`, as are `ellipse` and `arc`: `at` places its box, `anchor="center"` its center. */
 export const circle = (radius: number): Geometry => ({
   kind: "ellipse",
   radius: [positive(radius, "circle()"), radius],
 });
 
-/** Drawn around its own `[0, 0]`, `rx` across and `ry` down: `at` places its box, `anchor="center"` its center. */
 export const ellipse = (rx: number, ry: number): Geometry => ({
   kind: "ellipse",
   radius: [positive(rx, "ellipse()"), positive(ry, "ellipse()")],
@@ -128,13 +121,10 @@ export const ellipse = (rx: number, ry: number): Geometry => ({
 
 export interface ArcOptions {
   readonly radius: number;
-  /** Where it starts, in degrees clockwise from three o'clock. Default 0. */
   readonly start?: number;
-  /** How far it runs, in degrees clockwise. */
   readonly sweep: number;
 }
 
-/** Part of a circle's edge. Its box is the whole circle's, so it turns around the circle's center. */
 export const arc = ({ radius, start = 0, sweep }: ArcOptions): Geometry => {
   if (!Number.isFinite(start) || !Number.isFinite(sweep))
     throw new Error(`arc() needs a finite start and sweep, got ${start} and ${sweep}.`);
@@ -142,36 +132,22 @@ export const arc = ({ radius, start = 0, sweep }: ArcOptions): Geometry => {
   return { kind: "arc", radius: positive(radius, "arc()"), start, sweep };
 };
 
-/**
- * A straight segment between two points. Without `at` it stays where they are; with one, `at` places its box. It
- * has no fill. To join two nodes, use `<Arrow>`.
- */
 export const line = (from: Vec, to: Vec): Geometry => ({ kind: "line", from, to });
 
-/** A closed outline through `points`. Without `at` it stays where they are; with one, `at` places its box. */
 export const polygon = (points: readonly Vec[]): Geometry => ({
   kind: "polygon",
   points,
   closed: true,
 });
 
-/** An open outline through `points`. Without `at` it stays where they are; with one, `at` places its box. */
 export const polyline = (points: readonly Vec[]): Geometry => ({
   kind: "polygon",
   points,
   closed: false,
 });
 
-/**
- * A path built step by step: `path().moveTo([0, 0]).lineTo([10, 0]).close()`. Without `at` it stays where its
- * points are; with one, `at` places its box.
- */
 export const path = (): PathBuilder => new PathBuilder();
 
-/**
- * A geometry from path data, the `d` string icon sets and drawing tools write (`"M0 0L10 0Z"`), read when the scene
- * compiles: the way in for icons and traced artwork. To build a path in code, use `path()`.
- */
 export const pathData = (d: string): Geometry => ({
   kind: "path",
   contours: ringsOf(d),
@@ -180,7 +156,6 @@ export const pathData = (d: string): Geometry => ({
 
 const DEG = Math.PI / 180;
 
-/** Where an arc's edge is at `angle` degrees. */
 export const onCircle = (radius: number, angle: number): Vec => [
   radius * Math.cos(angle * DEG),
   radius * Math.sin(angle * DEG),
@@ -214,7 +189,6 @@ const around = (xs: readonly number[], ys: readonly number[]): Box => {
   return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
 };
 
-/** What an outline covers in its own frame, strokes aside. Curves are measured exactly, not by their control points. */
 export const boxOf = (outline: Outline): Box => {
   switch (outline.kind) {
     case "rect":
@@ -260,7 +234,6 @@ export const boxOf = (outline: Outline): Box => {
   }
 };
 
-/** A color by name, with a value for light and for dark. */
 export interface Token {
   readonly kind: "token";
   readonly name: string;
@@ -268,16 +241,12 @@ export interface Token {
   readonly dark: Hex;
 }
 
-/** A hex color, the same in every scheme, or a token from `tokens()`, which has a light and a dark value. */
 export type Color = Hex | Token;
 
-/** What fills or strokes: a color, or a gradient from `linear()` or `radial()`. */
 export type Paint = Color | Gradient;
 
-/** Tokens by name, as `tokens()` makes them. */
 export type Theme<K extends string = string> = { readonly [N in K]: Token };
 
-/** Name colors once: `theme.surface` is a token that follows the viewer in SVG and is baked elsewhere. */
 export const tokens = <const K extends string>(values: {
   readonly light: Readonly<Record<K, Hex>>;
   readonly dark: Readonly<Record<K, Hex>>;

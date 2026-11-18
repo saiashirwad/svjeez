@@ -19,7 +19,6 @@ const jetbrains = await font.load(fixture("JetBrainsMono"));
 const emit = (build: () => SceneElement) =>
   svg.emit(scene({ size: [200, 100], duration: 1, title: "Fonts" }, build));
 
-/** One text in a font, emitted. */
 const written = (value: FontValue, text: string) =>
   emit(() => (
     <Text font={value} size={10} fill="#000000">
@@ -32,7 +31,6 @@ const faces = (out: string) =>
     ...out.matchAll(/@font-face\{font-family:([^;]+);[^}]*font-weight:(\d+);font-style:(\w+)\}/g),
   ].map((m) => `${m[1]} ${m[2]} ${m[3]}`);
 
-/** The first embedded face, read back as a font. */
 const cutOf = (out: string) => font(Buffer.from(/base64,([^)]+)\)/.exec(out)![1]!, "base64"));
 
 describe("font", () => {
@@ -164,7 +162,6 @@ describe("embedding", () => {
     ));
 
     expect(faces(out)).toEqual(["'ABeeZee' 400 normal"]);
-    // A scene names no fallback family: every character it draws is in the face it names.
     expect(out).toContain(`font-family="'ABeeZee'"`);
   });
 

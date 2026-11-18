@@ -2,7 +2,6 @@ import type { Animated, Paint, Scene, SceneNode, TextNode, TextRun } from "../mo
 import { isCurved } from "../model/curve";
 import { isLane } from "../model/lane";
 
-/** Everything in a scene that some target might not draw. A new node kind, paint or effect adds a name here. */
 export type Feature =
   | "text"
   | "outlinedText"
@@ -17,23 +16,16 @@ export type Feature =
   | "nonScalingStroke"
   | "liveTokens"
   | "curvedMotion"
-  /** A dashed stroke with round or square caps whose trim or outline moves. */
   | "movingDashedTrim";
 
-/**
- * How a backend handles a feature. `exact` draws it as the model says. `close` draws something a viewer can tell
- * apart, and says how in `note`. `none` can't draw it.
- */
 export type Support =
   | { readonly level: "exact" }
   | { readonly level: "close"; readonly note: string }
   | { readonly level: "none"; readonly note: string };
 
 export interface Diagnostic {
-  /** `none` is an error, `close` a warning. */
   readonly severity: "error" | "warning";
   readonly feature: Feature;
-  /** The key of the node that uses it. */
   readonly key: string;
   readonly message: string;
 }
@@ -41,7 +33,6 @@ export interface Diagnostic {
 export interface Backend<Out, Options = {}> {
   readonly name: string;
   readonly supports: Readonly<Record<Feature, Support>>;
-  /** Throws on any feature the backend can't draw, naming the node. Each `close` one goes to `onWarning`. */
   emit(
     scene: Scene,
     options?: Options & { readonly onWarning?: (warning: Diagnostic) => void },
@@ -102,7 +93,6 @@ const featuresOf = (node: SceneNode): Feature[] => {
   return [...new Set(used)];
 };
 
-/** What `backend` can't draw exactly in `scene`, without emitting anything. */
 export const diagnose = (
   scene: Scene,
   backend: Pick<Backend<never>, "name" | "supports">,
@@ -134,7 +124,6 @@ export const diagnose = (
   return out;
 };
 
-/** Runs `diagnose` for an `emit`: throws the errors together and hands on the warnings. */
 export const admit = (
   scene: Scene,
   backend: Pick<Backend<never>, "name" | "supports">,

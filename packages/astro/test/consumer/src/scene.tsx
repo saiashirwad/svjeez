@@ -1,4 +1,3 @@
-// Astro also imports this file outside the ?svjeez environment, with React's JSX by default.
 /** @jsxImportSource svjeez */
 import { Shape, circle, ease, enter, scene, span } from "svjeez";
 

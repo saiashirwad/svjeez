@@ -37,7 +37,6 @@ const morphing = (when = span(2, 1)) => (
 
 const morph = emit(() => morphing());
 
-/** The two outlines as the backend writes them, read off the morph's own animate. */
 const [, A = "", B = ""] = /values="([^";]*);([^";]*)"/.exec(morph) ?? [];
 
 const there = emit(() => (
@@ -63,11 +62,6 @@ const plain = (out: string, values: string, keyTimes: string, dur: string, attri
     `<animate attributeName="${attribute}" values="${values}" keyTimes="${keyTimes}" dur="${dur}" repeatCount="indefinite"/>`,
   );
 
-/**
- * The backend writes outlines with relative commands (`h20v20`), and Chromium draws a plain animate whose values
- * repeat a relative path wrongly between two of them. So the frame checks swap in the same outlines with absolute
- * commands, in both the windowed scene and its reference; the windowing under test is untouched.
- */
 const absolute = (out: string) =>
   out.replaceAll(A, "M0 0L20 0L20 20L0 20Z").replaceAll(B, "M4 4L16 4L16 16L4 16Z");
 
@@ -184,7 +178,6 @@ describe.if(browser)("windowed SMIL renders as the plain animate did", () => {
     [10, 10.5, 11.9, 12.5, 15, 20, 20.5, 21.9, 22.5, 29.9],
   );
 
-  // Scene seconds at twice the speed: the loop is 10 scene seconds, 5 played.
   check(
     "blur on a scene played faster",
     blurred,

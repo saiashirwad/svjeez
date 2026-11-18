@@ -22,11 +22,6 @@ import { boxesOf, isLane, placements, svg, type Model, type Spanned } from "svje
 import { alongCurve, curveLength, splitCurve } from "../src/model/curve";
 import { blendVec, valueAt } from "../src/model/sample";
 
-/**
- * A spring that turns, written as curved keys (`Key.via`): fewer keys than straight ones, the same motion through
- * every cut, repeat, rewind and loop the steps make, and every reader of the lane agreeing with it.
- */
-
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [400, 300], duration, title: "Test" }, build);
 
@@ -82,15 +77,10 @@ interface Route {
     readonly rewind?: number;
     readonly loop?: number;
   };
-  /** The Sequence the dot sits in starts here. */
   readonly inside?: number;
   readonly duration?: number;
 }
 
-/**
- * The same route as `at`, which may curve, and as a motion layer's `offset`, which never does: two fittings of one
- * motion, each within a small part of the distance of the simulated spring.
- */
 const both = ({ start, legs, finish = {}, inside, duration = 4 }: Route) => {
   let at = track<Vec>(start);
   let layer = motion({ offset: start });
@@ -130,7 +120,6 @@ const both = ({ start, legs, finish = {}, inside, duration = 4 }: Route) => {
   };
 };
 
-/** The farthest the two lanes are apart at any of a thousand moments a second. */
 const apart = (a: Model.Lane<Vec>, b: Model.Lane<Vec>, duration: number): number => {
   let worst = 0;
 
@@ -143,7 +132,6 @@ const apart = (a: Model.Lane<Vec>, b: Model.Lane<Vec>, duration: number): number
   return worst;
 };
 
-/** A dot thrown along x at 400px/s, then sprung toward a point below: the handoff turns it. */
 const thrown: Route = {
   start: [0, 0],
   legs: [
@@ -211,7 +199,6 @@ describe("springs that turn write curved keys", () => {
     }
 
     expect(worst).toBeLessThan(0.3);
-    // The spring swings past y = 100 and back. Every ease stays within 0 and 1, so the curves themselves go past.
     expect(deepest).toBeGreaterThan(120);
   });
 
@@ -295,7 +282,6 @@ describe("springs that turn write curved keys", () => {
       expect(curved.period).toBe(straight.period);
       expect(apart(curved, straight, duration * 2)).toBeLessThan(0.5);
 
-      // Rotated, the loop starts where it was cut: partway through a curved key, split in two.
       if (route.inside !== undefined) expect(curved.keys[1].via).toBeDefined();
     });
 
@@ -411,7 +397,6 @@ describe("readers of a curved spring agree with it", () => {
 
     const after = valueAt(lane, 0.901, blendVec);
 
-    // moveBy moves from the spring's target, as it does after any move, but from where the dot is when it is cut.
     expect(Math.hypot(after[0] - cut[0], after[1] - cut[1])).toBeLessThan(0.5);
     expect(valueAt(lane, 4, blendVec)).toEqual([150, 100]);
   });

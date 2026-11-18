@@ -11,14 +11,6 @@ import { isLane } from "../model/lane";
 import { same } from "../model/steps";
 import { onCircle } from "../author/values";
 
-/**
- * How the SVG backend draws a geometry that moves: the cheapest route that draws exactly what the lane means. A
- * geometry that only moves or only scales is drawn still, with a CSS translate or scale. An arc on one circle is drawn
- * once as its widest arc, with a CSS dash that opens and turns it. A rect, a circle, an ellipse and a line animate
- * their own attributes through SMIL. Anything else is a `<path>` whose `d` animates through SMIL, written short.
- */
-
-/** An attribute or CSS property one of the routes animates. */
 export type GeometrySlot =
   | "d"
   | "draw"
@@ -32,7 +24,6 @@ export type GeometrySlot =
   | "x2"
   | "y2";
 
-/** A lane for the emitter, its values already named the way the emitter reads them. */
 export interface Written {
   readonly slot: GeometrySlot;
   readonly lane: Lane<ChannelValues>;
@@ -42,27 +33,19 @@ export interface Written {
 
 export type Moving =
   | {
-      /** The geometry is drawn still, and moved or scaled as a whole. */
       readonly kind: "still";
       readonly geometry: Geometry;
-      /** A CSS scale around the frame's origin, before anything else applies. */
       readonly scale?: Lane<Vec>;
-      /** A CSS translate, before anything else applies. */
       readonly offset?: Lane<Vec>;
     }
   | {
       readonly kind: "element";
       readonly tag: string;
       readonly attrs: Record<string, AttrValue>;
-      /** Whether `at` went into the element's own coordinates. */
       readonly placed: boolean;
       readonly lanes: readonly Written[];
     };
 
-/**
- * SMIL reads a lane's values under its first channel and writes the attribute the lane's key names. A number SMIL
- * animates on a rect, a circle, an ellipse or a line rides under `width`, the channel the old API animates the same way.
- */
 const smilNumber = (value: number): ChannelValues => ({ width: value });
 
 const close = (a: number, b: number, size: number): boolean =>
@@ -74,7 +57,6 @@ const pointsOf = (contours: readonly Contour[]): Vec[] =>
 const extent = (points: readonly Vec[]): number =>
   Math.max(1, ...points.map(([x, y]) => Math.max(Math.abs(x), Math.abs(y))));
 
-/** How far each key sits from the first, if every key is the first moved as a whole. */
 const shifts = (keys: readonly Geometry[]): Vec[] | undefined => {
   const all = keys.map((key) => pointsOf(contoursOf(key)));
   const first = all[0]!;
@@ -95,7 +77,6 @@ const shifts = (keys: readonly Geometry[]): Vec[] | undefined => {
   return found.every((by) => by !== undefined) ? found : undefined;
 };
 
-/** How each key scales `base` around the frame's origin, if every key is `base` scaled. */
 const scales = (keys: readonly Geometry[], base: Geometry): Vec[] | undefined => {
   const reference = pointsOf(contoursOf(base));
   const size = extent(reference);
@@ -129,7 +110,6 @@ const scales = (keys: readonly Geometry[], base: Geometry): Vec[] | undefined =>
   return found.every((by) => by !== undefined) ? found : undefined;
 };
 
-/** The lane's keys with `values` in place of each geometry, eases kept. */
 const along = <T>(lane: Lane<Geometry>, values: readonly T[]): Lane<T> => {
   const [head, next, ...rest] = lane.keys.map((key, i) => ({ ...key, value: values[i]! }));
 
@@ -141,7 +121,6 @@ const placedAt = ([x, y]: Vec, names: readonly [string, string]) => ({
   ...(y !== 0 && { [names[1]]: num(y) }),
 });
 
-/** Where an element whose own coordinates don't place it is moved to. */
 interface Moved {
   readonly transform?: string;
 }
@@ -151,7 +130,6 @@ const moved = ([x, y]: Vec): Moved =>
 
 type Numbers = Readonly<Partial<Record<GeometrySlot, number>>>;
 
-/** One SMIL lane per attribute whose value changes, as an element with every attribute's first value. */
 const element = (
   tag: string,
   lane: Lane<Geometry>,
@@ -177,12 +155,6 @@ const element = (
   };
 };
 
-/**
- * An arc on one circle as the widest arc it ever covers, drawn by a CSS dash: a dash's ends move in step with the
- * arc's angles, so the blend between keys stays on the circle with no extra keys. The arc's direction doesn't change
- * what it covers, so a sweep is taken clockwise from its lower end; one whose sweep changes sign can't take this route.
- * A sweep past a full turn overlaps itself as the arc does.
- */
 const dashed = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving | undefined => {
   const arcs = lane.keys.map((key) => key.value);
   const { stroke } = node;
@@ -208,7 +180,6 @@ const dashed = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving | undefi
   if (signs.size > 1 || !(widest > 0)) return undefined;
   const { radius } = arcs[0]!;
   const r = num(radius);
-  // One arc command draws up to 340°; past that its ends come too close to place its center reliably.
   const pieces = widest <= 340 ? 1 : Math.ceil(widest / 270 - 1e-9);
   const step = widest / pieces;
   let d = `M${pt(onCircle(radius, low))}`;
@@ -216,9 +187,6 @@ const dashed = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving | undefi
   for (let i = 1; i <= pieces; i++)
     d += `A${r} ${r} 0 ${step > 180 ? 1 : 0} 1 ${pt(onCircle(radius, low + step * i))}`;
 
-  // A dash with no length draws its caps as a dot, as a still arc of no sweep does, but only when the dash itself
-  // has no length: one hidden past the path's start draws nothing. So a round or square cap that reaches no length
-  // writes the dash's length too.
   const dots = stroke.cap !== "butt" && spans.some((each) => each.length === 0);
   const grows = !dots && spans.every((each) => each.low === low);
 
@@ -239,24 +207,14 @@ const dashed = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving | undefi
 
 const pt = ([x, y]: Vec): string => `${num(x)} ${num(y)}`;
 
-/**
- * How far, in px, the path SMIL blends between two of an arc's keys may stray from the true arc. Frames at 2x against
- * the true arc differ only in edge antialiasing at a quarter pixel, with a third fewer keys than at a tenth; at half a
- * pixel the edge starts to shift.
- */
 const ARC_TOLERANCE = 0.25;
 
-/** The part of `curve` between two points of its progress, as an ease of its own. */
 const portion = (curve: Ease, from: number, to: number, where: string): Ease => {
   const tail = from > 0 ? splitEase(curve, from, where)[1] : curve;
 
   return to < 1 ? splitEase(tail, (to - from) / (1 - from), where)[0] : tail;
 };
 
-/**
- * Where to cut a transition between two arcs so the path blend between cuts stays within ARC_TOLERANCE of the arc: an
- * end that turns by δ radians strays about r·δ²/8 from the circle. The cuts follow the ease, so they bunch where it is fast.
- */
 const arcCuts = (curve: Ease, turn: number, radius: number): number[] => {
   const most = Math.sqrt((8 * ARC_TOLERANCE) / Math.max(radius, 1e-9));
   const cuts: number[] = [];
@@ -277,12 +235,6 @@ const arcCuts = (curve: Ease, turn: number, radius: number): number[] => {
   return cuts;
 };
 
-/**
- * A geometry lane with the keys SMIL needs to draw it exactly. SMIL blends path data point by point, which is exact for
- * every kind whose points move in step with its parameters (rects, ellipses, lines, polygons, matched paths). An arc's
- * ends move around a circle, so a transition between arcs is cut finely enough that each blend stays on the circle.
- * SMIL can't blend path data in steps, so `ease.steps(n)` is written as n cuts.
- */
 const blendable = (lane: Lane<Geometry>, key: string): Lane<Geometry> => {
   const where = `geometry on "${key}"`;
   const [head, ...tail] = lane.keys;
@@ -339,7 +291,6 @@ const blendable = (lane: Lane<Geometry>, key: string): Lane<Geometry> => {
   return { ...lane, keys: [head, keys[1]!, ...keys.slice(2)] };
 };
 
-/** How one curve is written in every key: dropped (no length in any), a line, across, down, or a cubic. */
 type Command = "" | "l" | "h" | "v" | "c";
 
 const isStraight = (from: Vec, [c1, c2, to]: Cubic): boolean =>
@@ -361,10 +312,6 @@ const isPoint = (from: Vec, curve: Cubic): boolean =>
     (point) => Math.abs(point[0] - from[0]) < 1e-9 && Math.abs(point[1] - from[1]) < 1e-9,
   );
 
-/**
- * The commands that write every key with the same structure, so SMIL can blend them. A closed contour's last line,
- * when it runs back to the start in every key, is left to its `z`.
- */
 const commandsOf = (keys: readonly (readonly Contour[])[]): Command[][] =>
   keys[0]!.map((contour, c) => {
     const commands = contour.curves.map((_, k): Command => {
@@ -403,17 +350,12 @@ const commandsOf = (keys: readonly (readonly Contour[])[]): Command[][] =>
     return commands;
   });
 
-/** Numbers joined the short way: no space before a minus sign. */
 const joined = (numbers: readonly string[]): string =>
   numbers.reduce(
     (out, value, i) => (i === 0 || value.startsWith("-") ? out + value : `${out} ${value}`),
     "",
   );
 
-/**
- * Path data with relative commands, rounded to `places`. Each step is the difference of two rounded points, so the
- * rounding never adds up along the path. A closed contour's last line back to the start is its `z`.
- */
 const writeData = (
   contours: readonly Contour[],
   commands: readonly Command[][],
@@ -458,17 +400,12 @@ const writeData = (
   return d as PathData;
 };
 
-/**
- * Decimal places for path data: a hundredth of a pixel, or a thousandth for a shape under 10px, which is more likely
- * to be drawn scaled up. Frames at 4x show no change from three places at two; at one they do.
- */
 const placesFor = (outlines: readonly (readonly Contour[])[]): number => {
   const size = Math.max(...outlines.map((contours) => extent(pointsOf(contours))));
 
   return size < 10 ? 3 : 2;
 };
 
-/** A `<path>` whose `d` animates through SMIL, every key written with the same short commands. */
 const morph = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving => {
   const written = blendable(lane, node.key);
 
@@ -509,10 +446,8 @@ const morph = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving => {
   };
 };
 
-/** Whether a paint is a gradient, laid out in the shape's frame. */
 const isGradient = (paint: Paint): boolean => !Array.isArray(paint) && "stops" in paint;
 
-/** Whether a gradient is laid out in the shape's frame, so moving or scaling the outline as a whole would move it too. */
 const framed = (node: ShapeNode): boolean =>
   [node.fill, node.stroke?.color].some(
     (paint) =>
@@ -520,7 +455,6 @@ const framed = (node: ShapeNode): boolean =>
       (isLane(paint) ? paint.keys.map((key) => key.value) : [paint]).some(isGradient),
   );
 
-/** Whether scaling the shape scales nothing but its outline: no stroke, and no gradient laid out in its frame. */
 const scalable = (node: ShapeNode): boolean => node.stroke === undefined && !framed(node);
 
 type Arc = Extract<Geometry, { kind: "arc" }>;
@@ -541,7 +475,6 @@ const isLine = (value: Geometry): value is Line => value.kind === "line";
 
 const ENDS = ["x1", "y1", "x2", "y2"] as const;
 
-/** The attributes SMIL animates for a rect with one radius at every corner, a circle, an ellipse or a line. */
 const ownAttributes = (lane: Lane<Geometry>, at: Vec): Moving | undefined => {
   const keys = lane.keys.map((key) => key.value);
 
@@ -580,14 +513,12 @@ const ownAttributes = (lane: Lane<Geometry>, at: Vec): Moving | undefined => {
 
     const changing = ENDS.filter((name) => ends.some((value) => value[name] !== ends[0]![name]));
 
-    // Two or more ends that move cost less as one `d`.
     return changing.length === 1 ? element("line", lane, ENDS, ends, {}) : undefined;
   }
 
   return undefined;
 };
 
-/** The cheapest exact way to draw `lane` on `node`, whose frame starts at `at`. */
 export const drawMoving = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving => {
   const keys = lane.keys.map((key) => key.value);
   const moves = shifts(keys);
@@ -597,7 +528,6 @@ export const drawMoving = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Movi
       ? { kind: "still", geometry: keys[0]! }
       : { kind: "still", geometry: keys[0]!, offset: along(lane, moves) };
 
-  // What is left animates through SMIL, which can't write an ease that overshoots.
   const smil = smilSafe(lane, `geometry on "${node.key}"`);
 
   if (keys[0]!.kind === "arc") return dashed(node, lane, at) ?? morph(node, smil, at);

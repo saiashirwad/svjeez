@@ -15,24 +15,20 @@ import {
 } from "svjeez";
 import { mono, theme } from "../theme";
 
-/** One angle drives everything below: the spoke turns with it, and the rest are mappings of it. */
 const theta = track(0).to(360, span(0.3, 4), ease.inOut).rewind(1.2, ease.inOut);
 
 const CENTER: Vec = [140, 150];
 const RADIUS = 90;
 
-/** The wave's axis: where 0° and 360° land, and how tall it swings. */
 const WAVE = { x: 290, y: 150, width: 300, height: 80 } as const;
 
 const DEG = Math.PI / 180;
 
-/** Where the angle puts a point on the dial: not affine, so it is sampled. */
 const onDial = (t: number): Vec => [
   CENTER[0] + RADIUS * Math.cos(t * DEG),
   CENTER[1] - RADIUS * Math.sin(t * DEG),
 ];
 
-/** The same angle on the wave: across is affine in it, up and down is its sine. */
 const onWave = (t: number): Vec => [
   WAVE.x + (t / 360) * WAVE.width,
   WAVE.y - WAVE.height * Math.sin(t * DEG),

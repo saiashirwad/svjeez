@@ -56,13 +56,11 @@ const body = (build: () => SceneElement, duration = 4): string =>
 
 const css = (build: () => SceneElement): string => svg.emit(made(build)).split("</style>")[0]!;
 
-/** The path data an `<animate attributeName="d">` moves through. */
 const morphs = (out: string): string[] =>
   /attributeName="d" values="([^"]*)"/.exec(out)?.[1]?.split(";") ?? [];
 
 const commands = (d: string): string => d.replace(/[^A-Za-z]/g, "");
 
-/** Where relative path data ends: its `M` and every step after it, added up. */
 const ends = (d: string): [number, number] => {
   const at: [number, number] = [0, 0];
 
@@ -289,7 +287,6 @@ describe("animated geometry", () => {
       />
     ));
 
-    // The box takes in the stroke, so the outline starts half the stroke in from where the shape is placed.
     expect(out).toContain('<rect x="0.5" y="0.5" width="40" height="10" rx="4"');
     expect(out).toContain('attributeName="width"');
     expect(out).toContain('attributeName="rx"');

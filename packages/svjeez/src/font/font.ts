@@ -22,38 +22,23 @@ export type FontStyle = "normal" | "italic";
 export type { Metrics as FontMetrics };
 
 export interface FontOptions {
-  /** The CSS family name. Default: read from the file, or a name derived from the bytes for WOFF and WOFF2. */
   readonly family?: string;
-  /** Default: read from the file (OS/2 usWeightClass), else 400. */
   readonly weight?: number;
   readonly style?: FontStyle;
-  /** Generic or installed families to fall back to. Default `monospace` for a fixed-pitch font, else `sans-serif`. */
   readonly fallback?: readonly string[];
-  /**
-   * Embed only the glyphs the scene's text uses. Default true. Applies to TrueType outlines; OTF with CFF
-   * outlines, WOFF and WOFF2 embed whole. Turn off if text changes after rendering.
-   */
   readonly subset?: boolean;
-  /**
-   * Default true. False draws one glyph per character, with no ligatures or contextual alternates, so a coding
-   * font such as JetBrains Mono still subsets without forming `=>` ligatures.
-   */
   readonly ligatures?: boolean;
 }
 
 export interface PathOptions {
-  /** Font size in px. */
   readonly size: number;
-  /** Where the first glyph's origin lands: the left end of the baseline. Default 0, 0. */
   readonly x?: number;
   readonly y?: number;
 }
 
 export interface GlyphPath {
   readonly char: string;
-  /** Path data in scene coordinates. Empty for a space. */
   readonly d: string;
-  /** Left edge of the glyph's advance box. */
   readonly x: number;
   readonly advance: number;
 }
@@ -102,7 +87,6 @@ const hash = (bytes: Uint8Array): string => {
   return (h >>> 0).toString(36);
 };
 
-/** A font file, embedded as a data URI. Pass it as `fontFamily`, measure text with it, or draw text as paths. */
 export class Font {
   readonly #sfnt: Sfnt | undefined;
   readonly #bytes: Uint8Array;
@@ -116,7 +100,6 @@ export class Font {
   readonly ligatures: boolean;
   readonly format: FontFormat;
   readonly href: `data:${string}`;
-  /** Length of `href`, which is what the output pays each time the font is embedded. */
   readonly bytes: number;
 
   constructor(bytes: Uint8Array, format: FontFormat, options: FontOptions) {
@@ -154,7 +137,6 @@ export class Font {
     return this.#typesetter.layoutGlyphs(text);
   }
 
-  /** The data URI to embed for text `texts`: cut down to their glyphs when the font allows, else the whole file. */
   embed(texts: readonly string[]): `data:${string}` {
     const font = this.#sfnt;
 
@@ -178,12 +160,10 @@ export class Font {
     return href;
   }
 
-  /** Ascent, descent, line gap, cap height and x-height in em. Multiply by the font size for px. */
   get metrics(): Metrics {
     return metrics(this.#readable("metrics"));
   }
 
-  /** Whether the font has a glyph for this character. The browser draws a missing one from the fallback font. */
   has(char: string): boolean {
     if (char === "") return false;
 
@@ -192,7 +172,6 @@ export class Font {
     return this.#typesetter.glyph(char) !== 0;
   }
 
-  /** Advance width of one line of text in px, with ligatures and kerning as the browser applies them. */
   measure(text: string, size: number): number {
     const scale = size / this.metrics.unitsPerEm;
 
@@ -202,14 +181,12 @@ export class Font {
     );
   }
 
-  /** How far each glyph of one line moves the pen, in px, after ligatures and kerning. They add up to `measure()`. */
   advances(text: string, size: number): number[] {
     const scale = size / this.metrics.unitsPerEm;
 
     return this.#typeset(text, "advances()").map((glyph) => glyph.advance * scale);
   }
 
-  /** One line of text as outlines. Paths stay sharp at any zoom and can be animated glyph by glyph, but are not selectable text. */
   path(text: string, { size, x = 0, y = 0 }: PathOptions): TextPath {
     const font = this.#readable("path()");
 
@@ -285,7 +262,6 @@ const escapeControl = (char: string): string => {
   return code < 0x20 || code === 0x7f ? `\\${code.toString(16)} ` : char;
 };
 
-/** A CSS string. Control characters are hex-escaped, since a raw newline would end the string and start a rule. */
 const cssString = (text: string): string =>
   `'${[...text.replace(/['\\]/g, "\\$&")].map(escapeControl).join("")}'`;
 
@@ -311,10 +287,6 @@ export const fontFaceRule = (name: string, font: Font, texts: readonly string[] 
 
 const SUPPORTED = Object.keys(FORMATS).join(", ");
 
-/**
- * Embed a font. The format comes from the bytes, never the file extension. Pure and synchronous.
- * See `font.load` for files and URLs, and `font.family` to group weights and styles under one name.
- */
 export const font = Object.assign(
   (source: Uint8Array | ArrayBuffer, options: FontOptions = {}): Font => {
     const bytes = source instanceof Uint8Array ? source : new Uint8Array(source);
@@ -337,10 +309,8 @@ export const font = Object.assign(
     return new Font(bytes, format, options);
   },
   {
-    /** Read an http(s) URL with fetch, or a path or file: URL from disk. */
     load: async (source: string | URL, options: FontOptions = {}): Promise<Font> =>
       font(await readSource(source), options),
-    /** Group weights and styles under the first face's family name. Using the family embeds every face in it. */
     family: (...faces: readonly [Font, ...Font[]]): FontFamily => {
       if (faces.length === 0) throw new Error("font.family() needs at least one font, got none.");
       const seen = new Map<string, Font>();

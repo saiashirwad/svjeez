@@ -2,13 +2,6 @@ import { contoursOf } from "../model/geometry";
 import type { Contour, Geometry as Outline, Vec } from "../model/ir";
 import { outlineOf, type Geometry } from "./values";
 
-/**
- * `subtract`: holes cut into a shape, drawn exactly as one even-odd path. That is exact only while every cut lies
- * wholly inside the base or wholly outside it and no two cuts overlap, so each of those is checked on the outlines
- * flattened finely, and anything else is an error that says so.
- */
-
-/** Pieces each curve is flattened into for the checks. The path itself keeps its curves. */
 const PIECES = 24;
 
 const flatten = (contour: Contour): Vec[] => {
@@ -36,7 +29,6 @@ const flatten = (contour: Contour): Vec[] => {
   );
 };
 
-/** The closed polyline's edges, the last back to the first point. */
 const edgesOf = (ring: readonly Vec[]): [Vec, Vec][] =>
   ring.flatMap((a, i): [Vec, Vec][] => {
     const b = ring[(i + 1) % ring.length]!;
@@ -47,7 +39,6 @@ const edgesOf = (ring: readonly Vec[]): [Vec, Vec][] =>
 const cross = (o: Vec, a: Vec, b: Vec): number =>
   (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
 
-/** Whether two edges meet anywhere, touching included: a cut that touches the base's edge is not wholly inside it. */
 const meet = ([a, b]: [Vec, Vec], [c, d]: [Vec, Vec]): boolean => {
   const scale = Math.max(1, ...[a, b, c, d].flat().map(Math.abs));
   const tiny = 1e-9 * scale * scale;
@@ -79,7 +70,6 @@ const crosses = (a: readonly Vec[], b: readonly Vec[]): boolean => {
   return edgesOf(a).some((edge) => others.some((other) => meet(edge, other)));
 };
 
-/** Whether a closed polyline crosses itself: two edges that are not neighbors meet. */
 const tangled = (ring: readonly Vec[]): boolean => {
   const edges = edgesOf(ring);
 
@@ -101,7 +91,6 @@ const inside = (ring: readonly Vec[], [x, y]: Vec): boolean => {
 
 const same = (a: Vec, b: Vec): boolean => a[0] === b[0] && a[1] === b[1];
 
-/** A contour without the curves of no length that a rect's sharp corners are, which would only lengthen the path. */
 const tidy = (contour: Contour): Contour => {
   let from = contour.start;
 
@@ -116,7 +105,6 @@ const tidy = (contour: Contour): Contour => {
   return { ...contour, curves };
 };
 
-/** One closed contour, or the error naming what it is instead. */
 const closed = (outline: Outline, what: string): Contour[] => {
   const contours = contoursOf(outline);
 
@@ -128,12 +116,6 @@ const closed = (outline: Outline, what: string): Contour[] => {
   return contours;
 };
 
-/**
- * `base` with every shape in `cuts` taken out of it, as one even-odd path: a card with a round window, a ring, a
- * stencil. Each cut lies wholly inside the base, where it makes a hole, or wholly outside, where it changes nothing,
- * and no two cuts overlap or touch. A cut that crosses the base's edge or another cut is an error: draw that outline
- * with `path()` instead.
- */
 export const subtract = (base: Geometry, ...cuts: readonly Geometry[]): Outline => {
   const outline = outlineOf(base);
   const [outer, ...holes] = closed(outline, "the base");

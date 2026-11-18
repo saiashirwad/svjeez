@@ -17,13 +17,9 @@ const QUALITIES = { low: "QUALITY_LOW", medium: "QUALITY_MEDIUM", high: "QUALITY
 
 export type VideoQuality = keyof typeof QUALITIES;
 
-/** `background: "transparent"` keeps alpha in WebM only. */
 export type VideoOptions = SceneOptions & {
-  /** Frames per second. Default 30. */
   readonly fps?: number;
-  /** How many times to play the scene's loop. Default 1. */
   readonly loops?: number;
-  /** Bitrate for the frame size and rate. Default "high". */
   readonly quality?: VideoQuality;
 } & (
     | { readonly format?: "mp4"; readonly codec?: VideoCodec<"mp4"> }
@@ -35,10 +31,8 @@ export interface Video {
   readonly mime: string;
   readonly format: VideoFormat;
   readonly codec: VideoCodec;
-  /** Playback length in seconds: `frames / fps`. The scene's own length is `Scene.duration`, in scene seconds. */
   readonly playTime: Seconds;
   readonly frames: number;
-  /** The scheme the video was rendered in, after resolving "system". */
   readonly colorScheme: ColorScheme;
 }
 
@@ -62,7 +56,6 @@ type Page = typeof globalThis & {
   };
 };
 
-/** Encode one loop, or several, of an SVG's animation as a video, in headless Chromium. Needs `playwright-core`. */
 export const video = async (svg: string, options: VideoOptions = {}): Promise<Video> => {
   const format = options.format ?? "mp4";
 
@@ -103,7 +96,6 @@ export const video = async (svg: string, options: VideoOptions = {}): Promise<Vi
     await scene.addScript(BUNDLE);
     const first = await scene.capture(0);
     const view = new DataView(first.buffer, first.byteOffset);
-    // 4:2:0 chroma covers pixels in pairs, so H.264 rejects an odd side.
     const width = view.getUint32(16) & ~1;
     const height = view.getUint32(20) & ~1;
 

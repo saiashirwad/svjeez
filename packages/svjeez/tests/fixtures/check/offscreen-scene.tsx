@@ -1,6 +1,5 @@
 import { Group, Shape, circle, rect, scene, span, track } from "svjeez";
 
-// A scene with one fault for `svjeez check`: a dot placed where the canvas never shows it.
 export default scene({ size: [100, 60], duration: 1, title: "Off canvas" }, () => (
   <Group>
     <Shape geometry={rect(100, 60)} fill="#111111" />

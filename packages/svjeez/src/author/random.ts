@@ -16,11 +16,6 @@ const mulberry32 = (seed: number) => () => {
 
 const isText = (seed: number | string): seed is string => typeof seed === "string";
 
-/**
- * A seeded stream of numbers from 0 up to 1, the same for the same seed on every run and runtime. A whole number
- * seeds it directly and a string is hashed first, so `random("leg-3")` names its own stream. `wiggle` takes its
- * noise from `random(String(seed))`.
- */
 export const random = (seed: number | string): (() => number) => {
   if (isText(seed)) return mulberry32(fnv1a(seed));
 

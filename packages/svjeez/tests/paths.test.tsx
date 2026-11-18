@@ -18,11 +18,9 @@ const emit = (build: () => SceneElement, reducedMotion?: number | false) =>
 
 const commands = (d: string) => d.replace(/[^A-Za-z]/g, "");
 
-/** The path data an `<animate attributeName="d">` moves through. */
 const morphs = (out: string): string[] =>
   /attributeName="d" values="([^"]*)"/.exec(out)?.[1]?.split(";") ?? [];
 
-/** Each ring's shape: how many curves it has, and whether it closes. */
 const shape = (rings: readonly Ring[]) => rings.map((ring) => [ring.curves.length, ring.closed]);
 
 const ends = (ring: Ring) => ring.curves.map(([, , to]) => to.join(" "));

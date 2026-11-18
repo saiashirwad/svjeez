@@ -114,7 +114,6 @@ describe("morph", () => {
     const [layer] = shape(model, "a").layers;
 
     expect(ends(layer!.rotate)).toEqual([0, 90]);
-    // At rest after the morph, the rect stands turned around its own center, (10, 5), as written.
     const box = boxesOf(model, 2).a!;
 
     expect(box.x).toBeCloseTo(5);

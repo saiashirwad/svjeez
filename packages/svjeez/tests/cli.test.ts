@@ -44,7 +44,6 @@ test("svjeez video names the package to install when @svjeez/video is missing", 
   writeFileSync(file, '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>');
 
   const result = Bun.spawnSync(
-    // --no-install: Bun would otherwise fetch @svjeez/video from npm into this empty folder.
     [process.execPath, "--no-install", join(import.meta.dir, "../src/cli.ts"), "video", file],
     { cwd: dir },
   );
@@ -105,7 +104,7 @@ test("svg --json reports compiled timing with the line that wrote each track", (
   const build: BuildReport & { svg: string } = JSON.parse(output.stdout.toString());
 
   const track = build.timeline.find((track) => track.label.endsWith(" · opacity"));
-  expect(track?.source).toContain("cue-scene.tsx:11:");
+  expect(track?.source).toContain("cue-scene.tsx:10:");
   expect(track?.spans).toHaveLength(2);
   expect(track?.spans[0]?.at).toBeCloseTo(0.213);
   expect(track?.spans[1]?.at).toBeCloseTo(0.413);
@@ -153,7 +152,6 @@ test("svjeez svg emits a scene model default export, and --json reports its buil
     cli("svg", file, "--json").stdout.toString(),
   );
 
-  // A traced build marks each node with its key and the line that wrote it, and is otherwise the same picture.
   expect(build.svg).toContain(`data-key="1" data-source="${file}:`);
   expect(build.svg.replace(/ data-(key|source)="[^"]*"/g, "")).toBe(out.stdout.toString());
   expect(build).toMatchObject({ duration: 2, loop: true, warnings: [] });

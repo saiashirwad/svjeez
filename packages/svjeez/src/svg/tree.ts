@@ -2,7 +2,6 @@ import type { Lane } from "./compile";
 import { isFontValue, type FontValue } from "../font/font";
 import { escapeAttr, escapeText } from "../model/format";
 
-/** An attribute's value: text, or a font, which the emitter turns into the family it embeds. */
 export type AttrValue = string | FontValue;
 
 export type SvgNode =
@@ -11,7 +10,6 @@ export type SvgNode =
       readonly tag: string;
       readonly attrs: Readonly<Record<string, AttrValue>>;
       readonly children: readonly SvgNode[];
-      /** Lanes already resolved and placed by the scene model's SVG backend. */
       readonly lanes?: readonly Lane[];
       readonly still?: Readonly<Record<string, AttrValue>>;
     }
@@ -32,7 +30,6 @@ export const element = (
 
 export const raw = (value: string): SvgNode => ({ kind: "raw", value });
 
-/** Text as an element's one child, such as a title's. */
 export const text = (value: string): SvgNode => ({ kind: "text", value });
 
 const serializeAttrs = (attrs: Readonly<Record<string, AttrValue>>): string =>

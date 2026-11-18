@@ -29,7 +29,6 @@ const laneOf = <T,>(value: Model.Animated<T>): Model.Lane<T> => {
   return value;
 };
 
-/** What a backend draws at `t`: the keys interpolated through their eases, along their curves when they have them. */
 const valueAt = (lane: Model.Lane<number | Model.Vec>, t: number): number[] => {
   const { keys } = lane;
 
@@ -52,7 +51,6 @@ const isNumber = (value: number | Model.Vec): value is number => typeof value ==
 
 const atOf = (model: Model.Scene, index = 0) => laneOf(model.root.children[index]!.at);
 
-/** The spring equation integrated step by step, to check the closed form against. */
 const integrated = (spring: Spring, x0: number, v0: number, until: number): [number, number] => {
   const k = spring.stiffness / spring.mass;
   const c = spring.damping / spring.mass;

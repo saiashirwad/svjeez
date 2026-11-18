@@ -12,38 +12,24 @@ import { isDerived, type Derived } from "./derived";
 import { isTrack, passageOf, track, type Track } from "./track";
 import type { Geometry, Paint } from "./values";
 
-/**
- * Choreography: motion written as actions on refs, played one after another or together, instead of as a track on
- * each prop. An action is plain data with a length; `timeline()` places it on a clock, and lowering writes each
- * (node, property) it moves as the one track a hand-written `track()` would be, starting from the node's own value.
- */
-
-/** A shape's stroke as a verb moves it: its color, its width, or both. */
 export interface StrokeMoves {
   readonly color?: Paint;
   readonly width?: number;
 }
 
-/** What an action can move on a node, and the value each one goes to: the props of the same names. */
 export interface Moves {
-  /** Where the node goes in its parent, as its own `at` says it: a point, or an anchor its `at` point lands on. */
   readonly at?: Vec | Anchor;
-  /** Degrees, clockwise. */
   readonly rotate?: number;
   readonly scale?: number | Vec;
   readonly opacity?: number;
-  /** A shape's or a text's fill. */
   readonly fill?: Paint;
-  /** A shape's stroke: the parts of it named. */
   readonly stroke?: StrokeMoves;
   readonly trim?: Vec;
   readonly geometry?: Geometry;
 }
 
-/** One property a move writes: a stroke's color and width are two. */
 type Prop = Exclude<keyof Moves, "stroke"> | "stroke" | "strokeWidth";
 
-/** The names `Moves` takes. */
 const NAMES: readonly (keyof Moves)[] = [
   "at",
   "rotate",
@@ -55,19 +41,13 @@ const NAMES: readonly (keyof Moves)[] = [
   "geometry",
 ];
 
-/** A value one of `Moves` takes, once anchors are read. */
 type Value = Vec | number | Paint | Geometry;
 
 const isName = (name: string): name is keyof Moves => NAMES.some((known) => known === name);
 
-/** The point of a node that `move` lands on an anchor: a place on its box, or a point measured from its `at` point. */
 export type Point = Place | Vec;
 
 export interface MoveOptions {
-  /**
-   * Which point of the node lands on an anchor: a place on its box, or a point measured from the one its `at`
-   * places. Default `[0, 0]`: the point its `at` places, its box's top-left unless its `anchor` says.
-   */
   readonly point?: Point;
 }
 
@@ -76,7 +56,6 @@ type Goal =
   | { readonly kind: "by"; readonly by: Vec }
   | { readonly kind: "anchor"; readonly anchor: Anchor; readonly point: Point };
 
-/** One property of one node going to a goal: a transition, or a cut when `over` is 0. */
 export interface Move {
   readonly target: Ref;
   readonly prop: Prop;
@@ -84,11 +63,9 @@ export interface Move {
   readonly over: Seconds;
   readonly curve: Curve;
   readonly goal: Goal;
-  /** How it reads in code, for errors: `win.move()`. */
   readonly verb: string;
 }
 
-/** Every property a timeline moves on a node, gliding back to where it started over the clock's last `over` seconds. */
 export interface Rewind {
   readonly target: Ref;
   readonly over: Seconds;
@@ -96,15 +73,10 @@ export interface Rewind {
   readonly verb: string;
 }
 
-/**
- * Something that happens to refs over `length` seconds, counted from its own start. Actions are values: combine
- * them with `seq`, `par` and `stagger`, and write verbs of your own as functions that return them.
- */
 export class Action {
   readonly length: Seconds;
   readonly moves: readonly Move[];
   readonly rewinds: readonly Rewind[];
-  /** Named spans inside it, from its own start. */
   readonly labels: ReadonlyMap<string, Span>;
 
   constructor(
@@ -119,7 +91,6 @@ export class Action {
     this.labels = labels;
   }
 
-  /** The same action, its span named `name`: a timeline reads it back with `.span(name)`. */
   as(name: string): Action {
     if (name === "") throw new Error("as() needs a name.");
 
@@ -148,7 +119,6 @@ const actions = (list: readonly Action[], what: string): readonly Action[] => {
   return list;
 };
 
-/** Actions placed at their starts, as one: its length is `length`, or where the last one ends. */
 const together = (placed: readonly (readonly [Action, Seconds])[], length?: Seconds): Action => {
   const labels = new Map<string, Span>();
 
@@ -171,7 +141,6 @@ const together = (placed: readonly (readonly [Action, Seconds])[], length?: Seco
   );
 };
 
-/** One action after another, each starting as the one before ends. */
 export const seq = (...list: readonly Action[]): Action => {
   let at = 0;
 
@@ -187,11 +156,9 @@ export const seq = (...list: readonly Action[]): Action => {
   );
 };
 
-/** Actions that start together. It lasts as long as the longest. */
 export const par = (...list: readonly Action[]): Action =>
   together(actions(list, "par()").map((action) => [action, 0]));
 
-/** Nothing for `seconds`: a pause in a `seq`. */
 export const wait = (seconds: Seconds): Action => {
   if (!(seconds >= 0 && Number.isFinite(seconds)))
     throw new Error(`wait() needs a finite number of seconds of 0 or more, got ${seconds}.`);
@@ -199,10 +166,6 @@ export const wait = (seconds: Seconds): Action => {
   return new Action(seconds);
 };
 
-/**
- * Actions that start `step` seconds apart. It lasts until the last one ends. For spans that start a step apart, use
- * `span.cascade(count, step)`.
- */
 export const stagger = (step: Seconds, ...list: readonly Action[]): Action => {
   if (!Number.isFinite(step))
     throw new Error(
@@ -212,7 +175,6 @@ export const stagger = (step: Seconds, ...list: readonly Action[]): Action => {
   return together(actions(list, "stagger()").map((action, i) => [action, i * step]));
 };
 
-/** A positive length for a transition, or the error that says how to write a cut. */
 const length = (over: Seconds, verb: string): Seconds => {
   if (!(over > 0 && Number.isFinite(over)))
     throw new Error(
@@ -224,7 +186,6 @@ const length = (over: Seconds, verb: string): Seconds => {
 
 const DEFAULT_CURVE: Curve = ease.out;
 
-/** Each property `values` names, with the value it goes to: a stroke's color and width apart. */
 const flatValues = (values: Moves, verb: string): (readonly [Prop, Value | Anchor])[] => {
   const unknown = Object.keys(values).find((name) => !isName(name));
 
@@ -273,11 +234,9 @@ const label = (target: Ref, name: string): string => `${target.label}.${name}()`
 
 const isPoint = (to: Vec | Anchor | Ref): to is Vec => Array.isArray(to);
 
-/** Whether a verb was given a stroke as the prop writes it, not a bare paint. */
 const isStrokeMoves = (stroke: StrokeMoves | Paint): stroke is StrokeMoves =>
   typeof stroke === "object" && !Array.isArray(stroke) && !("kind" in stroke);
 
-/** The verbs every ref has, as functions of the ref: `Ref`'s methods call these. */
 export const verbs = {
   to: (target: Ref, values: Moves, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
     const verb = label(target, "to");
@@ -363,7 +322,6 @@ export const verbs = {
   },
 };
 
-/** A choreography placed on a clock: the scene's, or the `<Sequence timeline={…}>` it is given to. */
 export class Timeline {
   readonly action: Action;
 
@@ -371,12 +329,10 @@ export class Timeline {
     this.action = action;
   }
 
-  /** When the last action ends, on the timeline's clock. A rewind runs at the end of the clock, after this. */
   get end(): Seconds {
     return this.action.length;
   }
 
-  /** The span of the action named `name` with `.as(name)`, on the timeline's clock: line other things up with it. */
   span(name: string): Spanned {
     const found = this.action.labels.get(name);
 
@@ -394,11 +350,6 @@ export class Timeline {
 
 let open: Timeline[] | undefined;
 
-/**
- * Plays actions one after another on the scene's clock, or on a `<Sequence>`'s when given to it as
- * `<Sequence start={…} timeline={…}>`. Call it inside `scene()`'s callback or a component the scene renders. Every
- * node it moves must sit on that clock.
- */
 export const timeline = (...list: readonly Action[]): Timeline => {
   if (!open)
     throw new Error(
@@ -411,7 +362,6 @@ export const timeline = (...list: readonly Action[]): Timeline => {
   return made;
 };
 
-/** A node element: what lowering gives a key. */
 export type NodeElement = Exclude<
   SceneElement,
   { readonly type: "fragment" | "sequence" | "morph" | "run" }
@@ -431,7 +381,6 @@ const KINDS: Readonly<Record<Prop, readonly NodeElement["type"][]>> = {
   geometry: ["shape"],
 };
 
-/** What a prop is when the node doesn't write it. `at` is where the node is, which lowering knows. */
 const UNWRITTEN: Readonly<Partial<Record<Prop, Value>>> = {
   rotate: 0,
   scale: 1,
@@ -470,7 +419,6 @@ interface Placed<T> {
   readonly item: T;
 }
 
-/** Whether `target` names the node keyed `key`, given the keys of the refs lowered so far. */
 const names = (target: Ref, el: NodeElement, key: string, refs: Notes["refs"]): boolean => {
   if (!target.within) return el.props.ref === target;
   const owner = refs.get(target.within.ref);
@@ -485,7 +433,6 @@ const walk = (el: SceneElement, visit: (el: SceneElement) => void): void => {
     for (const child of el.children) walk(child, visit);
 };
 
-/** The track a hand-written prop would be: the node's own value, then each move in time order, then the rewind. */
 const written = (
   initial: Value,
   moves: readonly Move[],
@@ -520,23 +467,16 @@ const plus = (before: Value, by: Vec, move: Move): Vec => {
 
 const isPlace = (point: Point): point is Place => typeof point === "string";
 
-/** `point` in the node's own frame, given its box and the point of it that its `at` places. */
 const pointIn = (point: Point, box: Box, home: Vec, verb: string): Vec =>
   isPlace(point) ? placeIn(box, point, [0, 0], verb) : [home[0] + point[0], home[1] + point[1]];
 
-/**
- * The timelines of one scene, as lowering applies them. Lowering asks for each node in turn; every node a timeline
- * moves gets its tracks, and at the end each ref a timeline names must have been found.
- */
 export class Cues {
   readonly #moves: readonly Placed<Move>[];
   readonly #rewinds: readonly Placed<Rewind>[];
   readonly #claimed = new Set<Timeline>();
   readonly #clocks = new Map<Timeline, Clock>();
   readonly #met = new Set<Move | Rewind>();
-  /** Each move applied, on the scene's clock, with the key of the node it moved. */
   readonly applied: { verb: string; key: string; start: Seconds; over: Seconds }[] = [];
-  /** Each ref a timeline names, whether or not a node has it. */
   get refs(): readonly Ref[] {
     return [...this.#moves, ...this.#rewinds].map(
       ({ item }) => item.target.within?.ref ?? item.target,
@@ -562,7 +502,6 @@ export class Cues {
     });
   }
 
-  /** A `<Sequence timeline={…}>` is lowered: that timeline runs on its clock. */
   claim(timeline: Timeline, clock: Clock): void {
     if (!this.#claimed.has(timeline))
       throw new Error(
@@ -597,10 +536,6 @@ export class Cues {
     );
   }
 
-  /**
-   * The element with the tracks the timelines give it, or as it is when none moves it. `home` is where its `at` is
-   * when it writes none.
-   */
   apply(
     el: NodeElement,
     key: string,
@@ -673,7 +608,6 @@ export class Cues {
               t,
             );
 
-            // As every other goal, in the node's placement: the point its `at` names, not its frame's origin.
             return [x - dx + node.home[0], y - dy + node.home[1]];
           };
 
@@ -763,7 +697,6 @@ export class Cues {
     return start;
   }
 
-  /** Every ref a timeline names was on a node it could move. */
   finish(): void {
     for (const { item } of [...this.#moves, ...this.#rewinds]) {
       if (this.#met.has(item)) continue;
@@ -778,7 +711,6 @@ export class Cues {
   }
 }
 
-/** Two moves of one property that overlap, unless the first is a spring that the second cuts. */
 const conflicts = (moves: readonly Move[], prop: Prop, key: string): void => {
   moves.forEach((a, i) => {
     for (const b of moves.slice(i + 1)) {
@@ -812,7 +744,6 @@ const withTracks = (el: NodeElement, tracks: ReadonlyMap<Prop, Track<Value>>): N
   return { ...el, props: { ...el.props, ...own, ...stroke } } as NodeElement;
 };
 
-/** Runs a scene's build with timelines open, and gives back what it built and the timelines it made. */
 export const collect = (build: () => SceneElement): readonly [SceneElement, Cues] => {
   const outer = open;
   const made: Timeline[] = [];

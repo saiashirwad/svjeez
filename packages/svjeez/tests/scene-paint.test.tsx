@@ -49,7 +49,6 @@ const only = (model: Model.Scene): Model.SceneNode => model.root.children[0]!;
 
 const count = (text: string, part: string): number => text.split(part).length - 1;
 
-/** The SVG backend's output with the indents between tags taken out, so tests can read it as one line. */
 const emitted = (model: Model.Scene): string => svg.emit(model).replace(/>\s+</g, "><");
 
 describe("gradients", () => {
@@ -608,7 +607,6 @@ describe("effects", () => {
       )),
     );
 
-    // Around the rect's center, (50, 50), anything within its half diagonal at twice its size, 28.3, can be drawn.
     expect(out).toContain('x="17" y="17" width="66" height="66"');
   });
 
@@ -642,7 +640,6 @@ describe("effects", () => {
     expect(out).toMatch(
       /<g filter="url\(#f1\)"[^>]*class="a m1"><rect width="40" height="20" fill="#FF0000" clip-path="url\(#c1\)"\/><\/g>/,
     );
-    // The region holds the clipped content, 20 by 20, its shadow 2 over and 6 out, and a unit of room on each side.
     expect(out).toContain('x="-5" y="-5" width="34" height="34"');
   });
 
@@ -660,7 +657,6 @@ describe("effects", () => {
     expect(out).toContain('attributeName="stdDeviation" values="8;0"');
     expect(out).toContain('<filter id="f1s"');
     expect(out).toContain('[filter="url(#f1)"]{filter:url(#f1s)}');
-    // The region holds the widest the blur gets.
     expect(out).toContain('x="-25" y="-25" width="90" height="70"');
   });
 

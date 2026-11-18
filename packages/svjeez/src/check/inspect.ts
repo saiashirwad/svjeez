@@ -55,34 +55,6 @@ import {
 } from "./survey";
 import { boxOf } from "../author/values";
 
-/**
- * A check of a scene that reads only the model: no browser, no pixels, the same answer every time. Each rule speaks
- * only when it is sure, or says `info` when it can't be; it never guesses from what a backend writes.
- *
- * | code              | severity              | what it means                                                                  |
- * | ----------------- | --------------------- | ------------------------------------------------------------------------------ |
- * | `compile-error`   | error                 | The scene threw while it was built. Only `svjeez check` reports it.             |
- * | `compile-warning` | warning               | The old compiler warned while it wrote an SVG string. Only `svjeez check`.      |
- * | `never-visible`   | warning               | A node can't be seen at any time: hidden, painting nothing, or covered.        |
- * | `zero-size`       | warning               | A node's geometry, text or image has no size at any time.                      |
- * | `off-canvas`      | error, warning        | Outside the canvas at every time (error), or cut by its edge at rest.          |
- * | `text-overflow`   | warning               | Text past the canvas at rest, or a line wider than the width it wraps to.      |
- * | `overlap`         | warning               | Two texts drawn over each other while both are fully shown.                    |
- * | `missing-glyph`   | error                 | Characters the text's face has no glyph for.                                   |
- * | `low-contrast`    | warning, info         | Text or a thin line too close in color to the flat color behind it.            |
- * | `loop-seam`       | warning               | A looping scene jumps when it starts again: a value ends where it didn't start.|
- * | `visible-at-zero` | error                 | Shown at 0s and cut straight back in, or filled while its stroke draws in.     |
- * | `nothing-enters`  | info                  | Everything is on screen from 0s and nothing ever enters.                       |
- * | `wasted-motion`   | info                  | A value changes before the node is first seen, or after it is gone for good.   |
- * | `static`          | warning, info         | Nothing in the scene moves, or a value changes only after the scene ends.      |
- * | `unused-symbol`   | info                  | A symbol no instance draws.                                                    |
- * | `layout-overlap`  | warning               | Two children of a `<Stack>` or `<Grid>` overlap: motion carried one onto another. |
- * | `word-cut`        | warning               | A word wider than the width its text wraps to, cut across two lines.          |
- * | `unattached-ref`  | warning               | A ref the scene made that no node takes.                                       |
- * | `hidden-target`   | warning               | A timeline moves a node that is never visible.                                 |
- * | `unsupported`     | error                 | A feature the chosen backend can't draw.                                       |
- * | `approximate`     | warning               | A feature the chosen backend draws differently from the model.                |
- */
 export const RULES = {
   "compile-error": "The scene threw while it was built.",
   "compile-warning": "The old compiler warned while it wrote an SVG string.",
@@ -111,7 +83,6 @@ export type Code = keyof typeof RULES;
 
 export type Severity = "error" | "warning" | "info";
 
-/** Another node a finding is about, as an overlap's other text. */
 export interface Related {
   readonly key: string;
   readonly source?: Source;
@@ -120,26 +91,19 @@ export interface Related {
 export interface Finding {
   readonly code: Code;
   readonly severity: Severity;
-  /** The node it is about. The root's key when it is about the whole scene; empty when the scene didn't build. */
   readonly key: string;
   readonly source?: Source;
-  /** What is wrong, in one sentence, in the scene's terms: node kinds and keys, seconds and scene units. */
   readonly message: string;
-  /** What to change. */
   readonly hint: string;
-  /** The scene times it was seen at, when it holds at some times and not others. */
   readonly times?: readonly Seconds[];
   readonly related?: readonly Related[];
 }
 
 export interface InspectOptions {
-  /** Also report what this backend can't draw exactly, as `unsupported` and `approximate`. */
   readonly backend?: Pick<Backend<never>, "name" | "supports">;
-  /** More times to read the scene at, besides every key and halfway between each two. */
   readonly times?: readonly Seconds[];
 }
 
-/** Everything the rules share, read once. */
 interface Survey {
   readonly scene: Scene;
   readonly entries: readonly Entry[];
@@ -147,7 +111,6 @@ interface Survey {
   readonly times: readonly Seconds[];
   readonly frames: readonly ReadonlyMap<string, Placed>[];
   readonly hidden: ReadonlyMap<string, readonly Stretch[]>;
-  /** Nodes already reported as never seen: nothing more is said about them or what they hold. */
   readonly gone: Set<string>;
   readonly out: Finding[];
 }
@@ -177,13 +140,11 @@ const add = (
   });
 };
 
-/** Whether `entry` or a group around it was already reported as never seen. */
 const isGone = (survey: Survey, entry: Entry): boolean =>
   [...entry.ancestors, entry.node].some((node) => survey.gone.has(node.key));
 
 const isLeaf = (entry: Entry): boolean => entry.node.kind !== "group";
 
-/** Every placement of `entry` at the times it shows, with the time. */
 const shown = (
   survey: Survey,
   entry: Entry,
@@ -196,10 +157,6 @@ const shown = (
       : [];
   });
 
-// ---------------------------------------------------------------------------------------------------------------
-// never-visible, zero-size
-
-/** Whether a geometry has no size along an axis that matters for what it draws. */
 const flatAxes = (geometry: Geometry): readonly [across: boolean, down: boolean] => {
   switch (geometry.kind) {
     case "rect":
@@ -213,7 +170,6 @@ const flatAxes = (geometry: Geometry): readonly [across: boolean, down: boolean]
     }
 
     default: {
-      // A line, a polygon or a path still draws a stroke when it is flat: only a point draws nothing.
       const { width, height } = boxOf(geometry);
       const point = width === 0 && height === 0;
 
@@ -222,7 +178,6 @@ const flatAxes = (geometry: Geometry): readonly [across: boolean, down: boolean]
   }
 };
 
-/** Whether a geometry has no size at any time: the same axis flat at every key, which every ease between keeps. */
 const flatThroughout = (geometry: Animated<Geometry>): boolean => {
   const keys = isLane(geometry) ? geometry.keys.map((key) => key.value) : [geometry];
   const axes = keys.map(flatAxes);
@@ -243,16 +198,13 @@ const describeGeometry = (geometry: Geometry): string => {
   }
 };
 
-/** Whether a trim draws no stroke at any time. */
 const trimmedAway = (trim: Animated<Vec> | undefined): boolean => {
   if (trim === undefined) return false;
   const keys = isLane(trim) ? trim.keys.map((key) => key.value) : [trim];
 
-  // Two trims of no length mix into a trim of no length.
   return keys.every(([from, to]) => from === to);
 };
 
-/** Why a shape paints nothing, if it doesn't. */
 const unpainted = (scene: Scene, node: ShapeNode, duration: Seconds): string | undefined => {
   if (!clearThroughout(scene, node.fill)) return undefined;
   const fill = node.fill === undefined ? "no fill" : "a fill that is fully transparent";
@@ -271,7 +223,6 @@ const unpainted = (scene: Scene, node: ShapeNode, duration: Seconds): string | u
   return undefined;
 };
 
-/** Why a text paints nothing, if it doesn't. */
 const unwritten = (scene: Scene, node: TextNode, duration: Seconds): string | undefined => {
   const runs = runsOf(node).filter((run) => run.text.trim() !== "");
 
@@ -292,7 +243,6 @@ const unwritten = (scene: Scene, node: TextNode, duration: Seconds): string | un
   return undefined;
 };
 
-/** Why `entry` is hidden at every time by its layers and its groups', if it is. */
 const hiddenWhy = (survey: Survey, entry: Entry): string | undefined => {
   const { duration } = survey.scene;
   const { node } = entry;
@@ -378,7 +328,6 @@ const neverVisible = (survey: Survey): void => {
   covered(survey);
 };
 
-/** Where `entry` may draw at any time, in the scene; undefined when it can't be bounded or draws nothing. */
 const reachInScene = (survey: Survey, entry: Entry): Box | undefined => {
   try {
     const own = placed(reachOf(entry.node, survey.scene.symbols, "inspect"), entry.node);
@@ -391,7 +340,6 @@ const reachInScene = (survey: Survey, entry: Entry): Box | undefined => {
   }
 };
 
-/** Whether nothing about where `node` is or how it shows ever changes, and nothing cuts or blends what it draws. */
 const isPlain = (node: SceneNode): boolean =>
   !isLane(node.at) &&
   node.clip === undefined &&
@@ -407,12 +355,9 @@ const isPlain = (node: SceneNode): boolean =>
       layer.scale[1] !== 0,
   );
 
-/** A shape drawn the same at every time, one opaque color over an upright rect: what it hides is exactly known. */
 interface Cover {
   readonly entry: Entry;
-  /** The rect, in the scene. */
   readonly box: Box;
-  /** Its largest corner radius, in the scene. */
   readonly radius: number;
 }
 
@@ -444,14 +389,12 @@ const opaque = (scene: Scene, paint: ShapeNode["fill"], scheme: Scheme): boolean
   return rgbaIn(scene, paint, scheme)[3] >= 1;
 };
 
-/** Whether `box` lies inside `outer` grown by `by` on every side. */
 const within = (box: Box, outer: Box, by = 0): boolean =>
   box.x >= outer.x - by - 1e-6 &&
   box.y >= outer.y - by - 1e-6 &&
   box.x + box.width <= outer.x + outer.width + by + 1e-6 &&
   box.y + box.height <= outer.y + outer.height + by + 1e-6;
 
-/** Whether a rect with corners rounded by `radius` hides all of `box`: inside it once its corners are cut away. */
 const hides = (cover: Box, radius: number, box: Box): boolean =>
   within(box, { ...cover, x: cover.x + radius, width: cover.width - radius * 2 }) ||
   within(box, { ...cover, y: cover.y + radius, height: cover.height - radius * 2 });
@@ -486,12 +429,8 @@ const covered = (survey: Survey): void => {
   }
 };
 
-// ---------------------------------------------------------------------------------------------------------------
-// off-canvas, text-overflow
-
 const EDGES = ["left", "top", "right", "bottom"] as const;
 
-/** How far `box` reaches past each edge of the canvas: left, top, right, bottom. */
 const past = (box: Box, [width, height]: Vec): readonly number[] => [
   -box.x,
   -box.y,
@@ -567,7 +506,6 @@ const offCanvas = (survey: Survey): void => {
       continue;
     }
 
-    // A big shape past the edge is a background or a deliberate bleed; so is one that is mostly outside.
     if (box.width >= width / 2 || box.height >= height / 2) continue;
 
     if (by >= (across ? box.width : box.height) / 4) continue;
@@ -585,7 +523,6 @@ const offCanvas = (survey: Survey): void => {
 const short = (text: string, length = 40): string =>
   text.length > length ? `${text.slice(0, length - 1)}…` : text;
 
-/** Lines wider than the column they were laid out in: only a glyph wider than the width to wrap to can do that. */
 const wideLines = (survey: Survey): void => {
   for (const entry of survey.entries) {
     const { node } = entry;
@@ -614,13 +551,8 @@ const wideLines = (survey: Survey): void => {
   }
 };
 
-// ---------------------------------------------------------------------------------------------------------------
-// overlap
-
-/** The middle half of a text's box, where its letters' bodies are: lines may touch at ascenders and descenders. */
 const ink = (box: Box): Box => ({ ...box, y: box.y + box.height / 4, height: box.height / 2 });
 
-/** Whether an entry or a group around it is moving, turning or scaling at `t`. */
 const travelling = (entry: Entry, t: Seconds): boolean =>
   [...entry.ancestors, entry.node].some(
     (node) =>
@@ -631,7 +563,6 @@ const travelling = (entry: Entry, t: Seconds): boolean =>
       ),
   );
 
-/** Whether an entry's own opacity, or a group's around it, is changing at `t`. */
 const fading = (entry: Entry, t: Seconds): boolean =>
   [...entry.ancestors, entry.node].some((node) =>
     node.layers.some((layer) => movingAt(layer.opacity, t) || movingAt(layer.scale, t)),
@@ -656,7 +587,6 @@ const overlap = (survey: Survey): void => {
     const up = texts.flatMap((entry) => {
       const at = frame.get(entry.node.key);
 
-      // Text passing over text on its way somewhere is a transition; text that rests over text is a mistake.
       return at && at.opacity > VISIBLE && !fading(entry, t) && !travelling(entry, t)
         ? [{ entry, box: ink(at.box) }]
         : [];
@@ -696,7 +626,6 @@ const overlap = (survey: Survey): void => {
   }
 };
 
-/** Whether an opaque node drawn between two texts hides most of the lower one at `t`. */
 const hiddenBetween = (
   survey: Survey,
   frame: ReadonlyMap<string, Placed>,
@@ -727,9 +656,6 @@ const list = (times: readonly Seconds[]): string => {
 
   return times.length > 4 ? `${shown} and ${times.length - 4} more` : shown;
 };
-
-// ---------------------------------------------------------------------------------------------------------------
-// missing-glyph
 
 const missingGlyphs = (survey: Survey): void => {
   const { fonts } = survey.scene;
@@ -769,10 +695,6 @@ const missingGlyphs = (survey: Survey): void => {
   }
 };
 
-// ---------------------------------------------------------------------------------------------------------------
-// low-contrast
-
-/** Relative luminance, as WCAG defines it. */
 const luminance = ([r, g, b]: Rgba): number => {
   const lin = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
 
@@ -785,7 +707,6 @@ const ratio = (a: Rgba, b: Rgba): number => {
   return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
 };
 
-/** `top` with its alpha, over an opaque `under`. */
 const over = (top: Rgba, alpha: number, under: Rgba): Rgba => {
   const a = top[3] * alpha;
   const mix = (i: 0 | 1 | 2) => top[i] * a + under[i] * (1 - a);
@@ -793,7 +714,6 @@ const over = (top: Rgba, alpha: number, under: Rgba): Rgba => {
   return [mix(0), mix(1), mix(2), 1];
 };
 
-/** The one opaque color a node shows across all of `box` at `t`, with its name; undefined when it isn't one flat color there. */
 interface Flat {
   readonly name: string;
   readonly color: Readonly<Record<Scheme, Rgba>>;
@@ -829,7 +749,6 @@ const flatAt = (
   const flat: Flat = { name, color: { light, dark } };
 
   if (!box) return flat;
-  // The box takes in the stroke, which covers the fill for its whole width from the outline in.
   const stroke = 2 * strokeReachAt(node, at, t);
 
   const inner = {
@@ -859,7 +778,6 @@ const flatAt = (
   return undefined;
 };
 
-/** What is directly behind `box` at `t`: the nearest node drawn before `entry` that reaches into it, if it is one flat color across it. */
 const behind = (
   survey: Survey,
   entry: Entry,
@@ -925,7 +843,6 @@ const lowContrast = (survey: Survey): void => {
       let found: Contrast | undefined;
 
       for (const { paint, alpha, steady } of paints) {
-        // A run on its way in or out is read once it has arrived.
         if (movingAt(paint, t) || !steady(t) || alpha(t) < 0.99) continue;
 
         const by = SCHEMES.flatMap((scheme) => {
@@ -988,7 +905,6 @@ const lowContrast = (survey: Survey): void => {
   }
 };
 
-/** The flat paints a text's runs or a thin unfilled stroke draw with, each with what multiplies its alpha at a time. */
 const paintsOf = (
   scene: Scene,
   node: SceneNode,
@@ -1017,16 +933,11 @@ const paintsOf = (
     ? Math.max(...node.stroke.width.keys.map((key) => key.value))
     : node.stroke.width;
 
-  // A wide stroke reads as a shape, which the contrast of thin lines and text says nothing about.
   return width > 0 && width <= 2
     ? [{ paint: node.stroke.color, alpha: () => 1, steady: () => true }]
     : [];
 };
 
-// ---------------------------------------------------------------------------------------------------------------
-// loop-seam
-
-/** How `named` differs between two times, in words, or undefined when it looks the same at both. */
 const gap = (
   survey: Survey,
   entry: Entry,
@@ -1111,14 +1022,12 @@ const gap = (
   }
 };
 
-/** The paint nearest to `t`: paints with nothing between them are read at the closer key. */
 const paintAt = (value: Animated<Paint>, t: Seconds): Paint => {
   const { from, to, amount } = between(value, t);
 
   return amount < 0.5 ? from : to;
 };
 
-/** Points along a geometry's outline, many to a curve. */
 const traced = (geometry: Geometry): Vec[][] =>
   contoursOf(geometry).map((contour) => {
     const points: Vec[] = [contour.start];
@@ -1149,10 +1058,6 @@ const toSegment = ([px, py]: Vec, [ax, ay]: Vec, [bx, by]: Vec): number => {
   return Math.hypot(px - ax - dx * u, py - ay - dy * u);
 };
 
-/**
- * How far apart two outlines are as drawn: the farthest any point of one lies from the other, both ways. Where a
- * contour starts doesn't count, so a circle matched to start elsewhere is the same circle.
- */
 const outlineGap = (a: Geometry, b: Geometry): number => {
   const [x, y] = [traced(a), traced(b)];
 
@@ -1227,10 +1132,6 @@ const loopSeam = (survey: Survey): void => {
   }
 };
 
-// ---------------------------------------------------------------------------------------------------------------
-// timing
-
-/** What multiplies a node's own opacity at `t`: its layers', not its groups'. */
 const ownOpacity = (node: SceneNode, t: Seconds): number =>
   node.layers.reduce((product, layer) => {
     const { from, to, amount } = between(layer.opacity, t);
@@ -1238,12 +1139,10 @@ const ownOpacity = (node: SceneNode, t: Seconds): number =>
     return product * (from + (to - from) * amount);
   }, 1);
 
-/** How long a pop can be hidden for and still read as a mistake rather than a beat. */
 const HOLD = 0.1;
 
 const STEP = 0.005;
 
-/** A node shown at 0s that cuts to hidden and comes straight back: its entrance was written from values it doesn't start at. */
 const popsIn = (
   node: SceneNode,
   duration: Seconds,
@@ -1270,7 +1169,6 @@ const popsIn = (
 
 const length = ([from, to]: Vec): number => Math.abs(to - from);
 
-/** Whether a node comes in by a way other than its layers: a stroke that draws, or text runs that fade or color in. */
 const arrives = (scene: Scene, node: SceneNode): boolean => {
   if (node.kind === "shape") return node.trim !== undefined && isLane(node.trim);
 
@@ -1300,7 +1198,6 @@ const timing = (survey: Survey): void => {
 
     if (isLeaf(entry) && (hidden.length > 0 || arrives(scene, node))) enters = true;
 
-    // Changes after the end.
     for (const { name, value } of named) {
       if (!isLane(value) || value.period !== undefined) continue;
       const changes = changesOf(value, duration);
@@ -1370,7 +1267,6 @@ const timing = (survey: Survey): void => {
     });
 };
 
-/** Changes of a node's values that no one sees: before it is first visible, or after it is gone for good. */
 const wasted = (
   survey: Survey,
   entry: Entry,
@@ -1393,7 +1289,6 @@ const wasted = (
     for (const change of changesOf(value, duration)) {
       if (change[1] < first - 1e-6) before.set(name, [...(before.get(name) ?? []), change]);
       else if (change[0] > last + 1e-6 && change[0] < duration) {
-        // In a loop, setting a value back to where it starts, while hidden, is how a loop closes.
         if (loop && gap(survey, entry, item, [change[1], 0], 1) === undefined) continue;
         after.set(name, [...(after.get(name) ?? []), change]);
       }
@@ -1426,9 +1321,6 @@ const wasted = (
       hint: "Drop the change, or show the node while it happens.",
     });
 };
-
-// ---------------------------------------------------------------------------------------------------------------
-// unused, capabilities
 
 const unusedSymbols = (survey: Survey): void => {
   const used = new Set<string>();
@@ -1471,10 +1363,6 @@ const capabilities = (survey: Survey, backend: InspectOptions["backend"]): void 
     });
 };
 
-/**
- * Findings the same code makes in the same words for nodes written at one place, as a component's repeated parts,
- * folded into one: the first node names the rest in `related`.
- */
 const folded = (findings: readonly Finding[]): Finding[] => {
   const out: Finding[] = [];
   const at = new Map<string, { index: number; more: string[]; times: Set<Seconds> }>();
@@ -1531,12 +1419,8 @@ const folded = (findings: readonly Finding[]): Finding[] => {
 
 const RANK: Readonly<Record<Severity, number>> = { error: 0, warning: 1, info: 2 };
 
-// ---------------------------------------------------------------------------------------------------------------
-// layout-overlap, word-cut, unattached-ref, hidden-target: what the model keeps of how the scene was written
-
 const CONTAINERS = { stack: "<Stack>", grid: "<Grid>" } as const;
 
-/** How far two boxes overlap across and down, or undefined when they only touch or are apart. */
 const overlapOf = (a: Box, b: Box): Vec | undefined => {
   const across = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x);
   const down = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
@@ -1544,7 +1428,6 @@ const overlapOf = (a: Box, b: Box): Vec | undefined => {
   return across > 0.5 && down > 0.5 ? [across, down] : undefined;
 };
 
-/** Where an entry's box is at each time it shows, by time. */
 const boxesShown = (survey: Survey, entry: Entry): ReadonlyMap<Seconds, Box> =>
   new Map(
     survey.times.flatMap((t, i): [Seconds, Box][] => {
@@ -1556,7 +1439,6 @@ const boxesShown = (survey: Survey, entry: Entry): ReadonlyMap<Seconds, Box> =>
     }),
   );
 
-/** A stack or a grid places its children apart; one that ends up over another was carried there by motion. */
 const layoutOverlap = (survey: Survey): void => {
   for (const entry of survey.entries) {
     const { node } = entry;
@@ -1598,11 +1480,9 @@ const layoutOverlap = (survey: Survey): void => {
   }
 };
 
-/** The text of one laid-out line. */
 const lineText = (node: TextNode, index: number): string =>
   node.lines[index]?.runs.map((run) => run.text).join("") ?? "";
 
-/** A word cut in two by a line break reads as two words: report each place the width did that. */
 const wordCuts = (survey: Survey): void => {
   for (const entry of survey.entries) {
     const { node } = entry;
@@ -1627,7 +1507,6 @@ const wordCuts = (survey: Survey): void => {
   }
 };
 
-/** A ref no node takes points at nothing: most often a node that was meant to have `ref={…}` and doesn't. */
 const unattachedRefs = (survey: Survey): void => {
   const { root, authored } = survey.scene;
 
@@ -1643,7 +1522,6 @@ const unattachedRefs = (survey: Survey): void => {
   }
 };
 
-/** A move on a node no one ever sees is work the scene does for nothing, or a sign the wrong node is moved. */
 const hiddenTargets = (survey: Survey): void => {
   const byKey = new Map(survey.entries.map((entry) => [entry.node.key, entry]));
   const said = new Set<string>();
@@ -1663,11 +1541,6 @@ const hiddenTargets = (survey: Survey): void => {
   }
 };
 
-/**
- * What is wrong with `scene`, read from the model alone: no browser, the same findings every time, errors first. Each
- * finding names a node by its key and where it was written, says what is wrong in the scene's terms, and what to
- * change. Codes and what each means are in `RULES`.
- */
 export const inspect = (scene: Scene, options: InspectOptions = {}): Finding[] => {
   const entries = entriesOf(scene);
   const times = momentsOf(scene, options.times);

@@ -1,5 +1,3 @@
-/** Time and easing, shared by the scene model and the emitter. */
-
 export type Seconds = number;
 
 declare const easeBrand: unique symbol;
@@ -35,9 +33,7 @@ export const ease = {
   in: bezier(0.55, 0.06, 0.68, 0.19),
   out: bezier(0.23, 1, 0.32, 1),
   inOut: bezier(0.77, 0, 0.175, 1),
-  /** Overshoots, then settles. */
   pop: bezier(0.34, 1.56, 0.64, 1),
-  /** Hold the old value and jump at the end: the jagged, hand-drawn look. */
   hold: steps(1),
   steps,
   bezier,

@@ -1,6 +1,5 @@
 export interface PageElement {
   readonly tag: string;
-  /** The key of the scene-model node that drew it, when the backend wrote one. */
   readonly key?: string;
   readonly source?: string;
   readonly text?: string;
@@ -184,8 +183,6 @@ export const setup = (): PageSetup => {
 
   const SKIP = new Set(["offset", "easing", "composite", "computedOffset"]);
 
-  // Chromium leaves custom properties out of getKeyframes(), so read a CSS animation's properties from its rule too, and
-  // whether any of them takes more than one value.
   const declared = new Map<string, Set<string>>();
   const varies = new Set<string>();
 

@@ -29,7 +29,6 @@ const STOPS: readonly Vec[] = [
   [296, 40],
 ];
 
-/** Each move starts before the last one lands: a spring takes the dot from wherever it is, at its speed. */
 const MOVES = [span(0.4, 0.6), span(1, 0.6), span(1.6, wobble.settle)];
 const BACK = span(4.2, wobble.settle);
 

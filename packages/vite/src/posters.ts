@@ -6,11 +6,8 @@ import { close, encode } from "./encode.ts";
 export type Scheme = "light" | "dark";
 
 export interface PosterOptions {
-  /** Device pixels per SVG pixel. Default 1. */
   readonly scale?: number;
-  /** WebP quality from 0 to 1. Default 0.8. */
   readonly quality?: number;
-  /** CSS background behind the scene. Default `Canvas`, the scheme's page color. */
   readonly background?: string;
 }
 

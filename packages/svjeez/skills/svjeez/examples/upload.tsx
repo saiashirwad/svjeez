@@ -26,18 +26,12 @@ const BAR = 180;
 const ring = ref("ring");
 const pop = ease.spring({ stiffness: 260, damping: 12 });
 
-/** The beats: the upload runs, the check lands, and everything winds back before the loop. */
 const upload = span(0.4, 2.8);
 const done = upload.next(0.4);
 const reset = span(5.2, 0.6);
 
-/**
- * One number drives the picture: the ring's stroke and the bar's width are both mapped from it, so they can never
- * disagree, and its rewind winds both back at once.
- */
 const progress = track(0).to(1, upload, ease.inOut).rewind(reset.over, ease.inOut);
 
-/** Two labels in one place: one fades out as the other fades in. */
 const swap = (from: number) =>
   track(from)
     .to(1 - from, done.first(0.3))

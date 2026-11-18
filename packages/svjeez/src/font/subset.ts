@@ -148,7 +148,6 @@ const charMap = (pairs: readonly (readonly [number, number])[]): Uint8Array => {
   return Uint8Array.from([...head, ...bmp, ...full.done()]);
 };
 
-/** A subtable's length is a u16, so it holds at most 10920 pairs; more go into further subtables. */
 export const kernTable = (
   pairs: readonly (readonly [number, number, number])[],
   perSubtable = 10000,

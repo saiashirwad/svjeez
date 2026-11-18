@@ -48,7 +48,6 @@ const pathOf = (raw: string): string =>
 
 const slash = (path: string): string => path.replace(/\\/g, "/");
 
-/** Where the code that called in was written, when a trace inspects files under its `within` directory. */
 export const caller = (): JsxSource | undefined => {
   const directory = scope[TRACE]?.within;
 

@@ -3,12 +3,6 @@ import { flat, type Child, type Common, type SceneElement } from "./nodes";
 import { Anchor, canvasAnchor, fractionOf, placeIn, Ref, type Place } from "./refs";
 import type { Arrange } from "./settle";
 
-/**
- * Layout containers. Each lowers into a plain group that measures its children's boxes, strokes included, and places
- * every child's box in its slot. A child in a container has no `at` or `anchor` of its own, since the container
- * places it; motion layers and `rotate`, `scale` and `opacity` still apply, around where it was placed, because
- * layout reads the box at rest.
- */
 export type Alignment = "start" | "center" | "end";
 
 const SHARE: Readonly<Record<Alignment, number>> = { start: 0, center: 0.5, end: 1 };
@@ -24,7 +18,6 @@ const share = (value: Alignment, what: string): number => {
 
 const isPair = (value: number | Vec): value is Vec => Array.isArray(value);
 
-/** A length, or one across and one down, checked to be finite and not negative. */
 const room = (value: number | Vec, what: string): Vec => {
   const [x, y] = isPair(value) ? value : [value, value];
 
@@ -34,7 +27,6 @@ const room = (value: number | Vec, what: string): Vec => {
   return [x, y];
 };
 
-/** Where each of `sizes` starts when they follow one another from `from`, `space` apart, and where the last ends. */
 const run = (sizes: readonly number[], from: number, space: number) => {
   let at = from;
 
@@ -50,21 +42,13 @@ const run = (sizes: readonly number[], from: number, space: number) => {
 };
 
 export interface StackProps extends Common {
-  /** Default `column`. */
   readonly direction?: "row" | "column";
-  /** Between two children. Default 0. */
   readonly gap?: number;
-  /** Where each child sits across the stack. Default `start`. */
   readonly align?: Alignment;
-  /** Room around the children, inside the stack's box: one length, or one across and one down. Default 0. */
   readonly padding?: number | Vec;
   readonly children?: Child;
 }
 
-/**
- * Children one after another along a row or a column, `gap` apart. The stack's frame starts at the top-left of its
- * box, padding included, so its `at` puts that corner.
- */
 export const Stack = ({
   direction = "column",
   gap = 0,
@@ -111,22 +95,14 @@ export const Stack = ({
 };
 
 export interface GridProps extends Common {
-  /** How many cells across. Children fill rows from the left. */
   readonly columns: number;
-  /** Between two cells: one length, or one across and one down. Default 0. */
   readonly gap?: number | Vec;
-  /** Where a child sits across its cell. Default `start`. */
   readonly justify?: Alignment;
-  /** Where a child sits down its cell. Default `start`. */
   readonly align?: Alignment;
   readonly padding?: number | Vec;
   readonly children?: Child;
 }
 
-/**
- * Children in rows of `columns` cells. Each column is as wide as its widest child and each row as tall as its tallest.
- * The grid's frame starts at the top-left of its box, padding included.
- */
 export const Grid = ({
   columns,
   gap = 0,
@@ -179,23 +155,12 @@ export const Grid = ({
 };
 
 export interface AlignProps extends Omit<Common, "at" | "anchor"> {
-  /**
-   * What to place the children against: the canvas (the default), a box in the parent's frame, or a node's box by its
-   * ref. Against a node that moves, the children move with it.
-   */
   readonly to?: "canvas" | Box | Ref;
-  /** Which point of `to` the children's boxes take: the same point of each box lands on it. Default `center`. */
   readonly place?: Place;
-  /** How far in from the edges `place` names: one length, or one across and one down. Default 0. */
   readonly inset?: number | Vec;
   readonly children?: Child;
 }
 
-/**
- * Places children against a box: `place="top-right"` puts each child's top-right corner on the top-right corner of
- * `to`, `inset` in from both edges. Its frame's origin is that point. It places itself, so it takes no `at` and
- * can't sit in another container.
- */
 export const Align = ({
   to = "canvas",
   place = "center",

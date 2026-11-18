@@ -15,13 +15,11 @@ export interface SceneModule {
   readonly height: number;
   readonly title: string;
   readonly desc: string;
-  /** A still frame per color scheme, for `?svjeez&posters`. */
   readonly posters?: { readonly light: string; readonly dark: string };
 }
 
 export interface SvjeezOptions {
   readonly posters?: PosterOptions;
-  /** Where posters are kept between runs. Default `svjeez/` in Vite's cache directory. */
   readonly cacheDir?: string;
 }
 

@@ -24,28 +24,19 @@ import { blendNumber, valueAt } from "../model/sample";
 import { mixNumber, same } from "../model/steps";
 import { boxOf } from "../author/values";
 
-/**
- * What the SVG backend writes into `<defs>`: gradients, clip paths, masks and filters. Ids are its own, and two uses
- * of the same thing share one. A def that SMIL moves gets a still twin, which a viewer who asked for reduced motion sees
- * instead, since CSS can pause CSS animations but not SMIL.
- */
 export interface Defs {
   readonly scene: Scene;
   readonly canvas: Canvas;
-  /** What goes into `<defs>`, in the order it was first asked for. */
   readonly nodes: SvgNode[];
-  /** Rules for reduced motion, each swapping a def SMIL moves for its still twin. */
   readonly stills: string[];
   readonly ids: Map<string, string>;
   readonly counts: Map<string, number>;
-  /** The emitter's own lane, so a stop's color moves as every other CSS lane does and SMIL reads the same keys. */
   readonly lane: <T>(
     slot: string,
     lane: Lane<T>,
     values: (value: T) => ChannelValues,
     route: "css" | "smil",
   ) => CssLane;
-  /** The emitter's own node, for a clip's outline and a mask's content. */
   readonly draw: (node: SceneNode) => SvgNode;
 }
 
@@ -71,14 +62,12 @@ const nextId = (defs: Defs, base: string): string => {
   return `${defs.canvas.prefix}${base}${count}`;
 };
 
-/** A value as a def writes it: the attribute, what it is at the still frame, and the SMIL that moves it. */
 interface Moving {
   readonly value: string;
   readonly still: string;
   readonly nodes: readonly SvgNode[];
 }
 
-/** Where a windowed animation ends: the attribute holds it outside the window, as the old emitter's `windowEnd`. */
 const windowEnd = (nodes: readonly SvgNode[]): string | undefined => {
   const [first] = nodes;
 
@@ -87,16 +76,11 @@ const windowEnd = (nodes: readonly SvgNode[]): string | undefined => {
     : undefined;
 };
 
-/** A lane that holds one value is that value. */
 const settled = <T>(value: Animated<T>): Animated<T> =>
   isLane(value) && value.keys.every((key) => same(key.value, value.keys[0].value))
     ? value.keys[0].value
     : value;
 
-/**
- * A number on a def's attribute, through SMIL when it moves: CSS can't animate a gradient's points, a stop's offset
- * or a filter's numbers. `clamp` keeps it where the attribute means something.
- */
 const smil = (
   defs: Defs,
   attribute: string,
@@ -121,19 +105,16 @@ const smil = (
   return { value: windowEnd(nodes) ?? still, still, nodes };
 };
 
-/** A def as `twinned` builds it: its node, and whether SMIL moves it. */
 interface Built {
   readonly node: SvgNode;
   readonly moves: boolean;
 }
 
-/** A def's id, and whether it has a still twin for reduced motion. */
 interface Written {
   readonly id: string;
   readonly twin: boolean;
 }
 
-/** One def, written once for the picture that moves and, when SMIL moves it, once more still. */
 const twinned = (
   defs: Defs,
   signature: string,
@@ -156,13 +137,11 @@ const twinned = (
   return { id, twin: true };
 };
 
-/** What an attribute reads as, for the picture that moves or the still twin, and the SMIL children that go with it. */
 const pick = (written: Moving, still: boolean): string => (still ? written.still : written.value);
 
 const children = (list: readonly Moving[], still: boolean): SvgNode[] =>
   still ? [] : list.flatMap((written) => [...written.nodes]);
 
-/** A reduced-motion rule that swaps `id` for its still twin wherever `property` names it. */
 const swap = (defs: Defs, property: string, id: string): void => {
   const rule = `[${property}="url(#${id})"]{${property}:url(#${id}s)}`;
 
@@ -172,11 +151,6 @@ const swap = (defs: Defs, property: string, id: string): void => {
 const part = <T>(paint: Gradient | Lane<Gradient>, read: (gradient: Gradient) => T): Animated<T> =>
   settled(isLane(paint) ? mapLane(paint, read) : read(paint));
 
-/**
- * A gradient as a paint server, its points in the user space of the element it paints, which is the node's frame moved
- * by `shift`. Its points and offsets move through SMIL, and its colors through CSS on each stop, so a token stays a
- * live variable.
- */
 export const gradientUrl = (
   defs: Defs,
   paint: Gradient | Lane<Gradient>,
@@ -213,7 +187,6 @@ export const gradientUrl = (
           at("r", (g) => (g.kind === "radial" ? g.radius : 0), undefined),
         ];
 
-  // A linear gradient's x1, y1 and y2 default to 0; x2 and every radial number default to percents, so they stay.
   const optional = new Set(["x1", "y1", "y2"]);
 
   const stops = first.stops.map((stop, i) => {
@@ -287,14 +260,12 @@ export const gradientUrl = (
   return `url(#${id})`;
 };
 
-/** Whether an effect changes nothing it is given, so no filter needs to run for it. */
 const idle = (effect: Effect): boolean =>
   effect.kind === "blur"
     ? !isLane(effect.radius) && effect.radius <= 0
     : (!isLane(effect.opacity) && effect.opacity <= 0) ||
       (isRgba(effect.color) && effect.color[3] <= 0);
 
-/** The effects that change something, in order. */
 export const working = (effects: readonly Effect[]): Effect[] =>
   effects.filter((effect) => !idle(effect));
 
@@ -307,10 +278,6 @@ const box = ({ x, y, width, height }: Box) => ({
 
 const length = (value: number): number => Math.max(0, value);
 
-/**
- * A filter that runs `effects` in order over `region`, in the user space of the element it is on. Its numbers move
- * through SMIL, the only way every engine animates a filter primitive. Colors blend in sRGB, as the model says.
- */
 export const filterUrl = (
   defs: Defs,
   effects: readonly Effect[],
@@ -389,10 +356,6 @@ export const filterUrl = (
   return `url(#${id})`;
 };
 
-/**
- * An alpha mask drawing `mask` in the user space of the element it is on, the node's frame moved by `shift`. What
- * lies outside `region` is hidden, which changes nothing, since the mask's content never reaches there.
- */
 export const maskUrl = (defs: Defs, mask: SceneNode, region: Box, shift: Vec): string => {
   const { id } = twinned(defs, JSON.stringify(["m", mask.key, shift]), "m", (own) => ({
     moves: false,
@@ -406,10 +369,6 @@ export const maskUrl = (defs: Defs, mask: SceneNode, region: Box, shift: Vec): s
   return `url(#${id})`;
 };
 
-/**
- * A clip path holding `clip` in the user space of the element it is on, the node's frame moved by `shift`. It is
- * drawn as a shape is, so a clip that moves takes the same routes a geometry does.
- */
 export const clipUrl = (defs: Defs, clip: Animated<Geometry>, shift: Vec, key: string): string => {
   const { id } = twinned(defs, JSON.stringify(["c", clip, shift]), "c", (own) => {
     const outline: ShapeNode = {
@@ -429,7 +388,6 @@ export const clipUrl = (defs: Defs, clip: Animated<Geometry>, shift: Vec, key: s
       throw new Error(
         `The clip on "${key}" moves in a way its outline can't carry on its own, which lowering never writes. This is a bug in svjeez; please report it with the scene.`,
       );
-    // A clip path takes its outline only: no paint, and its own name for the fill rule.
     const { fill: _fill, "fill-rule": rule, ...attrs } = drawn.attrs;
 
     return {
