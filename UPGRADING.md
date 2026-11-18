@@ -7,6 +7,8 @@
 - **Time.** `motion()` chains, `animation={…}`, `<Clip>`, `<Once>`, `<Ambient>`, `<Pivot>` and `show()` are gone. Animate a prop with a `track`, a node with a `motion` layer or a recipe (`enter`, `exit`, `draw`, `wiggle`, `shake`, `spin`, `sampled`), and sequence refs with `timeline()`.
 - **Removed outright.** `def`, `css`, `fx`, `Picture` (use `<Image src={picture(…)}>`), `Glyphs`, ink, the extras (`code`, `terminal`, callouts, themes; use `tokens()`), `Drawn`, `valuesAt`, `svjeez/geometry` and the public `render()`. A module may still default-export an SVG string.
 - **Packages.** charts, code, diagrams, dom, geo, math, mermaid, live, react and svelte stay on 0.7 until they are ported. The CLI's `values` and `set` are gone with the editor.
+- **Removed outright.** `def`, `css`, `fx`, `Picture` (use `<Image src={picture(…)}>`), `Glyphs`, `Icon`, ink, the extras (`code`, `terminal`, callouts, themes; use `tokens()`), `Drawn`, `valuesAt`, `svjeez/geometry` and the public `render()`. A module may still default-export an SVG string.
+- **Packages.** code, diagrams, dom, geo, icons, math, mermaid, live, react and svelte stay on 0.7 until they are ported. The CLI's `values` and `set` are gone with the editor.
 - **restyle.** `onceAt` is gone, and a scene with a morph, a geometry that changes size or an animated effect can't follow a `timeline`.
 
 # Upgrading svjeez from 0.5 or 0.6 to 0.7

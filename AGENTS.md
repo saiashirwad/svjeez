@@ -17,6 +17,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/astro/` is `@svjeez/astro`, the Astro integration, built on `@svjeez/vite`.
 - `packages/fonts/` is `@svjeez/fonts`, which loads Google Fonts by family name into a `Font`.
 - `packages/icons/` is `@svjeez/icons`, the Tabler and Lucide path data and the `<Icon>` that draws it.
+- `packages/charts/` is `@svjeez/charts`, which draws bars, lines and areas on shared axes, with `d3-scale` and `d3-shape`.
 - `packages/video/` is `@svjeez/video`, which encodes a scene as MP4 or WebM through Mediabunny in headless Chromium.
 - `examples/` holds the scene-model example scenes and their committed output in `examples/dist/`. `examples/golden/` keeps the SVGs the 0.7 examples built, as references for frame diffs when a feature is ported; nothing builds or tests them. It is private and never published.
 
@@ -91,7 +92,7 @@ These are the rules that aren't visible from one file:
 Every package shares one version. To release, bump them together and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-for p in svjeez vite astro fonts video; do (cd packages/$p && bun pm version prerelease --preid next --no-git-tag-version); done   # on next; main uses minor, patch or major
+for p in svjeez vite astro fonts charts video; do (cd packages/$p && bun pm version prerelease --preid next --no-git-tag-version); done   # on next; main uses minor, patch or major
 bun install && bun run build:examples && git add -A examples && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 
