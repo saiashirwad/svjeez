@@ -4,12 +4,14 @@ import {
   Shape,
   Text,
   canvas,
+  ease,
   enter,
   exit,
   line,
   rect,
   scene,
   span,
+  track,
   type Paint,
 } from "svjeez";
 import { geist } from "../fonts/faces";
@@ -88,7 +90,7 @@ export default scene(
               {
                 name: "opened",
                 color: theme.orange,
-                span: span(0.6, 1.1),
+                draw: track(0).to(1, span(0.6, 1.5)),
               },
             ),
             bars(
@@ -96,7 +98,7 @@ export default scene(
               {
                 name: "merged",
                 color: theme.blue,
-                span: span(0.8, 1.1),
+                draw: track(0).to(1, span(0.8, 1.5)),
               },
             ),
           ]}
@@ -117,7 +119,7 @@ export default scene(
                 curve: "monotone",
                 dots: 3.5,
                 label: "median",
-                span: span(1.2, 1.8),
+                draw: track(0).to(1, span(1.2, 1.8), ease.linear),
               },
             ),
           ]}

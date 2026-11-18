@@ -8,6 +8,7 @@ import { blendVec, breaksOf, follow, laneFrom, unrolled, valueAt } from "../mode
 import { ease } from "./spring";
 import type { Connect } from "./settle";
 import type { Anim } from "./track";
+import { through } from "./derived";
 import { lookOf, paintedBoxOf } from "../model/painted";
 
 export interface ArrowProps extends Omit<Common, "at" | "anchor" | "origin" | "rotate" | "scale"> {
@@ -16,7 +17,8 @@ export interface ArrowProps extends Omit<Common, "at" | "anchor" | "origin" | "r
   readonly stroke: StrokeProps;
   readonly bend?: number;
   readonly inset?: number;
-  readonly trim?: Anim<Vec>;
+  /** How much of the arrow is drawn, from 0 to 1: the shaft is trimmed to [0, draw] and the head rides its tip. */
+  readonly draw?: Anim<number>;
   readonly head?: number | "none";
 }
 
@@ -333,7 +335,7 @@ const isNumber = (value: Anim<number>): value is number => typeof value === "num
 
 export const Arrow = (props: ArrowProps): SceneElement => {
   const label = "<Arrow>";
-  const { from, to, stroke, bend = 0, inset = 0, trim, head = 8, ...common } = props;
+  const { from, to, stroke, bend = 0, inset = 0, draw, head = 8, ...common } = props;
 
   if ("at" in common || "anchor" in common)
     throw new SceneError(
@@ -373,7 +375,7 @@ export const Arrow = (props: ArrowProps): SceneElement => {
           key: "shaft",
           geometry: { kind: "line", from: [0, 0], to: [1, 0] },
           stroke: drawn,
-          ...(trim !== undefined && { trim }),
+          ...(draw !== undefined && { trim: through(draw, (progress): Vec => [0, progress]) }),
         },
       },
       ...(size > 0

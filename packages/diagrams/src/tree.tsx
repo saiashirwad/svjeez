@@ -8,6 +8,8 @@ import {
   checkIds,
   Edge,
   Node,
+  checkDraws,
+  drawnBy,
   edgeKey,
   extent,
   isBare,
@@ -104,6 +106,12 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
     return span(Math.max(0, a?.start ?? 0, b ? b.start - over : 0), over);
   };
 
+  checkDraws(
+    options.draw,
+    out.edges.map((e) => edgeKey(e.from, e.to)),
+    WHAT,
+  );
+
   const parts = new Map<string, Spanned | undefined>([
     ...out.order.map((id) => [id, shown.get(id)] as const),
     ...out.edges.map((e) => [edgeKey(e.from, e.to), drawn(e.from, e.to)] as const),
@@ -118,7 +126,7 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
           key={edgeKey(e.from, e.to)}
           look={l}
           points={lines.get(e.to)!}
-          drawn={drawn(e.from, e.to)}
+          draw={drawnBy(options.draw, edgeKey(e.from, e.to), drawn(e.from, e.to), WHAT)}
         />
       ))}
       {between}

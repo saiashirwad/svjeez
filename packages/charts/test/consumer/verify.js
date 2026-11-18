@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { Group, font, scene, span } from "svjeez";
+import { Group, font, scene, span, track } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
 import { svg as backend } from "svjeez/tools";
 import { Chart, bars, line } from "@svjeez/charts";
@@ -17,14 +17,17 @@ const out = backend.emit(
         axis: "#8E8E93",
         label: "#6E6E73",
         series: [
-          bars({ Q1: 12, Q2: 48, Q3: 31 }, { color: "#0A6CFF", span: span(0.2, 1) }),
+          bars(
+            { Q1: 12, Q2: 48, Q3: 31 },
+            { color: "#0A6CFF", draw: track(0).to(1, span(0.2, 1)) },
+          ),
           line(
             [
               ["Q1", 12],
               ["Q2", 48],
               ["Q3", 31],
             ],
-            { color: "#E5453B", span: span(1, 1), dots: true },
+            { color: "#E5453B", draw: track(0).to(1, span(1, 1)), dots: true },
           ),
         ],
       }),

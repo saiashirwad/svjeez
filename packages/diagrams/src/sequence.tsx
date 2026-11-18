@@ -9,6 +9,8 @@ import {
   checkIds,
   Chip,
   Edge,
+  checkDraws,
+  drawnBy,
   Node,
   extent,
   known,
@@ -107,6 +109,12 @@ export function sequence<const A extends Record<string, Labelled>>(
 
   const drawOf = (beat: Span) => span(beat.start, Math.min(0.5, beat.over * 0.7));
   const fadeOf = (beat: Span) => span(beat.start, Math.min(0.25, beat.over));
+  checkDraws(
+    options.draw,
+    rows.flatMap((row, i) => (row.kind === "note" ? [] : [`message-${i + 1}`])),
+    WHAT,
+  );
+
   const noteTint = mix(l.colors.accent, l.colors.background, 0.12);
 
   const draw = (between?: Child): SceneElement => (
@@ -152,7 +160,7 @@ export function sequence<const A extends Record<string, Labelled>>(
               points={points}
               head={row.head ?? "filled"}
               dash={row.reply ? [5, 4] : undefined}
-              drawn={beat && drawOf(beat)}
+              draw={drawnBy(options.draw, `message-${i + 1}`, beat && drawOf(beat), WHAT)}
             />
             <Chip
               key="label"

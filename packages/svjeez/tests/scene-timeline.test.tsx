@@ -318,17 +318,17 @@ describe("springs, arrows and parts", () => {
     expect(keys.at(-1)![1][0] - keys[0]![1][0]).toBeCloseTo(20, 9);
   });
 
-  test("trim and stroke on an arrow draw and recolor its shaft and head", () => {
+  test("draw and stroke on an arrow draw and recolor its shaft and head", () => {
     const model = made(() => {
       const [a, b] = [ref("a"), ref("b")];
-      const trim = track<Vec>([0, 0]).to([0, 1], span(0, 1), ease.linear);
+      const progress = track(0).to(1, span(0, 1), ease.linear);
       const color = track<`#${string}`>("#000000").to("#ff0000", span(1, 0.5));
 
       return (
         <Group>
           <Shape fill="#000000" ref={a} geometry={rect(10, 10)} at={[0, 0]} />
           <Shape fill="#000000" ref={b} geometry={rect(10, 10)} at={[100, 0]} />
-          <Arrow key="arrow" from={a.right} to={b.left} trim={trim} stroke={{ color }} />
+          <Arrow key="arrow" from={a.right} to={b.left} draw={progress} stroke={{ color }} />
         </Group>
       );
     });

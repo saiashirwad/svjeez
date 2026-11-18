@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Align, Group, Shape, circle, font, scene, span } from "svjeez";
+import { Align, Group, Shape, circle, font, scene, span, track } from "svjeez";
 import { SceneError, inspect, svg, type Child } from "svjeez/tools";
 import {
   flowchart,
@@ -95,6 +95,24 @@ describe("flowchart", () => {
     expect(chart.when("a")).toBeUndefined();
     expect(chart.when("b")).toMatchObject({ start: 2, over: 0.3 });
     expect(chart.when("a->b")).toMatchObject({ start: 1.7, over: 0.3 });
+  });
+
+  test("an edge can draw from a timeline of its own, but not also from a reveal", () => {
+    const spec = { nodes: { a: "A", b: "B" }, edges: [["a", "b"]] } as const;
+    const progress = track(0).to(1, span(1, 1));
+    const chart = flowchart(spec, { ...options, draw: { "a->b": progress } });
+
+    expect(svg.emit(draw(chart.node))).toContain("@keyframes");
+    expect(chart.when("a->b")).toBeUndefined();
+
+    expect(
+      thrown(() => flowchart(spec, { ...options, reveal: span(0, 1), draw: { "a->b": progress } }))
+        .message,
+    ).toContain('draws "a->b" from a draw timeline, but its reveal already draws it');
+
+    expect(thrown(() => flowchart(spec, { ...options, draw: { "b->a": progress } })).problem).toBe(
+      'flowchart() draw names "b->a", which is not one of its edges.',
+    );
   });
 
   test("size holds every node, and parts are refs a scene can place against", () => {

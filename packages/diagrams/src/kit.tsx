@@ -4,7 +4,6 @@ import {
   Group,
   Shape,
   Text,
-  draw,
   enter,
   path,
   polygon,
@@ -15,6 +14,8 @@ import {
   span,
   tokens,
   track,
+  through,
+  type Anim,
   type Geometry,
   type Ref,
   type SceneElement,
@@ -54,7 +55,11 @@ export interface DiagramOptions {
   readonly weight?: number;
   readonly colors?: DiagramColors;
   readonly name?: string;
+  /** Drive an edge's drawing from your own timeline, 0 to 1, by its id ("a->b"). An edge a reveal also draws can't have one. */
+  readonly draw?: Draws;
 }
+
+export type Draws = Readonly<Record<string, Anim<number>>>;
 
 export interface Diagram<Id extends string> {
   readonly node: SceneElement;
@@ -435,7 +440,7 @@ export interface EdgeProps {
   readonly width?: number;
   readonly dash?: readonly number[];
   readonly head?: ArrowHead;
-  readonly drawn?: Span;
+  readonly draw?: Anim<number>;
 }
 
 const headOf = (head: ArrowHead, tip: Point, ux: number, uy: number): Geometry => {
@@ -480,17 +485,14 @@ export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
     ...(e.dash && { dash: e.dash }),
   } as const;
 
-  const { drawn } = e;
-  const tip = drawn && span(drawn.start + drawn.over * 0.85, drawn.over * 0.15);
-
   return (
     <Group key={e.key}>
       <Shape
         key="line"
         geometry={curve(points).geometry}
         stroke={stroke}
-        trim={drawn && !e.dash ? draw(drawn) : undefined}
-        opacity={drawn && e.dash ? fade(drawn) : undefined}
+        trim={e.draw !== undefined && !e.dash ? through(e.draw, (d): Vec => [0, d]) : undefined}
+        opacity={e.draw !== undefined && e.dash ? e.draw : undefined}
       />
       {head !== "none" && (
         <Shape
@@ -500,7 +502,7 @@ export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
           stroke={
             head === "filled" ? undefined : { color, width: 1.5, cap: "round", join: "round" }
           }
-          opacity={tip && fade(tip)}
+          opacity={e.draw === undefined ? undefined : through(e.draw, (d) => (d >= 0.85 ? 1 : 0))}
         />
       )}
     </Group>
@@ -589,6 +591,39 @@ export const schedule = (
   }
 
   return shown;
+};
+
+/** The progress of an edge: its reveal span run once, or the timeline the author gave its id, never both. */
+export const drawnBy = (
+  draws: Draws | undefined,
+  id: string,
+  when: Span | undefined,
+  what: string,
+): Anim<number> | undefined => {
+  const own = draws?.[id];
+
+  if (own === undefined) return when && track(0).to(1, when);
+
+  if (when !== undefined)
+    throw new SceneError(
+      `${what} draws "${id}" from a draw timeline, but its reveal already draws it.`,
+      `Pick one: drop draw["${id}"], or leave the nodes it joins out of reveal.`,
+    );
+
+  return own;
+};
+
+export const checkDraws = (
+  draws: Draws | undefined,
+  ids: readonly string[],
+  what: string,
+): void => {
+  for (const id of Object.keys(draws ?? {}))
+    if (!ids.includes(id))
+      throw new SceneError(
+        `${what} draw names "${id}", which is not one of its edges.`,
+        `Its edges are ${quoted(ids)}.`,
+      );
 };
 
 export const extent = (spans: readonly (Span | undefined)[]): Spanned | undefined => {

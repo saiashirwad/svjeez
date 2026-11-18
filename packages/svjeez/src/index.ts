@@ -44,6 +44,8 @@ export { adjust, blur, displace, shadow } from "./author/effects";
 
 export { motion, track, type Anim, type Track } from "./author/track";
 
+export { through } from "./author/derived";
+
 export { draw, enter, exit, sampled, wiggle } from "./author/recipes";
 
 export { ease, type Curve } from "./author/spring";

@@ -5,15 +5,13 @@ import {
   Shape,
   Text,
   circle,
-  draw,
-  ease,
   enter,
   linear,
   path,
   pathData,
   rect,
-  span,
-  track,
+  through,
+  type Anim,
   type SceneElement,
   type Vec,
 } from "svjeez";
@@ -30,8 +28,17 @@ import type {
 } from "./types.ts";
 
 const CURVES = { linear: curveLinear, monotone: curveMonotoneX, step: curveStep } as const;
-const DOT_POP = 0.3;
-const LABEL_IN = 0.4;
+const DOT_POP = 0.08;
+const LABEL_IN = 0.15;
+
+const ramp = (from: number, to: number, progress: number): number =>
+  Math.min(1, Math.max(0, (progress - from) / (to - from)));
+
+/** What a part of a series is while the whole is drawn to `draw`: nothing animates when there is no draw. */
+const drawing =
+  (draw: Anim<number> | undefined) =>
+  <U,>(fn: (progress: number) => U): Anim<U> | undefined =>
+    draw === undefined ? undefined : through(draw, fn);
 
 const strokes = (...rows: readonly (readonly [Vec, Vec])[]): PathBuilder =>
   rows.reduce((p, [from, to]) => p.moveTo(from).lineTo(to), path());
@@ -142,14 +149,14 @@ interface BarsProps {
 
 const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps): SceneElement => {
   const { plot, zero } = layout;
-  const { radius = 3, color, span: when } = options;
-  const stagger = options.stagger ?? 0.08;
-  const curve = options.ease ?? ease.out;
+  const { radius = 3, color, draw } = options;
+  const stagger = options.stagger ?? 0.3;
+  const drawn = drawing(draw);
 
-  if (!(stagger >= 0) || !Number.isFinite(stagger))
+  if (!(stagger >= 0 && stagger < 1))
     throw new SceneError(
       `bars("${options.name}") has a stagger of ${stagger}.`,
-      "Give 0 or more seconds.",
+      "Give a share of the draw from 0 up to, but not including, 1.",
     );
 
   const gap = slot.count > 1 ? 2 : 0;
@@ -159,7 +166,7 @@ const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps)
   const format = options.values === true ? layout.yFormat : options.values || undefined;
   const byKey = new Map(data);
 
-  const drawn = layout.bands.flatMap(({ key, at }, i) => {
+  const parts = layout.bands.flatMap(({ key, at }, i) => {
     const value = byKey.get(key);
 
     if (value === undefined) return [];
@@ -167,7 +174,8 @@ const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps)
     const length = Math.abs(zero - plot.y(value));
     const x = at + slot.index * width + gap / 2;
     const radii = up ? ([r, r, 0, 0] as const) : ([0, 0, r, r] as const);
-    const start = when ? when.start + i * stagger : 0;
+    const start = layout.bands.length > 1 ? (stagger * i) / (layout.bands.length - 1) : 0;
+    const grown = (progress: number): number => ramp(start, start + 1 - stagger, progress);
 
     const bar = (
       <Shape
@@ -176,12 +184,16 @@ const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps)
         at={[x, zero]}
         anchor={up ? "bottom-left" : "top-left"}
         origin={up ? "bottom" : "top"}
-        scale={when && track<Vec>([1, 0]).to([1, 1], span(start, when.over), curve)}
+        scale={drawn((progress): Vec => [1, grown(progress)])}
         fill={color}
       />
     );
 
     if (!format) return [bar];
+
+    const rest: Vec = [x + barWidth / 2, plot.y(value) + (up ? -4 : 4)];
+    const lift = up ? 4 : -4;
+    const shown = (progress: number): number => ramp(0.6, 1, grown(progress));
 
     return [
       bar,
@@ -189,22 +201,17 @@ const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps)
         key={`${key}:value`}
         font={chart.font}
         size={size}
-        at={[x + barWidth / 2, plot.y(value) + (up ? -4 : 4)]}
+        at={drawn((progress): Vec => [rest[0], rest[1] + (1 - shown(progress)) * lift]) ?? rest}
         anchor={up ? "bottom" : "top"}
         fill={chart.label}
-        motion={
-          when &&
-          enter(span(start + when.over * 0.6, 0.35), {
-            from: { opacity: 0, offset: [0, up ? 4 : -4] },
-          })
-        }
+        opacity={drawn(shown)}
       >
         {format(value)}
       </Text>,
     ];
   });
 
-  return <Group key={options.name}>{drawn}</Group>;
+  return <Group key={options.name}>{parts}</Group>;
 };
 
 const reaches = (points: readonly Vec[]): readonly number[] => {
@@ -236,7 +243,8 @@ const Line = ({
   fill,
   stroked = true,
 }: LineProps): SceneElement => {
-  const { color, span: when, label, width = 2.5 } = options;
+  const { color, draw, label, width = 2.5 } = options;
+  const drawn = drawing(draw);
 
   const d = d3line<Vec>()
     .x((p) => p[0])
@@ -247,6 +255,8 @@ const Line = ({
   const radius = options.dots === true ? 4 : options.dots || 0;
   const last = points.at(-1)!;
   const along = reaches(points);
+  const rest: Vec = [last[0] + (radius || width) + 8, last[1]];
+  const shown = (progress: number): number => ramp(1 - LABEL_IN, 1, progress);
 
   return (
     <Group key={options.name}>
@@ -256,7 +266,7 @@ const Line = ({
           key="line"
           geometry={pathData(d!)}
           stroke={{ color, width, cap: "round", join: "round" }}
-          trim={when && draw(when, { curve: ease.linear })}
+          trim={drawn((progress): Vec => [0, progress])}
         />
       )}
       {radius > 0 &&
@@ -267,13 +277,9 @@ const Line = ({
             at={at}
             anchor="center"
             fill={color}
-            motion={
-              when &&
-              enter(span(when.start + when.over * along[i]!, DOT_POP), {
-                from: { scale: 0 },
-                curve: ease.pop,
-              })
-            }
+            scale={drawn((progress) =>
+              ramp(along[i]! * (1 - DOT_POP), along[i]! * (1 - DOT_POP) + DOT_POP, progress),
+            )}
           />
         ))}
       {label ? (
@@ -281,13 +287,10 @@ const Line = ({
           key="label"
           font={chart.font}
           size={size}
-          at={[last[0] + (radius || width) + 8, last[1]]}
+          at={drawn((progress): Vec => [rest[0] - (1 - shown(progress)) * 8, rest[1]]) ?? rest}
           anchor="left"
           fill={color}
-          motion={
-            when &&
-            enter(span(when.start + when.over, LABEL_IN), { from: { opacity: 0, offset: [-8, 0] } })
-          }
+          opacity={drawn(shown)}
         >
           {label}
         </Text>
@@ -308,7 +311,7 @@ const pointsOn = (plot: Layout["plot"], data: readonly Datum[]): Vec[] =>
 const Area = ({ look, data, options }: AreaProps): SceneElement => {
   const { plot, yDomain, width, height } = look.layout;
   const [low, high] = yDomain;
-  const { color, span: when } = options;
+  const { color, draw } = options;
   const baseline = options.baseline ?? 0;
 
   if (!Number.isFinite(baseline))
@@ -342,25 +345,31 @@ const Area = ({ look, data, options }: AreaProps): SceneElement => {
     />
   );
 
-  const fill = (
-    <Shape
-      key="fill"
-      geometry={pathData(shape!)}
-      fill={color}
-      mask={fade}
-      clip={
-        when &&
-        track(rect(0, height)).to(rect(width, height), span(when.start, when.over), ease.linear)
-      }
-    />
-  );
+  const fill = <Shape key="fill" geometry={pathData(shape!)} fill={color} mask={fade} />;
+
+  // Two nested clips wipe the fill open: the inner one slides in from the left while its content slides back.
+  const wiped =
+    draw === undefined ? (
+      fill
+    ) : (
+      <Group key="fill" clip={rect(width, height)}>
+        <Group
+          clip={rect(width, height)}
+          offset={through(draw, (progress): Vec => [-(1 - progress) * width, 0])}
+        >
+          <Group offset={through(draw, (progress): Vec => [(1 - progress) * width, 0])}>
+            {fill}
+          </Group>
+        </Group>
+      </Group>
+    );
 
   return (
     <Line
       look={look}
       points={points}
       options={options}
-      fill={fill}
+      fill={wiped}
       stroked={options.line !== false}
     />
   );

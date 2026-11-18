@@ -21,6 +21,8 @@ import {
   checkIds,
   Chip,
   Edge,
+  checkDraws,
+  drawnBy,
   edgeKey,
   isBare,
   keyed,
@@ -359,6 +361,16 @@ export function stateMachine<
 
   const transitionKeys = keyed(transitions.map((t) => edgeKey(t.source, t.target)));
 
+  const lineKeys = local.lines.map((x) =>
+    isTransition(x)
+      ? transitionKeys[x.of]!
+      : x.of === "start"
+        ? `start->${x.to}`
+        : `${x.from}->end`,
+  );
+
+  checkDraws(options.draw, lineKeys, WHAT);
+
   const parts = new Map<string, Spanned | undefined>([
     ...ids.map((id) => [id, undefined] as const),
     ...transitionKeys.map((key) => [key, undefined] as const),
@@ -380,17 +392,12 @@ export function stateMachine<
             ground={ground(n.depth + 1)}
           />
         ))}
-      {local.lines.map((x) => (
+      {local.lines.map((x, i) => (
         <Edge
-          key={
-            isTransition(x)
-              ? transitionKeys[x.of]!
-              : x.of === "start"
-                ? `start->${x.to}`
-                : `${x.from}->end`
-          }
+          key={lineKeys[i]!}
           look={l}
           points={x.points}
+          draw={drawnBy(options.draw, lineKeys[i]!, undefined, WHAT)}
         />
       ))}
       {local.dots.map((d, k) => (
