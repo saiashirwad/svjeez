@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">Review pipeline</title>
+  <desc id="d">A flowchart of an agent review pipeline appears node by node, then a token runs from the opened PR to the posted review.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--blue-22-background:#1C2B41;--magenta-22-background:#322641;--orange-22-background:#3F2B0C}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0;--blue-22-background:#C9DFFF;--magenta-22-background:#E9D9F8;--orange-22-background:#FAE1CD}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:10s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,8%{translate:0px 6px}12%,100%{translate:0px 0px}}
+@keyframes k2{0%,8%{opacity:0}12%,100%{opacity:1}}
+.m1{animation-name:k1,k2}
+@keyframes k3{0%,5%{stroke-dashoffset:1;visibility:hidden}8%,100%{stroke-dashoffset:0;visibility:visible}}
+.m2{animation-name:k3}
+@keyframes k4{0%,7.55%{opacity:0}8%,100%{opacity:1}}
+.m3{animation-name:k4}
+@keyframes k5{0%,8%{stroke-dashoffset:1;visibility:hidden}11%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k5}
+@keyframes k6{0%,10.55%{opacity:0}11%,100%{opacity:1}}
+.m5{animation-name:k6}
+@keyframes k7{0%,11%{stroke-dashoffset:1;visibility:hidden}14%,100%{stroke-dashoffset:0;visibility:visible}}
+.m6{animation-name:k7}
+@keyframes k8{0%,13.55%{opacity:0}14%,100%{opacity:1}}
+.m7{animation-name:k8}
+@keyframes k9{0%,14%{stroke-dashoffset:1;visibility:hidden}17%,100%{stroke-dashoffset:0;visibility:visible}}
+.m8{animation-name:k9}
+@keyframes k10{0%,16.55%{opacity:0}17%,100%{opacity:1}}
+.m9{animation-name:k10}
+@keyframes k11{0%,17%{stroke-dashoffset:1;visibility:hidden}20%,100%{stroke-dashoffset:0;visibility:visible}}
+.m10{animation-name:k11}
+@keyframes k12{0%,19.55%{opacity:0}20%,100%{opacity:1}}
+.m11{animation-name:k12}
+@keyframes k13{0%,23%{stroke-dashoffset:1;visibility:hidden}26%,100%{stroke-dashoffset:0;visibility:visible}}
+.m12{animation-name:k13}
+@keyframes k14{0%,25.55%{opacity:0}26%,100%{opacity:1}}
+.m13{animation-name:k14}
+@keyframes k15{0%,26%{stroke-dashoffset:1;visibility:hidden}29%,100%{stroke-dashoffset:0;visibility:visible}}
+.m14{animation-name:k15}
+@keyframes k16{0%,28.55%{opacity:0}29%,100%{opacity:1}}
+.m15{animation-name:k16}
+@keyframes k17{0%,20%{stroke-dashoffset:1;visibility:hidden}23%,100%{stroke-dashoffset:0;visibility:visible}}
+.m16{animation-name:k17}
+@keyframes k18{0%,22.55%{opacity:0}23%,100%{opacity:1}}
+.m17{animation-name:k18}
+@keyframes k19{0%,36%{stroke-dashoffset:1;visibility:hidden}60%,100%{stroke-dashoffset:0;visibility:visible}}
+.m18{animation-name:k19;animation-timing-function:linear}
+@keyframes k20{0%,5%{translate:0px 6px}8%,100%{translate:0px 0px}}
+@keyframes k21{0%,5%{opacity:0}8%,100%{opacity:1}}
+.m19{animation-name:k20,k21}
+@keyframes k22{0%,2%{translate:0px 6px}5%,100%{translate:0px 0px}}
+@keyframes k23{0%,2%{opacity:0}5%,100%{opacity:1}}
+.m20{animation-name:k22,k23}
+@keyframes k24{0%,8%{translate:0px 6px}11%,100%{translate:0px 0px}}
+@keyframes k25{0%,8%{opacity:0}11%,100%{opacity:1}}
+.m21{animation-name:k24,k25}
+@keyframes k26{0%,11%{translate:0px 6px}14%,100%{translate:0px 0px}}
+@keyframes k27{0%,11%{opacity:0}14%,100%{opacity:1}}
+.m22{animation-name:k26,k27}
+@keyframes k28{0%,14%{translate:0px 6px}17%,100%{translate:0px 0px}}
+@keyframes k29{0%,14%{opacity:0}17%,100%{opacity:1}}
+.m23{animation-name:k28,k29}
+@keyframes k30{0%,17%{translate:0px 6px}20%,100%{translate:0px 0px}}
+@keyframes k31{0%,17%{opacity:0}20%,100%{opacity:1}}
+.m24{animation-name:k30,k31}
+@keyframes k32{0%,20%{translate:0px 6px}23%,100%{translate:0px 0px}}
+@keyframes k33{0%,20%{opacity:0}23%,100%{opacity:1}}
+.m25{animation-name:k32,k33}
+@keyframes k34{0%,26%{translate:0px 6px}29%,100%{translate:0px 0px}}
+@keyframes k35{0%,26%{opacity:0}29%,100%{opacity:1}}
+.m26{animation-name:k34,k35}
+@keyframes k36{0%,23%{translate:0px 6px}26%,100%{translate:0px 0px}}
+@keyframes k37{0%,23%{opacity:0}26%,100%{opacity:1}}
+.m27{animation-name:k36,k37}
+@keyframes k38{0%,26%{translate:0px 6px}28.5%,100%{translate:0px 0px}}
+@keyframes k39{0%,26%{opacity:0}28.5%,100%{opacity:1}}
+.m28{animation-name:k38,k39}
+@keyframes k40{0%,29%{translate:0px 6px}31.5%,100%{translate:0px 0px}}
+@keyframes k41{0%,29%{opacity:0}31.5%,100%{opacity:1}}
+.m29{animation-name:k40,k41}
+@keyframes k42{0%,23%{translate:0px 6px}25.5%,100%{translate:0px 0px}}
+@keyframes k43{0%,23%{opacity:0}25.5%,100%{opacity:1}}
+.m30{animation-name:k42,k43}
+@keyframes k44{0%,36%,60%,100%{opacity:0}37.5%,58%{opacity:1}}
+@keyframes k45{0%,36%{translate:123.85px 182.26px}36.5%{translate:142.56px 179.93px}37%{translate:150.78px 162.8px}37.5%{translate:155.74px 144.18px}38%{translate:162.25px 126.13px}38.5%{translate:178.49px 119.26px}42%{translate:313.38px 119.26px}42.5%{translate:327.31px 129.74px}43.5%{translate:336.92px 167.03px}44%{translate:343.33px 185.12px}44.5%{translate:359.9px 191.26px}49.5%{translate:552.61px 191.26px}52.5%{translate:667.73px 180.76px}54%{translate:725.54px 180.76px}54.5%{translate:742.46px 176.02px}55%{translate:747.81px 157.74px}58%{translate:761.47px 42.95px}58.5%{translate:766.07px 24.31px}59%{translate:782.21px 18px}60%,100%{translate:820.75px 18px}}
+.m31{animation-name:k44,k45;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes k46{0%,92%{opacity:1}98%,100%{opacity:0}}
+.m32{animation-name:k46}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-8s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="960" height="540" fill="var(--background)"/>
+  <g transform="translate(480 270)" class="a m32">
+    <g transform="translate(-480.9 -168.88)" style="transform-origin:0px 0px;scale:0.936">
+      <g transform="translate(166 72)" class="a m1">
+        <rect x="0.5" y="0.5" width="795.55" height="221.26" rx="10" fill="none" stroke="var(--border)" stroke-dasharray="4 3"/>
+        <text x="12" y="17.271" font-size="11.05" fill="var(--muted)">Review agent</text>
+      </g>
+      <path d="M123.85 182.26L138 182.26C154 182.26 154 119.26 170 119.26L174.9 119.26" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
+      <polygon points="181.9 119.26 173.9 123.26 173.9 115.26" fill="var(--border)" class="a m3"/>
+      <path d="M120.7 191.26L182.7 191.26" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+      <polygon points="189.7 191.26 181.7 195.26 181.7 187.26" fill="var(--border)" class="a m5"/>
+      <path d="M117.55 200.26L138 200.26C154 200.26 154 263.26 169 263.26L171 263.26" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
+      <polygon points="178 263.26 170 267.26 170 259.26" fill="var(--border)" class="a m7"/>
+      <path d="M312.3 119.26L318.2 119.26C334.2 119.26 334.2 191.26 350.2 191.26L357.2 191.26" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
+      <polygon points="364.2 191.26 356.2 195.26 356.2 187.26" fill="var(--border)" class="a m9"/>
+      <path d="M304.5 191.26L357.2 191.26" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
+      <polygon points="364.2 191.26 356.2 195.26 356.2 187.26" fill="var(--border)" class="a m9"/>
+      <path d="M316.2 263.26L318.2 263.26C334.2 263.26 334.2 191.26 350.2 191.26L357.2 191.26" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
+      <polygon points="364.2 191.26 356.2 195.26 356.2 187.26" fill="var(--border)" class="a m9"/>
+      <path d="M130 36L332.2 36C348.2 36 348.2 191.26 355.2 191.26L357.2 191.26" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
+      <polygon points="364.2 191.26 356.2 195.26 356.2 187.26" fill="var(--border)" class="a m9"/>
+      <path d="M509.8 191.26L550.8 191.26" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m10"/>
+      <polygon points="557.8 191.26 549.8 195.26 549.8 187.26" fill="var(--border)" class="a m11"/>
+      <path d="M685.52 192.76L820.95 192.76" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m12"/>
+      <polygon points="827.95 192.76 819.95 196.76 819.95 188.76" fill="var(--border)" class="a m13"/>
+      <path d="M885.15 209.26L885.15 319.26C885.15 324.76 880.65 329.26 875.15 329.26L447 329.26C441.5 329.26 437 324.76 437 319.26L437 216.26" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m14"/>
+      <polygon points="437 209.26 441 217.26 433 217.26" fill="var(--border)" class="a m15"/>
+      <path d="M664.81 180.76L738.86 180.76C754.86 180.76 754.86 18 770.86 18L813.75 18" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m16"/>
+      <polygon points="820.75 18 812.75 22 812.75 14" fill="var(--border)" class="a m17"/>
+      <path d="M123.85 182.26L138 182.26C154 182.26 154 119.26 170 119.26L181.9 119.26M312.3 119.26L318.2 119.26C334.2 119.26 334.2 191.26 350.2 191.26L364.2 191.26M509.8 191.26L557.8 191.26M664.81 180.76L738.86 180.76C754.86 180.76 754.86 18 770.86 18L820.75 18" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m18"/>
+      <g transform="translate(3 173.26)" class="a m19">
+        <polygon points="12.6 0 124 0 111.4 36 0 36" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+        <text x="26.9" y="22.68" font-size="13" fill="var(--text)">PR opened</text>
+      </g>
+      <g transform="translate(0 13)" class="a m20">
+        <path d="M0 5C0 2.239 29.1 0 65 0C100.9 0 130 2.239 130 5L130 41C130 43.762 100.9 46 65 46C29.1 46 0 43.762 0 41Z" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+        <path d="M0 5C0 7.762 29.1 10 65 10C100.9 10 130 7.762 130 5" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
+        <text x="14.3" y="30.18" font-size="13" fill="var(--text)">Review memory</text>
+      </g>
+      <g transform="translate(181.9 101.26)" class="a m21">
+        <rect x="0.75" y="0.75" width="130.4" height="36" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+        <path d="M8 0L8 36M122.4 0L122.4 36" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
+        <text x="22.3" y="22.68" font-size="13" fill="var(--text)">Run linters</text>
+      </g>
+      <g transform="translate(189.7 173.26)" class="a m22">
+        <rect x="0.75" y="0.75" width="114.8" height="36" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+        <path d="M8 0L8 36M106.8 0L106.8 36" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
+        <text x="22.3" y="22.68" font-size="13" fill="var(--text)">Run tests</text>
+      </g>
+      <g transform="translate(178 245.26)" class="a m23">
+        <rect x="0.75" y="0.75" width="138.2" height="36" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+        <path d="M8 0L8 36M130.2 0L130.2 36" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
+        <text x="22.3" y="22.68" font-size="13" fill="var(--text)">Scan secrets</text>
+      </g>
+      <g transform="translate(364.2 173.26)" class="a m24">
+        <rect x="0.75" y="0.75" width="145.6" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+        <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Analyze changes</text>
+      </g>
+      <g transform="translate(557.8 162.76)" class="a m25">
+        <polygon points="65.585 0 131.17 28.5 65.585 57 0 28.5" fill="var(--orange-22-background)" stroke="var(--orange)" stroke-width="1.5"/>
+        <text x="38.285" y="33.18" font-size="13" fill="var(--text)">Issues?</text>
+      </g>
+      <g transform="translate(827.95 173.26)" class="a m26">
+        <rect x="0.75" y="0.75" width="114.4" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+        <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Draft fixes</text>
+      </g>
+      <g transform="translate(820.75 0)" class="a m27">
+        <rect x="0.75" y="0.75" width="128.8" height="36" rx="18" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+        <text x="21.5" y="22.68" font-size="13" fill="var(--text)">Post review</text>
+      </g>
+      <g class="a m28">
+        <rect x="743.51" y="184.26" width="29.89" height="17" rx="3" fill="var(--background)"/>
+        <text x="748.51" y="196.738" font-size="11.05" fill="var(--muted)">yes</text>
+      </g>
+      <g class="a m29">
+        <rect x="636.18" y="320.76" width="49.78" height="17" rx="3" fill="var(--background)"/>
+        <text x="641.18" y="333.238" font-size="11.05" fill="var(--muted)">re-run</text>
+      </g>
+      <g class="a m30">
+        <rect x="710.29" y="172.26" width="23.26" height="17" rx="3" fill="var(--background)"/>
+        <text x="715.29" y="184.738" font-size="11.05" fill="var(--muted)">no</text>
+      </g>
+      <circle r="5" fill="var(--orange)" class="a m31"/>
+    </g>
+  </g>
+</svg>

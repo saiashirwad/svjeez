@@ -31,6 +31,10 @@ const budgets = {
   code: { bytes: 11600, elements: 152, stops: 32, smil: 0, cost: 23 },
   globe: { bytes: 440000, elements: 80, stops: 210, smil: 14, cost: 30 },
   math: { bytes: 24000, elements: 48, stops: 20, smil: 0, cost: 13 },
+  flowchart: { bytes: 14600, elements: 74, stops: 110, smil: 0, cost: 52 },
+  sequence: { bytes: 12100, elements: 79, stops: 79, smil: 0, cost: 39 },
+  state: { bytes: 13100, elements: 86, stops: 55, smil: 0, cost: 9 },
+  lanes: { bytes: 20100, elements: 97, stops: 104, smil: 28, cost: 62 },
 } satisfies Record<string, Budget>;
 
 const measure = (svg: string): Budget => {

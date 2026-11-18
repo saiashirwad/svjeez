@@ -84,6 +84,7 @@ Each package runs while the scene compiles, so the SVG still carries no script.
 - [`@svjeez/code`](https://github.com/saiashirwad/svjeez/tree/main/packages/code): highlighted code that types itself and morphs
 - [`@svjeez/geo`](https://github.com/saiashirwad/svjeez/tree/main/packages/geo): maps and turning globes from GeoJSON or TopoJSON
 - [`@svjeez/math`](https://github.com/saiashirwad/svjeez/tree/main/packages/math): TeX as glyph shapes, plots, constructions and plane transformations
+- [`@svjeez/diagrams`](https://github.com/saiashirwad/svjeez/tree/main/packages/diagrams): flowcharts, sequence diagrams, state machines, trees and swimlanes, laid out and revealed
 - [`@svjeez/video`](https://github.com/saiashirwad/svjeez/tree/main/packages/video): MP4 or WebM from a scene
 - [`@svjeez/vite`](https://github.com/saiashirwad/svjeez/tree/main/packages/vite), [`@svjeez/astro`](https://github.com/saiashirwad/svjeez/tree/main/packages/astro): scenes compiled into a Vite app or Astro site
 

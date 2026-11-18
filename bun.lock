@@ -17,6 +17,7 @@
       "devDependencies": {
         "@svjeez/charts": "workspace:*",
         "@svjeez/code": "workspace:*",
+        "@svjeez/diagrams": "workspace:*",
         "@svjeez/fonts": "workspace:*",
         "@svjeez/geo": "workspace:*",
         "@svjeez/icons": "workspace:*",
@@ -68,6 +69,18 @@
       "dependencies": {
         "shiki": "4.5.0",
       },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "svjeez": "workspace:*",
+        "typescript": "latest",
+      },
+      "peerDependencies": {
+        "svjeez": "workspace:^",
+      },
+    },
+    "packages/diagrams": {
+      "name": "@svjeez/diagrams",
+      "version": "0.8.0-next.0",
       "devDependencies": {
         "@types/bun": "latest",
         "svjeez": "workspace:*",
@@ -583,6 +596,8 @@
     "@svjeez/charts": ["@svjeez/charts@workspace:packages/charts"],
 
     "@svjeez/code": ["@svjeez/code@workspace:packages/code"],
+
+    "@svjeez/diagrams": ["@svjeez/diagrams@workspace:packages/diagrams"],
 
     "@svjeez/dom": ["@svjeez/dom@workspace:packages/dom"],
 

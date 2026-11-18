@@ -1,0 +1,234 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">Agent threads on a timeline</title>
+  <desc id="d">Five agent threads over time: the lead plans and delegates, search reads and browses, build edits and tests, and each reports back to the lead.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--border-8-background:#121315;--blue-25-background:#1E3049;--magenta-25-background:#382A49;--cyan-25-background:#203C49}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0;--border-8-background:#F6F6F6;--blue-25-background:#C2DAFF;--magenta-25-background:#E6D4F7;--cyan-25-background:#C6E6EA}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:11s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,1.818%{opacity:0}3.636%,100%{opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,43.636%{opacity:0}45.455%,100%{opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,67.273%{opacity:0}69.091%,100%{opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,10.909%{opacity:0}12.727%,100%{opacity:1}}
+.m4{animation-name:k4}
+@keyframes k5{0%,25.455%{opacity:0}27.273%,100%{opacity:1}}
+.m5{animation-name:k5}
+@keyframes k6{0%,52.727%{opacity:0}54.545%,100%{opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,10.909%{stroke-dashoffset:1;visibility:hidden}13.636%,100%{stroke-dashoffset:0;visibility:visible}}
+.m7{animation-name:k7}
+@keyframes k8{0%,13.227%{opacity:0}13.636%,100%{opacity:1}}
+.m8{animation-name:k8}
+@keyframes k9{0%,13.636%,100%{visibility:hidden}10.909%{visibility:visible}}
+@keyframes k10{0%,10.909%{translate:224.8px 37px}13.636%,100%{translate:224.8px 75px}}
+.m9{animation-name:k9,k10;animation-timing-function:steps(1),linear}
+@keyframes k11{0%,25.455%{stroke-dashoffset:1;visibility:hidden}28.182%,100%{stroke-dashoffset:0;visibility:visible}}
+.m10{animation-name:k11}
+@keyframes k12{0%,27.773%{opacity:0}28.182%,100%{opacity:1}}
+.m11{animation-name:k12}
+@keyframes k13{0%,28.182%,100%{visibility:hidden}25.455%{visibility:visible}}
+@keyframes k14{0%,25.455%{translate:359.2px 37px}28.182%,100%{translate:359.2px 131px}}
+.m12{animation-name:k13,k14;animation-timing-function:steps(1),linear}
+@keyframes k15{0%,43.636%{stroke-dashoffset:1;visibility:hidden}46.364%,100%{stroke-dashoffset:0;visibility:visible}}
+.m13{animation-name:k15}
+@keyframes k16{0%,45.955%{opacity:0}46.364%,100%{opacity:1}}
+.m14{animation-name:k16}
+@keyframes k17{0%,46.364%,100%{visibility:hidden}43.636%{visibility:visible}}
+@keyframes k18{0%,43.636%{translate:527.2px 75px}46.364%,100%{translate:527.2px 37px}}
+.m15{animation-name:k17,k18;animation-timing-function:steps(1),linear}
+@keyframes k19{0%,67.273%{stroke-dashoffset:1;visibility:hidden}70%,100%{stroke-dashoffset:0;visibility:visible}}
+.m16{animation-name:k19}
+@keyframes k20{0%,69.591%{opacity:0}70%,100%{opacity:1}}
+.m17{animation-name:k20}
+@keyframes k21{0%,70%,100%{visibility:hidden}67.273%{visibility:visible}}
+@keyframes k22{0%,67.273%{translate:745.6px 131px}70%,100%{translate:745.6px 37px}}
+.m18{animation-name:k21,k22;animation-timing-function:steps(1),linear}
+@keyframes k23{0%,18.182%{scale:0.3}20.909%,100%{scale:1}}
+@keyframes k24{0%,18.182%{opacity:0}20.909%,100%{opacity:1}}
+.m19{animation-name:k23,k24;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k25{0%,18.182%{translate:0px 6px}20.455%,100%{translate:0px 0px}}
+@keyframes k26{0%,18.182%{opacity:0}20.455%,100%{opacity:1}}
+.m20{animation-name:k25,k26}
+@keyframes k27{0%,32.727%{scale:0.3}35.455%,100%{scale:1}}
+@keyframes k28{0%,32.727%{opacity:0}35.455%,100%{opacity:1}}
+.m21{animation-name:k27,k28;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k29{0%,32.727%{translate:0px 6px}35%,100%{translate:0px 0px}}
+@keyframes k30{0%,32.727%{opacity:0}35%,100%{opacity:1}}
+.m22{animation-name:k29,k30}
+@keyframes k31{0%,34.545%{scale:0.3}37.273%,100%{scale:1}}
+@keyframes k32{0%,34.545%{opacity:0}37.273%,100%{opacity:1}}
+.m23{animation-name:k31,k32;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k33{0%,34.545%{translate:0px 6px}36.818%,100%{translate:0px 0px}}
+@keyframes k34{0%,34.545%{opacity:0}36.818%,100%{opacity:1}}
+.m24{animation-name:k33,k34}
+@keyframes k35{0%,49.091%{scale:0.3}51.818%,100%{scale:1}}
+@keyframes k36{0%,49.091%{opacity:0}51.818%,100%{opacity:1}}
+.m25{animation-name:k35,k36;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k37{0%,49.091%{translate:0px 6px}51.364%,100%{translate:0px 0px}}
+@keyframes k38{0%,49.091%{opacity:0}51.364%,100%{opacity:1}}
+.m26{animation-name:k37,k38}
+@keyframes k39{0%,61.818%{scale:0.3}64.545%,100%{scale:1}}
+@keyframes k40{0%,61.818%{opacity:0}64.545%,100%{opacity:1}}
+.m27{animation-name:k39,k40;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k41{0%,61.818%{translate:0px 6px}64.091%,100%{translate:0px 0px}}
+@keyframes k42{0%,61.818%{opacity:0}64.091%,100%{opacity:1}}
+.m28{animation-name:k41,k42}
+@keyframes k43{0%,54.545%{scale:0.3}57.273%,100%{scale:1}}
+@keyframes k44{0%,54.545%{opacity:0}57.273%,100%{opacity:1}}
+.m29{animation-name:k43,k44;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k45{0%,54.545%{translate:0px 6px}56.818%,100%{translate:0px 0px}}
+@keyframes k46{0%,54.545%{opacity:0}56.818%,100%{opacity:1}}
+.m30{animation-name:k45,k46}
+@keyframes k47{0%,63.636%{scale:0.3}66.364%,100%{scale:1}}
+@keyframes k48{0%,63.636%{opacity:0}66.364%,100%{opacity:1}}
+.m31{animation-name:k47,k48;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k49{0%,63.636%{translate:0px 6px}65.909%,100%{translate:0px 0px}}
+@keyframes k50{0%,63.636%{opacity:0}65.909%,100%{opacity:1}}
+.m32{animation-name:k49,k50}
+@keyframes k51{0%,1.818%{translate:141.55px 0px}79.091%,100%{translate:855.55px 0px}}
+.m33{animation-name:k51;animation-timing-function:linear}
+@keyframes k52{0%,90%{opacity:1}95.455%,100%{opacity:0}}
+.m34{animation-name:k52}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
+]]></style>
+  <rect width="960" height="540" fill="var(--background)"/>
+  <g transform="translate(44.6 119.146)" class="a m34">
+    <rect width="870.8" height="56" fill="var(--border-8-background)"/>
+    <circle cx="5" cy="28" r="4" fill="var(--blue)"/>
+    <text x="16" y="33.04" font-size="14" fill="var(--text)">TH-01 lead</text>
+    <line x1="140.8" y1="28" x2="854.8" y2="28" fill="none" stroke="var(--border)" stroke-dasharray="2 4"/>
+    <circle cx="5" cy="84" r="4" fill="var(--magenta)"/>
+    <text x="16" y="89.04" font-size="14" fill="var(--text)">TH-02 search</text>
+    <line x1="140.8" y1="84" x2="854.8" y2="84" fill="none" stroke="var(--border)" stroke-dasharray="2 4"/>
+    <rect y="112" width="870.8" height="56" fill="var(--border-8-background)"/>
+    <circle cx="5" cy="140" r="4" fill="var(--cyan)"/>
+    <text x="16" y="145.04" font-size="14" fill="var(--text)">TH-03 build</text>
+    <line x1="140.8" y1="140" x2="854.8" y2="140" fill="none" stroke="var(--border)" stroke-dasharray="2 4"/>
+    <circle cx="5" cy="196" r="4" fill="var(--blue)"/>
+    <text x="16" y="201.04" font-size="14" fill="var(--text)">TH-04 test</text>
+    <line x1="140.8" y1="196" x2="854.8" y2="196" fill="none" stroke="var(--border)" stroke-dasharray="2 4"/>
+    <rect y="224" width="870.8" height="56" fill="var(--border-8-background)"/>
+    <circle cx="5" cy="252" r="4" fill="var(--magenta)"/>
+    <text x="16" y="257.04" font-size="14" fill="var(--text)">TH-05 docs</text>
+    <line x1="140.8" y1="252" x2="854.8" y2="252" fill="none" stroke="var(--border)" stroke-dasharray="2 4"/>
+    <line x1="140.8" y1="0" x2="140.8" y2="284" fill="none" stroke="var(--border)" opacity="0.4"/>
+    <text x="133.66" y="298.138" font-size="11.9" fill="var(--muted)">0s</text>
+    <line x1="224.8" y1="0" x2="224.8" y2="284" fill="none" stroke="var(--border)" opacity="0.4"/>
+    <text x="217.66" y="298.138" font-size="11.9" fill="var(--muted)">1s</text>
+    <line x1="308.8" y1="0" x2="308.8" y2="284" fill="none" stroke="var(--border)" opacity="0.4"/>
+    <text x="301.66" y="298.138" font-size="11.9" fill="var(--muted)">2s</text>
+    <line x1="392.8" y1="0" x2="392.8" y2="284" fill="none" stroke="var(--border)" opacity="0.4"/>
+    <text x="385.66" y="298.138" font-size="11.9" fill="var(--muted)">3s</text>
+    <line x1="476.8" y1="0" x2="476.8" y2="284" fill="none" stroke="var(--border)" opacity="0.4"/>
+    <text x="469.66" y="298.138" font-size="11.9" fill="var(--muted)">4s</text>
+    <line x1="560.8" y1="0" x2="560.8" y2="284" fill="none" stroke="var(--border)" opacity="0.4"/>
+    <text x="553.66" y="298.138" font-size="11.9" fill="var(--muted)">5s</text>
+    <line x1="644.8" y1="0" x2="644.8" y2="284" fill="none" stroke="var(--border)" opacity="0.4"/>
+    <text x="637.66" y="298.138" font-size="11.9" fill="var(--muted)">6s</text>
+    <line x1="728.8" y1="0" x2="728.8" y2="284" fill="none" stroke="var(--border)" opacity="0.4"/>
+    <text x="721.66" y="298.138" font-size="11.9" fill="var(--muted)">7s</text>
+    <line x1="812.8" y1="0" x2="812.8" y2="284" fill="none" stroke="var(--border)" opacity="0.4"/>
+    <text x="805.66" y="298.138" font-size="11.9" fill="var(--muted)">8s</text>
+    <g transform="translate(140.8 19)">
+      <rect x="0.5" y="0.5" width="218.4" height="18" rx="4" fill="var(--blue-25-background)" stroke="var(--blue)" class="dm">
+        <animate id="w1" attributeName="width" values="0;218.4" keyTimes="0;1" begin="0.2s;w1.begin+11s" dur="2.6001s" fill="freeze" data-loop="11s"/>
+        <set attributeName="width" to="0" begin="0s;w1.begin+10.8s" dur="0.2s" fill="freeze" data-loop="11s"/>
+        <animate id="w2" attributeName="rx" values="0;4" keyTimes="0;1" begin="0.2s;w2.begin+11s" dur="2.6001s" fill="freeze" data-loop="11s"/>
+        <set attributeName="rx" to="0" begin="0s;w2.begin+10.8s" dur="0.2s" fill="freeze" data-loop="11s"/>
+      </rect>
+      <rect x="0.5" y="0.5" width="218.4" height="18" rx="4" fill="var(--blue-25-background)" stroke="var(--blue)" class="ds" display="none"/>
+      <text x="8" y="33.138" font-size="11.9" fill="var(--muted)" class="a m1">planning</text>
+    </g>
+    <g transform="translate(527.2 19)">
+      <rect x="0.5" y="0.5" width="84" height="18" rx="4" fill="var(--blue-25-background)" stroke="var(--blue)" class="dm">
+        <animate id="w3" attributeName="width" values="0;84" keyTimes="0;1" begin="4.8s;w3.begin+11s" dur="1s" fill="freeze" data-loop="11s"/>
+        <set attributeName="width" to="0" begin="0s;w3.begin+6.2s" dur="4.8s" fill="freeze" data-loop="11s"/>
+        <animate id="w4" attributeName="rx" values="0;4" keyTimes="0;1" begin="4.8s;w4.begin+11s" dur="1s" fill="freeze" data-loop="11s"/>
+        <set attributeName="rx" to="0" begin="0s;w4.begin+6.2s" dur="4.8s" fill="freeze" data-loop="11s"/>
+      </rect>
+      <rect x="0.5" y="0.5" width="84" height="18" rx="4" fill="var(--blue-25-background)" stroke="var(--blue)" class="ds" display="none"/>
+      <text x="8" y="33.138" font-size="11.9" fill="var(--muted)" class="a m2">review</text>
+    </g>
+    <g transform="translate(745.6 19)">
+      <rect x="0.5" y="0.5" width="109.2" height="18" rx="4" fill="var(--blue-25-background)" stroke="var(--blue)" class="dm">
+        <animate id="w5" attributeName="width" values="0;109.2" keyTimes="0;1" begin="7.4s;w5.begin+11s" dur="1.3s" fill="freeze" data-loop="11s"/>
+        <set attributeName="width" to="0" begin="0s;w5.begin+3.6s" dur="7.4s" fill="freeze" data-loop="11s"/>
+        <animate id="w6" attributeName="rx" values="0;4" keyTimes="0;1" begin="7.4s;w6.begin+11s" dur="1.3s" fill="freeze" data-loop="11s"/>
+        <set attributeName="rx" to="0" begin="0s;w6.begin+3.6s" dur="7.4s" fill="freeze" data-loop="11s"/>
+      </rect>
+      <rect x="0.5" y="0.5" width="109.2" height="18" rx="4" fill="var(--blue-25-background)" stroke="var(--blue)" class="ds" display="none"/>
+      <text x="8" y="33.138" font-size="11.9" fill="var(--muted)" class="a m3">merge</text>
+    </g>
+    <g transform="translate(224.8 75)">
+      <rect x="0.5" y="0.5" width="302.4" height="18" rx="4" fill="var(--magenta-25-background)" stroke="var(--magenta)" class="dm">
+        <animate id="w7" attributeName="width" values="0;302.4" keyTimes="0;1" begin="1.2s;w7.begin+11s" dur="3.6s" fill="freeze" data-loop="11s"/>
+        <set attributeName="width" to="0" begin="0s;w7.begin+9.8s" dur="1.2s" fill="freeze" data-loop="11s"/>
+        <animate id="w8" attributeName="rx" values="0;4" keyTimes="0;1" begin="1.2s;w8.begin+11s" dur="3.6s" fill="freeze" data-loop="11s"/>
+        <set attributeName="rx" to="0" begin="0s;w8.begin+9.8s" dur="1.2s" fill="freeze" data-loop="11s"/>
+      </rect>
+      <rect x="0.5" y="0.5" width="302.4" height="18" rx="4" fill="var(--magenta-25-background)" stroke="var(--magenta)" class="ds" display="none"/>
+      <text x="8" y="33.138" font-size="11.9" fill="var(--muted)" class="a m4">researching</text>
+    </g>
+    <g transform="translate(359.2 131)">
+      <rect x="0.5" y="0.5" width="386.4" height="18" rx="4" fill="var(--cyan-25-background)" stroke="var(--cyan)" class="dm">
+        <animate id="w9" attributeName="width" values="0;386.4" keyTimes="0;1" begin="2.8001s;w9.begin+11s" dur="4.6s" fill="freeze" data-loop="11s"/>
+        <set attributeName="width" to="0" begin="0s;w9.begin+8.2s" dur="2.8001s" fill="freeze" data-loop="11s"/>
+        <animate id="w10" attributeName="rx" values="0;4" keyTimes="0;1" begin="2.8001s;w10.begin+11s" dur="4.6s" fill="freeze" data-loop="11s"/>
+        <set attributeName="rx" to="0" begin="0s;w10.begin+8.2s" dur="2.8001s" fill="freeze" data-loop="11s"/>
+      </rect>
+      <rect x="0.5" y="0.5" width="386.4" height="18" rx="4" fill="var(--cyan-25-background)" stroke="var(--cyan)" class="ds" display="none"/>
+      <text x="8" y="33.138" font-size="11.9" fill="var(--muted)" class="a m5">editing</text>
+    </g>
+    <g transform="translate(527.2 187)">
+      <rect x="0.5" y="0.5" width="218.4" height="18" rx="4" fill="var(--blue-25-background)" stroke="var(--blue)" class="dm">
+        <animate id="w11" attributeName="width" values="0;218.4" keyTimes="0;1" begin="4.8s;w11.begin+11s" dur="2.6001s" fill="freeze" data-loop="11s"/>
+        <set attributeName="width" to="0" begin="0s;w11.begin+6.2s" dur="4.8s" fill="freeze" data-loop="11s"/>
+        <animate id="w12" attributeName="rx" values="0;4" keyTimes="0;1" begin="4.8s;w12.begin+11s" dur="2.6001s" fill="freeze" data-loop="11s"/>
+        <set attributeName="rx" to="0" begin="0s;w12.begin+6.2s" dur="4.8s" fill="freeze" data-loop="11s"/>
+      </rect>
+      <rect x="0.5" y="0.5" width="218.4" height="18" rx="4" fill="var(--blue-25-background)" stroke="var(--blue)" class="ds" display="none"/>
+      <text x="8" y="33.138" font-size="11.9" fill="var(--muted)" class="a m2">verifying</text>
+    </g>
+    <g transform="translate(611.2 243)">
+      <rect x="0.5" y="0.5" width="201.6" height="18" rx="4" fill="var(--magenta-25-background)" stroke="var(--magenta)" class="dm">
+        <animate id="w13" attributeName="width" values="0;201.6" keyTimes="0;1" begin="5.8s;w13.begin+11s" dur="2.4s" fill="freeze" data-loop="11s"/>
+        <set attributeName="width" to="0" begin="0s;w13.begin+5.2s" dur="5.8s" fill="freeze" data-loop="11s"/>
+        <animate id="w14" attributeName="rx" values="0;4" keyTimes="0;1" begin="5.8s;w14.begin+11s" dur="2.4s" fill="freeze" data-loop="11s"/>
+        <set attributeName="rx" to="0" begin="0s;w14.begin+5.2s" dur="5.8s" fill="freeze" data-loop="11s"/>
+      </rect>
+      <rect x="0.5" y="0.5" width="201.6" height="18" rx="4" fill="var(--magenta-25-background)" stroke="var(--magenta)" class="ds" display="none"/>
+      <text x="8" y="33.138" font-size="11.9" fill="var(--muted)" class="a m6">writing</text>
+    </g>
+    <path d="M224.8 37L224.8 68" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m7"/>
+    <polygon points="224.8 75 220.8 67 228.8 67" fill="var(--border)" class="a m8"/>
+    <circle r="4" fill="var(--orange)" class="a m9"/>
+    <path d="M359.2 37L359.2 124" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m10"/>
+    <polygon points="359.2 131 355.2 123 363.2 123" fill="var(--border)" class="a m11"/>
+    <circle r="4" fill="var(--orange)" class="a m12"/>
+    <path d="M527.2 75L527.2 44" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m13"/>
+    <polygon points="527.2 37 531.2 45 523.2 45" fill="var(--border)" class="a m14"/>
+    <circle r="4" fill="var(--orange)" class="a m15"/>
+    <path d="M745.6 131L745.6 44" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m16"/>
+    <polygon points="745.6 37 749.6 45 741.6 45" fill="var(--border)" class="a m17"/>
+    <circle r="4" fill="var(--orange)" class="a m18"/>
+    <polygon points="0 -10 10 0 0 10 -10 0" transform="translate(292 84)" fill="var(--magenta)" stroke="var(--background)" style="transform-origin:292px 84px" class="a m19"/>
+    <text x="277.72" y="64.284" font-size="11.9" fill="var(--text)" class="a m20">Read</text>
+    <polygon points="0 -10 10 0 0 10 -10 0" transform="translate(426.4 84)" fill="var(--blue)" stroke="var(--background)" style="transform-origin:426.4px 84px" class="a m21"/>
+    <text x="415.69" y="64.284" font-size="11.9" fill="var(--text)" class="a m22">Web</text>
+    <polygon points="0 -10 10 0 0 10 -10 0" transform="translate(443.2 140)" fill="var(--magenta)" stroke="var(--background)" style="transform-origin:443.2px 140px" class="a m23"/>
+    <text x="428.92" y="120.284" font-size="11.9" fill="var(--text)" class="a m24">Edit</text>
+    <polygon points="0 -10 10 0 0 10 -10 0" transform="translate(577.6 140)" fill="var(--orange)" stroke="var(--background)" style="transform-origin:577.6px 140px" class="a m25"/>
+    <text x="563.32" y="120.284" font-size="11.9" fill="var(--text)" class="a m26">Test</text>
+    <polygon points="0 -10 10 0 0 10 -10 0" transform="translate(695.2 140)" fill="var(--magenta)" stroke="var(--background)" style="transform-origin:695.2px 140px" class="a m27"/>
+    <text x="680.92" y="120.284" font-size="11.9" fill="var(--text)" class="a m28">Edit</text>
+    <polygon points="0 -10 10 0 0 10 -10 0" transform="translate(628 196)" fill="var(--magenta)" stroke="var(--background)" style="transform-origin:628px 196px" class="a m29"/>
+    <text x="617.29" y="176.284" font-size="11.9" fill="var(--text)" class="a m30">Run</text>
+    <polygon points="0 -10 10 0 0 10 -10 0" transform="translate(712 252)" fill="var(--magenta)" stroke="var(--background)" style="transform-origin:712px 252px" class="a m31"/>
+    <text x="697.72" y="232.284" font-size="11.9" fill="var(--text)" class="a m32">Edit</text>
+    <line x1="0" y1="0" x2="0" y2="280" fill="none" stroke="var(--orange)" stroke-width="1.5" class="a m33"/>
+  </g>
+</svg>
