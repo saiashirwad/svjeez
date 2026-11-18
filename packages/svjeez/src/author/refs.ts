@@ -1,7 +1,14 @@
 import type { Seconds } from "../model/time";
 import type { Box, Vec } from "../model/ir";
 import type { Curve } from "./spring";
-import { verbs, type Action, type MoveOptions, type Moves, type StrokeMoves } from "./timeline";
+import {
+  verbs,
+  type Action,
+  type MoveOptions,
+  type Moves,
+  type Over,
+  type StrokeMoves,
+} from "./timeline";
 import { PLACE_LIST, PLACES } from "./pin";
 import type { Paint } from "./values";
 
@@ -129,7 +136,7 @@ export class Ref {
     return this.#place("bottom-right");
   }
 
-  to(values: Moves, over: Seconds, curve?: Curve): Action {
+  to(values: Moves, over: Over, curve?: Curve): Action {
     return verbs.to(this, values, over, curve);
   }
 
@@ -137,39 +144,39 @@ export class Ref {
     return verbs.set(this, values);
   }
 
-  move(to: Vec | Anchor | Ref, over: Seconds, curve?: Curve, options?: MoveOptions): Action {
+  move(to: Vec | Anchor | Ref, over: Over, curve?: Curve, options?: MoveOptions): Action {
     return verbs.move(this, to, over, curve, options);
   }
 
-  moveBy(by: Vec, over: Seconds, curve?: Curve): Action {
+  moveBy(by: Vec, over: Over, curve?: Curve): Action {
     return verbs.moveBy(this, by, over, curve);
   }
 
-  rotate(to: number, over: Seconds, curve?: Curve): Action {
+  rotate(to: number, over: Over, curve?: Curve): Action {
     return verbs.rotate(this, to, over, curve);
   }
 
-  scale(to: number | Vec, over: Seconds, curve?: Curve): Action {
+  scale(to: number | Vec, over: Over, curve?: Curve): Action {
     return verbs.scale(this, to, over, curve);
   }
 
-  show(over: Seconds, curve?: Curve): Action {
+  show(over: Over, curve?: Curve): Action {
     return verbs.show(this, over, curve);
   }
 
-  hide(over: Seconds, curve?: Curve): Action {
+  hide(over: Over, curve?: Curve): Action {
     return verbs.hide(this, over, curve);
   }
 
-  fill(to: Paint, over: Seconds, curve?: Curve): Action {
+  fill(to: Paint, over: Over, curve?: Curve): Action {
     return verbs.fill(this, to, over, curve);
   }
 
-  stroke(to: StrokeMoves, over: Seconds, curve?: Curve): Action {
+  stroke(to: StrokeMoves, over: Over, curve?: Curve): Action {
     return verbs.stroke(this, to, over, curve);
   }
 
-  draw(over: Seconds, curve?: Curve): Action {
+  draw(over: Over, curve?: Curve): Action {
     return verbs.draw(this, over, curve);
   }
 

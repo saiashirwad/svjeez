@@ -6,7 +6,7 @@ import type { SceneElement } from "./nodes";
 import { Anchor, placeIn, type Place, type Ref } from "./refs";
 import { blendVec, valueAt } from "../model/sample";
 import { outward, type Notes } from "./settle";
-import { ease, isSpring, type Curve } from "./spring";
+import { Spring, ease, isSpring, type Curve } from "./spring";
 import { laneOf, mapped, mixVec, type Clock, type Timing } from "../model/steps";
 import { isDerived, type Derived } from "./derived";
 import { isTrack, passageOf, track, type Track } from "./track";
@@ -186,6 +186,19 @@ const length = (over: Seconds, verb: string): Seconds => {
 
 const DEFAULT_CURVE: Curve = ease.out;
 
+export type Over = Seconds | Spring;
+
+const timed = (over: Over, curve: Curve | undefined, verb: string): readonly [Seconds, Curve] => {
+  if (!(over instanceof Spring)) return [length(over, verb), curve ?? DEFAULT_CURVE];
+
+  if (curve !== undefined)
+    throw new Error(
+      `${verb} is given a spring for its length and a curve as well. A spring sets its own length: pass it once, as in ${verb.slice(0, -1)}…, spring).`,
+    );
+
+  return [over.settle, over];
+};
+
 const flatValues = (values: Moves, verb: string): (readonly [Prop, Value | Anchor])[] => {
   const unknown = Object.keys(values).find((name) => !isName(name));
 
@@ -238,21 +251,22 @@ const isStrokeMoves = (stroke: StrokeMoves | Paint): stroke is StrokeMoves =>
   typeof stroke === "object" && !Array.isArray(stroke) && !("kind" in stroke);
 
 export const verbs = {
-  to: (target: Ref, values: Moves, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
+  to: (target: Ref, values: Moves, over: Over, curve?: Curve): Action => {
     const verb = label(target, "to");
 
-    return one(target, verb, values, length(over, verb), curve);
+    return one(target, verb, values, ...timed(over, curve, verb));
   },
   set: (target: Ref, values: Moves): Action =>
     one(target, label(target, "set"), values, 0, ease.hold),
   move: (
     target: Ref,
     to: Vec | Anchor | Ref,
-    over: Seconds,
-    curve: Curve = DEFAULT_CURVE,
+    over: Over,
+    curve?: Curve,
     options: MoveOptions = {},
   ): Action => {
     const verb = label(target, "move");
+    const [seconds, shape] = timed(over, curve, verb);
 
     if (isPoint(to)) {
       if (options.point !== undefined)
@@ -260,59 +274,61 @@ export const verbs = {
           `${verb} lands a point of the node on an anchor, such as card.left, but ${JSON.stringify(to)} is a point in the parent. Move the node's at there without a point, or give an anchor.`,
         );
 
-      return one(target, verb, { at: to }, length(over, verb), curve);
+      return one(target, verb, { at: to }, seconds, shape);
     }
 
     const anchor = to instanceof Anchor ? to : to.center;
     const goal: Goal = { kind: "anchor", anchor, point: options.point ?? [0, 0] };
 
-    return new Action(length(over, verb), [
-      { target, prop: "at", start: 0, over, curve, goal, verb },
+    return new Action(seconds, [
+      { target, prop: "at", start: 0, over: seconds, curve: shape, goal, verb },
     ]);
   },
-  moveBy: (target: Ref, by: Vec, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
+  moveBy: (target: Ref, by: Vec, over: Over, curve?: Curve): Action => {
     const verb = label(target, "moveBy");
+    const [seconds, shape] = timed(over, curve, verb);
 
-    return new Action(length(over, verb), [
-      { target, prop: "at", start: 0, over, curve, goal: { kind: "by", by }, verb },
+    return new Action(seconds, [
+      { target, prop: "at", start: 0, over: seconds, curve: shape, goal: { kind: "by", by }, verb },
     ]);
   },
-  rotate: (target: Ref, to: number, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
+  rotate: (target: Ref, to: number, over: Over, curve?: Curve): Action => {
     const verb = label(target, "rotate");
 
-    return one(target, verb, { rotate: to }, length(over, verb), curve);
+    return one(target, verb, { rotate: to }, ...timed(over, curve, verb));
   },
-  scale: (target: Ref, to: number | Vec, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
+  scale: (target: Ref, to: number | Vec, over: Over, curve?: Curve): Action => {
     const verb = label(target, "scale");
 
-    return one(target, verb, { scale: to }, length(over, verb), curve);
+    return one(target, verb, { scale: to }, ...timed(over, curve, verb));
   },
-  show: (target: Ref, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
+  show: (target: Ref, over: Over, curve?: Curve): Action => {
     const verb = label(target, "show");
 
-    return one(target, verb, { opacity: 1 }, length(over, verb), curve);
+    return one(target, verb, { opacity: 1 }, ...timed(over, curve, verb));
   },
-  hide: (target: Ref, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
+  hide: (target: Ref, over: Over, curve?: Curve): Action => {
     const verb = label(target, "hide");
 
-    return one(target, verb, { opacity: 0 }, length(over, verb), curve);
+    return one(target, verb, { opacity: 0 }, ...timed(over, curve, verb));
   },
-  fill: (target: Ref, to: Paint, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
+  fill: (target: Ref, to: Paint, over: Over, curve?: Curve): Action => {
     const verb = label(target, "fill");
 
-    return one(target, verb, { fill: to }, length(over, verb), curve);
+    return one(target, verb, { fill: to }, ...timed(over, curve, verb));
   },
-  stroke: (target: Ref, to: StrokeMoves, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
+  stroke: (target: Ref, to: StrokeMoves, over: Over, curve?: Curve): Action => {
     const verb = label(target, "stroke");
 
-    return one(target, verb, { stroke: to }, length(over, verb), curve);
+    return one(target, verb, { stroke: to }, ...timed(over, curve, verb));
   },
-  draw: (target: Ref, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
+  draw: (target: Ref, over: Over, curve?: Curve): Action => {
     const verb = label(target, "draw");
+    const [seconds, shape] = timed(over, curve, verb);
 
-    return new Action(length(over, verb), [
+    return new Action(seconds, [
       ...one(target, verb, { trim: [0, 0] }, 0, ease.hold).moves,
-      ...one(target, verb, { trim: [0, 1] }, over, curve).moves,
+      ...one(target, verb, { trim: [0, 1] }, seconds, shape).moves,
     ]);
   },
   rewind: (target: Ref, over: Seconds, curve: Curve = DEFAULT_CURVE): Action => {
@@ -368,6 +384,8 @@ export type NodeElement = Exclude<
 >;
 
 const FOR_ALL: readonly NodeElement["type"][] = ["group", "shape", "text", "image", "instance"];
+
+const DRAWN: ReadonlySet<Prop> = new Set(["trim", "stroke", "strokeWidth"]);
 
 const KINDS: Readonly<Record<Prop, readonly NodeElement["type"][]>> = {
   at: FOR_ALL,
@@ -478,6 +496,7 @@ export class Cues {
   readonly #claimed = new Set<Timeline>();
   readonly #clocks = new Map<Timeline, Clock>();
   readonly #met = new Set<Move | Rewind>();
+  readonly #forwarded = new Map<string, readonly Placed<Move>[]>();
   readonly applied: { verb: string; key: string; start: Seconds; over: Seconds }[] = [];
   get refs(): readonly Ref[] {
     return [...this.#moves, ...this.#rewinds].map(
@@ -538,6 +557,13 @@ export class Cues {
     );
   }
 
+  #keyOf(target: Ref, refs: Notes["refs"]): string | undefined {
+    if (!target.within) return refs.get(target);
+    const owner = refs.get(target.within.ref);
+
+    return owner === undefined ? undefined : `${owner}/${target.within.path.join("/")}`;
+  }
+
   apply(
     el: NodeElement,
     key: string,
@@ -546,10 +572,28 @@ export class Cues {
     parent: string,
     home: () => Vec = () => [0, 0],
   ): NodeElement {
-    const mine = this.#moves.filter(({ item }) => names(item.target, el, key, notes.refs));
-    const back = this.#rewinds.filter(({ item }) => names(item.target, el, key, notes.refs));
+    const owned = this.#moves.filter(({ item }) => names(item.target, el, key, notes.refs));
+    let mine = [...owned, ...(this.#forwarded.get(key) ?? [])];
 
-    if (mine.length === 0 && back.length === 0) return el;
+    if (el.type === "group" && el.settle?.kind === "connect") {
+      const passed = mine.filter(({ item }) => DRAWN.has(item.prop));
+
+      mine = mine.filter((each) => !passed.includes(each));
+      this.#forwarded.set(`${key}/shaft`, passed);
+      this.#forwarded.set(
+        `${key}/head`,
+        passed.filter(({ item }) => item.prop !== "trim"),
+      );
+    }
+
+    if (mine.length === 0) return el;
+
+    const back = this.#rewinds.filter(({ item }) => {
+      if (names(item.target, el, key, notes.refs)) return true;
+      const owner = this.#keyOf(item.target, notes.refs);
+
+      return owner !== undefined && key.startsWith(`${owner}/`);
+    });
 
     for (const { timeline, item } of [...mine, ...back]) {
       this.#onClock(timeline, key, item.verb, timing);
@@ -568,9 +612,6 @@ export class Cues {
 
     if (twice)
       throw new Error(`${rewind!.verb} and ${twice.verb} both rewind "${key}". Rewind it once.`);
-
-    if (rewind && mine.length === 0)
-      throw new Error(`${rewind.verb} rewinds "${key}", but no timeline moves it.`);
 
     const byProp = new Map<Prop, Move[]>();
 
@@ -705,7 +746,16 @@ export class Cues {
     return start;
   }
 
-  finish(): void {
+  finish(notes: Notes): void {
+    for (const { item } of this.#rewinds) {
+      const owner = this.#keyOf(item.target, notes.refs);
+
+      if (!this.#met.has(item) && owner !== undefined)
+        throw new Error(
+          `${item.verb} rewinds "${owner}", but no timeline moves it or anything inside it.`,
+        );
+    }
+
     for (const { item } of [...this.#moves, ...this.#rewinds]) {
       if (this.#met.has(item)) continue;
       const { target } = item;

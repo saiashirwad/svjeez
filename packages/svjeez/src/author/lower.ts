@@ -927,7 +927,7 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
     children,
   };
 
-  cues.finish();
+  cues.finish(ctx.notes);
   const root = settle(drafted, ctx.notes, duration);
   const refs = [...new Set([...declared, ...ctx.notes.refs.keys(), ...cues.refs])];
 

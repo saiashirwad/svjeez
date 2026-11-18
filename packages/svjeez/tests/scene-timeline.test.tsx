@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  Arrow,
   Group,
   Sequence,
   Shape,
@@ -20,6 +21,7 @@ import {
   type SceneElement,
 } from "svjeez";
 import { isLane, type Model } from "svjeez/tools";
+import type { Spanned } from "../src/author/span";
 import { blendNumber, blendVec, valueAt } from "../src/model/sample";
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
@@ -236,6 +238,100 @@ describe("verbs", () => {
 
     expect(x).toBeCloseTo(70, 6);
     expect(y).toBeCloseTo(5, 6);
+  });
+});
+
+describe("springs, arrows and parts", () => {
+  test("a spring given for over sets the verb's length to its own settle time", () => {
+    const flick = ease.spring({ stiffness: 320, damping: 22 });
+    const knob = ref("knob");
+    const action = knob.moveBy([20, 0], flick);
+
+    expect(action.length).toBeCloseTo(flick.settle, 9);
+    expect(action.moves[0]!.curve).toBe(flick);
+    expect(() => knob.moveBy([20, 0], flick, ease.out)).toThrow(
+      "knob.moveBy() is given a spring for its length and a curve as well",
+    );
+
+    const model = made(() => {
+      timeline(knob.moveBy([20, 0], flick));
+
+      return <Shape fill="#000000" ref={knob} geometry={circle(3)} at={[0, 0]} />;
+    });
+
+    const keys = times(find(model, "knob").at);
+
+    expect(keys.at(-1)![1][0] - keys[0]![1][0]).toBeCloseTo(20, 9);
+  });
+
+  test("draw and stroke on an arrow's ref draw and recolor its shaft and head", () => {
+    const model = made(() => {
+      const [a, b, arrow] = [ref("a"), ref("b"), ref("arrow")];
+
+      timeline(arrow.draw(1, ease.linear), arrow.stroke({ color: "#ff0000" }, 0.5));
+
+      return (
+        <Group>
+          <Shape fill="#000000" ref={a} geometry={rect(10, 10)} at={[0, 0]} />
+          <Shape fill="#000000" ref={b} geometry={rect(10, 10)} at={[100, 0]} />
+          <Arrow ref={arrow} from={a.right} to={b.left} stroke={{ color: "#000000" }} />
+        </Group>
+      );
+    });
+
+    const shaft = find(model, "arrow/shaft");
+    const head = find(model, "arrow/head");
+
+    expect(shaft.kind === "shape" && valueAt(shaft.trim!, 0.5, blendVec)).toEqual([0, 0.5]);
+    expect(shaft.kind === "shape" && isLane(shaft.stroke!.color)).toBe(true);
+    expect(head.kind === "shape" && isLane(head.stroke!.color)).toBe(true);
+  });
+
+  test("rewind on a group's ref rewinds every part the timeline moved inside it", () => {
+    const model = made(() => {
+      const toggle = ref("toggle");
+
+      timeline(
+        toggle.part("knob").moveBy([20, 0], 0.5),
+        toggle.part("groove").fill("#ff0000", 0.5),
+        toggle.rewind(0.5),
+      );
+
+      return (
+        <Group ref={toggle}>
+          <Shape fill="#000000" key="groove" geometry={rect(44, 24)} />
+          <Shape fill="#ffffff" key="knob" geometry={circle(9)} at={[3, 3]} />
+        </Group>
+      );
+    });
+
+    const knob = times(find(model, "toggle/knob").at);
+    const groove = find(model, "toggle/groove");
+    const fill = groove.kind === "shape" ? times(groove.fill!) : [];
+
+    expect(knob.at(-1)).toEqual([4, knob[0]![1]]);
+    expect(fill.at(-1)).toEqual([4, fill[0]![1]]);
+    expect(() =>
+      made(() => {
+        const still = ref("still");
+
+        timeline(wait(1), still.rewind(0.5));
+
+        return (
+          <Group ref={still}>
+            <Shape fill="#000000" geometry={rect(4, 4)} />
+          </Group>
+        );
+      }),
+    ).toThrow('still.rewind() rewinds "still", but no timeline moves it or anything inside it.');
+  });
+
+  test("cascade() returns as many spans as it is asked for, typed as a tuple", () => {
+    const [first, second, third] = span(0, 1).cascade(3, 0.5);
+    const pair: [Spanned, Spanned] = span(1, 1).cascade(2, 0.25);
+
+    expect([first.start, second.start, third.start]).toEqual([0, 0.5, 1]);
+    expect(pair[1].start).toBe(1.25);
   });
 });
 

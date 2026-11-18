@@ -15,6 +15,12 @@ export interface When {
   readonly over?: Seconds;
 }
 
+export type Spans<N extends number, Done extends Spanned[] = []> = number extends N
+  ? Spanned[]
+  : Done["length"] extends N
+    ? Done
+    : Spans<N, [...Done, Spanned]>;
+
 export interface Spanned extends Span {
   readonly end: Seconds;
   shift(dt: Seconds): Spanned;
@@ -26,7 +32,7 @@ export interface Spanned extends Span {
   chain<const O extends readonly Seconds[]>(
     ...overs: O
   ): [Spanned, ...{ -readonly [K in keyof O]: Spanned }];
-  cascade(count: number, step: Seconds): Spanned[];
+  cascade<const N extends number>(count: N, step: Seconds): Spans<N>;
 }
 
 export interface OpenSpanned extends OpenSpan {
@@ -98,15 +104,16 @@ class Range implements Spanned {
     return out as [Spanned, ...{ -readonly [K in keyof O]: Spanned }];
   }
 
-  cascade(count: number, step: Seconds): Range[] {
+  cascade<const N extends number>(count: N, step: Seconds): Spans<N> {
     if (!Number.isInteger(count) || count < 0 || !Number.isFinite(step))
       throw new Error(
         `cascade() needs a whole count of 0 or more and a finite step, got count ${count} and step ${step}.`,
       );
 
+    // SAFETY: the array holds count spans, which is the tuple Spans<N> names for a literal count.
     return Array.from({ length: count }, (_, i) =>
       build(this.start + i * step, this.over, "cascade()"),
-    );
+    ) as Spans<N>;
   }
 }
 
