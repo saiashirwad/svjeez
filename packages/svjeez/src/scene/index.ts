@@ -8,6 +8,7 @@ export {
   Group,
   Image,
   Instance,
+  Ref,
   Sequence,
   Shape,
   Text,
@@ -18,7 +19,6 @@ export {
   type Common,
   type ImageProps,
   type InstanceProps,
-  type Ref,
   type SceneSymbol,
   type SceneElement,
   type SequenceProps,
@@ -55,7 +55,7 @@ export {
   type Anim,
   type LayerValues,
   type Motion,
-  type Stack,
+  type Stack as MotionStack,
   type Track,
 } from "./track";
 
@@ -75,6 +75,22 @@ export {
 } from "./recipes";
 
 export { picture, type PictureData } from "../picture";
+
+export { Anchor, type Edge, type Place } from "./refs";
+
+export {
+  Align,
+  Grid,
+  Stack,
+  type AlignProps,
+  type Alignment,
+  type GridProps,
+  type StackProps,
+} from "./layout";
+
+export { Arrow, Line, type ArrowProps, type LineProps } from "./arrow";
+
+export { layoutText, type TextAlign, type TextLayout, type TextLayoutOptions } from "./text";
 
 export type { Ease, Seconds } from "../motion";
 

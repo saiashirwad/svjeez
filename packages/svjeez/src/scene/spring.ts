@@ -51,7 +51,7 @@ export interface Run {
   readonly needs: Seconds;
 }
 
-interface Sample {
+export interface Sample {
   readonly t: Seconds;
   readonly values: readonly number[];
   readonly velocity: readonly number[];
@@ -91,7 +91,7 @@ const progressOf = (curve: Ease, u: number): number => {
  * The fewest keys whose eases stay within `tolerance` of every sample: the split-at-the-worst-sample pass of
  * `sampled()`'s Ramer-Douglas-Peucker, with Hermite curves between keys in place of straight lines.
  */
-const fitted = (samples: readonly Sample[], tolerance: number): RunKey[] => {
+export const fitted = (samples: readonly Sample[], tolerance: number): RunKey[] => {
   const keys: RunKey[] = [{ t: samples[0]!.t, values: samples[0]!.values }];
 
   const split = (a: number, b: number): void => {

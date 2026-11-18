@@ -2,22 +2,22 @@ import type { FontValue } from "../font/font";
 import type { Seconds } from "../motion";
 import type { PictureData } from "../picture";
 import type { Vec } from "./ir";
+import type { Anchor, Ref } from "./refs";
+import type { Settle } from "./settle";
 import type { Anim, Stack } from "./track";
 import { rect, type Geometry, type Paint } from "./values";
 
-/** The handle code holds for a node. It carries the node's key; anchors, the measured box and motion verbs come with layout. */
-export interface Ref {
-  readonly key: string;
-}
-
-export const ref = (key: string): Ref => ({ key });
+export { Ref, ref } from "./refs";
 
 export interface Common {
   /** The node's stable name among its siblings. Defaults to its ref's key, then to its place in the tree. */
   readonly key?: string;
   readonly ref?: Ref;
-  /** Where the node's own origin goes in its parent. */
-  readonly at?: Anim<Vec>;
+  /**
+   * Where the node's own origin goes in its parent: a point, a track, or an anchor on another node, which it follows
+   * when that node moves. Inside a layout container there is none: the container places the node.
+   */
+  readonly at?: Anim<Vec> | Anchor;
   /** What `rotate` and `scale` turn around, in the node's own frame: the center of its box unless you say. */
   readonly origin?: "center" | "top-left" | Vec;
   /** Degrees, clockwise. */
@@ -51,8 +51,16 @@ export interface TextProps extends Common {
   readonly font: FontValue;
   readonly size: number;
   readonly fill: Anim<Paint>;
-  /** Which point of the baseline `at` names. Default `start`. */
+  /**
+   * How lines sit in their column, and so which point of the first baseline `at` names: its start, middle or end.
+   * Default `start`.
+   */
   readonly align?: "start" | "center" | "end";
+  /** Wrap to this many px: the column is this wide. Without it lines break only at line breaks. */
+  readonly width?: number;
+  /** Baseline to baseline, in multiples of `size`. Default: the font's own line height. */
+  readonly lineHeight?: number;
+  /** Line breaks in it start new lines. */
   readonly children: string;
 }
 
@@ -105,6 +113,8 @@ export type SceneElement =
       readonly type: "group";
       readonly props: Common;
       readonly children: readonly SceneElement[];
+      /** What a layout container or a connector asks of the second pass of lowering. */
+      readonly settle?: Settle;
     }
   | { readonly type: "shape"; readonly props: ShapeProps }
   | { readonly type: "text"; readonly props: TextProps }
