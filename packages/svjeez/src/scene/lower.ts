@@ -132,7 +132,7 @@ const animated = <A, T>(
   // SAFETY: a value that is not undefined is an A, and undefined is itself one when A allows it, so change() takes it either way.
   const data = mapped(passageOf(value).data, "value", (given) => change(given as A));
 
-  return laneOf(data, data.initial.value!, timing, mix, where);
+  return laneOf(data, data.initial.value!, timing, mix, where, curves);
 };
 
 const colorOf = (ctx: Ctx, paint: Paint, where: string): Color => {

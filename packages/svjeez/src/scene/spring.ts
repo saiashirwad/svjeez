@@ -4,8 +4,7 @@ import type { Vec } from "./ir";
 
 /**
  * Real springs: a mass on a damped spring, simulated in seconds from where a value is and how fast it moves. A spring
- * is a step's curve, not an ease in the model: lowering writes it out as linear keys, so every backend only
- * interpolates.
+ * is a step's curve, not an ease in the model: lowering writes it out as keys, so every backend only interpolates.
  */
 export interface SpringOptions {
   /** How hard the spring pulls toward the target. Higher is faster. */
@@ -209,7 +208,9 @@ const reachOf = (
 
 /**
  * Keys for a point that may curve: each reaches as far as a straight key or a curved one (`Key.via`) can, whichever
- * is farther, and every ease stays within 0 and 1, as a lane with curves needs.
+ * is farther, and every ease stays within 0 and 1, as a lane with curves needs. A cubic in time from 0 to 1 whose two
+ * middle values are within 0 and 1 never turns back, so the point never backs along its curve, and a key cut at any
+ * moment is two keys of the same kind (steps.ts).
  */
 export const fittedCurves = (samples: readonly Sample[], tolerance: number): RunKey[] => {
   const keys: RunKey[] = [{ t: samples[0]!.t, values: samples[0]!.values }];
@@ -407,13 +408,17 @@ export class Spring {
 
   /**
    * The motion from `from` toward `to` starting at `velocity`, one entry per component, for at most `window`
-   * seconds: sampled densely, then cut down to the keys that stay within a small part of the distance.
+   * seconds: sampled densely, then cut down to the keys that stay within a small part of the distance. With `curves`,
+   * a point's keys may be curved (`Key.via`), and every ease stays within 0 and 1, as a lane with a curve needs: an
+   * overshoot is the path going past the target and back, never an ease past 1. Whether that is smaller is the
+   * lane's to weigh, since one curve puts the whole lane under that rule.
    */
   run(
     from: readonly number[],
     to: readonly number[],
     velocity: readonly number[],
     window: Seconds,
+    curves = false,
   ): Run {
     const x0 = from.map((value, i) => value - to[i]!);
     const needs = this.settleTime(x0, velocity);
@@ -444,7 +449,10 @@ export class Spring {
     });
 
     return {
-      keys: fitted(samples, size * KEYED),
+      keys:
+        curves && from.length === 2
+          ? fittedCurves(samples, size * KEYED)
+          : fitted(samples, size * KEYED),
       velocity: settled
         ? velocity.map(() => 0)
         : x0.map((x, c) => this.state(x, velocity[c]!, end)[1]),

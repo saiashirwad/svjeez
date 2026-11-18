@@ -61,8 +61,8 @@ const tableOf = (from: Vec, via: Controls, to: Vec): Table => {
 export const curveLength = (from: Vec, via: Controls, to: Vec): number =>
   tableOf(from, via, to).lengths[STEPS]!;
 
-/** The point `share` (0 to 1) of the way along the curve, by length. */
-export const alongCurve = (from: Vec, via: Controls, to: Vec, share: number): Vec => {
+/** The parameter of the cubic at `share` (0 to 1) of the way along the curve, by length. */
+const paramAt = (from: Vec, via: Controls, to: Vec, share: number): number => {
   const { lengths } = tableOf(from, via, to);
   const goal = Math.min(1, Math.max(0, share)) * lengths[STEPS]!;
   let [lo, hi] = [0, STEPS];
@@ -75,9 +75,31 @@ export const alongCurve = (from: Vec, via: Controls, to: Vec, share: number): Ve
   }
 
   const span = lengths[hi]! - lengths[lo]!;
-  const s = (lo + (span > 0 ? (goal - lengths[lo]!) / span : 0)) / STEPS;
 
-  return point(from, via, to, s);
+  return (lo + (span > 0 ? (goal - lengths[lo]!) / span : 0)) / STEPS;
+};
+
+/** The point `share` (0 to 1) of the way along the curve, by length. */
+export const alongCurve = (from: Vec, via: Controls, to: Vec, share: number): Vec =>
+  point(from, via, to, paramAt(from, via, to, share));
+
+/**
+ * The curve cut `share` (0 to 1) of the way along its length, exactly (de Casteljau): the controls of the part before,
+ * the point where it is cut, which is `alongCurve` there, and the controls of the part after. An ease that shapes the
+ * share of the whole length covered, cut at the same moment, shapes the share of each part's length.
+ */
+export const splitCurve = (
+  from: Vec,
+  via: Controls,
+  to: Vec,
+  share: number,
+): readonly [head: Controls, at: Vec, tail: Controls] => {
+  const s = paramAt(from, via, to, share);
+  const lerp = (a: Vec, b: Vec): Vec => [a[0] + (b[0] - a[0]) * s, a[1] + (b[1] - a[1]) * s];
+  const [a, b, c] = [lerp(from, via[0]), lerp(via[0], via[1]), lerp(via[1], to)];
+  const [d, e] = [lerp(a, b), lerp(b, c)];
+
+  return [[a, d], lerp(d, e), [e, c]];
 };
 
 /** The controls of the cubic from `from` to `to` that leaves and arrives at these speeds, per whole curve. */

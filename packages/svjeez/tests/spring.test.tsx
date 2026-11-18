@@ -1,6 +1,7 @@
 /** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import { easeAt } from "../src/ease-at";
+import { alongCurve } from "../src/scene/curve";
 import {
   Group,
   Sequence,
@@ -32,7 +33,7 @@ const laneOf = <T,>(value: Model.Animated<T>): Model.Lane<T> => {
   return value;
 };
 
-/** What a backend draws at `t`: the keys interpolated through their eases. */
+/** What a backend draws at `t`: the keys interpolated through their eases, along their curves when they have them. */
 const valueAt = (lane: Model.Lane<number | Model.Vec>, t: number): number[] => {
   const { keys } = lane;
 
@@ -45,6 +46,8 @@ const valueAt = (lane: Model.Lane<number | Model.Vec>, t: number): number[] => {
   const [a, b] = [keys[index - 1]!, keys[index]!];
   const p = easeAt(b.ease!, (t - a.t) / (b.t - a.t));
   const [from, to] = [list(a.value), list(b.value)];
+
+  if (b.via) return [...alongCurve([from[0]!, from[1]!], b.via, [to[0]!, to[1]!], p)];
 
   return from.map((value, c) => value + (to[c]! - value) * p);
 };
