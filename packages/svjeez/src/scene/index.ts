@@ -76,6 +76,8 @@ export {
 
 export { picture, type PictureData } from "../picture";
 
+export { font, type FontValue } from "../font/font";
+
 export { Anchor, type Edge, type Place } from "./refs";
 
 export {

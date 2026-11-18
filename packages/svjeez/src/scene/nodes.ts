@@ -11,6 +11,7 @@ import { rect, type Geometry, type Paint } from "./values";
 
 export { Ref, ref } from "./refs";
 
+/** What every node takes: its identity, where it sits, and how it turns, scales, fades and moves in layers. */
 export interface Common {
   /** The node's stable name among its siblings. Defaults to its ref's key, then to its place in the tree. */
   readonly key?: string;
@@ -30,6 +31,7 @@ export interface Common {
   readonly motion?: Stack;
 }
 
+/** A shape's outline. It is drawn centered on the edge, after the fill. */
 export interface StrokeProps {
   readonly color: Anim<Paint>;
   /** Default 1. */
@@ -40,6 +42,7 @@ export interface StrokeProps {
   readonly nonScaling?: boolean;
 }
 
+/** A geometry, filled, stroked or both. */
 export interface ShapeProps extends Common {
   readonly geometry: Anim<Geometry>;
   /** Nothing is inherited: a shape with no fill has none. */
@@ -49,6 +52,7 @@ export interface ShapeProps extends Common {
   readonly trim?: Anim<Vec>;
 }
 
+/** Text laid out when the scene compiles, so its box is known and the same in every target. */
 export interface TextProps extends Common {
   readonly font: FontValue;
   readonly size: number;
@@ -66,6 +70,7 @@ export interface TextProps extends Common {
   readonly children: string;
 }
 
+/** A picture from `picture()`. */
 export interface ImageProps extends Common {
   /** The picture, from `picture()`. */
   readonly src: PictureData;
@@ -99,10 +104,12 @@ export const symbol = (name: string, build: () => Child): SceneSymbol => {
   return { kind: "symbol", name, build };
 };
 
+/** One placement of a symbol. */
 export interface InstanceProps extends Common {
   readonly of: SceneSymbol;
 }
 
+/** A local clock: `at` and `over` are seconds on the clock around it, as a span's are. */
 export interface SequenceProps {
   readonly at: Seconds;
   readonly over?: Seconds;
@@ -134,6 +141,7 @@ export type SceneElement =
   | { readonly type: "fragment"; readonly children: readonly SceneElement[] }
   | MorphElement;
 
+/** What a node takes as children: elements, lists of them, and `false`, `null` or `undefined` for nothing. */
 export type Child = SceneElement | false | null | undefined | readonly Child[];
 
 const TYPES: ReadonlySet<string> = new Set([
@@ -186,6 +194,7 @@ export const flat = (child: Child): SceneElement[] => {
   return isList(child) ? child.flatMap(flat) : [child];
 };
 
+/** Nodes that move together. Its box holds its children where they rest. It draws nothing itself. */
 export const Group = ({
   children,
   ...props
@@ -195,8 +204,10 @@ export const Group = ({
   children: flat(children),
 });
 
+/** A geometry in a frame of its own: where that frame starts depends on the geometry (see `rect`, `circle`). */
 export const Shape = (props: ShapeProps): SceneElement => ({ type: "shape", props });
 
+/** Text whose frame starts on its first baseline, at the point `align` names. */
 export const Text = (props: TextProps): SceneElement => ({ type: "text", props });
 
 /** A picture in a frame of its own size, from its top-left corner. */

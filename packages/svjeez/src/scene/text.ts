@@ -2,6 +2,7 @@ import type { Font } from "../font/font";
 import { ringsOf } from "../paths";
 import type { Box, TextLine } from "./ir";
 
+/** How lines sit in their column: from the start, around the middle, or to the end. */
 export type TextAlign = "start" | "center" | "end";
 
 export interface TextLayoutOptions {

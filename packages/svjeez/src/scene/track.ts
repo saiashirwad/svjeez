@@ -27,6 +27,7 @@ export interface Track<T> {
   map<U>(fn: (value: T) => U, options?: DeriveOptions): Derived<U>;
 }
 
+/** What every prop that can move takes: a still value, a track, or a track derived from others. */
 export type Anim<T> = T | Track<T> | Derived<T>;
 
 export class ValueTrack<T> implements Track<T> {
@@ -96,6 +97,7 @@ export interface Motion {
   rewind(over: Seconds, curve?: Curve): Motion;
 }
 
+/** What a node's `motion` takes: one layer, or several, the first outermost. Exported as `MotionStack`. */
 export type Stack = Motion | readonly (Motion | false | null | undefined)[];
 
 export class LayerMotion implements Motion {

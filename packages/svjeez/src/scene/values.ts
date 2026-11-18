@@ -119,6 +119,7 @@ export const circle = (radius: number): Geometry => ({
   radius: [positive(radius, "circle()"), radius],
 });
 
+/** Centered on its frame's origin, `rx` across and `ry` down. */
 export const ellipse = (rx: number, ry: number): Geometry => ({
   kind: "ellipse",
   radius: [positive(rx, "ellipse()"), positive(ry, "ellipse()")],
@@ -140,20 +141,24 @@ export const arc = ({ radius, start = 0, sweep }: ArcOptions): Geometry => {
   return { kind: "arc", radius: positive(radius, "arc()"), start, sweep };
 };
 
+/** A straight segment in the shape's frame. It has no fill. To join two nodes, use `<Line>` or `<Arrow>`. */
 export const line = (from: Vec, to: Vec): Geometry => ({ kind: "line", from, to });
 
+/** A closed outline through `points`, in the shape's frame. */
 export const polygon = (points: readonly Vec[]): Geometry => ({
   kind: "polygon",
   points,
   closed: true,
 });
 
+/** An open outline through `points`, in the shape's frame. */
 export const polyline = (points: readonly Vec[]): Geometry => ({
   kind: "polygon",
   points,
   closed: false,
 });
 
+/** A path built step by step: `path().moveTo([0, 0]).lineTo([10, 0]).close()`. */
 export const path = (): PathBuilder => new PathBuilder();
 
 /** Reads SVG path data into a geometry at compile time: the way in for icons and traced artwork. */
@@ -253,11 +258,13 @@ export interface Token {
   readonly dark: Hex;
 }
 
+/** A hex color, the same in every scheme, or a token from `tokens()`, which has a light and a dark value. */
 export type Color = Hex | Token;
 
 /** Gradients arrive with clips, masks and effects. Until then a paint is a color. */
 export type Paint = Color;
 
+/** Tokens by name, as `tokens()` makes them. */
 export type Theme<K extends string = string> = { readonly [N in K]: Token };
 
 /** Name colors once: `theme.surface` is a token that follows the viewer in SVG and is baked elsewhere. */
