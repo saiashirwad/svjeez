@@ -16,7 +16,9 @@ export type Feature =
   | "radialGradient"
   | "nonScalingStroke"
   | "liveTokens"
-  | "curvedMotion";
+  | "curvedMotion"
+  /** A dashed stroke with round or square caps whose trim or outline moves. */
+  | "movingDashedTrim";
 
 /**
  * How a backend handles a feature. `exact` draws it as the model says. `close` draws something a viewer can tell
@@ -80,6 +82,15 @@ const featuresOf = (node: SceneNode): Feature[] => {
   }
 
   if (node.kind === "shape" && node.stroke?.nonScaling) used.push("nonScalingStroke");
+
+  if (
+    node.kind === "shape" &&
+    node.stroke?.dash !== undefined &&
+    node.stroke.cap !== "butt" &&
+    node.trim !== undefined &&
+    (isLane(node.trim) || isLane(node.geometry))
+  )
+    used.push("movingDashedTrim");
 
   if (
     [node.at, ...node.layers.map((layer) => layer.offset)].some(

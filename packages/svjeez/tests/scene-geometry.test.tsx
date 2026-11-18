@@ -528,6 +528,81 @@ describe("strokes, scales and trims", () => {
   });
 });
 
+describe("a dash under a trim", () => {
+  test("a still trim keeps the dashes inside it, each cut at its ends, as one dash array", () => {
+    const out = body(() => (
+      <Shape
+        geometry={line([0, 0], [100, 0])}
+        stroke={{ color: "#000000", width: 2, dash: [10, 5] }}
+        trim={[0.12, 0.5]}
+      />
+    ));
+
+    expect(out).toContain('stroke-dasharray="10 5 10 5 5 101" stroke-dashoffset="-15"');
+    expect(out).not.toContain("pathLength");
+  });
+
+  test("a dash of no length is a dot where it lies, and a trim that keeps no dash draws no stroke", () => {
+    expect(
+      body(() => (
+        <Shape
+          geometry={line([0, 0], [100, 0])}
+          stroke={{ color: "#000000", cap: "round", dash: [0, 10] }}
+          trim={[0.15, 0.4]}
+        />
+      )),
+    ).toContain('stroke-dasharray="0 10 0 10 0 101" stroke-dashoffset="-20"');
+    expect(
+      body(() => (
+        <Shape
+          geometry={line([0, 0], [100, 0])}
+          fill="#00FF00"
+          stroke={{ color: "#000000", dash: [10, 20] }}
+          trim={[0.11, 0.29]}
+        />
+      )),
+    ).not.toContain("stroke=");
+  });
+
+  test("a moving trim masks the dashed stroke with the trimmed one, and leaves the fill whole", () => {
+    const model = made(() => (
+      <Shape
+        key="ring"
+        geometry={circle(10)}
+        at={[50, 50]}
+        fill="#00FF00"
+        stroke={{ color: "#000000", width: 2, dash: [4, 2], cap: "round" }}
+        trim={track<Vec>([0, 0]).to([0, 1], span(0, 2))}
+      />
+    ));
+
+    const out = svg.emit(model);
+
+    expect(out).toMatch(
+      /<mask id="m\d*"[^>]*>\s*<circle r="10" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/,
+    );
+    expect(out).toMatch(/<circle r="10" fill="#00FF00"\/>/);
+    expect(out).toMatch(
+      /<circle r="10" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 2" mask="url\(#m\d*\)"/,
+    );
+    expect(diagnose(model, svg)).toEqual([
+      expect.objectContaining({ feature: "movingDashedTrim", key: "ring", severity: "warning" }),
+    ]);
+  });
+
+  test("with butt caps a moving trim over a dash is exact", () => {
+    const model = made(() => (
+      <Shape
+        geometry={circle(10)}
+        stroke={{ color: "#000000", dash: [4, 2] }}
+        trim={track<Vec>([0, 0]).to([0, 1], span(0, 2))}
+      />
+    ));
+
+    expect(diagnose(model, svg)).toEqual([]);
+  });
+});
+
 describe("images and instances", () => {
   const pic = picture('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"/>');
 

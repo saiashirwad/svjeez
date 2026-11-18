@@ -21,6 +21,8 @@ import type {
   Paint,
   Scene,
   Face,
+  GroupNode,
+  Rgba,
   SceneNode,
   ShapeNode,
   TextNode,
@@ -32,6 +34,7 @@ import { labelled } from "./identity";
 import { isLane, mapLane } from "./lane";
 import { same } from "./steps";
 import { onCircle } from "./values";
+import { lengthOf } from "./geometry";
 import { blendable, isGradient } from "./paint";
 import { grown, reachOf } from "./reach";
 import {
@@ -85,6 +88,10 @@ const supports: Readonly<Record<Feature, Support>> = {
   nonScalingStroke: EXACT,
   liveTokens: EXACT,
   curvedMotion: EXACT,
+  movingDashedTrim: {
+    level: "close",
+    note: "a dash that starts just past a moving end of the trim can show a sliver of its cap there. Butt caps, a still trim or no dash draw it exactly.",
+  },
 };
 
 interface Ctx {
@@ -461,7 +468,7 @@ const along = (ctx: Ctx, shells: Shell[], lane: Lane<Vec>): void => {
       key.ease.points.some((value, c) => c % 2 === 1 && (value < 0 || value > 1))
     )
       throw new Error(
-        `A curved lane reached the SVG backend with an ease that leaves 0 to 1 at ${num(key.t)}s, which a motion path can't draw: lowering writes curves only with eases inside it.`,
+        `A curved move at ${num(key.t)}s has an ease that leaves 0 to 1, which lowering never writes. This is a bug in svjeez; please report it with the scene.`,
       );
   });
 
@@ -512,13 +519,17 @@ const travel = (ctx: Ctx, shells: Shell[], by: Animated<Vec>): void => {
 const asColor = (paint: Paint, where: string): Color => {
   if (isColor(paint)) return paint;
 
-  throw new Error(`${where} mixes colors and gradients.`);
+  throw new Error(
+    `${where} holds a color and a gradient in one lane, which lowering never writes. This is a bug in svjeez; please report it with the scene.`,
+  );
 };
 
 const asGradient = (paint: Paint, where: string): Gradient => {
   if (!isColor(paint)) return paint;
 
-  throw new Error(`${where} mixes colors and gradients.`);
+  throw new Error(
+    `${where} holds a color and a gradient in one lane, which lowering never writes. This is a bug in svjeez; please report it with the scene.`,
+  );
 };
 
 /**
@@ -574,6 +585,51 @@ const painted = (
 const emptyTrim = (trim: ShapeNode["trim"]): boolean =>
   trim !== undefined && !isLane(trim) && trim[1] - trim[0] <= 0;
 
+/**
+ * The dashes of `dash`, laid from the start of an outline `length` long, that lie inside `trim`: each cut at the
+ * trim's ends, as one dash array from the first and the offset that puts the first in place. Undefined when no dash
+ * lies inside. A pattern of no length is a solid line.
+ */
+export const trimmedDash = (
+  dash: readonly number[],
+  length: number,
+  [from, to]: Vec,
+): { readonly array: number[]; readonly offset: number } | undefined => {
+  const pattern = dash.length % 2 === 1 ? [...dash, ...dash] : [...dash];
+  const period = pattern.reduce((sum, n) => sum + n, 0);
+  const [start, end] = [from * length, to * length];
+  const kept: (readonly [number, number])[] = [];
+
+  if (!(period > 0)) kept.push([start, end]);
+
+  for (let at = 0, i = 0; period > 0 && at <= end; i++) {
+    const piece = pattern[i % pattern.length]!;
+    const [a, b] = [Math.max(at, start), Math.min(at + piece, end)];
+
+    // A dash that is a dot is kept where it lies; one cut down to nothing is not.
+    if (i % 2 === 0 && (piece === 0 ? at >= start : b > a)) kept.push([a, b]);
+    at += piece;
+  }
+
+  if (kept.length === 0) return undefined;
+
+  return {
+    array: [
+      ...kept.flatMap(([a, b], k) => (k === 0 ? [b - a] : [a - kept[k - 1]![1], b - a])),
+      length + 1,
+    ],
+    offset: kept[0]![0],
+  };
+};
+
+/** Whether a dashed stroke under a still trim on a still outline keeps no dash at all. */
+const noDashLeft = (node: ShapeNode): boolean =>
+  node.stroke?.dash !== undefined &&
+  node.trim !== undefined &&
+  !isLane(node.trim) &&
+  !isLane(node.geometry) &&
+  trimmedDash(node.stroke.dash, lengthOf(node.geometry), node.trim) === undefined;
+
 const stroked = (
   ctx: Ctx,
   node: ShapeNode,
@@ -582,7 +638,7 @@ const stroked = (
   shift: Vec,
 ): void => {
   const { trim } = node;
-  const stroke = emptyTrim(trim) ? undefined : node.stroke;
+  const stroke = emptyTrim(trim) || noDashLeft(node) ? undefined : node.stroke;
 
   painted(ctx, "stroke", stroke?.color, attrs, lanes, shift, node.key);
 
@@ -605,10 +661,17 @@ const stroked = (
 
   if (trim === undefined || !stroke) return;
 
-  if (stroke.dash)
-    throw new Error(
-      `"${node.key}" has both a dash and a trim. SVG draws both with one dash pattern, so pick one.`,
-    );
+  // A dash under a still trim on a still outline is one dash array: the dashes inside the trim, each cut at its ends.
+  // `dashedTrim` draws any other dash and trim before this is reached.
+  if (stroke.dash && !isLane(trim) && !isLane(node.geometry)) {
+    const { array, offset } = trimmedDash(stroke.dash, lengthOf(node.geometry), trim)!;
+
+    attrs["stroke-dasharray"] = array.map((n) => num(n)).join(" ");
+
+    if (offset !== 0) attrs["stroke-dashoffset"] = num(-offset);
+
+    return;
+  }
 
   // A trim that grows from the start moves only the dash offset, as the old `draw` does. One whose start moves writes
   // the dash too. Either way `visibility` hides the stroke while it has no length, so a round cap draws no dot.
@@ -898,7 +961,65 @@ const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Dra
 
 const symbolId = (ctx: Ctx, name: string): string => `${ctx.prefix}symbol-${name}`;
 
+/** Opaque white, what a mask's content is drawn in: only its alpha counts. */
+const OPAQUE: Rgba = [1, 1, 1, 1];
+
+/**
+ * A dashed stroke whose trim or outline moves, as a group that draws the same: the fill on its own, then the dashed
+ * stroke masked by the trimmed stroke undashed. With butt caps it is exact; with round or square ones, a dash that
+ * starts just past a moving end can show a sliver of its cap, which `diagnose` reports.
+ */
+const dashedTrim = (node: SceneNode): GroupNode | undefined => {
+  if (node.kind !== "shape" || !node.stroke?.dash || node.trim === undefined) return undefined;
+
+  if (!isLane(node.trim) && !isLane(node.geometry)) return undefined;
+  const { kind: _, geometry, fill, stroke, trim, clip, mask, ...base } = node;
+
+  const still = {
+    box: node.box,
+    at: [0, 0] as const,
+    origin: node.origin,
+    layers: [],
+    effects: [],
+  };
+
+  const { dash: _dash, ...solid } = stroke;
+
+  const outline: GroupNode = {
+    kind: "group",
+    ...still,
+    key: `${node.key}#trim`,
+    children: [
+      {
+        kind: "shape",
+        ...still,
+        key: `${node.key}#trim/stroke`,
+        geometry,
+        stroke: { ...solid, color: OPAQUE },
+        trim,
+      },
+    ],
+  };
+
+  return {
+    ...base,
+    kind: "group",
+    ...(clip !== undefined && { clip }),
+    ...(mask !== undefined && { mask }),
+    children: [
+      ...(fill === undefined
+        ? []
+        : [{ kind: "shape", ...still, key: `${node.key}#fill`, geometry, fill } as const]),
+      { kind: "shape", ...still, key: `${node.key}#stroke`, geometry, stroke, mask: outline },
+    ],
+  };
+};
+
 const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
+  const split = dashedTrim(node);
+
+  if (split) return emitNode(ctx, split);
+
   const at: Vec = isLane(node.at) ? [0, 0] : node.at;
 
   ctx.frame = at;
