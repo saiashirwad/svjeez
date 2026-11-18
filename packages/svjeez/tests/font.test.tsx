@@ -425,13 +425,12 @@ describe("path", () => {
     }
 
     const tables = new Map([
-      ["head", 0],
-      ["loca", 64],
-      ["glyf", 256],
+      ["head", { offset: 0, length: 64 }],
+      ["loca", { offset: 64, length: 192 }],
+      ["glyf", { offset: 256, length: view.byteLength - 256 }],
     ]);
 
-    const lengths = new Map<string, number>();
-    expect(() => contours({ view, tables, lengths }, 0)).toThrow("too many components");
+    expect(() => contours({ view, tables }, 0)).toThrow("too many components");
   });
 
   test("needs a positive size", () => {

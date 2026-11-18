@@ -1,9 +1,13 @@
 import { SceneError } from "../model/scene-error";
 
+interface TableRecord {
+  readonly offset: number;
+  readonly length: number;
+}
+
 export interface Sfnt {
   readonly view: DataView;
-  readonly tables: ReadonlyMap<string, number>;
-  readonly lengths: ReadonlyMap<string, number>;
+  readonly tables: ReadonlyMap<string, TableRecord>;
 }
 
 export const SFNT_TRUETYPE = 0x00010000;
@@ -17,20 +21,21 @@ export const u32 = (f: Sfnt, at: number): number => f.view.getUint32(at);
 
 export const f2dot14 = (f: Sfnt, at: number): number => i16(f, at) / 16384;
 
-export const table = (f: Sfnt, tag: string): number | undefined => f.tables.get(tag);
+export const table = (f: Sfnt, tag: string): number | undefined => f.tables.get(tag)?.offset;
 
-export const required = (f: Sfnt, tag: string): number => {
-  const at = f.tables.get(tag);
+export const requiredTable = (f: Sfnt, tag: string): TableRecord => {
+  const record = f.tables.get(tag);
 
-  if (at === undefined) throw new SceneError(`This font has no ${tag} table.`);
+  if (!record) throw new SceneError(`This font has no ${tag} table.`);
 
-  return at;
+  return record;
 };
+
+export const required = (f: Sfnt, tag: string): number => requiredTable(f, tag).offset;
 
 export const sfnt = (bytes: Uint8Array): Sfnt => {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  const tables = new Map<string, number>();
-  const lengths = new Map<string, number>();
+  const tables = new Map<string, TableRecord>();
   const count = view.getUint16(4);
 
   if (12 + 16 * count > bytes.length)
@@ -45,11 +50,10 @@ export const sfnt = (bytes: Uint8Array): Sfnt => {
     if (offset + length > bytes.length)
       throw new SceneError("This font is truncated: a table runs past the end of the file.");
     const tag = String.fromCharCode(...bytes.subarray(record, record + 4));
-    tables.set(tag, offset);
-    lengths.set(tag, length);
+    tables.set(tag, { offset, length });
   }
 
-  return { view, tables, lengths };
+  return { view, tables };
 };
 
 export interface Metrics {
