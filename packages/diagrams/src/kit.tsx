@@ -119,7 +119,6 @@ const channels = (hex: Hex): readonly number[] =>
 
 const blend = (fg: Hex, bg: Hex, share: number): Hex => {
   const [a, b] = [channels(fg), channels(bg)];
-  // SAFETY: six hex digits after a # is a Hex
 
   return `#${a
     .map((c, i) =>
@@ -127,7 +126,7 @@ const blend = (fg: Hex, bg: Hex, share: number): Hex => {
         .toString(16)
         .padStart(2, "0"),
     )
-    .join("")}` as Hex;
+    .join("")}`;
 };
 
 const nameOf = (color: Color): string => (isToken(color) ? color.name : `c${color.slice(1, 7)}`);

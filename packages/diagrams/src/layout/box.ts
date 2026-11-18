@@ -15,11 +15,13 @@ export interface Size {
 
 export interface Box extends Point, Size {}
 
-// SAFETY: a Box flips to a Box and a Point to a Point, so the result has the same keys as T
-export const flip = <T extends Box | Point>(value: T): T =>
-  ("w" in value
+export function flip(value: Box): Box;
+export function flip(value: Point): Point;
+export function flip(value: Box | Point): Box | Point {
+  return "w" in value
     ? { x: value.y, y: value.x, w: value.h, h: value.w }
-    : { x: value.y, y: value.x }) as T;
+    : { x: value.y, y: value.x };
+}
 
 export const maxOf = (values: readonly number[]): number => {
   let max = -Infinity;

@@ -95,12 +95,14 @@ const sources = async (server: ViteDevServer, file: string, root: string): Promi
   return sha256(sorted.map((path, i) => relative(root, path) + texts[i]).join(""));
 };
 
+type Recordings<M> = {
+  [K in keyof M as M[K] extends { readonly kind: "svjeez-demo" } ? K : never]: Step[];
+};
+
 export const recordings = async <M extends Record<string, unknown>>(
   file: string,
   { cache, vite: config = {}, inputs, ...options }: RecordingsOptions,
-): Promise<{
-  [K in keyof M as M[K] extends { readonly kind: "svjeez-demo" } ? K : never]: Step[];
-}> => {
+): Promise<Recordings<M>> => {
   const { createServer, mergeConfig } = await import("vite");
   const source = await readFile(file, "utf8");
 
@@ -130,7 +132,7 @@ export const recordings = async <M extends Record<string, unknown>>(
     const mod = await server.ssrLoadModule(file);
 
     demos = Object.fromEntries(
-      Object.entries(mod).filter((e): e is [string, Demo] => isDemo(e[1])),
+      Object.entries<unknown>(mod).filter((e): e is [string, Demo] => isDemo(e[1])),
     );
 
     // SAFETY: the server listens on a port, so its address is an AddressInfo and not a pipe name.
@@ -163,7 +165,7 @@ export const recordings = async <M extends Record<string, unknown>>(
 
         return out;
       },
-    )) as never;
+    )) as Recordings<M>;
   } finally {
     await server.close();
     await rm(cacheDir, { recursive: true, force: true });

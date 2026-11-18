@@ -39,13 +39,17 @@ export const story = async <Model, Msg, Cmd>(
 
   const step = async (from: Model, msg: Msg) => {
     const [next, cmds] = update(from, msg);
-    model = { value: next };
-    await settle(cmds);
+
+    return await settle(next, cmds);
   };
 
-  const settle = async (cmds: readonly Cmd[]) => {
+  const settle = async (from: Model, cmds: readonly Cmd[]): Promise<{ value: Model }> => {
+    let next = from;
+
     for (const cmd of cmds)
-      for (const msg of await resolve(cmd, model!.value)) await step(model!.value, msg);
+      for (const msg of await resolve(cmd, next)) next = (await step(next, msg)).value;
+
+    return { value: next };
   };
 
   for (const beat of beats) {
@@ -54,10 +58,8 @@ export const story = async <Model, Msg, Cmd>(
       continue;
     }
 
-    if ("given" in beat) {
-      model = { value: beat.given };
-      await settle(beat.cmds ?? []);
-    } else if (model) await step(model.value, beat.message);
+    if ("given" in beat) model = await settle(beat.given, beat.cmds ?? []);
+    else if (model) model = await step(model.value, beat.message);
     else throw new Error("story(): a message comes before any given(model).");
 
     const markup = view(model.value);
