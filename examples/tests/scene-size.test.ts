@@ -21,6 +21,7 @@ const budgets = {
   layout: { bytes: 11000, elements: 43, stops: 80, smil: 0, cost: 15 },
   morph: { bytes: 10000, elements: 32, stops: 48, smil: 6, cost: 37 },
   derived: { bytes: 9300, elements: 21, stops: 46, smil: 1, cost: 5 },
+  count: { bytes: 16600, elements: 49, stops: 170, smil: 0, cost: 26 },
   type: { bytes: 3900, elements: 35, stops: 20, smil: 0, cost: 10 },
   icons: { bytes: 10350, elements: 33, stops: 48, smil: 0, cost: 24 },
   charts: { bytes: 15500, elements: 96, stops: 76, smil: 0, cost: 38 },
