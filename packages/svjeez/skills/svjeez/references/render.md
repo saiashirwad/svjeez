@@ -22,4 +22,4 @@ One self-contained file: animation as CSS keyframes (and SMIL where CSS can't re
 
 ## Video
 
-`npm i -D @svjeez/video`. `svjeez video scene.tsx --out scene.mp4` encodes `--loops` loops (default 1) at `--fps` (default 30) in headless Chromium; `.webm` or `--format webm` writes WebM, `--background transparent` keeps alpha (WebM only, and only where the scene paints nothing). `--quality low|medium|high`, `--scale`, `--color-scheme` (a video bakes one scheme). Give the scene even sides: video can't encode odd ones.
+`npm i -D @svjeez/video@next`. `svjeez video scene.tsx --out scene.mp4` encodes `--loops` loops (default 1) at `--fps` (default 30) in headless Chromium; `.webm` or `--format webm` writes WebM, `--background transparent` keeps alpha (WebM only, and only where the scene paints nothing). `--quality low|medium|high`, `--scale`, `--color-scheme` (a video bakes one scheme). Give the scene even sides: video can't encode odd ones.

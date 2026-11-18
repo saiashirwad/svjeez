@@ -3,8 +3,7 @@
 Embed a svjeez scene in Astro 7. The integration compiles it to an SVG asset and can generate light and dark posters.
 
 ```sh
-npx astro add @svjeez/astro
-npm i -D svjeez
+npm i -D @svjeez/astro@next svjeez@next
 ```
 
 ```js
@@ -27,4 +26,4 @@ import hero from "../scenes/hero.tsx";
 
 Use `getScene(scene, { posters: { scale: 2 } })` from `@svjeez/astro/scene` for custom markup or poster URLs. Posters need `playwright-core` and `npx playwright-core install chromium-headless-shell`.
 
-[Site using the integration](https://github.com/saiashirwad/svjeez/tree/main/site)
+[Example Astro app](https://github.com/saiashirwad/svjeez/tree/next/packages/astro/test/consumer)

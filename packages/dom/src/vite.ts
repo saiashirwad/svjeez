@@ -139,7 +139,7 @@ export const recordings = async <M extends Record<string, unknown>>(
     const { port } = server.httpServer!.address() as AddressInfo;
     const made = await sources(server, file, root);
 
-    // SAFETY: the steps are recorded for every exported demo, by name, which is the type `recordings` gives M's demos.
+    // SAFETY: the caller supplies M for this module, and runtime discovery selects exports by the demo tag.
     return (await snapshots(
       cache,
       { ...options, base: `http://localhost:${port}`, inputs: [made, inputs] },

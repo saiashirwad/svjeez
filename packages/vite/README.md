@@ -3,7 +3,7 @@
 Compile svjeez scenes into SVG assets when a Vite app builds. The app receives a URL, dimensions and accessible text.
 
 ```sh
-npm i -D @svjeez/vite svjeez
+npm i -D @svjeez/vite@next svjeez@next
 ```
 
 ```ts
@@ -23,4 +23,4 @@ import hero from "./scenes/hero.tsx?svjeez";
 
 The plugin compiles the scene in its own JSX environment and reloads when a scene dependency changes. Add `&posters` for light and dark WebP stills. Configure them with `svjeez({ posters: { scale, quality, background } })`. Posters need `playwright-core` and `npx playwright-core install chromium-headless-shell`.
 
-[Example app](https://github.com/saiashirwad/svjeez/tree/main/packages/vite/test/app)
+[Example app](https://github.com/saiashirwad/svjeez/tree/next/packages/vite/test/app)

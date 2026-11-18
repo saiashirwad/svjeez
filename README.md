@@ -59,7 +59,7 @@ npx svjeez svg scene.tsx --out hello.svg
 npx svjeez dev scene.tsx
 ```
 
-Open `hello.svg` in a browser or embed it with `<img src="hello.svg" alt="A curve draws on, then a dot pops in">`. With Bun, use `bun add svjeez` and `bunx --bun svjeez` with the same scene and JSX config.
+Open `hello.svg` in a browser or embed it with `<img src="hello.svg" alt="A curve draws on, then a dot pops in">`. With Bun, use `bun add svjeez@next` and `bunx --bun svjeez` with the same scene and JSX config.
 
 ## Check a scene
 
