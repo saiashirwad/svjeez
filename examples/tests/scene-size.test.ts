@@ -23,6 +23,7 @@ const budgets = {
   derived: { bytes: 9300, elements: 21, stops: 46, smil: 1, cost: 5 },
   type: { bytes: 3900, elements: 35, stops: 20, smil: 0, cost: 10 },
   icons: { bytes: 10350, elements: 33, stops: 48, smil: 0, cost: 24 },
+  charts: { bytes: 15500, elements: 96, stops: 76, smil: 0, cost: 38 },
   paint: { bytes: 8800, elements: 52, stops: 18, smil: 14, cost: 14 },
   epicycles: { bytes: 45200, elements: 145, stops: 119, smil: 0, cost: 84 },
   escapement: { bytes: 51500, elements: 143, stops: 128, smil: 0, cost: 49 },

@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@svjeez/charts": "workspace:*",
     "@svjeez/fonts": "workspace:*",
     "@svjeez/icons": "workspace:*",
     "@svjeez/video": "workspace:*",
