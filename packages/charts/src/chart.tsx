@@ -23,6 +23,7 @@ import type {
   AreaOptions,
   BarsOptions,
   ChartProps,
+  Datum,
   LineCurve,
   LineOptions,
   Series,
@@ -134,8 +135,8 @@ const Axes = ({ look: { chart, layout, size } }: { readonly look: Look }): Scene
 
 interface BarsProps {
   readonly look: Look;
-  readonly data: readonly (readonly [string, number])[];
-  readonly options: BarsOptions & { readonly name: string };
+  readonly data: readonly Datum<string>[];
+  readonly options: BarsOptions;
   readonly slot: { readonly index: number; readonly count: number };
 }
 
@@ -222,22 +223,20 @@ const reaches = (points: readonly Vec[]): readonly number[] => {
 
 interface LineProps {
   readonly look: Look;
-  readonly data: readonly (readonly [string | number, number])[];
-  readonly options: LineOptions & { readonly name: string };
+  readonly points: readonly Vec[];
+  readonly options: LineOptions;
   readonly fill?: SceneElement;
   readonly stroked?: boolean;
 }
 
 const Line = ({
-  look: { chart, layout, size },
-  data,
+  look: { chart, size },
+  points,
   options,
   fill,
   stroked = true,
 }: LineProps): SceneElement => {
-  const { plot } = layout;
   const { color, span: when, label, width = 2.5 } = options;
-  const points = data.map(([x, y]): Vec => [plot.x(x), plot.y(y)]);
 
   const d = d3line<Vec>()
     .x((p) => p[0])
@@ -299,9 +298,12 @@ const Line = ({
 
 interface AreaProps {
   readonly look: Look;
-  readonly data: readonly (readonly [string | number, number])[];
-  readonly options: AreaOptions & { readonly name: string };
+  readonly data: readonly Datum[];
+  readonly options: AreaOptions;
 }
+
+const pointsOn = (plot: Layout["plot"], data: readonly Datum[]): Vec[] =>
+  data.map(([x, y]) => [plot.x(x), plot.y(y)]);
 
 const Area = ({ look, data, options }: AreaProps): SceneElement => {
   const { plot, yDomain, width, height } = look.layout;
@@ -316,7 +318,7 @@ const Area = ({ look, data, options }: AreaProps): SceneElement => {
     );
 
   const base = plot.y(Math.min(Math.max(baseline, low), high));
-  const points = data.map(([x, y]): Vec => [plot.x(x), plot.y(y)]);
+  const points = pointsOn(plot, data);
   const top = Math.min(base, ...points.map(([, y]) => y));
 
   const shape = d3area<Vec>()
@@ -354,7 +356,13 @@ const Area = ({ look, data, options }: AreaProps): SceneElement => {
   );
 
   return (
-    <Line look={look} data={data} options={options} fill={fill} stroked={options.line !== false} />
+    <Line
+      look={look}
+      points={points}
+      options={options}
+      fill={fill}
+      stroked={options.line !== false}
+    />
   );
 };
 
@@ -368,12 +376,13 @@ export const Chart = (props: ChartProps): SceneElement => {
   let placed = 0;
 
   const drawn = series.map((s: Series) => {
-    const options = { ...s.options, name: s.options.name! };
+    const options = { ...s.options, name: s.options.name };
 
     if (s.kind === "bars")
       return <Bars look={look} data={s.data} options={options} slot={{ index: placed++, count }} />;
 
-    if (s.kind === "line") return <Line look={look} data={s.data} options={options} />;
+    if (s.kind === "line")
+      return <Line look={look} points={pointsOn(layout.plot, s.data)} options={options} />;
 
     return <Area look={look} data={s.data} options={options} />;
   });

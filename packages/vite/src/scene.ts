@@ -27,17 +27,18 @@ const unescape = (text: string) =>
     .replace(/&apos;/g, "'")
     .replace(/&amp;/g, "&");
 
-const compiled = new WeakMap<object, string>();
+const compiled = new WeakMap<Exclude<SceneSource, string>, string>();
 
 const isSvgText = (scene: SceneSource): scene is string => typeof scene === "string";
 
-const emit = (made: string | Scene) => (isSvgText(made) ? made : backend.emit(made));
-
 const compile = (scene: SceneSource) => {
   if (isSvgText(scene)) return scene;
-  let svg = compiled.get(scene);
+  const known = compiled.get(scene);
 
-  if (svg === undefined) compiled.set(scene, (svg = emit(isScene(scene) ? scene : scene())));
+  if (known !== undefined) return known;
+  const made = isScene(scene) ? scene : scene();
+  const svg = isSvgText(made) ? made : backend.emit(made);
+  compiled.set(scene, svg);
 
   return svg;
 };
@@ -55,7 +56,7 @@ export const getScene = (
 
   if (!box) throw new Error("getScene() needs a scene whose svg has a viewBox, found none.");
 
-  const [, , width, height] = box.slice(1).map(Number);
+  const [width, height] = [Number(box[3]), Number(box[4])];
 
   let posters: Record<Scheme, string> | undefined;
 
@@ -76,8 +77,8 @@ export const getScene = (
 
   return {
     src: `${ROUTE}${name}.svg`,
-    width: width!,
-    height: height!,
+    width,
+    height,
     title: unescape(/<title[^>]*>([^<]*)<\/title>/.exec(svg)?.[1] ?? ""),
     desc: unescape(/<desc[^>]*>([^<]*)<\/desc>/.exec(svg)?.[1] ?? ""),
     svg,

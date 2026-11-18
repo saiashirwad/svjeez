@@ -1,41 +1,19 @@
 import { pathData, type Geometry } from "svjeez";
+import { simplifyPoints } from "./simplify.ts";
 
 type Tenths = readonly [number, number];
 
 const tenth = (v: number) => Math.round(v * 10);
 
-const straighten = (line: readonly Tenths[], epsilon: number): Tenths[] => {
-  if (line.length < 3) return [...line];
-  const keep = new Uint8Array(line.length);
-  const stack: [number, number][] = [[0, line.length - 1]];
-  keep[0] = keep[line.length - 1] = 1;
-
-  while (stack.length > 0) {
-    const [first, last] = stack.pop()!;
-    const [ax, ay] = line[first]!;
-    const [bx, by] = line[last]!;
+const straighten = (line: readonly Tenths[], epsilon: number): Tenths[] =>
+  simplifyPoints(line, epsilon, ([ax, ay], [bx, by]) => {
     const length = Math.hypot(bx - ax, by - ay);
-    let far = 0;
-    let index = 0;
 
-    for (let i = first + 1; i < last; i++) {
-      const [x, y] = line[i]!;
-
-      const distance = length
+    return ([x, y]) =>
+      length
         ? Math.abs((bx - ax) * (ay - y) - (ax - x) * (by - ay)) / length
         : Math.hypot(x - ax, y - ay);
-
-      if (distance > far) [far, index] = [distance, i];
-    }
-
-    if (far > epsilon) {
-      keep[index] = 1;
-      stack.push([first, index], [index, last]);
-    }
-  }
-
-  return line.filter((_, i) => keep[i]);
-};
+  });
 
 export const rings = (
   list: readonly (readonly (readonly [number, number])[])[],

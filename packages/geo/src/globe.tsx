@@ -18,7 +18,15 @@ import {
   type Vec,
 } from "svjeez";
 import { SceneError, type ShapeProps } from "svjeez/tools";
-import { finder, lonLat, read, type GeoData, type LonLat, type ReadOptions } from "./data.ts";
+import {
+  finder,
+  lonLat,
+  positive,
+  read,
+  type GeoData,
+  type LonLat,
+  type ReadOptions,
+} from "./data.ts";
 import { rings } from "./outline.ts";
 import {
   ORIGIN,
@@ -166,13 +174,6 @@ const made = (what: string, radius: number, pieces: readonly Anim<Geometry>[]): 
   radius,
   pieces,
 });
-
-const positive = (value: number, what: string, fix: string): number => {
-  if (!(Number.isFinite(value) && value > 0))
-    throw new SceneError(`${what} needs a positive number, got ${value}.`, fix);
-
-  return value;
-};
 
 export function globe(data: GeoData, options: GlobeOptions): Globe {
   const { simplify = 0.6, step = 6, tolerance = 1, turn } = options;

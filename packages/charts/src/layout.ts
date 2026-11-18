@@ -58,18 +58,18 @@ const labelOf = (series: Series): string =>
     : `${series.kind}("${series.options.name}")`;
 
 const checkSeries = (series: readonly Series[], x: XScale): void => {
-  const names = new Set<string>();
+  const names = new Set<string | undefined>();
 
   for (const s of series) {
     const label = labelOf(s);
     const { name, span } = s.options;
 
-    if (names.has(name!))
+    if (names.has(name))
       fail(
         `Two series are both named "${name}".`,
         `Give each series of one chart its own name: ${s.kind}(data, { name: "…", color }).`,
       );
-    names.add(name!);
+    names.add(name);
 
     if (span && (!(span.over > 0) || !Number.isFinite(span.start + span.over)))
       fail(
