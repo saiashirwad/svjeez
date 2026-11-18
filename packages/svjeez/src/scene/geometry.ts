@@ -289,10 +289,18 @@ const PIECES = 8;
  * anchor is fitted with) is cut into pieces, each with its own part of the ease, or a straight line where that part
  * still overshoots. The values at the cuts are the lane's own, so the path is the same where it is cut.
  */
-export const smilSafe = (lane: Lane<Geometry>, where: string): Lane<Geometry> => {
+export const smilSafe = (lane: Lane<Geometry>, where: string): Lane<Geometry> =>
+  smilSafeWith(lane, mixGeometry, where);
+
+/** `smilSafe` for a lane of any value that `mix` blends. */
+export const smilSafeWith = <T>(
+  lane: Lane<T>,
+  mix: (a: T, b: T, amount: number, where: string) => T,
+  where: string,
+): Lane<T> => {
   if (lane.keys.every((key) => smilWritable(key.ease))) return lane;
   const [first] = lane.keys;
-  const keys: Key<Geometry>[] = [first];
+  const keys: Key<T>[] = [first];
 
   lane.keys.slice(1).forEach((key, i) => {
     const from = lane.keys[i]!;
@@ -310,10 +318,7 @@ export const smilSafe = (lane: Lane<Geometry>, where: string): Lane<Geometry> =>
 
       keys.push({
         t: from.t + (key.t - from.t) * end,
-        value:
-          piece === PIECES
-            ? key.value
-            : mixGeometry(from.value, key.value, easeAt(curve, end), where),
+        value: piece === PIECES ? key.value : mix(from.value, key.value, easeAt(curve, end), where),
         ease: smilWritable(part) ? part : ease.linear,
       });
     }

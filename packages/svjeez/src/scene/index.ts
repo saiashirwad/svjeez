@@ -130,6 +130,21 @@ export { derive, type DeriveOptions, type Derived, type Source } from "./derived
 
 export { isLane } from "./lane";
 
+export {
+  linear,
+  radial,
+  type Gradient,
+  type LinearAcrossOptions,
+  type LinearOptions,
+  type RadialAcrossOptions,
+  type RadialOptions,
+  type Stops,
+} from "./paint";
+
+export { blur, shadow, type Effect, type ShadowOptions } from "./effects";
+
+export { subtract } from "./holes";
+
 export { morph, type MorphOptions } from "./morph";
 
 export { boxesOf, hitTest, placements, valueAt, type Matrix, type Placed } from "./boxes";

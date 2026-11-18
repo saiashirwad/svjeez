@@ -4,6 +4,7 @@ import { checkWindow, span, type Span } from "../span";
 import { matched, mixGeometry } from "./geometry";
 import { isPlaced, placedLike } from "./identity";
 import type {
+  Effect,
   Lane,
   Animated,
   Geometry,
@@ -21,7 +22,8 @@ import type {
 import { isLane, pair } from "./lane";
 import { flat, type Child, type SceneElement } from "./nodes";
 import { ease, isSpring, type Curve } from "./spring";
-import { Passage, laneOf, mixNumber, mixVec, noMix, same, type Mix, type Timing } from "./steps";
+import { Passage, laneOf, mixNumber, mixVec, same, type Mix, type Timing } from "./steps";
+import { blendable, isGradient, mixPaint } from "./paint";
 import type { LayerValues } from "./track";
 
 /**
@@ -426,7 +428,7 @@ const firstPresent = (entry: Entry): SceneNode => entry.filled[entry.present.ind
 const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed = plan.exit) => {
   const rest = firstPresent(entry);
   const shown = presence(plan, entry, enter, exit);
-  const clip = agreed(entry, (node) => node.clip, "clip");
+  const clip = clipOf(plan, entry);
   const mask = agreed(entry, (node) => node.mask, "mask");
 
   return {
@@ -444,11 +446,108 @@ const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed
     layers: [...(shown ? [shown] : []), ...layersOf(plan, entry, rest.origin)],
     ...(clip && { clip }),
     ...(mask && { mask }),
-    effects: agreed(entry, (node) => node.effects, "effects"),
+    effects: effectsOf(plan, entry),
   };
 };
 
+/** A clip reshapes between states as a geometry does. A state with no clip draws everything, which no outline can blend to. */
+const clipOf = (plan: Plan, entry: Entry): Animated<Geometry> | undefined => {
+  const clips = entry.filled.map((node) => node.clip);
+
+  if (clips.every((clip) => clip === undefined)) return undefined;
+
+  const given = clips.flatMap((clip) => (clip === undefined ? [] : [clip]));
+
+  if (given.length < clips.length)
+    throw new Error(
+      `morph() can't blend "${entry.key}": it has a clip in one state and none in another, and no outline blends into drawing everything. Give it a clip in every state, as large as the node where it should show all of it.`,
+    );
+
+  return outlinesOf(plan, entry, given, "clip");
+};
+
+/** What an effect is when a state has none of it: a blur of 0, or the same shadow with no opacity. */
+const absent = (effect: Effect): Effect =>
+  effect.kind === "blur" ? { kind: "blur", radius: 0 } : { ...effect, opacity: 0 };
+
+const kinds = (effects: readonly Effect[]): string =>
+  effects.map((effect) => effect.kind).join(", ");
+
+/**
+ * Effects blend one by one between states that list the same kinds in the same order. A state with none takes the
+ * others' with nothing in them, so a shadow fades in and a blur sharpens.
+ */
+const effectsOf = (plan: Plan, entry: Entry): Effect[] => {
+  const lists = entry.filled.map((node) => node.effects);
+  const template = lists.reduce((most, list) => (list.length > most.length ? list : most));
+  const odd = lists.find((list) => list.length > 0 && kinds(list) !== kinds(template));
+
+  if (odd)
+    throw new Error(
+      `morph() can't blend the effects of "${entry.key}": one state has ${kinds(odd)} and another ${kinds(template)}. List the same effects in the same order in every state, or none.`,
+    );
+  const filled = lists.map((list) => (list.length === 0 ? template.map(absent) : list));
+  const what = (name: string) => `${name} of an effect`;
+
+  return template.map((effect, i): Effect => {
+    const states = filled.map((list) => list[i]!);
+
+    if (effect.kind === "blur")
+      return {
+        kind: "blur",
+        radius: blend(
+          plan,
+          entry,
+          states.map((each) => (each.kind === "blur" ? each.radius : 0)),
+          mixNumber,
+          what("blur radius"),
+        ),
+      };
+    const shadows = states.flatMap((each) => (each.kind === "shadow" ? [each] : []));
+
+    return {
+      kind: "shadow",
+      offset: blend(
+        plan,
+        entry,
+        shadows.map((each) => each.offset),
+        mixVec,
+        what("shadow offset"),
+      ),
+      blur: blend(
+        plan,
+        entry,
+        shadows.map((each) => each.blur),
+        mixNumber,
+        what("shadow blur"),
+      ),
+      color: agreed(
+        entry,
+        (node) => {
+          const own = node.effects[i];
+
+          return own?.kind === "shadow" ? own.color : effect.color;
+        },
+        "shadow color",
+      ),
+      opacity: blend(
+        plan,
+        entry,
+        shadows.map((each) => each.opacity),
+        mixNumber,
+        what("shadow opacity"),
+      ),
+    };
+  });
+};
+
 const NONE: Paint = [0, 0, 0, 0];
+
+/** A paint with nothing showing that blends with `like`: a gradient keeps its points with every stop clear. */
+const clear = (like: Animated<Paint> | undefined): Paint =>
+  like !== undefined && !isLane(like) && isGradient(like)
+    ? { ...like, stops: like.stops.map((stop) => ({ ...stop, color: NONE })) }
+    : NONE;
 
 /** A paint's colors never spring: under a spring they take `ease.inOut` over the span. */
 const paintCurve = (plan: Plan): Curve | undefined =>
@@ -461,14 +560,18 @@ const paints = (
   what: string,
 ): Animated<Paint> | undefined => {
   if (values.every((value) => value === undefined)) return undefined;
+  const none = clear(values.find((value) => value !== undefined));
 
-  return blend(
-    plan,
-    entry,
-    values.map((value) => value ?? NONE),
-    noMix,
-    what,
-    paintCurve(plan),
+  return blendable(
+    blend(
+      plan,
+      entry,
+      values.map((value) => value ?? none),
+      mixPaint,
+      what,
+      paintCurve(plan),
+    ),
+    `${what} on "${entry.key}" in morph()`,
   );
 };
 
@@ -528,21 +631,34 @@ const geometryMix = (template: Geometry): Mix<Geometry> =>
     },
   );
 
-const geometryOf = (plan: Plan, entry: Entry, shapes: readonly ShapeNode[]): Animated<Geometry> => {
-  const values = shapes.map((node) => node.geometry);
+const geometryOf = (plan: Plan, entry: Entry, shapes: readonly ShapeNode[]): Animated<Geometry> =>
+  outlinesOf(
+    plan,
+    entry,
+    shapes.map((node) => node.geometry),
+    "geometry",
+  );
+
+/** One outline per state, matched so any two blend, as a lane through the transitions. */
+const outlinesOf = (
+  plan: Plan,
+  entry: Entry,
+  values: readonly Animated<Geometry>[],
+  what: string,
+): Animated<Geometry> => {
   const [first] = values;
 
   if (values.every((value) => same(value, first))) return first!;
 
   if (values.some(isLane))
     throw new Error(
-      `morph() can't blend the geometry of "${entry.key}": it moves in a state (a track) and also differs between states. Write it the same in every state, or let the morph reshape it.`,
+      `morph() can't blend the ${what} of "${entry.key}": it moves in a state (a track) and also differs between states. Write it the same in every state, or let the morph reshape it.`,
     );
 
   // SAFETY: no value is a lane, so each is a geometry.
-  const blendable = matched(values as readonly Geometry[], `geometry on "${entry.key}" in morph()`);
+  const outlines = matched(values as readonly Geometry[], `${what} on "${entry.key}" in morph()`);
 
-  return blend(plan, entry, blendable, geometryMix(blendable[0]!), "geometry");
+  return blend(plan, entry, outlines, geometryMix(outlines[0]!), what);
 };
 
 const strokeOf = (plan: Plan, entry: Entry, shapes: readonly ShapeNode[]): Stroke | undefined => {
@@ -565,13 +681,16 @@ const strokeOf = (plan: Plan, entry: Entry, shapes: readonly ShapeNode[]): Strok
   return {
     ...given,
     // A state with no stroke draws it with no width, in the color of the others.
-    color: blend(
-      plan,
-      entry,
-      strokes.map((stroke) => (stroke ?? given).color),
-      noMix,
-      "stroke color",
-      paintCurve(plan),
+    color: blendable(
+      blend(
+        plan,
+        entry,
+        strokes.map((stroke) => (stroke ?? given).color),
+        mixPaint,
+        "stroke color",
+        paintCurve(plan),
+      ),
+      `stroke color on "${entry.key}" in morph()`,
     ),
     width: blend(
       plan,
@@ -646,13 +765,16 @@ const blendedLines = (plan: Plan, entry: Entry, states: readonly TextNode[]): Te
 
       return {
         ...rest,
-        fill: blend(
-          plan,
-          entry,
-          runs.map((each) => each.fill),
-          noMix,
-          "fill",
-          paintCurve(plan),
+        fill: blendable(
+          blend(
+            plan,
+            entry,
+            runs.map((each) => each.fill),
+            mixPaint,
+            "fill",
+            paintCurve(plan),
+          ),
+          `fill on "${entry.key}" in morph()`,
         ),
         ...(opacity !== undefined && opacity !== 1 && { opacity }),
       };

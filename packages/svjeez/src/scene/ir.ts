@@ -13,6 +13,10 @@ import type { Ease, Seconds } from "../motion";
  * 2. `at` puts that frame's origin in the parent's frame. Then each layer, the outermost first, moves by its
  *    `offset`, rotates and scales, all around `origin`, a fixed point in the node's frame.
  * 3. Nothing is inherited. A node with no fill has no fill.
+ * 4. A node is drawn in this order: its own content (a group's children, the first underneath), then cut to `clip`,
+ *    then masked by `mask`, then each of `effects` in turn, and only then placed by `at` and the layers, whose
+ *    opacities fade the whole result. Clip, mask, gradients and effects are all in the node's own frame, so they move,
+ *    turn and scale with it, and an effect's lengths scale with it too.
  */
 export interface Scene {
   readonly size: Vec;
@@ -125,11 +129,16 @@ export type Geometry =
     };
 
 export interface Stop {
+  /** From 0 at the gradient's start to 1 at its end. Offsets never decrease from one stop to the next. */
   readonly offset: number;
   readonly color: Color;
 }
 
-/** Gradient points are in the node's own frame, in the same units as its geometry. */
+/**
+ * Gradient points are in the node's own frame, in the same units as its geometry. Colors blend in sRGB, and before the
+ * first stop and after the last the end colors hold. In a lane every key is the same kind with as many stops, so a
+ * backend only interpolates points, offsets and colors.
+ */
 export type Gradient =
   | {
       readonly kind: "linear";
@@ -164,13 +173,21 @@ export interface Layer {
   readonly opacity: Animated<number>;
 }
 
+/**
+ * What a node's drawing goes through after its clip and mask, in order: each effect takes what the one before it made.
+ * Blurs are Gaussian, `radius` and `blur` their standard deviation, as CSS `blur()` takes it, in the node's own
+ * units. Effects blend colors in sRGB. An effect never changes the node's box.
+ */
 export type Effect =
   | { readonly kind: "blur"; readonly radius: Animated<number> }
   | {
+      /** A copy of the drawing's alpha in `color`, moved by `offset`, blurred and laid under the drawing. */
       readonly kind: "shadow";
-      readonly offset: Vec;
-      readonly blur: number;
+      readonly offset: Animated<Vec>;
+      readonly blur: Animated<number>;
       readonly color: Color;
+      /** Multiplies the color's own alpha, from 0 to 1. */
+      readonly opacity: Animated<number>;
     };
 
 /** Where a node was written, so an editor can go from the picture back to the code. */
@@ -193,7 +210,12 @@ interface Base {
   readonly origin: Vec;
   /** The outermost first. The node's own `rotate`, `scale` and `opacity` are the last. A layer that changes nothing is left out. */
   readonly layers: readonly Layer[];
-  readonly clip?: Geometry;
+  /** Only what lies inside this outline is drawn, by its fill rule. The node's box stays its content's. */
+  readonly clip?: Animated<Geometry>;
+  /**
+   * The node shows where this drawing is opaque, by its alpha: an alpha mask, so the mask's colors, and the scheme its
+   * tokens follow, don't matter. It is drawn in the node's own frame, as a child would be, and is never shown itself.
+   */
   readonly mask?: SceneNode;
   readonly effects: readonly Effect[];
 }

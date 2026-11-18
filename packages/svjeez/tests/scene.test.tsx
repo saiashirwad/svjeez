@@ -311,10 +311,22 @@ describe("the SVG backend", () => {
       root: { ...model.root, children: [{ ...dot, effects: [{ kind: "blur", radius: 2 }] }] },
     };
 
+    const flat = {
+      name: "Flat",
+      supports: { ...svg.supports, blur: { level: "none", note: "no filters." } },
+    } as const;
+
     expect(
-      diagnose(blurred, svg).map((entry) => [entry.severity, entry.feature, entry.key]),
+      diagnose(blurred, flat).map((entry) => [entry.severity, entry.feature, entry.key]),
     ).toEqual([["error", "blur", "dot"]]);
-    expect(() => svg.emit(blurred)).toThrow('"dot" uses blur, which SVG can\'t draw');
+    expect(diagnose(blurred, flat)[0]!.message).toBe(
+      '"dot" uses blur, which Flat can\'t draw: no filters.',
+    );
+
+    const warned: string[] = [];
+
+    svg.emit(blurred, { onWarning: (warning) => warned.push(`${warning.feature} ${warning.key}`) });
+    expect(warned).toEqual(["blur dot"]);
   });
 });
 

@@ -1,6 +1,5 @@
-import type { Color as CssColor } from "../attributes";
 import type { Backend as Route, Target, TargetValues } from "../channels";
-import type { Lane as CssLane } from "../compile";
+import type { Canvas, Lane as CssLane } from "../compile";
 import type { Emit } from "../css";
 import { num } from "../format";
 import type { Key as Held } from "../keys";
@@ -12,13 +11,14 @@ import { foldLayers } from "./fold";
 import { drawMoving, type GeometrySlot } from "./svg-geometry";
 import type {
   Animated,
+  Box,
   Color,
+  Gradient,
   Contour,
   Geometry,
   Lane,
   Layer,
   Paint,
-  Rgba,
   Scene,
   Face,
   SceneNode,
@@ -29,9 +29,21 @@ import type {
 } from "./ir";
 import { curveLength, isCurved } from "./curve";
 import { labelled } from "./identity";
-import { isLane } from "./lane";
+import { isLane, mapLane } from "./lane";
 import { same } from "./steps";
 import { onCircle } from "./values";
+import { blendable, isGradient } from "./paint";
+import { grown, reachOf } from "./reach";
+import {
+  clipUrl,
+  colorText,
+  filterUrl,
+  gradientUrl,
+  maskUrl,
+  working,
+  type Defs,
+} from "./svg-paint";
+import { REDUCED_MOTION } from "../css";
 
 /**
  * The SVG backend. It decides where each lane lands (a CSS property, or a wrapper group when two lanes would
@@ -51,21 +63,25 @@ export interface SvgOptions {
   readonly sources?: boolean;
 }
 
-const LATER = "the SVG backend doesn't write it yet.";
 const EXACT: Support = { level: "exact" };
-const NONE: Support = { level: "none", note: LATER };
+
+/** Measured against Chromium and Firefox, which draw a small blur as small as it is. */
+const SOFT_BLUR: Support = {
+  level: "close",
+  note: "WebKit draws any blur under about 1.5 units about that soft, so a blur that eases out to 0 looks softer there in its last moments. Chromium and Firefox draw it exactly.",
+};
 
 const supports: Readonly<Record<Feature, Support>> = {
   text: EXACT,
   outlinedText: EXACT,
   image: EXACT,
   instance: EXACT,
-  clip: NONE,
-  mask: NONE,
-  blur: NONE,
-  shadow: NONE,
-  linearGradient: NONE,
-  radialGradient: NONE,
+  clip: EXACT,
+  mask: EXACT,
+  blur: SOFT_BLUR,
+  shadow: SOFT_BLUR,
+  linearGradient: EXACT,
+  radialGradient: EXACT,
   nonScalingStroke: EXACT,
   liveTokens: EXACT,
   curvedMotion: EXACT,
@@ -79,33 +95,15 @@ interface Ctx {
   readonly sources: boolean;
   /** What the root `<svg>` states for every text in it, so each text writes only what differs. */
   readonly around: Partial<Face>;
+  /** Gradients, clips, masks and filters, written once each. */
+  readonly defs: Defs;
+  /** Where the node being drawn has its frame in its element's own coordinates: what a gradient's points move by. */
+  frame: Vec;
+  /** The key of the node being drawn, for errors. */
+  key: string;
 }
 
-const isRgba = (color: Color): color is Rgba => Array.isArray(color);
-
-const byte = (unit: number): string =>
-  Math.round(Math.min(1, Math.max(0, unit)) * 255)
-    .toString(16)
-    .padStart(2, "0")
-    .toUpperCase();
-
-// SAFETY: a "#" and hex digits, or var() of a token name, is a color as the attribute types spell one.
-const colorText = (color: Color): CssColor =>
-  (isRgba(color)
-    ? `#${byte(color[0])}${byte(color[1])}${byte(color[2])}${color[3] < 1 ? byte(color[3]) : ""}`
-    : `var(--${color.name})`) as CssColor;
-
-const isRgbaPaint = (paint: Paint): paint is Rgba => Array.isArray(paint);
-
-const isColor = (paint: Paint): paint is Color => isRgbaPaint(paint) || paint.kind === "token";
-
-const solid = (paint: Paint): Color => {
-  if (isColor(paint)) return paint;
-
-  throw new Error(
-    `A ${paint.kind} gradient reached the SVG backend, which doesn't write gradients yet.`,
-  );
-};
+const isColor = (paint: Paint): paint is Color => !isGradient(paint);
 
 const pt = ([x, y]: Vec): string => `${num(x)} ${num(y)}`;
 
@@ -311,7 +309,7 @@ const isCut = (keys: readonly Held[]): boolean =>
 /** A lane for the emitter. Its channels are the names its values carry. An opacity cut hides with `visibility` unless `cuts` is false. */
 const cssLane = <T>(
   ctx: Ctx,
-  slot: Slot | GeometrySlot,
+  slot: Slot | GeometrySlot | (string & {}),
   lane: Lane<T>,
   values: (value: T) => TargetValues,
   {
@@ -340,6 +338,8 @@ interface Shell {
   readonly lanes: CssLane[];
   readonly style: string[];
   readonly taken: Set<Slot>;
+  /** A clip, a mask or a filter: what the element does to what it holds, before its own transforms. */
+  readonly attrs: Record<string, AttrValue>;
   /** The outermost of translate (0), rotate (1) and scale (2) already here. A new one must come before it. */
   rank: number;
   opacity?: number;
@@ -350,7 +350,14 @@ interface Shell {
 
 const RANK: Partial<Record<Slot, number>> = { translate: 0, rotate: 1, scale: 2 };
 
-const shell = (): Shell => ({ lanes: [], style: [], taken: new Set(), rank: 3, pivots: false });
+const shell = (): Shell => ({
+  lanes: [],
+  style: [],
+  taken: new Set(),
+  attrs: {},
+  rank: 3,
+  pivots: false,
+});
 
 const open = (shells: Shell[], slot: Slot): Shell => {
   const rank = RANK[slot];
@@ -501,12 +508,31 @@ const travel = (ctx: Ctx, shells: Shell[], by: Animated<Vec>): void => {
     open(shells, "translate").style.push(`translate:${num(by[0])}px ${num(by[1])}px`);
 };
 
+/** One key of a paint lane that `blendable` passed, as the kind its first key is. */
+const asColor = (paint: Paint, where: string): Color => {
+  if (isColor(paint)) return paint;
+
+  throw new Error(`${where} mixes colors and gradients.`);
+};
+
+const asGradient = (paint: Paint, where: string): Gradient => {
+  if (!isColor(paint)) return paint;
+
+  throw new Error(`${where} mixes colors and gradients.`);
+};
+
+/**
+ * A fill or stroke. A gradient is laid out in the node's frame, which sits at `shift` in the element's own
+ * coordinates: where the node's frame is for the element being drawn, unless the caller says.
+ */
 const painted = (
   ctx: Ctx,
   slot: "fill" | "stroke",
   paint: Animated<Paint> | undefined,
   attrs: Record<string, AttrValue>,
   lanes: CssLane[],
+  shift: Vec = ctx.frame,
+  key = ctx.key,
 ): void => {
   if (paint === undefined) {
     if (slot === "fill") attrs.fill = "none";
@@ -515,15 +541,31 @@ const painted = (
   }
 
   if (!isLane(paint)) {
-    attrs[slot] = colorText(solid(paint));
+    attrs[slot] = isColor(paint)
+      ? colorText(paint)
+      : gradientUrl(ctx.defs, paint, shift, slot, key);
 
     return;
   }
 
-  attrs[slot] = colorText(solid(paint.keys[0].value));
+  const where = `${slot} on "${key}"`;
+
+  blendable(paint, where);
+
+  if (!isColor(paint.keys[0].value)) {
+    const gradients = mapLane(paint, (value) => asGradient(value, where));
+
+    attrs[slot] = gradientUrl(ctx.defs, gradients, shift, slot, key);
+
+    return;
+  }
+
+  const colors = mapLane(paint, (value) => asColor(value, where));
+
+  attrs[slot] = colorText(colors.keys[0].value);
   lanes.push(
-    cssLane(ctx, slot, paint, (value) =>
-      slot === "fill" ? { fill: colorText(solid(value)) } : { stroke: colorText(solid(value)) },
+    cssLane(ctx, slot, colors, (value) =>
+      slot === "fill" ? { fill: colorText(value) } : { stroke: colorText(value) },
     ),
   );
 };
@@ -537,11 +579,12 @@ const stroked = (
   node: ShapeNode,
   attrs: Record<string, AttrValue>,
   lanes: CssLane[],
+  shift: Vec,
 ): void => {
   const { trim } = node;
   const stroke = emptyTrim(trim) ? undefined : node.stroke;
 
-  painted(ctx, "stroke", stroke?.color, attrs, lanes);
+  painted(ctx, "stroke", stroke?.color, attrs, lanes, shift, node.key);
 
   if (stroke) {
     const width = isLane(stroke.width) ? stroke.width.keys[0].value : stroke.width;
@@ -618,8 +661,10 @@ const shapeElement = (
     };
   }
 
-  painted(ctx, "fill", node.fill, drawn.attrs, lanes);
-  stroked(ctx, node, drawn.attrs, lanes);
+  const shift: Vec = drawn.placed ? at : [0, 0];
+
+  painted(ctx, "fill", node.fill, drawn.attrs, lanes, shift, node.key);
+  stroked(ctx, node, drawn.attrs, lanes, shift);
 
   return drawn;
 };
@@ -747,7 +792,7 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
   };
 
   if (base) {
-    painted(ctx, "fill", base.fill, drawn.attrs, lanes);
+    painted(ctx, "fill", base.fill, drawn.attrs, lanes, at, node.key);
 
     if (base.opacity !== undefined) opacity(base, drawn.attrs, lanes);
   } else drawn.attrs.fill = "none";
@@ -776,7 +821,8 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
 
       first = false;
 
-      if (!same(run.fill, base!.fill)) painted(ctx, "fill", run.fill, tspan.attrs, own);
+      if (!same(run.fill, base!.fill))
+        painted(ctx, "fill", run.fill, tspan.attrs, own, at, node.key);
 
       if (!same(run.opacity ?? 1, base!.opacity ?? 1)) opacity(run, tspan.attrs, own);
 
@@ -790,10 +836,73 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
   return { drawn, children };
 };
 
+/** The element that takes a clip, a mask or a filter, and where the node's frame sits in its coordinates. */
+interface Holder {
+  readonly own: Shell;
+  readonly shift: Vec;
+}
+
+/**
+ * Clip and mask on one element, then effects on one around it, inside every layer: the order rule 4 of ir.ts sets.
+ * The element drawn takes them itself when nothing else is on it yet, and a group of their own holds them otherwise.
+ * Each is laid out in its element's own coordinates, where the node's frame sits at `shift`.
+ */
+const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Drawn): void => {
+  const holder = (): Holder => {
+    const current = shells.at(-1)!;
+
+    const bare =
+      shells.length === 1 &&
+      current.taken.size === 0 &&
+      current.style.length === 0 &&
+      current.lanes.length === 0 &&
+      current.opacity === undefined &&
+      Object.keys(current.attrs).length === 0;
+
+    if (bare) return { own: current, shift: drawn.placed ? at : [0, 0] };
+    const own = shell();
+
+    shells.push(own);
+
+    return { own, shift: at };
+  };
+
+  const moved = (box: Box, [x, y]: Vec): Box => ({ ...box, x: box.x + x, y: box.y + y });
+  const { scene } = ctx;
+
+  if (node.clip !== undefined || node.mask) {
+    const { own, shift } = holder();
+
+    if (node.clip !== undefined)
+      own.attrs["clip-path"] = clipUrl(ctx.defs, node.clip, shift, node.key);
+
+    if (node.mask) {
+      const reach = reachOf(node.mask, scene.symbols, `the mask of "${node.key}"`);
+      const region = reach ? moved(grown(reach, 1), shift) : { x: 0, y: 0, width: 0, height: 0 };
+
+      own.attrs.mask = maskUrl(ctx.defs, node.mask, region, shift);
+    }
+  }
+
+  const effects = working(node.effects);
+
+  if (effects.length === 0) return;
+  const reach = reachOf({ ...node, effects }, scene.symbols, `the effects of "${node.key}"`);
+
+  // A node that draws nothing has nothing for its effects to work on.
+  if (!reach) return;
+  const { own, shift } = holder();
+
+  own.attrs.filter = filterUrl(ctx.defs, effects, moved(grown(reach, 1), shift), node.key);
+};
+
 const symbolId = (ctx: Ctx, name: string): string => `${ctx.prefix}symbol-${name}`;
 
 const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
   const at: Vec = isLane(node.at) ? [0, 0] : node.at;
+
+  ctx.frame = at;
+  ctx.key = node.key;
   const lanes: CssLane[] = [];
   let drawn: Drawn;
   let children: SvgNode[] = [];
@@ -878,6 +987,8 @@ const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
 
   if (drawn.offset) travel(ctx, shells, drawn.offset);
 
+  dressed(ctx, node, shells, at, drawn);
+
   for (const layer of [...foldLayers(node.layers)].reverse()) place(ctx, shells, layer, cuts);
 
   if (isLane(node.at)) travel(ctx, shells, node.at);
@@ -906,6 +1017,7 @@ const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
     ];
 
     return {
+      ...own.attrs,
       ...(own.opacity !== undefined && { opacity: num(own.opacity) }),
       ...(style.length > 0 && { style: style.join(";") }),
     };
@@ -994,12 +1106,36 @@ export const svg: Backend<string, SvgOptions> = {
     admit(scene, svg, options.onWarning);
     const around = aroundOf(scene);
 
+    const prefix = options.prefix ?? "";
+
+    const canvas: Canvas = {
+      width: scene.size[0],
+      height: scene.size[1],
+      duration: scene.duration,
+      playbackRate: options.playbackRate ?? 1,
+      prefix,
+      ...(scene.still !== undefined && { stillAt: scene.still }),
+      loop: scene.loop,
+    };
+
     const ctx: Ctx = {
       scene,
-      prefix: options.prefix ?? "",
+      prefix,
       hides: new Map(),
       sources: options.sources ?? false,
       around,
+      defs: {
+        scene,
+        canvas,
+        nodes: [],
+        stills: [],
+        ids: new Map(),
+        counts: new Map(),
+        lane: (slot, lane, values, route) => cssLane(ctx, slot, lane, values, { route }),
+        draw: (node) => emitNode(ctx, node),
+      },
+      frame: [0, 0],
+      key: "",
     };
 
     const names = Object.keys(scene.symbols);
@@ -1018,6 +1154,10 @@ export const svg: Backend<string, SvgOptions> = {
       );
     });
 
+    const body = scene.root.children.map((child) => emitNode(ctx, child));
+    const all = [...defs, ...ctx.defs.nodes];
+    const { stills } = ctx.defs;
+
     return render(
       {
         width: scene.size[0],
@@ -1025,7 +1165,9 @@ export const svg: Backend<string, SvgOptions> = {
         duration: scene.duration,
         title: scene.title,
         ...(scene.desc !== undefined && { desc: scene.desc }),
-        css: tokenCss(scene, options.prefix ?? ""),
+        css: [tokenCss(scene, prefix), stills.length > 0 && `${REDUCED_MOTION}${stills.join("")}}`]
+          .filter(Boolean)
+          .join("\n"),
         loop: scene.loop,
         reducedMotion: scene.still === undefined ? false : { at: scene.still },
         ...(options.prefix !== undefined && { prefix: options.prefix }),
@@ -1040,10 +1182,7 @@ export const svg: Backend<string, SvgOptions> = {
           },
         }),
       },
-      [
-        ...(defs.length > 0 ? [element("defs", {}, defs)] : []),
-        ...scene.root.children.map((child) => emitNode(ctx, child)),
-      ],
+      [...(all.length > 0 ? [element("defs", {}, all)] : []), ...body],
     );
   },
 };

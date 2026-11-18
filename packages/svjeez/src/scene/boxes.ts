@@ -1,7 +1,6 @@
 import type { Seconds } from "../motion";
 import { mixGeometry } from "./geometry";
 import type { Animated, Box, Geometry, Layer, Scene, SceneNode, Source, Vec } from "./ir";
-import { isLane } from "./lane";
 import { valueAt as sampleAt } from "./sample";
 import { mixNumber, mixVec, type Mix } from "./steps";
 import { boxOf } from "./values";
@@ -97,10 +96,27 @@ const around = (points: readonly Vec[]): Box => {
   return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
 };
 
+const geometryAt = (geometry: Animated<Geometry>, t: Seconds, where: string): Box =>
+  boxOf(valueAt(geometry, t, mixGeometry, where));
+
+/** What a node covers in its frame at `t`: its content's box, cut to its clip's box when it has one. */
 const frameAt = (node: SceneNode, t: Seconds): Box =>
-  node.kind === "shape" && isLane(node.geometry)
-    ? boxOf(valueAt<Geometry>(node.geometry, t, mixGeometry, `"${node.key}"`))
-    : node.box;
+  clipped(
+    node,
+    node.kind === "shape" ? geometryAt(node.geometry, t, `"${node.key}"`) : node.box,
+    t,
+  );
+
+/** `content` cut to the box of `node`'s clip at `t`: a box test is as far as a hit test goes. */
+const clipped = (node: SceneNode, content: Box, t: Seconds): Box => {
+  if (node.clip === undefined) return content;
+  const clip = geometryAt(node.clip, t, `clip on "${node.key}"`);
+  const [x, y] = [Math.max(content.x, clip.x), Math.max(content.y, clip.y)];
+  const right = Math.min(content.x + content.width, clip.x + clip.width);
+  const bottom = Math.min(content.y + content.height, clip.y + clip.height);
+
+  return { x, y, width: Math.max(0, right - x), height: Math.max(0, bottom - y) };
+};
 
 /**
  * Every node of `scene` at `at` seconds (0, the picture at rest, unless you say), placed in the scene, in the order
@@ -136,18 +152,31 @@ export const placements = (scene: Scene, at: Seconds = 0): Placed[] => {
 
     // The root's box is the canvas; another group's holds wherever its children are now, in its frame too, so a
     // group whose children have moved away is hit where they are, not where they were.
-    if (depth > 0)
-      out[index] = {
-        ...out[index]!,
-        box: around(inside.flatMap((child) => corners(child.box))),
-        ...(back && {
-          frame: around(
+    if (depth > 0) {
+      const held = around(inside.flatMap((child) => corners(child.box)));
+
+      const frame =
+        back &&
+        clipped(
+          node,
+          around(
             inside.flatMap((child) =>
               corners(child.frame).map((point) => apply(back, apply(child.matrix, point))),
             ),
           ),
-        }),
+          at,
+        );
+
+      out[index] = {
+        ...out[index]!,
+        // A clip cuts what the group holds, so its box in the scene is its cut frame's.
+        box:
+          frame && node.clip !== undefined
+            ? around(corners(frame).map((p) => apply(own, p)))
+            : held,
+        ...(frame && { frame }),
       };
+    }
 
     return out[index]!;
   };

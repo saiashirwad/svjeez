@@ -8,6 +8,7 @@ import type { Settle } from "./settle";
 import type { MorphElement } from "./morph";
 import type { Timeline } from "./timeline";
 import type { Anim, Stack } from "./track";
+import type { Effect } from "./effects";
 import { rect, type Geometry, type Paint } from "./values";
 
 export { Ref, ref } from "./refs";
@@ -30,6 +31,18 @@ export interface Common {
   readonly opacity?: Anim<number>;
   /** Layers of motion around the node, the first outermost. */
   readonly motion?: Stack;
+  /**
+   * Only what lies inside this outline is drawn. It is in the node's own frame, so it moves, turns and scales with the
+   * node, and a track reshapes it as it does a shape's geometry. The node's box stays its content's.
+   */
+  readonly clip?: Anim<Geometry>;
+  /**
+   * The node shows only where this content is opaque: its alpha masks, never its colors. It is drawn in the node's own
+   * frame, as a child would be, and is never shown itself.
+   */
+  readonly mask?: Child;
+  /** `blur()` and `shadow()`, applied in order to the node with its children, after its clip and mask. */
+  readonly effects?: readonly Effect[];
 }
 
 /** A shape's outline. It is drawn centered on the edge, after the fill. */
