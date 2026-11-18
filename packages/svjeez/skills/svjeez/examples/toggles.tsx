@@ -8,14 +8,12 @@ import {
   canvas,
   circle,
   ease,
-  enter,
   par,
   pathData,
   rect,
   ref,
   scene,
   seq,
-  span,
   timeline,
   wait,
   type Action,
@@ -98,7 +96,7 @@ export default scene(
       <Group>
         <Shape geometry={canvas.rect} fill={theme.background} />
         <Align>
-          <Stack gap={8} motion={enter(span(0, 0.4), { from: { opacity: 0, offset: [0, 8] } })}>
+          <Stack gap={8}>
             <Text font={sans} weight={600} size={16} fill={theme.text}>
               Settings
             </Text>
@@ -110,7 +108,6 @@ export default scene(
           ref={cursor}
           geometry={pathData("M0 0V16l4.2-3.8 3 6.8 2.8-1.2-3-6.6H12Z")}
           at={IDLE}
-          motion={enter(span(0.1, 0.3))}
           fill={theme.text}
           stroke={{ color: theme.background, width: 1.2, join: "round" }}
         />

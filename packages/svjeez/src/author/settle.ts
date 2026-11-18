@@ -334,6 +334,8 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     );
   };
 
+  const attached = new Map<Draft, string[]>();
+
   const target = (anchor: Anchor): Draft => {
     if (anchor.of === "canvas") return top;
     const { within } = anchor.of;
@@ -389,6 +391,12 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
         return end;
       });
 
+      attached.set(
+        d,
+        asked.ends.flatMap((end) =>
+          isAnchor(end) && end.of !== "canvas" ? [target(end).node.key] : [],
+        ),
+      );
       d.children = asked
         .connect(
           ends,
@@ -594,7 +602,15 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     d.node.mask === undefined;
 
   const build = (d: Draft): SceneNode => {
-    const placed = { ...d.node, at: d.at, box: d.box, origin: d.origin };
+    const ends = attached.get(d);
+
+    const placed = {
+      ...d.node,
+      at: d.at,
+      box: d.box,
+      origin: d.origin,
+      ...(ends && ends.length > 0 && { authored: { ...d.node.authored, ends } }),
+    };
 
     if (placed.kind !== "group") return placed;
     const children = d.children.map(build);

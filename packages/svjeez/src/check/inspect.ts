@@ -43,6 +43,7 @@ import {
   seconds,
   sharedArea,
   shownOf,
+  merged,
   namesOf,
   sourcesOf,
   strokeReachAt,
@@ -1089,6 +1090,27 @@ const outlineGap = (a: Geometry, b: Geometry): number => {
     : Math.max(oneWay(x, y), oneWay(y, x));
 };
 
+const restarts = (
+  survey: Survey,
+  { node, ancestors }: Entry,
+  first: ReadonlyMap<string, Placed>,
+  end: Seconds,
+): boolean => {
+  if (node.kind !== "text") return false;
+  const words = textOf(node);
+
+  return survey.entries.some(
+    (other) =>
+      other.node !== node &&
+      other.node.kind === "text" &&
+      other.ancestors.at(-1) === ancestors.at(-1) &&
+      textOf(other.node) === words &&
+      (first.get(other.node.key)?.opacity ?? 0) > VISIBLE &&
+      !inside(survey.hidden.get(other.node.key) ?? [], 0) &&
+      inside(survey.hidden.get(other.node.key) ?? [], end),
+  );
+};
+
 const loopSeam = (survey: Survey): void => {
   const { scene } = survey;
   const { duration } = scene;
@@ -1096,6 +1118,8 @@ const loopSeam = (survey: Survey): void => {
   if (!scene.loop || duration <= 0) return;
   const end = duration - Math.max(1e-6, duration * 1e-7);
   const [first, last] = [framesOf(scene, [0])[0]!, framesOf(scene, [end])[0]!];
+  const seams = new Set<string>();
+  const byKey = new Map(survey.entries.map((each) => [each.node.key, each.node]));
 
   for (const entry of survey.entries.slice(1)) {
     if (isGone(survey, entry)) continue;
@@ -1103,6 +1127,29 @@ const loopSeam = (survey: Survey): void => {
     const [a, b] = [first.get(node.key), last.get(node.key)];
 
     const hidden = survey.hidden.get(node.key) ?? [];
+    const above = entry.ancestors.at(-1);
+
+    if (
+      b &&
+      b.opacity > VISIBLE &&
+      !inside(hidden, end) &&
+      (!a || a.opacity <= VISIBLE || inside(hidden, 0)) &&
+      !(above && above !== scene.root && inside(survey.hidden.get(above.key) ?? [], 0)) &&
+      !restarts(survey, entry, first, end)
+    ) {
+      const entered = merged(hidden).find(([from]) => from <= 1e-6)?.[1] ?? 0;
+
+      add(survey, {
+        code: "loop-seam",
+        severity: "warning",
+        key: node.key,
+        message: `${label(node)} enters at ${seconds(entered)} and never leaves, so it vanishes when the loop starts again at 0s.`,
+        hint: "Let it leave before the end (exit(), a fade, or .rewind() on its timeline), or have it on screen from 0s.",
+        times: [Number(end.toFixed(3)), 0],
+      });
+      continue;
+    }
+
     if (
       !a ||
       !b ||
@@ -1125,6 +1172,43 @@ const loopSeam = (survey: Survey): void => {
     });
 
     if (jumps.length === 0) continue;
+    const connector = [...entry.ancestors, node].reverse().find((each) => each.authored?.ends);
+
+    if (connector) {
+      const moved = (connector.authored?.ends ?? []).filter((key) => {
+        const [from, to] = [first.get(key), last.get(key)];
+
+        return (
+          !from ||
+          !to ||
+          Math.abs(from.opacity - to.opacity) > VISIBLE ||
+          Math.max(
+            Math.abs(from.box.x - to.box.x),
+            Math.abs(from.box.y - to.box.y),
+            Math.abs(from.box.width - to.box.width),
+            Math.abs(from.box.height - to.box.height),
+          ) > 0.5
+        );
+      });
+
+      if (seams.has(connector.key)) continue;
+      seams.add(connector.key);
+
+      if (moved.length > 0) {
+        const names = moved.map((key) => nodeName(byKey.get(key) ?? connector)).join(" and ");
+
+        add(survey, {
+          code: "loop-seam",
+          severity: "warning",
+          key: connector.key,
+          message: `${label(connector)} jumps when the loop starts again, from ${seconds(duration)} back to 0s, because its ends follow ${names}, which is not at 0s where it is at the end: it scales, fades or moves in. The arrow is redrawn to match, so it jumps too.`,
+          hint: `End the loop with ${names} as it starts (exit() it, or .rewind() its motion), or bring the arrow in after its ends settle and take it out before the end.`,
+          times: [Number(end.toFixed(3)), 0],
+        });
+        continue;
+      }
+    }
+
     add(survey, {
       code: "loop-seam",
       severity: "warning",

@@ -632,3 +632,67 @@ group("describe", () => {
   });
 });
 
+group("loop-seam for what enters and stays", () => {
+  test("a node that enters and never leaves vanishes at the seam", () => {
+    const found = only(
+      made(() => (
+        <Group>
+          <Dot key="late" motion={enter(span(0.5, 0.5))} />
+        </Group>
+      )),
+      "loop-seam",
+    );
+
+    expect(found.map((each) => [each.key, each.message])).toEqual([
+      [
+        "late",
+        '<Shape> "late" enters at 0.5s and never leaves, so it vanishes when the loop starts again at 0s.',
+      ],
+    ]);
+  });
+
+  test("one that leaves again, or a scene that does not loop, is fine", () => {
+    const fades = <Dot key="late" motion={[enter(span(0.5, 0.5)), exit(span(3, 0.5))]} />;
+
+    expect(
+      only(
+        made(() => fades),
+        "loop-seam",
+      ),
+    ).toEqual([]);
+    expect(
+      only(
+        made(() => <Dot key="late" motion={enter(span(0.5, 0.5))} />, 4, false),
+        "loop-seam",
+      ),
+    ).toEqual([]);
+  });
+
+  test("an arrow on a node that scales in is told why it jumps", () => {
+    const found = only(
+      made(() => {
+        const a = ref("a");
+        const b = ref("b");
+
+        return (
+          <Group>
+            <Shape ref={a} geometry={rect(30, 20)} at={[20, 30]} fill="#336699" />
+            <Shape
+              ref={b}
+              geometry={rect(30, 20)}
+              at={[150, 30]}
+              fill="#336699"
+              motion={enter(span(0.2, 0.5), { from: { scale: 0 } })}
+            />
+            <Arrow key="link" from={a.right} to={b.left} stroke={{ color: "#222222" }} />
+          </Group>
+        );
+      }),
+      "loop-seam",
+    );
+
+    expect(found.map((each) => each.key)).toEqual(["b", "link"]);
+    expect(found[1]!.message).toContain('because its ends follow <Shape> "b"');
+  });
+});
+

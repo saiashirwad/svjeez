@@ -51,7 +51,7 @@ In code, `inspect(scene)` and `describe(scene, times)` from `svjeez/tools` retur
 | `overlap` | warning | two different texts over each other while both are fully shown |
 | `missing-glyph` | error | characters the text's face has no glyph for; no other font fills in |
 | `low-contrast` | warning, info | text or a thin line too close to the flat color behind it, in either scheme |
-| `loop-seam` | warning | a looping scene jumps when it starts again: a value ends where it didn't start, by how far |
+| `loop-seam` | warning | a looping scene jumps when it starts again: a value ends where it didn't start, by how far; or a node enters and never leaves, so it vanishes at the seam; or an arrow's ends follow a node that scales or moves in |
 | `visible-at-zero` | error | shown at 0s and cut straight back in, or filled while its stroke draws in |
 | `nothing-enters` | info | everything is on screen from 0s and nothing enters |
 | `wasted-motion` | info | a value changes before the node is first seen, or after it is gone for good |

@@ -156,7 +156,7 @@ npx svjeez frames scene.tsx --sheet --out frames/   # look: open frames/sheet.pn
 | `low-contrast` | text or a thin line too close in color to the flat color behind it, per scheme |
 | `never-visible`, `zero-size` | a node hidden, painting nothing or covered at every time; geometry with no size |
 | `visible-at-zero` | shown at 0s and cut straight back in, or filled while its stroke draws in |
-| `loop-seam` | a looping scene jumps when it starts again: end where you started (`.rewind()`, `exit()`) |
+| `loop-seam` | a looping scene jumps when it starts again: end where you started (`.rewind()`, `exit()`); a node that enters must leave, and an arrow follows what its ends are attached to |
 | `static`, `nothing-enters`, `wasted-motion` | nothing moves; nothing enters; a value changes while no one sees it |
 | `unattached-ref`, `hidden-target`, `unused-symbol` | a ref no node takes; a timeline moving a node never seen; a symbol never placed |
 | `unsupported`, `approximate` | the SVG backend can't draw a feature, or draws it a little differently (a blur below about 1.5) |

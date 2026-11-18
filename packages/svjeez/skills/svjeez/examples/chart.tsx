@@ -5,7 +5,6 @@ import {
   Stack,
   Text,
   canvas,
-  enter,
   morph,
   rect,
   scene,
@@ -92,7 +91,7 @@ export default scene(
   () => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
-      <Group motion={enter(span(0, 0.5))}>
+      <Group>
         {morph.between([...quarters, quarters[0]!].map(chart), turns, {
           stagger: 0.05,
           enter: { opacity: 0, scale: 0.8 },
