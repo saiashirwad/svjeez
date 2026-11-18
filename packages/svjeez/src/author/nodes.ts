@@ -96,6 +96,10 @@ export interface TextProps extends Omit<Common, "anchor"> {
   readonly align?: "start" | "center" | "end";
   readonly width?: number;
   readonly lineHeight?: number;
+  /** Sets the text along this outline, on one line: it takes no `width`. */
+  readonly path?: Geometry;
+  /** Where along `path` the text begins, as a fraction of its length (default 0); `align` is relative to it. */
+  readonly start?: Anim<number>;
   readonly children?: TextContent;
 }
 

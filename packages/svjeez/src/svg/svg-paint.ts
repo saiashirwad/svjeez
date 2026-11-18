@@ -4,7 +4,7 @@ import type { Canvas, Lane as CssLane } from "./compile";
 import { num } from "../model/format";
 import { animate, windowEnd } from "./smil";
 import { element, type SvgNode } from "./tree";
-import { outlineBoxOf, smilSafeWith } from "../model/geometry";
+import { contoursOf, outlineBoxOf, smilSafeWith } from "../model/geometry";
 import type {
   Animated,
   Box,
@@ -408,3 +408,27 @@ export const clipUrl = (defs: Defs, clip: Animated<Geometry>, shift: Vec, key: s
 
   return `url(#${id})`;
 };
+
+/** The id of a <path> in defs that text runs along, drawn `shift` away from the origin. */
+export const pathId = (defs: Defs, path: Geometry, shift: Vec, key: string): string =>
+  twinned(defs, JSON.stringify(["p", path, shift]), "p", (own) => {
+    const geometry: Geometry = { kind: "path", contours: contoursOf(path), rule: "nonzero" };
+
+    const drawn = defs.draw({
+      kind: "shape",
+      key: `${key}#path`,
+      box: outlineBoxOf(geometry),
+      at: shift,
+      origin: [0, 0],
+      layers: [],
+      effects: [],
+      geometry,
+    });
+
+    if (drawn.kind !== "element" || drawn.tag !== "path")
+      throw new Error(
+        `The path of "${key}" did not draw as a single <path>, which lowering never writes. This is a bug in svjeez; please report it with the scene.`,
+      );
+
+    return { moves: false, node: element("path", { d: drawn.attrs.d!, id: own }) };
+  }).id;

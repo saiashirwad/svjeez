@@ -1,5 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { ease, font, Group, Run, Text, morph, scene, span, track, type SceneElement } from "svjeez";
+import {
+  circle,
+  ease,
+  font,
+  Group,
+  line,
+  Run,
+  Text,
+  morph,
+  scene,
+  span,
+  track,
+  type SceneElement,
+} from "svjeez";
 import { boxesOf, diagnose, isLane, svg, type Model } from "svjeez/tools";
 
 const fixture = (name: string) => new URL(`./fixtures/${name}.ttf`, import.meta.url);
@@ -584,5 +597,71 @@ describe("text strokes and animated size", () => {
         </Text>
       )),
     ).toThrow("needs a size above 0 at the start, got 0.");
+  });
+});
+
+describe("text along a path", () => {
+  const along = (extra: Partial<Parameters<typeof Text>[0]> = {}, text = "Hi") =>
+    made(() => (
+      <Text
+        key="t"
+        font={space}
+        size={10}
+        fill="#000000"
+        path={line([0, 50], [180, 50])}
+        {...extra}
+      >
+        {text}
+      </Text>
+    ));
+
+  test("lowers to glyph positions along the path and a box around them", () => {
+    const node = textOf(along());
+
+    expect(node.along?.align).toBe("start");
+    expect(node.lines[0]!.runs[0]!.at).toEqual([0, 50]);
+    expect(node.box.x).toBeCloseTo(0, 3);
+    expect(node.box.width).toBeCloseTo(12.24, 3);
+    expect(node.box.height).toBeGreaterThan(10);
+  });
+
+  test("start and align place the text relative to a fraction of the path", () => {
+    const node = textOf(along({ start: 0.5, align: "center" }));
+
+    expect(node.lines[0]!.runs[0]!.at[0]).toBeCloseTo(83.88, 3);
+  });
+
+  test("emits a textPath on a path in defs, with startOffset and text-anchor", () => {
+    const out = emit(along({ start: 0.5, align: "center" }));
+
+    expect(out).toMatch(/<defs>\s*<path d="M0 50L180 50" id="\w+"\/>\s*<\/defs>/);
+    expect(out).toMatch(/<text[^>]*text-anchor="middle"/);
+    expect(out).toMatch(/<textPath href="#\w+" startOffset="90">Hi<\/textPath>/);
+  });
+
+  test("a start track animates startOffset", () => {
+    const out = emit(along({ start: track(0).to(1, span(0, 1), ease.linear) }));
+
+    expect(out).toContain('attributeName="startOffset"');
+    expect(out).toContain('values="0;180"');
+  });
+
+  test("wraps tspans for styled runs inside the textPath", () => {
+    const out = emit(
+      made(() => (
+        <Text key="t" font={space} size={10} fill="#000000" path={circle(30)}>
+          a<Run weight={700}>b</Run>
+        </Text>
+      )),
+    );
+
+    expect(out).toMatch(/<textPath[^>]*><tspan>a<\/tspan><tspan[^>]*>b<\/tspan><\/textPath>/);
+  });
+
+  test("errors name what to change", () => {
+    expect(() => along({ path: line([0, 0], [0, 0]) })).toThrow("has no length");
+    expect(() => along({}, "x".repeat(40))).toThrow(/is 64\.8 longer than its path \(.*\)\./);
+    expect(() => along({ width: 50 })).toThrow("takes no width");
+    expect(() => along({}, "a\nb")).toThrow("takes one line, but its text has 2");
   });
 });

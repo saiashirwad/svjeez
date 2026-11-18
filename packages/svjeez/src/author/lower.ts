@@ -2,7 +2,7 @@ import type { Font } from "../font/font";
 import { num } from "../model/format";
 import { EPSILON, type Seconds } from "../model/time";
 import { checkWindow } from "./span";
-import { matched, mixGeometry, outlineBoxOf } from "../model/geometry";
+import { lengthOf as outlineLength, matched, mixGeometry, outlineBoxOf } from "../model/geometry";
 import { componentOf, identified, sourced, writtenAt } from "./identity";
 import { entryOf, named, nameNode, naming, quoted, whereOf, wordsOf, type Named } from "./names";
 import { SceneError, located } from "../model/scene-error";
@@ -89,7 +89,7 @@ import {
 import { FontBook, charName, faceOf, piecesOf, type Asked } from "./runs";
 import { lookOf, paintedBoxOf } from "../model/painted";
 import { minus, pinned } from "./pin";
-import { layoutRuns } from "./text";
+import { layoutRuns, setAlong } from "./text";
 import { countedNodes, countingIn, formatOf, ticksOf } from "./count";
 import { blendable, gradientOf, isWrittenGradient, mixPaint } from "./paint";
 import type { Effect as EffectProps } from "./effects";
@@ -441,6 +441,12 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
   const counted = ((): { node: SceneNode } | { words: string } | undefined => {
     if (!counting) return undefined;
 
+    if (props.path !== undefined)
+      throw new SceneError(
+        `${where} counts, and a count can't be set along a path.`,
+        "Drop path, or write the number as plain text.",
+      );
+
     if (props.width !== undefined)
       throw new SceneError(
         `${where} counts, and a count doesn't wrap, so it takes no width.`,
@@ -528,7 +534,15 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     return { text: words, face: look.font, style: look };
   });
 
-  const { lines, box, cuts } = layoutRuns(
+  const outline = props.path === undefined ? undefined : outlineOf(props.path);
+
+  if (outline && props.width !== undefined)
+    throw new SceneError(
+      `${where} sets text along a path, which doesn't wrap, so it takes no width.`,
+      "Drop width, or drop path to wrap the text.",
+    );
+
+  const flat = layoutRuns(
     faceOf(props.font, props.weight, props.italic, where),
     pieces,
     {
@@ -539,6 +553,31 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     },
     where,
   );
+
+  const start = animated(props.start ?? 0, keep, timing, mixNumber, `start on ${where}`);
+  const reach = outline && outlineLength(outline);
+
+  if (outline && !(reach! > 0))
+    throw new SceneError(
+      `The path of ${where} has no length to set text along.`,
+      "Give it a path with some length, such as a line, circle(…) or path().moveTo(…).lineTo(…).",
+    );
+
+  if (outline && flat.lines.length > 1)
+    throw new SceneError(
+      `${where} sets text along a path, which takes one line, but its text has ${flat.lines.length}.`,
+      "Drop the line breaks, or use one <Text path={…}> per line.",
+    );
+
+  if (outline && flat.box.width > reach!)
+    throw new SceneError(
+      `The text of ${where} is ${num(flat.box.width - reach!)} longer than its path (${num(flat.box.width)} against ${num(reach!)}).`,
+      "Give it a smaller size or a longer path.",
+    );
+
+  const { lines, box, cuts } = outline
+    ? setAlong(flat, outline, restOf(props.start ?? 0), props.align ?? "start")
+    : flat;
 
   const fills = new Map<RunLook, Animated<ModelPaint>>();
 
@@ -558,6 +597,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
       ...(props.width !== undefined && { authored: { wrap: { width: props.width, cuts } } }),
       kind: "text",
       size,
+      ...(outline && { along: { path: outline, start, align: props.align ?? "start" } }),
       ...(props.stroke && {
         stroke: strokeOf(ctx, { join: "round", ...props.stroke }, timing, where, box),
       }),
