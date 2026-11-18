@@ -97,7 +97,9 @@ describe("faces", () => {
           x
         </Text>
       )),
-    ).toThrow(`Text "t" asks for Space Mono 600, which its family doesn't have: it has 400, 700.`);
+    ).toThrow(
+      `<Text> "t" asks for Space Mono 600, which its family doesn't have: it has 400, 700.`,
+    );
 
     expect(() =>
       made(() => (
@@ -113,7 +115,7 @@ describe("faces", () => {
           a <Run weight={700}>b</Run>
         </Text>
       )),
-    ).toThrow(`Text "t" asks for Space Mono 700, but its font is the one face Space Mono 400.`);
+    ).toThrow(`<Text> "t" asks for Space Mono 700, but its font is the one face Space Mono 400.`);
 
     expect(() =>
       made(() => (
@@ -326,7 +328,7 @@ describe("runs", () => {
           a <Group />
         </Text>
       )),
-    ).toThrow(`Text "t" holds a <Group>. A <Text> holds strings and <Run>s`);
+    ).toThrow(`<Text> "t" holds a <Group>. A <Text> holds strings and <Run>s`);
   });
 
   test("a backend that needs outlines checks every run", () => {

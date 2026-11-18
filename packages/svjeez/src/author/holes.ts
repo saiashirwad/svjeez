@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import { contoursOf } from "../model/geometry";
 import type { Contour, Geometry as Outline, Vec } from "../model/ir";
 import { outlineOf, type Geometry } from "./values";
@@ -109,7 +110,7 @@ const closed = (outline: Outline, what: string): Contour[] => {
   const contours = contoursOf(outline);
 
   if (contours.length === 0 || contours.some((contour) => !contour.closed))
-    throw new Error(
+    throw new SceneError(
       `subtract() needs closed shapes, and ${what} is open. Close it, or use a rect, circle, ellipse or polygon.`,
     );
 
@@ -149,12 +150,13 @@ export const subtract = (base: Geometry, ...cuts: readonly Geometry[]): Outline 
   const [outer, ...holes] = closed(outline, "the base");
 
   if (holes.length > 0 && !(outline.kind === "path" && outline.rule === "evenodd"))
-    throw new Error(
+    throw new SceneError(
       "subtract() takes a base of one outline, or one subtract() already made. A nonzero path of several contours has no one edge to cut holes inside.",
     );
   const ring = flatten(outer!);
 
-  if (tangled(ring)) throw new Error("subtract() needs a base whose edge never crosses itself.");
+  if (tangled(ring))
+    throw new SceneError("subtract() needs a base whose edge never crosses itself.");
   const kept: { readonly contour: Contour; readonly ring: Vec[]; readonly what: string }[] = [];
 
   const given = [
@@ -163,7 +165,7 @@ export const subtract = (base: Geometry, ...cuts: readonly Geometry[]): Outline 
       const contours = closed(outlineOf(cut), `cut ${i + 1}`);
 
       if (contours.length > 1)
-        throw new Error(
+        throw new SceneError(
           `subtract() cuts one outline at a time, and cut ${i + 1} has ${contours.length}. Pass each as a cut of its own.`,
         );
 
@@ -175,18 +177,20 @@ export const subtract = (base: Geometry, ...cuts: readonly Geometry[]): Outline 
     const own = flatten(contour);
 
     if (tangled(own))
-      throw new Error(
+      throw new SceneError(
         `subtract() needs cuts whose edges never cross themselves, and ${what}'s does.`,
       );
 
     if (crosses(own, ring))
-      throw new Error(
+      throw new SceneError(
         `subtract() cuts holes that lie wholly inside the base or wholly outside it, and ${what} crosses or touches the base's edge. Draw that outline with path() instead.`,
       );
 
     if (!inside(ring, own[0]!)) {
       if (inside(own, ring[0]!))
-        throw new Error(`subtract()'s ${what} covers the whole base, so nothing would be left.`);
+        throw new SceneError(
+          `subtract()'s ${what} covers the whole base, so nothing would be left.`,
+        );
       continue;
     }
 
@@ -195,7 +199,7 @@ export const subtract = (base: Geometry, ...cuts: readonly Geometry[]): Outline 
     );
 
     if (other)
-      throw new Error(
+      throw new SceneError(
         `subtract()'s ${what} overlaps or touches ${other.what}, and holes that overlap don't cut as one even-odd path. Draw them as one cut.`,
       );
     kept.push({ contour, ring: own, what });

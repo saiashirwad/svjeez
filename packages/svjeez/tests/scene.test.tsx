@@ -398,7 +398,7 @@ describe("the SVG backend", () => {
       diagnose(blurred, flat).map((entry) => [entry.severity, entry.feature, entry.key]),
     ).toEqual([["error", "blur", "dot"]]);
     expect(diagnose(blurred, flat)[0]!.message).toBe(
-      '"dot" uses blur, which Flat can\'t draw: no filters.',
+      '<Shape> "dot" uses blur, which Flat can\'t draw: no filters.',
     );
 
     const warned: string[] = [];

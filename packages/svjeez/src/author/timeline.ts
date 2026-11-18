@@ -1,11 +1,15 @@
+import { named, whereOf } from "./names";
 import { num } from "../model/format";
 import { EPSILON, type Seconds } from "../model/time";
 import { span, type Span, type Spanned } from "./span";
-import type { Animated, Box, Vec } from "../model/ir";
+import type { Animated, Box, Source, Vec } from "../model/ir";
+import { caller } from "../svg/traced";
+import { sourceFrom } from "./identity";
+import { SceneError, located } from "../model/scene-error";
 import type { SceneElement } from "./nodes";
 import { Anchor, placeIn, type Place, type Ref } from "./refs";
 import { blendVec, valueAt } from "../model/sample";
-import { outward, type Notes } from "./settle";
+import { outward, type Aim, type Notes } from "./settle";
 import { Spring, ease, isSpring, type Curve } from "./spring";
 import { laneOf, mapped, mixVec, type Clock, type Timing } from "../model/steps";
 import { isDerived, type Derived } from "./derived";
@@ -64,6 +68,7 @@ export interface Move {
   readonly curve: Curve;
   readonly goal: Goal;
   readonly verb: string;
+  readonly source?: Source;
 }
 
 export interface Rewind {
@@ -71,6 +76,7 @@ export interface Rewind {
   readonly over: Seconds;
   readonly curve: Curve;
   readonly verb: string;
+  readonly source?: Source;
 }
 
 export class Action {
@@ -92,10 +98,12 @@ export class Action {
   }
 
   as(name: string): Action {
-    if (name === "") throw new Error("as() needs a name.");
+    if (name === "") throw new SceneError("as() needs a name.");
 
     if (this.labels.has(name))
-      throw new Error(`Two spans in one action are both named "${name}". Give one another name.`);
+      throw new SceneError(
+        `Two spans in one action are both named "${name}". Give one another name.`,
+      );
 
     return new Action(
       this.length,
@@ -111,7 +119,7 @@ const isAction = (value: Action | Seconds | undefined): value is Action => value
 const actions = (list: readonly Action[], what: string): readonly Action[] => {
   list.forEach((action, i) => {
     if (!isAction(action))
-      throw new Error(
+      throw new SceneError(
         `${what} takes actions, such as win.move([10, 20], 1) or wait(0.5), but argument ${i + 1} is not one.`,
       );
   });
@@ -125,7 +133,7 @@ const together = (placed: readonly (readonly [Action, Seconds])[], length?: Seco
   for (const [action, at] of placed)
     for (const [name, { start, over }] of action.labels) {
       if (labels.has(name))
-        throw new Error(
+        throw new SceneError(
           `Two spans in one timeline are both named "${name}". Give one another name.`,
         );
       labels.set(name, { start: at + start, over });
@@ -161,14 +169,14 @@ export const par = (...list: readonly Action[]): Action =>
 
 export const wait = (seconds: Seconds): Action => {
   if (!(seconds >= 0 && Number.isFinite(seconds)))
-    throw new Error(`wait() needs a finite number of seconds of 0 or more, got ${seconds}.`);
+    throw new SceneError(`wait() needs a finite number of seconds of 0 or more, got ${seconds}.`);
 
   return new Action(seconds);
 };
 
 export const stagger = (step: Seconds, ...list: readonly Action[]): Action => {
   if (!Number.isFinite(step))
-    throw new Error(
+    throw new SceneError(
       "stagger() takes a step in seconds and then actions, such as stagger(0.1, a.show(0.3), b.show(0.3)). For spans a step apart, write span(…).cascade(count, step).",
     );
 
@@ -177,7 +185,7 @@ export const stagger = (step: Seconds, ...list: readonly Action[]): Action => {
 
 const length = (over: Seconds, verb: string): Seconds => {
   if (!(over > 0 && Number.isFinite(over)))
-    throw new Error(
+    throw new SceneError(
       `${verb} needs a positive number of seconds, got ${over}. Use set() for a cut.`,
     );
 
@@ -203,7 +211,7 @@ const flatValues = (values: Moves, verb: string): (readonly [Prop, Value | Ancho
   const unknown = Object.keys(values).find((name) => !isName(name));
 
   if (unknown !== undefined)
-    throw new Error(`${verb} can't move "${unknown}". It moves ${NAMES.join(", ")}.`);
+    throw new SceneError(`${verb} can't move "${unknown}". It moves ${NAMES.join(", ")}.`);
 
   return Object.keys(values)
     .filter(isName)
@@ -219,7 +227,7 @@ const flatValues = (values: Moves, verb: string): (readonly [Prop, Value | Ancho
       if (stroke === undefined) return [];
 
       if (!isStrokeMoves(stroke))
-        throw new Error(
+        throw new SceneError(
           `${verb} takes stroke as the prop does, an object: { stroke: { color: …, width: … } }.`,
         );
 
@@ -250,7 +258,35 @@ const isPoint = (to: Vec | Anchor | Ref): to is Vec => Array.isArray(to);
 const isStrokeMoves = (stroke: StrokeMoves | Paint): stroke is StrokeMoves =>
   typeof stroke === "object" && !Array.isArray(stroke) && !("kind" in stroke);
 
-export const verbs = {
+const site = (): Source | undefined => {
+  const at = caller();
+
+  return at && sourceFrom(at);
+};
+
+const stamped = <V extends Record<string, (...args: never[]) => Action>>(all: V): V => {
+  const out: Record<string, (...args: never[]) => Action> = {};
+
+  for (const [name, verb] of Object.entries(all))
+    out[name] = (...args) => {
+      const action = verb(...args);
+      const source = site();
+
+      return source
+        ? new Action(
+            action.length,
+            action.moves.map((move) => ({ ...move, source })),
+            action.rewinds.map((rewind) => ({ ...rewind, source })),
+            action.labels,
+          )
+        : action;
+    };
+
+  // SAFETY: out holds every verb of all under its own name, each taking and returning what it did.
+  return out as V;
+};
+
+export const verbs = stamped({
   to: (target: Ref, values: Moves, over: Over, curve?: Curve): Action => {
     const verb = label(target, "to");
 
@@ -270,7 +306,7 @@ export const verbs = {
 
     if (isPoint(to)) {
       if (options.point !== undefined)
-        throw new Error(
+        throw new SceneError(
           `${verb} lands a point of the node on an anchor, such as card.left, but ${JSON.stringify(to)} is a point in the parent. Move the node's at there without a point, or give an anchor.`,
         );
 
@@ -336,7 +372,7 @@ export const verbs = {
 
     return new Action(0, [], [{ target, over: length(over, verb), curve, verb }]);
   },
-};
+});
 
 export class Timeline {
   readonly action: Action;
@@ -355,7 +391,7 @@ export class Timeline {
     if (!found) {
       const known = [...this.action.labels.keys()];
 
-      throw new Error(
+      throw new SceneError(
         `The timeline has no span named "${name}". ${known.length > 0 ? `It has ${known.map((n) => `"${n}"`).join(", ")}.` : "Name one with action.as(name)."}`,
       );
     }
@@ -368,7 +404,7 @@ let open: Timeline[] | undefined;
 
 export const timeline = (...list: readonly Action[]): Timeline => {
   if (!open)
-    throw new Error(
+    throw new SceneError(
       "timeline() is only known while scene()'s callback runs. Call it there, or in a component the scene renders.",
     );
   const made = new Timeline(seq(...actions(list, "timeline()")));
@@ -480,7 +516,7 @@ const isVec = (value: Value): value is Vec =>
 
 const plus = (before: Value, by: Vec, move: Move): Vec => {
   if (!isVec(before))
-    throw new Error(`${move.verb} moves by a point, so the node needs a point to start from.`);
+    throw new SceneError(`${move.verb} moves by a point, so the node needs a point to start from.`);
 
   return [before[0] + by[0], before[1] + by[1]];
 };
@@ -516,7 +552,7 @@ export class Cues {
       if (el.type !== "sequence" || !el.timeline) return;
 
       if (this.#claimed.has(el.timeline))
-        throw new Error(
+        throw new SceneError(
           "One timeline is given to two <Sequence>s. Make one for each with timeline().",
         );
       this.#claimed.add(el.timeline);
@@ -525,7 +561,7 @@ export class Cues {
 
   claim(timeline: Timeline, clock: Clock): void {
     if (!this.#claimed.has(timeline))
-      throw new Error(
+      throw new SceneError(
         "A <Sequence> inside a symbol is given a timeline, but a symbol is drawn once for every instance. Give the timeline to a <Sequence> in the scene's own tree.",
       );
     this.#clocks.set(timeline, clock);
@@ -536,8 +572,8 @@ export class Cues {
     const clock = this.#clocks.get(timeline);
 
     if (!clock)
-      throw new Error(
-        `${verb} moves "${key}", which sits outside the <Sequence> its timeline is given to. A timeline moves only nodes on its own clock.`,
+      throw new SceneError(
+        `${verb} moves ${named(key)}, which sits outside the <Sequence> its timeline is given to. A timeline moves only nodes on its own clock.`,
       );
 
     return clock;
@@ -550,10 +586,10 @@ export class Cues {
 
     if (same) return;
 
-    throw new Error(
+    throw new SceneError(
       clock
-        ? `${verb} moves "${key}", which runs on ${clockName(here)}'s clock, but its timeline runs on ${clockName(clock)}'s. A timeline moves only nodes on its own clock.`
-        : `${verb} moves "${key}", which sits inside ${clockName(here)}, but its timeline runs on the scene's clock. Give the timeline to that sequence: <Sequence start={…} timeline={…}>.`,
+        ? `${verb} moves ${named(key)}, which runs on ${clockName(here)}'s clock, but its timeline runs on ${clockName(clock)}'s. A timeline moves only nodes on its own clock.`
+        : `${verb} moves ${named(key)}, which sits inside ${clockName(here)}, but its timeline runs on the scene's clock. Give the timeline to that sequence: <Sequence start={…} timeline={…}>.`,
     );
   }
 
@@ -611,7 +647,9 @@ export class Cues {
     const [rewind, twice] = back.map(({ item }) => item);
 
     if (twice)
-      throw new Error(`${rewind!.verb} and ${twice.verb} both rewind "${key}". Rewind it once.`);
+      throw new SceneError(
+        `${rewind!.verb} and ${twice.verb} both rewind ${named(key)}. Rewind it once.`,
+      );
 
     const byProp = new Map<Prop, Move[]>();
 
@@ -623,10 +661,18 @@ export class Cues {
       const moves = [...list].sort((a, b) => a.start - b.start || a.over - b.over);
       const initial = this.#initial(el, prop, moves[0]!, key, notes, parent, home);
 
-      conflicts(moves, prop, key);
+      conflicts(moves, prop, key, timing.clock.offset);
 
       if (moves.some((move) => move.goal.kind === "anchor")) {
         notes.aims.set(key, (read, self) => {
+          try {
+            return aimed(read, self);
+          } catch (error) {
+            throw error instanceof Error ? located(error, whereOf(key)) : error;
+          }
+        });
+
+        const aimed: Aim = (read, self) => {
           const seen = new Map<Anchor, Animated<Vec>>();
 
           const land = (move: Move, before: Value): Value => {
@@ -658,13 +704,13 @@ export class Cues {
 
           const lane = mapped(data, "value", (value): Vec => {
             if (!isVec(value))
-              throw new Error(`at on "${key}" needs a point, got ${String(value)}.`);
+              throw new SceneError(`at on ${named(key)} needs a point, got ${String(value)}.`);
 
             return value;
           });
 
-          return laneOf(lane, lane.initial.value!, timing, mixVec, `at on "${key}"`, true);
-        });
+          return laneOf(lane, lane.initial.value!, timing, mixVec, `at on ${named(key)}`, true);
+        };
 
         continue;
       }
@@ -705,33 +751,33 @@ export class Cues {
     const painted = prop === "fill" || prop === "stroke";
 
     if (!KINDS[prop].includes(el.type) || (el.type === "group" && painted && !el.paints))
-      throw new Error(
-        `${verb} moves ${prop} on "${key}", a ${el.type}, which has none. Only ${KINDS[prop].map((kind) => (kind === "group" && painted ? "container" : kind)).join(" or ")} nodes have ${prop}.`,
+      throw new SceneError(
+        `${verb} moves ${prop} on ${named(key)}, which has none. Only ${KINDS[prop].map((kind) => (kind === "group" && painted ? "container" : kind)).join(" or ")} nodes have ${prop}.`,
       );
     const value = writtenOf(el, prop);
 
     if (isTrack(value) || isDerived(value))
-      throw new Error(
-        `${verb} moves ${prop} on "${key}", which a track already moves. Move it in one place: write the track's steps as actions, or the actions as track steps.`,
+      throw new SceneError(
+        `${verb} moves ${prop} on ${named(key)}, which a track already moves. Move it in one place: write the track's steps as actions, or the actions as track steps.`,
       );
 
     if (value instanceof Anchor)
-      throw new Error(
-        `${verb} moves "${key}", which is placed at ${value.label}. Place it at a point and move() it to the anchor instead.`,
+      throw new SceneError(
+        `${verb} moves ${named(key)}, which is placed at ${value.label}. Place it at a point and move() it to the anchor instead.`,
       );
     const container = notes.nodes.get(parent)?.settle;
 
     if (prop === "at" && container?.kind === "arrange")
-      throw new Error(
-        `${verb} moves "${key}", but the ${container.label} it sits in places it. Wrap it in a <Group> for the container to place, and move the node inside.`,
+      throw new SceneError(
+        `${verb} moves ${named(key)}, but the ${container.label} it sits in places it. Wrap it in a <Group> for the container to place, and move the node inside.`,
       );
     const start = value ?? (prop === "at" ? home() : UNWRITTEN[prop]);
 
     if (start === undefined)
-      throw new Error(
+      throw new SceneError(
         prop === "fill"
-          ? `${verb} changes the fill of "${key}", which has none to start from. Give it fill={…}.`
-          : `${verb} changes the stroke of "${key}", which has none. Give it stroke={{ color: … }}.`,
+          ? `${verb} changes the fill of ${named(key)}, which has none to start from. Give it fill={…}.`
+          : `${verb} changes the stroke of ${named(key)}, which has none. Give it stroke={{ color: … }}.`,
       );
 
     if (
@@ -739,8 +785,8 @@ export class Cues {
       (el.type === "shape" || el.type === "group") &&
       !el.props.stroke
     )
-      throw new Error(
-        `${verb} changes the stroke of "${key}", which has none. Give it stroke={{ color: … }}.`,
+      throw new SceneError(
+        `${verb} changes the stroke of ${named(key)}, which has none. Give it stroke={{ color: … }}.`,
       );
 
     return start;
@@ -760,25 +806,54 @@ export class Cues {
       if (this.#met.has(item)) continue;
       const { target } = item;
 
-      throw new Error(
-        target.within
-          ? `${item.verb} names ${target.label}, but no node is keyed "${target.within.path.join("/")}" inside the node ref={${target.within.ref.key}} is on.`
-          : `${item.verb} moves the ref "${target.key}", which is on no node. Give one node ref={…} with it.`,
-      );
+      throw target.within
+        ? new SceneError(
+            `${item.verb} names ${target.label}, but no node is keyed "${target.within.path.join("/")}" inside the node ref={${target.within.ref.key}} is on.`,
+            undefined,
+            item.source && { source: item.source },
+          )
+        : new SceneError(
+            `${item.verb} moves the ref "${target.key}", which is on no node.`,
+            "Give one node ref={…} with it.",
+            item.source && { source: item.source },
+          );
     }
   }
 }
 
-const conflicts = (moves: readonly Move[], prop: Prop, key: string): void => {
+const when = (move: Move, offset: Seconds): string =>
+  move.over === 0
+    ? `at ${num(offset + move.start)}s`
+    : `from ${num(offset + move.start)}s to ${num(offset + end(move))}s`;
+
+const collision = (a: Move, b: Move, prop: Prop, key: string, offset: Seconds): SceneError => {
+  const [cut, running] = a.over === 0 ? [a, b] : b.over === 0 ? [b, a] : [undefined, undefined];
+  const source = b.source ?? a.source;
+  const where = { ...whereOf(key), ...(source && { source }) };
+
+  if (cut && running)
+    return new SceneError(
+      `${cut.verb} sets ${prop} on ${named(key)} ${when(cut, offset)}, while ${running.verb} is still moving it ${when(running, offset)}.`,
+      `Set it once ${running.verb} ends, at ${num(offset + end(running))}s or later, or end ${running.verb} by ${num(offset + cut.start)}s.`,
+      where,
+    );
+
+  const [first, second] = a.start <= b.start ? [a, b] : [b, a];
+
+  return new SceneError(
+    `${first.verb} moves ${prop} on ${named(key)} ${when(first, offset)}, and ${second.verb} moves it too ${when(second, offset)}, before the first one ends.`,
+    `Start ${second.verb} at ${num(offset + end(first))}s or later (seq() plays actions one after another), or move both props in one to().`,
+    where,
+  );
+};
+
+const conflicts = (moves: readonly Move[], prop: Prop, key: string, offset: Seconds): void => {
   moves.forEach((a, i) => {
     for (const b of moves.slice(i + 1)) {
       const overlap = a.start < end(b) - EPSILON && b.start < end(a) - EPSILON;
       const cut = isSpring(a.curve) && a.start < b.start - EPSILON;
 
-      if (overlap && !cut)
-        throw new Error(
-          `${a.verb} and ${b.verb} both move ${prop} on "${key}" between ${num(Math.max(a.start, b.start))}s and ${num(Math.min(end(a), end(b)))}s. Play them one after another with seq(), or move both in one to().`,
-        );
+      if (overlap && !cut) throw collision(a, b, prop, key, offset);
     }
   });
 };

@@ -118,7 +118,7 @@ describe("timelines reach a node wherever it sits", () => {
         );
       }),
     ).toThrow(
-      'dot.move() moves "0/dot", but the <Stack> it sits in places it. Wrap it in a <Group>',
+      'dot.move() moves <Shape> "dot", but the <Stack> it sits in places it. Wrap it in a <Group>',
     );
   });
 
@@ -264,7 +264,7 @@ describe("morph between states that hold layout, text, connectors, images and in
           </Group>
         );
       }),
-    ).toThrow('A <Stack> in a morph() state holds "s/l", which is placed by an anchor');
+    ).toThrow('A <Stack> in a morph() state holds <Arrow> "l", which is placed by an anchor');
   });
 
   test("a node anchored in one state and placed at a point in another says how to write it", () => {
@@ -368,7 +368,7 @@ describe("morph between states that hold layout, text, connectors, images and in
         </Stack>
       )),
     ).toThrow(
-      'The <Stack> "row" lays out "row/g/a", which a morph() resizes, brings in or takes away inside a <Sequence>',
+      '<Stack> "row" lays out <Shape> "a", which a morph() resizes, brings in or takes away inside a <Sequence>',
     );
 
     expect(() =>
@@ -397,14 +397,14 @@ describe("morph between states that hold layout, text, connectors, images and in
     expect(() =>
       made(() => <Arrow key="arrow" from={[0, 0]} to={untyped} stroke={{ color: blue }} />),
     ).toThrow(
-      'The <Arrow> "arrow" is given a track for its to, but an end is a point or an anchor. To move an end, attach it to a ref\'s anchor, as in to={card.left}, and move the node it is attached to.',
+      '<Arrow> "arrow" is given a track for its to, but an end is a point or an anchor. To move an end, attach it to a ref\'s anchor, as in to={card.left}, and move the node it is attached to.',
     );
 
     expect(() =>
       made(() => (
         <Arrow head="none" key="line" from={untyped} to={[9, 9]} stroke={{ color: blue }} />
       )),
-    ).toThrow('The <Arrow> "line" is given a track for its from');
+    ).toThrow('<Arrow> "line" is given a track for its from');
   });
 
   test("a Stack around a morph that only moves or recolors its children still lays it out", () => {
@@ -496,7 +496,7 @@ describe("morph between states that hold layout, text, connectors, images and in
 
     expect(() =>
       made(() => morph(<Image key="i" src={badge} />, <Image key="i" src={other} />, span(1, 1))),
-    ).toThrow('morph() can\'t blend "i": its picture or size differs between states');
+    ).toThrow('morph() can\'t blend <Image> "i": its picture or size differs between states');
   });
 });
 
@@ -711,7 +711,7 @@ describe("springs across slices", () => {
         />
       )),
     ).toThrow(
-      'geometry on "s" moves on a spring, and a spring moves only numbers and points. Use an ease such as ease.out.',
+      'geometry on <Shape> "s" moves on a spring, and a spring moves only numbers and points. Use an ease such as ease.out.',
     );
 
     expect(() =>
@@ -722,7 +722,7 @@ describe("springs across slices", () => {
           fill={track<Paint>(red).to(blue, span(0, 2), ease.spring(settle))}
         />
       )),
-    ).toThrow('fill on "s" moves on a spring');
+    ).toThrow('fill on <Shape> "s" moves on a spring');
   });
 });
 
@@ -800,7 +800,9 @@ describe("derived tracks feed every kind of value", () => {
           />
         );
       }),
-    ).toThrow('dot.move() moves at on "dot", which a track already moves. Move it in one place');
+    ).toThrow(
+      'dot.move() moves at on <Shape> "dot", which a track already moves. Move it in one place',
+    );
   });
 });
 
@@ -971,7 +973,7 @@ describe("errors a newcomer meets first", () => {
 
     // SAFETY: what a scene written without types hands over.
     expect(() => made(() => <Shape geometry={undefined as never} fill={red} />)).toThrow(
-      '<Shape> "0" needs a geometry, such as geometry={rect(40, 20)}.',
+      "<Shape> has no geometry. Give it one, such as geometry={rect(40, 20)}.",
     );
   });
 
@@ -982,7 +984,9 @@ describe("errors a newcomer meets first", () => {
           <Shape key="a" geometry={circle(4)} anchor="center" at={[5, 5]} fill={red} />
         </Stack>
       )),
-    ).toThrow('"0/a" has an at of its own, but the <Stack> it sits in places it. Drop its at');
+    ).toThrow(
+      '<Shape> "a" has an at of its own, but the <Stack> it sits in places it. Drop its at',
+    );
   });
 
   test("an unkeyed morph says to key what changes", () => {
@@ -1056,7 +1060,7 @@ describe("errors a newcomer meets first", () => {
         />
       )),
     ).toThrow(
-      'opacity on "late" runs until 4.5s, past the 4s scene. End it by then, or give scene() a longer duration.',
+      'opacity on <Shape> "late" runs until 4.5s, past the 4s scene. End it by then, or give scene() a longer duration.',
     );
 
     expect(() =>

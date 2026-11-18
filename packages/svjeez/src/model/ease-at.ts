@@ -1,3 +1,4 @@
+import { SceneError } from "./scene-error";
 import { ease, type Ease } from "./time";
 
 const cubic = (a: number, b: number, u: number) =>
@@ -47,7 +48,7 @@ export const splitEase = (curve: Ease, progress: number, where: string): readonl
       const done = Math.round(edge);
 
       if (Math.abs(edge - done) > 1e-6 || done < 1 || done >= curve.count)
-        throw new Error(
+        throw new SceneError(
           `${where} cuts a steps(${curve.count}) transition between two of its steps. Cut it on a step edge, or use ease.out.`,
         );
 

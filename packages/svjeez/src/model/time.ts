@@ -1,3 +1,5 @@
+import { SceneError } from "./scene-error";
+
 export type Seconds = number;
 
 declare const easeBrand: unique symbol;
@@ -14,7 +16,7 @@ const brand = (body: EaseBody): Ease => body as Ease;
 
 const bezier = (x1: number, y1: number, x2: number, y2: number): Ease => {
   if (![x1, y1, x2, y2].every(Number.isFinite) || x1 < 0 || x1 > 1 || x2 < 0 || x2 > 1)
-    throw new Error(
+    throw new SceneError(
       `ease.bezier needs x1 and x2 between 0 and 1 and a finite y1 and y2, got ${x1}, ${y1}, ${x2}, ${y2}.`,
     );
 
@@ -23,7 +25,7 @@ const bezier = (x1: number, y1: number, x2: number, y2: number): Ease => {
 
 const steps = (count: number): Ease => {
   if (!Number.isInteger(count) || count < 1)
-    throw new Error(`ease.steps needs a positive whole count, got ${count}.`);
+    throw new SceneError(`ease.steps needs a positive whole count, got ${count}.`);
 
   return brand({ kind: "steps", count });
 };

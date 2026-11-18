@@ -494,7 +494,9 @@ describe("tracks", () => {
 
         return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
       }),
-    ).toThrow('dot.move() and dot.moveBy() both move at on "dot" between 0.5s and 1s');
+    ).toThrow(
+      'dot.move() moves at on <Shape> "dot" from 0s to 1s, and dot.moveBy() moves it too from 0.5s to 1.5s, before the first one ends. Start dot.moveBy() at 1s or later',
+    );
   });
 
   test("a prop a track already moves can't be moved by a timeline too", () => {
@@ -514,7 +516,7 @@ describe("tracks", () => {
           />
         );
       }),
-    ).toThrow('dot.to() moves opacity on "dot", which a track already moves');
+    ).toThrow('dot.to() moves opacity on <Shape> "dot", which a track already moves');
   });
 
   test("a rewind that runs into the actions throws as a track's does", () => {
@@ -526,7 +528,7 @@ describe("tracks", () => {
 
         return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
       }),
-    ).toThrow('rewind(1) on at on "dot" needs the last 1s');
+    ).toThrow('rewind(1) on at on <Shape> "dot" needs the last 1s');
   });
 });
 
@@ -541,7 +543,7 @@ describe("errors", () => {
       timeline(g.fill("#ffffff", 1));
 
       return <Group ref={g} />;
-    }, 'g.fill() moves fill on "g", a group, which has none. Only shape or text or container nodes have fill.');
+    }, 'g.fill() moves fill on <Group> "g", which has none. Only shape or text or container nodes have fill.');
 
     throws(() => {
       const s = ref("s");
@@ -549,7 +551,7 @@ describe("errors", () => {
       timeline(s.stroke({ color: "#ffffff" }, 1));
 
       return <Shape fill="#000000" ref={s} geometry={circle(2)} anchor="center" />;
-    }, 'changes the stroke of "s", which has none');
+    }, 'changes the stroke of <Shape> "s", which has none');
   });
 
   test("a ref on no node, or a part no node is, is named", () => {
@@ -644,6 +646,8 @@ describe("clocks", () => {
           </Group>
         );
       }),
-    ).toThrow('dot.show() moves "dot", which sits outside the <Sequence> its timeline is given to');
+    ).toThrow(
+      'dot.show() moves <Shape> "dot", which sits outside the <Sequence> its timeline is given to',
+    );
   });
 });

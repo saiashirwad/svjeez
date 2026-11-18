@@ -20,6 +20,7 @@ import type {
 import { isLane, mapLane } from "../model/lane";
 import { breaksOf, unrolled } from "../model/sample";
 import { same } from "../model/steps";
+import { nodeName } from "../model/naming";
 
 export interface Entry {
   readonly node: SceneNode;
@@ -48,6 +49,23 @@ export const sourcesOf = (scene: Scene): Map<string, Source> => {
 
   const visit = (node: SceneNode): void => {
     if (node.source) out.set(node.key, node.source);
+
+    if (node.kind === "group") node.children.forEach(visit);
+
+    if (node.mask) visit(node.mask);
+  };
+
+  visit(scene.root);
+  Object.values(scene.symbols).forEach(visit);
+
+  return out;
+};
+
+export const namesOf = (scene: Scene): Map<string, string> => {
+  const out = new Map<string, string>();
+
+  const visit = (node: SceneNode): void => {
+    out.set(node.key, nodeName(node));
 
     if (node.kind === "group") node.children.forEach(visit);
 

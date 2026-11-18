@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import type { Seconds } from "../model/time";
 import type { Box, Vec } from "../model/ir";
 import type { Curve } from "./spring";
@@ -49,7 +50,7 @@ export const isAnchor = (value: unknown): value is Anchor => value instanceof An
 
 const fraction = (t: number, what: string): number => {
   if (!Number.isFinite(t))
-    throw new Error(`${what} needs a finite fraction of the edge, got ${t}.`);
+    throw new SceneError(`${what} needs a finite fraction of the edge, got ${t}.`);
 
   return t;
 };
@@ -60,7 +61,7 @@ export class Ref {
 
   constructor(key: string, within?: { readonly ref: Ref; readonly path: readonly string[] }) {
     if (key === "" || key.includes("/"))
-      throw new Error(`A ref needs a key with no "/" in it, got "${key}".`);
+      throw new SceneError(`A ref needs a key with no "/" in it, got "${key}".`);
     this.key = key;
     this.within = within;
   }
@@ -75,7 +76,7 @@ export class Ref {
     const path = key.split("/");
 
     if (path.some((step) => step === ""))
-      throw new Error(`${this.label}.part() needs keys joined by "/", got "${key}".`);
+      throw new SceneError(`${this.label}.part() needs keys joined by "/", got "${key}".`);
     const root = this.within?.ref ?? this;
 
     return new Ref(path.at(-1)!, { ref: root, path: [...(this.within?.path ?? []), ...path] });
@@ -86,7 +87,7 @@ export class Ref {
     const place = SIDES[edge];
 
     if (!place)
-      throw new Error(`${this.label}.side() takes left, right, top or bottom, got "${edge}".`);
+      throw new SceneError(`${this.label}.side() takes left, right, top or bottom, got "${edge}".`);
 
     return new Anchor(this, `${this.label}.side("${edge}", ${along})`, (box) =>
       at(box, place(along)),
@@ -223,7 +224,7 @@ export const fractionOf = (place: Place, what: string): Fraction => {
   const where = Object.hasOwn(PLACES, place) ? PLACES[place] : undefined;
 
   if (!where)
-    throw new Error(`${what} takes a place, one of ${PLACE_LIST}, got "${String(place)}".`);
+    throw new SceneError(`${what} takes a place, one of ${PLACE_LIST}, got "${String(place)}".`);
 
   return where;
 };

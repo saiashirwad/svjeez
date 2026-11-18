@@ -10,12 +10,12 @@ npx svjeez check scene.tsx                           # the model, then the SVG m
 ```
 
 ```
-card.tsx:44:9  low-contrast  info: text "1/0/1/2/0/1/0" ("+128") is hard to see: green on raised is 3.70:1 in the light scheme (6.59:1 in dark), under the 4.5:1 text this size needs.
+card.tsx:44:9  low-contrast  info: <Text> "+128" is hard to see: green on raised is 3.70:1 in the light scheme (6.59:1 in dark), under the 4.5:1 text this size needs.
     hint: Pick a fill farther from raised in both schemes, or make the text larger.
 0 errors, 0 warnings, 1 info; model only
 ```
 
-A node's key is the keys from the root down, joined by `/`; a node with no `key` or `ref` is named by its index among its siblings. Key the nodes you will want to read. A scene that throws while it builds is one `compile-error` finding with the message. `check` exits 1 on any error. `--params` and `--param` work as for every command ([params.md](params.md)); `--color-scheme` picks the scheme the browser pass measures.
+A node's key is the keys from the root down, joined by `/`; a node with no `key` or `ref` is named by its index among its siblings. Messages name a node by its component and its key, as `<Shape> "dot"`, or by its words for a text with no key, and a part an `<Arrow>` draws is named after the arrow. Key the nodes you will want to read. A scene that throws while it builds is one `compile-error` finding: its `source` is the line of the node or the call that is wrong, its message says what is wrong and its hint what to change. Until the scene builds, `--at` has nothing to describe. `check` exits 1 on any error. `--params` and `--param` work as for every command ([params.md](params.md)); `--color-scheme` picks the scheme the browser pass measures.
 
 ## Reading what is on screen
 

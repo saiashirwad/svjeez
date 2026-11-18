@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import { NUDGE, ease, type Ease, type Seconds } from "../model/time";
 import { random } from "./random";
 import { checkWindow, span, type Span } from "./span";
@@ -63,10 +64,10 @@ export const wiggle = (amplitude: LayerValues, options: WiggleOptions): Motion =
   const rate = options.rate ?? 8;
 
   if (!Number.isFinite(period) || period <= 0)
-    throw new Error(`wiggle() needs a positive period, got ${period}.`);
+    throw new SceneError(`wiggle() needs a positive period, got ${period}.`);
 
   if (!(rate > 0 && Number.isFinite(rate)))
-    throw new Error(`wiggle() needs a positive rate, got ${rate}.`);
+    throw new SceneError(`wiggle() needs a positive rate, got ${rate}.`);
   const count = Math.max(2, Math.round(rate * period));
   const next = random(String(options.seed));
 
@@ -113,7 +114,7 @@ export const draw = (when: Span, { curve = ease.out }: DrawOptions = {}): Track<
 
 export const spin = ({ every }: { readonly every: Seconds }): Track<number> => {
   if (!(every > 0 && Number.isFinite(every)))
-    throw new Error(`spin() needs a positive every, got ${every}.`);
+    throw new SceneError(`spin() needs a positive every, got ${every}.`);
 
   return track(0).to(360, span(0, every), ease.linear).loop(every);
 };
@@ -135,12 +136,12 @@ export const shake = (
   const { start, over } = closed(when, "shake()");
 
   if (amplitude.offset === undefined && amplitude.rotate === undefined)
-    throw new Error(
+    throw new SceneError(
       "shake() needs an offset or a rotate to swing by, as in shake({ offset: [6, 0] }, when).",
     );
 
   if (!(rate > 0 && Number.isFinite(rate)))
-    throw new Error(`shake() needs a positive rate, got ${rate}.`);
+    throw new SceneError(`shake() needs a positive rate, got ${rate}.`);
   const count = Math.max(2, Math.round(over * rate));
 
   const swing = (k: number): LayerValues => {
@@ -255,10 +256,10 @@ const simplified = <T>(
   const { start: from, over: duration } = closed(window, what);
 
   if (!Number.isFinite(step) || step <= 0)
-    throw new Error(`${what} needs a positive step, got ${step}.`);
+    throw new SceneError(`${what} needs a positive step, got ${step}.`);
 
   if (!(tolerance >= 0 && Number.isFinite(tolerance)))
-    throw new Error(`${what} needs a finite tolerance of 0 or more, got ${tolerance}.`);
+    throw new SceneError(`${what} needs a finite tolerance of 0 or more, got ${tolerance}.`);
   const edge = duration * NUDGE;
 
   const times = Array.from(
@@ -306,7 +307,7 @@ const roundTo = (precision: number | undefined, what: string): ((value: number) 
   if (precision === undefined) return (value) => value;
 
   if (!(Number.isInteger(precision) && precision >= 0))
-    throw new Error(`${what} needs a whole, non-negative precision, got ${precision}.`);
+    throw new SceneError(`${what} needs a whole, non-negative precision, got ${precision}.`);
   const factor = 10 ** precision;
 
   return (value) => Math.round(value * factor) / factor;
@@ -362,7 +363,7 @@ export function sampled(
       const each = isNumber(value) ? [value] : [...value];
 
       if (!each.every(Number.isFinite))
-        throw new Error(
+        throw new SceneError(
           `sampled() returned ${JSON.stringify(value)} at t=${t}; every sample needs finite numbers.`,
         );
 
@@ -375,7 +376,7 @@ export function sampled(
     shape ??= own;
 
     if (own !== shape)
-      throw new Error(
+      throw new SceneError(
         `sampled() returned geometry at t=${t} that doesn't match the first sample (${own} against ${shape}). Return one kind with the same number of points every time.`,
       );
 
@@ -414,7 +415,7 @@ sampled.motion = (
     const tolerance = options.tolerance[name];
 
     if (tolerance === undefined)
-      throw new Error(
+      throw new SceneError(
         `sampled.motion() needs a tolerance for \`${name}\`, which the function returns.`,
       );
 
@@ -422,13 +423,13 @@ sampled.motion = (
       const value = sample(t)[name];
 
       if (value === undefined)
-        throw new Error(
+        throw new SceneError(
           `sampled.motion() returned no \`${name}\` at t=${t}; every sample needs the same values.`,
         );
       const each = isScalar(value) ? (name === "scale" ? [value, value] : [value]) : [...value];
 
       if (!each.every(Number.isFinite))
-        throw new Error(
+        throw new SceneError(
           `sampled.motion() returned ${JSON.stringify(value)} for \`${name}\` at t=${t}; it needs finite numbers.`,
         );
 

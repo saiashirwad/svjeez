@@ -337,7 +337,7 @@ describe.if(browser)("checkScene", () => {
 
     expect(result.exitCode).toBe(1);
     expect(out).toMatch(
-      /offscreen-scene\.tsx:6:5 {2}off-canvas {2}error: shape "dot" is outside the 100×60 canvas/,
+      /offscreen-scene\.tsx:6:5 {2}off-canvas {2}error: <Shape> "dot" is outside the 100×60 canvas/,
     );
     expect(out).toContain("\n    hint: Move it onto the canvas, or remove it.");
     expect(out).toContain("1 error, 0 warnings");
@@ -423,4 +423,35 @@ test("a trace reads each node's place off the stack, and sources writes it", () 
   expect(
     svg.emit(scene({ size: [10, 10], duration: 1, title: "Trace" }, build), { sources: true }),
   ).not.toContain("data-source");
+});
+
+describe("svjeez check when the scene does not build", () => {
+  const cli = (...flags: string[]) =>
+    Bun.spawnSync([process.execPath, join(import.meta.dir, "../src/cli.ts"), "check", ...flags]);
+
+  const fixture = (name: string) => join(import.meta.dir, `fixtures/check/${name}.tsx`);
+
+  test("a compile error carries the node's line, its name, and the fix as the hint", () => {
+    const result = cli(fixture("unpainted"), "--no-browser", "--json");
+    const report = JSON.parse(result.stdout.toString());
+
+    expect(result.exitCode).toBe(1);
+    expect(report.errors).toEqual([
+      expect.objectContaining({
+        code: "compile-error",
+        message: "<Shape> paints nothing: it has no fill and no stroke.",
+        hint: "Give it a fill, as in fill={theme.text}, or a stroke, as in stroke={{ color: theme.text }}.",
+        source: expect.objectContaining({ line: 6 }),
+      }),
+    ]);
+  });
+
+  test("two actions on one prop point at the second call", () => {
+    const out = cli(fixture("overlap"), "--no-browser").stdout.toString();
+
+    expect(out).toMatch(
+      /overlap\.tsx:6:\d+ {2}compile-error {2}error: dot\.set\(\) sets at on <Shape> "dot" at 0\.5s/,
+    );
+  });
+
 });

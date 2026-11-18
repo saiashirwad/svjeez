@@ -137,7 +137,7 @@ npx svjeez frames scene.tsx --sheet --out frames/   # look: open frames/sheet.pn
 ```
 
 1. Pick `duration` and plan the beats as spans first.
-2. Fix type errors, then every `check` error. A scene that throws while it builds is a `compile-error` with the message; the table below says what each means.
+2. Fix type errors, then every `check` error. A scene that throws while it builds is a `compile-error` at the line of the node or call that is wrong, naming it (`<Shape> "dot"`, `the head of <Arrow> "link"`), with what to change as its hint; the table below says what each means. A `SceneError` from `svjeez/tools` carries the same: `problem`, `fix`, `node` and `source`.
 3. Read each warning, open a frame at the times it names, and fix the scene unless the frame shows what you meant. `info` is advice.
 4. Use `--at` to confirm what the picture is at a beat: each node's key, kind, box, fill and what is changing. Give nodes you will read a `key` so the output names them.
 5. Render a sheet at the start, middle and end of each beat (`--times 0,0.4,1.2`) in `--color-scheme light` and `dark`, and look: things arrive and leave on cue, nothing off center or clipped, text legible, the last frame flows into the first.
@@ -195,7 +195,7 @@ Type errors:
 | `Type '"red"' is not assignable to type 'Anim<Paint> \| undefined'` | colors are `"#RRGGBB"` hex or tokens |
 | `Type 'string' is not assignable to type 'Anchor \| Anim<Vec> \| undefined'` | `at` is a point or an anchor; a place name goes in `anchor` |
 | `Type 'string' is not assignable to type 'StrokeProps'` | `stroke={{ color: theme.text, width: 2 }}` |
-| `… is not assignable to type 'IntrinsicAttributes & TextProps'` | `<Text>` needs `font`, `size` and `fill` |
+| `… is not assignable to type 'IntrinsicAttributes & TextProps'`, then `Property 'font' is missing in type '…' but required in type 'TextProps'` | the second line names the prop: `<Text>` needs `font` and `size`, and a `fill` to paint |
 | `Argument of type 'number' is not assignable to parameter of type 'Span'` | steps take spans: `.to(1, span(0.5, 0.3))` |
 | `Property 'rect' does not exist on type 'JSX.IntrinsicElements'` | there are no SVG tags: `<Shape geometry={rect(w, h)} />` |
 
@@ -205,25 +205,26 @@ Runtime errors. `…` stands for a value the message fills in.
 | --- | --- |
 | `… holds …, an SVG tag, which a scene doesn't draw: every node is a component, such as <Shape geometry={rect(w, h)} />.` | write components, and put the JSX pragma at the top of the file |
 | `… holds the bare text "…". Write text in a <Text font={…} size={…} fill={…}>.` | wrap strings in `<Text>` |
-| `<Shape> … needs a geometry, such as geometry={rect(40, 20)}.` | give it `geometry` |
-| `<Shape> … paints nothing: it has no fill and no stroke.` | give it `fill` or `stroke` |
-| `<Text> … draws "…" with no fill, so it paints nothing.` | `fill` on the `<Text>` or the `<Run>` |
-| `<Text> … draws … which has no glyph for …` | a font that has the character, or leave it out |
-| `Text … asks for …, which its family doesn't have: it has ….` | load that weight or style into `font.family(…)` |
-| `"…" has an at of its own, but the … it sits in places it. Drop its at; to nudge it, give it a motion layer with an offset.` | a container places its children |
+| `… has no geometry.` | give it `geometry`, such as `geometry={rect(40, 20)}` |
+| `… paints nothing: it has no fill and no stroke.` | give it `fill` or `stroke` |
+| `… draws "…" with no fill, so it paints nothing.` | `fill` on the `<Text>` or the `<Run>` |
+| `… draws … in …, which has no glyph for ….` | a font that has the character, or leave it out |
+| `… asks for …, which its family doesn't have: it has ….` | load that weight or style into `font.family(…)` |
+| `… has an at of its own, but the … it sits in places it.` | a container places its children: drop `at`, or nudge it with a motion layer's offset |
 | `<Align> places itself against its to, so it takes no ….` | move it with `inset` and `place` |
 | `… takes a place, one of …, got "…".` | one of the nine places, such as `"top-left"` |
 | `anchor on … names the point its at places, but it has no at, so it stays where its coordinates put it.` | give a line, polygon or path an `at`, or drop `anchor` |
-| `… names the ref "…", which is on no node. Give one node ref={…} with it.` | put the ref on a node |
+| `… names the ref "…", which is on no node.` | put the ref on a node |
 | `… moves the ref "…", which is on no node.` | put the ref on a node the scene draws |
-| `The ref "…" is on two nodes, "…" and "…". A ref names one node: make another with ref().` | one ref per node |
+| `The ref "…" is on two nodes, … and ….` | one ref per node |
 | `Two nodes are both keyed "…"…` | keys are unique among siblings |
-| `… moves "…", which is placed at …. Place it at a point and move() it to the anchor instead.` | `at` a point, then `move(anchor, …)` |
-| `… moves "…", but the … it sits in places it. Wrap it in a <Group> for the container to place, and move the node inside.` | move what is inside the container's child |
-| `… and … both move … on "…" between …s and …s. Play them one after another with seq(), or move both in one to().` | one action per prop at a time |
-| `… moves … on "…", which a track already moves.` | a prop moves by a track or a timeline, not both |
-| `… moves … on "…", a …, which has none. Only … nodes have ….` | `draw` and `fill` need a shape: put the ref on the shape |
-| `… moves "…", which sits inside …, but its timeline runs on the scene's clock.` | `<Sequence start={…} timeline={…}>` |
+| `… moves …, which is placed at …. Place it at a point and move() it to the anchor instead.` | `at` a point, then `move(anchor, …)` |
+| `… moves …, but the … it sits in places it. Wrap it in a <Group> for the container to place, and move the node inside.` | move what is inside the container's child |
+| `… moves … on … …, and … moves it too …, before the first one ends.` | one action per prop at a time: start the second when the first ends (`seq()`), or move both props in one `to()` |
+| `… sets … on … …, while … is still moving it ….` | `set()` after the move ends, or end the move sooner |
+| `… moves … on …, which a track already moves.` | a prop moves by a track or a timeline, not both |
+| `… moves … on …, which has none. Only … nodes have ….` | `draw` and `fill` need a shape: put the ref on the shape |
+| `… moves …, which sits inside …, but its timeline runs on the scene's clock.` | `<Sequence start={…} timeline={…}>` |
 | `timeline() is only known while scene()'s callback runs.` | call `timeline()` inside `scene()`'s callback or a component |
 | `canvas is only known inside scene()'s callback.` | read `canvas` inside the callback |
 | `to() takes a span, got …. Write .to(value, span(start, over)); a step right after another is span.next(over).` | pass a span |
@@ -234,8 +235,8 @@ Runtime errors. `…` stands for a value the message fills in.
 | `rewind(…) on … needs the last …s of its …s clock, but the motion runs until …s.` | a shorter rewind, or end the motion earlier |
 | `loop(…) is shorter than the motion, which runs until …s.` | a longer period |
 | `morph() matches nodes by key, and … the states have … nodes with no key, so they would pair up by their place.` | `key` every node that comes, goes or changes |
-| `morph() can't turn "…" from a … into a …: a node keeps its kind across states.` | another key for the other kind |
-| `The … "…" lays out "…", which a morph() resizes, brings in or takes away inside a <Sequence>, so the … can't make room for it.` | put the container inside the `<Sequence>` |
+| `morph() can't turn the node keyed "…" from a … into a …: a node keeps its kind across states.` | another key for the other kind |
+| `… lays out …, which a morph() resizes, brings in or takes away inside a <Sequence>, so the … can't make room for it.` | put the container inside the `<Sequence>` |
 | `The … … is … …, but its children… and padding need ….` | a larger `width` or `height`, or leave it out |
 | `… is given a spring for its length and a curve as well.` | pass the spring once, in place of the length |
 | `The … of "…" is sized by its box, but "…" inside it is placed by an anchor…` | size the clip with numbers, or move that node out |

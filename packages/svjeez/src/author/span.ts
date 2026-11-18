@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import type { Seconds } from "../model/time";
 
 export interface Span {
@@ -45,7 +46,7 @@ export interface OpenSpanned extends OpenSpan {
 
 const finite = (value: number, what: string): void => {
   if (!Number.isFinite(value))
-    throw new Error(`${what} needs a finite number of seconds, got ${value}.`);
+    throw new SceneError(`${what} needs a finite number of seconds, got ${value}.`);
 };
 
 class Range implements Spanned {
@@ -106,7 +107,7 @@ class Range implements Spanned {
 
   cascade<const N extends number>(count: N, step: Seconds): Spans<N> {
     if (!Number.isInteger(count) || count < 0 || !Number.isFinite(step))
-      throw new Error(
+      throw new SceneError(
         `cascade() needs a whole count of 0 or more and a finite step, got count ${count} and step ${step}.`,
       );
 
@@ -162,10 +163,10 @@ function build(start: Seconds, over: Seconds | undefined, what: string): Range |
 
 export const checkWindow = (start: Seconds, over: Seconds, what: string, empty = false): void => {
   if (!Number.isFinite(start) || start < 0)
-    throw new Error(`${what} needs a start of 0 or later, got ${start}.`);
+    throw new SceneError(`${what} needs a start of 0 or later, got ${start}.`);
 
   if (!Number.isFinite(over) || (empty ? over < 0 : over <= 0))
-    throw new Error(
+    throw new SceneError(
       empty
         ? `${what} needs a length of 0 or more, got ${over}.`
         : `${what} needs a positive over, got ${over}.`,

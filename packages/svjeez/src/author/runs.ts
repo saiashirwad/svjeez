@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import { Font, FontFamily, type FontValue } from "../font/font";
 import type { Face } from "../model/ir";
 import type { RunProps, RunStyle, SceneElement, TextChild } from "./nodes";
@@ -39,8 +40,8 @@ export const piecesOf = (children: TextChild, style: Asked, where: string): Aske
   if (isElement(children) && isRun(children))
     return piecesOf(children.props.children, over(style, children.props), where);
 
-  throw new Error(
-    `Text ${where} holds ${isElement(children) ? `a <${children.type[0]!.toUpperCase()}${children.type.slice(1)}>` : String(children)}. A <Text> holds strings and <Run>s; put other nodes beside it, in a <Group> or a <Stack>.`,
+  throw new SceneError(
+    `${where} holds ${isElement(children) ? `a <${children.type[0]!.toUpperCase()}${children.type.slice(1)}>` : String(children)}. A <Text> holds strings and <Run>s; put other nodes beside it, in a <Group> or a <Stack>.`,
   );
 };
 
@@ -56,15 +57,15 @@ export const faceOf = (
   where: string,
 ): Font => {
   if (weight !== undefined && !(weight >= 1 && weight <= 1000))
-    throw new Error(`Text ${where} needs a weight between 1 and 1000, got ${weight}.`);
+    throw new SceneError(`${where} needs a weight between 1 and 1000, got ${weight}.`);
 
   if (value instanceof Font) {
     const style = italic === undefined ? value.style : italic ? "italic" : "normal";
 
     if ((weight ?? value.weight) === value.weight && style === value.style) return value;
 
-    throw new Error(
-      `Text ${where} asks for ${faceName(value.family, weight ?? value.weight, style)}, but its font is the one face ${faceName(value.family, value.weight, value.style)}. Load that face too and pass font.family(…) or google.family("${value.family}", […]), or ask for ${value.weight}${value.style === "italic" ? " italic" : ""}.`,
+    throw new SceneError(
+      `${where} asks for ${faceName(value.family, weight ?? value.weight, style)}, but its font is the one face ${faceName(value.family, value.weight, value.style)}. Load that face too and pass font.family(…) or google.family("${value.family}", […]), or ask for ${value.weight}${value.style === "italic" ? " italic" : ""}.`,
     );
   }
 
@@ -78,8 +79,8 @@ export const faceOf = (
     (face) => `${face.weight}${face.style === "italic" ? " italic" : ""}`,
   );
 
-  throw new Error(
-    `Text ${where} asks for ${faceName(value.name, asked, style)}, which its family doesn't have: it has ${has.join(", ")}. Load that face into the family, or ask for one it has.`,
+  throw new SceneError(
+    `${where} asks for ${faceName(value.name, asked, style)}, which its family doesn't have: it has ${has.join(", ")}. Load that face into the family, or ask for one it has.`,
   );
 };
 
@@ -104,7 +105,7 @@ export class FontBook {
     );
 
     if (same && same !== face && same.href !== face.href)
-      throw new Error(
+      throw new SceneError(
         `Two different fonts are both ${faceName(family, face.weight, face.style)}. Give one another family name with font(bytes, { family }).`,
       );
 

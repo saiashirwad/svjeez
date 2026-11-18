@@ -611,7 +611,7 @@ describe("origin is named on the box, as anchor is", () => {
       // @ts-expect-error: "middle" is not a place.
       made(() => <Shape key="s" geometry={rect(10, 10)} fill="#000000" origin="middle" />),
     ).toThrow(
-      'origin on "s" takes a place, one of "top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right", or a point measured from its box\'s top-left, such as [20, 0], got "middle".',
+      'origin on <Shape> "s" takes a place, one of "top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right", or a point measured from its box\'s top-left, such as [20, 0], got "middle".',
     );
   });
 });
@@ -622,7 +622,7 @@ describe("errors say what to write", () => {
       // @ts-expect-error: "middle" is not a place.
       made(() => <Shape fill="#000000" key="s" geometry={rect(10, 10)} anchor="middle" />),
     ).toThrow(
-      'anchor on "s" takes a place, one of "top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right", or two fractions of the box such as [0.5, 1], got "middle".',
+      'anchor on <Shape> "s" takes a place, one of "top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right", or two fractions of the box such as [0.5, 1], got "middle".',
     );
     expect(() =>
       made(() => (
@@ -630,10 +630,10 @@ describe("errors say what to write", () => {
         <Shape fill="#000000" key="s" geometry={rect(10, 10)} at={[0, 0]} anchor="baseline" />
       )),
     ).toThrow(
-      'anchor="baseline" on "s" names a baseline, which only a <Text> has. Use a place on the box, such as "bottom".',
+      'anchor="baseline" on <Shape> "s" names a baseline, which only a <Text> has. Use a place on the box, such as "bottom".',
     );
     expect(() => made(() => <Group key="g" at={[10, 10]} anchor="center" />)).toThrow(
-      'anchor on "g" names a point of its box, but the box is empty: it draws nothing at rest. Drop anchor and place it by at alone.',
+      'anchor on <Group> "g" names a point of its box, but the box is empty: it draws nothing at rest. Drop anchor and place it by at alone.',
     );
   });
 
@@ -648,7 +648,7 @@ describe("errors say what to write", () => {
         />
       )),
     ).toThrow(
-      'anchor on "p" names the point its at places, but it has no at, so it stays where its coordinates put it. Give it an at, or drop anchor.',
+      'anchor on <Shape> "p" names the point its at places, but it has no at, so it stays where its coordinates put it. Give it an at, or drop anchor.',
     );
     expect(() =>
       made(() => (
@@ -656,7 +656,9 @@ describe("errors say what to write", () => {
           <Shape fill="#000000" key="a" geometry={rect(10, 10)} anchor="center" />
         </Stack>
       )),
-    ).toThrow('"col/a" has anchor="center", but the <Stack> it sits in lines up its box itself.');
+    ).toThrow(
+      '<Shape> "a" has anchor="center", but the <Stack> it sits in lines up its box itself.',
+    );
     expect(() =>
       made(() => (
         // @ts-expect-error: Align places itself.

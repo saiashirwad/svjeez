@@ -1,3 +1,5 @@
+import { SceneError } from "../model/scene-error";
+
 export interface Sfnt {
   readonly view: DataView;
   readonly tables: ReadonlyMap<string, number>;
@@ -20,7 +22,7 @@ export const table = (f: Sfnt, tag: string): number | undefined => f.tables.get(
 export const required = (f: Sfnt, tag: string): number => {
   const at = f.tables.get(tag);
 
-  if (at === undefined) throw new Error(`This font has no ${tag} table.`);
+  if (at === undefined) throw new SceneError(`This font has no ${tag} table.`);
 
   return at;
 };
@@ -32,14 +34,16 @@ export const sfnt = (bytes: Uint8Array): Sfnt => {
   const count = view.getUint16(4);
 
   if (12 + 16 * count > bytes.length)
-    throw new Error("This font is truncated: its table directory runs past the end of the file.");
+    throw new SceneError(
+      "This font is truncated: its table directory runs past the end of the file.",
+    );
 
   for (let i = 0; i < count; i++) {
     const record = 12 + 16 * i;
     const [offset, length] = [view.getUint32(record + 8), view.getUint32(record + 12)];
 
     if (offset + length > bytes.length)
-      throw new Error("This font is truncated: a table runs past the end of the file.");
+      throw new SceneError("This font is truncated: a table runs past the end of the file.");
     const tag = String.fromCharCode(...bytes.subarray(record, record + 4));
     tables.set(tag, offset);
     lengths.set(tag, length);

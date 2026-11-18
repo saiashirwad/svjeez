@@ -4,14 +4,22 @@ import type { SceneNode, Source } from "../model/ir";
 import type { SceneElement } from "./nodes";
 
 const written = new WeakMap<SceneElement, Source>();
+const components = new WeakMap<SceneElement, string>();
 
-export const remember = (element: SceneElement, source: JsxSource | undefined): SceneElement => {
-  if (source && !written.has(element))
-    written.set(element, {
-      file: source.fileName ?? "",
-      line: source.lineNumber,
-      ...(source.columnNumber !== undefined && { column: source.columnNumber }),
-    });
+export const sourceFrom = (source: JsxSource): Source => ({
+  file: source.fileName ?? "",
+  line: source.lineNumber,
+  ...(source.columnNumber !== undefined && { column: source.columnNumber }),
+});
+
+export const remember = (
+  element: SceneElement,
+  source: JsxSource | undefined,
+  component?: string,
+): SceneElement => {
+  if (source && !written.has(element)) written.set(element, sourceFrom(source));
+
+  if (component && !components.has(element)) components.set(element, component);
 
   return element;
 };
@@ -23,6 +31,9 @@ export const sourced = (from: SceneElement, to: SceneElement): SceneElement => {
 
   return to;
 };
+export const writtenAt = (element: SceneElement): Source | undefined => written.get(element);
+
+export const componentOf = (element: SceneElement): string | undefined => components.get(element);
 
 const keyedByPlace = new WeakSet<SceneNode>();
 
@@ -30,9 +41,16 @@ export const identified = <N extends SceneNode>(
   element: SceneElement,
   name: string | undefined,
   node: N,
+  named?: { readonly name: string; readonly source?: Source },
 ): N => {
-  const source = written.get(element);
-  const out = source ? { ...node, source } : node;
+  const source = written.get(element) ?? named?.source;
+  const readable = named?.name;
+
+  const out = {
+    ...node,
+    ...(readable !== undefined && { name: readable }),
+    ...(source && { source }),
+  };
 
   if (name === undefined) keyedByPlace.add(out);
 

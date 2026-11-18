@@ -560,7 +560,7 @@ describe("clips and masks", () => {
           </Group>
         </Group>
       )),
-    ).toThrow('"1#mask/spot" is in the mask of "1"');
+    ).toThrow('<Shape> "spot" is in the mask of <Group>');
   });
 
   test("hit tests and boxes stop at a clip's box", () => {
@@ -766,7 +766,7 @@ describe("effects", () => {
   test("an effect's lengths are checked, and a non-scaling stroke can't be bounded under one", () => {
     expect(() =>
       made(() => <Shape fill="#000000" key="a" geometry={rect(4, 4)} effects={[blur(-1)]} />),
-    ).toThrow('blur on "a" needs a finite length of 0 or more, got -1.');
+    ).toThrow('blur on <Shape> "a" needs a finite length of 0 or more, got -1.');
     expect(() =>
       emitted(
         made(() => (
@@ -863,7 +863,7 @@ describe("morph", () => {
           span(0, 1),
         ),
       ),
-    ).toThrow('can\'t blend the effects of "a"');
+    ).toThrow('can\'t blend the effects of <Shape> "a"');
   });
 });
 

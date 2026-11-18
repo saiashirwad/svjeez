@@ -21,6 +21,7 @@ import {
 import { momentsOf, sourcesOf } from "./check/survey";
 import { startTrace, stopTrace, traceOf, type BuildReport } from "./svg/traced";
 import { validateSvg } from "./svg/validate";
+import { isSceneError } from "./model/scene-error";
 
 const USAGE = `usage:
   svjeez svg <file> [--out file.svg] [--json] [params]
@@ -551,15 +552,18 @@ const thrownAt = (error: Error, file: string): Source | undefined => {
 };
 
 const compileError = (error: Error, file: string): CheckFinding => {
-  const source = thrownAt(error, file);
+  const told = isSceneError(error) ? error : undefined;
+  const source = told?.source ?? thrownAt(error, file);
 
   return {
     code: "compile-error",
     severity: "error",
-    key: "",
+    key: told?.key ?? "",
     ...(source && { source }),
-    message: error.message,
-    hint: "Fix what the message names; the scene must build before anything else can be checked.",
+    message: told?.problem ?? error.message,
+    hint:
+      told?.fix ??
+      "Fix what the message names; the scene must build before anything else can be checked.",
   };
 };
 

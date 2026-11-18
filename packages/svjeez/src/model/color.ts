@@ -1,3 +1,5 @@
+import { SceneError } from "./scene-error";
+
 export type Color =
   | `#${string}`
   | `rgb(${string})`
@@ -25,7 +27,7 @@ const WITH_ALPHA = /^#(?:[\da-f]{3}|[\da-f]{6}|[\da-f]{8})$/i;
 
 export const hexOf = (color: Hex, caller: string, alpha = false): Hex => {
   if (!(alpha ? WITH_ALPHA : SOLID).test(color))
-    throw new Error(
+    throw new SceneError(
       `${caller} needs ${alpha ? "#rgb, #rrggbb or #rrggbbaa" : "#rgb or #rrggbb"} colors, got ${color}.`,
     );
 

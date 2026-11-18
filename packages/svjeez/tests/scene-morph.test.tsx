@@ -298,7 +298,7 @@ describe("morph", () => {
           span(2, 1),
         ),
       ),
-    ).toThrow(`morph() can't blend the rotate of "a"`);
+    ).toThrow(`morph() can't blend the rotate of <Shape> "a"`);
   });
 
   test("errors name the key and say what to write", () => {
@@ -312,7 +312,7 @@ describe("morph", () => {
           span(0, 1),
         ),
       ),
-    ).toThrow(`morph() can't turn "a" from a shape into a text`);
+    ).toThrow(`morph() can't turn the node keyed "a" from a shape into a text`);
 
     expect(() =>
       made(() =>
@@ -347,7 +347,7 @@ describe("morph", () => {
           span(0, 1),
         ),
       ),
-    ).toThrow(`morph() can't blend "a": its stroke's cap`);
+    ).toThrow(`morph() can't blend <Shape> "a": its stroke's cap`);
 
     expect(() =>
       morph.between(

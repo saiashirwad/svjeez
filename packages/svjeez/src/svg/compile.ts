@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import { formatValue, spec, valueOf, type Backend, type Channel } from "./channels";
 import { baseRule, classBody, cssDeclarations, cssKeyframes, freezeRule, type Emit } from "./css";
 import { fontFaces, isFontValue, type Font, type FontValue } from "../font/font";
@@ -90,7 +91,7 @@ const fontFamily = (state: State, value: FontValue): string => {
     }
 
     if (taken)
-      throw new Error(
+      throw new SceneError(
         `Two different fonts claim ${slot}. Give one of them another family name with font(bytes, { family }).`,
       );
     state.fonts.set(slot, font);

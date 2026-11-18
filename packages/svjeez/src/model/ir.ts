@@ -159,6 +159,7 @@ export interface Source {
 
 interface Base {
   readonly key: string;
+  readonly name?: string;
   readonly source?: Source;
   readonly box: Box;
   readonly at: Animated<Vec>;

@@ -1,3 +1,5 @@
+import { SceneError } from "../model/scene-error";
+import { named } from "./names";
 import type { Animated, Box, SceneNode, Vec } from "../model/ir";
 import { isLane } from "../model/lane";
 import type { Place } from "./refs";
@@ -53,17 +55,17 @@ export const pinned = (
   const along = isName(anchor) && isBaseline(anchor) ? BASELINE[anchor] : undefined;
 
   if (!named && !isPair(anchor) && along === undefined)
-    throw new Error(
+    throw new SceneError(
       `anchor on ${where} takes a place, one of ${PLACE_LIST}${baseline === undefined ? "" : ', or on a text "baseline-left", "baseline" or "baseline-right"'}, or two fractions of the box such as [0.5, 1], got ${isName(anchor) ? `"${anchor}"` : JSON.stringify(anchor)}.`,
     );
 
   if (along !== undefined && baseline === undefined)
-    throw new Error(
+    throw new SceneError(
       `anchor="${String(anchor)}" on ${where} names a baseline, which only a <Text> has. Use a place on the box, such as "bottom".`,
     );
 
   if (box.width === 0 && box.height === 0)
-    throw new Error(
+    throw new SceneError(
       `anchor on ${where} names a point of its box, but the box is empty: it draws nothing at rest. Drop anchor and place it by at alone.`,
     );
 
@@ -82,7 +84,7 @@ export const homeOf = (
   anchor: TextAnchorPlace | undefined,
   box: Box,
 ): Vec => {
-  const where = `"${node.key}"`;
+  const where = `${named(node.key)}`;
 
   if (kind === "group" || kind === "instance")
     return anchor === undefined ? [0, 0] : pinned(anchor, box, where);

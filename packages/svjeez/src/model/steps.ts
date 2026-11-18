@@ -1,3 +1,4 @@
+import { SceneError } from "./scene-error";
 import { easeAt, splitEase } from "./ease-at";
 import { MAX_KEYS, snapPeriod } from "../svg/keys";
 import { EPSILON, NUDGE, ease, type Ease, type Seconds } from "./time";
@@ -29,7 +30,7 @@ const MAX_UNROLLED = 20000;
 
 const time = (value: Seconds, what: string): Seconds => {
   if (!Number.isFinite(value) || value < 0)
-    throw new Error(`${what} needs a finite, non-negative number of seconds, got ${value}.`);
+    throw new SceneError(`${what} needs a finite, non-negative number of seconds, got ${value}.`);
 
   return value;
 };
@@ -62,20 +63,22 @@ export class Passage<V extends object> {
 
   to(values: Partial<V>, when: Span, curve: Curve = ease.out): Passage<V> {
     if (!isSpan(when))
-      throw new Error(
+      throw new SceneError(
         `to() takes a span, got ${String(when)}. Write .to(value, span(start, over)); a step right after another is span.next(over).`,
       );
     const start = time(when.start, "to()");
 
     if (!(time(when.over, "to()") > 0))
-      throw new Error(`to() needs a positive duration, got ${when.over}. Use set() for a cut.`);
+      throw new SceneError(
+        `to() needs a positive duration, got ${when.over}. Use set() for a cut.`,
+      );
 
     return this.#push({ start, over: when.over, ease: curve, values });
   }
 
   set(values: Partial<V>, at: Seconds): Passage<V> {
     if (!isTime(at))
-      throw new Error(
+      throw new SceneError(
         `set() takes the time of the cut in seconds, got ${at === undefined ? "none" : JSON.stringify(at)}. Write .set(value, at).`,
       );
 
@@ -84,11 +87,13 @@ export class Passage<V extends object> {
 
   loop(period: Seconds): Passage<V> {
     if (!(time(period, "loop()") > 0))
-      throw new Error(`loop() needs a positive period, got ${period}.`);
+      throw new SceneError(`loop() needs a positive period, got ${period}.`);
     const last = Math.max(0, ...this.data.steps.map(end));
 
     if (last > period + EPSILON)
-      throw new Error(`loop(${period}) is shorter than the motion, which runs until ${last}s.`);
+      throw new SceneError(
+        `loop(${period}) is shorter than the motion, which runs until ${last}s.`,
+      );
 
     return this.#with({ period });
   }
@@ -99,13 +104,13 @@ export class Passage<V extends object> {
     this.#open("repeat()");
 
     if (steps.length === 0)
-      throw new Error("repeat() needs a passage to repeat: write a transition first.");
+      throw new SceneError("repeat() needs a passage to repeat: write a transition first.");
 
     if (isUntil(times)) {
       if (!Number.isFinite(times.until))
-        throw new Error(`repeat() needs a finite until, got ${times.until}.`);
+        throw new SceneError(`repeat() needs a finite until, got ${times.until}.`);
     } else if (!Number.isInteger(times) || times < 1)
-      throw new Error(`repeat() needs a whole number of plays of 1 or more, got ${times}.`);
+      throw new SceneError(`repeat() needs a whole number of plays of 1 or more, got ${times}.`);
 
     const from = Math.min(...steps.map((step) => step.start));
     const to = Math.max(...steps.map(end));
@@ -113,20 +118,20 @@ export class Passage<V extends object> {
     const limit = isUntil(times) ? times.until : Infinity;
 
     if (!(length > 0))
-      throw new Error(
+      throw new SceneError(
         `repeat() needs a passage with a length, but its steps start and end at ${from}s. Add a transition.`,
       );
 
     if (limit !== Infinity && !(limit > to + EPSILON))
-      throw new Error(
+      throw new SceneError(
         `repeat({ until: ${limit} }) needs a time after the passage ends, at ${to}s.`,
       );
 
     const passes = isUntil(times) ? Math.ceil((limit - from) / length - EPSILON) : times;
 
     if (passes * steps.length > MAX_UNROLLED)
-      throw new Error(
-        `repeat() would unroll ${passes} passes of ${steps.length} steps into keyframes. Use .loop(period) for a motion that never stops.`,
+      throw new SceneError(
+        `repeat() would unroll ${passes} passes of ${steps.length} steps one after another. Use .loop(period) for a motion that never stops.`,
       );
 
     const touched = [...new Set(steps.flatMap((step) => names(step.values)))];
@@ -153,7 +158,7 @@ export class Passage<V extends object> {
 
   rewind(over: Seconds, curve: Curve = ease.out): Passage<V> {
     if (!(time(over, "rewind()") > 0))
-      throw new Error(`rewind() needs a positive duration, got ${over}.`);
+      throw new SceneError(`rewind() needs a positive duration, got ${over}.`);
 
     this.#open("rewind()");
 
@@ -162,7 +167,7 @@ export class Passage<V extends object> {
 
   #open(what: string): void {
     if (this.data.rewind)
-      throw new Error(`${what} can't follow rewind(), which runs to the end of the clock.`);
+      throw new SceneError(`${what} can't follow rewind(), which runs to the end of the clock.`);
   }
 
   #push(step: Step<V>): Passage<V> {
@@ -171,7 +176,7 @@ export class Passage<V extends object> {
     this.#open("A transition");
 
     if (period !== undefined && end(step) > period + EPSILON)
-      throw new Error(`A step ending at ${end(step)}s overruns loop(${period}).`);
+      throw new SceneError(`A step ending at ${end(step)}s overruns loop(${period}).`);
 
     for (const other of this.data.steps) {
       const shared = names(step.values).find((name) => name in other.values);
@@ -183,7 +188,7 @@ export class Passage<V extends object> {
         !cuts(other, step) &&
         !cuts(step, other)
       )
-        throw new Error(
+        throw new SceneError(
           `Two transitions move \`${String(shared)}\` between ${Math.max(step.start, other.start)}s and ${Math.min(end(step), end(other))}s. Move them in one .to(), or stack two motions. Only a spring can be cut by a step that starts while it moves.`,
         );
     }
@@ -273,7 +278,7 @@ export const same = <T>(a: T, b: T): boolean => a === b || JSON.stringify(a) ===
 export const noMix = <T>(a: T, b: T, _amount: number, where: string): T => {
   if (same(a, b)) return a;
 
-  throw new Error(
+  throw new SceneError(
     `${where} is cut partway through a transition, and only numbers and points can be cut there. Cut it between transitions.`,
   );
 };
@@ -305,7 +310,7 @@ interface Moving {
 
 const componentsOf = <T>(mix: Mix<T>, where: string): Parts<T> => {
   if (!isSpringy(mix))
-    throw new Error(
+    throw new SceneError(
       `${where} moves on a spring, and a spring moves only numbers and points. Use an ease such as ease.out.`,
     );
 
@@ -357,7 +362,7 @@ const segmentsOf = <T>(
     const run = curve.run(from, parts.split(value), carried, stop - start, curves);
 
     if (ends && !run.settled)
-      throw new Error(
+      throw new SceneError(
         `The spring on ${where} from ${num(start)}s needs ${num(Math.ceil(run.needs * 100) / 100)}s to settle, but its span is ${num(stop - start)}s. Give it a longer span, a stiffer or more damped spring, or cut it with a later step.`,
       );
 
@@ -413,7 +418,7 @@ const segmentsOf = <T>(
     const curve = data.rewind.ease;
 
     if (start < last - EPSILON)
-      throw new Error(
+      throw new SceneError(
         `rewind(${data.rewind.over}) on ${where} needs the last ${data.rewind.over}s of its ${clockEnd}s clock, but the motion runs until ${last}s.`,
       );
 
@@ -542,21 +547,21 @@ const reach = (
 ): void => {
   if (!onClock) {
     if (until > period + EPSILON)
-      throw new Error(`${where} runs until ${num(until)}s, past its ${num(period)}s loop.`);
+      throw new SceneError(`${where} runs until ${num(until)}s, past its ${num(period)}s loop.`);
 
     return;
   }
 
   for (const clip of [...clock.clips].reverse())
     if (!clip.open && until > clip.end + EPSILON)
-      throw new Error(
+      throw new SceneError(
         `${where} runs until ${num(until - clip.start)}s, past the ${num(clip.end - clip.start)}s ${clip.label}. End it by then, or give the sequence a longer over.`,
       );
 
   if (until > duration + EPSILON) {
     const inside = clock.clips.at(-1);
 
-    throw new Error(
+    throw new SceneError(
       `${where} runs until ${num(until)}s${inside ? ` (${num(until - clock.offset)}s into ${inside.label})` : ""}, past the ${num(duration)}s scene. End it by then, or give scene() a longer duration.`,
     );
   }
@@ -643,7 +648,7 @@ const written = <T>(
       : held;
 
   if (keys.length > MAX_KEYS)
-    throw new Error(
+    throw new SceneError(
       `${where} has ${keys.length} keys; the cap is ${MAX_KEYS}.${data.repeated ? " repeat() unrolls every pass, so use .loop(period) for a motion that never stops." : ""}`,
     );
 

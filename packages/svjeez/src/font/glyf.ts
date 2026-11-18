@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import { f2dot14, i16, i8, required, u16, u32, u8, type Sfnt } from "./sfnt";
 
 interface Point {
@@ -79,7 +80,7 @@ export const contours = (
 
   if (count >= 0) return simple(f, at, count);
 
-  if (depth > 8) throw new Error("This font nests composite glyphs too deeply.");
+  if (depth > 8) throw new SceneError("This font nests composite glyphs too deeply.");
   const result: Contour[] = [];
   let p = at + 10;
 
@@ -87,7 +88,7 @@ export const contours = (
     flags = u16(f, p);
 
     if (--budget.components < 0)
-      throw new Error("This font's composite glyphs have too many components.");
+      throw new SceneError("This font's composite glyphs have too many components.");
     const component = u16(f, p + 2);
     p += 4;
     const words = flags & 1;

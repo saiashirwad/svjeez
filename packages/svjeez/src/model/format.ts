@@ -1,3 +1,5 @@
+import { SceneError } from "./scene-error";
+
 const round = (n: number, places = 3): number => {
   const factor = 10 ** places;
   const value = Math.round((n + Number.EPSILON) * factor) / factor;
@@ -6,7 +8,7 @@ const round = (n: number, places = 3): number => {
 };
 
 export const num = (value: number, places = 3): string => {
-  if (!Number.isFinite(value)) throw new Error(`Expected a finite number, received ${value}`);
+  if (!Number.isFinite(value)) throw new SceneError(`Expected a finite number, received ${value}`);
 
   return String(round(value, places));
 };

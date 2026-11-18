@@ -1,3 +1,5 @@
+import { SceneError } from "../model/scene-error";
+import { named } from "./names";
 import { num } from "../model/format";
 import { EPSILON, type Seconds } from "../model/time";
 import { checkWindow, span, type Span } from "./span";
@@ -47,10 +49,10 @@ const between = (
   options: MorphOptions = {},
 ): SceneElement => {
   if (states.length < 2)
-    throw new Error(`morph.between() needs two states or more, got ${states.length}.`);
+    throw new SceneError(`morph.between() needs two states or more, got ${states.length}.`);
 
   if (spans.length !== states.length - 1)
-    throw new Error(
+    throw new SceneError(
       `morph.between() takes one span per transition: ${states.length} states need ${states.length - 1} spans, got ${spans.length}.`,
     );
 
@@ -59,7 +61,7 @@ const between = (
     const before = spans[i - 1];
 
     if (before && start < before.start + before.over - EPSILON)
-      throw new Error(
+      throw new SceneError(
         `morph.between()'s spans must follow one another: span ${i + 1} starts at ${num(start)}s, before span ${i} ends at ${num(before.start + before.over)}s.`,
       );
   });
@@ -67,7 +69,7 @@ const between = (
   const { stagger = 0 } = options;
 
   if (!(stagger >= 0 && Number.isFinite(stagger)))
-    throw new Error(`morph() needs a stagger of 0 or more seconds, got ${stagger}.`);
+    throw new SceneError(`morph() needs a stagger of 0 or more seconds, got ${stagger}.`);
 
   return { type: "morph", states: states.map(flat), spans, options };
 };
@@ -113,8 +115,8 @@ const entries = (lists: readonly (readonly SceneNode[])[]): Entry[] => {
   if (where && counts.some((count) => count !== counts[0])) {
     const parent = parentOf(where.key);
 
-    throw new Error(
-      `morph() matches nodes by key, and ${parent ? `inside "${parent}"` : "at the top"} the states have ${counts.join(", ")} nodes with no key, so they would pair up by their place. Give each node that comes, goes or changes a key, as in <Shape key="…" />.`,
+    throw new SceneError(
+      `morph() matches nodes by key, and ${parent ? `inside ${named(parent)}` : "at the top"} the states have ${counts.join(", ")} nodes with no key, so they would pair up by their place. Give each node that comes, goes or changes a key, as in <Shape key="…" />.`,
     );
   }
 
@@ -126,8 +128,8 @@ const entries = (lists: readonly (readonly SceneNode[])[]): Entry[] => {
     const kinds = [...new Set(nodes.map((node) => node.kind))];
 
     if (kinds.length > 1)
-      throw new Error(
-        `morph() can't turn "${key}" from a ${kinds[0]} into a ${kinds[1]}: a node keeps its kind across states.${placeNote(key, nodes)}`,
+      throw new SceneError(
+        `morph() can't turn the node keyed "${key.split("/").at(-1)}" from a ${kinds[0]} into a ${kinds[1]}: a node keeps its kind across states.${placeNote(key, nodes)}`,
       );
 
     const filled = found.map((node, s) => {
@@ -237,8 +239,8 @@ const blend = <T>(
   if (values.every((value) => same(value, first))) return first!;
 
   if (values.some(isLane))
-    throw new Error(
-      `morph() can't blend the ${what} of "${entry.key}": it moves in a state (a track, a recipe or a timeline) and also differs between states. Write it the same in every state, or let the morph move it.`,
+    throw new SceneError(
+      `morph() can't blend the ${what} of ${named(entry.key)}: it moves in a state (a track, a recipe or a timeline) and also differs between states. Write it the same in every state, or let the morph move it.`,
     );
 
   // SAFETY: no value is a lane, so each is a T.
@@ -251,7 +253,7 @@ const blend = <T>(
     fixed.slice(0, -1),
     fixed.slice(1),
     mix,
-    `${what} on "${entry.key}" in morph()`,
+    `${what} on ${named(entry.key)} in morph()`,
     curve,
   );
 };
@@ -261,8 +263,8 @@ const agreed = <T>(entry: Entry, read: (node: SceneNode) => T, what: string): T 
   const other = values.find((value) => !same(value, values[0]));
 
   if (other !== undefined)
-    throw new Error(
-      `morph() can't blend "${entry.key}": its ${what} differs between states, and ${what} doesn't animate.${placeNote(entry.key, entry.filled)}`,
+    throw new SceneError(
+      `morph() can't blend ${named(entry.key)}: its ${what} differs between states, and ${what} doesn't animate.${placeNote(entry.key, entry.filled)}`,
     );
 
   return values[0]!;
@@ -284,8 +286,8 @@ const rebased = (entry: Entry, node: SceneNode, origin: Vec): readonly Layer[] =
 
   return node.layers.map((layer) => {
     if (isLane(layer.rotate) || isLane(layer.scale))
-      throw new Error(
-        `morph() can't blend "${entry.key}": it turns or scales in a state, and its origin moves between states. Give it the same origin in every state, as in origin={[x, y]}.`,
+      throw new SceneError(
+        `morph() can't blend ${named(entry.key)}: it turns or scales in a state, and its origin moves between states. Give it the same origin in every state, as in origin={[x, y]}.`,
       );
     const [mx, my] = rotateScale(layer, [dx, dy]);
     const shift: Vec = [dx - mx, dy - my];
@@ -328,7 +330,7 @@ const presence = (plan: Plan, entry: Entry, enter: Fixed, exit: Fixed): Layer | 
   });
 
   const initial = present[0] ? IDLE : enter;
-  const where = `entering or exiting on "${entry.key}" in morph()`;
+  const where = `entering or exiting on ${named(entry.key)} in morph()`;
 
   const field = <T>(read: (layer: Fixed) => T, mix: Mix<T>): Animated<T> =>
     travel(plan, windows, read(initial), from.map(read), to.map(read), mix, where);
@@ -396,6 +398,7 @@ const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed
 
   return {
     key: entry.key,
+    ...(rest.name !== undefined && { name: rest.name }),
     ...(rest.source && { source: rest.source }),
     box: rest.box,
     at: blend(
@@ -421,8 +424,8 @@ const clipOf = (plan: Plan, entry: Entry): Animated<Geometry> | undefined => {
   const given = clips.flatMap((clip) => (clip === undefined ? [] : [clip]));
 
   if (given.length < clips.length)
-    throw new Error(
-      `morph() can't blend "${entry.key}": it has a clip in one state and none in another, and no outline blends into drawing everything. Give it a clip in every state, as large as the node where it should show all of it.`,
+    throw new SceneError(
+      `morph() can't blend ${named(entry.key)}: it has a clip in one state and none in another, and no outline blends into drawing everything. Give it a clip in every state, as large as the node where it should show all of it.`,
     );
 
   return outlinesOf(plan, entry, given, "clip");
@@ -440,8 +443,8 @@ const effectsOf = (plan: Plan, entry: Entry): Effect[] => {
   const odd = lists.find((list) => list.length > 0 && kinds(list) !== kinds(template));
 
   if (odd)
-    throw new Error(
-      `morph() can't blend the effects of "${entry.key}": one state has ${kinds(odd)} and another ${kinds(template)}. List the same effects in the same order in every state, or none.`,
+    throw new SceneError(
+      `morph() can't blend the effects of ${named(entry.key)}: one state has ${kinds(odd)} and another ${kinds(template)}. List the same effects in the same order in every state, or none.`,
     );
   const filled = lists.map((list) => (list.length === 0 ? template.map(absent) : list));
   const what = (name: string) => `${name} of an effect`;
@@ -526,7 +529,7 @@ const paints = (
       what,
       paintCurve(plan),
     ),
-    `${what} on "${entry.key}" in morph()`,
+    `${what} on ${named(entry.key)} in morph()`,
   );
 };
 
@@ -603,12 +606,15 @@ const outlinesOf = (
   if (values.every((value) => same(value, first))) return first!;
 
   if (values.some(isLane))
-    throw new Error(
-      `morph() can't blend the ${what} of "${entry.key}": it moves in a state (a track) and also differs between states. Write it the same in every state, or let the morph reshape it.`,
+    throw new SceneError(
+      `morph() can't blend the ${what} of ${named(entry.key)}: it moves in a state (a track) and also differs between states. Write it the same in every state, or let the morph reshape it.`,
     );
 
   // SAFETY: no value is a lane, so each is a geometry.
-  const outlines = matched(values as readonly Geometry[], `${what} on "${entry.key}" in morph()`);
+  const outlines = matched(
+    values as readonly Geometry[],
+    `${what} on ${named(entry.key)} in morph()`,
+  );
 
   return blend(plan, entry, outlines, geometryMix(outlines[0]!), what);
 };
@@ -626,8 +632,8 @@ const strokeOf = (plan: Plan, entry: Entry, shapes: readonly ShapeNode[]): Strok
   );
 
   if (styles.some((each) => !same(each, styles[0])))
-    throw new Error(
-      `morph() can't blend "${entry.key}": its stroke's cap, join, dash or nonScaling differs between states, and those don't animate. Give the stroke the same style in every state.`,
+    throw new SceneError(
+      `morph() can't blend ${named(entry.key)}: its stroke's cap, join, dash or nonScaling differs between states, and those don't animate. Give the stroke the same style in every state.`,
     );
 
   return {
@@ -641,7 +647,7 @@ const strokeOf = (plan: Plan, entry: Entry, shapes: readonly ShapeNode[]): Strok
         "stroke color",
         paintCurve(plan),
       ),
-      `stroke color on "${entry.key}" in morph()`,
+      `stroke color on ${named(entry.key)} in morph()`,
     ),
     width: blend(
       plan,
@@ -723,7 +729,7 @@ const blendedLines = (plan: Plan, entry: Entry, states: readonly TextNode[]): Te
             "fill",
             paintCurve(plan),
           ),
-          `fill on "${entry.key}" in morph()`,
+          `fill on ${named(entry.key)} in morph()`,
         ),
         ...(opacity !== undefined && opacity !== 1 && { opacity }),
       };
@@ -774,6 +780,7 @@ const textOf = (plan: Plan, entry: Entry): TextNode | GroupNode => {
     return {
       kind: "text",
       key: part.key,
+      ...(own.name !== undefined && { name: own.name }),
       ...(own.source && { source: own.source }),
       box: own.box,
       at: [0, 0],
@@ -841,7 +848,7 @@ export const merge = (
     const length = over - stagger * (moving.length - 1);
 
     if (moving.length > 1 && !(length > EPSILON))
-      throw new Error(
+      throw new SceneError(
         `morph()'s stagger of ${num(stagger)}s across the ${moving.length} things that change in transition ${i + 1} takes the whole ${num(over)}s span. Give it a longer span or a shorter stagger.`,
       );
 

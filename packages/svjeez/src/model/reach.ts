@@ -1,3 +1,4 @@
+import { SceneError } from "./scene-error";
 import type { Ease } from "./time";
 import { mixGeometry } from "./geometry";
 import type { Animated, Box, Effect, Geometry, Layer, SceneNode, Vec } from "./ir";
@@ -119,7 +120,7 @@ const strokeReach = (node: Extract<SceneNode, { kind: "shape" }>, inside: string
   if (!stroke) return 0;
 
   if (stroke.nonScaling)
-    throw new Error(
+    throw new SceneError(
       `"${node.key}" has a non-scaling stroke inside ${inside}, whose width in its own units depends on every scale around it, so the region can't be bounded. Drop nonScaling there, or move the effect or mask to a node without it.`,
     );
   const width = Math.max(0, ...numbers(stroke.width).map(Math.abs));

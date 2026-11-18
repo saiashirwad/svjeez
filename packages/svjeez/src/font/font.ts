@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import { contours, pathData } from "./glyf";
 import { typesetter, type Typesetter } from "./shape";
 import { subset } from "./subset";
@@ -117,14 +118,14 @@ export class Font {
     ];
 
     if (!(this.weight >= 1 && this.weight <= 1000))
-      throw new Error(`font() needs a weight between 1 and 1000, got ${this.weight}.`);
+      throw new SceneError(`font() needs a weight between 1 and 1000, got ${this.weight}.`);
     this.href = `data:${FORMATS[format].mime};base64,${base64(bytes)}`;
     this.bytes = this.href.length;
   }
 
   #readable(what: string): Sfnt {
     if (!this.#sfnt)
-      throw new Error(
+      throw new SceneError(
         `${what} needs the TTF or OTF file. A ${this.format.toUpperCase()} font embeds, but its tables are compressed.`,
       );
 
@@ -191,12 +192,12 @@ export class Font {
     const font = this.#readable("path()");
 
     if (this.format === "otf")
-      throw new Error(
+      throw new SceneError(
         "path() reads TrueType outlines. This OTF stores CFF outlines, which path() does not read yet.",
       );
 
     if (!(size > 0) || !Number.isFinite(x + y))
-      throw new Error(
+      throw new SceneError(
         `path() needs a positive size and finite coordinates, got size ${size} at ${x}, ${y}.`,
       );
     const scale = size / this.metrics.unitsPerEm;
@@ -219,7 +220,7 @@ export class Font {
   }
 
   toString(): never {
-    throw new Error("A font is not a string. Pass it as fontFamily={font}.");
+    throw new SceneError("A font is not a string. Pass it as fontFamily={font}.");
   }
 }
 
@@ -247,7 +248,7 @@ export class FontFamily {
   }
 
   toString(): never {
-    throw new Error("A font family is not a string. Pass it as fontFamily={family}.");
+    throw new SceneError("A font family is not a string. Pass it as fontFamily={family}.");
   }
 }
 
@@ -291,11 +292,11 @@ export const font = Object.assign(
   (source: Uint8Array | ArrayBuffer, options: FontOptions = {}): Font => {
     const bytes = source instanceof Uint8Array ? source : new Uint8Array(source);
 
-    if (bytes.length < 12) throw new Error("This font is empty or truncated.");
+    if (bytes.length < 12) throw new SceneError("This font is empty or truncated.");
     const signature = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(0);
 
     if (signature === tag("ttcf"))
-      throw new Error(
+      throw new SceneError(
         "This is a font collection (.ttc). Extract one face to a .ttf or .otf and load that.",
       );
 
@@ -304,7 +305,7 @@ export const font = Object.assign(
       FORMATS[key].matches(signature),
     );
 
-    if (!format) throw new Error(`Unknown font format. font() reads ${SUPPORTED}.`);
+    if (!format) throw new SceneError(`Unknown font format. font() reads ${SUPPORTED}.`);
 
     return new Font(bytes, format, options);
   },
@@ -312,14 +313,15 @@ export const font = Object.assign(
     load: async (source: string | URL, options: FontOptions = {}): Promise<Font> =>
       font(await readSource(source), options),
     family: (...faces: readonly [Font, ...Font[]]): FontFamily => {
-      if (faces.length === 0) throw new Error("font.family() needs at least one font, got none.");
+      if (faces.length === 0)
+        throw new SceneError("font.family() needs at least one font, got none.");
       const seen = new Map<string, Font>();
 
       for (const face of faces) {
         const key = `${face.weight} ${face.style}`;
 
         if (seen.has(key))
-          throw new Error(
+          throw new SceneError(
             `font.family() got two ${face.style} faces of weight ${face.weight}. Each weight and style needs its own file.`,
           );
         seen.set(key, face);

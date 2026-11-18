@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import { hexBytes, hexOf, type Hex } from "../model/color";
 import { ringsOf } from "../model/paths";
 import type { Box, Contour, Cubic, Geometry as Outline, Rgba, Vec } from "../model/ir";
@@ -14,7 +15,7 @@ const straight = (from: Vec, to: Vec): Cubic => [lerp(from, to, 1 / 3), lerp(fro
 
 const positive = (value: number, what: string): number => {
   if (!(value >= 0 && Number.isFinite(value)))
-    throw new Error(`${what} needs a finite size of 0 or more, got ${value}.`);
+    throw new SceneError(`${what} needs a finite size of 0 or more, got ${value}.`);
 
   return value;
 };
@@ -33,7 +34,7 @@ export class PathBuilder {
   }
 
   #pen(what: string): Contour {
-    if (!this.#open) throw new Error(`${what} needs a start: call moveTo() first.`);
+    if (!this.#open) throw new SceneError(`${what} needs a start: call moveTo() first.`);
 
     return this.#open;
   }
@@ -127,7 +128,7 @@ export interface ArcOptions {
 
 export const arc = ({ radius, start = 0, sweep }: ArcOptions): Geometry => {
   if (!Number.isFinite(start) || !Number.isFinite(sweep))
-    throw new Error(`arc() needs a finite start and sweep, got ${start} and ${sweep}.`);
+    throw new SceneError(`arc() needs a finite start and sweep, got ${start} and ${sweep}.`);
 
   return { kind: "arc", radius: positive(radius, "arc()"), start, sweep };
 };
@@ -256,12 +257,12 @@ export const tokens = <const K extends string>(values: {
 
   for (const name of names) {
     if (!/^[A-Za-z_][\w-]*$/.test(name))
-      throw new Error(
+      throw new SceneError(
         `tokens() needs names made of letters, digits, _ and -, starting with a letter or _, got "${name}".`,
       );
 
     if (values.light[name] === undefined)
-      throw new Error(`tokens() has a dark "${name}" and no light one.`);
+      throw new SceneError(`tokens() has a dark "${name}" and no light one.`);
   }
 
   // SAFETY: names are the keys of `dark`, so each K gets exactly one token.

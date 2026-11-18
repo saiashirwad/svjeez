@@ -1,3 +1,4 @@
+import { SceneError } from "./scene-error";
 import { num } from "./format";
 import { segments } from "./pathTokens";
 
@@ -118,7 +119,7 @@ const parse = (d: string): Ring[] => {
     const arity = ARITY.get(upper);
 
     if (arity === undefined)
-      throw new Error(`matchPaths() cannot read the "${letter}" command in "${d}".`);
+      throw new SceneError(`matchPaths() cannot read the "${letter}" command in "${d}".`);
     const relative = letter !== upper;
 
     if (upper === "Z") {
@@ -130,7 +131,7 @@ const parse = (d: string): Ring[] => {
     }
 
     if (n.length === 0 || n.length % arity !== 0)
-      throw new Error(`matchPaths() found ${n.length} numbers after "${letter}" in "${d}".`);
+      throw new SceneError(`matchPaths() found ${n.length} numbers after "${letter}" in "${d}".`);
 
     for (let i = 0; i < n.length; i += arity) {
       const v = n.slice(i, i + arity);

@@ -1,3 +1,4 @@
+import { SceneError } from "./model/scene-error";
 import { hexOf, type Hex } from "./model/color";
 import { ease, type Ease } from "./model/time";
 
@@ -69,16 +70,16 @@ const check = (name: string, p: NumberParam): NumberParam => {
   const at = `${name}(${p.value})`;
 
   if (!(Number.isFinite(p.min) && Number.isFinite(p.max) && p.min < p.max))
-    throw new Error(`${at} needs min below max, both finite, got ${p.min} and ${p.max}.`);
+    throw new SceneError(`${at} needs min below max, both finite, got ${p.min} and ${p.max}.`);
 
   if (!(p.step > 0 && Number.isFinite(p.step)))
-    throw new Error(`${at} needs a positive finite step, got ${p.step}.`);
+    throw new SceneError(`${at} needs a positive finite step, got ${p.step}.`);
 
   if (!(Number.isFinite(p.value) && p.value >= p.min && p.value <= p.max))
-    throw new Error(`${at} is outside its range ${p.min} to ${p.max}.`);
+    throw new SceneError(`${at} is outside its range ${p.min} to ${p.max}.`);
 
   if (p.scale === "log" && p.min <= 0)
-    throw new Error(`${at} has a log scale, so its min must be positive, got ${p.min}.`);
+    throw new SceneError(`${at} has a log scale, so its min must be positive, got ${p.min}.`);
 
   return p;
 };
@@ -90,12 +91,12 @@ export const count = (
   value: number,
   options: Partial<Range> & Pick<Range, "max"> & Omit<Extras, "step">,
 ): NumberParam => {
-  if (!Number.isInteger(value)) throw new Error(`count(${value}) needs a whole number.`);
+  if (!Number.isInteger(value)) throw new SceneError(`count(${value}) needs a whole number.`);
 
   const { min = 0, max } = options;
 
   if (!(Number.isInteger(min) && Number.isInteger(max)))
-    throw new Error(`count(${value}) needs whole-number bounds, got ${min} and ${max}.`);
+    throw new SceneError(`count(${value}) needs whole-number bounds, got ${min} and ${max}.`);
 
   return check("count", { kind: "number", value, min: 0, ...options, step: 1 });
 };
@@ -124,12 +125,14 @@ export const choice = <const T extends string>(
   extras: Labelled = {},
 ): ChoiceParam<T> => {
   if (new Set(options).size !== options.length)
-    throw new Error(
+    throw new SceneError(
       `choice("${value}") needs distinct options, got ${options.map((o) => `"${o}"`).join(", ")}.`,
     );
 
   if (!options.includes(value))
-    throw new Error(`choice("${value}") is not one of ${options.map((o) => `"${o}"`).join(", ")}.`);
+    throw new SceneError(
+      `choice("${value}") is not one of ${options.map((o) => `"${o}"`).join(", ")}.`,
+    );
 
   return { kind: "choice", value, options, ...extras };
 };
@@ -141,7 +144,9 @@ export const text = (
   const { maxLength } = options;
 
   if (maxLength !== undefined && !(Number.isInteger(maxLength) && maxLength > 0))
-    throw new Error(`text(${show(value)}) needs a whole maxLength of 1 or more, got ${maxLength}.`);
+    throw new SceneError(
+      `text(${show(value)}) needs a whole maxLength of 1 or more, got ${maxLength}.`,
+    );
 
   valueOf({ kind: "text", value, maxLength }, value, "text()");
 
@@ -159,14 +164,14 @@ export const list = <const I extends ScalarParam | Fields>(
     !(Number.isInteger(min) && min >= 0) ||
     (max !== undefined && !(Number.isInteger(max) && max >= min))
   )
-    throw new Error(
+    throw new SceneError(
       `list() needs a whole min of 0 or more and a whole max no smaller, got ${min} and ${max}.`,
     );
 
   if (!isScalar(item))
     for (const [key, field] of Object.entries(item))
       if (!isScalar(field))
-        throw new Error(
+        throw new SceneError(
           `list() items are scalars or records of scalars, so field "${key}" cannot be a list. Make it a list param of its own.`,
         );
 
@@ -230,7 +235,7 @@ const easeOf = (v: Json | undefined, path: string): Ease => {
     if (v.kind === "steps") return ease.steps(Number(v.count));
   }
 
-  throw new Error(
+  throw new SceneError(
     `${path} needs an ease: ${NAMED_EASES.map((n) => `"${n}"`).join(", ")}, or { "kind": "bezier", "points": [x1, y1, x2, y2] }, got ${show(v)}.`,
   );
 };
@@ -239,17 +244,17 @@ const valueOf = (p: Param, v: Json | undefined, path: string): Param["value"] =>
   switch (p.kind) {
     case "number": {
       if (!isNumber(v) || !Number.isFinite(v) || v < p.min || v > p.max)
-        throw new Error(`${path} needs a number from ${p.min} to ${p.max}, got ${show(v)}.`);
+        throw new SceneError(`${path} needs a number from ${p.min} to ${p.max}, got ${show(v)}.`);
 
       if (p.step === 1 && Number.isInteger(p.min) && !Number.isInteger(v))
-        throw new Error(`${path} needs a whole number, got ${show(v)}.`);
+        throw new SceneError(`${path} needs a whole number, got ${show(v)}.`);
 
       return v;
     }
 
     case "color":
       if (!isString(v))
-        throw new Error(`${path} needs a hex color such as "#FF5D8F", got ${show(v)}.`);
+        throw new SceneError(`${path} needs a hex color such as "#FF5D8F", got ${show(v)}.`);
 
       // SAFETY: hexOf throws unless the string is a hex color, so what it returns is one.
       return hexOf(v as Hex, path);
@@ -259,7 +264,7 @@ const valueOf = (p: Param, v: Json | undefined, path: string): Param["value"] =>
       const option = p.options.find((o) => o === v);
 
       if (option === undefined)
-        throw new Error(
+        throw new SceneError(
           `${path} is one of ${p.options.map((o) => `"${o}"`).join(", ")}, got ${show(v)}.`,
         );
 
@@ -267,19 +272,19 @@ const valueOf = (p: Param, v: Json | undefined, path: string): Param["value"] =>
     }
 
     case "text":
-      if (!isString(v)) throw new Error(`${path} needs text, got ${show(v)}.`);
+      if (!isString(v)) throw new SceneError(`${path} needs text, got ${show(v)}.`);
 
       if (p.maxLength !== undefined && v.length > p.maxLength)
-        throw new Error(
+        throw new SceneError(
           `${path} is ${v.length} characters, over its maxLength of ${p.maxLength}. Shorten it to fit.`,
         );
 
       return v;
     case "list": {
-      if (!Array.isArray(v)) throw new Error(`${path} needs a list, got ${show(v)}.`);
+      if (!Array.isArray(v)) throw new SceneError(`${path} needs a list, got ${show(v)}.`);
 
       if (v.length < p.min || (p.max !== undefined && v.length > p.max))
-        throw new Error(
+        throw new SceneError(
           `${path} has ${v.length} items, and needs ${p.max === undefined ? `at least ${p.min}` : `${p.min} to ${p.max}`}.`,
         );
 
@@ -297,13 +302,13 @@ const valueOf = (p: Param, v: Json | undefined, path: string): Param["value"] =>
 
 const fieldsOf = (fields: Fields, v: Json | undefined, path: string) => {
   if (!isRecord(v))
-    throw new Error(
+    throw new SceneError(
       `${path} needs an object with ${Object.keys(fields).join(", ")}, got ${show(v)}.`,
     );
 
   for (const key of Object.keys(v))
     if (!Object.hasOwn(fields, key))
-      throw new Error(
+      throw new SceneError(
         `${path}.${key} is not a field. An item has ${Object.keys(fields).join(", ")}.`,
       );
 
@@ -322,16 +327,18 @@ export const parse = <S extends Schema>(schema: S, json: Json): Values<S> => {
     try {
       input = JSON.parse(json);
     } catch (error) {
-      throw new Error(`The params are not JSON: ${error instanceof Error ? error.message : error}`);
+      throw new SceneError(
+        `The params are not JSON: ${error instanceof Error ? error.message : error}`,
+      );
     }
 
   if (!isRecord(input))
-    throw new Error(`The params need a JSON object keyed by param name, got ${show(input)}.`);
+    throw new SceneError(`The params need a JSON object keyed by param name, got ${show(input)}.`);
   const keys = Object.keys(schema);
 
   for (const key of Object.keys(input))
     if (!Object.hasOwn(schema, key))
-      throw new Error(
+      throw new SceneError(
         `"${key}" is not a param of this scene. It declares ${keys.length ? keys.join(", ") : "none"}.`,
       );
 

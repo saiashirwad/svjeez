@@ -1,3 +1,4 @@
+import { SceneError } from "./scene-error";
 import { easeAt, easeBetween } from "./ease-at";
 import { ease, type Ease } from "./time";
 import { matchRings } from "./paths";
@@ -198,7 +199,7 @@ export const mixGeometry = (a: Geometry, b: Geometry, amount: number, where: str
       };
   }
 
-  throw new Error(
+  throw new SceneError(
     `${where} blends a ${a.kind} into a ${b.kind} that has another structure. Lower geometry keys through matched() first.`,
   );
 };
@@ -226,7 +227,7 @@ export const matched = (values: readonly Geometry[], where: string): Geometry[] 
   const rules = new Set(values.flatMap((value) => (value.kind === "path" ? [value.rule] : [])));
 
   if (rules.size > 1)
-    throw new Error(
+    throw new SceneError(
       `${where} morphs between a nonzero and an evenodd path, and a fill rule can't blend. Give every key one rule.`,
     );
 
@@ -234,7 +235,7 @@ export const matched = (values: readonly Geometry[], where: string): Geometry[] 
     const contours = contoursOf(value);
 
     if (contours.length === 0)
-      throw new Error(
+      throw new SceneError(
         `${where} morphs to or from a ${value.kind} with no outline. Give every key a point at least.`,
       );
 

@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import { ease, type Seconds } from "../model/time";
 import type { Span } from "./span";
 import type { Vec } from "../model/ir";
@@ -70,7 +71,8 @@ export function track<T>(initial: T): Track<T> {
 export const isTrack = <T>(value: Anim<T>): value is Track<T> => value instanceof ValueTrack;
 
 export const passageOf = <T>(value: Track<T>): Passage<{ readonly value: T }> => {
-  if (!(value instanceof ValueTrack)) throw new Error("A track is built with track() or a recipe.");
+  if (!(value instanceof ValueTrack))
+    throw new SceneError("A track is built with track() or a recipe.");
 
   return value.passage;
 };
@@ -128,7 +130,7 @@ export const layersOf = (stack: Layers | undefined): LayerMotion[] => {
     if (!entry) return false;
 
     if (!(entry instanceof LayerMotion))
-      throw new Error("motion takes layers built with motion() or a recipe.");
+      throw new SceneError("motion takes layers built with motion() or a recipe.");
 
     return true;
   });

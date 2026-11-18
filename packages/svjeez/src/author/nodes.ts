@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import type { FontValue } from "../font/font";
 import type { Seconds } from "../model/time";
 import type { PictureData } from "./picture";
@@ -174,13 +175,13 @@ export const sceneElement = (
   where: string,
 ): Exclude<SceneElement, { readonly type: "run" }> => {
   if (isObject(value) && value.type === "run")
-    throw new Error(
+    throw new SceneError(
       `${where} holds a <Run>, which draws only inside a <Text>. Put it in one, as in <Text font={…} size={…} fill={…}>a <Run weight={600}>bold</Run> word</Text>.`,
     );
 
   if (isPlaceable(value)) return value;
 
-  throw new Error(
+  throw new SceneError(
     isText(value)
       ? `${where} holds the bare text "${String(value)}". Write text in a <Text font={…} size={…} fill={…}>.`
       : `${where} holds ${isObject(value) ? "JSX that another runtime built" : String(value)}, not a scene node. Put \`/** @jsxImportSource svjeez */\` at the top of the file, so its JSX builds scene nodes.`,
@@ -225,7 +226,7 @@ export const Sequence = ({ start, over, timeline, children }: SequenceProps): Sc
 let building: Vec | undefined;
 
 const size = (): Vec => {
-  if (!building) throw new Error("canvas is only known inside scene()'s callback.");
+  if (!building) throw new SceneError("canvas is only known inside scene()'s callback.");
 
   return building;
 };

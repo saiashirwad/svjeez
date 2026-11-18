@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import { ease as eases, type Ease, type Seconds } from "../model/time";
 import {
   alongCurve,
@@ -258,7 +259,7 @@ const straightKeys = (samples: readonly Sample[], tolerance: number): RunKey[] =
 
 const finite = (value: number, what: string): number => {
   if (!(value > 0 && Number.isFinite(value)))
-    throw new Error(`ease.spring() needs a positive, finite ${what}, got ${value}.`);
+    throw new SceneError(`ease.spring() needs a positive, finite ${what}, got ${value}.`);
 
   return value;
 };
@@ -338,7 +339,7 @@ export class Spring {
       [lo, hi] = [hi, hi * 2];
 
       if (hi > NEVER)
-        throw new Error(
+        throw new SceneError(
           `ease.spring({ stiffness: ${this.stiffness}, damping: ${this.damping} }) takes more than an hour to settle. Give it more damping.`,
         );
     }
@@ -419,7 +420,7 @@ export const endSlope = (curve: Ease): number => {
       if (Math.abs(dx) > 1e-9) return dy / dx;
 
       if (Math.abs(dy) > 1e-9)
-        throw new Error(
+        throw new SceneError(
           `ease.bezier(${curve.points.join(", ")}) ends moving infinitely fast, so a spring can't take its speed. Start the spring later, or end the ease with x2 below 1.`,
         );
       const [ddx, ddy] = [x1 - 2 * x2 + 1, y1 - 2 * y2 + 1];

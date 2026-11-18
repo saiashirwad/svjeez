@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import type { Box, Vec } from "../model/ir";
 import { EPSILON } from "../model/time";
 import { flat, type Backdrop, type Child, type Common, type SceneElement } from "./nodes";
@@ -14,7 +15,7 @@ const share = (value: Alignment, what: string): number => {
   const found = SHARE[value];
 
   if (found === undefined)
-    throw new Error(`${what} takes "start", "center" or "end", got "${String(value)}".`);
+    throw new SceneError(`${what} takes "start", "center" or "end", got "${String(value)}".`);
 
   return found;
 };
@@ -25,7 +26,7 @@ const room = (value: number | Vec, what: string): Vec => {
   const [x, y] = isPair(value) ? value : [value, value];
 
   if (!(x >= 0 && y >= 0 && Number.isFinite(x + y)))
-    throw new Error(`${what} needs finite lengths of 0 or more, got ${x} and ${y}.`);
+    throw new SceneError(`${what} needs finite lengths of 0 or more, got ${x} and ${y}.`);
 
   return [x, y];
 };
@@ -113,7 +114,7 @@ export const Stack = ({
   const label = "<Stack>";
 
   if (direction !== "row" && direction !== "column")
-    throw new Error(`<Stack> takes direction "row" or "column", got "${String(direction)}".`);
+    throw new SceneError(`<Stack> takes direction "row" or "column", got "${String(direction)}".`);
   const [space] = room(gap, "<Stack> gap");
   const { backdrop, inset } = paint(label, { fill, stroke, radius }, padding);
   const stretch = align === "stretch";
@@ -196,7 +197,7 @@ export const Grid = ({
   ...props
 }: GridProps): SceneElement => {
   if (!(Number.isInteger(columns) && columns >= 1))
-    throw new Error(`<Grid> needs a whole number of columns, 1 or more, got ${columns}.`);
+    throw new SceneError(`<Grid> needs a whole number of columns, 1 or more, got ${columns}.`);
   const [gx, gy] = room(gap, "<Grid> gap");
   const { backdrop, inset } = paint("<Grid>", { fill, stroke, radius }, padding);
   const [px, py] = inset;
@@ -319,7 +320,7 @@ export const Align = ({
   ...props
 }: AlignProps): SceneElement => {
   if ("at" in props || "anchor" in props)
-    throw new Error(
+    throw new SceneError(
       `<Align> places itself against its to, so it takes no ${"at" in props ? "at" : "anchor"}. Move it in with inset, and say which point lands where with place.`,
     );
   const [u, v] = fractionOf(place, "<Align>");

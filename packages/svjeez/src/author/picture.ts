@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import { readSource } from "./source";
 
 export type ImageFormat = "svg" | "png" | "jpeg" | "gif" | "webp";
@@ -203,12 +204,12 @@ export const picture = Object.assign(
       FORMATS[key].matches(bytes),
     );
 
-    if (!format) throw new Error(`Unknown image format. picture() reads ${SUPPORTED}.`);
+    if (!format) throw new SceneError(`Unknown image format. picture() reads ${SUPPORTED}.`);
     const codec = FORMATS[format];
     const size = codec.size(bytes);
 
     if (!size || !(size.width > 0 && size.height > 0)) {
-      throw new Error(
+      throw new SceneError(
         format === "svg"
           ? "This SVG has no size. Give the root <svg> a width and height or a viewBox."
           : `Could not read the size of this ${format} image. The file may be truncated.`,

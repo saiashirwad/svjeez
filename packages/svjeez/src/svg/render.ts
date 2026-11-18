@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import { compile } from "./compile";
 import type { FontStyle, FontValue } from "../font/font";
 import { RATE_ATTR } from "./rate";
@@ -33,11 +34,11 @@ export const render = (options: RenderOptions, nodes: readonly SvgNode[]): strin
   const playbackRate = options.playbackRate ?? 1;
 
   if (!(playbackRate > 0 && Number.isFinite(playbackRate)))
-    throw new Error(`svg.emit() needs a positive, finite playbackRate, got ${playbackRate}.`);
+    throw new SceneError(`svg.emit() needs a positive, finite playbackRate, got ${playbackRate}.`);
   const prefix = options.prefix ?? "";
 
   if (prefix !== "" && !/^[A-Za-z][\w-]*$/.test(prefix))
-    throw new Error(
+    throw new SceneError(
       `svg.emit() needs a prefix of letters, digits, _ and -, starting with a letter, got ${JSON.stringify(prefix)}.`,
     );
 

@@ -1,5 +1,10 @@
 import { describe as group, expect, test } from "bun:test";
 import {
+  Arrow,
+  enter,
+  exit,
+  line,
+  type Vec,
   font,
   Group,
   Shape,
@@ -50,7 +55,7 @@ group("never-visible", () => {
       );
 
       expect(found).toMatchObject({ key: "a", severity: "warning" });
-      expect(found!.message).toStartWith('shape "a" is never visible');
+      expect(found!.message).toStartWith('<Shape> "a" is never visible');
     }
   });
 
@@ -626,3 +631,4 @@ group("describe", () => {
     expect(() => describe(model, [-1])).toThrow("times in seconds from 0");
   });
 });
+

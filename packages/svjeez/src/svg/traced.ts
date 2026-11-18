@@ -49,14 +49,23 @@ const pathOf = (raw: string): string =>
 const slash = (path: string): string => path.replace(/\\/g, "/");
 
 export const caller = (): JsxSource | undefined => {
-  const directory = scope[TRACE]?.within;
-
-  if (!directory) return undefined;
-  const within = slash(directory).replace(/\/?$/, "/");
+  if (!scope[TRACE]?.within) return undefined;
   const limit = Error.stackTraceLimit;
   Error.stackTraceLimit = 80;
   const stack = new Error().stack ?? "";
   Error.stackTraceLimit = limit;
+
+  return frameIn(stack);
+};
+
+export const thrownFrom = (error: Error): JsxSource | undefined =>
+  error.stack ? frameIn(error.stack) : undefined;
+
+const frameIn = (stack: string): JsxSource | undefined => {
+  const directory = scope[TRACE]?.within;
+
+  if (!directory) return undefined;
+  const within = slash(directory).replace(/\/?$/, "/");
 
   for (const line of stack.split("\n")) {
     const match = FRAME.exec(line);

@@ -1,3 +1,5 @@
+import { nodeName } from "../model/naming";
+import { SceneError } from "../model/scene-error";
 import type { ChannelValues } from "./channels";
 import type { Emit } from "./css";
 import { easeAt, splitEase } from "../model/ease-at";
@@ -416,8 +418,10 @@ const morph = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving => {
   const outlines = written.keys.map((key) => contoursOf(key.value, pieces));
 
   if (outlines.some((contours) => contours.length === 0))
-    throw new Error(
-      `"${node.key}" animates a geometry with no outline. Give every key a point at least.`,
+    throw new SceneError(
+      `${nodeName(node)} animates a geometry with no outline.`,
+      "Give every key a point at least.",
+      { key: node.key, ...(node.source && { source: node.source }) },
     );
   const commands = commandsOf(outlines);
   const places = placesFor(outlines);

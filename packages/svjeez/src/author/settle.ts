@@ -1,3 +1,5 @@
+import { named, namedAt, whereOf } from "./names";
+import { SceneError } from "../model/scene-error";
 import { EPSILON, type Seconds } from "../model/time";
 import type { Animated, Box, Layer, SceneNode, Vec } from "../model/ir";
 import { atRest, isLane } from "../model/lane";
@@ -122,14 +124,18 @@ export const note = (
 
   if (ref) {
     if (ref.within)
-      throw new Error(
-        `"${key}" is given ref={${ref.label}}, but a part is found inside its node, never given. Give the node a ref() of its own.`,
+      throw new SceneError(
+        `${named(key)} is given ref={${ref.label}}, but a part is found inside its node, never given.`,
+        "Give the node a ref() of its own.",
+        whereOf(key),
       );
     const taken = into.refs.get(ref);
 
     if (taken !== undefined && taken !== key)
-      throw new Error(
-        `The ref "${ref.key}" is on two nodes, "${taken}" and "${key}". A ref names one node: make another with ref().`,
+      throw new SceneError(
+        `The ref "${ref.key}" is on two nodes, ${namedAt(taken)} and ${named(key)}.`,
+        "A ref names one node: make another with ref().",
+        whereOf(key),
       );
     into.refs.set(ref, key);
   }
@@ -227,8 +233,10 @@ export const originOf = (origin: Note["origin"], box: Box, key: string): Vec => 
   if (isOffset(origin)) return [box.x + origin[0], box.y + origin[1]];
 
   if (!Object.hasOwn(PLACES, origin))
-    throw new Error(
-      `origin on "${key}" takes a place, one of ${PLACE_LIST}, or a point measured from its box's top-left, such as [20, 0], got ${JSON.stringify(origin)}.`,
+    throw new SceneError(
+      `origin on ${named(key)} takes a place, one of ${PLACE_LIST}, or a point measured from its box's top-left, such as [20, 0], got ${JSON.stringify(origin)}.`,
+      undefined,
+      whereOf(key),
     );
   const [u, v] = PLACES[origin];
 
@@ -283,8 +291,10 @@ const inward = (
     const [dx, dy] = [x - origin[0] - ox, y - origin[1] - oy];
 
     if (Math.abs(sx) < EPSILON || Math.abs(sy) < EPSILON)
-      throw new Error(
-        `An anchor is resolved inside "${key}", which is scaled to 0 at ${t}s, so no point maps into it. Attach to a node outside it.`,
+      throw new SceneError(
+        `An anchor is resolved inside ${named(key)}, which is scaled to 0 at ${t}s, so no point maps into it.`,
+        "Attach to a node outside it.",
+        whereOf(key),
       );
 
     x = origin[0] + (dx * Math.cos(angle) - dy * Math.sin(angle)) / sx;
@@ -317,8 +327,10 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
   top.measuring = 2;
 
   const loop = (d: Draft, what: string): never => {
-    throw new Error(
-      `"${d.node.key}" can't be placed: its ${what} depends on itself, through an anchor or a container. Anchor it to a node outside it, or give a node that turns or scales an origin.`,
+    throw new SceneError(
+      `${named(d.node.key)} can't be placed: its ${what} depends on itself, through an anchor or a container.`,
+      "Anchor it to a node outside it, or give a node that turns or scales an origin.",
+      whereOf(d.node.key),
     );
   };
 
@@ -329,8 +341,9 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     const key = refs.get(owner);
 
     if (key === undefined)
-      throw new Error(
-        `${anchor.label} names the ref "${owner.key}", which is on no node. Give one node ref={…} with it.`,
+      throw new SceneError(
+        `${anchor.label} names the ref "${owner.key}", which is on no node.`,
+        "Give one node ref={…} with it.",
       );
 
     if (!within) return byKey.get(key)!;
@@ -340,8 +353,10 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
     const near = byKey.get(key)!.children.map((child) => child.node.key.slice(key.length + 1));
 
-    throw new Error(
-      `${anchor.label} names no node: "${key}" has no part "${within.path.join("/")}".${near.length > 0 ? ` The parts right inside it are ${near.map((name) => `"${name}"`).join(", ")}.` : " It has none."}`,
+    throw new SceneError(
+      `${anchor.label} names no node: ${named(key)} has no part "${within.path.join("/")}".${near.length > 0 ? ` The parts right inside it are ${near.map((name) => `"${name}"`).join(", ")}.` : " It has none."}`,
+      undefined,
+      whereOf(key),
     );
   };
 
@@ -365,8 +380,10 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
         if (isAnchor(end)) return resolve(end, d);
 
         if (!isPoint(end))
-          throw new Error(
-            `The ${asked.label} "${d.node.key}" is given ${isTrack(end) || isDerived(end) ? "a track" : String(end)} for its ${i === 0 ? "from" : "to"}, but an end is a point or an anchor. To move an end, attach it to a ref's anchor, as in ${i === 0 ? "from" : "to"}={card.left}, and move the node it is attached to.`,
+          throw new SceneError(
+            `${named(d.node.key)} is given ${isTrack(end) || isDerived(end) ? "a track" : String(end)} for its ${i === 0 ? "from" : "to"}, but an end is a point or an anchor.`,
+            `To move an end, attach it to a ref's anchor, as in ${i === 0 ? "from" : "to"}={card.left}, and move the node it is attached to.`,
+            whereOf(d.node.key),
           );
 
         return end;
@@ -386,8 +403,10 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
         const changing = resizedWithin(child.node, resized);
 
         if (changing !== undefined)
-          throw new Error(
-            `The ${asked.label} "${d.node.key}" lays out "${changing}", which a morph() resizes, brings in or takes away inside a <Sequence>, so the ${asked.label} can't make room for it. Put the ${asked.label} inside the <Sequence>, or inside the morph's states, so each state is laid out on its own.`,
+          throw new SceneError(
+            `${named(d.node.key)} lays out ${named(changing)}, which a morph() resizes, brings in or takes away inside a <Sequence>, so the ${asked.label} can't make room for it.`,
+            `Put the ${asked.label} inside the <Sequence>, or inside the morph's states, so each state is laid out on its own.`,
+            whereOf(d.node.key),
           );
 
         placedInside(child.node.key, child.note, asked.label);
@@ -413,7 +432,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
       const folded = folds(d);
 
       const home =
-        folded && !d.homed ? pinned(d.note?.pin, box, `"${d.node.key}"`) : ([0, 0] as const);
+        folded && !d.homed ? pinned(d.note?.pin, box, `${named(d.node.key)}`) : ([0, 0] as const);
 
       const [x, y] = folded ? [atRest(d.at)[0] - home[0], atRest(d.at)[1] - home[1]] : [0, 0];
 
@@ -637,7 +656,7 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
       if (note?.pin === undefined || outsider(node, into) !== undefined) return node.at;
       into.nodes.set(node.key, { ...into.nodes.get(node.key)!, pinned: true });
 
-      return homed(node.at, pinned(note.pin, box, `"${node.key}"`));
+      return homed(node.at, pinned(note.pin, box, `${named(node.key)}`));
     };
 
     if (asked?.kind !== "arrange") {
@@ -657,8 +676,10 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
       const inside = outsider(child, into);
 
       if (inside !== undefined)
-        throw new Error(
-          `A ${asked.label} in a morph() state holds "${inside}", which is placed by an anchor, a timeline's move to an anchor, or as an arrow's end. A morph arranges each state on its own, before anchors are known: attach it outside the ${asked.label}, or outside the morph.`,
+        throw new SceneError(
+          `A ${asked.label} in a morph() state holds ${named(inside)}, which is placed by an anchor, a timeline's move to an anchor, or as an arrow's end. A morph arranges each state on its own, before anchors are known.`,
+          `Attach it outside the ${asked.label}, or outside the morph.`,
+          whereOf(inside),
         );
     }
 
@@ -702,13 +723,17 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
 
 const placedInside = (key: string, note: Note | undefined, label: string): void => {
   if (note?.placed)
-    throw new Error(
-      `"${key}" has an at of its own, but the ${label} it sits in places it. Drop its at; to nudge it, give it a motion layer with an offset.`,
+    throw new SceneError(
+      `${named(key)} has an at of its own, but the ${label} it sits in places it.`,
+      "Drop its at; to nudge it, give it a motion layer with an offset.",
+      whereOf(key),
     );
 
   if (note?.pin !== undefined)
-    throw new Error(
-      `"${key}" has anchor=${JSON.stringify(note.pin)}, but the ${label} it sits in lines up its box itself. Drop anchor, and say where children sit with the ${label}'s own align, justify or place.`,
+    throw new SceneError(
+      `${named(key)} has anchor=${JSON.stringify(note.pin)}, but the ${label} it sits in lines up its box itself.`,
+      `Drop anchor, and say where children sit with the ${label}'s own align, justify or place.`,
+      whereOf(key),
     );
 };
 
@@ -730,8 +755,10 @@ export const sameAnchors = (
         before === anchor || (before?.of === anchor?.of && before?.label === anchor?.label);
 
       if (!alike)
-        throw new Error(
-          `"${node.key}" is placed ${placing(before)} in one morph() state and ${placing(anchor)} in another. A morph blends points, not anchors: place it the same way in every state, or put it in a <Group> placed at the anchor in every state and move it inside.`,
+        throw new SceneError(
+          `${named(node.key)} is placed ${placing(before)} in one morph() state and ${placing(anchor)} in another. A morph blends points, not anchors.`,
+          "Place it the same way in every state, or put it in a <Group> placed at the anchor in every state and move it inside.",
+          whereOf(node.key),
         );
     } else seen.set(node.key, anchor);
 

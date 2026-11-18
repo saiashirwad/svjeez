@@ -186,7 +186,7 @@ describe("spring steps", () => {
         />
       )),
     ).toThrow(
-      `The spring on at on "dot" from 0s needs ${Math.ceil(bouncy.settle * 100) / 100}s to settle, but its span is 0.5s.`,
+      `The spring on at on <Shape> "dot" from 0s needs ${Math.ceil(bouncy.settle * 100) / 100}s to settle, but its span is 0.5s.`,
     );
   });
 
@@ -319,7 +319,9 @@ describe("spring steps", () => {
           fill={track(theme.a).to(theme.b, span(0, 2), bouncy)}
         />
       )),
-    ).toThrow('fill on "dot" moves on a spring, and a spring moves only numbers and points.');
+    ).toThrow(
+      'fill on <Shape> "dot" moves on a spring, and a spring moves only numbers and points.',
+    );
   });
 
   test("a spring inside a Sequence runs on the sequence's clock", () => {

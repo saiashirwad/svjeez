@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import type { Font } from "../font/font";
 import { ringsOf } from "../model/paths";
 import type { Box, Contour, Vec } from "../model/ir";
@@ -174,18 +175,18 @@ export const layoutRuns = <S>(
   where: string,
 ): TextLayout<S> => {
   if (!(size > 0 && Number.isFinite(size)))
-    throw new Error(`Text ${where} needs a positive size, got ${size}.`);
+    throw new SceneError(`${where} needs a positive size, got ${size}.`);
 
   if (width !== undefined && !(width > 0 && Number.isFinite(width)))
-    throw new Error(`Text ${where} needs a positive width to wrap to, got ${width}.`);
+    throw new SceneError(`${where} needs a positive width to wrap to, got ${width}.`);
 
   if (lineHeight !== undefined && !(lineHeight > 0 && Number.isFinite(lineHeight)))
-    throw new Error(`Text ${where} needs a positive lineHeight, got ${lineHeight}.`);
+    throw new SceneError(`${where} needs a positive lineHeight, got ${lineHeight}.`);
   const share = SHARE[align];
 
   if (share === undefined)
-    throw new Error(
-      `Text ${where} takes align "start", "center" or "end", got "${String(align)}".`,
+    throw new SceneError(
+      `${where} takes align "start", "center" or "end", got "${String(align)}".`,
     );
   const { ascent, descent, lineGap } = base.metrics;
   const step = (lineHeight ?? ascent + descent + lineGap) * size;

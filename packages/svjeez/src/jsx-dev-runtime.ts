@@ -1,7 +1,7 @@
 import type { JsxSource } from "./author/sources";
 import { caller } from "./svg/traced";
 import { remember } from "./author/identity";
-import { Fragment, build, jsx, type JSX } from "./jsx-runtime";
+import { Fragment, build, componentName, jsx, type JSX } from "./jsx-runtime";
 import type { Child, SceneElement } from "./author/nodes";
 
 export { Fragment, jsx, jsx as jsxs, type JSX };
@@ -29,5 +29,7 @@ export function jsxDEV<P extends { readonly children?: Child }>(
   _isStaticChildren?: boolean,
   source?: JsxSource,
 ): SceneElement {
-  return remember(build(type, props, key), source ?? caller());
+  const at = source ?? caller();
+
+  return remember(build(type, props, key, at), at, componentName(type));
 }

@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import { EPSILON, type Seconds } from "../model/time";
 import type { Animated, Key, Lane, Vec } from "../model/ir";
 import { isLane } from "../model/lane";
@@ -23,7 +24,7 @@ export class Derived<T> {
 
   constructor(sources: readonly Base[], read: (values: readonly Read[]) => T, tolerance?: number) {
     if (tolerance !== undefined && !(tolerance > 0 && Number.isFinite(tolerance)))
-      throw new Error(`A derived track needs a positive tolerance, got ${tolerance}.`);
+      throw new SceneError(`A derived track needs a positive tolerance, got ${tolerance}.`);
     this.sources = sources;
     this.read = read;
     this.tolerance = tolerance;
@@ -143,7 +144,9 @@ const flatten = <T>(value: T, where: string): Flat => {
     if (!isNumber(part)) return part;
 
     if (!Number.isFinite(part))
-      throw new Error(`${where} is derived to ${part} at some moment. Keep the mapping finite.`);
+      throw new SceneError(
+        `${where} is derived to ${part} at some moment. Keep the mapping finite.`,
+      );
     numbers.push(part);
 
     return 0;
@@ -247,7 +250,7 @@ const sampledLane = <T>(
     const flat = flatten(out(lanes.map((lane) => valueAt(lane, t, blendRead))), where);
 
     if (flat.shape !== shape)
-      throw new Error(
+      throw new SceneError(
         `${where} is derived to values of different shapes over time, such as two kinds of geometry. Derive one kind with the same number of points.`,
       );
 
@@ -293,7 +296,7 @@ export const derivedOf = <A, T>(
     const first = data.initial.value;
 
     if (first === undefined || !readable(first))
-      throw new Error(
+      throw new SceneError(
         `${where} is derived from a track of something other than numbers or points. Derive from a number or point track, and map it to the value you need.`,
       );
 

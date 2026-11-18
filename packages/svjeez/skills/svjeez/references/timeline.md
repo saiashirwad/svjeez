@@ -40,7 +40,7 @@ Verbs take what, then how long, then the curve (default `ease.out`). A spring in
 | `to({ at, rotate, scale, opacity, fill, stroke, trim, geometry }, over)`, `set({ … })` | several props at once; `set` is a cut |
 | `rewind(over)` | everything the timeline moved on the node and on every part inside it glides back over the clock's last seconds; it always runs at the end |
 
-Every verb writes the node's own prop track, starting from the node's own value, so a node a container places can't `move`: wrap it in a `<Group>` and move what is inside. A prop has one writer: a track, a timeline, a derived value or a morph. Two actions moving one prop at once throw, naming both.
+Every verb writes the node's own prop track, starting from the node's own value, so a node a container places can't `move`: wrap it in a `<Group>` and move what is inside. A prop has one writer: a track, a timeline, a derived value or a morph. Two actions moving one prop at once throw, naming both calls, when each runs, and when the second may start.
 
 `action.as("name")` names an action's span, and `const t = timeline(…)` gives it back as `t.span("name")` on the timeline's clock, to line a track or a motion layer up with it. `t.end` is when the last action ends.
 

@@ -1,4 +1,6 @@
-import type { Animated, Paint, Scene, SceneNode, TextNode, TextRun } from "../model/ir";
+import type { Animated, Paint, Scene, SceneNode, Source, TextNode, TextRun } from "../model/ir";
+import { nodeName } from "../model/naming";
+import { SceneError } from "../model/scene-error";
 import { isCurved } from "../model/curve";
 import { isLane } from "../model/lane";
 
@@ -28,6 +30,7 @@ export interface Diagnostic {
   readonly feature: Feature;
   readonly key: string;
   readonly message: string;
+  readonly source?: Source;
 }
 
 export interface Backend<Out, Options = {}> {
@@ -109,7 +112,8 @@ export const diagnose = (
         severity: support.level === "none" ? "error" : "warning",
         feature,
         key: node.key,
-        message: `"${node.key}" uses ${feature}, which ${backend.name} ${support.level === "none" ? "can't draw" : "draws differently"}: ${support.note}`,
+        message: `${nodeName(node)} uses ${feature}, which ${backend.name} ${support.level === "none" ? "can't draw" : "draws differently"}: ${support.note}`,
+        ...(node.source && { source: node.source }),
       });
     }
 
@@ -132,7 +136,13 @@ export const admit = (
   const found = diagnose(scene, backend);
   const errors = found.filter((entry) => entry.severity === "error");
 
-  if (errors.length > 0) throw new Error(errors.map((entry) => entry.message).join("\n"));
+  const [first] = errors;
+
+  if (first)
+    throw new SceneError(errors.map((entry) => entry.message).join("\n"), undefined, {
+      key: first.key,
+      ...(first.source && { source: first.source }),
+    });
 
   if (onWarning) found.forEach(onWarning);
 };

@@ -1,3 +1,4 @@
+import { nodeName } from "../model/naming";
 import type { Seconds } from "../model/time";
 import { diagnose, type Backend } from "../svg/backend";
 import { valueAt, type Placed } from "./boxes";
@@ -42,6 +43,7 @@ import {
   seconds,
   sharedArea,
   shownOf,
+  namesOf,
   sourcesOf,
   strokeReachAt,
   textOf,
@@ -115,7 +117,12 @@ interface Survey {
   readonly out: Finding[];
 }
 
-const label = (node: SceneNode): string => `${node.kind} "${node.key}"`;
+const label = (node: SceneNode): string => nodeName(node);
+
+const spoken = (node: SceneNode, length = 40): string =>
+  node.kind !== "text" || /^\d+$/.test(node.key.split("/").at(-1) ?? "")
+    ? label(node)
+    : `${label(node)} ("${short(textOf(node), length)}")`;
 
 const VISIBLE = 0.05;
 
@@ -499,7 +506,7 @@ const offCanvas = (survey: Survey): void => {
         code: "text-overflow",
         severity: "warning",
         key: entry.node.key,
-        message: `${label(entry.node)} ("${short(textOf(entry.node))}") runs ${units(by)} past the ${edge} edge of the canvas while it rests.`,
+        message: `${spoken(entry.node)} runs ${units(by)} past the ${edge} edge of the canvas while it rests.`,
         hint: "Move it inside, shorten it, give it a width to wrap to, or shrink its size.",
         times: seen.map((s) => s.t),
       });
@@ -545,7 +552,7 @@ const wideLines = (survey: Survey): void => {
       code: "text-overflow",
       severity: "warning",
       key: node.key,
-      message: `${label(node)} ("${short(textOf(node))}") has a line ${units(widest)} wide in a column ${units(node.box.width)} wide: a single character is wider than the width it wraps to.`,
+      message: `${spoken(node)} has a line ${units(widest)} wide in a column ${units(node.box.width)} wide: a single character is wider than the width it wraps to.`,
       hint: "Give it a wider width to wrap to, or a smaller size.",
     });
   }
@@ -618,7 +625,7 @@ const overlap = (survey: Survey): void => {
       code: "overlap",
       severity: "warning",
       key: a.node.key,
-      message: `${label(a.node)} ("${short(textOf(a.node), 24)}") and ${label(b.node)} ("${short(textOf(b.node), 24)}") overlap while both are shown, at ${list(times)}.`,
+      message: `${spoken(a.node, 24)} and ${spoken(b.node, 24)} overlap while both are shown, at ${list(times)}.`,
       hint: "Move one, or hide one while the other shows.",
       times,
       related: [b.node.key],
@@ -688,7 +695,7 @@ const missingGlyphs = (survey: Survey): void => {
         code: "missing-glyph",
         severity: "error",
         key: node.key,
-        message: `${label(node)} ("${short(textOf(node))}") uses ${shown.join(", ")}, which ${face} has no glyph for, so each target draws something different there.`,
+        message: `${spoken(node)} uses ${shown.join(", ")}, which ${face} has no glyph for, so each target draws something different there.`,
         hint: "Load a face that has these characters, or write the text without them.",
       });
     }
@@ -887,9 +894,7 @@ const lowContrast = (survey: Survey): void => {
     const text = node.kind === "text";
     const floor = text ? 3 : 1.5;
 
-    const what = text
-      ? `${label(node)} ("${short(textOf(node), 24)}")`
-      : `the stroke of ${label(node)}`;
+    const what = text ? `${spoken(node, 24)}` : `the stroke of ${label(node)}`;
 
     const other = worst.scheme === "light" ? "dark" : "light";
 
@@ -945,7 +950,7 @@ const gap = (
   [then, now]: readonly [Seconds, Seconds],
   scale: number,
 ): string | undefined => {
-  const where = `"${entry.node.key}"`;
+  const where = nodeName(entry.node);
 
   switch (named.kind) {
     case "number": {
@@ -1098,7 +1103,6 @@ const loopSeam = (survey: Survey): void => {
     const [a, b] = [first.get(node.key), last.get(node.key)];
 
     const hidden = survey.hidden.get(node.key) ?? [];
-
     if (
       !a ||
       !b ||
@@ -1363,7 +1367,7 @@ const capabilities = (survey: Survey, backend: InspectOptions["backend"]): void 
     });
 };
 
-const folded = (findings: readonly Finding[]): Finding[] => {
+const folded = (findings: readonly Finding[], names: ReadonlyMap<string, string>): Finding[] => {
   const out: Finding[] = [];
   const at = new Map<string, { index: number; more: string[]; times: Set<Seconds> }>();
 
@@ -1381,7 +1385,7 @@ const folded = (findings: readonly Finding[]): Finding[] => {
       source.file,
       source.line,
       source.column,
-      finding.message.replaceAll(`"${key}"`, ""),
+      finding.message.replaceAll(names.get(key) ?? `"${key}"`, ""),
     ].join("\u0000");
 
     const known = at.get(id);
@@ -1403,8 +1407,8 @@ const folded = (findings: readonly Finding[]): Finding[] => {
     out[index] = {
       ...first,
       message: first.message.replace(
-        `"${first.key}"`,
-        `"${first.key}" (and ${more.length} more written at the same place: ${more.map((key) => `"${key}"`).join(", ")})`,
+        names.get(first.key) ?? `"${first.key}"`,
+        (name) => `${name} (and ${more.length} more written at the same place)`,
       ),
       related: [
         ...(first.related ?? []),
@@ -1510,7 +1514,7 @@ const wordCuts = (survey: Survey): void => {
       code: "word-cut",
       severity: "warning",
       key: node.key,
-      message: `${label(node)} ("${short(textOf(node))}") wraps to ${units(wrap.width)} wide, and a word wider than that is cut across lines where | marks: ${words.join(", ")}.`,
+      message: `${spoken(node)} wraps to ${units(wrap.width)} wide, and a word wider than that is cut across lines where | marks: ${words.join(", ")}.`,
       hint: "Give it a wider width to wrap to, a smaller size, or a shorter word.",
     });
   }
@@ -1582,7 +1586,7 @@ export const inspect = (scene: Scene, options: InspectOptions = {}): Finding[] =
 
   const order = new Map(entries.map((entry) => [entry.node.key, entry.order]));
 
-  return folded(survey.out)
+  return folded(survey.out, namesOf(scene))
     .map((finding, index) => ({ finding, index }))
     .sort(
       (a, b) =>

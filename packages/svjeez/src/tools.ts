@@ -94,6 +94,10 @@ export { boxesOf, hitTest, placements, valueAt, type Matrix, type Placed } from 
 
 export { isScene } from "./model/is-scene";
 
+export { SceneError, type Where } from "./model/scene-error";
+
+export { nodeName } from "./model/naming";
+
 export {
   inspect,
   RULES,

@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import { EPSILON, type Seconds } from "../model/time";
 import type { Animated, Geometry, Key, Lane, Layer, ShapeNode, Vec } from "../model/ir";
 import { atRest, isLane } from "../model/lane";
@@ -335,26 +336,28 @@ export const Arrow = (props: ArrowProps): SceneElement => {
   const { from, to, stroke, bend = 0, inset = 0, trim, head = 8, ...common } = props;
 
   if ("at" in common || "anchor" in common)
-    throw new Error(
+    throw new SceneError(
       `${label} is placed by its from and to, so it takes no ${"at" in common ? "at" : "anchor"}.`,
     );
 
   if (head !== "none" && !(head > 0 && Number.isFinite(head)))
-    throw new Error(
+    throw new SceneError(
       `${label} needs a head longer than 0, got ${String(head)}. For a plain line, write head="none".`,
     );
 
   if (stroke === undefined || stroke.color === undefined)
-    throw new Error(`${label} needs a stroke with a color, as in stroke={{ color: theme.text }}.`);
+    throw new SceneError(
+      `${label} needs a stroke with a color, as in stroke={{ color: theme.text }}.`,
+    );
   const { width = 1.5, cap = "round", join = "round", ...rest } = stroke;
 
   if (isNumber(width) && !(width >= 0 && Number.isFinite(width)))
-    throw new Error(`${label} needs a stroke width of 0 or more, got ${width}.`);
+    throw new SceneError(`${label} needs a stroke width of 0 or more, got ${width}.`);
 
   if (!(inset >= 0 && Number.isFinite(inset)))
-    throw new Error(`${label} needs an inset of 0 or more, got ${inset}.`);
+    throw new SceneError(`${label} needs an inset of 0 or more, got ${inset}.`);
 
-  if (!Number.isFinite(bend)) throw new Error(`${label} needs a finite bend, got ${bend}.`);
+  if (!Number.isFinite(bend)) throw new SceneError(`${label} needs a finite bend, got ${bend}.`);
   const drawn: StrokeProps = { ...rest, width, cap, join };
   const size = head === "none" ? 0 : head;
 

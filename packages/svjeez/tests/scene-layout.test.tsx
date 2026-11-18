@@ -279,7 +279,7 @@ describe("containers", () => {
             <Shape fill="#000000" key="a" geometry={circle(3)} anchor="center" at={where} />
           </Stack>
         )),
-      ).toThrow('"s/a" has an at of its own, but the <Stack> it sits in places it');
+      ).toThrow('<Shape> "a" has an at of its own, but the <Stack> it sits in places it');
   });
 
   test("a child turns around where it was placed, since layout reads its box at rest", () => {
@@ -604,7 +604,7 @@ describe("anchors", () => {
         </Group>
       )),
     ).toThrow(
-      'card.part("body").center names no node: "card" has no part "body". The parts right inside it are "title".',
+      'card.part("body").center names no node: <Group> "card" has no part "body". The parts right inside it are "title".',
     );
     expect(() =>
       made(() => (
@@ -615,7 +615,7 @@ describe("anchors", () => {
           </Group>
         </Group>
       )),
-    ).toThrow('The ref "card" is on two nodes, "card" and "1/card"');
+    ).toThrow('The ref "card" is on two nodes, <Shape> "card" and <Shape> "card"');
   });
 
   test("a node anchored to the group it sits in is a loop, and says so", () => {

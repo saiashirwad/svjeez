@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import type {
   Animated,
   Box,
@@ -54,20 +55,20 @@ const finite = (point: Vec): boolean => point.every((value) => Number.isFinite(v
 
 const checked = (stops: Stops, caller: string): Stops => {
   if (stops.length < 2)
-    throw new Error(
+    throw new SceneError(
       `${caller} needs two stops or more, got ${stops.length}. For one color, fill with the color itself.`,
     );
   const pairs = stops.filter(isPair);
 
   if (pairs.length !== 0 && pairs.length !== stops.length)
-    throw new Error(
+    throw new SceneError(
       `${caller} takes stops as colors, spread evenly, or as [offset, color] pairs, not both in one list.`,
     );
   let last = 0;
 
   for (const [offset] of pairs) {
     if (!(offset >= last && offset <= 1))
-      throw new Error(
+      throw new SceneError(
         `${caller} needs stop offsets from 0 to 1 that never decrease, got ${pairs.map(([each]) => each).join(", ")}.`,
       );
     last = offset;
@@ -79,7 +80,7 @@ const checked = (stops: Stops, caller: string): Stops => {
 export const linear = Object.assign(
   ({ from, to, stops }: LinearOptions): Gradient => {
     if (!finite(from) || !finite(to))
-      throw new Error(
+      throw new SceneError(
         `linear() needs finite points, got [${from.join(", ")}] and [${to.join(", ")}].`,
       );
 
@@ -88,7 +89,7 @@ export const linear = Object.assign(
   {
     across: ({ angle = 0, stops }: LinearAcrossOptions): Gradient => {
       if (!Number.isFinite(angle))
-        throw new Error(`linear.across() needs a finite angle, got ${angle}.`);
+        throw new SceneError(`linear.across() needs a finite angle, got ${angle}.`);
 
       return { kind: "linear", angle, stops: checked(stops, "linear.across()") };
     },
@@ -98,10 +99,10 @@ export const linear = Object.assign(
 export const radial = Object.assign(
   ({ center, radius, stops }: RadialOptions): Gradient => {
     if (!finite(center))
-      throw new Error(`radial() needs a finite center, got [${center.join(", ")}].`);
+      throw new SceneError(`radial() needs a finite center, got [${center.join(", ")}].`);
 
     if (!(radius > 0 && Number.isFinite(radius)))
-      throw new Error(`radial() needs a positive radius, got ${radius}.`);
+      throw new SceneError(`radial() needs a positive radius, got ${radius}.`);
 
     return { kind: "radial", center, radius, stops: checked(stops, "radial()") };
   },
@@ -142,12 +143,12 @@ export const gradientOf = (
 
   const measured = (form: string): Box => {
     if (!box)
-      throw new Error(
+      throw new SceneError(
         `${where} has ${form}, which spreads over the node's box, and this paint has no box to spread over. Give the gradient its points: ${given.kind === "linear" ? "linear({ from, to, stops })" : "radial({ center, radius, stops })"}.`,
       );
 
     if (!(box.width > 0 || box.height > 0))
-      throw new Error(
+      throw new SceneError(
         `${where} has ${form} on a box with no size, so it has nothing to spread over.`,
       );
 
@@ -216,7 +217,7 @@ export const blendable = <P extends Animated<ModelPaint> | undefined>(
   const odd = gradients.find((value) => value.kind !== kind);
 
   if (odd !== undefined)
-    throw new Error(
+    throw new SceneError(
       `${where} moves from a ${kind} gradient to a ${odd.kind} one, and the two kinds don't blend. Give every key a ${kind} gradient, or draw two shapes and fade one into the other.`,
     );
 

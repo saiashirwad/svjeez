@@ -1,3 +1,5 @@
+import { SceneError } from "../model/scene-error";
+
 const fnv1a = (text: string): number => {
   let hash = 0x811c9dc5;
 
@@ -20,7 +22,7 @@ export const random = (seed: number | string): (() => number) => {
   if (isText(seed)) return mulberry32(fnv1a(seed));
 
   if (!Number.isInteger(seed))
-    throw new Error(`random() needs a whole number or a string seed, got ${seed}.`);
+    throw new SceneError(`random() needs a whole number or a string seed, got ${seed}.`);
 
   return mulberry32(seed);
 };
