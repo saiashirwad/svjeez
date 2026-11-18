@@ -7,9 +7,9 @@ import {
   Route,
   beatOf,
   checkIds,
-  drawChip,
-  drawEdge,
-  drawNode,
+  Chip,
+  Edge,
+  Node,
   extent,
   known,
   labelOf,
@@ -118,9 +118,9 @@ export function sequence<const A extends Record<string, Labelled>>(
           stroke={{ color: l.colors.line, width: 1, dash: [3, 4] }}
         />
       ))}
-      {actors.map((a) =>
-        drawNode(l, { key: a.id, role: a.role, label: a.label, box: heads.get(a.id)! }),
-      )}
+      {actors.map((a) => (
+        <Node key={a.id} look={l} role={a.role} label={a.label} box={heads.get(a.id)!} />
+      ))}
       {between}
       {rows.map((row, i) => {
         const { points, box } = placed[i]!;
@@ -146,20 +146,22 @@ export function sequence<const A extends Record<string, Labelled>>(
 
         return (
           <Group key={`message-${i + 1}`}>
-            {drawEdge(l, {
-              key: "arrow",
-              points,
-              head: row.head ?? "filled",
-              ...(row.reply && { dash: [5, 4] }),
-              drawn: beat && drawOf(beat),
-            })}
-            {drawChip(l, {
-              key: "label",
-              box,
-              text: row.text,
-              fill: l.colors.text,
-              motion: beat && pop(fadeOf(beat)),
-            })}
+            <Edge
+              key="arrow"
+              look={l}
+              points={points}
+              head={row.head ?? "filled"}
+              dash={row.reply ? [5, 4] : undefined}
+              drawn={beat && drawOf(beat)}
+            />
+            <Chip
+              key="label"
+              look={l}
+              box={box}
+              text={row.text}
+              fill={l.colors.text}
+              motion={beat && pop(fadeOf(beat))}
+            />
           </Group>
         );
       })}

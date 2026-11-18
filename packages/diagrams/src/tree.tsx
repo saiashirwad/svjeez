@@ -6,8 +6,8 @@ import type { Point } from "./layout/box.ts";
 import {
   Route,
   checkIds,
-  drawEdge,
-  drawNode,
+  Edge,
+  Node,
   edgeKey,
   extent,
   isBare,
@@ -113,24 +113,28 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
 
   const draw = (between?: Child): SceneElement => (
     <Group ref={handle.ref}>
-      {out.edges.map((e) =>
-        drawEdge(l, {
-          key: edgeKey(e.from, e.to),
-          points: lines.get(e.to)!,
-          drawn: drawn(e.from, e.to),
-        }),
-      )}
+      {out.edges.map((e) => (
+        <Edge
+          key={edgeKey(e.from, e.to)}
+          look={l}
+          points={lines.get(e.to)!}
+          drawn={drawn(e.from, e.to)}
+        />
+      ))}
       {between}
       {nodes.map((n) => {
         const at = shown.get(n.id);
 
-        return drawNode(l, {
-          key: n.id,
-          role: n.role,
-          label: n.label,
-          box: boxes.get(n.id)!,
-          motion: at && pop(at),
-        });
+        return (
+          <Node
+            key={n.id}
+            look={l}
+            role={n.role}
+            label={n.label}
+            box={boxes.get(n.id)!}
+            motion={at && pop(at)}
+          />
+        );
       })}
     </Group>
   );

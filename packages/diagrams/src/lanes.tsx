@@ -18,8 +18,8 @@ import { lanes as layout } from "./layout/lanes.ts";
 import {
   Route,
   checkIds,
-  drawChip,
-  drawEdge,
+  Chip,
+  Edge,
   extent,
   known,
   labelOf,
@@ -248,7 +248,7 @@ export function lanes<const L extends Record<string, Labelled>>(
 
         return (
           <Group key={`link-${i + 1}`}>
-            {drawEdge(l, { key: "arrow", points, drawn: reveal && fire })}
+            <Edge key="arrow" look={l} points={points} drawn={reveal && fire} />
             {reveal && (
               <Shape
                 key="pulse"
@@ -289,15 +289,17 @@ export function lanes<const L extends Record<string, Labelled>>(
                 enter(at(e.at, 0.3), { from: { opacity: 0, scale: 0.3 }, curve: ease.pop })
               }
             />
-            {label &&
-              drawChip(l, {
-                key: "label",
-                box: { x: label.x + dx, y: label.y + dy, w: label.w, h: label.h },
-                text: e.label!,
-                fill: l.colors.text,
-                ground: "none",
-                motion: reveal && pop(at(e.at, 0.25)),
-              })}
+            {label && (
+              <Chip
+                key="label"
+                look={l}
+                box={{ x: label.x + dx, y: label.y + dy, w: label.w, h: label.h }}
+                text={e.label!}
+                fill={l.colors.text}
+                ground="none"
+                motion={reveal && pop(at(e.at, 0.25))}
+              />
+            )}
           </Group>
         );
       })}

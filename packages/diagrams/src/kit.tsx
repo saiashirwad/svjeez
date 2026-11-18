@@ -388,15 +388,16 @@ const round = (value: number): number => Math.round(value * 100) / 100;
 export const pop = (when: Span): Layers => enter(when, { from: { opacity: 0, offset: [0, 6] } });
 export const fade = (when: Span): Track<number> => track(0).to(1, when);
 
-export interface NodeDraw {
+export interface NodeProps {
   readonly key: string;
+  readonly look: Look;
   readonly role: NodeRole;
   readonly label: string;
   readonly box: Box;
   readonly motion?: Layers;
 }
 
-export const drawNode = (l: Look, n: NodeDraw): SceneElement => {
+export const Node = ({ look: l, ...n }: NodeProps): SceneElement => {
   const tint = l.tint(n.role);
   const [w, h] = [round(n.box.w), round(n.box.h)];
   const detail = detailOf(n.role, w, h);
@@ -427,8 +428,9 @@ export const drawNode = (l: Look, n: NodeDraw): SceneElement => {
 
 const HEAD = 8;
 
-export interface EdgeDraw {
+export interface EdgeProps {
   readonly key: string;
+  readonly look: Look;
   readonly points: readonly Point[];
   readonly color?: Color;
   readonly width?: number;
@@ -457,7 +459,7 @@ const headOf = (head: ArrowHead, tip: Point, ux: number, uy: number): Geometry =
   }
 };
 
-export const drawEdge = (l: Look, e: EdgeDraw): SceneElement => {
+export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
   const color = e.color ?? l.colors.line;
   const head = e.head ?? "filled";
   const [a, b] = [e.points.at(-2)!, e.points.at(-1)!];
@@ -506,8 +508,9 @@ export const drawEdge = (l: Look, e: EdgeDraw): SceneElement => {
   );
 };
 
-export interface ChipDraw {
+export interface ChipProps {
   readonly key: string;
+  readonly look: Look;
   readonly box: Box;
   readonly text: string;
   readonly fill?: Color;
@@ -515,7 +518,7 @@ export interface ChipDraw {
   readonly motion?: Layers;
 }
 
-export const drawChip = (l: Look, c: ChipDraw): SceneElement => (
+export const Chip = ({ look: l, ...c }: ChipProps): SceneElement => (
   <Center
     key={c.key}
     at={[round(c.box.x), round(c.box.y)]}

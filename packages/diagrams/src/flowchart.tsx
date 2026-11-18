@@ -7,9 +7,9 @@ import type { Box, Point } from "./layout/box.ts";
 import {
   Route,
   checkIds,
-  drawChip,
-  drawEdge,
-  drawNode,
+  Chip,
+  Edge,
+  Node,
   edgeKey,
   extent,
   keyed,
@@ -200,40 +200,46 @@ export function flowchart<
           </Group>
         );
       })}
-      {lines.map((e, i) =>
-        drawEdge(l, {
-          key: edgeKeys[i]!,
-          points: e.points,
-          drawn: timed[i],
-          ...(e.style?.line === "dotted" && { dash: [2, 4] }),
-          ...(e.style?.line === "thick" && { width: 3 }),
-          ...(e.style?.head && { head: e.style.head }),
-        }),
-      )}
+      {lines.map((e, i) => (
+        <Edge
+          key={edgeKeys[i]!}
+          look={l}
+          points={e.points}
+          drawn={timed[i]}
+          dash={e.style?.line === "dotted" ? [2, 4] : undefined}
+          width={e.style?.line === "thick" ? 3 : undefined}
+          head={e.style?.head}
+        />
+      ))}
       {between}
       {nodes.map((n) => {
         const at = shown.get(n.id);
 
-        return drawNode(l, {
-          key: n.id,
-          role: n.role,
-          label: n.label,
-          box: boxes.get(n.id)!,
-          motion: at && pop(at),
-        });
+        return (
+          <Node
+            key={n.id}
+            look={l}
+            role={n.role}
+            label={n.label}
+            box={boxes.get(n.id)!}
+            motion={at && pop(at)}
+          />
+        );
       })}
       {lines.map((e, i) => {
         const t = timed[i];
 
         return (
           e.box &&
-          e.label !== undefined &&
-          drawChip(l, {
-            key: `${edgeKeys[i]!}:label`,
-            box: e.box,
-            text: e.label,
-            motion: t && pop(span(t.start + t.over, LABEL)),
-          })
+          e.label !== undefined && (
+            <Chip
+              key={`${edgeKeys[i]!}:label`}
+              look={l}
+              box={e.box}
+              text={e.label}
+              motion={t && pop(span(t.start + t.over, LABEL))}
+            />
+          )
         );
       })}
     </Group>

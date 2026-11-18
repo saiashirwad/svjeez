@@ -19,8 +19,8 @@ import type { Box, Point } from "./layout/box.ts";
 import {
   Route,
   checkIds,
-  drawChip,
-  drawEdge,
+  Chip,
+  Edge,
   edgeKey,
   isBare,
   keyed,
@@ -364,16 +364,19 @@ export function stateMachine<
   const draw = (between?: Child): SceneElement => (
     <Group ref={handle.ref}>
       {[...nodes.values()].sort((a, b) => a.depth - b.depth).map(drawState)}
-      {local.lines.map((x) =>
-        drawEdge(l, {
-          key: isTransition(x)
-            ? transitionKeys[x.of]!
-            : x.of === "start"
-              ? `start->${x.to}`
-              : `${x.from}->end`,
-          points: x.points,
-        }),
-      )}
+      {local.lines.map((x) => (
+        <Edge
+          key={
+            isTransition(x)
+              ? transitionKeys[x.of]!
+              : x.of === "start"
+                ? `start->${x.to}`
+                : `${x.from}->end`
+          }
+          look={l}
+          points={x.points}
+        />
+      ))}
       {local.dots.map((d, k) => (
         <Shape
           key={`initial-${k + 1}`}
@@ -398,14 +401,16 @@ export function stateMachine<
       {local.lines.map(
         (x) =>
           isTransition(x) &&
-          x.label &&
-          drawChip(l, {
-            key: `${transitionKeys[x.of]!}:label`,
-            box: x.label,
-            text: transitions[x.of]!.label!,
-            fill: l.colors.text,
-            ground: ground(x.depth),
-          }),
+          x.label && (
+            <Chip
+              key={`${transitionKeys[x.of]!}:label`}
+              look={l}
+              box={x.label}
+              text={transitions[x.of]!.label!}
+              fill={l.colors.text}
+              ground={ground(x.depth)}
+            />
+          ),
       )}
     </Group>
   );
