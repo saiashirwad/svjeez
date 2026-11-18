@@ -189,10 +189,11 @@ const paragraphs = <S>(pieces: readonly TextPiece<S>[]): Part<S>[][] => {
 
 /**
  * Text laid out at compile time: broken into lines at line breaks and, with a `width`, wherever the next word would
- * not fit; each run measured with its own face, each line aligned and placed on its baseline. The frame's origin is
- * on the first line's baseline: `align` says which point of it, the start, the middle or the end of the column. A
- * column is `width` wide when there is one, else as wide as the widest line. Lines are `lineHeight` apart, or as far
- * as `base`'s own line height says, whatever faces the runs use.
+ * not fit; each run measured with its own face, each line aligned in its column and placed on its baseline. The
+ * frame's origin is the top-left of the box: the column's start, at the top of the tallest ascent of the faces the
+ * runs use, so the first baseline is that ascent below it, whatever `align` says. A column is `width` wide when
+ * there is one, else as wide as the widest line. Lines are `lineHeight` apart, or as far as `base`'s own line
+ * height says, whatever faces the runs use.
  */
 export const layoutRuns = <S>(
   base: Font,
@@ -226,11 +227,13 @@ export const layoutRuns = <S>(
   const broken = paragraphs(pieces).flatMap((paragraph) => wrap(paragraph, fits));
   const measured = broken.map(measure);
   const column = width ?? Math.max(0, ...measured);
-  const left = -column * share;
+  const faces = new Set([base, ...broken.flatMap((parts) => parts.map((part) => part.face))]);
+  const top = Math.max(...[...faces].map((face) => face.metrics.ascent)) * size;
+  const bottom = Math.max(...[...faces].map((face) => face.metrics.descent)) * size;
 
   const lines = broken.map((parts, index): LaidLine<S> => {
-    const start = left + (column - measured[index]!) * share;
-    const y = index * step;
+    const start = (column - measured[index]!) * share;
+    const y = top + index * step;
     let x = start;
 
     const runs = parts.map((part): LaidRun<S> => {
@@ -263,18 +266,9 @@ export const layoutRuns = <S>(
     return { at: [start, y], runs };
   });
 
-  const faces = new Set([base, ...lines.flatMap((line) => line.runs.map((run) => run.face))]);
-  const top = Math.max(...[...faces].map((face) => face.metrics.ascent));
-  const bottom = Math.max(...[...faces].map((face) => face.metrics.descent));
-
   return {
     lines,
-    box: {
-      x: left,
-      y: -top * size,
-      width: column,
-      height: (lines.length - 1) * step + (top + bottom) * size,
-    },
+    box: { x: 0, y: 0, width: column, height: (lines.length - 1) * step + top + bottom },
   };
 };
 

@@ -20,7 +20,7 @@ import type { Geometry, Paint } from "./values";
 
 /** What an action can move on a node, and the value each one goes to. */
 export interface Moves {
-  /** Where the node's frame sits in its parent: a point, or an anchor it lands on. */
+  /** Where the node goes in its parent, as its own `at` says it: a point, or an anchor its `at` point lands on. */
   readonly at?: Vec | Anchor;
   /** Degrees, clockwise. */
   readonly rotate?: number;
@@ -58,7 +58,10 @@ const isProp = (name: string): name is Prop => PROPS.some((prop) => prop === nam
 export type Point = Place | Vec;
 
 export interface MoveToOptions {
-  /** Which point of the node lands on the anchor. Default `[0, 0]`: the point its `at` places. */
+  /**
+   * Which point of the node lands on the anchor: a place on its box, or a point measured from the one its `at`
+   * places. Default `[0, 0]`: the point its `at` places, its box's top-left unless its `anchor` says.
+   */
   readonly point?: Point;
 }
 
@@ -426,9 +429,8 @@ const KINDS: Readonly<Record<Prop, readonly NodeElement["type"][]>> = {
   geometry: ["shape"],
 };
 
-/** What a prop is when the node doesn't write it. */
+/** What a prop is when the node doesn't write it. `at` is where the node is, which lowering knows. */
 const UNWRITTEN: Readonly<Partial<Record<Prop, Value>>> = {
-  at: [0, 0],
   rotate: 0,
   scale: 1,
   opacity: 1,
@@ -516,8 +518,9 @@ const plus = (before: Value, by: Vec, move: Move): Vec => {
 
 const isPlace = (point: Point): point is Place => typeof point === "string";
 
-const pointIn = (point: Point, box: Box, verb: string): Vec =>
-  isPlace(point) ? placeIn(box, point, [0, 0], verb) : point;
+/** `point` in the node's own frame, given its box and the point of it that its `at` places. */
+const pointIn = (point: Point, box: Box, home: Vec, verb: string): Vec =>
+  isPlace(point) ? placeIn(box, point, [0, 0], verb) : [home[0] + point[0], home[1] + point[1]];
 
 /**
  * The timelines of one scene, as lowering applies them. Lowering asks for each node in turn; every node a timeline
@@ -584,8 +587,18 @@ export class Cues {
     );
   }
 
-  /** The element with the tracks the timelines give it, or as it is when none moves it. */
-  apply(el: NodeElement, key: string, timing: Timing, notes: Notes, parent: string): NodeElement {
+  /**
+   * The element with the tracks the timelines give it, or as it is when none moves it. `home` is where its `at` is
+   * when it writes none.
+   */
+  apply(
+    el: NodeElement,
+    key: string,
+    timing: Timing,
+    notes: Notes,
+    parent: string,
+    home: () => Vec = () => [0, 0],
+  ): NodeElement {
     const mine = this.#moves.filter(({ item }) => names(item.target, el, key, notes.refs));
     const back = this.#rewinds.filter(({ item }) => names(item.target, el, key, notes.refs));
 
@@ -612,7 +625,7 @@ export class Cues {
 
     for (const [prop, list] of byProp) {
       const moves = [...list].sort((a, b) => a.start - b.start || a.over - b.over);
-      const initial = this.#initial(el, prop, moves[0]!, key, notes, parent);
+      const initial = this.#initial(el, prop, moves[0]!, key, notes, parent, home);
 
       conflicts(moves, prop, key);
 
@@ -635,14 +648,15 @@ export class Cues {
             const node = self();
 
             const [dx, dy] = outward(
-              pointIn(goal.point, node.box, move.verb),
+              pointIn(goal.point, node.box, node.home, move.verb),
               [0, 0],
               node.origin,
               node.layers,
               t,
             );
 
-            return [x - dx, y - dy];
+            // As every other goal, in the node's placement: the point its `at` names, not its frame's origin.
+            return [x - dx + node.home[0], y - dy + node.home[1]];
           };
 
           const { data } = passageOf(written(initial, moves, land, rewind));
@@ -689,6 +703,7 @@ export class Cues {
     key: string,
     notes: Notes,
     parent: string,
+    home: () => Vec,
   ): Value {
     const { verb } = first;
 
@@ -713,7 +728,7 @@ export class Cues {
       throw new Error(
         `${verb} moves "${key}", but the ${container.label} it sits in places it. Wrap it in a <Group> for the container to place, and move the node inside.`,
       );
-    const start = value ?? UNWRITTEN[prop];
+    const start = value ?? (prop === "at" ? home() : UNWRITTEN[prop]);
 
     if (start === undefined)
       throw new Error(

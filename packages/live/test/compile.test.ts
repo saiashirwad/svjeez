@@ -50,7 +50,7 @@ describe("compileScene", () => {
 
   test("a scene model compiles under its file's @jsxImportSource, and reports its size", async () => {
     const result = await compileScene(
-      `/** @jsxImportSource svjeez/scene */\nimport { Shape, circle, enter, rect, scene, span } from "svjeez/scene";\n\nexport default scene({ size: [200, 120], duration: 4, title: "Hello" }, () => (\n  <>\n    <Shape geometry={rect(200, 120)} fill="#101010" />\n    <Shape geometry={circle(8)} at={[100, 40]} fill="#3EE6D6" motion={enter(span(1.2, 0.5), { scale: 0 })} />\n  </>\n));\n`,
+      `/** @jsxImportSource svjeez/scene */\nimport { Shape, circle, enter, rect, scene, span } from "svjeez/scene";\n\nexport default scene({ size: [200, 120], duration: 4, title: "Hello" }, () => (\n  <>\n    <Shape geometry={rect(200, 120)} fill="#101010" />\n    <Shape geometry={circle(8)} at={[100, 40]} anchor="center" fill="#3EE6D6" motion={enter(span(1.2, 0.5), { scale: 0 })} />\n  </>\n));\n`,
     );
 
     if (!result.ok) throw new Error(result.error.message);

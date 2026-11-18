@@ -155,7 +155,7 @@ describe("gradients", () => {
       made(() => (
         <Group>
           <Shape geometry={rect(40, 20)} at={[10, 10]} fill={sky} />
-          <Shape geometry={rect(40, 20)} at={[10, 10]} stroke={{ color: sky }} />
+          <Shape geometry={rect(40, 20)} at={[9.5, 9.5]} stroke={{ color: sky }} />
           <Shape geometry={rect(40, 20, { radius: [4, 0, 0, 0] })} at={[10, 10]} fill={sky} />
         </Group>
       )),
@@ -241,7 +241,7 @@ describe("gradients", () => {
 });
 
 describe("gradients on text", () => {
-  test("text takes a gradient with points, laid out where its baseline starts", () => {
+  test("text takes a gradient with points, in its frame, whose origin is its box's top-left", () => {
     const out = emitted(
       made(() => (
         <Text
@@ -256,7 +256,7 @@ describe("gradients on text", () => {
     );
 
     expect(out).toContain('x1="20" y1="30" x2="60" y2="30"');
-    expect(out).toMatch(/<text x="20" y="30"[^>]*fill="url\(#g1\)"/);
+    expect(out).toMatch(/<text x="20" y="41\.2"[^>]*fill="url\(#g1\)"/);
   });
 
   test("a span takes a gradient with points, in the text's frame", () => {
@@ -529,8 +529,18 @@ describe("clips and masks", () => {
     expect(() =>
       made(() => (
         <Group>
-          <Shape ref={dot} geometry={circle(2)} at={[50, 50]} />
-          <Group mask={<Shape key="spot" geometry={circle(4)} at={dot.center} fill="#000000" />}>
+          <Shape ref={dot} geometry={circle(2)} anchor="center" at={[50, 50]} />
+          <Group
+            mask={
+              <Shape
+                key="spot"
+                geometry={circle(4)}
+                anchor="center"
+                at={dot.center}
+                fill="#000000"
+              />
+            }
+          >
             <Shape geometry={rect(30, 10)} fill="#FF0000" />
           </Group>
         </Group>

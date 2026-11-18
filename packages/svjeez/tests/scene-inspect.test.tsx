@@ -261,7 +261,7 @@ group("text", () => {
     );
 
     expect(found!.message).toContain("wider than the width it wraps to");
-    expect(codes(made(() => say("a long line that wraps", [20, 30], { width: 60 })))).not.toContain(
+    expect(codes(made(() => say("a long line that wraps", [20, 10], { width: 60 })))).not.toContain(
       "text-overflow",
     );
   });
@@ -501,6 +501,7 @@ group("describe", () => {
       <Shape
         key="ball"
         geometry={circle(5)}
+        anchor="center"
         fill="#0000FF"
         at={track([20, 60]).to([120, 60], span(1, 2))}
       />

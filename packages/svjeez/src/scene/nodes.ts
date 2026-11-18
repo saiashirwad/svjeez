@@ -4,6 +4,7 @@ import type { Span as TimeSpan } from "../span";
 import type { PictureData } from "../picture";
 import type { Vec } from "./ir";
 import type { Anchor, Ref } from "./refs";
+import type { AnchorPlace, TextAnchorPlace } from "./pin";
 import type { Settle } from "./settle";
 import type { MorphElement } from "./morph";
 import type { Timeline } from "./timeline";
@@ -19,10 +20,19 @@ export interface Common {
   readonly key?: string;
   readonly ref?: Ref;
   /**
-   * Where the node's own origin goes in its parent: a point, a track, or an anchor on another node, which it follows
-   * when that node moves. Inside a layout container there is none: the container places the node.
+   * Where the node goes in its parent: its `anchor` point, the top-left of its box unless you say, lands here. A point,
+   * a track, or an anchor on another node, which it follows when that node moves. Without one, the node's anchor
+   * point sits at its parent's origin, but a line, polygon or path stays where its own coordinates put it. A group
+   * or an instance is a frame for what it holds: its `at` is where their `[0, 0]` goes, unless it has an `anchor`.
+   * Inside a layout container there is none: the container places the node.
    */
   readonly at?: Anim<Vec> | Anchor;
+  /**
+   * Which point of the node's box `at` names: a place such as `"center"` or `"bottom-right"`, or fractions across and
+   * down, as `[0.5, 1]`. The box is what the node paints, a stroke included. Default `"top-left"`; a group's or an
+   * instance's default is its frame's origin.
+   */
+  readonly anchor?: AnchorPlace;
   /** What `rotate` and `scale` turn around, in the node's own frame: the center of its box unless you say. */
   readonly origin?: "center" | "top-left" | Vec;
   /** Degrees, clockwise. */
@@ -45,7 +55,7 @@ export interface Common {
   readonly effects?: readonly Effect[];
 }
 
-/** A shape's outline. It is drawn centered on the edge, after the fill. */
+/** A shape's outline. It is drawn centered on the edge, after the fill, and the shape's box takes it in. */
 export interface StrokeProps {
   readonly color: Anim<Paint>;
   /** Default 1. */
@@ -104,7 +114,13 @@ export interface SpanProps extends Omit<RunStyle, "opacity"> {
 }
 
 /** Text laid out when the scene compiles, so its box is known and the same in every target. */
-export interface TextProps extends Common {
+export interface TextProps extends Omit<Common, "anchor"> {
+  /**
+   * Which point of the text `at` names: a place on its box, top-left by default, or a point on its first line's
+   * baseline: `"baseline-left"`, `"baseline"` (the middle of the column) or `"baseline-right"`, to line text up
+   * with other text or a rule whatever its size.
+   */
+  readonly anchor?: TextAnchorPlace;
   readonly font: FontValue;
   /** Which face of `font`: 400 is regular, 600 semibold. Default 400, or a single face's own weight. */
   readonly weight?: number;
@@ -113,10 +129,7 @@ export interface TextProps extends Common {
   readonly size: number;
   /** Every run's fill, unless a `<Span>` says otherwise. */
   readonly fill: Anim<Paint>;
-  /**
-   * How lines sit in their column, and so which point of the first baseline `at` names: its start, middle or end.
-   * Default `start`.
-   */
+  /** How lines sit in their column: from its start, around its middle, or to its end. Default `start`. */
   readonly align?: "start" | "center" | "end";
   /** Wrap to this many px: the column is this wide. Without it lines break only at line breaks. */
   readonly width?: number;
@@ -265,7 +278,10 @@ export const flat = (child: Child): SceneElement[] => {
   return isList(child) ? child.flatMap(flat) : [child];
 };
 
-/** Nodes that move together. Its box holds its children where they rest. It draws nothing itself. */
+/**
+ * Nodes that move together. It is a frame: `at` is where its children's `[0, 0]` goes, or with an `anchor`, where
+ * that point of its box goes. Its box holds its children's where they rest. It draws nothing itself.
+ */
 export const Group = ({
   children,
   ...props
@@ -275,10 +291,10 @@ export const Group = ({
   children: flat(children),
 });
 
-/** A geometry in a frame of its own: where that frame starts depends on the geometry (see `rect`, `circle`). */
+/** A geometry, filled, stroked or both. Its box is what it paints, the stroke included, and `at` places that box. */
 export const Shape = (props: ShapeProps): SceneElement => ({ type: "shape", props });
 
-/** Text whose frame starts on its first baseline, at the point `align` names. */
+/** Text in a column: `at` places its box, from the top of its first line's tallest ascent. */
 export const Text = (props: TextProps): SceneElement => ({ type: "text", props });
 
 /**
@@ -293,10 +309,13 @@ export type Span = TimeSpan;
  */
 export const Span = (props: SpanProps): SceneElement => ({ type: "span", props });
 
-/** A picture in a frame of its own size, from its top-left corner. */
+/** A picture, its box as big as it is drawn. */
 export const Image = (props: ImageProps): SceneElement => ({ type: "image", props });
 
-/** One placement of a symbol. Its box is the symbol's, so it turns around the symbol's center. */
+/**
+ * One placement of a symbol. Its box is the symbol's, so it turns around the symbol's center, and its `at` is where
+ * the symbol's `[0, 0]` goes, as a group's is.
+ */
 export const Instance = (props: InstanceProps): SceneElement => ({ type: "instance", props });
 
 /**

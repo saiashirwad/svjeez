@@ -82,7 +82,7 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
       </Grid>
       <Group ref={card} at={[60, 110]}>
         <Shape geometry={rect(70, 40, { radius: 6 })} fill={theme.soft} />
-        <Text font={mono} size={11} width={60} at={[6, 16]} fill={theme.ink}>
+        <Text font={mono} size={11} width={60} at={[6, 16]} anchor="baseline-left" fill={theme.ink}>
           {"a card that wraps"}
         </Text>
       </Group>
@@ -104,6 +104,7 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
       <Shape
         geometry={arc({ radius: 18, sweep: 270 })}
         at={[280, 140]}
+        anchor="center"
         stroke={{ color: theme.accent, width: 4, cap: "round" }}
         trim={angle.map((a) => [0, a / 270] as const)}
       />
@@ -111,6 +112,7 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
         ref={dot}
         geometry={circle(3)}
         fill={theme.cool}
+        anchor="center"
         at={derive([angle], (a) => [250 + a / 6, 186] as const)}
       />
       <Line from={[250, 160]} to={dot.top} color={theme.cool} />
@@ -118,7 +120,13 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
       <Instance of={star} at={[44, 170]} scale={1.5} />
       <Sequence at={1}>
         <Sequence at={0.5} timeline={nested}>
-          <Shape ref={late} geometry={circle(6)} at={[90, 170]} fill={theme.accent} />
+          <Shape
+            ref={late}
+            geometry={circle(6)}
+            at={[90, 170]}
+            anchor="center"
+            fill={theme.accent}
+          />
         </Sequence>
       </Sequence>
       <Align place="bottom-right" inset={6}>

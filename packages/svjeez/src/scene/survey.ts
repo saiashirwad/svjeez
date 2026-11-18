@@ -417,15 +417,6 @@ export const strokeReachAt = (node: ShapeNode, placed: Placed, t: Seconds): numb
   return (width / 2) * (node.stroke.nonScaling ? 1 : scaleOf(placed.matrix));
 };
 
-/** What a node paints over at a time, in the scene: its box, grown by its stroke. */
-export const paintedBox = (node: SceneNode, placed: Placed, t: Seconds): Box => {
-  if (node.kind !== "shape") return placed.box;
-  const by = strokeReachAt(node, placed, t);
-  const { x, y, width, height } = placed.box;
-
-  return { x: x - by, y: y - by, width: width + by * 2, height: height + by * 2 };
-};
-
 export const area = (box: Box): number => Math.max(0, box.width) * Math.max(0, box.height);
 
 /** How much of two boxes lies in both. */

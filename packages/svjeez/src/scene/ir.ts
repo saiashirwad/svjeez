@@ -5,11 +5,16 @@ import type { Ease, Seconds } from "../motion";
  * The scene model: what a scene means, with nothing of any one target in it. The authoring API lowers into it, and
  * every backend (SVG, Lottie, frames) reads only this. All of it is plain data, so it survives JSON.
  *
- * Three rules hold for every node, in every backend:
+ * Authors place every node the same way, and lowering turns that into `at` below, so no backend sees it:
  *
- * 1. A node draws in a frame of its own. A rect's frame starts at its top-left corner, a circle's, an ellipse's and an
- *    arc's at the center, a path's and a group's wherever its coordinates say, and a text's on its baseline. An arc's
- *    box is its whole circle's, so it turns around the circle's center.
+ *   `at` puts the node's `anchor` point, the top-left of its box unless it says, at that point of its parent. The box
+ *   is what the node paints, a stroke included. A group or an instance is a frame: without an `anchor`, its `at` is
+ *   where its children's `[0, 0]` goes, and a line, polygon or path with no `at` stays where its coordinates are.
+ *
+ * These rules hold for every node, in every backend:
+ *
+ * 1. A node draws in a frame of its own, where its geometry's coordinates are: a rect from `[0, 0]`, a circle, an
+ *    ellipse or an arc around it, a text with its box's top-left there. `box` is what it paints in that frame.
  * 2. `at` puts that frame's origin in the parent's frame. Then each layer, the outermost first, moves by its
  *    `offset`, rotates and scales, all around `origin`, a fixed point in the node's frame.
  * 3. Nothing is inherited. A node with no fill has no fill.
@@ -159,6 +164,7 @@ export interface Stroke {
   readonly color: Animated<Paint>;
   readonly width: Animated<number>;
   readonly cap: "butt" | "round" | "square";
+  /** A miter whose tip is more than 4 widths from its corner is beveled, as SVG's default `stroke-miterlimit` does. */
   readonly join: "miter" | "round" | "bevel";
   readonly dash?: readonly number[];
   /** The width stays the same on screen whatever scales the node. */
@@ -203,7 +209,11 @@ interface Base {
   /** Unique in the scene and stable across edits: the keys from the root down, joined by `/`. */
   readonly key: string;
   readonly source?: Source;
-  /** What the node covers at rest, in its own frame, before `at` and the layers. */
+  /**
+   * What the node paints at rest, in its own frame, before `at` and the layers: a shape's stroke included, its caps
+   * and its miters too. An arc's is its whole circle's, so it turns around the circle's center. A group's holds its
+   * children's.
+   */
   readonly box: Box;
   readonly at: Animated<Vec>;
   /** The point the layers turn and scale around, in the node's own frame. */
@@ -270,7 +280,10 @@ export interface TextLine {
   readonly runs: readonly TextRun[];
 }
 
-/** Text in one size, on lines of runs. Its box runs from the tallest ascent of its faces to the deepest descent. */
+/**
+ * Text in one size, on lines of runs. Its box runs from the tallest ascent of its faces to the deepest descent, and its
+ * frame's origin is the box's top-left, so the first baseline is that ascent below it.
+ */
 export interface TextNode extends Base {
   readonly kind: "text";
   readonly size: number;

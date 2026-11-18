@@ -4,6 +4,7 @@ import type { Animated, Box, Geometry, Layer, Scene, SceneNode, Source, Vec } fr
 import { valueAt as sampleAt } from "./sample";
 import { mixNumber, mixVec, type Mix } from "./steps";
 import { boxOf } from "./values";
+import { lookOf, paintedBoxOf } from "./painted";
 
 /**
  * Where every node of a scene is, by the transform rule at the top of ir.ts: what an editor needs to draw handles
@@ -99,11 +100,16 @@ const around = (points: readonly Vec[]): Box => {
 const geometryAt = (geometry: Animated<Geometry>, t: Seconds, where: string): Box =>
   boxOf(valueAt(geometry, t, mixGeometry, where));
 
-/** What a node covers in its frame at `t`: its content's box, cut to its clip's box when it has one. */
+/** What a node covers in its frame at `t`: what it paints, a stroke included, cut to its clip's box when it has one. */
 const frameAt = (node: SceneNode, t: Seconds): Box =>
   clipped(
     node,
-    node.kind === "shape" ? geometryAt(node.geometry, t, `"${node.key}"`) : node.box,
+    node.kind === "shape"
+      ? paintedBoxOf(
+          valueAt(node.geometry, t, mixGeometry, `"${node.key}"`),
+          lookOf(node, node.stroke && number(node.stroke.width, t)),
+        )
+      : node.box,
     t,
   );
 

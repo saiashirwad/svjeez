@@ -125,7 +125,7 @@ describe("timelines reach a node wherever it sits", () => {
 
         return (
           <Stack>
-            <Shape ref={dot} geometry={circle(4)} fill={red} />
+            <Shape ref={dot} geometry={circle(4)} anchor="center" fill={red} />
           </Stack>
         );
       }),
@@ -160,8 +160,8 @@ describe("timelines reach a node wherever it sits", () => {
       timeline(dot.fade(0.5, 1));
 
       return morph(
-        <Shape ref={dot} geometry={circle(4)} fill={red} />,
-        <Shape ref={dot} geometry={circle(8)} fill={red} />,
+        <Shape ref={dot} geometry={circle(4)} anchor="center" fill={red} />,
+        <Shape ref={dot} geometry={circle(8)} anchor="center" fill={red} />,
         span(2, 1),
       );
     });
@@ -180,7 +180,7 @@ describe("timelines reach a node wherever it sits", () => {
       return (
         <Sequence at={1}>
           <Sequence at={0.5} timeline={nested}>
-            <Shape ref={dot} geometry={circle(4)} fill={red} />
+            <Shape ref={dot} geometry={circle(4)} anchor="center" fill={red} />
           </Sequence>
         </Sequence>
       );
@@ -288,6 +288,7 @@ describe("morph between states that hold layout, text, connectors, images and in
           <Shape
             key="d"
             geometry={circle(2)}
+            anchor="center"
             at={where === "anchor" ? a.right : where}
             fill={blue}
           />
@@ -422,7 +423,7 @@ describe("morph between states that hold layout, text, connectors, images and in
   test("an image and an instance move between states, and a picture that changes is refused", () => {
     const badge = picture('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="10"/>');
     const other = picture('<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/>');
-    const star = symbol("star", () => <Shape geometry={circle(4)} fill={red} />);
+    const star = symbol("star", () => <Shape geometry={circle(4)} anchor="center" fill={red} />);
 
     const model = made(() =>
       morph(
@@ -455,7 +456,7 @@ describe("anchors follow whatever moves their node", () => {
       return (
         <Group>
           {target(<Shape ref={a} geometry={rect(10, 10)} fill={red} />)}
-          <Shape key="dot" geometry={circle(1)} at={a.right} fill={blue} />
+          <Shape key="dot" geometry={circle(1)} anchor="center" at={a.right} fill={blue} />
         </Group>
       );
     }, 3);
@@ -478,7 +479,7 @@ describe("anchors follow whatever moves their node", () => {
       return (
         <Group>
           <Shape ref={a} geometry={rect(10, 10)} fill={red} />
-          <Shape key="dot" geometry={circle(1)} at={a.right} fill={blue} />
+          <Shape key="dot" geometry={circle(1)} anchor="center" at={a.right} fill={blue} />
         </Group>
       );
     }, 3);
@@ -543,7 +544,7 @@ describe("anchors follow whatever moves their node", () => {
             geometry={track(rect(10, 10)).to(rect(60, 10), span(0, 1), ease.linear)}
             fill={red}
           />
-          <Shape key="dot" geometry={circle(1)} at={bar.right} fill={blue} />
+          <Shape key="dot" geometry={circle(1)} anchor="center" at={bar.right} fill={blue} />
         </Group>
       );
     });
@@ -571,8 +572,20 @@ describe("anchors follow whatever moves their node", () => {
               span(1, 1),
             )}
           </Group>
-          <Shape key="one" geometry={circle(1)} at={row.part("y").right} fill={blue} />
-          <Shape key="two" geometry={circle(1)} at={card.part("body").left} fill={blue} />
+          <Shape
+            key="one"
+            geometry={circle(1)}
+            anchor="center"
+            at={row.part("y").right}
+            fill={blue}
+          />
+          <Shape
+            key="two"
+            geometry={circle(1)}
+            anchor="center"
+            at={card.part("body").left}
+            fill={blue}
+          />
         </Group>
       );
     });
@@ -595,7 +608,7 @@ describe("springs across slices", () => {
         dot.move([60, 60], 1.5, ease.spring(settle)),
       );
 
-      return <Shape ref={dot} geometry={circle(4)} fill={red} />;
+      return <Shape ref={dot} geometry={circle(4)} anchor="center" fill={red} />;
     });
 
     const dot = find(model, "dot");
@@ -676,13 +689,20 @@ describe("derived tracks feed every kind of value", () => {
           <Shape
             key="ring"
             geometry={circle(10)}
+            anchor="center"
             stroke={{ color: red }}
             trim={angle.map((u): Vec => [0, u])}
           />
-          <Shape key="lamp" geometry={circle(4)} fill={angle.map((u) => (u < 0.5 ? red : blue))} />
+          <Shape
+            key="lamp"
+            geometry={circle(4)}
+            anchor="center"
+            fill={angle.map((u) => (u < 0.5 ? red : blue))}
+          />
           <Shape
             ref={dot}
             geometry={circle(2)}
+            anchor="center"
             at={derive([angle], (u): Vec => [100 + 50 * u, 50])}
             fill={red}
           />
@@ -722,7 +742,13 @@ describe("derived tracks feed every kind of value", () => {
         timeline(dot.move([10, 10], 1));
 
         return (
-          <Shape ref={dot} geometry={circle(2)} at={angle.map((u): Vec => [u, 0])} fill={red} />
+          <Shape
+            ref={dot}
+            geometry={circle(2)}
+            anchor="center"
+            at={angle.map((u): Vec => [u, 0])}
+            fill={red}
+          />
         );
       }),
     ).toThrow('dot.move() moves at on "dot", which a track already moves. Move it in one place');
@@ -732,7 +758,10 @@ describe("derived tracks feed every kind of value", () => {
 /** Every node kind, in layout, a morph and a symbol. */
 const everyKind = (options: { readonly loop?: boolean } = {}): Model.Scene => {
   const badge = picture('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="10"/>');
-  const star = symbol("star", () => <Shape key="body" geometry={circle(4)} fill={red} />);
+
+  const star = symbol("star", () => (
+    <Shape key="body" geometry={circle(4)} anchor="center" fill={red} />
+  ));
 
   return scene({ size: [200, 100], duration: 4, title: "Every kind", ...options }, () => {
     const moved = ref("moved");
@@ -741,7 +770,7 @@ const everyKind = (options: { readonly loop?: boolean } = {}): Model.Scene => {
 
     return (
       <Group>
-        <Shape ref={moved} geometry={circle(2)} at={[190, 90]} fill={blue} />
+        <Shape ref={moved} geometry={circle(2)} anchor="center" at={[190, 90]} fill={blue} />
         <Shape key="shape" geometry={rect(20, 10)} at={[10, 10]} rotate={30} fill={red} />
         <Text key="text" font={mono} size={10} at={[40, 20]} scale={2} fill={red}>
           {"hi"}
@@ -882,7 +911,9 @@ describe("errors a newcomer meets first", () => {
   test("a file without the scene pragma says to add it", () => {
     expect(() =>
       // SAFETY: what svjeez's SVG runtime is handed when a file without the pragma nests scene nodes in a fragment.
-      svgJsx(SvgFragment, { children: [<Shape geometry={circle(4)} fill={red} />] as never }),
+      svgJsx(SvgFragment, {
+        children: [<Shape geometry={circle(4)} anchor="center" fill={red} />] as never,
+      }),
     ).toThrow("Put `/** @jsxImportSource svjeez/scene */` at the top of the file");
 
     // SAFETY: what scene() is handed when a file without the pragma writes a lowercase tag.
@@ -907,7 +938,7 @@ describe("errors a newcomer meets first", () => {
     expect(() =>
       made(() => (
         <Stack>
-          <Shape key="a" geometry={circle(4)} at={[5, 5]} fill={red} />
+          <Shape key="a" geometry={circle(4)} anchor="center" at={[5, 5]} fill={red} />
         </Stack>
       )),
     ).toThrow('"0/a" has an at of its own, but the <Stack> it sits in places it. Drop its at');
@@ -918,11 +949,11 @@ describe("errors a newcomer meets first", () => {
       made(() =>
         morph(
           <Group>
-            <Shape geometry={circle(4)} fill={red} />
+            <Shape geometry={circle(4)} anchor="center" fill={red} />
           </Group>,
           <Group>
-            <Shape geometry={circle(4)} fill={red} />
-            <Shape geometry={circle(4)} fill={red} />
+            <Shape geometry={circle(4)} anchor="center" fill={red} />
+            <Shape geometry={circle(4)} anchor="center" fill={red} />
           </Group>,
           span(1, 1),
         ),
@@ -935,7 +966,7 @@ describe("errors a newcomer meets first", () => {
       made(() => {
         const ghost = ref("ghost");
 
-        return <Shape geometry={circle(4)} at={ghost.right} fill={red} />;
+        return <Shape geometry={circle(4)} anchor="center" at={ghost.right} fill={red} />;
       }),
     ).toThrow(
       'ghost.right names the ref "ghost", which is on no node. Give one node ref={…} with it.',
@@ -947,7 +978,7 @@ describe("errors a newcomer meets first", () => {
 
         timeline(ghost.fade(0, 1));
 
-        return <Shape geometry={circle(4)} fill={red} />;
+        return <Shape geometry={circle(4)} anchor="center" fill={red} />;
       }),
     ).toThrow('ghost.fade() moves the ref "ghost", which is on no node.');
   });
@@ -955,20 +986,33 @@ describe("errors a newcomer meets first", () => {
   test("a span past the end of the scene names the prop and the node", () => {
     expect(() =>
       made(() => (
-        <Shape key="late" geometry={circle(4)} opacity={track(0).to(1, span(3.5, 1))} fill={red} />
+        <Shape
+          key="late"
+          geometry={circle(4)}
+          anchor="center"
+          opacity={track(0).to(1, span(3.5, 1))}
+          fill={red}
+        />
       )),
     ).toThrow('"late"');
 
     expect(() =>
       made(() => (
         <Sequence at={3} over={2}>
-          <Shape geometry={circle(4)} fill={red} />
+          <Shape geometry={circle(4)} anchor="center" fill={red} />
         </Sequence>
       )),
     ).toThrow("A <Sequence at={3} over={2}> runs until 5s, past the 4s scene.");
 
     expect(() =>
-      made(() => <Shape key="late" geometry={circle(4)} opacity={track(0).to(1, span(3.5, 1))} />),
+      made(() => (
+        <Shape
+          key="late"
+          geometry={circle(4)}
+          anchor="center"
+          opacity={track(0).to(1, span(3.5, 1))}
+        />
+      )),
     ).toThrow(
       'opacity on "late" runs until 4.5s, past the 4s scene. End it by then, or give scene() a longer duration.',
     );
@@ -979,7 +1023,7 @@ describe("errors a newcomer meets first", () => {
 
         timeline(dot.fade(0, 5));
 
-        return <Shape ref={dot} geometry={circle(4)} fill={red} />;
+        return <Shape ref={dot} geometry={circle(4)} anchor="center" fill={red} />;
       }),
     ).toThrow('"dot"');
   });

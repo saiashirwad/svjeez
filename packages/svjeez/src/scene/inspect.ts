@@ -35,7 +35,6 @@ import {
   movingAt,
   ownHidden,
   paintName,
-  paintedBox,
   rgbaIn,
   runsOf,
   scaleOf,
@@ -43,6 +42,7 @@ import {
   sharedArea,
   shownOf,
   sourcesOf,
+  strokeReachAt,
   textOf,
   units,
   valuesOf,
@@ -183,7 +183,7 @@ const shown = (
     const at = survey.frames[i]!.get(entry.node.key);
 
     return at && at.opacity > VISIBLE && !inside(survey.hidden.get(entry.node.key) ?? [], t)
-      ? [{ t, placed: at, box: paintedBox(entry.node, at, t) }]
+      ? [{ t, placed: at, box: at.box }]
       : [];
   });
 
@@ -834,7 +834,8 @@ const flatAt = (
   const flat: Flat = { name, color: { light, dark } };
 
   if (!box) return flat;
-  const stroke = paintedBox(node, at, t).x < at.box.x ? at.box.x - paintedBox(node, at, t).x : 0;
+  // The box takes in the stroke, which covers the fill for its whole width from the outline in.
+  const stroke = 2 * strokeReachAt(node, at, t);
 
   const inner = {
     x: at.box.x + stroke,
@@ -879,7 +880,7 @@ const behind = (
 
     if (!at || at.opacity <= 1e-3 || inside(survey.hidden.get(under.node.key) ?? [], t)) continue;
 
-    if (sharedArea(paintedBox(under.node, at, t), box) <= 0) continue;
+    if (sharedArea(at.box, box) <= 0) continue;
     const flat = flatAt(survey, under, at, t, box);
 
     return flat && { key: under.node.key, flat };
@@ -916,7 +917,7 @@ const lowContrast = (survey: Survey): void => {
       const at = frame.get(node.key);
 
       if (!at || at.opacity < 0.99 || fading(entry, t)) return;
-      const box = paintedBox(node, at, t);
+      const { box } = at;
       const back = behind(survey, entry, frame, box, t);
 
       if (!back) return;

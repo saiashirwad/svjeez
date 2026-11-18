@@ -114,7 +114,7 @@ export const rect = (width: number, height: number, options: RectOptions = {}): 
   };
 };
 
-/** Centered on its frame's origin, as are `ellipse` and `arc`. */
+/** Drawn around its own `[0, 0]`, as are `ellipse` and `arc`: `at` places its box, `anchor="center"` its center. */
 export const circle = (radius: number): Geometry => ({
   kind: "ellipse",
   radius: [positive(radius, "circle()"), radius],
@@ -142,24 +142,30 @@ export const arc = ({ radius, start = 0, sweep }: ArcOptions): Geometry => {
   return { kind: "arc", radius: positive(radius, "arc()"), start, sweep };
 };
 
-/** A straight segment in the shape's frame. It has no fill. To join two nodes, use `<Line>` or `<Arrow>`. */
+/**
+ * A straight segment between two points. Without `at` it stays where they are; with one, `at` places its box. It
+ * has no fill. To join two nodes, use `<Line>` or `<Arrow>`.
+ */
 export const line = (from: Vec, to: Vec): Geometry => ({ kind: "line", from, to });
 
-/** A closed outline through `points`, in the shape's frame. */
+/** A closed outline through `points`. Without `at` it stays where they are; with one, `at` places its box. */
 export const polygon = (points: readonly Vec[]): Geometry => ({
   kind: "polygon",
   points,
   closed: true,
 });
 
-/** An open outline through `points`, in the shape's frame. */
+/** An open outline through `points`. Without `at` it stays where they are; with one, `at` places its box. */
 export const polyline = (points: readonly Vec[]): Geometry => ({
   kind: "polygon",
   points,
   closed: false,
 });
 
-/** A path built step by step: `path().moveTo([0, 0]).lineTo([10, 0]).close()`. */
+/**
+ * A path built step by step: `path().moveTo([0, 0]).lineTo([10, 0]).close()`. Without `at` it stays where its
+ * points are; with one, `at` places its box.
+ */
 export const path = (): PathBuilder => new PathBuilder();
 
 /** Reads SVG path data into a geometry at compile time: the way in for icons and traced artwork. */

@@ -84,6 +84,8 @@ export { font, type FontValue } from "../font/font";
 
 export { Anchor, type Edge, type Place } from "./refs";
 
+export type { AnchorPlace, TextAnchorPlace } from "./pin";
+
 export {
   Align,
   Grid,

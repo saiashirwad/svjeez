@@ -119,8 +119,10 @@ const both = ({ start, legs, finish = {}, inside, duration = 4 }: Route) => {
   const model = made(
     () => (
       <Group>
-        {placed(<Shape key="curved" geometry={circle(4)} at={at} fill={red} />)}
-        {placed(<Shape key="straight" geometry={circle(4)} motion={layer} fill={red} />)}
+        {placed(<Shape key="curved" geometry={circle(4)} anchor="center" at={at} fill={red} />)}
+        {placed(
+          <Shape key="straight" geometry={circle(4)} anchor="center" motion={layer} fill={red} />,
+        )}
       </Group>
     ),
     duration,
@@ -366,10 +368,10 @@ describe("readers of a curved spring agree with it", () => {
     const model = made(() =>
       morph(
         <Group key="g">
-          <Shape key="dot" geometry={circle(4)} at={route()} fill={red} />
+          <Shape key="dot" geometry={circle(4)} anchor="center" at={route()} fill={red} />
         </Group>,
         <Group key="g" at={[30, 20]}>
-          <Shape key="dot" geometry={circle(4)} at={route()} fill={red} />
+          <Shape key="dot" geometry={circle(4)} anchor="center" at={route()} fill={red} />
         </Group>,
         span(1, 2),
         { curve: pop },
@@ -403,7 +405,7 @@ describe("readers of a curved spring agree with it", () => {
         dot.moveBy([-50, 0], 1),
       );
 
-      return <Shape ref={dot} geometry={circle(4)} fill={red} />;
+      return <Shape ref={dot} geometry={circle(4)} anchor="center" fill={red} />;
     });
 
     const lane = laneOf(find(model, "dot").at);

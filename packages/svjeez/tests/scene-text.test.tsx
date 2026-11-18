@@ -270,7 +270,7 @@ describe("runs", () => {
         [" d", 400, "normal"],
       ],
     ]);
-    expect(node.lines[1]!.at[1]).toBe(20);
+    expect(node.lines[1]!.at[1] - node.lines[0]!.at[1]).toBeCloseTo(20);
   });
 
   test("a span's fill and opacity animate on the scene's clock", () => {
@@ -299,7 +299,7 @@ describe("runs", () => {
     ).toEqual([0, 1]);
   });
 
-  test("the box runs from the tallest ascent of any face to the deepest descent", () => {
+  test("the box runs from the tallest ascent of any face to the deepest descent, and at places its top", () => {
     const node = textOf(
       made(() => (
         <Text key="t" font={space} size={10} fill="#000000">
@@ -311,12 +311,22 @@ describe("runs", () => {
     const top = Math.max(regular.metrics.ascent, sans.metrics.ascent);
     const bottom = Math.max(regular.metrics.descent, sans.metrics.descent);
 
-    expect(node.box.y).toBeCloseTo(-top * 10);
+    expect(node.box.y).toBe(0);
+    expect(node.lines[0]!.at[1]).toBeCloseTo(top * 10);
     expect(node.box.height).toBeCloseTo((top + bottom) * 10);
     expect(
       boxesOf(
         made(() => (
           <Text key="t" font={space} size={10} fill="#000000" at={[5, 50]}>
+            a <Span font={abeezee}>b</Span>
+          </Text>
+        )),
+      ).t!.y,
+    ).toBeCloseTo(50);
+    expect(
+      boxesOf(
+        made(() => (
+          <Text key="t" font={space} size={10} fill="#000000" at={[5, 50]} anchor="baseline-left">
             a <Span font={abeezee}>b</Span>
           </Text>
         )),
@@ -373,7 +383,7 @@ describe("SVG", () => {
   test("one text, a tspan per run where layout put it, stating only what differs", () => {
     const out = emit(
       made(() => (
-        <Text font={space} size={10} at={[10, 20]} fill="#000000">
+        <Text font={space} size={10} at={[10, 20]} anchor="baseline-left" fill="#000000">
           Total{" "}
           <Span weight={700} fill="#ff0000">
             42
@@ -433,13 +443,13 @@ describe("SVG", () => {
     const out = emit(
       made(() => (
         <Group>
-          <Text font={space} size={10} fill="#000000">
+          <Text font={space} size={10} anchor="baseline-left" fill="#000000">
             a
           </Text>
-          <Text font={space} weight={700} size={10} fill="#000000">
+          <Text font={space} weight={700} size={10} anchor="baseline-left" fill="#000000">
             b
           </Text>
-          <Text font={abeezee} size={10} fill="#000000">
+          <Text font={abeezee} size={10} anchor="baseline-left" fill="#000000">
             c
           </Text>
         </Group>

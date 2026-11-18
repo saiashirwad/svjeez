@@ -68,6 +68,8 @@ import {
   type Token,
 } from "./values";
 import { FontBook, faceOf, piecesOf, type Asked } from "./runs";
+import { lookOf, paintedBoxOf } from "./painted";
+import { hasCoordinates, minus, pinned } from "./pin";
 import { layoutRuns } from "./text";
 import { blendable, gradientOf, isWrittenGradient, mixPaint } from "./paint";
 import type { Effect as EffectProps } from "./effects";
@@ -186,7 +188,11 @@ const NOWHERE: Vec = [0, 0];
 
 const IDLE: Layer = { offset: [0, 0], rotate: 0, scale: [1, 1], opacity: 1 };
 
-const base = (props: Common, box: Box, key: string, timing: Timing) => {
+/**
+ * What every node has, with `home`, the point of its frame that its `at` names: `at` is moved so that point, not the
+ * frame's origin, lands where the author said. A group's anchor is applied in the second pass, once its box is known.
+ */
+const base = (props: Omit<Common, "anchor">, box: Box, key: string, timing: Timing, home: Vec) => {
   const where = `"${key}"`;
 
   const own: Layer = {
@@ -201,7 +207,14 @@ const base = (props: Common, box: Box, key: string, timing: Timing) => {
     box,
     at: isAnchor(props.at)
       ? NOWHERE
-      : animated<Vec, Vec>(props.at ?? [0, 0], keep, timing, mixVec, `at on ${where}`, true),
+      : animated<Vec, Vec>(
+          props.at ?? [0, 0],
+          (point) => minus(point, home),
+          timing,
+          mixVec,
+          `at on ${where}`,
+          true,
+        ),
     origin: originOf(props.origin, box),
     layers: [...layersOf(props.motion).map((layer) => layerOf(layer, timing, where)), own].filter(
       (layer) => !same(layer, IDLE),
@@ -242,9 +255,11 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
   if (props.geometry === undefined)
     throw new Error(`<Shape> ${where} needs a geometry, such as geometry={rect(40, 20)}.`);
   const geometry = geometryOf(props.geometry, timing, where);
-  const box = boxOf(atRest(geometry));
-  const paint = (value: Paint) => colorOf(ctx, value, where, box);
-  const { stroke } = props;
+  const rest = atRest(geometry);
+  // A gradient spreads across the outline; the stroke is drawn over its edge.
+  const outline = boxOf(rest);
+  const paint = (value: Paint) => colorOf(ctx, value, where, outline);
+  const { stroke: written } = props;
 
   const painted = (value: Anim<Paint>, what: string) =>
     blendable(
@@ -252,24 +267,35 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
       `${what} on ${where}`,
     );
 
+  const stroke = written && {
+    color: painted(written.color, "stroke"),
+    width: animated(written.width ?? 1, keep, timing, mixNumber, `stroke width on ${where}`),
+    cap: written.cap ?? "butt",
+    join: written.join ?? "miter",
+    ...(written.dash && { dash: written.dash }),
+    nonScaling: written.nonScaling ?? false,
+  };
+
+  const trim =
+    props.trim === undefined
+      ? undefined
+      : animated<Vec, Vec>(props.trim, keep, timing, mixVec, `trim on ${where}`);
+
+  const box = paintedBoxOf(rest, lookOf({ stroke, trim }));
+  const free = props.at === undefined && hasCoordinates(rest.kind);
+
+  if (free && props.anchor !== undefined)
+    throw new Error(
+      `anchor on ${where} names the point its at places, but it has no at, so it stays where its coordinates put it. Give it an at, or drop anchor.`,
+    );
+
   return {
-    ...base(props, box, key, timing),
+    ...base(props, box, key, timing, free ? [0, 0] : pinned(props.anchor, box, where)),
     kind: "shape",
     geometry,
     ...(props.fill !== undefined && { fill: painted(props.fill, "fill") }),
-    ...(stroke && {
-      stroke: {
-        color: painted(stroke.color, "stroke"),
-        width: animated(stroke.width ?? 1, keep, timing, mixNumber, `stroke width on ${where}`),
-        cap: stroke.cap ?? "butt",
-        join: stroke.join ?? "miter",
-        ...(stroke.dash && { dash: stroke.dash }),
-        nonScaling: stroke.nonScaling ?? false,
-      },
-    }),
-    ...(props.trim !== undefined && {
-      trim: animated<Vec, Vec>(props.trim, keep, timing, mixVec, `trim on ${where}`),
-    }),
+    ...(stroke && { stroke }),
+    ...(trim !== undefined && { trim }),
   };
 };
 
@@ -353,7 +379,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
   };
 
   return {
-    ...base(props, box, key, timing),
+    ...base(props, box, key, timing, pinned(props.anchor, box, where, lines[0]?.at[1] ?? 0)),
     kind: "text",
     size: props.size,
     lines: lines.map((line): TextLine => ({
@@ -380,8 +406,10 @@ const image = (props: ImageProps, key: string, timing: Timing): ImageNode => {
   if (!(width > 0 && height > 0 && Number.isFinite(width) && Number.isFinite(height)))
     throw new Error(`Image "${key}" needs a positive width and height, got ${width} by ${height}.`);
 
+  const box = { x: 0, y: 0, width, height };
+
   return {
-    ...base(props, { x: 0, y: 0, width, height }, key, timing),
+    ...base(props, box, key, timing, pinned(props.anchor, box, `"${key}"`)),
     kind: "image",
     size: [width, height],
     data: src.href,
@@ -408,11 +436,14 @@ const instance = (ctx: Ctx, props: InstanceProps, key: string, timing: Timing): 
     const root = `#${of.name}`;
 
     // A symbol is drawn once and shared, so it is lowered on the scene's own clock, wherever an instance sits.
-    const children = lowerAll(
-      ctx,
-      within(ctx.size, () => flat(of.build())),
-      sceneTiming(ctx),
-      root,
+    const children = arrangeState(
+      lowerAll(
+        ctx,
+        within(ctx.size, () => flat(of.build())),
+        sceneTiming(ctx),
+        root,
+      ),
+      ctx.notes,
     );
 
     entry.node = {
@@ -436,7 +467,10 @@ const instance = (ctx: Ctx, props: InstanceProps, key: string, timing: Timing): 
       `Instance "${key}" of symbol "${of.name}" sits inside ${clip?.label ?? "a sequence"}, but the symbol moves, and a symbol's tracks run on the scene's clock for every instance. Move the instance instead, or draw the content without a symbol.`,
     );
 
-  return { ...base(props, node!.box, key, timing), kind: "instance", symbol: of.name };
+  const home: Vec =
+    props.anchor === undefined ? [0, 0] : pinned(props.anchor, node!.box, `"${key}"`);
+
+  return { ...base(props, node!.box, key, timing, home), kind: "instance", symbol: of.name };
 };
 
 const sceneTiming = ({ duration }: Ctx): Timing => ({
@@ -519,9 +553,18 @@ const lowerAll = (
       if (!taken.has(String(index))) own = String(index);
     taken.add(own);
     const key = parent ? `${parent}/${own}` : own;
-    const el = ctx.cues.apply(given, key, timing, ctx.notes, parent);
 
-    note(ctx.notes, key, el.props, el.type === "group" ? el.settle : undefined);
+    // A shape drawn by its own coordinates starts a timeline's move from where they put its box.
+    const home = (): Vec => {
+      if (given.type !== "shape" || given.props.at !== undefined) return [0, 0];
+      const drawn = shape(ctx, given.props, key, timing);
+
+      return hasCoordinates(atRest(drawn.geometry).kind) ? [drawn.box.x, drawn.box.y] : [0, 0];
+    };
+
+    const el = ctx.cues.apply(given, key, timing, ctx.notes, parent, home);
+
+    note(ctx.notes, key, el.props, el.type, el.type === "group" ? el.settle : undefined);
 
     const done = (node: SceneNode): SceneNode[] => [
       identified(given, name, dressed(ctx, el.props, node, timing)),
@@ -540,7 +583,7 @@ const lowerAll = (
         const children = lowerAll(ctx, el.children, timing, key);
 
         const node: GroupNode = {
-          ...base(el.props, around(children), key, timing),
+          ...base(el.props, around(children), key, timing, [0, 0]),
           kind: "group",
           children,
         };
@@ -615,7 +658,12 @@ const maskOf = (ctx: Ctx, mask: Child, key: string, timing: Timing): GroupNode |
 };
 
 /** `node` with the clip, mask and effects `props` ask for, all in its own frame. */
-const dressed = (ctx: Ctx, props: Common, node: SceneNode, timing: Timing): SceneNode => {
+const dressed = (
+  ctx: Ctx,
+  props: Omit<Common, "anchor">,
+  node: SceneNode,
+  timing: Timing,
+): SceneNode => {
   const where = `"${node.key}"`;
   const { clip, effects = [] } = props;
   const mask = props.mask === undefined ? undefined : maskOf(ctx, props.mask, node.key, timing);

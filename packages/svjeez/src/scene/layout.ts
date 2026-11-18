@@ -4,10 +4,10 @@ import { Anchor, canvasAnchor, fractionOf, placeIn, Ref, type Place } from "./re
 import type { Arrange } from "./settle";
 
 /**
- * Layout containers. Each lowers into a plain group that measures its children's boxes and places every child so its
- * box lands in its slot, wherever the child's own origin is: a circle's is its center, a rect's its top-left. A child
- * in a container has no `at` of its own, since the container places it; motion layers and `rotate`, `scale` and
- * `opacity` still apply, around where it was placed, because layout reads the box at rest.
+ * Layout containers. Each lowers into a plain group that measures its children's boxes, strokes included, and places
+ * every child's box in its slot. A child in a container has no `at` or `anchor` of its own, since the container
+ * places it; motion layers and `rotate`, `scale` and `opacity` still apply, around where it was placed, because
+ * layout reads the box at rest.
  */
 export type Alignment = "start" | "center" | "end";
 
@@ -176,7 +176,7 @@ export const Grid = ({
   };
 };
 
-export interface AlignProps extends Omit<Common, "at"> {
+export interface AlignProps extends Omit<Common, "at" | "anchor"> {
   /**
    * What to place the children against: the canvas (the default), a box in the parent's frame, or a node's box by its
    * ref. Against a node that moves, the children move with it.
@@ -201,9 +201,9 @@ export const Align = ({
   children,
   ...props
 }: AlignProps): SceneElement => {
-  if ("at" in props)
+  if ("at" in props || "anchor" in props)
     throw new Error(
-      "<Align> places itself against its to, so it takes no at. Move it in with inset.",
+      `<Align> places itself against its to, so it takes no ${"at" in props ? "at" : "anchor"}. Move it in with inset, and say which point lands where with place.`,
     );
   const [u, v] = fractionOf(place, "<Align>");
   const gap = room(inset, "<Align> inset");

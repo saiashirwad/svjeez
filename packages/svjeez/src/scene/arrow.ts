@@ -7,7 +7,8 @@ import { blendVec, breaksOf, follow, laneFrom, unrolled, valueAt } from "./sampl
 import { ease } from "./spring";
 import type { Connect } from "./settle";
 import type { Anim } from "./track";
-import { boxOf, type Paint } from "./values";
+import { lookOf, paintedBoxOf } from "./painted";
+import type { Paint } from "./values";
 
 /**
  * Connectors: a line or an arrow between two points, each a point in the connector's frame or an anchor on a node. It
@@ -15,7 +16,7 @@ import { boxOf, type Paint } from "./values";
  * node moves and turns it; a straight shaft that also stretches is drawn at its longest and trimmed to length, so
  * only a bent one that stretches needs its geometry to move.
  */
-export interface LineProps extends Omit<Common, "at" | "origin" | "rotate" | "scale"> {
+export interface LineProps extends Omit<Common, "at" | "anchor" | "origin" | "rotate" | "scale"> {
   readonly from: Vec | Anchor;
   readonly to: Vec | Anchor;
   readonly color: Anim<Paint>;
@@ -264,7 +265,7 @@ const connect =
         ...plain,
         geometry,
         at,
-        box: boxOf(atRest(geometry)),
+        box: paintedBoxOf(atRest(geometry), lookOf({ stroke: node.stroke, trim: rest })),
         origin: [0, 0],
         layers,
         ...(rest !== undefined && { trim: rest }),
@@ -369,7 +370,10 @@ const connect =
 const connector = (label: string, props: ArrowProps, size: number): SceneElement => {
   const { from, to, color, width = 1.5, bend = 0, gap = 0, trim, dash, head: _, ...common } = props;
 
-  if ("at" in common) throw new Error(`${label} is placed by its from and to, so it takes no at.`);
+  if ("at" in common || "anchor" in common)
+    throw new Error(
+      `${label} is placed by its from and to, so it takes no ${"at" in common ? "at" : "anchor"}.`,
+    );
 
   if (!(width >= 0 && Number.isFinite(width)))
     throw new Error(`${label} needs a width of 0 or more, got ${width}.`);

@@ -93,7 +93,7 @@ describe("morph", () => {
     const a = shape(
       made(() =>
         morph(
-          <Shape key="a" geometry={circle(10)} fill="#ff0000" />,
+          <Shape key="a" geometry={circle(10)} anchor="center" fill="#ff0000" />,
           <Shape key="a" geometry={rect(40, 20, { radius: 6 })} fill="#ff0000" />,
           span(0, 1),
         ),
@@ -166,10 +166,10 @@ describe("morph", () => {
     const model = made(() =>
       morph(
         <Group key="g">
-          <Shape key="dot" geometry={circle(2)} at={[0, 0]} />
+          <Shape key="dot" geometry={circle(2)} anchor="center" at={[0, 0]} />
         </Group>,
         <Group key="g" at={[10, 0]}>
-          <Shape key="dot" geometry={circle(2)} at={[5, 5]} />
+          <Shape key="dot" geometry={circle(2)} anchor="center" at={[5, 5]} />
         </Group>,
         span(0, 1),
       ),
@@ -239,7 +239,7 @@ describe("morph", () => {
     const a = shape(
       made(() =>
         morph(
-          <Shape key="a" geometry={circle(10)} fill="#ff0000" />,
+          <Shape key="a" geometry={circle(10)} anchor="center" fill="#ff0000" />,
           <Shape key="a" geometry={rect(30, 20)} at={[40, 0]} fill="#00ff00" />,
           span(0, 3),
           { curve: ease.spring({ stiffness: 170, damping: 14 }) },
@@ -259,7 +259,7 @@ describe("morph", () => {
       ["a", "b", "c"].map((key) => (
         <Group key={key}>
           <Shape key="bar" geometry={rect(5, h)} />
-          <Shape key="dot" geometry={circle(h / 4)} />
+          <Shape key="dot" geometry={circle(h / 4)} anchor="center" />
         </Group>
       ));
 
@@ -356,7 +356,7 @@ describe("morph", () => {
     const out = svg.emit(
       made(() =>
         morph(
-          <Shape key="a" geometry={circle(10)} at={[20, 20]} fill="#ff0000" />,
+          <Shape key="a" geometry={circle(10)} anchor="center" at={[20, 20]} fill="#ff0000" />,
           <Shape key="a" geometry={rect(40, 20)} at={[60, 30]} fill="#0000ff" />,
           span(1, 1),
         ),
@@ -375,7 +375,7 @@ describe("boxes and hit tests", () => {
         <Shape key="back" geometry={rect(200, 100)} />
         <Group key="card" at={[50, 20]}>
           <Shape key="face" geometry={rect(40, 40)} />
-          <Shape key="pip" geometry={circle(5)} at={[20, 20]} />
+          <Shape key="pip" geometry={circle(5)} anchor="center" at={[20, 20]} />
         </Group>
         <Shape key="ghost" geometry={rect(200, 100)} opacity={0} />
         <Shape

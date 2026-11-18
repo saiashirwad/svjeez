@@ -58,7 +58,7 @@ describe("verbs", () => {
         par(dot.rotate(90, 1), dot.scale(2, 1), dot.fade(0.5, 1)),
       );
 
-      return <Shape ref={dot} geometry={circle(4)} at={[10, 20]} rotate={15} />;
+      return <Shape ref={dot} geometry={circle(4)} anchor="center" at={[10, 20]} rotate={15} />;
     });
 
     const dot = find(model, "dot");
@@ -147,7 +147,7 @@ describe("verbs", () => {
         dot.set({ at: [0, 0] }),
       );
 
-      return <Shape ref={dot} geometry={circle(4)} />;
+      return <Shape ref={dot} geometry={circle(4)} anchor="center" />;
     });
 
     const dot = find(model, "dot");
@@ -164,7 +164,7 @@ describe("verbs", () => {
 
       timeline(par(dot.move([40, 0], 1), dot.rotate(90, 1)), dot.rewind(0.5, ease.linear));
 
-      return <Shape ref={dot} geometry={circle(4)} />;
+      return <Shape ref={dot} geometry={circle(4)} anchor="center" />;
     });
 
     const dot = find(model, "dot");
@@ -179,7 +179,7 @@ describe("verbs", () => {
     ]);
   });
 
-  test("moveTo lands the node's origin on another ref's anchor, or a point of it named by options.point", () => {
+  test("moveTo lands the point the node's at names on another ref's anchor, or a point of it named by options.point", () => {
     const model = made(() => {
       const target = ref("target");
       const a = ref("a");
@@ -198,7 +198,7 @@ describe("verbs", () => {
             <Shape geometry={rect(20, 10)} />
             <Shape key="pin" geometry={rect(4, 4)} at={[30, 30]} />
           </Group>
-          <Shape ref={a} geometry={circle(2)} />
+          <Shape ref={a} geometry={circle(2)} anchor="center" />
           <Group at={[10, 10]}>
             <Shape ref={b} geometry={rect(6, 6)} />
           </Group>
@@ -220,7 +220,7 @@ describe("verbs", () => {
       return (
         <Group>
           <Shape ref={card} geometry={rect(20, 10)} />
-          <Shape ref={dot} geometry={circle(2)} />
+          <Shape ref={dot} geometry={circle(2)} anchor="center" />
         </Group>
       );
     });
@@ -239,7 +239,7 @@ describe("combinators", () => {
 
       timeline(build(dot));
 
-      return <Shape ref={dot} geometry={circle(4)} />;
+      return <Shape ref={dot} geometry={circle(4)} anchor="center" />;
     }, 10);
 
     return times(find(model, "dot").at).map(([t]) => t);
@@ -265,7 +265,7 @@ describe("combinators", () => {
       return (
         <Group>
           {dots.map((dot) => (
-            <Shape ref={dot} geometry={circle(2)} opacity={0} />
+            <Shape ref={dot} geometry={circle(2)} anchor="center" opacity={0} />
           ))}
         </Group>
       );
@@ -289,7 +289,7 @@ describe("combinators", () => {
         seq(wait(0.2), dot.move([2, 0], 1).as("grab")).as("tail"),
       );
 
-      return <Shape ref={dot} geometry={circle(4)} />;
+      return <Shape ref={dot} geometry={circle(4)} anchor="center" />;
     });
 
     expect(read!.span("grab").at).toBeCloseTo(0.7);
@@ -305,7 +305,9 @@ describe("combinators", () => {
       const bulb = ref("bulb");
 
       return {
-        node: <Shape ref={bulb} geometry={circle(4)} fill="#000000" opacity={0.2} />,
+        node: (
+          <Shape ref={bulb} geometry={circle(4)} anchor="center" fill="#000000" opacity={0.2} />
+        ),
         blink: (): Action => seq(bulb.show(0.1), wait(0.3), bulb.fade(0.2, 0.1)),
       };
     };
@@ -369,7 +371,7 @@ describe("tracks", () => {
 
       timeline(par(dot.move([100, 0], 2, spring), seq(wait(0.3), dot.move([0, 50], 2, spring))));
 
-      return <Shape ref={dot} geometry={circle(4)} />;
+      return <Shape ref={dot} geometry={circle(4)} anchor="center" />;
     });
 
     expect(valueAt(find(model, "dot").at, 4, blendVec)).toEqual([0, 50]);
@@ -382,7 +384,7 @@ describe("tracks", () => {
 
         timeline(par(dot.move([1, 0], 1), seq(wait(0.5), dot.moveBy([1, 1], 1))));
 
-        return <Shape ref={dot} geometry={circle(4)} />;
+        return <Shape ref={dot} geometry={circle(4)} anchor="center" />;
       }),
     ).toThrow('dot.move() and dot.moveBy() both move at on "dot" between 0.5s and 1s');
   });
@@ -394,7 +396,14 @@ describe("tracks", () => {
 
         timeline(dot.fade(0, 1));
 
-        return <Shape ref={dot} geometry={circle(4)} opacity={track(1).to(0.5, span(2, 1))} />;
+        return (
+          <Shape
+            ref={dot}
+            geometry={circle(4)}
+            anchor="center"
+            opacity={track(1).to(0.5, span(2, 1))}
+          />
+        );
       }),
     ).toThrow('dot.fade() moves opacity on "dot", which a track already moves');
   });
@@ -406,7 +415,7 @@ describe("tracks", () => {
 
         timeline(dot.move([1, 0], 3.5), dot.rewind(1));
 
-        return <Shape ref={dot} geometry={circle(4)} />;
+        return <Shape ref={dot} geometry={circle(4)} anchor="center" />;
       }),
     ).toThrow('rewind(1) on at on "dot" needs the last 1s');
   });
@@ -430,7 +439,7 @@ describe("errors", () => {
 
       timeline(s.stroke("#ffffff", 1));
 
-      return <Shape ref={s} geometry={circle(2)} />;
+      return <Shape ref={s} geometry={circle(2)} anchor="center" />;
     }, 'changes the stroke of "s", which has none');
   });
 
@@ -438,7 +447,7 @@ describe("errors", () => {
     throws(() => {
       timeline(ref("ghost").show(1));
 
-      return <Shape geometry={circle(2)} />;
+      return <Shape geometry={circle(2)} anchor="center" />;
     }, 'ghost.show() moves the ref "ghost", which is on no node');
 
     throws(() => {
@@ -459,7 +468,7 @@ describe("errors", () => {
       return (
         <Group>
           <Stack>
-            <Shape ref={dot} geometry={circle(2)} />
+            <Shape ref={dot} geometry={circle(2)} anchor="center" />
           </Stack>
         </Group>
       );
@@ -486,7 +495,7 @@ describe("clocks", () => {
 
       return (
         <Sequence at={1.5} timeline={steps}>
-          <Shape ref={dot} geometry={circle(2)} />
+          <Shape ref={dot} geometry={circle(2)} anchor="center" />
         </Sequence>
       );
     });
@@ -508,7 +517,7 @@ describe("clocks", () => {
 
         return (
           <Sequence at={1}>
-            <Shape ref={dot} geometry={circle(2)} />
+            <Shape ref={dot} geometry={circle(2)} anchor="center" />
           </Sequence>
         );
       }),
@@ -521,7 +530,7 @@ describe("clocks", () => {
 
         return (
           <Group>
-            <Shape ref={dot} geometry={circle(2)} />
+            <Shape ref={dot} geometry={circle(2)} anchor="center" />
             <Sequence at={1} timeline={steps} />
           </Group>
         );

@@ -5,6 +5,12 @@ import { Shape, circle, rect, scene, show, span } from "svjeez/scene";
 export default scene({ size: [100, 60], duration: 2, title: "Model" }, () => (
   <>
     <Shape geometry={rect(100, 60)} fill="#101010" />
-    <Shape geometry={circle(10)} at={[50, 30]} fill="#3EE6D6" opacity={show(span(0.5, 1))} />
+    <Shape
+      geometry={circle(10)}
+      at={[50, 30]}
+      anchor="center"
+      fill="#3EE6D6"
+      opacity={show(span(0.5, 1))}
+    />
   </>
 ));

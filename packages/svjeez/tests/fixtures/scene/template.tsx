@@ -9,5 +9,5 @@ export const params = {
 
 export default (p: Values<typeof params> = defaults(params)) =>
   scene({ size: [100, 60], duration: 2, title: p.title }, () => (
-    <Shape geometry={circle(p.radius)} at={[50, 30]} fill="#3EE6D6" />
+    <Shape geometry={circle(p.radius)} at={[50, 30]} anchor="center" fill="#3EE6D6" />
   ));

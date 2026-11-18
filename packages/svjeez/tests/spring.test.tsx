@@ -138,6 +138,7 @@ describe("spring steps", () => {
     const model = made(() => (
       <Shape
         geometry={circle(4)}
+        anchor="center"
         at={track([0, 0]).to([300, 0], span(0.5, bouncy.settle), bouncy)}
       />
     ));
@@ -180,6 +181,7 @@ describe("spring steps", () => {
         <Shape
           key="dot"
           geometry={circle(4)}
+          anchor="center"
           at={track([0, 0]).to([100, 0], span(0, 0.5), bouncy)}
         />
       )),
@@ -193,6 +195,7 @@ describe("spring steps", () => {
       made(() => (
         <Shape
           geometry={circle(4)}
+          anchor="center"
           at={track([0, 0]).to([200, 0], span(0, 2), bouncy).to([60, 0], span(0.3, 2), bouncy)}
         />
       )),
@@ -213,6 +216,7 @@ describe("spring steps", () => {
       made(() => (
         <Shape
           geometry={circle(4)}
+          anchor="center"
           at={track([0, 0]).to([200, 0], span(0, 2), bouncy).to([200, 120], span(0.4, 2), bouncy)}
         />
       )),
@@ -243,6 +247,7 @@ describe("spring steps", () => {
       made(() => (
         <Shape
           geometry={circle(4)}
+          anchor="center"
           at={track([0, 0]).to([100, 0], span(0, 1), ease.linear).to([150, 0], span(1, 2), bouncy)}
         />
       )),
@@ -259,6 +264,7 @@ describe("spring steps", () => {
         made(() => (
           <Shape
             geometry={circle(4)}
+            anchor="center"
             at={track([0, 0])
               .to([100, 0], span(0, 1), curve)
               .to([150, 0], span(1 + gap, 2), bouncy)}
@@ -277,6 +283,7 @@ describe("spring steps", () => {
       made(() => (
         <Shape
           geometry={circle(4)}
+          anchor="center"
           at={track([0, 0]).to([100, 0], span(0, 2), bouncy).to([0, 0], span(0.5, 0.5))}
         />
       )),
@@ -303,6 +310,7 @@ describe("spring steps", () => {
         <Shape
           key="dot"
           geometry={circle(4)}
+          anchor="center"
           fill={track(theme.a).to(theme.b, span(0, 2), bouncy)}
         />
       )),
@@ -316,6 +324,7 @@ describe("spring steps", () => {
           <Sequence at={at}>
             <Shape
               geometry={circle(4)}
+              anchor="center"
               at={track([0, 0]).to([80, 0], span(0, bouncy.settle), bouncy)}
             />
           </Sequence>
@@ -338,6 +347,7 @@ describe("spring steps", () => {
       made(() => (
         <Shape
           geometry={circle(4)}
+          anchor="center"
           at={track([0, 0]).to([50, 0], span(0, 1.5), bouncy).repeat(2)}
         />
       )),
@@ -354,6 +364,7 @@ describe("spring steps", () => {
         <Shape
           key="dot"
           geometry={circle(4)}
+          anchor="center"
           rotate={track(0).to(90, span(0, 0.5), bouncy).loop(0.5)}
         />
       )),
@@ -362,6 +373,7 @@ describe("spring steps", () => {
     const model = made(() => (
       <Shape
         geometry={circle(4)}
+        anchor="center"
         rotate={track(0).to(90, span(0, 1.5), bouncy).to(0, span(1.5, 0.5)).loop(2)}
       />
     ));
@@ -374,6 +386,7 @@ describe("spring steps", () => {
       made(() => (
         <Shape
           geometry={circle(4)}
+          anchor="center"
           motion={motion()
             .to({ offset: [40, 20] }, span(0, 1.5), bouncy)
             .rewind(1.5, bouncy)}
@@ -392,6 +405,7 @@ describe("spring steps", () => {
       made(() => (
         <Shape
           geometry={circle(4)}
+          anchor="center"
           at={track([0, 0]).to([100, 0], span(0, bouncy.settle), bouncy)}
         />
       )),

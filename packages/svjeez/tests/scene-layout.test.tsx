@@ -91,7 +91,7 @@ const tip = (model: Model.Scene, key: string, t: number): Model.Vec => {
 };
 
 describe("text", () => {
-  test("one line is measured with the font, from ascent to descent", () => {
+  test("one line is measured with the font, from ascent to descent, its baseline the ascent below its top", () => {
     const node = find(
       made(() => (
         <Text key="t" font={mono} size={20} fill="#000000">
@@ -104,7 +104,8 @@ describe("text", () => {
     const { ascent, descent } = mono.metrics;
 
     expect(node.box.width).toBeCloseTo(mono.measure("Hello", 20));
-    expect(node.box.y).toBeCloseTo(-ascent * 20);
+    expect(node.box.y).toBe(0);
+    expect(node.kind === "text" && node.lines[0]!.at[1]).toBeCloseTo(ascent * 20);
     expect(node.box.height).toBeCloseTo((ascent + descent) * 20);
   });
 
@@ -118,7 +119,12 @@ describe("text", () => {
       "t",
     );
 
-    expect(node.kind === "text" && node.lines.map((line) => [said(line), line.at[1]])).toEqual([
+    const top = node.kind === "text" ? node.lines[0]!.at[1] : 0;
+
+    expect(top).toBeCloseTo(mono.metrics.ascent * 10);
+    expect(
+      node.kind === "text" && node.lines.map((line) => [said(line), Math.round(line.at[1] - top)]),
+    ).toEqual([
       ["one", 0],
       ["two", 15],
       ["", 30],
@@ -147,7 +153,7 @@ describe("text", () => {
     expect(node.box.width).toBe(40);
   });
 
-  test("align centers each line in its column, around the point at names", () => {
+  test("align centers each line in its column, which starts at the box's left whatever align says", () => {
     const node = find(
       made(() => (
         <Text key="t" font={mono} size={10} width={60} align="center" fill="#000000">
@@ -160,15 +166,16 @@ describe("text", () => {
     if (node.kind !== "text") throw new Error("not text");
     const [one, three] = node.lines;
 
-    expect(node.box.x).toBe(-30);
-    expect(one!.at[0]).toBeCloseTo(-mono.measure("a", 10) / 2);
-    expect(three!.at[0]).toBeCloseTo(-mono.measure("abc", 10) / 2);
+    expect(node.box.x).toBe(0);
+    expect(node.box.width).toBe(60);
+    expect(one!.at[0]).toBeCloseTo((60 - mono.measure("a", 10)) / 2);
+    expect(three!.at[0]).toBeCloseTo((60 - mono.measure("abc", 10)) / 2);
   });
 
   test("SVG places every line itself, and every line's characters reach the font subset", () => {
     const out = svg.emit(
       made(() => (
-        <Text font={mono} size={10} at={[10, 20]} fill="#000000">
+        <Text font={mono} size={10} at={[10, 20]} anchor="baseline-left" fill="#000000">
           {"Ab\nQz"}
         </Text>
       )),
@@ -184,7 +191,7 @@ describe("text", () => {
 });
 
 describe("containers", () => {
-  test("a row places each child's box in its slot, wherever its origin is", () => {
+  test("a row places each child's box in its slot, whatever its geometry", () => {
     const model = made(() => (
       <Stack key="row" direction="row" gap={5} align="center" at={[10, 20]}>
         <Shape key="a" geometry={circle(3)} />
@@ -271,7 +278,7 @@ describe("containers", () => {
       expect(() =>
         made(() => (
           <Stack key="s">
-            <Shape key="a" geometry={circle(3)} at={where} />
+            <Shape key="a" geometry={circle(3)} anchor="center" at={where} />
           </Stack>
         )),
       ).toThrow('"s/a" has an at of its own, but the <Stack> it sits in places it');
@@ -304,7 +311,12 @@ describe("anchors", () => {
     const model = made(() => (
       <Group>
         <Group key="left" at={[5, 5]}>
-          <Shape key="pin" geometry={circle(1)} at={target.part("box").bottomRight} />
+          <Shape
+            key="pin"
+            geometry={circle(1)}
+            anchor="center"
+            at={target.part("box").bottomRight}
+          />
         </Group>
         <Group ref={target} at={[50, 20]}>
           <Shape key="box" geometry={rect(20, 10)} at={[3, 4]} />
@@ -323,7 +335,7 @@ describe("anchors", () => {
         <Group at={[100, 50]} rotate={90} scale={2} origin={[0, 0]}>
           <Shape ref={target} geometry={rect(10, 4)} />
         </Group>
-        <Shape key="pin" geometry={circle(1)} at={target.right} />
+        <Shape key="pin" geometry={circle(1)} anchor="center" at={target.right} />
       </Group>
     ));
 
@@ -342,7 +354,7 @@ describe("anchors", () => {
           <Shape ref={target} geometry={rect(10, 10)} />
         </Group>
         <Group key="other" at={[7, 3]}>
-          <Shape key="pin" geometry={circle(1)} at={target.center} />
+          <Shape key="pin" geometry={circle(1)} anchor="center" at={target.center} />
         </Group>
       </Group>
     ));
@@ -369,9 +381,9 @@ describe("anchors", () => {
     const model = made(() => (
       <Group>
         <Group at={[100, 50]} rotate={spin({ every: 4 })} origin={[0, 0]}>
-          <Shape ref={target} geometry={circle(2)} at={[30, 0]} />
+          <Shape ref={target} geometry={circle(2)} anchor="center" at={[30, 0]} />
         </Group>
-        <Shape key="pin" geometry={circle(1)} at={target.center} />
+        <Shape key="pin" geometry={circle(1)} anchor="center" at={target.center} />
       </Group>
     ));
 
@@ -395,16 +407,16 @@ describe("anchors", () => {
     const lost = ref("lost");
     const card = ref("card");
 
-    expect(() => made(() => <Shape geometry={circle(1)} at={lost.center} />)).toThrow(
-      'lost.center names the ref "lost", which is on no node',
-    );
+    expect(() =>
+      made(() => <Shape geometry={circle(1)} anchor="center" at={lost.center} />),
+    ).toThrow('lost.center names the ref "lost", which is on no node');
     expect(() =>
       made(() => (
         <Group>
           <Group ref={card}>
             <Shape key="title" geometry={rect(1, 1)} />
           </Group>
-          <Shape geometry={circle(1)} at={card.part("body").center} />
+          <Shape geometry={circle(1)} anchor="center" at={card.part("body").center} />
         </Group>
       )),
     ).toThrow(
@@ -413,9 +425,9 @@ describe("anchors", () => {
     expect(() =>
       made(() => (
         <Group>
-          <Shape ref={card} geometry={circle(1)} />
+          <Shape ref={card} geometry={circle(1)} anchor="center" />
           <Group>
-            <Shape ref={card} geometry={circle(1)} />
+            <Shape ref={card} geometry={circle(1)} anchor="center" />
           </Group>
         </Group>
       )),
@@ -429,7 +441,7 @@ describe("anchors", () => {
       made(() => (
         <Group ref={card}>
           <Shape key="a" geometry={rect(10, 10)} />
-          <Shape key="b" geometry={circle(1)} at={card.right} />
+          <Shape key="b" geometry={circle(1)} anchor="center" at={card.right} />
         </Group>
       )),
     ).toThrow("depends on itself");
