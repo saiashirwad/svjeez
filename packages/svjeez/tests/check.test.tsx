@@ -454,4 +454,12 @@ describe("svjeez check when the scene does not build", () => {
     );
   });
 
+  test("--at says to fix the build first, not that the file is SVG", () => {
+    const out = cli(fixture("unpainted"), "--no-browser", "--at", "1").stdout.toString();
+
+    expect(out).toContain(
+      "--at describes the scene once it builds; fix the compile error above first.",
+    );
+    expect(out).not.toContain("this file is SVG");
+  });
 });

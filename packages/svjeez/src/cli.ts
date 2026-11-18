@@ -736,7 +736,9 @@ const checkCommand = async (args: string[]): Promise<void> => {
     if (described) console.log(`\n${described.text}`);
     else if (at)
       console.log(
-        "\n--at describes a scene model; this file is SVG, so there is nothing to describe.",
+        found.some((f) => f.code === "compile-error")
+          ? "\n--at describes the scene once it builds; fix the compile error above first."
+          : "\n--at describes a scene model; this file is SVG, so there is nothing to describe.",
       );
   }
 
