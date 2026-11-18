@@ -4,18 +4,29 @@ import { createRequire } from "node:module";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
+import { timelineCues, type Finding as BrowserFinding } from "./check";
 import { checkScene, renderFrames, type FrameTimes } from "./frames";
 import { parse, type Json, type JsonObject, type Param, type Schema, type Values } from "./params";
-import { isScene, svg, type Diagnostic, type Scene } from "./scene";
+import {
+  describe,
+  inspect,
+  isScene,
+  svg,
+  type Diagnostic,
+  type Model,
+  type Related,
+  type Scene,
+  type Severity,
+} from "./scene";
+import { momentsOf, sourcesOf } from "./scene/survey";
 import { startTrace, stopTrace, traceOf, type BuildReport } from "./traced";
-import { timelineCues } from "./check";
 import { validateSvg } from "./validate";
 
 const USAGE = `usage:
   svjeez svg <file> [--out file.svg] [--json] [params]
   svjeez dev <file> [--port 5173] [--out file.svg] [params]
   svjeez frames <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
-  svjeez check <file> [--times 0,0.5,1] [--json] [--color-scheme system|light|dark] [params]
+  svjeez check <file> [--no-browser] [--times 0,0.5,1] [--at 0,1.5] [--json] [--color-scheme system|light|dark] [params]
   svjeez values <file> [--json] [--filter text]
   svjeez set <file> key=value [key=value ...] [--dry-run]
   svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
@@ -32,8 +43,11 @@ svg --json includes the SVG, compiler warnings and timeline tracks in scene seco
 video encodes --loops loops of the scene, through @svjeez/video. Its format follows --out's extension, else mp4.
 --background transparent keeps alpha, in webm only.
 On Node, .tsx files load through tsx when it is installed.
-check measures the scene in headless Chromium and prints one finding per line, file:line:column  rule  severity: message.
-It exits 1 when any finding is an error. Without --times it measures 0, seven times across the loop, and just before the end.
+check reads a scene model first, with no browser, then measures the scene in headless Chromium, and prints one finding
+per line, file:line:column  code  severity: message, with what to change on a hint: line below. --no-browser reads the
+model only, at once. --at 0,1.5 also describes what is on screen at those times. --json prints
+{ errors, warnings, info, frames?, timeline? }. It exits 1 when any finding is an error, the scene failing to build
+included. Without --times the browser measures 0, seven times across the loop, just before the end, and the scene's keys.
 values lists every number, color, ease and param in the scene's source that the editor shows a control for, with its key;
 set writes key=value into those literals and changes nothing else. Both read the source without running a browser,
 through @svjeez/live.
@@ -50,6 +64,8 @@ const fail = (message: string): never => {
 };
 
 type Built = string | Scene;
+
+type Source = Model.Source;
 
 type Build = (values?: Values<Schema>) => Built | Promise<Built>;
 
@@ -138,12 +154,12 @@ const valuesFor = async (
 
 const warn = (warning: Diagnostic): void => console.warn(`warning: ${warning.message}`);
 
-/** A scene model's diagnostics go to `onWarning`; an SVG string's warnings are the caller's to read. */
-const loadSvg = async (
+/** What a file's default export builds: a scene model, or SVG text. */
+const loadValue = async (
   file: string,
   flags: ParamFlags = {},
-  onWarning: (warning: Diagnostic) => void = warn,
-): Promise<string> => {
+  problem: (message: string) => never = fail,
+): Promise<Built> => {
   const path = resolve(file);
   const given = flags.params !== undefined || (flags.param?.length ?? 0) > 0;
 
@@ -204,6 +220,21 @@ const loadSvg = async (
     ? await (values === undefined ? module.default() : module.default(values))
     : module.default;
 
+  if (isScene(value) || isText(value)) return value;
+
+  return problem(
+    `${file} must export default a scene, as in \`export default scene({ ... }, () => ...)\`, an SVG string, or a function that returns either.`,
+  );
+};
+
+/** A scene model's diagnostics go to `onWarning`; an SVG string's warnings are the caller's to read. */
+const loadSvg = async (
+  file: string,
+  flags: ParamFlags = {},
+  onWarning: (warning: Diagnostic) => void = warn,
+): Promise<string> => {
+  const value = await loadValue(file, flags);
+
   // A traced build (`svg --json`, `check`, the dev server) marks each node with its key and the line that wrote it.
   if (isScene(value))
     return svg.emit(value, {
@@ -211,11 +242,7 @@ const loadSvg = async (
       sources: Boolean(traceOf()?.within ?? traceOf()?.sources),
     });
 
-  if (isText(value)) return value;
-
-  return fail(
-    `${file} must export default a scene, as in \`export default scene({ ... }, () => ...)\`, an SVG string, or a function that returns either.`,
-  );
+  return value;
 };
 
 const number = (flag: string, value: string | undefined): number | undefined => {
@@ -499,13 +526,109 @@ const skillCommand = async (args: string[]): Promise<void> => {
   console.log(`installed the svjeez skill in ${relative(process.cwd(), target) || "."}`);
 };
 
+/** A finding of `svjeez check`, from the model or the browser, with its place relative to the working directory. */
+interface CheckFinding {
+  readonly code: string;
+  readonly severity: Severity;
+  /** The node's key; empty when no node is known, as for a scene that didn't build or an SVG file. */
+  readonly key: string;
+  readonly source?: Source;
+  readonly message: string;
+  readonly hint: string;
+  readonly times?: readonly number[];
+  readonly related?: readonly Related[];
+}
+
+/** The browser checks at most this many times besides its own, from the scene's keys. */
+const CUES = 48;
+
+const parseTimes = (flag: string, text: string): number[] =>
+  text.split(",").map((time) => {
+    const parsed = time.trim() === "" ? NaN : Number(time.trim());
+
+    return Number.isFinite(parsed) && parsed >= 0
+      ? parsed
+      : fail(`--${flag} needs seconds from 0, separated by commas, got "${text}".`);
+  });
+
+/** A `data-source` string, `file:line:column`, as a source. */
+const sourceOf = (text: string | undefined): Source | undefined => {
+  const match = text === undefined ? null : /^(.*?):(\d+)(?::(\d+))?$/.exec(text);
+
+  return match
+    ? {
+        file: match[1] ?? "",
+        line: Number(match[2]),
+        ...(match[3] !== undefined && { column: Number(match[3]) }),
+      }
+    : undefined;
+};
+
+/** Where in `file` an error was thrown: the first frame of its stack in the scene's folder, not a dependency. */
+const thrownAt = (error: Error, file: string): Source | undefined => {
+  const stack = error.stack ?? "";
+  const folder = dirname(resolve(file));
+
+  for (const line of stack.split("\n")) {
+    const match = /\(?((?:file:\/\/)?[^\s()]+?):(\d+):(\d+)\)?\s*$/.exec(line);
+
+    if (!match) continue;
+
+    const path = match[1]!.startsWith("file://")
+      ? fileURLToPath(match[1]!.replace(/\?.*$/, ""))
+      : match[1]!;
+
+    if (path.startsWith(folder) && !path.includes("node_modules"))
+      return { file: path, line: Number(match[2]), column: Number(match[3]) };
+  }
+
+  return undefined;
+};
+
+const compileError = (error: Error, file: string): CheckFinding => {
+  const source = thrownAt(error, file);
+
+  return {
+    code: "compile-error",
+    severity: "error",
+    key: "",
+    ...(source && { source }),
+    message: error.message,
+    hint: "Fix what the message names; the scene must build before anything else can be checked.",
+  };
+};
+
+/** A browser finding in the model's terms: the node's key and source, and its hint apart from its message. */
+const fromBrowser = (found: BrowserFinding, sources: ReadonlyMap<string, Source>): CheckFinding => {
+  const source =
+    (found.key !== undefined ? sources.get(found.key) : undefined) ?? sourceOf(found.source);
+
+  const message = found.message.endsWith(found.hint)
+    ? found.message.slice(0, -found.hint.length).trimEnd()
+    : found.message;
+
+  return {
+    code: found.rule,
+    severity: found.severity,
+    key: found.key ?? "",
+    ...(source && { source }),
+    message,
+    hint: found.hint,
+    ...(found.times.length > 0 && { times: found.times }),
+  };
+};
+
+const RANKS: readonly Severity[] = ["error", "warning", "info"];
+
 const checkCommand = async (args: string[]): Promise<void> => {
   const { values, positionals } = parseArgs({
     args,
     allowPositionals: true,
     options: {
       times: { type: "string", short: "t" },
+      at: { type: "string" },
       json: { type: "boolean" },
+      "no-browser": { type: "boolean" },
       "color-scheme": { type: "string" },
       ...PARAM_OPTIONS,
     },
@@ -513,59 +636,146 @@ const checkCommand = async (args: string[]): Promise<void> => {
 
   const file = positionals[0] ?? fail(USAGE);
   const scheme = parseScheme(values["color-scheme"]);
-  const times = values.times === undefined ? undefined : when(values.times, undefined);
+  const times = values.times === undefined ? undefined : parseTimes("times", values.times);
+  const at = values.at === undefined ? undefined : parseTimes("at", values.at);
+  const found: CheckFinding[] = [];
+  let model: Scene | undefined;
+  let svgText: string | undefined;
+  let measured: { readonly duration: number; readonly times: readonly number[] } | undefined;
+  let rendered: BuildReport | undefined;
 
-  const built = await loadBuild(file, values, true, true);
-  reportWarnings(built.warnings);
-
-  const {
-    duration,
-    times: measured,
-    findings,
-  } = await checkScene(built.svg, {
-    times: times && "times" in times ? times.times : undefined,
-    cues:
-      times || built.duration === undefined
-        ? undefined
-        : timelineCues(built.timeline, built.duration),
-    colorScheme: scheme,
+  startTrace({
+    within: file.endsWith(".svg") ? undefined : dirname(resolve(file)),
+    sources: true,
+    onRender: (_, report) => {
+      rendered = report;
+    },
   });
 
-  const where = (source: string | undefined): string => {
-    if (!source) return file;
-    const match = /^(.*?)((?::\d+){1,2})$/.exec(source);
+  try {
+    const value = await loadValue(file, values, (message) => {
+      throw new Error(message);
+    });
 
-    return match?.[1]
-      ? `${relative(process.cwd(), match[1]) || match[1]}${match[2]}`
-      : `${file}:${source}`;
-  };
+    if (isScene(value)) {
+      model = value;
+      found.push(...inspect(value, { backend: svg, ...(times && { times }) }));
+    }
 
-  const errors = findings.filter((found) => found.severity === "error").length;
+    // The model's own findings say what the SVG backend can't draw; emitting would throw them again.
+    if (!values["no-browser"] && !found.some((f) => f.code === "unsupported"))
+      svgText = isScene(value) ? svg.emit(value, { sources: true }) : value;
+
+    // What the old compiler warned about while it wrote an SVG string.
+    if (isText(value))
+      for (const warning of rendered?.warnings ?? validateSvg(value).warnings)
+        found.push({
+          code: "compile-warning",
+          severity: "warning",
+          key: "",
+          message: warning,
+          hint: "Change what the warning names.",
+        });
+  } catch (error) {
+    found.push(compileError(error instanceof Error ? error : new Error(String(error)), file));
+  } finally {
+    stopTrace();
+  }
+
+  if (svgText !== undefined) {
+    const sources = model ? sourcesOf(model) : new Map<string, Source>();
+
+    const cues = model
+      ? momentsOf(model)
+          .filter((t) => t < model!.duration)
+          .filter((_, i, all) => all.length <= CUES || i % Math.ceil(all.length / CUES) === 0)
+      : rendered?.duration === undefined
+        ? undefined
+        : timelineCues(rendered.timeline, rendered.duration);
+
+    const report = await checkScene(svgText, {
+      ...(times ? { times } : cues && { cues }),
+      colorScheme: scheme,
+    });
+
+    measured = { duration: report.duration, times: report.times };
+    // A rule both read is said once, as the model says it.
+    const said = new Set(found.map((f) => `${f.code} ${f.key}`));
+
+    for (const browser of report.findings) {
+      const mapped = fromBrowser(browser, sources);
+
+      if (mapped.key === "" || !said.has(`${mapped.code} ${mapped.key}`)) found.push(mapped);
+    }
+  }
+
+  const where = (source: Source | undefined): Source | undefined =>
+    source && {
+      ...source,
+      file: source.file === "" ? file : relative(process.cwd(), source.file) || source.file,
+    };
+
+  const placed = found
+    .map((f, index) => ({
+      f: {
+        ...f,
+        ...(f.source && { source: where(f.source) }),
+        ...(f.related && {
+          related: f.related.map((r) => (r.source ? { ...r, source: where(r.source) } : r)),
+        }),
+      },
+      index,
+    }))
+    .sort((a, b) => RANKS.indexOf(a.f.severity) - RANKS.indexOf(b.f.severity) || a.index - b.index)
+    .map(({ f }) => f);
+
+  const by = (severity: Severity) => placed.filter((f) => f.severity === severity);
+  const described = model && at ? describe(model, at) : undefined;
 
   if (values.json)
     console.log(
       JSON.stringify(
         {
-          duration,
-          times: measured,
-          findings: findings.map((found) => ({ ...found, source: where(found.source) })),
+          errors: by("error"),
+          warnings: by("warning"),
+          info: by("info"),
+          ...(described && { frames: described.frames, timeline: described.timeline }),
         },
         null,
         2,
       ),
     );
   else {
-    for (const found of findings)
-      console.log(`${where(found.source)}  ${found.rule}  ${found.severity}: ${found.message}`);
+    for (const f of placed) {
+      const place = f.source
+        ? `${f.source.file}:${f.source.line}${f.source.column === undefined ? "" : `:${f.source.column}`}`
+        : file;
 
-    const warnings = findings.length - errors;
+      console.log(`${place}  ${f.code}  ${f.severity}: ${f.message}\n    hint: ${f.hint}`);
+    }
+
     const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+    const shown = (t: number) => Number(t.toFixed(3));
+
+    const how = measured
+      ? `; loop ${shown(measured.duration)}s, measured at ${measured.times.length > 12 ? `${measured.times.length} times from ${shown(measured.times[0]!)}s to ${shown(measured.times.at(-1)!)}s` : measured.times.map(shown).join(", ")}`
+      : values["no-browser"]
+        ? "; model only"
+        : "";
+
     console.log(
-      `${plural(errors, "error")}, ${plural(warnings, "warning")}; loop ${Number(duration.toFixed(3))}s, measured at ${measured.map((time) => Number(time.toFixed(3))).join(", ")}`,
+      `${plural(by("error").length, "error")}, ${plural(by("warning").length, "warning")}, ${by("info").length} info${how}`,
     );
+
+    if (described) console.log(`\n${described.text}`);
+    else if (at)
+      console.log(
+        "\n--at describes a scene model; this file is SVG, so there is nothing to describe.",
+      );
   }
 
-  if (errors > 0) process.exitCode = 1;
+  if (by("error").length > 0) process.exitCode = 1;
 };
 
 const devCommand = async (args: string[]): Promise<void> => {

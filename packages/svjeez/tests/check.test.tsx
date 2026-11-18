@@ -322,9 +322,9 @@ describe.if(browser)("checkScene", () => {
     const withCues = run();
 
     expect(uniform.exitCode).toBe(0);
-    expect(uniform.stdout.toString()).not.toContain('"rule": "overlap"');
+    expect(uniform.stdout.toString()).not.toContain('"code": "overlap"');
     expect(withCues.exitCode).toBe(0);
-    expect(withCues.stdout.toString()).toContain('"rule": "overlap"');
+    expect(withCues.stdout.toString()).toContain('"code": "overlap"');
   });
 
   test("svjeez check prints file:line:column findings and exits 1 on an error", () => {
@@ -340,7 +340,58 @@ describe.if(browser)("checkScene", () => {
     expect(out).toMatch(
       /offscreen\.tsx:9:7 {2}off-canvas {2}error: <circle> is outside the 100x60 canvas/,
     );
+    expect(out).toContain("\n    hint: Move it onto the canvas, or remove it.");
     expect(out).toContain("1 error, 0 warnings");
+  });
+
+  const cli = (...flags: string[]) =>
+    Bun.spawnSync([process.execPath, join(import.meta.dir, "../src/cli.ts"), "check", ...flags]);
+
+  test("svjeez check reads a scene model first, names nodes by key, and says each rule once", () => {
+    const result = cli(join(import.meta.dir, "fixtures/check/model.tsx"), "--json");
+    const report = JSON.parse(result.stdout.toString());
+
+    expect(result.exitCode).toBe(1);
+    expect(Object.keys(report)).toEqual(["errors", "warnings", "info"]);
+    expect(report.errors).toEqual([
+      expect.objectContaining({
+        code: "off-canvas",
+        key: "lost",
+        source: expect.objectContaining({ line: 8 }),
+        hint: "Move it onto the canvas, or remove it.",
+      }),
+    ]);
+    expect(result.stdout.toString()).not.toMatch(/<(rect|path|circle)>/);
+  });
+
+  test("svjeez check --no-browser reads the model alone, and --at describes the picture", () => {
+    const result = cli(
+      join(import.meta.dir, "fixtures/check/model.tsx"),
+      "--no-browser",
+      "--at",
+      "1",
+    );
+
+    const out = result.stdout.toString();
+
+    expect(out).toContain("1 error, 0 warnings, 1 info; model only");
+    expect(out).toContain("at 1s:");
+    expect(out).toContain("dot: shown throughout; at 0s–end");
+  });
+
+  test("a scene that throws while it builds is a finding in the same shape", () => {
+    const result = cli(join(import.meta.dir, "fixtures/check/broken.tsx"), "--json");
+    const report = JSON.parse(result.stdout.toString());
+
+    expect(result.exitCode).toBe(1);
+    expect(report.errors).toEqual([
+      expect.objectContaining({
+        code: "compile-error",
+        key: "",
+        message: "width is not known yet",
+        source: expect.objectContaining({ line: 6 }),
+      }),
+    ]);
   });
 });
 

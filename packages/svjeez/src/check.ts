@@ -21,7 +21,12 @@ export type CheckRule =
 export interface Finding {
   readonly rule: CheckRule;
   readonly severity: "error" | "warning";
+  /** What is wrong, then `hint`. */
   readonly message: string;
+  /** What to change: the last sentence of `message`. */
+  readonly hint: string;
+  /** The key of the scene-model node that drew the element, when the scene was rendered with sources. */
+  readonly key?: string;
   readonly times: readonly Seconds[];
   readonly source?: string;
   readonly element: string;
@@ -47,10 +52,16 @@ const HOLD = 0.1;
 
 const round = (time: Seconds): Seconds => Number(time.toFixed(3));
 
+/** What a scene-model node's element is, by the tag the backend drew it as. */
+const kindOf = (tag: string): string =>
+  tag === "text" ? "text" : tag === "image" ? "image" : tag === "use" ? "instance" : "shape";
+
 const name = (element: PageElement): string =>
-  element.text === undefined
-    ? `<${element.tag}>`
-    : `<text "${element.text.length >= 40 ? `${element.text}…` : element.text}">`;
+  element.key !== undefined
+    ? `${kindOf(element.tag)} "${element.key}"${element.text === undefined ? "" : ` ("${element.text}")`}`
+    : element.text === undefined
+      ? `<${element.tag}>`
+      : `<text "${element.text.length >= 40 ? `${element.text}…` : element.text}">`;
 
 const list = (times: readonly Seconds[]): string =>
   times.map((time) => `${round(time)}s`).join(", ");
@@ -210,12 +221,15 @@ const finding = (
   element: PageElement,
   times: readonly Seconds[],
   message: string,
+  hint: string,
 ): Finding => ({
   rule,
   severity,
-  message,
+  message: `${message} ${hint}`,
+  hint,
   times: times.map(round),
   element: name(element),
+  ...(element.key !== undefined && { key: element.key }),
   ...(element.source && { source: element.source }),
 });
 
@@ -252,7 +266,8 @@ const offCanvas = (
           "error",
           leaf,
           seen.map((s) => s.time),
-          `${name(leaf)} is outside the ${width}x${height} canvas at every time it is visible (${list(seen.map((s) => s.time))}). Move it onto the canvas, or remove it.`,
+          `${name(leaf)} is outside the ${width}x${height} canvas at every time it is visible (${list(seen.map((s) => s.time))}).`,
+          "Move it onto the canvas, or remove it.",
         ),
       ];
 
@@ -282,7 +297,8 @@ const offCanvas = (
         "warning",
         leaf,
         cut.map((c) => c.time),
-        `${name(leaf)} is cut off ${Math.round(Math.max(...sides))} past the ${edge} edge of the canvas while it rests (${list(cut.map((c) => c.time))}). Move it inside, or let it bleed well past the edge if the crop is meant.`,
+        `${name(leaf)} is cut off ${Math.round(Math.max(...sides))} past the ${edge} edge of the canvas while it rests (${list(cut.map((c) => c.time))}).`,
+        "Move it inside, or let it bleed well past the edge if the crop is meant.",
       ),
     ];
   });
@@ -368,7 +384,8 @@ const textOverflow = (
             "warning",
             leaf,
             [...new Set(seen)],
-            `${name(leaf)} runs ${Math.round(worst.by)} past the ${worst.edge} edge of ${worst.of} (${list([...new Set(seen)])}). Shorten it, shrink the font, or widen what holds it.`,
+            `${name(leaf)} runs ${Math.round(worst.by)} past the ${worst.edge} edge of ${worst.of} (${list([...new Set(seen)])}).`,
+            "Shorten it, shrink the font, or widen what holds it.",
           ),
         ];
   });
@@ -446,7 +463,8 @@ const overlap = (
       "warning",
       a,
       seen,
-      `${name(a)} and ${name(b)}${b.source ? ` at ${b.source}` : ""} overlap while both are visible (${list(seen)}). Move one, or hide one while the other shows.`,
+      `${name(a)} and ${name(b)}${b.source ? ` at ${b.source}` : ""} overlap while both are visible (${list(seen)}).`,
+      "Move one, or hide one while the other shows.",
     );
   });
 };
@@ -460,7 +478,8 @@ const still = (animated: readonly PageElement[], series: readonly PageSeries[]):
             "warning",
             element,
             [],
-            `${name(element)} carries an animation but draws nothing at any time in the loop. Attach the motion to the element you see, or give this one content.`,
+            `${name(element)} carries an animation but draws nothing at any time in the loop.`,
+            "Attach the motion to the element you see, or give this one content.",
           ),
         ]
       : series[index] && !series[index].changes && !series[index].shownThroughout
@@ -470,7 +489,8 @@ const still = (animated: readonly PageElement[], series: readonly PageSeries[]):
               "warning",
               element,
               [],
-              `${name(element)} carries an animation, yet none of its animated values change across the loop. The motion is not attached to what moves, its values never differ, or it starts after the scene's duration.`,
+              `${name(element)} carries an animation, yet none of its animated values change across the loop.`,
+              "The motion is not attached to what moves, its values never differ, or it starts after the scene's duration.",
             ),
           ]
         : [],
@@ -501,7 +521,8 @@ const visibleAtZero = (
           "error",
           element,
           [0],
-          `${name(element)} shows from 0s, cuts to hidden at ${at(cut)}s, and comes straight back in by ${at(rise)}s. Start its motion from the hidden values, as in motion({ opacity: 0 }).`,
+          `${name(element)} shows from 0s, cuts to hidden at ${at(cut)}s, and comes straight back in by ${at(rise)}s.`,
+          "Start its motion from the hidden values, as in motion({ opacity: 0 }).",
         ),
       ];
 
@@ -514,7 +535,8 @@ const visibleAtZero = (
           "error",
           element,
           [0],
-          `${name(element)} has its fill showing at 0s while its stroke only draws in by ${at(full)}s. Set fill="none", or fade the fill in after the draw.`,
+          `${name(element)} has its fill showing at 0s while its stroke only draws in by ${at(full)}s.`,
+          'Set fill="none", or fade the fill in after the draw.',
         ),
       ];
 
@@ -582,7 +604,8 @@ const seam = (
           "warning",
           leaf,
           [before, 0],
-          `${name(leaf)} ${what} when the loop restarts, between ${round(before)}s and 0s. End its motion where it starts (.rewind() closes a loop), or fade it out before the end.`,
+          `${name(leaf)} ${what} when the loop restarts, between ${round(before)}s and 0s.`,
+          "End its motion where it starts (.rewind() closes a loop), or fade it out before the end.",
         ),
       ];
     }),

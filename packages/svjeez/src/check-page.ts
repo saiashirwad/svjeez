@@ -1,5 +1,7 @@
 export interface PageElement {
   readonly tag: string;
+  /** The key of the scene-model node that drew it, when the backend wrote one. */
+  readonly key?: string;
   readonly source?: string;
   readonly text?: string;
   readonly order: number;
@@ -116,6 +118,7 @@ export const setup = (): PageSetup => {
 
   const describe = (el: Element): PageElement => {
     const source = el.closest("[data-source]")?.getAttribute("data-source") ?? undefined;
+    const key = el.closest("[data-key]")?.getAttribute("data-key") ?? undefined;
 
     const text =
       el.localName === "text"
@@ -155,6 +158,7 @@ export const setup = (): PageSetup => {
     return {
       tag: el.localName,
       order: order.get(el) ?? 0,
+      ...(key !== undefined && { key }),
       ...(source && { source }),
       ...(text !== undefined && { text }),
       ...(masked && { masked }),
