@@ -81,8 +81,7 @@ export type TextChild =
   | undefined
   | readonly TextChild[];
 
-export interface RunProps extends Omit<RunStyle, "opacity"> {
-  readonly opacity?: Anim<number>;
+export interface RunProps extends RunStyle {
   readonly children?: TextChild;
 }
 

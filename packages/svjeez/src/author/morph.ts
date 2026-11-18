@@ -271,9 +271,7 @@ const agreed = <T>(entry: Entry, read: (node: SceneNode) => T, what: string): T 
   return values[0]!;
 };
 
-const rotateScale = (layer: Layer, [x, y]: Vec): Vec => {
-  // SAFETY: the caller only passes layers whose rotate and scale are fixed.
-  const [rotate, [sx, sy]] = [layer.rotate as number, layer.scale as Vec];
+const rotateScale = (rotate: number, [sx, sy]: Vec, [x, y]: Vec): Vec => {
   const angle = (rotate * Math.PI) / 180;
   const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
 
@@ -290,7 +288,7 @@ const rebased = (entry: Entry, node: SceneNode, origin: Vec): readonly Layer[] =
       throw new SceneError(
         `morph() can't blend ${named(entry.key)}: it turns or scales in a state, and its origin moves between states. Give it the same origin in every state, as in origin={[x, y]}.`,
       );
-    const [mx, my] = rotateScale(layer, [dx, dy]);
+    const [mx, my] = rotateScale(layer.rotate, layer.scale, [dx, dy]);
     const shift: Vec = [dx - mx, dy - my];
     const move = (offset: Vec): Vec => [offset[0] + shift[0], offset[1] + shift[1]];
 
