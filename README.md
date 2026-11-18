@@ -13,7 +13,7 @@ From a new directory with Node 20 or later:
 ```sh
 npm init -y
 npm pkg set type=module
-npm install svjeez
+npm install svjeez@next
 npm install -D tsx typescript
 ```
 
@@ -70,25 +70,25 @@ npx svjeez check scene.tsx
 npx svjeez frames scene.tsx --times 0,1,2 --sheet
 ```
 
-Open **Timeline** in the dev preview to inspect clips and motion tracks. **Check layout** and the `check` command report layout and timing findings with source locations. Open `frames/sheet.png` to review the picture at each selected time. Run `npx svjeez skill --install` for the [authoring guide](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/SKILL.md) and worked examples.
+Open **Timeline** in the dev preview to inspect clips and motion tracks. **Check layout** and the `check` command report layout and timing findings with source locations. Open `frames/sheet.png` to review the picture at each selected time. Run `npx svjeez skill --install` for the [authoring guide](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/SKILL.md) and worked examples.
 
 ## Packages
 
 Each package runs while the scene compiles, so the SVG still carries no script.
 
-- [`svjeez`](https://github.com/saiashirwad/svjeez/tree/main/packages/svjeez): scenes, layout, text, timelines, the SVG backend and the CLI
-- [`@svjeez/fonts`](https://github.com/saiashirwad/svjeez/tree/main/packages/fonts): Google Fonts by name, subset and embedded
-- [`@svjeez/icons`](https://github.com/saiashirwad/svjeez/tree/main/packages/icons): Tabler and Lucide icons as an `<Icon>` node
-- [`@svjeez/charts`](https://github.com/saiashirwad/svjeez/tree/main/packages/charts): bar, line and area charts on shared axes
-- [`@svjeez/dom`](https://github.com/saiashirwad/svjeez/tree/main/packages/dom): HTML, React or Svelte states recorded in Chromium as snapshot data
-- [`@svjeez/code`](https://github.com/saiashirwad/svjeez/tree/main/packages/code): highlighted code that types itself and morphs
-- [`@svjeez/geo`](https://github.com/saiashirwad/svjeez/tree/main/packages/geo): maps and turning globes from GeoJSON or TopoJSON
-- [`@svjeez/math`](https://github.com/saiashirwad/svjeez/tree/main/packages/math): TeX as glyph shapes, plots, constructions and plane transformations
-- [`@svjeez/diagrams`](https://github.com/saiashirwad/svjeez/tree/main/packages/diagrams): flowcharts, sequence diagrams, state machines, trees and swimlanes, laid out and revealed
-- [`@svjeez/mermaid`](https://github.com/saiashirwad/svjeez/tree/main/packages/mermaid): Mermaid flowcharts, sequence and state diagrams drawn as svjeez diagrams
-- [`@svjeez/video`](https://github.com/saiashirwad/svjeez/tree/main/packages/video): MP4 or WebM from a scene
-- [`@svjeez/vite`](https://github.com/saiashirwad/svjeez/tree/main/packages/vite), [`@svjeez/astro`](https://github.com/saiashirwad/svjeez/tree/main/packages/astro): scenes compiled into a Vite app or Astro site
+- [`svjeez`](https://github.com/saiashirwad/svjeez/tree/next/packages/svjeez): scenes, layout, text, timelines, the SVG backend and the CLI
+- [`@svjeez/fonts`](https://github.com/saiashirwad/svjeez/tree/next/packages/fonts): Google Fonts by name, subset and embedded
+- [`@svjeez/icons`](https://github.com/saiashirwad/svjeez/tree/next/packages/icons): Tabler and Lucide icons as an `<Icon>` node
+- [`@svjeez/charts`](https://github.com/saiashirwad/svjeez/tree/next/packages/charts): bar, line and area charts on shared axes
+- [`@svjeez/dom`](https://github.com/saiashirwad/svjeez/tree/next/packages/dom): HTML, React or Svelte states recorded in Chromium as snapshot data
+- [`@svjeez/code`](https://github.com/saiashirwad/svjeez/tree/next/packages/code): highlighted code that types itself and morphs
+- [`@svjeez/geo`](https://github.com/saiashirwad/svjeez/tree/next/packages/geo): maps and turning globes from GeoJSON or TopoJSON
+- [`@svjeez/math`](https://github.com/saiashirwad/svjeez/tree/next/packages/math): TeX as glyph shapes, plots, constructions and plane transformations
+- [`@svjeez/diagrams`](https://github.com/saiashirwad/svjeez/tree/next/packages/diagrams): flowcharts, sequence diagrams, state machines, trees and swimlanes, laid out and revealed
+- [`@svjeez/mermaid`](https://github.com/saiashirwad/svjeez/tree/next/packages/mermaid): Mermaid flowcharts, sequence and state diagrams drawn as svjeez diagrams
+- [`@svjeez/video`](https://github.com/saiashirwad/svjeez/tree/next/packages/video): MP4 or WebM from a scene
+- [`@svjeez/vite`](https://github.com/saiashirwad/svjeez/tree/next/packages/vite), [`@svjeez/astro`](https://github.com/saiashirwad/svjeez/tree/next/packages/astro): scenes compiled into a Vite app or Astro site
 
 ## Contributing
 
-Run `bun install` at the root, then `bun run typecheck` and `bun run test`. See [AGENTS.md](https://github.com/saiashirwad/svjeez/blob/main/AGENTS.md) for the workspace and release process, and [UPGRADING.md](https://github.com/saiashirwad/svjeez/blob/main/UPGRADING.md) for the 0.7 migration.
+Run `bun install` at the root, then `bun run typecheck` and `bun run test`. See [AGENTS.md](https://github.com/saiashirwad/svjeez/blob/next/AGENTS.md) for the workspace and release process, and [UPGRADING.md](https://github.com/saiashirwad/svjeez/blob/next/UPGRADING.md) for migration between versions.

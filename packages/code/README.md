@@ -3,7 +3,7 @@
 Syntax-highlighted code for svjeez scenes. `<Code>` tokenizes with Shiki while the scene compiles and colors each token from a palette, in light and dark. The SVG carries no script.
 
 ```sh
-npm i -D @svjeez/code svjeez
+npm i -D @svjeez/code@next @svjeez/fonts@next svjeez@next
 ```
 
 ```tsx

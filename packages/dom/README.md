@@ -3,7 +3,7 @@
 Record states of real HTML, React or Svelte in headless Chromium as data an svjeez scene can draw. This package reads and records; drawing a snapshot is not part of it yet.
 
 ```sh
-npm i -D @svjeez/dom svjeez playwright-core
+npm i -D @svjeez/dom@next svjeez@next playwright-core
 npx playwright-core install chromium-headless-shell
 ```
 

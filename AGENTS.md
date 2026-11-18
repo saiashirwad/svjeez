@@ -22,7 +22,8 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/code/` is `@svjeez/code`, which highlights source with Shiki into a `<Code>` node that types itself and morphs by line.
 - `packages/geo/` is `@svjeez/geo`, which projects GeoJSON and TopoJSON into maps and turning globes.
 - `packages/math/` is `@svjeez/math`, which typesets TeX into glyph shapes through MathJax and draws plots, constructions and plane transformations as geometry.
-- `packages/diagrams/` is `@svjeez/diagrams`, which lays out and reveals flowcharts, sequence diagrams, state machines, trees and swimlanes.- `packages/mermaid/` is `@svjeez/mermaid`, which reads Mermaid text and draws it with `@svjeez/diagrams`: `mermaid()` returns the matching flowchart, sequence diagram or state machine.
+- `packages/diagrams/` is `@svjeez/diagrams`, which lays out and reveals flowcharts, sequence diagrams, state machines, trees and swimlanes.
+- `packages/mermaid/` is `@svjeez/mermaid`, which reads Mermaid text and draws it with `@svjeez/diagrams`: `mermaid()` returns the matching flowchart, sequence diagram or state machine.
 - `packages/video/` is `@svjeez/video`, which encodes a scene as MP4 or WebM through Mediabunny in headless Chromium.
 - `examples/` holds the scene-model example scenes and their committed output in `examples/dist/`. It is private and never published. The 0.7 example SVGs used for frame comparisons when porting live in `main`'s history (`git show main:examples/dist/<name>.svg`).
 
@@ -69,7 +70,7 @@ Paths in this section are relative to `packages/svjeez/`.
 
 These are the rules that aren't visible from one file:
 
-- `@svjeez/vite` and `@svjeez/astro` never import svjeez. Scenes run in a Vite environment of their own that compiles JSX as svjeez. Run `bun run test` in `packages/vite/` to build and serve the React app in `test/app/`, and `bun run dev` there to open it.
+- `@svjeez/vite` runs scenes in a separate Vite environment that compiles JSX as svjeez. Its runner loads svjeez in that environment, so the plugin and Astro integration can load in an app that uses a different JSX runtime. Run `bun run test` in `packages/vite/` to build and serve the React app in `test/app/`, and `bun run dev` there to open it.
 - `@svjeez/fonts` is the only package that touches the network. The examples load every font through it, and the library's own tests read the TTFs in `packages/svjeez/tests/fixtures/`.
 - A package that scene writers use has an example scene in `examples/` and a reference in `skills/svjeez/references/`.
 
