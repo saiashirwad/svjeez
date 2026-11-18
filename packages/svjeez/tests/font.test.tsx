@@ -4,7 +4,7 @@ import { Group, Run, Text, font, scene, type SceneElement } from "svjeez";
 import { svg, type FontValue } from "svjeez/tools";
 import { validateSvg } from "svjeez/frames";
 import { contours, pathData } from "../src/font/glyf";
-import { sfnt } from "../src/font/sfnt";
+import { required, sfnt, u16 } from "../src/font/sfnt";
 import { typesetter } from "../src/font/shape";
 import { subset } from "../src/font/subset";
 
@@ -276,7 +276,7 @@ describe("embedding", () => {
     const real = typesetter(parsed);
     const clef = "\u{1d11e}";
     const remapped = { ...real, glyph: (char: string) => real.glyph(char === clef ? "H" : char) };
-    const cut = font(subset(bytes, parsed, remapped, real.kern, [`${clef}i`])!);
+    const cut = font(subset(bytes, parsed, remapped, [`${clef}i`])!);
     expect(cut.has(clef) && cut.has("i")).toBe(true);
     expect(cut.has("H")).toBe(false);
   });
@@ -292,6 +292,72 @@ describe("embedding", () => {
     const out = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><style>@font-face{font-family:'Big';src:url(${big}) format('woff2')}</style><text font-family="'Big'">Hi</text></svg>`;
 
     expect(validateSvg(out).warnings.join("\n")).toContain("An embedded font is");
+  });
+});
+
+describe("subset", () => {
+  const load = async (name: string) => {
+    const bytes = new Uint8Array(await readFile(fixture(name)));
+    const parsed = sfnt(bytes);
+
+    return { bytes, parsed, real: typesetter(parsed, false) };
+  };
+
+  test("renumbers the kept glyphs and keeps every advance and the kerning of adjacent pairs", async () => {
+    const { bytes, parsed, real } = await load("ABeeZee-Regular");
+    const texts = ["To AVA", "Wave"];
+    const cut = sfnt(subset(bytes, parsed, real, texts)!);
+    const mine = typesetter(cut, false);
+    const chars = [...new Set(texts.join(""))];
+
+    expect(u16(cut, required(cut, "maxp") + 4)).toBe(1 + chars.length);
+    expect([...cut.tables.keys()].sort()).toEqual(
+      [
+        "OS/2",
+        "cmap",
+        "cvt ",
+        "fpgm",
+        "gasp",
+        "glyf",
+        "head",
+        "hhea",
+        "hmtx",
+        "kern",
+        "loca",
+        "maxp",
+        "name",
+        "post",
+        "prep",
+      ].sort(),
+    );
+
+    for (const text of texts)
+      expect(mine.layoutGlyphs(text).map((glyph) => glyph.advance)).toEqual(
+        real.layoutGlyphs(text).map((glyph) => glyph.advance),
+      );
+
+    const kerning = (t: typeof real, pair: string) => t.kern(t.glyph(pair[0]!), t.glyph(pair[1]!));
+    expect(kerning(real, "AV")).not.toBe(0);
+    expect(kerning(mine, "AV")).toBe(kerning(real, "AV"));
+    expect(kerning(mine, "VA")).toBe(kerning(real, "VA"));
+
+    const apart = chars
+      .flatMap((left) => chars.map((right) => left + right))
+      .filter((pair) => !texts.some((text) => text.includes(pair)) && kerning(real, pair) !== 0);
+
+    expect(apart.length).toBeGreaterThan(0);
+
+    for (const pair of apart) expect(kerning(mine, pair)).toBe(0);
+  });
+
+  test("a composite glyph keeps its components, renumbered, and draws the same outline", async () => {
+    const { bytes, parsed, real } = await load("SpaceMono-Regular");
+    const cut = sfnt(subset(bytes, parsed, real, ["é"])!);
+    const mine = typesetter(cut, false);
+
+    expect(u16(cut, required(cut, "maxp") + 4)).toBeGreaterThan(2);
+    expect(contours(cut, mine.glyph("é"))).toEqual(contours(parsed, real.glyph("é")));
+    expect(contours(cut, mine.glyph("é")).length).toBeGreaterThan(1);
   });
 });
 

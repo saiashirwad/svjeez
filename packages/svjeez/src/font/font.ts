@@ -152,7 +152,7 @@ export class Font {
     if (!href) {
       this.#typesetter ??= typesetter(font, this.ligatures);
       const active = this.#typesetter;
-      const cut = subset(this.#bytes, font, active, active.kern, texts, this.ligatures);
+      const cut = subset(this.#bytes, font, active, texts, this.ligatures);
       href = cut ? `data:font/ttf;base64,${base64(cut)}` : this.href;
       this.#embeds.set(key, href);
     }
