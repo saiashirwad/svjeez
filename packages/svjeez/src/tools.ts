@@ -37,6 +37,8 @@ export type {
 
 export type { LayerValues, Layers, Motion } from "./author/track";
 
+export type { TextContent } from "./author/count";
+
 export type {
   DrawOptions,
   EnterOptions,

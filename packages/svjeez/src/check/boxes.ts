@@ -137,7 +137,7 @@ export const placements = (scene: Scene, at: Seconds = 0): Placed[] => {
     const inside = node.children.map((child) => visit(child, own, opacity, depth + 1));
     const back = inverse(own);
 
-    if (depth > 0) {
+    if (depth > 0 && !(node.kind === "group" && node.authored?.count)) {
       const held = around(inside.flatMap((child) => corners(child.box)));
 
       const frame =

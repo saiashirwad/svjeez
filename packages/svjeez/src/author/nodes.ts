@@ -10,6 +10,7 @@ import type { MorphElement } from "./morph";
 import type { Timeline } from "./timeline";
 import type { Anim, Layers } from "./track";
 import type { Effect } from "./effects";
+import type { TextContent } from "./count";
 import { rect, type Geometry, type Paint } from "./values";
 
 export { Ref, ref } from "./refs";
@@ -95,7 +96,7 @@ export interface TextProps extends Omit<Common, "anchor"> {
   readonly align?: "start" | "center" | "end";
   readonly width?: number;
   readonly lineHeight?: number;
-  readonly children?: TextChild;
+  readonly children?: TextContent;
 }
 
 export interface ImageProps extends Common {

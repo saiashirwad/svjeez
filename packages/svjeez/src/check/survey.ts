@@ -2,6 +2,7 @@ import { isHold, type Seconds } from "../model/time";
 import { placements, type Matrix, type Placed } from "./boxes";
 import type {
   Animated,
+  Authored,
   Box,
   Color,
   Geometry,
@@ -42,6 +43,15 @@ export const entriesOf = (scene: Scene): Entry[] => {
 
   return out;
 };
+
+export const countOf = (node: SceneNode): NonNullable<Authored["count"]> | undefined =>
+  node.kind === "group" ? node.authored?.count : undefined;
+
+export const inCount = (entry: Entry): boolean =>
+  entry.ancestors.some((node) => countOf(node) !== undefined);
+
+export const countAt = (count: NonNullable<Authored["count"]>, t: Seconds): string =>
+  (count.ticks.findLast((tick) => tick.t <= t + 1e-9) ?? count.ticks[0]!).text;
 
 export const sourcesOf = (scene: Scene): Map<string, Source> => {
   const out = new Map<string, Source>();

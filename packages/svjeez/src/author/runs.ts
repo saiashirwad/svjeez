@@ -1,7 +1,8 @@
 import { SceneError } from "../model/scene-error";
 import { Font, FontFamily, type FontValue } from "../font/font";
 import type { Face } from "../model/ir";
-import type { RunProps, RunStyle, SceneElement, TextChild } from "./nodes";
+import type { RunProps, RunStyle, SceneElement } from "./nodes";
+import { isCount, type TextContent } from "./count";
 
 export type Asked = RunStyle & Required<Pick<RunStyle, "font">>;
 
@@ -10,16 +11,16 @@ export interface AskedPiece {
   readonly asked: Asked;
 }
 
-const isList = (child: TextChild): child is readonly TextChild[] => Array.isArray(child);
+const isList = (child: TextContent): child is readonly TextContent[] => Array.isArray(child);
 
-const isWords = (child: TextChild): child is string | number =>
+const isWords = (child: TextContent): child is string | number =>
   typeof child === "string" || typeof child === "number";
 
 const isRun = (child: SceneElement): child is { readonly type: "run"; readonly props: RunProps } =>
   child.type === "run";
 
-const isElement = (child: TextChild): child is SceneElement =>
-  typeof child === "object" && child !== null && !isList(child);
+const isElement = (child: TextContent): child is SceneElement =>
+  typeof child === "object" && child !== null && !isList(child) && !isCount(child);
 
 const over = (style: Asked, run: RunProps): Asked => ({
   ...style,
@@ -30,8 +31,14 @@ const over = (style: Asked, run: RunProps): Asked => ({
   ...(run.opacity !== undefined && { opacity: run.opacity }),
 });
 
-export const piecesOf = (children: TextChild, style: Asked, where: string): AskedPiece[] => {
+export const piecesOf = (children: TextContent, style: Asked, where: string): AskedPiece[] => {
   if (children === undefined || children === null || children === false) return [];
+
+  if (isCount(children))
+    throw new SceneError(
+      `${where} holds a count() inside a <Run>, and a count goes straight in its <Text>.`,
+      "Write <Text …>{count(…)}</Text>, and style the whole <Text>.",
+    );
 
   if (isWords(children)) return [{ text: String(children), asked: style }];
 

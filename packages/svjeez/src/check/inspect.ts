@@ -27,8 +27,11 @@ import {
   changesOf,
   clearThroughout,
   colorAt,
+  countAt,
+  countOf,
   covers,
   entriesOf,
+  inCount,
   framesOf,
   hiddenOf,
   inside,
@@ -579,7 +582,8 @@ const fading = (entry: Entry, t: Seconds): boolean =>
 const overlap = (survey: Survey): void => {
   const texts = survey.entries.filter(
     (entry) =>
-      entry.node.kind === "text" &&
+      (entry.node.kind === "text" || countOf(entry.node) !== undefined) &&
+      !inCount(entry) &&
       !isGone(survey, entry) &&
       ![...entry.ancestors, entry.node].some((node) => node.mask !== undefined),
   );
@@ -604,9 +608,7 @@ const overlap = (survey: Survey): void => {
       for (let y = x + 1; y < up.length; y++) {
         const [a, b] = [up[x]!, up[y]!];
 
-        if (a.entry.node.kind !== "text" || b.entry.node.kind !== "text") continue;
-
-        if (textOf(a.entry.node) === textOf(b.entry.node)) continue;
+        if (wordsAt(a.entry.node, t) === wordsAt(b.entry.node, t)) continue;
         const shared = sharedArea(a.box, b.box);
 
         if (shared <= 0.3 * Math.min(area(a.box), area(b.box))) continue;
@@ -620,8 +622,7 @@ const overlap = (survey: Survey): void => {
       }
   });
 
-  for (const { a, b, times } of pairs.values()) {
-    if (a.node.kind !== "text" || b.node.kind !== "text") continue;
+  for (const { a, b, times } of pairs.values())
     add(survey, {
       code: "overlap",
       severity: "warning",
@@ -631,7 +632,12 @@ const overlap = (survey: Survey): void => {
       times,
       related: [b.node.key],
     });
-  }
+};
+
+const wordsAt = (node: SceneNode, t: Seconds): string => {
+  const count = countOf(node);
+
+  return count ? countAt(count, t) : node.kind === "text" ? textOf(node) : "";
 };
 
 const hiddenBetween = (
@@ -1122,12 +1128,32 @@ const loopSeam = (survey: Survey): void => {
   const byKey = new Map(survey.entries.map((each) => [each.node.key, each.node]));
 
   for (const entry of survey.entries.slice(1)) {
-    if (isGone(survey, entry)) continue;
+    if (isGone(survey, entry) || inCount(entry)) continue;
     const { node } = entry;
     const [a, b] = [first.get(node.key), last.get(node.key)];
 
     const hidden = survey.hidden.get(node.key) ?? [];
     const above = entry.ancestors.at(-1);
+    const count = countOf(node);
+
+    if (
+      count &&
+      a &&
+      b &&
+      a.opacity > VISIBLE &&
+      b.opacity > VISIBLE &&
+      !inside(hidden, 0) &&
+      !inside(hidden, end) &&
+      countAt(count, end) !== countAt(count, 0)
+    )
+      add(survey, {
+        code: "loop-seam",
+        severity: "warning",
+        key: node.key,
+        message: `${label(node)} shows ${JSON.stringify(countAt(count, end))} at the end and jumps to ${JSON.stringify(countAt(count, 0))} when the loop starts again at 0s.`,
+        hint: "Count back to where it starts (.rewind() on its track), or fade it out before the end.",
+        times: [Number(end.toFixed(3)), 0],
+      });
 
     if (
       b &&

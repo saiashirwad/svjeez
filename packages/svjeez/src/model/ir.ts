@@ -34,6 +34,7 @@ export interface Authored {
   readonly wrap?: { readonly width: number; readonly cuts: readonly number[] };
   readonly backdrop?: true;
   readonly ends?: readonly string[];
+  readonly count?: { readonly ticks: readonly { readonly t: Seconds; readonly text: string }[] };
 }
 
 export type { Ease, Seconds };

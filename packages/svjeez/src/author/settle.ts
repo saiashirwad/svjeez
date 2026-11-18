@@ -492,7 +492,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
         measure(child);
       }
 
-      d.box = d.note?.arranged ? d.node.box : around(d.children);
+      d.box = d.note?.arranged || d.node.authored?.count ? d.node.box : around(d.children);
     }
 
     d.origin = originOf(

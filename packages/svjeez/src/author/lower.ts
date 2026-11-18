@@ -22,7 +22,6 @@ import type {
   ShapeNode,
   Face,
   TextLine,
-  TextNode,
   TextRun,
   TokenValue,
   Vec,
@@ -87,6 +86,7 @@ import { FontBook, charName, faceOf, piecesOf, type Asked } from "./runs";
 import { lookOf, paintedBoxOf } from "../model/painted";
 import { hasCoordinates, minus, pinned } from "./pin";
 import { layoutRuns } from "./text";
+import { countedNodes, countingIn, formatOf, ticksOf } from "./count";
 import { blendable, gradientOf, isWrittenGradient, mixPaint } from "./paint";
 import type { Effect as EffectProps } from "./effects";
 
@@ -301,8 +301,9 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
   };
 };
 
-const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode => {
+const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNode => {
   const where = named(key);
+  const counting = countingIn(props.children, where);
 
   const own: Asked = {
     font: props.font,
@@ -357,7 +358,71 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
     return look;
   };
 
-  const asked = piecesOf(props.children, own, where);
+  const unseen = (look: RunLook, words: string): void => {
+    const missing = FontBook.missing(look.font, words);
+
+    if (missing.length === 0) return;
+    const { family, weight, style } = look.face;
+
+    throw new SceneError(
+      `${where} draws ${JSON.stringify(words.trim())} in ${family} ${weight}${style === "italic" ? " italic" : ""}, which has no glyph for ${missing.map(charName).join(", ")}.`,
+      `Use a font that has ${missing.length === 1 ? "it" : "them"}, or leave ${missing.length === 1 ? "it" : "them"} out: no other font fills in.`,
+    );
+  };
+
+  const counted = ((): { node: SceneNode } | { words: string } | undefined => {
+    if (!counting) return undefined;
+
+    if (props.width !== undefined)
+      throw new SceneError(
+        `${where} counts, and a count doesn't wrap, so it takes no width.`,
+        "Drop width: the <Text> is as wide as the widest number it shows.",
+      );
+    const look = styleOf(own);
+
+    if (!look)
+      throw new SceneError(
+        `${where} counts with no fill, so it paints nothing.`,
+        "Give the <Text> a fill, as in fill={theme.text}.",
+      );
+    const format = formatOf(counting.count.format, where);
+    const value = animated(counting.count.value, keep, timing, mixNumber, `the count in ${where}`);
+    const ticks = ticksOf(value, ctx.duration, format, where);
+    const { before, after } = counting;
+
+    unseen(look, before + ticks.map((tick) => tick.text).join("") + after);
+
+    if (ticks.length === 1) return { words: before + ticks[0]!.text + after };
+
+    const { box, baseline, node } = countedNodes(
+      {
+        key,
+        where,
+        font: look.font,
+        face: look.face,
+        size: props.size,
+        align: props.align ?? "start",
+        fill: look.fill,
+      },
+      counting,
+      ticks,
+    );
+
+    return {
+      node: {
+        ...base(props, box, key, timing, pinned(props.anchor, box, where, baseline)),
+        authored: {
+          count: { ticks: ticks.map(({ t, text }) => ({ t, text: before + text + after })) },
+        },
+        kind: "group",
+        children: [node],
+      },
+    };
+  })();
+
+  if (counted && "node" in counted) return counted.node;
+
+  const asked = piecesOf(counted ? counted.words : props.children, own, where);
   const found = asked.map((piece) => styleOf(piece.asked));
 
   const borrowed = (i: number): RunLook => {
@@ -381,16 +446,8 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
 
   const pieces = asked.map(({ text: words }, i) => {
     const look = found[i] ?? borrowed(i);
-    const missing = FontBook.missing(look.font, words);
 
-    if (missing.length > 0) {
-      const { family, weight, style } = look.face;
-
-      throw new SceneError(
-        `${where} draws ${JSON.stringify(words.trim())} in ${family} ${weight}${style === "italic" ? " italic" : ""}, which has no glyph for ${missing.map(charName).join(", ")}.`,
-        `Use a font that has ${missing.length === 1 ? "it" : "them"}, or leave ${missing.length === 1 ? "it" : "them"} out: no other font fills in.`,
-      );
-    }
+    unseen(look, words);
 
     return { text: words, face: look.font, style: look };
   });

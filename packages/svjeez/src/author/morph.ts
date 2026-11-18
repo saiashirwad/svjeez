@@ -1,11 +1,12 @@
 import { SceneError } from "../model/scene-error";
-import { named } from "./names";
+import { named, whereOf } from "./names";
 import { num } from "../model/format";
 import { EPSILON, type Seconds } from "../model/time";
 import { checkWindow, span, type Span } from "./span";
 import { matched, mixGeometry } from "../model/geometry";
 import { isPlaced, placedLike } from "./identity";
 import type {
+  Authored,
   Effect,
   Lane,
   Animated,
@@ -791,17 +792,39 @@ const textOf = (plan: Plan, entry: Entry): TextNode | GroupNode => {
   return { ...placed(plan, entry), kind: "group", children };
 };
 
+const countIn = (entry: Entry): Authored["count"] => {
+  const counts = entry.filled
+    .filter((_, s) => entry.present[s])
+    .map((node) => (node.kind === "group" ? node.authored?.count : undefined));
+
+  if (counts.every((count) => count === undefined)) return undefined;
+
+  if (counts.some((count) => !same(count, counts[0])))
+    throw new SceneError(
+      `morph() can't blend ${named(entry.key)}: it counts, and what it counts differs between states.`,
+      "Give its count() the same track in every state, or key the <Text> differently in each state so they crossfade.",
+      whereOf(entry.key),
+    );
+
+  return counts[0];
+};
+
 const build = (plan: Plan, entry: Entry): SceneNode => {
   const rest = firstPresent(entry);
 
   const node = ((): SceneNode => {
     switch (rest.kind) {
-      case "group":
+      case "group": {
+        const count = countIn(entry);
+
         return {
           ...placed(plan, entry),
+          ...(count && { authored: { count } }),
           kind: "group",
           children: entry.children.map((child) => build(plan, child)),
         };
+      }
+
       case "shape":
         return shapeOf(plan, entry);
       case "text":

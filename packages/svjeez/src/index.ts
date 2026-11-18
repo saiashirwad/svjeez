@@ -54,6 +54,8 @@ export { par, seq, stagger, timeline, wait, type Action } from "./author/timelin
 
 export { morph } from "./author/morph";
 
+export { count, type Count, type CountFormat } from "./author/count";
+
 export { picture } from "./author/picture";
 
 export { font } from "./font/font";

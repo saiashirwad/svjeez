@@ -781,6 +781,18 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
   if (single)
     return { drawn, children: line?.runs[0] ? [{ kind: "text", value: line.runs[0].text }] : [] };
 
+  const glyphs = node.lines.flatMap((each) => each.runs);
+
+  if (
+    node.lines.every((each) => each.runs.length === 1) &&
+    glyphs.every((run) => [...run.text].length === 1 && lookOf(run) === lookOf(base!))
+  ) {
+    drawn.attrs.x = glyphs.map((run) => num(at[0] + run.at[0])).join(" ");
+    drawn.attrs.y = glyphs.map((run) => num(at[1] + run.at[1])).join(" ");
+
+    return { drawn, children: [{ kind: "text", value: glyphs.map((run) => run.text).join("") }] };
+  }
+
   let first = true;
 
   const children = node.lines.flatMap((each) =>

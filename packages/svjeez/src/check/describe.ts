@@ -1,13 +1,16 @@
 import type { Seconds } from "../model/time";
 import type { Placed } from "./boxes";
-import type { Animated, Paint, Scene, SceneNode, Vec } from "../model/ir";
+import type { Animated, Paint, Scene, SceneNode, TextNode, Vec } from "../model/ir";
 import { isLane, mapLane } from "../model/lane";
 import {
   between,
   changesOf,
+  countAt,
+  countOf,
   entriesOf,
   framesOf,
   hiddenOf,
+  inCount,
   inside,
   merged,
   ownHidden,
@@ -101,9 +104,11 @@ const nodeAt = (entry: Entry, placed: Placed, t: Seconds, duration: Seconds): De
   const scale: Vec = [Math.hypot(a, b), Math.sign(a * d - b * c) * Math.hypot(c, d)];
   const changing = changingAt(node, t, duration);
   const { x, y, width, height } = placed.box;
+  const count = countOf(node);
 
-  const fill =
-    node.kind === "shape" && node.fill !== undefined
+  const fill = count
+    ? paintAt(firstText(node)!.lines[0]!.runs[0]!.fill, t)
+    : node.kind === "shape" && node.fill !== undefined
       ? paintAt(node.fill, t)
       : node.kind === "text"
         ? [
@@ -118,10 +123,11 @@ const nodeAt = (entry: Entry, placed: Placed, t: Seconds, duration: Seconds): De
 
   return {
     key: node.key,
-    kind: node.kind,
+    kind: count ? "text" : node.kind,
     depth: entry.depth - 1,
     ...(node.kind === "shape" && { geometry: atRest(node.geometry, t).kind }),
     ...(node.kind === "text" && { text: short(textOf(node)) }),
+    ...(count && { text: short(countAt(count, t)) }),
     box: [round(x), round(y), round(width), round(height)],
     ...(Math.abs(placed.opacity - 1) > 0.005 && { opacity: Number(placed.opacity.toFixed(2)) }),
     ...(Math.abs(rotate) > 0.5 && { rotate: Math.round(rotate) }),
@@ -132,6 +138,24 @@ const nodeAt = (entry: Entry, placed: Placed, t: Seconds, duration: Seconds): De
     ...(stroke !== undefined && { stroke }),
     ...(changing.length > 0 && { changing }),
   };
+};
+
+const firstText = (node: SceneNode): TextNode | undefined =>
+  node.kind === "text"
+    ? node
+    : node.kind === "group"
+      ? node.children.map(firstText).find(Boolean)
+      : undefined;
+
+const countSpans = (node: SceneNode): Stretch[] => {
+  const ticks = countOf(node)?.ticks.slice(1) ?? [];
+
+  return merged(
+    ticks.map((tick, i): Stretch => [
+      ticks[i - 1] && tick.t - ticks[i - 1]!.t <= 0.5 ? ticks[i - 1]!.t : tick.t,
+      tick.t,
+    ]),
+  );
 };
 
 const atRest = <T>(value: Animated<T>, t: Seconds): T => {
@@ -183,6 +207,10 @@ const timelineOf = (entry: Entry, duration: Seconds): NodeTimeline | undefined =
     });
   }
 
+  const counting = countSpans(entry.node);
+
+  if (counting.length > 0) animates.push({ value: "count", spans: counting });
+
   if (
     ownHidden(entry.node, duration).length === 0 &&
     trimmedAway(entry.node, duration).length === 0 &&
@@ -198,7 +226,11 @@ export const describe = (scene: Scene, times: readonly Seconds[]): Description =
     if (!(Number.isFinite(t) && t >= 0))
       throw new Error(`describe() takes times in seconds from 0, got ${t}.`);
   const { duration } = scene;
-  const entries = entriesOf(scene).slice(1);
+
+  const entries = entriesOf(scene)
+    .slice(1)
+    .filter((entry) => !inCount(entry));
+
   const hidden = new Map(entries.map((entry) => [entry.node.key, unseenOf(entry, duration)]));
   const placedAt = framesOf(scene, times);
 
@@ -212,7 +244,7 @@ export const describe = (scene: Scene, times: readonly Seconds[]): Description =
     };
 
     const visible = entries.filter((entry) =>
-      entry.node.kind === "group"
+      entry.node.kind === "group" && !countOf(entry.node)
         ? entries.some(
             (inner) =>
               inner.node.kind !== "group" && inner.ancestors.includes(entry.node) && shows(inner),
@@ -293,6 +325,7 @@ const look = (node: DescribedNode, around: DescribedNode | undefined): string =>
 
 const worthALine = (node: SceneNode): boolean =>
   node.kind !== "group" ||
+  countOf(node) !== undefined ||
   !/^\d+$/.test(node.key.split("/").at(-1)!) ||
   node.layers.length > 0 ||
   isLane(node.at) ||
