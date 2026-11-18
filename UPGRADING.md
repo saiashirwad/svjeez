@@ -1,12 +1,12 @@
 # Upgrading from 0.7 to next (0.8.0-next)
 
-`next` replaces the authoring API with the scene model. Nothing from 0.7's root carries over unchanged, so port a scene rather than patch it. Install with `npm i svjeez@next`, along with `@svjeez/fonts@next`, `@svjeez/video@next`, `@svjeez/vite@next` or `@svjeez/astro@next` if you use them.
+`next` replaces the authoring API with the scene model. Nothing from 0.7's root carries over unchanged, so port a scene rather than patch it. Install with `npm i svjeez@next`, along with `@svjeez/fonts@next`, `@svjeez/icons@next`, `@svjeez/video@next`, `@svjeez/vite@next` or `@svjeez/astro@next` if you use them.
 
 - **One import.** The scene model moved to the root: what came from its subpath now comes from `svjeez`, and its tools subpath is `svjeez/tools`. `"jsxImportSource": "svjeez"` builds scene nodes, so drop the scene pragmas.
 - **No SVG tags.** JSX holds components (`<Shape>`, `<Text>`, `<Group>`, `<Stack>`, `<Grid>`, `<Align>`, `<Arrow>`, `<Image>`, `<Sequence>`). `render(options, <svg JSX/>)` becomes `export default scene({ size: [w, h], duration, title }, () => …)`.
 - **Time.** `motion()` chains, `animation={…}`, `<Clip>`, `<Once>`, `<Ambient>`, `<Pivot>` and `show()` are gone. Animate a prop with a `track`, a node with a `motion` layer or a recipe (`enter`, `exit`, `draw`, `wiggle`, `shake`, `spin`, `sampled`), and sequence refs with `timeline()`.
-- **Removed outright.** `def`, `css`, `fx`, `Picture` (use `<Image src={picture(…)}>`), `Glyphs`, `Icon`, ink, the extras (`code`, `terminal`, callouts, themes; use `tokens()`), `Drawn`, `valuesAt`, `svjeez/geometry` and the public `render()`. A module may still default-export an SVG string.
-- **Packages.** charts, code, diagrams, dom, geo, icons, math, mermaid, live, react and svelte stay on 0.7 until they are ported. The CLI's `values` and `set` are gone with the editor.
+- **Removed outright.** `def`, `css`, `fx`, `Picture` (use `<Image src={picture(…)}>`), `Glyphs`, ink, the extras (`code`, `terminal`, callouts, themes; use `tokens()`), `Drawn`, `valuesAt`, `svjeez/geometry` and the public `render()`. A module may still default-export an SVG string.
+- **Packages.** charts, code, diagrams, dom, geo, math, mermaid, live, react and svelte stay on 0.7 until they are ported. The CLI's `values` and `set` are gone with the editor.
 - **restyle.** `onceAt` is gone, and a scene with a morph, a geometry that changes size or an animated effect can't follow a `timeline`.
 
 # Upgrading svjeez from 0.5 or 0.6 to 0.7
@@ -102,7 +102,7 @@ Needs judgment: `show` takes one span or a list, merges overlaps, and keeps both
 
 **12. Tools take scene seconds.** `svjeez frames --times`, `restyle({ at })` and `seek(time)` used playback seconds. They now use the seconds your motions are written in. The numbers are the same unless the scene sets `render({ playbackRate })` other than 1: then multiply each old playback time by `playbackRate`. Check scrub, poster and scroll code that calls `seek` or `restyle`.
 
-**11b. `Icon` is `IconData`** (type of `svjeez`; 0.6.1 exported `Icon` from `@svjeez/icons`). Search `\bIcon\b` imported from `@svjeez/icons`, and import `IconData` from `svjeez`. The tabler and lucide path data are unchanged. `<Icon>` the component, from `svjeez`, keeps its name.
+**11b. `<Icon>` and `IconData` come from `@svjeez/icons`** on `next`, not `svjeez`. The tabler and lucide path data are unchanged. `<Icon icon={rocket} color={theme.text} size={48} />` replaces `x`, `y`, `stroke`, `fill`, `strokeWidth` and `animation`: `color` paints either kind, `at` places it, `width` is the outline width in grid units, and `trim={(piece) => draw(…)}` replaces `animation={(_, each) => draw(…)}`.
 
 ## Escape hatches
 
@@ -246,7 +246,7 @@ Smaller breaking changes, in the order a typecheck will find them.
 
 - `defaultLight` is gone (use `systemLight`), and `inkPath` is no longer exported from `svjeez`.
 - `@svjeez/code`: the palettes (`tomorrow`, `solarizedDark` and the rest) come from `@svjeez/code/palettes` only, and the root no longer re-exports `CodePiece`, `CodeRole` or `CodeTokens`: import those types from `svjeez`. Importing the package no longer loads Shiki until `highlight()` runs.
-- `@svjeez/icons`: the package root is gone, so `import type { IconData } from "@svjeez/icons"` is `import type { IconData } from "svjeez"`. The `/tabler` and `/lucide` paths stay. `svjeez` is now a peer dependency, for that type.
+- `@svjeez/icons`: the root exports `Icon` and `IconData`; the `/tabler` and `/lucide` paths stay.
 - `@svjeez/geo`: `nightfall` is gone, with no users. Use `globe().night(date)` on a globe, or `night(date)` with `map.path()` on a flat map.
 - `@svjeez/fonts`: `cacheDir` is not exported. Set `SVJEEZ_FONTS_CACHE` to move the cache.
 - `@svjeez/vite`: the `Options` type is `SvjeezOptions`.

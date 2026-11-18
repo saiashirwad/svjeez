@@ -8,7 +8,7 @@ NOTE: very SPARSE comments only, just the MOST ESSENTIAL ONES. if you encounter 
 
 ## Workspace
 
-`next` is the scene-model rewrite. `main` stays on 0.7.x and keeps everything `next` deleted: the site, the live editor (`@svjeez/live`, `@svjeez/react`, `@svjeez/svelte`), and the charts, code, diagrams, dom, geo, icons, math and mermaid packages. Each comes back by porting it from `main` (`git show main:<path>`) onto the scene model, never by restoring it as it was.
+`next` is the scene-model rewrite. `main` stays on 0.7.x and keeps everything `next` deleted: the site, the live editor (`@svjeez/live`, `@svjeez/react`, `@svjeez/svelte`), and the charts, code, diagrams, dom, geo, math and mermaid packages. Each comes back by porting it from `main` (`git show main:<path>`) onto the scene model, never by restoring it as it was.
 
 The repository is a Bun workspace. The root `package.json` is private and lists the workspaces:
 
@@ -16,6 +16,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/vite/` is `@svjeez/vite`, the Vite plugin.
 - `packages/astro/` is `@svjeez/astro`, the Astro integration, built on `@svjeez/vite`.
 - `packages/fonts/` is `@svjeez/fonts`, which loads Google Fonts by family name into a `Font`.
+- `packages/icons/` is `@svjeez/icons`, the Tabler and Lucide path data and the `<Icon>` that draws it.
 - `packages/video/` is `@svjeez/video`, which encodes a scene as MP4 or WebM through Mediabunny in headless Chromium.
 - `examples/` holds the scene-model example scenes and their committed output in `examples/dist/`. `examples/golden/` keeps the SVGs the 0.7 examples built, as references for frame diffs when a feature is ported; nothing builds or tests them. It is private and never published.
 
