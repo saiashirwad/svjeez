@@ -1,6 +1,6 @@
 # Upgrading from 0.7 to next (0.8.0-next)
 
-`next` replaces the authoring API with the scene model. Nothing from 0.7's root carries over unchanged, so port a scene rather than patch it. Install with `npm i svjeez@next`, along with `@svjeez/fonts@next`, `@svjeez/icons@next`, `@svjeez/charts@next`, `@svjeez/code@next`, `@svjeez/dom@next`, `@svjeez/geo@next`, `@svjeez/math@next`, `@svjeez/video@next`, `@svjeez/vite@next` or `@svjeez/astro@next` if you use them.
+`next` replaces the authoring API with the scene model. Nothing from 0.7's root carries over unchanged, so port a scene rather than patch it. Install with `npm i svjeez@next`, along with `@svjeez/fonts@next`, `@svjeez/icons@next`, `@svjeez/charts@next`, `@svjeez/code@next`, `@svjeez/diagrams@next`, `@svjeez/dom@next`, `@svjeez/geo@next`, `@svjeez/math@next`, `@svjeez/video@next`, `@svjeez/vite@next` or `@svjeez/astro@next` if you use them.
 
 - **One import.** The scene model moved to the root: what came from its subpath now comes from `svjeez`, and its tools subpath is `svjeez/tools`. `"jsxImportSource": "svjeez"` builds scene nodes, so drop the scene pragmas.
 - **No SVG tags.** JSX holds components (`<Shape>`, `<Text>`, `<Group>`, `<Stack>`, `<Grid>`, `<Align>`, `<Arrow>`, `<Image>`, `<Sequence>`). `render(options, <svg JSX/>)` becomes `export default scene({ size: [w, h], duration, title }, () => …)`.
