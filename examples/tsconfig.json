@@ -22,6 +22,6 @@
       "svjeez/frames": ["../packages/svjeez/src/frames.ts"]
     }
   },
-  "include": [".", "../packages/svjeez/src"],
+  "include": [".", "../packages/svjeez/src", "../packages/code/src"],
   "exclude": ["dist", "golden", "node_modules"]
 }
