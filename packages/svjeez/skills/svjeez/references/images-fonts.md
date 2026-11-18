@@ -1,64 +1,50 @@
-# Images and fonts
+# Images, symbols and fonts
 
-Both load as bytes and embed as data URIs, so the output stays one file. GitHub and Markdown show SVGs through `<img>`, which blocks external hrefs but allows `data:`.
+## Fonts
+
+Text is measured with its real font when the scene compiles, so every `<Text>` names a `font`, and the SVG embeds only the glyphs it draws.
+
+```ts
+import { google } from "@svjeez/fonts";
+import { font } from "svjeez/scene";
+
+const inter = await google("Inter");                                        // one face, 400
+const geist = await google.family("Geist", [{ weight: 400 }, { weight: 600 }, { weight: 400, style: "italic" }]);
+const mono = await google("JetBrains Mono", { ligatures: false });
+
+const local = font.family(
+  await font.load(new URL("./fonts/Geist-400.ttf", import.meta.url)),
+  await font.load(new URL("./fonts/Geist-600.ttf", import.meta.url)),
+);
+```
+
+- `@svjeez/fonts` (`npm i @svjeez/fonts@next`) downloads a Google font by family name once and caches it on disk (`SVJEEZ_FONTS_CACHE`, else `~/.cache/svjeez/fonts`). It is the only part of svjeez that uses the network.
+- `font.load(path | URL)` reads a TTF or OTF from disk or http(s); `font(bytes)` takes the bytes. `font.family(...faces)` groups faces under the first one's family name. WOFF and WOFF2 embed but can't be measured: use TTF or OTF.
+- `<Text weight={600} italic>` and `<Run weight={600}>` pick a face of the family. A face the family doesn't have is an error that lists the ones it has: the browser never makes up a bold or a slant.
+- Options: `ligatures: false` (one glyph per character, so a coding font stays small), `subset: false` (embed the whole file), `fallback` (families a viewer without the embedded font sees), `family`, `weight`, `style`.
+- A character a face lacks is a `missing-glyph` error; nothing falls back silently.
+- Each face a scene uses costs its glyph subset, usually the largest part of a small SVG. Use one family, two weights.
+
+The examples load Geist from `examples/fonts/` through `examples/style.ts`, so they work offline wherever the skill is installed.
 
 ## Images
 
 ```tsx
-import { Picture, ease, fx, motion, picture, span } from "svjeez";
+const logo = await picture.load("logo.png");      // PNG, JPEG, GIF, WebP or SVG; picture(bytes or svg string) works too
 
-const photo = await picture.load(new URL("./harbor.jpg", import.meta.url)); // path, file: or http(s) URL
-const logo = picture('<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="18"/></svg>');   // bytes or SVG markup, sync
-
-const framed = <Picture src={photo} x={20} y={20} width={240} radius={16} fit="cover" alt="A harbor at dusk" filter={fx.duotone({ dark: "#1b1464", light: "#ffb36b" })} />;
-const kenBurns = <Picture src={logo} x={20} y={20} width={240} height={160} animation={motion({ scale: 1 }).to({ scale: 1.3 }, span(0, 6), ease.inOut)} />;
+<Image src={logo} width={48} at={[16, 16]} motion={enter(span(0, 0.4))} />
 ```
 
-`picture()` sniffs the format from the bytes (svg, png, jpeg, gif, webp), never the extension, and reads the size from the header after EXIF rotation. It throws on anything else.
+The image fills its box from its top-left; with one of `width` and `height` the other follows its aspect ratio, with neither it is the picture's own size. It is placed, clipped, masked and moved like any node. A morph can move an image between states but not change its picture.
 
-`<Picture>` takes `x` and `y` (default 0), `width` and `height` (one given derives the other; none uses the intrinsic size), `fit` (`cover` default, `contain`, `fill`), `radius`, `filter`, `opacity`, `class` and `alt`. Without `alt` the picture is `aria-hidden`. Its `animation` moves the image inside a fixed frame, so `scale` zooms about the frame's center, clipped to the frame. To animate the whole picture, wrap it in an animated `<g>`. Draw a picture as often as you like. Its bytes embed once.
-
-Before you embed:
-
-- Only SVG scales infinitely. Raster pixelates, so export it at 2x the drawn size.
-- base64 adds about 33%, and the whole file downloads before the first frame. Keep each image under 100 KB. `validateSvg` warns past 256 KB.
-- `<image href="photo.png">` loads in a page but not through `<img>`. `validateSvg` warns on it. Use `picture.load()`.
-- An embedded SVG is sealed. Fonts, scripts and external refs do not load inside it, so outline its text. Its own CSS animations freeze on the first frame through `<img>`. Animate with `<Picture animation>` or a wrapping `<g>`.
-- A filter over a large animated image re-renders every frame.
-- You are redistributing the bytes. Check the license.
-
-## Fonts
-
-Load a TTF or OTF the way you load an image. Use it as real text, to measure text, or as outlines.
+## Symbols
 
 ```tsx
-import { Glyphs, draw, fitText, font, span } from "svjeez";
+const dot = symbol(() => <Shape geometry={circle(6)} fill={theme.blue} />);
 
-const display = await font.load(new URL("./ArchivoBlack-Regular.ttf", import.meta.url)); // or font(bytes), sync
-const body = font.family(await font.load(new URL("./Body-Regular.ttf", import.meta.url)), await font.load(new URL("./Body-Bold.ttf", import.meta.url)));
-
-const real = <text x={20} y={60} fontFamily={body} fontWeight="bold">Real, selectable text</text>; // also on <g>
-const width = display.measure("Wave!", 96); // px, kerning and ligatures included
-const fits = fitText(display, ["Wave!", "and more"], { width: 360, max: 96 }); // the largest whole size where every line fits; `min` floors it, `tail` leaves ems after the last line
-const title = <Glyphs font={display} text="Wave!" size={96} x={(400 - width) / 2} y={140} stroke="#FF5FA8" fill="none" animation={(glyph, each) => draw(each.stagger(span(0, 1), 0.15))} />;
+<Stack direction="row" gap={8}>
+  {[0, 1, 2].map((i) => <Instance of={dot} motion={enter(span(i * 0.2, 0.3))} />)}
+</Stack>
 ```
 
-- For Google Fonts, `npm i @svjeez/fonts` and `await google("Archivo Black", { weight: 400 })` (from `@svjeez/fonts`) returns the same `Font`, or `google.family("ABeeZee", [{ weight: 400 }, { weight: 400, style: "italic" }], { ligatures: false })` a family: the faces, then options shared by every face, which a face's own options override. Files are cached on disk, so only the first build needs the network.
-- `font()` and `font.load()` read the format from the bytes (ttf, otf, woff, woff2) and the family, weight and style from the file. Pass `{ family, weight, style, fallback }` to override, and `subset` or `ligatures` as below.
-- `font.family(...faces)` groups faces under the first one's name. `family.face(weight, style)` picks like the browser. Two faces with the same weight and style throw.
-- `fontFamily={font}` embeds each face the first time the tree uses it, once, and writes the fallback after it (`monospace` for a fixed-pitch font, else `sans-serif`).
-- `measure(text, size)` and `path(text, { size, x, y })` match Chromium's layout, standard ligatures and pair kerning included. `path` returns `{ d, width, glyphs }`. `font.metrics` gives ascent, descent, line gap, cap height and x-height in em. `font.has(char)` tells you whether the font covers a character.
-- `<Glyphs>` draws one path per visible glyph in a group labelled with the text (`alt` overrides the label). `font` may be a family, and `weight` and `style` pick its face. `animation` is a stack applied to every glyph, or a function of `(glyph, each)` for a stagger: `each.index`, `each.count` (spaces count, so it is the length of `text`) and `each.stagger(first, step)`, this glyph's span in a `stagger(first, count, step)` over all of them. `<Icon>` calls its `animation` the same way, per path. To move the word as one, wrap it in an animated `<g>`.
-- Extras take `font` too: `code(src, { font })` (monospaced only), every diagram, `Callout`, and `flow` packet labels. Their boxes are then sized by measuring, not by a 0.6em-per-character guess.
-
-Before you embed:
-
-- An embedded TrueType font is cut down to the glyphs the scene uses, often to a tenth of the file. Text that forms ligatures, or could meet other browser layout such as contextual alternates or combining marks, embeds the whole font. So do OTF with CFF outlines, WOFF and WOFF2. Pass `{ subset: false }` to embed the whole file.
-- A coding font such as JetBrains Mono turns `=>` into a ligature. Load it with `{ ligatures: false }` to draw one glyph per character and keep the cut.
-- `validateSvg` warns past 256 KB. For a short title, `<Glyphs>` embeds no font at all.
-- Glyphs are outlines. They are not selectable, the group's `aria-label` is all assistive tech reads, and they lose hinting. Keep small body text as `<text>`.
-- `measure` and `path` need the TTF or OTF file. WOFF and WOFF2 embed but throw. `path` reads TrueType outlines only, so an OTF with CFF outlines throws.
-- Shaping is for Latin text: no bidi, no contextual alternates, no mark positioning.
-- A character the font lacks draws from the fallback in `<text>` and as the `.notdef` box in `<Glyphs>`.
-- A `.ttc` collection throws. Extract one face. Two files sharing a family, weight and style throw `Two different fonts claim …`. Rename one with `font(bytes, { family })`.
-- You are redistributing the font. Check its license. OFL fonts allow embedding.
+`symbol(build)` is drawn once; each `<Instance of={…}>` places it, with its own `at`, `opacity`, `motion` and the rest. Tracks inside the symbol run on the scene's clock and are shared by every instance, so instances move in step: set them apart by moving the instances themselves. Use a symbol for content repeated many times (icons, dots, tiles), where it saves bytes.
