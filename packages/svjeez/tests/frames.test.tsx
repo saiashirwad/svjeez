@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import assert from "node:assert/strict";
 import { deflateSync } from "node:zlib";
 import { checkScene, openScene, renderFrames } from "svjeez/frames";
 import { loopLength, seek, restyle } from "svjeez/page";
@@ -119,19 +120,16 @@ const flooded = () => (
 
 describe.if(browser)("renderFrames", () => {
   test("frames at different times differ, and holds between transitions render the same", async () => {
-    const { frames } = await renderFrames(fade, { times: [0, 1.5, 2.5, 3.5] });
+    const times = [0, 1.5, 2.5, 3.5];
+    const { frames } = await renderFrames(fade, { times });
 
-    // SAFETY: renderFrames returns one frame for each of the four times passed above.
-    const [before, middle, after, later] = frames.map((frame) => frame.png) as [
-      Uint8Array,
-      Uint8Array,
-      Uint8Array,
-      Uint8Array,
-    ];
+    expect(frames.map((frame) => frame.time)).toEqual(times);
+    const [before, middle, after, later] = frames;
+    assert(before && middle && after && later);
 
-    expect(same(before, middle)).toBe(false);
-    expect(same(middle, after)).toBe(false);
-    expect(same(after, later)).toBe(true);
+    expect(same(before.png, middle.png)).toBe(false);
+    expect(same(middle.png, after.png)).toBe(false);
+    expect(same(after.png, later.png)).toBe(true);
   });
 
   test("a curve starting to draw shows no round-cap dot at its far end", async () => {
@@ -146,10 +144,14 @@ describe.if(browser)("renderFrames", () => {
       </Group>
     ));
 
-    const { frames } = await renderFrames(curve, { times: [0, 0.004, 0.008, 0.012], scale: 2 });
-    const [blank, ...early] = frames.map((frame) => frame.png);
+    const times = [0, 0.004, 0.008, 0.012];
+    const { frames } = await renderFrames(curve, { times, scale: 2 });
 
-    for (const frame of early) expect(same(frame, blank!)).toBe(true);
+    expect(frames.map((frame) => frame.time)).toEqual(times);
+    const [blank, ...early] = frames;
+    assert(blank);
+
+    for (const frame of early) expect(same(frame.png, blank.png)).toBe(true);
   });
 
   test("the same time renders the same pixels every run", async () => {
