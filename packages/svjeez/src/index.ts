@@ -44,13 +44,11 @@ export { blur, shadow } from "./author/effects";
 
 export { motion, track, type Anim, type Track } from "./author/track";
 
-export { draw, enter, exit, sampled, shake, spin, wiggle } from "./author/recipes";
+export { draw, enter, exit, sampled, wiggle } from "./author/recipes";
 
 export { ease, type Curve } from "./author/spring";
 
-export { span, type Span } from "./author/span";
-
-export { par, seq, stagger, timeline, wait, type Action } from "./author/timeline";
+export { span, type Spanned as Span } from "./author/span";
 
 export { morph } from "./author/morph";
 

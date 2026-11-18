@@ -19,7 +19,6 @@ import {
   rect,
   scene,
   span,
-  spin,
   tokens,
   track,
   type SceneElement,
@@ -115,7 +114,12 @@ const fade = emit([40, 20], 4, () => (
 ));
 
 const flooded = () => (
-  <Shape geometry={rect(10, 10)} at={[5, 5]} fill="#FF0000" effects={[blur(track(0).set(3, 1))]} />
+  <Shape
+    geometry={rect(10, 10)}
+    at={[5, 5]}
+    fill="#FF0000"
+    effects={[blur(track(0).set(3, span(1)))]}
+  />
 );
 
 describe.if(browser)("renderFrames", () => {
@@ -247,7 +251,13 @@ describe.if(browser)("renderFrames", () => {
           motion={motion({ offset: [0, 0] }).to({ offset: [10, 0] }, span(0, 12), ease.linear)}
         />
         {[2, 3, 5, 7, 8].map((laps) => (
-          <Shape geometry={circle(4)} fill="#000000" rotate={spin({ every: 12 / laps })} />
+          <Shape
+            geometry={circle(4)}
+            fill="#000000"
+            rotate={track(0)
+              .to(360, span(0, 12 / laps), ease.linear)
+              .loop(12 / laps)}
+          />
         ))}
       </Group>
     ));

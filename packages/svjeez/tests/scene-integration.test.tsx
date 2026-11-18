@@ -21,7 +21,6 @@ import {
   scene,
   span,
   symbol,
-  timeline,
   track,
   type Paint,
   type SceneElement,
@@ -92,7 +91,7 @@ describe("timelines reach a node wherever it sits", () => {
     const model = made(() => {
       const grid = ref("grid");
 
-      timeline(grid.part("b").to({ opacity: 0.25 }, 1, ease.linear));
+      grid.part("b").to({ opacity: 0.25 }, span(0, 1), ease.linear);
 
       return (
         <Grid ref={grid} columns={2} gap={4}>
@@ -109,7 +108,7 @@ describe("timelines reach a node wherever it sits", () => {
       made(() => {
         const dot = ref("dot");
 
-        timeline(dot.move([5, 5], 1));
+        dot.move([5, 5], span(0, 1));
 
         return (
           <Stack>
@@ -127,7 +126,7 @@ describe("timelines reach a node wherever it sits", () => {
       const spoke = ref("spoke");
       const wheel = symbol(() => <Shape ref={spoke} geometry={rect(2, 10)} fill={red} />);
 
-      timeline(spoke.rotate(90, 1));
+      spoke.to({ rotate: 90 }, span(0, 1));
 
       return (
         <Group>
@@ -145,7 +144,7 @@ describe("timelines reach a node wherever it sits", () => {
     const model = made(() => {
       const dot = ref("dot");
 
-      timeline(dot.to({ opacity: 0.5 }, 1));
+      dot.to({ opacity: 0.5 }, span(0, 1));
 
       return morph(
         <Shape ref={dot} geometry={circle(4)} anchor="center" fill={red} />,
@@ -160,14 +159,14 @@ describe("timelines reach a node wherever it sits", () => {
     expect(isLane(dot.kind === "shape" && dot.geometry)).toBe(true);
   });
 
-  test("inside nested Sequences, on the clock of the one it is given to", () => {
+  test("inside nested Sequences, on the clock of the one the node sits in", () => {
     const model = made(() => {
       const dot = ref("dot");
-      const nested = timeline(dot.moveBy([10, 0], 1, ease.linear));
+      dot.move([10, 0], span(0, 1), ease.linear);
 
       return (
-        <Sequence start={1}>
-          <Sequence start={0.5} timeline={nested}>
+        <Sequence when={span(1)}>
+          <Sequence when={span(0.5)}>
             <Shape ref={dot} geometry={circle(4)} anchor="center" fill={red} />
           </Sequence>
         </Sequence>
@@ -355,7 +354,7 @@ describe("morph between states that hold layout, text, connectors, images and in
     expect(() =>
       made(() => (
         <Stack key="row" direction="row">
-          <Sequence start={1}>
+          <Sequence when={span(1)}>
             <Group key="g">
               {morph(
                 <Shape key="a" geometry={rect(10, 10)} fill={red} />,
@@ -522,11 +521,11 @@ describe("anchors follow whatever moves their node", () => {
     return model;
   };
 
-  test("a timeline", () => {
+  test("verbs", () => {
     const model = made(() => {
       const a = ref("a");
 
-      timeline(a.move([80, 40], 1), a.rotate(90, 1));
+      a.to({ rotate: 90 }, a.move([80, 40], span(0, 1)).next(1));
 
       return (
         <Group>
@@ -651,14 +650,13 @@ describe("anchors follow whatever moves their node", () => {
 describe("springs across slices", () => {
   const settle = { stiffness: 170, damping: 26 };
 
-  test("a timeline hands a spring's speed from one action to the next", () => {
+  test("a verb hands a spring's speed on to the next verb", () => {
     const model = made(() => {
       const dot = ref("dot");
 
-      timeline(
-        dot.move([60, 0], 0.4, ease.spring(settle)),
-        dot.move([60, 60], 1.5, ease.spring(settle)),
-      );
+      const first = dot.move([60, 0], span(0, 0.4), ease.spring(settle));
+
+      dot.move([60, 60], first.next(1.5), ease.spring(settle));
 
       return <Shape ref={dot} geometry={circle(4)} anchor="center" fill={red} />;
     });
@@ -783,12 +781,12 @@ describe("derived tracks feed every kind of value", () => {
     }
   });
 
-  test("a timeline can't move a prop a derived track writes, and says to move it in one place", () => {
+  test("a verb can't move a prop a derived track writes, and says to move it in one place", () => {
     expect(() =>
       made(() => {
         const dot = ref("dot");
 
-        timeline(dot.move([10, 10], 1));
+        dot.move([10, 10], span(0, 1));
 
         return (
           <Shape
@@ -813,7 +811,7 @@ const everyKind = (options: { readonly loop?: boolean } = {}): Model.Scene => {
   return scene({ size: [200, 100], duration: 4, title: "Every kind", ...options }, () => {
     const moved = ref("moved");
 
-    timeline(moved.to({ opacity: 0.5 }, 1));
+    moved.to({ opacity: 0.5 }, span(0, 1));
 
     return (
       <Group>
@@ -1006,7 +1004,7 @@ describe("errors a newcomer meets first", () => {
     ).toThrow('Give each node that comes, goes or changes a key, as in <Shape key="…" />');
   });
 
-  test("a ref on no node names the ref, whether an anchor or a timeline uses it", () => {
+  test("a ref on no node names the ref, whether an anchor or a verb uses it", () => {
     expect(() =>
       made(() => {
         const ghost = ref("ghost");
@@ -1021,7 +1019,7 @@ describe("errors a newcomer meets first", () => {
       made(() => {
         const ghost = ref("ghost");
 
-        timeline(ghost.to({ opacity: 0 }, 1));
+        ghost.to({ opacity: 0 }, span(0, 1));
 
         return <Shape geometry={circle(4)} anchor="center" fill={red} />;
       }),
@@ -1043,11 +1041,11 @@ describe("errors a newcomer meets first", () => {
 
     expect(() =>
       made(() => (
-        <Sequence start={3} over={2}>
+        <Sequence when={span(3, 2)}>
           <Shape geometry={circle(4)} anchor="center" fill={red} />
         </Sequence>
       )),
-    ).toThrow("A <Sequence start={3} over={2}> runs until 5s, past the 4s scene.");
+    ).toThrow("A <Sequence when={span(3, 2)}> runs until 5s, past the 4s scene.");
 
     expect(() =>
       made(() => (
@@ -1067,7 +1065,7 @@ describe("errors a newcomer meets first", () => {
       made(() => {
         const dot = ref("dot");
 
-        timeline(dot.to({ opacity: 0 }, 5));
+        dot.to({ opacity: 0 }, span(0, 5));
 
         return <Shape ref={dot} geometry={circle(4)} anchor="center" fill={red} />;
       }),

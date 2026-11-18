@@ -7,7 +7,7 @@ import type { Anchor, Ref } from "./refs";
 import type { AnchorPlace, TextAnchorPlace } from "./pin";
 import type { Origin, Settle } from "./settle";
 import type { MorphElement } from "./morph";
-import type { Timeline } from "./timeline";
+import { isWhen, type When } from "./span";
 import type { Anim, Layers } from "./track";
 import type { Effect } from "./effects";
 import type { TextContent } from "./count";
@@ -116,9 +116,7 @@ export interface InstanceProps extends Common {
 }
 
 export interface SequenceProps {
-  readonly start: Seconds;
-  readonly over?: Seconds;
-  readonly timeline?: Timeline;
+  readonly when: When;
   readonly children?: Child;
 }
 
@@ -140,7 +138,6 @@ export type SceneElement =
       readonly type: "sequence";
       readonly start: Seconds;
       readonly over?: Seconds;
-      readonly timeline?: Timeline;
       readonly children: readonly SceneElement[];
     }
   | { readonly type: "fragment"; readonly children: readonly SceneElement[] }
@@ -215,13 +212,19 @@ export const Image = (props: ImageProps): SceneElement => ({ type: "image", prop
 
 export const Instance = (props: InstanceProps): SceneElement => ({ type: "instance", props });
 
-export const Sequence = ({ start, over, timeline, children }: SequenceProps): SceneElement => ({
-  type: "sequence",
-  start,
-  ...(over !== undefined && { over }),
-  ...(timeline && { timeline }),
-  children: flat(children),
-});
+export const Sequence = ({ when, children }: SequenceProps): SceneElement => {
+  if (!isWhen(when))
+    throw new SceneError(
+      `<Sequence> takes when={span(start, over)}, or when={span(start)} to run to the end, got ${String(when)}.`,
+    );
+
+  return {
+    type: "sequence",
+    start: when.start,
+    ...(when.over !== undefined && { over: when.over }),
+    children: flat(children),
+  };
+};
 
 let building: Vec | undefined;
 

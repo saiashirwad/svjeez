@@ -122,7 +122,7 @@ export default scene(
         geometry={card}
         at={corner(3)}
         fill={theme.green}
-        opacity={track(0).to(1, span(0.4, 1.2)).set(0, 2)}
+        opacity={track(0).to(1, span(0.4, 1.2)).set(0, span(2))}
         effects={[blur(track(12).to(1.5, span(0.4, 1.4), ease.out))]}
       />
       <Shape

@@ -16,7 +16,6 @@ import {
   rect,
   sampled,
   scene,
-  shake,
   span,
   symbol,
   track,
@@ -219,7 +218,7 @@ describe("animated geometry", () => {
   test("a looped morph inside a sequence is rotated with a real geometry at the seam", () => {
     const lane = geometryLane(
       made(() => (
-        <Sequence start={0.5}>
+        <Sequence when={span(0.5)}>
           <Shape
             fill="#000000"
             geometry={track(rect(10, 10))
@@ -530,7 +529,7 @@ describe("strokes, scales and trims", () => {
 
   test("an opacity cut over a moving trim writes opacity, so the trim's own visibility can't show through", () => {
     const style = css(() => (
-      <Group opacity={track(0).set(1, 1).set(0, 3)}>
+      <Group opacity={track(0).set(1, span(1)).set(0, span(3))}>
         <Shape
           geometry={circle(10)}
           anchor="center"
@@ -677,7 +676,7 @@ describe("images and instances", () => {
 
     expect(() =>
       made(() => (
-        <Sequence start={1}>
+        <Sequence when={span(1)}>
           <Instance of={spinner} />
         </Sequence>
       )),
@@ -705,29 +704,7 @@ describe("images and instances", () => {
   });
 });
 
-describe("shake and sampled", () => {
-  test("shake swings, shrinks and settles at rest", () => {
-    const node = only(
-      made(() => (
-        <Shape
-          fill="#000000"
-          geometry={circle(4)}
-          anchor="center"
-          motion={shake({ offset: [10, 0] }, span(0, 1))}
-        />
-      )),
-    );
-
-    const offset = node.layers[0]!.offset;
-
-    expect(isLane(offset)).toBe(true);
-
-    if (!isLane(offset)) return;
-
-    expect(offset.keys[1]!.value[0]).toBeCloseTo(-10 * (1 - 1 / 12));
-    expect(offset.keys.at(-1)!.value).toEqual([0, 0]);
-  });
-
+describe("sampled", () => {
   test("sampled keeps two keys for a straight line and cuts at a jump", () => {
     const linear = only(
       made(() => (

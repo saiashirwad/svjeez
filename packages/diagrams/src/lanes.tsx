@@ -257,8 +257,8 @@ export function lanes<const L extends Record<string, Labelled>>(
                 fill={l.colors.highlight}
                 at={new Route([points]).travel(fire)}
                 opacity={track(0)
-                  .set(1, fire.start)
-                  .set(0, fire.start + fire.over)}
+                  .set(1, fire)
+                  .set(0, span(fire.start + fire.over))}
               />
             )}
           </Group>

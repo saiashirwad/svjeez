@@ -15,7 +15,6 @@ import {
   rect,
   scene,
   span,
-  spin,
   subtract,
   track,
   type Vec,
@@ -57,7 +56,7 @@ export default scene(
             <Shape
               key="ring"
               geometry={ring}
-              rotate={spin({ every: 3 })}
+              rotate={track(0).to(360, span(0, 3), ease.linear).loop(3)}
               fill={linear.across({ angle: 90, stops: ["#FFFFFF", "#FFFFFF33"] })}
             />
           </Center>

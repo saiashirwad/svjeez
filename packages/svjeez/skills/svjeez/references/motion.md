@@ -6,7 +6,7 @@ Three ways to move a node, each for its own job. Mixing two on one prop is an er
 | --- | --- | --- |
 | a prop's own value over time | `opacity={track(0).to(1, span(0.5, 0.3))}` | anything a node has: `at`, `fill`, `geometry`, `trim`, `stroke.width`, `clip`, effects |
 | layers around the node | `motion={[enter(span(0, 0.4)), wiggle({ rotate: 3 }, { seed: 1 })]}` | entrances, exits, wobble, drift; they compose with the props |
-| verbs on refs | `timeline(card.move([40, 0], 0.5))` | choreography: see [timeline.md](timeline.md) |
+| verbs on refs | `card.move([40, 0], span(1, 0.5))` | choreography: see [timeline.md](timeline.md) |
 
 ## Tracks
 
@@ -15,16 +15,16 @@ const fadeIn = span(1, 0.5);
 const shrink = fadeIn.next(0.4, 2);            // 0.4s long, 2s after fadeIn ends
 
 opacity={track(0).to(1, fadeIn).to(0, shrink, ease.in)}
-scale={track(1).to(0.8, shrink, ease.in).set(1, shrink.end)}
+scale={track(1).to(0.8, shrink, ease.in).set(1, span(shrink.end))}
 ```
 
-- `track(initial)` holds `initial` until the first step. `.to(value, span, curve?)` moves during the span (default `ease.out`); between steps the value holds. `.set(value, time)` is a cut.
+- `track(initial)` holds `initial` until the first step. `.to(value, span, curve?)` moves during the span (default `ease.out`); between steps the value holds. `.set(value, span)` is a cut at the span's start: `.set(1, span(2))`, or `.set(0, step)` to cut where `step` starts.
 - `.loop(period)` repeats forever; the period is snapped to divide `duration`. `.repeat(n)` or `.repeat({ until })` plays the passage so far again. `.rewind(over, curve?)` glides back to the first value over the clock's last `over` seconds, which is how a loop closes; nothing can follow it.
 - Steps may be written in any order; two that overlap on one track throw, unless the first is a spring, which the next step cuts and hands its speed to.
 - A track of geometry morphs: `track(rect(36, 36)).to(rect(96, 64, { radius: 20 }), span(0.4, 1))`. Rects stay rects, arcs stay arcs (`sweep` opens an arc), and any other pair is matched point for point.
 - A track of paint blends colors, and gradients of one kind (see [paint.md](paint.md)).
 
-Spans: `span(start, over)`; `span(start)` runs to the end of the clock. `.end`, `.next(over, gap?)`, `.shift(dt)`, `.pad(before, after?)`, `.until(end)`, `.first(over)`, `.last(over)`, `.chain(...overs)` (end to end: `const [crouch, leap, land] = span(0.1, 0.3).chain(0.12, 0.25)`), and `.cascade(count, step)` (the same length, `step` apart: entrances; `const [a, b, c] = s.cascade(3, 0.1)` is typed as three spans, so no `!`). Build each beat from the one before, so moving one moves the rest.
+Spans: `span(start, over)`; `span(start)` runs to the end of the clock. `.end`, `.next(over, gap?)`, `.shift(dt)`, `.chain(...overs)` (end to end: `const [crouch, leap, land] = span(0.1, 0.3).chain(0.12, 0.25)`), and `.cascade(count, step)` (the same length, `step` apart: entrances; `const [a, b, c] = s.cascade(3, 0.1)` is typed as three spans, so no `!`). Build each beat from the one before, so moving one moves the rest. A span is the only way to say when; a plain number is always a length. A span inside another is plain arithmetic: `span(trip.start, 0.15)` begins with it, `span(trip.end - 0.2, 0.2)` ends with it.
 
 ## Layers
 
@@ -32,11 +32,10 @@ Spans: `span(start, over)`; `span(start)` runs to the end of the clock. `.end`, 
 
 - `enter(span, { from, curve })` arrives from `from` (default `{ opacity: 0 }`) to rest; `exit(span, { to, curve })` leaves rest for `to`.
 - `wiggle(amplitude, { seed, rate, period, curve })`: seeded noise around rest that loops seamlessly. Change `seed` to reroll.
-- `shake({ offset, rotate }, span, { rate })`: a damped swing that settles by the span's end.
 - `motion(initial).to(values, span, curve).set(…).loop(…).repeat(…).rewind(…)`: a layer of your own.
 - `sampled.motion((t) => values, span, { tolerance: { offset: 0.5, rotate: 1 } })`: a layer from any function of time.
 
-Recipes that return tracks: `draw(span)` for `trim` (strokes the outline on), `spin({ every })` for `rotate`.
+Recipes that return tracks: `draw(span)` for `trim` (strokes the outline on). A steady spin is a looped track: `rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}`.
 
 ## Springs
 

@@ -1,4 +1,4 @@
-import { Group, Text, font, scene, track } from "svjeez";
+import { Group, Text, font, scene, span, track } from "svjeez";
 
 const sans = await font.load(new URL("../ABeeZee-Regular.ttf", import.meta.url));
 
@@ -13,7 +13,7 @@ export default scene({ size: [200, 100], duration: 4, title: "Cue" }, () => (
       size={16}
       fill="#F472B6"
       at={[20, 40]}
-      opacity={track(0).set(1, 0.213).set(0, 0.413)}
+      opacity={track(0).set(1, span(0.213)).set(0, span(0.413))}
     >
       second label
     </Text>

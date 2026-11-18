@@ -1,7 +1,7 @@
 import { SceneError } from "./scene-error";
 import { easeAt, splitEase, staysInside } from "./ease-at";
 import { DEFAULT_EASE, EPSILON, NUDGE, ease, type Ease, type Seconds } from "./time";
-import type { Span } from "../author/span";
+import { isWhen, type Span, type When } from "../author/span";
 import { num } from "./format";
 import { isCurved, splitCurve, type Controls } from "./curve";
 import type { Animated, Key, Lane, Vec } from "./ir";
@@ -44,8 +44,6 @@ const isUntil = (
 const isSpan = (when: Span | Seconds | null | undefined): when is Span =>
   typeof when === "object" && when !== null;
 
-const isTime = (at: Seconds | Span | undefined): at is Seconds => typeof at === "number";
-
 // SAFETY: values is a Partial<V>, so its own keys are keys of V.
 const names = <V extends object>(values: Partial<V>): (keyof V)[] =>
   Object.keys(values) as (keyof V)[];
@@ -75,13 +73,13 @@ export class Passage<V extends object> {
     return this.#push({ start, over: when.over, ease: curve, values });
   }
 
-  set(values: Partial<V>, at: Seconds): Passage<V> {
-    if (!isTime(at))
+  set(values: Partial<V>, when: When): Passage<V> {
+    if (!isWhen(when))
       throw new SceneError(
-        `set() takes the time of the cut in seconds, got ${at === undefined ? "none" : JSON.stringify(at)}. Write .set(value, at).`,
+        `set() takes when the cut happens as a span, got ${when === undefined ? "none" : JSON.stringify(when)}. Write .set(value, span(at)), or .set(value, step) to cut where a span starts.`,
       );
 
-    return this.#push({ start: time(at, "set()"), over: 0, ease: ease.hold, values });
+    return this.#push({ start: time(when.start, "set()"), over: 0, ease: ease.hold, values });
   }
 
   loop(period: Seconds): Passage<V> {

@@ -56,9 +56,9 @@ export default scene({ size: [240, 140], duration: 4, title: "Hello", theme, red
 2. **`at` places the node's `anchor`**, the box's top-left unless `anchor` names another point (`"center"`, `"bottom-right"`, `[0.5, 1]`, and for text `"baseline"`, `"baseline-left"`, `"baseline-right"`). A `<Group>` is a frame: its `at` is where its children's `[0, 0]` goes. A line, polygon or path with no `at` stays where its coordinates are. `rotate` and `scale` turn around `origin`, `"center"` of the box by default; `origin="at"` turns around the point `at` places, a group's `[0, 0]`.
 3. **Nothing is inherited.** A shape with no fill has none; a text needs its own `font`, `size` and `fill`. Share styles by spreading objects or writing components.
 4. **Animated props take a value or a track**: `opacity={track(0).to(1, span(0.5, 0.3))}`. Geometry, paint, stroke width, trim, clip and effects animate the same way.
-5. **Time is spans on clocks.** `span(start, over)` is when; build each beat from the one before (`a.next(0.4)`, `a.cascade(3, 0.1)`). `<Sequence start={…}>` starts a clock of its own.
+5. **Time is spans on clocks.** `span(start, over)` is when; build each beat from the one before (`a.next(0.4)`, `a.cascade(3, 0.1)`). A plain number is only ever a length. `<Sequence when={span(…)}>` starts a clock of its own.
 6. **Layout containers place children.** `<Stack>`, `<Grid>`, `<Center>` and `<Align>` measure boxes and set each child's place; a child in one takes no `at`. `<Stack>`, `<Grid>` and `<Center>` also draw their own background, sized to what they hold. Prefer them to coordinates you compute.
-7. **Refs name nodes.** `const card = ref("card")`, `<Group ref={card}>`, then `card.right`, `card.center`, `card.part("title")` from anywhere: arrows attach to them, `<Align to={card}>` places against them, and a `timeline()` moves them.
+7. **Refs name nodes.** `const card = ref("card")`, `<Group ref={card}>`, then `card.right`, `card.center`, `card.part("title")` from anywhere: arrows attach to them, `<Align to={card}>` places against them, and verbs move them: `card.move(target.center, span(1, 0.5))`.
 8. **Morph goes between keyed states.** `morph.between([a, b, c], spans)` matches nodes by `key`: one in both states moves, resizes and recolors; one only in the later state enters; one only in the earlier exits.
 
 ## Vocabulary
@@ -71,7 +71,7 @@ export default scene({ size: [240, 140], duration: 4, title: "Hello", theme, red
 | `<Group>` | a frame that moves its children together |
 | `<Image src={picture(…)} width height>` | a PNG, JPEG, GIF, WebP or SVG embedded |
 | `<Instance of={symbol(() => …)}>` | content drawn once, placed many times |
-| `<Sequence start over timeline>` | a local clock: tracks inside count from `start` |
+| `<Sequence when={span}>` | a local clock: tracks and verbs inside count from the span's start |
 | `<Arrow from to stroke bend inset head trim>` | a line or arrow between points or anchors; follows them as they move |
 
 Every node also takes `key`, `ref`, `at`, `anchor`, `origin`, `rotate` (degrees, clockwise), `scale`, `opacity`, `motion`, `clip`, `mask` and `effects`.
@@ -95,14 +95,14 @@ Every node also takes `key`, `ref`, `at`, `anchor`, `origin`, `rotate` (degrees,
 
 | Motion | |
 | --- | --- |
-| `track(v).to(v2, span, curve?).set(v3, t).loop(p).repeat(n).rewind(over)` | a prop's value over time |
-| `motion={[enter(span, { from }), exit(span, { to }), wiggle(amp, { seed }), shake(amp, span)]}` | layers around the node, first outermost: `offset`, `rotate`, `scale`, `opacity` |
+| `track(v).to(v2, span, curve?).set(v3, span).loop(p).repeat(n).rewind(over)` | a prop's value over time |
+| `motion={[enter(span, { from }), exit(span, { to }), wiggle(amp, { seed })]}` | layers around the node, first outermost: `offset`, `rotate`, `scale`, `opacity` |
 | `motion({ offset: [0, 8] }).to({ offset: [0, 0] }, span)` | a layer of your own |
-| `draw(span)` for `trim`, `spin({ every })` for `rotate` | recipes that return tracks |
-| `ease.linear in out inOut pop hold steps(n) bezier(…)`, `ease.spring({ stiffness, damping })` | curves; a spring's `.settle` is how long it needs, and a verb given a spring for its length lasts that long |
+| `draw(span)` for `trim` | a recipe that returns a track |
+| `ease.linear in out inOut pop hold steps(n) bezier(…)`, `ease.spring({ stiffness, damping })` | curves; a spring's `.settle` is how long it needs: `span(start, spring.settle)` |
 | `theta.map((t) => …)`, `a.with(b).map((a, b) => …)` | derived tracks: one value drives many props |
 | `sampled((t) => value, span, { tolerance })` | any function of time, fitted to few keys |
-| `timeline(seq(…), par(…), stagger(step, …), wait(s))` with `ref.move`, `moveBy`, `rotate`, `scale`, `show`, `hide`, `fill`, `stroke`, `draw`, `to`, `set`, `rewind` | choreography over refs; `rewind` on a component's ref rewinds every part inside it |
+| `ref.to(values, span)`, `ref.set(values, span)`, `ref.move(to, span)` | verbs over refs; each returns its span, so the next beat is `prev.next(over)` |
 | `morph(before, after, span)`, `morph.between(states, spans, { stagger, enter, exit, curve })` | state to state by key |
 
 | Layout | |
@@ -119,13 +119,13 @@ Anchors on a ref: `center`, `left`, `right`, `top`, `bottom`, `topLeft`, `topRig
 
 - **A prop changes on its own schedule**: give the prop a track. `fill={track(theme.text).to(theme.blue, span(1, 0.3))}`.
 - **A node arrives, leaves, wobbles or drifts**: a motion layer in `motion`. Layers multiply opacity and add offsets on top of the node's own props, so an entrance never fights a prop's track.
-- **Several nodes act in an order that depends on each other** (a cursor reaches a button, then it presses): a `timeline()` of verbs on refs, written as a script. A component can return its refs' verbs as actions (`toggle.on`).
+- **Several nodes act in an order that depends on each other** (a cursor reaches a button, then it presses): verbs on refs, each beat built from the span the one before returned. A component can take a span and return one (`toggle.on(after)`).
 - **Two layouts of the same picture** (chart values, before/after code, a reflowing list): `morph` between keyed states, not hand-written tracks per node.
 - **A number that changes** (a total, a percentage, a timer): `count()` in a `<Text>`, never texts crossfaded per value.
 - **One number drives many props**: one track and `.map()` from it, not parallel tracks that can drift apart.
 - **A card, a pill, a row with a background**: give the `<Stack>` or `<Center>` a `fill`, `stroke` and `radius`, not a rect of a size you worked out.
 - **Centering a label on a shape**: `<Center>` around both, not `at` arithmetic.
-- **A prop moves in one place only**: a track, a timeline verb or a morph, never two of them. Each says so if you mix them.
+- **A prop moves in one place only**: a track, a verb or a morph, never two of them. Each says so if you mix them.
 
 ## Render, look, fix
 
@@ -229,12 +229,11 @@ Runtime errors. `…` stands for a value the message fills in.
 | `Two nodes are both keyed "…"…` | keys are unique among siblings |
 | `… moves …, which is placed at …. Place it at a point and move() it to the anchor instead.` | `at` a point, then `move(anchor, …)` |
 | `… moves …, but the … it sits in places it. Wrap it in a <Group> for the container to place, and move the node inside.` | move what is inside the container's child |
-| `… moves … on … …, and … moves it too …, before the first one ends.` | one action per prop at a time: start the second when the first ends (`seq()`), or move both props in one `to()` |
+| `… moves … on … …, and … moves it too …, before the first one ends.` | one action per prop at a time: start the second when the first ends (`first.next(over)`), or move both props in one `to()` |
 | `… sets … on … …, while … is still moving it ….` | `set()` after the move ends, or end the move sooner |
 | `… moves … on …, which a track already moves.` | a prop moves by a track or a timeline, not both |
 | `… moves … on …, which has none. Only … nodes have ….` | `draw` and `fill` need a shape: put the ref on the shape |
-| `… moves …, which sits inside …, but its timeline runs on the scene's clock.` | `<Sequence start={…} timeline={…}>` |
-| `timeline() is only known while scene()'s callback runs.` | call `timeline()` inside `scene()`'s callback or a component |
+| `… is only known while scene()'s callback runs.` | call verbs inside `scene()`'s callback or a component it renders |
 | `canvas is only known inside scene()'s callback.` | read `canvas` inside the callback |
 | `to() takes a span, got …. Write .to(value, span(start, over)); a step right after another is span.next(over).` | pass a span |
 | ``Two transitions move `…` between …s and …s.`` | one `.to()` per stretch of time, or two layers |
@@ -248,9 +247,7 @@ Runtime errors. `…` stands for a value the message fills in.
 | `… lays out …, which a morph() resizes, brings in or takes away inside a <Sequence>, so the … can't make room for it.` | put the container inside the `<Sequence>` |
 | `… is … …, but its children… and padding need ….` | a larger `width` or `height`, or leave it out |
 | `A child of … is keyed "background", which names the container's own fill and stroke.` | give the child another key |
-| `… rewinds …, but no timeline moves it or anything inside it.` | move it or a part of it before rewinding, or drop the rewind |
 | `A … holds morphs on different spans or with different options, and it reflows with one morph at a time.` | the same states, spans and options for every morph in one container |
-| `… is given a spring for its length and a curve as well.` | pass the spring once, in place of the length |
 | `The … of … is sized by its box, but … inside it is placed by an anchor…` | size the clip with numbers, or move that node out |
 | `… holds … count()s, and a <Text> counts one number.` | a `<Text>` per number, side by side in a `<Stack direction="row">` |
 | `… counts, so it holds strings around its count() and no <Run>s.` | style the whole `<Text>` |

@@ -328,7 +328,7 @@ describe("spring steps", () => {
     const motionOf = (at: number) => {
       const model = made(() => (
         <Group>
-          <Sequence start={at}>
+          <Sequence when={span(at)}>
             <Shape
               fill="#000000"
               geometry={circle(4)}

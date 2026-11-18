@@ -1,6 +1,6 @@
 import { SceneError } from "../model/scene-error";
 import { ease, type Seconds } from "../model/time";
-import type { Span } from "./span";
+import type { Span, When } from "./span";
 import type { Vec } from "../model/ir";
 import type { Curve } from "./spring";
 import type { Geometry } from "./values";
@@ -17,7 +17,7 @@ import {
 
 export interface Track<T> {
   to(value: T, when: Span, curve?: Curve): Track<T>;
-  set(value: T, time: Seconds): Track<T>;
+  set(value: T, when: When): Track<T>;
   loop(period: Seconds): Track<T>;
   repeat(times: number | { readonly until: Seconds }): Track<T>;
   rewind(over: Seconds, curve?: Curve): Track<T>;
@@ -34,8 +34,8 @@ export class ValueTrack<T> implements Track<T> {
     return new ValueTrack(this.passage.to({ value }, when, curve));
   }
 
-  set(value: T, time: Seconds): ValueTrack<T> {
-    return new ValueTrack(this.passage.set({ value }, time));
+  set(value: T, when: When): ValueTrack<T> {
+    return new ValueTrack(this.passage.set({ value }, when));
   }
 
   loop(period: Seconds): ValueTrack<T> {
@@ -86,7 +86,7 @@ export interface LayerValues {
 
 export interface Motion {
   to(values: LayerValues, when: Span, curve?: Curve): Motion;
-  set(values: LayerValues, time: Seconds): Motion;
+  set(values: LayerValues, when: When): Motion;
   loop(period: Seconds): Motion;
   repeat(times: number | { readonly until: Seconds }): Motion;
   rewind(over: Seconds, curve?: Curve): Motion;
@@ -101,8 +101,8 @@ export class LayerMotion implements Motion {
     return new LayerMotion(this.passage.to(values, when, curve));
   }
 
-  set(values: LayerValues, time: Seconds): LayerMotion {
-    return new LayerMotion(this.passage.set(values, time));
+  set(values: LayerValues, when: When): LayerMotion {
+    return new LayerMotion(this.passage.set(values, when));
   }
 
   loop(period: Seconds): LayerMotion {

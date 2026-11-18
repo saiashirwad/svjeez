@@ -15,15 +15,11 @@ import {
   circle,
   ease,
   morph,
-  par,
   rect,
   ref,
   scene,
-  seq,
   span,
-  spin,
   symbol,
-  timeline,
   tokens,
   track,
 } from "svjeez";
@@ -40,7 +36,11 @@ const badge = picture(
 );
 
 const star = symbol(() => (
-  <Shape geometry={rect(12, 12, { radius: 3 })} fill={theme.accent} rotate={spin({ every: 2 })} />
+  <Shape
+    geometry={rect(12, 12, { radius: 3 })}
+    fill={theme.accent}
+    rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}
+  />
 ));
 
 export default scene({ size: [320, 200], duration: 4, title: "Integration", theme }, () => {
@@ -51,17 +51,11 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
   const dot = ref("dot");
   const angle = track(0).to(270, span(0.5, 2.5), ease.inOut);
 
-  timeline(
-    seq(
-      par(
-        grid.part("b").to({ opacity: 0.3 }, 0.6),
-        card.move([200, 110], 1.2, ease.spring({ stiffness: 120, damping: 14 })),
-      ),
-      mover.rotate(45, 0.8),
-    ),
-  );
+  grid.part("b").to({ opacity: 0.3 }, span(0, 0.6));
+  const landed = card.move([200, 110], span(0, 1.2), ease.spring({ stiffness: 120, damping: 14 }));
 
-  const nested = timeline(late.moveBy([40, 0], 0.8, ease.inOut));
+  mover.to({ rotate: 45 }, landed.next(0.8));
+  late.move([130, 170], span(0, 0.8), ease.inOut);
 
   return (
     <Group>
@@ -118,8 +112,8 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
       <Arrow head="none" from={[250, 160]} to={dot.top} stroke={{ color: theme.cool }} />
       <Instance of={star} at={[20, 170]} />
       <Instance of={star} at={[44, 170]} scale={1.5} />
-      <Sequence start={1}>
-        <Sequence start={0.5} timeline={nested}>
+      <Sequence when={span(1)}>
+        <Sequence when={span(0.5)}>
           <Shape
             ref={late}
             geometry={circle(6)}

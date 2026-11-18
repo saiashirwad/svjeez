@@ -7,13 +7,10 @@ import {
   Text,
   circle,
   font,
-  par,
   rect,
   ref,
   scene,
-  seq,
-  timeline,
-  wait,
+  span,
   type SceneElement,
 } from "svjeez";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
@@ -172,7 +169,8 @@ describe("two actions on one prop", () => {
       made(() => {
         const dot = ref("dot");
 
-        timeline(par(dot.move([60, 30], 1), seq(wait(0.5), dot.set({ at: [10, 10] }))));
+        dot.move([60, 30], span(0, 1));
+        dot.set({ at: [10, 10] }, span(0.5));
 
         return <Shape ref={dot} geometry={circle(4)} at={[10, 30]} fill="#FF0000" />;
       }),
@@ -191,15 +189,16 @@ describe("two actions on one prop", () => {
       made(() => {
         const dot = ref("dot");
 
-        timeline(par(dot.move([60, 30], 2), seq(wait(1), dot.moveBy([10, 0], 2))));
+        dot.move([60, 30], span(0, 2));
+        dot.move([70, 30], span(1, 2));
 
         return <Shape ref={dot} geometry={circle(4)} at={[10, 30]} fill="#FF0000" />;
       }),
     );
 
     expect(error.problem).toBe(
-      'dot.move() moves at on <Shape> "dot" from 0s to 2s, and dot.moveBy() moves it too from 1s to 3s, before the first one ends.',
+      'dot.move() moves at on <Shape> "dot" from 0s to 2s, and dot.move() moves it too from 1s to 3s, before the first one ends.',
     );
-    expect(error.fix).toStartWith("Start dot.moveBy() at 2s or later");
+    expect(error.fix).toStartWith("Start dot.move() at 2s or later");
   });
 });

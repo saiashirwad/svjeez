@@ -9,8 +9,6 @@ import {
   ref,
   scene,
   span,
-  spin,
-  timeline,
   tokens,
   track,
   type Paint,
@@ -62,7 +60,7 @@ describe("affine mappings", () => {
   });
 
   test("a loop stays a loop with its period, and chained maps compose", () => {
-    const theta = spin({ every: 2 });
+    const theta = track(0).to(360, span(0, 2), ease.linear).loop(2);
 
     const node = only(
       made(() => (
@@ -184,7 +182,7 @@ describe("sampled mappings", () => {
           fill="#000000"
           geometry={circle(2)}
           anchor="center"
-          at={spin({ every: 2 }).map(around)}
+          at={track(0).to(360, span(0, 2), ease.linear).loop(2).map(around)}
         />
       )),
     );
@@ -245,7 +243,7 @@ describe("derived tracks", () => {
   test("follow their sources inside a sequence", () => {
     const node = only(
       made(() => (
-        <Sequence start={1}>
+        <Sequence when={span(1)}>
           <Shape
             fill="#000000"
             geometry={circle(2)}
@@ -308,12 +306,12 @@ describe("derived tracks", () => {
     ).toThrow("derived to values of different shapes");
   });
 
-  test("a timeline can't move a prop a derived track moves", () => {
+  test("a verb can't move a prop a derived track moves", () => {
     expect(() =>
       made(() => {
         const dot = ref("dot");
 
-        timeline(dot.to({ opacity: 0 }, 1));
+        dot.to({ opacity: 0 }, span(0, 1));
 
         return (
           <Shape

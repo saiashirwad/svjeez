@@ -724,7 +724,7 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
 
       if (inside !== undefined)
         throw new SceneError(
-          `A ${asked.label} in a morph() state holds ${named(inside)}, which is placed by an anchor, a timeline's move to an anchor, or as an arrow's end. A morph arranges each state on its own, before anchors are known.`,
+          `A ${asked.label} in a morph() state holds ${named(inside)}, which is placed by an anchor, a move() onto an anchor, or as an arrow's end. A morph arranges each state on its own, before anchors are known.`,
           `Attach it outside the ${asked.label}, or outside the morph.`,
           whereOf(inside),
         );

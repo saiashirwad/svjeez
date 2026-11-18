@@ -251,7 +251,7 @@ export const loopSeam = (survey: Survey): void => {
         severity: "warning",
         key: node.key,
         message: `${label(node)} enters at ${seconds(entered)} and never leaves, so it vanishes when the loop starts again at 0s.`,
-        hint: "Let it leave before the end (exit(), a fade, or .rewind() on its timeline), or have it on screen from 0s.",
+        hint: "Let it leave before the end (exit(), a fade, or .rewind() on its track), or have it on screen from 0s.",
         times: [Number(end.toFixed(3)), 0],
       });
       continue;

@@ -78,21 +78,16 @@ describe("span()", () => {
     expect(box(chained)).toBe(box(byHand));
   });
 
-  test("a span knows its end, and shifts, chains and pads into new spans", () => {
+  test("a span knows its end, and shifts and chains into new spans", () => {
     const reach = clock(0, 0.7);
     const grab = reach.next(1, 0.2);
-    const down = grab.pad(0.15);
 
     expect(reach.end).toBeCloseTo(0.7, 9);
     expect([grab.start, grab.over, grab.end]).toEqual(
       [0.9, 1, 1.9].map((n) => expect.closeTo(n, 9)),
     );
-    expect(down.start).toBeCloseTo(0.75, 9);
-    expect(down.over).toBeCloseTo(1.3, 9);
     expect(clock(1, 2).shift(2)).toMatchObject({ start: 3, over: 2 });
     expect(clock(1, 2).next(1)).toMatchObject({ start: 3, over: 1 });
-    expect(clock(1, 2).pad(1, 0)).toMatchObject({ start: 0, over: 3 });
-    expect(clock(1, 2).pad(-0.5)).toMatchObject({ start: 1.5, over: 1 });
   });
 
   test("a span is not a thenable, so awaiting or returning one from an async function works", async () => {
@@ -108,18 +103,6 @@ describe("span()", () => {
     expect(open.over).toBeUndefined();
     expect(open.end).toBe(Infinity);
     expect(open.shift(1).start).toBe(3);
-    expect(open.pad(1).start).toBe(1);
-  });
-
-  test("until runs a span to an end time; first and last start or end with another", () => {
-    expect(clock(2).until(3.5)).toMatchObject({ start: 2, over: 1.5 });
-    expect(clock(1, 4).until(2)).toMatchObject({ start: 1, over: 1 });
-    expect(clock(1, 4).first(0.5)).toMatchObject({ start: 1, over: 0.5 });
-    expect(clock(2).first(0.5)).toMatchObject({ start: 2, over: 0.5 });
-    expect(clock(1, 4).last(0.5)).toMatchObject({ start: 4.5, over: 0.5 });
-    expect(() => clock(2).until(1)).toThrow("until() needs a length of 0 or more, got -1.");
-    expect(() => clock(1, 1).until(Infinity)).toThrow("until() needs a finite number of seconds");
-    expect(() => clock(1, 1).last(3)).toThrow("last() needs a start of 0 or later, got -1.");
   });
 
   test(".cascade() lays out spans step apart, each as long as the first", () => {
@@ -134,13 +117,11 @@ describe("span()", () => {
     expect(clock(0, 1).cascade(2, 0)[1]).toMatchObject({ start: 0, over: 1 });
   });
 
-  test("a span before 0, with a negative or infinite length, or padded out of the clock throws", () => {
+  test("a span before 0, or with a negative or infinite length throws", () => {
     expect(() => clock(-1, 1)).toThrow(/start of 0 or later/);
     expect(() => clock(1, -1)).toThrow(/length of 0 or more/);
     expect(() => clock(1, Infinity)).toThrow(/length of 0 or more/);
     expect(() => clock(Number.NaN)).toThrow(/start of 0 or later/);
-    expect(() => clock(1, 2).pad(2)).toThrow(/pad\(\) needs a start of 0 or later/);
-    expect(() => clock(1, 2).pad(-2)).toThrow(/pad\(\) needs a length/);
   });
 });
 
@@ -255,7 +236,7 @@ describe(".repeat()", () => {
     expect(() => motion({ offset: x(0) }).repeat(2)).toThrow(/needs a passage to repeat/);
     expect(() =>
       motion({ offset: x(0) })
-        .set({ offset: x(5) }, 0)
+        .set({ offset: x(5) }, clock(0))
         .repeat(2),
     ).toThrow(/needs a passage with a length/);
     expect(() => spin.repeat({ until: 2 })).toThrow(/needs a time after the passage ends, at 2s/);

@@ -34,8 +34,8 @@ const progress = track(0).to(1, upload, ease.inOut).rewind(reset.over, ease.inOu
 
 const swap = (from: number) =>
   track(from)
-    .to(1 - from, done.first(0.3))
-    .to(from, reset.first(0.3));
+    .to(1 - from, span(done.start, 0.3))
+    .to(from, span(reset.start, 0.3));
 
 export default scene(
   {
@@ -64,10 +64,10 @@ export default scene(
               key="check"
               geometry={path().moveTo([0, 7]).lineTo([7, 14]).lineTo([20, 0])}
               stroke={{ color: theme.green, width: 4, cap: "round", join: "round" }}
-              trim={draw(done.first(0.3))}
+              trim={draw(span(done.start, 0.3))}
               motion={[
-                motion({ scale: 0.4 }).to({ scale: 1 }, done.first(pop.settle), pop),
-                exit(reset.first(0.3)),
+                motion({ scale: 0.4 }).to({ scale: 1 }, span(done.start, pop.settle), pop),
+                exit(span(reset.start, 0.3)),
               ]}
             />
           </Center>

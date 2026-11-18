@@ -64,7 +64,7 @@ export default scene(
             anchor="center"
             fill={theme.orange}
             at={last.route.travel(home)}
-            opacity={track(0).set(1, home.start).to(0, home.next(0.2))}
+            opacity={track(0).set(1, home).to(0, home.next(0.2))}
           />
         </Group>
       </Align>

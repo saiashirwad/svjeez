@@ -12,7 +12,6 @@ import {
   rect,
   scene,
   span,
-  spin,
   tokens,
   track,
   type SceneElement,
@@ -101,7 +100,7 @@ describe("lowering", () => {
   test("a track inside a sequence lands on the scene's clock", () => {
     const node = only(
       made(() => (
-        <Sequence start={1}>
+        <Sequence when={span(1)}>
           <Shape
             fill="#000000"
             geometry={circle(4)}
@@ -148,7 +147,7 @@ describe("lowering", () => {
             fill="#000000"
             geometry={circle(4)}
             anchor="center"
-            rotate={spin({ every: 1.5 })}
+            rotate={track(0).to(360, span(0, 1.5), ease.linear).loop(1.5)}
           />
         ),
         4,
@@ -163,7 +162,7 @@ describe("lowering", () => {
   test("a track that outruns its sequence names it", () => {
     expect(() =>
       made(() => (
-        <Sequence start={1} over={1}>
+        <Sequence when={span(1, 1)}>
           <Shape
             fill="#000000"
             geometry={circle(4)}
@@ -172,7 +171,7 @@ describe("lowering", () => {
           />
         </Sequence>
       )),
-    ).toThrow("past the 1s <Sequence start={1} over={1}>");
+    ).toThrow("past the 1s <Sequence when={span(1, 1)}>");
   });
 
   test("tokens the scene uses are declared with both values", () => {
@@ -211,7 +210,12 @@ describe("the SVG backend", () => {
   test("a shape placed by its own coordinates turns around its fill box", () => {
     expect(
       body(() => (
-        <Shape fill="#000000" geometry={rect(20, 10)} at={[5, 5]} rotate={spin({ every: 2 })} />
+        <Shape
+          fill="#000000"
+          geometry={rect(20, 10)}
+          at={[5, 5]}
+          rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}
+        />
       )),
     ).toMatch(/<rect x="5" y="5" width="20" height="10" fill="#000000" class="a m1 fb"\/>/);
   });
@@ -219,7 +223,7 @@ describe("the SVG backend", () => {
   test("anything else turns around its origin, written out", () => {
     expect(
       body(() => (
-        <Group at={[50, 50]} rotate={spin({ every: 2 })}>
+        <Group at={[50, 50]} rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}>
           <Shape fill="#000000" geometry={rect(20, 10)} />
           <Shape fill="#000000" geometry={rect(4, 4)} at={[16, 6]} />
         </Group>
@@ -229,7 +233,7 @@ describe("the SVG backend", () => {
 
   test("a group that only places one node is written as that node, placed by both", () => {
     const out = body(() => (
-      <Group at={[50, 50]} rotate={spin({ every: 2 })}>
+      <Group at={[50, 50]} rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}>
         <Shape geometry={path().moveTo([0, 0]).lineTo([20, 10])} stroke={{ color: "#FF0000" }} />
       </Group>
     ));
@@ -246,7 +250,7 @@ describe("the SVG backend", () => {
         fill="#000000"
         geometry={circle(4)}
         anchor="center"
-        rotate={spin({ every: 2 })}
+        rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}
         motion={motion({ offset: [0, 0] }).to({ offset: [10, 0] }, span(0, 1))}
       />
     ));

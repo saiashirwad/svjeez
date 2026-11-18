@@ -152,7 +152,7 @@ const along = lengths([...trace, trace[0]!]);
 const total = along.at(-1)!;
 
 const drawing = span(0.8, 10);
-const [shown, fill, gone] = [drawing.first(0.5), drawing.next(0.6), drawing.next(0.6, 2)];
+const [shown, fill, gone] = [span(drawing.start, 0.5), drawing.next(0.6), drawing.next(0.6, 2)];
 
 const drawn = (t: number): number => {
   const u = Math.min(1, t / drawing.over) * TRACE;

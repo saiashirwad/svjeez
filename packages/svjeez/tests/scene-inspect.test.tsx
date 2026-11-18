@@ -18,9 +18,8 @@ import {
   rect,
   ref,
   scene,
+  ease,
   span,
-  spin,
-  timeline,
   tokens,
   track,
   type Paint,
@@ -378,7 +377,7 @@ group("loop-seam", () => {
     const near = [
       made(() => <Dot at={track([0, 0]).to([50, 0], span(0, 1)).to([0, 0], span(2, 1))} />),
       made(() => <Dot at={track([0, 0]).to([50, 0], span(0, 1))} />, 4, false),
-      made(() => <Dot rotate={spin({ every: 2 })} />),
+      made(() => <Dot rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)} />),
       made(() => <Dot rotate={track(0).to(360, span(0, 4))} />),
       made(() => (
         <Dot at={track([0, 0]).to([50, 0], span(0, 1))} opacity={track(1).to(0, span(3, 0.5))} />
@@ -442,7 +441,9 @@ group("timing", () => {
         "static",
       )[0]!.message,
     ).toContain("Nothing in the scene moves");
-    expect(codes(made(() => <Dot rotate={spin({ every: 2 })} />))).toContain("nothing-enters");
+    expect(
+      codes(made(() => <Dot rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)} />)),
+    ).toContain("nothing-enters");
     expect(codes(made(() => <Dot opacity={track(0).to(1, span(0, 1))} />))).not.toContain(
       "nothing-enters",
     );
@@ -474,7 +475,7 @@ group("capabilities and the model alone", () => {
       <Group>
         <Dot key="far" at={[300, 10]} />
         <Dot key="cut" at={[192, 10]} />
-        <Dot key="spin" rotate={spin({ every: 2 })} />
+        <Dot key="spin" rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)} />
       </Group>
     ));
 
@@ -553,12 +554,12 @@ group("what the model keeps of how the scene was written", () => {
     ]);
   });
 
-  test("a timeline that moves a node no one sees is reported; one that moves a seen node is not", () => {
+  test("a verb that moves a node no one sees is reported; one that moves a seen node is not", () => {
     const moved = (opacity: number) =>
       made(() => {
         const dot = ref("dot");
 
-        timeline(dot.move([60, 20], 1));
+        dot.move([60, 20], span(0, 1));
 
         return <Dot ref={dot} opacity={opacity} />;
       });

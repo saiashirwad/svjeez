@@ -112,56 +112,6 @@ export const draw = (when: Span, { curve = ease.out }: DrawOptions = {}): Track<
   return track([0, 0]).to([0, 1], span(start, over), curve);
 };
 
-export const spin = ({ every }: { readonly every: Seconds }): Track<number> => {
-  if (!(every > 0 && Number.isFinite(every)))
-    throw new SceneError(`spin() needs a positive every, got ${every}.`);
-
-  return track(0).to(360, span(0, every), ease.linear).loop(every);
-};
-
-export interface ShakeAmplitude {
-  readonly offset?: Vec;
-  readonly rotate?: number;
-}
-
-export interface ShakeOptions {
-  readonly rate?: number;
-}
-
-export const shake = (
-  amplitude: ShakeAmplitude,
-  when: Span,
-  { rate = 12 }: ShakeOptions = {},
-): Motion => {
-  const { start, over } = closed(when, "shake()");
-
-  if (amplitude.offset === undefined && amplitude.rotate === undefined)
-    throw new SceneError(
-      "shake() needs an offset or a rotate to swing by, as in shake({ offset: [6, 0] }, when).",
-    );
-
-  if (!(rate > 0 && Number.isFinite(rate)))
-    throw new SceneError(`shake() needs a positive rate, got ${rate}.`);
-  const count = Math.max(2, Math.round(over * rate));
-
-  const swing = (k: number): LayerValues => {
-    const share = k === count ? 0 : (k % 2 ? -1 : 1) * (1 - k / count);
-    const { offset, rotate } = amplitude;
-
-    return {
-      ...(offset && { offset: [offset[0] * share, offset[1] * share] as const }),
-      ...(rotate !== undefined && { rotate: rotate * share }),
-    };
-  };
-
-  let layer = motion();
-
-  for (let k = 1; k <= count; k++)
-    layer = layer.to(swing(k), span(start + ((k - 1) * over) / count, over / count), ease.linear);
-
-  return layer;
-};
-
 export interface SampledOptions {
   readonly step?: Seconds;
   readonly tolerance: number;
@@ -390,7 +340,7 @@ export function sampled(
   let out = track<number | Vec | Geometry>(first);
 
   for (const { start, over, value } of kept)
-    out = over > 0 ? out.to(value, span(start, over), ease.linear) : out.set(value, start);
+    out = over > 0 ? out.to(value, span(start, over), ease.linear) : out.set(value, span(start));
 
   return out;
 }
@@ -459,7 +409,8 @@ sampled.motion = (
 
   for (const { kept } of lanes)
     for (const { start, over, value } of kept)
-      layer = over > 0 ? layer.to(value, span(start, over), ease.linear) : layer.set(value, start);
+      layer =
+        over > 0 ? layer.to(value, span(start, over), ease.linear) : layer.set(value, span(start));
 
   return layer;
 };

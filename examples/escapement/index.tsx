@@ -442,7 +442,9 @@ const held = (stop: Stop, lead = 1) => {
   const next = order[order.indexOf(stop) + 1];
   const end = next ? tour[next].move.start : D;
 
-  return span(tour[stop].move.end - lead).until(end + 0.4);
+  const from = tour[stop].move.end - lead;
+
+  return span(from, end + 0.4 - from);
 };
 
 interface Note {
@@ -468,7 +470,7 @@ const Label = ({ name, note, at: [x, y], to, stop, after = 0, end }: Note): Scen
     : [x + side * (far ? wide + size * 0.35 : -size * 0.35), y - size * 0.32];
 
   return (
-    <Group motion={[enter(shown.first(0.8)), exit(span(shown.end, 0.8))]}>
+    <Group motion={[enter(span(shown.start, 0.8)), exit(span(shown.end, 0.8))]}>
       <Shape
         geometry={line(tail, to)}
         stroke={{ color: "#ECE9E2B3", width: size * 0.05 }}

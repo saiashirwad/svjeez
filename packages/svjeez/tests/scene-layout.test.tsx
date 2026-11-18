@@ -20,8 +20,6 @@ import {
   ref,
   scene,
   span,
-  spin,
-  timeline,
   track,
   type SceneElement,
 } from "svjeez";
@@ -290,7 +288,7 @@ describe("containers", () => {
           fill="#000000"
           key="b"
           geometry={rect(10, 10)}
-          rotate={spin({ every: 2 })}
+          rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}
           motion={motion({ offset: [0, 5] })}
         />
       </Stack>
@@ -411,11 +409,12 @@ describe("containers that draw themselves", () => {
     expect(find(fitted, "c").box).toEqual({ x: 0, y: 0, width: 22, height: 14 });
   });
 
-  test("a grid draws its background too, and a timeline recolors a container's fill and stroke", () => {
+  test("a grid draws its background too, and verbs recolor a container's fill and stroke", () => {
     const model = made(() => {
       const grid = ref("grid");
 
-      timeline(grid.fill("#ff0000", 1), grid.stroke({ color: "#00ff00" }, 1));
+      grid.to({ fill: "#ff0000" }, span(0, 1));
+      grid.to({ stroke: { color: "#00ff00" } }, span(0, 1));
 
       return (
         <Grid
@@ -559,7 +558,7 @@ describe("anchors", () => {
 
     const model = made(() => (
       <Group>
-        <Group at={[100, 50]} rotate={spin({ every: 4 })}>
+        <Group at={[100, 50]} rotate={track(0).to(360, span(0, 4), ease.linear).loop(4)}>
           <Shape fill="#000000" ref={target} geometry={circle(2)} anchor="center" at={[30, 0]} />
           <Shape fill="#000000" geometry={circle(2)} anchor="center" at={[-30, 0]} />
         </Group>

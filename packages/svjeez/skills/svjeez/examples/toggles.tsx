@@ -8,20 +8,18 @@ import {
   canvas,
   circle,
   ease,
-  par,
   pathData,
   rect,
   ref,
   scene,
-  seq,
-  timeline,
-  wait,
-  type Action,
+  span,
   type SceneElement,
+  type Span,
   type Vec,
 } from "svjeez";
 import { sans, theme } from "./style";
 
+const DURATION = 6;
 const IDLE: Vec = [400, 230];
 const flick = ease.spring({ stiffness: 320, damping: 22 });
 
@@ -38,8 +36,15 @@ const toggle = (name: string) => {
         <Shape key="knob" geometry={circle(9)} at={[3, 3]} fill="#FFFFFF" />
       </Group>
     ),
-    on: par(knob.moveBy([20, 0], flick), groove.fill(theme.blue, 0.2)),
-    off: handle.rewind(0.5),
+    on: (after: Span) => {
+      groove.to({ fill: theme.blue }, after.next(0.2));
+
+      return knob.move([23, 3], after.next(flick.settle), flick);
+    },
+    off: (when: Span) => {
+      groove.to({ fill: theme.raised }, when);
+      knob.move([3, 3], when);
+    },
   };
 };
 
@@ -64,7 +69,7 @@ const Row = ({ label, children }: { readonly label: string; readonly children: S
 export default scene(
   {
     size: [480, 280],
-    duration: 6,
+    duration: DURATION,
     title: "Settings",
     desc: "A cursor turns on two switches in a settings panel, one after the other, then both switch back off before the loop.",
     theme,
@@ -75,22 +80,17 @@ export default scene(
     const dark = toggle("dark");
     const alerts = toggle("alerts");
 
-    const press = (): Action => seq(cursor.scale(0.85, 0.08), cursor.scale(1, 0.12));
+    const press = (after: Span) =>
+      cursor.to({ scale: 1 }, cursor.to({ scale: 0.85 }, after.next(0.08)).next(0.12));
 
-    timeline(
-      wait(0.4),
-      cursor.move(dark.handle.center, 0.8, ease.inOut),
-      press(),
-      dark.on,
-      wait(0.3),
-      cursor.move(alerts.handle.center, 0.6, ease.inOut),
-      press(),
-      alerts.on,
-      wait(0.4),
-      cursor.move(IDLE, 0.7, ease.inOut),
-      dark.off,
-      alerts.off,
-    );
+    const darkOn = dark.on(press(cursor.move(dark.handle.center, span(0.4, 0.8), ease.inOut)));
+    const toAlerts = cursor.move(alerts.handle.center, darkOn.next(0.6, 0.3), ease.inOut);
+    const alertsOn = alerts.on(press(toAlerts));
+    const back = span(DURATION - 0.5, 0.5);
+
+    cursor.move(IDLE, alertsOn.next(0.7, 0.4), ease.inOut);
+    dark.off(back);
+    alerts.off(back);
 
     return (
       <Group>

@@ -7,20 +7,18 @@ import {
   canvas,
   circle,
   ease,
-  par,
   pathData,
   rect,
   ref,
   scene,
-  seq,
-  timeline,
-  wait,
-  type Action,
+  span,
   type SceneElement,
+  type Span,
   type Vec,
 } from "svjeez";
 import { mono, theme } from "../theme";
 
+const DURATION = 9;
 const IDLE: Vec = [244, 196];
 const RADIUS = 7;
 const LINE = 1.5;
@@ -50,7 +48,10 @@ const keycap = (label: string) => {
         </Text>
       </Group>
     ),
-    press: (hold: number): Action => seq(lit.show(0.08), wait(hold - 0.16), lit.hide(0.08)),
+    press: (held: Span): void => {
+      lit.to({ opacity: 1 }, span(held.start, 0.08));
+      lit.to({ opacity: 0 }, span(held.start + held.over - 0.08, 0.08));
+    },
   };
 };
 
@@ -67,17 +68,15 @@ const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
   const grip = win.part("titlebar");
   const key = keycap("opt");
 
-  const gesture = timeline(
-    cursor.move(grip, 0.7, ease.inOut),
-    wait(0.05),
-    par(
-      key.press(1.3),
-      seq(wait(0.15), par(win.move(to, 1, ease.inOut), cursor.move(grip, 1, ease.inOut))),
-    ),
-    wait(0.1),
-    cursor.move(IDLE, 0.5, ease.inOut),
-    win.rewind(0.8),
-  );
+  const reach = cursor.move(grip, span(0, 0.7), ease.inOut);
+  const held = reach.next(1.3, 0.05);
+  const drag = span(held.start + 0.15, 1);
+
+  key.press(held);
+  win.move(to, drag, ease.inOut);
+  cursor.move(grip, drag, ease.inOut);
+  cursor.move(IDLE, held.next(0.5, 0.1), ease.inOut);
+  win.move(from, span(DURATION - start - 0.8, 0.8), ease.out);
 
   return (
     <Group at={[x, 30]}>
@@ -86,7 +85,7 @@ const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
         fill={theme.background}
         stroke={{ color: theme.raised, width: 1.5 }}
       />
-      <Sequence start={start} timeline={gesture}>
+      <Sequence when={span(start)}>
         {key.node}
         <Stack
           ref={win}
@@ -130,7 +129,7 @@ const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
 export default scene(
   {
     size: [640, 300],
-    duration: 9,
+    duration: DURATION,
     title: "A clip",
     desc: "Two desktops play one gesture a few seconds apart: a cursor takes a window by its title bar and drags it while a key is held, then the window goes back.",
     theme,

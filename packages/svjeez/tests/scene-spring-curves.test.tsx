@@ -12,7 +12,6 @@ import {
   ref,
   scene,
   span,
-  timeline,
   track,
   type Curve,
   type SceneElement,
@@ -98,7 +97,7 @@ const both = ({ start, legs, finish = {}, inside, duration = 4 }: Route) => {
   if (finish.loop !== undefined) [at, layer] = [at.loop(finish.loop), layer.loop(finish.loop)];
 
   const placed = (dot: SceneElement): SceneElement =>
-    inside === undefined ? dot : <Sequence start={inside}>{dot}</Sequence>;
+    inside === undefined ? dot : <Sequence when={span(inside)}>{dot}</Sequence>;
 
   const model = made(
     () => (
@@ -375,15 +374,15 @@ describe("readers of a curved spring agree with it", () => {
     }
   });
 
-  test("moveBy after a cut spring carries on from where the curved spring was cut", () => {
+  test("a move after a cut spring carries on from where the curved spring was cut", () => {
     const model = made(() => {
       const dot = ref("dot");
 
-      timeline(
-        dot.move([200, 0], 0.5, ease.linear),
-        dot.move([200, 100], 0.4, swing),
-        dot.moveBy([-50, 0], 1),
-      );
+      const [slide, drop, back] = span(0, 0.5).chain(0.4, 1);
+
+      dot.move([200, 0], slide, ease.linear);
+      dot.move([200, 100], drop, swing);
+      dot.move([150, 100], back);
 
       return <Shape ref={dot} geometry={circle(4)} anchor="center" fill={red} />;
     });

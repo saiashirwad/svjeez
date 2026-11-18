@@ -170,9 +170,9 @@ describe.if(browser)("checkScene", () => {
       made(() => (
         <Group>
           <BG />
-          {square(0, 0, { opacity: track(1).set(0, 1).to(1, span(1, 0.5)) })}
+          {square(0, 0, { opacity: track(1).set(0, span(1)).to(1, span(1, 0.5)) })}
           {square(50, 0, { opacity: track(0).to(1, span(1, 0.5)) })}
-          {square(100, 0, { opacity: track(1).set(0, 0.4).to(1, span(1, 0.5)) })}
+          {square(100, 0, { opacity: track(1).set(0, span(0.4)).to(1, span(1, 0.5)) })}
         </Group>
       )),
       "visible-at-zero",
@@ -472,7 +472,7 @@ describe("svjeez check when the scene does not build", () => {
     const out = cli(fixture("overlap"), "--no-browser").stdout.toString();
 
     expect(out).toMatch(
-      /overlap\.tsx:6:\d+ {2}compile-error {2}error: dot\.set\(\) sets at on <Shape> "dot" at 0\.5s/,
+      /overlap\.tsx:7:\d+ {2}compile-error {2}error: dot\.set\(\) sets at on <Shape> "dot" at 0\.5s/,
     );
   });
 

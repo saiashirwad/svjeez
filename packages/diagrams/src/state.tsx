@@ -576,7 +576,7 @@ export function stateMachine<
           };
 
           const opacity = runs.reduce(
-            (t, r) => t.set(1, r.when.start).set(0, r.when.start + r.when.over),
+            (t, r) => t.set(1, r.when).set(0, span(r.when.start + r.when.over)),
             track(0),
           );
 

@@ -218,7 +218,7 @@ const travel = <T>(
   let current = initial;
 
   windows.forEach(({ start, over }, i) => {
-    if (!same(current, from[i]!)) passage = passage.set({ value: from[i]! }, start);
+    if (!same(current, from[i]!)) passage = passage.set({ value: from[i]! }, { start });
 
     if (!same(from[i]!, to[i]!)) passage = passage.to({ value: to[i]! }, span(start, over), curve);
     current = to[i]!;
@@ -241,7 +241,7 @@ const blend = <T>(
 
   if (values.some(isLane))
     throw new SceneError(
-      `morph() can't blend the ${what} of ${named(entry.key)}: it moves in a state (a track, a recipe or a timeline) and also differs between states. Write it the same in every state, or let the morph move it.`,
+      `morph() can't blend the ${what} of ${named(entry.key)}: it moves in a state (a track, a recipe or a verb) and also differs between states. Write it the same in every state, or let the morph move it.`,
     );
 
   // SAFETY: no value is a lane, so each is a T.

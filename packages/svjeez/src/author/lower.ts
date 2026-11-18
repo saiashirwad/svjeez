@@ -70,7 +70,7 @@ import {
 } from "../model/steps";
 import { isTrack, layersOf, passageOf, type Anim, type LayerMotion } from "./track";
 import { derivedOf, isDerived } from "./derived";
-import { collect, type Cues, type NodeElement } from "./timeline";
+import { collect, type Cues, type NodeElement } from "./verbs";
 import {
   outlineOf,
   polygon,
@@ -599,7 +599,7 @@ const sceneTiming = ({ duration }: Ctx): Timing => ({
 });
 
 const label = (begin: Seconds, over: Seconds | undefined): string =>
-  `<Sequence start={${num(begin)}}${over === undefined ? "" : ` over={${num(over)}}`}>`;
+  `<Sequence when={span(${num(begin)}${over === undefined ? "" : `, ${num(over)}`})}>`;
 
 const inside = (timing: Timing, begin: Seconds, over: Seconds | undefined): Timing => {
   checkWindow(begin, over ?? 1, "<Sequence>");
@@ -636,11 +636,7 @@ const lowerAll = (
     if (given.type === "fragment") return lowerAll(ctx, given.children, timing, parent, taken);
 
     if (given.type === "sequence") {
-      const clocked = inside(timing, given.start, given.over);
-
-      if (given.timeline) ctx.cues.claim(given.timeline, clocked.clock);
-
-      return lowerAll(ctx, given.children, clocked, parent, taken);
+      return lowerAll(ctx, given.children, inside(timing, given.start, given.over), parent, taken);
     }
 
     if (given.type === "morph" && given.only !== undefined) {
@@ -838,7 +834,7 @@ const maskOf = (ctx: Ctx, mask: Child, key: string, timing: Timing): GroupNode |
 
     if (placed !== undefined)
       throw new SceneError(
-        `${named(placed)} is in the mask of ${named(key)} and is placed by an anchor, a timeline's move to an anchor, or as an arrow's end. A mask is drawn in its node's frame and is never part of the layout.`,
+        `${named(placed)} is in the mask of ${named(key)} and is placed by an anchor, a move() onto an anchor, or as an arrow's end. A mask is drawn in its node's frame and is never part of the layout.`,
         "Place what is in it with at.",
         whereOf(placed),
       );
@@ -912,7 +908,7 @@ const sized = (ctx: Ctx, props: Omit<Common, "anchor">, node: SceneNode): SceneN
 
     if (placed !== undefined)
       throw new SceneError(
-        `The ${what} of ${named(node.key)} is sized by its box, but ${named(placed)} inside it is placed by an anchor, a timeline's move to an anchor, or as an arrow's end, so its box isn't known yet.`,
+        `The ${what} of ${named(node.key)} is sized by its box, but ${named(placed)} inside it is placed by an anchor, a move() onto an anchor, or as an arrow's end, so its box isn't known yet.`,
         `Size the ${what} with numbers, or move that node out.`,
       );
   }
@@ -1064,7 +1060,7 @@ const lowerScene = (options: SceneOptions, build: () => SceneElement): Scene => 
     children,
   };
 
-  cues.finish(ctx.notes);
+  cues.finish();
   const root = settle(drafted, ctx.notes, duration);
   const refs = [...new Set([...declared, ...ctx.notes.refs.keys(), ...cues.refs])];
 

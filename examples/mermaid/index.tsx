@@ -69,7 +69,9 @@ export default scene(
             anchor="center"
             fill={theme.orange}
             at={route.travel(trip)}
-            opacity={track(0).to(1, trip.first(0.15)).to(0, trip.last(0.2))}
+            opacity={track(0)
+              .to(1, span(trip.start, 0.15))
+              .to(0, span(trip.end - 0.2, 0.2))}
           />
         </Group>
       </Align>

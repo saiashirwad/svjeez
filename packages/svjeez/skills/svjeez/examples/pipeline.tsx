@@ -13,14 +13,9 @@ import {
   ease,
   enter,
   exit,
-  par,
   ref,
   scene,
-  seq,
   span,
-  timeline,
-  wait,
-  type Action,
   type Ref,
   type SceneElement,
   type Span,
@@ -80,19 +75,24 @@ export default scene(
       [video, toVideo],
     ] as const;
 
-    const deliver = (target: Ref): Action =>
-      seq(
-        dot.set({ at: source.right }),
-        dot.show(0.15),
-        dot.move(model.left, 0.35, ease.in),
-        dot.hide(0.1),
-        dot.set({ at: model.right }),
-        dot.show(0.1),
-        dot.move(target.left, 0.35, ease.out),
-        par(dot.hide(0.15), target.stroke({ color: theme.blue }, 0.2)),
-      );
+    const deliver = (after: Span, target: Ref): Span => {
+      const appear = after.next(0.15);
 
-    timeline(wait(atVideo.end + 0.3), seq(...targets.map(([target]) => deliver(target))));
+      dot.set({ at: source.right }, appear);
+      dot.to({ opacity: 1 }, appear);
+      const reach = dot.move(model.left, appear.next(0.35), ease.in);
+      const again = dot.to({ opacity: 0 }, reach.next(0.1)).next(0.1);
+
+      dot.set({ at: model.right }, again);
+      dot.to({ opacity: 1 }, again);
+      const land = dot.move(target.left, again.next(0.35), ease.out);
+
+      dot.to({ opacity: 0 }, land.next(0.15));
+
+      return target.to({ stroke: { color: theme.blue } }, land.next(0.2));
+    };
+
+    targets.reduce((after, [target]) => deliver(after, target), span(0, atVideo.end + 0.3));
 
     return (
       <Group>

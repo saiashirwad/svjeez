@@ -21,10 +21,8 @@ import {
   rect,
   ref,
   scene,
-  seq,
   span,
   symbol,
-  timeline,
   track,
   type SceneElement,
 } from "svjeez";
@@ -374,19 +372,17 @@ describe("a box is what the shape paints", () => {
   });
 });
 
-describe("timelines move the anchor point", () => {
+describe("verbs move the anchor point", () => {
   test("move takes the point at names to the point given; move to an anchor lands it, or a point measured from it", () => {
     const dot = ref("dot");
     const pin = ref("pin");
 
     const model = made(() => {
-      timeline(
-        seq(
-          dot.move([100, 50], 1),
-          dot.move(pin, 1),
-          dot.move(pin, 1, undefined, { point: [5, 0] }),
-        ),
-      );
+      const [one, two, three] = span(0, 1).chain(1, 1);
+
+      dot.move([100, 50], one);
+      dot.move(pin, two);
+      dot.move(pin, three, undefined, { point: [5, 0] });
 
       return (
         <Group>
@@ -411,7 +407,7 @@ describe("timelines move the anchor point", () => {
     const mark = ref("mark");
 
     const model = made(() => {
-      timeline(mark.moveBy([10, 0], 1));
+      mark.move([50, 40], span(0, 1));
 
       return (
         <Shape

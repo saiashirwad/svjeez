@@ -21,7 +21,7 @@ export default scene(
         at={[76, 36]}
         fill={theme.blue}
         opacity={track(0).to(1, fadeIn).to(0, shrink, ease.in)}
-        scale={track(1).to(0.8, shrink, ease.in).set(1, shrink.end)}
+        scale={track(1).to(0.8, shrink, ease.in).set(1, span(shrink.end))}
       />
     </Group>
   ),

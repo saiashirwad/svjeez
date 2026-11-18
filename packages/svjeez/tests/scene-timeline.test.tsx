@@ -7,17 +7,11 @@ import {
   Stack,
   circle,
   ease,
-  par,
   rect,
   ref,
   scene,
-  seq,
   span,
-  stagger,
-  timeline,
   track,
-  wait,
-  type Action,
   type SceneElement,
 } from "svjeez";
 import { isLane, type Model } from "svjeez/tools";
@@ -48,15 +42,13 @@ const times = <T,>(value: Model.Animated<T>): [number, T][] =>
   isLane(value) ? value.keys.map((key) => [key.t, key.value]) : [];
 
 describe("verbs", () => {
-  test("move, moveBy, rotate, scale and fade write the node's own props, from its own values", () => {
+  test("move, to and set write the node's own props, from its own values", () => {
     const model = made(() => {
       const dot = ref("dot");
 
-      timeline(
-        dot.move([50, 20], 1, ease.linear),
-        dot.moveBy([10, 0], 0.5, ease.linear),
-        par(dot.rotate(90, 1), dot.scale(2, 1), dot.to({ opacity: 0.5 }, 1)),
-      );
+      dot.move([50, 20], span(0, 1), ease.linear);
+      dot.move([60, 20], span(1, 0.5), ease.linear);
+      dot.to({ rotate: 90, scale: 2, opacity: 0.5 }, span(1.5, 1));
 
       return (
         <Shape
@@ -88,17 +80,15 @@ describe("verbs", () => {
     expect(times(own(dot).opacity).at(-1)).toEqual([4, 0.5]);
   });
 
-  test("show and hide fade to 1 and 0; fill, stroke and trim move a shape's paint", () => {
+  test("to moves opacity, fill, stroke and trim of a shape's paint", () => {
     const model = made(() => {
       const box = ref("box");
 
-      timeline(
-        box.show(0.5),
-        box.fill("#ff0000", 0.5),
-        box.stroke({ color: "#00ff00" }, 0.5),
-        box.to({ trim: [0, 0.5] }, 0.5),
-        box.hide(0.5),
-      );
+      box.to({ opacity: 1 }, span(0, 0.5));
+      box.to({ fill: "#ff0000" }, span(0.5, 0.5));
+      box.to({ stroke: { color: "#00ff00" } }, span(1, 0.5));
+      box.to({ trim: [0, 0.5] }, span(1.5, 0.5));
+      box.to({ opacity: 0 }, span(2, 0.5));
 
       return (
         <Shape
@@ -126,20 +116,17 @@ describe("verbs", () => {
     ]);
   });
 
-  test("draw cuts the trim to nothing and strokes it on", () => {
-    const line = (draw: (action: Action) => void) =>
-      made(() => {
-        const stroke = ref("s");
+  test("a cut of the trim to nothing, then a trim to the whole, draws a stroke on", () => {
+    const model = made(() => {
+      const stroke = ref("s");
 
-        draw(seq(wait(1), stroke.draw(1, ease.linear)));
+      stroke.set({ trim: [0, 0] }, span(1));
+      stroke.to({ trim: [0, 1] }, span(1, 1), ease.linear);
 
-        return <Shape ref={stroke} geometry={rect(10, 10)} stroke={{ color: "#000000" }} />;
-      });
+      return <Shape ref={stroke} geometry={rect(10, 10)} stroke={{ color: "#000000" }} />;
+    });
 
-    const node = find(
-      line((action) => timeline(action)),
-      "s",
-    );
+    const node = find(model, "s");
 
     expect(node.kind === "shape" && valueAt(node.trim!, 0.5, blendVec)).toEqual([0, 1]);
     expect(node.kind === "shape" && valueAt(node.trim!, 1.5, blendVec)[1]).toBeCloseTo(0.5);
@@ -150,11 +137,8 @@ describe("verbs", () => {
     const model = made(() => {
       const dot = ref("dot");
 
-      timeline(
-        dot.to({ at: [40, 0], opacity: 0.5 }, 1, ease.linear),
-        wait(1),
-        dot.set({ at: [0, 0] }),
-      );
+      dot.to({ at: [40, 0], opacity: 0.5 }, span(0, 1), ease.linear);
+      dot.set({ at: [0, 0] }, span(2));
 
       return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
     });
@@ -167,11 +151,14 @@ describe("verbs", () => {
     expect(valueAt(own(dot).opacity, 3, blendNumber)).toBe(0.5);
   });
 
-  test("rewind glides everything the timeline moved on a node back over the clock's last seconds", () => {
+  test("verbs going back to the initial values at the clock's end glide the node home", () => {
     const model = made(() => {
       const dot = ref("dot");
 
-      timeline(par(dot.move([40, 0], 1), dot.rotate(90, 1)), dot.rewind(0.5, ease.linear));
+      dot.move([40, 0], span(0, 1));
+      dot.to({ rotate: 90 }, span(0, 1));
+      dot.move([0, 0], span(3.5, 0.5), ease.linear);
+      dot.to({ rotate: 0 }, span(3.5, 0.5), ease.linear);
 
       return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
     });
@@ -188,18 +175,14 @@ describe("verbs", () => {
     ]);
   });
 
-  test("moveTo lands the point the node's at names on another ref's anchor, or a point of it named by options.point", () => {
+  test("move lands the point the node's at names on another ref's anchor, or a point of it named by options.point", () => {
     const model = made(() => {
       const target = ref("target");
       const a = ref("a");
       const b = ref("b");
 
-      timeline(
-        par(
-          a.move(target, 1),
-          b.move(target.part("pin").topLeft, 1, ease.out, { point: "center" }),
-        ),
-      );
+      a.move(target, span(0, 1));
+      b.move(target.part("pin").topLeft, span(0, 1), ease.out, { point: "center" });
 
       return (
         <Group>
@@ -219,12 +202,13 @@ describe("verbs", () => {
     expect(times(find(model, "2/b").at).at(-1)).toEqual([4, [117, 67]]);
   });
 
-  test("moveTo a moving anchor lands where the anchor is when the move ends", () => {
+  test("move to a moving anchor lands where the anchor is when the move ends", () => {
     const model = made(() => {
       const card = ref("card");
       const dot = ref("dot");
 
-      timeline(par(card.move([100, 0], 2, ease.linear), dot.move(card.right, 1, ease.linear)));
+      card.move([100, 0], span(0, 2), ease.linear);
+      dot.move(card.right, span(0, 1), ease.linear);
 
       return (
         <Group>
@@ -242,19 +226,14 @@ describe("verbs", () => {
 });
 
 describe("springs, arrows and parts", () => {
-  test("a spring given for over sets the verb's length to its own settle time", () => {
+  test("a span of a spring's settle time runs the verb for as long as the spring takes", () => {
     const flick = ease.spring({ stiffness: 320, damping: 22 });
-    const knob = ref("knob");
-    const action = knob.moveBy([20, 0], flick);
-
-    expect(action.length).toBeCloseTo(flick.settle, 9);
-    expect(action.moves[0]!.curve).toBe(flick);
-    expect(() => knob.moveBy([20, 0], flick, ease.out)).toThrow(
-      "knob.moveBy() is given a spring for its length and a curve as well",
-    );
 
     const model = made(() => {
-      timeline(knob.moveBy([20, 0], flick));
+      const knob = ref("knob");
+      const ran = knob.move([20, 0], span(0, flick.settle), flick);
+
+      expect(ran.over).toBeCloseTo(flick.settle, 9);
 
       return <Shape fill="#000000" ref={knob} geometry={circle(3)} at={[0, 0]} />;
     });
@@ -264,11 +243,13 @@ describe("springs, arrows and parts", () => {
     expect(keys.at(-1)![1][0] - keys[0]![1][0]).toBeCloseTo(20, 9);
   });
 
-  test("draw and stroke on an arrow's ref draw and recolor its shaft and head", () => {
+  test("trim and stroke on an arrow's ref draw and recolor its shaft and head", () => {
     const model = made(() => {
       const [a, b, arrow] = [ref("a"), ref("b"), ref("arrow")];
 
-      timeline(arrow.draw(1, ease.linear), arrow.stroke({ color: "#ff0000" }, 0.5));
+      arrow.set({ trim: [0, 0] }, span(0));
+      arrow.to({ trim: [0, 1] }, span(0, 1), ease.linear);
+      arrow.to({ stroke: { color: "#ff0000" } }, span(1, 0.5));
 
       return (
         <Group>
@@ -287,15 +268,14 @@ describe("springs, arrows and parts", () => {
     expect(head.kind === "shape" && isLane(head.stroke!.color)).toBe(true);
   });
 
-  test("rewind on a group's ref rewinds every part the timeline moved inside it", () => {
+  test("verbs on a group's parts, going back to the start, return every part home", () => {
     const model = made(() => {
       const toggle = ref("toggle");
 
-      timeline(
-        toggle.part("knob").moveBy([20, 0], 0.5),
-        toggle.part("groove").fill("#ff0000", 0.5),
-        toggle.rewind(0.5),
-      );
+      toggle.part("knob").move([23, 3], span(0, 0.5));
+      toggle.part("groove").to({ fill: "#ff0000" }, span(0.5, 0.5));
+      toggle.part("knob").move([3, 3], span(3.5, 0.5));
+      toggle.part("groove").to({ fill: "#000000" }, span(3.5, 0.5));
 
       return (
         <Group ref={toggle}>
@@ -311,21 +291,6 @@ describe("springs, arrows and parts", () => {
 
     expect(knob.at(-1)).toEqual([4, knob[0]![1]]);
     expect(fill.at(-1)).toEqual([4, fill[0]![1]]);
-    expect(() =>
-      made(() => {
-        const still = ref("still");
-
-        timeline(wait(1), still.rewind(0.5));
-
-        return (
-          <Group ref={still}>
-            <Shape fill="#000000" geometry={rect(4, 4)} />
-          </Group>
-        );
-      }),
-    ).toThrow(
-      'still.rewind() rewinds <Group> "still", but no timeline moves it or anything inside it.',
-    );
   });
 
   test("cascade() returns as many spans as it is asked for, typed as a tuple", () => {
@@ -337,35 +302,27 @@ describe("springs, arrows and parts", () => {
   });
 });
 
-describe("combinators", () => {
-  const starts = (build: (dot: ReturnType<typeof ref>) => Action) => {
+describe("spans", () => {
+  test("a verb returns the span it ran in, and next() chains the verb after it", () => {
     const model = made(() => {
       const dot = ref("dot");
+      const first = dot.move([1, 0], span(0, 1));
 
-      timeline(build(dot));
+      expect([first.start, first.over, first.end]).toEqual([0, 1, 1]);
+      dot.move([2, 0], first.next(1, 0.5));
 
       return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
     }, 10);
 
-    return times(find(model, "dot").at).map(([t]) => t);
-  };
-
-  test("seq plays end to end, wait pauses, par starts together and lasts as long as the longest", () => {
-    expect(starts((dot) => seq(dot.move([1, 0], 1), wait(0.5), dot.move([2, 0], 1)))).toEqual([
-      0, 1, 1.5, 2.5, 10,
-    ]);
-
-    const p = par(wait(2), seq(wait(0.5)));
-
-    expect(p.length).toBe(2);
-    expect(seq(p, wait(1)).length).toBe(3);
+    expect(times(find(model, "dot").at).map(([t]) => t)).toEqual([0, 1, 1.5, 2.5, 10]);
   });
 
-  test("stagger starts each action a step after the one before", () => {
+  test("cascade starts each verb a step after the one before", () => {
     const model = made(() => {
       const dots = [ref("a"), ref("b"), ref("c")];
+      const spans = span(0, 1).cascade(3, 0.25);
 
-      timeline(stagger(0.25, ...dots.map((dot) => dot.show(1))));
+      dots.forEach((dot, i) => dot.to({ opacity: 1 }, spans[i]!));
 
       return (
         <Group>
@@ -380,33 +337,6 @@ describe("combinators", () => {
       times(own(find(model, key)).opacity).find(([, value]) => value === 1)![0];
 
     expect(["a", "b", "c"].map(lit)).toEqual([1, 1.25, 1.5]);
-    expect(
-      span(0, 1)
-        .cascade(3, 0.5)
-        .map((each) => each.start),
-    ).toEqual([0, 0.5, 1]);
-  });
-
-  test("labels read spans back on the timeline's clock, and end is when the last action ends", () => {
-    let read: ReturnType<typeof timeline> | undefined;
-
-    made(() => {
-      const dot = ref("dot");
-
-      read = timeline(
-        dot.move([1, 0], 0.5),
-        seq(wait(0.2), dot.move([2, 0], 1).as("grab")).as("tail"),
-      );
-
-      return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
-    });
-
-    expect(read!.span("grab").start).toBeCloseTo(0.7);
-    expect(read!.span("grab").over).toBe(1);
-    expect(read!.span("tail").end).toBeCloseTo(1.7);
-    expect(read!.end).toBeCloseTo(1.7);
-    expect(() => read!.span("nope")).toThrow('It has "grab", "tail"');
-    expect(() => seq(wait(1).as("x"), wait(1).as("x"))).toThrow('both named "x"');
   });
 
   test("a component can make its own verbs over its own refs", () => {
@@ -417,14 +347,19 @@ describe("combinators", () => {
         node: (
           <Shape ref={bulb} geometry={circle(4)} anchor="center" fill="#000000" opacity={0.2} />
         ),
-        blink: (): Action => seq(bulb.show(0.1), wait(0.3), bulb.to({ opacity: 0.2 }, 0.1)),
+        blink: (at: number) => {
+          const on = bulb.to({ opacity: 1 }, span(at, 0.1));
+
+          return bulb.to({ opacity: 0.2 }, on.next(0.1, 0.3));
+        },
       };
     };
 
     const model = made(() => {
       const one = lamp();
+      const done = one.blink(1);
 
-      timeline(wait(1), one.blink(), one.blink());
+      one.blink(done.end);
 
       return <Group>{one.node}</Group>;
     });
@@ -433,27 +368,19 @@ describe("combinators", () => {
       0.2, 0.2, 1, 1, 0.2, 1, 1, 0.2, 0.2,
     ]);
   });
-
-  test("combinators take only actions", () => {
-    // @ts-expect-error a track is not an action
-    expect(() => seq(track(0))).toThrow("seq() takes actions");
-  });
 });
 
 describe("tracks", () => {
-  test("a timeline gives exactly the lanes the same hand-written tracks give", () => {
-    const viaTimeline = made(() => {
+  test("verbs give exactly the lanes the same hand-written tracks give", () => {
+    const viaVerbs = made(() => {
       const card = ref("card");
 
-      timeline(
-        wait(0.25),
-        par(
-          card.move([80, 40], 1, ease.inOut),
-          card.rotate(30, 1, ease.spring({ stiffness: 300, damping: 30 })),
-        ),
-        card.to({ opacity: 0.4 }, 0.5),
-        card.rewind(1, ease.linear),
-      );
+      card.move([80, 40], span(0.25, 1), ease.inOut);
+      card.to({ rotate: 30 }, span(0.25, 1), ease.spring({ stiffness: 300, damping: 30 }));
+      card.to({ opacity: 0.4 }, span(1.25, 0.5));
+      card.move([10, 10], span(3, 1), ease.linear);
+      card.to({ rotate: 0 }, span(3, 1), ease.linear);
+      card.to({ opacity: 1 }, span(3, 1), ease.linear);
 
       return <Shape fill="#000000" ref={card} geometry={rect(20, 10)} at={[10, 10]} />;
     });
@@ -471,15 +398,16 @@ describe("tracks", () => {
       />
     ));
 
-    expect(viaTimeline.root).toEqual(byHand.root);
+    expect(viaVerbs.root).toEqual(byHand.root);
   });
 
-  test("a spring may be cut by the next action on the same prop, which carries its speed on", () => {
+  test("a spring may be cut by the next verb on the same prop, which carries its speed on", () => {
     const model = made(() => {
       const dot = ref("dot");
       const spring = ease.spring({ stiffness: 120, damping: 8 });
 
-      timeline(par(dot.move([100, 0], 2, spring), seq(wait(0.3), dot.move([0, 50], 2, spring))));
+      dot.move([100, 0], span(0, 2), spring);
+      dot.move([0, 50], span(0.3, 2), spring);
 
       return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
     });
@@ -487,26 +415,27 @@ describe("tracks", () => {
     expect(valueAt(find(model, "dot").at, 4, blendVec)).toEqual([0, 50]);
   });
 
-  test("two actions that move one prop at once throw, naming the key and the prop", () => {
+  test("two verbs that move one prop at once throw, naming the key and the prop", () => {
     expect(() =>
       made(() => {
         const dot = ref("dot");
 
-        timeline(par(dot.move([1, 0], 1), seq(wait(0.5), dot.moveBy([1, 1], 1))));
+        dot.move([1, 0], span(0, 1));
+        dot.move([2, 1], span(0.5, 1));
 
         return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
       }),
     ).toThrow(
-      'dot.move() moves at on <Shape> "dot" from 0s to 1s, and dot.moveBy() moves it too from 0.5s to 1.5s, before the first one ends. Start dot.moveBy() at 1s or later',
+      'dot.move() moves at on <Shape> "dot" from 0s to 1s, and dot.move() moves it too from 0.5s to 1.5s, before the first one ends. Start dot.move() at 1s or later',
     );
   });
 
-  test("a prop a track already moves can't be moved by a timeline too", () => {
+  test("a prop a track already moves can't be moved by a verb too", () => {
     expect(() =>
       made(() => {
         const dot = ref("dot");
 
-        timeline(dot.to({ opacity: 0 }, 1));
+        dot.to({ opacity: 0 }, span(0, 1));
 
         return (
           <Shape
@@ -520,18 +449,6 @@ describe("tracks", () => {
       }),
     ).toThrow('dot.to() moves opacity on <Shape> "dot", which a track already moves');
   });
-
-  test("a rewind that runs into the actions throws as a track's does", () => {
-    expect(() =>
-      made(() => {
-        const dot = ref("dot");
-
-        timeline(dot.move([1, 0], 3.5), dot.rewind(1));
-
-        return <Shape fill="#000000" ref={dot} geometry={circle(4)} anchor="center" />;
-      }),
-    ).toThrow('rewind(1) on at on <Shape> "dot" needs the last 1s');
-  });
 });
 
 describe("errors", () => {
@@ -542,15 +459,15 @@ describe("errors", () => {
     throws(() => {
       const g = ref("g");
 
-      timeline(g.fill("#ffffff", 1));
+      g.to({ fill: "#ffffff" }, span(0, 1));
 
       return <Group ref={g} />;
-    }, 'g.fill() moves fill on <Group> "g", which has none. Only shape or text or container nodes have fill.');
+    }, 'g.to() moves fill on <Group> "g", which has none. Only shape or text or container nodes have fill.');
 
     throws(() => {
       const s = ref("s");
 
-      timeline(s.stroke({ color: "#ffffff" }, 1));
+      s.to({ stroke: { color: "#ffffff" } }, span(0, 1));
 
       return <Shape fill="#000000" ref={s} geometry={circle(2)} anchor="center" />;
     }, 'changes the stroke of <Shape> "s", which has none');
@@ -558,15 +475,15 @@ describe("errors", () => {
 
   test("a ref on no node, or a part no node is, is named", () => {
     throws(() => {
-      timeline(ref("ghost").show(1));
+      ref("ghost").to({ opacity: 1 }, span(0, 1));
 
       return <Shape fill="#000000" geometry={circle(2)} anchor="center" />;
-    }, 'ghost.show() moves the ref "ghost", which is on no node');
+    }, 'ghost.to() moves the ref "ghost", which is on no node');
 
     throws(() => {
       const card = ref("card");
 
-      timeline(card.part("lid").show(1));
+      card.part("lid").to({ opacity: 1 }, span(0, 1));
 
       return <Group ref={card} />;
     }, 'no node is keyed "lid"');
@@ -576,7 +493,7 @@ describe("errors", () => {
     throws(() => {
       const dot = ref("dot");
 
-      timeline(dot.move([5, 5], 1));
+      dot.move([5, 5], span(0, 1));
 
       return (
         <Group>
@@ -588,26 +505,29 @@ describe("errors", () => {
     }, "Wrap it in a <Group>");
   });
 
-  test("timeline() outside a scene, and verbs with no time, throw", () => {
-    expect(() => timeline(wait(1))).toThrow(
-      "timeline() is only known while scene()'s callback runs",
+  test("a verb outside a scene, and verbs with no time, throw", () => {
+    expect(() => ref("a").to({ opacity: 1 }, span(0, 1))).toThrow(
+      "is only known while scene()'s callback runs",
     );
-    expect(() => ref("a").move([0, 0], 0)).toThrow(
-      "a.move() needs a positive number of seconds, got 0. Use set() for a cut.",
+    expect(() => ref("a").move([0, 0], span(0, 0))).toThrow(
+      "a.move() needs a span with a positive length, got 0s. Use set() for a cut.",
     );
     // SAFETY: a deliberately wrong prop, as untyped code could pass, to see the error it gets.
-    expect(() => ref("a").to({ size: 3 } as never, 1)).toThrow('a.to() can\'t move "size"');
+    expect(() => ref("a").to({ size: 3 } as never, span(0, 1))).toThrow(
+      'a.to() can\'t move "size"',
+    );
   });
 });
 
 describe("clocks", () => {
-  test("a timeline given to a sequence runs on its clock", () => {
+  test("a verb inside a sequence runs on its clock", () => {
     const model = made(() => {
       const dot = ref("dot");
-      const steps = timeline(dot.move([10, 0], 1, ease.linear));
+
+      dot.move([10, 0], span(0, 1), ease.linear);
 
       return (
-        <Sequence start={1.5} timeline={steps}>
+        <Sequence when={span(1.5)}>
           <Shape fill="#000000" ref={dot} geometry={circle(2)} anchor="center" />
         </Sequence>
       );
@@ -619,37 +539,5 @@ describe("clocks", () => {
       [2.5, [10, 0]],
       [4, [10, 0]],
     ]);
-  });
-
-  test("a node on another clock than its timeline's throws, and says where to give the timeline", () => {
-    expect(() =>
-      made(() => {
-        const dot = ref("dot");
-
-        timeline(dot.show(1));
-
-        return (
-          <Sequence start={1}>
-            <Shape fill="#000000" ref={dot} geometry={circle(2)} anchor="center" />
-          </Sequence>
-        );
-      }),
-    ).toThrow("Give the timeline to that sequence: <Sequence start={…} timeline={…}>");
-
-    expect(() =>
-      made(() => {
-        const dot = ref("dot");
-        const steps = timeline(dot.show(1));
-
-        return (
-          <Group>
-            <Shape fill="#000000" ref={dot} geometry={circle(2)} anchor="center" />
-            <Sequence start={1} timeline={steps} />
-          </Group>
-        );
-      }),
-    ).toThrow(
-      'dot.show() moves <Shape> "dot", which sits outside the <Sequence> its timeline is given to',
-    );
   });
 });

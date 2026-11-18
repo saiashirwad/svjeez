@@ -11,10 +11,10 @@ export interface OpenSpan {
   readonly over?: undefined;
 }
 
-export interface When {
-  readonly start: Seconds;
-  readonly over?: Seconds;
-}
+export type When = Span | OpenSpan;
+
+export const isWhen = (when: When | Seconds | null | undefined): when is When =>
+  typeof when === "object" && when !== null && Number.isFinite(when.start);
 
 export type Spans<N extends number, Done extends Spanned[] = []> = number extends N
   ? Spanned[]
@@ -26,10 +26,6 @@ export interface Spanned extends Span {
   readonly end: Seconds;
   shift(dt: Seconds): Spanned;
   next(over: Seconds, gap?: Seconds): Spanned;
-  pad(before: Seconds, after?: Seconds): Spanned;
-  until(end: Seconds): Spanned;
-  first(over: Seconds): Spanned;
-  last(over: Seconds): Spanned;
   chain<const O extends readonly Seconds[]>(
     ...overs: O
   ): [Spanned, ...{ -readonly [K in keyof O]: Spanned }];
@@ -39,9 +35,6 @@ export interface Spanned extends Span {
 export interface OpenSpanned extends OpenSpan {
   readonly end: number;
   shift(dt: Seconds): OpenSpanned;
-  pad(before: Seconds): OpenSpanned;
-  until(end: Seconds): Spanned;
-  first(over: Seconds): Spanned;
 }
 
 const finite = (value: number, what: string): void => {
@@ -69,29 +62,6 @@ class Range implements Spanned {
     finite(gap, "next()");
 
     return build(this.end + gap, over, "next()");
-  }
-
-  pad(before: Seconds, after: Seconds = before): Range {
-    finite(before, "pad()");
-    finite(after, "pad()");
-
-    return build(this.start - before, this.over + before + after, "pad()");
-  }
-
-  until(end: Seconds): Range {
-    finite(end, "until()");
-
-    return build(this.start, end - this.start, "until()");
-  }
-
-  first(over: Seconds): Range {
-    return build(this.start, over, "first()");
-  }
-
-  last(over: Seconds): Range {
-    finite(over, "last()");
-
-    return build(this.end - over, over, "last()");
   }
 
   chain<const O extends readonly Seconds[]>(
@@ -128,22 +98,6 @@ class Tail implements OpenSpanned {
     finite(dt, "shift()");
 
     return build(this.start + dt, undefined, "shift()");
-  }
-
-  pad(before: Seconds): Tail {
-    finite(before, "pad()");
-
-    return build(this.start - before, undefined, "pad()");
-  }
-
-  until(end: Seconds): Range {
-    finite(end, "until()");
-
-    return build(this.start, end - this.start, "until()");
-  }
-
-  first(over: Seconds): Range {
-    return build(this.start, over, "first()");
   }
 }
 

@@ -1,17 +1,9 @@
 import { SceneError } from "../model/scene-error";
-import type { Seconds } from "../model/time";
 import type { Box, Vec } from "../model/ir";
 import type { Curve } from "./spring";
-import {
-  verbs,
-  type Action,
-  type MoveOptions,
-  type Moves,
-  type Over,
-  type StrokeMoves,
-} from "./timeline";
+import { verbs, type MoveOptions, type Moves } from "./verbs";
+import type { Span, Spanned, When } from "./span";
 import { PLACE_LIST, PLACES } from "./pin";
-import type { Paint } from "./values";
 
 export type Edge = "left" | "right" | "top" | "bottom";
 
@@ -137,52 +129,16 @@ export class Ref {
     return this.#place("bottom-right");
   }
 
-  to(values: Moves, over: Over, curve?: Curve): Action {
-    return verbs.to(this, values, over, curve);
+  to(values: Moves, when: Span, curve?: Curve): Spanned {
+    return verbs.to(this, values, when, curve);
   }
 
-  set(values: Moves): Action {
-    return verbs.set(this, values);
+  set(values: Moves, when: When): Spanned {
+    return verbs.set(this, values, when);
   }
 
-  move(to: Vec | Anchor | Ref, over: Over, curve?: Curve, options?: MoveOptions): Action {
-    return verbs.move(this, to, over, curve, options);
-  }
-
-  moveBy(by: Vec, over: Over, curve?: Curve): Action {
-    return verbs.moveBy(this, by, over, curve);
-  }
-
-  rotate(to: number, over: Over, curve?: Curve): Action {
-    return verbs.rotate(this, to, over, curve);
-  }
-
-  scale(to: number | Vec, over: Over, curve?: Curve): Action {
-    return verbs.scale(this, to, over, curve);
-  }
-
-  show(over: Over, curve?: Curve): Action {
-    return verbs.show(this, over, curve);
-  }
-
-  hide(over: Over, curve?: Curve): Action {
-    return verbs.hide(this, over, curve);
-  }
-
-  fill(to: Paint, over: Over, curve?: Curve): Action {
-    return verbs.fill(this, to, over, curve);
-  }
-
-  stroke(to: StrokeMoves, over: Over, curve?: Curve): Action {
-    return verbs.stroke(this, to, over, curve);
-  }
-
-  draw(over: Over, curve?: Curve): Action {
-    return verbs.draw(this, over, curve);
-  }
-
-  rewind(over: Seconds, curve?: Curve): Action {
-    return verbs.rewind(this, over, curve);
+  move(to: Vec | Anchor | Ref, when: Span, curve?: Curve, options?: MoveOptions): Spanned {
+    return verbs.move(this, to, when, curve, options);
   }
 }
 

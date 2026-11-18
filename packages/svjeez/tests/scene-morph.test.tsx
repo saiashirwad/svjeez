@@ -266,7 +266,7 @@ describe("morph", () => {
     ]);
 
     const placed = shape(
-      made(() => <Sequence start={1}>{morph(at(0), at(10), span(1, 1))}</Sequence>),
+      made(() => <Sequence when={span(1)}>{morph(at(0), at(10), span(1, 1))}</Sequence>),
       "a",
     );
 

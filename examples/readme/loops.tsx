@@ -1,4 +1,17 @@
-import { Group, Shape, arc, canvas, circle, enter, exit, scene, span, spin, wiggle } from "svjeez";
+import {
+  Group,
+  Shape,
+  arc,
+  canvas,
+  circle,
+  ease,
+  enter,
+  exit,
+  scene,
+  span,
+  track,
+  wiggle,
+} from "svjeez";
 import { theme } from "../theme";
 
 export default scene(
@@ -18,7 +31,7 @@ export default scene(
         at={[60, 60]}
         anchor="center"
         stroke={{ color: theme.cyan, width: 5, cap: "round" }}
-        rotate={spin({ every: 2 })}
+        rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}
       />
       <Shape
         geometry={circle(10)}
