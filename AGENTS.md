@@ -80,7 +80,7 @@ Each package's source explains its own internals. These are the rules that aren'
 
 `ci.yml` runs on every pull request. It lints, typechecks, runs the tests, fails if `examples/dist/` is stale, and on Node 20 and 22 renders every example and checks the packed packages. `@svjeez/astro` is checked on Node 22 only, because Astro 7 needs it.
 
-`release.yml` runs `scripts/release.ts` on every push to `main` or `next` after CI passes. It publishes every package whose version isn't on npm or has no GitHub release yet, and rerunning it skips steps that already happened. A prerelease version such as `0.8.0-next.0` goes to the `next` dist-tag. On any branch but `main` it skips stable versions, so every version on `next` keeps its `-next.N` suffix.
+`release.yml` runs CI and `scripts/release.ts plan` on every push to `main` or `next`, but publishes only when someone runs it by hand (`gh workflow run release --ref next`), and only after CI passes. A run publishes every package whose version isn't on npm or has no GitHub release yet, and rerunning it skips steps that already happened. A prerelease version such as `0.8.0-next.0` goes to the `next` dist-tag. On any branch but `main` it skips stable versions, so every version on `next` keeps its `-next.N` suffix.
 
 Every package shares one version. To release, bump them together and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
