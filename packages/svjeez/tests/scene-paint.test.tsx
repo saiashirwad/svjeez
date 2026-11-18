@@ -4,6 +4,7 @@ import { font } from "svjeez";
 import {
   Group,
   Shape,
+  Span,
   Stack,
   Text,
   blur,
@@ -258,14 +259,155 @@ describe("gradients on text", () => {
     expect(out).toMatch(/<text x="20" y="30"[^>]*fill="url\(#g1\)"/);
   });
 
-  test("a gradient across the box needs a box the paint can see, which a text fill has none of yet", () => {
-    expect(() =>
+  test("a span takes a gradient with points, in the text's frame", () => {
+    const out = emitted(
       made(() => (
-        <Text font={mono} size={10} fill={linear.across({ stops: ["#000000", "#FFFFFF"] })}>
-          Hi
+        <Text font={mono} size={10} at={[20, 30]} fill="#000000">
+          a{" "}
+          <Span fill={linear({ from: [0, 0], to: [40, 0], stops: ["#FF0000", "#0000FF"] })}>b</Span>
         </Text>
       )),
-    ).toThrow("which spreads over the node's box, and this paint has no box to spread over");
+    );
+
+    expect(out).toContain('x1="20" y1="30" x2="60" y2="30"');
+    expect(out).toMatch(/<tspan[^>]*fill="url\(#g1\)"[^>]*>b<\/tspan>/);
+  });
+
+  test("an across gradient spreads over the whole text's box, a span's too", () => {
+    const stops = ["#000000", "#FFFFFF"] as const;
+
+    const model = made(() => (
+      <Text font={mono} size={10} fill={linear.across({ stops })}>
+        ab <Span fill={radial.across({ stops })}>cd</Span>
+      </Text>
+    ));
+
+    const node = only(model);
+
+    if (node.kind !== "text") throw new Error("a text");
+    const { x, y, width, height } = node.box;
+    const [first, second] = node.lines[0]!.runs;
+
+    expect(first!.fill).toMatchObject({
+      kind: "linear",
+      from: [x + 0, y + height / 2],
+      to: [x + width, y + height / 2],
+    });
+    expect(second!.fill).toMatchObject({
+      kind: "radial",
+      center: [x + width / 2, y + height / 2],
+      radius: Math.hypot(width / 2, height / 2),
+    });
+    expect(emitted(model)).toContain("<radialGradient");
+  });
+
+  test("two spans with the same across gradient are one run", () => {
+    const g = linear.across({ angle: 90, stops: ["#000000", "#FFFFFF"] });
+
+    const node = only(
+      made(() => (
+        <Text font={mono} size={10} fill="#000000">
+          <Span fill={g}>ab</Span>
+          <Span fill={g}>cd</Span>
+        </Text>
+      )),
+    );
+
+    expect(node.kind === "text" && node.lines[0]!.runs.map((run) => run.text)).toEqual(["abcd"]);
+  });
+
+  test("diagnose names the gradients a text draws with", () => {
+    const model = made(() => (
+      <Text font={mono} size={10} fill={linear.across({ stops: ["#000000", "#FFFFFF"] })}>
+        a <Span fill={radial.across({ stops: ["#000000", "#FFFFFF"] })}>b</Span>
+      </Text>
+    ));
+
+    expect(diagnose(model, svg)).toEqual([]);
+    expect(svg.supports.linearGradient.level).toBe("exact");
+    expect(emitted(model)).toMatch(/<linearGradient.*<radialGradient/);
+  });
+
+  test("a span's animated opacity works beside an animated gradient fill", () => {
+    const g = (x: number) => linear({ from: [0, 0], to: [x, 0], stops: ["#000000", "#FFFFFF"] });
+
+    const out = emitted(
+      made(() => (
+        <Text font={mono} size={10} fill={track(g(10)).to(g(40), span(0, 1))}>
+          a <Span opacity={track(0).to(1, span(0, 1))}>b</Span>
+        </Text>
+      )),
+    );
+
+    expect(out).toMatch(/<text[^>]*fill="url\(#g1\)"/);
+    expect(out).toMatch(/<tspan[^>]*fill-opacity="0"[^>]*>b<\/tspan>/);
+    expect(out).toMatch(/\{fill-opacity:1\}/);
+    expect(out).toMatch(
+      /<linearGradient id="g1"[^>]*><animate[^>]*attributeName="x2" values="10;40"/,
+    );
+  });
+
+  test("clip, mask and effects dress a text, and a mask can be text", () => {
+    const out = emitted(
+      made(() => (
+        <Group>
+          <Text
+            font={mono}
+            size={10}
+            fill="#000000"
+            clip={rect(20, 10)}
+            effects={[shadow({ color: "#000000", blur: 2, opacity: 0.5 })]}
+          >
+            Hi
+          </Text>
+          <Shape
+            geometry={rect(80, 40)}
+            fill="#2266FF"
+            mask={
+              <Text font={mono} size={20} fill="#FFFFFF">
+                Hi
+              </Text>
+            }
+          />
+        </Group>
+      )),
+    );
+
+    expect(out).toMatch(/<g filter="url\(#f1\)"><text[^>]*clip-path="url\(#c1\)">Hi<\/text><\/g>/);
+    expect(out).toMatch(/<mask[^>]*>.*<text[^>]*>Hi<\/text>.*<\/mask>/);
+  });
+
+  test("a text's fill morphs gradient to gradient, and not color to gradient", () => {
+    const g = (angle: number) => linear.across({ angle, stops: ["#000000", "#FFFFFF"] });
+
+    const model = made(() =>
+      morph(
+        <Text key="t" font={mono} size={10} fill={g(0)}>
+          Hi
+        </Text>,
+        <Text key="t" font={mono} size={10} fill={g(90)}>
+          Hi
+        </Text>,
+        span(1, 1),
+      ),
+    );
+
+    const t = only(model);
+
+    expect(t.kind === "text" && isLane(t.lines[0]!.runs[0]!.fill)).toBe(true);
+    expect(() =>
+      made(() =>
+        morph(
+          <Text key="t" font={mono} size={10} fill="#FF0000">
+            Hi
+          </Text>,
+          <Text key="t" font={mono} size={10} fill={g(0)}>
+            Hi
+          </Text>,
+          span(0, 1),
+        ),
+      ),
+    ).toThrow("only colors, or gradients of one kind with as many stops, blend");
   });
 });
 

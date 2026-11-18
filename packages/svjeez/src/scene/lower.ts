@@ -52,17 +52,7 @@ import {
   settle,
   type Notes,
 } from "./settle";
-import {
-  laneOf,
-  mapped,
-  mixNumber,
-  mixVec,
-  noMix,
-  same,
-  touches,
-  type Mix,
-  type Timing,
-} from "./steps";
+import { laneOf, mapped, mixNumber, mixVec, same, touches, type Mix, type Timing } from "./steps";
 import { isTrack, layersOf, passageOf, type Anim, type LayerMotion } from "./track";
 import { derivedOf, isDerived } from "./derived";
 import { collect, type Cues } from "./timeline";
@@ -85,9 +75,13 @@ import type { Effect as EffectProps } from "./effects";
 interface RunLook {
   readonly face: Face;
   readonly font: Font;
-  readonly fill: Animated<ModelPaint>;
+  /** The fill, lowered once the text's box is known: an `across` gradient spreads over the whole text's box. */
+  readonly fill: (box: Box) => Animated<ModelPaint>;
   readonly opacity?: Animated<number>;
 }
+
+/** What a span's fill is lowered against to tell two apart before the text is laid out. Places are fractions of a box, so two `across` gradients that differ do here too. */
+const PROBE: Box = { x: 0, y: 0, width: 1, height: 1 };
 
 /** What `scene()` is told about the whole scene. */
 export interface SceneOptions {
@@ -302,13 +296,17 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
       faceOf(asked.font, asked.weight, asked.italic, where),
     );
 
-    const fill = animated(
-      asked.fill,
-      (value: Paint) => colorOf(ctx, value, where),
-      timing,
-      noMix,
-      `fill on ${where}`,
-    );
+    const fill = (box: Box): Animated<ModelPaint> =>
+      blendable(
+        animated(
+          asked.fill,
+          (value: Paint) => colorOf(ctx, value, where, box),
+          timing,
+          mixPaint,
+          `fill on ${where}`,
+        ),
+        `fill on ${where}`,
+      );
 
     const opacity =
       asked.opacity === undefined
@@ -316,7 +314,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
         : animated(asked.opacity, keep, timing, mixNumber, `opacity of a <Span> in ${where}`);
 
     const made = { face, font, fill, ...(opacity !== undefined && opacity !== 1 && { opacity }) };
-    const id = JSON.stringify([face, fill, made.opacity]);
+    const id = JSON.stringify([face, fill(PROBE), made.opacity]);
     const look = looks.get(id) ?? made;
 
     looks.set(id, look);
@@ -343,6 +341,16 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
     where,
   );
 
+  const fills = new Map<RunLook, Animated<ModelPaint>>();
+
+  const fillOf = (look: RunLook): Animated<ModelPaint> => {
+    const known = fills.get(look) ?? look.fill(box);
+
+    fills.set(look, known);
+
+    return known;
+  };
+
   return {
     ...base(props, box, key, timing),
     kind: "text",
@@ -354,7 +362,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
         at,
         advances,
         face: style.face,
-        fill: style.fill,
+        fill: fillOf(style),
         ...(style.opacity !== undefined && { opacity: style.opacity }),
         ...(outline && { outline }),
       })),
