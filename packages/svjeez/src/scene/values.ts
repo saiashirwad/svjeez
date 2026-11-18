@@ -1,6 +1,7 @@
 import { hexBytes, hexOf, type Hex } from "../color";
 import { ringsOf } from "../paths";
 import type { Box, Contour, Cubic, Geometry as Outline, Rgba, Vec } from "./ir";
+import type { Gradient } from "./paint";
 
 export type { Hex };
 
@@ -261,8 +262,8 @@ export interface Token {
 /** A hex color, the same in every scheme, or a token from `tokens()`, which has a light and a dark value. */
 export type Color = Hex | Token;
 
-/** Gradients arrive with clips, masks and effects. Until then a paint is a color. */
-export type Paint = Color;
+/** What fills or strokes: a color, or a gradient from `linear()` or `radial()`. */
+export type Paint = Color | Gradient;
 
 /** Tokens by name, as `tokens()` makes them. */
 export type Theme<K extends string = string> = { readonly [N in K]: Token };

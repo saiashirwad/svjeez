@@ -13,6 +13,8 @@ import type {
   ImageNode,
   InstanceNode,
   Layer,
+  Effect,
+  Paint as ModelPaint,
   Scene,
   SceneNode,
   ShapeNode,
@@ -20,12 +22,13 @@ import type {
   TokenValue,
   Vec,
 } from "./ir";
-import { atRest, pair } from "./lane";
+import { atRest, isLane, pair } from "./lane";
 import { morphed } from "./morph";
 import {
   flat,
   sceneElement,
   within,
+  type Child,
   type Common,
   type ImageProps,
   type InstanceProps,
@@ -41,6 +44,7 @@ import {
   note,
   notes,
   originOf,
+  outsider,
   sameAnchors,
   settle,
   type Notes,
@@ -67,8 +71,11 @@ import {
   type Hex,
   type Paint,
   type Theme,
+  type Token,
 } from "./values";
 import { layoutText } from "./text";
+import { blendable, gradientOf, isWrittenGradient, mixPaint } from "./paint";
+import type { Effect as EffectProps } from "./effects";
 
 /** What `scene()` is told about the whole scene. */
 export interface SceneOptions {
@@ -123,7 +130,16 @@ const animated = <A, T>(
   return laneOf(data, data.initial.value!, timing, mix, where);
 };
 
-const colorOf = (ctx: Ctx, paint: Paint, where: string): Color => {
+/**
+ * A paint in the model: a color, or a gradient whose points `box` gives when it spreads across one. Without a box,
+ * such a gradient is an error.
+ */
+const colorOf = (ctx: Ctx, paint: Paint, where: string, box?: Box): ModelPaint =>
+  isWrittenGradient(paint)
+    ? gradientOf(paint, box, (color) => solidOf(ctx, color, where), where)
+    : solidOf(ctx, paint, where);
+
+const solidOf = (ctx: Ctx, paint: Hex | Token, where: string): Color => {
   if (isHex(paint)) return rgbaOf(paint, where);
   const value = { light: rgbaOf(paint.light, where), dark: rgbaOf(paint.dark, where) };
   const known = ctx.tokens.get(paint.name);
@@ -135,7 +151,7 @@ const colorOf = (ctx: Ctx, paint: Paint, where: string): Color => {
   return { kind: "token", name: paint.name };
 };
 
-const isHex = (paint: Paint): paint is Hex => typeof paint === "string";
+const isHex = (paint: Hex | Token): paint is Hex => typeof paint === "string";
 
 const layerOf = ({ passage }: LayerMotion, timing: Timing, where: string): Layer => {
   const { data } = passage;
@@ -195,8 +211,9 @@ const geometryOf = (
   value: ShapeProps["geometry"],
   timing: Timing,
   where: string,
+  what = "geometry",
 ): Animated<Outline> => {
-  if (isDerived(value)) return derivedOf(value, outlineOf, timing, `geometry on ${where}`);
+  if (isDerived(value)) return derivedOf(value, outlineOf, timing, `${what} on ${where}`);
 
   if (!isTrack(value)) return outlineOf(value);
   const { data } = passageOf(value);
@@ -205,11 +222,11 @@ const geometryOf = (
     (values): Geometry[] => (values.value === undefined ? [] : [values.value]),
   );
 
-  const blended = matched(authored.map(outlineOf), `geometry on ${where}`);
+  const blended = matched(authored.map(outlineOf), `${what} on ${where}`);
   const lowered = new Map(authored.map((given, i) => [given, blended[i]!]));
   const lane = mapped(data, "value", (given) => lowered.get(given)!);
 
-  return laneOf(lane, lane.initial.value!, timing, mixGeometry, `geometry on ${where}`);
+  return laneOf(lane, lane.initial.value!, timing, mixGeometry, `${what} on ${where}`);
 };
 
 const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeNode => {
@@ -218,19 +235,24 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
   if (props.geometry === undefined)
     throw new Error(`<Shape> ${where} needs a geometry, such as geometry={rect(40, 20)}.`);
   const geometry = geometryOf(props.geometry, timing, where);
-  const paint = (value: Paint) => colorOf(ctx, value, where);
+  const box = boxOf(atRest(geometry));
+  const paint = (value: Paint) => colorOf(ctx, value, where, box);
   const { stroke } = props;
 
+  const painted = (value: Anim<Paint>, what: string) =>
+    blendable(
+      animated(value, paint, timing, mixPaint, `${what} on ${where}`),
+      `${what} on ${where}`,
+    );
+
   return {
-    ...base(props, boxOf(atRest(geometry)), key, timing),
+    ...base(props, box, key, timing),
     kind: "shape",
     geometry,
-    ...(props.fill !== undefined && {
-      fill: animated(props.fill, paint, timing, noMix, `fill on ${where}`),
-    }),
+    ...(props.fill !== undefined && { fill: painted(props.fill, "fill") }),
     ...(stroke && {
       stroke: {
-        color: animated(stroke.color, paint, timing, noMix, `stroke on ${where}`),
+        color: painted(stroke.color, "stroke"),
         width: animated(stroke.width ?? 1, keep, timing, mixNumber, `stroke width on ${where}`),
         cap: stroke.cap ?? "butt",
         join: stroke.join ?? "miter",
@@ -427,15 +449,19 @@ const lowerAll = (
 
     note(ctx.notes, key, el.props, el.type === "group" ? el.settle : undefined);
 
+    const done = (node: SceneNode): SceneNode[] => [
+      identified(given, name, dressed(ctx, el.props, node, timing)),
+    ];
+
     switch (el.type) {
       case "shape":
-        return [identified(given, name, shape(ctx, el.props, key, timing))];
+        return done(shape(ctx, el.props, key, timing));
       case "text":
-        return [identified(given, name, text(ctx, el.props, key, timing))];
+        return done(text(ctx, el.props, key, timing));
       case "image":
-        return [identified(given, name, image(el.props, key, timing))];
+        return done(image(el.props, key, timing));
       case "instance":
-        return [identified(given, name, instance(ctx, el.props, key, timing))];
+        return done(instance(ctx, el.props, key, timing));
       case "group": {
         const children = lowerAll(ctx, el.children, timing, key);
 
@@ -445,10 +471,88 @@ const lowerAll = (
           children,
         };
 
-        return [identified(given, name, node)];
+        return done(node);
       }
     }
   });
+
+/** A length an effect takes: a still one below 0 is a mistake, and one a lane passes below 0 draws as 0. */
+const lengthOf = (value: Anim<number>, timing: Timing, where: string): Animated<number> => {
+  const out = animated(value, keep, timing, mixNumber, where);
+
+  if (!isLane(out) && !(out >= 0 && Number.isFinite(out)))
+    throw new Error(`${where} needs a finite length of 0 or more, got ${out}.`);
+
+  return out;
+};
+
+const effectOf = (ctx: Ctx, effect: EffectProps, timing: Timing, where: string): Effect => {
+  if (effect.kind === "blur")
+    return { kind: "blur", radius: lengthOf(effect.radius, timing, `blur on ${where}`) };
+
+  if (effect.kind !== "shadow")
+    throw new Error(
+      `effects on ${where} takes blur() and shadow(), got ${JSON.stringify(effect)}.`,
+    );
+  const opacity = animated(effect.opacity, keep, timing, mixNumber, `shadow opacity on ${where}`);
+
+  if (!isLane(opacity) && !(opacity >= 0 && opacity <= 1))
+    throw new Error(`shadow opacity on ${where} needs a number from 0 to 1, got ${opacity}.`);
+
+  return {
+    kind: "shadow",
+    offset: animated<Vec, Vec>(effect.offset, keep, timing, mixVec, `shadow offset on ${where}`),
+    blur: lengthOf(effect.blur, timing, `shadow blur on ${where}`),
+    color: solidOf(ctx, effect.color, `shadow on ${where}`),
+    opacity,
+  };
+};
+
+/**
+ * A mask's content, lowered in the node's frame as children would be and arranged where it stands. Nothing in it can
+ * be placed from outside, since the second pass places only what the scene draws.
+ */
+const maskOf = (ctx: Ctx, mask: Child, key: string, timing: Timing): GroupNode | undefined => {
+  const elements = flat(mask);
+
+  if (elements.length === 0) return undefined;
+  const root = `${key}#mask`;
+  const children = arrangeState(lowerAll(ctx, elements, timing, root), ctx.notes);
+
+  for (const child of children) {
+    const placed = outsider(child, ctx.notes);
+
+    if (placed !== undefined)
+      throw new Error(
+        `"${placed}" is in the mask of "${key}" and is placed by an anchor, a timeline's moveTo or as a connector. A mask is drawn in its node's frame and is never part of the layout: place what is in it with at.`,
+      );
+  }
+
+  return {
+    kind: "group",
+    key: root,
+    box: around(children),
+    at: [0, 0],
+    origin: [0, 0],
+    layers: [],
+    effects: [],
+    children,
+  };
+};
+
+/** `node` with the clip, mask and effects `props` ask for, all in its own frame. */
+const dressed = (ctx: Ctx, props: Common, node: SceneNode, timing: Timing): SceneNode => {
+  const where = `"${node.key}"`;
+  const { clip, effects = [] } = props;
+  const mask = props.mask === undefined ? undefined : maskOf(ctx, props.mask, node.key, timing);
+
+  return {
+    ...node,
+    ...(clip !== undefined && { clip: geometryOf(clip, timing, where, "clip") }),
+    ...(mask && { mask }),
+    effects: effects.map((effect) => effectOf(ctx, effect, timing, where)),
+  };
+};
 
 /** A fragment, or a group with nothing to say: no props and no layout, so it is the root itself. */
 const isBare = (el: SceneElement): boolean =>

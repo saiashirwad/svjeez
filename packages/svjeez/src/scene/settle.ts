@@ -270,10 +270,16 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
   /**
    * Whether `d` is a container whose `at` is written as a still point. That point is folded into its children's, so
-   * layout adds no transform: the container's frame is its parent's, and its box sits where `at` put it.
+   * layout adds no transform: the container's frame is its parent's, and its box sits where `at` put it. A clip or a
+   * mask is in the container's own frame, so a container with one keeps it.
    */
   const folds = (d: Draft): boolean =>
-    d.note?.settle?.kind === "arrange" && !d.note.anchor && d.note.placed && !isLane(d.node.at);
+    d.note?.settle?.kind === "arrange" &&
+    !d.note.anchor &&
+    d.note.placed &&
+    !isLane(d.node.at) &&
+    d.node.clip === undefined &&
+    d.node.mask === undefined;
 
   const measure = (d: Draft): void => {
     if (d.measuring === 2) return;
@@ -437,7 +443,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 };
 
 /** The first anchor, timeline target or connector under `node`: what a state's layout can't settle on its own. */
-const outsider = (node: SceneNode, notes: Notes): string | undefined => {
+export const outsider = (node: SceneNode, notes: Notes): string | undefined => {
   const own = notes.nodes.get(node.key);
 
   if (own?.anchor || own?.settle?.kind === "connect" || notes.aims.has(node.key)) return node.key;
