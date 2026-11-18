@@ -6,7 +6,7 @@ import type { Key as Held } from "./keys";
 import { DEFAULT_EASE, EPSILON, isHold } from "../model/time";
 import { render } from "./render";
 import { element, type AttrValue, type SvgNode } from "./tree";
-import { admit, type Backend, type Feature, type Support } from "./backend";
+import { admit, type Backend, type Feature, type Support } from "../model/backend";
 import { foldLayers } from "../model/fold";
 import { drawMoving, type GeometrySlot } from "./svg-geometry";
 import type {
@@ -64,7 +64,7 @@ const SOFT_BLUR: Support = {
 
 const supports: Readonly<Record<Feature, Support>> = {
   text: EXACT,
-  outlinedText: EXACT,
+  unoutlinedText: EXACT,
   image: EXACT,
   instance: EXACT,
   clip: EXACT,

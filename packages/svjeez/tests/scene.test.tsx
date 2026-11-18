@@ -18,6 +18,7 @@ import {
   type SceneElement,
 } from "svjeez";
 import { diagnose, isLane, isScene, svg, type Model } from "svjeez/tools";
+import { FEATURES } from "../src/model/backend";
 
 const theme = tokens({ light: { ink: "#111111" }, dark: { ink: "#EEEEEE" } });
 
@@ -398,7 +399,7 @@ describe("the SVG backend", () => {
       diagnose(blurred, flat).map((entry) => [entry.severity, entry.feature, entry.key]),
     ).toEqual([["error", "blur", "dot"]]);
     expect(diagnose(blurred, flat)[0]!.message).toBe(
-      '<Shape> "dot" uses blur, which Flat can\'t draw: no filters.',
+      '<Shape> "dot" uses a blur, which Flat can\'t draw: no filters.',
     );
 
     const warned: string[] = [];
@@ -413,6 +414,15 @@ describe("the SVG backend", () => {
 
     svg.emit(faint, { onWarning: (warning) => warned.push(`${warning.feature} ${warning.key}`) });
     expect(warned).toEqual(["softBlur dot"]);
+  });
+
+  test("every feature has words an author knows, not its id", () => {
+    for (const [feature, words] of Object.entries(FEATURES)) {
+      expect(svg.supports).toHaveProperty(feature);
+
+      expect(words).toBeDefined();
+      expect(words).not.toMatch(/[A-Z]/);
+    }
   });
 });
 

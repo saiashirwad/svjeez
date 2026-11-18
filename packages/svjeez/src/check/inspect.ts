@@ -1,6 +1,6 @@
 import { nodeName } from "../model/naming";
 import type { Seconds } from "../model/time";
-import { diagnose, type Backend } from "../svg/backend";
+import { FEATURES, diagnose, type Backend } from "../model/backend";
 import { valueAt, type Placed } from "./boxes";
 import { contoursOf, mixGeometry } from "../model/geometry";
 import type {
@@ -1446,8 +1446,8 @@ const capabilities = (survey: Survey, backend: InspectOptions["backend"]): void 
       message: found.message,
       hint:
         found.severity === "error"
-          ? `Draw it without ${found.feature} for ${backend.name}, or emit for a backend that has it.`
-          : `Keep it if the difference is fine for ${backend.name}, or draw it without ${found.feature}.`,
+          ? `Draw it without ${FEATURES[found.feature]} for ${backend.name}, or emit for a backend that has it.`
+          : `Keep it if the difference is fine for ${backend.name}, or draw it without ${FEATURES[found.feature]}.`,
     });
 };
 

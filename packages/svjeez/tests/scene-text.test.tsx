@@ -354,12 +354,22 @@ describe("runs", () => {
       name: "Outlines",
       supports: {
         ...svg.supports,
-        outlinedText: { level: "none", note: "no fonts here." } as const,
+        unoutlinedText: { level: "none", note: "no fonts here." } as const,
       },
     };
 
     expect(diagnose(model, backend)).toEqual([]);
-    expect(diagnose(changed, backend).map((each) => each.feature)).toEqual(["outlinedText"]);
+    expect(diagnose(changed, backend).map((each) => each.feature)).toEqual(["unoutlinedText"]);
+    expect(diagnose(changed, backend)[0]!.message).toBe(
+      "<Text> \"t\" uses text in a font svjeez can't outline, which Outlines can't draw: no fonts here.",
+    );
+
+    const plain = {
+      name: "Plain",
+      supports: { ...svg.supports, text: { level: "none", note: "no text." } as const },
+    };
+
+    expect(diagnose(model, plain).map((each) => each.feature)).toEqual(["text"]);
   });
 });
 

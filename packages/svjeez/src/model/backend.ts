@@ -1,12 +1,12 @@
-import type { Animated, Paint, Scene, SceneNode, Source, TextNode, TextRun } from "../model/ir";
-import { nodeName } from "../model/naming";
-import { SceneError } from "../model/scene-error";
-import { isCurved } from "../model/curve";
-import { isLane } from "../model/lane";
+import type { Animated, Paint, Scene, SceneNode, Source, TextNode, TextRun } from "./ir";
+import { nodeName } from "./naming";
+import { SceneError } from "./scene-error";
+import { isCurved } from "./curve";
+import { isLane } from "./lane";
 
 export type Feature =
   | "text"
-  | "outlinedText"
+  | "unoutlinedText"
   | "image"
   | "instance"
   | "clip"
@@ -20,6 +20,24 @@ export type Feature =
   | "liveTokens"
   | "curvedMotion"
   | "movingDashedTrim";
+
+export const FEATURES: Readonly<Record<Feature, string>> = {
+  text: "text",
+  unoutlinedText: "text in a font svjeez can't outline",
+  image: "a picture",
+  instance: "a symbol",
+  clip: "a clip",
+  mask: "a mask",
+  blur: "a blur",
+  shadow: "a shadow",
+  softBlur: "a blur under 1.5 units",
+  linearGradient: "a linear gradient",
+  radialGradient: "a radial gradient",
+  nonScalingStroke: "a stroke that keeps its width when scaled",
+  liveTokens: "light and dark colors",
+  curvedMotion: "a curved path of motion",
+  movingDashedTrim: "a dashed stroke trimmed while it moves",
+};
 
 export type Support =
   | { readonly level: "exact" }
@@ -67,8 +85,11 @@ const featuresOf = (node: SceneNode): Feature[] => {
     ...(node.kind === "text" ? runsOf(node).flatMap((run) => paints(run.fill)) : []),
   ];
 
-  if (node.kind === "text")
-    used.push(runsOf(node).every((run) => run.outline) ? "text" : "outlinedText");
+  if (node.kind === "text") {
+    used.push("text");
+
+    if (runsOf(node).some((run) => !run.outline)) used.push("unoutlinedText");
+  }
 
   if (node.kind === "image" || node.kind === "instance") used.push(node.kind);
 
@@ -125,7 +146,7 @@ export const diagnose = (
         severity: support.level === "none" ? "error" : "warning",
         feature,
         key: node.key,
-        message: `${nodeName(node)} uses ${feature}, which ${backend.name} ${support.level === "none" ? "can't draw" : "draws differently"}: ${support.note}`,
+        message: `${nodeName(node)} uses ${FEATURES[feature]}, which ${backend.name} ${support.level === "none" ? "can't draw" : "draws differently"}: ${support.note}`,
         ...(node.source && { source: node.source }),
       });
     }

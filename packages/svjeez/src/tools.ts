@@ -1,6 +1,12 @@
 export { svg, type SvgOptions } from "./svg/svg";
 
-export { diagnose, type Backend, type Diagnostic, type Feature, type Support } from "./svg/backend";
+export {
+  diagnose,
+  type Backend,
+  type Diagnostic,
+  type Feature,
+  type Support,
+} from "./model/backend";
 
 export type { SceneOptions } from "./author/lower";
 
