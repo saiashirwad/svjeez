@@ -6,14 +6,20 @@ export { diagnose, type Backend, type Diagnostic, type Feature, type Support } f
 
 export {
   Group,
+  Image,
+  Instance,
   Sequence,
   Shape,
   Text,
   canvas,
   ref,
+  symbol,
   type Child,
   type Common,
+  type ImageProps,
+  type InstanceProps,
   type Ref,
+  type SceneSymbol,
   type SceneElement,
   type SequenceProps,
   type ShapeProps,
@@ -53,7 +59,17 @@ export {
   type Track,
 } from "./track";
 
-export { draw, enter, exit, show, spin, wiggle, type WiggleOptions } from "./recipes";
+export {
+  draw,
+  enter,
+  exit,
+  show,
+  spin,
+  wiggle,
+  type WiggleOptions,
+} from "./recipes";
+
+export { picture, type PictureData } from "../picture";
 
 export { ease, type Ease, type Seconds } from "../motion";
 

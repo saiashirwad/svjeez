@@ -76,6 +76,17 @@ export const CHANNELS = {
     collidesWith: ["transform"],
     wrapsOn: ["text"],
   },
+  /** The scale down, when it differs from `scale` across. It shares the scale lane, so both write one CSS `scale`. */
+  scaleY: {
+    value: number,
+    tags: GRAPHICS,
+    lane: "scale",
+    composition: "nest",
+    identity: 1,
+    pivot: true,
+    collidesWith: ["transform"],
+    wrapsOn: ["text"],
+  },
   rotate: {
     value: number,
     tags: GRAPHICS,
@@ -103,6 +114,26 @@ export const CHANNELS = {
     composition: "replace",
     range: [0, 1],
     pins: { pathLength: "1", "stroke-dasharray": "1 2" },
+  },
+  /**
+   * Where the stroked part starts, 0 to 1, with `draw` where it ends. Together they write the dash itself, so the
+   * window can move; CSS animates `stroke-dasharray` in Chromium, Firefox and WebKit.
+   */
+  drawStart: {
+    value: number,
+    tags: GEOMETRY,
+    lane: "draw",
+    composition: "replace",
+    range: [0, 1],
+    pins: { pathLength: "1", "stroke-dasharray": "1 2" },
+  },
+  strokeWidth: {
+    value: number,
+    tags: PAINTED,
+    lane: "stroke-width",
+    composition: "replace",
+    attr: "stroke-width",
+    range: [0, Infinity],
   },
   d: {
     value: pathData,

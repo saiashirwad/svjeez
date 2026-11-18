@@ -225,10 +225,4 @@ describe("the SVG backend", () => {
     ).toEqual([["error", "blur", "dot"]]);
     expect(() => svg.emit(blurred)).toThrow('"dot" uses blur, which SVG can\'t draw');
   });
-
-  test("animated geometry says it is not built yet", () => {
-    expect(() =>
-      made(() => <Shape geometry={track(rect(1, 1)).to(rect(2, 2), span(0, 1))} />),
-    ).toThrow("Animated geometry is not built yet");
-  });
 });

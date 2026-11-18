@@ -1,5 +1,6 @@
 import type { FontValue } from "../font/font";
 import type { Seconds } from "../motion";
+import type { PictureData } from "../picture";
 import type { Vec } from "./ir";
 import type { Anim, Stack } from "./track";
 import { rect, type Geometry, type Paint } from "./values";
@@ -30,7 +31,7 @@ export interface Common {
 export interface StrokeProps {
   readonly color: Anim<Paint>;
   /** Default 1. */
-  readonly width?: number;
+  readonly width?: Anim<number>;
   readonly cap?: "butt" | "round" | "square";
   readonly join?: "miter" | "round" | "bevel";
   readonly dash?: readonly number[];
@@ -42,7 +43,7 @@ export interface ShapeProps extends Common {
   /** Nothing is inherited: a shape with no fill has none. */
   readonly fill?: Anim<Paint>;
   readonly stroke?: StrokeProps;
-  /** The part of the outline that is drawn, as two fractions of its length. */
+  /** The part of the stroke that is drawn, as two fractions of the outline's length, from and to. A fill is never trimmed. */
   readonly trim?: Anim<Vec>;
 }
 
@@ -53,6 +54,43 @@ export interface TextProps extends Common {
   /** Which point of the baseline `at` names. Default `start`. */
   readonly align?: "start" | "center" | "end";
   readonly children: string;
+}
+
+export interface ImageProps extends Common {
+  /** The picture, from `picture()`. */
+  readonly src: PictureData;
+  /**
+   * The frame the picture fills, from its top-left corner, stretched to it. With only one of width and height the other
+   * follows the picture's aspect ratio; with neither it is the picture's own size.
+   */
+  readonly width?: number;
+  readonly height?: number;
+}
+
+/**
+ * Content drawn once and placed many times with `<Instance of={…} />`. Build it with `symbol()`: its content is
+ * lowered once, the first time an instance needs it, and every instance shows that one drawing.
+ */
+export interface SceneSymbol {
+  readonly kind: "symbol";
+  readonly name: string;
+  readonly build: () => Child;
+}
+
+/**
+ * A symbol named `name`, unique in the scene. Its tracks run on the scene's clock and are shared by every instance, so
+ * every instance moves in step; move the instances themselves (`at`, `opacity`, `motion`) to set them apart. An
+ * instance of a symbol that moves can't sit inside a `<Sequence>` that starts later, since its clock would not apply.
+ */
+export const symbol = (name: string, build: () => Child): SceneSymbol => {
+  if (!/^[A-Za-z_][\w-]*$/.test(name))
+    throw new Error(`symbol() needs a name made of letters, digits, _ and -, got "${name}".`);
+
+  return { kind: "symbol", name, build };
+};
+
+export interface InstanceProps extends Common {
+  readonly of: SceneSymbol;
 }
 
 export interface SequenceProps {
@@ -70,6 +108,8 @@ export type SceneElement =
     }
   | { readonly type: "shape"; readonly props: ShapeProps }
   | { readonly type: "text"; readonly props: TextProps }
+  | { readonly type: "image"; readonly props: ImageProps }
+  | { readonly type: "instance"; readonly props: InstanceProps }
   | {
       readonly type: "sequence";
       readonly at: Seconds;
@@ -100,6 +140,12 @@ export const Group = ({
 export const Shape = (props: ShapeProps): SceneElement => ({ type: "shape", props });
 
 export const Text = (props: TextProps): SceneElement => ({ type: "text", props });
+
+/** A picture in a frame of its own size, from its top-left corner. */
+export const Image = (props: ImageProps): SceneElement => ({ type: "image", props });
+
+/** One placement of a symbol. Its box is the symbol's, so it turns around the symbol's center. */
+export const Instance = (props: InstanceProps): SceneElement => ({ type: "instance", props });
 
 /**
  * A clock of its own: every track inside counts from `at`, so a component is written from 0 and placed anywhere, and

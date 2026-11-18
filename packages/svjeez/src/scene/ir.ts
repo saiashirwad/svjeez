@@ -27,7 +27,7 @@ export interface Scene {
   readonly tokens: Readonly<Record<string, TokenValue>>;
   /** The font files text nodes name, by family. The one member that is not plain data. */
   readonly fonts: Readonly<Record<string, FontValue>>;
-  /** What `instance` nodes draw, by name. */
+  /** What `instance` nodes draw, by name. Their lanes are on the scene's clock, shared by every instance. */
   readonly symbols: Readonly<Record<string, SceneNode>>;
   readonly root: GroupNode;
 }
@@ -195,7 +195,10 @@ export interface ShapeNode extends Base {
   readonly geometry: Animated<Geometry>;
   readonly fill?: Animated<Paint>;
   readonly stroke?: Stroke;
-  /** The part of the outline that is drawn, as two fractions of its length. */
+  /**
+   * The part of the stroke that is drawn, as two fractions of the outline's length, from and to. The fill is never
+   * trimmed. A trim with no length draws no stroke, whatever its cap.
+   */
   readonly trim?: Animated<Vec>;
 }
 

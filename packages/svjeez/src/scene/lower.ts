@@ -3,11 +3,15 @@ import { num } from "../format";
 import { EPSILON, type Seconds } from "../motion";
 import { ringsOf } from "../paths";
 import { checkWindow } from "../span";
+import { matched, mixGeometry } from "./geometry";
 import type {
   Animated,
   Box,
   Color,
+  Geometry as Outline,
   GroupNode,
+  ImageNode,
+  InstanceNode,
   Layer,
   Scene,
   SceneNode,
@@ -17,7 +21,17 @@ import type {
   Vec,
 } from "./ir";
 import { isLane, pair } from "./lane";
-import { within, type Common, type SceneElement, type ShapeProps, type TextProps } from "./nodes";
+import {
+  flat,
+  within,
+  type Common,
+  type ImageProps,
+  type InstanceProps,
+  type SceneElement,
+  type SceneSymbol,
+  type ShapeProps,
+  type TextProps,
+} from "./nodes";
 import {
   laneOf,
   mapped,
@@ -30,7 +44,15 @@ import {
   type Timing,
 } from "./steps";
 import { isTrack, layersOf, passageOf, type Anim, type LayerMotion } from "./track";
-import { boxOf, outlineOf, rgbaOf, type Hex, type Paint, type Theme } from "./values";
+import {
+  boxOf,
+  outlineOf,
+  rgbaOf,
+  type Geometry,
+  type Hex,
+  type Paint,
+  type Theme,
+} from "./values";
 
 export interface SceneOptions {
   readonly size: Vec;
@@ -48,6 +70,17 @@ export interface SceneOptions {
 interface Ctx {
   readonly tokens: Map<string, TokenValue>;
   readonly fonts: Map<string, FontValue>;
+  readonly size: Vec;
+  readonly duration: Seconds;
+  /** Each symbol an instance has placed, lowered once. */
+  readonly symbols: Map<string, SymbolEntry>;
+}
+
+interface SymbolEntry {
+  readonly of: SceneSymbol;
+  /** Absent while the symbol's own content is being lowered. */
+  node?: GroupNode;
+  moves?: boolean;
 }
 
 /** A value's first key: what it is at rest, for measuring. */
@@ -135,19 +168,37 @@ const base = (props: Common, box: Box, key: string, timing: Timing) => {
   };
 };
 
+/**
+ * A geometry track as a lane whose keys all blend: `matched` keeps keys of one kind as they are and turns any other
+ * mix into paths with the same points. A key written twice becomes one value, so a shape that comes back is the same.
+ */
+const geometryOf = (
+  value: ShapeProps["geometry"],
+  timing: Timing,
+  where: string,
+): Animated<Outline> => {
+  if (!isTrack(value)) return outlineOf(value);
+  const { data } = passageOf(value);
+
+  const authored = [data.initial, ...data.steps.map((step) => step.values)].flatMap(
+    (values): Geometry[] => (values.value === undefined ? [] : [values.value]),
+  );
+
+  const blended = matched(authored.map(outlineOf), `geometry on ${where}`);
+  const lowered = new Map(authored.map((given, i) => [given, blended[i]!]));
+  const lane = mapped(data, "value", (given) => lowered.get(given)!);
+
+  return laneOf(lane, lane.initial.value!, timing, mixGeometry, `geometry on ${where}`);
+};
+
 const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeNode => {
   const where = `"${key}"`;
-
-  if (isTrack(props.geometry))
-    throw new Error(
-      `geometry on ${where} is a track. Animated geometry is not built yet: it lands with the next part of the scene model.`,
-    );
-  const geometry = outlineOf(props.geometry);
+  const geometry = geometryOf(props.geometry, timing, where);
   const paint = (value: Paint) => colorOf(ctx, value, where);
   const { stroke } = props;
 
   return {
-    ...base(props, boxOf(geometry), key, timing),
+    ...base(props, boxOf(rest(geometry)), key, timing),
     kind: "shape",
     geometry,
     ...(props.fill !== undefined && {
@@ -156,7 +207,7 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
     ...(stroke && {
       stroke: {
         color: animated(stroke.color, paint, timing, noMix, `stroke on ${where}`),
-        width: stroke.width ?? 1,
+        width: animated(stroke.width ?? 1, keep, timing, mixNumber, `stroke width on ${where}`),
         cap: stroke.cap ?? "butt",
         join: stroke.join ?? "miter",
         ...(stroke.dash && { dash: stroke.dash }),
@@ -220,6 +271,79 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
     ),
   };
 };
+
+const image = (props: ImageProps, key: string, timing: Timing): ImageNode => {
+  const { src } = props;
+  const ratio = src.width / src.height;
+  const width = props.width ?? (props.height === undefined ? src.width : props.height * ratio);
+  const height = props.height ?? (props.width === undefined ? src.height : props.width / ratio);
+
+  if (!(width > 0 && height > 0 && Number.isFinite(width) && Number.isFinite(height)))
+    throw new Error(`Image "${key}" needs a positive width and height, got ${width} by ${height}.`);
+
+  return {
+    ...base(props, { x: 0, y: 0, width, height }, key, timing),
+    kind: "image",
+    size: [width, height],
+    data: src.href,
+  };
+};
+
+/** Whether anything in a lowered tree moves. */
+const moves = (node: SceneNode): boolean => JSON.stringify(node).includes('"kind":"lane"');
+
+const instance = (ctx: Ctx, props: InstanceProps, key: string, timing: Timing): InstanceNode => {
+  const { of } = props;
+  const known = ctx.symbols.get(of.name);
+
+  if (known && known.of !== of)
+    throw new Error(`Two different symbols are both named "${of.name}". Give one another name.`);
+
+  if (known && !known.node)
+    throw new Error(`Symbol "${of.name}" places an instance of itself, so it would never end.`);
+
+  if (!known) {
+    const entry: SymbolEntry = { of };
+
+    ctx.symbols.set(of.name, entry);
+    const root = `#${of.name}`;
+
+    // A symbol is drawn once and shared, so it is lowered on the scene's own clock, wherever an instance sits.
+    const children = lowerAll(
+      ctx,
+      within(ctx.size, () => flat(of.build())),
+      sceneTiming(ctx),
+      root,
+    );
+
+    entry.node = {
+      kind: "group",
+      key: root,
+      box: around(children),
+      at: [0, 0],
+      origin: [0, 0],
+      layers: [],
+      effects: [],
+      children,
+    };
+    entry.moves = moves(entry.node);
+  }
+
+  const { node, moves: moving } = ctx.symbols.get(of.name)!;
+  const clip = timing.clock.clips.at(-1);
+
+  if (moving && timing.clock.offset > EPSILON)
+    throw new Error(
+      `Instance "${key}" of symbol "${of.name}" sits inside ${clip?.label ?? "a sequence"}, but the symbol moves, and a symbol's tracks run on the scene's clock for every instance. Move the instance instead, or draw the content without a symbol.`,
+    );
+
+  return { ...base(props, node!.box, key, timing), kind: "instance", symbol: of.name };
+};
+
+const sceneTiming = ({ duration }: Ctx): Timing => ({
+  duration,
+  clock: { offset: 0, end: duration, clips: [] },
+});
 
 const around = (children: readonly SceneNode[]): Box => {
   if (children.length === 0) return { x: 0, y: 0, width: 0, height: 0 };
@@ -295,6 +419,10 @@ const lowerAll = (
         return [shape(ctx, el.props, key, timing)];
       case "text":
         return [text(ctx, el.props, key, timing)];
+      case "image":
+        return [image(el.props, key, timing)];
+      case "instance":
+        return [instance(ctx, el.props, key, timing)];
       case "group": {
         const children = lowerAll(ctx, el.children, timing, key);
 
@@ -322,15 +450,15 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
   if (options.reducedMotion && !Number.isFinite(options.reducedMotion.at))
     throw new Error(`scene() needs a finite reducedMotion.at, got ${options.reducedMotion.at}.`);
 
-  const ctx: Ctx = { tokens: new Map(), fonts: new Map() };
+  const ctx: Ctx = { tokens: new Map(), fonts: new Map(), size, duration, symbols: new Map() };
 
   for (const token of Object.values(options.theme ?? {})) colorOf(ctx, token, "scene()");
   const top = within(size, build);
 
   const children = lowerAll(
     ctx,
-    isBare(top) && top.type !== "shape" && top.type !== "text" ? top.children : [top],
-    { duration, clock: { offset: 0, end: duration, clips: [] } },
+    isBare(top) && (top.type === "fragment" || top.type === "group") ? top.children : [top],
+    sceneTiming(ctx),
     "",
   );
 
@@ -359,7 +487,7 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
     ...(still !== undefined && { still }),
     tokens: Object.fromEntries(ctx.tokens),
     fonts: Object.fromEntries(ctx.fonts),
-    symbols: {},
+    symbols: Object.fromEntries([...ctx.symbols].map(([name, entry]) => [name, entry.node!])),
     root,
   };
 };

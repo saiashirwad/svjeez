@@ -70,6 +70,14 @@ export const cssKeyframes = (lane: string, emit: Emit, all: readonly Key[], peri
 export const cssDeclarations = (lane: string, emit: Emit, values: TargetValues): string => {
   if (emit === "visibility") return `visibility:${values.opacity === 0 ? "hidden" : "visible"}`;
 
+  if (values.drawStart !== undefined) {
+    const from = values.drawStart;
+    const length = Math.max(0, (values.draw ?? 0) - from);
+    const dash = `stroke-dasharray:${num(length)} 2;stroke-dashoffset:${num(-from)}`;
+
+    return emit === "dash" ? dash : `${dash};visibility:${length > 0 ? "visible" : "hidden"}`;
+  }
+
   if (emit === "dash") return `stroke-dashoffset:${num(1 - (values.draw ?? 0))}`;
 
   switch (lane) {
@@ -77,6 +85,10 @@ export const cssDeclarations = (lane: string, emit: Emit, values: TargetValues):
       return `translate:${formatValue(values.x ?? 0)}px ${formatValue(values.y ?? 0)}px`;
     case "rotate":
       return `rotate:${formatValue(values.rotate)}deg`;
+    case "scale":
+      if (values.scaleY === undefined) return `scale:${formatValue(values.scale)}`;
+
+      return `scale:${formatValue(values.scale ?? 1)} ${formatValue(values.scaleY)}`;
     case "draw": {
       const drawn = values.draw ?? 0;
 
