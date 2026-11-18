@@ -1,6 +1,6 @@
 import { EPSILON, type Seconds } from "../motion";
 import type { Animated, Box, Layer, SceneNode, Vec } from "./ir";
-import { isLane } from "./lane";
+import { atRest, isLane } from "./lane";
 import { isAnchor, type Anchor, type Ref } from "./refs";
 import { mixGeometry } from "./geometry";
 import { blendNumber, blendVec, breaksOf, follow, laneFrom, valueAt } from "./sample";
@@ -129,8 +129,6 @@ const draft = (node: SceneNode, parent: Draft | undefined, nodes: Notes["nodes"]
   return own;
 };
 
-const rest = <T>(value: Animated<T>): T => (isLane(value) ? value.keys[0].value : value);
-
 /** The box around `children` where they rest, in their parent's frame. */
 export const around = (
   children: readonly { readonly at: Animated<Vec>; readonly box: Box }[],
@@ -140,7 +138,7 @@ export const around = (
   const ys: number[] = [];
 
   for (const { at, box } of children) {
-    const [x, y] = rest(at);
+    const [x, y] = atRest(at);
 
     xs.push(x + box.x, x + box.x + box.width);
     ys.push(y + box.y, y + box.y + box.height);
@@ -151,7 +149,8 @@ export const around = (
   return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
 };
 
-const originOf = (origin: Note["origin"], box: Box): Vec => {
+/** The point a node turns and scales around, in its frame: the center of its box unless it says. */
+export const originOf = (origin: Note["origin"], box: Box): Vec => {
   if (origin === undefined || origin === "center")
     return [box.x + box.width / 2, box.y + box.height / 2];
 
@@ -306,7 +305,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
       const { slots, box } = asked.arrange(d.children.map((child) => child.box));
       const folded = folds(d);
-      const [x, y] = folded ? rest(d.at) : [0, 0];
+      const [x, y] = folded ? atRest(d.at) : [0, 0];
 
       d.children.forEach((child, i) => {
         child.at = [x + slots[i]![0] - child.box.x, y + slots[i]![1] - child.box.y];

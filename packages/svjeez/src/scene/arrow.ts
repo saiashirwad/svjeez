@@ -1,6 +1,6 @@
 import { EPSILON, type Seconds } from "../motion";
 import type { Animated, Geometry, Key, Lane, Layer, ShapeNode, Vec } from "./ir";
-import { isLane } from "./lane";
+import { atRest, isLane } from "./lane";
 import type { Common, SceneElement } from "./nodes";
 import type { Anchor } from "./refs";
 import { blendVec, breaksOf, follow, laneFrom, unrolled, valueAt } from "./sample";
@@ -225,7 +225,7 @@ const connect =
         ...plain,
         geometry,
         at,
-        box: boxOf(isLane(geometry) ? geometry.keys[0].value : geometry),
+        box: boxOf(atRest(geometry)),
         origin: [0, 0],
         layers,
         ...(rest !== undefined && { trim: rest }),

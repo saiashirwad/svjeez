@@ -7,7 +7,6 @@ import type {
   Animated,
   Geometry,
   GroupNode,
-  Lane,
   Layer,
   Paint,
   SceneNode,
@@ -16,7 +15,7 @@ import type {
   TextNode,
   Vec,
 } from "./ir";
-import { isLane, pair } from "./lane";
+import { isLane, mapLane, pair } from "./lane";
 import { flat, type Child, type SceneElement } from "./nodes";
 import { ease, isSpring, type Curve } from "./spring";
 import { Passage, laneOf, mixNumber, mixVec, noMix, same, type Mix, type Timing } from "./steps";
@@ -323,15 +322,9 @@ const rebased = (entry: Entry, node: SceneNode, origin: Vec): readonly Layer[] =
 
     return {
       ...layer,
-      offset: isLane(layer.offset) ? shifted(layer.offset, move) : move(layer.offset),
+      offset: isLane(layer.offset) ? mapLane(layer.offset, move) : move(layer.offset),
     };
   });
-};
-
-const shifted = <T>(lane: Lane<T>, change: (value: T) => T): Lane<T> => {
-  const [head, next, ...rest] = lane.keys.map((key) => ({ ...key, value: change(key.value) }));
-
-  return { ...lane, keys: [head!, next!, ...rest] };
 };
 
 const presence = (plan: Plan, entry: Entry, enter: Fixed, exit: Fixed): Layer | undefined => {

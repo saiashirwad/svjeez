@@ -20,7 +20,7 @@ import type {
   TokenValue,
   Vec,
 } from "./ir";
-import { isLane, pair } from "./lane";
+import { atRest, pair } from "./lane";
 import { morphed } from "./morph";
 import {
   flat,
@@ -35,7 +35,7 @@ import {
   type TextProps,
 } from "./nodes";
 import { isAnchor } from "./refs";
-import { arrangeState, around, note, notes, settle, type Notes } from "./settle";
+import { arrangeState, around, note, notes, originOf, settle, type Notes } from "./settle";
 import {
   laneOf,
   mapped,
@@ -61,6 +61,7 @@ import {
 } from "./values";
 import { layoutText } from "./text";
 
+/** What `scene()` is told about the whole scene. */
 export interface SceneOptions {
   readonly size: Vec;
   readonly duration: Seconds;
@@ -93,9 +94,6 @@ interface SymbolEntry {
   node?: GroupNode;
   moves?: boolean;
 }
-
-/** A value's first key: what it is at rest, for measuring. */
-const rest = <T>(value: Animated<T>): T => (isLane(value) ? value.keys[0].value : value);
 
 const keep = <T>(value: T): T => value;
 
@@ -154,13 +152,6 @@ const layerOf = ({ passage }: LayerMotion, timing: Timing, where: string): Layer
 const NOWHERE: Vec = [0, 0];
 
 const IDLE: Layer = { offset: [0, 0], rotate: 0, scale: [1, 1], opacity: 1 };
-
-const originOf = (origin: Common["origin"], box: Box): Vec => {
-  if (origin === undefined || origin === "center")
-    return [box.x + box.width / 2, box.y + box.height / 2];
-
-  return origin === "top-left" ? [box.x, box.y] : origin;
-};
 
 const base = (props: Common, box: Box, key: string, timing: Timing) => {
   const where = `"${key}"`;
@@ -221,7 +212,7 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
   const { stroke } = props;
 
   return {
-    ...base(props, boxOf(rest(geometry)), key, timing),
+    ...base(props, boxOf(atRest(geometry)), key, timing),
     kind: "shape",
     geometry,
     ...(props.fill !== undefined && {
