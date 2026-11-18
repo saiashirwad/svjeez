@@ -1,7 +1,6 @@
 import { regularFace, type FontValue } from "../font/font";
 import { num } from "../format";
 import { EPSILON, type Seconds } from "../motion";
-import { ringsOf } from "../paths";
 import { checkWindow } from "../span";
 import type {
   Animated,
@@ -18,6 +17,8 @@ import type {
 } from "./ir";
 import { isLane, pair } from "./lane";
 import { within, type Common, type SceneElement, type ShapeProps, type TextProps } from "./nodes";
+import { isAnchor } from "./refs";
+import { note, notes, settle, type Notes } from "./settle";
 import {
   laneOf,
   mapped,
@@ -30,6 +31,7 @@ import {
   type Timing,
 } from "./steps";
 import { isTrack, layersOf, passageOf, type Anim, type LayerMotion } from "./track";
+import { layoutText } from "./text";
 import { boxOf, outlineOf, rgbaOf, type Hex, type Paint, type Theme } from "./values";
 
 export interface SceneOptions {
@@ -48,6 +50,8 @@ export interface SceneOptions {
 interface Ctx {
   readonly tokens: Map<string, TokenValue>;
   readonly fonts: Map<string, FontValue>;
+  /** What the second pass places: anchors, layout and connectors. */
+  readonly notes: Notes;
 }
 
 /** A value's first key: what it is at rest, for measuring. */
@@ -104,6 +108,9 @@ const layerOf = ({ passage }: LayerMotion, timing: Timing, where: string): Layer
   };
 };
 
+/** Where a node placed in the second pass waits during the first. */
+const NOWHERE: Vec = [0, 0];
+
 const IDLE: Layer = { offset: [0, 0], rotate: 0, scale: [1, 1], opacity: 1 };
 
 const originOf = (origin: Common["origin"], box: Box): Vec => {
@@ -126,7 +133,9 @@ const base = (props: Common, box: Box, key: string, timing: Timing) => {
   return {
     key,
     box,
-    at: animated<Vec, Vec>(props.at ?? [0, 0], keep, timing, mixVec, `at on ${where}`),
+    at: isAnchor(props.at)
+      ? NOWHERE
+      : animated<Vec, Vec>(props.at ?? [0, 0], keep, timing, mixVec, `at on ${where}`),
     origin: originOf(props.origin, box),
     layers: [...layersOf(props.motion).map((layer) => layerOf(layer, timing, where)), own].filter(
       (layer) => !same(layer, IDLE),
@@ -169,48 +178,33 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
   };
 };
 
-const START = { start: 0, center: -0.5, end: -1 } as const;
-
 const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode => {
   const where = `"${key}"`;
   const face = regularFace(props.font);
-  const { size } = props;
-
-  if (!(size > 0 && Number.isFinite(size)))
-    throw new Error(`Text ${where} needs a positive size, got ${size}.`);
-
-  if (props.children.includes("\n"))
-    throw new Error(`Text ${where} has a line break. Text is one line until layout lands.`);
-  const width = face.measure(props.children, size);
-  const x = width * START[props.align ?? "start"];
-  const { ascent, descent } = face.metrics;
   const known = ctx.fonts.get(face.family);
 
   if (known && known !== props.font)
     throw new Error(`Two different fonts are both the family "${face.family}".`);
   ctx.fonts.set(face.family, props.font);
 
-  const outlined = (() => {
-    try {
-      return face.path(props.children, { size, x });
-    } catch {
-      return undefined;
-    }
-  })();
+  const { lines, box } = layoutText(
+    face,
+    props.children,
+    {
+      size: props.size,
+      ...(props.width !== undefined && { width: props.width }),
+      ...(props.lineHeight !== undefined && { lineHeight: props.lineHeight }),
+      ...(props.align !== undefined && { align: props.align }),
+    },
+    where,
+  );
 
   return {
-    ...base(props, { x, y: -ascent * size, width, height: (ascent + descent) * size }, key, timing),
+    ...base(props, box, key, timing),
     kind: "text",
     family: face.family,
-    size,
-    lines: [
-      {
-        text: props.children,
-        at: [x, 0],
-        advances: outlined ? outlined.glyphs.map((glyph) => glyph.advance) : [width],
-        ...(outlined && { outline: ringsOf(outlined.d) }),
-      },
-    ],
+    size: props.size,
+    lines,
     fill: animated(
       props.fill,
       (value: Paint) => colorOf(ctx, value, where),
@@ -290,6 +284,8 @@ const lowerAll = (
     taken.add(own);
     const key = parent ? `${parent}/${own}` : own;
 
+    note(ctx.notes, key, el.props, el.type === "group" ? el.settle : undefined);
+
     switch (el.type) {
       case "shape":
         return [shape(ctx, el.props, key, timing)];
@@ -322,7 +318,7 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
   if (options.reducedMotion && !Number.isFinite(options.reducedMotion.at))
     throw new Error(`scene() needs a finite reducedMotion.at, got ${options.reducedMotion.at}.`);
 
-  const ctx: Ctx = { tokens: new Map(), fonts: new Map() };
+  const ctx: Ctx = { tokens: new Map(), fonts: new Map(), notes: notes() };
 
   for (const token of Object.values(options.theme ?? {})) colorOf(ctx, token, "scene()");
   const top = within(size, build);
@@ -334,7 +330,7 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
     "",
   );
 
-  const root: GroupNode = {
+  const drafted: GroupNode = {
     kind: "group",
     key: "root",
     box: { x: 0, y: 0, width: size[0], height: size[1] },
@@ -344,6 +340,8 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
     effects: [],
     children,
   };
+
+  const root = settle(drafted, ctx.notes, duration);
 
   const still =
     options.reducedMotion === false

@@ -202,6 +202,13 @@ export class Font {
     );
   }
 
+  /** How far each glyph of one line moves the pen, in px, after ligatures and kerning. They add up to `measure()`. */
+  advances(text: string, size: number): number[] {
+    const scale = size / this.metrics.unitsPerEm;
+
+    return this.#typeset(text, "advances()").map((glyph) => glyph.advance * scale);
+  }
+
   /** One line of text as outlines. Paths stay sharp at any zoom and can be animated glyph by glyph, but are not selectable text. */
   path(text: string, { size, x = 0, y = 0 }: PathOptions): TextPath {
     const font = this.#readable("path()");

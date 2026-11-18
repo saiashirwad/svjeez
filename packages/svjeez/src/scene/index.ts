@@ -6,6 +6,7 @@ export { diagnose, type Backend, type Diagnostic, type Feature, type Support } f
 
 export {
   Group,
+  Ref,
   Sequence,
   Shape,
   Text,
@@ -13,7 +14,6 @@ export {
   ref,
   type Child,
   type Common,
-  type Ref,
   type SceneElement,
   type SequenceProps,
   type ShapeProps,
@@ -49,9 +49,25 @@ export {
   type Anim,
   type LayerValues,
   type Motion,
-  type Stack,
+  type Stack as MotionStack,
   type Track,
 } from "./track";
+
+export { Anchor, type Edge, type Place } from "./refs";
+
+export {
+  Align,
+  Grid,
+  Stack,
+  type AlignProps,
+  type Alignment,
+  type GridProps,
+  type StackProps,
+} from "./layout";
+
+export { Arrow, Line, type ArrowProps, type LineProps } from "./arrow";
+
+export { layoutText, type TextAlign, type TextLayout, type TextLayoutOptions } from "./text";
 
 export { draw, enter, exit, show, spin, wiggle, type WiggleOptions } from "./recipes";
 

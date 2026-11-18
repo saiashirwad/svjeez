@@ -475,21 +475,32 @@ const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
     }
 
     case "text": {
-      const [line] = node.lines;
+      // Every line is placed where layout put it, so no browser anchors or wraps it.
+      const [line, ...more] = node.lines;
+      const where = (point: Vec) => ({ x: num(at[0] + point[0]), y: num(at[1] + point[1]) });
 
       drawn = {
         tag: "text",
         attrs: {
-          x: num(at[0] + (line?.at[0] ?? 0)),
-          y: num(at[1] + (line?.at[1] ?? 0)),
+          ...(more.length === 0 && where(line?.at ?? [0, 0])),
           "font-family": ctx.scene.fonts[node.family]!,
           "font-size": num(node.size),
+          ...(node.lines.some((each) => /^\s|\s$|\s\s/.test(each.text)) && {
+            "xml:space": "preserve",
+          }),
         },
         placed: true,
       };
 
       painted(ctx, "fill", node.fill, drawn.attrs, lanes);
-      children = [{ kind: "text", value: line?.text ?? "" }];
+      children =
+        more.length === 0
+          ? [{ kind: "text", value: line?.text ?? "" }]
+          : node.lines
+              .filter((each) => each.text !== "")
+              .map((each) =>
+                element("tspan", where(each.at), [{ kind: "text", value: each.text }]),
+              );
       break;
     }
 
