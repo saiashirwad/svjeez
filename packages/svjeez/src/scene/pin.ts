@@ -11,7 +11,8 @@ export type AnchorPlace = Place | readonly [across: number, down: number];
 /** What a text's `anchor` also takes: a point on its first line's baseline, at the start, middle or end of its column. */
 export type TextAnchorPlace = AnchorPlace | "baseline-left" | "baseline" | "baseline-right";
 
-const PLACES = {
+/** The nine places on a box, as fractions across and down. A ref names the same points: `"top-left"` is `card.topLeft`. */
+export const PLACES = {
   "top-left": [0, 0],
   top: [0.5, 0],
   "top-right": [1, 0],
@@ -22,6 +23,11 @@ const PLACES = {
   bottom: [0.5, 1],
   "bottom-right": [1, 1],
 } as const satisfies Readonly<Record<Place, readonly [number, number]>>;
+
+/** Every place, quoted and listed, for an error that says what to write. */
+export const PLACE_LIST = Object.keys(PLACES)
+  .map((name) => `"${name}"`)
+  .join(", ");
 
 const BASELINE = {
   "baseline-left": 0,
@@ -60,7 +66,7 @@ export const pinned = (
 
   if (!named && !isPair(anchor) && along === undefined)
     throw new Error(
-      `anchor on ${where} takes a place such as "top-left", "center" or "bottom-right", or two fractions of the box such as [0.5, 1], got ${isName(anchor) ? `"${anchor}"` : JSON.stringify(anchor)}.`,
+      `anchor on ${where} takes a place, one of ${PLACE_LIST}${baseline === undefined ? "" : ', or on a text "baseline-left", "baseline" or "baseline-right"'}, or two fractions of the box such as [0.5, 1], got ${isName(anchor) ? `"${anchor}"` : JSON.stringify(anchor)}.`,
     );
 
   if (along !== undefined && baseline === undefined)

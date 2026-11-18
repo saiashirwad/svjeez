@@ -502,13 +502,72 @@ describe("morph and describe follow the rule", () => {
   });
 });
 
+describe("the nine places", () => {
+  const PLACES = [
+    ["top-left", "topLeft"],
+    ["top", "top"],
+    ["top-right", "topRight"],
+    ["left", "left"],
+    ["center", "center"],
+    ["right", "right"],
+    ["bottom-left", "bottomLeft"],
+    ["bottom", "bottom"],
+    ["bottom-right", "bottomRight"],
+  ] as const;
+
+  test("each is a ref's anchor and an anchor string, naming the same point", () => {
+    const card = ref("card");
+
+    const found = boxes(() => (
+      <Group>
+        <Shape ref={card} geometry={rect(40, 20)} at={[60, 30]} fill="#000000" />
+        {PLACES.map(([place, property]) => (
+          <Shape
+            key={place}
+            geometry={rect(40, 20)}
+            at={card[property]}
+            anchor={place}
+            fill="#000000"
+          />
+        ))}
+      </Group>
+    ));
+
+    // The tag's place lands on the card's point of the same name, so a tag of the card's size covers it.
+    for (const [place] of PLACES) expect(found[place]).toEqual([60, 30, 40, 20]);
+  });
+
+  test("a wrong place, as an anchor or on <Align>, is told the nine", () => {
+    const nine = PLACES.map(([place]) => `"${place}"`).join(", ");
+
+    expect(() =>
+      made(() => (
+        // @ts-expect-error: "middle" is not a place.
+        <Align place="middle">
+          <Shape fill="#000000" geometry={rect(10, 10)} />
+        </Align>
+      )),
+    ).toThrow(`takes a place, one of ${nine}, got "middle".`);
+    expect(() =>
+      made(() => (
+        // @ts-expect-error: "base" is not a baseline.
+        <Text font={mono} size={10} at={[0, 0]} anchor="base" fill="#000000">
+          Hi
+        </Text>
+      )),
+    ).toThrow(
+      `takes a place, one of ${nine}, or on a text "baseline-left", "baseline" or "baseline-right", or two fractions`,
+    );
+  });
+});
+
 describe("errors say what to write", () => {
   test("an unknown anchor, a baseline off text, and an anchor on an empty box", () => {
     expect(() =>
       // @ts-expect-error: "middle" is not a place.
       made(() => <Shape fill="#000000" key="s" geometry={rect(10, 10)} anchor="middle" />),
     ).toThrow(
-      'anchor on "s" takes a place such as "top-left", "center" or "bottom-right", or two fractions of the box such as [0.5, 1], got "middle".',
+      'anchor on "s" takes a place, one of "top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right", or two fractions of the box such as [0.5, 1], got "middle".',
     );
     expect(() =>
       made(() => (

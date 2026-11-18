@@ -2,6 +2,7 @@ import type { Seconds } from "../motion";
 import type { Box, Vec } from "./ir";
 import type { Curve } from "./spring";
 import { verbs, type Action, type MoveOptions, type Moves, type StrokeMoves } from "./timeline";
+import { PLACE_LIST, PLACES } from "./pin";
 import type { Paint } from "./values";
 
 /** A side of a box. */
@@ -106,44 +107,48 @@ export class Ref {
     );
   }
 
-  #corner(name: string, where: Fraction): Anchor {
+  /** The anchor at `place`, named in code as its property is: `"top-left"` reads `card.topLeft`. */
+  #place(place: Place): Anchor {
+    const where = PLACES[place];
+    const name = place.replace(/-(\w)/g, (_, letter: string) => letter.toUpperCase());
+
     return new Anchor(this, `${this.label}.${name}`, (box) => at(box, where));
   }
 
   get center(): Anchor {
-    return this.#corner("center", [0.5, 0.5]);
+    return this.#place("center");
   }
 
   get left(): Anchor {
-    return this.#corner("left", [0, 0.5]);
+    return this.#place("left");
   }
 
   get right(): Anchor {
-    return this.#corner("right", [1, 0.5]);
+    return this.#place("right");
   }
 
   get top(): Anchor {
-    return this.#corner("top", [0.5, 0]);
+    return this.#place("top");
   }
 
   get bottom(): Anchor {
-    return this.#corner("bottom", [0.5, 1]);
+    return this.#place("bottom");
   }
 
   get topLeft(): Anchor {
-    return this.#corner("topLeft", [0, 0]);
+    return this.#place("top-left");
   }
 
   get topRight(): Anchor {
-    return this.#corner("topRight", [1, 0]);
+    return this.#place("top-right");
   }
 
   get bottomLeft(): Anchor {
-    return this.#corner("bottomLeft", [0, 1]);
+    return this.#place("bottom-left");
   }
 
   get bottomRight(): Anchor {
-    return this.#corner("bottomRight", [1, 1]);
+    return this.#place("bottom-right");
   }
 
   /*
@@ -255,25 +260,11 @@ export type Place =
   | "bottom-left"
   | "bottom-right";
 
-const PLACES: Readonly<Record<Place, Fraction>> = {
-  center: [0.5, 0.5],
-  top: [0.5, 0],
-  bottom: [0.5, 1],
-  left: [0, 0.5],
-  right: [1, 0.5],
-  "top-left": [0, 0],
-  "top-right": [1, 0],
-  "bottom-left": [0, 1],
-  "bottom-right": [1, 1],
-};
-
 export const fractionOf = (place: Place, what: string): Fraction => {
-  const where = PLACES[place];
+  const where = Object.hasOwn(PLACES, place) ? PLACES[place] : undefined;
 
   if (!where)
-    throw new Error(
-      `${what} takes a place such as "center", "top" or "bottom-right", got "${String(place)}".`,
-    );
+    throw new Error(`${what} takes a place, one of ${PLACE_LIST}, got "${String(place)}".`);
 
   return where;
 };
