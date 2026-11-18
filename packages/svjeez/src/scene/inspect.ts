@@ -61,6 +61,7 @@ import { boxOf } from "./values";
  * | code              | severity              | what it means                                                                  |
  * | ----------------- | --------------------- | ------------------------------------------------------------------------------ |
  * | `compile-error`   | error                 | The scene threw while it was built. Only `svjeez check` reports it.             |
+ * | `compile-warning` | warning               | The old compiler warned while it wrote an SVG string. Only `svjeez check`.      |
  * | `never-visible`   | warning               | A node can't be seen at any time: hidden, painting nothing, or covered.        |
  * | `zero-size`       | warning               | A node's geometry, text or image has no size at any time.                      |
  * | `off-canvas`      | error, warning        | Outside the canvas at every time (error), or cut by its edge at rest.          |
@@ -79,6 +80,7 @@ import { boxOf } from "./values";
  */
 export const RULES = {
   "compile-error": "The scene threw while it was built.",
+  "compile-warning": "The old compiler warned while it wrote an SVG string.",
   "never-visible": "A node can't be seen at any time: hidden, painting nothing, or covered.",
   "zero-size": "A node's geometry, text or image has no size at any time.",
   "off-canvas": "Outside the canvas at every time, or cut by its edge at rest.",
@@ -1473,6 +1475,64 @@ const capabilities = (survey: Survey, backend: InspectOptions["backend"]): void 
     });
 };
 
+/**
+ * Findings the same code makes in the same words for nodes written at one place, as a component's repeated parts,
+ * folded into one: the first node names the rest in `related`.
+ */
+const folded = (findings: readonly Finding[]): Finding[] => {
+  const out: Finding[] = [];
+  const at = new Map<string, { index: number; more: string[]; times: Set<Seconds> }>();
+
+  for (const finding of findings) {
+    const { source, key } = finding;
+
+    if (!source || key === "") {
+      out.push(finding);
+      continue;
+    }
+
+    const id = [
+      finding.code,
+      finding.severity,
+      source.file,
+      source.line,
+      source.column,
+      finding.message.replaceAll(`"${key}"`, ""),
+    ].join("\u0000");
+
+    const known = at.get(id);
+
+    if (known) {
+      known.more.push(key);
+
+      for (const t of finding.times ?? []) known.times.add(t);
+    } else {
+      at.set(id, { index: out.length, more: [], times: new Set(finding.times) });
+      out.push(finding);
+    }
+  }
+
+  for (const { index, more, times } of at.values()) {
+    if (more.length === 0) continue;
+    const first = out[index]!;
+
+    out[index] = {
+      ...first,
+      message: first.message.replace(
+        `"${first.key}"`,
+        `"${first.key}" (and ${more.length} more written at the same place: ${more.map((key) => `"${key}"`).join(", ")})`,
+      ),
+      related: [
+        ...(first.related ?? []),
+        ...more.map((key): Related => ({ key, source: first.source! })),
+      ],
+      ...(times.size > 0 && { times: [...times].sort((a, b) => a - b) }),
+    };
+  }
+
+  return out;
+};
+
 const RANK: Readonly<Record<Severity, number>> = { error: 0, warning: 1, info: 2 };
 
 /**
@@ -1508,7 +1568,7 @@ export const inspect = (scene: Scene, options: InspectOptions = {}): Finding[] =
 
   const order = new Map(entries.map((entry) => [entry.node.key, entry.order]));
 
-  return survey.out
+  return folded(survey.out)
     .map((finding, index) => ({ finding, index }))
     .sort(
       (a, b) =>
