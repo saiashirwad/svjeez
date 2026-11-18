@@ -42,6 +42,7 @@ import {
   arrangeState,
   around,
   note,
+  noteResized,
   notes,
   originOf,
   sameAnchors,
@@ -460,14 +461,20 @@ const lowerAll = (
 
     if (given.type === "morph") {
       const seen = new Map<string, Anchor | undefined>();
+      const states: SceneNode[][] = [];
 
-      return morphed(given, timing, taken, (state, names) => {
+      const merged = morphed(given, timing, taken, (state, names) => {
         const nodes = arrangeState(lowerAll(ctx, state, timing, parent, names), ctx.notes);
 
         sameAnchors(nodes, ctx.notes, seen);
+        states.push(nodes);
 
         return nodes;
       });
+
+      noteResized(ctx.notes, merged, states);
+
+      return merged;
     }
 
     const name = given.props.key ?? given.props.ref?.key;

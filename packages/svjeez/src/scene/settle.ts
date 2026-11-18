@@ -1,9 +1,11 @@
 import { EPSILON, type Seconds } from "../motion";
 import type { Animated, Box, Layer, SceneNode, Vec } from "./ir";
 import { atRest, isLane } from "./lane";
+import { isDerived } from "./derived";
 import { isAnchor, type Anchor, type Ref } from "./refs";
 import { mixGeometry } from "./geometry";
 import { blendNumber, blendVec, breaksOf, follow, laneFrom, valueAt } from "./sample";
+import { isTrack } from "./track";
 import { boxOf } from "./values";
 
 /**
@@ -60,9 +62,36 @@ export interface Notes {
   readonly nodes: Map<string, Note>;
   readonly refs: Map<Ref, string>;
   readonly aims: Map<string, Aim>;
+  /** Nodes a morph gives a different box in another state. */
+  readonly resized: Set<string>;
 }
 
-export const notes = (): Notes => ({ nodes: new Map(), refs: new Map(), aims: new Map() });
+export const notes = (): Notes => ({
+  nodes: new Map(),
+  refs: new Map(),
+  aims: new Map(),
+  resized: new Set(),
+});
+
+/** Notes each node a morph made whose box differs between the states it is in, as each state lowered it. */
+export const noteResized = (
+  into: Notes,
+  merged: readonly SceneNode[],
+  states: readonly (readonly SceneNode[])[],
+): void => {
+  for (const { key } of merged) {
+    const boxes = states.flatMap((state) =>
+      state.filter((node) => node.key === key).map((node) => node.box),
+    );
+
+    if (boxes.some((box) => !sameBox(box, boxes[0]!))) into.resized.add(key);
+  }
+};
+
+const sameBox = (a: Box, b: Box): boolean =>
+  [a.x - b.x, a.y - b.y, a.width - b.width, a.height - b.height].every(
+    (d) => Math.abs(d) <= EPSILON,
+  );
 
 interface Written {
   readonly ref?: Ref;
@@ -221,10 +250,14 @@ const inward = (
 /** How far a followed point may stray from where it really is, in px. */
 const TOLERANCE = 0.05;
 
+/** Whether a connector's end, as an untyped caller may write it, is a point. */
+const isPoint = (end: unknown): end is Vec =>
+  Array.isArray(end) && end.length === 2 && end.every((n) => Number.isFinite(n));
+
 /** Places every node the first pass could not, and gives the scene's root back with every box and `at` final. */
 export const settle = <G extends SceneNode & { readonly kind: "group" }>(
   root: G,
-  { nodes, refs, aims }: Notes,
+  { nodes, refs, aims, resized }: Notes,
   duration: Seconds,
 ): G => {
   const top = draft(root, undefined, nodes);
@@ -283,7 +316,16 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     const { settle: asked } = d.note ?? {};
 
     if (asked?.kind === "connect") {
-      const ends = asked.ends.map((end) => (isAnchor(end) ? resolve(end, d) : end));
+      const ends = asked.ends.map((end, i) => {
+        if (isAnchor(end)) return resolve(end, d);
+
+        if (!isPoint(end))
+          throw new Error(
+            `The ${asked.label} "${d.node.key}" is given ${isTrack(end) || isDerived(end) ? "a track" : String(end)} for its ${i === 0 ? "from" : "to"}, but an end is a point or an anchor. To move an end, attach it to a ref's anchor, as in ${i === 0 ? "from" : "to"}={card.left}, and move the node it is attached to.`,
+          );
+
+        return end;
+      });
 
       d.children = asked
         .connect(
@@ -296,6 +338,11 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
       d.box = around(d.children);
     } else if (asked?.kind === "arrange") {
       for (const child of d.children) {
+        if (resized.has(child.node.key))
+          throw new Error(
+            `The ${asked.label} "${d.node.key}" lays out "${child.node.key}", whose box a morph() changes, but layout reads each box at rest, so it would not make room. Put the ${asked.label} inside the morph's states instead, so each state is laid out on its own.`,
+          );
+
         if (child.note?.placed)
           throw new Error(
             `"${child.node.key}" has an at of its own, but the ${asked.label} it sits in places it. Drop its at; to nudge it, give it a motion layer with an offset.`,
