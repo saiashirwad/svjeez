@@ -21,6 +21,9 @@ const budgets = {
   clips: { bytes: 5100, elements: 35, stops: 16, smil: 0, cost: 6 },
   geometry: { bytes: 7800, elements: 19, stops: 11, smil: 5, cost: 9 },
   springs: { bytes: 8400, elements: 28, stops: 60, smil: 0, cost: 4 },
+  layout: { bytes: 11000, elements: 43, stops: 80, smil: 0, cost: 15 },
+  morph: { bytes: 10000, elements: 32, stops: 48, smil: 6, cost: 37 },
+  derived: { bytes: 9300, elements: 21, stops: 46, smil: 1, cost: 5 },
 } satisfies Record<string, Budget>;
 
 /** What a file costs to send and to play. */

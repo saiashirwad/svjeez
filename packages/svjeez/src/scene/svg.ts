@@ -708,7 +708,11 @@ const emitNode = (ctx: Ctx, node: SceneNode): SvgNode => {
     case "text": {
       // Every line is placed where layout put it, so no browser anchors or wraps it.
       const [line, ...more] = node.lines;
-      const where = (point: Vec) => ({ x: num(at[0] + point[0]), y: num(at[1] + point[1]) });
+
+      const where = ([px, py]: Vec) => ({
+        ...(at[0] + px !== 0 && { x: num(at[0] + px) }),
+        ...(at[1] + py !== 0 && { y: num(at[1] + py) }),
+      });
 
       drawn = {
         tag: "text",

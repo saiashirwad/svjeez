@@ -293,14 +293,18 @@ const connect =
     // the gap is part of the drawing, and only the angle and the length are lanes, each of one number.
     const at = steadyWhileHidden(from!, seen, breaks);
 
-    const angle = laneFrom(
-      follow((t) => [posed(t).angle], breaks, ANGLE, [0], ends),
-      ([value]) => value!,
-    );
-
     const stretch = follow((t) => [posed(t).length], breaks, NEAR, [], ends);
     const longest = Math.max(EPSILON, ...stretch.map((key) => key.values[0]!));
     const fixed = laneFrom(stretch, ([value]) => value!);
+
+    // An angle is as close as the far end of the arrow needs: within NEAR there, and never looser than ANGLE.
+    const turning = Math.max(ANGLE, (NEAR / (gap + longest + size)) * DEG);
+
+    const angle = laneFrom(
+      follow((t) => [posed(t).angle], breaks, turning, [0], ends),
+      ([value]) => value!,
+    );
+
     const start: Vec = [gap, 0];
 
     const [geometry, rest] = !isLane(fixed)
@@ -343,7 +347,7 @@ const connect =
         ([x, y]): Vec => [x!, y!],
       ),
       rotate: laneFrom(
-        follow((t) => [end(t)[1]], breaks, ANGLE, [0], ends),
+        follow((t) => [end(t)[1]], breaks, turning, [0], ends),
         ([value]) => value!,
       ),
       scale: [1, 1],

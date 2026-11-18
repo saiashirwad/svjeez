@@ -44,6 +44,10 @@ const DIFFERS = new Map<string, { props: string[]; why: string }>(
       props: ["bw"],
       why: "A diagonal line under a stretched rotation: Chromium bounds the turned box of its path, Firefox the turned path. The center is the same in both.",
     },
+    "firefox layout.svg": {
+      props: ["bcx"],
+      why: "An arrow head turns inside a group that rotates it about the arrow's start, so as it tilts Firefox bounds the turned head and Chromium its turned box. The frames are the same pixels in both.",
+    },
     "firefox site/icons.svg": {
       props: ["bcx"],
       why: "The same measuring difference on an icon turned by a few degrees: the bounds of the turned box and of the turned shape have different centers.",
