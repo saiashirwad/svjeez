@@ -1,0 +1,194 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 489 872" width="489" height="872" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">Deploy pipeline from Mermaid</title>
+  <desc id="d">A deploy pipeline written as Mermaid text appears node by node as a svjeez flowchart, then a token runs from the push to the live release.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--blue-22-background:#1C2B41;--orange-22-background:#3F2B0C;--magenta-22-background:#322641}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0;--blue-22-background:#C9DFFF;--orange-22-background:#FAE1CD;--magenta-22-background:#E9D9F8}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:12s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,20.833%{translate:0px 6px}24.167%,100%{translate:0px 0px}}
+@keyframes k2{0%,20.833%{opacity:0}24.167%,100%{opacity:1}}
+.m1{animation-name:k1,k2}
+@keyframes k3{0%,6.25%{stroke-dashoffset:1;visibility:hidden}9.167%,100%{stroke-dashoffset:0;visibility:visible}}
+.m2{animation-name:k3}
+@keyframes k4{0%,8.729%{opacity:0}9.167%,100%{opacity:1}}
+.m3{animation-name:k4}
+@keyframes k5{0%,9.167%{stroke-dashoffset:1;visibility:hidden}12.083%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k5}
+@keyframes k6{0%,11.646%{opacity:0}12.083%,100%{opacity:1}}
+.m5{animation-name:k6}
+@keyframes k7{0%,12.083%{stroke-dashoffset:1;visibility:hidden}15%,100%{stroke-dashoffset:0;visibility:visible}}
+.m6{animation-name:k7}
+@keyframes k8{0%,14.563%{opacity:0}15%,100%{opacity:1}}
+.m7{animation-name:k8}
+@keyframes k9{0%,15%{stroke-dashoffset:1;visibility:hidden}17.917%,100%{stroke-dashoffset:0;visibility:visible}}
+.m8{animation-name:k9}
+@keyframes k10{0%,17.479%{opacity:0}17.917%,100%{opacity:1}}
+.m9{animation-name:k10}
+@keyframes k11{0%,17.917%{stroke-dashoffset:1;visibility:hidden}20.833%,100%{stroke-dashoffset:0;visibility:visible}}
+.m10{animation-name:k11}
+@keyframes k12{0%,20.396%{opacity:0}20.833%,100%{opacity:1}}
+.m11{animation-name:k12}
+@keyframes k13{0%,20.833%{stroke-dashoffset:1;visibility:hidden}23.75%,100%{stroke-dashoffset:0;visibility:visible}}
+.m12{animation-name:k13}
+@keyframes k14{0%,23.313%{opacity:0}23.75%,100%{opacity:1}}
+.m13{animation-name:k14}
+@keyframes k15{0%,23.75%{stroke-dashoffset:1;visibility:hidden}26.667%,100%{stroke-dashoffset:0;visibility:visible}}
+.m14{animation-name:k15}
+@keyframes k16{0%,26.229%{opacity:0}26.667%,100%{opacity:1}}
+.m15{animation-name:k16}
+@keyframes k17{0%,26.667%{stroke-dashoffset:1;visibility:hidden}29.583%,100%{stroke-dashoffset:0;visibility:visible}}
+.m16{animation-name:k17}
+@keyframes k18{0%,29.146%{opacity:0}29.583%,100%{opacity:1}}
+.m17{animation-name:k18}
+@keyframes k19{0%,29.583%{stroke-dashoffset:1;visibility:hidden}32.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m18{animation-name:k19}
+@keyframes k20{0%,32.063%{opacity:0}32.5%,100%{opacity:1}}
+.m19{animation-name:k20}
+@keyframes k21{0%,41.667%{stroke-dashoffset:1;visibility:hidden}66.667%,100%{stroke-dashoffset:0;visibility:visible}}
+.m20{animation-name:k21;animation-timing-function:linear}
+@keyframes k22{0%,3.333%{translate:0px 6px}6.25%,100%{translate:0px 0px}}
+@keyframes k23{0%,3.333%{opacity:0}6.25%,100%{opacity:1}}
+.m21{animation-name:k22,k23}
+@keyframes k24{0%,9.167%{translate:0px 6px}12.083%,100%{translate:0px 0px}}
+@keyframes k25{0%,9.167%{opacity:0}12.083%,100%{opacity:1}}
+.m22{animation-name:k24,k25}
+@keyframes k26{0%,12.083%{translate:0px 6px}15%,100%{translate:0px 0px}}
+@keyframes k27{0%,12.083%{opacity:0}15%,100%{opacity:1}}
+.m23{animation-name:k26,k27}
+@keyframes k28{0%,15%{translate:0px 6px}17.917%,100%{translate:0px 0px}}
+@keyframes k29{0%,15%{opacity:0}17.917%,100%{opacity:1}}
+.m24{animation-name:k28,k29}
+@keyframes k30{0%,17.917%{translate:0px 6px}20.833%,100%{translate:0px 0px}}
+@keyframes k31{0%,17.917%{opacity:0}20.833%,100%{opacity:1}}
+.m25{animation-name:k30,k31}
+@keyframes k32{0%,6.25%{translate:0px 6px}9.167%,100%{translate:0px 0px}}
+@keyframes k33{0%,6.25%{opacity:0}9.167%,100%{opacity:1}}
+.m26{animation-name:k32,k33}
+@keyframes k34{0%,20.833%{translate:0px 6px}23.75%,100%{translate:0px 0px}}
+@keyframes k35{0%,20.833%{opacity:0}23.75%,100%{opacity:1}}
+.m27{animation-name:k34,k35}
+@keyframes k36{0%,23.75%{translate:0px 6px}26.667%,100%{translate:0px 0px}}
+@keyframes k37{0%,23.75%{opacity:0}26.667%,100%{opacity:1}}
+.m28{animation-name:k36,k37}
+@keyframes k38{0%,26.667%{translate:0px 6px}29.583%,100%{translate:0px 0px}}
+@keyframes k39{0%,26.667%{opacity:0}29.583%,100%{opacity:1}}
+.m29{animation-name:k38,k39}
+@keyframes k40{0%,29.583%{translate:0px 6px}32.5%,100%{translate:0px 0px}}
+@keyframes k41{0%,29.583%{opacity:0}32.5%,100%{opacity:1}}
+.m30{animation-name:k40,k41}
+@keyframes k42{0%,32.5%{translate:0px 6px}35.417%,100%{translate:0px 0px}}
+@keyframes k43{0%,32.5%{opacity:0}35.417%,100%{opacity:1}}
+.m31{animation-name:k42,k43}
+@keyframes k44{0%,15%{translate:0px 6px}17.083%,100%{translate:0px 0px}}
+@keyframes k45{0%,15%{opacity:0}17.083%,100%{opacity:1}}
+.m32{animation-name:k44,k45}
+@keyframes k46{0%,17.917%{translate:0px 6px}20%,100%{translate:0px 0px}}
+@keyframes k47{0%,17.917%{opacity:0}20%,100%{opacity:1}}
+.m33{animation-name:k46,k47}
+@keyframes k48{0%,26.667%{translate:0px 6px}28.75%,100%{translate:0px 0px}}
+@keyframes k49{0%,26.667%{opacity:0}28.75%,100%{opacity:1}}
+.m34{animation-name:k48,k49}
+@keyframes k50{0%,29.583%{translate:0px 6px}31.667%,100%{translate:0px 0px}}
+@keyframes k51{0%,29.583%{opacity:0}31.667%,100%{opacity:1}}
+.m35{animation-name:k50,k51}
+@keyframes k52{0%,41.667%,66.667%,100%{opacity:0}42.917%,65%{opacity:1}}
+@keyframes k53{0%,41.667%{translate:87.63px 41px}42.083%{translate:87.77px 55.12px}42.5%{translate:93.28px 67.76px}42.917%{translate:101.7px 78.96px}43.333%{translate:103.09px 92.89px}44.583%{translate:103.09px 135.27px}45%{translate:106.41px 148.71px}45.417%{translate:115.52px 159.47px}45.833%{translate:118.71px 172.95px}46.25%{translate:126.86px 181.98px}47.917%{translate:177.62px 206.8px}48.333%{translate:188.92px 213.87px}50%{translate:188.92px 270.37px}50.417%{translate:196.86px 281.01px}51.667%{translate:236.72px 295.1px}52.083%{translate:244.5px 305.83px}57.917%{translate:244.5px 503.58px}58.333%{translate:236.68px 512.82px}60%{translate:185.92px 537.63px}60.417%{translate:174.29px 544.5px}64.167%{translate:174.29px 671.62px}65%{translate:170.31px 699.59px}65.417%{translate:169.1px 713.63px}66.667%,100%{translate:169.1px 756px}}
+.m36{animation-name:k52,k53;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes k54{0%,93.333%{opacity:1}98.333%,100%{opacity:0}}
+.m37{animation-name:k54}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-10s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="489" height="872" fill="var(--background)"/>
+  <g transform="translate(40.229 39.625)" class="a m37">
+    <g transform="translate(80.4 395.74)" class="a m1">
+      <rect x="0.5" y="0.5" width="328.2" height="324.26" rx="10" fill="none" stroke="var(--border)" stroke-dasharray="4 3"/>
+      <text x="12" y="17.271" font-size="11.05" fill="var(--muted)">Release</text>
+    </g>
+    <path d="M87.63 41L87.63 54C87.63 70 103.09 70 103.09 85L103.09 87" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
+    <polygon points="103.09 94 99.09 86 107.09 86" fill="var(--border)" class="a m3"/>
+    <path d="M103.09 130L103.09 138C103.09 154 118.71 154 118.71 169L118.71 171" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <polygon points="118.71 178 114.71 170 122.71 170" fill="var(--border)" class="a m5"/>
+    <path d="M77.6 221.72L77.6 334" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
+    <polygon points="77.6 341 73.6 333 81.6 333" fill="var(--border)" class="a m7"/>
+    <path d="M188.92 212.32L188.92 272C188.92 288 244.5 288 244.5 304L244.5 334" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
+    <polygon points="244.5 341 240.5 333 248.5 333" fill="var(--border)" class="a m9"/>
+    <path d="M242.83 46L242.83 138C242.83 154 242.92 154 242.92 170L242.92 334" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
+    <polygon points="242.92 341 238.92 333 246.92 333" fill="var(--border)" class="a m9"/>
+    <path d="M244.5 377L244.5 418" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m10"/>
+    <polygon points="244.5 425 240.5 417 248.5 417" fill="var(--border)" class="a m11"/>
+    <path d="M244.5 461L244.5 502" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m12"/>
+    <polygon points="244.5 509 240.5 501 248.5 501" fill="var(--border)" class="a m13"/>
+    <path d="M174.29 543.32L174.29 665" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m14"/>
+    <polygon points="174.29 672 170.29 664 178.29 664" fill="var(--border)" class="a m15"/>
+    <path d="M314.7 543.32L314.7 603C314.7 619 339.2 619 339.2 635L339.2 665" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m16"/>
+    <polygon points="339.2 672 335.2 664 343.2 664" fill="var(--border)" class="a m17"/>
+    <path d="M169.1 708L169.1 749" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m18"/>
+    <polygon points="169.1 756 165.1 748 173.1 748" fill="var(--border)" class="a m19"/>
+    <path d="M87.63 41L87.63 54C87.63 70 103.09 70 103.09 86L103.09 94M103.09 130L103.09 138C103.09 154 118.71 154 118.71 170L118.71 178M188.92 212.32L188.92 272C188.92 288 244.5 288 244.5 304L244.5 341M244.5 377L244.5 425M244.5 461L244.5 509M174.29 543.32L174.29 672M169.1 708L169.1 756" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m20"/>
+    <g transform="translate(13.93 5)" class="a m21">
+      <polygon points="12.6 0 147.4 0 134.8 36 0 36" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <text x="26.9" y="22.68" font-size="13" fill="var(--text)">Push to main</text>
+    </g>
+    <g transform="translate(45.89 94)" class="a m22">
+      <rect x="0.75" y="0.75" width="114.4" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Build image</text>
+    </g>
+    <g transform="translate(30.51 178)" class="a m23">
+      <polygon points="88.205 0 176.41 28.5 88.205 57 0 28.5" fill="var(--orange-22-background)" stroke="var(--orange)" stroke-width="1.5"/>
+      <text x="45.305" y="33.18" font-size="13" fill="var(--text)">Tests pass?</text>
+    </g>
+    <g transform="translate(0 341)" class="a m24">
+      <polygon points="12.6 0 155.2 0 142.6 36 0 36" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <text x="26.9" y="22.68" font-size="13" fill="var(--text)">Notify author</text>
+    </g>
+    <g transform="translate(191.2 341)" class="a m25">
+      <rect x="0.75" y="0.75" width="106.6" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Scan image</text>
+    </g>
+    <g transform="translate(197.33 0)" class="a m26">
+      <path d="M0 5C0 2.239 20.37 0 45.5 0C70.63 0 91 2.239 91 5L91 41C91 43.762 70.63 46 45.5 46C20.37 46 0 43.762 0 41Z" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+      <path d="M0 5C0 7.762 20.37 10 45.5 10C70.63 10 91 7.762 91 5" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="14.3" y="30.18" font-size="13" fill="var(--text)">Registry</text>
+    </g>
+    <g transform="translate(163.9 425)" class="a m27">
+      <rect x="0.75" y="0.75" width="161.2" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Deploy to staging</text>
+    </g>
+    <g transform="translate(156.29 509)" class="a m28">
+      <polygon points="88.205 0 176.41 28.5 88.205 57 0 28.5" fill="var(--orange-22-background)" stroke="var(--orange)" stroke-width="1.5"/>
+      <text x="45.305" y="33.18" font-size="13" fill="var(--text)">Smoke test?</text>
+    </g>
+    <g transform="translate(92.4 672)" class="a m29">
+      <rect x="0.75" y="0.75" width="153.4" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Roll out to prod</text>
+    </g>
+    <g transform="translate(281.8 672)" class="a m30">
+      <rect x="0.75" y="0.75" width="114.8" height="36" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+      <path d="M8 0L8 36M106.8 0L106.8 36" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="22.3" y="22.68" font-size="13" fill="var(--text)">Roll back</text>
+    </g>
+    <g transform="translate(132 756)" class="a m31">
+      <rect x="0.75" y="0.75" width="74.2" height="36" rx="18" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <text x="21.5" y="22.68" font-size="13" fill="var(--text)">Live</text>
+    </g>
+    <g class="a m32">
+      <rect x="65.97" y="279.5" width="23.26" height="17" rx="3" fill="var(--background)"/>
+      <text x="70.97" y="291.978" font-size="11.05" fill="var(--muted)">no</text>
+    </g>
+    <g class="a m33">
+      <rect x="173.97" y="253" width="29.89" height="17" rx="3" fill="var(--background)"/>
+      <text x="178.97" y="265.478" font-size="11.05" fill="var(--muted)">yes</text>
+    </g>
+    <g class="a m34">
+      <rect x="159.35" y="610.5" width="29.89" height="17" rx="3" fill="var(--background)"/>
+      <text x="164.35" y="622.978" font-size="11.05" fill="var(--muted)">yes</text>
+    </g>
+    <g class="a m35">
+      <rect x="303.07" y="584" width="23.26" height="17" rx="3" fill="var(--background)"/>
+      <text x="308.07" y="596.478" font-size="11.05" fill="var(--muted)">no</text>
+    </g>
+    <circle r="5" fill="var(--orange)" class="a m36"/>
+  </g>
+</svg>
