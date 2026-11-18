@@ -2,7 +2,7 @@ import { SceneError } from "../model/scene-error";
 import type { FontValue } from "../font/font";
 import type { Seconds } from "../model/time";
 import type { PictureData } from "./picture";
-import type { Authored, Box, Vec } from "../model/ir";
+import type { Authored, Blend, Box, Vec } from "../model/ir";
 import type { Anchor, Ref } from "./refs";
 import type { AnchorPlace, TextAnchorPlace } from "./pin";
 import type { Origin, Settle } from "./settle";
@@ -28,6 +28,8 @@ export interface Common {
   readonly clip?: Anim<Geometry> | ((own: Bounds) => Anim<Geometry>);
   readonly mask?: Child | ((own: Bounds) => Child);
   readonly effects?: readonly Effect[];
+  /** How it composites onto its earlier siblings. A group whose children blend is isolated, so they blend only with each other. */
+  readonly blend?: "normal" | Blend;
 }
 
 export interface StrokeProps {
@@ -36,6 +38,8 @@ export interface StrokeProps {
   readonly cap?: "butt" | "round" | "square";
   readonly join?: "miter" | "round" | "bevel";
   readonly dash?: readonly number[];
+  /** Slides the dash pattern along the stroke. Needs `dash`, and can't be combined with `trim`. */
+  readonly dashOffset?: Anim<number>;
   readonly nonScaling?: boolean;
 }
 

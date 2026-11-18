@@ -266,6 +266,7 @@ type Slot =
   | "fill"
   | "stroke"
   | "stroke-width"
+  | "stroke-dashoffset"
   | "fill-opacity"
   | "d";
 
@@ -580,6 +581,17 @@ const strokeAttrs = (
 
   if (stroke.dash) attrs["stroke-dasharray"] = stroke.dash.map((n) => num(n)).join(" ");
 
+  const { dashOffset } = stroke;
+
+  if (dashOffset !== undefined) {
+    const first = isLane(dashOffset) ? dashOffset.keys[0].value : dashOffset;
+
+    if (isLane(dashOffset))
+      lanes.push(cssLane(ctx, "stroke-dashoffset", dashOffset, (value) => ({ dashOffset: value })));
+
+    if (first !== 0) attrs["stroke-dashoffset"] = num(first);
+  }
+
   if (stroke.nonScaling) attrs["vector-effect"] = "non-scaling-stroke";
 };
 
@@ -882,6 +894,16 @@ const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Dra
   own.attrs.filter = filterUrl(ctx.defs, effects, moved(growBox(reach, 1), shift), node.key);
 };
 
+const ISOLATE = "isolation:isolate";
+
+/**
+ * A node blends with what is drawn beneath it in its nearest isolated group, so a group
+ * whose children blend is isolated: they blend with their earlier siblings and never
+ * with whatever the group itself sits on. The root and each symbol count as groups.
+ */
+const isolates = (children: readonly SceneNode[]): boolean =>
+  children.some((child) => child.blend !== undefined);
+
 const symbolId = (ctx: Ctx, name: string): string => `${ctx.prefix}symbol-${name}`;
 
 const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
@@ -891,7 +913,9 @@ const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
   if (
     node.clip !== undefined ||
     node.mask !== undefined ||
+    node.blend !== undefined ||
     node.effects.length > 0 ||
+    isolates(node.children) ||
     isLane(child!.at) ||
     (node.layers.length > 0 && child!.layers.length > 0)
   )
@@ -1050,6 +1074,10 @@ const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
 
   if (isLane(node.at)) travel(ctx, shells, node.at);
 
+  if (node.kind === "group" && isolates(node.children)) shells[0]!.style.push(ISOLATE);
+
+  if (node.blend !== undefined) shells.at(-1)!.style.push(`mix-blend-mode:${node.blend}`);
+
   const { box } = node;
 
   const centered =
@@ -1192,7 +1220,10 @@ export const svg: Backend<string, SvgOptions> = {
 
       return element(
         "g",
-        { id: symbolId(ctx, name) },
+        {
+          id: symbolId(ctx, name),
+          ...(root.kind === "group" && isolates(root.children) && { style: ISOLATE }),
+        },
         root.kind === "group"
           ? root.children.map((child) => emitNode(ctx, child))
           : [emitNode(ctx, root)],
@@ -1225,7 +1256,10 @@ export const svg: Backend<string, SvgOptions> = {
           },
         }),
       },
-      [...(all.length > 0 ? [element("defs", {}, all)] : []), ...body],
+      [
+        ...(all.length > 0 ? [element("defs", {}, all)] : []),
+        ...(isolates(scene.root.children) ? [element("g", { style: ISOLATE }, body)] : body),
+      ],
     );
   },
 };
