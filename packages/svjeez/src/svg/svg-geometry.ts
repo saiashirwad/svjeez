@@ -7,11 +7,10 @@ import { num } from "../model/format";
 import { DEFAULT_EASE, ease, type Ease } from "../model/time";
 import type { PathData } from "../model/paths";
 import type { AttrValue } from "./tree";
-import { arcPieces, contoursOf, mixGeometry, smilSafe } from "../model/geometry";
+import { arcPieces, contoursOf, mixGeometry, onCircle, smilSafe } from "../model/geometry";
 import type { Contour, Cubic, Geometry, Key, Lane, Paint, ShapeNode, Vec } from "../model/ir";
 import { isLane } from "../model/lane";
 import { same } from "../model/steps";
-import { onCircle } from "../author/values";
 
 export type GeometrySlot =
   | "d"

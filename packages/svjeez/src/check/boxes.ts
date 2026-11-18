@@ -1,9 +1,8 @@
 import type { Seconds } from "../model/time";
-import { mixGeometry } from "../model/geometry";
+import { mixGeometry, outlineBoxOf } from "../model/geometry";
 import type { Animated, Box, Geometry, Layer, Scene, SceneNode, Source, Vec } from "../model/ir";
 import { valueAt as sampleAt } from "../model/sample";
 import { mixNumber, mixVec, type Mix } from "../model/steps";
-import { boxOf } from "../author/values";
 import { lookOf, paintedBoxOf } from "../model/painted";
 
 export type Matrix = readonly [a: number, b: number, c: number, d: number, e: number, f: number];
@@ -85,7 +84,7 @@ const around = (points: readonly Vec[]): Box => {
 };
 
 const geometryAt = (geometry: Animated<Geometry>, t: Seconds, where: string): Box =>
-  boxOf(valueAt(geometry, t, mixGeometry, where));
+  outlineBoxOf(valueAt(geometry, t, mixGeometry, where));
 
 const frameAt = (node: SceneNode, t: Seconds): Box =>
   clipped(

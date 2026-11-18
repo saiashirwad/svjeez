@@ -2,7 +2,7 @@ import type { Font } from "../font/font";
 import { num } from "../model/format";
 import { EPSILON, type Seconds } from "../model/time";
 import { checkWindow } from "./span";
-import { matched, mixGeometry } from "../model/geometry";
+import { matched, mixGeometry, outlineBoxOf } from "../model/geometry";
 import { componentOf, identified, sourced, writtenAt } from "./identity";
 import { entryOf, named, nameNode, naming, quoted, whereOf, wordsOf, type Named } from "./names";
 import { SceneError, located } from "../model/scene-error";
@@ -71,7 +71,6 @@ import { isTrack, layersOf, passageOf, type Anim, type LayerMotion } from "./tra
 import { derivedOf, isDerived } from "./derived";
 import { collect, type Cues, type NodeElement } from "./timeline";
 import {
-  boxOf,
   outlineOf,
   polygon,
   rect,
@@ -258,7 +257,7 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
     );
   const geometry = geometryOf(props.geometry, timing, where);
   const rest = atRest(geometry);
-  const outline = boxOf(rest);
+  const outline = outlineBoxOf(rest);
   const paint = (value: Paint) => colorOf(ctx, value, where, outline);
   const { stroke: written } = props;
 

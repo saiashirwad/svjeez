@@ -60,7 +60,7 @@ import {
   type Scheme,
   type Stretch,
 } from "./survey";
-import { boxOf } from "../author/values";
+import { outlineBoxOf } from "../model/geometry";
 
 export const RULES = {
   "compile-error": "The scene threw while it was built.",
@@ -182,7 +182,7 @@ const flatAxes = (geometry: Geometry): readonly [across: boolean, down: boolean]
     }
 
     default: {
-      const { width, height } = boxOf(geometry);
+      const { width, height } = outlineBoxOf(geometry);
       const point = width === 0 && height === 0;
 
       return [point, point];
@@ -1006,7 +1006,7 @@ const gap = (
       const b = valueAt(named.value, then, mixGeometry, `geometry on ${where}`);
 
       if (outlineGap(a, b) * scale <= 0.5) return undefined;
-      const [x, y] = [boxOf(a), boxOf(b)];
+      const [x, y] = [outlineBoxOf(a), outlineBoxOf(b)];
 
       if (Math.abs(x.width - y.width) * scale > 0.5 || Math.abs(x.height - y.height) * scale > 0.5)
         return `its ${named.name} jumps from ${units(y.width)} by ${units(y.height)} to ${units(x.width)} by ${units(x.height)}`;

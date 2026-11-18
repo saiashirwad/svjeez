@@ -4,7 +4,7 @@ import type { Canvas, Lane as CssLane } from "./compile";
 import { num } from "../model/format";
 import { animate } from "./smil";
 import { element, type SvgNode } from "./tree";
-import { smilSafeWith } from "../model/geometry";
+import { outlineBoxOf, smilSafeWith } from "../model/geometry";
 import type {
   Animated,
   Box,
@@ -22,7 +22,6 @@ import type {
 import { atRest, isLane, mapLane } from "../model/lane";
 import { blendNumber, valueAt } from "../model/sample";
 import { mixNumber, same } from "../model/steps";
-import { boxOf } from "../author/values";
 
 export interface Defs {
   readonly scene: Scene;
@@ -374,7 +373,7 @@ export const clipUrl = (defs: Defs, clip: Animated<Geometry>, shift: Vec, key: s
     const outline: ShapeNode = {
       kind: "shape",
       key: `${key}#clip`,
-      box: boxOf(atRest(clip)),
+      box: outlineBoxOf(atRest(clip)),
       at: shift,
       origin: [0, 0],
       layers: [],

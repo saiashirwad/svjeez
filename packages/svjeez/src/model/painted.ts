@@ -1,6 +1,6 @@
 import type { Box, Cubic, Geometry, ShapeNode, Stroke, Vec } from "./ir";
 import { atRest } from "./lane";
-import { boxOf, onCircle } from "../author/values";
+import { onCircle, outlineBoxOf } from "./geometry";
 
 export const MITER_LIMIT = 4;
 
@@ -263,7 +263,7 @@ const contourReach = (
 };
 
 export const paintedBoxOf = (outline: Geometry, stroke: StrokeLook | undefined): Box => {
-  const bare = boxOf(outline);
+  const bare = outlineBoxOf(outline);
 
   if (!stroke || !(stroke.width > 0)) return bare;
   const h = stroke.width / 2;

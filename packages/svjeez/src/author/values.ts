@@ -1,17 +1,11 @@
 import { SceneError } from "../model/scene-error";
 import { hexBytes, hexOf, type Hex } from "../model/color";
+import { lineCubic, quadraticCubic } from "../model/curve";
 import { ringsOf } from "../model/paths";
-import type { Box, Contour, Cubic, Geometry as Outline, Rgba, Vec } from "../model/ir";
+import type { Contour, Cubic, Geometry as Outline, Rgba, Vec } from "../model/ir";
 import type { Gradient } from "./paint";
 
 export type { Hex };
-
-const lerp = (a: Vec, b: Vec, u: number): Vec => [
-  a[0] + (b[0] - a[0]) * u,
-  a[1] + (b[1] - a[1]) * u,
-];
-
-const straight = (from: Vec, to: Vec): Cubic => [lerp(from, to, 1 / 3), lerp(from, to, 2 / 3), to];
 
 const positive = (value: number, what: string): number => {
   if (!(value >= 0 && Number.isFinite(value)))
@@ -52,7 +46,7 @@ export class PathBuilder {
   lineTo(to: Vec): PathBuilder {
     const open = this.#pen("lineTo()");
 
-    return this.#add(straight(open.curves.at(-1)?.[2] ?? open.start, to), "lineTo()");
+    return this.#add(lineCubic(open.curves.at(-1)?.[2] ?? open.start, to), "lineTo()");
   }
 
   curveTo(control1: Vec, control2: Vec, to: Vec): PathBuilder {
@@ -63,7 +57,7 @@ export class PathBuilder {
     const open = this.#pen("quadTo()");
     const from = open.curves.at(-1)?.[2] ?? open.start;
 
-    return this.#add([lerp(from, control, 2 / 3), lerp(to, control, 2 / 3), to], "quadTo()");
+    return this.#add(quadraticCubic(from, control, to), "quadTo()");
   }
 
   close(): PathBuilder {
@@ -72,7 +66,7 @@ export class PathBuilder {
     const [sx, sy] = open.start;
 
     const curves =
-      end[0] === sx && end[1] === sy ? open.curves : [...open.curves, straight(end, open.start)];
+      end[0] === sx && end[1] === sy ? open.curves : [...open.curves, lineCubic(end, open.start)];
 
     return new PathBuilder([...this.#done, { ...open, curves, closed: true }]);
   }
@@ -154,86 +148,6 @@ export const pathData = (d: string): Geometry => ({
   contours: ringsOf(d),
   rule: "nonzero",
 });
-
-const DEG = Math.PI / 180;
-
-export const onCircle = (radius: number, angle: number): Vec => [
-  radius * Math.cos(angle * DEG),
-  radius * Math.sin(angle * DEG),
-];
-
-const extremes = (a: number, b: number, c: number, d: number): number[] => {
-  const [p, q, r] = [-a + 3 * b - 3 * c + d, 2 * (a - 2 * b + c), -a + b];
-
-  const roots =
-    Math.abs(p) < 1e-12
-      ? Math.abs(q) < 1e-12
-        ? []
-        : [-r / q]
-      : [1, -1].map((sign) => (-q + sign * Math.sqrt(Math.max(0, q * q - 4 * p * r))) / (2 * p));
-
-  return [a, d].concat(
-    roots
-      .filter((t) => t > 0 && t < 1 && q * q - 4 * p * r >= 0)
-      .map((t) => {
-        const s = 1 - t;
-
-        return s * s * s * a + 3 * s * s * t * b + 3 * s * t * t * c + t * t * t * d;
-      }),
-  );
-};
-
-const around = (xs: readonly number[], ys: readonly number[]): Box => {
-  if (xs.length === 0) return { x: 0, y: 0, width: 0, height: 0 };
-  const [x, y] = [Math.min(...xs), Math.min(...ys)];
-
-  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
-};
-
-export const boxOf = (outline: Outline): Box => {
-  switch (outline.kind) {
-    case "rect":
-      return { x: 0, y: 0, width: outline.size[0], height: outline.size[1] };
-    case "ellipse": {
-      const [rx, ry] = outline.radius;
-
-      return { x: -rx, y: -ry, width: rx * 2, height: ry * 2 };
-    }
-
-    case "arc": {
-      const r = outline.radius;
-
-      return { x: -r, y: -r, width: r * 2, height: r * 2 };
-    }
-
-    case "line":
-      return around([outline.from[0], outline.to[0]], [outline.from[1], outline.to[1]]);
-    case "polygon":
-      return around(
-        outline.points.map((point) => point[0]),
-        outline.points.map((point) => point[1]),
-      );
-    case "path": {
-      const xs: number[] = [];
-      const ys: number[] = [];
-
-      for (const contour of outline.contours) {
-        let from = contour.start;
-
-        xs.push(from[0]);
-        ys.push(from[1]);
-
-        for (const [c1, c2, to] of contour.curves) {
-          xs.push(...extremes(from[0], c1[0], c2[0], to[0]));
-          ys.push(...extremes(from[1], c1[1], c2[1], to[1]));
-          from = to;
-        }
-      }
-
-      return around(xs, ys);
-    }
-  }
-};
 
 export interface Token {
   readonly kind: "token";
