@@ -90,19 +90,21 @@ const paramAt = (from: Vec, via: Controls, to: Vec, share: number): number => {
 export const alongCurve = (from: Vec, via: Controls, to: Vec, share: number): Vec =>
   point(from, via, to, paramAt(from, via, to, share));
 
-export const splitCurve = (
+export const splitCurveAtParameter = (
   from: Vec,
   via: Controls,
   to: Vec,
-  share: number,
+  parameter: number,
 ): readonly [head: Controls, at: Vec, tail: Controls] => {
-  const s = paramAt(from, via, to, share);
-  const lerp = (a: Vec, b: Vec): Vec => lerpPoint(a, b, s);
+  const lerp = (a: Vec, b: Vec): Vec => lerpPoint(a, b, parameter);
   const [a, b, c] = [lerp(from, via[0]), lerp(via[0], via[1]), lerp(via[1], to)];
   const [d, e] = [lerp(a, b), lerp(b, c)];
 
   return [[a, d], lerp(d, e), [e, c]];
 };
+
+export const splitCurve = (from: Vec, via: Controls, to: Vec, share: number) =>
+  splitCurveAtParameter(from, via, to, paramAt(from, via, to, share));
 
 export const hermiteControls = (from: Vec, leave: Vec, arrive: Vec, to: Vec): Controls => [
   [from[0] + leave[0] / 3, from[1] + leave[1] / 3],

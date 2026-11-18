@@ -1,5 +1,5 @@
 import { SceneError } from "./scene-error";
-import { lerpPoint, lineCubic, quadraticCubic } from "./curve";
+import { lineCubic, quadraticCubic, splitCurveAtParameter } from "./curve";
 import { num } from "./format";
 import type { Contour, Cubic, Vec } from "./ir";
 import { segments } from "./pathTokens";
@@ -206,16 +206,11 @@ const parse = (d: string): Ring[] => {
 export const ringsOf = (d: string): Ring[] => parse(d);
 
 const halve = (from: Vec, [c1, c2, to]: Cubic): [Cubic, Cubic] => {
-  const a = lerpPoint(from, c1, 0.5);
-  const b = lerpPoint(c1, c2, 0.5);
-  const c = lerpPoint(c2, to, 0.5);
-  const ab = lerpPoint(a, b, 0.5);
-  const bc = lerpPoint(b, c, 0.5);
-  const mid = lerpPoint(ab, bc, 0.5);
+  const [head, at, tail] = splitCurveAtParameter(from, [c1, c2], to, 0.5);
 
   return [
-    [a, ab, mid],
-    [bc, c, to],
+    [...head, at],
+    [...tail, to],
   ];
 };
 
