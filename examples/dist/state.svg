@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">Agent lifecycle</title>
+  <desc id="d">A state machine for an agent run, walked once: idle, then working (planning and calling tools in turn), waiting on the user, working again, done.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--blue-22-muted-8-background:#25344B;--magenta-10-muted-8-background:#27222F;--orange-22-muted-8-background:#483415;--cyan-22-muted-8-background:#263F4B;--red-22-muted-8-background:#482828;--muted-8-background:#151618;--blue-22-muted-16-background:#2E3E55;--orange-22-muted-16-background:#523E1F}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0;--blue-22-muted-8-background:#C0D5F6;--magenta-10-muted-8-background:#EAE3F2;--orange-22-muted-8-background:#F1D7C4;--cyan-22-muted-8-background:#C3DFE4;--red-22-muted-8-background:#F0CDCB;--muted-8-background:#F3F3F4;--blue-22-muted-16-background:#B7CDEE;--orange-22-muted-16-background:#E8CFBB}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:20s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,2%,5.5%,100%{opacity:0}2.75%,4.75%{opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,8.889%,12.389%,64.925%,68.425%,100%{opacity:0}9.639%,11.639%,65.675%,67.675%{opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,14.139%,17.639%,32.125%,35.625%,70.175%,73.675%,100%{opacity:0}14.889%,16.889%,32.875%,34.875%,70.925%,72.925%{opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,21.028%,24.528%,39.014%,42.514%,77.065%,80.565%,100%{opacity:0}21.778%,23.778%,39.764%,41.764%,77.815%,79.815%{opacity:1}}
+.m4{animation-name:k4}
+@keyframes k5{0%,47.33%,50.83%,100%{opacity:0}48.08%,50.08%{opacity:1}}
+.m5{animation-name:k5}
+@keyframes k6{0%,85.653%,89.153%,100%{opacity:0}86.403%,88.403%{opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,8.889%,14.139%,21.028%,32.125%,39.014%,47.33%,64.925%,70.175%,77.065%,85.653%,100%{visibility:hidden}5.5%,12.389%,17.639%,24.528%,35.625%,42.514%,50.83%,68.425%,73.675%,80.565%{visibility:visible}}
+@keyframes k8{0%,5.5%{translate:129.2px 177px}8.889%{translate:278.32px 177px;animation-timing-function:steps(1)}8.89%,12.25%,64.926%,68.25%{translate:308.32px 172.5px}12.5%{translate:311.36px 172.5px}14.139%,70.175%{translate:356.32px 172.5px;animation-timing-function:steps(1)}14.14%,17.5%,32.126%,35.5%,70.176%,73.5%{translate:457.12px 172.5px}17.75%{translate:462px 172.5px}21.028%,39.014%,77.065%{translate:606.24px 172.5px;animation-timing-function:steps(1)}21.029%,24.5%{translate:677.64px 192px}24.75%{translate:677.64px 201.76px}25%{translate:677.64px 212.76px}25.25%{translate:676px 223.44px}25.5%{translate:666.55px 228px}31%{translate:424.55px 228px}31.25%{translate:413.62px 227.45px}31.5%{translate:406.87px 219.5px}32.125%{translate:406.72px 192px;animation-timing-function:steps(1)}35.75%{translate:462.61px 172.5px}39.015%,42.5%{translate:765.04px 119px}42.75%{translate:775.41px 119px}44%{translate:830.41px 119px}44.25%{translate:841.11px 117.57px}44.5%{translate:847.84px 109.3px}45.25%{translate:858.39px 78.06px}45.5%{translate:863.51px 68.4px}45.75%{translate:873.19px 64.5px}47.33%{translate:942.72px 64.5px;animation-timing-function:steps(1)}47.331%,50.75%{translate:1022.52px 45px}51%{translate:1022.52px 37.53px}51.5%{translate:1021.88px 15.6px}51.75%{translate:1013.72px 9.12px}62.75%{translate:529.73px 9.19px}63%{translate:522.09px 16.32px}64.925%{translate:521.68px 101px;animation-timing-function:steps(1)}68.5%{translate:310.37px 172.5px}73.75%{translate:460.4px 172.5px}77.066%,80.5%{translate:765.04px 139.5px}80.75%{translate:773.2px 139.5px}85.653%,100%{translate:988.92px 139.5px}}
+.m7{animation-name:k7,k8;animation-timing-function:steps(1),linear}
+@keyframes k9{0%,93.153%{opacity:1}96.153%,100%{opacity:0}}
+.m8{animation-name:k9}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-17.531s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="960" height="540" fill="var(--background)"/>
+  <g transform="translate(480 270)" class="a m8">
+    <g transform="translate(-584.535 -155)" style="transform-origin:0px 0px;scale:0.77">
+      <g transform="translate(62 157.497)">
+        <rect x="0.75" y="0.75" width="67.2" height="39" rx="8" fill="var(--blue-22-muted-8-background)" stroke="var(--blue)" stroke-width="1.5"/>
+        <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Idle</text>
+      </g>
+      <g transform="translate(278.32 100.999)">
+        <rect x="0.75" y="0.75" width="486.72" height="152" rx="10" fill="var(--magenta-10-muted-8-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+        <line x1="0" y1="36" x2="486.72" y2="36" fill="none" stroke="var(--magenta)"/>
+        <text x="213.96" y="23.04" font-size="14" fill="var(--text)">Working</text>
+      </g>
+      <g transform="translate(942.72 45)">
+        <rect x="0.75" y="0.75" width="159.6" height="39" rx="8" fill="var(--orange-22-muted-8-background)" stroke="var(--orange)" stroke-width="1.5"/>
+        <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Waiting on user</text>
+      </g>
+      <g transform="translate(988.92 120)">
+        <rect x="0.75" y="0.75" width="67.2" height="39" rx="8" fill="var(--cyan-22-muted-8-background)" stroke="var(--cyan)" stroke-width="1.5"/>
+        <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Done</text>
+      </g>
+      <g transform="translate(980.52 195)">
+        <rect x="0.75" y="0.75" width="84" height="39" rx="8" fill="var(--red-22-muted-8-background)" stroke="var(--red)" stroke-width="1.5"/>
+        <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Failed</text>
+      </g>
+      <g transform="translate(967.92 270)">
+        <rect x="0.5" y="0.5" width="109.2" height="39" rx="8" fill="var(--muted-8-background)" stroke="var(--muted)"/>
+        <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Cancelled</text>
+      </g>
+      <g transform="translate(356.32 152.999)">
+        <rect x="0.75" y="0.75" width="100.8" height="39" rx="8" fill="var(--blue-22-muted-16-background)" stroke="var(--blue)" stroke-width="1.5"/>
+        <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Planning</text>
+      </g>
+      <g transform="translate(606.24 152.999)">
+        <rect x="0.75" y="0.75" width="142.8" height="39" rx="8" fill="var(--orange-22-muted-16-background)" stroke="var(--orange)" stroke-width="1.5"/>
+        <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Calling tools</text>
+      </g>
+      <path d="M14 177L55 177" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="62 177 54 181 54 173" fill="var(--muted)"/>
+      <path d="M129.2 177L271.32 177" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="278.32 177 270.32 181 270.32 173" fill="var(--muted)"/>
+      <path d="M765.04 119L837.88 119C853.88 119 853.88 64.5 869.88 64.5L935.72 64.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="942.72 64.5 934.72 68.5 934.72 60.5" fill="var(--muted)"/>
+      <path d="M1022.52 45L1022.52 19C1022.52 13.5 1018.02 9 1012.52 9L531.68 9C526.18 9 521.68 13.5 521.68 19L521.68 94" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="521.68 101 517.68 93 525.68 93" fill="var(--muted)"/>
+      <path d="M765.04 139.5L981.92 139.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="988.92 139.5 980.92 143.5 980.92 135.5" fill="var(--muted)"/>
+      <path d="M765.04 214.5L973.52 214.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="980.52 214.5 972.52 218.5 972.52 210.5" fill="var(--muted)"/>
+      <path d="M765.04 235L837.88 235C853.88 235 853.88 289.5 869.88 289.5L960.92 289.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="967.92 289.5 959.92 293.5 959.92 285.5" fill="var(--muted)"/>
+      <path d="M1056.12 139.5L1118.32 139.5C1134.32 139.5 1134.32 214.5 1141.32 214.5L1143.32 214.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="1150.32 214.5 1142.32 218.5 1142.32 210.5" fill="var(--muted)"/>
+      <path d="M1064.52 214.5L1143.32 214.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="1150.32 214.5 1142.32 218.5 1142.32 210.5" fill="var(--muted)"/>
+      <path d="M1077.12 289.5L1118.32 289.5C1134.32 289.5 1134.32 214.5 1141.32 214.5L1143.32 214.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="1150.32 214.5 1142.32 218.5 1142.32 210.5" fill="var(--muted)"/>
+      <path d="M308.32 172.5L349.32 172.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="356.32 172.5 348.32 176.5 348.32 168.5" fill="var(--muted)"/>
+      <path d="M457.12 172.5L599.24 172.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="606.24 172.5 598.24 176.5 598.24 168.5" fill="var(--muted)"/>
+      <path d="M677.64 192L677.64 218C677.64 223.5 673.14 228 667.64 228L416.72 228C411.22 228 406.72 223.5 406.72 218L406.72 199" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="406.72 192 410.72 200 402.72 200" fill="var(--muted)"/>
+      <circle cx="7" cy="176.997" r="7" fill="var(--text)"/>
+      <circle cx="301.32" cy="172.499" r="7" fill="var(--text)"/>
+      <g transform="translate(1159.32 214.5)">
+        <circle r="9" fill="none" stroke="var(--text)" stroke-width="1.5"/>
+        <circle r="5" fill="var(--text)"/>
+      </g>
+      <rect x="59" y="154.497" width="75.2" height="47" rx="11" fill="none" stroke="var(--orange)" stroke-width="2" class="a m1"/>
+      <rect x="275.32" y="97.999" width="494.72" height="160" rx="13" fill="none" stroke="var(--orange)" stroke-width="2" class="a m2"/>
+      <rect x="353.32" y="149.999" width="108.8" height="47" rx="11" fill="none" stroke="var(--orange)" stroke-width="2" class="a m3"/>
+      <rect x="603.24" y="149.999" width="150.8" height="47" rx="11" fill="none" stroke="var(--orange)" stroke-width="2" class="a m4"/>
+      <rect x="939.72" y="42" width="167.6" height="47" rx="11" fill="none" stroke="var(--orange)" stroke-width="2" class="a m5"/>
+      <rect x="985.92" y="117" width="75.2" height="47" rx="11" fill="none" stroke="var(--orange)" stroke-width="2" class="a m6"/>
+      <circle r="5" fill="var(--orange)" class="a m7"/>
+      <rect x="184.48" y="168" width="38.56" height="18" rx="3" fill="var(--background)"/>
+      <text x="189.48" y="181.284" font-size="11.9" fill="var(--text)">task</text>
+      <rect x="793.75" y="110" width="31.42" height="18" rx="3" fill="var(--background)"/>
+      <text x="798.75" y="123.284" font-size="11.9" fill="var(--text)">ask</text>
+      <rect x="749.25" width="45.7" height="18" rx="3" fill="var(--background)"/>
+      <text x="754.25" y="13.284" font-size="11.9" fill="var(--text)">reply</text>
+      <rect x="850.56" y="130.5" width="52.84" height="18" rx="3" fill="var(--background)"/>
+      <text x="855.56" y="143.784" font-size="11.9" fill="var(--text)">finish</text>
+      <rect x="849.93" y="205.5" width="45.7" height="18" rx="3" fill="var(--background)"/>
+      <text x="854.93" y="218.784" font-size="11.9" fill="var(--text)">error</text>
+      <rect x="884.48" y="280.5" width="52.84" height="18" rx="3" fill="var(--background)"/>
+      <text x="889.48" y="293.784" font-size="11.9" fill="var(--text)">cancel</text>
+      <rect x="512.4" y="163.5" width="38.56" height="18" rx="3" fill="var(--muted-8-background)"/>
+      <text x="517.4" y="176.784" font-size="11.9" fill="var(--text)">plan</text>
+      <rect x="515.76" y="219" width="52.84" height="18" rx="3" fill="var(--muted-8-background)"/>
+      <text x="520.76" y="232.284" font-size="11.9" fill="var(--text)">result</text>
+    </g>
+  </g>
+</svg>
