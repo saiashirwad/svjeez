@@ -80,6 +80,7 @@ jobs:
         working-directory: packages/fonts
       - run: npm run test:package
         working-directory: packages/icons
+        working-directory: packages/charts
       - run: npm run test:package
         working-directory: packages/vite
       - run: npm run test:package
