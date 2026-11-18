@@ -265,8 +265,16 @@ export const momentsOf = (scene: Scene, extra: readonly Seconds[] = []): Seconds
   );
 };
 
-export const framesOf = (scene: Scene, times: readonly Seconds[]): Map<string, Placed>[] =>
-  times.map((t) => new Map(placements(scene, t).map((placed) => [placed.key, placed])));
+export interface SampledFrame {
+  readonly t: Seconds;
+  readonly frame: ReadonlyMap<string, Placed>;
+}
+
+export const frameAt = (scene: Scene, t: Seconds): SampledFrame["frame"] =>
+  new Map(placements(scene, t).map((placed) => [placed.key, placed]));
+
+export const framesOf = (scene: Scene, times: readonly Seconds[]): SampledFrame[] =>
+  times.map((t) => ({ t, frame: frameAt(scene, t) }));
 
 export const scaleOf = (m: Matrix): number => Math.sqrt(Math.abs(m[0] * m[3] - m[1] * m[2]));
 

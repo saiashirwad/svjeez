@@ -2,14 +2,23 @@ import { FontBook, charName } from "../author/runs";
 import type { Box, SceneNode, TextNode, Vec } from "../model/ir";
 import type { Seconds } from "../model/time";
 import type { Placed } from "./boxes";
-import { VISIBLE, add, fading, isGone, label, list, spoken, type Survey } from "./inspect-context";
+import {
+  VISIBLE,
+  add,
+  fading,
+  isGone,
+  label,
+  list,
+  shownBoxes,
+  spoken,
+  type Survey,
+} from "./inspect-context";
 import { flatAt } from "./inspect-visibility";
 import {
   area,
   countAt,
   countOf,
   inCount,
-  inside,
   movingAt,
   runsOf,
   sharedArea,
@@ -72,9 +81,7 @@ export const overlap = (survey: Survey): void => {
     { readonly a: Entry; readonly b: Entry; readonly times: Seconds[] }
   >();
 
-  survey.times.forEach((t, i) => {
-    const frame = survey.frames[i]!;
-
+  survey.frames.forEach(({ t, frame }) => {
     const up = texts.flatMap((entry) => {
       const at = frame.get(entry.node.key);
 
@@ -191,17 +198,6 @@ const overlapOf = (a: Box, b: Box): Vec | undefined => {
   return across > 0.5 && down > 0.5 ? [across, down] : undefined;
 };
 
-const boxesShown = (survey: Survey, entry: Entry): ReadonlyMap<Seconds, Box> =>
-  new Map(
-    survey.times.flatMap((t, i): [Seconds, Box][] => {
-      const at = survey.frames[i]!.get(entry.node.key);
-
-      return at && at.opacity > VISIBLE && !inside(survey.hidden.get(entry.node.key) ?? [], t)
-        ? [[t, at.box]]
-        : [];
-    }),
-  );
-
 export const layoutOverlap = (survey: Survey): void => {
   for (const entry of survey.entries) {
     const { node } = entry;
@@ -222,20 +218,25 @@ export const layoutOverlap = (survey: Survey): void => {
         (each) =>
           each.ancestors.at(-1) === node && !each.node.authored?.backdrop && !isGone(survey, each),
       )
-      .map((each) => ({ entry: each, boxes: boxesShown(survey, each) }));
+      .map((entry) => ({
+        entry,
+        boxes: new Map(shownBoxes(survey, entry).map(({ t, box }) => [t, box])),
+      }));
 
     children.forEach((a, i) => {
       for (const b of children.slice(i + 1)) {
         let most: Vec = [0, 0];
+        const times: Seconds[] = [];
 
-        const times = survey.times.filter((t) => {
+        for (const { t } of survey.frames) {
           const [x, y] = [a.boxes.get(t), b.boxes.get(t)];
           const by = x && y ? overlapOf(x, y) : undefined;
 
-          if (by && by[0] * by[1] > most[0] * most[1]) most = by;
+          if (!by) continue;
+          times.push(t);
 
-          return by !== undefined;
-        });
+          if (by[0] * by[1] > most[0] * most[1]) most = by;
+        }
 
         if (times.length === 0) continue;
         add(survey, {

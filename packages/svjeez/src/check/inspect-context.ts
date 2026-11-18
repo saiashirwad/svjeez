@@ -1,8 +1,15 @@
-import type { Scene, SceneNode, Source } from "../model/ir";
+import type { Box, Scene, SceneNode, Source } from "../model/ir";
 import { nodeName } from "../model/naming";
 import type { Seconds } from "../model/time";
-import type { Placed } from "./boxes";
-import { movingAt, seconds, textOf, type Entry, type Stretch } from "./survey";
+import {
+  inside,
+  movingAt,
+  seconds,
+  textOf,
+  type Entry,
+  type SampledFrame,
+  type Stretch,
+} from "./survey";
 
 export const RULES = {
   "compile-error": "The scene threw while it was built.",
@@ -52,10 +59,9 @@ export interface Survey {
   readonly scene: Scene;
   readonly entries: readonly Entry[];
   readonly sources: ReadonlyMap<string, Source>;
-  readonly times: readonly Seconds[];
-  readonly frames: readonly ReadonlyMap<string, Placed>[];
+  readonly frames: readonly SampledFrame[];
   readonly hidden: ReadonlyMap<string, readonly Stretch[]>;
-  readonly gone: Set<string>;
+  readonly gone: ReadonlySet<string>;
   readonly out: Finding[];
 }
 
@@ -67,6 +73,20 @@ export const spoken = (node: SceneNode, length = 40): string =>
     : `${label(node)} ("${short(textOf(node), length)}")`;
 
 export const VISIBLE = 0.05;
+
+export const shownBoxes = (
+  survey: Survey,
+  entry: Entry,
+): { readonly t: Seconds; readonly box: Box }[] => {
+  const { key } = entry.node;
+  const hidden = survey.hidden.get(key) ?? [];
+
+  return survey.frames.flatMap(({ t, frame }) => {
+    const at = frame.get(key);
+
+    return at && at.opacity > VISIBLE && !inside(hidden, t) ? [{ t, box: at.box }] : [];
+  });
+};
 
 export const add = (
   survey: Survey,

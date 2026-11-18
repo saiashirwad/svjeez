@@ -14,7 +14,7 @@ import {
   colorAt,
   countAt,
   countOf,
-  framesOf,
+  frameAt,
   inCount,
   inside,
   merged,
@@ -105,7 +105,7 @@ const gap = (
 
         if (!x || !y) return !same(a, b);
 
-        return x.some((c, i) => Math.abs(c - y[i]!) > 2 / 255);
+        return ([0, 1, 2, 3] as const).some((i) => Math.abs(x[i] - y[i]) > 2 / 255);
       });
 
       return changed
@@ -204,7 +204,7 @@ export const loopSeam = (survey: Survey): void => {
 
   if (!scene.loop || duration <= 0) return;
   const end = duration - Math.max(1e-6, duration * 1e-7);
-  const [first, last] = [framesOf(scene, [0])[0]!, framesOf(scene, [end])[0]!];
+  const [first, last] = [frameAt(scene, 0), frameAt(scene, end)];
   const seams = new Set<string>();
   const byKey = new Map(survey.entries.map((each) => [each.node.key, each.node]));
 

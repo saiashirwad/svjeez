@@ -232,11 +232,8 @@ export const describe = (scene: Scene, times: readonly Seconds[]): Description =
     .filter((entry) => !inCount(entry));
 
   const hidden = new Map(entries.map((entry) => [entry.node.key, unseenOf(entry, duration)]));
-  const placedAt = framesOf(scene, times);
 
-  const frames = times.map((t, i): DescribedFrame => {
-    const frame = placedAt[i]!;
-
+  const frames = framesOf(scene, times).map(({ t, frame }): DescribedFrame => {
     const shows = (entry: Entry): boolean => {
       const at = frame.get(entry.node.key);
 

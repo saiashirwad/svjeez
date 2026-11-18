@@ -91,17 +91,17 @@ const RANK: Readonly<Record<Severity, number>> = { error: 0, warning: 1, info: 2
 export const inspect = (scene: Scene, options: InspectOptions = {}): Finding[] => {
   const entries = entriesOf(scene);
   const times = momentsOf(scene, options.times);
+  const out: Finding[] = [];
 
-  const survey: Survey = {
+  const survey = {
     scene,
     entries,
     sources: sourcesOf(scene),
-    times,
     frames: framesOf(scene, times),
     hidden: new Map(entries.map((entry) => [entry.node.key, hiddenOf(entry, scene.duration)])),
-    gone: new Set(),
-    out: [],
-  };
+    gone: new Set<string>(),
+    out,
+  } satisfies Survey;
 
   neverVisible(survey);
   offCanvas(survey);
@@ -120,7 +120,7 @@ export const inspect = (scene: Scene, options: InspectOptions = {}): Finding[] =
 
   const order = new Map(entries.map((entry) => [entry.node.key, entry.order]));
 
-  return folded(survey.out, namesOf(scene))
+  return folded(out, namesOf(scene))
     .map((finding, index) => ({ finding, index }))
     .sort(
       (a, b) =>

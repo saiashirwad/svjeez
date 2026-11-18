@@ -85,8 +85,7 @@ export const lowContrast = (survey: Survey): void => {
     const low: Seconds[] = [];
     let need = 0;
 
-    survey.times.forEach((t, i) => {
-      const frame = survey.frames[i]!;
+    survey.frames.forEach(({ t, frame }) => {
       const at = frame.get(node.key);
 
       if (!at || at.opacity < 0.99 || fading(entry, t)) return;
@@ -121,8 +120,10 @@ export const lowContrast = (survey: Survey): void => {
             : [];
         });
 
-        if (by.length < 2) continue;
-        const [lo, hi] = by[0]!.value <= by[1]!.value ? [by[0]!, by[1]!] : [by[1]!, by[0]!];
+        const [first, second] = by;
+
+        if (!first || !second) continue;
+        const [lo, hi] = first.value <= second.value ? [first, second] : [second, first];
         const value = between(paint, t);
 
         if (!found || lo.value < found.ratio)

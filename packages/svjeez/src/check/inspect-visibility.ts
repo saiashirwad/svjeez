@@ -14,14 +14,13 @@ import { isLane } from "../model/lane";
 import { placed, reachOf } from "../model/reach";
 import type { Seconds } from "../model/time";
 import type { Placed } from "./boxes";
-import { VISIBLE, add, isGone, isLeaf, label, spoken, type Survey } from "./inspect-context";
+import { add, isGone, isLeaf, label, shownBoxes, spoken, type Survey } from "./inspect-context";
 import {
   SCHEMES,
   between,
   clearThroughout,
   colorAt,
   covers,
-  inside,
   isUpright,
   movingAt,
   ownHidden,
@@ -38,17 +37,7 @@ import {
   type Stretch,
 } from "./survey";
 
-const shown = (
-  survey: Survey,
-  entry: Entry,
-): { readonly t: Seconds; readonly placed: Placed; readonly box: Box }[] =>
-  survey.times.flatMap((t, i) => {
-    const at = survey.frames[i]!.get(entry.node.key);
-
-    return at && at.opacity > VISIBLE && !inside(survey.hidden.get(entry.node.key) ?? [], t)
-      ? [{ t, placed: at, box: at.box }]
-      : [];
-  });
+type VisibilitySurvey = Survey & { readonly gone: Set<string> };
 
 const flatAxes = (geometry: Geometry): readonly [across: boolean, down: boolean] => {
   switch (geometry.kind) {
@@ -153,7 +142,7 @@ const hiddenWhy = (survey: Survey, entry: Entry): string | undefined => {
   return "it and the groups around it are hidden at every time between them";
 };
 
-export const neverVisible = (survey: Survey): void => {
+export const neverVisible = (survey: VisibilitySurvey): void => {
   const { scene } = survey;
   const { duration } = scene;
 
@@ -265,7 +254,7 @@ const coverOf = (survey: Survey, entry: Entry): Cover | undefined => {
   if (!SCHEMES.every((scheme) => opaque(survey.scene, node.fill, scheme))) return undefined;
 
   if (![...entry.ancestors, node].every(isPlain)) return undefined;
-  const at = survey.frames[0]!.get(node.key);
+  const at = survey.frames[0]?.frame.get(node.key);
 
   if (!at || !isUpright(at.matrix) || at.matrix[0] <= 0 || at.matrix[3] <= 0) return undefined;
 
@@ -292,7 +281,7 @@ const hides = (cover: Box, radius: number, box: Box): boolean =>
   within(box, { ...cover, x: cover.x + radius, width: cover.width - radius * 2 }) ||
   within(box, { ...cover, y: cover.y + radius, height: cover.height - radius * 2 });
 
-const covered = (survey: Survey): void => {
+const covered = (survey: VisibilitySurvey): void => {
   const covers = survey.entries.flatMap((entry) => {
     const cover = coverOf(survey, entry);
 
@@ -341,7 +330,7 @@ const still = (boxes: readonly Box[]): boolean =>
 const clippedAround = (entry: Entry): boolean =>
   entry.ancestors.some((group) => group.clip !== undefined || group.mask !== undefined);
 
-export const offCanvas = (survey: Survey): void => {
+export const offCanvas = (survey: VisibilitySurvey): void => {
   const { size } = survey.scene;
   const [width, height] = size;
 
@@ -369,10 +358,11 @@ export const offCanvas = (survey: Survey): void => {
 
   for (const entry of survey.entries) {
     if (!isLeaf(entry) || isGone(survey, entry) || clippedAround(entry)) continue;
-    const seen = shown(survey, entry);
+    const seen = shownBoxes(survey, entry);
+    const [first] = seen;
 
-    if (seen.length === 0 || !still(seen.map((s) => s.box))) continue;
-    const { box } = seen[0]!;
+    if (!first || !still(seen.map((s) => s.box))) continue;
+    const { box } = first;
     const sides = past(box, size);
     const by = Math.max(...sides);
 
@@ -464,12 +454,16 @@ export const flatAt = (
     const [cx, cy] = [inner.x + inner.width / 2, inner.y + inner.height / 2];
     const [rx, ry] = [inner.width / 2, inner.height / 2];
 
-    const held = [
+    const corners: readonly Vec[] = [
       [box.x, box.y],
       [box.x + box.width, box.y],
       [box.x, box.y + box.height],
       [box.x + box.width, box.y + box.height],
-    ].every(([x, y]) => rx > 0 && ry > 0 && ((x! - cx) / rx) ** 2 + ((y! - cy) / ry) ** 2 <= 1);
+    ];
+
+    const held = corners.every(
+      ([x, y]) => rx > 0 && ry > 0 && ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1,
+    );
 
     return held ? flat : undefined;
   }
