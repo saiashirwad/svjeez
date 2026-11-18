@@ -1,4 +1,5 @@
 import { attributeName } from "./attributes";
+import type { Lane } from "./compile";
 import { isRef, type AnyRef } from "./defs";
 import type { Drawn, Part } from "./drawn";
 import { isFontValue, type FontValue } from "./font/font";
@@ -36,6 +37,8 @@ export type SvgNode =
       readonly attrs: Readonly<Record<string, AttrValue>>;
       readonly children: readonly SvgNode[];
       readonly motions: readonly Motion[];
+      /** Lanes already resolved and placed, from the scene model's SVG backend. They replace `motions`. */
+      readonly lanes?: readonly Lane[];
       readonly once?: boolean;
       readonly ambient?: boolean;
       readonly still?: Readonly<Record<string, AttrValue>>;

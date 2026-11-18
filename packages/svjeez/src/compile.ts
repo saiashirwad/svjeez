@@ -63,7 +63,7 @@ export interface Canvas {
   readonly loop: boolean;
 }
 
-interface Lane {
+export interface Lane {
   readonly key: string;
   readonly backend: Backend;
   readonly channels: readonly Target[];
@@ -817,12 +817,14 @@ const walk = (
       };
 
       const shells = veil(
-        node.motions.length > 0
-          ? placeLanes(
-              bare,
-              node.motions.map((value) => lanesOf(state, bare, value)),
-            )
-          : [],
+        node.lanes
+          ? [[...node.lanes]]
+          : node.motions.length > 0
+            ? placeLanes(
+                bare,
+                node.motions.map((value) => lanesOf(state, bare, value)),
+              )
+            : [],
         veiled,
       );
 

@@ -1,37 +1,47 @@
-import { ease, enter, motion, render, span, wiggle } from "svjeez";
-import { css, theme } from "../style";
+/** @jsxImportSource svjeez/scene */
+import {
+  Group,
+  Shape,
+  arc,
+  canvas,
+  circle,
+  enter,
+  scene,
+  span,
+  spin,
+  svg,
+  wiggle,
+} from "svjeez/scene";
+import { theme } from "../theme";
+
+const loops = scene(
+  {
+    size: [200, 120],
+    duration: 4,
+    title: "Loops and stacking",
+    desc: "A ring spins on a two second loop beside a dot that fades in and then wanders.",
+    theme,
+    reducedMotion: { at: 1 },
+  },
+  () => (
+    <Group>
+      <Shape geometry={canvas.rect} fill={theme.background} />
+      <Shape
+        geometry={arc({ radius: 24, sweep: 120 })}
+        at={[60, 60]}
+        stroke={{ color: theme.cyan, width: 5, cap: "round" }}
+        rotate={spin({ every: 2 })}
+      />
+      <Shape
+        geometry={circle(10)}
+        at={[140, 60]}
+        fill={theme.magenta}
+        motion={[enter(span(0, 0.6)), wiggle({ offset: [4, 4] }, { seed: "dot" })]}
+      />
+    </Group>
+  ),
+);
 
 export default function build(): string {
-  return render(
-    {
-      width: 200,
-      height: 120,
-      duration: 4,
-      title: "Loops and stacking",
-      desc: "A ring spins on a two second loop beside a dot that fades in and then wanders.",
-      css,
-      reducedMotion: { at: 1 },
-    },
-    <>
-      <rect width="100%" height="100%" fill={theme.base00} />
-      <g transform="translate(60 60)">
-        <circle
-          r={24}
-          fill="none"
-          stroke={theme.base0C}
-          strokeWidth={5}
-          strokeLinecap="round"
-          strokeDasharray="50 101"
-          animation={motion({ rotate: 0 }).to({ rotate: 360 }, span(0, 2), ease.linear).loop(2)}
-        />
-      </g>
-      <circle
-        cx={140}
-        cy={60}
-        r={10}
-        fill={theme.base0E}
-        animation={[enter({ at: 0, over: 0.6 }), wiggle({ x: 4, y: 4 }, { seed: "dot" })]}
-      />
-    </>,
-  );
+  return svg.emit(loops);
 }

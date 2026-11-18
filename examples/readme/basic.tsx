@@ -1,33 +1,46 @@
-import { draw, ease, enter, render } from "svjeez";
-import { css, theme } from "../style";
+/** @jsxImportSource svjeez/scene */
+import {
+  Group,
+  Shape,
+  canvas,
+  circle,
+  draw,
+  ease,
+  enter,
+  path,
+  scene,
+  span,
+  svg,
+} from "svjeez/scene";
+import { theme } from "../theme";
+
+const hello = scene(
+  {
+    size: [200, 120],
+    duration: 4,
+    title: "Hello",
+    desc: "A curve draws itself, then a dot pops in above it.",
+    theme,
+    reducedMotion: { at: 3 },
+  },
+  () => (
+    <Group>
+      <Shape geometry={canvas.rect} fill={theme.background} />
+      <Shape
+        geometry={path().moveTo([20, 100]).curveTo([60, 20], [140, 20], [180, 100])}
+        stroke={{ color: "#FF5FA8", width: 4 }}
+        trim={draw(span(0.2, 1.2))}
+      />
+      <Shape
+        geometry={circle(8)}
+        at={[100, 40]}
+        fill="#3EE6D6"
+        motion={enter(span(1.2, 0.5), { scale: 0 }, ease.pop)}
+      />
+    </Group>
+  ),
+);
 
 export default function build(): string {
-  return render(
-    {
-      width: 200,
-      height: 120,
-      duration: 4,
-      title: "Hello",
-      desc: "A curve draws itself, then a dot pops in above it.",
-      css,
-      reducedMotion: { at: 3 },
-    },
-    <>
-      <rect width="100%" height="100%" fill={theme.base00} />
-      <path
-        d="M20 100C60 20 140 20 180 100"
-        fill="none"
-        stroke="#FF5FA8"
-        strokeWidth={4}
-        animation={draw({ at: 0.2, over: 1.2 })}
-      />
-      <circle
-        cx={100}
-        cy={40}
-        r={8}
-        fill="#3EE6D6"
-        animation={enter({ at: 1.2, over: 0.5 }, { scale: 0 }, ease.pop)}
-      />
-    </>,
-  );
+  return svg.emit(hello);
 }

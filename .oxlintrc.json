@@ -36,7 +36,6 @@
         "allowInTypeGuards": true
       }
     ],
-    "anti-slop/no-shape-in-symbol-names": "error",
     "anti-slop/no-unknown-parameters": "error",
     "anti-slop/no-unknown-returns": "error",
     "anti-slop/no-unknown-type-aliases": "error",

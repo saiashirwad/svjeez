@@ -9,7 +9,7 @@ type Vec = readonly [number, number];
 
 type Cubic = readonly [Vec, Vec, Vec];
 
-interface Ring {
+export interface Ring {
   readonly start: Vec;
   readonly curves: readonly Cubic[];
   readonly closed: boolean;
@@ -215,6 +215,9 @@ const parse = (d: string): Ring[] => {
 
   return rings;
 };
+
+/** Path data as rings of cubic curves: every command, relative or not, written out. */
+export const ringsOf = (d: string): Ring[] => parse(d);
 
 const halve = (from: Vec, [c1, c2, to]: Cubic): [Cubic, Cubic] => {
   const a = lerp(from, c1, 0.5);
