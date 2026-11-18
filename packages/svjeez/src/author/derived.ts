@@ -48,6 +48,19 @@ export class Derived<T> {
 export const isDerived = <T>(value: Anim<T> | Anchor | undefined): value is Derived<T> =>
   value instanceof Derived;
 
+const startOf = (source: Base): Read =>
+  // SAFETY: a source track holds numbers or points, the values read() takes.
+  isTrack(source) ? (passageOf(source as Track<Read>).data.initial.value as Read) : source;
+
+/** The value an animated prop starts from, at the start of its clock. */
+export const restOf = <T>(value: Anim<T>): T => {
+  if (isTrack(value)) return passageOf(value).data.initial.value!;
+
+  if (!isDerived(value)) return value;
+
+  return value.read(value.sources.map(startOf));
+};
+
 const isDerivedSource = (source: Source): source is Derived<number> | Derived<Vec> =>
   source instanceof Derived;
 

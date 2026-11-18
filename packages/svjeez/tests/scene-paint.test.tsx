@@ -953,3 +953,57 @@ describe("subtract", () => {
     ).toThrow("never crosses itself");
   });
 });
+
+describe("one stroke, colors that move", () => {
+  test("a container's stroke is the same stroke a shape takes, width track and all", () => {
+    const model = made(() => (
+      <Stack
+        key="card"
+        padding={4}
+        fill="#ffffff"
+        stroke={{ color: "#000000", width: track(1).to(4, span(0, 1)) }}
+      >
+        <Shape geometry={rect(10, 10)} fill="#ff0000" />
+      </Stack>
+    ));
+
+    const card = only(model);
+    const back = card.kind === "group" ? card.children[0] : undefined;
+
+    expect(back?.kind === "shape" && isLane(back.stroke!.width)).toBe(true);
+  });
+
+  test("a shadow's color can move like its other values", () => {
+    const model = made(() => (
+      <Shape
+        geometry={rect(20, 20)}
+        fill="#ffffff"
+        effects={[
+          shadow({ color: track<`#${string}`>("#000000").to("#ff0000", span(0, 1)), blur: 4 }),
+        ]}
+      />
+    ));
+
+    const node = only(model);
+    const [effect] = node.effects;
+
+    expect(effect?.kind === "shadow" && isLane(effect.color)).toBe(true);
+    expect(emitted(model)).toContain("flood-color");
+  });
+
+  test("a morph blends a shadow's color between states", () => {
+    const card = (color: "#000000" | "#ff0000") => (
+      <Shape
+        key="c"
+        geometry={rect(20, 20)}
+        fill="#ffffff"
+        effects={[shadow({ color, blur: 4 })]}
+      />
+    );
+
+    const model = made(() => morph(card("#000000"), card("#ff0000"), span(0, 1)));
+    const [effect] = only(model).effects;
+
+    expect(effect?.kind === "shadow" && isLane(effect.color)).toBe(true);
+  });
+});

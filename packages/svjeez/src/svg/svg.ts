@@ -25,6 +25,7 @@ import type {
   Rgba,
   SceneNode,
   ShapeNode,
+  Stroke,
   TextNode,
   TextRun,
   Vec,
@@ -555,6 +556,33 @@ const noDashLeft = (node: ShapeNode): boolean =>
   !isLane(node.geometry) &&
   trimmedDash(node.stroke.dash, lengthOf(node.geometry), node.trim) === undefined;
 
+const strokeAttrs = (
+  ctx: Ctx,
+  stroke: Stroke | undefined,
+  attrs: Record<string, AttrValue>,
+  lanes: CssLane[],
+  shift: Vec,
+  key: string,
+): void => {
+  painted(ctx, "stroke", stroke?.color, attrs, lanes, shift, key);
+
+  if (!stroke) return;
+  const width = isLane(stroke.width) ? stroke.width.keys[0].value : stroke.width;
+
+  if (isLane(stroke.width))
+    lanes.push(cssLane(ctx, "stroke-width", stroke.width, (value) => ({ strokeWidth: value })));
+
+  if (width !== 1) attrs["stroke-width"] = num(width);
+
+  if (stroke.cap !== "butt") attrs["stroke-linecap"] = stroke.cap;
+
+  if (stroke.join !== "miter") attrs["stroke-linejoin"] = stroke.join;
+
+  if (stroke.dash) attrs["stroke-dasharray"] = stroke.dash.map((n) => num(n)).join(" ");
+
+  if (stroke.nonScaling) attrs["vector-effect"] = "non-scaling-stroke";
+};
+
 const stroked = (
   ctx: Ctx,
   node: ShapeNode,
@@ -565,24 +593,7 @@ const stroked = (
   const { trim } = node;
   const stroke = emptyTrim(trim) || noDashLeft(node) ? undefined : node.stroke;
 
-  painted(ctx, "stroke", stroke?.color, attrs, lanes, shift, node.key);
-
-  if (stroke) {
-    const width = isLane(stroke.width) ? stroke.width.keys[0].value : stroke.width;
-
-    if (isLane(stroke.width))
-      lanes.push(cssLane(ctx, "stroke-width", stroke.width, (value) => ({ strokeWidth: value })));
-
-    if (width !== 1) attrs["stroke-width"] = num(width);
-
-    if (stroke.cap !== "butt") attrs["stroke-linecap"] = stroke.cap;
-
-    if (stroke.join !== "miter") attrs["stroke-linejoin"] = stroke.join;
-
-    if (stroke.dash) attrs["stroke-dasharray"] = stroke.dash.map((n) => num(n)).join(" ");
-
-    if (stroke.nonScaling) attrs["vector-effect"] = "non-scaling-stroke";
-  }
+  strokeAttrs(ctx, stroke, attrs, lanes, shift, node.key);
 
   if (trim === undefined || !stroke) return;
 
@@ -764,6 +775,11 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
 
     if (base.opacity !== undefined) opacity(base, drawn.attrs, lanes);
   } else drawn.attrs.fill = "none";
+
+  if (node.stroke) {
+    strokeAttrs(ctx, node.stroke, drawn.attrs, lanes, at, node.key);
+    drawn.attrs["paint-order"] = "stroke";
+  }
 
   if (single)
     return { drawn, children: line?.runs[0] ? [{ kind: "text", value: line.runs[0].text }] : [] };

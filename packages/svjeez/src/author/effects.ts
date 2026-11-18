@@ -8,14 +8,14 @@ export type Effect =
       readonly kind: "shadow";
       readonly offset: Anim<Vec>;
       readonly blur: Anim<number>;
-      readonly color: Color;
+      readonly color: Anim<Color>;
       readonly opacity: Anim<number>;
     };
 
 export const blur = (radius: Anim<number>): Effect => ({ kind: "blur", radius });
 
 export interface ShadowOptions {
-  readonly color: Color;
+  readonly color: Anim<Color>;
   readonly offset?: Anim<Vec>;
   readonly blur?: Anim<number>;
   readonly opacity?: Anim<number>;

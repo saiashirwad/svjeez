@@ -48,13 +48,9 @@ export interface Bounds extends Box {
 
 export type Radius = number | readonly [number, number, number, number];
 
-export interface ContainerStroke extends Omit<StrokeProps, "width" | "nonScaling"> {
-  readonly width?: number;
-}
-
 export interface Backdrop {
   readonly fill?: Anim<Paint>;
-  readonly stroke?: ContainerStroke;
+  readonly stroke?: StrokeProps;
   readonly radius?: Radius;
 }
 
@@ -91,8 +87,9 @@ export interface TextProps extends Omit<Common, "anchor"> {
   readonly font: FontValue;
   readonly weight?: number;
   readonly italic?: boolean;
-  readonly size: number;
+  readonly size: Anim<number>;
   readonly fill?: Anim<Paint>;
+  readonly stroke?: StrokeProps;
   readonly align?: "start" | "center" | "end";
   readonly width?: number;
   readonly lineHeight?: number;

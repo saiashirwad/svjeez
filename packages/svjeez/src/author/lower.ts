@@ -11,6 +11,7 @@ import type {
   Animated,
   Box,
   Color,
+  Stroke,
   Geometry as Outline,
   GroupNode,
   ImageNode,
@@ -27,7 +28,7 @@ import type {
   TokenValue,
   Vec,
 } from "../model/ir";
-import { atRest, isLane, pair } from "../model/lane";
+import { atRest, isLane, mapLane, pair } from "../model/lane";
 import { morphed, type MorphElement } from "./morph";
 import {
   flat,
@@ -42,6 +43,7 @@ import {
   type SceneElement,
   type SceneSymbol,
   type ShapeProps,
+  type StrokeProps,
   type TextProps,
 } from "./nodes";
 import { declaring, isAnchor, type Anchor } from "./refs";
@@ -64,13 +66,14 @@ import {
   mapped,
   mixNumber,
   mixVec,
+  noMix,
   same,
   touches,
   type Mix,
   type Timing,
 } from "../model/steps";
 import { isTrack, layersOf, passageOf, type Anim, type LayerMotion } from "./track";
-import { derivedOf, isDerived } from "./derived";
+import { derivedOf, isDerived, restOf } from "./derived";
 import { collect, type Cues, type NodeElement } from "./verbs";
 import {
   outlineOf,
@@ -269,14 +272,7 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
       `${what} on ${where}`,
     );
 
-  const stroke = written && {
-    color: painted(written.color, "stroke"),
-    width: animated(written.width ?? 1, keep, timing, mixNumber, `stroke width on ${where}`),
-    cap: written.cap ?? "butt",
-    join: written.join ?? "miter",
-    ...(written.dash && { dash: written.dash }),
-    nonScaling: written.nonScaling ?? false,
-  };
+  const stroke = written && strokeOf(ctx, written, timing, where, outline);
 
   const trim =
     props.trim === undefined
@@ -295,8 +291,69 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
   };
 };
 
+const strokeOf = (
+  ctx: Ctx,
+  written: StrokeProps,
+  timing: Timing,
+  where: string,
+  box: Box,
+): Stroke => ({
+  color: blendable(
+    animated(
+      written.color,
+      (value: Paint) => colorOf(ctx, value, where, box),
+      timing,
+      mixPaint,
+      `stroke on ${where}`,
+    ),
+    `stroke on ${where}`,
+  ),
+  width: animated(written.width ?? 1, keep, timing, mixNumber, `stroke width on ${where}`),
+  cap: written.cap ?? "butt",
+  join: written.join ?? "miter",
+  ...(written.dash && { dash: written.dash }),
+  nonScaling: written.nonScaling ?? false,
+});
+
+/** An animated size lays the text out at the size it starts at, and scales it from its anchor. */
+const grownBy = (
+  given: TextProps["size"],
+  size: number,
+  timing: Timing,
+  where: string,
+): ((node: SceneNode, home: Vec) => SceneNode) => {
+  const lane = animated(given, keep, timing, mixNumber, `size on ${where}`);
+
+  if (!isLane(lane)) return (node) => node;
+
+  if (lane.keys.some((each) => !(each.value >= 0)))
+    throw new SceneError(`${where} needs a size of 0 or more at every time.`);
+
+  return (node, [x, y]) => {
+    const [hx, hy] = [x - node.origin[0], y - node.origin[1]];
+    const share = (value: number): number => value / size;
+
+    const layer: Layer = {
+      offset: mapLane(lane, (value): Vec => [(1 - share(value)) * hx, (1 - share(value)) * hy]),
+      rotate: 0,
+      scale: mapLane(lane, (value): Vec => [share(value), share(value)]),
+      opacity: 1,
+    };
+
+    return { ...node, layers: [...node.layers, layer] };
+  };
+};
+
 const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNode => {
   const where = named(key);
+  const size = restOf(props.size);
+
+  if (!(size > 0 && Number.isFinite(size)))
+    throw new SceneError(
+      `${where} needs a size above 0 at the start, got ${size}.`,
+      "To grow text in from nothing, start from its size and scale it in with motion={enter(…, { from: { scale: 0 } })}.",
+    );
+  const grown = grownBy(props.size, size, timing, where);
   const counting = countingIn(props.children, where);
 
   const own: Asked = {
@@ -394,7 +451,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
         where,
         font: look.font,
         face: look.face,
-        size: props.size,
+        size,
         align: props.align ?? "start",
         fill: look.fill,
       },
@@ -402,15 +459,23 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
       ticks,
     );
 
+    const home = pinned(props.anchor, box, where, baseline);
+
+    const stroke =
+      props.stroke && strokeOf(ctx, { join: "round", ...props.stroke }, timing, where, box);
+
     return {
-      node: {
-        ...base(props, box, key, timing, pinned(props.anchor, box, where, baseline)),
-        authored: {
-          count: { ticks: ticks.map(({ t, text }) => ({ t, text: before + text + after })) },
+      node: grown(
+        {
+          ...base(props, box, key, timing, home),
+          authored: {
+            count: { ticks: ticks.map(({ t, text }) => ({ t, text: before + text + after })) },
+          },
+          kind: "group",
+          children: [stroke ? stroked(node, stroke) : node],
         },
-        kind: "group",
-        children: [node],
-      },
+        home,
+      ),
     };
   })();
 
@@ -450,7 +515,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     faceOf(props.font, props.weight, props.italic, where),
     pieces,
     {
-      size: props.size,
+      size,
       ...(props.width !== undefined && { width: props.width }),
       ...(props.lineHeight !== undefined && { lineHeight: props.lineHeight }),
       ...(props.align !== undefined && { align: props.align }),
@@ -468,25 +533,40 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     return known;
   };
 
-  return {
-    ...base(props, box, key, timing, pinned(props.anchor, box, where, lines[0]?.at[1] ?? 0)),
-    ...(props.width !== undefined && { authored: { wrap: { width: props.width, cuts } } }),
-    kind: "text",
-    size: props.size,
-    lines: lines.map((line): TextLine => ({
-      at: line.at,
-      runs: line.runs.map(({ text: words, at, advances, outline, style }): TextRun => ({
-        text: words,
-        at,
-        advances,
-        face: style.face,
-        fill: fillOf(style),
-        ...(style.opacity !== undefined && { opacity: style.opacity }),
-        ...(outline && { outline }),
+  const home = pinned(props.anchor, box, where, lines[0]?.at[1] ?? 0);
+
+  return grown(
+    {
+      ...base(props, box, key, timing, home),
+      ...(props.width !== undefined && { authored: { wrap: { width: props.width, cuts } } }),
+      kind: "text",
+      size,
+      ...(props.stroke && {
+        stroke: strokeOf(ctx, { join: "round", ...props.stroke }, timing, where, box),
+      }),
+      lines: lines.map((line): TextLine => ({
+        at: line.at,
+        runs: line.runs.map(({ text: words, at, advances, outline, style }): TextRun => ({
+          text: words,
+          at,
+          advances,
+          face: style.face,
+          fill: fillOf(style),
+          ...(style.opacity !== undefined && { opacity: style.opacity }),
+          ...(outline && { outline }),
+        })),
       })),
-    })),
-  };
+    },
+    home,
+  );
 };
+
+const stroked = (node: SceneNode, stroke: Stroke): SceneNode =>
+  node.kind === "text"
+    ? { ...node, stroke }
+    : node.kind === "group"
+      ? { ...node, children: node.children.map((child) => stroked(child, stroke)) }
+      : node;
 
 const image = (props: ImageProps, key: string, timing: Timing): ImageNode => {
   const { src } = props;
@@ -874,7 +954,13 @@ const effectOf = (ctx: Ctx, effect: EffectProps, timing: Timing, where: string):
     kind: "shadow",
     offset: animated<Vec, Vec>(effect.offset, keep, timing, mixVec, `shadow offset on ${where}`),
     blur: lengthOf(effect.blur, timing, `shadow blur on ${where}`),
-    color: solidOf(ctx, effect.color, `shadow on ${where}`),
+    color: animated<Hex | Token, Color>(
+      effect.color,
+      (value) => solidOf(ctx, value, `shadow on ${where}`),
+      timing,
+      noMix,
+      `shadow color on ${where}`,
+    ),
     opacity,
   };
 };
@@ -980,7 +1066,7 @@ const backdropOf = (
   timing: Timing,
 ): BackdropOf | undefined => {
   if (fill === undefined && stroke === undefined) return undefined;
-  const line = stroke === undefined ? 0 : (stroke.width ?? 1);
+  const line = stroke === undefined ? 0 : restOf(stroke.width ?? 1);
 
   return (box) => ({
     ...shape(

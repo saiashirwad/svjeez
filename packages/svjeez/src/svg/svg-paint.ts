@@ -254,7 +254,7 @@ const idle = (effect: Effect): boolean =>
   effect.kind === "blur"
     ? !isLane(effect.radius) && effect.radius <= 0
     : (!isLane(effect.opacity) && effect.opacity <= 0) ||
-      (isRgba(effect.color) && effect.color[3] <= 0);
+      (!isLane(effect.color) && isRgba(effect.color) && effect.color[3] <= 0);
 
 export const working = (effects: readonly Effect[]): Effect[] =>
   effects.filter((effect) => !idle(effect));
@@ -307,7 +307,7 @@ export const filterUrl = (
           ? []
           : [["flood-opacity", opacity] as const]),
       ],
-      flood: colorText(effect.color),
+      flood: effect.color,
     };
   });
 
@@ -325,19 +325,37 @@ export const filterUrl = (
         ...box(region),
         "color-interpolation-filters": "sRGB",
       },
-      primitives.map(({ tag, numbers, flood }) =>
-        element(
-          tag,
-          {
-            ...Object.fromEntries(numbers.map(([name, written]) => [name, pick(written, still)])),
-            ...(flood !== undefined && { "flood-color": flood }),
-          },
-          children(
-            numbers.map(([, written]) => written),
-            still,
+      primitives
+        .map(({ tag, numbers, flood }) =>
+          element(
+            tag,
+            {
+              ...Object.fromEntries(numbers.map(([name, written]) => [name, pick(written, still)])),
+              ...(flood !== undefined && { "flood-color": colorText(atRest(flood)) }),
+            },
+            children(
+              numbers.map(([, written]) => written),
+              still,
+            ),
           ),
-        ),
-      ),
+        )
+        .map((primitive, i) => {
+          const flood = primitives[i]!.flood;
+
+          return flood !== undefined && isLane(flood)
+            ? {
+                ...primitive,
+                lanes: [
+                  defs.lane(
+                    "flood-color",
+                    flood,
+                    (value) => ({ floodColor: colorText(value) }),
+                    "css",
+                  ),
+                ],
+              }
+            : primitive;
+        }),
     ),
   }));
 

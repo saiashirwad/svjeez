@@ -25,7 +25,16 @@ import type {
 import { isLane, pair } from "../model/lane";
 import { flat, type Child, type SceneElement } from "./nodes";
 import { ease, isSpring, type Curve } from "./spring";
-import { Passage, laneOf, mixNumber, mixVec, same, type Mix, type Timing } from "../model/steps";
+import {
+  Passage,
+  laneOf,
+  mixNumber,
+  mixVec,
+  noMix,
+  same,
+  type Mix,
+  type Timing,
+} from "../model/steps";
 import { blendable, isGradient, mixPaint } from "./paint";
 import type { LayerValues } from "./track";
 
@@ -480,14 +489,13 @@ const effectsOf = (plan: Plan, entry: Entry): Effect[] => {
         mixNumber,
         what("shadow blur"),
       ),
-      color: agreed(
+      color: blend(
+        plan,
         entry,
-        (node) => {
-          const own = node.effects[i];
-
-          return own?.kind === "shadow" ? own.color : effect.color;
-        },
-        "shadow color",
+        shadows.map((each) => each.color),
+        noMix,
+        what("shadow color"),
+        paintCurve(plan),
       ),
       opacity: blend(
         plan,
@@ -618,8 +626,12 @@ const outlinesOf = (
   return blend(plan, entry, outlines, geometryMix(outlines[0]!), what);
 };
 
-const strokeOf = (plan: Plan, entry: Entry, shapes: readonly ShapeNode[]): Stroke | undefined => {
-  const strokes = shapes.map((node) => node.stroke);
+const strokeOf = (
+  plan: Plan,
+  entry: Entry,
+  nodes: readonly (ShapeNode | TextNode)[],
+): Stroke | undefined => {
+  const strokes = nodes.map((node) => node.stroke);
   const given = strokes.find((stroke) => stroke !== undefined);
 
   if (!given) return undefined;
@@ -742,11 +754,13 @@ const textOf = (plan: Plan, entry: Entry): TextNode | GroupNode => {
 
   if (texts.every((node) => wording(node) === wording(texts[0]!))) {
     const rest = texts[0]!;
+    const stroke = strokeOf(plan, entry, texts);
 
     return {
       ...placed(plan, entry),
       kind: "text",
       size: rest.size,
+      ...(stroke && { stroke }),
       lines: blendedLines(plan, entry, texts),
     };
   }
@@ -783,6 +797,7 @@ const textOf = (plan: Plan, entry: Entry): TextNode | GroupNode => {
       layers: shown ? [shown] : [],
       effects: [],
       size: own.size,
+      ...(own.stroke && { stroke: own.stroke }),
       lines: blendedLines(local, part, filled),
     };
   });

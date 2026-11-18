@@ -34,6 +34,7 @@ const CHANNELS = {
   fillOpacity: { value: number },
   stroke: { value: color },
   stopColor: { value: color },
+  floodColor: { value: color },
   stdDeviation: { value: number },
   dx: { value: number },
   dy: { value: number },

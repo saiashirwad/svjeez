@@ -2,6 +2,7 @@ import { SceneError } from "../model/scene-error";
 import type { Box, Vec } from "../model/ir";
 import { EPSILON } from "../model/time";
 import { flat, type Backdrop, type Child, type Common, type SceneElement } from "./nodes";
+import { restOf } from "./derived";
 import { Anchor, canvasAnchor, fractionOf, placeIn, Ref, type Place } from "./refs";
 import type { Arrange, Size } from "./settle";
 
@@ -54,7 +55,7 @@ const size = (value: number | undefined, what: string): number | undefined => {
 
 const paint = (label: string, { fill, stroke, radius }: Backdrop, padding: number | Vec) => {
   const [px, py] = room(padding, `${label} padding`);
-  const line = stroke === undefined ? 0 : (stroke.width ?? 1);
+  const line = stroke === undefined ? 0 : restOf(stroke.width ?? 1);
 
   if (!(line >= 0 && Number.isFinite(line)))
     throw new SceneError(`${label} needs a stroke width of 0 or more, got ${line}.`);

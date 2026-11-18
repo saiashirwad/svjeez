@@ -149,7 +149,7 @@ export type Effect =
       readonly kind: "shadow";
       readonly offset: Animated<Vec>;
       readonly blur: Animated<number>;
-      readonly color: Color;
+      readonly color: Animated<Color>;
       readonly opacity: Animated<number>;
     };
 
@@ -210,6 +210,7 @@ export interface TextLine {
 export interface TextNode extends Base {
   readonly kind: "text";
   readonly size: number;
+  readonly stroke?: Stroke;
   readonly lines: readonly TextLine[];
 }
 

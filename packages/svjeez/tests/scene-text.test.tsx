@@ -1,5 +1,17 @@
 import { describe, expect, test } from "bun:test";
-import { font, Group, Run, Text, morph, scene, span, track, type SceneElement } from "svjeez";
+import {
+  ease,
+  font,
+  Group,
+  Run,
+  Text,
+  morph,
+  ref,
+  scene,
+  span,
+  track,
+  type SceneElement,
+} from "svjeez";
 import { boxesOf, diagnose, isLane, svg, type Model } from "svjeez/tools";
 
 const fixture = (name: string) => new URL(`./fixtures/${name}.ttf`, import.meta.url);
@@ -524,5 +536,72 @@ describe("morph", () => {
       "text",
       "text",
     ]);
+  });
+});
+
+describe("text strokes and animated size", () => {
+  test("a stroke on text draws under its fill, and a verb can change it", () => {
+    const model = made(() => {
+      const label = ref("t");
+
+      label.to({ stroke: { color: "#ff0000", width: 3 } }, span(1, 1));
+
+      return (
+        <Text
+          ref={label}
+          font={space}
+          size={20}
+          fill="#000000"
+          stroke={{ color: "#ffffff", width: 2 }}
+        >
+          Hi
+        </Text>
+      );
+    });
+
+    const node = textOf(model);
+
+    expect(isLane(node.stroke!.color)).toBe(true);
+    expect(isLane(node.stroke!.width)).toBe(true);
+
+    const out = emit(model);
+
+    expect(out).toContain('paint-order="stroke"');
+    expect(out).toContain('stroke-width="2"');
+  });
+
+  test("an animated size lays out at the size it starts at and grows from its anchor", () => {
+    const model = made(() => (
+      <Text
+        key="t"
+        font={space}
+        size={track(10).to(20, span(0, 1), ease.linear)}
+        fill="#000000"
+        at={[50, 50]}
+        anchor="bottom-left"
+      >
+        Hi
+      </Text>
+    ));
+
+    const node = textOf(model);
+
+    expect(node.size).toBe(10);
+
+    const [start, end] = [boxesOf(model, 0)["t"]!, boxesOf(model, 1)["t"]!];
+
+    expect(end.width).toBeCloseTo(start.width * 2, 3);
+    expect(end.x).toBeCloseTo(start.x, 3);
+    expect(end.y + end.height).toBeCloseTo(start.y + start.height, 3);
+  });
+
+  test("a size that starts at 0 says to scale the text in instead", () => {
+    expect(() =>
+      made(() => (
+        <Text font={space} size={track(0).to(20, span(0, 1))} fill="#000000">
+          Hi
+        </Text>
+      )),
+    ).toThrow("needs a size above 0 at the start, got 0.");
   });
 });

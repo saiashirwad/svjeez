@@ -244,8 +244,8 @@ const KINDS: Readonly<Record<Prop, readonly NodeElement["type"][]>> = {
   scale: FOR_ALL,
   opacity: FOR_ALL,
   fill: ["shape", "text", "group"],
-  stroke: ["shape", "group"],
-  strokeWidth: ["shape"],
+  stroke: ["shape", "text", "group"],
+  strokeWidth: ["shape", "text", "group"],
   trim: ["shape"],
   geometry: ["shape"],
 };
@@ -275,14 +275,19 @@ const writtenOf = (el: NodeElement, prop: Prop): Written => {
         ? el.props.fill
         : undefined;
     case "stroke":
-      return el.type === "shape" || el.type === "group" ? el.props.stroke?.color : undefined;
+      return stroking(el) ? el.props.stroke?.color : undefined;
     case "strokeWidth":
-      return el.type === "shape" ? el.props.stroke?.width : undefined;
+      return stroking(el) ? el.props.stroke?.width : undefined;
     case "trim":
     case "geometry":
       return el.type === "shape" ? el.props[prop] : undefined;
   }
 };
+
+const stroking = (
+  el: NodeElement,
+): el is NodeElement & { readonly type: "shape" | "text" | "group" } =>
+  el.type === "shape" || el.type === "text" || el.type === "group";
 
 const framed = (el: NodeElement): el is NodeElement & { readonly type: "group" | "instance" } =>
   (el.type === "group" || el.type === "instance") && el.props.offset !== undefined;
@@ -519,11 +524,7 @@ export class Cues {
           : `${verb} changes the stroke of ${named(key)}, which has none. Give it stroke={{ color: … }}.`,
       );
 
-    if (
-      (prop === "stroke" || prop === "strokeWidth") &&
-      (el.type === "shape" || el.type === "group") &&
-      !el.props.stroke
-    )
+    if ((prop === "stroke" || prop === "strokeWidth") && stroking(el) && !el.props.stroke)
       throw new SceneError(
         `${verb} changes the stroke of ${named(key)}, which has none. Give it stroke={{ color: … }}.`,
       );
@@ -647,7 +648,7 @@ const withTracks = (el: NodeElement, tracks: ReadonlyMap<Prop, Track<Value>>): N
   const width = tracks.get("strokeWidth");
 
   const stroke =
-    (el.type === "shape" || el.type === "group") && el.props.stroke && (color || width)
+    stroking(el) && el.props.stroke && (color || width)
       ? { stroke: { ...el.props.stroke, ...(color && { color }), ...(width && { width }) } }
       : undefined;
 
