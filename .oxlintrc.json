@@ -1,6 +1,8 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "ignorePatterns": [
+    "packages/icons/src/lucide.ts",
+    "packages/icons/src/tabler.ts",
     ".claude/**",
     ".opencode/**",
     ".preview/**",

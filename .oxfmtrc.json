@@ -3,6 +3,8 @@
   "embeddedLanguageFormatting": "off",
   "proseWrap": "preserve",
   "ignorePatterns": [
+    "packages/icons/src/lucide.ts",
+    "packages/icons/src/tabler.ts",
     ".claude/**",
     ".opencode/**",
     ".preview/**",
