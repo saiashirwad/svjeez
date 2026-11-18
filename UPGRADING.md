@@ -1,13 +1,14 @@
 # Upgrading from 0.7 to next (0.8.0-next)
 
-`next` replaces the authoring API with the scene model. Nothing from 0.7's root carries over unchanged, so port a scene rather than patch it. Install with `npm i svjeez@next`, along with `@svjeez/fonts@next`, `@svjeez/icons@next`, `@svjeez/charts@next`, `@svjeez/code@next`, `@svjeez/dom@next`, `@svjeez/geo@next`, `@svjeez/video@next`, `@svjeez/vite@next` or `@svjeez/astro@next` if you use them.
+`next` replaces the authoring API with the scene model. Nothing from 0.7's root carries over unchanged, so port a scene rather than patch it. Install with `npm i svjeez@next`, along with `@svjeez/fonts@next`, `@svjeez/icons@next`, `@svjeez/charts@next`, `@svjeez/code@next`, `@svjeez/dom@next`, `@svjeez/geo@next`, `@svjeez/math@next`, `@svjeez/video@next`, `@svjeez/vite@next` or `@svjeez/astro@next` if you use them.
 
 - **One import.** The scene model moved to the root: what came from its subpath now comes from `svjeez`, and its tools subpath is `svjeez/tools`. `"jsxImportSource": "svjeez"` builds scene nodes, so drop the scene pragmas.
 - **No SVG tags.** JSX holds components (`<Shape>`, `<Text>`, `<Group>`, `<Stack>`, `<Grid>`, `<Align>`, `<Arrow>`, `<Image>`, `<Sequence>`). `render(options, <svg JSX/>)` becomes `export default scene({ size: [w, h], duration, title }, () => …)`.
 - **Time.** `motion()` chains, `animation={…}`, `<Clip>`, `<Once>`, `<Ambient>`, `<Pivot>` and `show()` are gone. Animate a prop with a `track`, a node with a `motion` layer or a recipe (`enter`, `exit`, `draw`, `wiggle`, `shake`, `spin`, `sampled`), and sequence refs with `timeline()`.
 - **Removed outright.** `def`, `css`, `fx`, `Picture` (use `<Image src={picture(…)}>`), `Glyphs`, `Icon`, ink, the extras (`code`, `terminal`, callouts, themes; use `tokens()`), `Drawn`, `valuesAt`, `svjeez/geometry` and the public `render()`. A module may still default-export an SVG string.
-- **Packages.** diagrams, math, mermaid, live, react and svelte stay on 0.7 until they are ported. The CLI's `values` and `set` are gone with the editor.
+- **Packages.** diagrams, mermaid, live, react and svelte stay on 0.7 until they are ported. The CLI's `values` and `set` are gone with the editor.
 - **@svjeez/geo.** `project(data, { size })` draws from `[0, 0]` and returns geometry for `<Shape>`: `land`, `borders` (shared edges only; 0.7's `lines`), `sphere`, `graticule()`, `shape()` (0.7's `path()`), `route()`, `point()`, `dots()`, and `regions`/`region()` with `geometry`, `center` and `box`. `globe(data, { radius, facing, turn: { by, over } })` replaces `globe(span, data, { frame, tilt, spin })`: it is drawn around `[0, 0]`, and `<GlobeShape of={earth.land}>` draws what turns. `choropleth`, `cartogram`, `toBars`, `traffic`, `arc`, `reproject`, `trueSize`, the color scales and `legend` are gone: fill each region yourself, and morph a region's geometry with a track.
+- **@svjeez/math.** `tex()` is `<Tex>`, `plane()` returns geometry, and `construct()` is a set of point functions (see its reference).
 - **restyle.** `onceAt` is gone, and a scene with a morph, a geometry that changes size or an animated effect can't follow a `timeline`.
 
 # Upgrading svjeez from 0.5 or 0.6 to 0.7

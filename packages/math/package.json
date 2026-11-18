@@ -1,0 +1,36 @@
+{
+  "name": "@svjeez/math",
+  "version": "0.8.0-next.0",
+  "private": true,
+  "description": "TeX, plots, constructions and transformations for svjeez: formulas typeset to glyph outlines while the scene builds, ready for morph() and refs.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/math"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "bun test --conditions @svjeez/source",
+    "typecheck": "tsc --noEmit",
+    "build:package": "bun ../../scripts/package-plugin.ts",
+    "test:package": "bun ../../scripts/package-plugin-check.ts"
+  },
+  "dependencies": {
+    "mathjax-full": "3.2.2"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "svjeez": "workspace:*",
+    "typescript": "latest"
+  },
+  "peerDependencies": {
+    "svjeez": "workspace:^"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
