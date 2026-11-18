@@ -1,36 +1,56 @@
+/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
-import { def, font, fx, motion, render, span } from "svjeez";
 import { validateSvg } from "svjeez/frames";
+import {
+  Group,
+  Shape,
+  Text,
+  blur,
+  circle,
+  ease,
+  font,
+  linear,
+  motion,
+  rect,
+  scene,
+  span,
+  track,
+} from "svjeez/scene";
+import { svg } from "svjeez/scene/tools";
 
-const scene = (prefix?: string) =>
-  render(
-    {
-      width: 100,
-      height: 100,
-      duration: 4,
-      title: "P",
-      desc: "D",
-      prefix,
-      reducedMotion: { at: 1 },
-    },
-    <>
-      <rect
-        width={10}
-        height={10}
-        fill={def.linearGradient({}, [<stop offset={0} stopColor="#fff" />])}
-        animation={motion({ opacity: 0, rotate: 0 }).to({ opacity: 1, rotate: 90 }, span(1, 1))}
+const model = scene(
+  { size: [100, 100], duration: 4, title: "P", desc: "D", reducedMotion: 1 },
+  () => (
+    <Group>
+      <Shape
+        geometry={rect(10, 10)}
+        fill={linear({ from: [0, 0], to: [10, 0], stops: ["#FFFFFF", "#000000"] })}
+        motion={motion({ opacity: 0, rotate: 0 }).to({ opacity: 1, rotate: 90 }, span(1, 1))}
       />
-      <circle r={4} animation={motion({ blur: 0 }).to({ blur: 4 }, span(2, 1))} />
-      <circle r={4} animation={motion({ scale: 1 }).to({ scale: 2 }, span(2, 1))} />
-    </>,
-  );
+      <Shape
+        geometry={circle(4)}
+        fill="#000000"
+        effects={[blur(track(0).to(4, span(2, 1), ease.linear))]}
+      />
+      <Shape
+        geometry={circle(4)}
+        fill="#000000"
+        motion={motion({ scale: 1 }).to({ scale: 2 }, span(2, 1))}
+      />
+    </Group>
+  ),
+);
 
-const names = (svg: string) => {
-  const source = svg.replace(/xmlns="[^"]*"/, "");
+const emit = (prefix?: string) => svg.emit(model, prefix === undefined ? {} : { prefix });
+
+const names = (out: string) => {
+  const source = out.replace(/xmlns="[^"]*"/, "");
   const classes = [...source.matchAll(/class="([^"]*)"/g)].flatMap((match) => match[1]!.split(" "));
 
   const others = [
-    ...source.matchAll(/(?:id="|url\(#|href="#|@keyframes |(?<![\w-])\.)([A-Za-z][\w-]*)/g),
+    ...source.matchAll(
+      /(?:id="|url\(#|href="#|@keyframes |(?<![\w-])\.|begin="[\d.]+s;)([A-Za-z][\w-]*)/g,
+    ),
   ].map((match) => match[1]!);
 
   const animationNames = [...source.matchAll(/animation-name:([^;}]*)/g)].flatMap((match) =>
@@ -42,11 +62,12 @@ const names = (svg: string) => {
 
 describe("prefix", () => {
   test("an empty prefix changes nothing", () => {
-    expect(scene("")).toBe(scene());
+    expect(emit("")).toBe(emit());
   });
 
   test("two scenes with different prefixes share no generated identifier", () => {
-    const [a, b] = [scene("one-"), scene("two-")];
+    const [a, b] = [emit("one-"), emit("two-")];
+
     expect([...names(a)].filter((name) => names(b).has(name))).toEqual([]);
     expect(a).toContain('id="one-t"');
     expect(a).toContain('aria-labelledby="one-t one-d"');
@@ -55,10 +76,12 @@ describe("prefix", () => {
     expect(a).toMatch(/\.one-a\{/);
     expect(a).toMatch(/\.one-fb\{/);
     expect(a).toContain("url(#one-");
+    expect(a).toMatch(/begin="[\d.]+s;one-s1\.begin/);
   });
 
   test("two scenes without prefixes share identifiers", () => {
-    const shared = [...names(scene())].filter((name) => names(scene()).has(name));
+    const shared = [...names(emit())].filter((name) => names(emit()).has(name));
+
     expect(shared).toContain("t");
     expect(shared).toContain("k1");
   });
@@ -66,40 +89,44 @@ describe("prefix", () => {
   test("a prefix renames embedded font families in the rule and its uses", async () => {
     const sans = await font.load(new URL("./fixtures/ABeeZee-Regular.ttf", import.meta.url));
 
-    const svg = render(
-      { width: 100, height: 100, duration: 1, title: "F", prefix: "one-" },
-      <text fontFamily={sans}>Hi</text>,
+    const out = svg.emit(
+      scene({ size: [100, 100], duration: 1, title: "F" }, () => (
+        <Text font={sans} size={12} fill="#000000">
+          Hi
+        </Text>
+      )),
+      { prefix: "one-" },
     );
 
-    expect(svg).toContain("@font-face{font-family:'one-ABeeZee'");
-    expect(svg).toContain(`font-family="'one-ABeeZee', sans-serif"`);
+    expect(out).toContain("@font-face{font-family:'one-ABeeZee'");
+    expect(out).toMatch(/font-family="'one-ABeeZee'/);
+    expect(out).not.toMatch(/font-family[=:]"?'ABeeZee'/);
   });
 
   test("a prefix must be a CSS identifier start", () => {
     for (const bad of ["1a", "-a", "a b", "a.b", 'a"b'])
-      expect(() => scene(bad)).toThrow(/needs a prefix/);
+      expect(() => emit(bad)).toThrow(/needs a prefix/);
   });
 });
 
 test("a prefixed scene still warns about a filter over many animated elements", () => {
-  const svg = (prefix?: string) =>
-    render(
-      { width: 100, height: 100, duration: 2, title: "Glow", prefix },
-      <g filter={fx.blur({ by: 2 })}>
-        {Array.from({ length: 45 }, (_, i) => (
-          <circle
-            cx={i}
-            cy={50}
-            r={1}
-            animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(i / 45, 0.5))}
-          />
-        ))}
-      </g>,
-    );
+  const glow = scene({ size: [100, 100], duration: 2, title: "Glow" }, () => (
+    <Group effects={[blur(2)]}>
+      {Array.from({ length: 45 }, (_, i) => (
+        <Shape
+          key={`dot-${i}`}
+          at={[i, 50]}
+          geometry={circle(1)}
+          fill="#000000"
+          motion={motion({ opacity: 0 }).to({ opacity: 1 }, span(i / 45, 0.5))}
+        />
+      ))}
+    </Group>
+  ));
 
   const warnings = (source: string) =>
     validateSvg(source).warnings.filter((w) => w.includes("animated elements"));
 
-  expect(warnings(svg())).toHaveLength(1);
-  expect(warnings(svg("p-"))).toHaveLength(1);
+  expect(warnings(svg.emit(glow))).toHaveLength(1);
+  expect(warnings(svg.emit(glow, { prefix: "p-" }))).toHaveLength(1);
 });

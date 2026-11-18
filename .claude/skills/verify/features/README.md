@@ -13,7 +13,7 @@ This directory is the maintained source for verifying what svjeez users see and 
 
 - Run every command from the repo root.
 - Run the CLI through `$V cli`, so `examples/` is the working directory and the call is logged.
-- Scene paths: `readme/hero.tsx`, `readme/basic.tsx` and the other `examples/` paths are relative to `examples/`. The skill's own examples are at `packages/svjeez/skills/svjeez/examples/` and need the full path.
+- Scene paths: `clips/index.tsx`, `readme/basic.tsx` and the other `examples/` paths are relative to `examples/`. The skill's own examples are at `packages/svjeez/skills/svjeez/examples/` and need the full path.
 - Scratch scenes go in `$VERIFY_RUN/scratch/`. A scratch scene can't import `svjeez` (no `node_modules` there), so make it export a plain SVG string. For a scene that imports svjeez, use one from `examples/` or the skill's examples.
 - Never edit repo files to drive a feature. Change scratch files instead.
 

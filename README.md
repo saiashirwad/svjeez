@@ -34,18 +34,25 @@ Save this as `tsconfig.json`:
 Save this as `scene.tsx`:
 
 ```tsx
-import { draw, ease, enter, render, span } from "svjeez";
+/** @jsxImportSource svjeez/scene */
+import { Group, Shape, circle, draw, ease, enter, path, scene, span } from "svjeez/scene";
 
-export default () =>
-  render(
-    { width: 200, height: 120, duration: 4, title: "Hello" },
-    <>
-      <path d="M20 100C60 20 140 20 180 100" fill="none" stroke="#FF5FA8"
-        strokeWidth={4} animation={draw(span(0.2, 1.2))} />
-      <circle cx={100} cy={40} r={8} fill="#3EE6D6"
-        animation={enter(span(1.2, 0.5), { scale: 0 }, ease.pop)} />
-    </>,
-  );
+export default scene({ size: [200, 120], duration: 4, title: "Hello" }, () => (
+  <Group>
+    <Shape
+      geometry={path().moveTo([20, 100]).curveTo([60, 20], [140, 20], [180, 100])}
+      stroke={{ color: "#FF5FA8", width: 4 }}
+      trim={draw(span(0.2, 1.2))}
+    />
+    <Shape
+      geometry={circle(8)}
+      at={[100, 40]}
+      anchor="center"
+      fill="#3EE6D6"
+      motion={enter(span(1.2, 0.5), { from: { scale: 0 }, curve: ease.pop })}
+    />
+  </Group>
+));
 ```
 
 ```sh

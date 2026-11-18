@@ -97,25 +97,19 @@ test("svjeez svg calls a template with its defaults, then with --params and --pa
   );
 });
 
-test("svg --json reports compiled timing and leaves the exported SVG byte-identical", () => {
-  const file = join(import.meta.dir, "fixtures/check/cue.tsx");
+test("svg --json reports compiled timing with the line that wrote each track", () => {
+  const file = join(import.meta.dir, "fixtures/check/cue-scene.tsx");
   const output = cli("svg", file, "--json");
 
   expect(output.exitCode).toBe(0);
   const build: BuildReport & { svg: string } = JSON.parse(output.stdout.toString());
 
-  expect(build.svg).toBe(cli("svg", file).stdout.toString());
-  expect(build.timeline).toContainEqual(
-    expect.objectContaining({
-      label: "caption · opacity",
-      source: expect.stringContaining("cue.tsx:"),
-    }),
-  );
-  const spans = build.timeline.find((track) => track.label === "caption · opacity")?.spans;
-  expect(spans).toHaveLength(2);
-  expect(spans?.[0]?.at).toBeCloseTo(0.213);
-  expect(spans?.[1]?.at).toBeCloseTo(0.4);
-  expect(build.warnings).toEqual(['@keyframes "unused" is never referenced.']);
+  const track = build.timeline.find((track) => track.label.endsWith(" · opacity"));
+  expect(track?.source).toContain("cue-scene.tsx:12:");
+  expect(track?.spans).toHaveLength(2);
+  expect(track?.spans[0]?.at).toBeCloseTo(0.213);
+  expect(track?.spans[1]?.at).toBeCloseTo(0.413);
+  expect(build.warnings).toEqual([]);
 });
 
 test("svjeez svg says what is wrong with a param, naming its path", () => {

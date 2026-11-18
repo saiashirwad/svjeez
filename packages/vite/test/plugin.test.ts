@@ -44,9 +44,10 @@ test("the dev server serves a scene and reloads it when the scene or a file it i
   writeFileSync(join(scratch, "label.ts"), `export const label = "first";`);
 
   const scene = (size: number) =>
-    `import { render } from "svjeez";
+    `/** @jsxImportSource svjeez/scene */
+import { Shape, rect, scene } from "svjeez/scene";
 import { label } from "./label";
-export default () => render({ width: ${size}, height: 100, duration: 1, title: label }, <text x="10" y="50">{label}</text>);`;
+export default () => scene({ size: [${size}, 100], duration: 1, title: label }, () => <Shape geometry={rect(10, 10)} fill="#3EE6D6" />);`;
 
   writeFileSync(join(scratch, "scene.tsx"), scene(200));
 
@@ -90,10 +91,10 @@ export default () => render({ width: ${size}, height: 100, duration: 1, title: l
     const first = await load();
     await Bun.sleep(500);
     expect(first.module).toContain(`"title": "first"`);
-    expect(first.svg).toContain(">first</text>");
+    expect(first.svg).toContain(">first</title>");
 
     await change("label.ts", `export const label = "second";`);
-    expect((await load()).svg).toContain(">second</text>");
+    expect((await load()).svg).toContain(">second</title>");
 
     await change("scene.tsx", scene(300));
     expect((await load()).module).toContain(`"width": 300`);
@@ -158,9 +159,10 @@ test("a scene imports a CommonJS package when the server environment bundles eve
   writeFileSync(join(dir, "main.ts"), `export { default } from "./scene.tsx?svjeez";`);
   writeFileSync(
     join(dir, "scene.tsx"),
-    `import { render } from "svjeez";
+    `/** @jsxImportSource svjeez/scene */
+import { Shape, rect, scene } from "svjeez/scene";
 import { label } from "cjs-label";
-export default () => render({ width: 100, height: 100, duration: 1, title: label }, <text x="10" y="50">{label}</text>);`,
+export default () => scene({ size: [100, 100], duration: 1, title: label }, () => <Shape geometry={rect(10, 10)} fill="#3EE6D6" />);`,
   );
 
   const config = appConfig(dir);

@@ -1,7 +1,7 @@
 import { dirname, join } from "node:path";
 import { createRequire } from "node:module";
 import type * as Mediabunny from "mediabunny";
-import type { Seconds } from "svjeez";
+import type { Seconds } from "svjeez/scene/tools";
 import { openScene, type ColorScheme, type SceneOptions } from "svjeez/frames";
 
 const FORMATS = {

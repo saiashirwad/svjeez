@@ -21,11 +21,11 @@ Preconditions:
 
 - Baseline from the README.
 
-- **File output.** Run `$V cli svg readme/hero.tsx --out $VERIFY_RUN/evidence/hero.svg`. Exit 0, and `head -c 300 $VERIFY_RUN/evidence/hero.svg` shows an `<svg` root with a `<title>`, and `grep -c '@keyframes' $VERIFY_RUN/evidence/hero.svg` is above 0.
-- **Stdout.** Run `$V cli svg "$PWD/packages/svjeez/skills/svjeez/examples/orbit.tsx"`. Exit 0, and the log shows the SVG text with `<title id="t">Orbit</title>`.
+- **File output.** Run `$V cli svg clips/index.tsx --out $VERIFY_RUN/evidence/clips.svg`. Exit 0, and `head -c 300 $VERIFY_RUN/evidence/clips.svg` shows an `<svg` root with a `<title>`, and `grep -c '@keyframes' $VERIFY_RUN/evidence/clips.svg` is above 0.
+- **Stdout.** Run `$V cli svg readme/basic.tsx`. Exit 0, and the log shows the SVG text with `<title id="t">Hello</title>`.
 - **Bad export.** Run `echo 'export default 42' > $VERIFY_RUN/scratch/bad.ts` then `$V cli svg $VERIFY_RUN/scratch/bad.ts`. Exit 1 with the `must export default` message.
 - **Usage.** Run `$V cli svg`. Exit 1 with the usage text.
-- **Proof.** Render the written file: `$V cli frames $VERIFY_RUN/evidence/hero.svg --count 4 --sheet --out $VERIFY_RUN/evidence/hero-svg-frames`, then open `sheet.png`.
+- **Proof.** Render the written file: `$V cli frames $VERIFY_RUN/evidence/clips.svg --count 4 --sheet --out $VERIFY_RUN/evidence/clips-svg-frames`, then open `sheet.png`.
 
 ## Gotchas
 

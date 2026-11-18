@@ -1,15 +1,36 @@
+/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
-import { blendPaths, commandsOf } from "../src/paths";
-import { ease, motion, render, sampled, span, type Motion } from "svjeez";
-import { matchPaths } from "svjeez/geometry";
+import {
+  Shape,
+  ease,
+  pathData,
+  sampled,
+  scene,
+  span,
+  track,
+  type SceneElement,
+} from "svjeez/scene";
+import { svg } from "svjeez/scene/tools";
+import { blendPaths, commandsOf, matchPaths } from "../src/paths";
 
-const scene = (animation: Motion<"d">, reducedMotion?: false) =>
-  render(
-    { width: 100, height: 100, duration: 4, title: "Test", reducedMotion },
-    <path d="M0 0H10V10Z" animation={animation} />,
+const emit = (build: () => SceneElement, reducedMotion?: number | false) =>
+  svg.emit(
+    scene(
+      {
+        size: [100, 100],
+        duration: 4,
+        title: "Test",
+        ...(reducedMotion !== undefined && { reducedMotion }),
+      },
+      build,
+    ),
   );
 
 const commands = (d: string) => d.replace(/[^A-Za-z]/g, "");
+
+/** The path data an `<animate attributeName="d">` moves through. */
+const morphs = (out: string): string[] =>
+  /attributeName="d" values="([^"]*)"/.exec(out)?.[1]?.split(";") ?? [];
 
 describe("matchPaths", () => {
   test("rewrites shapes with different commands to the same commands", () => {
@@ -39,72 +60,68 @@ describe("matchPaths", () => {
 });
 
 describe("the d channel", () => {
-  test("animates through SMIL with a still twin for reduced motion", () => {
-    const [a, b] = matchPaths(["M0 0H10V10Z", "M5 0L10 10H0Z"]);
-    const svg = scene(motion({ d: a! }).to({ d: b! }, span(1, 1)));
+  const square = "M0 0H10V10Z";
+  const triangle = "M5 0L10 10H0Z";
 
-    expect(svg).toContain('attributeName="d"');
-    expect(svg).toMatch(/<path[^>]*class="[^"]*ds"[^>]*display="none"/);
-    expect(svg).toMatch(/prefers-reduced-motion:reduce\)\{[^}]*dm\{display:none\}/);
+  test("animates through SMIL with a still twin for reduced motion", () => {
+    const out = emit(() => (
+      <Shape geometry={track(pathData(square)).to(pathData(triangle), span(1, 1))} fill="#000000" />
+    ));
+
+    expect(out).toContain('attributeName="d"');
+    expect(new Set(morphs(out).map(commands)).size).toBe(1);
+    expect(out).toMatch(/<path[^>]*class="[^"]*ds"[^>]*display="none"/);
+    expect(out).toMatch(/prefers-reduced-motion:reduce\)\{[^}]*dm\{display:none\}/);
   });
 
   test("the still twin draws the shape the morph has reached at the still moment", () => {
-    const svg = render(
-      { width: 100, height: 100, duration: 4, title: "Test", reducedMotion: { at: 2 } },
-      <path
-        d="M0 0H10"
-        animation={motion({ d: "M0 0H10" }).to({ d: "M0 10H20" }, span(1, 2), ease.linear)}
-      />,
+    const out = emit(
+      () => (
+        <Shape
+          geometry={track(pathData("M0 0H10")).to(pathData("M0 10H20"), span(1, 2), ease.linear)}
+          stroke={{ color: "#000000" }}
+        />
+      ),
+      2,
     );
 
-    expect(svg).toMatch(/<path[^>]*d="M0 5H15"[^>]*class="[^"]*ds"/);
+    expect(out).toMatch(/<path[^>]*d="M0 5h15"[^>]*class="[^"]*ds"/);
   });
 
   test("needs no twin when reduced motion is off", () => {
-    const [a, b] = matchPaths(["M0 0H10V10Z", "M5 0L10 10H0Z"]);
-
-    expect(scene(motion({ d: a! }).to({ d: b! }, span(0, 1)), false)).not.toContain(
-      'display="none"',
+    const out = emit(
+      () => (
+        <Shape
+          geometry={track(pathData(square)).to(pathData(triangle), span(0, 1))}
+          fill="#000000"
+        />
+      ),
+      false,
     );
-  });
 
-  test("rejects paths with different commands", () => {
-    expect(() => scene(motion({ d: "M0 0H10V10Z" }).to({ d: "M0 0L10 10Z" }, span(0, 1)))).toThrow(
-      "d on <path> moves between paths with different commands, so it would jump. Write them through matchPaths() first.",
-    );
+    expect(out).toContain('attributeName="d"');
+    expect(out).not.toContain('display="none"');
   });
 });
 
 describe("sampled with path data", () => {
-  test("keeps few keys for a shape that moves steadily", () => {
-    const m = sampled.path({ at: 0, over: 4 }, (t) => `M${10 * t} 0L${10 * t + 5} 5`, {
-      tolerance: 0.1,
-    });
+  test("keeps few keys for a shape that changes steadily", () => {
+    const out = emit(() => (
+      <Shape
+        geometry={sampled((t) => pathData(`M0 0L${5 + 10 * t} 5`), span(0, 4), { tolerance: 0.1 })}
+        stroke={{ color: "#000000" }}
+      />
+    ));
 
-    const svg = scene(m);
-    const values = svg.match(/values="([^"]*)"/)![1]!.split(";");
-
-    expect(values).toEqual(["M0 0L5 5", "M40 0L45 5"]);
+    expect(morphs(out)).toEqual(["M0 0l5 5", "M0 0l45 5"]);
   });
 
-  test("rejects samples with different commands", () => {
+  test("rejects samples with a different structure", () => {
     expect(() =>
-      sampled.path({ at: 0, over: 2 }, (t) => (t < 1 ? "M0 0L1 1" : "M0 0L1 1L2 2"), {
+      sampled((t) => pathData(t < 1 ? "M0 0L1 1" : "M0 0L1 1L2 2"), span(0, 2), {
         tolerance: 1,
       }),
-    ).toThrow("sampled.path() returned a path with different commands at t=1 than at t=0.");
-  });
-
-  test("lets points stray by their slack", () => {
-    const wave = (t: number) => `M0 0L${50 + 40 * Math.sin(t)} 0`;
-
-    const keys = (slack?: (x: number, y: number) => number) =>
-      scene(sampled.path({ at: 0, over: 4 }, wave, { tolerance: 0.5, slack }))
-        .match(/values="([^"]*)"/)![1]!
-        .split(";").length;
-
-    expect(keys((x) => (x > 5 ? 100 : 0))).toBe(2);
-    expect(keys()).toBeGreaterThan(5);
+    ).toThrow("sampled() returned geometry at t=1 that doesn't match the first sample");
   });
 });
 

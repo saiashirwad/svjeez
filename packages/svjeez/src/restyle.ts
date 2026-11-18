@@ -156,7 +156,7 @@ export const restyle = (
     .filter(Boolean)
     .join("\n");
 
-  if (still) out = out.replace(REDUCED_MOTION, "@media all{");
+  if (still) out = out.replaceAll(REDUCED_MOTION, "@media all{");
   else if (at || paused || onceAt !== undefined) {
     const loop = (at ?? 0) / rate;
     const once = (onceAt ?? at ?? 0) / rate;
@@ -186,7 +186,7 @@ export const restyle = (
       return tag.replace(/^<animate\b/, `<animate begin="${num(begin)}s"${hold}`);
     });
 
-    if (paused) out = out.replace(REDUCED_MOTION, "@media not all{");
+    if (paused) out = out.replaceAll(REDUCED_MOTION, "@media not all{");
   }
 
   if (extra) {

@@ -1,10 +1,29 @@
+/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
-import { ease, motion, render, span } from "svjeez";
 import { renderFrames } from "svjeez/frames";
 import { restyle } from "svjeez/page";
+import {
+  Shape,
+  blur,
+  ease,
+  pathData,
+  rect,
+  scene,
+  span,
+  track,
+  type SceneElement,
+} from "svjeez/scene";
+import { svg, type SceneOptions, type SvgOptions } from "svjeez/scene/tools";
+
+const emit = (
+  build: () => SceneElement,
+  options: Partial<SceneOptions> = {},
+  output: SvgOptions = {},
+): string =>
+  svg.emit(scene({ size: [20, 20], duration: 10, title: "Window", ...options }, build), output);
 
 const browser = await renderFrames(
-  render({ width: 4, height: 4, duration: 1, title: "Probe" }, <rect width={4} height={4} />),
+  emit(() => <Shape geometry={rect(4, 4)} fill="#000000" />, { duration: 1 }),
   { times: [0] },
 ).then(
   () => true,
@@ -18,47 +37,70 @@ const browser = await renderFrames(
 
 const same = (a: Uint8Array, b: Uint8Array) => Buffer.from(a).equals(Buffer.from(b));
 
-const A = "M0 0L20 0L20 20L0 20Z";
-const B = "M4 4L16 4L16 16L4 16Z";
-const size = { width: 20, height: 20, title: "Window" };
-const attrsOf = (svg: string, tag: string) => svg.match(new RegExp(`<${tag}\\b[^>]*>`, "g")) ?? [];
+const attrsOf = (out: string, tag: string) => out.match(new RegExp(`<${tag}\\b[^>]*>`, "g")) ?? [];
 
-const morph = render(
-  { ...size, duration: 10 },
-  <path d={A} fill="red" animation={motion({ d: A }).to({ d: B }, span(2, 1), ease.linear)} />,
+const square = pathData("M0 0L20 0L20 20L0 20Z");
+const inner = pathData("M4 4L16 4L16 16L4 16Z");
+
+const morphing = (when = span(2, 1)) => (
+  <Shape geometry={track(square).to(inner, when, ease.linear)} fill="#FF0000" />
 );
 
-const there = render(
-  { ...size, duration: 10 },
-  <path
-    d={A}
-    fill="red"
-    animation={motion({ d: A })
-      .to({ d: B }, span(2, 1), ease.linear)
-      .to({ d: A }, span(8, 1), ease.linear)}
-  />,
+const morph = emit(() => morphing());
+
+/** The two outlines as the backend writes them, read off the morph's own animate. */
+const [, A = "", B = ""] = /values="([^";]*);([^";]*)"/.exec(morph) ?? [];
+
+const there = emit(() => (
+  <Shape
+    geometry={track(square).to(inner, span(2, 1), ease.linear).to(square, span(8, 1), ease.linear)}
+    fill="#FF0000"
+  />
+));
+
+const blurring = () => (
+  <Shape
+    geometry={rect(9, 9)}
+    fill="#000000"
+    effects={[blur(track(6).to(0, span(1, 2), ease.linear))]}
+  />
 );
 
-const blur = render(
-  { ...size, duration: 10, playbackRate: 2 },
-  <g animation={motion({ blur: 6 }).to({ blur: 0 }, span(1, 2), ease.linear)}>
-    <rect width={9} height={9} />
-  </g>,
-);
+const blurred = emit(blurring, {}, { playbackRate: 2 });
 
-const plain = (svg: string, values: string, keyTimes: string, dur: string, attribute = "d") =>
-  svg.replace(
+const plain = (out: string, values: string, keyTimes: string, dur: string, attribute = "d") =>
+  out.replace(
     /<animate id="[^"]*"[^>]*\/>(?:\s*<set[^>]*\/>)*/,
     `<animate attributeName="${attribute}" values="${values}" keyTimes="${keyTimes}" dur="${dur}" repeatCount="indefinite"/>`,
   );
 
-const morphPlain = plain(morph, `${A};${A};${B};${B}`, "0;0.2;0.3;1", "10s");
-const therePlain = plain(there, `${A};${A};${B};${B};${A};${A}`, "0;0.2;0.3;0.8;0.9;1", "10s");
-const blurPlain = plain(blur, "6;6;0;0", "0;0.1;0.3;1", "5s", "stdDeviation");
+/**
+ * The backend writes outlines with relative commands (`h20v20`), and Chromium draws a plain animate whose values
+ * repeat a relative path wrongly between two of them. So the frame checks swap in the same outlines with absolute
+ * commands, in both the windowed scene and its reference; the windowing under test is untouched.
+ */
+const absolute = (out: string) =>
+  out.replaceAll(A, "M0 0L20 0L20 20L0 20Z").replaceAll(B, "M4 4L16 4L16 16L4 16Z");
+
+const [a, b] = ["M0 0L20 0L20 20L0 20Z", "M4 4L16 4L16 16L4 16Z"];
+const morphFramed = absolute(morph);
+const thereFramed = absolute(there);
+
+const morphPlain = plain(morphFramed, `${a};${a};${b};${b}`, "0;0.2;0.3;1", "10s");
+
+const therePlain = plain(
+  thereFramed,
+  `${a};${a};${b};${b};${a};${a}`,
+  "0;0.2;0.3;0.8;0.9;1",
+  "10s",
+);
+
+const blurPlain = plain(blurred, "6;6;0;0", "0;0.1;0.3;1", "5s", "stdDeviation");
 
 describe("windowed SMIL markup", () => {
   test("a morph that holds most of the loop animates only while it moves", () => {
     const [animate] = attrsOf(morph, "animate");
+
     expect(animate).toContain(`values="${A};${B}"`);
     expect(animate).toContain('keyTimes="0;1"');
     expect(animate).toContain('begin="2s;w1.begin+10s"');
@@ -77,57 +119,49 @@ describe("windowed SMIL markup", () => {
   });
 
   test("the element holds the last value and the reduced-motion twin keeps the still frame", () => {
-    const svg = render(
-      { ...size, duration: 10, reducedMotion: { at: 0.5 } },
-      <path d={A} animation={motion({ d: A }).to({ d: B }, span(2, 1), ease.linear)} />,
-    );
+    const out = emit(() => morphing(), { reducedMotion: 0.5 });
 
-    expect(svg).toContain(`<path d="${B}" class="dm">`);
-    expect(svg).toContain(`<path d="${A}" class="ds" display="none"/>`);
+    expect(out).toMatch(new RegExp(`<path d="${B}"[^>]* class="dm">`));
+    expect(out).toMatch(new RegExp(`<path d="${A}"[^>]* class="ds" display="none"/>`));
 
-    const filter = render(
-      { ...size, duration: 10, reducedMotion: { at: 0.5 } },
-      <g animation={motion({ blur: 6 }).to({ blur: 0 }, span(2, 1), ease.linear)} />,
-    );
+    const filter = emit(blurring, { reducedMotion: 0.5 });
 
     expect(filter).toContain('<feGaussianBlur stdDeviation="0">');
     expect(filter).toContain('<feGaussianBlur stdDeviation="6"/>');
   });
 
   test("blur windows at playback speed", () => {
-    expect(attrsOf(blur, "animate")[0]).toContain('begin="0.5s;w1.begin+5s" dur="1s"');
-    expect(attrsOf(blur, "set")[0]).toContain('to="6" begin="0s;w1.begin+4.5s" dur="0.5s"');
+    expect(attrsOf(blurred, "animate")[0]).toContain('begin="0.5s;s1.begin+5s" dur="1s"');
+    expect(attrsOf(blurred, "set")[0]).toContain('to="6" begin="0s;s1.begin+4.5s" dur="0.5s"');
   });
 
   test("ids carry the prefix and stay unique", () => {
-    const svg = render(
-      { ...size, duration: 10, prefix: "x" },
-      <>
-        <path d={A} animation={motion({ d: A }).to({ d: B }, span(2, 1), ease.linear)} />
-        <path d={A} animation={motion({ d: A }).to({ d: B }, span(3, 1), ease.linear)} />
-      </>,
+    const out = emit(
+      () => (
+        <>
+          {morphing(span(2, 1))}
+          {morphing(span(3, 1))}
+        </>
+      ),
+      {},
+      { prefix: "x" },
     );
 
-    const ids = [...svg.matchAll(/ id="([^"]*)"/g)].map((match) => match[1]);
+    const ids = [...out.matchAll(/ id="([^"]*)"/g)].map((match) => match[1]);
+
     expect(ids.filter((id) => id?.startsWith("xw"))).toEqual(["xw1", "xw2"]);
-    expect(svg).toContain("xw2.begin+10s");
+    expect(out).toContain("xw2.begin+10s");
   });
 
   test("a motion that fills the loop is left as it was", () => {
-    const svg = render(
-      { ...size, duration: 10 },
-      <path d={A} animation={motion({ d: A }).to({ d: B }, span(1, 8), ease.linear)} />,
-    );
+    const out = emit(() => morphing(span(1, 8)));
 
-    expect(attrsOf(svg, "animate")[0]).toContain('repeatCount="indefinite"');
-    expect(svg).not.toContain("<set");
+    expect(attrsOf(out, "animate")[0]).toContain('repeatCount="indefinite"');
+    expect(out).not.toContain("<set");
   });
 
-  test("loop: false and Once keep the plain animate", () => {
-    const still = render(
-      { ...size, duration: 10, loop: false },
-      <path d={A} animation={motion({ d: A }).to({ d: B }, span(2, 1), ease.linear)} />,
-    );
+  test("loop: false keeps the plain animate", () => {
+    const still = emit(() => morphing(), { loop: false });
 
     expect(attrsOf(still, "animate")[0]).not.toContain("w1");
     expect(attrsOf(still, "animate")[0]).toContain("repeatCount=");
@@ -151,12 +185,12 @@ describe.if(browser)("windowed SMIL renders as the plain animate did", () => {
       expect(a.frames.some((frame) => !same(frame.png, a.frames[0]!.png))).toBe(true);
     });
 
-  check("a morph that resets at the top of the loop", morph, morphPlain);
-  check("a morph that comes back", there, therePlain);
+  check("a morph that resets at the top of the loop", morphFramed, morphPlain);
+  check("a morph that comes back", thereFramed, therePlain);
 
   check(
     "the merged set resets each later loop",
-    morph,
+    morphFramed,
     morphPlain,
     [10, 10.5, 11.9, 12.5, 15, 20, 20.5, 21.9, 22.5, 29.9],
   );
@@ -164,7 +198,7 @@ describe.if(browser)("windowed SMIL renders as the plain animate did", () => {
   // Scene seconds at twice the speed: the loop is 10 scene seconds, 5 played.
   check(
     "blur on a scene played faster",
-    blur,
+    blurred,
     blurPlain,
     [0, 0.5, 1.5, 2.5, 3, 5, 9.5, 10, 11.5, 12.5, 21],
   );
@@ -176,7 +210,7 @@ describe.if(browser)("windowed SMIL renders as the plain animate did", () => {
         const later = paused ? [0, 3] : [0, 0.25, 3, 7];
 
         const [a, b] = await Promise.all([
-          renderFrames(restyle(morph, options), { times: later }),
+          renderFrames(restyle(morphFramed, options), { times: later }),
           renderFrames(restyle(morphPlain, options), { times: later }),
         ]);
 

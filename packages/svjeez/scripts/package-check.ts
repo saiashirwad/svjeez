@@ -20,12 +20,14 @@ const ENTRIES = [
   "svjeez/geometry",
 ];
 
-const CONSUMER = `import { css, ease, enter, render } from "svjeez";
+const CONSUMER = `/** @jsxImportSource svjeez/scene */
+import { Shape, circle, ease, enter, scene, span } from "svjeez/scene";
+import { svg as backend } from "svjeez/scene/tools";
 import { renderFrames } from "svjeez/frames";
 
-// @ts-expect-error a css hole takes a property, a number or css, not a string
-css\`.dot{fill:\${"red"}}\`;
-export const svg: string = render({ width: 10, height: 10, duration: 1, title: "t" }, <circle r={2} animation={enter({ at: 0, over: 1 }, { scale: 0 }, ease.pop)} />);
+// @ts-expect-error a circle's radius is a number
+circle("2");
+export const svg: string = backend.emit(scene({ size: [10, 10], duration: 1, title: "t" }, () => <Shape geometry={circle(2)} fill="#000000" motion={enter(span(0, 1), { from: { scale: 0 }, curve: ease.pop })} />));
 export { renderFrames };
 `;
 

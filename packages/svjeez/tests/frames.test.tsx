@@ -1,29 +1,49 @@
+/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import { deflateSync } from "node:zlib";
+import { openScene, renderFrames } from "svjeez/frames";
+import { loopLength, seek, restyle } from "svjeez/page";
 import {
-  Once,
-  Picture,
-  def,
+  Group,
+  Image,
+  Shape,
+  Text,
+  blur,
+  circle,
   draw,
   ease,
   font,
   motion,
+  path,
   picture,
-  render,
-  type Child,
-  type SvgNode,
-  adaptive,
+  rect,
+  scene,
   span,
-  systemDark,
-  systemLight,
-} from "svjeez";
-
-import { openScene, renderFrames } from "svjeez/frames";
-import { loopLength, seek, restyle } from "svjeez/page";
+  spin,
+  tokens,
+  track,
+  type SceneElement,
+} from "svjeez/scene";
+import { svg, type SceneOptions, type SvgOptions } from "svjeez/scene/tools";
 import { systemColorScheme } from "../src/scheme";
 
+const emit = (
+  [width, height]: readonly [number, number],
+  duration: number,
+  build: () => SceneElement,
+  options: Partial<SceneOptions> & SvgOptions = {},
+): string => {
+  const { prefix, playbackRate, sources, ...rest } = options;
+
+  return svg.emit(scene({ size: [width, height], duration, title: "Frames", ...rest }, build), {
+    prefix,
+    playbackRate,
+    sources,
+  });
+};
+
 const browser = await renderFrames(
-  render({ width: 4, height: 4, duration: 1, title: "Probe" }, <rect width={4} height={4} />),
+  emit([4, 4], 1, () => <Shape geometry={rect(4, 4)} fill="#000000" />),
   { times: [0] },
 ).then(
   () => true,
@@ -90,14 +110,13 @@ const solidPng = (
 
 const same = (a: Uint8Array, b: Uint8Array) => Buffer.from(a).equals(Buffer.from(b));
 
-const fade = render(
-  { width: 40, height: 20, duration: 4, title: "Fade" },
-  <rect
-    width={40}
-    height={20}
-    fill="#3EE6D6"
-    animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(1, 1), ease.linear)}
-  />,
+const fade = emit([40, 20], 4, () => (
+  <Shape geometry={rect(40, 20)} fill="#3EE6D6" opacity={track(0).to(1, span(1, 1), ease.linear)} />
+));
+
+/** A square whose blur is cut from 0 to 3 at 1s: drawn by SMIL on its filter primitive. */
+const flooded = () => (
+  <Shape geometry={rect(10, 10)} at={[5, 5]} fill="#FF0000" effects={[blur(track(0).set(3, 1))]} />
 );
 
 describe.if(browser)("renderFrames", () => {
@@ -118,20 +137,16 @@ describe.if(browser)("renderFrames", () => {
   });
 
   test("a curve starting to draw shows no round-cap dot at its far end", async () => {
-    const curve = render(
-      { width: 70, height: 40, duration: 1, title: "Curve" },
-      <>
-        <path
-          d="M10 30C31.25 30 47.08 19.52 62.1 7.48"
-          fill="none"
-          stroke="#000"
-          strokeWidth={2}
-          strokeLinecap="round"
-          animation={draw({ at: 0, over: 0.45 }, ease.inOut)}
+    const curve = emit([70, 40], 1, () => (
+      <Group>
+        <Shape
+          geometry={path().moveTo([10, 30]).curveTo([31.25, 30], [47.08, 19.52], [62.1, 7.48])}
+          stroke={{ color: "#000000", width: 2, cap: "round" }}
+          trim={draw(span(0, 0.45), { curve: ease.inOut })}
         />
-        <rect width={45} height={40} fill="#fff" />
-      </>,
-    );
+        <Shape geometry={rect(45, 40)} fill="#FFFFFF" />
+      </Group>
+    ));
 
     const { frames } = await renderFrames(curve, { times: [0, 0.004, 0.008, 0.012], scale: 2 });
     const [blank, ...early] = frames.map((frame) => frame.png);
@@ -149,50 +164,36 @@ describe.if(browser)("renderFrames", () => {
   });
 
   test("SMIL animations on filter primitives are seeked too", async () => {
-    const flood = def.filter(
-      {},
-      <feFlood
-        floodColor="#ff0000"
-        animation={motion({ floodColor: "#ff0000" }).set({ floodColor: "#0000ff" }, 1)}
-      />,
-    );
+    const out = emit([20, 20], 2, flooded);
 
-    const svg = render(
-      { width: 20, height: 20, duration: 2, title: "Flood" },
-      <rect width={20} height={20} filter={flood} />,
-    );
-
-    expect(svg).toContain("<animate");
-    const { frames } = await renderFrames(svg, { times: [0.5, 1.5, 1.8] });
+    expect(out).toContain("<animate");
+    const { frames } = await renderFrames(out, { times: [0.5, 1.5, 1.8] });
     expect(same(frames[0]!.png, frames[1]!.png)).toBe(false);
     expect(same(frames[1]!.png, frames[2]!.png)).toBe(true);
   });
 
   test("loop: false holds the last frame after the scene ends, inner loops and SMIL included", async () => {
-    const flood = def.filter(
-      {},
-      <feFlood
-        floodColor="#ff0000"
-        animation={motion({ floodColor: "#ff0000" }).set({ floodColor: "#0000ff" }, 1)}
-      />,
-    );
-
-    const scene = (loop: boolean) =>
-      render(
-        { width: 40, height: 20, duration: 2, title: "Once", loop },
-        <>
-          <rect width={20} height={20} filter={flood} />
-          <rect
-            y={5}
-            width={10}
-            height={10}
-            fill="#3EE6D6"
-            animation={motion({ x: 20 }).to({ x: 30 }, span(0, 0.5), ease.linear).loop(0.5)}
-          />
-        </>,
+    const made = (loop: boolean) =>
+      emit(
+        [40, 20],
+        2,
+        () => (
+          <Group>
+            {flooded()}
+            <Shape
+              geometry={rect(10, 10)}
+              at={[20, 5]}
+              fill="#3EE6D6"
+              motion={motion({ offset: [0, 0] })
+                .to({ offset: [10, 0] }, span(0, 0.5), ease.linear)
+                .loop(0.5)}
+            />
+          </Group>
+        ),
+        { loop },
       );
 
-    const once = (await renderFrames(scene(false), { times: [0.3, 2, 3.5, 5.1] })).frames.map(
+    const once = (await renderFrames(made(false), { times: [0.3, 2, 3.5, 5.1] })).frames.map(
       (frame) => frame.png,
     );
 
@@ -200,7 +201,7 @@ describe.if(browser)("renderFrames", () => {
     expect(same(once[1]!, once[2]!)).toBe(true);
     expect(same(once[2]!, once[3]!)).toBe(true);
 
-    const looping = (await renderFrames(scene(true), { times: [0.3, 2.3] })).frames.map(
+    const looping = (await renderFrames(made(true), { times: [0.3, 2.3] })).frames.map(
       (frame) => frame.png,
     );
 
@@ -215,53 +216,49 @@ describe.if(browser)("renderFrames", () => {
   });
 
   test("a scene made only of loops lasts as long as their common period", async () => {
-    const svg = render(
-      { width: 20, height: 20, duration: 6, title: "Loops" },
-      <>
-        <rect
-          width={10}
-          height={10}
-          animation={motion({ x: 0 }).to({ x: 10 }, span(0, 2), ease.linear).loop(2)}
+    const loops = emit([20, 20], 6, () => (
+      <Group>
+        <Shape
+          geometry={rect(10, 10)}
+          fill="#000000"
+          motion={motion({ offset: [0, 0] })
+            .to({ offset: [10, 0] }, span(0, 2), ease.linear)
+            .loop(2)}
         />
-        <circle r={4} animation={motion({ y: 0 }).to({ y: 10 }, span(0, 3), ease.linear).loop(3)} />
-      </>,
-    );
+        <Shape
+          geometry={circle(4)}
+          fill="#000000"
+          motion={motion({ offset: [0, 0] })
+            .to({ offset: [0, 10] }, span(0, 3), ease.linear)
+            .loop(3)}
+        />
+      </Group>
+    ));
 
-    expect((await renderFrames(svg, { times: [0] })).duration).toBe(6);
+    expect((await renderFrames(loops, { times: [0] })).duration).toBe(6);
   });
 
   test("periods that are rounded fractions of the scene duration still loop in the scene duration", async () => {
-    const ring = (laps: number) => (
-      <circle
-        r={4}
-        animation={motion({ rotate: 0 })
-          .to({ rotate: 360 }, span(0, 12 / laps), ease.linear)
-          .loop(12 / laps)}
-      />
-    );
-
-    const svg = render(
-      { width: 20, height: 20, duration: 12, title: "Rings" },
-      <>
-        <rect
-          width={10}
-          height={10}
-          animation={motion({ x: 0 }).to({ x: 10 }, span(0, 12), ease.linear)}
+    const rings = emit([20, 20], 12, () => (
+      <Group>
+        <Shape
+          geometry={rect(10, 10)}
+          fill="#000000"
+          motion={motion({ offset: [0, 0] }).to({ offset: [10, 0] }, span(0, 12), ease.linear)}
         />
-        {[2, 3, 5, 7, 8].map(ring)}
-      </>,
-    );
+        {[2, 3, 5, 7, 8].map((laps) => (
+          <Shape geometry={circle(4)} fill="#000000" rotate={spin({ every: 12 / laps })} />
+        ))}
+      </Group>
+    ));
 
-    const { duration, frames } = await renderFrames(svg, { count: 4 });
+    const { duration, frames } = await renderFrames(rings, { count: 4 });
     expect(duration).toBe(12);
     expect(frames.map((frame) => frame.time)).toEqual([0, 3, 6, 9]);
   });
 
   test("a sheet too big for one capture comes back whole, at a lower scale", async () => {
-    const wide = render(
-      { width: 2000, height: 100, duration: 4, title: "Wide" },
-      <rect width={2000} height={100} fill="#3EE6D6" />,
-    );
+    const wide = emit([2000, 100], 4, () => <Shape geometry={rect(2000, 100)} fill="#3EE6D6" />);
 
     const { sheet } = await renderFrames(wide, { count: 4, scale: 3, sheet: true });
     const { width, height } = pngSize(sheet!);
@@ -293,17 +290,17 @@ describe.if(browser)("renderFrames", () => {
   });
 
   test("an open scene captures what renderFrames renders, in a secure context, until closed", async () => {
-    const scene = await openScene(fade, { scale: 2, colorScheme: "light" });
+    const opened = await openScene(fade, { scale: 2, colorScheme: "light" });
 
     try {
-      expect(scene.duration).toBe(4);
+      expect(opened.duration).toBe(4);
       expect(
-        await scene.evaluate((name) => name in window && isSecureContext, "VideoEncoder"),
+        await opened.evaluate((name) => name in window && isSecureContext, "VideoEncoder"),
       ).toBe(true);
       const { frames } = await renderFrames(fade, { times: [1.5], scale: 2, colorScheme: "light" });
-      expect(same(await scene.capture(1.5), frames[0]!.png)).toBe(true);
+      expect(same(await opened.capture(1.5), frames[0]!.png)).toBe(true);
     } finally {
-      await scene.close();
+      await opened.close();
     }
   });
 
@@ -314,22 +311,14 @@ describe.if(browser)("renderFrames", () => {
   });
 
   test("frames follow the system color scheme unless told otherwise", async () => {
-    const svg = render(
-      {
-        width: 20,
-        height: 20,
-        duration: 1,
-        title: "Scheme",
-        css: "rect{fill:#ffffff}@media (prefers-color-scheme:dark){rect{fill:#000000}}",
-      },
-      <rect width={20} height={20} />,
-    );
+    const theme = tokens({ light: { paper: "#FFFFFF" }, dark: { paper: "#000000" } });
+    const out = emit([20, 20], 1, () => <Shape geometry={rect(20, 20)} fill={theme.paper} />);
 
     const [light, dark, system, fallback] = await Promise.all([
-      renderFrames(svg, { times: [0], colorScheme: "light" }),
-      renderFrames(svg, { times: [0], colorScheme: "dark" }),
-      renderFrames(svg, { times: [0], colorScheme: "system" }),
-      renderFrames(svg, { times: [0] }),
+      renderFrames(out, { times: [0], colorScheme: "light" }),
+      renderFrames(out, { times: [0], colorScheme: "dark" }),
+      renderFrames(out, { times: [0], colorScheme: "system" }),
+      renderFrames(out, { times: [0] }),
     ]);
 
     expect(same(light.frames[0]!.png, dark.frames[0]!.png)).toBe(false);
@@ -347,52 +336,47 @@ describe.if(browser)("renderFrames", () => {
   });
 
   test("an embedded raster and an embedded SVG paint their own colors", async () => {
-    const scene = (child: SvgNode) =>
-      render({ width: 20, height: 20, duration: 1, title: "Embed" }, child);
-
     const raster = picture(solidPng(8, 8, [0, 200, 0]));
 
     const vector = picture(
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 4"><rect width="4" height="4" fill="#c80000"/></svg>',
     );
 
-    const paint = async (child: SvgNode) =>
-      (await renderFrames(scene(child), { times: [0], colorScheme: "light" })).frames[0]!.png;
+    const paint = async (build: () => SceneElement) =>
+      (await renderFrames(emit([20, 20], 1, build), { times: [0], colorScheme: "light" }))
+        .frames[0]!.png;
 
-    const png = await paint(<Picture src={raster} x={0} y={0} width={20} height={20} />);
-    const svg = await paint(<Picture src={vector} x={0} y={0} width={20} height={20} />);
-    const green = await paint(<rect width={20} height={20} fill="#00c800" />);
-    const red = await paint(<rect width={20} height={20} fill="#c80000" />);
+    const png = await paint(() => <Image src={raster} width={20} height={20} />);
+    const svgImage = await paint(() => <Image src={vector} width={20} height={20} />);
+    const green = await paint(() => <Shape geometry={rect(20, 20)} fill="#00C800" />);
+    const red = await paint(() => <Shape geometry={rect(20, 20)} fill="#C80000" />);
     expect(same(png, green)).toBe(true);
-    expect(same(svg, red)).toBe(true);
-    expect(same(png, svg)).toBe(false);
+    expect(same(svgImage, red)).toBe(true);
+    expect(same(png, svgImage)).toBe(false);
   });
 });
 
 describe.if(browser)("embedded fonts", async () => {
   const sans = await font.load(new URL("./fixtures/ABeeZee-Regular.ttf", import.meta.url));
 
-  const paint = async (child: Child) =>
-    (
-      await renderFrames(
-        render({ width: 240, height: 60, duration: 1, title: "Font" }, <g fill="#000">{child}</g>),
-        { times: [0], colorScheme: "light", background: "#fff" },
-      )
-    ).frames[0]!.png;
+  const shot = async (out: string) =>
+    (await renderFrames(out, { times: [0], colorScheme: "light", background: "#fff" })).frames[0]!
+      .png;
+
+  const paint = (build: () => SceneElement) => shot(emit([240, 60], 1, build));
+
+  const line = (text: string, x: number, face = sans) => (
+    <Text font={face} size={28} fill="#000000" at={[x, 12]}>
+      {text}
+    </Text>
+  );
 
   test("an embedded font paints, rather than the fallback", async () => {
-    const embedded = await paint(
-      <text x={10} y={40} fontSize={28} fontFamily={sans}>
-        Wave AV
-      </text>,
-    );
+    const embedded = await paint(() => line("Wave AV", 10));
+    const out = emit([240, 60], 1, () => line("Wave AV", 10));
+    const fallback = await shot(out.replace(/font-family="[^"]*"/g, 'font-family="sans-serif"'));
 
-    const fallback = await paint(
-      <text x={10} y={40} fontSize={28} fontFamily="sans-serif">
-        Wave AV
-      </text>,
-    );
-
+    expect(out).toContain("@font-face");
     expect(same(embedded, fallback)).toBe(false);
   });
 
@@ -402,54 +386,30 @@ describe.if(browser)("embedded fonts", async () => {
       { subset: false },
     );
 
-    const line = (
-      <text x={10} y={40} fontSize={28} fontFamily={sans}>
-        To AVA, café!
-      </text>
-    );
-
-    const full = (
-      <text x={10} y={40} fontSize={28} fontFamily={whole}>
-        To AVA, café!
-      </text>
-    );
-
-    expect(same(await paint(line), await paint(full))).toBe(true);
+    expect(
+      same(
+        await paint(() => line("To AVA, café!", 10)),
+        await paint(() => line("To AVA, café!", 10, whole)),
+      ),
+    ).toBe(true);
   });
 
   test("measure() matches the browser's layout, kerning included", async () => {
-    const whole = await paint(
-      <text x={10} y={40} fontSize={28} fontFamily={sans}>
-        To AVA
-      </text>,
-    );
+    const whole = await paint(() => line("To AVA", 10));
 
-    const split = await paint(
-      <>
-        <text x={10} y={40} fontSize={28} fontFamily={sans}>
-          To AV
-        </text>
-        <text
-          x={10 + sans.measure("To AVA", 28) - sans.measure("A", 28)}
-          y={40}
-          fontSize={28}
-          fontFamily={sans}
-        >
-          A
-        </text>
-      </>,
-    );
+    const split = await paint(() => (
+      <Group>
+        {line("To AV", 10)}
+        {line("A", 10 + sans.measure("To AVA", 28) - sans.measure("A", 28))}
+      </Group>
+    ));
 
-    const unkerned = await paint(
-      <>
-        <text x={10} y={40} fontSize={28} fontFamily={sans}>
-          To AV
-        </text>
-        <text x={10 + sans.measure("To AV", 28)} y={40} fontSize={28} fontFamily={sans}>
-          A
-        </text>
-      </>,
-    );
+    const unkerned = await paint(() => (
+      <Group>
+        {line("To AV", 10)}
+        {line("A", 10 + sans.measure("To AV", 28))}
+      </Group>
+    ));
 
     expect(same(whole, split)).toBe(true);
     expect(same(whole, unkerned)).toBe(false);
@@ -457,17 +417,14 @@ describe.if(browser)("embedded fonts", async () => {
 });
 
 describe("renderFrames input", () => {
-  const svg = render(
-    { width: 4, height: 4, duration: 1, title: "Probe" },
-    <rect width={4} height={4} />,
-  );
+  const probe = emit([4, 4], 1, () => <Shape geometry={rect(4, 4)} fill="#000000" />);
 
   test("rejects a bad count or time before launching a browser", async () => {
-    await expect(renderFrames(svg, { count: -1 })).rejects.toThrow(
+    await expect(renderFrames(probe, { count: -1 })).rejects.toThrow(
       "renderFrames() needs a positive whole count, got -1.",
     );
-    await expect(renderFrames(svg, { count: 1.5 })).rejects.toThrow("got 1.5.");
-    await expect(renderFrames(svg, { times: [0, -2] })).rejects.toThrow(
+    await expect(renderFrames(probe, { count: 1.5 })).rejects.toThrow("got 1.5.");
+    await expect(renderFrames(probe, { times: [0, -2] })).rejects.toThrow(
       "renderFrames() needs finite, non-negative times, got -2.",
     );
   });
@@ -475,20 +432,25 @@ describe("renderFrames input", () => {
 
 describe.if(browser)("prefix in one page", () => {
   const slide = (prefix?: string) =>
-    render(
-      { width: 100, height: 40, duration: 2, title: "A", prefix },
-      <rect id="a" width={10} height={10} animation={motion({ x: 0 }).to({ x: 50 }, span(0, 2))} />,
+    emit(
+      [100, 40],
+      2,
+      () => (
+        <Shape
+          geometry={rect(10, 10)}
+          fill="#000000"
+          motion={motion({ offset: [0, 0] }).to({ offset: [50, 0] }, span(0, 2))}
+        />
+      ),
+      { prefix },
     );
 
-  const fade = (prefix?: string) =>
-    render(
-      { width: 100, height: 40, duration: 2, title: "B", prefix },
-      <rect
-        id="b"
-        width={10}
-        height={10}
-        animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(0, 2))}
-      />,
+  const fadeIn = (prefix?: string) =>
+    emit(
+      [100, 40],
+      2,
+      () => <Shape geometry={rect(10, 10)} fill="#000000" opacity={track(0).to(1, span(0, 2))} />,
+      { prefix },
     );
 
   const halfway = async (html: string) => {
@@ -505,9 +467,9 @@ describe.if(browser)("prefix in one page", () => {
           animation.currentTime = 1000;
         }
 
-        const read = (id: string) => getComputedStyle(document.getElementById(id)!);
+        const [a, b] = [...document.querySelectorAll("svg rect")].map((el) => getComputedStyle(el));
 
-        return { translate: read("a").translate, opacity: Number(read("b").opacity) };
+        return { translate: a!.translate, opacity: Number(b!.opacity) };
       });
     } finally {
       await chrome.close();
@@ -516,7 +478,7 @@ describe.if(browser)("prefix in one page", () => {
 
   test("prefixed scenes each animate their own motion", async () => {
     const { translate, opacity } = await halfway(
-      `<!doctype html><body>${slide("a-")}${fade("b-")}`,
+      `<!doctype html><body>${slide("a-")}${fadeIn("b-")}`,
     );
 
     expect(parseFloat(translate)).toBeGreaterThan(25);
@@ -526,93 +488,84 @@ describe.if(browser)("prefix in one page", () => {
   });
 
   test("unprefixed scenes clobber each other's keyframes", async () => {
-    const { translate } = await halfway(`<!doctype html><body>${slide()}${fade()}`);
+    const { translate } = await halfway(`<!doctype html><body>${slide()}${fadeIn()}`);
     expect(translate).toBe("none");
   });
 });
 
 describe("restyle", () => {
-  const scene = (reducedMotion?: { at: number }) =>
-    render(
-      { width: 40, height: 20, duration: 4, title: "Restyle", reducedMotion },
-      <>
-        <rect
-          width={40}
-          height={20}
-          fill="#3EE6D6"
-          animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(0, 4), ease.linear)}
-        />
-        <rect
-          x={10}
-          width={10}
-          height={10}
-          fill="#E64"
-          animation={motion({ blur: 0 }).to({ blur: 4 }, span(0, 2), ease.linear)}
-        />
-      </>,
+  const made = (reducedMotion?: number) =>
+    emit(
+      [40, 20],
+      4,
+      () => (
+        <Group>
+          <Shape
+            geometry={rect(40, 20)}
+            fill="#3EE6D6"
+            opacity={track(0).to(1, span(0, 4), ease.linear)}
+          />
+          <Shape
+            geometry={rect(10, 10)}
+            at={[10, 0]}
+            fill="#EE6644"
+            effects={[blur(track(0).to(4, span(0, 2), ease.linear))]}
+          />
+        </Group>
+      ),
+      reducedMotion === undefined ? {} : { reducedMotion },
     );
 
   test("an untouched copy is the input, and the reduced-motion freeze stays where posters read it", () => {
-    const svg = scene({ at: 2.5 });
-    expect(restyle(svg, {})).toBe(svg);
-    expect(svg).toMatch(/animation-delay:-2\.5s!important/);
+    const out = made(2.5);
+    expect(restyle(out, {})).toBe(out);
+    expect(out).toMatch(/animation-delay:-2\.5s!important/);
   });
 
   describe.if(browser)("in the browser", () => {
-    const paint = async (svg: string, time: number) =>
-      (await renderFrames(svg, { times: [time], colorScheme: "light" })).frames[0]!.png;
+    const paint = async (out: string, time: number) =>
+      (await renderFrames(out, { times: [time], colorScheme: "light" })).frames[0]!.png;
 
     test("a copy started at 1.5 s begins where the original is at 1.5 s, CSS and SMIL motions alike", async () => {
-      const svg = scene();
-      expect(svg).toContain("<animate");
-      expect(same(await paint(restyle(svg, { at: 1.5 }), 0), await paint(svg, 1.5))).toBe(true);
-      expect(same(await paint(restyle(svg, { at: 1.5 }), 0), await paint(svg, 0))).toBe(false);
+      const out = made();
+      expect(out).toContain("<animate");
+      expect(same(await paint(restyle(out, { at: 1.5 }), 0), await paint(out, 1.5))).toBe(true);
+      expect(same(await paint(restyle(out, { at: 1.5 }), 0), await paint(out, 0))).toBe(false);
     });
 
-    test("css after the scene's own recolors a scene painted with theme variables", async () => {
-      const { theme, css } = adaptive({ dark: systemDark, light: systemLight });
-
-      const svg = render(
-        { width: 20, height: 20, duration: 1, title: "Themed", css },
-        <rect width={20} height={20} fill={theme.base0D} />,
-      );
+    test("css after the scene's own recolors a scene painted with theme tokens", async () => {
+      const theme = tokens({ light: { accent: "#3EE6D6" }, dark: { accent: "#3EE6D6" } });
+      const themed = emit([20, 20], 1, () => <Shape geometry={rect(20, 20)} fill={theme.accent} />);
 
       const red = await paint(
-        render(
-          { width: 20, height: 20, duration: 1, title: "Red" },
-          <rect width={20} height={20} fill="#ff0000" />,
-        ),
+        emit([20, 20], 1, () => <Shape geometry={rect(20, 20)} fill="#FF0000" />),
         0,
       );
 
-      expect(same(await paint(restyle(svg, { css: "svg{--base0D:#ff0000}" }), 0), red)).toBe(true);
-      expect(same(await paint(svg, 0), red)).toBe(false);
+      expect(themed).toContain("var(--accent)");
+      expect(same(await paint(restyle(themed, { css: "svg{--accent:#ff0000}" }), 0), red)).toBe(
+        true,
+      );
+      expect(same(await paint(themed, 0), red)).toBe(false);
     });
 
+    // The scene backend writes its SMIL stills in a reduced-motion block of their own, ahead of the CSS freeze, so
+    // restyle() has to turn on every such block.
     test("still holds the reduced-motion frame, SMIL included", async () => {
-      const svg = scene({ at: 2.5 });
-      expect(same(await paint(restyle(svg, { still: true }), 0), await paint(svg, 2.5))).toBe(true);
+      const out = made(2.5);
+      expect(same(await paint(restyle(out, { still: true }), 0), await paint(out, 2.5))).toBe(true);
     });
 
     test("still stops every animation, a scene's own CSS among them", async () => {
-      const own = render(
-        {
-          width: 20,
-          height: 20,
-          duration: 1,
-          title: "Own",
-          css: "@keyframes spin{from{opacity:0}to{opacity:1}}rect{animation:spin 100s linear infinite}",
-        },
-        <rect width={20} height={20} />,
-      );
+      const own = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" width="20" height="20"><style>@keyframes spin{from{opacity:0}to{opacity:1}}rect{animation:spin 100s linear infinite}</style><rect width="20" height="20"/></svg>`;
 
-      const opacityAfter = async (svg: string) => {
+      const opacityAfter = async (out: string) => {
         const { chromium } = await import("playwright-core");
         const chrome = await chromium.launch();
 
         try {
           const page = await chrome.newPage();
-          await page.setContent(`<!doctype html><body>${svg}`);
+          await page.setContent(`<!doctype html><body>${out}`);
           await page.waitForTimeout(500);
 
           return await page.evaluate(() =>
@@ -628,7 +581,7 @@ describe("restyle", () => {
     });
 
     const asImage = async (
-      svg: string,
+      out: string,
       waits: readonly number[],
       reducedMotion: "reduce" | "no-preference" = "no-preference",
     ) => {
@@ -637,7 +590,7 @@ describe("restyle", () => {
 
       try {
         const page = await chrome.newPage({ viewport: { width: 40, height: 20 }, reducedMotion });
-        const src = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+        const src = `data:image/svg+xml,${encodeURIComponent(out)}`;
         await page.setContent(`<style>body{margin:0}img{display:block}</style><img src="${src}">`);
         await page.evaluate(() => document.querySelector("img")!.decode());
         const shots: Uint8Array[] = [];
@@ -654,23 +607,16 @@ describe("restyle", () => {
     };
 
     test("paused holds an <img> at the moment asked for, CSS and SMIL motions alike", async () => {
-      const svg = scene();
-      const [first, later] = await asImage(restyle(svg, { at: 1.5, paused: true }), [50, 700]);
-      const [start] = await asImage(restyle(svg, { paused: true }), [50]);
+      const out = made();
+      const [first, later] = await asImage(restyle(out, { at: 1.5, paused: true }), [50, 700]);
+      const [start] = await asImage(restyle(out, { paused: true }), [50]);
 
-      const drawn = render(
-        { width: 40, height: 20, duration: 4, title: "1.5 s in" },
-        <>
-          <rect width={40} height={20} fill="#3EE6D6" opacity={0.375} />
-          <rect
-            x={10}
-            width={10}
-            height={10}
-            fill="#E64"
-            filter={def.filter({}, <feGaussianBlur stdDeviation={3} />)}
-          />
-        </>,
-      );
+      const drawn = emit([40, 20], 4, () => (
+        <Group>
+          <Shape geometry={rect(40, 20)} fill="#3EE6D6" opacity={0.375} />
+          <Shape geometry={rect(10, 10)} at={[10, 0]} fill="#EE6644" effects={[blur(3)]} />
+        </Group>
+      ));
 
       const [frame] = await asImage(drawn, [50]);
 
@@ -680,89 +626,28 @@ describe("restyle", () => {
     });
 
     test("paused shows its moment to a viewer who prefers reduced motion, not the still frame", async () => {
-      const paused = restyle(scene({ at: 3.5 }), { at: 1.5, paused: true });
+      const paused = restyle(made(3.5), { at: 1.5, paused: true });
       const [reduced] = await asImage(paused, [50], "reduce");
       const [moving] = await asImage(paused, [50]);
 
       expect(same(reduced!, moving!)).toBe(true);
     });
 
-    test("<Once> parts hold their end on the loop clock, and onceAt gives them a clock of their own", async () => {
-      const fade = (over: number) =>
-        motion({ opacity: 0 }).to({ opacity: 1 }, span(0, over), ease.linear);
-
-      const blur = motion({ blur: 0 }).to({ blur: 4 }, span(0, 2), ease.linear);
-
-      const svg = render(
-        { width: 40, height: 20, duration: 2, title: "Once" },
-        <>
-          <rect width={20} height={20} fill="#3EE6D6" animation={fade(2)} />
-          <Once>
-            <rect x={20} width={20} height={10} fill="#E64" animation={fade(1)} />
-            <rect x={25} y={12} width={10} height={6} fill="#246" animation={blur} />
-          </Once>
-        </>,
-      );
-
-      const drawn = (loop: number, once: number, deviation: number) =>
-        render(
-          { width: 40, height: 20, duration: 2, title: "Drawn" },
-          <>
-            <rect width={20} height={20} fill="#3EE6D6" opacity={loop} />
-            <rect x={20} width={20} height={10} fill="#E64" opacity={once} />
-            <rect
-              x={25}
-              y={12}
-              width={10}
-              height={6}
-              fill="#246"
-              filter={def.filter(
-                { filterUnits: "userSpaceOnUse", x: 0, y: 0, width: 40, height: 20 },
-                <feGaussianBlur stdDeviation={deviation} />,
-              )}
-            />
-          </>,
-        );
-
-      const [late, own, ...references] = await Promise.all([
-        asImage(restyle(svg, { at: 2.5, paused: true }), [50]),
-        asImage(restyle(svg, { at: 2.5, onceAt: 0.5, paused: true }), [50]),
-        asImage(drawn(0.25, 1, 4), [50]),
-        asImage(drawn(0.25, 0.5, 1), [50]),
-      ]);
-
-      expect(same(late[0]!, references[0]![0]!)).toBe(true);
-      expect(same(own[0]!, references[1]![0]!)).toBe(true);
-    });
-
     test("a scene that plays once stays valid, held, and on its last frame when started past its end", async () => {
-      const once = render(
-        { width: 40, height: 20, duration: 4, title: "Once", loop: false },
-        <rect
-          width={10}
-          height={10}
-          animation={motion({ blur: 0 }).to({ blur: 4 }, span(0, 4), ease.linear)}
-        />,
+      const square = (amount: number | ReturnType<typeof track<number>>) => () => (
+        <Shape geometry={rect(10, 10)} fill="#000000" effects={[blur(amount)]} />
       );
+
+      const once = emit([40, 20], 4, square(track(0).to(4, span(0, 4), ease.linear)), {
+        loop: false,
+      });
 
       const paused = restyle(once, { at: 1, paused: true });
       expect(paused.match(/fill="freeze"/g)).toHaveLength(1);
       const [first, later] = await asImage(paused, [50, 500]);
       expect(same(first!, later!)).toBe(true);
 
-      const ended = render(
-        { width: 40, height: 20, duration: 4, title: "Ended" },
-        <rect
-          width={10}
-          height={10}
-          filter={def.filter(
-            { filterUnits: "userSpaceOnUse", x: 0, y: 0, width: 40, height: 20 },
-            <feGaussianBlur stdDeviation={4} />,
-          )}
-        />,
-      );
-
-      const [last] = await asImage(ended, [50]);
+      const [last] = await asImage(emit([40, 20], 4, square(4)), [50]);
       const [past] = await asImage(restyle(once, { at: 6 }), [50]);
       const [heldPast] = await asImage(restyle(once, { at: 6, paused: true }), [50]);
       expect(same(past!, last!)).toBe(true);
@@ -779,14 +664,18 @@ declare global {
 }
 
 describe.if(browser)("seek and loopLength on an inline <svg>", () => {
-  const scene = (prefix: string, duration: number) =>
-    render(
-      { width: 20, height: 20, duration, title: prefix, prefix },
-      <rect
-        width={20}
-        height={20}
-        animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(0, duration), ease.linear)}
-      />,
+  const fading = (duration: number, options: SvgOptions = {}) =>
+    emit(
+      [20, 20],
+      duration,
+      () => (
+        <Shape
+          geometry={rect(20, 20)}
+          fill="#000000"
+          opacity={track(0).to(1, span(0, duration), ease.linear)}
+        />
+      ),
+      options,
     );
 
   test("scrub one picture and leave the rest of the page playing", async () => {
@@ -795,7 +684,9 @@ describe.if(browser)("seek and loopLength on an inline <svg>", () => {
 
     try {
       const page = await chrome.newPage();
-      await page.setContent(`<!doctype html><body>${scene("one", 4)}${scene("two", 3)}`);
+      await page.setContent(
+        `<!doctype html><body>${fading(4, { prefix: "one" })}${fading(3, { prefix: "two" })}`,
+      );
       await page.addScriptTag({
         content: `window.seek = ${seek};window.loopLength = ${loopLength};`,
       });
@@ -824,14 +715,7 @@ describe.if(browser)("seek and loopLength on an inline <svg>", () => {
   });
 
   test("take scene seconds on a scene played at another rate", async () => {
-    const fast = render(
-      { width: 20, height: 20, duration: 4, title: "Fast", playbackRate: 2 },
-      <rect
-        width={20}
-        height={20}
-        animation={motion({ opacity: 0 }).to({ opacity: 1 }, span(0, 4), ease.linear)}
-      />,
-    );
+    const fast = fading(4, { playbackRate: 2 });
 
     const { chromium } = await import("playwright-core");
     const chrome = await chromium.launch();
@@ -858,12 +742,12 @@ describe.if(browser)("seek and loopLength on an inline <svg>", () => {
       await chrome.close();
     }
 
-    const scene = await openScene(fast);
+    const opened = await openScene(fast);
 
     try {
-      expect([scene.duration, scene.playbackRate]).toEqual([4, 2]);
+      expect([opened.duration, opened.playbackRate]).toEqual([4, 2]);
     } finally {
-      await scene.close();
+      await opened.close();
     }
   });
 });

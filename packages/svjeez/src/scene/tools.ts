@@ -41,7 +41,7 @@ export type {
 
 export type { PictureData } from "../picture";
 
-export type { FontValue } from "../font/font";
+export type { Font, FontFamily, FontOptions, FontStyle, FontValue } from "../font/font";
 
 export type { Anchor, Edge, Place } from "./refs";
 

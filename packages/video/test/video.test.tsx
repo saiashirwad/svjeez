@@ -1,17 +1,19 @@
+/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
 import { ALL_FORMATS, BufferSource, EncodedPacketSink, Input } from "mediabunny";
-import { motion, render, span } from "svjeez";
+import { Shape, rect, scene as made, span, track } from "svjeez/scene";
+import { svg } from "svjeez/scene/tools";
 import { video } from "@svjeez/video";
 
 const scene = (width: number, height: number) =>
-  render(
-    { width, height, duration: 1, title: "Slide" },
-    <rect
-      width={16}
-      height={height}
-      fill="#3EE6D6"
-      animation={motion({ x: 0 }).to({ x: width - 16 }, span(0, 1))}
-    />,
+  svg.emit(
+    made({ size: [width, height], duration: 1, title: "Slide" }, () => (
+      <Shape
+        geometry={rect(16, height)}
+        fill="#3EE6D6"
+        at={track([0, 0]).to([width - 16, 0], span(0, 1))}
+      />
+    )),
   );
 
 const slide = scene(64, 48);
@@ -106,9 +108,10 @@ describe("video", () => {
   });
 
   test("a scene with nothing animated has no video to make", async () => {
-    const still = render(
-      { width: 8, height: 8, duration: 1, title: "Still" },
-      <rect width={8} height={8} />,
+    const still = svg.emit(
+      made({ size: [8, 8], duration: 1, title: "Still" }, () => (
+        <Shape geometry={rect(8, 8)} fill="#000000" />
+      )),
     );
 
     const error = await video(still, { format: "webm" }).catch((error: Error) => error);

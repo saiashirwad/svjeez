@@ -1,113 +1,125 @@
+/** @jsxImportSource svjeez/scene */
 import { describe, expect, test } from "bun:test";
-import { Style, font, render, type Child } from "svjeez";
+import { Group, Run, Text, font, scene, type SceneElement } from "svjeez/scene";
+import { svg } from "svjeez/scene/tools";
 
 const fixture = (name: string) => new URL(`./fixtures/${name}.ttf`, import.meta.url);
 const regular = await font.load(fixture("SpaceMono-Regular"));
 const bold = await font.load(fixture("SpaceMono-Bold"));
 const family = font.family(regular, bold);
+const sans = await font.load(fixture("ABeeZee-Regular"));
+const sansItalic = await font.load(fixture("ABeeZee-Italic"));
+const slanted = font.family(sans, sansItalic);
 
-const scene = (child: Child) =>
-  render({ width: 200, height: 100, duration: 1, title: "Faces" }, child);
+const emit = (build: () => SceneElement) =>
+  svg.emit(scene({ size: [200, 100], duration: 1, title: "Faces" }, build));
 
-const embeds = (svg: string) =>
+/** Each embedded face, by weight and style, read back as a font. */
+const embeds = (out: string) =>
   new Map(
-    [...svg.matchAll(/url\(data:font\/ttf;base64,([^)]+)\)[^}]*font-weight:(\d+)/g)].map((m) => [
-      Number(m[2]),
-      font(Buffer.from(m[1]!, "base64")),
-    ]),
+    [
+      ...out.matchAll(
+        /url\(data:font\/ttf;base64,([^)]+)\)[^}]*font-weight:(\d+);font-style:(\w+)/g,
+      ),
+    ].map((m) => [`${m[2]} ${m[3]}`, font(Buffer.from(m[1]!, "base64"))]),
   );
 
 describe("per-face subsetting", () => {
   test("each weight embeds only the glyphs drawn in it", () => {
-    const svg = scene(
-      <g>
-        <text fontFamily={family} fontWeight={400}>
-          abc
-        </text>
-        <text fontFamily={family} fontWeight={700}>
-          XYZ
-        </text>
-      </g>,
-    );
-
-    const cut = embeds(svg);
-    expect(cut.get(400)!.has("a") && cut.get(400)!.has("c")).toBe(true);
-    expect(cut.get(400)!.has("X")).toBe(false);
-    expect(cut.get(700)!.has("X") && cut.get(700)!.has("Z")).toBe(true);
-    expect(cut.get(700)!.has("a")).toBe(false);
-  });
-
-  test("weight and style are inherited from ancestors, and a nearer one wins", () => {
-    const svg = scene(
-      <g fontFamily={family} fontWeight={700}>
-        <text>XYZ</text>
-        <text fontWeight="normal">abc</text>
-      </g>,
-    );
-
-    const cut = embeds(svg);
-    expect(cut.get(700)!.has("X")).toBe(true);
-    expect(cut.get(700)!.has("a")).toBe(false);
-    expect(cut.get(400)!.has("a")).toBe(true);
-    expect(cut.get(400)!.has("X")).toBe(false);
-  });
-
-  test("a weight with no exact face goes to every face of the family", () => {
     const cut = embeds(
-      scene(
-        <text fontFamily={family} fontWeight={600}>
-          abc
-        </text>,
-      ),
-    );
-
-    expect(cut.get(400)!.has("a")).toBe(true);
-    expect(cut.get(700)!.has("a")).toBe(true);
-  });
-
-  test("a weight that cannot be read statically goes to every face", () => {
-    const cut = embeds(
-      scene(
-        <text fontFamily={family} style="font-weight:bolder">
-          abc
-        </text>,
-      ),
-    );
-
-    expect(cut.get(400)!.has("a")).toBe(true);
-    expect(cut.get(700)!.has("a")).toBe(true);
-  });
-
-  test("a weight set by a class keeps the text in every face of its family", () => {
-    const cut = embeds(
-      scene(
-        <g>
-          <Style>{".heavy{font-weight:700}"}</Style>
-          <text fontFamily={family} class="heavy">
+      emit(() => (
+        <Group>
+          <Text font={family} weight={400} size={10} fill="#000000">
             abc
-          </text>
-        </g>,
-      ),
+          </Text>
+          <Text font={family} weight={700} size={10} fill="#000000">
+            XYZ
+          </Text>
+        </Group>
+      )),
     );
 
-    expect(cut.get(400)!.has("a")).toBe(true);
-    expect(cut.get(700)!.has("a")).toBe(true);
+    expect(cut.get("400 normal")!.has("a") && cut.get("400 normal")!.has("c")).toBe(true);
+    expect(cut.get("400 normal")!.has("X")).toBe(false);
+    expect(cut.get("700 normal")!.has("X") && cut.get("700 normal")!.has("Z")).toBe(true);
+    expect(cut.get("700 normal")!.has("a")).toBe(false);
   });
 
-  test("text with an unknown family goes to every face", () => {
+  test("a run takes its face from the text around it, and a nearer weight wins", () => {
     const cut = embeds(
-      scene(
-        <g>
-          <text fontFamily={family} fontWeight={400}>
-            abc
-          </text>
-          <text>XYZ</text>
-        </g>,
-      ),
+      emit(() => (
+        <Text font={family} weight={700} size={10} fill="#000000">
+          XYZ<Run weight={400}>abc</Run>
+        </Text>
+      )),
     );
 
-    expect(cut.get(400)!.has("X")).toBe(true);
-    expect(cut.get(700)!.has("X")).toBe(true);
-    expect(cut.get(700)!.has("a")).toBe(false);
+    expect(cut.get("700 normal")!.has("X")).toBe(true);
+    expect(cut.get("700 normal")!.has("a")).toBe(false);
+    expect(cut.get("400 normal")!.has("a")).toBe(true);
+    expect(cut.get("400 normal")!.has("X")).toBe(false);
+  });
+
+  test("texts that inherit their face from the root still cut by the face they draw in", () => {
+    const out = emit(() => (
+      <Group>
+        <Text font={family} weight={700} size={10} fill="#000000">
+          XY
+        </Text>
+        <Text font={family} weight={700} size={10} fill="#000000">
+          Z
+        </Text>
+        <Text font={family} size={10} fill="#000000">
+          abc
+        </Text>
+      </Group>
+    ));
+
+    const cut = embeds(out);
+
+    expect(out).toMatch(/<svg[^>]*font-family="'Space Mono'"/);
+    expect(cut.get("700 normal")!.has("Z")).toBe(true);
+    expect(cut.get("700 normal")!.has("a")).toBe(false);
+    expect(cut.get("400 normal")!.has("a")).toBe(true);
+    expect(cut.get("400 normal")!.has("X")).toBe(false);
+  });
+
+  test("an italic run goes only to the italic face", () => {
+    const cut = embeds(
+      emit(() => (
+        <Text font={slanted} size={10} fill="#000000">
+          up <Run italic>slant</Run>
+        </Text>
+      )),
+    );
+
+    expect(cut.get("400 italic")!.has("s") && cut.get("400 italic")!.has("t")).toBe(true);
+    expect(cut.get("400 italic")!.has("u")).toBe(false);
+    expect(cut.get("400 normal")!.has("u")).toBe(true);
+    expect(cut.get("400 normal")!.has("s")).toBe(false);
+  });
+
+  test("each family's face holds only its own family's text", () => {
+    const faces = [
+      ...emit(() => (
+        <Group>
+          <Text font={family} size={10} fill="#000000">
+            abc
+          </Text>
+          <Text font={sans} size={10} fill="#000000">
+            XYZ
+          </Text>
+        </Group>
+      )).matchAll(/url\(data:font\/ttf;base64,([^)]+)\)/g),
+    ].map((m) => font(Buffer.from(m[1]!, "base64")));
+
+    expect(faces.length).toBe(2);
+
+    for (const face of faces) {
+      const mine = face.family === "Space Mono" ? "a" : "X";
+      const theirs = face.family === "Space Mono" ? "X" : "a";
+      expect(face.has(mine)).toBe(true);
+      expect(face.has(theirs)).toBe(false);
+    }
   });
 });

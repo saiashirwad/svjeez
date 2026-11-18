@@ -9,7 +9,7 @@ svjeez compiles TypeScript scenes into one animated SVG. A user touches it throu
 
 The feature map in [`features/README.md`](features/README.md) is the list of what to prove. Read it, then open the feature file you need.
 
-Other surfaces are not mapped yet: the Vite plugin's test app (`packages/vite`, `bun run test` / `bun run dev`), the Astro site and its playground (`site/`, `bun run dev`), and `bun run build:examples`. Prove those with their own commands from `AGENTS.md`.
+Other surfaces are not mapped yet: the Vite plugin's test app (`packages/vite`, `bun run test` / `bun run dev`) and `bun run build:examples`. Prove those with their own commands from `AGENTS.md`.
 
 ## Launch
 

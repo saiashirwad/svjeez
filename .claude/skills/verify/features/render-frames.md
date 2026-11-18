@@ -22,10 +22,10 @@ Preconditions:
 
 - Baseline from the README; `$V doctor` shows Chromium launching.
 
-- **Chosen times, sheet, dark.** Run `$V cli frames readme/hero.tsx --times 0,1.5 --sheet --color-scheme dark --out $VERIFY_RUN/evidence/hero-frames`. Exit 0. The first line reads `loop 12s, dark`, then two frame paths and `sheet.png`. Open `sheet.png`: the 0s cell is blank dark, the 1.5s cell shows the svjeez wordmark and four panels.
+- **Chosen times, sheet, dark.** Run `$V cli frames clips/index.tsx --times 0,1.5 --sheet --color-scheme dark --out $VERIFY_RUN/evidence/clips-frames`. Exit 0. The first line reads `loop 9s, dark`, then two frame paths and `sheet.png`. Open `sheet.png`: both cells show the two desktops on a dark background, and the window or cursor has moved between them.
 - **Count.** Run `$V cli frames readme/basic.tsx --count 3 --out $VERIFY_RUN/evidence/basic-frames`. Exit 0 and three `frame-0N-*.png` files, evenly spaced across the loop.
 - **Columns.** Run `$V cli frames readme/basic.tsx --count 4 --columns 2 --out $VERIFY_RUN/evidence/basic-grid`. `sheet.png` is a 2×2 grid.
-- **Argument errors.** Run `$V cli frames readme/hero.tsx --times 1 --count 2`. Exit 1 with `Pass --times or --count, not both.` Run `$V cli frames readme/hero.tsx --color-scheme sepia`. Exit 1 with `--color-scheme is system, light or dark, got "sepia".`
+- **Argument errors.** Run `$V cli frames clips/index.tsx --times 1 --count 2`. Exit 1 with `Pass --times or --count, not both.` Run `$V cli frames clips/index.tsx --color-scheme sepia`. Exit 1 with `--color-scheme is system, light or dark, got "sepia".`
 - **Proof.** Open the sheets and describe each cell against the scene's timeline.
 
 ## Gotchas

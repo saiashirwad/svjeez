@@ -20,7 +20,7 @@ Preconditions:
 
 - Baseline from the README. No preview running for this run.
 
-- **Start.** Run `$V preview start packages/svjeez/skills/svjeez/examples/orbit.tsx`, then `$V doctor --preview`. Ready line and `doctor: healthy`.
+- **Start.** Run `$V preview start examples/readme/basic.tsx`, then `$V doctor --preview`. Ready line and `doctor: healthy`.
 - **Play, pause, scrub.** Run `$V preview drive --at 2.5 --name orbit`. JSON shows `"title": "Orbit"`, `"duration": 6`, `playing.after` later than `playing.before`, `"toggle": "play"`, and `scrubbedTo` and `heldAfterPause` both `2.50s / 6.00s`. In `orbit-at-2.5s.png` the moon sits left of the planet and below its center.
 - **Error panel.** Stop, then start on a scratch scene: `printf 'export default () => \`<svg xmlns="http://www.w3.org/2000/svg" width="80" height="40"><title>one</title></svg>\`;\n' > $VERIFY_RUN/scratch/live.ts` and `$V preview start $VERIFY_RUN/scratch/live.ts`. Overwrite it with `printf 'export default () => { throw new Error("boom-verify"); };\n' > $VERIFY_RUN/scratch/live.ts`. Within about a second, `curl -s $URL/state` (after `source $VERIFY_RUN/scratch/preview.env`) has version 2 and an `error` containing `boom-verify`. `$V preview drive --name broken` writes `broken-error.png` with the stack trace on the page.
 - **Rebuild clears it.** Write the first scene back with `<title>two</title>`. `/state` reaches version 3 with no `error`, and `$V preview drive --name fixed` reports `"title": "two"` and `"error": null`.
