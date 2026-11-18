@@ -25,4 +25,4 @@ await writeFile("scene.mp4", bytes);
 
 `video()` returns the encoded bytes, format, codec, duration and frame count. Codec availability depends on Chromium. Choose another codec, WebM or a Chrome executable if the requested encoder is unavailable.
 
-[API reference](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/video.md)
+[API reference](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/render.md)

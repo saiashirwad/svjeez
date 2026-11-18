@@ -344,7 +344,7 @@ Nothing renders differently.
 
 Search the project for `#` followed by a digit inside quotes next to `key`: in `editor.send({ type: "set", key: … })`, `select` messages, `state.grips[…]`, `valueOf(state, …)`, and any saved selection or test. Replace each with the key `svjeez values <scene>` now prints for that literal, or look the key up by its literal instead of writing it, as in `state.values.find((v) => v.literal.text === "40")!.key`. Keys read from `state.values` at run time need nothing.
 
-New, nothing to migrate: `svjeez values <scene>` lists those keys with each value's kind, value, range and `file:line:column`, and `svjeez set <scene> key=value …` writes values into the file the way the editor does (see `references/edit.md`). Both need `@svjeez/live` installed. `editFor(value, v)` from `@svjeez/live` is the edit a `set` message makes.
+New, nothing to migrate: `svjeez values <scene>` lists those keys with each value's kind, value, range and `file:line:column`, and `svjeez set <scene> key=value …` writes values into the file the way the editor does. Both need `@svjeez/live` installed. `editFor(value, v)` from `@svjeez/live` is the edit a `set` message makes.
 
 ### `@svjeez/dom`: keys pair page-wide, and a recording draws once what doesn't change
 
