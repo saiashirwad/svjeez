@@ -307,19 +307,12 @@ export interface MatchOptions {
   readonly precision?: number;
 }
 
-export function matchPaths(paths: readonly string[], options: MatchOptions = {}): PathData[] {
-  const places = options.precision ?? 2;
-
-  if (paths.length === 0) return [];
-
-  const parsed = paths.map((d) => {
-    const rings = parse(d);
-
-    if (rings.length === 0) throw new Error(`matchPaths() found no shape in "${d}".`);
-
-    return rings;
-  });
-
+/**
+ * Outlines with the same rings and the same curve count in each ring, so each can blend into the next point by point.
+ * A ring one outline lacks grows from the middle of another's; curves split where they are longest; each closed ring
+ * turns to start nearest where the ring before it starts.
+ */
+export const matchRings = (parsed: readonly (readonly Ring[])[]): Ring[][] => {
   const count = Math.max(...parsed.map((rings) => rings.length));
 
   const filled = parsed.map((rings, v) =>
@@ -347,7 +340,23 @@ export function matchPaths(paths: readonly string[], options: MatchOptions = {})
   for (let v = 1; v < even.length; v++)
     even[v] = even[v]!.map((ring, r) => align(ring, even[v - 1]![r]!));
 
-  return even.map((rings) => write(rings, places));
+  return even;
+};
+
+export function matchPaths(paths: readonly string[], options: MatchOptions = {}): PathData[] {
+  const places = options.precision ?? 2;
+
+  if (paths.length === 0) return [];
+
+  const parsed = paths.map((d) => {
+    const rings = parse(d);
+
+    if (rings.length === 0) throw new Error(`matchPaths() found no shape in "${d}".`);
+
+    return rings;
+  });
+
+  return matchRings(parsed).map((rings) => write(rings, places));
 }
 
 export const blendPaths = (a: string, b: string, amount: number): PathData => {

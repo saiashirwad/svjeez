@@ -2,6 +2,7 @@ import { ease, type Seconds } from "../motion";
 import type { Span } from "../span";
 import type { Vec } from "./ir";
 import type { Curve } from "./spring";
+import type { Geometry } from "./values";
 import { Passage } from "./steps";
 
 /**
@@ -49,6 +50,7 @@ export class ValueTrack<T> implements Track<T> {
 /** Start a track. `initial` is the value before the first step. */
 export function track(initial: number): Track<number>;
 export function track(initial: Vec): Track<Vec>;
+export function track(initial: Geometry): Track<Geometry>;
 export function track<T>(initial: T): Track<T>;
 export function track<T>(initial: T): Track<T> {
   return new ValueTrack(new Passage({ initial: { value: initial }, steps: [] }));

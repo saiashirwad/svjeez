@@ -1,10 +1,12 @@
-import { ease, type Ease, type Seconds } from "../motion";
+import { NUDGE, ease, type Ease, type Seconds } from "../motion";
 import { random } from "../random";
 import { checkWindow, span, type Span, type When } from "../span";
+import { contoursOf } from "./geometry";
 import type { Vec } from "./ir";
 import { pair } from "./lane";
 import type { Curve } from "./spring";
 import { motion, track, type LayerValues, type Motion, type Track } from "./track";
+import { outlineOf, type Geometry } from "./values";
 
 const REST = { offset: [0, 0], rotate: 0, scale: 1, opacity: 1 } as const;
 
@@ -164,4 +166,371 @@ export const show = (
   }
 
   return shown;
+};
+
+export interface ShakeAmplitude {
+  /** How far it swings first, across and down. */
+  readonly offset?: Vec;
+  /** How far it turns first, in degrees. */
+  readonly rotate?: number;
+}
+
+/** A damped swing around rest, back and forth `rate` times a second (default 12), settling at rest by the span's end. */
+export const shake = (
+  when: Span,
+  amplitude: ShakeAmplitude,
+  { rate = 12 }: { readonly rate?: number } = {},
+): Motion => {
+  const { at, over } = closed(when, "shake()");
+
+  if (!(rate > 0 && Number.isFinite(rate)))
+    throw new Error(`shake() needs a positive rate, got ${rate}.`);
+  const count = Math.max(2, Math.round(over * rate));
+
+  const swing = (k: number): LayerValues => {
+    const share = k === count ? 0 : (k % 2 ? -1 : 1) * (1 - k / count);
+    const { offset, rotate } = amplitude;
+
+    return {
+      ...(offset && { offset: [offset[0] * share, offset[1] * share] as const }),
+      ...(rotate !== undefined && { rotate: rotate * share }),
+    };
+  };
+
+  let layer = motion();
+
+  for (let k = 1; k <= count; k++)
+    layer = layer.to(swing(k), span(at + ((k - 1) * over) / count, over / count), ease.linear);
+
+  return layer;
+};
+
+export interface SampledOptions {
+  /** Seconds between samples before simplifying. Default 0.05. */
+  readonly step?: Seconds;
+  /**
+   * How far the straight run between two kept keys may stray from a sample, in the value's own units: px for a point,
+   * and for a geometry the farthest any of its points strays.
+   */
+  readonly tolerance: number;
+  /** Decimal places a number or point is rounded to before simplifying. Default none. */
+  readonly precision?: number;
+}
+
+/** One kept step: a transition over `over` seconds, or a cut when `over` is 0. */
+interface Kept<T> {
+  readonly at: Seconds;
+  readonly over: Seconds;
+  readonly value: T;
+}
+
+interface Simplified<T> {
+  readonly first: T;
+  readonly kept: readonly Kept<T>[];
+}
+
+interface Sample<T> {
+  readonly t: Seconds;
+  readonly value: T;
+  readonly points: readonly (readonly number[])[];
+}
+
+/** How far `b`'s farthest point is from `a`'s. */
+const apart = (a: Sample<unknown>, b: Sample<unknown>): number =>
+  Math.max(
+    0,
+    ...a.points.map((point, i) => Math.hypot(...point.map((v, c) => v - b.points[i]![c]!))),
+  );
+
+/** The samples to keep so straight runs between them stay within `tolerance` of every sample. */
+const ramerDouglasPeucker = <T>(run: readonly Sample<T>[], tolerance: number): number[] => {
+  const kept = [0, run.length - 1];
+
+  const split = (a: number, b: number): void => {
+    let worst = -1;
+    let error = tolerance;
+
+    for (let i = a + 1; i < b; i++) {
+      const u = (i - a) / (b - a);
+      const [from, to, here] = [run[a]!, run[b]!, run[i]!];
+
+      const miss = Math.max(
+        ...here.points.map((point, p) =>
+          Math.hypot(
+            ...point.map(
+              (v, c) => v - (from.points[p]![c]! + (to.points[p]![c]! - from.points[p]![c]!) * u),
+            ),
+          ),
+        ),
+      );
+
+      if (miss > error) [worst, error] = [i, miss];
+    }
+
+    if (worst < 0) return;
+    kept.push(worst);
+    split(a, worst);
+    split(worst, b);
+  };
+
+  split(0, run.length - 1);
+
+  return kept.sort((a, b) => a - b);
+};
+
+/** Narrows a jump between two samples down to the two closest moments either side of it, or none if it is a slope. */
+const jump = <T>(
+  a: Sample<T>,
+  b: Sample<T>,
+  at: (t: Seconds) => Sample<T>,
+  tolerance: number,
+): readonly [Sample<T>, Sample<T>] | undefined => {
+  const floor = Math.max(tolerance, apart(a, b) / 1000);
+  let [lo, hi] = [a, b];
+
+  for (let i = 0; i < 20; i++) {
+    const mid = at((lo.t + hi.t) / 2);
+    [lo, hi] = apart(lo, mid) > apart(mid, hi) ? [lo, mid] : [mid, hi];
+
+    if (apart(lo, hi) <= floor) return undefined;
+  }
+
+  return [lo, hi];
+};
+
+/**
+ * Samples a function densely and keeps only the steps a viewer can tell apart: morphs come out dense, holds sparse, and
+ * a jump comes out as a cut. `points` reads a value as points to measure, and throws on one that can't follow the first.
+ */
+const simplified = <T>(
+  window: Span,
+  read: (t: Seconds) => T,
+  points: (value: T, t: Seconds) => readonly (readonly number[])[],
+  options: { readonly step?: Seconds; readonly tolerance: number },
+  what: string,
+): Simplified<T> => {
+  const { step = 0.05, tolerance } = options;
+  const { at: from, over: duration } = closed(window, what);
+
+  if (!Number.isFinite(step) || step <= 0)
+    throw new Error(`${what} needs a positive step, got ${step}.`);
+
+  if (!(tolerance >= 0 && Number.isFinite(tolerance)))
+    throw new Error(`${what} needs a finite tolerance of 0 or more, got ${tolerance}.`);
+  const edge = duration * NUDGE;
+
+  const times = Array.from(
+    { length: Math.ceil((duration - edge) / step) },
+    (_, i) => i * step,
+  ).concat(duration);
+
+  const at = (t: Seconds): Sample<T> => {
+    const value = read(t);
+
+    return { t, value, points: points(value, t) };
+  };
+
+  const samples = times.map(at);
+  const runs: Sample<T>[][] = [[samples[0]!]];
+
+  for (const next of samples.slice(1)) {
+    const run = runs.at(-1)!;
+    const last = run.at(-1)!;
+    const cut = apart(last, next) > tolerance ? jump(last, next, at, tolerance) : undefined;
+
+    if (cut) {
+      if (cut[0].t > last.t) run.push(cut[0]);
+      runs.push(cut[1].t < next.t ? [cut[1], next] : [next]);
+    } else run.push(next);
+  }
+
+  const kept: Kept<T>[] = [];
+
+  runs.forEach((run, r) => {
+    if (r > 0) kept.push({ at: from + run[0]!.t, over: 0, value: run[0]!.value });
+    const keep = run.length > 1 ? ramerDouglasPeucker(run, tolerance) : [];
+
+    for (let j = 1; j < keep.length; j++) {
+      const [a, b] = [run[keep[j - 1]!]!, run[keep[j]!]!];
+
+      kept.push({ at: from + a.t, over: b.t - a.t, value: b.value });
+    }
+  });
+
+  return { first: samples[0]!.value, kept };
+};
+
+const roundTo = (precision: number | undefined, what: string): ((value: number) => number) => {
+  if (precision === undefined) return (value) => value;
+
+  if (!(Number.isInteger(precision) && precision >= 0))
+    throw new Error(`${what} needs a whole, non-negative precision, got ${precision}.`);
+  const factor = 10 ** precision;
+
+  return (value) => Math.round(value * factor) / factor;
+};
+
+const isNumber = (value: number | Vec | Geometry): value is number => typeof value === "number";
+
+const isScalar = (value: number | Vec): value is number => typeof value === "number";
+
+const isVec = (value: Vec | Geometry): value is Vec => Array.isArray(value);
+
+/** A geometry as contours to measure. An arc always has four pieces, so arcs of any sweep compare point by point. */
+const measured = (outline: ReturnType<typeof outlineOf>) =>
+  contoursOf(outline, outline.kind === "arc" ? 4 : undefined);
+
+/** A geometry's kind and the shape of its contours: two samples with the same one blend point by point. */
+const structure = (outline: ReturnType<typeof outlineOf>): string =>
+  `${outline.kind}:${measured(outline)
+    .map((contour) => `${contour.curves.length}${contour.closed ? "z" : ""}`)
+    .join(",")}`;
+
+/**
+ * A track sampled from a function of time: `sample` gets time from 0 to the span's `over`, and the track plays it from
+ * the span's `at`, holding the first value before and the last after. Only the keys the tolerance needs are kept, as
+ * linear steps, and a jump becomes a cut. A geometry sample keeps its kind and its number of points throughout.
+ */
+export function sampled(
+  window: Span,
+  sample: (t: Seconds) => number,
+  options: SampledOptions,
+): Track<number>;
+export function sampled(
+  window: Span,
+  sample: (t: Seconds) => Vec,
+  options: SampledOptions,
+): Track<Vec>;
+export function sampled(
+  window: Span,
+  sample: (t: Seconds) => Geometry,
+  options: SampledOptions,
+): Track<Geometry>;
+export function sampled(
+  window: Span,
+  sample: (t: Seconds) => number | Vec | Geometry,
+  options: SampledOptions,
+): Track<number | Vec | Geometry> {
+  const round = roundTo(options.precision, "sampled()");
+  let shape: string | undefined;
+
+  const read = (t: Seconds): number | Vec | Geometry => {
+    const value = sample(t);
+
+    if (isNumber(value)) return round(value);
+
+    return isVec(value) ? [round(value[0]), round(value[1])] : value;
+  };
+
+  const points = (value: number | Vec | Geometry, t: Seconds): number[][] => {
+    if (isNumber(value) || isVec(value)) {
+      const each = isNumber(value) ? [value] : [...value];
+
+      if (!each.every(Number.isFinite))
+        throw new Error(
+          `sampled() returned ${JSON.stringify(value)} at t=${t}; every sample needs finite numbers.`,
+        );
+
+      return [each];
+    }
+
+    const outline = outlineOf(value);
+    const own = structure(outline);
+
+    shape ??= own;
+
+    if (own !== shape)
+      throw new Error(
+        `sampled() returned geometry at t=${t} that doesn't match the first sample (${own} against ${shape}). Return one kind with the same number of points every time.`,
+      );
+
+    return measured(outline).flatMap((contour) => [
+      [...contour.start],
+      ...contour.curves.flatMap((curve) => curve.map((point) => [...point])),
+    ]);
+  };
+
+  const { first, kept } = simplified(window, read, points, options, "sampled()");
+  let out = track<number | Vec | Geometry>(first);
+
+  for (const { at, over, value } of kept)
+    out = over > 0 ? out.to(value, span(at, over), ease.linear) : out.set(value, at);
+
+  return out;
+}
+
+export interface SampledMotionOptions {
+  /** Seconds between samples before simplifying. Default 0.05. */
+  readonly step?: Seconds;
+  /** One tolerance for each value the function returns, in its own units: px for `offset`, degrees for `rotate`. */
+  readonly tolerance: { readonly [K in keyof LayerValues]?: number };
+  /** Decimal places each value is rounded to before simplifying. Default none. */
+  readonly precision?: number;
+}
+
+const LAYER_NAMES = ["offset", "rotate", "scale", "opacity"] as const;
+
+/**
+ * A motion layer sampled from a function of time, each value it returns simplified with its own tolerance, as
+ * `sampled()` does for one track.
+ */
+sampled.motion = (
+  window: Span,
+  sample: (t: Seconds) => LayerValues,
+  options: SampledMotionOptions,
+): Motion => {
+  const round = roundTo(options.precision, "sampled.motion()");
+  const names = LAYER_NAMES.filter((name) => sample(0)[name] !== undefined);
+
+  const lanes = names.map((name) => {
+    const tolerance = options.tolerance[name];
+
+    if (tolerance === undefined)
+      throw new Error(
+        `sampled.motion() needs a tolerance for \`${name}\`, which the function returns.`,
+      );
+
+    const read = (t: Seconds): readonly number[] => {
+      const value = sample(t)[name];
+
+      if (value === undefined)
+        throw new Error(
+          `sampled.motion() returned no \`${name}\` at t=${t}; every sample needs the same values.`,
+        );
+      const each = isScalar(value) ? (name === "scale" ? [value, value] : [value]) : [...value];
+
+      if (!each.every(Number.isFinite))
+        throw new Error(
+          `sampled.motion() returned ${JSON.stringify(value)} for \`${name}\` at t=${t}; it needs finite numbers.`,
+        );
+
+      return each.map(round);
+    };
+
+    const valueOf = (each: readonly number[]): LayerValues =>
+      name === "rotate" || name === "opacity"
+        ? { [name]: each[0]! }
+        : { [name]: [each[0]!, each[1]!] as const };
+
+    const { first, kept } = simplified(
+      window,
+      read,
+      (each) => [each],
+      { ...options, tolerance },
+      "sampled.motion()",
+    );
+
+    return {
+      first: valueOf(first),
+      kept: kept.map((step) => ({ ...step, value: valueOf(step.value) })),
+    };
+  });
+
+  let layer = motion(Object.assign({}, ...lanes.map((lane) => lane.first)));
+
+  for (const { kept } of lanes)
+    for (const { at, over, value } of kept)
+      layer = over > 0 ? layer.to(value, span(at, over), ease.linear) : layer.set(value, at);
+
+  return layer;
 };
