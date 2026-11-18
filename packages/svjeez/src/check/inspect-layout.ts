@@ -31,7 +31,7 @@ export const wideLines = (survey: Survey): void => {
   for (const entry of survey.entries) {
     const { node } = entry;
 
-    if (node.kind !== "text" || isGone(survey, entry)) continue;
+    if (node.kind !== "text" || node.along || isGone(survey, entry)) continue;
 
     const widest = Math.max(
       0,

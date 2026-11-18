@@ -206,6 +206,12 @@ export interface TextNode extends Base {
   readonly size: number;
   readonly stroke?: Stroke;
   readonly lines: readonly TextLine[];
+  /** Text set along an outline, from `start` (a fraction of its length), aligned to that point. */
+  readonly along?: {
+    readonly path: Geometry;
+    readonly start: Animated<number>;
+    readonly align: "start" | "center" | "end";
+  };
 }
 
 export interface ImageNode extends Base {

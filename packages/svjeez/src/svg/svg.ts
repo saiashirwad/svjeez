@@ -32,10 +32,10 @@ import type {
 } from "../model/ir";
 import { curveLength, isCurved } from "../model/curve";
 import { placeOf } from "../model/scene-error";
-import { isLane, mapLane } from "../model/lane";
-import { same } from "../model/steps";
+import { atRest, isLane, mapLane } from "../model/lane";
+import { mixNumber, same } from "../model/steps";
 import { homed } from "../author/pin";
-import { growBox, lengthOf, onCircle } from "../model/geometry";
+import { growBox, lengthOf, onCircle, smilSafeWith } from "../model/geometry";
 import { blendable, isGradient } from "../author/paint";
 import { reachOf } from "../model/reach";
 import { walkScene } from "../model/walk";
@@ -45,6 +45,7 @@ import {
   filterUrl,
   gradientUrl,
   maskUrl,
+  pathId,
   working,
   type Defs,
 } from "./svg-paint";
@@ -752,6 +753,32 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
     own.push(cssLane(ctx, "fill-opacity", value, (each) => ({ fillOpacity: each })));
   };
 
+  const { along } = node;
+
+  /** Along a path the runs sit in a <textPath>, which starts `start` of the way along it. */
+  const onPath = (inside: SvgNode[]): SvgNode[] => {
+    if (!along) return inside;
+    const length = lengthOf(along.path);
+    const { start } = along;
+
+    const attrs = {
+      href: `#${pathId(ctx.defs, along.path, at, node.key)}`,
+      startOffset: num(atRest(start) * length),
+    };
+
+    if (!isLane(start)) return [element("textPath", attrs, inside)];
+
+    const lane = cssLane(
+      ctx,
+      "startOffset",
+      smilSafeWith(start, mixNumber, `the start of "${node.key}"`),
+      (value) => ({ startOffset: value * length }),
+      { route: "smil" },
+    );
+
+    return [{ ...element("textPath", attrs, inside), lanes: [lane] }];
+  };
+
   const firstLine = line?.at ?? [0, 0];
   const start = line?.runs[0]?.at ?? firstLine;
 
@@ -759,9 +786,11 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
     tag: "text",
     placed: true,
     attrs: {
-      ...(single && where(start, start[0] + at[0] !== 0, start[1] + at[1] !== 0)),
+      ...(single && !along && where(start, start[0] + at[0] !== 0, start[1] + at[1] !== 0)),
       ...(base && facing(base.face, ctx.around)),
       "font-size": num(node.size),
+      ...(along &&
+        along.align !== "start" && { "text-anchor": along.align === "center" ? "middle" : "end" }),
       ...(node.lines.some((each) =>
         /^\s|\s$|\s\s/.test(each.runs.map((run) => run.text).join("")),
       ) && {
@@ -782,9 +811,13 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
   }
 
   if (single)
-    return { drawn, children: line?.runs[0] ? [{ kind: "text", value: line.runs[0].text }] : [] };
+    return {
+      drawn,
+      children: onPath(line?.runs[0] ? [{ kind: "text", value: line.runs[0].text }] : []),
+    };
 
   if (
+    !along &&
     node.lines.every((each) => each.runs.length === 1) &&
     runs.every((run) => base && [...run.text].length === 1 && lookOf(run) === lookOf(base))
   ) {
@@ -800,11 +833,13 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
     each.runs.map((run, index): SvgNode => {
       const own: CssLane[] = [];
 
-      const placed = where(
-        run.at,
-        !first || at[0] + run.at[0] !== 0,
-        index === 0 && (!first || at[1] + run.at[1] !== 0),
-      );
+      const placed = along
+        ? {}
+        : where(
+            run.at,
+            !first || at[0] + run.at[0] !== 0,
+            index === 0 && (!first || at[1] + run.at[1] !== 0),
+          );
 
       const tspan: Drawn = {
         tag: "tspan",
@@ -826,7 +861,7 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
     }),
   );
 
-  return { drawn, children };
+  return { drawn, children: onPath(children) };
 };
 
 interface Holder {

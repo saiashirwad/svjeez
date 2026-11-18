@@ -30,6 +30,7 @@ const CHANNELS = {
   strokeWidth: { value: number },
   d: { value: pathData },
   offsetDistance: { value: number },
+  startOffset: { value: number },
   fill: { value: color },
   fillOpacity: { value: number },
   stroke: { value: color },
