@@ -121,7 +121,7 @@ export const placements = (scene: Scene, at: Seconds = 0): Placed[] => {
     const frame = frameAt(node, at);
     const index = out.length;
 
-    out.push({
+    const initial: Placed = {
       key: node.key,
       kind: node.kind,
       ...(node.source && { source: node.source }),
@@ -130,38 +130,42 @@ export const placements = (scene: Scene, at: Seconds = 0): Placed[] => {
       matrix: own,
       opacity,
       depth,
-    });
+    };
 
-    if (node.kind !== "group" || node.children.length === 0) return out[index]!;
-    const inside = node.children.map((child) => visit(child, own, opacity, depth + 1));
+    out.push(initial);
+
+    if (node.kind !== "group" || node.children.length === 0) return initial;
+    const children = node.children.map((child) => visit(child, own, opacity, depth + 1));
+
+    if (depth === 0 || node.authored?.count) return initial;
+
     const back = inverse(own);
+    const childBounds = around(children.flatMap((child) => corners(child.box)));
 
-    if (depth > 0 && !(node.kind === "group" && node.authored?.count)) {
-      const held = around(inside.flatMap((child) => corners(child.box)));
-
-      const frame =
-        back &&
-        clipped(
-          node,
-          around(
-            inside.flatMap((child) =>
-              corners(child.frame).map((point) => apply(back, apply(child.matrix, point))),
-            ),
+    const groupFrame =
+      back &&
+      clipped(
+        node,
+        around(
+          children.flatMap((child) =>
+            corners(child.frame).map((point) => apply(back, apply(child.matrix, point))),
           ),
-          at,
-        );
+        ),
+        at,
+      );
 
-      out[index] = {
-        ...out[index]!,
-        box:
-          frame && node.clip !== undefined
-            ? around(corners(frame).map((p) => apply(own, p)))
-            : held,
-        ...(frame && { frame }),
-      };
-    }
+    const finalized: Placed = {
+      ...initial,
+      box:
+        groupFrame && node.clip !== undefined
+          ? around(corners(groupFrame).map((point) => apply(own, point)))
+          : childBounds,
+      ...(groupFrame && { frame: groupFrame }),
+    };
 
-    return out[index]!;
+    out[index] = finalized;
+
+    return finalized;
   };
 
   visit(scene.root, IDENTITY, 1, 0);
