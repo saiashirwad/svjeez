@@ -75,7 +75,7 @@ export default function build(): string {
       title: "Browse examples",
       desc: "The words browse examples are handwritten while Blip, the svjeez mascot, fans out a hand of little picture cards and hops with delight.",
       reducedMotion: { at: 2 },
-      css: cssTag(Object.assign([css, ""], { raw: [css, ""] }), SQUASH),
+      css: cssTag`${cssTag.text(css)}${SQUASH}`,
     },
     <>
       <Once>

@@ -92,3 +92,5 @@ const lit = <circle r={10} filter={pulse} />;
 ```
 
 A filter over many animated elements re-renders every frame. `validateSvg` (from `svjeez/frames`) warns at 40 or more. Paint a glow with a gradient, or filter something that holds still.
+
+Use `css.text(text)` to compose CSS you already have, such as the stylesheet from `adaptive()`, into a CSS template with registered properties.

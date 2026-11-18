@@ -1,10 +1,27 @@
 import { remember } from "./sources";
+import type { Span } from "./span";
 import type { SvgNode } from "./svg";
 
 export const TRACE: unique symbol = Symbol.for("svjeez.sources");
 
+export interface TimelineTrack {
+  readonly label: string;
+  readonly source?: string;
+  readonly spans: readonly Span[];
+  readonly period?: number;
+}
+
+export interface BuildReport {
+  readonly warnings: readonly string[];
+  readonly duration?: number;
+  readonly loop?: boolean;
+  readonly timeline: readonly TimelineTrack[];
+}
+
 interface Trace {
-  readonly within: string;
+  readonly within?: string;
+  readonly sources?: boolean;
+  readonly onRender: (svg: string, report: BuildReport) => void;
 }
 
 interface Scope {
@@ -14,15 +31,15 @@ interface Scope {
 
 const scope: Scope = globalThis;
 
-export const startTrace = (within: string): void => {
-  scope[TRACE] = { within };
+export const startTrace = (trace: Trace): void => {
+  scope[TRACE] = trace;
 };
 
 export const stopTrace = (): void => {
   delete scope[TRACE];
 };
 
-export const tracing = (): boolean => scope[TRACE] !== undefined;
+export const traceOf = (): Trace | undefined => scope[TRACE];
 
 const FRAME = /(?:\(|at )((?:file:\/\/)?[^()\s][^()]*?):(\d+):(\d+)\)?\s*$/;
 
@@ -34,10 +51,10 @@ const pathOf = (raw: string): string =>
 const slash = (path: string): string => path.replace(/\\/g, "/");
 
 export const traced = (node: SvgNode): SvgNode => {
-  const trace = scope[TRACE];
+  const directory = scope[TRACE]?.within;
 
-  if (!trace) return node;
-  const within = slash(trace.within).replace(/\/?$/, "/");
+  if (!directory) return node;
+  const within = slash(directory).replace(/\/?$/, "/");
   const limit = Error.stackTraceLimit;
   Error.stackTraceLimit = 80;
   const stack = new Error().stack ?? "";

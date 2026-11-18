@@ -17,14 +17,20 @@ export const remember = (node: SvgNode, source: JsxSource | undefined): SvgNode 
 const place = ({ fileName, lineNumber, columnNumber }: JsxSource): string =>
   [fileName || undefined, lineNumber, columnNumber].filter((part) => part !== undefined).join(":");
 
+export const sourceOf = (node: SvgNode): string | undefined => {
+  const source = written.get(node);
+
+  return source && place(source);
+};
+
 export const withSources = (node: SvgNode): SvgNode => {
   switch (node.kind) {
     case "element": {
-      const source = written.get(node);
+      const source = sourceOf(node);
 
       return {
         ...node,
-        attrs: source ? { ...node.attrs, "data-source": place(source) } : node.attrs,
+        attrs: source ? { ...node.attrs, "data-source": source } : node.attrs,
         children: node.children.map(withSources),
       };
     }

@@ -13,6 +13,7 @@ const { values: flags, positionals: wanted } = parseArgs({
   allowPositionals: true,
   options: {
     dir: { type: "string" },
+    state: { type: "string" },
     tolerance: { type: "string" },
     threshold: { type: "string" },
   },
@@ -20,6 +21,8 @@ const { values: flags, positionals: wanted } = parseArgs({
 
 const options = {
   out: join(WORK, "diffs"),
+  name: flags.state,
+  includePassing: flags.state !== undefined,
   tolerance: flags.tolerance === undefined ? undefined : Number(flags.tolerance),
   threshold: flags.threshold === undefined ? undefined : Number(flags.threshold),
 };
@@ -60,17 +63,27 @@ else {
 
 const pct = (n: number) => `${(n * 100).toFixed(2)}%`;
 let failed = 0;
+let checked = 0;
 
 for (const dir of dirs) {
   console.log(`\n${basename(dir)}\n  card  state             scheme  time     painted  mismatch`);
 
   for (const r of await fidelity(dir, options)) {
     failed += r.failed ? 1 : 0;
+    checked++;
+
+    for (const diagnostic of r.diagnostics ?? [])
+      console.log(`    ${diagnostic.element}: ${diagnostic.message}`);
 
     console.log(
-      `  ${String(r.card).padEnd(5)} ${r.name.padEnd(17)} ${r.scheme.padEnd(6)}  ${r.time.toFixed(2).padStart(5)}s  ${String(r.painted).padStart(7)}  ${pct(r.mismatch).padStart(7)}${r.failed ? `  FAIL ${r.image ?? ""}` : ""}`,
+      `  ${String(r.card).padEnd(5)} ${r.name.padEnd(17)} ${r.scheme.padEnd(6)}  ${r.time.toFixed(2).padStart(5)}s  ${String(r.painted).padStart(7)}  ${pct(r.mismatch).padStart(7)}${r.failed ? "  FAIL" : ""}${r.image ? `  ${r.image}` : ""}`,
     );
   }
+}
+
+if (flags.state !== undefined && checked === 0) {
+  console.error(`No captured state named ${JSON.stringify(flags.state)}.`);
+  process.exit(1);
 }
 
 console.log(failed > 0 ? `\n${failed} state(s) over the threshold` : "\nall states match");

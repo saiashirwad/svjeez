@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -119,6 +119,36 @@ try {
       });
     }
   }
+
+  check("README quickstart on the packed CLI", () => {
+    const quickstart = join(dir, "quickstart");
+    mkdirSync(quickstart);
+    const readme = readFileSync(join(consumer, "node_modules/svjeez/README.md"), "utf8");
+
+    const block = (lang: string) => {
+      const example = readme.split("```" + lang + "\n")[1]?.split("\n```")[0];
+
+      if (!example) throw new Error(`Missing the README ${lang} quickstart block.`);
+
+      return example;
+    };
+
+    run("npm", ["init", "-y"], quickstart);
+    run("npm", ["pkg", "set", "type=module"], quickstart);
+    run("npm", ["install", "--no-audit", "--no-fund", tarball], quickstart);
+    run("npm", ["install", "--no-audit", "--no-fund", "-D", "tsx", "typescript"], quickstart);
+    writeFileSync(join(quickstart, "tsconfig.json"), block("json"));
+    writeFileSync(join(quickstart, "scene.tsx"), block("tsx"));
+    run(join(quickstart, "node_modules/.bin/tsc"), ["--noEmit"], quickstart);
+    run(
+      process.execPath,
+      ["node_modules/svjeez/package-dist/cli.js", "svg", "scene.tsx", "--out", "hello.svg"],
+      quickstart,
+    );
+
+    if (!readFileSync(join(quickstart, "hello.svg"), "utf8").includes(">Hello</title>"))
+      throw new Error("The README scene did not render the expected SVG.");
+  });
 
   for (const entry of ENTRIES) {
     check(`import and require ${entry}`, () => {

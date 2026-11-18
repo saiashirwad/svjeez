@@ -230,7 +230,7 @@ export default function build(): string {
       title: "Blip",
       desc: "A short svjeez scene makes Blip, the svjeez mascot, hop. Each line of code changes what Blip does: five edits add squash and stretch, a flashing bulb, darting eyes, kicking feet and a flip, and Blip does each at once. The scene compiles to one animated SVG with no JavaScript.",
       reducedMotion: { at: 16 },
-      css: cssTag(Object.assign([css, ""], { raw: [css, ""] }), SQUASH),
+      css: cssTag`${cssTag.text(css)}${SQUASH}`,
     },
     <>
       <rect width={W} height={H} fill={theme.base00} />

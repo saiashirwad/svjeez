@@ -1,16 +1,10 @@
 # @svjeez/svelte
 
-Svelte components for editing a [svjeez](https://www.npmjs.com/package/svjeez) scene through its own source. `Code` shows the file with a control on every number, color and ease: drag a number sideways, pick a color, bend an ease's curve. `Picture` shows the scene as it compiles, with a handle to drag for the selected number, and `Transport` plays, pauses and scrubs it, and `Stats` reads out the file's gzipped size, keyframes, script and build time. Every change rewrites one literal in the file, so the code stays the code.
-
-The store underneath is [`@svjeez/live`](https://www.npmjs.com/package/@svjeez/live); [`@svjeez/react`](https://www.npmjs.com/package/@svjeez/react) renders the same components for React.
-
-## Install
+Svelte 5 components for editing svjeez scene source with a preview, playback controls and controls for editable literals.
 
 ```sh
 npm i @svjeez/svelte @svjeez/live svjeez
 ```
-
-## Use
 
 ```svelte
 <script lang="ts">
@@ -28,24 +22,6 @@ npm i @svjeez/svelte @svjeez/live svjeez
 <Code editor={scene} file="lanterns.tsx" />
 ```
 
-`new SceneEditor(text, { first })` takes a picture to show until the first compile: with [`@svjeez/vite`](https://www.npmjs.com/package/@svjeez/vite), pass the module `import first from "./lanterns.tsx?svjeez"` gives. The editor compiles in a worker, which starts the first time a component reads its state in the browser, so a server render starts none. Add `duration` to `first` if the page knows it, and the transport works before the first compile. The editor pauses, its worker stopped, whenever no component reads its state.
+Create a `SceneEditor` for the source and destroy it when the component unmounts. Read custom state from `scene.state`. Pass `first` when you have a prebuilt preview from [@svjeez/vite](https://www.npmjs.com/package/@svjeez/vite). Use the shared stylesheet’s `--sj-*` custom properties to theme the components.
 
-`scene.state` is the `@svjeez/live` state, reactive, and `scene.send(message)` changes it: the same messages a control sends, so a page or an agent can drive the editor too.
-
-### Your own controls
-
-`Code` takes a `control` snippet. It gets each value and a `plain` snippet that renders the built-in control:
-
-```svelte
-<Code editor={scene}>
-  {#snippet control(value, plain)}
-    {#if value.label === "swing"}<Knob {value} editor={scene} />{:else}{@render plain()}{/if}
-  {/snippet}
-</Code>
-```
-
-Send `{ type: "set", key: value.key, value: next }` from it, with `continues: true` on every step of a drag after the first so undo takes the drag whole.
-
-### Styles
-
-`@svjeez/live/editor.css` styles every component. Theme it with the `--sj-*` custom properties it lists at the top.
+[API reference](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/edit.md)

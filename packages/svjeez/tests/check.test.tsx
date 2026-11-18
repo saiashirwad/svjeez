@@ -311,6 +311,22 @@ describe.if(browser)("checkScene", () => {
     expect((await checkScene(svg)).findings[0]?.source).toBeUndefined();
   });
 
+  test("CLI picks up a short overlap between uniform samples", () => {
+    const file = join(import.meta.dir, "fixtures/check/cue.tsx");
+    const cli = join(import.meta.dir, "../src/cli.ts");
+
+    const run = (...flags: string[]) =>
+      Bun.spawnSync([process.execPath, cli, "check", file, "--json", ...flags]);
+
+    const uniform = run("--times", "0,0.5,1,1.5,2,2.5,3,3.5");
+    const withCues = run();
+
+    expect(uniform.exitCode).toBe(0);
+    expect(uniform.stdout.toString()).not.toContain('"rule": "overlap"');
+    expect(withCues.exitCode).toBe(0);
+    expect(withCues.stdout.toString()).toContain('"rule": "overlap"');
+  });
+
   test("svjeez check prints file:line:column findings and exits 1 on an error", () => {
     const result = Bun.spawnSync([
       process.execPath,
@@ -338,7 +354,7 @@ test("checkScene rejects bad times before it starts a browser", async () => {
 });
 
 test("a trace reads each element's place off the stack, and render() writes it without sources", () => {
-  startTrace(import.meta.dir);
+  startTrace({ within: import.meta.dir, sources: true, onRender: () => {} });
 
   try {
     const svg = render(

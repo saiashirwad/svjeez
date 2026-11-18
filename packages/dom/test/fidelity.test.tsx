@@ -18,6 +18,7 @@ const css = `
   input { font: 16px "Space Mono"; width: 100%; box-sizing: border-box; border: 1px solid #ccc }  .custom { appearance: none; display: block; width: 200px; height: 20px; margin: 0; background: transparent }
   .custom::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: linear-gradient(to right, #06c 60%, #ccc 60%) }
   .custom::-webkit-slider-thumb { appearance: none; width: 14px; height: 14px; margin-top: -5px; border-radius: 50%; background: #06c; box-shadow: 0 1px 3px rgb(0 0 0 / .4) }
+  .approximation { width: 30px; height: 10px; background: conic-gradient(red, blue); }
   .dim { display: block; background: #fc0; color: #000 }
   @media (prefers-color-scheme: dark) { .dim { opacity: .4 } .card { background: #111; color: #eee } }
 `;
@@ -89,3 +90,29 @@ describe("fidelity", () => {
     }
   }, 60000);
 });
+
+test("reports approximations by element for a selected state", async () => {
+  const file = join(root, "approximations.json");
+  const screenshots = join(root, "approximations");
+  await snapshots(file, { css, screenshots, schemes: "light" }, (dom) =>
+    dom.run('<div class="approximation" data-part="sample"></div>', [
+      snap("first"),
+      snap("selected"),
+    ]),
+  );
+
+  const results = await fidelity(shotsDir(screenshots, file), {
+    name: "selected",
+    out: join(root, "approximations-diff"),
+    includePassing: true,
+    threshold: 1,
+  });
+
+  expect(results).toHaveLength(1);
+  expect(results[0]).toMatchObject({
+    name: "selected",
+    failed: false,
+    diagnostics: [{ code: "background", element: '[data-part="sample"]' }],
+  });
+  expect(readFileSync(results[0]!.image!).length).toBeGreaterThan(100);
+}, 60000);

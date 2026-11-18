@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import { mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import type { BuildReport } from "../src/traced";
 
 const cli = (...args: string[]) =>
   Bun.spawnSync([process.execPath, join(import.meta.dir, "../src/cli.ts"), ...args]);
@@ -96,6 +97,27 @@ test("svjeez svg calls a template with its defaults, then with --params and --pa
   );
 });
 
+test("svg --json reports compiled timing and leaves the exported SVG byte-identical", () => {
+  const file = join(import.meta.dir, "fixtures/check/cue.tsx");
+  const output = cli("svg", file, "--json");
+
+  expect(output.exitCode).toBe(0);
+  const build: BuildReport & { svg: string } = JSON.parse(output.stdout.toString());
+
+  expect(build.svg).toBe(cli("svg", file).stdout.toString());
+  expect(build.timeline).toContainEqual(
+    expect.objectContaining({
+      label: "caption · opacity",
+      source: expect.stringContaining("cue.tsx:"),
+    }),
+  );
+  const spans = build.timeline.find((track) => track.label === "caption · opacity")?.spans;
+  expect(spans).toHaveLength(2);
+  expect(spans?.[0]?.at).toBeCloseTo(0.213);
+  expect(spans?.[1]?.at).toBeCloseTo(0.4);
+  expect(build.warnings).toEqual(['@keyframes "unused" is never referenced.']);
+});
+
 test("svjeez svg says what is wrong with a param, naming its path", () => {
   const { dir, file } = template();
   const data = join(dir, "data.json");
@@ -179,7 +201,9 @@ test("svjeez dev serves the scene with its params and rebuilds it when the scene
     };
 
     expect(await svg()).toContain("<title>One</title>");
-    expect(await (await fetch(url)).text()).toContain('<input id="scrub" type="range"');
+    expect(await (await fetch(url)).text()).toContain(
+      'id="scrub" aria-label="Scene time" type="range"',
+    );
 
     writeFileSync(data, JSON.stringify({ title: "Two" }));
     expect((await until(2)).error).toBeUndefined();

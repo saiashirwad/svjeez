@@ -9,6 +9,7 @@ import {
   type BrowserOptions,
 } from "./browser.ts";
 import { PAD } from "./demo.ts";
+import { diagnose } from "./diagnostics.ts";
 import type { Action } from "./flow.ts";
 import { dataUri, families, fontFace, formatOf, isWholeFile, sources, unwrap } from "./fonts.ts";
 import {
@@ -480,6 +481,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
     };
 
     let shots: Shots = {};
+    let diagnostics: Partial<Record<Scheme, Awaited<ReturnType<typeof diagnose>>>> = {};
 
     const pass = async (value: Scheme) => {
       await scheme(value);
@@ -490,7 +492,10 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
 
       const root = await page.evaluate(walk, { selector, pad, parts });
 
-      if (options.screenshots) shots[value] = await shoot(page, selector, root.box, pad);
+      if (options.screenshots) {
+        shots[value] = await shoot(page, selector, root.box, pad);
+        diagnostics[value] = await page.evaluate(diagnose, { selector });
+      }
 
       return root;
     };
@@ -514,6 +519,7 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
 
     const read = async (): Promise<Snapshot> => {
       shots = {};
+      diagnostics = {};
       await shim(page);
       await settle(page, true);
       await canvases(page);
@@ -526,7 +532,23 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
         [...families(root)].filter((f) => !givenFamilies.has(f)),
       );
 
+      if (options.screenshots) {
+        const embedded = new Set(
+          [...givenFamilies, ...fonts.map((face) => face.family)].map((f) => f.toLowerCase()),
+        );
+
+        for (const scheme of ["light", "dark"] as const) {
+          const entries = diagnostics[scheme];
+
+          if (entries)
+            diagnostics[scheme] = entries.filter(
+              (entry) => !entry.family || !embedded.has(entry.family.toLowerCase()),
+            );
+        }
+      }
+
       return {
+        ...(options.screenshots && { diagnostics }),
         width: Math.ceil(root.box.width + 2 * pad),
         height: Math.ceil(root.box.height + 2 * pad),
         pad,

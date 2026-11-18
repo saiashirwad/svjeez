@@ -46,6 +46,8 @@ import { EPSILON, dataOf, type Motion, type Step } from "./motion";
 import { commandsOf } from "./paths";
 import { resolveSteps } from "./resolve";
 import { animate } from "./smil";
+import { sourceOf } from "./sources";
+import type { TimelineTrack } from "./traced";
 import { element, type AttrValue, type Element, type SvgNode } from "./svg";
 
 export interface Canvas {
@@ -88,6 +90,7 @@ interface Clock {
 
 interface State {
   readonly canvas: Canvas;
+  readonly timeline?: TimelineTrack[];
   readonly ids: Map<AnyRef, Map<number, string>>;
   clock: Clock;
   readonly blurs: Map<string, string>;
@@ -708,6 +711,36 @@ const veil = (shells: readonly Lane[][], veiled: boolean): Lane[][] =>
 const clipLabel = ({ at, over }: { readonly at: number; readonly over?: number }): string =>
   `<Clip at={${num(at)}}${over === undefined ? "" : ` over={${num(over)}}`}>`;
 
+const timelineOf = (node: Element, lanes: readonly Lane[]): TimelineTrack[] => {
+  const source = sourceOf(node) ?? String(node.attrs["data-source"] ?? "");
+  const name = node.attrs["data-part"] ?? node.attrs.id ?? `<${node.tag}>`;
+
+  return lanes
+    .filter((lane) => !isHeld(lane))
+    .flatMap((lane) => {
+      const scale = lane.snapped / lane.period;
+
+      const spans = lane.keys.flatMap((key, index) => {
+        if (!moving(lane.keys, index)) return [];
+        const next = lane.keys[index + 1]!;
+        const at = (key.ease.kind === "steps" && key.ease.count === 1 ? next.t : key.t) * scale;
+
+        return [{ at, over: Math.max(0, next.t * scale - at) }];
+      });
+
+      if (spans.length === 0) return [];
+
+      return [
+        {
+          label: lane.label ?? `${name} · ${lane.key}`,
+          ...(source && { source }),
+          spans,
+          period: lane.snapped,
+        },
+      ];
+    });
+};
+
 const walk = (
   state: State,
   node: SvgNode,
@@ -733,6 +766,13 @@ const walk = (
     }
 
     case "fragment":
+      if (state.timeline && node.parts)
+        for (const { id, span } of node.parts)
+          state.timeline.push({
+            label: id,
+            spans: [{ at: state.clock.offset + span.at, over: span.over }],
+          });
+
       return {
         ...node,
         children: node.children.map((child) => walk(state, child, veiled, within, font)),
@@ -751,6 +791,7 @@ const walk = (
         );
       }
 
+      state.timeline?.push({ label, spans: [{ at: start, over: end - start }] });
       state.clock = {
         offset: start,
         end,
@@ -784,6 +825,9 @@ const walk = (
           : [],
         veiled,
       );
+
+      if (state.timeline)
+        for (const shell of shells) state.timeline.push(...timelineOf(node, shell));
 
       const hides =
         veiled || shells.some((shell) => shell.some((lane) => lane.emit === "visibility"));
@@ -827,9 +871,11 @@ export const compile = (
   content: readonly SvgNode[],
   canvas: Canvas,
   author: string | Css = "",
+  timeline?: TimelineTrack[],
 ): Compiled => {
   const state: State = {
     canvas,
+    timeline,
     ids: new Map(),
     clock: { offset: 0, end: canvas.duration, clips: [] },
     blurs: new Map(),

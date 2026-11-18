@@ -347,11 +347,15 @@ export const drawNode = (
 
 const HEAD = 8;
 
+export type ArrowHead = "filled" | "none" | "cross" | "async";
+
 export const arrow = (
   points: readonly Point[],
   look: Look & {
     readonly color?: Color;
     readonly dashed?: boolean;
+    readonly line?: "solid" | "dotted" | "thick";
+    readonly head?: ArrowHead;
     readonly at?: Seconds;
     readonly over?: Seconds;
   },
@@ -360,9 +364,25 @@ export const arrow = (
   const [a, b] = [points.at(-2)!, points.at(-1)!];
   const length = Math.hypot(b.x - a.x, b.y - a.y) || 1;
   const [ux, uy] = [(b.x - a.x) / length, (b.y - a.y) / length];
-  const trimmed = [...points.slice(0, -1), { x: b.x - ux * (HEAD - 1), y: b.y - uy * (HEAD - 1) }];
-  const head = `M${b.x} ${b.y}L${b.x - ux * HEAD - uy * HEAD * 0.5} ${b.y - uy * HEAD + ux * HEAD * 0.5}L${b.x - ux * HEAD + uy * HEAD * 0.5} ${b.y - uy * HEAD - ux * HEAD * 0.5}Z`;
-  const { at, over = 0.4 } = look;
+  const { at, over = 0.4, head = "filled" } = look;
+  const dash = look.dashed ? "5 4" : look.line === "dotted" ? "2 4" : undefined;
+
+  const trimmed =
+    head === "filled"
+      ? [...points.slice(0, -1), { x: b.x - ux * (HEAD - 1), y: b.y - uy * (HEAD - 1) }]
+      : points;
+
+  const tip = `${b.x} ${b.y}`;
+  const left = `${b.x - ux * HEAD - uy * HEAD * 0.5} ${b.y - uy * HEAD + ux * HEAD * 0.5}`;
+  const right = `${b.x - ux * HEAD + uy * HEAD * 0.5} ${b.y - uy * HEAD - ux * HEAD * 0.5}`;
+  const frontLeft = `${b.x - uy * HEAD * 0.5} ${b.y + ux * HEAD * 0.5}`;
+  const frontRight = `${b.x + uy * HEAD * 0.5} ${b.y - ux * HEAD * 0.5}`;
+
+  const marks = {
+    filled: `M${tip}L${left}L${right}Z`,
+    async: `M${left}L${tip}L${right}`,
+    cross: `M${left}L${frontRight}M${right}L${frontLeft}`,
+  };
 
   return (
     <g>
@@ -370,26 +390,30 @@ export const arrow = (
         d={curve(trimmed).d}
         fill="none"
         stroke={color}
-        strokeWidth={1.5}
+        strokeWidth={look.line === "thick" ? 3 : 1.5}
         strokeLinejoin="round"
-        strokeDasharray={look.dashed ? "5 4" : undefined}
+        strokeDasharray={dash}
         animation={
           at === undefined
             ? undefined
-            : look.dashed
+            : dash
               ? motion({ opacity: 0 }).to({ opacity: 1 }, span(at, over))
               : draw({ at, over })
         }
       />
-      <path
-        d={head}
-        fill={color}
-        animation={
-          at === undefined
-            ? undefined
-            : motion({ opacity: 0 }).to({ opacity: 1 }, span(at + over * 0.85, over * 0.15))
-        }
-      />
+      {head !== "none" && (
+        <path
+          d={marks[head]}
+          fill={head === "filled" ? color : "none"}
+          stroke={head === "filled" ? undefined : color}
+          strokeWidth={head === "filled" ? undefined : 1.5}
+          animation={
+            at === undefined
+              ? undefined
+              : motion({ opacity: 0 }).to({ opacity: 1 }, span(at + over * 0.85, over * 0.15))
+          }
+        />
+      )}
     </g>
   );
 };

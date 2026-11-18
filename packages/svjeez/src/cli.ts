@@ -6,11 +6,12 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { checkScene, renderFrames, type FrameTimes } from "./frames";
 import { parse, type Json, type JsonObject, type Param, type Schema, type Values } from "./params";
-import { startTrace } from "./traced";
+import { startTrace, stopTrace, type BuildReport } from "./traced";
+import { timelineCues } from "./check";
 import { validateSvg } from "./validate";
 
 const USAGE = `usage:
-  svjeez svg <file> [--out file.svg] [params]
+  svjeez svg <file> [--out file.svg] [--json] [params]
   svjeez dev <file> [--port 5173] [--out file.svg] [params]
   svjeez frames <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
   svjeez check <file> [--times 0,0.5,1] [--json] [--color-scheme system|light|dark] [params]
@@ -24,7 +25,8 @@ const USAGE = `usage:
 (from svjeez/params), are checked against it, and are passed to the default export; a key left out keeps its default.
 --param sets one value that is not a list, and wins over the file.
 Times are scene seconds. Without --times, frames takes --count frames (default 6) across one loop.
-dev serves a page that plays the scene with a scrubber and rebuilds it when a file beside it changes.
+dev serves a preview with a scrubber and a timeline, and rebuilds it when a file beside it changes.
+svg --json includes the SVG, compiler warnings and timeline tracks in scene seconds.
 video encodes --loops loops of the scene, through @svjeez/video. Its format follows --out's extension, else mp4.
 --background transparent keeps alpha, in webm only.
 On Node, .tsx files load through tsx when it is installed.
@@ -55,7 +57,7 @@ interface SceneModule {
 const isSceneFunction = (value: SceneModule["default"]): value is Scene =>
   typeof value === "function";
 
-const isText = (value: string | undefined): value is string => typeof value === "string";
+const isText = (value: unknown): value is string => typeof value === "string";
 
 const isParam = (p: Param | undefined): p is Param =>
   typeof p === "object" && p !== null && "kind" in p;
@@ -147,25 +149,36 @@ const loadSvg = async (file: string, flags: ParamFlags = {}): Promise<string> =>
   const module: SceneModule = await import(url).catch(async (error: Error & { code?: string }) => {
     if (error.code !== "ERR_UNKNOWN_FILE_EXTENSION") throw error;
 
-    const tsx = (() => {
-      try {
-        return pathToFileURL(
-          createRequire(join(process.cwd(), "package.json")).resolve("tsx/esm/api"),
-        ).href;
-      } catch {
-        return "tsx/esm/api";
-      }
-    })();
+    const api = "tsx/esm/api";
 
-    const { register }: { register: () => void } = await import(tsx).catch(() =>
-      fail(
-        `Node cannot load ${file}. Install tsx, run \`bunx --bun svjeez\`, or compile it to .js first.`,
-      ),
-    );
+    const { register }: { register: () => void } = await import(api)
+      .catch(async (error: Error & { code?: string }) => {
+        if (error.code !== "ERR_MODULE_NOT_FOUND") throw error;
+
+        const manifest = createRequire(join(process.cwd(), "package.json")).resolve(
+          "tsx/package.json",
+        );
+
+        const { exports }: { exports: { "./esm/api"?: { import: string | { default: string } } } } =
+          JSON.parse(await readFile(manifest, "utf8"));
+
+        const entry = exports["./esm/api"]?.import;
+
+        if (!entry) throw error;
+
+        // createRequire resolves the CommonJS branch, whose loader registration fails on Node 20.
+        return import(new URL(isText(entry) ? entry : entry.default, pathToFileURL(manifest)).href);
+      })
+      .catch(() =>
+        fail(
+          `Node cannot load ${file}. Install tsx, run \`bunx --bun svjeez\`, or compile it to .js first.`,
+        ),
+      );
 
     register();
 
-    return import(url);
+    // Node 20 remembers the failed import at the original URL.
+    return import(new URL("?svjeez-tsx", url).href);
   });
 
   const schema = isSchema(module.params) ? module.params : undefined;
@@ -213,22 +226,57 @@ const when = (times: string | undefined, count: string | undefined): FrameTimes 
     : fail(`--count needs a positive whole number, got ${frames}.`);
 };
 
-const report = (svg: string): void => {
-  for (const warning of validateSvg(svg).warnings) console.warn(`warning: ${warning}`);
+const reportWarnings = (warnings: readonly string[]): void => {
+  for (const warning of warnings) console.warn(`warning: ${warning}`);
+};
+
+const report = (svg: string): void => reportWarnings(validateSvg(svg).warnings);
+
+const loadBuild = async (
+  file: string,
+  flags: ParamFlags,
+  inspect = false,
+  sources = false,
+): Promise<BuildReport & { svg: string }> => {
+  let captured: { svg: string; report: BuildReport } | undefined;
+  startTrace({
+    within: inspect && !file.endsWith(".svg") ? dirname(resolve(file)) : undefined,
+    sources,
+    onRender: (svg, report) => {
+      captured = { svg, report };
+    },
+  });
+
+  try {
+    const svg = await loadSvg(file, flags);
+
+    if (captured?.svg === svg) return { svg, ...captured.report };
+
+    return { svg, warnings: validateSvg(svg).warnings, timeline: [] };
+  } finally {
+    stopTrace();
+  }
 };
 
 const svgCommand = async (args: string[]): Promise<void> => {
   const { values, positionals } = parseArgs({
     args,
     allowPositionals: true,
-    options: { out: { type: "string", short: "o" }, ...PARAM_OPTIONS },
+    options: {
+      out: { type: "string", short: "o" },
+      json: { type: "boolean" },
+      ...PARAM_OPTIONS,
+    },
   });
 
-  const svg = await loadSvg(positionals[0] ?? fail(USAGE), values);
-  report(svg);
+  const built = await loadBuild(positionals[0] ?? fail(USAGE), values, values.json);
 
-  if (values.out) await writeFile(values.out, svg);
-  else process.stdout.write(svg);
+  if (!values.json) reportWarnings(built.warnings);
+
+  if (values.out) await writeFile(values.out, built.svg);
+
+  if (values.json) console.log(JSON.stringify(built));
+  else if (!values.out) process.stdout.write(built.svg);
 };
 
 const parseScheme = (value: string | undefined) =>
@@ -442,16 +490,19 @@ const checkCommand = async (args: string[]): Promise<void> => {
   const scheme = parseScheme(values["color-scheme"]);
   const times = values.times === undefined ? undefined : when(values.times, undefined);
 
-  if (!file.endsWith(".svg")) startTrace(dirname(resolve(file)));
-  const svg = await loadSvg(file, values);
-  report(svg);
+  const built = await loadBuild(file, values, true, true);
+  reportWarnings(built.warnings);
 
   const {
     duration,
     times: measured,
     findings,
-  } = await checkScene(svg, {
+  } = await checkScene(built.svg, {
     times: times && "times" in times ? times.times : undefined,
+    cues:
+      times || built.duration === undefined
+        ? undefined
+        : timelineCues(built.timeline, built.duration),
     colorScheme: scheme,
   });
 

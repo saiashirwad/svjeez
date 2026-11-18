@@ -355,3 +355,28 @@ describe("mermaid", () => {
     expect(d.doc.kind).toBe("sequence");
   });
 });
+
+test("draws Mermaid flowchart edge styles without adding arrowheads", () => {
+  const d = mermaid("flowchart LR\nA --- B\nB -.-> C\nC ==> D");
+
+  if (d.kind !== "flowchart") throw new Error("Expected a flowchart.");
+
+  const under = svg(d.layers.under);
+
+  expect(under).toContain('stroke-dasharray="2 4"');
+  expect(under).toContain('stroke-width="3"');
+  expect(under.match(/<path\b/g)).toHaveLength(5);
+});
+
+test("draws headless, crossed and open sequence messages", () => {
+  const messageSvg = (arrow: string) => svg(mermaid(`sequenceDiagram\nA${arrow}B: Body`).node);
+  const pathCount = (source: string) => source.match(/<path\b/g)?.length;
+  const headless = messageSvg("->");
+  const cross = messageSvg("-x");
+  const open = messageSvg("--)");
+
+  expect(pathCount(cross)).toBe(pathCount(headless)! + 1);
+  expect(pathCount(open)).toBe(pathCount(cross));
+  expect(cross).toMatch(/d="M[^"]+M[^"]+" fill="none" stroke="/);
+  expect(open).toContain('stroke-dasharray="5 4"');
+});

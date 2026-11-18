@@ -59,7 +59,7 @@ export default function build(): string {
       title: "Watch the intro",
       desc: "The words watch the intro are handwritten while Blip, the svjeez mascot, plays projector: its antenna bulb flickers on, a beam lights a little screen with a pulsing play button, and Blip bobs along to the show.",
       reducedMotion: { at: 2 },
-      css: cssTag(Object.assign([css, ""], { raw: [css, ""] }), SQUASH),
+      css: cssTag`${cssTag.text(css)}${SQUASH}`,
     },
     <>
       <Once>
