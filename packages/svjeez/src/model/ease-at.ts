@@ -102,6 +102,9 @@ export const splitEase = (curve: Ease, progress: number, where: string): readonl
   }
 };
 
+export const staysInside = (curve: Ease | undefined): boolean =>
+  curve?.kind !== "bezier" || [curve.points[1], curve.points[3]].every((y) => y >= 0 && y <= 1);
+
 export const easeBetween = (curve: Ease, from: number, to: number, where: string): Ease => {
   if (isHold(curve)) return to >= 1 - EPSILON ? curve : ease.linear;
   const tail = from > EPSILON ? splitEase(curve, from, where)[1] : curve;

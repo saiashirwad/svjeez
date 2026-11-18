@@ -1,5 +1,5 @@
 import { SceneError } from "./scene-error";
-import { easeAt, splitEase } from "./ease-at";
+import { easeAt, splitEase, staysInside } from "./ease-at";
 import { MAX_KEYS, snapPeriod } from "../svg/keys";
 import { DEFAULT_EASE, EPSILON, NUDGE, ease, type Ease, type Seconds } from "./time";
 import type { Span } from "../author/span";
@@ -572,10 +572,6 @@ export interface Timing {
   readonly clock: Clock;
 }
 
-const within = (key: Key<unknown>): boolean =>
-  key.ease?.kind !== "bezier" ||
-  [key.ease.points[1], key.ease.points[3]].every((y) => y >= 0 && y <= 1);
-
 const costOf = (value: Animated<unknown>): number =>
   isLane(value) ? value.keys.reduce((sum, key) => sum + (key.via ? 1.5 : 1), 0) : 0;
 
@@ -599,7 +595,7 @@ export const laneOf = <T>(
 
   return isLane(curved) &&
     isCurved(curved.keys) &&
-    curved.keys.every(within) &&
+    curved.keys.every((key) => staysInside(key.ease)) &&
     costOf(curved) < costOf(straight)
     ? curved
     : straight;

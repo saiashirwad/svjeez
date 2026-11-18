@@ -1,6 +1,6 @@
 import { SceneError } from "./scene-error";
-import { easeAt, easeBetween } from "./ease-at";
-import { ease, type Ease } from "./time";
+import { easeAt, easeBetween, staysInside } from "./ease-at";
+import { ease } from "./time";
 import { matchRings } from "./paths";
 import type { Contour, Cubic, Geometry, Key, Lane, Vec } from "./ir";
 import { curveLength } from "./curve";
@@ -253,9 +253,6 @@ export const matched = (values: readonly Geometry[], where: string): Geometry[] 
   }));
 };
 
-const smilWritable = (curve: Ease | undefined): boolean =>
-  curve?.kind !== "bezier" || [curve.points[1], curve.points[3]].every((y) => y >= 0 && y <= 1);
-
 const PIECES = 8;
 
 export const smilSafe = (lane: Lane<Geometry>, where: string): Lane<Geometry> =>
@@ -266,7 +263,7 @@ export const smilSafeWith = <T>(
   mix: (a: T, b: T, amount: number, where: string) => T,
   where: string,
 ): Lane<T> => {
-  if (lane.keys.every((key) => smilWritable(key.ease))) return lane;
+  if (lane.keys.every((key) => staysInside(key.ease))) return lane;
   const [first] = lane.keys;
   const keys: Key<T>[] = [first];
 
@@ -274,7 +271,7 @@ export const smilSafeWith = <T>(
     const from = lane.keys[i]!;
     const curve = key.ease;
 
-    if (!curve || smilWritable(curve)) {
+    if (!curve || staysInside(curve)) {
       keys.push(key);
 
       return;
@@ -287,7 +284,7 @@ export const smilSafeWith = <T>(
       keys.push({
         t: from.t + (key.t - from.t) * end,
         value: piece === PIECES ? key.value : mix(from.value, key.value, easeAt(curve, end), where),
-        ease: smilWritable(part) ? part : ease.linear,
+        ease: staysInside(part) ? part : ease.linear,
       });
     }
   });
