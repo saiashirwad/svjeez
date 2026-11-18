@@ -23,6 +23,7 @@ const budgets = {
   derived: { bytes: 9300, elements: 21, stops: 46, smil: 1, cost: 5 },
   type: { bytes: 3900, elements: 35, stops: 20, smil: 0, cost: 10 },
   paint: { bytes: 8800, elements: 52, stops: 18, smil: 14, cost: 14 },
+  math: { bytes: 24000, elements: 48, stops: 20, smil: 0, cost: 13 },
 } satisfies Record<string, Budget>;
 
 const measure = (svg: string): Budget => {
