@@ -1,3 +1,4 @@
+import { jsx } from "svjeez/jsx-runtime";
 import {
   Center,
   Group,
@@ -118,8 +119,8 @@ const channels = (hex: Hex): readonly number[] =>
 
 const blend = (fg: Hex, bg: Hex, share: number): Hex => {
   const [a, b] = [channels(fg), channels(bg)];
-
   // SAFETY: six hex digits after a # is a Hex
+
   return `#${a
     .map((c, i) =>
       Math.round(c * share + b[i]! * (1 - share))
@@ -168,7 +169,6 @@ export const look = (options: DiagramOptions | undefined, what: string): Look =>
     throw new SceneError(`${what} needs a size above 0, got ${size}.`);
   const muted = colors.muted ?? colors.text;
   const washes = new Map<string, Color>();
-
   const tint = (role: NodeRole): Color => colors.roles?.[role] ?? colors.accent;
 
   return {
@@ -202,7 +202,12 @@ export const look = (options: DiagramOptions | undefined, what: string): Look =>
 export const isBare = <T extends object>(spec: string | T): spec is string =>
   typeof spec === "string";
 
-export const labelOf = (spec: Labelled): { readonly label: string; readonly role: NodeRole } =>
+export const labelOf = (
+  spec: Labelled,
+): {
+  readonly label: string;
+  readonly role: NodeRole;
+} =>
   isBare(spec) ? { label: spec, role: "task" } : { label: spec.label, role: spec.role ?? "task" };
 
 export const sizeOf = (l: Look, role: NodeRole, label: string): Size => {
@@ -380,9 +385,7 @@ const detailOf = (role: NodeRole, w: number, h: number): Geometry | undefined =>
 };
 
 const round = (value: number): number => Math.round(value * 100) / 100;
-
 export const pop = (when: Span): Layers => enter(when, { from: { opacity: 0, offset: [0, 6] } });
-
 export const fade = (when: Span): Track<number> => track(0).to(1, when);
 
 export interface NodeDraw {
@@ -398,28 +401,35 @@ export const drawNode = (l: Look, n: NodeDraw): SceneElement => {
   const [w, h] = [round(n.box.w), round(n.box.h)];
   const detail = detailOf(n.role, w, h);
 
-  return (
-    <Group key={n.key} at={[round(n.box.x), round(n.box.y)]} motion={n.motion}>
-      <Shape
-        key="shape"
-        geometry={outline(n.role, w, h)}
-        fill={l.wash(n.role)}
-        stroke={{ color: tint, width: 1.5 }}
-      />
-      {detail && <Shape key="detail" geometry={detail} stroke={{ color: tint, width: 1.5 }} />}
-      <Text
-        key="label"
-        font={l.font}
-        size={l.size}
-        weight={l.weight}
-        fill={l.colors.text}
-        anchor="center"
-        at={[w / 2, round(h / 2 + (n.role === "store" ? LID / 2 : 0))]}
-      >
-        {n.label}
-      </Text>
-    </Group>
-  );
+  return jsx(Group, {
+    key: n.key,
+    at: [round(n.box.x), round(n.box.y)],
+    motion: n.motion,
+    children: [
+      jsx(Shape, {
+        key: "shape",
+        geometry: outline(n.role, w, h),
+        fill: l.wash(n.role),
+        stroke: { color: tint, width: 1.5 },
+      }),
+      detail &&
+        jsx(Shape, {
+          key: "detail",
+          geometry: detail,
+          stroke: { color: tint, width: 1.5 },
+        }),
+      jsx(Text, {
+        key: "label",
+        font: l.font,
+        size: l.size,
+        weight: l.weight,
+        fill: l.colors.text,
+        anchor: "center",
+        at: [w / 2, round(h / 2 + (n.role === "store" ? LID / 2 : 0))],
+        children: n.label,
+      }),
+    ],
+  });
 };
 
 const HEAD = 8;
@@ -477,31 +487,29 @@ export const drawEdge = (l: Look, e: EdgeDraw): SceneElement => {
   } as const;
 
   const { drawn } = e;
-
   const tip = drawn && span(drawn.start + drawn.over * 0.85, drawn.over * 0.15);
 
-  return (
-    <Group key={e.key}>
-      <Shape
-        key="line"
-        geometry={curve(points).geometry}
-        stroke={stroke}
-        trim={drawn && !e.dash ? draw(drawn) : undefined}
-        opacity={drawn && e.dash ? fade(drawn) : undefined}
-      />
-      {head !== "none" && (
-        <Shape
-          key="head"
-          geometry={headOf(head, b, ux, uy)}
-          fill={head === "filled" ? color : undefined}
-          stroke={
-            head === "filled" ? undefined : { color, width: 1.5, cap: "round", join: "round" }
-          }
-          opacity={tip && fade(tip)}
-        />
-      )}
-    </Group>
-  );
+  return jsx(Group, {
+    key: e.key,
+    children: [
+      jsx(Shape, {
+        key: "line",
+        geometry: curve(points).geometry,
+        stroke: stroke,
+        trim: drawn && !e.dash ? draw(drawn) : undefined,
+        opacity: drawn && e.dash ? fade(drawn) : undefined,
+      }),
+      head !== "none" &&
+        jsx(Shape, {
+          key: "head",
+          geometry: headOf(head, b, ux, uy),
+          fill: head === "filled" ? color : undefined,
+          stroke:
+            head === "filled" ? undefined : { color, width: 1.5, cap: "round", join: "round" },
+          opacity: tip && fade(tip),
+        }),
+    ],
+  });
 };
 
 export interface ChipDraw {
@@ -513,21 +521,22 @@ export interface ChipDraw {
   readonly motion?: Layers;
 }
 
-export const drawChip = (l: Look, c: ChipDraw): SceneElement => (
-  <Center
-    key={c.key}
-    at={[round(c.box.x), round(c.box.y)]}
-    width={round(c.box.w)}
-    height={round(c.box.h)}
-    radius={3}
-    fill={c.ground === "none" ? undefined : (c.ground ?? l.colors.background)}
-    motion={c.motion}
-  >
-    <Text font={l.font} size={l.small} fill={c.fill ?? l.colors.muted}>
-      {c.text}
-    </Text>
-  </Center>
-);
+export const drawChip = (l: Look, c: ChipDraw): SceneElement =>
+  jsx(Center, {
+    key: c.key,
+    at: [round(c.box.x), round(c.box.y)],
+    width: round(c.box.w),
+    height: round(c.box.h),
+    radius: 3,
+    fill: c.ground === "none" ? undefined : (c.ground ?? l.colors.background),
+    motion: c.motion,
+    children: jsx(Text, {
+      font: l.font,
+      size: l.small,
+      fill: c.fill ?? l.colors.muted,
+      children: c.text,
+    }),
+  });
 
 const isSpan = (value: Reveal<string>): value is Span =>
   typeof value.start === "number" && typeof value.over === "number";
@@ -681,7 +690,6 @@ export class Route {
   readonly geometry: Geometry;
   readonly length: number;
   readonly #lengths: readonly number[];
-
   constructor(hops: readonly (readonly Point[])[]) {
     const curves = hops.map(curve);
     this.points = curves.flatMap((c) => c.samples);
@@ -705,7 +713,6 @@ export class Route {
     this.#lengths = lengths;
     this.length = lengths.at(-1)!;
   }
-
   at(fraction: number): Vec {
     const goal = Math.min(1, Math.max(0, fraction)) * this.length;
 
@@ -721,7 +728,6 @@ export class Route {
 
     return [round(a[0] + (b[0] - a[0]) * share), round(a[1] + (b[1] - a[1]) * share)];
   }
-
   travel(when: Span): Track<Vec> {
     const s = spanOf(when, "travel()");
 

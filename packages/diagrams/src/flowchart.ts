@@ -1,3 +1,4 @@
+import { jsx } from "svjeez/jsx-runtime";
 import { Group, Shape, Text, rect, span, type SceneElement } from "svjeez";
 import type { Child } from "svjeez/tools";
 import { SceneError, type Spanned } from "svjeez/tools";
@@ -25,7 +26,7 @@ import {
   type DiagramOptions,
   type EdgeId,
   type Reveal,
-} from "./kit.tsx";
+} from "./kit.ts";
 import type { Direction, FlowchartEdge, FlowchartGroup, Labelled } from "./types.ts";
 
 export interface FlowchartOptions<N extends string = string> extends DiagramOptions {
@@ -49,7 +50,11 @@ export function flowchart<
   const E extends readonly FlowchartEdge<NoInfer<keyof N & string>>[],
   const G extends Record<string, FlowchartGroup<NoInfer<keyof N & string>>> = {},
 >(
-  spec: { readonly nodes: N; readonly groups?: G; readonly edges: E },
+  spec: {
+    readonly nodes: N;
+    readonly groups?: G;
+    readonly edges: E;
+  },
   options: FlowchartOptions<NoInfer<keyof N & string>>,
 ): Flowchart<keyof N & string, keyof G & string, EdgeId<E[number]>> {
   type Id = keyof N & string;
@@ -70,8 +75,8 @@ export function flowchart<
     label,
     style,
   }));
-
   // SAFETY: G's values are FlowchartGroup<keyof N & string>, and the {} default has none
+
   const groups = Object.entries((spec.groups ?? {}) as Record<string, FlowchartGroup<string>>);
   checkIds(groups.length === 0 ? ["-"] : groups.map(([id]) => id), WHAT, "group");
   const member = new Map<string, string>();
@@ -176,63 +181,73 @@ export function flowchart<
   const name = options.name ?? "flowchart";
   const handle = partsOf<Id | (keyof G & string) | EdgeId<E[number]>>(WHAT, name, parts);
 
-  const draw = (between?: Child): SceneElement => (
-    <Group ref={handle.ref}>
-      {groups.map(([id, g]) => {
-        const b = move(out.groups.get(id)!);
-        const at = groupAt(g);
+  const draw = (between?: Child): SceneElement =>
+    jsx(Group, {
+      ref: handle.ref,
+      children: [
+        groups.map(([id, g]) => {
+          const b = move(out.groups.get(id)!);
+          const at = groupAt(g);
 
-        return (
-          <Group key={id} at={[b.x, b.y]} motion={at && pop(at)}>
-            <Shape
-              key="frame"
-              geometry={rect(b.w, b.h, { radius: 10 })}
-              stroke={{ color: l.colors.line, width: 1, dash: [4, 3] }}
-            />
-            <Text key="label" font={l.font} size={l.small} fill={l.colors.muted} at={[12, 6]}>
-              {g.label}
-            </Text>
-          </Group>
-        );
-      })}
-      {lines.map((e, i) =>
-        drawEdge(l, {
-          key: edgeKeys[i]!,
-          points: e.points,
-          drawn: timed[i],
-          ...(e.style?.line === "dotted" && { dash: [2, 4] }),
-          ...(e.style?.line === "thick" && { width: 3 }),
-          ...(e.style?.head && { head: e.style.head }),
+          return jsx(Group, {
+            key: id,
+            at: [b.x, b.y],
+            motion: at && pop(at),
+            children: [
+              jsx(Shape, {
+                key: "frame",
+                geometry: rect(b.w, b.h, { radius: 10 }),
+                stroke: { color: l.colors.line, width: 1, dash: [4, 3] },
+              }),
+              jsx(Text, {
+                key: "label",
+                font: l.font,
+                size: l.small,
+                fill: l.colors.muted,
+                at: [12, 6],
+                children: g.label,
+              }),
+            ],
+          });
         }),
-      )}
-      {between}
-      {nodes.map((n) => {
-        const at = shown.get(n.id);
+        lines.map((e, i) =>
+          drawEdge(l, {
+            key: edgeKeys[i]!,
+            points: e.points,
+            drawn: timed[i],
+            ...(e.style?.line === "dotted" && { dash: [2, 4] }),
+            ...(e.style?.line === "thick" && { width: 3 }),
+            ...(e.style?.head && { head: e.style.head }),
+          }),
+        ),
+        between,
+        nodes.map((n) => {
+          const at = shown.get(n.id);
 
-        return drawNode(l, {
-          key: n.id,
-          role: n.role,
-          label: n.label,
-          box: boxes.get(n.id)!,
-          motion: at && pop(at),
-        });
-      })}
-      {lines.map((e, i) => {
-        const t = timed[i];
+          return drawNode(l, {
+            key: n.id,
+            role: n.role,
+            label: n.label,
+            box: boxes.get(n.id)!,
+            motion: at && pop(at),
+          });
+        }),
+        lines.map((e, i) => {
+          const t = timed[i];
 
-        return (
-          e.box &&
-          e.label !== undefined &&
-          drawChip(l, {
-            key: `${edgeKeys[i]!}:label`,
-            box: e.box,
-            text: e.label,
-            motion: t && pop(span(t.start + t.over, LABEL)),
-          })
-        );
-      })}
-    </Group>
-  );
+          return (
+            e.box &&
+            e.label !== undefined &&
+            drawChip(l, {
+              key: `${edgeKeys[i]!}:label`,
+              box: e.box,
+              text: e.label,
+              motion: t && pop(span(t.start + t.over, LABEL)),
+            })
+          );
+        }),
+      ],
+    });
 
   const find = (from: string, to: string) => {
     const line = lines.find((e) => e.from === from && e.to === to);

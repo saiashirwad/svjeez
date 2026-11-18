@@ -7,13 +7,13 @@ export {
   type DiagramColors,
   type DiagramOptions,
   type Reveal,
-} from "./kit.tsx";
+} from "./kit.ts";
 
-export { flowchart, type Flowchart, type FlowchartOptions } from "./flowchart.tsx";
+export { flowchart, type Flowchart, type FlowchartOptions } from "./flowchart.ts";
 
-export { lanes, type Lanes, type LanesOptions } from "./lanes.tsx";
+export { lanes, type Lanes, type LanesOptions } from "./lanes.ts";
 
-export { sequence, type Sequence, type SequenceOptions } from "./sequence.tsx";
+export { sequence, type Sequence, type SequenceOptions } from "./sequence.ts";
 
 export {
   stateMachine,
@@ -21,6 +21,6 @@ export {
   type StateMachineOptions,
   type Walk,
   type WalkOptions,
-} from "./state.tsx";
+} from "./state.ts";
 
-export { tree, type Tree, type TreeOptions } from "./tree.tsx";
+export { tree, type Tree, type TreeOptions } from "./tree.ts";

@@ -1,3 +1,4 @@
+import { jsx } from "svjeez/jsx-runtime";
 import { Group, span, type SceneElement } from "svjeez";
 import { SceneError, type Child, type Spanned } from "svjeez/tools";
 import { tree as layout } from "./layout/tree.ts";
@@ -20,7 +21,7 @@ import {
   type Diagram,
   type DiagramOptions,
   type Reveal,
-} from "./kit.tsx";
+} from "./kit.ts";
 import type { Direction, TreeSpec } from "./types.ts";
 
 export interface TreeOptions<N extends string = string> extends DiagramOptions {
@@ -29,7 +30,9 @@ export interface TreeOptions<N extends string = string> extends DiagramOptions {
 }
 
 type TreeEdges<N> = {
-  [K in keyof N & string]: N[K] extends { readonly parent: infer P extends string }
+  [K in keyof N & string]: N[K] extends {
+    readonly parent: infer P extends string;
+  }
     ? `${P}->${K}`
     : never;
 }[keyof N & string];
@@ -41,7 +44,11 @@ export interface Tree<N extends string, E extends string = `${N}->${N}`> extends
 const WHAT = "tree()";
 
 export function tree<const N extends Record<string, TreeSpec<string>>>(
-  spec: { readonly nodes: N & { readonly [K in keyof N]: TreeSpec<Exclude<keyof N & string, K>> } },
+  spec: {
+    readonly nodes: N & {
+      readonly [K in keyof N]: TreeSpec<Exclude<keyof N & string, K>>;
+    };
+  },
   options: TreeOptions<NoInfer<keyof N & string>>,
 ): Tree<keyof N & string, TreeEdges<N>> {
   type Id = keyof N & string;
@@ -104,29 +111,31 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
 
   const handle = partsOf<Id | TreeEdges<N>>(WHAT, options.name ?? "tree", parts);
 
-  const draw = (between?: Child): SceneElement => (
-    <Group ref={handle.ref}>
-      {out.edges.map((e) =>
-        drawEdge(l, {
-          key: edgeKey(e.from, e.to),
-          points: lines.get(e.to)!,
-          drawn: drawn(e.from, e.to),
-        }),
-      )}
-      {between}
-      {nodes.map((n) => {
-        const at = shown.get(n.id);
+  const draw = (between?: Child): SceneElement =>
+    jsx(Group, {
+      ref: handle.ref,
+      children: [
+        out.edges.map((e) =>
+          drawEdge(l, {
+            key: edgeKey(e.from, e.to),
+            points: lines.get(e.to)!,
+            drawn: drawn(e.from, e.to),
+          }),
+        ),
+        between,
+        nodes.map((n) => {
+          const at = shown.get(n.id);
 
-        return drawNode(l, {
-          key: n.id,
-          role: n.role,
-          label: n.label,
-          box: boxes.get(n.id)!,
-          motion: at && pop(at),
-        });
-      })}
-    </Group>
-  );
+          return drawNode(l, {
+            key: n.id,
+            role: n.role,
+            label: n.label,
+            box: boxes.get(n.id)!,
+            motion: at && pop(at),
+          });
+        }),
+      ],
+    });
 
   const up = (id: string): string[] => {
     const parent = out.parent.get(id);

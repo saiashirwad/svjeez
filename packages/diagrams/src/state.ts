@@ -1,3 +1,4 @@
+import { jsx } from "svjeez/jsx-runtime";
 import {
   Group,
   Shape,
@@ -32,16 +33,27 @@ import {
   type Diagram,
   type DiagramOptions,
   type EdgeId,
-} from "./kit.tsx";
+} from "./kit.ts";
 import type { Direction, NodeRole, StateSpec, StateTransition } from "./types.ts";
 
 type StateIds<S> = {
-  [K in keyof S & string]: K | (S[K] extends { readonly states: infer I } ? StateIds<I> : never);
+  [K in keyof S & string]:
+    | K
+    | (S[K] extends {
+        readonly states: infer I;
+      }
+        ? StateIds<I>
+        : never);
 }[keyof S & string];
 
 type Checked<S> = {
-  readonly [K in keyof S]: S[K] extends { readonly states: infer I }
-    ? S[K] & { readonly initial: keyof I & string; readonly states: Checked<I> }
+  readonly [K in keyof S]: S[K] extends {
+    readonly states: infer I;
+  }
+    ? S[K] & {
+        readonly initial: keyof I & string;
+        readonly states: Checked<I>;
+      }
     : S[K];
 };
 
@@ -109,8 +121,11 @@ const DOT = 14;
 const RING = 18;
 const PAD = 16;
 
-const isTransition = (line: Line): line is Line & { readonly of: number } =>
-  typeof line.of === "number";
+const isTransition = (
+  line: Line,
+): line is Line & {
+  readonly of: number;
+} => typeof line.of === "number";
 
 const isList = (at: Span | readonly Span[]): at is readonly Span[] => Array.isArray(at);
 
@@ -192,8 +207,8 @@ export function stateMachine<
 
     return { owner, depth, nodes: list, initial };
   };
-
   // SAFETY: Checked<S> only adds initial and states to S's composites, which StateSpec already admits
+
   const root = scope(spec.states as Readonly<Record<string, StateSpec>>, spec.initial, 0);
   const ids = [...nodes.keys()];
 
@@ -312,88 +327,97 @@ export function stateMachine<
     const tint = n.role && l.tint(n.role);
     const radius = n.inner ? 10 : 8;
 
-    return (
-      <Group key={n.id} at={[b.x, b.y]}>
-        <Shape
-          key="shape"
-          geometry={rect(b.w, b.h, { radius })}
-          fill={
-            n.role
-              ? mix(l.tint(n.role), ground(n.depth + 1), n.inner ? 0.1 : 0.22)
-              : ground(n.depth + 1)
-          }
-          stroke={{ color: tint ?? l.colors.line, width: tint ? 1.5 : 1 }}
-        />
-        {n.inner && (
-          <Shape
-            key="rule"
-            geometry={line([0, header], [b.w, header])}
-            stroke={{ color: tint ?? l.colors.line, width: 1 }}
-          />
-        )}
-        <Text
-          key="label"
-          font={l.font}
-          size={l.size}
-          weight={l.weight}
-          fill={l.colors.text}
-          anchor="center"
-          at={[b.w / 2, n.inner ? header / 2 : b.h / 2]}
-        >
-          {n.label}
-        </Text>
-      </Group>
-    );
+    return jsx(Group, {
+      key: n.id,
+      at: [b.x, b.y],
+      children: [
+        jsx(Shape, {
+          key: "shape",
+          geometry: rect(b.w, b.h, { radius }),
+          fill: n.role
+            ? mix(l.tint(n.role), ground(n.depth + 1), n.inner ? 0.1 : 0.22)
+            : ground(n.depth + 1),
+          stroke: { color: tint ?? l.colors.line, width: tint ? 1.5 : 1 },
+        }),
+        n.inner &&
+          jsx(Shape, {
+            key: "rule",
+            geometry: line([0, header], [b.w, header]),
+            stroke: { color: tint ?? l.colors.line, width: 1 },
+          }),
+        jsx(Text, {
+          key: "label",
+          font: l.font,
+          size: l.size,
+          weight: l.weight,
+          fill: l.colors.text,
+          anchor: "center",
+          at: [b.w / 2, n.inner ? header / 2 : b.h / 2],
+          children: n.label,
+        }),
+      ],
+    });
   };
 
-  const draw = (between?: Child): SceneElement => (
-    <Group ref={handle.ref}>
-      {[...nodes.values()].sort((a, b) => a.depth - b.depth).map(drawState)}
-      {local.lines.map((x) =>
-        drawEdge(l, {
-          key: isTransition(x)
-            ? transitionKeys[x.of]!
-            : x.of === "start"
-              ? `start->${x.to}`
-              : `${x.from}->end`,
-          points: x.points,
-        }),
-      )}
-      {local.dots.map((d, k) => (
-        <Shape
-          key={`initial-${k + 1}`}
-          geometry={circle(DOT / 2)}
-          anchor="center"
-          at={centerOf(d)}
-          fill={l.colors.text}
-        />
-      ))}
-      {local.ends.map((d, k) => (
-        <Group key={`final-${k + 1}`} at={centerOf(d)}>
-          <Shape
-            geometry={circle(RING / 2)}
-            anchor="center"
-            at={[0, 0]}
-            stroke={{ color: l.colors.text, width: 1.5 }}
-          />
-          <Shape geometry={circle(RING / 2 - 4)} anchor="center" at={[0, 0]} fill={l.colors.text} />
-        </Group>
-      ))}
-      {between}
-      {local.lines.map(
-        (x) =>
-          isTransition(x) &&
-          x.label &&
-          drawChip(l, {
-            key: `${transitionKeys[x.of]!}:label`,
-            box: x.label,
-            text: transitions[x.of]!.label!,
-            fill: l.colors.text,
-            ground: ground(x.depth),
+  const draw = (between?: Child): SceneElement =>
+    jsx(Group, {
+      ref: handle.ref,
+      children: [
+        [...nodes.values()].sort((a, b) => a.depth - b.depth).map(drawState),
+        local.lines.map((x) =>
+          drawEdge(l, {
+            key: isTransition(x)
+              ? transitionKeys[x.of]!
+              : x.of === "start"
+                ? `start->${x.to}`
+                : `${x.from}->end`,
+            points: x.points,
           }),
-      )}
-    </Group>
-  );
+        ),
+        local.dots.map((d, k) =>
+          jsx(Shape, {
+            key: `initial-${k + 1}`,
+            geometry: circle(DOT / 2),
+            anchor: "center",
+            at: centerOf(d),
+            fill: l.colors.text,
+          }),
+        ),
+        local.ends.map((d, k) =>
+          jsx(Group, {
+            key: `final-${k + 1}`,
+            at: centerOf(d),
+            children: [
+              jsx(Shape, {
+                geometry: circle(RING / 2),
+                anchor: "center",
+                at: [0, 0],
+                stroke: { color: l.colors.text, width: 1.5 },
+              }),
+              jsx(Shape, {
+                geometry: circle(RING / 2 - 4),
+                anchor: "center",
+                at: [0, 0],
+                fill: l.colors.text,
+              }),
+            ],
+          }),
+        ),
+        between,
+        local.lines.map(
+          (x) =>
+            isTransition(x) &&
+            x.label &&
+            drawChip(l, {
+              key: `${transitionKeys[x.of]!}:label`,
+              box: x.label,
+              text: transitions[x.of]!.label!,
+              fill: l.colors.text,
+              ground: ground(x.depth),
+            }),
+        ),
+      ],
+    });
 
   const find = (from: string, to: string) =>
     local.lines.find(
@@ -412,7 +436,6 @@ export function stateMachine<
 
     if (target.parent === a && nodes.get(a)!.inner!.initial === b)
       return new Route([local.lines.find((x) => x.of === "start" && x.to === b)!.points]);
-
     throw new SceneError(
       `walk() has no way from "${a}" to "${b}".`,
       "Each next state needs a transition from the one before, or is the initial state inside it.",
@@ -456,10 +479,13 @@ export function stateMachine<
           `walk() has ${list.length} spans for a path of ${path.length} states.`,
           "Give one span per state, or one span for the first state to start from.",
         );
-
       const first = isList(at) ? undefined : spanOf(at, "walk() at");
       const lit: Spanned[] = [];
-      const runs: { readonly route: Route; readonly when: Span }[] = [];
+
+      const runs: {
+        readonly route: Route;
+        readonly when: Span;
+      }[] = [];
 
       path.forEach((_, k) => {
         if (list) {
@@ -507,15 +533,13 @@ export function stateMachine<
           return t.to(1, span(x.start, edge)).to(0, span(x.start + x.over - edge, edge));
         }, track(0));
 
-        return (
-          <Shape
-            key={s}
-            geometry={rect(b.w + 8, b.h + 8, { radius: nodes.get(s)!.inner ? 13 : 11 })}
-            at={[b.x - 4, b.y - 4]}
-            stroke={{ color: l.colors.highlight, width: 2 }}
-            opacity={opacity}
-          />
-        );
+        return jsx(Shape, {
+          key: s,
+          geometry: rect(b.w + 8, b.h + 8, { radius: nodes.get(s)!.inner ? 13 : 11 }),
+          at: [b.x - 4, b.y - 4],
+          stroke: { color: l.colors.highlight, width: 2 },
+          opacity: opacity,
+        });
       });
 
       const end = lit.at(-1)!.start + lit.at(-1)!.over;
@@ -542,31 +566,26 @@ export function stateMachine<
             track(0),
           );
 
-          return (
-            <Shape
-              key="token"
-              geometry={circle(5)}
-              anchor="center"
-              at={sampled(where, span(from, to - from), { tolerance: 0.5 })}
-              fill={l.colors.highlight}
-              opacity={opacity}
-            />
-          );
+          return jsx(Shape, {
+            key: "token",
+            geometry: circle(5),
+            anchor: "center",
+            at: sampled(where, span(from, to - from), { tolerance: 0.5 }),
+            fill: l.colors.highlight,
+            opacity: opacity,
+          });
         })();
-
       // SAFETY: ids are exactly the states of S, and each gets an entry, empty when the walk never lights it
+
       const spans = Object.fromEntries(ids.map((s) => [s, byState.get(s) ?? []])) as Record<
         Id,
         Spanned[]
       >;
 
       return {
-        node: (
-          <Group>
-            {highlights}
-            {token}
-          </Group>
-        ),
+        node: jsx(Group, {
+          children: [highlights, token],
+        }),
         span: whole,
         spans,
       };
