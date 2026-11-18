@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import { Group, Run, Text, ease, rect, track, type Span } from "svjeez";
 import { SceneError, type Common, type FontValue } from "svjeez/tools";
 import { checkTabSize, highlight, type Grammar, type Highlighted, type Lang } from "./highlight.ts";

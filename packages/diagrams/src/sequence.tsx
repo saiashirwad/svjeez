@@ -1,4 +1,4 @@
-import { jsx } from "svjeez/jsx-runtime";
+/** @jsxImportSource svjeez */
 import { Center, Group, Shape, Text, line, span, type SceneElement, type Span } from "svjeez";
 import { SceneError, type Child, type Spanned } from "svjeez/tools";
 import { sequence as layout } from "./layout/sequence.ts";
@@ -22,7 +22,7 @@ import {
   spanOf,
   type Diagram,
   type DiagramOptions,
-} from "./kit.ts";
+} from "./kit.tsx";
 import type { Labelled, SequenceMessage } from "./types.ts";
 
 export interface SequenceOptions extends DiagramOptions {
@@ -109,65 +109,62 @@ export function sequence<const A extends Record<string, Labelled>>(
   const fadeOf = (beat: Span) => span(beat.start, Math.min(0.25, beat.over));
   const noteTint = mix(l.colors.accent, l.colors.background, 0.12);
 
-  const draw = (between?: Child): SceneElement =>
-    jsx(Group, {
-      ref: handle.ref,
-      children: [
-        [...out.lifelines].map(([id, [a, b]]) =>
-          jsx(Shape, {
-            key: `${id}:life`,
-            geometry: line([a.x + dx, a.y + dy], [b.x + dx, b.y + dy]),
-            stroke: { color: l.colors.line, width: 1, dash: [3, 4] },
-          }),
-        ),
-        actors.map((a) =>
-          drawNode(l, { key: a.id, role: a.role, label: a.label, box: heads.get(a.id)! }),
-        ),
-        between,
-        rows.map((row, i) => {
-          const { points, box } = placed[i]!;
-          const beat = beats[i];
+  const draw = (between?: Child): SceneElement => (
+    <Group ref={handle.ref}>
+      {[...out.lifelines].map(([id, [a, b]]) => (
+        <Shape
+          key={`${id}:life`}
+          geometry={line([a.x + dx, a.y + dy], [b.x + dx, b.y + dy])}
+          stroke={{ color: l.colors.line, width: 1, dash: [3, 4] }}
+        />
+      ))}
+      {actors.map((a) =>
+        drawNode(l, { key: a.id, role: a.role, label: a.label, box: heads.get(a.id)! }),
+      )}
+      {between}
+      {rows.map((row, i) => {
+        const { points, box } = placed[i]!;
+        const beat = beats[i];
 
-          if (row.kind === "note")
-            return jsx(Center, {
-              key: `note-${i + 1}`,
-              at: [box.x, box.y],
-              width: box.w,
-              height: box.h,
-              radius: 4,
-              fill: noteTint,
-              stroke: { color: l.colors.accent, width: 1 },
+        if (row.kind === "note")
+          return (
+            <Center
+              key={`note-${i + 1}`}
+              at={[box.x, box.y]}
+              width={box.w}
+              height={box.h}
+              radius={4}
+              fill={noteTint}
+              stroke={{ color: l.colors.accent, width: 1 }}
+              motion={beat && pop(fadeOf(beat))}
+            >
+              <Text font={l.font} size={l.small} fill={l.colors.text}>
+                {row.text}
+              </Text>
+            </Center>
+          );
+
+        return (
+          <Group key={`message-${i + 1}`}>
+            {drawEdge(l, {
+              key: "arrow",
+              points,
+              head: row.head ?? "filled",
+              ...(row.reply && { dash: [5, 4] }),
+              drawn: beat && drawOf(beat),
+            })}
+            {drawChip(l, {
+              key: "label",
+              box,
+              text: row.text,
+              fill: l.colors.text,
               motion: beat && pop(fadeOf(beat)),
-              children: jsx(Text, {
-                font: l.font,
-                size: l.small,
-                fill: l.colors.text,
-                children: row.text,
-              }),
-            });
-
-          return jsx(Group, {
-            key: `message-${i + 1}`,
-            children: [
-              drawEdge(l, {
-                key: "arrow",
-                points,
-                head: row.head ?? "filled",
-                ...(row.reply && { dash: [5, 4] }),
-                drawn: beat && drawOf(beat),
-              }),
-              drawChip(l, {
-                key: "label",
-                box,
-                text: row.text,
-                fill: l.colors.text,
-                motion: beat && pop(fadeOf(beat)),
-              }),
-            ],
-          });
-        }),
-      ],
-    });
+            })}
+          </Group>
+        );
+      })}
+    </Group>
+  );
 
   const parts = new Map<string, Spanned | undefined>(ids.map((id) => [id, undefined]));
   const handle = partsOf<Id>(WHAT, options.name ?? "sequence", parts);

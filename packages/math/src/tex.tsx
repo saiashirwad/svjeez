@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import {
   Group,
   Shape,
@@ -13,7 +14,6 @@ import {
   type Span,
   type Vec,
 } from "svjeez";
-import { jsx } from "svjeez/jsx-runtime";
 import { SceneError, type Common, type Hex, type Place, type TextAnchorPlace } from "svjeez/tools";
 import { typeset, type Mark, type Typeset } from "./mathjax.ts";
 import { mapRing, pointsOf, type Ring } from "./path.ts";
@@ -271,7 +271,7 @@ export function Tex({
     const counts = new Map<string, number>();
 
     return tree.items.map((item) => {
-      if (isTree(item)) return jsx(Group, { children: build(item) }, item.id);
+      if (isTree(item)) return <Group key={item.id}>{build(item)}</Group>;
       const name = NAMES.get(item.char) ?? (item.char.trim() || "symbol");
       const count = (counts.get(name) ?? 0) + 1;
 
@@ -289,38 +289,36 @@ export function Tex({
 
       if (write)
         outlines.push(
-          jsx(
-            Shape,
-            {
-              geometry,
-              at,
-              stroke: { color: paint, width: round(size * 0.025), join: "round" },
-              trim: draw(span(begin, stroke * 0.7)),
-              motion: exit(span(begin + stroke * 0.7, stroke * 0.3)),
-            },
-            `${outlines.length}`,
-          ),
+          <Shape
+            key={`${outlines.length}`}
+            geometry={geometry}
+            at={at}
+            stroke={{ color: paint, width: round(size * 0.025), join: "round" }}
+            trim={draw(span(begin, stroke * 0.7))}
+            motion={exit(span(begin + stroke * 0.7, stroke * 0.3))}
+          />,
         );
 
-      return jsx(
-        Shape,
-        {
-          geometry,
-          at,
-          fill: paint,
-          ...(write && { motion: enter(span(begin + stroke * 0.5, stroke * 0.5)) }),
-        },
-        key,
+      return (
+        <Shape
+          key={key}
+          geometry={geometry}
+          at={at}
+          fill={paint}
+          {...(write && { motion: enter(span(begin + stroke * 0.5, stroke * 0.5)) })}
+        />
       );
     });
   };
 
   const glyphs = build(treeOf(laid.marks, source));
 
-  return jsx(Group, {
-    ...common,
-    children: [glyphs, write && jsx(Group, { children: outlines }, "writing")],
-  });
+  return (
+    <Group {...common}>
+      {glyphs}
+      {write && <Group key="writing">{outlines}</Group>}
+    </Group>
+  );
 }
 
 Tex.measure = measure;

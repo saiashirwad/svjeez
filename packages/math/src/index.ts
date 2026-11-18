@@ -1,4 +1,4 @@
-export { Tex, type TexBox, type TexMeasure, type TexOptions, type TexProps } from "./tex.ts";
+export { Tex, type TexBox, type TexMeasure, type TexOptions, type TexProps } from "./tex.tsx";
 
 export {
   Axes,
@@ -17,7 +17,7 @@ export {
   type Riemann,
   type RiemannOptions,
   type VectorOptions,
-} from "./plane.ts";
+} from "./plane.tsx";
 
 export {
   angle,

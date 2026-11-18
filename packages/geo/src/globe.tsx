@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import { geoContains } from "d3-geo";
 import type { GeoJsonProperties } from "geojson";
 import {
@@ -16,7 +17,6 @@ import {
   type Span,
   type Vec,
 } from "svjeez";
-import { jsx } from "svjeez/jsx-runtime";
 import { SceneError, type ShapeProps } from "svjeez/tools";
 import { finder, lonLat, read, type GeoData, type LonLat, type ReadOptions } from "./data.ts";
 import { rings } from "./outline.ts";
@@ -686,9 +686,11 @@ export const GlobeShape = ({ of, fill, stroke, trim, ...rest }: GlobeShapeProps)
     ...(trim !== undefined && { trim }),
   };
 
-  return jsx(Group, {
-    ...rest,
-    clip: circle(of.radius),
-    children: of.pieces.map((geometry, i) => jsx(Shape, { key: String(i), geometry, ...paint })),
-  });
+  return (
+    <Group {...rest} clip={circle(of.radius)}>
+      {of.pieces.map((geometry, i) => (
+        <Shape key={String(i)} geometry={geometry} {...paint} />
+      ))}
+    </Group>
+  );
 };

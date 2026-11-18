@@ -1,4 +1,4 @@
-import { jsx } from "svjeez/jsx-runtime";
+/** @jsxImportSource svjeez */
 import { Group, span, type SceneElement } from "svjeez";
 import { SceneError, type Child, type Spanned } from "svjeez/tools";
 import { tree as layout } from "./layout/tree.ts";
@@ -21,7 +21,7 @@ import {
   type Diagram,
   type DiagramOptions,
   type Reveal,
-} from "./kit.ts";
+} from "./kit.tsx";
 import type { Direction, TreeSpec } from "./types.ts";
 
 export interface TreeOptions<N extends string = string> extends DiagramOptions {
@@ -111,31 +111,29 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
 
   const handle = partsOf<Id | TreeEdges<N>>(WHAT, options.name ?? "tree", parts);
 
-  const draw = (between?: Child): SceneElement =>
-    jsx(Group, {
-      ref: handle.ref,
-      children: [
-        out.edges.map((e) =>
-          drawEdge(l, {
-            key: edgeKey(e.from, e.to),
-            points: lines.get(e.to)!,
-            drawn: drawn(e.from, e.to),
-          }),
-        ),
-        between,
-        nodes.map((n) => {
-          const at = shown.get(n.id);
-
-          return drawNode(l, {
-            key: n.id,
-            role: n.role,
-            label: n.label,
-            box: boxes.get(n.id)!,
-            motion: at && pop(at),
-          });
+  const draw = (between?: Child): SceneElement => (
+    <Group ref={handle.ref}>
+      {out.edges.map((e) =>
+        drawEdge(l, {
+          key: edgeKey(e.from, e.to),
+          points: lines.get(e.to)!,
+          drawn: drawn(e.from, e.to),
         }),
-      ],
-    });
+      )}
+      {between}
+      {nodes.map((n) => {
+        const at = shown.get(n.id);
+
+        return drawNode(l, {
+          key: n.id,
+          role: n.role,
+          label: n.label,
+          box: boxes.get(n.id)!,
+          motion: at && pop(at),
+        });
+      })}
+    </Group>
+  );
 
   const up = (id: string): string[] => {
     const parent = out.parent.get(id);

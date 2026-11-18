@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import { area as d3area, curveLinear, curveMonotoneX, curveStep, line as d3line } from "d3-shape";
 import {
   Group,

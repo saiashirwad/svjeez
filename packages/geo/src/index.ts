@@ -13,7 +13,7 @@ export {
   type Riding,
   type Turn,
   type Turning,
-} from "./globe.ts";
+} from "./globe.tsx";
 
 export { night, sun } from "./sun.ts";
 

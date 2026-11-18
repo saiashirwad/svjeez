@@ -1,4 +1,4 @@
-import { jsx } from "svjeez/jsx-runtime";
+/** @jsxImportSource svjeez */
 import {
   Center,
   Group,
@@ -401,35 +401,28 @@ export const drawNode = (l: Look, n: NodeDraw): SceneElement => {
   const [w, h] = [round(n.box.w), round(n.box.h)];
   const detail = detailOf(n.role, w, h);
 
-  return jsx(Group, {
-    key: n.key,
-    at: [round(n.box.x), round(n.box.y)],
-    motion: n.motion,
-    children: [
-      jsx(Shape, {
-        key: "shape",
-        geometry: outline(n.role, w, h),
-        fill: l.wash(n.role),
-        stroke: { color: tint, width: 1.5 },
-      }),
-      detail &&
-        jsx(Shape, {
-          key: "detail",
-          geometry: detail,
-          stroke: { color: tint, width: 1.5 },
-        }),
-      jsx(Text, {
-        key: "label",
-        font: l.font,
-        size: l.size,
-        weight: l.weight,
-        fill: l.colors.text,
-        anchor: "center",
-        at: [w / 2, round(h / 2 + (n.role === "store" ? LID / 2 : 0))],
-        children: n.label,
-      }),
-    ],
-  });
+  return (
+    <Group key={n.key} at={[round(n.box.x), round(n.box.y)]} motion={n.motion}>
+      <Shape
+        key="shape"
+        geometry={outline(n.role, w, h)}
+        fill={l.wash(n.role)}
+        stroke={{ color: tint, width: 1.5 }}
+      />
+      {detail && <Shape key="detail" geometry={detail} stroke={{ color: tint, width: 1.5 }} />}
+      <Text
+        key="label"
+        font={l.font}
+        size={l.size}
+        weight={l.weight}
+        fill={l.colors.text}
+        anchor="center"
+        at={[w / 2, round(h / 2 + (n.role === "store" ? LID / 2 : 0))]}
+      >
+        {n.label}
+      </Text>
+    </Group>
+  );
 };
 
 const HEAD = 8;
@@ -489,27 +482,28 @@ export const drawEdge = (l: Look, e: EdgeDraw): SceneElement => {
   const { drawn } = e;
   const tip = drawn && span(drawn.start + drawn.over * 0.85, drawn.over * 0.15);
 
-  return jsx(Group, {
-    key: e.key,
-    children: [
-      jsx(Shape, {
-        key: "line",
-        geometry: curve(points).geometry,
-        stroke: stroke,
-        trim: drawn && !e.dash ? draw(drawn) : undefined,
-        opacity: drawn && e.dash ? fade(drawn) : undefined,
-      }),
-      head !== "none" &&
-        jsx(Shape, {
-          key: "head",
-          geometry: headOf(head, b, ux, uy),
-          fill: head === "filled" ? color : undefined,
-          stroke:
-            head === "filled" ? undefined : { color, width: 1.5, cap: "round", join: "round" },
-          opacity: tip && fade(tip),
-        }),
-    ],
-  });
+  return (
+    <Group key={e.key}>
+      <Shape
+        key="line"
+        geometry={curve(points).geometry}
+        stroke={stroke}
+        trim={drawn && !e.dash ? draw(drawn) : undefined}
+        opacity={drawn && e.dash ? fade(drawn) : undefined}
+      />
+      {head !== "none" && (
+        <Shape
+          key="head"
+          geometry={headOf(head, b, ux, uy)}
+          fill={head === "filled" ? color : undefined}
+          stroke={
+            head === "filled" ? undefined : { color, width: 1.5, cap: "round", join: "round" }
+          }
+          opacity={tip && fade(tip)}
+        />
+      )}
+    </Group>
+  );
 };
 
 export interface ChipDraw {
@@ -521,22 +515,21 @@ export interface ChipDraw {
   readonly motion?: Layers;
 }
 
-export const drawChip = (l: Look, c: ChipDraw): SceneElement =>
-  jsx(Center, {
-    key: c.key,
-    at: [round(c.box.x), round(c.box.y)],
-    width: round(c.box.w),
-    height: round(c.box.h),
-    radius: 3,
-    fill: c.ground === "none" ? undefined : (c.ground ?? l.colors.background),
-    motion: c.motion,
-    children: jsx(Text, {
-      font: l.font,
-      size: l.small,
-      fill: c.fill ?? l.colors.muted,
-      children: c.text,
-    }),
-  });
+export const drawChip = (l: Look, c: ChipDraw): SceneElement => (
+  <Center
+    key={c.key}
+    at={[round(c.box.x), round(c.box.y)]}
+    width={round(c.box.w)}
+    height={round(c.box.h)}
+    radius={3}
+    fill={c.ground === "none" ? undefined : (c.ground ?? l.colors.background)}
+    motion={c.motion}
+  >
+    <Text font={l.font} size={l.small} fill={c.fill ?? l.colors.muted}>
+      {c.text}
+    </Text>
+  </Center>
+);
 
 const isSpan = (value: Reveal<string>): value is Span =>
   typeof value.start === "number" && typeof value.over === "number";
