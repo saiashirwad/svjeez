@@ -8,7 +8,8 @@ import { DEFAULT_EASE, ease, type Ease } from "../model/time";
 import type { PathData } from "../model/paths";
 import type { AttrValue } from "./tree";
 import { arcPieces, contoursOf, mixGeometry, onCircle, smilSafe } from "../model/geometry";
-import type { Contour, Cubic, Geometry, Key, Lane, Paint, ShapeNode, Vec } from "../model/ir";
+import { isColor } from "../model/painted";
+import type { Contour, Cubic, Geometry, Key, Lane, ShapeNode, Vec } from "../model/ir";
 import { isLane } from "../model/lane";
 import { same } from "../model/steps";
 
@@ -441,13 +442,13 @@ const morph = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving => {
   };
 };
 
-const isGradient = (paint: Paint): boolean => !Array.isArray(paint) && "stops" in paint;
-
 const framed = (node: ShapeNode): boolean =>
   [node.fill, node.stroke?.color].some(
     (paint) =>
       paint !== undefined &&
-      (isLane(paint) ? paint.keys.map((key) => key.value) : [paint]).some(isGradient),
+      (isLane(paint) ? paint.keys.map((key) => key.value) : [paint]).some(
+        (value) => !isColor(value),
+      ),
   );
 
 const scalable = (node: ShapeNode): boolean => node.stroke === undefined && !framed(node);

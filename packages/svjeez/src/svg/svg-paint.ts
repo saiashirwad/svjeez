@@ -13,6 +13,7 @@ import type {
   Geometry,
   Gradient,
   Lane,
+  Pattern,
   Rgba,
   Scene,
   SceneNode,
@@ -244,6 +245,63 @@ export const gradientUrl = (
       ],
     ),
   }));
+
+  if (twin) swap(defs, property, id);
+
+  return `url(#${id})`;
+};
+
+export const patternUrl = (
+  defs: Defs,
+  pattern: Pattern,
+  shift: Vec,
+  property: "fill" | "stroke",
+  key: string,
+): string => {
+  const where = `the pattern on "${key}"`;
+
+  const at = (name: "x" | "y", axis: 0 | 1) =>
+    [
+      name,
+      smil(
+        defs,
+        name,
+        settled(
+          isLane(pattern.offset)
+            ? mapLane(pattern.offset, (value) => value[axis] + shift[axis])
+            : pattern.offset[axis] + shift[axis],
+        ),
+        where,
+      ),
+    ] as const;
+
+  const corner = [at("x", 0), at("y", 1)];
+
+  const { id, twin } = twinned(
+    defs,
+    JSON.stringify(["p", pattern.tile.key, shift]),
+    "p",
+    (own, still) => ({
+      moves: corner.some(([, written]) => written.nodes.length > 0),
+      node: element(
+        "pattern",
+        {
+          id: own,
+          patternUnits: "userSpaceOnUse",
+          ...Object.fromEntries(corner.map(([name, written]) => [name, pick(written, still)])),
+          width: num(pattern.size[0]),
+          height: num(pattern.size[1]),
+        },
+        [
+          ...children(
+            corner.map(([, written]) => written),
+            still,
+          ),
+          defs.draw(pattern.tile),
+        ],
+      ),
+    }),
+  );
 
   if (twin) swap(defs, property, id);
 

@@ -11,6 +11,7 @@ import type {
   Vec,
 } from "../model/ir";
 import { isLane } from "../model/lane";
+import { isColor } from "../model/painted";
 import { placed, reachOf } from "../model/reach";
 import type { Seconds } from "../model/time";
 import type { Placed } from "./boxes";
@@ -266,7 +267,7 @@ const coverOf = (survey: Survey, entry: Entry): Cover | undefined => {
 };
 
 const opaque = (scene: Scene, paint: ShapeNode["fill"], scheme: Scheme): boolean => {
-  if (paint === undefined || isLane(paint) || "stops" in paint) return false;
+  if (paint === undefined || isLane(paint) || !isColor(paint)) return false;
 
   return rgbaIn(scene, paint, scheme)[3] >= 1;
 };

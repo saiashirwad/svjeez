@@ -18,6 +18,7 @@ import type {
   Vec,
 } from "../model/ir";
 import { isLane, mapLane } from "../model/lane";
+import { isColor } from "../model/painted";
 import { breaksOf, segmentAt, unrolled } from "../model/sample";
 import { same } from "../model/steps";
 import { nodeName } from "../model/naming";
@@ -309,8 +310,6 @@ const isRgba = (color: Color): color is Rgba => Array.isArray(color);
 export const rgbaIn = (scene: Scene, color: Color, scheme: Scheme): Rgba =>
   isRgba(color) ? color : (scene.tokens[color.name]?.[scheme] ?? [0, 0, 0, 0]);
 
-const isColor = (paint: Paint): paint is Color => !("stops" in paint);
-
 export const colorAt = (
   scene: Scene,
   paint: Animated<Paint>,
@@ -330,7 +329,8 @@ export const colorAt = (
 export const isClear = (scene: Scene, paint: Paint): boolean =>
   isColor(paint)
     ? SCHEMES.every((scheme) => rgbaIn(scene, paint, scheme)[3] <= 0)
-    : paint.stops.every((stop) =>
+    : "stops" in paint &&
+      paint.stops.every((stop) =>
         SCHEMES.every((scheme) => rgbaIn(scene, stop.color, scheme)[3] <= 0),
       );
 
@@ -350,7 +350,11 @@ export const colorName = (color: Color): string =>
     : color.name;
 
 export const paintName = (paint: Paint): string =>
-  isColor(paint) ? colorName(paint) : `${paint.kind} gradient`;
+  isColor(paint)
+    ? colorName(paint)
+    : paint.kind === "pattern"
+      ? "pattern"
+      : `${paint.kind} gradient`;
 
 export const strokeReachAt = (node: ShapeNode, placed: Placed, t: Seconds): number => {
   if (!node.stroke) return 0;

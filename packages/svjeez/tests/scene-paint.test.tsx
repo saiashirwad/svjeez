@@ -12,6 +12,7 @@ import {
   linear,
   morph,
   moved,
+  pattern,
   polygon,
   radial,
   rect,
@@ -253,6 +254,105 @@ describe("gradients", () => {
 
     expect(out).not.toContain("translate:");
     expect(out).toContain('attributeName="d"');
+  });
+});
+
+describe("patterns", () => {
+  const dots = pattern({
+    size: [10, 10],
+    children: <Shape geometry={circle(2)} at={[5, 5]} fill="#FF0000" />,
+  });
+
+  test("a pattern lowers its children into a tile, once however many nodes it paints", () => {
+    const model = made(() => (
+      <Group>
+        <Shape geometry={rect(40, 20)} fill={dots} />
+        <Shape geometry={rect(40, 20)} stroke={{ color: dots }} />
+      </Group>
+    ));
+
+    const [a, b] = model.root.children;
+
+    if (a?.kind !== "shape" || b?.kind !== "shape") throw new Error("expected two shapes");
+    const fill = a.fill;
+
+    expect(fill).toMatchObject({
+      kind: "pattern",
+      size: [10, 10],
+      offset: [0, 0],
+      tile: { children: [{ kind: "shape" }] },
+    });
+    expect(b.stroke?.color).toBe(fill);
+    expect(diagnose(model, svg).length).toBe(0);
+  });
+
+  test("SVG writes one pattern for every use of it, in the painted node's frame", () => {
+    const out = emitted(
+      made(() => (
+        <Group>
+          <Shape geometry={rect(40, 20)} fill={dots} />
+          <Shape geometry={rect(40, 20)} stroke={{ color: dots }} />
+        </Group>
+      )),
+    );
+
+    expect(count(out, "<pattern")).toBe(1);
+    expect(out).toContain(
+      '<pattern id="p1" patternUnits="userSpaceOnUse" x="0" y="0" width="10" height="10">',
+    );
+    expect(out).toContain('fill="url(#p1)"');
+    expect(out).toContain('stroke="url(#p1)"');
+  });
+
+  test("an offset track scrolls the pattern by SMIL, with a still twin", () => {
+    const x = track<Vec>([0, 0]).to([10, 0], span(1, 1));
+
+    const out = emitted(
+      made(() => (
+        <Shape
+          geometry={rect(40, 20)}
+          at={[5, 0]}
+          fill={pattern({
+            size: [10, 10],
+            children: <Shape geometry={rect(5, 5)} fill="#000000" />,
+            offset: x,
+          })}
+        />
+      )),
+    );
+
+    expect(out).toContain('attributeName="x" values="5;15"');
+    expect(out).toContain('<pattern id="p1s"');
+    expect(out).toContain(
+      '@media (prefers-reduced-motion:reduce){[fill="url(#p1)"]{fill:url(#p1s)}}',
+    );
+  });
+
+  test("a pattern blends with nothing but itself", () => {
+    expect(() =>
+      made(() => (
+        <Shape geometry={rect(4, 4)} fill={track<Paint>("#000000").to(dots, span(0, 1))} />
+      )),
+    ).toThrow("would blend a pattern with a different paint");
+    expect(() =>
+      made(() =>
+        morph(
+          <Shape key="a" geometry={rect(4, 4)} fill="#000000" />,
+          <Shape key="a" geometry={rect(4, 4)} fill={dots} />,
+          span(0, 1),
+        ),
+      ),
+    ).toThrow("would blend a pattern with a different paint");
+    expect(() =>
+      made(() => <Shape geometry={rect(4, 4)} fill={track<Paint>(dots).to(dots, span(0, 1))} />),
+    ).not.toThrow();
+  });
+
+  test("a pattern is checked where it is written", () => {
+    expect(() => pattern({ size: [0, 10], children: null })).toThrow("positive numbers");
+    expect(() =>
+      made(() => <Shape geometry={rect(4, 4)} fill={pattern({ size: [4, 4], children: null })} />),
+    ).toThrow("has nothing to draw");
   });
 });
 
