@@ -155,6 +155,15 @@ export const CHANNELS = {
     range: [0, 100],
   },
   fill: { value: color, tags: PAINTED, lane: "fill", composition: "replace", attr: "fill" },
+  /** How opaque the fill is: what fades one run of a text, since a `<tspan>` takes no `opacity`. */
+  fillOpacity: {
+    value: number,
+    tags: PAINTED,
+    lane: "fill-opacity",
+    composition: "replace",
+    attr: "fill-opacity",
+    range: [0, 1],
+  },
   stroke: { value: color, tags: PAINTED, lane: "stroke", composition: "replace", attr: "stroke" },
   color: {
     value: color,

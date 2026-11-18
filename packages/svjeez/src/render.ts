@@ -1,4 +1,5 @@
 import { compile } from "./compile";
+import type { FontStyle, FontValue } from "./font/font";
 import { RATE_ATTR } from "./rate";
 import { num } from "./format";
 import type { Seconds } from "./motion";
@@ -35,6 +36,17 @@ export interface RenderOptions {
   readonly sources?: boolean;
   /** Receives SVG validation warnings from this render. */
   readonly onWarning?: (warning: string) => void;
+  /**
+   * Font properties on the root `<svg>`, which every text inherits unless it says otherwise: a family embeds as one
+   * written on a text does. Default none.
+   */
+  readonly font?: RootFont;
+}
+
+export interface RootFont {
+  readonly family?: FontValue;
+  readonly weight?: number;
+  readonly style?: FontStyle;
 }
 
 /** Compile motions and refs, serialize, and validate. Throws on invalid output. */
@@ -74,6 +86,11 @@ export const render = (options: RenderOptions, content: Child): string => {
     { width, height, duration, playbackRate, prefix, stillAt, loop: options.loop ?? true },
     options.css,
     timeline,
+    {
+      ...(options.font?.family !== undefined && { "font-family": options.font.family }),
+      ...(options.font?.weight !== undefined && { "font-weight": num(options.font.weight) }),
+      ...(options.font?.style !== undefined && { "font-style": options.font.style }),
+    },
   );
 
   const rootAttributes = {
@@ -85,8 +102,11 @@ export const render = (options: RenderOptions, content: Child): string => {
     "aria-labelledby": options.desc ? `${prefix}t ${prefix}d` : `${prefix}t`,
   };
 
-  const rated =
-    playbackRate === 1 ? rootAttributes : { ...rootAttributes, [RATE_ATTR]: num(playbackRate) };
+  const rated = {
+    ...rootAttributes,
+    ...(playbackRate !== 1 && { [RATE_ATTR]: num(playbackRate) }),
+    ...compiled.root,
+  };
 
   const root = element("svg", prefix ? { ...rated, class: `${prefix}root` } : rated, [
     element("title", { id: `${prefix}t` }, children(options.title, true)),

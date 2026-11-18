@@ -867,6 +867,8 @@ export interface Compiled {
   readonly body: readonly SvgNode[];
   readonly defs: readonly SvgNode[];
   readonly css: string;
+  /** `rootAttrs` resolved, for the root `<svg>`. */
+  readonly root: Readonly<Record<string, AttrValue>>;
 }
 
 export const compile = (
@@ -874,6 +876,7 @@ export const compile = (
   canvas: Canvas,
   author: string | Css = "",
   timeline?: TimelineTrack[],
+  rootAttrs: Element["attrs"] = {},
 ): Compiled => {
   const state: State = {
     canvas,
@@ -897,7 +900,10 @@ export const compile = (
     once: false,
   };
 
-  const body = content.map((node) => walk(state, node));
+  // Every element inherits the root's font properties, so a family written there embeds and reaches every text.
+  const root = resolveAttrs(state, rootAttrs);
+  const font = fontOf(canvas.prefix, rootAttrs, root, UNKNOWN_FONT);
+  const body = content.map((node) => walk(state, node, false, NOWHERE, font));
   const authored = (isCss(author) ? resolveCss(state, author) : author).trim();
 
   noteCss(state.fontUse, authored);
@@ -919,5 +925,6 @@ export const compile = (
     body,
     defs: state.defs,
     css: [authored, ...state.styles, generated].filter(Boolean).join("\n\n"),
+    root,
   };
 };
