@@ -53,7 +53,7 @@ export default scene({ size: [240, 140], duration: 4, title: "Hello", theme, red
 ## The model in eight rules
 
 1. **Every node has a box**: what it paints, its stroke included, measured when the scene compiles. Text too.
-2. **`at` places the node's `anchor`**, the box's top-left unless `anchor` names another point (`"center"`, `"bottom-right"`, `[0.5, 1]`, and for text `"baseline"`, `"baseline-left"`, `"baseline-right"`). A `<Group>` is a frame: its `at` is where its children's `[0, 0]` goes. A line, polygon or path with no `at` stays where its coordinates are. `rotate` and `scale` turn around `origin`, `"center"` of the box by default.
+2. **`at` places the node's `anchor`**, the box's top-left unless `anchor` names another point (`"center"`, `"bottom-right"`, `[0.5, 1]`, and for text `"baseline"`, `"baseline-left"`, `"baseline-right"`). A `<Group>` is a frame: its `at` is where its children's `[0, 0]` goes. A line, polygon or path with no `at` stays where its coordinates are. `rotate` and `scale` turn around `origin`, `"center"` of the box by default; `origin="at"` turns around the point `at` places, a group's `[0, 0]`.
 3. **Nothing is inherited.** A shape with no fill has none; a text needs its own `font`, `size` and `fill`. Share styles by spreading objects or writing components.
 4. **Every prop takes a value or a track**: `opacity={track(0).to(1, span(0.5, 0.3))}`. Geometry, paint, stroke width, trim, clip and effects animate the same way.
 5. **Time is spans on clocks.** `span(start, over)` is when; build each beat from the one before (`a.next(0.4)`, `a.cascade(3, 0.1)`). `<Sequence start={…}>` starts a clock of its own.

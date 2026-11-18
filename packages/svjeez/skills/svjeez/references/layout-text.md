@@ -43,7 +43,7 @@ export default scene({ size: [360, 200], duration: 2, title: "Containers", theme
 - Containers cost nothing in the output: they become plain placements, plus one rect for one that draws itself.
 - A container around a `morph()` reflows with it: see [morph.md](morph.md).
 
-The nine places, for `anchor`, `origin`, `place` and `radial.across({ center })`: `top-left`, `top`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom`, `bottom-right`. `anchor` also takes fractions of the box, `[0.5, 1]`, and `origin` a point measured from the box's top-left, `[20, 0]`.
+The nine places, for `anchor`, `origin`, `place` and `radial.across({ center })`: `top-left`, `top`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom`, `bottom-right`. `anchor` also takes fractions of the box, `[0.5, 1]`, and `origin` a point measured from the box's top-left, `[20, 0]`, or `"at"`, the point `at` places: a gear drawn around its group's `[0, 0]` turns about its axle with `<Group at={axle} rotate={…} origin="at">`.
 
 ## Placing without a container
 

@@ -598,6 +598,51 @@ describe("origin is named on the box, as anchor is", () => {
     expect(found.text).toEqual([text.width, text.height]);
   });
 
+  test('"at" turns around the point at places: a group\'s [0, 0], or its anchor', () => {
+    const found = origins(() => (
+      <Group>
+        <Group key="frame" at={[40, 40]} origin="at">
+          <Shape geometry={rect(30, 10)} at={[10, 10]} fill="#000000" />
+        </Group>
+        <Group key="anchored" at={[40, 40]} anchor="bottom-right" origin="at">
+          <Shape geometry={rect(30, 10)} at={[10, 10]} fill="#000000" />
+        </Group>
+        <Shape
+          key="dot"
+          geometry={circle(5)}
+          at={[50, 50]}
+          anchor="center"
+          origin="at"
+          fill="#000000"
+        />
+        <Shape
+          key="path"
+          geometry={line([10, 50], [90, 50])}
+          stroke={{ color: "#000000" }}
+          origin="at"
+        />
+        <Stack key="row" at={[20, 20]} origin="at" gap={4}>
+          <Shape geometry={rect(10, 10)} fill="#000000" />
+          <Shape geometry={rect(10, 10)} fill="#000000" />
+        </Stack>
+      </Group>
+    ));
+
+    expect(found.frame).toEqual([0, 0]);
+    expect(found.anchored).toEqual([40, 20]);
+    expect(found.dot).toEqual([0, 0]);
+    expect(found.path).toEqual([0, 0]);
+    expect(found.row).toEqual([20, 20]);
+
+    const turned = boxes(() => (
+      <Group key="arm" at={[100, 100]} rotate={90} origin="at">
+        <Shape key="bar" geometry={rect(40, 4)} at={[0, -2]} fill="#000000" />
+      </Group>
+    ));
+
+    expect(turned["arm/bar"]).toEqual([98, 100, 4, 40]);
+  });
+
   test("a turn around the center keeps a circle where it is", () => {
     const found = boxes(() => (
       <Shape key="dot" geometry={circle(5)} at={[20, 20]} rotate={180} fill="#000000" />
@@ -611,7 +656,7 @@ describe("origin is named on the box, as anchor is", () => {
       // @ts-expect-error: "middle" is not a place.
       made(() => <Shape key="s" geometry={rect(10, 10)} fill="#000000" origin="middle" />),
     ).toThrow(
-      'origin on <Shape> "s" takes a place, one of "top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right", or a point measured from its box\'s top-left, such as [20, 0], got "middle".',
+      'origin on <Shape> "s" takes a place, one of "top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right", a point measured from its box\'s top-left, such as [20, 0], or "at" for the point its at places, got "middle".',
     );
   });
 });

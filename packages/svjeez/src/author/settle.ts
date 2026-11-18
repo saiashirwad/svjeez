@@ -63,7 +63,7 @@ interface Note {
   readonly kind: Kind;
   readonly pin?: TextAnchorPlace;
   readonly pinned?: true;
-  readonly origin: Place | Vec | undefined;
+  readonly origin: Origin | undefined;
   readonly settle?: Settle;
   readonly backdrop?: BackdropOf;
 }
@@ -118,7 +118,7 @@ interface Written {
   readonly ref?: Ref;
   readonly at?: unknown;
   readonly anchor?: TextAnchorPlace;
-  readonly origin?: Place | Vec;
+  readonly origin?: Origin;
 }
 
 export const note = (
@@ -234,16 +234,25 @@ export const around = (
   return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
 };
 
-const isOffset = (origin: Place | Vec): origin is Vec => Array.isArray(origin);
+export type Origin = Place | Vec | "at";
 
-export const originOf = (origin: Note["origin"], box: Box, key: string): Vec => {
+const isOffset = (origin: Origin): origin is Vec => Array.isArray(origin);
+
+export const originOf = (
+  origin: Origin | undefined,
+  box: Box,
+  key: string,
+  home: () => Vec,
+): Vec => {
   if (origin === undefined) return [box.x + box.width / 2, box.y + box.height / 2];
+
+  if (origin === "at") return home();
 
   if (isOffset(origin)) return [box.x + origin[0], box.y + origin[1]];
 
   if (!Object.hasOwn(PLACES, origin))
     throw new SceneError(
-      `origin on ${named(key)} takes a place, one of ${PLACE_LIST}, or a point measured from its box's top-left, such as [20, 0], got ${JSON.stringify(origin)}.`,
+      `origin on ${named(key)} takes a place, one of ${PLACE_LIST}, a point measured from its box's top-left, such as [20, 0], or "at" for the point its at places, got ${JSON.stringify(origin)}.`,
       undefined,
       whereOf(key),
     );
@@ -385,6 +394,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     if (d.measuring === 1) loop(d, "box");
     d.measuring = 1;
     const { settle: asked } = d.note ?? {};
+    let pivot: Vec | undefined;
 
     if (asked?.kind === "connect") {
       const ends = asked.ends.map((end, i) => {
@@ -455,7 +465,10 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
       const [x, y] = folded ? [atRest(d.at)[0] - home[0], atRest(d.at)[1] - home[1]] : [0, 0];
 
-      if (folded) d.homed = true;
+      if (folded) {
+        d.homed = true;
+        pivot = [x + home[0], y + home[1]];
+      }
 
       d.children.forEach((child, i) => {
         child.at = [x + slots[i]![0] - child.box.x, y + slots[i]![1] - child.box.y];
@@ -482,7 +495,12 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
       d.box = d.note?.arranged ? d.node.box : around(d.children);
     }
 
-    d.origin = originOf(d.note?.origin, d.box, d.node.key);
+    d.origin = originOf(
+      d.note?.origin,
+      d.box,
+      d.node.key,
+      () => pivot ?? homeOf(d.note?.kind ?? d.node.kind, d.node, d.note?.pin, d.box),
+    );
     d.measuring = 2;
   };
 
@@ -694,7 +712,9 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
         children,
         box,
         at: pin(box),
-        origin: originOf(note?.origin, box, node.key),
+        origin: originOf(note?.origin, box, node.key, () =>
+          homeOf(node.kind, node, note?.pin, box),
+        ),
       };
     }
 
@@ -736,7 +756,7 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
       ...node,
       box,
       at: pin(box),
-      origin: originOf(note!.origin, box, node.key),
+      origin: originOf(note!.origin, box, node.key, () => homeOf(node.kind, node, note!.pin, box)),
       children: [
         ...behind(backdrop, node, box),
         ...placed.map((child, i) => ({
