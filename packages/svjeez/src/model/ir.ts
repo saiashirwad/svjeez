@@ -147,6 +147,7 @@ export interface Stroke {
   readonly dash?: readonly number[];
   readonly dashOffset?: Animated<number>;
   readonly nonScaling: boolean;
+  readonly under: boolean;
 }
 
 export interface Layer {

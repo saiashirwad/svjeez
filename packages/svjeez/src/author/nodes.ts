@@ -41,6 +41,8 @@ export interface StrokeProps {
   /** Slides the dash pattern along the stroke. Needs `dash`, and can't be combined with `trim`. */
   readonly dashOffset?: Anim<number>;
   readonly nonScaling?: boolean;
+  /** Draw the stroke under the fill. */
+  readonly under?: boolean;
 }
 
 export interface Bounds extends Box {
@@ -90,7 +92,7 @@ export interface TextProps extends Omit<Common, "anchor"> {
   readonly font: FontValue;
   readonly weight?: number;
   readonly italic?: boolean;
-  readonly size: Anim<number>;
+  readonly size: number;
   readonly fill?: Anim<Paint>;
   readonly stroke?: StrokeProps;
   readonly align?: "start" | "center" | "end";

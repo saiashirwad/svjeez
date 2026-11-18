@@ -594,6 +594,8 @@ const strokeAttrs = (
   }
 
   if (stroke.nonScaling) attrs["vector-effect"] = "non-scaling-stroke";
+
+  if (stroke.under) attrs["paint-order"] = "stroke";
 };
 
 const stroked = (
@@ -817,10 +819,7 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
     if (base.opacity !== undefined) opacity(base, drawn.attrs, lanes);
   } else drawn.attrs.fill = "none";
 
-  if (node.stroke) {
-    strokeAttrs(ctx, node.stroke, drawn.attrs, lanes, at, node.key);
-    drawn.attrs["paint-order"] = "stroke";
-  }
+  if (node.stroke) strokeAttrs(ctx, node.stroke, drawn.attrs, lanes, at, node.key);
 
   if (single)
     return {
