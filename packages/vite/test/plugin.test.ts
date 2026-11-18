@@ -113,7 +113,7 @@ import { Shape, circle, rect, scene } from "svjeez/scene";
 export default scene({ size: [120, 80], duration: 1, title: "Model" }, () => (
   <>
     <Shape geometry={rect(120, 80)} fill="#101010" />
-    <Shape geometry={circle(10)} at={[60, 40]} fill="#3EE6D6" />
+    <Shape geometry={circle(10)} at={[60, 40]} anchor="center" fill="#3EE6D6" />
   </>
 ));`,
   );
