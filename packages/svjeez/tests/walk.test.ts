@@ -47,6 +47,7 @@ test("walks children before masks, then visits declared symbols without expandin
       unused: group("unused"),
     },
   };
+
   const visited: string[] = [];
 
   walkScene(scene, (node) => {
