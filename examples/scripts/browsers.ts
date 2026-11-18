@@ -36,21 +36,9 @@ const PAGES = 4;
  */
 const DIFFERS = new Map<string, { props: string[]; why: string }>(
   Object.entries({
-    "firefox horizon.svg": {
-      props: ["bcx", "bcy", "bw", "bh"],
-      why: "Firefox reads the fill-box of a group wrong when its children rotate about fill-boxes of their own (a group of circles with `rotate` and `transform-box: fill-box` gets bounds of [0, -636, 900, 900] where Chromium and WebKit say [-636, -636, 1273, 1273]), so the rings of the group scale and spin about another center.",
-    },
-    "firefox plane.svg": {
-      props: ["bw"],
-      why: "A diagonal line under a stretched rotation: Chromium bounds the turned box of its path, Firefox the turned path. The center is the same in both.",
-    },
     "firefox layout.svg": {
       props: ["bcx"],
       why: "An arrow head turns inside a group that rotates it about the arrow's start, so as it tilts Firefox bounds the turned head and Chromium its turned box. The frames are the same pixels in both.",
-    },
-    "firefox site/icons.svg": {
-      props: ["bcx"],
-      why: "The same measuring difference on an icon turned by a few degrees: the bounds of the turned box and of the turned shape have different centers.",
     },
   }),
 );

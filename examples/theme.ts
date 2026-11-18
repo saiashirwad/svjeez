@@ -1,29 +1,38 @@
-import { systemDark, systemLight, type Base16, type Hex } from "svjeez";
 import { tokens } from "svjeez/scene";
 import { mono } from "./fonts/faces";
 
-const named = (scheme: Base16) => {
-  // SAFETY: a base16 scheme is built from hex colors, so each slot is one.
-  const hex = (slot: keyof Base16): Hex => scheme[slot] as Hex;
-
-  return {
-    background: hex("base00"),
-    surface: hex("base01"),
-    raised: hex("base02"),
-    border: hex("base03"),
-    muted: hex("base04"),
-    text: hex("base05"),
-    red: hex("base08"),
-    orange: hex("base09"),
-    yellow: hex("base0A"),
-    green: hex("base0B"),
-    cyan: hex("base0C"),
-    blue: hex("base0D"),
-    magenta: hex("base0E"),
-  };
-};
-
-/** The examples' palette as tokens, named for what they are for. Scenes on the scene model take it from here, as the others take `theme` from style.ts. */
-export const theme = tokens({ light: named(systemLight), dark: named(systemDark) });
+/** The examples' palette as tokens, named for what they are for: white and system gray by day, near-black by night, with the system accent colors. */
+export const theme = tokens({
+  light: {
+    background: "#FFFFFF",
+    surface: "#F5F5F7",
+    raised: "#E5E5EA",
+    border: "#8E8E93",
+    muted: "#6E6E73",
+    text: "#1D1D1F",
+    red: "#E5453B",
+    orange: "#E8751A",
+    yellow: "#E5A50A",
+    green: "#2FA84F",
+    cyan: "#1B9AAA",
+    blue: "#0A6CFF",
+    magenta: "#9B51E0",
+  },
+  dark: {
+    background: "#090A0C",
+    surface: "#18181B",
+    raised: "#27272A",
+    border: "#7C7C82",
+    muted: "#A1A1A6",
+    text: "#E5E5EA",
+    red: "#FF6961",
+    orange: "#FF9F0A",
+    yellow: "#FFD60A",
+    green: "#32D74B",
+    cyan: "#64D2FF",
+    blue: "#5EA0FF",
+    magenta: "#C58AFF",
+  },
+});
 
 export { mono };

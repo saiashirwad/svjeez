@@ -5,9 +5,7 @@
   "scripts": {
     "build": "bun run scripts/build.ts",
     "dev": "bun run ../packages/svjeez/src/cli.ts dev",
-    "scroll": "bun run scroll/serve.ts",
     "render-png": "bun run ../packages/svjeez/src/cli.ts frames",
-    "fidelity": "bun run scripts/fidelity.ts",
     "perf": "bun run scripts/perf.ts",
     "render-video": "bun run ../packages/svjeez/src/cli.ts video",
     "test": "bun test",
@@ -16,35 +14,12 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^7.3.1",
-    "@svjeez/charts": "workspace:*",
-    "@svjeez/code": "workspace:*",
-    "@svjeez/diagrams": "workspace:*",
-    "@svjeez/dom": "workspace:*",
     "@svjeez/fonts": "workspace:*",
-    "@svjeez/geo": "workspace:*",
-    "@svjeez/icons": "workspace:*",
-    "@svjeez/math": "workspace:*",
-    "@svjeez/mermaid": "workspace:*",
     "@svjeez/video": "workspace:*",
-    "@tailwindcss/node": "^4.3.5",
-    "@tailwindcss/vite": "^4.3.5",
     "@types/bun": "latest",
-    "@types/d3-geo": "^3.1.0",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.1.2",
-    "d3-geo": "^3.1.1",
-    "lucide-react": "^1.73.0",
     "playwright-core": "^1.64.1",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1",
-    "svelte": "^5.57.3",
     "svjeez": "workspace:*",
-    "tailwindcss": "^4.3.5",
     "tsx": "^4.23.15",
-    "typescript": "latest",
-    "vite": "8.3.5",
-    "world-atlas": "^2.0.2"
+    "typescript": "latest"
   }
 }

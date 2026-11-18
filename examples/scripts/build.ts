@@ -13,7 +13,7 @@ const flat = (dir: string) =>
 
 const examples = [...new Bun.Glob("*/index.tsx").scanSync(ROOT)]
   .map((entry) => basename(dirname(entry)))
-  .concat(flat("readme"), flat("site"))
+  .concat(flat("readme"))
   .sort();
 
 const wanted = process.argv.slice(2);
@@ -73,8 +73,6 @@ const build = async (name: string): Promise<boolean> => {
 };
 
 await mkdir(join(OUT, "readme"), { recursive: true });
-
-await mkdir(join(OUT, "site"), { recursive: true });
 
 const results = await Promise.all((wanted.length > 0 ? wanted : examples).map(build));
 

@@ -15,14 +15,14 @@ test("a build emits the scene and its posters, and the bundle holds only their U
   const outDir = join(scratch, "dist");
   await build({ ...appConfig(), build: { outDir, emptyOutDir: true } });
   const files = readdirSync(join(outDir, "assets"));
-  const svg = files.find((file) => /^hero-.*\.svg$/.test(file));
+  const svg = files.find((file) => /^basic-.*\.svg$/.test(file));
   const js = files.find((file) => file.endsWith(".js"));
   expect(svg).toBeDefined();
   expect(readFileSync(join(outDir, "assets", svg!), "utf8")).toStartWith("<svg");
 
   for (const scheme of ["light", "dark"]) {
     const poster = files.find(
-      (file) => file.startsWith(`hero-${scheme}-`) && file.endsWith(".webp"),
+      (file) => file.startsWith(`basic-${scheme}-`) && file.endsWith(".webp"),
     );
 
     expect(

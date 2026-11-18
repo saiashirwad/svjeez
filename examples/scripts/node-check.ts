@@ -16,7 +16,6 @@ const scenes = [
     .filter((entry) => entry.isDirectory() && existsSync(join(ROOT, entry.name, "index.tsx")))
     .map((entry) => join(entry.name, "index.tsx")),
   ...(await flat("readme")),
-  ...(await flat("site")),
 ];
 
 type Made = string | Scene;

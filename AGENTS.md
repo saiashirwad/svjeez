@@ -21,7 +21,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/math/` is `@svjeez/math`, which typesets TeX into glyph paths through MathJax and draws coordinate planes (axes, plots, moving grids), calculus on them, vector fields and contour lines.
 - `packages/mermaid/` is `@svjeez/mermaid`, which reads Mermaid flowcharts, sequence diagrams and state diagrams into svjeez diagrams.
 - `packages/video/` is `@svjeez/video`, which encodes a scene as MP4 or WebM through Mediabunny in headless Chromium.
-- `examples/` holds the example scenes and their committed output in `examples/dist/`. It is private and never published.
+- `examples/` holds the scene-model example scenes and their committed output in `examples/dist/`. `examples/golden/` keeps the SVGs the 0.7 examples built, as references for frame diffs when a feature is ported; nothing builds or tests them. It is private and never published.
 
 Run `bun install` once at the root. From the root, `bun run typecheck` and `bun run test` run every workspace's script, `bun run build:examples` rebuilds `examples/dist/`, and `bun run typecheck` also checks `scripts/` through the root `tsconfig.json`. Every other command runs inside its workspace.
 
@@ -44,7 +44,7 @@ bun run render-png <file> --sheet  # svjeez frames: frames/ with sheet.png (--ti
 bun run svjeez <command> ...      # any CLI command from source: svg, dev, frames, check, video, skill
 ```
 
-`examples/` has its own `build`, `dev`, `render-png`, `render-video`, `test`, `test:node` and `typecheck`. `bun run build [name ...]` there writes `examples/dist/`, as in `bun run build readme/hero`. Its `tsconfig.json` maps `svjeez` to the library's `src/`, so the examples always run the source.
+`examples/` has its own `build`, `dev`, `render-png`, `render-video`, `test`, `test:node` and `typecheck`. `bun run build [name ...]` there writes `examples/dist/`, as in `bun run build readme/basic`. Its `tsconfig.json` maps `svjeez` to the library's `src/`, so the examples always run the source.
 
 Frame rendering needs Chromium once per machine: `bunx playwright-core install chromium-headless-shell`.
 
@@ -77,7 +77,7 @@ Each package's source explains its own internals. These are the rules that aren'
 - Don't change the behavior of an existing public function without being asked.
 - After changing an example or the compiler, rebuild the affected `examples/dist/` files and commit them with the change.
 - Keep the library free of Astro. Astro code belongs in `packages/astro/`.
-- Scenes that show code, an explainer or a terminal take `theme`, `css` and `mono` from `examples/style.ts`, and the site's code blocks and playground read the same palette through `site/src/styles/code.ts`. `examples/tests/style.test.ts` fails on a scene that brings its own code palette or mono font.
+- Example scenes take `theme` and `mono` from `examples/theme.ts`, so they share one palette and one embedded mono font.
 - Time is spans on clocks: write `show`, `<Clip>` and `{ at, over }`, never absolute seconds inside a component. `frames`, `restyle` and `seek` take scene seconds, so `render` writes `data-playback-rate` on the root and they read it.
 - Check visual changes with `bun run svjeez check <file>`, which reports layout and timing faults as text, then by looking at frames: run `bun run render-png <file> --sheet` and open `sheet.png`. Passing tests don't show timing or layout bugs.
 - A package that lays something out returns a `Drawn` (`src/drawn.ts`): `node`, `span`, `bounds`, `parts` and `part(id)`, where each part has a `box` and its own `span`. Don't add another name for the same thing.

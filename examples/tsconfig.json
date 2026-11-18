@@ -26,13 +26,6 @@
       "svjeez/frames": ["../packages/svjeez/src/frames.ts"]
     }
   },
-  "include": [
-    ".",
-    "../packages/svjeez/src",
-    "../packages/math/src",
-    "../packages/geo/src",
-    "../packages/charts/src",
-    "../packages/diagrams/src"
-  ],
-  "exclude": ["dist", "node_modules"]
+  "include": [".", "../packages/svjeez/src"],
+  "exclude": ["dist", "golden", "node_modules"]
 }
