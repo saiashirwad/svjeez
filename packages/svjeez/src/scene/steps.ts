@@ -545,14 +545,14 @@ const reach = (
   for (const clip of [...clock.clips].reverse())
     if (!clip.open && until > clip.end + EPSILON)
       throw new Error(
-        `${where} runs until ${num(until - clip.start)}s, past the ${num(clip.end - clip.start)}s ${clip.label}.`,
+        `${where} runs until ${num(until - clip.start)}s, past the ${num(clip.end - clip.start)}s ${clip.label}. End it by then, or give the sequence a longer over.`,
       );
 
   if (until > duration + EPSILON) {
     const inside = clock.clips.at(-1);
 
     throw new Error(
-      `${where} runs until ${num(until)}s${inside ? ` (${num(until - clock.offset)}s into ${inside.label})` : ""}, past the ${num(duration)}s scene.`,
+      `${where} runs until ${num(until)}s${inside ? ` (${num(until - clock.offset)}s into ${inside.label})` : ""}, past the ${num(duration)}s scene. End it by then, or give scene() a longer duration.`,
     );
   }
 };

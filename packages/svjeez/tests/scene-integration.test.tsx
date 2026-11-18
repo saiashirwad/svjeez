@@ -801,6 +801,18 @@ describe("errors a newcomer meets first", () => {
     );
   });
 
+  test("bare text and a shape with no geometry say what to write", () => {
+    // SAFETY: what JSX hands over for text written straight inside a group.
+    expect(() => made(() => <Group>{"hello" as never}</Group>)).toThrow(
+      'The scene holds the bare text "hello". Write text in a <Text font={…} size={…} fill={…}>.',
+    );
+
+    // SAFETY: what a scene written without types hands over.
+    expect(() => made(() => <Shape geometry={undefined as never} fill={red} />)).toThrow(
+      '<Shape> "0" needs a geometry, such as geometry={rect(40, 20)}.',
+    );
+  });
+
   test("a child a container places, given an at, says to drop it", () => {
     expect(() =>
       made(() => (
@@ -866,6 +878,12 @@ describe("errors a newcomer meets first", () => {
     ).toThrow("A <Sequence at={3} over={2}> runs until 5s, past the 4s scene.");
 
     expect(() =>
+      made(() => <Shape key="late" geometry={circle(4)} opacity={track(0).to(1, span(3.5, 1))} />),
+    ).toThrow(
+      'opacity on "late" runs until 4.5s, past the 4s scene. End it by then, or give scene() a longer duration.',
+    );
+
+    expect(() =>
       made(() => {
         const dot = ref("dot");
 
@@ -921,6 +939,7 @@ describe.if(browser)("frames", () => {
     for (const playbackRate of [1, 2]) {
       const out = svg.emit(integration, { playbackRate, prefix: "r" });
       const reduced = await shot(out, "reduce");
+
       const paused = await shot(
         restyle(out, { at: integration.still!, paused: true }),
         "no-preference",

@@ -151,6 +151,10 @@ const TYPES: ReadonlySet<string> = new Set([
 const isObject = (value: SceneElement): value is SceneElement =>
   typeof value === "object" && value !== null;
 
+/** Whether JSX handed over text, which a scene draws only through <Text>. */
+const isText = (value: SceneElement | string | number): value is string | number =>
+  typeof value === "string" || typeof value === "number";
+
 /** What a lowercase tag that svjeez's SVG runtime built is called, as JSX writes it. */
 const svgTag = (value: SceneElement): string | undefined =>
   isObject(value) && "kind" in value && value.kind === "element" && "tag" in value
@@ -168,7 +172,9 @@ export const sceneElement = (value: SceneElement, where: string): SceneElement =
   throw new Error(
     tag
       ? `${where} holds ${tag}, an SVG tag, which a scene doesn't draw: every node is a component, such as <Shape geometry={rect(w, h)} />. If the file has no \`/** @jsxImportSource svjeez/scene */\` at its top, add it.`
-      : `${where} holds ${isObject(value) ? "JSX that svjeez's SVG runtime built" : String(value)}, not a scene node. Put \`/** @jsxImportSource svjeez/scene */\` at the top of the file, so its JSX builds scene nodes.`,
+      : isText(value)
+        ? `${where} holds the bare text "${String(value)}". Write text in a <Text font={…} size={…} fill={…}>.`
+        : `${where} holds ${isObject(value) ? "JSX that svjeez's SVG runtime built" : String(value)}, not a scene node. Put \`/** @jsxImportSource svjeez/scene */\` at the top of the file, so its JSX builds scene nodes.`,
   );
 };
 

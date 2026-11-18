@@ -213,6 +213,9 @@ const geometryOf = (
 
 const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeNode => {
   const where = `"${key}"`;
+
+  if (props.geometry === undefined)
+    throw new Error(`<Shape> ${where} needs a geometry, such as geometry={rect(40, 20)}.`);
   const geometry = geometryOf(props.geometry, timing, where);
   const paint = (value: Paint) => colorOf(ctx, value, where);
   const { stroke } = props;
