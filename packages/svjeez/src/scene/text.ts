@@ -44,6 +44,8 @@ export interface TextLayout<S = Font> {
   readonly lines: readonly LaidLine<S>[];
   /** What the text covers, from the tallest ascent of its faces on the first line to the deepest descent on the last. */
   readonly box: Box;
+  /** The lines, by index, that end where a word wider than the width was cut in two. */
+  readonly cuts: readonly number[];
 }
 
 const SHARE: Readonly<Record<TextAlign, number>> = { start: 0, center: 0.5, end: 1 };
@@ -122,7 +124,7 @@ const tokens = <S>(paragraph: readonly Part<S>[]): Part<S>[][] => {
 };
 
 /** A word too wide for the line, cut into pieces that fit: the last piece starts the next line. */
-const cut = <S>(
+const cutWord = <S>(
   word: readonly Part<S>[],
   fits: (parts: readonly Part<S>[]) => boolean,
 ): Part<S>[][] => {
@@ -142,10 +144,14 @@ const cut = <S>(
   return [...pieces, piece];
 };
 
-/** One paragraph broken greedily at spaces so every line fits `width`. Spaces at a break are dropped. */
+/**
+ * One paragraph broken greedily at spaces so every line fits `width`. Spaces at a break are dropped. Each line that
+ * ends inside a cut word goes into `cut`.
+ */
 const wrap = <S>(
   paragraph: readonly Part<S>[],
   fits: (parts: readonly Part<S>[]) => boolean,
+  cut: Set<readonly Part<S>[]>,
 ): Part<S>[][] => {
   const lines: Part<S>[][] = [];
   let line: Part<S>[] = [];
@@ -165,8 +171,9 @@ const wrap = <S>(
     }
 
     if (textOf(line).trim() !== "") lines.push(trimmed(line));
-    const pieces = cut(token, fits);
+    const pieces = cutWord(token, fits);
 
+    for (const piece of pieces.slice(0, -1)) cut.add(piece);
     lines.push(...pieces.slice(0, -1));
     line = pieces.at(-1)!;
   }
@@ -223,7 +230,8 @@ export const layoutRuns = <S>(
   const fits = (parts: readonly Part<S>[]): boolean =>
     width === undefined || measure(parts) <= width;
 
-  const broken = paragraphs(pieces).flatMap((paragraph) => wrap(paragraph, fits));
+  const cut = new Set<readonly Part<S>[]>();
+  const broken = paragraphs(pieces).flatMap((paragraph) => wrap(paragraph, fits, cut));
   const measured = broken.map(measure);
   const column = width ?? Math.max(0, ...measured);
   const left = -column * share;
@@ -275,6 +283,7 @@ export const layoutRuns = <S>(
       width: column,
       height: (lines.length - 1) * step + (top + bottom) * size,
     },
+    cuts: broken.flatMap((line, index) => (cut.has(line) ? [index] : [])),
   };
 };
 

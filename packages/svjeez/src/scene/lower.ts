@@ -40,7 +40,7 @@ import {
   type ShapeProps,
   type TextProps,
 } from "./nodes";
-import { isAnchor, type Anchor } from "./refs";
+import { declaring, isAnchor, type Anchor } from "./refs";
 import {
   arrangeState,
   around,
@@ -374,7 +374,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
     return { text: words, face: look.font, style: look };
   });
 
-  const { lines, box } = layoutRuns(
+  const { lines, box, cuts } = layoutRuns(
     faceOf(props.font, props.weight, props.italic, where),
     pieces,
     {
@@ -398,6 +398,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): TextNode
 
   return {
     ...base(props, box, key, timing),
+    ...(props.width !== undefined && { authored: { wrap: { width: props.width, cuts } } }),
     kind: "text",
     size: props.size,
     lines: lines.map((line): TextLine => ({
@@ -608,6 +609,7 @@ const lowerAll = (
 
         const node: GroupNode = {
           ...base(el.props, around(children), key, timing),
+          ...(el.layout && { authored: { layout: el.layout } }),
           kind: "group",
           children,
         };
@@ -722,7 +724,9 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
       `scene() needs reducedMotion as a time in seconds, or false, got ${String(options.reducedMotion)}.`,
     );
 
-  const [top, cues] = collect(() => sceneElement(within(size, build), "scene()'s callback"));
+  const [[top, cues], declared] = declaring(() =>
+    collect(() => sceneElement(within(size, build), "scene()'s callback")),
+  );
 
   const ctx: Ctx = {
     tokens: new Map(),
@@ -757,6 +761,7 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
 
   cues.finish();
   const root = settle(drafted, ctx.notes, duration);
+  const refs = [...new Set([...declared, ...ctx.notes.refs.keys(), ...cues.refs])];
 
   const still =
     options.reducedMotion === false
@@ -774,5 +779,11 @@ export const scene = (options: SceneOptions, build: () => SceneElement): Scene =
     fonts: ctx.fonts.families(),
     symbols: Object.fromEntries([...ctx.symbols].map(([name, entry]) => [name, entry.node!])),
     root,
+    ...((refs.length > 0 || cues.applied.length > 0) && {
+      authored: {
+        refs: refs.map((each) => ({ key: each.key, attached: ctx.notes.refs.has(each) })),
+        actions: cues.applied,
+      },
+    }),
   };
 };

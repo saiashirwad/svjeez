@@ -49,6 +49,10 @@ For a scene model, these come first, read from the model with no browser (`inspe
 | `visible-at-zero` | error | As the browser rule, read from the lanes. |
 | `wasted-motion` | info | A value that changes before the node is first seen, or after it is gone for good. |
 | `nothing-enters`, `static` | info, warning | Everything on screen from 0s with nothing entering; nothing moving at all, or a change only after the end. |
+| `layout-overlap` | warning | Two children of a `<Stack>` or `<Grid>` over each other: the container placed them apart, and a motion, rotate or scale carried one onto the other. |
+| `word-cut` | warning | A word wider than the width its text wraps to, cut across two lines; the message marks each cut with `\|`. |
+| `unattached-ref` | warning | A ref the scene made that no node takes as `ref={…}`. |
+| `hidden-target` | warning | A timeline verb that moves a node that is never visible. |
 | `unsupported`, `approximate` | error, warning | What the SVG backend can't draw, or draws differently. |
 | `compile-error` | error | The scene threw while it was built: the message, at the line that threw. |
 

@@ -4,15 +4,19 @@ import { font } from "svjeez";
 import {
   Group,
   Shape,
+  Stack,
   Text,
   blur,
   circle,
   draw,
   linear,
+  motion,
   rect,
+  ref,
   scene,
   span,
   spin,
+  timeline,
   tokens,
   track,
   type Paint,
@@ -482,6 +486,89 @@ group("capabilities and the model alone", () => {
         ),
     );
     expect(inspect(model)).toEqual(found);
+  });
+});
+
+group("what the model keeps of how the scene was written", () => {
+  test("a stack's children carried over each other overlap; still ones that touch don't", () => {
+    const row = (offset: number) =>
+      made(() => (
+        <Stack key="row" direction="row" at={[20, 20]}>
+          <Shape key="a" geometry={rect(10, 10)} fill="#FF0000" />
+          <Shape
+            key="b"
+            geometry={rect(10, 10)}
+            fill="#00FF00"
+            motion={motion().to({ offset: [offset, 0] }, span(1, 1))}
+          />
+        </Stack>
+      ));
+
+    const model = row(-6);
+    const row0 = model.root.children[0]!;
+
+    expect(row0.authored?.layout).toEqual({ container: "stack", direction: "row", gap: [0, 0] });
+
+    const [found] = only(model, "layout-overlap");
+
+    expect(found?.key).toBe("row/a");
+    expect(found?.message).toContain('overlap by up to 6 by 10 in the <Stack> "row"');
+    expect(found?.related?.[0]?.key).toBe("row/b");
+    expect(codes(row(0))).not.toContain("layout-overlap");
+  });
+
+  test("a word wider than the width it wraps to is cut, and a line that breaks at a space is not", () => {
+    const wrapped = (words: string) =>
+      made(() => (
+        <Text key="t" font={mono} size={10} width={40} fill="#FFFFFF" at={[10, 20]}>
+          {words}
+        </Text>
+      ));
+
+    const model = wrapped("a measurement");
+
+    expect(model.root.children[0]!.authored?.wrap).toEqual({ width: 40, cuts: [1] });
+    expect(only(model, "word-cut")[0]?.message).toContain('"measur|ement"');
+    expect(codes(wrapped("a few words"))).not.toContain("word-cut");
+  });
+
+  test("a ref no node takes is reported; one a node takes is not", () => {
+    const model = made(() => {
+      const card = ref("card");
+
+      ref("spare");
+
+      return <Dot ref={card} />;
+    });
+
+    expect(model.authored?.refs).toEqual([
+      { key: "card", attached: true },
+      { key: "spare", attached: false },
+    ]);
+    expect(only(model, "unattached-ref").map((found) => found.message)).toEqual([
+      'ref "spare" is made, but no node takes it as ref={…}, so it points at nothing.',
+    ]);
+  });
+
+  test("a timeline that moves a node no one sees is reported; one that moves a seen node is not", () => {
+    const moved = (opacity: number) =>
+      made(() => {
+        const dot = ref("dot");
+
+        timeline(dot.move([60, 20], 1));
+
+        return <Dot ref={dot} opacity={opacity} />;
+      });
+
+    const model = moved(0);
+
+    expect(model.authored?.actions).toEqual([
+      { verb: "dot.move()", key: "dot", start: 0, over: 1 },
+    ]);
+    expect(only(model, "hidden-target")[0]?.message).toBe(
+      'dot.move() moves "dot", which is never visible, so no one sees the move.',
+    );
+    expect(codes(moved(1))).not.toContain("hidden-target");
   });
 });
 

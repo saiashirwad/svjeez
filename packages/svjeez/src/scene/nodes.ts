@@ -1,7 +1,7 @@
 import type { FontValue } from "../font/font";
 import type { Seconds } from "../motion";
 import type { PictureData } from "../picture";
-import type { Vec } from "./ir";
+import type { Authored, Vec } from "./ir";
 import type { Anchor, Ref } from "./refs";
 import type { Settle } from "./settle";
 import type { MorphElement } from "./morph";
@@ -182,6 +182,8 @@ export type SceneElement =
       readonly children: readonly SceneElement[];
       /** What a layout container or a connector asks of the second pass of lowering. */
       readonly settle?: Settle;
+      /** Which layout container made this group, for checks: lowering keeps it in the model. */
+      readonly layout?: Authored["layout"];
     }
   | { readonly type: "shape"; readonly props: ShapeProps }
   | { readonly type: "text"; readonly props: TextProps }

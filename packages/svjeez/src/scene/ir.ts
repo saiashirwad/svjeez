@@ -37,6 +37,39 @@ export interface Scene {
   /** What `instance` nodes draw, by name. Their lanes are on the scene's clock, shared by every instance. */
   readonly symbols: Readonly<Record<string, SceneNode>>;
   readonly root: GroupNode;
+  /** What the author wrote that the drawing doesn't show, for checks and editors. Backends ignore it. */
+  readonly authored?: SceneAuthored;
+}
+
+/**
+ * The scene as it was written, beyond what it draws: the refs the build made and whether each was given to a node,
+ * and what each timeline action moved. Backends ignore it; `inspect` reads it.
+ */
+export interface SceneAuthored {
+  /** Each ref the scene's build made, or that a node or a timeline used, by its key. */
+  readonly refs: readonly { readonly key: string; readonly attached: boolean }[];
+  /** Each move a timeline wrote, on the scene's clock: how it reads in code, and the key of the node it moved. */
+  readonly actions: readonly {
+    readonly verb: string;
+    readonly key: string;
+    readonly start: Seconds;
+    readonly over: Seconds;
+  }[];
+}
+
+/** What the author wrote about one node that its drawing doesn't show. Backends ignore it; `inspect` reads it. */
+export interface Authored {
+  /** The layout container that placed this group's children, and how: its direction and the gap between them. */
+  readonly layout?: {
+    readonly container: "stack" | "grid" | "align";
+    readonly direction?: "row" | "column";
+    readonly gap?: Vec;
+  };
+  /**
+   * For a text given a width: the width it wraps to, and the lines (by index) whose break cut a word in two, because
+   * the word was wider than the width.
+   */
+  readonly wrap?: { readonly width: number; readonly cuts: readonly number[] };
 }
 
 export type { Ease, Seconds };
@@ -218,6 +251,8 @@ interface Base {
    */
   readonly mask?: SceneNode;
   readonly effects: readonly Effect[];
+  /** What the author wrote that the drawing doesn't show. Backends ignore it. */
+  readonly authored?: Authored;
 }
 
 export interface GroupNode extends Base {

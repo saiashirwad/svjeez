@@ -531,6 +531,14 @@ export class Cues {
   readonly #claimed = new Set<Timeline>();
   readonly #clocks = new Map<Timeline, Clock>();
   readonly #met = new Set<Move | Rewind>();
+  /** Each move applied, on the scene's clock, with the key of the node it moved. */
+  readonly applied: { verb: string; key: string; start: Seconds; over: Seconds }[] = [];
+  /** Each ref a timeline names, whether or not a node has it. */
+  get refs(): readonly Ref[] {
+    return [...this.#moves, ...this.#rewinds].map(
+      ({ item }) => item.target.within?.ref ?? item.target,
+    );
+  }
 
   constructor(timelines: readonly Timeline[], top: SceneElement) {
     this.#moves = timelines.flatMap((timeline) =>
@@ -597,6 +605,14 @@ export class Cues {
       this.#onClock(timeline, key, item.verb, timing);
       this.#met.add(item);
     }
+
+    for (const { item } of mine)
+      this.applied.push({
+        verb: item.verb,
+        key,
+        start: timing.clock.offset + item.start,
+        over: item.over,
+      });
 
     const [rewind, twice] = back.map(({ item }) => item);
 

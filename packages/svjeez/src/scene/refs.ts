@@ -218,8 +218,30 @@ export class Ref {
   }
 }
 
+let declared: Ref[] | undefined;
+
 /** A ref to give one node, as `ref={win}`. Its key is the node's key unless the node has its own. */
-export const ref = (key: string): Ref => new Ref(key);
+export const ref = (key: string): Ref => {
+  const made = new Ref(key);
+
+  declared?.push(made);
+
+  return made;
+};
+
+/** Runs a scene's build, and gives back what it built and the refs made while it ran. */
+export const declaring = <T>(build: () => T): readonly [T, readonly Ref[]] => {
+  const outer = declared;
+  const made: Ref[] = [];
+
+  declared = made;
+
+  try {
+    return [build(), made];
+  } finally {
+    declared = outer;
+  }
+};
 
 /** Where a placement lands in a box: a corner, the middle of an edge, or the center. */
 export type Place =
