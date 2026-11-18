@@ -12,7 +12,6 @@ import {
   rect,
   scene,
   span,
-  svg,
   track,
   type Curve,
   type SceneElement,
@@ -92,7 +91,7 @@ const Card = (): SceneElement => (
   </Group>
 );
 
-const springs = scene(
+export default scene(
   {
     size: [520, 300],
     duration: 6,
@@ -110,7 +109,3 @@ const springs = scene(
     </Group>
   ),
 );
-
-export default function build(): string {
-  return svg.emit(springs);
-}
