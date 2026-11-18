@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { readFile } from "node:fs/promises";
 import { Group, Run, Text, font, scene, type SceneElement } from "svjeez";
 import { svg } from "svjeez/tools";
 
@@ -120,4 +121,28 @@ describe("per-face subsetting", () => {
       expect(face.has(theirs)).toBe(false);
     }
   });
+});
+
+describe("subset: false", () => {
+  for (const order of ["cut first", "whole first"])
+    test(`a copy loaded with subset: false embeds the whole file, ${order}`, async () => {
+      const bytes = await readFile(fixture("ABeeZee-Regular"));
+      const cut = font(bytes);
+      const whole = font(bytes, { subset: false });
+      const [first, second] = order === "cut first" ? [cut, whole] : [whole, cut];
+
+      const out = emit(() => (
+        <Group>
+          <Text font={first} size={10} fill="#000000">
+            Hi
+          </Text>
+          <Text font={second} size={10} fill="#000000">
+            Yo
+          </Text>
+        </Group>
+      ));
+
+      expect(out).toContain(whole.href);
+      expect(out.match(/@font-face/g)).toHaveLength(1);
+    });
 });

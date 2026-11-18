@@ -109,9 +109,13 @@ export class FontBook {
       );
 
     if (!same) known.faces.push(face);
+    else if (same.subset && !face.subset) known.faces[known.faces.indexOf(same)] = face;
     this.#families.set(family, known);
 
-    return { face: { family, weight: face.weight, style: face.style }, font: same ?? face };
+    return {
+      face: { family, weight: face.weight, style: face.style },
+      font: known.faces.find((each) => each.weight === face.weight && each.style === face.style)!,
+    };
   }
 
   families(): Record<string, FontFamily> {
