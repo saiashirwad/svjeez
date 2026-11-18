@@ -3,6 +3,7 @@ import { random } from "../random";
 import { checkWindow, span, type Span, type When } from "../span";
 import type { Vec } from "./ir";
 import { pair } from "./lane";
+import type { Curve } from "./spring";
 import { motion, track, type LayerValues, type Motion, type Track } from "./track";
 
 const REST = { offset: [0, 0], rotate: 0, scale: 1, opacity: 1 } as const;
@@ -24,7 +25,7 @@ const rest = (values: LayerValues): LayerValues =>
 export const enter = (
   when: Span,
   from: LayerValues = { opacity: 0 },
-  curve: Ease = ease.out,
+  curve: Curve = ease.out,
 ): Motion => {
   const { at, over } = closed(when, "enter()");
 
@@ -35,7 +36,7 @@ export const enter = (
 export const exit = (
   when: Span,
   to: LayerValues = { opacity: 0 },
-  curve: Ease = ease.out,
+  curve: Curve = ease.out,
 ): Motion => {
   const { at, over } = closed(when, "exit()");
 
@@ -98,7 +99,7 @@ export const wiggle = (amplitude: LayerValues, options: WiggleOptions): Motion =
 };
 
 /** A `trim` that strokes the outline on, from nothing to all of it. */
-export const draw = (when: Span, curve: Ease = ease.out): Track<Vec> => {
+export const draw = (when: Span, curve: Curve = ease.out): Track<Vec> => {
   const { at, over } = closed(when, "draw()");
 
   return track([0, 0]).to([0, 1], span(at, over), curve);

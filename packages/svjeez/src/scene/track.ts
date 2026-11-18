@@ -1,14 +1,15 @@
-import { ease, type Ease, type Seconds } from "../motion";
+import { ease, type Seconds } from "../motion";
 import type { Span } from "../span";
 import type { Vec } from "./ir";
+import type { Curve } from "./spring";
 import { Passage } from "./steps";
 
 /**
  * One value over time, on the clock it sits in: the scene's, or a `<Sequence>`'s. Steps may be written in any order,
- * and two that overlap throw. Between steps the value holds.
+ * and two that overlap throw, unless the first is a spring: a step that starts while a spring moves cuts it there and starts from where it is, and a spring that cuts in carries its speed on. Between steps the value holds.
  */
 export interface Track<T> {
-  to(value: T, when: Span, curve?: Ease): Track<T>;
+  to(value: T, when: Span, curve?: Curve): Track<T>;
   /** A hard cut. It has no length, so it takes a time, not a span. */
   set(value: T, at: Seconds): Track<T>;
   /** Repeat every `period` seconds, forever. The period is snapped so it divides the scene. */
@@ -16,7 +17,7 @@ export interface Track<T> {
   /** Play the passage so far again, a number of times or until a time. */
   repeat(times: number | { readonly until: Seconds }): Track<T>;
   /** At the end of the clock, glide back to the first value. Nothing can follow. */
-  rewind(over: Seconds, curve?: Ease): Track<T>;
+  rewind(over: Seconds, curve?: Curve): Track<T>;
 }
 
 export type Anim<T> = T | Track<T>;
@@ -24,7 +25,7 @@ export type Anim<T> = T | Track<T>;
 export class ValueTrack<T> implements Track<T> {
   constructor(readonly passage: Passage<{ readonly value: T }>) {}
 
-  to(value: T, when: Span, curve: Ease = ease.out): ValueTrack<T> {
+  to(value: T, when: Span, curve: Curve = ease.out): ValueTrack<T> {
     return new ValueTrack(this.passage.to({ value }, when, curve));
   }
 
@@ -40,7 +41,7 @@ export class ValueTrack<T> implements Track<T> {
     return new ValueTrack(this.passage.repeat(times));
   }
 
-  rewind(over: Seconds, curve: Ease = ease.out): ValueTrack<T> {
+  rewind(over: Seconds, curve: Curve = ease.out): ValueTrack<T> {
     return new ValueTrack(this.passage.rewind(over, curve));
   }
 }
@@ -76,11 +77,11 @@ export interface LayerValues {
  * the same thing: a dot that fades in on one layer wanders on another.
  */
 export interface Motion {
-  to(values: LayerValues, when: Span, curve?: Ease): Motion;
+  to(values: LayerValues, when: Span, curve?: Curve): Motion;
   set(values: LayerValues, at: Seconds): Motion;
   loop(period: Seconds): Motion;
   repeat(times: number | { readonly until: Seconds }): Motion;
-  rewind(over: Seconds, curve?: Ease): Motion;
+  rewind(over: Seconds, curve?: Curve): Motion;
 }
 
 export type Stack = Motion | readonly (Motion | false | null | undefined)[];
@@ -88,7 +89,7 @@ export type Stack = Motion | readonly (Motion | false | null | undefined)[];
 export class LayerMotion implements Motion {
   constructor(readonly passage: Passage<LayerValues>) {}
 
-  to(values: LayerValues, when: Span, curve: Ease = ease.out): LayerMotion {
+  to(values: LayerValues, when: Span, curve: Curve = ease.out): LayerMotion {
     return new LayerMotion(this.passage.to(values, when, curve));
   }
 
@@ -104,7 +105,7 @@ export class LayerMotion implements Motion {
     return new LayerMotion(this.passage.repeat(times));
   }
 
-  rewind(over: Seconds, curve: Ease = ease.out): LayerMotion {
+  rewind(over: Seconds, curve: Curve = ease.out): LayerMotion {
     return new LayerMotion(this.passage.rewind(over, curve));
   }
 }
