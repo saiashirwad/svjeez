@@ -22,6 +22,7 @@
         "@svjeez/geo": "workspace:*",
         "@svjeez/icons": "workspace:*",
         "@svjeez/math": "workspace:*",
+        "@svjeez/mermaid": "workspace:*",
         "@svjeez/video": "workspace:*",
         "@types/bun": "latest",
         "playwright-core": "^1.64.1",
@@ -183,6 +184,20 @@
         "typescript": "latest",
       },
       "peerDependencies": {
+        "svjeez": "workspace:^",
+      },
+    },
+    "packages/mermaid": {
+      "name": "@svjeez/mermaid",
+      "version": "0.8.0-next.0",
+      "devDependencies": {
+        "@svjeez/diagrams": "workspace:*",
+        "@types/bun": "latest",
+        "svjeez": "workspace:*",
+        "typescript": "latest",
+      },
+      "peerDependencies": {
+        "@svjeez/diagrams": "workspace:^",
         "svjeez": "workspace:^",
       },
     },
@@ -608,6 +623,8 @@
     "@svjeez/icons": ["@svjeez/icons@workspace:packages/icons"],
 
     "@svjeez/math": ["@svjeez/math@workspace:packages/math"],
+
+    "@svjeez/mermaid": ["@svjeez/mermaid@workspace:packages/mermaid"],
 
     "@svjeez/video": ["@svjeez/video@workspace:packages/video"],
 

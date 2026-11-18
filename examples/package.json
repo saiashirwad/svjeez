@@ -21,6 +21,7 @@
     "@svjeez/geo": "workspace:*",
     "@svjeez/icons": "workspace:*",
     "@svjeez/math": "workspace:*",
+    "@svjeez/mermaid": "workspace:*",
     "@svjeez/video": "workspace:*",
     "@types/bun": "latest",
     "playwright-core": "^1.64.1",

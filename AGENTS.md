@@ -22,7 +22,7 @@ The repository is a Bun workspace. The root `package.json` is private and lists 
 - `packages/code/` is `@svjeez/code`, which highlights source with Shiki into a `<Code>` node that types itself and morphs by line.
 - `packages/geo/` is `@svjeez/geo`, which projects GeoJSON and TopoJSON into maps and turning globes.
 - `packages/math/` is `@svjeez/math`, which typesets TeX into glyph shapes through MathJax and draws plots, constructions and plane transformations as geometry.
-- `packages/diagrams/` is `@svjeez/diagrams`, which lays out and reveals flowcharts, sequence diagrams, state machines, trees and swimlanes. Its input types in `src/types.ts` are what `@svjeez/mermaid` builds.
+- `packages/diagrams/` is `@svjeez/diagrams`, which lays out and reveals flowcharts, sequence diagrams, state machines, trees and swimlanes.- `packages/mermaid/` is `@svjeez/mermaid`, which reads Mermaid text and draws it with `@svjeez/diagrams`: `mermaid()` returns the matching flowchart, sequence diagram or state machine.
 - `packages/video/` is `@svjeez/video`, which encodes a scene as MP4 or WebM through Mediabunny in headless Chromium.
 - `examples/` holds the scene-model example scenes and their committed output in `examples/dist/`. `examples/golden/` keeps the SVGs the 0.7 examples built, as references for frame diffs when a feature is ported; nothing builds or tests them. It is private and never published.
 
@@ -97,7 +97,7 @@ These are the rules that aren't visible from one file:
 Every package shares one version. To release, bump them together and push. `bun pm version` doesn't commit inside a workspace, so commit yourself:
 
 ```sh
-for p in svjeez vite astro fonts icons charts dom code geo math diagrams video; do (cd packages/$p && bun pm version prerelease --preid next --no-git-tag-version); done   # on next; main uses minor, patch or major
+for p in svjeez vite astro fonts icons charts dom code geo math diagrams mermaid video; do (cd packages/$p && bun pm version prerelease --preid next --no-git-tag-version); done   # on next; main uses minor, patch or major
 bun install && bun run build:examples && git add -A examples && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 

@@ -1,0 +1,35 @@
+{
+  "name": "@svjeez/mermaid",
+  "version": "0.8.0-next.0",
+  "private": true,
+  "description": "Mermaid text drawn as a svjeez diagram: flowcharts, sequence diagrams and state diagrams, parsed by hand with no dependencies.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/mermaid"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "bun test --conditions @svjeez/source",
+    "typecheck": "tsc --noEmit",
+    "build:package": "bun ../../scripts/package-plugin.ts",
+    "test:package": "bun ../../scripts/package-plugin-check.ts"
+  },
+  "devDependencies": {
+    "@svjeez/diagrams": "workspace:*",
+    "@types/bun": "latest",
+    "svjeez": "workspace:*",
+    "typescript": "latest"
+  },
+  "peerDependencies": {
+    "@svjeez/diagrams": "workspace:^",
+    "svjeez": "workspace:^"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
