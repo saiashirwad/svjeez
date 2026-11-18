@@ -102,4 +102,4 @@ for p in svjeez vite astro fonts icons charts dom code geo math diagrams mermaid
 bun install && bun run build:examples && git add -A examples && git commit -am "v$(node -p 'require("./packages/svjeez/package.json").version')" && git push
 ```
 
-A new package needs one publish from a maintainer's machine before the workflow can release it. The header of `scripts/release.ts` describes `claim` and `plan`.
+A new package needs one publish from a maintainer's machine before the workflow can release it. Run `bun scripts/release.ts claim <package-dir>` to claim a package, or `bun scripts/release.ts plan` to inspect pending releases.

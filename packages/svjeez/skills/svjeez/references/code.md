@@ -5,8 +5,11 @@
 ```tsx
 import { Code } from "@svjeez/code";
 import { tomorrow } from "@svjeez/code/palettes";
+import { google } from "@svjeez/fonts";
 import { Group, Shape, canvas, scene, span } from "svjeez";
-import { mono, theme } from "./style";
+import { theme } from "./style";
+
+const mono = await google("JetBrains Mono", { ligatures: false });
 
 export default scene({ size: [400, 80], duration: 3, title: "Snippet", theme, loop: false }, () => (
   <Group>

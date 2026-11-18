@@ -70,7 +70,7 @@ npx svjeez check scene.tsx
 npx svjeez frames scene.tsx --times 0,1,2 --sheet
 ```
 
-Open **Timeline** in the dev preview to inspect clips and motion tracks. **Check layout** and the `check` command report layout and timing findings with source locations. Open `frames/sheet.png` to review the picture at each selected time. Run `npx svjeez skill --install` for the [authoring guide](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/SKILL.md) and worked examples.
+Open **Timeline** in the dev preview to inspect clips and motion tracks. Run `svjeez check` for layout and timing findings with source locations. Open `frames/sheet.png` to review the picture at each selected time. Run `npx svjeez skill --install` for the [authoring guide](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/SKILL.md) and worked examples.
 
 ## Packages
 

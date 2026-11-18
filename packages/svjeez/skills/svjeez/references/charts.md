@@ -42,7 +42,7 @@ The whole example is [`examples/charts`](../../../../../examples/charts/index.ts
 | `key` | key the chart when you morph between states |
 | children | a function `({ x, y, bandwidth, size }) => nodes`: annotations in the plot's own coordinates, where `x(value)` is a band's center or a linear value and `y(value)` a y value |
 
-A domain you leave out is fitted to every series. A fitted y domain includes 0 when the chart has bars or an area, and not for lines alone; `y.zero` overrides it. A domain you give is never stretched: a value outside it is an error.
+A domain you leave out is fitted to every series. A fitted y domain includes 0 when the chart has bars or an area. Use `y.zero` to set that choice explicitly. Linear domains, including ones you give, can expand to round tick boundaries. A value outside the resulting domain is an error.
 
 ## Series
 
@@ -91,4 +91,4 @@ Each error points at the `<Chart>` line and names the series:
 
 ## Counting numbers
 
-Axis labels and bar values are plain `<Text>`; in a morph they crossfade. Numbers that tick up between states will come from the counting text node once it lands.
+Axis labels and bar values use plain `<Text>` and crossfade in a morph. To show a number that counts, add a separate `<Text>` with `count()`.
