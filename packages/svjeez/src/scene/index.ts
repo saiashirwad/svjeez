@@ -55,7 +55,9 @@ export {
 
 export { draw, enter, exit, show, spin, wiggle, type WiggleOptions } from "./recipes";
 
-export { ease, type Ease, type Seconds } from "../motion";
+export type { Ease, Seconds } from "../motion";
+
+export { ease, type Curve, type Spring, type SpringOptions } from "./spring";
 
 export { span, chain, stagger, type Span, type Spanned, type When } from "../span";
 

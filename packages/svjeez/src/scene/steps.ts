@@ -4,6 +4,7 @@ import { EPSILON, NUDGE, ease, type Ease, type Seconds } from "../motion";
 import type { Span } from "../span";
 import { num } from "../format";
 import type { Animated, Key, Lane, Vec } from "./ir";
+import { endSlope, isSpring, type Curve, type Spring } from "./spring";
 
 /**
  * Steps over a set of named values, and the lanes they become. The builder is today's `motion()`, and the
@@ -12,7 +13,7 @@ import type { Animated, Key, Lane, Vec } from "./ir";
 export interface Step<V> {
   readonly start: Seconds;
   readonly over: Seconds;
-  readonly ease: Ease;
+  readonly ease: Curve;
   readonly values: Partial<V>;
   /** A cut back to the first value of each of these, between two passes of a repeat. */
   readonly restore?: readonly (keyof V)[];
@@ -23,7 +24,7 @@ export interface PassageData<V> {
   readonly initial: Partial<V>;
   readonly steps: readonly Step<V>[];
   readonly period?: Seconds;
-  readonly rewind?: { readonly over: Seconds; readonly ease: Ease };
+  readonly rewind?: { readonly over: Seconds; readonly ease: Curve };
   readonly repeated?: boolean;
 }
 
@@ -52,6 +53,10 @@ const isTime = (at: Seconds | Span | undefined): at is Seconds => typeof at === 
 const names = <V extends object>(values: Partial<V>): (keyof V)[] =>
   Object.keys(values) as (keyof V)[];
 
+/** Whether `later` may start while `spring` still moves: it cuts the spring there and takes over from it. */
+const cuts = <V>(spring: Step<V>, later: Step<V>): boolean =>
+  isSpring(spring.ease) && spring.start < later.start - EPSILON;
+
 /** The steps of one track or one motion layer. Immutable: every method returns a new passage. */
 export class Passage<V extends object> {
   constructor(readonly data: PassageData<V>) {}
@@ -60,7 +65,7 @@ export class Passage<V extends object> {
     return new Passage({ ...this.data, ...patch });
   }
 
-  to(values: Partial<V>, when: Span, curve: Ease = ease.out): Passage<V> {
+  to(values: Partial<V>, when: Span, curve: Curve = ease.out): Passage<V> {
     if (!isSpan(when))
       throw new Error(
         `to() takes a span, got ${String(when)}. Write .to(value, span(at, over)); a step right after another is span.next(over).`,
@@ -151,7 +156,7 @@ export class Passage<V extends object> {
     return this.#with({ steps: copies, repeated: true });
   }
 
-  rewind(over: Seconds, curve: Ease = ease.out): Passage<V> {
+  rewind(over: Seconds, curve: Curve = ease.out): Passage<V> {
     if (!(time(over, "rewind()") > 0))
       throw new Error(`rewind() needs a positive duration, got ${over}.`);
 
@@ -176,9 +181,15 @@ export class Passage<V extends object> {
     for (const other of this.data.steps) {
       const shared = names(step.values).find((name) => name in other.values);
 
-      if (shared && step.start < end(other) - EPSILON && other.start < end(step) - EPSILON)
+      if (
+        shared &&
+        step.start < end(other) - EPSILON &&
+        other.start < end(step) - EPSILON &&
+        !cuts(other, step) &&
+        !cuts(step, other)
+      )
         throw new Error(
-          `Two transitions move \`${String(shared)}\` between ${Math.max(step.start, other.start)}s and ${Math.min(end(step), end(other))}s. Move them in one .to(), or stack two motions.`,
+          `Two transitions move \`${String(shared)}\` between ${Math.max(step.start, other.start)}s and ${Math.min(end(step), end(other))}s. Move them in one .to(), or stack two motions. Only a spring can be cut by a step that starts while it moves.`,
         );
     }
 
@@ -236,15 +247,37 @@ export interface Clock {
   readonly clips: readonly ClipFrame[];
 }
 
+/** A value as numbers a spring can move one by one, and back. */
+export interface Parts<T> {
+  split(value: T): readonly number[];
+  join(values: readonly number[]): T;
+}
+
 /** How to stop between two values, for a cut that lands inside a transition. */
 export type Mix<T> = (a: T, b: T, amount: number, where: string) => T;
 
-export const mixNumber: Mix<number> = (a, b, amount) => a + (b - a) * amount;
+/** A mix whose values a spring can move: numbers and points. */
+type Springy<T> = Mix<T> & { readonly parts: Parts<T> };
 
-export const mixVec: Mix<Vec> = (a, b, amount) => [
-  a[0] + (b[0] - a[0]) * amount,
-  a[1] + (b[1] - a[1]) * amount,
-];
+const isSpringy = <T>(mix: Mix<T>): mix is Springy<T> => "parts" in mix;
+
+export const mixNumber: Springy<number> = Object.assign(
+  (a: number, b: number, amount: number): number => a + (b - a) * amount,
+  { parts: { split: (value: number) => [value], join: (values: readonly number[]) => values[0]! } },
+);
+
+export const mixVec: Springy<Vec> = Object.assign(
+  (a: Vec, b: Vec, amount: number): Vec => [
+    a[0] + (b[0] - a[0]) * amount,
+    a[1] + (b[1] - a[1]) * amount,
+  ],
+  {
+    parts: {
+      split: (value: Vec) => value,
+      join: (values: readonly number[]): Vec => [values[0]!, values[1]!],
+    },
+  },
+);
 
 export const same = <T>(a: T, b: T): boolean => a === b || JSON.stringify(a) === JSON.stringify(b);
 
@@ -271,54 +304,137 @@ interface Segment<T> {
   readonly value: T;
 }
 
+interface Written<T> {
+  readonly segments: readonly Segment<T>[];
+  /** When the last step's window ends: a spring that settles early still holds its span. */
+  readonly last: Seconds;
+}
+
+/** How a value moves where the step before it ended, for a spring that starts there. */
+interface Moving {
+  readonly at: Seconds;
+  readonly velocity: () => readonly number[];
+}
+
+const componentsOf = <T>(mix: Mix<T>, where: string): Parts<T> => {
+  if (!isSpringy(mix))
+    throw new Error(
+      `${where} moves on a spring, and a spring moves only numbers and points. Use an ease such as ease.out.`,
+    );
+
+  return mix.parts;
+};
+
 const segmentsOf = <T>(
   initial: T,
   data: PassageData<{ readonly value: T }>,
   clockEnd: Seconds,
   mix: Mix<T>,
   where: string,
-): Segment<T>[] => {
+): Written<T> => {
   const out: Segment<T>[] = [];
   let current = initial;
+  let moving: Moving | undefined;
+  let last = 0;
 
   const apply = (segment: Segment<T>): void => {
+    const from = current;
+
     out.push(segment);
     current = segment.value;
+    last = Math.max(last, segment.start + segment.over);
+
+    moving =
+      segment.over > 0
+        ? {
+            at: segment.start + segment.over,
+            velocity: () => {
+              const parts = componentsOf(mix, where);
+              const [a, b] = [parts.split(from), parts.split(segment.value)];
+              const slope = endSlope(segment.ease) / segment.over;
+
+              return a.map((value, c) => (b[c]! - value) * slope);
+            },
+          }
+        : undefined;
   };
 
-  for (const step of [...data.steps].sort((a, b) => a.start - b.start)) {
+  /** A spring from the current value toward `value`, from `start` until `stop`; `ends` when its span ends there. */
+  const spring = (curve: Spring, start: Seconds, stop: Seconds, value: T, ends: boolean): void => {
+    const parts = componentsOf(mix, where);
+    const from = parts.split(current);
+
+    const carried =
+      moving && Math.abs(moving.at - start) <= EPSILON ? moving.velocity() : from.map(() => 0);
+
+    const run = curve.run(from, parts.split(value), carried, stop - start);
+
+    if (ends && !run.settled)
+      throw new Error(
+        `The spring on ${where} from ${num(start)}s needs ${num(Math.ceil(run.needs * 100) / 100)}s to settle, but its span is ${num(stop - start)}s. Give it a longer span, a stiffer or more damped spring, or cut it with a later step.`,
+      );
+
+    run.keys.slice(1).forEach((key, index) => {
+      const before = run.keys[index]!;
+
+      out.push({
+        start: start + before.t,
+        over: key.t - before.t,
+        ease: key.ease ?? ease.linear,
+        value: parts.join(key.values),
+      });
+    });
+
+    current = parts.join(run.keys.at(-1)!.values);
+    last = Math.max(last, stop);
+    moving = run.settled ? undefined : { at: stop, velocity: () => run.velocity };
+  };
+
+  const steps = [...data.steps].sort((a, b) => a.start - b.start);
+
+  steps.forEach((step, index) => {
     const value = step.values.value;
+    const curve = step.ease;
 
     if (step.restore) {
       if (!same(current, initial))
         apply({ start: step.start, over: 0, ease: ease.hold, value: initial });
-    } else if (value === undefined) continue;
-    else if (step.until !== undefined && step.until < step.start + step.over - EPSILON) {
+      moving = undefined;
+    } else if (value === undefined) return;
+    else if (isSpring(curve)) {
+      const cut = steps[index + 1]?.start ?? Infinity;
+      const close = step.start + step.over;
+      const stop = Math.min(close, cut, step.until ?? Infinity);
+
+      // A step that starts as the span ends takes over too: span.next() hands off without a gap.
+      spring(curve, step.start, stop, value, stop === close && cut > close + EPSILON);
+    } else if (step.until !== undefined && step.until < step.start + step.over - EPSILON) {
       const progress = (step.until - step.start) / step.over;
-      const [curve] = splitEase(step.ease, progress, "repeat({ until })");
+      const [head] = splitEase(curve, progress, "repeat({ until })");
 
       apply({
         start: step.start,
         over: step.until - step.start,
-        ease: curve,
-        value: mix(current, value, easeAt(step.ease, progress), "repeat({ until })"),
+        ease: head,
+        value: mix(current, value, easeAt(curve, progress), "repeat({ until })"),
       });
-    } else apply({ start: step.start, over: step.over, ease: step.ease, value });
-  }
+    } else apply({ start: step.start, over: step.over, ease: curve, value });
+  });
 
   if (data.rewind && !same(current, initial)) {
-    const last = Math.max(0, ...out.map((segment) => segment.start + segment.over));
     const start = clockEnd - data.rewind.over;
+    const curve = data.rewind.ease;
 
     if (start < last - EPSILON)
       throw new Error(
         `rewind(${data.rewind.over}) on ${where} needs the last ${data.rewind.over}s of its ${clockEnd}s clock, but the motion runs until ${last}s.`,
       );
 
-    apply({ start, over: data.rewind.over, ease: data.rewind.ease, value: initial });
+    if (isSpring(curve)) spring(curve, start, clockEnd, initial, true);
+    else apply({ start, over: data.rewind.over, ease: curve, value: initial });
   }
 
-  return out;
+  return { segments: out, last };
 };
 
 const heldOf = <T>(initial: T, segments: readonly Segment<T>[], period: Seconds): Held<T>[] => {
@@ -462,8 +578,14 @@ export const laneOf = <T>(
   const period = data.period ?? duration;
   const offset = looped ? 0 : clock.offset;
   const snapped = looped ? snapPeriod(period, duration) : duration;
-  const segments = segmentsOf(first, data, looped ? period : clock.end - clock.offset, mix, where);
-  const last = Math.max(0, ...segments.map((segment) => segment.start + segment.over));
+
+  const { segments, last } = segmentsOf(
+    first,
+    data,
+    looped ? period : clock.end - clock.offset,
+    mix,
+    where,
+  );
 
   reach(clock, !looped, offset + last, duration, period, where);
 
