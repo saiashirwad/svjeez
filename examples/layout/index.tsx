@@ -11,7 +11,6 @@ import {
   ease,
   enter,
   motion,
-  rect,
   ref,
   scene,
   span,
@@ -25,9 +24,7 @@ import { mono, theme } from "../theme";
 
 const sans = geist.face(400);
 
-const WIDTH = 156;
-
-const PAD = 14;
+const TEXT = 125;
 
 interface CardProps {
   readonly handle: Ref;
@@ -39,8 +36,14 @@ interface CardProps {
 }
 
 const Card = ({ handle, title, dot, when, children, drift }: CardProps): SceneElement => (
-  <Group
+  <Stack
     ref={handle}
+    gap={10}
+    padding={14}
+    height={112}
+    radius={10}
+    fill={theme.surface}
+    stroke={{ color: theme.raised, width: 1.5 }}
     motion={[
       enter(when, { from: { opacity: 0, offset: [0, 10] } }),
       drift &&
@@ -49,23 +52,16 @@ const Card = ({ handle, title, dot, when, children, drift }: CardProps): SceneEl
           .to({ offset: [0, 0] }, span(5.2, 1.1), ease.inOut),
     ]}
   >
-    <Shape
-      geometry={rect(WIDTH, 112, { radius: 10 })}
-      fill={theme.surface}
-      stroke={{ color: theme.raised, width: 1.5 }}
-    />
-    <Stack gap={10} padding={PAD}>
-      <Stack direction="row" gap={8} align="center">
-        <Shape geometry={circle(4)} fill={dot} />
-        <Text font={mono} size={13} fill={theme.text}>
-          {title}
-        </Text>
-      </Stack>
-      <Text font={sans} size={12.5} lineHeight={1.4} width={WIDTH - PAD * 2} fill={theme.muted}>
-        {children}
+    <Stack direction="row" gap={8} align="center">
+      <Shape geometry={circle(4)} fill={dot} />
+      <Text font={mono} size={13} fill={theme.text}>
+        {title}
       </Text>
     </Stack>
-  </Group>
+    <Text font={sans} size={12.5} lineHeight={1.4} width={TEXT} fill={theme.muted}>
+      {children}
+    </Text>
+  </Stack>
 );
 
 const [measure, place, follow] = [ref("measure"), ref("place"), ref("follow")];
@@ -85,13 +81,13 @@ export default scene(
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Align place="center">
         <Stack direction="row" gap={50}>
-          <Card handle={measure} title="Measure" dot={theme.yellow} when={first!}>
+          <Card handle={measure} title="Measure" dot={theme.yellow} when={first}>
             Every node has a box the compiler knows, its text included.
           </Card>
-          <Card handle={place} title="Place" dot={theme.green} when={second!}>
+          <Card handle={place} title="Place" dot={theme.green} when={second}>
             Stacks and grids put each box in its slot, wherever its origin is.
           </Card>
-          <Card handle={follow} title="Follow" dot={theme.cyan} when={third!} drift>
+          <Card handle={follow} title="Follow" dot={theme.cyan} when={third} drift>
             Arrows attach to edges and follow the node when it moves.
           </Card>
         </Stack>

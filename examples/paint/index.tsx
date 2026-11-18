@@ -7,7 +7,7 @@ import {
   circle,
   ease,
   linear,
-  pathData,
+  moved,
   radial,
   rect,
   scene,
@@ -43,9 +43,6 @@ const Label = ({
   </Text>
 );
 
-const disc = ([x, y]: Vec, r: number) =>
-  pathData(`M${x + r} ${y}A${r} ${r} 0 1 1 ${x - r} ${y}A${r} ${r} 0 1 1 ${x + r} ${y}Z`);
-
 const card = rect(CARD[0], CARD[1], { radius: 14 });
 
 const sky = track(linear.across({ angle: 0, stops: [theme.blue, theme.magenta] }))
@@ -64,14 +61,7 @@ const stripes = Array.from({ length: 7 }, (_, k) => (
   />
 ));
 
-const wipe = linear({
-  from: [CARD[0], 0],
-  to: [CARD[0] + 48, 0],
-  stops: [
-    [0, "#000000"],
-    [1, "#00000000"],
-  ],
-});
+const FEATHER = 48;
 
 export default scene(
   {
@@ -93,9 +83,9 @@ export default scene(
         at={corner(1)}
         rotate={track(0).to(30, span(0.4, 2), ease.inOut).to(0, span(3.4, 1.6), ease.inOut)}
         scale={track(1).to(0.85, span(0.4, 2), ease.inOut).to(1, span(3.4, 1.6), ease.inOut)}
-        clip={track(disc([30, 34], 28))
-          .to(disc([82, 78], 28), span(0.4, 2), ease.inOut)
-          .to(disc([30, 34], 28), span(3.4, 1.6), ease.inOut)}
+        clip={track(moved(circle(28), [30, 34]))
+          .to(moved(circle(28), [82, 78]), span(0.4, 2), ease.inOut)
+          .to(moved(circle(28), [30, 34]), span(3.4, 1.6), ease.inOut)}
       >
         {stripes}
       </Group>
@@ -103,13 +93,20 @@ export default scene(
 
       <Group
         at={corner(2)}
-        mask={
+        mask={(own) => (
           <Shape
-            geometry={rect(CARD[0] + 48, CARD[1])}
-            at={track<Vec>([-CARD[0] - 48, 0]).to([0, 0], span(0.4, 1.8), ease.inOut)}
-            fill={wipe}
+            geometry={rect(own.width + FEATHER, own.height)}
+            at={track<Vec>([-own.width - FEATHER, 0]).to([0, 0], span(0.4, 1.8), ease.inOut)}
+            fill={linear({
+              from: [own.width, 0],
+              to: [own.width + FEATHER, 0],
+              stops: [
+                [0, "#000000"],
+                [1, "#00000000"],
+              ],
+            })}
           />
-        }
+        )}
       >
         <Shape
           geometry={card}

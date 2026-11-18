@@ -22,6 +22,8 @@ import {
 import { mono, theme } from "../theme";
 
 const IDLE: Vec = [244, 196];
+const RADIUS = 7;
+const LINE = 1.5;
 
 const outlined = (width: number, height: number, radius: number) => ({
   geometry: rect(width, height, { radius }),
@@ -86,23 +88,33 @@ const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
       />
       <Sequence start={start} timeline={gesture}>
         {key.node}
-        <Group ref={win} at={from}>
-          <Shape {...outlined(104, 72, 7)} fill={theme.surface} />
-          <Shape
+        <Stack
+          ref={win}
+          at={from}
+          width={104}
+          height={72}
+          align="stretch"
+          radius={RADIUS}
+          fill={theme.surface}
+          stroke={{ color: theme.border, width: LINE }}
+        >
+          <Stack
             key="titlebar"
-            geometry={rect(104, 18, { radius: [7, 7, 0, 0] })}
+            direction="row"
+            gap={5}
+            padding={[9, 5]}
+            radius={[RADIUS - LINE / 2, RADIUS - LINE / 2, 0, 0]}
             fill={theme.raised}
-          />
-          <Stack direction="row" gap={5} at={[10, 6]}>
+          >
             <Shape geometry={circle(3)} fill={theme.red} />
             <Shape geometry={circle(3)} fill={theme.yellow} />
             <Shape geometry={circle(3)} fill={theme.green} />
           </Stack>
-          <Stack gap={7} at={[14, 30]}>
+          <Stack gap={7} padding={[13, 11]}>
             <Shape geometry={rect(60, 5, { radius: 2.5 })} fill={theme.border} />
             <Shape geometry={rect(44, 5, { radius: 2.5 })} fill={theme.border} />
           </Stack>
-        </Group>
+        </Stack>
         <Shape
           ref={cursor}
           geometry={pathData("M0 0V16l4.2-3.8 3 6.8 2.8-1.2-3-6.6H12Z")}
