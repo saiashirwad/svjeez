@@ -1,7 +1,6 @@
-import { easeAt } from "./ease-at";
-import { EPSILON, NUDGE, ease, type Ease, type Seconds } from "./time";
+import { easeAt, easeBetween } from "./ease-at";
+import { DEFAULT_EASE, EPSILON, NUDGE, ease, isHold, type Ease, type Seconds } from "./time";
 import { alongCurve, fitControls, hermiteControls, onCurve, type Controls } from "./curve";
-import { portion } from "./fold";
 import type { Animated, Key, Lane, Vec } from "./ir";
 import { isLane } from "./lane";
 import { fitted, fittedCurves, keyCost, type RunKey, type Sample } from "../author/spring";
@@ -19,17 +18,32 @@ export const blendVec: Blend<Vec> = (a, b, u) => [
 const local = (t: Seconds, period: Seconds | undefined): Seconds =>
   period === undefined ? t : t - period * Math.max(0, Math.ceil(t / period - EPSILON) - 1);
 
-export const valueAt = <T>(value: Animated<T>, t: Seconds, blend: Blend<T>): T => {
-  if (!isLane(value)) return value;
-  const { keys } = value;
-  const at = local(t, value.period);
-  const index = keys.findLastIndex((key) => key.t <= at);
+export interface Segment<T> {
+  readonly from: Key<T>;
+  readonly to: Key<T>;
+  readonly amount: number;
+}
 
-  if (index < 0) return keys[0].value;
+export const segmentAt = <T>(lane: Lane<T>, t: Seconds): Segment<T> => {
+  const { keys } = lane;
+  const at = local(t, lane.period);
+  const index = keys.findLastIndex((key) => key.t <= at + EPSILON);
+
+  if (index < 0) return { from: keys[0], to: keys[0], amount: 0 };
   const [from, to] = [keys[index]!, keys[index + 1]];
 
-  if (!to) return from.value;
-  const amount = easeAt(to.ease ?? ease.linear, (at - from.t) / (to.t - from.t));
+  if (!to) return { from, to: from, amount: 0 };
+
+  if (at - from.t <= EPSILON) return { from, to, amount: 0 };
+
+  return { from, to, amount: easeAt(to.ease ?? DEFAULT_EASE, (at - from.t) / (to.t - from.t)) };
+};
+
+export const valueAt = <T>(value: Animated<T>, t: Seconds, blend: Blend<T>): T => {
+  if (!isLane(value)) return value;
+  const { from, to, amount } = segmentAt(value, t);
+
+  if (from === to || amount === 0) return from.value;
 
   return onCurve(from, to, amount) ?? blend(from.value, to.value, amount);
 };
@@ -78,8 +92,6 @@ type Between =
   | { readonly kind: "eased"; readonly curve: Ease }
   | { readonly kind: "other" };
 
-const isHold = (curve: Ease): boolean => curve.kind === "steps" && curve.count === 1;
-
 const between = (
   lanes: readonly (readonly Key<unknown>[])[],
   start: Seconds,
@@ -94,7 +106,7 @@ const between = (
     const [from, to] = [keys[next - 1]!, keys[next]!];
 
     if (!to.via && same(from.value, to.value)) continue;
-    const curve = to.ease ?? ease.linear;
+    const curve = to.ease ?? DEFAULT_EASE;
 
     if (isHold(curve)) {
       if (Math.abs(to.t - end) <= EPSILON) return { kind: "other" };
@@ -103,7 +115,13 @@ const between = (
 
     if (curve.kind === "steps") return { kind: "other" };
     const span = to.t - from.t;
-    const part = portion(curve, (start - from.t) / span, (end - from.t) / span);
+
+    const part = easeBetween(
+      curve,
+      (start - from.t) / span,
+      (end - from.t) / span,
+      "a sampled lane",
+    );
 
     if (found && JSON.stringify(found) !== JSON.stringify(part)) return { kind: "other" };
     found = part;
@@ -154,7 +172,7 @@ const strayed = (
 
   if (next <= 0) return false;
   const [a, b] = [keys[next - 1]!, keys[next]!];
-  const p = easeAt(b.ease ?? ease.linear, (t - a.t) / (b.t - a.t));
+  const p = easeAt(b.ease ?? DEFAULT_EASE, (t - a.t) / (b.t - a.t));
 
   const drawn = b.via
     ? alongCurve(pointOf(a.values), b.via, pointOf(b.values), p)
@@ -275,7 +293,7 @@ const easedRun = (
     keys.push({
       t,
       values: values[reach]!,
-      ease: portion(curve, share[from]!, share[reach]!),
+      ease: easeBetween(curve, share[from]!, share[reach]!, "a sampled lane"),
       ...(bend > line && { via: curveOf(from, reach).via }),
     });
     from = reach;
@@ -432,7 +450,7 @@ export const laneFrom = <T>(
       : {
           t: key.t,
           value: join(key.values),
-          ease: key.ease ?? ease.linear,
+          ease: key.ease ?? DEFAULT_EASE,
           ...(key.via && { via: key.via }),
         },
   );

@@ -1,7 +1,7 @@
 import { SceneError } from "./scene-error";
 import { easeAt, splitEase } from "./ease-at";
 import { MAX_KEYS, snapPeriod } from "../svg/keys";
-import { EPSILON, NUDGE, ease, type Ease, type Seconds } from "./time";
+import { DEFAULT_EASE, EPSILON, NUDGE, ease, type Ease, type Seconds } from "./time";
 import type { Span } from "../author/span";
 import { num } from "./format";
 import { isCurved, splitCurve, type Controls } from "./curve";
@@ -372,7 +372,7 @@ const segmentsOf = <T>(
       out.push({
         start: start + before.t,
         over: key.t - before.t,
-        ease: key.ease ?? ease.linear,
+        ease: key.ease ?? DEFAULT_EASE,
         value: parts.join(key.values),
         ...(key.via && { via: key.via }),
       });

@@ -1,11 +1,11 @@
 import { SceneError } from "./scene-error";
-import type { Ease } from "./time";
+import { DEFAULT_EASE, type Ease } from "./time";
 import { mixGeometry } from "./geometry";
 import type { Animated, Box, Effect, Geometry, Layer, SceneNode, Vec } from "./ir";
 import { isLane } from "./lane";
 
-const easeRange = (curve: Ease | undefined): readonly [number, number] =>
-  curve?.kind === "bezier"
+const easeRange = (curve: Ease): readonly [number, number] =>
+  curve.kind === "bezier"
     ? [Math.min(0, curve.points[1], curve.points[3]), Math.max(1, curve.points[1], curve.points[3])]
     : [0, 1];
 
@@ -16,7 +16,7 @@ const reached = <T>(value: Animated<T>, mix: (a: T, b: T, u: number) => T): T[] 
     const before = value.keys[i - 1];
 
     if (!before) return [key.value];
-    const [low, high] = easeRange(key.ease);
+    const [low, high] = easeRange(key.ease ?? DEFAULT_EASE);
 
     return [
       key.value,

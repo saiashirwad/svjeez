@@ -2,9 +2,9 @@ import { nodeName } from "../model/naming";
 import { SceneError } from "../model/scene-error";
 import type { ChannelValues } from "./channels";
 import type { Emit } from "./css";
-import { easeAt, splitEase } from "../model/ease-at";
+import { easeAt, easeBetween } from "../model/ease-at";
 import { num } from "../model/format";
-import { ease, type Ease } from "../model/time";
+import { DEFAULT_EASE, ease, type Ease } from "../model/time";
 import type { PathData } from "../model/paths";
 import type { AttrValue } from "./tree";
 import { arcPieces, contoursOf, mixGeometry, smilSafe } from "../model/geometry";
@@ -211,12 +211,6 @@ const pt = ([x, y]: Vec): string => `${num(x)} ${num(y)}`;
 
 const ARC_TOLERANCE = 0.25;
 
-const portion = (curve: Ease, from: number, to: number, where: string): Ease => {
-  const tail = from > 0 ? splitEase(curve, from, where)[1] : curve;
-
-  return to < 1 ? splitEase(tail, (to - from) / (1 - from), where)[0] : tail;
-};
-
 const arcCuts = (curve: Ease, turn: number, radius: number): number[] => {
   const most = Math.sqrt((8 * ARC_TOLERANCE) / Math.max(radius, 1e-9));
   const cuts: number[] = [];
@@ -244,7 +238,7 @@ const blendable = (lane: Lane<Geometry>, key: string): Lane<Geometry> => {
 
   tail.forEach((to, index) => {
     const from = index === 0 ? head : tail[index - 1]!;
-    const curve = to.ease ?? ease.out;
+    const curve = to.ease ?? DEFAULT_EASE;
     const [a, b] = [from.value, to.value];
     const at = (progress: number): number => from.t + (to.t - from.t) * progress;
 
@@ -285,7 +279,7 @@ const blendable = (lane: Lane<Geometry>, key: string): Lane<Geometry> => {
       keys.push({
         t: at(q),
         value: q === 1 ? b : mixGeometry(a, b, easeAt(curve, q), where),
-        ease: portion(curve, p, q, where),
+        ease: easeBetween(curve, p, q, where),
       });
     }
   });

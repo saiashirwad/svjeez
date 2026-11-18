@@ -1,5 +1,4 @@
-import { easeAt } from "../model/ease-at";
-import { EPSILON, ease, type Seconds } from "../model/time";
+import { isHold, type Seconds } from "../model/time";
 import { placements, type Matrix, type Placed } from "./boxes";
 import type {
   Animated,
@@ -18,7 +17,7 @@ import type {
   Vec,
 } from "../model/ir";
 import { isLane, mapLane } from "../model/lane";
-import { breaksOf, unrolled } from "../model/sample";
+import { breaksOf, segmentAt, unrolled } from "../model/sample";
 import { same } from "../model/steps";
 import { nodeName } from "../model/naming";
 
@@ -162,8 +161,7 @@ export const changesOf = (value: Animated<unknown>, duration: Seconds): Stretch[
   return out;
 };
 
-export const isCut = (key: Key<unknown>): boolean =>
-  key.ease !== undefined && key.ease.kind === "steps" && key.ease.count === 1;
+export const isCut = (key: Key<unknown>): boolean => isHold(key.ease);
 
 export const merged = (stretches: readonly Stretch[]): Stretch[] => {
   const sorted = [...stretches].sort((a, b) => a[0] - b[0]);
@@ -292,23 +290,9 @@ export interface Between<T> {
 
 export const between = <T>(value: Animated<T>, t: Seconds): Between<T> => {
   if (!isLane(value)) return { from: value, to: value, amount: 0 };
-  const { keys, period } = value;
+  const { from, to, amount } = segmentAt(value, t);
 
-  const at =
-    period === undefined ? t : t - period * Math.max(0, Math.ceil(t / period - EPSILON) - 1);
-
-  const index = keys.findLastIndex((key) => key.t <= at);
-
-  if (index < 0) return { from: keys[0].value, to: keys[0].value, amount: 0 };
-  const [from, to] = [keys[index]!, keys[index + 1]];
-
-  if (!to) return { from: from.value, to: from.value, amount: 0 };
-
-  return {
-    from: from.value,
-    to: to.value,
-    amount: easeAt(to.ease ?? ease.linear, (at - from.t) / (to.t - from.t)),
-  };
+  return { from: from.value, to: to.value, amount };
 };
 
 export const movingAt = (value: Animated<unknown>, t: Seconds): boolean => {

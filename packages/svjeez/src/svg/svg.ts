@@ -3,7 +3,7 @@ import type { Canvas, Lane as CssLane } from "./compile";
 import type { Emit } from "./css";
 import { num } from "../model/format";
 import type { Key as Held } from "./keys";
-import { EPSILON, ease } from "../model/time";
+import { DEFAULT_EASE, EPSILON, isHold } from "../model/time";
 import { render } from "./render";
 import { element, type AttrValue, type SvgNode } from "./tree";
 import { admit, type Backend, type Feature, type Support } from "./backend";
@@ -253,14 +253,14 @@ const held = <T>(lane: Lane<T>, duration: number, values: (value: T) => ChannelV
   const keys = lane.keys.map((key, index): Held => ({
     t: key.t,
     values: values(key.value),
-    ease: lane.keys[index + 1]?.ease ?? ease.out,
+    ease: lane.keys[index + 1]?.ease ?? DEFAULT_EASE,
   }));
 
   const [first, last] = [keys[0]!, keys.at(-1)!];
 
   return {
     keys: [
-      ...(first.t > EPSILON ? [{ ...first, t: 0, ease: ease.out }] : []),
+      ...(first.t > EPSILON ? [{ ...first, t: 0, ease: DEFAULT_EASE }] : []),
       ...keys,
       ...(last.t < period - EPSILON ? [{ ...last, t: period }] : []),
     ],
@@ -288,9 +288,7 @@ const isCut = (keys: readonly Held[]): boolean =>
 
     return (
       (value === 0 || value === 1) &&
-      (next === undefined ||
-        next.values.opacity === value ||
-        (key.ease.kind === "steps" && key.ease.count === 1))
+      (next === undefined || next.values.opacity === value || isHold(key.ease))
     );
   });
 

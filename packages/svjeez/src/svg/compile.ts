@@ -1,4 +1,5 @@
 import { SceneError } from "../model/scene-error";
+import { isHold } from "../model/time";
 import { formatValue, spec, valueOf, type Backend, type Channel } from "./channels";
 import { baseRule, classBody, cssDeclarations, cssKeyframes, freezeRule, type Emit } from "./css";
 import { fontFaces, isFontValue, type Font, type FontValue } from "../font/font";
@@ -291,7 +292,7 @@ const timelineOf = (node: Element, lanes: readonly Lane[]): TimelineTrack[] => {
       const spans = lane.keys.flatMap((key, index) => {
         if (!moving(lane.keys, index)) return [];
         const next = lane.keys[index + 1]!;
-        const at = (key.ease.kind === "steps" && key.ease.count === 1 ? next.t : key.t) * scale;
+        const at = (isHold(key.ease) ? next.t : key.t) * scale;
 
         return [{ at, over: Math.max(0, next.t * scale - at) }];
       });

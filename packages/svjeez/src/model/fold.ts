@@ -1,25 +1,13 @@
-import { easeAt, splitEase } from "./ease-at";
-import { EPSILON, ease, type Ease } from "./time";
-import { isCurved, onCurve } from "./curve";
+import { easeBetween } from "./ease-at";
+import { DEFAULT_EASE, EPSILON, ease, isHold } from "./time";
+import { isCurved } from "./curve";
 import type { Animated, Key, Lane, Layer, Vec } from "./ir";
 import { isLane } from "./lane";
 import { mixNumber, mixVec, same, type Mix } from "./steps";
+import { valueAt as sampleAt } from "./sample";
 
-const isHold = (curve: Ease | undefined): boolean => curve?.kind === "steps" && curve.count === 1;
-
-export const valueAt = <T>(lane: Lane<T>, t: number, mix: Mix<T>): T => {
-  const { keys } = lane;
-  const next = keys.findIndex((key) => key.t >= t - EPSILON);
-
-  if (next < 0) return keys.at(-1)!.value;
-  const to = keys[next]!;
-
-  if (next === 0 || Math.abs(to.t - t) <= EPSILON) return to.value;
-  const from = keys[next - 1]!;
-  const amount = easeAt(to.ease ?? ease.out, (t - from.t) / (to.t - from.t));
-
-  return onCurve(from, to, amount) ?? mix(from.value, to.value, amount, "a folded layer");
-};
+const valueAt = <T>(lane: Lane<T>, t: number, mix: Mix<T>): T =>
+  sampleAt(lane, t, (a, b, amount) => mix(a, b, amount, "a folded layer"));
 
 export const mapped = <T, U>(lane: Lane<T>, change: (value: T) => U): Lane<U> => {
   const [head, next, ...rest] = lane.keys.map((key) => ({ ...key, value: change(key.value) }));
@@ -42,14 +30,7 @@ const meet = ([s, e]: readonly [number, number], [s2, e2]: readonly [number, num
 const apart = <T>(a: Lane<T>, b: Lane<T>): boolean =>
   windows(a).every((one) => windows(b).every((other) => !meet(one, other) && !meet(other, one)));
 
-export const portion = (curve: Ease, from: number, to: number): Ease => {
-  if (isHold(curve)) return to >= 1 - EPSILON ? curve : ease.linear;
-  const tail = from > EPSILON ? splitEase(curve, from, "a folded layer")[1] : curve;
-
-  return to < 1 - EPSILON ? splitEase(tail, (to - from) / (1 - from), "a folded layer")[0] : tail;
-};
-
-const easeOver = <T>(lane: Lane<T>, t0: number, t1: number): Ease | undefined => {
+const easeOver = <T>(lane: Lane<T>, t0: number, t1: number) => {
   const next = lane.keys.findIndex((key) => key.t >= t1 - EPSILON);
 
   if (next <= 0) return undefined;
@@ -58,7 +39,12 @@ const easeOver = <T>(lane: Lane<T>, t0: number, t1: number): Ease | undefined =>
   if (same(from.value, to.value)) return undefined;
   const span = to.t - from.t;
 
-  return portion(to.ease ?? ease.out, (t0 - from.t) / span, (t1 - from.t) / span);
+  return easeBetween(
+    to.ease ?? DEFAULT_EASE,
+    (t0 - from.t) / span,
+    (t1 - from.t) / span,
+    "a folded layer",
+  );
 };
 
 const joined = <T>(

@@ -41,6 +41,11 @@ export const ease = {
   bezier,
 } as const;
 
+export const DEFAULT_EASE: Ease = ease.out;
+
+export const isHold = (curve: Ease | undefined): boolean =>
+  curve?.kind === "steps" && curve.count === 1;
+
 export const EPSILON = 1e-9;
 
 export const NUDGE = 1e-5;

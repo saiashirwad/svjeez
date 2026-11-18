@@ -1,5 +1,5 @@
 import { SceneError } from "./scene-error";
-import { ease, type Ease } from "./time";
+import { EPSILON, ease, isHold, type Ease } from "./time";
 
 const cubic = (a: number, b: number, u: number) =>
   3 * a * u * (1 - u) ** 2 + 3 * b * u * u * (1 - u) + u ** 3;
@@ -103,7 +103,8 @@ export const splitEase = (curve: Ease, progress: number, where: string): readonl
 };
 
 export const easeBetween = (curve: Ease, from: number, to: number, where: string): Ease => {
-  const tail = from > 0 ? splitEase(curve, from, where)[1] : curve;
+  if (isHold(curve)) return to >= 1 - EPSILON ? curve : ease.linear;
+  const tail = from > EPSILON ? splitEase(curve, from, where)[1] : curve;
 
-  return to < 1 ? splitEase(tail, (to - from) / (1 - from), where)[0] : tail;
+  return to < 1 - EPSILON ? splitEase(tail, (to - from) / (1 - from), where)[0] : tail;
 };
