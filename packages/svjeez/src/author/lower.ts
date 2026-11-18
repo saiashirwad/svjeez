@@ -279,6 +279,12 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
       ? undefined
       : animated<Vec, Vec>(props.trim, keep, timing, mixVec, `trim on ${where}`);
 
+  if (stroke?.dashOffset !== undefined && trim !== undefined)
+    throw new SceneError(
+      `${where} has both a trim and a stroke dashOffset, and both drive the dash.`,
+      "Pick one: animate trim to draw the stroke on, or dashOffset to march its dashes.",
+    );
+
   const box = paintedBoxOf(rest, lookOf({ stroke, trim }));
 
   return {
@@ -297,23 +303,34 @@ const strokeOf = (
   timing: Timing,
   where: string,
   box: Box,
-): Stroke => ({
-  color: blendable(
-    animated(
-      written.color,
-      (value: Paint) => colorOf(ctx, value, where, box),
-      timing,
-      mixPaint,
+): Stroke => {
+  if (written.dashOffset !== undefined && !written.dash)
+    throw new SceneError(
+      `${where} has a dashOffset but no dash to slide.`,
+      "Give the stroke a dash, as in stroke={{ color, dash: [4, 4], dashOffset }}.",
+    );
+
+  return {
+    color: blendable(
+      animated(
+        written.color,
+        (value: Paint) => colorOf(ctx, value, where, box),
+        timing,
+        mixPaint,
+        `stroke on ${where}`,
+      ),
       `stroke on ${where}`,
     ),
-    `stroke on ${where}`,
-  ),
-  width: animated(written.width ?? 1, keep, timing, mixNumber, `stroke width on ${where}`),
-  cap: written.cap ?? "butt",
-  join: written.join ?? "miter",
-  ...(written.dash && { dash: written.dash }),
-  nonScaling: written.nonScaling ?? false,
-});
+    width: animated(written.width ?? 1, keep, timing, mixNumber, `stroke width on ${where}`),
+    cap: written.cap ?? "butt",
+    join: written.join ?? "miter",
+    ...(written.dash && { dash: written.dash }),
+    ...(written.dashOffset !== undefined && {
+      dashOffset: animated(written.dashOffset, keep, timing, mixNumber, `dash offset on ${where}`),
+    }),
+    nonScaling: written.nonScaling ?? false,
+  };
+};
 
 /** An animated size lays the text out at the size it starts at, and scales it from its anchor. */
 const grownBy = (
@@ -993,7 +1010,7 @@ const dressed = (
 ): SceneNode => {
   const where = named(node.key);
   const own = boundsOf(node.box);
-  const { effects = [] } = props;
+  const { effects = [], blend } = props;
   const clip = byBox(props.clip) ? props.clip(own) : props.clip;
   const asked = byBox(props.mask) ? props.mask(own) : props.mask;
   const mask = asked === undefined ? undefined : maskOf(ctx, asked, node.key, timing);
@@ -1003,6 +1020,7 @@ const dressed = (
     ...(clip !== undefined && { clip: geometryOf(clip, timing, where, "clip") }),
     ...(mask && { mask }),
     effects: effects.map((effect) => effectOf(ctx, effect, timing, where)),
+    ...(blend !== undefined && blend !== "normal" && { blend }),
   };
 };
 

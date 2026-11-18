@@ -403,6 +403,7 @@ const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed
   const shown = presence(plan, entry, enter, exit);
   const clip = clipOf(plan, entry);
   const mask = agreed(entry, (node) => node.mask, "mask");
+  const mode = agreed(entry, (node) => node.blend ?? "normal", "blend");
 
   return {
     key: entry.key,
@@ -420,6 +421,7 @@ const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed
     layers: [...(shown ? [shown] : []), ...layersOf(plan, entry, rest.origin)],
     ...(clip && { clip }),
     ...(mask && { mask }),
+    ...(mode !== "normal" && { blend: mode }),
     effects: effectsOf(plan, entry),
   };
 };
@@ -667,6 +669,15 @@ const strokeOf = (
       mixNumber,
       "stroke width",
     ),
+    ...(strokes.some((stroke) => stroke?.dashOffset !== undefined) && {
+      dashOffset: blend(
+        plan,
+        entry,
+        strokes.map((stroke) => stroke?.dashOffset ?? 0),
+        mixNumber,
+        "stroke dash offset",
+      ),
+    }),
   };
 };
 

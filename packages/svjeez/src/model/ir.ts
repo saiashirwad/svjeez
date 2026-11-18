@@ -121,12 +121,31 @@ export type Gradient =
 
 export type Paint = Color | Gradient;
 
+/** How a node composites onto what is drawn beneath it inside its group. Normal is the absence of one. */
+export type Blend =
+  | "multiply"
+  | "screen"
+  | "overlay"
+  | "darken"
+  | "lighten"
+  | "color-dodge"
+  | "color-burn"
+  | "hard-light"
+  | "soft-light"
+  | "difference"
+  | "exclusion"
+  | "hue"
+  | "saturation"
+  | "color"
+  | "luminosity";
+
 export interface Stroke {
   readonly color: Animated<Paint>;
   readonly width: Animated<number>;
   readonly cap: "butt" | "round" | "square";
   readonly join: "miter" | "round" | "bevel";
   readonly dash?: readonly number[];
+  readonly dashOffset?: Animated<number>;
   readonly nonScaling: boolean;
 }
 
@@ -164,6 +183,7 @@ interface Base {
   readonly clip?: Animated<Geometry>;
   readonly mask?: SceneNode;
   readonly effects: readonly Effect[];
+  readonly blend?: Blend;
   readonly authored?: Authored;
 }
 

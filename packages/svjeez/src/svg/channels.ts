@@ -28,6 +28,7 @@ const CHANNELS = {
   draw: { value: number, pins: { pathLength: "1", "stroke-dasharray": "1 2" } },
   drawStart: { value: number, pins: { pathLength: "1", "stroke-dasharray": "1 2" } },
   strokeWidth: { value: number },
+  dashOffset: { value: number },
   d: { value: pathData },
   offsetDistance: { value: number },
   fill: { value: color },
