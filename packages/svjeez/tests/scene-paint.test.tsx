@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
+  adjust,
+  displace,
   font,
   Group,
   Run,
@@ -801,6 +803,92 @@ describe("effects", () => {
   });
 });
 
+describe("adjust and displace", () => {
+  const drawn = (...effects: Effect[]) =>
+    emitted(
+      made(() => <Shape geometry={rect(40, 20)} at={[10, 10]} fill="#FF0000" effects={effects} />),
+    );
+
+  test("adjust writes a primitive per change, in order, and skips what stays", () => {
+    const out = drawn(adjust({ saturate: 1.5, hue: 90, brightness: 1.2, contrast: 0.8 }));
+
+    expect(out).toContain(
+      '<feColorMatrix type="saturate" values="1.5"/><feColorMatrix type="hueRotate" values="90"/><feComponentTransfer><feFuncR type="linear" slope="1.2"/><feFuncG type="linear" slope="1.2"/><feFuncB type="linear" slope="1.2"/></feComponentTransfer><feComponentTransfer><feFuncR type="linear" slope="0.8" intercept="0.1"/>',
+    );
+    expect(drawn(adjust({ hue: 30 }))).toContain(
+      '<feColorMatrix type="hueRotate" values="30"/></filter>',
+    );
+    expect(drawn(adjust({}))).not.toContain("<filter");
+  });
+
+  test("adjust animates its attributes", () => {
+    const out = drawn(
+      adjust({
+        saturate: track(1).to(0, span(0, 1), ease.linear),
+        contrast: track(1).to(2, span(0, 1), ease.linear),
+      }),
+    );
+
+    expect(out).toContain('attributeName="values" values="1;0"');
+    expect(out).toContain('attributeName="slope" values="1;2"');
+    expect(out).toContain('attributeName="intercept" values="0;-0.5"');
+    expect(out).toContain('<filter id="f1s"');
+  });
+
+  test("displace reads the noise by name, after the effects before it", () => {
+    const out = drawn(blur(2), displace({ scale: 6, frequency: 0.05, seed: 3, octaves: 2 }));
+
+    expect(out).toContain(
+      '<feGaussianBlur result="e0" stdDeviation="2"/><feTurbulence type="fractalNoise" numOctaves="2" seed="3" result="n0" baseFrequency="0.05"/><feDisplacementMap in="e0" in2="n0" xChannelSelector="R" yChannelSelector="G" scale="6"/>',
+    );
+    expect(drawn(displace({ scale: 6, frequency: 0.05, seed: 1 }))).toContain(
+      '<feDisplacementMap in="SourceGraphic" in2="n0"',
+    );
+    expect(drawn(displace({ scale: 0, frequency: 0.05, seed: 1 }))).not.toContain("<filter");
+  });
+
+  test("a displacement grows the filter region by its largest scale", () => {
+    expect(drawn(displace({ scale: 10, frequency: 0.05, seed: 1 }))).toContain(
+      'x="-1" y="-1" width="62" height="42"',
+    );
+    expect(
+      drawn(displace({ scale: track(0).to(20, span(0, 1)), frequency: 0.05, seed: 1 })),
+    ).toContain('x="-11" y="-11" width="82" height="62"');
+  });
+
+  test("they lower to model effects and are checked", () => {
+    const node = only(
+      made(() => (
+        <Shape
+          geometry={rect(4, 4)}
+          fill="#000000"
+          effects={[adjust({ hue: 10 }), displace({ scale: 2, frequency: 1, seed: 4 })]}
+        />
+      )),
+    );
+
+    expect(node.effects).toEqual([
+      { kind: "adjust", saturate: 1, hue: 10, brightness: 1, contrast: 1 },
+      { kind: "displace", scale: 2, frequency: 1, seed: 4, octaves: 1 },
+    ]);
+
+    const bad = (effect: Effect) => () =>
+      made(() => <Shape key="a" fill="#000000" geometry={rect(4, 4)} effects={[effect]} />);
+
+    expect(bad(adjust({ saturate: -1 }))).toThrow(
+      'adjust saturate on <Shape> "a" needs a finite number of 0 or more, got -1.',
+    );
+    expect(bad(adjust({ contrast: -0.5 }))).toThrow("adjust contrast");
+    expect(bad(adjust({ hue: Infinity }))).toThrow("adjust hue");
+    expect(bad(displace({ scale: -1, frequency: 1, seed: 1 }))).toThrow("displace scale");
+    expect(bad(displace({ scale: 1, frequency: -1, seed: 1 }))).toThrow("displace frequency");
+    expect(bad(displace({ scale: 1, frequency: 1, seed: 1.5 }))).toThrow("displace seed");
+    expect(bad(displace({ scale: 1, frequency: 1, seed: 1, octaves: 0 }))).toThrow(
+      "displace octaves",
+    );
+  });
+});
+
 describe("morph", () => {
   test("gradients, clips and effects blend between states", () => {
     const g = (x: number) => linear({ from: [0, 0], to: [x, 0], stops: ["#000000", "#FFFFFF"] });
@@ -829,6 +917,51 @@ describe("morph", () => {
     const shown = card.effects[0]!.kind === "shadow" ? card.effects[0]!.opacity : 0;
 
     expect(isLane(shown) && [shown.keys[0].value, shown.keys.at(-1)!.value]).toEqual([0, 0.5]);
+  });
+
+  test("adjust and displace blend between states, or from nothing", () => {
+    const model = made(() =>
+      morph(
+        <Shape key="a" geometry={rect(4, 4)} fill="#000000" />,
+        <Shape
+          key="a"
+          geometry={rect(4, 4)}
+          fill="#000000"
+          effects={[adjust({ saturate: 0 }), displace({ scale: 8, frequency: 0.1, seed: 2 })]}
+        />,
+        span(0, 1),
+      ),
+    );
+
+    const [tone, warp] = only(model).effects;
+
+    expect(tone).toMatchObject({ kind: "adjust", saturate: { kind: "lane" }, hue: 0 });
+    expect(warp).toMatchObject({
+      kind: "displace",
+      scale: { kind: "lane" },
+      seed: 2,
+      frequency: 0.1,
+    });
+
+    expect(() =>
+      made(() =>
+        morph(
+          <Shape
+            key="a"
+            geometry={rect(4, 4)}
+            fill="#000000"
+            effects={[displace({ scale: 1, frequency: 1, seed: 1 })]}
+          />,
+          <Shape
+            key="a"
+            geometry={rect(4, 4)}
+            fill="#000000"
+            effects={[displace({ scale: 1, frequency: 1, seed: 2 })]}
+          />,
+          span(0, 1),
+        ),
+      ),
+    ).toThrow("seed or octaves differ");
   });
 
   test("a gradient fades in from a clear color, a color blends into a gradient, and two kinds of effect don't", () => {

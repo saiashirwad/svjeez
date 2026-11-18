@@ -97,6 +97,18 @@ export const valuesOf = (node: SceneNode): Named[] => {
 
   for (const effect of node.effects)
     if (effect.kind === "blur") out.push({ name: "blur", kind: "number", value: effect.radius });
+    else if (effect.kind === "adjust")
+      out.push(
+        { name: "adjust saturate", kind: "number", value: effect.saturate },
+        { name: "adjust hue", kind: "number", value: effect.hue },
+        { name: "adjust brightness", kind: "number", value: effect.brightness },
+        { name: "adjust contrast", kind: "number", value: effect.contrast },
+      );
+    else if (effect.kind === "displace")
+      out.push(
+        { name: "displace scale", kind: "number", value: effect.scale },
+        { name: "displace frequency", kind: "number", value: effect.frequency },
+      );
     else
       out.push(
         { name: "shadow offset", kind: "vec", value: effect.offset },

@@ -160,6 +160,20 @@ export interface Layer {
 export type Effect =
   | { readonly kind: "blur"; readonly radius: Animated<number> }
   | {
+      readonly kind: "adjust";
+      readonly saturate: Animated<number>;
+      readonly hue: Animated<number>;
+      readonly brightness: Animated<number>;
+      readonly contrast: Animated<number>;
+    }
+  | {
+      readonly kind: "displace";
+      readonly scale: Animated<number>;
+      readonly frequency: Animated<number>;
+      readonly seed: number;
+      readonly octaves: number;
+    }
+  | {
       readonly kind: "shadow";
       readonly offset: Animated<Vec>;
       readonly blur: Animated<number>;

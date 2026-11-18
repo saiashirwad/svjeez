@@ -73,6 +73,8 @@ const supports: Readonly<Record<Feature, Support>> = {
   mask: EXACT,
   blur: EXACT,
   shadow: EXACT,
+  adjust: EXACT,
+  displace: EXACT,
   softBlur: SOFT_BLUR,
   linearGradient: EXACT,
   radialGradient: EXACT,
