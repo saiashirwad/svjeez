@@ -48,7 +48,7 @@ interface Look {
   readonly size: number;
 }
 
-const axes = ({ chart, layout, size }: Look): SceneElement => {
+const Axes = ({ look: { chart, layout, size } }: { readonly look: Look }): SceneElement => {
   const { width, height, yTicks, xTicks } = layout;
   const bottom = height;
   const [low, high] = layout.yDomain;
@@ -132,12 +132,14 @@ const axes = ({ chart, layout, size }: Look): SceneElement => {
   );
 };
 
-const barsOf = (
-  { chart, layout, size }: Look,
-  data: readonly (readonly [string, number])[],
-  options: BarsOptions & { readonly name: string },
-  slot: { readonly index: number; readonly count: number },
-): SceneElement => {
+interface BarsProps {
+  readonly look: Look;
+  readonly data: readonly (readonly [string, number])[];
+  readonly options: BarsOptions & { readonly name: string };
+  readonly slot: { readonly index: number; readonly count: number };
+}
+
+const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps): SceneElement => {
   const { plot, zero } = layout;
   const { radius = 3, color, span: when } = options;
   const stagger = options.stagger ?? 0.08;
@@ -218,13 +220,21 @@ const reaches = (points: readonly Vec[]): readonly number[] => {
   return sums.map((length) => length / total);
 };
 
-const traced = (
-  { chart, layout, size }: Look,
-  data: readonly (readonly [string | number, number])[],
-  options: LineOptions & { readonly name: string },
-  fill?: SceneElement,
+interface LineProps {
+  readonly look: Look;
+  readonly data: readonly (readonly [string | number, number])[];
+  readonly options: LineOptions & { readonly name: string };
+  readonly fill?: SceneElement;
+  readonly stroked?: boolean;
+}
+
+const Line = ({
+  look: { chart, layout, size },
+  data,
+  options,
+  fill,
   stroked = true,
-): SceneElement => {
+}: LineProps): SceneElement => {
   const { plot } = layout;
   const { color, span: when, label, width = 2.5 } = options;
   const points = data.map(([x, y]): Vec => [plot.x(x), plot.y(y)]);
@@ -287,11 +297,13 @@ const traced = (
   );
 };
 
-const areaOf = (
-  look: Look,
-  data: readonly (readonly [string | number, number])[],
-  options: AreaOptions & { readonly name: string },
-): SceneElement => {
+interface AreaProps {
+  readonly look: Look;
+  readonly data: readonly (readonly [string | number, number])[];
+  readonly options: AreaOptions & { readonly name: string };
+}
+
+const Area = ({ look, data, options }: AreaProps): SceneElement => {
   const { plot, yDomain, width, height } = look.layout;
   const [low, high] = yDomain;
   const { color, span: when } = options;
@@ -341,7 +353,9 @@ const areaOf = (
     />
   );
 
-  return traced(look, data, options, fill, options.line !== false);
+  return (
+    <Line look={look} data={data} options={options} fill={fill} stroked={options.line !== false} />
+  );
 };
 
 export const Chart = (props: ChartProps): SceneElement => {
@@ -356,16 +370,17 @@ export const Chart = (props: ChartProps): SceneElement => {
   const drawn = series.map((s: Series) => {
     const options = { ...s.options, name: s.options.name! };
 
-    if (s.kind === "bars") return barsOf(look, s.data, options, { index: placed++, count });
+    if (s.kind === "bars")
+      return <Bars look={look} data={s.data} options={options} slot={{ index: placed++, count }} />;
 
-    if (s.kind === "line") return traced(look, s.data, options);
+    if (s.kind === "line") return <Line look={look} data={s.data} options={options} />;
 
-    return areaOf(look, s.data, options);
+    return <Area look={look} data={s.data} options={options} />;
   });
 
   return (
     <Group key={props.key} at={at}>
-      {axes(look)}
+      <Axes look={look} />
       {drawn}
       {props.children?.(layout.plot)}
     </Group>

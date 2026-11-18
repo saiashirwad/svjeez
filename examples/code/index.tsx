@@ -76,7 +76,7 @@ const moves = FIB.slice(1).map((_, i) => span(HOLD * (i + 1) + OVER * i, OVER));
 
 const fib = ref("fib");
 
-const version = ({ lang, keys, source }: (typeof FIB)[number]): SceneElement => (
+const Version = ({ lang, keys, source }: (typeof FIB)[number]): SceneElement => (
   <Code
     key="code"
     ref={fib}
@@ -130,7 +130,11 @@ export default scene(
         fill={theme.blue}
         opacity={track(0).to(0.18, span(0.8, 0.4))}
       />
-      {morph.between(FIB.map(version), moves, { stagger: 0.04 })}
+      {morph.between(
+        FIB.map((version) => <Version {...version} />),
+        moves,
+        { stagger: 0.04 },
+      )}
       <Stack direction="row" gap={8} at={[LEFT, 292]}>
         <Text font={mono} size={14} fill={theme.muted}>
           $

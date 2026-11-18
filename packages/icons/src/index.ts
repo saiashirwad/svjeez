@@ -5,4 +5,4 @@ export {
   type IconTrim,
   type OwnIconProps,
   type SharedIconProps,
-} from "./icon.ts";
+} from "./icon.tsx";

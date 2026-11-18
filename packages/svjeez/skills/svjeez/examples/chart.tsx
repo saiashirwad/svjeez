@@ -53,7 +53,7 @@ const quarters: readonly Quarter[] = [
 
 const PX_PER_UNIT = 1.4;
 
-const chart = ({ name, bars }: Quarter): SceneElement => (
+const Signups = ({ name, bars }: Quarter): SceneElement => (
   <Group>
     <Text key="title" font={sans} weight={600} size={16} at={[40, 28]} fill={theme.text}>
       {`Signups by region, ${name}`}
@@ -92,11 +92,15 @@ export default scene(
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Group>
-        {morph.between([...quarters, quarters[0]!].map(chart), turns, {
-          stagger: 0.05,
-          enter: { opacity: 0, scale: 0.8 },
-          exit: { opacity: 0, scale: 0.8 },
-        })}
+        {morph.between(
+          [...quarters, quarters[0]!].map((quarter) => <Signups {...quarter} />),
+          turns,
+          {
+            stagger: 0.05,
+            enter: { opacity: 0, scale: 0.8 },
+            exit: { opacity: 0, scale: 0.8 },
+          },
+        )}
       </Group>
     </Group>
   ),

@@ -43,7 +43,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import type { IconData } from "./icon.ts";
+import type { IconData } from "./icon.tsx";
 
 export const aArrowDown: IconData = { grid: 24, kind: "stroke", paths: ["m14 12 4 4 4-4","M18 16V7","m2 16 4.039-9.69a.5.5 0 0 1 .923 0L11 16","M3.304 13h6.392"] };
 export const aArrowUp: IconData = { grid: 24, kind: "stroke", paths: ["m14 11 4-4 4 4","M18 16V7","m2 16 4.039-9.69a.5.5 0 0 1 .923 0L11 16","M3.304 13h6.392"] };

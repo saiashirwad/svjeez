@@ -8,7 +8,7 @@
 - a `<Text>` whose words change crossfades; one that keeps them moves.
 
 ```tsx
-const chart = ({ name, bars }: Quarter) => (
+const Signups = ({ name, bars }: Quarter) => (
   <Group>
     <Text key="title" font={sans} size={16} at={[40, 28]} fill={theme.text}>{`Signups, ${name}`}</Text>
     <Stack key="bars" direction="row" gap={20} align="end" at={[40, 250]} anchor="bottom-left">
@@ -22,7 +22,7 @@ const chart = ({ name, bars }: Quarter) => (
   </Group>
 );
 
-morph.between([q1, q2, q3, q1].map(chart), [span(1.6, 1), span(4.2, 1), span(6.8, 1)], {
+morph.between([q1, q2, q3, q1].map((quarter) => <Signups {...quarter} />), [span(1.6, 1), span(4.2, 1), span(6.8, 1)], {
   stagger: 0.05,
   enter: { opacity: 0, scale: 0.8 },
   exit: { opacity: 0, scale: 0.8 },
