@@ -396,7 +396,10 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
     if (!moving.some(isLane)) return at(0);
 
-    return laneFrom(follow(at, breaksOf(moving, duration), TOLERANCE), ([x, y]): Vec => [x!, y!]);
+    return laneFrom(
+      follow(at, breaksOf(moving, duration), TOLERANCE, [], moving, true),
+      ([x, y]): Vec => [x!, y!],
+    );
   };
 
   for (const d of byKey.values()) {

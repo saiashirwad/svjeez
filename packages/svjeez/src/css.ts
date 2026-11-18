@@ -85,6 +85,8 @@ export const cssDeclarations = (lane: string, emit: Emit, values: TargetValues):
       return `translate:${formatValue(values.x ?? 0)}px ${formatValue(values.y ?? 0)}px`;
     case "rotate":
       return `rotate:${formatValue(values.rotate)}deg`;
+    case "offset-distance":
+      return `offset-distance:${formatValue(values.offsetDistance)}%`;
     case "scale":
       if (values.scaleY === undefined) return `scale:${formatValue(values.scale)}`;
 

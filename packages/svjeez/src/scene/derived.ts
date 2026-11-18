@@ -247,6 +247,7 @@ const sampledLane = <T>(
   period: Seconds | undefined,
   tolerance: number | undefined,
   where: string,
+  curves: boolean,
 ): Animated<T> => {
   const shape = flatten(out(lanes.map((lane) => valueAt(lane, 0, blendRead))), where).shape;
 
@@ -275,6 +276,9 @@ const sampledLane = <T>(
     at,
     breaksOf(lanes, window),
     tolerance ?? Math.min(0.05, Math.max(range * 1e-3, 1e-6)),
+    [],
+    lanes,
+    curves && shape === "[0,0]",
   );
 
   const lane = laneFrom(keys, (numbers): T => rebuild<T>(shape, numbers));
@@ -286,13 +290,15 @@ const isBaseTrack = (source: Base): source is Track<number> | Track<Vec> => isTr
 
 /**
  * A derived track as the model's value: a lane on the scene's clock, or a still value when nothing it reads moves.
- * `change` turns what the mapping gives into the model's value, as it does for a hand-written prop.
+ * `change` turns what the mapping gives into the model's value, as it does for a hand-written prop. `curves` says the
+ * value is a position, which a sampled lane may draw with curved keys.
  */
 export const derivedOf = <A, T>(
   value: Derived<A>,
   change: (value: A) => T,
   timing: Timing,
   where: string,
+  curves = false,
 ): Animated<T> => {
   const lanes = value.sources.map((source): Animated<Read> => {
     if (!isBaseTrack(source)) return source;
@@ -324,5 +330,6 @@ export const derivedOf = <A, T>(
     shared ? period : undefined,
     value.tolerance,
     where,
+    curves,
   );
 };

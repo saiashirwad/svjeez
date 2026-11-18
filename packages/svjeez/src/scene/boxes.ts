@@ -1,5 +1,6 @@
 import { easeAt } from "../ease-at";
 import type { Seconds } from "../motion";
+import { onCurve } from "./curve";
 import { mixGeometry } from "./geometry";
 import type { Animated, Box, Geometry, Layer, Scene, SceneNode, Source, Vec } from "./ir";
 import { isLane } from "./lane";
@@ -77,7 +78,10 @@ export const valueAt = <T>(value: Animated<T>, t: Seconds, mix: Mix<T>, where = 
   const [from, to] = [keys[next - 1]!, keys[next]!];
   const progress = (time - from.t) / (to.t - from.t);
 
-  return to.ease ? mix(from.value, to.value, easeAt(to.ease, progress), where) : to.value;
+  if (!to.ease) return to.value;
+  const amount = easeAt(to.ease, progress);
+
+  return onCurve(from, to, amount) ?? mix(from.value, to.value, amount, where);
 };
 
 const number = (value: Animated<number>, t: Seconds): number => valueAt(value, t, mixNumber);

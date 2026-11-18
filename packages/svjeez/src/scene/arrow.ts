@@ -161,6 +161,45 @@ const shownBy = (trim: Animated<Vec>, duration: Seconds): Animated<number> => {
   return lane;
 };
 
+/**
+ * The moment whose pose a connector shows at `t`: `t` itself while any of it is drawn, else the next moment it is,
+ * or the last when it never is again. A hidden connector holds still, so nothing is written for a pose no one sees.
+ */
+const seenBy = (shown: Animated<number>, duration: Seconds): ((t: Seconds) => Seconds) => {
+  if (!isLane(shown)) return (t) => t;
+  const keys = unrolled(shown, duration);
+
+  /** Where each stretch of time in which the connector shows starts and ends. */
+  const windows = keys.flatMap((key, i): (readonly [Seconds, Seconds])[] =>
+    key.value > 0.5 ? [[i === 0 ? 0 : key.t, keys[i + 1]?.t ?? duration]] : [],
+  );
+
+  if (windows.length === 0) return (t) => t;
+
+  return (t) => {
+    if (windows.some(([start, end]) => t >= start - EPSILON && t <= end + EPSILON)) return t;
+    const next = windows.find(([start]) => start > t);
+
+    return next ? next[0] : windows.at(-1)![1];
+  };
+};
+
+/** `value` as the connector shows it: a lane that only moves while the connector is hidden is held still. */
+const steadyWhileHidden = (
+  value: Animated<Vec>,
+  seen: (t: Seconds) => Seconds,
+  breaks: readonly Seconds[],
+): Animated<Vec> => {
+  if (!isLane(value)) return value;
+
+  const held = laneFrom(
+    follow((t) => valueAt(value, seen(t), blendVec), breaks, NEAR, [], [value], true),
+    ([x, y]): Vec => [x!, y!],
+  );
+
+  return isLane(held) ? value : held;
+};
+
 const layer = (rotate: Animated<number>, opacity: Animated<number>): Layer[] =>
   !isLane(rotate) && !isLane(opacity) && rotate === 0 && opacity === 1
     ? []
@@ -245,65 +284,81 @@ const connect =
       ];
     }
 
-    const breaks = breaksOf([from!, to!, trim], duration);
+    const ends = [from!, to!, trim];
+    const breaks = breaksOf(ends, duration);
+    const seen = seenBy(shown, duration);
+    const posed = (t: Seconds): Pose => pose(seen(t));
 
-    const at = laneFrom(
-      follow((t) => pose(t).start, breaks, NEAR),
-      ([x, y]): Vec => [x!, y!],
-    );
+    // The shaft's frame sits on `from` and turns there, so a far end that moves turns it without moving its start:
+    // the gap is part of the drawing, and only the angle and the length are lanes, each of one number.
+    const at = steadyWhileHidden(from!, seen, breaks);
 
     const angle = laneFrom(
-      follow((t) => [pose(t).angle], breaks, ANGLE, [0]),
+      follow((t) => [posed(t).angle], breaks, ANGLE, [0], ends),
       ([value]) => value!,
     );
 
-    const stretch = follow((t) => [pose(t).length], breaks, NEAR);
+    const stretch = follow((t) => [posed(t).length], breaks, NEAR, [], ends);
     const longest = Math.max(EPSILON, ...stretch.map((key) => key.values[0]!));
     const fixed = laneFrom(stretch, ([value]) => value!);
+    const start: Vec = [gap, 0];
 
     const [geometry, rest] = !isLane(fixed)
-      ? [shaftOf(bend, fixed, [0, 0], 0), shaft!.trim]
+      ? [shaftOf(bend, fixed, start, 0), shaft!.trim]
       : bend === 0
         ? [
-            shaftOf(0, longest, [0, 0], 0),
+            shaftOf(0, longest, start, 0),
             laneFrom(
               follow(
                 (t) => {
-                  const share = Math.min(1, pose(t).length / longest);
+                  const share = Math.min(1, posed(t).length / longest);
                   const [a, b] = valueAt(trim, t, blendVec);
 
                   return [a * share, b * share];
                 },
                 breaks,
                 NEAR / longest,
+                [],
+                ends,
               ),
               ([a, b]): Vec => [a!, b!],
             ),
           ]
-        : [laneFrom(stretch, ([value]) => shaftOf(bend, value!, [0, 0], 0)), shaft!.trim];
+        : [laneFrom(stretch, ([value]) => shaftOf(bend, value!, start, 0)), shaft!.trim];
+
+    if (!head) return [drawn(shaft!, geometry, at, layer(angle, 1), rest)];
+
+    /** Where the drawn end is along the turned shaft, and which way it heads there. */
+    const end = (t: Seconds): readonly [Vec, number] => {
+      const { length } = posed(t);
+      const reached = path(valueAt(trim, t, blendVec)[1]);
+
+      return [[gap + reached.at[0] * length, reached.at[1] * length], reached.heading];
+    };
+
+    // The head turns with the shaft, around the same point, and rides out along it: a move inside the turn.
+    const ride: Layer = {
+      offset: laneFrom(
+        follow((t) => end(t)[0], breaks, NEAR, [], ends, true),
+        ([x, y]): Vec => [x!, y!],
+      ),
+      rotate: laneFrom(
+        follow((t) => [end(t)[1]], breaks, ANGLE, [0], ends),
+        ([value]) => value!,
+      ),
+      scale: [1, 1],
+      opacity: 1,
+    };
 
     return [
       drawn(shaft!, geometry, at, layer(angle, 1), rest),
-      ...(head
-        ? [
-            drawn(
-              head,
-              headOf(size, [0, 0], 0),
-              laneFrom(
-                follow((t) => tipOf(t)[0], breaks, NEAR),
-                ([x, y]): Vec => [x!, y!],
-              ),
-              layer(
-                laneFrom(
-                  follow((t) => [tipOf(t)[1]], breaks, ANGLE, [0]),
-                  ([value]) => value!,
-                ),
-                shown,
-              ),
-              undefined,
-            ),
-          ]
-        : []),
+      drawn(
+        head,
+        headOf(size, [0, 0], 0),
+        at,
+        [{ offset: [0, 0], rotate: angle, scale: [1, 1], opacity: shown }, ride],
+        undefined,
+      ),
     ];
   };
 

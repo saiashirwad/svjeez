@@ -1,4 +1,6 @@
 import { ease as eases, type Ease, type Seconds } from "../motion";
+import { alongCurve, curveLength, fitControls, hermiteControls, type Controls } from "./curve";
+import type { Vec } from "./ir";
 
 /**
  * Real springs: a mass on a damped spring, simulated in seconds from where a value is and how fast it moves. A spring
@@ -38,6 +40,8 @@ export interface RunKey {
   readonly values: readonly number[];
   /** Shapes the way from the key before. The first key has none. */
   readonly ease?: Ease;
+  /** For a point: the controls of the curve from the key before, as `Key.via`. */
+  readonly via?: Controls;
 }
 
 export interface Run {
@@ -109,12 +113,163 @@ const strays = (samples: readonly Sample[], a: number, b: number): number => {
   return worst;
 };
 
+/** A sample's two values as a point. */
+const pointOf = (values: readonly number[]): Vec => [values[0]!, values[1]!];
+
+/** The curve and ease a curved key from sample `a` to sample `b` takes, or undefined when no ease within 0 and 1 fits. */
+interface Bend {
+  readonly via: Controls;
+  readonly ease: Ease;
+  /** How far it strays from the samples between, at the worst one. */
+  readonly strays: number;
+}
+
+/**
+ * The curved key from sample `a` to sample `b` that strays least: Hermite handles from the velocities, or handles
+ * fitted to the samples between, each with the Hermite ease of its length. Undefined when no ease within 0 and 1
+ * fits.
+ */
+const curving = (samples: readonly Sample[], a: number, b: number): Bend | undefined => {
+  const [from, to] = [samples[a]!, samples[b]!];
+  const span = to.t - from.t;
+  const [p, q] = [pointOf(from.values), pointOf(to.values)];
+  const leave: Vec = [from.velocity[0]! * span, from.velocity[1]! * span];
+  const arrive: Vec = [to.velocity[0]! * span, to.velocity[1]! * span];
+  const between = samples.slice(a + 1, b).map((sample) => pointOf(sample.values));
+  const walked = [0];
+
+  [...between, q].forEach((point, i) => {
+    const before = i === 0 ? p : between[i - 1]!;
+
+    walked.push(walked[i]! + Math.hypot(point[0] - before[0], point[1] - before[1]));
+  });
+
+  const shares = walked.slice(1, -1).map((length) => length / Math.max(walked.at(-1)!, 1e-12));
+
+  const tried = [
+    hermiteControls(p, leave, arrive, q),
+    fitControls(p, leave, arrive, q, between, shares),
+  ].flatMap((via): Bend[] => {
+    if (!via) return [];
+    const length = curveLength(p, via, q);
+
+    if (length < 1e-9) return [];
+
+    const [y1, y2] = [
+      Math.hypot(...leave) / (3 * length),
+      1 - Math.hypot(...arrive) / (3 * length),
+    ];
+
+    if (y1 > 1 || y2 < 0) return [];
+    const curve = eases.bezier(1 / 3, y1, 2 / 3, y2);
+
+    const strays = between.reduce((worst, want, i) => {
+      const at = alongCurve(p, via, q, progressOf(curve, (samples[a + 1 + i]!.t - from.t) / span));
+
+      return Math.max(worst, Math.hypot(at[0] - want[0], at[1] - want[1]));
+    }, 0);
+
+    return [{ via, ease: curve, strays }];
+  });
+
+  return tried.reduce<Bend | undefined>(
+    (best, one) => (!best || one.strays < best.strays ? one : best),
+    undefined,
+  );
+};
+
+/** How far a curved key from sample `a` to sample `b` strays from the samples between. */
+const straysCurved = (samples: readonly Sample[], a: number, b: number): number =>
+  curving(samples, a, b)?.strays ?? Infinity;
+
+/** A straight Hermite ease within 0 and 1, as a lane with curves needs. */
+const inside = (curve: Ease): boolean =>
+  curve.kind !== "bezier" || curve.points.every((value) => value >= 0 && value <= 1);
+
+/** How far the farthest sample a key from `from` can reach, by bisection, while `strays` stays within `tolerance`. */
+const reachOf = (
+  last: number,
+  from: number,
+  strays: (b: number) => number,
+  tolerance: number,
+): number => {
+  let [reach, beyond] = [from + 1, last + 1];
+
+  if (strays(last) <= tolerance) return last;
+
+  while (beyond - reach > 1) {
+    const middle = Math.floor((reach + beyond) / 2);
+
+    if (strays(middle) <= tolerance) reach = middle;
+    else beyond = middle;
+  }
+
+  return reach;
+};
+
+/**
+ * Keys for a point that may curve: each reaches as far as a straight key or a curved one (`Key.via`) can, whichever
+ * is farther, and every ease stays within 0 and 1, as a lane with curves needs.
+ */
+export const fittedCurves = (samples: readonly Sample[], tolerance: number): RunKey[] => {
+  const keys: RunKey[] = [{ t: samples[0]!.t, values: samples[0]!.values }];
+  const last = samples.length - 1;
+  let from = 0;
+
+  while (from < last) {
+    const line = reachOf(
+      last,
+      from,
+      (b) =>
+        b - from > 1 && !inside(hermite(samples[from]!, samples[b]!))
+          ? Infinity
+          : strays(samples, from, b),
+      tolerance,
+    );
+
+    const bend = reachOf(
+      last,
+      from,
+      (b) => (b - from > 1 ? straysCurved(samples, from, b) : Infinity),
+      tolerance,
+    );
+
+    const curve = bend > line ? curving(samples, from, bend) : undefined;
+    const reach = curve ? bend : line;
+    const to = samples[reach]!;
+
+    keys.push({
+      t: to.t,
+      values: to.values,
+      ...(curve
+        ? { ease: curve.ease, via: curve.via }
+        : { ease: reach - from > 1 ? hermite(samples[from]!, to) : eases.linear }),
+    });
+    from = reach;
+  }
+
+  return keys;
+};
+
+/** A curved key carries two more points than a straight one, so it counts as one and a half when the two are weighed. */
+export const keyCost = (keys: readonly RunKey[]): number =>
+  keys.reduce((sum, key) => sum + (key.via ? 1.5 : 1), 0);
+
 /**
  * Few keys whose eases stay within `tolerance` of every sample: each key reaches as far along the samples as a Hermite
  * curve from the key before can, found by bisection. Reaching forward needs about a third fewer keys than splitting at
  * the worst sample, the way `sampled()`'s Ramer-Douglas-Peucker does, for the same tolerance.
  */
-export const fitted = (samples: readonly Sample[], tolerance: number): RunKey[] => {
+export const fitted = (samples: readonly Sample[], tolerance: number, curves = false): RunKey[] => {
+  const straight = straightKeys(samples, tolerance);
+
+  if (!curves || samples[0]!.values.length !== 2) return straight;
+  const curved = fittedCurves(samples, tolerance);
+
+  return curved.some((key) => key.via) && keyCost(curved) < keyCost(straight) ? curved : straight;
+};
+
+const straightKeys = (samples: readonly Sample[], tolerance: number): RunKey[] => {
   const keys: RunKey[] = [{ t: samples[0]!.t, values: samples[0]!.values }];
   const last = samples.length - 1;
   let from = 0;

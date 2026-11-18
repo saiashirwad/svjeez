@@ -1,4 +1,5 @@
 import type { Animated, Paint, Scene, SceneNode } from "./ir";
+import { isCurved } from "./curve";
 import { isLane } from "./lane";
 
 /** Everything in a scene that some target might not draw. A new node kind, paint or effect adds a name here. */
@@ -14,7 +15,8 @@ export type Feature =
   | "linearGradient"
   | "radialGradient"
   | "nonScalingStroke"
-  | "liveTokens";
+  | "liveTokens"
+  | "curvedMotion";
 
 /**
  * How a backend handles a feature. `exact` draws it as the model says. `close` draws something a viewer can tell
@@ -76,6 +78,13 @@ const featuresOf = (node: SceneNode): Feature[] => {
   }
 
   if (node.kind === "shape" && node.stroke?.nonScaling) used.push("nonScalingStroke");
+
+  if (
+    [node.at, ...node.layers.map((layer) => layer.offset)].some(
+      (at) => isLane(at) && isCurved(at.keys),
+    )
+  )
+    used.push("curvedMotion");
 
   return [...new Set(used)];
 };

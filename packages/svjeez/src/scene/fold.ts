@@ -1,5 +1,6 @@
 import { easeAt, splitEase } from "../ease-at";
 import { EPSILON, ease, type Ease } from "../motion";
+import { isCurved, onCurve } from "./curve";
 import type { Animated, Key, Lane, Layer, Vec } from "./ir";
 import { isLane } from "./lane";
 import { mixNumber, mixVec, same, type Mix } from "./steps";
@@ -23,13 +24,9 @@ export const valueAt = <T>(lane: Lane<T>, t: number, mix: Mix<T>): T => {
 
   if (next === 0 || Math.abs(to.t - t) <= EPSILON) return to.value;
   const from = keys[next - 1]!;
+  const amount = easeAt(to.ease ?? ease.out, (t - from.t) / (to.t - from.t));
 
-  return mix(
-    from.value,
-    to.value,
-    easeAt(to.ease ?? ease.out, (t - from.t) / (to.t - from.t)),
-    "a folded layer",
-  );
+  return onCurve(from, to, amount) ?? mix(from.value, to.value, amount, "a folded layer");
 };
 
 /** The same lane with every value passed through `change`. Its eases stay, so it moves in step with the original. */
@@ -57,7 +54,7 @@ const apart = <T>(a: Lane<T>, b: Lane<T>): boolean =>
   windows(a).every((one) => windows(b).every((other) => !meet(one, other) && !meet(other, one)));
 
 /** The part of `curve` between two points of its progress, as an ease of its own. */
-const portion = (curve: Ease, from: number, to: number): Ease => {
+export const portion = (curve: Ease, from: number, to: number): Ease => {
   if (isHold(curve)) return to >= 1 - EPSILON ? curve : ease.linear;
   const tail = from > EPSILON ? splitEase(curve, from, "a folded layer")[1] : curve;
 
@@ -85,6 +82,9 @@ const joined = <T>(
   mix: Mix<T>,
 ): Animated<T> | undefined => {
   if (!isLane(a) && !isLane(b)) return op(a, b);
+
+  // A curve moved or scaled by another value is another curve, which mapping its keys alone would not draw.
+  if ((isLane(a) && isCurved(a.keys)) || (isLane(b) && isCurved(b.keys))) return undefined;
 
   if (!isLane(a)) return isLane(b) ? mapped(b, (value) => op(a, value)) : op(a, b);
 

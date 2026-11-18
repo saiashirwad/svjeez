@@ -328,8 +328,13 @@ const rebased = (entry: Entry, node: SceneNode, origin: Vec): readonly Layer[] =
   });
 };
 
-const shifted = <T>(lane: Lane<T>, change: (value: T) => T): Lane<T> => {
-  const [head, next, ...rest] = lane.keys.map((key) => ({ ...key, value: change(key.value) }));
+/** A lane of points moved by `move`, a curve's controls with it. */
+const shifted = (lane: Lane<Vec>, move: (value: Vec) => Vec): Lane<Vec> => {
+  const [head, next, ...rest] = lane.keys.map((key) => ({
+    ...key,
+    value: move(key.value),
+    ...(key.via && { via: [move(key.via[0]), move(key.via[1])] as const }),
+  }));
 
   return { ...lane, keys: [head!, next!, ...rest] };
 };

@@ -242,6 +242,66 @@ describe("the SVG backend", () => {
     expect(svg.emit(made(build), { sources: true })).toContain('<g data-key="row">');
   });
 
+  test("a point that goes round is a few curved keys, drawn on a motion path", () => {
+    const angle = track(0).to(360, span(0, 2), ease.inOut);
+
+    const model = made(() => (
+      <Shape
+        geometry={circle(3)}
+        at={angle.map((a): [number, number] => [
+          100 + 40 * Math.cos((a * Math.PI) / 180),
+          50 + 40 * Math.sin((a * Math.PI) / 180),
+        ])}
+      />
+    ));
+
+    const at = only(model).at;
+
+    expect(isLane(at) && at.keys.some((key) => key.via)).toBe(true);
+    expect(isLane(at) && at.keys.length).toBeLessThan(8);
+
+    const out = svg.emit(model).split("</style>").at(-1)!;
+
+    expect(out).toMatch(
+      /<g style="scale:\.0625;offset-path:path\('M2240 800C[^']*'\);offset-rotate:0deg" class="a m1">\s*<circle r="3" fill="none" style="scale:16"\/>/,
+    );
+    expect(svg.emit(model)).toContain("offset-distance:100%");
+  });
+
+  test("a curved lane whose ease leaves 0 to 1 is refused, not drawn off its path", () => {
+    const model = made(() => <Shape key="dot" geometry={circle(3)} />);
+    const dot = only(model);
+
+    const bent: Model.Scene = {
+      ...model,
+      root: {
+        ...model.root,
+        children: [
+          {
+            ...dot,
+            at: {
+              kind: "lane",
+              keys: [
+                { t: 0, value: [0, 0] },
+                {
+                  t: 1,
+                  value: [10, 0],
+                  ease: ease.bezier(0.3, 1.5, 0.6, 1),
+                  via: [
+                    [3, 5],
+                    [7, 5],
+                  ],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    expect(() => svg.emit(bent)).toThrow("an ease that leaves 0 to 1");
+  });
+
   test("a feature the backend can't draw is named with its node, before anything is written", () => {
     const model = made(() => <Shape key="dot" geometry={circle(4)} />);
     const dot = only(model);
