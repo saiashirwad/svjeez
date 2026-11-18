@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { checkScene, renderFrames, type FrameTimes } from "./frames";
 import { parse, type Json, type JsonObject, type Param, type Schema, type Values } from "./params";
+import { isScene, svg, type Diagnostic, type Scene } from "./scene";
 import { startTrace, stopTrace, type BuildReport } from "./traced";
 import { timelineCues } from "./check";
 import { validateSvg } from "./validate";
@@ -20,7 +21,8 @@ const USAGE = `usage:
   svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
   svjeez skill [--install [--dir .claude/skills]]
 
-<file> is an .svg, or a module whose default export is an SVG string or a function returning one.
+<file> is an .svg, or a module whose default export is a scene from svjeez/scene, an SVG string, or a function
+returning either.
 [params] is --params data.json and any number of --param key=value. They fill the module's exported \`params\` schema
 (from svjeez/params), are checked against it, and are passed to the default export; a key left out keeps its default.
 --param sets one value that is not a list, and wins over the file.
@@ -47,15 +49,16 @@ const fail = (message: string): never => {
   process.exit(1);
 };
 
-type Scene = (values?: Values<Schema>) => string | Promise<string>;
+type Built = string | Scene;
+
+type Build = (values?: Values<Schema>) => Built | Promise<Built>;
 
 interface SceneModule {
-  readonly default?: string | Scene;
+  readonly default?: Built | Build;
   readonly params?: Schema;
 }
 
-const isSceneFunction = (value: SceneModule["default"]): value is Scene =>
-  typeof value === "function";
+const isBuild = (value: SceneModule["default"]): value is Build => typeof value === "function";
 
 const isText = (value: unknown): value is string => typeof value === "string";
 
@@ -133,7 +136,14 @@ const valuesFor = async (
   }
 };
 
-const loadSvg = async (file: string, flags: ParamFlags = {}): Promise<string> => {
+const warn = (warning: Diagnostic): void => console.warn(`warning: ${warning.message}`);
+
+/** A scene model's diagnostics go to `onWarning`; an SVG string's warnings are the caller's to read. */
+const loadSvg = async (
+  file: string,
+  flags: ParamFlags = {},
+  onWarning: (warning: Diagnostic) => void = warn,
+): Promise<string> => {
   const path = resolve(file);
   const given = flags.params !== undefined || (flags.param?.length ?? 0) > 0;
 
@@ -190,13 +200,17 @@ const loadSvg = async (file: string, flags: ParamFlags = {}): Promise<string> =>
 
   const values = schema ? await valuesFor(file, schema, flags) : undefined;
 
-  const value = isSceneFunction(module.default)
+  const value = isBuild(module.default)
     ? await (values === undefined ? module.default() : module.default(values))
     : module.default;
 
+  if (isScene(value)) return svg.emit(value, { onWarning });
+
   if (isText(value)) return value;
 
-  return fail(`${file} must export default an SVG string, or a function that returns one.`);
+  return fail(
+    `${file} must export default a scene, as in \`export default scene({ ... }, () => ...)\`, an SVG string, or a function that returns either.`,
+  );
 };
 
 const number = (flag: string, value: string | undefined): number | undefined => {
@@ -239,6 +253,7 @@ const loadBuild = async (
   sources = false,
 ): Promise<BuildReport & { svg: string }> => {
   let captured: { svg: string; report: BuildReport } | undefined;
+  const diagnosed: string[] = [];
   startTrace({
     within: inspect && !file.endsWith(".svg") ? dirname(resolve(file)) : undefined,
     sources,
@@ -248,11 +263,16 @@ const loadBuild = async (
   });
 
   try {
-    const svg = await loadSvg(file, flags);
+    const svg = await loadSvg(file, flags, (warning) => diagnosed.push(warning.message));
 
-    if (captured?.svg === svg) return { svg, ...captured.report };
+    if (captured?.svg === svg)
+      return {
+        svg,
+        ...captured.report,
+        warnings: [...diagnosed, ...captured.report.warnings],
+      };
 
-    return { svg, warnings: validateSvg(svg).warnings, timeline: [] };
+    return { svg, warnings: [...diagnosed, ...validateSvg(svg).warnings], timeline: [] };
   } finally {
     stopTrace();
   }

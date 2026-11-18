@@ -61,6 +61,8 @@ export { span, chain, stagger, type Span, type Spanned, type When } from "../spa
 
 export { isLane } from "./lane";
 
+export { isScene } from "./is-scene";
+
 export type * as Model from "./ir";
 
 export type { Scene, Vec } from "./ir";

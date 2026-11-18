@@ -146,6 +146,41 @@ test("svjeez svg says what is wrong with a param, naming its path", () => {
   fails(["--params", data], "is not JSON");
 });
 
+test("svjeez svg emits a scene model default export, and --json reports its build", async () => {
+  const file = join(import.meta.dir, "fixtures/scene/model.tsx");
+  const { default: model } = await import(file);
+  const { svg } = await import("svjeez/scene");
+  const out = cli("svg", file);
+
+  expect(out.stderr.toString()).toBe("");
+  expect(out.stdout.toString()).toBe(svg.emit(model));
+
+  const build: BuildReport & { svg: string } = JSON.parse(
+    cli("svg", file, "--json").stdout.toString(),
+  );
+
+  expect(build.svg).toBe(out.stdout.toString());
+  expect(build).toMatchObject({ duration: 2, loop: true, warnings: [] });
+});
+
+test("svjeez svg calls a function that returns a scene model with its params", () => {
+  const file = join(import.meta.dir, "fixtures/scene/template.tsx");
+
+  expect(cli("svg", file).stdout.toString()).toContain('r="10"');
+  const out = cli("svg", file, "--param", "title=Big", "--param", "radius=20");
+  expect(out.stderr.toString()).toBe("");
+  expect(out.stdout.toString()).toContain(">Big</title>");
+  expect(out.stdout.toString()).toContain('r="20"');
+});
+
+test("svjeez svg says what a default export must be", () => {
+  const { file } = template("export default 42;\n");
+  const result = cli("svg", file);
+
+  expect(result.exitCode).toBe(1);
+  expect(result.stderr.toString()).toContain("must export default a scene");
+});
+
 test("svjeez svg with --params on a scene that declares none says so", () => {
   const { file } = template(
     "export default () => '<svg xmlns=\"http://www.w3.org/2000/svg\"/>';\n",

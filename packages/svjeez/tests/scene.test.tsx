@@ -10,6 +10,7 @@ import {
   ease,
   enter,
   isLane,
+  isScene,
   motion,
   path,
   rect,
@@ -230,5 +231,18 @@ describe("the SVG backend", () => {
     expect(() =>
       made(() => <Shape geometry={track(rect(1, 1)).to(rect(2, 2), span(0, 1))} />),
     ).toThrow("Animated geometry is not built yet");
+  });
+});
+
+describe("isScene", () => {
+  test("knows a scene model by its shape, and nothing else", () => {
+    const model = made(() => <Shape geometry={circle(4)} fill="#FF0000" />);
+
+    expect(isScene(model)).toBe(true);
+    expect(isScene(structuredClone({ ...model, fonts: {} }))).toBe(true);
+    expect(isScene(svg.emit(model))).toBe(false);
+    expect(isScene(() => model)).toBe(false);
+    expect(isScene({ ...model, root: null })).toBe(false);
+    expect(isScene(null)).toBe(false);
   });
 });

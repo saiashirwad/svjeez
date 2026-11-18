@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { validateSvg } from "svjeez/frames";
+import { isScene, svg as backend, type Scene } from "svjeez/scene";
 
 const root = join(import.meta.dir, "../skills/svjeez");
 const examples = join(root, "examples");
@@ -22,11 +23,25 @@ const sources = (dir: string): string[] =>
         : [],
   );
 
+type Made = string | Scene;
+
+const isBuild = (value: Made | (() => Made)): value is () => Made => typeof value === "function";
+
+/** A scene module's default export as SVG: a scene, an SVG string, or a function that returns either. */
+const svgOf = (exported: Made | (() => Made)): string => {
+  const made = isBuild(exported) ? exported() : exported;
+
+  return isScene(made) ? backend.emit(made) : made;
+};
+
 describe("skill examples", () => {
   for (const file of readdirSync(examples).filter((name) => name.endsWith(".tsx"))) {
     test(`${file} renders a valid, animated SVG`, async () => {
-      const { default: build }: { default: () => string } = await import(join(examples, file));
-      const svg = build();
+      const { default: exported }: { default: Made | (() => Made) } = await import(
+        join(examples, file)
+      );
+
+      const svg = svgOf(exported);
       expect(validateSvg(svg).errors).toEqual([]);
       expect(svg).toContain("@keyframes");
     });
