@@ -696,3 +696,31 @@ group("loop-seam for what enters and stays", () => {
   });
 });
 
+group("describe what is drawn", () => {
+  test("a stroke trimmed to nothing is not shown, and one that draws in shows from then", () => {
+    const model = made(() => (
+      <Group>
+        <Shape
+          key="trimmed"
+          geometry={line([0, 0], [50, 0])}
+          at={[10, 40]}
+          stroke={{ color: "#222222" }}
+          trim={[0.5, 0.5]}
+        />
+        <Shape
+          key="drawn"
+          geometry={line([0, 0], [50, 0])}
+          at={[10, 60]}
+          stroke={{ color: "#222222" }}
+          trim={track<Vec>([0, 0]).to([0, 1], span(1, 1))}
+        />
+      </Group>
+    ));
+
+    const { text, frames } = describe(model, [0.5]);
+
+    expect(text).toContain("trimmed: never shown");
+    expect(text).toContain("drawn: shown 1s–end");
+    expect(frames[0]!.nodes).toEqual([]);
+  });
+});

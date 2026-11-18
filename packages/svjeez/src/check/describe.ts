@@ -1,7 +1,7 @@
 import type { Seconds } from "../model/time";
 import type { Placed } from "./boxes";
 import type { Animated, Paint, Scene, SceneNode, Vec } from "../model/ir";
-import { isLane } from "../model/lane";
+import { isLane, mapLane } from "../model/lane";
 import {
   between,
   changesOf,
@@ -17,6 +17,7 @@ import {
   textOf,
   units,
   valuesOf,
+  zerosOf,
   type Entry,
   type Stretch,
 } from "./survey";
@@ -145,8 +146,21 @@ const valueOf = (value: Animated<number>, t: Seconds): number => {
   return from + (to - from) * amount;
 };
 
+const trimmedAway = (node: SceneNode, duration: Seconds): Stretch[] =>
+  node.kind === "shape" && node.fill === undefined && node.trim !== undefined
+    ? zerosOf(
+        isLane(node.trim)
+          ? mapLane(node.trim, ([a, b]) => Math.abs(b - a))
+          : Math.abs(node.trim[1] - node.trim[0]),
+        duration,
+      )
+    : [];
+
+const unseenOf = (entry: Entry, duration: Seconds): Stretch[] =>
+  merged([...hiddenOf(entry, duration), ...trimmedAway(entry.node, duration)]);
+
 const timelineOf = (entry: Entry, duration: Seconds): NodeTimeline | undefined => {
-  const hidden = hiddenOf(entry, duration);
+  const hidden = unseenOf(entry, duration);
   const animates: Animates[] = [];
 
   for (const { name, value } of valuesOf(entry.node)) {
@@ -169,7 +183,12 @@ const timelineOf = (entry: Entry, duration: Seconds): NodeTimeline | undefined =
     });
   }
 
-  if (ownHidden(entry.node, duration).length === 0 && animates.length === 0) return undefined;
+  if (
+    ownHidden(entry.node, duration).length === 0 &&
+    trimmedAway(entry.node, duration).length === 0 &&
+    animates.length === 0
+  )
+    return undefined;
 
   return { key: entry.node.key, kind: entry.node.kind, shown: shownOf(hidden, duration), animates };
 };
@@ -180,7 +199,7 @@ export const describe = (scene: Scene, times: readonly Seconds[]): Description =
       throw new Error(`describe() takes times in seconds from 0, got ${t}.`);
   const { duration } = scene;
   const entries = entriesOf(scene).slice(1);
-  const hidden = new Map(entries.map((entry) => [entry.node.key, hiddenOf(entry, duration)]));
+  const hidden = new Map(entries.map((entry) => [entry.node.key, unseenOf(entry, duration)]));
   const placedAt = framesOf(scene, times);
 
   const frames = times.map((t, i): DescribedFrame => {
@@ -368,9 +387,10 @@ const textFor = (
 
   for (const { keys, text } of said) lines.push(`  ${keysText(keys)}: ${text}`);
 
-  lines.push(
-    `  the ${still} other shapes, texts and images show when their groups do and never change`,
-  );
+  if (still > 0)
+    lines.push(
+      `  the ${still} other shapes, texts and images show when their groups do and never change`,
+    );
 
   for (const frame of frames) lines.push(`at ${seconds(frame.t)}:`, ...frameText(frame, byKey));
 
