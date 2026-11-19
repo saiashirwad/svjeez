@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 489 872" width="489" height="872" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 489 862" width="489" height="862" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
   <title id="t">Deploy pipeline from Mermaid</title>
   <desc id="d">A deploy pipeline written as Mermaid text appears node by node as a svjeez flowchart, then a token runs from the push to the live release.</desc>
   <style><![CDATA[
@@ -9,23 +9,23 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .a{animation-duration:12s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%,20.833%{translate:0 6px;opacity:0}24.167%,100%{translate:0 0;opacity:1}}
 .m1{animation-name:k1}
-@keyframes k2{0%,6.25%{stroke-dashoffset:1;visibility:hidden}9.167%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k2{0%,3.333%{stroke-dashoffset:1;visibility:hidden}6.25%,100%{stroke-dashoffset:0;visibility:visible}}
 .m2{animation-name:k2}
-@keyframes k3{0%,7.893%{visibility:hidden}7.894%,100%{visibility:visible}}
+@keyframes k3{0%,4.906%{visibility:hidden}4.907%,100%{visibility:visible}}
 .m3{animation-name:k3}
-@keyframes k4{0%,9.167%{stroke-dashoffset:1;visibility:hidden}12.083%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k4{0%,6.25%{stroke-dashoffset:1;visibility:hidden}9.167%,100%{stroke-dashoffset:0;visibility:visible}}
 .m4{animation-name:k4}
-@keyframes k5{0%,10.776%{visibility:hidden}10.777%,100%{visibility:visible}}
+@keyframes k5{0%,7.822%{visibility:hidden}7.823%,100%{visibility:visible}}
 .m5{animation-name:k5}
 @keyframes k6{0%,12.083%{stroke-dashoffset:1;visibility:hidden}15%,100%{stroke-dashoffset:0;visibility:visible}}
 .m6{animation-name:k6}
-@keyframes k7{0%,13.969%{visibility:hidden}13.97%,100%{visibility:visible}}
+@keyframes k7{0%,13.942%{visibility:hidden}13.943%,100%{visibility:visible}}
 .m7{animation-name:k7}
 @keyframes k8{0%,15%{stroke-dashoffset:1;visibility:hidden}17.917%,100%{stroke-dashoffset:0;visibility:visible}}
 .m8{animation-name:k8}
-@keyframes k9{0%,16.976%{visibility:hidden}16.977%,100%{visibility:visible}}
+@keyframes k9{0%,16.941%{visibility:hidden}16.942%,100%{visibility:visible}}
 .m9{animation-name:k9}
-@keyframes k10{0%,17.126%{visibility:hidden}17.127%,100%{visibility:visible}}
+@keyframes k10{0%,16.865%{visibility:hidden}16.866%,100%{visibility:visible}}
 .m10{animation-name:k10}
 @keyframes k11{0%,17.917%{stroke-dashoffset:1;visibility:hidden}20.833%,100%{stroke-dashoffset:0;visibility:visible}}
 .m11{animation-name:k11}
@@ -37,11 +37,11 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m14{animation-name:k14}
 @keyframes k15{0%,23.75%{stroke-dashoffset:1;visibility:hidden}26.667%,100%{stroke-dashoffset:0;visibility:visible}}
 .m15{animation-name:k15}
-@keyframes k16{0%,25.658%{visibility:hidden}25.659%,100%{visibility:visible}}
+@keyframes k16{0%,25.661%{visibility:hidden}25.662%,100%{visibility:visible}}
 .m16{animation-name:k16}
 @keyframes k17{0%,26.667%{stroke-dashoffset:1;visibility:hidden}29.583%,100%{stroke-dashoffset:0;visibility:visible}}
 .m17{animation-name:k17}
-@keyframes k18{0%,28.596%{visibility:hidden}28.597%,100%{visibility:visible}}
+@keyframes k18{0%,28.58%{visibility:hidden}28.581%,100%{visibility:visible}}
 .m18{animation-name:k18}
 @keyframes k19{0%,29.583%{stroke-dashoffset:1;visibility:hidden}32.5%,100%{stroke-dashoffset:0;visibility:visible}}
 .m19{animation-name:k19}
@@ -51,15 +51,15 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m21{animation-name:k21;animation-timing-function:linear}
 @keyframes k22{0%,3.333%{translate:0 6px;opacity:0}6.25%,100%{translate:0 0;opacity:1}}
 .m22{animation-name:k22}
-@keyframes k23{0%,9.167%{translate:0 6px;opacity:0}12.083%,100%{translate:0 0;opacity:1}}
+@keyframes k23{0%,6.25%{translate:0 6px;opacity:0}9.167%,100%{translate:0 0;opacity:1}}
 .m23{animation-name:k23}
-@keyframes k24{0%,12.083%{translate:0 6px;opacity:0}15%,100%{translate:0 0;opacity:1}}
+@keyframes k24{0%,9.167%{translate:0 6px;opacity:0}12.083%,100%{translate:0 0;opacity:1}}
 .m24{animation-name:k24}
 @keyframes k25{0%,15%{translate:0 6px;opacity:0}17.917%,100%{translate:0 0;opacity:1}}
 .m25{animation-name:k25}
 @keyframes k26{0%,17.917%{translate:0 6px;opacity:0}20.833%,100%{translate:0 0;opacity:1}}
 .m26{animation-name:k26}
-@keyframes k27{0%,6.25%{translate:0 6px;opacity:0}9.167%,100%{translate:0 0;opacity:1}}
+@keyframes k27{0%,12.083%{translate:0 6px;opacity:0}15%,100%{translate:0 0;opacity:1}}
 .m27{animation-name:k27}
 @keyframes k28{0%,20.833%{translate:0 6px;opacity:0}23.75%,100%{translate:0 0;opacity:1}}
 .m28{animation-name:k28}
@@ -80,100 +80,100 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @keyframes k36{0%,29.583%{translate:0 6px;opacity:0}31.667%,100%{translate:0 0;opacity:1}}
 .m36{animation-name:k36}
 @keyframes k37{0%,41.667%,66.667%,100%{opacity:0}42.917%,65%{opacity:1}}
-@keyframes k38{0%,41.667%{translate:87.63px 41px}42.083%{translate:87.77px 55.12px}42.5%{translate:93.28px 67.76px}42.917%{translate:101.7px 78.96px}43.333%{translate:103.09px 92.89px}44.583%{translate:103.09px 135.27px}45%{translate:106.41px 148.71px}45.417%{translate:115.52px 159.47px}45.833%{translate:118.71px 172.95px}46.25%{translate:126.86px 181.98px}47.917%{translate:177.62px 206.8px}48.333%{translate:188.92px 213.87px}50%{translate:188.92px 270.37px}50.417%{translate:196.86px 281.01px}51.667%{translate:236.72px 295.1px}52.083%{translate:244.5px 305.83px}57.917%{translate:244.5px 503.58px}58.333%{translate:236.68px 512.82px}60%{translate:185.92px 537.63px}60.417%{translate:174.29px 544.5px}64.167%{translate:174.29px 671.62px}65%{translate:170.31px 699.59px}65.417%{translate:169.1px 713.63px}66.667%,100%{translate:169.1px 756px}}
+@keyframes k38{0%,41.667%{translate:88.2px 36px}45.417%{translate:88.21px 162.73px}45.833%{translate:96.38px 171.31px}47.917%{translate:161.62px 197.78px}48.333%{translate:166.47px 208.64px}49.167%{translate:167.71px 236.76px}49.583%{translate:169.54px 250.72px}50%{translate:172.79px 264.4px}50.417%{translate:179.7px 276.44px}50.833%{translate:191.98px 282.46px}51.25%{translate:197.89px 295.1px}51.667%{translate:200.34px 308.94px}52.083%{translate:201.14px 322.99px}52.5%{translate:205.87px 334.88px}53.75%{translate:238.35px 361.89px}54.167%{translate:244.5px 373.09px}57.5%{translate:244.5px 485.74px}57.917%{translate:243.75px 499.32px}60%{translate:179.14px 527.29px}60.417%{translate:169.1px 534.78px}66.667%,100%{translate:169.1px 746px}}
 .m37{animation-name:k37,k38;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
 @keyframes k39{0%,93.333%{opacity:1}98.333%,100%{opacity:0}}
 .m38{animation-name:k39}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-10s!important;animation-play-state:paused!important}}
 ]]></style>
-  <rect width="489" height="872" fill="var(--background)"/>
-  <g transform="translate(40.479 40)" class="a m38">
-    <g transform="translate(80.4 395.74)" class="a m1">
+  <rect width="489" height="862" fill="var(--background)"/>
+  <g transform="translate(41.17 40)" class="a m38">
+    <g transform="translate(80.4 385.74)" class="a m1">
       <rect width="328.2" height="324.26" rx="10" fill="none" stroke="var(--border)" stroke-dasharray="4 3"/>
       <text x="12" y="17.271" font-size="11.05" fill="var(--muted)">Release</text>
     </g>
-    <path d="M87.63 41L87.63 54C87.63 70 103.09 70 103.09 85L103.09 87" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
-    <polygon points="103.09 94 99.09 86 107.09 86" fill="var(--border)" class="a m3"/>
-    <path d="M103.09 130L103.09 138C103.09 154 118.71 154 118.71 169L118.71 171" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
-    <polygon points="118.71 178 114.71 170 122.71 170" fill="var(--border)" class="a m5"/>
-    <path d="M77.6 221.72L77.6 334" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
-    <polygon points="77.6 341 73.6 333 81.6 333" fill="var(--border)" class="a m7"/>
-    <path d="M188.92 212.32L188.92 272C188.92 288 244.5 288 244.5 304L244.5 334" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
-    <polygon points="244.5 341 240.5 333 248.5 333" fill="var(--border)" class="a m9"/>
-    <path d="M242.83 46L242.83 138C242.83 154 242.92 154 242.92 170L242.92 334" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
-    <polygon points="242.92 341 238.92 333 246.92 333" fill="var(--border)" class="a m10"/>
-    <path d="M244.5 377L244.5 418" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m11"/>
-    <polygon points="244.5 425 240.5 417 248.5 417" fill="var(--border)" class="a m12"/>
-    <path d="M244.5 461L244.5 502" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m13"/>
-    <polygon points="244.5 509 240.5 501 248.5 501" fill="var(--border)" class="a m14"/>
-    <path d="M174.29 543.32L174.29 665" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m15"/>
-    <polygon points="174.29 672 170.29 664 178.29 664" fill="var(--border)" class="a m16"/>
-    <path d="M314.7 543.32L314.7 603C314.7 619 339.2 619 339.2 635L339.2 665" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m17"/>
-    <polygon points="339.2 672 335.2 664 343.2 664" fill="var(--border)" class="a m18"/>
-    <path d="M169.1 708L169.1 749" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m19"/>
-    <polygon points="169.1 756 165.1 748 173.1 748" fill="var(--border)" class="a m20"/>
-    <path d="M87.63 41L87.63 54C87.63 70 103.09 70 103.09 86L103.09 94M103.09 130L103.09 138C103.09 154 118.71 154 118.71 170L118.71 178M188.92 212.32L188.92 272C188.92 288 244.5 288 244.5 304L244.5 341M244.5 377L244.5 425M244.5 461L244.5 509M174.29 543.32L174.29 672M169.1 708L169.1 756" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m21"/>
-    <g transform="translate(13.93 5)" class="a m22">
+    <path d="M88.2 36L88.2 77" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
+    <polygon points="88.2 84 84.2 76 92.2 76" fill="var(--border)" class="a m3"/>
+    <path d="M88.21 120L88.21 161" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <polygon points="88.21 168 84.21 160 92.21 160" fill="var(--border)" class="a m5"/>
+    <path d="M77.6 221.57L77.6 324" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
+    <polygon points="77.6 331 73.6 323 81.6 323" fill="var(--border)" class="a m7"/>
+    <path d="M166.41 199.73L166.41 205.73C166.41 250.54 173.02 278 183.8 278C194.59 278 201.2 293.2 201.2 318L201.2 324" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
+    <polygon points="201.2 331 197.2 323 205.2 323" fill="var(--border)" class="a m9"/>
+    <path d="M244.5 219.28L244.5 324" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
+    <polygon points="244.5 331 240.5 323 248.5 323" fill="var(--border)" class="a m10"/>
+    <path d="M244.5 367L244.5 408" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m11"/>
+    <polygon points="244.5 415 240.5 407 248.5 407" fill="var(--border)" class="a m12"/>
+    <path d="M244.5 451L244.5 492" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m13"/>
+    <polygon points="244.5 499 240.5 491 248.5 491" fill="var(--border)" class="a m14"/>
+    <path d="M169.1 531.64L169.1 655" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m15"/>
+    <polygon points="169.1 662 165.1 654 173.1 654" fill="var(--border)" class="a m16"/>
+    <path d="M322.7 530.73L322.7 655" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m17"/>
+    <polygon points="322.7 662 318.7 654 326.7 654" fill="var(--border)" class="a m18"/>
+    <path d="M169.1 698L169.1 739" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m19"/>
+    <polygon points="169.1 746 165.1 738 173.1 738" fill="var(--border)" class="a m20"/>
+    <path d="M88.2 36L88.2 84M88.21 120L88.21 168M166.41 199.73L166.41 205.73C166.41 250.54 173.02 278 183.8 278C194.59 278 201.2 295.86 201.2 325L201.2 331M244.5 367L244.5 415M244.5 451L244.5 499M169.1 531.64L169.1 662M169.1 698L169.1 746" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linecap="round" pathLength="1" stroke-dasharray="1 2" class="a m21"/>
+    <g transform="translate(14.5 0)" class="a m22">
       <polygon points="12.6 0 147.4 0 134.8 36 0 36" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
       <text x="26.9" y="22.68" font-size="13" fill="var(--text)">Push to main</text>
     </g>
-    <g transform="translate(45.89 94)" class="a m23">
+    <g transform="translate(31 84)" class="a m23">
       <rect width="114.4" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
       <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Build image</text>
     </g>
-    <g transform="translate(30.51 178)" class="a m24">
+    <g transform="translate(0 168)" class="a m24">
       <polygon points="88.205 0 176.41 28.5 88.205 57 0 28.5" fill="var(--orange-22-background)" stroke="var(--orange)" stroke-width="1.5"/>
       <text x="45.305" y="33.18" font-size="13" fill="var(--text)">Tests pass?</text>
     </g>
-    <g transform="translate(0 341)" class="a m25">
+    <g transform="translate(0 331)" class="a m25">
       <polygon points="12.6 0 155.2 0 142.6 36 0 36" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
       <text x="26.9" y="22.68" font-size="13" fill="var(--text)">Notify author</text>
     </g>
-    <g transform="translate(191.2 341)" class="a m26">
+    <g transform="translate(191.2 331)" class="a m26">
       <rect width="106.6" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
       <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Scan image</text>
     </g>
-    <g transform="translate(197.33 0)" class="a m27">
+    <g transform="translate(212.41 173.5)" class="a m27">
       <path d="M0 5C0 2.239 20.37 0 45.5 0C70.63 0 91 2.239 91 5L91 41C91 43.762 70.63 46 45.5 46C20.37 46 0 43.762 0 41Z" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
       <path d="M0 5C0 7.762 20.37 10 45.5 10C70.63 10 91 7.762 91 5" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
       <text x="14.3" y="30.18" font-size="13" fill="var(--text)">Registry</text>
     </g>
-    <g transform="translate(163.9 425)" class="a m28">
+    <g transform="translate(163.9 415)" class="a m28">
       <rect width="161.2" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
       <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Deploy to staging</text>
     </g>
-    <g transform="translate(156.29 509)" class="a m29">
+    <g transform="translate(156.29 499)" class="a m29">
       <polygon points="88.205 0 176.41 28.5 88.205 57 0 28.5" fill="var(--orange-22-background)" stroke="var(--orange)" stroke-width="1.5"/>
       <text x="45.305" y="33.18" font-size="13" fill="var(--text)">Smoke test?</text>
     </g>
-    <g transform="translate(92.4 672)" class="a m30">
+    <g transform="translate(92.4 662)" class="a m30">
       <rect width="153.4" height="36" rx="8" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
       <text x="14.3" y="22.68" font-size="13" fill="var(--text)">Roll out to prod</text>
     </g>
-    <g transform="translate(281.8 672)" class="a m31">
+    <g transform="translate(281.8 662)" class="a m31">
       <rect width="114.8" height="36" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
       <path d="M8 0L8 36M106.8 0L106.8 36" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
       <text x="22.3" y="22.68" font-size="13" fill="var(--text)">Roll back</text>
     </g>
-    <g transform="translate(132 756)" class="a m32">
+    <g transform="translate(132 746)" class="a m32">
       <rect width="74.2" height="36" rx="18" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
       <text x="21.5" y="22.68" font-size="13" fill="var(--text)">Live</text>
     </g>
     <g class="a m33">
-      <rect x="65.97" y="279.5" width="23.26" height="17" rx="3" fill="var(--background)"/>
-      <text x="70.97" y="291.978" font-size="11.05" fill="var(--muted)">no</text>
+      <rect x="65.97" y="269.5" width="23.26" height="17" rx="3" fill="var(--background)"/>
+      <text x="70.97" y="281.978" font-size="11.05" fill="var(--muted)">no</text>
     </g>
     <g class="a m34">
-      <rect x="173.97" y="253" width="29.89" height="17" rx="3" fill="var(--background)"/>
-      <text x="178.97" y="265.478" font-size="11.05" fill="var(--muted)">yes</text>
+      <rect x="151.46" y="243" width="29.89" height="17" rx="3" fill="var(--background)"/>
+      <text x="156.46" y="255.478" font-size="11.05" fill="var(--muted)">yes</text>
     </g>
     <g class="a m35">
-      <rect x="159.35" y="610.5" width="29.89" height="17" rx="3" fill="var(--background)"/>
-      <text x="164.35" y="622.978" font-size="11.05" fill="var(--muted)">yes</text>
+      <rect x="154.15" y="600.5" width="29.89" height="17" rx="3" fill="var(--background)"/>
+      <text x="159.15" y="612.978" font-size="11.05" fill="var(--muted)">yes</text>
     </g>
     <g class="a m36">
-      <rect x="303.07" y="584" width="23.26" height="17" rx="3" fill="var(--background)"/>
-      <text x="308.07" y="596.478" font-size="11.05" fill="var(--muted)">no</text>
+      <rect x="311.07" y="600.5" width="23.26" height="17" rx="3" fill="var(--background)"/>
+      <text x="316.07" y="612.978" font-size="11.05" fill="var(--muted)">no</text>
     </g>
     <circle r="5" fill="var(--orange)" class="a m37"/>
   </g>
