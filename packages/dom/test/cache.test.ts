@@ -1,8 +1,10 @@
 import { afterAll, beforeEach, describe, expect, test } from "bun:test";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { cached } from "../src/index.ts";
+import { cachePath } from "../src/cache.ts";
+import { runFilm } from "../src/vite.ts";
 
 const dir = mkdtempSync(join(tmpdir(), "svjeez-cache-"));
 
@@ -61,4 +63,58 @@ describe("cached", () => {
 
     expect(await cached(f, "a", () => ++runs)).toBe(3);
   });
+});
+
+describe("cachePath", () => {
+  test("true puts the file next to the film file", () => {
+    expect(cachePath(true, "/a/b/card.film.tsx")).toBe("/a/b/card.film.states.json");
+  });
+
+  test("a relative path is relative to the film file, an absolute one is kept", () => {
+    expect(cachePath("x/states.json", "/a/b/card.film.tsx")).toBe("/a/b/x/states.json");
+    expect(cachePath("/tmp/s.json", undefined)).toBe("/tmp/s.json");
+  });
+
+  test("without a film file a relative path is an error", () => {
+    expect(() => cachePath("s.json", undefined)).toThrow(/absolute path/);
+  });
+});
+
+describe("film cache location", () => {
+  const out = join(import.meta.dir, "app", "cache-out");
+  const next = join(import.meta.dir, "app", "cached.film.states.json");
+
+  afterAll(() => {
+    rmSync(out, { recursive: true, force: true });
+    rmSync(next, { force: true });
+  });
+
+  test("a relative cache lands next to the film file, whatever the cwd, under Bun and runFilm", async () => {
+    rmSync(out, { recursive: true, force: true });
+    const cwd = process.cwd();
+
+    process.chdir(tmpdir());
+
+    try {
+      await import("./app/cached.film.ts");
+      expect(existsSync(join(out, "states.json"))).toBe(true);
+
+      rmSync(out, { recursive: true, force: true });
+      await runFilm(join(import.meta.dir, "app", "cached.film.ts"));
+      expect(existsSync(join(out, "states.json"))).toBe(true);
+    } finally {
+      process.chdir(cwd);
+    }
+  }, 120_000);
+
+  test("cache: true is <film file>.states.json", async () => {
+    process.env.CACHE_OPTION = "true";
+
+    try {
+      await runFilm(join(import.meta.dir, "app", "cached.film.ts"));
+      expect(existsSync(next)).toBe(true);
+    } finally {
+      delete process.env.CACHE_OPTION;
+    }
+  }, 120_000);
 });

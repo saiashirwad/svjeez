@@ -136,6 +136,7 @@ export const component = async <C extends Fn>(
   // SAFETY: `PropsFor` is a plain object type; the runtime check in `serializeProps` is what holds it to JSON.
   const wire = serializeProps(props as Bag, "component");
   const located = locate(Component);
+  const film = callerFile();
   const framework = pickFramework(located, Component, options.framework);
 
   const dir = await realpath(await mkdtemp(join(tmpdir(), "svjeez-dom-")));
@@ -165,6 +166,7 @@ export const component = async <C extends Fn>(
 
     return {
       ...app,
+      ...(film && { film }),
       sources: async () =>
         createHash("sha256")
           .update(await hashPage(app.url))

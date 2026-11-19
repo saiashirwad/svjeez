@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
+import { dirname, extname, isAbsolute, resolve } from "node:path";
 import { SNAPSHOT_VERSION, type Json } from "./schema.ts";
 
 const isFields = (value: Json): value is { readonly [key: string]: Json } =>
@@ -49,4 +49,21 @@ export const cached = async <T>(
   await writeFile(file, JSON.stringify(stored));
 
   return value;
+};
+
+/**
+ * Where the cache file for a film lives: `true` is `<film file without extension>.states.json`, a relative path is
+ * relative to the film file's directory, an absolute path is kept.
+ */
+export const cachePath = (cache: true | string, film: string | undefined): string => {
+  if (cache !== true && isAbsolute(cache)) return cache;
+
+  if (!film)
+    throw new Error(
+      "film: could not tell which file called film(), so `cache` needs an absolute path (or run the film file through Bun or runFilm).",
+    );
+
+  return cache === true
+    ? `${film.slice(0, film.length - extname(film).length)}.states.json`
+    : resolve(dirname(film), cache);
 };

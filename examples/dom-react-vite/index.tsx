@@ -13,6 +13,6 @@ export default await film(
     scheme: "both",
     title: "Sprint board (Vite)",
     viewport: { width: 760, height: 560 },
-    cache: `${import.meta.dir}/states.json`,
+    cache: "states.json",
   },
 );

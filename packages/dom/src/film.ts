@@ -2,7 +2,8 @@ import { scene } from "svjeez";
 import type { Scene } from "svjeez/tools";
 import type { Page } from "playwright-core";
 import { inlineAssets } from "./assets.ts";
-import { cached } from "./cache.ts";
+import { cached, cachePath } from "./cache.ts";
+import { callerFile } from "./component.ts";
 import { compile, type Diagnostic } from "./compile/index.ts";
 import { openPage, record, type OpenPageOptions, type Snap, type State } from "./record.ts";
 import { serializeProps, type Bag } from "./props.ts";
@@ -15,8 +16,12 @@ export interface FilmOptions {
   readonly title?: string;
   /** The browser window. Default 1280x720. */
   readonly viewport?: { readonly width: number; readonly height: number };
-  /** Keep the recorded states in this JSON file, and reuse them while the server's `sources()` and these options are unchanged. `SVJEEZ_DOM_REFRESH=1` records again. */
-  readonly cache?: string;
+  /**
+   * Keep the recorded states in a JSON file, and reuse them while the server's `sources()` and these options are unchanged.
+   * `true` is `<film file>.states.json` next to the film file (`card.film.tsx` -> `card.film.states.json`); a relative path is
+   * relative to the film file, not the working directory; an absolute path is used as is. `SVJEEZ_DOM_REFRESH=1` records again.
+   */
+  readonly cache?: boolean | string;
   /** Called with what the compile could not draw faithfully. Default: one `console.warn` listing them. */
   readonly onDiagnostics?: (diagnostics: readonly Diagnostic[]) => void;
   /**
@@ -84,6 +89,8 @@ export const film = async <Props = never>(
   options: FilmOptions = {},
 ): Promise<Scene> => {
   const { scheme, title = "Page", viewport, cache, onDiagnostics = warn, executablePath } = options;
+  // Before the first await, while the film file is still on the stack.
+  const caller = callerFile();
   const app = await target;
   const { selector } = app;
   const settle = options.settle ?? ((page: Page) => page.evaluate(settleScript(selector)));
@@ -165,10 +172,12 @@ export const film = async <Props = never>(
     const swap = (states: State[], from: string, to: string): State[] =>
       JSON.parse(JSON.stringify(states).replaceAll(from, to));
 
-    const states = cache
+    const file = cache ? cachePath(cache, app.film ?? caller) : undefined;
+
+    const states = file
       ? swap(
           await cached(
-            cache,
+            file,
             {
               sources: await app.sources(),
               selector,

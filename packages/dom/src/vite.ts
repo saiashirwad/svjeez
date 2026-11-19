@@ -128,6 +128,7 @@ export const serve = async ({
     throw new Error("serve from @svjeez/dom/vite needs vite. Install it with `npm i -D vite`.");
   });
 
+  const film = hosts.getStore()?.film;
   const cacheDir = await privateCache(config);
 
   const server: ViteDevServer = await createServer({
@@ -149,6 +150,7 @@ export const serve = async ({
     return {
       url: new URL(entry === "index.html" ? "/" : entry, origin).href,
       selector,
+      ...(film && { film }),
       sources: () => hashFiles(files),
       close: () => closeServer(server, cacheDir),
     };
@@ -345,6 +347,7 @@ export const component = async <C extends Fn>(
   return {
     url: new URL(`__svjeez-dom/${id}.html`, origin).href,
     selector: options.selector ?? SELECTOR,
+    film: host.film,
     sources: async () => {
       const styles = await Promise.all(
         (options.css ?? []).map(async (href) =>
