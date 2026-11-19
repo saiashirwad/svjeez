@@ -2,9 +2,9 @@ import { contoursOf, mixGeometry, outlineBoxOf } from "../model/geometry";
 import type { Animated, Geometry, Paint, Scene, SceneNode, Vec } from "../model/ir";
 import { isLane } from "../model/lane";
 import { nodeName } from "../model/naming";
-import { mixNumber, mixVec, same } from "../model/steps";
+import { mixNumber, mixVec, same, type Mix } from "../model/steps";
 import type { Seconds } from "../model/time";
-import { valueAt, type Placed } from "./boxes";
+import { layerMatrix, times, valueAt, type Matrix, type Placed } from "./boxes";
 import { VISIBLE, add, isGone, isLeaf, label, type Survey } from "./inspect-context";
 import {
   SCHEMES,
@@ -41,45 +41,21 @@ const gap = (
   const where = nodeName(entry.node);
 
   switch (named.kind) {
-    case "number": {
-      const [a, b] = [valueAt(named.value, now, mixNumber), valueAt(named.value, then, mixNumber)];
-      const { name } = named;
+    case "number":
+      return numberGap(
+        named.name,
+        valueAt(named.value, then, mixNumber),
+        valueAt(named.value, now, mixNumber),
+        scale,
+      );
 
-      if (name === "rotate") {
-        const turn = Math.abs(((a - b) % 360) + 360) % 360;
-        const by = Math.min(turn, 360 - turn);
-
-        return by > 0.5 ? `its rotate jumps ${units(by)}°` : undefined;
-      }
-
-      const limit = name.includes("opacity")
-        ? 0.02
-        : name === "stroke width"
-          ? 0.25
-          : 0.5 / Math.max(scale, 1e-6);
-
-      return Math.abs(a - b) > limit
-        ? `its ${name} jumps from ${units(b)} to ${units(a)}`
-        : undefined;
-    }
-
-    case "vec": {
-      const [a, b] = [valueAt(named.value, now, mixVec), valueAt(named.value, then, mixVec)];
-      const [dx, dy] = [a[0] - b[0], a[1] - b[1]];
-      const { name } = named;
-
-      if (name === "scale" || name === "trim") {
-        if (name === "trim" && (a[0] === a[1] || b[0] === b[1])) return undefined;
-
-        return Math.max(Math.abs(dx), Math.abs(dy)) > 0.01
-          ? `its ${name} jumps from ${b.map(units).join(", ")} to ${a.map(units).join(", ")}`
-          : undefined;
-      }
-
-      const by = Math.hypot(dx, dy) * scale;
-
-      return by > 0.5 ? `its ${name} moves it ${units(by)}` : undefined;
-    }
+    case "vec":
+      return vecGap(
+        named.name,
+        valueAt(named.value, then, mixVec),
+        valueAt(named.value, now, mixVec),
+        scale,
+      );
 
     case "geometry": {
       const a = valueAt(named.value, now, mixGeometry, `geometry on ${where}`);
@@ -113,6 +89,95 @@ const gap = (
         : undefined;
     }
   }
+};
+
+/** How a number jumps from `b` to `a`, if it does. */
+const numberGap = (name: string, b: number, a: number, scale: number): string | undefined => {
+  if (name === "rotate") {
+    const turn = Math.abs(((a - b) % 360) + 360) % 360;
+    const by = Math.min(turn, 360 - turn);
+
+    return by > 0.5 ? `its rotate jumps ${units(by)}°` : undefined;
+  }
+
+  const limit = name.includes("opacity")
+    ? 0.02
+    : name === "stroke width"
+      ? 0.25
+      : 0.5 / Math.max(scale, 1e-6);
+
+  return Math.abs(a - b) > limit ? `its ${name} jumps from ${units(b)} to ${units(a)}` : undefined;
+};
+
+/** How a point jumps from `b` to `a`, if it does. */
+const vecGap = (name: string, b: Vec, a: Vec, scale: number): string | undefined => {
+  const [dx, dy] = [a[0] - b[0], a[1] - b[1]];
+
+  if (name === "scale" || name === "trim") {
+    if (name === "trim" && (a[0] === a[1] || b[0] === b[1])) return undefined;
+
+    return Math.max(Math.abs(dx), Math.abs(dy)) > 0.01
+      ? `its ${name} jumps from ${b.map(units).join(", ")} to ${a.map(units).join(", ")}`
+      : undefined;
+  }
+
+  const by = Math.hypot(dx, dy) * scale;
+
+  return by > 0.5 ? `its ${name} moves it ${units(by)}` : undefined;
+};
+
+/** A value as the seam sees it: a lane that loops on its own period counts as its value at 0. */
+const seamAt = <T>(value: Animated<T>, t: Seconds, mix: Mix<T>): T =>
+  valueAt(value, isLane(value) && value.period !== undefined ? 0 : t, mix);
+
+/** What all of a node's layers come to at `t`: the transform they make, and each kind of value combined. */
+const composed = (node: SceneNode, t: Seconds) => {
+  const at = <T>(value: Animated<T>, mix: Mix<T>): T => seamAt(value, t, mix);
+
+  const still = node.layers.map((layer) => ({
+    offset: at(layer.offset, mixVec),
+    rotate: at(layer.rotate, mixNumber),
+    scale: at(layer.scale, mixVec),
+    skew: at(layer.skew, mixNumber),
+    opacity: at(layer.opacity, mixNumber),
+  }));
+
+  return {
+    matrix: still.map((layer) => layerMatrix(layer, node.origin, 0)).reduce(times, IDENTITY),
+    offset: still.reduce<Vec>((sum, { offset: [x, y] }) => [sum[0] + x, sum[1] + y], [0, 0]),
+    rotate: still.reduce((sum, { rotate }) => sum + rotate, 0),
+    scale: still.reduce<Vec>(
+      (product, { scale: [x, y] }) => [product[0] * x, product[1] * y],
+      [1, 1],
+    ),
+    skew: still.reduce((sum, { skew }) => sum + skew, 0),
+    opacity: still.reduce((product, { opacity }) => product * opacity, 1),
+  };
+};
+
+const IDENTITY: Matrix = [1, 0, 0, 1, 0, 0];
+
+/**
+ * How a node's layers jump at the seam, judged on what they come to together, so an enter() and an exit() on the
+ * same value that end where they start are no jump.
+ */
+const layersGap = (node: SceneNode, [then, now]: readonly [Seconds, Seconds], scale: number) => {
+  if (node.layers.length === 0) return [];
+  const [b, a] = [composed(node, then), composed(node, now)];
+  const linear = [0, 1, 2, 3].some((i) => Math.abs(a.matrix[i]! - b.matrix[i]!) > 0.01);
+  const moved = Math.hypot(a.matrix[4] - b.matrix[4], a.matrix[5] - b.matrix[5]) * scale > 0.5;
+
+  if (!linear && !moved && Math.abs(a.opacity - b.opacity) <= 0.02) return [];
+
+  const said = [
+    vecGap("offset", b.offset, a.offset, scale),
+    numberGap("rotate", b.rotate, a.rotate, scale),
+    vecGap("scale", b.scale, a.scale, scale),
+    numberGap("skew", b.skew, a.skew, scale),
+    numberGap("opacity", b.opacity, a.opacity, scale),
+  ].filter((each) => each !== undefined);
+
+  return said.length > 0 ? said : ["its motion layers jump"];
 };
 
 const paintAt = (value: Animated<Paint>, t: Seconds): Paint => {
@@ -269,14 +334,27 @@ export const loopSeam = (survey: Survey): void => {
     const parent = entry.ancestors.at(-1);
     const scale = parent ? scaleOf(first.get(parent.key)?.matrix ?? [1, 0, 0, 1, 0, 0]) : 1;
 
-    const jumps = valuesOf(node).flatMap((named) => {
-      const said =
-        isLane(named.value) && named.value.period === undefined
-          ? gap(survey, entry, named, [end, 0], scale)
-          : undefined;
+    const layered = new Set<unknown>(
+      node.layers.flatMap((layer) => [
+        layer.offset,
+        layer.rotate,
+        layer.scale,
+        layer.skew,
+        layer.opacity,
+      ]),
+    );
 
-      return said ? [said] : [];
-    });
+    const jumps = [
+      ...valuesOf(node).flatMap((named) => {
+        const said =
+          isLane(named.value) && named.value.period === undefined && !layered.has(named.value)
+            ? gap(survey, entry, named, [end, 0], scale)
+            : undefined;
+
+        return said ? [said] : [];
+      }),
+      ...layersGap(node, [end, 0], scale),
+    ];
 
     if (jumps.length === 0) continue;
     const connector = [...entry.ancestors, node].reverse().find((each) => each.authored?.ends);

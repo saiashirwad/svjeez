@@ -20,7 +20,7 @@ export interface Placed {
 
 const IDENTITY: Matrix = [1, 0, 0, 1, 0, 0];
 
-const times = (m: Matrix, n: Matrix): Matrix => [
+export const times = (m: Matrix, n: Matrix): Matrix => [
   m[0] * n[0] + m[2] * n[1],
   m[1] * n[0] + m[3] * n[1],
   m[0] * n[2] + m[2] * n[3],
@@ -58,7 +58,7 @@ const number = (value: Animated<number>, t: Seconds): number => valueAt(value, t
 
 const vec = (value: Animated<Vec>, t: Seconds): Vec => valueAt(value, t, mixVec);
 
-const layerMatrix = (layer: Layer, origin: Vec, t: Seconds): Matrix => {
+export const layerMatrix = (layer: Layer, origin: Vec, t: Seconds): Matrix => {
   const angle = (number(layer.rotate, t) * Math.PI) / 180;
   const [sx, sy] = vec(layer.scale, t);
   const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
