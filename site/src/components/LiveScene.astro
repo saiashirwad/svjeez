@@ -2,6 +2,7 @@
 // A scene that plays only while it is on screen and inside the page's play budget, and shows a poster otherwise.
 import type { HTMLAttributes } from "astro/types";
 import type { SceneImage } from "@svjeez/astro/scene";
+import { themed } from "../palettes";
 import Proof from "./Proof.astro";
 
 type Props = Omit<HTMLAttributes<"img">, "src" | "width" | "height"> & {
@@ -30,6 +31,7 @@ const { scene, cost, scheme, manual, name, bar, alt, class: className, ...attrib
   data-cost={cost}
   data-scheme={scheme}
   data-manual={manual ? "" : undefined}
+  data-themed={themed(scene.svg) ? "" : undefined}
   width={scene.width}
   height={scene.height}
   style={`--native: ${scene.width}`}

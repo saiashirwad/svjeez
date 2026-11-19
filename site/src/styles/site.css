@@ -269,7 +269,7 @@ kbd {
 .nav-ico[data-on] svg * {
   animation-play-state: running !important;
 }
-/* The light and dark toggle, set like the links so the row stays even. */
+/* The palette menu and the light and dark toggle, set like the links so the row stays even. */
 .controls {
   display: flex;
   align-items: center;
@@ -278,6 +278,45 @@ kbd {
 @media (hover: hover) and (pointer: fine) {
   .top nav a:hover {
     color: var(--ink);
+  }
+}
+
+/* The palettes: four little color wheels, half each palette's own background and half two of its accents. Pointing spins one, and the one being worn sits
+   a size up with a ring. */
+.palettes {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-inline: 0.25rem 0.75rem;
+}
+.palettes button {
+  inline-size: 1.1rem;
+  block-size: 1.1rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: conic-gradient(from -90deg, var(--s1) 0 25%, var(--s4) 0 50%, var(--s0) 0);
+  box-shadow: 0 0 0 1.5px var(--line);
+  cursor: pointer;
+  transition:
+    scale 0.3s cubic-bezier(0.34, 1.8, 0.64, 1),
+    rotate 0.5s var(--out),
+    box-shadow 0.2s;
+}
+.palettes button[aria-checked="true"] {
+  scale: 1.2;
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 3.5px var(--ink);
+}
+.palettes button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .palettes button:hover {
+    rotate: 120deg;
+    scale: 1.3;
   }
 }
 
@@ -343,6 +382,9 @@ kbd {
   .scheme[data-bump] .knob img {
     animation: knob-hop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
+  .palettes button[data-bump] {
+    animation: wheel-spin 0.6s var(--out);
+  }
 }
 @keyframes knob-hop {
   0% {
@@ -355,6 +397,15 @@ kbd {
     translate: -50% 0;
   }
 }
+@keyframes wheel-spin {
+  from {
+    rotate: 0deg;
+  }
+  to {
+    rotate: 360deg;
+  }
+}
+
 /* Copying: the two sheets give way to a check that draws itself, and a note says what happened, failure included. */
 .copy-icon .check {
   stroke-dasharray: 1;

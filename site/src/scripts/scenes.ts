@@ -1,4 +1,5 @@
 import { frozen, playing, replay, show } from "./frame";
+import { PALETTECHANGE } from "./palette";
 import { calm, scheme, THEMECHANGE } from "./scheme";
 
 const SHOWN = 0.3;
@@ -121,5 +122,16 @@ addEventListener(THEMECHANGE, () =>
   scenes.forEach((img) => {
     if (img.dataset.state === "live") replay(img);
     else if (img.dataset.state === "still") still(img);
+  }),
+);
+
+// Another palette: a playing scene goes on from where it is in the new colors, and a still is made again in them.
+addEventListener(PALETTECHANGE, () =>
+  scenes.forEach((img) => {
+    if (img.dataset.state === "live") replay(img);
+    else if (img.dataset.want === "live") {
+      delete img.dataset.want;
+      play(img);
+    } else if (img.dataset.want) still(img, { fade: true });
   }),
 );

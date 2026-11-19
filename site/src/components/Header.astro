@@ -3,6 +3,7 @@ import { getScene } from "@svjeez/astro/scene";
 import { svg } from "svjeez/tools";
 import mascot from "../scenes/mascot";
 import { github, moon, sun, system } from "../scenes/nav-icons";
+import { PALETTES, type Palette } from "../palettes";
 
 interface Props {
   current?: "examples";
@@ -16,6 +17,8 @@ const blip = getScene(mascot);
 const links: { href: string; label: string; page?: string }[] = [{ href: "https://github.com/saiashirwad/svjeez", label: "GitHub" }];
 
 const optional: string[] = [];
+const SWATCH = ["background", "red", "green", "blue", "magenta"] as const;
+const swatches = ({ theme }: Palette) => SWATCH.map((name, i) => `--s${i}: light-dark(${theme[name].light}, ${theme[name].dark})`).join("; ");
 
 // The icons are inlined, so they paint with the page's own colors: their ink is currentColor and their --bg the page's.
 const icon = (scene: Parameters<typeof svg.emit>[0], prefix: string) =>
@@ -39,6 +42,15 @@ const icon = (scene: Parameters<typeof svg.emit>[0], prefix: string) =>
       ))
     }
     <div class="controls">
+      <div class="palettes" role="radiogroup" aria-label="Color palette">
+        {
+          PALETTES.map((p) => (
+            <button type="button" role="radio" aria-checked="false" data-palette={p.id} style={swatches(p)} title={p.label} aria-label={p.label}>
+              <span class="pie" aria-hidden="true" />
+            </button>
+          ))
+        }
+      </div>
       <div class="scheme" role="radiogroup" aria-label="Color scheme" data-at="system">
         <span class="knob" aria-hidden="true"><img src={blip.src} width="26" height="26" alt="" /></span>
         <button type="button" role="radio" aria-checked="false" data-scheme="light" aria-label="Light" title="Light"><span class="nav-ico" aria-hidden="true" set:html={icon(sun, "sun")} /></button>
@@ -50,6 +62,8 @@ const icon = (scene: Parameters<typeof svg.emit>[0], prefix: string) =>
 </header>
 
 <script>
+  import { PALETTES } from "../palettes";
+  import { choose, palette } from "../scripts/palette";
   import { scheme, THEMECHANGE } from "../scripts/scheme";
 
   const icons = [...document.querySelectorAll<HTMLElement>(".top .nav-ico")];
@@ -114,4 +128,19 @@ const icon = (scene: Parameters<typeof svg.emit>[0], prefix: string) =>
 
     if (scheme() !== before) dispatchEvent(new Event(THEMECHANGE));
   });
+
+  const wheels = [...document.querySelectorAll<HTMLButtonElement>(".palettes [data-palette]")];
+  const mark = () => wheels.forEach((wheel) => wheel.setAttribute("aria-checked", String(wheel.dataset.palette === palette())));
+
+  mark();
+
+  for (const wheel of wheels)
+    wheel.addEventListener("click", () => {
+      const picked = PALETTES.find((p) => p.id === wheel.dataset.palette);
+
+      if (!picked) return;
+      choose(picked.id);
+      mark();
+      bump(wheel);
+    });
 </script>

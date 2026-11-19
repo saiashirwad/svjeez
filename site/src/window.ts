@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import type { SceneSource } from "@svjeez/astro/scene";
 import { isScene, svg as backend } from "svjeez/tools";
+import { theme } from "@examples/colors.ts";
 
 // Every scene on the page is a window of a fixed size: traffic lights and a title bar over the scene, fitted into
 // what is left. The size is the slot's, so tiles in a row line up whatever their scenes' own sizes are.
@@ -29,12 +30,14 @@ const markup = (source: SceneSource): string => {
 
 const escape = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
-// The window's colors: the examples theme's background, raised and surface greys, muted text, and red, yellow and green.
-const LIGHT =
-  "--wb:#FFFFFF;--wl:#E5E5EA;--ws:#F5F5F7;--wt:#6E6E73;--w8:#E5453B;--wa:#E5A50A;--wg:#2FA84F";
+// The window paints with the examples theme's tokens, declared the way a scene declares them, so it follows the scheme
+// and a palette restyles it with the scene inside.
+const declared = (scheme: "light" | "dark") =>
+  Object.values(theme)
+    .map((token) => `--${token.name}:${token[scheme]}`)
+    .join(";");
 
-const DARK =
-  "--wb:#090A0C;--wl:#27272A;--ws:#18181B;--wt:#A1A1A6;--w8:#FF6961;--wa:#FFD60A;--wg:#32D74B";
+const TOKENS = `svg{${declared("dark")}}@media (prefers-color-scheme:light){svg{${declared("light")}}}`;
 
 const SANS = "-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',system-ui,sans-serif";
 
@@ -84,9 +87,9 @@ export const windowed = (
   if (bare) return `${head}\n  ${nested}\n</svg>`;
 
   const middle = (text: string) =>
-    `<text x="${w / 2}" y="${bar / 2 + 4.5}" font-size="12" text-anchor="middle" font-family="${SANS}" fill="var(--wt)">${escape(text)}</text>`;
+    `<text x="${w / 2}" y="${bar / 2 + 4.5}" font-size="12" text-anchor="middle" font-family="${SANS}" fill="var(--muted)">${escape(text)}</text>`;
 
-  const lights = ["--w8", "--wa", "--wg"]
+  const lights = ["--red", "--yellow", "--green"]
     .map(
       (color, i) =>
         `<circle cx="${20.5 + 18 * i}" cy="${bar / 2 + 0.5}" r="5.5" fill="var(${color})"/>`,
@@ -94,13 +97,11 @@ export const windowed = (
     .join("");
 
   return `${head}
-  <style>.${id}{${LIGHT}}@media (prefers-color-scheme:dark){.${id}{${DARK}}}</style>
+  <style>${TOKENS}</style>
   <clipPath id="${id}c"><rect x="0.5" y="0.5" width="${w - 1}" height="${h - 1}" rx="12"/></clipPath>
-  <g class="${id}">
-    <rect x="0.5" y="0.5" width="${w - 1}" height="${h - 1}" rx="12" fill="var(--wb)"/>
-    <g clip-path="url(#${id}c)">${nested}</g>
-    <rect x="0.5" y="0.5" width="${w - 1}" height="${h - 1}" rx="12" fill="none" stroke="var(--wl)"/>
-    ${top ? `<path d="M0.5 ${bar + 0.5}h${w - 1}" stroke="var(--ws)"/>${lights}${middle(title!)}` : ""}
-  </g>
+  <rect x="0.5" y="0.5" width="${w - 1}" height="${h - 1}" rx="12" fill="var(--background)"/>
+  <g clip-path="url(#${id}c)">${nested}</g>
+  <rect x="0.5" y="0.5" width="${w - 1}" height="${h - 1}" rx="12" fill="none" stroke="var(--raised)"/>
+  ${top ? `<path d="M0.5 ${bar + 0.5}h${w - 1}" stroke="var(--surface)"/>${lights}${middle(title!)}` : ""}
 </svg>`;
 };

@@ -1,24 +1,50 @@
 import type { Code } from "astro:components";
 import type { ComponentProps } from "astro/types";
+import { CODE, DEFAULT_PALETTE, PALETTES, type Name, type Palette } from "../palettes";
 
-/** The code colors, light and dark: the examples' theme (examples/theme.ts), so a code block reads like the scenes. */
+const pair = ({ light, dark }: { light: string; dark: string }) => `light-dark(${light}, ${dark})`;
+
+/** The page's code roles, each painted like the code role of a scene's code (palettes.ts). */
 const ROLES = {
-  plain: ["#1D1D1F", "#E5E5EA"],
-  comment: ["#6E6E73", "#A1A1A6"],
-  punct: ["#6E6E73", "#A1A1A6"],
-  keyword: ["#9B51E0", "#C58AFF"],
-  fn: ["#0A6CFF", "#5EA0FF"],
-  string: ["#2FA84F", "#32D74B"],
-  number: ["#E8751A", "#FF9F0A"],
-  tag: ["#E5453B", "#FF6961"],
-} as const;
+  plain: "plain",
+  comment: "comment",
+  punct: "punctuation",
+  keyword: "keyword",
+  fn: "function",
+  string: "string",
+  number: "number",
+  tag: "tag",
+} as const satisfies Record<string, keyof typeof CODE>;
 
 type Role = keyof typeof ROLES;
 
-/** `--code-<role>` for each role, as `light-dark()` so it follows the page's scheme. */
-export const codeVars = `:root{${Object.entries(ROLES)
-  .map(([role, [light, dark]]) => `--code-${role}:light-dark(${light}, ${dark})`)
-  .join(";")}}`;
+/** The page's own colors under another palette, by the token that paints each. */
+const PAGE = {
+  bg: "background",
+  surface: "surface",
+  sunken: "surface",
+  band: "surface",
+  "win-bg": "background",
+  line: "raised",
+  muted: "muted",
+  ink: "text",
+  accent: "green",
+  "accent-ink": "background",
+} as const satisfies Record<string, Name>;
+
+const roles = ({ theme }: Palette) =>
+  Object.entries(ROLES).map(([role, code]) => `--code-${role}:${pair(theme[CODE[code]])}`);
+
+const page = ({ theme }: Palette) =>
+  Object.entries(PAGE).map(([token, name]) => `--${token}:${pair(theme[name])}`);
+
+/** `--code-<role>` for each role, and for every palette but the default its code roles and page tokens under `:root[data-palette]`. */
+export const codeVars = [
+  `:root{${roles(PALETTES[0]).join(";")}}`,
+  ...PALETTES.filter(({ id }) => id !== DEFAULT_PALETTE).map(
+    (p) => `:root[data-palette="${p.id}"]{${[...roles(p), ...page(p)].join(";")}}`,
+  ),
+].join("\n");
 
 const scope = (scopes: string[], role: Role) => ({
   scope: scopes,
