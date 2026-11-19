@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { chromium, type Browser, type Page } from "playwright-core";
 import { scene } from "svjeez";
 import { placements } from "svjeez/tools";
-import { captureScript, compile, type Snapshot } from "../src/index.ts";
+import { captureScript, compile, record, type Snapshot } from "../src/index.ts";
 
 const HTML = `<!doctype html>
 <style>
@@ -88,5 +88,56 @@ describe("animations on a real page", () => {
 
       expect(at(t, moveKey).box.x).toBeCloseTo(10 + 120 * progress, 0);
     }
+  }, 60_000);
+  test("a pulsing dot keeps pulsing through a film of several states", async () => {
+    const page = await browser.newPage({ viewport: { width: 300, height: 120 } });
+
+    await page.setContent(`<!doctype html>
+<style>
+  html, body { margin: 0 }
+  @keyframes beat { 0%, 100% { transform: scale(1) } 50% { transform: scale(1.6) } }
+  #dot { position: absolute; left: 10px; top: 10px; width: 12px; height: 12px; border-radius: 6px; background: #7dffc4;
+    animation: beat 1.6s ease-in-out infinite }
+  #card { position: absolute; left: 10px; top: 60px; width: 60px; height: 30px; background: #fc8 }
+  #card.right { left: 200px }
+</style>
+<div id="app" style="position:relative;width:300px;height:120px"><div id="dot" data-key="dot"></div><div id="card" data-key="card"></div></div>`);
+
+    const states = await record(page, "#app", async (snap) => {
+      await snap("start");
+      await page.evaluate(() => document.getElementById("card")!.classList.add("right"));
+      await snap("moved", { over: 0.7 });
+      await page.evaluate(() => document.getElementById("card")!.classList.remove("right"));
+      await snap("back", { over: 0.7 });
+    });
+
+    await page.close();
+
+    const compiled = compile(states);
+
+    expect(compiled.diagnostics).toEqual([]);
+
+    const model = scene(
+      { size: compiled.size, duration: compiled.duration, title: "page" },
+      () => compiled.element,
+    );
+
+    const scales = Array.from({ length: 40 }, (_, i) => {
+      const [a, b] = placements(model, (i / 40) * compiled.duration).find(
+        (placed) => placed.key === "app/@track/dot/@track",
+      )!.matrix;
+
+      return Math.hypot(a, b);
+    });
+
+    expect(Math.min(...scales)).toBeCloseTo(1, 2);
+    expect(Math.max(...scales)).toBeGreaterThan(1.5);
+
+    // It goes up and down more than once over the film, through the moves too.
+    const turns = scales.filter(
+      (value, i) => i > 0 && i < 39 && value > scales[i - 1]! && value > scales[i + 1]!,
+    );
+
+    expect(turns.length).toBeGreaterThanOrEqual(2);
   }, 60_000);
 });

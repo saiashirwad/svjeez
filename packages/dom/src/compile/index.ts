@@ -5,7 +5,7 @@ import { element } from "./box.tsx";
 import { context, type Diagnostic } from "./context.ts";
 import { normalize } from "./normalize.ts";
 import { pair, type PairBy, type Paired } from "./pair.ts";
-import { watchFor } from "./waapi.ts";
+import { animate, watchFor, type Slot } from "./waapi.ts";
 
 const DEFAULT_HOLD = 0.8;
 
@@ -83,30 +83,37 @@ export const compile = (
     snapshots.flatMap((snapshot) => snapshot.fonts ?? []),
     // Only a state-to-state blend needs a clip in every state.
     single ? new Set() : clips,
-    single ? (states[0]!.hold ?? resting) : undefined,
   );
 
   for (const { path, what } of moves) ctx.note(path, what);
 
-  const trees = roots.map((root) =>
-    element(root, [root.node.rect.x, root.node.rect.y], root.key, ctx),
-  );
-
   const spans: Span[] = [];
   const curves: Curve[] = [];
+  const slots: Slot[] = [];
+  const eases: (Curve | undefined)[] = [];
   let duration = 0;
 
   states.forEach((state, i) => {
-    if (i > 0) {
-      const length = state.over ?? over;
+    const start = duration;
+    const length = i > 0 ? (state.over ?? over) : 0;
 
+    if (i > 0) {
       spans.push(span(duration, length));
       curves.push(ease[state.ease ?? easing]);
       duration += length;
     }
 
     duration += state.hold ?? resting;
+    slots.push({ start, over: length, end: duration });
+    eases.push(i > 0 ? curves.at(-1) : undefined);
   });
+
+  // Animations are tracks over the whole timeline, put on each state's copy of an element alike: the morph has no lane to blend.
+  for (const [path, motion] of animate(roots, slots, eases, ctx)) ctx.motions.set(path, motion);
+
+  const trees = roots.map((root) =>
+    element(root, [root.node.rect.x, root.node.rect.y], root.key, ctx),
+  );
 
   const sizes = roots.map(({ node }) => node.rect);
 

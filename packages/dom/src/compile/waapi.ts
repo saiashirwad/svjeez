@@ -1,10 +1,11 @@
-import { span, track, type Anim, type Track } from "svjeez";
+import { span, track, type Anim, type Curve, type Track } from "svjeez";
 import type { Hex } from "svjeez/tools";
 import { isThemed, type Animation, type ElementNode, type Keyframe, type Rect } from "../schema.ts";
 import { byte, type Context } from "./context.ts";
 import { curveOf, easedAt, parseEasing, reversed, windowOf, type Easing } from "./easing.ts";
 import { IDENTITY, decompose, multiply } from "./transform.ts";
 import type { Matrix } from "../schema.ts";
+import { isElement, type Paired } from "./pair.ts";
 
 type Vec = readonly [number, number];
 
@@ -355,6 +356,8 @@ interface Piece<T> {
 
 /** What the scene does to one value: `over` 0 is a cut to `to`. */
 interface Move<T> {
+  /** A curve of its own, where `easing` (a CSS timing function) is not what draws it. */
+  readonly curve?: Curve;
   readonly at: number;
   readonly over: number;
   readonly from: T;
@@ -567,7 +570,7 @@ const trackOf = <T, U>({ initial, moves, period }: Plan<T>, pick: (value: T) => 
       }
     } else if (key(from) !== key(to)) {
       if (key(current) !== key(from)) made = made.set(goal(from), span(move.at));
-      made = made.to(goal(to), span(move.at, move.over), curveOf(move.easing));
+      made = made.to(goal(to), span(move.at, move.over), move.curve ?? curveOf(move.easing));
       steps++;
     } else if (key(current) !== key(from)) {
       made = made.set(goal(from), span(move.at));
@@ -692,34 +695,36 @@ const solidified = (stops: Stop<Rgba>[]): Stop<Rgba>[] =>
     return near ? { ...stop, value: [near.value[0], near.value[1], near.value[2], 0] } : stop;
   });
 
+/** One animation driving one property: what it does, and what the property is once it lets go. */
+interface Drive<T> {
+  /** The same in every state where it is the same animation: its name and keyframes. */
+  readonly id: string;
+  readonly stops: Stop<T>[];
+  readonly timing: Timing;
+  readonly base: T;
+}
+
+interface Drives {
+  transform?: Drive<Pose>;
+  opacity?: Drive<number>;
+  fill?: Drive<Rgba>;
+}
+
 /**
- * Compiles an element's running animations to tracks, so the scene plays them on from the captured moment.
- *
- * Scene time 0 is the capture: each animation continues from its own `currentTime`, through its delay, iterations and direction,
- * at its `playbackRate`, for `ctx.watch` seconds. Drives `transform` (with `translate`, `rotate` and `scale`), `opacity` and
- * `background-color`; paused and finished animations are left as the layout shows them.
+ * Reads an element's running animations: for each of `transform` (with `translate`, `rotate` and `scale`), `opacity` and
+ * `background-color`, the one that drives it. Paused and finished animations are left as the layout shows them.
  *
  * What an animation that does not fill returns to is the element's style without it, which a capture mid-flight cannot see:
  * `transform` and `opacity` go back to none and 1, and a color holds its last keyframe.
  */
-export const animate = (el: ElementNode, path: string, ctx: Context): Motion | undefined => {
+const driveOf = (el: ElementNode, path: string, ctx: Context): Drives | undefined => {
   const running = (el.animations ?? []).filter((animation) => animation.playState === "running");
 
   if (running.length === 0) return undefined;
 
-  if (ctx.watch === undefined) {
-    ctx.note(
-      path,
-      "animations are not compiled when several states are morphed; each state shows its captured moment",
-    );
-
-    return undefined;
-  }
-
-  const last = ctx.watch;
   const themed = isThemed(el.background);
   const staticFill: Rgba = (!isThemed(el.background) && rgbaOf(el.background ?? "")) || CLEAR;
-  const motion: { -readonly [K in keyof Motion]: Motion[K] } = {};
+  const drives: Drives = {};
 
   // A later animation replaces an earlier one that drives the same thing.
   const given = new Set<string>();
@@ -744,13 +749,14 @@ export const animate = (el: ElementNode, path: string, ctx: Context): Motion | u
         say(`the property ${name} is not compiled`);
 
     const timing = timingOf(animation);
+    const id = JSON.stringify([animation.name, animation.keyframes]);
     // What the element looks like with no animation: only known before the animation starts.
     const idle = animation.currentTime < animation.delay;
 
     if (animation.keyframes.length > 2 && timing.easing.kind !== "linear")
       say("the easing of the whole effect is only compiled for two keyframes");
 
-    const drives = (group: string): boolean => {
+    const drives_ = (group: string): boolean => {
       if (given.has(group)) {
         say(`${group} is also driven by a later animation, which wins`);
 
@@ -762,7 +768,7 @@ export const animate = (el: ElementNode, path: string, ctx: Context): Motion | u
       return true;
     };
 
-    if (TRANSFORM.some((name) => names.has(name)) && !motion.transform) {
+    if (TRANSFORM.some((name) => names.has(name)) && !drives.transform) {
       let previous: number | undefined;
 
       const stops = stopsOf<Pose>(
@@ -783,25 +789,16 @@ export const animate = (el: ElementNode, path: string, ctx: Context): Motion | u
         say,
       );
 
-      if (stops && drives("transform")) {
-        const run = plan(
+      if (stops && drives_("transform"))
+        drives.transform = {
+          id,
           stops,
           timing,
-          idle && el.transform ? poseOfMatrix(el.transform.matrix) : REST,
-          last,
-          mixPose,
-        );
-
-        motion.transform = {
-          offset: trackOf(run, (pose) => pose.translate),
-          rotate: trackOf(run, (pose) => pose.rotate),
-          scale: trackOf(run, (pose) => pose.scale),
-          skew: trackOf(run, (pose) => pose.skew),
+          base: idle && el.transform ? poseOfMatrix(el.transform.matrix) : REST,
         };
-      }
     }
 
-    if (names.has("opacity") && !motion.opacity) {
+    if (names.has("opacity") && !drives.opacity) {
       const stops = stopsOf<number>(
         animation,
         ["opacity"],
@@ -812,14 +809,11 @@ export const animate = (el: ElementNode, path: string, ctx: Context): Motion | u
         say,
       );
 
-      if (stops && drives("opacity"))
-        motion.opacity = trackOf(
-          plan(stops, timing, idle ? (el.opacity ?? 1) : 1, last, mixNumber),
-          (value) => value,
-        );
+      if (stops && drives_("opacity"))
+        drives.opacity = { id, stops, timing, base: idle ? (el.opacity ?? 1) : 1 };
     }
 
-    if (names.has("backgroundColor") && !motion.fill) {
+    if (names.has("backgroundColor") && !drives.fill) {
       if (themed) {
         say("a background color that follows the color scheme is not animated");
         continue;
@@ -835,28 +829,249 @@ export const animate = (el: ElementNode, path: string, ctx: Context): Motion | u
         say,
       );
 
-      if (stops && drives("fill")) {
-        const colors = solidified(stops);
-
+      if (stops && drives_("fill")) {
         // A color has no neutral value to return to: when it lets go mid-flight, it keeps its last keyframe.
         if (!idle && !timing.fillsAfter && Number.isFinite(timing.count))
           say("the background color keeps its last keyframe once the animation ends");
 
-        motion.fill = trackOf(
-          plan(
-            colors,
-            { ...timing, fillsAfter: idle ? timing.fillsAfter : true },
-            staticFill,
-            last,
-            mixRgba,
-          ),
-          hexOf,
-        );
+        drives.fill = {
+          id,
+          stops: solidified(stops),
+          timing: { ...timing, fillsAfter: idle ? timing.fillsAfter : true },
+          base: staticFill,
+        };
       }
     }
   }
 
-  return Object.keys(motion).length > 0 ? motion : undefined;
+  return Object.keys(drives).length > 0 ? drives : undefined;
+};
+
+/** When a state is on the scene's clock: its move in starts at `start` (0 for the first state), it rests from `start + over` to `end`. */
+export interface Slot {
+  readonly start: number;
+  readonly over: number;
+  readonly end: number;
+}
+
+/** The ease of each move into a state; the first state has none. */
+type Eases = readonly (Curve | undefined)[];
+
+const withCurve = <T>(move: Move<T>, curve: Curve | undefined): Move<T> =>
+  curve ? { ...move, curve } : move;
+
+/** The move cut short at scene time `end`. */
+const cutAt = <T>(move: Move<T>, end: number, mix: (a: T, b: T, u: number) => T): Move<T> => {
+  if (move.at + move.over <= end + 1e-9) return move;
+
+  const u = (end - move.at) / move.over;
+
+  return {
+    ...move,
+    over: end - move.at,
+    to: mix(move.from, move.to, easedAt(move.easing, u)),
+    easing: windowOf(move.easing, 0, u),
+  };
+};
+
+/**
+ * One property of one element over the states' whole timeline, as a single plan that every state's copy of the element shares,
+ * so a morph sees the same track in each and has nothing to blend.
+ *
+ * An animation that is the same (name and keyframes) in consecutive states is one run, continuous through the moves between them.
+ * It starts when its first state starts to appear (at 0 for the first state; for a state the element is already in, at the end
+ * of the move in, where the capture is what shows), taking its phase from that state's capture, and goes on to the end of its last
+ * state, or through the move out when the element leaves. Outside a run the property is the static value of the state, and
+ * moves between those with the state's ease.
+ *
+ * @param statics The property as each state shows it without animations; undefined where the element is not in that state.
+ */
+const lane = <T extends NonNullable<unknown>>(
+  drives: readonly (Drive<T> | undefined)[],
+  statics: readonly (T | undefined)[],
+  slots: readonly Slot[],
+  eases: Eases,
+  mix: (a: T, b: T, u: number) => T,
+  /** The value to move to, brought close to the one it moves from, so a turn takes the short way. */
+  near: (target: T, from: T) => T = (target) => target,
+): Plan<T> | undefined => {
+  const first = drives.find(Boolean);
+
+  if (!first) return undefined;
+
+  const total = slots.at(-1)!.end;
+
+  // One run over everything, from the start: the animation as it is, an endless one a loop.
+  if (
+    drives.every((drive) => drive?.id === first.id) &&
+    statics.every((value) => value !== undefined)
+  )
+    return plan(first.stops, first.timing, first.base, total, mix);
+
+  const moves: Move<T>[] = [];
+  const present = statics.findIndex((value) => value !== undefined);
+  let current = statics[present]!;
+  let initial = current;
+
+  const go = (i: number, to: T): void => {
+    const target = near(to, current);
+
+    if (key(current) === key(target)) return;
+
+    moves.push(
+      withCurve(
+        {
+          at: slots[i]!.start,
+          over: slots[i]!.over,
+          from: current,
+          to: target,
+          easing: LINEAR,
+        },
+        eases[i],
+      ),
+    );
+    current = target;
+  };
+
+  for (let i = 0; i < slots.length;) {
+    const drive = drives[i];
+
+    if (!drive) {
+      if (i > 0 && statics[i] !== undefined) go(i, statics[i]!);
+
+      i++;
+      continue;
+    }
+
+    let last = i;
+
+    while (drives[last + 1]?.id === drive.id) last++;
+
+    const entering = i > 0 && statics[i - 1] === undefined;
+    const leaving = last + 1 < slots.length && statics[last + 1] === undefined;
+    const start = i === 0 ? 0 : entering ? slots[i]!.start : slots[i]!.start + slots[i]!.over;
+
+    const end =
+      last + 1 === slots.length
+        ? total
+        : leaving
+          ? slots[last + 1]!.start + slots[last + 1]!.over
+          : slots[last]!.end;
+
+    const run = plan(drive.stops, drive.timing, drive.base, end - start, mix);
+
+    if (i > 0 && !entering) go(i, run.initial);
+    else if (moves.length === 0 && i === present) initial = current = run.initial;
+
+    const cycles = run.period === undefined ? 1 : Math.ceil((end - start) / run.period);
+
+    outer: for (let k = 0; k < cycles && moves.length < MAX_STEPS; k++)
+      for (const move of run.moves) {
+        const at = round(start + k * (run.period ?? 0) + move.at);
+
+        if (at >= end - 1e-9 && move.over > 0) break outer;
+
+        const placed = cutAt({ ...move, at }, end, mix);
+
+        moves.push(placed);
+        current = placed.to;
+      }
+
+    if (run.moves.length === 0) current = run.initial;
+
+    i = last + 1;
+  }
+
+  return { initial, moves };
+};
+
+/**
+ * Compiles the running animations of every element to tracks for its `@track` group, over the states' timeline: scene time 0 is the
+ * first state's capture, and each animation continues from its own `currentTime` through its delay, iterations and direction,
+ * at its `playbackRate`. Keyed by the element's path.
+ *
+ * The tracks are the same in every state an element is in, whatever animations that state has: so a morph never has to blend a
+ * lane, and the element keeps animating while it moves, enters or exits. See `lane` for when a run starts and ends.
+ */
+export const animate = (
+  roots: readonly Paired<ElementNode>[],
+  slots: readonly Slot[],
+  eases: Eases,
+  ctx: Context,
+): Map<string, Motion> => {
+  const found = new Map<string, (ElementNode | undefined)[]>();
+
+  const visit = (paired: Paired<ElementNode>, path: string, state: number): void => {
+    const nodes = found.get(path) ?? roots.map(() => undefined);
+
+    nodes[state] = paired.node;
+    found.set(path, nodes);
+
+    for (const kid of paired.children) if (isElement(kid)) visit(kid, `${path}/${kid.key}`, state);
+  };
+
+  roots.forEach((root, state) => visit(root, root.key, state));
+
+  const out = new Map<string, Motion>();
+
+  for (const [path, nodes] of found) {
+    if (!nodes.some((el) => el?.animations?.length)) continue;
+
+    const drives = nodes.map((el) => el && driveOf(el, path, ctx));
+
+    if (drives.every((one) => !one)) continue;
+
+    const motion: { -readonly [K in keyof Motion]: Motion[K] } = {};
+    const pick = <K extends keyof Drives>(group: K) => drives.map((one) => one?.[group]);
+
+    const poses = lane<Pose>(
+      pick("transform"),
+      nodes.map((el) => el && (el.transform ? poseOfMatrix(el.transform.matrix) : REST)),
+      slots,
+      eases,
+      mixPose,
+      (target, from) => ({ ...target, rotate: wound(target.rotate, from.rotate) }),
+    );
+
+    if (poses)
+      motion.transform = {
+        offset: trackOf(poses, (pose) => pose.translate),
+        rotate: trackOf(poses, (pose) => pose.rotate),
+        scale: trackOf(poses, (pose) => pose.scale),
+        skew: trackOf(poses, (pose) => pose.skew),
+      };
+
+    const alpha = lane<number>(
+      pick("opacity"),
+      nodes.map((el) => el && (el.opacity ?? 1)),
+      slots,
+      eases,
+      mixNumber,
+    );
+
+    if (alpha) motion.opacity = trackOf(alpha, (value) => value);
+
+    if (nodes.some((el) => isThemed(el?.background))) {
+      if (pick("fill").some(Boolean))
+        ctx.note(path, "a background color that follows the color scheme is not animated");
+    } else {
+      const fills = lane<Rgba>(
+        pick("fill"),
+        nodes.map(
+          (el) => el && ((!isThemed(el.background) && rgbaOf(el.background ?? "")) || CLEAR),
+        ),
+        slots,
+        eases,
+        mixRgba,
+      );
+
+      if (fills) motion.fill = trackOf(fills, hexOf);
+    }
+
+    if (Object.keys(motion).length > 0) out.set(path, motion);
+  }
+
+  return out;
 };
 
 const poseOfMatrix = (matrix: Matrix): Pose => {

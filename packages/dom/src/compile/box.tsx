@@ -10,7 +10,6 @@ import { isElement, type Paired } from "./pair.ts";
 import { text } from "./text.tsx";
 import { decompose } from "./transform.ts";
 import { vector } from "./vector.tsx";
-import { animate } from "./waapi.ts";
 
 type Blend = Exclude<Common["blend"], "normal" | undefined>;
 
@@ -62,7 +61,7 @@ export const element = (
   const padding = { box: inset(box, widths), radii: innerRadii(radii, widths) };
 
   // What animations drive replaces the static value the capture caught mid-flight.
-  const motion = el.animations?.length ? animate(el, path, ctx) : undefined;
+  const motion = ctx.motions.get(path);
 
   const placed = transform && !motion?.transform ? decompose(transform.matrix) : undefined;
 

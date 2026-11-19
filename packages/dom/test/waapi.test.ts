@@ -350,22 +350,112 @@ describe("a running animation continues from the captured moment", () => {
     expect(compile(root([])).duration).toBeCloseTo(0.8);
     expect(compile(root([slide({ duration: 3000 })]), { hold: 1 }).duration).toBeCloseTo(1);
   });
+});
 
-  test("with several states, animations are left out and said so", () => {
-    const state = (name: string) => ({
-      name,
+describe("animations across several states", () => {
+  const spin = (currentTime = 0) =>
+    anim({
+      name: "spin",
+      keyframes: frames("transform", "rotate(0deg)", "rotate(360deg)"),
+      iterations: "infinite",
+      currentTime,
+    });
+
+  /** One 20x20 box per state, moving right by 100 in each; its animations per state, or undefined where it is not there. */
+  const film = (per: (Animation[] | undefined)[], over = 1, hold = 1) => {
+    const states = per.map((animations, i) => ({
+      name: `s${i}`,
       snapshot: snapshot(
         box({
           id: "app",
-          children: [box({ key: "b", animations: [slide()] })],
+          rect: { x: 0, y: 0, width: 400, height: 100 },
+          children: animations
+            ? [
+                box({
+                  key: "b",
+                  rect: { x: i * 100, y: 0, width: 20, height: 20 },
+                  background: "rgb(255, 0, 0)",
+                  animations,
+                }),
+              ]
+            : [],
         }),
       ),
+    }));
+
+    const compiled = compile(states, { over, hold });
+
+    const model = scene(
+      { size: compiled.size, duration: compiled.duration, title: "t" },
+      () => compiled.element,
+    );
+
+    const at = (t: number) => placements(model, t).find((p) => p.key === "app/@track/b/@track")!;
+
+    return {
+      ...compiled,
+      angle: (t: number) => {
+        const [a, b] = at(t).matrix;
+
+        return (Math.atan2(b, a) * 180) / Math.PI;
+      },
+      opacity: (t: number) => at(t).opacity,
+    };
+  };
+
+  /** Two angles are the same turn, to a degree. */
+  const turned = (angle: number, expected: number) => {
+    const gap = ((((angle - expected) % 360) + 540) % 360) - 180;
+
+    expect(Math.abs(gap)).toBeLessThan(1);
+  };
+
+  test("a spinner present in every state keeps spinning through the moves, from the first capture's phase", () => {
+    // Each state was captured at a different phase of the same animation: the first one's counts.
+    const out = film([[spin(250)], [spin(700)], [spin(100)]]);
+
+    expect(out.diagnostics).toEqual([]);
+    expect(out.duration).toBe(5);
+
+    for (const t of [0, 0.5, 1.5, 2.25, 3.5, 4.75]) turned(out.angle(t), 90 + 360 * t);
+  });
+
+  test("an animation in one state plays from where that state's hold starts, and holds still outside", () => {
+    const out = film([[], [spin()], []]);
+
+    turned(out.angle(0.5), 0);
+    turned(out.angle(1.5), 0);
+    turned(out.angle(2.25), 90);
+    turned(out.angle(2.75), 270);
+    // The turn is whole when the state ends, so the next state has nothing to undo.
+    turned(out.angle(3.5), 0);
+    turned(out.angle(4.5), 0);
+  });
+
+  test("a different animation in the next state ends the first and starts the other", () => {
+    const pulse = anim({
+      name: "pulse",
+      keyframes: frames("opacity", "1", "0.5"),
+      iterations: "infinite",
     });
 
-    const out = compile([state("a"), state("b")]);
+    const out = film([[spin()], [pulse]]);
 
-    expect(out.diagnostics.map((d) => d.what)).toEqual([
-      "animations are not compiled when several states are morphed; each state shows its captured moment",
-    ]);
+    turned(out.angle(0.25), 90);
+    expect(out.opacity(0.5)).toBeCloseTo(1, 3);
+    expect(out.opacity(2.25)).toBeLessThan(1);
+  });
+
+  test("an element that enters or exits keeps animating while it fades", () => {
+    const out = film([undefined, [spin()], undefined]);
+
+    // Entering over 1 to 2: its animation starts with the move.
+    turned(out.angle(1.25), 90);
+    expect(out.opacity(1.25)).toBeLessThan(1);
+    turned(out.angle(2.5), 360 * 1.5);
+    // Leaving over 3 to 4: it spins on while it fades.
+    turned(out.angle(3.5), 360 * 2.5);
+    expect(out.opacity(3.5)).toBeLessThan(1);
+    expect(out.opacity(3.5)).toBeGreaterThan(0);
   });
 });
