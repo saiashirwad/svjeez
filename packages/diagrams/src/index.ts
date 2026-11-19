@@ -145,3 +145,12 @@ export {
   type ArchitectureSide,
   type ArchitectureSpec,
 } from "./architecture.tsx";
+
+export {
+  requirementDiagram,
+  type RequirementDiagram,
+  type RequirementDiagramOptions,
+  type RequirementLink,
+  type RequirementNode,
+  type RequirementRelation,
+} from "./requirement.tsx";

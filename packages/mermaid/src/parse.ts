@@ -12,6 +12,7 @@ import { parseMindmap } from "./mindmap.ts";
 import { parsePie } from "./pie.ts";
 import { parseQuadrant } from "./quadrant.ts";
 import { parseSankey } from "./sankey.ts";
+import { parseRequirement } from "./requirement.ts";
 import { parseSequence } from "./sequence.ts";
 import { parseState } from "./state.ts";
 import { parseTimeline } from "./timeline.ts";
@@ -19,7 +20,7 @@ import { parseXyChart } from "./xychart.ts";
 import type { MermaidDoc, ParseOptions } from "./types.ts";
 
 const KINDS =
-  "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `classDiagram`, `stateDiagram`/`stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `mindmap`, `gitGraph`, `journey`, `timeline`, `quadrantChart`, `xychart-beta`/`xychart`, `sankey-beta`, `block-beta` and `architecture-beta`.";
+  "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `classDiagram`, `stateDiagram`/`stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `mindmap`, `gitGraph`, `journey`, `timeline`, `quadrantChart`, `xychart-beta`/`xychart`, `sankey-beta`, `block-beta`, `architecture-beta` and `requirementDiagram`.";
 
 const lines = (text: string, file: string, first: number): Line[] =>
   text.split(/\r?\n/).flatMap((raw, i): Line[] => {
@@ -70,6 +71,8 @@ export function parseMermaid(text: string, options: ParseOptions = {}): MermaidD
   if ((word === "block-beta" || word === "block") && exact) return parseBlock(first, body);
 
   if (word === "architecture-beta" && exact) return parseArchitecture(first, body);
+
+  if (word === "requirementDiagram" && exact) return parseRequirement(first, body);
 
   if (word === "pie") return parsePie(first, body);
 

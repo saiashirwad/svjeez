@@ -17,6 +17,7 @@ import {
   type Timeline,
   type XyChart,
   type Sankey,
+  type RequirementDiagram,
   type Flowchart,
   type NodeRole,
   type NodeShape,
@@ -42,6 +43,7 @@ import { drawQuadrant } from "./quadrant.ts";
 import { drawTimeline } from "./timeline.ts";
 import { drawXyChart } from "./xychart.ts";
 import { drawSankey } from "./sankey.ts";
+import { drawRequirement } from "./requirement.ts";
 import type {
   ArchitectureDoc,
   BlockDoc,
@@ -57,6 +59,7 @@ import type {
   TimelineDoc,
   XyChartDoc,
   SankeyDoc,
+  RequirementDoc,
   FlowForm,
   MermaidDirection,
   MermaidDoc,
@@ -89,7 +92,8 @@ export type MermaidDiagram =
   | (XyChart & { readonly kind: "xychart"; readonly doc: XyChartDoc })
   | (Sankey & { readonly kind: "sankey"; readonly doc: SankeyDoc })
   | (BlockDiagram & { readonly kind: "block"; readonly doc: BlockDoc })
-  | (Architecture & { readonly kind: "architecture"; readonly doc: ArchitectureDoc });
+  | (Architecture & { readonly kind: "architecture"; readonly doc: ArchitectureDoc })
+  | (RequirementDiagram<string> & { readonly kind: "requirement"; readonly doc: RequirementDoc });
 
 const FORM_NODES: Record<FlowForm, { readonly role: NodeRole; readonly shape?: NodeShape }> = {
   rect: { role: "task" },
@@ -237,6 +241,9 @@ export function mermaid(text: string, options: MermaidOptions): MermaidDiagram {
 
   if (doc.kind === "er")
     return drawn(drawEr(doc, { ...diagramOptions, direction: asked }), "er", doc);
+
+  if (doc.kind === "requirement")
+    return drawn(drawRequirement(doc, { ...diagramOptions, direction: asked }), "requirement", doc);
 
   if (doc.kind !== "state" && asked)
     throw new SceneError(

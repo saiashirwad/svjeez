@@ -29,3 +29,5 @@ export type * from "./sankey.ts";
 export type * from "./block.ts";
 
 export type * from "./architecture.ts";
+
+export type * from "./requirement.ts";
