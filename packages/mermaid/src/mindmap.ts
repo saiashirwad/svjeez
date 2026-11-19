@@ -81,6 +81,7 @@ export const parseMindmap = (header: Line, body: readonly Line[]): MindmapDoc =>
     }
 
     const indent = l.indent ?? 0;
+
     const { label, shape } = read({
       ...l,
       text: l.text.replace(/:::[\w-]+(?:\s+[\w-]+)*\s*$/, "").trimEnd(),
