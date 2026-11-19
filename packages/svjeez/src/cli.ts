@@ -4,22 +4,22 @@ import { createRequire } from "node:module";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-import { timelineCues, type Finding as BrowserFinding } from "./check/check";
-import { checkScene, renderFrames, type FrameTimes } from "./frames";
+import { examine } from "./check/report";
+import { checkPixels, renderFrames, type FrameTimes } from "./frames";
 import { parse, type Json, type JsonObject, type Param, type Schema, type Values } from "./params";
 import {
   describe,
-  inspect,
   isScene,
   svg,
   type Diagnostic,
+  type LaneReport,
   type Model,
-  type Related,
+  type Problem,
   type Scene,
   type Severity,
 } from "./tools";
-import { momentsOf, sourcesOf } from "./check/survey";
-import { startTrace, stopTrace, traceOf, type BuildReport } from "./svg/traced";
+import { momentsOf, namesOf, sourcesOf } from "./check/survey";
+import { startTrace, stopTrace, traceOf } from "./svg/traced";
 import { validateSvg } from "./svg/validate";
 import { isSceneError } from "./model/scene-error";
 
@@ -27,7 +27,7 @@ const USAGE = `usage:
   svjeez svg <file> [--out file.svg] [--json] [params]
   svjeez dev <file> [--port 5173] [--out file.svg] [params]
   svjeez frames <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
-  svjeez check <file> [--no-browser] [--times 0,0.5,1] [--at 0,1.5] [--json] [--color-scheme system|light|dark] [params]
+  svjeez check <file> [--json] [--browser] [--at 0,1.5] [--times 0,0.5,1] [--color-scheme system|light|dark] [params]
   svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
   svjeez skill [--install [--dir .claude/skills]]
 
@@ -38,15 +38,17 @@ returning either.
 --param sets one value that is not a list, and wins over the file.
 Times are scene seconds. Without --times, frames takes --count frames (default 6) across one loop.
 dev serves a preview with a scrubber and a timeline, and rebuilds it when a file beside it changes.
-svg --json includes the SVG, compiler warnings and timeline tracks in scene seconds.
+svg --json prints { svg, warnings, lanes }: the SVG, its warnings and every animated lane, in scene seconds.
 video encodes --loops loops of the scene, through @svjeez/video. Its format follows --out's extension, else mp4.
 --background transparent keeps alpha, in webm only.
 On Node, .tsx files load through tsx when it is installed.
-check reads a scene model first, with no browser, then measures the scene in headless Chromium, and prints one finding
-per line, file:line:column  code  severity: message, with what to change on a hint: line below. --no-browser reads the
-model only, at once. --at 0,1.5 also describes what is on screen at those times. --json prints
-{ errors, warnings, info, frames?, timeline? }. It exits 1 when any finding is an error, the scene failing to build
-included. Without --times the browser measures 0, seven times across the loop, just before the end, and the scene's keys.
+check reads the scene model and emits its SVG once, with no browser, and prints one problem per line,
+file:line:column  code  severity: message, with what to change on a fix: line below, then the count and the animated
+lanes (css, or smil when a scene animates geometry, a filter or a gradient). --browser also measures the scene in
+headless Chromium. --at 0,1.5 also describes what is on screen at those times. --times 0,0.5 adds moments to sample.
+--json prints { ok, file, scene?, problems, lanes, measured?, frames?, timeline? }. It exits 1 when any problem is an
+error, the scene failing to build included. With --browser and no --times the browser measures 0, seven times across
+the loop, just before the end, and the scene's keys.
 skill prints the agent skill for writing svjeez scenes; --install copies it, with its references and examples, into <dir>/svjeez.`;
 
 const SCHEMES = ["system", "light", "dark"] as const;
@@ -220,21 +222,29 @@ const loadValue = async (
   );
 };
 
-const loadSvg = async (
+const loadBuilt = async (
   file: string,
   flags: ParamFlags = {},
   onWarning: (warning: Diagnostic) => void = warn,
-): Promise<string> => {
+  onLane?: (lane: LaneReport) => void,
+): Promise<{ readonly svg: string; readonly scene?: Scene }> => {
   const value = await loadValue(file, flags);
 
   if (isScene(value))
-    return svg.emit(value, {
-      onWarning,
-      sources: Boolean(traceOf()?.within ?? traceOf()?.sources),
-    });
+    return {
+      svg: svg.emit(value, {
+        onWarning,
+        ...(onLane && { onLane }),
+        sources: Boolean(traceOf()?.within ?? traceOf()?.sources),
+      }),
+      scene: value,
+    };
 
-  return value;
+  return { svg: value };
 };
+
+const loadSvg = async (file: string, flags: ParamFlags = {}): Promise<string> =>
+  (await loadBuilt(file, flags)).svg;
 
 const number = (flag: string, value: string | undefined): number | undefined => {
   if (value === undefined) return undefined;
@@ -269,33 +279,34 @@ const reportWarnings = (warnings: readonly string[]): void => {
 
 const report = (svg: string): void => reportWarnings(validateSvg(svg).warnings);
 
-const loadBuild = async (
-  file: string,
-  flags: ParamFlags,
-  inspect = false,
-  sources = false,
-): Promise<BuildReport & { svg: string }> => {
-  let captured: { svg: string; report: BuildReport } | undefined;
+interface SvgBuild {
+  readonly svg: string;
+  readonly warnings: readonly string[];
+  readonly lanes: readonly LaneReport[];
+  readonly duration?: number;
+  readonly loop?: boolean;
+}
+
+const loadBuild = async (file: string, flags: ParamFlags, sources = false): Promise<SvgBuild> => {
   const diagnosed: string[] = [];
-  startTrace({
-    within: inspect && !file.endsWith(".svg") ? dirname(resolve(file)) : undefined,
-    sources,
-    onRender: (svg, report) => {
-      captured = { svg, report };
-    },
-  });
+  const lanes: LaneReport[] = [];
+
+  startTrace({ within: sources && !file.endsWith(".svg") ? dirname(resolve(file)) : undefined });
 
   try {
-    const svg = await loadSvg(file, flags, (warning) => diagnosed.push(warning.message));
+    const built = await loadBuilt(
+      file,
+      flags,
+      (warning) => diagnosed.push(warning.message),
+      (lane) => lanes.push(lane),
+    );
 
-    if (captured?.svg === svg)
-      return {
-        svg,
-        ...captured.report,
-        warnings: [...diagnosed, ...captured.report.warnings],
-      };
-
-    return { svg, warnings: [...diagnosed, ...validateSvg(svg).warnings], timeline: [] };
+    return {
+      svg: built.svg,
+      warnings: [...diagnosed, ...validateSvg(built.svg).warnings],
+      lanes,
+      ...(built.scene && { duration: built.scene.duration, loop: built.scene.loop }),
+    };
   } finally {
     stopTrace();
   }
@@ -497,17 +508,6 @@ const skillCommand = async (args: string[]): Promise<void> => {
   console.log(`installed the svjeez skill in ${relative(process.cwd(), target) || "."}`);
 };
 
-interface CheckFinding {
-  readonly code: string;
-  readonly severity: Severity;
-  readonly key: string;
-  readonly source?: Source;
-  readonly message: string;
-  readonly hint: string;
-  readonly times?: readonly number[];
-  readonly related?: readonly Related[];
-}
-
 const CUES = 48;
 
 const parseTimes = (flag: string, text: string): number[] =>
@@ -518,18 +518,6 @@ const parseTimes = (flag: string, text: string): number[] =>
       ? parsed
       : fail(`--${flag} needs seconds from 0, separated by commas, got "${text}".`);
   });
-
-const sourceOf = (text: string | undefined): Source | undefined => {
-  const match = text === undefined ? null : /^(.*?):(\d+)(?::(\d+))?$/.exec(text);
-
-  return match
-    ? {
-        file: match[1] ?? "",
-        line: Number(match[2]),
-        ...(match[3] !== undefined && { column: Number(match[3]) }),
-      }
-    : undefined;
-};
 
 const thrownAt = (error: Error, file: string): Source | undefined => {
   const stack = error.stack ?? "";
@@ -551,7 +539,7 @@ const thrownAt = (error: Error, file: string): Source | undefined => {
   return undefined;
 };
 
-const compileError = (error: Error, file: string): CheckFinding => {
+const compileError = (error: Error, file: string): Problem => {
   const told = isSceneError(error) ? error : undefined;
   const source = told?.source ?? thrownAt(error, file);
 
@@ -561,32 +549,24 @@ const compileError = (error: Error, file: string): CheckFinding => {
     key: told?.key ?? "",
     ...(source && { source }),
     message: told?.problem ?? error.message,
-    hint:
+    fix:
       told?.fix ??
       "Fix what the message names; the scene must build before anything else can be checked.",
   };
 };
 
-const fromBrowser = (found: BrowserFinding, sources: ReadonlyMap<string, Source>): CheckFinding => {
-  const source =
-    (found.key !== undefined ? sources.get(found.key) : undefined) ?? sourceOf(found.source);
-
-  const message = found.message.endsWith(found.hint)
-    ? found.message.slice(0, -found.hint.length).trimEnd()
-    : found.message;
-
-  return {
-    code: found.rule,
-    severity: found.severity,
-    key: found.key ?? "",
-    ...(source && { source }),
-    message,
-    hint: found.hint,
-    ...(found.times.length > 0 && { times: found.times }),
-  };
-};
-
 const RANKS: readonly Severity[] = ["error", "warning", "info"];
+
+interface Report {
+  readonly ok: boolean;
+  readonly file: string;
+  readonly scene?: { readonly size: Model.Vec; readonly duration: number; readonly loop: boolean };
+  readonly problems: readonly Problem[];
+  readonly lanes: readonly LaneReport[];
+  readonly measured?: { readonly duration: number; readonly times: readonly number[] };
+  readonly frames?: ReturnType<typeof describe>["frames"];
+  readonly timeline?: ReturnType<typeof describe>["timeline"];
+}
 
 const checkCommand = async (args: string[]): Promise<void> => {
   const { values, positionals } = parseArgs({
@@ -596,7 +576,7 @@ const checkCommand = async (args: string[]): Promise<void> => {
       times: { type: "string", short: "t" },
       at: { type: "string" },
       json: { type: "boolean" },
-      "no-browser": { type: "boolean" },
+      browser: { type: "boolean" },
       "color-scheme": { type: "string" },
       ...PARAM_OPTIONS,
     },
@@ -606,19 +586,13 @@ const checkCommand = async (args: string[]): Promise<void> => {
   const scheme = parseScheme(values["color-scheme"]);
   const times = values.times === undefined ? undefined : parseTimes("times", values.times);
   const at = values.at === undefined ? undefined : parseTimes("at", values.at);
-  const found: CheckFinding[] = [];
+  const found: Problem[] = [];
   let model: Scene | undefined;
   let svgText: string | undefined;
-  let measured: { readonly duration: number; readonly times: readonly number[] } | undefined;
-  let rendered: BuildReport | undefined;
+  let lanes: readonly LaneReport[] = [];
+  let measured: Report["measured"];
 
-  startTrace({
-    within: file.endsWith(".svg") ? undefined : dirname(resolve(file)),
-    sources: true,
-    onRender: (_, report) => {
-      rendered = report;
-    },
-  });
+  startTrace({ within: file.endsWith(".svg") ? undefined : dirname(resolve(file)), sources: true });
 
   try {
     const value = await loadValue(file, values, (message) => {
@@ -627,48 +601,49 @@ const checkCommand = async (args: string[]): Promise<void> => {
 
     if (isScene(value)) {
       model = value;
-      found.push(...inspect(value, { backend: svg, ...(times && { times }) }));
-    }
+      const examined = examine(value, times);
 
-    if (!values["no-browser"] && !found.some((f) => f.code === "unsupported"))
-      svgText = isScene(value) ? svg.emit(value, { sources: true }) : value;
+      found.push(...examined.problems);
+      lanes = examined.lanes;
+      svgText = examined.svg;
+    } else {
+      svgText = value;
 
-    if (isText(value))
-      for (const warning of rendered?.warnings ?? validateSvg(value).warnings)
+      for (const warning of validateSvg(value).warnings)
         found.push({
           code: "compile-warning",
           severity: "warning",
           key: "",
           message: warning,
-          hint: "Change what the warning names.",
+          fix: "Change what the warning names.",
         });
+    }
   } catch (error) {
     found.push(compileError(error instanceof Error ? error : new Error(String(error)), file));
   } finally {
     stopTrace();
   }
 
-  if (svgText !== undefined) {
+  if (values.browser && svgText !== undefined) {
     const sources = model ? sourcesOf(model) : new Map<string, Source>();
 
     const cues = model
       ? momentsOf(model)
           .filter((t) => t < model!.duration)
           .filter((_, i, all) => all.length <= CUES || i % Math.ceil(all.length / CUES) === 0)
-      : rendered?.duration === undefined
-        ? undefined
-        : timelineCues(rendered.timeline, rendered.duration);
+      : undefined;
 
-    const report = await checkScene(svgText, {
+    const pixels = await checkPixels(svgText, {
       ...(times ? { times } : cues && { cues }),
       colorScheme: scheme,
     });
 
-    measured = { duration: report.duration, times: report.times };
+    measured = { duration: pixels.duration, times: pixels.times };
     const said = new Set(found.map((f) => `${f.code} ${f.key}`));
 
-    for (const browser of report.findings) {
-      const mapped = fromBrowser(browser, sources);
+    for (const browser of pixels.problems) {
+      const source = sources.get(browser.key) ?? browser.source;
+      const mapped = { ...browser, ...(source && { source }) };
 
       if (mapped.key === "" || !said.has(`${mapped.code} ${mapped.key}`)) found.push(mapped);
     }
@@ -694,30 +669,33 @@ const checkCommand = async (args: string[]): Promise<void> => {
     .sort((a, b) => RANKS.indexOf(a.f.severity) - RANKS.indexOf(b.f.severity) || a.index - b.index)
     .map(({ f }) => f);
 
+  const placedLanes = lanes.map((lane) => ({
+    ...lane,
+    ...(lane.source && { source: where(lane.source) }),
+  }));
+
   const by = (severity: Severity) => placed.filter((f) => f.severity === severity);
   const described = model && at ? describe(model, at) : undefined;
 
-  if (values.json)
-    console.log(
-      JSON.stringify(
-        {
-          errors: by("error"),
-          warnings: by("warning"),
-          info: by("info"),
-          ...(described && { frames: described.frames, timeline: described.timeline }),
-        },
-        null,
-        2,
-      ),
-    );
+  const report: Report = {
+    ok: by("error").length === 0,
+    file,
+    ...(model && { scene: { size: model.size, duration: model.duration, loop: model.loop } }),
+    problems: placed,
+    lanes: placedLanes,
+    ...(measured && { measured }),
+    ...(described && { frames: described.frames, timeline: described.timeline }),
+  };
+
+  if (values.json) console.log(JSON.stringify(report, null, 2));
   else {
-    for (const f of placed) {
-      const place = f.source
-        ? `${f.source.file}:${f.source.line}${f.source.column === undefined ? "" : `:${f.source.column}`}`
+    const place = (source: Source | undefined): string =>
+      source
+        ? `${source.file}:${source.line}${source.column === undefined ? "" : `:${source.column}`}`
         : file;
 
-      console.log(`${place}  ${f.code}  ${f.severity}: ${f.message}\n    hint: ${f.hint}`);
-    }
+    for (const f of placed)
+      console.log(`${place(f.source)}  ${f.code}  ${f.severity}: ${f.message}\n    fix: ${f.fix}`);
 
     const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
@@ -725,13 +703,23 @@ const checkCommand = async (args: string[]): Promise<void> => {
 
     const how = measured
       ? `; loop ${shown(measured.duration)}s, measured at ${measured.times.length > 12 ? `${measured.times.length} times from ${shown(measured.times[0]!)}s to ${shown(measured.times.at(-1)!)}s` : measured.times.map(shown).join(", ")}`
-      : values["no-browser"]
-        ? "; model only"
-        : "";
+      : "; model only";
 
     console.log(
       `${plural(by("error").length, "error")}, ${plural(by("warning").length, "warning")}, ${by("info").length} info${how}`,
     );
+
+    if (model) {
+      const names = namesOf(model);
+      const smil = placedLanes.filter((lane) => lane.backend === "smil");
+
+      console.log(`lanes: ${placedLanes.length - smil.length} css, ${smil.length} smil`);
+
+      for (const lane of smil)
+        console.log(
+          `  smil  ${lane.lane} on ${names.get(lane.key) ?? `"${lane.key}"`}${lane.source ? `  ${lane.source.file}:${lane.source.line}` : ""}`,
+        );
+    }
 
     if (described) console.log(`\n${described.text}`);
     else if (at)
@@ -742,7 +730,7 @@ const checkCommand = async (args: string[]): Promise<void> => {
       );
   }
 
-  if (by("error").length > 0) process.exitCode = 1;
+  if (!report.ok) process.exitCode = 1;
 };
 
 const devCommand = async (args: string[]): Promise<void> => {

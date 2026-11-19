@@ -23,17 +23,17 @@ import {
   type Paint,
   type SceneElement,
 } from "svjeez";
-import { describe, inspect, svg, type Code, type Finding, type Model } from "svjeez/tools";
+import { describe, check, type Code, type Problem, type Model } from "svjeez/tools";
 
 const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
 
 const made = (build: () => SceneElement, duration = 4, loop = true): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Test", loop }, build);
 
-const codes = (model: Model.Scene): Code[] => inspect(model).map((found) => found.code);
+const codes = (model: Model.Scene): Code[] => check(model).problems.map((found) => found.code);
 
-const only = (model: Model.Scene, code: Code): Finding[] =>
-  inspect(model).filter((found) => found.code === code);
+const only = (model: Model.Scene, code: Code): Problem[] =>
+  check(model).problems.filter((found) => found.code === code);
 
 const Dot = (props: Partial<Parameters<typeof Shape>[0]>): SceneElement => (
   <Shape geometry={rect(10, 10)} fill="#FF0000" at={[20, 20]} {...props} />
@@ -126,7 +126,7 @@ group("never-visible", () => {
     );
 
     expect(found).toMatchObject([{ key: "under", related: [{ key: "cover" }] }]);
-    expect(found[0]!.hint).toContain('"cover"');
+    expect(found[0]!.fix).toContain('"cover"');
   });
 
   test("covering stays silent when the cover is see-through, turned, smaller, under, rounded over it, or moving", () => {
@@ -451,13 +451,11 @@ group("timing", () => {
 });
 
 group("capabilities and the model alone", () => {
-  test("what a backend can't draw comes out in the same shape", () => {
-    const model = made(() => <Dot key="soft" effects={[blur(2)]} />);
-    const none = { level: "none", note: "no filters" } as const;
-    const backend = { name: "Flat", supports: { ...svg.supports, blur: none } };
+  test("what the SVG backend draws differently comes out in the same shape", () => {
+    const model = made(() => <Dot key="soft" effects={[blur(1)]} />);
 
-    expect(inspect(model, { backend }).filter((f) => f.code === "unsupported")).toMatchObject([
-      { key: "soft", severity: "error" },
+    expect(check(model).problems.filter((f) => f.code === "approximate")).toMatchObject([
+      { key: "soft", severity: "warning" },
     ]);
   });
 
@@ -470,7 +468,7 @@ group("capabilities and the model alone", () => {
       </Group>
     ));
 
-    const found = inspect(model);
+    const found = check(model).problems;
 
     expect(found.map((f) => f.severity)).toEqual(
       found
@@ -480,7 +478,7 @@ group("capabilities and the model alone", () => {
             ["error", "warning", "info"].indexOf(a) - ["error", "warning", "info"].indexOf(b),
         ),
     );
-    expect(inspect(model)).toEqual(found);
+    expect(check(model).problems).toEqual(found);
   });
 });
 

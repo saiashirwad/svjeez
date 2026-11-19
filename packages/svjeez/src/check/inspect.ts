@@ -1,22 +1,16 @@
-import { FEATURES, diagnose, type Backend } from "../model/backend";
+import { FEATURES, diagnose } from "../model/backend";
 import type { Scene } from "../model/ir";
 import type { Seconds } from "../model/time";
-import { add, type Finding, type Related, type Severity, type Survey } from "./inspect-context";
+import { add, type Problem, type Related, type Severity, type Survey } from "./inspect-context";
 import { lowContrast } from "./inspect-contrast";
 import { layoutOverlap, missingGlyphs, overlap, wideLines, wordCuts } from "./inspect-layout";
 import { loopSeam, timing } from "./inspect-timing";
+import { svg } from "../svg/svg";
 import { neverVisible, offCanvas } from "./inspect-visibility";
 import { entriesOf, framesOf, hiddenOf, momentsOf, namesOf, sourcesOf } from "./survey";
 
-export { RULES, type Code, type Finding, type Related, type Severity } from "./inspect-context";
-
-export interface InspectOptions {
-  readonly backend?: Pick<Backend<never>, "name" | "supports">;
-  readonly times?: readonly Seconds[];
-}
-
-const capabilities = (survey: Survey, backend: InspectOptions["backend"]): void => {
-  if (!backend) return;
+const capabilities = (survey: Survey): void => {
+  const backend = svg;
 
   for (const found of diagnose(survey.scene, backend))
     add(survey, {
@@ -24,15 +18,15 @@ const capabilities = (survey: Survey, backend: InspectOptions["backend"]): void 
       severity: found.severity,
       key: found.key,
       message: found.message,
-      hint:
+      fix:
         found.severity === "error"
           ? `Draw it without ${FEATURES[found.feature]} for ${backend.name}, or emit for a backend that has it.`
           : `Keep it if the difference is fine for ${backend.name}, or draw it without ${FEATURES[found.feature]}.`,
     });
 };
 
-const folded = (findings: readonly Finding[], names: ReadonlyMap<string, string>): Finding[] => {
-  const out: Finding[] = [];
+const folded = (findings: readonly Problem[], names: ReadonlyMap<string, string>): Problem[] => {
+  const out: Problem[] = [];
   const at = new Map<string, { index: number; more: string[]; times: Set<Seconds> }>();
 
   for (const finding of findings) {
@@ -87,10 +81,11 @@ const folded = (findings: readonly Finding[], names: ReadonlyMap<string, string>
 
 const RANK: Readonly<Record<Severity, number>> = { error: 0, warning: 1, info: 2 };
 
-export const inspect = (scene: Scene, options: InspectOptions = {}): Finding[] => {
+/** Every problem the model shows, as the SVG backend would draw it: errors first, then paint order. */
+export const problemsOf = (scene: Scene, sampled?: readonly Seconds[]): Problem[] => {
   const entries = entriesOf(scene);
-  const times = momentsOf(scene, options.times);
-  const out: Finding[] = [];
+  const times = momentsOf(scene, sampled);
+  const out: Problem[] = [];
 
   const survey = {
     scene,
@@ -112,7 +107,7 @@ export const inspect = (scene: Scene, options: InspectOptions = {}): Finding[] =
   timing(survey);
   layoutOverlap(survey);
   wordCuts(survey);
-  capabilities(survey, options.backend);
+  capabilities(survey);
 
   const order = new Map(entries.map((entry) => [entry.node.key, entry.order]));
 

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Group, font, morph, scene, span, tokens, track, type SceneElement } from "svjeez";
-import { SceneError, boxesOf, inspect, svg, type Scene } from "svjeez/tools";
+import { SceneError, boxesOf, check, svg, type Scene } from "svjeez/tools";
 import { Chart, area, bars, line, type Plot } from "../src/index.ts";
 
 const theme = tokens({
@@ -133,7 +133,7 @@ describe("drawing", () => {
 
     expect(a.x + a.width).toBeLessThan(b.x);
     expect(b.height).toBeCloseTo(a.height * 2, 0);
-    expect(inspect(view).filter((finding) => finding.severity === "error")).toEqual([]);
+    expect(check(view).problems.filter((finding) => finding.severity === "error")).toEqual([]);
   });
 
   test("bars, an area with dots and a label emit animated svg", () => {
@@ -166,7 +166,7 @@ describe("drawing", () => {
     ));
 
     expect(svg.emit(view)).toContain("@keyframes");
-    expect(inspect(view).filter((finding) => finding.severity === "error")).toEqual([]);
+    expect(check(view).problems.filter((finding) => finding.severity === "error")).toEqual([]);
   });
 
   test("a changed dataset morphs between states", () => {
@@ -189,7 +189,7 @@ describe("drawing", () => {
     const view = sceneOf(() => <Group>{morph.between(states, [span(1, 1)])}</Group>);
 
     expect(svg.emit(view)).toContain("@keyframes");
-    expect(inspect(view).filter((finding) => finding.severity === "error")).toEqual([]);
+    expect(check(view).problems.filter((finding) => finding.severity === "error")).toEqual([]);
   });
 });
 

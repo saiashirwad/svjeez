@@ -19,7 +19,6 @@ import {
   type Vec,
 } from "svjeez";
 import {
-  diagnose,
   isLane,
   isScene,
   placements,
@@ -29,6 +28,7 @@ import {
   type Model,
 } from "svjeez/tools";
 import { SceneError } from "svjeez/tools";
+import { diagnose } from "../src/model/backend";
 import { FEATURES } from "../src/model/backend";
 
 const theme = tokens({ light: { ink: "#111111" }, dark: { ink: "#EEEEEE" } });

@@ -5,13 +5,7 @@ import { systemColorScheme } from "./scheme";
 
 export { validateSvg, type ValidationResult } from "./svg/validate";
 
-export {
-  checkScene,
-  type CheckOptions,
-  type CheckReport,
-  type CheckRule,
-  type Finding,
-} from "./check/check";
+export { checkPixels, type CheckOptions, type PixelReport } from "./check/check";
 
 export type ColorScheme = "light" | "dark";
 

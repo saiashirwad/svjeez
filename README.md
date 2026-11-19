@@ -75,13 +75,14 @@ Each has one job.
 ## Check a scene
 
 ```sh
+npx svjeez check scene.tsx
 npm install -D playwright-core
 npx playwright-core install chromium-headless-shell
-npx svjeez check scene.tsx
+npx svjeez check scene.tsx --browser
 npx svjeez frames scene.tsx --times 0,1,2 --sheet
 ```
 
-Open **Timeline** in the dev preview to inspect clips and motion tracks. Run `svjeez check` for layout and timing findings with source locations. Open `frames/sheet.png` to review the picture at each selected time. Run `npx svjeez skill --install` for the [authoring guide](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/SKILL.md) and worked examples.
+`svjeez check` reads the scene model and the SVG it emits, with no browser, and prints one report: every problem with its source and a `fix:`, then the animated lanes (CSS, or SMIL where a scene animates geometry, a filter or a gradient). `--json` prints the same as `{ ok, file, scene, problems, lanes }`, and `--browser` adds a pixel pass in Chromium. In code, `check(scene)` from `svjeez/tools` returns `{ problems, lanes }`. Open **Timeline** in the dev preview to see the lanes. Open `frames/sheet.png` to review the picture at each selected time. Run `npx svjeez skill --install` for the [authoring guide](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/SKILL.md) and worked examples.
 
 ## Packages
 

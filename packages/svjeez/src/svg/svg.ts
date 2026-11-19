@@ -3,11 +3,11 @@ import type { Backend as Route, Channel, ChannelValues } from "./channels";
 import type { Canvas, Lane as CssLane } from "./compile";
 import type { Emit } from "./css";
 import { num } from "../model/format";
-import type { Key as Held } from "./keys";
+import { moving, type Key as Held } from "./keys";
 import { DEFAULT_EASE, EPSILON, isHold } from "../model/time";
 import { render } from "./render";
 import { element, type AttrValue, type Element, type SvgNode } from "./tree";
-import { admit, type Backend, type Feature, type Support } from "../model/backend";
+import { admit, type Backend, type Feature, type LaneReport, type Support } from "../model/backend";
 import { foldLayers } from "../model/fold";
 import { drawMoving, isStraight, type GeometrySlot } from "./svg-geometry";
 import type {
@@ -98,6 +98,10 @@ interface Ctx {
   readonly sources: boolean;
   readonly around: Partial<Face>;
   readonly defs: Defs;
+  readonly onLane?: (lane: LaneReport) => void;
+  readonly reported: Set<string>;
+  /** The node being emitted: the owner of every lane written meanwhile. */
+  current?: SceneNode;
 }
 
 const pt = ([x, y]: Vec): string => `${num(x)} ${num(y)}`;
@@ -286,6 +290,38 @@ const isCut = (keys: readonly Held[]): boolean =>
     );
   });
 
+const report = (ctx: Ctx, slot: string, lane: CssLane): void => {
+  const { onLane, current } = ctx;
+
+  if (!onLane || !current) return;
+  const scale = lane.snapped / lane.period;
+
+  const spans = lane.keys.flatMap((key, index) => {
+    if (!moving(lane.keys, index)) return [];
+    const next = lane.keys[index + 1]!;
+    const start = (isHold(key.ease) ? next.t : key.t) * scale;
+
+    return [{ start, over: Math.max(0, next.t * scale - start) }];
+  });
+
+  if (spans.length === 0) return;
+
+  const record: LaneReport = {
+    key: current.key,
+    ...(current.source && { source: current.source }),
+    lane: slot,
+    backend: lane.backend,
+    spans,
+    period: lane.snapped,
+  };
+
+  const id = JSON.stringify(record);
+
+  if (ctx.reported.has(id)) return;
+  ctx.reported.add(id);
+  onLane(record);
+};
+
 const cssLane = <T>(
   ctx: Ctx,
   slot: Slot | GeometrySlot | (string & {}),
@@ -299,7 +335,7 @@ const cssLane = <T>(
 ): CssLane => {
   const { keys, period } = held(lane, ctx.scene.duration, values);
 
-  return {
+  const written: CssLane = {
     key: slot,
     backend: route,
     // SAFETY: every values() above returns a ChannelValues, so the names of its first key are Channels.
@@ -309,6 +345,10 @@ const cssLane = <T>(
     snapped: period,
     emit: emit ?? (cuts && slot === "opacity" && isCut(keys) ? "visibility" : "value"),
   };
+
+  report(ctx, slot, written);
+
+  return written;
 };
 
 interface Shell {
@@ -1035,6 +1075,18 @@ const dashedTrim = (node: SceneNode): GroupNode | undefined => {
 };
 
 const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
+  const outer = ctx.current;
+
+  ctx.current = given;
+
+  try {
+    return emitOne(ctx, given);
+  } finally {
+    ctx.current = outer;
+  }
+};
+
+const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
   const node = lifted(ctx, given);
   const split = dashedTrim(node);
 
@@ -1249,6 +1301,8 @@ export const svg: Backend<string, SvgOptions> = {
       prefix,
       hides: new Map(),
       sources: options.sources ?? false,
+      ...(options.onLane && { onLane: options.onLane }),
+      reported: new Set(),
       around,
       defs: {
         scene,

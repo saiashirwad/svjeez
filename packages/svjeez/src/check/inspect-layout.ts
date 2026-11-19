@@ -50,7 +50,7 @@ export const wideLines = (survey: Survey): void => {
       severity: "warning",
       key: node.key,
       message: `${spoken(node)} has a line ${units(widest)} wide in a column ${units(node.box.width)} wide: a single character is wider than the width it wraps to.`,
-      hint: "Give it a wider width to wrap to, or a smaller size.",
+      fix: "Give it a wider width to wrap to, or a smaller size.",
     });
   }
 };
@@ -114,7 +114,7 @@ export const overlap = (survey: Survey): void => {
       severity: "warning",
       key: a.node.key,
       message: `${spoken(a.node, 24)} and ${spoken(b.node, 24)} overlap while both are shown, at ${list(times)}.`,
-      hint: "Move one, or hide one while the other shows.",
+      fix: "Move one, or hide one while the other shows.",
       times,
       related: [b.node.key],
     });
@@ -183,7 +183,7 @@ export const missingGlyphs = (survey: Survey): void => {
         severity: "error",
         key: node.key,
         message: `${spoken(node)} uses ${shown.join(", ")}, which ${face} has no glyph for, so each target draws something different there.`,
-        hint: "Load a face that has these characters, or write the text without them.",
+        fix: "Load a face that has these characters, or write the text without them.",
       });
     }
   }
@@ -244,7 +244,7 @@ export const layoutOverlap = (survey: Survey): void => {
           severity: "warning",
           key: a.entry.node.key,
           message: `${label(a.entry.node)} and ${label(b.entry.node)} overlap by up to ${units(most[0])} by ${units(most[1])} in the ${CONTAINERS[container]} "${node.key}", at ${list(times)}. It placed them apart; a motion, rotate or scale carried one over the other.`,
-          hint: `Give the ${CONTAINERS[container]} a larger gap, or move, turn or grow the child less.`,
+          fix: `Give the ${CONTAINERS[container]} a larger gap, or move, turn or grow the child less.`,
           times,
           related: [b.entry.node.key],
         });
@@ -275,7 +275,7 @@ export const wordCuts = (survey: Survey): void => {
       severity: "warning",
       key: node.key,
       message: `${spoken(node)} wraps to ${units(wrap.width)} wide, and a word wider than that is cut across lines where | marks: ${words.join(", ")}.`,
-      hint: "Give it a wider width to wrap to, a smaller size, or a shorter word.",
+      fix: "Give it a wider width to wrap to, a smaller size, or a shorter word.",
     });
   }
 };

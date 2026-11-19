@@ -11,7 +11,7 @@ import {
   type SceneElement,
 } from "svjeez";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
-import { SceneError, describe as describeScene, inspect, svg } from "svjeez/tools";
+import { SceneError, describe as describeScene, check, svg } from "svjeez/tools";
 import { Code, type CodeProps } from "../src/index.ts";
 import { tomorrow } from "../src/palettes.ts";
 
@@ -144,7 +144,7 @@ describe("<Code>", () => {
 
     const out = made(() => morph.between(states, [span(1, 1)]), 3);
 
-    expect(inspect(out).filter(({ severity }) => severity === "error")).toEqual([]);
+    expect(check(out).problems.filter(({ severity }) => severity === "error")).toEqual([]);
 
     const texts = (t: number) =>
       describeScene(out, [t]).frames[0]!.nodes.filter(({ kind }) => kind === "text");
@@ -159,7 +159,9 @@ describe("<Code>", () => {
   });
 
   test("a scene of code checks clean", () => {
-    const found = inspect(made(() => snippet({ at: [10, 10], typing: span(0, 1) }), 3, false));
+    const found = check(
+      made(() => snippet({ at: [10, 10], typing: span(0, 1) }), 3, false),
+    ).problems;
 
     expect(found.filter(({ severity }) => severity !== "info")).toEqual([]);
   });

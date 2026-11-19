@@ -1,5 +1,4 @@
 import { SceneError } from "../model/scene-error";
-import { isHold } from "../model/time";
 import { formatValue, spec, valueOf, type Backend, type Channel } from "./channels";
 import { baseRule, classBody, cssDeclarations, cssKeyframes, freezeRule, type Emit } from "./css";
 import { fontFaces, isFontValue, type Font, type FontValue } from "../font/font";
@@ -16,7 +15,6 @@ import {
 } from "../font/usage";
 import { moving, valueAt, type Key } from "./keys";
 import { animate, windowEnd } from "./smil";
-import type { TimelineTrack } from "./traced";
 import { element, type AttrValue, type Element, type SvgNode } from "./tree";
 
 export interface Canvas {
@@ -41,7 +39,6 @@ export interface Lane {
 
 interface State {
   readonly canvas: Canvas;
-  readonly timeline?: TimelineTrack[];
   readonly fonts: Map<string, Font>;
   readonly faces: { readonly name: string; readonly font: Font }[];
   readonly fontUse: FontUse;
@@ -276,36 +273,6 @@ const veil = (shells: readonly Lane[][], veiled: boolean): Lane[][] =>
       : lanes;
   });
 
-const timelineOf = (node: Element, lanes: readonly Lane[]): TimelineTrack[] => {
-  const source = String(node.attrs["data-source"] ?? "");
-  const name = node.attrs["data-key"] ?? node.attrs.id ?? `<${node.tag}>`;
-
-  return lanes
-    .filter((lane) => !isHeld(lane))
-    .flatMap((lane) => {
-      const scale = lane.snapped / lane.period;
-
-      const spans = lane.keys.flatMap((key, index) => {
-        if (!moving(lane.keys, index)) return [];
-        const next = lane.keys[index + 1]!;
-        const at = (isHold(key.ease) ? next.t : key.t) * scale;
-
-        return [{ at, over: Math.max(0, next.t * scale - at) }];
-      });
-
-      if (spans.length === 0) return [];
-
-      return [
-        {
-          label: `${String(name)} · ${lane.key}`,
-          ...(source && { source }),
-          spans,
-          period: lane.snapped,
-        },
-      ];
-    });
-};
-
 const walk = (
   state: State,
   node: SvgNode,
@@ -324,9 +291,6 @@ const walk = (
     case "element": {
       const bare = element(node.tag, resolveAttrs(state, node.attrs), []);
       const shells = veil(node.lanes ? [[...node.lanes]] : [], veiled);
-
-      if (state.timeline)
-        for (const shell of shells) state.timeline.push(...timelineOf(node, shell));
 
       const hides =
         veiled || shells.some((shell) => shell.some((lane) => lane.emit === "visibility"));
@@ -367,12 +331,10 @@ export const compile = (
   content: readonly SvgNode[],
   canvas: Canvas,
   author = "",
-  timeline?: TimelineTrack[],
   rootAttrs: Element["attrs"] = {},
 ): Compiled => {
   const state: State = {
     canvas,
-    timeline,
     fonts: new Map(),
     faces: [],
     fontUse: newFontUse(),

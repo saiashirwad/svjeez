@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Align, Group, Shape, circle, ease, font, scene, span, track } from "svjeez";
-import { SceneError, inspect, svg, type Child, type Model, type When } from "svjeez/tools";
+import { SceneError, check, svg, type Child, type Model, type When } from "svjeez/tools";
 import { Edge, look } from "../src/kit.tsx";
 import { blendNumber, valueAt } from "../../svjeez/src/model/sample";
 import {
@@ -34,8 +34,8 @@ const draw = (child: Child, duration = 6) =>
   ));
 
 const errorsOf = (child: Child) =>
-  inspect(draw(child))
-    .filter((f) => f.severity === "error")
+  check(draw(child))
+    .problems.filter((f) => f.severity === "error")
     .map((f) => f.message);
 
 const thrown = (run: () => void): SceneError => {

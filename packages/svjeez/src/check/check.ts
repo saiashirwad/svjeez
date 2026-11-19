@@ -1,5 +1,6 @@
 import type { Seconds } from "../model/time";
-import type { TimelineTrack } from "../svg/traced";
+import type { Source } from "../model/ir";
+import type { Code, Problem } from "./inspect-context";
 import { openScene, type SceneOptions } from "../frames";
 import {
   measure,
@@ -10,23 +11,10 @@ import {
   type PageSeries,
 } from "./check-page";
 
-export type CheckRule =
-  | "off-canvas"
-  | "text-overflow"
-  | "static"
-  | "visible-at-zero"
-  | "loop-seam"
-  | "overlap";
-
-export interface Finding {
-  readonly rule: CheckRule;
-  readonly severity: "error" | "warning";
-  readonly message: string;
-  readonly hint: string;
-  readonly key?: string;
-  readonly times: readonly Seconds[];
-  readonly source?: string;
+interface Found extends Problem {
   readonly element: string;
+  /** The `data-source` text the problem was read from, for grouping. */
+  readonly at?: string;
 }
 
 export interface CheckOptions extends SceneOptions {
@@ -34,11 +22,23 @@ export interface CheckOptions extends SceneOptions {
   readonly cues?: readonly Seconds[];
 }
 
-export interface CheckReport {
+export interface PixelReport {
   readonly duration: Seconds;
   readonly times: readonly Seconds[];
-  readonly findings: readonly Finding[];
+  readonly problems: Problem[];
 }
+
+const sourceOf = (text: string | undefined): Source | undefined => {
+  const match = text === undefined ? null : /^(.*?):(\d+)(?::(\d+))?$/.exec(text);
+
+  return match
+    ? {
+        file: match[1] ?? "",
+        line: Number(match[2]),
+        ...(match[3] !== undefined && { column: Number(match[3]) }),
+      }
+    : undefined;
+};
 
 const SWEEP = 96;
 
@@ -74,53 +74,18 @@ const sampleTimes = (duration: Seconds): Seconds[] => [
   duration - Math.min(0.05, duration / 100),
 ];
 
-export const timelineCues = (timeline: readonly TimelineTrack[], duration: Seconds): Seconds[] => {
-  const samples = new Set<Seconds>();
-  const limit = 48;
-
-  const add = (t: Seconds) => {
-    const time = round(t);
-
-    if (time >= 0 && time < duration) samples.add(time);
-  };
-
-  for (const track of timeline) {
-    const period = track.period ?? duration;
-    const cycles = Math.min(limit, Math.ceil(duration / period));
-
-    for (let i = 0; i < cycles; i++) {
-      const offset = i * period;
-      let previousEnd: Seconds | undefined;
-
-      for (const { at, over } of track.spans) {
-        if (previousEnd !== undefined && previousEnd < at) add(offset + (previousEnd + at) / 2);
-        add(offset + at);
-        add(offset + at + over / 2);
-        add(offset + at + over);
-        previousEnd = at + over;
-      }
-    }
-  }
-
-  const sorted = [...samples].sort((a, b) => a - b);
-
-  return sorted.length <= limit
-    ? sorted
-    : Array.from(
-        { length: limit },
-        (_, i) => sorted[Math.round((i * (sorted.length - 1)) / (limit - 1))]!,
-      );
-};
-
-export const checkScene = async (svg: string, options: CheckOptions = {}): Promise<CheckReport> => {
+export const checkPixels = async (
+  svg: string,
+  options: CheckOptions = {},
+): Promise<PixelReport> => {
   for (const time of options.times ?? options.cues ?? [])
     if (!(Number.isFinite(time) && time >= 0))
-      throw new Error(`checkScene() needs finite, non-negative times, got ${time}.`);
+      throw new Error(`checkPixels() needs finite, non-negative times, got ${time}.`);
 
   if (options.times?.length === 0)
-    throw new Error("checkScene() needs at least one time, got an empty list.");
+    throw new Error("checkPixels() needs at least one time, got an empty list.");
 
-  const scene = await openScene(svg, options, "checkScene()");
+  const scene = await openScene(svg, options, "checkPixels()");
 
   try {
     const { duration } = scene;
@@ -156,7 +121,7 @@ export const checkScene = async (svg: string, options: CheckOptions = {}): Promi
     const series =
       duration > 0 ? await scene.evaluate(sweep, { duration, steps: SWEEP, within: HOLD }) : [];
 
-    const findings = [
+    const findings: Found[] = [
       ...offCanvas(page.leaves, boxes, times, page),
       ...textOverflow(page.leaves, boxes, times, page),
       ...overlap(page.leaves, boxes, times),
@@ -165,32 +130,46 @@ export const checkScene = async (svg: string, options: CheckOptions = {}): Promi
       ...seam(page.leaves, edges, seamBefore, page, duration),
     ];
 
-    return { duration, times, findings: group(findings) };
+    return {
+      duration,
+      times,
+      problems: group(findings).map(plain),
+    };
   } finally {
     await scene.close();
   }
 };
 
-const group = (findings: readonly Finding[]): Finding[] => {
-  const groups = new Map<string, { first: Finding; count: number; times: Set<Seconds> }>();
+const plain = (found: Found): Problem => ({
+  code: found.code,
+  severity: found.severity,
+  key: found.key,
+  ...(found.source && { source: found.source }),
+  message: found.message,
+  fix: found.fix,
+  ...(found.times && { times: found.times }),
+});
+
+const group = (findings: readonly Found[]): Found[] => {
+  const groups = new Map<string, { first: Found; count: number; times: Set<Seconds> }>();
 
   for (const found of findings) {
     const key =
-      found.source && found.rule !== "overlap" ? `${found.rule} ${found.source}` : `${groups.size}`;
+      found.at && found.code !== "overlap" ? `${found.code} ${found.at}` : `${groups.size}`;
 
     const known = groups.get(key);
 
     if (known) {
       known.count++;
 
-      for (const time of found.times) known.times.add(time);
-    } else groups.set(key, { first: found, count: 1, times: new Set(found.times) });
+      for (const time of found.times ?? []) known.times.add(time);
+    } else groups.set(key, { first: found, count: 1, times: new Set(found.times ?? []) });
   }
 
   return [...groups.values()]
     .map(({ first, count, times }) => ({
       ...first,
-      times: [...times].sort((a, b) => a - b),
+      ...(times.size > 0 && { times: [...times].sort((a, b) => a - b) }),
       message:
         count > 1
           ? first.message.replace(
@@ -205,21 +184,22 @@ const group = (findings: readonly Finding[]): Finding[] => {
 type Canvas = { readonly width: number; readonly height: number };
 
 const finding = (
-  rule: CheckRule,
-  severity: Finding["severity"],
+  code: Code,
+  severity: Problem["severity"],
   element: PageElement,
   times: readonly Seconds[],
   message: string,
-  hint: string,
-): Finding => ({
-  rule,
+  fix: string,
+): Found => ({
+  code,
   severity,
-  message: `${message} ${hint}`,
-  hint,
-  times: times.map(round),
+  key: element.key ?? "",
+  ...(sourceOf(element.source) && { source: sourceOf(element.source) }),
+  message,
+  fix,
+  ...(times.length > 0 && { times: times.map(round) }),
   element: name(element),
-  ...(element.key !== undefined && { key: element.key }),
-  ...(element.source && { source: element.source }),
+  ...(element.source && { at: element.source }),
 });
 
 const past = (b: PageBox, x0: number, y0: number, x1: number, y1: number) =>
@@ -235,7 +215,7 @@ const offCanvas = (
   boxes: readonly PageBox[][],
   times: readonly Seconds[],
   { width, height }: Canvas,
-): Finding[] =>
+): Found[] =>
   leaves.flatMap((leaf, index) => {
     const seen = times.flatMap((time, t) => {
       const b = boxes[t]?.[index];
@@ -297,7 +277,7 @@ const textOverflow = (
   boxes: readonly PageBox[][],
   times: readonly Seconds[],
   { width, height }: Canvas,
-): Finding[] =>
+): Found[] =>
   leaves.flatMap((leaf, index) => {
     if (leaf.tag !== "text" || !leaf.text) return [];
     const canvas: Seconds[] = [];
@@ -389,7 +369,7 @@ const overlap = (
   leaves: readonly PageElement[],
   boxes: readonly PageBox[][],
   times: readonly Seconds[],
-): Finding[] => {
+): Found[] => {
   const texts = leaves.flatMap((leaf, index) =>
     leaf.tag === "text" && leaf.text && !leaf.masked ? [index] : [],
   );
@@ -458,7 +438,7 @@ const overlap = (
   });
 };
 
-const still = (animated: readonly PageElement[], series: readonly PageSeries[]): Finding[] =>
+const still = (animated: readonly PageElement[], series: readonly PageSeries[]): Found[] =>
   animated.flatMap((element, index) =>
     series[index]?.empty
       ? [
@@ -489,7 +469,7 @@ const visibleAtZero = (
   animated: readonly PageElement[],
   series: readonly PageSeries[],
   duration: Seconds,
-): Finding[] =>
+): Found[] =>
   animated.flatMap((element, index) => {
     const s = series[index];
 
@@ -538,7 +518,7 @@ const seam = (
   before: Seconds,
   { width, height }: Canvas,
   duration: Seconds,
-): Finding[] => {
+): Found[] => {
   const seen = (b: PageBox | undefined): b is PageBox =>
     b !== undefined && visible(b) && b[2] > 0 && b[3] > 0 && b[0] < width && b[1] < height;
 

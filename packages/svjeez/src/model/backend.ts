@@ -57,12 +57,25 @@ export interface Diagnostic {
   readonly source?: Source;
 }
 
+/** One animated lane the backend wrote: what moves, where it was written, how it is driven, when. */
+export interface LaneReport {
+  readonly key: string;
+  readonly source?: Source;
+  readonly lane: string;
+  readonly backend: "css" | "smil";
+  readonly spans: readonly { readonly start: number; readonly over: number }[];
+  readonly period?: number;
+}
+
 export interface Backend<Out, Options = {}> {
   readonly name: string;
   readonly supports: Readonly<Record<Feature, Support>>;
   emit(
     scene: Scene,
-    options?: Options & { readonly onWarning?: (warning: Diagnostic) => void },
+    options?: Options & {
+      readonly onWarning?: (warning: Diagnostic) => void;
+      readonly onLane?: (lane: LaneReport) => void;
+    },
   ): Out;
 }
 

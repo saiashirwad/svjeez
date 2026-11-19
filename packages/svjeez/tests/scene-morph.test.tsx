@@ -19,7 +19,7 @@ import {
   boxesOf,
   describe as describeScene,
   hitTest,
-  inspect,
+  check,
   isLane,
   svg,
   valueAt,
@@ -457,7 +457,7 @@ describe("different paths", () => {
     }
 
     expect(() => describeScene(model, times)).not.toThrow();
-    expect(() => inspect(model)).not.toThrow();
+    expect(() => check(model).problems).not.toThrow();
     expect(() => svg.emit(model)).not.toThrow();
   };
 

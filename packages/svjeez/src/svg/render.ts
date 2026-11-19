@@ -5,7 +5,6 @@ import { RATE_ATTR } from "./rate";
 import { num } from "../model/format";
 import type { Seconds } from "../model/time";
 import { element, raw, serialize, text, type SvgNode } from "./tree";
-import { traceOf, type TimelineTrack } from "./traced";
 import { share } from "./share";
 import { validateSvg } from "./validate";
 
@@ -50,14 +49,10 @@ export const render = (options: RenderOptions, nodes: readonly SvgNode[]): strin
       ? undefined
       : Math.max(0, Math.min(duration, options.still?.at ?? duration * 0.85));
 
-  const trace = traceOf();
-  const timeline: TimelineTrack[] | undefined = trace?.within ? [] : undefined;
-
   const { css, ...compiled } = compile(
     nodes,
     { width, height, duration, playbackRate, prefix, stillAt, loop: options.loop ?? true },
     options.css,
-    timeline,
     {
       ...(options.font?.family !== undefined && { "font-family": options.font.family }),
       ...(options.font?.weight !== undefined && { "font-weight": num(options.font.weight) }),
@@ -90,21 +85,12 @@ export const render = (options: RenderOptions, nodes: readonly SvgNode[]): strin
   ]);
 
   const source = serialize(root);
-  const { errors, warnings } = validateSvg(source);
+  const { errors } = validateSvg(source);
 
   if (errors.length > 0)
     throw new Error(
       `Generated SVG is invalid:\n${errors.map((error) => `  - ${error}`).join("\n")}`,
     );
 
-  const svg = `${source}\n`;
-
-  trace?.onRender(svg, {
-    warnings,
-    duration,
-    loop: options.loop ?? true,
-    timeline: timeline ?? [],
-  });
-
-  return svg;
+  return `${source}\n`;
 };

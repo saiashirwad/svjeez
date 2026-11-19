@@ -778,7 +778,7 @@ const everyKind = (options: { readonly loop?: boolean } = {}): Model.Scene => {
 };
 
 describe("identity and output for every node kind", () => {
-  startTrace({ within: import.meta.dir, onRender: () => undefined });
+  startTrace({ within: import.meta.dir });
   const model = everyKind();
 
   stopTrace();

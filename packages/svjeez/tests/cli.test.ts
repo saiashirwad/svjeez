@@ -2,7 +2,15 @@ import { expect, test } from "bun:test";
 import { mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { BuildReport } from "../src/svg/traced";
+import type { LaneReport } from "svjeez/tools";
+
+interface Build {
+  readonly svg: string;
+  readonly warnings: readonly string[];
+  readonly lanes: readonly LaneReport[];
+  readonly duration?: number;
+  readonly loop?: boolean;
+}
 
 const cli = (...args: string[]) =>
   Bun.spawnSync([process.execPath, join(import.meta.dir, "../src/cli.ts"), ...args]);
@@ -96,18 +104,20 @@ test("svjeez svg calls a template with its defaults, then with --params and --pa
   );
 });
 
-test("svg --json reports compiled timing with the line that wrote each track", () => {
+test("svg --json reports every animated lane with the line that wrote it", () => {
   const file = join(import.meta.dir, "fixtures/check/cue-scene.tsx");
   const output = cli("svg", file, "--json");
 
   expect(output.exitCode).toBe(0);
-  const build: BuildReport & { svg: string } = JSON.parse(output.stdout.toString());
+  const build: Build = JSON.parse(output.stdout.toString());
 
-  const track = build.timeline.find((track) => track.label.endsWith(" · opacity"));
-  expect(track?.source).toContain("cue-scene.tsx:10:");
+  const track = build.lanes.find((lane) => lane.lane === "opacity");
+  expect(track?.source?.file).toContain("cue-scene.tsx");
+  expect(track?.source?.line).toBe(10);
+  expect(track?.backend).toBe("css");
   expect(track?.spans).toHaveLength(2);
-  expect(track?.spans[0]?.at).toBeCloseTo(0.213);
-  expect(track?.spans[1]?.at).toBeCloseTo(0.413);
+  expect(track?.spans[0]?.start).toBeCloseTo(0.213);
+  expect(track?.spans[1]?.start).toBeCloseTo(0.413);
   expect(build.warnings).toEqual([]);
 });
 
@@ -148,9 +158,7 @@ test("svjeez svg emits a scene model default export, and --json reports its buil
   expect(out.stderr.toString()).toBe("");
   expect(out.stdout.toString()).toBe(svg.emit(model));
 
-  const build: BuildReport & { svg: string } = JSON.parse(
-    cli("svg", file, "--json").stdout.toString(),
-  );
+  const build: Build = JSON.parse(cli("svg", file, "--json").stdout.toString());
 
   expect(build.svg).toContain(`data-key="1" data-source="${file}:`);
   expect(build.svg.replace(/ data-(key|source)="[^"]*"/g, "")).toBe(out.stdout.toString());

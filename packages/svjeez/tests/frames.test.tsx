@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import assert from "node:assert/strict";
 import { deflateSync } from "node:zlib";
-import { checkScene, openScene, renderFrames } from "svjeez/frames";
+import { checkPixels, openScene, renderFrames } from "svjeez/frames";
 import { loopLength, seek, restyle } from "svjeez/page";
 import {
   Group,
@@ -788,7 +788,7 @@ describe.if(browser)("seek and loopLength on an inline <svg>", () => {
 
       const [rendered, checked] = await Promise.all([
         renderFrames(out, { times: [...times, 1.25], colorScheme }),
-        checkScene(out, { times, colorScheme }),
+        checkPixels(out, { times, colorScheme }),
       ]);
 
       expect(rendered.duration).toBe(4);
@@ -800,7 +800,7 @@ describe.if(browser)("seek and loopLength on an inline <svg>", () => {
       ]);
 
       expect(checked.duration).toBe(4);
-      expect(checked.findings.filter(({ rule }) => rule === "off-canvas")).toEqual([
+      expect(checked.problems.filter(({ code }) => code === "off-canvas")).toEqual([
         expect.objectContaining({ key: "window", times: [1.75], severity: "warning" }),
       ]);
     }

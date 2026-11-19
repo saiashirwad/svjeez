@@ -29,7 +29,8 @@ import {
   type SceneElement,
   type Vec,
 } from "svjeez";
-import { boxesOf, diagnose, hitTest, isLane, svg, type Effect, type Model } from "svjeez/tools";
+import { boxesOf, hitTest, isLane, svg, type Effect, type Model } from "svjeez/tools";
+import { diagnose } from "../src/model/backend";
 
 const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
 

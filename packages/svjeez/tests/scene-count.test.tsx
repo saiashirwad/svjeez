@@ -19,7 +19,7 @@ import { restyle } from "svjeez/page";
 import {
   describe as described,
   SceneError,
-  inspect,
+  check,
   isLane,
   svg,
   valueAt,
@@ -293,12 +293,12 @@ describe("a counting Text", () => {
       </Text>
     ));
 
-    const seams = inspect(once).filter((finding) => finding.code === "loop-seam");
+    const seams = check(once).problems.filter((finding) => finding.code === "loop-seam");
 
     expect(seams.map((finding) => finding.message)).toEqual([
       '<Text> "n" shows "50" at the end and jumps to "0" when the loop starts again at 0s.',
     ]);
-    expect(inspect(model).filter((finding) => finding.severity !== "info")).toEqual([]);
+    expect(check(model).problems.filter((finding) => finding.severity !== "info")).toEqual([]);
   });
 
   test("the same count in every state of a morph moves with it; a different one is an error", () => {

@@ -1,12 +1,6 @@
 export { svg, type SvgOptions } from "./svg/svg";
 
-export {
-  diagnose,
-  type Backend,
-  type Diagnostic,
-  type Feature,
-  type Support,
-} from "./model/backend";
+export type { Backend, Diagnostic, Feature, LaneReport, Support } from "./model/backend";
 
 export type { SceneOptions } from "./author/lower";
 
@@ -95,14 +89,14 @@ export { SceneError, type Where } from "./model/scene-error";
 export { nodeName } from "./model/naming";
 
 export {
-  inspect,
   RULES,
   type Code,
-  type Finding,
-  type InspectOptions,
+  type Problem,
   type Related,
   type Severity,
-} from "./check/inspect";
+} from "./check/inspect-context";
+
+export { check, type Check, type CheckOptions } from "./check/report";
 
 export {
   describe,

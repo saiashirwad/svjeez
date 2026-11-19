@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import { checkScene, renderFrames, type CheckRule, type Finding } from "svjeez/frames";
+import { checkPixels, renderFrames } from "svjeez/frames";
 import {
   Group,
   Shape,
@@ -17,7 +17,7 @@ import {
   type SceneElement,
   type Vec,
 } from "svjeez";
-import { svg, type Hex, type Layer } from "svjeez/tools";
+import { svg, type Code, type Hex, type Layer, type Problem } from "svjeez/tools";
 import { startTrace, stopTrace } from "../src/svg/traced";
 
 const made = (build: () => SceneElement, duration = 2, sources = false): string =>
@@ -42,8 +42,10 @@ const browser = await renderFrames(
 
 const sans = await font.load(new URL("./fixtures/ABeeZee-Regular.ttf", import.meta.url));
 
-const findings = async (svg: string, rule: CheckRule): Promise<Finding[]> =>
-  (await checkScene(svg, { colorScheme: "light" })).findings.filter((found) => found.rule === rule);
+const findings = async (svg: string, code: Code): Promise<Problem[]> =>
+  (await checkPixels(svg, { colorScheme: "light" })).problems.filter(
+    (found) => found.code === code,
+  );
 
 const BG = () => <Shape geometry={rect(200, 100)} fill="#111111" />;
 
@@ -57,7 +59,7 @@ const label = (x: number, y: number, size: number, text: string, fill: Hex = "#F
   </Text>
 );
 
-describe.if(browser)("checkScene", () => {
+describe.if(browser)("checkPixels", () => {
   test("samples animations inside a nested SVG on the checked scene's clock", async () => {
     const picture = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90" width="160" height="90" data-playback-rate="2">
       <style>
@@ -74,8 +76,8 @@ describe.if(browser)("checkScene", () => {
       </svg>
     </svg>`;
 
-    const report = await checkScene(picture, { times: [0, 0.5, 0.9], colorScheme: "light" });
-    const overlaps = report.findings.filter(({ rule }) => rule === "overlap");
+    const report = await checkPixels(picture, { times: [0, 0.5, 0.9], colorScheme: "light" });
+    const overlaps = report.problems.filter(({ code }) => code === "overlap");
 
     expect(overlaps.map(({ times }) => times)).toEqual([[0.9]]);
   });
@@ -92,7 +94,10 @@ describe.if(browser)("checkScene", () => {
     );
 
     expect(lost).toHaveLength(1);
-    expect(lost[0]).toMatchObject({ severity: "error", element: "<rect>" });
+    expect(lost[0]).toMatchObject({
+      severity: "error",
+      message: expect.stringContaining("<rect>"),
+    });
 
     const entering = await findings(
       made(() => (
@@ -121,7 +126,8 @@ describe.if(browser)("checkScene", () => {
     );
 
     expect(cut).toHaveLength(1);
-    expect(cut[0]).toMatchObject({ severity: "warning", element: "<rect>" });
+    expect(cut[0]!.severity).toBe("warning");
+    expect(cut[0]!.message).toContain("<rect>");
     expect(cut[0]!.message).toContain("past the right edge");
   });
 
@@ -140,11 +146,13 @@ describe.if(browser)("checkScene", () => {
       "text-overflow",
     );
 
-    expect(past.map((found) => found.element).sort()).toEqual([
-      '<text "far too long for this">',
-      '<text "overflowing label">',
+    expect(past.map((found) => /<text "([^"]+)">/.exec(found.message)?.[1]).sort()).toEqual([
+      "far too long for this",
+      "overflowing label",
     ]);
-    expect(past.find((found) => found.element.includes("label"))!.message).toContain("<rect>");
+    expect(past.find((found) => found.message.includes("overflowing label"))!.message).toContain(
+      "<rect>",
+    );
   });
 
   test("static: CSS keyframes whose values never change", async () => {
@@ -160,7 +168,8 @@ describe.if(browser)("checkScene", () => {
     const empty = await findings(svg, "static");
 
     expect(empty).toHaveLength(1);
-    expect(empty[0]).toMatchObject({ severity: "warning", element: "<g>" });
+    expect(empty[0]!.severity).toBe("warning");
+    expect(empty[0]!.message).toContain("<g>");
     expect(empty[0]!.message).toContain("draws nothing");
   });
 
@@ -279,7 +288,7 @@ describe.if(browser)("checkScene", () => {
   });
 
   test("a clean scene has nothing to report, and the default times run from 0 to just before the end", async () => {
-    const report = await checkScene(
+    const report = await checkPixels(
       made(() => (
         <Group>
           <BG />
@@ -292,7 +301,7 @@ describe.if(browser)("checkScene", () => {
       )),
     );
 
-    expect(report.findings).toEqual([]);
+    expect(report.problems).toEqual([]);
     expect(report.times[0]).toBe(0);
     expect(report.times.at(-1)!).toBeLessThan(2);
     expect(report.times.at(-1)!).toBeGreaterThan(1.9);
@@ -306,10 +315,10 @@ describe.if(browser)("checkScene", () => {
       </Group>
     );
 
-    expect((await checkScene(made(lost))).findings[0]).toMatchObject({ rule: "off-canvas" });
-    expect((await checkScene(made(lost))).findings[0]?.key).toBeUndefined();
+    expect((await checkPixels(made(lost))).problems[0]).toMatchObject({ code: "off-canvas" });
+    expect((await checkPixels(made(lost))).problems[0]?.key).toBe("");
 
-    startTrace({ within: import.meta.dir, onRender: () => {} });
+    startTrace({ within: import.meta.dir });
 
     const traced = (() => {
       try {
@@ -319,9 +328,10 @@ describe.if(browser)("checkScene", () => {
       }
     })();
 
-    const [found] = (await checkScene(traced)).findings;
-    expect(found).toMatchObject({ rule: "off-canvas", key: "lost" });
-    expect(found!.source).toMatch(/check\.test\.tsx:\d+:\d+$/);
+    const [found] = (await checkPixels(traced)).problems;
+    expect(found).toMatchObject({ code: "off-canvas", key: "lost" });
+    expect(found!.source).toMatchObject({ file: expect.stringMatching(/check\.test\.tsx$/) });
+    expect(found!.source?.line).toBeGreaterThan(0);
   });
 
   const cli = (...flags: string[]) =>
@@ -331,15 +341,15 @@ describe.if(browser)("checkScene", () => {
     const cue = svg.emit((await import("./fixtures/check/cue-scene")).default);
     const uniform = [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5];
 
-    expect((await checkScene(cue, { times: uniform })).findings).toEqual([]);
-    expect((await checkScene(cue, { cues: [0.3] })).findings.map((found) => found.rule)).toEqual([
+    expect((await checkPixels(cue, { times: uniform })).problems).toEqual([]);
+    expect((await checkPixels(cue, { cues: [0.3] })).problems.map((found) => found.code)).toEqual([
       "overlap",
     ]);
   });
 
   test("svjeez check finds a short overlap in a scene model between its uniform samples", () => {
     const file = join(import.meta.dir, "fixtures/check/cue-scene.tsx");
-    const uniform = cli(file, "--json", "--times", "0,0.5,1,1.5,2,2.5,3,3.5");
+    const uniform = cli(file, "--json", "--browser", "--times", "0,0.5,1,1.5,2,2.5,3,3.5");
 
     expect(uniform.exitCode).toBe(0);
     expect(uniform.stdout.toString()).toContain('"code": "overlap"');
@@ -353,7 +363,7 @@ describe.if(browser)("checkScene", () => {
     expect(out).toMatch(
       /offscreen-scene\.tsx:6:5 {2}off-canvas {2}error: <Shape> "dot" is outside the 100×60 canvas/,
     );
-    expect(out).toContain("\n    hint: Move it onto the canvas, or remove it.");
+    expect(out).toContain("\n    fix: Move it onto the canvas, or remove it.");
     expect(out).toContain("1 error, 0 warnings");
   });
 
@@ -362,25 +372,22 @@ describe.if(browser)("checkScene", () => {
     const report = JSON.parse(result.stdout.toString());
 
     expect(result.exitCode).toBe(1);
-    expect(Object.keys(report)).toEqual(["errors", "warnings", "info"]);
-    expect(report.errors).toEqual([
+    expect(Object.keys(report)).toEqual(["ok", "file", "scene", "problems", "lanes"]);
+    expect(report.ok).toBe(false);
+    expect(report.scene).toMatchObject({ duration: expect.any(Number), loop: expect.any(Boolean) });
+    expect(report.problems.filter((p: Problem) => p.severity === "error")).toEqual([
       expect.objectContaining({
         code: "off-canvas",
         key: "lost",
         source: expect.objectContaining({ line: 6 }),
-        hint: "Move it onto the canvas, or remove it.",
+        fix: "Move it onto the canvas, or remove it.",
       }),
     ]);
     expect(result.stdout.toString()).not.toMatch(/<(rect|path|circle)>/);
   });
 
-  test("svjeez check --no-browser reads the model alone, and --at describes the picture", () => {
-    const result = cli(
-      join(import.meta.dir, "fixtures/check/model.tsx"),
-      "--no-browser",
-      "--at",
-      "1",
-    );
+  test("svjeez check reads the model alone by default, and --at describes the picture", () => {
+    const result = cli(join(import.meta.dir, "fixtures/check/model.tsx"), "--at", "1");
 
     const out = result.stdout.toString();
 
@@ -394,7 +401,8 @@ describe.if(browser)("checkScene", () => {
     const report = JSON.parse(result.stdout.toString());
 
     expect(result.exitCode).toBe(1);
-    expect(report.errors).toEqual([
+    expect(report.ok).toBe(false);
+    expect(report.problems).toEqual([
       expect.objectContaining({
         code: "compile-error",
         key: "",
@@ -405,21 +413,21 @@ describe.if(browser)("checkScene", () => {
   });
 });
 
-test("checkScene rejects bad times before it starts a browser", async () => {
+test("checkPixels rejects bad times before it starts a browser", async () => {
   const still = made(BG);
 
-  await expect(checkScene(still, { times: [-1] })).rejects.toThrow(
-    "checkScene() needs finite, non-negative times, got -1.",
+  await expect(checkPixels(still, { times: [-1] })).rejects.toThrow(
+    "checkPixels() needs finite, non-negative times, got -1.",
   );
-  await expect(checkScene(still, { times: [] })).rejects.toThrow(
-    "checkScene() needs at least one time, got an empty list.",
+  await expect(checkPixels(still, { times: [] })).rejects.toThrow(
+    "checkPixels() needs at least one time, got an empty list.",
   );
 });
 
 test("a trace reads each node's place off the stack, and sources writes it", () => {
   const build = () => <Shape key="box" geometry={rect(4, 4)} fill="#000000" />;
 
-  startTrace({ within: import.meta.dir, onRender: () => {} });
+  startTrace({ within: import.meta.dir });
 
   try {
     const model = scene({ size: [10, 10], duration: 1, title: "Trace" }, build);
@@ -445,23 +453,23 @@ describe("svjeez check when the scene does not build", () => {
 
   const fixture = (name: string) => join(import.meta.dir, `fixtures/check/${name}.tsx`);
 
-  test("a compile error carries the node's line, its name, and the fix as the hint", () => {
-    const result = cli(fixture("unpainted"), "--no-browser", "--json");
+  test("a compile error carries the node's line, its name, and the fix as the fix", () => {
+    const result = cli(fixture("unpainted"), "--json");
     const report = JSON.parse(result.stdout.toString());
 
     expect(result.exitCode).toBe(1);
-    expect(report.errors).toEqual([
+    expect(report.problems).toEqual([
       expect.objectContaining({
         code: "compile-error",
         message: "<Shape> paints nothing: it has no fill and no stroke.",
-        hint: "Give it a fill, as in fill={theme.text}, or a stroke, as in stroke={{ color: theme.text }}.",
+        fix: "Give it a fill, as in fill={theme.text}, or a stroke, as in stroke={{ color: theme.text }}.",
         source: expect.objectContaining({ line: 6 }),
       }),
     ]);
   });
 
   test("two steps on one track point at the second call", () => {
-    const out = cli(fixture("overlap"), "--no-browser").stdout.toString();
+    const out = cli(fixture("overlap")).stdout.toString();
 
     expect(out).toMatch(
       /overlap\.tsx:4:\d+ {2}compile-error {2}error: Two steps move this track at once: one from 0s to 1s, and another at 0\.5s/,
@@ -469,7 +477,7 @@ describe("svjeez check when the scene does not build", () => {
   });
 
   test("--at says to fix the build first, not that the file is SVG", () => {
-    const out = cli(fixture("unpainted"), "--no-browser", "--at", "1").stdout.toString();
+    const out = cli(fixture("unpainted"), "--at", "1").stdout.toString();
 
     expect(out).toContain(
       "--at describes the scene once it builds; fix the compile error above first.",

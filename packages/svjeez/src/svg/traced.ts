@@ -2,24 +2,9 @@ import type { JsxSource } from "../author/sources";
 
 export const TRACE: unique symbol = Symbol.for("svjeez.sources");
 
-export interface TimelineTrack {
-  readonly label: string;
-  readonly source?: string;
-  readonly spans: readonly { readonly at: number; readonly over: number }[];
-  readonly period?: number;
-}
-
-export interface BuildReport {
-  readonly warnings: readonly string[];
-  readonly duration?: number;
-  readonly loop?: boolean;
-  readonly timeline: readonly TimelineTrack[];
-}
-
 interface Trace {
   readonly within?: string;
   readonly sources?: boolean;
-  readonly onRender: (svg: string, report: BuildReport) => void;
 }
 
 interface Scope {

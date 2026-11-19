@@ -20,7 +20,8 @@ import {
   type SceneElement,
   type Vec,
 } from "svjeez";
-import { diagnose, isLane, svg, type Model } from "svjeez/tools";
+import { isLane, svg, type Model } from "svjeez/tools";
+import { diagnose } from "../src/model/backend";
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Test" }, build);

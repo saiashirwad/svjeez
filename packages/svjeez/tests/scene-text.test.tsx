@@ -15,7 +15,8 @@ import {
   track,
   type SceneElement,
 } from "svjeez";
-import { boxesOf, diagnose, isLane, svg, type Model, type StrokeProps } from "svjeez/tools";
+import { boxesOf, isLane, svg, type Model, type StrokeProps } from "svjeez/tools";
+import { diagnose } from "../src/model/backend";
 
 const fixture = (name: string) => new URL(`./fixtures/${name}.ttf`, import.meta.url);
 const regular = await font.load(fixture("SpaceMono-Regular"));
