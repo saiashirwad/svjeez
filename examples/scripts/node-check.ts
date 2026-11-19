@@ -11,9 +11,16 @@ const flat = async (dir: string) =>
     .filter((name) => name.endsWith(".tsx"))
     .map((name) => join(dir, name));
 
+// A directory with an index.html is a film of a web page. Its index.tsx imports that HTML (Bun only) and
+// needs Chromium, so `bun run build` covers it and Node can't load it.
 const scenes = [
   ...(await readdir(ROOT, { withFileTypes: true }))
-    .filter((entry) => entry.isDirectory() && existsSync(join(ROOT, entry.name, "index.tsx")))
+    .filter(
+      (entry) =>
+        entry.isDirectory() &&
+        existsSync(join(ROOT, entry.name, "index.tsx")) &&
+        !existsSync(join(ROOT, entry.name, "index.html")),
+    )
     .map((entry) => join(entry.name, "index.tsx")),
   ...(await flat("readme")),
 ];

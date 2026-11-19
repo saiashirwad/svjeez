@@ -139,7 +139,12 @@ try {
     run("npm", ["install", "--no-audit", "--no-fund", tarball], quickstart);
     run("npm", ["install", "--no-audit", "--no-fund", "-D", "tsx", "typescript"], quickstart);
     writeFileSync(join(quickstart, "tsconfig.json"), block("json"));
-    writeFileSync(join(quickstart, "scene.tsx"), block("tsx"));
+    const scene = block("tsx");
+    const title = /title: "([^"]+)"/.exec(scene)?.[1];
+
+    if (!title) throw new Error("The README tsx quickstart sets no scene title to check for.");
+
+    writeFileSync(join(quickstart, "scene.tsx"), scene);
     run(join(quickstart, "node_modules/.bin/tsc"), ["--noEmit"], quickstart);
     run(
       process.execPath,
@@ -147,7 +152,7 @@ try {
       quickstart,
     );
 
-    if (!readFileSync(join(quickstart, "hello.svg"), "utf8").includes(">Hello</title>"))
+    if (!readFileSync(join(quickstart, "hello.svg"), "utf8").includes(`>${title}</title>`))
       throw new Error("The README scene did not render the expected SVG.");
   });
 
