@@ -2,19 +2,23 @@
 import lost from "../scenes/lost";
 import LiveScene from "../components/LiveScene.astro";
 import Base from "../layouts/Base.astro";
-import { live } from "../live";
 import { REPO } from "../links";
+import { live } from "../live";
+import { windowed } from "../window";
 
-const scene = live(lost);
+const wide = live(windowed(lost, { size: [1056, 432], title: "404.tsx" }));
+const tall = live(windowed(lost, { size: [358, 320], title: "404.tsx" }));
 ---
 
-<Base title="Not on the timeline · svjeez" description="This page isn't here. The home page is." class="lost" card="lost">
+<Base title="Not on the timeline · svjeez" description="This page isn't here. The examples and the home page are." class="lost" card="lost">
   <main class="wrap lost-page">
+    <h1>Page not found.</h1>
     <div class="big">
       <div class="win">
-        <LiveScene scene={scene} name="404" alt={scene.desc || "Page not found"} />
+        <LiveScene class="wide" scene={wide} cost={40} name="404" alt={wide.desc} />
+        <LiveScene class="tall" scene={tall} cost={30} name="404" alt={tall.desc} />
       </div>
     </div>
-    <p class="more"><a class="btn primary" href="/">Back to the start</a><a class="btn" href={`${REPO}/tree/main/examples`}>Browse the examples</a></p>
+    <p class="more"><a class="btn primary" href="/">Back to the start</a><a class="btn" href={`${REPO}/tree/main/examples`}>Explore the examples</a></p>
   </main>
 </Base>

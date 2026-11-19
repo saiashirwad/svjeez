@@ -16,53 +16,33 @@ body {
   background: transparent;
 }
 
-/* Light by default, dark under prefers-color-scheme. */
+/*
+ * The site's theme tokens (examples/colors.ts) paint the board: --background, --surface, --raised, --border, --muted,
+ * --text and the hues. film() gives the page their values in each scheme and reads the colors back as the tokens, so
+ * the scene recolors with the site's palette. Everything below is a token, or a color-mix() of them.
+ */
 :root {
   color-scheme: light dark;
-  --bg: #ffffff;
-  --side: #f6f7f9;
-  --panel: #ffffff;
-  --lane: #f3f4f7;
-  --line: #e4e6ec;
-  --text: #1b1d24;
-  --soft: #4b5060;
-  --muted: #8a90a0;
-  --accent: #0b6bff;
-  --accent-text: #ffffff;
-  --accent-tint: color-mix(in srgb, var(--accent) 14%, transparent);
-  --scrim: color-mix(in srgb, var(--bg) 55%, transparent);
-  --done: #1f9d55;
-  --orange: #e8710a;
-  --blue: #0b6bff;
-  --purple: #8e4ee6;
-  --green: #1f9d55;
-  --bug: #e5484d;
-  --feature: #0b9ec2;
-  --polish: #8e4ee6;
+  --bg: var(--background);
+  --side: var(--surface);
+  --panel: var(--background);
+  --lane: var(--surface);
+  --line: var(--raised);
+  --soft: color-mix(in srgb, var(--text) 50%, var(--muted));
+  --accent: var(--blue);
+  --accent-text: var(--background);
+  --accent-tint: color-mix(in srgb, var(--blue) 14%, transparent);
+  --scrim: color-mix(in srgb, var(--background) 55%, transparent);
+  --done: var(--green);
+  --bug: var(--red);
+  --feature: var(--cyan);
+  --polish: var(--magenta);
   --lift: 0 12px 28px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.06);
   --float: 0 24px 60px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #15171c;
-    --side: #1a1d23;
-    --panel: #1c1f26;
-    --lane: #1a1d23;
-    --line: #2b2f39;
-    --text: #e8eaf0;
-    --soft: #b4b9c6;
-    --muted: #7c8293;
-    --accent: #4d94ff;
-    --accent-text: #0d1117;
-    --done: #3fb97a;
-    --orange: #f0923b;
-    --blue: #4d94ff;
-    --purple: #b07cf0;
-    --green: #3fb97a;
-    --bug: #f26d71;
-    --feature: #3cc4e0;
-    --polish: #b07cf0;
     --lift: 0 12px 28px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
     --float: 0 24px 60px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.3);
   }
@@ -138,7 +118,7 @@ kbd {
   width: 18px;
   height: 18px;
   border-radius: 5px;
-  background: linear-gradient(135deg, var(--blue), var(--purple));
+  background: linear-gradient(135deg, var(--blue), var(--magenta));
 }
 
 .nav {

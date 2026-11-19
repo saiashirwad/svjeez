@@ -107,8 +107,7 @@ export default scene(
   },
   (canvas) => (
     <Group>
-      <Shape geometry={canvas.rect} fill={theme.surface} />
-      <Shape at={[24, 16]} geometry={rect(432, 264, { radius: 12 })} fill={theme.background} />
+      <Shape geometry={canvas.rect} fill={theme.background} />
       <Shape
         at={slide}
         geometry={rect(CHIP.width, CHIP.height, { radius: 8 })}

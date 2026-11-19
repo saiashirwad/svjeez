@@ -41,8 +41,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <rect x="56.4" y="292" width="193.2" height="18.48" style="transform-origin:56.4px 292px" class="a m1"/>
     </clipPath>
   </defs>
-  <rect width="480" height="340" fill="var(--surface)"/>
-  <rect x="24" y="16" width="432" height="264" rx="12" fill="var(--background)"/>
+  <rect width="480" height="340" fill="var(--background)"/>
   <rect width="84" height="32" rx="8" fill="var(--raised)" class="a m2"/>
   <g transform="translate(0 28)" font-family="'Geist'" font-size="14" font-weight="600" fill="var(--text)">
     <text x="73.516" y="20.97">TS</text>

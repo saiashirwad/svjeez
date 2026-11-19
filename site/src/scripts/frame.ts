@@ -1,4 +1,6 @@
 import { restyle } from "svjeez/page";
+import { DEFAULT_PALETTE, themeOf } from "../palettes";
+import { palette } from "./palette";
 import { calm, pinScheme, scheme as pageScheme, systemScheme, type Scheme } from "./scheme";
 
 const FADE = 200;
@@ -30,14 +32,30 @@ export const pinned = (img: HTMLImageElement) => {
   return want === systemScheme() ? undefined : want;
 };
 
-/** A blob URL of the scene at `live` pinned to `scheme`, `at` seconds in or held at its still frame. */
-const pin = async (live: string, scheme: Scheme, { at = 0, still = false } = {}) => {
+/** Whether the img shows its scene in another palette than the one it was built with. */
+const recolored = (img: HTMLImageElement) =>
+  "themed" in img.dataset && palette() !== DEFAULT_PALETTE;
+
+/**
+ * A blob URL of the scene at `live` in the current palette when `recolor`, pinned to `scheme` when given, `at` seconds in
+ * or held at its still frame.
+ */
+const paint = async (
+  live: string,
+  {
+    at = 0,
+    still = false,
+    scheme,
+    recolor = false,
+  }: { at?: number; still?: boolean; scheme?: Scheme; recolor?: boolean },
+) => {
   const svg = await source(live);
 
   if (!svg) return undefined;
+  const out = restyle(svg, { theme: recolor ? themeOf(palette(), svg) : undefined, at, still });
 
   return URL.createObjectURL(
-    new Blob([restyle(pinScheme(svg, scheme), { at, still })], { type: "image/svg+xml" }),
+    new Blob([scheme ? pinScheme(out, scheme) : out], { type: "image/svg+xml" }),
   );
 };
 
@@ -48,24 +66,33 @@ export interface Frame {
   readonly at?: number;
 }
 
-/** The scene at `live` playing from `at` seconds in, in the scheme the img must show. */
+/**
+ * The scene at `live` playing from `at` seconds in, in the palette and scheme the img must show. The plain file when
+ * it needs neither, unless the img shows a copy now, which is replaced by one that keeps its time.
+ */
 export const playing = async (img: HTMLImageElement, live: string, at = 0): Promise<Frame> => {
   const scheme = pinned(img);
-  const url = scheme ? await pin(live, scheme, { at }) : undefined;
+  const recolor = recolored(img);
+
+  if (!recolor && !scheme && (!at || img.getAttribute("src") === live))
+    return { url: live, live, at: 0 };
+  const url = await paint(live, { at, scheme, recolor });
 
   return url ? { url, live, at } : { url: live, live, at: 0 };
 };
 
-/** The scene's still: its poster, or a pinned still copy when it has none. */
+/** The scene's still: its poster, or a still copy when it must show another palette, or a scheme and has no poster. */
 export const frozen = async (
   img: HTMLImageElement,
   live: string,
   poster: string | undefined,
 ): Promise<Frame> => {
-  if (poster) return { url: poster };
   const scheme = pinned(img);
+  const recolor = recolored(img);
 
-  return { url: (scheme ? await pin(live, scheme, { still: true }) : undefined) ?? live };
+  if (!recolor && (poster || !scheme)) return { url: poster ?? live };
+
+  return { url: (await paint(live, { still: true, scheme, recolor })) ?? poster ?? live };
 };
 
 const turns = new WeakMap<HTMLImageElement, number>();
@@ -165,7 +192,7 @@ export const show = async (
 
 let lead = 0;
 
-/** Show a playing scene again where it is, in the scheme it must show now. */
+/** Show a playing scene again where it is, in the palette and scheme it must show now. */
 export const replay = async (img: HTMLImageElement) => {
   const clock = clocks.get(img);
 

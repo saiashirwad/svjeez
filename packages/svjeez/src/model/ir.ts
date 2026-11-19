@@ -41,6 +41,8 @@ export type Rgba = readonly [r: number, g: number, b: number, a: number];
 export interface TokenValue {
   readonly light: Rgba;
   readonly dark: Rgba;
+  /** A token made by mix(): `share` of `a` blended into `b`. */
+  readonly mix?: { readonly a: Color; readonly b: Color; readonly share: number };
 }
 
 export interface Token {

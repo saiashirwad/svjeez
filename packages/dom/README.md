@@ -36,7 +36,24 @@ The Vite adapter serves a `<link>`/`<script>` in `index.html` that points outsid
 
 A target is `{ url, selector, sources(), close() }`. `sources()` returns a hash of the app's source, which keys the cache. The Bun adapter hashes the bundled page and its assets; the Vite adapter hashes the entry HTML and every project module it imports.
 
-Options: `scheme` (`"light" | "dark" | "both"`), `cursor` (see below), `title` (default: the component's name, else the page `<title>` with Vite, else the film file's name), `viewport` (default 1280x720), `cache` (a JSON file; reused while the source and options are unchanged, `SVJEEZ_DOM_REFRESH=1` records again. `true` is `<film file>.states.json`; a relative path is relative to the film file, not the cwd; an absolute path is kept. The film file is known when Vite loads it (`?svjeez` or `runFilm`), or under Bun from the caller's stack frame (one helper, `callerFile`)), `settle` (see below), `onDiagnostics` (default: one `console.warn` listing what is not faithful), `executablePath`.
+Options: `scheme` (`"light" | "dark" | "both"`), `theme` (see below), `cursor` (see below), `title` (default: the component's name, else the page `<title>` with Vite, else the film file's name), `viewport` (default 1280x720), `cache` (a JSON file; reused while the source and options are unchanged, `SVJEEZ_DOM_REFRESH=1` records again. `true` is `<film file>.states.json`; a relative path is relative to the film file, not the cwd; an absolute path is kept. The film file is known when Vite loads it (`?svjeez` or `runFilm`), or under Bun from the caller's stack frame (one helper, `callerFile`)), `settle` (see below), `onDiagnostics` (default: one `console.warn` listing what is not faithful), `executablePath`.
+
+## A theme
+
+`theme` films an app that paints with your scene tokens, so its scene recolors with them. Give it the `tokens()` your other scenes use; the app's CSS paints with the same names as CSS variables.
+
+```tsx
+import { theme } from "./colors.ts"; // tokens({ light: { background, text, blue, … }, dark: { … } })
+
+export default await film(serve({ selector: "#root" }), script, { theme });
+```
+
+```css
+.card { background: var(--background); border: 1px solid var(--raised); color: var(--text); }
+.chip { background: color-mix(in srgb, var(--blue) 14%, transparent); }
+```
+
+The page gets the theme's values in each scheme (`themeCss(theme)`, as an adopted stylesheet, so nothing is added to the DOM) and is filmed in both. Each color is read back from its light and dark values: one token's is `var(--token)`, a `color-mix()` of two tokens at a whole percent is their `mix()`, and either at an alpha is a `mix()` with transparent. The SVG declares the tokens, so `restyle(svg, { theme })` recolors it like any scene, mixes included. A color nothing in the theme makes (a black shadow) stays as captured. The theme keys the cache. `scheme` may be left out or `"both"`.
 
 ## The mouse
 
@@ -221,7 +238,8 @@ const out = svg.emit(scene({ size, duration, title: "Hero" }, () => element));
 - `cached(file, inputs, fn)` keeps `fn`'s JSON result in `file` while `inputs` and the Snapshot version are unchanged. `SVJEEZ_DOM_REFRESH=1` records again.
 - `scheme: "both"` captures each state under light and dark `prefers-color-scheme` and merges them with `mergeSchemes(light, dark)`: a color that differs becomes `{ light, dark }`, and `compile` draws it as a theme token, so the SVG follows the viewer's scheme. The two trees must match node for node.
 - `inlineAssets` takes Snapshots or States (and returns the same kind), and embeds `<img>` and background images as `data:` URLs and the page's `@font-face` files for the families its text uses; `compile` then draws text with the embedded font instead of `font.system`. A URL that fails to download throws.
-- `openPage({ url, viewport?, executablePath?, onError? })` launches headless Chromium; `onError` hears page exceptions and console errors from before the page loads.
+- `compile(states, { theme })` draws a merged pair that the theme makes with its tokens (see [A theme](#a-theme)).
+- `openPage({ url, viewport?, executablePath?, onError?, css? })` launches headless Chromium; `onError` hears page exceptions and console errors from before the page loads, and `css` is added to every document as an adopted stylesheet.
 - `playwright-core` is an optional peer dependency.
 
 ## Not captured

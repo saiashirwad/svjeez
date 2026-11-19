@@ -93,6 +93,7 @@ Every node also takes `key ref at anchor origin rotate scale skew opacity motion
 | Paint | |
 | --- | --- |
 | `tokens({ light, dark })`, `"#RRGGBB"`, `"#RRGGBBAA"` | named colors with a value per scheme; plain hex is the same in both |
+| `mix(a, b, share)` | `share` (0 to 1) of `a` blended into `b`; with a token in either, a token the SVG blends live from the two |
 | `linear()`, `linear.across()`, `radial()`, `radial.across()`, `pattern({ size, tile, offset })` | gradients at points or across the box; a tile of nodes repeated |
 | `blur(r)`, `shadow({ color, offset, blur })`, `adjust({ hue, saturate })`, `displace({ scale, frequency, seed })` | `effects={[…]}`; also `clip`, `mask` and `blend` ([`references/paint.md`](references/paint.md)) |
 

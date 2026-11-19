@@ -1,8 +1,9 @@
 import { ease, morph, span, type Curve, type SceneElement, type Span, type Vec } from "svjeez";
+import type { Theme } from "svjeez/tools";
 import type { Snapshot } from "../schema.ts";
 import type { EaseName, State } from "../record.ts";
 import { element } from "./box.tsx";
-import { context, type Diagnostic } from "./context.ts";
+import { context, withTheme, type Diagnostic } from "./context.ts";
 import { withCursor, type Beat } from "./cursor.tsx";
 import { normalize } from "./normalize.ts";
 import { pair, type PairBy, type Paired } from "./pair.ts";
@@ -29,6 +30,12 @@ export interface CompileOptions {
    * Return undefined to leave it to `data-key`, the framework identity, `data-part`, `id`, then matching.
    */
   readonly pairBy?: PairBy;
+  /**
+   * The tokens the page paints with, as `tokens()` makes them, captured in both schemes: each color that a token, a mix of
+   * two at a whole percent, or either at an alpha makes in both schemes is drawn with them, so restyling the tokens
+   * restyles the scene. Other colors stay as captured.
+   */
+  readonly theme?: Theme;
 }
 
 export interface Compiled {
@@ -60,7 +67,12 @@ const pathsOf = ({ node, children }: Paired, path: string, into: Set<string>): v
  */
 export const compile = (
   input: Snapshot | readonly State[],
-  { over = 0.6, hold, ease: easing = "inOut", pairBy }: CompileOptions = {},
+  options: CompileOptions = {},
+): Compiled => withTheme(options.theme, () => compileStates(input, options));
+
+const compileStates = (
+  input: Snapshot | readonly State[],
+  { over = 0.6, hold, ease: easing = "inOut", pairBy }: CompileOptions,
 ): Compiled => {
   const states: readonly State[] = "root" in input ? [{ name: "", snapshot: input }] : input;
 

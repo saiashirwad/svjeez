@@ -1,8 +1,7 @@
 import { show } from "./show";
 
-export default show(
-  "Flowchart",
-  `flowchart RL
+/** The diagram's Mermaid source, laid out right to left. */
+export const source = `flowchart RL
     classDef hot fill:#3a1d1d,stroke:#ff6b6b,color:#ffd6d6,stroke-width:2px
     classDef cool stroke:#5ac8fa,stroke-dasharray: 4 3
 
@@ -24,5 +23,6 @@ export default show(
     smoke --x rollback
     prod ~~~ rollback
     prod --> done((Live))
-    linkStyle 3 stroke:#ff6b6b,stroke-width:2px`,
-);
+    linkStyle 3 stroke:#ff6b6b,stroke-width:2px`;
+
+export default show("Flowchart", source);

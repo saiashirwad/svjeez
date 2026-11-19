@@ -1,6 +1,7 @@
 import { film } from "@svjeez/dom";
 import { serve } from "@svjeez/dom/vite";
 import { selectors } from "playwright-core";
+import { theme } from "../../../../examples/colors.ts";
 
 // The app names its parts for svjeez with data-part; let getByTestId find them too.
 selectors.setTestIdAttribute("data-part");
@@ -53,7 +54,8 @@ export default await film(
     await snap("again", { over: 0.9, hold: 0.4 });
   },
   {
-    scheme: "both",
+    // The site's tokens: the board paints with them, so the site's palettes recolor it like its other scenes.
+    theme,
     cursor: true,
     title: "A project board, filmed from its React app",
     viewport: { width: 800, height: 450 },

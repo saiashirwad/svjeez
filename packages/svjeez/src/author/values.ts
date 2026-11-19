@@ -157,6 +157,8 @@ export interface Token {
   readonly name: string;
   readonly light: Hex;
   readonly dark: Hex;
+  /** Set by mix(): the SVG blends this token from the two it mixes, so restyling those restyles it too. */
+  readonly mix?: { readonly a: Color; readonly b: Color; readonly share: number };
 }
 
 export type Color = Hex | Token;
@@ -195,6 +197,50 @@ export const tokens = <const K extends string>(values: {
     ]),
   ) as Theme<K>;
 };
+
+// As CSS color-mix() blends, with premultiplied alpha: a mix with transparent is the color, fainter.
+const blend = (a: Hex, b: Hex, share: number): Hex => {
+  const [x, y] = [hexBytes(a), hexBytes(b)];
+  const alpha = x[3] * share + y[3] * (1 - share);
+  const byte = (n: number) => Math.round(n).toString(16).padStart(2, "0");
+
+  if (alpha === 0) return "#00000000";
+
+  const rgb = [0, 1, 2].map((i) =>
+    byte((x[i]! * x[3] * share + y[i]! * y[3] * (1 - share)) / alpha),
+  );
+
+  return `#${rgb.join("")}${alpha >= 255 ? "" : byte(alpha)}`;
+};
+
+const isToken = (color: Color): color is Token => typeof color !== "string";
+
+/**
+ * `share` of `a` blended into `b`, 0 to 1, as CSS `color-mix()` blends (alpha too: a mix with `#00000000` is a fainter
+ * color). Two hex colors give a hex color; with a token in either, a token named
+ * `<a>-<percent>-<b>` that the SVG blends live from the two, so restyling a scene's tokens restyles its mixes too.
+ */
+export function mix(a: Token, b: Color, share: number): Token;
+export function mix(a: Color, b: Token, share: number): Token;
+export function mix(a: Color, b: Color, share: number): Color;
+export function mix(a: Color, b: Color, share: number): Color {
+  if (!(share >= 0 && share <= 1))
+    throw new SceneError(`mix() needs a share from 0 to 1, got ${share}.`);
+
+  const [x, y] = [a, b].map((color) => (isToken(color) ? color : hexOf(color, "mix()", true)));
+
+  if (!isToken(x!) && !isToken(y!)) return blend(x!, y!, share);
+  const nameOf = (color: Color) => (isToken(color) ? color.name : `c${color.slice(1)}`);
+  const scheme = (color: Color, side: "light" | "dark") => (isToken(color) ? color[side] : color);
+
+  return {
+    kind: "token",
+    name: `${nameOf(x!)}-${Math.round(share * 100)}-${nameOf(y!)}`,
+    light: blend(scheme(x!, "light"), scheme(y!, "light"), share),
+    dark: blend(scheme(x!, "dark"), scheme(y!, "dark"), share),
+    mix: { a: x!, b: y!, share },
+  };
+}
 
 export const rgbaOf = (hex: Hex, caller: string): Rgba => {
   const [r, g, b, a] = hexBytes(hexOf(hex, caller, true));

@@ -1,4 +1,10 @@
 ---
+import { getScene } from "@svjeez/astro/scene";
+import { svg } from "svjeez/tools";
+import mascot from "../scenes/mascot";
+import { github, moon, sun, system } from "../scenes/nav-icons";
+import { PALETTES, type Palette } from "../palettes";
+
 interface Props {
   current?: "examples";
   wide?: boolean;
@@ -6,39 +12,85 @@ interface Props {
 
 const { current, wide } = Astro.props;
 
-// Tabler's outline icons, drawn at 24 units with a 2-unit stroke.
-const ICONS = {
-  github: "M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21",
-  sun: "M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0M3 12h1m8-9v1m8 8h1m-9 8v1M5.6 5.6l.7.7m12.1-.7-.7.7m0 11.4.7.7m-12.1-.7-.7.7",
-  system: "M3 5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zM7 20h10M9 16v4m6-4v4",
-  moon: "M12 3h.4a7.5 7.5 0 0 0 8.4 12.5A9 9 0 1 1 12 3z",
-} as const;
+const blip = getScene(mascot);
 
-const icon = (name: keyof typeof ICONS) =>
-  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${ICONS[name]}"/></svg>`;
+const links: { href: string; label: string; page?: string }[] = [{ href: "https://github.com/saiashirwad/svjeez", label: "GitHub" }];
+
+const optional: string[] = [];
+const SWATCH = ["background", "red", "green", "blue", "magenta"] as const;
+const swatches = ({ theme }: Palette) => SWATCH.map((name, i) => `--s${i}: light-dark(${theme[name].light}, ${theme[name].dark})`).join("; ");
+
+// The icons are inlined, so they paint with the page's own colors: their ink is currentColor and their --bg the page's.
+const icon = (scene: Parameters<typeof svg.emit>[0], prefix: string) =>
+  svg
+    .emit(scene, { prefix })
+    .replace(/^.*svg\.\w+root\{--ink.*\n/gm, "")
+    .replaceAll("var(--ink)", "currentColor");
 ---
 
 <header class:list={["wrap top", { wide }]}>
-  <a class="brand" href="/"><img src="/favicon.svg" width="26" height="26" alt="" /><span>svjeez</span></a>
+  <a class="brand" href="/"><img src={blip.src} width="26" height="26" alt="" /><span>svjeez</span></a>
   <nav aria-label="Main">
-    <a href="https://github.com/saiashirwad/svjeez/tree/main/examples" aria-current={current === "examples" ? "page" : undefined}><span>Examples</span></a>
-    <a href="https://github.com/saiashirwad/svjeez" aria-label="GitHub"><span class="gh nav-ico" aria-hidden="true" set:html={icon("github")} /></a>
+    {
+      links.map((link) => (
+        <a href={link.href} aria-label={link.label === "GitHub" ? "GitHub" : undefined} class:list={{ opt: optional.includes(link.label) }} aria-current={current && link.page === current ? "page" : undefined}>
+          {link.label === "GitHub" && (
+            <span class="gh nav-ico" aria-hidden="true" set:html={icon(github, "gh")} />
+          )}
+          {link.label !== "GitHub" && <span>{link.label}</span>}
+        </a>
+      ))
+    }
     <div class="controls">
+      <div class="palettes" role="radiogroup" aria-label="Color palette">
+        {
+          PALETTES.map((p) => (
+            <button type="button" role="radio" aria-checked="false" data-palette={p.id} style={swatches(p)} title={p.label} aria-label={p.label}>
+              <span class="pie" aria-hidden="true" />
+            </button>
+          ))
+        }
+      </div>
       <div class="scheme" role="radiogroup" aria-label="Color scheme" data-at="system">
-        <span class="knob" aria-hidden="true"><img src="/favicon.svg" width="26" height="26" alt="" /></span>
-        <button type="button" role="radio" aria-checked="false" data-scheme="light" aria-label="Light" title="Light"><span class="nav-ico" aria-hidden="true" set:html={icon("sun")} /></button>
-        <button type="button" role="radio" aria-checked="true" data-scheme="system" aria-label="System" title="System"><span class="nav-ico" aria-hidden="true" set:html={icon("system")} /></button>
-        <button type="button" role="radio" aria-checked="false" data-scheme="dark" aria-label="Dark" title="Dark"><span class="nav-ico" aria-hidden="true" set:html={icon("moon")} /></button>
+        <span class="knob" aria-hidden="true"><img src={blip.src} width="26" height="26" alt="" /></span>
+        <button type="button" role="radio" aria-checked="false" data-scheme="light" aria-label="Light" title="Light"><span class="nav-ico" aria-hidden="true" set:html={icon(sun, "sun")} /></button>
+        <button type="button" role="radio" aria-checked="true" data-scheme="system" aria-label="System" title="System"><span class="nav-ico" aria-hidden="true" set:html={icon(system, "sys")} /></button>
+        <button type="button" role="radio" aria-checked="false" data-scheme="dark" aria-label="Dark" title="Dark"><span class="nav-ico" aria-hidden="true" set:html={icon(moon, "moon")} /></button>
       </div>
     </div>
   </nav>
 </header>
 
 <script>
+  import { PALETTES } from "../palettes";
+  import { choose, palette } from "../scripts/palette";
   import { scheme, THEMECHANGE } from "../scripts/scheme";
 
+  const icons = [...document.querySelectorAll<HTMLElement>(".top .nav-ico")];
+  const calm = matchMedia("(prefers-reduced-motion: reduce)");
+
+  const play = (icon: HTMLElement) => {
+    if (!calm.matches) icon.setAttribute("data-on", "");
+  };
+
+  for (const icon of icons) {
+    const host = icon.closest("a, button")!;
+    host.addEventListener("pointerenter", () => play(icon));
+    icon.addEventListener("animationiteration", () => {
+      if (!host.matches(":hover")) icon.removeAttribute("data-on");
+    });
+  }
+
+  let next = 0;
+
+  setInterval(() => {
+    const shown = icons.filter((icon) => icon.offsetParent !== null);
+
+    if (shown.length) play(shown[next++ % shown.length]!);
+  }, 6000);
+
   // The slider picks light, system or dark. It sets `color-scheme` on the page, and Chromium hands that to every <img>
-  // SVG on it; system removes the choice so the page follows the OS again. The mark on the knob hops on every move.
+  // SVG on it; system removes the choice so the page follows the OS again. Blip on the knob hops on every move.
   const slider = document.querySelector<HTMLElement>(".scheme")!;
   const stops = [...slider.querySelectorAll<HTMLButtonElement>("[data-scheme]")];
   const chosen = () => document.documentElement.dataset.theme ?? "system";
@@ -76,4 +128,19 @@ const icon = (name: keyof typeof ICONS) =>
 
     if (scheme() !== before) dispatchEvent(new Event(THEMECHANGE));
   });
+
+  const wheels = [...document.querySelectorAll<HTMLButtonElement>(".palettes [data-palette]")];
+  const mark = () => wheels.forEach((wheel) => wheel.setAttribute("aria-checked", String(wheel.dataset.palette === palette())));
+
+  mark();
+
+  for (const wheel of wheels)
+    wheel.addEventListener("click", () => {
+      const picked = PALETTES.find((p) => p.id === wheel.dataset.palette);
+
+      if (!picked) return;
+      choose(picked.id);
+      mark();
+      bump(wheel);
+    });
 </script>

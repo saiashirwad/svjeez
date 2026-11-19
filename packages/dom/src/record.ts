@@ -196,6 +196,8 @@ export interface OpenPageOptions {
   readonly executablePath?: string;
   /** Called with every uncaught page exception and every `console.error`, from before the page loads. */
   readonly onError?: (message: string) => void;
+  /** CSS every document gets after its own (an adopted stylesheet: in the cascade, not in the DOM), from before it loads. */
+  readonly css?: string;
 }
 
 const ASSETS = new Set(["stylesheet", "script", "font", "image", "media"]);
@@ -206,6 +208,7 @@ export const openPage = async ({
   viewport = { width: 1280, height: 720 },
   executablePath,
   onError,
+  css,
 }: OpenPageOptions): Promise<{ page: Page; close: () => Promise<void> }> => {
   const { chromium } = await import("playwright-core").catch(() => {
     throw new Error(
@@ -257,6 +260,13 @@ export const openPage = async ({
         );
     });
   }
+
+  if (css)
+    await page.addInitScript((text) => {
+      const sheet = new CSSStyleSheet();
+      sheet.replaceSync(text);
+      document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+    }, css);
 
   try {
     await page.goto(url);

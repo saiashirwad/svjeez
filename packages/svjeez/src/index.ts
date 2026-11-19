@@ -23,6 +23,7 @@ export {
   circle,
   ellipse,
   line,
+  mix,
   path,
   polygon,
   rect,

@@ -2,9 +2,12 @@ import { REDUCED_MOTION } from "./svg/css";
 import { num } from "./model/format";
 import type { Seconds } from "./model/time";
 import { rateOf } from "./svg/rate";
+import type { Theme } from "./author/values";
 
 export interface RestyleOptions {
   readonly css?: string;
+  /** New light and dark values for the scene's tokens, by name, as tokens() makes them. Mixes of them follow. */
+  readonly theme?: Theme;
   readonly at?: Seconds;
   readonly paused?: boolean;
   readonly still?: boolean;
@@ -104,9 +107,23 @@ const timelineCss = (svg: string, timeline: string, range: string | undefined): 
   return `@supports (animation-timeline:scroll()){@media (prefers-reduced-motion:no-preference){${head}${rules.join("")}}}`;
 };
 
+// The theme's values in the scene's own form: dark on its root, light under a prefers-color-scheme query, so it still
+// follows the viewer's scheme and pins with it. Coming last, it wins over the scene's.
+const themeCss = (svg: string, theme: Theme): string => {
+  const prefix = /^<svg\b[^>]*\sclass="([^"]*)root"/.exec(svg)?.[1];
+  const scope = prefix ? `svg.${prefix}root` : "svg";
+
+  const declared = (scheme: "light" | "dark") =>
+    Object.values(theme)
+      .map((token) => `--${token.name}:${token[scheme]}`)
+      .join(";");
+
+  return `${scope}{${declared("dark")}}@media (prefers-color-scheme:light){${scope}{${declared("light")}}}`;
+};
+
 export const restyle = (
   svg: string,
-  { css, at, paused, still, timeline, range }: RestyleOptions,
+  { css, theme, at, paused, still, timeline, range }: RestyleOptions,
 ): string => {
   if (at !== undefined && !(Number.isFinite(at) && at >= 0))
     throw new Error(`restyle() needs at of 0 or more, got ${at}.`);
@@ -115,6 +132,7 @@ export const restyle = (
   const rate = rateOf(svg);
 
   const extra = [
+    theme && themeCss(svg, theme),
     css,
     (still || paused) && PAUSE,
     timeline !== undefined && timelineCss(svg, timeline, range),

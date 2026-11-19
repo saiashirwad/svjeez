@@ -1,5 +1,6 @@
-import type { Font, Hex, Token } from "svjeez/tools";
+import type { Font, Hex, Theme, Token } from "svjeez/tools";
 import { isThemed, type Color, type WebFont } from "../schema.ts";
+import { fromTheme } from "./theme.ts";
 import type { Motion } from "./waapi.ts";
 
 /** One place where the scene is not faithful to the page. */
@@ -86,13 +87,33 @@ export const byte = (n: number): string =>
 
 const withAlpha = ({ hex, alpha }: Plain): Hex => (alpha >= 1 ? hex : `${hex}${byte(alpha * 255)}`);
 
-/** The token for a color that is `light` in one scheme and `dark` in the other. Equal pairs share a name. */
-const tokenOf = (light: Hex, dark: Hex): Token => ({
-  kind: "token",
-  name: `c-${light.slice(1)}-${dark.slice(1)}`,
-  light,
-  dark,
-});
+// The theme the compile in progress paints with (`compile(states, { theme })`). Compiling is synchronous, so it is set
+// and cleared around one compile.
+let theme: Theme | undefined;
+
+/** Runs `run` with `colors` as the theme the scheme pairs are read back into. */
+export const withTheme = <T>(colors: Theme | undefined, run: () => T): T => {
+  const before = theme;
+  theme = colors;
+
+  try {
+    return run();
+  } finally {
+    theme = before;
+  }
+};
+
+/**
+ * The token for a color that is `light` in one scheme and `dark` in the other: the theme's, when it makes the pair,
+ * else one of the pair's own. Equal pairs share a name.
+ */
+const tokenOf = (light: Hex, dark: Hex): Token =>
+  (theme && fromTheme(light, dark, theme)) ?? {
+    kind: "token",
+    name: `c-${light.slice(1)}-${dark.slice(1)}`,
+    light,
+    dark,
+  };
 
 const isHex = (color: Solid): color is Hex => typeof color === "string";
 

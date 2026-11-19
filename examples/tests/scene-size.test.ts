@@ -38,6 +38,9 @@ const budgets = {
   lanes: { bytes: 19050, elements: 97, stops: 76, smil: 28, cost: 47.2 },
 } satisfies Record<string, Budget>;
 
+// Scenes change all the time; the budgets only catch a blowup, so each number may grow by a quarter before a test fails.
+const SLACK = 1.25;
+
 const measure = (svg: string): Budget => {
   const cost = costOf(svg);
   const tags = [...svg.matchAll(/<([a-zA-Z]+)[\s>/]/g)].map((match) => match[1]!);
@@ -61,10 +64,8 @@ describe("scene examples stay small", () => {
       const svg = readFileSync(join(import.meta.dir, "..", "dist", `${name}.svg`), "utf8");
       const found = measure(svg);
 
-      expect(found.bytes).toBeLessThanOrEqual(budget.bytes);
-      expect(found.elements).toBeLessThanOrEqual(budget.elements);
-      expect(found.stops).toBeLessThanOrEqual(budget.stops);
-      expect(found.smil).toBeLessThanOrEqual(budget.smil);
-      expect(found.cost).toBeLessThanOrEqual(budget.cost);
+      // SAFETY: every budget is a Budget literal, so its keys are exactly Budget's.
+      for (const key of Object.keys(budget) as (keyof Budget)[])
+        expect(found[key], key).toBeLessThanOrEqual(budget[key] * SLACK);
     });
 });

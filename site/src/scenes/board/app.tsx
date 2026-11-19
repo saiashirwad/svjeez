@@ -18,8 +18,8 @@ type Status = "todo" | "progress" | "done";
 
 type Label = "Bug" | "Feature" | "Polish";
 
-/** The hues named in board.css. */
-type Hue = "orange" | "blue" | "purple" | "green";
+/** The theme hues the board paints people and projects with. */
+type Hue = "orange" | "blue" | "magenta" | "green";
 
 interface Person {
   readonly id: string;
@@ -41,7 +41,7 @@ interface Issue {
 const PEOPLE: readonly Person[] = [
   { id: "mara", name: "Mara", initials: "MA", hue: "orange" },
   { id: "jonas", name: "Jonas", initials: "JO", hue: "blue" },
-  { id: "priya", name: "Priya", initials: "PR", hue: "purple" },
+  { id: "priya", name: "Priya", initials: "PR", hue: "magenta" },
   { id: "kit", name: "Kit", initials: "KT", hue: "green" },
 ];
 
@@ -559,7 +559,7 @@ export function Board(): ReactNode {
         <div className="section">Projects</div>
         <Project name="Editor" hue="orange" count={open} current />
         <Project name="Sync" hue="blue" count={9} />
-        <Project name="Mobile" hue="purple" count={4} />
+        <Project name="Mobile" hue="magenta" count={4} />
         <Project name="Billing" hue="green" count={2} />
         <div className="me">
           <Avatar who="mara" size={22} />

@@ -7,6 +7,7 @@ import {
   circle,
   ease,
   enter,
+  mix,
   path,
   rect,
   sampled,
@@ -28,6 +29,7 @@ import {
   type Model,
 } from "svjeez/tools";
 import { SceneError } from "svjeez/tools";
+import { restyle } from "svjeez/page";
 import { diagnose } from "../src/model/backend";
 import { FEATURES } from "../src/model/backend";
 
@@ -200,6 +202,33 @@ describe("the SVG backend", () => {
     expect(out).toContain("svg{--ink:#EEEEEE}");
     expect(out).toContain("@media (prefers-color-scheme:light){svg{--ink:#111111}}");
     expect(out).toContain('fill="var(--ink)"');
+  });
+
+  test("a mix of tokens is blended live from them, so restyling the theme restyles it", () => {
+    const wash = mix(theme.ink, "#FFFFFF", 0.25);
+    const out = svg.emit(made(() => <Shape geometry={circle(4)} fill={wash} />));
+
+    expect(wash).toMatchObject({ name: "ink-25-cFFFFFF", light: "#c4c4c4", dark: "#fbfbfb" });
+    expect(out).toContain(
+      "svg{--ink:#EEEEEE;--ink-25-cFFFFFF:color-mix(in srgb,var(--ink) 25%,#FFFFFF)}",
+    );
+    expect(out).toContain("@media (prefers-color-scheme:light){svg{--ink:#111111}}");
+
+    const other = tokens({ light: { ink: "#222222" }, dark: { ink: "#DDDDDD" } });
+
+    expect(restyle(out, { theme: other })).toContain(
+      "<style>svg{--ink:#DDDDDD}@media (prefers-color-scheme:light){svg{--ink:#222222}}</style></svg>",
+    );
+  });
+
+  test("mix() of two hex colors is a hex color", () => {
+    expect(mix("#000000", "#FFFFFF", 0.5)).toBe("#808080");
+    expect(() => mix("#000000", "#FFFFFF", 2)).toThrow(SceneError);
+  });
+
+  test("mix() blends alpha as color-mix() does: with transparent, the same color fainter", () => {
+    expect(mix("#0A6CFF", "#00000000", 0.25)).toBe("#0a6cff40");
+    expect(mix(theme.ink, "#00000000", 0.5).name).toBe("ink-50-c00000000");
   });
 
   test("a shape placed by its own coordinates turns around its fill box", () => {

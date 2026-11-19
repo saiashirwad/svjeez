@@ -25,7 +25,7 @@ One self-contained file: animation as CSS keyframes (and SMIL where CSS can't re
 
 ## Embedding and scrubbing
 
-Use the file in `<img src="scene.svg" alt="…">`. For scroll-driven or scrubbed playback, `svjeez/page` has `seek(time, root?)`, which pauses every animation in the root and jumps to scene seconds, `loopLength(root?)`, and `restyle(svg, { css, at, paused, still, timeline, range })`, which returns the SVG with extra CSS, frozen at `at`, or driven by a CSS scroll or view `timeline` (`"view()"`). A scene with a morph, a geometry that changes size or an animated effect can't follow a `timeline`: call `seek()` on scroll instead. Frameworks: [web.md](web.md).
+Use the file in `<img src="scene.svg" alt="…">`. For scroll-driven or scrubbed playback, `svjeez/page` has `seek(time, root?)`, which pauses every animation in the root and jumps to scene seconds, `loopLength(root?)`, and `restyle(svg, { css, theme, at, paused, still, timeline, range })`, which returns the SVG with extra CSS, its tokens repainted from a `tokens()` `theme` (mixes follow), frozen at `at`, or driven by a CSS scroll or view `timeline` (`"view()"`). A scene with a morph, a geometry that changes size or an animated effect can't follow a `timeline`: call `seek()` on scroll instead. Frameworks: [web.md](web.md).
 
 ## Video
 

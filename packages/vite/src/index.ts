@@ -1,6 +1,6 @@
 import { basename, extname, join } from "node:path";
 import { pathToFileURL } from "node:url";
-import type { Plugin, ResolvedConfig } from "vite";
+import type { Plugin, ResolvedConfig, ViteDevServer } from "vite";
 import { assets, ROUTE } from "./assets.ts";
 import type { PosterOptions } from "./posters.ts";
 import { createRunner, type Runner } from "./runner.ts";
@@ -23,6 +23,10 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
   let config: ResolvedConfig;
   let inFilm = false;
   const runners = new Map<string, Runner>();
+  let devServer: ViteDevServer | undefined;
+  // In dev, which `?svjeez` modules each source file feeds. They are watched, not added as imports: Vite counts
+  // `addWatchFile` in dev as an import, so a film's own CSS would land in the page that shows it.
+  const feeds = new Map<string, Set<string>>();
 
   return {
     name: "svjeez",
@@ -36,11 +40,12 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
       if (inFilm) return;
       assets.cache = pathToFileURL(`${options.cacheDir ?? join(config.cacheDir, "svjeez")}/`);
     },
-    configureServer(server) {
+    configureServer(dev) {
       if (inFilm) return;
+      devServer = dev;
       assets.limit = 500;
 
-      server.middlewares.use(ROUTE, async (request, response, next) => {
+      dev.middlewares.use(ROUTE, async (request, response, next) => {
         const asset = assets.files.get(
           decodeURIComponent(new URL(request.url!, "http://dev").pathname.slice(1)),
         );
@@ -59,6 +64,18 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
     },
     watchChange(file) {
       for (const runner of runners.values()) runner.invalidate(file);
+      const ids = feeds.get(file);
+
+      if (!devServer || !ids) return;
+
+      for (const environment of Object.values(devServer.environments))
+        for (const id of ids) {
+          const node = environment.moduleGraph.getModuleById(id);
+
+          if (node) environment.moduleGraph.invalidateModule(node);
+        }
+
+      devServer.ws.send({ type: "full-reload" });
     },
     async load(id) {
       const query = QUERY.exec(id);
@@ -74,7 +91,16 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
         query[1] ? (options.posters ?? true) : false,
       );
 
-      for (const dependency of dependencies) this.addWatchFile(dependency);
+      for (const dependency of dependencies) {
+        if (!devServer) {
+          this.addWatchFile(dependency);
+          continue;
+        }
+
+        devServer.watcher.add(dependency);
+        feeds.set(dependency, (feeds.get(dependency) ?? new Set()).add(id));
+      }
+
       const { src, width, height, title, desc, svg, posters } = image;
       // Server code (SSR, an Astro page) also gets the markup; a browser bundle gets the URL alone.
       const server = this.environment.config.consumer === "server";
