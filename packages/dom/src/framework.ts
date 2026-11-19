@@ -17,6 +17,12 @@ export interface BrowserAdapter<Component = never> {
    * stable layout. Leave it out and only those run.
    */
   settled?(): Promise<void>;
+  /**
+   * A stable identity for `el` that the framework knows and the DOM does not (React's `key`), or undefined. `film` stamps it
+   * as `data-svjeez-id` before each capture, and `pair` matches elements by it across states like a `data-key`, so a reordered
+   * list slides instead of fading. Leave it out for a framework with no such notion.
+   */
+  identify?(el: Element): string | undefined;
 }
 
 /**

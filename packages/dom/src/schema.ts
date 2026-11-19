@@ -284,6 +284,8 @@ export interface ElementNode {
   readonly id?: string;
   /** `data-key` */
   readonly key?: string;
+  /** What the framework adapter named this element (React's `key`), read from `data-svjeez-id`. Pairs like `data-key`, after it. */
+  readonly identity?: string;
   /** `data-part` */
   readonly part?: string;
   /** The border box, before this element's own transform (ancestor transforms compose on top). */

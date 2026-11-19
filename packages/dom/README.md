@@ -83,10 +83,14 @@ interface BrowserAdapter<Component> {
   unmount(): void;
   /** Optional idle signal: resolves when the framework has nothing pending. */
   settled?(): Promise<void>;
+  /** Optional: a stable identity for an element (React's `key`), or undefined. Becomes the node's `identity`. */
+  identify?(el: Element): string | undefined;
 }
 ```
 
 Pass it as `component(C, props, { framework })`. To type its props, add a branch to `PropsOf` in `src/props.ts`.
+
+`identify` lets film hand the framework's own keys to `pair`: before each capture it stamps `data-svjeez-id` on every element from `identify`, and capture stores it as `identity`. React reads the `key` from the fiber on the DOM node, and `film` does so on app targets too (it finds React's fibers on any page; a page without React gets none). Svelte keeps no keys in the DOM, so it has no `identify`: put `data-key` on a Svelte list's items to have a reorder slide.
 
 Settling prefers the adapter's `settled()` (a framework that knows its pending commands or effects are done can say so), then waits for fonts, transitions and a stable layout. Replace the whole strategy with the `settle: (page, selector) => Promise<void>` option. `film` and its script surface (`page`, `snap`, `update`) are plain Promise-based, so an Effect wrapper can wrap them one for one.
 
@@ -154,7 +158,7 @@ Drawn with core primitives: `filter` (`blur()` as core `blur`, `drop-shadow()` a
 
 The blending is core's `morph.between()`. What a pair of elements shares moves, resizes and recolors; text that changes crossfades; an element with no pair in the next state fades out, and one with no pair in the previous fades in.
 
-Elements are paired across states by `pair`, in this order: `pairBy(node)` (an option), `data-key`, `data-part`, `id`. Siblings with none of those are matched by tag and wording, keeping their order (a longest common subsequence); whatever stays unmatched enters or exits. Put `data-key` on anything that should keep its identity through reorders, inserts and removals.
+Elements are paired across states by `pair`, in this order: `pairBy(node)` (an option), `data-key`, the framework's `identity` (React's `key`, see [Adding a framework](#adding-a-framework)), `data-part`, `id`. Siblings with none of those are matched by tag and wording: first, in any order, the ones that are strongly alike (same tag and subtree shape, same words or 90% of their letter pairs) and each other's only best candidate, so a reordered list slides; then the rest keeping their order (a longest common subsequence). Duplicates and near-ties are not guessed at: they fall to the ordered match. Whatever stays unmatched enters or exits. Put `data-key` on anything that should keep its identity through reorders, inserts and removals. A React `key` is the bare key, not scoped to its list, so give lists distinct keys if their items should not pair across lists.
 
 A `data-key` (or `id`, or `pairBy` name) that sits under different parents in different states, like a card moving between columns, is lifted to the level of the nearest parent the states share and glides across in page coordinates. That works when nothing between it and that parent clips, transforms or fades; otherwise a diagnostic says so and it leaves in one place and enters in the other.
 

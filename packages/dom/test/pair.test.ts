@@ -68,7 +68,7 @@ describe("pair", () => {
     expect(new Set([...a, ...b].map(([, k]) => k)).size).toBe(4);
   });
 
-  test("a reorder of unkeyed siblings keeps the longest run in order and gives the others new keys", () => {
+  test("a reorder of unkeyed siblings with their own wording keeps every one's key", () => {
     const [a = [], b = []] = keys(
       list(item("one"), item("two"), item("three")),
       list(item("two"), item("three"), item("one")),
@@ -78,7 +78,7 @@ describe("pair", () => {
 
     expect(key(b, "two")).toBe(key(a, "two"));
     expect(key(b, "three")).toBe(key(a, "three"));
-    expect(key(b, "one")).not.toBe(key(a, "one"));
+    expect(key(b, "one")).toBe(key(a, "one"));
   });
 
   test("a changed text still pairs with its place, and a different tag does not", () => {
@@ -187,5 +187,70 @@ describe("a node under different parents", () => {
     const [, , third = []] = pair([a, b, c]).roots.map((root) => root.children.map((k) => k.key));
 
     expect(third).toEqual(["::after", "li[0]", "li[1]"]);
+  });
+
+  test("a shuffle of distinct cards is matched by wording, whatever the order", () => {
+    const one = list(item("apple pie"), item("banana split"), item("cherry tart"));
+    const two = list(item("cherry tart"), item("apple pie"), item("banana split"));
+    const [before = [], after = []] = keys(one, two);
+    const keyOf = (rows: typeof before, text: string) => rows.find(([run]) => run === text)![1];
+
+    for (const text of ["apple pie", "banana split", "cherry tart"])
+      expect(keyOf(after, text)).toBe(keyOf(before, text));
+  });
+
+  test("duplicate wording is ambiguous: it falls back to order, not a guess", () => {
+    const one = list(item("todo"), item("todo"), item("done"));
+    const two = list(item("done"), item("todo"), item("todo"));
+    const [before = [], after = []] = keys(one, two);
+
+    // "done" is unique, so it moves. The "todo"s could be either: they keep the order-keeping match, never swapped by a guess.
+    expect(after[0]![1]).toBe(before[2]![1]);
+    expect(after[1]![1]).toBe(before[1]![1]);
+    expect(after[2]![1]).not.toBe(before[0]![1]);
+  });
+
+  test("an ordinary edit (one out the front, one in the back) is not a move", () => {
+    const one = list(item("Count 1"), item("Count 2"), item("Count 3"));
+    const two = list(item("Count 2"), item("Count 3"), item("Count 4"));
+    const [before = [], after = []] = keys(one, two);
+
+    expect(after[0]![1]).toBe(before[1]![1]);
+    expect(after[1]![1]).toBe(before[2]![1]);
+    expect(after[2]![1]).not.toBe(before[0]![1]);
+  });
+
+  test("a framework identity sits between data-key and data-part, and follows a node across parents", () => {
+    const one = list(
+      item("x", { identity: "i", part: "p" }),
+      item("y", { key: "k", identity: "i" }),
+    );
+
+    expect(keys(one, one)[0]!.map(([, key]) => key)).toEqual(["i", "k"]);
+
+    const a = snapshot(
+      box({
+        id: "root",
+        children: [
+          box({ key: "left", children: [item("x", { identity: "card" })] }),
+          box({ key: "right" }),
+        ],
+      }),
+    );
+
+    const b = snapshot(
+      box({
+        id: "root",
+        children: [
+          box({ key: "left" }),
+          box({ key: "right", children: [item("x", { identity: "card" })] }),
+        ],
+      }),
+    );
+
+    const [first, second] = pair([a, b]).roots;
+
+    expect(find(first!, "card")).toBeDefined();
+    expect(find(second!, "card")).toBeDefined();
   });
 });

@@ -25,7 +25,7 @@ export interface CompileOptions {
   readonly ease?: EaseName;
   /**
    * Names an element so it is the same thing in every state: it keeps its identity and moves, where an unnamed one is matched by place and wording.
-   * Return undefined to leave it to `data-key`, `data-part`, `id`, then matching.
+   * Return undefined to leave it to `data-key`, the framework identity, `data-part`, `id`, then matching.
    */
   readonly pairBy?: PairBy;
 }

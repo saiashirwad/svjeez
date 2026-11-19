@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import { svg } from "svjeez/tools";
+import { boxesOf, svg } from "svjeez/tools";
 import { film } from "../src/index.ts";
 import { component as viteComponent, runFilm } from "../src/vite.ts";
 import { component } from "../src/bun.ts";
@@ -20,6 +20,42 @@ describe("component through Vite", () => {
     const scene = await runFilm(join(dir, "react.film.ts"));
 
     expect(svg.emit(scene)).toContain(">Card</title>");
+  }, 90_000);
+
+  /** Where the row keyed `key` is at scene time `t`; the first move runs from 0.8 to 1.8. */
+  const rowAt = (scene: Awaited<ReturnType<typeof runFilm>>, key: string, t: number) => {
+    const boxes = boxesOf(scene, t);
+    const path = Object.keys(boxes).find((one) => one.split("/").at(-1) === key);
+
+    if (path === undefined) throw new Error(`no row ${key}`);
+
+    return boxes[path]!;
+  };
+
+  test("a React list reordered by key alone (no data-key) slides, not fades", async () => {
+    const scene = await runFilm(join(dir, "reorder.film.ts"));
+
+    // Rows are 30px apart: [apple, banana, cherry] -> [cherry, apple, banana].
+    const [start, mid, end] = [0.8, 1.3, 1.8].map((t) => rowAt(scene, "3", t));
+
+    expect(rowAt(scene, "3", 0).y).toBeCloseTo(60, 0);
+    expect(start!.y).toBeCloseTo(60, 0);
+    expect(mid!.y).toBeGreaterThan(1);
+    expect(mid!.y).toBeLessThan(59);
+    expect(end!.y).toBeCloseTo(0, 0);
+    expect(rowAt(scene, "1", 1.3).y).toBeGreaterThan(1);
+    expect(rowAt(scene, "1", 1.3).y).toBeLessThan(29);
+  }, 90_000);
+
+  test("React keys tell apart rows with the same text", async () => {
+    const scene = await runFilm(join(dir, "duplicates.film.ts"));
+    const mid = rowAt(scene, "3", 1.3);
+
+    expect(rowAt(scene, "3", 0).y).toBeCloseTo(60, 0);
+    expect(mid.y).toBeGreaterThan(1);
+    expect(mid.y).toBeLessThan(59);
+    expect(rowAt(scene, "3", 1.8).y).toBeCloseTo(0, 0);
+    expect(rowAt(scene, "2", 1.8).y).toBeCloseTo(60, 0);
   }, 90_000);
 
   test("films a Svelte component", async () => {

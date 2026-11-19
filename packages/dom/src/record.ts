@@ -33,14 +33,27 @@ export interface RecordOptions {
    * (see `mergeSchemes`), so the scene follows the viewer's scheme. Default: the page as it is.
    */
   readonly scheme?: "light" | "dark" | "both";
+  /**
+   * A page expression that evaluates to `(el: Element) => string | undefined` (or nothing). Before each capture, every element
+   * under the root is stamped `data-svjeez-id` with its result (and unstamped when it is undefined), which capture reads as the
+   * node's `identity`. `film` uses it to hand the framework's identities (React keys) to `pair`.
+   */
+  readonly identify?: string;
 }
 
-const grab = async (page: Page, selector: string): Promise<Snapshot> =>
+const grab = async (page: Page, selector: string, identify?: string): Promise<Snapshot> =>
   checkVersion(
     await page.evaluate(
       `(() => {
         const root = document.querySelector(${JSON.stringify(selector)});
         if (!root) throw new Error("record: nothing on the page matches " + ${JSON.stringify(JSON.stringify(selector))});
+        const identify = ${identify ?? "undefined"};
+        if (identify)
+          for (const el of [root, ...root.querySelectorAll("*")]) {
+            const id = identify(el);
+            if (id) el.setAttribute("data-svjeez-id", id);
+            else el.removeAttribute("data-svjeez-id");
+          }
         return (${captureScript})(root);
       })()`,
     ),
@@ -72,7 +85,7 @@ export const record = async (
   page: Page,
   selector: string,
   run: (snap: Snap) => Promise<void>,
-  { scheme }: RecordOptions = {},
+  { scheme, identify }: RecordOptions = {},
 ): Promise<State[]> => {
   const states: State[] = [];
 
@@ -89,16 +102,16 @@ export const record = async (
     let snapshot: Snapshot;
 
     if (scheme === "both") {
-      const light = await grab(page, selector);
+      const light = await grab(page, selector, identify);
 
       await emulate(page, "dark");
 
-      const dark = await grab(page, selector);
+      const dark = await grab(page, selector, identify);
 
       await emulate(page, "light");
 
       snapshot = mergeSchemes(light, dark);
-    } else snapshot = await grab(page, selector);
+    } else snapshot = await grab(page, selector, identify);
 
     const state: State = { name, snapshot, ...timing };
 

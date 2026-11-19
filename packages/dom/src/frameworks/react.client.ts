@@ -4,6 +4,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { isFunction, withCallbacks } from "../callbacks.ts";
 import type { BrowserAdapter } from "../framework.ts";
 import type { Bag, Fn, Prop } from "../props.ts";
+import { reactIdentify } from "./react.identify.ts";
 
 /** A React component as a value: a function, or a `memo`/`forwardRef` object around one (`type` / `render`). */
 interface Wrapped {
@@ -62,6 +63,7 @@ const adapter: BrowserAdapter<ComponentType<Bag>> = {
   unmount() {
     root?.unmount();
   },
+  identify: reactIdentify,
 };
 
 export default adapter;

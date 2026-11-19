@@ -10,7 +10,11 @@ export interface BootProps {
 declare global {
   interface Window {
     /** Set once a component target has mounted; `film` drives `update` and reads `settled` from it. */
-    __svjeez?: { update(props: BootProps): Promise<void>; settled?(): Promise<void> };
+    __svjeez?: {
+      update(props: BootProps): Promise<void>;
+      settled?(): Promise<void>;
+      identify?(el: Element): string | undefined;
+    };
   }
 }
 
@@ -38,5 +42,6 @@ export const boot = async <Component>(
       await adapter.update(props);
     },
     ...(adapter.settled && { settled: () => adapter.settled!() }),
+    ...(adapter.identify && { identify: (el: Element) => adapter.identify!(el) }),
   };
 };

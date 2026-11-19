@@ -27,7 +27,7 @@ interface Slot {
   parent?: Slot;
   /** What the node asked to be called, if anything. */
   readonly named?: string;
-  /** Names the node across parents too: `pairBy`, `data-key` and `id`, which stand for one thing on the page. */
+  /** Names the node across parents too: `pairBy`, `data-key`, a framework identity and `id`, which stand for one thing on the page. */
   readonly global: boolean;
 }
 
@@ -35,8 +35,10 @@ const slotOf = (node: Node, parent: Slot | undefined, pairBy?: PairBy): Slot => 
   if (node.type === "text") return { node, key: "", children: [], parent, global: false };
 
   const asked = pairBy?.(node) || undefined;
-  const named = asked ?? (node.key || node.part || node.id || undefined);
-  const global = asked !== undefined || !!node.key || (!node.part && !!node.id);
+
+  const named = asked ?? (node.key || node.identity || node.part || node.id || undefined);
+
+  const global = asked !== undefined || !!node.key || !!node.identity || (!node.part && !!node.id);
 
   return { node, key: "", children: [], parent, global, ...(named && { named }) };
 };
@@ -110,6 +112,52 @@ const matching = (before: readonly Slot[], after: readonly Slot[]): Map<number, 
   return out;
 };
 
+const squash = (text: string): string => text.replace(/\s+/g, " ").trim();
+
+/** The tags of an element and everything in it: what its subtree looks like, ignoring words. */
+const shapeOf = (node: Node): string =>
+  node.type === "text" ? "#" : `${node.tag}(${node.children.map(shapeOf).join(",")})`;
+
+/**
+ * Matches without regard to order the siblings that can only be each other: elements with the same tag and shape, and
+ * the same words (or nearly: 90% of their letter pairs). A pair counts only when each is the other's single best candidate;
+ * duplicates and near-ties are left for `matching`. As `after` index -> `before` index.
+ */
+const strongMatches = (before: readonly Slot[], after: readonly Slot[]): Map<number, number> => {
+  const facts = (slot: Slot) =>
+    slot.node.type === "element"
+      ? { words: squash(wordsOf(slot.node)).slice(0, 200), shape: shapeOf(slot.node) }
+      : undefined;
+
+  const [was, now] = [before.map(facts), after.map(facts)];
+
+  const strength = (i: number, j: number): number => {
+    const [a, b] = [was[i], now[j]];
+
+    if (!a || !b || a.shape !== b.shape || !a.words || !b.words) return 0;
+
+    const like = likeness(a.words, b.words);
+
+    return like >= 0.9 ? like : 0;
+  };
+
+  const out = new Map<number, number>();
+
+  const best = (scores: number[]): number => {
+    const top = Math.max(...scores);
+
+    return top > 0 && scores.filter((one) => one === top).length === 1 ? scores.indexOf(top) : -1;
+  };
+
+  before.forEach((_, i) => {
+    const j = best(after.map((_, k) => strength(i, k)));
+
+    if (j >= 0 && best(before.map((_, k) => strength(k, j))) === i) out.set(j, i);
+  });
+
+  return out;
+};
+
 const nameOfKind = (node: Node): string => (node.type === "text" ? "text" : node.tag);
 
 /** Pairs the children of one node as it is in each state (undefined where the state has no such node), then goes down into each pair. */
@@ -160,13 +208,29 @@ const level = (parents: readonly (Slot | undefined)[], pairBy: PairBy | undefine
 
     const loose = slots.filter((slot) => !slot.named);
     const was = (before ?? []).filter((slot) => !slot.named);
+    // The order-keeping match is the default; a strong match overrides whatever it had for those two.
     const same = matching(was, loose);
+
+    for (const [j, i] of strongMatches(was, loose)) {
+      for (const [other, there] of same) if (other === j || there === i) same.delete(other);
+
+      same.set(j, i);
+    }
+
+    const matched = new Map<Slot, Slot>();
 
     loose.forEach((slot, j) => {
       const match = was[same.get(j) ?? -1];
 
-      slot.key = match ? match.key : fresh(nameOfKind(slot.node));
+      if (match) matched.set(slot, match);
     });
+
+    // In document order, so a fresh key is numbered the same whichever way the rest matched.
+    for (const slot of loose) {
+      const match = matched.get(slot);
+
+      slot.key = match ? match.key : fresh(nameOfKind(slot.node));
+    }
 
     before = slots;
   }
@@ -274,8 +338,8 @@ const frozen = (slot: Slot): Paired => ({
 
 /**
  * Gives every node of every snapshot a key that is the same in each state it appears in, so a state-to-state blend knows what became what.
- * Among siblings, a node is named by `pairBy`, then `data-key`, then `data-part`, then `id`; the rest are matched by tag and
- * wording, keeping order (a longest common subsequence). Whatever has no match gets a key of its own: it enters or exits.
+ * Among siblings, a node is named by `pairBy`, then `data-key`, then the framework's `identity`, then `data-part`, then `id`; the rest
+ * are matched first by strong, unambiguous likeness (same tag, shape and words) in any order, then by tag and wording keeping order (a longest common subsequence). Whatever has no match gets a key of its own: it enters or exits.
  * The roots always pair with each other.
  */
 export const pair = (snapshots: readonly Snapshot[], pairBy?: PairBy): Pairing => {

@@ -5,6 +5,7 @@ import type { Page } from "playwright-core";
 import { inlineAssets } from "./assets.ts";
 import { cached, cachePath } from "./cache.ts";
 import { callerFile } from "./component.ts";
+import { reactIdentifyScript } from "./frameworks/react.identify.ts";
 import { compile, type Diagnostic } from "./compile/index.ts";
 import { fromPortable, toPortable } from "./portable.ts";
 import { openPage, record, type OpenPageOptions, type Snap, type State } from "./record.ts";
@@ -63,6 +64,12 @@ export const settleScript = (selector: string) => `(async () => {
     last = now;
   }
 })()`;
+
+/**
+ * Where capture gets framework identities: the mounted adapter's `identify` (component targets), else React's, which finds
+ * its fibers on any page (app targets) and says nothing on a page without React.
+ */
+const IDENTIFY = `(window.__svjeez?.identify ?? ${reactIdentifyScript})`;
 
 /** A title from the film file's path: `board.film.tsx` is "board", `index.tsx` is the folder it is in. */
 export const titleFromFile = (file: string | undefined): string => {
@@ -164,7 +171,7 @@ export const film = async <Props = never>(
                 check();
               },
             }),
-          { ...(scheme && { scheme }) },
+          { ...(scheme && { scheme }), identify: IDENTIFY },
         );
 
         check();

@@ -1313,6 +1313,10 @@ export const capture = (root: Element): Snapshot => {
 
     if (key) node.key = key;
 
+    const identity = d.el?.getAttribute("data-svjeez-id");
+
+    if (identity) node.identity = identity;
+
     if (part ?? d.part) node.part = (part ?? d.part)!;
 
     if (!bare && radii.some(([x, y]) => x > 0 || y > 0)) node.radii = radii;
