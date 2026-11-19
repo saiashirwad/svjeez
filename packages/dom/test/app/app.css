@@ -1,0 +1,63 @@
+@font-face {
+  font-family: Mono;
+  src: url("../../../svjeez/tests/fixtures/SpaceMono-Regular.ttf") format("truetype");
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+#app {
+  width: 280px;
+  padding: 16px;
+  font:
+    15px/22px Mono,
+    monospace;
+  color: #111;
+  background: #f4f6fb;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+ul {
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  margin-bottom: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #c9d0e0;
+}
+
+button {
+  font: inherit;
+  padding: 4px 12px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: #4a4af0;
+}
+
+@media (prefers-color-scheme: dark) {
+  #app {
+    color: #eee;
+    background: #14161f;
+  }
+
+  li {
+    background: #262b3a;
+    border-color: #3a4156;
+  }
+}

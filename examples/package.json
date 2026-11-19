@@ -11,8 +11,7 @@
     "test": "bun test",
     "test:browsers": "bun test ./scripts/browsers.ts",
     "test:node": "tsx scripts/node-check.ts",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react",
-    "dom-react": "bun run dom-react/record.ts"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react && tsc --noEmit -p dom-react-vite"
   },
   "devDependencies": {
     "@svjeez/charts": "workspace:*",
@@ -28,12 +27,14 @@
     "@types/bun": "latest",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
     "playwright-core": "^1.64.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "svjeez": "workspace:*",
     "tsx": "^4.23.15",
     "typescript": "latest",
+    "vite": "8.3.5",
     "world-atlas": "^2.0.2"
   }
 }

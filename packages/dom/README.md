@@ -1,5 +1,42 @@
 # @svjeez/dom
 
+Turn a web app into an animated SVG. Write your app and an interaction script; `film` does the rest.
+
+```tsx
+import { film } from "@svjeez/dom";
+import { serve } from "@svjeez/dom/bun";
+import index from "./index.html";
+
+export default await film(
+  serve(index),
+  "#app",
+  async ({ page, snap }) => {
+    await snap("start");
+    await page.locator("button").first().click();
+    await snap("moved", { over: 0.7 });
+  },
+  { scheme: "both", title: "Sprint board", cache: `${import.meta.dir}/states.json` },
+);
+```
+
+It serves the app, opens it in Chromium, fails if the page throws or logs a console error, waits for fonts and a stable layout before each `snap`, records, inlines fonts and images while the server is still up, compiles, and closes everything. You get a core `Scene`: `svg.emit(scene)`, or default-export it from an examples-style `index.tsx`.
+
+With Vite (`vite` is an optional peer dependency), `serve` starts a dev server on a free port:
+
+```ts
+import { serve } from "@svjeez/dom/vite";
+
+film(serve({ root: import.meta.dir }), "#app", run, options);
+```
+
+`serve` takes any `DomServer`: `{ url, sources(), close() }`. `sources()` returns a hash of the app's source, which keys the cache. The Bun adapter hashes the bundled page and its assets; the Vite adapter hashes the entry HTML and every project module it imports.
+
+Options: `scheme` (`"light" | "dark" | "both"`), `title`, `viewport` (default 1280x720), `cache` (a JSON file; reused while the source and options are unchanged, `SVJEEZ_DOM_REFRESH=1` records again), `onDiagnostics` (default: one `console.warn` listing what is not faithful), `executablePath`.
+
+The rest of this page is the lower-level API `film` is built from.
+
+## Snapshots
+
 Capture a live DOM subtree as a plain, versioned JSON `Snapshot`: resolved layout, computed style, text runs with per-character advances, inline SVG, and Web Animations.
 
 ```
@@ -102,6 +139,7 @@ const out = svg.emit(scene({ size, duration, title: "Hero" }, () => element));
 - `cached(file, inputs, fn)` keeps `fn`'s JSON result in `file` while `inputs` and the Snapshot version are unchanged. `SVJEEZ_DOM_REFRESH=1` records again.
 - `scheme: "both"` captures each state under light and dark `prefers-color-scheme` and merges them with `mergeSchemes(light, dark)`: a color that differs becomes `{ light, dark }`, and `compile` draws it as a theme token, so the SVG follows the viewer's scheme. The two trees must match node for node.
 - `inlineAssets` takes Snapshots or States (and returns the same kind), and embeds `<img>` and background images as `data:` URLs and the page's `@font-face` files for the families its text uses; `compile` then draws text with the embedded font instead of `font.system`. A URL that fails to download throws. Background images are embedded but still not drawn.
+- `openPage({ url, viewport?, executablePath?, onError? })` launches headless Chromium; `onError` hears page exceptions and console errors from before the page loads.
 - `playwright-core` is an optional peer dependency.
 
 ## Not captured

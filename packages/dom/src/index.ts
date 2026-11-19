@@ -28,3 +28,7 @@ export { inlineAssets, type AssetOptions } from "./assets.ts";
 export { mergeSchemes } from "./scheme.ts";
 
 export type * from "./schema.ts";
+
+export { film, type FilmContext, type FilmOptions } from "./film.ts";
+
+export type { DomServer } from "./server.ts";

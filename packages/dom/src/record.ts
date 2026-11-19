@@ -114,6 +114,8 @@ export interface OpenPageOptions {
   readonly url: string;
   readonly viewport?: { readonly width: number; readonly height: number };
   readonly executablePath?: string;
+  /** Called with every uncaught page exception and every `console.error`, from before the page loads. */
+  readonly onError?: (message: string) => void;
 }
 
 /** Headless Chromium on `url`. Call `close()` when you are done. */
@@ -121,6 +123,7 @@ export const openPage = async ({
   url,
   viewport = { width: 1280, height: 720 },
   executablePath,
+  onError,
 }: OpenPageOptions): Promise<{ page: Page; close: () => Promise<void> }> => {
   const { chromium } = await import("playwright-core").catch(() => {
     throw new Error(
@@ -143,6 +146,11 @@ export const openPage = async ({
   }
 
   const page = await browser.newPage({ viewport });
+
+  if (onError) {
+    page.on("pageerror", (error) => onError(error.message));
+    page.on("console", (message) => message.type() === "error" && onError(message.text()));
+  }
 
   try {
     await page.goto(url);

@@ -2,7 +2,7 @@
   "name": "@svjeez/dom",
   "version": "0.8.0-next.0",
   "private": true,
-  "description": "Capture a live DOM subtree as a plain, versioned JSON Snapshot that svjeez can compile into a scene.",
+  "description": "Capture a live DOM subtree as a plain, versioned JSON Snapshot that svjeez can compile into a scene, or film a web app into one.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -12,7 +12,9 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./bun": "./src/bun.ts",
+    "./vite": "./src/vite.ts"
   },
   "scripts": {
     "test": "bun test --conditions @svjeez/source",
@@ -22,14 +24,19 @@
     "@types/bun": "latest",
     "playwright-core": "^1.64.1",
     "svjeez": "workspace:*",
-    "typescript": "latest"
+    "typescript": "latest",
+    "vite": "8.3.5"
   },
   "peerDependencies": {
     "playwright-core": ">=1.49",
-    "svjeez": "workspace:^"
+    "svjeez": "workspace:^",
+    "vite": ">=6"
   },
   "peerDependenciesMeta": {
     "playwright-core": {
+      "optional": true
+    },
+    "vite": {
       "optional": true
     }
   },
