@@ -157,6 +157,8 @@ export interface Token {
   readonly name: string;
   readonly light: Hex;
   readonly dark: Hex;
+  /** Set by mix(): the SVG blends this token from the two it mixes, so restyling those restyles it too. */
+  readonly mix?: { readonly a: Color; readonly b: Color; readonly share: number };
 }
 
 export type Color = Hex | Token;
@@ -194,6 +196,43 @@ export const tokens = <const K extends string>(values: {
       },
     ]),
   ) as Theme<K>;
+};
+
+const blend = (a: Hex, b: Hex, share: number): Hex => {
+  const [x, y] = [hexBytes(a), hexBytes(b)];
+
+  return `#${[0, 1, 2]
+    .map((i) =>
+      Math.round(x[i]! * share + y[i]! * (1 - share))
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("")}`;
+};
+
+const isToken = (color: Color): color is Token => typeof color !== "string";
+
+/**
+ * `share` of `a` blended into `b`, 0 to 1. Two hex colors give a hex color; with a token in either, a token named
+ * `<a>-<percent>-<b>` that the SVG blends live from the two, so restyling a scene's tokens restyles its mixes too.
+ */
+export const mix = (a: Color, b: Color, share: number): Color => {
+  if (!(share >= 0 && share <= 1))
+    throw new SceneError(`mix() needs a share from 0 to 1, got ${share}.`);
+
+  const [x, y] = [a, b].map((color) => (isToken(color) ? color : hexOf(color, "mix()", true)));
+
+  if (!isToken(x!) && !isToken(y!)) return blend(x!, y!, share);
+  const nameOf = (color: Color) => (isToken(color) ? color.name : `c${color.slice(1, 7)}`);
+  const scheme = (color: Color, side: "light" | "dark") => (isToken(color) ? color[side] : color);
+
+  return {
+    kind: "token",
+    name: `${nameOf(x!)}-${Math.round(share * 100)}-${nameOf(y!)}`,
+    light: blend(scheme(x!, "light"), scheme(y!, "light"), share),
+    dark: blend(scheme(x!, "dark"), scheme(y!, "dark"), share),
+    mix: { a: x!, b: y!, share },
+  };
 };
 
 export const rgbaOf = (hex: Hex, caller: string): Rgba => {

@@ -7,6 +7,7 @@ import {
   circle,
   enter,
   line,
+  mix,
   path,
   polygon,
   rect,
@@ -30,12 +31,10 @@ import {
   type Color,
   type Font,
   type FontValue,
-  type Hex,
   type Layer,
   type Layers,
   type PathBuilder,
   type StrokeProps,
-  type Token,
 } from "svjeez/tools";
 import { curve, vec } from "./curve.ts";
 import type { Box, Point, Size } from "./layout/box.ts";
@@ -123,36 +122,7 @@ export const defaultColors: DiagramColors = {
   },
 };
 
-const isToken = (color: Color): color is Token => typeof color !== "string";
-
-const channels = (hex: Hex): readonly number[] =>
-  [1, 3, 5].map((at) => Number.parseInt(hex.slice(at, at + 2), 16));
-
-const blend = (fg: Hex, bg: Hex, share: number): Hex => {
-  const [a, b] = [channels(fg), channels(bg)];
-
-  return `#${a
-    .map((c, i) =>
-      Math.round(c * share + b[i]! * (1 - share))
-        .toString(16)
-        .padStart(2, "0"),
-    )
-    .join("")}`;
-};
-
-const nameOf = (color: Color): string => (isToken(color) ? color.name : `c${color.slice(1, 7)}`);
-
-export const mix = (fg: Color, bg: Color, share: number): Color => {
-  if (!isToken(fg) && !isToken(bg)) return blend(fg, bg, share);
-  const name = `${nameOf(fg)}-${Math.round(share * 100)}-${nameOf(bg)}`;
-  const light = (c: Color): Hex => (isToken(c) ? c.light : c);
-  const dark = (c: Color): Hex => (isToken(c) ? c.dark : c);
-
-  return tokens({
-    light: { [name]: blend(light(fg), light(bg), share) },
-    dark: { [name]: blend(dark(fg), dark(bg), share) },
-  })[name]!;
-};
+export { mix };
 
 const isFamily = (font: FontValue): font is Exclude<FontValue, Font> => "face" in font;
 

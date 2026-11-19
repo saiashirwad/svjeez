@@ -192,7 +192,16 @@ const patternOf = (ctx: Ctx, given: Pattern, where: string, timing: Timing): Mod
 
 const solidOf = (ctx: Ctx, paint: Hex | Token, where: string): Color => {
   if (isHex(paint)) return rgbaOf(paint, where);
-  const value = { light: rgbaOf(paint.light, where), dark: rgbaOf(paint.dark, where) };
+  const { mix } = paint;
+
+  const value: TokenValue = {
+    light: rgbaOf(paint.light, where),
+    dark: rgbaOf(paint.dark, where),
+    ...(mix && {
+      mix: { a: solidOf(ctx, mix.a, where), b: solidOf(ctx, mix.b, where), share: mix.share },
+    }),
+  };
+
   const known = ctx.tokens.get(paint.name);
 
   if (known && !same(known, value))

@@ -1255,16 +1255,29 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
     : out;
 };
 
+// A token's light and dark values sit on the root, light under a prefers-color-scheme query. A mix() token is blended
+// from its two by color-mix(), so CSS that restyles those, as restyle() does with a theme, restyles it too.
 const tokenCss = (scene: Scene, prefix: string): string => {
   const names = Object.keys(scene.tokens);
 
   if (names.length === 0) return "";
   const scope = prefix ? `svg.${prefix}root` : "svg";
+  const base = names.filter((name) => !scene.tokens[name]!.mix);
+
+  const mixed = names.flatMap((name) => {
+    const { mix } = scene.tokens[name]!;
+
+    return mix
+      ? [
+          `--${name}:color-mix(in srgb,${colorText(mix.a)} ${num(mix.share * 100)}%,${colorText(mix.b)})`,
+        ]
+      : [];
+  });
 
   const declared = (scheme: "light" | "dark") =>
-    names.map((name) => `--${name}:${colorText(scene.tokens[name]![scheme])}`).join(";");
+    base.map((name) => `--${name}:${colorText(scene.tokens[name]![scheme])}`);
 
-  return `${scope}{${declared("dark")}}\n@media (prefers-color-scheme:light){${scope}{${declared("light")}}}`;
+  return `${scope}{${[...declared("dark"), ...mixed].join(";")}}\n@media (prefers-color-scheme:light){${scope}{${declared("light").join(";")}}}`;
 };
 
 const aroundOf = (scene: Scene): Partial<Face> => {
