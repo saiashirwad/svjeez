@@ -88,7 +88,7 @@ export const inherit = (
   prefix: string,
 ): readonly SvgNode[] => {
   const classes = animatedBy(css);
-  const plain = new Set(["a", "fb", "dm", "ds"].map((name) => prefix + name));
+  const plain = new Set(["a", "fb", "dm", "ds", "sl", "sd"].map((name) => prefix + name));
 
   /** Whether a group's own value for this attribute can change after it is written, or comes from somewhere else. */
   const moves = (node: Element, name: string): boolean => {

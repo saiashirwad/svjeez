@@ -5,7 +5,6 @@ import type { Placed } from "./boxes";
 import { add, fading, isGone, isLeaf, label, spoken, type Survey } from "./inspect-context";
 import { flatAt, type Flat } from "./inspect-visibility";
 import {
-  SCHEMES,
   between,
   clearThroughout,
   colorAt,
@@ -14,6 +13,7 @@ import {
   paintName,
   runsOf,
   scaleOf,
+  schemesOf,
   sharedArea,
   type Entry,
   type Scheme,
@@ -44,11 +44,13 @@ const behind = (
   frame: ReadonlyMap<string, Placed>,
   box: Box,
   t: Seconds,
+  scheme: Scheme,
 ): { readonly key: string; readonly flat: Flat } | undefined => {
   for (let i = entry.order - 1; i > 0; i--) {
     const under = survey.entries[i]!;
 
-    if (!isLeaf(under) || survey.gone.has(under.node.key)) continue;
+    if (!isLeaf(under) || survey.gone.has(under.node.key) || !schemesOf(under).includes(scheme))
+      continue;
     const at = frame.get(under.node.key);
 
     if (!at || at.opacity <= 1e-3 || inside(survey.hidden.get(under.node.key) ?? [], t)) continue;
@@ -65,7 +67,8 @@ const behind = (
 interface Contrast {
   readonly ratio: number;
   readonly scheme: Scheme;
-  readonly other: number;
+  /** The ratio in the other scheme, when the node shows in both. */
+  readonly other?: number;
   readonly color: string;
   readonly under: string;
   readonly key: string;
@@ -81,6 +84,7 @@ export const lowContrast = (survey: Survey): void => {
     const paints = paintsOf(scene, node);
 
     if (paints.length === 0) continue;
+    const schemes = schemesOf(entry);
     let worst: Contrast | undefined;
     const low: Seconds[] = [];
     let need = 0;
@@ -90,9 +94,14 @@ export const lowContrast = (survey: Survey): void => {
 
       if (!at || at.opacity < 0.99 || fading(entry, t)) return;
       const { box } = at;
-      const back = behind(survey, entry, frame, box, t);
 
-      if (!back) return;
+      const backs = schemes.flatMap((scheme) => {
+        const back = behind(survey, entry, frame, box, t, scheme);
+
+        return back ? [{ scheme, back }] : [];
+      });
+
+      if (backs.length === 0) return;
       const size = node.kind === "text" ? node.size * scaleOf(at.matrix) : 0;
       const bold = node.kind === "text" && runsOf(node).every((run) => run.face.weight >= 700);
 
@@ -104,36 +113,30 @@ export const lowContrast = (survey: Survey): void => {
       for (const { paint, alpha, steady } of paints) {
         if (movingAt(paint, t) || !steady(t) || alpha(t) < 0.99) continue;
 
-        const by = SCHEMES.flatMap((scheme) => {
-          const color = colorAt(scene, paint, t, scheme);
+        const by = backs
+          .flatMap(({ scheme, back }) => {
+            const color = colorAt(scene, paint, t, scheme);
+            const under = back.flat.color[scheme];
 
-          return color
-            ? [
-                {
-                  scheme,
-                  value: ratio(
-                    over(color, alpha(t), back.flat.color[scheme]),
-                    back.flat.color[scheme],
-                  ),
-                },
-              ]
-            : [];
-        });
+            return color
+              ? [{ scheme, back, value: ratio(over(color, alpha(t), under), under) }]
+              : [];
+          })
+          .sort((a, b) => a.value - b.value);
 
-        const [first, second] = by;
+        const [lo, hi] = by;
 
-        if (!first || !second) continue;
-        const [lo, hi] = first.value <= second.value ? [first, second] : [second, first];
+        if (!lo || by.length < backs.length) continue;
         const value = between(paint, t);
 
         if (!found || lo.value < found.ratio)
           found = {
             ratio: lo.value,
             scheme: lo.scheme,
-            other: hi.value,
+            ...(hi && { other: hi.value }),
             color: paintName(value.amount >= 0.5 ? value.to : value.from),
-            under: back.flat.name,
-            key: back.key,
+            under: lo.back.flat.name,
+            key: lo.back.key,
           };
       }
 
@@ -151,13 +154,14 @@ export const lowContrast = (survey: Survey): void => {
     const what = text ? `${spoken(node, 24)}` : `the stroke of ${label(node)}`;
 
     const other = worst.scheme === "light" ? "dark" : "light";
+    const also = worst.other === undefined ? "" : ` (${worst.other.toFixed(2)}:1 in ${other})`;
 
     add(survey, {
       code: "low-contrast",
       severity: worst.ratio < floor ? "warning" : "info",
       key: node.key,
-      message: `${what} is hard to see: ${worst.color} on ${worst.under} is ${worst.ratio.toFixed(2)}:1 in the ${worst.scheme} scheme (${worst.other.toFixed(2)}:1 in ${other}), under the ${need}:1 ${text ? "text this size needs" : "a thin line needs"}.`,
-      fix: `Pick a ${text ? "fill" : "stroke color"} farther from ${worst.under} in both schemes${text ? ", or make the text larger" : ", or make the line wider"}.`,
+      message: `${what} is hard to see: ${worst.color} on ${worst.under} is ${worst.ratio.toFixed(2)}:1 in the ${worst.scheme} scheme${also}, under the ${need}:1 ${text ? "text this size needs" : "a thin line needs"}.`,
+      fix: `Pick a ${text ? "fill" : "stroke color"} farther from ${worst.under} in ${schemes.length > 1 ? "both schemes" : `the ${worst.scheme} scheme`}${text ? ", or make the text larger" : ", or make the line wider"}.`,
       times: low,
       related: [worst.key],
     });

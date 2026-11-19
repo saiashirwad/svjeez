@@ -30,7 +30,7 @@ const [card, label] = [ref(), ref()];
 - `from` and `to` are points or anchors; the arrow follows them when their nodes move. `inset` pulls both ends in (default 0); `bend` bows the shaft sideways as a fraction of its length (0, straight, by default); `head` is the head's length in units (default 8), or `"none"` for a plain line. `stroke` is required.
 - `draw` is 0 to 1, a number or a track: the shaft is trimmed to `[0, draw]` and the head rides the tip.
 - **A head shows only while the drawn shaft reaches its base.** Drawing from 0 starts without a head; it appears on the tip once about one head length of shaft is drawn, and leaves the same way when un-drawn. An arrow shorter than its head shows the head only at `draw = 1`. There is no look-ahead.
-- It takes the common props except `at`, `anchor`, `origin`, `rotate` and `scale`: `key ref opacity motion clip mask effects blend`. Its parts, for a morph, are `shaft` and `head`.
+- It takes the common props except `at`, `anchor`, `origin`, `rotate` and `scale`: `key ref opacity motion clip mask effects blend scheme`. Its parts, for a morph, are `shaft` and `head`.
 - An arrow's ends that follow a node which scales or moves in at the loop seam are a `loop-seam`: bring the arrow in after its ends settle and take it out before the end.
 
 ## A token along anchors

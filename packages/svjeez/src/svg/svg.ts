@@ -26,6 +26,7 @@ import type {
   GroupNode,
   Rgba,
   SceneNode,
+  Scheme,
   ShapeNode,
   Stroke,
   TextNode,
@@ -100,6 +101,8 @@ interface Ctx {
   readonly defs: Defs;
   readonly onLane?: (lane: LaneReport) => void;
   readonly reported: Set<string>;
+  /** The schemes some node shows only in. */
+  readonly schemes: Set<Scheme>;
   /** The node being emitted: the owner of every lane written meanwhile. */
   current?: SceneNode;
 }
@@ -1021,6 +1024,7 @@ const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
     node.clip !== undefined ||
     node.mask !== undefined ||
     node.blend !== undefined ||
+    node.scheme !== undefined ||
     node.effects.length > 0 ||
     isolates(node.children) ||
     isLane(child!.at) ||
@@ -1229,13 +1233,15 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
     ...(still && { drawn: Object.keys(drawn.attrs) }),
   };
 
-  const out = outer.reduce<Element>(
+  const wrapped = outer.reduce<Element>(
     (content, own) => ({
       ...element("g", dress(own), [content]),
       ...(own.lanes.length > 0 && { lanes: own.lanes }),
     }),
     first,
   );
+
+  const out = node.scheme === undefined ? wrapped : schemed(ctx, node.scheme, wrapped);
 
   if (ctx.sources)
     return {
@@ -1254,6 +1260,34 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
     ? { kind: "fragment", children: out.children }
     : out;
 };
+
+/** The class a node shown only in `scheme` carries: one rule per scheme hides them all in the other. */
+const schemeClass = (prefix: string, scheme: Scheme): string =>
+  `${prefix}${scheme === "light" ? "sl" : "sd"}`;
+
+const schemed = (ctx: Ctx, scheme: Scheme, out: Element): Element => {
+  ctx.schemes.add(scheme);
+
+  return {
+    ...out,
+    attrs: {
+      ...out.attrs,
+      class: [out.attrs.class, schemeClass(ctx.prefix, scheme)].filter(Boolean).join(" "),
+    },
+  };
+};
+
+// Each scheme hides what shows only in the other. It is !important to win over an animated or still-frame display.
+const schemeCss = (schemes: ReadonlySet<Scheme>, prefix: string): string =>
+  (["light", "dark"] as const)
+    .flatMap((scheme) =>
+      schemes.has(scheme)
+        ? [
+            `@media (prefers-color-scheme:${scheme === "light" ? "dark" : "light"}){.${schemeClass(prefix, scheme)}{display:none!important}}`,
+          ]
+        : [],
+    )
+    .join("\n");
 
 // A token's light and dark values sit on the root, light under a prefers-color-scheme query. A mix() token is blended
 // from its two by color-mix(), so CSS that restyles those, as restyle() does with a theme, restyles it too.
@@ -1329,6 +1363,7 @@ export const svg: Backend<string, SvgOptions> = {
       sources: options.sources ?? false,
       ...(options.onLane && { onLane: options.onLane }),
       reported: new Set(),
+      schemes: new Set(),
       around,
       defs: {
         scene,
@@ -1353,7 +1388,11 @@ export const svg: Backend<string, SvgOptions> = {
         duration: scene.duration,
         title: scene.title,
         ...(scene.desc !== undefined && { desc: scene.desc }),
-        css: [tokenCss(scene, prefix), stills.length > 0 && `${REDUCED_MOTION}${stills.join("")}}`]
+        css: [
+          tokenCss(scene, prefix),
+          schemeCss(ctx.schemes, prefix),
+          stills.length > 0 && `${REDUCED_MOTION}${stills.join("")}}`,
+        ]
           .filter(Boolean)
           .join("\n"),
         loop: scene.loop,

@@ -81,7 +81,7 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 | `<Sequence when={span}>` | a local clock: tracks inside count from the span's start |
 | `<Arrow from to stroke bend inset head draw>` | between points or anchors; follows them as they move |
 
-Every node also takes `key ref at anchor origin rotate scale skew opacity motion clip mask effects blend`.
+Every node also takes `key ref at anchor origin rotate scale skew opacity motion clip mask effects blend scheme`. `scheme="light"` or `"dark"` shows a node in that color scheme only ([`references/paint.md`](references/paint.md)).
 
 | Geometry (a track of them morphs) | |
 | --- | --- |

@@ -24,7 +24,7 @@ import { BLIP } from "./blip";
 // A picture that builds itself: a sky, hills, a sun that is a moon at night, a kite and a cloud. Each piece is drawn
 // about its own point `at`, in the sky's frame, and takes its entrance and its life as `motion`.
 
-/** The picture's own colors by day and by night, which a palette leaves be. `day` and `night` are masks. */
+/** The picture's own colors by day and by night, which a palette leaves be. */
 export const scenery = tokens({
   light: {
     sky: "#CFE6EE",
@@ -37,8 +37,6 @@ export const scenery = tokens({
     bite: "#00000000",
     ray: "#FFC21A",
     star: "#00000000",
-    day: "#000000",
-    night: "#00000000",
   },
   dark: {
     sky: "#2C3440",
@@ -51,24 +49,8 @@ export const scenery = tokens({
     bite: "#2C3440",
     ray: "#00000000",
     star: "#F3ECD2",
-    day: "#00000000",
-    night: "#000000",
   },
 });
-
-/**
- * Shows its children only by day or only by night, through a mask `size` big from its origin. The mask is sized with
- * numbers, as a mask sized by its box can't hold nodes placed by anchors.
- */
-export const Only = ({
-  when,
-  size,
-  children,
-}: {
-  when: "day" | "night";
-  size: Vec;
-  children: Child;
-}) => <Group mask={<Shape geometry={rect(...size)} fill={scenery[when]} />}>{children}</Group>;
 
 const skyShape = ([w, h]: Vec): Geometry => rect(w, h, { radius: [0, 0, 11, 11] });
 
@@ -130,9 +112,10 @@ interface HillsProps {
 
 /** Two rolling hills along the bottom of a sky `size` big. */
 export const Hills = ({ size: [w, h], rise: [near, far], out }: HillsProps) => {
-  const rising = (when: Span, depth: number): Layers => ({
-    offset: track<Vec>([0, depth]).to([0, 0], when, ease.pop).to([0, depth], out, ease.in),
-  });
+  const rising = (when: Span, depth: number): Layers => [
+    enter(when, { from: { offset: [0, depth] }, curve: ease.pop }),
+    exit(out, { to: { offset: [0, depth] }, curve: ease.in }),
+  ];
 
   return (
     <Group offset={[0, h]}>

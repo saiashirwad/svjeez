@@ -22,7 +22,7 @@ A name that is a reserved word or starts with a digit gets an `icon` prefix, as 
 
 ## Props
 
-`<Icon>` takes every node prop (`key ref at anchor offset origin rotate scale opacity motion clip mask effects blend`) and moves as one node.
+`<Icon>` takes every node prop (`key ref at anchor offset origin rotate scale opacity motion clip mask effects blend scheme`) and moves as one node.
 
 | Prop | |
 | --- | --- |

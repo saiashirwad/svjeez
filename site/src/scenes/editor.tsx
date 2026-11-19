@@ -124,12 +124,15 @@ export const CodeLine = ({
   source,
   key,
   motion,
+  scheme,
 }: {
   source: string;
   key?: string;
   motion?: Layers;
+  /** The one color scheme it shows in. */
+  scheme?: "light" | "dark";
 }) => (
-  <Text key={key} font={mono} size={SIZE} motion={motion}>
+  <Text key={key} font={mono} size={SIZE} motion={motion} scheme={scheme}>
     {highlight(source, "tsx")[0]!.map(([role, text]) => (
       <Run fill={ink(role)}>{text}</Run>
     ))}
@@ -157,10 +160,18 @@ interface SquiggleProps {
   /** Drawn in over `draw`, faded out over `out`. */
   readonly draw: Span;
   readonly out: Span;
+  /** The one color scheme it shows in. */
+  readonly scheme?: "light" | "dark";
 }
 
 /** A hand-drawn wavy underline under a word. */
-export const Squiggle = ({ under: { baseline, width }, color, draw, out }: SquiggleProps) => {
+export const Squiggle = ({
+  under: { baseline, width },
+  color,
+  draw,
+  out,
+  scheme,
+}: SquiggleProps) => {
   const waves = Math.max(2, Math.round(width / 7));
   const step = (width - 4) / waves;
 
@@ -170,7 +181,11 @@ export const Squiggle = ({ under: { baseline, width }, color, draw, out }: Squig
   );
 
   return (
-    <Group offset={baseline.map(([x, y]) => [x + 2, y + 6])} opacity={track(1).to(0, out)}>
+    <Group
+      offset={baseline.map(([x, y]) => [x + 2, y + 6])}
+      opacity={track(1).to(0, out)}
+      scheme={scheme}
+    >
       <Shape
         geometry={wave}
         stroke={{ color, width: 3, cap: "round" }}
