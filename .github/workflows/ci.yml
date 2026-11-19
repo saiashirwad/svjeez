@@ -27,16 +27,17 @@ jobs:
       - run: bun run format:check
       - run: bun run typecheck
 
+  # Not in Playwright's image: @svjeez/dom's tests measure text in the runner's system fonts, which the image doesn't have.
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    container: mcr.microsoft.com/playwright:v1.64.1-noble
-    env:
-      HOME: /root
     steps:
       - uses: actions/checkout@v4
-      - run: npm install --global bun
+      - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
+      # The locked playwright-core, since bunx fetches the latest and its Chromium build isn't the one the tests launch.
+      - run: bun run playwright-core install --with-deps chromium-headless-shell
+        working-directory: packages/svjeez
       - run: bun run test
       - run: npm pack --dry-run
         working-directory: packages/svjeez
