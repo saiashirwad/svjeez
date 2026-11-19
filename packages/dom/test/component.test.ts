@@ -21,6 +21,14 @@ describe("component through Vite", () => {
     expect(scene.duration).toBeGreaterThan(0);
   }, 90_000);
 
+  test("a callback prop nobody passes is a no-op, in React and Svelte", async () => {
+    const scenes = await Promise.all(
+      ["omitted-react.film.ts", "omitted-svelte.film.ts"].map((name) => runFilm(join(dir, name))),
+    );
+
+    for (const scene of scenes) expect(scene.duration).toBeGreaterThan(0);
+  }, 120_000);
+
   test("films run in parallel, each finding its own server", async () => {
     const [react, svelte] = await Promise.all([
       runFilm(join(dir, "react.film.ts")),

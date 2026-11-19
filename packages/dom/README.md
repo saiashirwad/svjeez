@@ -53,7 +53,7 @@ export default await film(component(Card, { task }, { css: [theme] }), async ({ 
 
 The component is mounted alone in `#svjeez-root` (the capture selector, unless `selector` is given). `update(props)` merges new props, re-renders and waits for the page to settle.
 
-**Props** are typed from the component (React `(props) => node`, Svelte `Component<Props>`) and cross to the browser as JSON. Data props are required and must be JSON-serializable (a `Date`, `Map` or class instance is a type error, and a runtime error naming the prop). Function props are optional: any function you pass is replaced by a no-op in the browser, so pass one if the component calls it unconditionally. Plain `tsc` sees `.svelte` imports as untyped (`Component<any>`), so check Svelte projects with `svelte-check` (see `examples/dom-svelte/card.check.ts`).
+**Props** are typed from the component (React `(props) => node`, Svelte `Component<Props>`) and cross to the browser as JSON. Data props are required and must be JSON-serializable (a `Date`, `Map` or class instance is a type error, and a runtime error naming the prop). Function props are optional: any function you pass is replaced by a no-op in the browser, and so is every callback you leave out, by naming convention: a prop called `on` + a capital (`onDone`, `onSelect`) reads as a no-op when missing (React and Svelte 5). Other function props you omit are `undefined`, so pass those as `() => {}`. Plain `tsc` sees `.svelte` imports as untyped (`Component<any>`), so check Svelte projects with `svelte-check` (see `examples/dom-svelte/card.check.ts`).
 
 **Finding the module.** The browser has to load the same component, so `component` finds the module whose export `=== Card`:
 

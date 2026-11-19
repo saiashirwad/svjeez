@@ -1,5 +1,6 @@
 import { flushSync, mount, tick, unmount, type Component } from "svelte";
 import type { BrowserAdapter } from "../framework.ts";
+import { withCallbacks } from "../callbacks.ts";
 import type { Bag } from "../props.ts";
 
 // A $state proxy as the props object is what lets `update` re-render without remounting.
@@ -9,7 +10,7 @@ let instance: Bag | undefined;
 const adapter: BrowserAdapter<Component<Bag>> = {
   mount(component, initial, el) {
     props = initial;
-    instance = mount(component, { target: el, props });
+    instance = mount(component, { target: el, props: withCallbacks(props) });
     flushSync();
   },
   update(next) {
