@@ -1,8 +1,8 @@
 /** @jsxImportSource svjeez */
 import { Group, Shape, Text, rect, span, type SceneElement, type Span } from "svjeez";
-import { SceneError, type Child } from "svjeez/tools";
+import { SceneError, type Child, type StrokeProps } from "svjeez/tools";
 import { layered } from "./layout/layered.ts";
-import type { Box, Point } from "./layout/box.ts";
+import { DIRECTIONS, isVertical, type Box, type Point } from "./layout/box.ts";
 import {
   Route,
   checkIds,
@@ -13,6 +13,7 @@ import {
   drawnBy,
   edgeKey,
   extent,
+  formOf,
   keyed,
   known,
   labelOf,
@@ -28,7 +29,13 @@ import {
   type EdgeId,
   type Reveal,
 } from "./kit.tsx";
-import type { Direction, FlowchartEdge, FlowchartGroup, Labelled } from "./types.ts";
+import type {
+  Direction,
+  FlowchartEdge,
+  FlowchartEdgeOptions,
+  FlowchartGroup,
+  Labelled,
+} from "./types.ts";
 
 export interface FlowchartOptions<N extends string = string> extends DiagramOptions {
   readonly direction?: Direction;
@@ -45,6 +52,17 @@ export interface Flowchart<
 }
 
 const WHAT = "flowchart()";
+
+const strokeOf = (style: FlowchartEdgeOptions | undefined): Partial<StrokeProps> => {
+  const stroke: { -readonly [K in keyof StrokeProps]?: StrokeProps[K] } = {};
+  const width = style?.width ?? (style?.line === "thick" ? 3 : undefined);
+
+  if (style?.line === "dotted") stroke.dash = [2, 4];
+
+  if (width !== undefined) stroke.width = width;
+
+  return stroke;
+};
 
 export function flowchart<
   const N extends Record<string, Labelled>,
@@ -63,12 +81,14 @@ export function flowchart<
   const l = look(options, WHAT);
   const { direction = "TB" } = options;
 
-  if (direction !== "TB" && direction !== "LR")
-    throw new SceneError(`${WHAT} takes direction "TB" or "LR", got "${String(direction)}".`);
+  if (!DIRECTIONS.includes(direction))
+    throw new SceneError(
+      `${WHAT} takes direction "TB", "LR", "BT" or "RL", got "${String(direction)}".`,
+    );
   const nodes = Object.entries<Labelled>(spec.nodes).map(([id, s]) => ({ id, ...labelOf(s) }));
   const ids = nodes.map((n) => n.id);
   checkIds(ids, WHAT, "node");
-  const roles = new Map(nodes.map((n) => [n.id, n.role]));
+  const forms = new Map(nodes.map((n) => [n.id, formOf(n.role, n.shape)]));
 
   const edges = spec.edges.map(([from, to, label, style]: FlowchartEdge<string>, i) => ({
     from: known(from, ids, WHAT, "node", `edge ${i + 1}`),
@@ -109,7 +129,7 @@ export function flowchart<
 
   const out = layered({
     direction,
-    nodes: nodes.map((n) => ({ id: n.id, ...sizeOf(l, n.role, n.label) })),
+    nodes: nodes.map((n) => ({ id: n.id, ...sizeOf(l, formOf(n.role, n.shape), n.label) })),
     edges: edges.map((e) => ({
       from: e.from,
       to: e.to,
@@ -128,9 +148,9 @@ export function flowchart<
 
   const lines = out.edges.map((e, i) => {
     const points: Point[] = e.points.map((p) => ({ x: p.x + dx, y: p.y + dy }));
-    points[0] = onOutline(roles.get(e.from)!, boxes.get(e.from)!, points[0]!, points[1]!);
+    points[0] = onOutline(forms.get(e.from)!, boxes.get(e.from)!, points[0]!, points[1]!);
     points[points.length - 1] = onOutline(
-      roles.get(e.to)!,
+      forms.get(e.to)!,
       boxes.get(e.to)!,
       points.at(-1)!,
       points.at(-2)!,
@@ -139,7 +159,7 @@ export function flowchart<
     return { ...edges[i]!, points, box: e.label && move(e.label) };
   });
 
-  const cross = (b: Box) => (direction === "TB" ? b.x : b.y);
+  const cross = (b: Box) => (isVertical(direction) ? b.x : b.y);
 
   const order = [...ids].sort(
     (a, b) => out.rank.get(a)! - out.rank.get(b)! || cross(boxes.get(a)!) - cross(boxes.get(b)!),
@@ -194,28 +214,33 @@ export function flowchart<
               geometry={rect(b.w, b.h, { radius: 10 })}
               stroke={{ color: l.colors.line, width: 1, dash: [4, 3] }}
             />
-            <Text key="label" font={l.font} size={l.small} fill={l.colors.muted} at={[12, 6]}>
+            <Text
+              key="label"
+              font={l.font}
+              size={l.small}
+              fill={l.colors.muted}
+              at={[12, direction === "BT" ? b.h - l.small * 1.2 - 6 : 6]}
+            >
               {g.label}
             </Text>
           </Group>
         );
       })}
-      {lines.map((e, i) => (
-        <Edge
-          key={edgeKeys[i]!}
-          look={l}
-          points={e.points}
-          draw={drawnBy(options.draw, edgeKeys[i]!, timed[i], WHAT)}
-          stroke={
-            e.style?.line === "dotted"
-              ? { dash: [2, 4] }
-              : e.style?.line === "thick"
-                ? { width: 3 }
-                : undefined
-          }
-          head={e.style?.head}
-        />
-      ))}
+      {lines.map(
+        (e, i) =>
+          e.style?.line !== "invisible" && (
+            <Edge
+              key={edgeKeys[i]!}
+              look={l}
+              points={e.points}
+              draw={drawnBy(options.draw, edgeKeys[i]!, timed[i], WHAT)}
+              color={e.style?.color}
+              stroke={strokeOf(e.style)}
+              head={e.style?.head}
+              tail={e.style?.tail}
+            />
+          ),
+      )}
       {between}
       {nodes.map((n) => {
         const at = shown.get(n.id);
@@ -225,6 +250,8 @@ export function flowchart<
             key={n.id}
             look={l}
             role={n.role}
+            shape={n.shape}
+            style={n.style}
             label={n.label}
             box={boxes.get(n.id)!}
             motion={at && pop(at)}
@@ -236,7 +263,8 @@ export function flowchart<
 
         return (
           e.box &&
-          e.label !== undefined && (
+          e.label !== undefined &&
+          e.style?.line !== "invisible" && (
             <Chip
               key={`${edgeKeys[i]!}:label`}
               look={l}

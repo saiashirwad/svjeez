@@ -1,5 +1,5 @@
 import { SceneError } from "svjeez/tools";
-import type { Place } from "./types.ts";
+import type { MermaidDirection, Place } from "./types.ts";
 
 export interface Line {
   readonly file: string;
@@ -20,6 +20,9 @@ export const clean = (text: string): string =>
     .replace(/<br\s*\/?>/gi, " ")
     .replace(/\s+/g, " ")
     .trim();
+
+export const isDirection = (text: string | undefined): text is MermaidDirection =>
+  text === "TB" || text === "LR" || text === "BT" || text === "RL";
 
 export const unquote = (text: string): string => {
   const t = text.trim();

@@ -164,7 +164,10 @@ describe("erDiagram", () => {
       'erDiagram() relation 1 names "Z", which is not one of its entities.',
     );
     expect(bad([{ from: "A", to: "B", toCard: "many" }]).problem).toContain('cardinality "many"');
-    expect(bad([], { direction: "RL" }).problem).toContain('direction "TB" or "LR"');
+    // SAFETY: the test passes a direction the types would reject.
+    expect(bad([], { direction: "UP" as "TB" }).problem).toContain(
+      'direction "TB", "LR", "BT" or "RL"',
+    );
     // SAFETY: the test names a part or input the types would reject.
     expect(thrown(() => shop().part("Nope" as "ORDER")).problem).toContain('has no part "Nope"');
   });

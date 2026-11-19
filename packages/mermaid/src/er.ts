@@ -1,7 +1,7 @@
 import { erDiagram, type DiagramOptions, type ErCard, type ErDiagram } from "@svjeez/diagrams";
 import type { Span } from "svjeez";
-import { clean, fail, sourceOf, unquote, type Line } from "./errors.ts";
-import type { Place } from "./types.ts";
+import { clean, fail, isDirection, sourceOf, unquote, type Line } from "./errors.ts";
+import type { MermaidDirection, Place } from "./types.ts";
 
 export interface MermaidErAttribute {
   readonly type: string;
@@ -28,13 +28,13 @@ export interface MermaidErRelation {
 export interface ErDoc {
   readonly kind: "er";
   readonly source: Place;
-  readonly direction: "TB" | "LR";
+  readonly direction: MermaidDirection;
   readonly entities: readonly MermaidErEntity[];
   readonly relations: readonly MermaidErRelation[];
 }
 
 const SUPPORTED =
-  'Supported: `ENTITY`, `ENTITY { type name PK "comment" }`, `ENTITY["Alias"]`, quoted "entity names", relationships `A ||--o{ B : label` with cardinalities `||` `|o` `o|` `}|` `|{` `}o` `o{` and `--` or `..` lines, and `direction TB` or `LR`.';
+  'Supported: `ENTITY`, `ENTITY { type name PK "comment" }`, `ENTITY["Alias"]`, quoted "entity names", relationships `A ||--o{ B : label` with cardinalities `||` `|o` `o|` `}|` `|{` `}o` `o{` and `--` or `..` lines, and `direction TB`, `LR`, `BT` or `RL`.';
 
 const CARDS = new Map<string, ErCard>([
   ["||", "one"],
@@ -123,11 +123,7 @@ export const parseEr = (header: Line, body: readonly Line[]): ErDoc => {
     const dir = /^direction\s+(\w+)$/.exec(l.text)?.[1];
 
     if (dir) {
-      if (dir !== "TB" && dir !== "LR")
-        fail(
-          l,
-          "svjeez lays ER diagrams out top to bottom or left to right. Write `direction TB` or `direction LR`.",
-        );
+      if (!isDirection(dir)) fail(l, `direction ${dir} is not one of TB, LR, BT or RL.`);
       direction = dir;
       continue;
     }
@@ -201,7 +197,7 @@ export const parseEr = (header: Line, body: readonly Line[]): ErDoc => {
 };
 
 export interface ErDrawOptions extends DiagramOptions {
-  readonly direction?: "TB" | "LR";
+  readonly direction?: MermaidDirection;
   readonly reveal?: Span;
 }
 

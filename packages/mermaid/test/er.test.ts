@@ -88,7 +88,7 @@ describe("parse er errors", () => {
     expect(message("CAR 1 to zero or more DRIVER : allows")).toContain("word cardinalities");
     expect(message("style A fill:#f9f")).toContain("style is not supported");
     expect(message("subgraph x")).toContain("subgraph is not supported");
-    expect(message("direction RL")).toContain("top to bottom or left to right");
+    expect(message("direction UP")).toContain("not one of TB, LR, BT or RL");
     expect(message("A:::cls")).toContain("`:::`");
   });
 

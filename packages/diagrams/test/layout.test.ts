@@ -99,6 +99,30 @@ describe("layered", () => {
     }
   }
 
+  test("BT and RL mirror TB and LR, and every edge ends on its nodes", () => {
+    const g = graphs.diamond!;
+
+    const [tb, bt, lr, rl] = (["TB", "BT", "LR", "RL"] as const).map((direction) =>
+      layered({ ...g, direction }),
+    );
+
+    const y = (out: typeof tb, id: string) => out!.nodes.get(id)!.y;
+    const x = (out: typeof tb, id: string) => out!.nodes.get(id)!.x;
+
+    expect(y(tb, "a")).toBeLessThan(y(tb, "d"));
+    expect(y(bt, "a")).toBeGreaterThan(y(bt, "d"));
+    expect(x(lr, "a")).toBeLessThan(x(lr, "d"));
+    expect(x(rl, "a")).toBeGreaterThan(x(rl, "d"));
+    expect(bt!.bounds.h).toBeCloseTo(tb!.bounds.h, 3);
+    expect(rl!.bounds.w).toBeCloseTo(lr!.bounds.w, 3);
+
+    for (const out of [bt!, rl!])
+      for (const e of out.edges) {
+        expect(onBorder(e.points[0]!, out.nodes.get(e.from)!)).toBe(true);
+        expect(onBorder(e.points.at(-1)!, out.nodes.get(e.to)!)).toBe(true);
+      }
+  });
+
   test("a cycle reverses one edge for ranking but still points the right way", () => {
     const out = layered(graphs.cycle!);
     const back = out.edges.find((e) => e.from === "wait" && e.to === "run")!;

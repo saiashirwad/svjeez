@@ -2,7 +2,7 @@
 import { Group, Shape, Text, line, rect, span, type SceneElement, type Span } from "svjeez";
 import { SceneError, type Child } from "svjeez/tools";
 import { layered } from "./layout/layered.ts";
-import type { Box, Point } from "./layout/box.ts";
+import { DIRECTIONS, isVertical, type Box, type Point } from "./layout/box.ts";
 import {
   Chip,
   Route,
@@ -176,8 +176,10 @@ export function classDiagram<
   const l = look(options, WHAT);
   const { direction = "TB" } = options;
 
-  if (direction !== "TB" && direction !== "LR")
-    throw new SceneError(`${WHAT} takes direction "TB" or "LR", got "${String(direction)}".`);
+  if (!DIRECTIONS.includes(direction))
+    throw new SceneError(
+      `${WHAT} takes direction "TB", "LR", "BT" or "RL", got "${String(direction)}".`,
+    );
   const s = sizesOf(l);
 
   const built = Object.entries<string | ClassSpec>(spec.classes).map(([id, c]) =>
@@ -272,7 +274,7 @@ export function classDiagram<
     };
   });
 
-  const cross = (b: Box) => (direction === "TB" ? b.x : b.y);
+  const cross = (b: Box) => (isVertical(direction) ? b.x : b.y);
 
   const order = [...ids].sort(
     (a, b) => out.rank.get(a)! - out.rank.get(b)! || cross(boxes.get(a)!) - cross(boxes.get(b)!),

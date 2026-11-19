@@ -15,7 +15,7 @@ import {
 } from "svjeez";
 import { SceneError, type Child, type Color } from "svjeez/tools";
 import { layered } from "./layout/layered.ts";
-import type { Box, Point } from "./layout/box.ts";
+import { DIRECTIONS, type Box, type Point } from "./layout/box.ts";
 import {
   Route,
   checkIds,
@@ -206,8 +206,10 @@ export function stateMachine<
   const l = look(options, WHAT);
   const { direction = "TB" } = options;
 
-  if (direction !== "TB" && direction !== "LR")
-    throw new SceneError(`${WHAT} takes direction "TB" or "LR", got "${String(direction)}".`);
+  if (!DIRECTIONS.includes(direction))
+    throw new SceneError(
+      `${WHAT} takes direction "TB", "LR", "BT" or "RL", got "${String(direction)}".`,
+    );
   const header = Math.round(l.size * 2.6);
   const nodes = new Map<string, Node>();
 

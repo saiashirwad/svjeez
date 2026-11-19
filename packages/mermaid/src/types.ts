@@ -9,27 +9,51 @@ import type { PieDoc } from "./pie.ts";
 
 export type Place = NonNullable<Where["source"]>;
 
+export type MermaidDirection = "TB" | "LR" | "BT" | "RL";
+
 export type FlowForm =
   | "rect"
   | "round"
   | "stadium"
   | "diamond"
   | "circle"
+  | "doubleCircle"
   | "subroutine"
-  | "cylinder";
+  | "cylinder"
+  | "hexagon"
+  | "parallelogram"
+  | "parallelogramBack"
+  | "trapezoid"
+  | "trapezoidBack"
+  | "asymmetric";
+
+/** Per-node paint from `classDef`, `class`, `:::` and `style`. Colors are hex. */
+export interface FlowStyle {
+  readonly fill?: `#${string}`;
+  readonly stroke?: `#${string}`;
+  readonly color?: `#${string}`;
+  readonly width?: number;
+  readonly dash?: readonly number[];
+}
+
+export type FlowEnd = "none" | "arrow" | "circle" | "cross";
 
 export interface MermaidFlowNode {
   readonly id: string;
   readonly label: string;
   readonly form: FlowForm;
+  readonly style?: FlowStyle;
 }
 
 export interface MermaidFlowEdge {
   readonly from: string;
   readonly to: string;
   readonly label?: string;
-  readonly line: "solid" | "dotted" | "thick";
-  readonly arrow: boolean;
+  readonly line: "solid" | "dotted" | "thick" | "invisible";
+  readonly head: FlowEnd;
+  readonly tail: FlowEnd;
+  /** From `linkStyle`. */
+  readonly style?: Pick<FlowStyle, "stroke" | "width">;
 }
 
 export interface FlowSubgraph {
@@ -41,7 +65,7 @@ export interface FlowSubgraph {
 export interface FlowchartDoc {
   readonly kind: "flowchart";
   readonly source: Place;
-  readonly direction: "TD" | "TB" | "BT" | "LR" | "RL";
+  readonly direction: "TD" | MermaidDirection;
   readonly nodes: readonly MermaidFlowNode[];
   readonly edges: readonly MermaidFlowEdge[];
   readonly subgraphs: readonly FlowSubgraph[];
@@ -91,7 +115,7 @@ export interface MermaidStateTransition {
 export interface StateDoc {
   readonly kind: "state";
   readonly source: Place;
-  readonly direction?: "TB" | "LR";
+  readonly direction?: MermaidDirection;
   readonly initial: string;
   readonly states: readonly StateNode[];
   readonly transitions: readonly MermaidStateTransition[];

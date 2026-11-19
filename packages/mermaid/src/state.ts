@@ -1,8 +1,8 @@
-import { clean, fail, sourceOf, unquote, type Line } from "./errors.ts";
+import { clean, fail, isDirection, sourceOf, unquote, type Line } from "./errors.ts";
 import type { StateDoc, StateNode, MermaidStateTransition } from "./types.ts";
 
 const SUPPORTED =
-  'Supported: `[*] --> A`, `A --> [*]`, `A --> B : label`, `state "Long name" as A`, composite `state A {` ... `}`, and `direction LR` at the top.';
+  'Supported: `[*] --> A`, `A --> [*]`, `A --> B : label`, `state "Long name" as A`, composite `state A {` ... `}`, and `direction TB`, `LR`, `BT` or `RL` at the top.';
 
 const TRANSITION = /^(\[\*\]|\w+)\s*-->\s*(\[\*\]|\w+)\s*(?::\s*(.*))?$/;
 const DECLARE = /^state\s+(?:"([^"]*)"\s+as\s+(\w+)|(\w+))\s*(\{)?$/;
@@ -75,8 +75,7 @@ export const parseState = (header: Line, body: readonly Line[]): StateDoc => {
       if (stack.length > 1 || direction)
         fail(l, "direction is read once, at the top of the diagram, not inside a composite state.");
 
-      if (dir !== "TB" && dir !== "LR")
-        fail(l, `direction ${dir} is not drawn: svjeez lays out TB and LR.`);
+      if (!isDirection(dir)) fail(l, `direction ${dir} is not one of TB, LR, BT or RL.`);
       direction = dir;
       continue;
     }

@@ -181,7 +181,10 @@ describe("classDiagram", () => {
       'classDiagram() relation 1 names "Z", which is not one of its classes.',
     );
     expect(bad([{ from: "A", to: "B", end: "cross" }]).problem).toContain('the end "cross"');
-    expect(bad([], { direction: "BT" }).problem).toContain('direction "TB" or "LR"');
+    // SAFETY: the test passes a direction the types would reject.
+    expect(bad([], { direction: "UP" as "TB" }).problem).toContain(
+      'direction "TB", "LR", "BT" or "RL"',
+    );
     // SAFETY: the test names a part or input the types would reject.
     expect(
       thrown(() =>

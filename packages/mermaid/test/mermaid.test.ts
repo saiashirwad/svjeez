@@ -59,16 +59,16 @@ describe("parse flowchart", () => {
       ["F", "Sub", "subroutine"],
       ["G", "Store", "cylinder"],
     ]);
-    expect(doc.edges.map((e) => [e.from, e.to, e.label, e.line, e.arrow])).toEqual([
-      ["A", "B", undefined, "solid", true],
-      ["B", "C", undefined, "solid", true],
-      ["C", "D", undefined, "dotted", true],
-      ["D", "E", undefined, "thick", true],
-      ["E", "F", undefined, "solid", false],
-      ["F", "G", "text", "solid", true],
-      ["G", "A", "piped", "solid", true],
-      ["A", "B", "dotted label", "dotted", true],
-      ["B", "C", "thick label", "thick", true],
+    expect(doc.edges.map((e) => [e.from, e.to, e.label, e.line, e.head])).toEqual([
+      ["A", "B", undefined, "solid", "arrow"],
+      ["B", "C", undefined, "solid", "arrow"],
+      ["C", "D", undefined, "dotted", "arrow"],
+      ["D", "E", undefined, "thick", "arrow"],
+      ["E", "F", undefined, "solid", "none"],
+      ["F", "G", "text", "solid", "arrow"],
+      ["G", "A", "piped", "solid", "arrow"],
+      ["A", "B", "dotted label", "dotted", "arrow"],
+      ["B", "C", "thick label", "thick", "arrow"],
     ]);
   });
 
@@ -117,12 +117,179 @@ describe("parse flowchart", () => {
   });
 });
 
+describe("parse flowchart shapes", () => {
+  test("reads hexagon, parallelograms, trapezoids, asymmetric and double circle", () => {
+    const doc = flow(`flowchart TD
+      A{{Hex}} --> B[/Lean right/]
+      B --> C[\\Lean left\\]
+      C --> D[/Wide base\\]
+      D --> E[\\Wide top/]
+      E --> F>Flag]
+      F --> G(((Done)))`);
+
+    expect(doc.nodes.map((n) => [n.label, n.form])).toEqual([
+      ["Hex", "hexagon"],
+      ["Lean right", "parallelogram"],
+      ["Lean left", "parallelogramBack"],
+      ["Wide base", "trapezoid"],
+      ["Wide top", "trapezoidBack"],
+      ["Flag", "asymmetric"],
+      ["Done", "doubleCircle"],
+    ]);
+  });
+
+  test("a label may hold a slash inside a slanted shape", () => {
+    expect(flow("flowchart TD\nA[/read a/b/]").nodes[0]?.label).toBe("read a/b");
+  });
+
+  test("A@{ shape, label } names a shape and a label", () => {
+    const doc = flow(`flowchart TD
+      A@{ shape: hex, label: "Prepare, now" } --> B@{ shape: cyl }
+      C@{ shape: lean-l, label: 'x' }`);
+
+    expect(doc.nodes.map((n) => [n.id, n.label, n.form])).toEqual([
+      ["A", "Prepare, now", "hexagon"],
+      ["B", "B", "cylinder"],
+      ["C", "x", "parallelogramBack"],
+    ]);
+    expect(message("flowchart TD\nA@{ shape: bolt }")).toContain("not supported");
+    expect(message("flowchart TD\nA@{ shape: hex")).toContain("never closes");
+  });
+
+  test("a markdown string reads as its plain text", () => {
+    const doc = flow('flowchart TD\nA["`**bold** and *soft*`"] -->|"`**yes**`"| B');
+
+    expect(doc.nodes[0]?.label).toBe("bold and soft");
+    expect(doc.edges[0]?.label).toBe("yes");
+  });
+});
+
+describe("parse flowchart edges", () => {
+  test("reads both ends, circle and cross ends, invisible and longer edges", () => {
+    const doc = flow(`flowchart TD
+      A <--> B
+      B --o C
+      C --x D
+      D o--o E
+      E x--x F
+      F ~~~ G
+      G ---> H
+      H ====> I
+      I <-. text .-> J
+      J -- label --x K
+      K e1@--> L`);
+
+    expect(doc.edges.map((e) => [e.line, e.tail, e.head, e.label])).toEqual([
+      ["solid", "arrow", "arrow", undefined],
+      ["solid", "none", "circle", undefined],
+      ["solid", "none", "cross", undefined],
+      ["solid", "circle", "circle", undefined],
+      ["solid", "cross", "cross", undefined],
+      ["invisible", "none", "none", undefined],
+      ["solid", "none", "arrow", undefined],
+      ["thick", "none", "arrow", undefined],
+      ["dotted", "arrow", "arrow", "text"],
+      ["solid", "none", "cross", "label"],
+      ["solid", "none", "arrow", undefined],
+    ]);
+  });
+
+  test("an edge id and its animation line are ignored", () => {
+    const doc = flow("flowchart TD\nA e1@--> B\ne1@{ animate: true }");
+
+    expect(doc.nodes.map((n) => n.id)).toEqual(["A", "B"]);
+  });
+
+  test("-- with no arrow is not an edge", () => {
+    expect(message("flowchart TD\nA -- B")).toContain("expected an edge");
+  });
+});
+
+describe("parse flowchart styles", () => {
+  test("classDef, class, ::: and style color nodes, with style winning", () => {
+    const doc = flow(`flowchart TD
+      A:::hot --> B
+      C
+      classDef hot fill:#f96,stroke:#333,stroke-width:4px,color:#fff,stroke-dasharray: 5 5
+      classDef cool fill:#00f
+      class B,C cool
+      style C stroke:red,fill:#abc`);
+
+    const styles = Object.fromEntries(doc.nodes.map((n) => [n.id, n.style]));
+
+    expect(styles.A).toEqual({
+      fill: "#f96",
+      stroke: "#333",
+      width: 4,
+      color: "#fff",
+      dash: [5, 5],
+    });
+    expect(styles.B).toEqual({ fill: "#00f" });
+    expect(styles.C).toEqual({ fill: "#abc", stroke: "#ff0000" });
+  });
+
+  test("classDef default styles every node", () => {
+    const doc = flow(
+      "flowchart TD\nA --> B\nclassDef default fill:#eee\nclassDef x stroke:#000\nclass B x",
+    );
+
+    expect(doc.nodes.map((n) => n.style)).toEqual([
+      { fill: "#eee" },
+      { fill: "#eee", stroke: "#000" },
+    ]);
+  });
+
+  test("linkStyle colors edges by index", () => {
+    const doc = flow(`flowchart TD
+      A --> B --> C
+      linkStyle default stroke:#999
+      linkStyle 1 stroke:#f00,stroke-width:3px`);
+
+    expect(doc.edges.map((e) => e.style)).toEqual([
+      { stroke: "#999" },
+      { stroke: "#f00", width: 3 },
+    ]);
+    expect(message("flowchart TD\nA --> B\nlinkStyle 4 stroke:#f00")).toContain("out of range");
+  });
+
+  test("click and a subgraph direction are accepted and ignored", () => {
+    const doc = flow(`flowchart TD
+      subgraph g
+        direction LR
+        A --> B
+      end
+      click A href "https://example.com" _blank`);
+
+    expect(doc.subgraphs).toEqual([{ id: "g", title: "g", nodes: ["A", "B"] }]);
+    expect(message("flowchart TD\nsubgraph g\ndirection UP\nA\nend")).toContain("not one of");
+  });
+
+  test("an undefined class, an unknown node and a bad color are errors", () => {
+    expect(message("flowchart TD\nA:::nope")).toContain("not defined");
+    expect(message("flowchart TD\nA\nstyle Z fill:#fff")).toContain("not a node");
+    expect(message("flowchart TD\nA\nstyle A fill:#12")).toContain("not a color");
+  });
+});
+
+describe("directions", () => {
+  test("BT and RL draw flowcharts, state, class and ER diagrams", () => {
+    for (const text of [
+      "flowchart BT\nA --> B",
+      "flowchart RL\nA --> B",
+      "stateDiagram-v2\ndirection BT\n[*] --> A",
+      "classDiagram\ndirection RL\nA <|-- B",
+      "erDiagram\ndirection BT\nA ||--o{ B : has",
+    ])
+      expect(mermaid(text, { font: mono }).size[0]).toBeGreaterThan(0);
+  });
+});
+
 describe("parse errors", () => {
   test("name the line number, the line and what is supported", () => {
-    const m = message("flowchart TD\nA --> B\n\nclassDef red fill:#f00\n");
+    const m = message("flowchart TD\nA --> B\n\ntitle Hello\n");
 
     expect(m).toContain("mermaid:4:");
-    expect(m).toContain("classDef red fill:#f00");
+    expect(m).toContain("title Hello");
     expect(m).toContain("not supported");
     expect(m).toContain("Supported:");
   });
@@ -155,7 +322,7 @@ describe("parse errors", () => {
   });
 
   test("reject junk after a node", () => {
-    expect(message("flowchart TD\nA:::red --> B")).toContain("expected an edge");
+    expect(message("flowchart TD\nA[x] junk")).toContain("expected an edge");
   });
 });
 
@@ -254,7 +421,7 @@ describe("parse state", () => {
 
 test("file and line place an error in the surrounding source", () => {
   try {
-    parseMermaid("flowchart TD\nA --> B\nclassDef x fill:#f00", { file: "flow.ts", line: 10 });
+    parseMermaid("flowchart TD\nA --> B\ntitle x", { file: "flow.ts", line: 10 });
   } catch (e) {
     if (!(e instanceof SceneError)) throw e;
     expect(e.message).toStartWith("flow.ts:12:");
@@ -286,12 +453,12 @@ describe("mermaid", () => {
     expect(chart.size[1]).toBeGreaterThan(0);
   });
 
-  test("options.direction overrides the text, and BT and RL name the fix", () => {
+  test("options.direction overrides the text, and BT and RL are drawn", () => {
     const text = "flowchart RL\nA --> B";
-    const options = { font: mono, file: "f.ts", line: 3 };
 
-    expect(mermaid(text, { ...options, direction: "LR" }).kind).toBe("flowchart");
-    expect(() => mermaid(text, options)).toThrow(/^f\.ts:3: .*RL.*Write TD or LR/);
+    expect(mermaid(text, { font: mono, direction: "LR" }).kind).toBe("flowchart");
+
+    expect(mermaid(text, { font: mono }).kind).toBe("flowchart");
   });
 
   test("a sequence diagram and a state diagram", () => {
@@ -336,7 +503,7 @@ describe("mermaid", () => {
 
   test("a parse error carries file and line", () => {
     expect(() =>
-      mermaid("flowchart TD\nA --> B\nclassDef x fill:#f00", {
+      mermaid("flowchart TD\nA --> B\ntitle x", {
         font: mono,
         file: "flow.ts",
         line: 10,

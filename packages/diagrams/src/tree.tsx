@@ -24,10 +24,10 @@ import {
   type DiagramOptions,
   type Reveal,
 } from "./kit.tsx";
-import type { Direction, TreeSpec } from "./types.ts";
+import type { TreeSpec } from "./types.ts";
 
 export interface TreeOptions<N extends string = string> extends DiagramOptions {
-  readonly direction?: Direction;
+  readonly direction?: "TB" | "LR";
   readonly reveal?: Reveal<N>;
 }
 

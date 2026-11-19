@@ -4,6 +4,7 @@ import {
   around,
   flip,
   indexing,
+  mirror,
   simplify,
   union,
   type Box,
@@ -70,7 +71,7 @@ export const BEND = 16;
 
 export function layered(input: LayeredInput): LayeredLayout {
   const { direction = "TB", rankGap = 48, nodeGap = 36, groupPad = 12 } = input;
-  const lr = direction === "LR";
+  const lr = direction === "LR" || direction === "RL";
 
   const { unique, at } = indexing(
     input.nodes.map((n) => n.id),
@@ -346,7 +347,19 @@ export function layered(input: LayeredInput): LayeredLayout {
     BEND,
   );
 
-  const out = (value: Box): Box => (lr ? flip(value) : value);
+  const axis = direction === "BT" ? "y" : direction === "RL" ? "x" : undefined;
+
+  const out = (value: Box): Box => {
+    const turned = lr ? flip(value) : value;
+
+    return axis ? mirror(turned, axis) : turned;
+  };
+
+  const spot = (value: Point): Point => {
+    const turned = lr ? flip(value) : value;
+
+    return axis ? mirror(turned, axis) : turned;
+  };
 
   const laid = edges.map(({ i }, k): LayeredEdge => {
     const label = loops[k] ?? free[k];
@@ -354,7 +367,7 @@ export function layered(input: LayeredInput): LayeredLayout {
     return {
       from: input.edges[i]!.from,
       to: input.edges[i]!.to,
-      points: routes[k]!.map((point) => (lr ? flip(point) : point)),
+      points: routes[k]!.map(spot),
       label: label && out(label),
     };
   });

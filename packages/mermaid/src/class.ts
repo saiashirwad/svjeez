@@ -5,8 +5,8 @@ import {
   type DiagramOptions,
 } from "@svjeez/diagrams";
 import type { Span } from "svjeez";
-import { clean, fail, sourceOf, unquote, type Line } from "./errors.ts";
-import type { Place } from "./types.ts";
+import { clean, fail, isDirection, sourceOf, unquote, type Line } from "./errors.ts";
+import type { MermaidDirection, Place } from "./types.ts";
 
 export interface MermaidClass {
   readonly id: string;
@@ -30,14 +30,14 @@ export interface MermaidClassRelation {
 export interface ClassDoc {
   readonly kind: "class";
   readonly source: Place;
-  readonly direction: "TB" | "LR";
+  readonly direction: MermaidDirection;
   readonly classes: readonly MermaidClass[];
   readonly relations: readonly MermaidClassRelation[];
   readonly namespaces: readonly { readonly id: string; readonly classes: readonly string[] }[];
 }
 
 const SUPPORTED =
-  'Supported: `class Name`, `class Name { +attribute  +method() }`, `<<annotation>>`, `Name : +member`, relations `<|--` `*--` `o--` `-->` `..>` `..|>` `--` `..` with "cardinality" and `: label`, `namespace Name { ... }`, and `direction TB` or `LR`.';
+  'Supported: `class Name`, `class Name { +attribute  +method() }`, `<<annotation>>`, `Name : +member`, relations `<|--` `*--` `o--` `-->` `..>` `..|>` `--` `..` with "cardinality" and `: label`, `namespace Name { ... }`, and `direction TB`, `LR`, `BT` or `RL`.';
 
 const LEAVES = new Map<string, ClassEnd>([
   ["<|", "triangle"],
@@ -176,11 +176,7 @@ export const parseClass = (header: Line, body: readonly Line[]): ClassDoc => {
     const dir = /^direction\s+(\w+)$/.exec(l.text)?.[1];
 
     if (dir) {
-      if (dir !== "TB" && dir !== "LR")
-        fail(
-          l,
-          `svjeez lays class diagrams out top to bottom or left to right. Write \`direction TB\` or \`direction LR\`.`,
-        );
+      if (!isDirection(dir)) fail(l, `direction ${dir} is not one of TB, LR, BT or RL.`);
       direction = dir;
       continue;
     }
@@ -278,7 +274,7 @@ export const parseClass = (header: Line, body: readonly Line[]): ClassDoc => {
 };
 
 export interface ClassDrawOptions extends DiagramOptions {
-  readonly direction?: "TB" | "LR";
+  readonly direction?: MermaidDirection;
   readonly reveal?: Span;
 }
 

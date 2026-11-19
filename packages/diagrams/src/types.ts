@@ -1,14 +1,39 @@
-export type Direction = "TB" | "LR";
+import type { Color } from "svjeez/tools";
+
+export type Direction = "TB" | "LR" | "BT" | "RL";
 
 export type NodeRole = "task" | "input" | "output" | "tool" | "decision" | "store";
 
-export type Labelled = string | { readonly label: string; readonly role?: NodeRole };
+/** An outline that a role does not imply: it changes the shape and keeps the role's color. */
+export type NodeShape = "hexagon" | "slantBack" | "trapezoid" | "trapezoidBack" | "flag" | "double";
 
-export type ArrowHead = "filled" | "none" | "cross" | "async";
+/** Per-node paint that replaces what the role would give. */
+export interface NodeStyle {
+  readonly fill?: Color;
+  readonly stroke?: Color;
+  readonly color?: Color;
+  readonly width?: number;
+  readonly dash?: readonly number[];
+}
+
+export type Labelled =
+  | string
+  | {
+      readonly label: string;
+      readonly role?: NodeRole;
+      readonly shape?: NodeShape;
+      readonly style?: NodeStyle;
+    };
+
+export type ArrowHead = "filled" | "none" | "cross" | "async" | "circle";
 
 export interface FlowchartEdgeOptions {
-  readonly line?: "solid" | "dotted" | "thick";
-  readonly head?: "filled" | "none";
+  /** `invisible` takes part in the layout but is not drawn. */
+  readonly line?: "solid" | "dotted" | "thick" | "invisible";
+  readonly head?: "filled" | "none" | "cross" | "circle";
+  readonly tail?: "filled" | "none" | "cross" | "circle";
+  readonly color?: Color;
+  readonly width?: number;
 }
 
 export type FlowchartEdge<N extends string> =

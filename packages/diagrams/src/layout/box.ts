@@ -23,6 +23,19 @@ export function flip(value: Box | Point): Box | Point {
     : { x: value.y, y: value.x };
 }
 
+export function mirror(value: Box, axis: "x" | "y"): Box;
+export function mirror(value: Point, axis: "x" | "y"): Point;
+export function mirror(value: Box | Point, axis: "x" | "y"): Box | Point {
+  const [w, h] = "w" in value ? [value.w, value.h] : [0, 0];
+
+  return axis === "x" ? { ...value, x: -value.x - w } : { ...value, y: -value.y - h };
+}
+
+export const DIRECTIONS: readonly Direction[] = ["TB", "LR", "BT", "RL"];
+
+export const isVertical = (direction: Direction): boolean =>
+  direction === "TB" || direction === "BT";
+
 export const maxOf = (values: readonly number[]): number => {
   let max = -Infinity;
 

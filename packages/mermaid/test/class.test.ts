@@ -115,7 +115,7 @@ describe("parse class errors", () => {
     expect(message("classDef big fill:#f9f")).toContain("classDef is not supported");
     expect(message("class A:::big")).toContain("`:::` style classes are not supported");
     expect(message("Foo ()-- Bar")).toContain("lollipop");
-    expect(message("direction BT")).toContain("top to bottom or left to right");
+    expect(message("direction UP")).toContain("not one of TB, LR, BT or RL");
     expect(message("class A {\n+run()*\n}")).toContain("abstract");
     expect(message("namespace A {\nnamespace B {")).toContain("nested namespaces");
     expect(message('click A href "x"')).toContain("click is not supported");

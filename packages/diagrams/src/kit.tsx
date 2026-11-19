@@ -4,6 +4,7 @@ import {
   Group,
   Shape,
   Text,
+  circle,
   enter,
   line,
   path,
@@ -38,7 +39,7 @@ import {
 } from "svjeez/tools";
 import { curve, vec } from "./curve.ts";
 import type { Box, Point, Size } from "./layout/box.ts";
-import type { ArrowHead, Labelled, NodeRole } from "./types.ts";
+import type { ArrowHead, Labelled, NodeRole, NodeShape, NodeStyle } from "./types.ts";
 
 export interface DiagramColors {
   readonly background: Color;
@@ -220,18 +221,38 @@ export const labelOf = (
 ): {
   readonly label: string;
   readonly role: NodeRole;
+  readonly shape?: NodeShape;
+  readonly style?: NodeStyle;
 } =>
-  isBare(spec) ? { label: spec, role: "task" } : { label: spec.label, role: spec.role ?? "task" };
+  isBare(spec)
+    ? { label: spec, role: "task" }
+    : { label: spec.label, role: spec.role ?? "task", shape: spec.shape, style: spec.style };
 
-export const sizeOf = (l: Look, role: NodeRole, label: string): Size => {
+/** What a node's outline, size and edge ends follow: its shape when it has one, else its role. */
+export type Form = NodeRole | NodeShape;
+
+export const formOf = (role: NodeRole, shape?: NodeShape): Form => shape ?? role;
+
+export const sizeOf = (l: Look, role: Form, label: string): Size => {
   const text = l.measure(label, l.size, l.weight);
   const [w, h] = [text + l.size * 2.2, Math.round(l.size * 2.8)];
 
   switch (role) {
     case "input":
       return { w: w + h * 0.7, h };
+    case "slantBack":
+      return { w: w + h * 0.7, h };
     case "output":
       return { w: w + h * 0.4, h };
+    case "hexagon":
+      return { w: w + h * 0.6, h };
+    case "trapezoid":
+    case "trapezoidBack":
+      return { w: w + h * 0.6, h };
+    case "flag":
+      return { w: w + h * 0.4, h };
+    case "double":
+      return { w: w + h * 0.4 + 2 * RING, h: h + 2 * RING };
     case "tool":
       return { w: w + 16, h };
     case "decision":
@@ -249,10 +270,12 @@ export const labelSize = (l: Look, text: string): Size => ({
 });
 
 const SKEW = 0.35;
+const CORNER = 0.3;
+const RING = 4;
 const LID = 5;
 const K = 0.5523;
 
-export const onOutline = (role: NodeRole, b: Box, end: Point, toward: Point): Point => {
+export const onOutline = (role: Form, b: Box, end: Point, toward: Point): Point => {
   const [cx, cy] = [b.x + b.w / 2, b.y + b.h / 2];
   const vertical = end.x === toward.x;
 
@@ -281,6 +304,36 @@ export const onOutline = (role: NodeRole, b: Box, end: Point, toward: Point): Po
       return { x: end.x < cx ? b.x + s : b.x + b.w - b.h * SKEW + s, y: end.y };
     }
 
+    case "slantBack": {
+      if (vertical) return end;
+      const s = b.h * SKEW * ((end.y - b.y) / b.h);
+
+      return { x: end.x < cx ? b.x + s : b.x + b.w - b.h * SKEW + s, y: end.y };
+    }
+
+    case "trapezoid":
+    case "trapezoidBack": {
+      if (vertical) return end;
+      const t = (end.y - b.y) / b.h;
+      const s = b.h * CORNER * (role === "trapezoid" ? 1 - t : t);
+
+      return { x: end.x < cx ? b.x + s : b.x + b.w - s, y: end.y };
+    }
+
+    case "hexagon": {
+      if (vertical) return end;
+      const s = b.h * CORNER * (Math.abs(end.y - cy) / (b.h / 2));
+
+      return { x: end.x < cx ? b.x + s : b.x + b.w - s, y: end.y };
+    }
+
+    case "flag": {
+      if (vertical || end.x > cx) return end;
+
+      return { x: b.x + b.h * CORNER * (1 - Math.abs(end.y - cy) / (b.h / 2)), y: end.y };
+    }
+
+    case "double":
     case "output": {
       const r = b.h / 2;
 
@@ -338,7 +391,7 @@ const halfEllipse = (
   ] as const satisfies readonly (readonly [Vec, Vec, Vec])[];
 };
 
-export const outline = (role: NodeRole, w: number, h: number): Geometry => {
+export const outline = (role: Form, w: number, h: number): Geometry => {
   switch (role) {
     case "input": {
       const s = h * SKEW;
@@ -346,6 +399,33 @@ export const outline = (role: NodeRole, w: number, h: number): Geometry => {
       return polygon([s, 0], [w, 0], [w - s, h], [0, h]);
     }
 
+    case "slantBack": {
+      const s = h * SKEW;
+
+      return polygon([0, 0], [w - s, 0], [w, h], [s, h]);
+    }
+
+    case "trapezoid": {
+      const s = h * CORNER;
+
+      return polygon([s, 0], [w - s, 0], [w, h], [0, h]);
+    }
+
+    case "trapezoidBack": {
+      const s = h * CORNER;
+
+      return polygon([0, 0], [w, 0], [w - s, h], [s, h]);
+    }
+
+    case "hexagon": {
+      const s = h * CORNER;
+
+      return polygon([s, 0], [w - s, 0], [w, h / 2], [w - s, h], [s, h], [0, h / 2]);
+    }
+
+    case "flag":
+      return polygon([0, 0], [w, 0], [w, h], [0, h], [h * CORNER, h / 2]);
+    case "double":
     case "output":
       return rect(w, h, { radius: h / 2 });
     case "decision":
@@ -371,7 +451,9 @@ export const outline = (role: NodeRole, w: number, h: number): Geometry => {
   }
 };
 
-const detailOf = (role: NodeRole, w: number, h: number): Geometry | undefined => {
+const detailOf = (role: Form, w: number, h: number): Geometry | undefined => {
+  if (role === "double") return rect(w - 2 * RING, h - 2 * RING, { radius: (h - 2 * RING) / 2 });
+
   if (role === "tool")
     return path()
       .moveTo([8, 0])
@@ -395,33 +477,41 @@ export interface NodeProps {
   readonly key: string;
   readonly look: Look;
   readonly role: NodeRole;
+  readonly shape?: NodeShape;
+  readonly style?: NodeStyle;
   readonly label: string;
   readonly box: Box;
   readonly motion?: Layers;
 }
 
 export const Node = ({ look: l, ...n }: NodeProps): SceneElement => {
-  const tint = l.tint(n.role);
+  const form = formOf(n.role, n.shape);
+  const tint = n.style?.stroke ?? l.tint(n.role);
   const [w, h] = [round(n.box.w), round(n.box.h)];
-  const detail = detailOf(n.role, w, h);
+  const detail = detailOf(form, w, h);
+  const stroke = { color: tint, width: n.style?.width ?? 1.5, dash: n.style?.dash };
 
   return (
     <Group key={n.key} offset={[round(n.box.x), round(n.box.y)]} motion={n.motion}>
       <Shape
         key="shape"
-        geometry={outline(n.role, w, h)}
-        fill={l.wash(n.role)}
-        stroke={{ color: tint, width: 1.5 }}
+        geometry={outline(form, w, h)}
+        fill={n.style?.fill ?? l.wash(n.role)}
+        stroke={stroke}
       />
-      {detail && <Shape key="detail" geometry={detail} stroke={{ color: tint, width: 1.5 }} />}
+      {detail && (
+        <Group key="detail" offset={form === "double" ? [RING, RING] : [0, 0]}>
+          <Shape geometry={detail} stroke={stroke} />
+        </Group>
+      )}
       <Text
         key="label"
         font={l.font}
         size={l.size}
         weight={l.weight}
-        fill={l.colors.text}
+        fill={n.style?.color ?? l.colors.text}
         anchor="center"
-        at={[w / 2, round(h / 2 + (n.role === "store" ? LID / 2 : 0))]}
+        at={[w / 2, round(h / 2 + (form === "store" ? LID / 2 : 0))]}
       >
         {n.label}
       </Text>
@@ -439,10 +529,17 @@ export interface EdgeProps {
   /** Changes to the default line: width 1.5, round cap and join. */
   readonly stroke?: Partial<StrokeProps>;
   readonly head?: ArrowHead;
+  /** A head drawn at the start of the line. Defaults to none. */
+  readonly tail?: ArrowHead;
   readonly draw?: Anim<number>;
 }
 
-const headOf = (head: Exclude<ArrowHead, "none">, tip: Point, ux: number, uy: number): Geometry => {
+const headOf = (
+  head: Exclude<ArrowHead, "none" | "circle">,
+  tip: Point,
+  ux: number,
+  uy: number,
+): Geometry => {
   const p = (x: number, y: number): Vec => vec({ x, y });
   const tipAt = p(tip.x, tip.y);
   const left = p(tip.x - ux * HEAD - uy * HEAD * 0.5, tip.y - uy * HEAD + ux * HEAD * 0.5);
@@ -468,17 +565,62 @@ const headOf = (head: Exclude<ArrowHead, "none">, tip: Point, ux: number, uy: nu
   }
 };
 
+interface MarkProps {
+  readonly key: string;
+  readonly look: Look;
+  readonly kind: Exclude<ArrowHead, "none">;
+  readonly tip: Point;
+  readonly ux: number;
+  readonly uy: number;
+  readonly color: Color;
+  readonly stroke: StrokeProps;
+  readonly opacity?: Anim<number>;
+}
+
+const Mark = ({ look: l, ...m }: MarkProps): SceneElement => {
+  if (m.kind === "circle")
+    return (
+      <Group
+        key={m.key}
+        offset={[round(m.tip.x - m.ux * HEAD * 0.5), round(m.tip.y - m.uy * HEAD * 0.5)]}
+      >
+        <Shape
+          geometry={circle(HEAD * 0.5)}
+          fill={l.colors.background}
+          stroke={m.stroke}
+          opacity={m.opacity}
+        />
+      </Group>
+    );
+
+  return (
+    <Shape
+      key={m.key}
+      geometry={headOf(m.kind, m.tip, m.ux, m.uy)}
+      fill={m.kind === "filled" ? m.color : undefined}
+      stroke={m.kind === "filled" ? undefined : m.stroke}
+      opacity={m.opacity}
+    />
+  );
+};
+
 export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
   const color = e.color ?? l.colors.line;
   const head = e.head ?? "filled";
+  const tail = e.tail ?? "none";
   const [a, b] = [e.points.at(-2)!, e.points.at(-1)!];
   const length = Math.hypot(b.x - a.x, b.y - a.y) || 1;
   const [ux, uy] = [(b.x - a.x) / length, (b.y - a.y) / length];
+  const [c, d] = [e.points[1]!, e.points[0]!];
+  const back = Math.hypot(d.x - c.x, d.y - c.y) || 1;
+  const [vx, vy] = [(d.x - c.x) / back, (d.y - c.y) / back];
 
-  const points =
-    head === "filled"
-      ? [...e.points.slice(0, -1), { x: b.x - ux * (HEAD - 1), y: b.y - uy * (HEAD - 1) }]
-      : e.points;
+  const points = [...e.points];
+
+  if (head === "filled")
+    points[points.length - 1] = { x: b.x - ux * (HEAD - 1), y: b.y - uy * (HEAD - 1) };
+
+  if (tail === "filled") points[0] = { x: d.x - vx * (HEAD - 1), y: d.y - vy * (HEAD - 1) };
 
   const stroke: StrokeProps = {
     color,
@@ -487,6 +629,13 @@ export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
     join: "round",
     ...e.stroke,
   };
+
+  const mark = {
+    color,
+    width: stroke.width ?? 1.5,
+    cap: "round",
+    join: "round",
+  } as const;
 
   // The head stays fixed at the end and shows once the drawn line reaches its base.
   const cut = head === "filled" ? HEAD - 1 : 0;
@@ -504,20 +653,35 @@ export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
         opacity={e.draw !== undefined && stroke.dash ? e.draw : undefined}
       />
       {head !== "none" && (
-        <Shape
+        <Mark
           key="head"
-          geometry={headOf(head, b, ux, uy)}
-          fill={head === "filled" ? color : undefined}
-          stroke={
-            head === "filled" ? undefined : { color, width: 1.5, cap: "round", join: "round" }
-          }
+          look={l}
+          kind={head}
+          tip={b}
+          ux={ux}
+          uy={uy}
+          color={color}
+          stroke={mark}
           opacity={
             e.draw === undefined
               ? undefined
               : stroke.dash
                 ? e.draw
-                : through(e.draw, (d) => (d >= reach ? 1 : 0))
+                : through(e.draw, (t) => (t >= reach ? 1 : 0))
           }
+        />
+      )}
+      {tail !== "none" && (
+        <Mark
+          key="tail"
+          look={l}
+          kind={tail}
+          tip={d}
+          ux={vx}
+          uy={vy}
+          color={color}
+          stroke={mark}
+          opacity={e.draw}
         />
       )}
     </Group>

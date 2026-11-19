@@ -222,6 +222,102 @@ describe("flowchart", () => {
   });
 });
 
+describe("flowchart shapes, styles and directions", () => {
+  const forms = {
+    a: { label: "A", role: "tool", shape: "hexagon" },
+    b: { label: "B", role: "input", shape: "slantBack" },
+    c: { label: "C", shape: "trapezoid" },
+    d: { label: "D", shape: "trapezoidBack" },
+    e: { label: "E", role: "input", shape: "flag" },
+    f: { label: "F", role: "output", shape: "double" },
+  } as const;
+
+  const spec = {
+    nodes: forms,
+    edges: [
+      ["a", "b"],
+      ["b", "c"],
+      ["c", "d"],
+      ["d", "e"],
+      ["e", "f"],
+    ],
+  } as const;
+
+  test("every shape draws, checks and keeps its edges on its outline", () => {
+    const chart = flowchart(spec, options);
+
+    expect(svg.emit(draw(chart.node))).toContain("<svg");
+    expect(errorsOf(chart.node)).toEqual([]);
+    expect(chart.edge("a", "b").points[0]).toBeDefined();
+  });
+
+  test("BT and RL flip the flow, and a group's label sits on the far side for BT", () => {
+    const base = { nodes: { a: "A", b: "B" }, edges: [["a", "b"]] } as const;
+
+    const end = (direction: "TB" | "BT" | "LR" | "RL") => {
+      const route = flowchart(base, { ...options, direction }).edge("a", "b");
+      const [first, last] = [route.points[0]!, route.points.at(-1)!];
+
+      return [last[0] - first[0], last[1] - first[1]];
+    };
+
+    expect(end("TB")![1]).toBeGreaterThan(0);
+    expect(end("BT")![1]).toBeLessThan(0);
+    expect(end("LR")![0]).toBeGreaterThan(0);
+    expect(end("RL")![0]).toBeLessThan(0);
+
+    const grouped = flowchart(
+      { ...base, groups: { g: { label: "Group", nodes: ["a", "b"] } } },
+      { ...options, direction: "BT" },
+    );
+
+    expect(errorsOf(grouped.node)).toEqual([]);
+  });
+
+  test("a node style replaces the role's paint", () => {
+    const chart = flowchart(
+      {
+        nodes: {
+          a: {
+            label: "A",
+            style: { fill: "#ff0000", stroke: "#00ff00", color: "#0000ff", width: 4 },
+          },
+        },
+        edges: [],
+      },
+      options,
+    );
+
+    const out = svg.emit(draw(chart.node));
+
+    expect(out.toLowerCase()).toContain("#ff0000");
+    expect(out.toLowerCase()).toContain("#00ff00");
+    expect(out.toLowerCase()).toContain("#0000ff");
+  });
+
+  test("edges take tails, circle and cross ends, colors and widths; invisible ones are not drawn", () => {
+    const chart = flowchart(
+      {
+        nodes: { a: "A", b: "B", c: "C", d: "D" },
+        edges: [
+          ["a", "b", undefined, { tail: "filled", head: "filled" }],
+          ["b", "c", undefined, { head: "circle", tail: "cross", color: "#ff00ff", width: 3 }],
+          ["c", "d", "hidden", { line: "invisible" }],
+        ],
+      },
+      options,
+    );
+
+    const out = svg.emit(draw(chart.node));
+
+    expect(errorsOf(chart.node)).toEqual([]);
+    expect(out.toLowerCase()).toContain("#ff00ff");
+    expect(out).not.toContain("hidden");
+    expect(chart.edge("c", "d").length).toBeGreaterThan(0);
+    expect(chart.size[1]).toBeGreaterThan(150);
+  });
+});
+
 describe("tree", () => {
   const team = () =>
     tree(

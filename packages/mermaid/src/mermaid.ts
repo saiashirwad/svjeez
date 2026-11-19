@@ -13,6 +13,7 @@ import {
   type Pie,
   type Flowchart,
   type NodeRole,
+  type NodeShape,
   type Sequence,
   type StateMachine,
   type StateSpec,
@@ -38,6 +39,7 @@ import type {
   MindmapDoc,
   PieDoc,
   FlowForm,
+  MermaidDirection,
   MermaidDoc,
   ParseOptions,
   SequenceDoc,
@@ -46,7 +48,7 @@ import type {
 } from "./types.ts";
 
 export interface MermaidOptions extends DiagramOptions, ParseOptions {
-  readonly direction?: "TB" | "LR";
+  readonly direction?: MermaidDirection;
   readonly reveal?: Span;
 }
 
@@ -62,15 +64,24 @@ export type MermaidDiagram =
   | (Mindmap<string> & { readonly kind: "mindmap"; readonly doc: MindmapDoc })
   | (GitGraph & { readonly kind: "git"; readonly doc: GitDoc });
 
-const FORM_ROLES: Record<FlowForm, NodeRole> = {
-  rect: "task",
-  round: "task",
-  stadium: "input",
-  diamond: "decision",
-  circle: "output",
-  subroutine: "tool",
-  cylinder: "store",
+const FORM_NODES: Record<FlowForm, { readonly role: NodeRole; readonly shape?: NodeShape }> = {
+  rect: { role: "task" },
+  round: { role: "task" },
+  stadium: { role: "input" },
+  diamond: { role: "decision" },
+  circle: { role: "output" },
+  doubleCircle: { role: "output", shape: "double" },
+  subroutine: { role: "tool" },
+  cylinder: { role: "store" },
+  hexagon: { role: "tool", shape: "hexagon" },
+  parallelogram: { role: "input" },
+  parallelogramBack: { role: "input", shape: "slantBack" },
+  trapezoid: { role: "task", shape: "trapezoid" },
+  trapezoidBack: { role: "task", shape: "trapezoidBack" },
+  asymmetric: { role: "input", shape: "flag" },
 };
+
+const HEADS = { none: "none", arrow: "filled", circle: "circle", cross: "cross" } as const;
 
 const NAMES = {
   sequence: "sequence diagram",
@@ -106,25 +117,29 @@ export function mermaid(text: string, options: MermaidOptions): MermaidDiagram {
   if (doc.kind === "flowchart") {
     const direction = asked ?? (doc.direction === "TD" ? "TB" : doc.direction);
 
-    if (direction === "BT" || direction === "RL")
-      throw new SceneError(
-        `The flowchart is written ${direction}, and svjeez lays flowcharts out top to bottom or left to right.`,
-        "Write TD or LR in the Mermaid text, or pass { direction }.",
-        { source: doc.source },
-      );
-
     return drawn(
       flowchart(
         {
           nodes: Object.fromEntries(
-            doc.nodes.map((n) => [n.id, { label: n.label, role: FORM_ROLES[n.form] }]),
+            doc.nodes.map((n) => [n.id, { label: n.label, ...FORM_NODES[n.form], style: n.style }]),
           ),
           groups: Object.fromEntries(
             doc.subgraphs.map((g) => [g.id, { label: g.title, nodes: g.nodes }]),
           ),
           edges: doc.edges.map(
             (e) =>
-              [e.from, e.to, e.label, { line: e.line, head: e.arrow ? "filled" : "none" }] as const,
+              [
+                e.from,
+                e.to,
+                e.label,
+                {
+                  line: e.line,
+                  head: HEADS[e.head],
+                  tail: HEADS[e.tail],
+                  color: e.style?.stroke,
+                  width: e.style?.width,
+                },
+              ] as const,
           ),
         },
         { ...diagramOptions, direction },
