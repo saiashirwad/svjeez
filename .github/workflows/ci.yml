@@ -57,7 +57,8 @@ jobs:
     container: mcr.microsoft.com/playwright:v1.64.1-noble
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      # setup-bun needs unzip, which the image lacks; it does have npm.
+      - run: npm install --global bun
       - run: bun install --frozen-lockfile
       - run: bun run test:browsers
         working-directory: examples
