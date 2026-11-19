@@ -11,6 +11,7 @@ import {
   type Journey,
   type Mindmap,
   type Pie,
+  type Timeline,
   type Flowchart,
   type NodeRole,
   type NodeShape,
@@ -30,6 +31,7 @@ import { drawJourney } from "./journey.ts";
 import { drawMindmap } from "./mindmap.ts";
 import { parseMermaid } from "./parse.ts";
 import { drawPie } from "./pie.ts";
+import { drawTimeline } from "./timeline.ts";
 import type {
   ClassDoc,
   ErDoc,
@@ -39,6 +41,7 @@ import type {
   JourneyDoc,
   MindmapDoc,
   PieDoc,
+  TimelineDoc,
   FlowForm,
   MermaidDirection,
   MermaidDoc,
@@ -65,7 +68,8 @@ export type MermaidDiagram =
   | (Journey & { readonly kind: "journey"; readonly doc: JourneyDoc })
   | (Pie<string> & { readonly kind: "pie"; readonly doc: PieDoc })
   | (Mindmap<string> & { readonly kind: "mindmap"; readonly doc: MindmapDoc })
-  | (GitGraph & { readonly kind: "git"; readonly doc: GitDoc });
+  | (GitGraph & { readonly kind: "git"; readonly doc: GitDoc })
+  | (Timeline & { readonly kind: "timeline"; readonly doc: TimelineDoc });
 
 const FORM_NODES: Record<FlowForm, { readonly role: NodeRole; readonly shape?: NodeShape }> = {
   rect: { role: "task" },
@@ -93,6 +97,7 @@ const NAMES = {
   pie: "pie chart",
   mindmap: "mindmap",
   git: "git graph",
+  timeline: "timeline",
 } as const;
 
 const stateRegion = (r: StateRegion) => ({
@@ -224,6 +229,8 @@ export function mermaid(text: string, options: MermaidOptions): MermaidDiagram {
   if (doc.kind === "mindmap") return drawn(drawMindmap(doc, diagramOptions), "mindmap", doc);
 
   if (doc.kind === "git") return drawn(drawGit(doc, diagramOptions), "git", doc);
+
+  if (doc.kind === "timeline") return drawn(drawTimeline(doc, diagramOptions), "timeline", doc);
 
   if (doc.kind === "sequence") {
     return drawn(

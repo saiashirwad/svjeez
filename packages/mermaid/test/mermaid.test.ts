@@ -301,7 +301,7 @@ describe("parse errors", () => {
 
   test("reject another diagram type", () => {
     expect(message("sankey-beta\nA,B,10")).toContain("Supported diagram types");
-    expect(message("quadrantChart\ntitle Q")).toContain("mermaid:1:");
+    expect(message("requirementDiagram\ntitle Q")).toContain("mermaid:1:");
   });
 
   test("reject empty text, a bad direction and an unclosed subgraph", () => {
@@ -716,6 +716,7 @@ describe("every supported diagram type", () => {
     journey: "journey\ntitle Day\nsection Work\nCode: 5: Me",
     pie: 'pie title Pets\n"Dogs" : 3\n"Cats" : 2',
     mindmap: "mindmap\n  root\n    A\n    B",
+    timeline: "timeline\ntitle T\nsection S\n2021 : a : b\n     : c",
     git: "gitGraph\ncommit\nbranch dev\ncommit\ncheckout main\nmerge dev",
   } as const;
 

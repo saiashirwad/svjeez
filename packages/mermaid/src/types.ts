@@ -6,6 +6,7 @@ import type { GitDoc } from "./git.ts";
 import type { JourneyDoc } from "./journey.ts";
 import type { MindmapDoc } from "./mindmap.ts";
 import type { PieDoc } from "./pie.ts";
+import type { TimelineDoc } from "./timeline.ts";
 
 export type Place = NonNullable<Where["source"]>;
 
@@ -203,11 +204,12 @@ export type MermaidDoc =
   | PieDoc
   | MindmapDoc
   | GitDoc
-  | JourneyDoc;
+  | JourneyDoc
+  | TimelineDoc;
 
 export interface ParseOptions {
   readonly file?: string;
   readonly line?: number;
 }
 
-export type { ClassDoc, ErDoc, GanttDoc, GitDoc, JourneyDoc, MindmapDoc, PieDoc };
+export type { ClassDoc, ErDoc, GanttDoc, GitDoc, JourneyDoc, MindmapDoc, PieDoc, TimelineDoc };

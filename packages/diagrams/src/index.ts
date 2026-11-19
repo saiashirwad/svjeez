@@ -83,3 +83,12 @@ export {
   type GitGraphOptions,
   type GitKind,
 } from "./git.tsx";
+
+export {
+  timeline,
+  type Timeline,
+  type TimelineOptions,
+  type TimelinePeriod,
+  type TimelineSection,
+  type TimelineSpec,
+} from "./timeline.tsx";

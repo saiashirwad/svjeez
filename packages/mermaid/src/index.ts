@@ -17,3 +17,5 @@ export type * from "./journey.ts";
 export type * from "./mindmap.ts";
 
 export type * from "./pie.ts";
+
+export type * from "./timeline.ts";
