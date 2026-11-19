@@ -3,6 +3,8 @@ import { loopLength, seek } from "./page";
 import { rateOf } from "./svg/rate";
 import { systemColorScheme } from "./scheme";
 
+export { costOf, type Cost } from "./svg/cost";
+
 export { validateSvg, type ValidationResult } from "./svg/validate";
 
 export { checkPixels, type CheckOptions, type PixelReport } from "./check/check";

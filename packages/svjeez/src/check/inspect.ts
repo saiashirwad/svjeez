@@ -4,6 +4,7 @@ import type { Seconds } from "../model/time";
 import { add, type Problem, type Related, type Severity, type Survey } from "./inspect-context";
 import { lowContrast } from "./inspect-contrast";
 import { layoutOverlap, missingGlyphs, overlap, wideLines, wordCuts } from "./inspect-layout";
+import { movingFilter } from "./inspect-cost";
 import { loopSeam, timing } from "./inspect-timing";
 import { svg } from "../svg/svg";
 import { neverVisible, offCanvas } from "./inspect-visibility";
@@ -105,6 +106,7 @@ export const problemsOf = (scene: Scene, sampled?: readonly Seconds[]): Problem[
   lowContrast(survey);
   loopSeam(survey);
   timing(survey);
+  movingFilter(survey);
   layoutOverlap(survey);
   wordCuts(survey);
   capabilities(survey);

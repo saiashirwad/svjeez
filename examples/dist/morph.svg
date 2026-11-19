@@ -15,41 +15,39 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m3{animation-name:k3}
 @keyframes k4{0%,17.949%,100%{translate:64px 176px}33.333%,84.615%{translate:64px 140px}}
 .m4{animation-name:k4}
-@keyframes k5{0%,52.051%,100%{scale:1}63.59%,84.615%{scale:0.6}}
-@keyframes k6{0%,52.051%,100%{opacity:1}63.59%,84.615%{opacity:0}}
-.m5{animation-name:k5,k6}
-@keyframes k7{0%,52.821%,100%{fill:var(--blue)}64.359%,84.615%{fill:var(--orange)}}
-@keyframes k8{0%,17.949%,100%{translate:168px 128px}33.333%,52.821%{translate:168px 164px}64.359%,84.615%{translate:272px 149px}}
-.m6{animation-name:k7,k8}
-@keyframes k9{0%,52.821%,100%{translate:185.6px 243.76px}64.359%,84.615%{translate:289.6px 243.76px}}
-.m7{animation-name:k9}
-@keyframes k10{0%,17.949%,100%{fill:var(--blue)}33.333%,84.615%{fill:var(--green)}}
-@keyframes k11{0%,17.949%,100%{translate:272px 153.5px}33.333%,53.59%{translate:272px 101px}65.128%,84.615%{translate:64px 86px}}
-.m8{animation-name:k10,k11}
-@keyframes k12{0%,53.59%,100%{translate:286px 243.76px}65.128%,84.615%{translate:78px 243.76px}}
-.m9{animation-name:k12}
-@keyframes k13{0%,54.359%{translate:376px 191px}65.897%,100%{translate:168px 122px}}
-.m10{animation-name:k13}
-@keyframes k14{0%,54.359%{translate:393.6px 243.76px}65.897%,100%{translate:185.6px 243.76px}}
-.m11{animation-name:k14}
-@keyframes k15{0%,17.949%,100%{scale:0.6}33.333%,84.615%{scale:1}}
-@keyframes k16{0%,17.949%,100%{opacity:0}33.333%,84.615%{opacity:1}}
-.m12{animation-name:k15,k16}
-@keyframes k17{0%,55.128%,100%{fill:var(--raised)}66.667%,84.615%{fill:var(--magenta)}}
-@keyframes k18{0%,17.949%,100%{translate:520px 110px}33.333%,84.615%{translate:472px 90px}}
-.m13{animation-name:k17,k18}
-@keyframes k19{0%,55.128%{opacity:1}66.667%,100%{opacity:0}}
-.m14{animation-name:k19}
-@keyframes k20{0%,55.128%{opacity:0}66.667%,100%{opacity:1}}
-.m15{animation-name:k20}
+@keyframes k5{0%,52.051%,100%{scale:1;opacity:1}63.59%,84.615%{scale:0.6;opacity:0}}
+.m5{animation-name:k5}
+@keyframes k6{0%,52.821%,100%{fill:var(--blue)}64.359%,84.615%{fill:var(--orange)}}
+@keyframes k7{0%,17.949%,100%{translate:168px 128px}33.333%,52.821%{translate:168px 164px}64.359%,84.615%{translate:272px 149px}}
+.m6{animation-name:k6,k7}
+@keyframes k8{0%,52.821%,100%{translate:185.6px 243.76px}64.359%,84.615%{translate:289.6px 243.76px}}
+.m7{animation-name:k8}
+@keyframes k9{0%,17.949%,100%{fill:var(--blue)}33.333%,84.615%{fill:var(--green)}}
+@keyframes k10{0%,17.949%,100%{translate:272px 153.5px}33.333%,53.59%{translate:272px 101px}65.128%,84.615%{translate:64px 86px}}
+.m8{animation-name:k9,k10}
+@keyframes k11{0%,53.59%,100%{translate:286px 243.76px}65.128%,84.615%{translate:78px 243.76px}}
+.m9{animation-name:k11}
+@keyframes k12{0%,54.359%{translate:376px 191px}65.897%,100%{translate:168px 122px}}
+.m10{animation-name:k12}
+@keyframes k13{0%,54.359%{translate:393.6px 243.76px}65.897%,100%{translate:185.6px 243.76px}}
+.m11{animation-name:k13}
+@keyframes k14{0%,17.949%,100%{scale:0.6;opacity:0}33.333%,84.615%{scale:1;opacity:1}}
+.m12{animation-name:k14}
+@keyframes k15{0%,55.128%,100%{fill:var(--raised)}66.667%,84.615%{fill:var(--magenta)}}
+@keyframes k16{0%,17.949%,100%{translate:520px 110px}33.333%,84.615%{translate:472px 90px}}
+.m13{animation-name:k15,k16}
+@keyframes k17{0%,55.128%{opacity:1}66.667%,100%{opacity:0}}
+.m14{animation-name:k17}
+@keyframes k18{0%,55.128%{opacity:0}66.667%,100%{opacity:1}}
+.m15{animation-name:k18}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-5s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <rect width="640" height="280" fill="var(--background)"/>
   <rect x="48" y="236" width="512" height="1.5" fill="var(--border)"/>
-  <g transform="translate(64 25.72)">
-    <text y="14.28" font-size="14" fill="var(--text)" class="a m1">Revenue, Q1</text>
-    <text y="14.28" font-size="14" fill="var(--text)" class="a m2">Revenue, Q2</text>
-    <text y="14.28" font-size="14" fill="var(--text)" class="a m3">Revenue, Q3</text>
+  <g transform="translate(64 25.72)" font-size="14" fill="var(--text)">
+    <text y="14.28" class="a m1">Revenue, Q1</text>
+    <text y="14.28" class="a m2">Revenue, Q2</text>
+    <text y="14.28" class="a m3">Revenue, Q3</text>
   </g>
   <g style="transform-origin:96px 217.8px" class="a m5">
     <rect width="64" height="96" rx="6" fill="var(--blue)" class="a m4 dm">
@@ -80,8 +78,8 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     <animate attributeName="d" values="M14 0c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1c2.53 2.53 4.1 6.03 4.1 9.9z;M14 0c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1c2.53 2.53 4.1 6.03 4.1 9.9z;M96 10c0 6.67 0 13.33 0 20c0 5.52-4.48 10-10 10c-25.33 0-50.67 0-76 0c-5.52 0-10-4.48-10-10c0-6.67 0-13.33 0-20c0-5.52 4.48-10 10-10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z;M96 10c0 6.67 0 13.33 0 20c0 5.52-4.48 10-10 10c-25.33 0-50.67 0-76 0c-5.52 0-10-4.48-10-10c0-6.67 0-13.33 0-20c0-5.52 4.48-10 10-10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z;M9.9-9.9c2.53 2.53 4.1 6.03 4.1 9.9c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1z" keyTimes="0;0.17949;0.33333;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1;0.23 1 0.32 1" dur="7.8s" repeatCount="indefinite"/>
   </path>
   <path d="M96 10c0 6.67 0 13.33 0 20c0 5.52 -4.48 10 -10 10c-25.33 0 -50.67 0 -76 0c-5.52 0 -10 -4.48 -10 -10c0 -6.67 0 -13.33 0 -20c0 -5.52 4.48 -10 10 -10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z" fill="var(--raised)" class="a m13 ds" display="none"/>
-  <g transform="translate(500.8 99.68)" style="transform-origin:520px 110.24px" class="a m12">
-    <text y="16.32" font-size="16" fill="var(--text)" class="a m14">+18%</text>
-    <text y="16.32" font-size="16" fill="var(--text)" class="a m15">+31%</text>
+  <g transform="translate(500.8 99.68)" style="transform-origin:520px 110.24px" class="a m12" font-size="16" fill="var(--text)">
+    <text y="16.32" class="a m14">+18%</text>
+    <text y="16.32" class="a m15">+31%</text>
   </g>
 </svg>

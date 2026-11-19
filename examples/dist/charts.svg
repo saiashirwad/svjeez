@@ -10,80 +10,76 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @font-face{font-family:'Geist';src:url(data:font/ttf;base64,AAEAAAANAIAAAwBQT1MvMjyEb+gAAADcAAAAYGNtYXACAQK6AAABPAAAAHxnYXNwAAAAEAAAAbgAAAAIZ2x5ZhoyqLAAAAHAAAAIgmhlYWQzD4fcAAAKRAAAADZoaGVhDEoJgwAACnwAAAAkaG10eD0gBvIAAAqgAAAAeGtlcm4ClALmAAALGAAAASxsb2NhIuMg8AAADEQAAAA+bWF4cAA4ANgAAAyEAAAAIG5hbWUA7AU7AAAMpAAAABxwb3N0/58AMgAADMAAAAAgcHJlcGgGjIUAAAzgAAAABwAEAlMBkAAFAAACigJYAAAASwKKAlgAAAFeADIBPgAAAAAAAAAAAAAAAKEAAv9QAeR7AAAAAAAAAABWUkNMAMAAIPsCA+3+2QAABEABBiAAAJcAAAAAAhICxgAAACAACgAAAAEAAwABAAAADAAEAHAAAAAYABAAAwAIACAALABKAE0AUABSAGIAZQBpAHcAef//AAAAIAAsAEoATQBQAFIAYQBkAGcAawB5////4f/W/7n/t/+1/7T/pv+l/6T/o/+iAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAB//8ADwAEACgAAAI1AsYAAwAHAAsADwAAMxEhESUhESETJwEXAwE3ASgCDf4UAcv+NQgVAdAVFf4wFQHQAsb9OiQCfv1vHQKHHf15Aocd/XkAAQAs/2QAnQBxAAYAABc3IzUzFQcvMDNxPJyccWOqAAABAEP/8AIIAsYAEQAABSImJic3FhYzMjY1ETMRFAYGASVCZjkBWAFIQURJVjhlED9wSQZSWF5WAc7+MlF3QAAAAQBcAAADEQLGAAwAADMRMxMTMxEjEQMjAxFceOPieFbLc8sCxv2YAmj9OgIm/doCJv3aAAIAXAAAAlYCxgALABQAADMRMzIWFRQGBiMjEREzMjY1NCYjI1z/d4Q8cE+pqVBRUVCpAsZyZURjNP7sAWhEQ0FCAAIAXAAAAmICxgAWAB8AADMRITIWFhUUBgYHJzIWFxcjJyYmIyMRETMyNjU0JiMjXAENS2w7LUYmBkFLBhRXEgQ3Ps7CQUxOSrcCxjRhQjBLLAIJPELRyCwq/uIBckI9PkMAAgAs//QCFAIeACUAMQAAFyImNTQ2Nzc0JiMiBgcnNjYzMhYVFRQWMzMVBgYjIiYmNRcOAicyNjY1NQcGBhUUFt9SYVBXvD8/N0AMWQ9zWmZsDQ8VBBIKJC0UCgc2UCU1SyisNik1DExERE4QI0NCMS4HS11zZdsSD0oBARcxKAIiNx9KKUcsJiAKKSElKQAAAgBQ//QCJwLGABIAIAAABSImJwcjETMVNjYzMhYWFRQGBicyNjU0JiMiBgYVFBYWAUM3VhcDTFQUVDdGZjg4ZktDTk5BMUYlJUUMMStQAsb+ITVEfFVVfERQaltcaS9YPjxZMAAAAgAs//QCAwLGABIAIAAABSImJjU0NjYzMhYXNTMRIycGBicyNjY1NCYmIyIGFRQWAQxFZTY2ZUU1WBZUTAMWWicvQSIiQS9GU1MMRHxVVXxELSn+/TpQKzFQMFk8PlgvaVxbagAAAgAs//QCBQIeABcAHgAABSImJjU0NjYzMhYWFRUhFhYzMjY3FwYGAyEmJiMiBgEfS207O2tJRWo7/n8FUUU0Qw1aFXXvASUGTTs9TwxEfVRUfEVBfFkZVVYxKAdHWwFFTUhLAAIALP9eAgICHgAgAC0AAAUiJiYnNxYWMzI2NTUGBiMiJiY1NDY2MzIWFzUzERQGBgMyNjc2JiYjIgYVFBYBGTlcPgtYDD09SE0TVDRDaTs6Z0I4WRJQOGhLRFIBASVFLkZNT6ImRi4GJSs6OlYqMkJ0S0xzQjQsVP4SPlkvAQ5fUjdPK19SUl8AAAEAUAAAAfUCxgAWAAAzETMRJz4CMzIWFhURIxE0JiMiBhURUFQKCjBGKjlPKVQ3OEBOAsb+1wIsOBszWzv+qwE9TUpOSv7E//8ATgAAAKYCxwAmABwAAAAGAB0iAAABAFAAAAIfAsYACwAAMxEzEQEzBxMjJwcVUFQBAnDR2mataALG/i8BHeH+z/huigABAFAAAADzAsYACwAAMyImNREzERQWMzMVuC46VBEQLjA0AmL9pRARSgABAFAAAAMdAh4AKQAAMxEzFyc+AjMyFhcnPgIzMhYWFREjETQmIyIGBhURIxE0JiMiBgYVEVBNAwwJLUIoRVcLEAgrRCw5TihUODclNx5UMjslNx8CEoYELD8jTEQBLj8iL1pA/qsBQ0hJJEMw/sMBPUdQJEQv/sMAAAEAUAAAAfUCHgAXAAAzETMXJz4CMzIWFhURIxE0JiYjIgYVEVBNAwoKMkcpPU8nVBcyKD1PAhKHCS89HjZbOP6rAT0xQyNNSv7DAAACACz/9AIRAh4ADwAbAAAFIiYmNTQ2NjMyFhYVFAYGJzI2NTQmIyIGFRQWAR9Jbjw8bklJbTw8bUlJUVFJSVJSDER9VFV8RER8VVR9RFBpXFxpaVxcaQAAAgBQ/2oCJwIeABUAIwAAFxEzFyc2NjMyFhYVFAYGIyImJic3ETcyNjU0JiMiBgYVFBYWUE4CDBRdPU9lMTFlTylHMQkMlkVQUEUuQyUkRJYCqHIGOz1OfklJfk4cMiIO/vjaaF1daCxYQUFYLAACACz/agIDAh4AFQAjAAAFIxEXDgIjIiYmNTQ2NjMyFhcHNzMDMjY2NTQmJiMiBhUUFgIDVAwJMUcpT2UxMWVPPl0TDAJO6i9DJCVDLkVQUJYBCA4iMhxOfklJfk49OwZy/jIsWEFBWCxoXV1oAAEAUAAAAU8CEgAPAAAzETMXJzY2MzMVIyIGBhURUEoECApDODQzKDUbAhKGA0Q/UB05LP7AAAEALP/0AdwCHgAsAAAFIiYmJzcWFjMyNjU0JiYnLgI1NDYzMhYWFwcuAiMiBhUUFhYXHgIVFAYBEUljNQRYCD9GNjsTODZKVCJpYEZZLgVYAho0LDk2FTUuTlgjcQwuUTQGMDkjJxUcFQoOKjwqR1sxTisGGSwbLCIaIRUIDSg7KklRAAIANwAAAWYCjgALAA8AACEiJjURMxEUFjMzFQE1IRUBEkhFVCAhTP7RAS9CRgIG/fwkHEoByEpKAAABAFD/9AHvAhIAFAAAFyImNREzERQWMzI2NREzESM1FwYG/k9fVDc5P0hUUA0QWgxrXgFV/sJNSVFHATz97oMHQUcAAAEAFgAAAgICEgAGAAAzAzMTEzMD18FcmppcwQIS/kQBvP3uAAEAFgAAAx0CEgAMAAAzAzMTEzMTEzMDIwMDuqRcfH5afn1cpGp2dgIS/kYBuv5GAbr97gGT/m0AAQAW/2oCAwISABAAABc1MzI2NzcjAzMTEzMDBgYjZz0cGwcTHcJcnpdc1w88NZZKERMyAgj+RgG6/asrKAABAFAAAACkAhIAAwAAMxEzEVBUAhL97gABACwCZQCEAscAAwAAEzUzFSxYAmViYgAAAAEAAAABzM2bdxHuXw889QADA+gAAAAA5almUwAAAADl9BCn/zj/EAkiBCIAAAAGAAIAAAAAAAAAAQAAA+3+2QAACWD/OP1ECSID6AAAAAAAAAAAAAAAAAAAAB4CWAAoAPoAAADJACwCVQBDA20AXAKKAFwCoABcAicALAJTAFACUwAsAjEALAJSACwCRQBQAPQATgJOAFABCwBQA20AUAJFAFACPQAsAlMAUAJTACwBewBQAggALAGIADcCPwBQAhgAFgMzABYCGQAWAPQAUAAAACwAAAABAAABKAABAC8AwAAFAFoABAAK//YABQAY/+IABgAK//QABwAR//wABwAV//wACAAS//YACAAb/+cACQAN/+wACgAJ//YACgAK//YACgAO//YACgAR//YACgAU//YACgAV//YACgAW//YACgAZ/+cACgAa/+cACwAK//YADAAN//oADAAS//QADQAH//YADQAK//YADQATAAYADwAP//YAEAAK//QAEAAS//QAEQAK//QAEQAX/9gAEQAY//EAEgAR//YAEgAT//YAEgAX/+IAEgAY//YAEwAK//YAEwAW//YAFQAK/9gAFQAL/9gAFQAW/9gAFQAb/+cAFgAM//YAFgAX/+IAFwAM//AAFwAS//AAFwAW//AAGAAK//YAGQAN//YAGgAK/+YAAAAmACYANgBWAHAAkQDCAQoBPQFwAaIB5wILAhYCLgJDAoACpgLSAwkDQANbA50DugPcA+4ECgQpBDUEQQAAAAEAAAAeAHgAEABeAAUAAQAAAAAAAAAAAAAAAAAEAAEAAAABABIAAwABBAkAAQAKAAAARwBlAGkAcwB0AAMAAAAAAAD/nAAyAAAAAAAAAAAAAAAAAAAAAAAAAAC4Af+FsASNAA==) format('truetype');font-weight:400;font-style:normal}
 .a{animation-duration:11s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 .fb{transform-box:fill-box;transform-origin:center}
-@keyframes k1{0%,2.727%{translate:0px 10px}8.182%,100%{translate:0px 0px}}
-@keyframes k2{0%,2.727%{opacity:0}8.182%,100%{opacity:1}}
-.m1{animation-name:k1,k2}
-@keyframes k3{0%,4.545%{opacity:0}9.091%,100%{opacity:1}}
-.m2{animation-name:k3}
-@keyframes k4{0%,7.273%{translate:0px 10px}12.727%,100%{translate:0px 0px}}
-@keyframes k5{0%,7.273%{opacity:0}12.727%,100%{opacity:1}}
-.m3{animation-name:k4,k5}
-@keyframes k6{0%,3.636%{opacity:0}9.091%,100%{opacity:1}}
-.m4{animation-name:k6}
-@keyframes k7{0%,5.455%{scale:1 0}8.299%,100%{scale:1 1}}
-.m5{animation-name:k7;animation-timing-function:cubic-bezier(.365,.472,.656,.788)}
-@keyframes k8{0%,5.644%{scale:1 0}8.736%,100%{scale:1 1}}
-.m6{animation-name:k8;animation-timing-function:cubic-bezier(.355,.491,.639,.802)}
-@keyframes k9{0%,5.838%{scale:1 0}9.287%,100%{scale:1 1}}
-.m7{animation-name:k9;animation-timing-function:cubic-bezier(.342,.516,.616,.821)}
-@keyframes k10{0%,6.036%{scale:1 0}10.047%,100%{scale:1 1}}
-.m8{animation-name:k10;animation-timing-function:cubic-bezier(.324,.554,.585,.846)}
-@keyframes k11{0%,6.24%{scale:1 0}11.302%,100%{scale:1 1}}
-.m9{animation-name:k11;animation-timing-function:cubic-bezier(.296,.62,.537,.886)}
-@keyframes k12{0%,6.451%{scale:1 0}19.091%,100%{scale:1 1}}
-.m10{animation-name:k12;animation-timing-function:cubic-bezier(.199,1,.349,1)}
-@keyframes k13{0%,7.273%{scale:1 0}10.117%,100%{scale:1 1}}
-.m11{animation-name:k13;animation-timing-function:cubic-bezier(.365,.472,.656,.788)}
-@keyframes k14{0%,7.463%{scale:1 0}10.554%,100%{scale:1 1}}
-.m12{animation-name:k14;animation-timing-function:cubic-bezier(.355,.491,.639,.802)}
-@keyframes k15{0%,7.656%{scale:1 0}11.105%,100%{scale:1 1}}
-.m13{animation-name:k15;animation-timing-function:cubic-bezier(.342,.516,.616,.821)}
-@keyframes k16{0%,7.854%{scale:1 0}11.866%,100%{scale:1 1}}
-.m14{animation-name:k16;animation-timing-function:cubic-bezier(.324,.554,.585,.846)}
-@keyframes k17{0%,8.058%{scale:1 0}13.121%,100%{scale:1 1}}
-.m15{animation-name:k17;animation-timing-function:cubic-bezier(.296,.62,.537,.886)}
-@keyframes k18{0%,8.27%{scale:1 0}20.909%,100%{scale:1 1}}
-.m16{animation-name:k18;animation-timing-function:cubic-bezier(.199,1,.349,1)}
-@keyframes k19{0%,8.182%{opacity:0}13.636%,100%{opacity:1}}
-.m17{animation-name:k19}
-@keyframes k20{0%,10.909%{translate:300px 0px}27.273%,100%{translate:0px 0px}}
-.m18{animation-name:k20;animation-timing-function:linear}
-@keyframes k21{0%,10.909%{translate:-300px 0px}27.273%,100%{translate:0px 0px}}
-.m19{animation-name:k21;animation-timing-function:linear}
-@keyframes k22{0%,10.909%{stroke-dashoffset:1;visibility:hidden}27.273%,100%{stroke-dashoffset:0;visibility:visible}}
-.m20{animation-name:k22;animation-timing-function:linear}
-@keyframes k23{0%,10.909%{scale:0}12.218%,100%{scale:1}}
-.m21{animation-name:k23;animation-timing-function:linear}
-@keyframes k24{0%,12.045%{scale:0}13.354%,100%{scale:1}}
-.m22{animation-name:k24;animation-timing-function:linear}
-@keyframes k25{0%,13.397%{scale:0}14.706%,100%{scale:1}}
-.m23{animation-name:k25;animation-timing-function:linear}
-@keyframes k26{0%,14.533%{scale:0}15.842%,100%{scale:1}}
-.m24{animation-name:k26;animation-timing-function:linear}
-@keyframes k27{0%,15.669%{scale:0}16.978%,100%{scale:1}}
-.m25{animation-name:k27;animation-timing-function:linear}
-@keyframes k28{0%,17.021%{scale:0}18.33%,100%{scale:1}}
-.m26{animation-name:k28;animation-timing-function:linear}
-@keyframes k29{0%,18.157%{scale:0}19.466%,100%{scale:1}}
-.m27{animation-name:k29;animation-timing-function:linear}
-@keyframes k30{0%,21.254%{scale:0}22.563%,100%{scale:1}}
-.m28{animation-name:k30;animation-timing-function:linear}
-@keyframes k31{0%,22.862%{scale:0}24.171%,100%{scale:1}}
-.m29{animation-name:k31;animation-timing-function:linear}
-@keyframes k32{0%,23.998%{scale:0}25.307%,100%{scale:1}}
-.m30{animation-name:k32;animation-timing-function:linear}
-@keyframes k33{0%,24.981%{scale:0}26.29%,100%{scale:1}}
-.m31{animation-name:k33;animation-timing-function:linear}
-@keyframes k34{0%,25.964%{scale:0}27.273%,100%{scale:1}}
-.m32{animation-name:k34;animation-timing-function:linear}
-@keyframes k35{0%,24.818%{opacity:0}27.273%,100%{opacity:1}}
-@keyframes k36{0%,24.818%{translate:303.5px 214.413px}27.273%,100%{translate:311.5px 214.413px}}
-.m33{animation-name:k35,k36;animation-timing-function:linear,linear}
-@keyframes k37{0%,25.455%{translate:0px 10px}30.909%,100%{translate:0px 0px}}
-@keyframes k38{0%,25.455%{opacity:0}30.909%,100%{opacity:1}}
-.m34{animation-name:k37,k38}
-@keyframes k39{0%,92.727%{opacity:1}100%{opacity:0}}
-.m35{animation-name:k39}
+@keyframes k1{0%,2.727%{translate:0 10px;opacity:0}8.182%,100%{translate:0 0;opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,4.545%{opacity:0}9.091%,100%{opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,7.273%{translate:0 10px;opacity:0}12.727%,100%{translate:0 0;opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,3.636%{opacity:0}9.091%,100%{opacity:1}}
+.m4{animation-name:k4}
+@keyframes k5{0%,5.455%{scale:1 0}8.299%,100%{scale:1 1}}
+.m5{animation-name:k5;animation-timing-function:cubic-bezier(.365,.472,.656,.788)}
+@keyframes k6{0%,5.644%{scale:1 0}8.736%,100%{scale:1 1}}
+.m6{animation-name:k6;animation-timing-function:cubic-bezier(.355,.491,.639,.802)}
+@keyframes k7{0%,5.838%{scale:1 0}9.287%,100%{scale:1 1}}
+.m7{animation-name:k7;animation-timing-function:cubic-bezier(.342,.516,.616,.821)}
+@keyframes k8{0%,6.036%{scale:1 0}10.047%,100%{scale:1 1}}
+.m8{animation-name:k8;animation-timing-function:cubic-bezier(.324,.554,.585,.846)}
+@keyframes k9{0%,6.24%{scale:1 0}11.302%,100%{scale:1 1}}
+.m9{animation-name:k9;animation-timing-function:cubic-bezier(.296,.62,.537,.886)}
+@keyframes k10{0%,6.451%{scale:1 0}19.091%,100%{scale:1 1}}
+.m10{animation-name:k10;animation-timing-function:cubic-bezier(.199,1,.349,1)}
+@keyframes k11{0%,7.273%{scale:1 0}10.117%,100%{scale:1 1}}
+.m11{animation-name:k11;animation-timing-function:cubic-bezier(.365,.472,.656,.788)}
+@keyframes k12{0%,7.463%{scale:1 0}10.554%,100%{scale:1 1}}
+.m12{animation-name:k12;animation-timing-function:cubic-bezier(.355,.491,.639,.802)}
+@keyframes k13{0%,7.656%{scale:1 0}11.105%,100%{scale:1 1}}
+.m13{animation-name:k13;animation-timing-function:cubic-bezier(.342,.516,.616,.821)}
+@keyframes k14{0%,7.854%{scale:1 0}11.866%,100%{scale:1 1}}
+.m14{animation-name:k14;animation-timing-function:cubic-bezier(.324,.554,.585,.846)}
+@keyframes k15{0%,8.058%{scale:1 0}13.121%,100%{scale:1 1}}
+.m15{animation-name:k15;animation-timing-function:cubic-bezier(.296,.62,.537,.886)}
+@keyframes k16{0%,8.27%{scale:1 0}20.909%,100%{scale:1 1}}
+.m16{animation-name:k16;animation-timing-function:cubic-bezier(.199,1,.349,1)}
+@keyframes k17{0%,8.182%{opacity:0}13.636%,100%{opacity:1}}
+.m17{animation-name:k17}
+@keyframes k18{0%,10.909%{translate:300px 0}27.273%,100%{translate:0 0}}
+.m18{animation-name:k18;animation-timing-function:linear}
+@keyframes k19{0%,10.909%{translate:-300px 0}27.273%,100%{translate:0 0}}
+.m19{animation-name:k19;animation-timing-function:linear}
+@keyframes k20{0%,10.909%{stroke-dashoffset:1;visibility:hidden}27.273%,100%{stroke-dashoffset:0;visibility:visible}}
+.m20{animation-name:k20;animation-timing-function:linear}
+@keyframes k21{0%,10.909%{scale:0}12.218%,100%{scale:1}}
+.m21{animation-name:k21;animation-timing-function:linear}
+@keyframes k22{0%,12.045%{scale:0}13.354%,100%{scale:1}}
+.m22{animation-name:k22;animation-timing-function:linear}
+@keyframes k23{0%,13.397%{scale:0}14.706%,100%{scale:1}}
+.m23{animation-name:k23;animation-timing-function:linear}
+@keyframes k24{0%,14.533%{scale:0}15.842%,100%{scale:1}}
+.m24{animation-name:k24;animation-timing-function:linear}
+@keyframes k25{0%,15.669%{scale:0}16.978%,100%{scale:1}}
+.m25{animation-name:k25;animation-timing-function:linear}
+@keyframes k26{0%,17.021%{scale:0}18.33%,100%{scale:1}}
+.m26{animation-name:k26;animation-timing-function:linear}
+@keyframes k27{0%,18.157%{scale:0}19.466%,100%{scale:1}}
+.m27{animation-name:k27;animation-timing-function:linear}
+@keyframes k28{0%,21.254%{scale:0}22.563%,100%{scale:1}}
+.m28{animation-name:k28;animation-timing-function:linear}
+@keyframes k29{0%,22.862%{scale:0}24.171%,100%{scale:1}}
+.m29{animation-name:k29;animation-timing-function:linear}
+@keyframes k30{0%,23.998%{scale:0}25.307%,100%{scale:1}}
+.m30{animation-name:k30;animation-timing-function:linear}
+@keyframes k31{0%,24.981%{scale:0}26.29%,100%{scale:1}}
+.m31{animation-name:k31;animation-timing-function:linear}
+@keyframes k32{0%,25.964%{scale:0}27.273%,100%{scale:1}}
+.m32{animation-name:k32;animation-timing-function:linear}
+@keyframes k33{0%,24.818%{opacity:0;translate:303.5px 214.413px}27.273%,100%{opacity:1;translate:311.5px 214.413px}}
+.m33{animation-name:k33;animation-timing-function:linear}
+@keyframes k34{0%,25.455%{translate:0 10px;opacity:0}30.909%,100%{translate:0 0;opacity:1}}
+.m34{animation-name:k34}
+@keyframes k35{0%,92.727%{opacity:1}100%{opacity:0}}
+.m35{animation-name:k35}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-6s!important;animation-play-state:paused!important}}
 ]]></style>
   <defs>
@@ -102,9 +98,9 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
   <g class="a m35">
     <text x="48" y="72.14" font-family="'Geist'" font-weight="600" font-size="28" fill="var(--text)">Median time to first review fell from 26 to 7 hours</text>
     <text x="48" y="99.075" font-family="'Geist'" font-size="15" fill="var(--muted)">Pull requests, January to June</text>
-    <g transform="translate(48 124)" class="a m1">
-      <text y="18.09" font-family="'Geist'" font-weight="600" font-size="18" fill="var(--text)">Opened and merged</text>
-      <text y="39.065" font-family="'Geist'" font-size="13" fill="var(--muted)">Pull requests per month</text>
+    <g transform="translate(48 124)" class="a m1" font-family="'Geist'">
+      <text y="18.09" font-weight="600" font-size="18" fill="var(--text)">Opened and merged</text>
+      <text y="39.065" font-size="13" fill="var(--muted)">Pull requests per month</text>
     </g>
     <g class="a m2">
       <g transform="translate(260 144)">
@@ -116,26 +112,26 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
         <text x="16" y="9.26" font-family="'Geist'" font-size="12" fill="var(--muted)">merged</text>
       </g>
     </g>
-    <g transform="translate(532 124)" class="a m3">
-      <text y="18.09" font-family="'Geist'" font-weight="600" font-size="18" fill="var(--text)">Time to first review</text>
-      <text y="39.065" font-family="'Geist'" font-size="13" fill="var(--muted)">Median hours, by week</text>
+    <g transform="translate(532 124)" class="a m3" font-family="'Geist'">
+      <text y="18.09" font-weight="600" font-size="18" fill="var(--text)">Time to first review</text>
+      <text y="39.065" font-size="13" fill="var(--muted)">Median hours, by week</text>
     </g>
     <g transform="translate(84 196)">
-      <g class="a m4">
+      <g class="a m4" font-size="12" fill="var(--muted)">
         <path d="M0 290L380 290M0 217.5L380 217.5M0 145L380 145M0 72.5L380 72.5M0 0L380 0" fill="none" stroke="var(--border)" opacity="0.25"/>
         <path d="M-4 290L4 290M-4 217.5L4 217.5M-4 145L4 145M-4 72.5L4 72.5M-4 0L4 0" fill="none" stroke="var(--border)"/>
         <path d="M0 0L0 290L380 290" fill="none" stroke="var(--border)" stroke-width="1.5"/>
-        <text x="-14.2" y="294.32" font-size="12" fill="var(--muted)">0</text>
-        <text x="-21.4" y="221.82" font-size="12" fill="var(--muted)">20</text>
-        <text x="-21.4" y="149.32" font-size="12" fill="var(--muted)">40</text>
-        <text x="-21.4" y="76.82" font-size="12" fill="var(--muted)">60</text>
-        <text x="-21.4" y="4.32" font-size="12" fill="var(--muted)">80</text>
-        <text x="20.867" y="309.24" font-size="12" fill="var(--muted)">Jan</text>
-        <text x="84.2" y="309.24" font-size="12" fill="var(--muted)">Feb</text>
-        <text x="147.533" y="309.24" font-size="12" fill="var(--muted)">Mar</text>
-        <text x="210.867" y="309.24" font-size="12" fill="var(--muted)">Apr</text>
-        <text x="274.2" y="309.24" font-size="12" fill="var(--muted)">May</text>
-        <text x="337.533" y="309.24" font-size="12" fill="var(--muted)">Jun</text>
+        <text x="-14.2" y="294.32">0</text>
+        <text x="-21.4" y="221.82">20</text>
+        <text x="-21.4" y="149.32">40</text>
+        <text x="-21.4" y="76.82">60</text>
+        <text x="-21.4" y="4.32">80</text>
+        <text x="20.867" y="309.24">Jan</text>
+        <text x="84.2" y="309.24">Feb</text>
+        <text x="147.533" y="309.24">Mar</text>
+        <text x="210.867" y="309.24">Apr</text>
+        <text x="274.2" y="309.24">May</text>
+        <text x="337.533" y="309.24">Jun</text>
       </g>
       <path d="M3 0H17.167A3 3 0 0 1 20.167 3V152.25H0V3A3 3 0 0 1 3 0Z" transform="translate(10.5 137.75)" fill="var(--orange)" style="transform-origin:20.583px 290px" class="a m5"/>
       <path d="M3 0H17.167A3 3 0 0 1 20.167 3V174H0V3A3 3 0 0 1 3 0Z" transform="translate(73.833 116)" fill="var(--orange)" style="transform-origin:83.917px 290px" class="a m6"/>
@@ -151,26 +147,26 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <path d="M3 0H17.167A3 3 0 0 1 20.167 3V261H0V3A3 3 0 0 1 3 0Z" transform="translate(349.333 29)" fill="var(--blue)" style="transform-origin:359.417px 290px" class="a m16"/>
     </g>
     <g transform="translate(568 196)">
-      <g class="a m17">
+      <g class="a m17" font-size="12" fill="var(--muted)">
         <path d="M0 290L300 290M0 193.333L300 193.333M0 96.667L300 96.667M0 0L300 0M0 0L0 290M27.273 0L27.273 290M54.545 0L54.545 290M81.818 0L81.818 290M109.091 0L109.091 290M136.364 0L136.364 290M163.636 0L163.636 290M190.909 0L190.909 290M218.182 0L218.182 290M245.455 0L245.455 290M272.727 0L272.727 290M300 0L300 290" fill="none" stroke="var(--border)" opacity="0.25"/>
         <path d="M-4 290L4 290M-4 193.333L4 193.333M-4 96.667L4 96.667M-4 0L4 0M0 286L0 294M27.273 286L27.273 294M54.545 286L54.545 294M81.818 286L81.818 294M109.091 286L109.091 294M136.364 286L136.364 294M163.636 286L163.636 294M190.909 286L190.909 294M218.182 286L218.182 294M245.455 286L245.455 294M272.727 286L272.727 294M300 286L300 294" fill="none" stroke="var(--border)"/>
         <path d="M0 0L0 290L300 290" fill="none" stroke="var(--border)" stroke-width="1.5"/>
-        <text x="-14.2" y="294.32" font-size="12" fill="var(--muted)">0</text>
-        <text x="-21.4" y="197.653" font-size="12" fill="var(--muted)">10</text>
-        <text x="-21.4" y="100.987" font-size="12" fill="var(--muted)">20</text>
-        <text x="-21.4" y="4.32" font-size="12" fill="var(--muted)">30</text>
-        <text x="-3.6" y="309.24" font-size="12" fill="var(--muted)">1</text>
-        <text x="23.673" y="309.24" font-size="12" fill="var(--muted)">2</text>
-        <text x="50.945" y="309.24" font-size="12" fill="var(--muted)">3</text>
-        <text x="78.218" y="309.24" font-size="12" fill="var(--muted)">4</text>
-        <text x="105.491" y="309.24" font-size="12" fill="var(--muted)">5</text>
-        <text x="132.764" y="309.24" font-size="12" fill="var(--muted)">6</text>
-        <text x="160.036" y="309.24" font-size="12" fill="var(--muted)">7</text>
-        <text x="187.309" y="309.24" font-size="12" fill="var(--muted)">8</text>
-        <text x="214.582" y="309.24" font-size="12" fill="var(--muted)">9</text>
-        <text x="238.255" y="309.24" font-size="12" fill="var(--muted)">10</text>
-        <text x="265.527" y="309.24" font-size="12" fill="var(--muted)">11</text>
-        <text x="292.8" y="309.24" font-size="12" fill="var(--muted)">12</text>
+        <text x="-14.2" y="294.32">0</text>
+        <text x="-21.4" y="197.653">10</text>
+        <text x="-21.4" y="100.987">20</text>
+        <text x="-21.4" y="4.32">30</text>
+        <text x="-3.6" y="309.24">1</text>
+        <text x="23.673" y="309.24">2</text>
+        <text x="50.945" y="309.24">3</text>
+        <text x="78.218" y="309.24">4</text>
+        <text x="105.491" y="309.24">5</text>
+        <text x="132.764" y="309.24">6</text>
+        <text x="160.036" y="309.24">7</text>
+        <text x="187.309" y="309.24">8</text>
+        <text x="214.582" y="309.24">9</text>
+        <text x="238.255" y="309.24">10</text>
+        <text x="265.527" y="309.24">11</text>
+        <text x="292.8" y="309.24">12</text>
       </g>
       <g clip-path="url(#c1)">
         <g clip-path="url(#c1)" class="a m19">

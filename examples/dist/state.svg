@@ -28,7 +28,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 ]]></style>
   <rect width="960" height="540" fill="var(--background)"/>
   <g transform="translate(480 270)" class="a m8">
-    <g transform="translate(-584.535 -154.75)" style="transform-origin:0px 0px;scale:0.77">
+    <g transform="translate(-584.535 -154.75)" style="transform-origin:0 0;scale:0.77" fill="var(--text)">
       <g transform="translate(62 157.497)">
         <rect width="67.2" height="39" rx="8" fill="var(--blue-22-muted-8-background)" stroke="var(--blue)" stroke-width="1.5"/>
         <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Idle</text>
@@ -88,8 +88,8 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <polygon points="606.24 172.5 598.24 176.5 598.24 168.5" fill="var(--muted)"/>
       <path d="M677.64 192L677.64 218C677.64 223.5 673.14 228 667.64 228L416.72 228C411.22 228 406.72 223.5 406.72 218L406.72 199" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="406.72 192 410.72 200 402.72 200" fill="var(--muted)"/>
-      <circle cx="7" cy="176.997" r="7" fill="var(--text)"/>
-      <circle cx="301.32" cy="172.499" r="7" fill="var(--text)"/>
+      <circle cx="7" cy="176.997" r="7"/>
+      <circle cx="301.32" cy="172.499" r="7"/>
       <g transform="translate(1159.32 214.5)">
         <circle r="9" fill="none" stroke="var(--text)" stroke-width="1.5"/>
         <circle r="5" fill="var(--text)"/>

@@ -82,7 +82,7 @@ npx svjeez check scene.tsx --browser
 npx svjeez frames scene.tsx --times 0,1,2 --sheet
 ```
 
-`svjeez check` reads the scene model and the SVG it emits, with no browser, and prints one report: every problem with its source and a `fix:`, then the animated lanes (CSS, or SMIL where a scene animates geometry, a filter or a gradient). `--json` prints the same as `{ ok, file, scene, problems, lanes }`, and `--browser` adds a pixel pass in Chromium. In code, `check(scene)` from `svjeez/tools` returns `{ problems, lanes }`. Open **Timeline** in the dev preview to see the lanes. Open `frames/sheet.png` to review the picture at each selected time. Run `npx svjeez skill --install` for the [authoring guide](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/SKILL.md) and worked examples.
+`svjeez check` reads the scene model and the SVG it emits, with no browser, and prints one report: every problem with its source and a `fix:`, then the animated lanes (CSS, or SMIL where a scene animates geometry, a filter or a gradient) and the cost of the SVG: running animations, and the area of filters redrawn every frame (a `moving-filter` problem names each one). `--json` prints the same as `{ ok, file, scene, problems, lanes, cost }`, and `--browser` adds a pixel pass in Chromium. In code, `check(scene)` from `svjeez/tools` returns `{ problems, lanes, cost }`. Open **Timeline** in the dev preview to see the lanes. Open `frames/sheet.png` to review the picture at each selected time. Run `npx svjeez skill --install` for the [authoring guide](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/SKILL.md) and worked examples.
 
 ## Packages
 

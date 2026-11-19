@@ -11,19 +11,18 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .fb{transform-box:fill-box;transform-origin:center}
 @keyframes k1{0%,6.667%,83.333%,100%{stop-color:var(--magenta)}33.333%,56.667%{stop-color:var(--orange)}}
 .m1{animation-name:k1;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k2{0%,6.667%,83.333%,100%{translate:0px 0px}40%,56.667%{translate:52px 44px}}
+@keyframes k2{0%,6.667%,83.333%,100%{translate:0 0}40%,56.667%{translate:52px 44px}}
 .m2{animation-name:k2;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k3{0%,6.667%{translate:-160px 0px}36.667%,100%{translate:0px 0px}}
+@keyframes k3{0%,6.667%{translate:-160px 0}36.667%,100%{translate:0 0}}
 .m3{animation-name:k3;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k4{0%,6.667%,83.333%,100%{scale:1}40%,56.667%{scale:0.85}}
-@keyframes k5{0%,6.667%,83.333%,100%{rotate:0deg}40%,56.667%{rotate:30deg}}
-.m4{animation-name:k4,k5;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k6{0%,6.667%,33.333%,100%{opacity:0}26.667%{opacity:1;animation-timing-function:steps(1)}}
-.m5{animation-name:k6}
-@keyframes k7{0%,28.333%,100%{opacity:0}33.333%,90%{opacity:1}}
-.m6{animation-name:k7}
-@keyframes k8{0%,16.667%,70%,100%{scale:1}30%{scale:1.06}56.667%{scale:1.06;animation-timing-function:cubic-bezier(.77,0,.175,1)}}
-.m7{animation-name:k8}
+@keyframes k4{0%,6.667%,83.333%,100%{scale:1;rotate:0deg}40%,56.667%{scale:0.85;rotate:30deg}}
+.m4{animation-name:k4;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k5{0%,6.667%,33.333%,100%{opacity:0}26.667%,33.332%{opacity:1}}
+.m5{animation-name:k5}
+@keyframes k6{0%,28.333%,100%{opacity:0}33.333%,90%{opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,16.667%,70%,100%{scale:1}30%{scale:1.06}56.667%{scale:1.06;animation-timing-function:cubic-bezier(.77,0,.175,1)}}
+.m7{animation-name:k7}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-2.2s!important;animation-play-state:paused!important}}
 ]]></style>
   <defs>

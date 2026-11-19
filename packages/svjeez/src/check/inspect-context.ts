@@ -26,6 +26,8 @@ export const RULES = {
   "nothing-enters": "Everything is on screen from 0s and nothing ever enters.",
   "wasted-motion": "A value changes before the node is first seen, or after it is gone for good.",
   static: "Nothing in the scene moves, or a value changes only after the scene ends.",
+  "moving-filter":
+    "A filter that is redrawn every frame because its parameters or what it filters move.",
   "layout-overlap": "Two children of a <Stack> or <Grid> overlap: motion carried one onto another.",
   "word-cut": "A word wider than the width its text wraps to, cut across two lines.",
   unsupported: "A feature the chosen backend can't draw.",

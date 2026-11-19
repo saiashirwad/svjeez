@@ -372,7 +372,7 @@ describe.if(browser)("checkPixels", () => {
     const report = JSON.parse(result.stdout.toString());
 
     expect(result.exitCode).toBe(1);
-    expect(Object.keys(report)).toEqual(["ok", "file", "scene", "problems", "lanes"]);
+    expect(Object.keys(report)).toEqual(["ok", "file", "scene", "problems", "lanes", "cost"]);
     expect(report.ok).toBe(false);
     expect(report.scene).toMatchObject({ duration: expect.any(Number), loop: expect.any(Boolean) });
     expect(report.problems.filter((p: Problem) => p.severity === "error")).toEqual([

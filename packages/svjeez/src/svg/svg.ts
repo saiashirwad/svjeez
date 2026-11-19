@@ -53,7 +53,7 @@ import {
   working,
   type Defs,
 } from "./svg-paint";
-import { REDUCED_MOTION } from "./css";
+import { REDUCED_MOTION, length } from "./css";
 
 export interface SvgOptions {
   readonly prefix?: string;
@@ -1193,7 +1193,7 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
   const dress = (own: Shell) => {
     const style = [
       ...(own.pivots && !fillBox
-        ? [`transform-origin:${num(own.origin?.[0] ?? ox)}px ${num(own.origin?.[1] ?? oy)}px`]
+        ? [`transform-origin:${length(own.origin?.[0] ?? ox)} ${length(own.origin?.[1] ?? oy)}`]
         : []),
       ...own.style,
     ];

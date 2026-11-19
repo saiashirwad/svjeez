@@ -1,6 +1,6 @@
 import { SceneError } from "../model/scene-error";
 import { formatValue, spec, valueOf, type Backend, type Channel } from "./channels";
-import { baseRule, classBody, cssDeclarations, cssKeyframes, freezeRule, type Emit } from "./css";
+import { baseRule, classBody, cssDeclarations, cssGroups, freezeRule, type Emit } from "./css";
 import { fontFaces, isFontValue, type Font, type FontValue } from "../font/font";
 import {
   UNKNOWN_FONT,
@@ -119,14 +119,13 @@ const keyframesName = (state: State, body: string): string => {
 };
 
 const className = (state: State, lanes: readonly Lane[]): string => {
-  const frames = lanes.map((lane) => cssKeyframes(lane.key, lane.emit, lane.keys, lane.period));
-  const names = frames.map(({ body }) => keyframesName(state, body));
+  const groups = cssGroups(lanes);
 
   const body = classBody(
     state.canvas,
-    lanes,
-    names,
-    frames.map((frame) => frame.timing),
+    groups,
+    groups.map(({ body }) => keyframesName(state, body)),
+    groups.map((group) => group.timing),
   );
 
   const known = state.classes.get(body);

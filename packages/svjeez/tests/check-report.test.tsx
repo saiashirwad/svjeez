@@ -85,11 +85,76 @@ describe("check(scene)", () => {
   });
 });
 
+describe("moving-filter", () => {
+  const filtered = (build: Parameters<typeof scene>[1]) =>
+    check(scene({ size: [200, 100], duration: 4, title: "Filter" }, build)).problems.filter(
+      (problem) => problem.code === "moving-filter",
+    );
+
+  test("a blur that changes is redrawn every frame, a warning when it covers a tenth of the canvas", () => {
+    const [problem, ...rest] = check(model).problems.filter(
+      (each) => each.code === "moving-filter",
+    );
+
+    expect(rest).toEqual([]);
+    expect(problem).toMatchObject({ key: "glow", severity: "warning" });
+    expect(problem!.message).toMatch(
+      /^<Shape> "glow" has a blur that is redrawn every frame from 0s to 2s over \d+×\d+ units \(\d+% of the canvas\): its blur changes\.$/,
+    );
+    expect(problem!.fix).toContain("Keep the effect still");
+  });
+
+  test("a small filter is only info", () => {
+    const [problem] = filtered(() => (
+      <Shape geometry={rect(10, 10)} fill="#FFFFFF" effects={[blur(track(1).to(2, span(0, 2)))]} />
+    ));
+
+    expect(problem).toMatchObject({ severity: "info" });
+  });
+
+  test("a still blur is free to move, and a node moved under it is not", () => {
+    expect(
+      filtered(() => (
+        <Shape
+          geometry={rect(40, 40)}
+          fill="#FFFFFF"
+          effects={[blur(4)]}
+          opacity={track(0).to(1, span(0, 1))}
+          at={track<[number, number]>([0, 0]).to([50, 0], span(0, 1))}
+        />
+      )),
+    ).toEqual([]);
+
+    const [problem] = filtered(() => (
+      <Shape
+        geometry={rect(40, 40)}
+        fill={track<`#${string}`>("#000000").to("#FFFFFF", span(0, 1))}
+        effects={[blur(4)]}
+      />
+    ));
+
+    expect(problem!.message).toContain("its fill changes under the effect");
+  });
+});
+
+describe("cost", () => {
+  test("check(scene) reports the cost of the SVG as it ships", () => {
+    const { cost } = check(model);
+
+    expect(cost!.animations).toBeGreaterThan(0);
+    expect(cost!.repaint).toBeGreaterThan(0);
+  });
+});
+
 describe("svjeez check", () => {
   const cli = (...flags: string[]) =>
     Bun.spawnSync([process.execPath, join(import.meta.dir, "../src/cli.ts"), "check", ...flags]);
 
   const file = join(import.meta.dir, "fixtures/check/lanes.tsx");
+
+  test("prints the cost line", () => {
+    expect(cli(file).stdout.toString()).toMatch(/^cost: [\d.]+ animations?, [\d.]+ repaint$/m);
+  });
 
   test("prints the lanes block with one line per SMIL lane", () => {
     const out = cli(file).stdout.toString();
@@ -102,7 +167,7 @@ describe("svjeez check", () => {
   test("--json lists the same lanes, with sources as objects", () => {
     const report = JSON.parse(cli(file, "--json").stdout.toString());
 
-    expect(Object.keys(report)).toEqual(["ok", "file", "scene", "problems", "lanes"]);
+    expect(Object.keys(report)).toEqual(["ok", "file", "scene", "problems", "lanes", "cost"]);
     expect(report.ok).toBe(true);
     expect(report.lanes.filter((lane: LaneReport) => lane.backend === "smil")).toHaveLength(2);
     expect(report.lanes[0].source).toEqual({

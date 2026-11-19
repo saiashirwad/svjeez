@@ -7,95 +7,82 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 
 @font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
 .a{animation-duration:10s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
-@keyframes k1{0%,8%{translate:0px 6px}12%,100%{translate:0px 0px}}
-@keyframes k2{0%,8%{opacity:0}12%,100%{opacity:1}}
-.m1{animation-name:k1,k2}
-@keyframes k3{0%,5%{stroke-dashoffset:1;visibility:hidden}8%,100%{stroke-dashoffset:0;visibility:visible}}
-.m2{animation-name:k3}
-@keyframes k4{0%{visibility:hidden}6.884%,100%{visibility:visible}}
-.m3{animation-name:k4;animation-timing-function:steps(1)}
-@keyframes k5{0%,8%{stroke-dashoffset:1;visibility:hidden}11%,100%{stroke-dashoffset:0;visibility:visible}}
-.m4{animation-name:k5}
-@keyframes k6{0%{visibility:hidden}9.757%,100%{visibility:visible}}
-.m5{animation-name:k6;animation-timing-function:steps(1)}
-@keyframes k7{0%,11%{stroke-dashoffset:1;visibility:hidden}14%,100%{stroke-dashoffset:0;visibility:visible}}
-.m6{animation-name:k7}
-@keyframes k8{0%{visibility:hidden}12.893%,100%{visibility:visible}}
-.m7{animation-name:k8;animation-timing-function:steps(1)}
-@keyframes k9{0%,14%{stroke-dashoffset:1;visibility:hidden}17%,100%{stroke-dashoffset:0;visibility:visible}}
-.m8{animation-name:k9}
-@keyframes k10{0%{visibility:hidden}15.89%,100%{visibility:visible}}
-.m9{animation-name:k10;animation-timing-function:steps(1)}
-@keyframes k11{0%{visibility:hidden}15.704%,100%{visibility:visible}}
-.m10{animation-name:k11;animation-timing-function:steps(1)}
-@keyframes k12{0%{visibility:hidden}15.877%,100%{visibility:visible}}
-.m11{animation-name:k12;animation-timing-function:steps(1)}
-@keyframes k13{0%{visibility:hidden}16.24%,100%{visibility:visible}}
-.m12{animation-name:k13;animation-timing-function:steps(1)}
-@keyframes k14{0%,17%{stroke-dashoffset:1;visibility:hidden}20%,100%{stroke-dashoffset:0;visibility:visible}}
-.m13{animation-name:k14}
-@keyframes k15{0%{visibility:hidden}18.618%,100%{visibility:visible}}
-.m14{animation-name:k15;animation-timing-function:steps(1)}
-@keyframes k16{0%,23%{stroke-dashoffset:1;visibility:hidden}26%,100%{stroke-dashoffset:0;visibility:visible}}
-.m15{animation-name:k16}
-@keyframes k17{0%{visibility:hidden}24.993%,100%{visibility:visible}}
-.m16{animation-name:k17;animation-timing-function:steps(1)}
-@keyframes k18{0%,26%{stroke-dashoffset:1;visibility:hidden}29%,100%{stroke-dashoffset:0;visibility:visible}}
-.m17{animation-name:k18}
-@keyframes k19{0%{visibility:hidden}28.367%,100%{visibility:visible}}
-.m18{animation-name:k19;animation-timing-function:steps(1)}
-@keyframes k20{0%,20%{stroke-dashoffset:1;visibility:hidden}23%,100%{stroke-dashoffset:0;visibility:visible}}
-.m19{animation-name:k20}
-@keyframes k21{0%{visibility:hidden}22.185%,100%{visibility:visible}}
-.m20{animation-name:k21;animation-timing-function:steps(1)}
-@keyframes k22{0%,36%{stroke-dashoffset:1;visibility:hidden}60%,100%{stroke-dashoffset:0;visibility:visible}}
-.m21{animation-name:k22;animation-timing-function:linear}
-@keyframes k23{0%,5%{translate:0px 6px}8%,100%{translate:0px 0px}}
-@keyframes k24{0%,5%{opacity:0}8%,100%{opacity:1}}
-.m22{animation-name:k23,k24}
-@keyframes k25{0%,2%{translate:0px 6px}5%,100%{translate:0px 0px}}
-@keyframes k26{0%,2%{opacity:0}5%,100%{opacity:1}}
-.m23{animation-name:k25,k26}
-@keyframes k27{0%,8%{translate:0px 6px}11%,100%{translate:0px 0px}}
-@keyframes k28{0%,8%{opacity:0}11%,100%{opacity:1}}
-.m24{animation-name:k27,k28}
-@keyframes k29{0%,11%{translate:0px 6px}14%,100%{translate:0px 0px}}
-@keyframes k30{0%,11%{opacity:0}14%,100%{opacity:1}}
-.m25{animation-name:k29,k30}
-@keyframes k31{0%,14%{translate:0px 6px}17%,100%{translate:0px 0px}}
-@keyframes k32{0%,14%{opacity:0}17%,100%{opacity:1}}
-.m26{animation-name:k31,k32}
-@keyframes k33{0%,17%{translate:0px 6px}20%,100%{translate:0px 0px}}
-@keyframes k34{0%,17%{opacity:0}20%,100%{opacity:1}}
-.m27{animation-name:k33,k34}
-@keyframes k35{0%,20%{translate:0px 6px}23%,100%{translate:0px 0px}}
-@keyframes k36{0%,20%{opacity:0}23%,100%{opacity:1}}
-.m28{animation-name:k35,k36}
-@keyframes k37{0%,26%{translate:0px 6px}29%,100%{translate:0px 0px}}
-@keyframes k38{0%,26%{opacity:0}29%,100%{opacity:1}}
-.m29{animation-name:k37,k38}
-@keyframes k39{0%,23%{translate:0px 6px}26%,100%{translate:0px 0px}}
-@keyframes k40{0%,23%{opacity:0}26%,100%{opacity:1}}
-.m30{animation-name:k39,k40}
-@keyframes k41{0%,26%{translate:0px 6px}28.5%,100%{translate:0px 0px}}
-@keyframes k42{0%,26%{opacity:0}28.5%,100%{opacity:1}}
-.m31{animation-name:k41,k42}
-@keyframes k43{0%,29%{translate:0px 6px}31.5%,100%{translate:0px 0px}}
-@keyframes k44{0%,29%{opacity:0}31.5%,100%{opacity:1}}
-.m32{animation-name:k43,k44}
-@keyframes k45{0%,23%{translate:0px 6px}25.5%,100%{translate:0px 0px}}
-@keyframes k46{0%,23%{opacity:0}25.5%,100%{opacity:1}}
-.m33{animation-name:k45,k46}
-@keyframes k47{0%,36%,60%,100%{opacity:0}37.5%,58%{opacity:1}}
-@keyframes k48{0%,36%{translate:123.85px 182.26px}36.5%{translate:142.56px 179.93px}37%{translate:150.78px 162.8px}37.5%{translate:155.74px 144.18px}38%{translate:162.25px 126.13px}38.5%{translate:178.49px 119.26px}42%{translate:313.38px 119.26px}42.5%{translate:327.31px 129.74px}43.5%{translate:336.92px 167.03px}44%{translate:343.33px 185.12px}44.5%{translate:359.9px 191.26px}49.5%{translate:552.61px 191.26px}52.5%{translate:667.73px 180.76px}54%{translate:725.54px 180.76px}54.5%{translate:742.46px 176.02px}55%{translate:747.81px 157.74px}58%{translate:761.47px 42.95px}58.5%{translate:766.07px 24.31px}59%{translate:782.21px 18px}60%,100%{translate:820.75px 18px}}
-.m34{animation-name:k47,k48;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
-@keyframes k49{0%,92%{opacity:1}98%,100%{opacity:0}}
-.m35{animation-name:k49}
+@keyframes k1{0%,8%{translate:0 6px;opacity:0}12%,100%{translate:0 0;opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,5%{stroke-dashoffset:1;visibility:hidden}8%,100%{stroke-dashoffset:0;visibility:visible}}
+.m2{animation-name:k2}
+@keyframes k3{0%,6.883%{visibility:hidden}6.884%,100%{visibility:visible}}
+.m3{animation-name:k3}
+@keyframes k4{0%,8%{stroke-dashoffset:1;visibility:hidden}11%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k4}
+@keyframes k5{0%,9.756%{visibility:hidden}9.757%,100%{visibility:visible}}
+.m5{animation-name:k5}
+@keyframes k6{0%,11%{stroke-dashoffset:1;visibility:hidden}14%,100%{stroke-dashoffset:0;visibility:visible}}
+.m6{animation-name:k6}
+@keyframes k7{0%,12.892%{visibility:hidden}12.893%,100%{visibility:visible}}
+.m7{animation-name:k7}
+@keyframes k8{0%,14%{stroke-dashoffset:1;visibility:hidden}17%,100%{stroke-dashoffset:0;visibility:visible}}
+.m8{animation-name:k8}
+@keyframes k9{0%,15.889%{visibility:hidden}15.89%,100%{visibility:visible}}
+.m9{animation-name:k9}
+@keyframes k10{0%,15.703%{visibility:hidden}15.704%,100%{visibility:visible}}
+.m10{animation-name:k10}
+@keyframes k11{0%,15.876%{visibility:hidden}15.877%,100%{visibility:visible}}
+.m11{animation-name:k11}
+@keyframes k12{0%,16.239%{visibility:hidden}16.24%,100%{visibility:visible}}
+.m12{animation-name:k12}
+@keyframes k13{0%,17%{stroke-dashoffset:1;visibility:hidden}20%,100%{stroke-dashoffset:0;visibility:visible}}
+.m13{animation-name:k13}
+@keyframes k14{0%,18.617%{visibility:hidden}18.618%,100%{visibility:visible}}
+.m14{animation-name:k14}
+@keyframes k15{0%,23%{stroke-dashoffset:1;visibility:hidden}26%,100%{stroke-dashoffset:0;visibility:visible}}
+.m15{animation-name:k15}
+@keyframes k16{0%,24.992%{visibility:hidden}24.993%,100%{visibility:visible}}
+.m16{animation-name:k16}
+@keyframes k17{0%,26%{stroke-dashoffset:1;visibility:hidden}29%,100%{stroke-dashoffset:0;visibility:visible}}
+.m17{animation-name:k17}
+@keyframes k18{0%,28.366%{visibility:hidden}28.367%,100%{visibility:visible}}
+.m18{animation-name:k18}
+@keyframes k19{0%,20%{stroke-dashoffset:1;visibility:hidden}23%,100%{stroke-dashoffset:0;visibility:visible}}
+.m19{animation-name:k19}
+@keyframes k20{0%,22.184%{visibility:hidden}22.185%,100%{visibility:visible}}
+.m20{animation-name:k20}
+@keyframes k21{0%,36%{stroke-dashoffset:1;visibility:hidden}60%,100%{stroke-dashoffset:0;visibility:visible}}
+.m21{animation-name:k21;animation-timing-function:linear}
+@keyframes k22{0%,5%{translate:0 6px;opacity:0}8%,100%{translate:0 0;opacity:1}}
+.m22{animation-name:k22}
+@keyframes k23{0%,2%{translate:0 6px;opacity:0}5%,100%{translate:0 0;opacity:1}}
+.m23{animation-name:k23}
+@keyframes k24{0%,8%{translate:0 6px;opacity:0}11%,100%{translate:0 0;opacity:1}}
+.m24{animation-name:k24}
+@keyframes k25{0%,11%{translate:0 6px;opacity:0}14%,100%{translate:0 0;opacity:1}}
+.m25{animation-name:k25}
+@keyframes k26{0%,14%{translate:0 6px;opacity:0}17%,100%{translate:0 0;opacity:1}}
+.m26{animation-name:k26}
+@keyframes k27{0%,17%{translate:0 6px;opacity:0}20%,100%{translate:0 0;opacity:1}}
+.m27{animation-name:k27}
+@keyframes k28{0%,20%{translate:0 6px;opacity:0}23%,100%{translate:0 0;opacity:1}}
+.m28{animation-name:k28}
+@keyframes k29{0%,26%{translate:0 6px;opacity:0}29%,100%{translate:0 0;opacity:1}}
+.m29{animation-name:k29}
+@keyframes k30{0%,23%{translate:0 6px;opacity:0}26%,100%{translate:0 0;opacity:1}}
+.m30{animation-name:k30}
+@keyframes k31{0%,26%{translate:0 6px;opacity:0}28.5%,100%{translate:0 0;opacity:1}}
+.m31{animation-name:k31}
+@keyframes k32{0%,29%{translate:0 6px;opacity:0}31.5%,100%{translate:0 0;opacity:1}}
+.m32{animation-name:k32}
+@keyframes k33{0%,23%{translate:0 6px;opacity:0}25.5%,100%{translate:0 0;opacity:1}}
+.m33{animation-name:k33}
+@keyframes k34{0%,36%,60%,100%{opacity:0}37.5%,58%{opacity:1}}
+@keyframes k35{0%,36%{translate:123.85px 182.26px}36.5%{translate:142.56px 179.93px}37%{translate:150.78px 162.8px}37.5%{translate:155.74px 144.18px}38%{translate:162.25px 126.13px}38.5%{translate:178.49px 119.26px}42%{translate:313.38px 119.26px}42.5%{translate:327.31px 129.74px}43.5%{translate:336.92px 167.03px}44%{translate:343.33px 185.12px}44.5%{translate:359.9px 191.26px}49.5%{translate:552.61px 191.26px}52.5%{translate:667.73px 180.76px}54%{translate:725.54px 180.76px}54.5%{translate:742.46px 176.02px}55%{translate:747.81px 157.74px}58%{translate:761.47px 42.95px}58.5%{translate:766.07px 24.31px}59%{translate:782.21px 18px}60%,100%{translate:820.75px 18px}}
+.m34{animation-name:k34,k35;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes k36{0%,92%{opacity:1}98%,100%{opacity:0}}
+.m35{animation-name:k36}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-8s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="960" height="540" fill="var(--background)"/>
   <g transform="translate(480 270)" class="a m35">
-    <g transform="translate(-480.65 -168.505)" style="transform-origin:0px 0px;scale:0.936">
+    <g transform="translate(-480.65 -168.505)" style="transform-origin:0 0;scale:0.936">
       <g transform="translate(166 72)" class="a m1">
         <rect width="795.55" height="221.26" rx="10" fill="none" stroke="var(--border)" stroke-dasharray="4 3"/>
         <text x="12" y="17.271" font-size="11.05" fill="var(--muted)">Review agent</text>

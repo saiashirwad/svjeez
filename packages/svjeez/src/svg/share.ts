@@ -30,10 +30,10 @@ const elementsIn = (node: SvgNode): number =>
       : 0;
 
 /** Bytes a copy has to save for each element it adds. */
-const PER_ELEMENT = 1000;
+export const PER_ELEMENT = 1000;
 
 /** Bytes a drawing has to save before a copy is worth a <use> and an entry in <defs>. */
-const WORTH = 64;
+export const WORTH = 64;
 
 interface Shared {
   readonly key: string;

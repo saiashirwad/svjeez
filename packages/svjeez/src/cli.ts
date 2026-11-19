@@ -5,6 +5,7 @@ import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { examine } from "./check/report";
+import { costOf, type Cost } from "./svg/cost";
 import { checkPixels, renderFrames, type FrameTimes } from "./frames";
 import { parse, type Json, type JsonObject, type Param, type Schema, type Values } from "./params";
 import {
@@ -46,7 +47,7 @@ check reads the scene model and emits its SVG once, with no browser, and prints 
 file:line:column  code  severity: message, with what to change on a fix: line below, then the count and the animated
 lanes (css, or smil when a scene animates geometry, a filter or a gradient). --browser also measures the scene in
 headless Chromium. --at 0,1.5 also describes what is on screen at those times. --times 0,0.5 adds moments to sample.
---json prints { ok, file, scene?, problems, lanes, measured?, frames?, timeline? }. It exits 1 when any problem is an
+--json prints { ok, file, scene?, problems, lanes, cost?, measured?, frames?, timeline? }, cost being { animations, repaint }. It exits 1 when any problem is an
 error, the scene failing to build included. With --browser and no --times the browser measures 0, seven times across
 the loop, just before the end, and the scene's keys.
 skill prints the agent skill for writing svjeez scenes; --install copies it, with its references and examples, into <dir>/svjeez.`;
@@ -563,6 +564,7 @@ interface Report {
   readonly scene?: { readonly size: Model.Vec; readonly duration: number; readonly loop: boolean };
   readonly problems: readonly Problem[];
   readonly lanes: readonly LaneReport[];
+  readonly cost?: Cost;
   readonly measured?: { readonly duration: number; readonly times: readonly number[] };
   readonly frames?: ReturnType<typeof describe>["frames"];
   readonly timeline?: ReturnType<typeof describe>["timeline"];
@@ -590,6 +592,7 @@ const checkCommand = async (args: string[]): Promise<void> => {
   let model: Scene | undefined;
   let svgText: string | undefined;
   let lanes: readonly LaneReport[] = [];
+  let cost: Cost | undefined;
   let measured: Report["measured"];
 
   startTrace({ within: file.endsWith(".svg") ? undefined : dirname(resolve(file)), sources: true });
@@ -605,9 +608,11 @@ const checkCommand = async (args: string[]): Promise<void> => {
 
       found.push(...examined.problems);
       lanes = examined.lanes;
+      cost = examined.cost;
       svgText = examined.svg;
     } else {
       svgText = value;
+      cost = costOf(value);
 
       for (const warning of validateSvg(value).warnings)
         found.push({
@@ -683,6 +688,7 @@ const checkCommand = async (args: string[]): Promise<void> => {
     ...(model && { scene: { size: model.size, duration: model.duration, loop: model.loop } }),
     problems: placed,
     lanes: placedLanes,
+    ...(cost && { cost }),
     ...(measured && { measured }),
     ...(described && { frames: described.frames, timeline: described.timeline }),
   };
@@ -708,6 +714,8 @@ const checkCommand = async (args: string[]): Promise<void> => {
     console.log(
       `${plural(by("error").length, "error")}, ${plural(by("warning").length, "warning")}, ${by("info").length} info${how}`,
     );
+
+    if (cost) console.log(`cost: ${plural(cost.animations, "animation")}, ${cost.repaint} repaint`);
 
     if (model) {
       const names = namesOf(model);

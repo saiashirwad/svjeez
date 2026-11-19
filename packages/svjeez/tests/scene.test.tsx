@@ -223,7 +223,9 @@ describe("the SVG backend", () => {
           <Shape fill="#000000" geometry={rect(4, 4)} at={[16, 6]} />
         </Group>
       )),
-    ).toContain('<g transform="translate(50 50)" style="transform-origin:60px 55px" class="a m1">');
+    ).toContain(
+      '<g transform="translate(50 50)" style="transform-origin:60px 55px" class="a m1" fill="#000000">',
+    );
   });
 
   test("a group that only places one node is written as that node, placed by both", () => {
@@ -261,7 +263,7 @@ describe("the SVG backend", () => {
     ));
 
     expect(shared).not.toContain("<g");
-    expect(nested).toMatch(/<g style="transform-origin:0px 0px" class="a m\d">\s*<circle/);
+    expect(nested).toMatch(/<g style="transform-origin:0 0" class="a m\d">\s*<circle/);
   });
 
   test("an entrance folds into the node's own opacity, so no wrapper draws it", () => {

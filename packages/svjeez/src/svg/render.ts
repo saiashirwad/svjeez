@@ -5,6 +5,7 @@ import { RATE_ATTR } from "./rate";
 import { num } from "../model/format";
 import type { Seconds } from "../model/time";
 import { element, raw, serialize, text, type SvgNode } from "./tree";
+import { inherit } from "./inherit";
 import { share } from "./share";
 import { validateSvg } from "./validate";
 
@@ -81,7 +82,9 @@ export const render = (options: RenderOptions, nodes: readonly SvgNode[]): strin
     element("title", { id: `${prefix}t` }, [text(options.title)]),
     ...(options.desc ? [element("desc", { id: `${prefix}d` }, [text(options.desc)])] : []),
     ...(css ? [element("style", {}, [raw(`\n${css}\n`)])] : []),
-    ...(options.share === false ? compiled.body : share(compiled.body, prefix)),
+    ...(options.share === false
+      ? compiled.body
+      : inherit(share(compiled.body, prefix), css ?? "", prefix)),
   ]);
 
   const source = serialize(root);

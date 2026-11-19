@@ -7,99 +7,83 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 
 @font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
 .a{animation-duration:12s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
-@keyframes k1{0%,20.833%{translate:0px 6px}24.167%,100%{translate:0px 0px}}
-@keyframes k2{0%,20.833%{opacity:0}24.167%,100%{opacity:1}}
-.m1{animation-name:k1,k2}
-@keyframes k3{0%,6.25%{stroke-dashoffset:1;visibility:hidden}9.167%,100%{stroke-dashoffset:0;visibility:visible}}
-.m2{animation-name:k3}
-@keyframes k4{0%{visibility:hidden}7.894%,100%{visibility:visible}}
-.m3{animation-name:k4;animation-timing-function:steps(1)}
-@keyframes k5{0%,9.167%{stroke-dashoffset:1;visibility:hidden}12.083%,100%{stroke-dashoffset:0;visibility:visible}}
-.m4{animation-name:k5}
-@keyframes k6{0%{visibility:hidden}10.777%,100%{visibility:visible}}
-.m5{animation-name:k6;animation-timing-function:steps(1)}
-@keyframes k7{0%,12.083%{stroke-dashoffset:1;visibility:hidden}15%,100%{stroke-dashoffset:0;visibility:visible}}
-.m6{animation-name:k7}
-@keyframes k8{0%{visibility:hidden}13.97%,100%{visibility:visible}}
-.m7{animation-name:k8;animation-timing-function:steps(1)}
-@keyframes k9{0%,15%{stroke-dashoffset:1;visibility:hidden}17.917%,100%{stroke-dashoffset:0;visibility:visible}}
-.m8{animation-name:k9}
-@keyframes k10{0%{visibility:hidden}16.977%,100%{visibility:visible}}
-.m9{animation-name:k10;animation-timing-function:steps(1)}
-@keyframes k11{0%{visibility:hidden}17.127%,100%{visibility:visible}}
-.m10{animation-name:k11;animation-timing-function:steps(1)}
-@keyframes k12{0%,17.917%{stroke-dashoffset:1;visibility:hidden}20.833%,100%{stroke-dashoffset:0;visibility:visible}}
-.m11{animation-name:k12}
-@keyframes k13{0%{visibility:hidden}19.49%,100%{visibility:visible}}
-.m12{animation-name:k13;animation-timing-function:steps(1)}
-@keyframes k14{0%,20.833%{stroke-dashoffset:1;visibility:hidden}23.75%,100%{stroke-dashoffset:0;visibility:visible}}
-.m13{animation-name:k14}
-@keyframes k15{0%{visibility:hidden}22.407%,100%{visibility:visible}}
-.m14{animation-name:k15;animation-timing-function:steps(1)}
-@keyframes k16{0%,23.75%{stroke-dashoffset:1;visibility:hidden}26.667%,100%{stroke-dashoffset:0;visibility:visible}}
-.m15{animation-name:k16}
-@keyframes k17{0%{visibility:hidden}25.659%,100%{visibility:visible}}
-.m16{animation-name:k17;animation-timing-function:steps(1)}
-@keyframes k18{0%,26.667%{stroke-dashoffset:1;visibility:hidden}29.583%,100%{stroke-dashoffset:0;visibility:visible}}
-.m17{animation-name:k18}
-@keyframes k19{0%{visibility:hidden}28.597%,100%{visibility:visible}}
-.m18{animation-name:k19;animation-timing-function:steps(1)}
-@keyframes k20{0%,29.583%{stroke-dashoffset:1;visibility:hidden}32.5%,100%{stroke-dashoffset:0;visibility:visible}}
-.m19{animation-name:k20}
-@keyframes k21{0%{visibility:hidden}31.157%,100%{visibility:visible}}
-.m20{animation-name:k21;animation-timing-function:steps(1)}
-@keyframes k22{0%,41.667%{stroke-dashoffset:1;visibility:hidden}66.667%,100%{stroke-dashoffset:0;visibility:visible}}
-.m21{animation-name:k22;animation-timing-function:linear}
-@keyframes k23{0%,3.333%{translate:0px 6px}6.25%,100%{translate:0px 0px}}
-@keyframes k24{0%,3.333%{opacity:0}6.25%,100%{opacity:1}}
-.m22{animation-name:k23,k24}
-@keyframes k25{0%,9.167%{translate:0px 6px}12.083%,100%{translate:0px 0px}}
-@keyframes k26{0%,9.167%{opacity:0}12.083%,100%{opacity:1}}
-.m23{animation-name:k25,k26}
-@keyframes k27{0%,12.083%{translate:0px 6px}15%,100%{translate:0px 0px}}
-@keyframes k28{0%,12.083%{opacity:0}15%,100%{opacity:1}}
-.m24{animation-name:k27,k28}
-@keyframes k29{0%,15%{translate:0px 6px}17.917%,100%{translate:0px 0px}}
-@keyframes k30{0%,15%{opacity:0}17.917%,100%{opacity:1}}
-.m25{animation-name:k29,k30}
-@keyframes k31{0%,17.917%{translate:0px 6px}20.833%,100%{translate:0px 0px}}
-@keyframes k32{0%,17.917%{opacity:0}20.833%,100%{opacity:1}}
-.m26{animation-name:k31,k32}
-@keyframes k33{0%,6.25%{translate:0px 6px}9.167%,100%{translate:0px 0px}}
-@keyframes k34{0%,6.25%{opacity:0}9.167%,100%{opacity:1}}
-.m27{animation-name:k33,k34}
-@keyframes k35{0%,20.833%{translate:0px 6px}23.75%,100%{translate:0px 0px}}
-@keyframes k36{0%,20.833%{opacity:0}23.75%,100%{opacity:1}}
-.m28{animation-name:k35,k36}
-@keyframes k37{0%,23.75%{translate:0px 6px}26.667%,100%{translate:0px 0px}}
-@keyframes k38{0%,23.75%{opacity:0}26.667%,100%{opacity:1}}
-.m29{animation-name:k37,k38}
-@keyframes k39{0%,26.667%{translate:0px 6px}29.583%,100%{translate:0px 0px}}
-@keyframes k40{0%,26.667%{opacity:0}29.583%,100%{opacity:1}}
-.m30{animation-name:k39,k40}
-@keyframes k41{0%,29.583%{translate:0px 6px}32.5%,100%{translate:0px 0px}}
-@keyframes k42{0%,29.583%{opacity:0}32.5%,100%{opacity:1}}
-.m31{animation-name:k41,k42}
-@keyframes k43{0%,32.5%{translate:0px 6px}35.417%,100%{translate:0px 0px}}
-@keyframes k44{0%,32.5%{opacity:0}35.417%,100%{opacity:1}}
-.m32{animation-name:k43,k44}
-@keyframes k45{0%,15%{translate:0px 6px}17.083%,100%{translate:0px 0px}}
-@keyframes k46{0%,15%{opacity:0}17.083%,100%{opacity:1}}
-.m33{animation-name:k45,k46}
-@keyframes k47{0%,17.917%{translate:0px 6px}20%,100%{translate:0px 0px}}
-@keyframes k48{0%,17.917%{opacity:0}20%,100%{opacity:1}}
-.m34{animation-name:k47,k48}
-@keyframes k49{0%,26.667%{translate:0px 6px}28.75%,100%{translate:0px 0px}}
-@keyframes k50{0%,26.667%{opacity:0}28.75%,100%{opacity:1}}
-.m35{animation-name:k49,k50}
-@keyframes k51{0%,29.583%{translate:0px 6px}31.667%,100%{translate:0px 0px}}
-@keyframes k52{0%,29.583%{opacity:0}31.667%,100%{opacity:1}}
-.m36{animation-name:k51,k52}
-@keyframes k53{0%,41.667%,66.667%,100%{opacity:0}42.917%,65%{opacity:1}}
-@keyframes k54{0%,41.667%{translate:87.63px 41px}42.083%{translate:87.77px 55.12px}42.5%{translate:93.28px 67.76px}42.917%{translate:101.7px 78.96px}43.333%{translate:103.09px 92.89px}44.583%{translate:103.09px 135.27px}45%{translate:106.41px 148.71px}45.417%{translate:115.52px 159.47px}45.833%{translate:118.71px 172.95px}46.25%{translate:126.86px 181.98px}47.917%{translate:177.62px 206.8px}48.333%{translate:188.92px 213.87px}50%{translate:188.92px 270.37px}50.417%{translate:196.86px 281.01px}51.667%{translate:236.72px 295.1px}52.083%{translate:244.5px 305.83px}57.917%{translate:244.5px 503.58px}58.333%{translate:236.68px 512.82px}60%{translate:185.92px 537.63px}60.417%{translate:174.29px 544.5px}64.167%{translate:174.29px 671.62px}65%{translate:170.31px 699.59px}65.417%{translate:169.1px 713.63px}66.667%,100%{translate:169.1px 756px}}
-.m37{animation-name:k53,k54;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
-@keyframes k55{0%,93.333%{opacity:1}98.333%,100%{opacity:0}}
-.m38{animation-name:k55}
+@keyframes k1{0%,20.833%{translate:0 6px;opacity:0}24.167%,100%{translate:0 0;opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,6.25%{stroke-dashoffset:1;visibility:hidden}9.167%,100%{stroke-dashoffset:0;visibility:visible}}
+.m2{animation-name:k2}
+@keyframes k3{0%,7.893%{visibility:hidden}7.894%,100%{visibility:visible}}
+.m3{animation-name:k3}
+@keyframes k4{0%,9.167%{stroke-dashoffset:1;visibility:hidden}12.083%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k4}
+@keyframes k5{0%,10.776%{visibility:hidden}10.777%,100%{visibility:visible}}
+.m5{animation-name:k5}
+@keyframes k6{0%,12.083%{stroke-dashoffset:1;visibility:hidden}15%,100%{stroke-dashoffset:0;visibility:visible}}
+.m6{animation-name:k6}
+@keyframes k7{0%,13.969%{visibility:hidden}13.97%,100%{visibility:visible}}
+.m7{animation-name:k7}
+@keyframes k8{0%,15%{stroke-dashoffset:1;visibility:hidden}17.917%,100%{stroke-dashoffset:0;visibility:visible}}
+.m8{animation-name:k8}
+@keyframes k9{0%,16.976%{visibility:hidden}16.977%,100%{visibility:visible}}
+.m9{animation-name:k9}
+@keyframes k10{0%,17.126%{visibility:hidden}17.127%,100%{visibility:visible}}
+.m10{animation-name:k10}
+@keyframes k11{0%,17.917%{stroke-dashoffset:1;visibility:hidden}20.833%,100%{stroke-dashoffset:0;visibility:visible}}
+.m11{animation-name:k11}
+@keyframes k12{0%,19.489%{visibility:hidden}19.49%,100%{visibility:visible}}
+.m12{animation-name:k12}
+@keyframes k13{0%,20.833%{stroke-dashoffset:1;visibility:hidden}23.75%,100%{stroke-dashoffset:0;visibility:visible}}
+.m13{animation-name:k13}
+@keyframes k14{0%,22.406%{visibility:hidden}22.407%,100%{visibility:visible}}
+.m14{animation-name:k14}
+@keyframes k15{0%,23.75%{stroke-dashoffset:1;visibility:hidden}26.667%,100%{stroke-dashoffset:0;visibility:visible}}
+.m15{animation-name:k15}
+@keyframes k16{0%,25.658%{visibility:hidden}25.659%,100%{visibility:visible}}
+.m16{animation-name:k16}
+@keyframes k17{0%,26.667%{stroke-dashoffset:1;visibility:hidden}29.583%,100%{stroke-dashoffset:0;visibility:visible}}
+.m17{animation-name:k17}
+@keyframes k18{0%,28.596%{visibility:hidden}28.597%,100%{visibility:visible}}
+.m18{animation-name:k18}
+@keyframes k19{0%,29.583%{stroke-dashoffset:1;visibility:hidden}32.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m19{animation-name:k19}
+@keyframes k20{0%,31.156%{visibility:hidden}31.157%,100%{visibility:visible}}
+.m20{animation-name:k20}
+@keyframes k21{0%,41.667%{stroke-dashoffset:1;visibility:hidden}66.667%,100%{stroke-dashoffset:0;visibility:visible}}
+.m21{animation-name:k21;animation-timing-function:linear}
+@keyframes k22{0%,3.333%{translate:0 6px;opacity:0}6.25%,100%{translate:0 0;opacity:1}}
+.m22{animation-name:k22}
+@keyframes k23{0%,9.167%{translate:0 6px;opacity:0}12.083%,100%{translate:0 0;opacity:1}}
+.m23{animation-name:k23}
+@keyframes k24{0%,12.083%{translate:0 6px;opacity:0}15%,100%{translate:0 0;opacity:1}}
+.m24{animation-name:k24}
+@keyframes k25{0%,15%{translate:0 6px;opacity:0}17.917%,100%{translate:0 0;opacity:1}}
+.m25{animation-name:k25}
+@keyframes k26{0%,17.917%{translate:0 6px;opacity:0}20.833%,100%{translate:0 0;opacity:1}}
+.m26{animation-name:k26}
+@keyframes k27{0%,6.25%{translate:0 6px;opacity:0}9.167%,100%{translate:0 0;opacity:1}}
+.m27{animation-name:k27}
+@keyframes k28{0%,20.833%{translate:0 6px;opacity:0}23.75%,100%{translate:0 0;opacity:1}}
+.m28{animation-name:k28}
+@keyframes k29{0%,23.75%{translate:0 6px;opacity:0}26.667%,100%{translate:0 0;opacity:1}}
+.m29{animation-name:k29}
+@keyframes k30{0%,26.667%{translate:0 6px;opacity:0}29.583%,100%{translate:0 0;opacity:1}}
+.m30{animation-name:k30}
+@keyframes k31{0%,29.583%{translate:0 6px;opacity:0}32.5%,100%{translate:0 0;opacity:1}}
+.m31{animation-name:k31}
+@keyframes k32{0%,32.5%{translate:0 6px;opacity:0}35.417%,100%{translate:0 0;opacity:1}}
+.m32{animation-name:k32}
+@keyframes k33{0%,15%{translate:0 6px;opacity:0}17.083%,100%{translate:0 0;opacity:1}}
+.m33{animation-name:k33}
+@keyframes k34{0%,17.917%{translate:0 6px;opacity:0}20%,100%{translate:0 0;opacity:1}}
+.m34{animation-name:k34}
+@keyframes k35{0%,26.667%{translate:0 6px;opacity:0}28.75%,100%{translate:0 0;opacity:1}}
+.m35{animation-name:k35}
+@keyframes k36{0%,29.583%{translate:0 6px;opacity:0}31.667%,100%{translate:0 0;opacity:1}}
+.m36{animation-name:k36}
+@keyframes k37{0%,41.667%,66.667%,100%{opacity:0}42.917%,65%{opacity:1}}
+@keyframes k38{0%,41.667%{translate:87.63px 41px}42.083%{translate:87.77px 55.12px}42.5%{translate:93.28px 67.76px}42.917%{translate:101.7px 78.96px}43.333%{translate:103.09px 92.89px}44.583%{translate:103.09px 135.27px}45%{translate:106.41px 148.71px}45.417%{translate:115.52px 159.47px}45.833%{translate:118.71px 172.95px}46.25%{translate:126.86px 181.98px}47.917%{translate:177.62px 206.8px}48.333%{translate:188.92px 213.87px}50%{translate:188.92px 270.37px}50.417%{translate:196.86px 281.01px}51.667%{translate:236.72px 295.1px}52.083%{translate:244.5px 305.83px}57.917%{translate:244.5px 503.58px}58.333%{translate:236.68px 512.82px}60%{translate:185.92px 537.63px}60.417%{translate:174.29px 544.5px}64.167%{translate:174.29px 671.62px}65%{translate:170.31px 699.59px}65.417%{translate:169.1px 713.63px}66.667%,100%{translate:169.1px 756px}}
+.m37{animation-name:k37,k38;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes k39{0%,93.333%{opacity:1}98.333%,100%{opacity:0}}
+.m38{animation-name:k39}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-10s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="489" height="872" fill="var(--background)"/>

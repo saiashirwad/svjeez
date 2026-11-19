@@ -572,7 +572,7 @@ describe("clips and masks", () => {
     );
 
     expect(out).toContain(
-      '<clipPath id="c1"><rect width="40" height="20" style="transform-origin:0px 0px" class="a m1"/></clipPath>',
+      '<clipPath id="c1"><rect width="40" height="20" style="transform-origin:0 0" class="a m1"/></clipPath>',
     );
     expect(out).toContain("@keyframes k1{0%{scale:0.25 1}25%,100%{scale:1 1}}");
   });
