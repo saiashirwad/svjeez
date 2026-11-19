@@ -300,8 +300,8 @@ describe("parse errors", () => {
   });
 
   test("reject another diagram type", () => {
-    expect(message("sankey-beta\nA,B,10")).toContain("Supported diagram types");
-    expect(message("requirementDiagram\ntitle Q")).toContain("mermaid:1:");
+    expect(message("zenuml\nA->B: hi")).toContain("Supported diagram types");
+    expect(message("wardley-beta\ntitle Q")).toContain("mermaid:1:");
   });
 
   test("reject empty text, a bad direction and an unclosed subgraph", () => {
