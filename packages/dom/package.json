@@ -25,7 +25,13 @@
     "typescript": "latest"
   },
   "peerDependencies": {
+    "playwright-core": ">=1.49",
     "svjeez": "workspace:^"
+  },
+  "peerDependenciesMeta": {
+    "playwright-core": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20"

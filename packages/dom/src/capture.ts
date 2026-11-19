@@ -1,7 +1,6 @@
 import type {
   Animation,
   Background,
-  Color,
   Corner,
   ElementNode,
   Font,
@@ -12,6 +11,7 @@ import type {
   Stop,
   SvgNode,
   TextNode,
+  WebFont,
 } from "./schema.ts";
 
 /**
@@ -21,7 +21,7 @@ import type {
  * Layout is read as it renders right now, so a running animation or transition is captured mid-flight.
  */
 interface Pending {
-  color: Color;
+  color: string;
   at?: number;
 }
 
@@ -37,7 +37,7 @@ export const capture = (root: Element): Snapshot => {
   const px = (value: string) => parseFloat(value) || 0;
 
   /** Any CSS color, as `rgb(r, g, b)` or `rgba(r, g, b, a)`. */
-  const color = (value: string): Color => {
+  const color = (value: string): string => {
     const parts = /^rgba?\((.+)\)$/
       .exec(value.trim())?.[1]
       ?.split(/[\s,/]+/)
@@ -788,9 +788,48 @@ export const capture = (root: Element): Snapshot => {
   if (top?.type !== "element")
     throw new Error("capture(root): the root is not rendered (display: none, hidden or empty).");
 
+  const fonts: WebFont[] = [];
+
+  for (const sheet of Array.from(document.styleSheets)) {
+    let rules: CSSRuleList;
+
+    try {
+      rules = sheet.cssRules;
+    } catch {
+      // A cross-origin stylesheet without CORS hides its rules.
+      continue;
+    }
+
+    const base = sheet.href ?? document.baseURI;
+
+    for (const rule of Array.from(rules)) {
+      if (!(rule instanceof CSSFontFaceRule)) continue;
+
+      const url = /url\(\s*(?:"([^"]*)"|'([^']*)'|([^)\s]*))\s*\)/.exec(
+        rule.style.getPropertyValue("src"),
+      );
+
+      const src = url && (url[1] ?? url[2] ?? url[3]);
+      const weight = rule.style.getPropertyValue("font-weight").trim();
+
+      if (!src) continue;
+
+      fonts.push({
+        family: rule.style
+          .getPropertyValue("font-family")
+          .trim()
+          .replace(/^["']|["']$/g, ""),
+        weight: weight === "bold" ? 700 : parseFloat(weight) || 400,
+        italic: /^(italic|oblique)/.test(rule.style.getPropertyValue("font-style").trim()),
+        src: new URL(src, base).href,
+      });
+    }
+  }
+
   return {
     version: 1,
     viewport: { width: window.innerWidth, height: window.innerHeight },
+    ...(fonts.length > 0 && { fonts }),
     root: top,
   };
 };

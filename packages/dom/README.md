@@ -50,6 +50,47 @@ Drawn with core primitives: rounded boxes (per-corner radii), background colors 
 
 `diagnostics` lists what is not faithful, as `{ path, what }`: a skew, an elliptical radial gradient, `groove`/`ridge`/`inset`/`outset` borders, background images, `<img>` sources that are not `data:` URLs, svg text, paint servers and other elements, and animations.
 
+## record, cache, assets, schemes
+
+Write normal Playwright against your own dev server; `record` only takes the snapshots. `snap(name, { over, hold, ease })` returns a `State` (`{ name, snapshot, over?, hold?, ease? }`): states play in order, `over` is the seconds spent moving into it from the previous one, `hold` the seconds it rests.
+
+```ts
+import { scene } from "svjeez";
+import { svg } from "svjeez/tools";
+import { cached, compile, inlineAssets, openPage, record } from "@svjeez/dom";
+
+const url = "http://localhost:5173";
+
+const states = await cached("hero.states.json", { url }, async () => {
+  const { page, close } = await openPage({ url, viewport: { width: 640, height: 400 } });
+
+  const recorded = await record(
+    page,
+    "#app",
+    async (snap) => {
+      await snap("empty");
+      await page.fill("input", "Ada");
+      await snap("typed", { over: 0.8 });
+    },
+    { scheme: "both" },
+  );
+
+  await close();
+
+  return recorded;
+});
+
+// Download images and the web fonts the text uses; the scene then needs no network.
+const [first] = await inlineAssets(states.map((s) => s.snapshot));
+const { element, size } = compile(first!);
+const out = svg.emit(scene({ size, duration: 1, title: "Hero" }, () => element));
+```
+
+- `cached(file, inputs, fn)` keeps `fn`'s JSON result in `file` while `inputs` and the Snapshot version are unchanged. `SVJEEZ_DOM_REFRESH=1` records again.
+- `scheme: "both"` captures each state under light and dark `prefers-color-scheme` and merges them with `mergeSchemes(light, dark)`: a color that differs becomes `{ light, dark }`, and `compile` draws it as a theme token, so the SVG follows the viewer's scheme. The two trees must match node for node.
+- `inlineAssets` embeds `<img>` and background images as `data:` URLs and the page's `@font-face` files for the families its text uses; `compile` then draws text with the embedded font instead of `font.system`. A URL that fails to download throws. Background images are embedded but still not drawn.
+- `playwright-core` is an optional peer dependency.
+
 ## Not captured
 
 `::before` / `::after`, text-shadow, filters and backdrop-filter, masks and clip-path, 3D transforms (only the 2D part is kept), `<canvas>` and `<video>` contents, form control values, shadow DOM, repeating and conic gradients, background-size/position/repeat, scroll offsets inside scrolled containers, right-to-left and vertical text, and a root that sits inside a transformed ancestor.

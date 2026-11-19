@@ -6,7 +6,25 @@
 
 export const SNAPSHOT_VERSION = 1;
 
-export type Color = string;
+/** Anything that survives `JSON.stringify`. */
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | readonly Json[]
+  | { readonly [key: string]: Json };
+
+/** A color that differs between schemes: what `mergeSchemes` pairs, and compile turns into a theme token. */
+export interface Themed {
+  readonly light: string;
+  readonly dark: string;
+}
+
+/** `rgb(...)` / `rgba(...)`, or a `Themed` pair of them. */
+export type Color = string | Themed;
+
+export const isThemed = (color: Color | undefined): color is Themed => typeof color === "object";
 
 export type Matrix = readonly [a: number, b: number, c: number, d: number, e: number, f: number];
 
@@ -110,7 +128,7 @@ export interface SvgNode {
   readonly tag: string;
   readonly attrs: Readonly<Record<string, string>>;
   /** Computed paint (fill, stroke, stroke-width, ...). Colors are normalized. */
-  readonly style: Readonly<Record<string, string>>;
+  readonly style: Readonly<Record<string, string | Themed>>;
   readonly text?: string;
   readonly children: readonly SvgNode[];
 }
@@ -185,9 +203,19 @@ export interface ElementNode {
 
 export type Node = ElementNode | TextNode;
 
+/** One `@font-face` rule of the page. `src` is the first `url()`, absolute; `inlineAssets` turns it into a `data:` URL. */
+export interface WebFont {
+  readonly family: string;
+  readonly weight: number;
+  readonly italic: boolean;
+  readonly src: string;
+}
+
 export interface Snapshot {
   readonly version: typeof SNAPSHOT_VERSION;
   readonly viewport: { readonly width: number; readonly height: number };
+  /** The page's web fonts, whether or not the root uses them. */
+  readonly fonts?: readonly WebFont[];
   readonly root: ElementNode;
 }
 

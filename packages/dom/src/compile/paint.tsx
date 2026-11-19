@@ -2,7 +2,7 @@
 import { Group, Shape, blur, linear, polygon, radial, shadow, type SceneElement } from "svjeez";
 import type { Stops, StrokeProps } from "svjeez/tools";
 import type { Background, BorderStyle, Color, Rect, Shadow, Side } from "../schema.ts";
-import { painted, type Context } from "./context.ts";
+import { colorKey, painted, type Context, type Solid } from "./context.ts";
 import {
   expand,
   innerRadii,
@@ -28,7 +28,7 @@ type Gradient = Extract<Background, { kind: "linear" | "radial" }>;
 const stopsOf = (gradient: Gradient): Stops | undefined => {
   let last = 0;
 
-  const stops = gradient.stops.map(({ offset, color }): [number, `#${string}`] => {
+  const stops = gradient.stops.map(({ offset, color }): [number, Solid] => {
     last = Math.max(last, Math.min(1, offset));
 
     return [last, painted(color)?.rgba ?? "#00000000"];
@@ -118,7 +118,7 @@ const line = (
   centre: number,
   width: number,
   style: BorderStyle,
-  color: string,
+  color: Color,
 ): SceneElement[] => {
   const paint = painted(color);
   const middle = expand(box, radii, -centre);
@@ -141,7 +141,7 @@ const uniform = (
   outer: number,
   width: number,
   style: BorderStyle,
-  color: string,
+  color: Color,
 ): SceneElement[] => {
   if (!PLAIN.has(style)) where.ctx.note(where.path, `${key}-style ${style} is drawn solid`);
 
@@ -206,7 +206,7 @@ export const border = (sides: readonly [Side, Side, Side, Side], where: Where): 
     inner.width > 0 && inner.height > 0 ? outline(inner, innerRadii(radii, widths)) : undefined,
   );
 
-  if (new Set(drawn.map(({ paint }) => paint.rgba)).size <= 1)
+  if (new Set(drawn.map(({ paint }) => colorKey(paint.rgba))).size <= 1)
     return drawn[0] ? [<Shape key="border" geometry={edge} fill={drawn[0].paint.rgba} />] : [];
 
   // One wedge per side, meeting along each corner's diagonal, and all of them cut to the ring.

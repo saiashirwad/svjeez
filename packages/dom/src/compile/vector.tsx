@@ -11,10 +11,14 @@ import {
   type SceneElement,
 } from "svjeez";
 import type { ShapeProps, StrokeProps } from "svjeez/tools";
-import type { Rect, SvgNode } from "../schema.ts";
+import { isThemed, type Rect, type SvgNode, type Themed } from "../schema.ts";
 import { fade, keyer, painted, type Context } from "./context.ts";
 import { rounded, type Vec } from "./geometry.ts";
 import { decompose, parseTransform } from "./transform.ts";
+
+/** A style value that is not a color pair: `Themed` shows up only in the paints. */
+const text = (value: string | Themed | undefined): string | undefined =>
+  isThemed(value) ? undefined : value;
 
 const number = (value: string | undefined, fallback = 0): number => {
   const n = parseFloat(value ?? "");
@@ -55,21 +59,21 @@ const looks = (node: SvgNode, { ctx, path: where }: Lowering) => {
   const colored = (name: "fill" | "stroke") => {
     const value = style[name];
 
-    if (value?.startsWith("url("))
+    if (!isThemed(value) && value?.startsWith("url("))
       ctx.note(where, `a ${name} that is a paint server (${value}) is not drawn`);
 
     const color = painted(value);
 
     if (!color) return undefined;
 
-    return fade(color, number(style[`${name}-opacity`], 1));
+    return fade(color, number(text(style[`${name}-opacity`]), 1));
   };
 
   const fill = colored("fill");
   const color = colored("stroke");
-  const width = number(style["stroke-width"], 1);
+  const width = number(text(style["stroke-width"]), 1);
 
-  const dash = numbers(style["stroke-dasharray"] === "none" ? "" : style["stroke-dasharray"]);
+  const dash = numbers(style["stroke-dasharray"] === "none" ? "" : text(style["stroke-dasharray"]));
   const dashed = dash.length > 0 && dash.every((d) => d >= 0) && dash.some((d) => d > 0);
 
   const stroke: StrokeProps | undefined =
@@ -77,11 +81,11 @@ const looks = (node: SvgNode, { ctx, path: where }: Lowering) => {
       ? {
           color,
           width,
-          cap: capOf(style["stroke-linecap"]),
-          join: joinOf(style["stroke-linejoin"]),
+          cap: capOf(text(style["stroke-linecap"])),
+          join: joinOf(text(style["stroke-linejoin"])),
           ...(dashed && {
             dash: dash.length % 2 === 0 ? dash : [...dash, ...dash],
-            dashOffset: number(style["stroke-dashoffset"]),
+            dashOffset: number(text(style["stroke-dashoffset"])),
           }),
         }
       : undefined;
@@ -172,7 +176,7 @@ const GROUPS: ReadonlySet<string> = new Set(["g", "a", "svg"]);
 /** An SVG node's own transform and opacity, as the props of the group that carries it. */
 const dressing = (node: SvgNode, { ctx, path: where }: Lowering) => {
   const matrix = parseTransform(node.attrs.transform);
-  const opacity = number(node.style.opacity, 1);
+  const opacity = number(text(node.style.opacity), 1);
 
   if (!matrix) ctx.note(where, `the transform "${node.attrs.transform}" could not be read`);
 

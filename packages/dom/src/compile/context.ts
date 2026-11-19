@@ -1,5 +1,5 @@
-import type { Font, Hex } from "svjeez/tools";
-import type { Color } from "../schema.ts";
+import type { Font, Hex, Token } from "svjeez/tools";
+import { isThemed, type Color, type WebFont } from "../schema.ts";
 
 /** One place where the scene is not faithful to the page. */
 export interface Diagnostic {
@@ -11,16 +11,19 @@ export interface Diagnostic {
 export interface Context {
   readonly diagnostics: Diagnostic[];
   readonly fonts: Map<string, Font>;
+  /** The page's web fonts, with their files embedded. */
+  readonly faces: readonly WebFont[];
   note(path: string, what: string): void;
 }
 
-export const context = (): Context => {
+export const context = (faces: readonly WebFont[] = []): Context => {
   const diagnostics: Diagnostic[] = [];
   const seen = new Set<string>();
 
   return {
     diagnostics,
     fonts: new Map(),
+    faces,
     note: (path, what) => {
       const id = `${path}\0${what}`;
 
@@ -47,12 +50,23 @@ export const keyer = () => {
   };
 };
 
-export interface Painted {
+/** A solid color: one hex, or a theme token that is one hex in each scheme. */
+export type Solid = Hex | Token;
+
+interface Plain {
   readonly hex: Hex;
   /** `hex` carries no alpha; this is it, 0 to 1. */
   readonly alpha: number;
-  /** `hex` with the alpha written into it, for a fill or a stop. */
-  readonly rgba: Hex;
+}
+
+export interface Painted {
+  /** The color without its alpha, for use with `alpha`. A themed color carries its alpha in each scheme, so this is `rgba` and `alpha` is 1. */
+  readonly hex: Solid;
+  readonly alpha: number;
+  /** The color with its alpha written into it, for a fill or a stop. */
+  readonly rgba: Solid;
+  /** The two schemes of a themed color. */
+  readonly pair?: readonly [Plain, Plain];
 }
 
 export const byte = (n: number): string =>
@@ -60,8 +74,22 @@ export const byte = (n: number): string =>
     .toString(16)
     .padStart(2, "0");
 
-/** A captured `rgb()` / `rgba()` as hex, or undefined when it is not one or draws nothing. */
-export const painted = (color: Color | undefined): Painted | undefined => {
+const withAlpha = ({ hex, alpha }: Plain): Hex => (alpha >= 1 ? hex : `${hex}${byte(alpha * 255)}`);
+
+/** The token for a color that is `light` in one scheme and `dark` in the other. Equal pairs share a name. */
+const tokenOf = (light: Hex, dark: Hex): Token => ({
+  kind: "token",
+  name: `c-${light.slice(1)}-${dark.slice(1)}`,
+  light,
+  dark,
+});
+
+const isHex = (color: Solid): color is Hex => typeof color === "string";
+
+/** A key that is equal for equal colors, themed or not. */
+export const colorKey = (color: Solid): string => (isHex(color) ? color : color.name);
+
+const plain = (color: string | undefined): Plain | undefined => {
   const parts = /^rgba?\((.+)\)$/
     .exec(color?.trim() ?? "")?.[1]
     ?.split(/[\s,/]+/)
@@ -78,14 +106,36 @@ export const painted = (color: Color | undefined): Painted | undefined => {
   )
     return undefined;
 
-  const hex: Hex = `#${byte(r)}${byte(g)}${byte(b)}`;
+  return { hex: `#${byte(r)}${byte(g)}${byte(b)}`, alpha: a };
+};
 
-  return { hex, alpha: a, rgba: a >= 1 ? hex : `${hex}${byte(a * 255)}` };
+const CLEAR: Plain = { hex: "#000000", alpha: 0 };
+
+/** A captured `rgb()` / `rgba()` (or a light/dark pair of them) as hex or a theme token, or undefined when it draws nothing. */
+export const painted = (color: Color | undefined): Painted | undefined => {
+  if (isThemed(color)) {
+    const light = plain(color.light);
+    const dark = plain(color.dark);
+
+    if (!light && !dark) return undefined;
+
+    const pair = [light ?? CLEAR, dark ?? CLEAR] as const;
+    const token = tokenOf(withAlpha(pair[0]), withAlpha(pair[1]));
+
+    return { hex: token, alpha: 1, rgba: token, pair };
+  }
+
+  const one = plain(color);
+
+  return one && { ...one, rgba: withAlpha(one) };
 };
 
 /** The color at `opacity` times its alpha. */
-export const fade = ({ hex, alpha }: Painted, opacity: number): Hex => {
-  const a = alpha * opacity;
+export const fade = (color: Painted, opacity: number): Solid => {
+  const scaled = ({ hex, alpha }: Plain): Plain => ({ hex, alpha: alpha * opacity });
 
-  return a >= 1 ? hex : `${hex}${byte(a * 255)}`;
+  if (color.pair)
+    return tokenOf(withAlpha(scaled(color.pair[0])), withAlpha(scaled(color.pair[1])));
+
+  return isHex(color.hex) ? withAlpha(scaled({ hex: color.hex, alpha: color.alpha })) : color.hex;
 };

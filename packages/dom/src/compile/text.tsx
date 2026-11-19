@@ -4,8 +4,20 @@ import type { Font } from "svjeez/tools";
 import type { Run as Captured, TextNode } from "../schema.ts";
 import { painted, type Context } from "./context.ts";
 import { sub, type Vec } from "./geometry.ts";
+import { bytesOf } from "./image.tsx";
 
-/** `"Helvetica Neue", Arial, sans-serif` as a system font. */
+/** The embedded web font that is `family` at this weight and slant, or the closest weight of it. */
+const embedded = (ctx: Context, family: string, weight: number, italic: boolean) =>
+  ctx.faces
+    .filter(
+      (one) =>
+        one.family.toLowerCase() === family.toLowerCase() &&
+        one.italic === italic &&
+        one.src.startsWith("data:"),
+    )
+    .sort((a, b) => Math.abs(a.weight - weight) - Math.abs(b.weight - weight))[0];
+
+/** `"Helvetica Neue", Arial, sans-serif` as the page's embedded font of that name, or else a system font. */
 const face = (ctx: Context, { family, weight, italic }: Captured["font"]): Font => {
   const id = `${family}\0${weight}\0${italic}`;
   const known = ctx.fonts.get(id);
@@ -17,7 +29,21 @@ const face = (ctx: Context, { family, weight, italic }: Captured["font"]): Font 
     .map((name) => name.trim().replace(/^["']|["']$/g, ""))
     .filter(Boolean);
 
-  const made = font.system(first, { weight, italic, ...(fallback.length > 0 && { fallback }) });
+  const web = embedded(ctx, first, weight, italic);
+  const bytes = web && bytesOf(web.src);
+  let made: Font | undefined;
+
+  if (bytes)
+    try {
+      made = font(bytes, { family: first, weight, italic });
+    } catch (error) {
+      ctx.note(
+        first,
+        `the web font ${first} could not be read, so it is a system font (${error instanceof Error ? error.message : String(error)})`,
+      );
+    }
+
+  made ??= font.system(first, { weight, italic, ...(fallback.length > 0 && { fallback }) });
 
   ctx.fonts.set(id, made);
 

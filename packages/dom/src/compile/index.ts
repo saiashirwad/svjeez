@@ -15,8 +15,8 @@ export interface Compiled {
 }
 
 /** Compiles a Snapshot to core scene elements: groups, shapes, text and pictures, nothing a backend has to guess at. */
-export const compile = ({ root }: Snapshot): Compiled => {
-  const ctx = context();
+export const compile = ({ root, fonts }: Snapshot): Compiled => {
+  const ctx = context(fonts);
   const key = nameOf(root, 0);
 
   return {

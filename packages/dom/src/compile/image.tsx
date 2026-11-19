@@ -5,7 +5,7 @@ import type { Context } from "./context.ts";
 import { outline } from "./geometry.ts";
 
 /** The bytes of a `data:` URL, or undefined for anything else. */
-const bytesOf = (src: string): Uint8Array | undefined => {
+export const bytesOf = (src: string): Uint8Array | undefined => {
   const data = /^data:([^,]*),(.*)$/s.exec(src);
 
   if (!data) return undefined;
