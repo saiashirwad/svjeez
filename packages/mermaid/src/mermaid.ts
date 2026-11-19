@@ -112,7 +112,6 @@ export type MermaidDiagram =
   | (C4<string> & { readonly kind: "c4"; readonly doc: C4Doc })
   | (Kanban<string> & { readonly kind: "kanban"; readonly doc: KanbanDoc })
   | (Packet<string> & { readonly kind: "packet"; readonly doc: PacketDoc })
-  | (Packet<string> & { readonly kind: "packet"; readonly doc: PacketDoc })
   | (Radar<string> & { readonly kind: "radar"; readonly doc: RadarDoc })
   | (Treemap<string> & { readonly kind: "treemap"; readonly doc: TreemapDoc });
 

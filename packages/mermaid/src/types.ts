@@ -226,7 +226,6 @@ export type MermaidDoc =
   | C4Doc
   | KanbanDoc
   | PacketDoc
-  | PacketDoc
   | RadarDoc
   | TreemapDoc;
 
@@ -249,13 +248,10 @@ export type {
   PacketDoc,
   PieDoc,
   QuadrantDoc,
+  RadarDoc,
   RequirementDoc,
   SankeyDoc,
   TimelineDoc,
-  XyChartDoc,
-  MindmapDoc,
-  PacketDoc,
-  PieDoc,
-  RadarDoc,
   TreemapDoc,
+  XyChartDoc,
 };

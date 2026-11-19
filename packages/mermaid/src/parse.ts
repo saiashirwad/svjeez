@@ -21,10 +21,6 @@ import { parseSequence } from "./sequence.ts";
 import { parseState } from "./state.ts";
 import { parseTimeline } from "./timeline.ts";
 import { parseXyChart } from "./xychart.ts";
-import type { MermaidDoc, ParseOptions } from "./types.ts";
-
-const KINDS =
-  "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `classDiagram`, `stateDiagram`/`stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `mindmap`, `gitGraph`, `journey`, `timeline`, `quadrantChart`, `xychart-beta`/`xychart`, `sankey-beta`, `block-beta`, `architecture-beta`, `requirementDiagram`, `C4Context` (and the other C4 headers), `kanban`, `packet-beta`, `radar-beta` and `treemap-beta`.";
 import { parseTreemap } from "./treemap.ts";
 import type { MermaidDoc, ParseOptions } from "./types.ts";
 
