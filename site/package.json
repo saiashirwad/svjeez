@@ -6,8 +6,8 @@
     "dev": "bun --conditions @svjeez/source --bun astro dev",
     "build": "bun --conditions @svjeez/source --bun astro build",
     "preview": "bun --conditions @svjeez/source --bun astro preview",
-    "deploy": "alchemy deploy",
-    "destroy": "alchemy destroy",
+    "deploy": "bun --conditions @svjeez/source --bun alchemy deploy",
+    "destroy": "bun --conditions @svjeez/source --bun alchemy destroy",
     "typecheck": "astro check && tsc --noEmit -p src/scenes/board",
     "test": "bun test --conditions @svjeez/source"
   },
