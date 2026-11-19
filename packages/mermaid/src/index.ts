@@ -23,3 +23,4 @@ export type * from "./timeline.ts";
 export type * from "./quadrant.ts";
 
 export type * from "./xychart.ts";
+export type * from "./sankey.ts";

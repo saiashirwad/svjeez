@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 758 418" width="758" height="418" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">Sankey diagram</title>
+  <desc id="d">A Mermaid sankey diagram drawn by @svjeez/mermaid.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--magenta-55-background:#705092;--blue-55-background:#385D92;--cyan-55-background:#3B7892;--orange-55-background:#905C0B;--magenta-35-background:#4B3761;--blue-35-background:#273F61;--cyan-35-background:#295061}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0;--magenta-55-background:#C89FEE;--blue-55-background:#78AEFF;--cyan-55-background:#82C7D0;--orange-55-background:#F2B381;--magenta-35-background:#DCC2F4;--blue-35-background:#A9CCFF;--cyan-35-background:#AFDCE1}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,15%{opacity:0}18.75%,100%{opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,18.75%{opacity:0}22.5%,100%{opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,22.5%{opacity:0}26.25%,100%{opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,33.75%{opacity:0}37.5%,100%{opacity:1}}
+.m4{animation-name:k4}
+@keyframes k5{0%,37.5%{opacity:0}41.25%,100%{opacity:1}}
+.m5{animation-name:k5}
+@keyframes k6{0%,30%{opacity:0}33.75%,100%{opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,48.75%{opacity:0}52.5%,100%{opacity:1}}
+.m7{animation-name:k7}
+@keyframes k8{0%,52.5%{opacity:0}56.25%,100%{opacity:1}}
+.m8{animation-name:k8}
+@keyframes k9{0%,56.25%{opacity:0}60%,100%{opacity:1}}
+.m9{animation-name:k9}
+@keyframes k10{0%,60%{opacity:0}63.75%,100%{opacity:1}}
+.m10{animation-name:k10}
+@keyframes k11{0%,3.75%{translate:0 6px;opacity:0}7.5%,100%{translate:0 0;opacity:1}}
+.m11{animation-name:k11}
+@keyframes k12{0%,26.25%{translate:0 6px;opacity:0}30%,100%{translate:0 0;opacity:1}}
+.m12{animation-name:k12}
+@keyframes k13{0%,7.5%{translate:0 6px;opacity:0}11.25%,100%{translate:0 0;opacity:1}}
+.m13{animation-name:k13}
+@keyframes k14{0%,11.25%{translate:0 6px;opacity:0}15%,100%{translate:0 0;opacity:1}}
+.m14{animation-name:k14}
+@keyframes k15{0%,41.25%{translate:0 6px;opacity:0}45%,100%{translate:0 0;opacity:1}}
+.m15{animation-name:k15}
+@keyframes k16{0%,45%{translate:0 6px;opacity:0}48.75%,100%{translate:0 0;opacity:1}}
+.m16{animation-name:k16}
+@keyframes k17{0%,63.75%{translate:0 6px;opacity:0}67.5%,100%{translate:0 0;opacity:1}}
+.m17{animation-name:k17}
+@keyframes k18{0%,67.5%{translate:0 6px;opacity:0}71.25%,100%{translate:0 0;opacity:1}}
+.m18{animation-name:k18}
+@keyframes k19{0%,71.25%{translate:0 6px;opacity:0}75%,100%{translate:0 0;opacity:1}}
+.m19{animation-name:k19}
+@keyframes k20{0%,75%{translate:0 6px;opacity:0}78.75%,100%{translate:0 0;opacity:1}}
+.m20{animation-name:k20}
+@keyframes k21{0%,78.75%{translate:0 6px;opacity:0}82.5%,100%{translate:0 0;opacity:1}}
+.m21{animation-name:k21}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-7.5s!important;animation-play-state:paused!important}}
+]]></style>
+  <defs>
+    <linearGradient id="g1" gradientUnits="userSpaceOnUse" x1="86.06" x2="244.06">
+      <stop stop-color="var(--magenta)"/>
+      <stop offset="1" stop-color="var(--blue)"/>
+    </linearGradient>
+    <linearGradient id="g2" gradientUnits="userSpaceOnUse" x1="86.06" x2="244.06">
+      <stop stop-color="var(--cyan)"/>
+      <stop offset="1" stop-color="var(--blue)"/>
+    </linearGradient>
+    <linearGradient id="g3" gradientUnits="userSpaceOnUse" x1="86.06" x2="244.06">
+      <stop stop-color="var(--orange)"/>
+      <stop offset="1" stop-color="var(--blue)"/>
+    </linearGradient>
+    <linearGradient id="g4" gradientUnits="userSpaceOnUse" x1="256.06" x2="414.06">
+      <stop stop-color="var(--blue)"/>
+      <stop offset="1" stop-color="var(--magenta-55-background)"/>
+    </linearGradient>
+    <linearGradient id="g5" gradientUnits="userSpaceOnUse" x1="256.06" x2="414.06">
+      <stop stop-color="var(--blue)"/>
+      <stop offset="1" stop-color="var(--blue-55-background)"/>
+    </linearGradient>
+    <linearGradient id="g6" gradientUnits="userSpaceOnUse" x1="256.06" x2="584.06">
+      <stop stop-color="var(--blue)"/>
+      <stop offset="1" stop-color="var(--cyan-55-background)"/>
+    </linearGradient>
+    <linearGradient id="g7" gradientUnits="userSpaceOnUse" x1="426.06" x2="584.06">
+      <stop stop-color="var(--magenta-55-background)"/>
+      <stop offset="1" stop-color="var(--orange-55-background)"/>
+    </linearGradient>
+    <linearGradient id="g8" gradientUnits="userSpaceOnUse" x1="426.06" x2="584.06">
+      <stop stop-color="var(--magenta-55-background)"/>
+      <stop offset="1" stop-color="var(--magenta-35-background)"/>
+    </linearGradient>
+    <linearGradient id="g9" gradientUnits="userSpaceOnUse" x1="426.06" x2="584.06">
+      <stop stop-color="var(--blue-55-background)"/>
+      <stop offset="1" stop-color="var(--blue-35-background)"/>
+    </linearGradient>
+    <linearGradient id="g10" gradientUnits="userSpaceOnUse" x1="426.06" x2="584.06">
+      <stop stop-color="var(--blue-55-background)"/>
+      <stop offset="1" stop-color="var(--cyan-35-background)"/>
+    </linearGradient>
+  </defs>
+  <rect width="758" height="418" fill="var(--background)"/>
+  <g transform="translate(32.24 32)">
+    <path d="M86.06 63.879C165.06 63.879 165.06 91.221 244.06 91.221L244.06 158.721C165.06 158.721 165.06 131.379 86.06 131.379Z" fill="url(#g1)" class="a m1"/>
+    <path d="M86.06 156.379C165.06 156.379 165.06 158.721 244.06 158.721L244.06 214.971C165.06 214.971 165.06 212.629 86.06 212.629Z" fill="url(#g2)" class="a m2"/>
+    <path d="M86.06 237.629C165.06 237.629 165.06 214.971 244.06 214.971L244.06 316.221C165.06 316.221 165.06 338.879 86.06 338.879Z" fill="url(#g3)" class="a m3"/>
+    <path d="M256.06 124.971C335.06 124.971 335.06 123.069 414.06 123.069L414.06 235.569C335.06 235.569 335.06 237.471 256.06 237.471Z" fill="url(#g4)" class="a m4"/>
+    <path d="M256.06 237.471C335.06 237.471 335.06 260.569 414.06 260.569L414.06 339.319C335.06 339.319 335.06 316.221 256.06 316.221Z" fill="url(#g5)" class="a m5"/>
+    <path d="M256.06 91.221C420.06 91.221 420.06 14.5 584.06 14.5L584.06 48.25C420.06 48.25 420.06 124.971 256.06 124.971Z" fill="url(#g6)" class="a m6"/>
+    <path d="M426.06 123.069C505.06 123.069 505.06 73.25 584.06 73.25L584.06 136.25C505.06 136.25 505.06 186.069 426.06 186.069Z" fill="url(#g7)" class="a m7"/>
+    <path d="M426.06 186.069C505.06 186.069 505.06 161.25 584.06 161.25L584.06 210.75C505.06 210.75 505.06 235.569 426.06 235.569Z" fill="url(#g8)" class="a m8"/>
+    <path d="M426.06 260.569C505.06 260.569 505.06 235.75 584.06 235.75L584.06 292C505.06 292 505.06 316.819 426.06 316.819Z" fill="url(#g9)" class="a m9"/>
+    <path d="M426.06 316.819C505.06 316.819 505.06 317 584.06 317L584.06 339.5C505.06 339.5 505.06 339.319 426.06 339.319Z" fill="url(#g10)" class="a m10"/>
+    <g class="a m11">
+      <rect x="74.06" y="63.879" width="12" height="67.5" rx="2" fill="var(--magenta)"/>
+      <text x="8" y="102.309" font-size="13" fill="var(--text)">Solar</text>
+      <text x="54.8" y="101.607" font-size="11.05" fill="var(--muted)">30</text>
+    </g>
+    <g class="a m12">
+      <rect x="244.06" y="91.221" width="12" height="225" rx="2" fill="var(--blue)"/>
+      <rect x="259.06" y="194.721" width="64.89" height="18" rx="3" fill="var(--background)" opacity="0.72"/>
+      <text x="262.06" y="208.401" font-size="13" fill="var(--text)">Grid</text>
+      <text x="301.06" y="207.699" font-size="11.05" fill="var(--muted)">100</text>
+    </g>
+    <g class="a m13">
+      <rect x="74.06" y="156.379" width="12" height="56.25" rx="2" fill="var(--cyan)"/>
+      <text x="15.8" y="189.184" font-size="13" fill="var(--text)">Wind</text>
+      <text x="54.8" y="188.482" font-size="11.05" fill="var(--muted)">25</text>
+    </g>
+    <g class="a m14">
+      <rect x="74.06" y="237.629" width="12" height="101.25" rx="2" fill="var(--orange)"/>
+      <text x="23.6" y="292.934" font-size="13" fill="var(--text)">Gas</text>
+      <text x="54.8" y="292.232" font-size="11.05" fill="var(--muted)">45</text>
+    </g>
+    <g class="a m15">
+      <rect x="414.06" y="123.069" width="12" height="112.5" rx="2" fill="var(--magenta-55-background)"/>
+      <rect x="429.06" y="170.319" width="66.06" height="18" rx="3" fill="var(--background)" opacity="0.72"/>
+      <text x="432.06" y="183.999" font-size="13" fill="var(--text)">Homes</text>
+      <text x="478.86" y="183.297" font-size="11.05" fill="var(--muted)">50</text>
+    </g>
+    <g class="a m16">
+      <rect x="414.06" y="260.569" width="12" height="78.75" rx="2" fill="var(--blue-55-background)"/>
+      <rect x="429.06" y="290.944" width="89.46" height="18" rx="3" fill="var(--background)" opacity="0.72"/>
+      <text x="432.06" y="304.624" font-size="13" fill="var(--text)">Industry</text>
+      <text x="502.26" y="303.922" font-size="11.05" fill="var(--muted)">35</text>
+    </g>
+    <g class="a m17">
+      <rect x="584.06" y="14.5" width="12" height="33.75" rx="2" fill="var(--cyan-55-background)"/>
+      <text x="602.06" y="36.055" font-size="13" fill="var(--text)">Losses</text>
+      <text x="656.66" y="35.353" font-size="11.05" fill="var(--muted)">15</text>
+    </g>
+    <g class="a m18">
+      <rect x="584.06" y="73.25" width="12" height="63" rx="2" fill="var(--orange-55-background)"/>
+      <text x="602.06" y="109.43" font-size="13" fill="var(--text)">Heating</text>
+      <text x="664.46" y="108.728" font-size="11.05" fill="var(--muted)">28</text>
+    </g>
+    <g class="a m19">
+      <rect x="584.06" y="161.25" width="12" height="49.5" rx="2" fill="var(--magenta-35-background)"/>
+      <text x="602.06" y="190.68" font-size="13" fill="var(--text)">Lighting</text>
+      <text x="672.26" y="189.978" font-size="11.05" fill="var(--muted)">22</text>
+    </g>
+    <g class="a m20">
+      <rect x="584.06" y="235.75" width="12" height="56.25" rx="2" fill="var(--blue-35-background)"/>
+      <text x="602.06" y="268.555" font-size="13" fill="var(--text)">Motors</text>
+      <text x="656.66" y="267.853" font-size="11.05" fill="var(--muted)">25</text>
+    </g>
+    <g class="a m21">
+      <rect x="584.06" y="317" width="12" height="22.5" rx="2" fill="var(--cyan-35-background)"/>
+      <text x="602.06" y="332.93" font-size="13" fill="var(--text)">Heat</text>
+      <text x="641.06" y="332.228" font-size="11.05" fill="var(--muted)">10</text>
+    </g>
+  </g>
+</svg>

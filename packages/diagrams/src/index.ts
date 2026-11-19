@@ -112,3 +112,11 @@ export {
   type XySeries,
   type XyValues,
 } from "./xychart.tsx";
+
+export {
+  sankey,
+  type Sankey,
+  type SankeyLink,
+  type SankeyOptions,
+  type SankeySpec,
+} from "./sankey.tsx";

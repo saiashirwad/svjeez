@@ -9,6 +9,7 @@ import type { PieDoc } from "./pie.ts";
 import type { QuadrantDoc } from "./quadrant.ts";
 import type { XyChartDoc } from "./xychart.ts";
 import type { TimelineDoc } from "./timeline.ts";
+import type { SankeyDoc } from "./sankey.ts";
 
 export type Place = NonNullable<Where["source"]>;
 
@@ -209,7 +210,8 @@ export type MermaidDoc =
   | JourneyDoc
   | TimelineDoc
   | QuadrantDoc
-  | XyChartDoc;
+  | XyChartDoc
+  | SankeyDoc;
 
 export interface ParseOptions {
   readonly file?: string;
@@ -225,6 +227,7 @@ export type {
   MindmapDoc,
   PieDoc,
   QuadrantDoc,
+  SankeyDoc,
   TimelineDoc,
   XyChartDoc,
 };

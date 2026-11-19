@@ -14,6 +14,7 @@ import {
   type QuadrantChart,
   type Timeline,
   type XyChart,
+  type Sankey,
   type Flowchart,
   type NodeRole,
   type NodeShape,
@@ -36,6 +37,7 @@ import { drawPie } from "./pie.ts";
 import { drawQuadrant } from "./quadrant.ts";
 import { drawTimeline } from "./timeline.ts";
 import { drawXyChart } from "./xychart.ts";
+import { drawSankey } from "./sankey.ts";
 import type {
   ClassDoc,
   ErDoc,
@@ -48,6 +50,7 @@ import type {
   QuadrantDoc,
   TimelineDoc,
   XyChartDoc,
+  SankeyDoc,
   FlowForm,
   MermaidDirection,
   MermaidDoc,
@@ -77,7 +80,8 @@ export type MermaidDiagram =
   | (GitGraph & { readonly kind: "git"; readonly doc: GitDoc })
   | (Timeline & { readonly kind: "timeline"; readonly doc: TimelineDoc })
   | (QuadrantChart & { readonly kind: "quadrant"; readonly doc: QuadrantDoc })
-  | (XyChart & { readonly kind: "xychart"; readonly doc: XyChartDoc });
+  | (XyChart & { readonly kind: "xychart"; readonly doc: XyChartDoc })
+  | (Sankey & { readonly kind: "sankey"; readonly doc: SankeyDoc });
 
 const FORM_NODES: Record<FlowForm, { readonly role: NodeRole; readonly shape?: NodeShape }> = {
   rect: { role: "task" },
@@ -108,6 +112,7 @@ const NAMES = {
   timeline: "timeline",
   quadrant: "quadrant chart",
   xychart: "xy chart",
+  sankey: "sankey diagram",
 } as const;
 
 const stateRegion = (r: StateRegion) => ({
@@ -245,6 +250,8 @@ export function mermaid(text: string, options: MermaidOptions): MermaidDiagram {
   if (doc.kind === "quadrant") return drawn(drawQuadrant(doc, diagramOptions), "quadrant", doc);
 
   if (doc.kind === "xychart") return drawn(drawXyChart(doc, diagramOptions), "xychart", doc);
+
+  if (doc.kind === "sankey") return drawn(drawSankey(doc, diagramOptions), "sankey", doc);
 
   if (doc.kind === "sequence") {
     return drawn(
