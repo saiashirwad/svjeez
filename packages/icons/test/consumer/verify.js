@@ -7,7 +7,7 @@ import { svg } from "svjeez/tools";
 
 assert.equal(tabler.rocket.paths.length, 3);
 
-assert.equal(tabler.checkFilled.kind, "fill");
+assert.equal(tabler.checkFilled.kind, "solid");
 
 assert.equal(Object.keys(tabler).length > 6000, true);
 
