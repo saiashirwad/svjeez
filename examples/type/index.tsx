@@ -1,8 +1,8 @@
-import { Group, Run, Shape, Stack, Text, rect, scene, span, track } from "svjeez";
+import { Group, Run, Shape, Stack, Text, scene, span, track } from "svjeez";
 import { geistText } from "../fonts/faces";
 import { mono, theme } from "../theme";
 
-const WIDTH = 392;
+const WIDTH = 416;
 
 const glowing = track(theme.text)
   .to(theme.magenta, span(0.6, 0.5))
@@ -20,9 +20,8 @@ export default scene(
   { size: [480, 300], duration: 6, theme, title: "Type, measured" },
   (canvas) => (
     <Group>
-      <Shape geometry={canvas.rect} fill={theme.surface} />
-      <Shape at={[24, 20]} geometry={rect(432, 260, { radius: 12 })} fill={theme.background} />
-      <Stack at={[44, 40]} gap={14}>
+      <Shape geometry={canvas.rect} fill={theme.background} />
+      <Stack at={[32, 32]} gap={14}>
         <Text font={geistText} weight={600} size={24} fill={theme.text}>
           Type, measured
         </Text>
