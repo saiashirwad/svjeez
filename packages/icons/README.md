@@ -1,28 +1,29 @@
 # @svjeez/icons
 
-Tabler and Lucide icons for svjeez scenes: an `<Icon>` that draws each piece, recolors, scales and moves like any node.
+Tabler and Lucide icons as `<Icon>` nodes for `svjeez`. Recolor, scale, move, or animate each stroke piece with `draw`.
 
 ```sh
 npm i @svjeez/icons@next svjeez@next
 ```
 
 ```tsx
-/** @jsxImportSource svjeez */
 import { Icon } from "@svjeez/icons";
 import { rocket } from "@svjeez/icons/tabler";
-import { scene, span, track } from "svjeez";
+import { Align, scene, span, track } from "svjeez";
 
 export default scene({ size: [128, 128], duration: 2, title: "Rocket" }, () => (
-  <Icon
-    icon={rocket}
-    at={[40, 40]}
-    size={48}
-    color="#FFFFFF"
-    draw={(piece) => track(0).to(1, span(0.2, 0.6).shift(piece * 0.1))}
-  />
+  <Align>
+    <Icon
+      icon={rocket}
+      size={48}
+      color="#FFFFFF"
+      draw={(piece) => track(0).to(1, span(0.2, 0.6).shift(piece * 0.1))}
+    />
+  </Align>
 ));
 ```
 
-Repeated still icons are shared automatically. Import icons by name from `@svjeez/icons/tabler` or `@svjeez/icons/lucide`; unused ones never reach the scene.
+- Import icons by name from `@svjeez/icons/tabler` or `@svjeez/icons/lucide`; unused icons are not bundled into the scene.
+- Identical static icons are deduplicated automatically in the emitted SVG.
 
-[Reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/icons.md)
+[API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/icons.md)

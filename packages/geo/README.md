@@ -1,6 +1,6 @@
 # @svjeez/geo
 
-Maps and turning globes for svjeez. GeoJSON or TopoJSON becomes scene geometry while the scene compiles, so the SVG carries outlines and no script.
+Maps and rotating globes for `svjeez`. Projects GeoJSON or TopoJSON into SVG geometry at compile time with zero viewer script.
 
 ```sh
 npm i -D @svjeez/geo@next svjeez@next world-atlas
@@ -27,6 +27,6 @@ export default scene({ size: [960, 540], duration: 4, title: "London to Tokyo" }
 ));
 ```
 
-`globe()` turns a globe over a span, with night, routes and places that ride it. `world-atlas` supplies the example's countries.
+Use `globe()` to spin a globe over a span, with optional night shading, great-circle routes, and pinned markers.
 
 [API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/geo.md)

@@ -1,6 +1,6 @@
 # @svjeez/mermaid
 
-Draw Mermaid text as a svjeez diagram: flowcharts, sequence diagrams and state diagrams.
+Parse Mermaid flowcharts, sequence diagrams, and state diagrams into animated `@svjeez/diagrams` scenes.
 
 ```sh
 npm i -D @svjeez/mermaid@next svjeez@next
@@ -8,6 +8,7 @@ npm i -D @svjeez/mermaid@next svjeez@next
 
 ```ts
 import { mermaid } from "@svjeez/mermaid";
+import { span } from "svjeez";
 
 const chart = mermaid(
   `flowchart LR
@@ -18,8 +19,8 @@ const chart = mermaid(
 );
 ```
 
-`mermaid(text, options)` returns the diagram `flowchart()`, `sequence()` or `stateMachine()` from `@svjeez/diagrams` would, with `kind` and the parsed `doc` added. The options are the diagram's own, plus `file` and `line` to say where the text sits in your source, so an error points at the Mermaid line as `file:line`. `parseMermaid(text, { file, line })` returns just the document, as plain data.
-
-The reader supports a subset of Mermaid. Syntax outside it, such as styling directives, activation bars and sequence blocks, throws a `SceneError` that names the line and what to write instead.
+- `mermaid(text, options)` returns the same diagram object as `flowchart()`, `sequence()`, or `stateMachine()` from `@svjeez/diagrams`, plus `kind` and the parsed `doc`.
+- Pass `file` and `line` in `options` so syntax errors point directly to the source line. Use `parseMermaid(text, { file, line })` to get the parsed document without building a diagram.
+- Unsupported Mermaid directives (such as styling directives, activation bars, and sequence blocks) throw a `SceneError` naming the line and the supported alternative.
 
 [API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/mermaid.md)
