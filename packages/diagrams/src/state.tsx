@@ -928,11 +928,15 @@ export function stateMachine<
           return t.to(1, span(x.start, edge)).to(0, span(x.start + x.over - edge, edge));
         }, track(0));
 
+        // The ring keeps a clear gap from the state's border, with corners concentric to it.
+        const pad = 6;
+        const radius = (nodes.get(s)!.inner ? 10 : 8) + pad;
+
         return (
           <Shape
             key={s}
-            geometry={rect(b.w + 8, b.h + 8, { radius: nodes.get(s)!.inner ? 13 : 11 })}
-            at={[b.x - 4, b.y - 4]}
+            geometry={rect(b.w + 2 * pad, b.h + 2 * pad, { radius })}
+            at={[b.x - pad, b.y - pad]}
             stroke={{ color: l.colors.highlight, width: 2 }}
             opacity={opacity}
           />
