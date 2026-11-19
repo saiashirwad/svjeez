@@ -14,7 +14,6 @@ import {
   ease,
   enter,
   morph,
-  motion,
   rect,
   ref,
   scene,
@@ -289,7 +288,7 @@ describe("containers", () => {
           key="b"
           geometry={rect(10, 10)}
           rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}
-          motion={motion({ offset: [0, 5] })}
+          motion={{ offset: [0, 5] }}
         />
       </Stack>
     ));

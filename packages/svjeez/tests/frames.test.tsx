@@ -12,7 +12,6 @@ import {
   circle,
   ease,
   font,
-  motion,
   path,
   picture,
   rect,
@@ -21,6 +20,7 @@ import {
   tokens,
   track,
   type SceneElement,
+  type Vec,
 } from "svjeez";
 import { svg, type SceneOptions, type SvgOptions } from "svjeez/tools";
 import { systemColorScheme } from "../src/scheme";
@@ -187,9 +187,9 @@ describe.if(browser)("renderFrames", () => {
               geometry={rect(10, 10)}
               at={[20, 5]}
               fill="#3EE6D6"
-              motion={motion({ offset: [0, 0] })
-                .to({ offset: [10, 0] }, span(0, 0.5), ease.linear)
-                .loop(0.5)}
+              motion={{
+                offset: track<Vec>([0, 0]).to([10, 0], span(0, 0.5), ease.linear).loop(0.5),
+              }}
             />
           </Group>
         ),
@@ -224,16 +224,12 @@ describe.if(browser)("renderFrames", () => {
         <Shape
           geometry={rect(10, 10)}
           fill="#000000"
-          motion={motion({ offset: [0, 0] })
-            .to({ offset: [10, 0] }, span(0, 2), ease.linear)
-            .loop(2)}
+          motion={{ offset: track<Vec>([0, 0]).to([10, 0], span(0, 2), ease.linear).loop(2) }}
         />
         <Shape
           geometry={circle(4)}
           fill="#000000"
-          motion={motion({ offset: [0, 0] })
-            .to({ offset: [0, 10] }, span(0, 3), ease.linear)
-            .loop(3)}
+          motion={{ offset: track<Vec>([0, 0]).to([0, 10], span(0, 3), ease.linear).loop(3) }}
         />
       </Group>
     ));
@@ -247,7 +243,7 @@ describe.if(browser)("renderFrames", () => {
         <Shape
           geometry={rect(10, 10)}
           fill="#000000"
-          motion={motion({ offset: [0, 0] }).to({ offset: [10, 0] }, span(0, 12), ease.linear)}
+          motion={{ offset: track<Vec>([0, 0]).to([10, 0], span(0, 12), ease.linear) }}
         />
         {[2, 3, 5, 7, 8].map((laps) => (
           <Shape
@@ -448,7 +444,7 @@ describe.if(browser)("prefix in one page", () => {
         <Shape
           geometry={rect(10, 10)}
           fill="#000000"
-          motion={motion({ offset: [0, 0] }).to({ offset: [50, 0] }, span(0, 2))}
+          motion={{ offset: track<Vec>([0, 0]).to([50, 0], span(0, 2)) }}
         />
       ),
       { prefix },

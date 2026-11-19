@@ -13,7 +13,6 @@ import {
   blur,
   circle,
   linear,
-  motion,
   rect,
   ref,
   scene,
@@ -495,7 +494,7 @@ group("what the model keeps of how the scene was written", () => {
             key="b"
             geometry={rect(10, 10)}
             fill="#00FF00"
-            motion={motion().to({ offset: [offset, 0] }, span(1, 1))}
+            motion={{ offset: track<Vec>([0, 0]).to([offset, 0], span(1, 1)) }}
           />
         </Stack>
       ));

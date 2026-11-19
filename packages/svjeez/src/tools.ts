@@ -34,17 +34,11 @@ export type {
   Token,
 } from "./author/values";
 
-export type { LayerValues, Layers, Motion } from "./author/track";
+export type { Layer, LayerValues, Layers } from "./author/track";
 
 export type { TextContent } from "./author/count";
 
-export type {
-  EnterOptions,
-  ExitOptions,
-  SampledMotionOptions,
-  SampledOptions,
-  WiggleOptions,
-} from "./author/recipes";
+export type { EnterOptions, ExitOptions, SampledOptions, WiggleOptions } from "./author/recipes";
 
 export type { PictureData } from "./author/picture";
 

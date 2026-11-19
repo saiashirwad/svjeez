@@ -7,7 +7,6 @@ import {
   Text,
   ease,
   font,
-  motion,
   path,
   rect,
   circle,
@@ -16,8 +15,9 @@ import {
   track,
   wiggle,
   type SceneElement,
+  type Vec,
 } from "svjeez";
-import { svg, type Hex } from "svjeez/tools";
+import { svg, type Hex, type Layer } from "svjeez/tools";
 import { startTrace, stopTrace } from "../src/svg/traced";
 
 const made = (build: () => SceneElement, duration = 2, sources = false): string =>
@@ -99,7 +99,7 @@ describe.if(browser)("checkScene", () => {
         <Group>
           <BG />
           {square(20, 20, {
-            motion: motion({ offset: [-300, 0] }).to({ offset: [0, 0] }, span(0.5, 1)),
+            motion: { offset: track<Vec>([-300, 0]).to([0, 0], span(0.5, 1)) },
           })}
         </Group>
       )),
@@ -212,12 +212,10 @@ describe.if(browser)("checkScene", () => {
         <Group>
           <BG />
           {square(0, 10, {
-            motion: motion({ offset: [0, 0] }).to({ offset: [60, 0] }, span(0, 1)),
+            motion: { offset: track<Vec>([0, 0]).to([60, 0], span(0, 1)) },
           })}
           {square(0, 60, {
-            motion: motion({ offset: [0, 0] })
-              .to({ offset: [60, 0] }, span(0, 1))
-              .rewind(0.5),
+            motion: { offset: track<Vec>([0, 0]).to([60, 0], span(0, 1)).rewind(0.5) },
           })}
         </Group>
       )),
@@ -229,7 +227,7 @@ describe.if(browser)("checkScene", () => {
   });
 
   test("loop-seam: a blink that repeats a whole number of times in the loop is not a seam", async () => {
-    const blink = (layer: ReturnType<typeof motion>) =>
+    const blink = (layer: Layer) =>
       made(
         () => (
           <Group>
@@ -239,9 +237,7 @@ describe.if(browser)("checkScene", () => {
               geometry={rect(5, 5)}
               fill="#FFFFFF"
               at={[150, 0]}
-              motion={motion({ offset: [0, 0] })
-                .to({ offset: [1, 0] }, span(0, 6))
-                .rewind(6)}
+              motion={{ offset: track<Vec>([0, 0]).to([1, 0], span(0, 6)).rewind(6) }}
             />
           </Group>
         ),
@@ -259,10 +255,7 @@ describe.if(browser)("checkScene", () => {
       ).toHaveLength(0);
 
     expect(
-      await findings(
-        blink(motion({ opacity: 1 }).to({ opacity: 0.5 }, span(6, 0.1), ease.hold)),
-        "loop-seam",
-      ),
+      await findings(blink({ opacity: track(1).to(0.5, span(6, 0.1), ease.hold) }), "loop-seam"),
     ).toHaveLength(1);
   });
 

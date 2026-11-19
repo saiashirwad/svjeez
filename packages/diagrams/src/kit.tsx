@@ -30,6 +30,7 @@ import {
   type Font,
   type FontValue,
   type Hex,
+  type Layer,
   type Layers,
   type PathBuilder,
   type StrokeProps,
@@ -379,7 +380,7 @@ const detailOf = (role: NodeRole, w: number, h: number): Geometry | undefined =>
 };
 
 const round = (value: number): number => Math.round(value * 100) / 100;
-export const pop = (when: Span): Layers => enter(when, { from: { opacity: 0, offset: [0, 6] } });
+export const pop = (when: Span): Layer => enter(when, { from: { opacity: 0, offset: [0, 6] } });
 export const fade = (when: Span): Track<number> => track(0).to(1, when);
 
 export interface NodeProps {

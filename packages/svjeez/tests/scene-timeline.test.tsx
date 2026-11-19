@@ -8,7 +8,6 @@ import {
   circle,
   ease,
   rect,
-  motion,
   ref,
   scene,
   span,
@@ -401,10 +400,9 @@ describe("spans", () => {
     expect(times(find(model, "dot").at).map(([t]) => t)).toEqual([0, 1, 1.5, 2.5, 10]);
   });
 
-  test("span before anything is written, and on a motion, says what is missing", () => {
+  test("span before anything is written says what is missing", () => {
     expect(() => track(0).span).toThrow("this track has no step yet");
-    expect(() => motion().span).toThrow("this motion has no step yet");
-    expect(motion().to({ opacity: 0 }, span(1, 2)).span.end).toBe(3);
+    expect(track(1).to(0, span(1, 2)).span.end).toBe(3);
     expect(track(0).set(1, span(2)).span.over).toBe(0);
   });
 
@@ -471,8 +469,8 @@ describe("tracks", () => {
     expect(() => track<Vec>([0, 0]).to([1, 0], span(0, 1)).to([2, 1], span(0.5, 1))).toThrow(
       "Two steps move this track at once: one from 0s to 1s, and another from 0.5s to 1.5s, before the first ends. Start the later step at 1s or later: the first step's span.next(over) starts where it ends.",
     );
-    expect(() => motion().to({ opacity: 0 }, span(0, 1)).to({ opacity: 1 }, span(0.5, 1))).toThrow(
-      "Two steps move `opacity` on this motion at once",
+    expect(() => track(1).to(0, span(0, 1)).to(1, span(0.5, 1))).toThrow(
+      "Two steps move this track at once",
     );
   });
 

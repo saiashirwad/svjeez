@@ -8,7 +8,6 @@ import {
   circle,
   ease,
   enter,
-  motion,
   ref,
   scene,
   span,
@@ -17,6 +16,7 @@ import {
   type Ref,
   type SceneElement,
   type Span,
+  type Vec,
 } from "svjeez";
 import { geist } from "../fonts/faces";
 import { mono, theme } from "../theme";
@@ -45,10 +45,11 @@ const Card = ({ handle, title, dot, when, children, drift }: CardProps): SceneEl
     stroke={{ color: theme.raised, width: 1.5 }}
     motion={[
       enter(when, { from: { opacity: 0, offset: [0, 10] } }),
-      drift &&
-        motion()
-          .to({ offset: [0, 56] }, span(3.2, 1.1), ease.inOut)
-          .to({ offset: [0, 0] }, span(5.2, 1.1), ease.inOut),
+      drift && {
+        offset: track<Vec>([0, 0])
+          .to([0, 56], span(3.2, 1.1), ease.inOut)
+          .to([0, 0], span(5.2, 1.1), ease.inOut),
+      },
     ]}
   >
     <Stack direction="row" gap={8} align="center">

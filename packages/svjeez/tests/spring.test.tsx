@@ -8,13 +8,13 @@ import {
   circle,
   ease,
   enter,
-  motion,
   rect,
   scene,
   span,
   tokens,
   track,
   type SceneElement,
+  type Vec,
 } from "svjeez";
 import { isLane, svg, type Model, type Spring } from "svjeez/tools";
 
@@ -395,9 +395,9 @@ describe("spring steps", () => {
         <Shape
           fill="#000000"
           geometry={circle(4)}
-          motion={motion()
-            .to({ offset: [40, 20] }, span(0, 1.5), bouncy)
-            .rewind(1.5, bouncy)}
+          motion={{
+            offset: track<Vec>([0, 0]).to([40, 20], span(0, 1.5), bouncy).rewind(1.5, bouncy),
+          }}
         />
       )),
     );

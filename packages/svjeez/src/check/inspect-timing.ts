@@ -309,7 +309,7 @@ export const loopSeam = (survey: Survey): void => {
           severity: "warning",
           key: connector.key,
           message: `${label(connector)} jumps when the loop starts again, from ${seconds(duration)} back to 0s, because its ends follow ${names}, which is not at 0s where it is at the end: it scales, fades or moves in. The arrow is redrawn to match, so it jumps too.`,
-          hint: `End the loop with ${names} as it starts (exit() it, or .rewind() its motion), or bring the arrow in after its ends settle and take it out before the end.`,
+          hint: `End the loop with ${names} as it starts (exit() it, or .rewind() its track), or bring the arrow in after its ends settle and take it out before the end.`,
           times: [Number(end.toFixed(3)), 0],
         });
         continue;
@@ -415,7 +415,7 @@ export const timing = (survey: Survey): void => {
         severity: "error",
         key: node.key,
         message: `${label(node)} shows from 0s, cuts to hidden at ${seconds(pop[0])}, and comes straight back by ${seconds(pop[1])}.`,
-        hint: "Start its motion from the hidden values, as in motion({ opacity: 0 }), so it is hidden from 0s.",
+        hint: "Start its track from the hidden values, as in motion={{ opacity: track(0).to(1, span(…)) }}, so it is hidden from 0s.",
         times: [0, pop[0], pop[1]],
       });
 

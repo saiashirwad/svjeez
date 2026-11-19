@@ -743,15 +743,16 @@ describe("sampled", () => {
     expect(lane.keys.length).toBeGreaterThan(3);
   });
 
-  test("sampled.motion simplifies each value with its own tolerance", () => {
+  test("sampled tracks in a layer each simplify with their own tolerance", () => {
     const node = only(
       made(() => (
         <Shape
           fill="#000000"
           geometry={circle(4)}
-          motion={sampled.motion((t) => ({ offset: [t * 10, 0], opacity: 1 - t / 2 }), span(0, 1), {
-            tolerance: { offset: 0.1, opacity: 0.01 },
-          })}
+          motion={{
+            offset: sampled((t): Vec => [t * 10, 0], span(0, 1), { tolerance: 0.1 }),
+            opacity: sampled((t) => 1 - t / 2, span(0, 1), { tolerance: 0.01 }),
+          }}
         />
       )),
     );

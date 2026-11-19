@@ -6,7 +6,6 @@ import {
   ease,
   enter,
   exit,
-  motion,
   rect,
   scene,
   span,
@@ -74,7 +73,7 @@ const Card = (): SceneElement => (
     offset={[380, 92]}
     motion={[
       enter(span(0.5, 0.2)),
-      motion({ scale: 0.2 }).to({ scale: 1 }, span(0.5, pop.settle), pop),
+      { scale: track(0.2).to(1, span(0.5, pop.settle), pop) },
       exit(span(5.3, 0.4), { to: { opacity: 0, scale: 0.9 }, curve: ease.in }),
     ]}
   >

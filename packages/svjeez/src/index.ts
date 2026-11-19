@@ -37,7 +37,7 @@ export { linear, pattern, radial } from "./author/paint";
 
 export { adjust, blur, displace, shadow } from "./author/effects";
 
-export { motion, track, type Anim, type Track } from "./author/track";
+export { track, type Anim, type Track } from "./author/track";
 
 export { through, within } from "./author/derived";
 

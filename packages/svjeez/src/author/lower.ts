@@ -70,12 +70,11 @@ import {
   mixVec,
   noMix,
   same,
-  touches,
   type Mix,
   type Reading,
   type Timing,
 } from "../model/steps";
-import { isTrack, layersOf, readOf, type Anim, type LayerMotion } from "./track";
+import { isTrack, layersOf, readOf, type Anim, type Layer as Written } from "./track";
 import { derivedOf, isDerived, restOf, through } from "./derived";
 import { withGoals } from "./goals";
 import type { NodeElement } from "./nodes";
@@ -205,24 +204,14 @@ const solidOf = (ctx: Ctx, paint: Hex | Token, where: string): Color => {
 
 const isHex = (paint: Hex | Token): paint is Hex => typeof paint === "string";
 
-const layerOf = (layer: LayerMotion, timing: Timing, where: string): Layer => {
-  const { data } = layer.passage;
-
-  const slot = <K extends "offset" | "rotate" | "scale" | "opacity", T>(
-    name: K,
-    change: (value: Exclude<Parameters<LayerMotion["to"]>[0][K], undefined>) => T,
-    atRest: T,
-    mix: Mix<T>,
-  ): Animated<T> =>
-    touches(data, name)
-      ? laneOf(mapped(data, name, change), atRest, timing, mix, `${name} on ${where}`)
-      : atRest;
+const layerOf = (layer: Written, timing: Timing, where: string): Layer => {
+  const at = (name: string): string => `${name} in motion of ${where}`;
 
   return {
-    offset: slot("offset", keep, [0, 0], mixVec),
-    rotate: slot("rotate", keep, 0, mixNumber),
-    scale: slot("scale", pair, [1, 1], mixVec),
-    opacity: slot("opacity", keep, 1, mixNumber),
+    offset: animated<Vec, Vec>(layer.offset ?? [0, 0], keep, timing, mixVec, at("offset")),
+    rotate: animated(layer.rotate ?? 0, keep, timing, mixNumber, at("rotate")),
+    scale: animated<number | Vec, Vec>(layer.scale ?? 1, pair, timing, mixVec, at("scale")),
+    opacity: animated(layer.opacity ?? 1, keep, timing, mixNumber, at("opacity")),
   };
 };
 
@@ -261,9 +250,10 @@ const base = (
           true,
         ),
     origin: originOf(ctx.notes.names, props.origin, box, key, () => home),
-    layers: [...layersOf(props.motion).map((layer) => layerOf(layer, timing, where)), own].filter(
-      (layer) => !same(layer, IDLE),
-    ),
+    layers: [
+      ...layersOf(props.motion, where).map((layer) => layerOf(layer, timing, where)),
+      own,
+    ].filter((layer) => !same(layer, IDLE)),
     effects: [],
   };
 };

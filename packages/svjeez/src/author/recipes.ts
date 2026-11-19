@@ -6,7 +6,7 @@ import { contoursOf } from "../model/geometry";
 import type { Vec } from "../model/ir";
 import { pair } from "../model/lane";
 import type { Curve } from "./spring";
-import { motion, track, type LayerValues, type Motion, type Track } from "./track";
+import { track, type Goal, type Layer, type LayerValues, type Track } from "./track";
 import { outlineOf, type Geometry } from "./values";
 
 const REST = { offset: [0, 0], rotate: 0, scale: 1, opacity: 1 } as const;
@@ -24,6 +24,19 @@ const named = (values: LayerValues): (keyof LayerValues)[] =>
 const rest = (values: LayerValues): LayerValues =>
   Object.fromEntries(named(values).map((name) => [name, REST[name]]));
 
+/** A layer with one track per key that both ends give, from one end to the other. */
+const between = (from: LayerValues, to: LayerValues, when: Interval, curve: Curve): Layer => ({
+  ...(from.offset && to.offset && { offset: track<Vec>(from.offset).to(to.offset, when, curve) }),
+  ...(from.rotate !== undefined &&
+    to.rotate !== undefined && { rotate: track(from.rotate).to(to.rotate, when, curve) }),
+  ...(from.scale !== undefined &&
+    to.scale !== undefined && {
+      scale: track<Vec>(pair(from.scale)).to(pair(to.scale), when, curve),
+    }),
+  ...(from.opacity !== undefined &&
+    to.opacity !== undefined && { opacity: track(from.opacity).to(to.opacity, when, curve) }),
+});
+
 export interface EnterOptions {
   readonly from?: LayerValues;
   readonly curve?: Curve;
@@ -32,10 +45,10 @@ export interface EnterOptions {
 export const enter = (
   when: Interval,
   { from = { opacity: 0 }, curve = DEFAULT_EASE }: EnterOptions = {},
-): Motion => {
+): Layer => {
   const { start, over } = closed(when, "enter()");
 
-  return motion(from).to(rest(from), span(start, over), curve);
+  return between(from, rest(from), span(start, over), curve);
 };
 
 export interface ExitOptions {
@@ -46,10 +59,10 @@ export interface ExitOptions {
 export const exit = (
   when: Interval,
   { to = { opacity: 0 }, curve = DEFAULT_EASE }: ExitOptions = {},
-): Motion => {
+): Layer => {
   const { start, over } = closed(when, "exit()");
 
-  return motion().to(to, span(start, over), curve);
+  return between(rest(to), to, span(start, over), curve);
 };
 
 export interface WiggleOptions {
@@ -59,7 +72,7 @@ export interface WiggleOptions {
   readonly period?: Seconds;
 }
 
-export const wiggle = (amplitude: LayerValues, options: WiggleOptions): Motion => {
+export const wiggle = (amplitude: LayerValues, options: WiggleOptions): Layer => {
   const period = options.period ?? 2;
   const rate = options.rate ?? 8;
 
@@ -70,36 +83,39 @@ export const wiggle = (amplitude: LayerValues, options: WiggleOptions): Motion =
     throw new SceneError(`wiggle() needs a positive rate, got ${rate}.`);
   const count = Math.max(2, Math.round(rate * period));
   const next = random(String(options.seed));
+  const curve = options.curve ?? DEFAULT_EASE;
 
   const noise = (amp: number): number[] =>
     Array.from({ length: count }, () => amp * (next() * 2 - 1));
 
+  /** One looped track through `at(i)` for i = 0..count, each step a `period / count` long. */
+  const looped = <T>(from: Track<T>, at: (i: number) => Goal<T>): Track<T> => {
+    let out = from;
+
+    for (let i = 1; i <= count; i++)
+      out = out.to(at(i % count), span(((i - 1) * period) / count, period / count), curve);
+
+    return out.loop(period);
+  };
+
+  // The draws happen in this order, so the same seed gives the same wiggle.
   const opacity = amplitude.opacity === undefined ? undefined : noise(amplitude.opacity);
   const rotate = amplitude.rotate === undefined ? undefined : noise(amplitude.rotate);
   const scale = amplitude.scale === undefined ? undefined : pair(amplitude.scale).map(noise);
   const offset = amplitude.offset === undefined ? undefined : amplitude.offset.map(noise);
 
-  const at = (index: number): LayerValues => {
-    const i = index % count;
+  const bounded = (i: number): number => Math.min(1, Math.max(0, 1 + opacity![i]!));
+  const grown = (i: number): Vec => [1 + scale![0]![i]!, 1 + scale![1]![i]!];
+  const shifted = (i: number): Vec => [offset![0]![i]!, offset![1]![i]!];
 
-    return {
-      ...(opacity && { opacity: Math.min(1, Math.max(0, 1 + opacity[i]!)) }),
-      ...(rotate && { rotate: rotate[i]! }),
-      ...(scale && { scale: [1 + scale[0]![i]!, 1 + scale[1]![i]!] as const }),
-      ...(offset && { offset: [offset[0]![i]!, offset[1]![i]!] as const }),
-    };
+  return {
+    ...(opacity && {
+      opacity: looped(track(bounded(0)), (i) => bounded(i)),
+    }),
+    ...(rotate && { rotate: looped(track(rotate[0]!), (i) => rotate[i]!) }),
+    ...(scale && { scale: looped(track(grown(0)), grown) }),
+    ...(offset && { offset: looped(track(shifted(0)), shifted) }),
   };
-
-  let layer = motion(at(0));
-
-  for (let i = 1; i <= count; i++)
-    layer = layer.to(
-      at(i),
-      span(((i - 1) * period) / count, period / count),
-      options.curve ?? DEFAULT_EASE,
-    );
-
-  return layer.loop(period);
 };
 
 export interface SampledOptions {
@@ -265,26 +281,14 @@ const structure = (outline: ReturnType<typeof outlineOf>): string =>
     .map((contour) => `${contour.curves.length}${contour.closed ? "z" : ""}`)
     .join(",")}`;
 
-export function sampled(
-  sample: (t: Seconds) => number,
+/** The track type for what a sample returns: numbers, points or geometry. */
+export type Sampled<T> = T extends number ? number : T extends Vec ? Vec : Geometry;
+
+export function sampled<T extends number | Vec | Geometry>(
+  sample: (t: Seconds) => T,
   window: Interval,
   options: SampledOptions,
-): Track<number>;
-export function sampled(
-  sample: (t: Seconds) => Vec,
-  window: Interval,
-  options: SampledOptions,
-): Track<Vec>;
-export function sampled(
-  sample: (t: Seconds) => Geometry,
-  window: Interval,
-  options: SampledOptions,
-): Track<Geometry>;
-export function sampled(
-  sample: (t: Seconds) => number | Vec | Geometry,
-  window: Interval,
-  options: SampledOptions,
-): Track<number | Vec | Geometry> {
+): Track<Sampled<T>> {
   const round = roundTo(options.precision, "sampled()");
   let shape: string | undefined;
 
@@ -330,75 +334,6 @@ export function sampled(
   for (const { start, over, value } of kept)
     out = over > 0 ? out.to(value, span(start, over), ease.linear) : out.set(value, span(start));
 
-  return out;
+  // SAFETY: every sample is a T, so every value of the track is a Sampled<T>.
+  return out as Track<Sampled<T>>;
 }
-
-export interface SampledMotionOptions {
-  readonly step?: Seconds;
-  readonly tolerance: { readonly [K in keyof LayerValues]?: number };
-  readonly precision?: number;
-}
-
-const LAYER_NAMES = ["offset", "rotate", "scale", "opacity"] as const;
-
-sampled.motion = (
-  sample: (t: Seconds) => LayerValues,
-  window: Interval,
-  options: SampledMotionOptions,
-): Motion => {
-  const round = roundTo(options.precision, "sampled.motion()");
-  const names = LAYER_NAMES.filter((name) => sample(0)[name] !== undefined);
-
-  const lanes = names.map((name) => {
-    const tolerance = options.tolerance[name];
-
-    if (tolerance === undefined)
-      throw new SceneError(
-        `sampled.motion() needs a tolerance for \`${name}\`, which the function returns.`,
-      );
-
-    const read = (t: Seconds): readonly number[] => {
-      const value = sample(t)[name];
-
-      if (value === undefined)
-        throw new SceneError(
-          `sampled.motion() returned no \`${name}\` at t=${t}; every sample needs the same values.`,
-        );
-      const each = isNumber(value) ? (name === "scale" ? [value, value] : [value]) : [...value];
-
-      if (!each.every(Number.isFinite))
-        throw new SceneError(
-          `sampled.motion() returned ${JSON.stringify(value)} for \`${name}\` at t=${t}; it needs finite numbers.`,
-        );
-
-      return each.map(round);
-    };
-
-    const valueOf = (each: readonly number[]): LayerValues =>
-      name === "rotate" || name === "opacity"
-        ? { [name]: each[0]! }
-        : { [name]: [each[0]!, each[1]!] as const };
-
-    const { first, kept } = simplified(
-      window,
-      read,
-      (each) => [each],
-      { ...options, tolerance },
-      "sampled.motion()",
-    );
-
-    return {
-      first: valueOf(first),
-      kept: kept.map((step) => ({ ...step, value: valueOf(step.value) })),
-    };
-  });
-
-  let layer = motion(Object.assign({}, ...lanes.map((lane) => lane.first)));
-
-  for (const { kept } of lanes)
-    for (const { start, over, value } of kept)
-      layer =
-        over > 0 ? layer.to(value, span(start, over), ease.linear) : layer.set(value, span(start));
-
-  return layer;
-};

@@ -7,7 +7,6 @@ import {
   circle,
   ease,
   morph,
-  motion,
   rect,
   ref,
   scene,
@@ -83,11 +82,11 @@ interface Route {
 
 const both = ({ start, legs, finish = {}, inside, duration = 4 }: Route) => {
   let at = track<Vec>(start);
-  let layer = motion({ offset: start });
+  let layer = track<Vec>(start);
 
   for (const [to, when, curve] of legs) {
     at = at.to(to, when, curve);
-    layer = layer.to({ offset: to }, when, curve);
+    layer = layer.to(to, when, curve);
   }
 
   if (finish.repeat) [at, layer] = [at.repeat(finish.repeat), layer.repeat(finish.repeat)];
@@ -104,7 +103,9 @@ const both = ({ start, legs, finish = {}, inside, duration = 4 }: Route) => {
     () => (
       <Group>
         {placed(<Shape key="curved" geometry={circle(4)} anchor="center" at={at} fill={red} />)}
-        {placed(<Shape key="straight" geometry={circle(4)} motion={layer} fill={red} />)}
+        {placed(
+          <Shape key="straight" geometry={circle(4)} motion={{ offset: layer }} fill={red} />,
+        )}
       </Group>
     ),
     duration,

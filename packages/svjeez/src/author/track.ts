@@ -38,71 +38,49 @@ export interface Track<T> {
 
 export type Anim<T> = T | Track<T> | Derived<T>;
 
-/** The passage of a track or a motion layer, and the span of its last step. */
-abstract class Written<V extends object> {
-  readonly passage: Passage<V>;
-  readonly #last: Span | undefined;
-  readonly #noun: string;
+// SAFETY: a step may hold an anchor where a point track expects a point; goals.ts resolves it before any mix sees it, and readOf refuses it anywhere else.
+const stored = <T>(goal: Goal<T>): T => goal as T;
 
-  constructor(passage: Passage<V>, last: Span | undefined, noun: string) {
+export class ValueTrack<T> implements Track<T> {
+  readonly passage: Passage<{ readonly value: T }>;
+  readonly #last: Span | undefined;
+
+  constructor(passage: Passage<{ readonly value: T }>, last?: Span) {
     this.passage = passage;
     this.#last = last;
-    this.#noun = noun;
   }
 
   get span(): Span {
     if (!this.#last)
       throw new SceneError(
-        `span is the span of the last step, but this ${this.#noun} has no step yet.`,
+        "span is the span of the last step, but this track has no step yet.",
         "Add a to() or set() first, then read its span.",
       );
 
     return this.#last;
   }
 
-  /** The same thing with another passage; its last step stays the last unless one is given. */
-  protected abstract made(passage: Passage<V>, last: Span | undefined): this;
-
-  protected stepped(values: V, when: Interval, curve: Curve): this {
-    return this.made(this.passage.to(values, when, curve), span(when.start, when.over));
+  to(value: Goal<T>, when: Interval, curve: Curve = DEFAULT_EASE): Track<T> {
+    return new ValueTrack(
+      this.passage.to({ value: stored(value) }, when, curve),
+      span(when.start, when.over),
+    );
   }
 
-  protected jumped(values: V, when: When): this {
-    return this.made(this.passage.set(values, when), span(when.start, 0));
+  set(value: Goal<T>, when: When): Track<T> {
+    return new ValueTrack(this.passage.set({ value: stored(value) }, when), span(when.start, 0));
   }
 
-  loop(period: Seconds): this {
-    return this.made(this.passage.loop(period), this.#last);
+  loop(period: Seconds): Track<T> {
+    return new ValueTrack(this.passage.loop(period), this.#last);
   }
 
-  repeat(times: number | { readonly until: Seconds }): this {
-    return this.made(this.passage.repeat(times), this.#last);
+  repeat(times: number | { readonly until: Seconds }): Track<T> {
+    return new ValueTrack(this.passage.repeat(times), this.#last);
   }
 
-  rewind(over: Seconds, curve: Curve = DEFAULT_EASE): this {
-    return this.made(this.passage.rewind(over, curve), this.#last);
-  }
-}
-
-// SAFETY: a step may hold an anchor where a point track expects a point; goals.ts resolves it before any mix sees it, and readOf refuses it anywhere else.
-const stored = <T>(goal: Goal<T>): T => goal as T;
-
-export class ValueTrack<T> extends Written<{ readonly value: T }> implements Track<T> {
-  constructor(passage: Passage<{ readonly value: T }>, last?: Span) {
-    super(passage, last, "track");
-  }
-
-  protected made(passage: Passage<{ readonly value: T }>, last: Span | undefined): this {
-    // SAFETY: ValueTrack has no subclass, so a new one is a this.
-    return new ValueTrack(passage, last) as this;
-  }
-
-  to(value: Goal<T>, when: Interval, curve: Curve = DEFAULT_EASE): this {
-    return this.stepped({ value: stored(value) }, when, curve);
-  }
-
-  set(value: Goal<T>, when: When): this {
-    return this.jumped({ value: stored(value) }, when);
+  rewind(over: Seconds, curve: Curve = DEFAULT_EASE): Track<T> {
+    return new ValueTrack(this.passage.rewind(over, curve), this.#last);
   }
 
   map<U>(fn: (value: T) => U, options: MapOptions = {}): Derived<U> {
@@ -191,51 +169,46 @@ export interface LayerValues {
   readonly opacity?: number;
 }
 
-/** A passing effect on top of a node's own props. A value, as a track is: every step returns a new layer. */
-export interface Motion {
-  /** The span of the last step. */
-  readonly span: Span;
-  to(values: LayerValues, when: Interval, curve?: Curve): Motion;
-  set(values: LayerValues, when: When): Motion;
-  loop(period: Seconds): Motion;
-  repeat(times: number | { readonly until: Seconds }): Motion;
-  rewind(over: Seconds, curve?: Curve): Motion;
+/** A layer of plain numbers, as enter() and exit() take them. */
+export interface LayerValues {
+  readonly offset?: Vec;
+  readonly rotate?: number;
+  readonly scale?: number | Vec;
+  readonly opacity?: number;
 }
 
-export type Layers = Motion | readonly (Motion | false | null | undefined)[];
-
-export class LayerMotion extends Written<LayerValues> implements Motion {
-  constructor(passage: Passage<LayerValues>, last?: Span) {
-    super(passage, last, "motion");
-  }
-
-  protected made(passage: Passage<LayerValues>, last: Span | undefined): this {
-    // SAFETY: LayerMotion has no subclass, so a new one is a this.
-    return new LayerMotion(passage, last) as this;
-  }
-
-  to(values: LayerValues, when: Interval, curve: Curve = DEFAULT_EASE): this {
-    return this.stepped(values, when, curve);
-  }
-
-  set(values: LayerValues, when: When): this {
-    return this.jumped(values, when);
-  }
+/** A passing effect on top of a node's own props: the props a node has, each a value or a track. */
+export interface Layer {
+  readonly offset?: Anim<Vec>;
+  readonly rotate?: Anim<number>;
+  readonly scale?: Anim<number> | Anim<Vec>;
+  readonly opacity?: Anim<number>;
 }
 
-export const motion = (initial: LayerValues = {}): Motion =>
-  new LayerMotion(new Passage({ initial, steps: [] }));
+export type Layers = Layer | readonly (Layer | false | null | undefined)[];
 
-export const layersOf = (stack: Layers | undefined): LayerMotion[] => {
-  const list: readonly (Motion | false | null | undefined)[] = Array.isArray(stack)
+const LAYER_KEYS = ["offset", "rotate", "scale", "opacity"];
+
+export const layersOf = (stack: Layers | undefined, where: string): Layer[] => {
+  const list: readonly (Layer | false | null | undefined)[] = Array.isArray(stack)
     ? stack
     : [stack];
 
-  return list.filter((entry): entry is LayerMotion => {
+  return list.filter((entry): entry is Layer => {
     if (!entry) return false;
 
-    if (!(entry instanceof LayerMotion))
-      throw new SceneError("motion takes layers built with motion() or a recipe.");
+    if (Object.getPrototypeOf(entry) !== Object.prototype)
+      throw new SceneError(
+        `motion on ${where} takes layers: plain objects of offset, rotate, scale and opacity, each a value or a track.`,
+        "Write motion={{ opacity: track(0).to(1, span(1, 0.3)) }}, or use enter(), exit() or wiggle().",
+      );
+    const unknown = Object.keys(entry).find((key) => !LAYER_KEYS.includes(key));
+
+    if (unknown !== undefined)
+      throw new SceneError(
+        `A motion layer holds offset, rotate, scale and opacity, and ${where} gives it "${unknown}".`,
+        "Keep those four keys, and move anything else onto the node.",
+      );
 
     return true;
   });

@@ -9,7 +9,6 @@ import {
   ease,
   font,
   linear,
-  motion,
   rect,
   scene,
   span,
@@ -22,18 +21,14 @@ const model = scene({ size: [100, 100], duration: 4, title: "P", desc: "D", stil
     <Shape
       geometry={rect(10, 10)}
       fill={linear({ from: [0, 0], to: [10, 0], stops: ["#FFFFFF", "#000000"] })}
-      motion={motion({ opacity: 0, rotate: 0 }).to({ opacity: 1, rotate: 90 }, span(1, 1))}
+      motion={{ opacity: track(0).to(1, span(1, 1)), rotate: track(0).to(90, span(1, 1)) }}
     />
     <Shape
       geometry={circle(4)}
       fill="#000000"
       effects={[blur(track(0).to(4, span(2, 1), ease.linear))]}
     />
-    <Shape
-      geometry={circle(4)}
-      fill="#000000"
-      motion={motion({ scale: 1 }).to({ scale: 2 }, span(2, 1))}
-    />
+    <Shape geometry={circle(4)} fill="#000000" motion={{ scale: track(1).to(2, span(2, 1)) }} />
   </Group>
 ));
 
@@ -114,7 +109,7 @@ test("a prefixed scene still warns about a filter over many animated elements", 
           at={[i, 50]}
           geometry={circle(1)}
           fill="#000000"
-          motion={motion({ opacity: 0 }).to({ opacity: 1 }, span(i / 45, 0.5))}
+          motion={{ opacity: track(0).to(1, span(i / 45, 0.5)) }}
         />
       ))}
     </Group>
