@@ -30,6 +30,7 @@
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
         "@vitejs/plugin-react": "^6.1.2",
+        "bun-plugin-svelte": "^0.0.6",
         "playwright-core": "^1.64.1",
         "react": "^19.3.1",
         "react-dom": "^19.3.1",
@@ -110,6 +111,7 @@
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
         "@vitejs/plugin-react": "^6.1.2",
+        "bun-plugin-svelte": "^0.0.6",
         "playwright-core": "^1.64.1",
         "react": "^19.3.1",
         "react-dom": "^19.3.1",
@@ -119,11 +121,13 @@
         "vite": "8.3.5",
       },
       "peerDependencies": {
+        "bun-plugin-svelte": ">=0.0.6",
         "playwright-core": ">=1.49",
         "svjeez": "workspace:^",
         "vite": ">=6",
       },
       "optionalPeers": [
+        "bun-plugin-svelte",
         "playwright-core",
         "vite",
       ],
@@ -757,6 +761,8 @@
     "bail": ["bail@2.0.2", "", {}, "sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw=="],
 
     "boolbase": ["boolbase@1.0.0", "", {}, "sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww=="],
+
+    "bun-plugin-svelte": ["bun-plugin-svelte@0.0.6", "", { "peerDependencies": { "svelte": "^5" } }, "sha512-HuEDvOieVwXvhpcHLcASeQIOVgje2GRO3Tu0ypJh3MkjGLkEBOQ1+6FWsMgb54FxfbPw9JP3q0WlBd8SjgrnGQ=="],
 
     "bun-types": ["bun-types@1.4.4", "", { "dependencies": { "@types/node": "*", "undici-types": "*" } }, "sha512-yjrJh5oGX7mMPKGd19YXyIjmEuj4G4zNC30bs7PM9Az7NQ3ndF3j6hbeRdvJTRQEhJ/FYQwW0a2moweEi2hMxQ=="],
 

@@ -75,6 +75,12 @@ describe("component through Bun", () => {
     expect(scene.duration).toBeGreaterThan(0);
   }, 60_000);
 
+  test("films a Svelte component through bun-plugin-svelte", async () => {
+    const scene = (await import("./component/bun-svelte.film.ts")).default;
+
+    expect(scene.duration).toBeGreaterThan(0);
+  }, 60_000);
+
   test("a named export is found too", async () => {
     const target = await component(Named, { label: "hi" });
 

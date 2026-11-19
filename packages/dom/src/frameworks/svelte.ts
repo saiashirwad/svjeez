@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import type { Framework } from "../framework.ts";
 
-/** Svelte 5: `.svelte` components. Needs Vite with `@sveltejs/vite-plugin-svelte`; Bun cannot bundle Svelte yet. */
+/** Svelte 5: `.svelte` components. Needs Vite with `@sveltejs/vite-plugin-svelte`, or Bun with `bun-plugin-svelte`. */
 export const svelte: Framework = {
   name: "svelte",
   detect: (file) => file.endsWith(".svelte"),

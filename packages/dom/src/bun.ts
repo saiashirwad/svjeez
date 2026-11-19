@@ -1,8 +1,8 @@
-import type { HTMLBundle } from "bun";
+import type { BunPlugin, HTMLBundle } from "bun";
 import { createHash } from "node:crypto";
 import { mkdtemp, realpath, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { isAbsolute, join, relative } from "node:path";
+import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import {
   callerFile,
   entryModule,
@@ -48,6 +48,36 @@ export const serve = (html: HTMLBundle, { selector, port = 0 }: ServeOptions): T
     sources: () => hashPage(url),
     close: () => server.stop(true),
   };
+};
+
+/** Serves a built directory (a `Bun.build` output with an `index.html`) as a `film` target. */
+const serveDirectory = (dir: string, { selector }: Pick<ServeOptions, "selector">): Target => {
+  const server = Bun.serve({
+    port: 0,
+    fetch: async ({ url }) => {
+      const { pathname } = new URL(url);
+      const file = resolve(dir, `.${pathname.endsWith("/") ? `${pathname}index.html` : pathname}`);
+      const found = file.startsWith(dir + sep) && Bun.file(file);
+
+      return found && (await found.exists())
+        ? new Response(found)
+        : new Response("Not found", { status: 404 });
+    },
+  });
+
+  const url = `http://localhost:${server.port}/`;
+
+  return { url, selector, sources: () => hashPage(url), close: () => server.stop(true) };
+};
+
+const sveltePlugin = async (): Promise<BunPlugin> => {
+  const { SveltePlugin } = await import("bun-plugin-svelte").catch(() => {
+    throw new Error(
+      "component: filming .svelte components with @svjeez/dom/bun needs bun-plugin-svelte. Install it with `bun add -D bun-plugin-svelte`.",
+    );
+  });
+
+  return SveltePlugin({ development: false });
 };
 
 const locate = (component: Prop): Located => {
@@ -96,7 +126,7 @@ const locate = (component: Prop): Located => {
  *     });
  *
  * Needs `preload = ["@svjeez/dom/bun/preload"]` in bunfig.toml (that is how the component's module is found by identity).
- * React only: Bun cannot bundle Svelte yet, so use `@svjeez/dom/vite` for `.svelte` components.
+ * Svelte components also need `bun-plugin-svelte` (a dev dependency): the preload loads it so the film file can import `.svelte`, and `component` bundles the page with it.
  */
 export const component = async <C extends Fn>(
   Component: C,
@@ -108,11 +138,6 @@ export const component = async <C extends Fn>(
   const located = locate(Component);
   const framework = pickFramework(located, Component, options.framework);
 
-  if (framework.name === "svelte")
-    throw new Error(
-      "component: Bun cannot bundle Svelte yet. Film .svelte components with component() from @svjeez/dom/vite.",
-    );
-
   const dir = await realpath(await mkdtemp(join(tmpdir(), "svjeez-dom-")));
 
   try {
@@ -122,17 +147,21 @@ export const component = async <C extends Fn>(
     await Bun.write(join(dir, "entry.ts"), entryModule(located, framework, wire));
     await Bun.write(join(dir, "index.html"), pageHtml(css, "./entry.ts"));
 
-    // The HTML bundler answers a broken build with an empty 500, so build once here to say what is wrong.
-    const built = await Bun.build({ entrypoints: [join(dir, "index.html")], throw: false });
+    const out = join(dir, "dist");
+
+    const built = await Bun.build({
+      entrypoints: [join(dir, "index.html")],
+      outdir: out,
+      plugins: framework.name === "svelte" ? [await sveltePlugin()] : [],
+      throw: false,
+    });
 
     if (!built.success)
       throw new Error(
         `component: Bun could not bundle ${located.file}:\n${built.logs.map((log) => `  ${log.message}`).join("\n")}`,
       );
 
-    // SAFETY: Bun gives an HTML import as an `HTMLBundle`.
-    const { default: html } = (await import(join(dir, "index.html"))) as { default: HTMLBundle };
-    const app = serve(html, { selector: options.selector ?? SELECTOR });
+    const app = serveDirectory(out, { selector: options.selector ?? SELECTOR });
 
     return {
       ...app,
