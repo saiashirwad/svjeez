@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
+import { svg } from "svjeez/tools";
 import { film } from "../src/index.ts";
 import { component as viteComponent, runFilm } from "../src/vite.ts";
 import { component } from "../src/bun.ts";
@@ -13,6 +14,12 @@ describe("component through Vite", () => {
     const scene = await runFilm(join(dir, "react.film.ts"));
 
     expect(scene.duration).toBeGreaterThan(0);
+  }, 90_000);
+
+  test("the scene is titled after the component", async () => {
+    const scene = await runFilm(join(dir, "react.film.ts"));
+
+    expect(svg.emit(scene)).toContain(">Card</title>");
   }, 90_000);
 
   test("films a Svelte component", async () => {

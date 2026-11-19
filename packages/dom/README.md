@@ -32,7 +32,7 @@ film(serve({ root: import.meta.dir, selector: "#app" }), run, options);
 
 A target is `{ url, selector, sources(), close() }`. `sources()` returns a hash of the app's source, which keys the cache. The Bun adapter hashes the bundled page and its assets; the Vite adapter hashes the entry HTML and every project module it imports.
 
-Options: `scheme` (`"light" | "dark" | "both"`), `title`, `viewport` (default 1280x720), `cache` (a JSON file; reused while the source and options are unchanged, `SVJEEZ_DOM_REFRESH=1` records again. `true` is `<film file>.states.json`; a relative path is relative to the film file, not the cwd; an absolute path is kept. The film file is found through `runFilm`'s bridge or, under Bun, the caller's stack frame (one helper, `callerFile`)), `settle` (see below), `onDiagnostics` (default: one `console.warn` listing what is not faithful), `executablePath`.
+Options: `scheme` (`"light" | "dark" | "both"`), `title` (default: the component's name, else the page `<title>` with Vite, else the film file's name), `viewport` (default 1280x720), `cache` (a JSON file; reused while the source and options are unchanged, `SVJEEZ_DOM_REFRESH=1` records again. `true` is `<film file>.states.json`; a relative path is relative to the film file, not the cwd; an absolute path is kept. The film file is found through `runFilm`'s bridge or, under Bun, the caller's stack frame (one helper, `callerFile`)), `settle` (see below), `onDiagnostics` (default: one `console.warn` listing what is not faithful), `executablePath`.
 
 ## One component
 

@@ -142,6 +142,7 @@ export const serve = async ({
   try {
     const origin = await listen(server);
     const html = await readFile(join(root, entry), "utf8");
+    const title = /<title>([^<]*)<\/title>/i.exec(html)?.[1]?.trim();
     const references = [...html.matchAll(REFERENCE)].map(([, reference]) => reference!);
     const files = await crawl(server, references);
 
@@ -151,6 +152,7 @@ export const serve = async ({
       url: new URL(entry === "index.html" ? "/" : entry, origin).href,
       selector,
       ...(film && { film }),
+      ...(title && { title }),
       sources: () => hashFiles(files),
       close: () => closeServer(server, cacheDir),
     };
@@ -348,6 +350,7 @@ export const component = async <C extends Fn>(
     url: new URL(`__svjeez-dom/${id}.html`, origin).href,
     selector: options.selector ?? SELECTOR,
     film: host.film,
+    ...(Component.name && { title: Component.name }),
     sources: async () => {
       const styles = await Promise.all(
         (options.css ?? []).map(async (href) =>

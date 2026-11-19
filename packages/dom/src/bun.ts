@@ -167,6 +167,7 @@ export const component = async <C extends Fn>(
     return {
       ...app,
       ...(film && { film }),
+      ...(Component.name && { title: Component.name }),
       sources: async () =>
         createHash("sha256")
           .update(await hashPage(app.url))

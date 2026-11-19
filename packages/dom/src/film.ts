@@ -1,3 +1,4 @@
+import { basename, dirname } from "node:path";
 import { scene } from "svjeez";
 import type { Scene } from "svjeez/tools";
 import type { Page } from "playwright-core";
@@ -12,7 +13,7 @@ import type { Target } from "./target.ts";
 export interface FilmOptions {
   /** Which `prefers-color-scheme` to capture under; `"both"` makes a scene that follows the viewer's. Default: the page as it is. */
   readonly scheme?: "light" | "dark" | "both";
-  /** The scene's title. Default "Page". */
+  /** The scene's title (the SVG's `<title>`, which assistive tech reads). Default: the component's name (`Card`), else the page's `<title>` (Vite `serve`), else the film file's name (`board.film.tsx` -> "board"; `index.tsx` -> its folder's name). */
   readonly title?: string;
   /** The browser window. Default 1280x720. */
   readonly viewport?: { readonly width: number; readonly height: number };
@@ -62,6 +63,15 @@ export const settleScript = (selector: string) => `(async () => {
   }
 })()`;
 
+/** A title from the film file's path: `board.film.tsx` is "board", `index.tsx` is the folder it is in. */
+export const titleFromFile = (file: string | undefined): string => {
+  if (!file) return "Untitled";
+
+  const name = basename(file).split(".")[0]!;
+
+  return name === "index" ? basename(dirname(file)) : name;
+};
+
 const ORIGIN = "http://svjeez-dom.invalid";
 
 const warn = (diagnostics: readonly Diagnostic[]) => {
@@ -88,7 +98,7 @@ export const film = async <Props = never>(
   run: (context: FilmContext<Props>) => Promise<void>,
   options: FilmOptions = {},
 ): Promise<Scene> => {
-  const { scheme, title = "Page", viewport, cache, onDiagnostics = warn, executablePath } = options;
+  const { scheme, viewport, cache, onDiagnostics = warn, executablePath } = options;
   // Before the first await, while the film file is still on the stack.
   const caller = callerFile();
   const app = await target;
@@ -195,6 +205,8 @@ export const film = async <Props = never>(
     const { element, size, duration, diagnostics } = compile(await inlineAssets(states));
 
     onDiagnostics(diagnostics);
+
+    const title = options.title ?? app.title ?? titleFromFile(app.film ?? caller);
 
     return scene({ size, duration, title }, () => element);
   } finally {
