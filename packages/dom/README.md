@@ -40,15 +40,27 @@ import { scene } from "svjeez";
 import { svg } from "svjeez/tools";
 import { compile } from "@svjeez/dom";
 
-const { element, size, diagnostics } = compile(snapshot);
-const out = svg.emit(scene({ size, duration: 1, title: "Hero" }, () => element));
+const { element, size, duration, diagnostics } = compile(snapshot);
+const out = svg.emit(scene({ size, duration, title: "Hero" }, () => element));
 ```
 
 Each element is a group framed at its transform origin (or its top-left corner), so children are measured from their parent. The root's top-left corner is `[0, 0]`, and `size` is its border box.
 
 Drawn with core primitives: rounded boxes (per-corner radii), background colors and linear/radial gradients, opacity, blend, 2D transforms, overflow clips, `<img>` data URLs as pictures, inline svg paths and basic shapes, text runs at their captured baselines and advances. Built from plain geometry: borders and outlines (a stroke pulled inside the box, or wedges cut to a ring when sides differ), outer shadows (core `shadow()` on a shape cut away under the box), spread and inset shadows (blurred shapes), and text decorations (thin rects).
 
-`diagnostics` lists what is not faithful, as `{ path, what }`: a skew, an elliptical radial gradient, `groove`/`ridge`/`inset`/`outset` borders, background images, `<img>` sources that are not `data:` URLs, svg text, paint servers and other elements, and animations.
+`diagnostics` lists what is not faithful, as `{ path, what }`: a skew, an elliptical radial gradient, `groove`/`ridge`/`inset`/`outset` borders, background images, `<img>` sources that are not `data:` URLs, svg text, paint servers and other elements, animations, and a keyed element that moves between parents it cannot ride across.
+
+## Animating between states
+
+`compile(states, options?)` takes the `State[]` that `record` returns. The first state shows, moves into the second over `over` seconds, rests for `hold`, and so on. Defaults: `over` 0.6, `hold` 0.8, `ease` `"inOut"`; set them in the options, or per state (`over` and `ease` are for the move into that state, `hold` for resting in it). `duration` is the total: use it as the scene's duration.
+
+The blending is core's `morph.between()`. What a pair of elements shares moves, resizes and recolors; text that changes crossfades; an element with no pair in the next state fades out, and one with no pair in the previous fades in.
+
+Elements are paired across states by `pair`, in this order: `pairBy(node)` (an option), `data-key`, `data-part`, `id`. Siblings with none of those are matched by tag and wording, keeping their order (a longest common subsequence); whatever stays unmatched enters or exits. Put `data-key` on anything that should keep its identity through reorders, inserts and removals.
+
+A `data-key` (or `id`, or `pairBy` name) that sits under different parents in different states, like a card moving between columns, is lifted to the level of the nearest parent the states share and glides across in page coordinates. That works when nothing between it and that parent clips, transforms or fades; otherwise a diagnostic says so and it leaves in one place and enters in the other.
+
+Every element also has an inner `@track` group, reserved for its CSS animations to hang `track()`s on without colliding with the lanes a morph drives.
 
 ## record, cache, assets, schemes
 
@@ -81,14 +93,13 @@ const states = await cached("hero.states.json", { url }, async () => {
 });
 
 // Download images and the web fonts the text uses; the scene then needs no network.
-const [first] = await inlineAssets(states.map((s) => s.snapshot));
-const { element, size } = compile(first!);
-const out = svg.emit(scene({ size, duration: 1, title: "Hero" }, () => element));
+const { element, size, duration } = compile(await inlineAssets(states));
+const out = svg.emit(scene({ size, duration, title: "Hero" }, () => element));
 ```
 
 - `cached(file, inputs, fn)` keeps `fn`'s JSON result in `file` while `inputs` and the Snapshot version are unchanged. `SVJEEZ_DOM_REFRESH=1` records again.
 - `scheme: "both"` captures each state under light and dark `prefers-color-scheme` and merges them with `mergeSchemes(light, dark)`: a color that differs becomes `{ light, dark }`, and `compile` draws it as a theme token, so the SVG follows the viewer's scheme. The two trees must match node for node.
-- `inlineAssets` embeds `<img>` and background images as `data:` URLs and the page's `@font-face` files for the families its text uses; `compile` then draws text with the embedded font instead of `font.system`. A URL that fails to download throws. Background images are embedded but still not drawn.
+- `inlineAssets` takes Snapshots or States (and returns the same kind), and embeds `<img>` and background images as `data:` URLs and the page's `@font-face` files for the families its text uses; `compile` then draws text with the embedded font instead of `font.system`. A URL that fails to download throws. Background images are embedded but still not drawn.
 - `playwright-core` is an optional peer dependency.
 
 ## Not captured

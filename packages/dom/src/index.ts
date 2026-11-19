@@ -2,7 +2,13 @@ export { capture, captureScript } from "./capture.ts";
 
 export { SNAPSHOT_VERSION, checkVersion } from "./schema.ts";
 
-export { compile, type Compiled, type Diagnostic } from "./compile/index.ts";
+export {
+  compile,
+  type CompileOptions,
+  type Compiled,
+  type Diagnostic,
+  type PairBy,
+} from "./compile/index.ts";
 
 export {
   openPage,

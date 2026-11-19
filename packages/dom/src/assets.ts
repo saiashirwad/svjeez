@@ -1,3 +1,4 @@
+import type { State } from "./record.ts";
 import type { ElementNode, Snapshot } from "./schema.ts";
 
 export interface AssetOptions {
@@ -75,14 +76,23 @@ const rewrite = (node: ElementNode, data: ReadonlyMap<string, string>): ElementN
 });
 
 /**
- * Downloads what each Snapshot points at and embeds it as `data:` URLs, so the scene needs no network:
+ * Downloads what each Snapshot (or each State's snapshot) points at and embeds it as `data:` URLs, so the scene needs no network:
  * `<img>` and background images, and the web fonts its text uses (the page's `@font-face` files; unused ones are dropped).
  * Each URL is fetched once across all the snapshots. A URL that cannot be fetched throws.
  */
-export const inlineAssets = async (
-  snapshots: readonly Snapshot[],
+export async function inlineAssets(
+  input: readonly Snapshot[],
+  options?: AssetOptions,
+): Promise<Snapshot[]>;
+export async function inlineAssets(
+  input: readonly State[],
+  options?: AssetOptions,
+): Promise<State[]>;
+export async function inlineAssets(
+  input: readonly (Snapshot | State)[],
   { fetch: get = (url) => fetch(url) }: AssetOptions = {},
-): Promise<Snapshot[]> => {
+): Promise<(Snapshot | State)[]> {
+  const snapshots = input.map((one) => ("snapshot" in one ? one.snapshot : one));
   const wanted = new Set<string>();
 
   const used = snapshots.map((snapshot) => {
@@ -112,6 +122,14 @@ export const inlineAssets = async (
       ...used[i]!.map((font) => ({ ...font, src: data.get(font.src)! })),
     ];
 
-    return { ...rest, root: rewrite(snapshot.root, data), ...(keep.length > 0 && { fonts: keep }) };
+    const inlined: Snapshot = {
+      ...rest,
+      root: rewrite(snapshot.root, data),
+      ...(keep.length > 0 && { fonts: keep }),
+    };
+
+    const one = input[i]!;
+
+    return "snapshot" in one ? { ...one, snapshot: inlined } : inlined;
   });
-};
+}

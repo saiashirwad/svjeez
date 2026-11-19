@@ -476,9 +476,11 @@ describe("keys", () => {
     );
 
     const keys = (el: typeof element): string[] =>
-      el.type === "group" ? [el.props.key!, ...el.children.flatMap(keys)] : [];
+      el.type === "group"
+        ? [...(el.props.key?.startsWith("@") ? [] : [el.props.key!]), ...el.children.flatMap(keys)]
+        : [];
 
-    expect(keys(element)).toEqual(["card", "a", "p", "i", "div[3]", "p~2"]);
+    expect(keys(element)).toEqual(["card", "a", "p", "i", "div[0]", "p~2"]);
   });
 });
 

@@ -1,27 +1,109 @@
-import type { SceneElement } from "svjeez";
+import { ease, morph, span, type Curve, type SceneElement, type Span } from "svjeez";
 import type { Snapshot } from "../schema.ts";
-import { element, nameOf } from "./box.tsx";
+import type { EaseName, State } from "../record.ts";
+import { element } from "./box.tsx";
 import { context, type Diagnostic } from "./context.ts";
+import { normalize } from "./normalize.ts";
+import { pair, type PairBy, type Paired } from "./pair.ts";
 
 export type { Diagnostic } from "./context.ts";
 
+export type { PairBy } from "./pair.ts";
+
+export interface CompileOptions {
+  /** Seconds a move between states takes unless the state says. Default 0.6. */
+  readonly over?: number;
+  /** Seconds a state rests before the next move unless it says. Default 0.8. */
+  readonly hold?: number;
+  /** The easing of a move unless the state says. Default `"inOut"`. */
+  readonly ease?: EaseName;
+  /**
+   * Names an element so it is the same thing in every state: it keeps its identity and moves, where an unnamed one is matched by place and wording.
+   * Return undefined to leave it to `data-key`, `data-part`, `id`, then matching.
+   */
+  readonly pairBy?: PairBy;
+}
+
 export interface Compiled {
-  /** The page as core scene elements, with the root's top-left corner at [0, 0]. */
+  /** The page as core scene elements, with the root's top-left corner at [0, 0]. With several states, the states morphing one into the next. */
   readonly element: SceneElement;
-  /** The root's border box: the scene to draw it in. */
+  /** The border box of the root, or the largest of the roots: the scene to draw it in. */
   readonly size: readonly [width: number, height: number];
+  /** Seconds the states take: every hold, and every move between them. Use it as the scene's duration. */
+  readonly duration: number;
   /** Everything that was approximated or left out. */
   readonly diagnostics: readonly Diagnostic[];
 }
 
-/** Compiles a Snapshot to core scene elements: groups, shapes, text and pictures, nothing a backend has to guess at. */
-export const compile = ({ root, fonts }: Snapshot): Compiled => {
-  const ctx = context(fonts);
-  const key = nameOf(root, 0);
+/** The paths of the elements that clip. */
+const pathsOf = ({ node, children }: Paired, path: string, into: Set<string>): void => {
+  if (node.type === "element" && node.clip) into.add(path);
+
+  for (const child of children) pathsOf(child, `${path}/${child.key}`, into);
+};
+
+/**
+ * Compiles a Snapshot to core scene elements: groups, shapes, text and pictures, nothing a backend has to guess at.
+ *
+ * Given states (see `record`), the page is shown as the first, moves into the second over `over` seconds, rests for `hold`, and so on.
+ * Elements are paired across states (see `pair`), and core's `morph.between()` does the blending: what a pair shares moves,
+ * resizes and recolors, text crossfades, and what has no pair fades in or out.
+ *
+ *     const { element, size, duration } = compile(await inlineAssets(await record(page, "#app", run)));
+ */
+export const compile = (
+  input: Snapshot | readonly State[],
+  { over = 0.6, hold = 0.8, ease: easing = "inOut", pairBy }: CompileOptions = {},
+): Compiled => {
+  const states: readonly State[] = "root" in input ? [{ name: "", snapshot: input }] : input;
+
+  if (states.length === 0) throw new Error("compile needs a Snapshot, or at least one state.");
+
+  const snapshots = states.map((state) => state.snapshot);
+  const { roots, diagnostics: moves } = pair(snapshots, pairBy);
+
+  const clips = new Set<string>();
+
+  for (const root of roots) pathsOf(root, root.key, clips);
+
+  const ctx = context(
+    snapshots.flatMap((snapshot) => snapshot.fonts ?? []),
+    // Only a state-to-state blend needs a clip in every state.
+    states.length > 1 ? clips : new Set(),
+  );
+
+  for (const { path, what } of moves) ctx.note(path, what);
+
+  const trees = roots.map((root) =>
+    element(root, [root.node.rect.x, root.node.rect.y], root.key, ctx),
+  );
+
+  const spans: Span[] = [];
+  const curves: Curve[] = [];
+  let duration = 0;
+
+  states.forEach((state, i) => {
+    if (i > 0) {
+      const length = state.over ?? over;
+
+      spans.push(span(duration, length));
+      curves.push(ease[state.ease ?? easing]);
+      duration += length;
+    }
+
+    duration += state.hold ?? hold;
+  });
+
+  const sizes = roots.map(({ node }) => node.rect);
 
   return {
-    element: element(root, [root.rect.x, root.rect.y], key, key, ctx),
-    size: [root.rect.width, root.rect.height],
+    element:
+      trees.length === 1 ? trees[0]! : morph.between(normalize(trees), spans, { curve: curves }),
+    size: [
+      Math.max(...sizes.map(({ width }) => width)),
+      Math.max(...sizes.map(({ height }) => height)),
+    ],
+    duration,
     diagnostics: ctx.diagnostics,
   };
 };

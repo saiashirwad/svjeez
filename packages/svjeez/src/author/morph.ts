@@ -39,7 +39,8 @@ import { blendable, isGradient, mixPaint } from "./paint";
 import type { LayerValues } from "./track";
 
 export interface MorphOptions {
-  readonly curve?: Curve;
+  /** One curve for every transition, or one per transition. */
+  readonly curve?: Curve | readonly Curve[];
   readonly enter?: LayerValues;
   readonly exit?: LayerValues;
   readonly stagger?: Seconds;
@@ -83,6 +84,9 @@ const between = (
 
   return { type: "morph", states: states.map(flat), spans, options };
 };
+
+const isCurves = (curve: Curve | readonly Curve[]): curve is readonly Curve[] =>
+  Array.isArray(curve);
 
 export const morph = Object.assign(
   (before: Child, after: Child, when: Interval, options: MorphOptions = {}): SceneElement =>
@@ -197,7 +201,8 @@ interface Window {
 
 interface Plan {
   readonly timing: Timing;
-  readonly curve: Curve;
+  /** One curve per transition. */
+  readonly curves: readonly Curve[];
   readonly enter: Fixed;
   readonly exit: Fixed;
   readonly windows: ReadonlyMap<Entry, readonly Window[]>;
@@ -228,7 +233,7 @@ const travel = <T>(
   to: readonly T[],
   mix: Mix<T>,
   where: string,
-  curve: Curve = plan.curve,
+  adapt: (curve: Curve) => Curve = (curve) => curve,
 ): Animated<T> => {
   let passage = new Passage<{ readonly value: T }>({ initial: { value: initial }, steps: [] });
   let current = initial;
@@ -236,7 +241,8 @@ const travel = <T>(
   windows.forEach(({ start, over }, i) => {
     if (!same(current, from[i]!)) passage = passage.set({ value: from[i]! }, { start });
 
-    if (!same(from[i]!, to[i]!)) passage = passage.to({ value: to[i]! }, span(start, over), curve);
+    if (!same(from[i]!, to[i]!))
+      passage = passage.to({ value: to[i]! }, span(start, over), adapt(plan.curves[i]!));
     current = to[i]!;
   });
 
@@ -249,7 +255,7 @@ const blend = <T>(
   values: readonly Animated<T>[],
   mix: Mix<T>,
   what: string,
-  curve?: Curve,
+  adapt?: (curve: Curve) => Curve,
 ): Animated<T> => {
   const [first] = values;
 
@@ -271,7 +277,7 @@ const blend = <T>(
     fixed.slice(1),
     mix,
     `${what} on ${plan.names.named(entry.key)} in morph()`,
-    curve,
+    adapt,
   );
 };
 
@@ -562,7 +568,7 @@ const effectsOf = (plan: Plan, entry: Entry): Effect[] => {
             shadows.map((each) => each.color),
             noMix,
             "shadow color of an effect",
-            paintCurve(plan),
+            paintCurve,
           ),
           opacity: number(
             "shadow opacity",
@@ -581,8 +587,8 @@ const clear = (like: Animated<Paint> | undefined): Paint =>
     ? { ...like, stops: like.stops.map((stop) => ({ ...stop, color: NONE })) }
     : NONE;
 
-const paintCurve = (plan: Plan): Curve | undefined =>
-  isSpring(plan.curve) ? DEFAULT_EASE : undefined;
+/** Colors don't spring: a spring's transition takes the default curve instead. */
+const paintCurve = (curve: Curve): Curve => (isSpring(curve) ? DEFAULT_EASE : curve);
 
 const paints = (
   plan: Plan,
@@ -600,7 +606,7 @@ const paints = (
       values.map((value) => value ?? none),
       mixPaint,
       what,
-      paintCurve(plan),
+      paintCurve,
     ),
     `${what} on ${plan.names.named(entry.key)} in morph()`,
   );
@@ -730,7 +736,7 @@ const strokeOf = (
         strokes.map((stroke) => (stroke ?? given).color),
         mixPaint,
         "stroke color",
-        paintCurve(plan),
+        paintCurve,
       ),
       `stroke color on ${plan.names.named(entry.key)} in morph()`,
     ),
@@ -821,7 +827,7 @@ const blendedLines = (plan: Plan, entry: Entry, states: readonly TextNode[]): Te
             runs.map((each) => each.fill),
             mixPaint,
             "fill",
-            paintCurve(plan),
+            paintCurve,
           ),
           `fill on ${plan.names.named(entry.key)} in morph()`,
         ),
@@ -979,7 +985,11 @@ export const merge = (
 
   const plan: Plan = {
     timing,
-    curve: options.curve ?? DEFAULT_EASE,
+    curves: spans.map((_, i) => {
+      const { curve = DEFAULT_EASE } = options;
+
+      return isCurves(curve) ? (curve[i] ?? DEFAULT_EASE) : curve;
+    }),
     enter: layerOf(options.enter ?? { opacity: 0 }),
     exit: layerOf(options.exit ?? { opacity: 0 }),
     windows,

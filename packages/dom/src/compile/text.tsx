@@ -94,11 +94,5 @@ const run = (one: Captured, at: Vec, key: string, ctx: Context): SceneElement[] 
 };
 
 /** A text node's line fragments, positioned by their baseline in the parent's frame `origin`. */
-export const text = (
-  node: TextNode,
-  origin: Vec,
-  key: string,
-  name: (key: string) => string,
-  ctx: Context,
-): SceneElement[] =>
-  node.runs.flatMap((one, i) => run(one, sub([one.x, one.y], origin), name(`${key}.${i}`), ctx));
+export const text = (node: TextNode, origin: Vec, key: string, ctx: Context): SceneElement[] =>
+  node.runs.flatMap((one, i) => run(one, sub([one.x, one.y], origin), `${key}.${i}`, ctx));

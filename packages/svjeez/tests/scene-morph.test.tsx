@@ -292,6 +292,27 @@ describe("morph", () => {
     expect(lane(a.fill).keys[1]!.ease).toEqual(ease.out);
   });
 
+  test("morph.between takes a curve per transition", () => {
+    const a = shape(
+      made(() =>
+        morph.between(
+          [
+            <Shape key="a" geometry={rect(10, 10)} at={[0, 0]} fill="#ff0000" />,
+            <Shape key="a" geometry={rect(10, 10)} at={[10, 0]} fill="#ff0000" />,
+            <Shape key="a" geometry={rect(10, 10)} at={[20, 0]} fill="#ff0000" />,
+          ],
+          [span(0, 1), span(2, 1)],
+          { curve: [ease.linear, ease.in] },
+        ),
+      ),
+      "a",
+    );
+
+    const { keys } = lane(a.at);
+
+    expect([keys[1]!.ease, keys[3]!.ease]).toEqual([ease.linear, ease.in]);
+  });
+
   test("a morph and a track take the same default curve", () => {
     const morphed = shape(
       made(() =>

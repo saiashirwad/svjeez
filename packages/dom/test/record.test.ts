@@ -79,12 +79,11 @@ describe("record", () => {
       dark: "rgb(17, 17, 17)",
     });
 
-    const [inlined] = await inlineAssets(states.map((s) => s.snapshot));
-    const { element, size, diagnostics } = compile(inlined!);
+    const { element, size, duration, diagnostics } = compile(await inlineAssets(states));
 
     expect(diagnostics.map((d) => d.what)).toEqual([]);
 
-    const out = svg.emit(scene({ size, duration: 1, title: "app" }, () => element));
+    const out = svg.emit(scene({ size, duration, title: "app" }, () => element));
 
     expect(out).toContain("@font-face");
     expect(out).toContain("data:image/png;base64");

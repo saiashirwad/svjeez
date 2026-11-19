@@ -12,6 +12,9 @@ const NONE: Radii = [
   [0, 0],
 ];
 
+/** Far enough out that a clip this large cuts nothing. */
+export const BIG = 1e5;
+
 /** How a circle's quarter is drawn as one cubic. */
 const KAPPA = 0.5522847498;
 

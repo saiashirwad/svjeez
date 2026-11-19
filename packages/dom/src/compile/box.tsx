@@ -1,11 +1,12 @@
 /** @jsxImportSource svjeez */
 import { Group, type SceneElement } from "svjeez";
 import type { Common } from "svjeez/tools";
-import type { ElementNode, Node, Rect } from "../schema.ts";
-import { keyer, type Context } from "./context.ts";
-import { add, innerRadii, inset, outline, sub, type Radii, type Vec } from "./geometry.ts";
+import type { ElementNode, Rect } from "../schema.ts";
+import type { Context } from "./context.ts";
+import { BIG, add, innerRadii, inset, outline, sub, type Radii, type Vec } from "./geometry.ts";
 import { image } from "./image.tsx";
 import { backgrounds, border, outlineOf, shadows, widthsOf, type Where } from "./paint.tsx";
+import { isElement, type Paired } from "./pair.ts";
 import { text } from "./text.tsx";
 import { decompose } from "./transform.ts";
 import { vector } from "./vector.tsx";
@@ -33,22 +34,13 @@ const BLENDS: readonly Blend[] = [
 const blendOf = (mode: string | undefined): Blend | undefined =>
   BLENDS.find((blend) => blend === mode);
 
-const BIG = 1e5;
-
-/** What an element is called next to its siblings, so the same element gets the same key capture after capture. */
-export const nameOf = (node: Node, index: number): string =>
-  node.type === "text"
-    ? `text[${index}]`
-    : (node.key ?? node.part ?? node.id ?? `${node.tag}[${index}]`);
-
 /**
  * An element as a group in its own frame: the origin of its transform, or its top-left corner without one.
  * `parent` is the parent's frame, in page coordinates, so every rect inside is measured from it.
  */
 export const element = (
-  el: ElementNode,
+  { node: el, key, children: kids }: Paired<ElementNode>,
   parent: Vec,
-  key: string,
   path: string,
   ctx: Context,
 ): SceneElement => {
@@ -97,26 +89,24 @@ export const element = (
       )
     : undefined;
 
-  const name = keyer();
-
   const content: SceneElement[] = [];
 
-  el.children.forEach((child, i) => {
-    const childKey = name(nameOf(child, i));
+  for (const kid of kids)
+    if (kid.node.type === "text") content.push(...text(kid.node, origin, kid.key, ctx));
+    else if (isElement(kid)) content.push(element(kid, origin, `${path}/${kid.key}`, ctx));
 
-    if (child.type === "text") content.push(...text(child, origin, childKey, name, ctx));
-    else content.push(element(child, origin, childKey, `${path}/${childKey}`, ctx));
-  });
-
+  // The names the compiler gives its own parts start with "@", which no sibling key does.
   if (el.image) {
-    const drawn = image(el.image, padding.box, name("image"), `${path}/image`, ctx);
+    const drawn = image(el.image, padding.box, "@image", `${path}/image`, ctx);
 
     if (drawn) content.unshift(drawn);
   }
 
-  if (el.svg) content.unshift(vector(el.svg, padding.box, name("svg"), `${path}/svg`, ctx));
+  if (el.svg) content.unshift(vector(el.svg, padding.box, "@svg", `${path}/svg`, ctx));
 
   const cut = el.clip && padding.box.width > 0 && padding.box.height > 0;
+  const forced = !cut && ctx.clips.has(path);
+  const open = { x: -BIG, y: -BIG, width: BIG * 2, height: BIG * 2 };
 
   const clipBox: Rect = cut
     ? {
@@ -125,16 +115,18 @@ export const element = (
         width: el.clip!.x ? padding.box.width : BIG * 2,
         height: el.clip!.y ? padding.box.height : BIG * 2,
       }
-    : padding.box;
+    : forced
+      ? open
+      : padding.box;
 
   const children: SceneElement[] = [
     ...(cast?.below ?? []),
     ...backgrounds(el.background, el.backgrounds, where),
     ...(lit?.above ?? []),
     ...(el.border ? border(el.border, where) : []),
-    ...(content.length > 0 && cut
+    ...(content.length > 0 && (cut || forced)
       ? [
-          <Group key={name("content")} clip={outline(clipBox, padding.radii)}>
+          <Group key="@content" clip={outline(clipBox, forced ? undefined : padding.radii)}>
             {content}
           </Group>,
         ]
@@ -152,7 +144,8 @@ export const element = (
       {...(el.opacity !== undefined && { opacity: el.opacity })}
       {...(blend && { blend })}
     >
-      {children}
+      {/* Pass 6 hangs an element's animations (`track()`) on this group, so they never collide with the lanes a morph drives on the group around it. */}
+      <Group key="@track">{children}</Group>
     </Group>
   );
 };

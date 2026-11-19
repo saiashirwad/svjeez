@@ -1151,7 +1151,7 @@ const alike = (a: MorphElement, b: MorphElement): boolean =>
     a.spans.map(({ start, over }) => [start, over]),
     b.spans.map(({ start, over }) => [start, over]),
   ) &&
-  a.options.curve === b.options.curve &&
+  same(a.options.curve ?? null, b.options.curve ?? null) &&
   a.options.stagger === b.options.stagger &&
   same(a.options.enter ?? null, b.options.enter ?? null) &&
   same(a.options.exit ?? null, b.options.exit ?? null);
