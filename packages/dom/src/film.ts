@@ -1,21 +1,29 @@
 import { readFileSync } from "node:fs";
 import { basename, dirname } from "node:path";
 import { scene } from "svjeez";
-import type { Scene } from "svjeez/tools";
+import type { Scene, Theme } from "svjeez/tools";
 import type { Page } from "playwright-core";
 import { inlineAssets } from "./assets.ts";
 import { cached, cachePath } from "./cache.ts";
 import { callerFile } from "./component.ts";
 import { reactIdentifyScript } from "./frameworks/react.identify.ts";
 import { compile, type Diagnostic } from "./compile/index.ts";
+import { themeCss } from "./compile/theme.ts";
 import { fromPortable, toPortable } from "./portable.ts";
 import { openPage, record, type OpenPageOptions, type Snap, type State } from "./record.ts";
 import { serializeProps, type Bag } from "./props.ts";
 import type { Target } from "./target.ts";
 
 export interface FilmOptions {
-  /** Which `prefers-color-scheme` to capture under; `"both"` makes a scene that follows the viewer's. Default: the page as it is. */
+  /** Which `prefers-color-scheme` to capture under; `"both"` makes a scene that follows the viewer's. Default: the page as it is, or `"both"` with a `theme`. */
   readonly scheme?: "light" | "dark" | "both";
+  /**
+   * The tokens the app paints with, as `tokens()` makes them. The page gets them as CSS variables (`--background`, …)
+   * in each scheme, filmed in both, and the scene paints with the tokens: a color that is a token, a `color-mix()` of two
+   * at a whole percent, or either at an alpha comes out as that token or `mix()`, so restyling the tokens restyles the
+   * scene. Other colors stay as captured.
+   */
+  readonly theme?: Theme;
   /** The scene's title (the SVG's `<title>`, which assistive tech reads). Default: the component's name (`Card`), else the page's `<title>` (Vite `serve`), else the film file's name (`board.film.tsx` -> "board"; `index.tsx` -> its folder's name). */
   readonly title?: string;
   /**
@@ -123,7 +131,9 @@ export const film = async <Props = never>(
   run: (context: FilmContext<Props>) => Promise<void>,
   options: FilmOptions = {},
 ): Promise<Scene> => {
-  const { scheme, cursor, viewport, cache, onDiagnostics = warn, executablePath } = options;
+  const { theme, cursor, viewport, cache, onDiagnostics = warn, executablePath } = options;
+
+  const scheme = theme ? "both" : options.scheme;
   // Before the first await, while the film file is still on the stack.
   const caller = callerFile();
   const app = await target;
@@ -131,6 +141,11 @@ export const film = async <Props = never>(
   const settle = options.settle ?? ((page: Page) => page.evaluate(settleScript(selector)));
 
   try {
+    if (theme && options.scheme && options.scheme !== "both")
+      throw new Error(
+        `film: a theme is filmed in both schemes, so its scene follows the viewer's. Leave scheme out, or make it "both", not ${JSON.stringify(options.scheme)}.`,
+      );
+
     const errors: string[] = [];
 
     const report = () =>
@@ -154,6 +169,7 @@ export const film = async <Props = never>(
         url: app.url,
         ...(viewport && { viewport }),
         ...(executablePath && { executablePath }),
+        ...(theme && { css: themeCss(theme) }),
         onError: (message) => {
           errors.push(message);
           fail(report());
@@ -215,6 +231,7 @@ export const film = async <Props = never>(
               sources: await app.sources(),
               selector,
               scheme: scheme ?? null,
+              ...(theme && { theme: themeCss(theme) }),
               viewport: viewport ?? null,
               ...(cursor && { cursor }),
               script: scriptInputs(run, app.film ?? caller),
@@ -227,7 +244,9 @@ export const film = async <Props = never>(
       : await capture();
 
     // Bundled fonts and images have hashed URLs that only this server knows.
-    const { element, size, duration, diagnostics } = compile(await inlineAssets(states));
+    const { element, size, duration, diagnostics } = compile(await inlineAssets(states), {
+      ...(theme && { theme }),
+    });
 
     onDiagnostics(diagnostics);
 

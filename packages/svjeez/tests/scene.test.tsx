@@ -226,6 +226,11 @@ describe("the SVG backend", () => {
     expect(() => mix("#000000", "#FFFFFF", 2)).toThrow(SceneError);
   });
 
+  test("mix() blends alpha as color-mix() does: with transparent, the same color fainter", () => {
+    expect(mix("#0A6CFF", "#00000000", 0.25)).toBe("#0a6cff40");
+    expect(mix(theme.ink, "#00000000", 0.5).name).toBe("ink-50-c00000000");
+  });
+
   test("a shape placed by its own coordinates turns around its fill box", () => {
     expect(
       body(() => (

@@ -29,6 +29,8 @@ export { inlineAssets, type AssetOptions } from "./assets.ts";
 
 export { mergeSchemes } from "./scheme.ts";
 
+export { themeCss } from "./compile/theme.ts";
+
 export type * from "./schema.ts";
 
 export { film, settleScript, type FilmContext, type FilmOptions } from "./film.ts";
