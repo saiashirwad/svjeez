@@ -625,3 +625,34 @@ describe("a real page", () => {
     expect(drawn).toContain("<circle");
   }, 60_000);
 });
+
+describe("pseudo-elements", () => {
+  test("a synthetic ::before and ::after compile like any element, with core primitives only", () => {
+    const dot = box({
+      tag: "::before",
+      part: "::before",
+      rect: { x: 4, y: 4, width: 10, height: 10 },
+      radii: [
+        [5, 5],
+        [5, 5],
+        [5, 5],
+        [5, 5],
+      ],
+      background: "rgb(255, 0, 0)",
+    });
+
+    const tail = box({
+      tag: "::after",
+      part: "::after",
+      rect: { x: 20, y: 0, width: 30, height: 20 },
+      background: "rgb(0, 0, 255)",
+      children: [words("new")],
+    });
+
+    const out = draw(box({ children: [dot, words("item", 20), tail] }));
+
+    expect(out.diagnostics).toEqual([]);
+    expect(out.svg).toContain('rx="5"');
+    expect(out.svg).toContain(">new</text>");
+  });
+});

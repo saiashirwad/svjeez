@@ -115,6 +115,8 @@ const snapshot = checkVersion(
 
 It works with Playwright, Puppeteer or raw CDP `Runtime.evaluate`. Do not pass `capture` itself through `page.evaluate(capture, ...)` from a bundled build: the bundler may add helpers around it. The `captureScript` string is built from the function's own source, so it needs nothing else.
 
+`::before` and `::after` become synthetic element nodes (tag `::before`/`::after`, `part` of the same name so they pair across states) before and after the real children, with their `content` text, `attr()`, `url()` and quotes resolved. An empty, absolutely positioned one in a host that is its containing block is read from the host's padding box. Any other is measured through a temporary `<span>` (or `<img>`) wearing its computed style, inserted after the real children are captured, while the pseudo-element is switched off by an adopted stylesheet; everything is removed afterwards. While it is there the host has one extra child, so `:first-child`, `:last-child` or `:empty` rules on real children may restyle them and nudge the pseudo-element. `counter()` content draws nothing, and replaced elements, `display: none` and `content: none` have no pseudo-element. Animations on a pseudo-element ride on its node.
+
 Capture reads the page as it renders now. Running animations and transitions are captured mid-flight: the layout shows that moment, and `animations` carries the keyframes and `currentTime`.
 
 ## Snapshot

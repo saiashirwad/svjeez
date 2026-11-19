@@ -365,6 +365,154 @@ describe("form controls", () => {
   });
 });
 
+describe("pseudo-elements", () => {
+  const runsOf = (node: Node) => (node.type === "text" ? node.runs : []);
+
+  const pseudos = (el: ElementNode) =>
+    el.children.filter((c): c is ElementNode => c.type === "element" && c.tag.startsWith("::"));
+
+  test("an absolutely positioned dot is read from the host's padding box, without touching the DOM", async () => {
+    await page.setContent(
+      `<style>html,body{margin:0}
+        #host{position:relative;margin:30px 20px;width:100px;height:60px;border:4px solid #000}
+        #host::after{content:"";position:absolute;top:6px;right:8px;width:10px;height:10px;border-radius:50%;background:red}
+      </style><div id="root"><div id="host"></div></div>`,
+    );
+
+    const { snapshot, mutations } = await page.evaluate<{ snapshot: Snapshot; mutations: number }>(
+      `(() => {
+        const watch = new MutationObserver(() => {});
+
+        watch.observe(document, { subtree: true, childList: true, attributes: true });
+
+        const snapshot = (${captureScript})(document.getElementById("root"));
+
+        return { snapshot, mutations: watch.takeRecords().length };
+      })()`,
+    );
+
+    const host = byId(snapshot, "host");
+    const [dot] = pseudos(host);
+
+    expect(dot).toMatchObject({ tag: "::after", part: "::after", background: "rgb(255, 0, 0)" });
+    // The host is 108 wide with a 4px border: right:8px leaves the dot 100 - 8 - 10 = 82 into the padding box.
+    expect(dot!.rect).toEqual({ x: 20 + 4 + 82, y: 30 + 4 + 6, width: 10, height: 10 });
+    expect(dot!.radii![0]).toEqual([5, 5]);
+    expect(mutations).toBe(0);
+  });
+
+  test("a text badge from content and attr() is measured through a stand-in that leaves no trace", async () => {
+    const snapshot = await snap(
+      `<style>#b::before{content:attr(data-n) " new";background:#eef;padding:0 4px}</style>
+       <p id="b" data-n="3">item</p>`,
+    );
+
+    const b = byId(snapshot, "b");
+    const [badge, text] = [pseudos(b)[0]!, b.children[1]!];
+
+    expect(b.children[0]).toBe(badge);
+    expect(badge).toMatchObject({
+      tag: "::before",
+      part: "::before",
+      background: "rgb(238, 238, 255)",
+    });
+    expect(badge.children[0]).toMatchObject({ type: "text", runs: [{ text: "3 new" }] });
+    // The badge sits before the real text, which starts to its right.
+    expect(badge.rect.x).toBe(0);
+    expect(text).toMatchObject({ type: "text" });
+    expect(runsOf(text!)[0]!.x).toBeGreaterThanOrEqual(badge.rect.width - 0.5);
+    expect(
+      await page.evaluate(() => document.querySelectorAll("[data-svjeez-pseudo],span").length),
+    ).toBe(0);
+    expect(await page.evaluate(() => document.adoptedStyleSheets.length)).toBe(0);
+    expect(
+      await page.evaluate(
+        () => getComputedStyle(document.getElementById("b")!, "::before").content,
+      ),
+    ).not.toBe("none");
+  });
+
+  test("a flex item pseudo-element sits between the real children", async () => {
+    const snapshot = await snap(
+      `<style>#f{display:flex;gap:10px}#f::before{content:"";width:12px;height:12px;background:blue}
+        #f::after{content:"end"}</style><div id="f"><i id="k" style="width:30px;height:10px;background:green"></i></div>`,
+    );
+
+    const f = byId(snapshot, "f");
+
+    expect(f.children.map((c) => (c.type === "element" ? c.tag : "text"))).toEqual([
+      "::before",
+      "i",
+      "::after",
+    ]);
+    expect(f.children[0]).toMatchObject({ rect: { x: 0, width: 12, height: 12 } });
+    expect(byId(snapshot, "k").rect.x).toBe(22);
+    expect(find(f, (e) => e.tag === "::after")!.rect.x).toBe(62);
+  });
+
+  test("real children keep their :first-child styling, and the page is left as it was", async () => {
+    const snapshot = await snap(
+      `<style>#p::before{content:"> "}#p::after{content:" <"}
+        #p b:first-child{color:rgb(1,2,3)} #p b:last-child{color:rgb(4,5,6)} #p:empty{background:red}</style>
+       <p id="p"><b id="x">one</b></p>`,
+    );
+
+    const p = byId(snapshot, "p");
+
+    expect(p.background).toBeUndefined();
+    expect(p.children.map((c) => (c.type === "element" ? c.tag : "text"))).toEqual([
+      "::before",
+      "b",
+      "::after",
+    ]);
+
+    const x = byId(snapshot, "x");
+    const run = runsOf(x.children[0]!)[0]!;
+
+    expect(run.color).toBe("rgb(4, 5, 6)");
+    expect(await page.evaluate(() => document.getElementById("p")!.children.length)).toBe(1);
+  });
+
+  test("content none, display none, hidden and replaced hosts have no pseudo-element", async () => {
+    const snapshot = await snap(
+      `<style>
+        #a::before{content:none} #b::before{content:"x";display:none} #c::before{content:"x";visibility:hidden}
+        #d::after{content:"x"} #e::after{content:"x"}
+      </style><div id="a">a</div><div id="b">b</div><div id="c">c</div><input id="d" value="v"><img id="e" alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">`,
+    );
+
+    for (const id of ["a", "b", "c", "d", "e"]) expect(pseudos(byId(snapshot, id))).toEqual([]);
+  });
+
+  test("an animated ::after rides on the synthetic node", async () => {
+    const snapshot = await snap(
+      `<style>@keyframes pulse{from{opacity:1}to{opacity:.2}}
+        #h{position:relative;width:40px;height:40px}
+        #h::after{content:"";position:absolute;left:0;top:0;width:8px;height:8px;background:red;animation:pulse 2s linear infinite paused}
+      </style><div id="h"></div>`,
+    );
+
+    const h = byId(snapshot, "h");
+    const [dot] = pseudos(h);
+
+    expect(h.animations).toBeUndefined();
+    expect(dot!.animations).toHaveLength(1);
+    expect(dot!.animations![0]).toMatchObject({
+      kind: "animation",
+      name: "pulse",
+      iterations: "infinite",
+    });
+  });
+
+  test("counter() content draws nothing", async () => {
+    const snapshot = await snap(
+      `<style>ol{counter-reset:n}li{counter-increment:n}li::before{content:counter(n)}</style><ol><li id="l">x</li></ol>`,
+    );
+
+    expect(pseudos(byId(snapshot, "l"))).toEqual([]);
+  });
+});
+
 describe("checkVersion", () => {
   test("accepts version 1", () => {
     expect(checkVersion({ version: 1 }).version).toBe(1);

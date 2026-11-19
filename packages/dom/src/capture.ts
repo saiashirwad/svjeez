@@ -26,6 +26,8 @@ interface Pending {
   at?: number;
 }
 
+type Pseudo = "::before" | "::after";
+
 type Writable<T> = { -readonly [K in keyof T]: T[K] };
 
 export const capture = (root: Element): Snapshot => {
@@ -544,11 +546,17 @@ export const capture = (root: Element): Snapshot => {
 
   // ------------------------------------------------------------- animations
 
-  const animationsOf = (el: Element): Animation[] =>
-    el.getAnimations().flatMap((animation) => {
+  const animationsOf = (el: Element, pseudo?: Pseudo): Animation[] =>
+    // A pseudo-element's animations are listed with the subtree's, and only there.
+    el.getAnimations({ subtree: pseudo !== undefined }).flatMap((animation) => {
       const effect = animation.effect;
 
-      if (!(effect instanceof KeyframeEffect) || effect.pseudoElement) return [];
+      if (
+        !(effect instanceof KeyframeEffect) ||
+        effect.target !== el ||
+        (effect.pseudoElement ?? undefined) !== pseudo
+      )
+        return [];
 
       if (animation.playState === "idle") return [];
 
@@ -759,6 +767,328 @@ export const capture = (root: Element): Snapshot => {
     };
   };
 
+  /** What a node needs beyond its computed style: the rect it sits in, and what an element (not a pseudo-element) adds. */
+  interface Draw {
+    tag: string;
+    rect: { x: number; y: number; width: number; height: number };
+    own: DOMMatrix;
+    origin: readonly [number, number];
+    kids: (ElementNode | TextNode)[];
+    animations: Animation[];
+    bare?: boolean;
+    clip?: boolean;
+    image?: ElementNode["image"];
+    svg?: SvgNode;
+    control?: Control;
+    el?: Element;
+    /** Names a pseudo-element's node among its siblings. */
+    part?: string;
+  }
+
+  const draw = (style: CSSStyleDeclaration, d: Draw): ElementNode => {
+    const { rect, own, origin, animations } = d;
+    // A native checkbox or radio has no CSS of its own to draw: compile draws it whole.
+    const bare = d.bare === true;
+    const radii = radiusOf(style, rect.width, rect.height);
+    const border = bare ? undefined : sidesOf(style);
+    const outlineWidth = px(style.outlineWidth);
+    const shadows = bare ? [] : shadowsOf(style.boxShadow);
+
+    const backgrounds = bare
+      ? []
+      : split(style.backgroundImage, ",").flatMap(
+          (one) => layer(one, rect.width, rect.height) ?? [],
+        );
+
+    const background = bare ? "rgba(0, 0, 0, 0)" : color(style.backgroundColor);
+
+    const clip = {
+      x: d.clip === true || style.overflowX !== "visible",
+      y: d.clip === true || style.overflowY !== "visible",
+    };
+
+    const node: Writable<ElementNode> = {
+      type: "element",
+      tag: d.tag,
+      rect,
+      children: d.kids,
+    };
+
+    const key = d.el?.getAttribute("data-key");
+    const part = d.el?.getAttribute("data-part");
+
+    if (d.el?.id) node.id = d.el.id;
+
+    if (key) node.key = key;
+
+    if (part ?? d.part) node.part = (part ?? d.part)!;
+
+    if (!bare && radii.some(([x, y]) => x > 0 || y > 0)) node.radii = radii;
+
+    // An animation of the transform needs the origin it turns about, even at a moment when the transform is none.
+    const turns = animations.some(({ keyframes }) =>
+      keyframes.some(({ props }) =>
+        ["transform", "translate", "rotate", "scale"].some((name) => name in props),
+      ),
+    );
+
+    if (!isPlain(own) || turns)
+      node.transform = {
+        matrix: [
+          round(own.a),
+          round(own.b),
+          round(own.c),
+          round(own.d),
+          round(own.e),
+          round(own.f),
+        ],
+        origin,
+      };
+
+    if (Number(style.opacity) !== 1) node.opacity = round(Number(style.opacity));
+
+    if (style.mixBlendMode !== "normal") node.blendMode = style.mixBlendMode;
+
+    if (clip.x || clip.y) node.clip = clip;
+
+    if (background !== "rgba(0, 0, 0, 0)") node.background = background;
+
+    if (backgrounds.length > 0) node.backgrounds = backgrounds;
+
+    if (border) node.border = border;
+
+    if (outlineWidth > 0 && style.outlineStyle !== "none")
+      node.outline = {
+        width: outlineWidth,
+        offset: px(style.outlineOffset),
+        color: color(style.outlineColor),
+        // SAFETY: a computed outline-style is always one of the BorderStyle keywords.
+        style: style.outlineStyle as Side["style"],
+      };
+
+    if (shadows.length > 0) node.shadows = shadows;
+
+    if (d.image) node.image = d.image;
+
+    if (d.svg) node.svg = d.svg;
+
+    if (d.control) node.control = d.control;
+
+    if (animations.length > 0) node.animations = animations;
+
+    return node;
+  };
+
+  /** The transform every child of a node rides on: `a`, then the node's own transform about its origin. */
+  const within = (a: DOMMatrix, own: DOMMatrix, origin: readonly [number, number]) =>
+    isPlain(own)
+      ? a
+      : a
+          .multiply(new DOMMatrix().translate(origin[0], origin[1]))
+          .multiply(own)
+          .multiply(new DOMMatrix().translate(-origin[0], -origin[1]));
+
+  // ---------------------------------------------------------- pseudo-elements
+
+  /** Elements that draw their own content, so `::before` and `::after` do not apply to them. */
+  const REPLACED = new Set([
+    "img",
+    "input",
+    "textarea",
+    "select",
+    "video",
+    "audio",
+    "canvas",
+    "iframe",
+    "embed",
+    "object",
+    "br",
+    "hr",
+    "meter",
+    "progress",
+  ]);
+
+  const MARK = "data-svjeez-pseudo";
+
+  /** A CSS string's text, with its escapes undone. */
+  const unquote = (value: string) =>
+    value
+      .slice(1, -1)
+      .replace(/\\([0-9a-fA-F]{1,6}) ?|\\(.)/gs, (_, hex?: string, char?: string) =>
+        hex ? String.fromCodePoint(parseInt(hex, 16)) : char!,
+      );
+
+  /**
+   * What a pseudo-element's `content` says, as text and an optional image.
+   * `counter()`, `counters()` and gradients have no value outside the cascade, so they draw nothing.
+   */
+  const contentOf = (el: Element, style: CSSStyleDeclaration) => {
+    const quotes = /"((?:[^"\\]|\\.)*)"/gs;
+    const pairs = [...style.quotes.matchAll(quotes)].map((m) => unquote(m[0]));
+    const [open = "“", close = "”"] = pairs;
+    let text = "";
+    let url: string | undefined;
+
+    for (const [token = ""] of style.content.matchAll(
+      /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|[\w-]+\((?:[^()"']|"[^"]*"|'[^']*')*\)|[\w-]+/gs,
+    )) {
+      if (token.startsWith('"')) text += unquote(token);
+      else if (token.startsWith("'")) text += unquote(`"${token.slice(1, -1)}"`);
+      else if (token.startsWith("attr(")) text += el.getAttribute(token.slice(5, -1).trim()) ?? "";
+      else if (token.startsWith("url("))
+        url = token
+          .slice(4, -1)
+          .trim()
+          .replace(/^["']|["']$/g, "");
+      else if (token === "open-quote") text += open;
+      else if (token === "close-quote") text += close;
+    }
+
+    return { text, url };
+  };
+
+  /** Properties that would start something on the stand-in that the pseudo-element does not run. */
+  const INERT = /^(animation|transition|view-transition|content|counter-)/;
+
+  /**
+   * A pseudo-element as a synthetic element node: tag `::before` or `::after`, named by `part` so it pairs with itself across states.
+   * Called after the host's real children are captured, because the general path inserts a stand-in next to them.
+   *
+   * - Fast path, no DOM change: an absolutely positioned, empty (`content: ""`) pseudo-element of a host that is its containing block
+   *   and has px size and insets. Its rect is computed from the host's padding box.
+   * - General path: a real `<span>` (an `<img>` for `url()`) is inserted where the pseudo-element is, wearing its computed style,
+   *   while the pseudo-element itself is switched off through a temporary adopted stylesheet keyed on a marker attribute.
+   *   It is measured like any element and removed in `finally`. Caveat: for that moment the host has one more child, so a real
+   *   child's `:first-child`, `:last-child`, `:empty` or `+` styling may differ, which can move the stand-in a little. The real
+   *   children are already captured, so only the pseudo-element's own position can be off, and `counter()` content draws nothing.
+   */
+  const pseudo = (
+    el: Element,
+    which: Pseudo,
+    a: DOMMatrix,
+    host?: { rect: Draw["rect"]; style: CSSStyleDeclaration },
+  ): (ElementNode | TextNode)[] => {
+    if (el instanceof SVGElement || REPLACED.has(el.localName)) return [];
+
+    const style = getComputedStyle(el, which);
+
+    if (
+      style.content === "none" ||
+      style.content === "normal" ||
+      style.display === "none" ||
+      style.visibility === "hidden" ||
+      style.visibility === "collapse"
+    )
+      return [];
+
+    const animations = animationsOf(el, which);
+    const stand: Stand = { tag: which, animations };
+
+    const fast =
+      host &&
+      style.position === "absolute" &&
+      style.content === '""' &&
+      [style.width, style.height, style.left, style.top].every((v) => v.endsWith("px")) &&
+      (host.style.position !== "static" ||
+        host.style.transform !== "none" ||
+        host.style.translate !== "none" ||
+        host.style.rotate !== "none" ||
+        host.style.scale !== "none" ||
+        host.style.perspective !== "none" ||
+        host.style.filter !== "none" ||
+        /\b(transform|filter|perspective)\b/.test(host.style.willChange) ||
+        /\b(layout|paint|strict|content)\b/.test(host.style.contain));
+
+    if (fast) {
+      const sized = (value: string, edges: string[]) =>
+        px(value) +
+        (style.boxSizing === "border-box"
+          ? 0
+          : edges.reduce((sum, e) => sum + px(style.getPropertyValue(e)), 0));
+
+      const width = sized(style.width, [
+        "padding-left",
+        "padding-right",
+        "border-left-width",
+        "border-right-width",
+      ]);
+
+      const height = sized(style.height, [
+        "padding-top",
+        "padding-bottom",
+        "border-top-width",
+        "border-bottom-width",
+      ]);
+
+      // `left` and `top` are measured from the host's padding box, to the pseudo-element's margin edge.
+      const rect = {
+        x: round(
+          host.rect.x +
+            px(host.style.borderLeftWidth) +
+            px(style.left) +
+            px(style.marginLeft) -
+            el.scrollLeft,
+        ),
+        y: round(
+          host.rect.y +
+            px(host.style.borderTopWidth) +
+            px(style.top) +
+            px(style.marginTop) -
+            el.scrollTop,
+        ),
+        width: round(width),
+        height: round(height),
+      };
+
+      if (rect.width === 0 || rect.height === 0) return [];
+
+      const own = ownMatrix(style, width, height);
+      const [ox = 0, oy = 0] = style.transformOrigin.split(" ").map(px);
+      const origin = [round(rect.x + ox), round(rect.y + oy)] as const;
+
+      return [draw(style, { tag: which, part: which, rect, own, origin, kids: [], animations })];
+    }
+
+    const { text, url } = contentOf(el, style);
+
+    // Read everything off the pseudo-element before it is switched off.
+    const worn: [string, string][] = [];
+
+    for (const name of Array.from(style))
+      if (!INERT.test(name)) worn.push([name, style.getPropertyValue(name)]);
+
+    const standIn = document.createElement(url === undefined ? "span" : "img");
+
+    standIn.style.cssText = "all:initial;animation:none;transition:none;";
+
+    for (const [name, value] of worn) standIn.style.setProperty(name, value);
+
+    if (standIn instanceof HTMLImageElement) standIn.src = url!;
+    else standIn.textContent = text;
+
+    const root = el.getRootNode();
+    const scope = root instanceof ShadowRoot ? root : document;
+    const off = new CSSStyleSheet();
+
+    off.replaceSync(`[${MARK}="${which}"]${which}{content:none !important}`);
+
+    const adopted = [...scope.adoptedStyleSheets];
+
+    el.setAttribute(MARK, which);
+    scope.adoptedStyleSheets = [...adopted, off];
+
+    try {
+      if (which === "::before") el.insertBefore(standIn, el.firstChild);
+      else el.append(standIn);
+
+      return element(standIn, a, stand);
+    } finally {
+      standIn.remove();
+      scope.adoptedStyleSheets = adopted;
+      el.removeAttribute(MARK);
+    }
+  };
+
   // ------------------------------------------------------------------- walk
 
   /** `a` carries the transforms of every ancestor, from layout space to the page. */
@@ -776,7 +1106,13 @@ export const capture = (root: Element): Snapshot => {
     return out;
   };
 
-  const element = (el: Element, a: DOMMatrix): (ElementNode | TextNode)[] => {
+  /** What `element` draws a pseudo-element's stand-in as: its pseudo-element's tag and animations. */
+  interface Stand {
+    tag: Pseudo;
+    animations: Animation[];
+  }
+
+  const element = (el: Element, a: DOMMatrix, stand?: Stand): (ElementNode | TextNode)[] => {
     const style = getComputedStyle(el);
 
     if (
@@ -786,7 +1122,8 @@ export const capture = (root: Element): Snapshot => {
     )
       return [];
 
-    if (style.display === "contents") return children(el, a);
+    if (style.display === "contents")
+      return [...pseudo(el, "::before", a), ...children(el, a), ...pseudo(el, "::after", a)];
 
     const box = pageRect(el);
     const inline = style.display === "inline" && !(el instanceof HTMLImageElement);
@@ -845,45 +1182,20 @@ export const capture = (root: Element): Snapshot => {
     };
 
     const origin = [round(cx + kx), round(cy + ky)] as const;
-
-    const inner = isPlain(own)
-      ? a
-      : a
-          .multiply(new DOMMatrix().translate(origin[0], origin[1]))
-          .multiply(own)
-          .multiply(new DOMMatrix().translate(-origin[0], -origin[1]));
-
+    const inner = within(a, own, origin);
     const form = formOf(el, style, rect);
+    const leaf = el instanceof SVGElement || el instanceof HTMLImageElement;
+
+    // The real children come first: a pseudo-element's stand-in is inserted next to them afterwards, so it cannot restyle them.
+    const real = form?.kids ?? (leaf ? [] : children(el, inner));
+    const host = { rect, style };
 
     const kids =
-      form?.kids ??
-      (el instanceof SVGElement || el instanceof HTMLImageElement ? [] : children(el, inner));
-
-    const svg = el instanceof SVGSVGElement ? svgOf(el) : undefined;
+      form || leaf || stand
+        ? real
+        : [...pseudo(el, "::before", inner, host), ...real, ...pseudo(el, "::after", inner, host)];
 
     if ((box.width === 0 || box.height === 0) && kids.length === 0) return [];
-
-    // A native checkbox or radio has no CSS of its own to draw: compile draws it whole.
-    const bare = form?.native === true;
-    const radii = radiusOf(style, rect.width, rect.height);
-    const border = bare ? undefined : sidesOf(style);
-    const outlineWidth = px(style.outlineWidth);
-    const shadows = bare ? [] : shadowsOf(style.boxShadow);
-
-    const backgrounds = bare
-      ? []
-      : split(style.backgroundImage, ",").flatMap(
-          (one) => layer(one, rect.width, rect.height) ?? [],
-        );
-
-    const background = bare ? "rgba(0, 0, 0, 0)" : color(style.backgroundColor);
-
-    const clip = {
-      x: form?.clip === true || style.overflowX !== "visible",
-      y: form?.clip === true || style.overflowY !== "visible",
-    };
-
-    const animations = animationsOf(el);
 
     const image =
       el instanceof HTMLImageElement
@@ -896,74 +1208,20 @@ export const capture = (root: Element): Snapshot => {
           }
         : undefined;
 
-    const node: Writable<ElementNode> = {
-      type: "element",
-      tag: el.localName,
+    const node = draw(style, {
+      tag: stand?.tag ?? el.localName,
       rect,
-      children: kids,
-    };
-
-    const key = el.getAttribute("data-key");
-    const part = el.getAttribute("data-part");
-
-    if (el.id) node.id = el.id;
-
-    if (key) node.key = key;
-
-    if (part) node.part = part;
-
-    if (!bare && radii.some(([x, y]) => x > 0 || y > 0)) node.radii = radii;
-
-    // An animation of the transform needs the origin it turns about, even at a moment when the transform is none.
-    const turns = animations.some(({ keyframes }) =>
-      keyframes.some(({ props }) =>
-        ["transform", "translate", "rotate", "scale"].some((name) => name in props),
-      ),
-    );
-
-    if (!isPlain(own) || turns)
-      node.transform = {
-        matrix: [
-          round(own.a),
-          round(own.b),
-          round(own.c),
-          round(own.d),
-          round(own.e),
-          round(own.f),
-        ],
-        origin,
-      };
-
-    if (Number(style.opacity) !== 1) node.opacity = round(Number(style.opacity));
-
-    if (style.mixBlendMode !== "normal") node.blendMode = style.mixBlendMode;
-
-    if (clip.x || clip.y) node.clip = clip;
-
-    if (background !== "rgba(0, 0, 0, 0)") node.background = background;
-
-    if (backgrounds.length > 0) node.backgrounds = backgrounds;
-
-    if (border) node.border = border;
-
-    if (outlineWidth > 0 && style.outlineStyle !== "none")
-      node.outline = {
-        width: outlineWidth,
-        offset: px(style.outlineOffset),
-        color: color(style.outlineColor),
-        // SAFETY: a computed outline-style is always one of the BorderStyle keywords.
-        style: style.outlineStyle as Side["style"],
-      };
-
-    if (shadows.length > 0) node.shadows = shadows;
-
-    if (image) node.image = image;
-
-    if (svg) node.svg = svg;
-
-    if (form?.control) node.control = form.control;
-
-    if (animations.length > 0) node.animations = animations;
+      own,
+      origin,
+      kids,
+      animations: stand?.animations ?? animationsOf(el),
+      ...(stand ? { part: stand.tag } : { el }),
+      bare: form?.native === true,
+      ...(form?.clip && { clip: true }),
+      ...(image && { image }),
+      ...(el instanceof SVGSVGElement && { svg: svgOf(el)! }),
+      ...(form?.control && { control: form.control }),
+    });
 
     return [node];
   };

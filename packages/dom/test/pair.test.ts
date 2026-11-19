@@ -169,4 +169,23 @@ describe("a node under different parents", () => {
       expect(find(roots[1]!.children[1]!, "card")).toBeDefined();
     }
   });
+
+  test("a pseudo-element that appears in the second state pairs by its part, and the real children stay paired", () => {
+    const pseudo = (which: "::before" | "::after") =>
+      box({ tag: which, part: which, rect: { x: 0, y: 0, width: 8, height: 8 } });
+
+    const a = list(item("x"), item("y"));
+    const b = list(pseudo("::before"), item("x"), item("y"), pseudo("::after"));
+    const c = list(pseudo("::after"), item("x"), item("y"));
+
+    const [one = [], two = []] = pair([a, b]).roots.map((root) => root.children.map((k) => k.key));
+
+    expect(one).toEqual(["li[0]", "li[1]"]);
+    expect(two).toEqual(["::before", "li[0]", "li[1]", "::after"]);
+
+    // The ::after that moves from last to first of the list still pairs with itself.
+    const [, , third = []] = pair([a, b, c]).roots.map((root) => root.children.map((k) => k.key));
+
+    expect(third).toEqual(["::after", "li[0]", "li[1]"]);
+  });
 });
