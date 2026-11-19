@@ -544,7 +544,8 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     if (spacing !== undefined && !Number.isFinite(spacing))
       throw new SceneError(`${where} needs a finite letterSpacing, got ${spacing}.`);
 
-    unseen(look, words);
+    // Supplied advances mean the browser already laid the run out, fallback fonts included.
+    if (!advances) unseen(look, words);
 
     return {
       text: words,
