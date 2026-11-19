@@ -17,9 +17,9 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m4{animation-name:k4}
 @keyframes k5{0%,11.249%{visibility:hidden}11.25%,100%{visibility:visible}}
 .m5{animation-name:k5}
-@keyframes k6{0%,12.4%{visibility:hidden}12.401%,100%{visibility:visible}}
+@keyframes k6{0%,12.527%{visibility:hidden}12.528%,100%{visibility:visible}}
 .m6{animation-name:k6}
-@keyframes k7{0%,8.939%{visibility:hidden}8.94%,100%{visibility:visible}}
+@keyframes k7{0%,8.89%{visibility:hidden}8.891%,100%{visibility:visible}}
 .m7{animation-name:k7}
 @keyframes k8{0%,12.505%{visibility:hidden}12.506%,100%{visibility:visible}}
 .m8{animation-name:k8}
@@ -53,17 +53,17 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
   </defs>
   <rect width="398" height="406" fill="var(--background)"/>
   <g transform="translate(32 32)" font-size="13" fill="var(--text)">
-    <path d="M42.5 128L42.5 249" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
-    <polygon points="42.5 128 36.5 140 48.5 140" fill="var(--background)" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m2"/>
+    <path d="M69.5 128L69.5 249" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
+    <polygon points="69.5 128 63.5 140 75.5 140" fill="var(--background)" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m2"/>
     <g class="a m3"/>
-    <path d="M129 128L129 134C129 171.82 130.14 195 132 195C133.86 195 135 212.86 135 242L135 248" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <path d="M129 128L129 134C129 171.82 141.92 195 163 195C184.08 195 197 212.86 197 242L197 248" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
     <polygon points="129 128 123 140 135 140" fill="var(--background)" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m5"/>
     <g class="a m6"/>
-    <path d="M189 100L189 106C189 152.5 167.34 181 132 181C96.66 181 75 204.56 75 243L75 249" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
+    <path d="M189 100L189 106C189 152.5 172.47 181 145.5 181C118.53 181 102 204.56 102 243L102 249" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
     <polygon points="189 100 184 108 189 116 194 108" fill="var(--background)" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m2"/>
     <g class="a m7"/>
-    <path d="M205 100L205 248" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
-    <polygon points="205 100 200 108 205 116 210 108" fill="var(--border)" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m5"/>
+    <path d="M256.5 100L256.5 248" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <polygon points="256.5 100 251.5 108 256.5 116 261.5 108" fill="var(--border)" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m5"/>
     <g class="a m8"/>
     <g class="a m9">
       <g clip-path="url(#c1)">
@@ -79,7 +79,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <text x="11" y="87.68">+int age</text>
       <text x="11" y="117.68">+speak() String</text>
     </g>
-    <g transform="translate(0 249)" class="a m10">
+    <g transform="translate(27 249)" class="a m10">
       <g clip-path="url(#c2)">
         <rect width="85" height="92" fill="var(--magenta-6-background)"/>
         <rect width="85" height="34" fill="var(--magenta-22-background)"/>
@@ -91,7 +91,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <text x="11" y="61.68">+swim()</text>
       <text x="11" y="81.68">+quack()</text>
     </g>
-    <g transform="translate(125 248)" class="a m11">
+    <g transform="translate(187 248)" class="a m11">
       <g clip-path="url(#c3)">
         <rect width="139" height="94" fill="var(--magenta-6-background)"/>
         <rect width="139" height="34" fill="var(--magenta-22-background)"/>
@@ -115,20 +115,20 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <text x="11" y="53.68" font-size="13">+List&lt;Duck&gt; ducks</text>
     </g>
     <g class="a m13">
-      <rect x="53.43" y="206.5" width="43.15" height="17" rx="3" fill="var(--background)"/>
-      <text x="58.43" y="218.978" font-size="11.05" fill="var(--muted)">hosts</text>
+      <rect x="167.43" y="132" width="43.15" height="17" rx="3" fill="var(--background)"/>
+      <text x="172.43" y="144.478" font-size="11.05" fill="var(--muted)">hosts</text>
     </g>
     <g class="a m14">
-      <rect x="173.48" y="181.5" width="63.04" height="17" rx="3" fill="var(--background)"/>
-      <text x="178.48" y="193.978" font-size="11.05" fill="var(--muted)">contains</text>
+      <rect x="224.98" y="165.5" width="63.04" height="17" rx="3" fill="var(--background)"/>
+      <text x="229.98" y="177.978" font-size="11.05" fill="var(--muted)">contains</text>
     </g>
     <g class="a m13">
-      <rect x="197" y="118" width="14.63" height="17" rx="3" fill="var(--background)"/>
-      <text x="201" y="130.478" font-size="11.05" fill="var(--muted)">1</text>
+      <rect x="197" y="104" width="14.63" height="17" rx="3" fill="var(--background)"/>
+      <text x="201" y="116.478" font-size="11.05" fill="var(--muted)">1</text>
     </g>
     <g class="a m13">
-      <rect x="83" y="228" width="14.63" height="17" rx="3" fill="var(--background)"/>
-      <text x="87" y="240.478" font-size="11.05" fill="var(--muted)">*</text>
+      <rect x="110" y="214" width="14.63" height="17" rx="3" fill="var(--background)"/>
+      <text x="114" y="226.478" font-size="11.05" fill="var(--muted)">*</text>
     </g>
   </g>
 </svg>

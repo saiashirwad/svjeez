@@ -13,14 +13,14 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m2{animation-name:k2}
 @keyframes k3{0%,14.883%,18.567%,33.018%,36.703%,70.996%,74.681%,100%{opacity:0}15.673%,17.778%,33.808%,35.913%,71.786%,73.891%{opacity:1}}
 .m3{animation-name:k3}
-@keyframes k4{0%,22.135%,25.819%,40.27%,43.954%,78.248%,81.932%,100%{opacity:0}22.924%,25.03%,41.059%,43.165%,79.038%,81.143%{opacity:1}}
+@keyframes k4{0%,22.135%,25.819%,40.27%,43.954%,78.248%,81.932%,100%{opacity:0}22.924%,25.03%,41.06%,43.165%,79.038%,81.143%{opacity:1}}
 .m4{animation-name:k4}
 @keyframes k5{0%,48.587%,52.271%,100%{opacity:0}49.376%,51.482%{opacity:1}}
 .m5{animation-name:k5}
 @keyframes k6{0%,87.627%,91.311%,100%{opacity:0}88.416%,90.521%{opacity:1}}
 .m6{animation-name:k6}
 @keyframes k7{0%,9.357%,14.883%,22.135%,33.018%,40.27%,48.587%,65.47%,70.996%,78.248%,87.627%,100%{visibility:hidden}5.789%,13.041%,18.567%,25.819%,36.703%,43.954%,52.271%,69.154%,74.681%,81.932%{visibility:visible}}
-@keyframes k8{0%,5.789%{translate:129.2px 132px}9.357%{translate:278.32px 132px;animation-timing-function:steps(1)}9.358%,12.895%,65.471%,68.947%{translate:308.32px 127.5px}13.158%{translate:311.36px 127.5px}14.883%,70.996%{translate:356.32px 127.5px;animation-timing-function:steps(1)}14.884%,18.421%,33.019%,36.579%,70.997%,74.474%{translate:457.12px 127.5px}18.684%{translate:462px 127.5px}22.135%,40.27%,78.248%{translate:606.24px 127.5px;animation-timing-function:steps(1)}22.136%,25.789%{translate:677.64px 147px}26.053%{translate:676.37px 156.54px}26.316%{translate:669.37px 164.61px}26.579%{translate:659.55px 169.47px}27.105%{translate:638.44px 175.49px}27.632%{translate:616.73px 178.98px}28.158%{translate:594.84px 181.16px}28.684%{translate:572.88px 182.43px}29.474%{translate:539.88px 182.96px}30.789%{translate:484.94px 180.86px}31.316%{translate:463.07px 178.48px}31.842%{translate:441.43px 174.54px}32.105%{translate:430.83px 171.6px}32.368%{translate:420.62px 167.58px}32.632%{translate:411.48px 161.65px}32.895%{translate:406.72px 152.17px}33.018%{translate:406.72px 147px;animation-timing-function:steps(1)}36.842%{translate:462.95px 127.5px}40.271%,43.947%{translate:765.04px 198px}44.737%{translate:797.73px 199.02px}45.263%{translate:819.57px 201.52px}45.526%{translate:830.31px 203.9px}45.789%{translate:840.73px 207.39px}46.053%{translate:849.86px 213.36px}46.316%{translate:854.39px 223.07px}46.579%{translate:860.73px 231.6px}46.842%{translate:870.59px 236.36px}47.105%{translate:881.14px 239.42px}47.632%{translate:902.84px 242.94px}48.421%{translate:935.79px 244.48px}48.587%{translate:942.72px 244.5px;animation-timing-function:steps(1)}48.588%,52.105%{translate:1022.52px 264px}52.368%{translate:1022.52px 268.07px}52.632%{translate:1017.11px 277.1px}52.895%{translate:1007.11px 281.67px}53.158%{translate:996.55px 284.65px}53.421%{translate:985.87px 287.27px}53.947%{translate:964.14px 290.69px}55%{translate:920.4px 295.33px}56.053%{translate:876.47px 297.94px}57.368%{translate:821.5px 299.53px}58.684%{translate:766.5px 299.85px}60%{translate:711.54px 298.02px}61.053%{translate:667.72px 294.08px}62.105%{translate:624.33px 286.77px}62.895%{translate:592.51px 278.04px}63.684%{translate:562.01px 265.52px}64.211%{translate:543.77px 253.29px}64.474%{translate:535.86px 245.84px}64.737%{translate:529.19px 237.09px}65%{translate:524.75px 227.3px}65.263%{translate:522.28px 216.58px}65.47%{translate:521.68px 208px;animation-timing-function:steps(1)}69.211%{translate:309.79px 127.5px}74.737%{translate:459.47px 127.5px}78.249%,81.842%{translate:765.04px 66px}82.105%{translate:772.27px 65.97px}82.895%{translate:805.22px 64.42px}83.421%{translate:826.91px 60.85px}83.684%{translate:837.45px 57.76px}83.947%{translate:847.3px 52.95px}84.474%{translate:859.27px 35.46px}84.737%{translate:869.1px 30.72px}85%{translate:879.66px 27.69px}85.526%{translate:901.3px 23.87px}86.053%{translate:923.18px 21.62px}86.842%{translate:956.13px 19.89px}87.627%,100%{translate:988.92px 19.5px}}
+@keyframes k8{0%,5.789%{translate:129.2px 132px}9.357%{translate:278.32px 132px;animation-timing-function:steps(1)}9.358%,12.895%,65.471%,68.947%{translate:308.32px 127.5px}13.158%{translate:311.36px 127.5px}14.883%,70.996%{translate:356.32px 127.5px;animation-timing-function:steps(1)}14.884%,18.421%,33.019%,36.579%,70.997%,74.474%{translate:457.12px 127.5px}18.684%{translate:462px 127.5px}22.135%,40.27%,78.248%{translate:606.24px 127.5px;animation-timing-function:steps(1)}22.136%,25.789%{translate:677.64px 147px}26.053%{translate:676.37px 156.54px}26.316%{translate:669.37px 164.61px}26.579%{translate:659.56px 169.48px}27.105%{translate:638.45px 175.5px}27.632%{translate:616.73px 178.98px}28.158%{translate:594.84px 181.16px}28.684%{translate:572.88px 182.43px}29.474%{translate:539.89px 182.96px}30.789%{translate:484.94px 180.86px}31.316%{translate:463.07px 178.48px}31.842%{translate:441.43px 174.55px}32.105%{translate:430.83px 171.61px}32.368%{translate:420.62px 167.59px}32.632%{translate:411.49px 161.65px}32.895%{translate:406.72px 152.17px}33.018%{translate:406.72px 147px;animation-timing-function:steps(1)}36.842%{translate:462.95px 127.5px}40.271%,43.947%{translate:765.04px 198px}44.737%{translate:797.72px 199.03px}45.263%{translate:819.57px 201.53px}45.526%{translate:830.31px 203.9px}45.789%{translate:840.73px 207.39px}46.053%{translate:849.86px 213.35px}46.316%{translate:854.39px 223.07px}46.579%{translate:860.72px 231.6px}46.842%{translate:870.59px 236.36px}47.105%{translate:881.14px 239.42px}47.632%{translate:902.83px 242.94px}48.421%{translate:935.79px 244.48px}48.587%{translate:942.72px 244.5px;animation-timing-function:steps(1)}48.588%,52.105%{translate:1022.52px 264px}52.368%{translate:1022.52px 268.07px}52.632%{translate:1017.12px 277.09px}52.895%{translate:1007.11px 281.67px}53.158%{translate:996.56px 284.65px}53.421%{translate:985.87px 287.27px}53.947%{translate:964.14px 290.69px}55%{translate:920.4px 295.33px}56.053%{translate:876.48px 297.94px}57.368%{translate:821.5px 299.53px}58.684%{translate:766.51px 299.85px}60%{translate:711.55px 298.02px}61.053%{translate:667.72px 294.08px}62.105%{translate:624.34px 286.77px}62.895%{translate:592.51px 278.05px}63.684%{translate:562.02px 265.52px}64.211%{translate:543.78px 253.3px}64.474%{translate:535.86px 245.85px}64.737%{translate:529.19px 237.1px}65%{translate:524.75px 227.3px}65.263%{translate:522.28px 216.58px}65.47%{translate:521.68px 208px;animation-timing-function:steps(1)}69.211%{translate:309.78px 127.5px}74.737%{translate:459.47px 127.5px}78.249%,81.842%{translate:765.04px 66px}82.105%{translate:772.27px 65.97px}82.895%{translate:805.22px 64.42px}83.421%{translate:826.91px 60.86px}83.684%{translate:837.45px 57.76px}83.947%{translate:847.29px 52.96px}84.474%{translate:859.27px 35.46px}84.737%{translate:869.1px 30.72px}85%{translate:879.65px 27.7px}85.526%{translate:901.3px 23.87px}86.053%{translate:923.18px 21.63px}86.842%{translate:956.13px 19.89px}87.627%,100%{translate:988.92px 19.5px}}
 .m7{animation-name:k7,k8;animation-timing-function:steps(1),linear}
 @keyframes k9{0%,95.521%{opacity:1}98.679%,100%{opacity:0}}
 .m8{animation-name:k9}
@@ -29,11 +29,11 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
   <rect width="960" height="540" fill="var(--background)"/>
   <g transform="translate(480 270)" class="a m8">
     <g transform="translate(-584.535 -152.5)" style="transform-origin:0 0;scale:0.77" fill="var(--text)">
-      <g transform="translate(62 112.498)">
+      <g transform="translate(62 112.5)">
         <rect width="67.2" height="39" rx="8" fill="var(--blue-22-muted-8-background)" stroke="var(--blue)" stroke-width="1.5"/>
         <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Idle</text>
       </g>
-      <g transform="translate(278.32 55.999)">
+      <g transform="translate(278.32 56)">
         <rect width="486.72" height="152" rx="10" fill="var(--magenta-10-muted-8-background)" stroke="var(--magenta)" stroke-width="1.5"/>
         <line x1="0" y1="36" x2="486.72" y2="36" fill="none" stroke="var(--magenta)"/>
         <text x="213.96" y="23.04" font-size="14" fill="var(--text)">Working</text>
@@ -54,11 +54,11 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
         <rect width="109.2" height="39" rx="8" fill="var(--muted-8-background)" stroke="var(--muted)"/>
         <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Cancelled</text>
       </g>
-      <g transform="translate(356.32 107.999)">
+      <g transform="translate(356.32 108)">
         <rect width="100.8" height="39" rx="8" fill="var(--blue-22-muted-16-background)" stroke="var(--blue)" stroke-width="1.5"/>
         <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Planning</text>
       </g>
-      <g transform="translate(606.24 107.999)">
+      <g transform="translate(606.24 108)">
         <rect width="142.8" height="39" rx="8" fill="var(--orange-22-muted-16-background)" stroke="var(--orange)" stroke-width="1.5"/>
         <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Calling tools</text>
       </g>
@@ -66,11 +66,11 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <polygon points="62 132 54 136 54 128" fill="var(--muted)"/>
       <path d="M129.2 132L271.32 132" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="278.32 132 270.32 136 270.32 128" fill="var(--muted)"/>
-      <path d="M765.04 198L771.04 198C822.4 198 853.88 206.83 853.88 221.25C853.88 235.66 882.7 244.5 929.72 244.5L935.72 244.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M765.04 198L771.04 198C822.4 198 853.88 206.84 853.88 221.25C853.88 235.67 882.7 244.5 929.72 244.5L935.72 244.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="942.72 244.5 934.72 248.5 934.72 240.5" fill="var(--muted)"/>
       <path d="M1022.52 264L1022.52 270C1022.52 288.6 927.36 300 772.1 300C616.84 300 521.68 269.98 521.68 221L521.68 215" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="521.68 208 525.68 216 517.68 216" fill="var(--muted)"/>
-      <path d="M765.04 66L771.04 66C822.4 66 853.88 57.16 853.88 42.75C853.88 28.33 900.26 19.5 975.92 19.5L981.92 19.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M765.04 66L771.04 66C822.4 66 853.88 57.17 853.88 42.75C853.88 28.34 900.26 19.5 975.92 19.5L981.92 19.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="988.92 19.5 980.92 23.5 980.92 15.5" fill="var(--muted)"/>
       <path d="M765.04 94.5L973.52 94.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="980.52 94.5 972.52 98.5 972.52 90.5" fill="var(--muted)"/>
@@ -88,16 +88,16 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <polygon points="606.24 127.5 598.24 131.5 598.24 123.5" fill="var(--muted)"/>
       <path d="M677.64 147L677.64 153C677.64 171.6 626.17 183 542.18 183C458.19 183 406.72 174.26 406.72 160L406.72 154" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="406.72 147 410.72 155 402.72 155" fill="var(--muted)"/>
-      <circle cx="7" cy="131.998" r="7"/>
-      <circle cx="301.32" cy="127.499" r="7"/>
+      <circle cx="7" cy="132" r="7"/>
+      <circle cx="301.32" cy="127.5" r="7"/>
       <g transform="translate(1159.32 94.5)">
         <circle r="9" fill="none" stroke="var(--text)" stroke-width="1.5"/>
         <circle r="5" fill="var(--text)"/>
       </g>
-      <rect x="59" y="109.498" width="75.2" height="47" rx="11" fill="none" stroke="var(--orange)" stroke-width="2" class="a m1"/>
-      <rect x="275.32" y="52.999" width="494.72" height="160" rx="13" fill="none" stroke="var(--orange)" stroke-width="2" class="a m2"/>
-      <rect x="353.32" y="104.999" width="108.8" height="47" rx="11" fill="none" stroke="var(--orange)" stroke-width="2" class="a m3"/>
-      <rect x="603.24" y="104.999" width="150.8" height="47" rx="11" fill="none" stroke="var(--orange)" stroke-width="2" class="a m4"/>
+      <rect x="59" y="109.5" width="75.2" height="47" rx="11" fill="none" stroke="var(--orange)" stroke-width="2" class="a m1"/>
+      <rect x="275.32" y="53" width="494.72" height="160" rx="13" fill="none" stroke="var(--orange)" stroke-width="2" class="a m2"/>
+      <rect x="353.32" y="105" width="108.8" height="47" rx="11" fill="none" stroke="var(--orange)" stroke-width="2" class="a m3"/>
+      <rect x="603.24" y="105" width="150.8" height="47" rx="11" fill="none" stroke="var(--orange)" stroke-width="2" class="a m4"/>
       <rect x="939.72" y="222" width="167.6" height="47" rx="11" fill="none" stroke="var(--orange)" stroke-width="2" class="a m5"/>
       <rect x="985.92" y="-3" width="75.2" height="47" rx="11" fill="none" stroke="var(--orange)" stroke-width="2" class="a m6"/>
       <circle r="5" fill="var(--orange)" class="a m7"/>
