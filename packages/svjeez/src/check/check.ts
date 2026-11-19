@@ -69,7 +69,7 @@ const overlapArea = (a: PageBox, b: PageBox): number =>
 
 const visible = (b: PageBox): boolean => b[5] === 1 && b[4] > 0.05;
 
-export const sampleTimes = (duration: Seconds): Seconds[] => [
+const sampleTimes = (duration: Seconds): Seconds[] => [
   ...Array.from({ length: 8 }, (_, i) => (i * duration) / 8),
   duration - Math.min(0.05, duration / 100),
 ];

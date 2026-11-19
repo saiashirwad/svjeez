@@ -255,8 +255,6 @@ const roundTo = (precision: number | undefined, what: string): ((value: number) 
 
 const isNumber = (value: number | Vec | Geometry): value is number => typeof value === "number";
 
-const isScalar = (value: number | Vec): value is number => typeof value === "number";
-
 const isVec = (value: Vec | Geometry): value is Vec => Array.isArray(value);
 
 const measured = (outline: ReturnType<typeof outlineOf>) =>
@@ -366,7 +364,7 @@ sampled.motion = (
         throw new SceneError(
           `sampled.motion() returned no \`${name}\` at t=${t}; every sample needs the same values.`,
         );
-      const each = isScalar(value) ? (name === "scale" ? [value, value] : [value]) : [...value];
+      const each = isNumber(value) ? (name === "scale" ? [value, value] : [value]) : [...value];
 
       if (!each.every(Number.isFinite))
         throw new SceneError(

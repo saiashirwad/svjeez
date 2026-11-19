@@ -180,7 +180,7 @@ export const gradientUrl = (
 
   const optional = new Set(["x1", "y1", "y2"]);
 
-  const stops = first.stops.map((stop, i) => {
+  const stops = first.stops.map((_, i) => {
     const offset = smil(
       defs,
       "offset",

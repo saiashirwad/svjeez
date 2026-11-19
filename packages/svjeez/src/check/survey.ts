@@ -75,8 +75,6 @@ export const namesOf = (scene: Scene): Map<string, string> => {
   return out;
 };
 
-export type ValueKind = "number" | "vec" | "geometry" | "paint";
-
 export type Named =
   | { readonly name: string; readonly kind: "number"; readonly value: Animated<number> }
   | { readonly name: string; readonly kind: "vec"; readonly value: Animated<Vec> }
@@ -151,7 +149,7 @@ export const textOf = (node: TextNode): string =>
     .join(" ")
     .trim();
 
-export const keysOver = <T>(lane: Lane<T>, duration: Seconds): readonly Key<T>[] =>
+const keysOver = <T>(lane: Lane<T>, duration: Seconds): readonly Key<T>[] =>
   lane.period === undefined ? lane.keys : unrolled(lane, duration);
 
 export type Stretch = readonly [from: Seconds, to: Seconds];
@@ -242,7 +240,7 @@ export const shownOf = (hidden: readonly Stretch[], duration: Seconds): Stretch[
   return out;
 };
 
-export const lanesOf = (scene: Scene): Lane<unknown>[] => {
+const lanesOf = (scene: Scene): Lane<unknown>[] => {
   const out: Lane<unknown>[] = [];
 
   walkScene(scene, (node) => {
@@ -338,7 +336,7 @@ export const colorAt = (
   return [mix(0), mix(1), mix(2), mix(3)];
 };
 
-export const isClear = (scene: Scene, paint: Paint): boolean =>
+const isClear = (scene: Scene, paint: Paint): boolean =>
   isColor(paint)
     ? SCHEMES.every((scheme) => rgbaIn(scene, paint, scheme)[3] <= 0)
     : "stops" in paint &&
@@ -356,7 +354,7 @@ const hex = (n: number): string =>
     .padStart(2, "0")
     .toUpperCase();
 
-export const colorName = (color: Color): string =>
+const colorName = (color: Color): string =>
   isRgba(color)
     ? `#${hex(color[0])}${hex(color[1])}${hex(color[2])}${color[3] < 1 ? hex(color[3]) : ""}`
     : color.name;

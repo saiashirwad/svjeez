@@ -87,7 +87,7 @@ export const homeOf = (
   return pinned(anchor, box, named(node.key), kind === "text" ? baselineOf(node) : undefined);
 };
 
-export const baselineOf = (node: SceneNode): number => {
+const baselineOf = (node: SceneNode): number => {
   if (node.kind === "text") return node.lines[0]?.at[1] ?? 0;
 
   return node.kind === "group" && node.children[0] ? baselineOf(node.children[0]) : 0;

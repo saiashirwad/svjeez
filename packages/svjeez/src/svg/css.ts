@@ -22,7 +22,7 @@ export const timing = (curve: Ease): string => {
   }
 };
 
-export const BASE_TIMING = timing(DEFAULT_EASE);
+const BASE_TIMING = timing(DEFAULT_EASE);
 
 const percents = (keys: readonly Key[], period: Seconds): string[] => {
   for (const places of [3, 4]) {

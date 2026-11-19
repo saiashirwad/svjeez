@@ -113,7 +113,7 @@ const ordered = (before: readonly string[], after: readonly string[]): string[] 
 
 const parentOf = (key: string): string => key.slice(0, Math.max(0, key.lastIndexOf("/")));
 
-const placeNote = (key: string, nodes: readonly SceneNode[]): string =>
+const placeNote = (nodes: readonly SceneNode[]): string =>
   nodes.some(isPlaced)
     ? ` It has no key, so it is matched by its place among its siblings: give each version a key, as in <Shape key="…" />.`
     : ` Give the two versions different keys, so one exits as the other enters.`;
@@ -139,7 +139,7 @@ const entries = (lists: readonly (readonly SceneNode[])[]): Entry[] => {
 
     if (kinds.length > 1)
       throw new SceneError(
-        `morph() can't turn the node keyed "${key.split("/").at(-1)}" from a ${kinds[0]} into a ${kinds[1]}: a node keeps its kind across states.${placeNote(key, nodes)}`,
+        `morph() can't turn the node keyed "${key.split("/").at(-1)}" from a ${kinds[0]} into a ${kinds[1]}: a node keeps its kind across states.${placeNote(nodes)}`,
       );
 
     const filled = found.map((node, s) => {
@@ -274,7 +274,7 @@ const agreed = <T>(entry: Entry, read: (node: SceneNode) => T, what: string): T 
 
   if (other !== undefined)
     throw new SceneError(
-      `morph() can't blend ${named(entry.key)}: its ${what} differs between states, and ${what} doesn't animate.${placeNote(entry.key, entry.filled)}`,
+      `morph() can't blend ${named(entry.key)}: its ${what} differs between states, and ${what} doesn't animate.${placeNote(entry.filled)}`,
     );
 
   return values[0]!;

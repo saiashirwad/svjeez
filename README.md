@@ -61,12 +61,12 @@ npx svjeez dev scene.tsx
 
 Open `hello.svg` in a browser or embed it with `<img src="hello.svg" alt="A curve draws on, then a dot pops in">`. With Bun, use `bun add svjeez@next` and `bunx --bun svjeez` with the same scene and JSX config.
 
-## Four ways to move something
+## Ways to move something
 
 Each has one job.
 
 - **A track** is a timeline you declare, write in scene order, and nodes read: `const glow = track(0)`, `<Shape opacity={glow} />`, then `glow.to(1, span(1, 0.3))`. Every write returns the track, and `glow.span` is the span of the last step, so `glow.span.next(0.5)` follows it. A point track can go to an anchor, resolved after layout: `pos.to(card.right, glow.span.next(0.5))` lands the node's `anchor` point on it. Its times count on the clock of the nodes that read it, so nodes on different clocks (another `<Sequence>`) need their own tracks.
-- **`draw`** is how a component is told to draw itself: a number or a track from 0 to 1, as in `<Arrow draw={t} />`, and each series of a chart takes the same prop.
+- **`draw`** is how a component is told to draw itself: a number or a track from 0 to 1, as in `<Arrow draw={t} />` or `<Shape draw={t} />` (trim `[0, draw]`), and each series of a chart takes the same prop.
 - **A motion layer** is a passing effect on top of the prop, such as an entrance, an exit or a wobble: `motion={enter(span(1, 0.3))}`. Layers always stack.
 - **A morph** says the picture's structure changes from one state to another, and moves whatever differs.
 - **A ref** moves nothing and has no name: `ref()` is a handle you give one node (`ref={card}`) so others can measure and place against it (`card.right`, `card.side("top")`, `card.part("title").center`). The node's key, if it has one, is what morphs match.

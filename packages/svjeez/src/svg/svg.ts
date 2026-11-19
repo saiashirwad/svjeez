@@ -542,7 +542,7 @@ const painted = (
 const emptyTrim = (trim: ShapeNode["trim"]): boolean =>
   trim !== undefined && !isLane(trim) && trim[1] - trim[0] <= 0;
 
-export const trimmedDash = (
+const trimmedDash = (
   dash: readonly number[],
   length: number,
   [from, to]: Vec,
