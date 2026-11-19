@@ -248,6 +248,25 @@ const chain = (slot: Slot): Slot[] => (slot.parent ? [...chain(slot.parent), slo
 
 const everySlot = (slot: Slot): Slot[] => [slot, ...slot.children.flatMap(everySlot)];
 
+/** Animated properties that act on an element's children as a group. */
+const GROUPED = new Set([
+  "opacity",
+  "transform",
+  "translate",
+  "rotate",
+  "scale",
+  "filter",
+  "clipPath",
+  "maskImage",
+]);
+
+const animatesGroup = (node: ElementNode): boolean =>
+  (node.animations ?? []).some(
+    (one) =>
+      (one.playState !== "finished" || one.fill === "forwards" || one.fill === "both") &&
+      one.keyframes.some((frame) => Object.keys(frame.props).some((prop) => GROUPED.has(prop))),
+  );
+
 const flat = (slot: Slot): boolean => {
   const { node } = slot;
 
@@ -256,7 +275,11 @@ const flat = (slot: Slot): boolean => {
     !node.transform &&
     !node.clip &&
     (node.opacity ?? 1) >= 1 &&
-    (!node.blendMode || node.blendMode === "normal")
+    (!node.blendMode || node.blendMode === "normal") &&
+    !node.filter?.length &&
+    !node.clipPath &&
+    !node.masks?.length &&
+    !animatesGroup(node)
   );
 };
 
