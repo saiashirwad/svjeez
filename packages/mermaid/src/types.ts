@@ -99,11 +99,30 @@ export interface SequenceDoc {
   readonly items: readonly (MermaidSequenceMessage | SequenceNote)[];
 }
 
+export type StateShape = "choice" | "fork" | "join";
+
+export interface StateRegion {
+  readonly initial: string;
+  readonly states: readonly StateNode[];
+}
+
 export interface StateNode {
   readonly id: string;
   readonly label: string;
   readonly final: boolean;
-  readonly inner?: { readonly initial: string; readonly states: readonly StateNode[] };
+  readonly shape?: StateShape;
+  readonly detail?: readonly string[];
+  /** The first region; `parallel` holds the regions after a `--`. */
+  readonly inner?: StateRegion & {
+    readonly direction?: "TB" | "LR";
+    readonly parallel?: readonly StateRegion[];
+  };
+}
+
+export interface StateNote {
+  readonly of: string;
+  readonly side: "left" | "right";
+  readonly text: string;
 }
 
 export interface MermaidStateTransition {
@@ -119,6 +138,7 @@ export interface StateDoc {
   readonly initial: string;
   readonly states: readonly StateNode[];
   readonly transitions: readonly MermaidStateTransition[];
+  readonly notes?: readonly StateNote[];
 }
 
 export type MermaidDoc =

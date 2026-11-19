@@ -45,6 +45,7 @@ import type {
   SequenceDoc,
   StateDoc,
   StateNode,
+  StateRegion,
 } from "./types.ts";
 
 export interface MermaidOptions extends DiagramOptions, ParseOptions {
@@ -92,14 +93,27 @@ const NAMES = {
   git: "git graph",
 } as const;
 
+const stateRegion = (r: StateRegion) => ({
+  initial: r.initial,
+  states: Object.fromEntries(r.states.map((s) => [s.id, stateSpec(s)])),
+});
+
 const stateSpec = (n: StateNode): StateSpec => {
-  if (n.inner)
+  if (n.shape) return { kind: n.shape === "choice" ? "choice" : "bar" };
+
+  if (n.inner) {
+    const { direction, parallel, ...first } = n.inner;
+
     return {
       label: n.label,
       final: n.final,
-      initial: n.inner.initial,
-      states: Object.fromEntries(n.inner.states.map((s) => [s.id, stateSpec(s)])),
+      ...stateRegion(first),
+      ...(direction && { direction }),
+      ...(parallel && { parallel: parallel.map(stateRegion) }),
     };
+  }
+
+  if (n.detail) return { label: n.label, final: n.final, detail: n.detail };
 
   return n.final ? { label: n.label, final: true } : n.label;
 };
@@ -211,6 +225,7 @@ export function mermaid(text: string, options: MermaidOptions): MermaidDiagram {
         transitions: doc.transitions.map((t) =>
           t.label === undefined ? ([t.from, t.to] as const) : ([t.from, t.to, t.label] as const),
         ),
+        notes: doc.notes,
       },
       { ...stateOptions, direction: asked ?? doc.direction },
     ),

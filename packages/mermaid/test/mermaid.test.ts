@@ -409,11 +409,86 @@ describe("parse state", () => {
     expect(on.inner?.states.map((s) => s.id)).toEqual(["Warm", "Hot"]);
   });
 
-  test("rejects a missing start, a labelled start, descriptions and choices", () => {
+  test("reads choice, fork and join pseudo-states", () => {
+    const doc = state(`stateDiagram-v2
+      [*] --> If
+      state If <<choice>>
+      state F <<fork>>
+      state J <<join>>
+      If --> F : yes
+      F --> A
+      F --> B
+      A --> J
+      B --> J`);
+
+    expect(doc.states.map((s) => [s.id, s.shape])).toEqual([
+      ["If", "choice"],
+      ["F", "fork"],
+      ["J", "join"],
+      ["A", undefined],
+      ["B", undefined],
+    ]);
+  });
+
+  test("reads one-line and block notes, and state descriptions", () => {
+    const doc = state(`stateDiagram-v2
+      [*] --> A
+      A : first line
+      A : second line
+      note right of A : a short note
+      note left of A
+        a longer
+        note
+      end note`);
+
+    expect(doc.states[0]!.detail).toEqual(["first line", "second line"]);
+    expect(doc.notes).toEqual([
+      { of: "A", side: "right", text: "a short note" },
+      { of: "A", side: "left", text: "a longer\nnote" },
+    ]);
+  });
+
+  test("splits a composite into concurrent regions and reads its direction", () => {
+    const doc = state(`stateDiagram-v2
+      [*] --> W
+      state W {
+        direction LR
+        [*] --> A
+        A --> B
+        --
+        [*] --> C
+        C --> D
+        --
+        [*] --> E
+      }`);
+
+    const w = doc.states[0]!.inner!;
+
+    expect(w.direction).toBe("LR");
+    expect(w.states.map((s) => s.id)).toEqual(["A", "B"]);
+    expect(w.parallel!.map((r) => [r.initial, r.states.map((s) => s.id)])).toEqual([
+      ["C", ["C", "D"]],
+      ["E", ["E"]],
+    ]);
+  });
+
+  test("accepts classDef, class and ::: and draws them plain", () => {
+    const doc = state(`stateDiagram-v2
+      classDef hot fill:#f00
+      [*] --> A:::hot
+      A --> B
+      class B hot`);
+
+    expect(doc.states.map((s) => s.id)).toEqual(["A", "B"]);
+  });
+
+  test("rejects a missing start, a labelled start and misplaced notes and dividers", () => {
     expect(message("stateDiagram-v2\nA --> B")).toContain("no start");
     expect(message("stateDiagram-v2\n[*] --> A : go")).toContain("cannot carry a label");
-    expect(message("stateDiagram-v2\n[*] --> A\nA : some text")).toContain("not supported");
-    expect(message("stateDiagram-v2\nstate c <<choice>>")).toContain("not supported");
+    expect(message("stateDiagram-v2\n[*] --> A\nnote right of Z : hi")).toContain("not a state");
+    expect(message("stateDiagram-v2\n[*] --> A\nnote right of A\nhi")).toContain("end note");
+    expect(message("stateDiagram-v2\n[*] --> A\n--")).toContain("composite");
+    expect(message("stateDiagram-v2\n[*] --> A\nA ~~ B")).toContain("cannot read this line");
     expect(message("stateDiagram-v2\n[*] --> A\nstate B {\nB1 --> B2\n}")).toContain("no start");
     expect(message("stateDiagram-v2\n[*] --> A\nstate B {\n[*] --> B1")).toContain("never closed");
   });
@@ -459,6 +534,26 @@ describe("mermaid", () => {
     expect(mermaid(text, { font: mono, direction: "LR" }).kind).toBe("flowchart");
 
     expect(mermaid(text, { font: mono }).kind).toBe("flowchart");
+  });
+
+  test("a state diagram with notes and regions draws and keeps walking", () => {
+    const machine = mermaid(
+      `stateDiagram-v2
+      [*] --> W
+      state W {
+        [*] --> A
+        A --> B
+        --
+        [*] --> C
+        A : doing a
+      }
+      state F <<fork>>
+      W --> F
+      note right of W : busy`,
+      { font: mono },
+    );
+
+    expect(machine.kind).toBe("state");
   });
 
   test("a sequence diagram and a state diagram", () => {

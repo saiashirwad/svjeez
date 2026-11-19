@@ -67,16 +67,39 @@ export interface SequenceSpec<A extends string = string> {
   readonly messages: readonly SequenceMessage<A>[];
 }
 
+export interface StateRegion {
+  readonly states: Readonly<Record<string, StateSpec>>;
+  readonly initial: string;
+}
+
 export type StateSpec =
   | string
-  | { readonly label: string; readonly final?: boolean; readonly role?: NodeRole }
+  | {
+      readonly label: string;
+      readonly final?: boolean;
+      readonly role?: NodeRole;
+      /** Description lines drawn under the name. */
+      readonly detail?: readonly string[];
+    }
+  /** A small diamond ("choice") or a thick bar ("bar", for a fork or join). */
+  | { readonly kind: "choice" | "bar" }
   | {
       readonly label: string;
       readonly final?: boolean;
       readonly role?: NodeRole;
       readonly states: Readonly<Record<string, StateSpec>>;
       readonly initial: string;
+      readonly direction?: Direction;
+      /** Concurrent regions drawn after this one, each with its own states and start. */
+      readonly parallel?: readonly StateRegion[];
     };
+
+export interface StateNote<S extends string = string> {
+  readonly of: S;
+  readonly text: string;
+  /** Beside the state; in an LR machine "left" is above it and "right" below. Defaults to "right". */
+  readonly side?: "left" | "right";
+}
 
 export type StateTransition<S extends string> =
   | readonly [from: S, to: S]
@@ -86,6 +109,7 @@ export interface StateMachineSpec {
   readonly states: Readonly<Record<string, StateSpec>>;
   readonly initial: string;
   readonly transitions: readonly StateTransition<string>[];
+  readonly notes?: readonly StateNote[];
 }
 
 export type TreeSpec<N extends string> =

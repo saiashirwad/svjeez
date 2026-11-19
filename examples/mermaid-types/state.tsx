@@ -3,11 +3,19 @@ import { show } from "./show";
 export default show(
   "State diagram",
   `stateDiagram-v2
-  direction LR
   [*] --> Idle
-  Idle --> Loading : fetch
-  Loading --> Ready : ok
-  Loading --> Failed : error
-  Failed --> Loading : retry
-  Ready --> [*]`,
+  Idle --> Check : submit
+  state Check <<choice>>
+  Check --> Fork : valid
+  Check --> Failed : invalid
+  state Fork <<fork>>
+  state Join <<join>>
+  Fork --> Charge
+  Fork --> Reserve
+  Charge --> Join
+  Reserve --> Join
+  Join --> Done
+  Failed --> Idle : retry
+  Done --> [*]
+  note right of Reserve : hold the stock for 10 minutes`,
 );

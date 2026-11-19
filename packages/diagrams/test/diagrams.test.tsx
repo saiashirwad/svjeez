@@ -488,6 +488,107 @@ describe("state machine", () => {
   });
 });
 
+describe("state machine extras", () => {
+  const rich = () =>
+    stateMachine(
+      {
+        states: {
+          start: { label: "Start", detail: ["entry: init", "exit: done"] },
+          pick: { kind: "choice" },
+          split: { kind: "bar" },
+          work: {
+            label: "Work",
+            states: { a: "A", b: "B" },
+            initial: "a",
+            parallel: [{ states: { c: "C", d: "D" }, initial: "c" }],
+          },
+          end: { label: "End", final: true },
+        },
+        initial: "start",
+        transitions: [
+          ["start", "pick"],
+          ["pick", "split", "yes"],
+          ["pick", "end", "no"],
+          ["split", "work"],
+          ["a", "b"],
+          ["c", "d"],
+          ["work", "end"],
+        ],
+        notes: [
+          { of: "start", text: "first\nsecond" },
+          { of: "end", text: "left note", side: "left" },
+        ],
+      },
+      { ...options, direction: "LR" },
+    );
+
+  test("draws choices, bars, regions and notes, and checks clean", () => {
+    expect(errorsOf(rich().node)).toEqual([]);
+  });
+
+  test("lays regions side by side in TB and stacked in LR", () => {
+    const tb = rich();
+
+    const lr = stateMachine(
+      {
+        states: {
+          work: {
+            label: "Work",
+            states: { a: "A" },
+            initial: "a",
+            parallel: [{ states: { c: "C" }, initial: "c" }],
+          },
+        },
+        initial: "work",
+        transitions: [],
+      },
+      { ...options, direction: "LR" },
+    );
+
+    expect(tb.size[0]).toBeGreaterThan(0);
+    expect(lr.size[1]).toBeGreaterThan(lr.size[0] / 4);
+    expect(errorsOf(lr.node)).toEqual([]);
+  });
+
+  test("a walk still crosses into a composite's start", () => {
+    const m = rich();
+    const walk = m.walk(["start", "pick", "split", "work", "a", "b"], { at: span(0, 0.5) });
+
+    expect(walk.spans.a).toHaveLength(1);
+    expect(errorsOf(m.with(walk.node))).toEqual([]);
+  });
+
+  test("refuses transitions across regions and notes on a choice", () => {
+    const states = {
+      work: {
+        label: "Work",
+        states: { a: "A" },
+        initial: "a",
+        parallel: [{ states: { c: "C" }, initial: "c" }],
+      },
+    } as const;
+
+    expect(
+      thrown(() => stateMachine({ states, initial: "work", transitions: [["a", "c"]] }, options))
+        .problem,
+    ).toContain("concurrent regions");
+
+    expect(
+      thrown(() =>
+        stateMachine(
+          {
+            states: { s: "S", p: { kind: "choice" } },
+            initial: "s",
+            transitions: [["s", "p"]],
+            notes: [{ of: "p", text: "no" }],
+          },
+          options,
+        ),
+      ).problem,
+    ).toContain("a choice");
+  });
+});
+
 describe("lanes", () => {
   const run = (reveal?: When) =>
     lanes(

@@ -5,6 +5,7 @@ import {
   Text,
   circle,
   line,
+  polygon,
   rect,
   sampled,
   span,
@@ -37,7 +38,7 @@ import {
   type DiagramOptions,
   type EdgeId,
 } from "./kit.tsx";
-import type { Direction, NodeRole, StateSpec, StateTransition } from "./types.ts";
+import type { Direction, NodeRole, StateNote, StateSpec, StateTransition } from "./types.ts";
 
 type StateIds<S> = {
   [K in keyof S & string]:
@@ -46,6 +47,11 @@ type StateIds<S> = {
         readonly states: infer I;
       }
         ? StateIds<I>
+        : never)
+    | (S[K] extends { readonly parallel: readonly (infer R)[] }
+        ? R extends { readonly states: infer J }
+          ? StateIds<J>
+          : never
         : never);
 }[keyof S & string];
 
@@ -86,10 +92,22 @@ interface Node {
   readonly id: string;
   readonly label: string;
   readonly final: boolean;
+  readonly kind: "state" | "choice" | "bar";
+  readonly detail: readonly string[];
   readonly role?: NodeRole;
   readonly parent?: string;
+  readonly region: number;
   readonly depth: number;
-  readonly inner?: Scope;
+  readonly inner?: readonly Scope[];
+}
+
+interface Note {
+  readonly name: string;
+  readonly of: string;
+  readonly side: "left" | "right";
+  readonly lines: readonly string[];
+  readonly w: number;
+  readonly h: number;
 }
 
 interface StateBoxProps {
@@ -102,8 +120,30 @@ interface StateBoxProps {
 }
 
 const StateBox = ({ look: l, node: n, box: b, header, ground }: StateBoxProps): SceneElement => {
+  if (n.kind === "choice")
+    return (
+      <Shape
+        key={n.id}
+        geometry={polygon([b.w / 2, 0], [b.w, b.h / 2], [b.w / 2, b.h], [0, b.h / 2])}
+        at={[b.x, b.y]}
+        fill={l.colors.text}
+      />
+    );
+
+  if (n.kind === "bar")
+    return (
+      <Shape
+        key={n.id}
+        geometry={rect(b.w, b.h, { radius: 2 })}
+        at={[b.x, b.y]}
+        fill={l.colors.text}
+      />
+    );
+
   const tint = n.role && l.tint(n.role);
   const radius = n.inner ? 10 : 8;
+  const split = n.inner || n.detail.length > 0;
+  const rule = tint ?? l.colors.line;
 
   return (
     <Group key={n.id} offset={[b.x, b.y]}>
@@ -111,13 +151,13 @@ const StateBox = ({ look: l, node: n, box: b, header, ground }: StateBoxProps): 
         key="shape"
         geometry={rect(b.w, b.h, { radius })}
         fill={n.role ? mix(l.tint(n.role), ground, n.inner ? 0.1 : 0.22) : ground}
-        stroke={{ color: tint ?? l.colors.line, width: tint ? 1.5 : 1 }}
+        stroke={{ color: rule, width: tint ? 1.5 : 1 }}
       />
-      {n.inner && (
+      {split && (
         <Shape
           key="rule"
           geometry={line([0, header], [b.w, header])}
-          stroke={{ color: tint ?? l.colors.line, width: 1 }}
+          stroke={{ color: rule, width: 1 }}
         />
       )}
       <Text
@@ -127,16 +167,61 @@ const StateBox = ({ look: l, node: n, box: b, header, ground }: StateBoxProps): 
         weight={l.weight}
         fill={l.colors.text}
         anchor="center"
-        at={[b.w / 2, n.inner ? header / 2 : b.h / 2]}
+        at={[b.w / 2, split ? header / 2 : b.h / 2]}
       >
         {n.label}
       </Text>
+      {n.detail.map((text, k) => (
+        <Text
+          key={`detail-${k + 1}`}
+          font={l.font}
+          size={l.small}
+          fill={l.colors.muted}
+          anchor="left"
+          at={[l.size, header + l.size * 0.4 + l.small * 1.5 * (k + 0.5)]}
+        >
+          {text}
+        </Text>
+      ))}
     </Group>
   );
 };
 
+interface NoteBoxProps {
+  readonly key: string;
+  readonly look: Look;
+  readonly note: Note;
+  readonly box: Box;
+  readonly ground: Color;
+}
+
+const NoteBox = ({ look: l, note, box: b, ground }: NoteBoxProps): SceneElement => (
+  <Group key={note.name} offset={[b.x, b.y]}>
+    <Shape
+      key="shape"
+      geometry={rect(b.w, b.h, { radius: 3 })}
+      fill={mix(l.tint("decision"), ground, 0.16)}
+      stroke={{ color: l.tint("decision"), width: 1 }}
+    />
+    {note.lines.map((text, k) => (
+      <Text
+        key={`line-${k + 1}`}
+        font={l.font}
+        size={l.small}
+        fill={l.colors.text}
+        anchor="left"
+        at={[NOTE_PAD, NOTE_PAD + l.small * 0.75 + l.small * 1.4 * k]}
+      >
+        {text}
+      </Text>
+    ))}
+  </Group>
+);
+
 interface Scope {
   readonly owner?: string;
+  readonly region: number;
+  readonly direction: Direction;
   readonly depth: number;
   readonly nodes: readonly Node[];
   readonly initial: string;
@@ -158,6 +243,14 @@ interface Local {
   readonly lines: Line[];
   readonly dots: Box[];
   readonly ends: Box[];
+  readonly rules: Point[][];
+  readonly notes: Placed[];
+}
+
+interface Placed {
+  readonly i: number;
+  readonly box: Box;
+  readonly lr: boolean;
 }
 
 const WHAT = "stateMachine()";
@@ -166,6 +259,12 @@ const END = "\u0000end";
 const DOT = 14;
 const RING = 18;
 const PAD = 16;
+const NOTE_PAD = 8;
+const NOTE_GAP = 28;
+const NOTE_STACK = 8;
+const CHOICE = 28;
+const BAR = [80, 8] as const;
+const SPLIT = PAD * 2;
 
 const isTransition = (
   line: Line,
@@ -188,6 +287,8 @@ const moved = (l: Line, dx: number, dy: number): Line => ({
   ...(l.label && { label: shift(l.label, dx, dy) }),
 });
 
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+
 const centerOf = (b: Box): Vec => [b.x + b.w / 2, b.y + b.h / 2];
 
 export function stateMachine<
@@ -198,6 +299,7 @@ export function stateMachine<
     readonly states: Checked<S>;
     readonly initial: NoInfer<keyof S & string>;
     readonly transitions: T;
+    readonly notes?: readonly StateNote<NoInfer<StateIds<S>>>[];
   },
   options: StateMachineOptions,
 ): StateMachine<StateIds<S>, EdgeId<T[number]>> {
@@ -214,31 +316,42 @@ export function stateMachine<
   const nodes = new Map<string, Node>();
 
   const scope = (
-    states: Readonly<Record<string, StateSpec>>,
-    initial: string,
+    r: { readonly states: Readonly<Record<string, StateSpec>>; readonly initial: string },
     depth: number,
+    heading: Direction,
+    region: number,
     owner?: string,
   ): Scope => {
-    checkIds(Object.keys(states), owner ? `${WHAT} state "${owner}"` : WHAT, "state");
+    checkIds(Object.keys(r.states), owner ? `${WHAT} state "${owner}"` : WHAT, "state");
 
-    const list = Object.entries(states).map(([id, s]): Node => {
+    const list = Object.entries(r.states).map(([id, s]): Node => {
       if (nodes.has(id))
         throw new SceneError(
           `${WHAT} has two states named "${id}".`,
           "Give each state its own name, inner states too.",
         );
 
+      const none: readonly string[] = [];
+      const base = { id, parent: owner, region, depth, detail: none };
+
       const node: Node = isBare(s)
-        ? { id, label: s, final: false, parent: owner, depth }
-        : {
-            id,
-            label: s.label,
-            final: s.final ?? false,
-            role: s.role,
-            parent: owner,
-            depth,
-            inner: "states" in s ? scope(s.states, s.initial, depth + 1, id) : undefined,
-          };
+        ? { ...base, label: s, final: false, kind: "state" }
+        : "kind" in s
+          ? { ...base, label: "", final: false, kind: s.kind }
+          : {
+              ...base,
+              label: s.label,
+              final: s.final ?? false,
+              role: s.role,
+              kind: "state",
+              detail: "detail" in s ? (s.detail ?? []) : [],
+              inner:
+                "states" in s
+                  ? [s, ...(s.parallel ?? [])].map((x, k) =>
+                      scope(x, depth + 1, s.direction ?? heading, k, id),
+                    )
+                  : undefined,
+            };
 
       nodes.set(id, node);
 
@@ -246,18 +359,24 @@ export function stateMachine<
     });
 
     known(
-      initial,
+      r.initial,
       list.map((n) => n.id),
       WHAT,
       "state",
       owner ? `state "${owner}"'s initial` : "initial",
     );
 
-    return { owner, depth, nodes: list, initial };
+    return { owner, region, direction: heading, depth, nodes: list, initial: r.initial };
   };
-  // SAFETY: Checked<S> only adds initial and states to S's composites, which StateSpec already admits
 
-  const root = scope(spec.states as Readonly<Record<string, StateSpec>>, spec.initial, 0);
+  const root = scope(
+    // SAFETY: Checked<S> only adds initial and states to S's composites, which StateSpec already admits
+    { states: spec.states as Readonly<Record<string, StateSpec>>, initial: spec.initial },
+    0,
+    direction,
+    0,
+  );
+
   const ids = [...nodes.keys()];
 
   const chain = (id: string): string[] => {
@@ -278,7 +397,15 @@ export function stateMachine<
         "Draw it from a sibling of the composite, or from one of its inner states.",
       );
 
-    return { owner: k === 0 ? undefined : a[k - 1], from: a[k]!, to: b[k]! };
+    const region = nodes.get(a[k]!)!.region;
+
+    if (region !== nodes.get(b[k]!)!.region)
+      throw new SceneError(
+        `${WHAT} can't draw a transition between "${from}" and "${to}", because they sit in concurrent regions.`,
+        "Regions run side by side: draw transitions inside a region, or to the composite.",
+      );
+
+    return { owner: k === 0 ? undefined : a[k - 1], region, from: a[k]!, to: b[k]! };
   };
 
   const transitions = spec.transitions.map(([from, to, label]: StateTransition<string>, i) => ({
@@ -292,28 +419,156 @@ export function stateMachine<
     target: to,
   }));
 
+  const notes = (spec.notes ?? []).map((n: StateNote, i): Note => {
+    const lines = n.text.split("\n").map((x) => x.trim());
+
+    if (lines.every((x) => x === "")) throw new SceneError(`${WHAT} note ${i + 1} has no text.`);
+
+    known(n.of, ids, WHAT, "state", `note ${i + 1}`);
+
+    if (nodes.get(n.of)!.kind !== "state")
+      throw new SceneError(
+        `${WHAT} note ${i + 1} is attached to "${n.of}", a ${nodes.get(n.of)!.kind}.`,
+        "Attach notes to ordinary states.",
+      );
+
+    return {
+      name: `note-${i + 1}`,
+      of: n.of,
+      side: n.side ?? "right",
+      lines,
+      w: Math.max(...lines.map((x) => l.measure(x, l.small))) + NOTE_PAD * 2,
+      h: lines.length * l.small * 1.4 + NOTE_PAD * 2,
+    };
+  });
+
+  const nodeSize = (n: Node, lr: boolean) => {
+    if (n.kind === "choice") return { w: CHOICE, h: CHOICE };
+
+    if (n.kind === "bar") return lr ? { w: BAR[1], h: BAR[0] } : { w: BAR[0], h: BAR[1] };
+
+    const lead = l.measure(n.label, l.size, l.weight);
+    const w = Math.max(lead, ...n.detail.map((x) => l.measure(x, l.small) + l.size * 0.4));
+
+    return {
+      w: w + l.size * 2.4,
+      h: n.detail.length
+        ? header + l.size * 0.8 + n.detail.length * l.small * 1.5
+        : Math.round(l.size * 2.8),
+    };
+  };
+
+  const empty = (w: number, h: number): Local => ({
+    w,
+    h,
+    boxes: new Map(),
+    lines: [],
+    dots: [],
+    ends: [],
+    rules: [],
+    notes: [],
+  });
+
+  const absorb = (into: Local, from: Local, dx: number, dy: number) => {
+    for (const [k, v] of from.boxes) into.boxes.set(k, shift(v, dx, dy));
+    into.lines.push(...from.lines.map((x) => moved(x, dx, dy)));
+    into.dots.push(...from.dots.map((d) => shift(d, dx, dy)));
+    into.ends.push(...from.ends.map((d) => shift(d, dx, dy)));
+    into.rules.push(...from.rules.map((r) => r.map((p) => ({ x: p.x + dx, y: p.y + dy }))));
+    into.notes.push(...from.notes.map((n) => ({ ...n, box: shift(n.box, dx, dy) })));
+  };
+
+  // Concurrent regions sit side by side in a TB composite and stacked in an LR one.
+  const join = (parts: readonly Local[], lr: boolean): Local => {
+    const along = (x: Local) => (lr ? x.h : x.w);
+    const across = (x: Local) => (lr ? x.w : x.h);
+    const total = parts.reduce((t, x) => t + along(x), 0) + SPLIT * (parts.length - 1);
+
+    const out = empty(
+      lr ? Math.max(...parts.map(across)) : total,
+      lr ? total : Math.max(...parts.map(across)),
+    );
+
+    let at = 0;
+
+    parts.forEach((x, k) => {
+      absorb(out, x, lr ? 0 : at, lr ? at : 0);
+      at += along(x);
+
+      if (k < parts.length - 1) {
+        const mid = at + SPLIT / 2;
+
+        out.rules.push(
+          lr
+            ? [
+                { x: -PAD, y: mid },
+                { x: out.w + PAD, y: mid },
+              ]
+            : [
+                { x: mid, y: -PAD },
+                { x: mid, y: out.h + PAD },
+              ],
+        );
+      }
+
+      at += SPLIT;
+    });
+
+    return out;
+  };
+
   const lay = (s: Scope): Local => {
-    const inner = new Map(s.nodes.flatMap((n) => (n.inner ? [[n.id, lay(n.inner)] as const] : [])));
+    const lr = s.direction === "LR";
+
+    const inner = new Map(
+      s.nodes.flatMap((n) =>
+        n.inner ? [[n.id, join(n.inner.map(lay), n.inner[0]!.direction === "LR")] as const] : [],
+      ),
+    );
 
     const size = (n: Node) => {
-      const own = {
-        w: l.measure(n.label, l.size, l.weight) + l.size * 2.4,
-        h: Math.round(l.size * 2.8),
-      };
-
+      const own = nodeSize(n, lr);
       const box = inner.get(n.id);
 
       return box ? { w: Math.max(own.w, box.w + 2 * PAD), h: header + box.h + 2 * PAD } : own;
     };
 
-    const mine = transitions.filter((t) => t.owner === s.owner);
+    // A state with notes is laid out in a slot wide enough for them on both sides, so its
+    // lines still meet it in the middle.
+    const room = (n: Node, own: { w: number; h: number }) => {
+      const mine = notes.map((x, i) => ({ x, i })).filter(({ x }) => x.of === n.id);
+
+      const stack = (side: Note["side"]) => {
+        const row = mine.filter(({ x }) => x.side === side);
+
+        return (
+          row.reduce((t, { x }) => t + (lr ? x.w : x.h), 0) +
+          NOTE_STACK * Math.max(0, row.length - 1)
+        );
+      };
+
+      const gap = mine.length ? Math.max(...mine.map(({ x }) => (lr ? x.h : x.w))) + NOTE_GAP : 0;
+
+      const long = Math.max(lr ? own.w : own.h, stack("left"), stack("right"));
+
+      return {
+        mine,
+        gap,
+        w: lr ? long : own.w + 2 * gap,
+        h: lr ? own.h + 2 * gap : long,
+      };
+    };
+
+    const slots = new Map(s.nodes.map((n) => [n.id, room(n, size(n))] as const));
+
+    const mine = transitions.filter((t) => t.owner === s.owner && t.region === s.region);
     const finals = s.nodes.filter((n) => n.final);
 
     const out = layered({
-      direction,
+      direction: s.direction,
       nodes: [
         { id: START, w: DOT, h: DOT },
-        ...s.nodes.map((n) => ({ id: n.id, ...size(n) })),
+        ...s.nodes.map((n) => ({ id: n.id, w: slots.get(n.id)!.w, h: slots.get(n.id)!.h })),
         ...(finals.length > 0 ? [{ id: END, w: RING, h: RING }] : []),
       ],
       edges: [
@@ -328,31 +583,100 @@ export function stateMachine<
     });
 
     const [dx, dy] = [-out.bounds.x, -out.bounds.y];
-    const boxes = new Map([...out.nodes].map(([id, b]) => [id, shift(b, dx, dy)]));
+    const result = empty(out.bounds.w, out.bounds.h);
+    const slotBox = new Map([...out.nodes].map(([id, b]) => [id, shift(b, dx, dy)]));
+    const boxes = new Map(slotBox);
 
-    const lines = out.edges.map((e, k): Line => ({
-      from: e.from,
-      to: e.to,
-      points: e.points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
-      depth: s.depth,
-      of: k === 0 ? "start" : k > mine.length ? "end" : mine[k - 1]!.i,
-      ...(k > 0 && k <= mine.length && e.label && { label: shift(e.label, dx, dy) }),
-    }));
+    for (const n of s.nodes) {
+      const [sb, own, slot] = [slotBox.get(n.id)!, size(n), slots.get(n.id)!];
 
-    const dots = [boxes.get(START)!];
-    const ends = finals.length > 0 ? [boxes.get(END)!] : [];
+      const b: Box = {
+        x: sb.x + (sb.w - own.w) / 2,
+        y: sb.y + (sb.h - own.h) / 2,
+        ...own,
+      };
+
+      boxes.set(n.id, b);
+
+      for (const side of ["left", "right"] as const) {
+        const row = slot.mine.filter(({ x }) => x.side === side);
+
+        const span =
+          row.reduce((t, { x }) => t + (lr ? x.w : x.h), 0) +
+          NOTE_STACK * Math.max(0, row.length - 1);
+
+        let at = (lr ? b.x + b.w / 2 : b.y + b.h / 2) - span / 2;
+
+        for (const { x, i } of row) {
+          const sign = side === "left" ? -1 : 1;
+
+          const box: Box = lr
+            ? {
+                x: at,
+                y: sign < 0 ? b.y - NOTE_GAP - x.h : b.y + b.h + NOTE_GAP,
+                w: x.w,
+                h: x.h,
+              }
+            : {
+                x: sign < 0 ? b.x - NOTE_GAP - x.w : b.x + b.w + NOTE_GAP,
+                y: at,
+                w: x.w,
+                h: x.h,
+              };
+
+          result.notes.push({ i, box, lr });
+          at += (lr ? x.w : x.h) + NOTE_STACK;
+        }
+      }
+    }
+
+    // keep a line that ends on a roomy slot inside the state it points at, with a jog
+    const keep = (points: Point[], id: string, end: 0 | -1): Point[] => {
+      const [b, sb] = [boxes.get(id)!, slotBox.get(id)!];
+
+      if (b.x === sb.x && b.y === sb.y && b.w === sb.w && b.h === sb.h) return points;
+      const flat = (p: Point): Point => (lr ? { x: p.y, y: p.x } : p);
+      const [lo, hi] = lr ? [b.y + 6, b.y + b.h - 6] : [b.x + 6, b.x + b.w - 6];
+      const [tip, next] = end === 0 ? [points[0]!, points[1]!] : [points.at(-1)!, points.at(-2)!];
+      const [t, n] = [flat(tip), flat(next)];
+      const now = clamp(t.x, lo, hi);
+
+      if (now === t.x) return points;
+      const mid = (t.y + n.y) / 2;
+      const back = (x: number, y: number): Point => (lr ? { x: y, y: x } : { x, y });
+      const jog = [back(now, t.y), back(now, mid), back(t.x, mid)];
+
+      return end === 0 ? [...jog, ...points.slice(1)] : [...points.slice(0, -1), ...jog.reverse()];
+    };
+
+    const lines = out.edges.map((e, k): Line => {
+      const base = e.points.map((p) => ({ x: p.x + dx, y: p.y + dy }));
+      const first = e.from === START ? base : keep(base, e.from, 0);
+
+      return {
+        from: e.from,
+        to: e.to,
+        points: e.to === END ? first : keep(first, e.to, -1),
+        depth: s.depth,
+        of: k === 0 ? "start" : k > mine.length ? "end" : mine[k - 1]!.i,
+        ...(k > 0 && k <= mine.length && e.label && { label: shift(e.label, dx, dy) }),
+      };
+    });
+
+    result.lines.push(...lines);
+    result.dots.push(slotBox.get(START)!);
+
+    if (finals.length > 0) result.ends.push(slotBox.get(END)!);
+
+    for (const [k, v] of boxes) result.boxes.set(k, v);
 
     for (const [id, local] of inner) {
       const b = boxes.get(id)!;
-      const [ix, iy] = [b.x + (b.w - local.w) / 2, b.y + header + PAD];
 
-      for (const [k, v] of local.boxes) boxes.set(k, shift(v, ix, iy));
-      lines.push(...local.lines.map((x) => moved(x, ix, iy)));
-      dots.push(...local.dots.map((d) => shift(d, ix, iy)));
-      ends.push(...local.ends.map((d) => shift(d, ix, iy)));
+      absorb(result, local, b.x + (b.w - local.w) / 2, b.y + header + PAD);
     }
 
-    return { w: out.bounds.w, h: out.bounds.h, boxes, lines, dots, ends };
+    return result;
   };
 
   const local = lay(root);
@@ -394,6 +718,56 @@ export function stateMachine<
             ground={ground(n.depth + 1)}
           />
         ))}
+      {local.rules.map((r, k) => (
+        <Shape
+          key={`divider-${k + 1}`}
+          geometry={line([r[0]!.x, r[0]!.y], [r[1]!.x, r[1]!.y])}
+          stroke={{ color: l.colors.line, width: 1, dash: [6, 4] }}
+        />
+      ))}
+      {local.notes.map(({ i, box, lr }) => {
+        const b = boxes.get(notes[i]!.of)!;
+        const side = notes[i]!.side;
+
+        return (
+          <Shape
+            key={`note-${i + 1}:link`}
+            geometry={
+              lr
+                ? line(
+                    [
+                      clamp(box.x + box.w / 2, b.x + 6, b.x + b.w - 6),
+                      side === "left" ? box.y + box.h : box.y,
+                    ],
+                    [
+                      clamp(box.x + box.w / 2, b.x + 6, b.x + b.w - 6),
+                      side === "left" ? b.y : b.y + b.h,
+                    ],
+                  )
+                : line(
+                    [
+                      side === "left" ? box.x + box.w : box.x,
+                      clamp(box.y + box.h / 2, b.y + 6, b.y + b.h - 6),
+                    ],
+                    [
+                      side === "left" ? b.x : b.x + b.w,
+                      clamp(box.y + box.h / 2, b.y + 6, b.y + b.h - 6),
+                    ],
+                  )
+            }
+            stroke={{ color: l.colors.line, width: 1, dash: [3, 3] }}
+          />
+        );
+      })}
+      {local.notes.map(({ i, box }) => (
+        <NoteBox
+          key={`note-${i + 1}`}
+          look={l}
+          note={notes[i]!}
+          box={box}
+          ground={ground(nodes.get(notes[i]!.of)!.depth)}
+        />
+      ))}
       {local.lines.map((x, i) => (
         <Edge
           key={lineKeys[i]!}
@@ -455,7 +829,7 @@ export function stateMachine<
 
     const target = nodes.get(b)!;
 
-    if (target.parent === a && nodes.get(a)!.inner!.initial === b)
+    if (target.parent === a && nodes.get(a)!.inner![target.region]!.initial === b)
       return new Route([local.lines.find((x) => x.of === "start" && x.to === b)!.points]);
     throw new SceneError(
       `walk() has no way from "${a}" to "${b}".`,
