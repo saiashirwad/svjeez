@@ -342,7 +342,7 @@ describe("a counting Text", () => {
     const { node } = counted(model, "row/card/stage/n");
 
     expect(node.box.height).toBeLessThan(25);
-    expect(isLane(node.at) ? valueAt(node.at, 0) : node.at).toEqual([
+    expect(isLane(node.at) ? valueAt(node.at, 0, mixVec) : node.at).toEqual([
       expect.closeTo(50 - node.box.width / 2, 1),
       expect.closeTo(22 - node.box.height / 2, 1),
     ]);

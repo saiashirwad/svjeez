@@ -203,11 +203,10 @@ export default scene(
           >
             <Group>
               <Shape geometry={rect(146, 76, { radius: 8 })} fill={theme.background} />
-              {morph.between(
-                [gridState, barsState, gridState],
-                [span(0.4, 0.7), span(3.4, 0.7)],
-                { curve: ease.pop, stagger: 0.05 },
-              )}
+              {morph.between([gridState, barsState, gridState], [span(0.4, 0.7), span(3.4, 0.7)], {
+                curve: ease.pop,
+                stagger: 0.05,
+              })}
             </Group>
           </Card>
 
@@ -241,7 +240,11 @@ export default scene(
                 draw={signal.map((v) => clamp(v, 0.02, 1))}
               />
               <Text font={mono} size={14} at={[69, 38]} anchor="center" fill={theme.text}>
-                {count(signal.map((v) => clamp(v) * 100), { rate: 16 })}%
+                {count(
+                  signal.map((v) => clamp(v) * 100),
+                  { rate: 16 },
+                )}
+                %
               </Text>
             </Group>
           </Card>

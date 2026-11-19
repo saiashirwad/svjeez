@@ -5,11 +5,13 @@ import { mono, theme } from "../theme";
 const M = 32;
 
 export const show = (title: string, text: string) => {
+  // State diagrams animate through walk(), not reveal.
+  const reveal = /^\s*stateDiagram/.test(text) ? undefined : span(0.3, 0.3);
+
   const chart = mermaid(text, {
     font: mono,
     textSize: 13,
-    // state diagrams animate through walk(), not reveal
-    ...(/^\s*stateDiagram/.test(text) ? {} : { reveal: span(0.3, 0.3) }),
+    reveal,
     colors: {
       background: theme.background,
       text: theme.text,
