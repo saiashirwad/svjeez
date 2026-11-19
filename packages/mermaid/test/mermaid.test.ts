@@ -720,6 +720,7 @@ describe("every supported diagram type", () => {
     quadrant: "quadrantChart\ntitle Q\nx-axis Low --> High\nA: [0.3, 0.6]",
     xychart: "xychart-beta\ntitle T\nx-axis [a, b]\nbar [1, 2]\nline [2, 1]",
     git: "gitGraph\ncommit\nbranch dev\ncommit\ncheckout main\nmerge dev",
+    c4: 'C4Context\nPerson(a, "A")\nSystem(b, "B")\nRel(a, b, "Uses")',
     requirement:
       "requirementDiagram\nrequirement r {\nid: 1\n}\nelement e {\ntype: x\n}\ne - satisfies -> r",
   } as const;

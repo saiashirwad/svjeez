@@ -154,3 +154,13 @@ export {
   type RequirementNode,
   type RequirementRelation,
 } from "./requirement.tsx";
+
+export {
+  c4,
+  type C4,
+  type C4Boundary,
+  type C4Element,
+  type C4Kind,
+  type C4Options,
+  type C4Relation,
+} from "./c4.tsx";

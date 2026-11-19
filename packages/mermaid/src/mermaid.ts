@@ -4,6 +4,7 @@ import {
   stateMachine,
   type Architecture,
   type BlockDiagram,
+  type C4,
   type ClassDiagram,
   type Diagram,
   type DiagramOptions,
@@ -31,6 +32,7 @@ import type { Span } from "svjeez";
 import { SceneError } from "svjeez/tools";
 import { drawArchitecture } from "./architecture.ts";
 import { drawBlock } from "./block.ts";
+import { drawC4 } from "./c4.ts";
 import { drawClass } from "./class.ts";
 import { drawEr } from "./er.ts";
 import { drawGantt } from "./gantt.ts";
@@ -47,6 +49,7 @@ import { drawRequirement } from "./requirement.ts";
 import type {
   ArchitectureDoc,
   BlockDoc,
+  C4Doc,
   ClassDoc,
   ErDoc,
   FlowchartDoc,
@@ -93,7 +96,9 @@ export type MermaidDiagram =
   | (Sankey & { readonly kind: "sankey"; readonly doc: SankeyDoc })
   | (BlockDiagram & { readonly kind: "block"; readonly doc: BlockDoc })
   | (Architecture & { readonly kind: "architecture"; readonly doc: ArchitectureDoc })
-  | (RequirementDiagram<string> & { readonly kind: "requirement"; readonly doc: RequirementDoc });
+  | (RequirementDiagram<string> & { readonly kind: "requirement"; readonly doc: RequirementDoc })
+  | (RequirementDiagram<string> & { readonly kind: "requirement"; readonly doc: RequirementDoc })
+  | (C4<string> & { readonly kind: "c4"; readonly doc: C4Doc });
 
 const FORM_NODES: Record<FlowForm, { readonly role: NodeRole; readonly shape?: NodeShape }> = {
   rect: { role: "task" },
@@ -244,6 +249,9 @@ export function mermaid(text: string, options: MermaidOptions): MermaidDiagram {
 
   if (doc.kind === "requirement")
     return drawn(drawRequirement(doc, { ...diagramOptions, direction: asked }), "requirement", doc);
+
+  if (doc.kind === "c4")
+    return drawn(drawC4(doc, { ...diagramOptions, direction: asked }), "c4", doc);
 
   if (doc.kind !== "state" && asked)
     throw new SceneError(

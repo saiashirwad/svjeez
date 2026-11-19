@@ -31,3 +31,5 @@ export type * from "./block.ts";
 export type * from "./architecture.ts";
 
 export type * from "./requirement.ts";
+
+export type * from "./c4.ts";

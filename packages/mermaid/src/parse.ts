@@ -2,6 +2,7 @@ import { SceneError } from "svjeez/tools";
 import { fail, type Line } from "./errors.ts";
 import { parseArchitecture } from "./architecture.ts";
 import { parseBlock } from "./block.ts";
+import { parseC4 } from "./c4.ts";
 import { parseClass } from "./class.ts";
 import { parseEr } from "./er.ts";
 import { parseFlowchart } from "./flowchart.ts";
@@ -20,7 +21,7 @@ import { parseXyChart } from "./xychart.ts";
 import type { MermaidDoc, ParseOptions } from "./types.ts";
 
 const KINDS =
-  "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `classDiagram`, `stateDiagram`/`stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `mindmap`, `gitGraph`, `journey`, `timeline`, `quadrantChart`, `xychart-beta`/`xychart`, `sankey-beta`, `block-beta`, `architecture-beta` and `requirementDiagram`.";
+  "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `classDiagram`, `stateDiagram`/`stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `mindmap`, `gitGraph`, `journey`, `timeline`, `quadrantChart`, `xychart-beta`/`xychart`, `sankey-beta`, `block-beta`, `architecture-beta`, `requirementDiagram`, `C4Context` (and the other C4 headers) and `kanban`.";
 
 const lines = (text: string, file: string, first: number): Line[] =>
   text.split(/\r?\n/).flatMap((raw, i): Line[] => {
@@ -73,6 +74,8 @@ export function parseMermaid(text: string, options: ParseOptions = {}): MermaidD
   if (word === "architecture-beta" && exact) return parseArchitecture(first, body);
 
   if (word === "requirementDiagram" && exact) return parseRequirement(first, body);
+
+  if (word?.startsWith("C4") && exact) return parseC4(first, body);
 
   if (word === "pie") return parsePie(first, body);
 

@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 922" width="800" height="922" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">C4 diagram</title>
+  <desc id="d">A Mermaid c4 diagram drawn by @svjeez/mermaid.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--blue-20-background:#1A283D;--muted-18-background:#242528}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0;--blue-20-background:#CEE2FF;--muted-18-background:#E5E5E6}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,AAEAAAAMAIAAAwBAT1MvMhDxBoEAAADMAAAAYGNtYXACeQM9AAABLAAAAIxnYXNwAAAAEAAAAbgAAAAIZ2x5ZlpGZ6IAAAHAAAAOwGhlYWQUkPFDAAAQgAAAADZoaGVhAcoBSQAAELgAAAAkaG10eHngEkMAABDcAAAA1GxvY2Fb51+SAAARsAAAAGxtYXhwAK0CbwAAEhwAAAAgbmFtZQKIBvAAABI8AAAALnBvc3T/aAAzAAASbAAAACBwcmVwaAaMhQAAEowAAAAHAAQCWgGQAAUAAAKKAlgAAABLAooCWAAAAV4AMgFAAAACAAAJAAAAAAAAoAAC/xAA+OsAAAAIAAAAAEpCAAAAwAAN/v8D/P7UAAAD/AEsIAABn9/XAAACJgLaAAAAIAAFAAAAAQADAAEAAAAMAAQAgAAAABwAEAADAAwAIAAtAC8AOgBFAEoAVQBYAFsAXQBpAHAAef//AAAAIAAsAC8AOgBBAEgATABXAFsAXQBhAGsAcv///+H/1v/V/8v/xf/D/8L/wf+//77/u/+6/7kAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAB//8ADwADAFoAAAH+AtoAAwAGAAkAADMRIRElIREBASFaAaT+ogEs/sABLP7UAtr9JjICO/4AAjsAAQCl/2ABdwCXAAMAABcTMwOlUIKCoAE3/skAAAEAjAEiAcwBcgADAAATNSEVjAFAASJQUAAAAQBL/5ICDQM+AAMAABcBMwFLAWNf/p1uA6z8VAAAAgDZ//YBfwIwAAsAFwAAASImNTQ2MzIWFRQGAyImNTQ2MzIWFRQGASwlLi4lJi0tJiUuLiUmLS0BmikiIikpIiIp/lwpIiIpKSIiKQAAAgAyAAACJgLaAAcAEAAAMxMzEyMnIwcTMycmJicGBgcyvnm9WzDdMEK4OBASAgISEALa/SbCwgEO4UBWDQ1WPwAAAwBdAAACEgLaABIAGwAkAAAzETMyFhUUBgYnNTYWFhUUBgYjJzMyNjU0JiMjNTMyNjU0JiMjXc9kcSpNNjpVLzRgQ4Z8P0lJP3x2OkNCOncC2mRZMkooAQ8BLlY7PlwxUUM6PEtOPjU1PgAAAQBY//YCBgLkAB8AAAUiJiY1ETQ2NjMyFhYVIzQmIyIGFREUFjMyNjUzFAYGATBCYTU1YUJCYDRaQTs7Q0M7O0FaNGAKMl9BAUpCXjIzXkE+Q0I+/rU+Q0M+QF8zAAIAXAAAAgAC2gALABUAADMRMzIWFhURFAYGIyczMjY1ETQmIyNcvUdnOTlnR2NjQktLQmMC2jZiQ/7dQ2M2UEpCASNBSgABAGQAAAIIAtoACwAAMxEhFSEVIRUhESEVZAGk/rUBKP7YAUsC2lLiUf79UgAAAQBdAAAB+wLaAAsAADMRMxEzETMRIxEjEV1a6lpa6gLa/sgBOP0mAVD+sAABAGkAAAHvAtoACwAAMzUzESM1IRUjETMVaZWVAYaVlVICNlJS/cpSAAABAC3/9gHvAtoAEQAABSImNTMUFjMyNjURIzUhERQGAQ5peFpHQEBHrwEJeQp2ZkNJSUMBtlL9+GZ2AAABAHMAAAIXAtoABQAAMxEzESEVc1oBSgLa/XhSAAABAEwAAAIMAtoAHAAAMxEzFxYWFzY2NzczESMRND4CNwMjAx4DFRFMdkwLEgQFEApIdlgGCgsEdl93BQoIBgLa7CA/ERE/Iev9JgEJLHB1ayj+kwFtJ2dzcjH+9wAAAQBaAAAB/gLaABEAADMRMxMuAjURMxEjAx4CFRFaeN8CBQNXeN4CBAMC2v2PGUlRJAGa/SYCcRhJUSX+ZgACAFj/9gIAAuQAEQAfAAAFIiYmNRE0NjYzMhYWFREUBgYnMjY1ETQmIyIGFREUFgEsQl8zM19CQl8zM19COz8/OzpAQAoyX0EBSkJeMjJeQf61QV8yUUM+AUo+Q0M+/rY+QwAAAgBcAAACJgLaAAwAFQAAMxEzMhYWFRQGBiMjEREzMjY1NCYjI1zrRGQ3N2REkZE7R0c7kQLaNWBCQWE1/tQBfUk9PkgAAAIAUP9MAg4C5AAXACUAAAUnFyIGIyImJjURNDY2MzIWFhURFAYHFycyNjURNCYjIgYVERQWAaZrCgQNCENjNjZjQ0RiNjo1deI7R0c7O0dHtLEGATVhQQFAQmA1NWBC/sBDZBnB+ko9AUA+SUk+/sA9SgAAAgBcAAACIQLaAA4AFwAAMxEzMhYWFRQGBxMjAyMRETMyNjU0JiMjXOJBYjZNQplqjHWIOEREOIgC2jVeP0pqFP7AATb+ygGHRzo7RgAAAQBI//YCEALlACoAAAUiJiYnMxQWMzI2NTQmJycmJjU0NjYzMhYXIzQmIyIGFRQWFxcWFhUUBgYBMEhnOAFaS0M/Ry8sY0tRNWBBYHQBWkE7OkEwLWRJUDhlCjBaPjdAPjcsQg0fF2xJO1cxa1k2PTgyLUIOIBduSjxaMgAAAQA3AAACIQLbAAcAADMRIzUhFSMR/8gB6sgCiVJS/XcAAAEAWv/2Af4C2gARAAAFIiY1ETMRFBYzMjY1ETMRFAYBLGZsWjs9PDxaawpxYQIS/e48RkY8AhL97mJwAAEAGQAAAj8C2gAkAAAzAzMTHgIVPgI3EzMTHgIXPgI3EzMDIwMuAicOAgcDbVRWNwIEAwIDBQNEXT4DBQUBAQMFAjlSVnE+AgUEAQEFBANDAtr95BYvKg4OKi8WAhz95BYvKg4OKi8WAhz9JgImFywmDAwmLBf92gAAAQAoAAACMALaABcAADMTAzMXFhYXNjY3NzMDEyMnJiYnBgYHByjSx2hxCRMGBRMJc2PH0md9CRMFBRMJfgFyAWjYEScLCycR2P6e/ojoEScMDCYR6QABAM3/kgHCAz4ABwAAFxEzFSMRMxXN9ZubbgOsUPz0UAAAAQCW/5IBiwM+AAcAABc1MxEjNTMRlpub9W5QAwxQ/FQAAAIAQf/2Af4CMAAcACcAABciJjU0NjMzNTQmIyIGByM2NjMyFhURIzUjNxQGJzI2NTUjIgYVFBb8V2RkVao9ODFCBVoJdFdfblgPD103QFKoLTQ/CllMTVg3MzcpI0dUYlT+hmkPPEZHQDJOMisuNQACAFz/9gIDAtoAFgAkAAAFIiY1FyMVIxEzFQczBzQ2MzIWFRUUBicyNjU1NCYjIgYVFRQWAUxEUhISWloCFBJTQ1NkZHE5QkI5N0FBCkk/FWkC2qB9FT5Kbl+hXm5ORECWQERGPpY+RgAAAQBV//YCBgIwAB0AAAUiJiY1NTQ2NjMyFhcjJiYjIgYVFRQWMzI2NzMGBgEwQmM2NmNCX3QDWgNBODtGRjs4QQNaA3QKMl9BlkJeMmZYNTlDPpc+RDo0WGYAAgBV//YB/ALaABYAJAAABSImNTU0NjMyFhUnMyc1MxEjNSM3FAYnMjY1NTQmIyIGFRUUFgEMUmVkU0RSEhQCWloSElImOEBAODlCQgpuXqFfbko+FX2g/SZpFT9JTkY+lj5GRECWQEQAAAIAVf/2AgMCMAAZACMAAAUiJiY1NTQ2NjMyFhYVFSEVFBYzMjY3MwYGEzU0JiMiBhUVIQEsQWE1NWFBQWE1/qpCPTRAB1oJdShBPj1CAQUKNF8/lkBeNDReQGE1QUUlJUVRAUMlQUZGQR0AAAEAPAAAAhcC2gATAAAzESM1MzU0NjMzFSMiBhUVMxUjEdygoFJIoaEfIeHhAZ1SX0FLUh0dX1L+YwACAFj/TAH7AjAAHgAsAAAXNTMyNjU1NyM3FAYjIiY1NTQ2MzIWFSczNTMRFAYjAzI2NTU0JiMiBhUVFBahryonAhIRUENVYmJVQ1AREVlbUSU4QEA4OT8/tFImKEZkDzxGb150Xm5GPA9p/cZKVgElRj5pPkZEQGlARAAAAQBcAAAB/gLaABYAADMRMxUVMwc0NjMyFhURIxE0JiMiBhURXFoTE05FU2JaPzY4QQLatGkVQUdmWP6OAWg7QUZA/qIA//8AVQAAAisDCQImADMAAAAGADQPAAABAF8AAAItAtoADAAAMxEzETM3MwMTIycjFV9aaqBnubxpoGsC2v5p4/76/uD19QABAB4AAAImAtoADgAAISImJjURIzUhERQWMzMVAXcwSCi5ARMmIK8mRi8B7VL9wSInUgAAAQBCAAACFgIwACcAADMRMxUzBzQ2MzIWFSczBzQ2MzIWFREjETQmIyIGFREjETQmIyIGFRFCTxIOMSouMhsqEzMqNDlTHRwbH0gfHBwcAiZCGC42RD42GC42TkD+XgGjIiYlIv5cAaMjJSUi/lwAAAEAXAAAAf4CMAAVAAAzETMVMwc0NjMyFhURIxE0JiMiBhURXFoTE05FU2JaPzY4QQImaRVBR2ZY/o4BaDs/RED+ogAAAgBV//gCAwIuABEAHwAABSImJjU1NDY2MzIWFhUVFAYGJzI2NTU0JiMiBhUVFBYBLEJgNTVgQkJgNTVgQjtCQjs6Q0MIMl9BkkJeMjJeQZNBXzJQQkCSQEJCQJJAQgAAAgBc/0wCAwIwABcAJQAAFxEzFTMHNDYzMhYVFRQGBiMiJjUXIxcVNzI2NTU0JiMiBhUVFBZcWhISU0RTYy1ROENUEhQCeTlBQTk3QkK0AtppFT9JbV+hP1wySj4VfaD4RECWQERGPpY+RgAAAQBvAAACFgIwABUAADMRMxUzBzQ2MzIWFRUjNTQmIyIGFRFvWBUdTUxXZ1o/OjlBAiZpQVlbbV0hGUFFRkD+ogAAAQBa//gCCAIuACwAAAUiJiYnMxYWMzMyNjU0JicnJiY1NDYzMzIWFyMmJiMjIgYVFBYXFxYWFRQGIwEbOFMxBVoGNSwqNTQvLkpRT15eJk9gCloGMCkmMy8oK0pZUWFiCCNALB0iKyQjKQcMDklGSlFKPxofJiYiIAcMDkxITFcAAAEANwAAAggCwQASAAAhIiY1ESM1MzUzFTMVIxEUMzMVAWhHT5ubWtzcPJZMRQFDUpubUv69P1IAAQBa//YB/gImABEAAAUiJjURMxEUFjMyNjURMxEUBgErX3JaQDc4QVp0CnFhAV7+oj5FRT4BXv6iYXEAAQA3AAACIQImAAwAADMDMxMWFhc2NjcTMwPvuFx6CxIEBRIKd1u4Aib+jiE9ERE9IQFy/doAAQAjAAACNQImAB4AADMDMxMWFhc2NjcTMxMWFhc2NjcTMwMjAyYmJwYGBwN7WFA3AwcCAgkDPVY9AwkCAgkDOUxcYzsECgICCAU+Aib+ehYzEREzFgGG/noWMxERMxYBhv3aAXwcOBAQOBz+hAABADIAAAImAiYAFwAAMxMDMxcWFhc2Njc3MwMTIycmJicGBgcHMsO3am0HDQQDDQduabfCanYHDQUEDwh3ARsBC6oLGggIGguq/vT+5rQLHQkJHQu0AAEAN/9MAiECJgANAAAXNwMzExYWFzY2NxMzAbJRzGSABwwEBAwGeGH+8bTWAgT+rBEvEBAvEQFU/SYAAAEAVQAAAisCJgAJAAAzNTMRIzUhETMVVcOqAQS5UgGCUv4sUgAAAQDlAokBcwMJAAsAAAEiJjU0NjMyFhUUBgEsISYmISEmJgKJIh0eIyMeHSIAAAEAAAACNgRE1VgUXw889QADA+gAAAAA29KmmgAAAADb2tDy+Tn+1ASSA/wAAAAGAAIAAAAAAAAAAQAAA/z+1AAABLD5Of2PBJIAAQAAAAAAAAAAAAAAAAAAADUCWABaAlgAAAJYAKUCWACMAlgASwJYANkCWAAyAlgAXQJYAFgCWABcAlgAZAJYAF0CWABpAlgALQJYAHMCWABMAlgAWgJYAFgCWABcAlgAUAJYAFwCWABIAlgANwJYAFoCWAAZAlgAKAJYAM0CWACWAlgAQQJYAFwCWABVAlgAVQJYAFUCWAA8AlgAWAJYAFwCWABVAlgAXwJYAB4CWABCAlgAXAJYAFUCWABcAlgAbwJYAFoCWAA3AlgAWgJYADcCWAAjAlgAMgJYADcCWABVAAAA5QAAABoAGgAoADUARABrAIwAwgDxARQBKwFBAVYBdAGDAbIB0QIDAiYCYAKHAsYC1wL1AzIDXQNuA38DtwPsBBkETgSEBKEE3wUCBQ0FJQU/BXcFmQXJBf8GIAZhBn0Gmwa2Bu0HGAc2B0kHYAABAAAANQG4AG4AtAAGAAEAAAAAAAAAAAAAAAAAAwACAAAAAQASAAMAAQQJAAEAHAAAAEoAZQB0AEIAcgBhAGkAbgBzACAATQBvAG4AbwAAAAMAAAAAAAD/ZQAyAAAAAQAAAAAAAAAAAAAAAAAAAAC4Af+FsASNAA==) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,7.5%{translate:0 6px;opacity:0}12.5%,100%{translate:0 0;opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,3.75%{stroke-dashoffset:1;visibility:hidden}7.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m2{animation-name:k2}
+@keyframes k3{0%,6.234%{visibility:hidden}6.235%,100%{visibility:visible}}
+.m3{animation-name:k3}
+@keyframes k4{0%,7.5%{stroke-dashoffset:1;visibility:hidden}11.25%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k4}
+@keyframes k5{0%,9.984%{visibility:hidden}9.985%,100%{visibility:visible}}
+.m5{animation-name:k5}
+@keyframes k6{0%,18.75%{stroke-dashoffset:1;visibility:hidden}22.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m6{animation-name:k6}
+@keyframes k7{0%,21.269%{visibility:hidden}21.27%,100%{visibility:visible}}
+.m7{animation-name:k7}
+@keyframes k8{0%,11.25%{stroke-dashoffset:1;visibility:hidden}15%,100%{stroke-dashoffset:0;visibility:visible}}
+.m8{animation-name:k8}
+@keyframes k9{0%,14.127%{visibility:hidden}14.128%,100%{visibility:visible}}
+.m9{animation-name:k9}
+@keyframes k10{0%,11.249%{stroke-dashoffset:1;visibility:hidden}11.25%,100%{stroke-dashoffset:0;visibility:visible}}
+.m10{animation-name:k10}
+@keyframes k11{0%,11.354%{visibility:hidden}11.355%,100%{visibility:visible}}
+.m11{animation-name:k11}
+@keyframes k12{0%,15%{stroke-dashoffset:1;visibility:hidden}18.75%,100%{stroke-dashoffset:0;visibility:visible}}
+.m12{animation-name:k12}
+@keyframes k13{0%,17.719%{visibility:hidden}17.72%,100%{visibility:visible}}
+.m13{animation-name:k13}
+@keyframes k14{0%,3.75%{translate:0 6px;opacity:0}7.5%,100%{translate:0 0;opacity:1}}
+.m14{animation-name:k14}
+@keyframes k15{0%,7.5%{translate:0 6px;opacity:0}11.25%,100%{translate:0 0;opacity:1}}
+.m15{animation-name:k15}
+@keyframes k16{0%,11.25%{translate:0 6px;opacity:0}15%,100%{translate:0 0;opacity:1}}
+.m16{animation-name:k16}
+@keyframes k17{0%,22.5%{translate:0 6px;opacity:0}26.25%,100%{translate:0 0;opacity:1}}
+.m17{animation-name:k17}
+@keyframes k18{0%,15%{translate:0 6px;opacity:0}18.75%,100%{translate:0 0;opacity:1}}
+.m18{animation-name:k18}
+@keyframes k19{0%,18.75%{translate:0 6px;opacity:0}22.5%,100%{translate:0 0;opacity:1}}
+.m19{animation-name:k19}
+@keyframes k20{0%,7.5%{translate:0 6px;opacity:0}10.625%,100%{translate:0 0;opacity:1}}
+.m20{animation-name:k20}
+@keyframes k21{0%,11.25%{translate:0 6px;opacity:0}14.375%,100%{translate:0 0;opacity:1}}
+.m21{animation-name:k21}
+@keyframes k22{0%,22.5%{translate:0 6px;opacity:0}25.625%,100%{translate:0 0;opacity:1}}
+.m22{animation-name:k22}
+@keyframes k23{0%,15%{translate:0 6px;opacity:0}18.125%,100%{translate:0 0;opacity:1}}
+.m23{animation-name:k23}
+@keyframes k24{0%,18.75%{translate:0 6px;opacity:0}21.875%,100%{translate:0 0;opacity:1}}
+.m24{animation-name:k24}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-7.5s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="800" height="922" fill="var(--background)"/>
+  <g transform="translate(32.125 26.898)" font-size="11.05" fill="var(--text)">
+    <text x="293.12" y="25.616" font-size="15.6">Internet banking</text>
+    <g transform="translate(498 266)" class="a m1">
+      <rect width="238" height="592" rx="10" fill="none" stroke="var(--border)" stroke-dasharray="6 4"/>
+      <text x="12" y="18.978" fill="var(--text)">Internet Banking</text>
+      <text x="126.08" y="18.978" fill="var(--muted)">[System]</text>
+    </g>
+    <path d="M617 156L617 289" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
+    <polygon points="617 296 613 288 621 288" fill="var(--border)" class="a m3"/>
+    <path d="M617 378L617 511" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <polygon points="617 518 613 510 621 510" fill="var(--border)" class="a m5"/>
+    <path d="M617 600L617 747" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
+    <polygon points="617 754 613 746 621 746" fill="var(--border)" class="a m7"/>
+    <path d="M520 600L520 606C520 645.68 440.3 670 310.25 670C180.21 670 100.5 698.88 100.5 746L100.5 752" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
+    <polygon points="100.5 759 96.5 751 104.5 751" fill="var(--border)" class="a m9"/>
+    <path d="M520 630L520 607" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m10"/>
+    <polygon points="520 600 524 608 516 608" fill="var(--border)" class="a m11"/>
+    <path d="M536 600L536 606C536 654.36 500.57 684 442.75 684C384.94 684 349.5 707.56 349.5 746L349.5 752" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m12"/>
+    <polygon points="349.5 759 345.5 751 353.5 751" fill="var(--border)" class="a m13"/>
+    <g transform="translate(506.5 40)" class="a m14">
+      <rect width="221" height="116" rx="8" fill="var(--blue-20-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <circle cx="110.5" cy="19" r="5" fill="var(--blue)"/>
+      <path d="M100.5 38C100.5 26 120.5 26 120.5 38Z" fill="var(--blue)"/>
+      <text x="79.3" y="60.68" font-size="13">Customer</text>
+      <text x="83.98" y="78.478" fill="var(--muted)">[Person]</text>
+      <text x="14.365" y="99.478">A bank customer with accounts</text>
+    </g>
+    <g transform="translate(526.5 296)" class="a m15">
+      <rect width="181" height="82" rx="8" fill="var(--blue-20-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <text x="63.2" y="26.68" font-size="13">Web app</text>
+      <text x="30.83" y="44.478" fill="var(--muted)">[Container: React]</text>
+      <text x="14.255" y="65.478">Delivers the banking UI</text>
+    </g>
+    <g transform="translate(510 518)" class="a m16">
+      <rect width="214" height="82" rx="8" fill="var(--blue-20-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <text x="95.3" y="26.68" font-size="13">API</text>
+      <text x="24.125" y="44.478" fill="var(--muted)">[Container: Java, Spring]</text>
+      <text x="14.18" y="65.478">Serves accounts and payments</text>
+    </g>
+    <g transform="translate(513 754)" class="a m17">
+      <path d="M0 5C0 2.239 46.561 0 104 0C161.439 0 208 2.239 208 5L208 87C208 89.762 161.439 92 104 92C46.561 92 0 89.762 0 87Z" fill="var(--blue-20-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <path d="M0 5C0 7.762 46.561 10 104 10C161.439 10 208 7.762 208 5" fill="none" stroke="var(--blue)" stroke-width="1.5"/>
+      <text x="72.8" y="31.68" font-size="13">Database</text>
+      <text x="27.755" y="49.478" fill="var(--muted)">[Container: PostgreSQL]</text>
+      <text x="14.495" y="70.478">Stores users and audit logs</text>
+    </g>
+    <g transform="translate(0 759)" class="a m18">
+      <rect width="201" height="82" rx="8" fill="var(--muted-18-background)" stroke="var(--muted)" stroke-width="1.5"/>
+      <text x="65.4" y="26.68" font-size="13">Mainframe</text>
+      <text x="14.31" y="44.478" fill="var(--muted)">[External Software System]</text>
+      <text x="34.2" y="65.478">Core banking records</text>
+    </g>
+    <g transform="translate(249 759)" class="a m19">
+      <rect width="201" height="82" rx="8" fill="var(--muted-18-background)" stroke="var(--muted)" stroke-width="1.5"/>
+      <text x="49.8" y="26.68" font-size="13">E-mail system</text>
+      <text x="14.31" y="44.478" fill="var(--muted)">[External Software System]</text>
+      <text x="37.515" y="65.478">Sends notifications</text>
+    </g>
+    <g transform="translate(588.5 209)" class="a m20" fill="var(--muted)">
+      <rect width="57" height="34" rx="3" fill="var(--background)"/>
+      <text x="15.24" y="12.478">Uses</text>
+      <text x="5.295" y="29.478">[HTTPS]</text>
+    </g>
+    <g transform="translate(572 431)" class="a m21" fill="var(--muted)">
+      <rect width="90" height="34" rx="3" fill="var(--background)"/>
+      <text x="28.425" y="12.478">Calls</text>
+      <text x="5.22" y="29.478">[JSON/HTTPS]</text>
+    </g>
+    <g transform="translate(558.5 660)" class="a m22" fill="var(--muted)">
+      <rect width="117" height="34" rx="3" fill="var(--background)"/>
+      <text x="5.46" y="12.478">Reads and writes</text>
+      <text x="38.61" y="29.478">[JDBC]</text>
+    </g>
+    <g transform="translate(78.5 697.5)" class="a m23" fill="var(--muted)">
+      <rect width="44" height="34" rx="3" fill="var(--background)"/>
+      <text x="5.425" y="12.478">Syncs</text>
+      <text x="5.425" y="29.478">[XML]</text>
+    </g>
+    <g transform="translate(304.5 704.5)" class="a m24" fill="var(--muted)">
+      <rect width="90" height="34" rx="3" fill="var(--background)"/>
+      <text x="5.22" y="12.478">Sends e-mail</text>
+      <text x="25.11" y="29.478">[SMTP]</text>
+    </g>
+  </g>
+</svg>
