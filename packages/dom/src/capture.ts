@@ -787,6 +787,14 @@ export const capture = (root: Element): Snapshot => {
     return [...cased].length === 1 ? cased : char;
   };
 
+  /** Letters that read right to left: Hebrew, Arabic, Syriac, Thaana, N'Ko and their presentation forms. */
+  const RIGHT_TO_LEFT = /[\u0590-\u08ff\ufb1d-\ufdff\ufe70-\ufeff]/;
+  /** Marks and joiners belong to the character before them. */
+  const JOINS = /^(?:\p{M}|\u200c|\u200d|\ufe0e|\ufe0f)/u;
+
+  const strongOf = (char: string): "" | "rtl" | "ltr" =>
+    RIGHT_TO_LEFT.test(char) ? "rtl" : /[\p{L}\p{N}]/u.test(char) ? "ltr" : "";
+
   const textOf = (node: Text, parent: Element, a: DOMMatrix): TextNode | undefined => {
     const style = getComputedStyle(parent);
     const font = fontOf(style);
@@ -851,6 +859,7 @@ export const capture = (root: Element): Snapshot => {
 
     const decoration = decorationOf(parent);
     const shadows = textShadowsOf(style);
+    const paragraphRtl = style.direction === "rtl";
     const runs: Run[] = [];
 
     for (const line of lines) {
@@ -858,22 +867,78 @@ export const capture = (root: Element): Snapshot => {
 
       while (chars.length > 0 && /\s/.test(chars[chars.length - 1]!.char)) chars.pop();
 
-      if (chars.length === 0) continue;
+      // The characters are in logical order. A bidirectional line is cut into pieces that each read one way across the line:
+      // a character joins the piece it sits against (at its right edge, or at its left edge when the piece runs right to left)
+      // unless it is a letter of the other direction. The pieces come out in visual order, so each is one run the SVG text
+      // can shape and order by itself.
+      const pieces: { chars: typeof chars; rtl: boolean; strong: "" | "rtl" | "ltr" }[] = [];
 
-      const run: Writable<Run> = {
-        x: round(line.x),
-        y: round(line.top + ascent),
-        text: chars.map((c) => c.char).join(""),
-        advances: chars.map((c, i) => round((chars[i + 1]?.x ?? c.x + c.width) - c.x)),
-        font,
-        letterSpacing: round(spacing),
-        color: color(style.color),
-      };
+      for (const [i, c] of chars.entries()) {
+        const last = pieces[pieces.length - 1];
+        const prev = chars[i - 1];
+        const strong = strongOf(c.char);
 
-      if (decoration) run.decoration = decoration;
+        if (last && prev) {
+          const forward = Math.abs(c.x - (prev.x + prev.width)) < 1.5;
+          const backward = Math.abs(c.x + c.width - prev.x) < 1.5;
 
-      if (shadows.length > 0) run.shadows = shadows;
-      runs.push(run);
+          const rtl = last.strong
+            ? last.strong === "rtl"
+            : last.chars.length === 1
+              ? backward && (!forward || paragraphRtl)
+              : last.rtl;
+
+          if (
+            JOINS.test(c.char) ||
+            ((rtl ? backward : forward) && (!strong || !last.strong || strong === last.strong))
+          ) {
+            last.rtl = rtl;
+            last.strong ||= strong;
+            last.chars.push(c);
+            continue;
+          }
+        }
+
+        pieces.push({ chars: [c], rtl: false, strong });
+      }
+
+      // A piece with no letters in it (a bracket, a space) takes the line's own direction, which also mirrors a bracket.
+      for (const piece of pieces) piece.rtl = piece.strong ? piece.strong === "rtl" : paragraphRtl;
+
+      // SVG text strips the spaces at the ends of a piece, and each piece is placed by its own x, so they are not needed.
+      if (pieces.length > 1)
+        for (const piece of pieces)
+          piece.chars = piece.chars.slice(
+            piece.chars.findIndex((c) => !/\s/.test(c.char)) >>> 0,
+            piece.chars.findLastIndex((c) => !/\s/.test(c.char)) + 1,
+          );
+
+      const placed = pieces
+        .flatMap((piece) =>
+          piece.chars.length > 0 ? [{ ...piece, x: Math.min(...piece.chars.map((c) => c.x)) }] : [],
+        )
+        .sort((a, b) => a.x - b.x);
+
+      for (const { chars: part, rtl, x } of placed) {
+        const run: Writable<Run> = {
+          x: round(x),
+          y: round(line.top + ascent),
+          text: part.map((c) => c.char).join(""),
+          advances: part.map((c, i) =>
+            round(rtl ? c.width : (part[i + 1]?.x ?? c.x + c.width) - c.x),
+          ),
+          font,
+          letterSpacing: round(spacing),
+          color: color(style.color),
+        };
+
+        if (rtl) run.rtl = true;
+
+        if (decoration) run.decoration = decoration;
+
+        if (shadows.length > 0) run.shadows = shadows;
+        runs.push(run);
+      }
     }
 
     return runs.length > 0 ? { type: "text", runs } : undefined;
@@ -1276,8 +1341,6 @@ export const capture = (root: Element): Snapshot => {
     if (d.el?.localName === "canvas" || d.el?.localName === "video")
       out.push(`<${d.el.localName}> is not drawn`);
 
-    if (d.el?.shadowRoot) out.push("a shadow root is not walked");
-
     return out;
   };
 
@@ -1620,7 +1683,12 @@ export const capture = (root: Element): Snapshot => {
   const children = (el: Element, a: DOMMatrix): (ElementNode | TextNode)[] => {
     const out: (ElementNode | TextNode)[] = [];
 
-    for (const child of el.childNodes) {
+    // The composed tree: an open shadow root stands in for its host's own children (which show only where it has a <slot>),
+    // and a <slot> shows what is assigned to it, or else its fallback content.
+    const assigned = el instanceof HTMLSlotElement ? el.assignedNodes({ flatten: true }) : [];
+    const nodes = assigned.length > 0 ? assigned : (el.shadowRoot ?? el).childNodes;
+
+    for (const child of nodes) {
       if (child instanceof Text) {
         const text = textOf(child, el, a);
 

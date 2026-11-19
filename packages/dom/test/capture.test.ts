@@ -828,6 +828,82 @@ describe("filter, text-shadow, clip-path and mask-image", () => {
   });
 });
 
+describe("open shadow roots", () => {
+  const wordsOf = (node: Node): string[] =>
+    node.type === "text" ? node.runs.map((run) => run.text) : node.children.flatMap(wordsOf);
+
+  test("the composed tree is captured: slotted nodes sit in their slots, fallback content shows when nothing is assigned", async () => {
+    await page.setContent(
+      `<style>html,body{margin:0;font:16px/20px monospace}</style><div id="root"><x-box id="h"><b slot="a">light a</b>loose</x-box><x-box id="e"></x-box></div>`,
+    );
+    await page.evaluate(() => {
+      customElements.define(
+        "x-box",
+        class extends HTMLElement {
+          constructor() {
+            super();
+            this.attachShadow({
+              mode: "open",
+            }).innerHTML = `<style>i{display:block;color:rgb(1,2,3)}</style><i>top</i><slot name="a">fallback a</slot><slot></slot><i>end</i>`;
+          }
+        },
+      );
+    });
+
+    const snapshot = await grab();
+
+    expect(wordsOf(byId(snapshot, "h"))).toEqual(["top", "light a", "loose", "end"]);
+    expect(wordsOf(byId(snapshot, "e"))).toEqual(["top", "fallback a", "end"]);
+    expect(byId(snapshot, "h").notes).toBeUndefined();
+
+    const shadowed = find(byId(snapshot, "h"), (el) => el.tag === "i");
+
+    expect(shadowed?.children[0]).toMatchObject({ runs: [{ color: "rgb(1, 2, 3)" }] });
+  });
+});
+
+describe("bidirectional text", () => {
+  const runsOf = async (html: string) => {
+    const el = byId(await snap(html), "n");
+
+    return el.children.flatMap((child) => (child.type === "text" ? child.runs : []));
+  };
+
+  test("a line mixing Hebrew and English is cut into runs in visual order, the Hebrew marked right to left", async () => {
+    const runs = await runsOf(`<p id="n" style="margin:0">abc \u05e9\u05dc\u05d5\u05dd def</p>`);
+
+    expect(runs.map((run) => run.text)).toEqual(["abc", "\u05e9\u05dc\u05d5\u05dd", "def"]);
+    expect(runs.map((run) => run.rtl)).toEqual([undefined, true, undefined]);
+    expect(runs[0]!.x).toBeLessThan(runs[1]!.x);
+    expect(runs[1]!.x).toBeLessThan(runs[2]!.x);
+    near(
+      runs[1]!.advances.reduce((sum, advance) => sum + advance, 0),
+      runs[2]!.x - runs[1]!.x - 9.6,
+      1.5,
+    );
+  });
+
+  test("a right-to-left paragraph reads from its right edge", async () => {
+    const runs = await runsOf(
+      `<p id="n" dir="rtl" style="margin:0;width:300px">\u05e9\u05dc\u05d5\u05dd hello</p>`,
+    );
+
+    expect(runs.map((run) => run.text)).toEqual(["hello", "\u05e9\u05dc\u05d5\u05dd"]);
+    expect(runs.map((run) => run.rtl)).toEqual([undefined, true]);
+    expect(runs[1]!.x + runs[1]!.advances.reduce((sum, advance) => sum + advance, 0)).toBeCloseTo(
+      300,
+      0,
+    );
+  });
+
+  test("plain left-to-right text stays one run with no rtl mark", async () => {
+    const runs = await runsOf(`<p id="n" style="margin:0">hello, world (really)</p>`);
+
+    expect(runs).toHaveLength(1);
+    expect(runs[0]!.rtl).toBeUndefined();
+  });
+});
+
 describe("notes: what capture cannot represent", () => {
   const noted = async (html: string, id = "n") => byId(await snap(html), id).notes ?? [];
 
@@ -927,19 +1003,6 @@ describe("notes: what capture cannot represent", () => {
 
     expect(byId(snapshot, "c").notes).toEqual(["<canvas> is not drawn"]);
     expect(byId(snapshot, "v").notes).toEqual(["<video> is not drawn"]);
-  });
-
-  test("an open shadow root", async () => {
-    const snapshot = await snap(`<div id="n" style="height:10px"></div>`);
-
-    expect(byId(snapshot, "n").notes).toBeUndefined();
-
-    await page.evaluate(() => {
-      const root = document.getElementById("n")!.attachShadow({ mode: "open" });
-
-      root.innerHTML = "<p>shadow</p>";
-    });
-    expect(byId(await grab(), "n").notes).toEqual(["a shadow root is not walked"]);
   });
 
   test("pseudo-element content that cannot resolve is said on the host", async () => {

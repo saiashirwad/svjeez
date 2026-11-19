@@ -332,6 +332,18 @@ describe("text", () => {
     expect(out.svg).toContain(">Hi!</text>");
   });
 
+  test("a right-to-left run is an isolate whose controls take no room", () => {
+    const out = draw(
+      box({
+        children: [
+          { type: "text", runs: [{ ...run, text: "\u05e9\u05dc", advances: [9, 4], rtl: true }] },
+        ],
+      }),
+    );
+
+    expect(out.svg).toContain(">\u2067\u05e9\u05dc\u2069</text>");
+  });
+
   test("decorations are thin rects as wide as the run", () => {
     const out = draw(
       box({

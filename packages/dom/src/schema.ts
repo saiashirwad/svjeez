@@ -207,6 +207,8 @@ export interface Run {
   readonly text: string;
   /** One horizontal pitch per code point of `text`, in px, letterSpacing included. */
   readonly advances: readonly number[];
+  /** A right-to-left piece of a bidirectional line: `text` is in logical order and reads right to left, filling `x` to `x` plus the advances. */
+  readonly rtl?: true;
   readonly font: Font;
   readonly letterSpacing: number;
   readonly color: Color;

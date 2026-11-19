@@ -125,7 +125,9 @@ Capture reads the page as it renders now. Running animations and transitions are
 
 Each background layer carries its own `place`: `background-size`, `-position`, `-repeat`, `-origin` and `-clip`, with shorter lists repeated to the number of layers, boxes and gradient sizes resolved to px, and gradients resolved against their tile. An image layer keeps `auto`, `cover` and `contain` for `compile`, which can read the image's size.
 
-Capture never drops CSS silently. Anything it cannot represent is a short phrase in the element's `notes` (`conic-gradient() is not drawn`, `a 3D transform is flattened to 2D`, `filter: sepia() is not drawn`, `<canvas> is not drawn`, an open shadow root, `::before counter() content is not drawn`, ...), and `compile` forwards each as a diagnostic. Closed shadow roots cannot be seen from the page, so they are not noted.
+Capture never drops CSS silently. Anything it cannot represent is a short phrase in the element's `notes` (`conic-gradient() is not drawn`, `a 3D transform is flattened to 2D`, `filter: sepia() is not drawn`, `<canvas> is not drawn`, `::before counter() content is not drawn`, ...), and `compile` forwards each as a diagnostic. Open shadow roots are captured as the browser composes them: a host shows its shadow tree, and a `<slot>` shows its assigned nodes (or its fallback content). Closed shadow roots cannot be seen from the page, so their hosts capture as empty.
+
+Bidirectional text is cut per line into pieces that each read one way, in visual order. A right-to-left piece (Hebrew, Arabic, ...) has `rtl: true` and its `text` in logical order, so the SVG text shapes joined scripts itself; `compile` wraps it in an isolate (U+2067 ... U+2069, zero advance) so it renders the same under any base direction. Spaces at the ends of a piece are dropped, so an underline or line-through has gaps where a line changes direction.
 
 ## Snapshot
 

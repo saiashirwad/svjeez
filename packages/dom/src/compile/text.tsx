@@ -59,7 +59,14 @@ const LINES = {
 
 const run = (one: Captured, at: Vec, key: string, ctx: Context): SceneElement[] => {
   const fill = painted(one.color);
-  const width = one.advances.reduce((sum, advance) => sum + advance, 0);
+
+  // A right-to-left piece is an isolate, so the SVG text orders it by itself, whichever way the text around it reads.
+  // The two controls take up no room.
+  const [words, advances] = one.rtl
+    ? [`\u2067${one.text}\u2069`, [0, ...one.advances, 0]]
+    : [one.text, one.advances];
+
+  const width = advances.reduce((sum, advance) => sum + advance, 0);
   const out: SceneElement[] = [];
 
   if (fill && one.text !== "") {
@@ -74,7 +81,7 @@ const run = (one: Captured, at: Vec, key: string, ctx: Context): SceneElement[] 
         at={where}
         anchor="baseline-left"
       >
-        <Run advances={one.advances}>{one.text}</Run>
+        <Run advances={advances}>{words}</Run>
       </Text>
     );
 

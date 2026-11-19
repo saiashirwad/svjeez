@@ -8,6 +8,8 @@ import form from "./app/form.html";
 import index from "./app/index.html";
 import effects from "./app/effects.html";
 import pseudo from "./app/pseudo.html";
+import rtl from "./app/rtl.html";
+import shadow from "./app/shadow.html";
 
 /** Mean absolute difference over the page's box (the scene may be larger, sized for its biggest state), RGB, 0 to 255, measured in Chromium. */
 const difference = async (
@@ -342,6 +344,45 @@ describe("film", () => {
       }
     }
   }, 90_000);
+
+  /** Films `app` once and compares the page with the scene's rendering. */
+  const matches = async (app: Bun.HTMLBundle, viewport: { width: number; height: number }) => {
+    let shot: Uint8Array = new Uint8Array();
+    const diagnostics: string[] = [];
+
+    const scene = await film(
+      serve(app, { selector: "#app" }),
+      async ({ page, snap }) => {
+        await snap("page");
+        shot = await page.locator("#app").screenshot();
+      },
+      { viewport, onDiagnostics: (all) => diagnostics.push(...all.map((one) => one.what)) },
+    );
+
+    const view = await openScene(svg.emit(scene));
+
+    try {
+      const shown = await view.capture(0.1);
+
+      return { diff: await difference(shot, shown), diagnostics };
+    } finally {
+      await view.close();
+    }
+  };
+
+  test("open shadow roots, slots and their fallbacks match the page", async () => {
+    const { diff, diagnostics } = await matches(shadow, { width: 400, height: 400 });
+
+    expect(diagnostics).toEqual([]);
+    expect(diff).toBeLessThan(4);
+  }, 60_000);
+
+  test("Hebrew, Arabic and mixed left-to-right and right-to-left lines match the page", async () => {
+    const { diff, diagnostics } = await matches(rtl, { width: 400, height: 500 });
+
+    expect(diagnostics).toEqual([]);
+    expect(diff).toBeLessThan(4);
+  }, 60_000);
 
   test("fails loudly when the page throws", async () => {
     await expect(

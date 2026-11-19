@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Svjeez bidirectional text</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #fff;
+        color: #0a0a0a;
+        font: 18px/28px Helvetica, Arial, sans-serif;
+      }
+      #app {
+        background: #fff;
+        width: 340px;
+        padding: 20px;
+      }
+      p {
+        margin: 0 0 8px;
+      }
+      .wrap {
+        width: 180px;
+      }
+      .line {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <p>hello שלום עולם world</p>
+      <p dir="rtl">שלום hello עולם world!</p>
+      <p dir="rtl">مرحبا بالعالم</p>
+      <p dir="rtl" class="wrap">שלום עולם זהו משפט ארוך יותר שעוטף hello world לשורות</p>
+      <p class="line">abc אבג def</p>
+      <p dir="rtl">מחיר: 120 שקל (כולל מע״מ)</p>
+    </div>
+  </body>
+</html>
