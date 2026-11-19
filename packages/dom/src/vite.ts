@@ -1,5 +1,7 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash, randomUUID } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import type { InlineConfig, Plugin, RunnableDevEnvironment, ViteDevServer } from "vite";
 import {
@@ -35,6 +37,19 @@ const REFERENCE = /\b(?:src|href)="(\/?[^":#]+\.(?:[mc]?[jt]sx?|css))"/g;
 const inProject = (file: string | null | undefined): file is string =>
   Boolean(file) && !file!.includes("/node_modules/");
 
+/**
+ * Each server gets its own dependency cache. Vite's default one is shared per project, and servers that optimize into it
+ * at the same time invalidate each other's bundles (the page then gets `504 Outdated Optimize Dep`).
+ */
+const privateCache = (config: InlineConfig | undefined): Promise<string | undefined> =>
+  config?.cacheDir ? Promise.resolve(undefined) : mkdtemp(join(tmpdir(), "svjeez-dom-vite-"));
+
+const closeServer = async (server: ViteDevServer, cacheDir: string | undefined): Promise<void> => {
+  await server.close();
+
+  if (cacheDir) await rm(cacheDir, { recursive: true, force: true });
+};
+
 const listen = async (server: ViteDevServer): Promise<string> => {
   if (!server.resolvedUrls) await server.listen();
 
@@ -45,11 +60,7 @@ const listen = async (server: ViteDevServer): Promise<string> => {
   return origin;
 };
 
-/**
- * Loads each url through the dev server, and every project module it imports (node_modules excluded), wherever they live.
- * Transforming the whole graph also settles dependency optimization before the browser loads.
- */
-const crawl = async (server: ViteDevServer, urls: readonly string[]): Promise<Set<string>> => {
+const crawlOnce = async (server: ViteDevServer, urls: readonly string[]): Promise<Set<string>> => {
   const files = new Set<string>();
   const queue = [...urls];
   const seen = new Set(queue);
@@ -69,6 +80,28 @@ const crawl = async (server: ViteDevServer, urls: readonly string[]): Promise<Se
   }
 
   return files;
+};
+
+/**
+ * Loads each url through the dev server, and every project module it imports (node_modules excluded), wherever they live.
+ * Transforming the whole graph also settles dependency optimization before the browser loads.
+ *
+ * Vite re-optimizes a dependency it finds late, and the requests caught in the middle fail with `ERR_OUTDATED_OPTIMIZED_DEP`
+ * (a page would reload and ask again). So do we: start the crawl over once the optimizer has settled.
+ */
+const crawl = async (server: ViteDevServer, urls: readonly string[]): Promise<Set<string>> => {
+  for (let attempt = 1; ; attempt++)
+    try {
+      return await crawlOnce(server, urls);
+    } catch (error) {
+      // SAFETY: only reading `code`, which Vite sets on this error and which is absent otherwise.
+      const outdated = (error as { code?: string } | null)?.code === "ERR_OUTDATED_OPTIMIZED_DEP";
+
+      if (!outdated || attempt >= 10) throw error;
+
+      // The optimizer's rerun has no promise to wait on.
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
 };
 
 const hashFiles = async (files: Iterable<string>, ...extra: string[]): Promise<string> => {
@@ -95,9 +128,12 @@ export const serve = async ({
     throw new Error("serve from @svjeez/dom/vite needs vite. Install it with `npm i -D vite`.");
   });
 
+  const cacheDir = await privateCache(config);
+
   const server: ViteDevServer = await createServer({
     root,
     logLevel: "warn",
+    ...(cacheDir && { cacheDir }),
     ...config,
     server: { ...config?.server, port: 0, strictPort: true, hmr: false, watch: null },
   });
@@ -114,10 +150,10 @@ export const serve = async ({
       url: new URL(entry === "index.html" ? "/" : entry, origin).href,
       selector,
       sources: () => hashFiles(files),
-      close: () => server.close(),
+      close: () => closeServer(server, cacheDir),
     };
   } catch (error) {
-    await server.close();
+    await closeServer(server, cacheDir);
 
     throw error;
   }
@@ -128,7 +164,7 @@ interface Page {
   readonly entry: string;
 }
 
-/** What `runFilm` leaves on `globalThis` for `component()` to find: the film file's modules do not share this package's instance. */
+/** What `component()` needs from the `runFilm` that is loading its film file. */
 interface Bridge {
   readonly server: ViteDevServer;
   readonly film: string;
@@ -136,8 +172,11 @@ interface Bridge {
 }
 
 declare global {
-  var svjeezDomVite: Bridge | undefined;
+  /** The film file's modules may hold a second copy of this package, so the storage lives on `globalThis`; each `runFilm` runs its film file inside its own bridge. */
+  var svjeezDomVite: AsyncLocalStorage<Bridge> | undefined;
 }
+
+const hosts = (globalThis.svjeezDomVite ??= new AsyncLocalStorage<Bridge>());
 
 const PREFIX = "virtual:svjeez-dom/";
 
@@ -172,19 +211,8 @@ export interface RunFilmOptions {
  *
  *     const scene = await runFilm("./card.film.tsx");
  */
-export const runFilm = (file: string, options: RunFilmOptions = {}): Promise<Scene> => {
-  // `component()` finds its server through one global, so film files run one at a time.
-  const run = running.then(() => load(file, options));
-
-  running = run.then(
-    () => undefined,
-    () => undefined,
-  );
-
-  return run;
-};
-
-let running: Promise<void> = Promise.resolve();
+export const runFilm = (file: string, options: RunFilmOptions = {}): Promise<Scene> =>
+  load(file, options);
 
 const load = async (
   file: string,
@@ -197,18 +225,17 @@ const load = async (
   const film = resolve(file);
   const byId = new Map<string, Page>();
 
+  const cacheDir = await privateCache(config);
+
   const server = await createServer({
     root,
     logLevel: "warn",
     appType: "custom",
+    ...(cacheDir && { cacheDir }),
     ...config,
     plugins: [...(config?.plugins ?? []), pages(byId)],
     server: { ...config?.server, port: 0, strictPort: true, hmr: false, watch: null },
   });
-
-  const previous = globalThis.svjeezDomVite;
-
-  globalThis.svjeezDomVite = { server, film, pages: byId };
 
   try {
     const environment = server.environments.ssr;
@@ -219,15 +246,18 @@ const load = async (
     // Starting the server also starts the plugins; the SSR loader needs them started.
     await listen(server);
 
-    return (await environment.runner.import<{ default: Scene }>(film)).default;
+    // `component()` reads the bridge from the async context of the film file's evaluation, so films can run in parallel.
+    const bridge: Bridge = { server, film, pages: byId };
+
+    return (await hosts.run(bridge, () => environment.runner.import<{ default: Scene }>(film)))
+      .default;
   } finally {
-    globalThis.svjeezDomVite = previous;
-    await server.close();
+    await closeServer(server, cacheDir);
   }
 };
 
 const locate = (host: Bridge, component: Prop): Located => {
-  // SAFETY: `runFilm` checked that the SSR environment is runnable before it published the bridge.
+  // SAFETY: `runFilm` checked that the SSR environment is runnable before it made the bridge.
   const { runner } = host.server.environments.ssr as RunnableDevEnvironment;
   const found: { file: string; name: string; imports: Set<string> }[] = [];
 
@@ -286,7 +316,7 @@ export const component = async <C extends Fn>(
 ): Promise<Target<Partial<PropsFor<C>>>> => {
   // SAFETY: `PropsFor` is a plain object type; the runtime check in `serializeProps` is what holds it to JSON.
   const wire = serializeProps(props as Bag, "component");
-  const host = globalThis.svjeezDomVite;
+  const host = hosts.getStore();
 
   if (!host)
     throw new Error(
@@ -307,6 +337,7 @@ export const component = async <C extends Fn>(
   const origin = await listen(host.server);
   const files = await crawl(host.server, [virtual]);
 
+  await host.server.environments.client.depsOptimizer?.scanProcessing;
   await host.server.waitForRequestsIdle();
 
   return {

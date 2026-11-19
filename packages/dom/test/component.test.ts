@@ -21,6 +21,16 @@ describe("component through Vite", () => {
     expect(scene.duration).toBeGreaterThan(0);
   }, 90_000);
 
+  test("films run in parallel, each finding its own server", async () => {
+    const [react, svelte] = await Promise.all([
+      runFilm(join(dir, "react.film.ts")),
+      runFilm(join(dir, "svelte.film.ts")),
+    ]);
+
+    expect(react.duration).toBeGreaterThan(0);
+    expect(svelte.duration).toBeGreaterThan(0);
+  }, 120_000);
+
   test("a component defined in the film file is refused", async () => {
     await expect(runFilm(join(dir, "local.film.ts"))).rejects.toThrow(
       "defined in the film file itself",
