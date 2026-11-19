@@ -13,6 +13,8 @@ export interface Target<Props = never> {
   sources(): Promise<string>;
   /** Stops the server (or unregisters the page). */
   close(): Promise<void>;
+  /** The folder that absolute file paths in the page's URLs (Vite's `/@fs/...`) are kept relative to in the cache. Default: the working directory. */
+  readonly base?: string;
   /** The film file that made this target, when the adapter knows it. `film` resolves `cache` against it. */
   readonly film?: string;
   /** What to call the scene when `title` is not given (a component's name, a page's `<title>`). */

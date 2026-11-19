@@ -57,6 +57,10 @@ export const outsideRoot = (html: string, entryDir: string, root: string): Map<s
 const inProject = (file: string | null | undefined): file is string =>
   Boolean(file) && !file!.includes("/node_modules/");
 
+/** Vite's optimized copies of dependencies live in the dependency cache: crawled (so they are settled), but never hashed, as their path and bundle names differ per run. */
+const isCached = (server: ViteDevServer, file: string): boolean =>
+  file.startsWith(`${server.config.cacheDir}/`);
+
 /**
  * Each server gets its own dependency cache. Vite's default one is shared per project, and servers that optimize into it
  * at the same time invalidate each other's bundles (the page then gets `504 Outdated Optimize Dep`).
@@ -90,7 +94,7 @@ const crawlOnce = async (server: ViteDevServer, urls: readonly string[]): Promis
 
     const module = await server.moduleGraph.getModuleByUrl(url);
 
-    if (inProject(module?.file)) files.add(module.file);
+    if (inProject(module?.file) && !isCached(server, module.file)) files.add(module.file);
 
     for (const next of module?.importedModules ?? [])
       if (inProject(next.file) && !seen.has(next.url)) {
@@ -214,6 +218,7 @@ export const serve = async ({
       selector,
       ...(film && { film }),
       ...(title && { title }),
+      base: searchForWorkspaceRoot(root),
       sources: () => hashFiles(root, files),
       close: () => closeServer(server, cacheDir),
     };
@@ -233,6 +238,7 @@ interface Page {
 interface Bridge {
   readonly server: ViteDevServer;
   readonly film: string;
+  readonly base: string;
   readonly pages: Map<string, Page>;
 }
 
@@ -285,9 +291,10 @@ const load = async (
   file: string,
   { root = dirname(resolve(file)), config }: RunFilmOptions,
 ): Promise<Scene> => {
-  const { createServer, isRunnableDevEnvironment } = await import("vite").catch(() => {
-    throw new Error("runFilm from @svjeez/dom/vite needs vite. Install it with `npm i -D vite`.");
-  });
+  const { createServer, isRunnableDevEnvironment, searchForWorkspaceRoot } =
+    await import("vite").catch(() => {
+      throw new Error("runFilm from @svjeez/dom/vite needs vite. Install it with `npm i -D vite`.");
+    });
 
   const film = resolve(file);
   const byId = new Map<string, Page>();
@@ -314,7 +321,7 @@ const load = async (
     await listen(server);
 
     // `component()` reads the bridge from the async context of the film file's evaluation, so films can run in parallel.
-    const bridge: Bridge = { server, film, pages: byId };
+    const bridge: Bridge = { server, film, base: searchForWorkspaceRoot(root), pages: byId };
 
     return (await hosts.run(bridge, () => environment.runner.import<{ default: Scene }>(film)))
       .default;
@@ -411,6 +418,7 @@ export const component = async <C extends Fn>(
     url: new URL(`__svjeez-dom/${id}.html`, origin).href,
     selector: options.selector ?? SELECTOR,
     film: host.film,
+    base: host.base,
     ...(Component.name && { title: Component.name }),
     sources: async () => {
       const styles = await Promise.all(

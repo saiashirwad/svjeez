@@ -1,4 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { cp, mkdtemp, readFile, rm } from "node:fs/promises";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { svg } from "svjeez/tools";
 import { film } from "../src/index.ts";
@@ -83,5 +85,61 @@ describe("assets outside the Vite root", () => {
         },
       ),
     ).rejects.toThrow(/stylesheet http:\/\/localhost:\d+\/nope\.css\?v=1 came back as text\/html/);
+  }, 60_000);
+});
+
+describe("cached states are portable", () => {
+  const outside = join(import.meta.dir, "outside");
+
+  test("a cached file holds no absolute path, and still films with the font inlined", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "svjeez-dom-portable-"));
+    const cache = join(dir, "states.json");
+
+    try {
+      const make = () =>
+        film(
+          serve({ root: join(outside, "font"), selector: "#app" }),
+          async ({ snap }) => {
+            await snap("a");
+          },
+          { cache, onDiagnostics: () => {} },
+        );
+
+      const first = svg.emit(await make());
+      const stored = await readFile(cache, "utf8");
+
+      expect(stored).toContain("svjeez-dom.invalid/@base/");
+      expect(stored).not.toContain(homedir());
+      expect(stored).not.toContain(join(import.meta.dir, ".."));
+      expect(stored).not.toContain("/@fs");
+      expect(stored).not.toContain("localhost");
+      expect(first).toContain("data:font/ttf;base64,");
+      // Replayed from the cache: the same scene.
+      expect(svg.emit(await make())).toBe(first);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 60_000);
+
+  test("sources() does not depend on where the project is checked out", async () => {
+    const copy = await mkdtemp(join(tmpdir(), "svjeez-dom-moved-"));
+
+    try {
+      await cp(outside, join(copy, "outside"), { recursive: true });
+
+      const hash = async (root: string) => {
+        const server = await serve({ root, selector: "#app" });
+
+        try {
+          return await server.sources();
+        } finally {
+          await server.close();
+        }
+      };
+
+      expect(await hash(join(copy, "outside", "app"))).toBe(await hash(join(outside, "app")));
+    } finally {
+      await rm(copy, { recursive: true, force: true });
+    }
   }, 60_000);
 });

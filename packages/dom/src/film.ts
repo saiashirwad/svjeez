@@ -6,6 +6,7 @@ import { inlineAssets } from "./assets.ts";
 import { cached, cachePath } from "./cache.ts";
 import { callerFile } from "./component.ts";
 import { compile, type Diagnostic } from "./compile/index.ts";
+import { fromPortable, toPortable } from "./portable.ts";
 import { openPage, record, type OpenPageOptions, type Snap, type State } from "./record.ts";
 import { serializeProps, type Bag } from "./props.ts";
 import type { Target } from "./target.ts";
@@ -71,8 +72,6 @@ export const titleFromFile = (file: string | undefined): string => {
 
   return name === "index" ? basename(dirname(file)) : name;
 };
-
-const ORIGIN = "http://svjeez-dom.invalid";
 
 const warn = (diagnostics: readonly Diagnostic[]) => {
   if (diagnostics.length > 0)
@@ -176,16 +175,14 @@ export const film = async <Props = never>(
       }
     };
 
-    // The port changes every run, so the cache keeps asset URLs relative to a placeholder origin.
+    // The port and the checkout's location change, so the cache keeps asset URLs relative to a placeholder origin and `base`.
     const origin = new URL(app.url).origin;
-
-    const swap = (states: State[], from: string, to: string): State[] =>
-      JSON.parse(JSON.stringify(states).replaceAll(from, to));
+    const base = app.base ?? process.cwd();
 
     const file = cache ? cachePath(cache, app.film ?? caller) : undefined;
 
     const states = file
-      ? swap(
+      ? fromPortable(
           await cached(
             file,
             {
@@ -194,10 +191,10 @@ export const film = async <Props = never>(
               scheme: scheme ?? null,
               viewport: viewport ?? null,
             },
-            async () => swap(await capture(), origin, ORIGIN),
+            async () => toPortable(await capture(), origin, base),
           ),
-          ORIGIN,
           origin,
+          base,
         )
       : await capture();
 
