@@ -164,7 +164,21 @@ export const openPage = async ({
 
   if (onError) {
     page.on("pageerror", (error) => onError(error.message));
-    page.on("console", (message) => message.type() === "error" && onError(message.text()));
+    page.on("console", (message) => {
+      if (message.type() !== "error") return;
+
+      // The browser's own "Failed to load resource: ... 404" doesn't say which resource; the message's location does.
+      const { url: failed } = message.location();
+
+      // Branded Chrome (the fallback when no headless shell is installed) asks every page for a favicon; a film page rarely has one.
+      if (failed && new URL(failed).pathname === "/favicon.ico") return;
+
+      onError(
+        failed && message.text().startsWith("Failed to load resource")
+          ? `${message.text()} (${failed})`
+          : message.text(),
+      );
+    });
     // A dev server answers a path it does not serve with its HTML page, status 200: the asset silently never arrives.
     page.on("response", (response) => {
       const kind = response.request().resourceType();

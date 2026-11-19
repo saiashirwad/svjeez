@@ -83,6 +83,13 @@ describe("cachePath", () => {
 describe("film cache location", () => {
   const out = join(import.meta.dir, "app", "cache-out");
   const next = join(import.meta.dir, "app", "cached.film.states.json");
+  const film = join(import.meta.dir, "app", "cached.film.ts");
+
+  // The film file loads this package's source, which imports `svjeez`. Vite leaves `svjeez` external and resolves it with only the
+  // `node` condition, i.e. to package-dist, which CI hasn't built; `bun test --conditions @svjeez/source` doesn't reach Vite's resolver.
+  const source = {
+    config: { ssr: { resolve: { externalConditions: ["node", "@svjeez/source"] } } },
+  };
 
   afterAll(() => {
     rmSync(out, { recursive: true, force: true });
@@ -100,7 +107,7 @@ describe("film cache location", () => {
       expect(existsSync(join(out, "states.json"))).toBe(true);
 
       rmSync(out, { recursive: true, force: true });
-      await runFilm(join(import.meta.dir, "app", "cached.film.ts"));
+      await runFilm(film, source);
       expect(existsSync(join(out, "states.json"))).toBe(true);
     } finally {
       process.chdir(cwd);
@@ -111,7 +118,7 @@ describe("film cache location", () => {
     process.env.CACHE_OPTION = "true";
 
     try {
-      await runFilm(join(import.meta.dir, "app", "cached.film.ts"));
+      await runFilm(film, source);
       expect(existsSync(next)).toBe(true);
     } finally {
       delete process.env.CACHE_OPTION;
