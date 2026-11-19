@@ -124,12 +124,18 @@ const crawl = async (server: ViteDevServer, urls: readonly string[]): Promise<Se
     }
 };
 
-const hashFiles = async (files: Iterable<string>, ...extra: string[]): Promise<string> => {
+/** Paths are hashed relative to `base`, so the same project hashes the same in any checkout. */
+const hashFiles = async (
+  base: string,
+  files: Iterable<string>,
+  ...extra: string[]
+): Promise<string> => {
   const hash = createHash("sha256");
 
-  for (const file of [...files].sort()) hash.update(file).update(await readFile(file));
+  for (const file of [...files].sort())
+    hash.update(relative(base, file)).update(await readFile(file));
 
-  for (const text of extra) hash.update(text);
+  for (const text of extra) hash.update(text.replaceAll(base, ""));
 
   return hash.digest("hex");
 };
@@ -208,7 +214,7 @@ export const serve = async ({
       selector,
       ...(film && { film }),
       ...(title && { title }),
-      sources: () => hashFiles(files),
+      sources: () => hashFiles(root, files),
       close: () => closeServer(server, cacheDir),
     };
   } catch (error) {
@@ -413,7 +419,13 @@ export const component = async <C extends Fn>(
         ),
       );
 
-      return hashFiles(files, JSON.stringify(wire), framework.name, ...styles);
+      return hashFiles(
+        host.server.config.root,
+        files,
+        JSON.stringify(wire),
+        framework.name,
+        ...styles,
+      );
     },
     close: async () => void host.pages.delete(id),
   };
