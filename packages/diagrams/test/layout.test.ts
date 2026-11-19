@@ -345,7 +345,8 @@ describe("layered", () => {
         edges: edges("a>d a>e b>d b>f c>e c>f d>g d>h e>h e>i f>g f>i"),
       });
 
-      expect(crossings(out)).toBeLessThanOrEqual(2);
+      // Four is the least any order of its layers allows.
+      expect(crossings(out)).toBeLessThanOrEqual(4);
     });
 
     test("edges leaving one node start at separate points along its side", () => {
@@ -397,6 +398,60 @@ describe("layered", () => {
       };
 
       expect(layered(input)).toEqual(layered(input));
+    });
+  });
+
+  describe("straightening", () => {
+    const center = (b: Box) => b.x + b.w / 2;
+
+    // Sideways steps along an edge, past the one it may take at each end to reach its ports.
+    const kinks = (e: { readonly points: readonly Point[] }) =>
+      Math.max(
+        0,
+        e.points.slice(1).filter((q, k) => Math.abs(q.x - e.points[k]!.x) > 0.5).length - 2,
+      );
+
+    test("a long edge runs straight between its bends", () => {
+      const out = layered({
+        nodes: nodes("a b c d e f g h"),
+        edges: edges("a>b b>c c>d d>e a>e a>f f>g g>h b>h c>h"),
+      });
+
+      for (const e of out.edges) expect(kinks(e)).toBe(0);
+    });
+
+    for (const [name, graph] of Object.entries<LayeredInput>(graphs))
+      test(`${name}: no long edge kinks between its bends`, () => {
+        const out = layered(graph);
+
+        const long = out.edges.filter(
+          (e) => Math.abs(out.rank.get(e.from)! - out.rank.get(e.to)!) > 1,
+        );
+
+        expect(long.reduce((n, e) => n + kinks(e), 0)).toBe(0);
+      });
+
+    test("a chain of nodes of different widths stays perfectly straight", () => {
+      const out = layered({ nodes: nodes("a b c d e"), edges: edges("a>b b>c c>d d>e") });
+      const xs = [...out.nodes.values()].map(center);
+
+      for (const x of xs) expect(x).toBeCloseTo(xs[0]!, 6);
+
+      for (const e of out.edges) expect(e.points).toHaveLength(2);
+    });
+
+    test("a parent with two children sits centred over them", () => {
+      const out = layered({ nodes: nodes("p a b"), edges: edges("p>a p>b") });
+      const [p, a, b] = ["p", "a", "b"].map((id) => center(out.nodes.get(id)!));
+
+      expect(p!).toBeCloseTo((a! + b!) / 2, 6);
+    });
+
+    test("a child with two parents sits centred under them", () => {
+      const out = layered({ nodes: nodes("a b c"), edges: edges("a>c b>c") });
+      const [a, b, c] = ["a", "b", "c"].map((id) => center(out.nodes.get(id)!));
+
+      expect(c!).toBeCloseTo((a! + b!) / 2, 6);
     });
   });
 
