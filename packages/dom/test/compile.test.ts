@@ -271,6 +271,17 @@ describe("shadows", () => {
     expect(out.svg).toContain('clip-rule="evenodd"');
   });
 
+  test("a themed shadow's caster is opaque, so its alpha is not applied twice", () => {
+    const out = draw(
+      box({
+        shadows: [shadow({ color: { light: "rgba(0, 0, 0, 0.2)", dark: "rgba(0, 0, 0, 0.5)" } })],
+      }),
+    );
+
+    expect(out.svg).toMatch(/<feDropShadow[^>]*flood-color="var\(--c-/);
+    expect(out.svg).toContain('fill="#000000" filter=');
+  });
+
   test("a spread shadow is a bigger, blurred shape", () => {
     const out = draw(box({ shadows: [shadow({ spread: 4, x: 0, y: 0 })] }));
 

@@ -332,12 +332,14 @@ export const shadows = (
     const cut = ring(outline(outside.box, outside.radii), outline(box, radii));
 
     if (one.spread === 0) {
+      // The caster is opaque: the shadow's alpha comes from its color alone (a themed color carries its alpha inside the
+      // token, so filling the caster with it too would square the alpha).
       below.push(
         <Group key={`shadow${n}`} clip={cut}>
           <Shape
             key="caster"
             {...rounded(box, radii)}
-            fill={paint.hex}
+            fill="#000000"
             effects={[
               shadow({
                 color: paint.hex,
