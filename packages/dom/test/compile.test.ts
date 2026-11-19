@@ -11,7 +11,7 @@ import {
   type Snapshot,
   type SvgNode,
 } from "../src/index.ts";
-import type { Matrix } from "../src/schema.ts";
+import type { Background, Matrix, Placement } from "../src/schema.ts";
 import { words } from "./fixtures.ts";
 import { decompose } from "../src/compile/transform.ts";
 
@@ -679,6 +679,354 @@ describe("notes from capture", () => {
       { path: "app", what: "filter is not drawn" },
       { path: "app/card", what: "a 3D transform is flattened to 2D" },
       { path: "app/card", what: "filter is not drawn" },
+    ]);
+  });
+});
+
+describe("background images and gradient tiles", () => {
+  /** A PNG's signature and header: all `picture()` reads of it. */
+  const png = (width: number, height: number): string => {
+    const head = Buffer.alloc(24);
+
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(head);
+    head.write("IHDR", 12);
+    head.writeUInt32BE(width, 16);
+    head.writeUInt32BE(height, 20);
+
+    return `data:image/png;base64,${head.toString("base64")}`;
+  };
+
+  const whole = (w: number, h: number) => ({ x: 0, y: 0, width: w, height: h });
+
+  const place = (over: Partial<Placement>): Placement => ({
+    size: ["auto", "auto"],
+    position: [
+      { percent: 0, px: 0 },
+      { percent: 0, px: 0 },
+    ],
+    repeat: ["repeat", "repeat"],
+    origin: whole(100, 60),
+    clip: whole(100, 60),
+    ...over,
+  });
+
+  const image = (src: string, over: Parameters<typeof place>[0]): Background => ({
+    kind: "image",
+    src,
+    place: place(over),
+  });
+
+  const image$ = (out: { svg: string }) => out.svg.match(/<image[^>]*>/g) ?? [];
+
+  test("cover scales the image to fill the box, centered, and cuts it to the box", () => {
+    const out = draw(
+      box({
+        backgrounds: [
+          image(png(40, 40), {
+            size: "cover",
+            repeat: ["no-repeat", "no-repeat"],
+            position: [
+              { percent: 50, px: 0 },
+              { percent: 50, px: 0 },
+            ],
+          }),
+        ],
+      }),
+    );
+
+    expect(out.diagnostics).toEqual([]);
+    // 100x60 around a square: 100x100, with 20px cut off above and below.
+    expect(image$(out)).toEqual([expect.stringContaining('width="100" height="100"')]);
+    expect(out.svg).toContain("clipPath");
+    expect(out.svg).toMatch(/translate\(0[ ,]-20\)|y="-20"/);
+  });
+
+  test("contain fits inside the box, and needs no clip", () => {
+    const out = draw(
+      box({
+        backgrounds: [
+          image(png(40, 40), {
+            size: "contain",
+            repeat: ["no-repeat", "no-repeat"],
+            position: [
+              { percent: 100, px: 0 },
+              { percent: 0, px: 0 },
+            ],
+          }),
+        ],
+      }),
+    );
+
+    expect(image$(out)).toEqual([expect.stringContaining('width="60" height="60"')]);
+    expect(out.svg).toContain('x="40"');
+    expect(out.svg).not.toContain("clipPath");
+  });
+
+  test("an explicit size with one auto axis keeps the ratio", () => {
+    const out = draw(
+      box({
+        backgrounds: [
+          image(png(40, 20), { size: [20, "auto"], repeat: ["no-repeat", "no-repeat"] }),
+        ],
+      }),
+    );
+
+    expect(image$(out)).toEqual([expect.stringContaining('width="20" height="10"')]);
+  });
+
+  test("a repeating image is a pattern whose cell is the tile", () => {
+    const out = draw(box({ backgrounds: [image(png(30, 20), { size: [30, 20] })] }));
+
+    expect(out.diagnostics).toEqual([]);
+    expect(out.svg).toMatch(/<pattern[^>]*width="30"[^>]*height="20"/);
+    expect(out.svg).toContain("url(#");
+  });
+
+  test("repeat-x repeats along one axis only", () => {
+    const out = draw(
+      box({
+        backgrounds: [
+          image(png(30, 20), {
+            repeat: ["repeat", "no-repeat"],
+            position: [
+              { percent: 0, px: 0 },
+              { percent: 100, px: 0 },
+            ],
+          }),
+        ],
+      }),
+    );
+
+    const [, width, height] = /<pattern[^>]*width="([\d.]+)"[^>]*height="([\d.]+)"/.exec(out.svg)!;
+
+    expect(Number(width)).toBe(30);
+    // Tall enough that no second tile reaches the box.
+    expect(Number(height)).toBeGreaterThanOrEqual(60);
+  });
+
+  test("round stretches the tile to a whole number across the origin box", () => {
+    const out = draw(
+      box({ backgrounds: [image(png(30, 20), { size: [30, 20], repeat: ["round", "repeat"] })] }),
+    );
+
+    // 100 / 30 rounds to 3 tiles, 33.33 wide.
+    expect(out.svg).toMatch(/<pattern[^>]*width="33\.33/);
+  });
+
+  test("space spreads whole tiles with gaps, flush to both edges", () => {
+    const out = draw(
+      box({ backgrounds: [image(png(30, 20), { size: [30, 20], repeat: ["space", "repeat"] })] }),
+    );
+
+    // Three tiles of 30 in 100 leave 10, split between two gaps: a period of 35.
+    expect(out.svg).toMatch(/<pattern[^>]*width="35"/);
+  });
+
+  test("an SVG with no size is drawn at the size the background gives it", () => {
+    const markup = `<svg xmlns='http://www.w3.org/2000/svg'><circle cx='5' cy='5' r='5'/></svg>`;
+
+    const out = draw(
+      box({
+        backgrounds: [
+          image(`data:image/svg+xml,${encodeURIComponent(markup)}`, {
+            size: [20, 10],
+            repeat: ["no-repeat", "no-repeat"],
+          }),
+        ],
+      }),
+    );
+
+    expect(out.diagnostics).toEqual([]);
+    expect(image$(out)).toEqual([expect.stringContaining('width="20" height="10"')]);
+  });
+
+  test("an image that was not inlined, or cannot be read, is a diagnostic", () => {
+    expect(notes(box({ backgrounds: [image("http://x/a.png", {})] }))).toEqual([
+      "a background-image url() that is not a data: URL is not drawn (http://x/a.png)",
+    ]);
+    expect(notes(box({ backgrounds: [image("data:text/plain,hello", {})] }))).toEqual([
+      expect.stringContaining("could not read"),
+    ]);
+  });
+
+  test("layers are drawn bottom first, each under its own key", () => {
+    const out = draw(
+      box({
+        backgrounds: [
+          image(png(10, 10), { size: [10, 10] }),
+          { kind: "linear", angle: 90, stops: stops("red", "blue") },
+        ],
+      }),
+    );
+
+    expect(out.svg.indexOf("linearGradient")).toBeLessThan(out.svg.indexOf("<pattern"));
+  });
+
+  test("a gradient with a size is a tile, repeated", () => {
+    const out = draw(
+      box({
+        backgrounds: [
+          {
+            kind: "linear",
+            angle: 90,
+            stops: stops("red", "blue"),
+            place: place({ size: [20, 60] }),
+          },
+        ],
+      }),
+    );
+
+    expect(out.svg).toMatch(/<pattern[^>]*width="20"[^>]*height="60"/);
+  });
+
+  test("a gradient clipped to the content box is cut to it, with the box's corners pulled in", () => {
+    const out = draw(
+      box({
+        radii: [corner(10), corner(10), corner(10), corner(10)],
+        backgrounds: [
+          {
+            kind: "linear",
+            angle: 90,
+            stops: stops("red", "blue"),
+            place: place({
+              size: [80, 40],
+              repeat: ["no-repeat", "no-repeat"],
+              origin: { x: 10, y: 10, width: 80, height: 40 },
+              clip: { x: 10, y: 10, width: 80, height: 40 },
+            }),
+          },
+        ],
+      }),
+    );
+
+    expect(out.svg).toContain('x="10" y="10" width="80" height="40"');
+  });
+
+  test("an opaque border hides what lies beneath it, so the tile need not repeat under it", () => {
+    const sides = [side(4), side(4), side(4), side(4)] as const;
+
+    const layer: Background = {
+      kind: "linear",
+      angle: 90,
+      stops: stops("red", "blue"),
+      // The default: the tile fills the padding box, and the clip is the border box.
+      place: place({ size: [92, 52], origin: { x: 4, y: 4, width: 92, height: 52 } }),
+    };
+
+    expect(draw(box({ border: sides, backgrounds: [layer] })).svg).not.toContain("<pattern");
+
+    const faint = [side(4, "rgba(0, 0, 0, 0.5)"), side(4), side(4), side(4)] as const;
+
+    expect(draw(box({ border: faint, backgrounds: [layer] })).svg).toContain("<pattern");
+  });
+
+  const stops = (...colors: string[]) =>
+    colors.map((color, i) => ({
+      offset: i / (colors.length - 1),
+      color: { red: "rgb(255, 0, 0)", blue: "rgb(0, 0, 255)", lime: "rgb(0, 255, 0)" }[color]!,
+    }));
+
+  test("an elliptical radial gradient is a circular one scaled in a clipped group", () => {
+    const out = draw(
+      box({
+        backgrounds: [
+          {
+            kind: "radial",
+            at: [50, 30],
+            radius: [50, 25],
+            stops: stops("red", "blue"),
+          },
+        ],
+      }),
+    );
+
+    expect(out.diagnostics).toEqual([]);
+    expect(out.svg).toContain("radialGradient");
+    expect(out.svg).toContain("scale:1 0.5");
+    expect(out.svg).toContain("clipPath");
+  });
+
+  test("a circular radial gradient needs neither", () => {
+    const out = draw(
+      box({
+        backgrounds: [
+          { kind: "radial", at: [50, 30], radius: [25, 25], stops: stops("red", "blue") },
+        ],
+      }),
+    );
+
+    expect(out.svg).toContain('r="25"');
+    expect(out.svg).not.toContain("scale");
+    expect(out.svg).not.toContain("clipPath");
+  });
+
+  test("a repeating linear gradient has its stops unrolled across the box", () => {
+    const out = draw(
+      box({
+        rect: { x: 0, y: 0, width: 100, height: 100 },
+        backgrounds: [
+          {
+            kind: "linear",
+            angle: 90,
+            repeating: true,
+            // 25px periods across 100px: four repeats.
+            stops: [
+              { offset: 0, color: "rgb(255, 0, 0)" },
+              { offset: 0.25, color: "rgb(0, 0, 255)" },
+            ],
+          },
+        ],
+      }),
+    );
+
+    expect(out.svg.match(/<stop /g)).toHaveLength(8);
+    expect(out.svg).toContain('offset="0.25"');
+  });
+
+  test("a repeating radial gradient reaches the far corner", () => {
+    const out = draw(
+      box({
+        rect: { x: 0, y: 0, width: 100, height: 100 },
+        backgrounds: [
+          {
+            kind: "radial",
+            at: [0, 0],
+            radius: [100, 100],
+            repeating: true,
+            stops: [
+              { offset: 0, color: "rgb(255, 0, 0)" },
+              { offset: 0.25, color: "rgb(0, 0, 255)" },
+            ],
+          },
+        ],
+      }),
+    );
+
+    // The far corner is 1.414 radii away: six periods of 0.25.
+    expect(out.svg.match(/<stop /g)!.length).toBeGreaterThanOrEqual(12);
+    expect(out.svg).toContain('r="141.42');
+  });
+
+  test("a repeating gradient with no period is drawn once", () => {
+    const out = draw(
+      box({
+        backgrounds: [
+          {
+            kind: "linear",
+            angle: 90,
+            repeating: true,
+            stops: [
+              { offset: 0.5, color: "rgb(255, 0, 0)" },
+              { offset: 0.5, color: "rgb(0, 0, 255)" },
+            ],
+          },
+        ],
+      }),
+    );
+
+    expect(out.svg.match(/<stop /g)).toHaveLength(2);
+    expect(out.diagnostics.map((d) => d.what)).toEqual([
+      "a repeating gradient with no period, or too many repeats, is drawn once",
     ]);
   });
 });

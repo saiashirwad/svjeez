@@ -86,7 +86,7 @@ describe("capture", () => {
       { x: 2, y: 4, blur: 6, spread: 1, color: "rgba(0, 0, 0, 0.5)", inset: false },
       { x: 0, y: 0, blur: 4, spread: 0, color: "rgb(0, 0, 255)", inset: true },
     ]);
-    expect(box.backgrounds).toEqual([
+    expect(box.backgrounds).toMatchObject([
       {
         kind: "linear",
         angle: 90,
@@ -95,6 +95,12 @@ describe("capture", () => {
           { offset: 0.5, color: "rgb(0, 0, 255)" },
           { offset: 1, color: "rgb(0, 255, 0)" },
         ],
+        // The default origin is the padding box, inside the 3px border, and the default clip is the border box.
+        place: {
+          size: [100, 60],
+          origin: { x: 3, y: 3, width: 100, height: 60 },
+          clip: { x: 0, y: 0, width: 106, height: 66 },
+        },
       },
     ]);
   }, 30_000);
@@ -106,7 +112,69 @@ describe("capture", () => {
 
     const [layer] = byId(snapshot, "r").backgrounds!;
 
-    expect(layer).toMatchObject({ kind: "radial", shape: "circle", at: [25, 50] });
+    // The default size, farthest-corner, reaches the far corner: 75 across and 50 down.
+    expect(layer).toMatchObject({ kind: "radial", at: [25, 50], radius: [90.139, 90.139] });
+  });
+
+  test("radial gradient sizes: keywords and lengths, for circles and ellipses", async () => {
+    const radii = async (css: string) => {
+      const snapshot = await snap(
+        `<div id="r" style="width:200px;height:100px;background:radial-gradient(${css}, red, blue)"></div>`,
+      );
+
+      const [layer] = byId(snapshot, "r").backgrounds!;
+
+      return layer?.kind === "radial" ? { at: layer.at, radius: layer.radius } : undefined;
+    };
+
+    expect(await radii("red")).toBeDefined();
+    // An ellipse reaches its corner in the same ratio as it reaches the sides.
+    expect(await radii("ellipse farthest-corner at 25% 50%")).toEqual({
+      at: [50, 50],
+      radius: [212.132, 70.711],
+    });
+    expect(await radii("closest-side at 25% 50%")).toEqual({ at: [50, 50], radius: [50, 50] });
+    expect(await radii("circle closest-side at 25% 20%")).toEqual({
+      at: [50, 20],
+      radius: [20, 20],
+    });
+    expect(await radii("circle farthest-side at 25% 20%")).toEqual({
+      at: [50, 20],
+      radius: [150, 150],
+    });
+    expect(await radii("circle closest-corner at 25% 20%")).toEqual({
+      at: [50, 20],
+      radius: [53.852, 53.852],
+    });
+    expect(await radii("circle 30px at left top")).toEqual({ at: [0, 0], radius: [30, 30] });
+    expect(await radii("ellipse 60px 25% at right")).toEqual({
+      at: [200, 50],
+      radius: [60, 25],
+    });
+    expect(await radii("40px 10px at bottom")).toEqual({ at: [100, 100], radius: [40, 10] });
+  });
+
+  test("repeating gradients keep their stops and say so", async () => {
+    const snapshot = await snap(
+      `<div id="r" style="width:100px;height:100px;background:repeating-linear-gradient(45deg, red, red 10px, blue 10px, blue 20px), repeating-radial-gradient(circle at 10px 20px, red 5px, blue 15px)"></div>`,
+    );
+
+    const [linear, radial] = byId(snapshot, "r").backgrounds!;
+
+    expect(radial).toMatchObject({
+      kind: "radial",
+      repeating: true,
+      at: [10, 20],
+      stops: [
+        { offset: 0.042, color: "rgb(255, 0, 0)" },
+        { offset: 0.125, color: "rgb(0, 0, 255)" },
+      ],
+    });
+    expect(linear).toMatchObject({ kind: "linear", repeating: true, angle: 45 });
+
+    if (linear?.kind !== "linear") throw new Error("expected a linear layer");
+    // The line through a 100px square at 45deg is 141.42px long, so 10px is 0.0707 of it.
+    expect(linear.stops.map((stop) => stop.offset)).toEqual([0, 0.071, 0.071, 0.141]);
   });
 
   test("multi-line text keeps its advances, letter-spacing and underline", async () => {
@@ -513,6 +581,98 @@ describe("pseudo-elements", () => {
   });
 });
 
+describe("background layers", () => {
+  const layersOf = async (css: string, extra = "") => {
+    const snapshot = await snap(
+      `<div id="b" style="width:200px;height:100px;padding:10px;border:5px solid red;box-sizing:content-box;${extra};${css}"></div>`,
+    );
+
+    return byId(snapshot, "b").backgrounds ?? [];
+  };
+
+  test("size, position, repeat, origin and clip, per layer", async () => {
+    const layers = await layersOf(
+      `background-image:url(data:image/gif;base64,R0lGODlhAQABAAAAACw=),linear-gradient(red,blue);
+       background-size:50% 20px,cover;background-position:right 10px bottom 5px,center;
+       background-repeat:repeat-x,space round;background-origin:content-box,border-box;background-clip:padding-box,content-box`,
+    );
+
+    expect(layers).toMatchObject([
+      {
+        kind: "image",
+        place: {
+          size: [100, 20],
+          // `right 10px bottom 5px` is `calc(100% - 10px) calc(100% - 5px)`.
+          position: [
+            { percent: 100, px: -10 },
+            { percent: 100, px: -5 },
+          ],
+          repeat: ["repeat", "no-repeat"],
+          origin: { x: 15, y: 15, width: 200, height: 100 },
+          clip: { x: 5, y: 5, width: 220, height: 120 },
+        },
+      },
+      {
+        kind: "linear",
+        place: {
+          // A gradient has no size of its own: cover is its origin box.
+          size: [230, 130],
+          position: [
+            { percent: 50, px: 0 },
+            { percent: 50, px: 0 },
+          ],
+          repeat: ["space", "round"],
+          origin: { x: 0, y: 0, width: 230, height: 130 },
+          clip: { x: 15, y: 15, width: 200, height: 100 },
+        },
+      },
+    ]);
+  });
+
+  test("a shorter list repeats to the number of layers", async () => {
+    const layers = await layersOf(
+      `background-image:linear-gradient(red,blue),linear-gradient(blue,red),linear-gradient(lime,red);
+       background-size:10px 10px,20px 20px;background-repeat:no-repeat;background-clip:content-box,border-box`,
+    );
+
+    expect(layers.map((layer) => layer.place?.size)).toEqual([
+      [10, 10],
+      [20, 20],
+      [10, 10],
+    ]);
+    expect(layers.map((layer) => layer.place?.repeat)).toEqual(
+      layers.map(() => ["no-repeat", "no-repeat"]),
+    );
+    expect(layers.map((layer) => layer.place?.clip.x)).toEqual([15, 0, 15]);
+  });
+
+  test("a url() layer keeps `auto` and the keywords for compile, which can read the image", async () => {
+    const layers = await layersOf(
+      `background-image:url(data:image/gif;base64,R0lGODlhAQABAAAAACw=),url(data:image/gif;base64,R0lGODlhAQABAAAAACw=),url(data:image/gif;base64,R0lGODlhAQABAAAAACw=);
+       background-size:auto,contain,30px auto`,
+    );
+
+    expect(layers.map((layer) => layer.place?.size)).toEqual([
+      ["auto", "auto"],
+      "contain",
+      [30, "auto"],
+    ]);
+  });
+
+  test("a gradient is resolved against its tile", async () => {
+    const [layer] = await layersOf(
+      "background:radial-gradient(circle closest-side, red, blue) 0 0/50px 40px",
+    );
+
+    expect(layer).toMatchObject({
+      kind: "radial",
+      at: [25, 20],
+      radius: [20, 20],
+      place: { size: [50, 40] },
+    });
+  });
+});
+
 describe("notes: what capture cannot represent", () => {
   const noted = async (html: string, id = "n") => byId(await snap(html), id).notes ?? [];
 
@@ -524,28 +684,20 @@ describe("notes: what capture cannot represent", () => {
     expect(byId(snapshot, "n").notes).toBeUndefined();
   });
 
-  test("conic and repeating gradients", async () => {
+  test("conic gradients", async () => {
     expect(
       await noted(
         `<div id="n" style="width:20px;height:20px;background-image:conic-gradient(red,blue),repeating-conic-gradient(red 0 10%,blue 0 20%),repeating-linear-gradient(red,blue 10px),linear-gradient(red,blue)"></div>`,
       ),
-    ).toEqual([
-      "conic-gradient() is not drawn",
-      "repeating-conic-gradient() is not drawn",
-      "repeating-linear-gradient() is not drawn",
-    ]);
+    ).toEqual(["conic-gradient() is not drawn", "repeating-conic-gradient() is not drawn"]);
   });
 
-  test("background size, position and repeat", async () => {
+  test("a fixed background is drawn as scroll", async () => {
     expect(
       await noted(
-        `<div id="n" style="width:20px;height:20px;background:linear-gradient(red,blue) 5px 5px/10px 10px no-repeat"></div>`,
+        `<div id="n" style="width:20px;height:20px;background:linear-gradient(red,blue) fixed"></div>`,
       ),
-    ).toEqual([
-      "background-size is not drawn",
-      "background-position is not drawn",
-      "background-repeat is not drawn",
-    ]);
+    ).toEqual(["background-attachment: fixed is drawn as scroll"]);
   });
 
   test("3D transforms are flattened, with perspective and preserve-3d", async () => {

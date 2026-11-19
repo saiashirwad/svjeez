@@ -1,18 +1,9 @@
 /** @jsxImportSource svjeez */
-import {
-  Group,
-  Shape,
-  blur,
-  linear,
-  polygon,
-  radial,
-  shadow,
-  type Anim,
-  type SceneElement,
-} from "svjeez";
-import type { Hex, Stops, StrokeProps } from "svjeez/tools";
+import { Group, Shape, blur, polygon, shadow, type Anim, type SceneElement } from "svjeez";
+import type { Hex, StrokeProps } from "svjeez/tools";
 import type { Background, BorderStyle, Color, Rect, Shadow, Side } from "../schema.ts";
-import { colorKey, painted, type Context, type Solid } from "./context.ts";
+import { layer } from "./background.tsx";
+import { colorKey, painted, type Context } from "./context.ts";
 import {
   expand,
   innerRadii,
@@ -33,80 +24,45 @@ export interface Where {
   readonly ctx: Context;
 }
 
-type Gradient = Extract<Background, { kind: "linear" | "radial" }>;
+/** Whether every side of the border that draws is solid and opaque, so nothing shows through it from behind. */
+export const hides = (sides: readonly [Side, Side, Side, Side] | undefined): boolean =>
+  !!sides &&
+  sides.every((side) => {
+    if (side.width <= 0 || side.style === "none" || side.style === "hidden") return true;
 
-const stopsOf = (gradient: Gradient): Stops | undefined => {
-  let last = 0;
+    const paint = painted(side.color);
 
-  const stops = gradient.stops.map(({ offset, color }): [number, Solid] => {
-    last = Math.max(last, Math.min(1, offset));
-
-    return [last, painted(color)?.rgba ?? "#00000000"];
+    return (
+      !paint ||
+      (side.style === "solid" && (paint.pair?.every((one) => one.alpha >= 1) ?? paint.alpha >= 1))
+    );
   });
 
-  return stops.length >= 2 ? stops : undefined;
-};
-
-/** The radius CSS gives a radial gradient: an ellipse is drawn as the circle between its two radii. */
-const radiusOf = (
-  layer: Extract<Background, { kind: "radial" }>,
-  box: Rect,
-  note: (what: string) => void,
-): number => {
-  const [cx, cy] = layer.at;
-  const [nearX, farX] = [Math.min(cx, box.width - cx), Math.max(cx, box.width - cx)];
-  const [nearY, farY] = [Math.min(cy, box.height - cy), Math.max(cy, box.height - cy)];
-  const closest = layer.size.startsWith("closest");
-  const [x, y] = closest ? [nearX, nearY] : [farX, farY];
-  const side = layer.size.endsWith("side");
-
-  if (layer.shape === "circle")
-    return side ? (closest ? Math.min(x, y) : Math.max(x, y)) : Math.hypot(x, y);
-
-  const [rx, ry] = side ? [x, y] : [x * Math.SQRT2, y * Math.SQRT2];
-
-  if (Math.abs(rx - ry) > 0.5) note("an elliptical radial-gradient is drawn as a circle");
-
-  return (rx + ry) / 2;
-};
-
-/** The background color and each gradient layer, bottom first. */
+/**
+ * The background color and each image and gradient layer, bottom first.
+ * `visible` is the part of the box an opaque border leaves showing, which layers need not draw beyond.
+ */
 export const backgrounds = (
   color: Color | undefined,
   layers: readonly Background[] | undefined,
-  { box, radii, path, ctx }: Where,
+  where: Where,
   /** The background color as a track, when an animation drives it: drawn even where the page is clear at the captured moment. */
   moving?: Anim<Hex>,
+  visible?: Rect,
 ): SceneElement[] => {
   const out: SceneElement[] = [];
-  const shape = rounded(box, radii);
+  const shape = rounded(where.box, where.radii);
   const fill = painted(color);
 
   if (moving) out.push(<Shape key="background" {...shape} fill={moving} />);
   else if (fill) out.push(<Shape key="background" {...shape} fill={fill.rgba} />);
 
   // CSS lists the topmost layer first.
-  [...(layers ?? [])].reverse().forEach((layer, i, all) => {
-    if (layer.kind === "image") return ctx.note(path, "a background-image url() is not drawn");
+  [...(layers ?? [])].reverse().forEach((one, i, all) => {
+    const n = all.length - i;
+    const drawn = layer(one, `${one.kind === "image" ? "image" : "gradient"}${n}`, where, visible);
 
-    const stops = stopsOf(layer);
-
-    if (!stops) return;
-
-    const paint =
-      layer.kind === "linear"
-        ? // CSS 0deg points up, and core's 0 points right.
-          linear.across({ angle: layer.angle - 90, stops })
-        : radial({
-            center: layer.at,
-            radius: Math.max(
-              0.01,
-              radiusOf(layer, box, (what) => ctx.note(path, what)),
-            ),
-            stops,
-          });
-
-    out.push(<Shape key={`gradient${all.length - i}`} {...shape} fill={paint} />);
+    if (drawn) out.push(drawn);
   });
 
   return out;

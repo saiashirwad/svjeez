@@ -6,7 +6,7 @@ import type { Context } from "./context.ts";
 import { BIG, add, innerRadii, inset, outline, sub, type Radii, type Vec } from "./geometry.ts";
 import { control } from "./control.tsx";
 import { image } from "./image.tsx";
-import { backgrounds, border, outlineOf, shadows, widthsOf, type Where } from "./paint.tsx";
+import { backgrounds, border, hides, outlineOf, shadows, widthsOf, type Where } from "./paint.tsx";
 import { isElement, type Paired } from "./pair.ts";
 import { text } from "./text.tsx";
 import { decompose } from "./transform.ts";
@@ -121,7 +121,13 @@ export const element = (
 
   const children: SceneElement[] = [
     ...(cast?.below ?? []),
-    ...backgrounds(el.background, el.backgrounds, where, motion?.fill),
+    ...backgrounds(
+      el.background,
+      el.backgrounds,
+      where,
+      motion?.fill,
+      hides(el.border) ? padding.box : undefined,
+    ),
     ...(lit?.above ?? []),
     ...(el.border ? border(el.border, where) : []),
     ...(el.control ? control(el.control, padding.box, ctx) : []),

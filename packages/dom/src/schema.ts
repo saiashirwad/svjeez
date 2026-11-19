@@ -50,16 +50,63 @@ export interface Stop {
   readonly color: Color;
 }
 
-export type Background =
-  | { readonly kind: "linear"; readonly angle: number; readonly stops: readonly Stop[] }
-  | {
-      readonly kind: "radial";
-      readonly shape: "circle" | "ellipse";
-      readonly size: string;
-      readonly at: readonly [x: number, y: number];
-      readonly stops: readonly Stop[];
-    }
-  | { readonly kind: "image"; readonly src: string };
+/** One axis of `background-size`: a length in px, or `auto` (the image's own size, or the whole box for a gradient). */
+export type Extent = number | "auto";
+
+/** `background-repeat` on one axis. */
+export type Repeat = "repeat" | "no-repeat" | "space" | "round";
+
+/** One axis of `background-position`: `px` plus `percent` of the free space (the box minus the tile). */
+export interface Offset {
+  readonly percent: number;
+  readonly px: number;
+}
+
+/**
+ * Where one background layer goes. Rects are in px from the border box's top-left corner.
+ * A gradient's `size` is always two px lengths: the tile its stops were resolved against.
+ */
+export interface Placement {
+  readonly size: readonly [width: Extent, height: Extent] | "cover" | "contain";
+  readonly position: readonly [x: Offset, y: Offset];
+  readonly repeat: readonly [x: Repeat, y: Repeat];
+  /** The box `size` and `position` are measured in (`background-origin`). */
+  readonly origin: Rect;
+  /** The box the layer is cut to (`background-clip`). */
+  readonly clip: Rect;
+}
+
+interface Layer {
+  /** Absent means the CSS defaults: the whole border box, repeated, from its top-left corner. */
+  readonly place?: Placement;
+}
+
+/** `repeating`: the stops repeat past the last one, with its period the span of the first stop to the last. */
+export interface LinearGradient extends Layer {
+  readonly kind: "linear";
+  readonly angle: number;
+  /** Offsets are fractions of the gradient line through the tile. */
+  readonly stops: readonly Stop[];
+  readonly repeating?: boolean;
+}
+
+export interface RadialGradient extends Layer {
+  readonly kind: "radial";
+  /** The center, in px from the tile's top-left corner. */
+  readonly at: readonly [x: number, y: number];
+  /** The ending shape's radii in px: equal for a circle. */
+  readonly radius: readonly [x: number, y: number];
+  /** Offsets are fractions of the horizontal radius. */
+  readonly stops: readonly Stop[];
+  readonly repeating?: boolean;
+}
+
+export interface ImageLayer extends Layer {
+  readonly kind: "image";
+  readonly src: string;
+}
+
+export type Background = LinearGradient | RadialGradient | ImageLayer;
 
 export type BorderStyle =
   | "none"
@@ -199,7 +246,7 @@ export interface ElementNode {
   /** Which axes clip their children to the padding box. */
   readonly clip?: { readonly x: boolean; readonly y: boolean };
   readonly background?: Color;
-  /** Gradient and image layers, topmost first. */
+  /** Gradient and image layers, topmost first, each with its own size, position, repeat, origin and clip. */
   readonly backgrounds?: readonly Background[];
   /** [top, right, bottom, left], present when any side draws. */
   readonly border?: readonly [Side, Side, Side, Side];

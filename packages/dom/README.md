@@ -119,6 +119,8 @@ It works with Playwright, Puppeteer or raw CDP `Runtime.evaluate`. Do not pass `
 
 Capture reads the page as it renders now. Running animations and transitions are captured mid-flight: the layout shows that moment, and `animations` carries the keyframes and `currentTime`. Each element with animations also gets `base`: what its animated properties compute to without them, which is what they return to when an animation ends or has not started. Capture reads it synchronously: each effect is pushed past its start with `fill: none`, the style is read, and the effect's timing is put back, so no frame renders and the animations keep their time, state and rate.
 
+Each background layer carries its own `place`: `background-size`, `-position`, `-repeat`, `-origin` and `-clip`, with shorter lists repeated to the number of layers, boxes and gradient sizes resolved to px, and gradients resolved against their tile. An image layer keeps `auto`, `cover` and `contain` for `compile`, which can read the image's size.
+
 Capture never drops CSS silently. Anything it cannot represent is a short phrase in the element's `notes` (`conic-gradient() is not drawn`, `a 3D transform is flattened to 2D`, `filter is not drawn`, `<canvas> is not drawn`, an open shadow root, `::before counter() content is not drawn`, ...), and `compile` forwards each as a diagnostic. Closed shadow roots cannot be seen from the page, so they are not noted.
 
 ## Snapshot
@@ -142,9 +144,9 @@ const out = svg.emit(scene({ size, duration, title: "Hero" }, () => element));
 
 Each element is a group framed at its transform origin (or its top-left corner), so children are measured from their parent. The root's top-left corner is `[0, 0]`, and `size` is its border box.
 
-Drawn with core primitives: rounded boxes (per-corner radii), background colors and linear/radial gradients, opacity, blend, 2D transforms, overflow clips, `<img>` data URLs as pictures, inline svg paths and basic shapes, text runs at their captured baselines and advances. Built from plain geometry: borders and outlines (a stroke pulled inside the box, or wedges cut to a ring when sides differ), outer shadows (core `shadow()` on a shape cut away under the box), spread and inset shadows (blurred shapes), and text decorations (thin rects).
+Drawn with core primitives: rounded boxes (per-corner radii), background colors, `url()` images and linear/radial gradients (repeating ones too, elliptical ones as a scaled circle) placed by `background-size`, `-position`, `-repeat`, `-origin` and `-clip`, opacity, blend, 2D transforms, overflow clips, `<img>` data URLs as pictures, inline svg paths and basic shapes, text runs at their captured baselines and advances. Built from plain geometry: borders and outlines (a stroke pulled inside the box, or wedges cut to a ring when sides differ), outer shadows (core `shadow()` on a shape cut away under the box), spread and inset shadows (blurred shapes), and text decorations (thin rects).
 
-`diagnostics` lists what is not faithful, as `{ path, what }`: everything the Snapshot's `notes` say, an elliptical radial gradient, `groove`/`ridge`/`inset`/`outset` borders, background images, `<img>` sources that are not `data:` URLs, svg text, paint servers and other elements, animated properties other than `transform`, `opacity` and `background-color`, and a keyed element that moves between parents it cannot ride across.
+`diagnostics` lists what is not faithful, as `{ path, what }`: everything the Snapshot's `notes` say, `groove`/`ridge`/`inset`/`outset` borders, background images that were not inlined or cannot be read, a repeating gradient with no period, `<img>` sources that are not `data:` URLs, svg text, paint servers and other elements, animated properties other than `transform`, `opacity` and `background-color`, and a keyed element that moves between parents it cannot ride across.
 
 ## Animating between states
 
@@ -197,10 +199,10 @@ const out = svg.emit(scene({ size, duration, title: "Hero" }, () => element));
 
 - `cached(file, inputs, fn)` keeps `fn`'s JSON result in `file` while `inputs` and the Snapshot version are unchanged. `SVJEEZ_DOM_REFRESH=1` records again.
 - `scheme: "both"` captures each state under light and dark `prefers-color-scheme` and merges them with `mergeSchemes(light, dark)`: a color that differs becomes `{ light, dark }`, and `compile` draws it as a theme token, so the SVG follows the viewer's scheme. The two trees must match node for node.
-- `inlineAssets` takes Snapshots or States (and returns the same kind), and embeds `<img>` and background images as `data:` URLs and the page's `@font-face` files for the families its text uses; `compile` then draws text with the embedded font instead of `font.system`. A URL that fails to download throws. Background images are embedded but still not drawn.
+- `inlineAssets` takes Snapshots or States (and returns the same kind), and embeds `<img>` and background images as `data:` URLs and the page's `@font-face` files for the families its text uses; `compile` then draws text with the embedded font instead of `font.system`. A URL that fails to download throws.
 - `openPage({ url, viewport?, executablePath?, onError? })` launches headless Chromium; `onError` hears page exceptions and console errors from before the page loads.
 - `playwright-core` is an optional peer dependency.
 
 ## Not captured
 
-`::before` / `::after`, text-shadow, filters and backdrop-filter, masks and clip-path, 3D transforms (only the 2D part is kept), `<canvas>` and `<video>` contents, form control carets and native chrome beyond checkbox, radio and select state, shadow DOM, repeating and conic gradients, background-size/position/repeat, scroll offsets inside scrolled containers, right-to-left and vertical text, and a root that sits inside a transformed ancestor.
+`::before` / `::after`, text-shadow, filters and backdrop-filter, masks and clip-path, 3D transforms (only the 2D part is kept), `<canvas>` and `<video>` contents, form control carets and native chrome beyond checkbox, radio and select state, shadow DOM, conic gradients, `background-attachment: fixed` (drawn as scroll), scroll offsets inside scrolled containers, right-to-left and vertical text, and a root that sits inside a transformed ancestor.

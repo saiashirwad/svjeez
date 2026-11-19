@@ -4,7 +4,11 @@ import type {
   Control,
   Corner,
   ElementNode,
+  Extent,
   Font,
+  Offset,
+  Rect,
+  Repeat,
   Run,
   Shadow,
   Side,
@@ -272,34 +276,13 @@ export const capture = (root: Element): Snapshot => {
     return n;
   };
 
-  const layer = (value: string, width: number, height: number): Background | undefined => {
-    const url = /^url\((.*)\)$/.exec(value)?.[1];
+  /** A center word pair (`left`, `25%`, `10px top`, ...) as px from the top-left of a `width` by `height` box. */
+  const placeOf = (given: string[], width: number, height: number): [number, number] => {
+    // `top` and `left` can come in either order.
+    const [first = "center", second = "center"] =
+      given[0] === "top" || given[0] === "bottom" ? [given[1], given[0]] : given;
 
-    if (url !== undefined) return { kind: "image", src: url.replace(/^["']|["']$/g, "") };
-
-    const call = /^(linear|radial)-gradient\((.*)\)$/s.exec(value);
-
-    if (!call) return undefined;
-    const args = split(call[2]!, ",");
-
-    const config = /^(to\s|[-\d.]+(deg|grad|rad|turn)$)/.test(args[0] ?? "")
-      ? args.shift()
-      : /^(circle|ellipse|closest|farthest|at\s)/.test(args[0] ?? "")
-        ? args.shift()
-        : undefined;
-
-    if (call[1] === "linear") {
-      const angle = config === undefined ? 180 : angleOf(config, width, height);
-      const rad = (angle * Math.PI) / 180;
-      const length = Math.abs(width * Math.sin(rad)) + Math.abs(height * Math.cos(rad));
-
-      return { kind: "linear", angle: round(angle), stops: stopsOf(args, length) };
-    }
-
-    const [shapeAndSize = "", position = ""] = (config ?? "").split(/\bat\b/).map((s) => s.trim());
-    const [px0 = "center", py0 = "center"] = position ? words(position) : [];
-
-    const place = (word: string, of: number, start: string, end: string) =>
+    const along = (word: string, of: number, start: string, end: string) =>
       word === start
         ? 0
         : word === end
@@ -310,21 +293,213 @@ export const capture = (root: Element): Snapshot => {
               ? (parseFloat(word) / 100) * of
               : px(word);
 
-    const at = [place(px0, width, "left", "right"), place(py0, height, "top", "bottom")] as const;
-    const shape = /\bcircle\b/.test(shapeAndSize) ? "circle" : "ellipse";
-    const size = /(closest|farthest)-(side|corner)/.exec(shapeAndSize)?.[0] ?? "farthest-corner";
-    const far = Math.max(at[0], width - at[0]);
+    return [along(first, width, "left", "right"), along(second, height, "top", "bottom")];
+  };
 
-    const ray =
-      shape === "circle" ? Math.hypot(far, Math.max(at[1], height - at[1])) : far * Math.SQRT2;
+  /** `(repeating-)linear/radial-gradient(...)` as a layer drawn into a tile of `width` by `height`. */
+  const gradient = (value: string, width: number, height: number): Background | undefined => {
+    const call = /^(repeating-)?(linear|radial)-gradient\((.*)\)$/s.exec(value);
+
+    if (!call) return undefined;
+    const args = split(call[3]!, ",");
+    const repeating = call[1] ? { repeating: true as const } : {};
+
+    const config = /^(to\s|[-\d.]+(deg|grad|rad|turn)$)/.test(args[0] ?? "")
+      ? args.shift()
+      : /^(circle|ellipse|closest|farthest|[-\d.]+(px|%)|at\s)/.test(args[0] ?? "")
+        ? args.shift()
+        : undefined;
+
+    if (call[2] === "linear") {
+      const angle = config === undefined ? 180 : angleOf(config, width, height);
+      const rad = (angle * Math.PI) / 180;
+      const length = Math.abs(width * Math.sin(rad)) + Math.abs(height * Math.cos(rad));
+
+      return { kind: "linear", angle: round(angle), stops: stopsOf(args, length), ...repeating };
+    }
+
+    const [shapeAndSize = "", position = ""] = (config ?? "").split(/\bat\b/).map((s) => s.trim());
+    const [cx, cy] = placeOf(position ? words(position) : [], width, height);
+    const [nearX, farX] = [Math.min(cx, width - cx), Math.max(cx, width - cx)];
+    const [nearY, farY] = [Math.min(cy, height - cy), Math.max(cy, height - cy)];
+    const given = words(shapeAndSize);
+    const lengths = given.filter((word) => /^[-\d.]/.test(word));
+    const keyword = /(closest|farthest)-(side|corner)/.exec(shapeAndSize)?.[0];
+    const circle = given.includes("circle") || (lengths.length === 1 && !given.includes("ellipse"));
+    const closest = keyword?.startsWith("closest") === true;
+    const corner = keyword?.endsWith("corner") !== false;
+    const [x, y] = closest ? [nearX, nearY] : [farX, farY];
+
+    // An explicit size wins; else the keyword (farthest-corner by default) decides.
+    const [rx, ry] =
+      lengths.length > 0
+        ? circle
+          ? [px(lengths[0]!), px(lengths[0]!)]
+          : [
+              lengths[0]!.endsWith("%") ? (parseFloat(lengths[0]!) / 100) * width : px(lengths[0]!),
+              lengths[1]?.endsWith("%")
+                ? (parseFloat(lengths[1]) / 100) * height
+                : px(lengths[1] ?? lengths[0]!),
+            ]
+        : circle
+          ? corner
+            ? [Math.hypot(x, y), Math.hypot(x, y)]
+            : [closest ? Math.min(x, y) : Math.max(x, y), closest ? Math.min(x, y) : Math.max(x, y)]
+          : corner
+            ? [x * Math.SQRT2, y * Math.SQRT2]
+            : [x, y];
 
     return {
       kind: "radial",
-      shape,
-      size,
-      at: [round(at[0]), round(at[1])],
-      stops: stopsOf(args, ray),
+      at: [round(cx), round(cy)],
+      radius: [round(rx), round(ry)],
+      stops: stopsOf(args, rx),
+      ...repeating,
     };
+  };
+
+  const KEYWORD_PERCENT = new Map([
+    ["left", 0],
+    ["top", 0],
+    ["center", 50],
+    ["right", 100],
+    ["bottom", 100],
+  ]);
+
+  /** One length, plain or `calc(a% + bpx)`, as its `percent` and `px` parts. */
+  const lengthOf = (word: string): Offset => {
+    const keyword = KEYWORD_PERCENT.get(word);
+
+    if (keyword !== undefined) return { percent: keyword, px: 0 };
+    let percent = 0;
+    let pixels = 0;
+
+    for (const [, sign, number, unit] of word.matchAll(/([+-])?\s*(\d*\.?\d+)(%|px)?/g)) {
+      const n = (sign === "-" ? -1 : 1) * parseFloat(number!);
+
+      if (unit === "%") percent += n;
+      else pixels += n;
+    }
+
+    return { percent: round(percent), px: round(pixels) };
+  };
+
+  const isRepeat = (word: string): word is Repeat =>
+    word === "repeat" || word === "no-repeat" || word === "space" || word === "round";
+
+  /** The border, padding or content box of an element, in px from its border box's corner. */
+  const boxOf = (style: CSSStyleDeclaration, rect: Rect, name: string): Rect => {
+    const edge = (side: "Top" | "Right" | "Bottom" | "Left") =>
+      (name === "border-box" ? 0 : px(style[`border${side}Width`])) +
+      (name === "content-box" ? px(style[`padding${side}`]) : 0);
+
+    const [t, r, b, l] = [edge("Top"), edge("Right"), edge("Bottom"), edge("Left")];
+
+    return {
+      x: round(l),
+      y: round(t),
+      width: round(Math.max(0, rect.width - l - r)),
+      height: round(Math.max(0, rect.height - t - b)),
+    };
+  };
+
+  /** The background layers, topmost first, and what of them cannot be drawn. */
+  const layersOf = (style: CSSStyleDeclaration, rect: Rect) => {
+    const layers: Background[] = [];
+    const notes: string[] = [];
+    const list = (value: string) => split(value, ",");
+
+    const [sizes, positions, repeats, origins, clips, attachments] = [
+      list(style.backgroundSize),
+      list(style.backgroundPosition),
+      list(style.backgroundRepeat),
+      list(style.backgroundOrigin),
+      list(style.backgroundClip),
+      list(style.backgroundAttachment),
+    ];
+
+    // Shorter lists repeat to the number of layers.
+    const nth = (values: string[], i: number, none: string) =>
+      values.length > 0 ? values[i % values.length]! : none;
+
+    split(style.backgroundImage, ",").forEach((one, i) => {
+      if (one === "none") return;
+
+      const origin = boxOf(style, rect, nth(origins, i, "padding-box"));
+      const clipName = nth(clips, i, "border-box");
+
+      const clip = boxOf(
+        style,
+        rect,
+        /^(padding|content)-box$/.test(clipName) ? clipName : "border-box",
+      );
+
+      const [sx = "auto", sy = sx] = words(nth(sizes, i, "auto"));
+      const sized = nth(sizes, i, "auto");
+      const keyword = sized === "cover" || sized === "contain" ? sized : undefined;
+
+      const extent = (word: string, of: number): Extent =>
+        word === "auto"
+          ? "auto"
+          : round(Math.max(0, lengthOf(word).px + (lengthOf(word).percent / 100) * of));
+
+      const [pxWord = "0%", pyWord = "0%"] = words(nth(positions, i, "0% 0%"));
+      const [rxWord = "repeat", ryWord = rxWord] = words(nth(repeats, i, "repeat"));
+
+      const repeat: [Repeat, Repeat] =
+        rxWord === "repeat-x"
+          ? ["repeat", "no-repeat"]
+          : rxWord === "repeat-y"
+            ? ["no-repeat", "repeat"]
+            : isRepeat(rxWord) && isRepeat(ryWord)
+              ? [rxWord, ryWord]
+              : ["repeat", "repeat"];
+
+      const position: [Offset, Offset] = [lengthOf(pxWord), lengthOf(pyWord)];
+
+      const common = {
+        position,
+        repeat,
+        origin,
+        clip,
+      };
+
+      if (nth(attachments, i, "scroll") === "fixed")
+        notes.push("background-attachment: fixed is drawn as scroll");
+
+      const url = /^url\((.*)\)$/s.exec(one)?.[1];
+
+      if (url !== undefined) {
+        layers.push({
+          kind: "image",
+          src: url.replace(/^["']|["']$/g, "").replace(/\\(["'])/g, "$1"),
+          place: {
+            size: keyword ?? [extent(sx, origin.width), extent(sy, origin.height)],
+            ...common,
+          },
+        });
+
+        return;
+      }
+
+      // A gradient has no size of its own: `auto`, `cover` and `contain` are the origin box.
+      const whole = (word: Extent, of: number) => (word === "auto" ? of : word);
+
+      const tile: [number, number] = keyword
+        ? [origin.width, origin.height]
+        : [
+            whole(extent(sx, origin.width), origin.width),
+            whole(extent(sy, origin.height), origin.height),
+          ];
+
+      const drawn = tile[0] > 0 && tile[1] > 0 ? gradient(one, tile[0], tile[1]) : undefined;
+
+      if (drawn) layers.push({ ...drawn, place: { size: tile, ...common } });
+      else if (tile[0] > 0 && tile[1] > 0)
+        notes.push(`${/^[\w-]+/.exec(one)?.[0] ?? "background-image"}() is not drawn`);
+    });
+
+    return { layers, notes };
   };
 
   const sidesOf = (style: CSSStyleDeclaration) => {
@@ -856,8 +1031,6 @@ export const capture = (root: Element): Snapshot => {
     part?: string;
   }
 
-  const NO_SIZE = new Set(["auto", "auto auto"]);
-
   /** The CSS an element has that the Snapshot cannot represent, as short phrases, for `notes`. */
   const unsupported = (style: CSSStyleDeclaration, d: Draw): string[] => {
     const out: string[] = [];
@@ -866,25 +1039,7 @@ export const capture = (root: Element): Snapshot => {
     const hasText = d.kids.some((kid) => kid.type === "text");
 
     if (d.bare !== true) {
-      let layers = 0;
-
-      for (const one of split(style.backgroundImage, ",")) {
-        if (one === "none") continue;
-
-        if (layer(one, d.rect.width, d.rect.height)) layers++;
-        else out.push(`${/^[\w-]+/.exec(one)?.[0] ?? "background-image"}() is not drawn`);
-      }
-
-      if (layers > 0) {
-        if (!split(style.backgroundSize, ",").every((size) => NO_SIZE.has(size)))
-          out.push("background-size is not drawn");
-
-        if (!split(style.backgroundPosition, ",").every((at) => at === "0% 0%" || at === "0px 0px"))
-          out.push("background-position is not drawn");
-
-        if (!split(style.backgroundRepeat, ",").every((repeat) => repeat === "repeat"))
-          out.push("background-repeat is not drawn");
-      }
+      out.push(...layersOf(style, d.rect).notes);
 
       if (/\btext\b/.test(get("background-clip"))) out.push("background-clip: text is not drawn");
     }
@@ -932,11 +1087,7 @@ export const capture = (root: Element): Snapshot => {
     const outlineWidth = px(style.outlineWidth);
     const shadows = bare ? [] : shadowsOf(style.boxShadow);
 
-    const backgrounds = bare
-      ? []
-      : split(style.backgroundImage, ",").flatMap(
-          (one) => layer(one, rect.width, rect.height) ?? [],
-        );
+    const backgrounds = bare ? [] : layersOf(style, rect).layers;
 
     const background = bare ? "rgba(0, 0, 0, 0)" : color(style.backgroundColor);
 
