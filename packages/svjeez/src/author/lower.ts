@@ -211,13 +211,14 @@ const layerOf = (layer: Written, timing: Timing, where: string): Layer => {
     offset: animated<Vec, Vec>(layer.offset ?? [0, 0], keep, timing, mixVec, at("offset")),
     rotate: animated(layer.rotate ?? 0, keep, timing, mixNumber, at("rotate")),
     scale: animated<number | Vec, Vec>(layer.scale ?? 1, pair, timing, mixVec, at("scale")),
+    skew: animated(layer.skew ?? 0, keep, timing, mixNumber, at("skew")),
     opacity: animated(layer.opacity ?? 1, keep, timing, mixNumber, at("opacity")),
   };
 };
 
 const NOWHERE: Vec = [0, 0];
 
-const IDLE: Layer = { offset: [0, 0], rotate: 0, scale: [1, 1], opacity: 1 };
+const IDLE: Layer = { offset: [0, 0], rotate: 0, scale: [1, 1], skew: 0, opacity: 1 };
 
 const base = (
   ctx: Ctx,
@@ -233,6 +234,7 @@ const base = (
     offset: [0, 0],
     rotate: animated(props.rotate ?? 0, keep, timing, mixNumber, `rotate on ${where}`),
     scale: animated<number | Vec, Vec>(props.scale ?? 1, pair, timing, mixVec, `scale on ${where}`),
+    skew: animated(props.skew ?? 0, keep, timing, mixNumber, `skew on ${where}`),
     opacity: animated(props.opacity ?? 1, keep, timing, mixNumber, `opacity on ${where}`),
   };
 

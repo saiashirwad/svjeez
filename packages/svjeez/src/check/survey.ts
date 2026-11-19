@@ -89,6 +89,7 @@ export const valuesOf = (node: SceneNode): Named[] => {
       { name: "offset", kind: "vec", value: layer.offset },
       { name: "rotate", kind: "number", value: layer.rotate },
       { name: "scale", kind: "vec", value: layer.scale },
+      { name: "skew", kind: "number", value: layer.skew },
       { name: "opacity", kind: "number", value: layer.opacity },
     );
 

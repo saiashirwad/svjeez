@@ -162,18 +162,12 @@ export const readOf = <T>(
   return readGoals(value, timing, where);
 };
 
-export interface LayerValues {
-  readonly offset?: Vec;
-  readonly rotate?: number;
-  readonly scale?: number | Vec;
-  readonly opacity?: number;
-}
-
 /** A layer of plain numbers, as enter() and exit() take them. */
 export interface LayerValues {
   readonly offset?: Vec;
   readonly rotate?: number;
   readonly scale?: number | Vec;
+  readonly skew?: number;
   readonly opacity?: number;
 }
 
@@ -182,12 +176,13 @@ export interface Layer {
   readonly offset?: Anim<Vec>;
   readonly rotate?: Anim<number>;
   readonly scale?: Anim<number> | Anim<Vec>;
+  readonly skew?: Anim<number>;
   readonly opacity?: Anim<number>;
 }
 
 export type Layers = Layer | readonly (Layer | false | null | undefined)[];
 
-const LAYER_KEYS = ["offset", "rotate", "scale", "opacity"];
+const LAYER_KEYS = ["offset", "rotate", "scale", "skew", "opacity"];
 
 export const layersOf = (stack: Layers | undefined, where: string): Layer[] => {
   const list: readonly (Layer | false | null | undefined)[] = Array.isArray(stack)
@@ -199,15 +194,15 @@ export const layersOf = (stack: Layers | undefined, where: string): Layer[] => {
 
     if (Object.getPrototypeOf(entry) !== Object.prototype)
       throw new SceneError(
-        `motion on ${where} takes layers: plain objects of offset, rotate, scale and opacity, each a value or a track.`,
+        `motion on ${where} takes layers: plain objects of offset, rotate, scale, skew and opacity, each a value or a track.`,
         "Write motion={{ opacity: track(0).to(1, span(1, 0.3)) }}, or use enter(), exit() or wiggle().",
       );
     const unknown = Object.keys(entry).find((key) => !LAYER_KEYS.includes(key));
 
     if (unknown !== undefined)
       throw new SceneError(
-        `A motion layer holds offset, rotate, scale and opacity, and ${where} gives it "${unknown}".`,
-        "Keep those four keys, and move anything else onto the node.",
+        `A motion layer holds offset, rotate, scale, skew and opacity, and ${where} gives it "${unknown}".`,
+        "Keep those five keys, and move anything else onto the node.",
       );
 
     return true;

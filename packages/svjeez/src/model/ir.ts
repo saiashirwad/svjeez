@@ -156,6 +156,8 @@ export interface Layer {
   readonly offset: Animated<Vec>;
   readonly rotate: Animated<number>;
   readonly scale: Animated<Vec>;
+  /** Degrees of shear along x in the layer's own frame, applied before scale and rotate. */
+  readonly skew: Animated<number>;
   readonly opacity: Animated<number>;
 }
 

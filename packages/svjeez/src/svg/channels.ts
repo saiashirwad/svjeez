@@ -25,6 +25,7 @@ const CHANNELS = {
   scale: { value: number, pivot: true },
   scaleY: { value: number, pivot: true },
   rotate: { value: number, pivot: true },
+  skew: { value: number, pivot: true },
   draw: { value: number, pins: { pathLength: "1", "stroke-dasharray": "1 2" } },
   drawStart: { value: number, pins: { pathLength: "1", "stroke-dasharray": "1 2" } },
   strokeWidth: { value: number },

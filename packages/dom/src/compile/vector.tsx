@@ -182,15 +182,14 @@ const dressing = (node: SvgNode, { ctx, path: where }: Lowering) => {
 
   const placed = matrix && decompose(matrix);
 
-  if (placed?.skew) ctx.note(where, "a skew in an svg transform is ignored");
-
   const moved =
     placed &&
     (placed.translate[0] !== 0 ||
       placed.translate[1] !== 0 ||
       placed.rotate !== 0 ||
       placed.scale[0] !== 1 ||
-      placed.scale[1] !== 1);
+      placed.scale[1] !== 1 ||
+      placed.skew !== 0);
 
   return {
     ...(moved && {
@@ -198,6 +197,7 @@ const dressing = (node: SvgNode, { ctx, path: where }: Lowering) => {
       origin: "at" as const,
       rotate: placed.rotate,
       scale: placed.scale,
+      skew: placed.skew,
     }),
     ...(opacity < 1 && { opacity }),
   };

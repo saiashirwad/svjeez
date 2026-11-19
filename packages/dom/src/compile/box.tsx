@@ -62,9 +62,6 @@ export const element = (
 
   const placed = transform && decompose(transform.matrix);
 
-  // Skew is the one part of a 2D matrix core has no way to say.
-  if (placed?.skew) ctx.note(path, `a skew of ${placed.skew.toFixed(1)} degrees is ignored`);
-
   if (el.animations?.length)
     ctx.note(path, "animations are not compiled; the layout shows the captured moment");
 
@@ -134,13 +131,20 @@ export const element = (
     ...(el.outline ? outlineOf(el.outline, where) : []),
   ];
 
-  const turned = placed && (placed.rotate !== 0 || placed.scale[0] !== 1 || placed.scale[1] !== 1);
+  const turned =
+    placed &&
+    (placed.rotate !== 0 || placed.scale[0] !== 1 || placed.scale[1] !== 1 || placed.skew !== 0);
 
   return (
     <Group
       key={key}
       offset={add(sub(origin, parent), placed?.translate ?? [0, 0])}
-      {...(turned && { origin: "at", rotate: placed.rotate, scale: placed.scale })}
+      {...(turned && {
+        origin: "at",
+        rotate: placed.rotate,
+        scale: placed.scale,
+        skew: placed.skew,
+      })}
       {...(el.opacity !== undefined && { opacity: el.opacity })}
       {...(blend && { blend })}
     >

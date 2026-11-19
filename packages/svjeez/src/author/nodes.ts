@@ -23,6 +23,8 @@ export interface Common {
   readonly origin?: Origin;
   readonly rotate?: Anim<number>;
   readonly scale?: Anim<number> | Anim<Vec>;
+  /** Degrees of shear along x, in the node's own frame: the box leans right for a positive angle, before it is scaled and rotated. */
+  readonly skew?: Anim<number>;
   readonly opacity?: Anim<number>;
   readonly motion?: Layers;
   readonly clip?: Anim<Geometry> | ((own: Bounds) => Anim<Geometry>);

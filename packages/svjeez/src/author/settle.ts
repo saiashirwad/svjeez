@@ -277,6 +277,8 @@ export const originOf = (
 const turns = (layer: Layer): boolean =>
   isLane(layer.rotate) ||
   isLane(layer.scale) ||
+  isLane(layer.skew) ||
+  layer.skew !== 0 ||
   layer.rotate !== 0 ||
   layer.scale[0] !== 1 ||
   layer.scale[1] !== 1;
@@ -295,8 +297,10 @@ export const outward = (
   for (const layer of [...layers].reverse()) {
     const [sx, sy] = valueAt(layer.scale, t, blendVec);
     const angle = valueAt(layer.rotate, t, blendNumber) * DEG;
+    const lean = Math.tan(valueAt(layer.skew, t, blendNumber) * DEG);
     const [ox, oy] = valueAt(layer.offset, t, blendVec);
-    const [dx, dy] = [(x - origin[0]) * sx, (y - origin[1]) * sy];
+    const [px, py] = [x - origin[0], y - origin[1]];
+    const [dx, dy] = [(px + lean * py) * sx, py * sy];
 
     x = origin[0] + ox + dx * Math.cos(angle) - dy * Math.sin(angle);
     y = origin[1] + oy + dx * Math.sin(angle) + dy * Math.cos(angle);
@@ -319,6 +323,7 @@ const inward = (
   for (const layer of layers) {
     const [sx, sy] = valueAt(layer.scale, t, blendVec);
     const angle = -valueAt(layer.rotate, t, blendNumber) * DEG;
+    const lean = Math.tan(valueAt(layer.skew, t, blendNumber) * DEG);
     const [ox, oy] = valueAt(layer.offset, t, blendVec);
     const [dx, dy] = [x - origin[0] - ox, y - origin[1] - oy];
 
@@ -329,8 +334,10 @@ const inward = (
         names.whereOf(key),
       );
 
-    x = origin[0] + (dx * Math.cos(angle) - dy * Math.sin(angle)) / sx;
-    y = origin[1] + (dx * Math.sin(angle) + dy * Math.cos(angle)) / sy;
+    const v = (dx * Math.sin(angle) + dy * Math.cos(angle)) / sy;
+
+    x = origin[0] + (dx * Math.cos(angle) - dy * Math.sin(angle)) / sx - lean * v;
+    y = origin[1] + v;
   }
 
   return [x, y];
@@ -627,7 +634,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
       ...(outline ? [outline] : []),
       ...[...up, ...down].flatMap((d) => [
         d.at,
-        ...d.node.layers.flatMap((layer) => [layer.offset, layer.rotate, layer.scale]),
+        ...d.node.layers.flatMap((layer) => [layer.offset, layer.rotate, layer.scale, layer.skew]),
       ]),
     ];
 

@@ -11,6 +11,8 @@ import {
   type Snapshot,
   type SvgNode,
 } from "../src/index.ts";
+import type { Matrix } from "../src/schema.ts";
+import { decompose } from "../src/compile/transform.ts";
 
 const box = (props: Partial<ElementNode> = {}): ElementNode => ({
   type: "element",
@@ -134,14 +136,32 @@ describe("boxes", () => {
     expect(out.diagnostics).toEqual([]);
   });
 
-  test("a skew is approximated and reported", () => {
+  test("a skew is drawn, with no diagnostic", () => {
     const skewed = box({
       transform: { matrix: [1, 0, Math.tan(Math.PI / 6), 1, 0, 0], origin: [0, 0] },
       background: "rgb(0, 0, 0)",
     });
 
-    expect(notes(skewed)).toEqual(["a skew of 30.0 degrees is ignored"]);
-    expect(draw(skewed).svg).toContain("<rect");
+    expect(notes(skewed)).toEqual([]);
+    expect(draw(skewed).svg).toContain("transform:skewX(30deg)");
+  });
+
+  test("decompose puts a matrix back together as translate · rotate · scale · skew", () => {
+    const matrix: Matrix = [0.8, 1.4, -0.3, 2.1, 12, -7];
+    const { translate, rotate, scale, skew } = decompose(matrix);
+    const [r, k] = [(rotate * Math.PI) / 180, Math.tan((skew * Math.PI) / 180)];
+    const [cos, sin] = [Math.cos(r), Math.sin(r)];
+
+    // rotate · scale · skewX
+    const back = [
+      cos * scale[0],
+      sin * scale[0],
+      cos * scale[0] * k - sin * scale[1],
+      sin * scale[0] * k + cos * scale[1],
+      ...translate,
+    ];
+
+    back.forEach((value, i) => expect(value).toBeCloseTo(matrix[i]!, 9));
   });
 
   test("children sit in their parent's frame, and animations are reported, not dropped", () => {

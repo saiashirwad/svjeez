@@ -106,7 +106,8 @@ const fold = (outer: Layer, inner: Layer): Layer | undefined => {
 
   const turns = always(inner.rotate, 0) || isUniform(outer.scale);
 
-  if (!still || !turns) return undefined;
+  // The inner layer's skew stays the innermost step, so it carries over; an outer skew sits between the two turns and can't merge.
+  if (!still || !turns || !always(outer.skew, 0)) return undefined;
   const offset = joined(outer.offset, inner.offset, addVec, mixVec);
   const rotate = joined(outer.rotate, inner.rotate, add, mixNumber);
   const scale = joined(outer.scale, inner.scale, timesVec, mixVec);
@@ -114,7 +115,7 @@ const fold = (outer: Layer, inner: Layer): Layer | undefined => {
 
   if (!offset || rotate === undefined || !scale || opacity === undefined) return undefined;
 
-  return { offset, rotate, scale, opacity };
+  return { offset, rotate, scale, skew: inner.skew, opacity };
 };
 
 export const foldLayers = (layers: readonly Layer[]): Layer[] => {

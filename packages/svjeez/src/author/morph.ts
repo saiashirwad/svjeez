@@ -213,15 +213,17 @@ interface Fixed {
   readonly offset: Vec;
   readonly rotate: number;
   readonly scale: Vec;
+  readonly skew: number;
   readonly opacity: number;
 }
 
-const IDLE: Fixed = { offset: [0, 0], rotate: 0, scale: [1, 1], opacity: 1 };
+const IDLE: Fixed = { offset: [0, 0], rotate: 0, scale: [1, 1], skew: 0, opacity: 1 };
 
 const layerOf = (values: LayerValues): Fixed => ({
   offset: values.offset ?? [0, 0],
   rotate: values.rotate ?? 0,
   scale: pair(values.scale ?? 1),
+  skew: values.skew ?? 0,
   opacity: values.opacity ?? 1,
 });
 
@@ -293,11 +295,12 @@ const agreed = <T>(plan: Plan, entry: Entry, read: (node: SceneNode) => T, what:
   return values[0]!;
 };
 
-const rotateScale = (rotate: number, [sx, sy]: Vec, [x, y]: Vec): Vec => {
+const rotateScale = (rotate: number, [sx, sy]: Vec, skew: number, [x, y]: Vec): Vec => {
   const angle = (rotate * Math.PI) / 180;
   const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
+  const leaned = x + Math.tan((skew * Math.PI) / 180) * y;
 
-  return [cos * sx * x - sin * sy * y, sin * sx * x + cos * sy * y];
+  return [cos * sx * leaned - sin * sy * y, sin * sx * leaned + cos * sy * y];
 };
 
 const rebased = (plan: Plan, entry: Entry, node: SceneNode, origin: Vec): readonly Layer[] => {
@@ -306,11 +309,11 @@ const rebased = (plan: Plan, entry: Entry, node: SceneNode, origin: Vec): readon
   if (Math.abs(dx) < EPSILON && Math.abs(dy) < EPSILON) return node.layers;
 
   return node.layers.map((layer) => {
-    if (isLane(layer.rotate) || isLane(layer.scale))
+    if (isLane(layer.rotate) || isLane(layer.scale) || isLane(layer.skew))
       throw new SceneError(
-        `morph() can't blend ${plan.names.named(entry.key)}: it turns or scales in a state, and its origin moves between states. Give it the same origin in every state, as in origin={[x, y]}.`,
+        `morph() can't blend ${plan.names.named(entry.key)}: it turns, scales or skews in a state, and its origin moves between states. Give it the same origin in every state, as in origin={[x, y]}.`,
       );
-    const [mx, my] = rotateScale(layer.rotate, layer.scale, [dx, dy]);
+    const [mx, my] = rotateScale(layer.rotate, layer.scale, layer.skew, [dx, dy]);
     const shift: Vec = [dx - mx, dy - my];
     const move = (offset: Vec): Vec => [offset[0] + shift[0], offset[1] + shift[1]];
 
@@ -360,6 +363,7 @@ const presence = (plan: Plan, entry: Entry, enter: Fixed, exit: Fixed): Layer | 
     offset: field((layer) => layer.offset, mixVec),
     rotate: field((layer) => layer.rotate, mixNumber),
     scale: field((layer) => layer.scale, mixVec),
+    skew: field((layer) => layer.skew, mixNumber),
     opacity: field((layer) => layer.opacity, mixNumber),
   };
 };
@@ -397,6 +401,13 @@ const layersOf = (plan: Plan, entry: Entry, origin: Vec): Layer[] => {
         at.map((layer) => layer.scale),
         mixVec,
         "scale",
+      ),
+      skew: blend(
+        plan,
+        entry,
+        at.map((layer) => layer.skew),
+        mixNumber,
+        "skew",
       ),
       opacity: blend(
         plan,

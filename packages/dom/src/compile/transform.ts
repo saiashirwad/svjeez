@@ -6,13 +6,13 @@ export interface Placement {
   /** Degrees, clockwise on screen. */
   readonly rotate: number;
   readonly scale: Vec;
-  /** Degrees; 0 for a matrix that only turns and scales. */
+  /** Degrees of shear along x, applied before scale and rotate; 0 for a matrix that only turns and scales. */
   readonly skew: number;
 }
 
 const DEGREES = 180 / Math.PI;
 
-/** A 2D matrix as the translate, rotate, scale and skew that make it. */
+/** A 2D matrix as the translate · rotate · scale · skew that make it, the order core applies them in. */
 export const decompose = ([a, b, c, d, e, f]: Matrix): Placement => {
   const sx = Math.hypot(a, b);
   const det = a * d - b * c;
@@ -23,7 +23,7 @@ export const decompose = ([a, b, c, d, e, f]: Matrix): Placement => {
     translate: [e, f],
     rotate: Math.atan2(b, a) * DEGREES,
     scale: [sx, det / sx],
-    skew: Math.atan2(a * c + b * d, det) * DEGREES,
+    skew: Math.atan((a * c + b * d) / (sx * sx)) * DEGREES,
   };
 };
 
