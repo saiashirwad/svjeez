@@ -422,6 +422,93 @@ describe("sequence", () => {
   });
 });
 
+describe("sequence blocks", () => {
+  const flow = (reveal = span(0, 0.5)) =>
+    sequence(
+      {
+        title: "Flow",
+        actors: { a: "A", b: "B", c: "C" },
+        boxes: [{ label: "Backend", actors: ["b", "c"] }],
+        messages: [
+          { autonumber: 1 },
+          ["a", "b", "start", { activate: true }],
+          {
+            block: "loop",
+            label: "every minute",
+            messages: [
+              ["b", "c", "poll"],
+              {
+                block: "alt",
+                label: "ok",
+                messages: [["c", "b", "data", { reply: true }]],
+                sections: [{ label: "down", messages: [{ note: ["b", "c"], text: "retry" }] }],
+              },
+            ],
+          },
+          { note: "a", side: "left", text: "left" },
+          {
+            block: "rect",
+            color: "#bfdfff",
+            opacity: 0.4,
+            messages: [["b", "a", "done", { deactivate: true }]],
+          },
+        ],
+      },
+      { ...options, reveal },
+    );
+
+  test("draws frames, dividers, bars, badges and a title without problems", () => {
+    const markup = svg.emit(draw(flow().node));
+
+    expect(errorsOf(flow().node)).toEqual([]);
+    expect(markup).toContain(">loop<");
+    expect(markup).toContain(">[every minute]<");
+    expect(markup).toContain(">[down]<");
+    expect(markup).toContain(">Flow<");
+    expect(markup).toContain(">[Backend]<");
+    expect(markup).toMatch(/>1<[\s\S]*>2<[\s\S]*>3</);
+  });
+
+  test("messages and notes count together, whatever blocks hold them", () => {
+    const s = flow();
+
+    expect(s.message(0).span).toMatchObject({ start: 0 });
+    expect(s.message(5).route.points).toHaveLength(2);
+    expect(thrown(() => s.message(7)).message).toBe(
+      "sequence() has no message 7. Count from 0: it has 6.",
+    );
+  });
+
+  test("rejects unknown actors, a colorless rect, a two-actor note with a side and a stray deactivate", () => {
+    expect(
+      thrown(() =>
+        sequence(
+          // @ts-expect-error "z" is not an actor
+          { actors: { a: "A" }, messages: [{ activate: "z" }] },
+          options,
+        ),
+      ).message,
+    ).toContain('names "z"');
+    expect(
+      thrown(() =>
+        sequence({ actors: { a: "A" }, messages: [{ block: "rect", messages: [] }] }, options),
+      ).problem,
+    ).toContain("rect needs a color");
+    expect(
+      thrown(() =>
+        sequence(
+          { actors: { a: "A", b: "B" }, messages: [{ note: ["a", "b"], side: "left", text: "x" }] },
+          options,
+        ),
+      ).problem,
+    ).toContain("two actors and a side");
+    expect(
+      thrown(() => sequence({ actors: { a: "A" }, messages: [{ deactivate: "a" }] }, options))
+        .message,
+    ).toContain("no activation");
+  });
+});
+
 describe("state machine", () => {
   const machine = () =>
     stateMachine(

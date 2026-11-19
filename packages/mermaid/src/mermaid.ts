@@ -15,6 +15,7 @@ import {
   type NodeRole,
   type NodeShape,
   type Sequence,
+  type SequenceMessage,
   type StateMachine,
   type StateSpec,
   type StateTransition,
@@ -43,6 +44,7 @@ import type {
   MermaidDoc,
   ParseOptions,
   SequenceDoc,
+  SequenceItem,
   StateDoc,
   StateNode,
   StateRegion,
@@ -97,6 +99,43 @@ const stateRegion = (r: StateRegion) => ({
   initial: r.initial,
   states: Object.fromEntries(r.states.map((s) => [s.id, stateSpec(s)])),
 });
+
+const sequenceMessages = (items: readonly SequenceItem[]): SequenceMessage<string>[] =>
+  items.map((m): SequenceMessage<string> => {
+    switch (m.kind) {
+      case "note":
+        return {
+          note: m.to === undefined ? m.actor : [m.actor, m.to],
+          text: m.text,
+          ...(m.side !== "over" && { side: m.side }),
+        };
+      case "activate":
+        return { activate: m.actor };
+      case "deactivate":
+        return { deactivate: m.actor };
+      case "autonumber":
+        return { autonumber: m.start };
+      case "block":
+        return {
+          block: m.block,
+          label: m.label,
+          color: m.color,
+          opacity: m.opacity,
+          messages: sequenceMessages(m.items),
+          sections: m.sections.map((x) => ({
+            label: x.label,
+            messages: sequenceMessages(x.items),
+          })),
+        };
+      case "message":
+        return [
+          m.from,
+          m.to,
+          m.text,
+          { reply: m.reply, head: m.head, activate: m.activate, deactivate: m.deactivate },
+        ];
+    }
+  });
 
 const stateSpec = (n: StateNode): StateSpec => {
   if (n.shape) return { kind: n.shape === "choice" ? "choice" : "bar" };
@@ -196,11 +235,9 @@ export function mermaid(text: string, options: MermaidOptions): MermaidDiagram {
               { label: p.label, role: p.role === "actor" ? "input" : "task" } as const,
             ]),
           ),
-          messages: doc.items.map((m) =>
-            m.kind === "note"
-              ? { note: m.actor, text: m.text }
-              : ([m.from, m.to, m.text, { reply: m.reply, head: m.head }] as const),
-          ),
+          messages: sequenceMessages(doc.items),
+          title: doc.title,
+          boxes: doc.boxes,
         },
         diagramOptions,
       ),

@@ -653,6 +653,101 @@ describe("sequence", () => {
   });
 });
 
+describe("sequence blocks, activations and notes", () => {
+  const actors = [
+    { id: "a", w: 40, h: 30 },
+    { id: "b", w: 40, h: 30 },
+    { id: "c", w: 40, h: 30 },
+  ];
+
+  const label = { w: 60, h: 14 };
+
+  const out = sequence({
+    actors,
+    title: { w: 100, h: 20 },
+    rows: [
+      { kind: "open", tab: { w: 40, h: 18 }, label: { w: 80, h: 16 } },
+      { kind: "message", from: "a", to: "b", label, activate: true },
+      { kind: "open", tab: { w: 30, h: 18 } },
+      { kind: "message", from: "b", to: "b", label, activate: true },
+      { kind: "message", from: "b", to: "b", label, deactivate: true },
+      { kind: "close" },
+      { kind: "divider", label: { w: 50, h: 16 } },
+      { kind: "message", from: "b", to: "a", label, deactivate: true },
+      { kind: "close" },
+      { kind: "note", actor: "a", to: "c", size: { w: 300, h: 26 } },
+      { kind: "note", actor: "c", side: "left", size: { w: 90, h: 26 } },
+    ],
+  });
+
+  const x = (id: string) => out.lifelines.get(id)![0].x;
+
+  test("a frame spans the lifelines it involves and nests its children", () => {
+    const [outer, inner] = out.frames;
+
+    expect(outer!.box.x).toBeLessThan(x("a"));
+    expect(outer!.box.x + outer!.box.w).toBeGreaterThan(x("b"));
+    expect(outer!.box.x + outer!.box.w).toBeLessThan(x("c") + 1);
+    expect(inner!.box.y).toBeGreaterThan(outer!.box.y);
+    expect(inner!.box.y + inner!.box.h).toBeLessThan(outer!.box.y + outer!.box.h);
+    expect(inner!.box.x).toBeGreaterThan(outer!.box.x);
+    expect(outer!.dividers).toHaveLength(1);
+    expect(outer!.dividers[0]!.y).toBeGreaterThan(inner!.box.y + inner!.box.h);
+    expect(outer!.at).toBe(0);
+    expect(inner!.at).toBe(1);
+  });
+
+  test("activations are bars on the lifeline, nested bars shift sideways", () => {
+    const [first, second] = out.bars.filter((b) => b.actor === "b");
+
+    expect(out.bars).toHaveLength(2);
+    expect(first!.box.x + first!.box.w / 2).toBeCloseTo(x("b"));
+    expect(second!.box.x).toBeGreaterThan(first!.box.x);
+    expect(second!.box.y).toBeGreaterThan(first!.box.y);
+    expect(second!.box.y + second!.box.h).toBeLessThanOrEqual(first!.box.y + first!.box.h);
+  });
+
+  test("an arrow stops at the edge of the bar it lands on", () => {
+    const send = out.rows[0]!.points;
+
+    expect(send[1]!.x).toBeLessThan(x("b"));
+    expect(send[0]!.x).toBe(x("a"));
+    const reply = out.rows[3]!.points;
+    expect(reply[0]!.x).toBeLessThan(x("b"));
+  });
+
+  test("notes span two actors or sit beside one, and the title heads the diagram", () => {
+    const [wide, beside] = [out.rows[4]!.box, out.rows[5]!.box];
+
+    expect(wide.w).toBeGreaterThanOrEqual(300);
+    expect(wide.x).toBeLessThan(x("a"));
+    expect(beside.x + beside.w).toBeLessThan(x("c"));
+    expect(out.title!.y).toBe(0);
+    expect(out.heads.get("a")!.y).toBeGreaterThan(out.title!.h);
+  });
+
+  test("deactivating without an activation is an error", () => {
+    expect(() => sequence({ actors, rows: [{ kind: "deactivate", actor: "a" }] })).toThrow(
+      "has no activation",
+    );
+    expect(() => sequence({ actors, rows: [{ kind: "close" }] })).toThrow("never opened");
+  });
+
+  test("a boxed group of actors gets a frame behind them", () => {
+    const boxed = sequence({
+      actors,
+      boxes: [{ actors: ["a", "b"], label: { w: 40, h: 14 } }],
+      rows: [{ kind: "message", from: "a", to: "c", label }],
+    });
+
+    const [b] = boxed.boxes;
+
+    expect(b!.box.x).toBeLessThan(boxed.heads.get("a")!.x);
+    expect(b!.box.x + b!.box.w).toBeGreaterThan(boxed.heads.get("b")!.x + 40);
+    expect(b!.box.x + b!.box.w).toBeLessThan(boxed.heads.get("c")!.x);
+  });
+});
+
 describe("lanes", () => {
   const out = lanes({
     lanes: [

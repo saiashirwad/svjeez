@@ -1,4 +1,4 @@
-import type { Color } from "svjeez/tools";
+import type { Color, Hex } from "svjeez/tools";
 
 export type Direction = "TB" | "LR" | "BT" | "RL";
 
@@ -52,19 +52,66 @@ export interface FlowchartSpec<N extends string = string> {
   readonly edges: readonly FlowchartEdge<N>[];
 }
 
+export type SequenceBlockKind = "loop" | "alt" | "opt" | "par" | "critical" | "break" | "rect";
+
+/** Messages inside one section of a block: `else` for alt, `and` for par, `option` for critical. */
+export interface SequenceSection<A extends string> {
+  readonly label?: string;
+  readonly messages: readonly SequenceMessage<A>[];
+}
+
+/** A labelled frame around the messages it holds; `rect` is a plain coloured background. */
+export interface SequenceBlock<A extends string> {
+  readonly block: SequenceBlockKind;
+  readonly label?: string;
+  /** For `rect`: `#rrggbb`, blended into the background by `opacity` (default 1). */
+  readonly color?: Hex;
+  readonly opacity?: number;
+  readonly messages: readonly SequenceMessage<A>[];
+  /** Further sections after the first, each behind a dashed divider. */
+  readonly sections?: readonly SequenceSection<A>[];
+}
+
 export type SequenceMessage<A extends string> =
   | readonly [from: A, to: A, label: string]
   | readonly [
       from: A,
       to: A,
       label: string,
-      options: { readonly reply?: boolean; readonly head?: ArrowHead },
+      options: {
+        readonly reply?: boolean;
+        readonly head?: ArrowHead;
+        /** Starts an activation bar on the receiver. */
+        readonly activate?: boolean;
+        /** Ends the sender's innermost activation bar. */
+        readonly deactivate?: boolean;
+      },
     ]
-  | { readonly note: A; readonly text: string };
+  | {
+      readonly note: A | readonly [A, A];
+      readonly text: string;
+      /** Beside a single actor instead of over it. */
+      readonly side?: "left" | "right";
+    }
+  | SequenceBlock<A>
+  | { readonly activate: A }
+  | { readonly deactivate: A }
+  /** Numbers the messages after it from this value, or stops numbering. */
+  | { readonly autonumber: number | false };
+
+export interface SequenceBox<A extends string> {
+  readonly label?: string;
+  readonly color?: Hex;
+  readonly opacity?: number;
+  /** Consecutive actors, in actor order. */
+  readonly actors: readonly A[];
+}
 
 export interface SequenceSpec<A extends string = string> {
   readonly actors: Readonly<Record<A, Labelled>>;
   readonly messages: readonly SequenceMessage<A>[];
+  readonly title?: string;
+  readonly boxes?: readonly SequenceBox<A>[];
 }
 
 export interface StateRegion {

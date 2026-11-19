@@ -351,7 +351,7 @@ describe("parse sequence", () => {
 
     expect(
       doc.items.map((i) =>
-        i.kind === "note" ? "note" : `${i.reply ? "reply" : "send"}/${i.head}`,
+        i.kind === "message" ? `${i.reply ? "reply" : "send"}/${i.head}` : i.kind,
       ),
     ).toEqual(["send/filled", "reply/filled", "send/cross", "send/async", "note", "send/filled"]);
   });
@@ -362,13 +362,94 @@ describe("parse sequence", () => {
     expect(d.kind === "sequence" && d.participants.map((p) => p.id)).toEqual(["B", "A"]);
   });
 
-  test("rejects activations, blocks and notes svjeez cannot draw", () => {
-    expect(message("sequenceDiagram\nA->>+B: hi")).toContain("activation");
-    expect(message("sequenceDiagram\nA->>B: hi\nactivate B")).toContain("mermaid:3:");
-    expect(message("sequenceDiagram\nloop every\nA->>B: x\nend")).toContain("not drawn");
-    expect(message("sequenceDiagram\nNote right of A: x")).toContain("Note over A");
-    expect(message("sequenceDiagram\nNote over A,B: x")).toContain("single actor");
+  test("rejects what svjeez cannot draw and malformed blocks", () => {
     expect(message("sequenceDiagram\nA->>B")).toContain("Cannot read this line");
+    expect(message("sequenceDiagram\nA->>B: x\ncreate participant C")).toContain("created");
+    expect(message("sequenceDiagram\nA->>B: hi\ndeactivate B")).toContain("mermaid:3:");
+    expect(message("sequenceDiagram\nA->>B: hi\ndeactivate B")).toContain("no activation");
+    expect(message("sequenceDiagram\nloop every\nA->>B: x")).toContain("never closed");
+    expect(message("sequenceDiagram\nA->>B: x\nend")).toContain("closes nothing");
+    expect(message("sequenceDiagram\nloop x\nelse y\nA->>B: x\nend")).toContain("alt block");
+    expect(message("sequenceDiagram\nrect nothing\nA->>B: x\nend")).toContain("needs a color");
+    expect(message("sequenceDiagram\nNote left of A,B: x")).toContain("one actor");
+    expect(message("sequenceDiagram\nautonumber 1 5\nA->>B: x")).toContain("one by one");
+    expect(
+      message(
+        "sequenceDiagram\nparticipant A\nparticipant B\nparticipant C\nbox X\nparticipant A\nparticipant C\nend",
+      ),
+    ).toContain("next to each other");
+  });
+
+  test("reads blocks with sections, nested", () => {
+    const d = parseMermaid(`sequenceDiagram
+      loop every minute
+        A->>B: ping
+        alt ok
+          B-->>A: pong
+        else down
+          Note over A,B: alert
+        end
+      end
+      rect rgba(0, 0, 255, .1)
+        A->>B: x
+      end`);
+
+    if (d.kind !== "sequence") throw new Error("not a sequence");
+    const [loop, rect] = d.items;
+
+    if (loop?.kind !== "block" || rect?.kind !== "block") throw new Error("not blocks");
+    const alt = loop.items[1];
+
+    expect([loop.block, loop.label, loop.items.length]).toEqual(["loop", "every minute", 2]);
+    expect(alt?.kind === "block" && [alt.label, alt.sections.map((s) => s.label)]).toEqual([
+      "ok",
+      ["down"],
+    ]);
+    expect(alt?.kind === "block" && alt.sections[0]!.items[0]).toMatchObject({
+      kind: "note",
+      actor: "A",
+      to: "B",
+      side: "over",
+    });
+    expect([rect.block, rect.color, rect.opacity]).toEqual(["rect", "#0000ff", 0.1]);
+  });
+
+  test("reads activations, autonumber, title, notes beside an actor and boxes", () => {
+    const d = parseMermaid(`sequenceDiagram
+      title Login flow
+      box Aqua Backend
+        participant A
+        participant B
+      end
+      participant C
+      autonumber 5
+      A->>+B: hi
+      B-->>-A: yo
+      activate C
+      Note right of C: hm
+      deactivate C
+      autonumber off`);
+
+    if (d.kind !== "sequence") throw new Error("not a sequence");
+
+    expect(d.title).toBe("Login flow");
+    expect(d.boxes).toEqual([
+      { label: "Backend", color: "#00ffff", opacity: 1, actors: ["A", "B"] },
+    ]);
+    expect(d.items.map((i) => i.kind)).toEqual([
+      "autonumber",
+      "message",
+      "message",
+      "activate",
+      "note",
+      "deactivate",
+      "autonumber",
+    ]);
+    expect(d.items[0]).toEqual({ kind: "autonumber", start: 5 });
+    expect(d.items[1]).toMatchObject({ activate: true, deactivate: false });
+    expect(d.items[2]).toMatchObject({ activate: false, deactivate: true });
+    expect(d.items[4]).toMatchObject({ side: "right", actor: "C" });
+    expect(d.items[6]).toEqual({ kind: "autonumber", start: false });
   });
 });
 
@@ -586,6 +667,26 @@ describe("mermaid", () => {
 
     expect(crosses(drawn("->>"))).toHaveLength(0);
     expect(crosses(drawn("-x"))).toHaveLength(1);
+  });
+
+  test("a sequence diagram with blocks, activations and autonumber draws", () => {
+    const chart = mermaid(
+      `sequenceDiagram
+      title T
+      autonumber
+      A->>+B: go
+      loop poll
+        B->>C: ask
+      end
+      B-->>-A: done`,
+      { font: mono, reveal: span(0, 0.5) },
+    );
+
+    const out = svg.emit(scene({ size: [800, 600], duration: 3, title: "s" }, () => chart.node));
+
+    expect(out).toContain(">loop<");
+    expect(out).toContain(">T<");
+    expect(chart.kind === "sequence" && chart.message(2).span).toBeDefined();
   });
 
   test("options a kind cannot honor are errors, not ignored", () => {

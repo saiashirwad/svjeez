@@ -84,19 +84,71 @@ export interface MermaidSequenceMessage {
   readonly text: string;
   readonly reply: boolean;
   readonly head: "filled" | "none" | "cross" | "async";
+  /** `+` on the arrow: the receiver gets an activation bar. */
+  readonly activate: boolean;
+  /** `-` on the arrow: the sender's innermost activation bar ends. */
+  readonly deactivate: boolean;
 }
 
 export interface SequenceNote {
   readonly kind: "note";
   readonly actor: string;
+  /** Set when the note spans from `actor` to this actor. */
+  readonly to?: string;
+  readonly side: "over" | "left" | "right";
   readonly text: string;
+}
+
+export interface SequenceActivation {
+  readonly kind: "activate" | "deactivate";
+  readonly actor: string;
+}
+
+/** `autonumber [start]` gives a number to the messages after it; `autonumber off` stops. */
+export interface SequenceAutonumber {
+  readonly kind: "autonumber";
+  readonly start: number | false;
+}
+
+export interface SequenceSection {
+  /** The text after `else`, `and` or `option`. */
+  readonly label: string;
+  readonly items: readonly SequenceItem[];
+}
+
+export interface MermaidSequenceBlock {
+  readonly kind: "block";
+  readonly block: "loop" | "alt" | "opt" | "par" | "critical" | "break" | "rect";
+  readonly label: string;
+  /** For `rect`: `#rrggbb` and how opaque it is. */
+  readonly color?: `#${string}`;
+  readonly opacity?: number;
+  readonly items: readonly SequenceItem[];
+  /** The `else`, `and` or `option` sections after the first. */
+  readonly sections: readonly SequenceSection[];
+}
+
+export type SequenceItem =
+  | MermaidSequenceMessage
+  | SequenceNote
+  | SequenceActivation
+  | SequenceAutonumber
+  | MermaidSequenceBlock;
+
+export interface SequenceBox {
+  readonly label?: string;
+  readonly color?: `#${string}`;
+  readonly opacity?: number;
+  readonly actors: readonly string[];
 }
 
 export interface SequenceDoc {
   readonly kind: "sequence";
   readonly source: Place;
+  readonly title?: string;
   readonly participants: readonly MermaidParticipant[];
-  readonly items: readonly (MermaidSequenceMessage | SequenceNote)[];
+  readonly boxes: readonly SequenceBox[];
+  readonly items: readonly SequenceItem[];
 }
 
 export type StateShape = "choice" | "fork" | "join";
