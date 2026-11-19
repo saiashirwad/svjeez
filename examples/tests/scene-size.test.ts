@@ -12,6 +12,7 @@ interface Budget {
 }
 
 const budgets = {
+  "readme/hero": { bytes: 32500, elements: 80, stops: 240, smil: 8, cost: 34 },
   "readme/basic": { bytes: 1600, elements: 7, stops: 4, smil: 0, cost: 2 },
   "readme/loops": { bytes: 2200, elements: 7, stops: 20, smil: 0, cost: 3 },
   "readme/motion": { bytes: 1600, elements: 6, stops: 5, smil: 0, cost: 2 },
