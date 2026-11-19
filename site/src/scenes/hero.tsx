@@ -17,7 +17,7 @@ import type { Layer, Layers } from "svjeez/tools";
 import { theme } from "../../../examples/theme";
 import { BLIP, Blip, GROUND, Pivot, flashes, flight, jumps, type Hop } from "./blip";
 import { BAR, CodeLine, Listing, ROW, Selection, Squiggle, Window, word } from "./editor";
-import { Burst, Cloud, Hills, Kite, Only, Sky, Stars, Sun, scenery, summit } from "./landscape";
+import { Burst, Cloud, Hills, Kite, Sky, Stars, Sun, scenery, summit } from "./landscape";
 
 // The home page hero. A scene's source fills in a line at a time while Blip hops down it, and each word Blip lands on
 // pops into the picture beside it as what it names. The source is this scene's own, in the API it is written in.
@@ -38,9 +38,6 @@ const NIGHT = SOURCE.replace("Sun", "Moon");
 /** The windows' size, and the sky under the picture window's title bar. */
 const WINDOW: Vec = [420, 320];
 const SKY: Vec = [WINDOW[0] - 2, WINDOW[1] - BAR - 2];
-
-/** A line of code's slot in the editor, the mask that shows it by day or by night. */
-const LINE: Vec = [WINDOW[0] - 66, ROW];
 
 /** Where each piece of the picture sits in the sky: the kite by its tail, Blip's hand on the string. */
 const SUN: Vec = [340, 62];
@@ -177,12 +174,8 @@ export default scene(
             <Listing handle={code} motion={exit(span(out.start, 0.4), { curve: ease.in })}>
               <CodeLine key="line0" source={source[0]!} motion={enter(span(0.1, 0.3))} />
               <Group key="line1" motion={arrive(lines[0]!)}>
-                <Only when="day" size={LINE}>
-                  <CodeLine source={source[1]!} />
-                </Only>
-                <Only when="night" size={LINE}>
-                  <CodeLine source={night[1]!} />
-                </Only>
+                <CodeLine source={source[1]!} scheme="light" />
+                <CodeLine source={night[1]!} scheme="dark" />
               </Group>
               {lines.slice(1).map((when, i) => (
                 <CodeLine key={`line${i + 2}`} source={source[i + 2]!} motion={arrive(when)} />
@@ -216,12 +209,8 @@ export default scene(
           </Window>
         </Stack>
       </Align>
-      <Only when="day" size={[W, H]}>
-        <Squiggle under={words[0]!} color={scenery.sun} draw={marks[0]!} out={out} />
-      </Only>
-      <Only when="night" size={[W, H]}>
-        <Squiggle under={moon} color={scenery.sun} draw={marks[0]!} out={out} />
-      </Only>
+      <Squiggle under={words[0]!} color={scenery.sun} draw={marks[0]!} out={out} scheme="light" />
+      <Squiggle under={moon} color={scenery.sun} draw={marks[0]!} out={out} scheme="dark" />
       {[scenery.hill, BLIP.cheek, scenery.mist].map((color, i) => (
         <Squiggle under={words[i + 1]!} color={color} draw={marks[i + 1]!} out={out} />
       ))}
