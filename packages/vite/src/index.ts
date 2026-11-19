@@ -27,6 +27,7 @@ const QUERY = /\?svjeez(&posters)?$/;
 
 export default function svjeez(options: SvjeezOptions = {}): Plugin {
   let config: ResolvedConfig;
+  let inFilm = false;
   const runners = new Map<string, Runner>();
 
   return {
@@ -34,9 +35,15 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
     enforce: "pre",
     configResolved(resolved) {
       config = resolved;
+
+      // The server that `runFilm` loads a film file with may load this app's config: leave the app's settings alone.
+      inFilm = resolved.plugins.some((plugin) => plugin.name === "svjeez-dom");
+
+      if (inFilm) return;
       assets.cache = pathToFileURL(`${options.cacheDir ?? join(config.cacheDir, "svjeez")}/`);
     },
     configureServer(server) {
+      if (inFilm) return;
       assets.limit = 500;
 
       server.middlewares.use(ROUTE, async (request, response, next) => {

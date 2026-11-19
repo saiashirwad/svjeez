@@ -1,11 +1,18 @@
 ---
 import type { HTMLAttributes } from "astro/types";
+import type { SceneModule } from "@svjeez/vite";
 import { getScene, type SceneSource } from "@svjeez/vite/scene";
 
-type Props = Omit<HTMLAttributes<"img">, "src" | "width" | "height"> & { scene: SceneSource };
+type Props = Omit<HTMLAttributes<"img">, "src" | "width" | "height"> & {
+  /** A `?svjeez` import, or a scene file's default export. */
+  scene: SceneModule | SceneSource;
+};
+
+const isModule = (scene: SceneModule | SceneSource): scene is SceneModule =>
+  typeof scene === "object" && "src" in scene;
 
 const { scene, alt, ...attributes } = Astro.props;
-const image = getScene(scene);
+const image = isModule(scene) ? scene : getScene(scene);
 ---
 
 <img src={image.src} width={image.width} height={image.height} alt={alt ?? (image.desc || image.title)} {...attributes} />

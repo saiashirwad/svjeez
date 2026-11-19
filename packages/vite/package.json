@@ -2,7 +2,7 @@
   "name": "@svjeez/vite",
   "version": "0.8.0-next.0",
   "private": true,
-  "description": "Vite plugin for svjeez: import a scene with ?svjeez and get an animated SVG's URL, with poster stills.",
+  "description": "Vite plugin for svjeez: import a scene or a @svjeez/dom film with ?svjeez and get an animated SVG's URL, with poster stills.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
     "test:package": "bun ../../scripts/package-plugin-check.ts"
   },
   "devDependencies": {
+    "@svjeez/dom": "workspace:*",
     "@types/bun": "latest",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
@@ -38,11 +39,15 @@
     "vite": "8.3.5"
   },
   "peerDependencies": {
+    "@svjeez/dom": "workspace:^",
     "playwright-core": ">=1.49",
     "svjeez": "workspace:^",
     "vite": ">=8"
   },
   "peerDependenciesMeta": {
+    "@svjeez/dom": {
+      "optional": true
+    },
     "playwright-core": {
       "optional": true
     }

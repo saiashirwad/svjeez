@@ -22,19 +22,21 @@ export default await film(
 
 It serves the app, opens it in Chromium, fails if the page throws or logs a console error, waits for fonts and a stable layout before each `snap`, records, inlines fonts and images while the server is still up, compiles, and closes everything. You get a core `Scene`: `svg.emit(scene)`, or default-export it from an examples-style `index.tsx`.
 
-With Vite (`vite` is an optional peer dependency), `serve` starts a dev server on a free port:
+With Vite (`vite` is an optional peer dependency), `serve` starts a dev server on a free port, rooted at the film file's folder unless you pass `root`:
 
 ```ts
 import { serve } from "@svjeez/dom/vite";
 
-film(serve({ root: import.meta.dir, selector: "#app" }), run, options);
+film(serve({ selector: "#app" }), run, options);
 ```
+
+To use a film in a Vite app or an Astro site, import the film file with `?svjeez` through [`@svjeez/vite`](../vite/README.md#films) (or `@svjeez/astro`): you get the SVG's URL, filmed in dev and in the build. From a script, `runFilm(file)` from `@svjeez/dom/vite` does the same and returns `{ scene, svg, files }`.
 
 The Vite adapter serves a `<link>`/`<script>` in `index.html` that points outside the root (`href="../shared/theme.css"`) through `/@fs/` and extends `server.fs.allow` to it. Any stylesheet, script, font or image that the server answers with `text/html` fails `film`, naming the URL.
 
 A target is `{ url, selector, sources(), close() }`. `sources()` returns a hash of the app's source, which keys the cache. The Bun adapter hashes the bundled page and its assets; the Vite adapter hashes the entry HTML and every project module it imports.
 
-Options: `scheme` (`"light" | "dark" | "both"`), `title` (default: the component's name, else the page `<title>` with Vite, else the film file's name), `viewport` (default 1280x720), `cache` (a JSON file; reused while the source and options are unchanged, `SVJEEZ_DOM_REFRESH=1` records again. `true` is `<film file>.states.json`; a relative path is relative to the film file, not the cwd; an absolute path is kept. The film file is found through `runFilm`'s bridge or, under Bun, the caller's stack frame (one helper, `callerFile`)), `settle` (see below), `onDiagnostics` (default: one `console.warn` listing what is not faithful), `executablePath`.
+Options: `scheme` (`"light" | "dark" | "both"`), `title` (default: the component's name, else the page `<title>` with Vite, else the film file's name), `viewport` (default 1280x720), `cache` (a JSON file; reused while the source and options are unchanged, `SVJEEZ_DOM_REFRESH=1` records again. `true` is `<film file>.states.json`; a relative path is relative to the film file, not the cwd; an absolute path is kept. The film file is known when Vite loads it (`?svjeez` or `runFilm`), or under Bun from the caller's stack frame (one helper, `callerFile`)), `settle` (see below), `onDiagnostics` (default: one `console.warn` listing what is not faithful), `executablePath`.
 
 ## One component
 
@@ -59,7 +61,7 @@ The component is mounted alone in `#svjeez-root` (the capture selector, unless `
 
 **Finding the module.** The browser has to load the same component, so `component` finds the module whose export `=== Card`:
 
-- **Vite:** run the film file through Vite's SSR loader with `runFilm("./card.film.tsx")` (returns the `Scene`). Vite loads `.svelte` and `.tsx` itself, so the module graph holds every export; the page is a virtual module served by the same dev server (your plugins, CSS modules and `<style>` blocks included). Without `runFilm`, `component` throws and says so. `runFilm` marks `svjeez` and `@svjeez/dom` as `ssr.external` (merged with your own), so the film file shares the host's copies. Film files can run in parallel: each `runFilm` has its own server and dependency cache.
+- **Vite:** the film file has to be loaded through Vite: import it with `?svjeez` ([`@svjeez/vite`](../vite/README.md#films)), or call `runFilm("./card.film.tsx")` from a script. It loads the film file with the nearest `vite.config.*` above it (up to its package; `root` and `config` options override), so Vite loads `.svelte` and `.tsx` itself and the module graph holds every export; the page is a virtual module served by the same dev server (your plugins, CSS modules and `<style>` blocks included). Loaded any other way, `component` throws and says so. `svjeez` and `@svjeez/dom` stay `ssr.external` (merged with your own), so the film file shares the host's copies. Films can run in parallel: each has its own server and dependency cache. A Bun-style `import.meta.dir` in the film file works too.
 - **Bun:** add `preload = ["@svjeez/dom/bun/preload"]` to `bunfig.toml`. The preload records each source module's live exports as it loads, and `component` bundles the page with Bun's HTML bundler. Svelte works too with `bun-plugin-svelte` installed (`bun add -D bun-plugin-svelte`): the preload then also lets the film file import `.svelte`, and `component` bundles the page with the plugin. See `examples/dom-svelte/card.bun.tsx`.
 
 A component defined in the film file itself, or one nothing exports, throws an error that says which.

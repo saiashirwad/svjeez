@@ -1,10 +1,17 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash, randomUUID } from "node:crypto";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
-import type { InlineConfig, Plugin, RunnableDevEnvironment, ViteDevServer } from "vite";
+import type {
+  EnvironmentModuleNode,
+  InlineConfig,
+  Plugin,
+  RunnableDevEnvironment,
+  ViteDevServer,
+} from "vite";
 import {
+  callerFile,
   entryModule,
   exportNameOf,
   notFound,
@@ -24,8 +31,8 @@ export type { ComponentOptions } from "./component.ts";
 export interface ServeOptions {
   /** The element to capture, as a CSS selector. */
   readonly selector: string;
-  /** The Vite project: where `index.html` and the config live. */
-  readonly root: string;
+  /** The Vite project: where `index.html` and the config live. Default: the film file's directory. */
+  readonly root?: string;
   /** Extra Vite config, merged over the project's own. */
   readonly config?: InlineConfig;
   /** The HTML entry, relative to `root`. Default `index.html`. */
@@ -150,15 +157,21 @@ const hashFiles = async (
  */
 export const serve = async ({
   selector,
-  root,
+  root: given,
   config,
   entry = "index.html",
 }: ServeOptions): Promise<Target> => {
+  // Before the first await, while the film file is still on the stack.
+  const host = hosts.getStore();
+  const film = host?.film ?? callerFile();
+  const root = given ?? (film && dirname(film));
+
+  if (!root) throw new Error("serve: could not tell which file called it, so pass { root }.");
+
   const { createServer, searchForWorkspaceRoot } = await import("vite").catch(() => {
     throw new Error("serve from @svjeez/dom/vite needs vite. Install it with `npm i -D vite`.");
   });
 
-  const film = hosts.getStore()?.film;
   const cacheDir = await privateCache(config);
   const html = await readFile(join(root, entry), "utf8");
   const outside = outsideRoot(html, dirname(join(root, entry)), root);
@@ -213,6 +226,8 @@ export const serve = async ({
 
     files.add(join(root, entry));
 
+    for (const file of files) host?.files.add(file);
+
     return {
       url: new URL(entry === "index.html" ? "/" : entry, origin).href,
       selector,
@@ -234,12 +249,14 @@ interface Page {
   readonly entry: string;
 }
 
-/** What `component()` needs from the `runFilm` that is loading its film file. */
+/** What `serve()` and `component()` need from the `runFilm` that is loading their film file. */
 interface Bridge {
   readonly server: ViteDevServer;
   readonly film: string;
   readonly base: string;
   readonly pages: Map<string, Page>;
+  /** Every source file the film depends on: its targets add theirs. */
+  readonly files: Set<string>;
 }
 
 declare global {
@@ -251,11 +268,16 @@ const hosts = (globalThis.svjeezDomVite ??= new AsyncLocalStorage<Bridge>());
 
 const PREFIX = "virtual:svjeez-dom/";
 
-const pages = (pagesById: Map<string, Page>): Plugin => ({
+const pages = (pagesById: Map<string, Page>, film: string): Plugin => ({
   name: "svjeez-dom",
   // The film file and this package must share one copy of `svjeez` and `@svjeez/dom`, so Vite leaves them to the runtime's own loader. Vite merges this with the project's `ssr.external`.
   config: () => ({ ssr: { external: ["svjeez", "@svjeez/dom"] } }),
   resolveId: (id) => (id.startsWith(PREFIX) ? id : undefined),
+  // Bun's `import.meta.dir` in the film file, so one written for Bun runs here too.
+  transform: (code, id) =>
+    id === film
+      ? code.replace(/\bimport\.meta\.dir\b(?!name)/g, JSON.stringify(dirname(id)))
+      : undefined,
   load: (id) => (id.startsWith(PREFIX) ? pagesById.get(id.slice(PREFIX.length))?.entry : undefined),
   configureServer: (server) => {
     server.middlewares.use(async (request, response, next) => {
@@ -271,32 +293,58 @@ const pages = (pagesById: Map<string, Page>): Plugin => ({
 });
 
 export interface RunFilmOptions {
-  /** The Vite project: where its config lives. Default: the film file's directory. */
+  /** The Vite project whose config loads the film file. Default: the nearest folder above the film file with a `vite.config.*`, up to its package; else the film file's folder. */
   readonly root?: string;
   /** Extra Vite config, merged over the project's own. */
   readonly config?: InlineConfig;
 }
 
-/**
- * Runs a film file through Vite's SSR loader and returns what it default-exports (a `Scene`).
- * `component()` needs this: Vite loads the film file's `.svelte` and `.tsx` imports, so it can tell which module exports
- * the component you passed, and serve that module to the browser.
- *
- *     const scene = await runFilm("./card.film.tsx");
- */
-export const runFilm = (file: string, options: RunFilmOptions = {}): Promise<Scene> =>
-  load(file, options);
+export interface Film {
+  /** What the film file default-exports. */
+  readonly scene: Scene;
+  /** The scene as SVG, emitted by the `svjeez` that made it (another copy of the package may not read its model). */
+  readonly svg: string;
+  /** The source files it was made from: the film file, what it imports, and its target's app or component. */
+  readonly files: readonly string[];
+}
 
-const load = async (
-  file: string,
-  { root = dirname(resolve(file)), config }: RunFilmOptions,
-): Promise<Scene> => {
+const CONFIG = /^vite\.config\.[mc]?[jt]s$/;
+
+/** The nearest folder from `dir` up with a Vite config, stopping at the first `package.json`. */
+const projectOf = async (dir: string): Promise<string | undefined> => {
+  for (let at = dir; ; at = dirname(at)) {
+    const names = await readdir(at).catch((): string[] => []);
+
+    if (names.some((name) => CONFIG.test(name))) return at;
+
+    if (names.includes("package.json") || dirname(at) === at) return;
+  }
+};
+
+const project = (node: EnvironmentModuleNode, found: Set<string>): void => {
+  for (const next of node.importedModules)
+    if (inProject(next.file) && !found.has(next.file)) {
+      found.add(next.file);
+      project(next, found);
+    }
+};
+
+/**
+ * Runs a film file through Vite's SSR loader: `@svjeez/vite` does this for a `?svjeez` import of a file that imports
+ * `@svjeez/dom/vite`. `component()` needs it: Vite loads the film file's `.svelte` and `.tsx` imports, so it can tell
+ * which module exports the component you passed, and serve that module to the browser.
+ *
+ *     const { scene } = await runFilm("./card.film.tsx");
+ */
+export const runFilm = async (file: string, options: RunFilmOptions = {}): Promise<Film> => {
   const { createServer, isRunnableDevEnvironment, searchForWorkspaceRoot } =
     await import("vite").catch(() => {
       throw new Error("runFilm from @svjeez/dom/vite needs vite. Install it with `npm i -D vite`.");
     });
 
   const film = resolve(file);
+  const root = options.root ?? (await projectOf(dirname(film))) ?? dirname(film);
+  const { config } = options;
   const byId = new Map<string, Page>();
 
   const cacheDir = await privateCache(config);
@@ -307,7 +355,7 @@ const load = async (
     appType: "custom",
     ...(cacheDir && { cacheDir }),
     ...config,
-    plugins: [...(config?.plugins ?? []), pages(byId)],
+    plugins: [...(config?.plugins ?? []), pages(byId, film)],
     server: { ...config?.server, port: 0, strictPort: true, hmr: false, watch: null },
   });
 
@@ -321,10 +369,29 @@ const load = async (
     await listen(server);
 
     // `component()` reads the bridge from the async context of the film file's evaluation, so films can run in parallel.
-    const bridge: Bridge = { server, film, base: searchForWorkspaceRoot(root), pages: byId };
+    const bridge: Bridge = {
+      server,
+      film,
+      base: searchForWorkspaceRoot(root),
+      pages: byId,
+      files: new Set([film]),
+    };
 
-    return (await hosts.run(bridge, () => environment.runner.import<{ default: Scene }>(film)))
-      .default;
+    const { default: scene } = await hosts.run(bridge, () =>
+      environment.runner.import<{ default: Scene }>(film),
+    );
+
+    for (const node of environment.moduleGraph.getModulesByFile(film) ?? [])
+      project(node, bridge.files);
+
+    // This package's `svjeez` emits it: the film server's own copy may not read the scene's model.
+    const { svg } = await import("svjeez/tools");
+
+    return {
+      scene,
+      svg: svg.emit(scene),
+      files: [...bridge.files].filter((file) => isAbsolute(file)),
+    };
   } finally {
     await closeServer(server, cacheDir);
   }
@@ -357,7 +424,7 @@ const locate = (host: Bridge, component: Prop): Located => {
   if (!defining)
     throw notFound(
       component,
-      "Is its module loaded? Import the component from its own file, and run this film file with runFilm() from @svjeez/dom/vite.",
+      "Is its module loaded? Import the component from its own file, and load this film file through Vite: a ?svjeez import with @svjeez/vite, or runFilm().",
     );
 
   if (defining.file === host.film)
@@ -380,7 +447,7 @@ const locate = (host: Bridge, component: Prop): Located => {
  *       await snap("done");
  *     });
  *
- * The film file must be loaded through Vite (see `runFilm`). Props are JSON: data props are required and plain,
+ * The film file must be loaded through Vite: import it with `?svjeez` (`@svjeez/vite`), or call `runFilm`. Props are JSON: data props are required and plain,
  * function props are optional and become no-ops in the browser. `update` merges new props in.
  */
 export const component = async <C extends Fn>(
@@ -394,7 +461,7 @@ export const component = async <C extends Fn>(
 
   if (!host)
     throw new Error(
-      "component() from @svjeez/dom/vite needs the film file to be loaded through Vite, which is how it finds the component's module. Run the film file with runFilm(file) from @svjeez/dom/vite.",
+      "component() from @svjeez/dom/vite needs the film file to be loaded through Vite, which is how it finds the component's module. Import it with ?svjeez through @svjeez/vite, or run it with runFilm(file) from @svjeez/dom/vite.",
     );
 
   const located = locate(host, Component);
@@ -410,6 +477,8 @@ export const component = async <C extends Fn>(
 
   const origin = await listen(host.server);
   const files = await crawl(host.server, [virtual]);
+
+  for (const file of files) host.files.add(file);
 
   await host.server.environments.client.depsOptimizer?.scanProcessing;
   await host.server.waitForRequestsIdle();
