@@ -26,8 +26,8 @@ assert.equal(mermaid("sequenceDiagram\nA->>B: hi", { font: sans }).kind, "sequen
 assert.equal(mermaid("stateDiagram-v2\n[*] --> A\nA --> [*]", { font: sans }).kind, "state");
 
 assert.throws(
-  () => mermaid("flowchart TD\nA --> B\nclassDef x fill:#f00", { font: sans, file: "flow.mmd" }),
-  (error) => error instanceof SceneError && /flow\.mmd:3.*classDef/.test(error.message),
+  () => mermaid("flowchart TD\nA --> B\nC@{ shape: bolt }", { font: sans, file: "flow.mmd" }),
+  (error) => error instanceof SceneError && /flow\.mmd:3.*bolt/.test(error.message),
 );
 
 console.log("drew a Mermaid " + chart.kind);

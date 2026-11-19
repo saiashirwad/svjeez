@@ -30,6 +30,10 @@ const DIFFERS = new Map<string, { props: string[]; why: string }>(
       props: ["bcx"],
       why: "An arrow head turns inside a group that rotates it about the arrow's start, so as it tilts Firefox bounds the turned head and Chromium its turned box. The frames are the same pixels in both.",
     },
+    "firefox readme/hero.svg": {
+      props: ["bcy"],
+      why: "Same as layout.svg: the magenta arrow head turns inside a group that rotates it about the arrow's start, so Firefox bounds the turned head and Chromium its turned box.",
+    },
   }),
 );
 

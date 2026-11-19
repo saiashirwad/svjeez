@@ -42,6 +42,20 @@ npm install svjeez
 npx svjeez svg scene.tsx --out scene.svg
 ```
 
+Scenes are JSX, so point TypeScript at svjeez's JSX runtime in `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "jsx": "react-jsx",
+    "jsxImportSource": "svjeez",
+    "strict": true
+  }
+}
+```
+
 During authoring, `npx svjeez dev scene.tsx` opens a local preview with a timeline scrubber and live reload on save.
 
 A minimal scene default-exports `scene(options, (canvas) => ...)`:

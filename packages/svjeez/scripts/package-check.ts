@@ -126,8 +126,13 @@ try {
     mkdirSync(quickstart);
     const readme = readFileSync(join(consumer, "node_modules/svjeez/README.md"), "utf8");
 
-    const block = (lang: string) => {
-      const example = readme.split("```" + lang + "\n")[1]?.split("\n```")[0];
+    // The first block in that language that holds `marker`, so snippets earlier in the README don't count.
+    const block = (lang: string, marker: string) => {
+      const example = readme
+        .split("```" + lang + "\n")
+        .slice(1)
+        .map((rest) => rest.split("\n```")[0])
+        .find((code) => code?.includes(marker));
 
       if (!example) throw new Error(`Missing the README ${lang} quickstart block.`);
 
@@ -138,8 +143,8 @@ try {
     run("npm", ["pkg", "set", "type=module"], quickstart);
     run("npm", ["install", "--no-audit", "--no-fund", tarball], quickstart);
     run("npm", ["install", "--no-audit", "--no-fund", "-D", "tsx", "typescript"], quickstart);
-    writeFileSync(join(quickstart, "tsconfig.json"), block("json"));
-    const scene = block("tsx");
+    writeFileSync(join(quickstart, "tsconfig.json"), block("json", "jsxImportSource"));
+    const scene = block("tsx", "export default scene(");
     const title = /title: "([^"]+)"/.exec(scene)?.[1];
 
     if (!title) throw new Error("The README tsx quickstart sets no scene title to check for.");
