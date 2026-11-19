@@ -25,7 +25,7 @@ describe("component through Vite", () => {
   /** Where the row keyed `key` is at scene time `t`; the first move runs from 0.8 to 1.8. */
   const rowAt = (scene: Awaited<ReturnType<typeof runFilm>>, key: string, t: number) => {
     const boxes = boxesOf(scene, t);
-    const path = Object.keys(boxes).find((one) => one.split("/").at(-1) === key);
+    const path = Object.keys(boxes).find((one) => one.split("/").at(-1)?.endsWith(`|${key}`));
 
     if (path === undefined) throw new Error(`no row ${key}`);
 
@@ -56,6 +56,40 @@ describe("component through Vite", () => {
     expect(mid.y).toBeLessThan(59);
     expect(rowAt(scene, "3", 1.8).y).toBeCloseTo(0, 0);
     expect(rowAt(scene, "2", 1.8).y).toBeCloseTo(60, 0);
+  }, 90_000);
+
+  test("the same React key in two lists is two rows, each moving within its own list", async () => {
+    const scene = await runFilm(join(dir, "lists.film.ts"));
+
+    const row = (list: number, key: string, t: number) => {
+      const boxes = boxesOf(scene, t);
+
+      const path = Object.keys(boxes).find((one) =>
+        one.split("/").at(-1)?.endsWith(`|ul${list}|${key}`),
+      );
+
+      if (path === undefined) throw new Error(`no row ${key} in list ${list}`);
+
+      return boxes[path]!;
+    };
+
+    const [left, right] = [row(0, "3", 0), row(1, "3", 0)];
+
+    expect(left.y).toBeCloseTo(60, 0);
+    expect(right.y).toBeCloseTo(60, 0);
+    expect(right.x).toBeGreaterThan(left.x + 100);
+
+    const mid = row(0, "3", 1.3);
+
+    expect(mid.y).toBeGreaterThan(1);
+    expect(mid.y).toBeLessThan(59);
+    expect(mid.x).toBeCloseTo(left.x, 0);
+    expect(row(0, "3", 1.8).y).toBeCloseTo(0, 0);
+
+    for (const key of ["1", "2", "3"]) {
+      expect(row(1, key, 1.3)).toEqual(row(1, key, 0));
+      expect(row(1, key, 1.8)).toEqual(row(1, key, 0));
+    }
   }, 90_000);
 
   test("films a Svelte component", async () => {

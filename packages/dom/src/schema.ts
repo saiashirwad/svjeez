@@ -284,7 +284,7 @@ export interface ElementNode {
   readonly id?: string;
   /** `data-key` */
   readonly key?: string;
-  /** What the framework adapter named this element (React's `key`), read from `data-svjeez-id`. Pairs like `data-key`, after it. */
+  /** What the framework adapter named this element (React's `key`, scoped by its list), read from `data-svjeez-id`. Pairs like `data-key`, after it. */
   readonly identity?: string;
   /** `data-part` */
   readonly part?: string;

@@ -90,7 +90,7 @@ interface BrowserAdapter<Component> {
 
 Pass it as `component(C, props, { framework })`. To type its props, add a branch to `PropsOf` in `src/props.ts`.
 
-`identify` lets film hand the framework's own keys to `pair`: before each capture it stamps `data-svjeez-id` on every element from `identify`, and capture stores it as `identity`. React reads the `key` from the fiber on the DOM node, and `film` does so on app targets too (it finds React's fibers on any page; a page without React gets none). Svelte keeps no keys in the DOM, so it has no `identify`: put `data-key` on a Svelte list's items to have a reorder slide.
+`identify` lets film hand the framework's own keys to `pair`: before each capture it stamps `data-svjeez-id` on every element from `identify`, and capture stores it as `identity`. React reads the `key` from the fiber on the DOM node, scoped by the list it is in (React keys are per list, so `key=1` in two lists is two elements), and `film` does so on app targets too (it finds React's fibers on any page; a page without React gets none). A keyed item that moves to another list is a new element: put `data-key` on it to follow it. Svelte keeps no keys in the DOM, so it has no `identify`: put `data-key` on a Svelte list's items to have a reorder slide.
 
 Settling prefers the adapter's `settled()` (a framework that knows its pending commands or effects are done can say so), then waits for fonts, transitions and a stable layout. Replace the whole strategy with the `settle: (page, selector) => Promise<void>` option. `film` and its script surface (`page`, `snap`, `update`) are plain Promise-based, so an Effect wrapper can wrap them one for one.
 
