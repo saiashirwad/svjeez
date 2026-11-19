@@ -203,9 +203,9 @@ export default scene(
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Group motion={exit(gone)}>
-        <Shape geometry={polygon(trace)} fill={theme.blue} opacity={track(0).to(1, fill)} />
+        <Shape geometry={polygon(...trace)} fill={theme.blue} opacity={track(0).to(1, fill)} />
         <Shape
-          geometry={polygon(trace)}
+          geometry={polygon(...trace)}
           stroke={{ color: theme.orange, width: 2, join: "round", cap: "round" }}
           trim={sampled((t): Vec => [0, drawn(t)], drawing, { tolerance: 0.002 })}
         />

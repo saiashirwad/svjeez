@@ -857,18 +857,8 @@ describe("the SVG backend", () => {
     const out = svg.emit(
       made(() => (
         <Shape
-          geometry={track(
-            polygon([
-              [0, 0],
-              [10, 0],
-              [5, 20],
-            ]),
-          ).to(
-            polygon([
-              [0, 0],
-              [10, 0],
-              [90, 20],
-            ]),
+          geometry={track(polygon([0, 0], [10, 0], [5, 20])).to(
+            polygon([0, 0], [10, 0], [90, 20]),
             span(0, 2),
             back,
           )}

@@ -1,6 +1,6 @@
 /** @jsxImportSource svjeez */
 import { Center, Group, Shape, Text, line, span, type SceneElement, type Span } from "svjeez";
-import { SceneError, type Child, type Spanned } from "svjeez/tools";
+import { SceneError, type Child } from "svjeez/tools";
 import { sequence as layout } from "./layout/sequence.ts";
 import type { Box } from "./layout/box.ts";
 import {
@@ -36,7 +36,7 @@ export type RowId = `message-${number}` | `note-${number}`;
 
 export interface Sequence<A extends string> extends Diagram<A> {
   message(index: number): {
-    readonly span: Spanned | undefined;
+    readonly span: Span | undefined;
     readonly route: Route;
   };
 }
@@ -92,7 +92,7 @@ export function sequence<const A extends Record<string, Labelled>>(
 
   const rowIds = rows.map((row, i) => `${row.kind}-${i + 1}`);
   const shown = schedule(options.reveal, rowIds, WHAT);
-  const beats: readonly (Spanned | undefined)[] = rowIds.map((id) => shown.get(id));
+  const beats: readonly (Span | undefined)[] = rowIds.map((id) => shown.get(id));
 
   const drawOf = (beat: Span) => span(beat.start, Math.min(0.5, beat.over * 0.7));
   const fadeOf = (beat: Span) => span(beat.start, Math.min(0.25, beat.over));
@@ -163,7 +163,7 @@ export function sequence<const A extends Record<string, Labelled>>(
     </Group>
   );
 
-  const parts = new Map<string, Spanned | undefined>(ids.map((id) => [id, undefined]));
+  const parts = new Map<string, Span | undefined>(ids.map((id) => [id, undefined]));
   const handle = partsOf<Id>(WHAT, parts);
 
   return {

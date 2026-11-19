@@ -13,7 +13,7 @@ import {
   type Span,
   type Vec,
 } from "svjeez";
-import { SceneError, type Child, type Color, type Spanned } from "svjeez/tools";
+import { SceneError, type Child, type Color } from "svjeez/tools";
 import { layered } from "./layout/layered.ts";
 import type { Box, Point } from "./layout/box.ts";
 import {
@@ -71,8 +71,8 @@ export interface WalkOptions {
 
 export interface Walk<S extends string> {
   readonly node: SceneElement;
-  readonly span: Spanned;
-  readonly spans: Readonly<Record<S, readonly Spanned[]>>;
+  readonly span: Span;
+  readonly spans: Readonly<Record<S, readonly Span[]>>;
 }
 
 export interface StateMachine<S extends string, T extends string = `${S}->${S}`> extends Diagram<
@@ -371,7 +371,7 @@ export function stateMachine<
 
   checkDraws(options.draw, lineKeys, WHAT);
 
-  const parts = new Map<string, Spanned | undefined>([
+  const parts = new Map<string, Span | undefined>([
     ...ids.map((id) => [id, undefined] as const),
     ...transitionKeys.map((key) => [key, undefined] as const),
   ]);
@@ -499,7 +499,7 @@ export function stateMachine<
           "Give one span per state, or one span for the first state to start from.",
         );
       const first = isList(at) ? undefined : spanOf(at, "walk() at");
-      const lit: Spanned[] = [];
+      const lit: Span[] = [];
 
       const runs: {
         readonly route: Route;
@@ -540,7 +540,7 @@ export function stateMachine<
             lit[k - 1] = span(prev.start, Math.max(0.05, runs[k - 1]!.when.start - prev.start));
         }
 
-      const byState = new Map<string, Spanned[]>();
+      const byState = new Map<string, Span[]>();
       path.forEach((s, k) => byState.set(s, [...(byState.get(s) ?? []), lit[k]!]));
 
       const highlights = [...byState].map(([s, spans]) => {
@@ -602,7 +602,7 @@ export function stateMachine<
 
       const spans = Object.fromEntries(ids.map((s) => [s, byState.get(s) ?? []])) as Record<
         Id,
-        Spanned[]
+        Span[]
       >;
 
       return {

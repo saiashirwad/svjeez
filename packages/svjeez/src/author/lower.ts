@@ -1080,12 +1080,7 @@ const boundsOf = (box: Box): Bounds => {
     rect:
       x === 0 && y === 0
         ? rect(width, height)
-        : polygon([
-            [x, y],
-            [x + width, y],
-            [x + width, y + height],
-            [x, y + height],
-          ]),
+        : polygon([x, y], [x + width, y], [x + width, y + height], [x, y + height]),
   };
 };
 

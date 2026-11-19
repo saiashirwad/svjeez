@@ -1,6 +1,6 @@
 /** @jsxImportSource svjeez */
-import { Group, span, type SceneElement } from "svjeez";
-import { SceneError, type Child, type Spanned } from "svjeez/tools";
+import { Group, span, type SceneElement, type Span } from "svjeez";
+import { SceneError, type Child } from "svjeez/tools";
 import { tree as layout } from "./layout/tree.ts";
 import type { Point } from "./layout/box.ts";
 import {
@@ -97,7 +97,7 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
 
   const shown = schedule(options.reveal, out.order, WHAT);
 
-  const drawn = (from: string, to: string): Spanned | undefined => {
+  const drawn = (from: string, to: string): Span | undefined => {
     const [a, b] = [shown.get(from), shown.get(to)];
 
     if (!a && !b) return undefined;
@@ -112,7 +112,7 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
     WHAT,
   );
 
-  const parts = new Map<string, Spanned | undefined>([
+  const parts = new Map<string, Span | undefined>([
     ...out.order.map((id) => [id, shown.get(id)] as const),
     ...out.edges.map((e) => [edgeKey(e.from, e.to), drawn(e.from, e.to)] as const),
   ]);

@@ -12,8 +12,9 @@ import {
   span,
   track,
   type SceneElement,
+  type Span,
 } from "svjeez";
-import { SceneError, type Child, type Spanned, type When } from "svjeez/tools";
+import { SceneError, type Child, type When } from "svjeez/tools";
 import { lanes as layout } from "./layout/lanes.ts";
 import {
   Route,
@@ -126,7 +127,7 @@ export function lanes<const L extends Record<string, Labelled>>(
     );
   const rate = reveal?.over === undefined ? 1 : reveal.over / out.end;
   const when = (t: number): number => (reveal?.start ?? 0) + t * rate;
-  const at = (t: number, over: number): Spanned => span(when(t), over * rate);
+  const at = (t: number, over: number): Span => span(when(t), over * rate);
   const role = (lane: string) => rows.find((r) => r.id === lane)!.role;
   checkDraws(
     options.draw,
@@ -137,7 +138,7 @@ export function lanes<const L extends Record<string, Labelled>>(
   const area = { x: out.track.x + dx, y: out.track.y + dy, w: out.track.w, h: out.track.h };
   const stripe = mix(l.colors.line, l.colors.background, 0.08);
 
-  const busy = (lane: string): Spanned | undefined =>
+  const busy = (lane: string): Span | undefined =>
     reveal &&
     extent([
       ...bars.filter((s) => s.lane === lane).map((s) => at(s.at, s.over)),
@@ -145,7 +146,7 @@ export function lanes<const L extends Record<string, Labelled>>(
       ...links.filter((k) => k.from === lane || k.to === lane).map((k) => at(k.at, 0.3)),
     ]);
 
-  const parts = new Map<string, Spanned | undefined>(ids.map((id) => [id, busy(id)]));
+  const parts = new Map<string, Span | undefined>(ids.map((id) => [id, busy(id)]));
   const handle = partsOf<Id>(WHAT, parts);
 
   const draw = (between?: Child): SceneElement => (
@@ -285,12 +286,7 @@ export function lanes<const L extends Record<string, Labelled>>(
           <Group key={`event-${i + 1}`}>
             <Shape
               key="mark"
-              geometry={polygon([
-                [0, -r],
-                [r, 0],
-                [0, r],
-                [-r, 0],
-              ])}
+              geometry={polygon([0, -r], [r, 0], [0, r], [-r, 0])}
               anchor="center"
               at={[p.x + dx, p.y + dy]}
               fill={tint}

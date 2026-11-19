@@ -45,11 +45,13 @@ export { enter, exit, sampled, wiggle } from "./author/recipes";
 
 export { ease, type Curve } from "./author/spring";
 
-export { span, type Spanned as Span } from "./author/span";
+export { span, type Span } from "./author/span";
 
 export { morph } from "./author/morph";
 
 export { count, type Count, type CountFormat } from "./author/count";
+
+export { param } from "./params";
 
 export { picture } from "./author/picture";
 

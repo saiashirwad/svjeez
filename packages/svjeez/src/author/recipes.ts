@@ -1,7 +1,7 @@
 import { SceneError } from "../model/scene-error";
 import { DEFAULT_EASE, NUDGE, ease, type Ease, type Seconds } from "../model/time";
 import { random } from "./random";
-import { checkWindow, span, type Span } from "./span";
+import { checkWindow, span, type Interval } from "./span";
 import { contoursOf } from "../model/geometry";
 import type { Vec } from "../model/ir";
 import { pair } from "../model/lane";
@@ -11,7 +11,7 @@ import { outlineOf, type Geometry } from "./values";
 
 const REST = { offset: [0, 0], rotate: 0, scale: 1, opacity: 1 } as const;
 
-const closed = ({ start, over }: Span, what: string): Span => {
+const closed = ({ start, over }: Interval, what: string): Interval => {
   checkWindow(start, over, what);
 
   return { start, over };
@@ -30,7 +30,7 @@ export interface EnterOptions {
 }
 
 export const enter = (
-  when: Span,
+  when: Interval,
   { from = { opacity: 0 }, curve = DEFAULT_EASE }: EnterOptions = {},
 ): Motion => {
   const { start, over } = closed(when, "enter()");
@@ -44,7 +44,7 @@ export interface ExitOptions {
 }
 
 export const exit = (
-  when: Span,
+  when: Interval,
   { to = { opacity: 0 }, curve = DEFAULT_EASE }: ExitOptions = {},
 ): Motion => {
   const { start, over } = closed(when, "exit()");
@@ -186,7 +186,7 @@ const jump = <T>(
 };
 
 const simplified = <T>(
-  window: Span,
+  window: Interval,
   read: (t: Seconds) => T,
   points: (value: T, t: Seconds) => readonly (readonly number[])[],
   options: { readonly step?: Seconds; readonly tolerance: number },
@@ -267,22 +267,22 @@ const structure = (outline: ReturnType<typeof outlineOf>): string =>
 
 export function sampled(
   sample: (t: Seconds) => number,
-  window: Span,
+  window: Interval,
   options: SampledOptions,
 ): Track<number>;
 export function sampled(
   sample: (t: Seconds) => Vec,
-  window: Span,
+  window: Interval,
   options: SampledOptions,
 ): Track<Vec>;
 export function sampled(
   sample: (t: Seconds) => Geometry,
-  window: Span,
+  window: Interval,
   options: SampledOptions,
 ): Track<Geometry>;
 export function sampled(
   sample: (t: Seconds) => number | Vec | Geometry,
-  window: Span,
+  window: Interval,
   options: SampledOptions,
 ): Track<number | Vec | Geometry> {
   const round = roundTo(options.precision, "sampled()");
@@ -343,7 +343,7 @@ const LAYER_NAMES = ["offset", "rotate", "scale", "opacity"] as const;
 
 sampled.motion = (
   sample: (t: Seconds) => LayerValues,
-  window: Span,
+  window: Interval,
   options: SampledMotionOptions,
 ): Motion => {
   const round = roundTo(options.precision, "sampled.motion()");

@@ -235,18 +235,8 @@ describe("gradients", () => {
     const out = emitted(
       made(() => (
         <Shape
-          geometry={track(
-            polygon([
-              [0, 0],
-              [10, 0],
-              [0, 10],
-            ]),
-          ).to(
-            polygon([
-              [20, 0],
-              [30, 0],
-              [20, 10],
-            ]),
+          geometry={track(polygon([0, 0], [10, 0], [0, 10])).to(
+            polygon([20, 0], [30, 0], [20, 10]),
             span(0, 1),
           )}
           fill={linear({ from: [0, 0], to: [30, 0], stops: ["#000000", "#FFFFFF"] })}
@@ -535,14 +525,7 @@ describe("clips and masks", () => {
         key="card"
         offset={[20, 10]}
         rotate={30}
-        clip={subtract(
-          rect(60, 40),
-          polygon([
-            [20, 10],
-            [40, 10],
-            [30, 30],
-          ]),
-        )}
+        clip={subtract(rect(60, 40), polygon([20, 10], [40, 10], [30, 30]))}
       >
         <Shape geometry={rect(60, 40)} fill="#FF0000" />
       </Group>
@@ -748,16 +731,7 @@ describe("clips and masks sized by the node's box", () => {
 
     expect(disc.kind === "path" && disc.contours[0]!.start).toEqual([40, 40]);
     expect(moved(rect(4, 2), [1, 1])).toMatchObject({ kind: "path" });
-    expect(
-      moved(
-        polygon([
-          [0, 0],
-          [1, 0],
-          [0, 1],
-        ]),
-        [2, 3],
-      ),
-    ).toEqual({
+    expect(moved(polygon([0, 0], [1, 0], [0, 1]), [2, 3])).toEqual({
       kind: "points",
       points: [
         [2, 3],
@@ -1118,79 +1092,34 @@ describe("morph", () => {
 
 describe("subtract", () => {
   test("cuts holes inside the base as one even-odd path, and drops cuts that miss it", () => {
-    const ring = subtract(
-      circle(20),
-      circle(10),
-      polygon([
-        [12, -2],
-        [16, -2],
-        [14, 2],
-      ]),
-    );
+    const ring = subtract(circle(20), circle(10), polygon([12, -2], [16, -2], [14, 2]));
 
     expect(ring.kind === "path" && ring.rule).toBe("evenodd");
     expect(ring.kind === "path" && ring.contours.length).toBe(3);
-    expect(
-      subtract(
-        rect(10, 10),
-        polygon([
-          [50, 50],
-          [60, 50],
-          [55, 60],
-        ]),
-      ),
-    ).toMatchObject({ contours: [{}] });
+    expect(subtract(rect(10, 10), polygon([50, 50], [60, 50], [55, 60]))).toMatchObject({
+      contours: [{}],
+    });
   });
 
   test("a hole in a hole already cut keeps cutting, and anything a single even-odd path would draw wrong is an error", () => {
-    const card = subtract(
-      rect(100, 40),
-      polygon([
-        [10, 10],
-        [20, 10],
-        [15, 20],
-      ]),
-    );
+    const card = subtract(rect(100, 40), polygon([10, 10], [20, 10], [15, 20]));
 
-    expect(
-      subtract(
-        card,
-        polygon([
-          [60, 10],
-          [80, 10],
-          [70, 30],
-        ]),
-      ),
-    ).toMatchObject({ contours: [{}, {}, {}] });
+    expect(subtract(card, polygon([60, 10], [80, 10], [70, 30]))).toMatchObject({
+      contours: [{}, {}, {}],
+    });
     expect(() => subtract(rect(10, 10), rect(20, 5))).toThrow("crosses or touches the base's edge");
     expect(() => subtract(rect(10, 10), rect(10, 10))).toThrow("crosses or touches");
     expect(() =>
       subtract(
         rect(40, 40),
-        polygon([
-          [5, 5],
-          [20, 5],
-          [20, 20],
-        ]),
-        polygon([
-          [10, 6],
-          [25, 6],
-          [25, 30],
-        ]),
+        polygon([5, 5], [20, 5], [20, 20]),
+        polygon([10, 6], [25, 6], [25, 30]),
       ),
     ).toThrow("overlaps or touches cut 1");
     expect(() => subtract(rect(10, 10), circle(50))).toThrow("covers the whole base");
-    expect(() =>
-      subtract(
-        polygon([
-          [0, 0],
-          [10, 10],
-          [10, 0],
-          [0, 10],
-        ]),
-        circle(1),
-      ),
-    ).toThrow("never crosses itself");
+    expect(() => subtract(polygon([0, 0], [10, 10], [10, 0], [0, 10]), circle(1))).toThrow(
+      "never crosses itself",
+    );
   });
 });
 

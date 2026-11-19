@@ -1,28 +1,16 @@
 import { describe, expect, test } from "bun:test";
-import { ease } from "svjeez";
-import {
-  choice,
-  color,
-  count,
-  defaults,
-  easing,
-  list,
-  number,
-  parse,
-  text,
-  type Json,
-  type Values,
-} from "svjeez/params";
+import { param, ease } from "svjeez";
+import { defaults, parse, type Json, type Values } from "svjeez/tools";
 
 const params = {
-  version: text("1.0.0", { maxLength: 12 }),
-  accent: color("#5EA0FF"),
-  rise: easing(ease.out),
-  tone: choice("calm", ["calm", "loud"]),
-  rows: count(3, { min: 1, max: 6 }),
-  tags: list(text(""), ["fast", "small"], { max: 4 }),
-  bars: list(
-    { label: text("Q1", { maxLength: 8 }), value: number(4, { min: 0, max: 100 }) },
+  version: param.text("1.0.0", { maxLength: 12 }),
+  accent: param.color("#5EA0FF"),
+  rise: param.easing(ease.out),
+  tone: param.choice("calm", ["calm", "loud"]),
+  rows: param.count(3, { min: 1, max: 6 }),
+  tags: param.list(param.text(""), ["fast", "small"], { max: 4 }),
+  bars: param.list(
+    { label: param.text("Q1", { maxLength: 8 }), value: param.number(4, { min: 0, max: 100 }) },
     [{ label: "Q1", value: 4 }],
     { min: 1 },
   ),
@@ -49,21 +37,25 @@ describe("data params", () => {
   });
 
   test("a bad declaration throws when the module loads, saying what to fix", () => {
-    expect(() => text("too long by far", { maxLength: 4 })).toThrow(
+    expect(() => param.text("too long by far", { maxLength: 4 })).toThrow(
       "text() is 15 characters, over its maxLength of 4. Shorten it to fit.",
     );
-    expect(() => text("a", { maxLength: 0 })).toThrow("needs a whole maxLength of 1 or more");
-    expect(() => list(text(""), ["a", "b", "c"], { max: 2 })).toThrow(
+    expect(() => param.text("a", { maxLength: 0 })).toThrow("needs a whole maxLength of 1 or more");
+    expect(() => param.list(param.text(""), ["a", "b", "c"], { max: 2 })).toThrow(
       "list() has 3 items, and needs 0 to 2.",
     );
-    expect(() => list(number(0, { min: 0, max: 1 }), [2])).toThrow(
+    expect(() => param.list(param.number(0, { min: 0, max: 1 }), [2])).toThrow(
       "list()[0] needs a number from 0 to 1, got 2.",
     );
-    expect(() => list(text(""), [], { min: 2, max: 1 })).toThrow("list() needs a whole min");
+    expect(() => param.list(param.text(""), [], { min: 2, max: 1 })).toThrow(
+      "list() needs a whole min",
+    );
     // @ts-expect-error a list item cannot hold a list
-    expect(() => list({ inner: list(text(""), []) }, [])).toThrow('field "inner" cannot be a list');
+    expect(() => param.list({ inner: param.list(param.text(""), []) }, [])).toThrow(
+      'field "inner" cannot be a list',
+    );
     // @ts-expect-error a record item needs every field
-    expect(() => list({ a: text("") }, [{}])).not.toThrow();
+    expect(() => param.list({ a: param.text("") }, [{}])).not.toThrow();
   });
 
   test("parse fills what the input leaves out with defaults", () => {

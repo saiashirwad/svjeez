@@ -108,24 +108,13 @@ describe("animated geometry", () => {
   });
 
   test("polygons blend by point when they have as many points, and match as paths when not", () => {
-    const tri = polygon([
-      [0, 0],
-      [10, 0],
-      [5, 8],
-    ]);
+    const tri = polygon([0, 0], [10, 0], [5, 8]);
 
     const same = geometryLane(
       made(() => (
         <Shape
           fill="#000000"
-          geometry={track(tri).to(
-            polygon([
-              [0, 0],
-              [20, 0],
-              [10, 16],
-            ]),
-            span(0, 1),
-          )}
+          geometry={track(tri).to(polygon([0, 0], [20, 0], [10, 16]), span(0, 1))}
         />
       )),
     );
@@ -134,15 +123,7 @@ describe("animated geometry", () => {
       made(() => (
         <Shape
           fill="#000000"
-          geometry={track(tri).to(
-            polygon([
-              [0, 0],
-              [10, 0],
-              [10, 10],
-              [0, 10],
-            ]),
-            span(0, 1),
-          )}
+          geometry={track(tri).to(polygon([0, 0], [10, 0], [10, 10], [0, 10]), span(0, 1))}
         />
       )),
     );
@@ -308,18 +289,8 @@ describe("animated geometry", () => {
     const style = svg.emit(
       made(() => (
         <Shape
-          geometry={track(
-            polygon([
-              [0, 0],
-              [10, 0],
-              [5, 8],
-            ]),
-          ).to(
-            polygon([
-              [20, 10],
-              [30, 10],
-              [25, 18],
-            ]),
+          geometry={track(polygon([0, 0], [10, 0], [5, 8])).to(
+            polygon([20, 10], [30, 10], [25, 18]),
             span(0, 1),
           )}
           stroke={{ color: "#FF0000" }}
@@ -620,7 +591,7 @@ describe("images", () => {
 
 describe("repeated drawings are shared", () => {
   const wing = polygon(
-    Array.from(
+    ...Array.from(
       { length: 80 },
       (_, i) => [Math.cos(i) * 30 + 40, Math.sin(i * 2) * 30 + 40] as const,
     ),

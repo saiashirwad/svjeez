@@ -1,7 +1,7 @@
 import { SceneError } from "./scene-error";
 import { easeAt, splitEase, staysInside } from "./ease-at";
 import { DEFAULT_EASE, EPSILON, NUDGE, ease, type Ease, type Seconds } from "./time";
-import { isWhen, type Span, type When } from "../author/span";
+import { isWhen, type Interval, type When } from "../author/span";
 import { num } from "./format";
 import { isCurved, splitCurve, type Controls } from "./curve";
 import type { Animated, Key, Lane, Vec } from "./ir";
@@ -41,7 +41,7 @@ const isUntil = (
   value: number | { readonly until: Seconds },
 ): value is { readonly until: Seconds } => typeof value === "object";
 
-const isSpan = (when: Span | Seconds | null | undefined): when is Span =>
+const isSpan = (when: Interval | Seconds | null | undefined): when is Interval =>
   typeof when === "object" && when !== null;
 
 // SAFETY: values is a Partial<V>, so its own keys are keys of V.
@@ -71,7 +71,7 @@ export class Passage<V extends object> {
     return new Passage({ ...this.data, ...patch });
   }
 
-  to(values: Partial<V>, when: Span, curve: Curve = DEFAULT_EASE): Passage<V> {
+  to(values: Partial<V>, when: Interval, curve: Curve = DEFAULT_EASE): Passage<V> {
     if (!isSpan(when))
       throw new SceneError(
         `to() takes a span, got ${String(when)}. Write .to(value, span(start, over)); a step right after another is span.next(over).`,

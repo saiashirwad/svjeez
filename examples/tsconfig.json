@@ -18,7 +18,6 @@
       "svjeez/tools": ["../packages/svjeez/src/tools.ts"],
       "svjeez/jsx-dev-runtime": ["../packages/svjeez/src/jsx-dev-runtime.ts"],
       "svjeez/page": ["../packages/svjeez/src/page.ts"],
-      "svjeez/params": ["../packages/svjeez/src/params.ts"],
       "svjeez/frames": ["../packages/svjeez/src/frames.ts"]
     }
   },

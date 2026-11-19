@@ -34,7 +34,7 @@ const USAGE = `usage:
 <file> is an .svg, or a module whose default export is a scene from svjeez, an SVG string, or a function
 returning either.
 [params] is --params data.json and any number of --param key=value. They fill the module's exported \`params\` schema
-(from svjeez/params), are checked against it, and are passed to the default export; a key left out keeps its default.
+(built with param from svjeez), are checked against it, and are passed to the default export; a key left out keeps its default.
 --param sets one value that is not a list, and wins over the file.
 Times are scene seconds. Without --times, frames takes --count frames (default 6) across one loop.
 dev serves a preview with a scrubber and a timeline, and rebuilds it when a file beside it changes.
@@ -204,7 +204,7 @@ const loadValue = async (
 
   if (given && !schema)
     fail(
-      `${file} has no \`export const params\` schema, so --params and --param have nothing to fill. Declare one with svjeez/params, or drop the flags.`,
+      `${file} has no \`export const params\` schema, so --params and --param have nothing to fill. Declare one with param from svjeez, or drop the flags.`,
     );
 
   const values = schema ? await valuesFor(file, schema, flags) : undefined;

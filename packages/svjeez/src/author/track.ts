@@ -1,7 +1,7 @@
 import { SceneError } from "../model/scene-error";
 import { DEFAULT_EASE, EPSILON, type Seconds } from "../model/time";
 import { num } from "../model/format";
-import { span, type Span, type Spanned, type When } from "./span";
+import { span, type Interval, type Span, type When } from "./span";
 import type { Vec } from "../model/ir";
 import type { Curve } from "./spring";
 import { isAnchor, type Anchor } from "./refs";
@@ -26,8 +26,8 @@ export type Goal<T> = T extends Vec ? T | Anchor : T;
  */
 export interface Track<T> {
   /** The span of the last step. */
-  readonly span: Spanned;
-  to(value: Goal<T>, when: Span, curve?: Curve): Track<T>;
+  readonly span: Span;
+  to(value: Goal<T>, when: Interval, curve?: Curve): Track<T>;
   set(value: Goal<T>, when: When): Track<T>;
   loop(period: Seconds): Track<T>;
   repeat(times: number | { readonly until: Seconds }): Track<T>;
@@ -41,16 +41,16 @@ export type Anim<T> = T | Track<T> | Derived<T>;
 /** The passage of a track or a motion layer, and the span of its last step. */
 abstract class Written<V extends object> {
   readonly passage: Passage<V>;
-  readonly #last: Spanned | undefined;
+  readonly #last: Span | undefined;
   readonly #noun: string;
 
-  constructor(passage: Passage<V>, last: Spanned | undefined, noun: string) {
+  constructor(passage: Passage<V>, last: Span | undefined, noun: string) {
     this.passage = passage;
     this.#last = last;
     this.#noun = noun;
   }
 
-  get span(): Spanned {
+  get span(): Span {
     if (!this.#last)
       throw new SceneError(
         `span is the span of the last step, but this ${this.#noun} has no step yet.`,
@@ -61,9 +61,9 @@ abstract class Written<V extends object> {
   }
 
   /** The same thing with another passage; its last step stays the last unless one is given. */
-  protected abstract made(passage: Passage<V>, last: Spanned | undefined): this;
+  protected abstract made(passage: Passage<V>, last: Span | undefined): this;
 
-  protected stepped(values: V, when: Span, curve: Curve): this {
+  protected stepped(values: V, when: Interval, curve: Curve): this {
     return this.made(this.passage.to(values, when, curve), span(when.start, when.over));
   }
 
@@ -88,16 +88,16 @@ abstract class Written<V extends object> {
 const stored = <T>(goal: Goal<T>): T => goal as T;
 
 export class ValueTrack<T> extends Written<{ readonly value: T }> implements Track<T> {
-  constructor(passage: Passage<{ readonly value: T }>, last?: Spanned) {
+  constructor(passage: Passage<{ readonly value: T }>, last?: Span) {
     super(passage, last, "track");
   }
 
-  protected made(passage: Passage<{ readonly value: T }>, last: Spanned | undefined): this {
+  protected made(passage: Passage<{ readonly value: T }>, last: Span | undefined): this {
     // SAFETY: ValueTrack has no subclass, so a new one is a this.
     return new ValueTrack(passage, last) as this;
   }
 
-  to(value: Goal<T>, when: Span, curve: Curve = DEFAULT_EASE): this {
+  to(value: Goal<T>, when: Interval, curve: Curve = DEFAULT_EASE): this {
     return this.stepped({ value: stored(value) }, when, curve);
   }
 
@@ -194,8 +194,8 @@ export interface LayerValues {
 /** A passing effect on top of a node's own props. A value, as a track is: every step returns a new layer. */
 export interface Motion {
   /** The span of the last step. */
-  readonly span: Spanned;
-  to(values: LayerValues, when: Span, curve?: Curve): Motion;
+  readonly span: Span;
+  to(values: LayerValues, when: Interval, curve?: Curve): Motion;
   set(values: LayerValues, when: When): Motion;
   loop(period: Seconds): Motion;
   repeat(times: number | { readonly until: Seconds }): Motion;
@@ -205,16 +205,16 @@ export interface Motion {
 export type Layers = Motion | readonly (Motion | false | null | undefined)[];
 
 export class LayerMotion extends Written<LayerValues> implements Motion {
-  constructor(passage: Passage<LayerValues>, last?: Spanned) {
+  constructor(passage: Passage<LayerValues>, last?: Span) {
     super(passage, last, "motion");
   }
 
-  protected made(passage: Passage<LayerValues>, last: Spanned | undefined): this {
+  protected made(passage: Passage<LayerValues>, last: Span | undefined): this {
     // SAFETY: LayerMotion has no subclass, so a new one is a this.
     return new LayerMotion(passage, last) as this;
   }
 
-  to(values: LayerValues, when: Span, curve: Curve = DEFAULT_EASE): this {
+  to(values: LayerValues, when: Interval, curve: Curve = DEFAULT_EASE): this {
     return this.stepped(values, when, curve);
   }
 

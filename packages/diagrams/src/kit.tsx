@@ -31,7 +31,6 @@ import {
   type FontValue,
   type Hex,
   type Layers,
-  type Spanned,
   type PathBuilder,
   type StrokeProps,
   type Token,
@@ -67,9 +66,9 @@ export interface Diagram<Id extends string> {
   with(between: Child): SceneElement;
   readonly size: Vec;
   readonly ref: Ref;
-  readonly span: Spanned | undefined;
+  readonly span: Span | undefined;
   part(id: Id): Ref;
-  when(id: Id): Spanned | undefined;
+  when(id: Id): Span | undefined;
 }
 
 export type Reveal<Id extends string> = Span | Readonly<Partial<Record<Id, Span>>>;
@@ -335,23 +334,13 @@ export const outline = (role: NodeRole, w: number, h: number): Geometry => {
     case "input": {
       const s = h * SKEW;
 
-      return polygon([
-        [s, 0],
-        [w, 0],
-        [w - s, h],
-        [0, h],
-      ]);
+      return polygon([s, 0], [w, 0], [w - s, h], [0, h]);
     }
 
     case "output":
       return rect(w, h, { radius: h / 2 });
     case "decision":
-      return polygon([
-        [w / 2, 0],
-        [w, h / 2],
-        [w / 2, h],
-        [0, h / 2],
-      ]);
+      return polygon([w / 2, 0], [w, h / 2], [w / 2, h], [0, h / 2]);
     case "store": {
       const [top, bottom] = [
         halfEllipse(w / 2, LID, w / 2, LID, -1, -1),
@@ -452,7 +441,7 @@ const headOf = (head: Exclude<ArrowHead, "none">, tip: Point, ux: number, uy: nu
 
   switch (head) {
     case "filled":
-      return polygon([tipAt, left, right]);
+      return polygon(tipAt, left, right);
     case "async":
       return line(left, tipAt, right);
     case "cross": {
@@ -548,7 +537,7 @@ const isSpan = (value: Reveal<string>): value is Span =>
 const given = (value: Span | undefined): value is Span =>
   typeof value === "object" && value !== null && isSpan(value);
 
-export const spanOf = (value: Span | undefined, what: string): Spanned => {
+export const spanOf = (value: Span | undefined, what: string): Span => {
   if (!given(value))
     throw new SceneError(`${what} needs a span, got ${String(value)}.`, "Write span(start, over).");
 
@@ -568,15 +557,15 @@ const quoted = (ids: readonly string[]): string =>
         .join(", ")}, …`
     : ids.map((id) => `"${id}"`).join(", ");
 
-export const beatOf = (beat: Span, i: number): Spanned =>
+export const beatOf = (beat: Span, i: number): Span =>
   span(Math.round((beat.start + i * beat.over) * 1e6) / 1e6, beat.over);
 
 export const schedule = (
   reveal: Reveal<string> | undefined,
   order: readonly string[],
   what: string,
-): Map<string, Spanned | undefined> => {
-  const shown = new Map<string, Spanned | undefined>(order.map((id) => [id, undefined]));
+): Map<string, Span | undefined> => {
+  const shown = new Map<string, Span | undefined>(order.map((id) => [id, undefined]));
 
   if (reveal === undefined) return shown;
 
@@ -633,7 +622,7 @@ export const checkDraws = (
       );
 };
 
-export const extent = (spans: readonly (Span | undefined)[]): Spanned | undefined => {
+export const extent = (spans: readonly (Span | undefined)[]): Span | undefined => {
   const known = spans.filter((s): s is Span => s !== undefined);
 
   if (known.length === 0) return undefined;
@@ -695,12 +684,12 @@ export const keyed = (ids: readonly string[]): string[] => {
 export interface Parts<Id extends string> {
   readonly ref: Ref;
   part(id: Id): Ref;
-  when(id: Id): Spanned | undefined;
+  when(id: Id): Span | undefined;
 }
 
 export const partsOf = <Id extends string>(
   what: string,
-  parts: ReadonlyMap<string, Spanned | undefined>,
+  parts: ReadonlyMap<string, Span | undefined>,
 ): Parts<Id> => {
   const handle = ref();
 

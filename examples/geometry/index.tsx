@@ -34,7 +34,7 @@ const Label = ({
 );
 
 const star = polygon(
-  Array.from({ length: 10 }, (_, k): Vec => {
+  ...Array.from({ length: 10 }, (_, k): Vec => {
     const reach = k % 2 === 0 ? 40 : 17;
     const angle = (k * Math.PI) / 5 - Math.PI / 2;
 

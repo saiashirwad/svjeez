@@ -106,11 +106,7 @@ describe("at places the anchor point of the box", () => {
         <Shape
           fill="#000000"
           key="poly"
-          geometry={polygon([
-            [5, 5],
-            [15, 5],
-            [10, 15],
-          ])}
+          geometry={polygon([5, 5], [15, 5], [10, 15])}
           at={[50, 50]}
           anchor="center"
         />
@@ -312,11 +308,7 @@ describe("a box is what the shape paints", () => {
   });
 
   test("joins: a miter reaches its tip, unless that is past the limit of 4, a bevel and a round don't", () => {
-    const triangle = polygon([
-      [0, 0],
-      [100, 0],
-      [50, 100],
-    ]);
+    const triangle = polygon([0, 0], [100, 0], [50, 100]);
 
     expect(stroked(triangle, { width: 10 })[3]).toBeCloseTo(116.18, 1);
     expect(stroked(triangle, { width: 10, join: "round" })).toEqual([-5, -5, 110, 110]);

@@ -15,9 +15,10 @@ import {
   track,
   type Curve,
   type SceneElement,
+  type Span,
   type Vec,
 } from "svjeez";
-import { boxesOf, isLane, placements, svg, type Model, type Spanned } from "svjeez/tools";
+import { boxesOf, isLane, placements, svg, type Model } from "svjeez/tools";
 import { alongCurve, curveLength, splitCurve } from "../src/model/curve";
 import { blendVec, valueAt } from "../src/model/sample";
 
@@ -66,7 +67,7 @@ const within = (lane: Model.Lane<Vec>): boolean =>
       [key.ease.points[1], key.ease.points[3]].every((y) => y >= 0 && y <= 1),
   );
 
-type Leg = readonly [to: Vec, when: Spanned, curve: Curve];
+type Leg = readonly [to: Vec, when: Span, curve: Curve];
 
 interface Route {
   readonly start: Vec;

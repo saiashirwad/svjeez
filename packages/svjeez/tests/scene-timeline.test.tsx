@@ -17,7 +17,7 @@ import {
   type Vec,
 } from "svjeez";
 import { isLane, type Model } from "svjeez/tools";
-import type { Spanned } from "../src/author/span";
+import type { Span } from "../src/author/span";
 import { blendVec, valueAt } from "../src/model/sample";
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
@@ -379,7 +379,7 @@ describe("springs, arrows and parts", () => {
 
   test("cascade() returns as many spans as it is asked for, typed as a tuple", () => {
     const [first, second, third] = span(0, 1).cascade(3, 0.5);
-    const pair: [Spanned, Spanned] = span(1, 1).cascade(2, 0.25);
+    const pair: [Span, Span] = span(1, 1).cascade(2, 0.25);
 
     expect([first.start, second.start, third.start]).toEqual([0, 0.5, 1]);
     expect(pair[1].start).toBe(1.25);

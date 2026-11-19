@@ -73,7 +73,7 @@ export type { Ease, Seconds } from "./model/time";
 
 export type { Spring, SpringOptions } from "./author/spring";
 
-export type { OpenSpanned, Spanned, When } from "./author/span";
+export type { OpenSpan, When } from "./author/span";
 
 export type { Derived, MapOptions, Source, Together } from "./author/derived";
 
@@ -121,3 +121,25 @@ export {
 export type * as Model from "./model/ir";
 
 export type { Scene } from "./model/ir";
+
+export {
+  defaults,
+  parse,
+  type ChoiceParam,
+  type ColorParam,
+  type EasingParam,
+  type Extras,
+  type Fields,
+  type Handles,
+  type ItemValue,
+  type Json,
+  type JsonObject,
+  type ListParam,
+  type NumberParam,
+  type Param,
+  type Range,
+  type ScalarParam,
+  type Schema,
+  type TextParam,
+  type Values,
+} from "./params";

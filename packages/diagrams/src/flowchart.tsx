@@ -1,7 +1,6 @@
 /** @jsxImportSource svjeez */
-import { Group, Shape, Text, rect, span, type SceneElement } from "svjeez";
-import type { Child } from "svjeez/tools";
-import { SceneError, type Spanned } from "svjeez/tools";
+import { Group, Shape, Text, rect, span, type SceneElement, type Span } from "svjeez";
+import { SceneError, type Child } from "svjeez/tools";
 import { layered } from "./layout/layered.ts";
 import type { Box, Point } from "./layout/box.ts";
 import {
@@ -149,7 +148,7 @@ export function flowchart<
   const shown = schedule(options.reveal, order, WHAT);
   const LABEL = 0.25;
 
-  const drawn = (from: string, to: string): Spanned | undefined => {
+  const drawn = (from: string, to: string): Span | undefined => {
     const [a, b] = [shown.get(from), shown.get(to)];
 
     if (!a && !b) return undefined;
@@ -158,7 +157,7 @@ export function flowchart<
     return span(Math.max(0, a?.start ?? 0, b ? b.start - over : 0), over);
   };
 
-  const groupAt = (g: FlowchartGroup<string>): Spanned | undefined => {
+  const groupAt = (g: FlowchartGroup<string>): Span | undefined => {
     const spans = g.nodes.map((n) => shown.get(n));
 
     if (spans.some((s) => !s)) return undefined;
@@ -170,7 +169,7 @@ export function flowchart<
   const timed = lines.map((e) => drawn(e.from, e.to));
   checkDraws(options.draw, edgeKeys, WHAT);
 
-  const parts = new Map<string, Spanned | undefined>([
+  const parts = new Map<string, Span | undefined>([
     ...order.map((id) => [id, shown.get(id)] as const),
     ...groups.map(([id, g]) => [id, groupAt(g)] as const),
     ...lines.map((e, i) => {

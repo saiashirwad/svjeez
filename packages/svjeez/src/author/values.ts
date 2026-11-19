@@ -137,7 +137,7 @@ export const line = (...points: readonly Vec[]): Geometry => {
 };
 
 /** A closed outline with a corner at each point. */
-export const polygon = (points: readonly Vec[]): Geometry => ({
+export const polygon = (...points: readonly Vec[]): Geometry => ({
   kind: "points",
   points,
   closed: true,

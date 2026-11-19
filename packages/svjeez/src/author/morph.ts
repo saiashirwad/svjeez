@@ -2,7 +2,7 @@ import { SceneError } from "../model/scene-error";
 import type { Names } from "./names";
 import { num } from "../model/format";
 import { DEFAULT_EASE, EPSILON, type Seconds } from "../model/time";
-import { checkWindow, span, type Span } from "./span";
+import { checkWindow, span, type Interval } from "./span";
 import { matched, mixGeometry } from "../model/geometry";
 import { isPlaced, placedLike } from "./identity";
 import type {
@@ -48,14 +48,14 @@ export interface MorphOptions {
 export interface MorphElement {
   readonly type: "morph";
   readonly states: readonly (readonly SceneElement[])[];
-  readonly spans: readonly Span[];
+  readonly spans: readonly Interval[];
   readonly options: MorphOptions;
   readonly only?: number;
 }
 
 const between = (
   states: readonly Child[],
-  spans: readonly Span[],
+  spans: readonly Interval[],
   options: MorphOptions = {},
 ): SceneElement => {
   if (states.length < 2)
@@ -85,7 +85,7 @@ const between = (
 };
 
 export const morph = Object.assign(
-  (before: Child, after: Child, when: Span, options: MorphOptions = {}): SceneElement =>
+  (before: Child, after: Child, when: Interval, options: MorphOptions = {}): SceneElement =>
     between([before, after], [when], options),
   { between },
 );
@@ -943,7 +943,7 @@ const build = (plan: Plan, entry: Entry): SceneNode => {
 
 export const merge = (
   states: readonly (readonly SceneNode[])[],
-  spans: readonly Span[],
+  spans: readonly Interval[],
   timing: Timing,
   names: Names,
   options: MorphOptions = {},
