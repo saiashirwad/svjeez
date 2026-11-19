@@ -91,8 +91,18 @@ describe("parse git", () => {
     ]);
   });
 
+  test("reads TB and BT orientations and a title, keeping commit ids the same", () => {
+    const [lr, tb, bt] = ["gitGraph", "gitGraph TB:", "gitGraph BT:"].map((h) =>
+      parse(`${h}\ntitle  Release flow\ncommit\nbranch dev\ncommit`),
+    );
+
+    expect([tb!.direction, bt!.direction]).toEqual(["TB", "BT"]);
+    expect(tb!.title).toBe("Release flow");
+    expect(tb!.commits.map((c) => c.id)).toEqual(lr!.commits.map((c) => c.id));
+  });
+
   test("errors name the line and say how to fix it", () => {
-    expect(message("gitGraph TB:\ncommit")).toContain("left to right");
+    expect(message("gitGraph RL:\ncommit")).toContain("cannot read the gitGraph header");
     expect(message("gitGraph\ncheckout dev")).toContain('there is no branch "dev"');
     expect(message("gitGraph\nbranch main")).toContain("already exists");
     expect(message("gitGraph\ncommit\nbranch a\ncommit\nmerge a")).toContain("itself");
@@ -106,7 +116,8 @@ describe("parse git", () => {
     expect(message("gitGraph\ncommit type: ODD")).toContain("not known");
     expect(message("gitGraph\ncommit colour: red")).toContain("not an option here");
     expect(message('gitGraph\ncherry-pick id: "Z"')).toContain("no commit");
-    expect(message("gitGraph\ntitle Hi\ncommit")).toContain("not supported");
+    expect(message("gitGraph\naccTitle: Hi\ncommit")).toContain("not supported");
+    expect(message("gitGraph\ntitle\ncommit")).toContain("needs text");
     expect(message("gitGraph\nrebase main")).toContain("cannot read this line");
   });
 

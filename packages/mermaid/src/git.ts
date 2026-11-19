@@ -21,18 +21,20 @@ export interface GitCommitDoc {
 export interface GitDoc {
   readonly kind: "git";
   readonly source: Place;
-  readonly direction: "LR";
-  /** Branch names in lane order, top to bottom. */
+  /** LR runs time left to right with a row per branch; TB and BT run it down or up with a column per branch. */
+  readonly direction: "LR" | "TB" | "BT";
+  readonly title?: string;
+  /** Branch names in lane order: top to bottom for LR, left to right for TB and BT. */
   readonly branches: readonly string[];
   /** Oldest first. */
   readonly commits: readonly GitCommitDoc[];
 }
 
 const SUPPORTED =
-  'Supported: `commit` with `id: "x"`, `tag: "v1"` and `type: NORMAL|REVERSE|HIGHLIGHT`, `branch name` (with `order: n`), `checkout name` or `switch name`, `merge name` (with `id`, `tag`, `type`) and `cherry-pick id: "x"` (with `parent: "p"`, `tag`).';
+  'Supported: `gitGraph`, `gitGraph TB:` or `BT:`, `title Text`, `commit` with `id: "x"`, `tag: "v1"` and `type: NORMAL|REVERSE|HIGHLIGHT`, `branch name` (with `order: n`), `checkout name` or `switch name`, `merge name` (with `id`, `tag`, `type`) and `cherry-pick id: "x"` (with `parent: "p"`, `tag`).';
 
 const HEADER = /^gitGraph(?:\s+(LR|TB|BT))?\s*:?$/;
-const UNSUPPORTED = /^(title|accTitle|accDescr)\b/;
+const UNSUPPORTED = /^(accTitle|accDescr)\b/;
 const OPTION = /([A-Za-z][\w-]*)\s*:\s*(?:"([^"]*)"|'([^']*)'|([^\s"']+))/g;
 
 const TYPES = new Map<string, GitCommitKind>([
@@ -104,13 +106,12 @@ export const parseGit = (header: Line, body: readonly Line[]): GitDoc => {
   const head = HEADER.exec(header.text);
 
   if (!head)
-    return fail(header, `cannot read the gitGraph header. Write \`gitGraph\` or \`gitGraph LR:\`.`);
-
-  if (head[1] === "TB" || head[1] === "BT")
     return fail(
       header,
-      "svjeez draws a gitGraph left to right. Write `gitGraph` or `gitGraph LR:`.",
+      "cannot read the gitGraph header. Write `gitGraph`, or `gitGraph LR:`, `TB:` or `BT:`.",
     );
+
+  let title: string | undefined;
   const order = new Map<string, number>([["main", 0]]);
   const heads = new Map<string, string | undefined>([["main", undefined]]);
   const made: GitCommitDoc[] = [];
@@ -164,7 +165,10 @@ export const parseGit = (header: Line, body: readonly Line[]): GitDoc => {
     if (word && UNSUPPORTED.test(word))
       return fail(l, `${word} is not supported in a gitGraph. ${SUPPORTED}`);
 
-    if (word === "commit") {
+    if (word === "title") {
+      if (!rest.trim()) return fail(l, "a title needs text after it.");
+      title = clean(rest);
+    } else if (word === "commit") {
       const bare = /^\s*"([^"]*)"/.exec(rest);
 
       const found = options(l, bare ? rest.slice(bare[0].length) : rest, [
@@ -290,7 +294,14 @@ export const parseGit = (header: Line, body: readonly Line[]): GitDoc => {
     .sort((a, b) => order.get(a.name)! - order.get(b.name)! || a.i - b.i)
     .map((b) => b.name);
 
-  return { kind: "git", source: sourceOf(header), direction: "LR", branches, commits: made };
+  return {
+    kind: "git",
+    source: sourceOf(header),
+    direction: head[1] === "TB" || head[1] === "BT" ? head[1] : "LR",
+    ...(title !== undefined && { title }),
+    branches,
+    commits: made,
+  };
 };
 
 const safe = (name: string): string => name.replaceAll("/", "\u2215");
@@ -316,6 +327,6 @@ export const drawGit = (
         label: c.kind === "cherry-pick" || (c.kind === "merge" && !c.named) ? undefined : c.id,
       })),
     },
-    options,
+    { direction: doc.direction, ...(doc.title !== undefined && { title: doc.title }), ...options },
   );
 };

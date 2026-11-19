@@ -48,6 +48,26 @@ const commits: readonly GitCommit<"main" | "dev">[] = [
 ];
 
 describe("gitGraph", () => {
+  test("TB and BT draw a column per branch, with a title above", () => {
+    const [down, up] = (["TB", "BT"] as const).map((direction) =>
+      gitGraph({ branches, commits }, { ...options, direction, title: "Flow" }),
+    );
+
+    for (const graph of [down!, up!]) {
+      expect(check(draw(graph.node)).problems.filter((p) => p.severity === "error")).toEqual([]);
+      expect(svg.emit(draw(graph.node))).toContain(">Flow<");
+      expect(graph.size[1]).toBeGreaterThan(graph.size[0]);
+    }
+
+    expect(down!.size).toEqual(up!.size);
+    expect(svg.emit(draw(down!.node))).not.toBe(svg.emit(draw(up!.node)));
+    expect(
+      // SAFETY: the test passes a direction the types reject.
+      thrown(() => gitGraph({ branches, commits }, { ...options, direction: "RL" as never }))
+        .problem,
+    ).toContain('"LR", "TB" or "BT"');
+  });
+
   test("draws branches, every kind of commit, tags and merge lines, with no scene errors", () => {
     const graph = gitGraph({ branches, commits }, options);
     const out = svg.emit(draw(graph.node));

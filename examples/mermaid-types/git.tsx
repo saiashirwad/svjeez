@@ -2,7 +2,8 @@ import { show } from "./show";
 
 export default show(
   "Git graph",
-  `gitGraph
+  `gitGraph TB:
+  title Release flow
   commit
   commit tag: "v1.0"
   branch feature
