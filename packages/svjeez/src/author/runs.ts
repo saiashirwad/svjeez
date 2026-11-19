@@ -9,6 +9,7 @@ export type Asked = RunStyle & Required<Pick<RunStyle, "font">>;
 export interface AskedPiece {
   readonly text: string;
   readonly asked: Asked;
+  readonly advances?: readonly number[];
 }
 
 const isList = (child: TextContent): child is readonly TextContent[] => Array.isArray(child);
@@ -29,7 +30,39 @@ const over = (style: Asked, run: RunProps): Asked => ({
   ...(run.italic !== undefined && { italic: run.italic }),
   ...(run.fill !== undefined && { fill: run.fill }),
   ...(run.opacity !== undefined && { opacity: run.opacity }),
+  ...(run.letterSpacing !== undefined && { letterSpacing: run.letterSpacing }),
 });
+
+const wordsOf = (child: TextContent): string | undefined => {
+  if (isWords(child)) return String(child);
+
+  return isList(child) && child.every(isWords) ? child.join("") : undefined;
+};
+
+const measured = (run: RunProps, style: Asked, where: string): AskedPiece[] => {
+  const words = wordsOf(run.children);
+  const { advances = [] } = run;
+
+  if (words === undefined)
+    throw new SceneError(
+      `${where} has a <Run> with advances that holds more than plain text.`,
+      "A run with advances is one string: put its advances on the <Run> around those words, and nest nothing in it.",
+    );
+
+  if (/[\r\n]/.test(words))
+    throw new SceneError(
+      `${where} has a <Run> with advances that holds a line break.`,
+      "A run with advances is one line: use one <Run> per line.",
+    );
+
+  if (advances.length !== [...words].length || !advances.every((each) => Number.isFinite(each)))
+    throw new SceneError(
+      `${where} has a <Run> of ${[...words].length} characters (${JSON.stringify(words)}) but ${advances.length} advances.`,
+      "Give advances one finite number per character, in scene units.",
+    );
+
+  return [{ text: words, asked: over(style, run), advances }];
+};
 
 export const piecesOf = (children: TextContent, style: Asked, where: string): AskedPiece[] => {
   if (children === undefined || children === null || children === false) return [];
@@ -43,6 +76,9 @@ export const piecesOf = (children: TextContent, style: Asked, where: string): As
   if (isWords(children)) return [{ text: String(children), asked: style }];
 
   if (isList(children)) return children.flatMap((child) => piecesOf(child, style, where));
+
+  if (isElement(children) && isRun(children) && children.props.advances !== undefined)
+    return measured(children.props, style, where);
 
   if (isElement(children) && isRun(children))
     return piecesOf(children.props.children, over(style, children.props), where);
@@ -136,7 +172,10 @@ export class FontBook {
 
   families(): Record<string, FontFamily> {
     return Object.fromEntries(
-      [...this.#families].map(([name, { faces }]) => [name, new FontFamily(name, faces, [])]),
+      [...this.#families].map(([name, { faces }]) => [
+        name,
+        new FontFamily(name, faces, faces[0]!.format === "system" ? faces[0]!.fallback : []),
+      ]),
     );
   }
 

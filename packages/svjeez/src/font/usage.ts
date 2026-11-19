@@ -101,7 +101,9 @@ export const faceRules = (use: FontUse, faces: readonly Face[]): string[] => {
   const every = use.runs.map((run) => run.text);
   const shared = use.runs.filter((run) => run.family === null).map((run) => run.text);
 
-  return faces.map(({ name, font }) => {
+  const files = faces.filter(({ font }) => font.format !== "system");
+
+  return files.map(({ name, font }) => {
     const slot = slotOf(name, font);
 
     if (use.css.family) return fontFaceRule(name, font, every);

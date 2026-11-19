@@ -39,7 +39,8 @@ import { blendable, isGradient, mixPaint } from "./paint";
 import type { LayerValues } from "./track";
 
 export interface MorphOptions {
-  readonly curve?: Curve;
+  /** One curve for every transition, or one per transition. */
+  readonly curve?: Curve | readonly Curve[];
   readonly enter?: LayerValues;
   readonly exit?: LayerValues;
   readonly stagger?: Seconds;
@@ -83,6 +84,9 @@ const between = (
 
   return { type: "morph", states: states.map(flat), spans, options };
 };
+
+const isCurves = (curve: Curve | readonly Curve[]): curve is readonly Curve[] =>
+  Array.isArray(curve);
 
 export const morph = Object.assign(
   (before: Child, after: Child, when: Interval, options: MorphOptions = {}): SceneElement =>
@@ -197,7 +201,8 @@ interface Window {
 
 interface Plan {
   readonly timing: Timing;
-  readonly curve: Curve;
+  /** One curve per transition. */
+  readonly curves: readonly Curve[];
   readonly enter: Fixed;
   readonly exit: Fixed;
   readonly windows: ReadonlyMap<Entry, readonly Window[]>;
@@ -208,15 +213,17 @@ interface Fixed {
   readonly offset: Vec;
   readonly rotate: number;
   readonly scale: Vec;
+  readonly skew: number;
   readonly opacity: number;
 }
 
-const IDLE: Fixed = { offset: [0, 0], rotate: 0, scale: [1, 1], opacity: 1 };
+const IDLE: Fixed = { offset: [0, 0], rotate: 0, scale: [1, 1], skew: 0, opacity: 1 };
 
 const layerOf = (values: LayerValues): Fixed => ({
   offset: values.offset ?? [0, 0],
   rotate: values.rotate ?? 0,
   scale: pair(values.scale ?? 1),
+  skew: values.skew ?? 0,
   opacity: values.opacity ?? 1,
 });
 
@@ -228,7 +235,7 @@ const travel = <T>(
   to: readonly T[],
   mix: Mix<T>,
   where: string,
-  curve: Curve = plan.curve,
+  adapt: (curve: Curve) => Curve = (curve) => curve,
 ): Animated<T> => {
   let passage = new Passage<{ readonly value: T }>({ initial: { value: initial }, steps: [] });
   let current = initial;
@@ -236,7 +243,8 @@ const travel = <T>(
   windows.forEach(({ start, over }, i) => {
     if (!same(current, from[i]!)) passage = passage.set({ value: from[i]! }, { start });
 
-    if (!same(from[i]!, to[i]!)) passage = passage.to({ value: to[i]! }, span(start, over), curve);
+    if (!same(from[i]!, to[i]!))
+      passage = passage.to({ value: to[i]! }, span(start, over), adapt(plan.curves[i]!));
     current = to[i]!;
   });
 
@@ -249,7 +257,7 @@ const blend = <T>(
   values: readonly Animated<T>[],
   mix: Mix<T>,
   what: string,
-  curve?: Curve,
+  adapt?: (curve: Curve) => Curve,
 ): Animated<T> => {
   const [first] = values;
 
@@ -271,7 +279,7 @@ const blend = <T>(
     fixed.slice(1),
     mix,
     `${what} on ${plan.names.named(entry.key)} in morph()`,
-    curve,
+    adapt,
   );
 };
 
@@ -287,11 +295,12 @@ const agreed = <T>(plan: Plan, entry: Entry, read: (node: SceneNode) => T, what:
   return values[0]!;
 };
 
-const rotateScale = (rotate: number, [sx, sy]: Vec, [x, y]: Vec): Vec => {
+const rotateScale = (rotate: number, [sx, sy]: Vec, skew: number, [x, y]: Vec): Vec => {
   const angle = (rotate * Math.PI) / 180;
   const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
+  const leaned = x + Math.tan((skew * Math.PI) / 180) * y;
 
-  return [cos * sx * x - sin * sy * y, sin * sx * x + cos * sy * y];
+  return [cos * sx * leaned - sin * sy * y, sin * sx * leaned + cos * sy * y];
 };
 
 const rebased = (plan: Plan, entry: Entry, node: SceneNode, origin: Vec): readonly Layer[] => {
@@ -300,11 +309,11 @@ const rebased = (plan: Plan, entry: Entry, node: SceneNode, origin: Vec): readon
   if (Math.abs(dx) < EPSILON && Math.abs(dy) < EPSILON) return node.layers;
 
   return node.layers.map((layer) => {
-    if (isLane(layer.rotate) || isLane(layer.scale))
+    if (isLane(layer.rotate) || isLane(layer.scale) || isLane(layer.skew))
       throw new SceneError(
-        `morph() can't blend ${plan.names.named(entry.key)}: it turns or scales in a state, and its origin moves between states. Give it the same origin in every state, as in origin={[x, y]}.`,
+        `morph() can't blend ${plan.names.named(entry.key)}: it turns, scales or skews in a state, and its origin moves between states. Give it the same origin in every state, as in origin={[x, y]}.`,
       );
-    const [mx, my] = rotateScale(layer.rotate, layer.scale, [dx, dy]);
+    const [mx, my] = rotateScale(layer.rotate, layer.scale, layer.skew, [dx, dy]);
     const shift: Vec = [dx - mx, dy - my];
     const move = (offset: Vec): Vec => [offset[0] + shift[0], offset[1] + shift[1]];
 
@@ -354,6 +363,7 @@ const presence = (plan: Plan, entry: Entry, enter: Fixed, exit: Fixed): Layer | 
     offset: field((layer) => layer.offset, mixVec),
     rotate: field((layer) => layer.rotate, mixNumber),
     scale: field((layer) => layer.scale, mixVec),
+    skew: field((layer) => layer.skew, mixNumber),
     opacity: field((layer) => layer.opacity, mixNumber),
   };
 };
@@ -391,6 +401,13 @@ const layersOf = (plan: Plan, entry: Entry, origin: Vec): Layer[] => {
         at.map((layer) => layer.scale),
         mixVec,
         "scale",
+      ),
+      skew: blend(
+        plan,
+        entry,
+        at.map((layer) => layer.skew),
+        mixNumber,
+        "skew",
       ),
       opacity: blend(
         plan,
@@ -562,7 +579,7 @@ const effectsOf = (plan: Plan, entry: Entry): Effect[] => {
             shadows.map((each) => each.color),
             noMix,
             "shadow color of an effect",
-            paintCurve(plan),
+            paintCurve,
           ),
           opacity: number(
             "shadow opacity",
@@ -581,8 +598,8 @@ const clear = (like: Animated<Paint> | undefined): Paint =>
     ? { ...like, stops: like.stops.map((stop) => ({ ...stop, color: NONE })) }
     : NONE;
 
-const paintCurve = (plan: Plan): Curve | undefined =>
-  isSpring(plan.curve) ? DEFAULT_EASE : undefined;
+/** Colors don't spring: a spring's transition takes the default curve instead. */
+const paintCurve = (curve: Curve): Curve => (isSpring(curve) ? DEFAULT_EASE : curve);
 
 const paints = (
   plan: Plan,
@@ -600,7 +617,7 @@ const paints = (
       values.map((value) => value ?? none),
       mixPaint,
       what,
-      paintCurve(plan),
+      paintCurve,
     ),
     `${what} on ${plan.names.named(entry.key)} in morph()`,
   );
@@ -730,7 +747,7 @@ const strokeOf = (
         strokes.map((stroke) => (stroke ?? given).color),
         mixPaint,
         "stroke color",
-        paintCurve(plan),
+        paintCurve,
       ),
       `stroke color on ${plan.names.named(entry.key)} in morph()`,
     ),
@@ -821,7 +838,7 @@ const blendedLines = (plan: Plan, entry: Entry, states: readonly TextNode[]): Te
             runs.map((each) => each.fill),
             mixPaint,
             "fill",
-            paintCurve(plan),
+            paintCurve,
           ),
           `fill on ${plan.names.named(entry.key)} in morph()`,
         ),
@@ -979,7 +996,11 @@ export const merge = (
 
   const plan: Plan = {
     timing,
-    curve: options.curve ?? DEFAULT_EASE,
+    curves: spans.map((_, i) => {
+      const { curve = DEFAULT_EASE } = options;
+
+      return isCurves(curve) ? (curve[i] ?? DEFAULT_EASE) : curve;
+    }),
     enter: layerOf(options.enter ?? { opacity: 0 }),
     exit: layerOf(options.exit ?? { opacity: 0 }),
     windows,

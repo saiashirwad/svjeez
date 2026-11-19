@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Svjeez shadow DOM</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #fff;
+        color: #0a0a0a;
+        font: 14px/20px Helvetica, Arial, sans-serif;
+      }
+      #app {
+        background: #fff;
+        width: 320px;
+        padding: 24px;
+        display: grid;
+        gap: 16px;
+      }
+    </style>
+    <script type="module" src="./shadow.ts"></script>
+  </head>
+  <body>
+    <div id="app">
+      <x-card>
+        <span slot="title">Shadow card</span>
+        <p>Slotted paragraph, styled from inside.</p>
+        loose text in the default slot
+      </x-card>
+      <x-card><p>Only a body: title and footer fall back.</p></x-card>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,46 @@
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 22px;
+  border-radius: 18px;
+  color: #fff;
+  background: linear-gradient(135deg, #5b5bf0, #b05bf0);
+  box-shadow: 0 8px 20px var(--shadow);
+}
+
+.head h1 {
+  margin: 0;
+  font:
+    24px/30px Display,
+    system-ui,
+    sans-serif;
+  flex: 1;
+}
+
+.pulse {
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  background: #7dffc4;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.7);
+    opacity: 0.35;
+  }
+}
+
+.badge {
+  padding: 3px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.25);
+  font-size: 14px;
+}

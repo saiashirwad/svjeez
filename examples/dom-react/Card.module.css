@@ -1,0 +1,42 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: 0 3px 10px var(--shadow);
+  border: 1px solid var(--line);
+}
+
+.done svg {
+  color: var(--ok);
+}
+
+.text {
+  flex: 1;
+}
+
+.title {
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.note {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+.card button {
+  font:
+    13px/16px Body,
+    sans-serif;
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #fff;
+  background: var(--accent);
+  border: 0;
+}

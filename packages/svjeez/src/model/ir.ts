@@ -156,6 +156,8 @@ export interface Layer {
   readonly offset: Animated<Vec>;
   readonly rotate: Animated<number>;
   readonly scale: Animated<Vec>;
+  /** Degrees of shear along x in the layer's own frame, applied before scale and rotate. */
+  readonly skew: Animated<number>;
   readonly opacity: Animated<number>;
 }
 
@@ -227,6 +229,8 @@ export interface TextRun {
   readonly text: string;
   readonly at: Vec;
   readonly advances: readonly number[];
+  /** Extra space after every glyph, already part of `advances`. */
+  readonly letterSpacing?: number;
   readonly face: Face;
   readonly fill: Animated<Paint>;
   readonly opacity?: Animated<number>;

@@ -13,6 +13,7 @@
     "packages/svjeez/tests/types.check.tsx",
     "**/dist/**",
     "**/package-dist/**",
-    "tools/oxlint/anti-slop/**"
+    "tools/oxlint/anti-slop/**",
+    "examples/*/states.json"
   ]
 }

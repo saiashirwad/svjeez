@@ -10,7 +10,10 @@ import type { Connect } from "./settle";
 import type { Anim } from "./track";
 import { lookOf, paintedBoxOf } from "../model/painted";
 
-export interface ArrowProps extends Omit<Common, "at" | "anchor" | "origin" | "rotate" | "scale"> {
+export interface ArrowProps extends Omit<
+  Common,
+  "at" | "anchor" | "origin" | "rotate" | "scale" | "skew"
+> {
   readonly from: Vec | Anchor;
   readonly to: Vec | Anchor;
   readonly stroke: StrokeProps;
@@ -205,7 +208,7 @@ const steadyWhileHidden = (
 const layer = (rotate: Animated<number>, opacity: Animated<number>): Layer[] =>
   !isLane(rotate) && !isLane(opacity) && rotate === 0 && opacity === 1
     ? []
-    : [{ offset: [0, 0], rotate, scale: [1, 1], opacity }];
+    : [{ offset: [0, 0], rotate, scale: [1, 1], skew: 0, opacity }];
 
 const NEAR = 0.05;
 
@@ -356,6 +359,7 @@ const connect =
         ([value]) => value!,
       ),
       scale: [1, 1],
+      skew: 0,
       opacity: 1,
     };
 
@@ -365,7 +369,7 @@ const connect =
         head,
         headOf(size, [0, 0], 0),
         at,
-        [{ offset: [0, 0], rotate: angle, scale: [1, 1], opacity: shown }, ride],
+        [{ offset: [0, 0], rotate: angle, scale: [1, 1], skew: 0, opacity: shown }, ride],
         undefined,
       ),
     ];

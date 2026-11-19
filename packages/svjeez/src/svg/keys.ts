@@ -13,7 +13,7 @@ export interface Key {
 const same = (a: ChannelValues, b: ChannelValues): boolean =>
   (Object.keys(a) as Channel[]).every((target) => valueOf(a, target) === valueOf(b, target));
 
-const FOLD_LANES = new Set(["translate", "rotate", "width", "height"]);
+const FOLD_LANES = new Set(["translate", "rotate", "skew", "width", "height"]);
 const FOLD_TOLERANCE = 0.1;
 
 export const foldKeys = (lane: string, keys: readonly Key[]): readonly Key[] => {

@@ -270,6 +270,7 @@ type Slot =
   | "translate"
   | "rotate"
   | "scale"
+  | "skew"
   | "opacity"
   | "draw"
   | "fill"
@@ -362,14 +363,15 @@ interface Shell {
   origin?: Vec;
 }
 
-const RANK: Partial<Record<Slot, number>> = { translate: 0, rotate: 1, scale: 2 };
+// CSS applies translate, rotate and scale in that order, then transform: so skew, the innermost step, is the last rank.
+const RANK: Partial<Record<Slot, number>> = { translate: 0, rotate: 1, scale: 2, skew: 3 };
 
 const shell = (): Shell => ({
   lanes: [],
   style: [],
   taken: new Set(),
   attrs: {},
-  rank: 3,
+  rank: 4,
   pivots: false,
 });
 
@@ -380,6 +382,8 @@ const open = (shells: Shell[], slot: Slot): Shell => {
   if (
     current.origin !== undefined ||
     current.taken.has(slot) ||
+    // The CSS `transform` that skews would replace the `transform` attribute a drawn element may carry, so a skew gets a wrapper of its own.
+    (slot === "skew" && shells.length === 1) ||
     (rank !== undefined && rank >= current.rank) ||
     ((slot === "rotate" || slot === "scale") && current.taken.has("offset-distance"))
   ) {
@@ -391,7 +395,7 @@ const open = (shells: Shell[], slot: Slot): Shell => {
 
   if (rank !== undefined) current.rank = rank;
 
-  if (slot === "rotate" || slot === "scale") current.pivots = true;
+  if (slot === "rotate" || slot === "scale" || slot === "skew") current.pivots = true;
 
   return current;
 };
@@ -399,7 +403,11 @@ const open = (shells: Shell[], slot: Slot): Shell => {
 const isUniform = ([x, y]: Vec): boolean => Math.abs(x - y) < 1e-9;
 
 const place = (ctx: Ctx, shells: Shell[], layer: Layer, cuts: boolean): void => {
-  const { scale, rotate, offset, opacity } = layer;
+  const { scale, rotate, skew, offset, opacity } = layer;
+
+  if (isLane(skew))
+    open(shells, "skew").lanes.push(cssLane(ctx, "skew", skew, (value) => ({ skew: value })));
+  else if (skew !== 0) open(shells, "skew").style.push(`transform:skewX(${num(skew)}deg)`);
 
   if (isLane(scale)) {
     const even = scale.keys.every((key) => isUniform(key.value));
@@ -466,7 +474,7 @@ const along = (ctx: Ctx, shells: Shell[], lane: Lane<Vec>): void => {
   }));
 
   const inner = shells.at(-1)!;
-  const transforms: readonly Slot[] = ["translate", "rotate", "scale"];
+  const transforms: readonly Slot[] = ["translate", "rotate", "scale", "skew"];
   const bare = transforms.every((slot) => !inner.taken.has(slot));
 
   const holder = bare && !inner.pivots && inner.origin === undefined ? inner : shell();
@@ -767,7 +775,8 @@ interface DrawnText {
   readonly children: SvgNode[];
 }
 
-const lookOf = (run: TextRun): string => JSON.stringify([run.face, run.fill, run.opacity ?? 1]);
+const lookOf = (run: TextRun): string =>
+  JSON.stringify([run.face, run.fill, run.opacity ?? 1, run.letterSpacing ?? 0]);
 
 const commonest = (runs: readonly TextRun[]): TextRun | undefined => {
   const counts = new Map<string, { run: TextRun; count: number }>();
@@ -866,6 +875,7 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
       ...(single && !along && where(start, start[0] + at[0] !== 0, start[1] + at[1] !== 0)),
       ...(base && facing(base.face, ctx.around)),
       "font-size": num(node.size),
+      ...(base?.letterSpacing && { "letter-spacing": num(base.letterSpacing) }),
       ...(along &&
         along.align !== "start" && { "text-anchor": along.align === "center" ? "middle" : "end" }),
       ...(node.lines.some((each) =>
@@ -927,6 +937,9 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
         painted(ctx, "fill", run.fill, tspan.attrs, own, at, node.key);
 
       if (!same(run.opacity ?? 1, base!.opacity ?? 1)) opacity(run, tspan.attrs, own);
+
+      if ((run.letterSpacing ?? 0) !== (base!.letterSpacing ?? 0))
+        tspan.attrs["letter-spacing"] = num(run.letterSpacing ?? 0);
 
       return {
         ...element("tspan", tspan.attrs, [{ kind: "text", value: run.text }]),

@@ -1,5 +1,6 @@
 import { mkdir } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
+import { runFilm } from "@svjeez/dom/vite";
 import { validateSvg } from "svjeez/frames";
 import { isScene, svg as backend, type Scene } from "svjeez/tools";
 
@@ -13,7 +14,7 @@ const flat = (dir: string) =>
 
 const examples = [...new Bun.Glob("*/index.tsx").scanSync(ROOT)]
   .map((entry) => basename(dirname(entry)))
-  .concat(flat("readme"))
+  .concat(flat("readme"), flat("dom-component"), flat("dom-svelte"))
   .sort();
 
 const wanted = process.argv.slice(2);
@@ -45,9 +46,12 @@ const lint = (svg: string): string | undefined => {
 
 const build = async (name: string): Promise<boolean> => {
   try {
-    const { default: exported }: { default: Made | (() => Made) } = await import(
-      join(ROOT, name.includes("/") ? `${name}.tsx` : join(name, "index.tsx"))
-    );
+    const file = join(ROOT, name.includes("/") ? `${name}.tsx` : join(name, "index.tsx"));
+
+    // `*.vite.tsx` films a component through Vite, which has to load the film file itself.
+    const exported: Made | (() => Made) = file.endsWith(".vite.tsx")
+      ? await runFilm(file)
+      : (await import(file)).default;
 
     const svg = svgOf(exported);
     const { warnings } = validateSvg(svg);
@@ -73,7 +77,9 @@ const build = async (name: string): Promise<boolean> => {
 
 await mkdir(join(OUT, "readme"), { recursive: true });
 
-const results = await Promise.all((wanted.length > 0 ? wanted : examples).map(build));
+const names = wanted.length > 0 ? wanted : examples;
+
+const results = await Promise.all(names.map(build));
 
 if (!xmllint) console.warn("xmllint not installed, skipped");
 

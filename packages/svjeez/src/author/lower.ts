@@ -211,13 +211,14 @@ const layerOf = (layer: Written, timing: Timing, where: string): Layer => {
     offset: animated<Vec, Vec>(layer.offset ?? [0, 0], keep, timing, mixVec, at("offset")),
     rotate: animated(layer.rotate ?? 0, keep, timing, mixNumber, at("rotate")),
     scale: animated<number | Vec, Vec>(layer.scale ?? 1, pair, timing, mixVec, at("scale")),
+    skew: animated(layer.skew ?? 0, keep, timing, mixNumber, at("skew")),
     opacity: animated(layer.opacity ?? 1, keep, timing, mixNumber, at("opacity")),
   };
 };
 
 const NOWHERE: Vec = [0, 0];
 
-const IDLE: Layer = { offset: [0, 0], rotate: 0, scale: [1, 1], opacity: 1 };
+const IDLE: Layer = { offset: [0, 0], rotate: 0, scale: [1, 1], skew: 0, opacity: 1 };
 
 const base = (
   ctx: Ctx,
@@ -233,6 +234,7 @@ const base = (
     offset: [0, 0],
     rotate: animated(props.rotate ?? 0, keep, timing, mixNumber, `rotate on ${where}`),
     scale: animated<number | Vec, Vec>(props.scale ?? 1, pair, timing, mixVec, `scale on ${where}`),
+    skew: animated(props.skew ?? 0, keep, timing, mixNumber, `skew on ${where}`),
     opacity: animated(props.opacity ?? 1, keep, timing, mixNumber, `opacity on ${where}`),
   };
 
@@ -390,6 +392,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     fill: props.fill,
     ...(props.weight !== undefined && { weight: props.weight }),
     ...(props.italic !== undefined && { italic: props.italic }),
+    ...(props.letterSpacing !== undefined && { letterSpacing: props.letterSpacing }),
   };
 
   const styles = new Map<Asked, RunLook | undefined>();
@@ -534,12 +537,23 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     return styleOf({ ...wanted, fill: "#00000000" })!;
   };
 
-  const pieces = asked.map(({ text: words }, i) => {
+  const pieces = asked.map(({ text: words, asked: wanted, advances }, i) => {
     const look = found[i] ?? borrowed(i);
+    const spacing = wanted.letterSpacing;
 
-    unseen(look, words);
+    if (spacing !== undefined && !Number.isFinite(spacing))
+      throw new SceneError(`${where} needs a finite letterSpacing, got ${spacing}.`);
 
-    return { text: words, face: look.font, style: look };
+    // Supplied advances mean the browser already laid the run out, fallback fonts included.
+    if (!advances) unseen(look, words);
+
+    return {
+      text: words,
+      face: look.font,
+      style: look,
+      ...(spacing && { spacing }),
+      ...(advances && { advances }),
+    };
   });
 
   const outline = props.along === undefined ? undefined : outlineOf(props.along);
@@ -610,10 +624,11 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     ...(stroke && { stroke }),
     lines: lines.map((line): TextLine => ({
       at: line.at,
-      runs: line.runs.map(({ text: words, at, advances, outline, style }): TextRun => ({
+      runs: line.runs.map(({ text: words, at, advances, outline, style, spacing }): TextRun => ({
         text: words,
         at,
         advances,
+        ...(spacing && { letterSpacing: spacing }),
         face: style.face,
         fill: fillOf(style),
         ...(style.opacity !== undefined && { opacity: style.opacity }),
@@ -1139,7 +1154,7 @@ const alike = (a: MorphElement, b: MorphElement): boolean =>
     a.spans.map(({ start, over }) => [start, over]),
     b.spans.map(({ start, over }) => [start, over]),
   ) &&
-  a.options.curve === b.options.curve &&
+  same(a.options.curve ?? null, b.options.curve ?? null) &&
   a.options.stagger === b.options.stagger &&
   same(a.options.enter ?? null, b.options.enter ?? null) &&
   same(a.options.exit ?? null, b.options.exit ?? null);

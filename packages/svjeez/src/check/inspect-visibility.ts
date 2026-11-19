@@ -233,6 +233,7 @@ const isPlain = (node: SceneNode): boolean =>
       !isLane(layer.offset) &&
       !isLane(layer.rotate) &&
       !isLane(layer.scale) &&
+      layer.skew === 0 &&
       layer.opacity === 1 &&
       layer.scale[0] !== 0 &&
       layer.scale[1] !== 0,

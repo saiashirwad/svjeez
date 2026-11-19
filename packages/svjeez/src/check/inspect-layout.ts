@@ -63,7 +63,10 @@ const travelling = (entry: Entry, t: Seconds): boolean =>
       movingAt(node.at, t) ||
       node.layers.some(
         (layer) =>
-          movingAt(layer.offset, t) || movingAt(layer.rotate, t) || movingAt(layer.scale, t),
+          movingAt(layer.offset, t) ||
+          movingAt(layer.rotate, t) ||
+          movingAt(layer.scale, t) ||
+          movingAt(layer.skew, t),
       ),
   );
 

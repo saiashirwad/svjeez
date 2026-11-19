@@ -62,7 +62,17 @@ const layerMatrix = (layer: Layer, origin: Vec, t: Seconds): Matrix => {
   const angle = (number(layer.rotate, t) * Math.PI) / 180;
   const [sx, sy] = vec(layer.scale, t);
   const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
-  const turn: Matrix = [cos * sx, sin * sx, -sin * sy, cos * sy, 0, 0];
+  const lean = Math.tan((number(layer.skew, t) * Math.PI) / 180);
+
+  const turn: Matrix = [
+    cos * sx,
+    sin * sx,
+    cos * sx * lean - sin * sy,
+    sin * sx * lean + cos * sy,
+    0,
+    0,
+  ];
+
   const [ox, oy] = origin;
 
   return [moveBy(vec(layer.offset, t)), moveBy(origin), turn, moveBy([-ox, -oy])].reduce(times);

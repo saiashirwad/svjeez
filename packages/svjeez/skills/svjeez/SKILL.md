@@ -61,7 +61,7 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 ## The model in eight rules
 
 1. **Every node has a box**: what it paints, its stroke included, measured when the scene compiles. Text too.
-2. **`at` places the node's `anchor`**, the box's top-left unless `anchor` names another point (`"center"`, `"bottom-right"`, `[0.5, 1]`, and for text `"baseline"`). A node with no `at` stays where its coordinates put it; `anchor` without `at` is an error. A `<Group>` used as a frame takes `offset` (where its children's `[0, 0]` goes) instead of `at`. `rotate` and `scale` turn around `origin`: `"center"` of the box by default, or `"at"`, a place, or a point.
+2. **`at` places the node's `anchor`**, the box's top-left unless `anchor` names another point (`"center"`, `"bottom-right"`, `[0.5, 1]`, and for text `"baseline"`). A node with no `at` stays where its coordinates put it; `anchor` without `at` is an error. A `<Group>` used as a frame takes `offset` (where its children's `[0, 0]` goes) instead of `at`. `rotate`, `scale` and `skew` (degrees of shear along x, before scale and rotate) turn around `origin`: `"center"` of the box by default, or `"at"`, a place, or a point.
 3. **Nothing is inherited.** A shape with no fill has none; every `<Text>` needs its own `font`, `size` and `fill`. There is no default font. Share styles with components or spread objects.
 4. **A prop takes a value or a track**, and tracks are immutable values: `opacity={track(0).to(1, span(0.5, 0.3))}`. Name the spans first, build each track, then write the JSX. `to`, `set`, `loop`, `repeat` and `rewind` return a new track.
 5. **Time is spans on clocks.** `span(start, over)` is when; build each beat from the one before (`a.next(0.4)`, `a.chain(…)`, `a.cascade(3, 0.1)`, `a.shift(dt)`). A plain number is only ever a length. `<Sequence when={span(…)}>` starts a clock of its own.
@@ -81,7 +81,7 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 | `<Sequence when={span}>` | a local clock: tracks inside count from the span's start |
 | `<Arrow from to stroke bend inset head draw>` | between points or anchors; follows them as they move |
 
-Every node also takes `key ref at anchor origin rotate scale opacity motion clip mask effects blend`.
+Every node also takes `key ref at anchor origin rotate scale skew opacity motion clip mask effects blend`.
 
 | Geometry (a track of them morphs) | |
 | --- | --- |
@@ -101,7 +101,7 @@ Every node also takes `key ref at anchor origin rotate scale opacity motion clip
 | `span(start, over)`, `span(start)` | `.end .next(over, gap) .shift(dt) .chain(...overs) .cascade(n, step)` |
 | `track(v).to(v2, span, curve?).set(v3, when).loop(p).repeat(n).rewind(over)` | also `.span` (of the last step), `.map(fn)`, `.with(other)` |
 | `through(value, fn)`, `within(draw, from, to)` | map a number or track; a part's own 0-to-1 share of a whole's progress |
-| `motion={[{ opacity: track… }, enter(span, { from }), exit(span, { to }), wiggle(amp, { seed })]}` | layers: plain objects of `offset rotate scale opacity`; first outermost, the node's own props innermost |
+| `motion={[{ opacity: track… }, enter(span, { from }), exit(span, { to }), wiggle(amp, { seed })]}` | layers: plain objects of `offset rotate scale skew opacity`; first outermost, the node's own props innermost |
 | `sampled(fn, span, { tolerance })` | any function of time (`t` from 0) fitted to few keys |
 | `ease.out`, `ease.in`, `ease.inOut`, `ease.pop`, `ease.linear`, `ease.spring()` | curves (default `ease.out`); a spring's `.settle` is the span it needs |
 | `morph(a, b, span)`, `morph.between(states, spans, { stagger, enter, exit, curve })` | state to state by key |
@@ -209,8 +209,8 @@ Runtime errors. `…` stands for a value the message fills in.
 | `… runs until …s…, past the …s scene. End it by then, or give scene() a longer duration.` | end it sooner, or a longer `duration` |
 | `rewind(…) on … needs the last …s of its …s clock, but the motion runs until …s.` | a shorter rewind, or end the motion earlier |
 | `loop(…) is shorter than the motion, which runs until …s.` | a longer period |
-| `motion on … takes layers: plain objects of offset, rotate, scale and opacity, each a value or a track.` | `motion={{ opacity: track(0).to(1, span(1, 0.3)) }}`, or `enter()`, `exit()`, `wiggle()` |
-| `A motion layer holds offset, rotate, scale and opacity, and … gives it "…".` | keep those four keys; put the rest on the node |
+| `motion on … takes layers: plain objects of offset, rotate, scale, skew and opacity, each a value or a track.` | `motion={{ opacity: track(0).to(1, span(1, 0.3)) }}`, or `enter()`, `exit()`, `wiggle()` |
+| `A motion layer holds offset, rotate, scale, skew and opacity, and … gives it "…".` | keep those five keys; put the rest on the node |
 | `… has both draw and trim, but draw is trim [0, draw].` | give `draw` or `trim`, not both |
 | `morph() matches nodes by key, and … the states have … nodes with no key, so they would pair up by their place.` | `key` every node that comes, goes or changes |
 | `morph() can't turn the node keyed "…" from a … into a …: a node keeps its kind across states.…` | another key for the other kind |

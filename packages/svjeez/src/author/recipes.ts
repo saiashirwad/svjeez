@@ -9,7 +9,7 @@ import type { Curve } from "./spring";
 import { track, type Goal, type Layer, type LayerValues, type Track } from "./track";
 import { outlineOf, type Geometry } from "./values";
 
-const REST = { offset: [0, 0], rotate: 0, scale: 1, opacity: 1 } as const;
+const REST = { offset: [0, 0], rotate: 0, scale: 1, skew: 0, opacity: 1 } as const;
 
 const closed = ({ start, over }: Interval, what: string): Interval => {
   checkWindow(start, over, what);
@@ -33,6 +33,8 @@ const between = (from: LayerValues, to: LayerValues, when: Interval, curve: Curv
     to.scale !== undefined && {
       scale: track<Vec>(pair(from.scale)).to(pair(to.scale), when, curve),
     }),
+  ...(from.skew !== undefined &&
+    to.skew !== undefined && { skew: track(from.skew).to(to.skew, when, curve) }),
   ...(from.opacity !== undefined &&
     to.opacity !== undefined && { opacity: track(from.opacity).to(to.opacity, when, curve) }),
 });

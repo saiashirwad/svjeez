@@ -116,9 +116,17 @@ const throughLayer = (box: Box, layer: Layer, origin: Vec): Box => {
   const [sx0, sx1] = range(scales.map(([x]) => x));
   const [sy0, sy1] = range(scales.map(([, y]) => y));
 
+  const [k0, k1] = range(numbers(layer.skew).map((angle) => Math.tan((angle * Math.PI) / 180)));
+
   const scaled = boxCorners(box).flatMap(([x, y]): Vec[] =>
-    [sx0, sx1].flatMap((sx) =>
-      [sy0, sy1].map((sy): Vec => [(x - origin[0]) * sx, (y - origin[1]) * sy]),
+    [k0, k1].flatMap((k) =>
+      [sx0, sx1].flatMap((sx) =>
+        [sy0, sy1].map((sy): Vec => {
+          const [dx, dy] = [x - origin[0], y - origin[1]];
+
+          return [(dx + k * dy) * sx, dy * sy];
+        }),
+      ),
     ),
   );
 

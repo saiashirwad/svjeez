@@ -222,6 +222,8 @@ export const cssDeclarations = (lane: string, emit: Emit, values: ChannelValues)
       return `translate:${length(values.x ?? 0)} ${length(values.y ?? 0)}`;
     case "rotate":
       return `rotate:${formatValue(values.rotate)}deg`;
+    case "skew":
+      return `transform:skewX(${formatValue(values.skew)}deg)`;
     case "offset-distance":
       return `offset-distance:${formatValue(values.offsetDistance)}%`;
     case "scale":

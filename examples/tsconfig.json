@@ -22,5 +22,5 @@
     }
   },
   "include": [".", "../packages/*/src"],
-  "exclude": ["dist", "node_modules"]
+  "exclude": ["dist", "node_modules", "dom-react", "dom-react-vite", "dom-component", "dom-svelte"]
 }

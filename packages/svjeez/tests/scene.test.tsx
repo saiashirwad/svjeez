@@ -438,7 +438,7 @@ describe("motion layers", () => {
 
   test("a track, or a key a layer does not hold, throws with a fix", () => {
     expect(() => refused(track(0).to(1, span(0, 1)))).toThrow(
-      /motion on .* takes layers: plain objects of offset, rotate, scale and opacity/,
+      /motion on .* takes layers: plain objects of offset, rotate, scale, skew and opacity/,
     );
     expect(() => refused({ opacity: 1, glow: 3 })).toThrow(/gives it "glow"/);
 
