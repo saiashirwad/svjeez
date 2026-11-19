@@ -142,6 +142,9 @@ describe("requirementDiagram", () => {
 
     expect(bad([{ from: "a", to: "z", type: "traces" }]).problem).toContain('relation 1 names "z"');
     expect(bad([{ from: "a", to: "b", type: "likes" }]).problem).toContain('"likes"');
-    expect(bad([], { direction: "RL" }).problem).toContain('direction "TB" or "LR"');
+    // SAFETY: the test passes a direction the types would reject.
+    expect(bad([], { direction: "UP" as "TB" }).problem).toContain(
+      'direction "TB", "LR", "BT" or "RL"',
+    );
   });
 });

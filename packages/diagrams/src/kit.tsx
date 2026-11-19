@@ -451,10 +451,9 @@ export const outline = (role: Form, w: number, h: number): Geometry => {
   }
 };
 
-const detailOf = (role: Form, w: number, h: number): Geometry | undefined => {
+export const detailOf = (role: Form, w: number, h: number): Geometry | undefined => {
   if (role === "double") return rect(w - 2 * RING, h - 2 * RING, { radius: (h - 2 * RING) / 2 });
 
-export const detailOf = (role: NodeRole, w: number, h: number): Geometry | undefined => {
   if (role === "tool")
     return path()
       .moveTo([8, 0])

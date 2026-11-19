@@ -13,7 +13,7 @@ import {
 } from "svjeez";
 import { SceneError, type Child, type Color } from "svjeez/tools";
 import { layered } from "./layout/layered.ts";
-import { union, type Box, type Point } from "./layout/box.ts";
+import { DIRECTIONS, isVertical, union, type Box, type Point } from "./layout/box.ts";
 import {
   Edge,
   Route,
@@ -208,8 +208,10 @@ export function c4<
   const l = look(options, WHAT);
   const { direction = "TB" } = options;
 
-  if (direction !== "TB" && direction !== "LR")
-    throw new SceneError(`${WHAT} takes direction "TB" or "LR", got "${String(direction)}".`);
+  if (!DIRECTIONS.includes(direction))
+    throw new SceneError(
+      `${WHAT} takes direction "TB", "LR", "BT" or "RL", got "${String(direction)}".`,
+    );
 
   const built = Object.entries<C4Element>(spec.elements).map(([id, e]) => {
     if (!KINDS.includes(e.kind ?? "system"))
@@ -365,7 +367,7 @@ export function c4<
 
   const width = Math.ceil(all.w);
   const height = Math.ceil(all.h + title);
-  const cross = (b: Box) => (direction === "TB" ? b.x : b.y);
+  const cross = (b: Box) => (isVertical(direction) ? b.x : b.y);
 
   const order = [...ids].sort(
     (a, b) => out.rank.get(a)! - out.rank.get(b)! || cross(boxes.get(a)!) - cross(boxes.get(b)!),

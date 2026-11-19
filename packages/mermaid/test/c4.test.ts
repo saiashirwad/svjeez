@@ -136,7 +136,7 @@ describe("parse c4 errors", () => {
     expect(message("accTitle: x")).toContain("accessibility text");
     expect(message('System(a, "A") {\n}')).toContain("holds nothing");
     expect(message('Frobnicate(a, "A")')).toContain("is not a C4 statement");
-    expect(message("direction RL")).toContain("top to bottom or left to right");
+    expect(message("direction UP")).toContain("not one of TB, LR, BT or RL");
   });
 
   test("rejects bad arguments with a fix", () => {

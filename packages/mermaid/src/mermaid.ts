@@ -100,7 +100,6 @@ export type MermaidDiagram =
   | (BlockDiagram & { readonly kind: "block"; readonly doc: BlockDoc })
   | (Architecture & { readonly kind: "architecture"; readonly doc: ArchitectureDoc })
   | (RequirementDiagram<string> & { readonly kind: "requirement"; readonly doc: RequirementDoc })
-  | (RequirementDiagram<string> & { readonly kind: "requirement"; readonly doc: RequirementDoc })
   | (C4<string> & { readonly kind: "c4"; readonly doc: C4Doc })
   | (Kanban<string> & { readonly kind: "kanban"; readonly doc: KanbanDoc });
 

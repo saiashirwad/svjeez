@@ -220,7 +220,6 @@ export type MermaidDoc =
   | BlockDoc
   | ArchitectureDoc
   | RequirementDoc
-  | RequirementDoc
   | C4Doc
   | KanbanDoc;
 
@@ -246,5 +245,4 @@ export type {
   SankeyDoc,
   TimelineDoc,
   XyChartDoc,
-  RequirementDoc,
 };

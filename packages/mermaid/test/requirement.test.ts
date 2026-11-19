@@ -120,7 +120,7 @@ describe("parse requirement errors", () => {
     expect(message("style a fill:#f9f")).toContain("style is not supported");
     expect(message("classDef x fill:#f00")).toContain("classDef is not supported");
     expect(message("element a:::x {\n}")).toContain("`:::`");
-    expect(message("direction RL")).toContain("top to bottom or left to right");
+    expect(message("direction UP")).toContain("not one of TB, LR, BT or RL");
   });
 
   test("rejects bad fields, names and relationships with a fix", () => {

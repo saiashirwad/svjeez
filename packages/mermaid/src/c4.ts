@@ -7,8 +7,8 @@ import {
   type DiagramOptions,
 } from "@svjeez/diagrams";
 import type { Span } from "svjeez";
-import { clean, fail, sourceOf, unquote, type Line } from "./errors.ts";
-import type { Place } from "./types.ts";
+import { clean, fail, isDirection, sourceOf, unquote, type Line } from "./errors.ts";
+import type { MermaidDirection, Place } from "./types.ts";
 
 export type C4Header = "C4Context" | "C4Container" | "C4Component" | "C4Dynamic" | "C4Deployment";
 
@@ -49,14 +49,14 @@ export interface C4Doc {
   readonly source: Place;
   readonly header: C4Header;
   readonly title?: string;
-  readonly direction: "TB" | "LR";
+  readonly direction: MermaidDirection;
   readonly shapes: readonly MermaidC4Shape[];
   readonly boundaries: readonly MermaidC4Boundary[];
   readonly relations: readonly MermaidC4Relation[];
 }
 
 const SUPPORTED =
-  'Supported: a header (C4Context, C4Container, C4Component, C4Dynamic or C4Deployment), `title Text`, Person, Person_Ext, System, Container and Component (each also with Db, Queue and _Ext variants), boundaries `Boundary`, `Enterprise_Boundary`, `System_Boundary`, `Container_Boundary`, `Node`, `Node_L`, `Node_R` and `Deployment_Node` opened with `{` and closed with `}`, relationships `Rel`, `BiRel`, `Rel_U`, `Rel_D`, `Rel_L`, `Rel_R`, `Rel_Back` and `RelIndex`, and `direction TB` or `LR`. Arguments are positional or `$name="value"`. `UpdateElementStyle`, `UpdateRelStyle` and `UpdateLayoutConfig` are read and ignored: svjeez themes and lays out diagrams itself.';
+  'Supported: a header (C4Context, C4Container, C4Component, C4Dynamic or C4Deployment), `title Text`, Person, Person_Ext, System, Container and Component (each also with Db, Queue and _Ext variants), boundaries `Boundary`, `Enterprise_Boundary`, `System_Boundary`, `Container_Boundary`, `Node`, `Node_L`, `Node_R` and `Deployment_Node` opened with `{` and closed with `}`, relationships `Rel`, `BiRel`, `Rel_U`, `Rel_D`, `Rel_L`, `Rel_R`, `Rel_Back` and `RelIndex`, and `direction TB`, `LR`, `BT` or `RL`. Arguments are positional or `$name="value"`. `UpdateElementStyle`, `UpdateRelStyle` and `UpdateLayoutConfig` are read and ignored: svjeez themes and lays out diagrams itself.';
 
 const HEADERS: readonly C4Header[] = [
   "C4Context",
@@ -211,11 +211,7 @@ export const parseC4 = (header: Line, body: readonly Line[]): C4Doc => {
     const dir = /^direction\s+(\w+)$/.exec(l.text)?.[1];
 
     if (dir) {
-      if (dir !== "TB" && dir !== "LR")
-        fail(
-          l,
-          "svjeez lays C4 diagrams out top to bottom or left to right. Write `direction TB` or `direction LR`.",
-        );
+      if (!isDirection(dir)) fail(l, `direction ${dir} is not one of TB, LR, BT or RL.`);
       direction = dir;
       continue;
     }
@@ -347,7 +343,7 @@ export const parseC4 = (header: Line, body: readonly Line[]): C4Doc => {
 };
 
 export interface C4DrawOptions extends DiagramOptions {
-  readonly direction?: "TB" | "LR";
+  readonly direction?: MermaidDirection;
   readonly reveal?: Span;
 }
 

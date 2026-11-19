@@ -6,8 +6,8 @@ import {
   type RequirementNode,
 } from "@svjeez/diagrams";
 import type { Span } from "svjeez";
-import { clean, fail, sourceOf, unquote, type Line } from "./errors.ts";
-import type { Place } from "./types.ts";
+import { clean, fail, isDirection, sourceOf, unquote, type Line } from "./errors.ts";
+import type { MermaidDirection, Place } from "./types.ts";
 
 export type RequirementKind =
   | "requirement"
@@ -44,14 +44,14 @@ export interface MermaidRequirementRelation {
 export interface RequirementDoc {
   readonly kind: "requirement";
   readonly source: Place;
-  readonly direction: "TB" | "LR";
+  readonly direction: MermaidDirection;
   readonly requirements: readonly MermaidRequirement[];
   readonly elements: readonly MermaidRequirementElement[];
   readonly relations: readonly MermaidRequirementRelation[];
 }
 
 const SUPPORTED =
-  "Supported: `requirement name { id: 1 text: ... risk: high verifymethod: test }` (also functionalRequirement, interfaceRequirement, performanceRequirement, physicalRequirement, designConstraint), `element name { type: x docref: y }`, relationships `a - satisfies -> b` or `b <- satisfies - a` (contains, copies, derives, satisfies, verifies, refines, traces), and `direction TB` or `LR`.";
+  "Supported: `requirement name { id: 1 text: ... risk: high verifymethod: test }` (also functionalRequirement, interfaceRequirement, performanceRequirement, physicalRequirement, designConstraint), `element name { type: x docref: y }`, relationships `a - satisfies -> b` or `b <- satisfies - a` (contains, copies, derives, satisfies, verifies, refines, traces), and `direction TB`, `LR`, `BT` or `RL`.";
 
 const TITLES: Readonly<Record<RequirementKind, string>> = {
   requirement: "Requirement",
@@ -208,11 +208,7 @@ export const parseRequirement = (header: Line, body: readonly Line[]): Requireme
     const dir = /^direction\s+(\w+)$/.exec(l.text)?.[1];
 
     if (dir) {
-      if (dir !== "TB" && dir !== "LR")
-        fail(
-          l,
-          "svjeez lays requirement diagrams out top to bottom or left to right. Write `direction TB` or `direction LR`.",
-        );
+      if (!isDirection(dir)) fail(l, `direction ${dir} is not one of TB, LR, BT or RL.`);
       direction = dir;
       continue;
     }
@@ -278,7 +274,7 @@ export const parseRequirement = (header: Line, body: readonly Line[]): Requireme
 };
 
 export interface RequirementDrawOptions extends DiagramOptions {
-  readonly direction?: "TB" | "LR";
+  readonly direction?: MermaidDirection;
   readonly reveal?: Span;
 }
 
