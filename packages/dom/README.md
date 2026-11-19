@@ -1,6 +1,8 @@
 # @svjeez/dom
 
-Turn a web app into an animated SVG. Write your app and an interaction script; `film` does the rest.
+Turn a web app, or one component, into an animated SVG. Write your app and an interaction script; `film` does the rest.
+
+`film(target, script, options)` takes a **target**: an app served at a URL with a root selector, or one component mounted alone.
 
 ```tsx
 import { film } from "@svjeez/dom";
@@ -8,8 +10,7 @@ import { serve } from "@svjeez/dom/bun";
 import index from "./index.html";
 
 export default await film(
-  serve(index),
-  "#app",
+  serve(index, { selector: "#app" }),
   async ({ page, snap }) => {
     await snap("start");
     await page.locator("button").first().click();
@@ -26,14 +27,66 @@ With Vite (`vite` is an optional peer dependency), `serve` starts a dev server o
 ```ts
 import { serve } from "@svjeez/dom/vite";
 
-film(serve({ root: import.meta.dir }), "#app", run, options);
+film(serve({ root: import.meta.dir, selector: "#app" }), run, options);
 ```
 
-`serve` takes any `DomServer`: `{ url, sources(), close() }`. `sources()` returns a hash of the app's source, which keys the cache. The Bun adapter hashes the bundled page and its assets; the Vite adapter hashes the entry HTML and every project module it imports.
+A target is `{ url, selector, sources(), close() }`. `sources()` returns a hash of the app's source, which keys the cache. The Bun adapter hashes the bundled page and its assets; the Vite adapter hashes the entry HTML and every project module it imports.
 
-Options: `scheme` (`"light" | "dark" | "both"`), `title`, `viewport` (default 1280x720), `cache` (a JSON file; reused while the source and options are unchanged, `SVJEEZ_DOM_REFRESH=1` records again), `onDiagnostics` (default: one `console.warn` listing what is not faithful), `executablePath`.
+Options: `scheme` (`"light" | "dark" | "both"`), `title`, `viewport` (default 1280x720), `cache` (a JSON file; reused while the source and options are unchanged, `SVJEEZ_DOM_REFRESH=1` records again), `settle` (see below), `onDiagnostics` (default: one `console.warn` listing what is not faithful), `executablePath`.
 
-The rest of this page is the lower-level API `film` is built from.
+## One component
+
+Pass the component itself, with typed props. No string paths:
+
+```tsx
+import Card from "./Card.tsx"; // or ./Card.svelte
+import theme from "./theme.css?url"; // Bun: import theme from "./theme.css" with { type: "file" }
+import { film } from "@svjeez/dom";
+import { component } from "@svjeez/dom/vite"; // or @svjeez/dom/bun
+
+export default await film(component(Card, { task }, { css: [theme] }), async ({ snap, update }) => {
+  await snap("todo");
+  await update({ task: { ...task, done: true } }); // typed against Card's props
+  await snap("done", { over: 0.6 });
+});
+```
+
+The component is mounted alone in `#svjeez-root` (the capture selector, unless `selector` is given). `update(props)` merges new props, re-renders and waits for the page to settle.
+
+**Props** are typed from the component (React `(props) => node`, Svelte `Component<Props>`) and cross to the browser as JSON. Data props are required and must be JSON-serializable (a `Date`, `Map` or class instance is a type error, and a runtime error naming the prop). Function props are optional: any function you pass is replaced by a no-op in the browser, so pass one if the component calls it unconditionally. `.svelte` imports are only as typed as your Svelte tooling makes them; plain `tsc` sees them as untyped.
+
+**Finding the module.** The browser has to load the same component, so `component` finds the module whose export `=== Card`:
+
+- **Vite:** run the film file through Vite's SSR loader with `runFilm("./card.film.tsx")` (returns the `Scene`). Vite loads `.svelte` and `.tsx` itself, so the module graph holds every export; the page is a virtual module served by the same dev server (your plugins, CSS modules and `<style>` blocks included). Without `runFilm`, `component` throws and says so. In a repo that links `svjeez` as a workspace package, add `ssr: { external: ["svjeez", "@svjeez/dom"] }` to the Vite config so the film file shares the host's copies.
+- **Bun:** add `preload = ["@svjeez/dom/bun/preload"]` to `bunfig.toml`. The preload records each source module's live exports as it loads, and `component` bundles the page with Bun's HTML bundler. React only: Bun cannot bundle Svelte yet.
+
+A component defined in the film file itself, or one nothing exports, throws an error that says which.
+
+## Adding a framework
+
+A framework is a `Framework` (node side) and a `BrowserAdapter` (browser side). React and Svelte are the built-in ones (`src/frameworks/`); film's core does not know about either.
+
+```ts
+interface Framework {
+  name: string;
+  /** Is `component`, exported from `file`, one of yours? Tried in order. */
+  detect(file: string, component: Prop): boolean;
+  /** Absolute path of a browser module whose default export is a BrowserAdapter. Bundled into the page. */
+  client: string;
+}
+
+interface BrowserAdapter<Component> {
+  mount(component: Component, props: Bag, el: HTMLElement): void | Promise<void>;
+  update(props: Bag): void | Promise<void>; // the full, merged props
+  unmount(): void;
+  /** Optional idle signal: resolves when the framework has nothing pending. */
+  settled?(): Promise<void>;
+}
+```
+
+Pass it as `component(C, props, { framework })`. To type its props, add a branch to `PropsOf` in `src/props.ts`.
+
+Settling prefers the adapter's `settled()` (a framework that knows its pending commands or effects are done can say so), then waits for fonts, transitions and a stable layout. Replace the whole strategy with the `settle: (page, selector) => Promise<void>` option. `film` and its script surface (`page`, `snap`, `update`) are plain Promise-based, so an Effect wrapper can wrap them one for one.
 
 ## Snapshots
 

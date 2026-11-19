@@ -307,6 +307,8 @@ export const component = async <C extends Fn>(
   const origin = await listen(host.server);
   const files = await crawl(host.server, [virtual]);
 
+  await host.server.waitForRequestsIdle();
+
   return {
     url: new URL(`__svjeez-dom/${id}.html`, origin).href,
     selector: options.selector ?? SELECTOR,

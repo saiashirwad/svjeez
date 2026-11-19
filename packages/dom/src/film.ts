@@ -5,7 +5,7 @@ import { inlineAssets } from "./assets.ts";
 import { cached } from "./cache.ts";
 import { compile, type Diagnostic } from "./compile/index.ts";
 import { openPage, record, type OpenPageOptions, type Snap, type State } from "./record.ts";
-import { serializeProps } from "./props.ts";
+import { serializeProps, type Bag } from "./props.ts";
 import type { Target } from "./target.ts";
 
 export interface FilmOptions {
@@ -91,23 +91,35 @@ export const film = async <Props = never>(
   try {
     const errors: string[] = [];
 
+    const report = () =>
+      new Error(`film: the page reported errors:\n${errors.map((e) => `  ${e}`).join("\n")}`);
+
     const check = () => {
-      if (errors.length > 0)
-        throw new Error(
-          `film: the page reported errors:\n${errors.map((e) => `  ${e}`).join("\n")}`,
-        );
+      if (errors.length > 0) throw report();
     };
+
+    // A page that fails while it starts (a component that throws) never gets its selector: stop waiting for it.
+    let fail: (error: Error) => void = () => {};
+
+    const failed = new Promise<never>((_, reject) => {
+      fail = reject;
+    });
+
+    failed.catch(() => {});
 
     const capture = async (): Promise<State[]> => {
       const { page, close } = await openPage({
         url: app.url,
         ...(viewport && { viewport }),
         ...(executablePath && { executablePath }),
-        onError: (message) => errors.push(message),
+        onError: (message) => {
+          errors.push(message);
+          fail(report());
+        },
       });
 
       try {
-        await page.waitForSelector(selector);
+        await Promise.race([page.waitForSelector(selector), failed]);
         await settle(page, selector);
         check();
 
@@ -123,7 +135,8 @@ export const film = async <Props = never>(
                 return snap(name, timing);
               },
               update: async (props) => {
-                const wire = serializeProps(props as object, "update");
+                // SAFETY: `Props` is a plain object type; the runtime check in `serializeProps` is what holds it to JSON.
+                const wire = serializeProps(props as Bag, "update");
 
                 if (!(await page.evaluate("Boolean(window.__svjeez)")))
                   throw new Error(

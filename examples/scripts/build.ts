@@ -77,7 +77,20 @@ const build = async (name: string): Promise<boolean> => {
 
 await mkdir(join(OUT, "readme"), { recursive: true });
 
-const results = await Promise.all((wanted.length > 0 ? wanted : examples).map(build));
+const names = wanted.length > 0 ? wanted : examples;
+
+// The `dom-*` examples start dev servers that share one dependency cache, so they take turns.
+const results = await Promise.all([
+  ...names.filter((name) => !name.startsWith("dom-")).map(build),
+  (async () => {
+    const served: boolean[] = [];
+
+    for (const name of names.filter((name) => name.startsWith("dom-")))
+      served.push(await build(name));
+
+    return served.every(Boolean);
+  })(),
+]);
 
 if (!xmllint) console.warn("xmllint not installed, skipped");
 
