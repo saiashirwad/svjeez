@@ -7,7 +7,7 @@ import {
   circle,
   ease,
   morph,
-  pathData,
+  path,
   rect,
   scene,
   span,
@@ -442,8 +442,8 @@ describe("morph", () => {
 });
 
 describe("different paths", () => {
-  const one = pathData("M0 0 C5 5 10 5 10 0 L10 10 Z");
-  const two = pathData("M0 0 L10 0 L10 10 Z M20 20 L30 20 L30 30 L20 30 Z");
+  const one = path.parse("M0 0 C5 5 10 5 10 0 L10 10 Z");
+  const two = path.parse("M0 0 L10 0 L10 10 Z M20 20 L30 20 L30 30 L20 30 Z");
   const times = [0, 0.5, 1, 1.5, 2, 2.5, 3, 4];
 
   const readers = (model: Model.Scene, key: string) => {

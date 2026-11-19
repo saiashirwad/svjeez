@@ -12,6 +12,8 @@ export type SvgNode =
       readonly children: readonly SvgNode[];
       readonly lanes?: readonly Lane[];
       readonly still?: Readonly<Record<string, AttrValue>>;
+      /** The attributes that draw it. When given, every other one only places it, so a copy can carry those. */
+      readonly drawn?: readonly string[];
     }
   | { readonly kind: "text"; readonly value: string }
   | { readonly kind: "raw"; readonly value: string }
@@ -43,7 +45,8 @@ const serializeAttrs = (attrs: Readonly<Record<string, AttrValue>>): string =>
 
 const cdata = (text: string): string => `<![CDATA[${text.replaceAll("]]>", "]]]]><![CDATA[>")}]]>`;
 
-const inline = (node: SvgNode, rawText = false): string => {
+/** A node as markup on one line, which is also how much it weighs. */
+export const inline = (node: SvgNode, rawText = false): string => {
   switch (node.kind) {
     case "text":
       return rawText ? node.value : escapeText(node.value);

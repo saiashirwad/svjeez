@@ -384,7 +384,7 @@ export const countedNodes = (
   const [across, down] = [size, size / 4];
 
   const clip: Geometry = {
-    kind: "polygon",
+    kind: "points",
     points: [
       [-across, -down],
       [full + across, -down],

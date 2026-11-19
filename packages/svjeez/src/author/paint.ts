@@ -30,18 +30,18 @@ export type Gradient =
       readonly radius: number;
       readonly stops: Stops;
     }
-  | { readonly kind: "radial"; readonly around: Place; readonly stops: Stops };
+  | { readonly kind: "radial"; readonly center: Place; readonly stops: Stops };
 
 export interface Pattern {
   readonly kind: "pattern";
   readonly size: Vec;
-  readonly children: Child;
+  readonly tile: Child;
   readonly offset: Anim<Vec>;
 }
 
 export interface PatternOptions {
   readonly size: Vec;
-  readonly children: Child;
+  readonly tile: Child;
   readonly offset?: Anim<Vec>;
 }
 
@@ -128,19 +128,19 @@ export const radial = Object.assign(
   {
     across: ({ center = "center", stops }: RadialAcrossOptions): Gradient => ({
       kind: "radial",
-      around: center,
+      center,
       stops: checked(stops, "radial.across()"),
     }),
   },
 );
 
-export const pattern = ({ size, children, offset = [0, 0] }: PatternOptions): Pattern => {
+export const pattern = ({ size, tile, offset = [0, 0] }: PatternOptions): Pattern => {
   if (!size.every((side) => side > 0 && Number.isFinite(side)))
     throw new SceneError(
       `pattern() needs a tile size of two positive numbers, got [${size.join(", ")}].`,
     );
 
-  return { kind: "pattern", size, children, offset };
+  return { kind: "pattern", size, tile, offset };
 };
 
 const DEG = Math.PI / 180;
@@ -199,10 +199,10 @@ export const gradientOf = (
     };
   }
 
-  if ("center" in given)
+  if ("radius" in given)
     return { kind: "radial", center: given.center, radius: given.radius, stops: pairs };
   const area = measured("radial.across()");
-  const center = placeIn(area, given.around, [0, 0], "radial.across()");
+  const center = placeIn(area, given.center, [0, 0], "radial.across()");
 
   return {
     kind: "radial",

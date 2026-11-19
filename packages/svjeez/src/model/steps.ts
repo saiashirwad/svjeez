@@ -576,9 +576,16 @@ const reach = (
   }
 };
 
+/** Where a track was first read: tracks are read on one clock per scene, the clock of the node that reads them. */
+export interface Reading {
+  readonly offset: Seconds;
+  readonly where: string;
+}
+
 export interface Timing {
   readonly duration: Seconds;
   readonly clock: Clock;
+  readonly reads: Map<object, Reading>;
 }
 
 const costOf = (value: Animated<unknown>): number =>

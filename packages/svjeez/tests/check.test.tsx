@@ -471,7 +471,7 @@ describe("svjeez check when the scene does not build", () => {
     const out = cli(fixture("overlap"), "--no-browser").stdout.toString();
 
     expect(out).toMatch(
-      /overlap\.tsx:7:\d+ {2}compile-error {2}error: Two steps move this track at once: one from 0s to 1s, and another at 0\.5s/,
+      /overlap\.tsx:4:\d+ {2}compile-error {2}error: Two steps move this track at once: one from 0s to 1s, and another at 0\.5s/,
     );
   });
 

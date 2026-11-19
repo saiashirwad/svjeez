@@ -117,7 +117,7 @@ export function mermaid(text: string, options: MermaidOptions): MermaidDiagram {
           messages: doc.items.map((m) =>
             m.kind === "note"
               ? { note: m.actor, text: m.text }
-              : ([m.from, m.to, m.text, { reply: m.line === "dashed", head: m.head }] as const),
+              : ([m.from, m.to, m.text, { reply: m.reply, head: m.head }] as const),
           ),
         },
         diagramOptions,

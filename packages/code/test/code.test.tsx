@@ -1,5 +1,15 @@
 import { describe, expect, test } from "bun:test";
-import { Group, Shape, canvas, font, morph, ref, scene, span, type SceneElement } from "svjeez";
+import {
+  Group,
+  Shape,
+  font,
+  morph,
+  ref,
+  scene,
+  span,
+  type Bounds,
+  type SceneElement,
+} from "svjeez";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
 import { SceneError, describe as describeScene, inspect, svg } from "svjeez/tools";
 import { Code, type CodeProps } from "../src/index.ts";
@@ -11,7 +21,7 @@ const mono = await font.load(
 
 const SOURCE = "const a = 1;\n\n  return a;";
 
-const made = (build: () => SceneElement, duration = 3, loop = true) =>
+const made = (build: (canvas: Bounds) => SceneElement, duration = 3, loop = true) =>
   scene({ size: [320, 120], duration, title: "Code", loop }, build);
 
 const snippet = (extra: Partial<CodeProps> = {}) =>
@@ -70,7 +80,7 @@ describe("<Code>", () => {
     const code = ref();
 
     const frame = describeScene(
-      made(() => (
+      made((canvas) => (
         <Group>
           {snippet({ key: "code", ref: code, keys: ["head", "gap", "tail"], at: [4, 4] })}
           <Shape

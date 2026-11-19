@@ -68,7 +68,8 @@ export interface LineOptions {
 
 export interface VectorOptions {
   readonly from?: Vec;
-  readonly width?: number;
+  /** The shaft is a filled outline, so only its width can be set. */
+  readonly stroke?: { readonly width?: number };
   readonly head?: number;
 }
 
@@ -313,7 +314,9 @@ const build = (options: PlaneOptions, map: (p: Vec) => Vec, curved: boolean): Pl
 
       return lineThrough([at, f(at)], [h, f(at + h) - f(at)], length);
     },
-    vector: (to, { from = ORIGIN, width = 3, head = width * 3.5 } = {}) => {
+    vector: (to, { from = ORIGIN, stroke, head } = {}) => {
+      const width = stroke?.width ?? 3;
+      const tip = head ?? width * 3.5;
       const a = point(from);
       const b = point(to);
       const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
@@ -324,7 +327,7 @@ const build = (options: PlaneOptions, map: (p: Vec) => Vec, curved: boolean): Pl
         );
       const [ux, uy] = [(b[0] - a[0]) / length, (b[1] - a[1]) / length];
       const [nx, ny] = [-uy, ux];
-      const neck = Math.max(0, length - head);
+      const neck = Math.max(0, length - tip);
 
       const at = (along: number, across: number): Vec => [
         round(a[0] + ux * along + nx * across),
@@ -334,9 +337,9 @@ const build = (options: PlaneOptions, map: (p: Vec) => Vec, curved: boolean): Pl
       return polygon([
         at(0, -width / 2),
         at(neck, -width / 2),
-        at(neck, -head * 0.55),
+        at(neck, -tip * 0.55),
         at(length, 0),
-        at(neck, head * 0.55),
+        at(neck, tip * 0.55),
         at(neck, width / 2),
         at(0, width / 2),
       ]);
@@ -404,7 +407,7 @@ export interface AxesProps extends Omit<Common, "anchor"> {
   readonly plane: Plane;
   readonly stroke: StrokeProps;
   readonly ticks?: number | Vec;
-  readonly grid?: StrokeProps;
+  readonly grid?: StrokeProps | false;
   readonly labels?: AxesLabels;
 }
 

@@ -44,7 +44,7 @@ const textOf = (model: Model.Scene, key = "t"): Model.TextNode => {
 };
 
 const runs = (node: Model.TextNode) =>
-  node.lines.map((line) => line.runs.map((run) => [run.text, run.face.weight, run.face.style]));
+  node.lines.map((line) => line.runs.map((run) => [run.text, run.face.weight, run.face.italic]));
 
 const emit = (model: Model.Scene): string => svg.emit(model).replace(/@font-face\{[^}]*\}/g, "");
 
@@ -73,9 +73,9 @@ describe("faces", () => {
       </Group>
     ));
 
-    expect(runs(textOf(model))).toEqual([[["a", 400, "normal"]]]);
-    expect(runs(textOf(model, "b"))).toEqual([[["b", 700, "normal"]]]);
-    expect(runs(textOf(model, "i"))).toEqual([[["c", 400, "italic"]]]);
+    expect(runs(textOf(model))).toEqual([[["a", 400, false]]]);
+    expect(runs(textOf(model, "b"))).toEqual([[["b", 700, false]]]);
+    expect(runs(textOf(model, "i"))).toEqual([[["c", 400, true]]]);
     expect(Object.keys(model.fonts)).toEqual(["Space Mono", "ABeeZee"]);
     expect(model.fonts["ABeeZee"]!.faces).toEqual([sansItalic]);
   });
@@ -91,7 +91,7 @@ describe("faces", () => {
           )),
         ),
       ),
-    ).toEqual([[["x", 700, "normal"]]]);
+    ).toEqual([[["x", 700, false]]]);
     expect(
       runs(
         textOf(
@@ -102,7 +102,7 @@ describe("faces", () => {
           )),
         ),
       ),
-    ).toEqual([[["x", 700, "normal"]]]);
+    ).toEqual([[["x", 700, false]]]);
   });
 
   test("a face the font doesn't have is an error that says what it has", () => {
@@ -178,9 +178,9 @@ describe("runs", () => {
 
     expect(runs(node)).toEqual([
       [
-        ["Total ", 400, "normal"],
-        ["42", 700, "normal"],
-        [" items", 400, "normal"],
+        ["Total ", 400, false],
+        ["42", 700, false],
+        [" items", 400, false],
       ],
     ]);
     const [a, b, c] = node.lines[0]!.runs;
@@ -261,12 +261,12 @@ describe("runs", () => {
 
     expect(runs(node)).toEqual([
       [
-        ["a ", 400, "normal"],
-        ["b", 700, "normal"],
+        ["a ", 400, false],
+        ["b", 700, false],
       ],
       [
-        ["c", 700, "normal"],
-        [" d", 400, "normal"],
+        ["c", 700, false],
+        [" d", 400, false],
       ],
     ]);
     expect(node.lines[1]!.at[1] - node.lines[0]!.at[1]).toBeCloseTo(20);
@@ -569,7 +569,7 @@ describe("text strokes", () => {
 
     expect(isLane(node.stroke!.color)).toBe(true);
     expect(isLane(node.stroke!.width)).toBe(true);
-    expect(node.stroke).toMatchObject({ join: "miter", under: false });
+    expect(node.stroke).toMatchObject({ join: "sharp", under: false });
 
     const out = emit(model);
 
@@ -591,11 +591,11 @@ describe("text strokes", () => {
   test("under is the same in every state of a morph", () => {
     expect(() =>
       made(() => morph(stroked({ under: true }), stroked({ under: false }), span(1, 1))),
-    ).toThrow("cap, join, dash, nonScaling or under differs");
+    ).toThrow("cap, join, dash, fixedWidth or under differs");
   });
 
-  test("a non-scaling stroke on scaled text keeps its width", () => {
-    const out = emit(made(() => stroked({ nonScaling: true }, { scale: 2 })));
+  test("a fixedWidth stroke on scaled text keeps its width", () => {
+    const out = emit(made(() => stroked({ fixedWidth: true }, { scale: 2 })));
 
     expect(out).toContain('vector-effect="non-scaling-stroke"');
   });
@@ -616,7 +616,7 @@ describe("text strokes", () => {
   });
 });
 
-describe("text along a path", () => {
+describe("text along an outline", () => {
   const along = (extra: Partial<Parameters<typeof Text>[0]> = {}, text = "Hi") =>
     made(() => (
       <Text
@@ -624,7 +624,7 @@ describe("text along a path", () => {
         font={space}
         size={10}
         fill="#000000"
-        path={line([0, 50], [180, 50])}
+        along={line([0, 50], [180, 50])}
         {...extra}
       >
         {text}
@@ -665,7 +665,7 @@ describe("text along a path", () => {
   test("wraps tspans for styled runs inside the textPath", () => {
     const out = emit(
       made(() => (
-        <Text key="t" font={space} size={10} fill="#000000" path={circle(30)}>
+        <Text key="t" font={space} size={10} fill="#000000" along={circle(30)}>
           a<Run weight={700}>b</Run>
         </Text>
       )),
@@ -675,8 +675,10 @@ describe("text along a path", () => {
   });
 
   test("errors name what to change", () => {
-    expect(() => along({ path: line([0, 0], [0, 0]) })).toThrow("has no length");
-    expect(() => along({}, "x".repeat(40))).toThrow(/is 64\.8 longer than its path \(.*\)\./);
+    expect(() => along({ along: line([0, 0], [0, 0]) })).toThrow("has no length");
+    expect(() => along({}, "x".repeat(40))).toThrow(
+      /is 64\.8 longer than the outline it is set along \(.*\)\./,
+    );
     expect(() => along({ width: 50 })).toThrow("takes no width");
     expect(() => along({}, "a\nb")).toThrow("takes one line, but its text has 2");
   });

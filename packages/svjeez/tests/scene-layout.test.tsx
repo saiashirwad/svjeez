@@ -355,7 +355,7 @@ describe("containers that draw themselves", () => {
         <Stack
           key="row"
           direction="row"
-          justify="space-between"
+          justify="spread"
           align="center"
           width={width}
           height={20}
@@ -651,7 +651,7 @@ describe("arrows", () => {
       to: [95, 10],
     });
     expect(
-      head.kind === "shape" && rest(head.geometry).kind === "polygon" && rest(head.geometry),
+      head.kind === "shape" && rest(head.geometry).kind === "points" && rest(head.geometry),
     ).toMatchObject({
       points: [expect.anything(), [95, 10], expect.anything()],
     });

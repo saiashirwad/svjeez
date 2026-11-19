@@ -5,7 +5,6 @@ import {
   Shape,
   Stack,
   Text,
-  canvas,
   circle,
   ease,
   enter,
@@ -74,9 +73,9 @@ export default scene(
     title: "Layout",
     desc: "Three cards in a row, each with a title and wrapped text laid out inside it. Arrows join them by their edges, and when the last card drifts down and back, the arrow into it follows.",
     theme,
-    reducedMotion: 2.4,
+    still: 2.4,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Group opacity={track(1).to(0, span(6.4, 0.5))}>

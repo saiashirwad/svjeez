@@ -2,7 +2,6 @@ import { google } from "@svjeez/fonts";
 import {
   Group,
   Shape,
-  canvas,
   circle,
   ease,
   enter,
@@ -25,7 +24,7 @@ const SAMPLES = 1024;
 const TRACE = 400;
 const HEIGHT = 360;
 
-const merriweather = await google("Merriweather", { style: "italic" });
+const merriweather = await google("Merriweather", { italic: true });
 
 const outline = (d: string): Vec[] => {
   const points: Vec[] = [];
@@ -198,9 +197,9 @@ export default scene(
     title: "Epicycles",
     desc: "Circles spinning on the tips of circles trace the letter pi, the largest first, and the letter fills in.",
     theme,
-    reducedMotion: 12,
+    still: 12,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Group motion={exit(gone)}>

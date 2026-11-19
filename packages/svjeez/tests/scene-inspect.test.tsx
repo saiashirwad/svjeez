@@ -462,15 +462,6 @@ group("capabilities and the model alone", () => {
     ]);
   });
 
-  test("a symbol no instance draws", () => {
-    const model = made(() => <Dot />);
-    const ghost = model.root.children[0]!;
-
-    expect(only({ ...model, symbols: { ghost } }, "unused-symbol")[0]!.message).toContain(
-      '"ghost"',
-    );
-  });
-
   test("findings come errors first, then warnings, then info, and are the same every time", () => {
     const model = made(() => (
       <Group>
@@ -535,21 +526,6 @@ group("what the model keeps of how the scene was written", () => {
     expect(model.root.children[0]!.authored?.wrap).toEqual({ width: 40, cuts: [1] });
     expect(only(model, "word-cut")[0]?.message).toContain('"measur|ement"');
     expect(codes(wrapped("a few words"))).not.toContain("word-cut");
-  });
-
-  test("a ref no node takes is reported; one a node takes is not", () => {
-    const model = made(() => {
-      const card = ref();
-
-      ref();
-
-      return <Dot key="card" ref={card} />;
-    });
-
-    expect(model.authored?.refs).toEqual([{ attached: true }, { attached: false }]);
-    expect(only(model, "unattached-ref").map((found) => found.message)).toEqual([
-      "A ref() is made, but no node takes it as ref={…}, so it points at nothing.",
-    ]);
   });
 });
 

@@ -189,7 +189,7 @@ export const neverVisible = (survey: VisibilitySurvey): void => {
         flatThroughout(node.geometry) &&
         describeGeometry(isLane(node.geometry) ? node.geometry.keys[0].value : node.geometry)) ||
       (node.kind === "text" && textOf(node) === "" && "a text with no characters") ||
-      (node.kind === "image" &&
+      (node.kind === "picture" &&
         (node.size[0] === 0 || node.size[1] === 0) &&
         `an image ${units(node.size[0])} by ${units(node.size[1])}`);
 
@@ -213,7 +213,7 @@ export const neverVisible = (survey: VisibilitySurvey): void => {
 
 const reachInScene = (survey: Survey, entry: Entry): Box | undefined => {
   try {
-    const own = placed(reachOf(entry.node, survey.scene.symbols, "inspect"), entry.node);
+    const own = placed(reachOf(entry.node, "inspect"), entry.node);
 
     return [...entry.ancestors]
       .reverse()

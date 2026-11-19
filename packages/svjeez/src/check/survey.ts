@@ -371,7 +371,7 @@ export const strokeReachAt = (node: ShapeNode, placed: Placed, t: Seconds): numb
   const { from, to, amount } = between(node.stroke.width, t);
   const width = Math.max(0, from + (to - from) * amount);
 
-  return (width / 2) * (node.stroke.nonScaling ? 1 : scaleOf(placed.matrix));
+  return (width / 2) * (node.stroke.fixedWidth ? 1 : scaleOf(placed.matrix));
 };
 
 export const area = (box: Box): number => Math.max(0, box.width) * Math.max(0, box.height);

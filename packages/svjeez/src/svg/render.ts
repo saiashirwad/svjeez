@@ -1,11 +1,12 @@
 import { SceneError } from "../model/scene-error";
 import { compile } from "./compile";
-import type { FontStyle, FontValue } from "../font/font";
+import { cssFontStyle, type FontValue } from "../font/font";
 import { RATE_ATTR } from "./rate";
 import { num } from "../model/format";
 import type { Seconds } from "../model/time";
 import { element, raw, serialize, text, type SvgNode } from "./tree";
 import { traceOf, type TimelineTrack } from "./traced";
+import { share } from "./share";
 import { validateSvg } from "./validate";
 
 export interface RenderOptions {
@@ -17,15 +18,17 @@ export interface RenderOptions {
   readonly css?: string;
   readonly playbackRate?: number;
   readonly prefix?: string;
-  readonly reducedMotion?: { readonly at: Seconds } | false;
+  readonly still?: { readonly at: Seconds } | false;
   readonly loop?: boolean;
   readonly font?: RootFont;
+  /** Write a drawing that repeats once and copy it. Off when every node has to be its own element. */
+  readonly share?: boolean;
 }
 
 export interface RootFont {
   readonly family?: FontValue;
   readonly weight?: number;
-  readonly style?: FontStyle;
+  readonly italic?: boolean;
 }
 
 export const render = (options: RenderOptions, nodes: readonly SvgNode[]): string => {
@@ -43,9 +46,9 @@ export const render = (options: RenderOptions, nodes: readonly SvgNode[]): strin
     );
 
   const stillAt =
-    options.reducedMotion === false
+    options.still === false
       ? undefined
-      : Math.max(0, Math.min(duration, options.reducedMotion?.at ?? duration * 0.85));
+      : Math.max(0, Math.min(duration, options.still?.at ?? duration * 0.85));
 
   const trace = traceOf();
   const timeline: TimelineTrack[] | undefined = trace?.within ? [] : undefined;
@@ -58,7 +61,9 @@ export const render = (options: RenderOptions, nodes: readonly SvgNode[]): strin
     {
       ...(options.font?.family !== undefined && { "font-family": options.font.family }),
       ...(options.font?.weight !== undefined && { "font-weight": num(options.font.weight) }),
-      ...(options.font?.style !== undefined && { "font-style": options.font.style }),
+      ...(options.font?.italic !== undefined && {
+        "font-style": cssFontStyle({ italic: options.font.italic }),
+      }),
     },
   );
 
@@ -81,7 +86,7 @@ export const render = (options: RenderOptions, nodes: readonly SvgNode[]): strin
     element("title", { id: `${prefix}t` }, [text(options.title)]),
     ...(options.desc ? [element("desc", { id: `${prefix}d` }, [text(options.desc)])] : []),
     ...(css ? [element("style", {}, [raw(`\n${css}\n`)])] : []),
-    ...compiled.body,
+    ...(options.share === false ? compiled.body : share(compiled.body, prefix)),
   ]);
 
   const source = serialize(root);

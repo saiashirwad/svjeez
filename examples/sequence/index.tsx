@@ -1,5 +1,5 @@
 import { sequence } from "@svjeez/diagrams";
-import { Align, Group, Shape, canvas, circle, exit, scene, span, track } from "svjeez";
+import { Align, Group, Shape, circle, exit, scene, span, track } from "svjeez";
 import { mono, theme } from "../theme";
 
 const login = sequence(
@@ -26,7 +26,7 @@ const login = sequence(
   },
   {
     font: mono,
-    size: 16,
+    textSize: 16,
     reveal: span(0.2, 0.8),
     colors: {
       background: theme.background,
@@ -51,9 +51,9 @@ export default scene(
     title: "Login request sequence",
     desc: "A sequence diagram of a login: the browser posts credentials, the API checks them against Postgres, has a token signed and returns it.",
     theme,
-    reducedMotion: 9,
+    still: 9,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Align motion={exit(LEAVE)}>

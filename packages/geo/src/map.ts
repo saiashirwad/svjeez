@@ -12,7 +12,7 @@ import {
   type GeoStream,
 } from "d3-geo";
 import type { Feature, GeoJsonProperties, Polygon } from "geojson";
-import { polyline, type Geometry, type Vec } from "svjeez";
+import { line, type Geometry, type Vec } from "svjeez";
 import { SceneError } from "svjeez/tools";
 import {
   finder,
@@ -257,7 +257,7 @@ export function project(data: GeoData, options: MapOptions): GeoMap {
           "Rotate the projection so both ends sit on one side, as in geoNaturalEarth1().rotate([-150, 0]).",
         );
 
-      return polyline(cut[0]!);
+      return line(...cut[0]!);
     },
     graticule(step = 10) {
       positive(step, "graticule()", "Give the degrees between lines, such as 15.");

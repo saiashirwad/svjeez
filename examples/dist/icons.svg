@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-labelledby="t d">
   <title id="t">Icons</title>
-  <desc id="d">Seven Tabler outline icons draw themselves one stroke at a time, a filled heart pops into the last place in the grid, and five shared stars pop in below.</desc>
+  <desc id="d">Seven Tabler outline icons draw themselves one stroke at a time, a filled heart pops into the last place in the grid, and five stars pop in below.</desc>
   <style><![CDATA[
 svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF}
 @media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0}}
@@ -51,9 +51,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-4.5s!important;animation-play-state:paused!important}}
 ]]></style>
   <defs>
-    <g id="symbol-0">
-      <path d="M8.243 7.34L1.863 8.265L1.75 8.288C1.402 8.38 1.13 8.653 1.039 9.002C0.948 9.35 1.051 9.721 1.31 9.972L5.932 14.471L4.842 20.826L4.829 20.936C4.808 21.296 4.982 21.64 5.285 21.836C5.589 22.031 5.974 22.048 6.293 21.88L11.999 18.88L17.692 21.88L17.792 21.926C18.128 22.058 18.509 21.999 18.79 21.771C19.07 21.543 19.205 21.182 19.144 20.826L18.053 14.471L22.677 9.971L22.755 9.886C22.982 9.607 23.041 9.227 22.91 8.892C22.779 8.557 22.478 8.318 22.122 8.266L15.742 7.34L12.89 1.56C12.722 1.218 12.374 1.002 11.993 1.002C11.612 1.002 11.264 1.218 11.096 1.56L8.243 7.34Z" fill="var(--yellow)"/>
-    </g>
+    <path id="u1" d="M8.243 7.34L1.863 8.265L1.75 8.288C1.402 8.38 1.13 8.653 1.039 9.002C0.948 9.35 1.051 9.721 1.31 9.972L5.932 14.471L4.842 20.826L4.829 20.936C4.808 21.296 4.982 21.64 5.285 21.836C5.589 22.031 5.974 22.048 6.293 21.88L11.999 18.88L17.692 21.88L17.792 21.926C18.128 22.058 18.509 21.999 18.79 21.771C19.07 21.543 19.205 21.182 19.144 20.826L18.053 14.471L22.677 9.971L22.755 9.886C22.982 9.607 23.041 9.227 22.91 8.892C22.779 8.557 22.478 8.318 22.122 8.266L15.742 7.34L12.89 1.56C12.722 1.218 12.374 1.002 11.993 1.002C11.612 1.002 11.264 1.218 11.096 1.56L8.243 7.34Z" fill="var(--yellow)"/>
   </defs>
   <rect width="640" height="360" fill="var(--background)"/>
   <g transform="translate(55 38.503)">
@@ -81,10 +79,10 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     <path d="M18.611 8.197C23.391 7.383 28.283 8.78 31.912 11.997L32.011 12.085L32.101 12.005C35.56 8.97 40.159 7.571 44.723 8.165L45.379 8.261C51.172 9.262 55.95 13.358 57.823 18.93C59.696 24.503 58.362 30.653 54.349 34.949L53.869 35.443L53.741 35.552L33.875 55.229C32.927 56.168 31.431 56.261 30.373 55.448L30.123 55.229L10.141 35.437C5.825 31.238 4.233 24.97 6.021 19.22C7.809 13.469 12.674 9.209 18.611 8.197Z" transform="translate(425.022 151.015)" fill="var(--red)" style="transform-origin:457px 183px" class="a m13"/>
   </g>
   <g transform="translate(55 38.503)">
-    <use href="#symbol-0" transform="translate(197.063 260.998)" style="transform-origin:209.056px 272.497px" class="a m14"/>
-    <use href="#symbol-0" transform="translate(225.035 260.998)" style="transform-origin:237.028px 272.497px" class="a m15"/>
-    <use href="#symbol-0" transform="translate(253.007 260.998)" style="transform-origin:265px 272.497px" class="a m16"/>
-    <use href="#symbol-0" transform="translate(280.98 260.998)" style="transform-origin:292.972px 272.497px" class="a m17"/>
-    <use href="#symbol-0" transform="translate(308.952 260.998)" style="transform-origin:320.944px 272.497px" class="a m18"/>
+    <use href="#u1" transform="translate(197.063 260.998)" style="transform-origin:209.056px 272.497px" class="a m14"/>
+    <use href="#u1" transform="translate(225.035 260.998)" style="transform-origin:237.028px 272.497px" class="a m15"/>
+    <use href="#u1" transform="translate(253.007 260.998)" style="transform-origin:265px 272.497px" class="a m16"/>
+    <use href="#u1" transform="translate(280.98 260.998)" style="transform-origin:292.972px 272.497px" class="a m17"/>
+    <use href="#u1" transform="translate(308.952 260.998)" style="transform-origin:320.944px 272.497px" class="a m18"/>
   </g>
 </svg>

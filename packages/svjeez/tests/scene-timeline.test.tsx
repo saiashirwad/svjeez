@@ -44,18 +44,15 @@ const times = <T,>(value: Model.Animated<T>): [number, T][] =>
   isLane(value) ? value.keys.map((key) => [key.t, key.value]) : [];
 
 describe("tracks you write", () => {
-  test("a track appends steps to itself, and a node reads it as the prop", () => {
+  test("a node reads the track it is given as the prop", () => {
     const model = made(() => {
-      const pos = track<Vec>([10, 20]);
-      const rotate = track(15);
-      const scale = track<Vec>([1, 1]);
-      const opacity = track(1);
+      const pos = track<Vec>([10, 20])
+        .to([50, 20], span(0, 1), ease.linear)
+        .to([60, 20], span(1, 0.5), ease.linear);
 
-      pos.to([50, 20], span(0, 1), ease.linear);
-      pos.to([60, 20], span(1, 0.5), ease.linear);
-      rotate.to(90, span(1.5, 1));
-      scale.to([2, 2], span(1.5, 1));
-      opacity.to(0.5, span(1.5, 1));
+      const rotate = track(15).to(90, span(1.5, 1));
+      const scale = track<Vec>([1, 1]).to([2, 2], span(1.5, 1));
+      const opacity = track(1).to(0.5, span(1.5, 1));
 
       return (
         <Shape
@@ -91,12 +88,10 @@ describe("tracks you write", () => {
 
   test("tracks move opacity, fill, stroke and trim of a shape's paint", () => {
     const model = made(() => {
-      const opacity = track(0).to(1, span(0, 0.5));
+      const opacity = track(0).to(1, span(0, 0.5)).to(0, span(2, 0.5));
       const fill = track<`#${string}`>("#000000").to("#ff0000", span(0.5, 0.5));
       const color = track<`#${string}`>("#000000").to("#00ff00", span(1, 0.5));
       const trim = track<Vec>([0, 1]).to([0, 0.5], span(1.5, 0.5));
-
-      opacity.to(0, span(2, 0.5));
 
       return (
         <Shape
@@ -127,10 +122,7 @@ describe("tracks you write", () => {
 
   test("a cut of the trim to nothing, then a trim to the whole, draws a stroke on", () => {
     const model = made(() => {
-      const trim = track<Vec>([0, 1]);
-
-      trim.set([0, 0], span(1));
-      trim.to([0, 1], span(1, 1), ease.linear);
+      const trim = track<Vec>([0, 1]).set([0, 0], span(1)).to([0, 1], span(1, 1), ease.linear);
 
       return <Shape key="s" geometry={rect(10, 10)} stroke={{ color: "#000000" }} trim={trim} />;
     });
@@ -142,22 +134,49 @@ describe("tracks you write", () => {
     expect(node.kind === "shape" && valueAt(node.trim!, 3, blendVec)).toEqual([0, 1]);
   });
 
-  test("a track returns itself, so chains and separate calls write the same steps", () => {
-    const chained = track(0);
-    const same = chained.to(1, span(0, 1)).to(0, span(2, 1));
+  test("a step returns a new track and leaves the first as it was", () => {
+    const first = track(0);
+    const second = first.to(1, span(0, 1));
 
-    expect(same).toBe(chained);
+    expect(second).not.toBe(first);
+    expect(() => first.span).toThrow("this track has no step yet");
+    expect(second.span.end).toBe(1);
+
+    const model = made(() => (
+      <Shape key="s" geometry={rect(10, 10)} fill="#000000" opacity={first} />
+    ));
+
+    expect(times(own(find(model, "s")).opacity)).toEqual([]);
+  });
+
+  test("a chain and step-by-step reassignment write the same steps", () => {
+    const sample = (opacity: ReturnType<typeof track<number>>) =>
+      times(
+        own(
+          find(
+            made(() => <Shape key="s" geometry={rect(10, 10)} fill="#000000" opacity={opacity} />),
+            "s",
+          ),
+        ).opacity,
+      );
+
+    const chained = track(0).to(1, span(0, 1)).to(0, span(2, 1));
+    let stepped = track(0);
+
+    stepped = stepped.to(1, span(0, 1));
+    stepped = stepped.to(0, span(2, 1));
+
+    expect(sample(stepped)).toEqual(sample(chained));
+    expect(sample(chained).length).toBeGreaterThan(2);
   });
 
   test("a set cuts a track, and a path back home at the clock's end glides the node home", () => {
     const model = made(() => {
-      const pos = track<Vec>([0, 0]);
-      const rotate = track(0);
+      const pos = track<Vec>([0, 0])
+        .to([40, 0], span(0, 1))
+        .to([0, 0], span(3.5, 0.5), ease.linear);
 
-      pos.to([40, 0], span(0, 1));
-      rotate.to(90, span(0, 1));
-      pos.to([0, 0], span(3.5, 0.5), ease.linear);
-      rotate.to(0, span(3.5, 0.5), ease.linear);
+      const rotate = track(0).to(90, span(0, 1)).to(0, span(3.5, 0.5), ease.linear);
 
       return (
         <Shape
@@ -183,9 +202,7 @@ describe("tracks you write", () => {
     ]);
 
     const cut = made(() => {
-      const pos = track<Vec>([40, 0]);
-
-      pos.set([0, 0], span(2));
+      const pos = track<Vec>([40, 0]).set([0, 0], span(2));
 
       return <Shape fill="#000000" key="dot" geometry={circle(4)} anchor="center" at={pos} />;
     });
@@ -199,11 +216,8 @@ describe("tracks that go to anchors", () => {
   test("a step to an anchor lands the node's anchor point on it", () => {
     const model = made(() => {
       const target = ref();
-      const a = track<Vec>([0, 0]);
-      const b = track<Vec>([0, 0]);
-
-      a.to(target.center, span(0, 1));
-      b.to(target.part("pin").topLeft, span(0, 1));
+      const a = track<Vec>([0, 0]).to(target.center, span(0, 1));
+      const b = track<Vec>([0, 0]).to(target.part("pin").topLeft, span(0, 1));
 
       return (
         <Group>
@@ -304,9 +318,7 @@ describe("springs, arrows and parts", () => {
     const flick = ease.spring({ stiffness: 320, damping: 22 });
 
     const model = made(() => {
-      const knob = track<Vec>([0, 0]);
-
-      knob.to([20, 0], span(0, flick.settle), flick);
+      const knob = track<Vec>([0, 0]).to([20, 0], span(0, flick.settle), flick);
 
       expect(knob.span.over).toBeCloseTo(flick.settle, 9);
 
@@ -343,13 +355,11 @@ describe("springs, arrows and parts", () => {
 
   test("tracks on a group's parts, going back to the start, return every part home", () => {
     const model = made(() => {
-      const knob = track<Vec>([3, 3]);
-      const groove = track<`#${string}`>("#000000");
+      const knob = track<Vec>([3, 3]).to([23, 3], span(0, 0.5)).to([3, 3], span(3.5, 0.5));
 
-      knob.to([23, 3], span(0, 0.5));
-      groove.to("#ff0000", span(0.5, 0.5));
-      knob.to([3, 3], span(3.5, 0.5));
-      groove.to("#000000", span(3.5, 0.5));
+      const groove = track<`#${string}`>("#000000")
+        .to("#ff0000", span(0.5, 0.5))
+        .to("#000000", span(3.5, 0.5));
 
       return (
         <Group key="toggle">
@@ -379,11 +389,11 @@ describe("springs, arrows and parts", () => {
 describe("spans", () => {
   test("span is the step written last, and next() chains the next step after it", () => {
     const model = made(() => {
-      const dot = track<Vec>([0, 0]);
+      const first = track<Vec>([0, 0]).to([1, 0], span(0, 1));
 
-      dot.to([1, 0], span(0, 1));
-      expect([dot.span.start, dot.span.over, dot.span.end]).toEqual([0, 1, 1]);
-      dot.to([2, 0], dot.span.next(1, 0.5));
+      expect([first.span.start, first.span.over, first.span.end]).toEqual([0, 1, 1]);
+
+      const dot = first.to([2, 0], first.span.next(1, 0.5));
 
       return <Shape fill="#000000" key="dot" geometry={circle(4)} anchor="center" at={dot} />;
     }, 10);
@@ -392,8 +402,8 @@ describe("spans", () => {
   });
 
   test("span before anything is written, and on a motion, says what is missing", () => {
-    expect(() => track(0).span).toThrow("nothing is written on this track yet");
-    expect(() => motion().span).toThrow("nothing is written on this motion yet");
+    expect(() => track(0).span).toThrow("this track has no step yet");
+    expect(() => motion().span).toThrow("this motion has no step yet");
     expect(motion().to({ opacity: 0 }, span(1, 2)).span.end).toBe(3);
     expect(track(0).set(1, span(2)).span.over).toBe(0);
   });
@@ -419,26 +429,21 @@ describe("spans", () => {
   });
 
   test("a component can make its own tracks and write them in scene order", () => {
-    const lamp = () => {
-      const glow = track(0.2);
+    const blink = (glow: ReturnType<typeof track<number>>, at: number) => {
+      const lit = glow.to(1, span(at, 0.1));
 
-      return {
-        node: <Shape key="bulb" geometry={circle(4)} fill="#000000" opacity={glow} />,
-        blink: (at: number) => {
-          glow.to(1, span(at, 0.1));
-
-          return glow.to(0.2, glow.span.next(0.1, 0.3)).span;
-        },
-      };
+      return lit.to(0.2, lit.span.next(0.1, 0.3));
     };
 
     const model = made(() => {
-      const one = lamp();
-      const done = one.blink(1);
+      const once = blink(track(0.2), 1);
+      const twice = blink(once, once.span.end);
 
-      one.blink(done.end);
-
-      return <Group>{one.node}</Group>;
+      return (
+        <Group>
+          <Shape key="bulb" geometry={circle(4)} fill="#000000" opacity={twice} />
+        </Group>
+      );
     });
 
     expect(times(own(find(model, "bulb")).opacity).map(([, value]) => value)).toEqual([
@@ -450,11 +455,11 @@ describe("spans", () => {
 describe("tracks", () => {
   test("a spring may be cut by the next step on the same track, which carries its speed on", () => {
     const model = made(() => {
-      const dot = track<Vec>([0, 0]);
       const spring = ease.spring({ stiffness: 120, damping: 8 });
 
-      dot.to([100, 0], span(0, 2), spring);
-      dot.to([0, 50], span(0.3, 2), spring);
+      const dot = track<Vec>([0, 0])
+        .to([100, 0], span(0, 2), spring)
+        .to([0, 50], span(0.3, 2), spring);
 
       return <Shape fill="#000000" key="dot" geometry={circle(4)} anchor="center" at={dot} />;
     });
@@ -469,16 +474,6 @@ describe("tracks", () => {
     expect(() => motion().to({ opacity: 0 }, span(0, 1)).to({ opacity: 1 }, span(0.5, 1))).toThrow(
       "Two steps move `opacity` on this motion at once",
     );
-  });
-
-  test("a track written after a scene read it throws", () => {
-    const glow = track(0);
-
-    made(() => <Shape fill="#000000" geometry={circle(4)} opacity={glow} />);
-    expect(() => glow.to(1, span(0, 1))).toThrow(
-      "to() writes a track that opacity on <Shape> has already read.",
-    );
-    expect(() => glow.set(1, span(0))).toThrow("set() writes a track");
   });
 
   test("a track read on two clocks throws, naming both nodes", () => {

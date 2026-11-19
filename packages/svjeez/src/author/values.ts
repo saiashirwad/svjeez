@@ -127,26 +127,29 @@ export const arc = ({ radius, start = 0, sweep }: ArcOptions): Geometry => {
   return { kind: "arc", radius: positive(radius, "arc()"), start, sweep };
 };
 
-export const line = (from: Vec, to: Vec): Geometry => ({ kind: "line", from, to });
+/** A straight line from one point to the next: two points, or an open line through more. */
+export const line = (...points: readonly Vec[]): Geometry => {
+  const [from, to, ...more] = points;
 
+  if (!from || !to) throw new SceneError(`line() needs two points or more, got ${points.length}.`);
+
+  return more.length === 0 ? { kind: "line", from, to } : { kind: "points", points, closed: false };
+};
+
+/** A closed outline with a corner at each point. */
 export const polygon = (points: readonly Vec[]): Geometry => ({
-  kind: "polygon",
+  kind: "points",
   points,
   closed: true,
 });
 
-export const polyline = (points: readonly Vec[]): Geometry => ({
-  kind: "polygon",
-  points,
-  closed: false,
-});
-
-export const path = (): PathBuilder => new PathBuilder();
-
-export const pathData = (d: string): Geometry => ({
-  kind: "path",
-  contours: ringsOf(d),
-  rule: "nonzero",
+/** An outline you draw step by step, or `path.parse(text)` for one copied from an icon set or a drawing tool. */
+export const path = Object.assign((): PathBuilder => new PathBuilder(), {
+  parse: (text: string): Geometry => ({
+    kind: "path",
+    contours: ringsOf(text),
+    rule: "nonzero",
+  }),
 });
 
 export interface Token {

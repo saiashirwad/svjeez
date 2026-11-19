@@ -189,7 +189,7 @@ const dashed = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving | undefi
   for (let i = 1; i <= pieces; i++)
     d += `A${r} ${r} 0 ${step > 180 ? 1 : 0} 1 ${pt(onCircle(radius, low + step * i))}`;
 
-  const dots = stroke.cap !== "butt" && spans.some((each) => each.length === 0);
+  const dots = stroke.cap !== "flat" && spans.some((each) => each.length === 0);
   const grows = !dots && spans.every((each) => each.low === low);
 
   const values = spans.map((each): ChannelValues => {

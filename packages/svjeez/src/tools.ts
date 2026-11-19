@@ -14,11 +14,9 @@ export type {
   Child,
   Common,
   Framed,
-  ImageProps,
-  InstanceProps,
+  PictureProps,
   RunProps,
   RunStyle,
-  SceneSymbol,
   SequenceProps,
   ShapeProps,
   StrokeProps,
@@ -50,7 +48,7 @@ export type {
 
 export type { PictureData } from "./author/picture";
 
-export type { Font, FontFamily, FontOptions, FontStyle, FontValue } from "./font/font";
+export type { Font, FontFamily, FontOptions, FontValue } from "./font/font";
 
 export type { Anchor, Edge, Place } from "./author/refs";
 

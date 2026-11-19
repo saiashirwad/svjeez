@@ -23,6 +23,6 @@ export default scene({ size: [128, 128], duration: 2, title: "Rocket" }, () => (
 ));
 ```
 
-Import icons by name from `@svjeez/icons/tabler` or `@svjeez/icons/lucide`; unused ones never reach the scene.
+Repeated still icons are shared automatically. Import icons by name from `@svjeez/icons/tabler` or `@svjeez/icons/lucide`; unused ones never reach the scene.
 
 [Reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/icons.md)

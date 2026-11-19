@@ -10,5 +10,4 @@ export const walkScene = (scene: Scene, visit: (node: SceneNode) => void): void 
   };
 
   walk(scene.root);
-  Object.values(scene.symbols).forEach(walk);
 };

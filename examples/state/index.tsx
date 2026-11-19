@@ -1,5 +1,5 @@
 import { stateMachine } from "@svjeez/diagrams";
-import { Align, Group, Shape, canvas, exit, scene, span } from "svjeez";
+import { Align, Group, Shape, exit, scene, span } from "svjeez";
 import { mono, theme } from "../theme";
 
 const agent = stateMachine(
@@ -34,7 +34,7 @@ const agent = stateMachine(
   },
   {
     font: mono,
-    size: 14,
+    textSize: 14,
     direction: "LR",
     colors: {
       background: theme.background,
@@ -74,9 +74,9 @@ export default scene(
     title: "Agent lifecycle",
     desc: "A state machine for an agent run, walked once: idle, then working (planning and calling tools in turn), waiting on the user, working again, done.",
     theme,
-    reducedMotion: walk.span.end - 0.3,
+    still: walk.span.end - 0.3,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Align motion={exit(LEAVE)}>

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Group, Image, picture, scene } from "svjeez";
+import { Group, Picture, picture, scene } from "svjeez";
 import { svg } from "svjeez/tools";
 import { validateSvg } from "svjeez/frames";
 
@@ -137,7 +137,7 @@ describe("picture", () => {
   });
 
   test("raster bytes become a base64 data URI that round-trips", () => {
-    const { href, bytes: cost } = picture(fixtures.png);
+    const { data: href, bytes: cost } = picture(fixtures.png);
     expect(href.startsWith("data:image/png;base64,")).toBe(true);
     expect(cost).toBe(href.length);
     expect(Buffer.from(href.split(",")[1]!, "base64").equals(Buffer.from(fixtures.png))).toBe(true);
@@ -146,7 +146,7 @@ describe("picture", () => {
   test("a large raster encodes without overflowing the call stack", () => {
     const big = new Uint8Array(3_000_000);
     big.set(fixtures.png);
-    expect(picture(big).href.length).toBeGreaterThan(4_000_000);
+    expect(picture(big).data.length).toBeGreaterThan(4_000_000);
   });
 
   test("SVG takes its size from width and height, else the viewBox", () => {
@@ -219,7 +219,7 @@ describe("picture", () => {
 
   test("SVG goes in as percent-encoded text and decodes back to the markup", () => {
     const markup = '<svg viewBox="0 0 10 10"><rect fill="#f00" width="10%" height="10"/></svg>';
-    const { href } = picture(markup);
+    const { data: href } = picture(markup);
     expect(href.startsWith("data:image/svg+xml,")).toBe(true);
     expect(href).not.toContain("base64");
     expect(href).not.toMatch(/[<>"#]/);
@@ -230,7 +230,7 @@ describe("picture", () => {
     const markup =
       '<svg viewBox="0 0 10 10"><text xml:space="preserve">a="\t\tb</text>\n<rect fill="#00f" width="1" height="1"/></svg>';
 
-    expect(decodeURIComponent(picture(markup).href.slice("data:image/svg+xml,".length))).toBe(
+    expect(decodeURIComponent(picture(markup).data.slice("data:image/svg+xml,".length))).toBe(
       markup,
     );
   });
@@ -288,30 +288,30 @@ describe("picture", () => {
   });
 });
 
-describe("<Image>", () => {
+describe("<Picture>", () => {
   const photo = picture(fixtures.png);
 
-  const emit = (node: () => ReturnType<typeof Image>) =>
+  const emit = (node: () => ReturnType<typeof Picture>) =>
     svg.emit(scene({ size: [400, 300], duration: 1, title: "Pic" }, node));
 
   const frame = (out: string) =>
     /<image[^>]* width="([^"]*)" height="([^"]*)"/.exec(out)?.slice(1).map(Number);
 
   test("derives the missing side from the aspect ratio, and defaults to intrinsic size", () => {
-    expect(frame(emit(() => <Image src={photo} width={150} />))).toEqual([150, 100]);
-    expect(frame(emit(() => <Image src={photo} height={50} />))).toEqual([75, 50]);
-    expect(frame(emit(() => <Image src={photo} />))).toEqual([300, 200]);
+    expect(frame(emit(() => <Picture src={photo} width={150} />))).toEqual([150, 100]);
+    expect(frame(emit(() => <Picture src={photo} height={50} />))).toEqual([75, 50]);
+    expect(frame(emit(() => <Picture src={photo} />))).toEqual([300, 200]);
   });
 
   test("the picture's bytes go in as its data URI", () => {
-    expect(emit(() => <Image src={photo} at={[10, 20]} />)).toContain(`href="${photo.href}"`);
+    expect(emit(() => <Picture src={photo} at={[10, 20]} />)).toContain(`href="${photo.data}"`);
   });
 
   test("the output validates, including a data URI image", () => {
     const out = emit(() => (
       <Group>
-        <Image src={photo} />
-        <Image src={picture('<svg viewBox="0 0 10 5"><rect width="10" height="5"/></svg>')} />
+        <Picture src={photo} />
+        <Picture src={picture('<svg viewBox="0 0 10 5"><rect width="10" height="5"/></svg>')} />
       </Group>
     ));
 

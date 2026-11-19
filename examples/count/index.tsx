@@ -4,7 +4,6 @@ import {
   Shape,
   Stack,
   Text,
-  canvas,
   count,
   ease,
   enter,
@@ -54,9 +53,9 @@ export default scene(
     title: "Numbers that count",
     desc: "Three cards fade in and their numbers count up to revenue, signups and uptime, then the cards fade out.",
     theme,
-    reducedMotion: 4,
+    still: 4,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Align>

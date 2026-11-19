@@ -2,16 +2,13 @@
 import {
   Group,
   Shape,
-  enter,
-  exit,
   path,
-  span,
-  track,
+  through,
+  within,
   type Anim,
   type Geometry,
   type Paint,
   type SceneElement,
-  type Span,
   type Vec,
 } from "svjeez";
 import { SceneError, type Common, type Hex, type Place, type TextAnchorPlace } from "svjeez/tools";
@@ -28,7 +25,11 @@ export interface TexProps extends Omit<Common, "anchor">, TexOptions {
   readonly children: string | readonly string[];
   readonly fill: Anim<Paint>;
   readonly colors?: Readonly<Record<string, Anim<Paint>>>;
-  readonly write?: Span;
+  /**
+   * How much is drawn, from 0 to 1: a number or a track. Each glyph strokes on, then fills, in order.
+   * With several glyphs, each takes a window of 0.6 of the draw, staggered over the rest (a 1s span matches the old `write`; longer ones stretch).
+   */
+  readonly draw?: Anim<number>;
 }
 
 export interface TexBox {
@@ -233,7 +234,7 @@ export function Tex({
   anchor,
   fill,
   colors = {},
-  write,
+  draw,
   at,
   ...common
 }: TexProps): SceneElement {
@@ -247,10 +248,9 @@ export function Tex({
 
   const total = laid.marks.length;
 
-  if (write && !(write.over > 0))
-    throw new SceneError(`write on <Tex> needs a span longer than 0 seconds, got ${write.over}.`);
-  const stroke = write ? Math.min(0.6, write.over) : 0;
-  const step = write && total > 1 ? (write.over - stroke) / (total - 1) : 0;
+  // Each glyph's share of the draw, and how far its start moves from the last.
+  const share = total > 1 ? 0.6 : 1;
+  const step = total > 1 ? (1 - share) / (total - 1) : 0;
 
   const paintOf = (mark: Mark): Anim<Paint> => {
     if (mark.color === undefined) return fill;
@@ -286,17 +286,17 @@ export function Tex({
 
       const at: Vec = [round(x), round(y)];
       const paint = paintOf(item);
-      const begin = write ? write.start + index++ * step : 0;
+      const begin = index++ * step;
 
-      if (write)
+      if (draw !== undefined)
         outlines.push(
           <Shape
             key={`${outlines.length}`}
             geometry={geometry}
             at={at}
             stroke={{ color: paint, width: round(size * 0.025), join: "round" }}
-            draw={track(0).to(1, span(begin, stroke * 0.7))}
-            motion={exit(span(begin + stroke * 0.7, stroke * 0.3))}
+            draw={within(draw, begin, begin + share * 0.7)}
+            opacity={through(within(draw, begin + share * 0.7, begin + share), (p) => 1 - p)}
           />,
         );
 
@@ -306,7 +306,9 @@ export function Tex({
           geometry={geometry}
           at={at}
           fill={paint}
-          {...(write && { motion: enter(span(begin + stroke * 0.5, stroke * 0.5)) })}
+          {...(draw !== undefined && {
+            opacity: within(draw, begin + share * 0.5, begin + share),
+          })}
         />
       );
     });
@@ -317,7 +319,7 @@ export function Tex({
   return (
     <Group {...common} {...(at !== undefined && { offset: at })}>
       {glyphs}
-      {write && <Group key="writing">{outlines}</Group>}
+      {draw !== undefined && <Group key="writing">{outlines}</Group>}
     </Group>
   );
 }

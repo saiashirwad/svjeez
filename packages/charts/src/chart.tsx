@@ -8,7 +8,6 @@ import {
   enter,
   linear,
   path,
-  pathData,
   rect,
   through,
   within,
@@ -16,7 +15,7 @@ import {
   type SceneElement,
   type Vec,
 } from "svjeez";
-import { SceneError, type PathBuilder } from "svjeez/tools";
+import { SceneError, type PathBuilder, type StrokeProps } from "svjeez/tools";
 import { TICK, layoutOf, type Layout } from "./layout.ts";
 import type {
   AreaOptions,
@@ -107,7 +106,7 @@ const Axes = ({ look: { chart, layout, size } }: { readonly look: Look }): Scene
         <Shape
           key="grid"
           geometry={strokes(...guides)}
-          stroke={{ color: chart.axis, width: 1 }}
+          stroke={{ color: chart.axis, width: 1, ...chart.grid }}
           opacity={0.25}
         />
       )}
@@ -247,7 +246,11 @@ const Line = ({
   fill,
   stroked = true,
 }: LineProps): SceneElement => {
-  const { color, draw, label, width = 2.5 } = options;
+  const { color, draw, label } = options;
+  const stroke: StrokeProps = { color, width: 2.5, cap: "round", join: "round", ...options.stroke };
+  // The label sits past the line end: a plain-number width moves it, a track or derived width keeps the default.
+  // SAFETY: Number.isFinite is true only for a plain number.
+  const width = Number.isFinite(stroke.width) ? (stroke.width as number) : 2.5;
   const drawn = drawing(draw);
 
   const d = d3line<Vec>()
@@ -268,8 +271,8 @@ const Line = ({
       {stroked && (
         <Shape
           key="line"
-          geometry={pathData(d!)}
-          stroke={{ color, width, cap: "round", join: "round" }}
+          geometry={path.parse(d!)}
+          stroke={stroke}
           trim={drawn((progress): Vec => [0, progress])}
         />
       )}
@@ -347,7 +350,7 @@ const Area = ({ look, data, options }: AreaProps): SceneElement => {
     />
   );
 
-  const fill = <Shape key="fill" geometry={pathData(shape!)} fill={color} mask={fade} />;
+  const fill = <Shape key="fill" geometry={path.parse(shape!)} fill={color} mask={fade} />;
 
   // Two nested clips wipe the fill open: the inner one slides in from the left while its content slides back.
   const wiped =
@@ -378,11 +381,11 @@ const Area = ({ look, data, options }: AreaProps): SceneElement => {
 };
 
 export const Chart = (props: ChartProps): SceneElement => {
-  const { size: area, x, y = {}, series, at = [0, 0], fontSize = 12 } = props;
+  const { size: area, x, y = {}, series, at = [0, 0], textSize = 12 } = props;
 
-  if (!(fontSize > 0)) throw new SceneError(`fontSize is ${fontSize}.`, "Give a positive size.");
+  if (!(textSize > 0)) throw new SceneError(`textSize is ${textSize}.`, "Give a positive size.");
   const layout = layoutOf(area, x, y, series);
-  const look: Look = { chart: props, layout, size: fontSize };
+  const look: Look = { chart: props, layout, size: textSize };
   const count = series.filter((s) => s.kind === "bars").length;
   let placed = 0;
 

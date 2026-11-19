@@ -10,13 +10,7 @@ export interface Scene {
   readonly still?: Seconds;
   readonly tokens: Readonly<Record<string, TokenValue>>;
   readonly fonts: Readonly<Record<string, FontFamily>>;
-  readonly symbols: Readonly<Record<string, SceneNode>>;
   readonly root: GroupNode;
-  readonly authored?: SceneAuthored;
-}
-
-export interface SceneAuthored {
-  readonly refs: readonly { readonly source?: Source; readonly attached: boolean }[];
 }
 
 export interface Authored {
@@ -93,7 +87,7 @@ export type Geometry =
       readonly sweep: number;
     }
   | { readonly kind: "line"; readonly from: Vec; readonly to: Vec }
-  | { readonly kind: "polygon"; readonly points: readonly Vec[]; readonly closed: boolean }
+  | { readonly kind: "points"; readonly points: readonly Vec[]; readonly closed: boolean }
   | {
       readonly kind: "path";
       readonly contours: readonly Contour[];
@@ -149,11 +143,12 @@ export type Blend =
 export interface Stroke {
   readonly color: Animated<Paint>;
   readonly width: Animated<number>;
-  readonly cap: "butt" | "round" | "square";
-  readonly join: "miter" | "round" | "bevel";
+  readonly cap: "flat" | "round" | "square";
+  readonly join: "sharp" | "round" | "flat";
   readonly dash?: readonly number[];
   readonly dashOffset?: Animated<number>;
-  readonly nonScaling: boolean;
+  /** The stroke keeps its width when the node is scaled. */
+  readonly fixedWidth: boolean;
   readonly under: boolean;
 }
 
@@ -225,7 +220,7 @@ export interface ShapeNode extends Base {
 export interface Face {
   readonly family: string;
   readonly weight: number;
-  readonly style: "normal" | "italic";
+  readonly italic: boolean;
 }
 
 export interface TextRun {
@@ -256,15 +251,10 @@ export interface TextNode extends Base {
   };
 }
 
-export interface ImageNode extends Base {
-  readonly kind: "image";
+export interface PictureNode extends Base {
+  readonly kind: "picture";
   readonly size: Vec;
   readonly data: string;
 }
 
-export interface InstanceNode extends Base {
-  readonly kind: "instance";
-  readonly symbol: string;
-}
-
-export type SceneNode = GroupNode | ShapeNode | TextNode | ImageNode | InstanceNode;
+export type SceneNode = GroupNode | ShapeNode | TextNode | PictureNode;

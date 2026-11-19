@@ -167,10 +167,7 @@ describe("two steps on one track", () => {
   test("a set() inside a step names the time of both and how to fix it", () => {
     const error = thrown(() =>
       made(() => {
-        const dot = track<Vec>([10, 30]);
-
-        dot.to([60, 30], span(0, 1));
-        dot.set([10, 10], span(0.5));
+        const dot = track<Vec>([10, 30]).to([60, 30], span(0, 1)).set([10, 10], span(0.5));
 
         return <Shape geometry={circle(4)} at={dot} fill="#FF0000" />;
       }),
@@ -187,10 +184,7 @@ describe("two steps on one track", () => {
   test("two steps that overlap say when the second may start", () => {
     const error = thrown(() =>
       made(() => {
-        const dot = track<Vec>([10, 30]);
-
-        dot.to([60, 30], span(0, 2));
-        dot.to([70, 30], span(1, 2));
+        const dot = track<Vec>([10, 30]).to([60, 30], span(0, 2)).to([70, 30], span(1, 2));
 
         return <Shape geometry={circle(4)} at={dot} fill="#FF0000" />;
       }),

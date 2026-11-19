@@ -6,5 +6,5 @@ export const geist = await google("Geist", options);
 
 export const abeezee = await google.family("ABeeZee", [
   { weight: 400 },
-  { weight: 400, style: "italic" },
+  { weight: 400, italic: true },
 ]);

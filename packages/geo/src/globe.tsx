@@ -7,7 +7,6 @@ import {
   circle,
   ease,
   path,
-  pathData,
   sampled,
   span,
   track,
@@ -235,7 +234,7 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
   const fit = (sample: (t: number) => string): Anim<Geometry> => {
     const frames = times.map(sample);
 
-    if (!turn) return pathData(frames[0]!);
+    if (!turn) return path.parse(frames[0]!);
     const values = frames.map((d) => d.match(/-?[\d.]+/g)!.map(Number));
 
     const room = values.map((v) =>
@@ -281,12 +280,12 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
     divide(0, frames.length - 1);
     kept.sort((a, b) => a - b);
     const start = turn.over.start;
-    let out = track<Geometry>(pathData(frames[0]!));
+    let out = track<Geometry>(path.parse(frames[0]!));
 
     for (let j = 1; j < kept.length; j++) {
       const [a, b] = [kept[j - 1]!, kept[j]!];
       out = out.to(
-        pathData(frames[b]!),
+        path.parse(frames[b]!),
         span(start + times[a]!, times[b]! - times[a]!),
         ease.linear,
       );

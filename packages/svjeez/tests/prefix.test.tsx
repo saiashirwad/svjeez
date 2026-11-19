@@ -17,28 +17,25 @@ import {
 } from "svjeez";
 import { svg } from "svjeez/tools";
 
-const model = scene(
-  { size: [100, 100], duration: 4, title: "P", desc: "D", reducedMotion: 1 },
-  () => (
-    <Group>
-      <Shape
-        geometry={rect(10, 10)}
-        fill={linear({ from: [0, 0], to: [10, 0], stops: ["#FFFFFF", "#000000"] })}
-        motion={motion({ opacity: 0, rotate: 0 }).to({ opacity: 1, rotate: 90 }, span(1, 1))}
-      />
-      <Shape
-        geometry={circle(4)}
-        fill="#000000"
-        effects={[blur(track(0).to(4, span(2, 1), ease.linear))]}
-      />
-      <Shape
-        geometry={circle(4)}
-        fill="#000000"
-        motion={motion({ scale: 1 }).to({ scale: 2 }, span(2, 1))}
-      />
-    </Group>
-  ),
-);
+const model = scene({ size: [100, 100], duration: 4, title: "P", desc: "D", still: 1 }, () => (
+  <Group>
+    <Shape
+      geometry={rect(10, 10)}
+      fill={linear({ from: [0, 0], to: [10, 0], stops: ["#FFFFFF", "#000000"] })}
+      motion={motion({ opacity: 0, rotate: 0 }).to({ opacity: 1, rotate: 90 }, span(1, 1))}
+    />
+    <Shape
+      geometry={circle(4)}
+      fill="#000000"
+      effects={[blur(track(0).to(4, span(2, 1), ease.linear))]}
+    />
+    <Shape
+      geometry={circle(4)}
+      fill="#000000"
+      motion={motion({ scale: 1 }).to({ scale: 2 }, span(2, 1))}
+    />
+  </Group>
+));
 
 const emit = (prefix?: string) => svg.emit(model, prefix === undefined ? {} : { prefix });
 

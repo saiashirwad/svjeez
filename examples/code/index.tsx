@@ -6,7 +6,6 @@ import {
   Shape,
   Stack,
   Text,
-  canvas,
   ease,
   morph,
   rect,
@@ -106,7 +105,7 @@ export default scene(
     theme,
     loop: false,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.surface} />
       <Shape at={[24, 16]} geometry={rect(432, 264, { radius: 12 })} fill={theme.background} />

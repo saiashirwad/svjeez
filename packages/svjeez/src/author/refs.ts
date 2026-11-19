@@ -128,28 +128,10 @@ export class Ref {
   }
 }
 
-let declared: Ref[] | undefined;
-
 export const ref = (): Ref => {
   const at = caller();
-  const made = new Ref(at && sourceFrom(at));
 
-  declared?.push(made);
-
-  return made;
-};
-
-export const declaring = <T>(build: () => T): readonly [T, readonly Ref[]] => {
-  const outer = declared;
-  const made: Ref[] = [];
-
-  declared = made;
-
-  try {
-    return [build(), made];
-  } finally {
-    declared = outer;
-  }
+  return new Ref(at && sourceFrom(at));
 };
 
 export type Place = keyof typeof PLACES;

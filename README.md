@@ -34,7 +34,7 @@ Save this as `tsconfig.json`:
 Save this as `scene.tsx`:
 
 ```tsx
-import { Group, Shape, circle, ease, enter, path, scene, span } from "svjeez";
+import { Group, Shape, circle, ease, enter, path, scene, span, track } from "svjeez";
 
 export default scene({ size: [200, 120], duration: 4, title: "Hello" }, () => (
   <Group>
@@ -59,13 +59,13 @@ npx svjeez svg scene.tsx --out hello.svg
 npx svjeez dev scene.tsx
 ```
 
-Open `hello.svg` in a browser or embed it with `<img src="hello.svg" alt="A curve draws on, then a dot pops in">`. With Bun, use `bun add svjeez@next` and `bunx --bun svjeez` with the same scene and JSX config.
+The scene function is handed its `canvas` (`canvas.rect`, `canvas.center`, `canvas.size`). Open `hello.svg` in a browser or embed it with `<img src="hello.svg" alt="A curve draws on, then a dot pops in">`. With Bun, use `bun add svjeez@next` and `bunx --bun svjeez` with the same scene and JSX config.
 
 ## Ways to move something
 
 Each has one job.
 
-- **A track** is a timeline you declare, write in scene order, and nodes read: `const glow = track(0)`, `<Shape opacity={glow} />`, then `glow.to(1, span(1, 0.3))`. Every write returns the track, and `glow.span` is the span of the last step, so `glow.span.next(0.5)` follows it. A point track can go to an anchor, resolved after layout: `pos.to(card.right, glow.span.next(0.5))` lands the node's `anchor` point on it. Its times count on the clock of the nodes that read it, so nodes on different clocks (another `<Sequence>`) need their own tracks.
+- **A track** is a value you build, then hand to a node: `const glow = track(0).to(1, span(1, 0.3))`, `<Shape opacity={glow} />`. Tracks are immutable: every `to`, `set`, `loop`, `repeat` and `rewind` returns a new track, so a component given a track can't schedule motion behind your back. Name your spans first, build each track, then write the JSX. `glow.span` is the span of the last step, so `glow.span.next(0.5)` follows it. A point track can go to an anchor, resolved after layout: `track(p).to(card.right, glow.span.next(0.5))` lands the node's `anchor` point on it. Its times count on the clock of the nodes that read it, so nodes on different clocks (another `<Sequence>`) need their own tracks.
 - **`draw`** is how a component is told to draw itself: a number or a track from 0 to 1, as in `<Arrow draw={t} />` or `<Shape draw={t} />` (trim `[0, draw]`), and each series of a chart takes the same prop.
 - **A motion layer** is a passing effect on top of the prop, such as an entrance, an exit or a wobble: `motion={enter(span(1, 0.3))}`. Layers always stack.
 - **A morph** says the picture's structure changes from one state to another, and moves whatever differs.

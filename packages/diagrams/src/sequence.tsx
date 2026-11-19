@@ -5,7 +5,6 @@ import { sequence as layout } from "./layout/sequence.ts";
 import type { Box } from "./layout/box.ts";
 import {
   Route,
-  beatOf,
   checkIds,
   Chip,
   Edge,
@@ -21,15 +20,19 @@ import {
   partsOf,
   pop,
   sizeOf,
-  spanOf,
+  schedule,
   type Diagram,
   type DiagramOptions,
+  type Reveal,
 } from "./kit.tsx";
 import type { Labelled, SequenceMessage } from "./types.ts";
 
 export interface SequenceOptions extends DiagramOptions {
-  readonly reveal?: Span | readonly Span[];
+  /** One span plays the rows one after another; a record times the rows it names, by id ("message-1", "note-2", counted over messages and notes together). */
+  readonly reveal?: Reveal<RowId>;
 }
+
+export type RowId = `message-${number}` | `note-${number}`;
 
 export interface Sequence<A extends string> extends Diagram<A> {
   message(index: number): {
@@ -39,9 +42,6 @@ export interface Sequence<A extends string> extends Diagram<A> {
 }
 
 const WHAT = "sequence()";
-
-const isList = (reveal: Span | readonly Span[] | undefined): reveal is readonly Span[] =>
-  Array.isArray(reveal);
 
 export function sequence<const A extends Record<string, Labelled>>(
   spec: {
@@ -90,22 +90,9 @@ export function sequence<const A extends Record<string, Labelled>>(
     box: move(r.box),
   }));
 
-  const { reveal } = options;
-
-  if (isList(reveal) && reveal.length !== rows.length)
-    throw new SceneError(
-      `${WHAT} reveal has ${reveal.length} spans for ${rows.length} messages and notes.`,
-      "Give one span per message or note, or one span for them all to follow each other.",
-    );
-
-  const beat =
-    reveal === undefined || isList(reveal) ? undefined : spanOf(reveal, `${WHAT} reveal`);
-
-  const beats: readonly (Spanned | undefined)[] = rows.map((_, i) =>
-    isList(reveal)
-      ? spanOf(reveal[i], `${WHAT} reveal for message ${i + 1}`)
-      : beat && beatOf(beat, i),
-  );
+  const rowIds = rows.map((row, i) => `${row.kind}-${i + 1}`);
+  const shown = schedule(options.reveal, rowIds, WHAT);
+  const beats: readonly (Spanned | undefined)[] = rowIds.map((id) => shown.get(id));
 
   const drawOf = (beat: Span) => span(beat.start, Math.min(0.5, beat.over * 0.7));
   const fadeOf = (beat: Span) => span(beat.start, Math.min(0.25, beat.over));
@@ -159,7 +146,7 @@ export function sequence<const A extends Record<string, Labelled>>(
               look={l}
               points={points}
               head={row.head ?? "filled"}
-              dash={row.reply ? [5, 4] : undefined}
+              stroke={row.reply ? { dash: [5, 4] } : undefined}
               draw={drawnBy(options.draw, `message-${i + 1}`, beat && drawOf(beat), WHAT)}
             />
             <Chip

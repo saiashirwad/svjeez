@@ -1,6 +1,6 @@
 import { Code, highlight, type CodeProps, type Lang } from "@svjeez/code";
 import { tomorrow } from "@svjeez/code/palettes";
-import { Group, Shape, canvas, font, scene } from "svjeez";
+import { Group, Shape, font, scene } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
 import { svg as backend } from "svjeez/tools";
 
@@ -27,7 +27,7 @@ const props: CodeProps = {
 };
 
 export const out: string = backend.emit(
-  scene({ size: [240, 60], duration: 1, title: "Code" }, () =>
+  scene({ size: [240, 60], duration: 1, title: "Code" }, (canvas) =>
     jsx(Group, {
       children: [
         jsx(Shape, { geometry: canvas.rect, fill: "#FFFFFF" }),

@@ -261,9 +261,12 @@ export const snapshots = async <T>(
 
     if (shots) {
       const recording: Recording = {
-        fonts: (options.fonts ?? [])
-          .flatMap(facesOf)
-          .map(({ family, weight, style, href }) => ({ family, weight, style, href })),
+        fonts: (options.fonts ?? []).flatMap(facesOf).map(({ family, weight, italic, href }) => ({
+          family,
+          weight,
+          style: italic ? ("italic" as const) : ("normal" as const),
+          href,
+        })),
         cards: tapes.map((t) => t.steps ?? []),
       };
 

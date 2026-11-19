@@ -12,7 +12,7 @@ import { Group, Shape, scene, span, track } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
 
 const graph: Plane = plane({ x: [-2, 2], y: [0, 4], size: [200, 100] });
-const props: TexProps = { size: 32, fill: "#000000", children: "x^2", write: span(0, 1) };
+const props: TexProps = { size: 32, fill: "#000000", children: "x^2", draw: 1 };
 const amount = track(0).to(1, span(0, 1));
 const [apex] = crossings({ center: [0, 0], radius: 10 }, { center: [10, 0], radius: 10 });
 

@@ -1,18 +1,4 @@
-import {
-  Group,
-  Shape,
-  Text,
-  canvas,
-  circle,
-  ease,
-  line,
-  polyline,
-  rect,
-  scene,
-  span,
-  track,
-  type Vec,
-} from "svjeez";
+import { Group, Shape, Text, circle, ease, line, rect, scene, span, track, type Vec } from "svjeez";
 import { mono, theme } from "../theme";
 
 const theta = track(0).to(360, span(0.3, 4), ease.inOut).rewind(1.2, ease.inOut);
@@ -34,7 +20,7 @@ const onWave = (t: number): Vec => [
   WAVE.y - WAVE.height * Math.sin(t * DEG),
 ];
 
-const wave = polyline(Array.from({ length: 73 }, (_, i) => onWave(i * 5)));
+const wave = line(...Array.from({ length: 73 }, (_, i) => onWave(i * 5)));
 
 export default scene(
   {
@@ -43,9 +29,9 @@ export default scene(
     title: "Derived tracks",
     desc: "One angle track turns a spoke round a dial, carries a point round its rim and along a sine wave, and fills a bar as it goes, then winds them all back.",
     theme,
-    reducedMotion: 2,
+    still: 2,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Shape

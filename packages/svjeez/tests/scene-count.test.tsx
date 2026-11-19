@@ -37,7 +37,7 @@ import { ease as modelEase } from "../src/model/time";
 const mono = await font.load(new URL("./fixtures/JetBrainsMono.ttf", import.meta.url));
 
 const made = (build: () => SceneElement, duration = 4, loop = true): Model.Scene =>
-  scene({ size: [200, 60], duration, title: "Count", loop, reducedMotion: 3.5 }, build);
+  scene({ size: [200, 60], duration, title: "Count", loop, still: 3.5 }, build);
 
 const find = (model: Model.Scene, key: string): Model.SceneNode => {
   const visit = (node: Model.SceneNode): Model.SceneNode | undefined =>
@@ -72,7 +72,7 @@ const glyphsAt = (model: Model.Scene, key: string, t: number) => {
   if (inner.kind !== "group") throw new Error("expected the clipped digits");
   const clip = inner.clip;
 
-  if (clip === undefined || isLane(clip) || clip.kind !== "polygon")
+  if (clip === undefined || isLane(clip) || clip.kind !== "points")
     throw new Error("expected a clip");
   const [top, bottom] = [clip.points[0]![1], clip.points[2]![1]];
   const glyphs: { x: number; text: string }[] = [];

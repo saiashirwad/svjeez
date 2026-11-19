@@ -166,11 +166,11 @@ export const missingGlyphs = (survey: Survey): void => {
       if (!family) continue;
 
       const face =
-        family.faces.find((f) => f.weight === run.face.weight && f.style === run.face.style) ??
-        family.face(run.face.weight, run.face.style);
+        family.faces.find((f) => f.weight === run.face.weight && f.italic === run.face.italic) ??
+        family.face(run.face.weight, run.face.italic);
 
       for (const char of FontBook.missing(face, run.text)) {
-        const name = `${run.face.family} ${run.face.weight}${run.face.style === "italic" ? " italic" : ""}`;
+        const name = `${run.face.family} ${run.face.weight}${run.face.italic ? " italic" : ""}`;
         missing.set(name, (missing.get(name) ?? new Set()).add(char));
       }
     }

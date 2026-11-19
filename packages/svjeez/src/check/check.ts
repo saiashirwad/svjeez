@@ -49,7 +49,7 @@ const HOLD = 0.1;
 const round = (time: Seconds): Seconds => Number(time.toFixed(3));
 
 const kindOf = (tag: string): string =>
-  tag === "text" ? "text" : tag === "image" ? "image" : tag === "use" ? "instance" : "shape";
+  tag === "text" ? "text" : tag === "image" ? "picture" : "shape";
 
 const name = (element: PageElement): string =>
   element.key !== undefined

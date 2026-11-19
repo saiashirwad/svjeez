@@ -224,7 +224,11 @@ const emitShell = (state: State, target: Element, lanes: readonly Lane[]): SvgNo
 
   if (classes.length > 0) attrs.class = classes.join(" ");
 
-  const shell = element(target.tag, attrs, children);
+  const shell: Element = {
+    ...element(target.tag, attrs, children),
+    ...(target.drawn && { drawn: target.drawn }),
+  };
+
   const emitted = Object.keys(still).length > 0 ? { ...shell, still } : shell;
 
   if (
@@ -336,6 +340,7 @@ const walk = (
       const el = {
         ...bare,
         children: node.children.map((child) => walk(state, child, hides, inherited)),
+        ...(node.drawn && { drawn: node.drawn }),
       };
 
       const [first, ...rest] = shells;

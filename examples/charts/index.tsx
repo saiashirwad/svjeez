@@ -3,7 +3,6 @@ import {
   Group,
   Shape,
   Text,
-  canvas,
   ease,
   enter,
   exit,
@@ -28,7 +27,7 @@ const counts = [
 
 const hours = [26, 28, 25, 27, 29, 26, 24, 15, 11, 9, 8, 7];
 
-const look = { font: mono, fontSize: 12, axis: theme.border, label: theme.muted, grid: true };
+const look = { font: mono, textSize: 12, axis: theme.border, label: theme.muted, grid: {} };
 
 const rise = (at: number) => enter(span(at, 0.6), { from: { opacity: 0, offset: [0, 10] } });
 
@@ -59,9 +58,9 @@ export default scene(
     title: "Pull request review time",
     desc: "Two charts animate in. Grouped bars show pull requests opened and merged per month, merged catching up with opened. An area chart shows the median hours to a first review falling from about 26 to 7 after a review bot ships in week 8. Sample data.",
     theme,
-    reducedMotion: 6,
+    still: 6,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Group motion={exit(span(10.2, 0.8))}>

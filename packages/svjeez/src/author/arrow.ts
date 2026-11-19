@@ -106,7 +106,7 @@ const headOf = (size: number, tip: Vec, angle: number): Geometry => {
   const barb = (side: number): Vec =>
     add(tip, turn([-size * Math.cos(SPREAD), side * size * Math.sin(SPREAD)], angle));
 
-  return { kind: "polygon", points: [barb(-1), tip, barb(1)], closed: false };
+  return { kind: "points", points: [barb(-1), tip, barb(1)], closed: false };
 };
 
 const isOpen = (trim: Vec): boolean => trim[1] - trim[0] > EPSILON;

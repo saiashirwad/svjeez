@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { renderFrames } from "svjeez/frames";
 import { restyle } from "svjeez/page";
-import { Shape, blur, ease, pathData, rect, scene, span, track, type SceneElement } from "svjeez";
+import { Shape, blur, ease, path, rect, scene, span, track, type SceneElement } from "svjeez";
 import { svg, type SceneOptions, type SvgOptions } from "svjeez/tools";
 
 const emit = (
@@ -28,8 +28,8 @@ const same = (a: Uint8Array, b: Uint8Array) => Buffer.from(a).equals(Buffer.from
 
 const attrsOf = (out: string, tag: string) => out.match(new RegExp(`<${tag}\\b[^>]*>`, "g")) ?? [];
 
-const square = pathData("M0 0L20 0L20 20L0 20Z");
-const inner = pathData("M4 4L16 4L16 16L4 16Z");
+const square = path.parse("M0 0L20 0L20 20L0 20Z");
+const inner = path.parse("M4 4L16 4L16 16L4 16Z");
 
 const morphing = (when = span(2, 1)) => (
   <Shape geometry={track(square).to(inner, when, ease.linear)} fill="#FF0000" />
@@ -102,12 +102,12 @@ describe("windowed SMIL markup", () => {
   });
 
   test("the element holds the last value and the reduced-motion twin keeps the still frame", () => {
-    const out = emit(() => morphing(), { reducedMotion: 0.5 });
+    const out = emit(() => morphing(), { still: 0.5 });
 
     expect(out).toMatch(new RegExp(`<path d="${B}"[^>]* class="dm">`));
     expect(out).toMatch(new RegExp(`<path d="${A}"[^>]* class="ds" display="none"/>`));
 
-    const filter = emit(blurring, { reducedMotion: 0.5 });
+    const filter = emit(blurring, { still: 0.5 });
 
     expect(filter).toContain('<feGaussianBlur stdDeviation="0">');
     expect(filter).toContain('<feGaussianBlur stdDeviation="6"/>');

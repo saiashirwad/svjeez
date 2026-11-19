@@ -4,7 +4,7 @@ import { readSource } from "./source";
 export type ImageFormat = "svg" | "png" | "jpeg" | "gif" | "webp";
 
 export interface PictureData {
-  readonly href: `data:${string}`;
+  readonly data: `data:${string}`;
   readonly width: number;
   readonly height: number;
   readonly format: ImageFormat;
@@ -216,12 +216,12 @@ export const picture = Object.assign(
       );
     }
 
-    const href =
+    const data =
       format === "svg"
         ? svgHref(new TextDecoder().decode(bytes))
         : (`data:${codec.mime};base64,${base64(bytes)}` as const);
 
-    return { href, ...size, format, bytes: href.length };
+    return { data, ...size, format, bytes: data.length };
   },
   {
     load: async (source: string | URL): Promise<PictureData> => picture(await readSource(source)),

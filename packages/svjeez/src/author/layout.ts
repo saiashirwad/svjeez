@@ -8,7 +8,8 @@ import type { Arrange, Size } from "./settle";
 
 export type Alignment = "start" | "center" | "end";
 
-export type Justify = Alignment | "space-between";
+/** Where children sit along the stack; "spread" puts the first and last at its ends, with equal gaps between. */
+export type Justify = Alignment | "spread";
 
 const SHARE: Readonly<Record<Alignment, number>> = { start: 0, center: 0.5, end: 1 };
 
@@ -121,8 +122,8 @@ export const Stack = ({
   const { backdrop, inset } = paint(label, { fill, stroke, radius }, padding);
   const stretch = align === "stretch";
   const cross = stretch ? 0 : share(align, '<Stack> align, or "stretch",');
-  const between = justify === "space-between";
-  const along = between ? 0 : share(justify, '<Stack> justify, or "space-between",');
+  const between = justify === "spread";
+  const along = between ? 0 : share(justify, '<Stack> justify, or "spread",');
   const row = direction === "row";
   const [wide, tall] = [size(width, "<Stack> width"), size(height, "<Stack> height")];
 

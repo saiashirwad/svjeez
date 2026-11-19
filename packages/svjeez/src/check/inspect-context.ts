@@ -26,10 +26,8 @@ export const RULES = {
   "nothing-enters": "Everything is on screen from 0s and nothing ever enters.",
   "wasted-motion": "A value changes before the node is first seen, or after it is gone for good.",
   static: "Nothing in the scene moves, or a value changes only after the scene ends.",
-  "unused-symbol": "A symbol no instance draws.",
   "layout-overlap": "Two children of a <Stack> or <Grid> overlap: motion carried one onto another.",
   "word-cut": "A word wider than the width its text wraps to, cut across two lines.",
-  "unattached-ref": "A ref the scene made that no node takes.",
   unsupported: "A feature the chosen backend can't draw.",
   approximate: "A feature the chosen backend draws differently from the model.",
 } as const;

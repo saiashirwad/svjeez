@@ -1,8 +1,1 @@
-export {
-  Icon,
-  type IconData,
-  type IconProps,
-  type IconDraw,
-  type OwnIconProps,
-  type SharedIconProps,
-} from "./icon.tsx";
+export { Icon, type IconData, type IconProps, type IconDraw } from "./icon.tsx";

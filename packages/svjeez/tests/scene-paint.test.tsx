@@ -44,7 +44,7 @@ const made = (build: () => SceneElement, duration = 4, still: number | false = 2
       size: [200, 100],
       duration,
       title: "Test",
-      reducedMotion: still,
+      still,
     },
     build,
   );
@@ -262,7 +262,7 @@ describe("gradients", () => {
 describe("patterns", () => {
   const dots = pattern({
     size: [10, 10],
-    children: <Shape geometry={circle(2)} at={[5, 5]} fill="#FF0000" />,
+    tile: <Shape geometry={circle(2)} at={[5, 5]} fill="#FF0000" />,
   });
 
   test("a pattern lowers its children into a tile, once however many nodes it paints", () => {
@@ -316,7 +316,7 @@ describe("patterns", () => {
           at={[5, 0]}
           fill={pattern({
             size: [10, 10],
-            children: <Shape geometry={rect(5, 5)} fill="#000000" />,
+            tile: <Shape geometry={rect(5, 5)} fill="#000000" />,
             offset: x,
           })}
         />
@@ -351,9 +351,9 @@ describe("patterns", () => {
   });
 
   test("a pattern is checked where it is written", () => {
-    expect(() => pattern({ size: [0, 10], children: null })).toThrow("positive numbers");
+    expect(() => pattern({ size: [0, 10], tile: null })).toThrow("positive numbers");
     expect(() =>
-      made(() => <Shape geometry={rect(4, 4)} fill={pattern({ size: [4, 4], children: null })} />),
+      made(() => <Shape geometry={rect(4, 4)} fill={pattern({ size: [4, 4], tile: null })} />),
     ).toThrow("has nothing to draw");
   });
 });
@@ -758,7 +758,7 @@ describe("clips and masks sized by the node's box", () => {
         [2, 3],
       ),
     ).toEqual({
-      kind: "polygon",
+      kind: "points",
       points: [
         [2, 3],
         [3, 3],
@@ -874,7 +874,7 @@ describe("effects", () => {
     expect(out).toContain('x="-25" y="-25" width="90" height="70"');
   });
 
-  test("an effect's lengths are checked, and a non-scaling stroke can't be bounded under one", () => {
+  test("an effect's lengths are checked, and a fixedWidth stroke can't be bounded under one", () => {
     expect(() =>
       made(() => <Shape fill="#000000" key="a" geometry={rect(4, 4)} effects={[blur(-1)]} />),
     ).toThrow('blur on <Shape> "a" needs a finite length of 0 or more, got -1.');
@@ -884,12 +884,12 @@ describe("effects", () => {
           <Shape
             key="a"
             geometry={rect(4, 4)}
-            stroke={{ color: "#000000", nonScaling: true }}
+            stroke={{ color: "#000000", fixedWidth: true }}
             effects={[blur(1)]}
           />
         )),
       ),
-    ).toThrow('"a" has a non-scaling stroke inside the effects of "a"');
+    ).toThrow('"a" has a fixedWidth stroke inside the effects of "a"');
   });
 
   test("SVG draws blur and shadow exactly, and warns only for a blur under 1.5", () => {

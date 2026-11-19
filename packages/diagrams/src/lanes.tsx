@@ -13,7 +13,7 @@ import {
   track,
   type SceneElement,
 } from "svjeez";
-import { SceneError, type Child, type Spanned } from "svjeez/tools";
+import { SceneError, type Child, type Spanned, type When } from "svjeez/tools";
 import { lanes as layout } from "./layout/lanes.ts";
 import {
   Route,
@@ -37,10 +37,8 @@ import type { LaneBar, LaneEvent, LaneLink, Labelled } from "./types.ts";
 
 export interface LanesOptions extends DiagramOptions {
   readonly scale: number;
-  readonly reveal?: {
-    readonly start: number;
-    readonly over?: number;
-  };
+  /** `span(start, over)` fits the lanes' timeline into `over`; an open `span(start)` plays it at its own rate. */
+  readonly reveal?: When;
 }
 
 export interface Lanes<L extends string> extends Diagram<L> {

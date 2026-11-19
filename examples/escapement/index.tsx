@@ -1,20 +1,17 @@
 import {
   Group,
-  Instance,
   Shape,
   Text,
-  canvas,
   circle,
   ease,
   enter,
   exit,
   line,
-  pathData,
+  path,
   sampled,
   scene,
   span,
   subtract,
-  symbol,
   track,
   type Paint,
   type SceneElement,
@@ -201,7 +198,7 @@ const windows = (
 };
 
 const pierced = (outline: string, holes: readonly string[]) =>
-  subtract(pathData(outline), ...holes.map(pathData));
+  subtract(path.parse(outline), ...holes.map(path.parse));
 
 const spiral = (from: number, to: number, a0: number, a1: number, places = 1): string => {
   const count = Math.max(1, Math.ceil(Math.abs(a1 - a0) / 30));
@@ -271,7 +268,7 @@ const Bevel = ({ gear }: { readonly gear: Gear }): SceneElement => (
 const Pinion = ({ gear }: { readonly gear: Gear }): SceneElement => (
   <Group>
     <Shape
-      geometry={pathData(teethOf(gear, 2))}
+      geometry={path.parse(teethOf(gear, 2))}
       fill={STEEL}
       stroke={{ color: STEEL_EDGE, width: 0.5, join: "round" }}
     />
@@ -333,20 +330,20 @@ const hairspring = Array.from({ length: SLICES + 1 }, (_, j) => {
   return (
     <Group offset={STAFF} origin="at" rotate={theta.map((v) => (v * j) / SLICES)}>
       <Shape
-        geometry={pathData(spiral(radius(u0), radius(u1), angle(u0), angle(u1), 2))}
+        geometry={path.parse(spiral(radius(u0), radius(u1), angle(u0), angle(u1), 2))}
         stroke={{ color: "#6F8FE8", width: 0.8, cap: "round" }}
       />
     </Group>
   );
 });
 
-const balanceWheel = subtract(circle(88), ...windows(9, 77, 3, 7, 30, 2).map(pathData));
+const balanceWheel = subtract(circle(88), ...windows(9, 77, 3, 7, 30, 2).map(path.parse));
 
 const fork = (() => {
   const top = -(REACH - PIN);
   const q = (x: number, y: number): string => pt([x, y], 2);
 
-  const lever = pathData(
+  const lever = path.parse(
     "M" +
       [
         q(-4.6, 0),
@@ -368,7 +365,7 @@ const fork = (() => {
   const local = (p: P): P => [p[0] - FORK[0], p[1] - FORK[1]];
   const mid = (s: typeof entry): P => local([(s[2][0] + s[3][0]) / 2, (s[2][1] + s[3][1]) / 2]);
 
-  const anchor = pathData(
+  const anchor = path.parse(
     "M" +
       q(...mid(entry)) +
       "Q" +
@@ -381,17 +378,13 @@ const fork = (() => {
       q(...mid(exitStone)),
   );
 
-  const stone = (s: readonly P[]) => pathData("M" + s.map((p) => pt(local(p), 2)).join("L") + "Z");
+  const stone = (s: readonly P[]) =>
+    path.parse("M" + s.map((p) => pt(local(p), 2)).join("L") + "Z");
 
   return { lever, anchor, entry: stone(entry), exit: stone(exitStone) };
 })();
 
-const arm = symbol(() => (
-  <Shape
-    geometry={pathData(spiral(100, 34, 0, 200))}
-    stroke={{ color: "#8C96A8", width: 4.2, cap: "round" }}
-  />
-));
+const arm = path.parse(spiral(100, 34, 0, 200));
 
 interface View {
   readonly center: Vec;
@@ -605,9 +598,9 @@ export default scene(
     duration: D,
     title: "A watch movement running, from the barrel to the escapement",
     desc: "A mechanical watch movement runs ten times slower than life: the balance swings, its pin throws the pallet fork from side to side, and the escape wheel steps a tooth at a time, turning the fourth and third wheels behind it. The view travels from the mainspring barrel down the train to the escapement, closes in on the impulse pin and then on the two ruby stones, and pulls back.",
-    reducedMotion: 31,
+    still: 31,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={GROUND} />
       <Group offset={camera.at} scale={camera.scale} origin="at">
@@ -620,7 +613,7 @@ export default scene(
         <Shade c={barrel.c} r={barrel.r} />
         <Axle gear={barrel} by={barrelBy}>
           <Shape
-            geometry={pathData(teethOf({ ...barrel, c: [0, 0] }))}
+            geometry={path.parse(teethOf({ ...barrel, c: [0, 0] }))}
             fill={BRASS}
             stroke={{ color: BRASS_EDGE, width: 0.6, join: "round" }}
           />
@@ -630,7 +623,12 @@ export default scene(
             stroke={{ color: BRASS_EDGE, width: 1 }}
           />
           {Array.from({ length: 9 }, (_, i) => (
-            <Instance of={arm} rotate={i * 40} origin="at" />
+            <Shape
+              geometry={arm}
+              stroke={{ color: "#8C96A8", width: 4.2, cap: "round" }}
+              rotate={i * 40}
+              origin="at"
+            />
           ))}
           <Shape geometry={circle(24)} fill={STEEL} stroke={{ color: STEEL_EDGE, width: 0.8 }} />
           <Shape geometry={circle(8)} fill={STEEL_EDGE} />

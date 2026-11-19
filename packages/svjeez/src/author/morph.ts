@@ -1,5 +1,5 @@
 import { SceneError } from "../model/scene-error";
-import { named, whereOf } from "./names";
+import type { Names } from "./names";
 import { num } from "../model/format";
 import { DEFAULT_EASE, EPSILON, type Seconds } from "../model/time";
 import { checkWindow, span, type Span } from "./span";
@@ -118,7 +118,7 @@ const placeNote = (nodes: readonly SceneNode[]): string =>
     ? ` It has no key, so it is matched by its place among its siblings: give each version a key, as in <Shape key="…" />.`
     : ` Give the two versions different keys, so one exits as the other enters.`;
 
-const entries = (lists: readonly (readonly SceneNode[])[]): Entry[] => {
+const entries = (names: Names, lists: readonly (readonly SceneNode[])[]): Entry[] => {
   const counts = lists.map((list) => list.filter(isPlaced).length);
   const where = lists.flat()[0];
 
@@ -126,7 +126,7 @@ const entries = (lists: readonly (readonly SceneNode[])[]): Entry[] => {
     const parent = parentOf(where.key);
 
     throw new SceneError(
-      `morph() matches nodes by key, and ${parent ? `inside ${named(parent)}` : "at the top"} the states have ${counts.join(", ")} nodes with no key, so they would pair up by their place. Give each node that comes, goes or changes a key, as in <Shape key="…" />.`,
+      `morph() matches nodes by key, and ${parent ? `inside ${names.named(parent)}` : "at the top"} the states have ${counts.join(", ")} nodes with no key, so they would pair up by their place. Give each node that comes, goes or changes a key, as in <Shape key="…" />.`,
     );
   }
 
@@ -153,7 +153,13 @@ const entries = (lists: readonly (readonly SceneNode[])[]): Entry[] => {
       key,
       present: found.map((node) => node !== undefined),
       filled,
-      children: kinds[0] === "group" ? entries(filled.map((node) => childrenOf(node))) : [],
+      children:
+        kinds[0] === "group"
+          ? entries(
+              names,
+              filled.map((node) => childrenOf(node)),
+            )
+          : [],
     };
   });
 };
@@ -195,6 +201,7 @@ interface Plan {
   readonly enter: Fixed;
   readonly exit: Fixed;
   readonly windows: ReadonlyMap<Entry, readonly Window[]>;
+  readonly names: Names;
 }
 
 interface Fixed {
@@ -250,7 +257,7 @@ const blend = <T>(
 
   if (values.some(isLane))
     throw new SceneError(
-      `morph() can't blend the ${what} of ${named(entry.key)}: it moves in a state (a track or a recipe) and also differs between states. Write it the same in every state, or let the morph move it.`,
+      `morph() can't blend the ${what} of ${plan.names.named(entry.key)}: it moves in a state (a track or a recipe) and also differs between states. Write it the same in every state, or let the morph move it.`,
     );
 
   // SAFETY: no value is a lane, so each is a T.
@@ -263,18 +270,18 @@ const blend = <T>(
     fixed.slice(0, -1),
     fixed.slice(1),
     mix,
-    `${what} on ${named(entry.key)} in morph()`,
+    `${what} on ${plan.names.named(entry.key)} in morph()`,
     curve,
   );
 };
 
-const agreed = <T>(entry: Entry, read: (node: SceneNode) => T, what: string): T => {
+const agreed = <T>(plan: Plan, entry: Entry, read: (node: SceneNode) => T, what: string): T => {
   const values = entry.filled.filter((_, s) => entry.present[s]).map(read);
   const other = values.find((value) => !same(value, values[0]));
 
   if (other !== undefined)
     throw new SceneError(
-      `morph() can't blend ${named(entry.key)}: its ${what} differs between states, and ${what} doesn't animate.${placeNote(entry.filled)}`,
+      `morph() can't blend ${plan.names.named(entry.key)}: its ${what} differs between states, and ${what} doesn't animate.${placeNote(entry.filled)}`,
     );
 
   return values[0]!;
@@ -287,7 +294,7 @@ const rotateScale = (rotate: number, [sx, sy]: Vec, [x, y]: Vec): Vec => {
   return [cos * sx * x - sin * sy * y, sin * sx * x + cos * sy * y];
 };
 
-const rebased = (entry: Entry, node: SceneNode, origin: Vec): readonly Layer[] => {
+const rebased = (plan: Plan, entry: Entry, node: SceneNode, origin: Vec): readonly Layer[] => {
   const [dx, dy] = [node.origin[0] - origin[0], node.origin[1] - origin[1]];
 
   if (Math.abs(dx) < EPSILON && Math.abs(dy) < EPSILON) return node.layers;
@@ -295,7 +302,7 @@ const rebased = (entry: Entry, node: SceneNode, origin: Vec): readonly Layer[] =
   return node.layers.map((layer) => {
     if (isLane(layer.rotate) || isLane(layer.scale))
       throw new SceneError(
-        `morph() can't blend ${named(entry.key)}: it turns or scales in a state, and its origin moves between states. Give it the same origin in every state, as in origin={[x, y]}.`,
+        `morph() can't blend ${plan.names.named(entry.key)}: it turns or scales in a state, and its origin moves between states. Give it the same origin in every state, as in origin={[x, y]}.`,
       );
     const [mx, my] = rotateScale(layer.rotate, layer.scale, [dx, dy]);
     const shift: Vec = [dx - mx, dy - my];
@@ -338,7 +345,7 @@ const presence = (plan: Plan, entry: Entry, enter: Fixed, exit: Fixed): Layer | 
   });
 
   const initial = present[0] ? IDLE : enter;
-  const where = `entering or exiting on ${named(entry.key)} in morph()`;
+  const where = `entering or exiting on ${plan.names.named(entry.key)} in morph()`;
 
   const field = <T>(read: (layer: Fixed) => T, mix: Mix<T>): Animated<T> =>
     travel(plan, windows, read(initial), from.map(read), to.map(read), mix, where);
@@ -352,7 +359,7 @@ const presence = (plan: Plan, entry: Entry, enter: Fixed, exit: Fixed): Layer | 
 };
 
 const layersOf = (plan: Plan, entry: Entry, origin: Vec): Layer[] => {
-  const stacks = entry.filled.map((node) => rebased(entry, node, origin));
+  const stacks = entry.filled.map((node) => rebased(plan, entry, node, origin));
   const depth = Math.max(...stacks.map((stack) => stack.length));
 
   const padded = stacks.map((stack) => [
@@ -402,8 +409,8 @@ const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed
   const rest = firstPresent(entry);
   const shown = presence(plan, entry, enter, exit);
   const clip = clipOf(plan, entry);
-  const mask = agreed(entry, (node) => node.mask, "mask");
-  const mode = agreed(entry, (node) => node.blend ?? "normal", "blend");
+  const mask = agreed(plan, entry, (node) => node.mask, "mask");
+  const mode = agreed(plan, entry, (node) => node.blend ?? "normal", "blend");
 
   return {
     key: entry.key,
@@ -435,7 +442,7 @@ const clipOf = (plan: Plan, entry: Entry): Animated<Geometry> | undefined => {
 
   if (given.length < clips.length)
     throw new SceneError(
-      `morph() can't blend ${named(entry.key)}: it has a clip in one state and none in another, and no outline blends into drawing everything. Give it a clip in every state, as large as the node where it should show all of it.`,
+      `morph() can't blend ${plan.names.named(entry.key)}: it has a clip in one state and none in another, and no outline blends into drawing everything. Give it a clip in every state, as large as the node where it should show all of it.`,
     );
 
   return outlinesOf(plan, entry, given, "clip");
@@ -467,7 +474,7 @@ const effectsOf = (plan: Plan, entry: Entry): Effect[] => {
 
   if (odd)
     throw new SceneError(
-      `morph() can't blend the effects of ${named(entry.key)}: one state has ${kinds(odd)} and another ${kinds(template)}. List the same effects in the same order in every state, or none.`,
+      `morph() can't blend the effects of ${plan.names.named(entry.key)}: one state has ${kinds(odd)} and another ${kinds(template)}. List the same effects in the same order in every state, or none.`,
     );
   const filled = lists.map((list) => (list.length === 0 ? template.map(absent) : list));
 
@@ -515,7 +522,7 @@ const effectsOf = (plan: Plan, entry: Entry): Effect[] => {
 
         if (displaces.some((each) => each.seed !== effect.seed || each.octaves !== effect.octaves))
           throw new SceneError(
-            `morph() can't blend the displace of ${named(entry.key)}: its seed or octaves differ between states. Give every state the same seed and octaves, and blend scale and frequency.`,
+            `morph() can't blend the displace of ${plan.names.named(entry.key)}: its seed or octaves differ between states. Give every state the same seed and octaves, and blend scale and frequency.`,
           );
 
         return {
@@ -595,7 +602,7 @@ const paints = (
       what,
       paintCurve(plan),
     ),
-    `${what} on ${named(entry.key)} in morph()`,
+    `${what} on ${plan.names.named(entry.key)} in morph()`,
   );
 };
 
@@ -609,7 +616,7 @@ const numbersOf = (geometry: Geometry): number[] => {
       return [geometry.radius, geometry.start, geometry.sweep];
     case "line":
       return [...geometry.from, ...geometry.to];
-    case "polygon":
+    case "points":
       return geometry.points.flat();
     case "path":
       return geometry.contours.flatMap((contour) => [...contour.start, ...contour.curves.flat(2)]);
@@ -630,8 +637,8 @@ const rebuilt = (template: Geometry, values: readonly number[]): Geometry => {
       return { kind: "arc", radius: take(), start: take(), sweep: take() };
     case "line":
       return { kind: "line", from: point(), to: point() };
-    case "polygon":
-      return { kind: "polygon", points: template.points.map(point), closed: template.closed };
+    case "points":
+      return { kind: "points", points: template.points.map(point), closed: template.closed };
     case "path":
       return {
         kind: "path",
@@ -673,13 +680,13 @@ const outlinesOf = (
 
   if (values.some(isLane))
     throw new SceneError(
-      `morph() can't blend the ${what} of ${named(entry.key)}: it moves in a state (a track) and also differs between states. Write it the same in every state, or let the morph reshape it.`,
+      `morph() can't blend the ${what} of ${plan.names.named(entry.key)}: it moves in a state (a track) and also differs between states. Write it the same in every state, or let the morph reshape it.`,
     );
 
   // SAFETY: no value is a lane, so each is a geometry.
   const outlines = matched(
     values as readonly Geometry[],
-    `${what} on ${named(entry.key)} in morph()`,
+    `${what} on ${plan.names.named(entry.key)} in morph()`,
   );
 
   return blend(plan, entry, outlines, geometryMix(outlines[0]!), what);
@@ -702,7 +709,7 @@ const strokeOf = (
             cap: stroke.cap,
             join: stroke.join,
             dash: stroke.dash,
-            nonScaling: stroke.nonScaling,
+            fixedWidth: stroke.fixedWidth,
             under: stroke.under,
           },
         ]
@@ -711,7 +718,7 @@ const strokeOf = (
 
   if (styles.some((each) => !same(each, styles[0])))
     throw new SceneError(
-      `morph() can't blend ${named(entry.key)}: its stroke's cap, join, dash, nonScaling or under differs between states, and those don't animate. Give the stroke the same style in every state.`,
+      `morph() can't blend ${plan.names.named(entry.key)}: its stroke's cap, join, dash, fixedWidth or under differs between states, and those don't animate. Give the stroke the same style in every state.`,
     );
 
   return {
@@ -725,7 +732,7 @@ const strokeOf = (
         "stroke color",
         paintCurve(plan),
       ),
-      `stroke color on ${named(entry.key)} in morph()`,
+      `stroke color on ${plan.names.named(entry.key)} in morph()`,
     ),
     width: blend(
       plan,
@@ -816,7 +823,7 @@ const blendedLines = (plan: Plan, entry: Entry, states: readonly TextNode[]): Te
             "fill",
             paintCurve(plan),
           ),
-          `fill on ${named(entry.key)} in morph()`,
+          `fill on ${plan.names.named(entry.key)} in morph()`,
         ),
         ...(opacity !== undefined && opacity !== 1 && { opacity }),
       };
@@ -881,7 +888,7 @@ const textOf = (plan: Plan, entry: Entry): TextNode | GroupNode => {
   return { ...placed(plan, entry), kind: "group", children };
 };
 
-const countIn = (entry: Entry): Authored["count"] => {
+const countIn = (plan: Plan, entry: Entry): Authored["count"] => {
   const counts = entry.filled
     .filter((_, s) => entry.present[s])
     .map((node) => (node.kind === "group" ? node.authored?.count : undefined));
@@ -890,9 +897,9 @@ const countIn = (entry: Entry): Authored["count"] => {
 
   if (counts.some((count) => !same(count, counts[0])))
     throw new SceneError(
-      `morph() can't blend ${named(entry.key)}: it counts, and what it counts differs between states.`,
+      `morph() can't blend ${plan.names.named(entry.key)}: it counts, and what it counts differs between states.`,
       "Give its count() the same track in every state, or key the <Text> differently in each state so they crossfade.",
-      whereOf(entry.key),
+      plan.names.whereOf(entry.key),
     );
 
   return counts[0];
@@ -904,7 +911,7 @@ const build = (plan: Plan, entry: Entry): SceneNode => {
   const node = ((): SceneNode => {
     switch (rest.kind) {
       case "group": {
-        const count = countIn(entry);
+        const count = countIn(plan, entry);
 
         return {
           ...placed(plan, entry),
@@ -918,22 +925,16 @@ const build = (plan: Plan, entry: Entry): SceneNode => {
         return shapeOf(plan, entry);
       case "text":
         return textOf(plan, entry);
-      case "image": {
+      case "picture": {
         agreed(
+          plan,
           entry,
-          (node) => (node.kind === "image" ? [node.size, node.data] : []),
+          (node) => (node.kind === "picture" ? [node.size, node.data] : []),
           "picture or size",
         );
 
-        return { ...placed(plan, entry), kind: "image", size: rest.size, data: rest.data };
+        return { ...placed(plan, entry), kind: "picture", size: rest.size, data: rest.data };
       }
-
-      case "instance":
-        return {
-          ...placed(plan, entry),
-          kind: "instance",
-          symbol: agreed(entry, (node) => (node.kind === "instance" ? node.symbol : ""), "symbol"),
-        };
     }
   })();
 
@@ -944,9 +945,10 @@ export const merge = (
   states: readonly (readonly SceneNode[])[],
   spans: readonly Span[],
   timing: Timing,
+  names: Names,
   options: MorphOptions = {},
 ): SceneNode[] => {
-  const top = entries(states);
+  const top = entries(names, states);
   const { stagger = 0 } = options;
   const windows = new Map<Entry, Window[]>();
   const all = preorder(top);
@@ -981,6 +983,7 @@ export const merge = (
     enter: layerOf(options.enter ?? { opacity: 0 }),
     exit: layerOf(options.exit ?? { opacity: 0 }),
     windows,
+    names,
   };
 
   return top.map((entry) => build(plan, entry));
@@ -990,20 +993,22 @@ export const morphed = (
   element: MorphElement,
   timing: Timing,
   taken: Set<string>,
-  lower: (state: readonly SceneElement[], names: Set<string>) => SceneNode[],
+  names: Names,
+  lower: (state: readonly SceneElement[], used: Set<string>) => SceneNode[],
 ): SceneNode[] => {
   const states = element.states.map((state) => {
-    const names = new Set(taken);
+    const used = new Set(taken);
 
-    return { nodes: lower(state, names), names };
+    return { nodes: lower(state, used), used };
   });
 
-  for (const { names } of states) for (const name of names) taken.add(name);
+  for (const { used } of states) for (const name of used) taken.add(name);
 
   return merge(
     states.map((state) => state.nodes),
     element.spans,
     timing,
+    names,
     element.options,
   );
 };

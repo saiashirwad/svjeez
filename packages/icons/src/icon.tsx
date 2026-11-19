@@ -1,18 +1,11 @@
 /** @jsxImportSource svjeez */
-import { Group, Instance, Shape, pathData, symbol } from "svjeez";
+import { Group, Shape, path, through } from "svjeez";
 import type { Anim, Geometry, Paint, SceneElement, Vec } from "svjeez";
-import {
-  SceneError,
-  type Color,
-  type Common,
-  type Framed,
-  type Model,
-  type SceneSymbol,
-} from "svjeez/tools";
+import { SceneError, type Common, type Framed, type Model, type StrokeProps } from "svjeez/tools";
 
 export interface IconData {
   readonly grid: number;
-  readonly kind: "stroke" | "fill";
+  readonly kind: "outline" | "solid";
   readonly paths: readonly string[];
 }
 
@@ -23,28 +16,16 @@ export type IconDraw = Anim<number> | PerPiece;
 interface Base extends Common, Framed {
   readonly icon: IconData;
   readonly size?: number;
-  readonly width?: number;
+  /** Over the default outline, whose width is in the icon's own grid units. */
+  readonly stroke?: Partial<StrokeProps>;
 }
 
-export interface OwnIconProps extends Base {
+export interface IconProps extends Base {
   readonly color: Anim<Paint>;
   readonly draw?: IconDraw;
-  readonly shared?: false;
 }
-
-export interface SharedIconProps extends Base {
-  readonly color: Color;
-  readonly shared: true;
-  readonly draw?: undefined;
-}
-
-export type IconProps = OwnIconProps | SharedIconProps;
 
 const WIDTH = 2;
-
-const isColor = (color: Anim<Paint>): color is Color =>
-  typeof color === "string" ||
-  (typeof color === "object" && "kind" in color && color.kind === "token");
 
 const positive = (value: number): boolean => Number.isFinite(value) && value > 0;
 
@@ -63,10 +44,10 @@ const check = (icon: IconData, size: number, props: IconProps): void => {
       "The grid is the positive side of the icon's square, such as 24.",
     );
 
-  if (icon.kind !== "stroke" && icon.kind !== "fill")
+  if (icon.kind !== "outline" && icon.kind !== "solid")
     throw new SceneError(
       `<Icon> has an icon whose kind is ${JSON.stringify(icon.kind)}.`,
-      'The kind is "stroke" for an outline or "fill" for a solid icon.',
+      'The kind is "outline" or "solid".',
     );
 
   if (!icon.paths.length || icon.paths.some((d) => !/^\s*[Mm]/.test(d)))
@@ -81,37 +62,32 @@ const check = (icon: IconData, size: number, props: IconProps): void => {
       "Give it a positive size in pixels.",
     );
 
-  if (props.width !== undefined && icon.kind === "fill")
+  if (props.stroke !== undefined && icon.kind === "solid")
     throw new SceneError(
-      "<Icon> is given a width, but its icon is solid, so it has no outline to size.",
-      "Drop width, or use an outline icon.",
+      "<Icon> is given a stroke, but its icon is solid, so it has no outline to style.",
+      "Drop stroke, or use an outline icon.",
     );
 
-  if (props.width !== undefined && !positive(props.width))
-    throw new SceneError(
-      `<Icon> has a width of ${String(props.width)}.`,
-      "Give it a positive width in the icon's own units, such as 2.",
-    );
+  if (props.stroke?.width !== undefined)
+    through(props.stroke.width, (width) => {
+      if (!positive(width))
+        throw new SceneError(
+          `<Icon> has a stroke width of ${String(width)}.`,
+          "Give it a positive width in the icon's own units, such as 2.",
+        );
+    });
 
-  if (props.draw !== undefined && icon.kind === "fill")
+  if (props.draw !== undefined && icon.kind === "solid")
     throw new SceneError(
       "<Icon> is given a draw, but its icon is solid, so it has no outline to draw.",
       "Bring it in with motion, such as enter(), or use an outline icon.",
     );
-
-  if (props.shared && !isColor(props.color))
-    throw new SceneError(
-      "<Icon> is shared, so it is drawn once for every use, but its color changes over time or is a gradient.",
-      "Give it a hex color or a token, or drop shared.",
-    );
 };
-
-const shares = new WeakMap<IconData, Map<Color, Map<string, SceneSymbol>>>();
 
 const isOutline = (geometry: Geometry): geometry is Model.Geometry => "kind" in geometry;
 
 const scaled = (d: string, by: number): Geometry => {
-  const geometry = pathData(d);
+  const geometry = path.parse(d);
 
   if (by === 1 || !isOutline(geometry) || geometry.kind !== "path") return geometry;
   const grow = ([x, y]: Vec): Vec => [x * by, y * by];
@@ -131,16 +107,16 @@ interface PieceProps {
   readonly icon: IconData;
   readonly index: number;
   readonly color: Anim<Paint>;
-  readonly width: number;
+  readonly stroke: StrokeProps;
   readonly by: number;
   readonly draw: Anim<number> | undefined;
 }
 
-const Piece = ({ icon, index, color, width, by, draw }: PieceProps): SceneElement => (
+const Piece = ({ icon, index, color, stroke, by, draw }: PieceProps): SceneElement => (
   <Shape
     geometry={scaled(icon.paths[index]!, by)}
-    fill={icon.kind === "stroke" ? undefined : color}
-    stroke={icon.kind === "stroke" ? { color, width, cap: "round", join: "round" } : undefined}
+    fill={icon.kind === "outline" ? undefined : color}
+    stroke={icon.kind === "outline" ? stroke : undefined}
     draw={draw}
   />
 );
@@ -148,7 +124,7 @@ const Piece = ({ icon, index, color, width, by, draw }: PieceProps): SceneElemen
 const drawn = (
   icon: IconData,
   color: Anim<Paint>,
-  width: number,
+  stroke: StrokeProps,
   by: number,
   draw: IconDraw | undefined,
 ): SceneElement[] =>
@@ -158,36 +134,25 @@ const drawn = (
       icon={icon}
       index={index}
       color={color}
-      width={width}
+      stroke={stroke}
       by={by}
       draw={isPerPiece(draw) ? draw(index, icon.paths.length) : draw}
     />
   ));
 
-const sharedSymbol = (icon: IconData, color: Color, width: number, by: number): SceneSymbol => {
-  const byColor = shares.get(icon) ?? new Map<Color, Map<string, SceneSymbol>>();
-  const bySize = byColor.get(color) ?? new Map<string, SceneSymbol>();
-  const name = `${width}/${by}`;
-
-  const made =
-    bySize.get(name) ?? symbol(() => <Group>{drawn(icon, color, width, by, undefined)}</Group>);
-
-  bySize.set(name, made);
-  byColor.set(color, bySize);
-  shares.set(icon, byColor);
-
-  return made;
-};
-
 export function Icon(props: IconProps): SceneElement {
-  const { icon, size = icon?.grid, width, color: _c, draw: _d, shared: _s, ...placement } = props;
+  const { icon, size = icon?.grid, stroke: custom, color: _c, draw: _d, ...placement } = props;
 
   check(icon, size, props);
   const by = size / icon.grid;
-  const stroke = (width ?? WIDTH) * by;
 
-  if (props.shared)
-    return <Instance {...placement} of={sharedSymbol(icon, props.color, stroke, by)} />;
+  const stroke: StrokeProps = {
+    color: props.color,
+    cap: "round",
+    join: "round",
+    ...custom,
+    width: through(custom?.width ?? WIDTH, (width) => width * by),
+  };
 
   return <Group {...placement}>{drawn(icon, props.color, stroke, by, props.draw)}</Group>;
 }

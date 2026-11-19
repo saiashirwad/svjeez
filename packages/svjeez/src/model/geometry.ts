@@ -81,7 +81,7 @@ export const outlineBoxOf = (outline: Geometry): Box => {
 
     case "line":
       return around([outline.from[0], outline.to[0]], [outline.from[1], outline.to[1]]);
-    case "polygon":
+    case "points":
       return around(
         outline.points.map((point) => point[0]),
         outline.points.map((point) => point[1]),
@@ -202,7 +202,7 @@ export const contoursOf = (geometry: Geometry, pieces?: number): Contour[] => {
       return [
         { start: geometry.from, curves: [lineCubic(geometry.from, geometry.to)], closed: false },
       ];
-    case "polygon": {
+    case "points": {
       const [first, ...rest] = geometry.points;
 
       if (!first) return [];
@@ -269,11 +269,11 @@ export const mixGeometry = (a: Geometry, b: Geometry, amount: number, where: str
       if (b.kind !== "line") break;
 
       return { kind: "line", from: lerpPoint(a.from, b.from, u), to: lerpPoint(a.to, b.to, u) };
-    case "polygon":
-      if (b.kind !== "polygon" || b.points.length !== a.points.length || b.closed !== a.closed)
+    case "points":
+      if (b.kind !== "points" || b.points.length !== a.points.length || b.closed !== a.closed)
         break;
 
-      return { kind: "polygon", points: mixAll(a.points, b.points, u), closed: a.closed };
+      return { kind: "points", points: mixAll(a.points, b.points, u), closed: a.closed };
     case "path":
       if (b.kind !== "path" || a.rule !== b.rule || !same(a.contours, b.contours)) break;
 
@@ -305,7 +305,7 @@ const alike = (values: readonly Geometry[]): boolean => {
   return rest.every((value) => {
     if (value.kind !== first.kind) return false;
 
-    if (value.kind === "polygon" && first.kind === "polygon")
+    if (value.kind === "points" && first.kind === "points")
       return value.points.length === first.points.length && value.closed === first.closed;
 
     if (value.kind === "path" && first.kind === "path")
@@ -321,7 +321,7 @@ export const matched = (values: readonly Geometry[], where: string): Geometry[] 
 
   if (rules.size > 1)
     throw new SceneError(
-      `${where} morphs between a nonzero and an evenodd path, and a fill rule can't blend. Give every key one rule.`,
+      `${where} morphs between a shape with holes cut by subtract() and one without, and a hole can't blend into none. Cut holes in every state, or in none.`,
     );
 
   const outlines = values.map((value) => {

@@ -2,7 +2,6 @@ import {
   Group,
   Shape,
   Text,
-  canvas,
   circle,
   ease,
   enter,
@@ -99,9 +98,9 @@ export default scene(
     title: "Springs",
     desc: "A dot springs between three targets, each move starting before the last lands, beside the same moves with ease.out. A card pops in on a springy scale.",
     theme,
-    reducedMotion: 3,
+    still: 3,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Lane y={24} label="ease.spring" curve={wobble} />

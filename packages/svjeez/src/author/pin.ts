@@ -1,5 +1,5 @@
 import { SceneError } from "../model/scene-error";
-import { named } from "./names";
+import type { Names } from "./names";
 import type { Animated, Box, SceneNode, Vec } from "../model/ir";
 import { isLane } from "../model/lane";
 import type { Place } from "./refs";
@@ -76,6 +76,7 @@ export const pinned = (
 };
 
 export const homeOf = (
+  names: Names,
   kind: SceneNode["kind"],
   node: SceneNode,
   anchor: TextAnchorPlace | undefined,
@@ -84,7 +85,7 @@ export const homeOf = (
 ): Vec => {
   if (framed) return [0, 0];
 
-  return pinned(anchor, box, named(node.key), kind === "text" ? baselineOf(node) : undefined);
+  return pinned(anchor, box, names.named(node.key), kind === "text" ? baselineOf(node) : undefined);
 };
 
 const baselineOf = (node: SceneNode): number => {

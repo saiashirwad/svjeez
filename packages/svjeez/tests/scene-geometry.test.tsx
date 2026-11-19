@@ -1,8 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   Group,
-  Image,
-  Instance,
+  Picture,
   Sequence,
   Shape,
   arc,
@@ -10,14 +9,13 @@ import {
   ease,
   ellipse,
   line,
-  pathData,
+  path,
   picture,
   polygon,
   rect,
   sampled,
   scene,
   span,
-  symbol,
   track,
   type SceneElement,
   type Vec,
@@ -98,7 +96,7 @@ describe("animated geometry", () => {
           fill="#000000"
           geometry={track(rect(20, 20))
             .to(ellipse(10, 6), span(0, 1))
-            .to(pathData("M0 0L10 0L5 8Z M20 0L30 0L25 8Z"), span(1, 1))}
+            .to(path.parse("M0 0L10 0L5 8Z M20 0L30 0L25 8Z"), span(1, 1))}
         />
       )),
     );
@@ -149,7 +147,7 @@ describe("animated geometry", () => {
       )),
     );
 
-    expect(same.keys[0]!.value.kind).toBe("polygon");
+    expect(same.keys[0]!.value.kind).toBe("points");
     expect(other.keys[0]!.value.kind).toBe("path");
   });
 
@@ -189,9 +187,12 @@ describe("animated geometry", () => {
 
     expect(() =>
       made(() => (
-        <Shape fill="#000000" geometry={track(pathData("M0 0L2 0L2 2Z")).to(evenodd, span(0, 1))} />
+        <Shape
+          fill="#000000"
+          geometry={track(path.parse("M0 0L2 0L2 2Z")).to(evenodd, span(0, 1))}
+        />
       )),
-    ).toThrow("morphs between a nonzero and an evenodd path");
+    ).toThrow("morphs between a shape with holes cut by subtract() and one without");
   });
 
   test("a cut inside a transition stops at the geometry between, by parameter", () => {
@@ -599,15 +600,15 @@ describe("a dash under a trim", () => {
   });
 });
 
-describe("images and instances", () => {
+describe("images", () => {
   const pic = picture('<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20"/>');
 
   test("an image fills a frame of its own, keeping its ratio when given one side", () => {
-    const model = made(() => <Image src={pic} at={[10, 10]} width={80} />);
+    const model = made(() => <Picture src={pic} at={[10, 10]} width={80} />);
     const node = only(model);
 
     expect(node).toMatchObject({
-      kind: "image",
+      kind: "picture",
       size: [80, 40],
       box: { x: 0, y: 0, width: 80, height: 40 },
     });
@@ -615,72 +616,110 @@ describe("images and instances", () => {
       '<image x="10" y="10" width="80" height="40" preserveAspectRatio="none" href="data:image/svg+xml,',
     );
   });
+});
 
-  test("a symbol is lowered once, drawn once in defs, and used by every instance", () => {
-    const dot = symbol(() => <Shape geometry={circle(4)} fill="#FF0000" />);
+describe("repeated drawings are shared", () => {
+  const wing = polygon(
+    Array.from(
+      { length: 80 },
+      (_, i) => [Math.cos(i) * 30 + 40, Math.sin(i * 2) * 30 + 40] as const,
+    ),
+  );
 
-    const model = made(() => (
-      <Group>
-        <Instance key="dot" of={dot} offset={[10, 10]} />
-        <Instance of={dot} offset={[30, 10]} scale={2} />
-      </Group>
-    ));
+  const uses = (out: string): string[] => out.match(/<use href="#[^"]+"[^>]*>/g) ?? [];
 
-    expect(Object.keys(model.symbols)).toEqual(["dot"]);
-    expect(model.root.children.map((node) => node.kind)).toEqual(["instance", "instance"]);
-    expect(model.root.children[0]!.box).toEqual({ x: -4, y: -4, width: 8, height: 8 });
-
-    const out = svg.emit(model);
-
-    expect(out.match(/<circle/g)).toHaveLength(1);
-    expect(out).toContain('<defs>\n    <g id="symbol-dot">');
-    expect(out).toContain('<use href="#symbol-dot" transform="translate(10 10)"/>');
-    expect(diagnose(model, svg)).toEqual([]);
-  });
-
-  test("a prefix keeps two scenes' symbols apart", () => {
-    const dot = symbol(() => <Shape geometry={circle(4)} fill="#FF0000" />);
-
-    expect(
-      svg.emit(
-        made(() => <Instance key="dot" of={dot} />),
-        { prefix: "x-" },
-      ),
-    ).toContain('href="#x-symbol-dot"');
-  });
-
-  test("a symbol that moves can't be placed inside a sequence that starts later", () => {
-    const spinner = symbol(() => (
-      <Shape geometry={rect(4, 4)} rotate={track(0).to(90, span(0, 1))} fill="#FF0000" />
-    ));
-
-    expect(() =>
+  test("the same still drawing at several places is written once and used at each", () => {
+    const out = svg.emit(
       made(() => (
-        <Sequence when={span(1)}>
-          <Instance of={spinner} />
-        </Sequence>
+        <Group>
+          <Shape geometry={wing} fill="#FF0000" at={[0, 0]} />
+          <Shape geometry={wing} fill="#FF0000" at={[100, 0]} />
+          <Shape geometry={wing} fill="#FF0000" at={[0, 100]} />
+        </Group>
       )),
-    ).toThrow("a symbol's tracks run on the scene's clock");
+    );
+
+    const [defs, body] = out.split("</defs>");
+
+    expect(defs).toContain("<defs>");
+    expect(defs!.match(/<polygon/g)).toHaveLength(1);
+    expect(body).not.toContain("<polygon");
+    expect(uses(body!)).toHaveLength(3);
+    expect(out).toMatch(/<use href="#u\d+"/);
   });
 
-  test("a symbol is named for its first instance's key, and two that would share a name don't", () => {
-    const a = symbol(() => <Shape fill="#000000" geometry={circle(4)} />);
-    const b = symbol(() => <Shape fill="#000000" geometry={circle(5)} />);
+  test("a group of shapes drawn at different offsets is shared as one group", () => {
+    const out = svg.emit(
+      made(() => (
+        <Group>
+          {[10, 100, 200].map((x) => (
+            <Group key={String(x)} offset={[x, 0]}>
+              <Shape geometry={wing} fill="#FF0000" />
+              <Shape geometry={wing} fill="#00FF00" at={[50, 50]} />
+            </Group>
+          ))}
+        </Group>
+      )),
+    );
 
+    expect(out.match(/<polygon/g)).toHaveLength(2);
+    expect(out.match(/<g id="u\d+">/g)).toHaveLength(1);
+    expect(out.match(/<use transform="translate\(\d+ 0\)" href="#u1"\/>/g)).toHaveLength(3);
+  });
+
+  test("a drawing that moves is shared, and each copy keeps its own motion", () => {
+    const out = svg.emit(
+      made(() => (
+        <Group>
+          <Shape geometry={wing} fill="#FF0000" rotate={track(0).to(90, span(0, 1))} />
+          <Shape
+            geometry={wing}
+            fill="#FF0000"
+            rotate={track(0).to(90, span(0, 1))}
+            at={[100, 0]}
+          />
+          <Shape
+            geometry={wing}
+            fill="#FF0000"
+            rotate={track(0).to(90, span(0, 1))}
+            at={[0, 100]}
+          />
+        </Group>
+      )),
+    );
+
+    expect(out.match(/<polygon/g)).toHaveLength(1);
+    expect(uses(out)).toHaveLength(3);
+    expect(uses(out).every((use) => use.includes('class="a m1"'))).toBe(true);
+  });
+
+  test("a tiny drawing is not shared: it has to save at least 64 bytes", () => {
+    const out = svg.emit(
+      made(() => (
+        <Group>
+          <Shape geometry={circle(4)} fill="#FF0000" at={[0, 0]} />
+          <Shape geometry={circle(4)} fill="#FF0000" at={[50, 0]} />
+        </Group>
+      )),
+    );
+
+    expect(out.match(/<circle/g)).toHaveLength(2);
+    expect(uses(out)).toHaveLength(0);
+  });
+
+  test("sources: true shares nothing, so every node keeps its own element", () => {
     const model = made(() => (
       <Group>
-        <Group key="left">
-          <Instance key="dot" of={a} />
-        </Group>
-        <Group key="right">
-          <Instance key="dot" of={b} />
-          <Instance key="again" of={a} />
-        </Group>
+        <Shape geometry={wing} fill="#FF0000" at={[0, 0]} />
+        <Shape geometry={wing} fill="#FF0000" at={[100, 0]} />
+        <Shape geometry={wing} fill="#FF0000" at={[0, 100]} />
       </Group>
     ));
 
-    expect(Object.keys(model.symbols)).toEqual(["dot", "dot-2"]);
-    expect(svg.emit(model).match(/<use href="#symbol-dot"/g)).toHaveLength(2);
+    const out = svg.emit(model, { sources: true });
+
+    expect(out.match(/<polygon/g)).toHaveLength(3);
+    expect(uses(out)).toHaveLength(0);
   });
 });
 

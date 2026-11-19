@@ -7,8 +7,6 @@ import {
   rect,
   scene,
   span,
-  symbol,
-  Instance,
   track,
   type Anim,
   type SceneElement,
@@ -81,23 +79,10 @@ describe("blend", () => {
     expect(out).toContain("isolation:isolate");
   });
 
-  test("the scene root and symbols isolate their blending children", () => {
+  test("the scene root isolates its blending children", () => {
     const top = emit(() => <Shape fill="#FF0000" geometry={rect(10, 10)} blend="overlay" />);
 
     expect(top).toMatch(/<g style="isolation:isolate">/);
-
-    const inside = emit(() => {
-      const mark = symbol(() => (
-        <>
-          <Shape fill="#FF0000" geometry={rect(10, 10)} />
-          <Shape fill="#00FF00" geometry={rect(10, 10)} blend="lighten" />
-        </>
-      ));
-
-      return <Instance of={mark} />;
-    });
-
-    expect(inside).toMatch(/<g id="symbol-\d+" style="isolation:isolate">/);
   });
 
   test("morph keeps a blend the states agree on and throws when they differ", () => {

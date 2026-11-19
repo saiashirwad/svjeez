@@ -1,5 +1,5 @@
 import type { Anim, Paint, Span, Vec } from "svjeez";
-import type { Child, FontValue } from "svjeez/tools";
+import type { Child, FontValue, StrokeProps } from "svjeez/tools";
 
 export type LineCurve = "linear" | "monotone" | "step";
 
@@ -45,7 +45,8 @@ export interface BarsOptions extends SeriesOptions {
 export interface LineOptions extends SeriesOptions {
   readonly curve?: LineCurve;
   readonly dots?: boolean | number;
-  readonly width?: number;
+  /** Restyles the line over its default: the series color, width 2.5, round cap and join. */
+  readonly stroke?: Partial<StrokeProps>;
   readonly label?: string;
 }
 
@@ -79,8 +80,9 @@ export interface ChartProps {
   readonly label: Paint;
   readonly y?: YScale;
   readonly at?: Vec;
-  readonly grid?: boolean;
-  readonly fontSize?: number;
+  /** Guide lines, off by default. `{}` draws them in the axis color; an object restyles them. */
+  readonly grid?: Partial<StrokeProps> | false;
+  readonly textSize?: number;
   readonly axesIn?: Span;
   readonly key?: string;
   readonly children?: (plot: Plot) => Child;

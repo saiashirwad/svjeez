@@ -82,7 +82,7 @@ const hull = (geometry: Geometry): Vec[] => {
       ];
     case "line":
       return [geometry.from, geometry.to];
-    case "polygon":
+    case "points":
       return [...geometry.points];
     case "path":
       return geometry.contours.flatMap((contour) => [contour.start, ...contour.curves.flat()]);
@@ -100,14 +100,14 @@ const strokeReach = (node: Extract<SceneNode, { kind: "shape" }>, inside: string
 
   if (!stroke) return 0;
 
-  if (stroke.nonScaling)
+  if (stroke.fixedWidth)
     throw new SceneError(
-      `"${node.key}" has a non-scaling stroke inside ${inside}, whose width in its own units depends on every scale around it, so the region can't be bounded. Drop nonScaling there, or move the effect or mask to a node without it.`,
+      `"${node.key}" has a fixedWidth stroke inside ${inside}, whose width in its own units depends on every scale around it, so the region can't be bounded. Drop fixedWidth there, or move the effect or mask to a node without it.`,
     );
   const width = Math.max(0, ...numbers(stroke.width).map(Math.abs));
 
   return (
-    (width / 2) * (stroke.join === "miter" ? MITER_LIMIT : stroke.cap === "square" ? Math.SQRT2 : 1)
+    (width / 2) * (stroke.join === "sharp" ? MITER_LIMIT : stroke.cap === "square" ? Math.SQRT2 : 1)
   );
 };
 
@@ -164,11 +164,7 @@ const throughEffects = (box: Box | undefined, effects: readonly Effect[]): Box |
     return union([inner, growBox(swept(inner, points(effect.offset)), soft)]);
   }, box);
 
-export const reachOf = (
-  node: SceneNode,
-  symbols: Readonly<Record<string, SceneNode>>,
-  inside: string,
-): Box | undefined => {
+export const reachOf = (node: SceneNode, inside: string): Box | undefined => {
   const where = `"${node.key}"`;
 
   const content = ((): Box | undefined => {
@@ -180,16 +176,10 @@ export const reachOf = (
       }
 
       case "group":
-        return union(node.children.map((child) => placed(reachOf(child, symbols, inside), child)));
-      case "instance": {
-        const root = symbols[node.symbol]!;
-
-        return placed(reachOf(root, symbols, inside), root);
-      }
-
+        return union(node.children.map((child) => placed(reachOf(child, inside), child)));
       case "text":
         return growBox(node.box, node.size / 2);
-      case "image":
+      case "picture":
         return node.box;
     }
   })();
@@ -200,7 +190,7 @@ export const reachOf = (
   const masked =
     node.mask === undefined
       ? clipped
-      : intersect(clipped, placed(reachOf(node.mask, symbols, inside), node.mask));
+      : intersect(clipped, placed(reachOf(node.mask, inside), node.mask));
 
   return throughEffects(masked, node.effects);
 };

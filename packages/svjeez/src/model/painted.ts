@@ -122,7 +122,7 @@ const contoursOf = (outline: Geometry): Run[] => {
   switch (outline.kind) {
     case "line":
       return [chain([outline.from, outline.to], false)];
-    case "polygon":
+    case "points":
       return [chain(outline.points, outline.closed)];
     case "path":
       return outline.contours.map((contour) => {
@@ -161,7 +161,7 @@ const contourReach = (
   if (drawn.length === 0) {
     const dot = start ?? segments[0]?.from;
 
-    return dot !== undefined && cap !== "butt"
+    return dot !== undefined && cap !== "flat"
       ? corners(growBox({ x: dot[0], y: dot[1], width: 0, height: 0 }, h))
       : [];
   }
@@ -214,7 +214,7 @@ const contourReach = (
           : Math.atan2(cross(before, after), dot(before, after));
 
       out.push(...arcReach(at, h, before, sweep));
-    } else if (join === "miter") {
+    } else if (join === "sharp") {
       const ratio = 1 / Math.sqrt(Math.max(EPS, (1 + along) / 2));
       const middle = unit(add(before, after));
 
@@ -228,7 +228,7 @@ const contourReach = (
     if (next) corner(way[1], next.way[0], segment.curve[2]);
   });
 
-  if (!closed && cap !== "butt") {
+  if (!closed && cap !== "flat") {
     const first = drawn[0]!;
     const last = drawn.at(-1)!;
 
@@ -257,7 +257,7 @@ export const paintedBoxOf = (outline: Geometry, stroke: StrokeLook | undefined):
   const h = stroke.width / 2;
 
   const loose =
-    stroke.cut && stroke.cap !== "butt"
+    stroke.cut && stroke.cap !== "flat"
       ? corners(growBox(bare, stroke.cap === "square" ? h * Math.SQRT2 : h))
       : [];
 

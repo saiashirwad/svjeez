@@ -20,9 +20,12 @@ import {
 /** What a step of a track can go to: a point track can also go to an anchor, resolved after layout. */
 export type Goal<T> = T extends Vec ? T | Anchor : T;
 
-/** A timeline you declare, write in scene order, and nodes read. Every write returns the same track. */
+/**
+ * A timeline nodes read. A track is a value: `to`, `set`, `loop`, `repeat` and `rewind` each return a new track with
+ * that step added, and leave the one they are called on as it was.
+ */
 export interface Track<T> {
-  /** The span of the step written last. */
+  /** The span of the last step. */
   readonly span: Spanned;
   to(value: Goal<T>, when: Span, curve?: Curve): Track<T>;
   set(value: Goal<T>, when: When): Track<T>;
@@ -35,50 +38,49 @@ export interface Track<T> {
 
 export type Anim<T> = T | Track<T> | Derived<T>;
 
-/** The passage a track or a motion layer writes into, and the one node that has read it. */
+/** The passage of a track or a motion layer, and the span of its last step. */
 abstract class Written<V extends object> {
-  #passage: Passage<V>;
-  #last: Spanned | undefined;
-  #reader: string | undefined;
+  readonly passage: Passage<V>;
+  readonly #last: Spanned | undefined;
   readonly #noun: string;
 
-  constructor(passage: Passage<V>, noun: string) {
-    this.#passage = passage;
+  constructor(passage: Passage<V>, last: Spanned | undefined, noun: string) {
+    this.passage = passage;
+    this.#last = last;
     this.#noun = noun;
-  }
-
-  get passage(): Passage<V> {
-    return this.#passage;
   }
 
   get span(): Spanned {
     if (!this.#last)
       throw new SceneError(
-        `span is the span of the step written last, but nothing is written on this ${this.#noun} yet.`,
-        "Write a to() or set() first, then read its span.",
+        `span is the span of the last step, but this ${this.#noun} has no step yet.`,
+        "Add a to() or set() first, then read its span.",
       );
 
     return this.#last;
   }
 
-  /** A scene reads this as it lowers; from then on a write could change nothing, so it is refused. */
-  readBy(where: string): void {
-    this.#reader ??= where;
+  /** The same thing with another passage; its last step stays the last unless one is given. */
+  protected abstract made(passage: Passage<V>, last: Spanned | undefined): this;
+
+  protected stepped(values: V, when: Span, curve: Curve): this {
+    return this.made(this.passage.to(values, when, curve), span(when.start, when.over));
   }
 
-  protected write(
-    what: string,
-    next: (passage: Passage<V>) => Passage<V>,
-    step?: () => Spanned,
-  ): void {
-    if (this.#reader !== undefined)
-      throw new SceneError(
-        `${what} writes a ${this.#noun} that ${this.#reader} has already read. A scene reads its ${this.#noun}s when scene()'s callback returns, so a step written later changes nothing.`,
-        `Write the ${this.#noun} inside scene()'s callback, before it returns.`,
-      );
-    this.#passage = next(this.#passage);
+  protected jumped(values: V, when: When): this {
+    return this.made(this.passage.set(values, when), span(when.start, 0));
+  }
 
-    if (step) this.#last = step();
+  loop(period: Seconds): this {
+    return this.made(this.passage.loop(period), this.#last);
+  }
+
+  repeat(times: number | { readonly until: Seconds }): this {
+    return this.made(this.passage.repeat(times), this.#last);
+  }
+
+  rewind(over: Seconds, curve: Curve = DEFAULT_EASE): this {
+    return this.made(this.passage.rewind(over, curve), this.#last);
   }
 }
 
@@ -86,46 +88,21 @@ abstract class Written<V extends object> {
 const stored = <T>(goal: Goal<T>): T => goal as T;
 
 export class ValueTrack<T> extends Written<{ readonly value: T }> implements Track<T> {
-  constructor(passage: Passage<{ readonly value: T }>) {
-    super(passage, "track");
+  constructor(passage: Passage<{ readonly value: T }>, last?: Spanned) {
+    super(passage, last, "track");
+  }
+
+  protected made(passage: Passage<{ readonly value: T }>, last: Spanned | undefined): this {
+    // SAFETY: ValueTrack has no subclass, so a new one is a this.
+    return new ValueTrack(passage, last) as this;
   }
 
   to(value: Goal<T>, when: Span, curve: Curve = DEFAULT_EASE): this {
-    this.write(
-      "to()",
-      (passage) => passage.to({ value: stored(value) }, when, curve),
-      () => span(when.start, when.over),
-    );
-
-    return this;
+    return this.stepped({ value: stored(value) }, when, curve);
   }
 
   set(value: Goal<T>, when: When): this {
-    this.write(
-      "set()",
-      (passage) => passage.set({ value: stored(value) }, when),
-      () => span(when.start, 0),
-    );
-
-    return this;
-  }
-
-  loop(period: Seconds): this {
-    this.write("loop()", (passage) => passage.loop(period));
-
-    return this;
-  }
-
-  repeat(times: number | { readonly until: Seconds }): this {
-    this.write("repeat()", (passage) => passage.repeat(times));
-
-    return this;
-  }
-
-  rewind(over: Seconds, curve: Curve = DEFAULT_EASE): this {
-    this.write("rewind()", (passage) => passage.rewind(over, curve));
-
-    return this;
+    return this.jumped({ value: stored(value) }, when);
   }
 
   map<U>(fn: (value: T) => U, options: MapOptions = {}): Derived<U> {
@@ -161,26 +138,6 @@ export const passageOf = <T>(value: Track<T>): Passage<{ readonly value: T }> =>
   return value.passage;
 };
 
-interface Reading {
-  readonly offset: Seconds;
-  readonly where: string;
-}
-
-let readings: Map<unknown, Reading> | undefined;
-
-/** Tracks are read on one clock per scene: the clock of the node that reads them. */
-export const reading = <T>(lower: () => T): T => {
-  const outer = readings;
-
-  readings = new Map();
-
-  try {
-    return lower();
-  } finally {
-    readings = outer;
-  }
-};
-
 const clockOf = (offset: Seconds): string =>
   offset === 0 ? "the scene's clock" : `the clock of a sequence that starts at ${num(offset)}s`;
 
@@ -191,13 +148,13 @@ export const goesToAnchor = <T>(value: Track<T>): boolean =>
 /** The passage of a track as a node reads it on that node's clock. Steps that go to anchors are still in it. */
 export const readGoals = <T>(
   value: Track<T>,
-  { clock }: Timing,
+  { clock, reads }: Timing,
   where: string,
 ): Passage<{ readonly value: T }> => {
   if (!(value instanceof ValueTrack))
     throw new SceneError("A track is built with track() or a recipe.");
   const { passage } = value;
-  const first = readings?.get(value);
+  const first = reads.get(value);
 
   if (passage.data.period === undefined) {
     if (first && Math.abs(first.offset - clock.offset) > EPSILON)
@@ -206,10 +163,8 @@ export const readGoals = <T>(
         "A track's spans mean one clock. Make a track for each clock, or put both nodes in the same <Sequence>.",
       );
 
-    if (!first) readings?.set(value, { offset: clock.offset, where });
+    if (!first) reads.set(value, { offset: clock.offset, where });
   }
-
-  value.readBy(where);
 
   return passage;
 };
@@ -236,8 +191,9 @@ export interface LayerValues {
   readonly opacity?: number;
 }
 
+/** A passing effect on top of a node's own props. A value, as a track is: every step returns a new layer. */
 export interface Motion {
-  /** The span of the step written last. */
+  /** The span of the last step. */
   readonly span: Spanned;
   to(values: LayerValues, when: Span, curve?: Curve): Motion;
   set(values: LayerValues, when: When): Motion;
@@ -249,46 +205,21 @@ export interface Motion {
 export type Layers = Motion | readonly (Motion | false | null | undefined)[];
 
 export class LayerMotion extends Written<LayerValues> implements Motion {
-  constructor(passage: Passage<LayerValues>) {
-    super(passage, "motion");
+  constructor(passage: Passage<LayerValues>, last?: Spanned) {
+    super(passage, last, "motion");
+  }
+
+  protected made(passage: Passage<LayerValues>, last: Spanned | undefined): this {
+    // SAFETY: LayerMotion has no subclass, so a new one is a this.
+    return new LayerMotion(passage, last) as this;
   }
 
   to(values: LayerValues, when: Span, curve: Curve = DEFAULT_EASE): this {
-    this.write(
-      "to()",
-      (passage) => passage.to(values, when, curve),
-      () => span(when.start, when.over),
-    );
-
-    return this;
+    return this.stepped(values, when, curve);
   }
 
   set(values: LayerValues, when: When): this {
-    this.write(
-      "set()",
-      (passage) => passage.set(values, when),
-      () => span(when.start, 0),
-    );
-
-    return this;
-  }
-
-  loop(period: Seconds): this {
-    this.write("loop()", (passage) => passage.loop(period));
-
-    return this;
-  }
-
-  repeat(times: number | { readonly until: Seconds }): this {
-    this.write("repeat()", (passage) => passage.repeat(times));
-
-    return this;
-  }
-
-  rewind(over: Seconds, curve: Curve = DEFAULT_EASE): this {
-    this.write("rewind()", (passage) => passage.rewind(over, curve));
-
-    return this;
+    return this.jumped(values, when);
   }
 }
 

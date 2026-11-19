@@ -3,7 +3,6 @@ import {
   Shape,
   Text,
   blur,
-  canvas,
   circle,
   ease,
   linear,
@@ -72,9 +71,9 @@ export default scene(
     title: "Paint and effects",
     desc: "A card whose gradient turns and warms, stripes seen through a moving round window while they turn, a soft masked wipe that reveals a card, a card that comes into focus, and a shadow that grows as a card lifts.",
     theme,
-    reducedMotion: 2.2,
+    still: 2.2,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
 

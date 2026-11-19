@@ -17,8 +17,6 @@ export const isScene = (value: unknown): value is Scene =>
   isObject(value.tokens) &&
   "fonts" in value &&
   isObject(value.fonts) &&
-  "symbols" in value &&
-  isObject(value.symbols) &&
   "root" in value &&
   isObject(value.root) &&
   "kind" in value.root &&

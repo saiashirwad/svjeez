@@ -5,9 +5,9 @@ import {
   Shape,
   Text,
   enter,
+  line,
   path,
   polygon,
-  polyline,
   rect,
   ref,
   sampled,
@@ -33,6 +33,7 @@ import {
   type Layers,
   type Spanned,
   type PathBuilder,
+  type StrokeProps,
   type Token,
 } from "svjeez/tools";
 import { curve, vec } from "./curve.ts";
@@ -51,7 +52,8 @@ export interface DiagramColors {
 
 export interface DiagramOptions {
   readonly font: FontValue;
-  readonly size?: number;
+  /** Font size of the labels. */
+  readonly textSize?: number;
   readonly weight?: number;
   readonly colors?: DiagramColors;
   /** Drive an edge's drawing from your own timeline, 0 to 1, by its id ("a->b"). An edge a reveal also draws can't have one. */
@@ -166,10 +168,10 @@ export const look = (options: DiagramOptions | undefined, what: string): Look =>
       `${what} needs a font to measure its labels with.`,
       `Pass one in its options, as in ${what.replace("()", "")}(spec, { font: sans }).`,
     );
-  const { font, size = 14, weight, colors = defaultColors } = options;
+  const { font, textSize: size = 14, weight, colors = defaultColors } = options;
 
   if (!(size > 0 && Number.isFinite(size)))
-    throw new SceneError(`${what} needs a size above 0, got ${size}.`);
+    throw new SceneError(`${what} needs a textSize above 0, got ${size}.`);
   const muted = colors.muted ?? colors.text;
   const washes = new Map<string, Color>();
   const tint = (role: NodeRole): Color => colors.roles?.[role] ?? colors.accent;
@@ -436,13 +438,13 @@ export interface EdgeProps {
   readonly look: Look;
   readonly points: readonly Point[];
   readonly color?: Color;
-  readonly width?: number;
-  readonly dash?: readonly number[];
+  /** Changes to the default line: width 1.5, round cap and join. */
+  readonly stroke?: Partial<StrokeProps>;
   readonly head?: ArrowHead;
   readonly draw?: Anim<number>;
 }
 
-const headOf = (head: ArrowHead, tip: Point, ux: number, uy: number): Geometry => {
+const headOf = (head: Exclude<ArrowHead, "none">, tip: Point, ux: number, uy: number): Geometry => {
   const p = (x: number, y: number): Vec => vec({ x, y });
   const tipAt = p(tip.x, tip.y);
   const left = p(tip.x - ux * HEAD - uy * HEAD * 0.5, tip.y - uy * HEAD + ux * HEAD * 0.5);
@@ -452,13 +454,19 @@ const headOf = (head: ArrowHead, tip: Point, ux: number, uy: number): Geometry =
     case "filled":
       return polygon([tipAt, left, right]);
     case "async":
-      return polyline([left, tipAt, right]);
-    default:
+      return line(left, tipAt, right);
+    case "cross": {
+      const [cx, cy] = [tip.x - ux * HEAD * 0.5, tip.y - uy * HEAD * 0.5];
+      const s = HEAD * 0.4;
+      const [ax, ay] = [(ux - uy) * s, (uy + ux) * s];
+      const [bx, by] = [(ux + uy) * s, (uy - ux) * s];
+
       return path()
-        .moveTo(left)
-        .lineTo(p(tip.x + uy * HEAD * 0.5, tip.y - ux * HEAD * 0.5))
-        .moveTo(right)
-        .lineTo(p(tip.x - uy * HEAD * 0.5, tip.y + ux * HEAD * 0.5));
+        .moveTo(p(cx - ax, cy - ay))
+        .lineTo(p(cx + ax, cy + ay))
+        .moveTo(p(cx - bx, cy - by))
+        .lineTo(p(cx + bx, cy + by));
+    }
   }
 };
 
@@ -474,15 +482,13 @@ export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
       ? [...e.points.slice(0, -1), { x: b.x - ux * (HEAD - 1), y: b.y - uy * (HEAD - 1) }]
       : e.points;
 
-  const width = e.width ?? 1.5;
-
-  const stroke = {
+  const stroke: StrokeProps = {
     color,
-    width,
+    width: 1.5,
     cap: "round",
     join: "round",
-    ...(e.dash && { dash: e.dash }),
-  } as const;
+    ...e.stroke,
+  };
 
   return (
     <Group key={e.key}>
@@ -490,8 +496,10 @@ export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
         key="line"
         geometry={curve(points).geometry}
         stroke={stroke}
-        trim={e.draw !== undefined && !e.dash ? through(e.draw, (d): Vec => [0, d]) : undefined}
-        opacity={e.draw !== undefined && e.dash ? e.draw : undefined}
+        trim={
+          e.draw !== undefined && !stroke.dash ? through(e.draw, (d): Vec => [0, d]) : undefined
+        }
+        opacity={e.draw !== undefined && stroke.dash ? e.draw : undefined}
       />
       {head !== "none" && (
         <Shape

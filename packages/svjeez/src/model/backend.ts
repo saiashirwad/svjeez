@@ -8,8 +8,7 @@ import { walkScene } from "./walk";
 export type Feature =
   | "text"
   | "unoutlinedText"
-  | "image"
-  | "instance"
+  | "picture"
   | "clip"
   | "mask"
   | "blur"
@@ -20,7 +19,7 @@ export type Feature =
   | "linearGradient"
   | "radialGradient"
   | "pattern"
-  | "nonScalingStroke"
+  | "fixedWidthStroke"
   | "liveTokens"
   | "curvedMotion"
   | "movingDashedTrim";
@@ -28,8 +27,7 @@ export type Feature =
 export const FEATURES: Readonly<Record<Feature, string>> = {
   text: "text",
   unoutlinedText: "text in a font svjeez can't outline",
-  image: "a picture",
-  instance: "a symbol",
+  picture: "a picture",
   clip: "a clip",
   mask: "a mask",
   blur: "a blur",
@@ -40,7 +38,7 @@ export const FEATURES: Readonly<Record<Feature, string>> = {
   linearGradient: "a linear gradient",
   radialGradient: "a radial gradient",
   pattern: "a pattern",
-  nonScalingStroke: "a stroke that keeps its width when scaled",
+  fixedWidthStroke: "a stroke that keeps its width when scaled",
   liveTokens: "light and dark colors",
   curvedMotion: "a curved path of motion",
   movingDashedTrim: "a dashed stroke trimmed while it moves",
@@ -98,7 +96,7 @@ const featuresOf = (node: SceneNode): Feature[] => {
     if (runsOf(node).some((run) => !run.outline)) used.push("unoutlinedText");
   }
 
-  if (node.kind === "image" || node.kind === "instance") used.push(node.kind);
+  if (node.kind === "picture") used.push("picture");
 
   if (node.clip) used.push("clip");
 
@@ -121,13 +119,13 @@ const featuresOf = (node: SceneNode): Feature[] => {
     else used.push(`${paint.kind}Gradient`);
   }
 
-  if ((node.kind === "shape" || node.kind === "text") && node.stroke?.nonScaling)
-    used.push("nonScalingStroke");
+  if ((node.kind === "shape" || node.kind === "text") && node.stroke?.fixedWidth)
+    used.push("fixedWidthStroke");
 
   if (
     node.kind === "shape" &&
     node.stroke?.dash !== undefined &&
-    node.stroke.cap !== "butt" &&
+    node.stroke.cap !== "flat" &&
     node.trim !== undefined &&
     (isLane(node.trim) || isLane(node.geometry))
   )

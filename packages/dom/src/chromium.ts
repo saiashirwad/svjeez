@@ -307,7 +307,11 @@ export const chromiumPages = async (options: BrowserOptions = {}): Promise<Pages
   const faces = given
     .map((face) =>
       fontFace(
-        { family: face.family, weight: String(face.weight), style: face.style },
+        {
+          family: face.family,
+          weight: String(face.weight),
+          style: face.italic ? "italic" : "normal",
+        },
         face.href,
         formatOf(face.format),
       ),

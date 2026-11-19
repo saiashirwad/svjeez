@@ -10,7 +10,7 @@ import {
   search,
   starFilled,
 } from "@svjeez/icons/tabler";
-import { Center, Grid, Shape, Stack, Group, canvas, ease, enter, scene, span, track } from "svjeez";
+import { Center, Grid, Shape, Stack, Group, ease, enter, scene, span, track } from "svjeez";
 import { theme } from "../theme";
 
 const SIZE = 64;
@@ -26,12 +26,12 @@ export default scene(
     size: [640, 360],
     duration: 5,
     title: "Icons",
-    desc: "Seven Tabler outline icons draw themselves one stroke at a time, a filled heart pops into the last place in the grid, and five shared stars pop in below.",
+    desc: "Seven Tabler outline icons draw themselves one stroke at a time, a filled heart pops into the last place in the grid, and five stars pop in below.",
     theme,
     loop: false,
-    reducedMotion: 4.5,
+    still: 4.5,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Center width={640} height={360}>
@@ -49,7 +49,7 @@ export default scene(
                   icon={icon}
                   size={SIZE}
                   color={theme.text}
-                  width={1.75}
+                  stroke={{ width: 1.75 }}
                   draw={(piece) => track(0).to(1, span(0.3, 0.7).shift(index * 0.3 + piece * 0.25))}
                 />
               </Center>
@@ -69,7 +69,6 @@ export default scene(
                 icon={starFilled}
                 size={24}
                 color={theme.yellow}
-                shared
                 motion={enter(pop.shift(0.15 * (i + 1)), {
                   from: { scale: 0.3, opacity: 0 },
                   curve: ease.pop,

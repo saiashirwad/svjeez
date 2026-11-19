@@ -2,7 +2,6 @@ import {
   Group,
   Shape,
   Text,
-  canvas,
   circle,
   morph,
   rect,
@@ -139,9 +138,9 @@ export default scene(
     title: "Morph",
     desc: "A bar chart moves through three quarters and back: bars grow, shrink, recolor and trade places, a new region enters, one leaves, the badge turns from a dot into a label, and the heading crossfades.",
     theme,
-    reducedMotion: STEP * 2 - 0.2,
+    still: STEP * 2 - 0.2,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Shape geometry={rect(512, 1.5)} at={[48, BASE]} fill={theme.border} />

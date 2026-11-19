@@ -10,11 +10,11 @@ npm i -D @svjeez/code@next @svjeez/fonts@next svjeez@next
 import { Code } from "@svjeez/code";
 import { google } from "@svjeez/fonts";
 import { tomorrow } from "@svjeez/code/palettes";
-import { Group, Shape, canvas, scene, span } from "svjeez";
+import { Group, Shape, scene, span } from "svjeez";
 
 const mono = await google("JetBrains Mono", { ligatures: false });
 
-export default scene({ size: [360, 80], duration: 3, title: "Greeting", loop: false }, () => (
+export default scene({ size: [360, 80], duration: 3, title: "Greeting", loop: false }, (canvas) => (
   <Group>
     <Shape geometry={canvas.rect} fill={tomorrow.plain} />
     <Code lang="ts" font={mono} size={16} palette={tomorrow} at={[20, 20]} typing={span(0.3, 1.5)}>

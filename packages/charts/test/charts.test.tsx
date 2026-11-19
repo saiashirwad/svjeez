@@ -250,3 +250,46 @@ describe("errors", () => {
     ).toBe('Use "linear", "monotone" or "step".');
   });
 });
+
+describe("stroke and grid", () => {
+  const chartOf = (
+    extra: { readonly grid?: Parameters<typeof Chart>[0]["grid"] },
+    stroke?: { width: number },
+  ) =>
+    svg.emit(
+      sceneOf(() => (
+        <Chart
+          {...look}
+          {...extra}
+          size={[300, 200]}
+          x={band}
+          series={[
+            line(
+              [
+                ["Jan", 10],
+                ["Feb", 40],
+                ["Mar", 25],
+              ],
+              { color: theme.blue, ...(stroke && { stroke }) },
+            ),
+          ]}
+        />
+      )),
+    );
+
+  test("the grid is off by default, and {} turns it on", () => {
+    const off = chartOf({});
+    const on = chartOf({ grid: {} });
+
+    expect(chartOf({ grid: false })).toBe(off);
+    expect(on.length).toBeGreaterThan(off.length);
+  });
+
+  test("a grid stroke restyles the guide lines", () => {
+    expect(chartOf({ grid: { width: 3 } })).not.toBe(chartOf({ grid: {} }));
+  });
+
+  test("a line stroke restyles the line", () => {
+    expect(chartOf({}, { width: 6 })).not.toBe(chartOf({}));
+  });
+});

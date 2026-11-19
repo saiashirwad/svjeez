@@ -1,4 +1,4 @@
-import { Group, Shape, canvas, circle, ease, enter, path, scene, span, track } from "svjeez";
+import { Group, Shape, circle, ease, enter, path, scene, span, track } from "svjeez";
 import { theme } from "../theme";
 
 export default scene(
@@ -8,10 +8,10 @@ export default scene(
     title: "Hello",
     desc: "A curve draws itself, then a dot pops in above it.",
     theme,
-    reducedMotion: 3,
+    still: 3,
     loop: false,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Shape

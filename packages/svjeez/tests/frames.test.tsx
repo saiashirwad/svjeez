@@ -5,7 +5,7 @@ import { checkScene, openScene, renderFrames } from "svjeez/frames";
 import { loopLength, seek, restyle } from "svjeez/page";
 import {
   Group,
-  Image,
+  Picture,
   Shape,
   Text,
   blur,
@@ -355,8 +355,8 @@ describe.if(browser)("renderFrames", () => {
       (await renderFrames(emit([20, 20], 1, build), { times: [0], colorScheme: "light" }))
         .frames[0]!.png;
 
-    const png = await paint(() => <Image src={raster} width={20} height={20} />);
-    const svgImage = await paint(() => <Image src={vector} width={20} height={20} />);
+    const png = await paint(() => <Picture src={raster} width={20} height={20} />);
+    const svgImage = await paint(() => <Picture src={vector} width={20} height={20} />);
     const green = await paint(() => <Shape geometry={rect(20, 20)} fill="#00C800" />);
     const red = await paint(() => <Shape geometry={rect(20, 20)} fill="#C80000" />);
     expect(same(png, green)).toBe(true);
@@ -503,7 +503,7 @@ describe.if(browser)("prefix in one page", () => {
 });
 
 describe("restyle", () => {
-  const made = (reducedMotion?: number) =>
+  const made = (still?: number) =>
     emit(
       [40, 20],
       4,
@@ -522,7 +522,7 @@ describe("restyle", () => {
           />
         </Group>
       ),
-      reducedMotion === undefined ? {} : { reducedMotion },
+      still === undefined ? {} : { still },
     );
 
   test("an untouched copy is the input, and the reduced-motion freeze stays where posters read it", () => {

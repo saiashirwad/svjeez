@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { Align, Group, Shape, circle, font, scene, span, track } from "svjeez";
-import { SceneError, inspect, svg, type Child } from "svjeez/tools";
+import { SceneError, inspect, svg, type Child, type When } from "svjeez/tools";
 import {
   flowchart,
   lanes,
@@ -280,15 +280,44 @@ describe("sequence", () => {
     expect(errorsOf(s.node)).toEqual([]);
   });
 
-  test("one span per message, or a clear error", () => {
+  test("a cross head is a stroked X at the tip, and no head draws nothing", () => {
+    const heads = (head: "none" | "cross") =>
+      svg.emit(
+        draw(
+          sequence({ actors: { a: "A", b: "B" }, messages: [["a", "b", "hi", { head }]] }, options)
+            .node,
+        ),
+      );
+
+    const cross = heads("cross");
+
+    const arrowPaths = (markup: string) =>
+      markup.match(/<path d="M[^"]*" fill="none" stroke="[^"]*"/g) ?? [];
+
+    expect(arrowPaths(heads("none"))).toHaveLength(1);
+    expect(arrowPaths(cross)).toHaveLength(2);
+    expect(cross).toMatch(
+      /<path d="M[\d. -]+L[\d. -]+M[\d. -]+L[\d. -]+" fill="none" stroke="#6E6E73"/,
+    );
+  });
+
+  test("a reveal record times rows by id, and names only rows that exist", () => {
+    const times = sequence(
+      { actors: { a: "A" }, messages: [["a", "a", "self"], { note: "a", text: "hm" }] },
+      { ...options, reveal: { "note-2": span(3, 1) } },
+    );
+
+    expect(times.message(0).span).toBeUndefined();
+    expect(times.span).toMatchObject({ start: 3 });
     expect(
       thrown(() =>
         sequence(
           { actors: { a: "A" }, messages: [["a", "a", "self"]] },
-          { ...options, reveal: [span(0, 1), span(1, 1)] },
+          // @ts-expect-error a message has the id "message-1", not "1"
+          { ...options, reveal: { "1": span(0, 1) } },
         ),
       ).problem,
-    ).toBe("sequence() reveal has 2 spans for 1 messages and notes.");
+    ).toContain('reveal names "1", which is not one of its nodes');
     expect(thrown(() => login().message(7)).message).toBe(
       "sequence() has no message 7. Count from 0: it has 3.",
     );
@@ -362,7 +391,7 @@ describe("state machine", () => {
 });
 
 describe("lanes", () => {
-  const run = (reveal?: { readonly start: number; readonly over?: number }) =>
+  const run = (reveal?: When) =>
     lanes(
       {
         lanes: { lead: "Lead", build: "Build" },

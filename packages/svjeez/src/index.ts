@@ -2,15 +2,12 @@ export { scene } from "./author/lower";
 
 export {
   Group,
-  Image,
-  Instance,
+  Picture,
   Run,
   Sequence,
   Shape,
   Text,
-  canvas,
   ref,
-  symbol,
   type Bounds,
   type SceneElement,
 } from "./author/nodes";
@@ -27,9 +24,7 @@ export {
   ellipse,
   line,
   path,
-  pathData,
   polygon,
-  polyline,
   rect,
   tokens,
   type Geometry,

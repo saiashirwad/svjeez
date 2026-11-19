@@ -1,5 +1,5 @@
 import { Axes, Tex, brace, plane } from "@svjeez/math";
-import { Group, Shape, Stack, Text, canvas, enter, exit, morph, scene, span, track } from "svjeez";
+import { Group, Shape, Stack, Text, enter, exit, morph, scene, span, track } from "svjeez";
 import { mono, theme } from "../theme";
 
 const D = 9;
@@ -25,9 +25,9 @@ export default scene(
     title: "Expanding (a + b)²",
     desc: "(a+b)^2 morphs into a^2+2ab+b^2 with a brace on the cross term, while a curve of (a+1)^2 draws beside it for b = 1.",
     theme,
-    reducedMotion: 6,
+    still: 6,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Group motion={[enter(fadeIn), exit(leave)]}>

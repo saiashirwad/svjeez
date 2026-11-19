@@ -4,7 +4,7 @@ import {
   Shape,
   ease,
   motion,
-  pathData,
+  path,
   rect,
   sampled,
   scene,
@@ -20,7 +20,7 @@ const DURATION = 10;
 
 const emit = (build: () => SceneElement, duration = DURATION, playbackRate?: number): string =>
   svg.emit(
-    scene({ size: [100, 100], title: "Test", duration, reducedMotion: false }, build),
+    scene({ size: [100, 100], title: "Test", duration, still: false }, build),
     playbackRate === undefined ? {} : { playbackRate },
   );
 
@@ -309,8 +309,8 @@ describe(".repeat()", () => {
   });
 
   test("a repeat of a path morph can stop partway too", () => {
-    const morph = track(pathData("M0 0L10 0"))
-      .to(pathData("M0 0L30 0"), clock(0, 2), ease.linear)
+    const morph = track(path.parse("M0 0L10 0"))
+      .to(path.parse("M0 0L30 0"), clock(0, 2), ease.linear)
       .repeat({ until: 3 });
 
     const out = emit(() => <Shape geometry={morph} stroke={{ color: "#000000", width: 1 }} />);
@@ -400,7 +400,7 @@ describe("sampled() with a window", () => {
   });
 
   test("a sampled path plays in a SMIL window on the scene's loop", () => {
-    const frame = (t: number) => pathData(`M0 0L${10 + t} 0`);
+    const frame = (t: number) => path.parse(`M0 0L${10 + t} 0`);
     const geometry = sampled(frame, clock(2, 3), { tolerance: 0.1 });
 
     const out = emit(() => <Shape geometry={geometry} stroke={{ color: "#000000", width: 1 }} />);

@@ -1,4 +1,3 @@
-import { named, whereOf } from "./names";
 import type { Animated, Vec } from "../model/ir";
 import { SceneError, located } from "../model/scene-error";
 import { isAnchor, type Anchor } from "./refs";
@@ -8,8 +7,8 @@ import { laneOf, mixVec, type Step, type Timing } from "../model/steps";
 import type { NodeElement } from "./nodes";
 import { goesToAnchor, isTrack, readGoals } from "./track";
 
-const framed = (el: NodeElement): el is NodeElement & { readonly type: "group" | "instance" } =>
-  (el.type === "group" || el.type === "instance") && el.props.offset !== undefined;
+const framed = (el: NodeElement): el is NodeElement & { readonly type: "group" } =>
+  el.type === "group" && el.props.offset !== undefined;
 
 const isVec = (value: unknown): value is Vec =>
   Array.isArray(value) && value.length === 2 && value.every(Number.isFinite);
@@ -30,14 +29,14 @@ export const withGoals = (
 
   if (!isTrack(written) || !goesToAnchor(written)) return el;
 
-  const where = `at on ${named(key)}`;
+  const where = `at on ${notes.names.named(key)}`;
   const { data } = readGoals(written, timing, where);
   const initial = data.initial.value;
   const container = notes.nodes.get(parent)?.settle;
 
   if (container?.kind === "arrange")
     throw new SceneError(
-      `${named(key)} goes to an anchor, but the ${container.label} it sits in places it.`,
+      `${notes.names.named(key)} goes to an anchor, but the ${container.label} it sits in places it.`,
       "Wrap it in a <Group> for the container to place, and move the node inside.",
     );
 
@@ -58,7 +57,7 @@ export const withGoals = (
     try {
       return aimed(read, self);
     } catch (error) {
-      throw error instanceof Error ? located(error, whereOf(key)) : error;
+      throw error instanceof Error ? located(error, notes.names.whereOf(key)) : error;
     }
   });
 

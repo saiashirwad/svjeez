@@ -207,8 +207,13 @@ export function flowchart<
           look={l}
           points={e.points}
           draw={drawnBy(options.draw, edgeKeys[i]!, timed[i], WHAT)}
-          dash={e.style?.line === "dotted" ? [2, 4] : undefined}
-          width={e.style?.line === "thick" ? 3 : undefined}
+          stroke={
+            e.style?.line === "dotted"
+              ? { dash: [2, 4] }
+              : e.style?.line === "thick"
+                ? { width: 3 }
+                : undefined
+          }
           head={e.style?.head}
         />
       ))}

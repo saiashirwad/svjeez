@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { Tex, plane } from "@svjeez/math";
-import { Group, Shape, scene, span } from "svjeez";
+import { Group, Shape, scene } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
 import { svg as backend } from "svjeez/tools";
 
@@ -14,7 +14,7 @@ const svg = backend.emit(
           size: 32,
           at: [10, 10],
           fill: "#000000",
-          write: span(0, 1),
+          draw: 1,
           children: String.raw`\frac{a}{b}+\sqrt{x}`,
         }),
         jsx(Shape, { geometry: graph.plot((x) => x * x), stroke: { color: "#000000" } }),

@@ -6,8 +6,7 @@ import {
   Arrow,
   Grid,
   Group,
-  Image,
-  Instance,
+  Picture,
   Sequence,
   Shape,
   Stack,
@@ -20,7 +19,6 @@ import {
   ref,
   scene,
   span,
-  symbol,
   track,
   type Paint,
   type SceneElement,
@@ -49,7 +47,6 @@ const all = (model: Model.Scene): Model.SceneNode[] => {
   };
 
   visit(model.root);
-  Object.values(model.symbols).forEach(visit);
 
   return out;
 };
@@ -103,26 +100,6 @@ describe("timelines reach a node wherever it sits", () => {
     expect(at(find(model, "grid/b"), 0)).toEqual([14, 0]);
   });
 
-  test("inside a symbol, every instance moves in step", () => {
-    const model = made(() => {
-      const turn = track(0).to(90, span(0, 1));
-
-      const wheel = symbol(() => (
-        <Shape key="spoke" geometry={rect(2, 10)} fill={red} rotate={turn} />
-      ));
-
-      return (
-        <Group>
-          <Instance key="one" of={wheel} />
-          <Instance key="two" of={wheel} offset={[40, 0]} />
-        </Group>
-      );
-    });
-
-    expect(isLane(own(find(model, "#one/spoke")).rotate)).toBe(true);
-    expect(placements(model, 1).find((node) => node.key === "two")?.kind).toBe("instance");
-  });
-
   test("inside a morph, a ref on the same node in each state is one node", () => {
     const model = made(() => {
       const fade = track(1).to(0.5, span(0, 1));
@@ -163,7 +140,7 @@ describe("timelines reach a node wherever it sits", () => {
   });
 });
 
-describe("morph between states that hold layout, text, connectors, images and instances", () => {
+describe("morph between states that hold layout, text, connectors, images", () => {
   test("a Stack reflows: each child moves from its slot in one state to its slot in the next", () => {
     const model = made(() =>
       morph(
@@ -451,20 +428,19 @@ describe("morph between states that hold layout, text, connectors, images and in
     }
   });
 
-  test("an image and an instance move between states, and a picture that changes is refused", () => {
+  test("an image and a shape move between states, and a picture that changes is refused", () => {
     const badge = picture('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="10"/>');
     const other = picture('<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"/>');
-    const star = symbol(() => <Shape geometry={circle(4)} fill={red} />);
 
     const model = made(() =>
       morph(
         <Group>
-          <Image key="i" src={badge} />
-          <Instance key="s" of={star} />
+          <Picture key="i" src={badge} />
+          <Shape key="s" geometry={circle(4)} fill={red} anchor="center" at={[0, 0]} />
         </Group>,
         <Group>
-          <Image key="i" src={badge} at={[50, 50]} />
-          <Instance key="s" of={star} offset={[80, 0]} scale={2} />
+          <Picture key="i" src={badge} at={[50, 50]} />
+          <Shape key="s" geometry={circle(4)} fill={red} anchor="center" at={[80, 0]} scale={2} />
         </Group>,
         span(1, 1),
       ),
@@ -474,8 +450,10 @@ describe("morph between states that hold layout, text, connectors, images and in
     expect(boxesOf(model, 2)["0/s"]).toEqual({ x: 72, y: -8, width: 16, height: 16 });
 
     expect(() =>
-      made(() => morph(<Image key="i" src={badge} />, <Image key="i" src={other} />, span(1, 1))),
-    ).toThrow('morph() can\'t blend <Image> "i": its picture or size differs between states');
+      made(() =>
+        morph(<Picture key="i" src={badge} />, <Picture key="i" src={other} />, span(1, 1)),
+      ),
+    ).toThrow('morph() can\'t blend <Picture> "i": its picture or size differs between states');
   });
 });
 
@@ -633,9 +611,8 @@ describe("springs across slices", () => {
 
   test("a step hands a spring's speed on to the next step", () => {
     const model = made(() => {
-      const dot = track<Vec>([0, 0]).to([60, 0], span(0, 0.4), ease.spring(settle));
-
-      dot.to([60, 60], dot.span.next(1.5), ease.spring(settle));
+      const first = track<Vec>([0, 0]).to([60, 0], span(0, 0.4), ease.spring(settle));
+      const dot = first.to([60, 60], first.span.next(1.5), ease.spring(settle));
 
       return <Shape key="dot" geometry={circle(4)} anchor="center" at={dot} fill={red} />;
     });
@@ -758,7 +735,6 @@ describe("derived tracks feed every kind of value", () => {
 
 const everyKind = (options: { readonly loop?: boolean } = {}): Model.Scene => {
   const badge = picture('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="10"/>');
-  const star = symbol(() => <Shape key="body" geometry={circle(4)} fill={red} />);
 
   return scene({ size: [200, 100], duration: 4, title: "Every kind", ...options }, () => {
     const fade = track(1).to(0.5, span(0, 1));
@@ -777,8 +753,15 @@ const everyKind = (options: { readonly loop?: boolean } = {}): Model.Scene => {
         <Text key="text" font={mono} size={10} at={[40, 20]} scale={2} fill={red}>
           {"hi"}
         </Text>
-        <Image key="image" src={badge} at={[90, 10]} rotate={90} />
-        <Instance key="instance" of={star} offset={[130, 15]} scale={[2, 1]} />
+        <Picture key="image" src={badge} at={[90, 10]} rotate={90} />
+        <Shape
+          key="star"
+          geometry={circle(4)}
+          fill={red}
+          anchor="center"
+          at={[130, 15]}
+          scale={[2, 1]}
+        />
         <Stack key="stack" direction="row" at={[10, 60]} gap={2}>
           <Shape key="cell" geometry={rect(10, 10)} fill={blue} />
         </Stack>
@@ -800,20 +783,18 @@ describe("identity and output for every node kind", () => {
 
   stopTrace();
 
-  test("keys run from the root down through containers, morphs and symbols", () => {
+  test("keys run from the root down through containers and morphs", () => {
     expect(all(model).map((node) => node.key)).toEqual([
       "root",
       "moved",
       "shape",
       "text",
       "image",
-      "instance",
+      "star",
       "stack",
       "stack/cell",
       "morph",
       "morph/m",
-      "#instance",
-      "#instance/body",
     ]);
   });
 
@@ -825,12 +806,11 @@ describe("identity and output for every node kind", () => {
       "shape",
       "text",
       "image",
-      "instance",
+      "star",
       "stack",
       "stack/cell",
       "morph",
       "morph/m",
-      "#instance/body",
     ])
       expect(out).toMatch(
         new RegExp(`data-key="${key}"[^>]*data-source="[^"]*scene-integration\\.test\\.tsx:\\d+`),
@@ -848,7 +828,7 @@ describe("identity and output for every node kind", () => {
     expect(hit([10.5, 10.5])).toBeUndefined();
     expect(hit([45, 15])).toBe("text");
     expect(hit([95, 20])).toBe("image");
-    expect(hit([137, 15])).toBe("instance");
+    expect(hit([137, 15])).toBe("star");
     expect(hit([15, 65])).toBe("stack/cell");
     expect(hit([65, 65], 0)).toBe("morph/m");
     expect(hit([65, 65], 3)).toBeUndefined();
@@ -860,7 +840,7 @@ describe("identity and output for every node kind", () => {
     const boxes = boxesOf(model);
 
     expect(boxes.image).toEqual({ x: 95, y: 5, width: 10, height: 20 });
-    expect(boxes.instance).toEqual({ x: 122, y: 11, width: 16, height: 8 });
+    expect(boxes.star).toEqual({ x: 122, y: 11, width: 16, height: 8 });
   });
 
   test("loop: false plays once and holds", () => {
