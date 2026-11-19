@@ -1,19 +1,19 @@
-import { createHash } from "node:crypto";
 import type { HTMLBundle } from "bun";
-import type { DomServer } from "./server.ts";
+import { hashPage } from "./hash.ts";
+import type { Target } from "./target.ts";
 
 export interface ServeOptions {
+  /** The element to capture, as a CSS selector. */
+  readonly selector: string;
   /** The port. Default: any free one. */
   readonly port?: number;
 }
 
-const REFERENCE = /\b(?:src|href)="([^"#]+)"/g;
-
 /**
- * Serves a Bun HTML import (`import index from "./index.html"`) for `film`.
+ * Serves a Bun HTML import (`import index from "./index.html"`) as a `film` target.
  * `sources()` hashes the page and every asset it references, as Bun bundled them.
  */
-export const serve = (html: HTMLBundle, { port = 0 }: ServeOptions = {}): DomServer => {
+export const serve = (html: HTMLBundle, { selector, port = 0 }: ServeOptions): Target => {
   const server = Bun.serve({
     port,
     routes: { "/": html },
@@ -25,19 +25,8 @@ export const serve = (html: HTMLBundle, { port = 0 }: ServeOptions = {}): DomSer
 
   return {
     url,
-    sources: async () => {
-      const page = await (await fetch(url)).text();
-      const hash = createHash("sha256").update(page);
-
-      for (const [, reference] of page.matchAll(REFERENCE)) {
-        const asset = new URL(reference!, url);
-
-        if (asset.origin === new URL(url).origin)
-          hash.update(Buffer.from(await (await fetch(asset)).arrayBuffer()));
-      }
-
-      return hash.digest("hex");
-    },
+    selector,
+    sources: () => hashPage(url),
     close: () => server.stop(true),
   };
 };

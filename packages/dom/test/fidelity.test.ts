@@ -57,8 +57,7 @@ describe("film", () => {
     const timings = [{}, { over: 0.5, hold: 0.6 }, { over: 0.5 }];
 
     const board = await film(
-      serve(index),
-      "#app",
+      serve(index, { selector: "#app" }),
       async ({ page, snap }) => {
         const shot = async () => shots.push(await page.locator("#app").screenshot());
 
@@ -105,7 +104,7 @@ describe("film", () => {
 
   test("fails loudly when the page throws", async () => {
     await expect(
-      film(serve(index), "#app", async ({ page }) => {
+      film(serve(index, { selector: "#app" }), async ({ page }) => {
         await page.evaluate(() =>
           setTimeout(() => {
             throw new Error("boom");

@@ -3,8 +3,7 @@ import { serve } from "@svjeez/dom/bun";
 import index from "./index.html";
 
 export default await film(
-  serve(index),
-  "#app",
+  serve(index, { selector: "#app" }),
   async ({ page, snap }) => {
     await snap("start");
 

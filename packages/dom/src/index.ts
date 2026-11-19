@@ -29,6 +29,6 @@ export { mergeSchemes } from "./scheme.ts";
 
 export type * from "./schema.ts";
 
-export { film, type FilmContext, type FilmOptions } from "./film.ts";
+export { film, settleScript, type FilmContext, type FilmOptions } from "./film.ts";
 
-export type { DomServer } from "./server.ts";
+export type { Target } from "./target.ts";

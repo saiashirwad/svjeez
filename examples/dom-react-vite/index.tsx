@@ -2,8 +2,7 @@ import { film } from "@svjeez/dom";
 import { serve } from "@svjeez/dom/vite";
 
 export default await film(
-  serve({ root: import.meta.dir }),
-  "#app",
+  serve({ root: import.meta.dir, selector: "#app" }),
   async ({ page, snap }) => {
     await snap("start");
 

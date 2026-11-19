@@ -6,7 +6,7 @@ import { serve } from "../src/vite.ts";
 const root = join(import.meta.dir, "app");
 
 test("serve hashes the project's modules and films the page", async () => {
-  const server = await serve({ root });
+  const server = await serve({ root, selector: "#app" });
 
   try {
     expect(await server.sources()).toBe(await server.sources());
@@ -16,8 +16,7 @@ test("serve hashes the project's modules and films the page", async () => {
   }
 
   const board = await film(
-    serve({ root }),
-    "#app",
+    serve({ root, selector: "#app" }),
     async ({ page, snap }) => {
       await snap("start");
       await page.click("#add");

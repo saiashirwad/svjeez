@@ -2,9 +2,11 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { InlineConfig, ViteDevServer } from "vite";
-import type { DomServer } from "./server.ts";
+import type { Target } from "./target.ts";
 
 export interface ServeOptions {
+  /** The element to capture, as a CSS selector. */
+  readonly selector: string;
   /** The Vite project: where `index.html` and the config live. */
   readonly root: string;
   /** Extra Vite config, merged over the project's own. */
@@ -16,14 +18,15 @@ export interface ServeOptions {
 const REFERENCE = /\b(?:src|href)="(\/?[^":#]+\.(?:[mc]?[jt]sx?|css))"/g;
 
 /**
- * Starts a Vite dev server for `film`.
+ * Starts a Vite dev server and makes it a `film` target.
  * `sources()` hashes the entry HTML and every project module it imports (node_modules excluded), wherever they live.
  */
 export const serve = async ({
+  selector,
   root,
   config,
   entry = "index.html",
-}: ServeOptions): Promise<DomServer> => {
+}: ServeOptions): Promise<Target> => {
   const { createServer } = await import("vite").catch(() => {
     throw new Error("serve from @svjeez/dom/vite needs vite. Install it with `npm i -D vite`.");
   });
@@ -64,6 +67,7 @@ export const serve = async ({
 
     return {
       url: new URL(entry === "index.html" ? "/" : entry, origin).href,
+      selector,
       sources: async () => {
         const hash = createHash("sha256");
 

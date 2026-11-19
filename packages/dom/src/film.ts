@@ -5,7 +5,8 @@ import { inlineAssets } from "./assets.ts";
 import { cached } from "./cache.ts";
 import { compile, type Diagnostic } from "./compile/index.ts";
 import { openPage, record, type OpenPageOptions, type Snap, type State } from "./record.ts";
-import type { DomServer } from "./server.ts";
+import { serializeProps } from "./props.ts";
+import type { Target } from "./target.ts";
 
 export interface FilmOptions {
   /** Which `prefers-color-scheme` to capture under; `"both"` makes a scene that follows the viewer's. Default: the page as it is. */
@@ -18,22 +19,33 @@ export interface FilmOptions {
   readonly cache?: string;
   /** Called with what the compile could not draw faithfully. Default: one `console.warn` listing them. */
   readonly onDiagnostics?: (diagnostics: readonly Diagnostic[]) => void;
+  /**
+   * Decides when the page is ready for a `snap` (and after every `update`). Default: `settleScript`, which waits for
+   * the framework adapter's idle signal if it has one, then fonts, transitions and a stable layout.
+   */
+  readonly settle?: (page: Page, selector: string) => Promise<void>;
   /** Chromium to use instead of the default. */
   readonly executablePath?: OpenPageOptions["executablePath"];
 }
 
-export interface FilmContext {
+export interface FilmContext<Props = never> {
   /** The page, to drive with Playwright. */
   readonly page: Page;
   /** Waits for the page to settle, then records a state. See `record`. */
   readonly snap: Snap;
+  /** Component targets only: merges `props` into the mounted component's props, re-renders and waits for the page to settle. */
+  readonly update: (props: Props) => Promise<void>;
 }
 
-/** Fonts loaded, running transitions done, and the root's box unchanged for a few frames. */
-const settleScript = (selector: string) => `(async () => {
+/**
+ * The default readiness check, as a page script: the framework adapter's `settled()` (component targets) if it has one,
+ * fonts loaded, running transitions done, and the root's box unchanged for a few frames.
+ */
+export const settleScript = (selector: string) => `(async () => {
   const root = document.querySelector(${JSON.stringify(selector)});
   const frame = () => new Promise((done) => requestAnimationFrame(() => done()));
   const box = () => { const r = root.getBoundingClientRect(); return [r.x, r.y, r.width, r.height].join(); };
+  await window.__svjeez?.settled?.();
   await document.fonts.ready;
   let last = "", still = 0;
   for (let i = 0; i < 120 && still < 3; i++) {
@@ -55,24 +67,26 @@ const warn = (diagnostics: readonly Diagnostic[]) => {
 };
 
 /**
- * Films a web app: serves it, opens it, runs your interaction script, and returns the scene that morphs between the states you `snap`.
+ * Films a target: opens it, runs your interaction script, and returns the scene that morphs between the states you `snap`.
  *
- *     export default await film(serve(index), "#app", async ({ page, snap }) => {
+ *     export default await film(serve(index, { selector: "#app" }), async ({ page, snap }) => {
  *       await snap("start");
  *       await page.getByRole("button").click();
  *       await snap("done", { over: 0.7 });
  *     }, { scheme: "both", title: "Demo" });
  *
+ * A target is an app (`serve`) or one mounted component (`component`, whose script can also `update` its props).
  * Throws if the page throws or logs a console error. Everything is closed afterwards, errors included.
  */
-export const film = async (
-  server: DomServer | Promise<DomServer>,
-  selector: string,
-  run: (context: FilmContext) => Promise<void>,
+export const film = async <Props = never>(
+  target: Target<Props> | Promise<Target<Props>>,
+  run: (context: FilmContext<Props>) => Promise<void>,
   options: FilmOptions = {},
 ): Promise<Scene> => {
   const { scheme, title = "Page", viewport, cache, onDiagnostics = warn, executablePath } = options;
-  const app = await server;
+  const app = await target;
+  const { selector } = app;
+  const settle = options.settle ?? ((page: Page) => page.evaluate(settleScript(selector)));
 
   try {
     const errors: string[] = [];
@@ -94,7 +108,7 @@ export const film = async (
 
       try {
         await page.waitForSelector(selector);
-        await page.evaluate(settleScript(selector));
+        await settle(page, selector);
         check();
 
         const recorded = await record(
@@ -104,9 +118,21 @@ export const film = async (
             run({
               page,
               snap: async (name, timing) => {
-                await page.evaluate(settleScript(selector));
+                await settle(page, selector);
 
                 return snap(name, timing);
+              },
+              update: async (props) => {
+                const wire = serializeProps(props as object, "update");
+
+                if (!(await page.evaluate("Boolean(window.__svjeez)")))
+                  throw new Error(
+                    "film: update() needs a component target. Make one with component() from @svjeez/dom/vite or @svjeez/dom/bun.",
+                  );
+
+                await page.evaluate(`window.__svjeez.update(${JSON.stringify(wire)})`);
+                await settle(page, selector);
+                check();
               },
             }),
           { ...(scheme && { scheme }) },
