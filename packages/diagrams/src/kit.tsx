@@ -480,6 +480,10 @@ export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
     ...e.stroke,
   };
 
+  // The head stays fixed at the end and shows once the drawn line reaches its base.
+  const cut = head === "filled" ? HEAD - 1 : 0;
+  const reach = Math.min(1, Math.max(0, 1 - (HEAD - cut) / (new Route([points]).length || 1)));
+
   return (
     <Group key={e.key}>
       <Shape
@@ -499,7 +503,13 @@ export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
           stroke={
             head === "filled" ? undefined : { color, width: 1.5, cap: "round", join: "round" }
           }
-          opacity={e.draw === undefined ? undefined : through(e.draw, (d) => (d >= 0.85 ? 1 : 0))}
+          opacity={
+            e.draw === undefined
+              ? undefined
+              : stroke.dash
+                ? e.draw
+                : through(e.draw, (d) => (d >= reach ? 1 : 0))
+          }
         />
       )}
     </Group>

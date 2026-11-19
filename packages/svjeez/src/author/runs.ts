@@ -58,11 +58,21 @@ const faceName = (family: string, weight: number, italic: boolean): string =>
   `${family} ${weight}${italic ? " italic" : ""}`;
 
 export const faceOf = (
-  value: FontValue,
+  value: FontValue | undefined,
   weight: number | undefined,
   italic: boolean | undefined,
   where: string,
 ): Font => {
+  if (!(value instanceof Font) && !(value instanceof FontFamily))
+    throw new SceneError(
+      value === undefined
+        ? `${where} has no font.`
+        : `${where} takes a font made by font(), font.load(), font.family() or @svjeez/fonts, got ${String(value)}.`,
+      value === undefined
+        ? 'Give it one: font={await font.load("Inter.ttf")}, or a family from @svjeez/fonts such as font={await google("Inter")}. There is no default font and nothing is inherited.'
+        : undefined,
+    );
+
   if (weight !== undefined && !(weight >= 1 && weight <= 1000))
     throw new SceneError(`${where} needs a weight between 1 and 1000, got ${weight}.`);
 

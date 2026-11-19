@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { Align, Group, Shape, circle, font, scene, span, track } from "svjeez";
-import { SceneError, inspect, svg, type Child, type When } from "svjeez/tools";
+import { Align, Group, Shape, circle, ease, font, scene, span, track } from "svjeez";
+import { SceneError, inspect, svg, type Child, type Model, type When } from "svjeez/tools";
+import { Edge, look } from "../src/kit.tsx";
+import { blendNumber, valueAt } from "../../svjeez/src/model/sample";
 import {
   flowchart,
   lanes,
@@ -424,5 +426,47 @@ describe("lanes", () => {
         ),
       ).message,
     ).toBe('lanes() link 1 runs from "a" to itself. Link two different lanes.');
+  });
+});
+
+describe("Edge head", () => {
+  const headOpacity = (head: "filled" | "async", dash: boolean, t: number): number => {
+    const l = look(options, "test");
+
+    const points = [
+      { x: 0, y: 10 },
+      { x: 100, y: 10 },
+    ];
+
+    const model = scene({ size: [200, 40], duration: 2, title: "Edge" }, () => (
+      <Edge
+        key="e"
+        look={l}
+        points={points}
+        head={head}
+        {...(dash && { stroke: { dash: [4, 4] } })}
+        draw={track(0).to(1, span(0, 1), ease.linear)}
+      />
+    ));
+
+    const visit = (node: Model.SceneNode): Model.SceneNode | undefined =>
+      node.key === "e/head"
+        ? node
+        : node.kind === "group"
+          ? node.children.map(visit).find(Boolean)
+          : undefined;
+
+    return valueAt(visit(model.root)!.layers[0]!.opacity, t, blendNumber);
+  };
+
+  test("the head stays hidden until the drawn line reaches its base", () => {
+    expect(headOpacity("async", false, 0.9)).toBe(0);
+    expect(headOpacity("async", false, 0.95)).toBe(1);
+    expect(headOpacity("filled", false, 0.98)).toBe(0);
+    expect(headOpacity("filled", false, 1)).toBe(1);
+  });
+
+  test("a dashed edge's head fades in with its line", () => {
+    expect(headOpacity("filled", true, 0.5)).toBeCloseTo(0.5, 2);
   });
 });

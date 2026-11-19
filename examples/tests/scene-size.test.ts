@@ -12,7 +12,7 @@ interface Budget {
 }
 
 // charts, flowchart, sequence and mermaid carry what an exact window of an eased draw costs: every staggered bar has its own
-// curve, and an edge head is a 0/1 step at 85% of its draw. An area's wipe follows its draw through two nested clips.
+// curve, and an edge head is a 0/1 step once its draw reaches the head's base. An area's wipe follows its draw through two nested clips.
 const budgets = {
   "readme/basic": { bytes: 1700, elements: 7, stops: 4, smil: 0, cost: 2 },
   "readme/loops": { bytes: 2450, elements: 7, stops: 20, smil: 0, cost: 3 },
@@ -33,9 +33,9 @@ const budgets = {
   code: { bytes: 11600, elements: 152, stops: 32, smil: 0, cost: 23 },
   globe: { bytes: 440000, elements: 80, stops: 210, smil: 14, cost: 30 },
   math: { bytes: 24000, elements: 48, stops: 20, smil: 0, cost: 13 },
-  flowchart: { bytes: 14750, elements: 74, stops: 110, smil: 0, cost: 52 },
+  flowchart: { bytes: 15150, elements: 74, stops: 116, smil: 0, cost: 52 },
   sequence: { bytes: 12400, elements: 79, stops: 79, smil: 0, cost: 39 },
-  mermaid: { bytes: 15700, elements: 78, stops: 130, smil: 0, cost: 56 },
+  mermaid: { bytes: 15800, elements: 78, stops: 132, smil: 0, cost: 56 },
   state: { bytes: 13100, elements: 86, stops: 55, smil: 0, cost: 9 },
   lanes: { bytes: 20100, elements: 97, stops: 104, smil: 28, cost: 62 },
 } satisfies Record<string, Budget>;

@@ -131,6 +131,29 @@ describe("SceneError", () => {
     ]);
   });
 
+  test("a Text without a font says there is no default, and one with a bad font says what it takes", () => {
+    const text = (props: { readonly font?: string }) =>
+      thrown(() =>
+        made(() =>
+          jsxDEV(
+            Text,
+            // SAFETY: what a scene written without types hands over: a font that is missing or not a font.
+            { size: 12, fill: "#000000", children: "hi", ...props } as never,
+            undefined,
+            false,
+            at(7),
+          ),
+        ),
+      );
+
+    const none = text({});
+
+    expect(none.problem).toMatch(/has no font/);
+    expect(none.fix).toMatch(/There is no default font/);
+    expect(none.source?.line).toBe(7);
+    expect(text({ font: "Inter" }).problem).toMatch(/takes a font made by .* got Inter/);
+  });
+
   test("a component that refuses its props is named, at its call", () => {
     const error = thrown(() =>
       made(() =>

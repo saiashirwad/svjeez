@@ -771,10 +771,10 @@ describe("arrows", () => {
     const head = find(model, "link/head");
     const opacity = head.layers[0]!.opacity;
 
-    expect(isLane(opacity) && opacity.keys.map((key) => [key.t, key.value])).toEqual([
-      [0, 0],
-      [1, 1],
-    ]);
+    const keys = isLane(opacity) ? opacity.keys.map((key) => [key.t, key.value]) : [];
+
+    expect(keys.map(([, value]) => value)).toEqual([0, 1]);
+    expect(keys[1]![0]).toBeCloseTo(1 + (8 * Math.cos(0.45)) / 100, 2);
     expect(tip(model, "link/head", 1.5)[0]).toBeCloseTo(50, 1);
     expect(tip(model, "link/head", 3)[0]).toBeCloseTo(100, 1);
   });
