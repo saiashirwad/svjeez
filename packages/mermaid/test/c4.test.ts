@@ -52,7 +52,7 @@ describe("parse c4", () => {
       System(s, "S", "descr")
       SystemDb_Ext(sd, "SD")
       SystemQueue(sq, "SQ")
-      Container(c, "C", "Java", "a container")
+      Container(C1, "C", "Java", "a container")
       ContainerDb(cd, "CD", $techn="PostgreSQL", $descr="rows")
       Component_Ext(ce, "CE", "Go")
       ComponentQueue(cq, "CQ")`);
@@ -65,7 +65,7 @@ describe("parse c4", () => {
       ["s", "system", "box", false],
       ["sd", "system", "db", true],
       ["sq", "system", "queue", false],
-      ["c", "container", "box", false],
+      ["C1", "container", "box", false],
       ["cd", "container", "db", false],
       ["ce", "component", "box", true],
       ["cq", "component", "queue", false],
@@ -80,13 +80,13 @@ describe("parse c4", () => {
       Enterprise_Boundary(e, "Bank") {
         System_Boundary(s, "Online")
         {
-          Container(a, "A")
+          Container(A1, "A")
         }
         Boundary(b, "Other", "custom") {
           System(x, "X")
         }
-        Node(n, "Server", "Linux") {
-          Container(y, "Y")
+        Node(N1, "Server", "Linux") {
+          Container(Y1, "Y")
         }
       }`);
 
@@ -94,12 +94,12 @@ describe("parse c4", () => {
       ["e", "Enterprise", undefined],
       ["s", "System", "e"],
       ["b", "custom", "e"],
-      ["n", "Linux", "e"],
+      ["N1", "Linux", "e"],
     ]);
     expect(doc.shapes.map((s) => [s.id, s.boundary])).toEqual([
-      ["a", "s"],
+      ["A1", "s"],
       ["x", "b"],
-      ["y", "n"],
+      ["Y1", "N1"],
     ]);
   });
 
@@ -169,10 +169,10 @@ describe("drawC4", () => {
     const doc = parse(`
       title Shop
       System_Boundary(b, "Shop") {
-        Container(web, "Web", "React", "The UI")
+        Container(Web, "Web", "React", "The UI")
       }
       Person(u, "User")
-      Rel(u, web, "Uses", "HTTPS")`);
+      Rel(u, Web, "Uses", "HTTPS")`);
 
     const diagram = drawC4(doc, { font: mono });
 
@@ -180,7 +180,7 @@ describe("drawC4", () => {
       scene({ size: [600, 600], duration: 1, title: "C4", loop: false }, () => diagram.node),
     );
 
-    for (const part of ["web", "u", "b", "u->web"]) expect(() => diagram.part(part)).not.toThrow();
+    for (const part of ["Web", "u", "b", "u->Web"]) expect(() => diagram.part(part)).not.toThrow();
 
     for (const text of ["Shop", "[Container: React]", "The UI", "Uses", "[HTTPS]", "[Person]"])
       expect(markup).toContain(text);
