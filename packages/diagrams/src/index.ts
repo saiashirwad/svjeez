@@ -78,6 +78,8 @@ export {
 
 export { packet, type Packet, type PacketField, type PacketOptions } from "./packet.tsx";
 
+export { radar, type Radar, type RadarCurve, type RadarOptions, type RadarSpec } from "./radar.tsx";
+
 export {
   gitGraph,
   type GitCommit,

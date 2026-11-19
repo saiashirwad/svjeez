@@ -16,6 +16,7 @@ import type { XyChartDoc } from "./xychart.ts";
 import type { TimelineDoc } from "./timeline.ts";
 import type { SankeyDoc } from "./sankey.ts";
 import type { RequirementDoc } from "./requirement.ts";
+import type { RadarDoc } from "./radar.ts";
 
 export type Place = NonNullable<Where["source"]>;
 
@@ -223,7 +224,9 @@ export type MermaidDoc =
   | RequirementDoc
   | C4Doc
   | KanbanDoc
-  | PacketDoc;
+  | PacketDoc
+  | PacketDoc
+  | RadarDoc;
 
 export interface ParseOptions {
   readonly file?: string;
@@ -248,4 +251,8 @@ export type {
   SankeyDoc,
   TimelineDoc,
   XyChartDoc,
+  MindmapDoc,
+  PacketDoc,
+  PieDoc,
+  RadarDoc,
 };

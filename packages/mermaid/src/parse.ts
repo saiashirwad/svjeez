@@ -12,6 +12,7 @@ import { parseJourney } from "./journey.ts";
 import { parseKanban } from "./kanban.ts";
 import { parseMindmap } from "./mindmap.ts";
 import { parsePacket } from "./packet.ts";
+import { parseRadar } from "./radar.ts";
 import { parsePie } from "./pie.ts";
 import { parseQuadrant } from "./quadrant.ts";
 import { parseSankey } from "./sankey.ts";
@@ -94,6 +95,8 @@ export function parseMermaid(text: string, options: ParseOptions = {}): MermaidD
   if (word === "xychart-beta" || word === "xychart") return parseXyChart(first, body);
 
   if (word === "packet-beta" || word === "packet") return parsePacket(first, body);
+
+  if (word === "radar-beta") return parseRadar(first, body);
 
   return fail(first, `the first line must name a diagram type. ${KINDS}`);
 }
