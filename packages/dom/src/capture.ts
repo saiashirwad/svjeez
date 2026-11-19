@@ -1,0 +1,803 @@
+import type {
+  Animation,
+  Background,
+  Color,
+  Corner,
+  ElementNode,
+  Font,
+  Run,
+  Shadow,
+  Side,
+  Snapshot,
+  Stop,
+  SvgNode,
+  TextNode,
+} from "./schema.ts";
+
+/**
+ * Reads a DOM subtree into a Snapshot. It runs inside the page, so it is one self-contained function:
+ * no imports at run time, no module state, every helper nested. That is what lets `captureScript` be its own source.
+ *
+ * Layout is read as it renders right now, so a running animation or transition is captured mid-flight.
+ */
+interface Pending {
+  color: Color;
+  at?: number;
+}
+
+type Writable<T> = { -readonly [K in keyof T]: T[K] };
+
+export const capture = (root: Element): Snapshot => {
+  const scrollX = window.scrollX;
+  const scrollY = window.scrollY;
+  const scratch = document.createElement("canvas");
+  const paint = scratch.getContext("2d", { willReadFrequently: true })!;
+
+  const round = (value: number) => Math.round(value * 1000) / 1000;
+  const px = (value: string) => parseFloat(value) || 0;
+
+  /** Any CSS color, as `rgb(r, g, b)` or `rgba(r, g, b, a)`. */
+  const color = (value: string): Color => {
+    const parts = /^rgba?\((.+)\)$/
+      .exec(value.trim())?.[1]
+      ?.split(/[\s,/]+/)
+      .map(Number);
+
+    let [r, g, b, a = 1] = parts ?? [];
+
+    if (r === undefined || g === undefined || b === undefined || [r, g, b, a].some(Number.isNaN)) {
+      paint.clearRect(0, 0, 1, 1);
+      paint.fillStyle = "#000";
+      paint.fillStyle = value;
+      paint.fillRect(0, 0, 1, 1);
+      const [pr = 0, pg = 0, pb = 0, pa = 0] = paint.getImageData(0, 0, 1, 1).data;
+
+      [r, g, b, a] = [pr, pg, pb, pa / 255];
+    }
+
+    a = round(a);
+
+    return a === 1 ? `rgb(${r}, ${g}, ${b})` : `rgba(${r}, ${g}, ${b}, ${a})`;
+  };
+
+  /** Splits on `separator` outside parentheses. */
+  const split = (value: string, separator: string) => {
+    const out: string[] = [];
+    let depth = 0;
+    let start = 0;
+
+    for (let i = 0; i < value.length; i++) {
+      const char = value[i];
+
+      if (char === "(") depth++;
+      else if (char === ")") depth--;
+      else if (depth === 0 && char === separator) {
+        out.push(value.slice(start, i).trim());
+        start = i + 1;
+      }
+    }
+
+    out.push(value.slice(start).trim());
+
+    return out.filter(Boolean);
+  };
+
+  const words = (value: string) => {
+    const out: string[] = [];
+    let depth = 0;
+    let current = "";
+
+    for (const char of value) {
+      if (char === "(") depth++;
+
+      if (char === ")") depth--;
+
+      if (depth === 0 && /\s/.test(char)) {
+        if (current) out.push(current);
+        current = "";
+      } else current += char;
+    }
+
+    if (current) out.push(current);
+
+    return out;
+  };
+
+  // ---------------------------------------------------------------- geometry
+
+  /** The 2D part of an element's own transform: translate, rotate, scale, then transform. */
+  const ownMatrix = (style: CSSStyleDeclaration, width: number, height: number) => {
+    const matrix = new DOMMatrix();
+    const [tx = "0", ty = "0"] = style.translate === "none" ? [] : style.translate.split(" ");
+
+    const length = (value: string, of: number) =>
+      value.endsWith("%") ? (parseFloat(value) / 100) * of : px(value);
+
+    matrix.translateSelf(length(tx, width), length(ty, height));
+
+    if (style.rotate !== "none") matrix.rotateSelf(parseFloat(style.rotate.split(" ").pop()!) || 0);
+
+    if (style.scale !== "none") {
+      const [sx = "1", sy = sx] = style.scale.split(" ");
+
+      matrix.scaleSelf(parseFloat(sx), parseFloat(sy));
+    }
+
+    if (style.transform !== "none") matrix.multiplySelf(new DOMMatrix(style.transform));
+
+    return matrix;
+  };
+
+  const invertible = (m: DOMMatrix) => m.a * m.d - m.b * m.c !== 0;
+
+  const isPlain = (m: DOMMatrix) =>
+    m.a === 1 && m.b === 0 && m.c === 0 && m.d === 1 && m.e === 0 && m.f === 0;
+
+  const pageRect = (el: Element | Range) => {
+    const rect = el.getBoundingClientRect();
+
+    return {
+      left: rect.left + scrollX,
+      top: rect.top + scrollY,
+      width: rect.width,
+      height: rect.height,
+    };
+  };
+
+  // ------------------------------------------------------------------ paint
+
+  const radiusOf = (style: CSSStyleDeclaration, width: number, height: number) => {
+    const read = (value: string): Corner => {
+      const [x = "0", y = x] = value.split(" ");
+
+      return [
+        x.endsWith("%") ? (parseFloat(x) / 100) * width : px(x),
+        y.endsWith("%") ? (parseFloat(y) / 100) * height : px(y),
+      ];
+    };
+
+    const [tl, tr, br, bl] = [
+      read(style.borderTopLeftRadius),
+      read(style.borderTopRightRadius),
+      read(style.borderBottomRightRadius),
+      read(style.borderBottomLeftRadius),
+    ];
+
+    const scale = Math.min(
+      1,
+      width / (tl[0] + tr[0]),
+      width / (bl[0] + br[0]),
+      height / (tl[1] + bl[1]),
+      height / (tr[1] + br[1]),
+    );
+
+    const fit = ([x, y]: Corner): Corner => [round(x * scale), round(y * scale)];
+
+    return [fit(tl), fit(tr), fit(br), fit(bl)] as const;
+  };
+
+  const fixStops = (parts: Pending[]): Stop[] => {
+    const offsets = parts.map((part) => part.at);
+
+    if (offsets[0] === undefined) offsets[0] = 0;
+
+    if (offsets[offsets.length - 1] === undefined) offsets[offsets.length - 1] = 1;
+    let high = 0;
+
+    for (let i = 0; i < offsets.length; i++) {
+      const at = offsets[i];
+
+      if (at === undefined) continue;
+      offsets[i] = high = Math.max(high, at);
+    }
+
+    for (let i = 0; i < offsets.length; i++) {
+      if (offsets[i] !== undefined) continue;
+      let next = i;
+
+      while (offsets[next] === undefined) next++;
+      const from = offsets[i - 1]!;
+      const to = offsets[next]!;
+
+      for (let j = i; j < next; j++)
+        offsets[j] = from + ((to - from) * (j - i + 1)) / (next - i + 1);
+    }
+
+    return parts.map((part, i) => ({ offset: round(offsets[i]!), color: part.color }));
+  };
+
+  /** `red 10%, blue 20px 30px` as stops, with px resolved against `length`. */
+  const stopsOf = (args: string[], length: number) => {
+    const parts: Pending[] = [];
+
+    for (const arg of args) {
+      const [first = "", ...positions] = words(arg);
+
+      if (/^[-\d.]/.test(first)) continue; // an interpolation hint
+
+      const offsets = positions.length === 0 ? [undefined] : positions;
+
+      for (const position of offsets) {
+        const at =
+          position === undefined
+            ? undefined
+            : position.endsWith("%")
+              ? parseFloat(position) / 100
+              : length > 0
+                ? px(position) / length
+                : 0;
+
+        const part: Pending = { color: color(first) };
+
+        if (at !== undefined) part.at = at;
+        parts.push(part);
+      }
+    }
+
+    return fixStops(parts);
+  };
+
+  const angleOf = (value: string, width: number, height: number) => {
+    const to = /^to\s+(.+)$/.exec(value)?.[1]?.split(/\s+/);
+
+    if (to) {
+      const corner = Math.atan2(width, height) * (180 / Math.PI);
+      const key = [...to].sort().join(" ");
+
+      const named = new Map([
+        ["top", 0],
+        ["right", 90],
+        ["bottom", 180],
+        ["left", 270],
+        ["right top", corner],
+        ["bottom right", 180 - corner],
+        ["bottom left", 180 + corner],
+        ["left top", 360 - corner],
+      ]);
+
+      return named.get(key) ?? 180;
+    }
+
+    const n = parseFloat(value);
+
+    if (value.endsWith("grad")) return (n * 360) / 400;
+
+    if (value.endsWith("rad")) return n * (180 / Math.PI);
+
+    if (value.endsWith("turn")) return n * 360;
+
+    return n;
+  };
+
+  const layer = (value: string, width: number, height: number): Background | undefined => {
+    const url = /^url\((.*)\)$/.exec(value)?.[1];
+
+    if (url !== undefined) return { kind: "image", src: url.replace(/^["']|["']$/g, "") };
+
+    const call = /^(linear|radial)-gradient\((.*)\)$/s.exec(value);
+
+    if (!call) return undefined;
+    const args = split(call[2]!, ",");
+
+    const config = /^(to\s|[-\d.]+(deg|grad|rad|turn)$)/.test(args[0] ?? "")
+      ? args.shift()
+      : /^(circle|ellipse|closest|farthest|at\s)/.test(args[0] ?? "")
+        ? args.shift()
+        : undefined;
+
+    if (call[1] === "linear") {
+      const angle = config === undefined ? 180 : angleOf(config, width, height);
+      const rad = (angle * Math.PI) / 180;
+      const length = Math.abs(width * Math.sin(rad)) + Math.abs(height * Math.cos(rad));
+
+      return { kind: "linear", angle: round(angle), stops: stopsOf(args, length) };
+    }
+
+    const [shapeAndSize = "", position = ""] = (config ?? "").split(/\bat\b/).map((s) => s.trim());
+    const [px0 = "center", py0 = "center"] = position ? words(position) : [];
+
+    const place = (word: string, of: number, start: string, end: string) =>
+      word === start
+        ? 0
+        : word === end
+          ? of
+          : word === "center"
+            ? of / 2
+            : word.endsWith("%")
+              ? (parseFloat(word) / 100) * of
+              : px(word);
+
+    const at = [place(px0, width, "left", "right"), place(py0, height, "top", "bottom")] as const;
+    const shape = /\bcircle\b/.test(shapeAndSize) ? "circle" : "ellipse";
+    const size = /(closest|farthest)-(side|corner)/.exec(shapeAndSize)?.[0] ?? "farthest-corner";
+    const far = Math.max(at[0], width - at[0]);
+
+    const ray =
+      shape === "circle" ? Math.hypot(far, Math.max(at[1], height - at[1])) : far * Math.SQRT2;
+
+    return {
+      kind: "radial",
+      shape,
+      size,
+      at: [round(at[0]), round(at[1])],
+      stops: stopsOf(args, ray),
+    };
+  };
+
+  const sidesOf = (style: CSSStyleDeclaration) => {
+    const side = (name: "Top" | "Right" | "Bottom" | "Left"): Side => ({
+      width: px(style[`border${name}Width`]),
+      // SAFETY: a computed border-style is always one of the BorderStyle keywords.
+      style: style[`border${name}Style`] as Side["style"],
+      color: color(style[`border${name}Color`]),
+    });
+
+    const sides = [side("Top"), side("Right"), side("Bottom"), side("Left")] as const;
+
+    return sides.some((s) => s.width > 0 && s.style !== "none" && s.style !== "hidden")
+      ? sides
+      : undefined;
+  };
+
+  const shadowsOf = (value: string): Shadow[] =>
+    value === "none"
+      ? []
+      : split(value, ",").map((one) => {
+          const tokens = words(one);
+          const numbers = tokens.filter((t) => /^[-\d.]/.test(t)).map(px);
+          const paint = tokens.find((t) => !/^[-\d.]/.test(t) && t !== "inset");
+
+          return {
+            x: numbers[0] ?? 0,
+            y: numbers[1] ?? 0,
+            blur: numbers[2] ?? 0,
+            spread: numbers[3] ?? 0,
+            color: color(paint ?? "black"),
+            inset: tokens.includes("inset"),
+          };
+        });
+
+  // ------------------------------------------------------------------- text
+
+  const fontOf = (style: CSSStyleDeclaration): Font => ({
+    family: style.fontFamily,
+    weight: parseInt(style.fontWeight, 10) || 400,
+    italic: style.fontStyle !== "normal",
+    stretch: parseFloat(style.fontStretch) || 100,
+    size: px(style.fontSize),
+  });
+
+  const decorationOf = (el: Element): Run["decoration"] => {
+    for (let at: Element | null = el; at; at = at.parentElement) {
+      const style = getComputedStyle(at);
+
+      const lines = style.textDecorationLine
+        .split(" ")
+        .filter((l): l is "underline" | "overline" | "line-through" =>
+          ["underline", "overline", "line-through"].includes(l),
+        );
+
+      if (lines.length > 0) {
+        const size = px(style.textDecorationThickness);
+
+        return {
+          lines,
+          color: color(style.textDecorationColor),
+          thickness: size > 0 ? size : round(px(style.fontSize) / 16),
+        };
+      }
+
+      if (!style.display.startsWith("inline")) break;
+    }
+
+    return undefined;
+  };
+
+  const casing = (style: CSSStyleDeclaration, char: string, before: string) => {
+    const cased =
+      style.textTransform === "uppercase"
+        ? char.toUpperCase()
+        : style.textTransform === "lowercase"
+          ? char.toLowerCase()
+          : style.textTransform === "capitalize" && /\s|^$/.test(before)
+            ? char.toUpperCase()
+            : char;
+
+    return [...cased].length === 1 ? cased : char;
+  };
+
+  const textOf = (node: Text, parent: Element, a: DOMMatrix): TextNode | undefined => {
+    const style = getComputedStyle(parent);
+    const font = fontOf(style);
+    const spacing = style.letterSpacing === "normal" ? 0 : px(style.letterSpacing);
+    const text = node.data;
+
+    paint.font =
+      style.font || `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const metrics = paint.measureText("Hg");
+    const ascent = metrics.fontBoundingBoxAscent;
+    const height = ascent + metrics.fontBoundingBoxDescent;
+    const aligned = a.b === 0 && a.c === 0 && invertible(a);
+    const inverse = invertible(a) ? a.inverse() : new DOMMatrix();
+    const range = document.createRange();
+
+    const lines: { x: number; top: number; chars: { char: string; x: number; width: number }[] }[] =
+      [];
+
+    for (let i = 0; i < text.length;) {
+      const char = String.fromCodePoint(text.codePointAt(i)!);
+
+      range.setStart(node, i);
+      range.setEnd(node, i + char.length);
+      i += char.length;
+      const box = range.getClientRects()[0];
+
+      if (!box || (box.width === 0 && /\s/.test(char))) continue;
+
+      let x: number;
+      let top: number;
+      let width: number;
+
+      if (aligned) {
+        const from = inverse.transformPoint(new DOMPoint(box.left + scrollX, box.top + scrollY));
+        const to = inverse.transformPoint(new DOMPoint(box.right + scrollX, box.bottom + scrollY));
+
+        x = Math.min(from.x, to.x);
+        top = Math.min(from.y, to.y);
+        width = Math.abs(to.x - from.x);
+      } else {
+        // A rotated or skewed ancestor turns each character's box into a bounding box.
+        // A box's center survives the transform, so the box comes back from its center and the font's size.
+        const centre = inverse.transformPoint(
+          new DOMPoint(box.left + box.width / 2 + scrollX, box.top + box.height / 2 + scrollY),
+        );
+
+        width = paint.measureText(char).width + spacing;
+        x = centre.x - width / 2;
+        top = centre.y - height / 2;
+      }
+
+      const before = text.slice(0, i - char.length).slice(-1);
+      let line = lines[lines.length - 1];
+
+      if (!line || Math.abs(top - line.top) > height / 2) {
+        line = { x, top, chars: [] };
+        lines.push(line);
+      }
+
+      line.chars.push({ char: casing(style, char, before), x, width });
+    }
+
+    const decoration = decorationOf(parent);
+    const runs: Run[] = [];
+
+    for (const line of lines) {
+      const chars = [...line.chars];
+
+      while (chars.length > 0 && /\s/.test(chars[chars.length - 1]!.char)) chars.pop();
+
+      if (chars.length === 0) continue;
+
+      const run: Writable<Run> = {
+        x: round(line.x),
+        y: round(line.top + ascent),
+        text: chars.map((c) => c.char).join(""),
+        advances: chars.map((c, i) => round((chars[i + 1]?.x ?? c.x + c.width) - c.x)),
+        font,
+        letterSpacing: round(spacing),
+        color: color(style.color),
+      };
+
+      if (decoration) run.decoration = decoration;
+      runs.push(run);
+    }
+
+    return runs.length > 0 ? { type: "text", runs } : undefined;
+  };
+
+  // -------------------------------------------------------------------- svg
+
+  const SVG_PAINT = [
+    "fill",
+    "fill-opacity",
+    "fill-rule",
+    "stroke",
+    "stroke-width",
+    "stroke-opacity",
+    "stroke-linecap",
+    "stroke-linejoin",
+    "stroke-miterlimit",
+    "stroke-dasharray",
+    "stroke-dashoffset",
+    "opacity",
+  ];
+
+  const svgOf = (el: Element): SvgNode | undefined => {
+    const tag = el.localName;
+    const style = getComputedStyle(el);
+
+    if (style.display === "none" || ["title", "desc", "metadata"].includes(tag)) return undefined;
+
+    const paints: Record<string, string> = {};
+
+    for (const name of SVG_PAINT) {
+      const value = style.getPropertyValue(name);
+
+      paints[name] = /^(rgb|color|hsl|oklch|oklab|lab|lch|#)/.test(value) ? color(value) : value;
+    }
+
+    const children = [...el.children].flatMap((child) => svgOf(child) ?? []);
+    const text = el.children.length === 0 ? el.textContent?.trim() : undefined;
+
+    const node: Writable<SvgNode> = {
+      tag,
+      attrs: Object.fromEntries([...el.attributes].map((a) => [a.name, a.value])),
+      style: paints,
+      children,
+    };
+
+    if (text) node.text = text;
+
+    return node;
+  };
+
+  // ------------------------------------------------------------- animations
+
+  const animationsOf = (el: Element): Animation[] =>
+    el.getAnimations().flatMap((animation) => {
+      const effect = animation.effect;
+
+      if (!(effect instanceof KeyframeEffect) || effect.pseudoElement) return [];
+
+      if (animation.playState === "idle") return [];
+
+      const timing = effect.getComputedTiming();
+
+      const kind =
+        animation instanceof CSSTransition
+          ? "transition"
+          : animation instanceof CSSAnimation
+            ? "animation"
+            : "script";
+
+      return [
+        {
+          kind,
+          name:
+            animation instanceof CSSTransition
+              ? animation.transitionProperty
+              : animation instanceof CSSAnimation
+                ? animation.animationName
+                : animation.id,
+          keyframes: effect.getKeyframes().map((frame) => ({
+            offset: round(frame.computedOffset ?? 0),
+            easing: frame.easing ?? "linear",
+            props: Object.fromEntries(
+              Object.entries(frame)
+                .filter(
+                  ([name]) => !["offset", "computedOffset", "easing", "composite"].includes(name),
+                )
+                .map(([name, value]) => [name, String(value)]),
+            ),
+          })),
+          duration: Number(timing.duration) || 0,
+          delay: Number(timing.delay) || 0,
+          endDelay: Number(timing.endDelay) || 0,
+          iterations: timing.iterations === Infinity ? "infinite" : Number(timing.iterations),
+          direction: timing.direction ?? "normal",
+          easing: timing.easing ?? "linear",
+          fill: timing.fill ?? "none",
+          currentTime: Number(animation.currentTime) || 0,
+          playbackRate: animation.playbackRate,
+          // SAFETY: idle animations returned above, which leaves these three.
+          playState: animation.playState as Animation["playState"],
+        },
+      ];
+    });
+
+  // ------------------------------------------------------------------- walk
+
+  /** `a` carries the transforms of every ancestor, from layout space to the page. */
+  const children = (el: Element, a: DOMMatrix): (ElementNode | TextNode)[] => {
+    const out: (ElementNode | TextNode)[] = [];
+
+    for (const child of el.childNodes) {
+      if (child instanceof Text) {
+        const text = textOf(child, el, a);
+
+        if (text) out.push(text);
+      } else if (child instanceof Element) out.push(...element(child, a));
+    }
+
+    return out;
+  };
+
+  const element = (el: Element, a: DOMMatrix): (ElementNode | TextNode)[] => {
+    const style = getComputedStyle(el);
+
+    if (
+      style.display === "none" ||
+      style.visibility === "hidden" ||
+      style.visibility === "collapse"
+    )
+      return [];
+
+    if (style.display === "contents") return children(el, a);
+
+    const box = pageRect(el);
+    const inline = style.display === "inline" && !(el instanceof HTMLImageElement);
+
+    const sized = (value: string, fallback: number, edges: string[]) => {
+      const n = parseFloat(value);
+
+      if (Number.isNaN(n)) return fallback;
+
+      return style.boxSizing === "border-box"
+        ? n
+        : n + edges.reduce((sum, e) => sum + px(style.getPropertyValue(e)), 0);
+    };
+
+    const own = inline ? new DOMMatrix() : ownMatrix(style, box.width, box.height);
+    const flat = isPlain(own) && isPlain(a);
+
+    const width = flat
+      ? box.width
+      : sized(style.width, box.width, [
+          "padding-left",
+          "padding-right",
+          "border-left-width",
+          "border-right-width",
+        ]);
+
+    const height = flat
+      ? box.height
+      : sized(style.height, box.height, [
+          "padding-top",
+          "padding-bottom",
+          "border-top-width",
+          "border-bottom-width",
+        ]);
+
+    const [ox = 0, oy = 0] = style.transformOrigin.split(" ").map(px);
+    const kx = ox - width / 2;
+    const ky = oy - height / 2;
+    let cx = box.left + box.width / 2;
+    let cy = box.top + box.height / 2;
+
+    if (!flat && invertible(a)) {
+      // The page center is A(own(center)). With k the origin's offset from the center and L own's linear part,
+      // own(center) = center + k + t - L k, so the untransformed center comes back by undoing A and that shift.
+      const page = a.inverse().transformPoint(new DOMPoint(cx, cy));
+
+      cx = page.x - (kx + own.e - (own.a * kx + own.c * ky));
+      cy = page.y - (ky + own.f - (own.b * kx + own.d * ky));
+    }
+
+    const rect = {
+      x: round(cx - width / 2),
+      y: round(cy - height / 2),
+      width: round(width),
+      height: round(height),
+    };
+
+    const origin = [round(cx + kx), round(cy + ky)] as const;
+
+    const inner = isPlain(own)
+      ? a
+      : a
+          .multiply(new DOMMatrix().translate(origin[0], origin[1]))
+          .multiply(own)
+          .multiply(new DOMMatrix().translate(-origin[0], -origin[1]));
+
+    const kids =
+      el instanceof SVGElement || el instanceof HTMLImageElement ? [] : children(el, inner);
+
+    const svg = el instanceof SVGSVGElement ? svgOf(el) : undefined;
+
+    if ((box.width === 0 || box.height === 0) && kids.length === 0) return [];
+
+    const radii = radiusOf(style, rect.width, rect.height);
+    const border = sidesOf(style);
+    const outlineWidth = px(style.outlineWidth);
+    const shadows = shadowsOf(style.boxShadow);
+
+    const backgrounds = split(style.backgroundImage, ",").flatMap(
+      (one) => layer(one, rect.width, rect.height) ?? [],
+    );
+
+    const background = color(style.backgroundColor);
+    const clip = { x: style.overflowX !== "visible", y: style.overflowY !== "visible" };
+    const animations = animationsOf(el);
+
+    const image =
+      el instanceof HTMLImageElement
+        ? {
+            src: el.currentSrc || el.src,
+            width: el.naturalWidth,
+            height: el.naturalHeight,
+            objectFit: style.objectFit,
+            objectPosition: style.objectPosition,
+          }
+        : undefined;
+
+    const node: Writable<ElementNode> = {
+      type: "element",
+      tag: el.localName,
+      rect,
+      children: kids,
+    };
+
+    const key = el.getAttribute("data-key");
+    const part = el.getAttribute("data-part");
+
+    if (el.id) node.id = el.id;
+
+    if (key) node.key = key;
+
+    if (part) node.part = part;
+
+    if (radii.some(([x, y]) => x > 0 || y > 0)) node.radii = radii;
+
+    if (!isPlain(own))
+      node.transform = {
+        matrix: [
+          round(own.a),
+          round(own.b),
+          round(own.c),
+          round(own.d),
+          round(own.e),
+          round(own.f),
+        ],
+        origin,
+      };
+
+    if (Number(style.opacity) !== 1) node.opacity = round(Number(style.opacity));
+
+    if (style.mixBlendMode !== "normal") node.blendMode = style.mixBlendMode;
+
+    if (clip.x || clip.y) node.clip = clip;
+
+    if (background !== "rgba(0, 0, 0, 0)") node.background = background;
+
+    if (backgrounds.length > 0) node.backgrounds = backgrounds;
+
+    if (border) node.border = border;
+
+    if (outlineWidth > 0 && style.outlineStyle !== "none")
+      node.outline = {
+        width: outlineWidth,
+        offset: px(style.outlineOffset),
+        color: color(style.outlineColor),
+        // SAFETY: a computed outline-style is always one of the BorderStyle keywords.
+        style: style.outlineStyle as Side["style"],
+      };
+
+    if (shadows.length > 0) node.shadows = shadows;
+
+    if (image) node.image = image;
+
+    if (svg) node.svg = svg;
+
+    if (animations.length > 0) node.animations = animations;
+
+    return [node];
+  };
+
+  const [top] = element(root, new DOMMatrix());
+
+  if (top?.type !== "element")
+    throw new Error("capture(root): the root is not rendered (display: none, hidden or empty).");
+
+  return {
+    version: 1,
+    viewport: { width: window.innerWidth, height: window.innerHeight },
+    root: top,
+  };
+};
+
+/**
+ * `capture`'s source, as a JavaScript expression that evaluates to the function.
+ * Hand it to any driver: `page.evaluate(`(${captureScript})(document.body)`)`.
+ * It relies on `capture` being one self-contained function, so do not run it through a bundler that adds helpers to functions.
+ */
+export const captureScript = `(${capture.toString()})`;

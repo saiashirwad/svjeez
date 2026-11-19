@@ -1,0 +1,29 @@
+{
+  "name": "@svjeez/dom",
+  "version": "0.8.0-next.0",
+  "private": true,
+  "description": "Capture a live DOM subtree as a plain, versioned JSON Snapshot that svjeez can compile into a scene.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/dom"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "bun test --conditions @svjeez/source",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "playwright-core": "^1.64.1",
+    "typescript": "latest"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
