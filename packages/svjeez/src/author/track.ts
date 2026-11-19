@@ -1,5 +1,5 @@
 import { SceneError } from "../model/scene-error";
-import { EPSILON, ease, type Seconds } from "../model/time";
+import { DEFAULT_EASE, EPSILON, type Seconds } from "../model/time";
 import { num } from "../model/format";
 import { span, type Span, type Spanned, type When } from "./span";
 import type { Vec } from "../model/ir";
@@ -90,7 +90,7 @@ export class ValueTrack<T> extends Written<{ readonly value: T }> implements Tra
     super(passage, "track");
   }
 
-  to(value: Goal<T>, when: Span, curve: Curve = ease.out): this {
+  to(value: Goal<T>, when: Span, curve: Curve = DEFAULT_EASE): this {
     this.write(
       "to()",
       (passage) => passage.to({ value: stored(value) }, when, curve),
@@ -122,7 +122,7 @@ export class ValueTrack<T> extends Written<{ readonly value: T }> implements Tra
     return this;
   }
 
-  rewind(over: Seconds, curve: Curve = ease.out): this {
+  rewind(over: Seconds, curve: Curve = DEFAULT_EASE): this {
     this.write("rewind()", (passage) => passage.rewind(over, curve));
 
     return this;
@@ -253,7 +253,7 @@ export class LayerMotion extends Written<LayerValues> implements Motion {
     super(passage, "motion");
   }
 
-  to(values: LayerValues, when: Span, curve: Curve = ease.out): this {
+  to(values: LayerValues, when: Span, curve: Curve = DEFAULT_EASE): this {
     this.write(
       "to()",
       (passage) => passage.to(values, when, curve),
@@ -285,7 +285,7 @@ export class LayerMotion extends Written<LayerValues> implements Motion {
     return this;
   }
 
-  rewind(over: Seconds, curve: Curve = ease.out): this {
+  rewind(over: Seconds, curve: Curve = DEFAULT_EASE): this {
     this.write("rewind()", (passage) => passage.rewind(over, curve));
 
     return this;

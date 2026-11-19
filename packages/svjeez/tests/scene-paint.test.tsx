@@ -641,12 +641,19 @@ describe("clips and masks", () => {
       [14, 0],
     ]);
 
-    const dot = ref("dot");
+    const dot = ref();
 
     expect(() =>
       made(() => (
         <Group>
-          <Shape fill="#000000" ref={dot} geometry={circle(2)} anchor="center" at={[50, 50]} />
+          <Shape
+            fill="#000000"
+            key="dot"
+            ref={dot}
+            geometry={circle(2)}
+            anchor="center"
+            at={[50, 50]}
+          />
           <Group
             mask={
               <Shape
@@ -763,12 +770,12 @@ describe("clips and masks sized by the node's box", () => {
   });
 
   test("a box-sized clip on a group that holds an anchored node says its box isn't known yet", () => {
-    const card = ref("card");
+    const card = ref();
 
     expect(() =>
       made(() => (
         <Group>
-          <Shape ref={card} geometry={rect(10, 10)} at={[50, 50]} fill="#000000" />
+          <Shape key="card" ref={card} geometry={rect(10, 10)} at={[50, 50]} fill="#000000" />
           <Group key="g" clip={(own) => own.rect}>
             <Shape key="dot" geometry={circle(2)} at={card.center} fill="#000000" />
           </Group>

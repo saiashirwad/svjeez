@@ -376,7 +376,7 @@ export function stateMachine<
     ...transitionKeys.map((key) => [key, undefined] as const),
   ]);
 
-  const handle = partsOf<Id | EdgeId<T[number]>>(WHAT, options.name ?? "state", parts);
+  const handle = partsOf<Id | EdgeId<T[number]>>(WHAT, parts);
 
   const draw = (between?: Child): SceneElement => (
     <Group ref={handle.ref}>

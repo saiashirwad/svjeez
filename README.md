@@ -69,7 +69,8 @@ Each has one job.
 - **`draw`** is how a component is told to draw itself: a number or a track from 0 to 1, as in `<Arrow draw={t} />`, and each series of a chart takes the same prop.
 - **A motion layer** is a passing effect on top of the prop, such as an entrance, an exit or a wobble: `motion={enter(span(1, 0.3))}`. Layers always stack.
 - **A morph** says the picture's structure changes from one state to another, and moves whatever differs.
-- **A ref** moves nothing: it names a node so others can measure and place against it (`card.right`, `card.side("top")`, `card.part("title").center`).
+- **A ref** moves nothing and has no name: `ref()` is a handle you give one node (`ref={card}`) so others can measure and place against it (`card.right`, `card.side("top")`, `card.part("title").center`). The node's key, if it has one, is what morphs match.
+- **A curve** is `ease.out` wherever you leave it out: `to`, `rewind`, recipes and morphs.
 
 ## Check a scene
 

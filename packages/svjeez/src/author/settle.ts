@@ -149,7 +149,7 @@ export const note = (
 
     if (taken !== undefined && taken !== key)
       throw new SceneError(
-        `The ref "${ref.key}" is on two nodes, ${namedAt(taken)} and ${named(key)}.`,
+        `A ref is on two nodes, ${namedAt(taken)} and ${named(key)}.`,
         "A ref names one node: make another with ref().",
         whereOf(key),
       );
@@ -371,8 +371,9 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
     if (key === undefined)
       throw new SceneError(
-        `${anchor.label} names the ref "${owner.key}", which is on no node.`,
+        `${anchor.label} is a ref that is on no node.`,
         "Give one node ref={…} with it.",
+        owner.source && { source: owner.source },
       );
 
     if (!within) return byKey.get(key)!;
@@ -383,7 +384,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     const near = byKey.get(key)!.children.map((child) => child.node.key.slice(key.length + 1));
 
     throw new SceneError(
-      `${anchor.label} names no node: ${named(key)} has no part "${within.path.join("/")}".${near.length > 0 ? ` The parts right inside it are ${near.map((name) => `"${name}"`).join(", ")}.` : " It has none."}`,
+      `${named(key)} has no part "${within.path.join("/")}", but ${anchor.label} asks for it.${near.length > 0 ? ` The parts right inside it are ${near.map((name) => `"${name}"`).join(", ")}.` : " It has none."}`,
       undefined,
       whereOf(key),
     );
@@ -806,12 +807,16 @@ const placedInside = (key: string, note: Note | undefined, label: string): void 
     );
 };
 
-const placing = (anchor: Anchor | undefined): string =>
-  anchor ? `at ${anchor.label}` : "at a point";
+const placing = (anchor: Anchor | undefined, refs: ReadonlyMap<Ref, string>): string => {
+  if (!anchor) return "at a point";
+  const owner = anchor.of === "canvas" ? undefined : refs.get(anchor.of.within?.ref ?? anchor.of);
+
+  return `at ${owner === undefined ? anchor.label : anchor.label.replace(/^ref\(\)/, named(owner))}`;
+};
 
 export const sameAnchors = (
   list: readonly SceneNode[],
-  { nodes }: Notes,
+  { nodes, refs }: Notes,
   seen: Map<string, Anchor | undefined>,
 ): void => {
   const visit = (node: SceneNode): void => {
@@ -825,7 +830,7 @@ export const sameAnchors = (
 
       if (!alike)
         throw new SceneError(
-          `${named(node.key)} is placed ${placing(before)} in one morph() state and ${placing(anchor)} in another. A morph blends points, not anchors.`,
+          `${named(node.key)} is placed ${placing(before, refs)} in one morph() state and ${placing(anchor, refs)} in another. A morph blends points, not anchors.`,
           "Place it the same way in every state, or put it in a <Group> placed at the anchor in every state and move it inside.",
           whereOf(node.key),
         );

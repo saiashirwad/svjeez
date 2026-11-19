@@ -22,13 +22,14 @@ export const unusedSymbols = (survey: Survey): void => {
 export const unattachedRefs = (survey: Survey): void => {
   const { root, authored } = survey.scene;
 
-  for (const { key, attached } of authored?.refs ?? []) {
+  for (const { source, attached } of authored?.refs ?? []) {
     if (attached) continue;
     add(survey, {
       code: "unattached-ref",
       severity: "warning",
       key: root.key,
-      message: `ref "${key}" is made, but no node takes it as ref={…}, so it points at nothing.`,
+      ...(source && { source }),
+      message: `A ref() is made${source ? ` at line ${source.line}` : ""}, but no node takes it as ref={…}, so it points at nothing.`,
       hint: "Give the node it is for ref={…}, or remove the ref.",
     });
   }

@@ -148,7 +148,7 @@ export function lanes<const L extends Record<string, Labelled>>(
     ]);
 
   const parts = new Map<string, Spanned | undefined>(ids.map((id) => [id, busy(id)]));
-  const handle = partsOf<Id>(WHAT, options.name ?? "lanes", parts);
+  const handle = partsOf<Id>(WHAT, parts);
 
   const draw = (between?: Child): SceneElement => (
     <Group ref={handle.ref}>

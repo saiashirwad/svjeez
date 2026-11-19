@@ -16,7 +16,7 @@ export interface Scene {
 }
 
 export interface SceneAuthored {
-  readonly refs: readonly { readonly key: string; readonly attached: boolean }[];
+  readonly refs: readonly { readonly source?: Source; readonly attached: boolean }[];
 }
 
 export interface Authored {

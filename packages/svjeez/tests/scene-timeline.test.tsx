@@ -198,7 +198,7 @@ describe("tracks you write", () => {
 describe("tracks that go to anchors", () => {
   test("a step to an anchor lands the node's anchor point on it", () => {
     const model = made(() => {
-      const target = ref("target");
+      const target = ref();
       const a = track<Vec>([0, 0]);
       const b = track<Vec>([0, 0]);
 
@@ -207,7 +207,7 @@ describe("tracks that go to anchors", () => {
 
       return (
         <Group>
-          <Group ref={target} offset={[100, 50]}>
+          <Group key="target" ref={target} offset={[100, 50]}>
             <Shape fill="#000000" geometry={rect(20, 10)} />
             <Shape fill="#000000" key="pin" geometry={rect(4, 4)} at={[30, 30]} />
           </Group>
@@ -225,13 +225,13 @@ describe("tracks that go to anchors", () => {
 
   test("a step to a moving anchor lands where the anchor is when the step ends", () => {
     const model = made(() => {
-      const card = ref("card");
+      const card = ref();
       const cardAt = track<Vec>([0, 0]).to([100, 0], span(0, 2), ease.linear);
       const dotAt = track<Vec>([0, 0]).to(card.right, span(0, 1), ease.linear);
 
       return (
         <Group>
-          <Shape fill="#000000" ref={card} geometry={rect(20, 10)} at={cardAt} />
+          <Shape fill="#000000" key="card" ref={card} geometry={rect(20, 10)} at={cardAt} />
           <Shape fill="#000000" key="dot" geometry={circle(2)} anchor="center" at={dotAt} />
         </Group>
       );
@@ -246,12 +246,12 @@ describe("tracks that go to anchors", () => {
   test("a track that goes to an anchor can't be read as anything but at", () => {
     expect(() =>
       made(() => {
-        const card = ref("card");
+        const card = ref();
         const bad = track<Vec>([1, 1]).to(card.right, span(0, 1));
 
         return (
           <Group>
-            <Shape fill="#000000" ref={card} geometry={rect(20, 10)} />
+            <Shape fill="#000000" key="card" ref={card} geometry={rect(20, 10)} />
             <Shape fill="#000000" geometry={circle(2)} scale={bad} />
           </Group>
         );
@@ -260,13 +260,13 @@ describe("tracks that go to anchors", () => {
   });
 
   test("a track that goes to an anchor starts at a point and doesn't loop", () => {
-    const card = ref("card");
+    const card = ref();
 
     expect(() => track(card.right)).toThrow("starts at an anchor");
     expect(() =>
       made(() => (
         <Group>
-          <Shape fill="#000000" ref={card} geometry={rect(20, 10)} />
+          <Shape fill="#000000" key="card" ref={card} geometry={rect(20, 10)} />
           <Shape
             fill="#000000"
             geometry={circle(2)}
@@ -280,11 +280,11 @@ describe("tracks that go to anchors", () => {
   test("a node a container places can't go to an anchor", () => {
     expect(() =>
       made(() => {
-        const card = ref("card");
+        const card = ref();
 
         return (
           <Group>
-            <Shape fill="#000000" ref={card} geometry={rect(20, 10)} />
+            <Shape fill="#000000" key="card" ref={card} geometry={rect(20, 10)} />
             <Stack>
               <Shape
                 fill="#000000"
@@ -320,14 +320,14 @@ describe("springs, arrows and parts", () => {
 
   test("draw and stroke on an arrow draw and recolor its shaft and head", () => {
     const model = made(() => {
-      const [a, b] = [ref("a"), ref("b")];
+      const [a, b] = [ref(), ref()];
       const progress = track(0).to(1, span(0, 1), ease.linear);
       const color = track<`#${string}`>("#000000").to("#ff0000", span(1, 0.5));
 
       return (
         <Group>
-          <Shape fill="#000000" ref={a} geometry={rect(10, 10)} at={[0, 0]} />
-          <Shape fill="#000000" ref={b} geometry={rect(10, 10)} at={[100, 0]} />
+          <Shape fill="#000000" key="a" ref={a} geometry={rect(10, 10)} at={[0, 0]} />
+          <Shape fill="#000000" key="b" ref={b} geometry={rect(10, 10)} at={[100, 0]} />
           <Arrow key="arrow" from={a.right} to={b.left} draw={progress} stroke={{ color }} />
         </Group>
       );

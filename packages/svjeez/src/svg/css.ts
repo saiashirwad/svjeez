@@ -2,7 +2,7 @@ import { formatValue, valueOf, type Channel, type ChannelValues } from "./channe
 import type { Canvas } from "./compile";
 import { num } from "../model/format";
 import { foldKeys, moving, type Key } from "./keys";
-import { ease, type Ease, type Seconds } from "../model/time";
+import { DEFAULT_EASE, type Ease, type Seconds } from "../model/time";
 
 export type Emit = "value" | "visibility" | "dash";
 
@@ -22,7 +22,7 @@ export const timing = (curve: Ease): string => {
   }
 };
 
-export const BASE_TIMING = timing(ease.out);
+export const BASE_TIMING = timing(DEFAULT_EASE);
 
 const percents = (keys: readonly Key[], period: Seconds): string[] => {
   for (const places of [3, 4]) {

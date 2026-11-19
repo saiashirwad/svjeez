@@ -67,7 +67,7 @@ describe("<Code>", () => {
   });
 
   test("keys name lines, and the code takes the node's own props", () => {
-    const code = ref("code");
+    const code = ref();
 
     const frame = describeScene(
       made(() => (

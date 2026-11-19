@@ -1,5 +1,7 @@
 import { SceneError } from "../model/scene-error";
-import type { Box, Vec } from "../model/ir";
+import type { Box, Source, Vec } from "../model/ir";
+import { caller } from "../svg/traced";
+import { sourceFrom } from "./identity";
 import { PLACE_LIST, PLACES } from "./pin";
 
 export type Edge = "left" | "right" | "top" | "bottom";
@@ -45,20 +47,19 @@ const fraction = (t: number, what: string): number => {
 };
 
 export class Ref {
-  readonly key: string;
+  readonly source: Source | undefined;
   readonly within: { readonly ref: Ref; readonly path: readonly string[] } | undefined;
 
-  constructor(key: string, within?: { readonly ref: Ref; readonly path: readonly string[] }) {
-    if (key === "" || key.includes("/"))
-      throw new SceneError(`A ref needs a key with no "/" in it, got "${key}".`);
-    this.key = key;
+  constructor(
+    source: Source | undefined,
+    within?: { readonly ref: Ref; readonly path: readonly string[] },
+  ) {
+    this.source = source;
     this.within = within;
   }
 
   get label(): string {
-    return this.within
-      ? `${this.within.ref.label}.part("${this.within.path.join("/")}")`
-      : this.key;
+    return this.within ? `ref().part("${this.within.path.join("/")}")` : "ref()";
   }
 
   part(key: string): Ref {
@@ -68,7 +69,7 @@ export class Ref {
       throw new SceneError(`${this.label}.part() needs keys joined by "/", got "${key}".`);
     const root = this.within?.ref ?? this;
 
-    return new Ref(path.at(-1)!, { ref: root, path: [...(this.within?.path ?? []), ...path] });
+    return new Ref(root.source, { ref: root, path: [...(this.within?.path ?? []), ...path] });
   }
 
   side(edge: Edge, t = 0.5): Anchor {
@@ -129,8 +130,9 @@ export class Ref {
 
 let declared: Ref[] | undefined;
 
-export const ref = (key: string): Ref => {
-  const made = new Ref(key);
+export const ref = (): Ref => {
+  const at = caller();
+  const made = new Ref(at && sourceFrom(at));
 
   declared?.push(made);
 

@@ -306,11 +306,12 @@ describe("readers of a curved spring agree with it", () => {
 
   test("an arrow on the anchor of a spring-moved node follows it", () => {
     const model = made(() => {
-      const dot = ref("dot");
+      const dot = ref();
 
       return (
         <Group>
           <Shape
+            key="dot"
             ref={dot}
             geometry={rect(10, 10)}
             at={track<Vec>([0, 0])

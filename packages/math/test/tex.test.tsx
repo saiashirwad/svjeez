@@ -115,11 +115,11 @@ describe("<Tex>", () => {
   });
 
   test("a part is a ref part: anchors and Align find it", () => {
-    const eq = ref("eq");
+    const eq = ref();
 
     const model = made(() => (
       <Group>
-        <Tex ref={eq} size={40} at={[20, 40]} fill="#000000" colors={{ a: "#2F6FEB" }}>
+        <Tex key="eq" ref={eq} size={40} at={[20, 40]} fill="#000000" colors={{ a: "#2F6FEB" }}>
           {formula}
         </Tex>
         <Align to={eq.part("cross")} place="bottom">

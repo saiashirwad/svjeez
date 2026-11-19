@@ -41,6 +41,7 @@ export const ease = {
   bezier,
 } as const;
 
+/** The one curve every `to`, `rewind`, recipe and morph uses unless told otherwise. */
 export const DEFAULT_EASE: Ease = ease.out;
 
 export const isHold = (curve: Ease | undefined): boolean =>

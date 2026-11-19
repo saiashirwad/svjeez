@@ -177,7 +177,7 @@ export function sequence<const A extends Record<string, Labelled>>(
   );
 
   const parts = new Map<string, Spanned | undefined>(ids.map((id) => [id, undefined]));
-  const handle = partsOf<Id>(WHAT, options.name ?? "sequence", parts);
+  const handle = partsOf<Id>(WHAT, parts);
 
   return {
     node: draw(),

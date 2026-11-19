@@ -226,11 +226,11 @@ describe("morph between states that hold layout, text, connectors, images and in
   test("a container in a morph state that holds an anchored node says where to attach it", () => {
     expect(() =>
       made(() => {
-        const a = ref("a");
+        const a = ref();
 
         return (
           <Group>
-            <Shape ref={a} geometry={rect(10, 10)} fill={red} />
+            <Shape key="a" ref={a} geometry={rect(10, 10)} fill={red} />
             {morph(
               <Stack key="s">
                 <Arrow head="none" key="l" from={[0, 0]} to={a.right} stroke={{ color: red }} />
@@ -249,7 +249,7 @@ describe("morph between states that hold layout, text, connectors, images and in
   test("a node anchored in one state and placed at a point in another says how to write it", () => {
     const state = (at: Vec | "anchor") =>
       made(() => {
-        const a = ref("a");
+        const a = ref();
 
         const dot = (where: Vec | "anchor") => (
           <Shape
@@ -263,17 +263,17 @@ describe("morph between states that hold layout, text, connectors, images and in
 
         return (
           <Group>
-            <Shape ref={a} geometry={rect(10, 10)} at={[100, 50]} fill={red} />
+            <Shape key="a" ref={a} geometry={rect(10, 10)} at={[100, 50]} fill={red} />
             {morph(dot(at), dot(at === "anchor" ? [10, 10] : "anchor"), span(1, 1))}
           </Group>
         );
       });
 
     expect(() => state("anchor")).toThrow(
-      '"d" is placed at a.right in one morph() state and at a point in another. A morph blends points, not anchors',
+      '"d" is placed at <Shape> "a".right in one morph() state and at a point in another. A morph blends points, not anchors',
     );
     expect(() => state([10, 10])).toThrow(
-      '"d" is placed at a point in one morph() state and at a.right',
+      '"d" is placed at a point in one morph() state and at <Shape> "a".right',
     );
   });
 
@@ -424,13 +424,13 @@ describe("morph between states that hold layout, text, connectors, images and in
 
   test("an arrow on refs whose targets move in the morph follows them", () => {
     const model = made(() => {
-      const a = ref("a");
-      const b = ref("b");
+      const a = ref();
+      const b = ref();
 
       const state = (y: number) => (
         <Group>
-          <Shape ref={a} geometry={rect(10, 10)} fill={red} />
-          <Shape ref={b} at={[100, y]} geometry={rect(10, 10)} fill={red} />
+          <Shape key="a" ref={a} geometry={rect(10, 10)} fill={red} />
+          <Shape key="b" ref={b} at={[100, y]} geometry={rect(10, 10)} fill={red} />
         </Group>
       );
 
@@ -482,11 +482,11 @@ describe("morph between states that hold layout, text, connectors, images and in
 describe("anchors follow whatever moves their node", () => {
   const follows = (target: (box: SceneElement) => SceneElement, moved: string) => {
     const model = made(() => {
-      const a = ref("a");
+      const a = ref();
 
       return (
         <Group>
-          {target(<Shape ref={a} geometry={rect(10, 10)} fill={red} />)}
+          {target(<Shape key="a" ref={a} geometry={rect(10, 10)} fill={red} />)}
           <Shape key="dot" geometry={circle(1)} anchor="center" at={a.right} fill={blue} />
         </Group>
       );
@@ -503,13 +503,13 @@ describe("anchors follow whatever moves their node", () => {
 
   test("tracks", () => {
     const model = made(() => {
-      const a = ref("a");
+      const a = ref();
       const pos = track<Vec>([0, 0]).to([80, 40], span(0, 1));
       const turn = track(0).to(90, pos.span.next(1));
 
       return (
         <Group>
-          <Shape ref={a} geometry={rect(10, 10)} fill={red} at={pos} rotate={turn} />
+          <Shape key="a" ref={a} geometry={rect(10, 10)} fill={red} at={pos} rotate={turn} />
           <Shape key="dot" geometry={circle(1)} anchor="center" at={a.right} fill={blue} />
         </Group>
       );
@@ -566,11 +566,12 @@ describe("anchors follow whatever moves their node", () => {
 
   test("a geometry that grows takes its anchors along", () => {
     const model = made(() => {
-      const bar = ref("bar");
+      const bar = ref();
 
       return (
         <Group>
           <Shape
+            key="bar"
             ref={bar}
             geometry={track(rect(10, 10)).to(rect(60, 10), span(0, 1), ease.linear)}
             fill={red}
@@ -587,16 +588,16 @@ describe("anchors follow whatever moves their node", () => {
 
   test("a part through a layout container and through a morph", () => {
     const model = made(() => {
-      const row = ref("row");
-      const card = ref("card");
+      const row = ref();
+      const card = ref();
 
       return (
         <Group>
-          <Stack ref={row} direction="row" gap={4} at={[0, 50]}>
+          <Stack key="row" ref={row} direction="row" gap={4} at={[0, 50]}>
             <Shape key="x" geometry={rect(10, 10)} fill={red} />
             <Shape key="y" geometry={rect(10, 10)} fill={red} />
           </Stack>
-          <Group ref={card}>
+          <Group key="card" ref={card}>
             {morph(
               <Shape key="body" geometry={rect(10, 10)} fill={red} />,
               <Shape key="body" geometry={rect(10, 10)} at={[100, 0]} fill={red} />,
@@ -707,7 +708,7 @@ describe("derived tracks feed every kind of value", () => {
 
   test("geometry, trim, a color and an anchor's node", () => {
     const model = made(() => {
-      const dot = ref("dot");
+      const dot = ref();
 
       return (
         <Group>
@@ -720,6 +721,7 @@ describe("derived tracks feed every kind of value", () => {
           />
           <Shape key="lamp" geometry={circle(4)} fill={angle.map((u) => (u < 0.5 ? red : blue))} />
           <Shape
+            key="dot"
             ref={dot}
             geometry={circle(2)}
             anchor="center"
@@ -957,16 +959,14 @@ describe("errors a newcomer meets first", () => {
     ).toThrow('Give each node that comes, goes or changes a key, as in <Shape key="…" />');
   });
 
-  test("a ref on no node names the ref, when an anchor uses it", () => {
+  test("a ref on no node says so, when an anchor uses it", () => {
     expect(() =>
       made(() => {
-        const ghost = ref("ghost");
+        const ghost = ref();
 
         return <Shape geometry={circle(4)} anchor="center" at={ghost.right} fill={red} />;
       }),
-    ).toThrow(
-      'ghost.right names the ref "ghost", which is on no node. Give one node ref={…} with it.',
-    );
+    ).toThrow("ref().right is a ref that is on no node. Give one node ref={…} with it.");
   });
 
   test("a span past the end of the scene names the prop and the node", () => {

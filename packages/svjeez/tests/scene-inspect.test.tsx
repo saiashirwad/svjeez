@@ -538,19 +538,16 @@ group("what the model keeps of how the scene was written", () => {
 
   test("a ref no node takes is reported; one a node takes is not", () => {
     const model = made(() => {
-      const card = ref("card");
+      const card = ref();
 
-      ref("spare");
+      ref();
 
-      return <Dot ref={card} />;
+      return <Dot key="card" ref={card} />;
     });
 
-    expect(model.authored?.refs).toEqual([
-      { key: "card", attached: true },
-      { key: "spare", attached: false },
-    ]);
+    expect(model.authored?.refs).toEqual([{ attached: true }, { attached: false }]);
     expect(only(model, "unattached-ref").map((found) => found.message)).toEqual([
-      'ref "spare" is made, but no node takes it as ref={…}, so it points at nothing.',
+      "A ref() is made, but no node takes it as ref={…}, so it points at nothing.",
     ]);
   });
 });
@@ -651,13 +648,14 @@ group("loop-seam for what enters and stays", () => {
   test("an arrow on a node that scales in is told why it jumps", () => {
     const found = only(
       made(() => {
-        const a = ref("a");
-        const b = ref("b");
+        const a = ref();
+        const b = ref();
 
         return (
           <Group>
-            <Shape ref={a} geometry={rect(30, 20)} at={[20, 30]} fill="#336699" />
+            <Shape key="a" ref={a} geometry={rect(30, 20)} at={[20, 30]} fill="#336699" />
             <Shape
+              key="b"
               ref={b}
               geometry={rect(30, 20)}
               at={[150, 30]}

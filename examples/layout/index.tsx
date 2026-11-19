@@ -64,7 +64,7 @@ const Card = ({ handle, title, dot, when, children, drift }: CardProps): SceneEl
   </Stack>
 );
 
-const [measure, place, follow] = [ref("measure"), ref("place"), ref("follow")];
+const [measure, place, follow] = [ref(), ref(), ref()];
 const [first, second, third] = span(0.3, 0.5).cascade(3, 0.25);
 
 export default scene(
