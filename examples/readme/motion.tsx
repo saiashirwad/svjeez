@@ -1,4 +1,4 @@
-import { Group, Shape, canvas, ease, rect, scene, span, track } from "svjeez";
+import { Group, Shape, ease, rect, scene, span, track } from "svjeez";
 import { theme } from "../theme";
 
 const fadeIn = span(1, 0.5);
@@ -11,9 +11,9 @@ export default scene(
     title: "Motion",
     desc: "A square fades in, holds, then shrinks away and cuts back to full size.",
     theme,
-    reducedMotion: 2,
+    still: 2,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Shape

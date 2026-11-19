@@ -1,6 +1,6 @@
 /** @jsxImportSource svjeez */
-import { Group, span, type SceneElement } from "svjeez";
-import { SceneError, type Child, type Spanned } from "svjeez/tools";
+import { Group, span, type SceneElement, type Span } from "svjeez";
+import { SceneError, type Child } from "svjeez/tools";
 import { tree as layout } from "./layout/tree.ts";
 import type { Point } from "./layout/box.ts";
 import {
@@ -8,6 +8,8 @@ import {
   checkIds,
   Edge,
   Node,
+  checkDraws,
+  drawnBy,
   edgeKey,
   extent,
   isBare,
@@ -95,7 +97,7 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
 
   const shown = schedule(options.reveal, out.order, WHAT);
 
-  const drawn = (from: string, to: string): Spanned | undefined => {
+  const drawn = (from: string, to: string): Span | undefined => {
     const [a, b] = [shown.get(from), shown.get(to)];
 
     if (!a && !b) return undefined;
@@ -104,12 +106,18 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
     return span(Math.max(0, a?.start ?? 0, b ? b.start - over : 0), over);
   };
 
-  const parts = new Map<string, Spanned | undefined>([
+  checkDraws(
+    options.draw,
+    out.edges.map((e) => edgeKey(e.from, e.to)),
+    WHAT,
+  );
+
+  const parts = new Map<string, Span | undefined>([
     ...out.order.map((id) => [id, shown.get(id)] as const),
     ...out.edges.map((e) => [edgeKey(e.from, e.to), drawn(e.from, e.to)] as const),
   ]);
 
-  const handle = partsOf<Id | TreeEdges<N>>(WHAT, options.name ?? "tree", parts);
+  const handle = partsOf<Id | TreeEdges<N>>(WHAT, parts);
 
   const draw = (between?: Child): SceneElement => (
     <Group ref={handle.ref}>
@@ -118,7 +126,7 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
           key={edgeKey(e.from, e.to)}
           look={l}
           points={lines.get(e.to)!}
-          drawn={drawn(e.from, e.to)}
+          draw={drawnBy(options.draw, edgeKey(e.from, e.to), drawn(e.from, e.to), WHAT)}
         />
       ))}
       {between}

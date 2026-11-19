@@ -14,26 +14,26 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m2{animation-name:k2;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k3{0%,6.504%{opacity:0}9.756%,100%{opacity:0.18}}
 @keyframes k4{0%,19.512%{translate:50px 160px}26.829%,46.341%{translate:50px 187px}53.659%,100%{translate:50px 214px}}
-.m3{animation-name:k3,k4;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+.m3{animation-name:k3,k4}
 @keyframes k5{0%,19.512%{opacity:1}26.829%,100%{opacity:0}}
-.m4{animation-name:k5;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m4{animation-name:k5}
 @keyframes k6{0%,19.512%,53.659%,100%{opacity:0}26.829%,46.341%{opacity:1}}
-.m5{animation-name:k6;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m5{animation-name:k6}
 @keyframes k7{0%,46.341%,80.488%,100%{opacity:0}53.659%,73.171%{opacity:1}}
-.m6{animation-name:k7;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m6{animation-name:k7}
 @keyframes k8{0%,73.171%{opacity:0}80.488%,100%{opacity:1}}
-.m7{animation-name:k8;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m7{animation-name:k8}
 @keyframes k9{0%,46.341%{opacity:0}53.659%,100%{opacity:1}}
-.m8{animation-name:k9;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m8{animation-name:k9}
 @keyframes k10{0%,46.341%,80.488%,100%{opacity:1}53.659%,73.171%{opacity:0}}
-.m9{animation-name:k10;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m9{animation-name:k10}
 @keyframes k11{0%,19.512%{opacity:0}26.829%,100%{opacity:1}}
-.m10{animation-name:k11;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k12{0%,19.512%{translate:0px 54px}26.829%,46.341%{translate:0px 81px}53.659%,100%{translate:0px 108px}}
-.m11{animation-name:k12;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m10{animation-name:k11}
+@keyframes k12{0%,19.512%{translate:0 54px}26.829%,46.341%{translate:0 81px}53.659%,100%{translate:0 108px}}
+.m11{animation-name:k12}
 @keyframes k13{0%,19.512%,53.659%,100%{opacity:1}26.829%,46.341%{opacity:0}}
-@keyframes k14{0%,46.341%{translate:0px 81px}53.659%,100%{translate:0px 135px}}
-.m12{animation-name:k13,k14;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+@keyframes k14{0%,46.341%{translate:0 81px}53.659%,100%{translate:0 135px}}
+.m12{animation-name:k13,k14}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-10.455s!important;animation-play-state:paused!important}}
 ]]></style>
   <defs>
@@ -44,35 +44,35 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
   <rect width="480" height="340" fill="var(--surface)"/>
   <rect x="24" y="16" width="432" height="264" rx="12" fill="var(--background)"/>
   <rect width="84" height="32" rx="8" fill="var(--raised)" class="a m2"/>
-  <g transform="translate(0 28)">
-    <text x="73.516" y="20.97" font-family="'Geist'" font-weight="600" font-size="14" fill="var(--text)">TS</text>
-    <text x="150.284" y="20.97" font-family="'Geist'" font-weight="600" font-size="14" fill="var(--text)">Python</text>
-    <text x="250.474" y="20.97" font-family="'Geist'" font-weight="600" font-size="14" fill="var(--text)">Rust</text>
-    <text x="348.627" y="20.97" font-family="'Geist'" font-weight="600" font-size="14" fill="var(--text)">Go</text>
+  <g transform="translate(0 28)" font-family="'Geist'" font-size="14" font-weight="600" fill="var(--text)">
+    <text x="73.516" y="20.97">TS</text>
+    <text x="150.284" y="20.97">Python</text>
+    <text x="250.474" y="20.97">Rust</text>
+    <text x="348.627" y="20.97">Go</text>
   </g>
   <rect width="400" height="28" rx="4" fill="var(--blue)" class="a m3"/>
-  <g transform="translate(60 108)">
+  <g transform="translate(60 108)" font-size="18" fill="var(--tomorrow-punctuation)">
     <text font-size="18" fill="var(--tomorrow-punctuation)" class="a m4"><tspan y="18.36" fill="var(--tomorrow-keyword)">function </tspan><tspan x="97.2" fill="var(--tomorrow-function)">fib</tspan><tspan x="129.6">(</tspan><tspan x="140.4" fill="var(--tomorrow-plain)">n</tspan><tspan x="151.2">: </tspan><tspan x="172.8" fill="var(--tomorrow-type)">number</tspan><tspan x="237.6">): </tspan><tspan x="270" fill="var(--tomorrow-type)">number </tspan><tspan x="345.6">{</tspan></text>
     <text font-size="18" fill="var(--tomorrow-punctuation)" class="a m5"><tspan y="18.36" fill="var(--tomorrow-keyword)">def </tspan><tspan x="43.2" fill="var(--tomorrow-function)">fib</tspan><tspan x="75.6">(</tspan><tspan x="86.4" fill="var(--tomorrow-plain)">n</tspan><tspan x="97.2">: </tspan><tspan x="118.8" fill="var(--tomorrow-type)">int</tspan><tspan x="151.2">) -&gt; </tspan><tspan x="205.2" fill="var(--tomorrow-type)">int</tspan><tspan x="237.6">:</tspan></text>
     <text font-size="18" fill="var(--tomorrow-punctuation)" class="a m6"><tspan y="18.36" fill="var(--tomorrow-keyword)">fn </tspan><tspan x="32.4" fill="var(--tomorrow-function)">fib</tspan><tspan x="64.8">(</tspan><tspan x="75.6" fill="var(--tomorrow-plain)">n</tspan><tspan x="86.4">: </tspan><tspan x="108" fill="var(--tomorrow-type)">u32</tspan><tspan x="140.4">) -&gt; </tspan><tspan x="194.4" fill="var(--tomorrow-type)">u32 </tspan><tspan x="237.6">{</tspan></text>
     <text font-size="18" fill="var(--tomorrow-keyword)" class="a m7"><tspan y="18.36">func </tspan><tspan x="54" fill="var(--tomorrow-function)">fib</tspan><tspan x="86.4" fill="var(--tomorrow-punctuation)">(</tspan><tspan x="97.2" fill="var(--tomorrow-plain)">n </tspan><tspan x="118.8">int</tspan><tspan x="151.2" fill="var(--tomorrow-punctuation)">) </tspan><tspan x="172.8">int </tspan><tspan x="216" fill="var(--tomorrow-punctuation)">{</tspan></text>
     <g transform="translate(0 27)">
-      <text font-size="18" xml:space="preserve" fill="var(--tomorrow-punctuation)" class="a m4"><tspan y="18.36" fill="var(--tomorrow-keyword)">  if </tspan><tspan x="54">(</tspan><tspan x="64.8" fill="var(--tomorrow-plain)">n </tspan><tspan x="86.4">&lt; </tspan><tspan x="108" fill="var(--tomorrow-number)">2</tspan><tspan x="118.8">) </tspan><tspan x="140.4" fill="var(--tomorrow-keyword)">return </tspan><tspan x="216" fill="var(--tomorrow-plain)">n</tspan><tspan x="226.8">;</tspan></text>
-      <text font-size="18" xml:space="preserve" fill="var(--tomorrow-punctuation)" class="a m5"><tspan y="18.36" fill="var(--tomorrow-keyword)">    if </tspan><tspan x="75.6" fill="var(--tomorrow-plain)">n </tspan><tspan x="97.2">&lt; </tspan><tspan x="118.8" fill="var(--tomorrow-number)">2</tspan><tspan x="129.6">:</tspan></text>
-      <text font-size="18" xml:space="preserve" fill="var(--tomorrow-punctuation)" class="a m8"><tspan y="18.36" fill="var(--tomorrow-keyword)">    if </tspan><tspan x="75.6" fill="var(--tomorrow-plain)">n </tspan><tspan x="97.2">&lt; </tspan><tspan x="118.8" fill="var(--tomorrow-number)">2 </tspan><tspan x="140.4">{</tspan></text>
+      <text xml:space="preserve" class="a m4"><tspan y="18.36" fill="var(--tomorrow-keyword)">  if </tspan><tspan x="54">(</tspan><tspan x="64.8" fill="var(--tomorrow-plain)">n </tspan><tspan x="86.4">&lt; </tspan><tspan x="108" fill="var(--tomorrow-number)">2</tspan><tspan x="118.8">) </tspan><tspan x="140.4" fill="var(--tomorrow-keyword)">return </tspan><tspan x="216" fill="var(--tomorrow-plain)">n</tspan><tspan x="226.8">;</tspan></text>
+      <text xml:space="preserve" class="a m5"><tspan y="18.36" fill="var(--tomorrow-keyword)">    if </tspan><tspan x="75.6" fill="var(--tomorrow-plain)">n </tspan><tspan x="97.2">&lt; </tspan><tspan x="118.8" fill="var(--tomorrow-number)">2</tspan><tspan x="129.6">:</tspan></text>
+      <text xml:space="preserve" class="a m8"><tspan y="18.36" fill="var(--tomorrow-keyword)">    if </tspan><tspan x="75.6" fill="var(--tomorrow-plain)">n </tspan><tspan x="97.2">&lt; </tspan><tspan x="118.8" fill="var(--tomorrow-number)">2 </tspan><tspan x="140.4">{</tspan></text>
     </g>
-    <g transform="translate(0 54)" class="a m10">
-      <text font-size="18" xml:space="preserve" fill="var(--tomorrow-keyword)" class="a m9"><tspan y="18.36">        return </tspan><tspan x="162" fill="var(--tomorrow-plain)">n</tspan></text>
-      <text font-size="18" xml:space="preserve" fill="var(--tomorrow-keyword)" class="a m6"><tspan y="18.36">        return </tspan><tspan x="162" fill="var(--tomorrow-plain)">n</tspan><tspan x="172.8" fill="var(--tomorrow-punctuation)">;</tspan></text>
+    <g transform="translate(0 54)" class="a m10" fill="var(--tomorrow-keyword)">
+      <text xml:space="preserve" class="a m9"><tspan y="18.36">        return </tspan><tspan x="162" fill="var(--tomorrow-plain)">n</tspan></text>
+      <text xml:space="preserve" class="a m6"><tspan y="18.36">        return </tspan><tspan x="162" fill="var(--tomorrow-plain)">n</tspan><tspan x="172.8" fill="var(--tomorrow-punctuation)">;</tspan></text>
     </g>
-    <text y="99.36" font-size="18" xml:space="preserve" fill="var(--tomorrow-punctuation)" class="a m8">    }</text>
+    <text y="99.36" xml:space="preserve" class="a m8">    }</text>
     <g class="a m11">
-      <text font-size="18" xml:space="preserve" fill="var(--tomorrow-punctuation)" class="a m4"><tspan y="18.36" fill="var(--tomorrow-keyword)">  return </tspan><tspan x="97.2" fill="var(--tomorrow-function)">fib</tspan><tspan x="129.6">(</tspan><tspan x="140.4" fill="var(--tomorrow-plain)">n </tspan><tspan x="162">- </tspan><tspan x="183.6" fill="var(--tomorrow-number)">1</tspan><tspan x="194.4">) + </tspan><tspan x="237.6" fill="var(--tomorrow-function)">fib</tspan><tspan x="270">(</tspan><tspan x="280.8" fill="var(--tomorrow-plain)">n </tspan><tspan x="302.4">- </tspan><tspan x="324" fill="var(--tomorrow-number)">2</tspan><tspan x="334.8">);</tspan></text>
-      <text font-size="18" xml:space="preserve" fill="var(--tomorrow-punctuation)" class="a m5"><tspan y="18.36" fill="var(--tomorrow-keyword)">    return </tspan><tspan x="118.8" fill="var(--tomorrow-plain)">fib</tspan><tspan x="151.2">(</tspan><tspan x="162" fill="var(--tomorrow-plain)">n </tspan><tspan x="183.6">- </tspan><tspan x="205.2" fill="var(--tomorrow-number)">1</tspan><tspan x="216">) + </tspan><tspan x="259.2" fill="var(--tomorrow-plain)">fib</tspan><tspan x="291.6">(</tspan><tspan x="302.4" fill="var(--tomorrow-plain)">n </tspan><tspan x="324">- </tspan><tspan x="345.6" fill="var(--tomorrow-number)">2</tspan><tspan x="356.4">)</tspan></text>
-      <text font-size="18" xml:space="preserve" fill="var(--tomorrow-punctuation)" class="a m6"><tspan y="18.36" fill="var(--tomorrow-function)">    fib</tspan><tspan x="75.6">(</tspan><tspan x="86.4" fill="var(--tomorrow-plain)">n </tspan><tspan x="108">- </tspan><tspan x="129.6" fill="var(--tomorrow-number)">1</tspan><tspan x="140.4">) + </tspan><tspan x="183.6" fill="var(--tomorrow-function)">fib</tspan><tspan x="216">(</tspan><tspan x="226.8" fill="var(--tomorrow-plain)">n </tspan><tspan x="248.4">- </tspan><tspan x="270" fill="var(--tomorrow-number)">2</tspan><tspan x="280.8">)</tspan></text>
-      <text font-size="18" xml:space="preserve" fill="var(--tomorrow-punctuation)" class="a m7"><tspan y="18.36" fill="var(--tomorrow-keyword)">    return </tspan><tspan x="118.8" fill="var(--tomorrow-function)">fib</tspan><tspan x="151.2">(</tspan><tspan x="162" fill="var(--tomorrow-plain)">n</tspan><tspan x="172.8">-</tspan><tspan x="183.6" fill="var(--tomorrow-number)">1</tspan><tspan x="194.4">) + </tspan><tspan x="237.6" fill="var(--tomorrow-function)">fib</tspan><tspan x="270">(</tspan><tspan x="280.8" fill="var(--tomorrow-plain)">n</tspan><tspan x="291.6">-</tspan><tspan x="302.4" fill="var(--tomorrow-number)">2</tspan><tspan x="313.2">)</tspan></text>
+      <text xml:space="preserve" class="a m4"><tspan y="18.36" fill="var(--tomorrow-keyword)">  return </tspan><tspan x="97.2" fill="var(--tomorrow-function)">fib</tspan><tspan x="129.6">(</tspan><tspan x="140.4" fill="var(--tomorrow-plain)">n </tspan><tspan x="162">- </tspan><tspan x="183.6" fill="var(--tomorrow-number)">1</tspan><tspan x="194.4">) + </tspan><tspan x="237.6" fill="var(--tomorrow-function)">fib</tspan><tspan x="270">(</tspan><tspan x="280.8" fill="var(--tomorrow-plain)">n </tspan><tspan x="302.4">- </tspan><tspan x="324" fill="var(--tomorrow-number)">2</tspan><tspan x="334.8">);</tspan></text>
+      <text xml:space="preserve" class="a m5"><tspan y="18.36" fill="var(--tomorrow-keyword)">    return </tspan><tspan x="118.8" fill="var(--tomorrow-plain)">fib</tspan><tspan x="151.2">(</tspan><tspan x="162" fill="var(--tomorrow-plain)">n </tspan><tspan x="183.6">- </tspan><tspan x="205.2" fill="var(--tomorrow-number)">1</tspan><tspan x="216">) + </tspan><tspan x="259.2" fill="var(--tomorrow-plain)">fib</tspan><tspan x="291.6">(</tspan><tspan x="302.4" fill="var(--tomorrow-plain)">n </tspan><tspan x="324">- </tspan><tspan x="345.6" fill="var(--tomorrow-number)">2</tspan><tspan x="356.4">)</tspan></text>
+      <text xml:space="preserve" class="a m6"><tspan y="18.36" fill="var(--tomorrow-function)">    fib</tspan><tspan x="75.6">(</tspan><tspan x="86.4" fill="var(--tomorrow-plain)">n </tspan><tspan x="108">- </tspan><tspan x="129.6" fill="var(--tomorrow-number)">1</tspan><tspan x="140.4">) + </tspan><tspan x="183.6" fill="var(--tomorrow-function)">fib</tspan><tspan x="216">(</tspan><tspan x="226.8" fill="var(--tomorrow-plain)">n </tspan><tspan x="248.4">- </tspan><tspan x="270" fill="var(--tomorrow-number)">2</tspan><tspan x="280.8">)</tspan></text>
+      <text xml:space="preserve" class="a m7"><tspan y="18.36" fill="var(--tomorrow-keyword)">    return </tspan><tspan x="118.8" fill="var(--tomorrow-function)">fib</tspan><tspan x="151.2">(</tspan><tspan x="162" fill="var(--tomorrow-plain)">n</tspan><tspan x="172.8">-</tspan><tspan x="183.6" fill="var(--tomorrow-number)">1</tspan><tspan x="194.4">) + </tspan><tspan x="237.6" fill="var(--tomorrow-function)">fib</tspan><tspan x="270">(</tspan><tspan x="280.8" fill="var(--tomorrow-plain)">n</tspan><tspan x="291.6">-</tspan><tspan x="302.4" fill="var(--tomorrow-number)">2</tspan><tspan x="313.2">)</tspan></text>
     </g>
-    <text y="18.36" font-size="18" fill="var(--tomorrow-punctuation)" class="a m12">}</text>
+    <text y="18.36" class="a m12">}</text>
   </g>
   <text x="40" y="306.28" font-size="14" fill="var(--muted)">$</text>
   <text font-size="14" fill="var(--tomorrow-function)" clip-path="url(#c1)"><tspan x="56.4" y="306.28">bunx </tspan><tspan x="98.4" fill="var(--tomorrow-string)">svjeez svg fib.tsx</tspan></text>

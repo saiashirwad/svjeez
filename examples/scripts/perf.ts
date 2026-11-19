@@ -4,7 +4,7 @@ import { basename, join, relative, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { brotliCompressSync, constants, gzipSync } from "node:zlib";
 import { chromium } from "playwright-core";
-import { costOf } from "./cost";
+import { costOf } from "svjeez/frames";
 
 const { values: flags, positionals: names } = parseArgs({
   allowPositionals: true,
@@ -208,7 +208,7 @@ const measure = async (file: string, tag: string) => {
   return {
     ...combine(all, median),
     byName: all[Math.floor(runs / 2)]!.byName,
-    running: costOf(text.toString()),
+    running: Object.values(costOf(text.toString())).reduce((sum, part) => sum + part, 0),
     raw: text.length / 1024,
     gzip: gzipSync(text).length / 1024,
     brotli: brotli.length / 1024,

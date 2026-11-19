@@ -34,14 +34,14 @@ Save this as `tsconfig.json`:
 Save this as `scene.tsx`:
 
 ```tsx
-import { Group, Shape, circle, draw, ease, enter, path, scene, span } from "svjeez";
+import { Group, Shape, circle, ease, enter, path, scene, span, track } from "svjeez";
 
 export default scene({ size: [200, 120], duration: 4, title: "Hello" }, () => (
   <Group>
     <Shape
       geometry={path().moveTo([20, 100]).curveTo([60, 20], [140, 20], [180, 100])}
       stroke={{ color: "#FF5FA8", width: 4 }}
-      trim={draw(span(0.2, 1.2))}
+      draw={track(0).to(1, span(0.2, 1.2))}
     />
     <Shape
       geometry={circle(8)}
@@ -59,18 +59,30 @@ npx svjeez svg scene.tsx --out hello.svg
 npx svjeez dev scene.tsx
 ```
 
-Open `hello.svg` in a browser or embed it with `<img src="hello.svg" alt="A curve draws on, then a dot pops in">`. With Bun, use `bun add svjeez@next` and `bunx --bun svjeez` with the same scene and JSX config.
+The scene function is handed its `canvas` (`canvas.rect`, `canvas.center`, `canvas.size`). Open `hello.svg` in a browser or embed it with `<img src="hello.svg" alt="A curve draws on, then a dot pops in">`. With Bun, use `bun add svjeez@next` and `bunx --bun svjeez` with the same scene and JSX config.
+
+## Ways to move something
+
+Each has one job.
+
+- **A track** is a value you build, then hand to a node: `const glow = track(0).to(1, span(1, 0.3))`, `<Shape opacity={glow} />`. Tracks are immutable: every `to`, `set`, `loop`, `repeat` and `rewind` returns a new track, so a component given a track can't schedule motion behind your back. Name your spans first, build each track, then write the JSX. `glow.span` is the span of the last step, so `glow.span.next(0.5)` follows it. A point track can go to an anchor, resolved after layout: `track(p).to(card.right, glow.span.next(0.5))` lands the node's `anchor` point on it. Its times count on the clock of the nodes that read it, so nodes on different clocks (another `<Sequence>`) need their own tracks.
+- **`draw`** is how a component is told to draw itself: a number or a track from 0 to 1, as in `<Arrow draw={t} />` or `<Shape draw={t} />` (trim `[0, draw]`), and each series of a chart takes the same prop.
+- **A motion layer** is a passing effect on top of the prop, such as an entrance, an exit or a wobble: `motion={enter(span(1, 0.3))}`, or a plain object of tracks, `motion={{ opacity: track(0).to(1, span(1, 0.3)) }}` (keys `offset`, `rotate`, `scale`, `opacity`). Layers always stack: the first is outermost, the node's own props innermost.
+- **A morph** says the picture's structure changes from one state to another, and moves whatever differs.
+- **A ref** moves nothing and has no name: `ref()` is a handle you give one node (`ref={card}`) so others can measure and place against it (`card.right`, `card.side("top")`, `card.part("title").center`). The node's key, if it has one, is what morphs match.
+- **A curve** is `ease.out` wherever you leave it out: `to`, `rewind`, recipes and morphs.
 
 ## Check a scene
 
 ```sh
+npx svjeez check scene.tsx
 npm install -D playwright-core
 npx playwright-core install chromium-headless-shell
-npx svjeez check scene.tsx
+npx svjeez check scene.tsx --browser
 npx svjeez frames scene.tsx --times 0,1,2 --sheet
 ```
 
-Open **Timeline** in the dev preview to inspect clips and motion tracks. Run `svjeez check` for layout and timing findings with source locations. Open `frames/sheet.png` to review the picture at each selected time. Run `npx svjeez skill --install` for the [authoring guide](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/SKILL.md) and worked examples.
+`svjeez check` reads the scene model and the SVG it emits, with no browser, and prints one report: every problem with its source and a `fix:`, then the animated lanes (CSS, or SMIL where a scene animates geometry, a filter or a gradient) and the cost of the SVG: running animations, and the area of filters redrawn every frame (a `moving-filter` problem names each one). `--json` prints the same as `{ ok, file, scene, problems, lanes, cost }`, and `--browser` adds a pixel pass in Chromium. In code, `check(scene)` from `svjeez/tools` returns `{ problems, lanes, cost }`. Open **Timeline** in the dev preview to see the lanes. Open `frames/sheet.png` to review the picture at each selected time. Run `npx svjeez skill --install` for the [authoring guide](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/SKILL.md) and worked examples.
 
 ## Packages
 
@@ -80,7 +92,6 @@ Each package runs while the scene compiles, so the SVG still carries no script.
 - [`@svjeez/fonts`](https://github.com/saiashirwad/svjeez/tree/next/packages/fonts): Google Fonts by name, subset and embedded
 - [`@svjeez/icons`](https://github.com/saiashirwad/svjeez/tree/next/packages/icons): Tabler and Lucide icons as an `<Icon>` node
 - [`@svjeez/charts`](https://github.com/saiashirwad/svjeez/tree/next/packages/charts): bar, line and area charts on shared axes
-- [`@svjeez/dom`](https://github.com/saiashirwad/svjeez/tree/next/packages/dom): HTML, React or Svelte states recorded in Chromium as snapshot data
 - [`@svjeez/code`](https://github.com/saiashirwad/svjeez/tree/next/packages/code): highlighted code that types itself and morphs
 - [`@svjeez/geo`](https://github.com/saiashirwad/svjeez/tree/next/packages/geo): maps and turning globes from GeoJSON or TopoJSON
 - [`@svjeez/math`](https://github.com/saiashirwad/svjeez/tree/next/packages/math): TeX as glyph shapes, plots, constructions and plane transformations

@@ -54,40 +54,48 @@ export const piecesOf = (children: TextContent, style: Asked, where: string): As
 
 const nameOf = (value: FontValue): string => (value instanceof Font ? value.family : value.name);
 
-const faceName = (family: string, weight: number, style: Face["style"]): string =>
-  `${family} ${weight}${style === "italic" ? " italic" : ""}`;
+const faceName = (family: string, weight: number, italic: boolean): string =>
+  `${family} ${weight}${italic ? " italic" : ""}`;
 
 export const faceOf = (
-  value: FontValue,
+  value: FontValue | undefined,
   weight: number | undefined,
   italic: boolean | undefined,
   where: string,
 ): Font => {
+  if (!(value instanceof Font) && !(value instanceof FontFamily))
+    throw new SceneError(
+      value === undefined
+        ? `${where} has no font.`
+        : `${where} takes a font made by font(), font.load(), font.family() or @svjeez/fonts, got ${String(value)}.`,
+      value === undefined
+        ? 'Give it one: font={await font.load("Inter.ttf")}, or a family from @svjeez/fonts such as font={await google("Inter")}. There is no default font and nothing is inherited.'
+        : undefined,
+    );
+
   if (weight !== undefined && !(weight >= 1 && weight <= 1000))
     throw new SceneError(`${where} needs a weight between 1 and 1000, got ${weight}.`);
 
   if (value instanceof Font) {
-    const style = italic === undefined ? value.style : italic ? "italic" : "normal";
+    const slanted = italic ?? value.italic;
 
-    if ((weight ?? value.weight) === value.weight && style === value.style) return value;
+    if ((weight ?? value.weight) === value.weight && slanted === value.italic) return value;
 
     throw new SceneError(
-      `${where} asks for ${faceName(value.family, weight ?? value.weight, style)}, but its font is the one face ${faceName(value.family, value.weight, value.style)}. Load that face too and pass font.family(…) or google.family("${value.family}", […]), or ask for ${value.weight}${value.style === "italic" ? " italic" : ""}.`,
+      `${where} asks for ${faceName(value.family, weight ?? value.weight, slanted)}, but its font is the one face ${faceName(value.family, value.weight, value.italic)}. Load that face too and pass font.family(…) or google.family("${value.family}", […]), or ask for ${value.weight}${value.italic ? " italic" : ""}.`,
     );
   }
 
-  const style = italic ? "italic" : "normal";
+  const slanted = italic ?? false;
   const asked = weight ?? 400;
-  const found = value.faces.find((face) => face.weight === asked && face.style === style);
+  const found = value.faces.find((face) => face.weight === asked && face.italic === slanted);
 
   if (found) return found;
 
-  const has = value.faces.map(
-    (face) => `${face.weight}${face.style === "italic" ? " italic" : ""}`,
-  );
+  const has = value.faces.map((face) => `${face.weight}${face.italic ? " italic" : ""}`);
 
   throw new SceneError(
-    `${where} asks for ${faceName(value.name, asked, style)}, which its family doesn't have: it has ${has.join(", ")}. Load that face into the family, or ask for one it has.`,
+    `${where} asks for ${faceName(value.name, asked, slanted)}, which its family doesn't have: it has ${has.join(", ")}. Load that face into the family, or ask for one it has.`,
   );
 };
 
@@ -108,12 +116,12 @@ export class FontBook {
     const known = this.#families.get(family) ?? { faces: [] };
 
     const same = known.faces.find(
-      (each) => each.weight === face.weight && each.style === face.style,
+      (each) => each.weight === face.weight && each.italic === face.italic,
     );
 
     if (same && same !== face && same.href !== face.href)
       throw new SceneError(
-        `Two different fonts are both ${faceName(family, face.weight, face.style)}. Give one another family name with font(bytes, { family }).`,
+        `Two different fonts are both ${faceName(family, face.weight, face.italic)}. Give one another family name with font(bytes, { family }).`,
       );
 
     if (!same) known.faces.push(face);
@@ -121,8 +129,8 @@ export class FontBook {
     this.#families.set(family, known);
 
     return {
-      face: { family, weight: face.weight, style: face.style },
-      font: known.faces.find((each) => each.weight === face.weight && each.style === face.style)!,
+      face: { family, weight: face.weight, italic: face.italic },
+      font: known.faces.find((each) => each.weight === face.weight && each.italic === face.italic)!,
     };
   }
 

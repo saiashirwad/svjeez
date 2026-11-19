@@ -1,5 +1,5 @@
 import { lanes } from "@svjeez/diagrams";
-import { Align, Group, Shape, canvas, exit, scene, span } from "svjeez";
+import { Align, Group, Shape, exit, scene, span } from "svjeez";
 import { mono, theme } from "../theme";
 
 const run = lanes(
@@ -38,7 +38,7 @@ const run = lanes(
   },
   {
     font: mono,
-    size: 14,
+    textSize: 14,
     scale: 84,
     reveal: span(0.2),
     colors: {
@@ -69,9 +69,9 @@ export default scene(
     title: "Agent threads on a timeline",
     desc: "Five agent threads over time: the lead plans and delegates, search reads and browses, build edits and tests, and each reports back to the lead.",
     theme,
-    reducedMotion: 9,
+    still: 9,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Align motion={exit(LEAVE)}>{run.node}</Align>

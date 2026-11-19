@@ -4,14 +4,14 @@ import {
   Shape,
   Stack,
   Text,
-  canvas,
   circle,
   ease,
-  pathData,
+  path,
   rect,
   ref,
   scene,
   span,
+  track,
   type SceneElement,
   type Span,
   type Vec,
@@ -28,32 +28,23 @@ const outlined = (width: number, height: number, radius: number) => ({
   stroke: { color: theme.border, width: 1.5 },
 });
 
-const keycap = (label: string) => {
-  const cap = ref("key");
-  const lit = cap.part("lit");
-
-  return {
-    node: (
-      <Group ref={cap} offset={[16, 184]}>
-        <Shape {...outlined(48, 40, 9)} fill={theme.surface} />
-        <Shape
-          key="lit"
-          geometry={rect(48, 40, { radius: 9 })}
-          fill={theme.raised}
-          stroke={{ color: theme.blue, width: 2 }}
-          opacity={0}
-        />
-        <Text font={mono} size={14} at={[24, 25]} anchor="baseline" fill={theme.text}>
-          {label}
-        </Text>
-      </Group>
-    ),
-    press: (held: Span): void => {
-      lit.to({ opacity: 1 }, span(held.start, 0.08));
-      lit.to({ opacity: 0 }, span(held.start + held.over - 0.08, 0.08));
-    },
-  };
-};
+const Keycap = ({ label, held }: { readonly label: string; readonly held: Span }): SceneElement => (
+  <Group offset={[16, 184]}>
+    <Shape {...outlined(48, 40, 9)} fill={theme.surface} />
+    <Shape
+      key="lit"
+      geometry={rect(48, 40, { radius: 9 })}
+      fill={theme.raised}
+      stroke={{ color: theme.blue, width: 2 }}
+      opacity={track(0)
+        .to(1, span(held.start, 0.08))
+        .to(0, span(held.end - 0.08, 0.08))}
+    />
+    <Text font={mono} size={14} at={[24, 25]} anchor="baseline" fill={theme.text}>
+      {label}
+    </Text>
+  </Group>
+);
 
 interface DesktopProps {
   readonly x: number;
@@ -63,20 +54,21 @@ interface DesktopProps {
 }
 
 const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
-  const win = ref("window");
-  const cursor = ref("cursor");
+  const win = ref();
+  const cursor = ref();
   const grip = win.part("titlebar");
-  const key = keycap("opt");
-
-  const reach = cursor.move(grip, span(0, 0.7), ease.inOut);
+  const reach = span(0, 0.7);
   const held = reach.next(1.3, 0.05);
   const drag = span(held.start + 0.15, 1);
 
-  key.press(held);
-  win.move(to, drag, ease.inOut);
-  cursor.move(grip, drag, ease.inOut);
-  cursor.move(IDLE, held.next(0.5, 0.1), ease.inOut);
-  win.move(from, span(DURATION - start - 0.8, 0.8), ease.out);
+  const winAt = track<Vec>(from)
+    .to(to, drag, ease.inOut)
+    .to(from, span(DURATION - start - 0.8, 0.8), ease.out);
+
+  const cursorAt = track<Vec>(IDLE)
+    .to(grip.center, reach, ease.inOut)
+    .to(grip.center, drag, ease.inOut)
+    .to(IDLE, held.next(0.5, 0.1), ease.inOut);
 
   return (
     <Group offset={[x, 30]}>
@@ -86,10 +78,10 @@ const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
         stroke={{ color: theme.raised, width: 1.5 }}
       />
       <Sequence when={span(start)}>
-        {key.node}
+        <Keycap label="opt" held={held} />
         <Stack
           ref={win}
-          at={from}
+          at={winAt}
           width={104}
           height={72}
           align="stretch"
@@ -116,10 +108,10 @@ const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
         </Stack>
         <Shape
           ref={cursor}
-          geometry={pathData("M0 0V16l4.2-3.8 3 6.8 2.8-1.2-3-6.6H12Z")}
+          geometry={path.parse("M0 0V16l4.2-3.8 3 6.8 2.8-1.2-3-6.6H12Z")}
           fill={theme.text}
           stroke={{ color: theme.background, width: 1.2, join: "round" }}
-          at={IDLE}
+          at={cursorAt}
         />
       </Sequence>
     </Group>
@@ -133,9 +125,9 @@ export default scene(
     title: "A clip",
     desc: "Two desktops play one gesture a few seconds apart: a cursor takes a window by its title bar and drags it while a key is held, then the window goes back.",
     theme,
-    reducedMotion: 2,
+    still: 2,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Desktop x={20} start={1} from={[28, 36]} to={[150, 110]} />

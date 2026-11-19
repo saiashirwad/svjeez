@@ -1,12 +1,13 @@
+import { cssFontStyle } from "../font/font";
 import type { Backend as Route, Channel, ChannelValues } from "./channels";
 import type { Canvas, Lane as CssLane } from "./compile";
 import type { Emit } from "./css";
 import { num } from "../model/format";
-import type { Key as Held } from "./keys";
+import { moving, type Key as Held } from "./keys";
 import { DEFAULT_EASE, EPSILON, isHold } from "../model/time";
 import { render } from "./render";
 import { element, type AttrValue, type Element, type SvgNode } from "./tree";
-import { admit, type Backend, type Feature, type Support } from "../model/backend";
+import { admit, type Backend, type Feature, type LaneReport, type Support } from "../model/backend";
 import { foldLayers } from "../model/fold";
 import { drawMoving, isStraight, type GeometrySlot } from "./svg-geometry";
 import type {
@@ -19,23 +20,26 @@ import type {
   Lane,
   Layer,
   Paint,
+  Pattern,
   Scene,
   Face,
   GroupNode,
   Rgba,
   SceneNode,
   ShapeNode,
+  Stroke,
   TextNode,
   TextRun,
   Vec,
 } from "../model/ir";
 import { curveLength, isCurved } from "../model/curve";
 import { placeOf } from "../model/scene-error";
-import { isLane, mapLane } from "../model/lane";
-import { same } from "../model/steps";
+import { atRest, isLane, mapLane } from "../model/lane";
+import { mixNumber, same } from "../model/steps";
 import { homed } from "../author/pin";
-import { growBox, lengthOf, onCircle } from "../model/geometry";
+import { growBox, lengthOf, onCircle, smilSafeWith } from "../model/geometry";
 import { blendable, isGradient } from "../author/paint";
+import { isColor } from "../model/painted";
 import { reachOf } from "../model/reach";
 import { walkScene } from "../model/walk";
 import {
@@ -44,10 +48,12 @@ import {
   filterUrl,
   gradientUrl,
   maskUrl,
+  pathId,
+  patternUrl,
   working,
   type Defs,
 } from "./svg-paint";
-import { REDUCED_MOTION } from "./css";
+import { REDUCED_MOTION, length } from "./css";
 
 export interface SvgOptions {
   readonly prefix?: string;
@@ -65,16 +71,18 @@ const SOFT_BLUR: Support = {
 const supports: Readonly<Record<Feature, Support>> = {
   text: EXACT,
   unoutlinedText: EXACT,
-  image: EXACT,
-  instance: EXACT,
+  picture: EXACT,
   clip: EXACT,
   mask: EXACT,
   blur: EXACT,
   shadow: EXACT,
+  adjust: EXACT,
+  displace: EXACT,
   softBlur: SOFT_BLUR,
   linearGradient: EXACT,
   radialGradient: EXACT,
-  nonScalingStroke: EXACT,
+  pattern: EXACT,
+  fixedWidthStroke: EXACT,
   liveTokens: EXACT,
   curvedMotion: EXACT,
   movingDashedTrim: {
@@ -90,9 +98,11 @@ interface Ctx {
   readonly sources: boolean;
   readonly around: Partial<Face>;
   readonly defs: Defs;
+  readonly onLane?: (lane: LaneReport) => void;
+  readonly reported: Set<string>;
+  /** The node being emitted: the owner of every lane written meanwhile. */
+  current?: SceneNode;
 }
-
-const isColor = (paint: Paint): paint is Color => !isGradient(paint);
 
 const pt = ([x, y]: Vec): string => `${num(x)} ${num(y)}`;
 
@@ -215,7 +225,7 @@ const outline = (geometry: Geometry, at: Vec): Drawn => {
         },
         placed: true,
       };
-    case "polygon":
+    case "points":
       return {
         tag: geometry.closed ? "polygon" : "polyline",
         attrs: { points: geometry.points.map(pt).join(" "), ...moved(at) },
@@ -265,6 +275,7 @@ type Slot =
   | "fill"
   | "stroke"
   | "stroke-width"
+  | "stroke-dashoffset"
   | "fill-opacity"
   | "d";
 
@@ -279,6 +290,38 @@ const isCut = (keys: readonly Held[]): boolean =>
     );
   });
 
+const report = (ctx: Ctx, slot: string, lane: CssLane): void => {
+  const { onLane, current } = ctx;
+
+  if (!onLane || !current) return;
+  const scale = lane.snapped / lane.period;
+
+  const spans = lane.keys.flatMap((key, index) => {
+    if (!moving(lane.keys, index)) return [];
+    const next = lane.keys[index + 1]!;
+    const start = (isHold(key.ease) ? next.t : key.t) * scale;
+
+    return [{ start, over: Math.max(0, next.t * scale - start) }];
+  });
+
+  if (spans.length === 0) return;
+
+  const record: LaneReport = {
+    key: current.key,
+    ...(current.source && { source: current.source }),
+    lane: slot,
+    backend: lane.backend,
+    spans,
+    period: lane.snapped,
+  };
+
+  const id = JSON.stringify(record);
+
+  if (ctx.reported.has(id)) return;
+  ctx.reported.add(id);
+  onLane(record);
+};
+
 const cssLane = <T>(
   ctx: Ctx,
   slot: Slot | GeometrySlot | (string & {}),
@@ -292,7 +335,7 @@ const cssLane = <T>(
 ): CssLane => {
   const { keys, period } = held(lane, ctx.scene.duration, values);
 
-  return {
+  const written: CssLane = {
     key: slot,
     backend: route,
     // SAFETY: every values() above returns a ChannelValues, so the names of its first key are Channels.
@@ -302,6 +345,10 @@ const cssLane = <T>(
     snapped: period,
     emit: emit ?? (cuts && slot === "opacity" && isCut(keys) ? "visibility" : "value"),
   };
+
+  report(ctx, slot, written);
+
+  return written;
 };
 
 interface Shell {
@@ -462,12 +509,23 @@ const asColor = (paint: Paint, where: string): Color => {
 };
 
 const asGradient = (paint: Paint, where: string): Gradient => {
-  if (!isColor(paint)) return paint;
+  if (isGradient(paint)) return paint;
 
   throw new Error(
-    `${where} holds a color and a gradient in one lane, which lowering never writes. This is a bug in svjeez; please report it with the scene.`,
+    `${where} holds a gradient and another kind of paint in one lane, which lowering never writes. This is a bug in svjeez; please report it with the scene.`,
   );
 };
+
+const urlOf = (
+  ctx: Ctx,
+  paint: Gradient | Pattern,
+  slot: "fill" | "stroke",
+  shift: Vec,
+  key: string,
+): string =>
+  paint.kind === "pattern"
+    ? patternUrl(ctx.defs, paint, shift, slot, key)
+    : gradientUrl(ctx.defs, paint, shift, slot, key);
 
 const painted = (
   ctx: Ctx,
@@ -485,9 +543,7 @@ const painted = (
   }
 
   if (!isLane(paint)) {
-    attrs[slot] = isColor(paint)
-      ? colorText(paint)
-      : gradientUrl(ctx.defs, paint, shift, slot, key);
+    attrs[slot] = isColor(paint) ? colorText(paint) : urlOf(ctx, paint, slot, shift, key);
 
     return;
   }
@@ -496,10 +552,19 @@ const painted = (
 
   blendable(paint, where);
 
-  if (!isColor(paint.keys[0].value)) {
-    const gradients = mapLane(paint, (value) => asGradient(value, where));
+  const first = paint.keys[0].value;
 
-    attrs[slot] = gradientUrl(ctx.defs, gradients, shift, slot, key);
+  if (!isColor(first)) {
+    attrs[slot] =
+      first.kind === "pattern"
+        ? urlOf(ctx, first, slot, shift, key)
+        : gradientUrl(
+            ctx.defs,
+            mapLane(paint, (value) => asGradient(value, where)),
+            shift,
+            slot,
+            key,
+          );
 
     return;
   }
@@ -517,7 +582,7 @@ const painted = (
 const emptyTrim = (trim: ShapeNode["trim"]): boolean =>
   trim !== undefined && !isLane(trim) && trim[1] - trim[0] <= 0;
 
-export const trimmedDash = (
+const trimmedDash = (
   dash: readonly number[],
   length: number,
   [from, to]: Vec,
@@ -555,6 +620,47 @@ const noDashLeft = (node: ShapeNode): boolean =>
   !isLane(node.geometry) &&
   trimmedDash(node.stroke.dash, lengthOf(node.geometry), node.trim) === undefined;
 
+const strokeAttrs = (
+  ctx: Ctx,
+  stroke: Stroke | undefined,
+  attrs: Record<string, AttrValue>,
+  lanes: CssLane[],
+  shift: Vec,
+  key: string,
+): void => {
+  painted(ctx, "stroke", stroke?.color, attrs, lanes, shift, key);
+
+  if (!stroke) return;
+  const width = isLane(stroke.width) ? stroke.width.keys[0].value : stroke.width;
+
+  if (isLane(stroke.width))
+    lanes.push(cssLane(ctx, "stroke-width", stroke.width, (value) => ({ strokeWidth: value })));
+
+  if (width !== 1) attrs["stroke-width"] = num(width);
+
+  if (stroke.cap !== "flat") attrs["stroke-linecap"] = stroke.cap;
+
+  if (stroke.join !== "sharp")
+    attrs["stroke-linejoin"] = stroke.join === "flat" ? "bevel" : stroke.join;
+
+  if (stroke.dash) attrs["stroke-dasharray"] = stroke.dash.map((n) => num(n)).join(" ");
+
+  const { dashOffset } = stroke;
+
+  if (dashOffset !== undefined) {
+    const first = isLane(dashOffset) ? dashOffset.keys[0].value : dashOffset;
+
+    if (isLane(dashOffset))
+      lanes.push(cssLane(ctx, "stroke-dashoffset", dashOffset, (value) => ({ dashOffset: value })));
+
+    if (first !== 0) attrs["stroke-dashoffset"] = num(first);
+  }
+
+  if (stroke.fixedWidth) attrs["vector-effect"] = "non-scaling-stroke";
+
+  if (stroke.under) attrs["paint-order"] = "stroke";
+};
+
 const stroked = (
   ctx: Ctx,
   node: ShapeNode,
@@ -565,24 +671,7 @@ const stroked = (
   const { trim } = node;
   const stroke = emptyTrim(trim) || noDashLeft(node) ? undefined : node.stroke;
 
-  painted(ctx, "stroke", stroke?.color, attrs, lanes, shift, node.key);
-
-  if (stroke) {
-    const width = isLane(stroke.width) ? stroke.width.keys[0].value : stroke.width;
-
-    if (isLane(stroke.width))
-      lanes.push(cssLane(ctx, "stroke-width", stroke.width, (value) => ({ strokeWidth: value })));
-
-    if (width !== 1) attrs["stroke-width"] = num(width);
-
-    if (stroke.cap !== "butt") attrs["stroke-linecap"] = stroke.cap;
-
-    if (stroke.join !== "miter") attrs["stroke-linejoin"] = stroke.join;
-
-    if (stroke.dash) attrs["stroke-dasharray"] = stroke.dash.map((n) => num(n)).join(" ");
-
-    if (stroke.nonScaling) attrs["vector-effect"] = "non-scaling-stroke";
-  }
+  strokeAttrs(ctx, stroke, attrs, lanes, shift, node.key);
 
   if (trim === undefined || !stroke) return;
 
@@ -653,7 +742,7 @@ const trimHides = (node: ShapeNode): boolean =>
   node.stroke !== undefined &&
   node.trim !== undefined &&
   isLane(node.trim) &&
-  node.stroke.cap !== "butt" &&
+  node.stroke.cap !== "flat" &&
   node.trim.keys.some(({ value: [from, to] }) => to - from <= 0);
 
 const hidesStroke = (ctx: Ctx, node: SceneNode): boolean => {
@@ -666,7 +755,7 @@ const hidesStroke = (ctx: Ctx, node: SceneNode): boolean => {
       ? trimHides(node)
       : node.kind === "group"
         ? node.children.some((child) => hidesStroke(ctx, child))
-        : node.kind === "instance" && hidesStroke(ctx, ctx.scene.symbols[node.symbol]!);
+        : false;
 
   ctx.hides.set(node.key, found);
 
@@ -717,14 +806,14 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
         : face.weight !== around.weight;
 
     const style =
-      around.style === undefined
-        ? face.style !== "normal" || faces.some((each) => each.style !== face.style)
-        : face.style !== around.style;
+      around.italic === undefined
+        ? face.italic || faces.some((each) => each.italic !== face.italic)
+        : face.italic !== around.italic;
 
     return {
       ...(face.family !== around.family && { "font-family": fonts[face.family]! }),
       ...(weight && { "font-weight": num(face.weight) }),
-      ...(style && { "font-style": face.style }),
+      ...(style && { "font-style": cssFontStyle(face) }),
     };
   };
 
@@ -741,6 +830,32 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
     own.push(cssLane(ctx, "fill-opacity", value, (each) => ({ fillOpacity: each })));
   };
 
+  const { along } = node;
+
+  /** Along a path the runs sit in a <textPath>, which starts `start` of the way along it. */
+  const onPath = (inside: SvgNode[]): SvgNode[] => {
+    if (!along) return inside;
+    const length = lengthOf(along.path);
+    const { start } = along;
+
+    const attrs = {
+      href: `#${pathId(ctx.defs, along.path, at, node.key)}`,
+      startOffset: num(atRest(start) * length),
+    };
+
+    if (!isLane(start)) return [element("textPath", attrs, inside)];
+
+    const lane = cssLane(
+      ctx,
+      "startOffset",
+      smilSafeWith(start, mixNumber, `the start of "${node.key}"`),
+      (value) => ({ startOffset: value * length }),
+      { route: "smil" },
+    );
+
+    return [{ ...element("textPath", attrs, inside), lanes: [lane] }];
+  };
+
   const firstLine = line?.at ?? [0, 0];
   const start = line?.runs[0]?.at ?? firstLine;
 
@@ -748,9 +863,11 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
     tag: "text",
     placed: true,
     attrs: {
-      ...(single && where(start, start[0] + at[0] !== 0, start[1] + at[1] !== 0)),
+      ...(single && !along && where(start, start[0] + at[0] !== 0, start[1] + at[1] !== 0)),
       ...(base && facing(base.face, ctx.around)),
       "font-size": num(node.size),
+      ...(along &&
+        along.align !== "start" && { "text-anchor": along.align === "center" ? "middle" : "end" }),
       ...(node.lines.some((each) =>
         /^\s|\s$|\s\s/.test(each.runs.map((run) => run.text).join("")),
       ) && {
@@ -765,10 +882,16 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
     if (base.opacity !== undefined) opacity(base, drawn.attrs, lanes);
   } else drawn.attrs.fill = "none";
 
+  if (node.stroke) strokeAttrs(ctx, node.stroke, drawn.attrs, lanes, at, node.key);
+
   if (single)
-    return { drawn, children: line?.runs[0] ? [{ kind: "text", value: line.runs[0].text }] : [] };
+    return {
+      drawn,
+      children: onPath(line?.runs[0] ? [{ kind: "text", value: line.runs[0].text }] : []),
+    };
 
   if (
+    !along &&
     node.lines.every((each) => each.runs.length === 1) &&
     runs.every((run) => base && [...run.text].length === 1 && lookOf(run) === lookOf(base))
   ) {
@@ -784,11 +907,13 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
     each.runs.map((run, index): SvgNode => {
       const own: CssLane[] = [];
 
-      const placed = where(
-        run.at,
-        !first || at[0] + run.at[0] !== 0,
-        index === 0 && (!first || at[1] + run.at[1] !== 0),
-      );
+      const placed = along
+        ? {}
+        : where(
+            run.at,
+            !first || at[0] + run.at[0] !== 0,
+            index === 0 && (!first || at[1] + run.at[1] !== 0),
+          );
 
       const tspan: Drawn = {
         tag: "tspan",
@@ -810,7 +935,7 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
     }),
   );
 
-  return { drawn, children };
+  return { drawn, children: onPath(children) };
 };
 
 interface Holder {
@@ -839,7 +964,6 @@ const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Dra
   };
 
   const moved = (box: Box, [x, y]: Vec): Box => ({ ...box, x: box.x + x, y: box.y + y });
-  const { scene } = ctx;
 
   if (node.clip !== undefined || node.mask) {
     const { own, shift } = holder();
@@ -848,7 +972,7 @@ const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Dra
       own.attrs["clip-path"] = clipUrl(ctx.defs, node.clip, shift, node.key);
 
     if (node.mask) {
-      const reach = reachOf(node.mask, scene.symbols, `the mask of "${node.key}"`);
+      const reach = reachOf(node.mask, `the mask of "${node.key}"`);
       const region = reach ? moved(growBox(reach, 1), shift) : { x: 0, y: 0, width: 0, height: 0 };
 
       own.attrs.mask = maskUrl(ctx.defs, node.mask, region, shift);
@@ -858,7 +982,7 @@ const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Dra
   const effects = working(node.effects);
 
   if (effects.length === 0) return;
-  const reach = reachOf({ ...node, effects }, scene.symbols, `the effects of "${node.key}"`);
+  const reach = reachOf({ ...node, effects }, `the effects of "${node.key}"`);
 
   if (!reach) return;
   const { own, shift } = holder();
@@ -866,7 +990,15 @@ const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Dra
   own.attrs.filter = filterUrl(ctx.defs, effects, moved(growBox(reach, 1), shift), node.key);
 };
 
-const symbolId = (ctx: Ctx, name: string): string => `${ctx.prefix}symbol-${name}`;
+const ISOLATE = "isolation:isolate";
+
+/**
+ * A node blends with what is drawn beneath it in its nearest isolated group, so a group
+ * whose children blend is isolated: they blend with their earlier siblings and never
+ * with whatever the group itself sits on. The root counts as a group.
+ */
+const isolates = (children: readonly SceneNode[]): boolean =>
+  children.some((child) => child.blend !== undefined);
 
 const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
   if (ctx.sources || node.kind !== "group" || node.children.length !== 1) return node;
@@ -875,7 +1007,9 @@ const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
   if (
     node.clip !== undefined ||
     node.mask !== undefined ||
+    node.blend !== undefined ||
     node.effects.length > 0 ||
+    isolates(node.children) ||
     isLane(child!.at) ||
     (node.layers.length > 0 && child!.layers.length > 0)
   )
@@ -941,6 +1075,18 @@ const dashedTrim = (node: SceneNode): GroupNode | undefined => {
 };
 
 const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
+  const outer = ctx.current;
+
+  ctx.current = given;
+
+  try {
+    return emitOne(ctx, given);
+  } finally {
+    ctx.current = outer;
+  }
+};
+
+const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
   const node = lifted(ctx, given);
   const split = dashedTrim(node);
 
@@ -978,7 +1124,7 @@ const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
       break;
     }
 
-    case "image": {
+    case "picture": {
       const [width, height] = node.size;
 
       drawn = {
@@ -995,14 +1141,6 @@ const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
       };
       break;
     }
-
-    case "instance":
-      drawn = {
-        tag: "use",
-        attrs: { href: `#${symbolId(ctx, node.symbol)}`, ...moved(at) },
-        placed: false,
-      };
-      break;
 
     case "text":
       ({ drawn, children } = textElement(ctx, node, at, lanes));
@@ -1034,6 +1172,10 @@ const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
 
   if (isLane(node.at)) travel(ctx, shells, node.at);
 
+  if (node.kind === "group" && isolates(node.children)) shells[0]!.style.push(ISOLATE);
+
+  if (node.blend !== undefined) shells.at(-1)!.style.push(`mix-blend-mode:${node.blend}`);
+
   const { box } = node;
 
   const centered =
@@ -1051,7 +1193,7 @@ const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
   const dress = (own: Shell) => {
     const style = [
       ...(own.pivots && !fillBox
-        ? [`transform-origin:${num(own.origin?.[0] ?? ox)}px ${num(own.origin?.[1] ?? oy)}px`]
+        ? [`transform-origin:${length(own.origin?.[0] ?? ox)} ${length(own.origin?.[1] ?? oy)}`]
         : []),
       ...own.style,
     ];
@@ -1066,9 +1208,12 @@ const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
   const [inner, ...outer] = shells;
   const innerLanes = [...lanes, ...inner!.lanes];
 
+  const still = lanes.length === 0 && drawn.tag !== "g" && !drawn.scale && !drawn.offset;
+
   const first: Element = {
     ...element(drawn.tag, { ...drawn.attrs, ...dress(inner!) }, children),
     ...(innerLanes.length > 0 && { lanes: innerLanes }),
+    ...(still && { drawn: Object.keys(drawn.attrs) }),
   };
 
   const out = outer.reduce<Element>(
@@ -1126,8 +1271,8 @@ const aroundOf = (scene: Scene): Partial<Face> => {
     ...(faces.some((each) => each.some((face) => face.weight !== each[0]!.weight)) && {
       weight: 400,
     }),
-    ...(faces.some((each) => each.some((face) => face.style !== each[0]!.style)) && {
-      style: "normal" as const,
+    ...(faces.some((each) => each.some((face) => face.italic !== each[0]!.italic)) && {
+      italic: false,
     }),
   };
 };
@@ -1156,6 +1301,8 @@ export const svg: Backend<string, SvgOptions> = {
       prefix,
       hides: new Map(),
       sources: options.sources ?? false,
+      ...(options.onLane && { onLane: options.onLane }),
+      reported: new Set(),
       around,
       defs: {
         scene,
@@ -1169,22 +1316,8 @@ export const svg: Backend<string, SvgOptions> = {
       },
     };
 
-    const names = Object.keys(scene.symbols);
-
-    const defs = names.map((name) => {
-      const root = scene.symbols[name]!;
-
-      return element(
-        "g",
-        { id: symbolId(ctx, name) },
-        root.kind === "group"
-          ? root.children.map((child) => emitNode(ctx, child))
-          : [emitNode(ctx, root)],
-      );
-    });
-
     const body = scene.root.children.map((child) => emitNode(ctx, child));
-    const all = [...defs, ...ctx.defs.nodes];
+    const all = ctx.defs.nodes;
     const { stills } = ctx.defs;
 
     return render(
@@ -1198,18 +1331,22 @@ export const svg: Backend<string, SvgOptions> = {
           .filter(Boolean)
           .join("\n"),
         loop: scene.loop,
-        reducedMotion: scene.still === undefined ? false : { at: scene.still },
+        share: !ctx.sources,
+        still: scene.still === undefined ? false : { at: scene.still },
         ...(options.prefix !== undefined && { prefix: options.prefix }),
         ...(options.playbackRate !== undefined && { playbackRate: options.playbackRate }),
         ...(Object.keys(around).length > 0 && {
           font: {
             ...(around.family !== undefined && { family: scene.fonts[around.family]! }),
             ...(around.weight !== undefined && { weight: around.weight }),
-            ...(around.style !== undefined && { style: around.style }),
+            ...(around.italic !== undefined && { italic: around.italic }),
           },
         }),
       },
-      [...(all.length > 0 ? [element("defs", {}, all)] : []), ...body],
+      [
+        ...(all.length > 0 ? [element("defs", {}, all)] : []),
+        ...(isolates(scene.root.children) ? [element("g", { style: ISOLATE }, body)] : body),
+      ],
     );
   },
 };

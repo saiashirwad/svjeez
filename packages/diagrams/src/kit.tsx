@@ -4,17 +4,18 @@ import {
   Group,
   Shape,
   Text,
-  draw,
   enter,
+  line,
   path,
   polygon,
-  polyline,
   rect,
   ref,
   sampled,
   span,
   tokens,
   track,
+  through,
+  type Anim,
   type Geometry,
   type Ref,
   type SceneElement,
@@ -29,9 +30,10 @@ import {
   type Font,
   type FontValue,
   type Hex,
+  type Layer,
   type Layers,
-  type Spanned,
   type PathBuilder,
+  type StrokeProps,
   type Token,
 } from "svjeez/tools";
 import { curve, vec } from "./curve.ts";
@@ -50,20 +52,24 @@ export interface DiagramColors {
 
 export interface DiagramOptions {
   readonly font: FontValue;
-  readonly size?: number;
+  /** Font size of the labels. */
+  readonly textSize?: number;
   readonly weight?: number;
   readonly colors?: DiagramColors;
-  readonly name?: string;
+  /** Drive an edge's drawing from your own timeline, 0 to 1, by its id ("a->b"). An edge a reveal also draws can't have one. */
+  readonly draw?: Draws;
 }
+
+export type Draws = Readonly<Record<string, Anim<number>>>;
 
 export interface Diagram<Id extends string> {
   readonly node: SceneElement;
   with(between: Child): SceneElement;
   readonly size: Vec;
   readonly ref: Ref;
-  readonly span: Spanned | undefined;
+  readonly span: Span | undefined;
   part(id: Id): Ref;
-  when(id: Id): Spanned | undefined;
+  when(id: Id): Span | undefined;
 }
 
 export type Reveal<Id extends string> = Span | Readonly<Partial<Record<Id, Span>>>;
@@ -162,10 +168,10 @@ export const look = (options: DiagramOptions | undefined, what: string): Look =>
       `${what} needs a font to measure its labels with.`,
       `Pass one in its options, as in ${what.replace("()", "")}(spec, { font: sans }).`,
     );
-  const { font, size = 14, weight, colors = defaultColors } = options;
+  const { font, textSize: size = 14, weight, colors = defaultColors } = options;
 
   if (!(size > 0 && Number.isFinite(size)))
-    throw new SceneError(`${what} needs a size above 0, got ${size}.`);
+    throw new SceneError(`${what} needs a textSize above 0, got ${size}.`);
   const muted = colors.muted ?? colors.text;
   const washes = new Map<string, Color>();
   const tint = (role: NodeRole): Color => colors.roles?.[role] ?? colors.accent;
@@ -329,23 +335,13 @@ export const outline = (role: NodeRole, w: number, h: number): Geometry => {
     case "input": {
       const s = h * SKEW;
 
-      return polygon([
-        [s, 0],
-        [w, 0],
-        [w - s, h],
-        [0, h],
-      ]);
+      return polygon([s, 0], [w, 0], [w - s, h], [0, h]);
     }
 
     case "output":
       return rect(w, h, { radius: h / 2 });
     case "decision":
-      return polygon([
-        [w / 2, 0],
-        [w, h / 2],
-        [w / 2, h],
-        [0, h / 2],
-      ]);
+      return polygon([w / 2, 0], [w, h / 2], [w / 2, h], [0, h / 2]);
     case "store": {
       const [top, bottom] = [
         halfEllipse(w / 2, LID, w / 2, LID, -1, -1),
@@ -384,7 +380,7 @@ const detailOf = (role: NodeRole, w: number, h: number): Geometry | undefined =>
 };
 
 const round = (value: number): number => Math.round(value * 100) / 100;
-export const pop = (when: Span): Layers => enter(when, { from: { opacity: 0, offset: [0, 6] } });
+export const pop = (when: Span): Layer => enter(when, { from: { opacity: 0, offset: [0, 6] } });
 export const fade = (when: Span): Track<number> => track(0).to(1, when);
 
 export interface NodeProps {
@@ -432,13 +428,13 @@ export interface EdgeProps {
   readonly look: Look;
   readonly points: readonly Point[];
   readonly color?: Color;
-  readonly width?: number;
-  readonly dash?: readonly number[];
+  /** Changes to the default line: width 1.5, round cap and join. */
+  readonly stroke?: Partial<StrokeProps>;
   readonly head?: ArrowHead;
-  readonly drawn?: Span;
+  readonly draw?: Anim<number>;
 }
 
-const headOf = (head: ArrowHead, tip: Point, ux: number, uy: number): Geometry => {
+const headOf = (head: Exclude<ArrowHead, "none">, tip: Point, ux: number, uy: number): Geometry => {
   const p = (x: number, y: number): Vec => vec({ x, y });
   const tipAt = p(tip.x, tip.y);
   const left = p(tip.x - ux * HEAD - uy * HEAD * 0.5, tip.y - uy * HEAD + ux * HEAD * 0.5);
@@ -446,15 +442,21 @@ const headOf = (head: ArrowHead, tip: Point, ux: number, uy: number): Geometry =
 
   switch (head) {
     case "filled":
-      return polygon([tipAt, left, right]);
+      return polygon(tipAt, left, right);
     case "async":
-      return polyline([left, tipAt, right]);
-    default:
+      return line(left, tipAt, right);
+    case "cross": {
+      const [cx, cy] = [tip.x - ux * HEAD * 0.5, tip.y - uy * HEAD * 0.5];
+      const s = HEAD * 0.4;
+      const [ax, ay] = [(ux - uy) * s, (uy + ux) * s];
+      const [bx, by] = [(ux + uy) * s, (uy - ux) * s];
+
       return path()
-        .moveTo(left)
-        .lineTo(p(tip.x + uy * HEAD * 0.5, tip.y - ux * HEAD * 0.5))
-        .moveTo(right)
-        .lineTo(p(tip.x - uy * HEAD * 0.5, tip.y + ux * HEAD * 0.5));
+        .moveTo(p(cx - ax, cy - ay))
+        .lineTo(p(cx + ax, cy + ay))
+        .moveTo(p(cx - bx, cy - by))
+        .lineTo(p(cx + bx, cy + by));
+    }
   }
 };
 
@@ -470,18 +472,17 @@ export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
       ? [...e.points.slice(0, -1), { x: b.x - ux * (HEAD - 1), y: b.y - uy * (HEAD - 1) }]
       : e.points;
 
-  const width = e.width ?? 1.5;
-
-  const stroke = {
+  const stroke: StrokeProps = {
     color,
-    width,
+    width: 1.5,
     cap: "round",
     join: "round",
-    ...(e.dash && { dash: e.dash }),
-  } as const;
+    ...e.stroke,
+  };
 
-  const { drawn } = e;
-  const tip = drawn && span(drawn.start + drawn.over * 0.85, drawn.over * 0.15);
+  // The head stays fixed at the end and shows once the drawn line reaches its base.
+  const cut = head === "filled" ? HEAD - 1 : 0;
+  const reach = Math.min(1, Math.max(0, 1 - (HEAD - cut) / (new Route([points]).length || 1)));
 
   return (
     <Group key={e.key}>
@@ -489,8 +490,10 @@ export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
         key="line"
         geometry={curve(points).geometry}
         stroke={stroke}
-        trim={drawn && !e.dash ? draw(drawn) : undefined}
-        opacity={drawn && e.dash ? fade(drawn) : undefined}
+        trim={
+          e.draw !== undefined && !stroke.dash ? through(e.draw, (d): Vec => [0, d]) : undefined
+        }
+        opacity={e.draw !== undefined && stroke.dash ? e.draw : undefined}
       />
       {head !== "none" && (
         <Shape
@@ -500,7 +503,13 @@ export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
           stroke={
             head === "filled" ? undefined : { color, width: 1.5, cap: "round", join: "round" }
           }
-          opacity={tip && fade(tip)}
+          opacity={
+            e.draw === undefined
+              ? undefined
+              : stroke.dash
+                ? e.draw
+                : through(e.draw, (d) => (d >= reach ? 1 : 0))
+          }
         />
       )}
     </Group>
@@ -539,7 +548,7 @@ const isSpan = (value: Reveal<string>): value is Span =>
 const given = (value: Span | undefined): value is Span =>
   typeof value === "object" && value !== null && isSpan(value);
 
-export const spanOf = (value: Span | undefined, what: string): Spanned => {
+export const spanOf = (value: Span | undefined, what: string): Span => {
   if (!given(value))
     throw new SceneError(`${what} needs a span, got ${String(value)}.`, "Write span(start, over).");
 
@@ -559,15 +568,15 @@ const quoted = (ids: readonly string[]): string =>
         .join(", ")}, …`
     : ids.map((id) => `"${id}"`).join(", ");
 
-export const beatOf = (beat: Span, i: number): Spanned =>
+export const beatOf = (beat: Span, i: number): Span =>
   span(Math.round((beat.start + i * beat.over) * 1e6) / 1e6, beat.over);
 
 export const schedule = (
   reveal: Reveal<string> | undefined,
   order: readonly string[],
   what: string,
-): Map<string, Spanned | undefined> => {
-  const shown = new Map<string, Spanned | undefined>(order.map((id) => [id, undefined]));
+): Map<string, Span | undefined> => {
+  const shown = new Map<string, Span | undefined>(order.map((id) => [id, undefined]));
 
   if (reveal === undefined) return shown;
 
@@ -591,7 +600,40 @@ export const schedule = (
   return shown;
 };
 
-export const extent = (spans: readonly (Span | undefined)[]): Spanned | undefined => {
+/** The progress of an edge: its reveal span run once, or the timeline the author gave its id, never both. */
+export const drawnBy = (
+  draws: Draws | undefined,
+  id: string,
+  when: Span | undefined,
+  what: string,
+): Anim<number> | undefined => {
+  const own = draws?.[id];
+
+  if (own === undefined) return when && track(0).to(1, when);
+
+  if (when !== undefined)
+    throw new SceneError(
+      `${what} draws "${id}" from a draw timeline, but its reveal already draws it.`,
+      `Pick one: drop draw["${id}"], or leave the nodes it joins out of reveal.`,
+    );
+
+  return own;
+};
+
+export const checkDraws = (
+  draws: Draws | undefined,
+  ids: readonly string[],
+  what: string,
+): void => {
+  for (const id of Object.keys(draws ?? {}))
+    if (!ids.includes(id))
+      throw new SceneError(
+        `${what} draw names "${id}", which is not one of its edges.`,
+        `Its edges are ${quoted(ids)}.`,
+      );
+};
+
+export const extent = (spans: readonly (Span | undefined)[]): Span | undefined => {
   const known = spans.filter((s): s is Span => s !== undefined);
 
   if (known.length === 0) return undefined;
@@ -653,15 +695,14 @@ export const keyed = (ids: readonly string[]): string[] => {
 export interface Parts<Id extends string> {
   readonly ref: Ref;
   part(id: Id): Ref;
-  when(id: Id): Spanned | undefined;
+  when(id: Id): Span | undefined;
 }
 
 export const partsOf = <Id extends string>(
   what: string,
-  name: string,
-  parts: ReadonlyMap<string, Spanned | undefined>,
+  parts: ReadonlyMap<string, Span | undefined>,
 ): Parts<Id> => {
-  const handle = ref(name);
+  const handle = ref();
 
   const find = (id: string): string => {
     if (!parts.has(id))

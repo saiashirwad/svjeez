@@ -1,5 +1,5 @@
 import { mermaid } from "@svjeez/mermaid";
-import { Align, Group, Shape, canvas, circle, draw, ease, exit, scene, span, track } from "svjeez";
+import { Align, Group, Shape, circle, ease, exit, scene, span, track } from "svjeez";
 import { mono, theme } from "../theme";
 
 const M = 40;
@@ -23,7 +23,7 @@ export const chart = mermaid(
     prod --> done((Live))`,
   {
     font: mono,
-    size: 13,
+    textSize: 13,
     reveal: span(0.4, 0.35),
     colors: {
       background: theme.background,
@@ -50,9 +50,9 @@ export default scene(
     title: "Deploy pipeline from Mermaid",
     desc: "A deploy pipeline written as Mermaid text appears node by node as a svjeez flowchart, then a token runs from the push to the live release.",
     theme,
-    reducedMotion: 10,
+    still: 10,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Align motion={exit(LEAVE)}>
@@ -61,7 +61,7 @@ export default scene(
             <Shape
               geometry={route.geometry}
               stroke={{ color: theme.orange, width: 2.5, cap: "round" }}
-              trim={draw(trip, { curve: ease.linear })}
+              draw={track(0).to(1, trip, ease.linear)}
             />,
           )}
           <Shape

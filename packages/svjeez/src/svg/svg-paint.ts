@@ -4,7 +4,7 @@ import type { Canvas, Lane as CssLane } from "./compile";
 import { num } from "../model/format";
 import { animate, windowEnd } from "./smil";
 import { element, type SvgNode } from "./tree";
-import { outlineBoxOf, smilSafeWith } from "../model/geometry";
+import { contoursOf, outlineBoxOf, smilSafeWith } from "../model/geometry";
 import type {
   Animated,
   Box,
@@ -13,6 +13,7 @@ import type {
   Geometry,
   Gradient,
   Lane,
+  Pattern,
   Rgba,
   Scene,
   SceneNode,
@@ -179,7 +180,7 @@ export const gradientUrl = (
 
   const optional = new Set(["x1", "y1", "y2"]);
 
-  const stops = first.stops.map((stop, i) => {
+  const stops = first.stops.map((_, i) => {
     const offset = smil(
       defs,
       "offset",
@@ -250,11 +251,85 @@ export const gradientUrl = (
   return `url(#${id})`;
 };
 
-const idle = (effect: Effect): boolean =>
-  effect.kind === "blur"
-    ? !isLane(effect.radius) && effect.radius <= 0
-    : (!isLane(effect.opacity) && effect.opacity <= 0) ||
-      (isRgba(effect.color) && effect.color[3] <= 0);
+export const patternUrl = (
+  defs: Defs,
+  pattern: Pattern,
+  shift: Vec,
+  property: "fill" | "stroke",
+  key: string,
+): string => {
+  const where = `the pattern on "${key}"`;
+
+  const at = (name: "x" | "y", axis: 0 | 1) =>
+    [
+      name,
+      smil(
+        defs,
+        name,
+        settled(
+          isLane(pattern.offset)
+            ? mapLane(pattern.offset, (value) => value[axis] + shift[axis])
+            : pattern.offset[axis] + shift[axis],
+        ),
+        where,
+      ),
+    ] as const;
+
+  const corner = [at("x", 0), at("y", 1)];
+
+  const { id, twin } = twinned(
+    defs,
+    JSON.stringify(["p", pattern.tile.key, shift]),
+    "p",
+    (own, still) => ({
+      moves: corner.some(([, written]) => written.nodes.length > 0),
+      node: element(
+        "pattern",
+        {
+          id: own,
+          patternUnits: "userSpaceOnUse",
+          ...Object.fromEntries(corner.map(([name, written]) => [name, pick(written, still)])),
+          width: num(pattern.size[0]),
+          height: num(pattern.size[1]),
+        },
+        [
+          ...children(
+            corner.map(([, written]) => written),
+            still,
+          ),
+          defs.draw(pattern.tile),
+        ],
+      ),
+    }),
+  );
+
+  if (twin) swap(defs, property, id);
+
+  return `url(#${id})`;
+};
+
+const rests = (value: Animated<number>, at: number): boolean => !isLane(value) && value === at;
+
+const idle = (effect: Effect): boolean => {
+  switch (effect.kind) {
+    case "blur":
+      return rests(effect.radius, 0);
+    case "adjust":
+      return (
+        rests(effect.saturate, 1) &&
+        rests(effect.hue, 0) &&
+        rests(effect.brightness, 1) &&
+        rests(effect.contrast, 1)
+      );
+    case "displace":
+      return rests(effect.scale, 0);
+    case "shadow":
+      return (
+        (!isLane(effect.opacity) && effect.opacity <= 0) ||
+        (!isLane(effect.color) && isRgba(effect.color) && effect.color[3] <= 0)
+      );
+  }
+};
 
 export const working = (effects: readonly Effect[]): Effect[] =>
   effects.filter((effect) => !idle(effect));
@@ -268,6 +343,145 @@ const box = ({ x, y, width, height }: Box) => ({
 
 const length = (value: number): number => Math.max(0, value);
 
+interface Primitive {
+  readonly tag: string;
+  readonly attrs: Readonly<Record<string, string>>;
+  readonly numbers: readonly (readonly [string, Moving])[];
+  readonly flood?: Animated<Color>;
+  readonly inside?: readonly Primitive[];
+}
+
+const moving = (primitive: Primitive): boolean =>
+  primitive.numbers.some(([, written]) => written.nodes.length > 0) ||
+  (primitive.inside ?? []).some(moving);
+
+const drawPrimitive = (primitive: Primitive, still: boolean, defs: Defs): SvgNode => {
+  const { tag, attrs, numbers, flood, inside = [] } = primitive;
+
+  const node = element(
+    tag,
+    {
+      ...attrs,
+      ...Object.fromEntries(numbers.map(([name, written]) => [name, pick(written, still)])),
+      ...(flood !== undefined && { "flood-color": colorText(atRest(flood)) }),
+    },
+    [
+      ...children(
+        numbers.map(([, written]) => written),
+        still,
+      ),
+      ...inside.map((each) => drawPrimitive(each, still, defs)),
+    ],
+  );
+
+  return flood !== undefined && isLane(flood)
+    ? {
+        ...node,
+        lanes: [
+          defs.lane("flood-color", flood, (value) => ({ floodColor: colorText(value) }), "css"),
+        ],
+      }
+    : node;
+};
+
+const primitivesOf = (
+  defs: Defs,
+  effect: Exclude<Effect, { kind: "displace" }>,
+  where: string,
+): Primitive[] => {
+  const amount = (name: string, value: Animated<number>) =>
+    [name, smil(defs, name, value, where, length)] as const;
+
+  switch (effect.kind) {
+    case "blur":
+      return [
+        {
+          tag: "feGaussianBlur",
+          attrs: {},
+          numbers: [amount("stdDeviation", effect.radius)],
+        },
+      ];
+    case "adjust": {
+      const out: Primitive[] = [];
+
+      if (!rests(effect.saturate, 1))
+        out.push({
+          tag: "feColorMatrix",
+          attrs: { type: "saturate" },
+          numbers: [amount("values", effect.saturate)],
+        });
+
+      if (!rests(effect.hue, 0))
+        out.push({
+          tag: "feColorMatrix",
+          attrs: { type: "hueRotate" },
+          numbers: [["values", smil(defs, "values", effect.hue, where)]],
+        });
+
+      // The same animation is written once per channel, as each element needs its own ids.
+      const transfer = (numbers: () => Primitive["numbers"]): Primitive => ({
+        tag: "feComponentTransfer",
+        attrs: {},
+        numbers: [],
+        inside: ["feFuncR", "feFuncG", "feFuncB"].map((tag) => ({
+          tag,
+          attrs: { type: "linear" },
+          numbers: numbers(),
+        })),
+      });
+
+      if (!rests(effect.brightness, 1))
+        out.push(transfer(() => [amount("slope", effect.brightness)]));
+
+      if (!rests(effect.contrast, 1)) {
+        const intercept = settled(
+          isLane(effect.contrast)
+            ? mapLane(effect.contrast, (value) => 0.5 - 0.5 * value)
+            : 0.5 - 0.5 * effect.contrast,
+        );
+
+        out.push(
+          transfer(() => [
+            amount("slope", effect.contrast),
+            ["intercept", smil(defs, "intercept", intercept, where)],
+          ]),
+        );
+      }
+
+      return out;
+    }
+
+    case "shadow": {
+      const offset = (axis: 0 | 1) =>
+        settled(
+          isLane(effect.offset)
+            ? mapLane(effect.offset, (value) => value[axis])
+            : effect.offset[axis],
+        );
+
+      const opacity = smil(defs, "flood-opacity", effect.opacity, where, (value) =>
+        Math.min(1, Math.max(0, value)),
+      );
+
+      return [
+        {
+          tag: "feDropShadow",
+          attrs: {},
+          numbers: [
+            ["dx", smil(defs, "dx", offset(0), where)],
+            ["dy", smil(defs, "dy", offset(1), where)],
+            amount("stdDeviation", effect.blur),
+            ...(opacity.nodes.length === 0 && opacity.value === "1"
+              ? []
+              : [["flood-opacity", opacity] as const]),
+          ],
+          flood: effect.color,
+        },
+      ];
+    }
+  }
+};
+
 export const filterUrl = (
   defs: Defs,
   effects: readonly Effect[],
@@ -275,48 +489,42 @@ export const filterUrl = (
   key: string,
 ): string => {
   const where = `the effects on "${key}"`;
+  const primitives: Primitive[] = [];
 
-  const primitives = effects.map((effect) => {
-    if (effect.kind === "blur")
-      return {
-        tag: "feGaussianBlur",
-        numbers: [
-          ["stdDeviation", smil(defs, "stdDeviation", effect.radius, where, length)] as const,
-        ],
-        flood: undefined,
-      };
+  for (const effect of effects) {
+    if (effect.kind !== "displace") {
+      primitives.push(...primitivesOf(defs, effect, where));
+      continue;
+    }
 
-    const offset = (axis: 0 | 1) =>
-      settled(
-        isLane(effect.offset)
-          ? mapLane(effect.offset, (value) => value[axis])
-          : effect.offset[axis],
-      );
+    // Noise ignores its input, so the map reads the effects before it by name.
+    const before = primitives.pop();
+    const input = before === undefined ? "SourceGraphic" : `e${primitives.length}`;
+    const noise = `n${primitives.length}`;
 
-    const opacity = smil(defs, "flood-opacity", effect.opacity, where, (value) =>
-      Math.min(1, Math.max(0, value)),
+    if (before !== undefined)
+      primitives.push({ ...before, attrs: { ...before.attrs, result: input } });
+    primitives.push(
+      {
+        tag: "feTurbulence",
+        attrs: {
+          type: "fractalNoise",
+          numOctaves: String(effect.octaves),
+          seed: String(effect.seed),
+          result: noise,
+        },
+        numbers: [["baseFrequency", smil(defs, "baseFrequency", effect.frequency, where, length)]],
+      },
+      {
+        tag: "feDisplacementMap",
+        attrs: { in: input, in2: noise, xChannelSelector: "R", yChannelSelector: "G" },
+        numbers: [["scale", smil(defs, "scale", effect.scale, where, length)]],
+      },
     );
-
-    return {
-      tag: "feDropShadow",
-      numbers: [
-        ["dx", smil(defs, "dx", offset(0), where)] as const,
-        ["dy", smil(defs, "dy", offset(1), where)] as const,
-        ["stdDeviation", smil(defs, "stdDeviation", effect.blur, where, length)] as const,
-        ...(opacity.nodes.length === 0 && opacity.value === "1"
-          ? []
-          : [["flood-opacity", opacity] as const]),
-      ],
-      flood: colorText(effect.color),
-    };
-  });
-
-  const moves = primitives.some(({ numbers }) =>
-    numbers.some(([, written]) => written.nodes.length > 0),
-  );
+  }
 
   const { id, twin } = twinned(defs, JSON.stringify(["f", effects, region]), "f", (own, still) => ({
-    moves,
+    moves: primitives.some(moving),
     node: element(
       "filter",
       {
@@ -325,19 +533,7 @@ export const filterUrl = (
         ...box(region),
         "color-interpolation-filters": "sRGB",
       },
-      primitives.map(({ tag, numbers, flood }) =>
-        element(
-          tag,
-          {
-            ...Object.fromEntries(numbers.map(([name, written]) => [name, pick(written, still)])),
-            ...(flood !== undefined && { "flood-color": flood }),
-          },
-          children(
-            numbers.map(([, written]) => written),
-            still,
-          ),
-        ),
-      ),
+      primitives.map((primitive) => drawPrimitive(primitive, still, defs)),
     ),
   }));
 
@@ -390,3 +586,27 @@ export const clipUrl = (defs: Defs, clip: Animated<Geometry>, shift: Vec, key: s
 
   return `url(#${id})`;
 };
+
+/** The id of a <path> in defs that text runs along, drawn `shift` away from the origin. */
+export const pathId = (defs: Defs, path: Geometry, shift: Vec, key: string): string =>
+  twinned(defs, JSON.stringify(["p", path, shift]), "p", (own) => {
+    const geometry: Geometry = { kind: "path", contours: contoursOf(path), rule: "nonzero" };
+
+    const drawn = defs.draw({
+      kind: "shape",
+      key: `${key}#path`,
+      box: outlineBoxOf(geometry),
+      at: shift,
+      origin: [0, 0],
+      layers: [],
+      effects: [],
+      geometry,
+    });
+
+    if (drawn.kind !== "element" || drawn.tag !== "path")
+      throw new Error(
+        `The path of "${key}" did not draw as a single <path>, which lowering never writes. This is a bug in svjeez; please report it with the scene.`,
+      );
+
+    return { moves: false, node: element("path", { d: drawn.attrs.d!, id: own }) };
+  }).id;

@@ -16,7 +16,8 @@ export interface ArrowProps extends Omit<Common, "at" | "anchor" | "origin" | "r
   readonly stroke: StrokeProps;
   readonly bend?: number;
   readonly inset?: number;
-  readonly trim?: Anim<Vec>;
+  /** How much of the arrow is drawn, from 0 to 1: the shaft is trimmed to [0, draw] and the head rides its tip. */
+  readonly draw?: Anim<number>;
   readonly head?: number | "none";
 }
 
@@ -55,10 +56,22 @@ const cubicAt = (p: readonly [Vec, Vec, Vec, Vec], u: number): Vec => {
 
 const SEGMENTS = 64;
 
-const along = (
-  bend: number,
-): ((fraction: number) => { readonly at: Vec; readonly heading: number }) => {
-  if (bend === 0) return (fraction) => ({ at: [fraction, 0], heading: 0 });
+interface Reading {
+  readonly at: Vec;
+  readonly heading: number;
+}
+
+interface Along {
+  (fraction: number): Reading;
+  /** The shaft's arc length when its chord is 1. */
+  readonly total: number;
+}
+
+const along = (bend: number): Along => {
+  if (bend === 0)
+    return Object.assign((fraction: number): Reading => ({ at: [fraction, 0], heading: 0 }), {
+      total: 1,
+    });
   const curve = bow(bend);
   const points = Array.from({ length: SEGMENTS + 1 }, (_, i) => cubicAt(curve, i / SEGMENTS));
   const lengths = [0];
@@ -70,7 +83,7 @@ const along = (
     );
   const total = lengths.at(-1)!;
 
-  return (fraction) => {
+  const read = (fraction: number): Reading => {
     const goal = Math.min(1, Math.max(0, fraction)) * total;
 
     const i = Math.max(
@@ -86,6 +99,8 @@ const along = (
       heading: Math.atan2(b[1] - a[1], b[0] - a[0]) * DEG,
     };
   };
+
+  return Object.assign(read, { total });
 };
 
 const shaftOf = (bend: number, length: number, start: Vec, angle: number): Geometry => {
@@ -105,31 +120,48 @@ const headOf = (size: number, tip: Vec, angle: number): Geometry => {
   const barb = (side: number): Vec =>
     add(tip, turn([-size * Math.cos(SPREAD), side * size * Math.sin(SPREAD)], angle));
 
-  return { kind: "polygon", points: [barb(-1), tip, barb(1)], closed: false };
+  return { kind: "points", points: [barb(-1), tip, barb(1)], closed: false };
 };
 
-const isOpen = (trim: Vec): boolean => trim[1] - trim[0] > EPSILON;
+const GRID = 1 / 60;
 
-const shownBy = (trim: Animated<Vec>, duration: Seconds): Animated<number> => {
-  if (!isLane(trim)) return isOpen(trim) ? 1 : 0;
-  const keys = unrolled(trim, duration);
-  const out: Key<number>[] = [];
+const FLIP = 0.001;
 
-  keys.forEach((key, i) => {
-    const next = keys[i + 1];
-    const value = isOpen(key.value) || (next !== undefined && isOpen(next.value)) ? 1 : 0;
-    const last = out.at(-1);
+/** 0/1 lane: 1 while the predicate holds, sampled on a grid and at every break, each flip bisected to a millisecond. */
+const laneOf = (
+  holds: (t: Seconds) => boolean,
+  breaks: readonly Seconds[],
+  duration: Seconds,
+): Animated<number> => {
+  const grid = Array.from({ length: Math.floor(duration / GRID) + 1 }, (_, i) => i * GRID);
 
-    if (!last)
-      out.push({ t: 0, value: key.t > EPSILON ? (isOpen(keys[0]!.value) ? 1 : 0) : value });
+  const times = [...new Set([0, duration, ...breaks, ...grid])]
+    .filter((t) => t >= 0 && t <= duration)
+    .sort((x, y) => x - y);
 
-    if (out.at(-1)!.value === value) return;
+  const keys: Key<number>[] = [{ t: 0, value: holds(0) ? 1 : 0 }];
+  let state = holds(0);
+  let before = 0;
 
-    if (key.t <= out.at(-1)!.t + EPSILON) out[out.length - 1] = { ...out.at(-1)!, value };
-    else out.push({ t: key.t, value, ease: ease.hold });
-  });
+  for (const t of times) {
+    if (holds(t) !== state) {
+      let [lo, hi] = [before, t];
 
-  const [first, second, ...rest] = out;
+      while (hi - lo > FLIP) {
+        const mid = (lo + hi) / 2;
+
+        if (holds(mid) === state) lo = mid;
+        else hi = mid;
+      }
+
+      state = !state;
+      keys.push({ t: hi, value: state ? 1 : 0, ease: ease.hold });
+    }
+
+    before = t;
+  }
+
+  const [first, second, ...rest] = keys;
 
   if (!second) return first!.value;
   const lane: Lane<number> = { kind: "lane", keys: [first!, second, ...rest] };
@@ -216,7 +248,16 @@ const connect =
       ];
     };
 
-    const shown = shownBy(trim, duration);
+    const depth = size * Math.cos(SPREAD);
+    const lengthAt = (t: Seconds): number => pose(t).length * path.total;
+
+    const shownAt = (t: Seconds): boolean => {
+      const length = lengthAt(t);
+      const [a, b] = valueAt(trim, t, blendVec);
+
+      return length > EPSILON && (b - a) * length >= Math.min(depth, length) - EPSILON;
+    };
+
     const moving = isLane(from!) || isLane(to!);
 
     const drawn = (
@@ -242,7 +283,7 @@ const connect =
     if (!moving && !isLane(trim)) {
       const { start, angle, length } = pose(0);
       const [tip, heading] = tipOf(0);
-      const shows = isOpen(trim) && length > EPSILON ? 1 : 0;
+      const shows = shownAt(0) ? 1 : 0;
 
       return [
         drawn(shaft!, shaftOf(bend, length, start, angle), [0, 0], [], shaft!.trim),
@@ -254,6 +295,7 @@ const connect =
 
     const ends = [from!, to!, trim];
     const breaks = breaksOf(ends, duration);
+    const shown = laneOf(shownAt, breaks, duration);
     const seen = seenBy(shown, duration);
     const posed = (t: Seconds): Pose => pose(seen(t));
 
@@ -333,7 +375,7 @@ const isNumber = (value: Anim<number>): value is number => typeof value === "num
 
 export const Arrow = (props: ArrowProps): SceneElement => {
   const label = "<Arrow>";
-  const { from, to, stroke, bend = 0, inset = 0, trim, head = 8, ...common } = props;
+  const { from, to, stroke, bend = 0, inset = 0, draw, head = 8, ...common } = props;
 
   if ("at" in common || "anchor" in common)
     throw new SceneError(
@@ -363,7 +405,9 @@ export const Arrow = (props: ArrowProps): SceneElement => {
 
   return {
     type: "group",
-    props: common,
+    props: {
+      ...common,
+    },
     children: [
       {
         type: "shape",
@@ -371,7 +415,7 @@ export const Arrow = (props: ArrowProps): SceneElement => {
           key: "shaft",
           geometry: { kind: "line", from: [0, 0], to: [1, 0] },
           stroke: drawn,
-          ...(trim !== undefined && { trim }),
+          ...(draw !== undefined && { draw }),
         },
       },
       ...(size > 0

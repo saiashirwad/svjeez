@@ -1,7 +1,8 @@
 import { SceneError } from "../model/scene-error";
 import type { Font } from "../font/font";
 import { ringsOf } from "../model/paths";
-import type { Box, Contour, Vec } from "../model/ir";
+import type { Box, Contour, Geometry, Vec } from "../model/ir";
+import { alongOutline, boundsOfPoints, lengthOf } from "../model/geometry";
 
 export type TextAlign = "start" | "center" | "end";
 
@@ -242,3 +243,48 @@ export const layoutText = (
   options: TextLayoutOptions,
   where: string,
 ): TextLayout => layoutRuns(face, [{ text, face, style: face }], options, where);
+
+/** Sets a laid-out single line along an outline: each run starts where the path is, and the box wraps every glyph. */
+export const setAlong = <S>(
+  layout: TextLayout<S>,
+  path: Geometry,
+  start: number,
+  align: TextAlign,
+): TextLayout<S> => {
+  const [line] = layout.lines;
+  const begin = start * lengthOf(path) - SHARE[align] * layout.box.width;
+  const ascent = line?.at[1] ?? 0;
+  const descent = layout.box.height - ascent;
+  const corners: Vec[] = [];
+
+  const runs = (line?.runs ?? []).map((run): LaidRun<S> => {
+    let distance = begin + run.at[0];
+    const { point } = alongOutline(path, distance);
+
+    for (const advance of run.advances) {
+      const { point: middle, angle } = alongOutline(path, distance + advance / 2);
+      const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
+
+      const glyph: Vec[] = [
+        [-advance / 2, -ascent],
+        [advance / 2, -ascent],
+        [advance / 2, descent],
+        [-advance / 2, descent],
+      ];
+
+      for (const [u, v] of glyph)
+        corners.push([middle[0] + u * cos - v * sin, middle[1] + u * sin + v * cos]);
+      distance += advance;
+    }
+
+    const { outline: _flat, ...placed } = run;
+
+    return { ...placed, at: point };
+  });
+
+  return {
+    lines: [{ at: runs[0]?.at ?? [0, 0], runs }],
+    box: corners.length > 0 ? boundsOfPoints(corners) : { x: 0, y: 0, width: 0, height: 0 },
+    cuts: [],
+  };
+};

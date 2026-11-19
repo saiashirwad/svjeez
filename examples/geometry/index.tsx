@@ -3,10 +3,9 @@ import {
   Shape,
   Text,
   arc,
-  canvas,
   circle,
   ease,
-  pathData,
+  path,
   polygon,
   rect,
   scene,
@@ -35,7 +34,7 @@ const Label = ({
 );
 
 const star = polygon(
-  Array.from({ length: 10 }, (_, k): Vec => {
+  ...Array.from({ length: 10 }, (_, k): Vec => {
     const reach = k % 2 === 0 ? 40 : 17;
     const angle = (k * Math.PI) / 5 - Math.PI / 2;
 
@@ -43,7 +42,7 @@ const star = polygon(
   }),
 );
 
-const heart = pathData(
+const heart = path.parse(
   "M0 -14C8 -34 42 -28 34 0C29 16 10 26 0 36C-10 26 -29 16 -34 0C-42 -28 -8 -34 0 -14Z",
 );
 
@@ -54,9 +53,9 @@ export default scene(
     title: "Animated geometry",
     desc: "A rect grows and rounds its corners, an arc opens around its circle, a star morphs into a heart, a ring's stroke swells, and a trimmed window travels around a circle.",
     theme,
-    reducedMotion: 2.5,
+    still: 2.5,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
 

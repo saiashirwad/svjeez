@@ -1,8 +1,7 @@
 import { SceneError } from "../model/scene-error";
-import type { Box, Vec } from "../model/ir";
-import type { Curve } from "./spring";
-import { verbs, type MoveOptions, type Moves } from "./verbs";
-import type { Span, Spanned, When } from "./span";
+import type { Box, Source, Vec } from "../model/ir";
+import { caller } from "../svg/traced";
+import { sourceFrom } from "./identity";
 import { PLACE_LIST, PLACES } from "./pin";
 
 export type Edge = "left" | "right" | "top" | "bottom";
@@ -48,20 +47,19 @@ const fraction = (t: number, what: string): number => {
 };
 
 export class Ref {
-  readonly key: string;
+  readonly source: Source | undefined;
   readonly within: { readonly ref: Ref; readonly path: readonly string[] } | undefined;
 
-  constructor(key: string, within?: { readonly ref: Ref; readonly path: readonly string[] }) {
-    if (key === "" || key.includes("/"))
-      throw new SceneError(`A ref needs a key with no "/" in it, got "${key}".`);
-    this.key = key;
+  constructor(
+    source: Source | undefined,
+    within?: { readonly ref: Ref; readonly path: readonly string[] },
+  ) {
+    this.source = source;
     this.within = within;
   }
 
   get label(): string {
-    return this.within
-      ? `${this.within.ref.label}.part("${this.within.path.join("/")}")`
-      : this.key;
+    return this.within ? `ref().part("${this.within.path.join("/")}")` : "ref()";
   }
 
   part(key: string): Ref {
@@ -71,7 +69,7 @@ export class Ref {
       throw new SceneError(`${this.label}.part() needs keys joined by "/", got "${key}".`);
     const root = this.within?.ref ?? this;
 
-    return new Ref(path.at(-1)!, { ref: root, path: [...(this.within?.path ?? []), ...path] });
+    return new Ref(root.source, { ref: root, path: [...(this.within?.path ?? []), ...path] });
   }
 
   side(edge: Edge, t = 0.5): Anchor {
@@ -128,41 +126,12 @@ export class Ref {
   get bottomRight(): Anchor {
     return this.#place("bottom-right");
   }
-
-  to(values: Moves, when: Span, curve?: Curve): Spanned {
-    return verbs.to(this, values, when, curve);
-  }
-
-  set(values: Moves, when: When): Spanned {
-    return verbs.set(this, values, when);
-  }
-
-  move(to: Vec | Anchor | Ref, when: Span, curve?: Curve, options?: MoveOptions): Spanned {
-    return verbs.move(this, to, when, curve, options);
-  }
 }
 
-let declared: Ref[] | undefined;
+export const ref = (): Ref => {
+  const at = caller();
 
-export const ref = (key: string): Ref => {
-  const made = new Ref(key);
-
-  declared?.push(made);
-
-  return made;
-};
-
-export const declaring = <T>(build: () => T): readonly [T, readonly Ref[]] => {
-  const outer = declared;
-  const made: Ref[] = [];
-
-  declared = made;
-
-  try {
-    return [build(), made];
-  } finally {
-    declared = outer;
-  }
+  return new Ref(at && sourceFrom(at));
 };
 
 export type Place = keyof typeof PLACES;

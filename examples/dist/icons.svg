@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360" role="img" aria-labelledby="t d">
   <title id="t">Icons</title>
-  <desc id="d">Seven Tabler outline icons draw themselves one stroke at a time, a filled heart pops into the last place in the grid, and five shared stars pop in below.</desc>
+  <desc id="d">Seven Tabler outline icons draw themselves one stroke at a time, a filled heart pops into the last place in the grid, and five stars pop in below.</desc>
   <style><![CDATA[
 svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF}
 @media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0}}
@@ -30,61 +30,53 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m11{animation-name:k11}
 @keyframes k12{0%,47%{stroke-dashoffset:1;visibility:hidden}61%,100%{stroke-dashoffset:0;visibility:visible}}
 .m12{animation-name:k12}
-@keyframes k13{0%,64%{scale:0.3}75%,100%{scale:1}}
-@keyframes k14{0%,64%{opacity:0}75%,100%{opacity:1}}
-.m13{animation-name:k13,k14;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
-@keyframes k15{0%,67%{scale:0.3}78%,100%{scale:1}}
-@keyframes k16{0%,67%{opacity:0}78%,100%{opacity:1}}
-.m14{animation-name:k15,k16;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
-@keyframes k17{0%,70%{scale:0.3}81%,100%{scale:1}}
-@keyframes k18{0%,70%{opacity:0}81%,100%{opacity:1}}
-.m15{animation-name:k17,k18;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
-@keyframes k19{0%,73%{scale:0.3}84%,100%{scale:1}}
-@keyframes k20{0%,73%{opacity:0}84%,100%{opacity:1}}
-.m16{animation-name:k19,k20;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
-@keyframes k21{0%,76%{scale:0.3}87%,100%{scale:1}}
-@keyframes k22{0%,76%{opacity:0}87%,100%{opacity:1}}
-.m17{animation-name:k21,k22;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
-@keyframes k23{0%,79%{scale:0.3}90%,100%{scale:1}}
-@keyframes k24{0%,79%{opacity:0}90%,100%{opacity:1}}
-.m18{animation-name:k23,k24;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.34,1.56,.64,1)}
+@keyframes k13{0%,64%{scale:0.3;opacity:0}75%,100%{scale:1;opacity:1}}
+.m13{animation-name:k13;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k14{0%,67%{scale:0.3;opacity:0}78%,100%{scale:1;opacity:1}}
+.m14{animation-name:k14;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k15{0%,70%{scale:0.3;opacity:0}81%,100%{scale:1;opacity:1}}
+.m15{animation-name:k15;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k16{0%,73%{scale:0.3;opacity:0}84%,100%{scale:1;opacity:1}}
+.m16{animation-name:k16;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k17{0%,76%{scale:0.3;opacity:0}87%,100%{scale:1;opacity:1}}
+.m17{animation-name:k17;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes k18{0%,79%{scale:0.3;opacity:0}90%,100%{scale:1;opacity:1}}
+.m18{animation-name:k18;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-4.5s!important;animation-play-state:paused!important}}
 ]]></style>
   <defs>
-    <g id="symbol-0">
-      <path d="M8.243 7.34L1.863 8.265L1.75 8.288C1.402 8.38 1.13 8.653 1.039 9.002C0.948 9.35 1.051 9.721 1.31 9.972L5.932 14.471L4.842 20.826L4.829 20.936C4.808 21.296 4.982 21.64 5.285 21.836C5.589 22.031 5.974 22.048 6.293 21.88L11.999 18.88L17.692 21.88L17.792 21.926C18.128 22.058 18.509 21.999 18.79 21.771C19.07 21.543 19.205 21.182 19.144 20.826L18.053 14.471L22.677 9.971L22.755 9.886C22.982 9.607 23.041 9.227 22.91 8.892C22.779 8.557 22.478 8.318 22.122 8.266L15.742 7.34L12.89 1.56C12.722 1.218 12.374 1.002 11.993 1.002C11.612 1.002 11.264 1.218 11.096 1.56L8.243 7.34Z" fill="var(--yellow)"/>
-    </g>
+    <path id="u1" d="M8.243 7.34L1.863 8.265L1.75 8.288C1.402 8.38 1.13 8.653 1.039 9.002C0.948 9.35 1.051 9.721 1.31 9.972L5.932 14.471L4.842 20.826L4.829 20.936C4.808 21.296 4.982 21.64 5.285 21.836C5.589 22.031 5.974 22.048 6.293 21.88L11.999 18.88L17.692 21.88L17.792 21.926C18.128 22.058 18.509 21.999 18.79 21.771C19.07 21.543 19.205 21.182 19.144 20.826L18.053 14.471L22.677 9.971L22.755 9.886C22.982 9.607 23.041 9.227 22.91 8.892C22.779 8.557 22.478 8.318 22.122 8.266L15.742 7.34L12.89 1.56C12.722 1.218 12.374 1.002 11.993 1.002C11.612 1.002 11.264 1.218 11.096 1.56L8.243 7.34Z" fill="var(--yellow)"/>
   </defs>
   <rect width="640" height="360" fill="var(--background)"/>
-  <g transform="translate(55 38.503)">
+  <g transform="translate(55 38.503)" fill="none">
     <rect x="0.5" y="0.5" width="529" height="249" rx="20" fill="var(--surface)" stroke="var(--raised)"/>
-    <g transform="translate(41.067 34.933)">
-      <path d="M10.667 34.667C20.454 35.83 28.17 43.546 29.333 53.333C34.126 50.571 37.151 45.529 37.333 40C46.49 36.779 52.805 28.359 53.333 18.667C53.333 14.248 49.752 10.667 45.333 10.667C35.641 11.195 27.221 17.51 24 26.667C18.471 26.849 13.429 29.874 10.667 34.667" fill="none" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
-      <path d="M18.667 37.333C12.989 40.539 9.824 46.868 10.667 53.333C17.132 54.176 23.461 51.011 26.667 45.333" fill="none" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
-      <path d="M37.333 24C37.333 25.473 38.527 26.667 40 26.667C41.473 26.667 42.667 25.473 42.667 24C42.667 22.527 41.473 21.333 40 21.333C38.527 21.333 37.333 22.527 37.333 24" fill="none" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m3"/>
+    <g transform="translate(41.067 34.933)" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.667 34.667C20.454 35.83 28.17 43.546 29.333 53.333C34.126 50.571 37.151 45.529 37.333 40C46.49 36.779 52.805 28.359 53.333 18.667C53.333 14.248 49.752 10.667 45.333 10.667C35.641 11.195 27.221 17.51 24 26.667C18.471 26.849 13.429 29.874 10.667 34.667" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
+      <path d="M18.667 37.333C12.989 40.539 9.824 46.868 10.667 53.333C17.132 54.176 23.461 51.011 26.667 45.333" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
+      <path d="M37.333 24C37.333 25.473 38.527 26.667 40 26.667C41.473 26.667 42.667 25.473 42.667 24C42.667 22.527 41.473 21.333 40 21.333C38.527 21.333 37.333 22.527 37.333 24" pathLength="1" stroke-dasharray="1 2" class="a m3"/>
     </g>
-    <path d="M34.667 8L34.667 26.667L50.667 26.667L29.333 56L29.333 37.333L13.333 37.333L34.667 8" transform="translate(169 35)" fill="none" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
-    <g transform="translate(297 35)">
-      <path d="M26.667 13.333C26.667 10.388 29.054 8 32 8C34.946 8 37.333 10.388 37.333 13.333C43.574 16.284 47.676 22.438 48 29.333L48 37.333C48.407 40.695 50.386 43.665 53.333 45.333L10.667 45.333C13.614 43.665 15.593 40.695 16 37.333L16 29.333C16.324 22.438 20.426 16.284 26.667 13.333" fill="none" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m5"/>
-      <path d="M24 45.333L24 48C24 52.418 27.582 56 32 56C36.418 56 40 52.418 40 48L40 45.333" fill="none" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
+    <path d="M34.667 8L34.667 26.667L50.667 26.667L29.333 56L29.333 37.333L13.333 37.333L34.667 8" transform="translate(169 35)" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <g transform="translate(297 35)" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M26.667 13.333C26.667 10.388 29.054 8 32 8C34.946 8 37.333 10.388 37.333 13.333C43.574 16.284 47.676 22.438 48 29.333L48 37.333C48.407 40.695 50.386 43.665 53.333 45.333L10.667 45.333C13.614 43.665 15.593 40.695 16 37.333L16 29.333C16.324 22.438 20.426 16.284 26.667 13.333" pathLength="1" stroke-dasharray="1 2" class="a m5"/>
+      <path d="M24 45.333L24 48C24 52.418 27.582 56 32 56C36.418 56 40 52.418 40 48L40 45.333" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
     </g>
-    <path d="M17.752 48C10.893 48 5.333 42.648 5.333 36.045C5.333 29.445 10.893 24.093 17.752 24.093C18.8 19.395 22.536 15.56 27.552 14.032C32.565 12.507 38.101 13.517 42.069 16.699C46.037 19.872 47.835 24.717 46.789 29.416L49.429 29.416C54.531 29.416 58.667 33.576 58.667 38.712C58.667 43.851 54.531 48.011 49.427 48.011L17.752 48.011" transform="translate(425 36.328)" fill="none" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m7"/>
-    <path d="M32 8C32.352 8 32.701 8 33.048 8C25.979 14.568 24.608 25.248 29.789 33.389C34.969 41.53 45.224 44.811 54.168 41.189C49.547 52.307 37.405 58.281 25.778 55.156C14.151 52.032 6.638 40.777 8.212 28.84C9.786 16.904 19.96 7.982 32 7.979L32 8" transform="translate(41.914 151.019)" fill="none" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
-    <g transform="translate(169 151)">
-      <path d="M8 26.667C8 36.976 16.357 45.333 26.667 45.333C36.976 45.333 45.333 36.976 45.333 26.667C45.333 16.357 36.976 8 26.667 8C16.357 8 8 16.357 8 26.667" fill="none" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m9"/>
-      <path d="M56 56L40 40" fill="none" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m10"/>
+    <path d="M17.752 48C10.893 48 5.333 42.648 5.333 36.045C5.333 29.445 10.893 24.093 17.752 24.093C18.8 19.395 22.536 15.56 27.552 14.032C32.565 12.507 38.101 13.517 42.069 16.699C46.037 19.872 47.835 24.717 46.789 29.416L49.429 29.416C54.531 29.416 58.667 33.576 58.667 38.712C58.667 43.851 54.531 48.011 49.427 48.011L17.752 48.011" transform="translate(425 36.328)" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m7"/>
+    <path d="M32 8C32.352 8 32.701 8 33.048 8C25.979 14.568 24.608 25.248 29.789 33.389C34.969 41.53 45.224 44.811 54.168 41.189C49.547 52.307 37.405 58.281 25.778 55.156C14.151 52.032 6.638 40.777 8.212 28.84C9.786 16.904 19.96 7.982 32 7.979L32 8" transform="translate(41.914 151.019)" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
+    <g transform="translate(169 151)" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 26.667C8 36.976 16.357 45.333 26.667 45.333C36.976 45.333 45.333 36.976 45.333 26.667C45.333 16.357 36.976 8 26.667 8C16.357 8 8 16.357 8 26.667" pathLength="1" stroke-dasharray="1 2" class="a m9"/>
+      <path d="M56 56L40 40" pathLength="1" stroke-dasharray="1 2" class="a m10"/>
     </g>
-    <g transform="translate(297 151)">
-      <path d="M8 18.667C8 15.721 10.388 13.333 13.333 13.333L50.667 13.333C53.612 13.333 56 15.721 56 18.667L56 45.333C56 48.279 53.612 50.667 50.667 50.667L13.333 50.667C10.388 50.667 8 48.279 8 45.333L8 18.667" fill="none" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m11"/>
-      <path d="M8 18.667L32 34.667L56 18.667" fill="none" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m12"/>
+    <g transform="translate(297 151)" stroke="var(--text)" stroke-width="4.667" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 18.667C8 15.721 10.388 13.333 13.333 13.333L50.667 13.333C53.612 13.333 56 15.721 56 18.667L56 45.333C56 48.279 53.612 50.667 50.667 50.667L13.333 50.667C10.388 50.667 8 48.279 8 45.333L8 18.667" pathLength="1" stroke-dasharray="1 2" class="a m11"/>
+      <path d="M8 18.667L32 34.667L56 18.667" pathLength="1" stroke-dasharray="1 2" class="a m12"/>
     </g>
     <path d="M18.611 8.197C23.391 7.383 28.283 8.78 31.912 11.997L32.011 12.085L32.101 12.005C35.56 8.97 40.159 7.571 44.723 8.165L45.379 8.261C51.172 9.262 55.95 13.358 57.823 18.93C59.696 24.503 58.362 30.653 54.349 34.949L53.869 35.443L53.741 35.552L33.875 55.229C32.927 56.168 31.431 56.261 30.373 55.448L30.123 55.229L10.141 35.437C5.825 31.238 4.233 24.97 6.021 19.22C7.809 13.469 12.674 9.209 18.611 8.197Z" transform="translate(425.022 151.015)" fill="var(--red)" style="transform-origin:457px 183px" class="a m13"/>
   </g>
   <g transform="translate(55 38.503)">
-    <use href="#symbol-0" transform="translate(197.063 260.998)" style="transform-origin:209.056px 272.497px" class="a m14"/>
-    <use href="#symbol-0" transform="translate(225.035 260.998)" style="transform-origin:237.028px 272.497px" class="a m15"/>
-    <use href="#symbol-0" transform="translate(253.007 260.998)" style="transform-origin:265px 272.497px" class="a m16"/>
-    <use href="#symbol-0" transform="translate(280.98 260.998)" style="transform-origin:292.972px 272.497px" class="a m17"/>
-    <use href="#symbol-0" transform="translate(308.952 260.998)" style="transform-origin:320.944px 272.497px" class="a m18"/>
+    <use href="#u1" transform="translate(197.063 260.998)" style="transform-origin:209.056px 272.497px" class="a m14"/>
+    <use href="#u1" transform="translate(225.035 260.998)" style="transform-origin:237.028px 272.497px" class="a m15"/>
+    <use href="#u1" transform="translate(253.007 260.998)" style="transform-origin:265px 272.497px" class="a m16"/>
+    <use href="#u1" transform="translate(280.98 260.998)" style="transform-origin:292.972px 272.497px" class="a m17"/>
+    <use href="#u1" transform="translate(308.952 260.998)" style="transform-origin:320.944px 272.497px" class="a m18"/>
   </g>
 </svg>

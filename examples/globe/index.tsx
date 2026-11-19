@@ -1,6 +1,6 @@
 import { createRequire } from "node:module";
 import { GlobeShape, globe, sun, type LonLat, type Topology } from "@svjeez/geo";
-import { Group, Shape, Text, blur, canvas, circle, scene, span } from "svjeez";
+import { Group, Shape, Text, blur, circle, scene, span } from "svjeez";
 import { mono, theme } from "../theme";
 
 const world: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
@@ -37,9 +37,9 @@ export default scene(
     title: "A day on a turning globe",
     desc: "A globe with real country outlines turns once through the 24 hours of the June solstice. Night covers the right side and its edge glows orange, and eight cities ride the globe with their names, fading out as they pass behind it.",
     theme,
-    reducedMotion: 12,
+    still: 12,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Group offset={[656, 270]}>

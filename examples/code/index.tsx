@@ -6,7 +6,6 @@ import {
   Shape,
   Stack,
   Text,
-  canvas,
   ease,
   morph,
   rect,
@@ -74,7 +73,7 @@ const HOLD = 2.4;
 const OVER = 0.9;
 const moves = FIB.slice(1).map((_, i) => span(HOLD * (i + 1) + OVER * i, OVER));
 
-const fib = ref("fib");
+const fib = ref();
 
 const Version = ({ lang, keys, source }: (typeof FIB)[number]): SceneElement => (
   <Code
@@ -106,7 +105,7 @@ export default scene(
     theme,
     loop: false,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.surface} />
       <Shape at={[24, 16]} geometry={rect(432, 264, { radius: 12 })} fill={theme.background} />

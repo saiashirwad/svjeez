@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Align, Group, Shape, Stack, morph, rect, ref, span } from "svjeez";
+import { Align, Group, Shape, Stack, ease, morph, rect, ref, span, track } from "svjeez";
 import { SceneError, svg, type Model } from "svjeez/tools";
 import { Tex } from "../src/index.ts";
 import { all, find, made } from "./helpers.ts";
@@ -115,11 +115,11 @@ describe("<Tex>", () => {
   });
 
   test("a part is a ref part: anchors and Align find it", () => {
-    const eq = ref("eq");
+    const eq = ref();
 
     const model = made(() => (
       <Group>
-        <Tex ref={eq} size={40} at={[20, 40]} fill="#000000" colors={{ a: "#2F6FEB" }}>
+        <Tex key="eq" ref={eq} size={40} at={[20, 40]} fill="#000000" colors={{ a: "#2F6FEB" }}>
           {formula}
         </Tex>
         <Align to={eq.part("cross")} place="bottom">
@@ -161,15 +161,35 @@ describe("<Tex>", () => {
     expect(all(model.root).filter((node) => node.kind === "shape").length).toBeGreaterThan(8);
   });
 
-  test("write draws each glyph's outline, then fills it", () => {
+  test("draw strokes each glyph on, then fills it", () => {
     const model = made(() => (
-      <Tex key="eq" size={40} fill="#000000" write={span(0.5, 1.5)}>
+      <Tex key="eq" size={40} fill="#000000" draw={track(0).to(1, span(0.5, 1.5), ease.linear)}>
         {"x+y"}
       </Tex>
     ));
 
     expect(find(model, "eq/writing").kind).toBe("group");
     expect(svg.emit(model)).toContain("@keyframes");
+  });
+
+  test("a plain number draw shows that much of the equation", () => {
+    const part = svg.emit(
+      made(() => (
+        <Tex key="eq" size={40} fill="#000000" draw={0.5}>
+          {"x+y"}
+        </Tex>
+      )),
+    );
+
+    const all = svg.emit(
+      made(() => (
+        <Tex key="eq" size={40} fill="#000000" draw={1}>
+          {"x+y"}
+        </Tex>
+      )),
+    );
+
+    expect(part).not.toBe(all);
   });
 
   test("stretchy braces, roots and fractions draw", () => {

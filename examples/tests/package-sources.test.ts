@@ -36,7 +36,7 @@ test("package sources and tests build nodes with JSX, not component calls", asyn
   const offenders: string[] = [];
 
   const call =
-    /(?<![.\w<]|function\s)(Group|Shape|Text|Run|Image|Instance|Sequence|Arrow|Stack|Grid|Center|Align|Node|Edge|Chip|Icon)\(\s*[{a-z]/;
+    /(?<![.\w<]|function\s)(Group|Shape|Text|Run|Picture|Sequence|Arrow|Stack|Grid|Center|Align|Node|Edge|Chip|Icon)\(\s*[{a-z]/;
 
   const files = [...new Glob("*/{src,test}/**/*.{ts,tsx}").scanSync(packages)].filter(
     (file) => !file.startsWith("svjeez/") && !file.includes("/consumer/"),

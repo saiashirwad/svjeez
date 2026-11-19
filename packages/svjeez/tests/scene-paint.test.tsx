@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
+  adjust,
+  displace,
   font,
   Group,
   Run,
@@ -12,6 +14,7 @@ import {
   linear,
   morph,
   moved,
+  pattern,
   polygon,
   radial,
   rect,
@@ -26,7 +29,8 @@ import {
   type SceneElement,
   type Vec,
 } from "svjeez";
-import { boxesOf, diagnose, hitTest, isLane, svg, type Effect, type Model } from "svjeez/tools";
+import { boxesOf, hitTest, isLane, svg, type Effect, type Model } from "svjeez/tools";
+import { diagnose } from "../src/model/backend";
 
 const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
 
@@ -41,7 +45,7 @@ const made = (build: () => SceneElement, duration = 4, still: number | false = 2
       size: [200, 100],
       duration,
       title: "Test",
-      reducedMotion: still,
+      still,
     },
     build,
   );
@@ -232,18 +236,8 @@ describe("gradients", () => {
     const out = emitted(
       made(() => (
         <Shape
-          geometry={track(
-            polygon([
-              [0, 0],
-              [10, 0],
-              [0, 10],
-            ]),
-          ).to(
-            polygon([
-              [20, 0],
-              [30, 0],
-              [20, 10],
-            ]),
+          geometry={track(polygon([0, 0], [10, 0], [0, 10])).to(
+            polygon([20, 0], [30, 0], [20, 10]),
             span(0, 1),
           )}
           fill={linear({ from: [0, 0], to: [30, 0], stops: ["#000000", "#FFFFFF"] })}
@@ -253,6 +247,105 @@ describe("gradients", () => {
 
     expect(out).not.toContain("translate:");
     expect(out).toContain('attributeName="d"');
+  });
+});
+
+describe("patterns", () => {
+  const dots = pattern({
+    size: [10, 10],
+    tile: <Shape geometry={circle(2)} at={[5, 5]} fill="#FF0000" />,
+  });
+
+  test("a pattern lowers its children into a tile, once however many nodes it paints", () => {
+    const model = made(() => (
+      <Group>
+        <Shape geometry={rect(40, 20)} fill={dots} />
+        <Shape geometry={rect(40, 20)} stroke={{ color: dots }} />
+      </Group>
+    ));
+
+    const [a, b] = model.root.children;
+
+    if (a?.kind !== "shape" || b?.kind !== "shape") throw new Error("expected two shapes");
+    const fill = a.fill;
+
+    expect(fill).toMatchObject({
+      kind: "pattern",
+      size: [10, 10],
+      offset: [0, 0],
+      tile: { children: [{ kind: "shape" }] },
+    });
+    expect(b.stroke?.color).toBe(fill);
+    expect(diagnose(model, svg).length).toBe(0);
+  });
+
+  test("SVG writes one pattern for every use of it, in the painted node's frame", () => {
+    const out = emitted(
+      made(() => (
+        <Group>
+          <Shape geometry={rect(40, 20)} fill={dots} />
+          <Shape geometry={rect(40, 20)} stroke={{ color: dots }} />
+        </Group>
+      )),
+    );
+
+    expect(count(out, "<pattern")).toBe(1);
+    expect(out).toContain(
+      '<pattern id="p1" patternUnits="userSpaceOnUse" x="0" y="0" width="10" height="10">',
+    );
+    expect(out).toContain('fill="url(#p1)"');
+    expect(out).toContain('stroke="url(#p1)"');
+  });
+
+  test("an offset track scrolls the pattern by SMIL, with a still twin", () => {
+    const x = track<Vec>([0, 0]).to([10, 0], span(1, 1));
+
+    const out = emitted(
+      made(() => (
+        <Shape
+          geometry={rect(40, 20)}
+          at={[5, 0]}
+          fill={pattern({
+            size: [10, 10],
+            tile: <Shape geometry={rect(5, 5)} fill="#000000" />,
+            offset: x,
+          })}
+        />
+      )),
+    );
+
+    expect(out).toContain('attributeName="x" values="5;15"');
+    expect(out).toContain('<pattern id="p1s"');
+    expect(out).toContain(
+      '@media (prefers-reduced-motion:reduce){[fill="url(#p1)"]{fill:url(#p1s)}}',
+    );
+  });
+
+  test("a pattern blends with nothing but itself", () => {
+    expect(() =>
+      made(() => (
+        <Shape geometry={rect(4, 4)} fill={track<Paint>("#000000").to(dots, span(0, 1))} />
+      )),
+    ).toThrow("would blend a pattern with a different paint");
+    expect(() =>
+      made(() =>
+        morph(
+          <Shape key="a" geometry={rect(4, 4)} fill="#000000" />,
+          <Shape key="a" geometry={rect(4, 4)} fill={dots} />,
+          span(0, 1),
+        ),
+      ),
+    ).toThrow("would blend a pattern with a different paint");
+    expect(() =>
+      made(() => <Shape geometry={rect(4, 4)} fill={track<Paint>(dots).to(dots, span(0, 1))} />),
+    ).not.toThrow();
+  });
+
+  test("a pattern is checked where it is written", () => {
+    expect(() => pattern({ size: [0, 10], tile: null })).toThrow("positive numbers");
+    expect(() =>
+      made(() => <Shape geometry={rect(4, 4)} fill={pattern({ size: [4, 4], tile: null })} />),
+    ).toThrow("has nothing to draw");
   });
 });
 
@@ -433,14 +526,7 @@ describe("clips and masks", () => {
         key="card"
         offset={[20, 10]}
         rotate={30}
-        clip={subtract(
-          rect(60, 40),
-          polygon([
-            [20, 10],
-            [40, 10],
-            [30, 30],
-          ]),
-        )}
+        clip={subtract(rect(60, 40), polygon([20, 10], [40, 10], [30, 30]))}
       >
         <Shape geometry={rect(60, 40)} fill="#FF0000" />
       </Group>
@@ -486,7 +572,7 @@ describe("clips and masks", () => {
     );
 
     expect(out).toContain(
-      '<clipPath id="c1"><rect width="40" height="20" style="transform-origin:0px 0px" class="a m1"/></clipPath>',
+      '<clipPath id="c1"><rect width="40" height="20" style="transform-origin:0 0" class="a m1"/></clipPath>',
     );
     expect(out).toContain("@keyframes k1{0%{scale:0.25 1}25%,100%{scale:1 1}}");
   });
@@ -539,12 +625,19 @@ describe("clips and masks", () => {
       [14, 0],
     ]);
 
-    const dot = ref("dot");
+    const dot = ref();
 
     expect(() =>
       made(() => (
         <Group>
-          <Shape fill="#000000" ref={dot} geometry={circle(2)} anchor="center" at={[50, 50]} />
+          <Shape
+            fill="#000000"
+            key="dot"
+            ref={dot}
+            geometry={circle(2)}
+            anchor="center"
+            at={[50, 50]}
+          />
           <Group
             mask={
               <Shape
@@ -639,17 +732,8 @@ describe("clips and masks sized by the node's box", () => {
 
     expect(disc.kind === "path" && disc.contours[0]!.start).toEqual([40, 40]);
     expect(moved(rect(4, 2), [1, 1])).toMatchObject({ kind: "path" });
-    expect(
-      moved(
-        polygon([
-          [0, 0],
-          [1, 0],
-          [0, 1],
-        ]),
-        [2, 3],
-      ),
-    ).toEqual({
-      kind: "polygon",
+    expect(moved(polygon([0, 0], [1, 0], [0, 1]), [2, 3])).toEqual({
+      kind: "points",
       points: [
         [2, 3],
         [3, 3],
@@ -661,12 +745,12 @@ describe("clips and masks sized by the node's box", () => {
   });
 
   test("a box-sized clip on a group that holds an anchored node says its box isn't known yet", () => {
-    const card = ref("card");
+    const card = ref();
 
     expect(() =>
       made(() => (
         <Group>
-          <Shape ref={card} geometry={rect(10, 10)} at={[50, 50]} fill="#000000" />
+          <Shape key="card" ref={card} geometry={rect(10, 10)} at={[50, 50]} fill="#000000" />
           <Group key="g" clip={(own) => own.rect}>
             <Shape key="dot" geometry={circle(2)} at={card.center} fill="#000000" />
           </Group>
@@ -765,7 +849,7 @@ describe("effects", () => {
     expect(out).toContain('x="-25" y="-25" width="90" height="70"');
   });
 
-  test("an effect's lengths are checked, and a non-scaling stroke can't be bounded under one", () => {
+  test("an effect's lengths are checked, and a fixedWidth stroke can't be bounded under one", () => {
     expect(() =>
       made(() => <Shape fill="#000000" key="a" geometry={rect(4, 4)} effects={[blur(-1)]} />),
     ).toThrow('blur on <Shape> "a" needs a finite length of 0 or more, got -1.');
@@ -775,12 +859,12 @@ describe("effects", () => {
           <Shape
             key="a"
             geometry={rect(4, 4)}
-            stroke={{ color: "#000000", nonScaling: true }}
+            stroke={{ color: "#000000", fixedWidth: true }}
             effects={[blur(1)]}
           />
         )),
       ),
-    ).toThrow('"a" has a non-scaling stroke inside the effects of "a"');
+    ).toThrow('"a" has a fixedWidth stroke inside the effects of "a"');
   });
 
   test("SVG draws blur and shadow exactly, and warns only for a blur under 1.5", () => {
@@ -798,6 +882,92 @@ describe("effects", () => {
     expect(warned(shadow({ color: "#000000", blur: 1, opacity: 0.5 }))).toEqual([
       ["warning", "softBlur"],
     ]);
+  });
+});
+
+describe("adjust and displace", () => {
+  const drawn = (...effects: Effect[]) =>
+    emitted(
+      made(() => <Shape geometry={rect(40, 20)} at={[10, 10]} fill="#FF0000" effects={effects} />),
+    );
+
+  test("adjust writes a primitive per change, in order, and skips what stays", () => {
+    const out = drawn(adjust({ saturate: 1.5, hue: 90, brightness: 1.2, contrast: 0.8 }));
+
+    expect(out).toContain(
+      '<feColorMatrix type="saturate" values="1.5"/><feColorMatrix type="hueRotate" values="90"/><feComponentTransfer><feFuncR type="linear" slope="1.2"/><feFuncG type="linear" slope="1.2"/><feFuncB type="linear" slope="1.2"/></feComponentTransfer><feComponentTransfer><feFuncR type="linear" slope="0.8" intercept="0.1"/>',
+    );
+    expect(drawn(adjust({ hue: 30 }))).toContain(
+      '<feColorMatrix type="hueRotate" values="30"/></filter>',
+    );
+    expect(drawn(adjust({}))).not.toContain("<filter");
+  });
+
+  test("adjust animates its attributes", () => {
+    const out = drawn(
+      adjust({
+        saturate: track(1).to(0, span(0, 1), ease.linear),
+        contrast: track(1).to(2, span(0, 1), ease.linear),
+      }),
+    );
+
+    expect(out).toContain('attributeName="values" values="1;0"');
+    expect(out).toContain('attributeName="slope" values="1;2"');
+    expect(out).toContain('attributeName="intercept" values="0;-0.5"');
+    expect(out).toContain('<filter id="f1s"');
+  });
+
+  test("displace reads the noise by name, after the effects before it", () => {
+    const out = drawn(blur(2), displace({ scale: 6, frequency: 0.05, seed: 3, octaves: 2 }));
+
+    expect(out).toContain(
+      '<feGaussianBlur result="e0" stdDeviation="2"/><feTurbulence type="fractalNoise" numOctaves="2" seed="3" result="n0" baseFrequency="0.05"/><feDisplacementMap in="e0" in2="n0" xChannelSelector="R" yChannelSelector="G" scale="6"/>',
+    );
+    expect(drawn(displace({ scale: 6, frequency: 0.05, seed: 1 }))).toContain(
+      '<feDisplacementMap in="SourceGraphic" in2="n0"',
+    );
+    expect(drawn(displace({ scale: 0, frequency: 0.05, seed: 1 }))).not.toContain("<filter");
+  });
+
+  test("a displacement grows the filter region by its largest scale", () => {
+    expect(drawn(displace({ scale: 10, frequency: 0.05, seed: 1 }))).toContain(
+      'x="-1" y="-1" width="62" height="42"',
+    );
+    expect(
+      drawn(displace({ scale: track(0).to(20, span(0, 1)), frequency: 0.05, seed: 1 })),
+    ).toContain('x="-11" y="-11" width="82" height="62"');
+  });
+
+  test("they lower to model effects and are checked", () => {
+    const node = only(
+      made(() => (
+        <Shape
+          geometry={rect(4, 4)}
+          fill="#000000"
+          effects={[adjust({ hue: 10 }), displace({ scale: 2, frequency: 1, seed: 4 })]}
+        />
+      )),
+    );
+
+    expect(node.effects).toEqual([
+      { kind: "adjust", saturate: 1, hue: 10, brightness: 1, contrast: 1 },
+      { kind: "displace", scale: 2, frequency: 1, seed: 4, octaves: 1 },
+    ]);
+
+    const bad = (effect: Effect) => () =>
+      made(() => <Shape key="a" fill="#000000" geometry={rect(4, 4)} effects={[effect]} />);
+
+    expect(bad(adjust({ saturate: -1 }))).toThrow(
+      'adjust saturate on <Shape> "a" needs a finite number of 0 or more, got -1.',
+    );
+    expect(bad(adjust({ contrast: -0.5 }))).toThrow("adjust contrast");
+    expect(bad(adjust({ hue: Infinity }))).toThrow("adjust hue");
+    expect(bad(displace({ scale: -1, frequency: 1, seed: 1 }))).toThrow("displace scale");
+    expect(bad(displace({ scale: 1, frequency: -1, seed: 1 }))).toThrow("displace frequency");
+    expect(bad(displace({ scale: 1, frequency: 1, seed: 1.5 }))).toThrow("displace seed");
+    expect(bad(displace({ scale: 1, frequency: 1, seed: 1, octaves: 0 }))).toThrow(
+      "displace octaves",
+    );
   });
 });
 
@@ -829,6 +999,51 @@ describe("morph", () => {
     const shown = card.effects[0]!.kind === "shadow" ? card.effects[0]!.opacity : 0;
 
     expect(isLane(shown) && [shown.keys[0].value, shown.keys.at(-1)!.value]).toEqual([0, 0.5]);
+  });
+
+  test("adjust and displace blend between states, or from nothing", () => {
+    const model = made(() =>
+      morph(
+        <Shape key="a" geometry={rect(4, 4)} fill="#000000" />,
+        <Shape
+          key="a"
+          geometry={rect(4, 4)}
+          fill="#000000"
+          effects={[adjust({ saturate: 0 }), displace({ scale: 8, frequency: 0.1, seed: 2 })]}
+        />,
+        span(0, 1),
+      ),
+    );
+
+    const [tone, warp] = only(model).effects;
+
+    expect(tone).toMatchObject({ kind: "adjust", saturate: { kind: "lane" }, hue: 0 });
+    expect(warp).toMatchObject({
+      kind: "displace",
+      scale: { kind: "lane" },
+      seed: 2,
+      frequency: 0.1,
+    });
+
+    expect(() =>
+      made(() =>
+        morph(
+          <Shape
+            key="a"
+            geometry={rect(4, 4)}
+            fill="#000000"
+            effects={[displace({ scale: 1, frequency: 1, seed: 1 })]}
+          />,
+          <Shape
+            key="a"
+            geometry={rect(4, 4)}
+            fill="#000000"
+            effects={[displace({ scale: 1, frequency: 1, seed: 2 })]}
+          />,
+          span(0, 1),
+        ),
+      ),
+    ).toThrow("seed or octaves differ");
   });
 
   test("a gradient fades in from a clear color, a color blends into a gradient, and two kinds of effect don't", () => {
@@ -878,78 +1093,87 @@ describe("morph", () => {
 
 describe("subtract", () => {
   test("cuts holes inside the base as one even-odd path, and drops cuts that miss it", () => {
-    const ring = subtract(
-      circle(20),
-      circle(10),
-      polygon([
-        [12, -2],
-        [16, -2],
-        [14, 2],
-      ]),
-    );
+    const ring = subtract(circle(20), circle(10), polygon([12, -2], [16, -2], [14, 2]));
 
     expect(ring.kind === "path" && ring.rule).toBe("evenodd");
     expect(ring.kind === "path" && ring.contours.length).toBe(3);
-    expect(
-      subtract(
-        rect(10, 10),
-        polygon([
-          [50, 50],
-          [60, 50],
-          [55, 60],
-        ]),
-      ),
-    ).toMatchObject({ contours: [{}] });
+    expect(subtract(rect(10, 10), polygon([50, 50], [60, 50], [55, 60]))).toMatchObject({
+      contours: [{}],
+    });
   });
 
   test("a hole in a hole already cut keeps cutting, and anything a single even-odd path would draw wrong is an error", () => {
-    const card = subtract(
-      rect(100, 40),
-      polygon([
-        [10, 10],
-        [20, 10],
-        [15, 20],
-      ]),
-    );
+    const card = subtract(rect(100, 40), polygon([10, 10], [20, 10], [15, 20]));
 
-    expect(
-      subtract(
-        card,
-        polygon([
-          [60, 10],
-          [80, 10],
-          [70, 30],
-        ]),
-      ),
-    ).toMatchObject({ contours: [{}, {}, {}] });
+    expect(subtract(card, polygon([60, 10], [80, 10], [70, 30]))).toMatchObject({
+      contours: [{}, {}, {}],
+    });
     expect(() => subtract(rect(10, 10), rect(20, 5))).toThrow("crosses or touches the base's edge");
     expect(() => subtract(rect(10, 10), rect(10, 10))).toThrow("crosses or touches");
     expect(() =>
       subtract(
         rect(40, 40),
-        polygon([
-          [5, 5],
-          [20, 5],
-          [20, 20],
-        ]),
-        polygon([
-          [10, 6],
-          [25, 6],
-          [25, 30],
-        ]),
+        polygon([5, 5], [20, 5], [20, 20]),
+        polygon([10, 6], [25, 6], [25, 30]),
       ),
     ).toThrow("overlaps or touches cut 1");
     expect(() => subtract(rect(10, 10), circle(50))).toThrow("covers the whole base");
-    expect(() =>
-      subtract(
-        polygon([
-          [0, 0],
-          [10, 10],
-          [10, 0],
-          [0, 10],
-        ]),
-        circle(1),
-      ),
-    ).toThrow("never crosses itself");
+    expect(() => subtract(polygon([0, 0], [10, 10], [10, 0], [0, 10]), circle(1))).toThrow(
+      "never crosses itself",
+    );
+  });
+});
+
+describe("one stroke, colors that move", () => {
+  test("a container's stroke is the same stroke a shape takes, width track and all", () => {
+    const model = made(() => (
+      <Stack
+        key="card"
+        padding={4}
+        fill="#ffffff"
+        stroke={{ color: "#000000", width: track(1).to(4, span(0, 1)) }}
+      >
+        <Shape geometry={rect(10, 10)} fill="#ff0000" />
+      </Stack>
+    ));
+
+    const card = only(model);
+    const back = card.kind === "group" ? card.children[0] : undefined;
+
+    expect(back?.kind === "shape" && isLane(back.stroke!.width)).toBe(true);
+  });
+
+  test("a shadow's color can move like its other values", () => {
+    const model = made(() => (
+      <Shape
+        geometry={rect(20, 20)}
+        fill="#ffffff"
+        effects={[
+          shadow({ color: track<`#${string}`>("#000000").to("#ff0000", span(0, 1)), blur: 4 }),
+        ]}
+      />
+    ));
+
+    const node = only(model);
+    const [effect] = node.effects;
+
+    expect(effect?.kind === "shadow" && isLane(effect.color)).toBe(true);
+    expect(emitted(model)).toContain("flood-color");
+  });
+
+  test("a morph blends a shadow's color between states", () => {
+    const card = (color: "#000000" | "#ff0000") => (
+      <Shape
+        key="c"
+        geometry={rect(20, 20)}
+        fill="#ffffff"
+        effects={[shadow({ color, blur: 4 })]}
+      />
+    );
+
+    const model = made(() => morph(card("#000000"), card("#ff0000"), span(0, 1)));
+    const [effect] = only(model).effects;
+
+    expect(effect?.kind === "shadow" && isLane(effect.color)).toBe(true);
   });
 });

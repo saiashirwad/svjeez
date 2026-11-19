@@ -127,7 +127,7 @@ describe("google", () => {
     async () => {
       const family = await google.family("ABeeZee", [
         { weight: 400 },
-        { weight: 400, style: "italic" },
+        { weight: 400, italic: true },
       ]);
 
       expect(family.face(400).measure("Hello", 20)).toBeGreaterThan(0);

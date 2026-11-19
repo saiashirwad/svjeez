@@ -2,22 +2,29 @@ import type { Font } from "../font/font";
 import { num } from "../model/format";
 import { EPSILON, type Seconds } from "../model/time";
 import { checkWindow } from "./span";
-import { matched, mixGeometry, outlineBoxOf } from "../model/geometry";
+import {
+  lengthOf as outlineLength,
+  growBox,
+  matched,
+  mixGeometry,
+  outlineBoxOf,
+} from "../model/geometry";
 import { componentOf, identified, sourced, writtenAt } from "./identity";
-import { entryOf, named, nameNode, naming, quoted, whereOf, wordsOf, type Named } from "./names";
+import { Names, quoted, wordsOf, type Named } from "./names";
 import { SceneError, located } from "../model/scene-error";
 import { tagOf } from "../model/naming";
 import type {
   Animated,
   Box,
   Color,
+  Stroke,
   Geometry as Outline,
   GroupNode,
-  ImageNode,
-  InstanceNode,
+  PictureNode,
   Layer,
   Effect,
   Paint as ModelPaint,
+  Pattern as ModelPattern,
   Scene,
   SceneNode,
   ShapeNode,
@@ -32,21 +39,18 @@ import { morphed, type MorphElement } from "./morph";
 import {
   flat,
   sceneElement,
-  within,
   type Backdrop,
   type Bounds,
   type Child,
   type Common,
-  type ImageProps,
-  type InstanceProps,
+  type PictureProps,
   type SceneElement,
-  type SceneSymbol,
   type ShapeProps,
+  type StrokeProps,
   type TextProps,
 } from "./nodes";
-import { declaring, isAnchor, type Anchor } from "./refs";
+import { isAnchor, type Anchor } from "./refs";
 import {
-  aimNow,
   arrangeState,
   around,
   note,
@@ -64,14 +68,16 @@ import {
   mapped,
   mixNumber,
   mixVec,
+  noMix,
   same,
-  touches,
   type Mix,
+  type Reading,
   type Timing,
 } from "../model/steps";
-import { isTrack, layersOf, passageOf, type Anim, type LayerMotion } from "./track";
-import { derivedOf, isDerived } from "./derived";
-import { collect, type Cues, type NodeElement } from "./verbs";
+import { isTrack, layersOf, readOf, type Anim, type Layer as Written } from "./track";
+import { derivedOf, isDerived, restOf, through } from "./derived";
+import { withGoals } from "./goals";
+import type { NodeElement } from "./nodes";
 import {
   outlineOf,
   polygon,
@@ -85,10 +91,17 @@ import {
 } from "./values";
 import { FontBook, charName, faceOf, piecesOf, type Asked } from "./runs";
 import { lookOf, paintedBoxOf } from "../model/painted";
-import { homeOf, minus, pinned } from "./pin";
-import { layoutRuns } from "./text";
+import { minus, pinned } from "./pin";
+import { layoutRuns, setAlong } from "./text";
 import { countedNodes, countingIn, formatOf, ticksOf } from "./count";
-import { blendable, gradientOf, isWrittenGradient, mixPaint } from "./paint";
+import {
+  blendable,
+  gradientOf,
+  isWrittenGradient,
+  isWrittenPattern,
+  mixPaint,
+  type Pattern,
+} from "./paint";
 import type { Effect as EffectProps } from "./effects";
 
 interface RunLook {
@@ -107,7 +120,11 @@ export interface SceneOptions {
   readonly desc?: string;
   readonly theme?: Theme;
   readonly loop?: boolean;
-  readonly reducedMotion?: Seconds | false;
+  /**
+   * The moment shown, held still, to viewers who ask for reduced motion: a time in seconds (85% of the duration if
+   * left out), or false to play the motion for them too.
+   */
+  readonly still?: Seconds | false;
 }
 
 interface Ctx {
@@ -115,16 +132,9 @@ interface Ctx {
   readonly fonts: FontBook;
   readonly size: Vec;
   readonly duration: Seconds;
-  readonly symbols: Map<string, SymbolEntry>;
-  readonly named: Map<SceneSymbol, string>;
   readonly notes: Notes;
-  readonly cues: Cues;
-}
-
-interface SymbolEntry {
-  readonly of: SceneSymbol;
-  node?: GroupNode;
-  moves?: boolean;
+  readonly patterns: Map<Pattern, ModelPattern>;
+  readonly reads: Map<object, Reading>;
 }
 
 const keep = <T>(value: T): T => value;
@@ -141,15 +151,44 @@ const animated = <A, T>(
 
   if (!isTrack(value)) return change(value);
   // SAFETY: a value that is not undefined is an A, and undefined is itself one when A allows it, so change() takes it either way.
-  const data = mapped(passageOf(value).data, "value", (given) => change(given as A));
+  const data = mapped(readOf(value, timing, where).data, "value", (given) => change(given as A));
 
   return laneOf(data, data.initial.value!, timing, mix, where, curves);
 };
 
-const colorOf = (ctx: Ctx, paint: Paint, where: string, box?: Box): ModelPaint =>
-  isWrittenGradient(paint)
+const colorOf = (ctx: Ctx, paint: Paint, where: string, timing: Timing, box?: Box): ModelPaint => {
+  if (isWrittenPattern(paint)) return patternOf(ctx, paint, where, timing);
+
+  return isWrittenGradient(paint)
     ? gradientOf(paint, box, (color) => solidOf(ctx, color, where), where)
     : solidOf(ctx, paint, where);
+};
+
+/** A pattern is lowered once, however many nodes it paints, so its tile is one def in SVG. */
+const patternOf = (ctx: Ctx, given: Pattern, where: string, timing: Timing): ModelPattern => {
+  const known = ctx.patterns.get(given);
+
+  if (known) return known;
+  const root = `pattern${ctx.patterns.size + 1}`;
+  const tile = groupOf(ctx, given.tile, root, `a pattern painting ${where}`, timing);
+
+  if (tile === undefined)
+    throw new SceneError(
+      `The pattern painting ${where} has nothing to draw.`,
+      "Give pattern() a tile, as in tile: <Shape geometry={circle(3)} fill={theme.ink} />.",
+    );
+
+  const made: ModelPattern = {
+    kind: "pattern",
+    size: given.size,
+    offset: animated<Vec, Vec>(given.offset, keep, timing, mixVec, `pattern offset on ${where}`),
+    tile,
+  };
+
+  ctx.patterns.set(given, made);
+
+  return made;
+};
 
 const solidOf = (ctx: Ctx, paint: Hex | Token, where: string): Color => {
   if (isHex(paint)) return rgbaOf(paint, where);
@@ -165,24 +204,14 @@ const solidOf = (ctx: Ctx, paint: Hex | Token, where: string): Color => {
 
 const isHex = (paint: Hex | Token): paint is Hex => typeof paint === "string";
 
-const layerOf = ({ passage }: LayerMotion, timing: Timing, where: string): Layer => {
-  const { data } = passage;
-
-  const slot = <K extends "offset" | "rotate" | "scale" | "opacity", T>(
-    name: K,
-    change: (value: Exclude<Parameters<LayerMotion["to"]>[0][K], undefined>) => T,
-    atRest: T,
-    mix: Mix<T>,
-  ): Animated<T> =>
-    touches(data, name)
-      ? laneOf(mapped(data, name, change), atRest, timing, mix, `${name} on ${where}`)
-      : atRest;
+const layerOf = (layer: Written, timing: Timing, where: string): Layer => {
+  const at = (name: string): string => `${name} in motion of ${where}`;
 
   return {
-    offset: slot("offset", keep, [0, 0], mixVec),
-    rotate: slot("rotate", keep, 0, mixNumber),
-    scale: slot("scale", pair, [1, 1], mixVec),
-    opacity: slot("opacity", keep, 1, mixNumber),
+    offset: animated<Vec, Vec>(layer.offset ?? [0, 0], keep, timing, mixVec, at("offset")),
+    rotate: animated(layer.rotate ?? 0, keep, timing, mixNumber, at("rotate")),
+    scale: animated<number | Vec, Vec>(layer.scale ?? 1, pair, timing, mixVec, at("scale")),
+    opacity: animated(layer.opacity ?? 1, keep, timing, mixNumber, at("opacity")),
   };
 };
 
@@ -190,8 +219,15 @@ const NOWHERE: Vec = [0, 0];
 
 const IDLE: Layer = { offset: [0, 0], rotate: 0, scale: [1, 1], opacity: 1 };
 
-const base = (props: Omit<Common, "anchor">, box: Box, key: string, timing: Timing, home: Vec) => {
-  const where = named(key);
+const base = (
+  ctx: Ctx,
+  props: Omit<Common, "anchor">,
+  box: Box,
+  key: string,
+  timing: Timing,
+  home: Vec,
+) => {
+  const where = ctx.notes.names.named(key);
 
   const own: Layer = {
     offset: [0, 0],
@@ -213,10 +249,11 @@ const base = (props: Omit<Common, "anchor">, box: Box, key: string, timing: Timi
           `at on ${where}`,
           true,
         ),
-    origin: originOf(props.origin, box, key, () => home),
-    layers: [...layersOf(props.motion).map((layer) => layerOf(layer, timing, where)), own].filter(
-      (layer) => !same(layer, IDLE),
-    ),
+    origin: originOf(ctx.notes.names, props.origin, box, key, () => home),
+    layers: [
+      ...layersOf(props.motion, where).map((layer) => layerOf(layer, timing, where)),
+      own,
+    ].filter((layer) => !same(layer, IDLE)),
     effects: [],
   };
 };
@@ -230,7 +267,7 @@ const geometryOf = (
   if (isDerived(value)) return derivedOf(value, outlineOf, timing, `${what} on ${where}`);
 
   if (!isTrack(value)) return outlineOf(value);
-  const { data } = passageOf(value);
+  const { data } = readOf(value, timing, `${what} on ${where}`);
 
   const authored = [data.initial, ...data.steps.map((step) => step.values)].flatMap(
     (values): Geometry[] => (values.value === undefined ? [] : [values.value]),
@@ -244,7 +281,7 @@ const geometryOf = (
 };
 
 const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeNode => {
-  const where = named(key);
+  const where = ctx.notes.names.named(key);
 
   if (props.geometry === undefined)
     throw new SceneError(
@@ -260,7 +297,7 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
   const geometry = geometryOf(props.geometry, timing, where);
   const rest = atRest(geometry);
   const outline = outlineBoxOf(rest);
-  const paint = (value: Paint) => colorOf(ctx, value, where, outline);
+  const paint = (value: Paint) => colorOf(ctx, value, where, timing, outline);
   const { stroke: written } = props;
 
   const painted = (value: Anim<Paint>, what: string) =>
@@ -269,24 +306,30 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
       `${what} on ${where}`,
     );
 
-  const stroke = written && {
-    color: painted(written.color, "stroke"),
-    width: animated(written.width ?? 1, keep, timing, mixNumber, `stroke width on ${where}`),
-    cap: written.cap ?? "butt",
-    join: written.join ?? "miter",
-    ...(written.dash && { dash: written.dash }),
-    nonScaling: written.nonScaling ?? false,
-  };
+  const stroke = written && strokeOf(ctx, written, timing, where, outline);
+
+  if (props.draw !== undefined && props.trim !== undefined)
+    throw new SceneError(
+      `${where} has both draw and trim, but draw is trim [0, draw].`,
+      "Pick one: draw for a stroke that draws on, or trim for a window [from, to].",
+    );
+  const window = props.draw === undefined ? props.trim : through(props.draw, (d): Vec => [0, d]);
 
   const trim =
-    props.trim === undefined
+    window === undefined
       ? undefined
-      : animated<Vec, Vec>(props.trim, keep, timing, mixVec, `trim on ${where}`);
+      : animated<Vec, Vec>(window, keep, timing, mixVec, `trim on ${where}`);
+
+  if (stroke?.dashOffset !== undefined && trim !== undefined)
+    throw new SceneError(
+      `${where} has both a draw or trim and a stroke dashOffset, and both drive the dash.`,
+      "Pick one: animate draw to draw the stroke on, or dashOffset to march its dashes.",
+    );
 
   const box = paintedBoxOf(rest, lookOf({ stroke, trim }));
 
   return {
-    ...base(props, box, key, timing, pinned(props.anchor, box, where)),
+    ...base(ctx, props, box, key, timing, pinned(props.anchor, box, where)),
     kind: "shape",
     geometry,
     ...(props.fill !== undefined && { fill: painted(props.fill, "fill") }),
@@ -295,8 +338,51 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
   };
 };
 
+const strokeOf = (
+  ctx: Ctx,
+  written: StrokeProps,
+  timing: Timing,
+  where: string,
+  box: Box,
+): Stroke => {
+  if (written.dashOffset !== undefined && !written.dash)
+    throw new SceneError(
+      `${where} has a dashOffset but no dash to slide.`,
+      "Give the stroke a dash, as in stroke={{ color, dash: [4, 4], dashOffset }}.",
+    );
+
+  return {
+    color: blendable(
+      animated(
+        written.color,
+        (value: Paint) => colorOf(ctx, value, where, timing, box),
+        timing,
+        mixPaint,
+        `stroke on ${where}`,
+      ),
+      `stroke on ${where}`,
+    ),
+    width: animated(written.width ?? 1, keep, timing, mixNumber, `stroke width on ${where}`),
+    cap: written.cap ?? "flat",
+    join: written.join ?? "sharp",
+    under: written.under ?? false,
+    ...(written.dash && { dash: written.dash }),
+    ...(written.dashOffset !== undefined && {
+      dashOffset: animated(written.dashOffset, keep, timing, mixNumber, `dash offset on ${where}`),
+    }),
+    fixedWidth: written.fixedWidth ?? false,
+  };
+};
+
 const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNode => {
-  const where = named(key);
+  const where = ctx.notes.names.named(key);
+  const { size } = props;
+
+  if (!(size > 0 && Number.isFinite(size)))
+    throw new SceneError(
+      `${where} needs a size above 0, got ${size}.`,
+      "To grow text in from nothing, scale it in with motion={enter(…, { from: { scale: 0 } })}.",
+    );
   const counting = countingIn(props.children, where);
 
   const own: Asked = {
@@ -329,7 +415,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
       blendable(
         animated(
           given,
-          (value: Paint) => colorOf(ctx, value, where, box),
+          (value: Paint) => colorOf(ctx, value, where, timing, box),
           timing,
           mixPaint,
           `fill on ${where}`,
@@ -356,16 +442,22 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     const missing = FontBook.missing(look.font, words);
 
     if (missing.length === 0) return;
-    const { family, weight, style } = look.face;
+    const { family, weight, italic } = look.face;
 
     throw new SceneError(
-      `${where} draws ${JSON.stringify(words.trim())} in ${family} ${weight}${style === "italic" ? " italic" : ""}, which has no glyph for ${missing.map(charName).join(", ")}.`,
+      `${where} draws ${JSON.stringify(words.trim())} in ${family} ${weight}${italic ? " italic" : ""}, which has no glyph for ${missing.map(charName).join(", ")}.`,
       `Use a font that has ${missing.length === 1 ? "it" : "them"}, or leave ${missing.length === 1 ? "it" : "them"} out: no other font fills in.`,
     );
   };
 
   const counted = ((): { node: SceneNode } | { words: string } | undefined => {
     if (!counting) return undefined;
+
+    if (props.along !== undefined)
+      throw new SceneError(
+        `${where} counts, and a count can't be set along an outline.`,
+        "Drop along, or write the number as plain text.",
+      );
 
     if (props.width !== undefined)
       throw new SceneError(
@@ -394,7 +486,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
         where,
         font: look.font,
         face: look.face,
-        size: props.size,
+        size,
         align: props.align ?? "start",
         fill: look.fill,
       },
@@ -402,14 +494,18 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
       ticks,
     );
 
+    const stroke = props.stroke && strokeOf(ctx, props.stroke, timing, where, box);
+    const drawn = strokedBox(box, stroke);
+    const home = pinned(props.anchor, drawn, where, baseline);
+
     return {
       node: {
-        ...base(props, box, key, timing, pinned(props.anchor, box, where, baseline)),
+        ...base(ctx, props, drawn, key, timing, home),
         authored: {
           count: { ticks: ticks.map(({ t, text }) => ({ t, text: before + text + after })) },
         },
         kind: "group",
-        children: [node],
+        children: [stroke ? stroked(node, stroke) : node],
       },
     };
   })();
@@ -446,17 +542,50 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     return { text: words, face: look.font, style: look };
   });
 
-  const { lines, box, cuts } = layoutRuns(
+  const outline = props.along === undefined ? undefined : outlineOf(props.along);
+
+  if (outline && props.width !== undefined)
+    throw new SceneError(
+      `${where} sets text along an outline, which doesn't wrap, so it takes no width.`,
+      "Drop width, or drop along to wrap the text.",
+    );
+
+  const flat = layoutRuns(
     faceOf(props.font, props.weight, props.italic, where),
     pieces,
     {
-      size: props.size,
+      size,
       ...(props.width !== undefined && { width: props.width }),
       ...(props.lineHeight !== undefined && { lineHeight: props.lineHeight }),
       ...(props.align !== undefined && { align: props.align }),
     },
     where,
   );
+
+  const start = animated(props.start ?? 0, keep, timing, mixNumber, `start on ${where}`);
+  const reach = outline && outlineLength(outline);
+
+  if (outline && !(reach! > 0))
+    throw new SceneError(
+      `The outline ${where} is set along has no length.`,
+      "Give along an outline with some length, such as a line, circle(…) or path().moveTo(…).lineTo(…).",
+    );
+
+  if (outline && flat.lines.length > 1)
+    throw new SceneError(
+      `${where} sets text along an outline, which takes one line, but its text has ${flat.lines.length}.`,
+      "Drop the line breaks, or use one <Text along={…}> per line.",
+    );
+
+  if (outline && flat.box.width > reach!)
+    throw new SceneError(
+      `The text of ${where} is ${num(flat.box.width - reach!)} longer than the outline it is set along (${num(flat.box.width)} against ${num(reach!)}).`,
+      "Give it a smaller size or a longer outline.",
+    );
+
+  const { lines, box, cuts } = outline
+    ? setAlong(flat, outline, restOf(props.start ?? 0), props.align ?? "start")
+    : flat;
 
   const fills = new Map<RunLook, Animated<ModelPaint>>();
 
@@ -468,11 +597,17 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     return known;
   };
 
+  const stroke = props.stroke && strokeOf(ctx, props.stroke, timing, where, box);
+  const drawn = strokedBox(box, stroke);
+  const home = pinned(props.anchor, drawn, where, lines[0]?.at[1] ?? 0);
+
   return {
-    ...base(props, box, key, timing, pinned(props.anchor, box, where, lines[0]?.at[1] ?? 0)),
+    ...base(ctx, props, drawn, key, timing, home),
     ...(props.width !== undefined && { authored: { wrap: { width: props.width, cuts } } }),
     kind: "text",
-    size: props.size,
+    size,
+    ...(outline && { along: { path: outline, start, align: props.align ?? "start" } }),
+    ...(stroke && { stroke }),
     lines: lines.map((line): TextLine => ({
       at: line.at,
       runs: line.runs.map(({ text: words, at, advances, outline, style }): TextRun => ({
@@ -488,7 +623,26 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
   };
 };
 
-const image = (props: ImageProps, key: string, timing: Timing): ImageNode => {
+/** A text's stroke is part of its box, as a shape's is. */
+const strokedBox = (box: Box, stroke: Stroke | undefined): Box =>
+  stroke
+    ? growBox(
+        box,
+        Math.max(
+          0,
+          ...(isLane(stroke.width) ? stroke.width.keys.map((key) => key.value) : [stroke.width]),
+        ) / 2,
+      )
+    : box;
+
+const stroked = (node: SceneNode, stroke: Stroke): SceneNode =>
+  node.kind === "text"
+    ? { ...node, stroke }
+    : node.kind === "group"
+      ? { ...node, children: node.children.map((child) => stroked(child, stroke)) }
+      : node;
+
+const picture = (ctx: Ctx, props: PictureProps, key: string, timing: Timing): PictureNode => {
   const { src } = props;
   const ratio = src.width / src.height;
   const width = props.width ?? (props.height === undefined ? src.width : props.height * ratio);
@@ -496,104 +650,23 @@ const image = (props: ImageProps, key: string, timing: Timing): ImageNode => {
 
   if (!(width > 0 && height > 0 && Number.isFinite(width) && Number.isFinite(height)))
     throw new SceneError(
-      `${named(key)} needs a positive width and height, got ${width} by ${height}.`,
+      `${ctx.notes.names.named(key)} needs a positive width and height, got ${width} by ${height}.`,
     );
 
   const box = { x: 0, y: 0, width, height };
 
   return {
-    ...base(props, box, key, timing, pinned(props.anchor, box, named(key))),
-    kind: "image",
+    ...base(ctx, props, box, key, timing, pinned(props.anchor, box, ctx.notes.names.named(key))),
+    kind: "picture",
     size: [width, height],
-    data: src.href,
+    data: src.data,
   };
 };
 
-const moves = (node: SceneNode): boolean => JSON.stringify(node).includes('"kind":"lane"');
-
-const symbolName = (ctx: Ctx, key: string): string => {
-  const stem = key
-    .split("/")
-    .at(-1)!
-    .replace(/[^\w-]/g, "_");
-
-  let name = stem;
-
-  for (let n = 2; ctx.symbols.has(name); n++) name = `${stem}-${n}`;
-
-  return name;
-};
-
-const instance = (ctx: Ctx, props: InstanceProps, key: string, timing: Timing): InstanceNode => {
-  const { of } = props;
-
-  if (of?.kind !== "symbol")
-    throw new SceneError(
-      `${named(key)} has no symbol to place.`,
-      "Give it of={…}, a symbol from symbol(() => …).",
-    );
-  const given = ctx.named.get(of);
-  const known = given === undefined ? undefined : ctx.symbols.get(given);
-
-  if (known && !known.node)
-    throw new SceneError(
-      `The symbol that ${named(key)} places holds an instance of itself, so it would never end.`,
-    );
-
-  const name = given ?? symbolName(ctx, key);
-
-  if (!known) {
-    const entry: SymbolEntry = { of };
-
-    ctx.named.set(of, name);
-    ctx.symbols.set(name, entry);
-    const root = `#${name}`;
-
-    const children = arrangeState(
-      lowerAll(
-        ctx,
-        within(ctx.size, () => flat(of.build())),
-        sceneTiming(ctx),
-        root,
-      ),
-      ctx.notes,
-    );
-
-    entry.node = {
-      kind: "group",
-      key: root,
-      box: around(children),
-      at: [0, 0],
-      origin: [0, 0],
-      layers: [],
-      effects: [],
-      children,
-    };
-    entry.moves = moves(entry.node);
-  }
-
-  const { node, moves: moving } = ctx.symbols.get(name)!;
-  const clip = timing.clock.clips.at(-1);
-
-  if (moving && timing.clock.offset > EPSILON)
-    throw new SceneError(
-      `${named(key)} sits inside ${clip?.label ?? "a sequence"}, but its symbol moves, and a symbol's tracks run on the scene's clock for every instance.`,
-      "Move the instance instead, or draw the content without a symbol.",
-    );
-
-  const framed = props.offset !== undefined;
-  const home: Vec = framed ? [0, 0] : pinned(props.anchor, node!.box, named(key));
-
-  return {
-    ...base(framed ? { ...props, at: props.offset } : props, node!.box, key, timing, home),
-    kind: "instance",
-    symbol: name,
-  };
-};
-
-const sceneTiming = ({ duration }: Ctx): Timing => ({
+const sceneTiming = ({ duration, reads }: Ctx): Timing => ({
   duration,
   clock: { offset: 0, end: duration, clips: [] },
+  reads,
 });
 
 const label = (begin: Seconds, over: Seconds | undefined): string =>
@@ -629,7 +702,7 @@ const lowerAll = (
   taken: Set<string> = new Set(),
 ): SceneNode[] =>
   elements.flatMap((element): SceneNode[] => {
-    const given = sceneElement(element, parent ? named(parent) : "The scene");
+    const given = sceneElement(element, parent ? ctx.notes.names.named(parent) : "The scene");
 
     if (given.type === "fragment") return lowerAll(ctx, given.children, timing, parent, taken);
 
@@ -662,8 +735,8 @@ const lowerAll = (
       const seen = new Map<string, Anchor | undefined>();
       const states: SceneNode[][] = [];
 
-      const merged = morphed(given, timing, taken, (state, names) => {
-        const nodes = arrangeState(lowerAll(ctx, state, timing, parent, names), ctx.notes);
+      const merged = morphed(given, timing, taken, ctx.notes.names, (state, used) => {
+        const nodes = arrangeState(lowerAll(ctx, state, timing, parent, used), ctx.notes);
 
         sameAnchors(nodes, ctx.notes, seen);
         states.push(nodes);
@@ -676,11 +749,11 @@ const lowerAll = (
       return merged;
     }
 
-    const name = given.props.key ?? given.props.ref?.key;
+    const name = given.props.key;
 
     if (name !== undefined && taken.has(name))
       throw new SceneError(
-        `Two nodes are both keyed "${name}"${parent && ` inside ${named(parent)}`}.`,
+        `Two nodes are both keyed "${name}"${parent && ` inside ${ctx.notes.names.named(parent)}`}.`,
         "Give each a key of its own.",
         { node: `"${name}"`, ...(writtenAt(given) && { source: writtenAt(given)! }) },
       );
@@ -695,14 +768,14 @@ const lowerAll = (
       if (!taken.has(String(index))) own = String(index);
     taken.add(own);
     const key = parent ? `${parent}/${own}` : own;
-    const entry = nameFor(given, name, parent);
+    const entry = nameFor(ctx, given, name, parent);
 
-    nameNode(key, entry);
+    ctx.notes.names.set(key, entry);
 
     try {
       return lowered(ctx, given, name, key, timing, parent);
     } catch (error) {
-      throw error instanceof Error ? located(error, whereOf(key)) : error;
+      throw error instanceof Error ? located(error, ctx.notes.names.whereOf(key)) : error;
     }
   });
 
@@ -714,9 +787,9 @@ const lowered = (
   timing: Timing,
   parent: string,
 ): SceneNode[] => {
-  const el = ctx.cues.apply(given, key, timing, ctx.notes, parent);
+  const el = withGoals(given, key, timing, ctx.notes, parent);
   const backdrop = el.type === "group" ? backdropOf(ctx, el.props, key, timing) : undefined;
-  const offset = el.type === "group" || el.type === "instance" ? el.props.offset : undefined;
+  const offset = el.type === "group" ? el.props.offset : undefined;
 
   placement(ctx, el.props, offset, key, parent);
   const still = el.props.at === undefined && offset === undefined && !ctx.notes.aims.has(key);
@@ -731,17 +804,7 @@ const lowered = (
   );
 
   const aimed = (node: SceneNode): SceneNode => {
-    const aim = ctx.notes.aims.get(key);
-
-    if (still && el.props.origin === "at") return { ...node, origin: [0, 0] };
-
-    if (!aim || el.type === "group" || ctx.notes.onAnchor.has(key)) return node;
-    ctx.notes.aims.delete(key);
-
-    return {
-      ...node,
-      at: aimNow(aim, node, homeOf(el.type, node, el.props.anchor, node.box, offset !== undefined)),
-    };
+    return still && el.props.origin === "at" ? { ...node, origin: [0, 0] } : node;
   };
 
   const done = (node: SceneNode): SceneNode[] => [
@@ -749,7 +812,7 @@ const lowered = (
       given,
       name,
       dressed(ctx, el.props, sized(ctx, el.props, aimed(node)), timing),
-      entryOf(key),
+      ctx.notes.names.entryOf(key),
     ),
   ];
 
@@ -758,21 +821,20 @@ const lowered = (
       return done(shape(ctx, el.props, key, timing));
     case "text":
       return done(text(ctx, el.props, key, timing));
-    case "image":
-      return done(image(el.props, key, timing));
-    case "instance":
-      return done(instance(ctx, el.props, key, timing));
+    case "picture":
+      return done(picture(ctx, el.props, key, timing));
     case "group": {
       const children = lowerAll(ctx, el.children, timing, key);
 
       if (backdrop && children.some((child) => child.key === `${key}/background`))
         throw new SceneError(
-          `A child of ${named(key)} is keyed "background", which names the container's own fill and stroke.`,
+          `A child of ${ctx.notes.names.named(key)} is keyed "background", which names the container's own fill and stroke.`,
           "Give the child another key.",
         );
 
       const node: GroupNode = {
         ...base(
+          ctx,
           offset === undefined ? el.props : { ...el.props, at: offset },
           around(children),
           key,
@@ -796,7 +858,7 @@ const placement = (
   key: string,
   parent: string,
 ): void => {
-  const where = named(key);
+  const where = ctx.notes.names.named(key);
 
   if (offset !== undefined && props.at !== undefined)
     throw new SceneError(
@@ -824,8 +886,8 @@ const placement = (
     );
 };
 
-const nameFor = (given: NodeElement, name: string | undefined, parent: string): Named => {
-  const above = parent ? entryOf(parent) : undefined;
+const nameFor = (ctx: Ctx, given: NodeElement, name: string | undefined, parent: string): Named => {
+  const above = parent ? ctx.notes.names.entryOf(parent) : undefined;
   const component = componentOf(given);
 
   if (!component && above)
@@ -848,11 +910,16 @@ const nameFor = (given: NodeElement, name: string | undefined, parent: string): 
   return { name: placed, short, ...(written && { source: written }) };
 };
 
-const lengthOf = (value: Anim<number>, timing: Timing, where: string): Animated<number> => {
+const lengthOf = (
+  value: Anim<number>,
+  timing: Timing,
+  where: string,
+  noun = "length",
+): Animated<number> => {
   const out = animated(value, keep, timing, mixNumber, where);
 
   if (!isLane(out) && !(out >= 0 && Number.isFinite(out)))
-    throw new SceneError(`${where} needs a finite length of 0 or more, got ${out}.`);
+    throw new SceneError(`${where} needs a finite ${noun} of 0 or more, got ${out}.`);
 
   return out;
 };
@@ -861,9 +928,47 @@ const effectOf = (ctx: Ctx, effect: EffectProps, timing: Timing, where: string):
   if (effect.kind === "blur")
     return { kind: "blur", radius: lengthOf(effect.radius, timing, `blur on ${where}`) };
 
+  if (effect.kind === "adjust") {
+    const hue = animated(effect.hue, keep, timing, mixNumber, `adjust hue on ${where}`);
+
+    if (!isLane(hue) && !Number.isFinite(hue))
+      throw new SceneError(`adjust hue on ${where} needs a finite number of degrees, got ${hue}.`);
+
+    const amount = (value: Anim<number>, name: string) =>
+      lengthOf(value, timing, `adjust ${name} on ${where}`, "number");
+
+    return {
+      kind: "adjust",
+      saturate: amount(effect.saturate, "saturate"),
+      hue,
+      brightness: amount(effect.brightness, "brightness"),
+      contrast: amount(effect.contrast, "contrast"),
+    };
+  }
+
+  if (effect.kind === "displace") {
+    const { seed, octaves } = effect;
+
+    if (!Number.isInteger(seed))
+      throw new SceneError(`displace seed on ${where} needs a whole number, got ${seed}.`);
+
+    if (!Number.isInteger(octaves) || octaves < 1)
+      throw new SceneError(
+        `displace octaves on ${where} needs a whole number of 1 or more, got ${octaves}.`,
+      );
+
+    return {
+      kind: "displace",
+      scale: lengthOf(effect.scale, timing, `displace scale on ${where}`),
+      frequency: lengthOf(effect.frequency, timing, `displace frequency on ${where}`, "number"),
+      seed,
+      octaves,
+    };
+  }
+
   if (effect.kind !== "shadow")
     throw new SceneError(
-      `effects on ${where} takes blur() and shadow(), got ${JSON.stringify(effect)}.`,
+      `effects on ${where} takes blur(), shadow(), adjust() and displace(), got ${JSON.stringify(effect)}.`,
     );
   const opacity = animated(effect.opacity, keep, timing, mixNumber, `shadow opacity on ${where}`);
 
@@ -874,16 +979,27 @@ const effectOf = (ctx: Ctx, effect: EffectProps, timing: Timing, where: string):
     kind: "shadow",
     offset: animated<Vec, Vec>(effect.offset, keep, timing, mixVec, `shadow offset on ${where}`),
     blur: lengthOf(effect.blur, timing, `shadow blur on ${where}`),
-    color: solidOf(ctx, effect.color, `shadow on ${where}`),
+    color: animated<Hex | Token, Color>(
+      effect.color,
+      (value) => solidOf(ctx, value, `shadow on ${where}`),
+      timing,
+      noMix,
+      `shadow color on ${where}`,
+    ),
     opacity,
   };
 };
 
-const maskOf = (ctx: Ctx, mask: Child, key: string, timing: Timing): GroupNode | undefined => {
-  const elements = flat(mask);
+const groupOf = (
+  ctx: Ctx,
+  content: Child,
+  root: string,
+  owner: string,
+  timing: Timing,
+): GroupNode | undefined => {
+  const elements = flat(content);
 
   if (elements.length === 0) return undefined;
-  const root = `${key}#mask`;
   const children = arrangeState(lowerAll(ctx, elements, timing, root), ctx.notes);
 
   for (const child of children) {
@@ -891,9 +1007,9 @@ const maskOf = (ctx: Ctx, mask: Child, key: string, timing: Timing): GroupNode |
 
     if (placed !== undefined)
       throw new SceneError(
-        `${named(placed)} is in the mask of ${named(key)} and is placed by an anchor, a move() onto an anchor, or as an arrow's end. A mask is drawn in its node's frame and is never part of the layout.`,
+        `${ctx.notes.names.named(placed)} is in ${owner} and is placed by an anchor, a track going to an anchor, or as an arrow's end. What is drawn there is never part of the layout.`,
         "Place what is in it with at.",
-        whereOf(placed),
+        ctx.notes.names.whereOf(placed),
       );
   }
 
@@ -915,18 +1031,29 @@ const dressed = (
   node: SceneNode,
   timing: Timing,
 ): SceneNode => {
-  const where = named(node.key);
+  const where = ctx.notes.names.named(node.key);
   const own = boundsOf(node.box);
-  const { effects = [] } = props;
+  const { effects = [], blend } = props;
   const clip = byBox(props.clip) ? props.clip(own) : props.clip;
   const asked = byBox(props.mask) ? props.mask(own) : props.mask;
-  const mask = asked === undefined ? undefined : maskOf(ctx, asked, node.key, timing);
+
+  const mask =
+    asked === undefined
+      ? undefined
+      : groupOf(
+          ctx,
+          asked,
+          `${node.key}#mask`,
+          `the mask of ${ctx.notes.names.named(node.key)}`,
+          timing,
+        );
 
   return {
     ...node,
     ...(clip !== undefined && { clip: geometryOf(clip, timing, where, "clip") }),
     ...(mask && { mask }),
     effects: effects.map((effect) => effectOf(ctx, effect, timing, where)),
+    ...(blend !== undefined && blend !== "normal" && { blend }),
   };
 };
 
@@ -943,12 +1070,7 @@ const boundsOf = (box: Box): Bounds => {
     rect:
       x === 0 && y === 0
         ? rect(width, height)
-        : polygon([
-            [x, y],
-            [x + width, y],
-            [x + width, y + height],
-            [x, y + height],
-          ]),
+        : polygon([x, y], [x + width, y], [x + width, y + height], [x, y + height]),
   };
 };
 
@@ -965,7 +1087,7 @@ const sized = (ctx: Ctx, props: Omit<Common, "anchor">, node: SceneNode): SceneN
 
     if (placed !== undefined)
       throw new SceneError(
-        `The ${what} of ${named(node.key)} is sized by its box, but ${named(placed)} inside it is placed by an anchor, a move() onto an anchor, or as an arrow's end, so its box isn't known yet.`,
+        `The ${what} of ${ctx.notes.names.named(node.key)} is sized by its box, but ${ctx.notes.names.named(placed)} inside it is placed by an anchor, a track going to an anchor, or as an arrow's end, so its box isn't known yet.`,
         `Size the ${what} with numbers, or move that node out.`,
       );
   }
@@ -980,7 +1102,7 @@ const backdropOf = (
   timing: Timing,
 ): BackdropOf | undefined => {
   if (fill === undefined && stroke === undefined) return undefined;
-  const line = stroke === undefined ? 0 : (stroke.width ?? 1);
+  const line = stroke === undefined ? 0 : restOf(stroke.width ?? 1);
 
   return (box) => ({
     ...shape(
@@ -1059,10 +1181,21 @@ const isBare = (el: SceneElement): boolean =>
   el.type === "fragment" ||
   (el.type === "group" && Object.keys(el.props).length === 0 && el.settle === undefined);
 
-export const scene = (options: SceneOptions, build: () => SceneElement): Scene =>
-  naming(() => lowerScene(options, build));
+/**
+ * A scene is its options and a function from the canvas to the picture. The canvas is the only thing a scene is told:
+ * a component that needs its size takes it as a prop.
+ */
+export const scene = (options: SceneOptions, build: (canvas: Bounds) => SceneElement): Scene => {
+  const names = new Names();
 
-const lowerScene = (options: SceneOptions, build: () => SceneElement): Scene => {
+  return names.naming(() => lowerScene(options, build, names));
+};
+
+const lowerScene = (
+  options: SceneOptions,
+  build: (canvas: Bounds) => SceneElement,
+  names: Names,
+): Scene => {
   const { size, duration } = options;
 
   if (!size.every((side) => side > 0 && side < Infinity))
@@ -1073,17 +1206,14 @@ const lowerScene = (options: SceneOptions, build: () => SceneElement): Scene => 
   if (!(duration > 0 && duration < Infinity))
     throw new SceneError(`scene() needs a positive duration, got ${duration}.`);
 
-  if (
-    options.reducedMotion !== undefined &&
-    options.reducedMotion !== false &&
-    !Number.isFinite(options.reducedMotion)
-  )
+  if (options.still !== undefined && options.still !== false && !Number.isFinite(options.still))
     throw new SceneError(
-      `scene() needs reducedMotion as a time in seconds, or false, got ${String(options.reducedMotion)}.`,
+      `scene() needs still as a time in seconds, or false, got ${String(options.still)}.`,
     );
 
-  const [[top, cues], declared] = declaring(() =>
-    collect(() => sceneElement(within(size, build), "scene()'s callback")),
+  const top = sceneElement(
+    build(boundsOf({ x: 0, y: 0, width: size[0], height: size[1] })),
+    "scene()'s callback",
   );
 
   const ctx: Ctx = {
@@ -1091,13 +1221,12 @@ const lowerScene = (options: SceneOptions, build: () => SceneElement): Scene => 
     fonts: new FontBook(),
     size,
     duration,
-    symbols: new Map(),
-    named: new Map(),
-    notes: notes(),
-    cues,
+    notes: notes(names),
+    patterns: new Map(),
+    reads: new Map(),
   };
 
-  for (const token of Object.values(options.theme ?? {})) colorOf(ctx, token, "scene()");
+  for (const token of Object.values(options.theme ?? {})) solidOf(ctx, token, "scene()");
 
   const children = lowerAll(
     ctx,
@@ -1117,14 +1246,12 @@ const lowerScene = (options: SceneOptions, build: () => SceneElement): Scene => 
     children,
   };
 
-  cues.finish();
   const root = settle(drafted, ctx.notes, duration);
-  const refs = [...new Set([...declared, ...ctx.notes.refs.keys(), ...cues.refs])];
 
   const still =
-    options.reducedMotion === false
+    options.still === false
       ? undefined
-      : Math.max(0, Math.min(duration, options.reducedMotion ?? duration * 0.85));
+      : Math.max(0, Math.min(duration, options.still ?? duration * 0.85));
 
   return {
     size,
@@ -1135,13 +1262,6 @@ const lowerScene = (options: SceneOptions, build: () => SceneElement): Scene => 
     ...(still !== undefined && { still }),
     tokens: Object.fromEntries(ctx.tokens),
     fonts: ctx.fonts.families(),
-    symbols: Object.fromEntries([...ctx.symbols].map(([name, entry]) => [name, entry.node!])),
     root,
-    ...((refs.length > 0 || cues.applied.length > 0) && {
-      authored: {
-        refs: refs.map((each) => ({ key: each.key, attached: ctx.notes.refs.has(each) })),
-        actions: cues.applied,
-      },
-    }),
   };
 };

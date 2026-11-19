@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { costOf } from "../scripts/cost";
+import { costOf } from "svjeez/frames";
 
 interface Budget {
   readonly bytes: number;
@@ -12,33 +12,34 @@ interface Budget {
 }
 
 const budgets = {
-  "readme/basic": { bytes: 1700, elements: 7, stops: 4, smil: 0, cost: 2 },
-  "readme/loops": { bytes: 2450, elements: 7, stops: 20, smil: 0, cost: 3 },
-  "readme/motion": { bytes: 1700, elements: 6, stops: 5, smil: 0, cost: 2 },
-  clips: { bytes: 5100, elements: 35, stops: 16, smil: 0, cost: 6 },
-  geometry: { bytes: 7800, elements: 19, stops: 11, smil: 5, cost: 9 },
-  springs: { bytes: 8400, elements: 28, stops: 60, smil: 0, cost: 4 },
-  layout: { bytes: 11000, elements: 43, stops: 80, smil: 0, cost: 15 },
-  morph: { bytes: 10000, elements: 32, stops: 48, smil: 6, cost: 37 },
-  derived: { bytes: 9300, elements: 21, stops: 46, smil: 1, cost: 5 },
-  count: { bytes: 16600, elements: 49, stops: 170, smil: 0, cost: 26 },
-  type: { bytes: 3900, elements: 35, stops: 20, smil: 0, cost: 10 },
-  icons: { bytes: 10350, elements: 33, stops: 48, smil: 0, cost: 24 },
-  charts: { bytes: 15500, elements: 96, stops: 76, smil: 0, cost: 38 },
-  paint: { bytes: 8800, elements: 52, stops: 18, smil: 14, cost: 14 },
-  epicycles: { bytes: 45200, elements: 145, stops: 119, smil: 0, cost: 84 },
-  escapement: { bytes: 51500, elements: 143, stops: 128, smil: 0, cost: 49 },
-  code: { bytes: 11600, elements: 152, stops: 32, smil: 0, cost: 23 },
-  globe: { bytes: 440000, elements: 80, stops: 210, smil: 14, cost: 30 },
-  math: { bytes: 24000, elements: 48, stops: 20, smil: 0, cost: 13 },
-  flowchart: { bytes: 14600, elements: 74, stops: 110, smil: 0, cost: 52 },
-  sequence: { bytes: 12100, elements: 79, stops: 79, smil: 0, cost: 39 },
-  mermaid: { bytes: 15400, elements: 78, stops: 130, smil: 0, cost: 56 },
-  state: { bytes: 13100, elements: 86, stops: 55, smil: 0, cost: 9 },
-  lanes: { bytes: 20100, elements: 97, stops: 104, smil: 28, cost: 62 },
+  "readme/basic": { bytes: 1600, elements: 7, stops: 4, smil: 0, cost: 2 },
+  "readme/loops": { bytes: 2200, elements: 7, stops: 20, smil: 0, cost: 3 },
+  "readme/motion": { bytes: 1600, elements: 6, stops: 5, smil: 0, cost: 2 },
+  clips: { bytes: 4300, elements: 30, stops: 16, smil: 0, cost: 6 },
+  geometry: { bytes: 6850, elements: 19, stops: 10, smil: 5, cost: 8.8 },
+  springs: { bytes: 7500, elements: 28, stops: 54, smil: 0, cost: 4 },
+  layout: { bytes: 9850, elements: 37, stops: 71, smil: 0, cost: 13 },
+  morph: { bytes: 7750, elements: 29, stops: 38, smil: 6, cost: 31.7 },
+  derived: { bytes: 8800, elements: 19, stops: 43, smil: 1, cost: 4 },
+  count: { bytes: 15350, elements: 49, stops: 170, smil: 0, cost: 26 },
+  type: { bytes: 3700, elements: 33, stops: 18, smil: 0, cost: 9 },
+  icons: { bytes: 9300, elements: 32, stops: 36, smil: 0, cost: 18 },
+  charts: { bytes: 15050, elements: 98, stops: 70, smil: 0, cost: 35 },
+  paint: { bytes: 8400, elements: 50, stops: 15, smil: 14, cost: 17.4 },
+  epicycles: { bytes: 44550, elements: 145, stops: 119, smil: 0, cost: 84 },
+  escapement: { bytes: 50850, elements: 140, stops: 122, smil: 0, cost: 48 },
+  code: { bytes: 10150, elements: 149, stops: 32, smil: 0, cost: 22 },
+  globe: { bytes: 435850, elements: 79, stops: 207, smil: 14, cost: 42.5 },
+  math: { bytes: 22600, elements: 48, stops: 18, smil: 0, cost: 12 },
+  flowchart: { bytes: 14250, elements: 74, stops: 90, smil: 0, cost: 39 },
+  sequence: { bytes: 11300, elements: 79, stops: 52, smil: 0, cost: 30 },
+  mermaid: { bytes: 14750, elements: 78, stops: 100, smil: 0, cost: 40 },
+  state: { bytes: 12800, elements: 86, stops: 55, smil: 0, cost: 9 },
+  lanes: { bytes: 19050, elements: 97, stops: 76, smil: 28, cost: 47.2 },
 } satisfies Record<string, Budget>;
 
 const measure = (svg: string): Budget => {
+  const cost = costOf(svg);
   const tags = [...svg.matchAll(/<([a-zA-Z]+)[\s>/]/g)].map((match) => match[1]!);
   const smil = tags.filter((tag) => tag === "animate" || tag === "set").length;
 
@@ -50,7 +51,7 @@ const measure = (svg: string): Budget => {
       0,
     ),
     smil,
-    cost: costOf(svg),
+    cost: Math.round((cost.animations + cost.repaint) * 10) / 10,
   };
 };
 

@@ -1,6 +1,22 @@
 import { describe, expect, test } from "bun:test";
-import { font, Group, Run, Text, morph, scene, span, track, type SceneElement } from "svjeez";
-import { boxesOf, diagnose, isLane, svg, type Model } from "svjeez/tools";
+import {
+  circle,
+  ease,
+  font,
+  Group,
+  line,
+  rect,
+  Run,
+  Shape,
+  Text,
+  morph,
+  scene,
+  span,
+  track,
+  type SceneElement,
+} from "svjeez";
+import { boxesOf, isLane, svg, type Model, type StrokeProps } from "svjeez/tools";
+import { diagnose } from "../src/model/backend";
 
 const fixture = (name: string) => new URL(`./fixtures/${name}.ttf`, import.meta.url);
 const regular = await font.load(fixture("SpaceMono-Regular"));
@@ -29,7 +45,7 @@ const textOf = (model: Model.Scene, key = "t"): Model.TextNode => {
 };
 
 const runs = (node: Model.TextNode) =>
-  node.lines.map((line) => line.runs.map((run) => [run.text, run.face.weight, run.face.style]));
+  node.lines.map((line) => line.runs.map((run) => [run.text, run.face.weight, run.face.italic]));
 
 const emit = (model: Model.Scene): string => svg.emit(model).replace(/@font-face\{[^}]*\}/g, "");
 
@@ -58,9 +74,9 @@ describe("faces", () => {
       </Group>
     ));
 
-    expect(runs(textOf(model))).toEqual([[["a", 400, "normal"]]]);
-    expect(runs(textOf(model, "b"))).toEqual([[["b", 700, "normal"]]]);
-    expect(runs(textOf(model, "i"))).toEqual([[["c", 400, "italic"]]]);
+    expect(runs(textOf(model))).toEqual([[["a", 400, false]]]);
+    expect(runs(textOf(model, "b"))).toEqual([[["b", 700, false]]]);
+    expect(runs(textOf(model, "i"))).toEqual([[["c", 400, true]]]);
     expect(Object.keys(model.fonts)).toEqual(["Space Mono", "ABeeZee"]);
     expect(model.fonts["ABeeZee"]!.faces).toEqual([sansItalic]);
   });
@@ -76,7 +92,7 @@ describe("faces", () => {
           )),
         ),
       ),
-    ).toEqual([[["x", 700, "normal"]]]);
+    ).toEqual([[["x", 700, false]]]);
     expect(
       runs(
         textOf(
@@ -87,7 +103,7 @@ describe("faces", () => {
           )),
         ),
       ),
-    ).toEqual([[["x", 700, "normal"]]]);
+    ).toEqual([[["x", 700, false]]]);
   });
 
   test("a face the font doesn't have is an error that says what it has", () => {
@@ -163,9 +179,9 @@ describe("runs", () => {
 
     expect(runs(node)).toEqual([
       [
-        ["Total ", 400, "normal"],
-        ["42", 700, "normal"],
-        [" items", 400, "normal"],
+        ["Total ", 400, false],
+        ["42", 700, false],
+        [" items", 400, false],
       ],
     ]);
     const [a, b, c] = node.lines[0]!.runs;
@@ -246,12 +262,12 @@ describe("runs", () => {
 
     expect(runs(node)).toEqual([
       [
-        ["a ", 400, "normal"],
-        ["b", 700, "normal"],
+        ["a ", 400, false],
+        ["b", 700, false],
       ],
       [
-        ["c", 700, "normal"],
-        [" d", 400, "normal"],
+        ["c", 700, false],
+        [" d", 400, false],
       ],
     ]);
     expect(node.lines[1]!.at[1] - node.lines[0]!.at[1]).toBeCloseTo(20);
@@ -524,5 +540,147 @@ describe("morph", () => {
       "text",
       "text",
     ]);
+  });
+});
+
+describe("text strokes", () => {
+  const stroked = (stroke: Partial<StrokeProps>, props: { scale?: number } = {}) => (
+    <Text
+      key="t"
+      font={space}
+      size={20}
+      fill="#000000"
+      at={[50, 50]}
+      stroke={{ color: "#ff0000", ...stroke }}
+      {...props}
+    >
+      Hi
+    </Text>
+  );
+
+  test("a track can change a text's stroke, and nothing is drawn under the fill unless asked", () => {
+    const model = made(() => {
+      const color = track<`#${string}`>("#ffffff").to("#ff0000", span(1, 1));
+      const width = track(2).to(3, span(1, 1));
+
+      return stroked({ color, width });
+    });
+
+    const node = textOf(model);
+
+    expect(isLane(node.stroke!.color)).toBe(true);
+    expect(isLane(node.stroke!.width)).toBe(true);
+    expect(node.stroke).toMatchObject({ join: "sharp", under: false });
+
+    const out = emit(model);
+
+    expect(out).not.toContain("paint-order");
+    expect(out).not.toContain("stroke-linejoin");
+  });
+
+  test("under draws the stroke below the fill, on text and shapes alike", () => {
+    const text = emit(made(() => stroked({ under: true })));
+
+    const shape = emit(
+      made(() => <Shape geometry={rect(10, 10)} stroke={{ color: "#ff0000", under: true }} />),
+    );
+
+    expect(text).toContain('paint-order="stroke"');
+    expect(shape).toContain('paint-order="stroke"');
+  });
+
+  test("under is the same in every state of a morph", () => {
+    expect(() =>
+      made(() => morph(stroked({ under: true }), stroked({ under: false }), span(1, 1))),
+    ).toThrow("cap, join, dash, fixedWidth or under differs");
+  });
+
+  test("a fixedWidth stroke on scaled text keeps its width", () => {
+    const out = emit(made(() => stroked({ fixedWidth: true }, { scale: 2 })));
+
+    expect(out).toContain('vector-effect="non-scaling-stroke"');
+  });
+
+  test("the stroke is part of the text's box", () => {
+    const bare = boxesOf(
+      made(() => stroked({ width: 0 })),
+      0,
+    )["t"]!;
+
+    const box = boxesOf(
+      made(() => stroked({ width: 4 })),
+      0,
+    )["t"]!;
+
+    expect(box.width).toBeCloseTo(bare.width + 4, 6);
+    expect(box.height).toBeCloseTo(bare.height + 4, 6);
+  });
+});
+
+describe("text along an outline", () => {
+  const along = (extra: Partial<Parameters<typeof Text>[0]> = {}, text = "Hi") =>
+    made(() => (
+      <Text
+        key="t"
+        font={space}
+        size={10}
+        fill="#000000"
+        along={line([0, 50], [180, 50])}
+        {...extra}
+      >
+        {text}
+      </Text>
+    ));
+
+  test("lowers to glyph positions along the path and a box around them", () => {
+    const node = textOf(along());
+
+    expect(node.along?.align).toBe("start");
+    expect(node.lines[0]!.runs[0]!.at).toEqual([0, 50]);
+    expect(node.box.x).toBeCloseTo(0, 3);
+    expect(node.box.width).toBeCloseTo(12.24, 3);
+    expect(node.box.height).toBeGreaterThan(10);
+  });
+
+  test("start and align place the text relative to a fraction of the path", () => {
+    const node = textOf(along({ start: 0.5, align: "center" }));
+
+    expect(node.lines[0]!.runs[0]!.at[0]).toBeCloseTo(83.88, 3);
+  });
+
+  test("emits a textPath on a path in defs, with startOffset and text-anchor", () => {
+    const out = emit(along({ start: 0.5, align: "center" }));
+
+    expect(out).toMatch(/<defs>\s*<path d="M0 50L180 50" id="\w+"\/>\s*<\/defs>/);
+    expect(out).toMatch(/<text[^>]*text-anchor="middle"/);
+    expect(out).toMatch(/<textPath href="#\w+" startOffset="90">Hi<\/textPath>/);
+  });
+
+  test("a start track animates startOffset", () => {
+    const out = emit(along({ start: track(0).to(1, span(0, 1), ease.linear) }));
+
+    expect(out).toContain('attributeName="startOffset"');
+    expect(out).toContain('values="0;180"');
+  });
+
+  test("wraps tspans for styled runs inside the textPath", () => {
+    const out = emit(
+      made(() => (
+        <Text key="t" font={space} size={10} fill="#000000" along={circle(30)}>
+          a<Run weight={700}>b</Run>
+        </Text>
+      )),
+    );
+
+    expect(out).toMatch(/<textPath[^>]*><tspan>a<\/tspan><tspan[^>]*>b<\/tspan><\/textPath>/);
+  });
+
+  test("errors name what to change", () => {
+    expect(() => along({ along: line([0, 0], [0, 0]) })).toThrow("has no length");
+    expect(() => along({}, "x".repeat(40))).toThrow(
+      /is 64\.8 longer than the outline it is set along \(.*\)\./,
+    );
+    expect(() => along({ width: 50 })).toThrow("takes no width");
+    expect(() => along({}, "a\nb")).toThrow("takes one line, but its text has 2");
   });
 });

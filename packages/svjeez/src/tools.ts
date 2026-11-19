@@ -1,12 +1,6 @@
 export { svg, type SvgOptions } from "./svg/svg";
 
-export {
-  diagnose,
-  type Backend,
-  type Diagnostic,
-  type Feature,
-  type Support,
-} from "./model/backend";
+export type { Backend, Diagnostic, Feature, LaneReport, Support } from "./model/backend";
 
 export type { SceneOptions } from "./author/lower";
 
@@ -14,11 +8,9 @@ export type {
   Child,
   Common,
   Framed,
-  ImageProps,
-  InstanceProps,
+  PictureProps,
   RunProps,
   RunStyle,
-  SceneSymbol,
   SequenceProps,
   ShapeProps,
   StrokeProps,
@@ -36,22 +28,15 @@ export type {
   Token,
 } from "./author/values";
 
-export type { LayerValues, Layers, Motion } from "./author/track";
+export type { Layer, LayerValues, Layers } from "./author/track";
 
 export type { TextContent } from "./author/count";
 
-export type {
-  DrawOptions,
-  EnterOptions,
-  ExitOptions,
-  SampledMotionOptions,
-  SampledOptions,
-  WiggleOptions,
-} from "./author/recipes";
+export type { EnterOptions, ExitOptions, SampledOptions, WiggleOptions } from "./author/recipes";
 
 export type { PictureData } from "./author/picture";
 
-export type { Font, FontFamily, FontOptions, FontStyle, FontValue } from "./font/font";
+export type { Font, FontFamily, FontOptions, FontValue } from "./font/font";
 
 export type { Anchor, Edge, Place } from "./author/refs";
 
@@ -76,9 +61,7 @@ export type { Ease, Seconds } from "./model/time";
 
 export type { Spring, SpringOptions } from "./author/spring";
 
-export type { OpenSpanned, Spanned, When } from "./author/span";
-
-export type { MoveOptions, Moves, Point, StrokeMoves } from "./author/verbs";
+export type { OpenSpan, When } from "./author/span";
 
 export type { Derived, MapOptions, Source, Together } from "./author/derived";
 
@@ -93,7 +76,7 @@ export type {
   Stops,
 } from "./author/paint";
 
-export type { Effect, ShadowOptions } from "./author/effects";
+export type { AdjustOptions, DisplaceOptions, Effect, ShadowOptions } from "./author/effects";
 
 export type { MorphOptions } from "./author/morph";
 
@@ -106,14 +89,14 @@ export { SceneError, type Where } from "./model/scene-error";
 export { nodeName } from "./model/naming";
 
 export {
-  inspect,
   RULES,
   type Code,
-  type Finding,
-  type InspectOptions,
+  type Problem,
   type Related,
   type Severity,
-} from "./check/inspect";
+} from "./check/inspect-context";
+
+export { check, type Check, type CheckOptions } from "./check/report";
 
 export {
   describe,
@@ -126,3 +109,25 @@ export {
 export type * as Model from "./model/ir";
 
 export type { Scene } from "./model/ir";
+
+export {
+  defaults,
+  parse,
+  type ChoiceParam,
+  type ColorParam,
+  type EasingParam,
+  type Extras,
+  type Fields,
+  type Handles,
+  type ItemValue,
+  type Json,
+  type JsonObject,
+  type ListParam,
+  type NumberParam,
+  type Param,
+  type Range,
+  type ScalarParam,
+  type Schema,
+  type TextParam,
+  type Values,
+} from "./params";

@@ -139,12 +139,12 @@ function parse(file: string, svg: string, kind: IconData["kind"]): IconData {
     throw new Error(`viewBox "${rootAttrs.viewBox}" is not a square from the origin`);
 
   const rootPaint =
-    kind === "fill" ? { fill: "currentColor" } : { fill: "none", stroke: "currentColor" };
+    kind === "solid" ? { fill: "currentColor" } : { fill: "none", stroke: "currentColor" };
 
   for (const [name, value] of Object.entries(rootPaint))
     if (rootAttrs[name] !== value) throw new Error(`<svg> ${name} is "${rootAttrs[name]}"`);
 
-  if (kind === "stroke" && rootAttrs["stroke-width"] !== "2")
+  if (kind === "outline" && rootAttrs["stroke-width"] !== "2")
     throw new Error(`stroke-width is "${rootAttrs["stroke-width"]}"`);
 
   const body = clean.slice(clean.indexOf(">", root.index) + 1);
@@ -184,14 +184,14 @@ const SOURCES: readonly Source[] = [
     pkg: "@tabler/icons",
     out: "tabler.ts",
     folders: [
-      { dir: "icons/outline", kind: "stroke", suffix: "" },
-      { dir: "icons/filled", kind: "fill", suffix: "-filled" },
+      { dir: "icons/outline", kind: "outline", suffix: "" },
+      { dir: "icons/filled", kind: "solid", suffix: "-filled" },
     ],
   },
   {
     pkg: "lucide-static",
     out: "lucide.ts",
-    folders: [{ dir: "icons", kind: "stroke", suffix: "" }],
+    folders: [{ dir: "icons", kind: "outline", suffix: "" }],
   },
 ];
 

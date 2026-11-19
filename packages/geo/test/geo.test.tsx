@@ -79,7 +79,7 @@ describe("project", () => {
     const to = map.point([151.21, -33.87]);
     const route = map.route([-0.13, 51.51], [151.21, -33.87]);
 
-    expect(route).toMatchObject({ kind: "polygon", closed: false });
+    expect(route).toMatchObject({ kind: "points", closed: false });
 
     if (!("points" in route)) throw new Error("a route is a polyline");
     expect(route.points[0]).toEqual(from);

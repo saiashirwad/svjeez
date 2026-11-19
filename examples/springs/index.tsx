@@ -2,12 +2,10 @@ import {
   Group,
   Shape,
   Text,
-  canvas,
   circle,
   ease,
   enter,
   exit,
-  motion,
   rect,
   scene,
   span,
@@ -75,7 +73,7 @@ const Card = (): SceneElement => (
     offset={[380, 92]}
     motion={[
       enter(span(0.5, 0.2)),
-      motion({ scale: 0.2 }).to({ scale: 1 }, span(0.5, pop.settle), pop),
+      { scale: track(0.2).to(1, span(0.5, pop.settle), pop) },
       exit(span(5.3, 0.4), { to: { opacity: 0, scale: 0.9 }, curve: ease.in }),
     ]}
   >
@@ -99,9 +97,9 @@ export default scene(
     title: "Springs",
     desc: "A dot springs between three targets, each move starting before the last lands, beside the same moves with ease.out. A card pops in on a springy scale.",
     theme,
-    reducedMotion: 3,
+    still: 3,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Lane y={24} label="ease.spring" curve={wobble} />

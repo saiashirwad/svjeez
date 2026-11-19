@@ -4,8 +4,7 @@ import {
   Align,
   Arrow,
   Group,
-  Image,
-  Instance,
+  Picture,
   Shape,
   Stack,
   Text,
@@ -17,13 +16,12 @@ import {
   path,
   picture,
   polygon,
-  polyline,
   rect,
   ref,
   scene,
   span,
-  symbol,
   track,
+  type Vec,
   type SceneElement,
 } from "svjeez";
 import {
@@ -84,7 +82,6 @@ describe("at places the anchor point of the box", () => {
 
     expect(found.rect).toEqual([10, 10, 20, 10]);
     expect(found.circle).toEqual([10, 10, 10, 10]);
-    expect(found.centered).toEqual([5, 5, 10, 10]);
     expect(found.corner).toEqual([80, 40, 20, 10]);
     expect(found.share).toEqual([90, 40, 20, 10]);
     expect(found.arc).toEqual([32, 32, 16, 16]);
@@ -109,11 +106,7 @@ describe("at places the anchor point of the box", () => {
         <Shape
           fill="#000000"
           key="poly"
-          geometry={polygon([
-            [5, 5],
-            [15, 5],
-            [10, 15],
-          ])}
+          geometry={polygon([5, 5], [15, 5], [10, 15])}
           at={[50, 50]}
           anchor="center"
         />
@@ -167,16 +160,10 @@ describe("at places the anchor point of the box", () => {
     expect(found.right!.y + found.right!.height).toBeCloseTo(50);
   });
 
-  test("an image, an instance and a group are placed by their boxes; offset places an instance's or group's [0, 0] instead", () => {
-    const dot = symbol(() => <Shape geometry={rect(10, 10)} at={[5, 5]} fill="#FF0000" />);
-
+  test("an image and a group are placed by their boxes; offset places a group's [0, 0] instead", () => {
     const found = boxes(() => (
       <Group>
-        <Image key="image" src={pic} at={[10, 10]} anchor="center" />
-        <Instance key="boxed" of={dot} at={[50, 50]} />
-        <Instance key="centered" of={dot} at={[50, 50]} anchor="center" />
-        <Instance key="frame" of={dot} offset={[50, 50]} />
-        <Instance key="home" of={dot} />
+        <Picture key="image" src={pic} at={[10, 10]} anchor="center" />
         <Group key="group" at={[20, 30]}>
           <Shape fill="#000000" key="a" geometry={rect(10, 10)} at={[5, 5]} />
           <Shape fill="#000000" key="b" geometry={rect(10, 10)} at={[35, 15]} />
@@ -193,10 +180,6 @@ describe("at places the anchor point of the box", () => {
     ));
 
     expect(found.image).toEqual([-10, 0, 40, 20]);
-    expect(found.boxed).toEqual([50, 50, 10, 10]);
-    expect(found.centered).toEqual([45, 45, 10, 10]);
-    expect(found.frame).toEqual([55, 55, 10, 10]);
-    expect(found.home).toEqual([5, 5, 10, 10]);
     expect(found["group/a"]).toEqual([20, 30, 10, 10]);
     expect(found["group/b"]).toEqual([50, 40, 10, 10]);
     expect(found["framed/a"]).toEqual([25, 35, 10, 10]);
@@ -253,12 +236,13 @@ describe("at places the anchor point of the box", () => {
 describe("curved motion keeps its curve when the anchor point is not the frame's origin", () => {
   test("a box centered on a point that goes round, and one that follows it, stay on it", () => {
     const angle = track(0).to(360, span(0, 2), ease.inOut);
-    const dot = ref("dot");
+    const dot = ref();
 
     const model = made(() => (
       <Group>
         <Shape
           fill="#000000"
+          key="dot"
           ref={dot}
           geometry={rect(6, 6)}
           anchor="center"
@@ -324,21 +308,13 @@ describe("a box is what the shape paints", () => {
   });
 
   test("joins: a miter reaches its tip, unless that is past the limit of 4, a bevel and a round don't", () => {
-    const triangle = polygon([
-      [0, 0],
-      [100, 0],
-      [50, 100],
-    ]);
+    const triangle = polygon([0, 0], [100, 0], [50, 100]);
 
     expect(stroked(triangle, { width: 10 })[3]).toBeCloseTo(116.18, 1);
     expect(stroked(triangle, { width: 10, join: "round" })).toEqual([-5, -5, 110, 110]);
-    expect(stroked(triangle, { width: 10, join: "bevel" })[3]).toBeCloseTo(107.24, 1);
+    expect(stroked(triangle, { width: 10, join: "flat" })[3]).toBeCloseTo(107.24, 1);
 
-    const spike = polyline([
-      [0, 0],
-      [100, 5],
-      [0, 10],
-    ]);
+    const spike = line([0, 0], [100, 5], [0, 10]);
 
     expect(stroked(spike, { width: 10 })[2]).toBeLessThan(101);
   });
@@ -363,11 +339,12 @@ describe("a box is what the shape paints", () => {
   });
 
   test("anchors on a ref are on the painted box, and so is a hit", () => {
-    const card = ref("card");
+    const card = ref();
 
     const model = made(() => (
       <Group>
         <Shape
+          key="card"
           ref={card}
           geometry={rect(40, 20)}
           at={[10, 10]}
@@ -382,22 +359,18 @@ describe("a box is what the shape paints", () => {
   });
 });
 
-describe("verbs move the anchor point", () => {
-  test("move takes the point at names to the point given; move to an anchor lands it, or a point measured from it", () => {
-    const dot = ref("dot");
-    const pin = ref("pin");
+describe("tracks move the anchor point", () => {
+  test("a track to a point moves the point at names there; to an anchor lands it", () => {
+    const pin = ref();
 
     const model = made(() => {
-      const [one, two, three] = span(0, 1).chain(1, 1);
-
-      dot.move([100, 50], one);
-      dot.move(pin, two);
-      dot.move(pin, three, undefined, { point: [5, 0] });
+      const [one, two] = span(0, 1).chain(1);
+      const dot = track<Vec>([20, 20]).to([100, 50], one).to(pin.center, two);
 
       return (
         <Group>
-          <Shape fill="#000000" ref={pin} geometry={rect(20, 20)} at={[150, 10]} />
-          <Shape fill="#000000" ref={dot} geometry={circle(5)} at={[20, 20]} anchor="center" />
+          <Shape fill="#000000" key="pin" ref={pin} geometry={rect(20, 20)} at={[150, 10]} />
+          <Shape fill="#000000" key="dot" geometry={circle(5)} at={dot} anchor="center" />
         </Group>
       );
     });
@@ -410,18 +383,16 @@ describe("verbs move the anchor point", () => {
 
     expect(at(1)).toEqual([95, 45]);
     expect(at(2)).toEqual([155, 15]);
-    expect(at(3)).toEqual([150, 15]);
   });
 
-  test("a path drawn by its coordinates starts a move from where they put its box", () => {
-    const mark = ref("mark");
-
+  test("a path drawn by its coordinates starts a track from where they put its box", () => {
     const model = made(() => {
-      mark.move([50, 40], span(0, 1));
+      const mark = track<Vec>([40, 40]).to([50, 40], span(0, 1));
 
       return (
         <Shape
-          ref={mark}
+          key="mark"
+          at={mark}
           geometry={path().moveTo([40, 40]).lineTo([60, 50])}
           stroke={{ color: "#000000", width: 0 }}
         />
@@ -509,11 +480,11 @@ describe("the nine places", () => {
   ] as const;
 
   test("each is a ref's anchor and an anchor string, naming the same point", () => {
-    const card = ref("card");
+    const card = ref();
 
     const found = boxes(() => (
       <Group>
-        <Shape ref={card} geometry={rect(40, 20)} at={[60, 30]} fill="#000000" />
+        <Shape key="card" ref={card} geometry={rect(40, 20)} at={[60, 30]} fill="#000000" />
         {PLACES.map(([place, property]) => (
           <Shape
             key={place}
@@ -558,8 +529,6 @@ describe("origin is named on the box, as anchor is", () => {
     Object.fromEntries(made(build).root.children.map((node) => [node.key, node.origin]));
 
   test("a place or a point from the box's top-left, the same for every kind", () => {
-    const dot = symbol(() => <Shape geometry={rect(10, 10)} at={[5, 5]} fill="#FF0000" />);
-
     const found = origins(() => (
       <Group>
         <Shape
@@ -579,8 +548,7 @@ describe("origin is named on the box, as anchor is", () => {
         <Text key="text" font={mono} size={10} fill="#000000" origin="bottom-right">
           Hi
         </Text>
-        <Image key="image" src={pic} origin={[10, 5]} />
-        <Instance key="instance" of={dot} origin="top-left" />
+        <Picture key="image" src={pic} origin={[10, 5]} />
         <Group key="group" origin={[2, 0]}>
           <Shape geometry={rect(10, 10)} at={[5, 5]} fill="#000000" />
         </Group>
@@ -592,7 +560,6 @@ describe("origin is named on the box, as anchor is", () => {
     expect(found.ring).toEqual([0, 0]);
     expect(found.line).toEqual([10, 50]);
     expect(found.image).toEqual([10, 5]);
-    expect(found.instance).toEqual([5, 5]);
     expect(found.group).toEqual([7, 5]);
 
     const text = made(() => (
@@ -634,7 +601,6 @@ describe("origin is named on the box, as anchor is", () => {
       </Group>
     ));
 
-    expect(found.frame).toEqual([0, 0]);
     expect(found.anchored).toEqual([40, 20]);
     expect(found.dot).toEqual([0, 0]);
     expect(found.path).toEqual([0, 0]);
@@ -750,20 +716,5 @@ describe("errors say what to write", () => {
         <Arrow from={[0, 0]} to={[10, 10]} stroke={{ color: "#000000" }} anchor="center" />
       )),
     ).toThrow("<Arrow> is placed by its from and to, so it takes no anchor.");
-  });
-});
-
-describe("symbols", () => {
-  test("a layout container inside a symbol is laid out, and a group's anchor applies there", () => {
-    const row = symbol(() => (
-      <Stack direction="row" gap={2} at={[0, 0]} anchor="center">
-        <Shape fill="#000000" geometry={rect(10, 10)} />
-        <Shape fill="#000000" geometry={rect(10, 10)} />
-      </Stack>
-    ));
-
-    expect(boxes(() => <Instance key="i" of={row} offset={[100, 50]} />).i).toEqual([
-      89, 45, 22, 10,
-    ]);
   });
 });

@@ -4,8 +4,7 @@ const KINDS = {
   group: "Group",
   shape: "Shape",
   text: "Text",
-  image: "Image",
-  instance: "Instance",
+  picture: "Picture",
 } as const;
 
 export const tagOf = (kind: SceneNode["kind"]): string => `<${KINDS[kind]}>`;

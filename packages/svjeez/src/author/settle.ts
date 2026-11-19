@@ -1,4 +1,4 @@
-import { named, namedAt, whereOf } from "./names";
+import type { Names } from "./names";
 import { SceneError, located } from "../model/scene-error";
 
 import { EPSILON, type Seconds } from "../model/time";
@@ -12,11 +12,11 @@ import { isTrack } from "./track";
 import { lookOf, paintedBoxOf } from "../model/painted";
 import { PLACE_LIST, PLACES, homed, homeOf, pinned, type TextAnchorPlace } from "./pin";
 
-const laidOut = <T>(key: string, run: () => T): T => {
+const laidOut = <T>(names: Names, key: string, run: () => T): T => {
   try {
     return run();
   } catch (error) {
-    throw error instanceof Error ? located(error, whereOf(key)) : error;
+    throw error instanceof Error ? located(error, names.whereOf(key)) : error;
   }
 };
 
@@ -88,28 +88,17 @@ export interface Notes {
   readonly aims: Map<string, Aim>;
   readonly onAnchor: Set<string>;
   readonly resized: Set<string>;
+  readonly names: Names;
 }
 
-export const notes = (): Notes => ({
+export const notes = (names: Names): Notes => ({
   nodes: new Map(),
   refs: new Map(),
   aims: new Map(),
   onAnchor: new Set(),
   resized: new Set(),
+  names,
 });
-
-export const aimNow = (aim: Aim, node: SceneNode, home: Vec): Animated<Vec> =>
-  homed(
-    aim(
-      () => {
-        throw new SceneError(
-          `${named(node.key)} is moved onto an anchor before anchors are known.`,
-        );
-      },
-      () => ({ box: node.box, origin: node.origin, layers: node.layers, home }),
-    ),
-    home,
-  );
 
 export const noteResized = (
   into: Notes,
@@ -149,22 +138,23 @@ export const note = (
   backdrop?: BackdropOf,
 ): void => {
   const { ref } = props;
+  const { names } = into;
   const point = props.at ?? props.offset;
 
   if (ref) {
     if (ref.within)
       throw new SceneError(
-        `${named(key)} is given ref={${ref.label}}, but a part is found inside its node, never given.`,
+        `${names.named(key)} is given ref={${ref.label}}, but a part is found inside its node, never given.`,
         "Give the node a ref() of its own.",
-        whereOf(key),
+        names.whereOf(key),
       );
     const taken = into.refs.get(ref);
 
     if (taken !== undefined && taken !== key)
       throw new SceneError(
-        `The ref "${ref.key}" is on two nodes, ${namedAt(taken)} and ${named(key)}.`,
+        `A ref is on two nodes, ${names.namedAt(taken)} and ${names.named(key)}.`,
         "A ref names one node: make another with ref().",
-        whereOf(key),
+        names.whereOf(key),
       );
     into.refs.set(ref, key);
   }
@@ -261,6 +251,7 @@ export type Origin = Place | Vec | "at";
 const isOffset = (origin: Origin): origin is Vec => Array.isArray(origin);
 
 export const originOf = (
+  names: Names,
   origin: Origin | undefined,
   box: Box,
   key: string,
@@ -274,9 +265,9 @@ export const originOf = (
 
   if (!Object.hasOwn(PLACES, origin))
     throw new SceneError(
-      `origin on ${named(key)} takes a place, one of ${PLACE_LIST}, a point measured from its box's top-left, such as [20, 0], or "at" for the point its at places, got ${JSON.stringify(origin)}.`,
+      `origin on ${names.named(key)} takes a place, one of ${PLACE_LIST}, a point measured from its box's top-left, such as [20, 0], or "at" for the point its at places, got ${JSON.stringify(origin)}.`,
       undefined,
-      whereOf(key),
+      names.whereOf(key),
     );
   const [u, v] = PLACES[origin];
 
@@ -315,6 +306,7 @@ export const outward = (
 };
 
 const inward = (
+  names: Names,
   p: Vec,
   at: Vec,
   origin: Vec,
@@ -332,9 +324,9 @@ const inward = (
 
     if (Math.abs(sx) < EPSILON || Math.abs(sy) < EPSILON)
       throw new SceneError(
-        `An anchor is resolved inside ${named(key)}, which is scaled to 0 at ${t}s, so no point maps into it.`,
+        `An anchor is resolved inside ${names.named(key)}, which is scaled to 0 at ${t}s, so no point maps into it.`,
         "Attach to a node outside it.",
-        whereOf(key),
+        names.whereOf(key),
       );
 
     x = origin[0] + (dx * Math.cos(angle) - dy * Math.sin(angle)) / sx;
@@ -351,7 +343,7 @@ const isPoint = (end: unknown): end is Vec =>
 
 export const settle = <G extends SceneNode & { readonly kind: "group" }>(
   root: G,
-  { nodes, refs, aims, resized }: Notes,
+  { nodes, refs, aims, resized, names }: Notes,
   duration: Seconds,
 ): G => {
   const top = draft(root, undefined, nodes);
@@ -368,9 +360,9 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
   const loop = (d: Draft, what: string): never => {
     throw new SceneError(
-      `${named(d.node.key)} can't be placed: its ${what} depends on itself, through an anchor or a container.`,
+      `${names.named(d.node.key)} can't be placed: its ${what} depends on itself, through an anchor or a container.`,
       "Anchor it to a node outside it, or give a node that turns or scales an origin.",
-      whereOf(d.node.key),
+      names.whereOf(d.node.key),
     );
   };
 
@@ -384,8 +376,9 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
     if (key === undefined)
       throw new SceneError(
-        `${anchor.label} names the ref "${owner.key}", which is on no node.`,
+        `${anchor.label} is a ref that is on no node.`,
         "Give one node ref={…} with it.",
+        owner.source && { source: owner.source },
       );
 
     if (!within) return byKey.get(key)!;
@@ -396,9 +389,9 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     const near = byKey.get(key)!.children.map((child) => child.node.key.slice(key.length + 1));
 
     throw new SceneError(
-      `${anchor.label} names no node: ${named(key)} has no part "${within.path.join("/")}".${near.length > 0 ? ` The parts right inside it are ${near.map((name) => `"${name}"`).join(", ")}.` : " It has none."}`,
+      `${names.named(key)} has no part "${within.path.join("/")}", but ${anchor.label} asks for it.${near.length > 0 ? ` The parts right inside it are ${near.map((name) => `"${name}"`).join(", ")}.` : " It has none."}`,
       undefined,
-      whereOf(key),
+      names.whereOf(key),
     );
   };
 
@@ -424,9 +417,9 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
         if (!isPoint(end))
           throw new SceneError(
-            `${named(d.node.key)} is given ${isTrack(end) || isDerived(end) ? "a track" : String(end)} for its ${i === 0 ? "from" : "to"}, but an end is a point or an anchor.`,
+            `${names.named(d.node.key)} is given ${isTrack(end) || isDerived(end) ? "a track" : String(end)} for its ${i === 0 ? "from" : "to"}, but an end is a point or an anchor.`,
             `To move an end, attach it to a ref's anchor, as in ${i === 0 ? "from" : "to"}={card.left}, and move the node it is attached to.`,
-            whereOf(d.node.key),
+            names.whereOf(d.node.key),
           );
 
         return end;
@@ -453,19 +446,19 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
         if (changing !== undefined)
           throw new SceneError(
-            `${named(d.node.key)} lays out ${named(changing)}, which a morph() resizes, brings in or takes away inside a <Sequence>, so the ${asked.label} can't make room for it.`,
+            `${names.named(d.node.key)} lays out ${names.named(changing)}, which a morph() resizes, brings in or takes away inside a <Sequence>, so the ${asked.label} can't make room for it.`,
             `Put the ${asked.label} inside the <Sequence>, or inside the morph's states, so each state is laid out on its own.`,
-            whereOf(d.node.key),
+            names.whereOf(d.node.key),
           );
 
-        placedInside(child.node.key, child.note, asked.label);
+        placedInside(names, child.node.key, child.note, asked.label);
         measure(child);
       }
 
-      const { slots, box, sizes } = laidOut(d.node.key, () =>
+      const { slots, box, sizes } = laidOut(names, d.node.key, () =>
         asked.arrange(
           d.children.map((child) => child.box),
-          named(d.node.key),
+          names.named(d.node.key),
         ),
       );
 
@@ -483,7 +476,9 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
       const folded = folds(d);
 
       const home =
-        folded && !d.homed ? pinned(d.note?.pin, box, `${named(d.node.key)}`) : ([0, 0] as const);
+        folded && !d.homed
+          ? pinned(d.note?.pin, box, `${names.named(d.node.key)}`)
+          : ([0, 0] as const);
 
       const [x, y] = folded ? [atRest(d.at)[0] - home[0], atRest(d.at)[1] - home[1]] : [0, 0];
 
@@ -518,11 +513,13 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     }
 
     d.origin = originOf(
+      names,
       d.note?.origin,
       d.box,
       d.node.key,
       () =>
-        pivot ?? homeOf(d.note?.kind ?? d.node.kind, d.node, d.note?.pin, d.box, unmoved(d.note)),
+        pivot ??
+        homeOf(names, d.note?.kind ?? d.node.kind, d.node, d.note?.pin, d.box, unmoved(d.note)),
     );
     d.measuring = 2;
   };
@@ -547,7 +544,14 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     const home = (): Vec => {
       measure(d);
 
-      return homeOf(d.note?.kind ?? d.node.kind, d.node, d.note?.pin, d.box, unmoved(d.note));
+      return homeOf(
+        names,
+        d.note?.kind ?? d.node.kind,
+        d.node,
+        d.note?.pin,
+        d.box,
+        unmoved(d.note),
+      );
     };
 
     if (anchor) d.at = homed(resolve(anchor, d.parent!), home());
@@ -614,7 +618,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
       for (const d of up) p = outward(p, valueAt(d.at, t, blendVec), d.origin, d.node.layers, t);
 
       for (const d of down)
-        p = inward(p, valueAt(d.at, t, blendVec), d.origin, d.node.layers, t, d.node.key);
+        p = inward(names, p, valueAt(d.at, t, blendVec), d.origin, d.node.layers, t, d.node.key);
 
       return p;
     };
@@ -701,6 +705,7 @@ export const outsider = (node: SceneNode, notes: Notes): string | undefined => {
 };
 
 export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode[] => {
+  const { names } = into;
   const first = new Map<string, Note | undefined>();
 
   const arranged = (node: SceneNode, size?: Size): SceneNode => {
@@ -723,16 +728,11 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
 
     const pin = (box: Box): Animated<Vec> => {
       if (note?.framed || note?.anchor || outsider(node, into) !== undefined) return node.at;
-      const aim = into.aims.get(node.key);
 
-      if (!note?.placed && !aim) return node.at;
+      if (!note?.placed) return node.at;
       into.nodes.set(node.key, { ...into.nodes.get(node.key)!, pinned: true });
-      const home = pinned(note?.pin, box, `${named(node.key)}`);
 
-      if (!aim) return homed(node.at, home);
-      into.aims.delete(node.key);
-
-      return aimNow(aim, { ...node, box }, home);
+      return homed(node.at, pinned(note?.pin, box, `${names.named(node.key)}`));
     };
 
     if (asked?.kind !== "arrange") {
@@ -743,28 +743,28 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
         children,
         box,
         at: pin(box),
-        origin: originOf(note?.origin, box, node.key, () =>
-          homeOf(node.kind, node, note?.pin, box, unmoved(note)),
+        origin: originOf(names, note?.origin, box, node.key, () =>
+          homeOf(names, node.kind, node, note?.pin, box, unmoved(note)),
         ),
       };
     }
 
     for (const child of children) {
-      placedInside(child.key, into.nodes.get(child.key), asked.label);
+      placedInside(names, child.key, into.nodes.get(child.key), asked.label);
       const inside = outsider(child, into);
 
       if (inside !== undefined)
         throw new SceneError(
-          `A ${asked.label} in a morph() state holds ${named(inside)}, which is placed by an anchor, a move() onto an anchor, or as an arrow's end. A morph arranges each state on its own, before anchors are known.`,
+          `A ${asked.label} in a morph() state holds ${names.named(inside)}, which is placed by an anchor, a track going to an anchor, or as an arrow's end. A morph arranges each state on its own, before anchors are known.`,
           `Attach it outside the ${asked.label}, or outside the morph.`,
-          whereOf(inside),
+          names.whereOf(inside),
         );
     }
 
-    const { slots, box, sizes } = laidOut(node.key, () =>
+    const { slots, box, sizes } = laidOut(names, node.key, () =>
       asked.arrange(
         children.map((child) => child.box),
-        named(node.key),
+        names.named(node.key),
       ),
     );
 
@@ -787,8 +787,8 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
       ...node,
       box,
       at: pin(box),
-      origin: originOf(note!.origin, box, node.key, () =>
-        homeOf(node.kind, node, note!.pin, box, unmoved(note)),
+      origin: originOf(names, note!.origin, box, node.key, () =>
+        homeOf(names, node.kind, node, note!.pin, box, unmoved(note)),
       ),
       children: [
         ...behind(backdrop, node, box),
@@ -805,31 +805,39 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
 
 const unmoved = (note: Note | undefined): boolean => note?.framed === true || note?.still === true;
 
-const placedInside = (key: string, note: Note | undefined, label: string): void => {
+const placedInside = (names: Names, key: string, note: Note | undefined, label: string): void => {
   if (note?.placed) {
     const prop = note.framed ? "offset" : "at";
 
     throw new SceneError(
-      `${named(key)} has its own ${prop}, but the ${label} it sits in places it.`,
+      `${names.named(key)} has its own ${prop}, but the ${label} it sits in places it.`,
       `Drop its ${prop}; to nudge it, give it a motion layer with an offset.`,
-      whereOf(key),
+      names.whereOf(key),
     );
   }
 
   if (note?.pin !== undefined)
     throw new SceneError(
-      `${named(key)} has anchor=${JSON.stringify(note.pin)}, but the ${label} it sits in lines up its box itself.`,
+      `${names.named(key)} has anchor=${JSON.stringify(note.pin)}, but the ${label} it sits in lines up its box itself.`,
       `Drop anchor, and say where children sit with the ${label}'s own align, justify or place.`,
-      whereOf(key),
+      names.whereOf(key),
     );
 };
 
-const placing = (anchor: Anchor | undefined): string =>
-  anchor ? `at ${anchor.label}` : "at a point";
+const placing = (
+  names: Names,
+  anchor: Anchor | undefined,
+  refs: ReadonlyMap<Ref, string>,
+): string => {
+  if (!anchor) return "at a point";
+  const owner = anchor.of === "canvas" ? undefined : refs.get(anchor.of.within?.ref ?? anchor.of);
+
+  return `at ${owner === undefined ? anchor.label : anchor.label.replace(/^ref\(\)/, names.named(owner))}`;
+};
 
 export const sameAnchors = (
   list: readonly SceneNode[],
-  { nodes }: Notes,
+  { nodes, refs, names }: Notes,
   seen: Map<string, Anchor | undefined>,
 ): void => {
   const visit = (node: SceneNode): void => {
@@ -843,9 +851,9 @@ export const sameAnchors = (
 
       if (!alike)
         throw new SceneError(
-          `${named(node.key)} is placed ${placing(before)} in one morph() state and ${placing(anchor)} in another. A morph blends points, not anchors.`,
+          `${names.named(node.key)} is placed ${placing(names, before, refs)} in one morph() state and ${placing(names, anchor, refs)} in another. A morph blends points, not anchors.`,
           "Place it the same way in every state, or put it in a <Group> placed at the anchor in every state and move it inside.",
-          whereOf(node.key),
+          names.whereOf(node.key),
         );
     } else seen.set(node.key, anchor);
 

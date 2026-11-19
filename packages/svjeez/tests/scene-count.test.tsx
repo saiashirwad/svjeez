@@ -19,7 +19,7 @@ import { restyle } from "svjeez/page";
 import {
   describe as described,
   SceneError,
-  inspect,
+  check,
   isLane,
   svg,
   valueAt,
@@ -37,7 +37,7 @@ import { ease as modelEase } from "../src/model/time";
 const mono = await font.load(new URL("./fixtures/JetBrainsMono.ttf", import.meta.url));
 
 const made = (build: () => SceneElement, duration = 4, loop = true): Model.Scene =>
-  scene({ size: [200, 60], duration, title: "Count", loop, reducedMotion: 3.5 }, build);
+  scene({ size: [200, 60], duration, title: "Count", loop, still: 3.5 }, build);
 
 const find = (model: Model.Scene, key: string): Model.SceneNode => {
   const visit = (node: Model.SceneNode): Model.SceneNode | undefined =>
@@ -72,7 +72,7 @@ const glyphsAt = (model: Model.Scene, key: string, t: number) => {
   if (inner.kind !== "group") throw new Error("expected the clipped digits");
   const clip = inner.clip;
 
-  if (clip === undefined || isLane(clip) || clip.kind !== "polygon")
+  if (clip === undefined || isLane(clip) || clip.kind !== "points")
     throw new Error("expected a clip");
   const [top, bottom] = [clip.points[0]![1], clip.points[2]![1]];
   const glyphs: { x: number; text: string }[] = [];
@@ -293,12 +293,12 @@ describe("a counting Text", () => {
       </Text>
     ));
 
-    const seams = inspect(once).filter((finding) => finding.code === "loop-seam");
+    const seams = check(once).problems.filter((finding) => finding.code === "loop-seam");
 
     expect(seams.map((finding) => finding.message)).toEqual([
       '<Text> "n" shows "50" at the end and jumps to "0" when the loop starts again at 0s.',
     ]);
-    expect(inspect(model).filter((finding) => finding.severity !== "info")).toEqual([]);
+    expect(check(model).problems.filter((finding) => finding.severity !== "info")).toEqual([]);
   });
 
   test("the same count in every state of a morph moves with it; a different one is an error", () => {

@@ -1,4 +1,4 @@
-import { pathData, type Geometry } from "svjeez";
+import { path, type Geometry } from "svjeez";
 import { simplifyPoints } from "./simplify.ts";
 
 type Tenths = readonly [number, number];
@@ -64,7 +64,7 @@ export class Outline {
   geometry(): Geometry | undefined {
     this.#flush();
 
-    return this.#out ? pathData(this.#out) : undefined;
+    return this.#out ? path.parse(this.#out) : undefined;
   }
 
   #flush(): void {

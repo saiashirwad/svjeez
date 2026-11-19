@@ -18,14 +18,16 @@ import { readSource } from "../author/source";
 
 export type FontFormat = "ttf" | "otf" | "woff" | "woff2";
 
-export type FontStyle = "normal" | "italic";
+/** How CSS spells a face's slant. */
+export const cssFontStyle = (face: { readonly italic: boolean }): "normal" | "italic" =>
+  face.italic ? "italic" : "normal";
 
 export type { Metrics as FontMetrics };
 
 export interface FontOptions {
   readonly family?: string;
   readonly weight?: number;
-  readonly style?: FontStyle;
+  readonly italic?: boolean;
   readonly fallback?: readonly string[];
   readonly subset?: boolean;
   readonly ligatures?: boolean;
@@ -95,7 +97,7 @@ export class Font {
   readonly #embeds = new Map<string, `data:${string}`>();
   readonly family: string;
   readonly weight: number;
-  readonly style: FontStyle;
+  readonly italic: boolean;
   readonly fallback: readonly string[];
   readonly subset: boolean;
   readonly ligatures: boolean;
@@ -112,7 +114,7 @@ export class Font {
     this.format = format;
     this.family = options.family ?? (readable && name(readable, 16, 1)) ?? `font-${hash(bytes)}`;
     this.weight = options.weight ?? (readable ? weightOf(readable) : 400);
-    this.style = options.style ?? (readable && isItalic(readable) ? "italic" : "normal");
+    this.italic = options.italic ?? (readable !== undefined && isItalic(readable));
     this.fallback = options.fallback ?? [
       readable && isFixedPitch(readable) ? "monospace" : "sans-serif",
     ];
@@ -235,8 +237,8 @@ export class FontFamily {
     readonly fallback: readonly string[],
   ) {}
 
-  face(weight = 400, style: FontStyle = "normal"): Font {
-    const styled = this.faces.filter((face) => face.style === style);
+  face(weight = 400, italic = false): Font {
+    const styled = this.faces.filter((face) => face.italic === italic);
     const pool = styled.length > 0 ? styled : this.faces;
     const exact = pool.find((face) => face.weight === weight);
 
@@ -288,7 +290,7 @@ export const fontFaces = (value: FontValue): FontFaces => {
 };
 
 export const fontFaceRule = (name: string, font: Font, texts: readonly string[] = []): string =>
-  `@font-face{font-family:${cssString(name)};src:url(${font.embed(texts)}) format('${FORMATS[font.format].css}');font-weight:${font.weight};font-style:${font.style}}`;
+  `@font-face{font-family:${cssString(name)};src:url(${font.embed(texts)}) format('${FORMATS[font.format].css}');font-weight:${font.weight};font-style:${cssFontStyle(font)}}`;
 
 const SUPPORTED = Object.keys(FORMATS).join(", ");
 
@@ -322,11 +324,11 @@ export const font = Object.assign(
       const seen = new Map<string, Font>();
 
       for (const face of faces) {
-        const key = `${face.weight} ${face.style}`;
+        const key = `${face.weight} ${cssFontStyle(face)}`;
 
         if (seen.has(key))
           throw new SceneError(
-            `font.family() got two ${face.style} faces of weight ${face.weight}. Each weight and style needs its own file.`,
+            `font.family() got two ${face.italic ? "italic" : "upright"} faces of weight ${face.weight}. Each weight, upright and italic, needs its own file.`,
           );
         seen.set(key, face);
       }

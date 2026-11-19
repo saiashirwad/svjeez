@@ -1,5 +1,5 @@
 import { flowchart } from "@svjeez/diagrams";
-import { Align, Group, Shape, canvas, circle, draw, ease, exit, scene, span, track } from "svjeez";
+import { Align, Group, Shape, circle, ease, exit, scene, span, track } from "svjeez";
 import { mono, theme } from "../theme";
 
 export const chart = flowchart(
@@ -37,7 +37,7 @@ export const chart = flowchart(
   },
   {
     font: mono,
-    size: 13,
+    textSize: 13,
     direction: "LR",
     reveal: span(0.2, 0.3),
     colors: {
@@ -63,9 +63,9 @@ export default scene(
     title: "Review pipeline",
     desc: "A flowchart of an agent review pipeline appears node by node, then a token runs from the opened PR to the posted review.",
     theme,
-    reducedMotion: 8,
+    still: 8,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Align motion={exit(LEAVE)}>
@@ -74,7 +74,7 @@ export default scene(
             <Shape
               geometry={route.geometry}
               stroke={{ color: theme.orange, width: 2.5, cap: "round" }}
-              trim={draw(trip, { curve: ease.linear })}
+              draw={track(0).to(1, trip, ease.linear)}
             />,
           )}
           <Shape

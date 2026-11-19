@@ -7,7 +7,6 @@ import {
   circle,
   ease,
   morph,
-  motion,
   rect,
   ref,
   scene,
@@ -15,9 +14,10 @@ import {
   track,
   type Curve,
   type SceneElement,
+  type Span,
   type Vec,
 } from "svjeez";
-import { boxesOf, isLane, placements, svg, type Model, type Spanned } from "svjeez/tools";
+import { boxesOf, isLane, placements, svg, type Model } from "svjeez/tools";
 import { alongCurve, curveLength, splitCurve } from "../src/model/curve";
 import { blendVec, valueAt } from "../src/model/sample";
 
@@ -66,7 +66,7 @@ const within = (lane: Model.Lane<Vec>): boolean =>
       [key.ease.points[1], key.ease.points[3]].every((y) => y >= 0 && y <= 1),
   );
 
-type Leg = readonly [to: Vec, when: Spanned, curve: Curve];
+type Leg = readonly [to: Vec, when: Span, curve: Curve];
 
 interface Route {
   readonly start: Vec;
@@ -82,11 +82,11 @@ interface Route {
 
 const both = ({ start, legs, finish = {}, inside, duration = 4 }: Route) => {
   let at = track<Vec>(start);
-  let layer = motion({ offset: start });
+  let layer = track<Vec>(start);
 
   for (const [to, when, curve] of legs) {
     at = at.to(to, when, curve);
-    layer = layer.to({ offset: to }, when, curve);
+    layer = layer.to(to, when, curve);
   }
 
   if (finish.repeat) [at, layer] = [at.repeat(finish.repeat), layer.repeat(finish.repeat)];
@@ -103,7 +103,9 @@ const both = ({ start, legs, finish = {}, inside, duration = 4 }: Route) => {
     () => (
       <Group>
         {placed(<Shape key="curved" geometry={circle(4)} anchor="center" at={at} fill={red} />)}
-        {placed(<Shape key="straight" geometry={circle(4)} motion={layer} fill={red} />)}
+        {placed(
+          <Shape key="straight" geometry={circle(4)} motion={{ offset: layer }} fill={red} />,
+        )}
       </Group>
     ),
     duration,
@@ -306,11 +308,12 @@ describe("readers of a curved spring agree with it", () => {
 
   test("an arrow on the anchor of a spring-moved node follows it", () => {
     const model = made(() => {
-      const dot = ref("dot");
+      const dot = ref();
 
       return (
         <Group>
           <Shape
+            key="dot"
             ref={dot}
             geometry={rect(10, 10)}
             at={track<Vec>([0, 0])
@@ -374,15 +377,14 @@ describe("readers of a curved spring agree with it", () => {
 
   test("a move after a cut spring carries on from where the curved spring was cut", () => {
     const model = made(() => {
-      const dot = ref("dot");
-
       const [slide, drop, back] = span(0, 0.5).chain(0.4, 1);
 
-      dot.move([200, 0], slide, ease.linear);
-      dot.move([200, 100], drop, swing);
-      dot.move([150, 100], back);
+      const dot = track<Vec>([0, 0])
+        .to([200, 0], slide, ease.linear)
+        .to([200, 100], drop, swing)
+        .to([150, 100], back);
 
-      return <Shape ref={dot} geometry={circle(4)} anchor="center" fill={red} />;
+      return <Shape key="dot" geometry={circle(4)} anchor="center" at={dot} fill={red} />;
     });
 
     const lane = laneOf(find(model, "dot").at);

@@ -8,80 +8,78 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
 .a{animation-duration:7.8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%,17.949%,100%{opacity:1}33.333%,84.615%{opacity:0}}
-.m1{animation-name:k1;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m1{animation-name:k1}
 @keyframes k2{0%,17.949%,62.821%,100%{opacity:0}33.333%,51.282%{opacity:1}}
-.m2{animation-name:k2;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m2{animation-name:k2}
 @keyframes k3{0%,51.282%,100%{opacity:0}62.821%,84.615%{opacity:1}}
-.m3{animation-name:k3;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m3{animation-name:k3}
 @keyframes k4{0%,17.949%,100%{translate:64px 176px}33.333%,84.615%{translate:64px 140px}}
-.m4{animation-name:k4;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k5{0%,52.051%,100%{scale:1}63.59%,84.615%{scale:0.6}}
-@keyframes k6{0%,52.051%,100%{opacity:1}63.59%,84.615%{opacity:0}}
-.m5{animation-name:k5,k6;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k7{0%,52.821%,100%{fill:var(--blue)}64.359%,84.615%{fill:var(--orange)}}
-@keyframes k8{0%,17.949%,100%{translate:168px 128px}33.333%,52.821%{translate:168px 164px}64.359%,84.615%{translate:272px 149px}}
-.m6{animation-name:k7,k8;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k9{0%,52.821%,100%{translate:185.6px 243.76px}64.359%,84.615%{translate:289.6px 243.76px}}
-.m7{animation-name:k9;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k10{0%,17.949%,100%{fill:var(--blue)}33.333%,84.615%{fill:var(--green)}}
-@keyframes k11{0%,17.949%,100%{translate:272px 153.5px}33.333%,53.59%{translate:272px 101px}65.128%,84.615%{translate:64px 86px}}
-.m8{animation-name:k10,k11;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k12{0%,53.59%,100%{translate:286px 243.76px}65.128%,84.615%{translate:78px 243.76px}}
-.m9{animation-name:k12;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k13{0%,54.359%{translate:376px 191px}65.897%,100%{translate:168px 122px}}
-.m10{animation-name:k13;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k14{0%,54.359%{translate:393.6px 243.76px}65.897%,100%{translate:185.6px 243.76px}}
-.m11{animation-name:k14;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k15{0%,17.949%,100%{scale:0.6}33.333%,84.615%{scale:1}}
-@keyframes k16{0%,17.949%,100%{opacity:0}33.333%,84.615%{opacity:1}}
-.m12{animation-name:k15,k16;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k17{0%,55.128%,100%{fill:var(--raised)}66.667%,84.615%{fill:var(--magenta)}}
-@keyframes k18{0%,17.949%,100%{translate:520px 110px}33.333%,84.615%{translate:472px 90px}}
-.m13{animation-name:k17,k18;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
-@keyframes k19{0%,55.128%{opacity:1}66.667%,100%{opacity:0}}
-.m14{animation-name:k19;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes k20{0%,55.128%{opacity:0}66.667%,100%{opacity:1}}
-.m15{animation-name:k20;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m4{animation-name:k4}
+@keyframes k5{0%,52.051%,100%{scale:1;opacity:1}63.59%,84.615%{scale:0.6;opacity:0}}
+.m5{animation-name:k5}
+@keyframes k6{0%,52.821%,100%{fill:var(--blue)}64.359%,84.615%{fill:var(--orange)}}
+@keyframes k7{0%,17.949%,100%{translate:168px 128px}33.333%,52.821%{translate:168px 164px}64.359%,84.615%{translate:272px 149px}}
+.m6{animation-name:k6,k7}
+@keyframes k8{0%,52.821%,100%{translate:185.6px 243.76px}64.359%,84.615%{translate:289.6px 243.76px}}
+.m7{animation-name:k8}
+@keyframes k9{0%,17.949%,100%{fill:var(--blue)}33.333%,84.615%{fill:var(--green)}}
+@keyframes k10{0%,17.949%,100%{translate:272px 153.5px}33.333%,53.59%{translate:272px 101px}65.128%,84.615%{translate:64px 86px}}
+.m8{animation-name:k9,k10}
+@keyframes k11{0%,53.59%,100%{translate:286px 243.76px}65.128%,84.615%{translate:78px 243.76px}}
+.m9{animation-name:k11}
+@keyframes k12{0%,54.359%{translate:376px 191px}65.897%,100%{translate:168px 122px}}
+.m10{animation-name:k12}
+@keyframes k13{0%,54.359%{translate:393.6px 243.76px}65.897%,100%{translate:185.6px 243.76px}}
+.m11{animation-name:k13}
+@keyframes k14{0%,17.949%,100%{scale:0.6;opacity:0}33.333%,84.615%{scale:1;opacity:1}}
+.m12{animation-name:k14}
+@keyframes k15{0%,55.128%,100%{fill:var(--raised)}66.667%,84.615%{fill:var(--magenta)}}
+@keyframes k16{0%,17.949%,100%{translate:520px 110px}33.333%,84.615%{translate:472px 90px}}
+.m13{animation-name:k15,k16}
+@keyframes k17{0%,55.128%{opacity:1}66.667%,100%{opacity:0}}
+.m14{animation-name:k17}
+@keyframes k18{0%,55.128%{opacity:0}66.667%,100%{opacity:1}}
+.m15{animation-name:k18}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-5s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <rect width="640" height="280" fill="var(--background)"/>
   <rect x="48" y="236" width="512" height="1.5" fill="var(--border)"/>
-  <g transform="translate(64 25.72)">
-    <text y="14.28" font-size="14" fill="var(--text)" class="a m1">Revenue, Q1</text>
-    <text y="14.28" font-size="14" fill="var(--text)" class="a m2">Revenue, Q2</text>
-    <text y="14.28" font-size="14" fill="var(--text)" class="a m3">Revenue, Q3</text>
+  <g transform="translate(64 25.72)" font-size="14" fill="var(--text)">
+    <text y="14.28" class="a m1">Revenue, Q1</text>
+    <text y="14.28" class="a m2">Revenue, Q2</text>
+    <text y="14.28" class="a m3">Revenue, Q3</text>
   </g>
   <g style="transform-origin:96px 217.8px" class="a m5">
     <rect width="64" height="96" rx="6" fill="var(--blue)" class="a m4 dm">
-      <animate attributeName="height" values="60;60;96;96;60" keyTimes="0;0.17949;0.33333;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" dur="7.8s" repeatCount="indefinite"/>
+      <animate attributeName="height" values="60;60;96;96;60" keyTimes="0;0.17949;0.33333;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1;0.23 1 0.32 1" dur="7.8s" repeatCount="indefinite"/>
     </rect>
     <rect width="64" height="96" rx="6" fill="var(--blue)" class="a m4 ds" display="none"/>
     <text x="78" y="256" font-size="12" fill="var(--muted)">north</text>
   </g>
-  <rect width="64" height="86.996" rx="6" fill="var(--blue)" class="a m6 dm">
-    <animate attributeName="height" values="108;108;72;72;87;87;108" keyTimes="0;0.17949;0.33333;0.52821;0.64359;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" dur="7.8s" repeatCount="indefinite"/>
+  <rect width="64" height="87" rx="6" fill="var(--blue)" class="a m6 dm">
+    <animate attributeName="height" values="108;108;72;72;87;87;108" keyTimes="0;0.17949;0.33333;0.52821;0.64359;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1;0.23 1 0.32 1;0 0 1 1;0.23 1 0.32 1" dur="7.8s" repeatCount="indefinite"/>
   </rect>
-  <rect width="64" height="86.996" rx="6" fill="var(--blue)" class="a m6 ds" display="none"/>
+  <rect width="64" height="87" rx="6" fill="var(--blue)" class="a m6 ds" display="none"/>
   <text y="12.24" font-size="12" fill="var(--muted)" class="a m7">east</text>
-  <rect width="64" height="149.935" rx="6" fill="var(--blue)" class="a m8 dm">
-    <animate attributeName="height" values="82.5;82.5;135;135;150;150;82.5" keyTimes="0;0.17949;0.33333;0.5359;0.65128;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" dur="7.8s" repeatCount="indefinite"/>
+  <rect width="64" height="149.999" rx="6" fill="var(--blue)" class="a m8 dm">
+    <animate attributeName="height" values="82.5;82.5;135;135;150;150;82.5" keyTimes="0;0.17949;0.33333;0.5359;0.65128;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1;0.23 1 0.32 1;0 0 1 1;0.23 1 0.32 1" dur="7.8s" repeatCount="indefinite"/>
   </rect>
-  <rect width="64" height="149.935" rx="6" fill="var(--blue)" class="a m8 ds" display="none"/>
+  <rect width="64" height="149.999" rx="6" fill="var(--blue)" class="a m8 ds" display="none"/>
   <text y="12.24" font-size="12" fill="var(--muted)" class="a m9">south</text>
   <g style="transform-origin:408px 225.3px" class="a m12">
     <rect width="64" height="114" rx="6" fill="var(--cyan)" class="a m10 dm">
-      <animate id="w1" attributeName="height" values="45;114" keyTimes="0;1" calcMode="spline" keySplines="0.77 0 0.175 1" begin="4.24s;w1.begin+7.8s" dur="0.9s" fill="freeze" data-loop="7.8s"/>
+      <animate id="w1" attributeName="height" values="45;114" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="4.24s;w1.begin+7.8s" dur="0.9s" fill="freeze" data-loop="7.8s"/>
       <set attributeName="height" to="45" begin="0s;w1.begin+3.56s" dur="4.24s" fill="freeze" data-loop="7.8s"/>
     </rect>
-    <rect width="64" height="113.001" rx="6" fill="var(--cyan)" class="a m10 ds" display="none"/>
+    <rect width="64" height="113.962" rx="6" fill="var(--cyan)" class="a m10 ds" display="none"/>
     <text y="12.24" font-size="12" fill="var(--muted)" class="a m11">west</text>
   </g>
   <path d="M96 10c0 6.67 0 13.33 0 20c0 5.52 -4.48 10 -10 10c-25.33 0 -50.67 0 -76 0c-5.52 0 -10 -4.48 -10 -10c0 -6.67 0 -13.33 0 -20c0 -5.52 4.48 -10 10 -10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z" fill="var(--raised)" class="a m13 dm">
-    <animate attributeName="d" values="M14 0c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1c2.53 2.53 4.1 6.03 4.1 9.9z;M14 0c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1c2.53 2.53 4.1 6.03 4.1 9.9z;M96 10c0 6.67 0 13.33 0 20c0 5.52-4.48 10-10 10c-25.33 0-50.67 0-76 0c-5.52 0-10-4.48-10-10c0-6.67 0-13.33 0-20c0-5.52 4.48-10 10-10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z;M96 10c0 6.67 0 13.33 0 20c0 5.52-4.48 10-10 10c-25.33 0-50.67 0-76 0c-5.52 0-10-4.48-10-10c0-6.67 0-13.33 0-20c0-5.52 4.48-10 10-10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z;M9.9-9.9c2.53 2.53 4.1 6.03 4.1 9.9c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1z" keyTimes="0;0.17949;0.33333;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" dur="7.8s" repeatCount="indefinite"/>
+    <animate attributeName="d" values="M14 0c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1c2.53 2.53 4.1 6.03 4.1 9.9z;M14 0c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1c2.53 2.53 4.1 6.03 4.1 9.9z;M96 10c0 6.67 0 13.33 0 20c0 5.52-4.48 10-10 10c-25.33 0-50.67 0-76 0c-5.52 0-10-4.48-10-10c0-6.67 0-13.33 0-20c0-5.52 4.48-10 10-10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z;M96 10c0 6.67 0 13.33 0 20c0 5.52-4.48 10-10 10c-25.33 0-50.67 0-76 0c-5.52 0-10-4.48-10-10c0-6.67 0-13.33 0-20c0-5.52 4.48-10 10-10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z;M9.9-9.9c2.53 2.53 4.1 6.03 4.1 9.9c0 3.87-1.57 7.37-4.1 9.9c-2.53 2.53-6.03 4.1-9.9 4.1c-3.87 0-7.37-1.57-9.9-4.1c-2.53-2.53-4.1-6.03-4.1-9.9c0-3.87 1.57-7.37 4.1-9.9c2.53-2.53 6.03-4.1 9.9-4.1c3.87 0 7.37 1.57 9.9 4.1z" keyTimes="0;0.17949;0.33333;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1;0.23 1 0.32 1" dur="7.8s" repeatCount="indefinite"/>
   </path>
   <path d="M96 10c0 6.67 0 13.33 0 20c0 5.52 -4.48 10 -10 10c-25.33 0 -50.67 0 -76 0c-5.52 0 -10 -4.48 -10 -10c0 -6.67 0 -13.33 0 -20c0 -5.52 4.48 -10 10 -10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z" fill="var(--raised)" class="a m13 ds" display="none"/>
-  <g transform="translate(500.8 99.68)" style="transform-origin:520px 110.24px" class="a m12">
-    <text y="16.32" font-size="16" fill="var(--text)" class="a m14">+18%</text>
-    <text y="16.32" font-size="16" fill="var(--text)" class="a m15">+31%</text>
+  <g transform="translate(500.8 99.68)" style="transform-origin:520px 110.24px" class="a m12" font-size="16" fill="var(--text)">
+    <text y="16.32" class="a m14">+18%</text>
+    <text y="16.32" class="a m15">+31%</text>
   </g>
 </svg>

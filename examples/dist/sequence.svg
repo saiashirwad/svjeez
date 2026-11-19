@@ -9,76 +9,59 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .a{animation-duration:10s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%,2%{stroke-dashoffset:1;visibility:hidden}7%,100%{stroke-dashoffset:0;visibility:visible}}
 .m1{animation-name:k1}
-@keyframes k2{0%,6.25%{opacity:0}7%,100%{opacity:1}}
+@keyframes k2{0%,5.347%{visibility:hidden}5.348%,100%{visibility:visible}}
 .m2{animation-name:k2}
-@keyframes k3{0%,2%{translate:0px 6px}4.5%,100%{translate:0px 0px}}
-@keyframes k4{0%,2%{opacity:0}4.5%,100%{opacity:1}}
-.m3{animation-name:k3,k4}
-@keyframes k5{0%,10%{stroke-dashoffset:1;visibility:hidden}15%,100%{stroke-dashoffset:0;visibility:visible}}
-.m4{animation-name:k5}
-@keyframes k6{0%,14.25%{opacity:0}15%,100%{opacity:1}}
-.m5{animation-name:k6}
-@keyframes k7{0%,10%{translate:0px 6px}12.5%,100%{translate:0px 0px}}
-@keyframes k8{0%,10%{opacity:0}12.5%,100%{opacity:1}}
-.m6{animation-name:k7,k8}
-@keyframes k9{0%,18%{stroke-dashoffset:1;visibility:hidden}23%,100%{stroke-dashoffset:0;visibility:visible}}
-.m7{animation-name:k9}
-@keyframes k10{0%,22.25%{opacity:0}23%,100%{opacity:1}}
-.m8{animation-name:k10}
-@keyframes k11{0%,18%{translate:0px 6px}20.5%,100%{translate:0px 0px}}
-@keyframes k12{0%,18%{opacity:0}20.5%,100%{opacity:1}}
-.m9{animation-name:k11,k12}
-@keyframes k13{0%,26%{opacity:0}31%,100%{opacity:1}}
-.m10{animation-name:k13}
-@keyframes k14{0%,30.25%{opacity:0}31%,100%{opacity:1}}
-.m11{animation-name:k14}
-@keyframes k15{0%,26%{translate:0px 6px}28.5%,100%{translate:0px 0px}}
-@keyframes k16{0%,26%{opacity:0}28.5%,100%{opacity:1}}
-.m12{animation-name:k15,k16}
-@keyframes k17{0%,34%{stroke-dashoffset:1;visibility:hidden}39%,100%{stroke-dashoffset:0;visibility:visible}}
-.m13{animation-name:k17}
-@keyframes k18{0%,38.25%{opacity:0}39%,100%{opacity:1}}
-.m14{animation-name:k18}
-@keyframes k19{0%,34%{translate:0px 6px}36.5%,100%{translate:0px 0px}}
-@keyframes k20{0%,34%{opacity:0}36.5%,100%{opacity:1}}
-.m15{animation-name:k19,k20}
-@keyframes k21{0%,42%{opacity:0}47%,100%{opacity:1}}
-.m16{animation-name:k21}
-@keyframes k22{0%,46.25%{opacity:0}47%,100%{opacity:1}}
-.m17{animation-name:k22}
-@keyframes k23{0%,42%{translate:0px 6px}44.5%,100%{translate:0px 0px}}
-@keyframes k24{0%,42%{opacity:0}44.5%,100%{opacity:1}}
-.m18{animation-name:k23,k24}
-@keyframes k25{0%,50%{stroke-dashoffset:1;visibility:hidden}55%,100%{stroke-dashoffset:0;visibility:visible}}
-.m19{animation-name:k25}
-@keyframes k26{0%,54.25%{opacity:0}55%,100%{opacity:1}}
-.m20{animation-name:k26}
-@keyframes k27{0%,50%{translate:0px 6px}52.5%,100%{translate:0px 0px}}
-@keyframes k28{0%,50%{opacity:0}52.5%,100%{opacity:1}}
-.m21{animation-name:k27,k28}
-@keyframes k29{0%,58%{opacity:0}63%,100%{opacity:1}}
-.m22{animation-name:k29}
-@keyframes k30{0%,62.25%{opacity:0}63%,100%{opacity:1}}
-.m23{animation-name:k30}
-@keyframes k31{0%,58%{translate:0px 6px}60.5%,100%{translate:0px 0px}}
-@keyframes k32{0%,58%{opacity:0}60.5%,100%{opacity:1}}
-.m24{animation-name:k31,k32}
-@keyframes k33{0%,66%{opacity:0}71%,100%{opacity:1}}
-.m25{animation-name:k33}
-@keyframes k34{0%,70.25%{opacity:0}71%,100%{opacity:1}}
-.m26{animation-name:k34}
-@keyframes k35{0%,66%{translate:0px 6px}68.5%,100%{translate:0px 0px}}
-@keyframes k36{0%,66%{opacity:0}68.5%,100%{opacity:1}}
-.m27{animation-name:k35,k36}
-@keyframes k37{0%{opacity:0;animation-timing-function:steps(1)}66%,71%{opacity:1}73%,100%{opacity:0}}
-@keyframes k38{0%,66%{translate:332.3px 407px}71%,100%{translate:66.95px 407px}}
-.m28{animation-name:k37,k38;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
-@keyframes k39{0%,92%{opacity:1}98%,100%{opacity:0}}
-.m29{animation-name:k39}
+@keyframes k3{0%,2%{translate:0 6px;opacity:0}4.5%,100%{translate:0 0;opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,10%{stroke-dashoffset:1;visibility:hidden}15%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k4}
+@keyframes k5{0%,13.214%{visibility:hidden}13.215%,100%{visibility:visible}}
+.m5{animation-name:k5}
+@keyframes k6{0%,10%{translate:0 6px;opacity:0}12.5%,100%{translate:0 0;opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,18%{stroke-dashoffset:1;visibility:hidden}23%,100%{stroke-dashoffset:0;visibility:visible}}
+.m7{animation-name:k7}
+@keyframes k8{0%,21.283%{visibility:hidden}21.284%,100%{visibility:visible}}
+.m8{animation-name:k8}
+@keyframes k9{0%,18%{translate:0 6px;opacity:0}20.5%,100%{translate:0 0;opacity:1}}
+.m9{animation-name:k9}
+@keyframes k10{0%,26%{opacity:0}31%,100%{opacity:1}}
+.m10{animation-name:k10}
+@keyframes k11{0%,26%{translate:0 6px;opacity:0}28.5%,100%{translate:0 0;opacity:1}}
+.m11{animation-name:k11}
+@keyframes k12{0%,34%{stroke-dashoffset:1;visibility:hidden}39%,100%{stroke-dashoffset:0;visibility:visible}}
+.m12{animation-name:k12}
+@keyframes k13{0%,37.746%{visibility:hidden}37.747%,100%{visibility:visible}}
+.m13{animation-name:k13}
+@keyframes k14{0%,34%{translate:0 6px;opacity:0}36.5%,100%{translate:0 0;opacity:1}}
+.m14{animation-name:k14}
+@keyframes k15{0%,42%{opacity:0}47%,100%{opacity:1}}
+.m15{animation-name:k15}
+@keyframes k16{0%,42%{translate:0 6px;opacity:0}44.5%,100%{translate:0 0;opacity:1}}
+.m16{animation-name:k16}
+@keyframes k17{0%,50%{stroke-dashoffset:1;visibility:hidden}55%,100%{stroke-dashoffset:0;visibility:visible}}
+.m17{animation-name:k17}
+@keyframes k18{0%,53.577%{visibility:hidden}53.578%,100%{visibility:visible}}
+.m18{animation-name:k18}
+@keyframes k19{0%,50%{translate:0 6px;opacity:0}52.5%,100%{translate:0 0;opacity:1}}
+.m19{animation-name:k19}
+@keyframes k20{0%,58%{opacity:0}63%,100%{opacity:1}}
+.m20{animation-name:k20}
+@keyframes k21{0%,58%{translate:0 6px;opacity:0}60.5%,100%{translate:0 0;opacity:1}}
+.m21{animation-name:k21}
+@keyframes k22{0%,66%{opacity:0}71%,100%{opacity:1}}
+.m22{animation-name:k22}
+@keyframes k23{0%,66%{translate:0 6px;opacity:0}68.5%,100%{translate:0 0;opacity:1}}
+.m23{animation-name:k23}
+@keyframes k24{0%,65.999%,73%,100%{opacity:0}66%,71%{opacity:1}}
+@keyframes k25{0%,66%{translate:332.3px 407px}71%,100%{translate:66.95px 407px}}
+.m24{animation-name:k24,k25;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes k26{0%,92%{opacity:1}98%,100%{opacity:0}}
+.m25{animation-name:k26}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="960" height="540" fill="var(--background)"/>
-  <g transform="translate(94.524 55.875)" class="a m29">
+  <g transform="translate(94.524 55.875)" class="a m25">
     <line x1="66.95" y1="50" x2="66.95" y2="429" fill="none" stroke="var(--border)" stroke-dasharray="3 4"/>
     <line x1="217.1" y1="50" x2="217.1" y2="429" fill="none" stroke="var(--border)" stroke-dasharray="3 4"/>
     <line x1="332.3" y1="50" x2="332.3" y2="429" fill="none" stroke="var(--border)" stroke-dasharray="3 4"/>
@@ -131,41 +114,41 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <text x="353.3" y="169.896" font-size="13.6" fill="var(--text)">get session</text>
     </g>
     <path d="M464.06 217L339.3 217" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" class="a m10"/>
-    <polygon points="332.3 217 340.3 213 340.3 221" fill="var(--border)" class="a m11"/>
-    <g class="a m12">
+    <polygon points="332.3 217 340.3 213 340.3 221" fill="var(--border)" class="a m10"/>
+    <g class="a m11">
       <rect x="376.86" y="193" width="42.64" height="20" rx="3" fill="var(--background)"/>
       <text x="381.86" y="207.896" font-size="13.6" fill="var(--text)">miss</text>
     </g>
-    <path d="M332.3 255L708.26 255" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m13"/>
-    <polygon points="715.26 255 707.26 259 707.26 251" fill="var(--border)" class="a m14"/>
-    <g class="a m15">
+    <path d="M332.3 255L708.26 255" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m12"/>
+    <polygon points="715.26 255 707.26 259 707.26 251" fill="var(--border)" class="a m13"/>
+    <g class="a m14">
       <rect x="473.9" y="231" width="99.76" height="20" rx="3" fill="var(--background)"/>
       <text x="478.9" y="245.896" font-size="13.6" fill="var(--text)">select user</text>
     </g>
-    <path d="M715.26 293L339.3 293" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" class="a m16"/>
-    <polygon points="332.3 293 340.3 289 340.3 297" fill="var(--border)" class="a m17"/>
-    <g class="a m18">
+    <path d="M715.26 293L339.3 293" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" class="a m15"/>
+    <polygon points="332.3 293 340.3 289 340.3 297" fill="var(--border)" class="a m15"/>
+    <g class="a m16">
       <rect x="506.54" y="269" width="34.48" height="20" rx="3" fill="var(--background)"/>
       <text x="511.54" y="283.896" font-size="13.6" fill="var(--text)">row</text>
     </g>
-    <path d="M332.3 331L575.46 331" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m19"/>
-    <polygon points="582.46 331 574.46 335 574.46 327" fill="var(--border)" class="a m20"/>
-    <g class="a m21">
+    <path d="M332.3 331L575.46 331" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m17"/>
+    <polygon points="582.46 331 574.46 335 574.46 327" fill="var(--border)" class="a m18"/>
+    <g class="a m19">
       <rect x="411.58" y="307" width="91.6" height="20" rx="3" fill="var(--background)"/>
       <text x="416.58" y="321.896" font-size="13.6" fill="var(--text)">sign token</text>
     </g>
-    <path d="M582.46 369L339.3 369" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" class="a m22"/>
-    <polygon points="332.3 369 340.3 365 340.3 373" fill="var(--border)" class="a m23"/>
-    <g class="a m24">
+    <path d="M582.46 369L339.3 369" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" class="a m20"/>
+    <polygon points="332.3 369 340.3 365 340.3 373" fill="var(--border)" class="a m20"/>
+    <g class="a m21">
       <rect x="440.14" y="345" width="34.48" height="20" rx="3" fill="var(--background)"/>
       <text x="445.14" y="359.896" font-size="13.6" fill="var(--text)">jwt</text>
     </g>
-    <path d="M332.3 407L73.95 407" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" class="a m25"/>
-    <polygon points="66.95 407 74.95 403 74.95 411" fill="var(--border)" class="a m26"/>
-    <g class="a m27">
+    <path d="M332.3 407L73.95 407" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" class="a m22"/>
+    <polygon points="66.95 407 74.95 403 74.95 411" fill="var(--border)" class="a m22"/>
+    <g class="a m23">
       <rect x="129.35" y="383" width="140.56" height="20" rx="3" fill="var(--background)"/>
       <text x="134.35" y="397.896" font-size="13.6" fill="var(--text)">200 + Set-Cookie</text>
     </g>
-    <circle r="4" fill="var(--orange)" class="a m28"/>
+    <circle r="4" fill="var(--orange)" class="a m24"/>
   </g>
 </svg>

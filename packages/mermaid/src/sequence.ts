@@ -96,7 +96,7 @@ export const parseSequence = (header: Line, body: readonly Line[]): SequenceDoc 
         from: from!,
         to: to!,
         text: clean(text!),
-        line: arrow!.startsWith("--") ? "dashed" : "solid",
+        reply: arrow!.startsWith("--"),
         head: HEADS.get(arrow!.replace(/^--?/, ""))!,
       });
       continue;

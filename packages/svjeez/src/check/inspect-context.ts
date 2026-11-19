@@ -13,7 +13,7 @@ import {
 
 export const RULES = {
   "compile-error": "The scene threw while it was built.",
-  "compile-warning": "The old compiler warned while it wrote an SVG string.",
+  "compile-warning": "An SVG file or string the scene was given carries a warning.",
   "never-visible": "A node can't be seen at any time: hidden, painting nothing, or covered.",
   "zero-size": "A node's geometry, text or image has no size at any time.",
   "off-canvas": "Outside the canvas at every time, or cut by its edge at rest.",
@@ -26,11 +26,10 @@ export const RULES = {
   "nothing-enters": "Everything is on screen from 0s and nothing ever enters.",
   "wasted-motion": "A value changes before the node is first seen, or after it is gone for good.",
   static: "Nothing in the scene moves, or a value changes only after the scene ends.",
-  "unused-symbol": "A symbol no instance draws.",
+  "moving-filter":
+    "A filter that is redrawn every frame because its parameters or what it filters move.",
   "layout-overlap": "Two children of a <Stack> or <Grid> overlap: motion carried one onto another.",
   "word-cut": "A word wider than the width its text wraps to, cut across two lines.",
-  "unattached-ref": "A ref the scene made that no node takes.",
-  "hidden-target": "A timeline moves a node that is never visible.",
   unsupported: "A feature the chosen backend can't draw.",
   approximate: "A feature the chosen backend draws differently from the model.",
 } as const;
@@ -44,13 +43,13 @@ export interface Related {
   readonly source?: Source;
 }
 
-export interface Finding {
+export interface Problem {
   readonly code: Code;
   readonly severity: Severity;
   readonly key: string;
   readonly source?: Source;
   readonly message: string;
-  readonly hint: string;
+  readonly fix: string;
   readonly times?: readonly Seconds[];
   readonly related?: readonly Related[];
 }
@@ -62,7 +61,7 @@ export interface Survey {
   readonly frames: readonly SampledFrame[];
   readonly hidden: ReadonlyMap<string, readonly Stretch[]>;
   readonly gone: ReadonlySet<string>;
-  readonly out: Finding[];
+  readonly out: Problem[];
 }
 
 export const label = (node: SceneNode): string => nodeName(node);
@@ -90,9 +89,9 @@ export const shownBoxes = (
 
 export const add = (
   survey: Survey,
-  finding: Omit<Finding, "source" | "related"> & { readonly related?: readonly string[] },
+  finding: Omit<Problem, "related"> & { readonly related?: readonly string[] },
 ): void => {
-  const source = survey.sources.get(finding.key);
+  const source = finding.source ?? survey.sources.get(finding.key);
   const { related, ...rest } = finding;
 
   survey.out.push({

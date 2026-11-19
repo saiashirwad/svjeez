@@ -5,12 +5,9 @@ import {
   Shape,
   Stack,
   Text,
-  canvas,
   circle,
-  draw,
   ease,
   enter,
-  motion,
   ref,
   scene,
   span,
@@ -19,6 +16,7 @@ import {
   type Ref,
   type SceneElement,
   type Span,
+  type Vec,
 } from "svjeez";
 import { geist } from "../fonts/faces";
 import { mono, theme } from "../theme";
@@ -47,10 +45,11 @@ const Card = ({ handle, title, dot, when, children, drift }: CardProps): SceneEl
     stroke={{ color: theme.raised, width: 1.5 }}
     motion={[
       enter(when, { from: { opacity: 0, offset: [0, 10] } }),
-      drift &&
-        motion()
-          .to({ offset: [0, 56] }, span(3.2, 1.1), ease.inOut)
-          .to({ offset: [0, 0] }, span(5.2, 1.1), ease.inOut),
+      drift && {
+        offset: track<Vec>([0, 0])
+          .to([0, 56], span(3.2, 1.1), ease.inOut)
+          .to([0, 0], span(5.2, 1.1), ease.inOut),
+      },
     ]}
   >
     <Stack direction="row" gap={8} align="center">
@@ -65,7 +64,7 @@ const Card = ({ handle, title, dot, when, children, drift }: CardProps): SceneEl
   </Stack>
 );
 
-const [measure, place, follow] = [ref("measure"), ref("place"), ref("follow")];
+const [measure, place, follow] = [ref(), ref(), ref()];
 const [first, second, third] = span(0.3, 0.5).cascade(3, 0.25);
 
 export default scene(
@@ -75,9 +74,9 @@ export default scene(
     title: "Layout",
     desc: "Three cards in a row, each with a title and wrapped text laid out inside it. Arrows join them by their edges, and when the last card drifts down and back, the arrow into it follows.",
     theme,
-    reducedMotion: 2.4,
+    still: 2.4,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Group opacity={track(1).to(0, span(6.4, 0.5))}>
@@ -99,14 +98,14 @@ export default scene(
           to={place.left}
           inset={6}
           stroke={{ color: theme.blue }}
-          trim={draw(span(1.5, 0.5))}
+          draw={track(0).to(1, span(1.5, 0.5))}
         />
         <Arrow
           from={place.right}
           to={follow.left}
           inset={6}
           stroke={{ color: theme.blue }}
-          trim={draw(span(1.9, 0.5))}
+          draw={track(0).to(1, span(1.9, 0.5))}
         />
       </Group>
       <Align place="bottom" inset={22}>

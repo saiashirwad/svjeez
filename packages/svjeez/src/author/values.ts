@@ -3,7 +3,7 @@ import { hexBytes, hexOf, type Hex } from "../model/color";
 import { lineCubic, quadraticCubic } from "../model/curve";
 import { ringsOf } from "../model/paths";
 import type { Contour, Cubic, Geometry as Outline, Rgba, Vec } from "../model/ir";
-import type { Gradient } from "./paint";
+import type { Gradient, Pattern } from "./paint";
 
 export type { Hex };
 
@@ -127,26 +127,29 @@ export const arc = ({ radius, start = 0, sweep }: ArcOptions): Geometry => {
   return { kind: "arc", radius: positive(radius, "arc()"), start, sweep };
 };
 
-export const line = (from: Vec, to: Vec): Geometry => ({ kind: "line", from, to });
+/** A straight line from one point to the next: two points, or an open line through more. */
+export const line = (...points: readonly Vec[]): Geometry => {
+  const [from, to, ...more] = points;
 
-export const polygon = (points: readonly Vec[]): Geometry => ({
-  kind: "polygon",
+  if (!from || !to) throw new SceneError(`line() needs two points or more, got ${points.length}.`);
+
+  return more.length === 0 ? { kind: "line", from, to } : { kind: "points", points, closed: false };
+};
+
+/** A closed outline with a corner at each point. */
+export const polygon = (...points: readonly Vec[]): Geometry => ({
+  kind: "points",
   points,
   closed: true,
 });
 
-export const polyline = (points: readonly Vec[]): Geometry => ({
-  kind: "polygon",
-  points,
-  closed: false,
-});
-
-export const path = (): PathBuilder => new PathBuilder();
-
-export const pathData = (d: string): Geometry => ({
-  kind: "path",
-  contours: ringsOf(d),
-  rule: "nonzero",
+/** An outline you draw step by step, or `path.parse(text)` for one copied from an icon set or a drawing tool. */
+export const path = Object.assign((): PathBuilder => new PathBuilder(), {
+  parse: (text: string): Geometry => ({
+    kind: "path",
+    contours: ringsOf(text),
+    rule: "nonzero",
+  }),
 });
 
 export interface Token {
@@ -158,7 +161,7 @@ export interface Token {
 
 export type Color = Hex | Token;
 
-export type Paint = Color | Gradient;
+export type Paint = Color | Gradient | Pattern;
 
 export type Theme<K extends string = string> = { readonly [N in K]: Token };
 

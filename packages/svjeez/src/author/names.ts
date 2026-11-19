@@ -11,55 +11,56 @@ export interface Named {
   readonly source?: Source;
 }
 
-let open: Map<string, Named> | undefined;
+/** What a scene calls its nodes, so an error can name the node and where it was written. One per scene. */
+export class Names {
+  readonly #open = new Map<string, Named>();
 
-export const naming = <T>(build: () => T): T => {
-  const outer = open;
-
-  open = new Map();
-
-  try {
-    return build();
-  } catch (error) {
-    if (!(error instanceof Error)) throw error;
-    const thrown = thrownFrom(error);
-
-    throw resolved(located(error, thrown ? { source: sourceFrom(thrown) } : {}));
-  } finally {
-    open = outer;
+  set(key: string, named: Named): void {
+    this.#open.set(key, named);
   }
-};
 
-const resolved = (error: Error): Error => {
-  if (!(error instanceof SceneError) || error.key === undefined) return error;
-  const known = open?.get(error.key);
+  entryOf(key: string): Named | undefined {
+    return this.#open.get(key);
+  }
 
-  return known ? error.at(whereOf(error.key)) : error;
-};
+  named(key: string): string {
+    return this.#open.get(key)?.name ?? `"${key}"`;
+  }
 
-export const nameNode = (key: string, named: Named): void => {
-  open?.set(key, named);
-};
+  whereOf(key: string): Where {
+    const known = this.#open.get(key);
 
-export const named = (key: string): string => open?.get(key)?.name ?? `"${key}"`;
+    return {
+      key,
+      node: known?.name ?? `"${key}"`,
+      ...(known?.source && { source: known.source }),
+    };
+  }
 
-export const whereOf = (key: string): Where => {
-  const known = open?.get(key);
+  namedAt(key: string): string {
+    const known = this.#open.get(key);
 
-  return {
-    key,
-    node: known?.name ?? `"${key}"`,
-    ...(known?.source && { source: known.source }),
-  };
-};
+    return known?.source ? `${known.name} (line ${known.source.line})` : this.named(key);
+  }
 
-export const namedAt = (key: string): string => {
-  const known = open?.get(key);
+  /** Runs build; an error that leaves it gets the location of the node it is about. */
+  naming<T>(build: () => T): T {
+    try {
+      return build();
+    } catch (error) {
+      if (!(error instanceof Error)) throw error;
+      const thrown = thrownFrom(error);
 
-  return known?.source ? `${known.name} (line ${known.source.line})` : named(key);
-};
+      throw this.#resolved(located(error, thrown ? { source: sourceFrom(thrown) } : {}));
+    }
+  }
 
-export const entryOf = (key: string): Named | undefined => open?.get(key);
+  #resolved(error: Error): Error {
+    if (!(error instanceof SceneError) || error.key === undefined) return error;
+
+    return this.#open.has(error.key) ? error.at(this.whereOf(error.key)) : error;
+  }
+}
 
 const SHORT = 24;
 

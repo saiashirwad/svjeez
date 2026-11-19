@@ -13,12 +13,16 @@ const ENTRIES = [
   "svjeez/tools",
   "svjeez/frames",
   "svjeez/page",
-  "svjeez/params",
 ];
 
-const CONSUMER = `import { Shape, circle, ease, enter, scene, span } from "svjeez";
+const CONSUMER = `import { Shape, circle, ease, enter, param, scene, span } from "svjeez";
 import { svg as backend } from "svjeez/tools";
 import { renderFrames } from "svjeez/frames";
+
+// @ts-expect-error params come from the root, not a subpath
+import "svjeez/params";
+
+export const speed = param.number(1, { min: 0, max: 4 });
 
 // @ts-expect-error a circle's radius is a number
 circle("2");

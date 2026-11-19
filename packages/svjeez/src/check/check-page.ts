@@ -62,7 +62,7 @@ interface Scope {
 const setupPage = (seekPage: typeof seek): PageSetup => {
   const svg = document.querySelector("svg");
 
-  if (!svg) throw new Error("checkScene() found no <svg> in the page.");
+  if (!svg) throw new Error("checkPixels() found no <svg> in the page.");
 
   const UNPAINTED = new Set([
     "defs",
@@ -277,7 +277,7 @@ export const measure = ({ time, before }: { time: number; before: number }): Pag
   const scope: Scope = window;
   const state = scope.__svjeezCheck;
 
-  if (!state) throw new Error("checkScene() measured a page it had not set up.");
+  if (!state) throw new Error("checkPixels() measured a page it had not set up.");
   const { seek, svg, leaves } = state;
   const frame = svg.getBoundingClientRect();
   const view = svg.viewBox.baseVal;
@@ -453,7 +453,7 @@ export const sweep = ({
   const scope: Scope = window;
   const state = scope.__svjeezCheck;
 
-  if (!state) throw new Error("checkScene() measured a page it had not set up.");
+  if (!state) throw new Error("checkPixels() measured a page it had not set up.");
   const { seek, svg, animated } = state;
 
   const smilValue = (el: Element, name: string, style: CSSStyleDeclaration): string => {

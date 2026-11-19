@@ -8,7 +8,8 @@ import { DEFAULT_EASE, ease, type Ease } from "../model/time";
 import type { PathData } from "../model/paths";
 import type { AttrValue } from "./tree";
 import { arcPieces, contoursOf, mixGeometry, onCircle, smilSafe } from "../model/geometry";
-import type { Contour, Cubic, Geometry, Key, Lane, Paint, ShapeNode, Vec } from "../model/ir";
+import { isColor } from "../model/painted";
+import type { Contour, Cubic, Geometry, Key, Lane, ShapeNode, Vec } from "../model/ir";
 import { isLane } from "../model/lane";
 import { same } from "../model/steps";
 
@@ -188,7 +189,7 @@ const dashed = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving | undefi
   for (let i = 1; i <= pieces; i++)
     d += `A${r} ${r} 0 ${step > 180 ? 1 : 0} 1 ${pt(onCircle(radius, low + step * i))}`;
 
-  const dots = stroke.cap !== "butt" && spans.some((each) => each.length === 0);
+  const dots = stroke.cap !== "flat" && spans.some((each) => each.length === 0);
   const grows = !dots && spans.every((each) => each.low === low);
 
   const values = spans.map((each): ChannelValues => {
@@ -441,13 +442,13 @@ const morph = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving => {
   };
 };
 
-const isGradient = (paint: Paint): boolean => !Array.isArray(paint) && "stops" in paint;
-
 const framed = (node: ShapeNode): boolean =>
   [node.fill, node.stroke?.color].some(
     (paint) =>
       paint !== undefined &&
-      (isLane(paint) ? paint.keys.map((key) => key.value) : [paint]).some(isGradient),
+      (isLane(paint) ? paint.keys.map((key) => key.value) : [paint]).some(
+        (value) => !isColor(value),
+      ),
   );
 
 const scalable = (node: ShapeNode): boolean => node.stroke === undefined && !framed(node);

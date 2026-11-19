@@ -9,7 +9,7 @@ npm i -D @svjeez/geo@next svjeez@next world-atlas
 ```tsx
 import { createRequire } from "node:module";
 import { project, type Topology } from "@svjeez/geo";
-import { Group, Shape, draw, scene, span } from "svjeez";
+import { Group, Shape, scene, span, track } from "svjeez";
 
 const world: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
 const map = project(world, { size: [900, 460] });
@@ -21,7 +21,7 @@ export default scene({ size: [960, 540], duration: 4, title: "London to Tokyo" }
     <Shape
       geometry={map.route([-0.13, 51.51], [139.69, 35.69])}
       stroke={{ color: "#F4B740", width: 2 }}
-      trim={draw(span(0.5, 2))}
+      draw={track(0).to(1, span(0.5, 2))}
     />
   </Group>
 ));

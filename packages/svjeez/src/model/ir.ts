@@ -10,19 +10,7 @@ export interface Scene {
   readonly still?: Seconds;
   readonly tokens: Readonly<Record<string, TokenValue>>;
   readonly fonts: Readonly<Record<string, FontFamily>>;
-  readonly symbols: Readonly<Record<string, SceneNode>>;
   readonly root: GroupNode;
-  readonly authored?: SceneAuthored;
-}
-
-export interface SceneAuthored {
-  readonly refs: readonly { readonly key: string; readonly attached: boolean }[];
-  readonly actions: readonly {
-    readonly verb: string;
-    readonly key: string;
-    readonly start: Seconds;
-    readonly over: Seconds;
-  }[];
 }
 
 export interface Authored {
@@ -99,7 +87,7 @@ export type Geometry =
       readonly sweep: number;
     }
   | { readonly kind: "line"; readonly from: Vec; readonly to: Vec }
-  | { readonly kind: "polygon"; readonly points: readonly Vec[]; readonly closed: boolean }
+  | { readonly kind: "points"; readonly points: readonly Vec[]; readonly closed: boolean }
   | {
       readonly kind: "path";
       readonly contours: readonly Contour[];
@@ -125,15 +113,43 @@ export type Gradient =
       readonly stops: readonly Stop[];
     };
 
-export type Paint = Color | Gradient;
+export interface Pattern {
+  readonly kind: "pattern";
+  readonly size: Vec;
+  readonly offset: Animated<Vec>;
+  readonly tile: GroupNode;
+}
+
+export type Paint = Color | Gradient | Pattern;
+
+/** How a node composites onto what is drawn beneath it inside its group. Normal is the absence of one. */
+export type Blend =
+  | "multiply"
+  | "screen"
+  | "overlay"
+  | "darken"
+  | "lighten"
+  | "color-dodge"
+  | "color-burn"
+  | "hard-light"
+  | "soft-light"
+  | "difference"
+  | "exclusion"
+  | "hue"
+  | "saturation"
+  | "color"
+  | "luminosity";
 
 export interface Stroke {
   readonly color: Animated<Paint>;
   readonly width: Animated<number>;
-  readonly cap: "butt" | "round" | "square";
-  readonly join: "miter" | "round" | "bevel";
+  readonly cap: "flat" | "round" | "square";
+  readonly join: "sharp" | "round" | "flat";
   readonly dash?: readonly number[];
-  readonly nonScaling: boolean;
+  readonly dashOffset?: Animated<number>;
+  /** The stroke keeps its width when the node is scaled. */
+  readonly fixedWidth: boolean;
+  readonly under: boolean;
 }
 
 export interface Layer {
@@ -146,10 +162,24 @@ export interface Layer {
 export type Effect =
   | { readonly kind: "blur"; readonly radius: Animated<number> }
   | {
+      readonly kind: "adjust";
+      readonly saturate: Animated<number>;
+      readonly hue: Animated<number>;
+      readonly brightness: Animated<number>;
+      readonly contrast: Animated<number>;
+    }
+  | {
+      readonly kind: "displace";
+      readonly scale: Animated<number>;
+      readonly frequency: Animated<number>;
+      readonly seed: number;
+      readonly octaves: number;
+    }
+  | {
       readonly kind: "shadow";
       readonly offset: Animated<Vec>;
       readonly blur: Animated<number>;
-      readonly color: Color;
+      readonly color: Animated<Color>;
       readonly opacity: Animated<number>;
     };
 
@@ -170,6 +200,7 @@ interface Base {
   readonly clip?: Animated<Geometry>;
   readonly mask?: SceneNode;
   readonly effects: readonly Effect[];
+  readonly blend?: Blend;
   readonly authored?: Authored;
 }
 
@@ -189,7 +220,7 @@ export interface ShapeNode extends Base {
 export interface Face {
   readonly family: string;
   readonly weight: number;
-  readonly style: "normal" | "italic";
+  readonly italic: boolean;
 }
 
 export interface TextRun {
@@ -210,18 +241,20 @@ export interface TextLine {
 export interface TextNode extends Base {
   readonly kind: "text";
   readonly size: number;
+  readonly stroke?: Stroke;
   readonly lines: readonly TextLine[];
+  /** Text set along an outline, from `start` (a fraction of its length), aligned to that point. */
+  readonly along?: {
+    readonly path: Geometry;
+    readonly start: Animated<number>;
+    readonly align: "start" | "center" | "end";
+  };
 }
 
-export interface ImageNode extends Base {
-  readonly kind: "image";
+export interface PictureNode extends Base {
+  readonly kind: "picture";
   readonly size: Vec;
   readonly data: string;
 }
 
-export interface InstanceNode extends Base {
-  readonly kind: "instance";
-  readonly symbol: string;
-}
-
-export type SceneNode = GroupNode | ShapeNode | TextNode | ImageNode | InstanceNode;
+export type SceneNode = GroupNode | ShapeNode | TextNode | PictureNode;

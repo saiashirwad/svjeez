@@ -157,7 +157,7 @@ export const lowContrast = (survey: Survey): void => {
       severity: worst.ratio < floor ? "warning" : "info",
       key: node.key,
       message: `${what} is hard to see: ${worst.color} on ${worst.under} is ${worst.ratio.toFixed(2)}:1 in the ${worst.scheme} scheme (${worst.other.toFixed(2)}:1 in ${other}), under the ${need}:1 ${text ? "text this size needs" : "a thin line needs"}.`,
-      hint: `Pick a ${text ? "fill" : "stroke color"} farther from ${worst.under} in both schemes${text ? ", or make the text larger" : ", or make the line wider"}.`,
+      fix: `Pick a ${text ? "fill" : "stroke color"} farther from ${worst.under} in both schemes${text ? ", or make the text larger" : ", or make the line wider"}.`,
       times: low,
       related: [worst.key],
     });

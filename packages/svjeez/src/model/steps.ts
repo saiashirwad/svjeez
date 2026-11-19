@@ -1,7 +1,7 @@
 import { SceneError } from "./scene-error";
 import { easeAt, splitEase, staysInside } from "./ease-at";
 import { DEFAULT_EASE, EPSILON, NUDGE, ease, type Ease, type Seconds } from "./time";
-import { isWhen, type Span, type When } from "../author/span";
+import { isWhen, type Interval, type When } from "../author/span";
 import { num } from "./format";
 import { isCurved, splitCurve, type Controls } from "./curve";
 import type { Animated, Key, Lane, Vec } from "./ir";
@@ -41,7 +41,7 @@ const isUntil = (
   value: number | { readonly until: Seconds },
 ): value is { readonly until: Seconds } => typeof value === "object";
 
-const isSpan = (when: Span | Seconds | null | undefined): when is Span =>
+const isSpan = (when: Interval | Seconds | null | undefined): when is Interval =>
   typeof when === "object" && when !== null;
 
 // SAFETY: values is a Partial<V>, so its own keys are keys of V.
@@ -51,6 +51,19 @@ const names = <V extends object>(values: Partial<V>): (keyof V)[] =>
 const cuts = <V>(spring: Step<V>, later: Step<V>): boolean =>
   isSpring(spring.ease) && spring.start < later.start - EPSILON;
 
+const when = <V>(step: Step<V>): string =>
+  step.over === 0 ? `at ${num(step.start)}s` : `from ${num(step.start)}s to ${num(end(step))}s`;
+
+const collision = <V>(shared: keyof V, a: Step<V>, b: Step<V>): SceneError => {
+  const [first, second] = a.start <= b.start ? [a, b] : [b, a];
+  const what = shared === "value" ? "this track" : `\`${String(shared)}\` on this motion`;
+
+  return new SceneError(
+    `Two steps move ${what} at once: one ${when(first)}, and another ${when(second)}, before the first ends.`,
+    `Start the later step at ${num(end(first))}s or later: the first step's span.next(over) starts where it ends.`,
+  );
+};
+
 export class Passage<V extends object> {
   constructor(readonly data: PassageData<V>) {}
 
@@ -58,7 +71,7 @@ export class Passage<V extends object> {
     return new Passage({ ...this.data, ...patch });
   }
 
-  to(values: Partial<V>, when: Span, curve: Curve = ease.out): Passage<V> {
+  to(values: Partial<V>, when: Interval, curve: Curve = DEFAULT_EASE): Passage<V> {
     if (!isSpan(when))
       throw new SceneError(
         `to() takes a span, got ${String(when)}. Write .to(value, span(start, over)); a step right after another is span.next(over).`,
@@ -153,7 +166,7 @@ export class Passage<V extends object> {
     return this.#with({ steps: copies, repeated: true });
   }
 
-  rewind(over: Seconds, curve: Curve = ease.out): Passage<V> {
+  rewind(over: Seconds, curve: Curve = DEFAULT_EASE): Passage<V> {
     if (!(time(over, "rewind()") > 0))
       throw new SceneError(`rewind() needs a positive duration, got ${over}.`);
 
@@ -185,9 +198,7 @@ export class Passage<V extends object> {
         !cuts(other, step) &&
         !cuts(step, other)
       )
-        throw new SceneError(
-          `Two transitions move \`${String(shared)}\` between ${Math.max(step.start, other.start)}s and ${Math.min(end(step), end(other))}s. Move them in one .to(), or stack two motions. Only a spring can be cut by a step that starts while it moves.`,
-        );
+        throw collision(shared, other, step);
     }
 
     return this.#with({ steps: [...this.data.steps, step] });
@@ -427,7 +438,7 @@ const segmentsOf = <T>(
 };
 
 const heldOf = <T>(initial: T, segments: readonly Segment<T>[], period: Seconds): Held<T>[] => {
-  const keys: Held<T>[] = [{ t: 0, value: initial, ease: ease.out }];
+  const keys: Held<T>[] = [{ t: 0, value: initial, ease: DEFAULT_EASE }];
   const nudge = period * NUDGE;
   let current = initial;
 
@@ -441,25 +452,26 @@ const heldOf = <T>(initial: T, segments: readonly Segment<T>[], period: Seconds)
       if (contiguous)
         keys[keys.length - 1] = { t: last.t, value: last.value, ease: segment.ease, ...via };
       else keys.push({ t: segment.start, value: current, ease: segment.ease, ...via });
-      keys.push({ t: segment.start + segment.over, value: segment.value, ease: ease.out });
+      keys.push({ t: segment.start + segment.over, value: segment.value, ease: DEFAULT_EASE });
     } else if (keys.length === 1 && segment.start === 0) {
       keys[0] = { ...last, value: segment.value };
     } else if (contiguous && last.t + nudge > period + EPSILON) {
       keys[keys.length - 1] = { ...last, t: last.t - nudge, ease: ease.hold };
-      keys.push({ t: period, value: segment.value, ease: ease.out });
+      keys.push({ t: period, value: segment.value, ease: DEFAULT_EASE });
     } else {
       keys[keys.length - 1] = { ...last, ease: ease.hold };
       keys.push({
         t: contiguous ? last.t + nudge : segment.start,
         value: segment.value,
-        ease: ease.out,
+        ease: DEFAULT_EASE,
       });
     }
 
     current = segment.value;
   }
 
-  if (keys.at(-1)!.t < period - EPSILON) keys.push({ t: period, value: current, ease: ease.out });
+  if (keys.at(-1)!.t < period - EPSILON)
+    keys.push({ t: period, value: current, ease: DEFAULT_EASE });
 
   return keys;
 };
@@ -564,9 +576,16 @@ const reach = (
   }
 };
 
+/** Where a track was first read: tracks are read on one clock per scene, the clock of the node that reads them. */
+export interface Reading {
+  readonly offset: Seconds;
+  readonly where: string;
+}
+
 export interface Timing {
   readonly duration: Seconds;
   readonly clock: Clock;
+  readonly reads: Map<object, Reading>;
 }
 
 const costOf = (value: Animated<unknown>): number =>

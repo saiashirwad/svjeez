@@ -3,13 +3,14 @@ import {
   Group,
   Shape,
   Text,
-  canvas,
+  ease,
   enter,
   exit,
   line,
   rect,
   scene,
   span,
+  track,
   type Paint,
 } from "svjeez";
 import { geist } from "../fonts/faces";
@@ -26,7 +27,7 @@ const counts = [
 
 const hours = [26, 28, 25, 27, 29, 26, 24, 15, 11, 9, 8, 7];
 
-const look = { font: mono, fontSize: 12, axis: theme.border, label: theme.muted, grid: true };
+const look = { font: mono, textSize: 12, axis: theme.border, label: theme.muted, grid: {} };
 
 const rise = (at: number) => enter(span(at, 0.6), { from: { opacity: 0, offset: [0, 10] } });
 
@@ -57,9 +58,9 @@ export default scene(
     title: "Pull request review time",
     desc: "Two charts animate in. Grouped bars show pull requests opened and merged per month, merged catching up with opened. An area chart shows the median hours to a first review falling from about 26 to 7 after a review bot ships in week 8. Sample data.",
     theme,
-    reducedMotion: 6,
+    still: 6,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Group motion={exit(span(10.2, 0.8))}>
@@ -88,7 +89,7 @@ export default scene(
               {
                 name: "opened",
                 color: theme.orange,
-                span: span(0.6, 1.1),
+                draw: track(0).to(1, span(0.6, 1.5)),
               },
             ),
             bars(
@@ -96,7 +97,7 @@ export default scene(
               {
                 name: "merged",
                 color: theme.blue,
-                span: span(0.8, 1.1),
+                draw: track(0).to(1, span(0.8, 1.5)),
               },
             ),
           ]}
@@ -117,7 +118,7 @@ export default scene(
                 curve: "monotone",
                 dots: 3.5,
                 label: "median",
-                span: span(1.2, 1.8),
+                draw: track(0).to(1, span(1.2, 1.8), ease.linear),
               },
             ),
           ]}

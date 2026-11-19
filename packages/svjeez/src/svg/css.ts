@@ -2,7 +2,7 @@ import { formatValue, valueOf, type Channel, type ChannelValues } from "./channe
 import type { Canvas } from "./compile";
 import { num } from "../model/format";
 import { foldKeys, moving, type Key } from "./keys";
-import { ease, type Ease, type Seconds } from "../model/time";
+import { DEFAULT_EASE, ease, isHold, type Ease, type Seconds } from "../model/time";
 
 export type Emit = "value" | "visibility" | "dash";
 
@@ -22,13 +22,37 @@ export const timing = (curve: Ease): string => {
   }
 };
 
-export const BASE_TIMING = timing(ease.out);
+const BASE_TIMING = timing(DEFAULT_EASE);
 
-const percents = (keys: readonly Key[], period: Seconds): string[] => {
+interface Stops {
+  /** The percent of each key. */
+  readonly at: readonly string[];
+  /** For each key, the stop just before the next one when that segment is a hold, else undefined. */
+  readonly before: readonly (string | undefined)[];
+}
+
+const percents = (keys: readonly Key[], period: Seconds): Stops => {
   for (const places of [3, 4]) {
-    const out = keys.map((key) => `${num((key.t / period) * 100, places)}%`);
+    const at = keys.map((key) => (key.t / period) * 100);
+    const out = at.map((value) => `${num(value, places)}%`);
 
-    if (new Set(out).size === out.length) return out;
+    if (new Set(out).size !== out.length) continue;
+    const taken = new Set(out);
+    const step = 10 ** -places;
+
+    // A hold is written as the key's own stop up to one step before the next, so no steps(1) has to be said.
+    const before = keys.map((_, index) => {
+      if (!moving(keys, index) || !isHold(keys[index]!.ease)) return undefined;
+      const stop = `${num(Number(num(at[index + 1]!, places)) - step, places)}%`;
+
+      if (taken.has(stop) || Number.parseFloat(stop) <= Number.parseFloat(out[index]!))
+        return undefined;
+      taken.add(stop);
+
+      return stop;
+    });
+
+    return { at: out, before };
   }
 
   throw new Error(
@@ -36,11 +60,28 @@ const percents = (keys: readonly Key[], period: Seconds): string[] => {
   );
 };
 
-export const cssKeyframes = (lane: string, emit: Emit, all: readonly Key[], period: Seconds) => {
+interface Frames {
+  /** Each stop group: its selectors, the timing it says for itself, and what it sets. */
+  readonly blocks: readonly {
+    readonly selectors: string;
+    readonly suffix: string;
+    readonly set: string;
+  }[];
+  readonly timing: string;
+}
+
+const frames = (
+  lane: string,
+  emit: Emit,
+  all: readonly Key[],
+  period: Seconds,
+  holds: boolean,
+): Frames => {
   const keys = emit === "value" ? foldKeys(lane, all) : all;
   const counts = new Map<string, number>();
   keys.forEach((key, index) => {
-    if (moving(keys, index)) counts.set(timing(key.ease), (counts.get(timing(key.ease)) ?? 0) + 1);
+    if (moving(keys, index) && !(holds && isHold(key.ease)))
+      counts.set(timing(key.ease), (counts.get(timing(key.ease)) ?? 0) + 1);
   });
 
   const [laneTiming] = [...counts].reduce<[string, number]>(
@@ -48,22 +89,119 @@ export const cssKeyframes = (lane: string, emit: Emit, all: readonly Key[], peri
     [BASE_TIMING, counts.get(BASE_TIMING) ?? 0],
   );
 
-  const blocks = new Map<string, string[]>();
-  const at = percents(keys, period);
+  const blocks = new Map<string, { selectors: string[]; suffix: string; set: string }>();
+  const stops = percents(keys, period);
+  const { at } = stops;
+  const before = holds ? stops.before : stops.before.map(() => undefined);
   keys.forEach((key, index) => {
     const own = timing(key.ease);
+    const held = before[index] !== undefined;
 
-    const block =
-      cssDeclarations(lane, emit, key.values) +
-      (moving(keys, index) && own !== laneTiming ? `;animation-timing-function:${own}` : "");
+    const suffix =
+      moving(keys, index) && !held && own !== laneTiming ? `animation-timing-function:${own}` : "";
 
-    blocks.set(block, [...(blocks.get(block) ?? []), at[index]!]);
+    const set = cssDeclarations(lane, emit, key.values);
+    const id = `${set};${suffix}`;
+    const block = blocks.get(id) ?? { selectors: [], suffix, set };
+
+    block.selectors.push(at[index]!, ...(held ? [before[index]!] : []));
+    blocks.set(id, block);
   });
 
   return {
-    body: [...blocks].map(([block, list]) => `${list.join(",")}{${block}}`).join(""),
+    blocks: [...blocks.values()].map(({ selectors, suffix, set }) => ({
+      selectors: selectors.join(","),
+      suffix,
+      set,
+    })),
     timing: laneTiming,
   };
+};
+
+/** The stops of one lane. A hold is written as a stop just before the next key, unless saying steps(1) once is shorter. */
+export const cssFrames = (
+  lane: string,
+  emit: Emit,
+  all: readonly Key[],
+  period: Seconds,
+): Frames => {
+  const exact = frames(lane, emit, all, period, true);
+  const classic = frames(lane, emit, all, period, false);
+
+  const said =
+    classic.timing === timing(ease.hold)
+      ? `animation-timing-function:${classic.timing};`.length
+      : 0;
+
+  return bodyOf(exact).length <= bodyOf(classic).length + said ? exact : classic;
+};
+
+const bodyOf = (frames: Frames): string =>
+  frames.blocks
+    .map(({ selectors, suffix, set }) => `${selectors}{${set}${suffix && `;${suffix}`}}`)
+    .join("");
+
+/** The keyframes one lane needs, written alone. */
+export const cssKeyframes = (lane: string, emit: Emit, all: readonly Key[], period: Seconds) => {
+  const frames = cssFrames(lane, emit, all, period);
+
+  return { body: bodyOf(frames), timing: frames.timing };
+};
+
+/** What two lanes must share to run in one @keyframes: when each stop falls, how it eases, and the clock it runs on. */
+const skeleton = (frames: Frames, lane: { readonly period: Seconds; readonly snapped: Seconds }) =>
+  [
+    frames.timing,
+    lane.period,
+    lane.snapped,
+    ...frames.blocks.map(({ selectors, suffix }) => `${selectors}|${suffix}`),
+  ].join("/");
+
+export interface Group {
+  readonly body: string;
+  readonly timing: string;
+  readonly snapped: Seconds;
+}
+
+/** An element's lanes with the same stops and clock become one @keyframes. */
+export const cssGroups = (
+  lanes: readonly {
+    readonly key: string;
+    readonly emit: Emit;
+    readonly keys: readonly Key[];
+    readonly period: Seconds;
+    readonly snapped: Seconds;
+  }[],
+): Group[] => {
+  const groups = new Map<string, { frames: Frames[]; snapped: Seconds }>();
+
+  for (const lane of lanes) {
+    const frames = cssFrames(lane.key, lane.emit, lane.keys, lane.period);
+    const id = skeleton(frames, lane);
+    const group = groups.get(id) ?? { frames: [], snapped: lane.snapped };
+
+    group.frames.push(frames);
+    groups.set(id, group);
+  }
+
+  return [...groups.values()].map(({ frames, snapped }) => ({
+    body: bodyOf({
+      timing: frames[0]!.timing,
+      blocks: frames[0]!.blocks.map((block, index) => ({
+        ...block,
+        set: frames.map((each) => each.blocks[index]!.set).join(";"),
+      })),
+    }),
+    timing: frames[0]!.timing,
+    snapped,
+  }));
+};
+
+/** A length in px, with no unit on zero. */
+export const length = (value: number): string => {
+  const text = formatValue(value);
+
+  return text === "0" ? text : `${text}px`;
 };
 
 export const cssDeclarations = (lane: string, emit: Emit, values: ChannelValues): string => {
@@ -81,7 +219,7 @@ export const cssDeclarations = (lane: string, emit: Emit, values: ChannelValues)
 
   switch (lane) {
     case "translate":
-      return `translate:${formatValue(values.x ?? 0)}px ${formatValue(values.y ?? 0)}px`;
+      return `translate:${length(values.x ?? 0)} ${length(values.y ?? 0)}`;
     case "rotate":
       return `rotate:${formatValue(values.rotate)}deg`;
     case "offset-distance":

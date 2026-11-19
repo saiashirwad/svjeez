@@ -11,6 +11,7 @@ import type {
   Vec,
 } from "../model/ir";
 import { isLane } from "../model/lane";
+import { isColor } from "../model/painted";
 import { placed, reachOf } from "../model/reach";
 import type { Seconds } from "../model/time";
 import type { Placed } from "./boxes";
@@ -163,7 +164,7 @@ export const neverVisible = (survey: VisibilitySurvey): void => {
         severity: "warning",
         key: node.key,
         message: `${label(node)} is never visible: ${why}.`,
-        hint:
+        fix:
           why.includes("fill") || why.includes("stroke")
             ? "Give it a fill, or a stroke with a color and a width above 0, or remove it."
             : hide,
@@ -178,7 +179,7 @@ export const neverVisible = (survey: VisibilitySurvey): void => {
         severity: "warning",
         key: node.key,
         message: `${label(node)} is never visible: its clip has no area at any time, so it cuts everything away.`,
-        hint: "Give the clip a size, or remove the clip.",
+        fix: "Give the clip a size, or remove the clip.",
       });
       continue;
     }
@@ -188,7 +189,7 @@ export const neverVisible = (survey: VisibilitySurvey): void => {
         flatThroughout(node.geometry) &&
         describeGeometry(isLane(node.geometry) ? node.geometry.keys[0].value : node.geometry)) ||
       (node.kind === "text" && textOf(node) === "" && "a text with no characters") ||
-      (node.kind === "image" &&
+      (node.kind === "picture" &&
         (node.size[0] === 0 || node.size[1] === 0) &&
         `an image ${units(node.size[0])} by ${units(node.size[1])}`);
 
@@ -199,7 +200,7 @@ export const neverVisible = (survey: VisibilitySurvey): void => {
         severity: "warning",
         key: node.key,
         message: `${label(node)} has no size at any time (${flat}), so it draws nothing.`,
-        hint:
+        fix:
           node.kind === "text"
             ? "Give it some text, or remove it."
             : "Give it a width and a height above 0 at some time, or remove it.",
@@ -212,7 +213,7 @@ export const neverVisible = (survey: VisibilitySurvey): void => {
 
 const reachInScene = (survey: Survey, entry: Entry): Box | undefined => {
   try {
-    const own = placed(reachOf(entry.node, survey.scene.symbols, "inspect"), entry.node);
+    const own = placed(reachOf(entry.node, "inspect"), entry.node);
 
     return [...entry.ancestors]
       .reverse()
@@ -266,7 +267,7 @@ const coverOf = (survey: Survey, entry: Entry): Cover | undefined => {
 };
 
 const opaque = (scene: Scene, paint: ShapeNode["fill"], scheme: Scheme): boolean => {
-  if (paint === undefined || isLane(paint) || "stops" in paint) return false;
+  if (paint === undefined || isLane(paint) || !isColor(paint)) return false;
 
   return rgbaIn(scene, paint, scheme)[3] >= 1;
 };
@@ -305,7 +306,7 @@ const covered = (survey: VisibilitySurvey): void => {
       severity: "warning",
       key: entry.node.key,
       message: `${label(entry.node)} is never visible: ${label(cover.entry.node)}, an opaque rect drawn after it, covers it at every time.`,
-      hint: `Draw it after "${cover.entry.node.key}" (later among its siblings), or move it out from under it.`,
+      fix: `Draw it after "${cover.entry.node.key}" (later among its siblings), or move it out from under it.`,
       related: [cover.entry.node.key],
     });
   }
@@ -351,7 +352,7 @@ export const offCanvas = (survey: VisibilitySurvey): void => {
         severity: "error",
         key: entry.node.key,
         message: `${label(entry.node)} is outside the ${width}×${height} canvas at every time: it stays within x ${units(reach.x)} to ${units(reach.x + reach.width)}, y ${units(reach.y)} to ${units(reach.y + reach.height)}.`,
-        hint: "Move it onto the canvas, or remove it.",
+        fix: "Move it onto the canvas, or remove it.",
       });
     }
   }
@@ -383,7 +384,7 @@ export const offCanvas = (survey: VisibilitySurvey): void => {
         severity: "warning",
         key: entry.node.key,
         message: `${spoken(entry.node)} runs ${units(by)} past the ${edge} edge of the canvas while it rests.`,
-        hint: "Move it inside, shorten it, give it a width to wrap to, or shrink its size.",
+        fix: "Move it inside, shorten it, give it a width to wrap to, or shrink its size.",
         times: seen.map((s) => s.t),
       });
       continue;
@@ -397,7 +398,7 @@ export const offCanvas = (survey: VisibilitySurvey): void => {
       severity: "warning",
       key: entry.node.key,
       message: `${label(entry.node)} is cut off ${units(by)} past the ${edge} edge of the canvas while it rests.`,
-      hint: "Move it inside, or let it bleed well past the edge if the crop is meant.",
+      fix: "Move it inside, or let it bleed well past the edge if the crop is meant.",
       times: seen.map((s) => s.t),
     });
   }

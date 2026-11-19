@@ -84,10 +84,10 @@ const check = (name: string, p: NumberParam): NumberParam => {
   return p;
 };
 
-export const number = (value: number, options: Range & Extras): NumberParam =>
+const number = (value: number, options: Range & Extras): NumberParam =>
   check("number", { kind: "number", value, step: 0.01, ...options });
 
-export const count = (
+const count = (
   value: number,
   options: Partial<Range> & Pick<Range, "max"> & Omit<Extras, "step">,
 ): NumberParam => {
@@ -101,25 +101,25 @@ export const count = (
   return check("count", { kind: "number", value, min: 0, ...options, step: 1 });
 };
 
-export const seconds = (
+const seconds = (
   value: number,
   options: Partial<Range> & Pick<Range, "max"> & Extras,
 ): NumberParam =>
   check("seconds", { kind: "number", value, min: 0, step: 0.01, unit: "s", ...options });
 
-export const color = (value: Hex, options: Labelled = {}): ColorParam => ({
+const color = (value: Hex, options: Labelled = {}): ColorParam => ({
   kind: "color",
   value: hexOf(value, "color()"),
   ...options,
 });
 
-export const easing = (value: Ease, options: Labelled = {}): EasingParam => ({
+const easing = (value: Ease, options: Labelled = {}): EasingParam => ({
   kind: "easing",
   value,
   ...options,
 });
 
-export const choice = <const T extends string>(
+const choice = <const T extends string>(
   value: NoInfer<T>,
   options: readonly T[],
   extras: Labelled = {},
@@ -137,10 +137,7 @@ export const choice = <const T extends string>(
   return { kind: "choice", value, options, ...extras };
 };
 
-export const text = (
-  value: string,
-  options: Labelled & Pick<TextParam, "maxLength"> = {},
-): TextParam => {
+const text = (value: string, options: Labelled & Pick<TextParam, "maxLength"> = {}): TextParam => {
   const { maxLength } = options;
 
   if (maxLength !== undefined && !(Number.isInteger(maxLength) && maxLength > 0))
@@ -153,7 +150,7 @@ export const text = (
   return { kind: "text", value, ...options };
 };
 
-export const list = <const I extends ScalarParam | Fields>(
+const list = <const I extends ScalarParam | Fields>(
   item: I,
   value: readonly NoInfer<ItemValue<I>>[],
   options: Labelled & { readonly min?: number; readonly max?: number } = {},
@@ -180,6 +177,9 @@ export const list = <const I extends ScalarParam | Fields>(
   // SAFETY: valueOf returns a list param's value with each item checked against `item`, which is ItemValue<I>[].
   return { ...declared, value: valueOf(declared, value, "list()") as ListParam<I>["value"] };
 };
+
+/** Declare a scene's knobs: `export const params = { speed: param.number(1, { min: 0, max: 4 }) }`. */
+export const param = { number, count, seconds, color, easing, choice, text, list };
 
 export const defaults = <S extends Schema>(schema: S): Values<S> =>
   // SAFETY: the entries are exactly the schema's keys, each mapped to that param's own value.

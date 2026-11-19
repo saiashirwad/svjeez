@@ -34,26 +34,26 @@ const faces = (out: string) =>
 const cutOf = (out: string) => font(Buffer.from(/base64,([^)]+)\)/.exec(out)![1]!, "base64"));
 
 describe("font", () => {
-  test("reads family, weight, style and a fallback from the file", () => {
+  test("reads family, weight, italic and a fallback from the file", () => {
     expect(sans).toMatchObject({
       format: "ttf",
       family: "ABeeZee",
       weight: 400,
-      style: "normal",
+      italic: false,
       fallback: ["sans-serif"],
     });
-    expect(italic).toMatchObject({ family: "ABeeZee", style: "italic" });
+    expect(italic).toMatchObject({ family: "ABeeZee", italic: true });
     expect(monoBold).toMatchObject({ family: "Space Mono", weight: 700, fallback: ["monospace"] });
   });
 
   test("options override what the file says", async () => {
     const bytes = await readFile(fixture("ABeeZee-Regular"));
     expect(
-      font(bytes, { family: "Body", weight: 500, style: "italic", fallback: ["Georgia", "serif"] }),
+      font(bytes, { family: "Body", weight: 500, italic: true, fallback: ["Georgia", "serif"] }),
     ).toMatchObject({
       family: "Body",
       weight: 500,
-      style: "italic",
+      italic: true,
       fallback: ["Georgia", "serif"],
     });
   });
@@ -130,7 +130,7 @@ describe("font.family", () => {
     expect(family.name).toBe("Space Mono");
     expect(family.face()).toBe(mono);
     expect(family.face(600)).toBe(monoBold);
-    expect(family.face(400, "italic")).toBe(mono);
+    expect(family.face(400, true)).toBe(mono);
   });
 
   test("follows CSS weight matching when no face is exact", async () => {
@@ -144,7 +144,7 @@ describe("font.family", () => {
   });
 
   test("two faces in one weight and style slot are an error", () => {
-    expect(() => font.family(sans, sans)).toThrow("two normal faces of weight 400");
+    expect(() => font.family(sans, sans)).toThrow("two upright faces of weight 400");
   });
 });
 

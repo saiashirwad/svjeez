@@ -2,15 +2,12 @@ export { scene } from "./author/lower";
 
 export {
   Group,
-  Image,
-  Instance,
+  Picture,
   Run,
   Sequence,
   Shape,
   Text,
-  canvas,
   ref,
-  symbol,
   type Bounds,
   type SceneElement,
 } from "./author/nodes";
@@ -27,9 +24,7 @@ export {
   ellipse,
   line,
   path,
-  pathData,
   polygon,
-  polyline,
   rect,
   tokens,
   type Geometry,
@@ -38,21 +33,25 @@ export {
 
 export { moved, subtract } from "./author/holes";
 
-export { linear, radial } from "./author/paint";
+export { linear, pattern, radial } from "./author/paint";
 
-export { blur, shadow } from "./author/effects";
+export { adjust, blur, displace, shadow } from "./author/effects";
 
-export { motion, track, type Anim, type Track } from "./author/track";
+export { track, type Anim, type Track } from "./author/track";
 
-export { draw, enter, exit, sampled, wiggle } from "./author/recipes";
+export { through, within } from "./author/derived";
+
+export { enter, exit, sampled, wiggle } from "./author/recipes";
 
 export { ease, type Curve } from "./author/spring";
 
-export { span, type Spanned as Span } from "./author/span";
+export { span, type Span } from "./author/span";
 
 export { morph } from "./author/morph";
 
 export { count, type Count, type CountFormat } from "./author/count";
+
+export { param } from "./params";
 
 export { picture } from "./author/picture";
 

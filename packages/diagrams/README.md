@@ -24,6 +24,6 @@ export default scene({ size: [480, 320], duration: 4, title: "Review", theme }, 
 ));
 ```
 
-Each diagram returns its `node`, its `size`, `part(id)` refs for arrows and `<Align>`, `when(id)` for timing, and routes with `travel(span)` for a token's `at`. For Mermaid source, use `@svjeez/mermaid`.
+Each diagram returns its `node`, its `size`, `part(id)` refs for arrows and `<Align>`, `when(id)` for timing, and routes with `travel(span)` for a token's `at`. `reveal` is a schedule of spans (one span plays the parts in order; a record times the ones it names; a sequence names its rows `message-1`, `note-2`, …). To drive an edge from your own timeline instead, pass `draw: { "pr->lint": progress }`, a track from 0 to 1 per edge id; an edge a `reveal` also draws can't have one. For Mermaid source, use `@svjeez/mermaid`.
 
 [API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/diagrams.md)

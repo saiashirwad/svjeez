@@ -1,6 +1,6 @@
 # @svjeez/charts
 
-Bar, line and area charts on shared axes for a svjeez scene. Scales are fitted to the data while the scene builds, and each series grows or draws on over a span you give it.
+Bar, line and area charts on shared axes for a svjeez scene. Scales are fitted to the data while the scene builds, and each series grows or draws on from a `draw` progress, 0 to 1, that you give it as a number or a track.
 
 ```sh
 npm i -D @svjeez/charts@next @svjeez/fonts@next svjeez@next
@@ -9,7 +9,7 @@ npm i -D @svjeez/charts@next @svjeez/fonts@next svjeez@next
 ```tsx
 import { Chart, bars, line } from "@svjeez/charts";
 import { google } from "@svjeez/fonts";
-import { Group, scene, span, tokens } from "svjeez";
+import { Group, scene, span, tokens, track } from "svjeez";
 
 const theme = tokens({
   light: { text: "#1D1D1F", muted: "#6E6E73", blue: "#0A6CFF" },
@@ -25,8 +25,12 @@ export default scene({ size: [440, 260], duration: 4, title: "Sales by quarter",
       size={[360, 200]}
       x={{ kind: "band", domain: Object.keys(sales) }}
       series={[
-        bars(sales, { color: theme.blue, span: span(0.6, 1.2) }),
-        line(Object.entries(sales), { color: theme.text, span: span(1.8, 1.2), dots: true }),
+        bars(sales, { color: theme.blue, draw: track(0).to(1, span(0.6, 1.2)) }),
+        line(Object.entries(sales), {
+          color: theme.text,
+          draw: track(0).to(1, span(1.8, 1.2)),
+          dots: true,
+        }),
       ]}
       font={mono}
       axis={theme.muted}

@@ -11,6 +11,6 @@ export const geist = await google.family("Geist", [{ weight: 400 }, { weight: 60
 
 export const geistText = await google.family(
   "Geist",
-  [{ weight: 400 }, { weight: 600 }, { weight: 400, style: "italic" }],
+  [{ weight: 400 }, { weight: 600 }, { weight: 400, italic: true }],
   { ligatures: false },
 );

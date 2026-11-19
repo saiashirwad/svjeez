@@ -27,3 +27,5 @@ import hero from "../scenes/hero.tsx";
 Use `getScene(scene, { posters: { scale: 2 } })` from `@svjeez/astro/scene` for custom markup or poster URLs. Posters need `playwright-core` and `npx playwright-core install chromium-headless-shell`.
 
 [Example Astro app](https://github.com/saiashirwad/svjeez/tree/next/packages/astro/test/consumer)
+
+[API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/web.md)

@@ -7,7 +7,7 @@ import {
   circle,
   ease,
   morph,
-  pathData,
+  path,
   rect,
   scene,
   span,
@@ -19,7 +19,7 @@ import {
   boxesOf,
   describe as describeScene,
   hitTest,
-  inspect,
+  check,
   isLane,
   svg,
   valueAt,
@@ -273,7 +273,7 @@ describe("morph", () => {
     expect(lane(placed.at).keys.map((key) => key.t)).toEqual([0, 2, 3, 4]);
   });
 
-  test("a spring moves geometry and points, and colors take ease.inOut", () => {
+  test("a spring moves geometry and points, and colors take the default curve", () => {
     const a = shape(
       made(() =>
         morph(
@@ -289,7 +289,36 @@ describe("morph", () => {
     expect(lane(a.at).keys.length).toBeGreaterThan(4);
     expect(Math.max(...lane(a.at).keys.map((key) => key.value[0]))).toBeGreaterThan(40);
     expect(lane(a.geometry).keys.length).toBeGreaterThan(4);
-    expect(lane(a.fill).keys[1]!.ease).toEqual(ease.inOut);
+    expect(lane(a.fill).keys[1]!.ease).toEqual(ease.out);
+  });
+
+  test("a morph and a track take the same default curve", () => {
+    const morphed = shape(
+      made(() =>
+        morph(
+          <Shape key="a" geometry={circle(10)} fill="#ff0000" />,
+          <Shape key="a" geometry={circle(10)} fill="#00ff00" />,
+          span(0, 1),
+        ),
+      ),
+      "a",
+    );
+
+    expect(lane(morphed.fill).keys[1]!.ease).toEqual(ease.out);
+
+    const moved = shape(
+      made(() => (
+        <Shape
+          key="b"
+          geometry={circle(10)}
+          fill="#ff0000"
+          at={track([0, 0] as const).to([10, 0] as const, span(0, 1))}
+        />
+      )),
+      "b",
+    );
+
+    expect(lane(moved.at).keys[1]!.ease).toEqual(ease.out);
   });
 
   test("a stagger starts each changing sibling later, with what it holds, and all end by the span's end", () => {
@@ -413,8 +442,8 @@ describe("morph", () => {
 });
 
 describe("different paths", () => {
-  const one = pathData("M0 0 C5 5 10 5 10 0 L10 10 Z");
-  const two = pathData("M0 0 L10 0 L10 10 Z M20 20 L30 20 L30 30 L20 30 Z");
+  const one = path.parse("M0 0 C5 5 10 5 10 0 L10 10 Z");
+  const two = path.parse("M0 0 L10 0 L10 10 Z M20 20 L30 20 L30 30 L20 30 Z");
   const times = [0, 0.5, 1, 1.5, 2, 2.5, 3, 4];
 
   const readers = (model: Model.Scene, key: string) => {
@@ -428,7 +457,7 @@ describe("different paths", () => {
     }
 
     expect(() => describeScene(model, times)).not.toThrow();
-    expect(() => inspect(model)).not.toThrow();
+    expect(() => check(model).problems).not.toThrow();
     expect(() => svg.emit(model)).not.toThrow();
   };
 

@@ -128,7 +128,7 @@ export const moved = (geometry: Geometry, by: Vec): Outline => {
   switch (outline.kind) {
     case "line":
       return { ...outline, from: plus(outline.from, by), to: plus(outline.to, by) };
-    case "polygon":
+    case "points":
       return { ...outline, points: outline.points.map((point) => plus(point, by)) };
     default:
       return {
@@ -151,7 +151,7 @@ export const subtract = (base: Geometry, ...cuts: readonly Geometry[]): Outline 
 
   if (holes.length > 0 && !(outline.kind === "path" && outline.rule === "evenodd"))
     throw new SceneError(
-      "subtract() takes a base of one outline, or one subtract() already made. A nonzero path of several contours has no one edge to cut holes inside.",
+      "subtract() takes a base of one outline, or one subtract() already made. A shape made of several outlines has no one edge to cut holes inside.",
     );
   const ring = flatten(outer!);
 
@@ -200,7 +200,7 @@ export const subtract = (base: Geometry, ...cuts: readonly Geometry[]): Outline 
 
     if (other)
       throw new SceneError(
-        `subtract()'s ${what} overlaps or touches ${other.what}, and holes that overlap don't cut as one even-odd path. Draw them as one cut.`,
+        `subtract()'s ${what} overlaps or touches ${other.what}, and holes that overlap don't cut cleanly. Draw them as one hole.`,
       );
     kept.push({ contour, ring: own, what });
   }

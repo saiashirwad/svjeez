@@ -7,16 +7,28 @@ import {
   circle,
   ease,
   enter,
-  motion,
   path,
   rect,
+  sampled,
   scene,
   span,
   tokens,
   track,
   type SceneElement,
+  type Track,
+  type Vec,
 } from "svjeez";
-import { diagnose, isLane, isScene, svg, type Model } from "svjeez/tools";
+import {
+  isLane,
+  isScene,
+  placements,
+  svg,
+  type Layer,
+  type Layers,
+  type Model,
+} from "svjeez/tools";
+import { SceneError } from "svjeez/tools";
+import { diagnose } from "../src/model/backend";
 import { FEATURES } from "../src/model/backend";
 
 const theme = tokens({ light: { ink: "#111111" }, dark: { ink: "#EEEEEE" } });
@@ -123,12 +135,7 @@ describe("lowering", () => {
   test("a track that never changes is a plain value, and a layer that changes nothing is left out", () => {
     const node = only(
       made(() => (
-        <Shape
-          fill="#000000"
-          geometry={circle(4)}
-          opacity={track(1)}
-          motion={motion({ rotate: 0 })}
-        />
+        <Shape fill="#000000" geometry={circle(4)} opacity={track(1)} motion={{ rotate: 0 }} />
       )),
     );
 
@@ -216,7 +223,9 @@ describe("the SVG backend", () => {
           <Shape fill="#000000" geometry={rect(4, 4)} at={[16, 6]} />
         </Group>
       )),
-    ).toContain('<g transform="translate(50 50)" style="transform-origin:60px 55px" class="a m1">');
+    ).toContain(
+      '<g transform="translate(50 50)" style="transform-origin:60px 55px" class="a m1" fill="#000000">',
+    );
   });
 
   test("a group that only places one node is written as that node, placed by both", () => {
@@ -238,7 +247,7 @@ describe("the SVG backend", () => {
         fill="#000000"
         geometry={circle(4)}
         rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}
-        motion={motion({ offset: [0, 0] }).to({ offset: [10, 0] }, span(0, 1))}
+        motion={{ offset: track<Vec>([0, 0]).to([10, 0], span(0, 1)) }}
       />
     ));
 
@@ -247,14 +256,14 @@ describe("the SVG backend", () => {
         fill="#000000"
         geometry={circle(4)}
         motion={[
-          motion({ rotate: 0 }).to({ rotate: 90 }, span(0, 1)),
-          motion({ offset: [0, 0] }).to({ offset: [10, 0] }, span(0, 1)),
+          { rotate: track(0).to(90, span(0, 1)) },
+          { offset: track<Vec>([0, 0]).to([10, 0], span(0, 1)) },
         ]}
       />
     ));
 
     expect(shared).not.toContain("<g");
-    expect(nested).toMatch(/<g style="transform-origin:0px 0px" class="a m\d">\s*<circle/);
+    expect(nested).toMatch(/<g style="transform-origin:0 0" class="a m\d">\s*<circle/);
   });
 
   test("an entrance folds into the node's own opacity, so no wrapper draws it", () => {
@@ -415,5 +424,92 @@ describe("isScene", () => {
     expect(isScene(() => model)).toBe(false);
     expect(isScene({ ...model, root: null })).toBe(false);
     expect(isScene(null)).toBe(false);
+  });
+});
+
+describe("motion layers", () => {
+  const refused = (
+    layers: Layers | Track<number> | Record<string, number> | (Layer | Track<number>)[],
+  ) =>
+    made(() => (
+      // SAFETY: the test hands over what the types refuse, to read the error.
+      <Shape fill="#000000" geometry={rect(10, 10)} motion={layers as never} />
+    ));
+
+  test("a track, or a key a layer does not hold, throws with a fix", () => {
+    expect(() => refused(track(0).to(1, span(0, 1)))).toThrow(
+      /motion on .* takes layers: plain objects of offset, rotate, scale and opacity/,
+    );
+    expect(() => refused({ opacity: 1, glow: 3 })).toThrow(/gives it "glow"/);
+
+    const error = (() => {
+      try {
+        refused([{ opacity: 1 }, track(0)]);
+      } catch (caught) {
+        return caught;
+      }
+    })();
+
+    expect(error).toBeInstanceOf(SceneError);
+    expect(error).toHaveProperty("fix", expect.stringContaining("motion={{ opacity: track(0)"));
+  });
+
+  const matrixAt = (model: Model.Scene, t: number) =>
+    placements(model, t).find((placed) => placed.key === "0")!.matrix;
+
+  test("an outer layer's offset is not scaled by what is inside it", () => {
+    const model = made(() => (
+      <Shape
+        fill="#000000"
+        geometry={rect(10, 10)}
+        scale={2}
+        motion={[{ offset: track<Vec>([0, 0]).to([10, 0], span(0, 1), ease.linear) }, false]}
+      />
+    ));
+
+    expect(matrixAt(model, 1)[4] - matrixAt(model, 0)[4]).toBeCloseTo(10, 5);
+    expect(matrixAt(model, 1)[0]).toBeCloseTo(2, 5);
+  });
+
+  test("scales of the layers and the node multiply, and a missing key rests", () => {
+    const model = made(() => (
+      <Shape
+        fill="#000000"
+        geometry={rect(10, 10)}
+        scale={2}
+        motion={[{ scale: track(1).to(3, span(0, 1), ease.linear) }, { rotate: 0 }]}
+      />
+    ));
+
+    expect(matrixAt(model, 0)[0]).toBeCloseTo(2, 5);
+    expect(matrixAt(model, 1)[0]).toBeCloseTo(6, 5);
+    expect(matrixAt(model, 1)[1]).toBeCloseTo(0, 5);
+  });
+
+  test("sampled gives a track of what the function returns, which feeds at and a layer", () => {
+    const num: Track<number> = sampled(() => 5, span(0, 1), { tolerance: 0.1 });
+    const point: Track<Vec> = sampled((t): Vec => [t * 10, 0], span(0, 1), { tolerance: 0.1 });
+
+    // @ts-expect-error: a number sampler is not a point track.
+    const wrong: Track<Vec> = num;
+
+    expect([num, wrong]).toHaveLength(2);
+
+    const model = made(() => (
+      <Group>
+        <Shape key="a" fill="#000000" geometry={circle(4)} at={point} />
+        <Shape
+          key="b"
+          fill="#000000"
+          geometry={circle(4)}
+          motion={{
+            offset: point,
+            opacity: sampled((t) => 1 - t / 2, span(0, 1), { tolerance: 0.01 }),
+          }}
+        />
+      </Group>
+    ));
+
+    expect(model.root.children).toHaveLength(2);
   });
 });

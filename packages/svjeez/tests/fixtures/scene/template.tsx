@@ -1,9 +1,9 @@
-import { defaults, number, text, type Values } from "svjeez/params";
-import { Shape, circle, scene } from "svjeez";
+import { Shape, circle, param, scene } from "svjeez";
+import { defaults, type Values } from "svjeez/tools";
 
 export const params = {
-  title: text("Dot", { maxLength: 12 }),
-  radius: number(10, { min: 1, max: 30, step: 1 }),
+  title: param.text("Dot", { maxLength: 12 }),
+  radius: param.number(10, { min: 1, max: 30, step: 1 }),
 };
 
 export default (p: Values<typeof params> = defaults(params)) =>

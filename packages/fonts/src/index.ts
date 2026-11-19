@@ -3,11 +3,11 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { font } from "svjeez";
-import type { Font, FontFamily, FontOptions, FontStyle } from "svjeez/tools";
+import type { Font, FontFamily, FontOptions } from "svjeez/tools";
 
-export type GoogleOptions = Omit<FontOptions, "family" | "weight" | "style"> & {
+export type GoogleOptions = Omit<FontOptions, "family" | "weight" | "italic"> & {
   readonly weight?: number;
-  readonly style?: FontStyle;
+  readonly italic?: boolean;
 };
 
 const cacheDir = (): string => {
@@ -47,9 +47,11 @@ const isFont = (bytes: Uint8Array): boolean => {
   return true;
 };
 
-const cssUrl = (family: string, weight: number, style: FontStyle): string => {
+const slant = (italic: boolean): string => (italic ? "italic" : "normal");
+
+const cssUrl = (family: string, weight: number, italic: boolean): string => {
   const name = encodeURIComponent(family).replace(/%20/g, "+");
-  const axes = style === "italic" ? `ital,wght@1,${weight}` : `wght@${weight}`;
+  const axes = italic ? `ital,wght@1,${weight}` : `wght@${weight}`;
 
   return `https://fonts.googleapis.com/css2?family=${name}:${axes}`;
 };
@@ -62,14 +64,14 @@ const message = (page: string): string => {
 
 class GoogleError extends Error {}
 
-const download = async (family: string, weight: number, style: FontStyle): Promise<Uint8Array> => {
-  const label = `${family} ${weight} ${style}`;
-  const css = await fetch(cssUrl(family, weight, style), { headers: HEADERS });
+const download = async (family: string, weight: number, italic: boolean): Promise<Uint8Array> => {
+  const label = `${family} ${weight} ${slant(italic)}`;
+  const css = await fetch(cssUrl(family, weight, italic), { headers: HEADERS });
   const text = await css.text();
 
   if (!css.ok)
     throw new GoogleError(
-      `Google Fonts has no "${family}" at weight ${weight} (${style}): HTTP ${css.status}, ${message(text)}`,
+      `Google Fonts has no "${family}" at weight ${weight} (${slant(italic)}): HTTP ${css.status}, ${message(text)}`,
     );
 
   const url = /src:\s*url\(([^)]+)\)/.exec(text)?.[1];
@@ -88,12 +90,12 @@ const download = async (family: string, weight: number, style: FontStyle): Promi
 
 const pending = new Map<string, Promise<Uint8Array>>();
 
-const bytesOf = (family: string, weight: number, style: FontStyle): Promise<Uint8Array> => {
-  const path = join(cacheDir(), `${slug(family)}-${weight}-${style}.ttf`);
+const bytesOf = (family: string, weight: number, italic: boolean): Promise<Uint8Array> => {
+  const path = join(cacheDir(), `${slug(family)}-${weight}-${slant(italic)}.ttf`);
   let bytes = pending.get(path);
 
   if (!bytes) {
-    bytes = load(path, family, weight, style).finally(() => pending.delete(path));
+    bytes = load(path, family, weight, italic).finally(() => pending.delete(path));
     pending.set(path, bytes);
   }
 
@@ -104,7 +106,7 @@ const load = async (
   path: string,
   family: string,
   weight: number,
-  style: FontStyle,
+  italic: boolean,
 ): Promise<Uint8Array> => {
   try {
     const cached = await readFile(path);
@@ -115,19 +117,19 @@ const load = async (
   let bytes: Uint8Array;
 
   try {
-    bytes = await download(family, weight, style);
+    bytes = await download(family, weight, italic);
   } catch (error) {
     if (error instanceof GoogleError) throw error;
 
     throw new Error(
-      `Could not load "${family}" ${weight} ${style} from Google Fonts, and ${path} is not cached. Run once with a network connection.`,
+      `Could not load "${family}" ${weight} ${slant(italic)} from Google Fonts, and ${path} is not cached. Run once with a network connection.`,
       { cause: error },
     );
   }
 
   if (!isFont(bytes))
     throw new GoogleError(
-      `Google Fonts answered for ${family} ${weight} ${style} with a file that is not a font.`,
+      `Google Fonts answered for ${family} ${weight} ${slant(italic)} with a file that is not a font.`,
     );
 
   const temp = `${path}.${process.pid}.${Date.now()}.tmp`;
@@ -141,9 +143,9 @@ const load = async (
 
 export const google = Object.assign(
   async (family: string, options: GoogleOptions = {}): Promise<Font> => {
-    const { weight = 400, style = "normal", ...rest } = options;
+    const { weight = 400, italic = false, ...rest } = options;
 
-    return font(await bytesOf(family, weight, style), { ...rest, family, weight, style });
+    return font(await bytesOf(family, weight, italic), { ...rest, family, weight, italic });
   },
   {
     family: async (

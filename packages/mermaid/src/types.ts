@@ -51,7 +51,7 @@ export interface MermaidSequenceMessage {
   readonly from: string;
   readonly to: string;
   readonly text: string;
-  readonly line: "solid" | "dashed";
+  readonly reply: boolean;
   readonly head: "filled" | "none" | "cross" | "async";
 }
 

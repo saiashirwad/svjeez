@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { Shape, canvas, scene } from "svjeez";
+import { Shape, scene } from "svjeez";
 import { svg } from "svjeez/tools";
 import * as palettes from "../src/palettes.ts";
 import * as root from "../src/index.ts";
@@ -45,7 +45,7 @@ test("palette() names its tokens after the palette, so they never meet a scene's
   expect(mine.plain).toMatchObject({ name: "mine-plain" });
 
   const out = svg.emit(
-    scene({ size: [20, 20], duration: 1, title: "Palette" }, () => (
+    scene({ size: [20, 20], duration: 1, title: "Palette" }, (canvas) => (
       <Shape geometry={canvas.rect} fill={mine.keyword} />
     )),
   );

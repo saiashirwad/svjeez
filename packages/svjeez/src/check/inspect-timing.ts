@@ -232,7 +232,7 @@ export const loopSeam = (survey: Survey): void => {
         severity: "warning",
         key: node.key,
         message: `${label(node)} shows ${JSON.stringify(countAt(count, end))} at the end and jumps to ${JSON.stringify(countAt(count, 0))} when the loop starts again at 0s.`,
-        hint: "Count back to where it starts (.rewind() on its track), or fade it out before the end.",
+        fix: "Count back to where it starts (.rewind() on its track), or fade it out before the end.",
         times: [Number(end.toFixed(3)), 0],
       });
 
@@ -251,7 +251,7 @@ export const loopSeam = (survey: Survey): void => {
         severity: "warning",
         key: node.key,
         message: `${label(node)} enters at ${seconds(entered)} and never leaves, so it vanishes when the loop starts again at 0s.`,
-        hint: "Let it leave before the end (exit(), a fade, or .rewind() on its track), or have it on screen from 0s.",
+        fix: "Let it leave before the end (exit(), a fade, or .rewind() on its track), or have it on screen from 0s.",
         times: [Number(end.toFixed(3)), 0],
       });
       continue;
@@ -309,7 +309,7 @@ export const loopSeam = (survey: Survey): void => {
           severity: "warning",
           key: connector.key,
           message: `${label(connector)} jumps when the loop starts again, from ${seconds(duration)} back to 0s, because its ends follow ${names}, which is not at 0s where it is at the end: it scales, fades or moves in. The arrow is redrawn to match, so it jumps too.`,
-          hint: `End the loop with ${names} as it starts (exit() it, or .rewind() its motion), or bring the arrow in after its ends settle and take it out before the end.`,
+          fix: `End the loop with ${names} as it starts (exit() it, or .rewind() its track), or bring the arrow in after its ends settle and take it out before the end.`,
           times: [Number(end.toFixed(3)), 0],
         });
         continue;
@@ -321,7 +321,7 @@ export const loopSeam = (survey: Survey): void => {
       severity: "warning",
       key: node.key,
       message: `${label(node)} jumps when the loop starts again, from ${seconds(duration)} back to 0s: ${[...new Set(jumps)].join(", ")}.`,
-      hint: "End each of its motions where it starts (.rewind() closes a loop), or fade it out before the end.",
+      fix: "End each of its motions where it starts (.rewind() closes a loop), or fade it out before the end.",
       times: [Number(end.toFixed(3)), 0],
     });
   }
@@ -403,7 +403,7 @@ export const timing = (survey: Survey): void => {
           severity: "warning",
           key: node.key,
           message: `${label(node)}'s ${name} changes only at ${seconds(changes[0]![0])}, after the scene ends at ${seconds(duration)}, so it never moves.`,
-          hint: "Move the motion into the scene's duration, or make the scene longer.",
+          fix: "Move the motion into the scene's duration, or make the scene longer.",
         });
     }
 
@@ -415,7 +415,7 @@ export const timing = (survey: Survey): void => {
         severity: "error",
         key: node.key,
         message: `${label(node)} shows from 0s, cuts to hidden at ${seconds(pop[0])}, and comes straight back by ${seconds(pop[1])}.`,
-        hint: "Start its motion from the hidden values, as in motion({ opacity: 0 }), so it is hidden from 0s.",
+        fix: "Start its track from the hidden values, as in motion={{ opacity: track(0).to(1, span(…)) }}, so it is hidden from 0s.",
         times: [0, pop[0], pop[1]],
       });
 
@@ -436,7 +436,7 @@ export const timing = (survey: Survey): void => {
           severity: "error",
           key: node.key,
           message: `${label(node)} has its fill showing at 0s while its stroke only draws in by ${seconds(trim.keys[drawn]!.t)}.`,
-          hint: "Drop the fill, or fade the fill in after the draw.",
+          fix: "Drop the fill, or fade the fill in after the draw.",
           times: [0],
         });
     }
@@ -450,7 +450,7 @@ export const timing = (survey: Survey): void => {
       severity: "warning",
       key: scene.root.key,
       message: `Nothing in the scene moves in its ${seconds(duration)}.`,
-      hint: "Animate something, or make it a still picture with a duration of 0.",
+      fix: "Animate something, or make it a still picture with a duration of 0.",
     });
   else if (moves && !enters)
     add(survey, {
@@ -458,7 +458,7 @@ export const timing = (survey: Survey): void => {
       severity: "info",
       key: scene.root.key,
       message: "Everything is on screen from 0s, and nothing ever enters.",
-      hint: "Let the main parts enter in turn (enter(), a fade or a draw), unless the loop is meant to start mid-motion.",
+      fix: "Let the main parts enter in turn (enter(), a fade or a draw), unless the loop is meant to start mid-motion.",
     });
 };
 
@@ -504,7 +504,7 @@ const wasted = (
       severity: "info",
       key: entry.node.key,
       message: `${label(entry.node)} changes its ${said(before)} before it is first visible at ${seconds(first)}, where no one sees it.`,
-      hint: "Start it with the values it should show, or move the change to when it is visible.",
+      fix: "Start it with the values it should show, or move the change to when it is visible.",
     });
 
   if (after.size > 0)
@@ -513,6 +513,6 @@ const wasted = (
       severity: "info",
       key: entry.node.key,
       message: `${label(entry.node)} changes its ${said(after)} after it is gone for good at ${seconds(last)}, where no one sees it.`,
-      hint: "Drop the change, or show the node while it happens.",
+      fix: "Drop the change, or show the node while it happens.",
     });
 };

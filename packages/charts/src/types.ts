@@ -1,5 +1,5 @@
-import type { Paint, Span, Vec } from "svjeez";
-import type { Child, Ease, FontValue } from "svjeez/tools";
+import type { Anim, Paint, Span, Vec } from "svjeez";
+import type { Child, FontValue, StrokeProps } from "svjeez/tools";
 
 export type LineCurve = "linear" | "monotone" | "step";
 
@@ -31,12 +31,13 @@ export type Datum<X extends string | number = string | number> = readonly [x: X,
 export interface SeriesOptions {
   readonly color: Paint;
   readonly name?: string;
-  readonly span?: Span;
+  /** How much of the series is drawn, from 0 to 1: a number or a track. */
+  readonly draw?: Anim<number>;
 }
 
 export interface BarsOptions extends SeriesOptions {
+  /** The share of the draw spent staggering the bars' starts, from 0 to below 1. Default 0.3. */
   readonly stagger?: number;
-  readonly ease?: Ease;
   readonly radius?: number;
   readonly values?: boolean | ((value: number) => string);
 }
@@ -44,7 +45,8 @@ export interface BarsOptions extends SeriesOptions {
 export interface LineOptions extends SeriesOptions {
   readonly curve?: LineCurve;
   readonly dots?: boolean | number;
-  readonly width?: number;
+  /** Restyles the line over its default: the series color, width 2.5, round cap and join. */
+  readonly stroke?: Partial<StrokeProps>;
   readonly label?: string;
 }
 
@@ -78,8 +80,9 @@ export interface ChartProps {
   readonly label: Paint;
   readonly y?: YScale;
   readonly at?: Vec;
-  readonly grid?: boolean;
-  readonly fontSize?: number;
+  /** Guide lines, off by default. `{}` draws them in the axis color; an object restyles them. */
+  readonly grid?: Partial<StrokeProps> | false;
+  readonly textSize?: number;
   readonly axesIn?: Span;
   readonly key?: string;
   readonly children?: (plot: Plot) => Child;

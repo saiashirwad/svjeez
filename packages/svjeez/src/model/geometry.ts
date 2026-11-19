@@ -3,7 +3,7 @@ import { easeAt, easeBetween, staysInside } from "./ease-at";
 import { ease } from "./time";
 import { matchRings } from "./paths";
 import type { Box, Contour, Cubic, Geometry, Key, Lane, Vec } from "./ir";
-import { curveLength, lerpPoint, lineCubic } from "./curve";
+import { alongCurve, curveLength, lerpPoint, lineCubic, type Controls } from "./curve";
 
 const DEG = Math.PI / 180;
 const KAPPA = (4 / 3) * Math.tan(Math.PI / 8);
@@ -81,7 +81,7 @@ export const outlineBoxOf = (outline: Geometry): Box => {
 
     case "line":
       return around([outline.from[0], outline.to[0]], [outline.from[1], outline.to[1]]);
-    case "polygon":
+    case "points":
       return around(
         outline.points.map((point) => point[0]),
         outline.points.map((point) => point[1]),
@@ -202,7 +202,7 @@ export const contoursOf = (geometry: Geometry, pieces?: number): Contour[] => {
       return [
         { start: geometry.from, curves: [lineCubic(geometry.from, geometry.to)], closed: false },
       ];
-    case "polygon": {
+    case "points": {
       const [first, ...rest] = geometry.points;
 
       if (!first) return [];
@@ -269,11 +269,11 @@ export const mixGeometry = (a: Geometry, b: Geometry, amount: number, where: str
       if (b.kind !== "line") break;
 
       return { kind: "line", from: lerpPoint(a.from, b.from, u), to: lerpPoint(a.to, b.to, u) };
-    case "polygon":
-      if (b.kind !== "polygon" || b.points.length !== a.points.length || b.closed !== a.closed)
+    case "points":
+      if (b.kind !== "points" || b.points.length !== a.points.length || b.closed !== a.closed)
         break;
 
-      return { kind: "polygon", points: mixAll(a.points, b.points, u), closed: a.closed };
+      return { kind: "points", points: mixAll(a.points, b.points, u), closed: a.closed };
     case "path":
       if (b.kind !== "path" || a.rule !== b.rule || !same(a.contours, b.contours)) break;
 
@@ -305,7 +305,7 @@ const alike = (values: readonly Geometry[]): boolean => {
   return rest.every((value) => {
     if (value.kind !== first.kind) return false;
 
-    if (value.kind === "polygon" && first.kind === "polygon")
+    if (value.kind === "points" && first.kind === "points")
       return value.points.length === first.points.length && value.closed === first.closed;
 
     if (value.kind === "path" && first.kind === "path")
@@ -321,7 +321,7 @@ export const matched = (values: readonly Geometry[], where: string): Geometry[] 
 
   if (rules.size > 1)
     throw new SceneError(
-      `${where} morphs between a nonzero and an evenodd path, and a fill rule can't blend. Give every key one rule.`,
+      `${where} morphs between a shape with holes cut by subtract() and one without, and a hole can't blend into none. Cut holes in every state, or in none.`,
     );
 
   const outlines = values.map((value) => {
@@ -418,4 +418,47 @@ export const lengthOf = (geometry: Geometry): number => {
         return sum + length + (closed ? Math.hypot(start[0] - from[0], start[1] - from[1]) : 0);
       }, 0);
   }
+};
+
+interface Piece {
+  readonly from: Vec;
+  readonly via: Controls;
+  readonly to: Vec;
+}
+
+export interface Heading {
+  readonly point: Vec;
+  readonly angle: number;
+}
+
+/** The point and heading (radians) `distance` along the outline, held at its ends. */
+export const alongOutline = (geometry: Geometry, distance: number): Heading => {
+  const pieces = contoursOf(geometry).flatMap(({ start, curves, closed }) => {
+    const all = closed ? [...curves, lineCubic(curves.at(-1)?.[2] ?? start, start)] : curves;
+
+    return all.map((curve, i): Piece => ({
+      from: i === 0 ? start : all[i - 1]![2],
+      via: [curve[0], curve[1]],
+      to: curve[2],
+    }));
+  });
+
+  let left = Math.max(0, distance);
+
+  for (const [i, { from, via, to }] of pieces.entries()) {
+    const length = curveLength(from, via, to);
+
+    if (left > length && i < pieces.length - 1) {
+      left -= length;
+      continue;
+    }
+
+    const share = length > 0 ? Math.min(1, left / length) : 0;
+    const [before, after] = [Math.max(0, share - 0.01), Math.min(1, share + 0.01)];
+    const [a, b] = [alongCurve(from, via, to, before), alongCurve(from, via, to, after)];
+
+    return { point: alongCurve(from, via, to, share), angle: Math.atan2(b[1] - a[1], b[0] - a[0]) };
+  }
+
+  return { point: [0, 0], angle: 0 };
 };

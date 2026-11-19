@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { Align, Group, Shape, circle, font, scene, span } from "svjeez";
-import { SceneError, inspect, svg, type Child } from "svjeez/tools";
+import { Align, Group, Shape, circle, ease, font, scene, span, track } from "svjeez";
+import { SceneError, check, svg, type Child, type Model, type When } from "svjeez/tools";
+import { Edge, look } from "../src/kit.tsx";
+import { blendNumber, valueAt } from "../../svjeez/src/model/sample";
 import {
   flowchart,
   lanes,
@@ -32,8 +34,8 @@ const draw = (child: Child, duration = 6) =>
   ));
 
 const errorsOf = (child: Child) =>
-  inspect(draw(child))
-    .filter((f) => f.severity === "error")
+  check(draw(child))
+    .problems.filter((f) => f.severity === "error")
     .map((f) => f.message);
 
 const thrown = (run: () => void): SceneError => {
@@ -95,6 +97,24 @@ describe("flowchart", () => {
     expect(chart.when("a")).toBeUndefined();
     expect(chart.when("b")).toMatchObject({ start: 2, over: 0.3 });
     expect(chart.when("a->b")).toMatchObject({ start: 1.7, over: 0.3 });
+  });
+
+  test("an edge can draw from a timeline of its own, but not also from a reveal", () => {
+    const spec = { nodes: { a: "A", b: "B" }, edges: [["a", "b"]] } as const;
+    const progress = track(0).to(1, span(1, 1));
+    const chart = flowchart(spec, { ...options, draw: { "a->b": progress } });
+
+    expect(svg.emit(draw(chart.node))).toContain("@keyframes");
+    expect(chart.when("a->b")).toBeUndefined();
+
+    expect(
+      thrown(() => flowchart(spec, { ...options, reveal: span(0, 1), draw: { "a->b": progress } }))
+        .message,
+    ).toContain('draws "a->b" from a draw timeline, but its reveal already draws it');
+
+    expect(thrown(() => flowchart(spec, { ...options, draw: { "b->a": progress } })).problem).toBe(
+      'flowchart() draw names "b->a", which is not one of its edges.',
+    );
   });
 
   test("size holds every node, and parts are refs a scene can place against", () => {
@@ -262,15 +282,44 @@ describe("sequence", () => {
     expect(errorsOf(s.node)).toEqual([]);
   });
 
-  test("one span per message, or a clear error", () => {
+  test("a cross head is a stroked X at the tip, and no head draws nothing", () => {
+    const heads = (head: "none" | "cross") =>
+      svg.emit(
+        draw(
+          sequence({ actors: { a: "A", b: "B" }, messages: [["a", "b", "hi", { head }]] }, options)
+            .node,
+        ),
+      );
+
+    const cross = heads("cross");
+
+    const arrowPaths = (markup: string) =>
+      markup.match(/<path d="M[^"]*" fill="none" stroke="[^"]*"/g) ?? [];
+
+    expect(arrowPaths(heads("none"))).toHaveLength(1);
+    expect(arrowPaths(cross)).toHaveLength(2);
+    expect(cross).toMatch(
+      /<path d="M[\d. -]+L[\d. -]+M[\d. -]+L[\d. -]+" fill="none" stroke="#6E6E73"/,
+    );
+  });
+
+  test("a reveal record times rows by id, and names only rows that exist", () => {
+    const times = sequence(
+      { actors: { a: "A" }, messages: [["a", "a", "self"], { note: "a", text: "hm" }] },
+      { ...options, reveal: { "note-2": span(3, 1) } },
+    );
+
+    expect(times.message(0).span).toBeUndefined();
+    expect(times.span).toMatchObject({ start: 3 });
     expect(
       thrown(() =>
         sequence(
           { actors: { a: "A" }, messages: [["a", "a", "self"]] },
-          { ...options, reveal: [span(0, 1), span(1, 1)] },
+          // @ts-expect-error a message has the id "message-1", not "1"
+          { ...options, reveal: { "1": span(0, 1) } },
         ),
       ).problem,
-    ).toBe("sequence() reveal has 2 spans for 1 messages and notes.");
+    ).toContain('reveal names "1", which is not one of its nodes');
     expect(thrown(() => login().message(7)).message).toBe(
       "sequence() has no message 7. Count from 0: it has 3.",
     );
@@ -344,7 +393,7 @@ describe("state machine", () => {
 });
 
 describe("lanes", () => {
-  const run = (reveal?: { readonly start: number; readonly over?: number }) =>
+  const run = (reveal?: When) =>
     lanes(
       {
         lanes: { lead: "Lead", build: "Build" },
@@ -377,5 +426,47 @@ describe("lanes", () => {
         ),
       ).message,
     ).toBe('lanes() link 1 runs from "a" to itself. Link two different lanes.');
+  });
+});
+
+describe("Edge head", () => {
+  const headOpacity = (head: "filled" | "async", dash: boolean, t: number): number => {
+    const l = look(options, "test");
+
+    const points = [
+      { x: 0, y: 10 },
+      { x: 100, y: 10 },
+    ];
+
+    const model = scene({ size: [200, 40], duration: 2, title: "Edge" }, () => (
+      <Edge
+        key="e"
+        look={l}
+        points={points}
+        head={head}
+        {...(dash && { stroke: { dash: [4, 4] } })}
+        draw={track(0).to(1, span(0, 1), ease.linear)}
+      />
+    ));
+
+    const visit = (node: Model.SceneNode): Model.SceneNode | undefined =>
+      node.key === "e/head"
+        ? node
+        : node.kind === "group"
+          ? node.children.map(visit).find(Boolean)
+          : undefined;
+
+    return valueAt(visit(model.root)!.layers[0]!.opacity, t, blendNumber);
+  };
+
+  test("the head stays hidden until the drawn line reaches its base", () => {
+    expect(headOpacity("async", false, 0.9)).toBe(0);
+    expect(headOpacity("async", false, 0.95)).toBe(1);
+    expect(headOpacity("filled", false, 0.98)).toBe(0);
+    expect(headOpacity("filled", false, 1)).toBe(1);
+  });
+
+  test("a dashed edge's head fades in with its line", () => {
+    expect(headOpacity("filled", true, 0.5)).toBeCloseTo(0.5, 2);
   });
 });

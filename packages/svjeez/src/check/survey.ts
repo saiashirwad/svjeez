@@ -18,6 +18,7 @@ import type {
   Vec,
 } from "../model/ir";
 import { isLane, mapLane } from "../model/lane";
+import { isColor } from "../model/painted";
 import { breaksOf, segmentAt, unrolled } from "../model/sample";
 import { same } from "../model/steps";
 import { nodeName } from "../model/naming";
@@ -74,8 +75,6 @@ export const namesOf = (scene: Scene): Map<string, string> => {
   return out;
 };
 
-export type ValueKind = "number" | "vec" | "geometry" | "paint";
-
 export type Named =
   | { readonly name: string; readonly kind: "number"; readonly value: Animated<number> }
   | { readonly name: string; readonly kind: "vec"; readonly value: Animated<Vec> }
@@ -97,6 +96,18 @@ export const valuesOf = (node: SceneNode): Named[] => {
 
   for (const effect of node.effects)
     if (effect.kind === "blur") out.push({ name: "blur", kind: "number", value: effect.radius });
+    else if (effect.kind === "adjust")
+      out.push(
+        { name: "adjust saturate", kind: "number", value: effect.saturate },
+        { name: "adjust hue", kind: "number", value: effect.hue },
+        { name: "adjust brightness", kind: "number", value: effect.brightness },
+        { name: "adjust contrast", kind: "number", value: effect.contrast },
+      );
+    else if (effect.kind === "displace")
+      out.push(
+        { name: "displace scale", kind: "number", value: effect.scale },
+        { name: "displace frequency", kind: "number", value: effect.frequency },
+      );
     else
       out.push(
         { name: "shadow offset", kind: "vec", value: effect.offset },
@@ -138,7 +149,7 @@ export const textOf = (node: TextNode): string =>
     .join(" ")
     .trim();
 
-export const keysOver = <T>(lane: Lane<T>, duration: Seconds): readonly Key<T>[] =>
+const keysOver = <T>(lane: Lane<T>, duration: Seconds): readonly Key<T>[] =>
   lane.period === undefined ? lane.keys : unrolled(lane, duration);
 
 export type Stretch = readonly [from: Seconds, to: Seconds];
@@ -229,7 +240,7 @@ export const shownOf = (hidden: readonly Stretch[], duration: Seconds): Stretch[
   return out;
 };
 
-export const lanesOf = (scene: Scene): Lane<unknown>[] => {
+const lanesOf = (scene: Scene): Lane<unknown>[] => {
   const out: Lane<unknown>[] = [];
 
   walkScene(scene, (node) => {
@@ -309,8 +320,6 @@ const isRgba = (color: Color): color is Rgba => Array.isArray(color);
 export const rgbaIn = (scene: Scene, color: Color, scheme: Scheme): Rgba =>
   isRgba(color) ? color : (scene.tokens[color.name]?.[scheme] ?? [0, 0, 0, 0]);
 
-const isColor = (paint: Paint): paint is Color => !("stops" in paint);
-
 export const colorAt = (
   scene: Scene,
   paint: Animated<Paint>,
@@ -327,10 +336,11 @@ export const colorAt = (
   return [mix(0), mix(1), mix(2), mix(3)];
 };
 
-export const isClear = (scene: Scene, paint: Paint): boolean =>
+const isClear = (scene: Scene, paint: Paint): boolean =>
   isColor(paint)
     ? SCHEMES.every((scheme) => rgbaIn(scene, paint, scheme)[3] <= 0)
-    : paint.stops.every((stop) =>
+    : "stops" in paint &&
+      paint.stops.every((stop) =>
         SCHEMES.every((scheme) => rgbaIn(scene, stop.color, scheme)[3] <= 0),
       );
 
@@ -344,20 +354,24 @@ const hex = (n: number): string =>
     .padStart(2, "0")
     .toUpperCase();
 
-export const colorName = (color: Color): string =>
+const colorName = (color: Color): string =>
   isRgba(color)
     ? `#${hex(color[0])}${hex(color[1])}${hex(color[2])}${color[3] < 1 ? hex(color[3]) : ""}`
     : color.name;
 
 export const paintName = (paint: Paint): string =>
-  isColor(paint) ? colorName(paint) : `${paint.kind} gradient`;
+  isColor(paint)
+    ? colorName(paint)
+    : paint.kind === "pattern"
+      ? "pattern"
+      : `${paint.kind} gradient`;
 
 export const strokeReachAt = (node: ShapeNode, placed: Placed, t: Seconds): number => {
   if (!node.stroke) return 0;
   const { from, to, amount } = between(node.stroke.width, t);
   const width = Math.max(0, from + (to - from) * amount);
 
-  return (width / 2) * (node.stroke.nonScaling ? 1 : scaleOf(placed.matrix));
+  return (width / 2) * (node.stroke.fixedWidth ? 1 : scaleOf(placed.matrix));
 };
 
 export const area = (box: Box): number => Math.max(0, box.width) * Math.max(0, box.height);

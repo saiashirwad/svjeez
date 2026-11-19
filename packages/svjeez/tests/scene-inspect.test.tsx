@@ -12,9 +12,7 @@ import {
   Text,
   blur,
   circle,
-  draw,
   linear,
-  motion,
   rect,
   ref,
   scene,
@@ -25,17 +23,17 @@ import {
   type Paint,
   type SceneElement,
 } from "svjeez";
-import { describe, inspect, svg, type Code, type Finding, type Model } from "svjeez/tools";
+import { describe, check, type Code, type Problem, type Model } from "svjeez/tools";
 
 const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
 
 const made = (build: () => SceneElement, duration = 4, loop = true): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Test", loop }, build);
 
-const codes = (model: Model.Scene): Code[] => inspect(model).map((found) => found.code);
+const codes = (model: Model.Scene): Code[] => check(model).problems.map((found) => found.code);
 
-const only = (model: Model.Scene, code: Code): Finding[] =>
-  inspect(model).filter((found) => found.code === code);
+const only = (model: Model.Scene, code: Code): Problem[] =>
+  check(model).problems.filter((found) => found.code === code);
 
 const Dot = (props: Partial<Parameters<typeof Shape>[0]>): SceneElement => (
   <Shape geometry={rect(10, 10)} fill="#FF0000" at={[20, 20]} {...props} />
@@ -128,7 +126,7 @@ group("never-visible", () => {
     );
 
     expect(found).toMatchObject([{ key: "under", related: [{ key: "cover" }] }]);
-    expect(found[0]!.hint).toContain('"cover"');
+    expect(found[0]!.fix).toContain('"cover"');
   });
 
   test("covering stays silent when the cover is see-through, turned, smaller, under, rounded over it, or moving", () => {
@@ -404,11 +402,13 @@ group("timing", () => {
   test("a fill showing while its stroke draws in", () => {
     const stroked = { color: "#000000", width: 2 } as const;
 
-    expect(codes(made(() => <Dot stroke={stroked} trim={draw(span(0, 1))} />))).toContain(
+    expect(codes(made(() => <Dot stroke={stroked} draw={track(0).to(1, span(0, 1))} />))).toContain(
       "visible-at-zero",
     );
     expect(
-      codes(made(() => <Dot fill={undefined} stroke={stroked} trim={draw(span(0, 1))} />)),
+      codes(
+        made(() => <Dot fill={undefined} stroke={stroked} draw={track(0).to(1, span(0, 1))} />),
+      ),
     ).not.toContain("visible-at-zero");
   });
 
@@ -451,23 +451,12 @@ group("timing", () => {
 });
 
 group("capabilities and the model alone", () => {
-  test("what a backend can't draw comes out in the same shape", () => {
-    const model = made(() => <Dot key="soft" effects={[blur(2)]} />);
-    const none = { level: "none", note: "no filters" } as const;
-    const backend = { name: "Flat", supports: { ...svg.supports, blur: none } };
+  test("what the SVG backend draws differently comes out in the same shape", () => {
+    const model = made(() => <Dot key="soft" effects={[blur(1)]} />);
 
-    expect(inspect(model, { backend }).filter((f) => f.code === "unsupported")).toMatchObject([
-      { key: "soft", severity: "error" },
+    expect(check(model).problems.filter((f) => f.code === "approximate")).toMatchObject([
+      { key: "soft", severity: "warning" },
     ]);
-  });
-
-  test("a symbol no instance draws", () => {
-    const model = made(() => <Dot />);
-    const ghost = model.root.children[0]!;
-
-    expect(only({ ...model, symbols: { ghost } }, "unused-symbol")[0]!.message).toContain(
-      '"ghost"',
-    );
   });
 
   test("findings come errors first, then warnings, then info, and are the same every time", () => {
@@ -479,7 +468,7 @@ group("capabilities and the model alone", () => {
       </Group>
     ));
 
-    const found = inspect(model);
+    const found = check(model).problems;
 
     expect(found.map((f) => f.severity)).toEqual(
       found
@@ -489,7 +478,7 @@ group("capabilities and the model alone", () => {
             ["error", "warning", "info"].indexOf(a) - ["error", "warning", "info"].indexOf(b),
         ),
     );
-    expect(inspect(model)).toEqual(found);
+    expect(check(model).problems).toEqual(found);
   });
 });
 
@@ -503,7 +492,7 @@ group("what the model keeps of how the scene was written", () => {
             key="b"
             geometry={rect(10, 10)}
             fill="#00FF00"
-            motion={motion().to({ offset: [offset, 0] }, span(1, 1))}
+            motion={{ offset: track<Vec>([0, 0]).to([offset, 0], span(1, 1)) }}
           />
         </Stack>
       ));
@@ -534,45 +523,6 @@ group("what the model keeps of how the scene was written", () => {
     expect(model.root.children[0]!.authored?.wrap).toEqual({ width: 40, cuts: [1] });
     expect(only(model, "word-cut")[0]?.message).toContain('"measur|ement"');
     expect(codes(wrapped("a few words"))).not.toContain("word-cut");
-  });
-
-  test("a ref no node takes is reported; one a node takes is not", () => {
-    const model = made(() => {
-      const card = ref("card");
-
-      ref("spare");
-
-      return <Dot ref={card} />;
-    });
-
-    expect(model.authored?.refs).toEqual([
-      { key: "card", attached: true },
-      { key: "spare", attached: false },
-    ]);
-    expect(only(model, "unattached-ref").map((found) => found.message)).toEqual([
-      'ref "spare" is made, but no node takes it as ref={…}, so it points at nothing.',
-    ]);
-  });
-
-  test("a verb that moves a node no one sees is reported; one that moves a seen node is not", () => {
-    const moved = (opacity: number) =>
-      made(() => {
-        const dot = ref("dot");
-
-        dot.move([60, 20], span(0, 1));
-
-        return <Dot ref={dot} opacity={opacity} />;
-      });
-
-    const model = moved(0);
-
-    expect(model.authored?.actions).toEqual([
-      { verb: "dot.move()", key: "dot", start: 0, over: 1 },
-    ]);
-    expect(only(model, "hidden-target")[0]?.message).toBe(
-      'dot.move() moves "dot", which is never visible, so no one sees the move.',
-    );
-    expect(codes(moved(1))).not.toContain("hidden-target");
   });
 });
 
@@ -672,13 +622,14 @@ group("loop-seam for what enters and stays", () => {
   test("an arrow on a node that scales in is told why it jumps", () => {
     const found = only(
       made(() => {
-        const a = ref("a");
-        const b = ref("b");
+        const a = ref();
+        const b = ref();
 
         return (
           <Group>
-            <Shape ref={a} geometry={rect(30, 20)} at={[20, 30]} fill="#336699" />
+            <Shape key="a" ref={a} geometry={rect(30, 20)} at={[20, 30]} fill="#336699" />
             <Shape
+              key="b"
               ref={b}
               geometry={rect(30, 20)}
               at={[150, 30]}

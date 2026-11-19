@@ -3,24 +3,25 @@ import { restyle } from "svjeez/page";
 import {
   Shape,
   ease,
-  motion,
-  pathData,
+  path,
   rect,
   sampled,
   scene,
   span as clock,
   track,
   type Paint,
+  type Track,
   type SceneElement,
+  type Vec,
 } from "svjeez";
-import { svg, type Motion } from "svjeez/tools";
+import { svg, type Layer } from "svjeez/tools";
 import { easeAt } from "../src/model/ease-at";
 
 const DURATION = 10;
 
 const emit = (build: () => SceneElement, duration = DURATION, playbackRate?: number): string =>
   svg.emit(
-    scene({ size: [100, 100], title: "Test", duration, reducedMotion: false }, build),
+    scene({ size: [100, 100], title: "Test", duration, still: false }, build),
     playbackRate === undefined ? {} : { playbackRate },
   );
 
@@ -48,8 +49,19 @@ const keys = (out: string, property: string, duration = DURATION): Held[] => {
     .sort((a, b) => a.t - b.t);
 };
 
-const box = (layer: Motion, duration = DURATION): string =>
-  emit(() => <Shape geometry={rect(10, 10)} fill="#000000" motion={layer} />, duration);
+const box = (layer: Layer | Track<Vec>, duration = DURATION): string =>
+  emit(
+    () => (
+      <Shape
+        geometry={rect(10, 10)}
+        fill="#000000"
+        motion={"to" in layer ? { offset: layer } : layer}
+      />
+    ),
+    duration,
+  );
+
+const turn = (rotate: Track<number>, duration = DURATION): string => box({ rotate }, duration);
 
 const x = (value: number): [number, number] => [value, 0];
 
@@ -65,15 +77,12 @@ describe("span()", () => {
 
     const [a, b, c] = clock(0.1, 0.3).chain(0.12, 0.25);
 
-    const byHand = motion({ offset: x(0) })
-      .to({ offset: x(5) }, clock(0.1, 0.3))
-      .to({ offset: x(9) }, clock(0.1, 0.3).next(0.12))
-      .to({ offset: x(0) }, clock(0.1, 0.3).next(0.12).next(0.25));
+    const byHand = track<Vec>(x(0))
+      .to(x(5), clock(0.1, 0.3))
+      .to(x(9), clock(0.1, 0.3).next(0.12))
+      .to(x(0), clock(0.1, 0.3).next(0.12).next(0.25));
 
-    const chained = motion({ offset: x(0) })
-      .to({ offset: x(5) }, a)
-      .to({ offset: x(9) }, b)
-      .to({ offset: x(0) }, c);
+    const chained = track<Vec>(x(0)).to(x(5), a).to(x(9), b).to(x(0), c);
 
     expect(box(chained)).toBe(box(byHand));
   });
@@ -126,10 +135,10 @@ describe("span()", () => {
 });
 
 describe(".repeat()", () => {
-  const spin = motion({ rotate: 0 }).to({ rotate: 360 }, clock(0, 2), ease.linear);
+  const spin = () => track(0).to(360, clock(0, 2), ease.linear);
 
   test("a count plays the passage that many times, each from the initial values", () => {
-    expect(keys(box(spin.repeat(3)), "rotate")).toEqual([
+    expect(keys(turn(spin().repeat(3)), "rotate")).toEqual([
       { t: 0, value: 0 },
       { t: 2, value: 360 },
       { t: 2.0001, value: 0 },
@@ -141,24 +150,20 @@ describe(".repeat()", () => {
   });
 
   test("repeat(1) changes nothing", () => {
-    expect(box(spin.repeat(1))).toBe(box(spin));
+    expect(turn(spin().repeat(1))).toBe(turn(spin()));
   });
 
   test("the passage runs from the earliest step's start to the latest step's end", () => {
-    const out = box(
-      motion({ offset: x(0) })
-        .to({ offset: x(10) }, clock(1, 1), ease.linear)
-        .repeat(2),
-    );
+    const out = box(track<Vec>(x(0)).to(x(10), clock(1, 1), ease.linear).repeat(2));
 
     expect(keys(out, "translate").map((key) => Math.round(key.t * 1000) / 1000)).toEqual([
       0, 1, 2, 2, 3, 10,
     ]);
 
     const late = box(
-      motion({ offset: x(0) })
-        .to({ offset: x(0) }, clock(3, 1), ease.linear)
-        .to({ offset: x(10) }, clock(1, 1), ease.linear)
+      track<Vec>(x(0))
+        .to(x(0), clock(3, 1), ease.linear)
+        .to(x(10), clock(1, 1), ease.linear)
         .repeat(2),
     );
 
@@ -167,9 +172,9 @@ describe(".repeat()", () => {
 
   test("a passage that ends where it began restarts without a cut", () => {
     const out = box(
-      motion({ offset: x(0) })
-        .to({ offset: x(10) }, clock(0, 1), ease.linear)
-        .to({ offset: x(0) }, clock(0, 1).next(1), ease.linear)
+      track<Vec>(x(0))
+        .to(x(10), clock(0, 1), ease.linear)
+        .to(x(0), clock(0, 1).next(1), ease.linear)
         .repeat(3),
     );
 
@@ -177,7 +182,7 @@ describe(".repeat()", () => {
   });
 
   test("until repeats to that time, cutting the last pass short, and holds the value it reached", () => {
-    const held = keys(box(spin.repeat({ until: 7 })), "rotate");
+    const held = keys(turn(spin().repeat({ until: 7 })), "rotate");
 
     expect(held.at(-2)).toEqual({ t: 7, value: 180 });
     expect(held.at(-1)).toEqual({ t: 10, value: 180 });
@@ -185,16 +190,12 @@ describe(".repeat()", () => {
   });
 
   test("until on a pass boundary plays whole passes", () => {
-    expect(keys(box(spin.repeat({ until: 6 })), "rotate").at(-2)).toEqual({ t: 6, value: 360 });
-    expect(box(spin.repeat({ until: 6 }))).toBe(box(spin.repeat(3)));
+    expect(keys(turn(spin().repeat({ until: 6 })), "rotate").at(-2)).toEqual({ t: 6, value: 360 });
+    expect(turn(spin().repeat({ until: 6 }))).toBe(turn(spin().repeat(3)));
   });
 
   test("a transition cut partway ends on the value the whole transition passed through there", () => {
-    const out = box(
-      motion({ offset: x(0) })
-        .to({ offset: x(100) }, clock(0, 2), ease.out)
-        .repeat({ until: 3 }),
-    );
+    const out = box(track<Vec>(x(0)).to(x(100), clock(0, 2), ease.out).repeat({ until: 3 }));
 
     const held = keys(out, "translate");
 
@@ -203,113 +204,98 @@ describe(".repeat()", () => {
   });
 
   test("a cut transition keeps the shape of the curve, not a straight line to the cut", () => {
-    const out = box(
-      motion({ offset: x(0) })
-        .to({ offset: x(100) }, clock(0, 2), ease.inOut)
-        .repeat({ until: 3 }),
-    );
+    const out = box(track<Vec>(x(0)).to(x(100), clock(0, 2), ease.inOut).repeat({ until: 3 }));
 
     expect(out).toMatch(/cubic-bezier\(/);
     expect(out).not.toContain("cubic-bezier(.77,0,.175,1);animation-timing-function:linear");
   });
 
   test("a later step may follow the repeat", () => {
-    const out = box(spin.repeat({ until: 4 }).to({ rotate: 90 }, clock(5, 1), ease.linear));
+    const out = turn(spin().repeat({ until: 4 }).to(90, clock(5, 1), ease.linear));
 
     expect(keys(out, "rotate").at(-2)).toEqual({ t: 6, value: 90 });
   });
 
   test("two channels restart together, each from its own initial value", () => {
-    const out = box(
-      motion({ offset: x(5), opacity: 0.5 })
-        .to({ offset: x(25), opacity: 1 }, clock(0, 1), ease.linear)
-        .repeat(2),
-    );
+    const out = box({
+      offset: track<Vec>(x(5)).to(x(25), clock(0, 1), ease.linear).repeat(2),
+      opacity: track(0.5).to(1, clock(0, 1), ease.linear).repeat(2),
+    });
 
     expect(keys(out, "translate").map((key) => key.value)).toEqual([5, 25, 5, 25, 25]);
     expect(keys(out, "opacity").map((key) => key.value)).toEqual([0.5, 1, 0.5, 1, 1]);
   });
 
   test("asks for a whole number of plays, a passage, a length and an until after the passage", () => {
-    expect(() => spin.repeat(0)).toThrow(/whole number of plays/);
-    expect(() => spin.repeat(1.5)).toThrow(/whole number of plays/);
-    expect(() => motion({ offset: x(0) }).repeat(2)).toThrow(/needs a passage to repeat/);
-    expect(() =>
-      motion({ offset: x(0) })
-        .set({ offset: x(5) }, clock(0))
-        .repeat(2),
-    ).toThrow(/needs a passage with a length/);
-    expect(() => spin.repeat({ until: 2 })).toThrow(/needs a time after the passage ends, at 2s/);
-    expect(() => spin.repeat({ until: Infinity })).toThrow(/finite until/);
+    expect(() => spin().repeat(0)).toThrow(/whole number of plays/);
+    expect(() => spin().repeat(1.5)).toThrow(/whole number of plays/);
+    expect(() => track<Vec>(x(0)).repeat(2)).toThrow(/needs a passage to repeat/);
+    expect(() => track<Vec>(x(0)).set(x(5), clock(0)).repeat(2)).toThrow(
+      /needs a passage with a length/,
+    );
+    expect(() => spin().repeat({ until: 2 })).toThrow(/needs a time after the passage ends, at 2s/);
+    expect(() => spin().repeat({ until: Infinity })).toThrow(/finite until/);
   });
 
   test("a runaway count fails before it unrolls, and a lane past its key cap says why", () => {
-    expect(() => spin.repeat(100000)).toThrow(/would unroll 100000 passes/);
+    expect(() => spin().repeat(100000)).toThrow(/would unroll 100000 passes/);
     expect(() =>
-      box(
-        motion({ offset: x(0) })
-          .to({ offset: x(1) }, clock(0, 1), ease.linear)
-          .repeat(1500),
-        3000,
-      ),
+      box(track<Vec>(x(0)).to(x(1), clock(0, 1), ease.linear).repeat(1500), 3000),
     ).toThrow(
       /has 3\d{3} keys; the cap is 2000. repeat\(\) unrolls every pass, so use .loop\(period\)/,
     );
   });
 
   test("stopping a steps() transition off a step edge throws, and on one it cuts cleanly", () => {
-    const stepped = motion({ offset: x(0) }).to({ offset: x(100) }, clock(0, 2), ease.steps(4));
+    const stepped = () => track<Vec>(x(0)).to(x(100), clock(0, 2), ease.steps(4));
 
-    expect(() => box(stepped.repeat({ until: 3.2 }))).toThrow(
+    expect(() => box(stepped().repeat({ until: 3.2 }))).toThrow(
       /repeat\(\{ until \}\) cuts a steps\(4\) transition between two of its steps/,
     );
 
-    expect(keys(box(stepped.repeat({ until: 3 })), "translate").at(-2)).toEqual({
+    expect(keys(box(stepped().repeat({ until: 3 })), "translate").at(-2)).toEqual({
       t: 3,
       value: 50,
     });
   });
 
   test("stopping a colour transition partway throws, but a colour that holds there is fine", () => {
-    const tint = track<Paint>("#000000").to("#FFFFFF", clock(0, 2), ease.linear);
+    const tint = () => track<Paint>("#000000").to("#FFFFFF", clock(0, 2), ease.linear);
 
-    const painted = (fill: typeof tint) =>
+    const painted = (fill: ReturnType<typeof tint>) =>
       emit(() => <Shape geometry={rect(10, 10)} fill={fill} />);
 
-    expect(() => painted(tint.repeat({ until: 3 }))).toThrow(
+    expect(() => painted(tint().repeat({ until: 3 }))).toThrow(
       /repeat\(\{ until \}\) is cut partway through a transition, and only numbers and points can be cut/,
     );
-    expect(painted(tint.repeat({ until: 4 }))).toContain("fill");
+    expect(painted(tint().repeat({ until: 4 }))).toContain("fill");
   });
 
   test("nothing follows rewind(), and a repeat can't follow it", () => {
-    const rewound = motion({ offset: x(0) })
-      .to({ offset: x(10) }, clock(0, 1))
-      .rewind(1);
+    const rewound = track<Vec>(x(0)).to(x(10), clock(0, 1)).rewind(1);
 
     expect(() => rewound.repeat(2)).toThrow(/can't follow rewind/);
-    expect(() => rewound.to({ offset: x(1) }, clock(2, 1))).toThrow(/can't follow rewind/);
+    expect(() => rewound.to(x(1), clock(2, 1))).toThrow(/can't follow rewind/);
     expect(() => rewound.rewind(1)).toThrow(/can't follow rewind/);
   });
 
   test("a loop shorter than the repeated passages throws", () => {
-    expect(() => spin.repeat(3).loop(5)).toThrow(/shorter than the motion/);
+    expect(() => spin().repeat(3).loop(5)).toThrow(/shorter than the motion/);
   });
 
   test("a repeat that stops mid-pass moves every channel it touches to where that pass had got", () => {
-    const out = box(
-      motion({ offset: x(0), opacity: 0 })
-        .to({ offset: x(100), opacity: 1 }, clock(0, 2), ease.linear)
-        .repeat({ until: 5 }),
-    );
+    const out = box({
+      offset: track<Vec>(x(0)).to(x(100), clock(0, 2), ease.linear).repeat({ until: 5 }),
+      opacity: track(0).to(1, clock(0, 2), ease.linear).repeat({ until: 5 }),
+    });
 
     expect(keys(out, "translate").at(-2)).toEqual({ t: 5, value: 50 });
     expect(keys(out, "opacity").at(-2)).toEqual({ t: 5, value: 0.5 });
   });
 
   test("a repeat of a path morph can stop partway too", () => {
-    const morph = track(pathData("M0 0L10 0"))
-      .to(pathData("M0 0L30 0"), clock(0, 2), ease.linear)
+    const morph = track(path.parse("M0 0L10 0"))
+      .to(path.parse("M0 0L30 0"), clock(0, 2), ease.linear)
       .repeat({ until: 3 });
 
     const out = emit(() => <Shape geometry={morph} stroke={{ color: "#000000", width: 1 }} />);
@@ -319,10 +305,10 @@ describe(".repeat()", () => {
 });
 
 describe(".rewind()", () => {
-  const out = motion({ offset: x(0) }).to({ offset: x(50) }, clock(0, 2), ease.linear);
+  const out = () => track<Vec>(x(0)).to(x(50), clock(0, 2), ease.linear);
 
   test("glides every channel back to its initial value, ending at the scene's end", () => {
-    expect(keys(box(out.rewind(1)), "translate")).toEqual([
+    expect(keys(box(out().rewind(1)), "translate")).toEqual([
       { t: 0, value: 0 },
       { t: 2, value: 50 },
       { t: 9, value: 50 },
@@ -331,7 +317,7 @@ describe(".rewind()", () => {
   });
 
   test("a loop's clock ends at its period, so the loop closes", () => {
-    const held = keys(box(out.loop(5).rewind(1)), "translate", 5);
+    const held = keys(box(out().loop(5).rewind(1)), "translate", 5);
 
     expect(held.at(0)).toEqual({ t: 0, value: 0 });
     expect(held.at(-1)).toEqual({ t: 5, value: 0 });
@@ -339,22 +325,16 @@ describe(".rewind()", () => {
   });
 
   test("adds nothing to a motion that is already home, and uses the ease it is given", () => {
-    const home = motion({ offset: x(0) })
-      .to({ offset: x(5) }, clock(0, 1))
-      .to({ offset: x(0) }, clock(0, 1).next(1));
+    const home = () => track<Vec>(x(0)).to(x(5), clock(0, 1)).to(x(0), clock(0, 1).next(1));
 
-    expect(box(home.rewind(1))).toBe(box(home));
-    expect(box(out.rewind(1, ease.linear))).not.toBe(box(out.rewind(1)));
+    expect(box(home().rewind(1))).toBe(box(home()));
+    expect(box(out().rewind(1, ease.linear))).not.toBe(box(out().rewind(1)));
   });
 
   test("needs the room: a motion still running when the rewind must start throws", () => {
-    expect(() =>
-      box(
-        motion({ offset: x(0) })
-          .to({ offset: x(9) }, clock(8, 1.5))
-          .rewind(1),
-      ),
-    ).toThrow(/rewind\(1\) .*needs the last 1s of its 10s clock, but the motion runs until 9.5s/);
+    expect(() => box(track<Vec>(x(0)).to(x(9), clock(8, 1.5)).rewind(1))).toThrow(
+      /rewind\(1\) .*needs the last 1s of its 10s clock, but the motion runs until 9.5s/,
+    );
   });
 
   test("a colour comes back to the value it started on", () => {
@@ -369,14 +349,14 @@ describe("sampled() with a window", () => {
   test("plays from the window's start, hands the function time from 0 to over, and holds either side", () => {
     const seen: number[] = [];
 
-    const layer = sampled.motion(
+    const layer = sampled(
       (t) => {
         seen.push(t);
 
-        return { offset: x(t * 10) };
+        return x(t * 10);
       },
       clock(4, 2),
-      { tolerance: { offset: 0.01 } },
+      { tolerance: 0.01 },
     );
 
     const held = keys(box(layer), "translate");
@@ -398,7 +378,7 @@ describe("sampled() with a window", () => {
   });
 
   test("a sampled path plays in a SMIL window on the scene's loop", () => {
-    const frame = (t: number) => pathData(`M0 0L${10 + t} 0`);
+    const frame = (t: number) => path.parse(`M0 0L${10 + t} 0`);
     const geometry = sampled(frame, clock(2, 3), { tolerance: 0.1 });
 
     const out = emit(() => <Shape geometry={geometry} stroke={{ color: "#000000", width: 1 }} />);
@@ -414,7 +394,7 @@ describe("one clock in the tools", () => {
         <Shape
           geometry={rect(10, 10)}
           fill="#000000"
-          motion={motion({ offset: x(0) }).to({ offset: x(4) }, clock(0, 4), ease.linear)}
+          motion={{ offset: track<Vec>(x(0)).to(x(4), clock(0, 4), ease.linear) }}
         />
       ),
       4,

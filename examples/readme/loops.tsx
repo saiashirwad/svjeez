@@ -1,17 +1,4 @@
-import {
-  Group,
-  Shape,
-  arc,
-  canvas,
-  circle,
-  ease,
-  enter,
-  exit,
-  scene,
-  span,
-  track,
-  wiggle,
-} from "svjeez";
+import { Group, Shape, arc, circle, ease, enter, exit, scene, span, track, wiggle } from "svjeez";
 import { theme } from "../theme";
 
 export default scene(
@@ -21,9 +8,9 @@ export default scene(
     title: "Loops and stacking",
     desc: "A ring spins on a two second loop beside a dot that fades in and then wanders.",
     theme,
-    reducedMotion: 1,
+    still: 1,
   },
-  () => (
+  (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Shape

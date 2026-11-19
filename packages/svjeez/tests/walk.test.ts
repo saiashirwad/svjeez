@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import type { GroupNode, InstanceNode, Scene, SceneNode } from "../src/model/ir";
+import type { GroupNode, Scene, SceneNode } from "../src/model/ir";
 import { walkScene } from "../src/model/walk";
 
 const base = {
@@ -18,15 +18,7 @@ const group = (key: string, children: SceneNode[] = [], mask?: SceneNode): Group
   mask,
 });
 
-const instance = (key: string, mask?: SceneNode): InstanceNode => ({
-  ...base,
-  kind: "instance",
-  key,
-  symbol: "used",
-  mask,
-});
-
-test("walks children before masks, then visits declared symbols without expanding instances", () => {
+test("walks children before masks", () => {
   const scene: Scene = {
     size: [10, 10],
     duration: 0,
@@ -37,15 +29,11 @@ test("walks children before masks, then visits declared symbols without expandin
     root: group(
       "root",
       [
-        group("group", [instance("first use", group("instance mask"))], group("group mask")),
-        instance("second use"),
+        group("group", [group("child", [], group("child mask"))], group("group mask")),
+        group("second"),
       ],
       group("root mask", [group("mask child")], group("nested mask")),
     ),
-    symbols: {
-      used: group("used", [group("symbol child")], group("symbol mask")),
-      unused: group("unused"),
-    },
   };
 
   const visited: string[] = [];
@@ -57,16 +45,12 @@ test("walks children before masks, then visits declared symbols without expandin
   expect(visited).toEqual([
     "root",
     "group",
-    "first use",
-    "instance mask",
+    "child",
+    "child mask",
     "group mask",
-    "second use",
+    "second",
     "root mask",
     "mask child",
     "nested mask",
-    "used",
-    "symbol child",
-    "symbol mask",
-    "unused",
   ]);
 });

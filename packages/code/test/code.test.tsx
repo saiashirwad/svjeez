@@ -1,7 +1,17 @@
 import { describe, expect, test } from "bun:test";
-import { Group, Shape, canvas, font, morph, ref, scene, span, type SceneElement } from "svjeez";
+import {
+  Group,
+  Shape,
+  font,
+  morph,
+  ref,
+  scene,
+  span,
+  type Bounds,
+  type SceneElement,
+} from "svjeez";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
-import { SceneError, describe as describeScene, inspect, svg } from "svjeez/tools";
+import { SceneError, describe as describeScene, check, svg } from "svjeez/tools";
 import { Code, type CodeProps } from "../src/index.ts";
 import { tomorrow } from "../src/palettes.ts";
 
@@ -11,7 +21,7 @@ const mono = await font.load(
 
 const SOURCE = "const a = 1;\n\n  return a;";
 
-const made = (build: () => SceneElement, duration = 3, loop = true) =>
+const made = (build: (canvas: Bounds) => SceneElement, duration = 3, loop = true) =>
   scene({ size: [320, 120], duration, title: "Code", loop }, build);
 
 const snippet = (extra: Partial<CodeProps> = {}) =>
@@ -67,10 +77,10 @@ describe("<Code>", () => {
   });
 
   test("keys name lines, and the code takes the node's own props", () => {
-    const code = ref("code");
+    const code = ref();
 
     const frame = describeScene(
-      made(() => (
+      made((canvas) => (
         <Group>
           {snippet({ key: "code", ref: code, keys: ["head", "gap", "tail"], at: [4, 4] })}
           <Shape
@@ -134,7 +144,7 @@ describe("<Code>", () => {
 
     const out = made(() => morph.between(states, [span(1, 1)]), 3);
 
-    expect(inspect(out).filter(({ severity }) => severity === "error")).toEqual([]);
+    expect(check(out).problems.filter(({ severity }) => severity === "error")).toEqual([]);
 
     const texts = (t: number) =>
       describeScene(out, [t]).frames[0]!.nodes.filter(({ kind }) => kind === "text");
@@ -149,7 +159,9 @@ describe("<Code>", () => {
   });
 
   test("a scene of code checks clean", () => {
-    const found = inspect(made(() => snippet({ at: [10, 10], typing: span(0, 1) }), 3, false));
+    const found = check(
+      made(() => snippet({ at: [10, 10], typing: span(0, 1) }), 3, false),
+    ).problems;
 
     expect(found.filter(({ severity }) => severity !== "info")).toEqual([]);
   });

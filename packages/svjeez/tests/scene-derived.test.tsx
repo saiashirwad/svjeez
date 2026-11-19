@@ -14,6 +14,7 @@ import {
   type Paint,
   type SceneElement,
   type Vec,
+  within,
 } from "svjeez";
 import { isLane, svg, type Model } from "svjeez/tools";
 import { easeAt } from "../src/model/ease-at";
@@ -137,6 +138,48 @@ describe("affine mappings", () => {
       [32.5, 20],
       [32.5, 20],
     ]);
+  });
+});
+
+describe("windows", () => {
+  const draw = track(0).to(1, span(0.5, 2), ease.inOut);
+
+  const windowed = (from: number, to: number) =>
+    own(
+      only(
+        made(() => <Shape fill="#000000" geometry={circle(2)} opacity={within(draw, from, to)} />),
+      ),
+    ).opacity;
+
+  test("cut an eased step exactly, in two keys around the same ease", () => {
+    const lane = windowed(0.25, 0.75);
+
+    const source = own(
+      only(made(() => <Shape fill="#000000" geometry={circle(2)} opacity={draw} />)),
+    ).opacity;
+
+    expect(keysOf(lane).length).toBeLessThanOrEqual(4);
+
+    for (let t = 0; t <= 4; t += 0.05) {
+      const at = valueAt(source, t, blendNumber);
+
+      expect(valueAt(lane, t, blendNumber)).toBeCloseTo(
+        Math.min(1, Math.max(0, (at - 0.25) / 0.5)),
+        6,
+      );
+    }
+  });
+
+  test("of a plain number is a plain number", () => {
+    const node = only(
+      made(() => <Shape fill="#000000" geometry={circle(2)} opacity={within(0.5, 0.25, 0.75)} />),
+    );
+
+    expect(own(node).opacity).toBe(0.5);
+  });
+
+  test("need a start below the end", () => {
+    expect(() => within(draw, 0.5, 0.5)).toThrow("not a span");
   });
 });
 
@@ -295,33 +338,13 @@ describe("derived tracks", () => {
     ).toThrow("derived to values of different shapes");
   });
 
-  test("a verb can't move a prop a derived track moves", () => {
-    expect(() =>
-      made(() => {
-        const dot = ref("dot");
-
-        dot.to({ opacity: 0 }, span(0, 1));
-
-        return (
-          <Shape
-            fill="#000000"
-            ref={dot}
-            geometry={circle(2)}
-            anchor="center"
-            opacity={progress.map((p) => p)}
-          />
-        );
-      }),
-    ).toThrow("which a track already moves");
-  });
-
   test("an anchor can be mapped in the frame of the box it is on", () => {
     const model = made(() => {
-      const card = ref("card");
+      const card = ref();
 
       return (
         <Group>
-          <Shape fill="#000000" ref={card} geometry={rect(20, 10)} at={[10, 10]} />
+          <Shape fill="#000000" key="card" ref={card} geometry={rect(20, 10)} at={[10, 10]} />
           <Shape
             fill="#000000"
             geometry={circle(2)}

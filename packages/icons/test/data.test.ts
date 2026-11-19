@@ -17,7 +17,7 @@ describe.each(Object.entries(sets))("%s", (_, set) => {
     const broken = icons.filter(
       ([, { grid, kind, paths }]) =>
         !(grid > 0) ||
-        !["stroke", "fill"].includes(kind) ||
+        !["outline", "solid"].includes(kind) ||
         paths.length === 0 ||
         paths.some((d) => !/^[Mm]/.test(d)),
     );
@@ -30,7 +30,7 @@ describe("tabler", () => {
   test("an outline icon keeps its pieces and drops the invisible frame", () => {
     expect(tabler.rocket).toEqual({
       grid: 24,
-      kind: "stroke",
+      kind: "outline",
       paths: [
         "M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3",
         "M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3",
@@ -44,8 +44,8 @@ describe("tabler", () => {
   });
 
   test("a filled icon is a fill icon with a Filled suffix", () => {
-    expect(tabler.checkFilled.kind).toBe("fill");
-    expect(tabler.check.kind).toBe("stroke");
+    expect(tabler.checkFilled.kind).toBe("solid");
+    expect(tabler.check.kind).toBe("outline");
     expect(tabler.arrowLeft.paths.length).toBeGreaterThan(0);
   });
 });
@@ -54,7 +54,7 @@ describe("lucide", () => {
   test("a circle becomes arcs", () => {
     expect(lucide.circle).toEqual({
       grid: 24,
-      kind: "stroke",
+      kind: "outline",
       paths: ["M2 12a10 10 0 1 0 20 0a10 10 0 1 0 -20 0"],
     });
   });

@@ -11,7 +11,9 @@ import {
   ref,
   scene,
   span,
+  track,
   type SceneElement,
+  type Vec,
 } from "svjeez";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
 import { SceneError, type Model } from "svjeez/tools";
@@ -101,13 +103,13 @@ describe("SceneError", () => {
 
   test("an arrow's parts are named after the arrow and point at it", () => {
     const model = made(() => {
-      const a = ref("a");
-      const b = ref("b");
+      const a = ref();
+      const b = ref();
 
       return (
         <Group>
-          <Shape ref={a} geometry={rect(10, 10)} at={[10, 10]} fill="#000000" />
-          <Shape ref={b} geometry={rect(10, 10)} at={[100, 10]} fill="#000000" />
+          <Shape key="a" ref={a} geometry={rect(10, 10)} at={[10, 10]} fill="#000000" />
+          <Shape key="b" ref={b} geometry={rect(10, 10)} at={[100, 10]} fill="#000000" />
           {jsxDEV(
             Arrow,
             { key: "link", from: a.right, to: b.left, stroke: { color: "#000000" } },
@@ -127,6 +129,29 @@ describe("SceneError", () => {
       ['the shaft of <Arrow> "link"', 12],
       ['the head of <Arrow> "link"', 12],
     ]);
+  });
+
+  test("a Text without a font says there is no default, and one with a bad font says what it takes", () => {
+    const text = (props: { readonly font?: string }) =>
+      thrown(() =>
+        made(() =>
+          jsxDEV(
+            Text,
+            // SAFETY: what a scene written without types hands over: a font that is missing or not a font.
+            { size: 12, fill: "#000000", children: "hi", ...props } as never,
+            undefined,
+            false,
+            at(7),
+          ),
+        ),
+      );
+
+    const none = text({});
+
+    expect(none.problem).toMatch(/has no font/);
+    expect(none.fix).toMatch(/There is no default font/);
+    expect(none.source?.line).toBe(7);
+    expect(text({ font: "Inter" }).problem).toMatch(/takes a font made by .* got Inter/);
   });
 
   test("a component that refuses its props is named, at its call", () => {
@@ -161,42 +186,36 @@ describe("SceneError", () => {
   });
 });
 
-describe("two actions on one prop", () => {
-  test("a set() inside a move names both calls, the time, and how to fix it", () => {
+describe("two steps on one track", () => {
+  test("a set() inside a step names the time of both and how to fix it", () => {
     const error = thrown(() =>
       made(() => {
-        const dot = ref("dot");
+        const dot = track<Vec>([10, 30]).to([60, 30], span(0, 1)).set([10, 10], span(0.5));
 
-        dot.move([60, 30], span(0, 1));
-        dot.set({ at: [10, 10] }, span(0.5));
-
-        return <Shape ref={dot} geometry={circle(4)} at={[10, 30]} fill="#FF0000" />;
+        return <Shape geometry={circle(4)} at={dot} fill="#FF0000" />;
       }),
     );
 
     expect(error.problem).toBe(
-      'dot.set() sets at on <Shape> "dot" at 0.5s, while dot.move() is still moving it from 0s to 1s.',
+      "Two steps move this track at once: one from 0s to 1s, and another at 0.5s, before the first ends.",
     );
     expect(error.fix).toBe(
-      "Set it once dot.move() ends, at 1s or later, or end dot.move() by 0.5s.",
+      "Start the later step at 1s or later: the first step's span.next(over) starts where it ends.",
     );
   });
 
-  test("two moves that overlap say when the second may start", () => {
+  test("two steps that overlap say when the second may start", () => {
     const error = thrown(() =>
       made(() => {
-        const dot = ref("dot");
+        const dot = track<Vec>([10, 30]).to([60, 30], span(0, 2)).to([70, 30], span(1, 2));
 
-        dot.move([60, 30], span(0, 2));
-        dot.move([70, 30], span(1, 2));
-
-        return <Shape ref={dot} geometry={circle(4)} at={[10, 30]} fill="#FF0000" />;
+        return <Shape geometry={circle(4)} at={dot} fill="#FF0000" />;
       }),
     );
 
     expect(error.problem).toBe(
-      'dot.move() moves at on <Shape> "dot" from 0s to 2s, and dot.move() moves it too from 1s to 3s, before the first one ends.',
+      "Two steps move this track at once: one from 0s to 2s, and another from 1s to 3s, before the first ends.",
     );
-    expect(error.fix).toStartWith("Start dot.move() at 2s or later");
+    expect(error.fix).toStartWith("Start the later step at 2s or later");
   });
 });

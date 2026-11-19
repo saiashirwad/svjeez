@@ -8,16 +8,18 @@ import { walkScene } from "./walk";
 export type Feature =
   | "text"
   | "unoutlinedText"
-  | "image"
-  | "instance"
+  | "picture"
   | "clip"
   | "mask"
   | "blur"
   | "shadow"
+  | "adjust"
+  | "displace"
   | "softBlur"
   | "linearGradient"
   | "radialGradient"
-  | "nonScalingStroke"
+  | "pattern"
+  | "fixedWidthStroke"
   | "liveTokens"
   | "curvedMotion"
   | "movingDashedTrim";
@@ -25,16 +27,18 @@ export type Feature =
 export const FEATURES: Readonly<Record<Feature, string>> = {
   text: "text",
   unoutlinedText: "text in a font svjeez can't outline",
-  image: "a picture",
-  instance: "a symbol",
+  picture: "a picture",
   clip: "a clip",
   mask: "a mask",
   blur: "a blur",
   shadow: "a shadow",
+  adjust: "a color adjustment",
+  displace: "a noise displacement",
   softBlur: "a blur under 1.5 units",
   linearGradient: "a linear gradient",
   radialGradient: "a radial gradient",
-  nonScalingStroke: "a stroke that keeps its width when scaled",
+  pattern: "a pattern",
+  fixedWidthStroke: "a stroke that keeps its width when scaled",
   liveTokens: "light and dark colors",
   curvedMotion: "a curved path of motion",
   movingDashedTrim: "a dashed stroke trimmed while it moves",
@@ -53,12 +57,25 @@ export interface Diagnostic {
   readonly source?: Source;
 }
 
+/** One animated lane the backend wrote: what moves, where it was written, how it is driven, when. */
+export interface LaneReport {
+  readonly key: string;
+  readonly source?: Source;
+  readonly lane: string;
+  readonly backend: "css" | "smil";
+  readonly spans: readonly { readonly start: number; readonly over: number }[];
+  readonly period?: number;
+}
+
 export interface Backend<Out, Options = {}> {
   readonly name: string;
   readonly supports: Readonly<Record<Feature, Support>>;
   emit(
     scene: Scene,
-    options?: Options & { readonly onWarning?: (warning: Diagnostic) => void },
+    options?: Options & {
+      readonly onWarning?: (warning: Diagnostic) => void;
+      readonly onLane?: (lane: LaneReport) => void;
+    },
   ): Out;
 }
 
@@ -92,7 +109,7 @@ const featuresOf = (node: SceneNode): Feature[] => {
     if (runsOf(node).some((run) => !run.outline)) used.push("unoutlinedText");
   }
 
-  if (node.kind === "image" || node.kind === "instance") used.push(node.kind);
+  if (node.kind === "picture") used.push("picture");
 
   if (node.clip) used.push("clip");
 
@@ -101,21 +118,27 @@ const featuresOf = (node: SceneNode): Feature[] => {
   for (const effect of node.effects) {
     used.push(effect.kind);
 
-    if (softens(effect.kind === "blur" ? effect.radius : effect.blur)) used.push("softBlur");
+    const soft =
+      effect.kind === "blur" ? effect.radius : effect.kind === "shadow" ? effect.blur : undefined;
+
+    if (soft !== undefined && softens(soft)) used.push("softBlur");
   }
 
   for (const paint of painted) {
-    if (Array.isArray(paint)) continue;
+    if (!("kind" in paint)) continue;
 
-    if ("kind" in paint) used.push(paint.kind === "token" ? "liveTokens" : `${paint.kind}Gradient`);
+    if (paint.kind === "token") used.push("liveTokens");
+    else if (paint.kind === "pattern") used.push("pattern");
+    else used.push(`${paint.kind}Gradient`);
   }
 
-  if (node.kind === "shape" && node.stroke?.nonScaling) used.push("nonScalingStroke");
+  if ((node.kind === "shape" || node.kind === "text") && node.stroke?.fixedWidth)
+    used.push("fixedWidthStroke");
 
   if (
     node.kind === "shape" &&
     node.stroke?.dash !== undefined &&
-    node.stroke.cap !== "butt" &&
+    node.stroke.cap !== "flat" &&
     node.trim !== undefined &&
     (isLane(node.trim) || isLane(node.geometry))
   )

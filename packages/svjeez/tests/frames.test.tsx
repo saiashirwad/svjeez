@@ -1,19 +1,17 @@
 import { describe, expect, test } from "bun:test";
 import assert from "node:assert/strict";
 import { deflateSync } from "node:zlib";
-import { checkScene, openScene, renderFrames } from "svjeez/frames";
+import { checkPixels, openScene, renderFrames } from "svjeez/frames";
 import { loopLength, seek, restyle } from "svjeez/page";
 import {
   Group,
-  Image,
+  Picture,
   Shape,
   Text,
   blur,
   circle,
-  draw,
   ease,
   font,
-  motion,
   path,
   picture,
   rect,
@@ -22,6 +20,7 @@ import {
   tokens,
   track,
   type SceneElement,
+  type Vec,
 } from "svjeez";
 import { svg, type SceneOptions, type SvgOptions } from "svjeez/tools";
 import { systemColorScheme } from "../src/scheme";
@@ -142,7 +141,7 @@ describe.if(browser)("renderFrames", () => {
         <Shape
           geometry={path().moveTo([10, 30]).curveTo([31.25, 30], [47.08, 19.52], [62.1, 7.48])}
           stroke={{ color: "#000000", width: 2, cap: "round" }}
-          trim={draw(span(0, 0.45), { curve: ease.inOut })}
+          draw={track(0).to(1, span(0, 0.45), ease.inOut)}
         />
         <Shape geometry={rect(45, 40)} fill="#FFFFFF" />
       </Group>
@@ -188,9 +187,9 @@ describe.if(browser)("renderFrames", () => {
               geometry={rect(10, 10)}
               at={[20, 5]}
               fill="#3EE6D6"
-              motion={motion({ offset: [0, 0] })
-                .to({ offset: [10, 0] }, span(0, 0.5), ease.linear)
-                .loop(0.5)}
+              motion={{
+                offset: track<Vec>([0, 0]).to([10, 0], span(0, 0.5), ease.linear).loop(0.5),
+              }}
             />
           </Group>
         ),
@@ -225,16 +224,12 @@ describe.if(browser)("renderFrames", () => {
         <Shape
           geometry={rect(10, 10)}
           fill="#000000"
-          motion={motion({ offset: [0, 0] })
-            .to({ offset: [10, 0] }, span(0, 2), ease.linear)
-            .loop(2)}
+          motion={{ offset: track<Vec>([0, 0]).to([10, 0], span(0, 2), ease.linear).loop(2) }}
         />
         <Shape
           geometry={circle(4)}
           fill="#000000"
-          motion={motion({ offset: [0, 0] })
-            .to({ offset: [0, 10] }, span(0, 3), ease.linear)
-            .loop(3)}
+          motion={{ offset: track<Vec>([0, 0]).to([0, 10], span(0, 3), ease.linear).loop(3) }}
         />
       </Group>
     ));
@@ -248,7 +243,7 @@ describe.if(browser)("renderFrames", () => {
         <Shape
           geometry={rect(10, 10)}
           fill="#000000"
-          motion={motion({ offset: [0, 0] }).to({ offset: [10, 0] }, span(0, 12), ease.linear)}
+          motion={{ offset: track<Vec>([0, 0]).to([10, 0], span(0, 12), ease.linear) }}
         />
         {[2, 3, 5, 7, 8].map((laps) => (
           <Shape
@@ -356,8 +351,8 @@ describe.if(browser)("renderFrames", () => {
       (await renderFrames(emit([20, 20], 1, build), { times: [0], colorScheme: "light" }))
         .frames[0]!.png;
 
-    const png = await paint(() => <Image src={raster} width={20} height={20} />);
-    const svgImage = await paint(() => <Image src={vector} width={20} height={20} />);
+    const png = await paint(() => <Picture src={raster} width={20} height={20} />);
+    const svgImage = await paint(() => <Picture src={vector} width={20} height={20} />);
     const green = await paint(() => <Shape geometry={rect(20, 20)} fill="#00C800" />);
     const red = await paint(() => <Shape geometry={rect(20, 20)} fill="#C80000" />);
     expect(same(png, green)).toBe(true);
@@ -449,7 +444,7 @@ describe.if(browser)("prefix in one page", () => {
         <Shape
           geometry={rect(10, 10)}
           fill="#000000"
-          motion={motion({ offset: [0, 0] }).to({ offset: [50, 0] }, span(0, 2))}
+          motion={{ offset: track<Vec>([0, 0]).to([50, 0], span(0, 2)) }}
         />
       ),
       { prefix },
@@ -504,7 +499,7 @@ describe.if(browser)("prefix in one page", () => {
 });
 
 describe("restyle", () => {
-  const made = (reducedMotion?: number) =>
+  const made = (still?: number) =>
     emit(
       [40, 20],
       4,
@@ -523,7 +518,7 @@ describe("restyle", () => {
           />
         </Group>
       ),
-      reducedMotion === undefined ? {} : { reducedMotion },
+      still === undefined ? {} : { still },
     );
 
   test("an untouched copy is the input, and the reduced-motion freeze stays where posters read it", () => {
@@ -793,7 +788,7 @@ describe.if(browser)("seek and loopLength on an inline <svg>", () => {
 
       const [rendered, checked] = await Promise.all([
         renderFrames(out, { times: [...times, 1.25], colorScheme }),
-        checkScene(out, { times, colorScheme }),
+        checkPixels(out, { times, colorScheme }),
       ]);
 
       expect(rendered.duration).toBe(4);
@@ -805,7 +800,7 @@ describe.if(browser)("seek and loopLength on an inline <svg>", () => {
       ]);
 
       expect(checked.duration).toBe(4);
-      expect(checked.findings.filter(({ rule }) => rule === "off-canvas")).toEqual([
+      expect(checked.problems.filter(({ code }) => code === "off-canvas")).toEqual([
         expect.objectContaining({ key: "window", times: [1.75], severity: "warning" }),
       ]);
     }

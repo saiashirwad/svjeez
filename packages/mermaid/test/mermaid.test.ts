@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { SceneError } from "svjeez/tools";
-import { font, span } from "svjeez";
+import { SceneError, svg } from "svjeez/tools";
+import { font, scene, span } from "svjeez";
 import { mermaid, parseMermaid, type FlowchartDoc, type StateDoc } from "../src/index";
 
 const mono = await font.load(
@@ -179,17 +179,14 @@ describe("parse sequence", () => {
     ]);
   });
 
-  test("reads arrows into line and head", () => {
+  test("reads arrows into reply and head", () => {
     if (doc.kind !== "sequence") throw new Error("not a sequence");
 
-    expect(doc.items.map((i) => (i.kind === "note" ? "note" : `${i.line}/${i.head}`))).toEqual([
-      "solid/filled",
-      "dashed/filled",
-      "solid/cross",
-      "solid/async",
-      "note",
-      "solid/filled",
-    ]);
+    expect(
+      doc.items.map((i) =>
+        i.kind === "note" ? "note" : `${i.reply ? "reply" : "send"}/${i.head}`,
+      ),
+    ).toEqual(["send/filled", "reply/filled", "send/cross", "send/async", "note", "send/filled"]);
   });
 
   test("an undeclared participant appears at its first mention", () => {
@@ -313,6 +310,20 @@ describe("mermaid", () => {
     expect(seq.kind === "sequence" && seq.message(0).route).toBeDefined();
     expect(machine.kind).toBe("state");
     expect(machine.size[0]).toBeGreaterThan(machine.size[1]);
+  });
+
+  test("a sequence -x arrow draws a cross at its tip", () => {
+    const drawn = (arrow: string) => {
+      const chart = mermaid(`sequenceDiagram\nA${arrow}B: hi`, { font: mono });
+
+      return svg.emit(scene({ size: [400, 300], duration: 1, title: "t" }, () => chart.node));
+    };
+
+    const crosses = (markup: string) =>
+      markup.match(/<path d="M[\d. -]+L[\d. -]+M[\d. -]+L[\d. -]+" fill="none"/g) ?? [];
+
+    expect(crosses(drawn("->>"))).toHaveLength(0);
+    expect(crosses(drawn("-x"))).toHaveLength(1);
   });
 
   test("options a kind cannot honor are errors, not ignored", () => {

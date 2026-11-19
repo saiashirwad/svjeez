@@ -1,27 +1,17 @@
 import { describe, expect, test } from "bun:test";
-import {
-  Shape,
-  ease,
-  path,
-  pathData,
-  sampled,
-  scene,
-  span,
-  track,
-  type SceneElement,
-} from "svjeez";
+import { Shape, ease, path, sampled, scene, span, track, type SceneElement } from "svjeez";
 import { svg } from "svjeez/tools";
 import { contoursOf } from "../src/model/geometry";
 import { blendPaths, commandsOf, matchRings, ringsOf, type Ring } from "../src/model/paths";
 
-const emit = (build: () => SceneElement, reducedMotion?: number | false) =>
+const emit = (build: () => SceneElement, still?: number | false) =>
   svg.emit(
     scene(
       {
         size: [100, 100],
         duration: 4,
         title: "Test",
-        ...(reducedMotion !== undefined && { reducedMotion }),
+        ...(still !== undefined && { still }),
       },
       build,
     ),
@@ -84,7 +74,10 @@ describe("the d channel", () => {
 
   test("animates through SMIL with a still twin for reduced motion", () => {
     const out = emit(() => (
-      <Shape geometry={track(pathData(square)).to(pathData(triangle), span(1, 1))} fill="#000000" />
+      <Shape
+        geometry={track(path.parse(square)).to(path.parse(triangle), span(1, 1))}
+        fill="#000000"
+      />
     ));
 
     expect(out).toContain('attributeName="d"');
@@ -97,7 +90,11 @@ describe("the d channel", () => {
     const out = emit(
       () => (
         <Shape
-          geometry={track(pathData("M0 0H10")).to(pathData("M0 10H20"), span(1, 2), ease.linear)}
+          geometry={track(path.parse("M0 0H10")).to(
+            path.parse("M0 10H20"),
+            span(1, 2),
+            ease.linear,
+          )}
           stroke={{ color: "#000000" }}
         />
       ),
@@ -111,7 +108,7 @@ describe("the d channel", () => {
     const out = emit(
       () => (
         <Shape
-          geometry={track(pathData(square)).to(pathData(triangle), span(0, 1))}
+          geometry={track(path.parse(square)).to(path.parse(triangle), span(0, 1))}
           fill="#000000"
         />
       ),
@@ -127,7 +124,9 @@ describe("sampled with path data", () => {
   test("keeps few keys for a shape that changes steadily", () => {
     const out = emit(() => (
       <Shape
-        geometry={sampled((t) => pathData(`M0 0L${5 + 10 * t} 5`), span(0, 4), { tolerance: 0.1 })}
+        geometry={sampled((t) => path.parse(`M0 0L${5 + 10 * t} 5`), span(0, 4), {
+          tolerance: 0.1,
+        })}
         stroke={{ color: "#000000" }}
       />
     ));
@@ -137,7 +136,7 @@ describe("sampled with path data", () => {
 
   test("rejects samples with a different structure", () => {
     expect(() =>
-      sampled((t) => pathData(t < 1 ? "M0 0L1 1" : "M0 0L1 1L2 2"), span(0, 2), {
+      sampled((t) => path.parse(t < 1 ? "M0 0L1 1" : "M0 0L1 1L2 2"), span(0, 2), {
         tolerance: 1,
       }),
     ).toThrow("sampled() returned geometry at t=1 that doesn't match the first sample");

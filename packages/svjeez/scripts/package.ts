@@ -10,7 +10,6 @@ const result = await Bun.build({
     "./src/tools.ts",
     "./src/frames.ts",
     "./src/page.ts",
-    "./src/params.ts",
     "./src/cli.ts",
   ],
   external: ["playwright-core"],

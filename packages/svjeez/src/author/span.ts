@@ -1,40 +1,40 @@
 import { SceneError } from "../model/scene-error";
 import type { Seconds } from "../model/time";
 
-export interface Span {
+export interface Interval {
   readonly start: Seconds;
   readonly over: Seconds;
 }
 
-export interface OpenSpan {
+export interface OpenInterval {
   readonly start: Seconds;
   readonly over?: undefined;
 }
 
-export type When = Span | OpenSpan;
+export type When = Interval | OpenInterval;
 
 export const isWhen = (when: When | Seconds | null | undefined): when is When =>
   typeof when === "object" && when !== null && Number.isFinite(when.start);
 
-export type Spans<N extends number, Done extends Spanned[] = []> = number extends N
-  ? Spanned[]
+export type Spans<N extends number, Done extends Span[] = []> = number extends N
+  ? Span[]
   : Done["length"] extends N
     ? Done
-    : Spans<N, [...Done, Spanned]>;
+    : Spans<N, [...Done, Span]>;
 
-export interface Spanned extends Span {
+export interface Span extends Interval {
   readonly end: Seconds;
-  shift(dt: Seconds): Spanned;
-  next(over: Seconds, gap?: Seconds): Spanned;
+  shift(dt: Seconds): Span;
+  next(over: Seconds, gap?: Seconds): Span;
   chain<const O extends readonly Seconds[]>(
     ...overs: O
-  ): [Spanned, ...{ -readonly [K in keyof O]: Spanned }];
+  ): [Span, ...{ -readonly [K in keyof O]: Span }];
   cascade<const N extends number>(count: N, step: Seconds): Spans<N>;
 }
 
-export interface OpenSpanned extends OpenSpan {
+export interface OpenSpan extends OpenInterval {
   readonly end: number;
-  shift(dt: Seconds): OpenSpanned;
+  shift(dt: Seconds): OpenSpan;
 }
 
 const finite = (value: number, what: string): void => {
@@ -42,7 +42,7 @@ const finite = (value: number, what: string): void => {
     throw new SceneError(`${what} needs a finite number of seconds, got ${value}.`);
 };
 
-class Range implements Spanned {
+class Range implements Span {
   constructor(
     readonly start: Seconds,
     readonly over: Seconds,
@@ -66,13 +66,13 @@ class Range implements Spanned {
 
   chain<const O extends readonly Seconds[]>(
     ...overs: O
-  ): [Spanned, ...{ -readonly [K in keyof O]: Spanned }] {
-    const out: Spanned[] = [this];
+  ): [Span, ...{ -readonly [K in keyof O]: Span }] {
+    const out: Span[] = [this];
 
     for (const over of overs) out.push(out[out.length - 1]!.next(over));
 
     // SAFETY: out holds this span and one per entry of overs, in order, which is the tuple the signature names.
-    return out as [Spanned, ...{ -readonly [K in keyof O]: Spanned }];
+    return out as [Span, ...{ -readonly [K in keyof O]: Span }];
   }
 
   cascade<const N extends number>(count: N, step: Seconds): Spans<N> {
@@ -88,7 +88,7 @@ class Range implements Spanned {
   }
 }
 
-class Tail implements OpenSpanned {
+class Tail implements OpenSpan {
   readonly over = undefined;
   readonly end = Infinity;
 
@@ -127,8 +127,8 @@ export const checkWindow = (start: Seconds, over: Seconds, what: string, empty =
     );
 };
 
-export function span(start: Seconds, over: Seconds): Spanned;
-export function span(start: Seconds): OpenSpanned;
-export function span(start: Seconds, over?: Seconds): Spanned | OpenSpanned {
+export function span(start: Seconds, over: Seconds): Span;
+export function span(start: Seconds): OpenSpan;
+export function span(start: Seconds, over?: Seconds): Span | OpenSpan {
   return over === undefined ? build(start, undefined, "span()") : build(start, over, "span()");
 }

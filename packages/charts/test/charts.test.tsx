@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { Group, font, morph, scene, span, tokens, type SceneElement } from "svjeez";
-import { SceneError, boxesOf, inspect, svg, type Scene } from "svjeez/tools";
+import { Group, font, morph, scene, span, tokens, track, type SceneElement } from "svjeez";
+import { SceneError, boxesOf, check, svg, type Scene } from "svjeez/tools";
 import { Chart, area, bars, line, type Plot } from "../src/index.ts";
 
 const theme = tokens({
@@ -115,9 +115,12 @@ describe("drawing", () => {
         series={[
           bars(
             { Jan: 10, Feb: 40, Mar: 25 },
-            { name: "a", color: theme.blue, span: span(0.2, 1), values: true },
+            { name: "a", color: theme.blue, draw: track(0).to(1, span(0.2, 1)), values: true },
           ),
-          bars({ Jan: 20, Feb: 10, Mar: 5 }, { name: "b", color: theme.red, span: span(0.4, 1) }),
+          bars(
+            { Jan: 20, Feb: 10, Mar: 5 },
+            { name: "b", color: theme.red, draw: track(0).to(1, span(0.4, 1)) },
+          ),
         ]}
       />
     ));
@@ -130,7 +133,7 @@ describe("drawing", () => {
 
     expect(a.x + a.width).toBeLessThan(b.x);
     expect(b.height).toBeCloseTo(a.height * 2, 0);
-    expect(inspect(view).filter((finding) => finding.severity === "error")).toEqual([]);
+    expect(check(view).problems.filter((finding) => finding.severity === "error")).toEqual([]);
   });
 
   test("bars, an area with dots and a label emit animated svg", () => {
@@ -142,7 +145,7 @@ describe("drawing", () => {
         series={[
           bars(
             { Jan: 10, Feb: 40, Mar: 25 },
-            { color: theme.blue, span: span(0.2, 1), values: true },
+            { color: theme.blue, draw: track(0).to(1, span(0.2, 1)), values: true },
           ),
           area(
             [
@@ -150,14 +153,20 @@ describe("drawing", () => {
               ["Feb", 40],
               ["Mar", 25],
             ],
-            { name: "trend", color: theme.red, span: span(1, 1), dots: true, label: "trend" },
+            {
+              name: "trend",
+              color: theme.red,
+              draw: track(0).to(1, span(1, 1)),
+              dots: true,
+              label: "trend",
+            },
           ),
         ]}
       />
     ));
 
     expect(svg.emit(view)).toContain("@keyframes");
-    expect(inspect(view).filter((finding) => finding.severity === "error")).toEqual([]);
+    expect(check(view).problems.filter((finding) => finding.severity === "error")).toEqual([]);
   });
 
   test("a changed dataset morphs between states", () => {
@@ -180,7 +189,7 @@ describe("drawing", () => {
     const view = sceneOf(() => <Group>{morph.between(states, [span(1, 1)])}</Group>);
 
     expect(svg.emit(view)).toContain("@keyframes");
-    expect(inspect(view).filter((finding) => finding.severity === "error")).toEqual([]);
+    expect(check(view).problems.filter((finding) => finding.severity === "error")).toEqual([]);
   });
 });
 
@@ -239,5 +248,48 @@ describe("errors", () => {
         ]),
       ).fix,
     ).toBe('Use "linear", "monotone" or "step".');
+  });
+});
+
+describe("stroke and grid", () => {
+  const chartOf = (
+    extra: { readonly grid?: Parameters<typeof Chart>[0]["grid"] },
+    stroke?: { width: number },
+  ) =>
+    svg.emit(
+      sceneOf(() => (
+        <Chart
+          {...look}
+          {...extra}
+          size={[300, 200]}
+          x={band}
+          series={[
+            line(
+              [
+                ["Jan", 10],
+                ["Feb", 40],
+                ["Mar", 25],
+              ],
+              { color: theme.blue, ...(stroke && { stroke }) },
+            ),
+          ]}
+        />
+      )),
+    );
+
+  test("the grid is off by default, and {} turns it on", () => {
+    const off = chartOf({});
+    const on = chartOf({ grid: {} });
+
+    expect(chartOf({ grid: false })).toBe(off);
+    expect(on.length).toBeGreaterThan(off.length);
+  });
+
+  test("a grid stroke restyles the guide lines", () => {
+    expect(chartOf({ grid: { width: 3 } })).not.toBe(chartOf({ grid: {} }));
+  });
+
+  test("a line stroke restyles the line", () => {
+    expect(chartOf({}, { width: 6 })).not.toBe(chartOf({}));
   });
 });

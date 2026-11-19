@@ -8,13 +8,13 @@ import {
   circle,
   ease,
   enter,
-  motion,
   rect,
   scene,
   span,
   tokens,
   track,
   type SceneElement,
+  type Vec,
 } from "svjeez";
 import { isLane, svg, type Model, type Spring } from "svjeez/tools";
 
@@ -297,10 +297,10 @@ describe("spring steps", () => {
     expect(cut.keys.find((key) => key.t === 1)?.value).toEqual([0, 0]);
     expect(valueAt(cut, 0.5)[0]).toBeCloseTo(100 + bouncy.state(-100, 0, 0.5)[0], 1);
     expect(() => track(0).to(1, span(0, 1)).to(2, span(0.5, 1), bouncy)).toThrow(
-      "Two transitions move",
+      "Two steps move this track at once",
     );
     expect(() => track(0).to(1, span(0, 2), bouncy).to(2, span(0, 1))).toThrow(
-      "Two transitions move",
+      "Two steps move this track at once",
     );
   });
 
@@ -395,9 +395,9 @@ describe("spring steps", () => {
         <Shape
           fill="#000000"
           geometry={circle(4)}
-          motion={motion()
-            .to({ offset: [40, 20] }, span(0, 1.5), bouncy)
-            .rewind(1.5, bouncy)}
+          motion={{
+            offset: track<Vec>([0, 0]).to([40, 20], span(0, 1.5), bouncy).rewind(1.5, bouncy),
+          }}
         />
       )),
     );
