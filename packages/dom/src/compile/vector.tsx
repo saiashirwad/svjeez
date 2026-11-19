@@ -235,6 +235,9 @@ const lower = (node: SvgNode, key: string, parent: Lowering): SceneElement[] => 
 
   if (!shape) return [];
 
+  // The stroke's shape is backed off by half its width; the fill's is not.
+  const bare = width > 0 ? (geometry(node, 0, here) ?? shape) : shape;
+
   const filled = node.tag === "line" ? undefined : fill;
   const parts: [string, ShapeProps][] = [];
 
@@ -244,12 +247,12 @@ const lower = (node: SvgNode, key: string, parent: Lowering): SceneElement[] => 
       node.tag === "polyline"
         ? polygon(...points(node.attrs.points))
         : node.style["fill-rule"] === "evenodd" &&
-            "kind" in shape.geometry &&
-            shape.geometry.kind === "path"
-          ? { ...shape.geometry, rule: "evenodd" as const }
-          : shape.geometry;
+            "kind" in bare.geometry &&
+            bare.geometry.kind === "path"
+          ? { ...bare.geometry, rule: "evenodd" as const }
+          : bare.geometry;
 
-    parts.push(["fill", { ...shape, geometry, fill: filled }]);
+    parts.push(["fill", { ...bare, geometry, fill: filled }]);
   }
 
   if (stroke) parts.push(["stroke", { ...shape, stroke }]);

@@ -309,14 +309,22 @@ interface FontFaces {
   readonly faces: readonly { readonly name: string; readonly font: Font }[];
 }
 
-export const fontFaces = (value: FontValue): FontFaces => {
+const GENERIC = /^(serif|sans-serif|monospace|cursive|fantasy|system-ui|math|emoji|ui-[a-z-]+)$/i;
+
+/** The CSS family list for a font. `prefix` renames only embedded faces; system families keep their own name, and a CSS generic (`monospace`) stays a bare keyword. */
+export const fontFaces = (value: FontValue, prefix = ""): FontFaces => {
   const [name, faces, fallback] =
     value instanceof Font
       ? [value.family, [value], value.fallback]
       : [value.name, value.faces, value.fallback];
 
+  const embedded = faces.some((font) => font.format !== "system");
+
   return {
-    family: [cssString(name), ...fallback].join(", "),
+    family:
+      !embedded && GENERIC.test(name.trim())
+        ? name.trim()
+        : [cssString((embedded ? prefix : "") + name), ...fallback].join(", "),
     faces: faces.map((font) => ({ name, font })),
   };
 };
