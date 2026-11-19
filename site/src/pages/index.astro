@@ -1,6 +1,6 @@
 ---
 import { Code } from "astro:components";
-import domReact from "@examples/dist/dom-react.svg?raw";
+import board from "../scenes/board/board.film.tsx";
 import charts from "@examples/charts/index.tsx";
 import code from "@examples/code/index.tsx";
 import count from "@examples/count/index.tsx";
@@ -30,7 +30,7 @@ import { shikiTheme } from "../styles/code";
 
 const s = {
   hero: live(hero),
-  film: live(domReact),
+  film: live(board),
   flowchart: live(flowchart),
   sequence: live(sequence),
   state: live(state),
@@ -56,28 +56,38 @@ const tiles = [
 
 const pkg = (name: string) => `${REPO}/tree/main/packages/${name}`;
 
-const film = `const app = serve(index, {
-  selector: "#app",
-});
-
-export default await film(
-  app,
+const film = `export default await film(
+  serve({ root, selector: "#root" }),
   async ({ page, snap }) => {
-    await snap("start");
+    await snap("idle", { hold: 1.2 });
 
-    const done = page
-      .getByRole("button", { name: "Done" });
-    await done.first().click();
-    await snap("moved", { over: 0.7 });
+    await page.keyboard
+      .press("ControlOrMeta+k");
+    await snap("palette", { over: 0.35 });
 
-    const input = page.locator("input");
-    await input.fill("Write the docs");
-    const add = page
-      .getByRole("button", { name: "Add" });
-    await add.click();
-    await snap("added", { over: 0.7 });
+    await page.locator("[data-part=query]")
+      .fill("new iss");
+    await snap("narrowed", { over: 0.4 });
+
+    await click("cmd-new-issue");
+    await page.locator("[data-part=title]")
+      .fill("Save drafts offline");
+    await snap("titled", { over: 1.1 });
+
+    await click("label-feature");
+    await click("who-mara");
+    await click("create");
+    await snap("created", { over: 0.6 });
+
+    await drag("card-ENG-143",
+      "lane-progress");
+    await snap("dropped", { over: 0.6 });
+
+    await click("status-ENG-143");
+    await click("set-done");
+    await snap("done", { over: 0.7 });
   },
-  { scheme: "both", title: "Sprint board" },
+  { scheme: "both", cache: "states.json" },
 );`;
 
 const theming = `const theme = tokens({
@@ -142,7 +152,7 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
     <section class="wrap sec g" id="film">
       <h2 class="c1-12 xl"><a class="anchor" href="#film">Recorded UI</a></h2>
       <p class="sub c1-8">A real React app, recorded by <a href={pkg("dom")}>@svjeez/dom</a>.</p>
-      <figure class="c1-8"><div class="win"><LiveScene scene={s.film} alt={s.film.desc} /></div></figure>
+      <figure class="c1-8"><div class="win"><LiveScene scene={s.film} alt="A project board: a command palette opens and narrows to New issue, a dialog takes a title, label and assignee, and the new card is dragged to In progress and marked done." /></div></figure>
       <Code class="code side c9-12" code={film} lang="tsx" theme={shikiTheme} />
     </section>
 

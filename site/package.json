@@ -8,7 +8,7 @@
     "preview": "astro preview",
     "deploy": "alchemy deploy",
     "destroy": "alchemy destroy",
-    "typecheck": "astro check",
+    "typecheck": "astro check && tsc --noEmit -p src/scenes/board",
     "test": "bun test --conditions @svjeez/source"
   },
   "dependencies": {
@@ -36,7 +36,13 @@
     "@alchemy.run/frontend-frameworks": "2.0.0-beta.87",
     "@astrojs/check": "^0.9.12",
     "@types/bun": "^1.4.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "lucide-react": "^1.76.0",
     "playwright-core": "^1.64.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "typescript": "6",
     "vite": "8.3.5"
   }
