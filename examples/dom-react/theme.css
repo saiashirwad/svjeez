@@ -1,0 +1,56 @@
+@font-face {
+  font-family: Body;
+  src: url("../../packages/svjeez/tests/fixtures/ABeeZee-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: Display;
+  src: url("../../packages/svjeez/tests/fixtures/ArchivoBlack-Regular.ttf") format("truetype");
+}
+
+:root {
+  color-scheme: light dark;
+  --page: #eef1f7;
+  --panel: #e3e8f2;
+  --card: #ffffff;
+  --ink: #1c2233;
+  --muted: #6a7389;
+  --line: #d3d9e6;
+  --accent: #5b5bf0;
+  --ok: #1f9d6b;
+  --shadow: rgba(28, 34, 51, 0.16);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #12141c;
+    --panel: #1b1f2b;
+    --card: #262b3a;
+    --ink: #eceff7;
+    --muted: #9aa3ba;
+    --line: #353b4e;
+    --accent: #8b8bff;
+    --ok: #4ad19a;
+    --shadow: rgba(0, 0, 0, 0.5);
+  }
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--page);
+}
+
+body {
+  padding: 20px;
+  font:
+    15px/20px Body,
+    system-ui,
+    sans-serif;
+  color: var(--ink);
+}
+
+#app {
+  width: 680px;
+  background: var(--page);
+}
