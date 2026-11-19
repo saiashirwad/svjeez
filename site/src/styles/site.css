@@ -1,0 +1,1159 @@
+/* svjeez.texoport.in: one stylesheet for every page. System fonts, no framework.
+   One grid: a 66rem content box, twelve columns, and every block starts on column 1, 5, 7 or 9. */
+
+@property --split {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 50%;
+}
+
+:root {
+  color-scheme: light dark;
+  --bg: light-dark(oklch(100% 0 0), oklch(14.5% 0.004 270));
+  --surface: light-dark(oklch(98.2% 0.002 270), oklch(20% 0.005 270));
+  --sunken: light-dark(oklch(97.2% 0.003 270), oklch(17.5% 0.005 270));
+  --ink: light-dark(oklch(21% 0.005 270), oklch(96% 0.002 270));
+  --muted: light-dark(oklch(50% 0.008 270), oklch(72% 0.008 270));
+  --line: light-dark(oklch(90% 0.004 270), oklch(29% 0.006 270));
+  --accent: light-dark(oklch(60% 0.19 150), oklch(76% 0.19 150));
+  --accent-ink: oklch(100% 0 0);
+  --shadow: light-dark(oklch(30% 0.02 270 / 0.16), oklch(0% 0 0 / 0.6));
+  --ring: light-dark(oklch(0% 0 0 / 0.07), oklch(100% 0 0 / 0.11));
+  --band: light-dark(oklch(97.2% 0.003 270), oklch(21.5% 0.006 270));
+  --win-bg: light-dark(#ffffff, #090a0c);
+  --warn: light-dark(oklch(58% 0.17 45), oklch(78% 0.15 60));
+
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+  --mono: var(--font-mono), ui-monospace, monospace;
+
+  --gutter: clamp(1rem, 4vw, 2rem);
+  --content: 66rem;
+  --gap: 1.5rem;
+  --radius: 0.75rem;
+  --out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+html {
+  background: var(--bg);
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+body {
+  margin: 0;
+  min-block-size: 100dvh;
+  color: var(--ink);
+  background: var(--bg);
+  font: 400 1rem / 1.6 var(--sans);
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+}
+img,
+svg {
+  display: block;
+  max-inline-size: 100%;
+}
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+p,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+a {
+  color: inherit;
+  text-decoration-color: color-mix(in oklch, currentColor 35%, transparent);
+  text-underline-offset: 0.2em;
+}
+/* A heading that links to its own section, so a section can be shared by URL. */
+a.anchor {
+  text-decoration: none;
+}
+a.anchor::after {
+  content: "#";
+  margin-inline-start: 0.25em;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+a.anchor:hover::after,
+a.anchor:focus-visible::after,
+:target h2 a.anchor::after {
+  opacity: 1;
+}
+section[id] {
+  scroll-margin-block-start: 1.5rem;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+::selection {
+  background: color-mix(in oklch, var(--accent) 28%, transparent);
+}
+code,
+pre,
+kbd {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+.wrap {
+  inline-size: min(100% - 2 * var(--gutter), var(--content));
+  margin-inline: auto;
+}
+
+/* The grid. On a phone everything is one column; from 56rem each block names its columns. */
+.g {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: var(--gap);
+  row-gap: 1.25rem;
+}
+@media (min-width: 56rem) {
+  .g {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+  .c1-12 {
+    grid-column: 1 / -1;
+  }
+  .c1-8 {
+    grid-column: 1 / 9;
+  }
+  .c1-6 {
+    grid-column: 1 / 7;
+  }
+  .c1-5 {
+    grid-column: 1 / 6;
+  }
+  .c1-4 {
+    grid-column: 1 / 5;
+  }
+  .c5-8 {
+    grid-column: 5 / 9;
+  }
+  .c5-12 {
+    grid-column: 5 / -1;
+  }
+  .c7-12 {
+    grid-column: 7 / -1;
+  }
+  .c9-12 {
+    grid-column: 9 / -1;
+  }
+}
+
+/* Buttons. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-block-size: 2.75rem;
+  padding-inline: 1.25rem;
+  font: 500 0.9375rem / 1 var(--sans);
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.btn.primary {
+  color: var(--bg);
+  background: var(--ink);
+  border-color: transparent;
+}
+.btn svg {
+  inline-size: 1.1em;
+  block-size: 1.1em;
+  flex: none;
+}
+.btn:active {
+  translate: 0 1px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    border-color: color-mix(in oklch, var(--ink) 35%, var(--line));
+  }
+  .btn.primary:hover {
+    background: color-mix(in oklch, var(--ink) 82%, var(--bg));
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn {
+    transition:
+      translate 0.12s var(--out),
+      border-color 0.15s,
+      background-color 0.15s;
+  }
+}
+
+/* Header. */
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1.25rem;
+}
+.brand {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font: 700 1.0625rem / 1 var(--display);
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+.brand img {
+  inline-size: 1.625rem;
+  block-size: 1.625rem;
+  border-radius: 22.5%;
+}
+.top nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 3vw, 1.5rem);
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.top nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+  padding-block: 0.5rem;
+}
+.top nav .gh {
+  flex: none;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+}
+/* The header's icons are svjeez scenes inlined in the page. They hold still until you point at their button, then play
+   a whole loop, and now and then one plays on its own. */
+.nav-ico {
+  display: inline-flex;
+}
+.nav-ico svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+.nav-ico svg,
+.nav-ico svg * {
+  animation-play-state: paused !important;
+}
+/* A script sets data-on while an icon plays, and lets each run finish its loop before it rests again. */
+.nav-ico[data-on] svg,
+.nav-ico[data-on] svg * {
+  animation-play-state: running !important;
+}
+/* The light and dark toggle, set like the links so the row stays even. */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+@media (hover: hover) and (pointer: fine) {
+  .top nav a:hover {
+    color: var(--ink);
+  }
+}
+
+/* Light, system and dark on a little track, with a knob that slides between them and Blip riding on top. */
+.scheme {
+  --i: 1;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1.75rem);
+  padding: 0.15rem;
+  border-radius: 999px;
+  background: var(--sunken);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.scheme[data-at="light"] {
+  --i: 0;
+}
+.scheme[data-at="dark"] {
+  --i: 2;
+}
+.scheme button {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  block-size: 1.6rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  cursor: pointer;
+}
+.scheme button[aria-checked="true"] {
+  color: var(--ink);
+}
+.scheme .nav-ico {
+  inline-size: 1.05rem;
+  block-size: 1.05rem;
+}
+.knob {
+  position: absolute;
+  inset-block-start: 0.15rem;
+  inset-inline-start: 0.15rem;
+  inline-size: 1.75rem;
+  block-size: 1.6rem;
+  border-radius: 999px;
+  background: var(--bg);
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 1px 3px var(--shadow);
+  translate: calc(var(--i) * 100%) 0;
+  transition: translate 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.knob img {
+  position: absolute;
+  inset-block-start: -0.95rem;
+  inset-inline-start: 50%;
+  inline-size: 1.15rem;
+  block-size: auto;
+  translate: -50% 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .scheme[data-bump] .knob img {
+    animation: knob-hop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+@keyframes knob-hop {
+  0% {
+    translate: -50% 0;
+  }
+  40% {
+    translate: -50% -0.6rem;
+  }
+  100% {
+    translate: -50% 0;
+  }
+}
+
+/* Copying: the two sheets give way to a check that draws itself, and a note says what happened, failure included. */
+.copy-icon .check {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+[data-copied="ok"] .copy-icon .sheets {
+  opacity: 0;
+}
+[data-copied="ok"] .copy-icon .check {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+[data-copied="ok"] .copy-icon {
+  color: var(--accent);
+}
+[data-copied="failed"] .copy-icon {
+  color: var(--warn);
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-copied="ok"] .copy-icon .check {
+    transition: stroke-dashoffset 0.35s 0.05s var(--out);
+  }
+  .copy-icon .sheets {
+    transition: opacity 0.12s;
+  }
+}
+.copy-say {
+  position: absolute;
+  inset-block-end: calc(100% + 0.5rem);
+  inset-inline-end: 0;
+  inline-size: max-content;
+  max-inline-size: 17rem;
+  padding: 0.45rem 0.7rem;
+  font: 500 0.8125rem / 1.35 var(--sans);
+  color: var(--bg);
+  background: var(--ink);
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1rem -0.5rem var(--shadow);
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.copy-say:empty {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .copy-say {
+    transition:
+      opacity 0.15s,
+      translate 0.2s var(--out);
+  }
+  .copy-say:empty {
+    translate: 0 0.25rem;
+  }
+}
+
+/* The proof chip: a scene's gzipped size, set in the right of the scene's own title bar as if the window knew it.
+   --native is the scene's width and --bar its title bar's height, both in the scene's pixels, so the chip lands in the
+   middle of the bar at any size the scene is drawn. */
+.win {
+  position: relative;
+  container-type: inline-size;
+}
+.proof {
+  position: absolute;
+  inset-block-start: calc(100cqi * var(--bar) / 2 / var(--native));
+  inset-inline-end: calc(100cqi * 12 / var(--native));
+  translate: 0 -50%;
+}
+/* A scene with no title bar, like the agent's desktop, keeps its top for its own menu bar, so the chip sits low. */
+.proof.bare {
+  inset-block: auto 0.625rem;
+  inset-inline-end: 0.625rem;
+  translate: none;
+}
+.proof-chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  block-size: 1.375rem;
+  padding: 0 0.3rem 0 0.5rem;
+  font: 600 0.6875rem / 1 var(--sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  white-space: nowrap;
+  background: color-mix(in oklch, var(--win-bg) 70%, transparent);
+  border: 0;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--line) 70%, transparent);
+  cursor: pointer;
+}
+.proof-chip::after {
+  content: "";
+  position: absolute;
+  inset: min(0px, (100% - 44px) / 2);
+}
+.proof-chip svg {
+  inline-size: 0.625rem;
+  block-size: 0.625rem;
+}
+.proof-chip:active {
+  translate: 0 1px;
+}
+.proof-chip:has(+ .proof-menu:popover-open) {
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+@media (hover: hover) and (pointer: fine) {
+  .proof-chip:hover {
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px var(--line);
+  }
+}
+.proof-menu {
+  margin: 0;
+  padding: 0.375rem;
+  inline-size: min(18rem, 100vw - 2rem);
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  box-shadow: 0 1rem 2rem -0.75rem var(--shadow);
+  font: 500 0.875rem / 1.2 var(--sans);
+  opacity: 0;
+  transition:
+    opacity 0.15s var(--out),
+    display 0.15s allow-discrete,
+    overlay 0.15s allow-discrete;
+}
+.proof-menu:popover-open {
+  display: grid;
+  gap: 0.125rem;
+  opacity: 1;
+}
+@starting-style {
+  .proof-menu:popover-open {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .proof-menu {
+    translate: 0 -0.25rem;
+    transition:
+      opacity 0.15s var(--out),
+      translate 0.15s var(--out),
+      display 0.15s allow-discrete,
+      overlay 0.15s allow-discrete;
+  }
+  .proof-menu:popover-open {
+    translate: 0 0;
+  }
+  @starting-style {
+    .proof-menu:popover-open {
+      translate: 0 -0.25rem;
+    }
+  }
+}
+@supports (position-area: block-end) {
+  .proof-menu {
+    margin-block-start: 0.375rem;
+    position-area: block-end span-inline-start;
+    position-try-fallbacks:
+      flip-block,
+      flip-inline,
+      flip-block flip-inline;
+  }
+}
+.proof-head {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.5rem 0.625rem 0.625rem;
+  margin-block-end: 0.25rem;
+  border-block-end: 1px solid var(--line);
+}
+.proof-head b {
+  font: 600 0.8125rem / 1.2 var(--mono);
+}
+.proof-head > span {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.proof-menu :is(a, button) {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-block-size: 2.5rem;
+  padding: 0 0.625rem;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+.proof-menu :is(a, button) > svg {
+  flex: none;
+  inline-size: 1.05rem;
+  block-size: 1.05rem;
+  color: var(--muted);
+}
+.proof-menu :is(a, button):focus-visible {
+  outline-offset: -2px;
+}
+.proof-menu :is(a, button):active {
+  background: var(--sunken);
+}
+@media (hover: hover) and (pointer: fine) {
+  .proof-menu :is(a, button):hover {
+    background: var(--sunken);
+  }
+}
+.proof-menu code {
+  font-size: 0.85em;
+}
+/* The tag itself stays hidden until a blocked clipboard needs it on screen to be copied by hand. */
+.proof-tag {
+  display: none;
+  margin: 0.25rem 0.375rem 0.375rem;
+  padding: 0.5rem 0.625rem;
+  font: 400 0.6875rem / 1.5 var(--mono);
+  overflow-wrap: anywhere;
+  background: var(--sunken);
+  border-radius: 0.375rem;
+  user-select: all;
+}
+.proof-menu:has([data-copied="failed"]) .proof-tag {
+  display: block;
+}
+/* A popover clips what overflows it, so inside the menu the note is a line of its own under the actions. */
+.proof-menu .copy-say {
+  position: static;
+  inline-size: auto;
+  max-inline-size: none;
+  padding: 0.25rem 0.625rem 0.5rem;
+  color: var(--accent);
+  background: none;
+  box-shadow: none;
+  translate: none;
+}
+.proof-menu .copy-say:empty {
+  display: none;
+}
+.proof-menu:has([data-copied="failed"]) .copy-say {
+  color: var(--warn);
+}
+
+/* Windows: every scene is a window with its own chrome, so the page only adds a shadow. */
+.win {
+  border-radius: var(--radius);
+  background: var(--win-bg);
+  box-shadow:
+    0 0 0 1px var(--ring),
+    0 1.25rem 2.5rem -1rem var(--shadow);
+}
+.win img,
+.win > .daynight {
+  border-radius: inherit;
+}
+/* A scene draws its own window, a 12px radius and a hairline in its own pixels, so the page's frame steps aside and the
+   scene casts the shadow itself, with its radius scaled to the size it is drawn at. One outline, one corner. */
+.win:has(> .scene) {
+  background: none;
+  box-shadow: none;
+}
+.win > .scene {
+  border-radius: calc(100cqi * 12 / var(--native));
+  box-shadow: 0 1.25rem 2.5rem -1rem var(--shadow);
+}
+.scene {
+  inline-size: 100%;
+  block-size: auto;
+}
+:is(.scene, .proof).tall {
+  display: none;
+}
+@media (max-width: 55.99rem) {
+  :is(.scene, .proof).wide {
+    display: none;
+  }
+  .scene.tall {
+    display: block;
+  }
+  .proof.tall {
+    display: revert;
+  }
+  .big .win {
+    inline-size: min(100%, 26rem);
+    margin-inline: auto;
+  }
+}
+@media (min-width: 42rem) and (max-width: 55.99rem) {
+  .big .win {
+    inline-size: 28rem;
+  }
+}
+/* Hero: the headline says what the picture is, and the picture plays under it at its own size. */
+.hero {
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+  justify-items: start;
+  row-gap: 1.25rem;
+  padding-block: clamp(1.5rem, 4vw, 2.25rem) 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+.hero h1 {
+  font-size: clamp(2.25rem, 0.75rem + 5vw, 4rem);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+  padding-block-end: 0.07em;
+}
+.hero h1 code {
+  font-size: 0.82em;
+  letter-spacing: -0.03em;
+}
+.ul {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 0.07em;
+  text-underline-offset: 0.07em;
+  text-decoration-skip-ink: none;
+}
+.lede {
+  max-inline-size: 42ch;
+  font-size: clamp(1.125rem, 1rem + 0.5vw, 1.3125rem);
+  line-height: 1.5;
+  color: var(--muted);
+}
+/* The promise in the lede: ink color and a step of weight, enough to catch the eye without shouting. */
+.lede strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+/* With room for it, each sentence of the lede gets its own line. */
+@media (min-width: 48rem) {
+  .lede {
+    max-inline-size: none;
+  }
+  .lede span {
+    display: block;
+  }
+}
+.hero-stage {
+  position: relative;
+  inline-size: 100%;
+}
+.hero-scene {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+/* The first section sits right under the hero, without a hairline. */
+#film {
+  margin-block-start: clamp(3.5rem, 9vw, 6.5rem);
+  padding-block-start: 0;
+  border-block-start: 0;
+}
+/* Sections: a hairline, a numbered label, a heading, and blocks on the grid. */
+.sec {
+  padding-block: clamp(2.5rem, 6vw, 4.5rem) 0;
+  margin-block-start: clamp(2.5rem, 7vw, 5.5rem);
+  border-block-start: 1px solid var(--line);
+  row-gap: clamp(1.25rem, 2.5vw, 1.75rem);
+}
+.sec h2 {
+  font-size: clamp(1.875rem, 1.2rem + 2.6vw, 3.25rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+}
+.sec h2.xl {
+  font-size: clamp(2.125rem, 1.2rem + 4vw, 4.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+.sub {
+  max-inline-size: 38ch;
+  font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  line-height: 1.55;
+  color: var(--muted);
+  align-self: end;
+}
+.sec > h2 {
+  text-wrap: balance;
+}
+.sec > h2 + .sub {
+  align-self: start;
+  max-inline-size: 60ch;
+  margin-block-start: -0.5rem;
+  text-wrap: pretty;
+}
+.sub code,
+.foot code,
+figure code {
+  font-size: 0.85em;
+}
+.sub code {
+  color: var(--ink);
+}
+figure {
+  min-inline-size: 0;
+}
+figcaption {
+  margin-block-start: 0.9rem;
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+figure h3 {
+  margin-block-start: 1.25rem;
+  font: 600 1.125rem / 1.3 var(--sans);
+  letter-spacing: -0.01em;
+}
+figure h3 + p {
+  margin-block-start: 0.35rem;
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+.tint {
+  margin-block-start: clamp(2.5rem, 7vw, 5.5rem);
+  padding-block-end: clamp(3rem, 7vw, 5.5rem);
+  background: var(--band);
+}
+.tint .sec {
+  margin-block-start: 0;
+  padding-block-start: clamp(3rem, 7vw, 5.5rem);
+  border-block-start: 0;
+}
+
+pre.code {
+  margin: 0;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  background: var(--pre-bg);
+  border-radius: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  tab-size: 2;
+  box-shadow: 0 0 0 1px var(--line);
+}
+@media (max-width: 30em) {
+  pre.code {
+    font-size: 0.71875rem;
+  }
+}
+/* Code blocks are Astro's <Code> with the theme in styles/code.ts, colored by the --code-* palette the scenes share. */
+pre.code {
+  --pre-bg: var(--sunken);
+  font-variant-ligatures: none;
+}
+
+/* Light and dark, side by side. */
+.stagewrap {
+  min-inline-size: 0;
+}
+pre.side {
+  align-self: start;
+}
+.daynight {
+  --split: 50%;
+  position: relative;
+  aspect-ratio: 1280 / 720;
+  overflow: clip;
+  border-radius: var(--radius);
+  box-shadow:
+    0 0 0 1px var(--ring),
+    0 1.25rem 2.5rem -1rem var(--shadow);
+  touch-action: pan-y;
+  cursor: ew-resize;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.layer {
+  position: absolute;
+  inset: 0;
+}
+.layer img {
+  inline-size: 100%;
+  block-size: 100%;
+  pointer-events: none;
+}
+.layer.light {
+  color-scheme: light;
+}
+.layer.dark {
+  color-scheme: dark;
+  clip-path: inset(0 0 0 var(--split));
+}
+.handle {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: var(--split);
+  inline-size: 2px;
+  translate: -1px 0;
+  background: oklch(100% 0 0);
+  box-shadow: 0 0 0 1px oklch(0% 0 0 / 0.25);
+  pointer-events: none;
+}
+.handle::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: oklch(20% 0.005 270)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 7l-5 5 5 5M15 7l5 5-5 5'/%3E%3C/svg%3E")
+    center / 1.5rem no-repeat;
+  box-shadow: 0 2px 8px oklch(0% 0 0 / 0.35);
+}
+.daynight:has(input:focus-visible) .handle::after {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.tag {
+  position: absolute;
+  inset-block-start: 0.75rem;
+  padding: 0.3rem 0.65rem;
+  font: 600 0.75rem / 1 var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  pointer-events: none;
+}
+.tag.l {
+  inset-inline-start: 0.75rem;
+  color: oklch(30% 0.01 270);
+  background: oklch(98% 0 0 / 0.85);
+}
+.tag.d {
+  inset-inline-end: 0.75rem;
+  color: oklch(92% 0.005 270);
+  background: oklch(20% 0.005 270 / 0.85);
+}
+.hint {
+  position: absolute;
+  inset-block-end: 0.75rem;
+  inset-inline-start: 50%;
+  translate: -50% 0;
+  padding: 0.3rem 0.65rem;
+  font: 500 0.6875rem / 1 var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: oklch(95% 0 0);
+  background: oklch(20% 0.005 270 / 0.7);
+  border-radius: 999px;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.daynight.playing .hint {
+  opacity: 0;
+}
+.daynight input {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.daynight.intro {
+  animation: sweep 2.4s 0.2s var(--out) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .daynight.intro {
+    animation: none;
+  }
+}
+@keyframes sweep {
+  0% {
+    --split: 50%;
+  }
+  35% {
+    --split: 82%;
+  }
+  70% {
+    --split: 22%;
+  }
+  100% {
+    --split: 50%;
+  }
+}
+
+/* The wall: everything the packages draw, as equal tiles in two columns. At 66rem a column is about 516px, so every
+   504-wide scene draws at close to its own size and the title bars, chips and in-scene code all match from tile to
+   tile. */
+.wall {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem var(--gap);
+}
+@media (min-width: 40rem) {
+  .wall {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.tile {
+  display: grid;
+  align-content: start;
+  row-gap: 0.875rem;
+  margin-block-end: 1rem;
+}
+.tile figcaption {
+  margin: 0;
+  padding-inline: 0.25rem;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+.tile figcaption b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.tile figcaption :is(a, span) {
+  margin-inline-start: 0.375rem;
+  font: 400 0.8125rem / 1 var(--mono);
+  color: var(--muted);
+}
+.tile figcaption p {
+  margin-block-start: 0.2rem;
+  color: var(--muted);
+}
+
+/* The close: the line that was in the footer, said out loud, then the two ways to start and the honest limits. */
+.close {
+  display: grid;
+  gap: clamp(1.25rem, 2.5vw, 1.75rem);
+  padding-block-start: clamp(4rem, 10vw, 7.5rem);
+}
+.close h2 {
+  max-inline-size: 16ch;
+  font-size: clamp(2.375rem, 1.2rem + 5vw, 5rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+.close h2 code {
+  font-size: 0.82em;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: var(--accent);
+}
+.tally {
+  max-inline-size: 46ch;
+  font-size: clamp(1.125rem, 1rem + 0.5vw, 1.3125rem);
+  line-height: 1.5;
+  color: var(--muted);
+}
+.tally b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.ways {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--gap);
+  margin-block-start: 1rem;
+}
+.way {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: 0.75rem;
+  min-inline-size: 0;
+}
+.way h3 {
+  font: 600 1.0625rem / 1.3 var(--sans);
+  letter-spacing: -0.01em;
+}
+.way p {
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+.way pre.code {
+  font-size: 0.875rem;
+}
+.way code,
+.fine code {
+  font-size: 0.85em;
+}
+.fine {
+  margin-block-start: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  max-inline-size: 44rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+  background: var(--sunken);
+  border-radius: var(--radius);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.fine h3 {
+  margin-block-end: 0.5rem;
+  font: 600 0.875rem / 1.3 var(--sans);
+  letter-spacing: 0;
+  color: var(--ink);
+}
+.fine ul {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-inline-start: 1.1rem;
+}
+
+/* Start and footer. */
+.more {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-block-start: 0.5rem;
+}
+.foot {
+  margin-block-start: clamp(4rem, 9vw, 7rem);
+  padding-block: 1.5rem 2.5rem;
+  border-block-start: 1px solid var(--line);
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.foot p {
+  max-inline-size: 52ch;
+}
+.foot:not(.g) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 2rem;
+}
+.foot nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+}
+.foot a {
+  text-decoration: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .foot a:hover {
+    color: var(--ink);
+  }
+}
+
+/* The playground page: a wider box, and a header that sheds links on a phone. */
+.wrap.wide {
+  inline-size: min(100% - 2 * var(--gutter), 90rem);
+}
+.top nav a[aria-current="page"] {
+  color: var(--ink);
+}
+@media (max-width: 30rem) {
+  .top nav {
+    gap: 0.5rem;
+  }
+  .top nav .opt {
+    display: none;
+  }
+}
+/* On a phone GitHub is its mark alone, and on the narrowest the logo stands for the name, so the menu and both
+   buttons still fit. The words stay for screen readers. */
+@media (max-width: 30rem) {
+  .top nav .gh + span {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+@media (max-width: 22.49rem) {
+  .brand span {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Not found: a short heading, Blip, lost, and two ways home. */
+.lost-page {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 2rem);
+  padding-block: clamp(1.5rem, 5vw, 3.5rem) clamp(3rem, 8vw, 6rem);
+}
+.lost-page h1 {
+  max-inline-size: 18ch;
+  font-size: clamp(2.25rem, 1rem + 5vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.lost-page .lede {
+  max-inline-size: 46ch;
+}

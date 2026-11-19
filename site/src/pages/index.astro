@@ -1,0 +1,222 @@
+---
+import { Code } from "astro:components";
+import domReact from "@examples/dist/dom-react.svg?raw";
+import charts from "@examples/charts/index.tsx";
+import code from "@examples/code/index.tsx";
+import count from "@examples/count/index.tsx";
+import derived from "@examples/derived/index.tsx";
+import epicycles from "@examples/epicycles/index.tsx";
+import flowchart from "@examples/flowchart/index.tsx";
+import geometry from "@examples/geometry/index.tsx";
+import globe from "@examples/globe/index.tsx";
+import hero from "@examples/readme/hero.tsx";
+import icons from "@examples/icons/index.tsx";
+import lanes from "@examples/lanes/index.tsx";
+import layout from "@examples/layout/index.tsx";
+import math from "@examples/math/index.tsx";
+import morph from "@examples/morph/index.tsx";
+import paint from "@examples/paint/index.tsx";
+import sequence from "@examples/sequence/index.tsx";
+import springs from "@examples/springs/index.tsx";
+import state from "@examples/state/index.tsx";
+import type from "@examples/type/index.tsx";
+import DayNight from "../components/DayNight.astro";
+import LiveScene from "../components/LiveScene.astro";
+import Base from "../layouts/Base.astro";
+import { live } from "../live";
+import { REPO } from "../links";
+import { facts, kb } from "../proof";
+import { shikiTheme } from "../styles/code";
+
+const s = {
+  hero: live(hero),
+  film: live(domReact),
+  flowchart: live(flowchart),
+  sequence: live(sequence),
+  state: live(state),
+  lanes: live(lanes),
+  code: live(code),
+  math: live(math),
+  epicycles: live(epicycles),
+  charts: live(charts),
+  globe: live(globe),
+  layout: live(layout),
+};
+
+const tiles = [
+  { name: "springs", label: "Springs", scene: live(springs), note: "Retargeted mid-flight" },
+  { name: "type", label: "Type", scene: live(type), note: "Measured with its own font" },
+  { name: "derived", label: "Derived tracks", scene: live(derived), note: "One track drives the rest" },
+  { name: "morph", label: "Morph", scene: live(morph), note: "Keyed enter, exit and move" },
+  { name: "geometry", label: "Geometry", scene: live(geometry), note: "Rects, arcs and morphing shapes" },
+  { name: "paint", label: "Paint", scene: live(paint), note: "Gradients, masks, blur, shadow" },
+  { name: "icons", label: "Icons", scene: live(icons), note: "Drawn on, popped, swapped" },
+  { name: "count", label: "Counters", scene: live(count), note: "Zero-JS number ticking" },
+];
+
+const pkg = (name: string) => `${REPO}/tree/main/packages/${name}`;
+
+const film = `export default await film(
+  serve(index, { selector: "#app" }),
+  async ({ page, snap }) => {
+    await snap("start");
+
+    await page
+      .locator('[data-key="col-todo"] button')
+      .first()
+      .click();
+    await snap("moved", { over: 0.7 });
+
+    await page.locator("input").fill("Write the docs");
+    await page.getByRole("button", { name: "Add" }).click();
+    await snap("added", { over: 0.7 });
+  },
+  { scheme: "both", title: "Sprint board" },
+);`;
+
+const theming = `const theme = tokens({
+  light: {
+    background: "#FFFFFF",
+    text: "#1D1D1F",
+    blue: "#0A6CFF",
+  },
+  dark: {
+    background: "#090A0C",
+    text: "#E5E5EA",
+    blue: "#5EA0FF",
+  },
+});
+
+export default scene(
+  { size: [640, 300], theme },
+  () => (
+    <Shape
+      geometry={circle(40)}
+      fill={theme.blue}
+    />
+  ),
+);`;
+
+const start = `npm i svjeez
+npx svjeez dev scene.tsx
+npx svjeez check scene.tsx
+npx svjeez svg scene.tsx --out scene.svg`;
+
+const files = new Map(
+  [...Object.values(s), ...tiles.map((tile) => tile.scene)].map((scene) => [scene.src, facts(scene)]),
+);
+
+const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, file) => sum + file[field], 0);
+---
+
+<Base
+  title="svjeez · write motion in TypeScript, ship it as one SVG"
+  description="Write motion in TypeScript. Ship it as one SVG file."
+  share={{
+    title: "svjeez: write motion in TypeScript, ship it as one SVG",
+    description: "Write motion in TypeScript and compile it to one SVG file. No player, no JavaScript.",
+    alt: "A spring-driven coil, a morphing card and a ring gauge, all one SVG.",
+  }}
+  class="home"
+>
+  <link slot="head" rel="preload" as="image" href={s.hero.src} media="(prefers-reduced-motion: no-preference)" />
+  <main>
+    <section class="wrap hero">
+      <h1>This is a <span class="ul">{kb(s.hero.gzip)}</span> SVG in an <code>&lt;img&gt;</code> tag.</h1>
+      <p class="lede">Written in TypeScript. No player, no JavaScript.</p>
+      <div class="hero-stage">
+        <LiveScene class="hero-scene" scene={s.hero} alt={s.hero.desc} />
+      </div>
+      <p class="more">
+        <a class="btn primary" href="#start">Get started</a>
+        <a class="btn" href={REPO}>View on GitHub</a>
+      </p>
+    </section>
+
+    <section class="wrap sec g" id="film">
+      <h2 class="c1-12 xl"><a class="anchor" href="#film">Recorded UI</a></h2>
+      <p class="sub c1-8">A real React app, recorded by <a href={pkg("dom")}>@svjeez/dom</a>.</p>
+      <figure class="c1-8"><div class="win"><LiveScene scene={s.film} alt={s.film.desc} /></div></figure>
+      <Code class="code side c9-12" code={film} lang="tsx" theme={shikiTheme} />
+    </section>
+
+    <div class="tint">
+      <section class="wrap sec g" id="explain">
+        <h2 class="c1-12 xl"><a class="anchor" href="#explain">Code, diagrams and math</a></h2>
+        <p class="sub c1-8"><a href={pkg("diagrams")}>@svjeez/diagrams</a> · <a href={pkg("mermaid")}>mermaid</a> · <a href={pkg("code")}>code</a> · <a href={pkg("math")}>math</a></p>
+        <figure class="c1-12"><div class="win"><LiveScene scene={s.flowchart} name="flowchart" alt={s.flowchart.desc} /></div></figure>
+        <figure class="c1-6"><div class="win"><LiveScene scene={s.sequence} name="sequence" alt={s.sequence.desc} /></div></figure>
+        <figure class="c7-12"><div class="win"><LiveScene scene={s.state} name="state" alt={s.state.desc} /></div></figure>
+        <figure class="c1-6"><div class="win"><LiveScene scene={s.lanes} name="lanes" alt={s.lanes.desc} /></div></figure>
+        <figure class="c7-12"><div class="win"><LiveScene scene={s.code} name="code" alt={s.code.desc} /></div></figure>
+        <figure class="c1-6"><div class="win"><LiveScene scene={s.math} name="math" alt={s.math.desc} /></div></figure>
+        <figure class="c7-12"><div class="win"><LiveScene scene={s.epicycles} name="epicycles" alt={s.epicycles.desc} /></div></figure>
+      </section>
+    </div>
+
+    <section class="wrap sec g" id="data">
+      <h2 class="c1-12 xl"><a class="anchor" href="#data">Charts and maps</a></h2>
+      <p class="sub c1-8"><a href={pkg("charts")}>@svjeez/charts</a> · <a href={pkg("geo")}>@svjeez/geo</a></p>
+      <figure class="c1-12"><div class="win"><LiveScene scene={s.charts} name="charts" alt={s.charts.desc} /></div></figure>
+      <figure class="c1-12"><div class="win"><LiveScene scene={s.globe} name="globe" alt={s.globe.desc} /></div></figure>
+    </section>
+
+    <section class="wrap sec g" id="light-dark">
+      <h2 class="c1-12"><a class="anchor" href="#light-dark">Light and dark</a></h2>
+      <p class="sub c1-8">One file, both schemes. Drag the handle.</p>
+      <div class="stagewrap c1-8">
+        <DayNight scene={s.layout} alt={s.layout.desc} />
+      </div>
+      <Code class="code side c9-12" code={theming} lang="tsx" theme={shikiTheme} />
+    </section>
+
+    <div class="tint">
+      <section class="wrap sec g" id="motion">
+        <h2 class="c1-12"><a class="anchor" href="#motion">Motion building blocks</a></h2>
+        <div class="wall c1-12">
+          {
+            tiles.map((tile) => (
+              <figure class="tile">
+                <div class="win"><LiveScene scene={tile.scene} name={tile.name} alt={tile.scene.desc} /></div>
+                <figcaption>
+                  <b>{tile.label}</b> <span>{tile.note}</span>
+                </figcaption>
+              </figure>
+            ))
+          }
+        </div>
+      </section>
+    </div>
+
+    <section class="wrap sec g" id="agents">
+      <h2 class="c1-12"><a class="anchor" href="#agents">Agent skill</a></h2>
+      <p class="sub c1-8">Your agent writes the scene, renders frames, and checks them itself.</p>
+      <pre class="code c1-8">npx svjeez skill --install</pre>
+    </section>
+
+    <section class="wrap close" id="start">
+      <h2><a class="anchor" href="#start">Get started</a></h2>
+      <p class="tally"><b>{files.size}</b> SVG files, <b>{Math.round(total("gzip") / 1024)} KB</b> gzipped, <b>{total("script")}</b> bytes of JavaScript.</p>
+      <div class="ways">
+        <div class="way">
+          <h3>Start yourself</h3>
+          <pre class="code">{start}</pre>
+          <p>Also: <a href={pkg("vite")}>Vite</a>, <a href={pkg("astro")}>Astro</a>, <a href={pkg("video")}>video</a>.</p>
+        </div>
+      </div>
+      <aside class="fine" id="fine-print" aria-labelledby="fine-print-title">
+        <h3 id="fine-print-title">The fine print</h3>
+        <ul>
+          <li>Node 20+ or Bun. On Node, install <code>tsx</code>.</li>
+          <li>Frames need <code>playwright-core</code> and Chromium.</li>
+          <li>Fonts and images are embedded in the file.</li>
+        </ul>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>MIT licensed.</p>
+    <nav aria-label="Footer"><a href={`${REPO}/tree/main/examples`}>Examples</a><a href={REPO}>GitHub</a><a href="https://www.npmjs.com/package/svjeez">npm</a></nav>
+  </footer>
+</Base>

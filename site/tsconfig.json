@@ -1,0 +1,15 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "svjeez",
+    "noUncheckedIndexedAccess": true,
+    "types": ["bun"],
+    "customConditions": ["@svjeez/source"],
+    "paths": {
+      "@examples/*": ["../examples/*"]
+    }
+  },
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"]
+}

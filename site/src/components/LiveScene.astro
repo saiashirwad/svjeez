@@ -1,0 +1,43 @@
+---
+// A scene that plays only while it is on screen and inside the page's play budget, and shows a poster otherwise.
+import type { HTMLAttributes } from "astro/types";
+import type { SceneImage } from "@svjeez/astro/scene";
+import Proof from "./Proof.astro";
+
+type Props = Omit<HTMLAttributes<"img">, "src" | "width" | "height"> & {
+  scene: SceneImage;
+  /** Main-thread milliseconds per second the scene costs while it plays. */
+  cost?: number;
+  /** Always show this scheme, whatever the page's. */
+  scheme?: "light" | "dark";
+  /** Played by a script of its own instead of by the budget. */
+  manual?: boolean;
+  /** Gives the scene a proof chip whose download is named svjeez-<name>.svg. */
+  name?: string;
+  /** The height of the scene's title bar in its own pixels, where the chip sits, or 0 for none. */
+  bar?: number;
+  alt: string;
+};
+
+const { scene, cost, scheme, manual, name, bar, alt, class: className, ...attributes } = Astro.props;
+---
+
+<img
+  class:list={["scene", className]}
+  data-live={scene.src}
+  data-light={scene.posters!.light}
+  data-dark={scene.posters!.dark}
+  data-cost={cost}
+  data-scheme={scheme}
+  data-manual={manual ? "" : undefined}
+  width={scene.width}
+  height={scene.height}
+  style={`--native: ${scene.width}`}
+  alt={alt}
+  {...attributes}
+/>
+{name && <Proof scene={scene} name={name} alt={alt} bar={bar} class={className} />}
+
+<script>
+  import "../scripts/scenes";
+</script>
