@@ -56,19 +56,25 @@ const tiles = [
 
 const pkg = (name: string) => `${REPO}/tree/main/packages/${name}`;
 
-const film = `export default await film(
-  serve(index, { selector: "#app" }),
+const film = `const app = serve(index, {
+  selector: "#app",
+});
+
+export default await film(
+  app,
   async ({ page, snap }) => {
     await snap("start");
 
-    await page
-      .locator('[data-key="col-todo"] button')
-      .first()
-      .click();
+    const done = page
+      .getByRole("button", { name: "Done" });
+    await done.first().click();
     await snap("moved", { over: 0.7 });
 
-    await page.locator("input").fill("Write the docs");
-    await page.getByRole("button", { name: "Add" }).click();
+    const input = page.locator("input");
+    await input.fill("Write the docs");
+    const add = page
+      .getByRole("button", { name: "Add" });
+    await add.click();
     await snap("added", { over: 0.7 });
   },
   { scheme: "both", title: "Sprint board" },
