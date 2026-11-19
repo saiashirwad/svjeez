@@ -1,6 +1,7 @@
 import type {
   Animation,
   Background,
+  Control,
   Corner,
   ElementNode,
   Font,
@@ -595,6 +596,169 @@ export const capture = (root: Element): Snapshot => {
       ];
     });
 
+  // ------------------------------------------------------------ form controls
+
+  const MIRRORED = [
+    "font-family",
+    "font-size",
+    "font-weight",
+    "font-style",
+    "font-stretch",
+    "font-variant",
+    "font-kerning",
+    "font-feature-settings",
+    "font-variation-settings",
+    "line-height",
+    "letter-spacing",
+    "word-spacing",
+    "text-transform",
+    "text-indent",
+    "text-align",
+    "text-rendering",
+    "tab-size",
+    "direction",
+    "overflow-wrap",
+    "word-break",
+  ];
+
+  const TEXT_INPUTS = new Set(["", "text", "search", "email", "url", "tel", "password", "number"]);
+  const BUTTON_INPUTS = new Set(["button", "submit", "reset"]);
+
+  /**
+   * The text a control shows, as a text node placed in the control's own layout space.
+   * A `Range` cannot reach into a control's UA shadow, so the text is laid out in a temporary mirror `<div>`
+   * with the control's font, content width and wrapping, and the mirror's runs are moved into the control's content box.
+   */
+  const mirrored = (
+    el: HTMLElement,
+    style: CSSStyleDeclaration,
+    rect: { x: number; y: number },
+    shown: string,
+    tint?: string,
+  ): TextNode | undefined => {
+    if (shown === "") return undefined;
+
+    const [pt, pr, pb, pl] = [
+      px(style.paddingTop),
+      px(style.paddingRight),
+      px(style.paddingBottom),
+      px(style.paddingLeft),
+    ];
+
+    const mirror = document.createElement("div");
+
+    mirror.style.cssText =
+      "position:fixed;left:0;top:0;visibility:hidden;margin:0;padding:0;border:0;box-sizing:content-box;overflow:visible;transform:none;";
+
+    for (const name of MIRRORED) mirror.style.setProperty(name, style.getPropertyValue(name));
+
+    mirror.style.whiteSpace = el instanceof HTMLTextAreaElement ? style.whiteSpace : "pre";
+    mirror.style.width = `${Math.max(0, el.clientWidth - pl - pr)}px`;
+    mirror.textContent = shown;
+    document.documentElement.append(mirror);
+
+    try {
+      // SAFETY: the mirror's only child is the text node `textContent` just made (`shown` is not empty).
+      const node = textOf(mirror.firstChild as Text, mirror, new DOMMatrix());
+
+      if (!node) return undefined;
+
+      const content = Math.max(0, el.clientHeight - pt - pb);
+      const lines = mirror.getBoundingClientRect().height;
+      // A single line sits in the middle of the content box; a textarea starts at its top.
+      const dy = el instanceof HTMLTextAreaElement ? 0 : (content - lines) / 2;
+      const left = rect.x + px(style.borderLeftWidth) + pl - scrollX - el.scrollLeft;
+      const top = rect.y + px(style.borderTopWidth) + pt + dy - scrollY - el.scrollTop;
+
+      return {
+        type: "text",
+        runs: node.runs.map((run) => ({
+          ...run,
+          x: round(run.x + left),
+          y: round(run.y + top),
+          ...(tint && { color: tint }),
+        })),
+      };
+    } finally {
+      mirror.remove();
+    }
+  };
+
+  const NATIVE_ACCENT = "rgb(0, 117, 255)";
+
+  /**
+   * What an `<input>`, `<textarea>` or `<select>` draws: the text it displays (its value, else its placeholder) as children,
+   * and a `control` for a native checkbox, radio or select chevron. Undefined for any other element.
+   */
+  const formOf = (
+    el: Element,
+    style: CSSStyleDeclaration,
+    rect: { x: number; y: number },
+  ): { kids: TextNode[]; control?: Control; native?: boolean; clip?: boolean } | undefined => {
+    const native = style.appearance !== "none";
+
+    if (el instanceof HTMLInputElement && (el.type === "checkbox" || el.type === "radio")) {
+      if (!native) return { kids: [] };
+
+      const accent = style.accentColor;
+
+      return {
+        kids: [],
+        native: true,
+        control: {
+          kind: el.type,
+          checked: el.checked,
+          indeterminate: el.type === "checkbox" && el.indeterminate,
+          accent: color(accent === "auto" ? NATIVE_ACCENT : accent),
+        },
+      };
+    }
+
+    let shown: string | undefined;
+    let tint: string | undefined;
+
+    if (el instanceof HTMLSelectElement) {
+      if (el.multiple || el.size > 1) return { kids: [] };
+
+      shown = el.selectedOptions[0]?.textContent?.trim() ?? "";
+    } else if (
+      el instanceof HTMLTextAreaElement ||
+      (el instanceof HTMLInputElement && (TEXT_INPUTS.has(el.type) || BUTTON_INPUTS.has(el.type)))
+    ) {
+      const value = el.value;
+
+      if (value !== "")
+        shown =
+          el instanceof HTMLInputElement && el.type === "password"
+            ? "\u2022".repeat([...value].length)
+            : value;
+      else if (el instanceof HTMLInputElement && BUTTON_INPUTS.has(el.type)) shown = "";
+      else if (el.placeholder) {
+        const hint = getComputedStyle(el, "::placeholder");
+
+        const [r, g, b, a] = color(hint.color)
+          .replace(/^rgba?\(|\)$/g, "")
+          .split(",")
+          .map(Number);
+
+        const alpha = round((a ?? 1) * (Number(hint.opacity) || 0));
+
+        shown = el.placeholder;
+        tint = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+      }
+    } else return undefined;
+
+    // SAFETY: only inputs, textareas and selects get here, and all three are HTMLElements.
+    const text = mirrored(el as HTMLElement, style, rect, shown ?? "", tint);
+
+    return {
+      kids: text ? [text] : [],
+      clip: true,
+      ...(el instanceof HTMLSelectElement &&
+        native && { control: { kind: "select" as const, color: color(style.color) } }),
+    };
+  };
+
   // ------------------------------------------------------------------- walk
 
   /** `a` carries the transforms of every ancestor, from layout space to the page. */
@@ -689,24 +853,36 @@ export const capture = (root: Element): Snapshot => {
           .multiply(own)
           .multiply(new DOMMatrix().translate(-origin[0], -origin[1]));
 
+    const form = formOf(el, style, rect);
+
     const kids =
-      el instanceof SVGElement || el instanceof HTMLImageElement ? [] : children(el, inner);
+      form?.kids ??
+      (el instanceof SVGElement || el instanceof HTMLImageElement ? [] : children(el, inner));
 
     const svg = el instanceof SVGSVGElement ? svgOf(el) : undefined;
 
     if ((box.width === 0 || box.height === 0) && kids.length === 0) return [];
 
+    // A native checkbox or radio has no CSS of its own to draw: compile draws it whole.
+    const bare = form?.native === true;
     const radii = radiusOf(style, rect.width, rect.height);
-    const border = sidesOf(style);
+    const border = bare ? undefined : sidesOf(style);
     const outlineWidth = px(style.outlineWidth);
-    const shadows = shadowsOf(style.boxShadow);
+    const shadows = bare ? [] : shadowsOf(style.boxShadow);
 
-    const backgrounds = split(style.backgroundImage, ",").flatMap(
-      (one) => layer(one, rect.width, rect.height) ?? [],
-    );
+    const backgrounds = bare
+      ? []
+      : split(style.backgroundImage, ",").flatMap(
+          (one) => layer(one, rect.width, rect.height) ?? [],
+        );
 
-    const background = color(style.backgroundColor);
-    const clip = { x: style.overflowX !== "visible", y: style.overflowY !== "visible" };
+    const background = bare ? "rgba(0, 0, 0, 0)" : color(style.backgroundColor);
+
+    const clip = {
+      x: form?.clip === true || style.overflowX !== "visible",
+      y: form?.clip === true || style.overflowY !== "visible",
+    };
+
     const animations = animationsOf(el);
 
     const image =
@@ -736,7 +912,7 @@ export const capture = (root: Element): Snapshot => {
 
     if (part) node.part = part;
 
-    if (radii.some(([x, y]) => x > 0 || y > 0)) node.radii = radii;
+    if (!bare && radii.some(([x, y]) => x > 0 || y > 0)) node.radii = radii;
 
     // An animation of the transform needs the origin it turns about, even at a moment when the transform is none.
     const turns = animations.some(({ keyframes }) =>
@@ -784,6 +960,8 @@ export const capture = (root: Element): Snapshot => {
     if (image) node.image = image;
 
     if (svg) node.svg = svg;
+
+    if (form?.control) node.control = form.control;
 
     if (animations.length > 0) node.animations = animations;
 

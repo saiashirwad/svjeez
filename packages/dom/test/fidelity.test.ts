@@ -3,6 +3,7 @@ import { openScene } from "svjeez/frames";
 import { svg } from "svjeez/tools";
 import { film, openPage } from "../src/index.ts";
 import { serve } from "../src/bun.ts";
+import form from "./app/form.html";
 import index from "./app/index.html";
 
 /** Mean absolute difference over the page's box (the scene may be larger, sized for its biggest state), RGB, 0 to 255, measured in Chromium. */
@@ -99,6 +100,38 @@ describe("film", () => {
       }
     } finally {
       await view.close();
+    }
+  }, 60_000);
+
+  test("a login form with values, a placeholder and a checkbox matches the page in both schemes", async () => {
+    const shots: Record<"light" | "dark", Uint8Array> = {
+      light: new Uint8Array(),
+      dark: new Uint8Array(),
+    };
+
+    const scene = await film(
+      serve(form, { selector: "#app" }),
+      async ({ page, snap }) => {
+        await snap("form");
+
+        for (const scheme of ["light", "dark"] as const) {
+          await page.emulateMedia({ colorScheme: scheme });
+          shots[scheme] = await page.locator("#app").screenshot();
+        }
+      },
+      { scheme: "both", viewport: { width: 400, height: 400 }, onDiagnostics: () => {} },
+    );
+
+    const markup = svg.emit(scene);
+
+    for (const scheme of ["light", "dark"] as const) {
+      const view = await openScene(markup, { colorScheme: scheme });
+
+      try {
+        expect(await difference(shots[scheme], await view.capture(0.1))).toBeLessThan(4);
+      } finally {
+        await view.close();
+      }
     }
   }, 60_000);
 

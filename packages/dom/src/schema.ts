@@ -166,6 +166,21 @@ export interface Animation {
   readonly playState: "running" | "paused" | "finished";
 }
 
+/**
+ * What a form control draws that is not its text (which is ordinary `TextNode` children).
+ * A native checkbox or radio (`appearance` not none) has no border or background of its own in the Snapshot: compile draws the whole control.
+ */
+export type Control =
+  | {
+      readonly kind: "checkbox" | "radio";
+      readonly checked: boolean;
+      readonly indeterminate: boolean;
+      /** `accent-color`, or the browser's default blue. */
+      readonly accent: Color;
+    }
+  /** A native `<select>`: its box and selected text are captured as usual, the chevron is drawn in `color`. */
+  | { readonly kind: "select"; readonly color: Color };
+
 export interface ElementNode {
   readonly type: "element";
   readonly tag: string;
@@ -197,6 +212,7 @@ export interface ElementNode {
   readonly shadows?: readonly Shadow[];
   readonly image?: ImageContent;
   readonly svg?: SvgNode;
+  readonly control?: Control;
   readonly animations?: readonly Animation[];
   readonly children: readonly (ElementNode | TextNode)[];
 }

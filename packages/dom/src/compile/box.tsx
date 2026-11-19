@@ -4,6 +4,7 @@ import type { Common } from "svjeez/tools";
 import type { ElementNode, Rect } from "../schema.ts";
 import type { Context } from "./context.ts";
 import { BIG, add, innerRadii, inset, outline, sub, type Radii, type Vec } from "./geometry.ts";
+import { control } from "./control.tsx";
 import { image } from "./image.tsx";
 import { backgrounds, border, outlineOf, shadows, widthsOf, type Where } from "./paint.tsx";
 import { isElement, type Paired } from "./pair.ts";
@@ -121,6 +122,7 @@ export const element = (
     ...backgrounds(el.background, el.backgrounds, where, motion?.fill),
     ...(lit?.above ?? []),
     ...(el.border ? border(el.border, where) : []),
+    ...(el.control ? control(el.control, padding.box, ctx) : []),
     ...(content.length > 0 && (cut || forced)
       ? [
           <Group key="@content" clip={outline(clipBox, forced ? undefined : padding.radii)}>

@@ -272,6 +272,99 @@ describe("capture", () => {
   });
 });
 
+describe("form controls", () => {
+  const texts = (el: ElementNode) =>
+    el.children.flatMap((c) => (c.type === "text" ? c.runs.map((r) => r.text) : []));
+
+  const runs = (el: ElementNode) => el.children.flatMap((c) => (c.type === "text" ? c.runs : []));
+
+  test("an input's value is its text, inside the content box", async () => {
+    const snapshot = await snap(
+      `<input id="i" value="Ada" style="width:100px;height:30px;padding:0 8px;border:1px solid #000;box-sizing:border-box;font:16px/20px monospace">`,
+    );
+
+    const input = byId(snapshot, "i");
+    const [run] = runs(input);
+
+    expect(texts(input)).toEqual(["Ada"]);
+    expect(input.clip).toEqual({ x: true, y: true });
+    near(run?.x, input.rect.x + 1 + 8);
+    // Centered in the 28px content box: a 20px line starts 4px down, and its baseline is below that.
+    expect(run!.y).toBeGreaterThan(input.rect.y + 1 + 4);
+    expect(run!.y).toBeLessThan(input.rect.y + 1 + 4 + 20);
+    expect(run?.advances).toHaveLength(3);
+  });
+
+  test("an empty input shows its placeholder, faded by its opacity", async () => {
+    const snapshot = await snap(
+      `<style>#p::placeholder{color:rgb(100,100,100);opacity:.5}</style><input id="p" placeholder="Search" style="font:16px monospace"><input id="q" placeholder="Gone" value="x">`,
+    );
+
+    const [run] = runs(byId(snapshot, "p"));
+
+    expect(run?.text).toBe("Search");
+    expect(run?.color).toBe("rgba(100, 100, 100, 0.5)");
+    expect(texts(byId(snapshot, "q"))).toEqual(["x"]);
+  });
+
+  test("a password is bullets", async () => {
+    const snapshot = await snap(`<input id="w" type="password" value="hunter2">`);
+
+    expect(texts(byId(snapshot, "w"))).toEqual(["\u2022".repeat(7)]);
+  });
+
+  test("a textarea wraps its value into lines and keeps its scroll", async () => {
+    const snapshot = await snap(
+      `<textarea id="t" style="width:80px;height:100px;padding:4px;border:0;font:16px/20px monospace;resize:none">one two three\nfour</textarea>`,
+    );
+
+    const lines = runs(byId(snapshot, "t"));
+
+    expect(lines.length).toBeGreaterThanOrEqual(3);
+    expect(lines.map((l) => l.text).join(" ")).toBe("one two three four");
+    expect(lines[1]!.y - lines[0]!.y).toBeCloseTo(20, 0);
+    expect(lines[0]!.x).toBeCloseTo(byId(snapshot, "t").rect.x + 4, 0);
+  });
+
+  test("a select shows its selected option and a chevron", async () => {
+    const snapshot = await snap(
+      `<select id="s"><option>One</option><option selected>Two</option></select><select id="n" style="appearance:none"><option>Bare</option></select>`,
+    );
+
+    expect(texts(byId(snapshot, "s"))).toEqual(["Two"]);
+    expect(byId(snapshot, "s").control).toMatchObject({ kind: "select" });
+    expect(texts(byId(snapshot, "n"))).toEqual(["Bare"]);
+    expect(byId(snapshot, "n").control).toBeUndefined();
+  });
+
+  test("native checkboxes and radios carry their state, not their chrome", async () => {
+    const snapshot = await snap(
+      `<input id="a" type="checkbox" checked><input id="b" type="checkbox"><input id="c" type="radio" checked style="accent-color:rgb(255,0,0)"><input id="d" type="checkbox" style="appearance:none;width:16px;height:16px;border:1px solid #000">`,
+    );
+
+    const a = byId(snapshot, "a");
+
+    expect(a.control).toEqual({
+      kind: "checkbox",
+      checked: true,
+      indeterminate: false,
+      accent: "rgb(0, 117, 255)",
+    });
+
+    expect(a.border).toBeUndefined();
+    expect(a.background).toBeUndefined();
+    expect(byId(snapshot, "b").control).toMatchObject({ checked: false });
+    expect(byId(snapshot, "c").control).toMatchObject({ kind: "radio", accent: "rgb(255, 0, 0)" });
+    expect(byId(snapshot, "d").control).toBeUndefined();
+    expect(byId(snapshot, "d").border).toBeDefined();
+  });
+
+  test("the measuring mirror is removed", async () => {
+    await snap(`<input value="x">`);
+    expect(await page.evaluate(() => document.documentElement.children.length)).toBe(2);
+  });
+});
+
 describe("checkVersion", () => {
   test("accepts version 1", () => {
     expect(checkVersion({ version: 1 }).version).toBe(1);

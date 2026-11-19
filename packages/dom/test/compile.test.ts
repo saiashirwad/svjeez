@@ -12,6 +12,7 @@ import {
   type SvgNode,
 } from "../src/index.ts";
 import type { Matrix } from "../src/schema.ts";
+import { words } from "./fixtures.ts";
 import { decompose } from "../src/compile/transform.ts";
 
 const box = (props: Partial<ElementNode> = {}): ElementNode => ({
@@ -464,6 +465,94 @@ describe("images", () => {
     expect(notes(img("https://example.com/a.png"))).toEqual([
       "an <img> whose src is not a data: URL is not drawn (https://example.com/a.png)",
     ]);
+  });
+});
+
+describe("form controls", () => {
+  const control = (props: Partial<ElementNode>): ElementNode =>
+    box({ tag: "input", rect: { x: 0, y: 0, width: 13, height: 13 }, ...props });
+
+  const checkbox = (checked: boolean, indeterminate = false) =>
+    draw(
+      control({
+        control: { kind: "checkbox", checked, indeterminate, accent: "rgb(0, 117, 255)" },
+      }),
+    );
+
+  test("a checked checkbox is an accent box with a tick; an unchecked one is a white box", () => {
+    const on = checkbox(true);
+    const off = checkbox(false);
+
+    expect(on.diagnostics).toEqual([]);
+    expect(on.svg).toContain("#0075FF");
+    expect(on.svg).toContain("<polyline");
+    expect(off.svg).not.toContain("#0075FF");
+    expect(off.svg).not.toContain("<polyline");
+  });
+
+  test("an indeterminate checkbox is a dash, not a tick", () => {
+    const dash = checkbox(false, true).svg;
+
+    expect(dash).toContain("#0075FF");
+    expect(dash).toContain("<line");
+    expect(dash).not.toContain("<polyline");
+  });
+
+  test("a radio is a circle, with a dot when checked", () => {
+    const radio = (checked: boolean) =>
+      draw(
+        control({
+          control: { kind: "radio", checked, indeterminate: false, accent: "rgb(255, 0, 0)" },
+        }),
+      ).svg;
+
+    expect(radio(false)).toContain("<circle");
+    expect(radio(false).match(/<circle/g)).toHaveLength(1);
+    expect(radio(true).match(/<circle/g)).toHaveLength(2);
+    expect(radio(true)).toContain("#FF0000");
+  });
+
+  test("an accent that differs by scheme becomes a theme token", () => {
+    const out = draw(
+      control({
+        control: {
+          kind: "checkbox",
+          checked: true,
+          indeterminate: false,
+          accent: { light: "rgb(0, 117, 255)", dark: "rgb(153, 200, 255)" },
+        },
+      }),
+    );
+
+    expect(out.svg).toContain("var(");
+  });
+
+  test("a select's chevron is drawn in its text color", () => {
+    const out = draw(
+      control({
+        tag: "select",
+        rect: { x: 0, y: 0, width: 100, height: 30 },
+        control: { kind: "select", color: "rgb(255, 0, 0)" },
+        children: [words("Two", 4, 20)],
+      }),
+    );
+
+    expect(out.svg).toContain("<polyline");
+    expect(out.svg).toContain("#FF0000");
+    expect(out.svg).toContain("Two");
+  });
+
+  test("the text of a control is ordinary text, clipped to the control", () => {
+    const out = draw(
+      control({
+        rect: { x: 0, y: 0, width: 100, height: 30 },
+        clip: { x: true, y: true },
+        children: [words("Search", 8, 20)],
+      }),
+    );
+
+    expect(out.svg).toContain("Search");
+    expect(out.svg).toContain("clip");
   });
 });
 
