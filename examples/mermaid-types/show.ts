@@ -8,7 +8,8 @@ export const show = (title: string, text: string) => {
   const chart = mermaid(text, {
     font: mono,
     textSize: 13,
-    reveal: span(0.3, 0.3),
+    // state diagrams animate through walk(), not reveal
+    ...(/^\s*stateDiagram/.test(text) ? {} : { reveal: span(0.3, 0.3) }),
     colors: {
       background: theme.background,
       text: theme.text,

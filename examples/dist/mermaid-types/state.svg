@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 735 217" width="735" height="217" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">State diagram</title>
+  <desc id="d">A Mermaid state diagram drawn by @svjeez/mermaid.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--border-8-background:#121315}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0;--border-8-background:#F6F6F6}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+]]></style>
+  <rect width="735" height="217" fill="var(--background)"/>
+  <g transform="translate(31.725 32.5)">
+    <g transform="translate(62 35.973)">
+      <rect width="62.4" height="36" rx="8" fill="var(--border-8-background)" stroke="var(--border)"/>
+      <text x="15.6" y="22.68" font-size="13" fill="var(--text)">Idle</text>
+    </g>
+    <g transform="translate(282.7 35.98)">
+      <rect width="85.8" height="36" rx="8" fill="var(--border-8-background)" stroke="var(--border)"/>
+      <text x="15.6" y="22.68" font-size="13" fill="var(--text)">Loading</text>
+    </g>
+    <g transform="translate(530.7 0)">
+      <rect width="70.2" height="36" rx="8" fill="var(--border-8-background)" stroke="var(--border)"/>
+      <text x="15.6" y="22.68" font-size="13" fill="var(--text)">Ready</text>
+    </g>
+    <g transform="translate(526.8 72)">
+      <rect width="78" height="36" rx="8" fill="var(--border-8-background)" stroke="var(--border)"/>
+      <text x="15.6" y="22.68" font-size="13" fill="var(--text)">Failed</text>
+    </g>
+    <path d="M14 53.97L55 53.97" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <polygon points="62 53.97 54 57.97 54 49.97" fill="var(--border)"/>
+    <path d="M124.4 53.98L275.7 53.98" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <polygon points="282.7 53.98 274.7 57.98 274.7 49.98" fill="var(--border)"/>
+    <path d="M368.5 45.98L374.5 45.98C419.85 45.98 447.65 40.66 447.65 31.99C447.65 23.32 474.27 18 517.7 18L523.7 18" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <polygon points="530.7 18 522.7 22 522.7 14" fill="var(--border)"/>
+    <path d="M368.5 61.98L374.5 61.98C419.85 61.98 447.65 67.3 447.65 75.99C447.65 84.68 472.79 90 513.8 90L519.8 90" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <polygon points="526.8 90 518.8 94 518.8 86" fill="var(--border)"/>
+    <path d="M565.8 108L565.8 114C565.8 132.6 520.16 144 445.7 144C371.24 144 325.6 121.57 325.6 84.98L325.6 78.98" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <polygon points="325.6 71.98 329.6 79.98 321.6 79.98" fill="var(--border)"/>
+    <path d="M600.9 18L645.8 18" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <polygon points="652.8 18 644.8 22 644.8 14" fill="var(--border)"/>
+    <circle cx="7" cy="53.973" r="7" fill="var(--text)"/>
+    <g transform="translate(661.8 18)">
+      <circle r="9" fill="none" stroke="var(--text)" stroke-width="1.5"/>
+      <circle r="5" fill="var(--text)"/>
+    </g>
+    <rect x="181.98" y="45.48" width="43.15" height="17" rx="3" fill="var(--background)"/>
+    <text x="186.98" y="57.958" font-size="11.05" fill="var(--text)">fetch</text>
+    <rect x="477.55" y="9.5" width="23.26" height="17" rx="3" fill="var(--background)"/>
+    <text x="482.55" y="21.978" font-size="11.05" fill="var(--text)">ok</text>
+    <rect x="386.5" y="53.48" width="43.15" height="17" rx="3" fill="var(--background)"/>
+    <text x="391.5" y="65.958" font-size="11.05" fill="var(--text)">error</text>
+    <rect x="424.13" y="135.5" width="43.15" height="17" rx="3" fill="var(--background)"/>
+    <text x="429.13" y="147.978" font-size="11.05" fill="var(--text)">retry</text>
+  </g>
+</svg>
