@@ -118,6 +118,8 @@ export interface OpenPageOptions {
   readonly onError?: (message: string) => void;
 }
 
+const ASSETS = new Set(["stylesheet", "script", "font", "image", "media"]);
+
 /** Headless Chromium on `url`. Call `close()` when you are done. */
 export const openPage = async ({
   url,
@@ -150,6 +152,16 @@ export const openPage = async ({
   if (onError) {
     page.on("pageerror", (error) => onError(error.message));
     page.on("console", (message) => message.type() === "error" && onError(message.text()));
+    // A dev server answers a path it does not serve with its HTML page, status 200: the asset silently never arrives.
+    page.on("response", (response) => {
+      const kind = response.request().resourceType();
+      const type = response.headers()["content-type"] ?? "";
+
+      if (ASSETS.has(kind) && type.includes("text/html"))
+        onError(
+          `${kind} ${response.url()} came back as ${type.split(";")[0]} instead of a ${kind}: the server has no such file (or does not serve it from there).`,
+        );
+    });
   }
 
   try {

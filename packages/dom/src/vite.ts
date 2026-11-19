@@ -2,7 +2,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash, randomUUID } from "node:crypto";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import type { InlineConfig, Plugin, RunnableDevEnvironment, ViteDevServer } from "vite";
 import {
   entryModule,
@@ -33,6 +33,26 @@ export interface ServeOptions {
 }
 
 const REFERENCE = /\b(?:src|href)="(\/?[^":#]+\.(?:[mc]?[jt]sx?|css))"/g;
+
+const ATTRIBUTE = /\b(src|href)="(\.\.?\/[^":#?]+)"/g;
+
+/**
+ * The entry HTML's relative `src`/`href` that point outside the Vite root. A browser resolves `../theme.css` against the
+ * page URL, which cannot climb above `/`, so Vite answers `/theme.css` with its HTML fallback. Vite serves such files
+ * under `/@fs/<absolute path>` (if `server.fs.allow` lets it); the entry HTML is rewritten to say so.
+ */
+export const outsideRoot = (html: string, entryDir: string, root: string): Map<string, string> => {
+  const found = new Map<string, string>();
+
+  for (const [, , reference] of html.matchAll(ATTRIBUTE)) {
+    const file = resolve(entryDir, reference!);
+    const out = relative(root, file);
+
+    if (out.startsWith("..") || isAbsolute(out)) found.set(reference!, file);
+  }
+
+  return found;
+};
 
 const inProject = (file: string | null | undefined): file is string =>
   Boolean(file) && !file!.includes("/node_modules/");
@@ -124,26 +144,61 @@ export const serve = async ({
   config,
   entry = "index.html",
 }: ServeOptions): Promise<Target> => {
-  const { createServer } = await import("vite").catch(() => {
+  const { createServer, searchForWorkspaceRoot } = await import("vite").catch(() => {
     throw new Error("serve from @svjeez/dom/vite needs vite. Install it with `npm i -D vite`.");
   });
 
   const film = hosts.getStore()?.film;
   const cacheDir = await privateCache(config);
+  const html = await readFile(join(root, entry), "utf8");
+  const outside = outsideRoot(html, dirname(join(root, entry)), root);
+  const fsUrl = (file: string) => `/@fs${file}`;
+
+  // Files the entry HTML links from outside the root must be servable: keep Vite's own allow-list and add their folders.
+  const allow = [
+    ...(config?.server?.fs?.allow ?? [searchForWorkspaceRoot(root)]),
+    ...[...outside.values()].map((file) => dirname(file)),
+  ];
+
+  const links: Plugin = {
+    name: "svjeez-dom-links",
+    transformIndexHtml: {
+      order: "pre",
+      handler: (page) =>
+        page.replace(ATTRIBUTE, (all, attribute: string, reference: string) => {
+          const file = outside.get(reference);
+
+          return file ? `${attribute}="${fsUrl(file)}"` : all;
+        }),
+    },
+  };
 
   const server: ViteDevServer = await createServer({
     root,
     logLevel: "warn",
     ...(cacheDir && { cacheDir }),
     ...config,
-    server: { ...config?.server, port: 0, strictPort: true, hmr: false, watch: null },
+    plugins: [...(config?.plugins ?? []), links],
+    server: {
+      ...config?.server,
+      port: 0,
+      strictPort: true,
+      hmr: false,
+      watch: null,
+      fs: { ...config?.server?.fs, allow },
+    },
   });
 
   try {
     const origin = await listen(server);
-    const html = await readFile(join(root, entry), "utf8");
     const title = /<title>([^<]*)<\/title>/i.exec(html)?.[1]?.trim();
-    const references = [...html.matchAll(REFERENCE)].map(([, reference]) => reference!);
+
+    const references = [...html.matchAll(REFERENCE)].map(([, reference]) => {
+      const file = outside.get(reference!);
+
+      return file ? fsUrl(file) : reference!;
+    });
+
     const files = await crawl(server, references);
 
     files.add(join(root, entry));

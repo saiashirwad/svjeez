@@ -1,4 +1,3 @@
-import "../dom-react/theme.css";
 import { createRoot } from "react-dom/client";
 import Board from "../dom-react/Board.tsx";
 

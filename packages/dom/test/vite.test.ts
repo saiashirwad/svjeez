@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { svg } from "svjeez/tools";
 import { film } from "../src/index.ts";
@@ -51,4 +51,37 @@ test("titleFromFile names the film file, or the folder of an index", () => {
   expect(titleFromFile("/a/board.film.tsx")).toBe("board");
   expect(titleFromFile("/a/sprint/index.tsx")).toBe("sprint");
   expect(titleFromFile(undefined)).toBe("Untitled");
+});
+
+describe("assets outside the Vite root", () => {
+  const outside = join(import.meta.dir, "outside");
+
+  test("a <link> to a file outside the root is served, not answered with HTML", async () => {
+    let brand = "";
+
+    await film(
+      serve({ root: join(outside, "app"), selector: "#app" }),
+      async ({ page, snap }) => {
+        brand = await page.evaluate(() =>
+          getComputedStyle(document.documentElement).getPropertyValue("--brand").trim(),
+        );
+        await snap("a");
+      },
+      { onDiagnostics: () => {} },
+    );
+
+    expect(brand).toBe("#123456");
+  }, 60_000);
+
+  test("a stylesheet the server answers with HTML fails loudly, naming the URL", async () => {
+    await expect(
+      film(
+        serve({ root: join(outside, "missing"), selector: "#app" }),
+        async ({ snap }) => void (await snap("a")),
+        {
+          onDiagnostics: () => {},
+        },
+      ),
+    ).rejects.toThrow(/stylesheet http:\/\/localhost:\d+\/nope\.css\?v=1 came back as text\/html/);
+  }, 60_000);
 });
