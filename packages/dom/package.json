@@ -14,7 +14,10 @@
   "exports": {
     ".": "./src/index.ts",
     "./bun": "./src/bun.ts",
-    "./vite": "./src/vite.ts"
+    "./bun/preload": "./src/bun-preload.ts",
+    "./vite": "./src/vite.ts",
+    "./react": "./src/frameworks/react.ts",
+    "./svelte": "./src/frameworks/svelte.ts"
   },
   "scripts": {
     "test": "bun test --conditions @svjeez/source",
