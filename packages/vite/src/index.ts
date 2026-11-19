@@ -100,6 +100,7 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
         devServer.watcher.add(dependency);
         feeds.set(dependency, (feeds.get(dependency) ?? new Set()).add(id));
       }
+
       const { src, width, height, title, desc, svg, posters } = image;
       // Server code (SSR, an Astro page) also gets the markup; a browser bundle gets the URL alone.
       const server = this.environment.config.consumer === "server";
