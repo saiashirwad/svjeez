@@ -1,160 +1,95 @@
 # svjeez
 
-Code animated graphics in TypeScript. Ship a single `.svg` with no JavaScript.
+svjeez is a TypeScript library for making animated SVGs. You write a scene in JSX and compile it to a single `.svg` file with no JavaScript. Motion runs through CSS `@keyframes`, and SMIL when a scene animates geometry, filters, or gradients.
 
-<a href="https://svjeez.texoport.in/intro"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/hype.svg" width="840" alt="Blip introduces a reel of animated code, diagrams, math and maps." /></a>
+Because the output is a plain SVG, it works anywhere an image does: an `<img>` tag, a docs site, or a GitHub README.
 
-[Website](https://svjeez.texoport.in) · [Gallery](https://svjeez.texoport.in/examples/) · [One-minute intro](https://svjeez.texoport.in/intro) · [npm](https://www.npmjs.com/package/svjeez)
+![A mechanical watch escapement in slow motion](examples/dist/escapement.svg)
 
-`svjeez` compiles JSX scenes into self-contained SVGs animated with CSS and SMIL—with dark mode, `prefers-reduced-motion` still frames, and subsetted fonts built in. Because there is no script in the output, they play anywhere an `<img>` works: GitHub READMEs, PR descriptions, docs, and emails.
+## A first scene
 
-<table>
-  <tr>
-    <td align="center" width="50%">
-      <a href="https://github.com/saiashirwad/svjeez/blob/next/examples/code/index.tsx">
-        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/next/examples/dist/code.svg" width="400" alt="Code morphing between TypeScript, Python, Rust, and Go." />
-      </a><br />
-      <sub><strong>Morphing code</strong> · 18 KB · 0 JS (<a href="https://github.com/saiashirwad/svjeez/blob/next/examples/code/index.tsx">source</a>)</sub>
-    </td>
-    <td align="center" width="50%">
-      <a href="https://github.com/saiashirwad/svjeez/blob/next/examples/math/index.tsx">
-        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/next/examples/dist/math.svg" width="400" alt="TeX equation morphing with a measured brace and plotted curve." />
-      </a><br />
-      <sub><strong>TeX morph &amp; plots</strong> · 25 KB · 0 JS (<a href="https://github.com/saiashirwad/svjeez/blob/next/examples/math/index.tsx">source</a>)</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="50%">
-      <a href="https://github.com/saiashirwad/svjeez/blob/next/examples/layout/index.tsx">
-        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/next/examples/dist/layout.svg" width="400" alt="Three laid-out cards with arrows that follow a moving card." />
-      </a><br />
-      <sub><strong>Layout &amp; moving anchors</strong> · 18 KB · 0 JS (<a href="https://github.com/saiashirwad/svjeez/blob/next/examples/layout/index.tsx">source</a>)</sub>
-    </td>
-    <td align="center" width="50%">
-      <a href="https://github.com/saiashirwad/svjeez/blob/next/examples/epicycles/index.tsx">
-        <img src="https://raw.githubusercontent.com/saiashirwad/svjeez/next/examples/dist/epicycles.svg" width="400" alt="Fourier epicycles tracing a pi glyph extracted from a Google Font." />
-      </a><br />
-      <sub><strong>Fourier epicycles</strong> · 45 KB · 0 JS (<a href="https://github.com/saiashirwad/svjeez/blob/next/examples/epicycles/index.tsx">source</a>)</sub>
-    </td>
-  </tr>
-</table>
-
-<sub>Every image above is a live, script-free SVG that adapts to your light or dark theme automatically.</sub>
-
-## Example
-
-No hardcoded coordinates. `tokens()` handles light/dark colors, `<Align>` and `<Stack>` settle layout, and `ref()` keeps the `<Arrow>` attached even after the circle springs up and back:
+A scene file default-exports `scene(options, (canvas) => ...)`:
 
 ```tsx
-import {
-  Align, Arrow, Group, Shape, Stack,
-  circle, ease, enter, rect, ref, scene, span, tokens, track, type Vec,
-} from "svjeez";
+import { Group, Shape, circle, ease, enter, path, scene, span, track } from "svjeez";
 
-const theme = tokens({
-  light: { bg: "#FFFFFF", from: "#E11D74", to: "#0D9488", line: "#64748B" },
-  dark: { bg: "#0F172A", from: "#FF5FA8", to: "#3EE6D6", line: "#94A3B8" },
-});
-
-export default scene({ size: [300, 120], duration: 3, loop: false, theme, title: "Flow" }, (canvas) => {
-  const from = ref();
-  const to = ref();
-  const drift = track<Vec>([0, 0])
-    .to([0, -18], span(1.4, 0.8), ease.spring())
-    .to([0, 0], span(2.3, 0.5));
-
-  return (
+export default scene(
+  {
+    size: [200, 120],
+    duration: 4,
+    title: "Hello",
+    desc: "A curve draws itself, then a dot pops in above it.",
+    still: 3,
+    loop: false,
+  },
+  (canvas) => (
     <Group>
-      <Shape geometry={canvas.rect} fill={theme.bg} />
-      <Align>
-        <Stack direction="row" gap={72} align="center">
-          <Shape
-            ref={from}
-            geometry={rect(56, 40, { radius: 8 })}
-            fill={theme.from}
-            motion={enter(span(0.1, 0.4), { from: { scale: 0.8, opacity: 0 }, curve: ease.pop })}
-          />
-          <Shape
-            ref={to}
-            geometry={circle(20)}
-            fill={theme.to}
-            motion={[
-              enter(span(0.3, 0.4), { from: { scale: 0.8, opacity: 0 }, curve: ease.pop }),
-              { offset: drift },
-            ]}
-          />
-        </Stack>
-      </Align>
-      <Arrow
-        from={from.right}
-        to={to.left}
-        inset={8}
-        stroke={{ color: theme.line, width: 3 }}
-        draw={track(0).to(1, span(0.75, 0.5))}
+      <Shape geometry={canvas.rect} fill="#18181b" />
+      <Shape
+        geometry={path().moveTo([20, 100]).curveTo([60, 20], [140, 20], [180, 100])}
+        stroke={{ color: "#FF5FA8", width: 4 }}
+        draw={track(0).to(1, span(0.2, 1.2))}
+      />
+      <Shape
+        geometry={circle(8)}
+        at={[100, 40]}
+        anchor="center"
+        fill="#3EE6D6"
+        motion={enter(span(1.2, 0.5), { from: { scale: 0 }, curve: ease.pop })}
       />
     </Group>
-  );
-});
+  ),
+);
 ```
+
+Compiled to SVG, that gives you a file of about 1 KB:
+
+![A curve draws itself, then a dot pops in above it](examples/dist/readme/basic.svg)
+
+Install with npm or Bun (Node 20+; `.tsx` scenes use `tsx` on Node) and build from the command line:
 
 ```sh
-npx svjeez dev scene.tsx                 # Live preview with scrubber and timeline
-npx svjeez check scene.tsx               # Lint layout, contrast, timing, and cost
-npx svjeez svg scene.tsx --out flow.svg  # Standalone SVG, no JS
+npm install svjeez
+npx svjeez svg scene.tsx --out scene.svg
 ```
 
-## What makes it different
+While editing, `svjeez dev scene.tsx` opens a local preview with a timeline scrubber that rebuilds on save. The CLI also includes `check` for linting and `frames` for PNG stills.
 
-- **Web-native `.svg` output.** CSS keyframes by default (SMIL only for paths, gradients, and filters), with automatic dark mode (`tokens()`), `prefers-reduced-motion` still frames, accessible `title`/`desc`, and pure-TS font subsetting.
-- **Layout & moving anchors.** `<Stack>`, `<Grid>`, `<Center>`, and `<Align>` settle at compile time; `ref()` keeps arrows and tracks attached even as nodes move or rotate.
-- **Composable motion & `morph()`.** Immutable `track()` timelines, analytical `ease.spring()` curves fitted to compact Beziers, and JSX-keyed `morph()` across shapes, layouts, code, and math.
-- **Browserless scene linting.** `svjeez check` catches overlaps, clipping, low contrast, loop seams, and repaint cost with `file:line:col` and `fix:` hints—plus `--browser`, `--json`, `frames --sheet`, and `svjeez skill --install` for agent workflows.
+You don't have to draw everything by hand, either. `@svjeez/dom` opens a real web app in Playwright, lets you click through it and take snapshots, and gives you back a scene where the UI animates between them. A React kanban board becomes a small SVG of a card moving across columns.
 
-## Packages
+## How scenes work
 
-Every package runs at compile time, so the output stays script-free. Install companion packages with `@next`.
+Scenes are built from components (`Group`, `Shape`, `Text`, and layout helpers) rather than raw SVG tags. Shapes take geometry along with fills, strokes, gradients, shadows, and blurs.
 
-| Package | What it adds |
-| --- | --- |
-| [`svjeez`](https://github.com/saiashirwad/svjeez/tree/next/packages/svjeez) | Core runtime, layout, motion, `morph()`, font subsetting, typed `params`, CLI, and optional `svjeez/page` scroll/seek helpers |
-| [`@svjeez/diagrams`](https://github.com/saiashirwad/svjeez/tree/next/packages/diagrams), [`@svjeez/mermaid`](https://github.com/saiashirwad/svjeez/tree/next/packages/mermaid) | Auto-laid-out flowcharts, sequence, state machines (`.walk()`), trees, swimlanes, and Mermaid input with full animation handles |
-| [`@svjeez/code`](https://github.com/saiashirwad/svjeez/tree/next/packages/code), [`@svjeez/math`](https://github.com/saiashirwad/svjeez/tree/next/packages/math) | Zero-WASM Shiki typing & keyed `morph()`; MathJax TeX glyph morphing, `\cssId` anchors, plots, constructions, and plane warps |
-| [`@svjeez/charts`](https://github.com/saiashirwad/svjeez/tree/next/packages/charts), [`@svjeez/geo`](https://github.com/saiashirwad/svjeez/tree/next/packages/geo) | d3-scaled bar/line/area charts with custom plot annotations; GeoJSON/TopoJSON maps and turning 3D globes with day/night shading |
-| [`@svjeez/fonts`](https://github.com/saiashirwad/svjeez/tree/next/packages/fonts), [`@svjeez/icons`](https://github.com/saiashirwad/svjeez/tree/next/packages/icons) | Cached Google Fonts fetcher; tree-shakeable Lucide and Tabler `<Icon>` nodes with per-stroke `draw` |
-| [`@svjeez/vite`](https://github.com/saiashirwad/svjeez/tree/next/packages/vite), [`@svjeez/astro`](https://github.com/saiashirwad/svjeez/tree/next/packages/astro), [`@svjeez/video`](https://github.com/saiashirwad/svjeez/tree/next/packages/video) | Zero-JS `?svjeez` / `<Scene>` imports with light/dark WebP posters; MP4 and transparent WebM export |
+Time is explicit and measured in scene seconds. A `span(start, duration)` names a window of time, and a `track(initial)` animates a prop across spans: position, rotation, scale, opacity, color, or a stroke's `draw` progress.
 
-## Quickstart
+Tracks take easing curves, real springs, and loops. If you give elements a `key`, `morph(before, after, span)` animates from one version of a scene to another, so a bar chart can grow, recolor and reorder without you tweening each bar.
 
-Requires Node 20+ (or Bun):
+## What the SVG handles
 
-```sh
-npm init -y && npm pkg set type=module
-npm install svjeez@next
-npm install -D tsx typescript
-```
+- Motion loops by default and freezes on a chosen still frame when `prefers-reduced-motion` is set.
+- Light and dark themes share one file through `prefers-color-scheme` and CSS custom properties.
+- Text stays real `<text>` with a subset of the font embedded in the file.
+- Each SVG includes `role="img"`, `<title>`, and `<desc>` from the scene options.
+- Output is deterministic: time is explicit and randomness is seeded, so the same scene always produces the same file.
 
-Add to `tsconfig.json`:
+Small scenes like the one above come out to 1 or 2 KB; larger scenes are typically 10 to 55 KB.
 
-```json
-{
-  "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "jsx": "react-jsx",
-    "jsxImportSource": "svjeez",
-    "strict": true
-  }
-}
-```
+## Add-on packages
 
-Run `npx svjeez dev scene.tsx` to preview, `npx svjeez check scene.tsx` to lint, and `npx svjeez svg scene.tsx --out out.svg` to build. With Bun, use `bun add svjeez@next` and `bunx --bun svjeez`.
+Optional `@svjeez/*` packages sit on top of the core library:
 
-For Chromium pixel checks (`--browser`), PNG contact sheets (`frames --sheet`), or video (`video`, also needs `@svjeez/video@next`), install Playwright once:
+- `@svjeez/charts`: animated bar, line, and area charts.
+- `@svjeez/code`: syntax-highlighted code blocks that type in and morph between versions.
+- `@svjeez/diagrams` and `@svjeez/mermaid`: animated flowcharts, sequence diagrams, state machines, and Mermaid input.
+- `@svjeez/math`: build-time TeX formulas, plots, and geometric constructions.
+- `@svjeez/icons`: Tabler and Lucide icons that draw stroke by stroke.
+- `@svjeez/fonts`: loads Google Fonts and caches them on disk.
+- `@svjeez/geo`: maps and turning globes from GeoJSON or TopoJSON.
+- `@svjeez/dom`: captures a live web app with Playwright and animates between states.
+- `@svjeez/vite` and `@svjeez/astro`: Vite imports and an Astro `<Scene>` component.
+- `@svjeez/video`: MP4 and WebM export.
 
-```sh
-npm install -D playwright-core && npx playwright-core install chromium-headless-shell
-```
+## License
 
-## Contributing
-
-Run `bun install` at the root, then `bun run typecheck` and `bun run test`. See [AGENTS.md](https://github.com/saiashirwad/svjeez/blob/next/AGENTS.md) and [UPGRADING.md](https://github.com/saiashirwad/svjeez/blob/next/UPGRADING.md).
+svjeez is pre-1.0 (currently 0.8) and licensed under MIT.
