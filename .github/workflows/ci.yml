@@ -9,8 +9,14 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# Jobs that launch a browser run in Playwright's image, which ships the browsers and their system packages. On a bare runner
+# those are an apt install from a mirror that is sometimes slow enough to stall a job for minutes.
+# The image version must match the playwright-core in bun.lock, since each release pins its own browser builds.
+# In it, setup-bun can't run (it needs unzip), so bun comes from npm, and HOME is /root because Firefox won't run as root with
+# a HOME owned by another user, which is how Actions starts the container.
+
 jobs:
-  test:
+  check:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -19,15 +25,18 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run lint
       - run: bun run format:check
-      # Browser builds are pinned by the lockfile, so cache them across runs. --with-deps still installs the system packages.
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-      # The locked playwright-core, since bunx fetches the latest and its Chromium build isn't the one the tests launch.
-      - run: bun run playwright-core install --with-deps chromium-headless-shell
-        working-directory: packages/svjeez
       - run: bun run typecheck
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container: mcr.microsoft.com/playwright:v1.64.1-noble
+    env:
+      HOME: /root
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --global bun
+      - run: bun install --frozen-lockfile
       - run: bun run test
       - run: npm pack --dry-run
         working-directory: packages/svjeez
@@ -52,80 +61,60 @@ jobs:
   browsers:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # Playwright's image ships the browsers and their system packages, which on a bare runner are a slow ~140 MB apt install.
-    # Its version must match the playwright-core in bun.lock, since each release pins its own browser builds.
     container: mcr.microsoft.com/playwright:v1.64.1-noble
-    # Firefox won't run as root with a HOME owned by another user, which is how Actions starts the container.
     env:
       HOME: /root
     steps:
       - uses: actions/checkout@v4
-      # setup-bun needs unzip, which the image lacks; it does have npm.
       - run: npm install --global bun
       - run: bun install --frozen-lockfile
       - run: bun run test:browsers
         working-directory: examples
 
+  # The core package on every supported Node: its tests, the examples, and the packed CLI and entry points.
   node:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    container: mcr.microsoft.com/playwright:v1.64.1-noble
+    env:
+      HOME: /root
     strategy:
       matrix:
         node: [20, 22]
     steps:
       - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - run: npm install --global bun
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - run: bun install --frozen-lockfile
       - run: node --version
-      # Browser builds are pinned by the lockfile, so cache them across runs. --with-deps still installs the system packages.
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-      # The locked playwright-core, since bunx fetches the latest and its Chromium build isn't the one the tests launch.
-      - run: bun run playwright-core install --with-deps chromium-headless-shell
-        working-directory: packages/svjeez
       - run: npm run test:node
         working-directory: packages/svjeez
       - run: npm run test:node
         working-directory: examples
       - run: npm run test:package
         working-directory: packages/svjeez
-      # The add-on package checks don't depend on the Node version, so they run once, on 22. Node 20 keeps the core package's
-      # check, which runs the packed CLI and imports every entry point. Astro 7 needs Node 22 anyway.
-      - run: npm run test:package
-        if: matrix.node != 20
-        working-directory: packages/fonts
-      - run: npm run test:package
-        if: matrix.node != 20
-        working-directory: packages/icons
-      - run: npm run test:package
-        if: matrix.node != 20
-        working-directory: packages/charts
-      - run: npm run test:package
-        if: matrix.node != 20
-        working-directory: packages/code
-      - run: npm run test:package
-        if: matrix.node != 20
-        working-directory: packages/geo
-      - run: npm run test:package
-        if: matrix.node != 20
-        working-directory: packages/math
-      - run: npm run test:package
-        if: matrix.node != 20
-        working-directory: packages/diagrams
-      - run: npm run test:package
-        if: matrix.node != 20
-        working-directory: packages/mermaid
-      - run: npm run test:package
-        if: matrix.node != 20
-        working-directory: packages/vite
-      - run: npm run test:package
-        if: matrix.node != 20
-        working-directory: packages/video
-      - run: npm run test:package
-        if: matrix.node != 20
-        working-directory: packages/astro
+
+  # The add-on packages' packed checks don't depend on the Node version, so they run once, on 22 (Astro 7 needs it),
+  # split in two so they finish alongside the other jobs.
+  packages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container: mcr.microsoft.com/playwright:v1.64.1-noble
+    env:
+      HOME: /root
+    strategy:
+      matrix:
+        packages:
+          - fonts icons charts code geo math
+          - diagrams mermaid vite video astro
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --global bun
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: bun install --frozen-lockfile
+      - name: npm run test:package in ${{ matrix.packages }}
+        run: for p in ${{ matrix.packages }}; do (cd "packages/$p" && npm run test:package) || exit 1; done
