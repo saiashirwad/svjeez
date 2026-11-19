@@ -117,13 +117,13 @@ It works with Playwright, Puppeteer or raw CDP `Runtime.evaluate`. Do not pass `
 
 `::before` and `::after` become synthetic element nodes (tag `::before`/`::after`, `part` of the same name so they pair across states) before and after the real children, with their `content` text, `attr()`, `url()` and quotes resolved. An empty, absolutely positioned one in a host that is its containing block is read from the host's padding box. Any other is measured through a temporary `<span>` (or `<img>`) wearing its computed style, inserted after the real children are captured, while the pseudo-element is switched off by an adopted stylesheet; everything is removed afterwards. While it is there the host has one extra child, so `:first-child`, `:last-child` or `:empty` rules on real children may restyle them and nudge the pseudo-element. `counter()` content draws nothing, and replaced elements, `display: none` and `content: none` have no pseudo-element. Animations on a pseudo-element ride on its node.
 
-Capture reads the page as it renders now. Running animations and transitions are captured mid-flight: the layout shows that moment, and `animations` carries the keyframes and `currentTime`.
+Capture reads the page as it renders now. Running animations and transitions are captured mid-flight: the layout shows that moment, and `animations` carries the keyframes and `currentTime`. Each element with animations also gets `base`: what its animated properties compute to without them, which is what they return to when an animation ends or has not started. Capture reads it synchronously: each effect is pushed past its start with `fill: none`, the style is read, and the effect's timing is put back, so no frame renders and the animations keep their time, state and rate.
 
 Capture never drops CSS silently. Anything it cannot represent is a short phrase in the element's `notes` (`conic-gradient() is not drawn`, `a 3D transform is flattened to 2D`, `filter is not drawn`, `<canvas> is not drawn`, an open shadow root, `::before counter() content is not drawn`, ...), and `compile` forwards each as a diagnostic. Closed shadow roots cannot be seen from the page, so they are not noted.
 
 ## Snapshot
 
-`{ version: 1, viewport, root }`. Every node is an element (`rect`, `radii`, `transform`, `opacity`, `clip`, `background`, `backgrounds`, `border`, `outline`, `shadows`, `image`, `svg`, `animations`, `notes`, `children`) or a text node of `runs`. Rects are the border box in page px before the element's own transform; each ancestor's transform composes on top. See `src/schema.ts`.
+`{ version: 1, viewport, root }`. Every node is an element (`rect`, `radii`, `transform`, `opacity`, `clip`, `background`, `backgrounds`, `border`, `outline`, `shadows`, `image`, `svg`, `animations`, `base`, `notes`, `children`) or a text node of `runs`. Rects are the border box in page px before the element's own transform; each ancestor's transform composes on top. See `src/schema.ts`.
 
 `checkVersion` throws on a Snapshot from another version. Snapshots are not migrated: capture again.
 

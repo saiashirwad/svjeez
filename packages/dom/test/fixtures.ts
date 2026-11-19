@@ -1,3 +1,4 @@
+import { valueAt, type Model } from "svjeez/tools";
 import type { ElementNode, Snapshot, TextNode } from "../src/index.ts";
 
 export const box = (props: Partial<ElementNode> = {}): ElementNode => ({
@@ -34,3 +35,29 @@ export const words = (text: string, x = 0, y = 12): TextNode => ({
     },
   ],
 });
+
+/** The solid background of the element at `path` (`app/b`), as `#rrggbb`, at scene time `t`, holding each lane's value until its next. */
+export const backgroundAt = (model: Model.Scene, path: string, t: number): string => {
+  const [head, ...rest] = path.split("/");
+
+  const lane = model.root.children
+    .flatMap(function walk(node: Model.SceneNode): Model.SceneNode[] {
+      return [node, ...("children" in node ? node.children.flatMap(walk) : [])];
+    })
+    .find((node) => node.key === `${head}/@track/${rest.join("/@track/")}/@track/background`);
+
+  if (lane?.kind !== "shape") throw new Error(`no background for ${path}`);
+
+  const fill = valueAt(lane.fill, t, (a) => a);
+
+  if (!Array.isArray(fill)) throw new Error(`the background of ${path} is not a plain color`);
+
+  return `#${fill
+    .slice(0, 3)
+    .map((c: number) =>
+      Math.round(c * 255)
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("")}`;
+};

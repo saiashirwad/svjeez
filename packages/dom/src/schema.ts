@@ -214,6 +214,11 @@ export interface ElementNode {
   readonly svg?: SvgNode;
   readonly control?: Control;
   readonly animations?: readonly Animation[];
+  /**
+   * What the animated properties compute to with the animations not in effect, by their JS name: the values they return to
+   * when an animation ends or has not started, and fill the keyframes it leaves out.
+   */
+  readonly base?: Readonly<Record<string, string>>;
   /** CSS on this element that capture could not represent, one short phrase each. Compile forwards them as diagnostics. */
   readonly notes?: readonly string[];
   readonly children: readonly (ElementNode | TextNode)[];

@@ -3,6 +3,7 @@ import { chromium, type Browser, type Page } from "playwright-core";
 import { scene } from "svjeez";
 import { placements } from "svjeez/tools";
 import { captureScript, compile, record, type Snapshot } from "../src/index.ts";
+import { backgroundAt } from "./fixtures.ts";
 
 const HTML = `<!doctype html>
 <style>
@@ -89,6 +90,56 @@ describe("animations on a real page", () => {
       expect(at(t, moveKey).box.x).toBeCloseTo(10 + 120 * progress, 0);
     }
   }, 60_000);
+  test("a color animated mid-flight returns to its base once the animation ends, and a transition ends on its target", async () => {
+    const page = await browser.newPage({ viewport: { width: 300, height: 120 } });
+
+    await page.setContent(`<!doctype html>
+<style>
+  html, body { margin: 0 }
+  @keyframes tint { from { background-color: rgb(255, 0, 0) } to { background-color: rgb(0, 0, 255) } }
+  .box { position: absolute; top: 10px; width: 40px; height: 40px; background: rgb(0, 128, 0) }
+  #tint { left: 10px; animation: tint 2s linear }
+  #fade { left: 100px; transition: background-color 2s linear }
+  #fade.go { background-color: rgb(200, 100, 50) }
+</style>
+<div id="app" style="position:relative;width:300px;height:120px">
+  <div id="tint" class="box" data-key="tint"></div><div id="fade" class="box" data-key="fade"></div></div>`);
+    await page.evaluate(() => document.getElementById("fade")!.classList.add("go"));
+    await rewind(page, 500);
+
+    const captured = await page.evaluate<Snapshot>(
+      `(${captureScript})(document.getElementById("app"))`,
+    );
+
+    // Capturing left them running.
+    const running = await page.evaluate(() =>
+      document.getAnimations().map((animation) => animation.playState),
+    );
+
+    await page.close();
+
+    expect(running).toEqual(["running", "running"]);
+
+    const compiled = compile(captured);
+
+    expect(compiled.diagnostics).toEqual([]);
+
+    const model = scene(
+      { size: compiled.size, duration: compiled.duration, title: "page" },
+      () => compiled.element,
+    );
+
+    // About a quarter of the way from red to blue (a few milliseconds past it), then the page's own green after the end.
+    const red = Number.parseInt(backgroundAt(model, "app/tint", 0).slice(1, 3), 16);
+
+    expect(red).toBeGreaterThan(150);
+    expect(red).toBeLessThan(200);
+    expect(backgroundAt(model, "app/tint", 4)).toBe("#008000");
+
+    // The transition ends on its target.
+    expect(backgroundAt(model, "app/fade", 4)).toBe("#c86432");
+  }, 60_000);
+
   test("a pulsing dot keeps pulsing through a film of several states", async () => {
     const page = await browser.newPage({ viewport: { width: 300, height: 120 } });
 

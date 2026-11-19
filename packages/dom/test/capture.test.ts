@@ -643,6 +643,108 @@ describe("notes: what capture cannot represent", () => {
   });
 });
 
+interface Probe {
+  t: number;
+  state: string;
+  rate: number;
+  timing: unknown;
+}
+
+describe("animated values return to their base", () => {
+  const SHEET = `<style>
+    @keyframes tint { from { background-color: rgb(255, 0, 0); transform: translateX(0px) } to { background-color: rgb(0, 0, 255); transform: translateX(50px) } }
+    #a { width:20px;height:20px;background:rgb(0, 128, 0);opacity:.5;transform:translateY(3px);animation:tint 4s linear 1s }
+    #b { width:20px;height:20px;background:rgb(10, 20, 30);transition:background-color 4s linear }
+    #b.go { background-color: rgb(200, 100, 50) }
+    #c { width:20px;height:20px;animation:tint 4s linear infinite }
+  </style><div id="a"></div><div id="b"></div><div id="c"></div>`;
+
+  test("each animated property is read without its animation", async () => {
+    await snap(SHEET);
+    await page.evaluate(() => {
+      document.getElementById("b")!.classList.add("go");
+
+      for (const animation of document.getAnimations()) animation.currentTime = 2500;
+    });
+
+    const after = await grab();
+
+    // Mid-flight, the layout shows the animation; the base is what it returns to.
+    expect(byId(after, "a").base).toEqual({
+      backgroundColor: "rgb(0, 128, 0)",
+      transform: "matrix(1, 0, 0, 1, 0, 3)",
+      translate: "none",
+      rotate: "none",
+      scale: "none",
+    });
+    expect(byId(after, "a").background).not.toBe("rgb(0, 128, 0)");
+    expect(byId(after, "b").base).toEqual({ backgroundColor: "rgb(200, 100, 50)" });
+    expect(byId(after, "c").base?.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+    expect(byId(after, "c").base?.transform).toBe("none");
+    expect(after.root.base).toBeUndefined();
+  });
+
+  test("it leaves the animations running at the same phase, with no events", async () => {
+    await snap(SHEET);
+
+    // Captured inside the page, between reading the animations' state and reading it again.
+    const run = await page.evaluate<{
+      events: string[];
+      same: boolean;
+      before: Probe[];
+      after: Probe[];
+    }>(`(async () => {
+      const events = [];
+      const animations = document.getAnimations();
+
+      for (const animation of animations) {
+        animation.currentTime = 1500;
+        animation.addEventListener("finish", () => events.push("finish"));
+        animation.addEventListener("cancel", () => events.push("cancel"));
+      }
+
+      // One animation paused, one with another rate and fill, to see that they come back as they were.
+      animations[0].pause();
+      animations[1].playbackRate = 2;
+      animations[1].effect.updateTiming({ fill: "both" });
+
+      const probe = () => animations.map((animation) => ({
+        t: Number(animation.currentTime),
+        state: animation.playState,
+        rate: animation.playbackRate,
+        timing: animation.effect.getTiming(),
+      }));
+
+      const before = probe();
+
+      (${captureScript})(document.getElementById("root"));
+
+      const same = document.getAnimations().every((animation, i) => animation === animations[i]);
+
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      return { events, same, before, after: probe() };
+    })()`);
+
+    expect(run.same).toBe(true);
+    expect(run.events).toEqual([]);
+    expect(run.before.length).toBe(2);
+
+    run.after.forEach((now, i) => {
+      const was = run.before[i]!;
+
+      expect(now.state).toBe(was.state);
+      expect(now.rate).toBe(was.rate);
+      expect(now.timing).toEqual(was.timing);
+
+      // A paused animation has not moved; the others ran on by about the 300ms we waited, at their rate.
+      const expected = was.state === "paused" ? 0 : 300 * was.rate;
+
+      expect(Math.abs(now.t - was.t - expected)).toBeLessThan(120 * was.rate + 1);
+    });
+  });
+});
+
 describe("checkVersion", () => {
   test("accepts version 1", () => {
     expect(checkVersion({ version: 1 }).version).toBe(1);

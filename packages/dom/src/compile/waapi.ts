@@ -714,8 +714,9 @@ interface Drives {
  * Reads an element's running animations: for each of `transform` (with `translate`, `rotate` and `scale`), `opacity` and
  * `background-color`, the one that drives it. Paused and finished animations are left as the layout shows them.
  *
- * What an animation that does not fill returns to is the element's style without it, which a capture mid-flight cannot see:
- * `transform` and `opacity` go back to none and 1, and a color holds its last keyframe.
+ * What an animation that does not fill returns to is the element's style without it, which a capture mid-flight cannot see: the
+ * Snapshot's `base`. A Snapshot without one (the element's animations all lay ahead of it) falls back to the static style, and
+ * mid-flight to none and 1 for `transform` and `opacity`; a color then holds its last keyframe.
  */
 const driveOf = (el: ElementNode, path: string, ctx: Context): Drives | undefined => {
   const running = (el.animations ?? []).filter((animation) => animation.playState === "running");
@@ -725,6 +726,21 @@ const driveOf = (el: ElementNode, path: string, ctx: Context): Drives | undefine
   const themed = isThemed(el.background);
   const staticFill: Rgba = (!isThemed(el.background) && rgbaOf(el.background ?? "")) || CLEAR;
   const drives: Drives = {};
+  const under = el.base;
+
+  const underPose = ((): Pose | undefined => {
+    const parsed = under && poseOf(under, el.rect);
+
+    return parsed && !(parsed instanceof Reason) ? poseOfMatrix(parsed.matrix) : undefined;
+  })();
+
+  const underAlpha = under?.opacity === undefined ? undefined : numberOf(under.opacity);
+
+  // A color that follows the color scheme is paired in the base too, and is not animated.
+  const underFill =
+    under?.backgroundColor === undefined || isThemed(under.backgroundColor)
+      ? undefined
+      : rgbaOf(under.backgroundColor);
 
   // A later animation replaces an earlier one that drives the same thing.
   const given = new Set<string>();
@@ -785,7 +801,7 @@ const driveOf = (el: ElementNode, path: string, ctx: Context): Drives | undefine
 
           return { ...pose, rotate: previous };
         },
-        REST,
+        underPose ?? REST,
         say,
       );
 
@@ -794,7 +810,7 @@ const driveOf = (el: ElementNode, path: string, ctx: Context): Drives | undefine
           id,
           stops,
           timing,
-          base: idle && el.transform ? poseOfMatrix(el.transform.matrix) : REST,
+          base: underPose ?? (idle && el.transform ? poseOfMatrix(el.transform.matrix) : REST),
         };
     }
 
@@ -805,12 +821,17 @@ const driveOf = (el: ElementNode, path: string, ctx: Context): Drives | undefine
         ({ props }) =>
           numberOf(props.opacity ?? "") ??
           new Reason(`the opacity "${props.opacity}" could not be read`),
-        1,
+        underAlpha ?? 1,
         say,
       );
 
       if (stops && drives_("opacity"))
-        drives.opacity = { id, stops, timing, base: idle ? (el.opacity ?? 1) : 1 };
+        drives.opacity = {
+          id,
+          stops,
+          timing,
+          base: underAlpha ?? (idle ? (el.opacity ?? 1) : 1),
+        };
     }
 
     if (names.has("backgroundColor") && !drives.fill) {
@@ -825,20 +846,22 @@ const driveOf = (el: ElementNode, path: string, ctx: Context): Drives | undefine
         ({ props }) =>
           rgbaOf(props.backgroundColor ?? "") ??
           new Reason(`the background-color "${props.backgroundColor}" could not be read`),
-        idle ? staticFill : undefined,
+        underFill ?? (idle ? staticFill : undefined),
         say,
       );
 
       if (stops && drives_("fill")) {
-        // A color has no neutral value to return to: when it lets go mid-flight, it keeps its last keyframe.
-        if (!idle && !timing.fillsAfter && Number.isFinite(timing.count))
-          say("the background color keeps its last keyframe once the animation ends");
+        // Without a recorded base, a color that lets go mid-flight has nothing to return to: it keeps its last keyframe.
+        const holds = !underFill && !idle;
+
+        if (holds && !timing.fillsAfter && Number.isFinite(timing.count))
+          say("has no base color, so the background color keeps its last keyframe once it ends");
 
         drives.fill = {
           id,
           stops: solidified(stops),
-          timing: { ...timing, fillsAfter: idle ? timing.fillsAfter : true },
-          base: staticFill,
+          timing: { ...timing, fillsAfter: holds ? true : timing.fillsAfter },
+          base: underFill ?? staticFill,
         };
       }
     }

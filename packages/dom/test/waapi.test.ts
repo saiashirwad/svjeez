@@ -3,7 +3,7 @@ import { scene } from "svjeez";
 import { isLane, placements, type Model } from "svjeez/tools";
 import { compile, type Animation, type ElementNode } from "../src/index.ts";
 import { easedAt, parseEasing } from "../src/compile/easing.ts";
-import { box, snapshot } from "./fixtures.ts";
+import { backgroundAt, box, snapshot } from "./fixtures.ts";
 
 const anim = (props: Partial<Animation>): Animation => ({
   kind: "animation",
@@ -70,6 +70,8 @@ const sampled = (animations: Animation[], el: Partial<ElementNode> = {}, hold = 
     opacity: (t: number) => track(t).opacity,
     notes: compiled.diagnostics.map((d) => d.what),
     fill,
+    /** The box's background color, as `#rrggbb`, at `t`. */
+    color: (t: number) => backgroundAt(model, "app/b", t),
   };
 };
 
@@ -252,6 +254,92 @@ describe("a running animation continues from the captured moment", () => {
 
     expect(background?.kind === "shape" && isLane(background.fill)).toBe(true);
     expect(out.notes).toEqual([]);
+  });
+
+  test("a color, a transform and an opacity return to their base when the animation ends mid-flight", () => {
+    const out = sampled(
+      [
+        anim({
+          keyframes: [
+            {
+              offset: 0,
+              easing: "linear",
+              props: {
+                backgroundColor: "rgb(255, 0, 0)",
+                transform: "translateX(0px)",
+                opacity: "1",
+              },
+            },
+            {
+              offset: 1,
+              easing: "linear",
+              props: {
+                backgroundColor: "rgb(0, 0, 255)",
+                transform: "translateX(100px)",
+                opacity: "0.2",
+              },
+            },
+          ],
+          duration: 2000,
+          currentTime: 500,
+        }),
+      ],
+      {
+        background: "rgb(120, 120, 120)",
+        opacity: 0.8,
+        transform: { matrix: [1, 0, 0, 1, 25, 0], origin: [0, 0] },
+        base: {
+          backgroundColor: "rgb(0, 128, 0)",
+          transform: "matrix(1, 0, 0, 1, 7, 0)",
+          translate: "none",
+          rotate: "none",
+          scale: "none",
+          opacity: "0.5",
+        },
+      },
+    );
+
+    expect(out.x(0)).toBeCloseTo(25, 3);
+    // After its end it is the base, not the last keyframe.
+    expect(out.x(3)).toBeCloseTo(7, 3);
+    expect(out.opacity(3)).toBeCloseTo(0.5, 3);
+    expect(out.color(3)).toBe("#008000");
+    expect(out.color(0)).toBe("#bf0040");
+    expect(out.notes).toEqual([]);
+  });
+
+  test("with a fill it holds the last keyframe, and before a delay it shows the base", () => {
+    const frames2 = [
+      { offset: 0, easing: "linear", props: { backgroundColor: "rgb(255, 0, 0)" } },
+      { offset: 1, easing: "linear", props: { backgroundColor: "rgb(0, 0, 255)" } },
+    ];
+
+    const base = { backgroundColor: "rgb(0, 128, 0)" };
+
+    const held = sampled([anim({ keyframes: frames2, fill: "forwards", currentTime: 500 })], {
+      base,
+    });
+
+    expect(held.color(3)).toBe("#0000ff");
+
+    const waiting = sampled([anim({ keyframes: frames2, delay: 1000, currentTime: 0 })], { base });
+
+    expect(waiting.color(0.5)).toBe("#008000");
+    expect(waiting.color(5)).toBe("#008000");
+  });
+
+  test("a color with no base says that it keeps its last keyframe", () => {
+    const out = sampled([
+      anim({
+        keyframes: [
+          { offset: 0, easing: "linear", props: { backgroundColor: "rgb(255, 0, 0)" } },
+          { offset: 1, easing: "linear", props: { backgroundColor: "rgb(0, 0, 255)" } },
+        ],
+        currentTime: 500,
+      }),
+    ]);
+
+    expect(out.notes.join("\n")).toContain("keeps its last keyframe");
   });
 
   test("easing: a cubic-bezier is cut at the captured moment, and steps jump", () => {

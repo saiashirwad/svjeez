@@ -546,20 +546,77 @@ export const capture = (root: Element): Snapshot => {
 
   // ------------------------------------------------------------- animations
 
-  const animationsOf = (el: Element, pseudo?: Pseudo): Animation[] =>
+  const TRANSFORMS = ["transform", "translate", "rotate", "scale"];
+
+  /** Far enough ahead that no animation has started: with `fill: none`, an effect that has not started draws nothing. */
+  const LATER = 1e15;
+
+  /**
+   * What `names` compute to on `el` with `animations` not in effect, which a capture mid-flight cannot see.
+   * Each effect is pushed past its start with no fill and put back exactly, with nothing rendered or awaited in between:
+   * the animations keep their time, play state and rate, and no event fires.
+   */
+  const underlying = (
+    el: Element,
+    pseudo: Pseudo | undefined,
+    animations: readonly globalThis.Animation[],
+    names: readonly string[],
+  ) => {
+    const effects = animations.flatMap((animation) =>
+      animation.playState === "finished" || !animation.effect ? [] : [animation.effect],
+    );
+
+    const timings = effects.map((effect) => {
+      const { fill, delay } = effect.getTiming();
+
+      return { fill, delay };
+    });
+
+    const out: Record<string, string> = {};
+
+    try {
+      for (const effect of effects) effect.updateTiming({ fill: "none", delay: LATER });
+
+      const style = getComputedStyle(el, pseudo);
+
+      for (const name of names) {
+        // A keyframe names its property in camelCase (`cssFloat` for `float`).
+        const css =
+          name === "cssFloat" ? "float" : name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+
+        const value = style.getPropertyValue(css);
+
+        if (value !== "") out[name] = value;
+      }
+    } finally {
+      effects.forEach((effect, i) => effect.updateTiming(timings[i]));
+    }
+
+    return out;
+  };
+
+  /** An element's animations, and what their properties are without them. */
+  interface Found {
+    animations: Animation[];
+    base?: Record<string, string>;
+  }
+
+  const animationsOf = (el: Element, pseudo?: Pseudo): Found => {
     // A pseudo-element's animations are listed with the subtree's, and only there.
-    el.getAnimations({ subtree: pseudo !== undefined }).flatMap((animation) => {
+    const live = el.getAnimations({ subtree: pseudo !== undefined }).filter((animation) => {
       const effect = animation.effect;
 
-      if (
-        !(effect instanceof KeyframeEffect) ||
-        effect.target !== el ||
-        (effect.pseudoElement ?? undefined) !== pseudo
-      )
-        return [];
+      return (
+        effect instanceof KeyframeEffect &&
+        effect.target === el &&
+        (effect.pseudoElement ?? undefined) === pseudo &&
+        animation.playState !== "idle"
+      );
+    });
 
-      if (animation.playState === "idle") return [];
-
+    const animations = live.map((animation): Animation => {
+      // SAFETY: `live` holds only animations of a KeyframeEffect.
+      const effect = animation.effect as KeyframeEffect;
       const timing = effect.getComputedTiming();
 
       const kind =
@@ -569,40 +626,50 @@ export const capture = (root: Element): Snapshot => {
             ? "animation"
             : "script";
 
-      return [
-        {
-          kind,
-          name:
-            animation instanceof CSSTransition
-              ? animation.transitionProperty
-              : animation instanceof CSSAnimation
-                ? animation.animationName
-                : animation.id,
-          keyframes: effect.getKeyframes().map((frame) => ({
-            offset: round(frame.computedOffset ?? 0),
-            easing: frame.easing ?? "linear",
-            props: Object.fromEntries(
-              Object.entries(frame)
-                .filter(
-                  ([name]) => !["offset", "computedOffset", "easing", "composite"].includes(name),
-                )
-                .map(([name, value]) => [name, String(value)]),
-            ),
-          })),
-          duration: Number(timing.duration) || 0,
-          delay: Number(timing.delay) || 0,
-          endDelay: Number(timing.endDelay) || 0,
-          iterations: timing.iterations === Infinity ? "infinite" : Number(timing.iterations),
-          direction: timing.direction ?? "normal",
-          easing: timing.easing ?? "linear",
-          fill: timing.fill ?? "none",
-          currentTime: Number(animation.currentTime) || 0,
-          playbackRate: animation.playbackRate,
-          // SAFETY: idle animations returned above, which leaves these three.
-          playState: animation.playState as Animation["playState"],
-        },
-      ];
+      return {
+        kind,
+        name:
+          animation instanceof CSSTransition
+            ? animation.transitionProperty
+            : animation instanceof CSSAnimation
+              ? animation.animationName
+              : animation.id,
+        keyframes: effect.getKeyframes().map((frame) => ({
+          offset: round(frame.computedOffset ?? 0),
+          easing: frame.easing ?? "linear",
+          props: Object.fromEntries(
+            Object.entries(frame)
+              .filter(
+                ([name]) => !["offset", "computedOffset", "easing", "composite"].includes(name),
+              )
+              .map(([name, value]) => [name, String(value)]),
+          ),
+        })),
+        duration: Number(timing.duration) || 0,
+        delay: Number(timing.delay) || 0,
+        endDelay: Number(timing.endDelay) || 0,
+        iterations: timing.iterations === Infinity ? "infinite" : Number(timing.iterations),
+        direction: timing.direction ?? "normal",
+        easing: timing.easing ?? "linear",
+        fill: timing.fill ?? "none",
+        currentTime: Number(animation.currentTime) || 0,
+        playbackRate: animation.playbackRate,
+        // SAFETY: idle animations are filtered out above, which leaves these three.
+        playState: animation.playState as Animation["playState"],
+      };
     });
+
+    if (animations.length === 0) return { animations };
+
+    const names = new Set(
+      animations.flatMap(({ keyframes }) => keyframes.flatMap(({ props }) => Object.keys(props))),
+    );
+
+    // The four compose into one transform, so a base for one needs the others.
+    if (TRANSFORMS.some((name) => names.has(name))) for (const name of TRANSFORMS) names.add(name);
+
+    return { animations, base: underlying(el, pseudo, live, [...names]) };
+  };
 
   // ------------------------------------------------------------ form controls
 
@@ -775,6 +842,8 @@ export const capture = (root: Element): Snapshot => {
     origin: readonly [number, number];
     kids: (ElementNode | TextNode)[];
     animations: Animation[];
+    /** What the animated properties compute to without the animations. */
+    base?: Record<string, string>;
     /** What the caller could not represent, besides what the style says. */
     notes?: string[];
     bare?: boolean;
@@ -945,6 +1014,8 @@ export const capture = (root: Element): Snapshot => {
 
     if (animations.length > 0) node.animations = animations;
 
+    if (d.base && Object.keys(d.base).length > 0) node.base = d.base;
+
     const notes = [...new Set([...(d.notes ?? []), ...unsupported(style, d)])];
 
     if (notes.length > 0) node.notes = notes;
@@ -1062,8 +1133,8 @@ export const capture = (root: Element): Snapshot => {
     )
       return [];
 
-    const animations = animationsOf(el, which);
-    const stand: Stand = { tag: which, animations };
+    const { animations, base } = animationsOf(el, which);
+    const stand: Stand = { tag: which, animations, base };
 
     const fast =
       host &&
@@ -1127,7 +1198,9 @@ export const capture = (root: Element): Snapshot => {
       const [ox = 0, oy = 0] = style.transformOrigin.split(" ").map(px);
       const origin = [round(rect.x + ox), round(rect.y + oy)] as const;
 
-      return [draw(style, { tag: which, part: which, rect, own, origin, kids: [], animations })];
+      return [
+        draw(style, { tag: which, part: which, rect, own, origin, kids: [], animations, base }),
+      ];
     }
 
     const { text, url, notes } = contentOf(el, style);
@@ -1194,6 +1267,7 @@ export const capture = (root: Element): Snapshot => {
   interface Stand {
     tag: Pseudo;
     animations: Animation[];
+    base?: Record<string, string>;
   }
 
   const element = (el: Element, a: DOMMatrix, stand?: Stand): (ElementNode | TextNode)[] => {
@@ -1302,14 +1376,17 @@ export const capture = (root: Element): Snapshot => {
           }
         : undefined;
 
+    const drawn = stand ?? animationsOf(el);
+
     const node = draw(style, {
       tag: stand?.tag ?? el.localName,
       rect,
       own,
       origin,
       kids,
-      animations: stand?.animations ?? animationsOf(el),
+      animations: drawn.animations,
       notes,
+      ...(drawn.base && { base: drawn.base }),
       ...(stand ? { part: stand.tag } : { el }),
       bare: form?.native === true,
       ...(form?.clip && { clip: true }),
