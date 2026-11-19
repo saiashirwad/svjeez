@@ -4,7 +4,7 @@ svjeez is a TypeScript library for making animated SVGs. You write a scene in JS
 
 Because the output is a plain SVG, it works anywhere an image does: an `<img>` tag, a docs site, or a GitHub README.
 
-![A mechanical watch escapement in slow motion](examples/dist/escapement.svg)
+![One angle track turns a spoke round a dial, carries a point along a sine wave, and fills a bar](examples/dist/derived.svg)
 
 ## A first scene
 
