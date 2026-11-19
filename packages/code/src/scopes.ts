@@ -1,14 +1,14 @@
-import type { CodeRole } from "svjeez";
+import type { CodeRole } from "./roles.ts";
 
 export const SCOPES = {
   comment: "comment",
-  punctuation: "punct",
-  "meta.brace": "punct",
+  punctuation: "punctuation",
+  "meta.brace": "punctuation",
   "punctuation.definition.comment": "comment",
   "punctuation.definition.string": "string",
 
   keyword: "keyword",
-  "keyword.operator": "punct",
+  "keyword.operator": "punctuation",
   "keyword.operator.new": "keyword",
   "keyword.operator.expression": "keyword",
   "keyword.operator.word": "keyword",
@@ -37,8 +37,8 @@ export const SCOPES = {
   "storage.type.string": "string",
   "entity.name.tag.yaml": "variable",
 
-  "entity.name.function": "fn",
-  "support.function": "fn",
+  "entity.name.function": "function",
+  "support.function": "function",
 
   "entity.name.type": "type",
   "entity.name.class": "type",
@@ -53,23 +53,21 @@ export const SCOPES = {
 
   "entity.name.tag": "tag",
   "entity.other.attribute-name": "type",
-  "entity.other.attribute-name.id": "fn",
+  "entity.other.attribute-name.id": "function",
 
   "markup.heading": "keyword",
   "markup.inline.raw": "string",
   "fenced_code.block.language": "constant",
   "markup.quote": "comment",
-  "markup.underline.link": "fn",
-  "markup.list": "punct",
-  "markup.inserted": "green",
-  "markup.deleted": "red",
-  "markup.changed": "yellow",
+  "markup.underline.link": "function",
+  "markup.list": "punctuation",
+  "markup.inserted": "inserted",
+  "markup.deleted": "deleted",
   "meta.diff.header": "comment",
-  "meta.diff.range": "cyan",
-  "meta.separator.diff": "cyan",
-  "punctuation.definition.inserted": "green",
-  "punctuation.definition.deleted": "red",
-  "punctuation.definition.changed": "yellow",
+  "meta.diff.range": "type",
+  "meta.separator.diff": "type",
+  "punctuation.definition.inserted": "inserted",
+  "punctuation.definition.deleted": "deleted",
   "punctuation.definition.heading": "keyword",
-  invalid: "red",
+  invalid: "deleted",
 } as const satisfies Record<string, CodeRole>;

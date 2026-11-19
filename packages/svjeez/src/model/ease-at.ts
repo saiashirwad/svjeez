@@ -1,0 +1,107 @@
+import { SceneError } from "./scene-error";
+import { EPSILON, ease, isHold, type Ease } from "./time";
+import { splitCurveAtParameter } from "./curve";
+
+const cubic = (a: number, b: number, u: number) =>
+  3 * a * u * (1 - u) ** 2 + 3 * b * u * u * (1 - u) + u ** 3;
+
+export const easeAt = (curve: Ease, progress: number): number => {
+  const x = Math.min(1, Math.max(0, progress));
+
+  switch (curve.kind) {
+    case "linear":
+      return x;
+    case "steps":
+      return Math.floor(x * curve.count) / curve.count;
+    case "bezier": {
+      const [x1, y1, x2, y2] = curve.points;
+      let lo = 0;
+      let hi = 1;
+
+      for (let i = 0; i < 40; i++) {
+        const mid = (lo + hi) / 2;
+
+        if (cubic(x1, x2, mid) < x) lo = mid;
+        else hi = mid;
+      }
+
+      return cubic(y1, y2, (lo + hi) / 2);
+    }
+  }
+};
+
+const unit = (x: number): number => Math.min(1, Math.max(0, x));
+
+export const splitEase = (curve: Ease, progress: number, where: string): readonly [Ease, Ease] => {
+  switch (curve.kind) {
+    case "linear":
+      return [curve, curve];
+    case "steps": {
+      if (curve.count === 1 && progress > 0 && progress < 1) return [curve, curve];
+      const edge = progress * curve.count;
+      const done = Math.round(edge);
+
+      if (Math.abs(edge - done) > 1e-6 || done < 1 || done >= curve.count)
+        throw new SceneError(
+          `${where} cuts a steps(${curve.count}) transition between two of its steps. Cut it on a step edge, or use ease.out.`,
+        );
+
+      return [ease.steps(done), ease.steps(curve.count - done)];
+    }
+
+    case "bezier": {
+      const [x1, y1, x2, y2] = curve.points;
+      let lo = 0;
+      let hi = 1;
+
+      for (let i = 0; i < 50; i++) {
+        const mid = (lo + hi) / 2;
+
+        if (cubic(x1, x2, mid) < progress) lo = mid;
+        else hi = mid;
+      }
+
+      const s = (lo + hi) / 2;
+
+      const [[a, d], f, [e, c]] = splitCurveAtParameter(
+        [0, 0],
+        [
+          [x1, y1],
+          [x2, y2],
+        ],
+        [1, 1],
+        s,
+      );
+
+      const rise = f[1];
+      const rest = 1 - f[1];
+
+      const head =
+        Math.abs(rise) < 1e-6
+          ? ease.linear
+          : ease.bezier(unit(a[0] / f[0]), a[1] / rise, unit(d[0] / f[0]), d[1] / rise);
+
+      const tail =
+        Math.abs(rest) < 1e-6
+          ? ease.linear
+          : ease.bezier(
+              unit((e[0] - f[0]) / (1 - f[0])),
+              (e[1] - f[1]) / rest,
+              unit((c[0] - f[0]) / (1 - f[0])),
+              (c[1] - f[1]) / rest,
+            );
+
+      return [head, tail];
+    }
+  }
+};
+
+export const staysInside = (curve: Ease | undefined): boolean =>
+  curve?.kind !== "bezier" || [curve.points[1], curve.points[3]].every((y) => y >= 0 && y <= 1);
+
+export const easeBetween = (curve: Ease, from: number, to: number, where: string): Ease => {
+  if (isHold(curve)) return to >= 1 - EPSILON ? curve : ease.linear;
+  const tail = from > EPSILON ? splitEase(curve, from, where)[1] : curve;
+
+  return to < 1 - EPSILON ? splitEase(tail, (to - from) / (1 - from), where)[0] : tail;
+};

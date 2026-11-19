@@ -1,18 +1,37 @@
 import assert from "node:assert/strict";
-import { highlight } from "@svjeez/code";
-import { render, code, defaultDark, tint } from "svjeez";
+import { Code, highlight } from "@svjeez/code";
+import { gruvbox, rosePine, solarized, tomorrow } from "@svjeez/code/palettes";
+import { Group, font, scene } from "svjeez";
+import { jsx } from "svjeez/jsx-runtime";
+import { SceneError, svg as backend } from "svjeez/tools";
 
-const tokens = highlight("const answer = 42;", "ts");
+assert.deepEqual(highlight("const answer = 42;", "ts")[0][0], ["keyword", "const"]);
 
-assert.deepEqual(tokens[0][0], ["keyword", "const"]);
+assert.throws(() => highlight("x", "cobol"), SceneError);
 
-const svg = render(
-  { width: 400, height: 80, duration: 1, title: "Code" },
-  code(tokens, { x: 10, y: 10, theme: defaultDark }).node,
+const face = await font.load(
+  new URL("../skills/svjeez/examples/fonts/Geist-400.ttf", import.meta.resolve("svjeez")),
 );
 
-assert.ok(svg.includes(`fill="${tint(defaultDark, "keyword")}"`));
+const out = backend.emit(
+  scene({ size: [240, 60], duration: 1, title: "Code" }, () =>
+    jsx(Group, {
+      children: jsx(Code, {
+        lang: "ts",
+        font: face,
+        size: 16,
+        palette: tomorrow,
+        children: "const answer = 42;",
+        at: [10, 10],
+      }),
+    }),
+  ),
+);
 
-assert.throws(() => highlight("x", "cobol"), /does not know the language "cobol"/);
+assert.match(out, /--tomorrow-keyword:#B294BB/);
 
-console.log(`highlighted a line into ${(svg.length / 1024).toFixed(1)} KB of SVG`);
+assert.match(out, /prefers-color-scheme:light/);
+
+assert.equal(new Set([gruvbox, rosePine, solarized, tomorrow]).size, 4);
+
+console.log(`highlighted a line into ${(out.length / 1024).toFixed(1)} KB of SVG`);

@@ -1,8 +1,8 @@
 {
   "name": "@svjeez/charts",
-  "version": "0.7.1",
+  "version": "0.8.0-next.0",
   "private": true,
-  "description": "Animated bar, line and area charts for svjeez: scales and paths computed while the scene builds, drawn on by the timeline.",
+  "description": "Animated bar, line and area charts for svjeez scenes: shared axes, scales fitted to the data, series that grow and draw on.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -31,7 +31,7 @@
     "typescript": "latest"
   },
   "peerDependencies": {
-    "svjeez": ">=0.6.0 <1"
+    "svjeez": "workspace:^"
   },
   "engines": {
     "node": ">=20"

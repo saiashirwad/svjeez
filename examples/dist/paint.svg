@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 776 220" width="776" height="220" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">Paint and effects</title>
+  <desc id="d">A card whose gradient turns and warms, stripes seen through a moving round window while they turn, a soft masked wipe that reveals a card, a card that comes into focus, and a shadow that grows as a card lifts.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0}}
+@media (prefers-reduced-motion:reduce){[fill="url(#g1)"]{fill:url(#g1s)}[filter="url(#f1)"]{filter:url(#f1s)}[filter="url(#f2)"]{filter:url(#f2s)}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:6s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,6.667%,83.333%,100%{stop-color:var(--magenta)}33.333%,56.667%{stop-color:var(--orange)}}
+.m1{animation-name:k1;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k2{0%,6.667%,83.333%,100%{translate:0 0}40%,56.667%{translate:52px 44px}}
+.m2{animation-name:k2;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k3{0%,6.667%{translate:-160px 0}36.667%,100%{translate:0 0}}
+.m3{animation-name:k3;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k4{0%,6.667%,83.333%,100%{scale:1;rotate:0deg}40%,56.667%{scale:0.85;rotate:30deg}}
+.m4{animation-name:k4;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k5{0%,6.667%,33.333%,100%{opacity:0}26.667%,33.332%{opacity:1}}
+.m5{animation-name:k5}
+@keyframes k6{0%,28.333%,100%{opacity:0}33.333%,90%{opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,16.667%,70%,100%{scale:1}30%{scale:1.06}56.667%{scale:1.06;animation-timing-function:cubic-bezier(.77,0,.175,1)}}
+.m7{animation-name:k7}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-2.2s!important;animation-play-state:paused!important}}
+]]></style>
+  <defs>
+    <linearGradient id="g1" gradientUnits="userSpaceOnUse" x1="28" y1="96" x2="140" y2="96">
+      <animate id="s1" attributeName="x1" values="28;84;84;28" keyTimes="0;0.34782;0.65218;1" calcMode="spline" keySplines="0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" begin="0.4s;s1.begin+6s" dur="4.6s" fill="freeze" data-loop="6s"/>
+      <set attributeName="x1" to="28" begin="0s" dur="0.4s" fill="freeze" data-loop="6s"/>
+      <animate id="s2" attributeName="y1" values="96;40;40;96" keyTimes="0;0.34782;0.65218;1" calcMode="spline" keySplines="0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" begin="0.4s;s2.begin+6s" dur="4.6s" fill="freeze" data-loop="6s"/>
+      <set attributeName="y1" to="96" begin="0s" dur="0.4s" fill="freeze" data-loop="6s"/>
+      <animate id="s3" attributeName="x2" values="140;84;84;140" keyTimes="0;0.34782;0.65218;1" calcMode="spline" keySplines="0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" begin="0.4s;s3.begin+6s" dur="4.6s" fill="freeze" data-loop="6s"/>
+      <set attributeName="x2" to="140" begin="0s" dur="0.4s" fill="freeze" data-loop="6s"/>
+      <animate id="s4" attributeName="y2" values="96;152;152;96" keyTimes="0;0.34782;0.65218;1" calcMode="spline" keySplines="0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" begin="0.4s;s4.begin+6s" dur="4.6s" fill="freeze" data-loop="6s"/>
+      <set attributeName="y2" to="96" begin="0s" dur="0.4s" fill="freeze" data-loop="6s"/>
+      <stop stop-color="var(--blue)"/>
+      <stop offset="1" stop-color="var(--magenta)" class="a m1"/>
+    </linearGradient>
+    <linearGradient id="g1s" gradientUnits="userSpaceOnUse" x1="84" y1="40" x2="84" y2="152">
+      <stop stop-color="var(--blue)"/>
+      <stop offset="1" stop-color="var(--magenta)" class="a m1"/>
+    </linearGradient>
+    <clipPath id="c1">
+      <path d="M58 34C58 49.464 45.464 62 30 62C14.536 62 2 49.464 2 34C2 18.536 14.536 6 30 6C45.464 6 58 18.536 58 34Z" class="a m2"/>
+    </clipPath>
+    <radialGradient id="g2" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="158.392">
+      <stop stop-color="var(--yellow)"/>
+      <stop offset="1" stop-color="var(--red)"/>
+    </radialGradient>
+    <linearGradient id="g3" gradientUnits="userSpaceOnUse" x1="112" x2="160">
+      <stop stop-color="#000000"/>
+      <stop offset="1" stop-color="#00000000"/>
+    </linearGradient>
+    <mask id="m1" maskUnits="userSpaceOnUse" x="-161" y="-1" width="322" height="114" mask-type="alpha">
+      <rect width="160" height="112" fill="url(#g3)" class="a m3"/>
+    </mask>
+    <filter id="f1" filterUnits="userSpaceOnUse" x="447" y="3" width="186" height="186" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="1.5">
+        <animate id="s5" attributeName="stdDeviation" values="12;1.5" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="0.4s;s5.begin+6s" dur="1.4s" fill="freeze" data-loop="6s"/>
+        <set attributeName="stdDeviation" to="12" begin="0s;s5.begin+5.6s" dur="0.4s" fill="freeze" data-loop="6s"/>
+      </feGaussianBlur>
+    </filter>
+    <filter id="f1s" filterUnits="userSpaceOnUse" x="447" y="3" width="186" height="186" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="1.5"/>
+    </filter>
+    <filter id="f2" filterUnits="userSpaceOnUse" x="603" y="9" width="179" height="189" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.45" flood-color="#000000">
+        <animate id="s6" attributeName="dy" values="2;12;12;2" keyTimes="0;0.25;0.75;1" calcMode="spline" keySplines="0.23 1 0.32 1;0 0 1 1;0.23 1 0.32 1" begin="1s;s6.begin+6s" dur="3.2s" fill="freeze" data-loop="6s"/>
+        <set attributeName="dy" to="2" begin="0s" dur="1s" fill="freeze" data-loop="6s"/>
+        <animate id="s7" attributeName="stdDeviation" values="2;10;10;2" keyTimes="0;0.25;0.75;1" calcMode="spline" keySplines="0.23 1 0.32 1;0 0 1 1;0.23 1 0.32 1" begin="1s;s7.begin+6s" dur="3.2s" fill="freeze" data-loop="6s"/>
+        <set attributeName="stdDeviation" to="2" begin="0s" dur="1s" fill="freeze" data-loop="6s"/>
+      </feDropShadow>
+    </filter>
+    <filter id="f2s" filterUnits="userSpaceOnUse" x="603" y="9" width="179" height="189" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="12" stdDeviation="10" flood-opacity="0.45" flood-color="#000000"/>
+    </filter>
+  </defs>
+  <rect width="776" height="220" fill="var(--background)"/>
+  <rect x="28" y="40" width="112" height="112" rx="14" fill="url(#g1)"/>
+  <text x="30" y="196" font-size="12" fill="var(--muted)">gradient shifts</text>
+  <g transform="translate(180 40)" clip-path="url(#c1)" style="transform-origin:236px 96px" class="a m4">
+    <rect width="16" height="112" fill="var(--cyan)"/>
+    <rect x="16" width="16" height="112" fill="var(--green)"/>
+    <rect x="32" width="16" height="112" fill="var(--yellow)"/>
+    <rect x="48" width="16" height="112" fill="var(--orange)"/>
+    <rect x="64" width="16" height="112" fill="var(--red)"/>
+    <rect x="80" width="16" height="112" fill="var(--magenta)"/>
+    <rect x="96" width="16" height="112" fill="var(--blue)"/>
+  </g>
+  <text x="196.4" y="196" font-size="12" fill="var(--muted)">moving clip</text>
+  <g transform="translate(332 40)" mask="url(#m1)">
+    <rect width="112" height="112" rx="14" fill="url(#g2)"/>
+    <circle cx="56" cy="56" r="18" fill="var(--background)"/>
+  </g>
+  <text x="341.2" y="196" font-size="12" fill="var(--muted)">masked reveal</text>
+  <rect x="484" y="40" width="112" height="112" rx="14" fill="var(--green)" filter="url(#f1)" class="a m5"/>
+  <rect x="484" y="40" width="112" height="112" rx="14" fill="var(--green)" class="a m6"/>
+  <text x="514.8" y="196" font-size="12" fill="var(--muted)">blur-in</text>
+  <rect x="636.5" y="40.5" width="112" height="112" rx="14" fill="var(--surface)" stroke="var(--border)" filter="url(#f2)" class="a m7 fb"/>
+  <text x="648.8" y="196" font-size="12" fill="var(--muted)">shadow grows</text>
+</svg>

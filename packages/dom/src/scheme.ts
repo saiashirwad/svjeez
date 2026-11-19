@@ -1,117 +1,100 @@
-import { isPair, paint, transparent } from "./paint.ts";
-import type { Box, Gradient, Item, Paint, Shadow, Vector } from "./tree.ts";
+import type { Json, Snapshot } from "./schema.ts";
 
-type Differ = (where: string) => void;
+/** Keys that say what a node is. If they differ, the two captures are not of the same page. */
+const toJson = (snapshot: Snapshot): Json => JSON.parse(JSON.stringify(snapshot));
 
-const plain = <C extends string>(color: Paint<C>): C => (isPair(color) ? color.light : color);
+const IDENTITY = new Set(["type", "tag", "kind", "text"]);
 
-const pick = (light?: Paint, dark?: Paint): Paint | undefined =>
-  light || dark
-    ? paint(plain(light ?? transparent(plain(dark!))), plain(dark ?? transparent(plain(light!))))
-    : undefined;
+const COLOR = /^rgba?\(/;
+const CLEAR = "rgba(0, 0, 0, 0)";
 
-const keep = <T>(light: T, where: string, differ: Differ): T => {
-  differ(where);
+const isColor = (value: Json): value is string => typeof value === "string" && COLOR.test(value);
 
+type Fields = { readonly [key: string]: Json };
+
+const isList = (value: Json): value is readonly Json[] => Array.isArray(value);
+
+const isFields = (value: Json): value is Fields =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const mismatch = (path: string, what: string): never => {
+  throw new Error(
+    `mergeSchemes: the light and dark captures differ in structure at ${path}: ${what}. Capture both with the same page state, so only colors change.`,
+  );
+};
+
+const merge = (light: Json, dark: Json, path: string): Json => {
+  if (isList(light) || isList(dark)) {
+    if (!isList(light) || !isList(dark)) {
+      return mismatch(
+        path,
+        `${isList(light) ? light.length : "no"} entries in light, ${isList(dark) ? dark.length : "no"} in dark`,
+      );
+    }
+
+    // Children are the page's structure and must match; any other list (shadows, gradient layers) keeps light's.
+    if (light.length !== dark.length)
+      return path.endsWith(".children")
+        ? mismatch(path, `${light.length} entries in light, ${dark.length} in dark`)
+        : light;
+
+    return light.map((one, i) => merge(one, dark[i] ?? null, `${path}[${i}]`));
+  }
+
+  if (isFields(light) && isFields(dark)) {
+    const out: { [key: string]: Json } = {};
+
+    for (const key of new Set([...Object.keys(light), ...Object.keys(dark)])) {
+      const a = light[key];
+      const b = dark[key];
+      const at = `${path}.${key}`;
+
+      // A color that is only set in one scheme (a transparent background in the other) pairs with clear.
+      if (a === undefined && b !== undefined && isColor(b)) out[key] = merge(CLEAR, b, at);
+      else if (b === undefined && a !== undefined && isColor(a)) out[key] = merge(a, CLEAR, at);
+      else if (a === undefined || b === undefined) {
+        // Anything else set in one scheme only comes from light, and is dropped when only dark has it.
+        if (IDENTITY.has(key) || key === "children")
+          mismatch(at, `it is set in ${a === undefined ? "dark" : "light"} only`);
+        else if (a !== undefined) out[key] = a;
+      } else out[key] = merge(a, b, at);
+    }
+
+    // Running animations were captured at different instants in the two schemes, so what they drive differs by phase,
+    // not by scheme: the animations and what they return to come from light, and so does the fill they animate.
+    const { animations, base } = light;
+
+    if (animations !== undefined && isList(animations) && animations.length > 0) {
+      out.animations = animations;
+
+      if (base !== undefined) out.base = base;
+
+      if (base !== undefined && isFields(base) && "backgroundColor" in base) {
+        if (light.background !== undefined) out.background = light.background;
+        else delete out.background;
+      }
+    }
+
+    return out;
+  }
+
+  if (light === dark) return light;
+
+  if (isColor(light) && isColor(dark)) return { light, dark };
+
+  const key = path.slice(path.lastIndexOf(".") + 1);
+
+  if (IDENTITY.has(key))
+    return mismatch(path, `${JSON.stringify(light)} in light, ${JSON.stringify(dark)} in dark`);
+
+  // Anything else (a sub-pixel of layout, an animation's time) keeps its light value.
   return light;
 };
 
-const mergeVector = (light: Vector, dark: Vector, differ: Differ): Vector =>
-  light.tag !== dark.tag || light.children.length !== dark.children.length
-    ? keep(light, light.tag, differ)
-    : {
-        ...light,
-        attrs: Object.fromEntries(
-          Object.entries(light.attrs).map(([k, v]) => {
-            const other = dark.attrs[k];
-
-            return [
-              k,
-              (k === "fill" || k === "stroke") && other ? paint(plain(v), plain(other)) : v,
-            ];
-          }),
-        ),
-        children: light.children.map((c, i) => mergeVector(c, dark.children[i]!, differ)),
-      };
-
-const mergeItem = (light: Item, dark: Item, differ: Differ): Item => {
-  if (light.kind === "text" && dark.kind === "text") {
-    if (dark.text !== light.text) return keep(light, `"${light.text}"`, differ);
-
-    return { ...light, color: paint(plain(light.color), plain(dark.color)) };
-  }
-
-  if (light.kind === "graphic" && dark.kind === "graphic") {
-    if (light.children.length !== dark.children.length) return keep(light, "svg", differ);
-
-    return {
-      ...light,
-      children: light.children.map((c, i) => mergeVector(c, dark.children[i]!, differ)),
-    };
-  }
-
-  if (light.kind === "image" && dark.kind === "image") return light;
-
-  if (light.kind === "box" && dark.kind === "box") return merge(light, dark, differ);
-
-  return keep(light, light.kind, differ);
-};
-
-const mergeShadows = (light: readonly Shadow[], dark: readonly Shadow[]): Shadow[] =>
-  Array.from({ length: Math.max(light.length, dark.length) }, (_, i) => ({
-    ...(light[i] ?? dark[i]!),
-    color: pick(light[i]?.color, dark[i]?.color)!,
-  }));
-
-const mergeGradients = (light: readonly Gradient[], dark: readonly Gradient[]): Gradient[] =>
-  Array.from({ length: Math.max(light.length, dark.length) }, (_, i) => {
-    const own = (light[i] ?? dark[i])!;
-    const other = light[i] ? dark[i] : light[i];
-
-    return {
-      ...own,
-      stops: own.stops.map((stop, k) => {
-        const c = plain(stop.color);
-        const o = other?.stops[Math.min(k, other.stops.length - 1)]?.color;
-        const theirs = o && plain(o);
-
-        return { ...stop, color: light[i] ? pick(c, theirs)! : pick(theirs, c)! };
-      }),
-    };
-  });
-
-export const merge = (light: Box, dark: Box, differ: Differ): Box => {
-  const same = light.children.length === dark.children.length;
-
-  if (!same) differ(`<${light.tag}>`);
-
-  const insets = mergeShadows(light.insets ?? [], dark.insets ?? []);
-  const gradients = mergeGradients(light.gradients ?? [], dark.gradients ?? []);
-
-  return {
-    ...light,
-    background: pick(light.background, dark.background),
-    border:
-      light.border || dark.border
-        ? {
-            widths: (light.border ?? dark.border)!.widths,
-            color: pick(light.border?.color, dark.border?.color)!,
-          }
-        : undefined,
-    outline:
-      light.outline || dark.outline
-        ? {
-            width: (light.outline ?? dark.outline)!.width,
-            offset: (light.outline ?? dark.outline)!.offset,
-            color: pick(light.outline?.color, dark.outline?.color)!,
-          }
-        : undefined,
-    darkOpacity: dark.opacity !== light.opacity ? dark.opacity : undefined,
-    shadows: mergeShadows(light.shadows, dark.shadows),
-    gradients: gradients.length > 0 ? gradients : undefined,
-    insets: insets.length > 0 ? insets : undefined,
-    children: same
-      ? light.children.map((c, i) => mergeItem(c, dark.children[i]!, differ))
-      : light.children,
-  };
-};
+/**
+ * One Snapshot from the same page captured under light and dark `prefers-color-scheme`:
+ * every color that differs becomes `{ light, dark }`, which `compile` draws as a theme token.
+ * The trees must match node for node (tags, text, children); everything else comes from `light`.
+ */
+export const mergeSchemes = (light: Snapshot, dark: Snapshot): Snapshot =>
+  JSON.parse(JSON.stringify(merge(toJson(light), toJson(dark), "snapshot")));

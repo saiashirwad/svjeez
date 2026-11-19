@@ -1,6 +1,8 @@
 name: release
 
-# Every push to main runs CI, then releases each package under packages/ whose version isn't on npm and GitHub yet.
+# Every push to main runs CI and the plan; pull requests (next included) get CI from ci.yml. Publishing is gated: it runs only on a manual workflow_dispatch of this workflow.
+# A dispatch releases each package under packages/ whose version isn't on npm and GitHub yet.
+# On next, scripts/release.ts releases only prerelease versions, which go to npm's next dist-tag.
 # scripts/release.ts decides which ones. npm's trusted publisher for every package names this file and the npm environment.
 on:
   push:
@@ -13,6 +15,7 @@ jobs:
 
   plan:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     outputs:
       packages: ${{ steps.plan.outputs.packages }}
     steps:
@@ -25,8 +28,9 @@ jobs:
 
   publish:
     needs: [ci, plan]
-    if: needs.plan.outputs.packages != ''
+    if: github.event_name == 'workflow_dispatch' && needs.plan.outputs.packages != ''
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: npm
     concurrency:
       group: release

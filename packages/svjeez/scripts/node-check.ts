@@ -1,6 +1,7 @@
 import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { validateSvg } from "svjeez/frames";
+import { isScene, svg as backend, type Scene } from "svjeez/tools";
 
 const ROOT = join(import.meta.dirname, "..");
 
@@ -8,12 +9,23 @@ const scenes = (await readdir(join(ROOT, "skills/svjeez/examples")))
   .filter((name) => name.endsWith(".tsx"))
   .map((name) => join("skills/svjeez/examples", name));
 
+type Made = string | Scene;
+
+const isBuild = (value: Made | (() => Made)): value is () => Made => typeof value === "function";
+
+const svgOf = (exported: Made | (() => Made)): string => {
+  const made = isBuild(exported) ? exported() : exported;
+
+  return isScene(made) ? backend.emit(made) : made;
+};
+
 let failed = 0;
 
 for (const scene of scenes) {
   try {
-    const { default: build }: { default: () => string } = await import(join(ROOT, scene));
-    const svg = build();
+    const { default: exported }: { default: Made | (() => Made) } = await import(join(ROOT, scene));
+
+    const svg = svgOf(exported);
     const { errors } = validateSvg(svg);
 
     if (errors.length > 0) throw new Error(errors.join("\n"));

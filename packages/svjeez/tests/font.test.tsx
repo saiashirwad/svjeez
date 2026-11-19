@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
-import { Glyphs, draw, fitText, font, render, span, type Child, Callout, code } from "svjeez";
-import { rect } from "svjeez/geometry";
+import { Group, Run, Text, font, scene, type SceneElement } from "svjeez";
+import { svg, type FontValue } from "svjeez/tools";
 import { validateSvg } from "svjeez/frames";
 import { contours, pathData } from "../src/font/glyf";
-import { sfnt } from "../src/font/sfnt";
+import { required, sfnt, u16 } from "../src/font/sfnt";
 import { typesetter } from "../src/font/shape";
 import { subset } from "../src/font/subset";
 
@@ -16,44 +16,53 @@ const monoBold = await font.load(fixture("SpaceMono-Bold"));
 const black = await font.load(fixture("ArchivoBlack-Regular"));
 const jetbrains = await font.load(fixture("JetBrainsMono"));
 
-const scene = (child: Child) =>
-  render({ width: 200, height: 100, duration: 1, title: "Fonts" }, child);
+const emit = (build: () => SceneElement) =>
+  svg.emit(scene({ size: [200, 100], duration: 1, title: "Fonts" }, build));
 
-const faces = (svg: string) =>
+const written = (value: FontValue, text: string) =>
+  emit(() => (
+    <Text font={value} size={10} fill="#000000">
+      {text}
+    </Text>
+  ));
+
+const faces = (out: string) =>
   [
-    ...svg.matchAll(/@font-face\{font-family:([^;]+);[^}]*font-weight:(\d+);font-style:(\w+)\}/g),
+    ...out.matchAll(/@font-face\{font-family:([^;]+);[^}]*font-weight:(\d+);font-style:(\w+)\}/g),
   ].map((m) => `${m[1]} ${m[2]} ${m[3]}`);
 
+const cutOf = (out: string) => font(Buffer.from(/base64,([^)]+)\)/.exec(out)![1]!, "base64"));
+
 describe("font", () => {
-  test("reads family, weight, style and a fallback from the file", () => {
+  test("reads family, weight, italic and a fallback from the file", () => {
     expect(sans).toMatchObject({
       format: "ttf",
       family: "ABeeZee",
       weight: 400,
-      style: "normal",
+      italic: false,
       fallback: ["sans-serif"],
     });
-    expect(italic).toMatchObject({ family: "ABeeZee", style: "italic" });
+    expect(italic).toMatchObject({ family: "ABeeZee", italic: true });
     expect(monoBold).toMatchObject({ family: "Space Mono", weight: 700, fallback: ["monospace"] });
   });
 
   test("options override what the file says", async () => {
     const bytes = await readFile(fixture("ABeeZee-Regular"));
     expect(
-      font(bytes, { family: "Body", weight: 500, style: "italic", fallback: ["Georgia", "serif"] }),
+      font(bytes, { family: "Body", weight: 500, italic: true, fallback: ["Georgia", "serif"] }),
     ).toMatchObject({
       family: "Body",
       weight: 500,
-      style: "italic",
+      italic: true,
       fallback: ["Georgia", "serif"],
     });
   });
 
   test("the bytes become a base64 data URI with the font's media type", async () => {
     const bytes = await readFile(fixture("ABeeZee-Regular"));
-    expect(sans.href.startsWith("data:font/ttf;base64,")).toBe(true);
-    expect(Buffer.from(sans.href.split(",")[1]!, "base64").equals(bytes)).toBe(true);
-    expect(sans.bytes).toBe(sans.href.length);
+    expect(sans.href!.startsWith("data:font/ttf;base64,")).toBe(true);
+    expect(Buffer.from(sans.href!.split(",")[1]!, "base64").equals(bytes)).toBe(true);
+    expect(sans.bytes).toBe(sans.href!.length);
   });
 
   test("rejects what it cannot read", () => {
@@ -72,7 +81,7 @@ describe("font", () => {
     });
 
     expect(woff2).toMatchObject({ format: "woff2", family: "Packed", weight: 400 });
-    expect(woff2.href.startsWith("data:font/woff2;base64,")).toBe(true);
+    expect(woff2.href!.startsWith("data:font/woff2;base64,")).toBe(true);
     expect(() => woff2.measure("Hi", 12)).toThrow("needs the TTF or OTF file");
     expect(() => woff2.path("Hi", { size: 12 })).toThrow("needs the TTF or OTF file");
   });
@@ -121,7 +130,7 @@ describe("font.family", () => {
     expect(family.name).toBe("Space Mono");
     expect(family.face()).toBe(mono);
     expect(family.face(600)).toBe(monoBold);
-    expect(family.face(400, "italic")).toBe(mono);
+    expect(family.face(400, true)).toBe(mono);
   });
 
   test("follows CSS weight matching when no face is exact", async () => {
@@ -135,56 +144,59 @@ describe("font.family", () => {
   });
 
   test("two faces in one weight and style slot are an error", () => {
-    expect(() => font.family(sans, sans)).toThrow("two normal faces of weight 400");
+    expect(() => font.family(sans, sans)).toThrow("two upright faces of weight 400");
   });
 });
 
-describe("fontFamily", () => {
-  test("embeds a used font once, with its fallback in the attribute", () => {
-    const svg = scene(
-      <>
-        <text fontFamily={sans}>One</text>
-        <text fontFamily={sans}>Two</text>
-      </>,
-    );
+describe("embedding", () => {
+  test("embeds a used font once", () => {
+    const out = emit(() => (
+      <Group>
+        <Text font={sans} size={10} fill="#000000">
+          One
+        </Text>
+        <Text font={sans} size={10} fill="#000000">
+          Two
+        </Text>
+      </Group>
+    ));
 
-    expect(faces(svg)).toEqual(["'ABeeZee' 400 normal"]);
-    expect(svg).toContain(`font-family="'ABeeZee', sans-serif"`);
+    expect(faces(out)).toEqual(["'ABeeZee' 400 normal"]);
+    expect(out).toContain(`font-family="'ABeeZee'"`);
   });
 
-  test("a family embeds every face under its name", () => {
-    const svg = scene(<text fontFamily={font.family(sans, italic)}>Hi</text>);
-    expect(faces(svg)).toEqual(["'ABeeZee' 400 normal", "'ABeeZee' 400 italic"]);
+  test("a family embeds each face drawn in it under its name, and no other", () => {
+    const family = font.family(sans, italic);
+
+    const both = emit(() => (
+      <Text font={family} size={10} fill="#000000">
+        Hi <Run italic>there</Run>
+      </Text>
+    ));
+
+    expect(faces(both)).toEqual(["'ABeeZee' 400 normal", "'ABeeZee' 400 italic"]);
+    expect(faces(written(family, "Hi"))).toEqual(["'ABeeZee' 400 normal"]);
   });
 
-  test("an unused font is not embedded", () => {
-    void sans;
-    expect(scene(<text fontFamily="monospace">Hi</text>)).not.toContain("@font-face");
-  });
-
-  test("works on a group, so its text inherits the font", () => {
-    expect(
-      faces(
-        scene(
-          <g fontFamily={mono}>
-            <text>Hi</text>
-          </g>,
-        ),
-      ),
-    ).toEqual(["'Space Mono' 400 normal"]);
+  test("a scene with no text embeds no font", () => {
+    expect(emit(() => <Group />)).not.toContain("@font-face");
   });
 
   test("the same file loaded twice embeds once", async () => {
     const again = await font.load(fixture("ABeeZee-Regular"));
 
-    const svg = scene(
-      <>
-        <text fontFamily={sans}>A</text>
-        <text fontFamily={again}>B</text>
-      </>,
-    );
+    const out = emit(() => (
+      <Group>
+        <Text font={sans} size={10} fill="#000000">
+          A
+        </Text>
+        <Text font={again} size={10} fill="#000000">
+          B
+        </Text>
+      </Group>
+    ));
 
-    expect(faces(svg)).toEqual(["'ABeeZee' 400 normal"]);
+    expect(faces(out)).toEqual(["'ABeeZee' 400 normal"]);
   });
 
   test("a family name cannot break out of the CSS string", async () => {
@@ -192,9 +204,7 @@ describe("fontFamily", () => {
       family: "x\n;}svg *{display:none}/*",
     });
 
-    const style = /<style>([\s\S]*)<\/style>/.exec(
-      scene(<text fontFamily={hostile}>Hi</text>),
-    )![1]!;
+    const style = /<style>([\s\S]*)<\/style>/.exec(written(hostile, "Hi"))![1]!;
 
     expect(style).toContain("@font-face{font-family:'x\\a ;}svg *{display:none}/*'");
     expect(style).not.toContain("\n;}");
@@ -202,19 +212,24 @@ describe("fontFamily", () => {
 
   test("two different files claiming one family slot is an error", async () => {
     const impostor = font(await readFile(fixture("SpaceMono-Regular")), { family: "ABeeZee" });
+
     expect(() =>
-      scene(
-        <>
-          <text fontFamily={sans}>A</text>
-          <text fontFamily={impostor}>B</text>
-        </>,
-      ),
-    ).toThrow("Two different fonts claim 'ABeeZee' 400 normal");
+      emit(() => (
+        <Group>
+          <Text font={sans} size={10} fill="#000000">
+            A
+          </Text>
+          <Text font={impostor} size={10} fill="#000000">
+            B
+          </Text>
+        </Group>
+      )),
+    ).toThrow("Two different fonts are both ABeeZee 400.");
   });
 
   test("embeds only the glyphs the scene's text uses", () => {
-    const embedded = (svg: string) => /url\(data:font\/ttf;base64,([^)]+)\)/.exec(svg)![1]!;
-    const cut = Buffer.from(embedded(scene(<text fontFamily={sans}>Hi</text>)), "base64");
+    const out = written(sans, "Hi");
+    const cut = Buffer.from(/url\(data:font\/ttf;base64,([^)]+)\)/.exec(out)![1]!, "base64");
     expect(cut.length).toBeLessThan(sans.bytes / 4);
     const parsed = font(cut);
     expect(parsed).toMatchObject({ family: "ABeeZee", weight: 400 });
@@ -224,25 +239,20 @@ describe("fontFamily", () => {
   });
 
   test("the cut keeps pair kerning among the glyphs it keeps", () => {
-    const cut = font(
-      Buffer.from(
-        /base64,([^)]+)\)/.exec(scene(<text fontFamily={sans}>AV To</text>))![1]!,
-        "base64",
-      ),
-    );
+    const cut = cutOf(written(sans, "AV To"));
 
     expect(cut.measure("AV", 100)).toBeCloseTo(sans.measure("AV", 100), 6);
     expect(cut.measure("To", 100)).toBeCloseTo(sans.measure("To", 100), 6);
   });
 
   test("text that forms ligatures embeds the whole font, so the browser can still form them", () => {
-    expect(scene(<text fontFamily={black}>fi</text>)).toContain(black.href);
+    expect(written(black, "fi")).toContain(black.href!);
   });
 
   test("text that could meet contextual alternates or mark positioning embeds the whole font", () => {
-    expect(scene(<text fontFamily={jetbrains}>a // b</text>)).toContain(jetbrains.href);
-    expect(scene(<text fontFamily={sans}>{"e\u0301"}</text>)).toContain(sans.href);
-    expect(scene(<text fontFamily={jetbrains}>POST /login</text>)).not.toContain(jetbrains.href);
+    expect(written(jetbrains, "a // b")).toContain(jetbrains.href!);
+    expect(written(sans, "e\u0301")).toContain(sans.href!);
+    expect(written(jetbrains, "POST /login")).not.toContain(jetbrains.href!);
   });
 
   test("with ligatures off, text draws one glyph per character and the font still cuts down", async () => {
@@ -252,11 +262,11 @@ describe("fontFamily", () => {
       plain.measure("f", 100) + plain.measure("i", 100),
       6,
     );
-    expect(scene(<text fontFamily={plain}>fi</text>)).not.toContain(plain.href);
+    expect(written(plain, "fi")).not.toContain(plain.href);
     const code = font(await readFile(fixture("JetBrainsMono")), { ligatures: false });
-    const svg = scene(<text fontFamily={code}>{"a // b => c"}</text>);
-    expect(svg).not.toContain(code.href);
-    const cut = font(Buffer.from(/base64,([^)]+)\)/.exec(svg)![1]!, "base64"));
+    const out = written(code, "a // b => c");
+    expect(out).not.toContain(code.href);
+    const cut = cutOf(out);
     expect(cut.has("=") && cut.has(">") && cut.has("/")).toBe(true);
   });
 
@@ -266,41 +276,88 @@ describe("fontFamily", () => {
     const real = typesetter(parsed);
     const clef = "\u{1d11e}";
     const remapped = { ...real, glyph: (char: string) => real.glyph(char === clef ? "H" : char) };
-    const cut = font(subset(bytes, parsed, remapped, real.kern, [`${clef}i`])!);
+    const cut = font(subset(bytes, parsed, remapped, [`${clef}i`])!);
     expect(cut.has(clef) && cut.has("i")).toBe(true);
     expect(cut.has("H")).toBe(false);
   });
 
   test("subset: false embeds the whole file", async () => {
     const whole = font(await readFile(fixture("ABeeZee-Regular")), { subset: false });
-    expect(scene(<text fontFamily={whole}>Hi</text>)).toContain(whole.href);
-  });
-
-  test("a later copy of the same file with subset: false still embeds it whole", async () => {
-    const whole = font(await readFile(fixture("ABeeZee-Regular")), { subset: false });
-
-    const svg = scene(
-      <>
-        <text fontFamily={sans}>A</text>
-        <text fontFamily={whole}>B</text>
-      </>,
-    );
-
-    expect(faces(svg)).toEqual(["'ABeeZee' 400 normal"]);
-    expect(svg).toContain(whole.href);
+    expect(written(whole, "Hi")).toContain(whole.href!);
   });
 
   test("a large embedded font warns", () => {
-    const big = font(
-      Uint8Array.from([...Buffer.from("wOF2"), ...new Uint8Array(200_000).fill(7)]),
-      {
-        family: "Big",
-      },
+    const big = `data:font/woff2;base64,${"A".repeat(300 * 1024)}`;
+
+    const out = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><style>@font-face{font-family:'Big';src:url(${big}) format('woff2')}</style><text font-family="'Big'">Hi</text></svg>`;
+
+    expect(validateSvg(out).warnings.join("\n")).toContain("An embedded font is");
+  });
+});
+
+describe("subset", () => {
+  const load = async (name: string) => {
+    const bytes = new Uint8Array(await readFile(fixture(name)));
+    const parsed = sfnt(bytes);
+
+    return { bytes, parsed, real: typesetter(parsed, false) };
+  };
+
+  test("renumbers the kept glyphs and keeps every advance and the kerning of adjacent pairs", async () => {
+    const { bytes, parsed, real } = await load("ABeeZee-Regular");
+    const texts = ["To AVA", "Wave"];
+    const cut = sfnt(subset(bytes, parsed, real, texts)!);
+    const mine = typesetter(cut, false);
+    const chars = [...new Set(texts.join(""))];
+
+    expect(u16(cut, required(cut, "maxp") + 4)).toBe(1 + chars.length);
+    expect([...cut.tables.keys()].sort()).toEqual(
+      [
+        "OS/2",
+        "cmap",
+        "cvt ",
+        "fpgm",
+        "gasp",
+        "glyf",
+        "head",
+        "hhea",
+        "hmtx",
+        "kern",
+        "loca",
+        "maxp",
+        "name",
+        "post",
+        "prep",
+      ].sort(),
     );
 
-    expect(validateSvg(scene(<text fontFamily={big}>Hi</text>)).warnings.join("\n")).toContain(
-      "An embedded font is",
-    );
+    for (const text of texts)
+      expect(mine.layoutGlyphs(text).map((glyph) => glyph.advance)).toEqual(
+        real.layoutGlyphs(text).map((glyph) => glyph.advance),
+      );
+
+    const kerning = (t: typeof real, pair: string) => t.kern(t.glyph(pair[0]!), t.glyph(pair[1]!));
+    expect(kerning(real, "AV")).not.toBe(0);
+    expect(kerning(mine, "AV")).toBe(kerning(real, "AV"));
+    expect(kerning(mine, "VA")).toBe(kerning(real, "VA"));
+
+    const apart = chars
+      .flatMap((left) => chars.map((right) => left + right))
+      .filter((pair) => !texts.some((text) => text.includes(pair)) && kerning(real, pair) !== 0);
+
+    expect(apart.length).toBeGreaterThan(0);
+
+    for (const pair of apart) expect(kerning(mine, pair)).toBe(0);
+  });
+
+  test("a composite glyph keeps its components, renumbered, and draws the same outline", async () => {
+    const { bytes, parsed, real } = await load("SpaceMono-Regular");
+    const cut = sfnt(subset(bytes, parsed, real, ["é"])!);
+    const mine = typesetter(cut, false);
+
+    expect(u16(cut, required(cut, "maxp") + 4)).toBeGreaterThan(2);
+    expect(contours(cut, mine.glyph("é"))).toEqual(contours(parsed, real.glyph("é")));
+    expect(contours(cut, mine.glyph("é")).length).toBeGreaterThan(1);
   });
 });
 
@@ -368,127 +425,15 @@ describe("path", () => {
     }
 
     const tables = new Map([
-      ["head", 0],
-      ["loca", 64],
-      ["glyf", 256],
+      ["head", { offset: 0, length: 64 }],
+      ["loca", { offset: 64, length: 192 }],
+      ["glyf", { offset: 256, length: view.byteLength - 256 }],
     ]);
 
-    const lengths = new Map<string, number>();
-    expect(() => contours({ view, tables, lengths }, 0)).toThrow("too many components");
+    expect(() => contours({ view, tables }, 0)).toThrow("too many components");
   });
 
   test("needs a positive size", () => {
     expect(() => sans.path("a", { size: 0 })).toThrow("positive size");
-  });
-});
-
-describe("fitText", () => {
-  test("is the largest whole size whose widest line fits, capped at max", () => {
-    const size = fitText(sans, ["Hi", "a longer line"], { width: 300, max: 500 });
-
-    expect(sans.measure("a longer line", size)).toBeLessThanOrEqual(300);
-    expect(sans.measure("a longer line", size + 1)).toBeGreaterThan(300);
-    expect(fitText(sans, "Hi", { width: 300, max: 20 })).toBe(20);
-  });
-
-  test("reserves tail ems after the last line only, and keeps to min", () => {
-    const plain = fitText(sans, ["wide wide wide", "x"], { width: 300, max: 500 });
-
-    expect(fitText(sans, ["wide wide wide", "x"], { width: 300, max: 500, tail: 5 })).toBe(plain);
-    expect(fitText(sans, ["x", "wide wide wide"], { width: 300, max: 500, tail: 5 })).toBeLessThan(
-      fitText(sans, ["x", "wide wide wide"], { width: 300, max: 500 }),
-    );
-    expect(fitText(sans, "wide wide wide", { width: 1, max: 500, min: 12 })).toBe(12);
-  });
-
-  test("says what to pass when the options cannot work", () => {
-    expect(() => fitText(sans, [], { width: 300, max: 20 })).toThrow("fitText() needs");
-  });
-});
-
-describe("Glyphs", () => {
-  test("draws one path per visible glyph, labelled with the text, and embeds no font", () => {
-    const svg = scene(<Glyphs font={sans} text="Hi there" size={20} y={40} fill="#fff" />);
-    expect(svg.match(/<path /g)?.length).toBe(7);
-    expect(svg).toContain('aria-label="Hi there"');
-    expect(svg).not.toContain("@font-face");
-  });
-
-  test("a function animation runs once per glyph and says where it is and how many there are", () => {
-    const seen: [string, number][] = [];
-    const counts = new Set<number>();
-
-    const svg = scene(
-      <Glyphs
-        font={sans}
-        text="ab c"
-        size={20}
-        stroke="#fff"
-        animation={(glyph, each) => {
-          seen.push([glyph.char, each.index]);
-          counts.add(each.count);
-
-          return draw(each.stagger(span(0, 0.5), 0.1));
-        }}
-      />,
-    );
-
-    expect(seen).toEqual([
-      ["a", 0],
-      ["b", 1],
-      ["c", 3],
-    ]);
-    expect([...counts]).toEqual([4]);
-
-    const by = scene(
-      <Glyphs
-        font={sans}
-        text="ab c"
-        size={20}
-        stroke="#fff"
-        animation={(_, { index }) => draw({ at: index * 0.1, over: 0.5 })}
-      />,
-    );
-
-    expect(svg).toBe(by);
-    expect(svg.match(/pathLength="1"/g)?.length).toBe(3);
-  });
-
-  test("from a family, picks the face by weight", () => {
-    const family = font.family(mono, monoBold);
-    const bold = scene(<Glyphs font={family} weight={700} text="a" size={20} />);
-    expect(bold).toBe(scene(<Glyphs font={monoBold} text="a" size={20} />));
-  });
-});
-
-describe("extras with a font", () => {
-  test("code() takes its column width from a monospaced font and embeds it", () => {
-    const block = code("let x = 1", { font: mono, fontSize: 20 });
-    expect(block.metrics.advance).toBeCloseTo(mono.measure("x", 20), 6);
-    expect(faces(scene(block.node))).toEqual(["'Space Mono' 400 normal"]);
-  });
-
-  test("code() rejects a proportional font", () => {
-    expect(() => code("x", { font: sans })).toThrow("needs a monospaced font");
-  });
-
-  test("a callout box fits its measured lines", () => {
-    const target = rect(0, 0, 40, 20);
-
-    const box = (text: string) =>
-      Number(
-        /<rect x="[^"]*" y="[^"]*" width="([^"]+)"/.exec(
-          scene(
-            <Callout target={target} show={{ at: 0, over: 1 }} font={sans}>
-              {text}
-            </Callout>,
-          ),
-        )![1],
-      );
-
-    expect(box("WWW") - box("iii")).toBeCloseTo(
-      sans.measure("WWW", 14) - sans.measure("iii", 14),
-      1,
-    );
   });
 });

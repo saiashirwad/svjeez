@@ -1,588 +1,756 @@
 import { describe, expect, test } from "bun:test";
-import { render, type Rect, type SvgNode } from "svjeez";
-import { flowchart, lanes, sequence, stateMachine, tree } from "../src/index.ts";
+import { Align, Group, Shape, circle, ease, font, scene, span, track } from "svjeez";
+import { SceneError, check, svg, type Child, type Model, type When } from "svjeez/tools";
+import { Edge, look } from "../src/kit.tsx";
+import { blendNumber, valueAt } from "../../svjeez/src/model/sample";
+import {
+  flowchart,
+  lanes,
+  sequence,
+  stateMachine,
+  tree,
+  type DiagramColors,
+} from "../src/index.ts";
 
-const valid = (node: SvgNode) =>
-  render({ width: 800, height: 600, duration: 10, title: "diagram" }, node);
+const mono = await font.load(
+  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
+);
 
-const inside = (outer: Rect, inner: Rect) =>
-  inner.x >= outer.x - 1e-6 &&
-  inner.y >= outer.y - 1e-6 &&
-  inner.x + inner.w <= outer.x + outer.w + 1e-6 &&
-  inner.y + inner.h <= outer.y + outer.h + 1e-6;
+const colors: DiagramColors = {
+  background: "#FFFFFF",
+  text: "#1D1D1F",
+  line: "#6E6E73",
+  accent: "#0A6CFF",
+};
 
-const touches = (p: { x: number; y: number }, b: Rect) =>
-  p.x >= b.x - 1e-6 && p.x <= b.x + b.w + 1e-6 && p.y >= b.y - 1e-6 && p.y <= b.y + b.h + 1e-6;
+const options = { font: mono, colors };
 
-describe("flowchart", () => {
-  const chart = flowchart(
+const draw = (child: Child, duration = 6) =>
+  scene({ size: [1200, 800], duration, title: "Diagram", loop: false }, () => (
+    <Group>
+      <Shape geometry={circle(1)} at={[0, 0]} fill="#FFFFFF" />
+      <Group offset={[20, 20]}>{child}</Group>
+    </Group>
+  ));
+
+const errorsOf = (child: Child) =>
+  check(draw(child))
+    .problems.filter((f) => f.severity === "error")
+    .map((f) => f.message);
+
+const thrown = (run: () => void): SceneError => {
+  try {
+    run();
+  } catch (error) {
+    if (error instanceof SceneError) return error;
+    throw error;
+  }
+
+  throw new Error("it did not throw");
+};
+
+const review = () =>
+  flowchart(
     {
       nodes: {
-        start: { label: "Start", role: "input" },
-        check: { label: "Ok?", role: "decision" },
-        work: "Work",
-        db: { label: "Save", role: "store" },
-        end: { label: "Done", role: "output" },
+        pr: { label: "PR opened", role: "input" },
+        lint: { label: "Run linters", role: "tool" },
+        ok: { label: "Clean?", role: "decision" },
+        post: { label: "Post review", role: "output" },
       },
-      groups: { core: { label: "Core", nodes: ["check", "work"] } },
+      groups: { agent: { label: "Review agent", nodes: ["lint", "ok"] } },
       edges: [
-        ["start", "check"],
-        ["check", "work", "yes"],
-        ["work", "check"],
-        ["check", "db", "no"],
-        ["db", "end"],
+        ["pr", "lint"],
+        ["lint", "ok"],
+        ["ok", "post", "yes"],
+        ["ok", "lint", "no"],
       ],
     },
-    { x: 100, y: 50, play: { at: 1 } },
+    { ...options, reveal: span(0.5, 0.4) },
   );
 
-  test("bounds start at x, y and hold every node and group", () => {
-    expect([chart.bounds.x, chart.bounds.y]).toEqual([100, 50]);
+describe("flowchart", () => {
+  test("draws, compiles and checks with no errors", () => {
+    const chart = review();
 
-    for (const id of ["start", "check", "work", "db", "end", "core"] as const)
-      expect(inside(chart.bounds, chart.part(id).box)).toBe(true);
-    expect(inside(chart.part("core").box, chart.part("work").box)).toBe(true);
+    expect(svg.emit(draw(chart.node))).toContain("<svg");
+    expect(errorsOf(chart.node)).toEqual([]);
   });
 
-  test("route runs edge to edge from the first node to the last, and throws with no path", () => {
-    const trip = chart.route("start", "end");
-    expect(touches(trip[0]!, chart.part("start").box)).toBe(true);
-    expect(touches(trip.at(-1)!, chart.part("end").box)).toBe(true);
-    expect(chart.route("work", "end").slice(0, chart.edge("work", "check").length)).toEqual(
-      chart.edge("work", "check"),
+  test("nodes enter one beat each in rank order, and edges draw on as their later end enters", () => {
+    const chart = review();
+
+    expect((["pr", "lint", "ok", "post"] as const).map((id) => chart.when(id)?.start)).toEqual([
+      0.5, 0.9, 1.3, 1.7,
+    ]);
+    expect(chart.when("pr->lint")).toMatchObject({ start: 0.5, over: 0.4 });
+    expect(chart.when("agent")?.start).toBe(0.9);
+    expect(chart.span).toMatchObject({ start: 0.5 });
+  });
+
+  test("a reveal record times the nodes it names and leaves the rest there from the start", () => {
+    const chart = flowchart(
+      { nodes: { a: "A", b: "B" }, edges: [["a", "b"]] },
+      { ...options, reveal: { b: span(2, 0.3) } },
     );
-    expect(() => chart.route("end", "start")).toThrow();
-    expect(() => chart.edge("start", "end")).toThrow();
+
+    expect(chart.when("a")).toBeUndefined();
+    expect(chart.when("b")).toMatchObject({ start: 2, over: 0.3 });
+    expect(chart.when("a->b")).toMatchObject({ start: 1.7, over: 0.3 });
   });
 
-  test("a decision's edges end on the diamond, not its bounding box", () => {
-    const into = chart.edge("start", "check").at(-1)!;
-    const b = chart.part("check").box;
+  test("an edge can draw from a timeline of its own, but not also from a reveal", () => {
+    const spec = { nodes: { a: "A", b: "B" }, edges: [["a", "b"]] } as const;
+    const progress = track(0).to(1, span(1, 1));
+    const chart = flowchart(spec, { ...options, draw: { "a->b": progress } });
+
+    expect(svg.emit(draw(chart.node))).toContain("@keyframes");
+    expect(chart.when("a->b")).toBeUndefined();
+
     expect(
-      Math.abs(into.x - b.center.x) / (b.w / 2) + Math.abs(into.y - b.center.y) / (b.h / 2),
-    ).toBeCloseTo(1, 6);
+      thrown(() => flowchart(spec, { ...options, reveal: span(0, 1), draw: { "a->b": progress } }))
+        .message,
+    ).toContain('draws "a->b" from a draw timeline, but its reveal already draws it');
+
+    expect(thrown(() => flowchart(spec, { ...options, draw: { "b->a": progress } })).problem).toBe(
+      'flowchart() draw names "b->a", which is not one of its edges.',
+    );
   });
 
-  test("renders valid SVG, static and revealed", () => {
-    expect(() => valid(chart.node)).not.toThrow();
-    expect(() => valid(flowchart({ nodes: { a: "A" }, edges: [] }).node)).not.toThrow();
-  });
-});
+  test("size holds every node, and parts are refs a scene can place against", () => {
+    const chart = review();
+    const [w, h] = chart.size;
 
-describe("sequence", () => {
-  const seq = sequence(
-    {
-      actors: { user: "User", api: { label: "API" }, db: { label: "Postgres", role: "store" } },
-      messages: [
-        ["user", "api", "POST /login"],
-        ["api", "db", "select"],
-        ["db", "api", "row", { reply: true }],
-        ["api", "api", "hash"],
-        { note: "api", text: "ok" },
-      ],
-    },
-    { play: { at: 2, step: 0.5 } },
-  );
+    expect(w).toBeGreaterThan(100);
+    expect(h).toBeGreaterThan(100);
 
-  test("message i runs between the two lifelines in its play slot", () => {
-    const { span, points } = seq.message(1);
-    expect(span).toEqual({ at: 2.5, over: 0.5 });
-    expect(points.map((p) => p.x)).toEqual([
-      seq.part("api").box.center.x,
-      seq.part("db").box.center.x,
-    ]);
-    expect(seq.message(2).points[0]!.y).toBeGreaterThan(points[0]!.y);
-    expect(() => seq.message(5)).toThrow();
+    const placed = draw(
+      <Group>
+        {chart.node}
+        <Align to={chart.part("lint")} place="top">
+          <Shape geometry={circle(3)} fill="#FF0000" />
+        </Align>
+      </Group>,
+    );
+
+    expect(svg.emit(placed)).toContain("<svg");
   });
 
-  test("renders valid SVG", () => expect(() => valid(seq.node)).not.toThrow());
+  test("route runs edge to edge, and says so when no edges join the two", () => {
+    const chart = review();
+    const route = chart.route("pr", "post");
 
-  test("with one time per row, each message runs until the next starts", () => {
-    const timed = sequence(
+    expect(route.points.length).toBeGreaterThan(4);
+    expect(route.length).toBeGreaterThan(0);
+    expect(route.at(0)).toEqual(route.points[0]!);
+    expect(route.at(1)).toEqual(route.points.at(-1)!);
+    expect(thrown(() => chart.route("post", "pr")).message).toBe(
+      'flowchart() has no way from "post" to "pr" along its edges. Route between nodes an edge path joins.',
+    );
+  });
+
+  test("a decision's edges end on the diamond, not its box", () => {
+    const chart = flowchart(
       {
-        actors: { a: "A", b: "B" },
-        messages: [["a", "b", "x"], ["b", "a", "y"], { note: "a", text: "z" }],
+        nodes: { q: { label: "Ok?", role: "decision" }, a: "A", b: "B" },
+        edges: [
+          ["q", "a"],
+          ["q", "b"],
+        ],
       },
-      { play: { at: [1, 1.5, 4], step: 0.6 } },
+      options,
     );
 
-    expect([0, 1, 2].map((i) => timed.message(i).span)).toEqual([
-      { at: 1, over: 0.5 },
-      { at: 1.5, over: 2.5 },
-      { at: 4, over: 0.6 },
-    ]);
-    expect(() =>
-      sequence({ actors: { a: "A" }, messages: [["a", "a", "x"]] }, { play: { at: [1, 2] } }),
-    ).toThrow();
-  });
-});
+    const [start] = chart.edge("q", "a").points;
+    const [w] = chart.size;
 
-describe("state", () => {
-  const machine = stateMachine({
-    states: { idle: "Idle", run: { label: "Running" }, done: { label: "Done", final: true } },
-    initial: "idle",
-    transitions: [
-      ["idle", "run", "start"],
-      ["run", "idle", "pause"],
-      ["run", "done"],
-    ],
+    expect(start![1]).toBeGreaterThan(0);
+    expect(start![0]).toBeLessThan(w);
   });
 
-  test("walk lights each state for its dwell, with travel time between", () => {
-    const walk = machine.walk(["idle", "run", "idle", "run", "done"], {
-      at: 1,
-      dwell: 1,
-      speed: 1e9,
-    });
+  test("misuse is a SceneError that names the diagram and what to fix", () => {
+    const nodes = { a: "A", b: "B" };
 
-    expect(walk.spans.idle.map((s) => s.at)).toEqual([1, expect.closeTo(3.7, 9)]);
-    expect(walk.spans.done[0]!.at).toBeCloseTo(1 + 4 * 1.35, 9);
-    expect(walk.span.end).toBeCloseTo(1 + 5 + 4 * 0.35, 9);
-    expect(() =>
-      valid(
-        <g>
-          {machine.node}
-          {walk.node}
-        </g>,
-      ),
-    ).not.toThrow();
-  });
-
-  test("with one time per state, each lights then, the token arriving as it does", () => {
-    const walk = machine.walk(["idle", "run", "done"], { at: [1, 5, 6], dwell: 2, speed: 1e9 });
-    expect([walk.spans.idle[0]!.at, walk.spans.run[0]!.at, walk.spans.done[0]!.at]).toEqual([
-      1, 5, 6,
-    ]);
-    expect(walk.spans.idle[0]!.over).toBeCloseTo(4 - 0.35, 9);
-    expect(walk.spans.run[0]!.over).toBeCloseTo(1 - 0.35, 9);
-    expect(walk.span.end).toBe(8);
-    expect(walk.parts.map((p) => p.id)).toEqual(["idle->run", "run->done"]);
-    expect([walk.part("idle->run").span.at, walk.part("idle->run").span.end]).toEqual([
-      expect.closeTo(4.65, 9),
-      5,
-    ]);
-    expect(walk.part("run->done").span.end).toBe(6);
-    const { x, y, w, h } = walk.bounds.union(machine.part("done").box);
-    expect({ x, y, w, h }).toMatchObject({
-      x: walk.bounds.x,
-      y: walk.bounds.y,
-      w: walk.bounds.w,
-      h: walk.bounds.h,
-    });
-    expect(() => walk.part("done->idle")).toThrow('walk() has no leg "done->idle"');
-    expect(() => machine.walk(["idle", "run"], { at: [2, 1] })).toThrow();
-  });
-
-  test("anchor puts that point of the bounds on x, y", () => {
-    const centered = stateMachine(
-      { states: { a: "A", b: "B" }, initial: "a", transitions: [["a", "b"]] },
-      { x: 400, y: 300, anchor: "center" },
+    // SAFETY: an edge to an unknown node on purpose, which the types forbid, to read the runtime error
+    expect(thrown(() => flowchart({ nodes, edges: [["a", "c" as "b"]] }, options)).message).toBe(
+      'flowchart() edge 1 names "c", which is not one of its nodes. Its nodes are "a", "b".',
     );
-
-    expect(centered.bounds.center).toEqual({ x: 400, y: 300 });
-    const below = sequence({ actors: { a: "A" }, messages: [] }, { x: 50, y: 20, anchor: "top" });
-    expect(below.bounds.top).toEqual({ x: 50, y: 20 });
-  });
-
-  test("walk throws when consecutive states have no transition", () => {
-    expect(() => machine.walk(["idle", "done"], { at: 0 })).toThrow();
-  });
-
-  test("the initial state sits below its marker and a final state above its bullseye", () => {
-    expect(machine.part("idle").box.y).toBeGreaterThan(machine.bounds.y + 14);
-    expect(machine.bounds.y + machine.bounds.h).toBeGreaterThan(
-      machine.part("done").box.y + machine.part("done").box.h + 18,
+    expect(thrown(() => flowchart({ nodes: {}, edges: [] }, options)).message).toBe(
+      "flowchart() needs at least one node, got none.",
     );
-  });
-
-  describe("composite", () => {
-    const review = stateMachine({
-      states: {
-        draft: "Draft",
-        review: {
-          label: "Review",
-          states: { screening: "Screening", decision: "Decision" },
-          initial: "screening",
-        },
-        published: { label: "Published", final: true },
-      },
-      initial: "draft",
-      transitions: [
-        ["draft", "review", "submit"],
-        ["screening", "decision"],
-        ["review", "draft", "rejected"],
-        ["decision", "published", "approved"],
-      ],
-    });
-
-    test("inner states sit inside their container, below its header", () => {
-      for (const id of ["screening", "decision"] as const) {
-        expect(inside(review.part("review").box, review.part(id).box)).toBe(true);
-        expect(review.part(id).box.y).toBeGreaterThan(review.part("review").box.y + 30);
-      }
-    });
-
-    test("a transition to the composite ends on its border; one from an inner state leaves the container", () => {
-      const into = review.edge("draft", "review").at(-1)!;
-      expect(into.y).toBeCloseTo(review.part("review").box.y, 6);
-      const out = review.edge("decision", "published");
-      expect(touches(out[0]!, review.part("review").box)).toBe(true);
-      expect(inside(review.part("review").box, review.part("published").box)).toBe(false);
-    });
-
-    test("a walk enters a composite through its initial state and leaves through its transitions", () => {
-      const walk = review.walk(["draft", "review", "screening", "decision", "published"], {
-        at: 0,
-      });
-
-      expect(walk.spans.screening).toHaveLength(1);
-      expect(() => review.walk(["draft", "decision"], { at: 0 })).toThrow();
-      expect(() =>
-        valid(
-          <g>
-            {review.node}
-            {walk.node}
-          </g>,
+    // SAFETY: no font on purpose, which the types forbid, to read the runtime error
+    expect(
+      thrown(() => flowchart({ nodes, edges: [] }, { font: undefined as never })).message,
+    ).toBe(
+      "flowchart() needs a font to measure its labels with. Pass one in its options, as in flowchart(spec, { font: sans }).",
+    );
+    expect(thrown(() => flowchart({ nodes: { "a/b": "A" }, edges: [] }, options)).problem).toBe(
+      'flowchart() has a node named "a/b".',
+    );
+    expect(
+      thrown(() =>
+        flowchart(
+          {
+            nodes,
+            groups: { x: { label: "X", nodes: ["a"] }, y: { label: "Y", nodes: ["a"] } },
+            edges: [],
+          },
+          options,
         ),
-      ).not.toThrow();
-    });
+      ).problem,
+    ).toBe('flowchart() puts node "a" in two groups, "x" and "y".');
+    // SAFETY: an unknown part on purpose, which the types forbid, to read the runtime error
+    expect(thrown(() => review().part("nope" as "pr")).message).toStartWith(
+      'flowchart() has no part "nope". Its parts are "pr", "lint", "ok", "post", "agent", "pr->lint"',
+    );
+    expect(
+      thrown(() => flowchart({ nodes, edges: [] }, { ...options, reveal: span(0, 0) })).problem,
+    ).toBe(
+      "flowchart() reveal needs a span that starts at 0 or later and lasts longer than 0, got span(0, 0).",
+    );
+  });
+
+  test("with() draws a child over the edges and under the nodes", () => {
+    const chart = review();
+    const route = chart.route("pr", "post");
+
+    expect(
+      errorsOf(
+        chart.with(<Shape geometry={route.geometry} stroke={{ color: "#FF8800", width: 2 }} />),
+      ),
+    ).toEqual([]);
   });
 });
 
-describe("diagram options", () => {
+describe("flowchart shapes, styles and directions", () => {
+  const forms = {
+    a: { label: "A", role: "tool", shape: "hexagon" },
+    b: { label: "B", role: "input", shape: "slantBack" },
+    c: { label: "C", shape: "trapezoid" },
+    d: { label: "D", shape: "trapezoidBack" },
+    e: { label: "E", role: "input", shape: "flag" },
+    f: { label: "F", role: "output", shape: "double" },
+  } as const;
+
   const spec = {
-    nodes: { a: "A", b: "B", c: "C" },
+    nodes: forms,
     edges: [
       ["a", "b"],
       ["b", "c"],
+      ["c", "d"],
+      ["d", "e"],
+      ["e", "f"],
     ],
   } as const;
 
-  test("direction is an option and turns the ranks sideways", () => {
-    const [down, across] = [flowchart(spec), flowchart(spec, { direction: "LR" })];
-    expect(down.part("c").box.y).toBeGreaterThan(down.part("a").box.y);
-    expect(across.part("c").box.x).toBeGreaterThan(across.part("a").box.x);
-    expect(across.part("c").box.y).toBeCloseTo(across.part("a").box.y, 6);
+  test("every shape draws, checks and keeps its edges on its outline", () => {
+    const chart = flowchart(spec, options);
+
+    expect(svg.emit(draw(chart.node))).toContain("<svg");
+    expect(errorsOf(chart.node)).toEqual([]);
+    expect(chart.edge("a", "b").points[0]).toBeDefined();
   });
 
-  test("play takes a start and a step, or one time per node after the first", () => {
-    const times = (svg: string) =>
-      [...svg.matchAll(/animation-delay:(-?[\d.]+)s/g)].map((m) => Number(m[1]));
+  test("BT and RL flip the flow, and a group's label sits on the far side for BT", () => {
+    const base = { nodes: { a: "A", b: "B" }, edges: [["a", "b"]] } as const;
 
-    const stepped = times(valid(flowchart(spec, { play: { at: 1, step: 2 } }).node));
-    const listed = times(valid(flowchart(spec, { play: { at: [1, 3] } }).node));
-    expect(stepped.length).toBeGreaterThan(0);
-    expect(Math.max(...stepped)).toBeCloseTo(Math.max(...listed), 6);
-    expect(() => flowchart(spec, { play: { at: [1] } })).toThrow(/needs 2 times, got 1/);
-    expect(() =>
-      tree({ nodes: { r: "R", k: { label: "K", parent: "r" } } }, { play: { at: [1, 2] } }),
-    ).toThrow(/needs 1 times, got 2/);
+    const end = (direction: "TB" | "BT" | "LR" | "RL") => {
+      const route = flowchart(base, { ...options, direction }).edge("a", "b");
+      const [first, last] = [route.points[0]!, route.points.at(-1)!];
+
+      return [last[0] - first[0], last[1] - first[1]];
+    };
+
+    expect(end("TB")![1]).toBeGreaterThan(0);
+    expect(end("BT")![1]).toBeLessThan(0);
+    expect(end("LR")![0]).toBeGreaterThan(0);
+    expect(end("RL")![0]).toBeLessThan(0);
+
+    const grouped = flowchart(
+      { ...base, groups: { g: { label: "Group", nodes: ["a", "b"] } } },
+      { ...options, direction: "BT" },
+    );
+
+    expect(errorsOf(grouped.node)).toEqual([]);
+  });
+
+  test("a node style replaces the role's paint", () => {
+    const chart = flowchart(
+      {
+        nodes: {
+          a: {
+            label: "A",
+            style: { fill: "#ff0000", stroke: "#00ff00", color: "#0000ff", width: 4 },
+          },
+        },
+        edges: [],
+      },
+      options,
+    );
+
+    const out = svg.emit(draw(chart.node));
+
+    expect(out.toLowerCase()).toContain("#ff0000");
+    expect(out.toLowerCase()).toContain("#00ff00");
+    expect(out.toLowerCase()).toContain("#0000ff");
+  });
+
+  test("edges take tails, circle and cross ends, colors and widths; invisible ones are not drawn", () => {
+    const chart = flowchart(
+      {
+        nodes: { a: "A", b: "B", c: "C", d: "D" },
+        edges: [
+          ["a", "b", undefined, { tail: "filled", head: "filled" }],
+          ["b", "c", undefined, { head: "circle", tail: "cross", color: "#ff00ff", width: 3 }],
+          ["c", "d", "hidden", { line: "invisible" }],
+        ],
+      },
+      options,
+    );
+
+    const out = svg.emit(draw(chart.node));
+
+    expect(errorsOf(chart.node)).toEqual([]);
+    expect(out.toLowerCase()).toContain("#ff00ff");
+    expect(out).not.toContain("hidden");
+    expect(chart.edge("c", "d").length).toBeGreaterThan(0);
+    expect(chart.size[1]).toBeGreaterThan(150);
   });
 });
 
 describe("tree", () => {
-  const team = tree(
-    {
-      nodes: {
-        root: "Root",
-        a: { label: "A", parent: "root" },
-        b: { label: "B", parent: "root", role: "tool" },
-        a1: { label: "A1", parent: "a" },
+  const team = () =>
+    tree(
+      {
+        nodes: {
+          lead: "Lead",
+          a: { label: "Search", parent: "lead" },
+          b: { label: "Build", parent: "lead" },
+        },
       },
-    },
-    { play: { at: 1 } },
-  );
+      { ...options, reveal: span(0.5, 0.3) },
+    );
 
-  test("route runs from one node up through the common ancestor and down to the other", () => {
-    const trip = team.route("a1", "b");
-    expect(touches(trip[0]!, team.part("a1").box)).toBe(true);
-    expect(touches(trip.at(-1)!, team.part("b").box)).toBe(true);
-    expect(Math.min(...trip.map((p) => p.y))).toBeCloseTo(
-      team.part("root").box.y + team.part("root").box.h,
-      6,
+  test("nodes enter breadth first and edges draw on with their child", () => {
+    const t = team();
+
+    expect(t.when("lead")).toMatchObject({ start: 0.5 });
+    expect(t.when("a")?.start).toBeCloseTo(0.8);
+    expect(t.when("lead->b")?.start).toBeCloseTo(0.8);
+    expect(errorsOf(t.node)).toEqual([]);
+  });
+
+  test("route goes up to the common ancestor and down again", () => {
+    const route = team().route("a", "b");
+    const ys = route.points.map(([, y]) => y);
+
+    expect(Math.min(...ys)).toBeLessThan(route.points[0]![1]);
+    expect(route.points.at(-1)![1]).toBeCloseTo(route.points[0]![1], 5);
+  });
+
+  test("a tree needs one root", () => {
+    expect(thrown(() => tree({ nodes: { a: "A", b: "B" } }, options)).message).toBe(
+      'tree() needs exactly one node with no parent, got "a", "b". Give every other node a parent.',
+    );
+  });
+});
+
+describe("sequence", () => {
+  const login = (reveal = span(0.2, 0.8)) =>
+    sequence(
+      {
+        actors: { user: "Browser", api: "API" },
+        messages: [
+          ["user", "api", "POST /login"],
+          { note: "api", text: "checks" },
+          ["api", "user", "200", { reply: true }],
+        ],
+      },
+      { ...options, reveal },
+    );
+
+  test("each message has a beat and a route between the lifelines", () => {
+    const s = login();
+    const reply = s.message(2);
+
+    expect(reply.span).toMatchObject({ start: 1.8, over: 0.8 });
+    expect(reply.route.points[0]![0]).toBeGreaterThan(reply.route.points.at(-1)![0]);
+    expect(errorsOf(s.node)).toEqual([]);
+  });
+
+  test("a cross head is a stroked X at the tip, and no head draws nothing", () => {
+    const heads = (head: "none" | "cross") =>
+      svg.emit(
+        draw(
+          sequence({ actors: { a: "A", b: "B" }, messages: [["a", "b", "hi", { head }]] }, options)
+            .node,
+        ),
+      );
+
+    const cross = heads("cross");
+
+    const arrowPaths = (markup: string) =>
+      markup.match(/<path d="M[^"]*" fill="none" stroke="[^"]*"/g) ?? [];
+
+    expect(arrowPaths(heads("none"))).toHaveLength(1);
+    expect(arrowPaths(cross)).toHaveLength(2);
+    expect(cross).toMatch(
+      /<path d="M[\d. -]+L[\d. -]+M[\d. -]+L[\d. -]+" fill="none" stroke="#6E6E73"/,
     );
   });
 
-  test("a parent sits centered over its children", () => {
-    expect(team.part("root").box.center.x).toBeCloseTo(
-      (team.part("a").box.center.x + team.part("b").box.center.x) / 2,
-      6,
+  test("a reveal record times rows by id, and names only rows that exist", () => {
+    const times = sequence(
+      { actors: { a: "A" }, messages: [["a", "a", "self"], { note: "a", text: "hm" }] },
+      { ...options, reveal: { "note-2": span(3, 1) } },
     );
-    expect(() => valid(team.node)).not.toThrow();
+
+    expect(times.message(0).span).toBeUndefined();
+    expect(times.span).toMatchObject({ start: 3 });
+    expect(
+      thrown(() =>
+        sequence(
+          { actors: { a: "A" }, messages: [["a", "a", "self"]] },
+          // @ts-expect-error a message has the id "message-1", not "1"
+          { ...options, reveal: { "1": span(0, 1) } },
+        ),
+      ).problem,
+    ).toContain('reveal names "1", which is not one of its nodes');
+    expect(thrown(() => login().message(7)).message).toBe(
+      "sequence() has no message 7. Count from 0: it has 3.",
+    );
+  });
+});
+
+describe("sequence blocks", () => {
+  const flow = (reveal = span(0, 0.5)) =>
+    sequence(
+      {
+        title: "Flow",
+        actors: { a: "A", b: "B", c: "C" },
+        boxes: [{ label: "Backend", actors: ["b", "c"] }],
+        messages: [
+          { autonumber: 1 },
+          ["a", "b", "start", { activate: true }],
+          {
+            block: "loop",
+            label: "every minute",
+            messages: [
+              ["b", "c", "poll"],
+              {
+                block: "alt",
+                label: "ok",
+                messages: [["c", "b", "data", { reply: true }]],
+                sections: [{ label: "down", messages: [{ note: ["b", "c"], text: "retry" }] }],
+              },
+            ],
+          },
+          { note: "a", side: "left", text: "left" },
+          {
+            block: "rect",
+            color: "#bfdfff",
+            opacity: 0.4,
+            messages: [["b", "a", "done", { deactivate: true }]],
+          },
+        ],
+      },
+      { ...options, reveal },
+    );
+
+  test("draws frames, dividers, bars, badges and a title without problems", () => {
+    const markup = svg.emit(draw(flow().node));
+
+    expect(errorsOf(flow().node)).toEqual([]);
+    expect(markup).toContain(">loop<");
+    expect(markup).toContain(">[every minute]<");
+    expect(markup).toContain(">[down]<");
+    expect(markup).toContain(">Flow<");
+    expect(markup).toContain(">[Backend]<");
+    expect(markup).toMatch(/>1<[\s\S]*>2<[\s\S]*>3</);
+  });
+
+  test("messages and notes count together, whatever blocks hold them", () => {
+    const s = flow();
+
+    expect(s.message(0).span).toMatchObject({ start: 0 });
+    expect(s.message(5).route.points).toHaveLength(2);
+    expect(thrown(() => s.message(7)).message).toBe(
+      "sequence() has no message 7. Count from 0: it has 6.",
+    );
+  });
+
+  test("rejects unknown actors, a colorless rect, a two-actor note with a side and a stray deactivate", () => {
+    expect(
+      thrown(() =>
+        sequence(
+          // @ts-expect-error "z" is not an actor
+          { actors: { a: "A" }, messages: [{ activate: "z" }] },
+          options,
+        ),
+      ).message,
+    ).toContain('names "z"');
+    expect(
+      thrown(() =>
+        sequence({ actors: { a: "A" }, messages: [{ block: "rect", messages: [] }] }, options),
+      ).problem,
+    ).toContain("rect needs a color");
+    expect(
+      thrown(() =>
+        sequence(
+          { actors: { a: "A", b: "B" }, messages: [{ note: ["a", "b"], side: "left", text: "x" }] },
+          options,
+        ),
+      ).problem,
+    ).toContain("two actors and a side");
+    expect(
+      thrown(() => sequence({ actors: { a: "A" }, messages: [{ deactivate: "a" }] }, options))
+        .message,
+    ).toContain("no activation");
+  });
+});
+
+describe("state machine", () => {
+  const machine = () =>
+    stateMachine(
+      {
+        states: {
+          idle: "Idle",
+          busy: { label: "Busy", states: { plan: "Plan", act: "Act" }, initial: "plan" },
+          done: { label: "Done", final: true },
+        },
+        initial: "idle",
+        transitions: [
+          ["idle", "busy", "go"],
+          ["plan", "act"],
+          ["act", "plan"],
+          ["busy", "done"],
+        ],
+      },
+      options,
+    );
+
+  test("draws composites with their inner states and checks clean", () => {
+    expect(errorsOf(machine().node)).toEqual([]);
+  });
+
+  test("a walk lights each state for its span, the token travelling between", () => {
+    const walk = machine().walk(["idle", "busy", "plan", "act", "done"], { at: span(0.5, 0.6) });
+
+    expect(walk.spans.idle).toEqual([expect.objectContaining({ start: 0.5, over: 0.6 })]);
+    expect(walk.spans.busy[0]!.start).toBeGreaterThan(1.1);
+    expect(walk.spans.done).toHaveLength(1);
+    expect(walk.span.start).toBe(0.5);
+    expect(errorsOf(machine().with(walk.node))).toEqual([]);
+  });
+
+  test("a walk with one span per state lights each then", () => {
+    const at = [span(0, 1), span(2, 1), span(4, 1)];
+    const walk = machine().walk(["idle", "busy", "plan"], { at });
+
+    expect(walk.spans.busy[0]).toMatchObject({ start: 2 });
+    expect(walk.spans.plan[0]).toMatchObject({ start: 4 });
+  });
+
+  test("a walk needs transitions between its states", () => {
+    expect(thrown(() => machine().walk(["idle", "done"], { at: span(0, 1) })).problem).toBe(
+      'walk() has no way from "idle" to "done".',
+    );
+  });
+
+  test("a transition between a composite and its inner state is refused", () => {
+    expect(
+      thrown(() =>
+        stateMachine(
+          {
+            states: { busy: { label: "Busy", states: { plan: "Plan" }, initial: "plan" } },
+            initial: "busy",
+            transitions: [["busy", "plan"]],
+          },
+          options,
+        ),
+      ).problem,
+    ).toBe(
+      'stateMachine() can\'t draw a transition between "busy" and "plan", because one holds the other.',
+    );
+  });
+});
+
+describe("state machine extras", () => {
+  const rich = () =>
+    stateMachine(
+      {
+        states: {
+          start: { label: "Start", detail: ["entry: init", "exit: done"] },
+          pick: { kind: "choice" },
+          split: { kind: "bar" },
+          work: {
+            label: "Work",
+            states: { a: "A", b: "B" },
+            initial: "a",
+            parallel: [{ states: { c: "C", d: "D" }, initial: "c" }],
+          },
+          end: { label: "End", final: true },
+        },
+        initial: "start",
+        transitions: [
+          ["start", "pick"],
+          ["pick", "split", "yes"],
+          ["pick", "end", "no"],
+          ["split", "work"],
+          ["a", "b"],
+          ["c", "d"],
+          ["work", "end"],
+        ],
+        notes: [
+          { of: "start", text: "first\nsecond" },
+          { of: "end", text: "left note", side: "left" },
+        ],
+      },
+      { ...options, direction: "LR" },
+    );
+
+  test("draws choices, bars, regions and notes, and checks clean", () => {
+    expect(errorsOf(rich().node)).toEqual([]);
+  });
+
+  test("lays regions side by side in TB and stacked in LR", () => {
+    const tb = rich();
+
+    const lr = stateMachine(
+      {
+        states: {
+          work: {
+            label: "Work",
+            states: { a: "A" },
+            initial: "a",
+            parallel: [{ states: { c: "C" }, initial: "c" }],
+          },
+        },
+        initial: "work",
+        transitions: [],
+      },
+      { ...options, direction: "LR" },
+    );
+
+    expect(tb.size[0]).toBeGreaterThan(0);
+    expect(lr.size[1]).toBeGreaterThan(lr.size[0] / 4);
+    expect(errorsOf(lr.node)).toEqual([]);
+  });
+
+  test("a walk still crosses into a composite's start", () => {
+    const m = rich();
+    const walk = m.walk(["start", "pick", "split", "work", "a", "b"], { at: span(0, 0.5) });
+
+    expect(walk.spans.a).toHaveLength(1);
+    expect(errorsOf(m.with(walk.node))).toEqual([]);
+  });
+
+  test("refuses transitions across regions and notes on a choice", () => {
+    const states = {
+      work: {
+        label: "Work",
+        states: { a: "A" },
+        initial: "a",
+        parallel: [{ states: { c: "C" }, initial: "c" }],
+      },
+    } as const;
+
+    expect(
+      thrown(() => stateMachine({ states, initial: "work", transitions: [["a", "c"]] }, options))
+        .problem,
+    ).toContain("concurrent regions");
+
+    expect(
+      thrown(() =>
+        stateMachine(
+          {
+            states: { s: "S", p: { kind: "choice" } },
+            initial: "s",
+            transitions: [["s", "p"]],
+            notes: [{ of: "p", text: "no" }],
+          },
+          options,
+        ),
+      ).problem,
+    ).toContain("a choice");
   });
 });
 
 describe("lanes", () => {
-  const run = lanes(
-    {
-      lanes: { a: "A", b: { label: "B", role: "tool" } },
-      spans: [{ lane: "a", at: 0, over: 2, label: "busy" }],
-      events: [{ lane: "b", at: 1, label: "READ" }],
-      links: [{ from: "a", to: "b", at: 1.5 }],
-    },
-    { scale: 50, x: 10, y: 20, play: { at: 0 } },
-  );
-
-  test("x maps seconds onto the lane axis at the given scale", () => {
-    expect(run.x(2) - run.x(1)).toBe(50);
-    expect(run.x(0)).toBeGreaterThan(run.part("a").box.x);
-    expect(run.part("b").box.y).toBe(run.part("a").box.y + run.part("a").box.h);
-    expect(() => valid(run.node)).not.toThrow();
-  });
-});
-
-describe("named errors", () => {
-  test("walk() names a state the machine does not have", () => {
-    const machine = stateMachine({
-      states: { a: "A", b: "B" },
-      initial: "a",
-      transitions: [["a", "b"]],
-    });
-
-    // @ts-expect-error "zz" is not a state
-    expect(() => machine.walk(["a", "zz"], { at: 0 })).toThrow('walk() has no state "zz"');
-  });
-
-  test("flowchart() needs a node", () => {
-    expect(() => flowchart({ nodes: {}, edges: [] })).toThrow(
-      "flowchart() needs at least one node",
-    );
-  });
-
-  test("lanes() rejects a link from a lane to itself", () => {
-    expect(() =>
-      lanes({ lanes: { a: "A" }, links: [{ from: "a", to: "a", at: 1 }] }, { scale: 10 }),
-    ).toThrow("lanes() needs a link between two different lanes");
-  });
-});
-
-describe("state scopes", () => {
-  test("a composite and its inner state cannot share an id", () => {
-    expect(() =>
-      stateMachine({
-        states: { a: { label: "A", initial: "a", states: { a: "Inner" } } },
-        initial: "a",
-        transitions: [],
-      }),
-    ).toThrow('two states named "a"');
-  });
-
-  test("a transition between a composite and its own inner state is rejected, not drawn as a loop", () => {
-    expect(() =>
-      stateMachine({
-        states: { box: { label: "Box", initial: "in", states: { in: "In" } } },
-        initial: "box",
-        transitions: [["box", "in"]],
-      }),
-    ).toThrow("one holds the other");
-  });
-});
-
-describe("span", () => {
-  const chain = {
-    nodes: { a: "A", b: "B", c: "C" },
-    edges: [
-      ["a", "b"],
-      ["b", "c"],
-    ],
-  } as const;
-
-  const window = (s: { at: number; end: number }) => [s.at, s.end];
-
-  test("a diagram without play is the instant 0", () => {
-    expect(window(flowchart(chain).span)).toEqual([0, 0]);
-    expect(window(tree({ nodes: { r: "R", k: { label: "K", parent: "r" } } }).span)).toEqual([
-      0, 0,
-    ]);
-  });
-
-  test("a flowchart runs from its first reveal to the last node settling", () => {
-    const { span } = flowchart(chain, { play: { at: [1, 3] } });
-
-    expect(span.at).toBeGreaterThan(0);
-    expect(span.at).toBeLessThan(1);
-    expect(span.end).toBeCloseTo(3.35, 6);
-  });
-
-  test("a tree ends when its last node has popped in", () => {
-    const { span } = tree(
-      { nodes: { r: "R", k: { label: "K", parent: "r" }, j: { label: "J", parent: "r" } } },
-      { play: { at: 2, step: 1 } },
-    );
-
-    expect(span.at).toBeGreaterThanOrEqual(1.65);
-    expect(span.end).toBeCloseTo(3.35, 6);
-  });
-
-  test("a sequence covers its first message to the end of its last", () => {
-    const { span } = sequence(
+  const run = (reveal?: When) =>
+    lanes(
       {
-        actors: { a: "A", b: "B" },
-        messages: [
-          ["a", "b", "x"],
-          ["b", "a", "y"],
-        ],
+        lanes: { lead: "Lead", build: "Build" },
+        spans: [{ lane: "lead", at: 0, over: 2, label: "plan" }],
+        events: [{ lane: "build", at: 1, label: "edit" }],
+        links: [{ from: "lead", to: "build", at: 1.5 }],
       },
-      { play: { at: 2, step: 0.8 } },
+      { ...options, scale: 50, ...(reveal && { reveal }) },
     );
 
-    expect(span.at).toBe(2);
-    expect(span.end).toBeCloseTo(3.3, 6);
+  test("x maps lane seconds onto the axis at the scale", () => {
+    const r = run();
+
+    expect(r.x(2) - r.x(0)).toBeCloseTo(100);
+    expect(r.span).toBeUndefined();
   });
 
-  test("lanes end with the playhead", () => {
-    const { span } = lanes(
-      { lanes: { a: "A" }, spans: [{ lane: "a", at: 0, over: 2 }] },
-      { scale: 50, play: { at: 1 } },
-    );
-
-    expect(span.at).toBe(1);
-    expect(span.end).toBeGreaterThanOrEqual(3);
-  });
-});
-
-describe("parts", () => {
-  const chain = {
-    nodes: { a: "A", b: "B", c: "C" },
-    groups: { pair: { label: "Pair", nodes: ["b", "c"] } },
-    edges: [
-      ["a", "b"],
-      ["b", "c"],
-    ],
-  } as const;
-
-  const window = (s: { at: number; end: number }) => [s.at, s.end];
-
-  test("each node's span is when it pops in, and the first rank's is the instant 0", () => {
-    const chart = flowchart(chain, { play: { at: 1, step: 0.5 } });
-
-    expect(chart.parts.map((p) => p.id)).toEqual(["a", "b", "c", "pair", "a->b", "b->c"]);
-    expect(window(chart.part("a").span)).toEqual([0, 0]);
-    expect(window(chart.part("b").span)).toEqual([1, 1.35]);
-    expect(window(chart.part("c").span)).toEqual([1.5, 1.85]);
-    expect(window(chart.part("pair").span)).toEqual([1, 1.4]);
-    expect(chart.part("c").box).toMatchObject({ w: expect.any(Number), h: expect.any(Number) });
+  test("a reveal plays lane time from its start, stretched to its length", () => {
+    expect(run({ start: 1 }).span).toMatchObject({ start: 1, over: 2 });
+    expect(run({ start: 1, over: 4 }).when("build")).toMatchObject({ start: 3 });
+    expect(errorsOf(run({ start: 0.5 }).node)).toEqual([]);
   });
 
-  test("play takes a time per node, and the nodes it leaves out are there from the start", () => {
-    const chart = flowchart(chain, { play: { at: { c: 1, a: 2 } } });
-
-    expect(window(chart.part("c").span)).toEqual([1, 1.35]);
-    expect(window(chart.part("a").span)).toEqual([2, 2.35]);
-    expect(window(chart.part("b").span)).toEqual([0, 0]);
-    expect(chart.span.end).toBeCloseTo(2.4, 6);
+  test("a link joins two lanes", () => {
     expect(
-      render({ width: 400, height: 400, duration: 3, title: "Schedule" }, [chart.node]),
-    ).toContain("@keyframes");
+      thrown(() =>
+        lanes(
+          { lanes: { a: "A" }, links: [{ from: "a", to: "a", at: 0 }] },
+          { ...options, scale: 10 },
+        ),
+      ).message,
+    ).toBe('lanes() link 1 runs from "a" to itself. Link two different lanes.');
+  });
+});
 
-    const team = tree(
-      { nodes: { r: "R", k: { label: "K", parent: "r" }, j: { label: "J", parent: "r" } } },
-      { play: { at: { j: 0.5, k: 3 } } },
-    );
+describe("Edge head", () => {
+  const headOpacity = (head: "filled" | "async", dash: boolean, t: number): number => {
+    const l = look(options, "test");
 
-    expect([team.part("r"), team.part("j"), team.part("k")].map((p) => p.span.at)).toEqual([
-      0, 0.5, 3,
-    ]);
+    const points = [
+      { x: 0, y: 10 },
+      { x: 100, y: 10 },
+    ];
+
+    const model = scene({ size: [200, 40], duration: 2, title: "Edge" }, () => (
+      <Edge
+        key="e"
+        look={l}
+        points={points}
+        head={head}
+        {...(dash && { stroke: { dash: [4, 4] } })}
+        draw={track(0).to(1, span(0, 1), ease.linear)}
+      />
+    ));
+
+    const visit = (node: Model.SceneNode): Model.SceneNode | undefined =>
+      node.key === "e/head"
+        ? node
+        : node.kind === "group"
+          ? node.children.map(visit).find(Boolean)
+          : undefined;
+
+    return valueAt(visit(model.root)!.layers[0]!.opacity, t, blendNumber);
+  };
+
+  test("the head stays hidden until the drawn line reaches its base", () => {
+    expect(headOpacity("async", false, 0.9)).toBe(0);
+    expect(headOpacity("async", false, 0.95)).toBe(1);
+    expect(headOpacity("filled", false, 0.98)).toBe(0);
+    expect(headOpacity("filled", false, 1)).toBe(1);
   });
 
-  test("a schedule names only nodes, at times of 0 or later", () => {
-    // @ts-expect-error: "z" is not a node
-    expect(() => flowchart(chain, { play: { at: { z: 1 } } })).toThrow(
-      'flowchart() play names "z", which is not a node. Its nodes are "a", "b", "c".',
-    );
-    expect(() => flowchart(chain, { play: { at: { a: -1 } } })).toThrow(
-      'flowchart() play needs a time of 0 or later for "a", got -1.',
-    );
-  });
-
-  test("part() is typed by id, and names the parts it has when one is missing", () => {
-    const chart = flowchart(chain);
-
-    // @ts-expect-error: "d" is not a node or group
-    expect(() => chart.part("d")).toThrow(
-      'flowchart() has no "d". Its parts are "a", "b", "c", "pair", "a->b", "b->c".',
-    );
-  });
-
-  test("a flowchart's edges are parts, each box around its line and each span when it draws on", () => {
-    const chart = flowchart(chain, { play: { at: 1, step: 0.5 } });
-
-    expect(window(chart.part("a->b").span)).toEqual([0.6, 1]);
-    expect(window(chart.part("b->c").span)).toEqual([1.1, 1.5]);
-
-    for (const p of chart.edge("a", "b")) {
-      const box = chart.part("a->b").box.pad(0.01);
-
-      expect(p.x >= box.x && p.x <= box.x + box.w && p.y >= box.y && p.y <= box.y + box.h).toBe(
-        true,
-      );
-    }
-
-    expect(window(flowchart(chain).part("a->b").span)).toEqual([0, 0]);
-    // @ts-expect-error: there is no edge from a to c
-    expect(() => chart.part("a->c")).toThrow('flowchart() has no "a->c"');
-  });
-
-  test("a tree's edges are parts by parent and child, drawing on as the child appears", () => {
-    const team = tree(
-      { nodes: { r: "R", k: { label: "K", parent: "r" }, j: { label: "J", parent: "r" } } },
-      { play: { at: 1, step: 0.5 } },
-    );
-
-    expect(team.parts.map((p) => p.id)).toEqual(["r", "k", "j", "r->k", "r->j"]);
-    expect(team.part("r->k").span.end).toBeCloseTo(team.part("k").span.at, 6);
-    expect(team.part("r->j").box.y).toBeGreaterThanOrEqual(team.part("r").box.y);
-    // @ts-expect-error: k is not j's parent
-    expect(() => team.part("k->j")).toThrow('tree() has no "k->j"');
-  });
-
-  test("a state machine's transitions are parts, there from the start", () => {
-    const machine = stateMachine({
-      states: { idle: "Idle", run: "Run" },
-      initial: "idle",
-      transitions: [
-        ["idle", "run", "go"],
-        ["run", "idle"],
-      ],
-    });
-
-    expect(machine.parts.map((p) => p.id)).toEqual(["idle", "run", "idle->run", "run->idle"]);
-    expect(window(machine.part("idle->run").span)).toEqual([0, 0]);
-    expect(machine.part("idle->run").box.w).toBeGreaterThan(0);
-    // @ts-expect-error: no transition goes from idle to idle
-    expect(() => machine.part("idle->idle")).toThrow('stateMachine() has no "idle->idle"');
-  });
-
-  test("a lane's span covers what plays on it", () => {
-    const run = lanes(
-      {
-        lanes: { a: "A", b: "B", c: "C" },
-        spans: [{ lane: "a", at: 0.5, over: 2 }],
-        events: [{ lane: "b", at: 3 }],
-        links: [{ from: "a", to: "b", at: 1 }],
-      },
-      { scale: 50, play: { at: 1 } },
-    );
-
-    expect(window(run.part("a").span)).toEqual([1.5, 3.5]);
-    expect(window(run.part("b").span)).toEqual([2, 4.3]);
-    expect(window(run.part("c").span)).toEqual([1, 1]);
-  });
-
-  test("a state machine's states and a sequence's actors are there from the start", () => {
-    const machine = stateMachine({
-      states: { idle: "Idle", run: "Run" },
-      initial: "idle",
-      transitions: [["idle", "run"]],
-    });
-
-    const seq = sequence(
-      { actors: { a: "A", b: "B" }, messages: [["a", "b", "x"]] },
-      { play: { at: 1 } },
-    );
-
-    expect(window(machine.part("run").span)).toEqual([0, 0]);
-    expect(window(machine.span)).toEqual([0, 0]);
-    expect(window(seq.part("b").span)).toEqual([0, 0]);
+  test("a dashed edge's head fades in with its line", () => {
+    expect(headOpacity("filled", true, 0.5)).toBeCloseTo(0.5, 2);
   });
 });

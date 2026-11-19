@@ -10,16 +10,10 @@
     ".preview/**",
     "**/*.astro",
     "**/*.md",
-    "examples/site/plain-narrow.ts",
-    "examples/explainer/scene.tsx",
     "packages/svjeez/tests/types.check.tsx",
-    "packages/diagrams/test/types.check.tsx",
     "**/dist/**",
-    "**/snapshots.json",
     "**/package-dist/**",
-    "**/.svelte-kit/**",
-    "site/.alchemy/**",
-    "site/.astro/**",
-    "tools/oxlint/anti-slop/**"
+    "tools/oxlint/anti-slop/**",
+    "examples/*/states.json"
   ]
 }

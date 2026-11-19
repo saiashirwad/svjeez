@@ -1,35 +1,45 @@
 # @svjeez/charts
 
-Draw data-driven bars, lines and areas on shared axes in a svjeez scene.
+Bar, line, and area charts on shared axes for `svjeez`. Scales are computed at build time, and each series animates in from a `draw` progress (`0` to `1` or a `track`).
 
 ```sh
-npm i -D @svjeez/charts svjeez
+npm i -D @svjeez/charts@next @svjeez/fonts@next svjeez@next
 ```
 
 ```tsx
-import { chart } from "@svjeez/charts";
-import { render, span } from "svjeez";
-import { rect } from "svjeez/geometry";
+import { Chart, bars, line } from "@svjeez/charts";
+import { google } from "@svjeez/fonts";
+import { Group, scene, span, tokens, track } from "svjeez";
 
-const sales = { Q1: 12, Q2: 48, Q3: 31, Q4: 87 };
-const points = Object.entries(sales);
-const plot = chart({
-  frame: rect(56, 24, 360, 200),
-  x: { kind: "band", domain: Object.keys(sales) },
-  data: points,
-  grid: true,
+const theme = tokens({
+  light: { text: "#1D1D1F", muted: "#6E6E73", blue: "#0A6CFF" },
+  dark: { text: "#E5E5EA", muted: "#A1A1A6", blue: "#5EA0FF" },
 });
-const bars = plot.bars(span(0.6, 1.5), sales);
+const mono = await google("JetBrains Mono");
+const sales = { Q1: 12, Q2: 48, Q3: 31, Q4: 87 };
 
-export default () =>
-  render(
-    { width: 440, height: 260, duration: 4, title: "Sales by quarter" },
-    <>{plot.node}{bars}</>,
-  );
+export default scene({ size: [440, 260], duration: 4, title: "Sales by quarter", theme }, () => (
+  <Group>
+    <Chart
+      at={[56, 24]}
+      size={[360, 200]}
+      x={{ kind: "band", domain: Object.keys(sales) }}
+      series={[
+        bars(sales, { color: theme.blue, draw: track(0).to(1, span(0.6, 1.2)) }),
+        line(Object.entries(sales), {
+          color: theme.text,
+          draw: track(0).to(1, span(1.8, 1.2)),
+          dots: true,
+        }),
+      ]}
+      font={mono}
+      axis={theme.muted}
+      label={theme.muted}
+    />
+  </Group>
+));
 ```
 
-Use `line(span, points)` or `area(span, points)` on the same plot. Series expose `span`, `bounds` and named parts. For example, `bars.part("Q3").box` gives a callout its position.
+To animate data changes over time, render one `<Chart>` per state and pass them to `morph.between()`.
 
-<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/charts"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/charts.svg" width="540" alt="Grouped bars grow beside an area chart." /></a>
-
-[API reference](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/charts.md)
+[API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/charts.md)

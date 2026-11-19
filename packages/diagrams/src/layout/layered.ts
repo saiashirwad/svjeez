@@ -1,8 +1,10 @@
+import { SceneError } from "svjeez/tools";
 import { groupBy } from "./group.ts";
 import {
   around,
   flip,
   indexing,
+  mirror,
   simplify,
   union,
   type Box,
@@ -49,7 +51,6 @@ interface Vertex {
   group: number;
   readonly up: number[];
   readonly down: number[];
-  readonly ins: number[];
   readonly outs: number[];
   readonly anchor?: number;
   readonly back?: number;
@@ -58,25 +59,26 @@ interface Vertex {
 }
 
 const LOOP = 20;
-const PORT = 12;
+const PITCH = 16;
+const MARGIN = 10;
 const TRACK = 14;
-
-const SNAP = 6;
-
-const MERGE = 16;
+const SNAP = 12;
+const BEND_SNAP = 24;
+const SLOPE = 0.125;
+const MAX_GAP = 3;
 
 export const BEND = 16;
 
 export function layered(input: LayeredInput): LayeredLayout {
   const { direction = "TB", rankGap = 48, nodeGap = 36, groupPad = 12 } = input;
-  const lr = direction === "LR";
+  const lr = direction === "LR" || direction === "RL";
 
   const { unique, at } = indexing(
     input.nodes.map((n) => n.id),
     (id) => `layered() has no node ${JSON.stringify(id)}.`,
   );
 
-  if (!unique) throw new Error("layered() node ids must be unique.");
+  if (!unique) throw new SceneError("layered() node ids must be unique.");
   const size = (s: Size): Size => (lr ? { w: s.h, h: s.w } : s);
 
   const groups = (input.groups ?? []).map((g) => ({
@@ -87,11 +89,12 @@ export function layered(input: LayeredInput): LayeredLayout {
 
   const groupOf = input.nodes.map(() => -1);
   groups.forEach((g, gi) => {
-    if (g.members.length === 0) throw new Error(`Group ${JSON.stringify(g.id)} has no members.`);
+    if (g.members.length === 0)
+      throw new SceneError(`Group ${JSON.stringify(g.id)} has no members.`);
 
     for (const m of g.members) {
       if (groupOf[m] !== -1)
-        throw new Error(`Node ${JSON.stringify(input.nodes[m]!.id)} is in two groups.`);
+        throw new SceneError(`Node ${JSON.stringify(input.nodes[m]!.id)} is in two groups.`);
       groupOf[m] = gi;
     }
   });
@@ -116,7 +119,6 @@ export function layered(input: LayeredInput): LayeredLayout {
     group: groupOf[i]!,
     up: [],
     down: [],
-    ins: [],
     outs: [],
     loop: 0,
   }));
@@ -133,7 +135,6 @@ export function layered(input: LayeredInput): LayeredLayout {
       group,
       up: [],
       down: [],
-      ins: [],
       outs: [],
       loop: 0,
       anchor,
@@ -163,7 +164,6 @@ export function layered(input: LayeredInput): LayeredLayout {
       vertices[a]!.down.push(v);
       vertices[a]!.outs.push(id);
       vertices[v]!.up.push(a);
-      vertices[v]!.ins.push(id);
 
       return id;
     });
@@ -199,66 +199,11 @@ export function layered(input: LayeredInput): LayeredLayout {
     lr,
   });
 
-  const ports = (v: number): Map<number, number> => {
-    const { node, down, outs } = vertices[v]!;
-
-    if (node === undefined) return new Map(outs.map((id) => [id, xs.center[v]!]));
-
-    const sorted = down
-      .map((o, k) => ({ o, id: outs[k]! }))
-      .sort((a, b) => xs.center[a.o]! - xs.center[b.o]! || a.id - b.id);
-
-    const step = Math.min(PORT, vertices[v]!.w / (sorted.length + 1));
-    const packed = sorted.map((_, k) => xs.center[v]! + (k - (sorted.length - 1) / 2) * step);
-    const reach = sorted.length < 2 ? 0 : Math.max(0, vertices[v]!.w / 2 - PORT * 1.5);
-
-    const [lo, hi] = [
-      Math.min(xs.center[v]! - reach, packed[0]!),
-      Math.max(xs.center[v]! + reach, packed.at(-1)!),
-    ];
-
-    const port = sorted.map(({ o }, k) =>
-      reach === 0 ? packed[k]! : Math.min(hi, Math.max(lo, xs.center[o]!)),
-    );
-
-    for (let k = 1; k < port.length; k++)
-      port[k] = Math.min(hi, Math.max(port[k]!, port[k - 1]! + step));
-
-    for (let k = port.length - 2; k >= 0; k--) port[k] = Math.min(port[k]!, port[k + 1]! - step);
-
-    return new Map(sorted.map(({ id }, k) => [id, port[k]!]));
-  };
-
-  const outPorts = vertices.map((_, v) => ports(v));
-
-  const ends = crossing.map(({ a, b }, id): Crossing => {
-    const [xa, center] = [outPorts[a]!.get(id)!, xs.center[b]!];
-
-    const straight =
-      vertices[b]!.node !== undefined &&
-      Math.abs(xa - center) <= Math.min(SNAP, vertices[b]!.w / 2);
-
-    return { id, xa, xb: straight ? xa : center };
-  });
-
-  const into = (c: Crossing) => crossing[c.id]!.b;
-
-  const merging = new Set(
-    ends.flatMap((c) =>
-      vertices[into(c)]!.node !== undefined &&
-      ends.some((d) => d !== c && into(d) === into(c) && Math.abs(d.xb - c.xb) < 0.5)
-        ? [c.id]
-        : [],
-    ),
-  );
+  const ends = spread(vertices, crossing, xs.center);
 
   const thick = layers.map((layer) => Math.max(0, ...layer.map((v) => vertices[v]!.h)));
   const inGap = (r: number) => ends.filter((c) => vertices[crossing[c.id]!.a]!.rank === r);
-  const lanes = thick.slice(1).map((_, r) => tracks(inGap(r), merging));
-
-  const merges = lanes.map((_, r) =>
-    inGap(r).some((c) => merging.has(c.id) && Math.abs(c.xa - c.xb) > 0.5),
-  );
+  const lanes = thick.slice(1).map((_, r) => tracks(inGap(r)));
 
   const padTop = groups.map((g) => groupPad + (lr ? 0 : g.label.h + 4));
 
@@ -284,10 +229,14 @@ export function layered(input: LayeredInput): LayeredLayout {
     const run = tallest[r]! > 0 ? tallest[r]! + 2 * BEND + 4 : BEND;
     const spread = Math.max(0, count - 1) * TRACK;
 
+    // A gap grows for the widest edge crossing it, so that edge keeps a clear slope.
+    const wide = Math.max(0, ...inGap(r).map((c) => Math.abs(c.xa - c.xb)));
+
     return Math.max(
       rankGap,
       below + above + 16,
-      merges[r] ? run + spread + MERGE : 2 * run + spread,
+      2 * run + spread,
+      Math.min(MAX_GAP * rankGap, wide * SLOPE),
     );
   });
 
@@ -300,9 +249,7 @@ export function layered(input: LayeredInput): LayeredLayout {
     const { track, count } = lanes[r]!;
     const k = track.get(id) ?? (count - 1) / 2;
 
-    return merges[r]
-      ? top[r + 1]! - MERGE - (count - 1 - k) * TRACK
-      : bottom(r) + gaps[r]! / 2 + (k - (count - 1) / 2) * TRACK;
+    return bottom(r) + gaps[r]! / 2 + (k - (count - 1) / 2) * TRACK;
   };
 
   const box = (v: number): Box => {
@@ -315,7 +262,7 @@ export function layered(input: LayeredInput): LayeredLayout {
     const b = box(v);
     const end = sides[v]!.left.includes(edge) ? "left" : "right";
     const list = sides[v]![end];
-    const step = Math.min(PORT, b.h / (list.length + 1));
+    const step = Math.min(PITCH, b.h / (list.length + 1));
 
     return {
       x: end === "left" ? b.x : b.x + b.w,
@@ -400,7 +347,19 @@ export function layered(input: LayeredInput): LayeredLayout {
     BEND,
   );
 
-  const out = <T extends Box | Point>(value: T): T => (lr ? flip(value) : value);
+  const axis = direction === "BT" ? "y" : direction === "RL" ? "x" : undefined;
+
+  const out = (value: Box): Box => {
+    const turned = lr ? flip(value) : value;
+
+    return axis ? mirror(turned, axis) : turned;
+  };
+
+  const spot = (value: Point): Point => {
+    const turned = lr ? flip(value) : value;
+
+    return axis ? mirror(turned, axis) : turned;
+  };
 
   const laid = edges.map(({ i }, k): LayeredEdge => {
     const label = loops[k] ?? free[k];
@@ -408,7 +367,7 @@ export function layered(input: LayeredInput): LayeredLayout {
     return {
       from: input.edges[i]!.from,
       to: input.edges[i]!.to,
-      points: routes[k]!.map(out),
+      points: routes[k]!.map(spot),
       label: label && out(label),
     };
   });
@@ -430,6 +389,77 @@ export function layered(input: LayeredInput): LayeredLayout {
     bounds,
   };
 }
+
+// Spreads the ends of segments along the node sides they meet. Each end wants to sit level
+// with the other end of its segment, so a segment runs straight where both nodes have room
+// for it; a side with several ends keeps them a pitch apart, in the order the other ends lie.
+// A lone end only leaves the middle of its side when it can then run straight. Ends on
+// dummies stay put. A few rounds let the two ends of a segment settle on one another.
+const spread = (
+  vertices: readonly Vertex[],
+  crossing: readonly { a: number; b: number }[],
+  center: readonly number[],
+): Crossing[] => {
+  const ends = crossing.map((_, id): Crossing => ({ id, xa: 0, xb: 0 }));
+  const xa = crossing.map(({ a }) => center[a]!);
+  const xb = crossing.map(({ b }) => center[b]!);
+
+  const sides = (key: "a" | "b") => {
+    const by = new Map<number, number[]>();
+
+    crossing.forEach((c, id) => {
+      if (vertices[c[key]]!.node !== undefined) by.set(c[key], [...(by.get(c[key]) ?? []), id]);
+    });
+
+    return [...by];
+  };
+
+  const [leaving, arriving] = [sides("a"), sides("b")];
+
+  const fit = (v: number, ids: readonly number[], want: readonly number[], x: number[]) => {
+    const [c, half] = [center[v]!, Math.max(0, vertices[v]!.w / 2 - MARGIN)];
+
+    if (ids.length === 1) {
+      x[ids[0]!] = Math.abs(want[0]! - c) <= half ? want[0]! : c;
+
+      return;
+    }
+
+    const pitch = Math.min(PITCH, (2 * half) / (ids.length - 1));
+    const at = ids.map((_, k) => k).sort((p, q) => want[p]! - want[q]! || p - q);
+    const p = at.map((k) => Math.min(c + half, Math.max(c - half, want[k]!)));
+
+    for (let k = 1; k < p.length; k++) p[k] = Math.max(p[k]!, p[k - 1]! + pitch);
+    p[p.length - 1] = Math.min(p.at(-1)!, c + half);
+
+    for (let k = p.length - 2; k >= 0; k--) p[k] = Math.min(p[k]!, p[k + 1]! - pitch);
+    at.forEach((k, i) => (x[ids[k]!] = p[i]!));
+  };
+
+  for (let round = 0; round < 4; round++) {
+    for (const [v, ids] of leaving)
+      fit(
+        v,
+        ids,
+        ids.map((id) => xb[id]!),
+        xa,
+      );
+
+    for (const [v, ids] of arriving)
+      fit(
+        v,
+        ids,
+        ids.map((id) => xa[id]!),
+        xb,
+      );
+  }
+
+  return ends.map((c) => ({
+    ...c,
+    xa: xa[c.id]!,
+    xb: Math.abs(xa[c.id]! - xb[c.id]!) < 1e-6 ? xa[c.id]! : xb[c.id]!,
+  }));
+};
 
 const backEdges = (
   count: number,
@@ -467,34 +497,113 @@ const backEdges = (
 const longestPath = (count: number, edges: readonly { u: number; v: number }[]): number[] => {
   const rank = Array.from({ length: count }, () => 0);
   const indegree = Array.from({ length: count }, () => 0);
+  const into = Array.from({ length: count }, (): number[] => []);
+  const out = Array.from({ length: count }, (): number[] => []);
 
-  for (const e of edges) indegree[e.v]!++;
+  for (const e of edges) {
+    indegree[e.v]!++;
+    out[e.u]!.push(e.v);
+    into[e.v]!.push(e.u);
+  }
+
   const queue = rank.flatMap((_, i) => (indegree[i] === 0 ? [i] : []));
 
   for (let k = 0; k < queue.length; k++) {
     const u = queue[k]!;
 
-    for (const e of edges) {
-      if (e.u !== u) continue;
-      rank[e.v] = Math.max(rank[e.v]!, rank[u]! + 1);
+    for (const v of out[u]!) {
+      rank[v] = Math.max(rank[v]!, rank[u]! + 1);
 
-      if (--indegree[e.v]! === 0) queue.push(e.v);
+      if (--indegree[v]! === 0) queue.push(v);
     }
   }
 
-  return rank;
+  // Longest-path ranks leave loosely attached nodes far from their neighbours. Sweeping
+  // from the bottom, a node with more edges leaving than arriving moves down beside its
+  // targets, and one with more arriving than leaving moves up beside its sources.
+  for (let pass = 0, changed = true; changed && pass < 8; pass++) {
+    changed = false;
+
+    for (const v of [...queue].reverse()) {
+      const next =
+        out[v]!.length > into[v]!.length
+          ? Math.min(...out[v]!.map((w) => rank[w]! - 1))
+          : out[v]!.length < into[v]!.length
+            ? Math.max(...into[v]!.map((u) => rank[u]! + 1))
+            : rank[v]!;
+
+      if (next !== rank[v]) [rank[v], changed] = [next, true];
+    }
+  }
+
+  const top = Math.min(...rank);
+
+  return rank.map((r) => r - top);
+};
+
+const SWEEPS = 24;
+const STALE = 4;
+const BIG = 600;
+
+// Counts crossings between each pair of neighbouring layers: pairs of segments whose ends
+// come in opposite order. Sorting by source and counting inversions of the targets with a
+// Fenwick tree keeps it O(E log V).
+const countCrossings = (vertices: readonly Vertex[], layers: readonly number[][]): number => {
+  const pos = new Int32Array(vertices.length);
+  layers.forEach((layer) => layer.forEach((v, k) => (pos[v] = k)));
+  let total = 0;
+
+  for (let r = 0; r + 1 < layers.length; r++) {
+    const pairs = layers[r]!.flatMap((v) =>
+      vertices[v]!.down.map((d) => [pos[v]!, pos[d]!] as const),
+    );
+
+    pairs.sort((p, q) => p[0] - q[0] || p[1] - q[1]);
+    const tree = new Int32Array(layers[r + 1]!.length + 1);
+
+    pairs.forEach(([, b], seen) => {
+      let below = 0;
+
+      for (let i = b + 1; i > 0; i -= i & -i) below += tree[i]!;
+      total += seen - below;
+
+      for (let i = b + 1; i < tree.length; i += i & -i) tree[i]!++;
+    });
+  }
+
+  return total;
+};
+
+// Depth-first from the top, so that what hangs off one node starts out side by side.
+const depthFirst = (vertices: readonly Vertex[], ranks: number): number[][] => {
+  const layers = Array.from({ length: ranks }, (): number[] => []);
+  const seen = new Uint8Array(vertices.length);
+
+  const roots = vertices.map((_, i) => i).sort((a, b) => vertices[a]!.rank - vertices[b]!.rank);
+
+  for (const root of roots) {
+    const stack = [root];
+
+    while (stack.length > 0) {
+      const v = stack.pop()!;
+
+      if (seen[v]) continue;
+      seen[v] = 1;
+      layers[vertices[v]!.rank]!.push(v);
+
+      for (let k = vertices[v]!.down.length - 1; k >= 0; k--) stack.push(vertices[v]!.down[k]!);
+    }
+  }
+
+  return layers;
 };
 
 const mean = (values: readonly number[]): number | undefined =>
   values.length === 0 ? undefined : values.reduce((a, b) => a + b, 0) / values.length;
 
 const order = (vertices: readonly Vertex[], ranks: number, groups: number) => {
-  const layers = Array.from({ length: ranks }, (): number[] => []);
-  vertices.forEach((v, i) => layers[v.rank]!.push(i));
+  const small = vertices.length <= BIG;
   const pos = new Float64Array(vertices.length);
-
-  const index = () =>
-    layers.forEach((layer) => layer.forEach((v, k) => (pos[v] = (k + 0.5) / layer.length)));
 
   const pin = (layer: number[]) =>
     layer.splice(
@@ -512,12 +621,10 @@ const order = (vertices: readonly Vertex[], ranks: number, groups: number) => {
     pin(layer);
   };
 
-  layers.forEach(pin);
-  index();
+  const index = (layers: readonly number[][]) =>
+    layers.forEach((layer) => layer.forEach((v, k) => (pos[v] = (k + 0.5) / layer.length)));
 
-  for (let sweep = 0; sweep < 8; sweep++) {
-    const down = sweep % 2 === 0;
-
+  const sweep = (layers: number[][], down: boolean) => {
     for (let k = 1; k < ranks; k++) {
       const layer = layers[down ? k : ranks - 1 - k]!;
 
@@ -542,10 +649,92 @@ const order = (vertices: readonly Vertex[], ranks: number, groups: number) => {
         (v) => (vertices[v]!.group >= 0 ? groupBary.get(vertices[v]!.group)! : b(v)),
         b,
       );
-      index();
+      index(layers);
     }
-  }
+  };
 
+  // Swaps neighbours in a layer while that removes crossings. A node and the back-edge
+  // dummies anchored to it move together; nodes of different groups never swap.
+  const transpose = (layers: number[][]) => {
+    for (let pass = 0; pass < 8; pass++) {
+      let changed = false;
+
+      for (const layer of layers) {
+        const units: number[][] = [];
+
+        for (const v of layer)
+          if (vertices[v]!.anchor === undefined || units.length === 0) units.push([v]);
+          else units.at(-1)!.push(v);
+
+        const near = (unit: readonly number[]) =>
+          unit.flatMap((v) => [...vertices[v]!.up, ...vertices[v]!.down]);
+
+        const rank = new Map(layers.flatMap((l) => l.map((v, k) => [v, k] as const)));
+
+        const between = (left: readonly number[], right: readonly number[]) => {
+          let n = 0;
+
+          for (const x of near(left))
+            for (const y of near(right))
+              if (vertices[x]!.rank === vertices[y]!.rank && rank.get(x)! > rank.get(y)!) n++;
+
+          return n;
+        };
+
+        for (let i = 0; i + 1 < units.length; i++) {
+          const [a, b] = [units[i]!, units[i + 1]!];
+
+          if (vertices[a[0]!]!.group !== vertices[b[0]!]!.group) continue;
+
+          if (between(b, a) < between(a, b)) {
+            [units[i], units[i + 1]] = [b, a];
+            layer.splice(0, layer.length, ...units.flat());
+            layer.forEach((v, k) => rank.set(v, k));
+            changed = true;
+          }
+        }
+      }
+
+      if (!changed) break;
+      index(layers);
+    }
+  };
+
+  const climb = (start: number[][], flip: boolean) => {
+    let layers = start.map((layer) => [...layer]);
+    layers.forEach(pin);
+    index(layers);
+
+    let best = groups === 0 ? countCrossings(vertices, layers) : Infinity;
+    let kept = layers.map((layer) => [...layer]);
+    let stale = 0;
+
+    for (let i = 0; i < SWEEPS && stale < STALE && best > 0; i++, stale++) {
+      sweep(layers, (i % 2 === 0) !== flip);
+      const n = countCrossings(vertices, layers);
+
+      if (n < best) [best, kept, stale] = [n, layers.map((layer) => [...layer]), 0];
+    }
+
+    layers = kept;
+
+    if (small && best > 0) {
+      index(layers);
+      transpose(layers);
+      best = countCrossings(vertices, layers);
+    }
+
+    return { layers, crossings: best };
+  };
+
+  const plain = Array.from({ length: ranks }, (): number[] => []);
+  vertices.forEach((v, i) => plain[v.rank]!.push(i));
+
+  const first = climb(depthFirst(vertices, ranks), false);
+  const second = small ? climb(plain, true) : first;
+  const { layers } = second.crossings < first.crossings ? second : first;
+
+  index(layers);
   const settled = Float64Array.from(pos);
 
   const groupKey = Array.from(
@@ -699,21 +888,6 @@ const place = (
 
   const sep = (a: Item, b: Item) => a.r + b.l + Math.max(a.gap, b.gap);
 
-  for (let changed = true; changed;) {
-    changed = false;
-
-    for (const row of rows) {
-      row.forEach((it, k) => {
-        const need = k === 0 ? it.l : get(row[k - 1]!) + sep(row[k - 1]!, it);
-
-        if (get(it) < need - 1e-9) {
-          set(it, need);
-          changed = true;
-        }
-      });
-    }
-  }
-
   const offset = Array.from({ length: vertices.length }, () => 0);
 
   for (const layer of layers) {
@@ -730,70 +904,81 @@ const place = (
   const center = (v: number) =>
     vertices[v]!.group < 0 ? vx[v]! : gx[vertices[v]!.group]! + offset[v]!;
 
-  const neighbours = (v: number) => [
-    ...vertices[v]!.up,
-    ...vertices[v]!.down,
-    ...(vertices[v]!.anchor === undefined ? [] : [vertices[v]!.anchor!]),
-  ];
-
-  const weight = (v: number, n: number) => {
-    const [a, b] = [vertices[v]!, vertices[n]!];
-
-    if ((a.node === undefined && b.node === undefined) || a.anchor === n) return 8;
-
-    const single =
-      (a.up.length === 1 && a.up[0] === n && b.down.length === 1) ||
-      (a.down.length === 1 && a.down[0] === n && b.up.length === 1);
-
-    return single ? 4 : 1;
-  };
-
-  const occurrences = new Map<string, { row: Item[]; k: number }[]>();
-
-  for (const row of rows)
-    row.forEach((it, k) =>
-      occurrences.set(`${it.kind}${it.id}`, [
-        ...(occurrences.get(`${it.kind}${it.id}`) ?? []),
-        { row, k },
-      ]),
-    );
-  const items = [...occurrences.values()].map((list) => list[0]!.row[list[0]!.k]!);
   const outer = (it: Item) => it.kind === "v" && vertices[it.id]!.outer !== undefined;
 
-  for (let sweep = 0; sweep < 60; sweep++) {
-    for (const it of sweep % 2 ? [...items].reverse() : items) {
-      if (outer(it)) continue;
+  // Back-edge channels are placed last, outside everything else; the rest of each row is one
+  // slot per item, and a group has one slot in each row it spans.
+  const slotItem: Item[] = [];
+  const slotOf = new Map<string, number>();
 
-      const pulls =
-        it.kind === "v"
-          ? neighbours(it.id).map((n) => ({ at: center(n), weight: weight(it.id, n) }))
-          : vertices.flatMap((v, i) =>
-              v.group === it.id
-                ? neighbours(i)
-                    .filter((n) => vertices[n]!.group !== it.id)
-                    .map((n) => ({ at: gx[it.id]! + center(n) - center(i), weight: weight(i, n) }))
-                : [],
-            );
+  const slots = rows.map((row, r) =>
+    row.flatMap((it) => {
+      if (outer(it)) return [];
+      slotOf.set(`${it.kind}${it.id}@${r}`, slotItem.length);
 
-      const total = pulls.reduce((sum, p) => sum + p.weight, 0);
+      return [slotItem.push(it) - 1];
+    }),
+  );
 
-      const want =
-        total === 0 ? undefined : pulls.reduce((sum, p) => sum + p.at * p.weight, 0) / total;
+  const end = (v: number) => {
+    const { group, rank } = vertices[v]!;
 
-      if (want === undefined) continue;
-      let [lo, hi] = [-Infinity, Infinity];
+    return {
+      slot: slotOf.get(group < 0 ? `v${v}@${rank}` : `g${group}@${rank}`),
+      dx: group < 0 ? 0 : offset[v]!,
+    };
+  };
 
-      for (const { row, k } of occurrences.get(`${it.kind}${it.id}`)!) {
-        if (k > 0 && !outer(row[k - 1]!))
-          lo = Math.max(lo, get(row[k - 1]!) + sep(row[k - 1]!, it));
+  const dummy = (v: number) => vertices[v]!.node === undefined && vertices[v]!.group < 0;
 
-        if (k < row.length - 1 && !outer(row[k + 1]!))
-          hi = Math.min(hi, get(row[k + 1]!) - sep(it, row[k + 1]!));
+  const links: Link[] = vertices.flatMap((u, a) =>
+    u.down.flatMap((b): Link[] => {
+      const [from, to] = [end(a), end(b)];
+
+      if (from.slot === undefined || to.slot === undefined) return [];
+
+      if (u.group >= 0 && u.group === vertices[b]!.group) return [];
+
+      return [{ a: from.slot, b: to.slot, da: from.dx, db: to.dx, inner: dummy(a) && dummy(b) }];
+    }),
+  );
+
+  for (let g = 0; g < groups; g++)
+    for (let r = span[g]![0]; r < span[g]![1]; r++)
+      links.push({
+        a: slotOf.get(`g${g}@${r}`)!,
+        b: slotOf.get(`g${g}@${r + 1}`)!,
+        da: 0,
+        db: 0,
+        inner: true,
+        held: true,
+      });
+
+  const gapBetween = (a: number, b: number) => sep(slotItem[a]!, slotItem[b]!);
+  const xs = balance(slots, links, gapBetween, (s) => [slotItem[s]!.l, slotItem[s]!.r]);
+
+  slotItem.forEach((it, s) => set(it, xs[s]!));
+
+  // Balancing picks each slot's x from different layouts, which can, rarely, bring two
+  // slots closer than their gap; push those apart.
+  for (let changed = true; changed;) {
+    changed = false;
+
+    for (const row of slots)
+      for (let k = 1; k < row.length; k++) {
+        const [a, b] = [row[k - 1]!, row[k]!];
+        const need = get(slotItem[a]!) + gapBetween(a, b);
+
+        if (get(slotItem[b]!) < need - 1e-9) {
+          set(slotItem[b]!, need);
+          changed = true;
+        }
       }
-
-      set(it, Math.min(hi, Math.max(lo, want)));
-    }
   }
+
+  const at = slotItem.map(get);
+  settle(slots, links, at, gapBetween, (s) => slotItem[s]!.kind === "v" && dummy(slotItem[s]!.id));
+  slotItem.forEach((it, s) => set(it, at[s]!));
 
   const channels = groupBy(
     rows.flatMap((row) => row.flatMap((it, k) => (outer(it) ? [{ it, row, k }] : []))),
@@ -823,4 +1008,296 @@ const place = (
     width,
     span,
   };
+};
+
+// A segment between a slot and one in the next row. `da` and `db` are where it meets each
+// slot, from the slot's centre. A held link joins a group's slots, which always stay in line.
+interface Link {
+  readonly a: number;
+  readonly b: number;
+  readonly da: number;
+  readonly db: number;
+  readonly inner: boolean;
+  readonly held?: boolean;
+}
+
+// Brandes–Köpf coordinate assignment. Each of four passes (aligning to the row above or
+// below, from the left or the right) lines each slot up with a median neighbour, so long
+// edges become straight blocks, then packs the blocks as tightly as their gaps allow. A
+// slot takes the mean of its two middle x values across the four, which centres a parent
+// over its children. A segment that would cross a bend-to-bend one is never aligned, so
+// long edges win over short ones.
+const balance = (
+  rows: readonly (readonly number[])[],
+  links: readonly Link[],
+  gap: (a: number, b: number) => number,
+  extent: (s: number) => readonly [number, number],
+): number[] => {
+  const n = rows.reduce((sum, row) => sum + row.length, 0);
+  const pos = new Int32Array(n);
+  rows.forEach((row) => row.forEach((s, k) => (pos[s] = k)));
+  const ups = Array.from({ length: n }, (): Link[] => []);
+  const downs = Array.from({ length: n }, (): Link[] => []);
+
+  for (const l of links) {
+    ups[l.b]!.push(l);
+    downs[l.a]!.push(l);
+  }
+
+  for (const list of ups) list.sort((p, q) => pos[p.a]! - pos[q.a]! || p.da - q.da);
+
+  for (const list of downs) list.sort((p, q) => pos[p.b]! - pos[q.b]! || p.db - q.db);
+
+  const conflict = new Set<Link>();
+
+  for (let r = 1; r < rows.length; r++) {
+    const row = rows[r]!;
+    let [k0, scan] = [0, 0];
+
+    row.forEach((s, i) => {
+      const inner = ups[s]!.find((l) => l.inner);
+      const k1 = inner ? pos[inner.a]! : rows[r - 1]!.length;
+
+      if (!inner && i < row.length - 1) return;
+
+      for (const t of row.slice(scan, i + 1))
+        for (const l of ups[t]!)
+          if (!l.inner && (pos[l.a]! < k0 || pos[l.a]! > k1)) conflict.add(l);
+
+      [k0, scan] = [k1, i + 1];
+    });
+  }
+
+  const layout = (down: boolean, right: boolean, free: boolean): number[] | undefined => {
+    const root = Array.from({ length: n }, (_, s) => s);
+    const shift = Array.from({ length: n }, () => 0);
+    const taken = new Uint8Array(n);
+    const near = (l: Link) => (down ? l.a : l.b);
+
+    for (const l of links) if (l.held) taken[near(l)] = 1;
+
+    for (let step = 0; step < rows.length; step++) {
+      const r = down ? step : rows.length - 1 - step;
+      const row = right ? [...rows[r]!].reverse() : rows[r]!;
+      const last = (rows[down ? r - 1 : r + 1]?.length ?? 0) - 1;
+      const idx = (s: number) => (right ? last - pos[s]! : pos[s]!);
+      let prev = -1;
+
+      for (const v of row) {
+        const list = down ? ups[v]! : downs[v]!;
+        const held = list.find((l) => l.held);
+
+        const join = (l: Link) => {
+          const w = near(l);
+          const [own, other] = down ? [l.db, l.da] : [l.da, l.db];
+          [root[v], shift[v], taken[w], prev] = [root[w]!, shift[w]! + other - own, 1, idx(w)];
+        };
+
+        if (held) {
+          join(held);
+          continue;
+        }
+
+        if (free || list.length === 0) continue;
+        const [lo, hi] = [(list.length - 1) >> 1, list.length >> 1];
+
+        for (const m of right ? [hi, lo] : [lo, hi]) {
+          const l = list[m]!;
+
+          if (root[v] === v && !taken[near(l)] && prev < idx(near(l)) && !conflict.has(l)) join(l);
+        }
+      }
+    }
+
+    const out = Array.from({ length: n }, (): { to: number; w: number }[] => []);
+    const indegree = new Int32Array(n);
+
+    for (const row of rows)
+      for (let k = 1; k < row.length; k++) {
+        const [a, b] = right ? [row[k]!, row[k - 1]!] : [row[k - 1]!, row[k]!];
+        const g = gap(row[k - 1]!, row[k]!);
+        out[root[a]!]!.push({
+          to: root[b]!,
+          w: right ? g - shift[a]! + shift[b]! : g + shift[a]! - shift[b]!,
+        });
+        indegree[root[b]!]!++;
+      }
+
+    const queue = root.filter((r, s) => r === s && indegree[s] === 0);
+
+    for (let k = 0; k < queue.length; k++)
+      for (const { to } of out[queue[k]!]!) if (--indegree[to]! === 0) queue.push(to);
+
+    if (queue.length < root.filter((r, s) => r === s).length) return undefined;
+    const x = new Float64Array(n);
+
+    for (const v of queue) for (const { to, w } of out[v]!) x[to] = Math.max(x[to]!, x[v]! + w);
+
+    // Longest paths leave a block hard against those before it; pull each back toward
+    // those after it, so blocks with nothing pushing them sit beside what they lead to.
+    for (const v of [...queue].reverse()) {
+      const room = Math.min(...out[v]!.map(({ to, w }) => x[to]! - w));
+
+      if (room !== Infinity && room > x[v]!) x[v] = room;
+    }
+
+    return root.map((r, s) => (right ? -x[r]! : x[r]!) + shift[s]!);
+  };
+
+  const variants = [
+    [true, false],
+    [true, true],
+    [false, false],
+    [false, true],
+  ] as const;
+
+  const all = variants.map(
+    ([down, right]) => layout(down, right, false) ?? layout(down, right, true)!,
+  );
+
+  const bounds = all.map((xs) => [
+    Math.min(...xs.map((x, s) => x - extent(s)[0])),
+    Math.max(...xs.map((x, s) => x + extent(s)[1])),
+  ]);
+
+  const narrowest = bounds.reduce(
+    (best, b, k) => (b[1]! - b[0]! < bounds[best]![1]! - bounds[best]![0]! ? k : best),
+    0,
+  );
+
+  const moved = all.map((xs, k) => {
+    const delta =
+      k % 2 === 0
+        ? bounds[narrowest]![0]! - bounds[k]![0]!
+        : bounds[narrowest]![1]! - bounds[k]![1]!;
+
+    return xs.map((x) => x + delta);
+  });
+
+  return Array.from({ length: n }, (_, s) => {
+    const four = moved.map((xs) => xs[s]!).sort((p, q) => p - q);
+
+    return (four[1]! + four[2]!) / 2;
+  });
+};
+
+// Pulls nearly straight segments straight, then pulls what is left toward its neighbours.
+// Slots already in line move as one block, so a straight edge stays straight. A segment's
+// smaller block moves, if every slot in it keeps its gap to those beside it, by up to SNAP,
+// or BEND_SNAP for a block of bends only.
+const settle = (
+  rows: readonly (readonly number[])[],
+  links: readonly Link[],
+  xs: number[],
+  gap: (a: number, b: number) => number,
+  bend: (s: number) => boolean,
+) => {
+  const n = xs.length;
+  const row = new Int32Array(n);
+  const pos = new Int32Array(n);
+  rows.forEach((list, r) => list.forEach((s, k) => [(row[s] = r), (pos[s] = k)]));
+  const block = Array.from({ length: n }, (_, s) => s);
+  const members = Array.from({ length: n }, (_, s) => [s]);
+
+  const join = (p: number, q: number) => {
+    let [keep, drop] = [block[p]!, block[q]!];
+
+    if (keep === drop) return;
+
+    if (members[keep]!.length < members[drop]!.length) [keep, drop] = [drop, keep];
+
+    for (const s of members[drop]!) block[s] = keep;
+    members[keep]!.push(...members[drop]!);
+    members[drop] = [];
+  };
+
+  const off = (l: Link) => xs[l.b]! + l.db - xs[l.a]! - l.da;
+  const touching = Array.from({ length: n }, (): Link[] => []);
+
+  for (const l of links) {
+    touching[l.a]!.push(l);
+    touching[l.b]!.push(l);
+  }
+
+  // How far a block can move left and right before one of its slots meets a neighbour.
+  const room = (id: number) => {
+    let [lo, hi] = [-Infinity, Infinity];
+
+    for (const s of members[id]!) {
+      const list = rows[row[s]!]!;
+      const [left, right] = [list[pos[s]! - 1], list[pos[s]! + 1]];
+
+      if (left !== undefined && block[left] !== id)
+        lo = Math.max(lo, xs[left]! + gap(left, s) - xs[s]!);
+
+      if (right !== undefined && block[right] !== id)
+        hi = Math.min(hi, xs[right]! - gap(s, right) - xs[s]!);
+    }
+
+    return [Math.min(0, lo), Math.max(0, hi)] as const;
+  };
+
+  const move = (id: number, by: number) => {
+    for (const s of members[id]!) xs[s]! += by;
+  };
+
+  const snap = () => {
+    for (const l of links) if (l.held || Math.abs(off(l)) < 0.01) join(l.a, l.b);
+
+    const near = links
+      .flatMap((l, k) =>
+        Math.abs(off(l)) >= 0.01 && Math.abs(off(l)) <= BEND_SNAP ? [{ l, k }] : [],
+      )
+      .sort((p, q) => Math.abs(off(p.l)) - Math.abs(off(q.l)) || p.k - q.k);
+
+    for (const { l } of near) {
+      const d = off(l);
+      const [upper, lower] = [block[l.a]!, block[l.b]!];
+
+      if (upper === lower) continue;
+
+      if (Math.abs(d) < 0.01) {
+        join(l.a, l.b);
+        continue;
+      }
+
+      const first = members[upper]!.length <= members[lower]!.length ? upper : lower;
+
+      for (const id of [first, first === upper ? lower : upper]) {
+        const by = id === upper ? d : -d;
+        const [lo, hi] = room(id);
+
+        if ((Math.abs(d) > SNAP && !members[id]!.every(bend)) || by < lo - 0.01 || by > hi + 0.01)
+          continue;
+
+        move(id, by);
+        join(l.a, l.b);
+        break;
+      }
+    }
+  };
+
+  snap();
+
+  // Each block moves toward the mean of where its other segments would run straight, so a
+  // node with two children ends up centred over them.
+  for (let sweep = 0; sweep < 24; sweep++) {
+    const ids = block.filter((id, s) => id === s);
+
+    for (const id of sweep % 2 ? ids.reverse() : ids) {
+      const pulls = members[id]!.flatMap((s) =>
+        touching[s]!.flatMap((l) =>
+          block[l.a] === block[l.b] ? [] : [l.a === s ? off(l) : -off(l)],
+        ),
+      );
+
+      const want = mean(pulls);
+
+      if (want === undefined) continue;
+      const [lo, hi] = room(id);
+      move(id, Math.min(hi, Math.max(lo, want)));
+    }
+  }
+
+  snap();
 };

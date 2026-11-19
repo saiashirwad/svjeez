@@ -1,45 +1,77 @@
-import type { Attrs, Tag } from "./attributes";
-import type { AnimatedTag, TagChannels } from "./channels";
-import type { Stack } from "./motion";
-import { children, node, type Child, type Props, type SvgNode } from "./svg";
-import { traced } from "./traced";
+import { caller, thrownFrom } from "./svg/traced";
+import { remember, sourceFrom } from "./author/identity";
+import { flat, type Child, type SceneElement } from "./author/nodes";
+import { SceneError, located } from "./model/scene-error";
+import type { JsxSource } from "./author/sources";
 
-export type ElementProps<T extends Tag> = Attrs<T> &
-  (T extends AnimatedTag ? { readonly animation?: Stack<TagChannels<T>> } : {});
+export const Fragment = Symbol.for("svjeez.scene.fragment");
 
-export const Fragment = Symbol.for("svjeez.fragment");
+type Component<P> = (props: P) => SceneElement;
 
-type Component = (props: Props) => SvgNode | null;
+const isFragment = <P>(type: Given<P>): type is typeof Fragment => type === Fragment;
 
-const isComponent = (type: string | typeof Fragment | Component): type is Component =>
-  typeof type === "function";
+type Given<P> = Component<P> | typeof Fragment | string;
 
-export const jsx = (type: string | typeof Fragment | Component, props: Props | null): SvgNode => {
-  const values = props ?? {};
+const isTag = <P>(type: Given<P>): type is string => typeof type === "string";
 
-  if (type === Fragment) return { kind: "fragment", children: children(values.children) };
+export const componentName = <P>(type: Given<P>): string | undefined =>
+  isFragment(type) || isTag(type) || !type.name ? undefined : type.name;
 
-  if (isComponent(type)) return type(values) ?? { kind: "fragment", children: [] };
+export const build = <P extends { readonly children?: Child }>(
+  type: Given<P>,
+  props: P,
+  key: string | undefined,
+  source: JsxSource | undefined,
+): SceneElement => {
+  if (isFragment(type)) return { type: "fragment", children: flat(props.children) };
+  const at = source && sourceFrom(source);
 
-  return traced(node(type, values));
+  if (isTag(type))
+    throw new SceneError(
+      `JSX holds <${type}>, an SVG tag, which a scene doesn't draw: every node is a component, such as <Shape geometry={rect(w, h)} />.`,
+      "Write components, and put the JSX pragma at the top of the file.",
+      { node: `<${type}>`, ...(at && { source: at }) },
+    );
+
+  try {
+    return type(key === undefined ? props : { ...props, key });
+  } catch (error) {
+    if (!(error instanceof Error)) throw error;
+    const thrown = thrownFrom(error);
+    const name = componentName(type);
+
+    throw located(error, {
+      ...(name && { node: `<${name}>` }),
+      ...((thrown ?? source) && { source: sourceFrom((thrown ?? source)!) }),
+    });
+  }
 };
 
-export const jsxs = jsx;
+export function jsx(
+  type: typeof Fragment,
+  props: { readonly children?: Child },
+  key?: string,
+): SceneElement;
+export function jsx<P>(type: Component<P>, props: P, key?: string): SceneElement;
+export function jsx<P extends { readonly children?: Child }>(
+  type: Component<P> | typeof Fragment,
+  props: P,
+  key?: string,
+): SceneElement {
+  const source = caller();
 
-export const jsxDEV = jsx;
+  return remember(build(type, props, key, source), source, componentName(type));
+}
 
-type Intrinsic<T extends Tag> = ElementProps<T> & {
-  readonly children?: Child;
-  readonly key?: string | number;
-};
+export { jsx as jsxs, jsx as jsxDEV };
 
 export namespace JSX {
-  export type Element = SvgNode;
+  export type Element = SceneElement;
   export interface IntrinsicAttributes {
-    key?: string | number;
+    key?: string;
   }
   export interface ElementChildrenAttribute {
     children: {};
   }
-  export type IntrinsicElements = { [T in Tag]: Intrinsic<T> };
+  export interface IntrinsicElements {}
 }

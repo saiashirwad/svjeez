@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 582 513" width="582" height="513" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">Architecture diagram</title>
+  <desc id="d">A Mermaid architecture diagram drawn by @svjeez/mermaid.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--blue-14-background:#151F2E}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0;--blue-14-background:#DDEAFF}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,7.5%{translate:0 6px;opacity:0}12.5%,100%{translate:0 0;opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,15%{translate:0 6px;opacity:0}20%,100%{translate:0 0;opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,3.75%{stroke-dashoffset:1;visibility:hidden}7.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m3{animation-name:k3}
+@keyframes k4{0%,6.027%{visibility:hidden}6.028%,100%{visibility:visible}}
+.m4{animation-name:k4}
+@keyframes k5{0%,7.5%{stroke-dashoffset:1;visibility:hidden}11.25%,100%{stroke-dashoffset:0;visibility:visible}}
+.m5{animation-name:k5}
+@keyframes k6{0%,11.25%{stroke-dashoffset:1;visibility:hidden}15%,100%{stroke-dashoffset:0;visibility:visible}}
+.m6{animation-name:k6}
+@keyframes k7{0%,13.465%{visibility:hidden}13.466%,100%{visibility:visible}}
+.m7{animation-name:k7}
+@keyframes k8{0%,15%{stroke-dashoffset:1;visibility:hidden}18.75%,100%{stroke-dashoffset:0;visibility:visible}}
+.m8{animation-name:k8}
+@keyframes k9{0%,18.75%{stroke-dashoffset:1;visibility:hidden}22.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m9{animation-name:k9}
+@keyframes k10{0%,21.153%{visibility:hidden}21.154%,100%{visibility:visible}}
+.m10{animation-name:k10}
+@keyframes k11{0%,22.5%{stroke-dashoffset:1;visibility:hidden}26.25%,100%{stroke-dashoffset:0;visibility:visible}}
+.m11{animation-name:k11}
+@keyframes k12{0%,24.942%{visibility:hidden}24.943%,100%{visibility:visible}}
+.m12{animation-name:k12}
+@keyframes k13{0%,3.75%{translate:0 6px;opacity:0}7.5%,100%{translate:0 0;opacity:1}}
+.m13{animation-name:k13}
+@keyframes k14{0%,7.5%{translate:0 6px;opacity:0}11.25%,100%{translate:0 0;opacity:1}}
+.m14{animation-name:k14}
+@keyframes k15{0%,11.25%{translate:0 6px;opacity:0}15%,100%{translate:0 0;opacity:1}}
+.m15{animation-name:k15}
+@keyframes k16{0%,15%{translate:0 6px;opacity:0}18.75%,100%{translate:0 0;opacity:1}}
+.m16{animation-name:k16}
+@keyframes k17{0%,22.5%{translate:0 6px;opacity:0}26.25%,100%{translate:0 0;opacity:1}}
+.m17{animation-name:k17}
+@keyframes k18{0%,26.25%{translate:0 6px;opacity:0}30%,100%{translate:0 0;opacity:1}}
+.m18{animation-name:k18}
+@keyframes k19{0%,18.75%{translate:0 6px;opacity:0}22.5%,100%{translate:0 0;opacity:1}}
+.m19{animation-name:k19}
+@keyframes k20{0%,26.25%{translate:0 6px;opacity:0}29.375%,100%{translate:0 0;opacity:1}}
+.m20{animation-name:k20}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-7.5s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="582" height="513" fill="var(--background)"/>
+  <g transform="translate(29 32)" fill="none">
+    <g transform="translate(131 2)" class="a m1">
+      <rect width="242" height="135" rx="12" stroke="var(--border)" stroke-dasharray="4 3"/>
+      <path d="M7 18C4.884 18.006 3.129 16.363 2.997 14.25C2.864 12.138 4.4 10.289 6.5 10.03C7.133 7.445 9.393 5.585 12.052 5.463C14.71 5.34 17.132 6.984 18 9.5C20.347 9.638 22.138 11.653 22 14C21.862 16.347 19.847 18.138 17.5 18Z" transform="translate(10 9)" stroke="var(--blue)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:22.498px 20.732px;scale:0.667"/>
+      <text x="32" y="19.271" font-size="11.05" fill="var(--muted)">Edge</text>
+    </g>
+    <g transform="translate(131 157)" class="a m2">
+      <rect width="385" height="290" rx="12" stroke="var(--border)" stroke-dasharray="4 3"/>
+      <path d="M7 18C4.884 18.006 3.129 16.363 2.997 14.25C2.864 12.138 4.4 10.289 6.5 10.03C7.133 7.445 9.393 5.585 12.052 5.463C14.71 5.34 17.132 6.984 18 9.5C20.347 9.638 22.138 11.653 22 14C21.862 16.347 19.847 18.138 17.5 18Z" transform="translate(10 9)" stroke="var(--blue)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:22.498px 20.732px;scale:0.667"/>
+      <text x="32" y="19.271" font-size="11.05" fill="var(--muted)">Core</text>
+    </g>
+    <path d="M67.5 70L143.5 70" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m3"/>
+    <polygon points="150.5 70 142.5 74 142.5 66" fill="var(--border)" class="a m4"/>
+    <path d="M210.5 70L293.5 70" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m5"/>
+    <path d="M180.5 123L180.5 188" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
+    <polygon points="180.5 195 176.5 187 184.5 187" fill="var(--border)" class="a m7"/>
+    <path d="M210.5 225L323.5 225" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
+    <path d="M323.5 225L429.5 225" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m9"/>
+    <polygon points="436.5 225 428.5 229 428.5 221" fill="var(--border)" class="a m10"/>
+    <path d="M323.5 225L323.5 343" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m11"/>
+    <polygon points="323.5 350 319.5 342 327.5 342" fill="var(--border)" class="a m12"/>
+    <g transform="translate(2 40)" class="a m13">
+      <rect x="6.25" y="0.75" width="60" height="60" rx="10" fill="var(--blue-14-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <path d="M3 12C3 16.971 7.029 21 12 21C16.971 21 21 16.971 21 12C21 7.029 16.971 3 12 3C7.029 3 3 7.029 3 12M3 12L21 12M12 3C7.174 8.03 7.174 15.97 12 21M12 3C16.826 8.03 16.826 15.97 12 21" transform="translate(20 14.5)" fill="none" stroke="var(--blue)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:32px 26.5px;scale:1.292"/>
+      <text x="16" y="79.18" font-size="13" fill="var(--text)">Users</text>
+    </g>
+    <g transform="translate(145 40)" class="a m14">
+      <rect x="6.25" y="0.75" width="60" height="60" rx="10" fill="var(--blue-14-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <path d="M3 4L21 4L21 11L3 11ZM3 13L21 13L21 20L3 20ZM7 7.5L7.01 7.5M7 16.5L7.01 16.5M11 7.5L17 7.5M11 16.5L17 16.5" transform="translate(20 14.5)" fill="none" stroke="var(--blue)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:32px 26.5px;scale:1.292"/>
+      <text x="8.2" y="79.18" font-size="13" fill="var(--text)">Gateway</text>
+    </g>
+    <g transform="translate(288 40)" class="a m15">
+      <rect x="6.25" y="0.75" width="60" height="60" rx="10" fill="var(--blue-14-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <path d="M7 18C4.884 18.006 3.129 16.363 2.997 14.25C2.864 12.138 4.4 10.289 6.5 10.03C7.133 7.445 9.393 5.585 12.052 5.463C14.71 5.34 17.132 6.984 18 9.5C20.347 9.638 22.138 11.653 22 14C21.862 16.347 19.847 18.138 17.5 18Z" transform="translate(20 14.5)" fill="none" stroke="var(--blue)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:32.498px 26.232px;scale:1.292"/>
+      <text x="23.8" y="79.18" font-size="13" fill="var(--text)">CDN</text>
+    </g>
+    <g transform="translate(145 195)" class="a m16">
+      <rect x="6.25" y="0.75" width="60" height="60" rx="10" fill="var(--blue-14-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <path d="M3 4L21 4L21 11L3 11ZM3 13L21 13L21 20L3 20ZM7 7.5L7.01 7.5M7 16.5L7.01 16.5M11 7.5L17 7.5M11 16.5L17 16.5" transform="translate(20 14.5)" fill="none" stroke="var(--blue)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:32px 26.5px;scale:1.292"/>
+      <text x="23.8" y="79.18" font-size="13" fill="var(--text)">API</text>
+    </g>
+    <g transform="translate(431 195)" class="a m17">
+      <rect x="6.25" y="0.75" width="60" height="60" rx="10" fill="var(--blue-14-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <path d="M4 6C4 7.657 7.582 9 12 9C16.418 9 20 7.657 20 6C20 4.343 16.418 3 12 3C7.582 3 4 4.343 4 6M4 6L4 18C4 19.657 7.582 21 12 21C16.418 21 20 19.657 20 18L20 6M4 12C4 13.657 7.582 15 12 15C16.418 15 20 13.657 20 12" transform="translate(20 14.5)" fill="none" stroke="var(--blue)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:32px 26.5px;scale:1.292"/>
+      <text x="4.3" y="79.18" font-size="13" fill="var(--text)">Postgres</text>
+    </g>
+    <g transform="translate(288 350)" class="a m18">
+      <rect x="6.25" y="0.75" width="60" height="60" rx="10" fill="var(--blue-14-background)" stroke="var(--blue)" stroke-width="1.5"/>
+      <path d="M5 3L19 3L19 21L5 21ZM12 6.5C9.791 6.5 8 8.291 8 10.5C8 12.709 9.791 14.5 12 14.5C14.209 14.5 16 12.709 16 10.5C16 8.291 14.209 6.5 12 6.5M12 10.5L12.01 10.5M8 18L11 18" transform="translate(20 14.5)" fill="none" stroke="var(--blue)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:32px 26.5px;scale:1.292"/>
+      <text x="16" y="79.18" font-size="13" fill="var(--text)">Files</text>
+    </g>
+    <circle cx="327.5" cy="229" r="4" fill="var(--border)" class="a m19"/>
+    <g class="a m20">
+      <rect x="301.93" y="279" width="43.15" height="17" rx="3" fill="var(--background)"/>
+      <text x="306.93" y="291.478" font-size="11.05" fill="var(--muted)">blobs</text>
+    </g>
+  </g>
+</svg>

@@ -1,7 +1,11 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { font } from "svjeez";
 import { flowchart, stateMachine } from "../src/index.ts";
 
-// Node 20 has no Map.groupBy; remove it so these run as they would there.
+const mono = await font.load(
+  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
+);
+
 const native = Map.groupBy;
 
 describe("without Map.groupBy, as on Node 20", () => {
@@ -23,13 +27,13 @@ describe("without Map.groupBy, as on Node 20", () => {
           ["c", "a"],
         ],
       },
-      {},
+      { font: mono },
     );
 
-    expect(chart.bounds.h).toBeGreaterThan(0);
+    expect(chart.size[1]).toBeGreaterThan(0);
   });
 
-  test("state lays out a machine", () => {
+  test("a state machine lays out", () => {
     const machine = stateMachine(
       {
         states: { idle: "Idle", busy: "Busy" },
@@ -39,9 +43,9 @@ describe("without Map.groupBy, as on Node 20", () => {
           ["busy", "idle"],
         ],
       },
-      {},
+      { font: mono },
     );
 
-    expect(machine.bounds.w).toBeGreaterThan(0);
+    expect(machine.size[0]).toBeGreaterThan(0);
   });
 });

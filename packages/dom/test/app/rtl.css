@@ -1,0 +1,25 @@
+@font-face {
+  font-family: "Bidi Test";
+  src: url("../fixtures/NotoSansBidi-Subset.ttf") format("truetype");
+}
+html,
+body {
+  margin: 0;
+  background: #fff;
+  color: #0a0a0a;
+  font: 18px/28px "Bidi Test";
+}
+#app {
+  background: #fff;
+  width: 340px;
+  padding: 20px;
+}
+p {
+  margin: 0 0 8px;
+}
+.wrap {
+  width: 180px;
+}
+.line {
+  text-decoration: underline;
+}

@@ -2,7 +2,6 @@ export type P = readonly [number, number];
 
 const RAD = Math.PI / 180;
 
-/** A point at radius r, a degrees clockwise from straight up. */
 export const polar = (r: number, a: number): P => [r * Math.sin(a * RAD), -r * Math.cos(a * RAD)];
 
 export const turn = ([x, y]: P, deg: number, [cx, cy]: P = [0, 0]): P => {
@@ -29,7 +28,7 @@ export const BANK = 5.5;
 
 export const SWING = 250;
 
-export const tooth: readonly P[] = [
+export const tooth: readonly [P, P, P, P, P, P, P] = [
   polar(TOE, 1.6),
   polar(R, -3.2),
   polar(56.5, -6.4),
@@ -39,7 +38,7 @@ export const tooth: readonly P[] = [
   polar(48, -3.4),
 ];
 
-const stone = (lock: P, letOff: P, lean: number): readonly P[] => {
+const stone = (lock: P, letOff: P, lean: number): readonly [P, P, P, P] => {
   const [vx, vy] = polar(17, lean);
 
   return [lock, letOff, [letOff[0] + vx, letOff[1] + vy], [lock[0] + vx, lock[1] + vy]];
@@ -74,7 +73,6 @@ const overlap = (a: readonly P[], b: readonly P[]) =>
   inside(a[0]!, b) ||
   inside(b[0]!, a);
 
-/** Whether any tooth is inside a stone with the wheel at w degrees and the fork at psi. */
 const blocked = (w: number, psi: number) => {
   const stones = [entry, exit].map((s) => s.map((p) => turn(p, psi, FORK)));
 
@@ -103,13 +101,11 @@ const ENGAGED = (() => {
   return t;
 })();
 
-/** The fork's angle for a balance angle: the pin carries it across, and it rests on a banking pin otherwise. */
 export const forkAt = (theta: number) =>
   Math.abs(theta) >= ENGAGED ? -Math.sign(theta) * BANK : -lift(theta);
 
 const N = 8000;
 
-/** The wheel is light but not weightless: free of the stones it turns no faster than this, in degrees per beat. */
 const FREE = 900;
 const STEP = 0.01;
 
@@ -139,7 +135,6 @@ const table = (() => {
   return out;
 })();
 
-/** How far the wheel has turned by a beat count, in degrees. Beat 1 is a tick on the entry stone, beat 2 on the exit. */
 export const wheelAt = (beat: number) => {
   const turns = Math.floor((beat - 0.5) / 2);
   const at = ((beat - 0.5 - turns * 2) / 2) * N;

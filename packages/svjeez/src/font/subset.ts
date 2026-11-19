@@ -1,63 +1,5 @@
-import { i16, required, table, u16, u32, type Sfnt } from "./sfnt";
+import { i16, name, required, requiredTable, table, u16, u32, type Sfnt } from "./sfnt";
 import type { Typesetter } from "./shape";
-
-const DROP = new Set([
-  "GSUB",
-  "GPOS",
-  "GDEF",
-  "BASE",
-  "JSTF",
-  "MATH",
-  "fvar",
-  "gvar",
-  "avar",
-  "cvar",
-  "HVAR",
-  "VVAR",
-  "MVAR",
-  "STAT",
-  "hdmx",
-  "LTSH",
-  "VDMX",
-  "DSIG",
-  "kern",
-  "morx",
-  "kerx",
-]);
-
-const glyphRange = (f: Sfnt, glyph: number): readonly [number, number] => {
-  const loca = required(f, "loca");
-  const long = i16(f, required(f, "head") + 50) === 1;
-  const at = (g: number) => (long ? u32(f, loca + 4 * g) : 2 * u16(f, loca + 2 * g));
-
-  return [at(glyph), at(glyph + 1)];
-};
-
-const withComponents = (f: Sfnt, glyphs: Set<number>): Set<number> => {
-  const glyf = required(f, "glyf");
-  const queue = [...glyphs];
-
-  while (queue.length > 0) {
-    const glyph = queue.pop()!;
-    const [start, end] = glyphRange(f, glyph);
-
-    if (start === end || i16(f, glyf + start) >= 0) continue;
-    let p = glyf + start + 10;
-
-    for (let flags = 0x20; flags & 0x20;) {
-      flags = u16(f, p);
-      const component = u16(f, p + 2);
-      p += 4 + (flags & 1 ? 4 : 2) + (flags & 0x08 ? 2 : flags & 0x40 ? 4 : flags & 0x80 ? 8 : 0);
-
-      if (!glyphs.has(component)) {
-        glyphs.add(component);
-        queue.push(component);
-      }
-    }
-  }
-
-  return glyphs;
-};
 
 class Writer {
   readonly bytes: number[] = [];
@@ -85,13 +27,33 @@ const search = (count: number, size: number) => {
   return { range: power * size, selector: Math.log2(power), shift: count * size - power * size };
 };
 
-const charMap = (pairs: readonly (readonly [number, number])[]): Uint8Array => {
-  const sorted = [...pairs].sort((a, b) => a[0] - b[0]);
-  const segments = sorted.filter(([code]) => code < 0xffff);
-  const count = segments.length + 1;
+type Group = [first: number, last: number, glyph: number];
+
+const groups = (pairs: readonly (readonly [number, number])[]): Group[] => {
+  const merged: Group[] = [];
+
+  for (const [code, glyph] of [...pairs].sort((a, b) => a[0] - b[0])) {
+    const last = merged.at(-1);
+
+    if (last && code === last[1] + 1 && glyph === last[2] + code - last[0]) last[1] = code;
+    else merged.push([code, code, glyph]);
+  }
+
+  return merged;
+};
+
+export const charMap = (pairs: readonly (readonly [number, number])[]): Uint8Array => {
+  const all = groups(pairs);
+
+  const segments: Group[] = [
+    ...groups(pairs.filter(([code]) => code < 0xffff)),
+    [0xffff, 0xffff, 0],
+  ];
+
+  const count = segments.length;
   const { range, selector, shift } = search(count, 2);
 
-  const sub = new Writer()
+  const bmp = new Writer()
     .u16(4)
     .u16(16 + 8 * count)
     .u16(0)
@@ -100,55 +62,38 @@ const charMap = (pairs: readonly (readonly [number, number])[]): Uint8Array => {
     .u16(selector)
     .u16(shift);
 
-  for (const [code] of segments) sub.u16(code);
-  sub.u16(0xffff).u16(0);
+  for (const [, last] of segments) bmp.u16(last);
+  bmp.u16(0);
 
-  for (const [code] of segments) sub.u16(code);
-  sub.u16(0xffff);
+  for (const [first] of segments) bmp.u16(first);
 
-  for (const [code, glyph] of segments) sub.u16((glyph - code) & 0xffff);
-  sub.u16(1);
+  for (const [first, , glyph] of segments) bmp.u16((glyph - first) & 0xffff);
 
-  for (let i = 0; i < count; i++) sub.u16(0);
-  const bmp = sub.done();
+  for (let i = 0; i < count; i++) bmp.u16(0);
 
-  if (sorted.every(([code]) => code <= 0xffff)) {
-    const head = new Writer().u16(0).u16(2).u16(0).u16(3).u32(20).u16(3).u16(1).u32(20).done();
-
-    return Uint8Array.from([...head, ...bmp]);
-  }
+  if (all.every(([, last]) => last <= 0xffff))
+    return Uint8Array.from([
+      ...new Writer().u16(0).u16(1).u16(3).u16(1).u32(12).bytes,
+      ...bmp.bytes,
+    ]);
 
   const full = new Writer()
     .u16(12)
     .u16(0)
-    .u32(16 + 12 * sorted.length)
+    .u32(16 + 12 * all.length)
     .u32(0)
-    .u32(sorted.length);
+    .u32(all.length);
 
-  for (const [code, glyph] of sorted) full.u32(code).u32(code).u32(glyph);
-  const at = 4 + 8 * 4 + bmp.length;
+  for (const [first, last, glyph] of all) full.u32(first).u32(last).u32(glyph);
+  const at = 4 + 8 * 2 + bmp.bytes.length;
 
-  const head = new Writer()
-    .u16(0)
-    .u16(4)
-    .u16(0)
-    .u16(3)
-    .u32(36)
-    .u16(0)
-    .u16(4)
-    .u32(at)
-    .u16(3)
-    .u16(1)
-    .u32(36)
-    .u16(3)
-    .u16(10)
-    .u32(at)
-    .done();
-
-  return Uint8Array.from([...head, ...bmp, ...full.done()]);
+  return Uint8Array.from([
+    ...new Writer().u16(0).u16(2).u16(3).u16(1).u32(20).u16(3).u16(10).u32(at).bytes,
+    ...bmp.bytes,
+    ...full.bytes,
+  ]);
 };
 
-/** A subtable's length is a u16, so it holds at most 10920 pairs; more go into further subtables. */
 export const kernTable = (
   pairs: readonly (readonly [number, number, number])[],
   perSubtable = 10000,
@@ -177,6 +122,27 @@ export const kernTable = (
   }
 
   return w.done();
+};
+
+const nameTable = (family: string): Uint8Array => {
+  const text = [...family].flatMap((char) => {
+    const code = char.charCodeAt(0);
+
+    return [code >> 8, code & 255];
+  });
+
+  const w = new Writer()
+    .u16(0)
+    .u16(1)
+    .u16(18)
+    .u16(3)
+    .u16(1)
+    .u16(0x409)
+    .u16(1)
+    .u16(text.length)
+    .u16(0);
+
+  return Uint8Array.from([...w.bytes, ...text]);
 };
 
 const checksum = (bytes: Uint8Array): number => {
@@ -223,22 +189,60 @@ const assemble = (tables: Map<string, Uint8Array>): Uint8Array => {
   return out;
 };
 
+const ARGS_WORDS = 0x0001;
+const ONE_SCALE = 0x0008;
+const MORE = 0x0020;
+const XY_SCALE = 0x0040;
+const TWO_BY_TWO = 0x0080;
+
+const componentSize = (flags: number): number =>
+  4 +
+  (flags & ARGS_WORDS ? 4 : 2) +
+  (flags & ONE_SCALE ? 2 : flags & XY_SCALE ? 4 : flags & TWO_BY_TWO ? 8 : 0);
+
+const glyphs = (f: Sfnt, bytes: Uint8Array) => {
+  const loca = required(f, "loca");
+  const glyf = required(f, "glyf");
+  const long = i16(f, required(f, "head") + 50) === 1;
+  const at = (g: number) => (long ? u32(f, loca + 4 * g) : 2 * u16(f, loca + 2 * g));
+
+  return (glyph: number): Uint8Array => bytes.subarray(glyf + at(glyph), glyf + at(glyph + 1));
+};
+
+const components = (data: Uint8Array): { glyph: number; at: number }[] => {
+  if (data.length === 0 || ((data[0]! << 24) >> 16) + data[1]! >= 0) return [];
+  const found: { glyph: number; at: number }[] = [];
+
+  for (let p = 10, flags = MORE; flags & MORE;) {
+    flags = (data[p]! << 8) | data[p + 1]!;
+    found.push({ glyph: (data[p + 2]! << 8) | data[p + 3]!, at: p });
+    p += componentSize(flags);
+  }
+
+  return found;
+};
+
+const renumbered = (data: Uint8Array, renumber: (glyph: number) => number): Uint8Array => {
+  const out = Uint8Array.from(data);
+
+  for (const { glyph, at } of components(data)) {
+    const id = renumber(glyph);
+    out[at + 2] = id >> 8;
+    out[at + 3] = id & 255;
+  }
+
+  return out;
+};
+
+const HINTING = ["cvt ", "fpgm", "gasp", "prep"];
+
 export const subset = (
   bytes: Uint8Array,
   f: Sfnt,
   typesetter: Typesetter,
-  kerning: (left: number, right: number) => number,
   texts: readonly string[],
   layout = true,
 ): Uint8Array | undefined => {
-  const chars = new Set(texts.flatMap((text) => [...text]));
-
-  const mapped = [...chars].flatMap((char) => {
-    const glyph = typesetter.glyph(char);
-
-    return glyph === 0 ? [] : [[char.codePointAt(0)!, glyph] as const];
-  });
-
   if (
     layout &&
     texts.some((text) =>
@@ -246,30 +250,46 @@ export const subset = (
     )
   )
     return undefined;
-  const drawn = [...new Set(mapped.map(([, glyph]) => glyph))];
+  const runs = texts.map((text) => [...text].map(typesetter.glyph));
 
-  if (layout && typesetter.beyond(texts.map((text) => [...text].map(typesetter.glyph))))
-    return undefined;
-  const keep = withComponents(f, new Set([0, ...drawn]));
+  if (layout && typesetter.beyond(runs)) return undefined;
 
-  const glyfData: number[] = [];
+  const mapped = [...new Set(texts.flatMap((text) => [...text]))]
+    .flatMap((char) => {
+      const glyph = typesetter.glyph(char);
+
+      return glyph === 0 ? [] : [[char.codePointAt(0)!, glyph] as const];
+    })
+    .sort((a, b) => a[0] - b[0]);
+
+  const outline = glyphs(f, bytes);
+  const order = [0];
+  const ids = new Map([[0, 0]]);
+
+  const keep = (glyph: number) => {
+    if (ids.has(glyph)) return;
+    ids.set(glyph, order.length);
+    order.push(glyph);
+  };
+
+  for (const [, glyph] of mapped) keep(glyph);
+
+  for (let i = 0; i < order.length; i++)
+    for (const { glyph } of components(outline(order[i]!))) keep(glyph);
+
+  const renumber = (glyph: number) => ids.get(glyph)!;
+  const glyf: number[] = [];
   const offsets: number[] = [];
-  const glyf = required(f, "glyf");
-  const glyphs = u16(f, required(f, "maxp") + 4);
 
-  for (let g = 0; g < glyphs; g++) {
-    offsets.push(glyfData.length);
+  for (const glyph of order) {
+    offsets.push(glyf.length);
+    glyf.push(...renumbered(outline(glyph), renumber));
 
-    if (!keep.has(g)) continue;
-    const [start, end] = glyphRange(f, g);
-
-    for (let i = start; i < end; i++) glyfData.push(f.view.getUint8(glyf + i));
-
-    while (glyfData.length % 4) glyfData.push(0);
+    if (glyf.length % 2) glyf.push(0);
   }
 
-  offsets.push(glyfData.length);
-  const short = glyfData.length < 0x20000;
+  offsets.push(glyf.length);
+  const short = glyf.length < 0x20000;
   const loca = new Writer();
 
   for (const offset of offsets) {
@@ -277,24 +297,52 @@ export const subset = (
     else loca.u32(offset);
   }
 
-  const copy = (tag: string): Uint8Array => {
-    const at = required(f, tag);
+  const hmtx = required(f, "hmtx");
+  const metrics = u16(f, required(f, "hhea") + 34);
+  const advance = (glyph: number) => u16(f, hmtx + 4 * Math.min(glyph, metrics - 1));
 
-    return new Uint8Array(bytes.buffer, bytes.byteOffset + at, f.lengths.get(tag)!).slice();
+  const bearing = (glyph: number) =>
+    glyph < metrics
+      ? i16(f, hmtx + 4 * glyph + 2)
+      : i16(f, hmtx + 4 * metrics + 2 * (glyph - metrics));
+
+  let long = order.length;
+
+  while (long > 1 && advance(order[long - 1]!) === advance(order[long - 2]!)) long--;
+  const widths = new Writer();
+
+  order.forEach((glyph, i) => {
+    if (i < long) widths.u16(advance(glyph));
+    widths.i16(bearing(glyph));
+  });
+
+  const copy = (tag: string): Uint8Array => {
+    const { offset, length } = requiredTable(f, tag);
+
+    return Uint8Array.from(bytes.subarray(offset, offset + length));
   };
 
-  const tables = new Map<string, Uint8Array>();
-
-  for (const tag of f.tables.keys())
-    if (!DROP.has(tag) && !["glyf", "loca", "cmap", "post", "head"].includes(tag))
-      tables.set(tag, copy(tag));
   const head = copy("head");
   new DataView(head.buffer).setUint32(8, 0);
   new DataView(head.buffer).setInt16(50, short ? 0 : 1);
-  tables.set("head", head);
-  tables.set("glyf", Uint8Array.from(glyfData));
-  tables.set("loca", loca.done());
-  tables.set("cmap", charMap(mapped));
+  const hhea = copy("hhea");
+  new DataView(hhea.buffer).setUint16(34, long);
+  const maxp = copy("maxp");
+  new DataView(maxp.buffer).setUint16(4, order.length);
+
+  const tables = new Map<string, Uint8Array>([
+    ["head", head],
+    ["hhea", hhea],
+    ["maxp", maxp],
+    ["name", nameTable(name(f, 16, 1) ?? "Subset")],
+    ["cmap", charMap(mapped.map(([code, glyph]) => [code, renumber(glyph)]))],
+    ["glyf", Uint8Array.from(glyf)],
+    ["loca", loca.done()],
+    ["hmtx", widths.done()],
+  ]);
+
+  for (const tag of ["OS/2", ...HINTING])
+    if (table(f, tag) !== undefined) tables.set(tag, copy(tag));
 
   if (table(f, "post") !== undefined) {
     const post = copy("post").slice(0, 32);
@@ -302,11 +350,17 @@ export const subset = (
     tables.set("post", post);
   }
 
-  const pairs = drawn
-    .flatMap((left) => drawn.map((right) => [left, right, kerning(left, right)] as const))
-    .filter(([, , value]) => value !== 0);
+  const pairs = new Map<number, readonly [number, number, number]>();
 
-  const kern = kernTable(pairs);
+  for (const run of runs)
+    for (let i = 0; i + 1 < run.length; i++) {
+      const [left, right] = [run[i]!, run[i + 1]!];
+      const value = typesetter.kern(left, right);
+
+      if (value !== 0) pairs.set(left * 65536 + right, [renumber(left), renumber(right), value]);
+    }
+
+  const kern = kernTable([...pairs.values()]);
 
   if (kern) tables.set("kern", kern);
 

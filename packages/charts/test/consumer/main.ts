@@ -1,33 +1,36 @@
-import { chart, type ChartBars, type Chart } from "@svjeez/charts";
-import { render } from "svjeez";
-import { rect } from "svjeez/geometry";
+import { Chart, area, bars, line, type ChartProps, type Series } from "@svjeez/charts";
+import { font } from "svjeez";
 
-const quarters: Chart<"band"> = chart({
-  frame: rect(40, 20, 360, 180),
-  x: { kind: "band", domain: ["Q1", "Q2", "Q3"] },
-  data: [
-    ["Q1", 4],
-    ["Q3", 9],
-  ],
-});
+const face = await font.load("ABeeZee-Regular.ttf");
 
-const sales: ChartBars = quarters.bars({ at: 0.5, over: 1 }, { Q1: 4, Q2: 7, Q3: 9 });
+const series: readonly Series[] = [
+  bars({ Q1: 12, Q2: 48 }, { color: "#0A6CFF", draw: 1 }),
+  line(
+    [
+      ["Q1", 12],
+      ["Q2", 48],
+    ],
+    { color: "#E5453B", curve: "monotone", dots: true },
+  ),
+  area(
+    [
+      [1, 2],
+      [2, 3],
+    ],
+    { color: "#2FA84F", baseline: 0 },
+  ),
+];
 
-const trend = quarters.line(
-  { at: sales.span.end, over: 1 },
-  [
-    ["Q1", 4],
-    ["Q3", 9],
-  ],
-  { curve: "monotone", dots: true },
-);
+export const props: ChartProps = {
+  size: [300, 200],
+  x: { kind: "band", domain: ["Q1", "Q2"] },
+  series,
+  font: face,
+  axis: "#8E8E93",
+  label: "#6E6E73",
+};
 
-export const svg: string = render({ width: 440, height: 240, duration: 4, title: "Charts" }, [
-  quarters.node,
-  sales.node,
-  trend.node,
-]);
+// @ts-expect-error a series needs a color
+export const colorless = bars({ Q1: 1 }, {});
 
-export const end: number = sales.span.end;
-
-export const q2: number = sales.part("Q2").span.end;
+export { Chart };

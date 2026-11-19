@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { union, type Box, type Point } from "../src/layout/box.ts";
 import { lanes } from "../src/layout/lanes.ts";
 import { layered, type LayeredInput } from "../src/layout/layered.ts";
+import { curve } from "../src/curve.ts";
 import { sequence } from "../src/layout/sequence.ts";
 import { tree } from "../src/layout/tree.ts";
 
@@ -97,6 +98,30 @@ describe("layered", () => {
       });
     }
   }
+
+  test("BT and RL mirror TB and LR, and every edge ends on its nodes", () => {
+    const g = graphs.diamond!;
+
+    const [tb, bt, lr, rl] = (["TB", "BT", "LR", "RL"] as const).map((direction) =>
+      layered({ ...g, direction }),
+    );
+
+    const y = (out: typeof tb, id: string) => out!.nodes.get(id)!.y;
+    const x = (out: typeof tb, id: string) => out!.nodes.get(id)!.x;
+
+    expect(y(tb, "a")).toBeLessThan(y(tb, "d"));
+    expect(y(bt, "a")).toBeGreaterThan(y(bt, "d"));
+    expect(x(lr, "a")).toBeLessThan(x(lr, "d"));
+    expect(x(rl, "a")).toBeGreaterThan(x(rl, "d"));
+    expect(bt!.bounds.h).toBeCloseTo(tb!.bounds.h, 3);
+    expect(rl!.bounds.w).toBeCloseTo(lr!.bounds.w, 3);
+
+    for (const out of [bt!, rl!])
+      for (const e of out.edges) {
+        expect(onBorder(e.points[0]!, out.nodes.get(e.from)!)).toBe(true);
+        expect(onBorder(e.points.at(-1)!, out.nodes.get(e.to)!)).toBe(true);
+      }
+  });
 
   test("a cycle reverses one edge for ranking but still points the right way", () => {
     const out = layered(graphs.cycle!);
@@ -258,25 +283,14 @@ describe("layered", () => {
         const out = layered({ ...graph, direction });
         const lines = out.edges.map((e) => ({ ...e, segments: segments(e.points) }));
 
-        test(`${name} ${direction}: no two edges share a stretch of line, except a final approach into one port`, () => {
-          const merging = (
-            e: (typeof lines)[number],
-            s: (typeof e.segments)[number],
-            f: (typeof lines)[number],
-            t: (typeof f.segments)[number],
-          ) => {
-            const [p, q] = [e.points.at(-1)!, f.points.at(-1)!];
-
-            return s === e.segments.at(-1) && t === f.segments.at(-1) && p.x === q.x && p.y === q.y;
-          };
-
+        test(`${name} ${direction}: no two edges share a stretch of line`, () => {
           for (const [i, e] of lines.entries())
             for (const f of lines.slice(i + 1))
               for (const s of e.segments)
                 for (const t of f.segments)
-                  expect(
-                    `${e.from}>${e.to} / ${f.from}>${f.to}: ${collinear(s, t) && !merging(e, s, f, t)}`,
-                  ).toEndWith("false");
+                  expect(`${e.from}>${e.to} / ${f.from}>${f.to}: ${collinear(s, t)}`).toEndWith(
+                    "false",
+                  );
         });
 
         test(`${name} ${direction}: no edge runs through a node`, () => {
@@ -311,6 +325,184 @@ describe("layered", () => {
         });
       }
     }
+  });
+
+  describe("crossings and ports", () => {
+    const wires = (out: ReturnType<typeof layered>) =>
+      out.edges.flatMap((e, i) => e.points.slice(1).map((q, k) => [e.points[k]!, q, i] as const));
+
+    const crossings = (out: ReturnType<typeof layered>) => {
+      const ccw = (a: Point, b: Point, c: Point) =>
+        (c.y - a.y) * (b.x - a.x) - (b.y - a.y) * (c.x - a.x);
+
+      const all = wires(out);
+      let n = 0;
+
+      for (const [i, [a, b, e]] of all.entries())
+        for (const [c, d, f] of all.slice(i + 1))
+          if (e !== f && ccw(a, b, c) * ccw(a, b, d) < 0 && ccw(c, d, a) * ccw(c, d, b) < 0) n++;
+
+      return n;
+    };
+
+    test("a shuffled matching comes out with no crossings", () => {
+      const out = layered({
+        nodes: nodes("a1 a2 a3 a4 a5 b1 b2 b3 b4 b5"),
+        edges: edges("a1>b3 a2>b5 a3>b1 a4>b4 a5>b2"),
+      });
+
+      expect(crossings(out)).toBe(0);
+    });
+
+    test("a tree declared in a scrambled order comes out with no crossings", () => {
+      const out = layered({
+        nodes: nodes("r a b c a1 a2 b1 b2 c1 c2 c3"),
+        edges: edges("r>c r>a r>b c>c2 a>a2 b>b1 c>c1 a>a1 b>b2 c>c3"),
+      });
+
+      expect(crossings(out)).toBe(0);
+    });
+
+    test("a three-layer lattice is drawn with the fewest crossings it allows", () => {
+      const out = layered({
+        nodes: nodes("a b c d e f g h i"),
+        edges: edges("a>d a>e b>d b>f c>e c>f d>g d>h e>h e>i f>g f>i"),
+      });
+
+      // Four is the least any order of its layers allows.
+      expect(crossings(out)).toBeLessThanOrEqual(4);
+    });
+
+    test("edges leaving one node start at separate points along its side", () => {
+      const out = layered({
+        nodes: [{ id: "hub", w: 200, h: 40 }, ...nodes("a b c")],
+        edges: edges("hub>a hub>b hub>c"),
+      });
+
+      const xs = out.edges.map((e) => e.points[0]!.x).sort((p, q) => p - q);
+      expect(new Set(xs).size).toBe(3);
+
+      for (let k = 1; k < xs.length; k++) expect(xs[k]! - xs[k - 1]!).toBeGreaterThanOrEqual(8);
+    });
+
+    test("edges entering one node end at separate points along its side", () => {
+      const out = layered({
+        nodes: [{ id: "hub", w: 200, h: 40 }, ...nodes("a b c")],
+        edges: edges("a>hub b>hub c>hub"),
+      });
+
+      const xs = out.edges.map((e) => e.points.at(-1)!.x).sort((p, q) => p - q);
+      expect(new Set(xs).size).toBe(3);
+
+      for (let k = 1; k < xs.length; k++) expect(xs[k]! - xs[k - 1]!).toBeGreaterThanOrEqual(8);
+    });
+
+    test("a lone edge between nodes with overlapping spans runs straight", () => {
+      const out = layered({
+        nodes: [
+          { id: "a", w: 200, h: 40 },
+          { id: "b", w: 60, h: 40 },
+        ],
+        edges: edges("a>b"),
+      });
+
+      expect(out.edges[0]!.points).toHaveLength(2);
+    });
+
+    test("a node hanging off a long chain sits next to its only neighbour", () => {
+      const out = layered({ nodes: nodes("a b c d x"), edges: edges("a>b b>c c>d x>d") });
+
+      expect(out.rank.get("x")).toBe(out.rank.get("c"));
+    });
+
+    test("the same input gives the same layout", () => {
+      const input = {
+        nodes: nodes("a b c d e f"),
+        edges: edges("a>b a>c b>d c>d d>e e>f f>b a>f"),
+      };
+
+      expect(layered(input)).toEqual(layered(input));
+    });
+  });
+
+  describe("straightening", () => {
+    const center = (b: Box) => b.x + b.w / 2;
+
+    // Sideways steps along an edge, past the one it may take at each end to reach its ports.
+    const kinks = (e: { readonly points: readonly Point[] }) =>
+      Math.max(
+        0,
+        e.points.slice(1).filter((q, k) => Math.abs(q.x - e.points[k]!.x) > 0.5).length - 2,
+      );
+
+    test("a long edge runs straight between its bends", () => {
+      const out = layered({
+        nodes: nodes("a b c d e f g h"),
+        edges: edges("a>b b>c c>d d>e a>e a>f f>g g>h b>h c>h"),
+      });
+
+      for (const e of out.edges) expect(kinks(e)).toBe(0);
+    });
+
+    for (const [name, graph] of Object.entries<LayeredInput>(graphs))
+      test(`${name}: no long edge kinks between its bends`, () => {
+        const out = layered(graph);
+
+        const long = out.edges.filter(
+          (e) => Math.abs(out.rank.get(e.from)! - out.rank.get(e.to)!) > 1,
+        );
+
+        expect(long.reduce((n, e) => n + kinks(e), 0)).toBe(0);
+      });
+
+    test("a chain of nodes of different widths stays perfectly straight", () => {
+      const out = layered({ nodes: nodes("a b c d e"), edges: edges("a>b b>c c>d d>e") });
+      const xs = [...out.nodes.values()].map(center);
+
+      for (const x of xs) expect(x).toBeCloseTo(xs[0]!, 6);
+
+      for (const e of out.edges) expect(e.points).toHaveLength(2);
+    });
+
+    test("a parent with two children sits centred over them", () => {
+      const out = layered({ nodes: nodes("p a b"), edges: edges("p>a p>b") });
+      const [p, a, b] = ["p", "a", "b"].map((id) => center(out.nodes.get(id)!));
+
+      expect(p!).toBeCloseTo((a! + b!) / 2, 6);
+    });
+
+    test("a child with two parents sits centred under them", () => {
+      const out = layered({ nodes: nodes("a b c"), edges: edges("a>c b>c") });
+      const [a, b, c] = ["a", "b", "c"].map((id) => center(out.nodes.get(id)!));
+
+      expect(c!).toBeCloseTo((a! + b!) / 2, 6);
+    });
+  });
+
+  describe("curve", () => {
+    const jog = [
+      { x: 0, y: 0 },
+      { x: 0, y: 30 },
+      { x: 100, y: 30 },
+      { x: 100, y: 60 },
+    ];
+
+    test("starts and ends on its points", () => {
+      const { samples } = curve(jog);
+      expect(samples[0]).toEqual([0, 0]);
+      expect(samples.at(-1)).toEqual([100, 60]);
+    });
+
+    test("a jog is one S that never leaves the box of its points or doubles back", () => {
+      const { samples } = curve(jog);
+
+      for (const [k, [x, y]] of samples.entries()) {
+        expect(x).toBeGreaterThanOrEqual(-1e-6);
+        expect(x).toBeLessThanOrEqual(100 + 1e-6);
+
+        if (k > 0) expect(y).toBeGreaterThanOrEqual(samples[k - 1]![1] - 1e-6);
+      }
+    });
   });
 
   test("unknown ids and a node in two groups throw", () => {
@@ -461,6 +653,101 @@ describe("sequence", () => {
   });
 });
 
+describe("sequence blocks, activations and notes", () => {
+  const actors = [
+    { id: "a", w: 40, h: 30 },
+    { id: "b", w: 40, h: 30 },
+    { id: "c", w: 40, h: 30 },
+  ];
+
+  const label = { w: 60, h: 14 };
+
+  const out = sequence({
+    actors,
+    title: { w: 100, h: 20 },
+    rows: [
+      { kind: "open", tab: { w: 40, h: 18 }, label: { w: 80, h: 16 } },
+      { kind: "message", from: "a", to: "b", label, activate: true },
+      { kind: "open", tab: { w: 30, h: 18 } },
+      { kind: "message", from: "b", to: "b", label, activate: true },
+      { kind: "message", from: "b", to: "b", label, deactivate: true },
+      { kind: "close" },
+      { kind: "divider", label: { w: 50, h: 16 } },
+      { kind: "message", from: "b", to: "a", label, deactivate: true },
+      { kind: "close" },
+      { kind: "note", actor: "a", to: "c", size: { w: 300, h: 26 } },
+      { kind: "note", actor: "c", side: "left", size: { w: 90, h: 26 } },
+    ],
+  });
+
+  const x = (id: string) => out.lifelines.get(id)![0].x;
+
+  test("a frame spans the lifelines it involves and nests its children", () => {
+    const [outer, inner] = out.frames;
+
+    expect(outer!.box.x).toBeLessThan(x("a"));
+    expect(outer!.box.x + outer!.box.w).toBeGreaterThan(x("b"));
+    expect(outer!.box.x + outer!.box.w).toBeLessThan(x("c") + 1);
+    expect(inner!.box.y).toBeGreaterThan(outer!.box.y);
+    expect(inner!.box.y + inner!.box.h).toBeLessThan(outer!.box.y + outer!.box.h);
+    expect(inner!.box.x).toBeGreaterThan(outer!.box.x);
+    expect(outer!.dividers).toHaveLength(1);
+    expect(outer!.dividers[0]!.y).toBeGreaterThan(inner!.box.y + inner!.box.h);
+    expect(outer!.at).toBe(0);
+    expect(inner!.at).toBe(1);
+  });
+
+  test("activations are bars on the lifeline, nested bars shift sideways", () => {
+    const [first, second] = out.bars.filter((b) => b.actor === "b");
+
+    expect(out.bars).toHaveLength(2);
+    expect(first!.box.x + first!.box.w / 2).toBeCloseTo(x("b"));
+    expect(second!.box.x).toBeGreaterThan(first!.box.x);
+    expect(second!.box.y).toBeGreaterThan(first!.box.y);
+    expect(second!.box.y + second!.box.h).toBeLessThanOrEqual(first!.box.y + first!.box.h);
+  });
+
+  test("an arrow stops at the edge of the bar it lands on", () => {
+    const send = out.rows[0]!.points;
+
+    expect(send[1]!.x).toBeLessThan(x("b"));
+    expect(send[0]!.x).toBe(x("a"));
+    const reply = out.rows[3]!.points;
+    expect(reply[0]!.x).toBeLessThan(x("b"));
+  });
+
+  test("notes span two actors or sit beside one, and the title heads the diagram", () => {
+    const [wide, beside] = [out.rows[4]!.box, out.rows[5]!.box];
+
+    expect(wide.w).toBeGreaterThanOrEqual(300);
+    expect(wide.x).toBeLessThan(x("a"));
+    expect(beside.x + beside.w).toBeLessThan(x("c"));
+    expect(out.title!.y).toBe(0);
+    expect(out.heads.get("a")!.y).toBeGreaterThan(out.title!.h);
+  });
+
+  test("deactivating without an activation is an error", () => {
+    expect(() => sequence({ actors, rows: [{ kind: "deactivate", actor: "a" }] })).toThrow(
+      "has no activation",
+    );
+    expect(() => sequence({ actors, rows: [{ kind: "close" }] })).toThrow("never opened");
+  });
+
+  test("a boxed group of actors gets a frame behind them", () => {
+    const boxed = sequence({
+      actors,
+      boxes: [{ actors: ["a", "b"], label: { w: 40, h: 14 } }],
+      rows: [{ kind: "message", from: "a", to: "c", label }],
+    });
+
+    const [b] = boxed.boxes;
+
+    expect(b!.box.x).toBeLessThan(boxed.heads.get("a")!.x);
+    expect(b!.box.x + b!.box.w).toBeGreaterThan(boxed.heads.get("b")!.x + 40);
+    expect(b!.box.x + b!.box.w).toBeLessThan(boxed.heads.get("c")!.x);
+  });
+});
+
 describe("lanes", () => {
   const out = lanes({
     lanes: [
@@ -507,7 +794,7 @@ describe("size limits", () => {
   });
 });
 
-test("src/layout imports nothing outside src/layout but svjeez", () => {
+test("src/layout imports nothing but itself, the types and SceneError", () => {
   const dir = join(import.meta.dir, "../src/layout");
 
   for (const file of readdirSync(dir)) {
@@ -515,6 +802,7 @@ test("src/layout imports nothing outside src/layout but svjeez", () => {
       (m) => m[1]!,
     );
 
-    for (const path of imports) expect(`${file}: ${path}`).toMatch(/: (svjeez|\.\/[\w-]+\.ts)$/);
+    for (const path of imports)
+      expect(`${file}: ${path}`).toMatch(/: (svjeez\/tools|\.\/[\w-]+\.ts|\.\.\/types\.ts)$/);
   }
 });

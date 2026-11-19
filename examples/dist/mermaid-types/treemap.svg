@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 512" width="720" height="512" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">Treemap</title>
+  <desc id="d">A Mermaid treemap diagram drawn by @svjeez/mermaid.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--magenta-12-background:#201929;--blue-12-background:#131C29;--cyan-12-background:#142229;--orange-12-background:#271C0C}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0;--magenta-12-background:#F3EAFB;--blue-12-background:#E2EDFF;--cyan-12-background:#E4F3F5;--orange-12-background:#FCEEE4}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,3.75%{opacity:0}7.5%,100%{opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,7.5%{translate:0 6px;opacity:0}11.25%,100%{translate:0 0;opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,11.25%{translate:0 6px;opacity:0}15%,100%{translate:0 0;opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,15%{translate:0 6px;opacity:0}18.75%,100%{translate:0 0;opacity:1}}
+.m4{animation-name:k4}
+@keyframes k5{0%,18.75%{opacity:0}22.5%,100%{opacity:1}}
+.m5{animation-name:k5}
+@keyframes k6{0%,22.5%{translate:0 6px;opacity:0}26.25%,100%{translate:0 0;opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,26.25%{translate:0 6px;opacity:0}30%,100%{translate:0 0;opacity:1}}
+.m7{animation-name:k7}
+@keyframes k8{0%,30%{opacity:0}33.75%,100%{opacity:1}}
+.m8{animation-name:k8}
+@keyframes k9{0%,33.75%{translate:0 6px;opacity:0}37.5%,100%{translate:0 0;opacity:1}}
+.m9{animation-name:k9}
+@keyframes k10{0%,37.5%{translate:0 6px;opacity:0}41.25%,100%{translate:0 0;opacity:1}}
+.m10{animation-name:k10}
+@keyframes k11{0%,41.25%{opacity:0}45%,100%{opacity:1}}
+.m11{animation-name:k11}
+@keyframes k12{0%,45%{translate:0 6px;opacity:0}48.75%,100%{translate:0 0;opacity:1}}
+.m12{animation-name:k12}
+@keyframes k13{0%,48.75%{translate:0 6px;opacity:0}52.5%,100%{translate:0 0;opacity:1}}
+.m13{animation-name:k13}
+@keyframes k14{0%,52.5%{translate:0 6px;opacity:0}56.25%,100%{translate:0 0;opacity:1}}
+.m14{animation-name:k14}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-7.5s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="720" height="512" fill="var(--background)"/>
+  <g transform="translate(31.5 29.034)" fill="var(--background)">
+    <text x="265.21" y="28.982" font-size="14.95" fill="var(--text)">Monthly budget</text>
+    <g class="a m1">
+      <rect x="8.5" y="39.7" width="334" height="400" rx="4" fill="var(--magenta-12-background)" stroke="var(--magenta)"/>
+      <text x="16" y="58.178" font-size="11.05" fill="var(--text)">Housing</text>
+      <text x="304" y="57.8" font-size="10" fill="var(--muted)">2,160</text>
+    </g>
+    <g class="a m2">
+      <rect x="14" y="67.2" width="322" height="304" rx="4" fill="var(--magenta)"/>
+      <text x="159.4" y="217.63" font-size="13">Rent</text>
+      <text x="160" y="230.925" font-size="10">1,800</text>
+    </g>
+    <g class="a m3">
+      <rect x="14" y="375.2" width="213" height="58" rx="4" fill="var(--magenta)"/>
+      <text x="85.4" y="402.63" font-size="13">Utilities</text>
+      <text x="111.5" y="415.925" font-size="10">240</text>
+    </g>
+    <g class="a m4">
+      <rect x="231" y="375.2" width="105" height="58" rx="4" fill="var(--magenta)"/>
+      <text x="248.4" y="402.63" font-size="13">Insurance</text>
+      <text x="274.5" y="415.925" font-size="10">120</text>
+    </g>
+    <g class="a m5">
+      <rect x="346.5" y="39.7" width="302" height="182" rx="4" fill="var(--blue-12-background)" stroke="var(--blue)"/>
+      <text x="354" y="58.178" font-size="11.05" fill="var(--text)">Food</text>
+      <text x="622" y="57.8" font-size="10" fill="var(--muted)">900</text>
+    </g>
+    <g class="a m6">
+      <rect x="352" y="67.2" width="199" height="148" rx="4" fill="var(--blue)"/>
+      <text x="416.4" y="139.63" font-size="13">Groceries</text>
+      <text x="442.5" y="152.925" font-size="10">620</text>
+    </g>
+    <g class="a m7">
+      <rect x="555" y="67.2" width="87" height="148" rx="4" fill="var(--blue)"/>
+      <text x="559.5" y="139.63" font-size="13">Eating out</text>
+      <text x="589.5" y="152.925" font-size="10">280</text>
+    </g>
+    <g class="a m8">
+      <rect x="507.5" y="225.7" width="141" height="214" rx="4" fill="var(--cyan-12-background)" stroke="var(--cyan)"/>
+      <text x="515" y="244.178" font-size="11.05" fill="var(--text)">Transport</text>
+      <text x="622" y="243.8" font-size="10" fill="var(--muted)">500</text>
+    </g>
+    <g class="a m9">
+      <rect x="513" y="253.2" width="129" height="147" rx="4" fill="var(--cyan)"/>
+      <text x="565.8" y="325.13" font-size="13">Car</text>
+      <text x="568.5" y="338.425" font-size="10">410</text>
+    </g>
+    <g class="a m10">
+      <rect x="513" y="404.2" width="129" height="29" rx="4" fill="var(--cyan)"/>
+      <text x="550.2" y="423.38" font-size="13" fill="var(--background)">Transit</text>
+    </g>
+    <g class="a m11">
+      <rect x="346.5" y="225.7" width="157" height="214" rx="4" fill="var(--orange-12-background)" stroke="var(--orange)"/>
+      <text x="354" y="244.178" font-size="11.05" fill="var(--text)">Fun</text>
+      <text x="477" y="243.8" font-size="10" fill="var(--muted)">550</text>
+    </g>
+    <g class="a m12" font-size="7">
+      <rect x="471" y="370.2" width="26" height="63" rx="4" fill="var(--orange)"/>
+      <text x="475.6" y="399.845">Str…</text>
+      <text x="479.8" y="408.595">40</text>
+    </g>
+    <g class="a m13">
+      <rect x="352" y="253.2" width="145" height="113" rx="4" fill="var(--orange)"/>
+      <text x="401.1" y="308.13" font-size="13">Travel</text>
+      <text x="415.5" y="321.425" font-size="10">350</text>
+    </g>
+    <g class="a m14">
+      <rect x="352" y="370.2" width="115" height="63" rx="4" fill="var(--orange)"/>
+      <text x="382.2" y="400.13" font-size="13">Hobbies</text>
+      <text x="400.5" y="413.425" font-size="10">160</text>
+    </g>
+  </g>
+</svg>

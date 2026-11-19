@@ -1,246 +1,411 @@
 /** @jsxImportSource svjeez */
-import { scaleBand, scaleLinear } from "d3-scale";
-import { type Color, type SvgNode, defaultDark, tint } from "svjeez";
+import { area as d3area, curveLinear, curveMonotoneX, curveStep, line as d3line } from "d3-shape";
+import {
+  Group,
+  Shape,
+  Text,
+  circle,
+  enter,
+  linear,
+  path,
+  rect,
+  through,
+  within,
+  type Anim,
+  type SceneElement,
+  type Vec,
+} from "svjeez";
+import { SceneError, type PathBuilder, type StrokeProps } from "svjeez/tools";
+import { TICK, layoutOf, type Layout } from "./layout.ts";
+import type {
+  AreaOptions,
+  BarsOptions,
+  ChartProps,
+  Datum,
+  LineCurve,
+  LineOptions,
+  Series,
+} from "./types.ts";
 
-import { buildSeries, round, type Frame } from "./series.tsx";
-import type { Chart, ChartOptions, Datum, XScale } from "./types.ts";
+const CURVES = { linear: curveLinear, monotone: curveMonotoneX, step: curveStep } as const;
+const DOT_POP = 0.08;
+const LABEL_IN = 0.15;
 
-const TICK = 4;
+/** What a part of a series is while the whole is drawn to `draw`: nothing animates when there is no draw. */
+const drawing =
+  (draw: Anim<number> | undefined) =>
+  <U,>(fn: (progress: number) => U): Anim<U> | undefined =>
+    draw === undefined ? undefined : through(draw, fn);
 
-const ACCENTS = ["blue", "number", "green", "magenta", "cyan", "yellow", "red"] as const;
+/** A part's own progress, 0 to 1, while the series draws from `from` to `to`. */
+const partOf = (
+  draw: Anim<number> | undefined,
+  from: number,
+  to: number,
+): Anim<number> | undefined => (draw === undefined ? undefined : within(draw, from, to));
 
-const compact = (n: number): string => String(Number(n.toPrecision(12)) + 0);
+const strokes = (...rows: readonly (readonly [Vec, Vec])[]): PathBuilder =>
+  rows.reduce((p, [from, to]) => p.moveTo(from).lineTo(to), path());
 
-const finitePair = (what: string, [a, b]: readonly [number, number]): void => {
-  if (!Number.isFinite(a) || !Number.isFinite(b) || b < a)
-    throw new Error(
-      `chart() needs a finite ${what} domain with max at or above min, got [${a}, ${b}].`,
-    );
+const curveOf = (curve: LineCurve = "linear") => {
+  if (!(curve in CURVES))
+    throw new SceneError(`curve is "${curve}".`, 'Use "linear", "monotone" or "step".');
+
+  return CURVES[curve];
 };
 
-const countOf = (what: string, count: number): number => {
-  if (!Number.isInteger(count) || count < 1)
-    throw new Error(`chart() needs a whole number of ${what} ticks, at least 1, got ${count}.`);
+interface Look {
+  readonly chart: ChartProps;
+  readonly layout: Layout;
+  readonly size: number;
+}
 
-  return count;
+const Axes = ({ look: { chart, layout, size } }: { readonly look: Look }): SceneElement => {
+  const { width, height, yTicks, xTicks } = layout;
+  const bottom = height;
+  const [low, high] = layout.yDomain;
+  const band = chart.x.kind === "band";
+
+  const guides = [
+    ...yTicks.map(({ at }): readonly [Vec, Vec] => [
+      [0, at],
+      [width, at],
+    ]),
+    ...(band
+      ? []
+      : xTicks.map(({ at }): readonly [Vec, Vec] => [
+          [at, 0],
+          [at, bottom],
+        ])),
+  ];
+
+  const marks = [
+    ...yTicks.map(({ at }): readonly [Vec, Vec] => [
+      [-TICK, at],
+      [TICK, at],
+    ]),
+    ...(band
+      ? []
+      : xTicks.map(({ at }): readonly [Vec, Vec] => [
+          [at, bottom - TICK],
+          [at, bottom + TICK],
+        ])),
+    ...(low < 0 && high > 0
+      ? [
+          [
+            [0, layout.zero],
+            [width, layout.zero],
+          ] as const,
+        ]
+      : []),
+  ];
+
+  return (
+    <Group key="axes" motion={chart.axesIn && enter(chart.axesIn)}>
+      {chart.grid && (
+        <Shape
+          key="grid"
+          geometry={strokes(...guides)}
+          stroke={{ color: chart.axis, width: 1, ...chart.grid }}
+          opacity={0.25}
+        />
+      )}
+      <Shape key="ticks" geometry={strokes(...marks)} stroke={{ color: chart.axis, width: 1 }} />
+      <Shape
+        key="axes"
+        geometry={path().moveTo([0, 0]).lineTo([0, bottom]).lineTo([width, bottom])}
+        stroke={{ color: chart.axis, width: 1.5 }}
+      />
+      {yTicks.map(({ value, at, label }) => (
+        <Text
+          key={`y:${value}`}
+          font={chart.font}
+          size={size}
+          at={[-TICK - 3, at]}
+          anchor="right"
+          fill={chart.label}
+        >
+          {label}
+        </Text>
+      ))}
+      {xTicks.map(({ value, at, label }) => (
+        <Text
+          key={`x:${value}`}
+          font={chart.font}
+          size={size}
+          at={[at, bottom + TICK + 3]}
+          anchor="top"
+          fill={chart.label}
+        >
+          {label}
+        </Text>
+      ))}
+    </Group>
+  );
 };
 
-const spread = (low: number, high: number): [number, number] =>
-  low === high ? [low, low + 1] : [low, high];
+interface BarsProps {
+  readonly look: Look;
+  readonly data: readonly Datum<string>[];
+  readonly options: BarsOptions;
+  readonly slot: { readonly index: number; readonly count: number };
+}
 
-export function chart<X extends XScale>(options: ChartOptions<X>): Chart<X["kind"]> {
-  const { frame, x: xs, data = [], grid = false } = options;
-  const { w: width, h: height } = frame;
-  const at = { x: frame.x, y: frame.y };
-  const { theme = defaultDark, fontSize = 12, font } = options;
-  const ys = options.y ?? {};
+const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps): SceneElement => {
+  const { plot, zero } = layout;
+  const { radius = 3, color, draw } = options;
+  const stagger = options.stagger ?? 0.3;
 
-  if (!(width > 0) || !(height > 0) || !Number.isFinite(width + height))
-    throw new Error(
-      `chart() needs a frame with a positive width and height, got ${width} and ${height}.`,
+  if (!(stagger >= 0 && stagger < 1))
+    throw new SceneError(
+      `bars("${options.name}") has a stagger of ${stagger}.`,
+      "Give a share of the draw from 0 up to, but not including, 1.",
     );
 
-  if (!(fontSize > 0)) throw new Error(`chart() needs a positive fontSize, got ${fontSize}.`);
+  const gap = slot.count > 1 ? 2 : 0;
+  const width = plot.bandwidth / slot.count;
+  const barWidth = Math.max(1, width - gap);
+  const r = Math.min(radius, barWidth / 2);
+  const format = options.values === true ? layout.yFormat : options.values || undefined;
+  const byKey = new Map(data);
 
-  data.forEach(([x, y], i) => {
-    if (!Number.isFinite(y) || (xs.kind === "linear" && !Number.isFinite(x)))
-      throw new Error(`chart() needs finite data, got [${x}, ${y}] at index ${i}.`);
+  const parts = layout.bands.flatMap(({ key, at }, i) => {
+    const value = byKey.get(key);
+
+    if (value === undefined) return [];
+    const up = value >= 0;
+    const length = Math.abs(zero - plot.y(value));
+    const x = at + slot.index * width + gap / 2;
+    const radii = up ? ([r, r, 0, 0] as const) : ([0, 0, r, r] as const);
+    const start = layout.bands.length > 1 ? (stagger * i) / (layout.bands.length - 1) : 0;
+    const grown = drawing(partOf(draw, start, start + 1 - stagger));
+
+    const bar = (
+      <Shape
+        key={key}
+        geometry={rect(barWidth, length, { radius: radii })}
+        at={[x, zero]}
+        anchor={up ? "bottom-left" : "top-left"}
+        origin={up ? "bottom" : "top"}
+        scale={grown((progress): Vec => [1, progress])}
+        fill={color}
+      />
+    );
+
+    if (!format) return [bar];
+
+    const rest: Vec = [x + barWidth / 2, plot.y(value) + (up ? -4 : 4)];
+    const lift = up ? 4 : -4;
+    const shown = partOf(draw, start + 0.6 * (1 - stagger), start + 1 - stagger);
+
+    return [
+      bar,
+      <Text
+        key={`${key}:value`}
+        font={chart.font}
+        size={size}
+        at={drawing(shown)((progress): Vec => [rest[0], rest[1] + (1 - progress) * lift]) ?? rest}
+        anchor={up ? "bottom" : "top"}
+        fill={chart.label}
+        opacity={shown}
+      >
+        {format(value)}
+      </Text>,
+    ];
   });
 
-  const yTicks = countOf("y", ys.ticks ?? 5);
-  let yDomain: [number, number];
+  return <Group key={options.name}>{parts}</Group>;
+};
 
-  if (ys.domain) {
-    finitePair("y", ys.domain);
-    yDomain = [...ys.domain];
-  } else {
-    if (data.length === 0)
-      throw new Error("chart() needs y.domain or data to fit the y scale, got neither.");
+const reaches = (points: readonly Vec[]): readonly number[] => {
+  const sums = points.reduce<number[]>((acc, p, i) => {
+    const prev = points[i - 1];
 
-    const values = data.map(([, y]) => y);
-    yDomain = spread(
-      Math.min(...values, ...(ys.zero === false ? [] : [0])),
-      Math.max(...values, ...(ys.zero === false ? [] : [0])),
+    acc.push((acc[i - 1] ?? 0) + (prev ? Math.hypot(p[0] - prev[0], p[1] - prev[1]) : 0));
+
+    return acc;
+  }, []);
+
+  const total = sums.at(-1) || 1;
+
+  return sums.map((length) => length / total);
+};
+
+interface LineProps {
+  readonly look: Look;
+  readonly points: readonly Vec[];
+  readonly options: LineOptions;
+  readonly fill?: SceneElement;
+  readonly stroked?: boolean;
+}
+
+const Line = ({
+  look: { chart, size },
+  points,
+  options,
+  fill,
+  stroked = true,
+}: LineProps): SceneElement => {
+  const { color, draw, label } = options;
+  const stroke: StrokeProps = { color, width: 2.5, cap: "round", join: "round", ...options.stroke };
+  // The label sits past the line end: a plain-number width moves it, a track or derived width keeps the default.
+  // SAFETY: Number.isFinite is true only for a plain number.
+  const width = Number.isFinite(stroke.width) ? (stroke.width as number) : 2.5;
+  const drawn = drawing(draw);
+
+  const d = d3line<Vec>()
+    .x((p) => p[0])
+    .y((p) => p[1])
+    .curve(curveOf(options.curve))
+    .digits(1)(points);
+
+  const radius = options.dots === true ? 4 : options.dots || 0;
+  const last = points.at(-1)!;
+  const along = reaches(points);
+  const rest: Vec = [last[0] + (radius || width) + 8, last[1]];
+  const shown = partOf(draw, 1 - LABEL_IN, 1);
+
+  return (
+    <Group key={options.name}>
+      {fill}
+      {stroked && (
+        <Shape
+          key="line"
+          geometry={path.parse(d!)}
+          stroke={stroke}
+          trim={drawn((progress): Vec => [0, progress])}
+        />
+      )}
+      {radius > 0 &&
+        points.map((at, i) => (
+          <Shape
+            key={`dot:${i}`}
+            geometry={circle(radius)}
+            at={at}
+            anchor="center"
+            fill={color}
+            scale={partOf(draw, along[i]! * (1 - DOT_POP), along[i]! * (1 - DOT_POP) + DOT_POP)}
+          />
+        ))}
+      {label ? (
+        <Text
+          key="label"
+          font={chart.font}
+          size={size}
+          at={drawing(shown)((progress): Vec => [rest[0] - (1 - progress) * 8, rest[1]]) ?? rest}
+          anchor="left"
+          fill={color}
+          opacity={shown}
+        >
+          {label}
+        </Text>
+      ) : undefined}
+    </Group>
+  );
+};
+
+interface AreaProps {
+  readonly look: Look;
+  readonly data: readonly Datum[];
+  readonly options: AreaOptions;
+}
+
+const pointsOn = (plot: Layout["plot"], data: readonly Datum[]): Vec[] =>
+  data.map(([x, y]) => [plot.x(x), plot.y(y)]);
+
+const Area = ({ look, data, options }: AreaProps): SceneElement => {
+  const { plot, yDomain, width, height } = look.layout;
+  const [low, high] = yDomain;
+  const { color, draw } = options;
+  const baseline = options.baseline ?? 0;
+
+  if (!Number.isFinite(baseline))
+    throw new SceneError(
+      `area("${options.name}") has a baseline of ${baseline}.`,
+      "Give a finite y value.",
     );
-  }
 
-  const yScale = scaleLinear()
-    .domain(yDomain)
-    .nice(yTicks)
-    .range([at.y + height, at.y]);
+  const base = plot.y(Math.min(Math.max(baseline, low), high));
+  const points = pointsOn(plot, data);
+  const top = Math.min(base, ...points.map(([, y]) => y));
 
-  const yFormat = ys.format ?? compact;
-  const yTickValues = yScale.ticks(yTicks);
-  const bottom = at.y + height;
+  const shape = d3area<Vec>()
+    .x((p) => p[0])
+    .y0(base)
+    .y1((p) => p[1])
+    .curve(curveOf(options.curve))
+    .digits(1)(points);
 
-  let xTickNodes: SvgNode[] = [];
-  let xGridNodes: SvgNode[] = [];
-  let bandwidth = 0;
-  let xOf: (value: string | number) => number;
-  let xDomain: readonly [number, number] | undefined;
-
-  const stroke = tint(theme, "comment");
-  const labelColor = tint(theme, "muted");
-
-  const line = (x1: number, y1: number, x2: number, y2: number, strokeWidth = 1) => (
-    <line
-      x1={round(x1)}
-      y1={round(y1)}
-      x2={round(x2)}
-      y2={round(y2)}
-      stroke={stroke}
-      strokeWidth={strokeWidth}
+  const fade = (
+    <Shape
+      geometry={rect(width, height)}
+      fill={linear({
+        from: [0, top],
+        to: [0, base],
+        stops: [
+          [0, "#00000066"],
+          [1, "#00000000"],
+        ],
+      })}
     />
   );
 
-  const text = (x: number, y: number, anchor: "middle" | "end", value: string) => (
-    <text
-      x={round(x)}
-      y={round(y)}
-      fontSize={fontSize}
-      textAnchor={anchor}
-      fill={labelColor}
-      fontFamily={font}
-    >
-      {value}
-    </text>
-  );
+  const fill = <Shape key="fill" geometry={path.parse(shape!)} fill={color} mask={fade} />;
 
-  if (xs.kind === "band") {
-    const seen = new Set<string>();
-
-    for (const key of xs.domain) {
-      if (seen.has(key))
-        throw new Error(`chart() needs distinct x.domain categories, got "${key}" twice.`);
-      seen.add(key);
-    }
-
-    if (xs.domain.length === 0)
-      throw new Error("chart() needs at least one x.domain category, got none.");
-
-    for (const [x] of data)
-      if (!seen.has(String(x)))
-        throw new Error(
-          `chart() got data for "${x}", which is not in x.domain (${xs.domain.join(", ")}). Add it to x.domain.`,
-        );
-
-    const padding = xs.padding ?? 0.3;
-
-    if (!(padding >= 0 && padding < 1))
-      throw new Error(`chart() needs x.padding from 0 up to 1, got ${padding}.`);
-
-    const band = scaleBand<string>()
-      .domain(xs.domain)
-      .range([at.x, at.x + width])
-      .paddingInner(padding)
-      .paddingOuter(padding / 2);
-
-    bandwidth = band.bandwidth();
-    xOf = (key) => {
-      const start = band(String(key));
-
-      if (start === undefined)
-        throw new Error(
-          `x() got "${key}", which is not in the x domain (${xs.domain.join(", ")}). Add it to x.domain.`,
-        );
-
-      return start + bandwidth / 2;
-    };
-
-    const format = xs.format ?? String;
-
-    xTickNodes = xs.domain.map((key) =>
-      text(xOf(key), bottom + TICK + fontSize, "middle", format(key)),
+  // Two nested clips wipe the fill open: the inner one slides in from the left while its content slides back.
+  const wiped =
+    draw === undefined ? (
+      fill
+    ) : (
+      <Group key="fill" clip={rect(width, height)}>
+        <Group
+          clip={rect(width, height)}
+          offset={through(draw, (progress): Vec => [-(1 - progress) * width, 0])}
+        >
+          <Group offset={through(draw, (progress): Vec => [(1 - progress) * width, 0])}>
+            {fill}
+          </Group>
+        </Group>
+      </Group>
     );
-  } else {
-    const xTicks = countOf("x", xs.ticks ?? 6);
-    let domain: [number, number];
 
-    if (xs.domain) {
-      finitePair("x", xs.domain);
-      domain = [...xs.domain];
-    } else {
-      if (data.length === 0)
-        throw new Error("chart() needs x.domain or data to fit the x scale, got neither.");
-
-      const values = data.map(([x]) => Number(x));
-      domain = spread(Math.min(...values), Math.max(...values));
-    }
-
-    const scale = scaleLinear()
-      .domain(domain)
-      .nice(xTicks)
-      .range([at.x, at.x + width]);
-
-    const format = xs.format ?? compact;
-
-    const [first, last] = scale.domain();
-
-    xDomain = [first!, last!];
-    xOf = (value) => scale(Number(value));
-
-    const values = scale.ticks(xTicks);
-
-    xTickNodes = [
-      ...values.map((v) => line(xOf(v), bottom - TICK, xOf(v), bottom + TICK)),
-      ...values.map((v) => text(xOf(v), bottom + TICK + fontSize, "middle", format(v))),
-    ];
-
-    xGridNodes = values.map((v) => line(xOf(v), at.y, xOf(v), bottom));
-  }
-
-  const [low, high] = yScale.domain();
-
-  if (low === undefined || high === undefined)
-    throw new Error("chart() could not fit the y scale.");
-
-  const gridNodes = [
-    ...yTickValues.map((v) => line(at.x, yScale(v), at.x + width, yScale(v))),
-    ...xGridNodes,
-  ];
-
-  const node = (
-    <g>
-      {grid ? <g strokeOpacity={0.25}>{gridNodes}</g> : undefined}
-      {low < 0 && high > 0 ? line(at.x, yScale(0), at.x + width, yScale(0)) : undefined}
-      {line(at.x, bottom, at.x + width, bottom, 1.5)}
-      {line(at.x, at.y, at.x, bottom, 1.5)}
-      {yTickValues.map((v) => line(at.x - TICK, yScale(v), at.x + TICK, yScale(v)))}
-      {yTickValues.map((v) =>
-        text(at.x - TICK - 3, yScale(v) + fontSize * 0.35, "end", yFormat(v)),
-      )}
-      {xTickNodes}
-    </g>
+  return (
+    <Line
+      look={look}
+      points={points}
+      options={options}
+      fill={wiped}
+      stroked={options.line !== false}
+    />
   );
+};
 
-  let used = 0;
+export const Chart = (props: ChartProps): SceneElement => {
+  const { size: area, x, y = {}, series, at = [0, 0], textSize = 12 } = props;
 
-  const shared: Frame = {
-    bounds: frame,
-    theme,
-    fontSize,
-    font,
-    bandwidth,
-    yDomain: [low, high],
-    xDomain,
-    x: (value) => xOf(value),
-    y: (value) => yScale(value),
-    yFormat,
-    nextColor: (): Color => tint(theme, ACCENTS[used++ % ACCENTS.length]!),
-    categories: xs.kind === "band" ? xs.domain : undefined,
-  };
+  if (!(textSize > 0)) throw new SceneError(`textSize is ${textSize}.`, "Give a positive size.");
+  const layout = layoutOf(area, x, y, series);
+  const look: Look = { chart: props, layout, size: textSize };
+  const count = series.filter((s) => s.kind === "bars").length;
+  let placed = 0;
 
-  const series = buildSeries(shared);
+  const drawn = series.map((s: Series) => {
+    const options = { ...s.options, name: s.options.name };
 
-  return {
-    node,
-    bounds: frame,
-    x: (value) => xOf(value),
-    y: (value) => yScale(value),
-    bandwidth,
-    // SAFETY: the conditional type on `bars` only offers it when the scale is a band, and series.bars throws otherwise.
-    bars: series.bars as Chart<X["kind"]>["bars"],
-    line: (when, points: readonly Datum<X["kind"]>[], o) => series.line(when, points, o),
-    area: (when, points: readonly Datum<X["kind"]>[], o) => series.area(when, points, o),
-  };
-}
+    if (s.kind === "bars")
+      return <Bars look={look} data={s.data} options={options} slot={{ index: placed++, count }} />;
+
+    if (s.kind === "line")
+      return <Line look={look} points={pointsOn(layout.plot, s.data)} options={options} />;
+
+    return <Area look={look} data={s.data} options={options} />;
+  });
+
+  return (
+    <Group key={props.key} offset={at}>
+      <Axes look={look} />
+      {drawn}
+      {props.children?.(layout.plot)}
+    </Group>
+  );
+};

@@ -1,19 +1,20 @@
 # @svjeez/vite
 
-Compile svjeez scenes into SVG assets when a Vite app builds. The app receives a URL, dimensions and accessible text.
+Compile `svjeez` scenes into static SVG assets during Vite dev and build.
 
 ```sh
-npm i -D @svjeez/vite svjeez
+npm i -D @svjeez/vite@next svjeez@next
 ```
 
 ```ts
+// vite.config.ts
 import svjeez from "@svjeez/vite";
 import { defineConfig } from "vite";
 
 export default defineConfig({ plugins: [svjeez()] });
 ```
 
-Add `/// <reference types="@svjeez/vite/client" />` to `src/vite-env.d.ts`, then import a scene in app code:
+Add `/// <reference types="@svjeez/vite/client" />` to `src/vite-env.d.ts`, then import scenes with `?svjeez`:
 
 ```tsx
 import hero from "./scenes/hero.tsx?svjeez";
@@ -21,6 +22,7 @@ import hero from "./scenes/hero.tsx?svjeez";
 <img src={hero.src} width={hero.width} height={hero.height} alt={hero.desc || hero.title} />;
 ```
 
-The plugin compiles the scene in its own JSX environment and reloads when a scene dependency changes. Add `&posters` for light and dark WebP stills. Configure them with `svjeez({ posters: { scale, quality, background } })`. Posters need `playwright-core` and `npx playwright-core install chromium-headless-shell`.
+- Compiles scenes in an isolated JSX environment with hot reload on dependency changes.
+- Append `&posters` to generate light and dark WebP stills (configure via `svjeez({ posters: { scale, quality, background } })`; requires `playwright-core` and `chromium-headless-shell`).
 
-[Example app](https://github.com/saiashirwad/svjeez/tree/main/packages/vite/test/app)
+[Example app](https://github.com/saiashirwad/svjeez/tree/next/packages/vite/test/app) · [API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/web.md)

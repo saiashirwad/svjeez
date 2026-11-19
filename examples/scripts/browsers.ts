@@ -4,15 +4,6 @@ import { join } from "node:path";
 import { chromium, firefox, webkit, type Browser, type Page } from "playwright-core";
 import { loopLength, seek } from "svjeez/page";
 
-// Every example SVG must play and seek the same in Chromium, Firefox and WebKit (Safari's engine). Each file is loaded
-// inline, paused, and set to the same scene times in each engine, forward and then backward: some spread over the loop,
-// some just before, inside and after every SMIL window, and some in the second loop. At each time, every element with a
-// SMIL or CSS animation reports its box, opacity, visibility and transforms, and each engine is compared to Chromium.
-//
-// It launches all three engines, so `bun test` doesn't pick it up: run `bun run test:browsers` in examples/. Locally an
-// engine that isn't installed is skipped. In CI it fails. Install them inside packages/svjeez with
-//   bun run playwright-core install --with-deps chromium-headless-shell firefox webkit
-
 const DIST = join(import.meta.dir, "..", "dist");
 
 const ENGINES = { chromium, firefox, webkit };
@@ -21,7 +12,6 @@ const GEOMETRY = 1;
 const OPACITY = 0.02;
 const BLUR = 0.1;
 
-/** Room on a box beyond a pixel, as a share of its size: text is shaped by each engine's own rasterizer and fallback font. */
 const TEXT = 0.2;
 
 const ROTATED = 0.45;
@@ -30,30 +20,25 @@ const CURVES = 0.02;
 const TIMES = 60;
 const PAGES = 4;
 
-/**
- * Files that differ across engines for a reason that isn't timing, as "engine file": the props left out of that file's
- * comparison, and why. Each one must say why.
- */
 const DIFFERS = new Map<string, { props: string[]; why: string }>(
   Object.entries({
-    "firefox horizon.svg": {
-      props: ["bcx", "bcy", "bw", "bh"],
-      why: "Firefox reads the fill-box of a group wrong when its children rotate about fill-boxes of their own (a group of circles with `rotate` and `transform-box: fill-box` gets bounds of [0, -636, 900, 900] where Chromium and WebKit say [-636, -636, 1273, 1273]), so the rings of the group scale and spin about another center.",
+    "firefox escapement.svg": {
+      props: ["bcx", "bcy"],
+      why: "A curved path turns inside rotating groups. Firefox bounds the turned curve and Chromium its turned box, so the centres of the two differ while the frames are the same pixels.",
     },
-    "firefox plane.svg": {
-      props: ["bw"],
-      why: "A diagonal line under a stretched rotation: Chromium bounds the turned box of its path, Firefox the turned path. The center is the same in both.",
-    },
-    "firefox site/icons.svg": {
+    "firefox layout.svg": {
       props: ["bcx"],
-      why: "The same measuring difference on an icon turned by a few degrees: the bounds of the turned box and of the turned shape have different centers.",
+      why: "An arrow head turns inside a group that rotates it about the arrow's start, so as it tilts Firefox bounds the turned head and Chromium its turned box. The frames are the same pixels in both.",
+    },
+    "firefox readme/hero.svg": {
+      props: ["bcy"],
+      why: "Same as layout.svg: the magenta arrow head turns inside a group that rotates it about the arrow's start, so Firefox bounds the turned head and Chromium its turned box.",
     },
   }),
 );
 
 const files = [...new Bun.Glob("**/*.svg").scanSync(DIST)].sort();
 
-/** Every reading is text, so numbers inside it (a box, `0px -17px`) are compared with a tolerance. */
 type Snapshot = Record<string, string>;
 
 type Run = {
@@ -75,11 +60,6 @@ declare global {
 const plan = ({ loop, count }: { loop: number; count: number }): number[] => {
   const marks = new Set<number>();
 
-  // Off the millisecond grid: a time on a step edge of a short loop (0.01s into a 0.1s steps(10) loop) rounds to either
-  // side depending on the engine, and no frame lands exactly there. Firefox's SMIL clock counts whole milliseconds, so
-  // the offset is one: a fraction would be cut, and a fast spline moves a pixel in that time.
-  // WebKit seeks backward to a third lap wrongly (it moves one chained interval at a time, and a window that restarts
-  // itself by `begin="0s;id.begin+9s"` shows its last value), so nothing is checked past two loops.
   const add = (time: number) =>
     time >= 0 &&
     time < loop * 2 &&
@@ -122,7 +102,6 @@ const plan = ({ loop, count }: { loop: number; count: number }): number[] => {
 const probe = ({ times, indices }: { times: number[]; indices?: number[] }) => {
   const targets = new Set<Element>();
 
-  // Chromium runs animations inside a display: none subtree, and Firefox and WebKit don't. Nothing there is on screen.
   const hidden = (element: Element) => {
     for (let node: Element | null = element; node; node = node.parentElement)
       if (getComputedStyle(node).display === "none") return true;
@@ -149,7 +128,6 @@ const probe = ({ times, indices }: { times: number[]; indices?: number[] }) => {
 
   const all = [...document.querySelectorAll("*")];
 
-  // The elements Chromium animates, when it has said which, so an engine that animates fewer is measured on them too.
   const list = indices
     ? indices.map((index) => all[index]!)
     : [...targets].sort((a, b) => all.indexOf(a) - all.indexOf(b));
@@ -167,7 +145,6 @@ const probe = ({ times, indices }: { times: number[]; indices?: number[] }) => {
       const key = labels[k]!;
       const style = getComputedStyle(element);
 
-      // Elements in a mask or a clip path aren't laid out on their own: Firefox has no box for them.
       const unlaidOut = element.closest("mask, clipPath") !== null;
 
       if (element instanceof SVGRectElement || element instanceof SVGImageElement) {
@@ -180,19 +157,20 @@ const probe = ({ times, indices }: { times: number[]; indices?: number[] }) => {
           snapshot[key + " ah"] = round(height.animVal.value);
       }
 
-      if (!unlaidOut && element instanceof SVGGraphicsElement && !element.matches("g, svg, use")) {
+      if (
+        !unlaidOut &&
+        element instanceof SVGGraphicsElement &&
+        !element.matches("g, svg, use, tspan")
+      ) {
         try {
           const box = element.getBBox();
-          // An empty box has no position worth comparing: Chromium keeps where it is, Firefox and WebKit say 0 0.
           const empty = round(box.width) === "0" || round(box.height) === "0";
 
           snapshot[key + " x"] = empty ? "0" : round(box.x);
           snapshot[key + " y"] = empty ? "0" : round(box.y);
           snapshot[key + " width"] = empty ? "0" : round(box.width);
           snapshot[key + " height"] = empty ? "0" : round(box.height);
-        } catch {
-          // Not every element has a box: a filter primitive, a gradient stop.
-        }
+        } catch {}
       }
 
       if (!unlaidOut && !element.matches("g, svg, use, line")) {
@@ -237,7 +215,6 @@ const probe = ({ times, indices }: { times: number[]; indices?: number[] }) => {
 
 const numbers = /(-?\d*\.?\d+(?:e[-+]?\d+)?)/;
 
-/** Whether two computed values are the same, to within a tolerance on every number in them. */
 const close = (prop: string, a: string, b: string | undefined, slack: number): boolean => {
   if (a === b) return true;
 
@@ -260,7 +237,6 @@ const close = (prop: string, a: string, b: string | undefined, slack: number): b
 
 type Mismatch = { when: string; key: string; expected: string; got: string };
 
-/** Where a run differs from the Chromium one. */
 const diff = (reference: Run, run: Run, skip: string[]): Mismatch[] => {
   const found: Mismatch[] = [];
   const lacks = reference.animated.filter((index) => !run.animated.includes(index));
@@ -288,8 +264,6 @@ const diff = (reference: Run, run: Run, skip: string[]): Mismatch[] => {
           ...["width", "height", "bw", "bh"].map((side) => Number(want[label + " " + side]) || 0),
         );
 
-        // Engines measure a rotated shape's bounds differently, Firefox around the shape and Chromium around its box, so
-        // the size of those bounds gets room. Where the bounds sit doesn't.
         const loose = reference.texty.includes(label);
 
         const slack = box
@@ -336,7 +310,6 @@ const open = async (browser: Browser, svg: string): Promise<Page> => {
   await page.setContent(
     `<!doctype html><meta charset="utf-8"><body style="margin:0">${svg}</body>`,
   );
-  // Firefox's bounds include the stroke and Chromium's don't, so only the fill is measured.
   await page.addStyleTag({ content: "*{stroke:none!important}" });
   await page.addScriptTag({ content: `window.seekTo = ${seek}; window.loopOf = ${loopLength};` });
   await page.evaluate(() => document.fonts.ready);
@@ -344,7 +317,6 @@ const open = async (browser: Browser, svg: string): Promise<Page> => {
   return page;
 };
 
-/** Every file's run in one browser, at the times Chromium chose when it has chosen them. */
 const collect = async (browser: Browser, reference?: Map<string, Run | Error>) => {
   const runs = new Map<string, Run | Error>();
   const queue = [...files];
@@ -385,9 +357,10 @@ for (const [name, type] of Object.entries(ENGINES)) {
   if (browser) launched.set(name, browser);
 }
 
+// Three engines closing in sequence can pass bun's 5 s hook timeout on a busy runner.
 afterAll(async () => {
-  for (const browser of launched.values()) await browser.close();
-});
+  await Promise.all([...launched.values()].map((browser) => browser.close()));
+}, 30_000);
 
 const seconds = (start: number) => Math.round((performance.now() - start) / 100) / 10;
 let chromiumRuns = new Map<string, Run | Error>();

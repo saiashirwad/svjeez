@@ -1,22 +1,19 @@
-export { chart } from "./chart.tsx";
+export { Chart } from "./chart.tsx";
+
+export { area, bars, line } from "./series.ts";
 
 export type {
-  ChartArea,
-  ChartAreaOptions,
+  AreaOptions,
   BandX,
-  ChartBar,
-  ChartBars,
-  ChartBarsOptions,
-  Chart,
-  ChartOptions,
-  Curve,
+  BarsOptions,
+  ChartProps,
   Datum,
-  ChartLine,
-  ChartPoint,
+  LineCurve,
+  LineOptions,
   LinearX,
-  ChartLineOptions,
+  Plot,
+  Series,
   SeriesOptions,
   XScale,
-  XValue,
   YScale,
 } from "./types.ts";

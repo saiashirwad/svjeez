@@ -1,0 +1,43 @@
+import { SceneError } from "./scene-error";
+
+export type Color =
+  | `#${string}`
+  | `rgb(${string})`
+  | `rgba(${string})`
+  | `hsl(${string})`
+  | `hsla(${string})`
+  | `oklch(${string})`
+  | `var(--${string})`
+  | "currentColor"
+  | "black"
+  | "white"
+  | "red"
+  | "green"
+  | "blue"
+  | "yellow"
+  | "orange"
+  | "purple"
+  | "gray"
+  | "transparent";
+
+export type Hex = Extract<Color, `#${string}`>;
+
+const SOLID = /^#(?:[\da-f]{3}|[\da-f]{6})$/i;
+const WITH_ALPHA = /^#(?:[\da-f]{3}|[\da-f]{6}|[\da-f]{8})$/i;
+
+export const hexOf = (color: Hex, caller: string, alpha = false): Hex => {
+  if (!(alpha ? WITH_ALPHA : SOLID).test(color))
+    throw new SceneError(
+      `${caller} needs ${alpha ? "#rgb, #rrggbb or #rrggbbaa" : "#rgb or #rrggbb"} colors, got ${color}.`,
+    );
+
+  return color;
+};
+
+export const hexBytes = (hex: Hex): readonly [number, number, number, number] => {
+  const digits = hex.slice(1);
+  const full = digits.length === 3 ? [...digits].map((digit) => digit + digit).join("") : digits;
+  const [r, g, b, a = 255] = (full.match(/../g) ?? []).map((pair) => parseInt(pair, 16));
+
+  return [r!, g!, b!, a];
+};

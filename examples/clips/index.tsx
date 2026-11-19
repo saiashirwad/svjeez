@@ -1,159 +1,137 @@
 import {
-  Clip,
+  Group,
+  Sequence,
+  Shape,
+  Stack,
+  Text,
+  circle,
   ease,
-  motion,
-  render,
-  show,
+  path,
+  rect,
+  ref,
+  scene,
   span,
-  type Point,
+  track,
+  type SceneElement,
   type Span,
-  type SvgNode,
+  type Vec,
 } from "svjeez";
-import { css, mono, theme } from "../style";
+import { mono, theme } from "../theme";
 
-const W = 640;
-const H = 300;
-const D = 9;
+const DURATION = 9;
+const IDLE: Vec = [244, 196];
+const RADIUS = 7;
+const LINE = 1.5;
 
-const reach = span(0, 0.7);
-const grab = reach.next(1, 0.2);
-const down = grab.pad(0.15);
-const leave = span(down.end + 0.1, 0.5);
+const outlined = (width: number, height: number, radius: number) => ({
+  geometry: rect(width, height, { radius }),
+  stroke: { color: theme.border, width: 1.5 },
+});
 
-const IDLE: Point = { x: 244, y: 196 };
-
-const grip = (window: Point): Point => ({ x: window.x + 52, y: window.y + 9 });
-
-interface WindowProps {
-  readonly from: Point;
-  readonly to: Point;
-  readonly drag: Span;
-}
-
-const Window = ({ from, to, drag }: WindowProps): SvgNode => (
-  <g
-    animation={motion({ x: from.x, y: from.y })
-      .to({ x: to.x, y: to.y }, drag, ease.inOut)
-      .rewind(0.8)}
-  >
-    <rect
-      width={104}
-      height={72}
-      rx={7}
-      fill={theme.base01}
-      stroke={theme.base03}
-      strokeWidth={1.5}
+const Keycap = ({ label, held }: { readonly label: string; readonly held: Span }): SceneElement => (
+  <Group offset={[16, 184]}>
+    <Shape {...outlined(48, 40, 9)} fill={theme.surface} />
+    <Shape
+      key="lit"
+      geometry={rect(48, 40, { radius: 9 })}
+      fill={theme.raised}
+      stroke={{ color: theme.blue, width: 2 }}
+      opacity={track(0)
+        .to(1, span(held.start, 0.08))
+        .to(0, span(held.end - 0.08, 0.08))}
     />
-    <path d="M0 18V7a7 7 0 0 1 7-7h90a7 7 0 0 1 7 7v11Z" fill={theme.base02} />
-    <circle cx={13} cy={9} r={3} fill={theme.base08} />
-    <circle cx={24} cy={9} r={3} fill={theme.base0A} />
-    <circle cx={35} cy={9} r={3} fill={theme.base0B} />
-    <rect x={14} y={30} width={60} height={5} rx={2.5} fill={theme.base03} />
-    <rect x={14} y={42} width={44} height={5} rx={2.5} fill={theme.base03} />
-  </g>
-);
-
-interface KeyProps {
-  readonly label: string;
-  readonly held: readonly Span[];
-}
-
-const Key = ({ label, held }: KeyProps): SvgNode => (
-  <g>
-    <rect
-      width={48}
-      height={40}
-      rx={9}
-      fill={theme.base01}
-      stroke={theme.base03}
-      strokeWidth={1.5}
-    />
-    <rect
-      width={48}
-      height={40}
-      rx={9}
-      fill={theme.base0D}
-      animation={show(held, { fade: 0.08 })}
-    />
-    <text x={24} y={25} fontFamily={mono} fontSize={14} textAnchor="middle" fill={theme.base05}>
+    <Text font={mono} size={14} at={[24, 25]} anchor="baseline" fill={theme.text}>
       {label}
-    </text>
-  </g>
+    </Text>
+  </Group>
 );
 
-interface CursorProps {
-  readonly from: Point;
-  readonly moves: readonly (readonly [Point, Span])[];
+interface DesktopProps {
+  readonly x: number;
+  readonly start: number;
+  readonly from: Vec;
+  readonly to: Vec;
 }
 
-const Cursor = ({ from, moves }: CursorProps): SvgNode => {
-  let track = motion({ x: from.x, y: from.y });
+const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
+  const win = ref();
+  const cursor = ref();
+  const grip = win.part("titlebar");
+  const reach = span(0, 0.7);
+  const held = reach.next(1.3, 0.05);
+  const drag = span(held.start + 0.15, 1);
 
-  for (const [to, when] of moves) track = track.to({ x: to.x, y: to.y }, when, ease.inOut);
+  const winAt = track<Vec>(from)
+    .to(to, drag, ease.inOut)
+    .to(from, span(DURATION - start - 0.8, 0.8), ease.out);
+
+  const cursorAt = track<Vec>(IDLE)
+    .to(grip.center, reach, ease.inOut)
+    .to(grip.center, drag, ease.inOut)
+    .to(IDLE, held.next(0.5, 0.1), ease.inOut);
 
   return (
-    <path
-      d="M0 0V16l4.2-3.8 3 6.8 2.8-1.2-3-6.6H12Z"
-      fill={theme.base05}
-      stroke={theme.base00}
-      strokeWidth={1.2}
-      strokeLinejoin="round"
-      animation={track}
-    />
+    <Group offset={[x, 30]}>
+      <Shape
+        geometry={rect(290, 240, { radius: 14 })}
+        fill={theme.background}
+        stroke={{ color: theme.raised, width: 1.5 }}
+      />
+      <Sequence when={span(start)}>
+        <Keycap label="opt" held={held} />
+        <Stack
+          ref={win}
+          at={winAt}
+          width={104}
+          height={72}
+          align="stretch"
+          radius={RADIUS}
+          fill={theme.surface}
+          stroke={{ color: theme.border, width: LINE }}
+        >
+          <Stack
+            key="titlebar"
+            direction="row"
+            gap={5}
+            padding={[9, 5]}
+            radius={[RADIUS - LINE / 2, RADIUS - LINE / 2, 0, 0]}
+            fill={theme.raised}
+          >
+            <Shape geometry={circle(3)} fill={theme.red} />
+            <Shape geometry={circle(3)} fill={theme.yellow} />
+            <Shape geometry={circle(3)} fill={theme.green} />
+          </Stack>
+          <Stack gap={7} padding={[13, 11]}>
+            <Shape geometry={rect(60, 5, { radius: 2.5 })} fill={theme.border} />
+            <Shape geometry={rect(44, 5, { radius: 2.5 })} fill={theme.border} />
+          </Stack>
+        </Stack>
+        <Shape
+          ref={cursor}
+          geometry={path.parse("M0 0V16l4.2-3.8 3 6.8 2.8-1.2-3-6.6H12Z")}
+          fill={theme.text}
+          stroke={{ color: theme.background, width: 1.2, join: "round" }}
+          at={cursorAt}
+        />
+      </Sequence>
+    </Group>
   );
 };
 
-interface GestureProps {
-  readonly x: number;
-  readonly at: number;
-  readonly from: Point;
-  readonly to: Point;
-}
-
-const Desktop = ({ x, at, from, to }: GestureProps): SvgNode => (
-  <g transform={`translate(${x} 30)`}>
-    <rect
-      width={290}
-      height={240}
-      rx={14}
-      fill={theme.base00}
-      stroke={theme.base02}
-      strokeWidth={1.5}
-    />
-    <g transform="translate(16 184)">
-      <Clip at={at}>
-        <Key label="opt" held={[down]} />
-      </Clip>
-    </g>
-    <Clip at={at}>
-      <Window from={from} to={to} drag={grab} />
-      <Cursor
-        from={IDLE}
-        moves={[
-          [grip(from), reach],
-          [grip(to), grab],
-          [IDLE, leave],
-        ]}
-      />
-    </Clip>
-  </g>
+export default scene(
+  {
+    size: [640, 300],
+    duration: DURATION,
+    title: "A clip",
+    desc: "Two desktops play one gesture a few seconds apart: a cursor takes a window by its title bar and drags it while a key is held, then the window goes back.",
+    theme,
+    still: 2,
+  },
+  (canvas) => (
+    <Group>
+      <Shape geometry={canvas.rect} fill={theme.background} />
+      <Desktop x={20} start={1} from={[28, 36]} to={[150, 110]} />
+      <Desktop x={330} start={4.4} from={[28, 96]} to={[150, 36]} />
+    </Group>
+  ),
 );
-
-export default function build(): string {
-  return render(
-    {
-      width: W,
-      height: H,
-      duration: D,
-      title: "A clip",
-      desc: "Two desktops play one gesture a few seconds apart: a cursor takes a window by its title bar and drags it while a key is held, then the window goes back.",
-      css,
-      reducedMotion: { at: 2 },
-    },
-    <>
-      <rect width="100%" height="100%" fill={theme.base00} />
-      <Desktop x={20} at={1} from={{ x: 28, y: 36 }} to={{ x: 150, y: 110 }} />
-      <Desktop x={330} at={4.4} from={{ x: 28, y: 96 }} to={{ x: 150, y: 36 }} />
-    </>,
-  );
-}

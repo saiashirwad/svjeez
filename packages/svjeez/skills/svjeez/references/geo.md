@@ -1,138 +1,56 @@
-# Real maps with @svjeez/geo
+# Maps and globes
 
-`@svjeez/geo` is a separate package: `npm i -D @svjeez/geo world-atlas`. It projects GeoJSON or TopoJSON into the scene's frame while the scene compiles, and returns path data and points in scene pixels.
+`@svjeez/geo` (`npm i @svjeez/geo@next world-atlas`) turns GeoJSON or TopoJSON into geometry for `<Shape>` while the scene compiles. A place is `[longitude, latitude]` in degrees, longitude first. `world-atlas` has the world's countries (`countries-110m.json`, or `-50m` for finer coasts).
+
+## Flat maps
 
 ```tsx
-import { project, type LonLat } from "@svjeez/geo";
-import { rect } from "svjeez/geometry";
 import { createRequire } from "node:module";
+import { geoEqualEarth, project, type Topology } from "@svjeez/geo";
 
-const world = createRequire(import.meta.url)("world-atlas/countries-50m.json");
-const map = project(world, {
-  frame: rect(24, 24, 912, 492),
-  filter: (f) => f.properties?.name !== "Antarctica",
-});
+const world: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
+const map = project(world, { size: [900, 460], projection: geoEqualEarth(), fit: "sphere" });
+const brazil = map.region("Brazil");
+
+<Group offset={[30, 40]}>
+  <Shape geometry={map.sphere} fill={theme.surface} />
+  <Shape geometry={map.land} fill={theme.cyan} />
+  <Shape geometry={map.borders} stroke={{ color: theme.background, width: 0.5 }} />
+  <Shape geometry={brazil.geometry} fill={theme.green} />
+  <Text font={mono} size={11} fill={theme.text} at={brazil.center} anchor="center">Brazil</Text>
+  <Shape geometry={map.route(london, tokyo)} stroke={{ color: theme.orange, width: 2 }} draw={track(0).to(1, span(0.5, 2))} />
+  <Shape geometry={circle(4)} at={map.point(london)} anchor="center" fill={theme.red} />
+</Group>
 ```
 
-- `frame` is a `Rect` in scene px, as in every `@svjeez/geo` function. `projection` takes any d3-geo projection; the default is `geoNaturalEarth1()`. `fit: "sphere"` fits the whole globe instead of the regions, any GeoJSON fits that, and `fit: false` keeps the projection as it is. `object` names the TopoJSON object to read, default the first.
-- `map.parts` holds `{ id, properties, feature, d, centroid, box }` per feature. `map.part("France")` finds one by `id` or `properties.name`. `centroid` and `box` describe the largest piece, so labels and zooms land on the mainland. Nothing is drawn yet, so a region has no `span`; `choropleth()` gives it one.
-- `map.land` fills every region in one path. `map.lines` strokes every border once. `map.sphere` and `map.graticule(15)` draw the globe and its grid.
-- `map.point([lon, lat])` places a marker or label. Longitude comes first.
-- `map.dots(step)` returns evenly spaced places on land, `{ at, id, properties, point }`, for a dot map. On a globe, far-side dots keep their `at` and have no `point`.
-- `sun(date)` is the `[lon, lat]` under the overhead sun, and `night(date)` the dark hemisphere as GeoJSON for `map.path()`.
-- `map.route(from, to)` returns the great-circle arc as points for `travel()` and `flow()`. For a line, write the points as path data with `polylinePath(points)` from `svjeez/geometry`, and draw it with `draw()`; `draw` needs no `strokeDasharray` of its own.
-- `map.line([a, b, c])` runs great circles through waypoints and returns one point list per piece, cut where it crosses the map's edge. `distance([a, b, c])` (exported by `@svjeez/geo`) gives its length in km. `examples/cables` lays submarine cables this way.
-- `map.bounds(region)`, `map.bounds([region, [lon, lat], ...], pad)` and `map.bounds(geojson)` return a `Rect` for a `Camera` stop.
-- `tolerance` (default 0.5px) sets how hard paths are simplified. Raise it for a small scene.
+- `project(data, { size, projection, fit, object, filter, tolerance })` draws the map from `[0, 0]` to `size`; place it with a `<Group offset>`. `projection` is any d3-geo projection (default `geoNaturalEarth1()`; the common ones are exported). `fit` is `"regions"` (default), `"sphere"` for the whole globe, or `false` to keep the projection's own scale. `filter` drops features, such as Antarctica. `tolerance` is the px a point must move to be kept (default 0.5).
+- Geometry: `land`, `borders` (edges two regions share, from TopoJSON only), `sphere` (the map's outline), `graticule(step)`, `shape(geojson)` for anything else, such as `shape(night(date))`, and `route(from, to)`, a great-circle line that `draw` strokes on.
+- Places: `point(at)` is a point for `at`; `regions` and `region(nameOrId)` give each region's `geometry`, `center` (on its largest piece) and `box`; `dots(step)` lays a dot every `step` degrees on land, for a dot map.
+- A region's geometry is a geometry like any other: a track of them morphs, so `track(region.geometry).to(moved(circle(r), region.center), span)` turns a country into a bubble. Choropleths are yours to write: fill each region yourself.
 
-## Zooming
-
-Don't zoom a camera over one animated path per country: Chromium flashes blank tiles. Animate the per-region paths for the intro, then at a fixed time hide them and show a still copy of `map.land` and `map.lines` inside the `Camera`. Put markers and routes in a second `Camera` with the same stops. `examples/world` in the svjeez repository does this.
-
-Animate a region's color with `motion({ fill: "#123" }).to({ fill: "#456" }, span(1, 0.6))`; `fillOpacity` is not a channel.
-
-## Turning dots
-
-Dots turn more cheaply than paths, through CSS alone. Register `lat` and `lon` with `css.property`, put them on each dot's `style`, animate one `yaw` angle on the group around them, and let a `css` rule place every dot with `sin` and `cos`. `examples/earth` in the svjeez repository turns the dots of `map.dots(2.8)` through a day and lights cities by the sun's angle this way.
-
-## Turning a globe
-
-`globe(span, data, { frame, tilt, spin: { from, to } })` turns a globe whose outlines are real paths during `span`. `from` and `to` are the longitude at the middle, reached across the whole span; a day turns from `lon` to `lon - 360`. Every layer is a `sampled.path()` with a fixed point count: the hidden side folds out past the rim instead of being clipped, so clip every layer to `globe.sphere`.
+## Turning globes
 
 ```tsx
-const earth = globe({ at: 0, over: 24 }, world, { frame: rect(430, 44, 452, 452), tilt: 22, spin: { from: 0, to: -360 } });
-const clip = def.clipPath({}, <path d={earth.sphere} />);
+import { GlobeShape, globe, sun } from "@svjeez/geo";
 
-<path d={earth.sphere} fill="#0b1a2c" />
-<g clipPath={clip}>
-  {earth.land().map((piece) => <path {...piece} fill="#9fcbea" />)}
-  <path {...earth.night((t) => new Date(day + t * 3_600_000))} fill="#000" opacity={0.6} />
-</g>
-{cities.map((c) => <g {...earth.place(c.at)}><circle r={3} /></g>)}
+const hour = (t: number) => new Date(Date.UTC(2026, 5, 21) + t * 3_600_000);
+const earth = globe(world, { radius: 220, facing: [-30, 22], turn: { by: -360, over: span(0, 24) } });
+
+<Group offset={[650, 270]}>
+  <Shape geometry={earth.sphere} fill={theme.surface} />
+  <GlobeShape of={earth.land} fill={theme.cyan} />
+  <GlobeShape of={earth.night(hour)} fill="#000000" opacity={0.5} />
+  <GlobeShape of={earth.route(london, tokyo)} stroke={{ color: theme.orange, width: 2 }} />
+  <Group {...earth.place(london)}>
+    <Shape geometry={circle(3)} fill={theme.orange} />
+  </Group>
+</Group>
 ```
 
-- `land()`, `borders()`, `graticule(15)` and `path(geojson)` return pieces a band of longitude wide, so a piece behind the globe costs no keys. Spread each onto a `<path>`.
-- `route(from, to)`, `circle(center, degrees)`, `night(date)` and `terminator(date)` return one path each. `date` is a `Date` or a function of the seconds since the span starts.
-- `place(at)` gives a `<g>` a moving `x`, `y` and `opacity`, so a marker rides the globe and fades out at the horizon. Draw its content at the origin.
-- `simplify` (default 0.6 degrees) and `tolerance` (default 1px) set the file size. One turn of 110m land in 24s with a 226px radius is about 500 KB at `simplify: 0.8`. Tilt the globe 20 degrees or more so its hidden pole holds the fold; an upright globe needs more keys.
-- `earth.parts` are the regions, as `project()` gives them, and `earth.part("France")` finds one by id or name. Its `box` is where it sits when the turn ends, a region behind the globe pressed onto the rim; its `span` is the globe's; and `path()` returns the region alone as turning pieces, to fill or outline it over the land. `earth.bounds` is the disc.
-- `spin` also takes `(t) => [lon, lat]`, with `t` in seconds since the span starts. `facing(t)` and `locate(at, t)` read the same clock, and `earth.span` is the span.
+- `globe(data, { radius, facing, turn, simplify, step, tolerance })` is drawn around `[0, 0]`: put it in a `<Group offset>`. `facing` is the place at the globe's middle when the turn starts; its latitude tilts the pole toward the viewer. `turn: { by, over }` turns it `by` degrees of longitude over a span; `by: -360` is one day, west to east, and loops seamlessly. Without `turn` the globe stands still.
+- Draw everything on the globe with `<GlobeShape of={…}>`, which takes a shape's `fill`, `stroke`, `draw`, `trim` and every node prop but `geometry` and `clip`: it clips to the disc, so the far side never shows. `of` takes `land`, `borders`, `region(name).outline`, `shape(geojson)`, `graticule(step)`, `circle(at, degrees)`, `route(from, to)`, `night(date)` and `terminator(date)`. A date may be a function of the turn's seconds, so night moves with time.
+- `sphere` is the disc, for the sea and the rim. `place(at, { fade })` returns `offset` and `opacity` for a `<Group>`: its `[0, 0]` rides the globe and fades out over the horizon.
+- `sun(date)` is the place under the sun; `night(date)` is the dark half as GeoJSON for a flat map's `shape()`.
+- `simplify` (degrees, default 0.6) and `tolerance` (px, default 1) trade detail for bytes: every outline on a turning globe is a path with many keys, so a globe is the largest thing a scene can hold. Use `countries-110m`, one `land`, and few `borders`.
 
-`examples/globe` in the svjeez repository turns a day this way. The dot globe stays smaller for a long loop.
-
-## Changing projection
-
-`reproject(data, [geoMercator(), geoEqualEarth()], { frame, filter })` writes every region under each projection from the same points, so `motion({ d })` morphs between them. `parts[i].d[k]` is region `i` under projection `k`, `part("Greenland")` finds one, and `land[k]` fills everything. Outlines are cut at the antimeridian and simplified once, in degrees. Filter out Antarctica for Mercator.
-
-```tsx
-const maps = reproject(world, [geoMercator(), geoEqualEarth()], { frame, filter });
-const [a, b] = maps.land;
-<path d={a} animation={motion({ d: a }).to({ d: b }, span(1, 1.8), ease.inOut)} />;
-```
-
-`trueSize(span, map, region, [lon, lat], { ease, tolerance, step })` slides a region's real outline across the globe and draws it through the map's projection at every step, so Greenland shrinks on Mercator as it reaches the equator. `ease` defaults to `ease.inOut`. It returns `{ d, animation }`, so spread it onto a `<path>`. Pass the same projection to `project()` with `fit: false` to land it on a reprojected map. `examples/projections` does the Mercator morph and the slide.
-
-## Data maps
-
-Color regions from numbers, play them through time, and morph the map into a cartogram or a bar chart. Import from `@svjeez/geo`. `examples/choropleth` in the svjeez repository plays life expectancy through 1960 to 2020, then morphs it into a population cartogram and a bar chart. The data is World Bank (SP.DYN.LE00.IN, SP.POP.TOTL) and is named in the scene's `desc`.
-
-A scale turns a number into one of `steps` colors (default 9). Colors are hex, blended in OKLab. `palettes` has `viridis`, `magma`, `blues`, `redBlue` and `brownTeal`.
-
-```tsx
-const scale = sequential(palettes.viridis, { domain: [35, 85], steps: 10, empty: "#2a343f" });
-const hot = diverging(palettes.redBlue, { domain: [-5, 0, 5] });
-const key = legend(scale, { frame: rect(40, 497, 360, 10), title: "Life expectancy (years)", empty: "No data" }); // key.node, key.bounds
-```
-
-`choropleth(spans, map, values, { scale, ease, lines, lineWidth })` keys `values` by region id or `properties.name`. A number is one frame. A list is one value per span in `spans`, which is a span or a list of them, and the map changes to each value's colors during its span. The first span fades the map in from `scale.empty`; give it no length, `{ at: 0, over: 0 }`, to show the first colors from the start. Spans must not overlap. Regions whose colors follow the same course share one path, so the file stays small. It returns `{ node, span, bounds, parts, part, unmatched, groups }`. `unmatched` lists keys that match no region. `parts` are the regions `values` names, and `part("France")` finds one by id or name, with its `span` from the first span that changes its color to the end of the last, so a label can follow it in: `enter(years.part("France").span.next(0.4))`.
-
-```tsx
-const years = choropleth(
-  [{ at: 0, over: 0 }, { at: 3, over: 1 }],
-  map,
-  { "250": [78, 82], "276": [77, 81] },
-  { scale, lines: "#0b1118" },
-);
-```
-
-`cartogram(span, map, values, { ease, fill, coverage, gap, detail, stagger })` sizes a circle per region by area, places it at the centroid, and pushes the circles apart. Each outline morphs into its circle through `matchPaths()` and the `d` channel, over `span`. With `stagger` (default 0, all together) the regions start that many seconds apart and the last one lands with the span. `toBars(span, map, values, { frame, top, order, max, gap })` morphs the biggest `top` regions (default 12) into horizontal bars in `frame`, a `Rect`. Both take one positive number per region and return `{ node, rest }` and the shapes as `parts`, each `{ id, region, value, box, span }` with `x`, `y` and `r` on a circle, to place labels from. `part("France")` finds one by id or name, and its `span` is when that region morphs. `fill` is a color or `(region, value) => color`.
-
-The shapes start as the outline and hide until the span starts. Keep the map under them and fade it out over the morph so nothing pops. Each region's outline is thinned to `detail` px (default 2.5), and pieces under a few px are left behind, because a morph stores every point several times. A world cartogram is about 600 KB. Raise `detail` for a smaller file.
-
-## Traffic
-
-`traffic(span, lines, { rate, seed, speed, style, color, size, back })` sends `rate` particles a second over `span`. Each takes a route picked by `weight` (a line is a list of points, or `{ points, weight, color }`) and leaves at a jittered moment, so they spread out. The same seed gives the same file. Each particle is a `flow()` token, so `style` is `dot`, `comet`, `trace` or `packet`. `back` is the share, 0 to 1, that run their route backward. It returns a `Drawn` with `count`, the particles sent; put it in the scene as it is. Its parts are the routes, by `id` (a line takes `{ points, id }`, and the default is its index, `"0"`), each with its `points`, `count`, `box` and a `span` from the first departure on it to the last arrival.
-
-`arc(map, from, to, { height })` returns a curved route for a flat map, bowed up the page by `height` px, as points for `traffic()`, `flow()` and `travel()`. `from` and `to` are `[lon, lat]` or points.
-
-```tsx
-const routes = flights.map(([a, b]) => ({ points: arc(map, a, b), weight: 3 }));
-const { node } = traffic({ at: 1, over: 8 }, routes, { rate: 6, seed: 4, style: "comet", size: 2.5 });
-```
-
-Particles still in flight at the end of the scene fail the scene's length check, so end the span a trip's length before the scene ends.
-
-## Errors
-
-| Error | Fix |
-| --- | --- |
-| `route() from … to … crosses the edge of the map` | Rotate the projection so both ends sit on one side: `geoNaturalEarth1().rotate([-150, 0])`. |
-| `point(…) falls outside the projection` | The place is on the far side of a globe or outside the clip. Rotate the projection toward it. |
-| `project() has no region …` | Use the feature's `id` or its `properties.name`. world-atlas ids are ISO 3166 numeric codes as strings. |
-| `choropleth() has … values per region but … spans. Pass one span per value.` | Give `spans` one span per entry of each list. |
-| `choropleth() needs every region to have the same number of values, got lists of …` | Pad or trim the lists to one length. |
-| `cartogram() takes one number per region, but … has a list.` | Pass one time's values. |
-| `toBars() needs positive values, got … for …` | Drop zero and negative values first. |
-| `A morph needs a start of 0 or later and a span longer than its … staggers of …s, got at … and over ….` | Lengthen the span or lower `stagger`. |
-| `cartogram() found no region to draw. Check the keys of values against the map's region ids and names.` | Keys are ids or `properties.name`. world-atlas ids are numeric strings such as `"250"`. |
-| `A color scale needs hex colors such as "#1f77b4", got …` | Scales blend hex colors. Names and CSS variables can't be blended. |
-| `sequential() needs a domain that rises, got […]` | Put the low value first. |
-| `traffic() needs a positive rate, got …` | Pass departures per second above 0. |
-| `traffic() needs a span with a positive length, got …s.` | Give the span an `over` above 0. |
-| `arc() needs two different places.` | The two ends must not coincide. |
-| `globe() needs a span that starts at 0 or later and lasts longer than 0, got at … and over ….` | Give `globe` a span such as `{ at: 0, over: 24 }`. |
-| `globe() found no parallel behind the globe clear of every outline …` | Tilt the globe further, simplify less, or filter out shapes that cross every parallel. |
-| `globe().borders() needs TopoJSON, which knows which edges two regions share.` | Load TopoJSON, or draw outlines with `path()`. |
-| `reproject() puts … far outside the frame under projection ….` | Filter that region out: Mercator stretches the poles without end. |
-| `reproject() needs at least two projections.` | Pass two or more projections. |
-| `trueSize() needs a region with polygons.` | Pass a region or polygon feature. |
+Errors name the call and what to write: a region that doesn't exist suggests the exact name, a place past a pole asks for longitude first, `borders` from GeoJSON asks for TopoJSON, and a route across a flat map's edge asks to rotate the projection. The repository's `examples/globe` is a whole scene.

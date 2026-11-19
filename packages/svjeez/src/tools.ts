@@ -1,0 +1,133 @@
+export { svg, type SvgOptions } from "./svg/svg";
+
+export type { Backend, Diagnostic, Feature, LaneReport, Support } from "./model/backend";
+
+export type { SceneOptions } from "./author/lower";
+
+export type {
+  Child,
+  Common,
+  Framed,
+  PictureProps,
+  RunProps,
+  RunStyle,
+  SequenceProps,
+  ShapeProps,
+  StrokeProps,
+  TextChild,
+  TextProps,
+} from "./author/nodes";
+
+export type {
+  ArcOptions,
+  Color,
+  Hex,
+  PathBuilder,
+  RectOptions,
+  Theme,
+  Token,
+} from "./author/values";
+
+export type { Layer, LayerValues, Layers } from "./author/track";
+
+export type { TextContent } from "./author/count";
+
+export type { EnterOptions, ExitOptions, SampledOptions, WiggleOptions } from "./author/recipes";
+
+export type { PictureData } from "./author/picture";
+
+export type { Font, FontFamily, FontOptions, FontValue } from "./font/font";
+
+export type { Anchor, Edge, Place } from "./author/refs";
+
+export type { AnchorPlace, TextAnchorPlace } from "./author/pin";
+
+export type { AlignProps, Alignment, GridProps, StackProps } from "./author/layout";
+
+export type { ArrowProps } from "./author/arrow";
+
+export {
+  layoutRuns,
+  layoutText,
+  type LaidLine,
+  type LaidRun,
+  type TextAlign,
+  type TextLayout,
+  type TextLayoutOptions,
+  type TextPiece,
+} from "./author/text";
+
+export type { Ease, Seconds } from "./model/time";
+
+export type { Spring, SpringOptions } from "./author/spring";
+
+export type { OpenSpan, When } from "./author/span";
+
+export type { Derived, MapOptions, Source, Together } from "./author/derived";
+
+export { isLane } from "./model/lane";
+
+export type {
+  Gradient,
+  LinearAcrossOptions,
+  LinearOptions,
+  RadialAcrossOptions,
+  RadialOptions,
+  Stops,
+} from "./author/paint";
+
+export type { AdjustOptions, DisplaceOptions, Effect, ShadowOptions } from "./author/effects";
+
+export type { MorphOptions } from "./author/morph";
+
+export { boxesOf, hitTest, placements, valueAt, type Matrix, type Placed } from "./check/boxes";
+
+export { isScene } from "./model/is-scene";
+
+export { SceneError, type Where } from "./model/scene-error";
+
+export { nodeName } from "./model/naming";
+
+export {
+  RULES,
+  type Code,
+  type Problem,
+  type Related,
+  type Severity,
+} from "./check/inspect-context";
+
+export { check, type Check, type CheckOptions } from "./check/report";
+
+export {
+  describe,
+  type Description,
+  type DescribedFrame,
+  type DescribedNode,
+  type NodeTimeline,
+} from "./check/describe";
+
+export type * as Model from "./model/ir";
+
+export type { Scene } from "./model/ir";
+
+export {
+  defaults,
+  parse,
+  type ChoiceParam,
+  type ColorParam,
+  type EasingParam,
+  type Extras,
+  type Fields,
+  type Handles,
+  type ItemValue,
+  type Json,
+  type JsonObject,
+  type ListParam,
+  type NumberParam,
+  type Param,
+  type Range,
+  type ScalarParam,
+  type Schema,
+  type TextParam,
+  type Values,
+} from "./params";

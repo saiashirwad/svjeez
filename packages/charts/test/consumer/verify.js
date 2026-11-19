@@ -1,42 +1,42 @@
 import assert from "node:assert/strict";
-import { chart } from "@svjeez/charts";
-import { render } from "svjeez";
-import { rect } from "svjeez/geometry";
+import { Group, font, scene, span, track } from "svjeez";
+import { jsx } from "svjeez/jsx-runtime";
+import { svg as backend } from "svjeez/tools";
+import { Chart, bars, line } from "@svjeez/charts";
 
-const c = chart({
-  frame: rect(40, 20, 360, 180),
-  x: { kind: "band", domain: ["Q1", "Q2", "Q3"] },
-  data: [
-    ["Q1", 4],
-    ["Q3", 9],
-  ],
-});
+const face = await font.load("ABeeZee-Regular.ttf");
 
-const bars = c.bars({ at: 0.5, over: 1 }, { Q1: 4, Q2: 7, Q3: 9 });
-
-const trend = c.line(
-  { at: bars.span.end, over: 1 },
-  [
-    ["Q1", 4],
-    ["Q3", 9],
-  ],
-  { curve: "monotone" },
+const out = backend.emit(
+  scene({ size: [360, 260], duration: 3, title: "Sales by quarter" }, () =>
+    jsx(Group, {
+      children: jsx(Chart, {
+        at: [50, 20],
+        size: [280, 200],
+        x: { kind: "band", domain: ["Q1", "Q2", "Q3"] },
+        font: face,
+        axis: "#8E8E93",
+        label: "#6E6E73",
+        series: [
+          bars(
+            { Q1: 12, Q2: 48, Q3: 31 },
+            { color: "#0A6CFF", draw: track(0).to(1, span(0.2, 1)) },
+          ),
+          line(
+            [
+              ["Q1", 12],
+              ["Q2", 48],
+              ["Q3", 31],
+            ],
+            { color: "#E5453B", draw: track(0).to(1, span(1, 1)), dots: true },
+          ),
+        ],
+      }),
+    }),
+  ),
 );
 
-const svg = render({ width: 440, height: 240, duration: 4, title: "Charts" }, [
-  c.node,
-  bars.node,
-  trend.node,
-]);
+assert.match(out, /@keyframes/);
 
-assert.match(svg, /^<svg[\s\S]*@keyframes[\s\S]*<rect/);
+assert.match(out, /@font-face/);
 
-assert.match(svg, />Q2<\/text>/);
-
-assert.equal(bars.parts.length, 3);
-
-assert.equal(bars.part("Q2").value, 7);
-
-assert.throws(() => c.bars({ at: 0, over: 1 }, { Q9: 1 }), /not in the x domain/);
-
-console.log(`rendered a chart into ${(svg.length / 1024).toFixed(1)} KB`);
+console.log(`drew a chart in ${out.length} bytes`);

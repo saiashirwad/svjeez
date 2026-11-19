@@ -1,75 +1,52 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
-import { browser, Dom, duration, size, wait } from "@svjeez/dom";
-import * as fidelity from "@svjeez/dom/fidelity";
-import { given, message, story } from "@svjeez/dom/story";
-import { recordings } from "@svjeez/dom/vite";
-import { jsx } from "svjeez/jsx-runtime";
-import { render } from "svjeez";
-import { validateSvg } from "svjeez/frames";
+import { existsSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { chromium } from "playwright-core";
+import { captureScript, compile } from "@svjeez/dom";
+import { react } from "@svjeez/dom/react";
+import { svelte } from "@svjeez/dom/svelte";
+import * as vite from "@svjeez/dom/vite";
 
-assert.ok(fidelity.fidelity);
-
-const counter = {
-  update: (n, by) => [n + by, []],
-  view: (n) => `<p data-part="count" style="font: 20px sans-serif">${n}</p>`,
-};
-
-const { html, flow } = await story(counter, [given(0), message(2)]);
-
-// try/finally rather than `await using`, which Node 20 and 22 cannot parse.
-const dom = await browser({ schemes: "light" });
-let steps;
-
-try {
-  steps = await dom.run(html, [...flow, wait(0.5)]);
-} finally {
-  await dom.close();
+// The files the browser side is served from, resolved by path at runtime, must exist in the package.
+for (const framework of [react, svelte]) {
+  assert.ok(existsSync(framework.client), `${framework.name} client missing: ${framework.client}`);
+  assert.match(framework.client, /\.js$/);
 }
 
-assert.equal(steps.length, 3);
+assert.ok(vite.runFilm instanceof Function);
 
-const svg = render({ ...size(steps), duration: duration(steps) }, jsx(Dom, { states: steps }));
+assert.ok(vite.component instanceof Function);
 
-assert.deepEqual(validateSvg(svg).errors, []);
+// `captureScript` is `capture.toString()`: it must stand alone in a page, with no helpers from the compile step.
+assert.match(captureScript, /^\(.*\)$/s);
 
-const dir = await mkdtemp(join(tmpdir(), "svjeez-dom-"));
+assert.doesNotMatch(captureScript, /\b(?:import|require)\b\s*[("']/);
 
-const texts = (steps) =>
-  steps.flatMap((step) => {
-    const state = Array.isArray(step) ? step[0] : step;
+assert.doesNotMatch(captureScript, /\b_?_[a-zA-Z]+\$?\d*\(/, "a compile helper leaked in");
 
-    if (!("root" in state)) return [];
-
-    const out = [];
-
-    const visit = (item) => {
-      if (item.kind === "text") out.push(item.text);
-
-      if (item.kind === "box") item.children.forEach(visit);
-    };
-
-    visit(state.root);
-
-    return [out.join("")];
-  });
+const browser = await chromium.launch();
 
 try {
-  for (const framework of ["react", "svelte"]) {
-    const file = fileURLToPath(new URL(`./${framework}.demo.js`, import.meta.url));
+  const page = await browser.newPage();
 
-    const demos = await recordings(file, {
-      cache: join(dir, `${framework}.json`),
-      schemes: "light",
-    });
+  await page.setContent(
+    `<div id="root" style="width:40px;height:20px;background:#3EE6D6">hi</div>`,
+  );
 
-    assert.deepEqual(texts(demos.counter), ["Count: 0", "Count: 1", "Total: 1"], framework);
-  }
+  const snapshot = await page.evaluate(`(${captureScript})(document.getElementById("root"))`);
+
+  assert.ok(snapshot instanceof Object);
+  assert.ok(compile(snapshot), "a captured snapshot compiles");
+  console.log("captureScript ran in Chromium and compiled");
 } finally {
-  await rm(dir, { recursive: true, force: true });
+  await browser.close();
 }
 
-console.log("recorded a React demo and a Svelte demo, and rendered a flow");
+// The Bun entries import `bun`, so they are only checked where Bun is installed.
+try {
+  execFileSync("bun", ["--version"], { stdio: "ignore" });
+  execFileSync("bun", ["-e", `await import("@svjeez/dom/bun")`], { stdio: "inherit" });
+  console.log("@svjeez/dom/bun imports under Bun");
+} catch {
+  console.log("bun not found; skipped the Bun entry");
+}

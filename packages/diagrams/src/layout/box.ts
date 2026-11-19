@@ -1,12 +1,40 @@
-import type { Box, Direction, Point, Size } from "svjeez";
+import { SceneError } from "svjeez/tools";
+import type { Direction } from "../types.ts";
 
-export type { Box, Direction, Point, Size };
+export type { Direction };
 
-// SAFETY: a Box flips to a Box and a Point to a Point, so the result has the same keys as T
-export const flip = <T extends Box | Point>(value: T): T =>
-  ("w" in value
+export interface Point {
+  readonly x: number;
+  readonly y: number;
+}
+
+export interface Size {
+  readonly w: number;
+  readonly h: number;
+}
+
+export interface Box extends Point, Size {}
+
+export function flip(value: Box): Box;
+export function flip(value: Point): Point;
+export function flip(value: Box | Point): Box | Point {
+  return "w" in value
     ? { x: value.y, y: value.x, w: value.h, h: value.w }
-    : { x: value.y, y: value.x }) as T;
+    : { x: value.y, y: value.x };
+}
+
+export function mirror(value: Box, axis: "x" | "y"): Box;
+export function mirror(value: Point, axis: "x" | "y"): Point;
+export function mirror(value: Box | Point, axis: "x" | "y"): Box | Point {
+  const [w, h] = "w" in value ? [value.w, value.h] : [0, 0];
+
+  return axis === "x" ? { ...value, x: -value.x - w } : { ...value, y: -value.y - h };
+}
+
+export const DIRECTIONS: readonly Direction[] = ["TB", "LR", "BT", "RL"];
+
+export const isVertical = (direction: Direction): boolean =>
+  direction === "TB" || direction === "BT";
 
 export const maxOf = (values: readonly number[]): number => {
   let max = -Infinity;
@@ -59,7 +87,7 @@ export const indexing = (ids: readonly string[], missing: (id: string) => string
     at: (id: string): number => {
       const i = index.get(id);
 
-      if (i === undefined) throw new Error(missing(id));
+      if (i === undefined) throw new SceneError(missing(id));
 
       return i;
     },

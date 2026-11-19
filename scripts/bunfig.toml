@@ -1,2 +1,1 @@
-# The root bunfig stops a bare `bun test` at the root, which runs no workspace. This one runs the scripts' own tests.
 [test]

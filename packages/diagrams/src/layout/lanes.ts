@@ -1,3 +1,4 @@
+import { SceneError } from "svjeez/tools";
 import { indexing, maxOf, union, type Box, type Point, type Size } from "./box.ts";
 
 interface LanesInput {
@@ -28,14 +29,15 @@ const NICE = [0.1, 0.2, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600];
 export function lanes(input: LanesInput): LanesLayout {
   const { scale, rowHeight = 56, bar = 18 } = input;
 
-  if (!(scale > 0)) throw new Error(`lanes() needs a positive scale, got ${scale}.`);
+  if (!(scale > 0)) throw new SceneError(`lanes() needs a positive scale, got ${scale}.`);
 
   const { unique, at: row } = indexing(
     input.lanes.map((l) => l.id),
     (id) => `lanes() has no lane ${JSON.stringify(id)}.`,
   );
 
-  if (!unique || input.lanes.length === 0) throw new Error("lanes() needs lanes with unique ids.");
+  if (!unique || input.lanes.length === 0)
+    throw new SceneError("lanes() needs lanes with unique ids.");
 
   const times = [
     ...input.spans.flatMap((s) => [s.from, s.to]),
@@ -47,7 +49,7 @@ export function lanes(input: LanesInput): LanesLayout {
     times.some((t) => !(t >= 0 && Number.isFinite(t))) ||
     input.spans.some((s) => !(s.to > s.from))
   )
-    throw new Error(
+    throw new SceneError(
       "lanes() times must be finite and non-negative, and each span must end after it starts.",
     );
   const end = Math.max(1, maxOf(times));

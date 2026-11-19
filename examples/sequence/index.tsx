@@ -1,6 +1,6 @@
-import { render, travel } from "svjeez";
 import { sequence } from "@svjeez/diagrams";
-import { HEIGHT, WIDTH, css, fit, hue, mono, theme } from "../gallery-style";
+import { Align, Group, Shape, circle, exit, scene, span, track } from "svjeez";
+import { mono, theme } from "../theme";
 
 const login = sequence(
   {
@@ -25,40 +25,49 @@ const login = sequence(
     ],
   },
   {
-    theme,
-    x: 0,
-    y: 0,
     font: mono,
-    fontSize: 16,
-    play: { at: 0.2, step: 0.8 },
-    tints: { task: hue.blue, input: hue.blue, tool: hue.purple, store: hue.purple },
+    textSize: 16,
+    reveal: span(0.2, 0.8),
+    colors: {
+      background: theme.background,
+      text: theme.text,
+      line: theme.border,
+      muted: theme.muted,
+      accent: theme.blue,
+      highlight: theme.orange,
+      roles: { tool: theme.magenta, store: theme.magenta },
+    },
   },
 );
 
-const D = 10;
 const last = login.message(8);
+const home = span(last.span!.start, 0.5);
+const LEAVE = span(9.2, 0.6);
 
-export default function build(): string {
-  return render(
-    {
-      width: WIDTH,
-      height: HEIGHT,
-      duration: D,
-      title: "Login request sequence",
-      desc: "A sequence diagram of a login: the browser posts credentials, the API checks them against Postgres, has a token signed and returns it.",
-      reducedMotion: { at: D - 1 },
-      css,
-    },
-    <>
-      <rect width={WIDTH} height={HEIGHT} fill={theme.base00} />
-      <g transform={fit(login.bounds.w, login.bounds.h)}>
-        {login}
-        <circle
-          r={4}
-          fill={theme.base09}
-          animation={travel(last.points, { at: last.span.at, over: 0.5 })}
-        />
-      </g>
-    </>,
-  );
-}
+export default scene(
+  {
+    size: [960, 540],
+    duration: 10,
+    title: "Login request sequence",
+    desc: "A sequence diagram of a login: the browser posts credentials, the API checks them against Postgres, has a token signed and returns it.",
+    theme,
+    still: 9,
+  },
+  (canvas) => (
+    <Group>
+      <Shape geometry={canvas.rect} fill={theme.background} />
+      <Align motion={exit(LEAVE)}>
+        <Group>
+          {login.node}
+          <Shape
+            geometry={circle(4)}
+            anchor="center"
+            fill={theme.orange}
+            at={last.route.travel(home)}
+            opacity={track(0).set(1, home).to(0, home.next(0.2))}
+          />
+        </Group>
+      </Align>
+    </Group>
+  ),
+);

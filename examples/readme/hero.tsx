@@ -1,148 +1,274 @@
-import { google } from "@svjeez/fonts";
 import {
+  Align,
   Arrow,
-  Glyphs,
-  Ink,
-  draw,
-  fitText,
+  Group,
+  Shape,
+  Stack,
+  Text,
+  circle,
+  count,
   ease,
-  enter,
-  motion,
-  render,
+  line,
+  morph,
+  path,
+  pattern,
+  rect,
+  ref,
+  scene,
   span,
-  stagger,
-  strokeFont,
-  tool,
-  variables,
+  track,
+  type Paint,
+  type Ref,
+  type SceneElement,
+  type Vec,
 } from "svjeez";
-import { css as codeCss, theme } from "../style";
-import { GROUND, SQUASH, blip, flight, jumps } from "../site/lib/blip";
+import { mono, theme } from "../theme";
 
-const W = 960;
-const H = 400;
-const D = 10;
-const X = 48;
+const spring = ease.spring({ stiffness: 185, damping: 15 });
+const forward = span(0.4, spring.settle);
+const back = span(3.4, spring.settle);
 
-const display = await google("Inter Tight", { weight: 800 });
-const casual = await strokeFont.load(new URL("../fonts/EMSCasualHand.svg", import.meta.url));
-const pen = tool.pen({ size: 2.8, seed: 4 });
+const signal = track(0).to(1, forward, spring).to(0, back, spring);
 
-const { vars, css: paint } = variables({ dark: { swipe: "#7A5A00" }, light: { swipe: "#FFE07A" } });
+const clamp = (v: number, lo = 0, hi = 1): number => Math.max(lo, Math.min(hi, v));
 
-const LINES = ["Animated SVGs", "from TypeScript"];
-const LEAD = 0.96;
-const last = LINES.length - 1;
+const coil = (v: number) => {
+  const top = 52 - 28 * v;
+  const bottom = 70;
+  const turns = 5;
+  const step = (bottom - top) / turns;
+  const mid = 69;
+  let d = path().moveTo([mid, bottom]);
 
-const size = fitText(display, LINES, { width: W - 2 * X, max: 120, tail: 0.98 });
+  for (let i = 1; i < turns; i++) {
+    const x = mid + (i % 2 === 1 ? -13 : 13);
+    d = d.lineTo([x, bottom - i * step]);
+  }
 
-const top = (H - size * 0.72 - last * size * LEAD) / 2 + 22;
-const base = (i: number) => top + size * 0.72 + i * size * LEAD;
-const scale = size / 150;
+  return d.lineTo([mid, top]);
+};
 
-const SPOT = { x: X + display.measure(LINES[last]!, size) + size * 0.56, y: base(last) };
+const TILES = [
+  { key: "a", color: theme.blue, height: 20 },
+  { key: "b", color: theme.cyan, height: 36 },
+  { key: "c", color: theme.magenta, height: 50 },
+  { key: "d", color: theme.green, height: 30 },
+] as const;
 
-const leave = motion({ opacity: 1 }).to({ opacity: 0 }, span(D - 1, 0.5));
+const gridState = (
+  <Group>
+    {TILES.map(({ key, color }, i) => (
+      <Shape
+        key={key}
+        geometry={rect(20, 20, { radius: 5 })}
+        at={[50 + (i % 2) * 26, 15 + Math.floor(i / 2) * 26]}
+        fill={color}
+      />
+    ))}
+  </Group>
+);
 
-const rise = stagger(span(0.2, 0.5), LINES.join(" ").split(" ").length, 0.14);
-let next = 0;
+const barsState = (
+  <Group>
+    {TILES.map(({ key, color, height }, i) => (
+      <Shape
+        key={key}
+        geometry={rect(20, height, { radius: 5 })}
+        at={[22 + i * 27, 63 - height]}
+        fill={color}
+      />
+    ))}
+  </Group>
+);
 
-const words = LINES.flatMap((line, i) => {
-  let x = X;
+const [driver, stage, output] = [ref(), ref(), ref()];
 
-  return line.split(" ").map((word) => {
-    const node = (
-      <g animation={[enter(rise[next++]!, { opacity: 0, y: 24 }, ease.out), leave]}>
-        <Glyphs font={display} text={word} size={size} x={x} y={base(i)} fill={theme.base05} />
-      </g>
-    );
+interface CardProps {
+  readonly handle: Ref;
+  readonly dot: Paint;
+  readonly title: string;
+  readonly tag: string;
+  readonly footer: SceneElement;
+  readonly width: number;
+  readonly lift?: boolean;
+  readonly children: SceneElement;
+}
 
-    x += display.measure(`${word} `, size);
+const Card = ({
+  handle,
+  dot,
+  title,
+  tag,
+  footer,
+  width,
+  lift,
+  children,
+}: CardProps): SceneElement => (
+  <Stack
+    ref={handle}
+    width={width}
+    height={160}
+    padding={[14, 12]}
+    justify="spread"
+    radius={12}
+    fill={theme.surface}
+    stroke={{ color: theme.border, width: 1 }}
+    motion={lift ? { offset: signal.map((v): Vec => [0, -24 * v]) } : undefined}
+  >
+    <Stack direction="row" width={width - 30} justify="spread" align="center">
+      <Stack direction="row" gap={7} align="center">
+        <Shape geometry={circle(4)} fill={dot} />
+        <Text font={mono} size={12} fill={theme.text}>
+          {title}
+        </Text>
+      </Stack>
+      <Text font={mono} size={11} fill={theme.muted}>
+        {tag}
+      </Text>
+    </Stack>
+    {children}
+    {footer}
+  </Stack>
+);
 
-    return node;
-  });
+const dots = pattern({
+  size: [20, 20],
+  tile: (
+    <Shape geometry={circle(1)} at={[10, 10]} anchor="center" fill={theme.border} opacity={0.35} />
+  ),
 });
 
-const from = X + display.measure("from ", size);
-const swipeW = display.measure("TypeScript", size);
-const swipeY = base(1) - size * 0.27;
+export default scene(
+  {
+    size: [720, 276],
+    duration: 6,
+    title: "Composable zero-JS SVG",
+    desc: "One spring track stretches a coil with a live readout, lifts a card whose tiles morph from a grid into bars while ref-attached arrows follow its edges, and drives a ring gauge with a zero-JS counter.",
+    theme,
+    still: 2.5,
+  },
+  (canvas) => (
+    <Group>
+      <Shape geometry={canvas.rect} fill={theme.background} />
+      <Shape geometry={canvas.rect} fill={dots} />
+      <Align place="center" motion={{ offset: [0, 6] }}>
+        <Stack direction="row" gap={56} align="center">
+          <Card
+            handle={driver}
+            dot={theme.blue}
+            title="track"
+            tag="spring"
+            width={168}
+            footer={
+              <Text font={mono} size={11} fill={theme.muted}>
+                value {count(signal, { decimals: 2, rate: 14 })}
+              </Text>
+            }
+          >
+            <Group>
+              <Shape geometry={rect(138, 76, { radius: 8 })} fill={theme.background} />
+              <Shape
+                geometry={line([14, 24], [124, 24])}
+                stroke={{ color: theme.border, width: 1, dash: [3, 4] }}
+              />
+              <Shape
+                geometry={line([34, 70], [104, 70])}
+                stroke={{ color: theme.border, width: 2, cap: "round" }}
+              />
+              <Shape
+                geometry={signal.map(coil)}
+                stroke={{ color: theme.blue, width: 2.2, cap: "round", join: "round" }}
+              />
+              <Shape
+                geometry={circle(8.5)}
+                at={signal.map((v): Vec => [69, 52 - 28 * v])}
+                anchor="center"
+                fill={theme.blue}
+              />
+            </Group>
+          </Card>
 
-const HOPS = [
-  { land: 2.0, height: 70 },
-  { land: 3.05, height: 46 },
-];
+          <Card
+            handle={stage}
+            dot={theme.magenta}
+            title="morph"
+            tag="ref()"
+            width={176}
+            lift
+            footer={
+              <Text font={mono} size={11} fill={theme.muted}>
+                grid → bars · ref()
+              </Text>
+            }
+          >
+            <Group>
+              <Shape geometry={rect(146, 76, { radius: 8 })} fill={theme.background} />
+              {morph.between([gridState, barsState, gridState], [span(0.4, 0.7), span(3.4, 0.7)], {
+                curve: ease.pop,
+                stagger: 0.05,
+              })}
+            </Group>
+          </Card>
 
-const hop = jumps(HOPS);
-const startX = (W + 120 - SPOT.x) / scale;
-const midX = (W - 60 - SPOT.x) / scale;
+          <Card
+            handle={output}
+            dot={theme.green}
+            title="count"
+            tag="0 KB JS"
+            width={168}
+            footer={
+              <Text font={mono} size={11} fill={theme.muted}>
+                pure css + smil
+              </Text>
+            }
+          >
+            <Group>
+              <Shape geometry={rect(138, 76, { radius: 8 })} fill={theme.background} />
+              <Shape
+                geometry={circle(28)}
+                at={[69, 38]}
+                anchor="center"
+                stroke={{ color: theme.raised, width: 5.5 }}
+              />
+              <Shape
+                geometry={circle(28)}
+                at={[69, 38]}
+                anchor="center"
+                origin="center"
+                rotate={-90}
+                stroke={{ color: theme.green, width: 5.5, cap: "round" }}
+                draw={signal.map((v) => clamp(v, 0.02, 1))}
+              />
+              <Text font={mono} size={14} at={[69, 38]} anchor="center" fill={theme.text}>
+                {count(
+                  signal.map((v) => clamp(v) * 100),
+                  { rate: 16 },
+                )}
+                %
+              </Text>
+            </Group>
+          </Card>
+        </Stack>
+      </Align>
 
-const slide = motion({ x: startX })
-  .to({ x: midX }, flight(HOPS[0]!), ease.linear)
-  .to({ x: 0 }, flight(HOPS[1]!), ease.linear);
-
-const look = motion({ x: -5, y: 0 })
-  .to({ x: -6, y: 4 }, span(3.4, 0.3), ease.inOut)
-  .to({ x: 5, y: -5 }, span(5.2, 0.35), ease.inOut)
-  .to({ x: -4, y: 3 }, span(6.6, 0.35), ease.inOut)
-  .to({ x: -5, y: 0 }, span(D - 0.4, 0.3));
-
-const NOTE = "that's one <img>!";
-const noteSize = 34;
-const note = casual.path(NOTE, { size: noteSize, x: SPOT.x - 330 * (noteSize / 38), y: top - 34 });
-const head = { x: SPOT.x + 12, y: SPOT.y - size * 0.95 - 8 };
-const tail = { x: SPOT.x - 30, y: top - 46 };
-
-export default () =>
-  render(
-    {
-      width: W,
-      height: H,
-      duration: D,
-      title: "svjeez: animated SVGs from TypeScript",
-      desc: 'The title "Animated SVGs from TypeScript" rises in word by word and a yellow highlighter swipes under TypeScript. Blip, the svjeez mascot, hops in from the right and lands where the full stop goes. A hand-lettered note inks on above it, "that\'s one <img>!", with an arrow pointing down at Blip, which looks the title over before it all fades for the next round.',
-      reducedMotion: { at: 7.5 },
-      css: `${codeCss}${paint}${SQUASH}`,
-    },
-    <>
-      <path
-        d={`M${from - 8} ${swipeY + 3}L${from + swipeW + 10} ${swipeY - 3}`}
-        stroke={vars.swipe}
-        strokeWidth={size * 0.48}
-        animation={[draw({ at: 1.15, over: 0.5 }, ease.inOut), leave]}
+      <Arrow
+        from={driver.right}
+        to={stage.left}
+        inset={8}
+        stroke={{ color: theme.blue, width: 2 }}
       />
-      {words}
-      <g
-        transform={`translate(${SPOT.x} ${SPOT.y + size * 0.02}) scale(${scale}) translate(${-GROUND.x} ${-GROUND.y})`}
-      >
-        <g animation={[slide, leave]}>
-          {blip({
-            body: hop.body,
-            stretch: hop.stretch,
-            bulb: hop.bulb,
-            look,
-            blinks: [4.4, 6.1, 8.2],
-            feet: {},
-          })}
-        </g>
-      </g>
-      <g animation={leave}>
-        <Ink
-          d={note.d}
-          tool={pen}
-          fill={theme.base09}
-          draw={{ at: 3.6, over: 1.1 }}
-          ease={ease.linear}
-        />
-        <Arrow
-          from={tail}
-          to={head}
-          bend={-34 / (head.y - tail.y)}
-          width={3}
-          head={14}
-          theme={theme}
-          show={span(4.5).until(D)}
-          draw={span(4.75, 0.3)}
-          ease={ease.inOut}
-        />
-      </g>
-    </>,
-  );
+      <Arrow
+        from={stage.right}
+        to={output.left}
+        inset={8}
+        stroke={{ color: theme.magenta, width: 2 }}
+      />
+
+      <Align place="bottom" inset={16}>
+        <Text font={mono} size={11} fill={theme.muted}>
+          one spring track · keyed morph() · moving ref() anchors · zero-JS count()
+        </Text>
+      </Align>
+    </Group>
+  ),
+);

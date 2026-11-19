@@ -1,161 +1,89 @@
 import { describe, expect, test } from "bun:test";
-import { render } from "svjeez";
-import { construct } from "../src/index";
+import {
+  angle,
+  bisect,
+  brace,
+  compass,
+  crossings,
+  distance,
+  extend,
+  foot,
+  meet,
+  midpoint,
+  rightAngle,
+  ticks,
+} from "../src/index.ts";
 
-const svg = (node: Parameters<typeof render>[1]) =>
-  render({ width: 400, height: 300, duration: 12, title: "construct" }, node);
+const close = (a: readonly number[], b: readonly number[]) =>
+  a.forEach((n, i) => expect(n).toBeCloseTo(b[i]!));
 
-describe("construct", () => {
-  test("two circles through each other's centers meet at the apexes of an equilateral triangle", () => {
-    const g = construct();
-    const [a, b] = [g.point(0, 0, "A"), g.point(10, 0, "B")];
-    const [top, bottom] = g.intersect(g.circle(a, b), g.circle(b, a));
+describe("constructions", () => {
+  test("two circles through each other's centers meet at the apex of an equilateral triangle", () => {
+    const [a, b] = [
+      [0, 0],
+      [100, 0],
+    ] as const;
 
-    expect(top!.x).toBeCloseTo(5, 9);
-    expect(top!.y).toBeCloseTo(Math.sqrt(75), 9);
-    expect(bottom!.y).toBeCloseTo(-Math.sqrt(75), 9);
+    const [up, down] = crossings({ center: a, radius: 100 }, { center: b, radius: 100 });
+
+    close(up!, [50, -50 * Math.sqrt(3)]);
+    close(down!, [50, 50 * Math.sqrt(3)]);
+    expect(crossings({ center: a, radius: 10 }, { center: b, radius: 10 })).toEqual([]);
   });
 
-  test("pick keeps one crossing and draws one dot", () => {
-    const g = construct();
-    const [a, b] = [g.point(0, 0), g.point(10, 0)];
-    const dots = (node: string) => node.match(/<circle /g)?.length ?? 0;
-    const before = dots(svg(g.node));
-    const c = g.intersect(g.circle(a, b), g.circle(b, a), { pick: 1, label: "C" });
+  test("a line crosses a circle twice", () => {
+    const hits = crossings({ center: [0, 0], radius: 5 }, [
+      [-10, 3],
+      [10, 3],
+    ]);
 
-    expect(c.label).toBe("C");
-    expect(c.y).toBeLessThan(0);
-    expect(dots(svg(g.node)) - before).toBe(1);
+    close(hits[0]!, [-4, 3]);
+    close(hits[1]!, [4, 3]);
   });
 
-  test("a line meets a circle in the order along the line", () => {
-    const g = construct();
-    const [a, b] = [g.point(-5, 0), g.point(5, 0)];
-    const [first, second] = g.intersect(g.line(a, b), g.circle(g.point(0, 0), { radius: 3 }));
-
-    expect([first!.x, second!.x]).toEqual([-3, 3]);
-  });
-
-  test("two lines cross in one point, and a segment that stops short is an error", () => {
-    const g = construct();
-    const [a, b, c, d] = [g.point(0, 0), g.point(2, 2), g.point(0, 4), g.point(4, 0)];
-
-    expect(g.intersect(g.line(a, b), g.line(c, d))).toMatchObject({ x: 2, y: 2 });
-    expect(() => g.intersect(g.segment(a, b), g.segment(c, g.point(1, 3.5)))).toThrow(
-      /past the end of segment/,
+  test("meet() finds where two lines cross, and refuses parallels", () => {
+    close(
+      meet(
+        [
+          [0, 0],
+          [2, 2],
+        ],
+        [
+          [0, 2],
+          [2, 0],
+        ],
+      ),
+      [1, 1],
     );
+    expect(() =>
+      meet(
+        [
+          [0, 0],
+          [1, 0],
+        ],
+        [
+          [0, 1],
+          [1, 1],
+        ],
+      ),
+    ).toThrow("runs parallel");
   });
 
-  test("circles that miss and parallel lines name the problem", () => {
-    const g = construct();
-    const [a, b] = [g.point(0, 0), g.point(1, 0)];
-
-    expect(() => g.intersect(g.circle(a, b), g.circle(g.point(9, 0), { radius: 1 }))).toThrow(
-      /found no crossing/,
-    );
-    expect(() => g.intersect(g.line(a, b), g.parallel(g.line(a, b), g.point(0, 1)))).toThrow(
-      /found no crossing/,
-    );
-    expect(() => g.circle(a, a)).toThrow(/positive radius/);
+  test("bisect, foot, midpoint, extend and distance", () => {
+    close(bisect([10, 0], [0, 0], [0, 10]), [Math.SQRT1_2, Math.SQRT1_2]);
+    close(foot([3, 5], [0, 0], [10, 0]), [3, 0]);
+    close(midpoint([0, 0], [4, 2]), [2, 1]);
+    close(extend([0, 0], [3, 4], 5), [6, 8]);
+    expect(distance([0, 0], [3, 4])).toBe(5);
   });
 
-  test("the perpendicular bisector is perpendicular and passes the midpoint", () => {
-    const g = construct();
-    const [a, b] = [g.point(0, 0), g.point(6, 2)];
-    const line = g.perpendicularBisector(a, b);
-    const dir = [line.b.x - line.a.x, line.b.y - line.a.y];
-
-    expect(dir[0]! * 6 + dir[1]! * 2).toBeCloseTo(0, 9);
-    expect((line.a.x + line.b.x) / 2).toBeCloseTo(3, 9);
-    expect((line.a.y + line.b.y) / 2).toBeCloseTo(1, 9);
-  });
-
-  test("the angle bisector splits the angle in two equal halves", () => {
-    const g = construct();
-    const [a, b, c] = [g.point(8, 0), g.point(0, 0), g.point(0, 5)];
-    const ray = g.angleBisector(a, b, c);
-
-    expect(ray.b.x / ray.b.y).toBeCloseTo(1, 9);
-  });
-
-  test("elements start one after another, and at overrides the order", () => {
-    const g = construct({ pace: { point: 1, gap: 0 } });
-
-    g.point(0, 0);
-    expect(g.time).toBe(1);
-    g.point(1, 0, undefined, { at: 5 });
-    expect(g.time).toBe(6);
-    g.together(() => {
-      g.point(2, 0);
-      g.point(3, 0, undefined, { over: 3 });
-    });
-    expect(g.time).toBe(9);
-    expect(g.span.end).toBeCloseTo(9, 9);
-  });
-
-  test("settle fades aids but not the figure", () => {
-    const g = construct({ origin: { x: 50, y: 50 }, unit: 10, faint: 0.3 });
-    const [a, b] = [g.point(0, 0), g.point(5, 0)];
-
-    g.circle(a, b, { aid: true });
-    g.segment(a, b);
-    g.settle();
-    const out = svg(g.node);
-
-    expect(out.match(/opacity: ?0\.3/g)?.length).toBe(1);
-  });
-
-  test("labels are formulas placed off the lines that meet at the point", () => {
-    const g = construct({ origin: { x: 100, y: 200 }, unit: 10 });
-    const [a, b, c] = [g.point(0, 0, "A"), g.point(10, 0, "B"), g.point(5, 8, "C")];
-
-    g.polygon([a, b, c]);
-    const out = svg(g.node);
-
-    expect(out).toContain("<path");
-    expect(() => construct({ unit: 0 })).toThrow(/positive unit/);
-  });
-});
-
-describe("parts", () => {
-  test("points, lines and circles are parts, each spanning its construction and its label", () => {
-    const g = construct({ unit: 10, origin: { x: 100, y: 100 } });
-    const [a, b] = [g.point(0, 0, "A"), g.point(10, 0, "B")];
-    const ab = g.segment(a, b);
-    const ring = g.circle(a, b);
-
-    expect(g.parts.map((p) => p.id)).toEqual(["A", "B", "AB", "circle A"]);
-    expect(g.part("B")).toBe(b);
-    expect([a.span.at, a.span.end]).toEqual([0, 0.5]);
-    expect([ab.span.at, ab.span.end]).toEqual([0.9, expect.closeTo(1.6, 9)]);
-    expect([ring.span.at, ring.span.end]).toEqual([1.75, 2.75]);
-    expect(ab.box).toMatchObject({ x: 100, y: 100, w: 100, h: 0 });
-    expect(ring.box).toMatchObject({ x: 0, y: 0, w: 200, h: 200 });
-    expect(a.box.center).toEqual({ x: 100, y: 100 });
-    expect(g.bounds.w).toBeGreaterThanOrEqual(200);
-    expect(() => g.part("C")).toThrow(
-      'construct() has no "C". Its parts are "A", "B", "AB", "circle A".',
-    );
-  });
-
-  test("a crossing is a part, and a line takes its label as its id", () => {
-    const g = construct();
-    const [a, b] = [g.point(0, 0, "A"), g.point(10, 0, "B")];
-    const m = g.perpendicularBisector(a, b, { label: "m" });
-    const c = g.intersect(g.line(a, b), m, { label: "M" });
-
-    expect(m.id).toBe("m");
-    expect(g.part("M")).toBe(c);
-    expect(c.span.at).toBeGreaterThanOrEqual(m.span.end);
-  });
-});
-
-describe("intersect on segments", () => {
-  test("pick keeps the crossing that lies on the segment", () => {
-    const g = construct();
-    const [a, b, c] = [g.point(0, 0), g.point(10, 0), g.point(9, 0)];
-    const p = g.intersect(g.segment(a, b), g.circle(c, g.point(12, 0)), { pick: 0 });
-
-    expect(p).toMatchObject({ x: 6, y: 0 });
+  test("marks build as geometry, and bad input says what it needs", () => {
+    expect(compass([0, 0], [10, 0])).toBeDefined();
+    expect(angle([10, 0], [0, 0], [0, 10])).toBeDefined();
+    expect(rightAngle([10, 0], [0, 0], [0, 10])).toBeDefined();
+    expect(ticks([0, 0], [10, 0], { count: 2 })).toBeDefined();
+    expect(brace(40)).toBeDefined();
+    expect(() => compass([1, 1], [1, 1])).toThrow("compass() needs a point away from its center");
+    expect(() => brace(0)).toThrow("brace() needs a width and height above 0");
   });
 });

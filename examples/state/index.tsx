@@ -1,8 +1,8 @@
-import { render } from "svjeez";
 import { stateMachine } from "@svjeez/diagrams";
-import { HEIGHT, WIDTH, css, fit, hue, mono, theme } from "../gallery-style";
+import { Align, Group, Shape, exit, scene, span } from "svjeez";
+import { mono, theme } from "../theme";
 
-export const agent = stateMachine(
+const agent = stateMachine(
   {
     states: {
       idle: { label: "Idle", role: "task" },
@@ -33,18 +33,17 @@ export const agent = stateMachine(
     ],
   },
   {
-    theme,
-    x: 0,
-    y: 0,
-    direction: "LR",
     font: mono,
-    fontSize: 16,
-    tints: {
-      task: hue.blue,
-      store: hue.purple,
-      input: hue.orange,
-      output: hue.cyan,
-      tool: hue.red,
+    textSize: 14,
+    direction: "LR",
+    colors: {
+      background: theme.background,
+      text: theme.text,
+      line: theme.muted,
+      muted: theme.muted,
+      accent: theme.blue,
+      highlight: theme.orange,
+      roles: { store: theme.magenta, input: theme.orange, output: theme.cyan, tool: theme.red },
     },
   },
 );
@@ -63,28 +62,26 @@ const walk = agent.walk(
     "acting",
     "done",
   ],
-  { at: 0.2, dwell: 0.7, token: { style: "comet", arrive: true } },
+  { at: span(0.4, 0.7) },
 );
 
-const D = Math.ceil(walk.span.end + 1.5);
+const LEAVE = walk.span.next(0.6, 0.8);
 
-export default function build(): string {
-  return render(
-    {
-      width: WIDTH,
-      height: HEIGHT,
-      duration: D,
-      title: "Agent lifecycle",
-      desc: "A state machine for an agent run, walked once: idle, then working (planning and calling tools in turn), waiting on the user, working again, done.",
-      reducedMotion: { at: walk.span.end - 0.3 },
-      css,
-    },
-    <>
-      <rect width={WIDTH} height={HEIGHT} fill={theme.base00} />
-      <g transform={fit(agent.bounds.w, agent.bounds.h)}>
-        {agent}
-        {walk}
-      </g>
-    </>,
-  );
-}
+export default scene(
+  {
+    size: [960, 540],
+    duration: Math.ceil(LEAVE.end + 0.2),
+    title: "Agent lifecycle",
+    desc: "A state machine for an agent run, walked once: idle, then working (planning and calling tools in turn), waiting on the user, working again, done.",
+    theme,
+    still: walk.span.end - 0.3,
+  },
+  (canvas) => (
+    <Group>
+      <Shape geometry={canvas.rect} fill={theme.background} />
+      <Align motion={exit(LEAVE)}>
+        <Group scale={900 / agent.size[0]}>{agent.with(walk.node)}</Group>
+      </Align>
+    </Group>
+  ),
+);

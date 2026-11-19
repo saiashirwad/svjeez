@@ -1,35 +1,54 @@
 import assert from "node:assert/strict";
-import { createRequire } from "node:module";
-import { project } from "@svjeez/geo";
-import { render, Camera } from "svjeez";
-import { rect } from "svjeez/geometry";
+import { GlobeShape, globe, project } from "@svjeez/geo";
+import { Group, Shape, scene, span } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
+import { svg as backend } from "svjeez/tools";
 
-const world = createRequire(import.meta.url)("world-atlas/countries-110m.json");
-const map = project(world, { frame: rect(0, 0, 640, 360) });
-
-const target = map.bounds(
-  [
-    [-74, 40.7],
-    [-0.13, 51.5],
+const land = {
+  type: "FeatureCollection",
+  features: [
+    {
+      type: "Feature",
+      id: "patch",
+      properties: { name: "Patch" },
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [-20, -10],
+            [20, -10],
+            [20, 30],
+            [-20, 30],
+            [-20, -10],
+          ],
+        ],
+      },
+    },
   ],
-  20,
+};
+
+const map = project(land, { size: [200, 100] });
+const earth = globe(land, { radius: 40, facing: [0, 10], turn: { by: -360, over: span(0, 4) } });
+
+const svg = backend.emit(
+  scene({ size: [300, 120], duration: 4, title: "Geo" }, () =>
+    jsx(Group, {
+      children: [
+        jsx(Shape, { geometry: map.region("Patch").geometry, fill: "#336699" }),
+        jsx(Group, {
+          at: [250, 60],
+          children: [
+            jsx(Shape, { geometry: earth.sphere, fill: "#102030" }),
+            jsx(GlobeShape, { of: earth.land, fill: "#88AACC" }),
+          ],
+        }),
+      ],
+    }),
+  ),
 );
 
-const svg = render(
-  { width: 640, height: 360, duration: 2, title: "World" },
-  Camera({
-    frame: rect(0, 0, 640, 360),
-    stops: [{ show: { at: 1, over: 1 }, target }],
-    children: [
-      jsx("path", { d: map.land }),
-      jsx("path", { d: map.lines, fill: "none", stroke: "#000" }),
-    ],
-  }),
-);
+assert.match(svg, /<clipPath/);
 
-assert.equal(map.parts.length, 177);
+assert.match(svg, /attributeName="d"/);
 
-assert.match(svg, /^<svg[\s\S]*@keyframes[\s\S]*<path d="M/);
-
-console.log(`rendered ${map.parts.length} countries into ${(svg.length / 1024).toFixed(0)} KB`);
+console.log(`projected ${map.regions.length} region and turned a globe in ${svg.length} bytes`);

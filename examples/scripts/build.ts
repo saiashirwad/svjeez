@@ -1,6 +1,8 @@
 import { mkdir } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
+import { runFilm } from "@svjeez/dom/vite";
 import { validateSvg } from "svjeez/frames";
+import { isScene, svg as backend, type Scene } from "svjeez/tools";
 
 const ROOT = join(import.meta.dir, "..");
 const OUT = join(ROOT, "dist");
@@ -12,7 +14,7 @@ const flat = (dir: string) =>
 
 const examples = [...new Bun.Glob("*/index.tsx").scanSync(ROOT)]
   .map((entry) => basename(dirname(entry)))
-  .concat(flat("readme"), flat("site"))
+  .concat(flat("readme"), flat("mermaid-types"), flat("dom-component"), flat("dom-svelte"))
   .sort();
 
 const wanted = process.argv.slice(2);
@@ -22,6 +24,16 @@ if (unknown.length > 0) {
   console.error(`unknown example: ${unknown.join(", ")}\navailable: ${examples.join(", ")}`);
   process.exit(1);
 }
+
+type Made = string | Scene;
+
+const isBuild = (value: Made | (() => Made)): value is () => Made => typeof value === "function";
+
+const svgOf = (exported: Made | (() => Made)): string => {
+  const made = isBuild(exported) ? exported() : exported;
+
+  return isScene(made) ? backend.emit(made) : made;
+};
 
 const xmllint = Bun.which("xmllint");
 
@@ -34,11 +46,14 @@ const lint = (svg: string): string | undefined => {
 
 const build = async (name: string): Promise<boolean> => {
   try {
-    const { default: make }: { default: () => string } = await import(
-      join(ROOT, name.includes("/") ? `${name}.tsx` : join(name, "index.tsx"))
-    );
+    const file = join(ROOT, name.includes("/") ? `${name}.tsx` : join(name, "index.tsx"));
 
-    const svg = make();
+    // `*.vite.tsx` films a component through Vite, which has to load the film file itself.
+    const exported: Made | (() => Made) = file.endsWith(".vite.tsx")
+      ? await runFilm(file)
+      : (await import(file)).default;
+
+    const svg = svgOf(exported);
     const { warnings } = validateSvg(svg);
     const problem = lint(svg);
 
@@ -62,9 +77,9 @@ const build = async (name: string): Promise<boolean> => {
 
 await mkdir(join(OUT, "readme"), { recursive: true });
 
-await mkdir(join(OUT, "site"), { recursive: true });
+const names = wanted.length > 0 ? wanted : examples;
 
-const results = await Promise.all((wanted.length > 0 ? wanted : examples).map(build));
+const results = await Promise.all(names.map(build));
 
 if (!xmllint) console.warn("xmllint not installed, skipped");
 

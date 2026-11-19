@@ -27,7 +27,7 @@ interface Tracks {
   readonly count: number;
 }
 
-export const tracks = (crossings: readonly Crossing[], merging: ReadonlySet<number>): Tracks => {
+export const tracks = (crossings: readonly Crossing[]): Tracks => {
   const track = new Map<number, number>();
   const used: Crossing[][] = [];
 
@@ -54,14 +54,7 @@ export const tracks = (crossings: readonly Crossing[], merging: ReadonlySet<numb
   };
 
   const bent = crossings.filter((c) => Math.abs(c.xa - c.xb) > SAME);
-  colour(
-    bent.filter((c) => !merging.has(c.id)),
-    0,
-  );
-  colour(
-    bent.filter((c) => merging.has(c.id)),
-    used.length,
-  );
+  colour(bent, 0);
 
   return { track, count: used.length };
 };

@@ -1,6 +1,6 @@
-import { render, flow } from "svjeez";
 import { flowchart } from "@svjeez/diagrams";
-import { HEIGHT, WIDTH, css, fit, hue, mono, theme } from "../gallery-style";
+import { Align, Group, Shape, circle, ease, exit, scene, span, track } from "svjeez";
+import { mono, theme } from "../theme";
 
 export const chart = flowchart(
   {
@@ -36,52 +36,58 @@ export const chart = flowchart(
     ],
   },
   {
-    theme,
-    x: 0,
-    y: 0,
-    direction: "LR",
     font: mono,
-    fontSize: 16,
-    play: { at: 0.2, step: 0.3 },
-    tints: {
-      task: hue.blue,
-      input: hue.blue,
-      output: hue.blue,
-      tool: hue.purple,
-      store: hue.purple,
-      decision: hue.orange,
+    textSize: 13,
+    direction: "LR",
+    reveal: span(0.2, 0.3),
+    colors: {
+      background: theme.background,
+      text: theme.text,
+      line: theme.border,
+      muted: theme.muted,
+      accent: theme.blue,
+      highlight: theme.orange,
+      roles: { tool: theme.magenta, store: theme.magenta, decision: theme.orange },
     },
   },
 );
 
-const trip = flow(chart.route("pr", "post"), {
-  at: 3.5,
-  speed: 240,
-  style: "trace",
-  color: theme.base09,
-  arrive: true,
-});
+const trip = span(3.6, 2.4);
+const route = chart.route("pr", "post");
+const LEAVE = span(9.2, 0.6);
 
-const D = 10;
-
-export default function build(): string {
-  return render(
-    {
-      width: WIDTH,
-      height: HEIGHT,
-      duration: D,
-      title: "Review pipeline",
-      desc: "A flowchart of an agent review pipeline appears node by node, then a token runs from the opened PR to the posted review.",
-      reducedMotion: { at: D - 1 },
-      css,
-    },
-    <>
-      <rect width={WIDTH} height={HEIGHT} fill={theme.base00} />
-      <g transform={fit(chart.bounds.w, chart.bounds.h)}>
-        {chart.layers.under}
-        {trip.node}
-        {chart.layers.over}
-      </g>
-    </>,
-  );
-}
+export default scene(
+  {
+    size: [960, 540],
+    duration: 10,
+    title: "Review pipeline",
+    desc: "A flowchart of an agent review pipeline appears node by node, then a token runs from the opened PR to the posted review.",
+    theme,
+    still: 8,
+  },
+  (canvas) => (
+    <Group>
+      <Shape geometry={canvas.rect} fill={theme.background} />
+      <Align motion={exit(LEAVE)}>
+        <Group scale={900 / chart.size[0]}>
+          {chart.with(
+            <Shape
+              geometry={route.geometry}
+              stroke={{ color: theme.orange, width: 2.5, cap: "round" }}
+              draw={track(0).to(1, trip, ease.linear)}
+            />,
+          )}
+          <Shape
+            geometry={circle(5)}
+            anchor="center"
+            fill={theme.orange}
+            at={route.travel(trip)}
+            opacity={track(0)
+              .to(1, span(trip.start, 0.15))
+              .to(0, span(trip.end - 0.2, 0.2))}
+          />
+        </Group>
+      </Align>
+    </Group>
+  ),
+);

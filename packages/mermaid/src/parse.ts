@@ -1,16 +1,37 @@
+import { SceneError } from "svjeez/tools";
 import { fail, type Line } from "./errors.ts";
+import { parseArchitecture } from "./architecture.ts";
+import { parseBlock } from "./block.ts";
+import { parseC4 } from "./c4.ts";
+import { parseClass } from "./class.ts";
+import { parseEr } from "./er.ts";
 import { parseFlowchart } from "./flowchart.ts";
+import { parseGantt } from "./gantt.ts";
+import { parseGit } from "./git.ts";
+import { parseJourney } from "./journey.ts";
+import { parseKanban } from "./kanban.ts";
+import { parseMindmap } from "./mindmap.ts";
+import { parsePacket } from "./packet.ts";
+import { parseRadar } from "./radar.ts";
+import { parsePie } from "./pie.ts";
+import { parseQuadrant } from "./quadrant.ts";
+import { parseSankey } from "./sankey.ts";
+import { parseRequirement } from "./requirement.ts";
 import { parseSequence } from "./sequence.ts";
 import { parseState } from "./state.ts";
-import type { MermaidDoc } from "./types.ts";
+import { parseTimeline } from "./timeline.ts";
+import { parseXyChart } from "./xychart.ts";
+import { parseTreemap } from "./treemap.ts";
+import type { MermaidDoc, ParseOptions } from "./types.ts";
 
 const KINDS =
-  "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `stateDiagram` and `stateDiagram-v2`.";
+  "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `classDiagram`, `stateDiagram`/`stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `mindmap`, `gitGraph`, `journey`, `packet-beta`, `radar-beta` and `treemap-beta`.";
 
-const lines = (text: string): Line[] =>
+const lines = (text: string, file: string, first: number): Line[] =>
   text.split(/\r?\n/).flatMap((raw, i): Line[] => {
     const trimmed = raw.trim();
-    const l = { line: i + 1, text: trimmed.replace(/\s*;$/, "") };
+    const indent = (/^\s*/.exec(raw)?.[0] ?? "").replace(/\t/g, "    ").length;
+    const l = { file, line: first + i, text: trimmed.replace(/\s*;$/, ""), indent };
 
     if (trimmed.startsWith("%%{"))
       return fail(l, "%%{ }%% directives are not supported: configure svjeez through its options.");
@@ -18,27 +39,67 @@ const lines = (text: string): Line[] =>
     return trimmed === "" || trimmed.startsWith("%%") ? [] : [l];
   });
 
-export function readDocument(text: string) {
-  const all = lines(text);
+export function parseMermaid(text: string, options: ParseOptions = {}): MermaidDoc {
+  const file = options.file ?? "mermaid";
+  const all = lines(text, file, options.line ?? 1);
   const first = all[0];
 
   if (!first)
-    throw new Error(
-      `parseMermaid() got no Mermaid text. Start with a header such as \`flowchart TD\`. ${KINDS}`,
+    throw new SceneError(
+      "parseMermaid() got no Mermaid text.",
+      `Start with a header such as \`flowchart TD\`. ${KINDS}`,
+      { source: { file, line: options.line ?? 1 } },
     );
   const word = /^[\w-]+/.exec(first.text)?.[0];
+  const body = all.slice(1);
 
-  if (word === "flowchart" || word === "graph")
-    return { header: first, doc: parseFlowchart(first, all.slice(1)) };
+  if (word === "flowchart" || word === "graph") return parseFlowchart(first, body);
 
-  if (word === "sequenceDiagram" && first.text === word)
-    return { header: first, doc: parseSequence(first, all.slice(1)) };
+  if (word === "sequenceDiagram" && first.text === word) return parseSequence(first, body);
 
   if ((word === "stateDiagram" || word === "stateDiagram-v2") && first.text === word)
-    return { header: first, doc: parseState(first, all.slice(1)) };
+    return parseState(first, body);
+
+  const exact = first.text === word;
+
+  if ((word === "classDiagram" || word === "classDiagram-v2") && exact)
+    return parseClass(first, body);
+
+  if (word === "erDiagram" && exact) return parseEr(first, body);
+
+  if (word === "gantt" && exact) return parseGantt(first, body);
+
+  if (word === "journey" && exact) return parseJourney(first, body);
+
+  if ((word === "sankey-beta" || word === "sankey") && exact) return parseSankey(first, body);
+
+  if ((word === "block-beta" || word === "block") && exact) return parseBlock(first, body);
+
+  if (word === "architecture-beta" && exact) return parseArchitecture(first, body);
+
+  if (word === "requirementDiagram" && exact) return parseRequirement(first, body);
+
+  if (word?.startsWith("C4") && exact) return parseC4(first, body);
+
+  if (word === "kanban" && exact) return parseKanban(first, body);
+
+  if (word === "pie") return parsePie(first, body);
+
+  if (word === "mindmap") return parseMindmap(first, body);
+
+  if (word === "gitGraph") return parseGit(first, body);
+
+  if (word === "timeline") return parseTimeline(first, body);
+
+  if (word === "quadrantChart") return parseQuadrant(first, body);
+
+  if (word === "xychart-beta" || word === "xychart") return parseXyChart(first, body);
+
+  if (word === "packet-beta" || word === "packet") return parsePacket(first, body);
+
+  if (word === "radar-beta") return parseRadar(first, body);
+
+  if (word === "treemap-beta" || word === "treemap") return parseTreemap(first, body);
 
   return fail(first, `the first line must name a diagram type. ${KINDS}`);
 }
-
-/** Reads Mermaid text into a plain model, with no svjeez involved. Throws a `MermaidSyntaxError` that names the line. */
-export const parseMermaid = (text: string): MermaidDoc => readDocument(text).doc;

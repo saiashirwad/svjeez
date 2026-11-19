@@ -1,0 +1,30 @@
+import { film } from "@svjeez/dom";
+import { component } from "@svjeez/dom/bun";
+import Card from "../dom-react/Card.tsx";
+import type { Task } from "../dom-react/Task.ts";
+import theme from "../dom-react/theme.css" with { type: "file" };
+
+const task: Task = {
+  id: 1,
+  title: "Sketch the board",
+  note: "Two columns, soft shadows",
+  done: false,
+};
+
+export default await film(
+  component(Card, { task }, { css: [theme] }),
+  async ({ snap, update }) => {
+    await snap("todo");
+
+    await update({ task: { ...task, note: "Wired up, waiting on review" } });
+    await snap("note", { over: 0.5 });
+
+    await update({ task: { ...task, note: "Wired up, waiting on review", done: true } });
+    await snap("done", { over: 0.6 });
+  },
+  {
+    scheme: "both",
+    title: "Card",
+    viewport: { width: 520, height: 120 },
+  },
+);

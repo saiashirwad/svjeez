@@ -1,37 +1,36 @@
-import { ease, enter, motion, render, span, wiggle } from "svjeez";
-import { css, theme } from "../style";
+import { Group, Shape, arc, circle, ease, enter, exit, scene, span, track, wiggle } from "svjeez";
+import { theme } from "../theme";
 
-export default function build(): string {
-  return render(
-    {
-      width: 200,
-      height: 120,
-      duration: 4,
-      title: "Loops and stacking",
-      desc: "A ring spins on a two second loop beside a dot that fades in and then wanders.",
-      css,
-      reducedMotion: { at: 1 },
-    },
-    <>
-      <rect width="100%" height="100%" fill={theme.base00} />
-      <g transform="translate(60 60)">
-        <circle
-          r={24}
-          fill="none"
-          stroke={theme.base0C}
-          strokeWidth={5}
-          strokeLinecap="round"
-          strokeDasharray="50 101"
-          animation={motion({ rotate: 0 }).to({ rotate: 360 }, span(0, 2), ease.linear).loop(2)}
-        />
-      </g>
-      <circle
-        cx={140}
-        cy={60}
-        r={10}
-        fill={theme.base0E}
-        animation={[enter({ at: 0, over: 0.6 }), wiggle({ x: 4, y: 4 }, { seed: "dot" })]}
+export default scene(
+  {
+    size: [200, 120],
+    duration: 4,
+    title: "Loops and stacking",
+    desc: "A ring spins on a two second loop beside a dot that fades in and then wanders.",
+    theme,
+    still: 1,
+  },
+  (canvas) => (
+    <Group>
+      <Shape geometry={canvas.rect} fill={theme.background} />
+      <Shape
+        geometry={arc({ radius: 24, sweep: 120 })}
+        at={[60, 60]}
+        anchor="center"
+        stroke={{ color: theme.cyan, width: 5, cap: "round" }}
+        rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)}
       />
-    </>,
-  );
-}
+      <Shape
+        geometry={circle(10)}
+        at={[140, 60]}
+        anchor="center"
+        fill={theme.magenta}
+        motion={[
+          enter(span(0, 0.6)),
+          exit(span(3.4, 0.6)),
+          wiggle({ offset: [4, 4] }, { seed: "dot" }),
+        ]}
+      />
+    </Group>
+  ),
+);

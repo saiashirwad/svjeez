@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
-import { ease, easeAt } from "svjeez";
-import { splitEase } from "../src/ease-at";
+import { ease } from "svjeez";
+import { easeAt } from "../src/model/ease-at";
+import { splitEase } from "../src/model/ease-at";
 
 test("linear returns its progress, clamped to the transition", () => {
   expect(easeAt(ease.linear, 0.3)).toBe(0.3);
@@ -11,7 +12,6 @@ test("linear returns its progress, clamped to the transition", () => {
 test("a bezier starts at 0, ends at 1, and matches CSS's ease at its midpoint", () => {
   expect(easeAt(ease.inOut, 0)).toBeCloseTo(0, 6);
   expect(easeAt(ease.inOut, 1)).toBeCloseTo(1, 6);
-  // CSS's `ease`, cubic-bezier(0.25, 0.1, 0.25, 1), is 0.8024 halfway.
   expect(easeAt(ease.bezier(0.25, 0.1, 0.25, 1), 0.5)).toBeCloseTo(0.8024, 3);
 });
 

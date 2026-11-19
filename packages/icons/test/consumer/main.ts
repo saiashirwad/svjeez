@@ -1,6 +1,9 @@
-import type { IconData } from "svjeez";
+import { Icon, type IconData, type IconProps } from "@svjeez/icons";
 import * as lucide from "@svjeez/icons/lucide";
-import { rocket, checkFilled } from "@svjeez/icons/tabler";
+import { checkFilled, rocket } from "@svjeez/icons/tabler";
 
-export const tabler: readonly IconData[] = [rocket, checkFilled];
-export const circle: IconData = lucide.circle;
+export const icons: readonly IconData[] = [rocket, checkFilled, lucide.circle];
+
+export const props: IconProps = { icon: rocket, color: "#000000", size: 48 };
+
+export const node = Icon(props);

@@ -1,38 +1,32 @@
 # @svjeez/geo
 
-Project GeoJSON or TopoJSON into a svjeez scene. Draw maps, routes, data overlays and turning globes.
+Maps and rotating globes for `svjeez`. Projects GeoJSON or TopoJSON into SVG geometry at compile time with zero viewer script.
 
 ```sh
-npm i -D @svjeez/geo svjeez world-atlas
+npm i -D @svjeez/geo@next svjeez@next world-atlas
 ```
 
 ```tsx
-import { project } from "@svjeez/geo";
-import { render, flow, span } from "svjeez";
-import { rect } from "svjeez/geometry";
-
 import { createRequire } from "node:module";
+import { project, type Topology } from "@svjeez/geo";
+import { Group, Shape, scene, span, track } from "svjeez";
 
-const world = createRequire(import.meta.url)("world-atlas/countries-50m.json");
-const map = project(world, { frame: rect(0, 0, 960, 540) });
+const world: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
+const map = project(world, { size: [900, 460] });
 
-const newYork = [-74, 40.7] as const;
-const london = [-0.13, 51.5] as const;
-const route = map.route(newYork, london);
-
-export default () =>
-  render(
-    { width: 960, height: 540, duration: 8, title: "New York to London" },
-    <>
-      <path d={map.land} fill="#1C3A4F" />
-      <path d={map.lines} fill="none" stroke="#5D8BA5" strokeWidth={0.6} />
-      {flow(route, { ...span(1, 4), style: "comet" }).node}
-    </>,
-  );
+export default scene({ size: [960, 540], duration: 4, title: "London to Tokyo" }, () => (
+  <Group at={[30, 40]}>
+    <Shape geometry={map.land} fill="#1C3A4F" />
+    <Shape geometry={map.borders} stroke={{ color: "#5D8BA5", width: 0.5 }} />
+    <Shape
+      geometry={map.route([-0.13, 51.51], [139.69, 35.69])}
+      stroke={{ color: "#F4B740", width: 2 }}
+      draw={track(0).to(1, span(0.5, 2))}
+    />
+  </Group>
+));
 ```
 
-`world-atlas` supplies the example’s country data. Use `map.point()` to place a label, `map.bounds()` to frame a camera shot, and `choropleth()` or `globe()` for animated data maps and globes.
+Use `globe()` to spin a globe over a span, with optional night shading, great-circle routes, and pinned markers.
 
-<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/flights"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/flights.svg" width="540" alt="Animated routes arc between cities on a map." /></a>
-
-[API reference](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/geo.md)
+[API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/geo.md)

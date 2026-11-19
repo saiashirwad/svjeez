@@ -1,3 +1,4 @@
+import { SceneError } from "../model/scene-error";
 import { advance, i16, required, table, u16, u32, type Sfnt } from "./sfnt";
 
 interface Placed {
@@ -75,7 +76,7 @@ const charMap = (f: Sfnt): CharMap => {
   const bmp = unicode.find((s) => s.format === 4);
 
   if (bmp) return format4(f, bmp.at);
-  throw new Error("This font has no Unicode character map (cmap format 4 or 12).");
+  throw new SceneError("This font has no Unicode character map (cmap format 4 or 12).");
 };
 
 const coverage = (f: Sfnt, at: number, glyph: number): number => {
@@ -357,7 +358,6 @@ export interface Typesetter {
   readonly beyond: (runs: readonly (readonly number[])[]) => boolean;
 }
 
-/** No bidi, contextual alternates or mark positioning, so complex scripts will not match the browser. */
 export const typesetter = (f: Sfnt, withLigatures = true): Typesetter => {
   const map = charMap(f);
 

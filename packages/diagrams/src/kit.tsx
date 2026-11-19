@@ -1,111 +1,262 @@
 /** @jsxImportSource svjeez */
 import {
-  type Color,
-  textWidth,
-  type FontValue,
-  type Edge,
-  type Point,
-  type Rect,
-  type Box,
-  type Drawn,
-  type Part,
-  type Size,
-  ease,
-  motion,
-  type Motion,
-  type Seconds,
-  type Span,
-  type Spanned,
-  span,
-  stagger,
-  type Beats,
-  type Stack,
-  draw,
+  Center,
+  Group,
+  Shape,
+  Text,
+  circle,
   enter,
-  type Child,
-  type SvgNode,
-  defaultDark,
-  type Base16,
-  type Slot,
+  line,
+  path,
+  polygon,
+  rect,
+  ref,
+  sampled,
+  span,
+  tokens,
+  track,
+  through,
+  type Anim,
+  type Geometry,
+  type Ref,
+  type SceneElement,
+  type Span,
+  type Track,
+  type Vec,
 } from "svjeez";
-import { rect } from "svjeez/geometry";
-import { curve } from "./curve.ts";
+import {
+  SceneError,
+  type Child,
+  type Color,
+  type Font,
+  type FontValue,
+  type Hex,
+  type Layer,
+  type Layers,
+  type PathBuilder,
+  type StrokeProps,
+  type Token,
+} from "svjeez/tools";
+import { curve, vec } from "./curve.ts";
+import type { Box, Point, Size } from "./layout/box.ts";
+import type { ArrowHead, Labelled, NodeRole, NodeShape, NodeStyle } from "./types.ts";
 
-export type NodeRole = "task" | "input" | "output" | "tool" | "decision" | "store";
-
-/**
- * Parts are the nodes plus a flowchart's groups, a sequence's actor heads or the lanes, by spec id. A part's `span`
- * is when it appears, or the instant 0 when there from the start; `bounds` covers everything drawn, labels included.
- */
-export type Diagram<Id extends string> = Drawn<Part<Id>>;
-
-/**
- * A start (items follow `step` apart in the diagram's order), one time per item, or a time per node id, which leaves
- * unnamed nodes there from the start.
- */
-export type PlayAt<Id extends string> = Beats | Readonly<Partial<Record<Id, Seconds>>>;
-
-/** Which point of `bounds` lands on `x`, `y`: a corner, the center, or the middle of an edge. */
-export type Anchor = "top-left" | "center" | Edge;
-
-export interface DiagramOptions {
-  /** Default `defaultDark`. */
-  readonly theme?: Base16;
-  /** Where `anchor` of `bounds` lands. */
-  readonly x?: number;
-  readonly y?: number;
-  /** Default `"top-left"`. */
-  readonly anchor?: Anchor;
-  /** Default 14. */
-  readonly fontSize?: number;
-  /** Embedded on the root element, and labels are sized by measuring them in it. */
-  readonly font?: FontValue;
-  /** On the root element, so fonts can come from your CSS. */
-  readonly class?: string;
-  /** The color each role is drawn in, over the defaults. A scene that wants two or three hues maps its roles onto them. */
-  readonly tints?: Partial<Record<NodeRole, Color>>;
+export interface DiagramColors {
+  readonly background: Color;
+  readonly text: Color;
+  readonly line: Color;
+  readonly accent: Color;
+  readonly muted?: Color;
+  readonly highlight?: Color;
+  readonly roles?: Readonly<Partial<Record<NodeRole, Color>>>;
+  /** Colors for categories such as pie slices and git branches; by default the distinct role colors. */
+  readonly series?: readonly Color[];
 }
 
-export type Labelled = string | { readonly label: string; readonly role?: NodeRole };
+export interface DiagramOptions {
+  readonly font: FontValue;
+  /** Font size of the labels. */
+  readonly textSize?: number;
+  readonly weight?: number;
+  readonly colors?: DiagramColors;
+  /** Drive an edge's drawing from your own timeline, 0 to 1, by its id ("a->b"). An edge a reveal also draws can't have one. */
+  readonly draw?: Draws;
+}
 
-export const isBareLabel = (spec: string | { readonly label: string }): spec is string =>
-  typeof spec === "string";
+export type Draws = Readonly<Record<string, Anim<number>>>;
 
-export const labelOf = (spec: Labelled): { readonly label: string; readonly role: NodeRole } =>
-  isBareLabel(spec)
-    ? { label: spec, role: "task" }
-    : { label: spec.label, role: spec.role ?? "task" };
+export interface Diagram<Id extends string> {
+  readonly node: SceneElement;
+  with(between: Child): SceneElement;
+  readonly size: Vec;
+  readonly ref: Ref;
+  readonly span: Span | undefined;
+  part(id: Id): Ref;
+  when(id: Id): Span | undefined;
+}
 
-const SLOT: Record<NodeRole, Slot> = {
-  task: "base0D",
-  input: "base0B",
-  output: "base0C",
-  tool: "base08",
-  decision: "base0A",
-  store: "base0E",
+export type Reveal<Id extends string> = Span | Readonly<Partial<Record<Id, Span>>>;
+
+const palette = tokens({
+  light: {
+    "diagram-background": "#FFFFFF",
+    "diagram-text": "#1D1D1F",
+    "diagram-line": "#8E8E93",
+    "diagram-muted": "#6E6E73",
+    "diagram-blue": "#0A6CFF",
+    "diagram-green": "#2FA84F",
+    "diagram-cyan": "#1B9AAA",
+    "diagram-red": "#E5453B",
+    "diagram-yellow": "#E5A50A",
+    "diagram-magenta": "#9B51E0",
+  },
+  dark: {
+    "diagram-background": "#090A0C",
+    "diagram-text": "#E5E5EA",
+    "diagram-line": "#7C7C82",
+    "diagram-muted": "#A1A1A6",
+    "diagram-blue": "#5EA0FF",
+    "diagram-green": "#32D74B",
+    "diagram-cyan": "#64D2FF",
+    "diagram-red": "#FF6961",
+    "diagram-yellow": "#FFD60A",
+    "diagram-magenta": "#C58AFF",
+  },
+});
+
+const ROLES: readonly NodeRole[] = ["task", "input", "output", "tool", "decision", "store"];
+
+export const defaultColors: DiagramColors = {
+  background: palette["diagram-background"],
+  text: palette["diagram-text"],
+  line: palette["diagram-line"],
+  muted: palette["diagram-muted"],
+  accent: palette["diagram-blue"],
+  highlight: palette["diagram-red"],
+  roles: {
+    task: palette["diagram-blue"],
+    input: palette["diagram-green"],
+    output: palette["diagram-cyan"],
+    tool: palette["diagram-red"],
+    decision: palette["diagram-yellow"],
+    store: palette["diagram-magenta"],
+  },
 };
 
-export const tintOf = (
-  theme: Base16,
-  role: NodeRole,
-  tints?: Partial<Record<NodeRole, Color>>,
-): Color => tints?.[role] ?? theme[SLOT[role]];
+const isToken = (color: Color): color is Token => typeof color !== "string";
 
-export const sizeOf = (role: NodeRole, label: string, fontSize: number, font?: FontValue): Size => {
-  const [w, h] = [textWidth(label, fontSize, font) + fontSize * 2.2, Math.round(fontSize * 2.8)];
+const channels = (hex: Hex): readonly number[] =>
+  [1, 3, 5].map((at) => Number.parseInt(hex.slice(at, at + 2), 16));
+
+const blend = (fg: Hex, bg: Hex, share: number): Hex => {
+  const [a, b] = [channels(fg), channels(bg)];
+
+  return `#${a
+    .map((c, i) =>
+      Math.round(c * share + b[i]! * (1 - share))
+        .toString(16)
+        .padStart(2, "0"),
+    )
+    .join("")}`;
+};
+
+const nameOf = (color: Color): string => (isToken(color) ? color.name : `c${color.slice(1, 7)}`);
+
+export const mix = (fg: Color, bg: Color, share: number): Color => {
+  if (!isToken(fg) && !isToken(bg)) return blend(fg, bg, share);
+  const name = `${nameOf(fg)}-${Math.round(share * 100)}-${nameOf(bg)}`;
+  const light = (c: Color): Hex => (isToken(c) ? c.light : c);
+  const dark = (c: Color): Hex => (isToken(c) ? c.dark : c);
+
+  return tokens({
+    light: { [name]: blend(light(fg), light(bg), share) },
+    dark: { [name]: blend(dark(fg), dark(bg), share) },
+  })[name]!;
+};
+
+const isFamily = (font: FontValue): font is Exclude<FontValue, Font> => "face" in font;
+
+export interface Look {
+  readonly font: FontValue;
+  readonly size: number;
+  readonly small: number;
+  readonly weight: number | undefined;
+  readonly colors: Required<Omit<DiagramColors, "roles" | "series">>;
+  /** Categorical colors, at least one. */
+  readonly series: readonly Color[];
+  measure(text: string, size: number, weight?: number): number;
+  tint(role: NodeRole): Color;
+  wash(role: NodeRole, share?: number): Color;
+}
+
+export const look = (options: DiagramOptions | undefined, what: string): Look => {
+  if (!options || options.font === undefined)
+    throw new SceneError(
+      `${what} needs a font to measure its labels with.`,
+      `Pass one in its options, as in ${what.replace("()", "")}(spec, { font: sans }).`,
+    );
+  const { font, textSize: size = 14, weight, colors = defaultColors } = options;
+
+  if (!(size > 0 && Number.isFinite(size)))
+    throw new SceneError(`${what} needs a textSize above 0, got ${size}.`);
+  const muted = colors.muted ?? colors.text;
+  const washes = new Map<string, Color>();
+  const tint = (role: NodeRole): Color => colors.roles?.[role] ?? colors.accent;
+  const series = colors.series?.length ? colors.series : [...new Set(ROLES.map(tint))];
+
+  return {
+    font,
+    size,
+    small: Math.round(size * 0.85 * 100) / 100,
+    weight,
+    colors: {
+      background: colors.background,
+      text: colors.text,
+      line: colors.line,
+      accent: colors.accent,
+      muted,
+      highlight: colors.highlight ?? colors.accent,
+    },
+    series,
+    measure: (text, at, w) => (isFamily(font) ? font.face(w ?? 400) : font).measure(text, at),
+    tint,
+    wash: (role, share = 0.22) => {
+      const key = `${role} ${share}`;
+      const known = washes.get(key);
+
+      if (known) return known;
+      const made = mix(tint(role), colors.background, share);
+      washes.set(key, made);
+
+      return made;
+    },
+  };
+};
+
+export const isBare = <T extends object>(spec: string | T): spec is string =>
+  typeof spec === "string";
+
+export const labelOf = (
+  spec: Labelled,
+): {
+  readonly label: string;
+  readonly role: NodeRole;
+  readonly shape?: NodeShape;
+  readonly style?: NodeStyle;
+} =>
+  isBare(spec)
+    ? { label: spec, role: "task" }
+    : { label: spec.label, role: spec.role ?? "task", shape: spec.shape, style: spec.style };
+
+/** What a node's outline, size and edge ends follow: its shape when it has one, else its role. */
+export type Form = NodeRole | NodeShape;
+
+export const formOf = (role: NodeRole, shape?: NodeShape): Form => shape ?? role;
+
+export const sizeOf = (l: Look, role: Form, label: string): Size => {
+  const text = l.measure(label, l.size, l.weight);
+  const [w, h] = [text + l.size * 2.2, Math.round(l.size * 2.8)];
 
   switch (role) {
     case "input":
       return { w: w + h * 0.7, h };
+    case "slantBack":
+      return { w: w + h * 0.7, h };
     case "output":
       return { w: w + h * 0.4, h };
+    case "hexagon":
+      return { w: w + h * 0.6, h };
+    case "trapezoid":
+    case "trapezoidBack":
+      return { w: w + h * 0.6, h };
+    case "flag":
+      return { w: w + h * 0.4, h };
+    case "double":
+      return { w: w + h * 0.4 + 2 * RING, h: h + 2 * RING };
     case "tool":
       return { w: w + 16, h };
     case "decision":
-      return {
-        w: textWidth(label, fontSize, font) * 1.45 + fontSize * 4,
-        h: Math.round(fontSize * 4.4),
-      };
+      return { w: text * 1.45 + l.size * 4, h: Math.round(l.size * 4.4) };
     case "store":
       return { w, h: h + 10 };
     case "task":
@@ -113,81 +264,18 @@ export const sizeOf = (role: NodeRole, label: string, fontSize: number, font?: F
   }
 };
 
-export const POP = 0.35;
-
-/**
- * Rises a few pixels instead of scaling: browsers can keep a once-animated `scale` layer rasterized small, which
- * blurs the label.
- */
-export const popIn = (at: Seconds): Motion<"opacity" | "y"> =>
-  enter({ at, over: POP }, { opacity: 0, y: 6 }, ease.out);
-
-const isBeats = (at: PlayAt<string>): at is Beats => typeof at === "number" || Array.isArray(at);
-
-export const INSTANT: Spanned = span(0, 0);
-
-export const schedule = (
-  at: PlayAt<string>,
-  order: readonly string[],
-  all: readonly string[],
-  step: Seconds,
-  what: string,
-): Map<string, Seconds> => {
-  const shown = new Map(all.map((id) => [id, -Infinity]));
-
-  if (isBeats(at)) {
-    slots(at, order.length, step, what).forEach((s, i) => shown.set(order[i]!, s.at));
-
-    return shown;
-  }
-
-  for (const [id, t] of Object.entries(at)) {
-    if (!shown.has(id))
-      throw new Error(
-        `${what} names ${JSON.stringify(id)}, which is not a node. Its nodes are ${all.map((n) => JSON.stringify(n)).join(", ")}.`,
-      );
-
-    if (t === undefined) continue;
-
-    if (!(Number.isFinite(t) && t >= 0))
-      throw new Error(`${what} needs a time of 0 or later for ${JSON.stringify(id)}, got ${t}.`);
-
-    shown.set(id, t);
-  }
-
-  return shown;
-};
-
-export const spanOfReveals = (reveals: readonly Span[]): Spanned => {
-  if (reveals.length === 0) return span(0, 0);
-
-  const first = Math.min(...reveals.map((r) => r.at));
-  const last = Math.max(...reveals.map((r) => r.at + r.over));
-
-  return span(first, last - first);
-};
-
-const isStart = (at: Beats): at is Seconds => typeof at === "number";
-
-export const slots = (at: Beats, count: number, step: Seconds, what: string): Spanned[] => {
-  if (isStart(at)) {
-    if (!(at >= 0)) throw new Error(`${what} needs a non-negative start, got ${at}.`);
-
-    return stagger(span(at, step), count, step);
-  }
-
-  if (at.length !== count) throw new Error(`${what} needs ${count} times, got ${at.length}.`);
-
-  if (at.some((t, i) => !(t >= 0) || (i > 0 && t < at[i - 1]!)))
-    throw new Error(`${what} needs non-negative times in order, got ${at.join(", ")}.`);
-
-  return at.map((t, i) => span(t, i + 1 < at.length ? at[i + 1]! - t : step));
-};
+export const labelSize = (l: Look, text: string): Size => ({
+  w: l.measure(text, l.small) + 10,
+  h: Math.round(l.small * 1.5),
+});
 
 const SKEW = 0.35;
+const CORNER = 0.3;
+const RING = 4;
 const LID = 5;
+const K = 0.5523;
 
-export const onOutline = (role: NodeRole, b: Box, end: Point, toward: Point): Point => {
+export const onOutline = (role: Form, b: Box, end: Point, toward: Point): Point => {
   const [cx, cy] = [b.x + b.w / 2, b.y + b.h / 2];
   const vertical = end.x === toward.x;
 
@@ -216,6 +304,36 @@ export const onOutline = (role: NodeRole, b: Box, end: Point, toward: Point): Po
       return { x: end.x < cx ? b.x + s : b.x + b.w - b.h * SKEW + s, y: end.y };
     }
 
+    case "slantBack": {
+      if (vertical) return end;
+      const s = b.h * SKEW * ((end.y - b.y) / b.h);
+
+      return { x: end.x < cx ? b.x + s : b.x + b.w - b.h * SKEW + s, y: end.y };
+    }
+
+    case "trapezoid":
+    case "trapezoidBack": {
+      if (vertical) return end;
+      const t = (end.y - b.y) / b.h;
+      const s = b.h * CORNER * (role === "trapezoid" ? 1 - t : t);
+
+      return { x: end.x < cx ? b.x + s : b.x + b.w - s, y: end.y };
+    }
+
+    case "hexagon": {
+      if (vertical) return end;
+      const s = b.h * CORNER * (Math.abs(end.y - cy) / (b.h / 2));
+
+      return { x: end.x < cx ? b.x + s : b.x + b.w - s, y: end.y };
+    }
+
+    case "flag": {
+      if (vertical || end.x > cx) return end;
+
+      return { x: b.x + b.h * CORNER * (1 - Math.abs(end.y - cy) / (b.h / 2)), y: end.y };
+    }
+
+    case "double":
     case "output": {
       const r = b.h / 2;
 
@@ -238,9 +356,9 @@ export const onOutline = (role: NodeRole, b: Box, end: Point, toward: Point): Po
 
     case "store": {
       if (!vertical) return end;
-      const curve = LID * Math.sqrt(Math.max(0, 1 - ((end.x - cx) / (b.w / 2)) ** 2));
+      const bulge = LID * Math.sqrt(Math.max(0, 1 - ((end.x - cx) / (b.w / 2)) ** 2));
 
-      return { x: end.x, y: end.y < cy ? b.y + LID - curve : b.y + b.h - LID + curve };
+      return { x: end.x, y: end.y < cy ? b.y + LID - bulge : b.y + b.h - LID + bulge };
     }
 
     case "task":
@@ -249,234 +367,484 @@ export const onOutline = (role: NodeRole, b: Box, end: Point, toward: Point): Po
   }
 };
 
-export const outline = (role: NodeRole, { x, y, w, h }: Box): string => {
+const halfEllipse = (
+  cx: number,
+  cy: number,
+  rx: number,
+  ry: number,
+  from: -1 | 1,
+  down: -1 | 1,
+) => {
+  const [a, b] = [rx * K, ry * K];
+
+  return [
+    [
+      [cx + from * rx, cy + down * b],
+      [cx + from * a, cy + down * ry],
+      [cx, cy + down * ry],
+    ],
+    [
+      [cx - from * a, cy + down * ry],
+      [cx - from * rx, cy + down * b],
+      [cx - from * rx, cy],
+    ],
+  ] as const satisfies readonly (readonly [Vec, Vec, Vec])[];
+};
+
+export const outline = (role: Form, w: number, h: number): Geometry => {
   switch (role) {
     case "input": {
       const s = h * SKEW;
 
-      return `M${x + s} ${y}H${x + w}L${x + w - s} ${y + h}H${x}Z`;
+      return polygon([s, 0], [w, 0], [w - s, h], [0, h]);
     }
 
+    case "slantBack": {
+      const s = h * SKEW;
+
+      return polygon([0, 0], [w - s, 0], [w, h], [s, h]);
+    }
+
+    case "trapezoid": {
+      const s = h * CORNER;
+
+      return polygon([s, 0], [w - s, 0], [w, h], [0, h]);
+    }
+
+    case "trapezoidBack": {
+      const s = h * CORNER;
+
+      return polygon([0, 0], [w, 0], [w - s, h], [s, h]);
+    }
+
+    case "hexagon": {
+      const s = h * CORNER;
+
+      return polygon([s, 0], [w - s, 0], [w, h / 2], [w - s, h], [s, h], [0, h / 2]);
+    }
+
+    case "flag":
+      return polygon([0, 0], [w, 0], [w, h], [0, h], [h * CORNER, h / 2]);
+    case "double":
     case "output":
-      return `M${x + h / 2} ${y}H${x + w - h / 2}A${h / 2} ${h / 2} 0 0 1 ${x + w - h / 2} ${y + h}H${x + h / 2}A${h / 2} ${h / 2} 0 0 1 ${x + h / 2} ${y}Z`;
+      return rect(w, h, { radius: h / 2 });
     case "decision":
-      return `M${x + w / 2} ${y}L${x + w} ${y + h / 2}L${x + w / 2} ${y + h}L${x} ${y + h / 2}Z`;
-    case "store":
-      return `M${x} ${y + LID}A${w / 2} ${LID} 0 0 1 ${x + w} ${y + LID}V${y + h - LID}A${w / 2} ${LID} 0 0 1 ${x} ${y + h - LID}Z`;
-    case "tool":
-    case "task": {
-      const r = role === "tool" ? 3 : 8;
+      return polygon([w / 2, 0], [w, h / 2], [w / 2, h], [0, h / 2]);
+    case "store": {
+      const [top, bottom] = [
+        halfEllipse(w / 2, LID, w / 2, LID, -1, -1),
+        halfEllipse(w / 2, h - LID, w / 2, LID, 1, 1),
+      ];
 
-      return `M${x + r} ${y}H${x + w - r}Q${x + w} ${y} ${x + w} ${y + r}V${y + h - r}Q${x + w} ${y + h} ${x + w - r} ${y + h}H${x + r}Q${x} ${y + h} ${x} ${y + h - r}V${y + r}Q${x} ${y} ${x + r} ${y}Z`;
+      return [...top, ...bottom]
+        .reduce(
+          (p, [c1, c2, to], i) => (i === 2 ? p.lineTo([w, h - LID]) : p).curveTo(c1, c2, to),
+          path().moveTo([0, LID]),
+        )
+        .close();
     }
+
+    case "tool":
+      return rect(w, h, { radius: 3 });
+    case "task":
+      return rect(w, h, { radius: 8 });
   }
 };
 
-export interface Look {
-  readonly theme: Base16;
-  readonly fontSize: number;
-  readonly tints?: Partial<Record<NodeRole, Color>>;
-}
+export const detailOf = (role: Form, w: number, h: number): Geometry | undefined => {
+  if (role === "double") return rect(w - 2 * RING, h - 2 * RING, { radius: (h - 2 * RING) / 2 });
 
-export const look = (options: DiagramOptions) => {
-  const { theme = defaultDark, fontSize = 14, font, class: cls, tints } = options;
-  const small = fontSize * 0.85;
+  if (role === "tool")
+    return path()
+      .moveTo([8, 0])
+      .lineTo([8, h])
+      .moveTo([w - 8, 0])
+      .lineTo([w - 8, h]);
 
-  return {
-    theme,
-    fontSize,
-    font,
-    small,
-    tints,
-    smallLook: { theme, fontSize: small, tints } satisfies Look,
-    root: (children: Child): SvgNode => (
-      <g class={cls} fontFamily={font}>
-        {children}
-      </g>
-    ),
-  };
+  if (role !== "store") return undefined;
+
+  return halfEllipse(w / 2, LID, w / 2, LID, -1, 1).reduce(
+    (p, [c1, c2, to]) => p.curveTo(c1, c2, to),
+    path().moveTo([0, LID]),
+  );
 };
 
-export const drawNode = (
-  role: NodeRole,
-  b: Box,
-  label: string,
-  look: Look,
-  animation?: Stack<"opacity" | "scale" | "x" | "y">,
-  extra?: SvgNode,
-): SvgNode => {
-  const { theme, fontSize } = look;
-  const tint = tintOf(theme, role, look.tints);
+const round = (value: number): number => Math.round(value * 100) / 100;
+export const pop = (when: Span): Layer => enter(when, { from: { opacity: 0, offset: [0, 6] } });
+export const fade = (when: Span): Track<number> => track(0).to(1, when);
 
-  const details =
-    role === "tool" ? (
-      <path
-        d={`M${b.x + 8} ${b.y}V${b.y + b.h}M${b.x + b.w - 8} ${b.y}V${b.y + b.h}`}
-        stroke={tint}
-        strokeOpacity={0.5}
-        strokeWidth={1.5}
-        fill="none"
-      />
-    ) : role === "store" ? (
-      <path
-        d={`M${b.x} ${b.y + LID}A${b.w / 2} ${LID} 0 0 0 ${b.x + b.w} ${b.y + LID}`}
-        stroke={tint}
-        fill="none"
-      />
-    ) : undefined;
+export interface NodeProps {
+  readonly key: string;
+  readonly look: Look;
+  readonly role: NodeRole;
+  readonly shape?: NodeShape;
+  readonly style?: NodeStyle;
+  readonly label: string;
+  readonly box: Box;
+  readonly motion?: Layers;
+}
+
+export const Node = ({ look: l, ...n }: NodeProps): SceneElement => {
+  const form = formOf(n.role, n.shape);
+  const tint = n.style?.stroke ?? l.tint(n.role);
+  const [w, h] = [round(n.box.w), round(n.box.h)];
+  const detail = detailOf(form, w, h);
+  const stroke = { color: tint, width: n.style?.width ?? 1.5, dash: n.style?.dash };
 
   return (
-    <g animation={animation}>
-      <path d={outline(role, b)} fill={theme.base00} />
-      <path d={outline(role, b)} fill={tint} fillOpacity={0.22} stroke={tint} strokeWidth={1.5} />
-      {details}
-      {extra}
-      <text
-        x={b.x + b.w / 2}
-        y={b.y + b.h / 2 + (role === "store" ? LID / 2 : 0) + fontSize * 0.35}
-        fontSize={fontSize}
-        textAnchor="middle"
-        fontWeight={600}
-        fill={theme.base05}
+    <Group key={n.key} offset={[round(n.box.x), round(n.box.y)]} motion={n.motion}>
+      <Shape
+        key="shape"
+        geometry={outline(form, w, h)}
+        fill={n.style?.fill ?? l.wash(n.role)}
+        stroke={stroke}
+      />
+      {detail && (
+        <Group key="detail" offset={form === "double" ? [RING, RING] : [0, 0]}>
+          <Shape geometry={detail} stroke={stroke} />
+        </Group>
+      )}
+      <Text
+        key="label"
+        font={l.font}
+        size={l.size}
+        weight={l.weight}
+        fill={n.style?.color ?? l.colors.text}
+        anchor="center"
+        at={[w / 2, round(h / 2 + (form === "store" ? LID / 2 : 0))]}
       >
-        {label}
-      </text>
-    </g>
+        {n.label}
+      </Text>
+    </Group>
   );
 };
 
 const HEAD = 8;
 
-export type ArrowHead = "filled" | "none" | "cross" | "async";
+export interface EdgeProps {
+  readonly key: string;
+  readonly look: Look;
+  readonly points: readonly Point[];
+  readonly color?: Color;
+  /** Changes to the default line: width 1.5, round cap and join. */
+  readonly stroke?: Partial<StrokeProps>;
+  readonly head?: ArrowHead;
+  /** A head drawn at the start of the line. Defaults to none. */
+  readonly tail?: ArrowHead;
+  readonly draw?: Anim<number>;
+}
 
-export const arrow = (
-  points: readonly Point[],
-  look: Look & {
-    readonly color?: Color;
-    readonly dashed?: boolean;
-    readonly line?: "solid" | "dotted" | "thick";
-    readonly head?: ArrowHead;
-    readonly at?: Seconds;
-    readonly over?: Seconds;
-  },
-): SvgNode => {
-  const color = look.color ?? look.theme.base04;
-  const [a, b] = [points.at(-2)!, points.at(-1)!];
-  const length = Math.hypot(b.x - a.x, b.y - a.y) || 1;
-  const [ux, uy] = [(b.x - a.x) / length, (b.y - a.y) / length];
-  const { at, over = 0.4, head = "filled" } = look;
-  const dash = look.dashed ? "5 4" : look.line === "dotted" ? "2 4" : undefined;
+const headOf = (
+  head: Exclude<ArrowHead, "none" | "circle">,
+  tip: Point,
+  ux: number,
+  uy: number,
+): Geometry => {
+  const p = (x: number, y: number): Vec => vec({ x, y });
+  const tipAt = p(tip.x, tip.y);
+  const left = p(tip.x - ux * HEAD - uy * HEAD * 0.5, tip.y - uy * HEAD + ux * HEAD * 0.5);
+  const right = p(tip.x - ux * HEAD + uy * HEAD * 0.5, tip.y - uy * HEAD - ux * HEAD * 0.5);
 
-  const trimmed =
-    head === "filled"
-      ? [...points.slice(0, -1), { x: b.x - ux * (HEAD - 1), y: b.y - uy * (HEAD - 1) }]
-      : points;
+  switch (head) {
+    case "filled":
+      return polygon(tipAt, left, right);
+    case "async":
+      return line(left, tipAt, right);
+    case "cross": {
+      const [cx, cy] = [tip.x - ux * HEAD * 0.5, tip.y - uy * HEAD * 0.5];
+      const s = HEAD * 0.4;
+      const [ax, ay] = [(ux - uy) * s, (uy + ux) * s];
+      const [bx, by] = [(ux + uy) * s, (uy - ux) * s];
 
-  const tip = `${b.x} ${b.y}`;
-  const left = `${b.x - ux * HEAD - uy * HEAD * 0.5} ${b.y - uy * HEAD + ux * HEAD * 0.5}`;
-  const right = `${b.x - ux * HEAD + uy * HEAD * 0.5} ${b.y - uy * HEAD - ux * HEAD * 0.5}`;
-  const frontLeft = `${b.x - uy * HEAD * 0.5} ${b.y + ux * HEAD * 0.5}`;
-  const frontRight = `${b.x + uy * HEAD * 0.5} ${b.y - ux * HEAD * 0.5}`;
+      return path()
+        .moveTo(p(cx - ax, cy - ay))
+        .lineTo(p(cx + ax, cy + ay))
+        .moveTo(p(cx - bx, cy - by))
+        .lineTo(p(cx + bx, cy + by));
+    }
+  }
+};
 
-  const marks = {
-    filled: `M${tip}L${left}L${right}Z`,
-    async: `M${left}L${tip}L${right}`,
-    cross: `M${left}L${frontRight}M${right}L${frontLeft}`,
-  };
+interface MarkProps {
+  readonly key: string;
+  readonly look: Look;
+  readonly kind: Exclude<ArrowHead, "none">;
+  readonly tip: Point;
+  readonly ux: number;
+  readonly uy: number;
+  readonly color: Color;
+  readonly stroke: StrokeProps;
+  readonly opacity?: Anim<number>;
+}
+
+const Mark = ({ look: l, ...m }: MarkProps): SceneElement => {
+  if (m.kind === "circle")
+    return (
+      <Group
+        key={m.key}
+        offset={[round(m.tip.x - m.ux * HEAD * 0.5), round(m.tip.y - m.uy * HEAD * 0.5)]}
+      >
+        <Shape
+          geometry={circle(HEAD * 0.5)}
+          fill={l.colors.background}
+          stroke={m.stroke}
+          opacity={m.opacity}
+        />
+      </Group>
+    );
 
   return (
-    <g>
-      <path
-        d={curve(trimmed).d}
-        fill="none"
-        stroke={color}
-        strokeWidth={look.line === "thick" ? 3 : 1.5}
-        strokeLinejoin="round"
-        strokeDasharray={dash}
-        animation={
-          at === undefined
-            ? undefined
-            : dash
-              ? motion({ opacity: 0 }).to({ opacity: 1 }, span(at, over))
-              : draw({ at, over })
-        }
-      />
-      {head !== "none" && (
-        <path
-          d={marks[head]}
-          fill={head === "filled" ? color : "none"}
-          stroke={head === "filled" ? undefined : color}
-          strokeWidth={head === "filled" ? undefined : 1.5}
-          animation={
-            at === undefined
-              ? undefined
-              : motion({ opacity: 0 }).to({ opacity: 1 }, span(at + over * 0.85, over * 0.15))
-          }
-        />
-      )}
-    </g>
+    <Shape
+      key={m.key}
+      geometry={headOf(m.kind, m.tip, m.ux, m.uy)}
+      fill={m.kind === "filled" ? m.color : undefined}
+      stroke={m.kind === "filled" ? undefined : m.stroke}
+      opacity={m.opacity}
+    />
   );
 };
 
-export const chip = (
-  b: Box,
-  text: string,
-  look: Look & { readonly fill?: Color; readonly ground?: Color | "none" },
-  animation?: Stack<"opacity">,
-): SvgNode => (
-  <g animation={animation}>
-    <rect x={b.x} y={b.y} width={b.w} height={b.h} rx={3} fill={look.ground ?? look.theme.base00} />
-    <text
-      x={b.x + b.w / 2}
-      y={b.y + b.h / 2 + look.fontSize * 0.35}
-      fontSize={look.fontSize}
-      textAnchor="middle"
-      fill={look.fill ?? look.theme.base04}
-    >
-      {text}
-    </text>
-  </g>
+export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
+  const color = e.color ?? l.colors.line;
+  const head = e.head ?? "filled";
+  const tail = e.tail ?? "none";
+  const [a, b] = [e.points.at(-2)!, e.points.at(-1)!];
+  const length = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+  const [ux, uy] = [(b.x - a.x) / length, (b.y - a.y) / length];
+  const [c, d] = [e.points[1]!, e.points[0]!];
+  const back = Math.hypot(d.x - c.x, d.y - c.y) || 1;
+  const [vx, vy] = [(d.x - c.x) / back, (d.y - c.y) / back];
+
+  const points = [...e.points];
+
+  if (head === "filled")
+    points[points.length - 1] = { x: b.x - ux * (HEAD - 1), y: b.y - uy * (HEAD - 1) };
+
+  if (tail === "filled") points[0] = { x: d.x - vx * (HEAD - 1), y: d.y - vy * (HEAD - 1) };
+
+  const stroke: StrokeProps = {
+    color,
+    width: 1.5,
+    cap: "round",
+    join: "round",
+    ...e.stroke,
+  };
+
+  const mark = {
+    color,
+    width: stroke.width ?? 1.5,
+    cap: "round",
+    join: "round",
+  } as const;
+
+  // The head stays fixed at the end and shows once the drawn line reaches its base.
+  const cut = head === "filled" ? HEAD - 1 : 0;
+  const reach = Math.min(1, Math.max(0, 1 - (HEAD - cut) / (new Route([points]).length || 1)));
+
+  return (
+    <Group key={e.key}>
+      <Shape
+        key="line"
+        geometry={curve(points).geometry}
+        stroke={stroke}
+        trim={
+          e.draw !== undefined && !stroke.dash ? through(e.draw, (d): Vec => [0, d]) : undefined
+        }
+        opacity={e.draw !== undefined && stroke.dash ? e.draw : undefined}
+      />
+      {head !== "none" && (
+        <Mark
+          key="head"
+          look={l}
+          kind={head}
+          tip={b}
+          ux={ux}
+          uy={uy}
+          color={color}
+          stroke={mark}
+          opacity={
+            e.draw === undefined
+              ? undefined
+              : stroke.dash
+                ? e.draw
+                : through(e.draw, (t) => (t >= reach ? 1 : 0))
+          }
+        />
+      )}
+      {tail !== "none" && (
+        <Mark
+          key="tail"
+          look={l}
+          kind={tail}
+          tip={d}
+          ux={vx}
+          uy={vy}
+          color={color}
+          stroke={mark}
+          opacity={e.draw}
+        />
+      )}
+    </Group>
+  );
+};
+
+export interface ChipProps {
+  readonly key: string;
+  readonly look: Look;
+  readonly box: Box;
+  readonly text: string;
+  readonly fill?: Color;
+  readonly ground?: Color | "none";
+  readonly motion?: Layers;
+}
+
+export const Chip = ({ look: l, ...c }: ChipProps): SceneElement => (
+  <Center
+    key={c.key}
+    at={[round(c.box.x), round(c.box.y)]}
+    width={round(c.box.w)}
+    height={round(c.box.h)}
+    radius={3}
+    fill={c.ground === "none" ? undefined : (c.ground ?? l.colors.background)}
+    motion={c.motion}
+  >
+    <Text font={l.font} size={l.small} fill={c.fill ?? l.colors.muted}>
+      {c.text}
+    </Text>
+  </Center>
 );
 
-export const labelSize = (text: string, fontSize: number, font?: FontValue): Size => ({
-  w: textWidth(text, fontSize, font) + 10,
-  h: Math.round(fontSize * 1.5),
-});
+const isSpan = (value: Reveal<string>): value is Span =>
+  typeof value.start === "number" && typeof value.over === "number";
 
-export const corner = (
-  w: number,
-  h: number,
-  {
-    x = 0,
-    y = 0,
-    anchor = "top-left",
-  }: { readonly x?: number; readonly y?: number; readonly anchor?: Anchor },
-): Point => {
-  const point =
-    anchor === "top-left"
-      ? { x: 0, y: 0 }
-      : anchor === "center"
-        ? rect(0, 0, w, h).center
-        : rect(0, 0, w, h)[anchor];
+const given = (value: Span | undefined): value is Span =>
+  typeof value === "object" && value !== null && isSpan(value);
 
-  return { x: x - point.x, y: y - point.y };
+export const spanOf = (value: Span | undefined, what: string): Span => {
+  if (!given(value))
+    throw new SceneError(`${what} needs a span, got ${String(value)}.`, "Write span(start, over).");
+
+  if (!(value.start >= 0 && value.over > 0 && Number.isFinite(value.start + value.over)))
+    throw new SceneError(
+      `${what} needs a span that starts at 0 or later and lasts longer than 0, got span(${value.start}, ${value.over}).`,
+    );
+
+  return span(value.start, value.over);
 };
 
-export const placer = (
-  bounds: Box,
-  options: { readonly x?: number; readonly y?: number; readonly anchor?: Anchor },
-) => {
-  const { x, y } = corner(bounds.w, bounds.h, options);
-  const [dx, dy] = [x - bounds.x, y - bounds.y];
+const quoted = (ids: readonly string[]): string =>
+  ids.length > 8
+    ? `${ids
+        .slice(0, 8)
+        .map((id) => `"${id}"`)
+        .join(", ")}, …`
+    : ids.map((id) => `"${id}"`).join(", ");
 
-  return {
-    box: (b: Box): Rect => rect(b.x + dx, b.y + dy, b.w, b.h),
-    point: (p: Point): Point => ({ x: p.x + dx, y: p.y + dy }),
-    bounds: rect(x, y, bounds.w, bounds.h),
-  };
+export const beatOf = (beat: Span, i: number): Span =>
+  span(Math.round((beat.start + i * beat.over) * 1e6) / 1e6, beat.over);
+
+export const schedule = (
+  reveal: Reveal<string> | undefined,
+  order: readonly string[],
+  what: string,
+): Map<string, Span | undefined> => {
+  const shown = new Map<string, Span | undefined>(order.map((id) => [id, undefined]));
+
+  if (reveal === undefined) return shown;
+
+  if (isSpan(reveal)) {
+    const beat = spanOf(reveal, `${what} reveal`);
+    order.forEach((id, i) => shown.set(id, beatOf(beat, i)));
+
+    return shown;
+  }
+
+  for (const [id, when] of Object.entries(reveal)) {
+    if (!shown.has(id))
+      throw new SceneError(
+        `${what} reveal names "${id}", which is not one of its nodes.`,
+        `Its nodes are ${quoted(order)}.`,
+      );
+
+    if (when !== undefined) shown.set(id, spanOf(when, `${what} reveal for "${id}"`));
+  }
+
+  return shown;
 };
 
-/** Id of the edge `F` to `T`, such as `"pr->post"`; an edge list in the spec gets one id per pair. */
+/** The progress of an edge: its reveal span run once, or the timeline the author gave its id, never both. */
+export const drawnBy = (
+  draws: Draws | undefined,
+  id: string,
+  when: Span | undefined,
+  what: string,
+): Anim<number> | undefined => {
+  const own = draws?.[id];
+
+  if (own === undefined) return when && track(0).to(1, when);
+
+  if (when !== undefined)
+    throw new SceneError(
+      `${what} draws "${id}" from a draw timeline, but its reveal already draws it.`,
+      `Pick one: drop draw["${id}"], or leave the nodes it joins out of reveal.`,
+    );
+
+  return own;
+};
+
+export const checkDraws = (
+  draws: Draws | undefined,
+  ids: readonly string[],
+  what: string,
+): void => {
+  for (const id of Object.keys(draws ?? {}))
+    if (!ids.includes(id))
+      throw new SceneError(
+        `${what} draw names "${id}", which is not one of its edges.`,
+        `Its edges are ${quoted(ids)}.`,
+      );
+};
+
+export const extent = (spans: readonly (Span | undefined)[]): Span | undefined => {
+  const known = spans.filter((s): s is Span => s !== undefined);
+
+  if (known.length === 0) return undefined;
+  const first = Math.min(...known.map((s) => s.start));
+
+  return span(first, Math.max(...known.map((s) => s.start + s.over)) - first);
+};
+
+export const checkIds = (ids: readonly string[], what: string, kind: string): void => {
+  if (ids.length === 0) throw new SceneError(`${what} needs at least one ${kind}, got none.`);
+
+  for (const id of ids)
+    if (id === "" || id.includes("/"))
+      throw new SceneError(
+        `${what} has a ${kind} named "${id}".`,
+        'Name it with no "/", so its part can be found.',
+      );
+};
+
+export const known = (
+  id: string,
+  ids: ReadonlySet<string> | readonly string[],
+  what: string,
+  kind: string,
+  where: string,
+): string => {
+  const all = [...ids];
+
+  if (!all.includes(id))
+    throw new SceneError(
+      `${what} ${where} names "${id}", which is not one of its ${kind}s.`,
+      `Its ${kind}s are ${quoted(all)}.`,
+    );
+
+  return id;
+};
+
+export const edgeKey = (from: string, to: string): string => `${from}->${to}`;
+
 export type EdgeId<E> = E extends readonly [
   infer F extends string,
   infer T extends string,
@@ -485,43 +853,92 @@ export type EdgeId<E> = E extends readonly [
   ? `${F}->${T}`
   : never;
 
-export const edgeId = (from: string, to: string): string => `${from}->${to}`;
+export const keyed = (ids: readonly string[]): string[] => {
+  const seen = new Map<string, number>();
 
-export const lineBox = (points: readonly Point[], label?: Box): Rect => {
-  const xs = points.map((p) => p.x);
-  const ys = points.map((p) => p.y);
-  const [left, top] = [Math.min(...xs), Math.min(...ys)];
-  const box = rect(left, top, Math.max(...xs) - left, Math.max(...ys) - top);
+  return ids.map((id) => {
+    const n = (seen.get(id) ?? 0) + 1;
+    seen.set(id, n);
 
-  return label ? box.union(rect(label.x, label.y, label.w, label.h)) : box;
+    return n === 1 ? id : `${id}#${n}`;
+  });
 };
+
+export interface Parts<Id extends string> {
+  readonly ref: Ref;
+  part(id: Id): Ref;
+  when(id: Id): Span | undefined;
+}
 
 export const partsOf = <Id extends string>(
   what: string,
-  boxes: Iterable<readonly [string, Rect]>,
-  when: (id: string, index: number) => Spanned = () => INSTANT,
-) => {
-  // SAFETY: the boxes are keyed by the spec's ids, which the diagram's signature types as Id
-  const parts = [...boxes].map(([id, box], i): Part<Id> => ({
-    id: id as Id,
-    box,
-    span: when(id, i),
-  }));
+  parts: ReadonlyMap<string, Span | undefined>,
+): Parts<Id> => {
+  const handle = ref();
+
+  const find = (id: string): string => {
+    if (!parts.has(id))
+      throw new SceneError(
+        `${what} has no part "${id}".`,
+        `Its parts are ${quoted([...parts.keys()])}.`,
+      );
+
+    return id;
+  };
 
   return {
-    parts,
-    part: (id: Id): Part<Id> => {
-      const found = parts.find((p) => p.id === id);
-
-      if (!found)
-        throw new Error(
-          `${what} has no ${JSON.stringify(id)}. Its parts are ${parts
-            .slice(0, 6)
-            .map((p) => JSON.stringify(p.id))
-            .join(", ")}${parts.length > 6 ? ", …" : ""}.`,
-        );
-
-      return found;
-    },
+    ref: handle,
+    part: (id) => handle.part(find(id)),
+    when: (id) => parts.get(find(id)),
   };
 };
+
+export class Route {
+  readonly points: readonly Vec[];
+  readonly geometry: Geometry;
+  readonly length: number;
+  readonly #lengths: readonly number[];
+  constructor(hops: readonly (readonly Point[])[]) {
+    const curves = hops.map(curve);
+    this.points = curves.flatMap((c) => c.samples);
+    let geometry: PathBuilder = path();
+
+    for (const c of curves)
+      for (const contour of c.geometry.contours) {
+        geometry = geometry.moveTo(contour.start);
+
+        for (const [c1, c2, to] of contour.curves) geometry = geometry.curveTo(c1, c2, to);
+      }
+
+    this.geometry = geometry;
+    const lengths = [0];
+
+    for (let i = 1; i < this.points.length; i++) {
+      const [a, b] = [this.points[i - 1]!, this.points[i]!];
+      lengths.push(lengths[i - 1]! + Math.hypot(b[0] - a[0], b[1] - a[1]));
+    }
+
+    this.#lengths = lengths;
+    this.length = lengths.at(-1)!;
+  }
+  at(fraction: number): Vec {
+    const goal = Math.min(1, Math.max(0, fraction)) * this.length;
+
+    const i = Math.max(
+      1,
+      this.#lengths.findIndex((l) => l >= goal),
+    );
+
+    if (this.points.length === 1) return this.points[0]!;
+    const [a, b] = [this.points[i - 1]!, this.points[i]!];
+    const piece = this.#lengths[i]! - this.#lengths[i - 1]!;
+    const share = piece > 0 ? (goal - this.#lengths[i - 1]!) / piece : 1;
+
+    return [round(a[0] + (b[0] - a[0]) * share), round(a[1] + (b[1] - a[1]) * share)];
+  }
+  travel(when: Span): Track<Vec> {
+    const s = spanOf(when, "travel()");
+
+    return sampled((t: number): Vec => this.at(t / s.over), s, { tolerance: 0.5 });
+  }
+}

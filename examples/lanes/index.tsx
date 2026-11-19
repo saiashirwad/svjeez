@@ -1,6 +1,6 @@
-import { render } from "svjeez";
 import { lanes } from "@svjeez/diagrams";
-import { HEIGHT, WIDTH, css, fit, hue, mono, theme } from "../gallery-style";
+import { Align, Group, Shape, exit, scene, span } from "svjeez";
+import { mono, theme } from "../theme";
 
 const run = lanes(
   {
@@ -37,40 +37,44 @@ const run = lanes(
     ],
   },
   {
-    theme,
-    x: 0,
-    y: 0,
     font: mono,
-    scale: 100,
-    fontSize: 16,
-    play: { at: 0.2 },
-    tints: {
-      input: hue.blue,
-      task: hue.purple,
-      tool: hue.cyan,
-      output: hue.blue,
-      store: hue.purple,
-      decision: hue.orange,
+    textSize: 14,
+    scale: 84,
+    reveal: span(0.2),
+    colors: {
+      background: theme.background,
+      text: theme.text,
+      line: theme.border,
+      muted: theme.muted,
+      accent: theme.blue,
+      highlight: theme.orange,
+      roles: {
+        input: theme.blue,
+        task: theme.magenta,
+        tool: theme.cyan,
+        output: theme.blue,
+        store: theme.magenta,
+        decision: theme.orange,
+      },
     },
   },
 );
 
-const D = 11;
+const LEAVE = run.span!.next(0.6, 1.2);
 
-export default function build(): string {
-  return render(
-    {
-      width: WIDTH,
-      height: HEIGHT,
-      duration: D,
-      title: "Agent threads on a timeline",
-      desc: "Three agent threads over time: the lead plans and delegates, search reads and browses, build edits and tests, and each reports back to the lead.",
-      reducedMotion: { at: 9 },
-      css,
-    },
-    <>
-      <rect width={WIDTH} height={HEIGHT} fill={theme.base00} />
-      <g transform={fit(run.bounds.w, run.bounds.h)}>{run}</g>
-    </>,
-  );
-}
+export default scene(
+  {
+    size: [960, 540],
+    duration: 11,
+    title: "Agent threads on a timeline",
+    desc: "Five agent threads over time: the lead plans and delegates, search reads and browses, build edits and tests, and each reports back to the lead.",
+    theme,
+    still: 9,
+  },
+  (canvas) => (
+    <Group>
+      <Shape geometry={canvas.rect} fill={theme.background} />
+      <Align motion={exit(LEAVE)}>{run.node}</Align>
+    </Group>
+  ),
+);

@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Svjeez pseudo-elements</title>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --fg: #0a0a0a;
+        --muted: #737373;
+        --border: #d4d4d4;
+        --accent: #2563eb;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0a0a0a;
+          --fg: #fafafa;
+          --muted: #a3a3a3;
+          --border: #3a3a3a;
+          --accent: #60a5fa;
+        }
+      }
+      html,
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font: 14px/20px Helvetica, Arial, sans-serif;
+      }
+      #app {
+        width: 320px;
+        padding: 24px;
+        background: var(--bg);
+      }
+      /* Inline text badge from content + attr(). */
+      .inbox {
+        font-weight: 600;
+      }
+      .inbox::after {
+        content: attr(data-count);
+        margin-left: 8px;
+        padding: 0 8px;
+        border-radius: 10px;
+        background: var(--accent);
+        color: var(--bg);
+        font-size: 12px;
+      }
+      /* Absolutely positioned decorative dot. */
+      .status {
+        position: relative;
+        margin-top: 16px;
+        padding-left: 20px;
+      }
+      .status::before {
+        content: "";
+        position: absolute;
+        left: 2px;
+        top: 5px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #22c55e;
+      }
+      /* A divider line between flex children. */
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .row::before {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+      .row::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+      /* A custom checkbox whose indicator is a rotated pseudo-element. */
+      .check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      .box {
+        position: relative;
+        width: 18px;
+        height: 18px;
+        box-sizing: border-box;
+        border: 2px solid var(--accent);
+        border-radius: 4px;
+        background: var(--accent);
+      }
+      .box::after {
+        content: "";
+        position: absolute;
+        left: 4px;
+        top: 0px;
+        width: 4px;
+        height: 9px;
+        border: solid var(--bg);
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="inbox" data-count="12">Inbox</div>
+      <div class="status">Online</div>
+      <div class="row"><span>or</span></div>
+      <div class="check"><span class="box"></span><span>Remember me</span></div>
+    </div>
+  </body>
+</html>

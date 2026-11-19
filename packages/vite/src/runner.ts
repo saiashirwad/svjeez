@@ -52,7 +52,6 @@ export const createRunner = (app: ResolvedConfig): Runner => {
             resolve: {
               conditions,
               externalConditions,
-              // Node's module runner cannot evaluate CommonJS such as MathJax, so `noExternal: true` is not passed through.
               noExternal: noExternal === true ? undefined : noExternal,
               external,
             },

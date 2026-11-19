@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { Picture, fx, picture, render } from "svjeez";
+import { Group, Picture, picture, scene } from "svjeez";
+import { svg } from "svjeez/tools";
 import { validateSvg } from "svjeez/frames";
 
 const isText = (part: number | string): part is string => typeof part === "string";
@@ -136,7 +137,7 @@ describe("picture", () => {
   });
 
   test("raster bytes become a base64 data URI that round-trips", () => {
-    const { href, bytes: cost } = picture(fixtures.png);
+    const { data: href, bytes: cost } = picture(fixtures.png);
     expect(href.startsWith("data:image/png;base64,")).toBe(true);
     expect(cost).toBe(href.length);
     expect(Buffer.from(href.split(",")[1]!, "base64").equals(Buffer.from(fixtures.png))).toBe(true);
@@ -145,7 +146,7 @@ describe("picture", () => {
   test("a large raster encodes without overflowing the call stack", () => {
     const big = new Uint8Array(3_000_000);
     big.set(fixtures.png);
-    expect(picture(big).href.length).toBeGreaterThan(4_000_000);
+    expect(picture(big).data.length).toBeGreaterThan(4_000_000);
   });
 
   test("SVG takes its size from width and height, else the viewBox", () => {
@@ -218,7 +219,7 @@ describe("picture", () => {
 
   test("SVG goes in as percent-encoded text and decodes back to the markup", () => {
     const markup = '<svg viewBox="0 0 10 10"><rect fill="#f00" width="10%" height="10"/></svg>';
-    const { href } = picture(markup);
+    const { data: href } = picture(markup);
     expect(href.startsWith("data:image/svg+xml,")).toBe(true);
     expect(href).not.toContain("base64");
     expect(href).not.toMatch(/[<>"#]/);
@@ -229,7 +230,7 @@ describe("picture", () => {
     const markup =
       '<svg viewBox="0 0 10 10"><text xml:space="preserve">a="\t\tb</text>\n<rect fill="#00f" width="1" height="1"/></svg>';
 
-    expect(decodeURIComponent(picture(markup).href.slice("data:image/svg+xml,".length))).toBe(
+    expect(decodeURIComponent(picture(markup).data.slice("data:image/svg+xml,".length))).toBe(
       markup,
     );
   });
@@ -290,109 +291,31 @@ describe("picture", () => {
 describe("<Picture>", () => {
   const photo = picture(fixtures.png);
 
-  const scene = (node: ReturnType<typeof Picture>) =>
-    render({ width: 400, height: 300, duration: 1, title: "Pic" }, node);
+  const emit = (node: () => ReturnType<typeof Picture>) =>
+    svg.emit(scene({ size: [400, 300], duration: 1, title: "Pic" }, node));
 
-  const frame = (svg: string) =>
-    /<rect x="[^"]*" y="[^"]*" width="([^"]*)" height="([^"]*)"/.exec(svg)?.slice(1).map(Number);
+  const frame = (out: string) =>
+    /<image[^>]* width="([^"]*)" height="([^"]*)"/.exec(out)?.slice(1).map(Number);
 
   test("derives the missing side from the aspect ratio, and defaults to intrinsic size", () => {
-    expect(frame(scene(<Picture src={photo} x={0} y={0} width={150} />))).toEqual([150, 100]);
-    expect(frame(scene(<Picture src={photo} x={0} y={0} height={50} />))).toEqual([75, 50]);
-    expect(frame(scene(<Picture src={photo} x={0} y={0} />))).toEqual([300, 200]);
-    expect(scene(<Picture src={photo} width={150} />)).toBe(
-      scene(<Picture src={photo} x={0} y={0} width={150} />),
-    );
+    expect(frame(emit(() => <Picture src={photo} width={150} />))).toEqual([150, 100]);
+    expect(frame(emit(() => <Picture src={photo} height={50} />))).toEqual([75, 50]);
+    expect(frame(emit(() => <Picture src={photo} />))).toEqual([300, 200]);
   });
 
-  test("fit scales and centers the image in its frame, defaulting to cover", () => {
-    expect(scene(<Picture src={photo} x={10} y={10} width={100} height={100} />)).toContain(
-      'transform="translate(-15 10) scale(0.5 0.5)"',
-    );
-    expect(
-      scene(<Picture src={photo} x={10} y={10} width={100} height={100} fit="contain" />),
-    ).toContain('transform="translate(10 26.6667) scale(0.333333 0.333333)"');
-    expect(
-      scene(<Picture src={photo} x={10} y={10} width={100} height={100} fit="fill" />),
-    ).toContain('transform="translate(10 10) scale(0.333333 0.5)"');
-  });
-
-  test("cover and radius clip to the frame; contain and fill need no clip", () => {
-    const rounded = scene(
-      <Picture src={photo} x={10} y={20} width={100} height={60} radius={12} />,
-    );
-
-    expect(rounded).toMatch(
-      /<clipPath[^>]*>\s*<rect x="10" y="20" width="100" height="60" rx="12"/,
-    );
-    expect(scene(<Picture src={photo} x={0} y={0} fit="contain" />)).not.toContain("clipPath");
-  });
-
-  test("a picture drawn many times embeds its bytes once", () => {
-    const svg = scene(
-      <>
-        <Picture src={photo} x={0} y={0} />
-        <Picture src={photo} x={100} y={0} fit="contain" />
-        <Picture src={photo} x={200} y={0} fit="fill" radius={8} />
-      </>,
-    );
-
-    expect(svg.split(photo.href).length - 1).toBe(1);
-  });
-
-  test("alt labels the picture, and no alt hides it", () => {
-    expect(scene(<Picture src={photo} x={0} y={0} alt="A harbor" />)).toContain(
-      'role="img" aria-label="A harbor"',
-    );
-    expect(scene(<Picture src={photo} x={0} y={0} />)).toContain('aria-hidden="true"');
+  test("the picture's bytes go in as its data URI", () => {
+    expect(emit(() => <Picture src={photo} at={[10, 20]} />)).toContain(`href="${photo.data}"`);
   });
 
   test("the output validates, including a data URI image", () => {
-    expect(validateSvg(scene(<Picture src={photo} x={0} y={0} radius={4} />)).errors).toEqual([]);
-  });
-});
+    const out = emit(() => (
+      <Group>
+        <Picture src={photo} />
+        <Picture src={picture('<svg viewBox="0 0 10 5"><rect width="10" height="5"/></svg>')} />
+      </Group>
+    ));
 
-describe("image filters", () => {
-  const filtered = (filter: ReturnType<typeof fx.grayscale>) =>
-    render(
-      { width: 10, height: 10, duration: 1, title: "Fx" },
-      <rect width={10} height={10} filter={filter} />,
-    );
-
-  test("each filter renders into the scene", () => {
-    expect(filtered(fx.grayscale({ amount: 0.25 }))).toContain('values="0.75"');
-    expect(filtered(fx.blur({ by: 3 }))).toContain('stdDeviation="3"');
-    expect(
-      filtered(fx.shadow({ dx: 2, dy: 3, blur: 4, color: "#000000", opacity: 0.5 })),
-    ).toContain("<feDropShadow");
-  });
-
-  test("duotone maps black to dark and white to light", () => {
-    const svg = filtered(fx.duotone({ dark: "#000000", light: "#ff8000" }));
-    const values = /values="([^"]+)"/.exec(svg)![1]!.split(" ").map(Number);
-
-    const apply = (gray: number) =>
-      [0, 1, 2].map((row) => {
-        // SAFETY: duotone writes a four-row, five-value color matrix, so each row slice holds five numbers.
-        const [r, g, b, , offset] = values.slice(row * 5, row * 5 + 5) as [
-          number,
-          number,
-          number,
-          number,
-          number,
-        ];
-
-        return (r + g + b) * gray + offset;
-      });
-
-    expect(apply(0)).toEqual([0, 0, 0]);
-    expect(apply(1)[0]).toBeCloseTo(1, 3);
-    expect(apply(1)[1]).toBeCloseTo(128 / 255, 3);
-    expect(svg).toContain('color-interpolation-filters="sRGB"');
-    // @ts-expect-error a named color is a type error; untyped callers still get the runtime check
-    expect(() => fx.duotone({ dark: "red", light: "#fff" })).toThrow(
-      "fx.duotone() needs #rgb or #rrggbb colors, got red.",
-    );
+    expect(validateSvg(out).errors).toEqual([]);
   });
 });
 
@@ -414,13 +337,6 @@ describe("image validation", () => {
         warnings.some((warning) => warning.includes("<img>") && warning.includes("picture.load()")),
       ).toBe(true);
     }
-
-    expect(() =>
-      render(
-        { width: 10, height: 10, duration: 1, title: "x" },
-        <image href="photo.png" width={10} height={10} />,
-      ),
-    ).not.toThrow();
   });
 
   test("fragment and data hrefs, and links, pass", () => {

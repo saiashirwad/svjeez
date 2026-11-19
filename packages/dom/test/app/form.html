@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Svjeez form</title>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --fg: #0a0a0a;
+        --muted: #737373;
+        --border: #e5e5e5;
+        --accent: #171717;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0a0a0a;
+          --fg: #fafafa;
+          --muted: #a3a3a3;
+          --border: #2e2e2e;
+          --accent: #fafafa;
+        }
+      }
+      html,
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font: 14px/20px Helvetica, Arial, sans-serif;
+      }
+      #app {
+        width: 320px;
+        padding: 24px;
+        background: var(--bg);
+      }
+      h1 {
+        margin: 0 0 16px;
+        font-size: 18px;
+        line-height: 24px;
+      }
+      label {
+        display: block;
+        margin: 12px 0 6px;
+        font-weight: 500;
+      }
+      input[type="email"],
+      input[type="password"],
+      input[type="search"] {
+        box-sizing: border-box;
+        width: 100%;
+        height: 36px;
+        padding: 4px 12px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: transparent;
+        color: var(--fg);
+        font: inherit;
+        outline: none;
+      }
+      input::placeholder {
+        color: var(--muted);
+        opacity: 1;
+      }
+      .remember {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      .remember label {
+        margin: 0;
+      }
+      input[type="checkbox"] {
+        margin: 0;
+        accent-color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <h1>Sign in</h1>
+      <label for="email">Email</label>
+      <input id="email" type="email" value="ada@example.com" />
+      <label for="password">Password</label>
+      <input id="password" type="password" value="hunter2hunter2" />
+      <label for="search">Search</label>
+      <input id="search" type="search" placeholder="Search tasks..." />
+      <div class="remember">
+        <input id="remember" type="checkbox" checked />
+        <label for="remember">Remember me</label>
+      </div>
+    </div>
+  </body>
+</html>

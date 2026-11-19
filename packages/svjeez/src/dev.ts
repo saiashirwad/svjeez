@@ -4,8 +4,8 @@ import { writeFile } from "node:fs/promises";
 import { createServer, type ServerResponse } from "node:http";
 import { basename, dirname, resolve } from "node:path";
 import { loopLength, seek } from "./page";
-import { escapeText } from "./format";
-import type { BuildReport } from "./traced";
+import { escapeText } from "./model/format";
+import type { LaneReport } from "./model/backend";
 
 export interface DevOptions {
   readonly file: string;
@@ -22,7 +22,13 @@ interface Build {
   readonly error?: string;
 }
 
-type Preview = BuildReport & { readonly svg: string };
+interface Preview {
+  readonly svg: string;
+  readonly warnings: readonly string[];
+  readonly lanes: readonly LaneReport[];
+  readonly duration?: number;
+  readonly loop?: boolean;
+}
 
 const page = (title: string) => `<!doctype html>
 <meta charset="utf-8">
@@ -65,7 +71,7 @@ const page = (title: string) => `<!doctype html>
   const clock = byId("clock"), error = byId("error"), tracks = byId("tracks");
   const warnings = byId("warnings"), check = byId("check"), findings = byId("findings");
   let duration = 1, rate = 1, time = 0, playing = true, loop = true, last = performance.now();
-  let version = 0, request = 0, timeline = [];
+  let version = 0, request = 0, lanes = [];
   const root = () => stage.querySelector("svg");
   const show = () => { scrub.value = time; clock.textContent = time.toFixed(2) + "s / " + duration.toFixed(2) + "s"; };
   const frame = (now) => {
@@ -100,15 +106,16 @@ const page = (title: string) => `<!doctype html>
   };
   const fillTracks = () => {
     tracks.replaceChildren();
-    if (!timeline.length) tracks.append(text("p", "No compiled tracks for this SVG."));
-    for (const { label, source, spans, period } of timeline) {
+    if (!lanes.length) tracks.append(text("p", "No compiled tracks for this SVG."));
+    for (const { key, lane, source: place, spans, period } of lanes) {
+      const label = key + " · " + lane, source = place ? place.file + ":" + place.line : "";
       const line = text("div", "", "track"), name = text("span", label, "label");
       const windows = text("div", "", "spans");
       name.title = [label, source].filter(Boolean).join(" · ");
       const cycles = period ? Math.min(24, Math.ceil(duration / period)) : 1;
       for (let i = 0; i < cycles; i++) {
         for (const span of spans) {
-          const at = span.at + i * (period ?? 0);
+          const at = span.start + i * (period ?? 0);
           if (at > duration) continue;
           const button = text("button", "", "span");
           button.title = [label, at.toFixed(3) + "s", source].filter(Boolean).join(" · ");
@@ -141,7 +148,7 @@ const page = (title: string) => `<!doctype html>
     rate = Number(root()?.getAttribute("data-playback-rate")) || 1;
     scrub.max = duration;
     time = loop ? time % duration : Math.min(time, duration);
-    timeline = data.timeline;
+    lanes = data.lanes;
     warnings.replaceChildren(...data.warnings.map((warning) => text("li", warning)));
     if (byId("inspector").open) fillTracks();
     playing ? play() : pause();
@@ -152,16 +159,17 @@ const page = (title: string) => `<!doctype html>
     check.disabled = true;
     findings.textContent = "Checking…";
     try {
-      const { findings: found, error: message } = await (await fetch("/check?version=" + checked)).json();
+      const { problems: found, error: message } = await (await fetch("/check?version=" + checked)).json();
       if (checked !== version) return;
       findings.replaceChildren();
       if (message || !found.length) {
-        findings.textContent = message || "No findings.";
+        findings.textContent = message || "No problems.";
         return;
       }
-      for (const { source, rule, severity, message, times } of found) {
-        const button = text("button", [source, severity, rule, message].filter(Boolean).join(" · "), "finding");
-        button.onclick = () => jump(times[0] ?? 0);
+      for (const { source, code, severity, message, fix, times } of found) {
+        const place = source ? source.file + ":" + source.line : "";
+        const button = text("button", [place, severity, code, message, fix].filter(Boolean).join(" · "), "finding");
+        button.onclick = () => jump(times?.[0] ?? 0);
         findings.append(button);
       }
     } catch {
@@ -175,11 +183,17 @@ const page = (title: string) => `<!doctype html>
   requestAnimationFrame(frame);
 </script>`;
 
-const run = (cli: string, command: string, file: string, args: readonly string[]) =>
+const run = (
+  cli: string,
+  command: string,
+  file: string,
+  args: readonly string[],
+  extra: readonly string[] = [],
+) =>
   new Promise<{ output: string; log: string; code: number | null }>((done) => {
     const child = spawn(
       process.execPath,
-      [...process.execArgv, cli, command, file, "--json", ...args],
+      [...process.execArgv, cli, command, file, "--json", ...extra, ...args],
       {
         stdio: ["ignore", "pipe", "pipe"],
       },
@@ -207,7 +221,7 @@ export const dev = async (options: DevOptions): Promise<string> => {
   const args = options.args ?? [];
   const clients = new Set<ServerResponse>();
   let state: Build = { version: 0 };
-  let preview: Preview = { svg: "", warnings: [], timeline: [] };
+  let preview: Preview = { svg: "", warnings: [], lanes: [] };
   let checking: { version: string; run: ReturnType<typeof run> } | undefined;
 
   const once = async () => {
@@ -313,7 +327,7 @@ export const dev = async (options: DevOptions): Promise<string> => {
         }
 
         if (checking?.version !== version) {
-          const task = run(options.cli, "check", source, args);
+          const task = run(options.cli, "check", source, args, ["--browser"]);
           checking = { version, run: task };
           void task.finally(() => {
             if (checking?.run === task) checking = undefined;

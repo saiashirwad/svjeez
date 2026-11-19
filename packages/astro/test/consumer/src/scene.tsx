@@ -1,10 +1,12 @@
 /** @jsxImportSource svjeez */
-import { enter, render } from "svjeez";
+import { Shape, circle, ease, enter, scene, span } from "svjeez";
 
-export default () =>
-  render(
-    { width: 320, height: 120, duration: 2, title: "Consumer" },
-    <text x="20" y="70" fontSize={40} animation={enter({ at: 0, over: 1 }, { opacity: 0 })}>
-      Hello
-    </text>,
-  );
+export default scene({ size: [320, 120], duration: 2, title: "Hello" }, () => (
+  <Shape
+    geometry={circle(30)}
+    at={[160, 60]}
+    anchor="center"
+    fill="#3EE6D6"
+    motion={enter(span(0, 1), { from: { scale: 0 }, curve: ease.pop })}
+  />
+));

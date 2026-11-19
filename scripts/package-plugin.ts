@@ -17,7 +17,6 @@ execFileSync(join(dir, "node_modules/.bin/tsc"), ["-p", "tsconfig.package.json"]
   stdio: "inherit",
 });
 
-// tsc rewrites `./x.ts` imports to `./x.js` but not strings, so `new URL("./worker.ts", import.meta.url)` would point at a missing file.
 for (const entry of readdirSync(out, { recursive: true, encoding: "utf8" }))
   if (entry.endsWith(".js")) {
     const file = join(out, entry);

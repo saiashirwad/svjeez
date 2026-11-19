@@ -1,46 +1,51 @@
-export {
-  browser,
-  type Browser,
-  type BrowserOptions,
-  type Card,
-  type MountOptions,
-  type OpenOptions,
-  type Url,
-} from "./browser.ts";
+export { capture, captureScript } from "./capture.ts";
+
+export { SNAPSHOT_VERSION, checkVersion } from "./schema.ts";
 
 export {
-  act,
-  click,
-  drag,
-  fill,
-  hover,
-  html,
-  move,
-  press,
-  props,
-  snap,
-  wait,
-  type Act,
-  type Action,
-  type DragOptions,
-  type Flow,
-  type Instruction,
-  type PageAction,
+  compile,
+  type CompileOptions,
+  type Compiled,
+  type Diagnostic,
+  type PairBy,
+} from "./compile/index.ts";
+
+export {
+  openPage,
+  record,
+  type EaseName,
+  type OpenPageOptions,
+  type RecordOptions,
   type Snap,
+  type State,
   type Timing,
-  type Wait,
-} from "./flow.ts";
+} from "./record.ts";
 
-export { snapshots, shotsDir, type SnapshotsOptions } from "./snapshots.ts";
+export { cached } from "./cache.ts";
 
-export { Dom, type DomProps } from "./draw/dom.tsx";
+export { inlineAssets, type AssetOptions } from "./assets.ts";
 
-export type { Palette } from "./palette.ts";
+export { mergeSchemes } from "./scheme.ts";
 
-export { duration, loop, size, type Step } from "./timeline.ts";
+export type * from "./schema.ts";
 
-export { find, rect } from "./find.ts";
+export { film, settleScript, type FilmContext, type FilmOptions } from "./film.ts";
 
-export { shots, type Shot, type ShotsOptions } from "./camera.ts";
+export type { Target } from "./target.ts";
 
-export type * from "./tree.ts";
+export type { BrowserAdapter, Framework } from "./framework.ts";
+
+export { react } from "./frameworks/react.ts";
+
+export { svelte } from "./frameworks/svelte.ts";
+
+export {
+  serializeProps,
+  type Json,
+  type PropsFor,
+  type PropsOf,
+  type Wire,
+  type WireProps,
+} from "./props.ts";
+
+export type { ComponentOptions } from "./component.ts";

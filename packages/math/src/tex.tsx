@@ -1,284 +1,327 @@
 /** @jsxImportSource svjeez */
 import {
-  ease,
-  motion,
-  span as spanOf,
-  type Color,
-  type Drawn,
-  type Part,
-  type Spanned,
-  type Rect,
-  type Span,
-  type Stack,
-  type SvgNode,
-  defaultDark,
-  tint,
-  type Base16,
-  type Morphable,
-  type MorphPiece,
+  Group,
+  Shape,
+  path,
+  through,
+  within,
+  type Anim,
+  type Geometry,
+  type Paint,
+  type SceneElement,
+  type Vec,
 } from "svjeez";
-import { rect } from "svjeez/geometry";
-
-import { compile } from "./mathjax.ts";
-import { apply, multiply, round, roundMatrix, scale, translate, type Matrix } from "./matrix.ts";
-import { pathPoints } from "./path.ts";
+import { SceneError, type Common, type Hex, type Place, type TextAnchorPlace } from "svjeez/tools";
+import { typeset, type Mark, type Typeset } from "./mathjax.ts";
+import { mapRing, pointsOf, type Ring } from "./path.ts";
 
 export interface TexOptions {
-  /** Left of the formula's box. Default 0. */
-  readonly x?: number;
-  /** Top of the formula's box. Default 0. */
-  readonly y?: number;
-  /** Pixels per em. Default 32. */
-  readonly fontSize?: number;
-  /** Colors the formula with its `plain` slot. Default `defaultDark`. */
-  readonly theme?: Base16;
-  readonly color?: Color;
-  /** Display style: big operators stack their limits and fractions are full size. Default true. */
-  readonly display?: boolean;
-  /** The point of the box that `x` and `y` place, as fractions of its width and height. `[0.5, 0.5]` centers the formula on `x`, `y`. Default `[0, 0]`, the top-left. */
-  readonly anchor?: readonly [number, number];
-}
-
-export interface WriteOptions {
-  /** Each glyph's outline draws, then fills, this long. Default 0.6. */
-  readonly stroke?: number;
-}
-
-export interface Glyph extends MorphPiece {
-  readonly char: string;
-  /** Scale relative to `fontSize`: about 0.707 for a superscript. */
   readonly size: number;
-  /** Path data in glyph units, 1000 to the em. */
-  readonly d: string;
-  /** Glyph units to scene pixels, absolute. `x` and `y` are its translation. */
-  readonly matrix: Matrix;
-  readonly fill?: string;
-  /** In scene pixels. */
-  readonly bounds: Rect;
+  readonly display?: boolean;
+  readonly anchor?: TextAnchorPlace;
 }
 
-/** Some glyphs of a formula: `box` is around them, and `span` from when the first starts to show to when the last has. */
-export interface TexPart extends Part {
-  readonly glyphs: readonly Glyph[];
+export interface TexProps extends Omit<Common, "anchor">, TexOptions {
+  readonly children: string | readonly string[];
+  readonly fill: Anim<Paint>;
+  readonly colors?: Readonly<Record<string, Anim<Paint>>>;
+  /**
+   * How much is drawn, from 0 to 1: a number or a track. Each glyph strokes on, then fills, in order.
+   * With several glyphs, each takes a window of 0.6 of the draw, staggered over the rest (a 1s span matches the old `write`; longer ones stretch).
+   */
+  readonly draw?: Anim<number>;
 }
 
-/**
- * A formula as drawn, at once or written on. Its parts are what `\cssId{id}{…}` names, in reading order. Point an
- * annotation at `part(id).box` and time it from `part(id).span`.
- */
-export interface TexDrawn extends Drawn<TexPart> {
-  /** The `nth` run of consecutive glyphs spelling `text`, such as `2ab`, as a part with `text` for its id. */
-  find(text: string, nth?: number): TexPart;
-}
-
-/** A typeset formula. `node` draws it at once, so it and its parts have the span `span(0, 0)`. */
-export interface Tex extends TexDrawn, Morphable<Glyph> {
+export interface TexBox {
+  readonly x: number;
+  readonly y: number;
   readonly width: number;
   readonly height: number;
-  write(span: Span, options?: WriteOptions): TexDrawn;
 }
 
-export type { Matrix };
+export interface TexMeasure extends TexBox {
+  readonly baseline: number;
+  readonly parts: readonly string[];
+  part(id: string): TexBox;
+}
 
-const glyphBounds = (d: string, matrix: Matrix): Rect => {
-  const points = pathPoints(d).map(([x, y]) => apply(matrix, x, y));
-  const [xs, ys] = [points.map(([x]) => x), points.map(([, y]) => y)];
-  const [left, top] = [Math.min(...xs), Math.min(...ys)];
-
-  return rect(round(left), round(top), round(Math.max(...xs) - left), round(Math.max(...ys) - top));
+const PLACES: Readonly<Record<Place | "baseline-left" | "baseline" | "baseline-right", Vec>> = {
+  "top-left": [0, 0],
+  top: [0.5, 0],
+  "top-right": [1, 0],
+  left: [0, 0.5],
+  center: [0.5, 0.5],
+  right: [1, 0.5],
+  "bottom-left": [0, 1],
+  bottom: [0.5, 1],
+  "bottom-right": [1, 1],
+  "baseline-left": [0, Number.NaN],
+  baseline: [0.5, Number.NaN],
+  "baseline-right": [1, Number.NaN],
 };
 
-/**
- * Typesets TeX into glyph paths while the scene compiles. Nothing reaches the viewer's browser but `<path>`s.
- * `x` and `y` place the top-left of the formula's box; one em is `fontSize` pixels.
- */
-export function tex(source: string, options: TexOptions = {}): Tex {
-  const { fontSize = 32, theme = defaultDark, display = true, anchor = [0, 0] } = options;
+const isFraction = (anchor: TextAnchorPlace): anchor is readonly [number, number] =>
+  Array.isArray(anchor);
+
+const fractionOf = (anchor: TextAnchorPlace): Vec => {
+  if (isFraction(anchor)) {
+    if (anchor.length === 2 && anchor.every(Number.isFinite)) return anchor;
+  } else if (Object.hasOwn(PLACES, anchor)) return PLACES[anchor];
+
+  throw new SceneError(
+    `<Tex> takes an anchor that names a place, such as "center" or "baseline-left", or two fractions of its box such as [0.5, 1], got ${JSON.stringify(anchor)}.`,
+  );
+};
+
+const cache = new Map<string, Typeset>();
+
+const typesetOnce = (source: string, display: boolean): Typeset => {
+  const key = `${display ? "D" : "T"}${source}`;
+  const found = cache.get(key) ?? typeset(source, display);
+
+  cache.set(key, found);
+
+  return found;
+};
+
+const sourceOf = (children: TexProps["children"]): string => {
+  const given: readonly unknown[] = Array.isArray(children) ? children : [children];
 
   if (
-    !(fontSize > 0) ||
-    !Number.isFinite((options.x ?? 0) + (options.y ?? 0) + anchor[0] + anchor[1])
+    !given.every((part): part is string => typeof part === "string") ||
+    given.join("").trim() === ""
   )
-    throw new Error(
-      `tex() needs finite coordinates and anchor and a positive fontSize, got x ${options.x}, y ${options.y}, anchor [${anchor.join(", ")}] and fontSize ${fontSize}.`,
-    );
-  const compiled = compile(source, display);
-  const [minX, minY, boxW, boxH] = compiled.box;
-  const k = fontSize / 1000;
-  const x = (options.x ?? 0) - anchor[0] * boxW * k;
-  const y = (options.y ?? 0) - anchor[1] * boxH * k;
-  const place = multiply(translate(x, y), multiply(scale(k), translate(-minX, -minY)));
-
-  const glyphs = compiled.marks.map((mark): Glyph => {
-    const placed = multiply(place, mark.matrix);
-    const size = round(mark.size);
-
-    const matrix = roundMatrix(placed);
-
-    return {
-      text: `${mark.key}@${size}`,
-      char: mark.char,
-      size,
-      d: mark.d,
-      matrix,
-      x: matrix[4],
-      y: matrix[5],
-      fill: mark.fill,
-      id: mark.id,
-      bounds: glyphBounds(mark.d, matrix),
-    };
-  });
-
-  const ink = options.color ?? tint(theme, "plain");
-
-  const draw = (glyph: Glyph, animation?: Stack<"x" | "y" | "opacity">): SvgNode => (
-    <g animation={animation}>
-      <path
-        d={glyph.d}
-        transform={`matrix(${glyph.matrix.join(" ")})`}
-        // SAFETY: the fill is a CSS color that the author wrote in `\color{…}`, which MathJax passes through unchecked.
-        fill={(glyph.fill as Color | undefined) ?? ink}
-      />
-    </g>
-  );
-
-  const bounds = rect(x, y, round(boxW * k), round(boxH * k));
-
-  const spelled = glyphs.map((g) => g.char).join("");
-
-  const starts = [0];
-
-  for (const g of glyphs) starts.push(starts.at(-1)! + g.char.length);
-
-  const spell = (needle: string, nth: number): [number, number] => {
-    let seen = 0;
-
-    for (
-      let pos = needle ? spelled.indexOf(needle) : -1;
-      pos >= 0;
-      pos = spelled.indexOf(needle, pos + 1)
-    ) {
-      const [first, last] = [starts.indexOf(pos), starts.indexOf(pos + needle.length)];
-
-      if (first < 0 || last < 0 || ++seen !== nth) continue;
-
-      return [first, last];
-    }
-
-    throw new Error(`tex.find() found ${seen} of ${JSON.stringify(needle)}, not ${nth}.`);
-  };
-
-  const ids = [...new Set(glyphs.flatMap((g) => (g.id === undefined ? [] : [g.id])))];
-
-  /** The formula as `node` draws it, glyph `i` showing during `shows[i]`. */
-  const drawn = (node: SvgNode, shows: readonly Spanned[], whole: Spanned): TexDrawn => {
-    const partOf = (id: string, picked: readonly number[]): TexPart => {
-      const start = Math.min(...picked.map((i) => shows[i]!.at));
-
-      return {
-        id,
-        glyphs: picked.map((i) => glyphs[i]!),
-        box: picked.map((i) => glyphs[i]!.bounds).reduce((a, b) => a.union(b)),
-        span: spanOf(start, Math.max(...picked.map((i) => shows[i]!.end)) - start),
-      };
-    };
-
-    const indices = (id: string) => glyphs.flatMap((g, i) => (g.id === id ? [i] : []));
-    const parts = ids.map((id) => partOf(id, indices(id)));
-
-    return {
-      node,
-      span: whole,
-      bounds,
-      parts,
-      part: (id) => {
-        const found = parts.find((p) => p.id === id);
-
-        if (!found)
-          throw new Error(
-            `tex.part() found no part named ${JSON.stringify(id)}. Wrap it in \\cssId{${id}}{…}${
-              ids.length > 0
-                ? `; the parts are ${ids.map((i) => JSON.stringify(i)).join(", ")}`
-                : ""
-            }.`,
-          );
-
-        return found;
-      },
-      find: (needle, nth = 1) => {
-        const [first, last] = spell(needle, nth);
-
-        return partOf(
-          needle,
-          Array.from({ length: last - first }, (_, k) => first + k),
-        );
-      },
-    };
-  };
-
-  const write = ({ at, over }: Span, { stroke = 0.6 }: WriteOptions = {}): TexDrawn => {
-    if (!(over >= 0 && stroke > 0))
-      throw new Error(
-        `tex.write() needs a non-negative span and a positive stroke time, got over ${over} and stroke ${stroke}.`,
-      );
-    const step = glyphs.length > 1 ? Math.max(0, over - stroke) / (glyphs.length - 1) : 0;
-    const shows = glyphs.map((_, i) => spanOf(at + i * step, stroke));
-
-    const node = (
-      <g>
-        {glyphs.map((g, i) => {
-          const start = at + i * step;
-          // SAFETY: a glyph's fill is the color a \color{} command wrote, which MathJax passes through as a CSS color.
-          const paint = (g.fill as Color | undefined) ?? ink;
-          const transform = `matrix(${g.matrix.join(" ")})`;
-
-          return (
-            <g>
-              <path
-                d={g.d}
-                transform={transform}
-                fill="none"
-                stroke={paint}
-                strokeWidth={round(1.2 / Math.hypot(g.matrix[0], g.matrix[1]))}
-                strokeLinejoin="round"
-                animation={motion({ draw: 0, opacity: 1 })
-                  .to({ draw: 1 }, spanOf(start, stroke * 0.7), ease.inOut)
-                  .to({ opacity: 0 }, spanOf(start, stroke * 0.7).next(stroke * 0.3))}
-              />
-              <path
-                d={g.d}
-                transform={transform}
-                fill={paint}
-                animation={motion({ opacity: 0 }).to(
-                  { opacity: 1 },
-                  spanOf(start + stroke * 0.5, stroke * 0.5),
-                )}
-              />
-            </g>
-          );
-        })}
-      </g>
+    throw new SceneError(
+      "<Tex> holds no TeX source.",
+      "Write it as a string child: <Tex size={32} fill={…}>{String.raw`\\frac{a}{b}`}</Tex>.",
     );
 
-    return drawn(
-      node,
-      shows,
-      shows.length > 0 ? shows[0]!.until(shows.at(-1)!.end) : spanOf(at, over),
-    );
-  };
+  return given.join("");
+};
 
-  const still = spanOf(0, 0);
+const round = (n: number): number => Math.round(n * 100) / 100 + 0;
+
+const tenth = (n: number): number => Math.round(n * 10) / 10 + 0;
+
+interface Laid {
+  readonly marks: readonly (Mark & { readonly rings: readonly Ring[] })[];
+  readonly width: number;
+  readonly height: number;
+  readonly origin: Vec;
+  readonly baseline: number;
+}
+
+const lay = (source: string, { size, display = true, anchor = "top-left" }: TexOptions): Laid => {
+  if (!(size > 0 && Number.isFinite(size)))
+    throw new SceneError(`<Tex> needs a size above 0, the pixels in one em, got ${size}.`);
+  const { box, marks } = typesetOnce(source, display);
+  const k = size / 1000;
+  const [width, height, baseline] = [box[2] * k, box[3] * k, -box[1] * k];
+  const [u, v] = fractionOf(anchor);
+  const origin: Vec = [width * u, Number.isNaN(v) ? baseline : height * v];
+
+  const place = ([x, y]: Vec): Vec => [(x - box[0]) * k - origin[0], (y - box[1]) * k - origin[1]];
 
   return {
-    ...drawn(
-      <g>{glyphs.map((g) => draw(g))}</g>,
-      glyphs.map(() => still),
-      still,
-    ),
-    write,
-    words: glyphs,
-    width: bounds.w,
-    height: bounds.h,
-    draw,
+    marks: marks.map((mark) => ({
+      ...mark,
+      rings: mark.rings.map((ring) => mapRing(ring, place)),
+    })),
+    width,
+    height,
+    origin,
+    baseline,
   };
+};
+
+const geometryOf = (rings: readonly Ring[]): Geometry =>
+  rings.reduce((built, ring) => {
+    let next = built.moveTo(ring.start);
+
+    for (const { to, via } of ring.segments)
+      next = via ? next.curveTo(via[0], via[1], to) : next.lineTo(to);
+
+    return next.close();
+  }, path());
+
+const boxOf = (rings: readonly Ring[]): TexBox => {
+  const points = rings.flatMap(pointsOf);
+  const [xs, ys] = [points.map(([x]) => x), points.map(([, y]) => y)];
+  const [x, y] = [Math.min(...xs), Math.min(...ys)];
+
+  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+};
+
+const partList = (marks: readonly Mark[]): string[] => [
+  ...new Set(marks.flatMap((mark) => mark.parts)),
+];
+
+const measure = (source: string, options: TexOptions): TexMeasure => {
+  const laid = lay(source, options);
+  const parts = partList(laid.marks);
+
+  return {
+    x: -laid.origin[0],
+    y: -laid.origin[1],
+    width: laid.width,
+    height: laid.height,
+    baseline: laid.baseline - laid.origin[1],
+    parts,
+    part(id) {
+      const marks = laid.marks.filter((mark) => mark.parts.includes(id));
+
+      if (marks.length === 0)
+        throw new SceneError(
+          `Tex.measure() found no part "${id}" in ${JSON.stringify(source)}.`,
+          parts.length > 0
+            ? `Its parts are ${parts.map((p) => `"${p}"`).join(", ")}.`
+            : `Name one with \\cssId{${id}}{…}.`,
+        );
+
+      return boxOf(marks.flatMap((mark) => mark.rings));
+    },
+  };
+};
+
+const NAMES = new Map([
+  ["/", "slash"],
+  ["path", "symbol"],
+]);
+
+const isHex = (color: string): color is Hex => /^#(?:[0-9a-f]{6}|[0-9a-f]{8})$/i.test(color);
+
+interface Tree {
+  readonly id?: string;
+  readonly items: (Mark | Tree)[];
 }
+
+const isTree = (item: Mark | Tree): item is Tree => "items" in item;
+
+const treeOf = (marks: readonly Mark[], source: string): Tree => {
+  const root: Tree = { items: [] };
+  const seen = new Set<string>();
+  const stack: Tree[] = [root];
+
+  for (const mark of marks) {
+    let depth = 1;
+
+    while (depth < stack.length && stack[depth]!.id === mark.parts[depth - 1]) depth++;
+    stack.length = depth;
+
+    for (const id of mark.parts.slice(depth - 1)) {
+      if (seen.has(id))
+        throw new SceneError(
+          `<Tex> names two parts "${id}" in ${JSON.stringify(source)}.`,
+          "Give each \\cssId{…} its own name.",
+        );
+      seen.add(id);
+      const tree: Tree = { id, items: [] };
+
+      stack.at(-1)!.items.push(tree);
+      stack.push(tree);
+    }
+
+    stack.at(-1)!.items.push(mark);
+  }
+
+  return root;
+};
+
+export function Tex({
+  children,
+  size,
+  display,
+  anchor,
+  fill,
+  colors = {},
+  draw,
+  at,
+  ...common
+}: TexProps): SceneElement {
+  const source = sourceOf(children);
+
+  const laid = lay(source, {
+    size,
+    ...(display !== undefined && { display }),
+    ...(anchor !== undefined && { anchor }),
+  });
+
+  const total = laid.marks.length;
+
+  // Each glyph's share of the draw, and how far its start moves from the last.
+  const share = total > 1 ? 0.6 : 1;
+  const step = total > 1 ? (1 - share) / (total - 1) : 0;
+
+  const paintOf = (mark: Mark): Anim<Paint> => {
+    if (mark.color === undefined) return fill;
+
+    if (Object.hasOwn(colors, mark.color)) return colors[mark.color]!;
+
+    if (isHex(mark.color)) return mark.color;
+
+    throw new SceneError(
+      `<Tex> colors part of ${JSON.stringify(source)} with \\color{${mark.color}}, which its colors don't name.`,
+      `Give it colors={{ ${/^[a-z_$][\w$]*$/i.test(mark.color) ? mark.color : JSON.stringify(mark.color)}: theme.blue }}, or write a hex color such as \\color{#2F6FEB}.`,
+    );
+  };
+
+  let index = 0;
+  const outlines: SceneElement[] = [];
+
+  const build = (tree: Tree): SceneElement[] => {
+    const counts = new Map<string, number>();
+
+    return tree.items.map((item) => {
+      if (isTree(item)) return <Group key={item.id}>{build(item)}</Group>;
+      const name = NAMES.get(item.char) ?? (item.char.trim() || "symbol");
+      const count = (counts.get(name) ?? 0) + 1;
+
+      counts.set(name, count);
+      const key = count === 1 ? name : `${name}#${count}`;
+      const { x, y } = boxOf(item.rings);
+
+      const geometry = geometryOf(
+        item.rings.map((ring) => mapRing(ring, ([px, py]) => [tenth(px - x), tenth(py - y)])),
+      );
+
+      const at: Vec = [round(x), round(y)];
+      const paint = paintOf(item);
+      const begin = index++ * step;
+
+      if (draw !== undefined)
+        outlines.push(
+          <Shape
+            key={`${outlines.length}`}
+            geometry={geometry}
+            at={at}
+            stroke={{ color: paint, width: round(size * 0.025), join: "round" }}
+            draw={within(draw, begin, begin + share * 0.7)}
+            opacity={through(within(draw, begin + share * 0.7, begin + share), (p) => 1 - p)}
+          />,
+        );
+
+      return (
+        <Shape
+          key={key}
+          geometry={geometry}
+          at={at}
+          fill={paint}
+          {...(draw !== undefined && {
+            opacity: within(draw, begin + share * 0.5, begin + share),
+          })}
+        />
+      );
+    });
+  };
+
+  const glyphs = build(treeOf(laid.marks, source));
+
+  return (
+    <Group {...common} {...(at !== undefined && { offset: at })}>
+      {glyphs}
+      {draw !== undefined && <Group key="writing">{outlines}</Group>}
+    </Group>
+  );
+}
+
+Tex.measure = measure;

@@ -1,33 +1,24 @@
-import type { Seconds } from "./motion";
+import type { Seconds } from "./model/time";
 import { loopLength, seek } from "./page";
-import { rateOf } from "./rate";
+import { rateOf } from "./svg/rate";
 import { systemColorScheme } from "./scheme";
 
-export { validateSvg, type ValidationResult } from "./validate";
+export { costOf, type Cost } from "./svg/cost";
 
-export {
-  checkScene,
-  type CheckOptions,
-  type CheckReport,
-  type CheckRule,
-  type Finding,
-} from "./check";
+export { validateSvg, type ValidationResult } from "./svg/validate";
+
+export { checkPixels, type CheckOptions, type PixelReport } from "./check/check";
 
 export type ColorScheme = "light" | "dark";
 
-/** When to capture: exact scene times, or `count` frames spread evenly over one loop. */
 export type FrameTimes =
   | { readonly times: readonly Seconds[]; readonly count?: never }
   | { readonly count: number; readonly times?: never };
 
 export interface SceneOptions {
-  /** Device pixel ratio. Default 1. */
   readonly scale?: number;
-  /** Which side of `prefers-color-scheme` to render. Default "system", this machine's appearance setting. */
   readonly colorScheme?: ColorScheme | "system";
-  /** CSS background behind the SVG. Default `Canvas`, the scheme's page color. Pass "transparent" for alpha. */
   readonly background?: string;
-  /** A Chromium or Chrome binary to use instead of Playwright's own. */
   readonly executablePath?: string;
 }
 
@@ -36,19 +27,14 @@ export type FrameOptions = FrameTimes &
     readonly sheet?: boolean | { readonly columns?: number };
   };
 
-/** An SVG open in headless Chromium, paused, ready to capture at any scene time. Close it when done. */
 export interface Scene {
-  /** The SVG's size in CSS pixels. Captures are `scale` times larger. */
   readonly width: number;
   readonly height: number;
   readonly scale: number;
   readonly duration: Seconds;
-  /** The `playbackRate` the scene was rendered with. One loop takes `duration / playbackRate` seconds to play. */
   readonly playbackRate: number;
   readonly colorScheme: ColorScheme;
-  /** Seek every animation to scene second `time` and return a PNG of the SVG. */
   capture(time: Seconds): Promise<Uint8Array>;
-  /** Run `fn` in the page. It is serialized, so it can use only `arg` and the page's globals. */
   evaluate<A, R>(fn: (arg: A) => R | Promise<R>, arg: A): Promise<R>;
   addScript(path: string): Promise<void>;
   close(): Promise<void>;
@@ -99,7 +85,6 @@ const size = (caller: string, svg: string) => {
   return { width, height };
 };
 
-// Chromium cannot capture past 16384 device pixels on a side, so a big sheet renders at a lower scale.
 const MAX_CAPTURE = 16000;
 const GAP = 12;
 const CAPTION = 20;
@@ -199,10 +184,6 @@ const stage = async (
   };
 };
 
-/**
- * Open an SVG in headless Chromium, paused at its start, for capturing frames one at a time.
- * Needs `playwright-core` and a Chromium build. `caller` names the function errors report.
- */
 export const openScene = async (
   svg: string,
   options: SceneOptions = {},
@@ -219,7 +200,6 @@ export const openScene = async (
   }
 };
 
-/** Rasterize an SVG at chosen scene times in headless Chromium. Needs `playwright-core` and a Chromium build. */
 export const renderFrames = async (svg: string, options: FrameOptions): Promise<Frames> => {
   const settings = resolve("renderFrames()", svg, options);
 

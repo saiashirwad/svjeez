@@ -1,26 +1,30 @@
 # @svjeez/code
 
-Highlight code at build time. Tokens carry roles such as `keyword` and `string`, so svjeez colors them with the scene’s palette.
+Syntax-highlighted code blocks for `svjeez` with typing animations and morphs. Shiki tokenizes at compile time, so the output SVG has no script.
 
 ```sh
-npm i -D @svjeez/code svjeez
+npm i -D @svjeez/code@next @svjeez/fonts@next svjeez@next
 ```
 
-```ts
-import { highlight } from "@svjeez/code";
-import { tomorrow, tomorrowNight } from "@svjeez/code/palettes";
-import { adaptive, code, render } from "svjeez";
+```tsx
+import { Code } from "@svjeez/code";
+import { tomorrow } from "@svjeez/code/palettes";
+import { google } from "@svjeez/fonts";
+import { Group, Shape, scene, span } from "svjeez";
 
-const { theme, css } = adaptive({ light: tomorrow, dark: tomorrowNight });
-const tokens = highlight("export const greet = (name: string) => 'hello ' + name;", "ts");
-const snippet = code(tokens, { x: 20, y: 16, fontSize: 16, theme });
+const mono = await google("JetBrains Mono", { ligatures: false });
 
-export default () =>
-  render({ width: 680, height: 60, duration: 1, title: "Greeting", css }, snippet.node);
+export default scene({ size: [360, 80], duration: 3, title: "Greeting", loop: false }, (canvas) => (
+  <Group>
+    <Shape geometry={canvas.rect} fill={tomorrow.plain} />
+    <Code lang="ts" font={mono} size={16} palette={tomorrow} at={[20, 20]} typing={span(0.3, 1.5)}>
+      {`export const greet = (name: string) => "hello " + name;`}
+    </Code>
+  </Group>
+));
 ```
 
-Pass the tokens to `code()` or to a highlighted terminal command. Common languages are bundled. Supply additional Shiki grammars through `highlight(source, lang, { grammars })`.
+- Built-in palettes in `@svjeez/code/palettes`: `tomorrow`, `solarized`, `gruvbox`, and `rosePine` (each with light and dark modes).
+- Define custom palettes with `palette(name, { light, dark })`.
 
-<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/code"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/code.svg" width="540" alt="A function morphs between four languages." /></a>
-
-[API reference](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/code.md)
+[API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/code.md)

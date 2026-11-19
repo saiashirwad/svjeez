@@ -1,104 +1,88 @@
 # Diagrams
 
-`flowchart`, `sequence`, `stateMachine`, `tree` and `lanes` take a typed spec, so a misspelled id is a compile error: `Type '"c"' is not assignable to type '"a" | "b"'`. They are in `@svjeez/diagrams`, a separate package: `npm i -D @svjeez/diagrams`. `flow` and `travel` are in `svjeez`. Each returns `{ node, span, bounds, parts, part(id) }`, the shape every svjeez package returns, plus helpers. Put the result itself in the scene, `{chart}`. The parts are the nodes (and a flowchart's groups, a sequence's actor heads, the lanes of `lanes()`): `part("build").box` is where one sits and `part("build").span` when it appears, the instant 0 for one there from the start. Edges are parts too, by `"from->to"`: a flowchart's edges, a tree's from parent to child, and a state machine's transitions. An edge's `box` covers its line and label, and its `span` is when it draws on. Two edges between the same nodes share an id, and `part` finds the first. `part` takes only the spec's ids and edges.
-
-Options common to all: `theme`, `x`, `y`, `anchor` (`"top-left"`, `"center"` or an edge, which part of `bounds` lands on `x, y`), `fontSize`, `font` and `class`. Size the canvas from `bounds`, not a guess. `flowchart`, `tree` and `stateMachine` take `direction: "TB" | "LR"`. A node `role` picks its shape and color: `task`, `input`, `output`, `tool`, `decision`, `store`. `tints: { tool: theme.base09 }` recolors a role, so a scene can hold to two or three hues. A `stateMachine` state takes a `role` too, which tints its box and stroke.
-
-A labelled edge is `[from, to, label?]` in a flowchart and a state machine, with the label a string. A sequence message is `[from, to, label, { reply? }?]`.
-
-## Timing
-
-| Diagram | How it plays |
-| --- | --- |
-| `flowchart` | `play: { at, step? }`. Nodes appear rank by rank after the first, each edge draws as the later of its ends appears. Default step 0.4 |
-| `tree` | `play: { at, step? }`. Breadth first. Default step 0.3 |
-| `sequence` | `play: { at, step? }`. One message or note per step, default 0.8 |
-| `lanes` | `play: { at }`. Real time: a playhead sweeps, spans grow, events pop |
-| `stateMachine` | No `play`. Call `walk(ids, { at })` |
-
-`at` is a start time, or an array with one time per item, to keep two diagrams in sync. A `flowchart` and a `tree` also take a time per node id, `play: { at: { plan: 0.5, build: 1.4, ship: 3 } }`, to show nodes in an order of your own; the nodes it leaves out are there from the start, and a misspelled id is a compile error. `lanes` takes a plain start time, because its spans already play in real time. Without `play`, everything is there from the start. `span` runs from the first reveal to the end of the last, to time what comes next: `chart.span.end`, or `chart.span.next(1)`. Without `play`, and on a `stateMachine`, it is the instant 0. A node's own span places a callout right after it lands: `enter(chart.part("build").span.next(0.4))`. A lane's span runs from the first of its bars, events and links to the end of the last.
-
-## Flowchart
+`@svjeez/diagrams` (`npm i @svjeez/diagrams@next`) lays out flowcharts, trees, sequence diagrams, state machines and swimlanes from a plain description, measures every label with your font, and reveals them step by step. It draws with the same nodes a scene does, so a diagram is checked, framed and themed like the rest.
 
 ```tsx
-import { flow } from "svjeez";
+/** @jsxImportSource svjeez */
 import { flowchart } from "@svjeez/diagrams";
+import { Align, Group, Shape, circle, exit, scene, span, track } from "svjeez";
+import { sans, theme } from "./style";
 
 const chart = flowchart(
   {
-    nodes: { pr: { label: "PR opened", role: "input" }, lint: { label: "Run linters", role: "tool" }, ok: { label: "Clean?", role: "decision" }, post: "Post review" },
+    nodes: {
+      pr: { label: "PR opened", role: "input" },
+      lint: { label: "Run linters", role: "tool" },
+      ok: { label: "Clean?", role: "decision" },
+      post: { label: "Post review", role: "output" },
+    },
     groups: { agent: { label: "Review agent", nodes: ["lint", "ok"] } },
     edges: [["pr", "lint"], ["lint", "ok"], ["ok", "post", "yes"], ["ok", "lint", "no"]],
   },
-  { play: { at: 0.5 }, direction: "TB" },
-);
-const trip = flow(chart.route("pr", "post"), { at: 4, style: "trace", arrive: true });
-const picture = <>{chart.layers.under}{trip.node}{chart.layers.over}</>; // the flow runs between edges and nodes
-```
-
-`edge(from, to)` is the drawn line, `route(from, to)` the shortest path through nodes, both as points. `layers` splits the diagram so a flow runs between edges and nodes.
-
-`flow(points, { at })` runs a token along any path. `style` is `dot`, `comet`, `trace` or `packet` (a labelled chip: pass `label`). `speed` is px per second, or set `over`. `arrive` adds a ripple at the end. It returns `{ node, span }`. `period` runs a dot, comet or packet again every that many seconds, and `tail` sets how many dots trail a comet. `travel(points, { at, speed, over })` is the bare motion: draw your own token at the origin and give it `animation={travel(...)}`.
-
-## Sequence
-
-```tsx
-import { sequence } from "@svjeez/diagrams";
-
-const login = sequence(
   {
-    actors: { user: "User", api: "API", db: { label: "Postgres", role: "store" } },
-    messages: [["user", "api", "POST /login"], ["api", "db", "select"], ["db", "api", "row", { reply: true }], { note: "api", text: "hash check" }],
+    font: sans,
+    textSize: 13,
+    direction: "LR",
+    reveal: span(0.3, 0.35),
+    colors: { background: theme.background, text: theme.text, line: theme.muted, accent: theme.blue },
   },
-  { play: { at: 0.5, step: 0.8 } },
 );
-const slot = login.message(2); // { span, points }: when it plays and where it runs
+
+const trip = span(2.4, 1.6);
+
+export default scene({ size: [720, 200], duration: 5, title: "Review", theme, loop: false }, (canvas) => (
+  <Group>
+    <Shape geometry={canvas.rect} fill={theme.background} />
+    <Align>
+      <Group>
+        {chart.node}
+        <Shape
+          geometry={circle(4)}
+          anchor="center"
+          fill={theme.red}
+          at={chart.route("pr", "post").travel(trip)}
+          opacity={track(0).to(1, span(trip.start, 0.1)).to(0, span(trip.end - 0.2, 0.2))}
+        />
+      </Group>
+    </Align>
+  </Group>
+));
 ```
 
-## State machine
+## The five diagrams
 
-```tsx
-import { stateMachine } from "@svjeez/diagrams";
+| Call | Description | Returns besides the common fields |
+| --- | --- | --- |
+| `flowchart({ nodes, edges, groups? }, options)` | nodes by id, edges `[from, to, label?, { line, head }?]`, groups of node ids drawn as a dashed frame | `edge(from, to)`, `route(from, to)`: the shortest path along edges |
+| `tree({ nodes }, options)` | each node names its `parent`; exactly one has none | `route(from, to)`: up to the common ancestor and down |
+| `sequence({ actors, messages }, options)` | messages `[from, to, label, { reply, head }?]` (a reply is dashed), or `{ note, text }` | `message(i)`: its `span` and its `route` |
+| `stateMachine({ states, initial, transitions }, options)` | a state is a label or `{ label, role, final, states, initial }`; `states` nests a composite | `edge(from, to)`, `walk(path, { at, speed })` |
+| `lanes({ lanes, spans, events, links }, options)` | bars `{ lane, at, over }`, events `{ lane, at }` and links `{ from, to, at }` in lane seconds; `scale` is pixels per second | `x(t)`: the axis position of lane second `t` |
 
-const agent = stateMachine(
-  {
-    states: { idle: "Idle", working: { label: "Working", states: { plan: "Plan", act: "Act" }, initial: "plan" }, done: { label: "Done", final: true } },
-    initial: "idle",
-    transitions: [["idle", "working", "task"], ["plan", "act"], ["act", "plan"], ["working", "done", "finish"]],
-  },
-  { direction: "LR" },
-);
-const walk = agent.walk(["idle", "working", "plan", "act", "done"], { at: 1, dwell: 0.8 }); // a Drawn, plus spans
-```
+A node is a label or `{ label, role }`; `role` (`task`, `input`, `output`, `tool`, `decision`, `store`) picks its outline and color. Ids are typed: an edge, a parent, a message or a transition naming a node the spec lacks is a type error.
 
-`walk` lights each state in turn and runs a token along the transition between them. `at` is a start time or one time per state. `dwell` (default 1) is how long each state stays lit and `speed` (default 220 px/s) moves the token. `token` takes the `flow` options except `at`, `over` and `speed`. It returns a `Drawn` to put in the scene with the machine: `spans` (when each state is lit), `span`, from the first state lit to when the last goes dark, and `parts`, one per leg by `"idle->working"`, whose `span` is when the token is on it. It throws `walk() has no way from "a" to "b".` when no transition connects two states. `edge(from, to)` gives the drawn line.
+## Options
 
-## Tree
+- `font` (required) measures and draws every label; `textSize` (default 14) and `weight` for node labels, which the family must have.
+- `colors`: `{ background, text, line, accent, muted?, highlight?, roles? }`. Without it the diagram uses a light and dark palette of its own. A role takes `roles[role]`, else `accent`; a node's fill is its color washed over `background`.
+- `direction`: `"TB"` (default) or `"LR"` for flowcharts, trees and state machines.
+- `reveal`: one span plays every part a beat each, end to end, in layout order: `span(0.3, 0.35)` brings the first in over 0.3 to 0.65, the next over 0.65 to 1. A record `{ lint: span(1, 0.3) }` times the ones it names and leaves the rest there from the start. Edges draw on as their later end enters, labels after them. A sequence takes one span, or a record by row id (`message-1`, `note-2`, counted over messages and notes together). Lanes take a span only: `span(start, over)` fits the timeline into `over`, an open `span(start)` plays at its own rate.
+- `draw: { "a->b": track }` drives an edge from your own timeline, 0 to 1 (`message-N` and `link-N` in sequences and lanes). An edge a `reveal` also draws throws.
+- An edge head is fixed at the end and shows once the drawn line reaches its base, like an `<Arrow>` head ([refs-arrows.md](refs-arrows.md)); a dashed edge fades its head in with the line.
 
-```tsx
-import { tree } from "@svjeez/diagrams";
+## What a diagram gives back
 
-const team = tree({ nodes: { lead: "Lead", a: { label: "Search", parent: "lead" }, b: { label: "Build", parent: "lead" } } }, { play: { at: 0.5 } });
-const hop = team.route("a", "b"); // up through the common ancestor and down
-```
+- `node`: the drawing, its top-left at `[0, 0]` of its frame. Place it with `<Align>`, a `<Group offset>` or a container, and scale it with the group's `scale`. `size` is `[width, height]`.
+- `with(child)`: the drawing with `child` over the edges and under the nodes and labels, for a trace along a route.
+- `part(id)`: a ref to a node, a group, an actor, a lane or an edge (`"pr->lint"`), for `<Align to>`, `<Arrow from to>` and anchors. `ref` is the diagram's own ref. Inside a node, `"shape"` and `"label"` are parts too.
+- `when(id)`: the span in which that part enters, or `undefined` when it is there from the start; `span` is the whole reveal.
+- A `Route`: `points`, `length`, `geometry` (a path along the edges, to stroke and `draw`), `at(fraction)` and `travel(span)`, a track for a token's `at` that runs the route at an even speed.
+- A walk lights each state of its path in turn and runs a token between them. `at: span(start, dwell)` lights the first state for `dwell`, and each next one when the token, moving at `speed` pixels per second, reaches it; a list of spans, one per state, says when each lights. Draw it with `machine.with(walk.node)`; `walk.spans[state]` and `walk.span` say when.
 
-Exactly one node has no `parent`.
+## Loops and checks
 
-## Lanes
+A diagram that reveals itself enters; a looping scene must take it away again before the loop (`<Align motion={exit(chart.span!.next(0.5, 4))}>`), or set `loop: false`. Everything a diagram draws carries the line of the call that made it, so `check` points there.
 
-```tsx
-import { lanes } from "@svjeez/diagrams";
+## Errors
 
-const run = lanes(
-  {
-    lanes: { lead: "Lead", build: { label: "Build", role: "tool" } },
-    spans: [{ lane: "lead", at: 0, over: 1, label: "plan" }, { lane: "build", at: 1, over: 3, label: "editing" }],
-    events: [{ lane: "build", at: 2, label: "TEST" }],
-    links: [{ from: "lead", to: "build", at: 1 }],
-  },
-  { scale: 80, play: { at: 0 } }, // scale: px per second
-);
-const x = run.x(2.5); // the x of lane time 2.5
-```
-
-Lane time 0 starts at `play.at` on the scene timeline.
+Each names the diagram call: it needs a `font` to measure labels with; a `reveal` names something that is not one of its nodes; a node sits in two groups; there is no way from one node to another along its edges (`route`, `walk`); a state machine can't draw a transition between a composite and its inner state; a `part(id)` that doesn't exist (edges are `"from->to"`).

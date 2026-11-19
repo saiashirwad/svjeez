@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1132 322" width="1132" height="322" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">Timeline</title>
+  <desc id="d">A Mermaid timeline diagram drawn by @svjeez/mermaid.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--border-12-background:#17181A;--border-45-background:#3D3D41;--magenta-30-background:#413055;--magenta-10-background:#1C1724;--blue-30-background:#233755;--blue-10-background:#121924;--cyan-30-background:#244655;--cyan-10-background:#121E24}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0;--border-12-background:#F1F1F2;--border-45-background:#CCCCCE;--magenta-30-background:#E1CBF6;--magenta-10-background:#F5EEFC;--blue-30-background:#B6D3FF;--blue-10-background:#E7F0FF;--cyan-30-background:#BBE1E6;--cyan-10-background:#E8F5F7}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,3.75%{opacity:0}7.5%,100%{opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,7.5%{opacity:0}11.25%,100%{opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,11.25%{opacity:0}15%,100%{opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,15%{opacity:0}18.75%,100%{opacity:1}}
+.m4{animation-name:k4}
+@keyframes k5{0%,18.75%{opacity:0}22.5%,100%{opacity:1}}
+.m5{animation-name:k5}
+@keyframes k6{0%,22.5%{opacity:0}26.25%,100%{opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%,26.25%{opacity:0}30%,100%{opacity:1}}
+.m7{animation-name:k7}
+@keyframes k8{0%,30%{opacity:0}33.75%,100%{opacity:1}}
+.m8{animation-name:k8}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-7.5s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="1132" height="322" fill="var(--background)"/>
+  <g transform="translate(32.375 35.75)" fill="none">
+    <text x="12" y="28.32" font-size="16" fill="var(--text)">History of a web browser</text>
+    <g transform="translate(12 41)">
+      <rect width="384" height="25" rx="6" fill="var(--border-12-background)"/>
+      <text x="162.165" y="16.478" font-size="11.05" fill="var(--text)">Early web</text>
+    </g>
+    <g transform="translate(408 41)">
+      <rect width="384" height="25" rx="6" fill="var(--border-12-background)"/>
+      <text x="152.22" y="16.478" font-size="11.05" fill="var(--text)">Browser wars</text>
+    </g>
+    <g transform="translate(804 41)">
+      <rect width="252" height="25" rx="6" fill="var(--border-12-background)"/>
+      <text x="106.11" y="16.478" font-size="11.05" fill="var(--text)">Modern</text>
+    </g>
+    <path d="M6 129L1055 129" fill="none" stroke="var(--border-45-background)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <polygon points="1062 129 1054 133 1054 125" fill="var(--border-45-background)"/>
+    <g class="a m1">
+      <line x1="72" y1="107" x2="72" y2="129" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <line x1="72" y1="129" x2="72" y2="180" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <g transform="translate(12 74)">
+        <rect width="120" height="33" rx="6" fill="var(--magenta-30-background)" stroke="var(--magenta)"/>
+        <text x="44.4" y="21.26" font-size="13" fill="var(--text)">1993</text>
+      </g>
+      <circle cx="72" cy="129" r="4.5" fill="var(--magenta)" stroke="var(--background)" stroke-width="1.5"/>
+      <g transform="translate(12 147)">
+        <rect width="120" height="33" rx="6" fill="var(--magenta-10-background)" stroke="var(--border-45-background)"/>
+        <text x="36.6" y="21.26" font-size="13" fill="var(--text)">Mosaic</text>
+      </g>
+    </g>
+    <g class="a m2">
+      <line x1="204" y1="107" x2="204" y2="129" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <line x1="204" y1="129" x2="204" y2="238" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <g transform="translate(144 74)">
+        <rect width="120" height="33" rx="6" fill="var(--magenta-30-background)" stroke="var(--magenta)"/>
+        <text x="44.4" y="21.26" font-size="13" fill="var(--text)">1994</text>
+      </g>
+      <circle cx="204" cy="129" r="4.5" fill="var(--magenta)" stroke="var(--background)" stroke-width="1.5"/>
+      <g transform="translate(144 147)" font-size="13" fill="var(--text)">
+        <rect width="120" height="50" rx="6" fill="var(--magenta-10-background)" stroke="var(--border-45-background)"/>
+        <text x="28.8" y="21.26">Netscape</text>
+        <text x="24.9" y="38.26">Navigator</text>
+      </g>
+      <g transform="translate(144 205)">
+        <rect width="120" height="33" rx="6" fill="var(--magenta-10-background)" stroke="var(--border-45-background)"/>
+        <text x="13.2" y="21.26" font-size="13" fill="var(--text)">Opera begins</text>
+      </g>
+    </g>
+    <g class="a m3">
+      <line x1="336" y1="107" x2="336" y2="129" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <line x1="336" y1="129" x2="336" y2="197" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <g transform="translate(276 74)">
+        <rect width="120" height="33" rx="6" fill="var(--magenta-30-background)" stroke="var(--magenta)"/>
+        <text x="44.4" y="21.26" font-size="13" fill="var(--text)">1995</text>
+      </g>
+      <circle cx="336" cy="129" r="4.5" fill="var(--magenta)" stroke="var(--background)" stroke-width="1.5"/>
+      <g transform="translate(276 147)" font-size="13" fill="var(--text)">
+        <rect width="120" height="50" rx="6" fill="var(--magenta-10-background)" stroke="var(--border-45-background)"/>
+        <text x="28.8" y="21.26">Internet</text>
+        <text x="28.8" y="38.26">Explorer</text>
+      </g>
+    </g>
+    <g class="a m4">
+      <line x1="468" y1="107" x2="468" y2="129" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <line x1="468" y1="129" x2="468" y2="197" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <g transform="translate(408 74)">
+        <rect width="120" height="33" rx="6" fill="var(--blue-30-background)" stroke="var(--blue)"/>
+        <text x="44.4" y="21.26" font-size="13" fill="var(--text)">1998</text>
+      </g>
+      <circle cx="468" cy="129" r="4.5" fill="var(--blue)" stroke="var(--background)" stroke-width="1.5"/>
+      <g transform="translate(408 147)" font-size="13" fill="var(--text)">
+        <rect width="120" height="50" rx="6" fill="var(--blue-10-background)" stroke="var(--border-45-background)"/>
+        <text x="32.7" y="21.26">Mozilla</text>
+        <text x="32.7" y="38.26">project</text>
+      </g>
+    </g>
+    <g class="a m5">
+      <line x1="600" y1="107" x2="600" y2="129" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <line x1="600" y1="129" x2="600" y2="180" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <g transform="translate(540 74)">
+        <rect width="120" height="33" rx="6" fill="var(--blue-30-background)" stroke="var(--blue)"/>
+        <text x="44.4" y="21.26" font-size="13" fill="var(--text)">2003</text>
+      </g>
+      <circle cx="600" cy="129" r="4.5" fill="var(--blue)" stroke="var(--background)" stroke-width="1.5"/>
+      <g transform="translate(540 147)">
+        <rect width="120" height="33" rx="6" fill="var(--blue-10-background)" stroke="var(--border-45-background)"/>
+        <text x="36.6" y="21.26" font-size="13" fill="var(--text)">Safari</text>
+      </g>
+    </g>
+    <g class="a m6">
+      <line x1="732" y1="107" x2="732" y2="129" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <line x1="732" y1="129" x2="732" y2="180" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <g transform="translate(672 74)">
+        <rect width="120" height="33" rx="6" fill="var(--blue-30-background)" stroke="var(--blue)"/>
+        <text x="44.4" y="21.26" font-size="13" fill="var(--text)">2004</text>
+      </g>
+      <circle cx="732" cy="129" r="4.5" fill="var(--blue)" stroke="var(--background)" stroke-width="1.5"/>
+      <g transform="translate(672 147)">
+        <rect width="120" height="33" rx="6" fill="var(--blue-10-background)" stroke="var(--border-45-background)"/>
+        <text x="17.1" y="21.26" font-size="13" fill="var(--text)">Firefox 1.0</text>
+      </g>
+    </g>
+    <g class="a m7">
+      <line x1="864" y1="107" x2="864" y2="129" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <line x1="864" y1="129" x2="864" y2="221" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <g transform="translate(804 74)">
+        <rect width="120" height="33" rx="6" fill="var(--cyan-30-background)" stroke="var(--cyan)"/>
+        <text x="44.4" y="21.26" font-size="13" fill="var(--text)">2008</text>
+      </g>
+      <circle cx="864" cy="129" r="4.5" fill="var(--cyan)" stroke="var(--background)" stroke-width="1.5"/>
+      <g transform="translate(804 147)">
+        <rect width="120" height="33" rx="6" fill="var(--cyan-10-background)" stroke="var(--border-45-background)"/>
+        <text x="36.6" y="21.26" font-size="13" fill="var(--text)">Chrome</text>
+      </g>
+      <g transform="translate(804 188)">
+        <rect width="120" height="33" rx="6" fill="var(--cyan-10-background)" stroke="var(--border-45-background)"/>
+        <text x="24.9" y="21.26" font-size="13" fill="var(--text)">V8 engine</text>
+      </g>
+    </g>
+    <g class="a m8">
+      <line x1="996" y1="107" x2="996" y2="129" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <line x1="996" y1="129" x2="996" y2="180" stroke="var(--border-45-background)" stroke-dasharray="2 3"/>
+      <g transform="translate(936 74)">
+        <rect width="120" height="33" rx="6" fill="var(--cyan-30-background)" stroke="var(--cyan)"/>
+        <text x="44.4" y="21.26" font-size="13" fill="var(--text)">2015</text>
+      </g>
+      <circle cx="996" cy="129" r="4.5" fill="var(--cyan)" stroke="var(--background)" stroke-width="1.5"/>
+      <g transform="translate(936 147)">
+        <rect width="120" height="33" rx="6" fill="var(--cyan-10-background)" stroke="var(--border-45-background)"/>
+        <text x="44.4" y="21.26" font-size="13" fill="var(--text)">Edge</text>
+      </g>
+    </g>
+  </g>
+</svg>

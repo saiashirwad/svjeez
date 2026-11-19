@@ -1,8 +1,8 @@
 {
   "name": "@svjeez/dom",
-  "version": "0.7.1",
+  "version": "0.8.0-next.0",
   "private": true,
-  "description": "Snapshot real HTML and CSS in headless Chromium into svjeez nodes you can animate.",
+  "description": "Capture a live DOM subtree as a plain, versioned JSON Snapshot that svjeez can compile into a scene, or film a web app into one.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -10,13 +10,14 @@
     "directory": "packages/dom"
   },
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
-    "./story": "./src/story.ts",
-    "./fidelity": "./src/fidelity.tsx",
-    "./react": "./src/react.ts",
+    "./bun": "./src/bun.ts",
+    "./bun/preload": "./src/bun-preload.ts",
     "./vite": "./src/vite.ts",
-    "./svelte": "./src/svelte.ts"
+    "./react": "./src/frameworks/react.ts",
+    "./svelte": "./src/frameworks/svelte.ts"
   },
   "scripts": {
     "test": "bun test --conditions @svjeez/source",
@@ -24,41 +25,47 @@
     "build:package": "bun ../../scripts/package-plugin.ts",
     "test:package": "bun ../../scripts/package-plugin-check.ts"
   },
-  "dependencies": {
-    "woff2-encoder": "^2.0.0"
-  },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@types/bun": "latest",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "bun-plugin-svelte": "^0.0.6",
     "playwright-core": "^1.64.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "svelte": "^5.57.3",
+    "svelte": "^5.58.0",
     "svjeez": "workspace:*",
     "typescript": "latest",
     "vite": "8.3.5"
   },
   "peerDependencies": {
+    "bun-plugin-svelte": ">=0.0.6",
     "playwright-core": ">=1.49",
     "react": ">=18",
     "react-dom": ">=18",
     "svelte": ">=5",
-    "svjeez": ">=0.6.0 <1",
-    "vite": ">=8"
+    "svjeez": "workspace:^",
+    "vite": ">=6"
   },
   "peerDependenciesMeta": {
+    "bun-plugin-svelte": {
+      "optional": true
+    },
+    "playwright-core": {
+      "optional": true
+    },
     "react": {
       "optional": true
     },
     "react-dom": {
       "optional": true
     },
-    "vite": {
+    "svelte": {
       "optional": true
     },
-    "svelte": {
+    "vite": {
       "optional": true
     }
   },

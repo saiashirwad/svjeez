@@ -1,39 +1,37 @@
 # @svjeez/math
 
-Typeset TeX as SVG glyph paths and animate plots, geometric constructions and mathematical transformations.
+TeX equations, coordinate plots, geometric constructions, and plane transformations for `svjeez`. MathJax compiles formulas into glyph outlines at build time; the SVG contains only shapes.
 
 ```sh
-npm i -D @svjeez/math svjeez
+npm i -D @svjeez/math@next svjeez@next
 ```
 
 ```tsx
-import { tex } from "@svjeez/math";
-import { render, Brace, morph } from "svjeez";
+import { Axes, Tex, plane } from "@svjeez/math";
+import { Group, Shape, morph, scene, span, track } from "svjeez";
 
-const at = { x: 40, y: 80, fontSize: 40 };
-const square = tex(String.raw`(a+b)^2`, at);
-const expanded = tex(String.raw`a^2 + \cssId{mid}{2ab} + b^2`, at);
-const m = morph([square, expanded, square], { at: [1.5, 4], over: 1 });
+const graph = plane({ x: [-4, 2], y: [0, 9], size: [440, 340] });
 
-export default () =>
-  render(
-    { width: 480, height: 200, duration: 6, title: "Binomial square" },
-    <>
-      {m.node}
-      <Brace
-        target={expanded.part("mid").box}
-        side="below"
-        label="cross term"
-        show={{ at: 2.5, over: 1.5 }}
+export default scene({ size: [960, 540], duration: 6, title: "(a + b)²" }, () => (
+  <Group>
+    {morph(
+      <Tex size={60} at={[48, 280]} fill="#161A21">{"(a+b)^2"}</Tex>,
+      <Tex size={60} at={[48, 280]} fill="#161A21">{"a^2+2ab+b^2"}</Tex>,
+      span(2, 1),
+    )}
+    <Group at={[462, 84]}>
+      <Axes plane={graph} stroke={{ color: "#6E6E73" }} />
+      <Shape
+        geometry={graph.plot((a) => (a + 1) ** 2)}
+        stroke={{ color: "#0A6CFF", width: 2.5 }}
+        draw={track(0).to(1, span(0.5, 1.5))}
       />
-    </>,
-  );
+    </Group>
+  </Group>
+));
 ```
 
-Use `plane()` to share coordinates between plots, secants, tangents and area fills. `construct()` animates compass-and-straightedge steps. Field helpers draw vectors, streamlines and contours.
+- Each glyph is a keyed `<Shape>`, so `morph()` automatically moves shared symbols between formulas.
+- Tag sub-expressions with `\cssId{name}{...}` to target them via `ref.part("name")`.
 
-<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/math"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/math.svg" width="540" alt="An equation expands and its terms move into place." /></a>
-
-[Fields and contours](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/fields.md)
-
-[API reference](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/math.md)
+[API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/math.md)

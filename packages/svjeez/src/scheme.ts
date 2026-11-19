@@ -8,7 +8,6 @@ const read = (command: string, args: readonly string[]): string =>
     timeout: 2000,
   });
 
-/** This machine's light or dark appearance: macOS, Windows, or GNOME. Light when there is none to read, as in CI. */
 export const systemColorScheme = (): ColorScheme => {
   try {
     switch (process.platform) {

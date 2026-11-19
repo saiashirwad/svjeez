@@ -1,3 +1,4 @@
+import { SceneError } from "svjeez/tools";
 import {
   around,
   flip,
@@ -35,7 +36,7 @@ export function tree(input: TreeInput): TreeLayout {
   const lr = direction === "LR";
   const index = new Map(input.nodes.map((n, i) => [n.id, i]));
 
-  if (index.size !== input.nodes.length) throw new Error("tree() node ids must be unique.");
+  if (index.size !== input.nodes.length) throw new SceneError("tree() node ids must be unique.");
   const size = input.nodes.map((n) => (lr ? { w: n.h, h: n.w } : { w: n.w, h: n.h }));
   const children = input.nodes.map((): number[] => []);
   const roots: number[] = [];
@@ -44,13 +45,14 @@ export function tree(input: TreeInput): TreeLayout {
     const p = index.get(n.parent);
 
     if (p === undefined)
-      throw new Error(
+      throw new SceneError(
         `tree() node ${JSON.stringify(n.id)} has an unknown parent ${JSON.stringify(n.parent)}.`,
       );
     children[p]!.push(i);
   });
 
-  if (roots.length !== 1) throw new Error(`tree() needs exactly one root, got ${roots.length}.`);
+  if (roots.length !== 1)
+    throw new SceneError(`tree() needs exactly one root, got ${roots.length}.`);
 
   const order = [roots[0]!];
   const depth = Array.from({ length: input.nodes.length }, () => 0);
@@ -62,7 +64,7 @@ export function tree(input: TreeInput): TreeLayout {
     }
   }
 
-  if (order.length !== input.nodes.length) throw new Error("tree() parents form a cycle.");
+  if (order.length !== input.nodes.length) throw new SceneError("tree() parents form a cycle.");
 
   const offset = Array.from({ length: input.nodes.length }, () => 0);
 

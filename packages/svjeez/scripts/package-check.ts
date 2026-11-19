@@ -10,26 +10,27 @@ const ENTRIES = [
   "svjeez",
   "svjeez/jsx-runtime",
   "svjeez/jsx-dev-runtime",
+  "svjeez/tools",
   "svjeez/frames",
   "svjeez/page",
-  "svjeez/params",
-  "svjeez/geometry",
 ];
 
-const CONSUMER = `import { css, ease, enter, render } from "svjeez";
+const CONSUMER = `import { Shape, circle, ease, enter, param, scene, span } from "svjeez";
+import { svg as backend } from "svjeez/tools";
 import { renderFrames } from "svjeez/frames";
 
-// @ts-expect-error a css hole takes a property, a number or css, not a string
-css\`.dot{fill:\${"red"}}\`;
-export const svg: string = render({ width: 10, height: 10, duration: 1, title: "t" }, <circle r={2} animation={enter({ at: 0, over: 1 }, { scale: 0 }, ease.pop)} />);
+export const speed = param.number(1, { min: 0, max: 4 });
+
+// @ts-expect-error a circle's radius is a number
+circle("2");
+export const svg: string = backend.emit(scene({ size: [10, 10], duration: 1, title: "t" }, () => <Shape geometry={circle(2)} fill="#000000" motion={enter(span(0, 1), { from: { scale: 0 }, curve: ease.pop })} />));
 export { renderFrames };
 `;
 
-// TypeScript 5.4 is the oldest supported compiler, and the newest that still has node10.
 const COMPILERS = [
   { name: "TypeScript 5.4", tsc: ["npx", "--yes", "--package", "typescript@5.4", "tsc"] },
   { name: "TypeScript latest", tsc: [join(BIN, "tsc")] },
-];
+] satisfies readonly { name: string; tsc: readonly [command: string, ...args: string[]] }[];
 
 const RESOLUTIONS = [
   { moduleResolution: "node10", module: "commonjs", type: "commonjs" },
@@ -91,7 +92,7 @@ try {
     name,
     tsc: [command, ...args],
   } of COMPILERS) {
-    const version = run(command!, [...args, "--version"]).trim();
+    const version = run(command, [...args, "--version"]).trim();
 
     for (const { moduleResolution, module, type } of RESOLUTIONS) {
       if (moduleResolution === "node10" && !version.startsWith("Version 5.")) continue;
@@ -115,7 +116,7 @@ try {
           join(consumer, "tsconfig.json"),
           JSON.stringify({ compilerOptions, files: ["index.tsx"] }),
         );
-        run(command!, [...args, "-p", consumer]);
+        run(command, [...args, "-p", consumer]);
       });
     }
   }
@@ -125,8 +126,13 @@ try {
     mkdirSync(quickstart);
     const readme = readFileSync(join(consumer, "node_modules/svjeez/README.md"), "utf8");
 
-    const block = (lang: string) => {
-      const example = readme.split("```" + lang + "\n")[1]?.split("\n```")[0];
+    // The first block in that language that holds `marker`, so snippets earlier in the README don't count.
+    const block = (lang: string, marker: string) => {
+      const example = readme
+        .split("```" + lang + "\n")
+        .slice(1)
+        .map((rest) => rest.split("\n```")[0])
+        .find((code) => code?.includes(marker));
 
       if (!example) throw new Error(`Missing the README ${lang} quickstart block.`);
 
@@ -137,8 +143,13 @@ try {
     run("npm", ["pkg", "set", "type=module"], quickstart);
     run("npm", ["install", "--no-audit", "--no-fund", tarball], quickstart);
     run("npm", ["install", "--no-audit", "--no-fund", "-D", "tsx", "typescript"], quickstart);
-    writeFileSync(join(quickstart, "tsconfig.json"), block("json"));
-    writeFileSync(join(quickstart, "scene.tsx"), block("tsx"));
+    writeFileSync(join(quickstart, "tsconfig.json"), block("json", "jsxImportSource"));
+    const scene = block("tsx", "export default scene(");
+    const title = /title: "([^"]+)"/.exec(scene)?.[1];
+
+    if (!title) throw new Error("The README tsx quickstart sets no scene title to check for.");
+
+    writeFileSync(join(quickstart, "scene.tsx"), scene);
     run(join(quickstart, "node_modules/.bin/tsc"), ["--noEmit"], quickstart);
     run(
       process.execPath,
@@ -146,7 +157,7 @@ try {
       quickstart,
     );
 
-    if (!readFileSync(join(quickstart, "hello.svg"), "utf8").includes(">Hello</title>"))
+    if (!readFileSync(join(quickstart, "hello.svg"), "utf8").includes(`>${title}</title>`))
       throw new Error("The README scene did not render the expected SVG.");
   });
 

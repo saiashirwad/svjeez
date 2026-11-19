@@ -1,28 +1,42 @@
 import assert from "node:assert/strict";
 import { flowchart, lanes, sequence, stateMachine, tree } from "@svjeez/diagrams";
-import { render } from "svjeez";
+import { Group, font, scene, span } from "svjeez";
+import { jsx } from "svjeez/jsx-runtime";
+import { SceneError, svg } from "svjeez/tools";
+
+const sans = await font.load(
+  new URL("./node_modules/svjeez/skills/svjeez/examples/fonts/Geist-400.ttf", import.meta.url),
+);
+
+const o = { font: sans };
 
 const chart = flowchart(
   { nodes: { a: "A", b: "B" }, edges: [["a", "b", "go"]] },
-  { play: { at: 0.5 } },
+  { ...o, reveal: span(0.5, 0.4) },
 );
 
-const svg = render({ width: 400, height: 300, duration: 4, title: "Diagrams" }, [chart.node]);
+const out = svg.emit(
+  scene({ size: [400, 300], duration: 4, title: "Diagrams" }, () =>
+    jsx(Group, { children: chart.node }),
+  ),
+);
 
-assert.match(svg, /^<svg[\s\S]*@keyframes/);
+assert.match(out, /^<svg[\s\S]*@keyframes/);
 
-assert.match(svg, />go</);
+assert.throws(
+  () => flowchart({ nodes: { a: "A" }, edges: [["a", "c"]] }, o),
+  (error) => error instanceof SceneError && /"c"/.test(error.message),
+);
 
-assert.throws(() => flowchart({ nodes: { a: "A" }, edges: [["a", "c"]] }), /c/);
+assert.ok(sequence({ actors: { u: "U", a: "A" }, messages: [["u", "a", "hi"]] }, o).size[0] > 0);
 
-assert.ok(sequence({ actors: { u: "U", a: "A" }, messages: [["u", "a", "hi"]] }).bounds.w > 0);
+assert.ok(stateMachine({ states: { a: "A" }, initial: "a", transitions: [] }, o).size[0] > 0);
 
-assert.ok(stateMachine({ states: { a: "A" }, initial: "a", transitions: [] }).bounds.w > 0);
-
-assert.ok(tree({ nodes: { root: "Root" } }).bounds.w > 0);
+assert.ok(tree({ nodes: { root: "Root" } }, o).size[0] > 0);
 
 assert.ok(
-  lanes({ lanes: { a: "A" }, spans: [{ lane: "a", at: 0, over: 1 }] }, { scale: 10 }).bounds.w > 0,
+  lanes({ lanes: { a: "A" }, spans: [{ lane: "a", at: 0, over: 1 }] }, { ...o, scale: 10 })
+    .size[0] > 0,
 );
 
-console.log(`rendered a flowchart into ${(svg.length / 1024).toFixed(1)} KB`);
+console.log(`rendered a flowchart into ${(out.length / 1024).toFixed(1)} KB`);

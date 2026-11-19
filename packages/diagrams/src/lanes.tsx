@@ -1,65 +1,52 @@
 /** @jsxImportSource svjeez */
 import {
-  textWidth,
+  Group,
+  Shape,
+  Text,
+  circle,
   ease,
-  motion,
-  type Seconds,
-  type Span,
-  type Spanned,
   enter,
-  travel,
-  span as spanOf,
+  line,
+  polygon,
+  rect,
+  span,
+  track,
+  type SceneElement,
+  type Span,
 } from "svjeez";
+import { SceneError, type Child, type When } from "svjeez/tools";
 import { lanes as layout } from "./layout/lanes.ts";
 import {
-  arrow,
-  chip,
+  Route,
+  checkIds,
+  Chip,
+  Edge,
+  checkDraws,
+  drawnBy,
+  extent,
+  known,
   labelOf,
   labelSize,
-  INSTANT,
   look,
+  mix,
   partsOf,
-  placer,
-  spanOfReveals,
-  tintOf,
-  type DiagramOptions,
-  type Labelled,
-  type NodeRole,
+  pop,
   type Diagram,
+  type DiagramOptions,
 } from "./kit.tsx";
-
-/** A bar on a lane for the span `{ at, over }`, in lane time. */
-export interface LaneBar<L extends string> extends Span {
-  readonly lane: L;
-  readonly label?: string;
-  readonly role?: NodeRole;
-}
-
-export interface LaneEvent<L extends string> {
-  readonly lane: L;
-  readonly at: Seconds;
-  readonly label?: string;
-  readonly role?: NodeRole;
-}
-
-export interface LaneLink<L extends string> {
-  readonly from: L;
-  readonly to: L;
-  readonly at: Seconds;
-}
+import type { LaneBar, LaneEvent, LaneLink, Labelled } from "./types.ts";
 
 export interface LanesOptions extends DiagramOptions {
-  /** Pixels per second. */
   readonly scale: number;
-  /** Play in real time from `at`, lane time 0 then: a playhead sweeps, spans grow as it passes, events pop, links fire. */
-  readonly play?: { readonly at: Seconds };
+  /** `span(start, over)` fits the lanes' timeline into `over`; an open `span(start)` plays it at its own rate. */
+  readonly reveal?: When;
 }
 
-/** Its parts are the lanes. With `play`, a lane's span runs from the first of its bars, events and links to the end of the last. */
 export interface Lanes<L extends string> extends Diagram<L> {
-  x(t: Seconds): number;
+  x(t: number): number;
 }
 
+const WHAT = "lanes()";
 const BAR = 18;
 
 export function lanes<const L extends Record<string, Labelled>>(
@@ -71,201 +58,275 @@ export function lanes<const L extends Record<string, Labelled>>(
   },
   options: LanesOptions,
 ): Lanes<keyof L & string> {
-  const { scale, play } = options;
-  const l = look(options);
-  const { theme, fontSize, font, small } = l;
-  const when = (t: Seconds) => (play?.at ?? 0) + t;
+  type Id = keyof L & string;
 
-  const rows = Object.entries(spec.lanes).map(([id, s]) => ({
-    id,
-    ...labelOf(s),
-  }));
+  const l = look(options, WHAT);
+  const { scale, reveal } = options;
 
-  const [spans, events, links] = [spec.spans ?? [], spec.events ?? [], spec.links ?? []];
+  if (!(scale > 0 && Number.isFinite(scale)))
+    throw new SceneError(`${WHAT} needs a scale above 0, in pixels per second, got ${scale}.`);
+  const rows = Object.entries<Labelled>(spec.lanes).map(([id, s]) => ({ id, ...labelOf(s) }));
+  const ids = rows.map((r) => r.id);
+  checkIds(ids, WHAT, "lane");
+  const [bars, events, links] = [spec.spans ?? [], spec.events ?? [], spec.links ?? []];
+  bars.forEach((s, i) => {
+    known(s.lane, ids, WHAT, "lane", `span ${i + 1}`);
 
-  for (const link of links)
-    if (link.from === link.to)
-      throw new Error(
-        `lanes() needs a link between two different lanes, got ${JSON.stringify(link.from)} on both ends.`,
+    if (!(s.at >= 0 && s.over > 0 && Number.isFinite(s.at + s.over)))
+      throw new SceneError(
+        `${WHAT} span ${i + 1} needs an at of 0 or later and an over above 0, got at ${s.at} and over ${s.over}.`,
       );
+  });
+  events.forEach((e, i) => {
+    known(e.lane, ids, WHAT, "lane", `event ${i + 1}`);
+
+    if (!(e.at >= 0 && Number.isFinite(e.at)))
+      throw new SceneError(`${WHAT} event ${i + 1} needs an at of 0 or later, got ${e.at}.`);
+  });
+  links.forEach((k, i) => {
+    known(k.from, ids, WHAT, "lane", `link ${i + 1}`);
+    known(k.to, ids, WHAT, "lane", `link ${i + 1}`);
+
+    if (k.from === k.to)
+      throw new SceneError(
+        `${WHAT} link ${i + 1} runs from "${k.from}" to itself.`,
+        "Link two different lanes.",
+      );
+
+    if (!(k.at >= 0 && Number.isFinite(k.at)))
+      throw new SceneError(`${WHAT} link ${i + 1} needs an at of 0 or later, got ${k.at}.`);
+  });
 
   const out = layout({
     lanes: rows.map((r) => ({
       id: r.id,
-      label: { w: textWidth(r.label, fontSize, font) + 16, h: fontSize },
+      label: { w: l.measure(r.label, l.size, l.weight) + 16, h: l.size },
     })),
-    spans: spans.map((s) => ({ lane: s.lane, from: s.at, to: s.at + s.over })),
+    spans: bars.map((s) => ({ lane: s.lane, from: s.at, to: s.at + s.over })),
     events: events.map((e) => ({
       ...e,
-      label: e.label === undefined ? undefined : labelSize(e.label, small, font),
+      label: e.label === undefined ? undefined : labelSize(l, e.label),
     })),
     links,
     scale,
     bar: BAR,
   });
 
-  const at = placer(out.bounds, options);
-  const boxes = new Map([...out.rows].map(([id, b]) => [id, at.box(b)]));
-  const track = at.box(out.track);
-  const x = (t: Seconds) => at.point({ x: out.x(t), y: 0 }).x;
+  const [dx, dy] = [-out.bounds.x, -out.bounds.y];
+
+  if (
+    reveal !== undefined &&
+    !(
+      reveal.start >= 0 &&
+      Number.isFinite(reveal.start) &&
+      (reveal.over === undefined || reveal.over > 0)
+    )
+  )
+    throw new SceneError(
+      `${WHAT} reveal needs a start of 0 or later and an over above 0, got span(${reveal.start}, ${reveal.over}).`,
+    );
+  const rate = reveal?.over === undefined ? 1 : reveal.over / out.end;
+  const when = (t: number): number => (reveal?.start ?? 0) + t * rate;
+  const at = (t: number, over: number): Span => span(when(t), over * rate);
   const role = (lane: string) => rows.find((r) => r.id === lane)!.role;
+  checkDraws(
+    options.draw,
+    links.map((_, i) => `link-${i + 1}`),
+    WHAT,
+  );
 
-  const node = l.root([
-    rows.map((r, i) => {
-      const b = boxes.get(r.id)!;
-      const label = at.point(out.labels.get(r.id)!);
+  const area = { x: out.track.x + dx, y: out.track.y + dy, w: out.track.w, h: out.track.h };
+  const stripe = mix(l.colors.line, l.colors.background, 0.08);
 
-      return (
-        <g>
-          {i % 2 === 0 && (
-            <rect x={b.x} y={b.y} width={b.w} height={b.h} fill={theme.base01} fillOpacity={0.5} />
-          )}
-          <circle cx={label.x + 5} cy={label.y} r={4} fill={tintOf(theme, r.role, l.tints)} />
-          <text
-            x={label.x + 16}
-            y={label.y + fontSize * 0.35}
-            fontSize={fontSize}
-            fill={theme.base05}
-          >
-            {r.label}
-          </text>
-          <path
-            d={`M${track.x} ${b.center.y}H${track.x + track.w}`}
-            stroke={theme.base02}
-            strokeDasharray="2 4"
-          />
-        </g>
-      );
-    }),
-    out.ticks.map(({ t, x: tx }) => {
-      const p = at.point({ x: tx, y: out.track.y + out.track.h });
+  const busy = (lane: string): Span | undefined =>
+    reveal &&
+    extent([
+      ...bars.filter((s) => s.lane === lane).map((s) => at(s.at, s.over)),
+      ...events.filter((e) => e.lane === lane).map((e) => at(e.at, 0.3)),
+      ...links.filter((k) => k.from === lane || k.to === lane).map((k) => at(k.at, 0.3)),
+    ]);
 
-      return (
-        <g>
-          <path d={`M${p.x} ${track.y}V${p.y + 4}`} stroke={theme.base02} strokeOpacity={0.6} />
-          <text
-            x={p.x}
-            y={p.y + 16}
-            fontSize={small}
-            textAnchor="middle"
-            fill={theme.base04}
-          >{`${+t.toFixed(1)}s`}</text>
-        </g>
-      );
-    }),
-    spans.map((s, i) => {
-      const b = at.box(out.spans[i]!);
-      const tint = tintOf(theme, s.role ?? role(s.lane), l.tints);
+  const parts = new Map<string, Span | undefined>(ids.map((id) => [id, busy(id)]));
+  const handle = partsOf<Id>(WHAT, parts);
 
-      return (
-        <g>
-          <rect
-            x={b.x}
-            y={b.y}
-            width={b.w}
-            height={b.h}
-            rx={4}
-            fill={tint}
-            fillOpacity={0.25}
-            stroke={tint}
-            animation={
-              play
-                ? motion({ width: 0 }).to(
-                    { width: b.w },
-                    { at: when(s.at), over: s.over },
-                    ease.linear,
-                  )
-                : undefined
-            }
-          />
-          {s.label !== undefined && (
-            <text
-              x={b.x + 8}
-              y={b.y + b.h + small + 3}
-              fontSize={small}
-              fill={theme.base04}
-              animation={play ? enter({ at: when(s.at), over: 0.2 }) : undefined}
-            >
-              {s.label}
-            </text>
-          )}
-        </g>
-      );
-    }),
-    links.map((link, i) => {
-      const [a, b] = out.links[i]!;
-      const [p, q] = [at.point(a), at.point(b)];
+  const draw = (between?: Child): SceneElement => (
+    <Group ref={handle.ref}>
+      {rows.map((r, i) => {
+        const b = out.rows.get(r.id)!;
+        const label = out.labels.get(r.id)!;
+        const mid = b.y + dy + b.h / 2;
 
-      return (
-        <g>
-          {arrow([p, q], { ...l, at: play ? when(link.at) : undefined, over: 0.3 })}
-          {play && (
-            <circle
-              r={4}
-              fill={theme.base09}
-              animation={travel([p, q], { at: when(link.at), over: 0.3 })}
-            />
-          )}
-        </g>
-      );
-    }),
-    events.map((e, i) => {
-      const { at: point, label } = out.events[i]!;
-      const p = at.point(point);
-      const tint = tintOf(theme, e.role ?? role(e.lane), l.tints);
-      const size = BAR / 2 + 1;
-
-      return (
-        <g>
-          <path
-            d={`M${p.x} ${p.y - size}L${p.x + size} ${p.y}L${p.x} ${p.y + size}L${p.x - size} ${p.y}Z`}
-            fill={tint}
-            stroke={theme.base00}
-            animation={
-              play
-                ? enter({ at: when(e.at), over: 0.3 }, { opacity: 0, scale: 0.3 }, ease.pop)
-                : undefined
-            }
-          />
-          {label &&
-            chip(
-              at.box(label),
-              e.label!,
-              { ...l.smallLook, fill: theme.base05, ground: "none" },
-              play ? enter({ at: when(e.at), over: 0.25 }) : undefined,
+        return (
+          <Group key={r.id}>
+            {i % 2 === 0 && (
+              <Shape
+                key="stripe"
+                geometry={rect(b.w, b.h)}
+                at={[b.x + dx, b.y + dy]}
+                fill={stripe}
+              />
             )}
-        </g>
-      );
-    }),
-    play && (
-      <path
-        d={`M${track.x} ${track.y}V${track.y + track.h}`}
-        stroke={theme.base09}
-        strokeWidth={1.5}
-        animation={motion({ x: 0 }).to({ x: track.w }, { at: when(0), over: out.end }, ease.linear)}
-      />
-    ),
-  ]);
+            <Shape
+              key="dot"
+              geometry={circle(4)}
+              anchor="center"
+              at={[label.x + dx + 5, label.y + dy]}
+              fill={l.tint(r.role)}
+            />
+            <Text
+              key="label"
+              font={l.font}
+              size={l.size}
+              weight={l.weight}
+              fill={l.colors.text}
+              anchor="left"
+              at={[label.x + dx + 16, label.y + dy]}
+            >
+              {r.label}
+            </Text>
+            <Shape
+              key="track"
+              geometry={line([area.x, mid], [area.x + area.w, mid])}
+              stroke={{ color: l.colors.line, width: 1, dash: [2, 4] }}
+            />
+          </Group>
+        );
+      })}
+      {out.ticks.map(({ t, x }, i) => (
+        <Group key={`tick-${i}`}>
+          <Shape
+            geometry={line([x + dx, area.y], [x + dx, area.y + area.h + 4])}
+            stroke={{ color: l.colors.line, width: 1 }}
+            opacity={0.4}
+          />
+          <Text
+            font={l.font}
+            size={l.small}
+            fill={l.colors.muted}
+            anchor="top"
+            at={[x + dx, area.y + area.h + 6]}
+          >{`${+t.toFixed(1)}s`}</Text>
+        </Group>
+      ))}
+      {bars.map((s, i) => {
+        const b = out.spans[i]!;
+        const tint = l.tint(s.role ?? role(s.lane));
 
-  const span = spanOfReveals(play ? [{ at: when(0), over: out.end }] : []);
+        return (
+          <Group key={`span-${i + 1}`} offset={[b.x + dx, b.y + dy]}>
+            <Shape
+              key="bar"
+              geometry={
+                reveal
+                  ? track(rect(0, b.h, { radius: 4 })).to(
+                      rect(b.w, b.h, { radius: 4 }),
+                      at(s.at, s.over),
+                      ease.linear,
+                    )
+                  : rect(b.w, b.h, { radius: 4 })
+              }
+              fill={mix(tint, l.colors.background, 0.25)}
+              stroke={{ color: tint, width: 1 }}
+            />
+            {s.label !== undefined && (
+              <Text
+                key="label"
+                font={l.font}
+                size={l.small}
+                fill={l.colors.muted}
+                at={[8, b.h + 3]}
+                motion={reveal && enter(at(s.at, 0.2))}
+              >
+                {s.label}
+              </Text>
+            )}
+          </Group>
+        );
+      })}
+      {links.map((k, i) => {
+        const [a, b] = out.links[i]!;
 
-  const busy = (lane: string): Spanned => {
-    const times: Span[] = [
-      ...spans.filter((s) => s.lane === lane).map((s) => ({ at: when(s.at), over: s.over })),
-      ...events.filter((e) => e.lane === lane).map((e) => ({ at: when(e.at), over: 0.3 })),
-      ...links
-        .filter((k) => k.from === lane || k.to === lane)
-        .map((k) => ({ at: when(k.at), over: 0.3 })),
-    ];
+        const points = [
+          { x: a.x + dx, y: a.y + dy },
+          { x: b.x + dx, y: b.y + dy },
+        ];
 
-    return times.length > 0 ? spanOfReveals(times) : spanOf(when(0), 0);
-  };
+        const fire = at(k.at, 0.3);
+
+        return (
+          <Group key={`link-${i + 1}`}>
+            <Edge
+              key="arrow"
+              look={l}
+              points={points}
+              draw={drawnBy(options.draw, `link-${i + 1}`, reveal && fire, WHAT)}
+            />
+            {reveal && (
+              <Shape
+                key="pulse"
+                geometry={circle(4)}
+                anchor="center"
+                fill={l.colors.highlight}
+                at={new Route([points]).travel(fire)}
+                opacity={track(0)
+                  .set(1, fire)
+                  .set(0, span(fire.start + fire.over))}
+              />
+            )}
+          </Group>
+        );
+      })}
+      {between}
+      {events.map((e, i) => {
+        const { at: p, label } = out.events[i]!;
+        const tint = l.tint(e.role ?? role(e.lane));
+        const r = BAR / 2 + 1;
+
+        return (
+          <Group key={`event-${i + 1}`}>
+            <Shape
+              key="mark"
+              geometry={polygon([0, -r], [r, 0], [0, r], [-r, 0])}
+              anchor="center"
+              at={[p.x + dx, p.y + dy]}
+              fill={tint}
+              stroke={{ color: l.colors.background, width: 1 }}
+              motion={
+                reveal &&
+                enter(at(e.at, 0.3), { from: { opacity: 0, scale: 0.3 }, curve: ease.pop })
+              }
+            />
+            {label && (
+              <Chip
+                key="label"
+                look={l}
+                box={{ x: label.x + dx, y: label.y + dy, w: label.w, h: label.h }}
+                text={e.label!}
+                fill={l.colors.text}
+                ground="none"
+                motion={reveal && pop(at(e.at, 0.25))}
+              />
+            )}
+          </Group>
+        );
+      })}
+      {reveal && (
+        <Shape
+          key="playhead"
+          geometry={line([0, 0], [0, area.h])}
+          stroke={{ color: l.colors.highlight, width: 1.5 }}
+          at={track([area.x, area.y]).to([area.x + area.w, area.y], at(0, out.end), ease.linear)}
+        />
+      )}
+    </Group>
+  );
 
   return {
-    node,
-    span,
-    bounds: at.bounds,
-    ...partsOf<keyof L & string>("lanes()", boxes, (lane) => (play ? busy(lane) : INSTANT)),
-    x,
+    node: draw(),
+    with: draw,
+    size: [Math.ceil(out.bounds.w), Math.ceil(out.bounds.h)],
+    span: reveal && at(0, out.end),
+    ...handle,
+    x: (t) => out.x(t) + dx,
   };
 }

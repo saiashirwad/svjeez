@@ -1,34 +1,10 @@
-import type { Seconds } from "./motion";
+import { seek as seekBrowser } from "./browser-seek";
+import type { Seconds } from "./model/time";
 
 export { restyle, type RestyleOptions } from "./restyle";
 
-/**
- * Runs in the page: pause every CSS and SMIL animation in `root`, the whole document by default, at `time` scene
- * seconds, the clock the scene's motions are written on. A scene rendered with a `playbackRate` is sought at
- * `time / playbackRate` seconds of playback. Pass an inline `<svg>` to scrub that picture alone.
- */
-export const seek = (time: Seconds, root: Document | Element = document): void => {
-  const rateAt = (element: Element | null | undefined): number =>
-    parseFloat(element?.closest("svg")?.getAttribute("data-playback-rate") ?? "") || 1;
+export const seek: (time: Seconds, root?: Document | Element) => void = seekBrowser;
 
-  const animations =
-    root instanceof Element ? root.getAnimations({ subtree: true }) : root.getAnimations();
-
-  for (const animation of animations) {
-    const target = animation.effect instanceof KeyframeEffect ? animation.effect.target : null;
-    animation.pause();
-    animation.currentTime = (time / rateAt(target)) * 1000;
-  }
-
-  const svgs = [...root.querySelectorAll("svg"), ...(root instanceof SVGSVGElement ? [root] : [])];
-
-  for (const svg of svgs) {
-    svg.pauseAnimations();
-    svg.setCurrentTime(time / rateAt(svg));
-  }
-};
-
-/** Runs in the page: one loop of the scene in `root`, the whole document by default, the least common multiple of every CSS and SMIL period, in scene seconds. */
 export const loopLength = (root: Document | Element = document): Seconds => {
   const svg =
     root instanceof Element

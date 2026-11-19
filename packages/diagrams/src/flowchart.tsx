@@ -1,98 +1,68 @@
 /** @jsxImportSource svjeez */
-import {
-  textWidth,
-  type Point,
-  type Rect,
-  type Direction,
-  motion,
-  type Seconds,
-  type Span,
-  enter,
-  type SvgNode,
-  span as spanOf,
-} from "svjeez";
+import { Group, Shape, Text, rect, span, type SceneElement, type Span } from "svjeez";
+import { SceneError, type Child, type StrokeProps } from "svjeez/tools";
 import { layered } from "./layout/layered.ts";
-import { curve } from "./curve.ts";
+import { DIRECTIONS, isVertical, type Box, type Point } from "./layout/box.ts";
 import {
-  arrow,
-  chip,
-  drawNode,
+  Route,
+  checkIds,
+  Chip,
+  Edge,
+  Node,
+  checkDraws,
+  drawnBy,
+  edgeKey,
+  extent,
+  formOf,
+  keyed,
+  known,
   labelOf,
   labelSize,
-  edgeId,
-  INSTANT,
-  lineBox,
   look,
   onOutline,
   partsOf,
-  placer,
-  POP,
-  popIn,
+  pop,
   schedule,
   sizeOf,
-  spanOfReveals,
   type Diagram,
   type DiagramOptions,
   type EdgeId,
-  type Labelled,
-  type NodeRole,
-  type PlayAt,
+  type Reveal,
 } from "./kit.tsx";
-
-export type FlowchartEdge<N extends string> =
-  | readonly [from: N, to: N]
-  | readonly [from: N, to: N, label: string]
-  | readonly [from: N, to: N, label: string | undefined, options: FlowchartEdgeOptions];
-
-export interface FlowchartEdgeOptions {
-  readonly line?: "solid" | "dotted" | "thick";
-  readonly head?: "filled" | "none";
-}
-
-export interface FlowchartGroup<N extends string> {
-  readonly label: string;
-  readonly nodes: readonly N[];
-}
+import type {
+  Direction,
+  FlowchartEdge,
+  FlowchartEdgeOptions,
+  FlowchartGroup,
+  Labelled,
+} from "./types.ts";
 
 export interface FlowchartOptions<N extends string = string> extends DiagramOptions {
-  /** Default `"TB"`. */
   readonly direction?: Direction;
-  /**
-   * Nodes appear in rank order, edges as the later of their ends does, groups with their first member. From a start
-   * `at` they follow `step` apart (default 0.4), or each at its own time. A record such as `{ build: 1, test: 2.5 }`
-   * times nodes by id; omitted ones are there from the start.
-   */
-  readonly play?: { readonly at: PlayAt<N>; readonly step?: Seconds };
+  readonly reveal?: Reveal<N>;
 }
 
-/**
- * Parts are the nodes, groups, then edges by id such as `"pr->post"`. An edge's span is when it draws on, label
- * included. Edges between the same nodes share an id; `part()` finds the first.
- */
 export interface Flowchart<
   N extends string,
   G extends string,
   E extends string = `${N}->${N}`,
 > extends Diagram<N | G | E> {
-  edge(from: N, to: N): Point[];
-  /** The shortest directed path through edges, as one polyline through each node on the way. */
-  route(from: N, to: N): Point[];
-  /** `node` in two layers, groups and edges `under` the nodes and labels `over` them, so a flow can run between. */
-  readonly layers: { readonly under: SvgNode; readonly over: SvgNode };
+  edge(from: N, to: N): Route;
+  route(from: N, to: N): Route;
 }
 
-interface Laid<N extends string> {
-  readonly boxes: ReadonlyMap<string, Rect>;
-  readonly lines: readonly {
-    readonly from: N;
-    readonly to: N;
-    readonly points: Point[];
-    readonly label?: Rect;
-  }[];
-  readonly groups: ReadonlyMap<string, Rect>;
-  readonly rank: ReadonlyMap<string, number>;
-  readonly bounds: Rect;
-}
+const WHAT = "flowchart()";
+
+const strokeOf = (style: FlowchartEdgeOptions | undefined): Partial<StrokeProps> => {
+  const stroke: { -readonly [K in keyof StrokeProps]?: StrokeProps[K] } = {};
+  const width = style?.width ?? (style?.line === "thick" ? 3 : undefined);
+
+  if (style?.line === "dotted") stroke.dash = [2, 4];
+
+  if (width !== undefined) stroke.width = width;
+
+  return stroke;
+};
 
 export function flowchart<
   const N extends Record<string, Labelled>,
@@ -104,248 +74,261 @@ export function flowchart<
     readonly groups?: G;
     readonly edges: E;
   },
-  options: FlowchartOptions<NoInfer<keyof N & string>> = {},
+  options: FlowchartOptions<NoInfer<keyof N & string>>,
 ): Flowchart<keyof N & string, keyof G & string, EdgeId<E[number]>> {
   type Id = keyof N & string;
 
-  const { direction, play } = options;
-  const l = look(options);
-  const { theme, fontSize, font, smallLook: small } = l;
+  const l = look(options, WHAT);
+  const { direction = "TB" } = options;
 
-  if (Object.keys(spec.nodes).length === 0)
-    throw new Error("flowchart() needs at least one node, got none.");
+  if (!DIRECTIONS.includes(direction))
+    throw new SceneError(
+      `${WHAT} takes direction "TB", "LR", "BT" or "RL", got "${String(direction)}".`,
+    );
+  const nodes = Object.entries<Labelled>(spec.nodes).map(([id, s]) => ({ id, ...labelOf(s) }));
+  const ids = nodes.map((n) => n.id);
+  checkIds(ids, WHAT, "node");
+  const forms = new Map(nodes.map((n) => [n.id, formOf(n.role, n.shape)]));
 
-  const nodes = Object.entries(spec.nodes).map(([id, s]) => ({
-    id,
-    ...labelOf(s),
+  const edges = spec.edges.map(([from, to, label, style]: FlowchartEdge<string>, i) => ({
+    from: known(from, ids, WHAT, "node", `edge ${i + 1}`),
+    to: known(to, ids, WHAT, "node", `edge ${i + 1}`),
+    label,
+    style,
   }));
 
-  const roles = new Map(nodes.map((n) => [n.id, n.role]));
-  const edges = spec.edges.map(([from, to, label, style]) => ({ from, to, label, style }));
-  // SAFETY: G's values are FlowchartGroup<keyof N & string>, and the {} default has no values to mismatch
-  const groups = Object.entries((spec.groups ?? {}) as Record<string, FlowchartGroup<Id>>);
+  const groups = Object.entries<FlowchartGroup<string>>(spec.groups ?? {});
+  checkIds(groups.length === 0 ? ["-"] : groups.map(([id]) => id), WHAT, "group");
+  const member = new Map<string, string>();
 
-  const laid = lay<Id>(
-    {
-      direction,
-      nodes: nodes.map((n) => ({ id: n.id, ...sizeOf(n.role, n.label, fontSize, font) })),
-      edges: edges.map((e) => ({
-        ...e,
-        label: e.label === undefined ? undefined : labelSize(e.label, small.fontSize, font),
-      })),
-      groups: groups.map(([id, g]) => ({
-        id,
-        members: g.nodes,
-        label: { w: textWidth(g.label, small.fontSize, font), h: small.fontSize * 1.2 },
-      })),
-    },
-    roles,
-    options,
-  );
-
-  const order = nodes
-    .map((n) => n.id)
-    .sort(
-      (a, b) =>
-        laid.rank.get(a)! - laid.rank.get(b)! ||
-        cross(laid.boxes.get(a)!, direction) - cross(laid.boxes.get(b)!, direction),
-    );
-
-  const step = play?.step ?? 0.4;
-  const later = order.filter((id) => laid.rank.get(id)! > 0);
-  const shown = schedule(play?.at ?? 0, later, order, step, "flowchart() play");
-
-  const appear = (id: string) => (play && shown.get(id)! >= 0 ? popIn(shown.get(id)!) : undefined);
-  const drawOver = Math.min(0.4, step);
-  const labelOver = 0.25;
-
-  const drawAt = (from: string, to: string) =>
-    Math.max(0, shown.get(from)!, shown.get(to)! - drawOver);
-
-  const under = l.root([
-    groups.map(([id, g]) => {
-      const b = laid.groups.get(id)!;
-      const at = Math.min(...g.nodes.map((n) => shown.get(n)!));
-
-      return (
-        <g animation={play && at >= 0 ? enter({ at, over: 0.4 }) : undefined}>
-          <rect
-            x={b.x}
-            y={b.y}
-            width={b.w}
-            height={b.h}
-            rx={10}
-            fill="none"
-            stroke={theme.base0E}
-            strokeOpacity={0.45}
-            strokeDasharray="4 3"
-          />
-          <text
-            x={b.x + 12}
-            y={b.y + 8 + small.fontSize}
-            fontSize={small.fontSize}
-            fill={theme.base04}
-          >
-            {g.label}
-          </text>
-        </g>
+  for (const [id, g] of groups) {
+    if (ids.includes(id))
+      throw new SceneError(
+        `${WHAT} has a group and a node both named "${id}".`,
+        "Give the group another name.",
       );
-    }),
-    laid.lines.map((line, i) =>
-      arrow(line.points, {
-        ...l,
-        ...edges[i]!.style,
-        at: play && drawAt(line.from, line.to),
-        over: drawOver,
-      }),
-    ),
-  ]);
 
-  const over = l.root([
-    nodes.map((n) => drawNode(n.role, laid.boxes.get(n.id)!, n.label, l, appear(n.id))),
-    laid.lines.map(
-      (line, i) =>
-        line.label &&
-        chip(
-          line.label,
-          edges[i]!.label!,
-          small,
-          play &&
-            motion({ opacity: 0 }).to(
-              { opacity: 1 },
-              spanOf(drawAt(line.from, line.to) + drawOver, labelOver),
-            ),
-        ),
-    ),
-  ]);
+    if (g.nodes.length === 0)
+      throw new SceneError(
+        `${WHAT} group "${id}" holds no nodes.`,
+        "List its nodes, or leave the group out.",
+      );
 
-  const groupAt = (g: FlowchartGroup<Id>) => Math.min(...g.nodes.map((n) => shown.get(n)!));
+    for (const n of g.nodes) {
+      known(n, ids, WHAT, "node", `group "${id}"`);
+      const other = member.get(n);
 
-  const appears = (id: string) => {
-    const group = groups.find(([gid]) => gid === id)?.[1];
-    const at = group ? groupAt(group) : shown.get(id)!;
+      if (other)
+        throw new SceneError(
+          `${WHAT} puts node "${n}" in two groups, "${other}" and "${id}".`,
+          "A node sits in one group at most.",
+        );
+      member.set(n, id);
+    }
+  }
 
-    return play && at >= 0 ? spanOf(at, group ? 0.4 : POP) : INSTANT;
-  };
+  const out = layered({
+    direction,
+    nodes: nodes.map((n) => ({ id: n.id, ...sizeOf(l, formOf(n.role, n.shape), n.label) })),
+    edges: edges.map((e) => ({
+      from: e.from,
+      to: e.to,
+      label: e.label === undefined ? undefined : labelSize(l, e.label),
+    })),
+    groups: groups.map(([id, g]) => ({
+      id,
+      members: g.nodes,
+      label: { w: l.measure(g.label, l.small), h: l.small * 1.2 },
+    })),
+  });
 
-  const reveals: Span[] = play
-    ? [
-        ...[...shown.values()].flatMap((at) => (at >= 0 ? [{ at, over: POP }] : [])),
-        ...groups.flatMap(([, g]) => {
-          const at = Math.min(...g.nodes.map((n) => shown.get(n)!));
+  const [dx, dy] = [-out.bounds.x, -out.bounds.y];
+  const move = (b: Box): Box => ({ x: b.x + dx, y: b.y + dy, w: b.w, h: b.h });
+  const boxes = new Map([...out.nodes].map(([id, b]) => [id, move(b)]));
 
-          return at >= 0 ? [{ at, over: 0.4 }] : [];
-        }),
-        ...laid.lines.flatMap((line) => {
-          const at = drawAt(line.from, line.to);
-
-          return [
-            { at, over: drawOver },
-            ...(line.label ? [{ at: at + drawOver, over: labelOver }] : []),
-          ];
-        }),
-      ]
-    : [];
-
-  return {
-    span: spanOfReveals(reveals),
-    node: (
-      <g>
-        {under}
-        {over}
-      </g>
-    ),
-    layers: { under, over },
-    bounds: laid.bounds,
-    ...partsOf<Id | (keyof G & string) | EdgeId<E[number]>>(
-      "flowchart()",
-      [
-        ...laid.boxes,
-        ...laid.groups,
-        ...laid.lines.map(
-          (line) => [edgeId(line.from, line.to), lineBox(line.points, line.label)] as const,
-        ),
-      ],
-      (id, i) => {
-        const line = laid.lines[i - laid.boxes.size - laid.groups.size];
-
-        if (!line) return appears(id);
-
-        if (!play) return INSTANT;
-
-        return spanOf(drawAt(line.from, line.to), drawOver + (line.label ? labelOver : 0));
-      },
-    ),
-    ...paths(laid.lines, laid.boxes),
-  };
-}
-
-const cross = (b: Rect, direction: Direction = "TB") => (direction === "TB" ? b.x : b.y);
-
-const lay = <N extends string>(
-  input: Parameters<typeof layered>[0],
-  roles: ReadonlyMap<string, NodeRole>,
-  options: DiagramOptions,
-): Laid<N> => {
-  const out = layered(input);
-  const at = placer(out.bounds, options);
-  const boxes = new Map([...out.nodes].map(([id, b]) => [id, at.box(b)]));
-
-  const lines = out.edges.map((e) => {
-    const points = e.points.map(at.point);
-    const [from, to] = [boxes.get(e.from)!, boxes.get(e.to)!];
-    points[0] = onOutline(roles.get(e.from) ?? "task", from, points[0]!, points[1]!);
+  const lines = out.edges.map((e, i) => {
+    const points: Point[] = e.points.map((p) => ({ x: p.x + dx, y: p.y + dy }));
+    points[0] = onOutline(forms.get(e.from)!, boxes.get(e.from)!, points[0]!, points[1]!);
     points[points.length - 1] = onOutline(
-      roles.get(e.to) ?? "task",
-      to,
+      forms.get(e.to)!,
+      boxes.get(e.to)!,
       points.at(-1)!,
       points.at(-2)!,
     );
 
-    // SAFETY: e.from and e.to are ids from spec.edges, which flowchart() types as keyof N & string
-    return { from: e.from as N, to: e.to as N, points, label: e.label && at.box(e.label) };
+    return { ...edges[i]!, points, box: e.label && move(e.label) };
   });
 
+  const cross = (b: Box) => (isVertical(direction) ? b.x : b.y);
+
+  const order = [...ids].sort(
+    (a, b) => out.rank.get(a)! - out.rank.get(b)! || cross(boxes.get(a)!) - cross(boxes.get(b)!),
+  );
+
+  const shown = schedule(options.reveal, order, WHAT);
+  const LABEL = 0.25;
+
+  const drawn = (from: string, to: string): Span | undefined => {
+    const [a, b] = [shown.get(from), shown.get(to)];
+
+    if (!a && !b) return undefined;
+    const over = Math.min(0.4, (b ?? a)!.over);
+
+    return span(Math.max(0, a?.start ?? 0, b ? b.start - over : 0), over);
+  };
+
+  const groupAt = (g: FlowchartGroup<string>): Span | undefined => {
+    const spans = g.nodes.map((n) => shown.get(n));
+
+    if (spans.some((s) => !s)) return undefined;
+
+    return span(Math.min(...spans.map((s) => s!.start)), 0.4);
+  };
+
+  const edgeKeys = keyed(lines.map((e) => edgeKey(e.from, e.to)));
+  const timed = lines.map((e) => drawn(e.from, e.to));
+  checkDraws(options.draw, edgeKeys, WHAT);
+
+  const parts = new Map<string, Span | undefined>([
+    ...order.map((id) => [id, shown.get(id)] as const),
+    ...groups.map(([id, g]) => [id, groupAt(g)] as const),
+    ...lines.map((e, i) => {
+      const t = timed[i];
+
+      return [edgeKeys[i]!, t && (e.box ? span(t.start, t.over + LABEL) : t)] as const;
+    }),
+  ]);
+
+  const handle = partsOf<Id | (keyof G & string) | EdgeId<E[number]>>(WHAT, parts);
+
+  const draw = (between?: Child): SceneElement => (
+    <Group ref={handle.ref}>
+      {groups.map(([id, g]) => {
+        const b = move(out.groups.get(id)!);
+        const at = groupAt(g);
+
+        return (
+          <Group key={id} offset={[b.x, b.y]} motion={at && pop(at)}>
+            <Shape
+              key="frame"
+              geometry={rect(b.w, b.h, { radius: 10 })}
+              stroke={{ color: l.colors.line, width: 1, dash: [4, 3] }}
+            />
+            <Text
+              key="label"
+              font={l.font}
+              size={l.small}
+              fill={l.colors.muted}
+              at={[12, direction === "BT" ? b.h - l.small * 1.2 - 6 : 6]}
+            >
+              {g.label}
+            </Text>
+          </Group>
+        );
+      })}
+      {lines.map(
+        (e, i) =>
+          e.style?.line !== "invisible" && (
+            <Edge
+              key={edgeKeys[i]!}
+              look={l}
+              points={e.points}
+              draw={drawnBy(options.draw, edgeKeys[i]!, timed[i], WHAT)}
+              color={e.style?.color}
+              stroke={strokeOf(e.style)}
+              head={e.style?.head}
+              tail={e.style?.tail}
+            />
+          ),
+      )}
+      {between}
+      {nodes.map((n) => {
+        const at = shown.get(n.id);
+
+        return (
+          <Node
+            key={n.id}
+            look={l}
+            role={n.role}
+            shape={n.shape}
+            style={n.style}
+            label={n.label}
+            box={boxes.get(n.id)!}
+            motion={at && pop(at)}
+          />
+        );
+      })}
+      {lines.map((e, i) => {
+        const t = timed[i];
+
+        return (
+          e.box &&
+          e.label !== undefined &&
+          e.style?.line !== "invisible" && (
+            <Chip
+              key={`${edgeKeys[i]!}:label`}
+              look={l}
+              box={e.box}
+              text={e.label}
+              motion={t && pop(span(t.start + t.over, LABEL))}
+            />
+          )
+        );
+      })}
+    </Group>
+  );
+
+  const find = (from: string, to: string) => {
+    const line = lines.find((e) => e.from === from && e.to === to);
+
+    if (!line) throw new SceneError(`${WHAT} has no edge from "${from}" to "${to}".`);
+
+    return line;
+  };
+
   return {
-    boxes,
-    lines,
-    groups: new Map([...out.groups].map(([id, b]) => [id, at.box(b)])),
-    rank: out.rank,
-    bounds: at.bounds,
-  };
-};
+    node: draw(),
+    with: draw,
+    size: [Math.ceil(out.bounds.w), Math.ceil(out.bounds.h)],
+    span: extent([...parts.values()]),
+    ...handle,
+    edge: (from, to) =>
+      new Route([
+        find(known(from, ids, WHAT, "node", "edge()"), known(to, ids, WHAT, "node", "edge()"))
+          .points,
+      ]),
+    route: (from, to) => {
+      known(from, ids, WHAT, "node", "route()");
+      known(to, ids, WHAT, "node", "route()");
 
-const paths = <N extends string>(lines: Laid<N>["lines"], boxes: ReadonlyMap<string, Rect>) => {
-  const edge = (from: N, to: N): Point[] => {
-    const line = lines.find((l) => l.from === from && l.to === to);
+      if (from === to) {
+        const b = boxes.get(from)!;
 
-    if (!line) throw new Error(`No edge from ${JSON.stringify(from)} to ${JSON.stringify(to)}.`);
-
-    return curve(line.points).samples;
-  };
-
-  const route = (from: N, to: N): Point[] => {
-    if (from === to) return [boxes.get(from)!.center];
-    const via = new Map<string, Laid<N>["lines"][number]>();
-
-    for (const queue: string[] = [from]; queue.length > 0 && !via.has(to);) {
-      const here = queue.shift()!;
-
-      for (const line of lines) {
-        if (line.from !== here || line.to === from || via.has(line.to)) continue;
-        via.set(line.to, line);
-        queue.push(line.to);
+        return new Route([[{ x: b.x + b.w / 2, y: b.y + b.h / 2 }]]);
       }
-    }
 
-    if (!via.has(to))
-      throw new Error(`No path from ${JSON.stringify(from)} to ${JSON.stringify(to)}.`);
-    const hops: Laid<N>["lines"][number][] = [];
+      const via = new Map<string, (typeof lines)[number]>();
 
-    for (let at: string = to; at !== from; at = hops[0]!.from) hops.unshift(via.get(at)!);
+      for (const queue: string[] = [from]; queue.length > 0 && !via.has(to);) {
+        const here = queue.shift()!;
 
-    return hops.flatMap((line) => curve(line.points).samples);
+        for (const line of lines) {
+          if (line.from !== here || line.to === from || via.has(line.to)) continue;
+          via.set(line.to, line);
+          queue.push(line.to);
+        }
+      }
+
+      if (!via.has(to))
+        throw new SceneError(
+          `${WHAT} has no way from "${from}" to "${to}" along its edges.`,
+          "Route between nodes an edge path joins.",
+        );
+      const hops: (typeof lines)[number][] = [];
+
+      for (let at: string = to; at !== from; at = hops[0]!.from) hops.unshift(via.get(at)!);
+
+      return new Route(hops.map((h) => h.points));
+    },
   };
-
-  return { edge, route };
-};
+}

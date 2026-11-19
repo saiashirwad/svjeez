@@ -1,35 +1,26 @@
 # @svjeez/mermaid
 
-Turn Mermaid text into an animated svjeez flowchart, sequence diagram or state diagram.
+Parse Mermaid flowcharts, sequence diagrams, and state diagrams into animated `@svjeez/diagrams` scenes.
 
 ```sh
-npm i -D @svjeez/mermaid svjeez
+npm i -D @svjeez/mermaid@next svjeez@next
 ```
 
-```tsx
+```ts
 import { mermaid } from "@svjeez/mermaid";
-import { render } from "svjeez";
+import { span } from "svjeez";
 
 const chart = mermaid(
   `flowchart LR
-    pr([PR opened]) --> lint[Run linters]
-    lint --> ok{Clean?}
-    ok -->|yes| post([Post review])
-    ok -->|no| fix[Draft fixes] --> lint`,
-  { x: 40, y: 40, play: { at: 0.4, step: 0.4 } },
+  pr([PR opened]) --> lint[Run linters]
+  lint --> ok{Clean?}
+  ok -->|yes| post([Post review])`,
+  { font, reveal: span(0.2, 0.3) },
 );
-
-export default () =>
-  render(
-    { width: chart.bounds.w + 80, height: chart.bounds.h + 80, duration: 6, title: "Review" },
-    chart,
-  );
 ```
 
-`mermaid(text, options)` returns a diagram with `kind`, `doc`, `node`, `span`, `bounds` and named parts. `parseMermaid(text)` returns the parsed document for tools that only need the structure.
+- `mermaid(text, options)` returns the same diagram object as `flowchart()`, `sequence()`, or `stateMachine()` from `@svjeez/diagrams`, plus `kind` and the parsed `doc`.
+- Pass `file` and `line` in `options` so syntax errors point directly to the source line. Use `parseMermaid(text, { file, line })` to get the parsed document without building a diagram.
+- Unsupported Mermaid directives (such as styling directives, activation bars, and sequence blocks) throw a `SceneError` naming the line and the supported alternative.
 
-The adapter supports a subset of Mermaid. Flowcharts lay out top-to-bottom or left-to-right. Sequence diagrams support participants, messages and single-participant notes. Edge styles and message heads carry through to the SVG. State diagrams include composite states. Syntax outside the supported subset, such as styling directives, activation bars and sequence blocks, throws a line-numbered `MermaidSyntaxError`.
-
-<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/mermaid"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/mermaid.svg" width="540" alt="A Mermaid flowchart animates into place." /></a>
-
-[API reference](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/mermaid.md)
+[API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/mermaid.md)

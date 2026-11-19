@@ -1,32 +1,32 @@
 # @svjeez/diagrams
 
-Lay out and animate flowcharts, sequence diagrams, state machines, trees and swimlanes from TypeScript.
+Flowcharts, sequence diagrams, state machines, trees, and swimlanes for `svjeez`. Laid out automatically with real font metrics and revealed step by step.
 
 ```sh
-npm i -D @svjeez/diagrams svjeez
+npm i @svjeez/diagrams@next svjeez@next
 ```
 
 ```tsx
 import { flowchart } from "@svjeez/diagrams";
-import { render } from "svjeez";
+import { Align, scene, span } from "svjeez";
+import { sans, theme } from "./style";
 
 const review = flowchart(
   {
-    nodes: { open: "Open PR", lint: "Run checks", merge: "Merge" },
-    edges: [["open", "lint"], ["lint", "merge", "Pass"]],
+    nodes: { open: "Open PR", lint: "Run checks", merge: { label: "Merge", role: "output" } },
+    edges: [["open", "lint"], ["lint", "merge", "pass"]],
   },
-  { x: 20, y: 20, play: { at: 0.5, step: 0.6 } },
+  { font: sans, reveal: span(0.3, 0.4) },
 );
 
-export default () =>
-  render(
-    { width: review.bounds.w + 40, height: review.bounds.h + 40, duration: 4, title: "Review" },
-    review.node,
-  );
+export default scene({ size: [480, 320], duration: 4, title: "Review", theme }, () => (
+  <Align>{review.node}</Align>
+));
 ```
 
-Use `part(id).box` to place an annotation and `part(id).span` to time it. Flowcharts also expose `route(from, to)` for motion along their edges. For Mermaid source, use [@svjeez/mermaid](https://www.npmjs.com/package/@svjeez/mermaid).
+- Every diagram returns `node`, `size`, `part(id)` refs (for arrows or `<Align>`), `when(id)` timing handles, and edge routes with `travel(span)`.
+- `reveal` accepts either a single `span` (plays parts in order) or a record mapping part IDs to spans.
+- Pass `draw: { "open->lint": track }` to drive an edge from your own timeline instead of `reveal`.
+- For Mermaid syntax input, use `@svjeez/mermaid`.
 
-<a href="https://github.com/saiashirwad/svjeez/tree/main/examples/flowchart"><img src="https://raw.githubusercontent.com/saiashirwad/svjeez/main/examples/dist/flowchart.svg" width="540" alt="A code review flowchart reveals and a token travels through it." /></a>
-
-[API reference](https://github.com/saiashirwad/svjeez/blob/main/packages/svjeez/skills/svjeez/references/diagrams.md)
+[API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/diagrams.md)

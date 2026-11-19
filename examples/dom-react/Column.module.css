@@ -1,0 +1,17 @@
+.col {
+  flex: 1;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--panel);
+  min-height: 230px;
+}
+
+.col h2 {
+  margin: 2px 4px 12px;
+  font:
+    13px/16px Body,
+    sans-serif;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}

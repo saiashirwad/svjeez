@@ -1,23 +1,10 @@
-/**
- * Measures what an SVG costs to download and to play, in Chrome driven by agent-browser (`agent-browser install`).
- *
- *   bun run perf hype flights               # examples/dist/hype.svg and flights.svg
- *   bun run perf --all                      # every SVG in dist
- *   bun run perf --base ../main/dist hype   # compare with the same files from another build
- *   bun run perf --throttle 4 --runs 3 hype # main thread 4x slower, median of three runs
- *   bun run perf --events hype              # also the ten costliest trace events
- *
- * Each SVG plays inline for --ms (default 3000) from each of --windows (default 4) points of its loop while DevTools
- * traces it. The table gives bytes (raw, gzip, brotli), the animations running per frame counted from the file
- * (cost.ts), and renderer main-thread ms per second of playback: style recalc (CSS animations), SMIL and paint.
- */
 import { mkdtempSync, readdirSync, readFileSync, statSync, cpSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, join, relative, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { brotliCompressSync, constants, gzipSync } from "node:zlib";
 import { chromium } from "playwright-core";
-import { costOf } from "./cost";
+import { costOf } from "svjeez/frames";
 
 const { values: flags, positionals: names } = parseArgs({
   allowPositionals: true,
@@ -83,7 +70,6 @@ const PHASES = new Map<string, "style" | "smil" | "paint">([
   ["Paint", "paint"],
 ]);
 
-/** Main-thread milliseconds per second of the renderer that drew the page: all of it, by phase, and the longest task. */
 const summarize = (path: string) => {
   const parsed = JSON.parse(readFileSync(path, "utf8"));
   const events: TraceEvent[] = parsed.traceEvents ?? parsed;
@@ -222,7 +208,7 @@ const measure = async (file: string, tag: string) => {
   return {
     ...combine(all, median),
     byName: all[Math.floor(runs / 2)]!.byName,
-    running: costOf(text.toString()),
+    running: Object.values(costOf(text.toString())).reduce((sum, part) => sum + part, 0),
     raw: text.length / 1024,
     gzip: gzipSync(text).length / 1024,
     brotli: brotli.length / 1024,

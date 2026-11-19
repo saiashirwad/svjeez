@@ -1,6 +1,3 @@
-//   bun scripts/release.ts plan           names the packages that have something to release
-//   bun scripts/release.ts publish        releases them; release.yml runs this with npm's trusted publishing
-//   bun scripts/release.ts claim <dir>    a new package's first publish, from a maintainer's machine
 import { execFileSync, spawn } from "node:child_process";
 import { appendFileSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -101,12 +98,22 @@ const releases = (): readonly string[] =>
     .split("\n")
     .filter(Boolean);
 
+const branch = process.env.GITHUB_REF_NAME ?? run("git", ["branch", "--show-current"]);
+
 const pending = async (): Promise<Pending[]> => {
   const tags = releases();
   const out: Pending[] = [];
 
   for (const pkg of packages()) {
     const { name, version } = pkg.manifest;
+
+    if (branch !== "main" && !version.includes("-")) {
+      warn(
+        `${name} ${version} is a stable version on ${branch}, so it isn't released. Only main releases stable versions.`,
+      );
+      continue;
+    }
+
     const versions = await published(name);
 
     if (!versions) {
@@ -177,7 +184,6 @@ const publish = async () => {
 
       if (pkg.out !== pkg.dir) run("bun", ["run", "build:package"], pkg.dir);
 
-      // npm pack runs prepack, which can print, so the tarball's name is the last line.
       const tarball = join(
         tmp,
         run("npm", ["pack", "--silent", "--pack-destination", tmp], pkg.out).split("\n").at(-1)!,

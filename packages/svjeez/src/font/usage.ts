@@ -1,5 +1,5 @@
-import { fontFaceRule, fontFaces, isFontValue, type Font } from "./font";
-import type { AttrValue, Element } from "../svg";
+import { cssFontStyle, fontFaceRule, fontFaces, isFontValue, type Font } from "./font";
+import type { AttrValue, Element } from "../svg/tree";
 
 interface Face {
   readonly name: string;
@@ -28,7 +28,7 @@ export const UNKNOWN_FONT: FontCtx = { family: null, weight: null, style: null }
 export const newFontUse = (): FontUse => ({ runs: [], css: { family: false, weight: false } });
 
 export const slotOf = (name: string, font: Font): string =>
-  `'${name}' ${font.weight} ${font.style}`;
+  `'${name}' ${font.weight} ${cssFontStyle(font)}`;
 
 const FONT_FAMILY_CSS = /font-family|(?:^|[\s;{}"'])font\s*:/i;
 const FONT_WEIGHT_CSS = /font-(?:weight|style|stretch)|(?:^|[\s;{}"'])font\s*:/i;
@@ -89,7 +89,7 @@ export const noteText = (use: FontUse, text: string, ctx: FontCtx): void => {
 
   const exact = ctx.family.flatMap(({ font }, i) =>
     (ctx.weight === null || font.weight === ctx.weight) &&
-    (ctx.style === null || font.style === ctx.style)
+    (ctx.style === null || cssFontStyle(font) === ctx.style)
       ? [slots[i]!]
       : [],
   );
@@ -101,7 +101,9 @@ export const faceRules = (use: FontUse, faces: readonly Face[]): string[] => {
   const every = use.runs.map((run) => run.text);
   const shared = use.runs.filter((run) => run.family === null).map((run) => run.text);
 
-  return faces.map(({ name, font }) => {
+  const files = faces.filter(({ font }) => font.format !== "system");
+
+  return files.map(({ name, font }) => {
     const slot = slotOf(name, font);
 
     if (use.css.family) return fontFaceRule(name, font, every);

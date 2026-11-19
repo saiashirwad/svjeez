@@ -1,28 +1,33 @@
 import assert from "node:assert/strict";
-import { mermaid, parseMermaid } from "@svjeez/mermaid";
-import { render } from "svjeez";
+import { mermaid } from "@svjeez/mermaid";
+import { font, scene } from "svjeez";
+import { jsx } from "svjeez/jsx-runtime";
+import { Group } from "svjeez";
+import { SceneError, svg } from "svjeez/tools";
 
-const flow = mermaid("flowchart LR\nA([Start]) --> B{OK?}\nB -->|yes| C[Ship]", {
-  play: { at: 0.5 },
-});
-
-const svg = render({ width: 600, height: 300, duration: 6, title: "Mermaid" }, [flow.node]);
-
-assert.equal(flow.kind, "flowchart");
-
-assert.match(svg, /^<svg[\s\S]*@keyframes/);
-
-assert.match(svg, />Ship</);
-
-assert.equal(mermaid("sequenceDiagram\nA->>B: hi").kind, "sequence");
-
-assert.equal(mermaid("stateDiagram-v2\n[*] --> A\nA --> [*]").kind, "state");
-
-assert.equal(parseMermaid("stateDiagram-v2\n[*] --> A").kind, "state");
-
-assert.throws(
-  () => parseMermaid("flowchart TD\nA --> B\nclassDef x fill:#f00"),
-  /line 3.*classDef/,
+const sans = await font.load(
+  new URL("./node_modules/svjeez/skills/svjeez/examples/fonts/Geist-400.ttf", import.meta.url),
 );
 
-console.log(`rendered a Mermaid flowchart into ${(svg.length / 1024).toFixed(1)} KB`);
+const chart = mermaid("flowchart LR\nA([Start]) --> B{OK?}\nB -->|yes| C[Ship]", { font: sans });
+
+assert.equal(chart.kind, "flowchart");
+
+const out = svg.emit(
+  scene({ size: [400, 300], duration: 2, title: "Mermaid" }, () =>
+    jsx(Group, { children: chart.node }),
+  ),
+);
+
+assert.match(out, /^<svg/);
+
+assert.equal(mermaid("sequenceDiagram\nA->>B: hi", { font: sans }).kind, "sequence");
+
+assert.equal(mermaid("stateDiagram-v2\n[*] --> A\nA --> [*]", { font: sans }).kind, "state");
+
+assert.throws(
+  () => mermaid("flowchart TD\nA --> B\nC@{ shape: bolt }", { font: sans, file: "flow.mmd" }),
+  (error) => error instanceof SceneError && /flow\.mmd:3.*bolt/.test(error.message),
+);
+
+console.log("drew a Mermaid " + chart.kind);

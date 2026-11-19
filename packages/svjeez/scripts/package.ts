@@ -7,14 +7,12 @@ const result = await Bun.build({
     "./src/index.ts",
     "./src/jsx-runtime.ts",
     "./src/jsx-dev-runtime.ts",
+    "./src/tools.ts",
     "./src/frames.ts",
     "./src/page.ts",
-    "./src/params.ts",
-    "./src/geometry.ts",
     "./src/cli.ts",
   ],
   external: ["playwright-core"],
-  // Bun 1.4 roots the output at the package instead of src once there are nine entrypoints, so name the root.
   root: "./src",
   outdir: "./package-dist",
   target: "node",
@@ -34,7 +32,6 @@ if (tsc.exitCode !== 0) {
   process.exit(tsc.exitCode);
 }
 
-// Node's ESM type resolution requires extensions on relative declaration imports.
 for (const file of await readdir("package-dist", { recursive: true })) {
   if (!file.endsWith(".d.ts")) continue;
   const path = `package-dist/${file}`;

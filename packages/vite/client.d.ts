@@ -1,5 +1,3 @@
-// Types for `?svjeez` imports. Add `/// <reference types="@svjeez/vite/client" />` to a declaration file in the app.
-
 declare module "*?svjeez" {
   const scene: import("@svjeez/vite").SceneModule;
   export default scene;

@@ -4,18 +4,20 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ALL_FORMATS, BufferSource, Input } from "mediabunny";
-import { motion, render, span } from "svjeez";
+import { Shape, rect, scene, span, track } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
+import { svg as backend } from "svjeez/tools";
 import { video } from "@svjeez/video";
 
-const svg = render({ width: 64, height: 48, duration: 1, title: "Slide" }, [
-  jsx("rect", {
-    width: 16,
-    height: 48,
-    fill: "#3EE6D6",
-    animation: motion({ x: 0 }).to({ x: 48 }, span(0, 1)),
-  }),
-]);
+const svg = backend.emit(
+  scene({ size: [64, 48], duration: 1, title: "Slide" }, () =>
+    jsx(Shape, {
+      geometry: rect(16, 48),
+      fill: "#3EE6D6",
+      at: track([0, 0]).to([48, 0], span(0, 1)),
+    }),
+  ),
+);
 
 for (const format of ["mp4", "webm"]) {
   const clip = await video(svg, { format, fps: 10, colorScheme: "light" });

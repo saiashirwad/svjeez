@@ -2,7 +2,15 @@ import { expect, test } from "bun:test";
 import { mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { BuildReport } from "../src/traced";
+import type { LaneReport } from "svjeez/tools";
+
+interface Build {
+  readonly svg: string;
+  readonly warnings: readonly string[];
+  readonly lanes: readonly LaneReport[];
+  readonly duration?: number;
+  readonly loop?: boolean;
+}
 
 const cli = (...args: string[]) =>
   Bun.spawnSync([process.execPath, join(import.meta.dir, "../src/cli.ts"), ...args]);
@@ -44,7 +52,6 @@ test("svjeez video names the package to install when @svjeez/video is missing", 
   writeFileSync(file, '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>');
 
   const result = Bun.spawnSync(
-    // --no-install: Bun would otherwise fetch @svjeez/video from npm into this empty folder.
     [process.execPath, "--no-install", join(import.meta.dir, "../src/cli.ts"), "video", file],
     { cwd: dir },
   );
@@ -97,25 +104,21 @@ test("svjeez svg calls a template with its defaults, then with --params and --pa
   );
 });
 
-test("svg --json reports compiled timing and leaves the exported SVG byte-identical", () => {
-  const file = join(import.meta.dir, "fixtures/check/cue.tsx");
+test("svg --json reports every animated lane with the line that wrote it", () => {
+  const file = join(import.meta.dir, "fixtures/check/cue-scene.tsx");
   const output = cli("svg", file, "--json");
 
   expect(output.exitCode).toBe(0);
-  const build: BuildReport & { svg: string } = JSON.parse(output.stdout.toString());
+  const build: Build = JSON.parse(output.stdout.toString());
 
-  expect(build.svg).toBe(cli("svg", file).stdout.toString());
-  expect(build.timeline).toContainEqual(
-    expect.objectContaining({
-      label: "caption · opacity",
-      source: expect.stringContaining("cue.tsx:"),
-    }),
-  );
-  const spans = build.timeline.find((track) => track.label === "caption · opacity")?.spans;
-  expect(spans).toHaveLength(2);
-  expect(spans?.[0]?.at).toBeCloseTo(0.213);
-  expect(spans?.[1]?.at).toBeCloseTo(0.4);
-  expect(build.warnings).toEqual(['@keyframes "unused" is never referenced.']);
+  const track = build.lanes.find((lane) => lane.lane === "opacity");
+  expect(track?.source?.file).toContain("cue-scene.tsx");
+  expect(track?.source?.line).toBe(10);
+  expect(track?.backend).toBe("css");
+  expect(track?.spans).toHaveLength(2);
+  expect(track?.spans[0]?.start).toBeCloseTo(0.213);
+  expect(track?.spans[1]?.start).toBeCloseTo(0.413);
+  expect(build.warnings).toEqual([]);
 });
 
 test("svjeez svg says what is wrong with a param, naming its path", () => {
@@ -144,6 +147,40 @@ test("svjeez svg says what is wrong with a param, naming its path", () => {
   fails(["--params", join(dir, "missing.json")], "no such file");
   writeFileSync(data, "{ nope");
   fails(["--params", data], "is not JSON");
+});
+
+test("svjeez svg emits a scene model default export, and --json reports its build", async () => {
+  const file = join(import.meta.dir, "fixtures/scene/model.tsx");
+  const { default: model } = await import(file);
+  const { svg } = await import("svjeez/tools");
+  const out = cli("svg", file);
+
+  expect(out.stderr.toString()).toBe("");
+  expect(out.stdout.toString()).toBe(svg.emit(model));
+
+  const build: Build = JSON.parse(cli("svg", file, "--json").stdout.toString());
+
+  expect(build.svg).toContain(`data-key="1" data-source="${file}:`);
+  expect(build.svg.replace(/ data-(key|source)="[^"]*"/g, "")).toBe(out.stdout.toString());
+  expect(build).toMatchObject({ duration: 2, loop: true, warnings: [] });
+});
+
+test("svjeez svg calls a function that returns a scene model with its params", () => {
+  const file = join(import.meta.dir, "fixtures/scene/template.tsx");
+
+  expect(cli("svg", file).stdout.toString()).toContain('r="10"');
+  const out = cli("svg", file, "--param", "title=Big", "--param", "radius=20");
+  expect(out.stderr.toString()).toBe("");
+  expect(out.stdout.toString()).toContain(">Big</title>");
+  expect(out.stdout.toString()).toContain('r="20"');
+});
+
+test("svjeez svg says what a default export must be", () => {
+  const { file } = template("export default 42;\n");
+  const result = cli("svg", file);
+
+  expect(result.exitCode).toBe(1);
+  expect(result.stderr.toString()).toContain("must export default a scene");
 });
 
 test("svjeez svg with --params on a scene that declares none says so", () => {

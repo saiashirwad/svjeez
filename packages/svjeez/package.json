@@ -1,6 +1,6 @@
 {
   "name": "svjeez",
-  "version": "0.7.1",
+  "version": "0.8.0-next.0",
   "description": "Animated SVGs in TypeScript. One file out, no JavaScript.",
   "license": "MIT",
   "repository": {
@@ -41,6 +41,11 @@
       "types": "./package-dist/jsx-dev-runtime.d.ts",
       "default": "./package-dist/jsx-dev-runtime.js"
     },
+    "./tools": {
+      "@svjeez/source": "./src/tools.ts",
+      "types": "./package-dist/tools.d.ts",
+      "default": "./package-dist/tools.js"
+    },
     "./frames": {
       "@svjeez/source": "./src/frames.ts",
       "types": "./package-dist/frames.d.ts",
@@ -50,16 +55,6 @@
       "@svjeez/source": "./src/page.ts",
       "types": "./package-dist/page.d.ts",
       "default": "./package-dist/page.js"
-    },
-    "./geometry": {
-      "@svjeez/source": "./src/geometry.ts",
-      "types": "./package-dist/geometry.d.ts",
-      "default": "./package-dist/geometry.js"
-    },
-    "./params": {
-      "@svjeez/source": "./src/params.ts",
-      "types": "./package-dist/params.d.ts",
-      "default": "./package-dist/params.js"
     }
   },
   "scripts": {
@@ -75,6 +70,14 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
+    "@svjeez/charts": "workspace:*",
+    "@svjeez/code": "workspace:*",
+    "@svjeez/diagrams": "workspace:*",
+    "@svjeez/fonts": "workspace:*",
+    "@svjeez/geo": "workspace:*",
+    "@svjeez/icons": "workspace:*",
+    "@svjeez/math": "workspace:*",
+    "@svjeez/mermaid": "workspace:*",
     "@types/bun": "latest",
     "playwright-core": "^1.64.1",
     "publint": "^0.3.25",

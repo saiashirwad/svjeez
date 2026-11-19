@@ -1,36 +1,32 @@
 import assert from "node:assert/strict";
-import { plane, contours, tex } from "@svjeez/math";
-import { render, morph } from "svjeez";
-import { rect } from "svjeez/geometry";
+import { Tex, plane } from "@svjeez/math";
+import { Group, Shape, scene } from "svjeez";
+import { jsx } from "svjeez/jsx-runtime";
+import { svg as backend } from "svjeez/tools";
 
-const at = { x: 20, y: 20, fontSize: 40 };
-const square = tex(String.raw`(a+b)^2`, at);
-const expanded = tex(String.raw`a^2 + \cssId{mid}{2ab} + b^2`, at);
+const graph = plane({ x: [-2, 2], y: [0, 4], size: [200, 100] });
 
-const svg = render({ width: 400, height: 120, duration: 4, title: "Math" }, [
-  morph([square, expanded], { at: [1], over: 1 }).node,
-]);
+const svg = backend.emit(
+  scene({ size: [300, 200], duration: 2, title: "Consumer" }, () =>
+    jsx(Group, {
+      children: [
+        jsx(Tex, {
+          size: 32,
+          at: [10, 10],
+          fill: "#000000",
+          draw: 1,
+          children: String.raw`\frac{a}{b}+\sqrt{x}`,
+        }),
+        jsx(Shape, { geometry: graph.plot((x) => x * x), stroke: { color: "#000000" } }),
+      ],
+    }),
+  ),
+);
 
-assert.match(svg, /^<svg[\s\S]*@keyframes[\s\S]*<path d="M/);
+const paths = svg.match(/<path/g)?.length ?? 0;
 
-assert.equal(expanded.words[0].text, "a@1");
+assert.ok(paths >= 6, `expected glyph paths, got ${paths}`);
 
-assert.ok(expanded.part("mid").box.w > 0);
+assert.doesNotMatch(svg, /<text/);
 
-assert.throws(() => tex(String.raw`\frac{`), /could not parse/);
-
-const graph = plane({ xRange: [-3, 3], yRange: [-1, 9], frame: rect(10, 10, 200, 100) });
-const plotted = render({ width: 240, height: 120, duration: 2, title: "Graph" }, [graph.node]);
-
-assert.match(plotted, /^<svg[\s\S]*<line /);
-
-assert.deepEqual(graph.point(-3, 9), { x: 10, y: 10 });
-
-const ring = contours((x, y) => x * x + y * y, {
-  levels: [1],
-  frame: rect(0, 0, 100, 100),
-});
-
-assert.ok(ring.some((level) => level.lines.length > 0));
-
-console.log(`rendered an equation morph into ${(svg.length / 1024).toFixed(1)} KB`);
+console.log(`typeset a fraction and a root into ${paths} paths`);

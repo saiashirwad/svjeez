@@ -1,187 +1,60 @@
-export { render, type RenderOptions } from "./render";
-
-export { motion, ease, type Motion, type Stack, type Seconds, type Ease } from "./motion";
+export { scene } from "./author/lower";
 
 export {
-  span,
-  chain,
-  stagger,
-  type Span,
-  type OpenSpan,
-  type Spanned,
-  type OpenSpanned,
-  type When,
-} from "./span";
+  Group,
+  Picture,
+  Run,
+  Sequence,
+  Shape,
+  Text,
+  ref,
+  type Bounds,
+  type SceneElement,
+} from "./author/nodes";
 
-export { Clip, type ClipProps } from "./clip";
+export type { Ref } from "./author/refs";
 
-export { easeAt } from "./ease-at";
+export { Align, Center, Grid, Stack } from "./author/layout";
 
-export { valuesAt, type ValuesAtOptions } from "./valuesAt";
-
-export { random } from "./random";
-
-export { Pivot, type PivotProps } from "./pivot";
+export { Arrow } from "./author/arrow";
 
 export {
-  enter,
-  exit,
-  draw,
-  shake,
-  wiggle,
-  sampled,
-  type WiggleOptions,
-  type SampledOptions,
-} from "./recipes";
+  arc,
+  circle,
+  ellipse,
+  line,
+  path,
+  polygon,
+  rect,
+  tokens,
+  type Geometry,
+  type Paint,
+} from "./author/values";
 
-export { def, type Ref, type DefTag } from "./defs";
+export { moved, subtract } from "./author/holes";
 
-export { css, type Css, type Property, type Syntax, type SyntaxOf } from "./properties";
+export { linear, pattern, radial } from "./author/paint";
 
-export { fx } from "./fx";
+export { adjust, blur, displace, shadow } from "./author/effects";
 
-export { picture, Picture, type ImageFormat, type PictureData, type PictureProps } from "./picture";
+export { track, type Anim, type Track } from "./author/track";
 
-export {
-  font,
-  type Font,
-  type FontFamily,
-  type FontFormat,
-  type FontMetrics,
-  type FontOptions,
-  type FontStyle,
-  type GlyphPath,
-  type PathOptions,
-  type TextPath,
-  type FontValue,
-  textWidth,
-} from "./font/font";
+export { through, within } from "./author/derived";
 
-export { fitText, type FitTextOptions } from "./font/fit";
+export { enter, exit, sampled, wiggle } from "./author/recipes";
 
-export { strokeFont, type StrokeFont } from "./font/stroke";
+export { ease, type Curve } from "./author/spring";
 
-export type { Each } from "./each";
+export { span, type Span } from "./author/span";
 
-export { Glyphs, type GlyphsProps } from "./glyphs";
+export { morph } from "./author/morph";
 
-export { Icon, type IconData, type IconProps } from "./icon";
+export { count, type Count, type CountFormat } from "./author/count";
 
-export { Ambient, type AmbientProps } from "./ambient";
+export { param } from "./params";
 
-export { Once, type OnceProps } from "./once";
+export { picture } from "./author/picture";
 
-export { Style, type StyleProps } from "./style";
+export { font } from "./font/font";
 
-export { spline, type Spline } from "./spline";
-
-export {
-  Ink,
-  tool,
-  type Tool,
-  type InkProps,
-  type PenOptions,
-  type BrushOptions,
-  type NibOptions,
-  type PencilOptions,
-} from "./ink/ink";
-
-export type { ElementProps } from "./jsx-runtime";
-
-export type { Attrs, Tag, Color, Paint, Length } from "./attributes";
-
-export { type Hex } from "./color";
-
-export type { Channel, ChannelValues, TagChannels } from "./channels";
-
-export type { SvgNode, Child } from "./svg";
-
-export type { Point, Rect, Edge } from "./geometry";
-
-export type { Drawn, Part } from "./drawn";
-
-export type { PathData } from "./paths";
-
-export type { Box, Size } from "./layout/box";
-
-export {
-  timeline,
-  show,
-  shot,
-  type ShowOptions,
-  type ShotMove,
-  type ShotOptions,
-  readingTime,
-  type ReadingOptions,
-  travel,
-  type Beats,
-  type Heading,
-  type Travel,
-  type Shown,
-  type HeadingOptions,
-  type TravelOptions,
-  type Timeline,
-  type TimelineOptions,
-} from "./extras/timeline";
-
-export {
-  code,
-  type Code,
-  type CodeOptions,
-  type CodeToken,
-  type CodeTokens,
-  type CodeRun,
-  type CodePiece,
-  type CodeWord,
-  type CodeMetrics,
-} from "./extras/code";
-
-export { readout, type ReadoutOptions } from "./extras/readout";
-
-export {
-  morph,
-  type MorphResult,
-  type MorphOptions,
-  type Morphable,
-  type MorphPiece,
-} from "./extras/morph";
-
-export { typewriter, type TypewriterOptions, type TypewriterResult } from "./extras/typewriter";
-
-export { reveal, type RevealOptions, type RevealResult } from "./extras/reveal";
-
-export { Focus, type FocusStop } from "./extras/focus";
-
-export { Arrow, Callout, Brace, Underline } from "./extras/annotations";
-
-export { Marker } from "./extras/marker";
-
-export { Camera, type CameraProps, type CameraStop } from "./extras/camera";
-
-export {
-  base16,
-  tint,
-  adaptive,
-  variables,
-  defaultDark,
-  systemLight,
-  systemDark,
-  type Base16,
-  type AdaptiveResult,
-  type VariablesResult,
-  type Slot,
-  type CodeRole,
-} from "./extras/theme";
-
-export { appWindow, type WindowOptions, type AppWindowResult } from "./extras/window";
-
-export {
-  terminal,
-  type TerminalCommand,
-  type TerminalOptions,
-  type TerminalResult,
-} from "./extras/terminal";
-
-export { flow, type FlowOptions, type FlowResult, type FlowStyle } from "./extras/flow";
-
-export type { Direction } from "./layout/box";
+export type { Vec } from "./model/ir";

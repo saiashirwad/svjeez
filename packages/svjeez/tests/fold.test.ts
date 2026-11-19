@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
-import { foldKeys, type Key } from "../src/keys";
-import { ease } from "../src/motion";
-import { cssKeyframes } from "../src/css";
+import { foldKeys, type Key } from "../src/svg/keys";
+import { ease } from "../src/model/time";
+import { cssKeyframes } from "../src/svg/css";
 
 const key = (t: number, x: number, y: number, e = ease.linear): Key => ({
   t,

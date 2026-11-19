@@ -8,9 +8,6 @@
     ".preview/**",
     "**/dist/**",
     "**/package-dist/**",
-    "**/.svelte-kit/**",
-    "site/.alchemy/**",
-    "site/.astro/**",
     "tools/oxlint/anti-slop/**"
   ],
   "jsPlugins": [
@@ -36,7 +33,6 @@
         "allowInTypeGuards": true
       }
     ],
-    "anti-slop/no-shape-in-symbol-names": "error",
     "anti-slop/no-unknown-parameters": "error",
     "anti-slop/no-unknown-returns": "error",
     "anti-slop/no-unknown-type-aliases": "error",

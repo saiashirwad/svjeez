@@ -1,161 +1,155 @@
-import { base16, type Base16 } from "svjeez";
+import { tokens } from "svjeez";
+import type { Hex } from "svjeez/tools";
+import { ROLES, type CodeRole, type Palette } from "./roles.ts";
 
-/** Dark ramp. Pairs with `tomorrow` in `adaptive`. */
-export const tomorrowNight: Base16 = /* @__PURE__ */ base16(
-  "#1d1f21",
-  "#282a2e",
-  "#373b41",
-  "#969896",
-  "#b4b7b4",
-  "#c5c8c6",
-  "#e0e0e0",
-  "#ffffff",
-  "#cc6666",
-  "#de935f",
-  "#f0c674",
-  "#b5bd68",
-  "#8abeb7",
-  "#81a2be",
-  "#b294bb",
-  "#a3685a",
+export type { CodeRole, Palette } from "./roles.ts";
+
+export interface PaletteColors {
+  readonly light: Readonly<Record<CodeRole, Hex>>;
+  readonly dark: Readonly<Record<CodeRole, Hex>>;
+}
+
+export const palette = (name: string, { light, dark }: PaletteColors): Palette => {
+  const named = (colors: Readonly<Record<CodeRole, Hex>>) =>
+    Object.fromEntries(ROLES.map((role) => [`${name}-${role}`, colors[role]]));
+
+  const made = tokens({ light: named(light), dark: named(dark) });
+
+  // SAFETY: ROLES lists every CodeRole, and each of them was given a token named after it above.
+  return Object.fromEntries(ROLES.map((role) => [role, made[`${name}-${role}`]!])) as Palette;
+};
+
+type Slots = readonly [
+  text: Hex,
+  muted: Hex,
+  soft: Hex,
+  purple: Hex,
+  blue: Hex,
+  green: Hex,
+  orange: Hex,
+  yellow: Hex,
+  red: Hex,
+];
+
+const colors = ([text, muted, soft, purple, blue, green, orange, yellow, red]: Slots) => ({
+  plain: text,
+  comment: muted,
+  punctuation: soft,
+  keyword: purple,
+  string: green,
+  number: orange,
+  constant: orange,
+  variable: red,
+  function: blue,
+  type: yellow,
+  tag: red,
+  inserted: green,
+  deleted: red,
+});
+
+const pair = (light: Slots, dark: Slots, name: string) =>
+  palette(name, { light: colors(light), dark: colors(dark) });
+
+export const tomorrow = pair(
+  [
+    "#4d4d4c",
+    "#6d6f6b",
+    "#6d6f6d",
+    "#8959a8",
+    "#416faa",
+    "#5c7200",
+    "#ab5708",
+    "#896b00",
+    "#c82829",
+  ],
+  [
+    "#c5c8c6",
+    "#969896",
+    "#b4b7b4",
+    "#b294bb",
+    "#81a2be",
+    "#b5bd68",
+    "#de935f",
+    "#f0c674",
+    "#cc6666",
+  ],
+  "tomorrow",
 );
 
-/** Light ramp. Pairs with `tomorrowNight` in `adaptive`. */
-export const tomorrow: Base16 = /* @__PURE__ */ base16(
-  "#ffffff",
-  "#e0e0e0",
-  "#d6d6d6",
-  "#8e908c",
-  "#969896",
-  "#4d4d4c",
-  "#282a2e",
-  "#1d1f21",
-  "#c82829",
-  "#f5871f",
-  "#eab700",
-  "#718c00",
-  "#3e999f",
-  "#4271ae",
-  "#8959a8",
-  "#a3685a",
+export const solarized = pair(
+  [
+    "#586e75",
+    "#627274",
+    "#5c7077",
+    "#6166c0",
+    "#2074af",
+    "#667500",
+    "#bd4615",
+    "#8c6a00",
+    "#d32724",
+  ],
+  [
+    "#93a1a1",
+    "#6e868f",
+    "#839496",
+    "#777cc8",
+    "#268bd2",
+    "#859900",
+    "#e25418",
+    "#b58900",
+    "#e1504e",
+  ],
+  "solarized",
 );
 
-/** Dark ramp. Pairs with `solarizedLight` in `adaptive`. */
-export const solarizedDark: Base16 = /* @__PURE__ */ base16(
-  "#002b36",
-  "#073642",
-  "#586e75",
-  "#657b83",
-  "#839496",
-  "#93a1a1",
-  "#eee8d5",
-  "#fdf6e3",
-  "#dc322f",
-  "#cb4b16",
-  "#b58900",
-  "#859900",
-  "#2aa198",
-  "#268bd2",
-  "#6c71c4",
-  "#d33682",
+export const gruvbox = pair(
+  [
+    "#504945",
+    "#7e6d4d",
+    "#665c54",
+    "#8f3f71",
+    "#076678",
+    "#74700d",
+    "#af3a03",
+    "#996411",
+    "#9d0006",
+  ],
+  [
+    "#d5c4a1",
+    "#8f8277",
+    "#bdae93",
+    "#d3869b",
+    "#83a598",
+    "#b8bb26",
+    "#fe8019",
+    "#fabd2f",
+    "#fb4934",
+  ],
+  "gruvbox",
 );
 
-/** Light ramp. Pairs with `solarizedDark` in `adaptive`. */
-export const solarizedLight: Base16 = /* @__PURE__ */ base16(
-  "#fdf6e3",
-  "#eee8d5",
-  "#93a1a1",
-  "#839496",
-  "#657b83",
-  "#586e75",
-  "#073642",
-  "#002b36",
-  "#dc322f",
-  "#cb4b16",
-  "#b58900",
-  "#859900",
-  "#2aa198",
-  "#268bd2",
-  "#6c71c4",
-  "#d33682",
-);
-
-/** Dark ramp. Pairs with `gruvboxLight` in `adaptive`. */
-export const gruvboxDark: Base16 = /* @__PURE__ */ base16(
-  "#282828",
-  "#3c3836",
-  "#504945",
-  "#665c54",
-  "#bdae93",
-  "#d5c4a1",
-  "#ebdbb2",
-  "#fbf1c7",
-  "#fb4934",
-  "#fe8019",
-  "#fabd2f",
-  "#b8bb26",
-  "#8ec07c",
-  "#83a598",
-  "#d3869b",
-  "#d65d0e",
-);
-
-/** Light ramp. Pairs with `gruvboxDark` in `adaptive`. */
-export const gruvboxLight: Base16 = /* @__PURE__ */ base16(
-  "#fbf1c7",
-  "#ebdbb2",
-  "#d5c4a1",
-  "#bdae93",
-  "#665c54",
-  "#504945",
-  "#3c3836",
-  "#282828",
-  "#9d0006",
-  "#af3a03",
-  "#b57614",
-  "#79740e",
-  "#427b58",
-  "#076678",
-  "#8f3f71",
-  "#d65d0e",
-);
-
-/** Dark ramp. Pairs with `rosePineDawn` in `adaptive`. */
-export const rosePine: Base16 = /* @__PURE__ */ base16(
-  "#191724",
-  "#1f1d2e",
-  "#26233a",
-  "#6e6a86",
-  "#908caa",
-  "#e0def4",
-  "#e0def4",
-  "#f4f2ff",
-  "#eb6f92",
-  "#f6c177",
-  "#ebbcba",
-  "#31748f",
-  "#9ccfd8",
-  "#3e8fb0",
-  "#c4a7e7",
-  "#524f67",
-);
-
-/** Light ramp. Pairs with `rosePine` in `adaptive`. */
-export const rosePineDawn: Base16 = /* @__PURE__ */ base16(
-  "#faf4ed",
-  "#fffaf3",
-  "#f2e9de",
-  "#9893a5",
-  "#797593",
-  "#575279",
-  "#575279",
-  "#26233a",
-  "#b4637a",
-  "#ea9d34",
-  "#d7827e",
-  "#286983",
-  "#56949f",
-  "#286983",
-  "#907aa9",
-  "#cecacd",
+export const rosePine = pair(
+  [
+    "#575279",
+    "#716b80",
+    "#6f6b89",
+    "#7e649b",
+    "#286983",
+    "#286983",
+    "#995f10",
+    "#c2423c",
+    "#ab526c",
+  ],
+  [
+    "#e0def4",
+    "#837f9a",
+    "#908caa",
+    "#c4a7e7",
+    "#3e8fb0",
+    "#3b8dad",
+    "#f6c177",
+    "#ebbcba",
+    "#eb6f92",
+  ],
+  "rosePine",
 );

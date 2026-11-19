@@ -10,7 +10,7 @@ const svg = find(/^scene-.*\.svg$/);
 
 assert.match(
   readFileSync(`dist/assets/${svg}`, "utf8"),
-  /^<svg[^>]*>[\s\S]*@keyframes[\s\S]*Hello/,
+  /^<svg[^>]*>[\s\S]*<title[^>]*>Hello<\/title>[\s\S]*@keyframes/,
 );
 
 for (const scheme of ["light", "dark"])
