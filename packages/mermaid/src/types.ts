@@ -9,6 +9,7 @@ import type { GitDoc } from "./git.ts";
 import type { JourneyDoc } from "./journey.ts";
 import type { KanbanDoc } from "./kanban.ts";
 import type { MindmapDoc } from "./mindmap.ts";
+import type { PacketDoc } from "./packet.ts";
 import type { PieDoc } from "./pie.ts";
 import type { QuadrantDoc } from "./quadrant.ts";
 import type { XyChartDoc } from "./xychart.ts";
@@ -221,7 +222,8 @@ export type MermaidDoc =
   | ArchitectureDoc
   | RequirementDoc
   | C4Doc
-  | KanbanDoc;
+  | KanbanDoc
+  | PacketDoc;
 
 export interface ParseOptions {
   readonly file?: string;
@@ -239,6 +241,7 @@ export type {
   JourneyDoc,
   KanbanDoc,
   MindmapDoc,
+  PacketDoc,
   PieDoc,
   QuadrantDoc,
   RequirementDoc,

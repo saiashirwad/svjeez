@@ -11,6 +11,7 @@ import { parseGit } from "./git.ts";
 import { parseJourney } from "./journey.ts";
 import { parseKanban } from "./kanban.ts";
 import { parseMindmap } from "./mindmap.ts";
+import { parsePacket } from "./packet.ts";
 import { parsePie } from "./pie.ts";
 import { parseQuadrant } from "./quadrant.ts";
 import { parseSankey } from "./sankey.ts";
@@ -22,7 +23,7 @@ import { parseXyChart } from "./xychart.ts";
 import type { MermaidDoc, ParseOptions } from "./types.ts";
 
 const KINDS =
-  "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `classDiagram`, `stateDiagram`/`stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `mindmap`, `gitGraph`, `journey`, `timeline`, `quadrantChart`, `xychart-beta`/`xychart`, `sankey-beta`, `block-beta`, `architecture-beta`, `requirementDiagram`, `C4Context` (and the other C4 headers) and `kanban`.";
+  "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `classDiagram`, `stateDiagram`/`stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `mindmap`, `gitGraph`, `journey`, `timeline`, `quadrantChart`, `xychart-beta`/`xychart`, `sankey-beta`, `block-beta`, `architecture-beta`, `requirementDiagram`, `C4Context` (and the other C4 headers), `kanban`, `packet-beta`, `radar-beta` and `treemap-beta`.";
 
 const lines = (text: string, file: string, first: number): Line[] =>
   text.split(/\r?\n/).flatMap((raw, i): Line[] => {
@@ -91,6 +92,8 @@ export function parseMermaid(text: string, options: ParseOptions = {}): MermaidD
   if (word === "quadrantChart") return parseQuadrant(first, body);
 
   if (word === "xychart-beta" || word === "xychart") return parseXyChart(first, body);
+
+  if (word === "packet-beta" || word === "packet") return parsePacket(first, body);
 
   return fail(first, `the first line must name a diagram type. ${KINDS}`);
 }

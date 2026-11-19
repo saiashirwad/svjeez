@@ -76,6 +76,8 @@ export {
   type MindSpec,
 } from "./mindmap.tsx";
 
+export { packet, type Packet, type PacketField, type PacketOptions } from "./packet.tsx";
+
 export {
   gitGraph,
   type GitCommit,

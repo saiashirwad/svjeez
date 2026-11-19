@@ -14,6 +14,7 @@ import {
   type Journey,
   type Kanban,
   type Mindmap,
+  type Packet,
   type Pie,
   type QuadrantChart,
   type Timeline,
@@ -41,6 +42,7 @@ import { drawGit } from "./git.ts";
 import { drawJourney } from "./journey.ts";
 import { drawKanban } from "./kanban.ts";
 import { drawMindmap } from "./mindmap.ts";
+import { drawPacket } from "./packet.ts";
 import { parseMermaid } from "./parse.ts";
 import { drawPie } from "./pie.ts";
 import { drawQuadrant } from "./quadrant.ts";
@@ -60,6 +62,7 @@ import type {
   JourneyDoc,
   KanbanDoc,
   MindmapDoc,
+  PacketDoc,
   PieDoc,
   QuadrantDoc,
   TimelineDoc,
@@ -101,7 +104,8 @@ export type MermaidDiagram =
   | (Architecture & { readonly kind: "architecture"; readonly doc: ArchitectureDoc })
   | (RequirementDiagram<string> & { readonly kind: "requirement"; readonly doc: RequirementDoc })
   | (C4<string> & { readonly kind: "c4"; readonly doc: C4Doc })
-  | (Kanban<string> & { readonly kind: "kanban"; readonly doc: KanbanDoc });
+  | (Kanban<string> & { readonly kind: "kanban"; readonly doc: KanbanDoc })
+  | (Packet<string> & { readonly kind: "packet"; readonly doc: PacketDoc });
 
 const FORM_NODES: Record<FlowForm, { readonly role: NodeRole; readonly shape?: NodeShape }> = {
   rect: { role: "task" },
@@ -136,6 +140,7 @@ const NAMES = {
   sankey: "sankey diagram",
   block: "block diagram",
   architecture: "cloud architecture diagram",
+  packet: "packet diagram",
 } as const;
 
 const stateRegion = (r: StateRegion) => ({
@@ -288,6 +293,8 @@ export function mermaid(text: string, options: MermaidOptions): MermaidDiagram {
 
   if (doc.kind === "architecture")
     return drawn(drawArchitecture(doc, diagramOptions), "architecture", doc);
+
+  if (doc.kind === "packet") return drawn(drawPacket(doc, diagramOptions), "packet", doc);
 
   if (doc.kind === "sequence") {
     return drawn(
