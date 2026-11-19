@@ -52,18 +52,13 @@ jobs:
   browsers:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # Playwright's image ships the browsers and their system packages, which on a bare runner are a slow ~140 MB apt install.
+    # Its version must match the playwright-core in bun.lock, since each release pins its own browser builds.
+    container: mcr.microsoft.com/playwright:v1.64.1-noble
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      # Browser builds are pinned by the lockfile, so cache them across runs. --with-deps still installs the system packages.
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-all-${{ runner.os }}-${{ hashFiles('bun.lock') }}
-      # The locked playwright-core, since bunx fetches the latest and its browser builds aren't the ones the tests launch.
-      - run: bun run playwright-core install --with-deps chromium-headless-shell firefox webkit
-        working-directory: packages/svjeez
       - run: bun run test:browsers
         working-directory: examples
 
