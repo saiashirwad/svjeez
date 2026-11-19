@@ -82,14 +82,37 @@ describe("parse mindmap", () => {
   });
 
   test("errors name the line and say how to fix it", () => {
-    expect(message("mindmap\n  A\n    ::icon(fa fa-book)")).toContain("icons are not supported");
-    expect(message("mindmap\n  A\n    B:::big")).toContain("classes");
+    expect(message("mindmap\n  ::icon(fa fa-book)\n  A")).toContain("before the root");
     expect(message("mindmap\n  A\n  B")).toBe(
       'm.mmd:3: "B": there can be only one root, and "A" is it. Indent this line under a node.',
     );
     expect(message("mindmap")).toContain("no root");
     expect(message("mindmap\n  A\n    ()")).toContain("needs some text");
     expect(message("mindmap x")).toContain("just `mindmap`");
+  });
+});
+
+describe("parse mindmap decorations", () => {
+  test("accepts icon and class lines without drawing them", () => {
+    const doc = parse(`mindmap
+      root
+        Books
+        ::icon(fa fa-book)
+        :::big wide
+        Ideas:::big
+        ::icon(mdi mdi-lightbulb)`);
+
+    expect(doc.root.children.map((c) => c.label)).toEqual(["Books", "Ideas"]);
+  });
+
+  test("reads markdown strings as plain text", () => {
+    const doc = parse(`mindmap
+      root["\`**bold** and *soft*\`"]
+        "\`plain __strong__ text\`"
+        snake_case_name`);
+
+    expect(doc.root.label).toBe("bold and soft");
+    expect(doc.root.children.map((c) => c.label)).toEqual(["plain strong text", "snake_case_name"]);
   });
 });
 

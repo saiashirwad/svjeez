@@ -19,7 +19,7 @@ export interface MindmapDoc {
 }
 
 const SUPPORTED =
-  "Supported: one root, then children indented under their parent; a node is plain text or `id[text]` `id(text)` `id((text))` `id))text((` `id)text(` `id{{text}}`.";
+  'Supported: one root, then children indented under their parent; a node is plain text or `id[text]` `id(text)` `id((text))` `id))text((` `id)text(` `id{{text}}`, markdown strings such as "`**bold**`" (shown as plain text), and `::icon(...)` and `:::class` lines (accepted and not drawn).';
 
 const SHAPES: readonly (readonly [RegExp, MindmapShape])[] = [
   [/^([^\s()[\]{}]*)\(\((.*)\)\)$/, "circle"],
@@ -45,8 +45,12 @@ const read = (l: Line) => {
     return m ? [{ text: m[2]!, shape }] : [];
   })[0];
 
-  const text = (shaped?.text ?? l.text).trim();
-  const label = clean(unquote(text).replace(/^`|`$/g, ""));
+  const text = unquote((shaped?.text ?? l.text).trim());
+  const markdown = /^`[^`]*`$/.test(text);
+
+  const label = clean(
+    markdown ? text.slice(1, -1).replace(/(\*\*|__)(.+?)\1|\*(\S[^*]*)\*/g, "$2$3") : text,
+  );
 
   if (label === "") return fail(l, `a node needs some text. ${SUPPORTED}`);
 
@@ -69,14 +73,19 @@ export const parseMindmap = (header: Line, body: readonly Line[]): MindmapDoc =>
   let root: Open | undefined;
 
   for (const l of body) {
-    if (l.text.startsWith("::icon"))
-      return fail(l, "icons are not supported: svjeez draws text only. Delete the ::icon line.");
-
-    if (l.text.startsWith(":::") || /\S:::\S/.test(l.text))
-      return fail(l, "styling classes (:::name) are not supported. Delete the class.");
+    // Icons and style classes decorate the node above, and svjeez draws neither.
+    if (/^::(icon\(.*\)|:\S.*)$/.test(l.text)) {
+      if (root === undefined)
+        return fail(l, "an icon or class belongs under a node, not before the root.");
+      continue;
+    }
 
     const indent = l.indent ?? 0;
-    const { label, shape } = read(l);
+    const { label, shape } = read({
+      ...l,
+      text: l.text.replace(/:::[\w-]+(?:\s+[\w-]+)*\s*$/, "").trimEnd(),
+    });
+
     const node: Open = { indent, children: [], label, shape, source: sourceOf(l) };
 
     if (root === undefined) {

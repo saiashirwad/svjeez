@@ -4,7 +4,8 @@ export default show(
   "Mindmap",
   `mindmap
   root((svjeez))
-    Scenes
+    "\`**Scenes**\`"
+      ::icon(fa fa-cube)
       Shapes
       Text
       Motion
@@ -13,7 +14,7 @@ export default show(
       Sequence
       Mermaid
     Output
-      SVG
+      SVG:::done
       Video
       PNG frames`,
 );
