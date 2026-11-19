@@ -91,7 +91,6 @@ Each package runs while the scene compiles, so the SVG still carries no script.
 - [`@svjeez/fonts`](https://github.com/saiashirwad/svjeez/tree/next/packages/fonts): Google Fonts by name, subset and embedded
 - [`@svjeez/icons`](https://github.com/saiashirwad/svjeez/tree/next/packages/icons): Tabler and Lucide icons as an `<Icon>` node
 - [`@svjeez/charts`](https://github.com/saiashirwad/svjeez/tree/next/packages/charts): bar, line and area charts on shared axes
-- [`@svjeez/dom`](https://github.com/saiashirwad/svjeez/tree/next/packages/dom): HTML, React or Svelte states recorded in Chromium as snapshot data
 - [`@svjeez/code`](https://github.com/saiashirwad/svjeez/tree/next/packages/code): highlighted code that types itself and morphs
 - [`@svjeez/geo`](https://github.com/saiashirwad/svjeez/tree/next/packages/geo): maps and turning globes from GeoJSON or TopoJSON
 - [`@svjeez/math`](https://github.com/saiashirwad/svjeez/tree/next/packages/math): TeX as glyph shapes, plots, constructions and plane transformations
