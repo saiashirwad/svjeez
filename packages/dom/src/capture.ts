@@ -256,7 +256,7 @@ export const capture = (root: Element): Snapshot => {
     const to = /^to\s+(.+)$/.exec(value)?.[1]?.split(/\s+/);
 
     if (to) {
-      const corner = Math.atan2(width, height) * (180 / Math.PI);
+      const corner = Math.atan2(height, width) * (180 / Math.PI);
       const key = [...to].sort().join(" ");
 
       const named = new Map([
@@ -1173,6 +1173,10 @@ export const capture = (root: Element): Snapshot => {
 
     for (const name of MIRRORED) mirror.style.setProperty(name, style.getPropertyValue(name));
 
+    // The mirror sits under <html>, so what the control colors its text with has to be copied too.
+    for (const name of ["color", "-webkit-text-fill-color", "text-shadow"])
+      mirror.style.setProperty(name, style.getPropertyValue(name));
+
     mirror.style.whiteSpace = el instanceof HTMLTextAreaElement ? style.whiteSpace : "pre";
     mirror.style.width = `${Math.max(0, el.clientWidth - pl - pr)}px`;
     mirror.textContent = shown;
@@ -1666,8 +1670,12 @@ export const capture = (root: Element): Snapshot => {
     scope.adoptedStyleSheets = [...adopted, off];
 
     try {
-      if (which === "::before") el.insertBefore(standIn, el.firstChild);
-      else el.append(standIn);
+      // A shadow host's pseudo-elements sit around its shadow tree, so the stand-in goes inside the shadow root:
+      // in the host's light DOM it would be unslotted.
+      const parent: Element | ShadowRoot = el.shadowRoot ?? el;
+
+      if (which === "::before") parent.insertBefore(standIn, parent.firstChild);
+      else parent.append(standIn);
 
       return element(standIn, a, stand);
     } finally {
@@ -1841,20 +1849,22 @@ export const capture = (root: Element): Snapshot => {
 
   const fonts: WebFont[] = [];
 
-  for (const sheet of Array.from(document.styleSheets)) {
-    let rules: CSSRuleList;
+  const seen = new Set<CSSStyleSheet>();
 
-    try {
-      rules = sheet.cssRules;
-    } catch {
-      // A cross-origin stylesheet without CORS hides its rules.
-      continue;
-    }
-
-    const base = sheet.href ?? document.baseURI;
-
+  const collect = (rules: CSSRuleList, base: string) => {
     for (const rule of Array.from(rules)) {
-      if (!(rule instanceof CSSFontFaceRule)) continue;
+      if (rule instanceof CSSImportRule) {
+        if (rule.styleSheet) walk(rule.styleSheet);
+
+        continue;
+      }
+
+      // @media, @supports, @layer { ... } and the like.
+      if (!(rule instanceof CSSFontFaceRule)) {
+        if (rule instanceof CSSGroupingRule) collect(rule.cssRules, base);
+
+        continue;
+      }
 
       const url = /url\(\s*(?:"([^"]*)"|'([^']*)'|([^)\s]*))\s*\)/.exec(
         rule.style.getPropertyValue("src"),
@@ -1875,7 +1885,26 @@ export const capture = (root: Element): Snapshot => {
         src: new URL(src, base).href,
       });
     }
-  }
+  };
+
+  const walk = (sheet: CSSStyleSheet) => {
+    if (seen.has(sheet)) return;
+
+    seen.add(sheet);
+
+    let rules: CSSRuleList;
+
+    try {
+      rules = sheet.cssRules;
+    } catch {
+      // A cross-origin stylesheet without CORS hides its rules.
+      return;
+    }
+
+    collect(rules, sheet.href ?? document.baseURI);
+  };
+
+  for (const sheet of Array.from(document.styleSheets)) walk(sheet);
 
   return {
     version: 1,
