@@ -55,6 +55,9 @@ jobs:
     # Playwright's image ships the browsers and their system packages, which on a bare runner are a slow ~140 MB apt install.
     # Its version must match the playwright-core in bun.lock, since each release pins its own browser builds.
     container: mcr.microsoft.com/playwright:v1.64.1-noble
+    # Firefox won't run as root with a HOME owned by another user, which is how Actions starts the container.
+    env:
+      HOME: /root
     steps:
       - uses: actions/checkout@v4
       # setup-bun needs unzip, which the image lacks; it does have npm.
