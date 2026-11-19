@@ -48,7 +48,7 @@ Each element is a group framed at its transform origin (or its top-left corner),
 
 Drawn with core primitives: rounded boxes (per-corner radii), background colors and linear/radial gradients, opacity, blend, 2D transforms, overflow clips, `<img>` data URLs as pictures, inline svg paths and basic shapes, text runs at their captured baselines and advances. Built from plain geometry: borders and outlines (a stroke pulled inside the box, or wedges cut to a ring when sides differ), outer shadows (core `shadow()` on a shape cut away under the box), spread and inset shadows (blurred shapes), and text decorations (thin rects).
 
-`diagnostics` lists what is not faithful, as `{ path, what }`: a skew, an elliptical radial gradient, `groove`/`ridge`/`inset`/`outset` borders, background images, `<img>` sources that are not `data:` URLs, svg text, paint servers and other elements, animations, and a keyed element that moves between parents it cannot ride across.
+`diagnostics` lists what is not faithful, as `{ path, what }`: an elliptical radial gradient, `groove`/`ridge`/`inset`/`outset` borders, background images, `<img>` sources that are not `data:` URLs, svg text, paint servers and other elements, animated properties other than `transform`, `opacity` and `background-color`, and a keyed element that moves between parents it cannot ride across.
 
 ## Animating between states
 
@@ -60,7 +60,9 @@ Elements are paired across states by `pair`, in this order: `pairBy(node)` (an o
 
 A `data-key` (or `id`, or `pairBy` name) that sits under different parents in different states, like a card moving between columns, is lifted to the level of the nearest parent the states share and glides across in page coordinates. That works when nothing between it and that parent clips, transforms or fades; otherwise a diagnostic says so and it leaves in one place and enters in the other.
 
-Every element also has an inner `@track` group, reserved for its CSS animations to hang `track()`s on without colliding with the lanes a morph drives.
+Every element also has an inner `@track` group that its Web Animations drive, so they never collide with the lanes a morph drives.
+
+With one Snapshot, running animations and transitions play on from the captured moment (scene time 0): each continues from its `currentTime` through its delay, iterations and direction at its `playbackRate`, as `track()`s on `transform` (with `translate`, `rotate`, `scale`; the matrix becomes offset, rotate, scale and skew), `opacity` and `background-color`. An infinite animation is one cycle started at its phase and looped; a finite one is unrolled. Without `hold`, the scene rests until the longest running animation ends (one cycle for an endless one). Easings are cubic-bezier and steps (`linear()` is drawn linear). `fill` decides what shows before and after; when an animation lets go of a value, `transform` and `opacity` return to none and 1 and a color keeps its last keyframe, since a mid-flight capture cannot see the style underneath. Paused and finished animations stay as captured. With several states, animations are not compiled (each state shows its captured moment).
 
 ## record, cache, assets, schemes
 

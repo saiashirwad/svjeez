@@ -738,7 +738,14 @@ export const capture = (root: Element): Snapshot => {
 
     if (radii.some(([x, y]) => x > 0 || y > 0)) node.radii = radii;
 
-    if (!isPlain(own))
+    // An animation of the transform needs the origin it turns about, even at a moment when the transform is none.
+    const turns = animations.some(({ keyframes }) =>
+      keyframes.some(({ props }) =>
+        ["transform", "translate", "rotate", "scale"].some((name) => name in props),
+      ),
+    );
+
+    if (!isPlain(own) || turns)
       node.transform = {
         matrix: [
           round(own.a),

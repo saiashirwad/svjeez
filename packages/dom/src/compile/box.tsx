@@ -10,6 +10,7 @@ import { isElement, type Paired } from "./pair.ts";
 import { text } from "./text.tsx";
 import { decompose } from "./transform.ts";
 import { vector } from "./vector.tsx";
+import { animate } from "./waapi.ts";
 
 type Blend = Exclude<Common["blend"], "normal" | undefined>;
 
@@ -60,10 +61,10 @@ export const element = (
   const widths = widthsOf(el.border);
   const padding = { box: inset(box, widths), radii: innerRadii(radii, widths) };
 
-  const placed = transform && decompose(transform.matrix);
+  // What animations drive replaces the static value the capture caught mid-flight.
+  const motion = el.animations?.length ? animate(el, path, ctx) : undefined;
 
-  if (el.animations?.length)
-    ctx.note(path, "animations are not compiled; the layout shows the captured moment");
+  const placed = transform && !motion?.transform ? decompose(transform.matrix) : undefined;
 
   const blend = blendOf(el.blendMode);
 
@@ -118,7 +119,7 @@ export const element = (
 
   const children: SceneElement[] = [
     ...(cast?.below ?? []),
-    ...backgrounds(el.background, el.backgrounds, where),
+    ...backgrounds(el.background, el.backgrounds, where, motion?.fill),
     ...(lit?.above ?? []),
     ...(el.border ? border(el.border, where) : []),
     ...(content.length > 0 && (cut || forced)
@@ -145,11 +146,17 @@ export const element = (
         scale: placed.scale,
         skew: placed.skew,
       })}
-      {...(el.opacity !== undefined && { opacity: el.opacity })}
+      {...(el.opacity !== undefined && !motion?.opacity && { opacity: el.opacity })}
       {...(blend && { blend })}
     >
-      {/* Pass 6 hangs an element's animations (`track()`) on this group, so they never collide with the lanes a morph drives on the group around it. */}
-      <Group key="@track">{children}</Group>
+      {/* An element's animations (`track()`) drive this group, so they never collide with the lanes a morph drives on the group around it. */}
+      <Group
+        key="@track"
+        {...(motion?.transform && { origin: "at" as const, ...motion.transform })}
+        {...(motion?.opacity && { opacity: motion.opacity })}
+      >
+        {children}
+      </Group>
     </Group>
   );
 };

@@ -164,40 +164,18 @@ describe("boxes", () => {
     back.forEach((value, i) => expect(value).toBeCloseTo(matrix[i]!, 9));
   });
 
-  test("children sit in their parent's frame, and animations are reported, not dropped", () => {
-    const child = box({
-      rect: { x: 25, y: 15, width: 10, height: 10 },
-      background: "rgb(0, 0, 0)",
-    });
-
+  test("children sit in their parent's frame", () => {
     const out = draw(
       box({
         rect: { x: 5, y: 5, width: 100, height: 60 },
-        children: [{ ...child, rect: { x: 30, y: 20, width: 10, height: 10 } }],
-        animations: [
-          {
-            kind: "animation",
-            name: "spin",
-            keyframes: [],
-            duration: 1000,
-            delay: 0,
-            endDelay: 0,
-            iterations: 1,
-            direction: "normal",
-            easing: "linear",
-            fill: "none",
-            currentTime: 0,
-            playbackRate: 1,
-            playState: "running",
-          },
+        children: [
+          box({ rect: { x: 30, y: 20, width: 10, height: 10 }, background: "rgb(0, 0, 0)" }),
         ],
       }),
     );
 
     expect(out.svg).toContain('<rect x="25" y="15" width="10" height="10"');
-    expect(out.diagnostics.map((d) => d.what)).toEqual([
-      "animations are not compiled; the layout shows the captured moment",
-    ]);
+    expect(out.diagnostics).toEqual([]);
   });
 });
 

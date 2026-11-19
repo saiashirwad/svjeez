@@ -5,6 +5,9 @@ import { element } from "./box.tsx";
 import { context, type Diagnostic } from "./context.ts";
 import { normalize } from "./normalize.ts";
 import { pair, type PairBy, type Paired } from "./pair.ts";
+import { watchFor } from "./waapi.ts";
+
+const DEFAULT_HOLD = 0.8;
 
 export type { Diagnostic } from "./context.ts";
 
@@ -13,7 +16,10 @@ export type { PairBy } from "./pair.ts";
 export interface CompileOptions {
   /** Seconds a move between states takes unless the state says. Default 0.6. */
   readonly over?: number;
-  /** Seconds a state rests before the next move unless it says. Default 0.8. */
+  /**
+   * Seconds a state rests before the next move unless it says. Default 0.8, or, for one Snapshot with running animations,
+   * as long as they need to be seen: the longest one still to run, or a cycle of an endless one.
+   */
   readonly hold?: number;
   /** The easing of a move unless the state says. Default `"inOut"`. */
   readonly ease?: EaseName;
@@ -53,7 +59,7 @@ const pathsOf = ({ node, children }: Paired, path: string, into: Set<string>): v
  */
 export const compile = (
   input: Snapshot | readonly State[],
-  { over = 0.6, hold = 0.8, ease: easing = "inOut", pairBy }: CompileOptions = {},
+  { over = 0.6, hold, ease: easing = "inOut", pairBy }: CompileOptions = {},
 ): Compiled => {
   const states: readonly State[] = "root" in input ? [{ name: "", snapshot: input }] : input;
 
@@ -66,10 +72,18 @@ export const compile = (
 
   for (const root of roots) pathsOf(root, root.key, clips);
 
+  const single = states.length === 1;
+
+  // One state rests for its hold, or long enough for its animations to play. They compile only then: they run on the scene's clock.
+  const resting =
+    hold ??
+    (single ? Math.max(DEFAULT_HOLD, ...roots.map(({ node }) => watchFor(node))) : DEFAULT_HOLD);
+
   const ctx = context(
     snapshots.flatMap((snapshot) => snapshot.fonts ?? []),
     // Only a state-to-state blend needs a clip in every state.
-    states.length > 1 ? clips : new Set(),
+    single ? new Set() : clips,
+    single ? (states[0]!.hold ?? resting) : undefined,
   );
 
   for (const { path, what } of moves) ctx.note(path, what);
@@ -91,7 +105,7 @@ export const compile = (
       duration += length;
     }
 
-    duration += state.hold ?? hold;
+    duration += state.hold ?? resting;
   });
 
   const sizes = roots.map(({ node }) => node.rect);

@@ -1,6 +1,16 @@
 /** @jsxImportSource svjeez */
-import { Group, Shape, blur, linear, polygon, radial, shadow, type SceneElement } from "svjeez";
-import type { Stops, StrokeProps } from "svjeez/tools";
+import {
+  Group,
+  Shape,
+  blur,
+  linear,
+  polygon,
+  radial,
+  shadow,
+  type Anim,
+  type SceneElement,
+} from "svjeez";
+import type { Hex, Stops, StrokeProps } from "svjeez/tools";
 import type { Background, BorderStyle, Color, Rect, Shadow, Side } from "../schema.ts";
 import { colorKey, painted, type Context, type Solid } from "./context.ts";
 import {
@@ -65,12 +75,15 @@ export const backgrounds = (
   color: Color | undefined,
   layers: readonly Background[] | undefined,
   { box, radii, path, ctx }: Where,
+  /** The background color as a track, when an animation drives it: drawn even where the page is clear at the captured moment. */
+  moving?: Anim<Hex>,
 ): SceneElement[] => {
   const out: SceneElement[] = [];
   const shape = rounded(box, radii);
   const fill = painted(color);
 
-  if (fill) out.push(<Shape key="background" {...shape} fill={fill.rgba} />);
+  if (moving) out.push(<Shape key="background" {...shape} fill={moving} />);
+  else if (fill) out.push(<Shape key="background" {...shape} fill={fill.rgba} />);
 
   // CSS lists the topmost layer first.
   [...(layers ?? [])].reverse().forEach((layer, i, all) => {

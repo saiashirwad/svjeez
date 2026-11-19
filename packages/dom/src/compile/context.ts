@@ -15,12 +15,15 @@ export interface Context {
   readonly faces: readonly WebFont[];
   /** The paths of elements that clip in some state: in every state they get a clip, a no-op one where the page has none, so a clip is never added or removed mid-morph. */
   readonly clips: ReadonlySet<string>;
+  /** Seconds the scene runs, when animations are compiled to play through them; undefined when several states morph and a state shows its captured moment. */
+  readonly watch: number | undefined;
   note(path: string, what: string): void;
 }
 
 export const context = (
   faces: readonly WebFont[] = [],
   clips: ReadonlySet<string> = new Set(),
+  watch?: number,
 ): Context => {
   const diagnostics: Diagnostic[] = [];
   const seen = new Set<string>();
@@ -30,6 +33,7 @@ export const context = (
     fonts: new Map(),
     faces,
     clips,
+    watch,
     note: (path, what) => {
       const id = `${path}\0${what}`;
 
