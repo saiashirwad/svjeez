@@ -11,6 +11,7 @@ import {
   pathData,
   rect,
   through,
+  within,
   type Anim,
   type SceneElement,
   type Vec,
@@ -31,14 +32,18 @@ const CURVES = { linear: curveLinear, monotone: curveMonotoneX, step: curveStep 
 const DOT_POP = 0.08;
 const LABEL_IN = 0.15;
 
-const ramp = (from: number, to: number, progress: number): number =>
-  Math.min(1, Math.max(0, (progress - from) / (to - from)));
-
 /** What a part of a series is while the whole is drawn to `draw`: nothing animates when there is no draw. */
 const drawing =
   (draw: Anim<number> | undefined) =>
   <U,>(fn: (progress: number) => U): Anim<U> | undefined =>
     draw === undefined ? undefined : through(draw, fn);
+
+/** A part's own progress, 0 to 1, while the series draws from `from` to `to`. */
+const partOf = (
+  draw: Anim<number> | undefined,
+  from: number,
+  to: number,
+): Anim<number> | undefined => (draw === undefined ? undefined : within(draw, from, to));
 
 const strokes = (...rows: readonly (readonly [Vec, Vec])[]): PathBuilder =>
   rows.reduce((p, [from, to]) => p.moveTo(from).lineTo(to), path());
@@ -151,7 +156,6 @@ const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps)
   const { plot, zero } = layout;
   const { radius = 3, color, draw } = options;
   const stagger = options.stagger ?? 0.3;
-  const drawn = drawing(draw);
 
   if (!(stagger >= 0 && stagger < 1))
     throw new SceneError(
@@ -175,7 +179,7 @@ const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps)
     const x = at + slot.index * width + gap / 2;
     const radii = up ? ([r, r, 0, 0] as const) : ([0, 0, r, r] as const);
     const start = layout.bands.length > 1 ? (stagger * i) / (layout.bands.length - 1) : 0;
-    const grown = (progress: number): number => ramp(start, start + 1 - stagger, progress);
+    const grown = drawing(partOf(draw, start, start + 1 - stagger));
 
     const bar = (
       <Shape
@@ -184,7 +188,7 @@ const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps)
         at={[x, zero]}
         anchor={up ? "bottom-left" : "top-left"}
         origin={up ? "bottom" : "top"}
-        scale={drawn((progress): Vec => [1, grown(progress)])}
+        scale={grown((progress): Vec => [1, progress])}
         fill={color}
       />
     );
@@ -193,7 +197,7 @@ const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps)
 
     const rest: Vec = [x + barWidth / 2, plot.y(value) + (up ? -4 : 4)];
     const lift = up ? 4 : -4;
-    const shown = (progress: number): number => ramp(0.6, 1, grown(progress));
+    const shown = partOf(draw, start + 0.6 * (1 - stagger), start + 1 - stagger);
 
     return [
       bar,
@@ -201,10 +205,10 @@ const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps)
         key={`${key}:value`}
         font={chart.font}
         size={size}
-        at={drawn((progress): Vec => [rest[0], rest[1] + (1 - shown(progress)) * lift]) ?? rest}
+        at={drawing(shown)((progress): Vec => [rest[0], rest[1] + (1 - progress) * lift]) ?? rest}
         anchor={up ? "bottom" : "top"}
         fill={chart.label}
-        opacity={drawn(shown)}
+        opacity={shown}
       >
         {format(value)}
       </Text>,
@@ -256,7 +260,7 @@ const Line = ({
   const last = points.at(-1)!;
   const along = reaches(points);
   const rest: Vec = [last[0] + (radius || width) + 8, last[1]];
-  const shown = (progress: number): number => ramp(1 - LABEL_IN, 1, progress);
+  const shown = partOf(draw, 1 - LABEL_IN, 1);
 
   return (
     <Group key={options.name}>
@@ -277,9 +281,7 @@ const Line = ({
             at={at}
             anchor="center"
             fill={color}
-            scale={drawn((progress) =>
-              ramp(along[i]! * (1 - DOT_POP), along[i]! * (1 - DOT_POP) + DOT_POP, progress),
-            )}
+            scale={partOf(draw, along[i]! * (1 - DOT_POP), along[i]! * (1 - DOT_POP) + DOT_POP)}
           />
         ))}
       {label ? (
@@ -287,10 +289,10 @@ const Line = ({
           key="label"
           font={chart.font}
           size={size}
-          at={drawn((progress): Vec => [rest[0] - (1 - shown(progress)) * 8, rest[1]]) ?? rest}
+          at={drawing(shown)((progress): Vec => [rest[0] - (1 - progress) * 8, rest[1]]) ?? rest}
           anchor="left"
           fill={color}
-          opacity={drawn(shown)}
+          opacity={shown}
         >
           {label}
         </Text>

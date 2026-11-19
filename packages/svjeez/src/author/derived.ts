@@ -6,6 +6,7 @@ import type { Anchor } from "./refs";
 import { breaksOf, follow, laneFrom, valueAt } from "../model/sample";
 import { laneOf, mixNumber, mixVec, type Mix, type Parts, type Timing } from "../model/steps";
 import { isTrack, passageOf, readOf, type Anim, type Track } from "./track";
+import { Window, ramp, windowLane } from "./window";
 
 export interface MapOptions {
   readonly tolerance?: number;
@@ -15,7 +16,7 @@ export type Source = number | Vec | Track<number> | Track<Vec> | Derived<number>
 
 type Read = number | Vec;
 
-type Base = number | Vec | Track<number> | Track<Vec>;
+type Base = number | Vec | Track<number> | Track<Vec> | Window;
 
 export class Derived<T> {
   readonly sources: readonly Base[];
@@ -53,8 +54,12 @@ export const through = <T, U>(value: Anim<T>, fn: (value: T) => U): Anim<U> =>
   isTrack(value) || isDerived(value) ? value.map(fn) : fn(value);
 
 const startOf = (source: Base): Read =>
-  // SAFETY: a source track holds numbers or points, the values read() takes.
-  isTrack(source) ? (passageOf(source as Track<Read>).data.initial.value as Read) : source;
+  source instanceof Window
+    ? source.of(restOf(source.track))
+    : // SAFETY: a source track holds numbers or points, the values read() takes.
+      isTrack(source)
+      ? (passageOf(source as Track<Read>).data.initial.value as Read)
+      : source;
 
 /** The value an animated prop starts from, at the start of its clock. */
 export const restOf = <T>(value: Anim<T>): T => {
@@ -122,6 +127,23 @@ export const mappedTrack = <T, U>(
     ([value]) => fn(value as T),
     options.tolerance,
   );
+
+/**
+ * A value's progress between `from` and `to`, from 0 to 1 and held outside: a draw timeline seen as one part's own.
+ * A track's window is exact and cheap, where a map() of it is sampled.
+ */
+export const within = (value: Anim<number>, from: number, to: number): Anim<number> => {
+  if (!(from < to))
+    throw new SceneError(
+      `A window runs from ${from} to ${to}, which is not a span.`,
+      "Give a start below its end, as in within(draw, 0.2, 0.8).",
+    );
+
+  if (!isTrack(value)) return through(value, (progress) => ramp(progress, from, to));
+
+  // SAFETY: the one source is a window, which reads as a number.
+  return new Derived([new Window(value, from, to)], ([progress]) => progress as number);
+};
 
 const isNumber = (value: Read | undefined): value is number => typeof value === "number";
 
@@ -347,7 +369,36 @@ const steppedLane = <T>(
   return period === undefined ? lane : { ...lane, period };
 };
 
-const isBaseTrack = (source: Base): source is Track<number> | Track<Vec> => isTrack(source);
+/** A track's lane seen through a window: cut exactly where it can be, sampled where it cannot. */
+const windowed = (
+  lane: Animated<Read>,
+  window: Window,
+  timing: Timing,
+  where: string,
+): Animated<Read> => {
+  // SAFETY: a window is of a number track, so its lane holds numbers.
+  const numbers = lane as Animated<number>;
+
+  if (!isLane(numbers)) return window.of(numbers);
+  const exact = windowLane(numbers, window);
+
+  if (exact !== undefined) return exact;
+  const period = numbers.period;
+
+  return sampledLane(
+    [numbers],
+    // SAFETY: the one lane is a number track's, so its value is a number.
+    ([progress]) => window.of(progress as number),
+    period ?? timing.duration,
+    period,
+    undefined,
+    where,
+    false,
+  );
+};
+
+const isBaseTrack = (source: Base): source is Track<number> | Track<Vec> | Window =>
+  source instanceof Window || isTrack(source);
 
 export const derivedOf = <A, T>(
   value: Derived<A>,
@@ -358,7 +409,8 @@ export const derivedOf = <A, T>(
 ): Animated<T> => {
   const lanes = value.sources.map((source): Animated<Read> => {
     if (!isBaseTrack(source)) return source;
-    const { data } = readOf<Read>(source, timing, `a track that ${where} is derived from`);
+    const track = source instanceof Window ? source.track : source;
+    const { data } = readOf<Read>(track, timing, `a track that ${where} is derived from`);
     const first = data.initial.value;
 
     if (first === undefined || !readable(first))
@@ -366,7 +418,9 @@ export const derivedOf = <A, T>(
         `${where} is derived from a track of something other than numbers or points. Derive from a number or point track, and map it to the value you need.`,
       );
 
-    return laneOf(data, first, timing, mixRead, `a track that ${where} is derived from`);
+    const lane = laneOf(data, first, timing, mixRead, `a track that ${where} is derived from`);
+
+    return source instanceof Window ? windowed(lane, source, timing, where) : lane;
   });
 
   const out = (values: readonly Read[]): T => change(value.read(values));
