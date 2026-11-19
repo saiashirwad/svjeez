@@ -120,3 +120,15 @@ export {
   type SankeyOptions,
   type SankeySpec,
 } from "./sankey.tsx";
+
+export {
+  blockDiagram,
+  type BlockBlock,
+  type BlockItem,
+  type BlockDiagram,
+  type BlockDiagramOptions,
+  type BlockGroup,
+  type BlockShape,
+  type BlockSpace,
+  type BlockSpec,
+} from "./block.tsx";
