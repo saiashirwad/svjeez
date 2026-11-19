@@ -32,3 +32,20 @@ export type * from "./schema.ts";
 export { film, settleScript, type FilmContext, type FilmOptions } from "./film.ts";
 
 export type { Target } from "./target.ts";
+
+export type { BrowserAdapter, Framework } from "./framework.ts";
+
+export { react } from "./frameworks/react.ts";
+
+export { svelte } from "./frameworks/svelte.ts";
+
+export {
+  serializeProps,
+  type Json,
+  type PropsFor,
+  type PropsOf,
+  type Wire,
+  type WireProps,
+} from "./props.ts";
+
+export type { ComponentOptions } from "./component.ts";
