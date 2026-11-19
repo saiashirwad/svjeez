@@ -25,11 +25,18 @@ const mismatch = (path: string, what: string): never => {
 
 const merge = (light: Json, dark: Json, path: string): Json => {
   if (isList(light) || isList(dark)) {
-    if (!isList(light) || !isList(dark) || light.length !== dark.length)
+    if (!isList(light) || !isList(dark)) {
       return mismatch(
         path,
         `${isList(light) ? light.length : "no"} entries in light, ${isList(dark) ? dark.length : "no"} in dark`,
       );
+    }
+
+    // Children are the page's structure and must match; any other list (shadows, gradient layers) keeps light's.
+    if (light.length !== dark.length)
+      return path.endsWith(".children")
+        ? mismatch(path, `${light.length} entries in light, ${dark.length} in dark`)
+        : light;
 
     return light.map((one, i) => merge(one, dark[i] ?? null, `${path}[${i}]`));
   }
@@ -45,9 +52,27 @@ const merge = (light: Json, dark: Json, path: string): Json => {
       // A color that is only set in one scheme (a transparent background in the other) pairs with clear.
       if (a === undefined && b !== undefined && isColor(b)) out[key] = merge(CLEAR, b, at);
       else if (b === undefined && a !== undefined && isColor(a)) out[key] = merge(a, CLEAR, at);
-      else if (a === undefined || b === undefined)
-        mismatch(at, `it is set in ${a === undefined ? "dark" : "light"} only`);
-      else out[key] = merge(a, b, at);
+      else if (a === undefined || b === undefined) {
+        // Anything else set in one scheme only comes from light, and is dropped when only dark has it.
+        if (IDENTITY.has(key) || key === "children")
+          mismatch(at, `it is set in ${a === undefined ? "dark" : "light"} only`);
+        else if (a !== undefined) out[key] = a;
+      } else out[key] = merge(a, b, at);
+    }
+
+    // Running animations were captured at different instants in the two schemes, so what they drive differs by phase,
+    // not by scheme: the animations and what they return to come from light, and so does the fill they animate.
+    const { animations, base } = light;
+
+    if (animations !== undefined && isList(animations) && animations.length > 0) {
+      out.animations = animations;
+
+      if (base !== undefined) out.base = base;
+
+      if (base !== undefined && isFields(base) && "backgroundColor" in base) {
+        if (light.background !== undefined) out.background = light.background;
+        else delete out.background;
+      }
     }
 
     return out;
