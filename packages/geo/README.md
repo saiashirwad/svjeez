@@ -9,7 +9,7 @@ npm i -D @svjeez/geo@next svjeez@next world-atlas
 ```tsx
 import { createRequire } from "node:module";
 import { project, type Topology } from "@svjeez/geo";
-import { Group, Shape, scene, span } from "svjeez";
+import { Group, Shape, scene, span, track } from "svjeez";
 
 const world: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
 const map = project(world, { size: [900, 460] });

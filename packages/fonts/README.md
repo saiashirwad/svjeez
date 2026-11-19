@@ -21,4 +21,4 @@ Pass a font to `<Text font={…}>`. Weight defaults to 400 and `italic` to false
 
 A build downloads a face on cache miss. Set `SVJEEZ_FONTS_CACHE` to share a cache in CI. It otherwise uses `$XDG_CACHE_HOME/svjeez/fonts` or `~/.cache/svjeez/fonts`.
 
-[API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/images-fonts.md)
+[API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/fonts-pictures.md)

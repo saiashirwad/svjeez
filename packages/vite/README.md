@@ -24,3 +24,5 @@ import hero from "./scenes/hero.tsx?svjeez";
 The plugin compiles the scene in its own JSX environment and reloads when a scene dependency changes. Add `&posters` for light and dark WebP stills. Configure them with `svjeez({ posters: { scale, quality, background } })`. Posters need `playwright-core` and `npx playwright-core install chromium-headless-shell`.
 
 [Example app](https://github.com/saiashirwad/svjeez/tree/next/packages/vite/test/app)
+
+[API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/web.md)

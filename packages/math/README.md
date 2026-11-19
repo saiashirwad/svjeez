@@ -8,7 +8,7 @@ npm i -D @svjeez/math@next svjeez@next
 
 ```tsx
 import { Axes, Tex, plane } from "@svjeez/math";
-import { Group, Shape, morph, scene, span } from "svjeez";
+import { Group, Shape, morph, scene, span, track } from "svjeez";
 
 const graph = plane({ x: [-4, 2], y: [0, 9], size: [440, 340] });
 

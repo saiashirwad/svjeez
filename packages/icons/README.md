@@ -10,7 +10,7 @@ npm i @svjeez/icons@next svjeez@next
 /** @jsxImportSource svjeez */
 import { Icon } from "@svjeez/icons";
 import { rocket } from "@svjeez/icons/tabler";
-import { scene, span } from "svjeez";
+import { scene, span, track } from "svjeez";
 
 export default scene({ size: [128, 128], duration: 2, title: "Rocket" }, () => (
   <Icon
