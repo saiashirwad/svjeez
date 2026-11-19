@@ -8,13 +8,14 @@ import { parseGit } from "./git.ts";
 import { parseJourney } from "./journey.ts";
 import { parseMindmap } from "./mindmap.ts";
 import { parsePie } from "./pie.ts";
+import { parseQuadrant } from "./quadrant.ts";
 import { parseSequence } from "./sequence.ts";
 import { parseState } from "./state.ts";
 import { parseTimeline } from "./timeline.ts";
 import type { MermaidDoc, ParseOptions } from "./types.ts";
 
 const KINDS =
-  "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `classDiagram`, `stateDiagram`/`stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `mindmap`, `gitGraph`, `journey` and `timeline`.";
+  "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `classDiagram`, `stateDiagram`/`stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `mindmap`, `gitGraph`, `journey`, `timeline` and `quadrantChart`.";
 
 const lines = (text: string, file: string, first: number): Line[] =>
   text.split(/\r?\n/).flatMap((raw, i): Line[] => {
@@ -67,6 +68,8 @@ export function parseMermaid(text: string, options: ParseOptions = {}): MermaidD
   if (word === "gitGraph") return parseGit(first, body);
 
   if (word === "timeline") return parseTimeline(first, body);
+
+  if (word === "quadrantChart") return parseQuadrant(first, body);
 
   return fail(first, `the first line must name a diagram type. ${KINDS}`);
 }

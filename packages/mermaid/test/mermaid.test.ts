@@ -717,6 +717,7 @@ describe("every supported diagram type", () => {
     pie: 'pie title Pets\n"Dogs" : 3\n"Cats" : 2',
     mindmap: "mindmap\n  root\n    A\n    B",
     timeline: "timeline\ntitle T\nsection S\n2021 : a : b\n     : c",
+    quadrant: "quadrantChart\ntitle Q\nx-axis Low --> High\nA: [0.3, 0.6]",
     git: "gitGraph\ncommit\nbranch dev\ncommit\ncheckout main\nmerge dev",
   } as const;
 

@@ -92,3 +92,12 @@ export {
   type TimelineSection,
   type TimelineSpec,
 } from "./timeline.tsx";
+
+export {
+  quadrantChart,
+  type QuadrantAxis,
+  type QuadrantChart,
+  type QuadrantChartOptions,
+  type QuadrantChartSpec,
+  type QuadrantPoint,
+} from "./quadrant.tsx";

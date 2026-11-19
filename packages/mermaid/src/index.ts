@@ -19,3 +19,5 @@ export type * from "./mindmap.ts";
 export type * from "./pie.ts";
 
 export type * from "./timeline.ts";
+
+export type * from "./quadrant.ts";
