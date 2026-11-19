@@ -1,6 +1,6 @@
 import type { Seconds } from "../model/time";
 import type { Placed } from "./boxes";
-import type { Animated, Paint, Scene, SceneNode, TextNode, Vec } from "../model/ir";
+import type { Animated, Paint, Scene, SceneNode, Scheme, TextNode, Vec } from "../model/ir";
 import { isLane, mapLane } from "../model/lane";
 import {
   between,
@@ -44,6 +44,8 @@ export interface DescribedNode {
   readonly fill?: string;
   readonly stroke?: string;
   readonly changing?: readonly Changing[];
+  /** The one color scheme it shows in, when it shows in only one. */
+  readonly scheme?: Scheme;
 }
 
 export interface DescribedFrame {
@@ -137,6 +139,7 @@ const nodeAt = (entry: Entry, placed: Placed, t: Seconds, duration: Seconds): De
     ...(fill !== undefined && fill !== "" && { fill }),
     ...(stroke !== undefined && { stroke }),
     ...(changing.length > 0 && { changing }),
+    ...(node.scheme !== undefined && { scheme: node.scheme }),
   };
 };
 
@@ -314,6 +317,7 @@ const look = (node: DescribedNode, around: DescribedNode | undefined): string =>
     node.fill !== undefined && `fill ${node.fill}`,
     node.stroke !== undefined && `stroke ${node.stroke}`,
     node.text !== undefined && JSON.stringify(node.text),
+    node.scheme !== undefined && `${node.scheme} only`,
     node.changing &&
       `~ ${node.changing.map((c) => `${c.value} ${seconds(c.from)}–${seconds(c.to)}`).join(", ")}`,
   ]
@@ -328,6 +332,7 @@ const worthALine = (node: SceneNode): boolean =>
   isLane(node.at) ||
   node.clip !== undefined ||
   node.mask !== undefined ||
+  node.scheme !== undefined ||
   node.effects.length > 0;
 
 const place = (look: string, at: string): string => {

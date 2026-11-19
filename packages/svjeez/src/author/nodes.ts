@@ -2,7 +2,7 @@ import { SceneError } from "../model/scene-error";
 import type { FontValue } from "../font/font";
 import type { Seconds } from "../model/time";
 import type { PictureData } from "./picture";
-import type { Authored, Blend, Box, Vec } from "../model/ir";
+import type { Authored, Blend, Box, Scheme, Vec } from "../model/ir";
 import type { Anchor, Ref } from "./refs";
 import type { AnchorPlace, TextAnchorPlace } from "./pin";
 import type { Origin, Settle } from "./settle";
@@ -32,6 +32,11 @@ export interface Common {
   readonly effects?: readonly Effect[];
   /** How it composites onto its earlier siblings. A group whose children blend is isolated, so they blend only with each other. */
   readonly blend?: "normal" | Blend;
+  /**
+   * Shows it only in this color scheme (the viewer's `prefers-color-scheme`); without it, it shows in both. It still
+   * takes its space in a layout in either, so light and dark alternatives that should sit in one place go in a Group.
+   */
+  readonly scheme?: Scheme;
 }
 
 export interface StrokeProps {

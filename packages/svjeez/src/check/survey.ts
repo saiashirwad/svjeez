@@ -12,6 +12,7 @@ import type {
   Rgba,
   Scene,
   SceneNode,
+  Scheme,
   ShapeNode,
   Source,
   TextNode,
@@ -312,9 +313,21 @@ export const movingAt = (value: Animated<unknown>, t: Seconds): boolean => {
   return amount > 1e-6 && amount < 1 - 1e-6 && !same(from, to);
 };
 
-export type Scheme = "light" | "dark";
+export type { Scheme };
 
 export const SCHEMES: readonly Scheme[] = ["light", "dark"];
+
+/** The schemes a node shows in: those that it and every group around it allow. */
+export const schemesOf = (entry: Entry): readonly Scheme[] =>
+  SCHEMES.filter((scheme) =>
+    [...entry.ancestors, entry.node].every(
+      (node) => node.scheme === undefined || node.scheme === scheme,
+    ),
+  );
+
+/** Whether two nodes show together in some scheme. */
+export const meet = (a: Entry, b: Entry): boolean =>
+  schemesOf(a).some((scheme) => schemesOf(b).includes(scheme));
 
 const isRgba = (color: Color): color is Rgba => Array.isArray(color);
 
@@ -337,17 +350,24 @@ export const colorAt = (
   return [mix(0), mix(1), mix(2), mix(3)];
 };
 
-const isClear = (scene: Scene, paint: Paint): boolean =>
+const isClear = (scene: Scene, paint: Paint, schemes: readonly Scheme[]): boolean =>
   isColor(paint)
-    ? SCHEMES.every((scheme) => rgbaIn(scene, paint, scheme)[3] <= 0)
+    ? schemes.every((scheme) => rgbaIn(scene, paint, scheme)[3] <= 0)
     : "stops" in paint &&
       paint.stops.every((stop) =>
-        SCHEMES.every((scheme) => rgbaIn(scene, stop.color, scheme)[3] <= 0),
+        schemes.every((scheme) => rgbaIn(scene, stop.color, scheme)[3] <= 0),
       );
 
-export const clearThroughout = (scene: Scene, paint: Animated<Paint> | undefined): boolean =>
+/** Whether a paint is clear at every time, in every one of `schemes` (both, unless the node shows in one). */
+export const clearThroughout = (
+  scene: Scene,
+  paint: Animated<Paint> | undefined,
+  schemes: readonly Scheme[] = SCHEMES,
+): boolean =>
   paint === undefined ||
-  (isLane(paint) ? paint.keys.every((key) => isClear(scene, key.value)) : isClear(scene, paint));
+  (isLane(paint)
+    ? paint.keys.every((key) => isClear(scene, key.value, schemes))
+    : isClear(scene, paint, schemes));
 
 const hex = (n: number): string =>
   Math.round(Math.min(1, Math.max(0, n)) * 255)

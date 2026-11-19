@@ -19,8 +19,10 @@ import {
   countAt,
   countOf,
   inCount,
+  meet,
   movingAt,
   runsOf,
+  schemesOf,
   sharedArea,
   textOf,
   units,
@@ -97,7 +99,8 @@ export const overlap = (survey: Survey): void => {
       for (let y = x + 1; y < up.length; y++) {
         const [a, b] = [up[x]!, up[y]!];
 
-        if (wordsAt(a.entry.node, t) === wordsAt(b.entry.node, t)) continue;
+        if (wordsAt(a.entry.node, t) === wordsAt(b.entry.node, t) || !meet(a.entry, b.entry))
+          continue;
         const shared = sharedArea(a.box, b.box);
 
         if (shared <= 0.3 * Math.min(area(a.box), area(b.box))) continue;
@@ -147,6 +150,7 @@ const hiddenBetween = (
     return (
       entry.node.kind === "shape" &&
       at !== undefined &&
+      schemesOf(lower).every((scheme) => schemesOf(entry).includes(scheme)) &&
       at.opacity > 0.95 &&
       flatAt(survey, entry, at, t) !== undefined &&
       sharedArea(at.box, box) > 0.8 * area(box)

@@ -1057,7 +1057,13 @@ const dressed = (
 ): SceneNode => {
   const where = ctx.notes.names.named(node.key);
   const own = boundsOf(node.box);
-  const { effects = [], blend } = props;
+  const { effects = [], blend, scheme } = props;
+
+  if (scheme !== undefined && scheme !== "light" && scheme !== "dark")
+    throw new SceneError(
+      `${where} has scheme ${JSON.stringify(scheme)}, but a scheme is "light" or "dark".`,
+      'Write scheme="light" or scheme="dark", or leave it out to show it in both.',
+    );
   const clip = byBox(props.clip) ? props.clip(own) : props.clip;
   const asked = byBox(props.mask) ? props.mask(own) : props.mask;
 
@@ -1078,6 +1084,7 @@ const dressed = (
     ...(mask && { mask }),
     effects: effects.map((effect) => effectOf(ctx, effect, timing, where)),
     ...(blend !== undefined && blend !== "normal" && { blend }),
+    ...(scheme !== undefined && { scheme }),
   };
 };
 

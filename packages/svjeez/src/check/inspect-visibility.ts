@@ -17,7 +17,6 @@ import type { Seconds } from "../model/time";
 import type { Placed } from "./boxes";
 import { add, isGone, isLeaf, label, shownBoxes, spoken, type Survey } from "./inspect-context";
 import {
-  SCHEMES,
   between,
   clearThroughout,
   colorAt,
@@ -29,6 +28,7 @@ import {
   rgbaIn,
   runsOf,
   scaleOf,
+  schemesOf,
   strokeReachAt,
   textOf,
   units,
@@ -88,14 +88,19 @@ const trimmedAway = (trim: Animated<Vec> | undefined): boolean => {
   return keys.every(([from, to]) => from === to);
 };
 
-const unpainted = (scene: Scene, node: ShapeNode, duration: Seconds): string | undefined => {
-  if (!clearThroughout(scene, node.fill)) return undefined;
+const unpainted = (
+  scene: Scene,
+  node: ShapeNode,
+  duration: Seconds,
+  schemes: readonly Scheme[],
+): string | undefined => {
+  if (!clearThroughout(scene, node.fill, schemes)) return undefined;
   const fill = node.fill === undefined ? "no fill" : "a fill that is fully transparent";
   const { stroke } = node;
 
   if (!stroke) return `it has ${fill} and no stroke`;
 
-  if (clearThroughout(scene, stroke.color))
+  if (clearThroughout(scene, stroke.color, schemes))
     return `it has ${fill} and a stroke that is fully transparent`;
 
   if (covers(zerosOf(stroke.width, duration), 0, duration))
@@ -106,18 +111,23 @@ const unpainted = (scene: Scene, node: ShapeNode, duration: Seconds): string | u
   return undefined;
 };
 
-const unwritten = (scene: Scene, node: TextNode, duration: Seconds): string | undefined => {
+const unwritten = (
+  scene: Scene,
+  node: TextNode,
+  duration: Seconds,
+  schemes: readonly Scheme[],
+): string | undefined => {
   const runs = runsOf(node).filter((run) => run.text.trim() !== "");
 
   if (runs.length === 0) return undefined;
 
-  if (runs.every((run) => clearThroughout(scene, run.fill)))
+  if (runs.every((run) => clearThroughout(scene, run.fill, schemes)))
     return "every run's fill is fully transparent";
 
   if (
     runs.every(
       (run) =>
-        clearThroughout(scene, run.fill) ||
+        clearThroughout(scene, run.fill, schemes) ||
         (run.opacity !== undefined && covers(zerosOf(run.opacity, duration), 0, duration)),
     )
   )
@@ -152,10 +162,15 @@ export const neverVisible = (survey: VisibilitySurvey): void => {
     const { node } = entry;
     const hide = "Give it an opacity and a scale above 0 at some time, or remove it.";
 
+    const schemes = schemesOf(entry);
+
     const why =
+      (schemes.length === 0
+        ? `it shows only in the ${node.scheme} scheme, inside a group that shows only in the other`
+        : undefined) ??
       hiddenWhy(survey, entry) ??
-      (node.kind === "shape" ? unpainted(scene, node, duration) : undefined) ??
-      (node.kind === "text" ? unwritten(scene, node, duration) : undefined);
+      (node.kind === "shape" ? unpainted(scene, node, duration, schemes) : undefined) ??
+      (node.kind === "text" ? unwritten(scene, node, duration, schemes) : undefined);
 
     if (why) {
       survey.gone.add(node.key);
@@ -165,9 +180,11 @@ export const neverVisible = (survey: VisibilitySurvey): void => {
         key: node.key,
         message: `${label(node)} is never visible: ${why}.`,
         fix:
-          why.includes("fill") || why.includes("stroke")
-            ? "Give it a fill, or a stroke with a color and a width above 0, or remove it."
-            : hide,
+          schemes.length === 0
+            ? "Give it the scheme of the group around it, or move it out of that group."
+            : why.includes("fill") || why.includes("stroke")
+              ? "Give it a fill, or a stroke with a color and a width above 0, or remove it."
+              : hide,
       });
       continue;
     }
@@ -253,7 +270,8 @@ const coverOf = (survey: Survey, entry: Entry): Cover | undefined => {
 
   if (node.fill === undefined || isLane(node.fill)) return undefined;
 
-  if (!SCHEMES.every((scheme) => opaque(survey.scene, node.fill, scheme))) return undefined;
+  if (!schemesOf(entry).every((scheme) => opaque(survey.scene, node.fill, scheme)))
+    return undefined;
 
   if (![...entry.ancestors, node].every(isPlain)) return undefined;
   const at = survey.frames[0]?.frame.get(node.key);
@@ -292,7 +310,14 @@ const covered = (survey: VisibilitySurvey): void => {
 
   for (const entry of survey.entries) {
     if (!isLeaf(entry) || isGone(survey, entry)) continue;
-    const later = covers.filter((cover) => cover.entry.order > entry.order);
+    const schemes = schemesOf(entry);
+
+    // A cover hides the node only if it shows in every scheme the node does.
+    const later = covers.filter(
+      (cover) =>
+        cover.entry.order > entry.order &&
+        schemes.every((scheme) => schemesOf(cover.entry).includes(scheme)),
+    );
 
     if (later.length === 0) continue;
     const reach = reachInScene(survey, entry);
@@ -434,7 +459,9 @@ export const flatAt = (
   const light = colorAt(survey.scene, node.fill, t, "light");
   const dark = colorAt(survey.scene, node.fill, t, "dark");
 
-  if (!light || !dark || light[3] < 0.999 || dark[3] < 0.999) return undefined;
+  // Opaque in each scheme it shows in: what the other scheme would show is never asked for.
+  if (!light || !dark || schemesOf(entry).some((scheme) => ({ light, dark })[scheme][3] < 0.999))
+    return undefined;
   const fill = between(node.fill, t);
   const name = paintName(fill.amount >= 0.5 ? fill.to : fill.from);
   const flat: Flat = { name, color: { light, dark } };

@@ -36,6 +36,9 @@ export interface Box {
   readonly height: number;
 }
 
+/** A color scheme: what `prefers-color-scheme` answers. */
+export type Scheme = "light" | "dark";
+
 export type Rgba = readonly [r: number, g: number, b: number, a: number];
 
 export interface TokenValue {
@@ -205,6 +208,8 @@ interface Base {
   readonly mask?: SceneNode;
   readonly effects: readonly Effect[];
   readonly blend?: Blend;
+  /** The one color scheme it shows in; it shows in both without one. */
+  readonly scheme?: Scheme;
   readonly authored?: Authored;
 }
 
