@@ -160,6 +160,32 @@ describe("classDiagram", () => {
     expect(errorsOf(d.node)).toEqual([]);
   });
 
+  test("draws notes, tethered or floating, and marked members", () => {
+    const d = classDiagram(
+      {
+        classes: {
+          A: {
+            attributes: [{ text: "+n", static: true }],
+            methods: [{ text: "+run()", abstract: true }],
+          },
+          B: {},
+        },
+        relations: [{ from: "A", to: "B" }],
+        notes: [{ text: "one\ntwo", for: "A" }, { text: "free" }],
+      },
+      options,
+    );
+
+    expect(errorsOf(d.node)).toEqual([]);
+    expect(svg.emit(draw(d.node))).toContain("two");
+    expect(
+      thrown(() =>
+        // SAFETY: the test names a class the types would reject.
+        classDiagram({ classes: { A: {} }, notes: [{ text: "x", for: "Z" }] } as never, options),
+      ).problem,
+    ).toContain('note 1 names "Z"');
+  });
+
   test("direction LR lays classes out across", () => {
     const [down, across] = [zoo(), zoo({ direction: "LR" })];
 

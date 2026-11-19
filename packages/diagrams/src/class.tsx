@@ -13,6 +13,7 @@ import {
   extent,
   isBare,
   keyed,
+  mix,
   labelSize,
   look,
   partsOf,
@@ -28,12 +29,26 @@ import type { Direction } from "./types.ts";
 
 export type { ClassEnd } from "./link.tsx";
 
+/** A member with a marker: static members are underlined, abstract ones italic. */
+export interface ClassMember {
+  readonly text: string;
+  readonly static?: boolean;
+  readonly abstract?: boolean;
+}
+
+export interface ClassNote<N extends string = string> {
+  /** Lines are separated by "\n". */
+  readonly text: string;
+  /** The class the note is attached to by a dashed line. Without it the note floats. */
+  readonly for?: N;
+}
+
 export interface ClassSpec {
   readonly label?: string;
   /** Drawn as «annotation» above the name, as in «interface». */
   readonly annotation?: string;
-  readonly attributes?: readonly string[];
-  readonly methods?: readonly string[];
+  readonly attributes?: readonly (string | ClassMember)[];
+  readonly methods?: readonly (string | ClassMember)[];
 }
 
 export interface ClassRelation<N extends string = string> {
@@ -106,8 +121,8 @@ interface Built {
   readonly id: string;
   readonly label: string;
   readonly annotation: string | undefined;
-  readonly attributes: readonly string[];
-  readonly methods: readonly string[];
+  readonly attributes: readonly ClassMember[];
+  readonly methods: readonly ClassMember[];
   readonly w: number;
   readonly h: number;
   readonly head: number;
@@ -118,7 +133,11 @@ const build = (l: Look, s: Sizes, id: string, spec: string | ClassSpec): Built =
   const own = isBare(spec) ? { label: spec } : spec;
   const label = own.label ?? id;
   const annotation = own.annotation === undefined ? undefined : `«${own.annotation}»`;
-  const [attributes, methods] = [own.attributes ?? [], own.methods ?? []];
+
+  const asMembers = (items: readonly (string | ClassMember)[] | undefined) =>
+    (items ?? []).map((m): ClassMember => (isBare(m) ? { text: m } : m));
+
+  const [attributes, methods] = [asMembers(own.attributes), asMembers(own.methods)];
   const part = (n: number) => (n === 0 ? s.empty : 2 * s.section + n * s.line);
   const head = 2 * s.pad + (annotation ? s.note : 0) + s.name;
   const members = attributes.length + methods.length > 0;
@@ -127,7 +146,7 @@ const build = (l: Look, s: Sizes, id: string, spec: string | ClassSpec): Built =
   const text = Math.max(
     l.measure(label, l.size * 1.1, l.weight),
     annotation ? l.measure(annotation, l.small) : 0,
-    ...[...attributes, ...methods].map((m) => l.measure(m, l.size, l.weight)),
+    ...[...attributes, ...methods].map((m) => l.measure(m.text, l.size, l.weight)),
   );
 
   return {
@@ -153,6 +172,24 @@ const named = (id: string, ids: readonly string[], where: string): string => {
   return id;
 };
 
+interface Sticky {
+  readonly lines: readonly string[];
+  readonly target: string | undefined;
+  readonly w: number;
+  readonly h: number;
+}
+
+const stickyOf = (l: Look, note: ClassNote): Sticky => {
+  const lines = note.text.split("\n");
+
+  return {
+    lines,
+    target: note.for,
+    w: Math.ceil(Math.max(...lines.map((t) => l.measure(t, l.small))) + 20),
+    h: Math.round(lines.length * l.small * 1.4 + 16),
+  };
+};
+
 interface RelationLine {
   readonly relation: ClassRelation;
   readonly points: readonly Point[];
@@ -168,6 +205,7 @@ export function classDiagram<
     readonly classes: C;
     readonly relations?: R;
     readonly namespaces?: G;
+    readonly notes?: readonly ClassNote<NoInfer<keyof C & string>>[];
   },
   options: ClassDiagramOptions<NoInfer<keyof C & string>>,
 ): ClassDiagram<keyof C & string, keyof G & string, RelationId<R[number]>> {
@@ -236,6 +274,15 @@ export function classDiagram<
     }
   }
 
+  const stickies = (spec.notes ?? []).map((n, i) => {
+    if (n.for !== undefined) named(n.for, ids, `note ${i + 1}`);
+
+    return stickyOf(l, n);
+  });
+
+  const stickyId = (i: number) => `#note-${i + 1}`;
+  const tied = stickies.flatMap((n, i) => (n.target === undefined ? [] : [i]));
+
   // The marked end (a parent, a whole) goes on top, whichever way the relation is written.
   const flipped = relations.map(
     (r) => HOLLOW.includes(r.end ?? "arrow") && !HOLLOW.includes(r.start ?? "none"),
@@ -247,12 +294,18 @@ export function classDiagram<
     direction,
     rankGap: labelled ? 80 : 64,
     nodeGap: 40,
-    nodes: built.map((c) => ({ id: c.id, w: c.w, h: c.h })),
-    edges: relations.map((r, i) => ({
-      from: flipped[i] ? r.to : r.from,
-      to: flipped[i] ? r.from : r.to,
-      label: r.label === undefined ? undefined : labelSize(l, r.label),
-    })),
+    nodes: [
+      ...built.map((c) => ({ id: c.id, w: c.w, h: c.h })),
+      ...stickies.map((n, i) => ({ id: stickyId(i), w: n.w, h: n.h })),
+    ],
+    edges: [
+      ...relations.map((r, i) => ({
+        from: flipped[i] ? r.to : r.from,
+        to: flipped[i] ? r.from : r.to,
+        label: r.label === undefined ? undefined : labelSize(l, r.label),
+      })),
+      ...tied.map((i) => ({ from: stickies[i]!.target!, to: stickyId(i), label: undefined })),
+    ],
     groups: spaces.map(([id, g]) => ({
       id,
       members: g.classes,
@@ -264,7 +317,7 @@ export function classDiagram<
   const move = (b: Box): Box => ({ x: b.x + dx, y: b.y + dy, w: b.w, h: b.h });
   const boxes = new Map([...out.nodes].map(([id, b]) => [id, move(b)]));
 
-  const lines = out.edges.map((e, i): RelationLine => {
+  const lines = out.edges.slice(0, relations.length).map((e, i): RelationLine => {
     const points = e.points.map((p) => ({ x: p.x + dx, y: p.y + dy }));
 
     return {
@@ -274,6 +327,11 @@ export function classDiagram<
     };
   });
 
+  const noteTint = mix(l.colors.accent, l.colors.background, 0.12);
+
+  const slants =
+    "faces" in l.font && l.font.faces.some((f) => f.italic && f.weight === (l.weight ?? 400));
+
   const cross = (b: Box) => (isVertical(direction) ? b.x : b.y);
 
   const order = [...ids].sort(
@@ -281,6 +339,12 @@ export function classDiagram<
   );
 
   const shown = schedule(options.reveal, order, WHAT);
+
+  const noteAt = (i: number): Span | undefined => {
+    const t = shown.get(stickies[i]!.target ?? order[0]!);
+
+    return t && span(t.start + t.over, LABEL);
+  };
 
   const drawn = (from: string, to: string): Span | undefined => {
     const [a, b] = [shown.get(from), shown.get(to)];
@@ -402,26 +466,63 @@ export function classDiagram<
           draw={drawnBy(options.draw, keys[i]!, timed[i], WHAT)}
         />
       ))}
+      {tied.map((i, k) => {
+        const t = noteAt(i);
+
+        const points = out.edges[relations.length + k]!.points.map((p) => ({
+          x: p.x + dx,
+          y: p.y + dy,
+        }));
+
+        return (
+          <Link
+            key={`note-${i + 1}:link`}
+            look={l}
+            points={points}
+            start="none"
+            end="none"
+            dashed
+            draw={drawnBy(undefined, `note-${i + 1}`, t && span(t.start, t.over), WHAT)}
+          />
+        );
+      })}
       {between}
       {built.map((c) => {
         const at = shown.get(c.id);
         const b = boxes.get(c.id)!;
         const tint = l.tint("task");
 
-        const rows = (items: readonly string[], top: number) =>
-          items.map((text, k) => (
-            <Text
-              key={`${top}:${k}`}
-              font={l.font}
-              size={l.size}
-              weight={l.weight}
-              fill={l.colors.text}
-              anchor="left"
-              at={[s.side, round(top + s.section + s.line * (k + 0.5))]}
-            >
-              {text}
-            </Text>
-          ));
+        const rows = (items: readonly ClassMember[], top: number) =>
+          items.map((m, k) => {
+            const y = round(top + s.section + s.line * (k + 0.5));
+
+            return (
+              <Group key={`${top}:${k}`}>
+                <Text
+                  key="text"
+                  font={l.font}
+                  size={l.size}
+                  weight={l.weight}
+                  italic={m.abstract && slants ? true : undefined}
+                  fill={m.abstract && !slants ? l.colors.muted : l.colors.text}
+                  anchor="left"
+                  at={[s.side, y]}
+                >
+                  {m.text}
+                </Text>
+                {m.static && (
+                  <Shape
+                    key="underline"
+                    geometry={line(
+                      [s.side, round(y + l.size * 0.6)],
+                      [s.side + l.measure(m.text, l.size, l.weight), round(y + l.size * 0.6)],
+                    )}
+                    stroke={{ color: l.colors.text, width: 1 }}
+                  />
+                )}
+              </Group>
+            );
+          });
 
         return (
           <Group key={c.id} offset={[round(b.x), round(b.y)]} motion={at && pop(at)}>
@@ -473,6 +574,36 @@ export function classDiagram<
             </Text>
             {rows(c.attributes, c.head)}
             {rows(c.methods, c.head + c.attrs)}
+          </Group>
+        );
+      })}
+      {stickies.map((n, i) => {
+        const b = move(out.nodes.get(stickyId(i))!);
+
+        return (
+          <Group
+            key={`note-${i + 1}`}
+            offset={[round(b.x), round(b.y)]}
+            motion={noteAt(i) && pop(noteAt(i)!)}
+          >
+            <Shape
+              key="card"
+              geometry={rect(b.w, b.h, { radius: 4 })}
+              fill={noteTint}
+              stroke={{ color: l.colors.accent, width: 1 }}
+            />
+            {n.lines.map((text, k) => (
+              <Text
+                key={`line-${k}`}
+                font={l.font}
+                size={l.small}
+                fill={l.colors.text}
+                anchor="left"
+                at={[10, round(8 + l.small * 1.4 * (k + 0.5))]}
+              >
+                {text}
+              </Text>
+            ))}
           </Group>
         );
       })}

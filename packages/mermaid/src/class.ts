@@ -2,6 +2,7 @@ import {
   classDiagram,
   type ClassDiagram,
   type ClassEnd,
+  type ClassMember,
   type DiagramOptions,
 } from "@svjeez/diagrams";
 import type { Span } from "svjeez";
@@ -12,8 +13,14 @@ export interface MermaidClass {
   readonly id: string;
   readonly label: string;
   readonly annotation?: string;
-  readonly attributes: readonly string[];
-  readonly methods: readonly string[];
+  /** A plain string, or a member marked static (`$`) or abstract (`*`). */
+  readonly attributes: readonly (string | ClassMember)[];
+  readonly methods: readonly (string | ClassMember)[];
+}
+
+export interface MermaidClassNote {
+  readonly text: string;
+  readonly for?: string;
 }
 
 export interface MermaidClassRelation {
@@ -33,11 +40,12 @@ export interface ClassDoc {
   readonly direction: MermaidDirection;
   readonly classes: readonly MermaidClass[];
   readonly relations: readonly MermaidClassRelation[];
+  readonly notes: readonly MermaidClassNote[];
   readonly namespaces: readonly { readonly id: string; readonly classes: readonly string[] }[];
 }
 
 const SUPPORTED =
-  'Supported: `class Name`, `class Name { +attribute  +method() }`, `<<annotation>>`, `Name : +member`, relations `<|--` `*--` `o--` `-->` `..>` `..|>` `--` `..` with "cardinality" and `: label`, `namespace Name { ... }`, and `direction TB`, `LR`, `BT` or `RL`.';
+  'Supported: `class Name`, `class Name { +attribute  +method() }` (also on one line), `<<annotation>>`, members ending in `$` (static) or `*` (abstract), `note "text"` and `note for Name "text"`, `Name : +member`, relations `<|--` `*--` `o--` `-->` `..>` `..|>` `--` `..` with "cardinality" and `: label`, `namespace Name { ... }`, and `direction TB`, `LR`, `BT` or `RL`.';
 
 const LEAVES = new Map<string, ClassEnd>([
   ["<|", "triangle"],
@@ -48,7 +56,9 @@ const LEAVES = new Map<string, ClassEnd>([
   [">", "arrow"],
 ]);
 
-const CLASS = /^class\s+(\w+)(?:~([^~]+)~)?(?:\s*\["([^"]*)"\])?\s*(\{)?$/;
+const CLASS = /^class\s+(\w+)(?:~([^~]+)~)?(?:\s*\["([^"]*)"\])?\s*(?:(\{)\s*(?:(.*?)\s*(\}))?)?$/;
+const NOTE = /^note(?:\s+for\s+(\w+))?\s+"([^"]*)"$/;
+const IGNORED = /^(?:classDef|cssClass|style|click|link|callback)\s+\S/;
 const NAMESPACE = /^namespace\s+(\w+)\s*\{$/;
 const ANNOTATION = /^<<\s*([^<>]+?)\s*>>(?:\s+(\w+))?$/;
 const MEMBER = /^(\w+)\s*:\s*(.+)$/;
@@ -57,13 +67,6 @@ const RELATION =
   /^(\w+)\s+(?:"([^"]*)"\s+)?(<\||\*|o|<)?(--|\.\.)(\|>|\*|o|>)?\s+(?:"([^"]*)"\s+)?(\w+)(?:\s*:\s*(.*))?$/;
 
 const UNSUPPORTED = new Map([
-  ["note", "notes are not drawn"],
-  ["classDef", "svjeez themes diagrams itself"],
-  ["cssClass", "svjeez themes diagrams itself"],
-  ["style", "svjeez themes diagrams itself"],
-  ["click", "classes are not clickable"],
-  ["link", "classes are not clickable"],
-  ["callback", "classes are not clickable"],
   ["accTitle", "accessibility text is not read"],
   ["accDescr", "accessibility text is not read"],
   ["title", "a diagram has no title"],
@@ -73,8 +76,8 @@ interface Mutable {
   readonly id: string;
   label: string;
   annotation?: string;
-  readonly attributes: string[];
-  readonly methods: string[];
+  readonly attributes: (string | ClassMember)[];
+  readonly methods: (string | ClassMember)[];
 }
 
 const generics = (text: string): string =>
@@ -86,6 +89,7 @@ export const parseClass = (header: Line, body: readonly Line[]): ClassDoc => {
 
   const classes = new Map<string, Mutable>();
   const relations: MermaidClassRelation[] = [];
+  const notes: MermaidClassNote[] = [];
   const namespaces: { id: string; classes: string[]; line: Line }[] = [];
   const owner = new Map<string, string>();
   let direction: ClassDoc["direction"] = "TB";
@@ -104,31 +108,37 @@ export const parseClass = (header: Line, body: readonly Line[]): ClassDoc => {
   };
 
   const member = (l: Line, c: Mutable, raw: string) => {
-    const text = generics(clean(raw));
+    const full = generics(clean(raw));
+    const mark = /[*$]$/.exec(full)?.[0];
+    const text = mark ? full.slice(0, -1).trimEnd() : full;
 
     if (!text) return;
 
-    if (/[*$]$/.test(text))
-      fail(
-        l,
-        "abstract (`*`) and static (`$`) member markers are not drawn. Drop the trailing marker.",
-      );
-    (text.slice(1).includes(")") ? c.methods : c.attributes).push(text);
+    const item: string | ClassMember = mark
+      ? { text, ...(mark === "$" ? { static: true } : { abstract: true }) }
+      : text;
+
+    (text.slice(1).includes(")") ? c.methods : c.attributes).push(item);
   };
 
-  for (const l of body) {
+  for (const raw of body) {
     if (open) {
-      if (l.text === "}") {
+      if (raw.text === "}") {
         open = undefined;
         continue;
       }
 
-      const note = ANNOTATION.exec(l.text);
+      const note = ANNOTATION.exec(raw.text);
 
       if (note) open.cls.annotation = clean(note[1]!);
-      else member(l, open.cls, l.text);
+      else member(raw, open.cls, raw.text);
       continue;
     }
+
+    // Style classes only colour a diagram, and svjeez themes it itself.
+    const l = { ...raw, text: raw.text.replace(/:::[\w-]+/g, "").trim() };
+
+    if (IGNORED.test(l.text)) continue;
 
     if (l.text === "}") {
       if (!space) fail(l, "`}` closes a class or namespace body, and none is open.");
@@ -139,7 +149,7 @@ export const parseClass = (header: Line, body: readonly Line[]): ClassDoc => {
     const declared = CLASS.exec(l.text);
 
     if (declared) {
-      const [, id, generic, label, brace] = declared;
+      const [, id, generic, label, brace, inline, closed] = declared;
       const c = touch(id!);
       c.label = label === undefined ? (generic ? `${id}<${generic}>` : id!) : clean(label);
 
@@ -155,7 +165,14 @@ export const parseClass = (header: Line, body: readonly Line[]): ClassDoc => {
         }
       }
 
-      if (brace) open = { cls: c, line: l };
+      if (inline) {
+        const note = ANNOTATION.exec(inline);
+
+        if (note) c.annotation = clean(note[1]!);
+        else member(l, c, inline);
+      }
+
+      if (brace && !closed) open = { cls: c, line: l };
       continue;
     }
 
@@ -196,8 +213,21 @@ export const parseClass = (header: Line, body: readonly Line[]): ClassDoc => {
         `${l.text.split(/\W/)[0]} is not supported: accessibility text is not read. ${SUPPORTED}`,
       );
 
-    if (l.text.includes(":::"))
-      fail(l, "`:::` style classes are not supported: svjeez themes diagrams itself.");
+    const noted = NOTE.exec(l.text);
+
+    if (noted) {
+      const text = noted[2]!.replace(/<br\s*\/?>/gi, "\\n");
+
+      if (noted[1]) touch(noted[1]);
+      notes.push({
+        text: text
+          .split("\\n")
+          .map((t) => clean(t))
+          .join("\n"),
+        ...(noted[1] && { for: noted[1] }),
+      });
+      continue;
+    }
 
     if (/\(\)\s*(--|\.\.)|(--|\.\.)\s*\(\)/.test(l.text))
       fail(
@@ -269,6 +299,7 @@ export const parseClass = (header: Line, body: readonly Line[]): ClassDoc => {
     direction,
     classes: [...classes.values()],
     relations,
+    notes,
     namespaces: namespaces.map(({ id, classes }) => ({ id, classes })),
   };
 };
@@ -298,6 +329,7 @@ export const drawClass = (
         ]),
       ),
       relations: doc.relations,
+      notes: doc.notes,
       namespaces: Object.fromEntries(
         doc.namespaces.map((n) => [n.id, { label: n.id, classes: n.classes }]),
       ),

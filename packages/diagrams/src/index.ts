@@ -16,6 +16,8 @@ export {
   type ClassEnd,
   type ClassNamespace,
   type ClassRelation,
+  type ClassMember,
+  type ClassNote,
   type ClassSpec,
 } from "./class.tsx";
 

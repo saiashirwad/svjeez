@@ -109,16 +109,66 @@ describe("parse class", () => {
   });
 });
 
+describe("parse class syntax gaps", () => {
+  test("reads one-line and empty bodies", () => {
+    const doc = parse(`
+      class A { +x }
+      class B{}
+      class C { <<interface>> }`);
+
+    expect(doc.classes.map((c) => [c.id, c.attributes, c.annotation])).toEqual([
+      ["A", ["+x"], undefined],
+      ["B", [], undefined],
+      ["C", [], "interface"],
+    ]);
+  });
+
+  test("marks static and abstract members", () => {
+    const doc = parse(`
+      class A {
+        +count$
+        +run()*
+        +stop() bool$
+      }`);
+
+    expect(doc.classes[0]!.attributes).toEqual([{ text: "+count", static: true }]);
+    expect(doc.classes[0]!.methods).toEqual([
+      { text: "+run()", abstract: true },
+      { text: "+stop() bool", static: true },
+    ]);
+  });
+
+  test("reads notes", () => {
+    const doc = parse(`
+      class A
+      note "free"
+      note for A "line one\\nline two"`);
+
+    expect(doc.notes).toEqual([{ text: "free" }, { text: "line one\nline two", for: "A" }]);
+  });
+
+  test("accepts style classes and click handlers, which only colour or link", () => {
+    const doc = parse(`
+      classDef big fill:#f9f
+      class A:::big
+      class B
+      A:::big --> B
+      cssClass "A" big
+      style B fill:#fff
+      click A href "https://x.test"
+      link B "https://x.test"
+      callback A "fn"`);
+
+    expect(doc.classes.map((c) => c.id)).toEqual(["A", "B"]);
+    expect(doc.relations).toHaveLength(1);
+  });
+});
+
 describe("parse class errors", () => {
   test("rejects what svjeez does not draw, with the reason and what is supported", () => {
-    expect(message('note "hello"')).toContain("note is not supported: notes are not drawn");
-    expect(message("classDef big fill:#f9f")).toContain("classDef is not supported");
-    expect(message("class A:::big")).toContain("`:::` style classes are not supported");
     expect(message("Foo ()-- Bar")).toContain("lollipop");
     expect(message("direction UP")).toContain("not one of TB, LR, BT or RL");
-    expect(message("class A {\n+run()*\n}")).toContain("abstract");
     expect(message("namespace A {\nnamespace B {")).toContain("nested namespaces");
-    expect(message('click A href "x"')).toContain("click is not supported");
   });
 
   test("reports unclosed bodies and unreadable lines with their file and line", () => {
@@ -130,6 +180,26 @@ describe("parse class errors", () => {
 });
 
 describe("drawClass", () => {
+  test("draws notes, static and abstract members", () => {
+    const doc = parse(`
+      class A {
+        +count$
+        +run()*
+      }
+      note for A "hello\\nworld"
+      note "floating"`);
+
+    const markup = svg.emit(
+      scene(
+        { size: [600, 600], duration: 1, title: "Class", loop: false },
+        () => drawClass(doc, { font: mono }).node,
+      ),
+    );
+
+    expect(markup).toContain("hello");
+    expect(markup).toContain("floating");
+  });
+
   test("draws the doc as a class diagram with a part per class and relation", () => {
     const doc = parse(`
       class Animal {

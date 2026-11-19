@@ -8,7 +8,8 @@ export default show(
     <<abstract>>
     +String name
     +int age
-    +speak() String
+    +speak() String*
+    +count$
   }
   class Duck {
     +swim()
@@ -24,5 +25,6 @@ export default show(
   Animal <|-- Duck
   Animal <|-- Fish
   Pond "1" o-- "*" Duck : hosts
-  Pond *-- Fish : contains`,
+  Pond *-- Fish : contains
+  note for Pond "Ducks live here"`,
 );
