@@ -1,10 +1,12 @@
 import type {
   Animation,
   Background,
+  ClipShape,
   Control,
   Corner,
   ElementNode,
   Extent,
+  FilterFn,
   Font,
   Offset,
   Rect,
@@ -16,6 +18,7 @@ import type {
   Stop,
   SvgNode,
   TextNode,
+  TextShadow,
   WebFont,
 } from "./schema.ts";
 
@@ -28,6 +31,11 @@ import type {
 interface Pending {
   color: string;
   at?: number;
+}
+
+interface Clipped {
+  shape?: ClipShape;
+  notes: string[];
 }
 
 type Pseudo = "::before" | "::after";
@@ -403,36 +411,45 @@ export const capture = (root: Element): Snapshot => {
     };
   };
 
-  /** The background layers, topmost first, and what of them cannot be drawn. */
-  const layersOf = (style: CSSStyleDeclaration, rect: Rect) => {
+  /**
+   * The `background-*` (or `mask-*`) layers, topmost first, and what of them cannot be drawn.
+   * A mask's origin and clip default to the border box, and its `fill-box`, `stroke-box` and `view-box` are the border box.
+   */
+  const layersOf = (
+    style: CSSStyleDeclaration,
+    rect: Rect,
+    prefix: "background" | "mask" = "background",
+  ) => {
     const layers: Background[] = [];
     const notes: string[] = [];
-    const list = (value: string) => split(value, ",");
+    const get = (name: string) => style.getPropertyValue(`${prefix}-${name}`).trim();
+    const list = (name: string) => split(get(name), ",");
 
     const [sizes, positions, repeats, origins, clips, attachments] = [
-      list(style.backgroundSize),
-      list(style.backgroundPosition),
-      list(style.backgroundRepeat),
-      list(style.backgroundOrigin),
-      list(style.backgroundClip),
-      list(style.backgroundAttachment),
+      list("size"),
+      list("position"),
+      list("repeat"),
+      list("origin"),
+      list("clip"),
+      list("attachment"),
     ];
 
     // Shorter lists repeat to the number of layers.
     const nth = (values: string[], i: number, none: string) =>
       values.length > 0 ? values[i % values.length]! : none;
 
-    split(style.backgroundImage, ",").forEach((one, i) => {
+    const boxName = (name: string) => (/^(padding|content)-box$/.test(name) ? name : "border-box");
+
+    split(get("image"), ",").forEach((one, i) => {
       if (one === "none") return;
 
-      const origin = boxOf(style, rect, nth(origins, i, "padding-box"));
-      const clipName = nth(clips, i, "border-box");
-
-      const clip = boxOf(
+      const origin = boxOf(
         style,
         rect,
-        /^(padding|content)-box$/.test(clipName) ? clipName : "border-box",
+        boxName(nth(origins, i, prefix === "mask" ? "border-box" : "padding-box")),
       );
+
+      const clip = boxOf(style, rect, boxName(nth(clips, i, "border-box")));
 
       const [sx = "auto", sy = sx] = words(nth(sizes, i, "auto"));
       const sized = nth(sizes, i, "auto");
@@ -464,15 +481,24 @@ export const capture = (root: Element): Snapshot => {
         clip,
       };
 
-      if (nth(attachments, i, "scroll") === "fixed")
+      if (prefix === "background" && nth(attachments, i, "scroll") === "fixed")
         notes.push("background-attachment: fixed is drawn as scroll");
 
       const url = /^url\((.*)\)$/s.exec(one)?.[1];
 
       if (url !== undefined) {
+        const src = url.replace(/^["']|["']$/g, "").replace(/\\(["'])/g, "$1");
+
+        // A mask can point at an element in the page (`url(#mask)`), which is not an image.
+        if (prefix === "mask" && src.startsWith("#")) {
+          notes.push("mask-image: url(#...) is not drawn");
+
+          return;
+        }
+
         layers.push({
           kind: "image",
-          src: url.replace(/^["']|["']$/g, "").replace(/\\(["'])/g, "$1"),
+          src,
           place: {
             size: keyword ?? [extent(sx, origin.width), extent(sy, origin.height)],
             ...common,
@@ -496,7 +522,7 @@ export const capture = (root: Element): Snapshot => {
 
       if (drawn) layers.push({ ...drawn, place: { size: tile, ...common } });
       else if (tile[0] > 0 && tile[1] > 0)
-        notes.push(`${/^[\w-]+/.exec(one)?.[0] ?? "background-image"}() is not drawn`);
+        notes.push(`${/^[\w-]+/.exec(one)?.[0] ?? `${prefix}-image`}() is not drawn`);
     });
 
     return { layers, notes };
@@ -534,6 +560,183 @@ export const capture = (root: Element): Snapshot => {
             inset: tokens.includes("inset"),
           };
         });
+
+  const lengthIn = (word: string, of: number) => {
+    const { px: pixels, percent } = lengthOf(word);
+
+    return pixels + (percent / 100) * of;
+  };
+
+  /** A computed `filter` as its functions, in order, and the ones that cannot be drawn. */
+  const filterOf = (value: string) => {
+    const list: FilterFn[] = [];
+    const notes: string[] = [];
+
+    for (const one of value === "none" ? [] : words(value)) {
+      const [, name = "", args = ""] = /^([\w-]+)\((.*)\)$/s.exec(one) ?? [];
+      const n = parseFloat(args);
+
+      if (name === "blur") list.push({ fn: "blur", radius: px(args) });
+      else if (name === "hue-rotate")
+        list.push({ fn: "hue-rotate", amount: round(angleOf(args, 0, 0)) });
+      else if (name === "drop-shadow") {
+        const tokens = words(args);
+        const lengths = tokens.filter((t) => /^[-\d.]/.test(t)).map(px);
+        const paint = tokens.find((t) => !/^[-\d.]/.test(t));
+
+        list.push({
+          fn: "drop-shadow",
+          x: lengths[0] ?? 0,
+          y: lengths[1] ?? 0,
+          blur: lengths[2] ?? 0,
+          color: color(paint ?? "black"),
+        });
+      } else if (
+        ["brightness", "contrast", "saturate", "grayscale", "opacity"].includes(name) &&
+        !Number.isNaN(n)
+      )
+        // SAFETY: the name is one of the five amounts just listed.
+        list.push({
+          fn: name as "brightness",
+          amount: round(args.endsWith("%") ? n / 100 : n),
+        });
+      else notes.push(`filter: ${name || one}() is not drawn`);
+    }
+
+    return { list, notes };
+  };
+
+  /** A computed `text-shadow`, topmost first. */
+  const textShadowsOf = (style: CSSStyleDeclaration): TextShadow[] =>
+    shadowsOf(style.textShadow).map(({ x, y, blur, color }) => ({ x, y, blur, color }));
+
+  /** The `mask-image` layers that draw as an alpha mask, and what of the mask cannot be drawn. */
+  const masksOf = (style: CSSStyleDeclaration, rect: Rect) => {
+    const { layers, notes } = layersOf(style, rect, "mask");
+    const get = (name: string) => style.getPropertyValue(name).trim();
+
+    if (layers.length === 0) return { layers, notes };
+
+    if (split(get("mask-mode"), ",").includes("luminance"))
+      return { layers: [], notes: [...notes, "mask-mode: luminance is not drawn"] };
+
+    const composite = split(get("mask-composite"), ",").find((one) => one !== "add");
+
+    if (composite && layers.length > 1) notes.push(`mask-composite: ${composite} is drawn as add`);
+
+    return { layers, notes };
+  };
+
+  /** A computed `clip-path`, resolved to px, and what of it cannot be drawn. */
+  const clipPathOf = (style: CSSStyleDeclaration, rect: Rect): Clipped => {
+    const value = style.clipPath;
+
+    if (value === "none") return { notes: [] };
+
+    const call = /^(inset|circle|ellipse|polygon|path)\((.*?)\)\s*([\w-]+-box)?$/s.exec(value);
+
+    if (!call) return { notes: [`clip-path: ${/^[\w-]+/.exec(value)?.[0] ?? value} is not drawn`] };
+
+    const [, name, args = "", named = "border-box"] = call;
+    const notes: string[] = [];
+
+    if (!/^(border|padding|content)-box$/.test(named))
+      notes.push(`clip-path: ${named} is drawn as border-box`);
+
+    const ref = boxOf(style, rect, /^(padding|content)-box$/.test(named) ? named : "border-box");
+    const rule = args.startsWith("evenodd") ? ("evenodd" as const) : ("nonzero" as const);
+
+    if (name === "inset") {
+      const [sides = "", corners] = args.split(/\bround\b/).map((part) => part.trim());
+      const [t = "0", r = t, b = t, l = r] = words(sides);
+      const x = ref.x + lengthIn(l, ref.width);
+      const y = ref.y + lengthIn(t, ref.height);
+
+      const shape: ClipShape = {
+        kind: "inset",
+        rect: {
+          x: round(x),
+          y: round(y),
+          width: round(Math.max(0, ref.x + ref.width - lengthIn(r, ref.width) - x)),
+          height: round(Math.max(0, ref.y + ref.height - lengthIn(b, ref.height) - y)),
+        },
+      };
+
+      if (corners) {
+        const [across = "", down = across] = corners.split("/").map((part) => part.trim());
+
+        const four = (given: string) => {
+          const [a = "0", b = a, c = a, d = b] = words(given);
+
+          return [a, b, c, d] as const;
+        };
+
+        const [h, v] = [four(across), four(down)];
+
+        const corner = (i: 0 | 1 | 2 | 3): Corner => [
+          round(lengthIn(h[i], ref.width)),
+          round(lengthIn(v[i], ref.height)),
+        ];
+
+        return { shape: { ...shape, radii: [corner(0), corner(1), corner(2), corner(3)] }, notes };
+      }
+
+      return { shape, notes };
+    }
+
+    if (name === "circle" || name === "ellipse") {
+      const [size = "", position = ""] = args.split(/\bat\b/).map((part) => part.trim());
+      const [cx, cy] = placeOf(words(position), ref.width, ref.height);
+      const sides = [Math.min(cx, ref.width - cx), Math.min(cy, ref.height - cy)] as const;
+      const far = [Math.max(cx, ref.width - cx), Math.max(cy, ref.height - cy)] as const;
+      const given = words(size);
+      const diagonal = Math.hypot(ref.width, ref.height) / Math.SQRT2;
+
+      // An omitted radius is `closest-side`; a circle takes the nearest or farthest of all four sides.
+      const radius = (word: string | undefined, axis: 0 | 1, of: number) =>
+        word === "farthest-side"
+          ? far[axis]
+          : word === undefined || word === "closest-side"
+            ? sides[axis]
+            : lengthIn(word, of);
+
+      const [rx, ry] =
+        name === "circle"
+          ? [
+              given[0] === "farthest-side"
+                ? Math.max(...far)
+                : given[0] === undefined || given[0] === "closest-side"
+                  ? Math.min(...sides)
+                  : lengthIn(given[0], diagonal),
+            ].flatMap((r) => [r, r])
+          : [radius(given[0], 0, ref.width), radius(given[1], 1, ref.height)];
+
+      return {
+        shape: {
+          kind: "ellipse",
+          center: [round(ref.x + cx), round(ref.y + cy)],
+          radius: [round(Math.max(0, rx!)), round(Math.max(0, ry!))],
+        },
+        notes,
+      };
+    }
+
+    if (name === "polygon") {
+      const points = split(args.replace(/^(nonzero|evenodd)\s*,?/, ""), ",").map(
+        (pair): [number, number] => {
+          const [x = "0", y = "0"] = words(pair);
+
+          return [round(ref.x + lengthIn(x, ref.width)), round(ref.y + lengthIn(y, ref.height))];
+        },
+      );
+
+      return { shape: { kind: "polygon", points, rule }, notes };
+    }
+
+    const d = /["']([^"']*)["']/.exec(args)?.[1] ?? "";
+
+    return { shape: { kind: "path", d, at: [ref.x, ref.y], rule }, notes };
+  };
 
   // ------------------------------------------------------------------- text
 
@@ -647,6 +850,7 @@ export const capture = (root: Element): Snapshot => {
     }
 
     const decoration = decorationOf(parent);
+    const shadows = textShadowsOf(style);
     const runs: Run[] = [];
 
     for (const line of lines) {
@@ -667,6 +871,8 @@ export const capture = (root: Element): Snapshot => {
       };
 
       if (decoration) run.decoration = decoration;
+
+      if (shadows.length > 0) run.shadows = shadows;
       runs.push(run);
     }
 
@@ -1057,15 +1263,12 @@ export const capture = (root: Element): Snapshot => {
     if (get("transform-style") === "preserve-3d")
       out.push("transform-style: preserve-3d is not drawn");
 
-    if (set("filter")) out.push("filter is not drawn");
+    out.push(...filterOf(get("filter")).notes);
 
     if (set("backdrop-filter")) out.push("backdrop-filter is not drawn");
 
-    if (set("clip-path")) out.push("clip-path is not drawn");
-
-    if (set("mask-image") || set("-webkit-mask-image")) out.push("mask-image is not drawn");
-
-    if (hasText && set("text-shadow")) out.push("text-shadow is not drawn");
+    out.push(...clipPathOf(style, d.rect).notes);
+    out.push(...masksOf(style, d.rect).notes);
 
     if (hasText && !get("writing-mode").startsWith("horizontal"))
       out.push("a vertical writing-mode is not drawn");
@@ -1156,6 +1359,16 @@ export const capture = (root: Element): Snapshot => {
       };
 
     if (shadows.length > 0) node.shadows = shadows;
+
+    const filter = filterOf(style.filter).list;
+    const clipPath = clipPathOf(style, rect).shape;
+    const masks = masksOf(style, rect).layers;
+
+    if (filter.length > 0) node.filter = filter;
+
+    if (clipPath) node.clipPath = clipPath;
+
+    if (masks.length > 0) node.masks = masks;
 
     if (d.image) node.image = d.image;
 

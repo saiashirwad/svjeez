@@ -150,7 +150,7 @@ const imageOf = (
   if (!bytes) {
     where.ctx.note(
       where.path,
-      `a background-image url() that is not a data: URL is not drawn (${layer.src.slice(0, 60)})`,
+      `a background or mask image url() that is not a data: URL is not drawn (${layer.src.slice(0, 60)})`,
     );
 
     return undefined;
@@ -177,7 +177,7 @@ const imageOf = (
 
     where.ctx.note(
       where.path,
-      `a background image that svjeez could not read is not drawn (${error instanceof Error ? error.message : String(error)})`,
+      `a background or mask image that svjeez could not read is not drawn (${error instanceof Error ? error.message : String(error)})`,
     );
 
     return undefined;

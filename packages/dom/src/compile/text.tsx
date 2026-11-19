@@ -1,9 +1,9 @@
 /** @jsxImportSource svjeez */
-import { Run, Shape, Text, font, rect, type SceneElement } from "svjeez";
-import type { Font } from "svjeez/tools";
+import { Run, Shape, Text, blur, font, rect, shadow, type SceneElement } from "svjeez";
+import type { Effect, Font } from "svjeez/tools";
 import type { Run as Captured, TextNode } from "../schema.ts";
-import { painted, type Context } from "./context.ts";
-import { sub, type Vec } from "./geometry.ts";
+import { painted, type Context, type Solid } from "./context.ts";
+import { add, sub, type Vec } from "./geometry.ts";
 import { bytesOf } from "./image.tsx";
 
 /** The embedded web font that is `family` at this weight and slant, or the closest weight of it. */
@@ -62,20 +62,63 @@ const run = (one: Captured, at: Vec, key: string, ctx: Context): SceneElement[] 
   const width = one.advances.reduce((sum, advance) => sum + advance, 0);
   const out: SceneElement[] = [];
 
-  if (fill && one.text !== "")
-    out.push(
+  if (fill && one.text !== "") {
+    const glyphs = (key: string, color: Solid, where: Vec, effects?: Effect[]) => (
       <Text
         key={key}
         font={face(ctx, one.font)}
         size={one.font.size}
-        fill={fill.rgba}
+        fill={color}
         {...(one.letterSpacing !== 0 && { letterSpacing: one.letterSpacing })}
-        at={at}
+        {...(effects && { effects })}
+        at={where}
         anchor="baseline-left"
       >
         <Run advances={one.advances}>{one.text}</Run>
-      </Text>,
+      </Text>
     );
+
+    const shadows = (one.shadows ?? []).flatMap((s) => {
+      const paint = painted(s.color);
+
+      const offset: Vec = [s.x, s.y];
+
+      // A blur radius, as in `box-shadow`: a deviation of half of it.
+      return paint ? [{ paint, offset, sigma: s.blur / 2 }] : [];
+    });
+
+    const [only, ...more] = shadows;
+
+    if (only && more.length === 0)
+      out.push(
+        glyphs(key, fill.rgba, at, [
+          shadow({
+            color: only.paint.hex,
+            offset: only.offset,
+            blur: only.sigma,
+            opacity: only.paint.alpha,
+          }),
+        ]),
+      );
+    else {
+      // A shadow of the text and the shadows below it would shadow those too, so each shadow is its own copy of the glyphs.
+      // CSS paints the first shadow on top.
+      [...shadows]
+        .reverse()
+        .forEach(({ paint, offset, sigma }, i) =>
+          out.push(
+            glyphs(
+              `${key}-shadow${shadows.length - i}`,
+              paint.rgba,
+              add(at, offset),
+              sigma > 0 ? [blur(sigma)] : undefined,
+            ),
+          ),
+        );
+
+      out.push(glyphs(key, fill.rgba, at));
+    }
+  }
 
   const line = one.decoration && painted(one.decoration.color);
 

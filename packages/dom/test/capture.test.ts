@@ -673,6 +673,161 @@ describe("background layers", () => {
   });
 });
 
+describe("filter, text-shadow, clip-path and mask-image", () => {
+  test("a filter list, in order, with its amounts as numbers", async () => {
+    const el = byId(
+      await snap(
+        `<div id="n" style="width:20px;height:20px;filter:blur(4px) drop-shadow(2px 3px 4px red) brightness(150%) grayscale(.5) hue-rotate(.25turn) opacity(30%) saturate(2) contrast(120%)"></div>`,
+      ),
+      "n",
+    );
+
+    expect(el.filter).toEqual([
+      { fn: "blur", radius: 4 },
+      { fn: "drop-shadow", x: 2, y: 3, blur: 4, color: "rgb(255, 0, 0)" },
+      { fn: "brightness", amount: 1.5 },
+      { fn: "grayscale", amount: 0.5 },
+      { fn: "hue-rotate", amount: 90 },
+      { fn: "opacity", amount: 0.3 },
+      { fn: "saturate", amount: 2 },
+      { fn: "contrast", amount: 1.2 },
+    ]);
+    expect(el.notes).toBeUndefined();
+  });
+
+  test("a drop-shadow with no color is currentcolor", async () => {
+    const el = byId(
+      await snap(`<div id="n" style="color:blue;filter:drop-shadow(1px 1px)">x</div>`),
+      "n",
+    );
+
+    expect(el.filter).toEqual([
+      { fn: "drop-shadow", x: 1, y: 1, blur: 0, color: "rgb(0, 0, 255)" },
+    ]);
+  });
+
+  test("text-shadow is on each run, topmost first", async () => {
+    const el = byId(
+      await snap(
+        `<div id="n" style="text-shadow:1px 2px 3px red, 0 0 4px rgba(0,0,0,.5)">hi</div>`,
+      ),
+      "n",
+    );
+
+    const [text] = el.children;
+
+    expect(text).toMatchObject({
+      type: "text",
+      runs: [
+        {
+          shadows: [
+            { x: 1, y: 2, blur: 3, color: "rgb(255, 0, 0)" },
+            { x: 0, y: 0, blur: 4, color: "rgba(0, 0, 0, 0.5)" },
+          ],
+        },
+      ],
+    });
+  });
+
+  test("clip-path shapes, resolved to px from the border box's corner", async () => {
+    const clip = async (css: string, style = "") =>
+      byId(
+        await snap(
+          `<div id="n" style="width:200px;height:100px;padding:10px;border:5px solid red;${style}clip-path:${css}"></div>`,
+        ),
+        "n",
+      ).clipPath;
+
+    // The border box is 230 by 130.
+    expect(await clip("inset(10px 5% round 8px 4px)")).toMatchObject({
+      kind: "inset",
+      rect: { x: 11.5, y: 10, width: 207, height: 110 },
+      radii: [
+        [8, 8],
+        [4, 4],
+        [8, 8],
+        [4, 4],
+      ],
+    });
+    expect(await clip("circle(50%)")).toEqual({
+      kind: "ellipse",
+      center: [115, 65],
+      radius: [expect.closeTo(Math.hypot(230, 130) / Math.SQRT2 / 2, 2), expect.any(Number)],
+    });
+    expect(await clip("circle(at 20px 30%)")).toEqual({
+      kind: "ellipse",
+      center: [20, 39],
+      radius: [20, 20],
+    });
+    expect(await clip("ellipse(40% 30% at 50% 50%)")).toEqual({
+      kind: "ellipse",
+      center: [115, 65],
+      radius: [92, 39],
+    });
+    expect(await clip("polygon(50% 0, 100% 100%, 0 100%)")).toEqual({
+      kind: "polygon",
+      points: [
+        [115, 0],
+        [230, 130],
+        [0, 130],
+      ],
+      rule: "nonzero",
+    });
+    expect(await clip("polygon(evenodd, 0 0, 10px 10px, 0 10px)")).toMatchObject({
+      rule: "evenodd",
+    });
+    expect(await clip("path('M0 0 L10 10 L0 10 Z')")).toEqual({
+      kind: "path",
+      d: "M 0 0 L 10 10 L 0 10 Z",
+      at: [0, 0],
+      rule: "nonzero",
+    });
+  });
+
+  test("a clip-path reference box moves the shape", async () => {
+    const el = byId(
+      await snap(
+        `<div id="n" style="width:200px;height:100px;padding:10px;border:5px solid red;clip-path:inset(0) content-box"></div>`,
+      ),
+      "n",
+    );
+
+    expect(el.clipPath).toMatchObject({ rect: { x: 15, y: 15, width: 200, height: 100 } });
+  });
+
+  test("mask-image layers are placed like background layers", async () => {
+    const el = byId(
+      await snap(
+        `<div id="n" style="width:100px;height:60px;mask-image:linear-gradient(black, transparent), linear-gradient(red,blue);mask-size:50px 20px, auto;mask-repeat:no-repeat;mask-position:right bottom"></div>`,
+      ),
+      "n",
+    );
+
+    expect(el.masks).toMatchObject([
+      {
+        kind: "linear",
+        angle: 180,
+        place: {
+          size: [50, 20],
+          repeat: ["no-repeat", "no-repeat"],
+          origin: { x: 0, y: 0, width: 100, height: 60 },
+        },
+      },
+      { kind: "linear", place: { size: [100, 60] } },
+    ]);
+    expect(el.backgrounds).toBeUndefined();
+  });
+
+  test("a mask url() image is kept as a src", async () => {
+    const el = byId(
+      await snap(`<div id="n" style="width:10px;height:10px;mask-image:url(a.png)"></div>`),
+      "n",
+    );
+
+    expect(el.masks).toMatchObject([{ kind: "image", src: expect.stringContaining("a.png") }]);
+  });
+});
+
 describe("notes: what capture cannot represent", () => {
   const noted = async (html: string, id = "n") => byId(await snap(html), id).notes ?? [];
 
@@ -719,27 +874,46 @@ describe("notes: what capture cannot represent", () => {
     ).toEqual(["perspective is not drawn", "transform-style: preserve-3d is not drawn"]);
   });
 
-  test("filter, backdrop-filter, clip-path and mask-image", async () => {
+  test("backdrop-filter, filter: invert() and sepia(), and the rest of what compile cannot draw", async () => {
     expect(
       await noted(
-        `<div id="n" style="width:20px;height:20px;filter:blur(2px);backdrop-filter:blur(2px);clip-path:circle(50%);mask-image:linear-gradient(red,blue)"></div>`,
+        `<div id="n" style="width:20px;height:20px;filter:blur(2px) invert(1) sepia(.5);backdrop-filter:blur(2px)"></div>`,
       ),
     ).toEqual([
-      "filter is not drawn",
+      "filter: invert() is not drawn",
+      "filter: sepia() is not drawn",
       "backdrop-filter is not drawn",
-      "clip-path is not drawn",
-      "mask-image is not drawn",
     ]);
+    expect(await noted(`<div id="n" style="width:20px;height:20px;filter:url(#x)"></div>`)).toEqual(
+      ["filter: url() is not drawn"],
+    );
   });
 
-  test("text-shadow, background-clip: text and vertical writing-mode, on the element that has the text", async () => {
+  test("clip-path: url(#...), margin-box and mask-image that cannot be drawn", async () => {
+    expect(
+      await noted(
+        `<div id="n" style="width:20px;height:20px;clip-path:url(#c);mask-image:url(#m);mask-mode:luminance"></div>`,
+      ),
+    ).toEqual(["clip-path: url is not drawn", "mask-image: url(#...) is not drawn"]);
+    expect(
+      await noted(
+        `<div id="n" style="width:20px;height:20px;mask-image:linear-gradient(red,blue);mask-mode:luminance"></div>`,
+      ),
+    ).toEqual(["mask-mode: luminance is not drawn"]);
+    expect(
+      await noted(
+        `<div id="n" style="width:20px;height:20px;clip-path:circle(50%) margin-box"></div>`,
+      ),
+    ).toEqual(["clip-path: margin-box is drawn as border-box"]);
+  });
+
+  test("background-clip: text and vertical writing-mode, on the element that has the text", async () => {
     const snapshot = await snap(
       `<div id="n" style="text-shadow:1px 1px red;background:red;background-clip:text;writing-mode:vertical-rl">hi<b id="k"><i id="e" style="display:block;width:5px;height:5px"></i></b></div>`,
     );
 
     expect(byId(snapshot, "n").notes).toEqual([
       "background-clip: text is not drawn",
-      "text-shadow is not drawn",
       "a vertical writing-mode is not drawn",
     ]);
     // Inherited, but this element draws no text of its own.
@@ -784,14 +958,14 @@ describe("notes: what capture cannot represent", () => {
 
   test("a pseudo-element's own style is noted on its node", async () => {
     const snapshot = await snap(
-      `<style>#n::before{content:"x";display:block;width:10px;height:10px;filter:blur(1px)}</style><div id="n">y</div>`,
+      `<style>#n::before{content:"x";display:block;width:10px;height:10px;backdrop-filter:blur(1px)}</style><div id="n">y</div>`,
     );
 
     const [before] = byId(snapshot, "n").children.filter(
       (c): c is ElementNode => c.type === "element" && c.tag === "::before",
     );
 
-    expect(before!.notes).toEqual(["filter is not drawn"]);
+    expect(before!.notes).toEqual(["backdrop-filter is not drawn"]);
   });
 });
 

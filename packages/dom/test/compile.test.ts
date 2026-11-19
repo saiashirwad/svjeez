@@ -11,7 +11,7 @@ import {
   type Snapshot,
   type SvgNode,
 } from "../src/index.ts";
-import type { Background, Matrix, Placement } from "../src/schema.ts";
+import type { Background, Matrix, Placement, Run as Captured } from "../src/schema.ts";
 import { words } from "./fixtures.ts";
 import { decompose } from "../src/compile/transform.ts";
 
@@ -842,7 +842,7 @@ describe("background images and gradient tiles", () => {
 
   test("an image that was not inlined, or cannot be read, is a diagnostic", () => {
     expect(notes(box({ backgrounds: [image("http://x/a.png", {})] }))).toEqual([
-      "a background-image url() that is not a data: URL is not drawn (http://x/a.png)",
+      "a background or mask image url() that is not a data: URL is not drawn (http://x/a.png)",
     ]);
     expect(notes(box({ backgrounds: [image("data:text/plain,hello", {})] }))).toEqual([
       expect.stringContaining("could not read"),
@@ -1027,6 +1027,235 @@ describe("background images and gradient tiles", () => {
     expect(out.svg.match(/<stop /g)).toHaveLength(2);
     expect(out.diagnostics.map((d) => d.what)).toEqual([
       "a repeating gradient with no period, or too many repeats, is drawn once",
+    ]);
+  });
+});
+
+describe("filter", () => {
+  const filtered = (filter: NonNullable<ElementNode["filter"]>) =>
+    draw(box({ background: "rgb(255, 0, 0)", filter }));
+
+  test("blur() is core's blur, with the same deviation", () => {
+    const out = filtered([{ fn: "blur", radius: 4 }]);
+
+    expect(out.svg).toContain('<feGaussianBlur stdDeviation="4"/>');
+    expect(out.diagnostics).toEqual([]);
+  });
+
+  test("drop-shadow() is core's shadow, its blur a deviation as it is", () => {
+    const out = filtered([{ fn: "drop-shadow", x: 2, y: 3, blur: 5, color: "rgba(0, 0, 0, 0.5)" }]);
+
+    expect(out.svg).toContain(
+      '<feDropShadow dx="2" dy="3" stdDeviation="5" flood-opacity="0.5" flood-color="#000000"/>',
+    );
+  });
+
+  test("brightness, contrast, saturate, grayscale and hue-rotate are core's adjust, in the order written", () => {
+    const out = filtered([
+      { fn: "grayscale", amount: 0.25 },
+      { fn: "brightness", amount: 1.5 },
+      { fn: "hue-rotate", amount: 90 },
+      { fn: "contrast", amount: 0.8 },
+      { fn: "saturate", amount: 2 },
+    ]);
+
+    // One filter primitive per function, in the order written.
+    const found = [
+      ...out.svg.matchAll(/<(feColorMatrix|feFuncR)[^>]*?(?:values|slope)="([^"]+)"/g),
+    ].map((m) => `${m[1]} ${m[2]}`);
+
+    expect(found).toEqual([
+      "feColorMatrix 0.75",
+      "feFuncR 1.5",
+      "feColorMatrix 90",
+      "feFuncR 0.8",
+      "feColorMatrix 2",
+    ]);
+    expect(out.svg).toContain('intercept="0.1"');
+    expect(out.diagnostics).toEqual([]);
+  });
+
+  test("opacity() is the element's opacity, so a later blur is noted", () => {
+    expect(filtered([{ fn: "opacity", amount: 0.4 }]).svg).toContain('opacity="0.4"');
+    expect(
+      filtered([
+        { fn: "opacity", amount: 0.4 },
+        { fn: "blur", radius: 2 },
+      ]).diagnostics.map((d) => d.what),
+    ).toEqual(["filter: opacity() before blur() or drop-shadow() is drawn after them"]);
+  });
+
+  test("an invisible blur draws no filter", () => {
+    expect(filtered([{ fn: "blur", radius: 0 }]).svg).not.toContain("<filter");
+  });
+});
+
+describe("text-shadow", () => {
+  const run = (shadows: NonNullable<Captured["shadows"]>) =>
+    draw(
+      box({
+        children: [
+          {
+            type: "text",
+            runs: [{ ...words("Hi").runs[0]!, shadows }],
+          },
+        ],
+      }),
+    );
+
+  test("one shadow is core's shadow on the text", () => {
+    const out = run([{ x: 2, y: 3, blur: 6, color: "rgba(0, 0, 0, 0.5)" }]);
+
+    expect(out.svg).toContain(
+      '<feDropShadow dx="2" dy="3" stdDeviation="3" flood-opacity="0.5" flood-color="#000000"/>',
+    );
+    expect(out.svg.match(/>Hi<\/text>/g)).toHaveLength(1);
+  });
+
+  test("several shadows are copies of the text below it, the first on top", () => {
+    const out = run([
+      { x: 0, y: 0, blur: 8, color: "rgb(255, 0, 0)" },
+      { x: 2, y: 2, blur: 0, color: "rgb(0, 0, 255)" },
+    ]);
+
+    const fills = [...out.svg.matchAll(/<text[^>]*fill="(#[0-9A-F]+)"/g)].map((m) => m[1]);
+
+    expect(fills).toEqual(["#0000FF", "#FF0000", "#000000"]);
+    expect(out.svg).toContain('<feGaussianBlur stdDeviation="4"/>');
+    expect(out.svg).not.toContain("feDropShadow");
+  });
+});
+
+describe("clip-path", () => {
+  const clipped = (clipPath: NonNullable<ElementNode["clipPath"]>, at = { x: 5, y: 7 }) =>
+    draw(box({ rect: { ...at, width: 100, height: 60 }, background: "rgb(255, 0, 0)", clipPath }));
+
+  test("a circle is an ellipse about its center", () => {
+    const out = clipped({ kind: "ellipse", center: [50, 30], radius: [30, 30] });
+
+    // A circle drawn about [50, 30] in the box's frame: its edge runs from x 20 to 80.
+    expect(out.svg).toMatch(/<clipPath[^>]*>\s*<path d="M80 30C/);
+    expect(out.diagnostics).toEqual([]);
+  });
+
+  test("a polygon and an inset with corners", () => {
+    expect(
+      clipped({
+        kind: "polygon",
+        points: [
+          [50, 0],
+          [100, 60],
+          [0, 60],
+        ],
+        rule: "nonzero",
+      }).svg,
+    ).toContain('points="50 0 100 60 0 60"');
+    expect(
+      clipped({
+        kind: "inset",
+        rect: { x: 10, y: 10, width: 50, height: 20 },
+        radii: [
+          [4, 4],
+          [4, 4],
+          [4, 4],
+          [4, 4],
+        ],
+      }).svg,
+    ).toMatch(/<clipPath[^>]*>\s*<path d="M14 10/);
+  });
+
+  test("an evenodd polygon and a path keep their fill rule, and a path starts at its reference box", () => {
+    const out = clipped({
+      kind: "path",
+      d: "M 0 0 L 10 10 L 0 10 Z",
+      at: [20, 0],
+      rule: "evenodd",
+    });
+
+    expect(out.svg).toContain('clip-rule="evenodd"');
+    expect(out.svg).toContain("M20 0");
+    expect(
+      clipped({
+        kind: "polygon",
+        points: [
+          [0, 0],
+          [10, 0],
+          [10, 10],
+        ],
+        rule: "evenodd",
+      }).svg,
+    ).toContain('clip-rule="evenodd"');
+  });
+});
+
+describe("mask-image", () => {
+  test("a gradient is an alpha mask, placed like a background", () => {
+    const out = draw(
+      box({
+        background: "rgb(255, 0, 0)",
+        masks: [
+          {
+            kind: "linear",
+            angle: 180,
+            stops: [
+              { offset: 0, color: "rgb(0, 0, 0)" },
+              { offset: 1, color: "rgba(0, 0, 0, 0)" },
+            ],
+          },
+        ],
+      }),
+    );
+
+    expect(out.svg).toMatch(/<mask [^>]*mask-type="alpha"/);
+    expect(out.svg).toContain("<linearGradient");
+    expect(out.diagnostics).toEqual([]);
+  });
+
+  test("a sized, unrepeated layer masks out the rest of the box", () => {
+    const out = draw(
+      box({
+        background: "rgb(255, 0, 0)",
+        masks: [
+          {
+            kind: "linear",
+            angle: 90,
+            stops: [
+              { offset: 0, color: "rgb(0, 0, 0)" },
+              { offset: 1, color: "rgb(0, 0, 0)" },
+            ],
+            place: {
+              size: [50, 20],
+              position: [
+                { percent: 100, px: 0 },
+                { percent: 100, px: 0 },
+              ],
+              repeat: ["no-repeat", "no-repeat"],
+              origin: { x: 0, y: 0, width: 100, height: 60 },
+              clip: { x: 0, y: 0, width: 100, height: 60 },
+            },
+          },
+        ],
+      }),
+    );
+
+    expect(out.svg).toMatch(/<mask [\s\S]*<rect[^>]*x="50" y="40" width="50" height="20"/);
+  });
+
+  test("an image that was not inlined is a diagnostic", () => {
+    expect(
+      notes(
+        box({
+          background: "rgb(255, 0, 0)",
+          masks: [
+            {
+              kind: "image",
+              src: "http://x/m.png",
+            },
+          ],
+        }),
+      ),
+    ).toEqual([
+      "a background or mask image url() that is not a data: URL is not drawn (http://x/m.png)",
     ]);
   });
 });

@@ -49,6 +49,18 @@ const fake = () => {
 };
 
 describe("inlineAssets", () => {
+  test("embeds a mask image like a background", async () => {
+    const { asked, fetch } = fake();
+
+    const [out] = await inlineAssets(
+      [snapshot(box({ masks: [{ kind: "image", src: "http://x/mask.png" }] }))],
+      { fetch },
+    );
+
+    expect(asked).toEqual(["http://x/mask.png"]);
+    expect(out!.root.masks).toEqual([{ kind: "image", src: "data:image/png;base64,AQID" }]);
+  });
+
   test("embeds images and backgrounds once each, across snapshots", async () => {
     const { asked, fetch } = fake();
 

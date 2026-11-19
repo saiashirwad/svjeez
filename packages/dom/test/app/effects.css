@@ -1,0 +1,143 @@
+:root {
+  --bg: #ffffff;
+  --fg: #0f172a;
+  --panel: #f1f5f9;
+  --accent: #2563eb;
+  --glow: rgba(37, 99, 235, 0.9);
+  --hard: rgba(15, 23, 42, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0a0a;
+    --fg: #f8fafc;
+    --panel: #1e293b;
+    --accent: #60a5fa;
+    --glow: rgba(96, 165, 250, 0.9);
+    --hard: rgba(248, 250, 252, 0.5);
+  }
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font:
+    16px/20px Arial,
+    sans-serif;
+}
+
+#app {
+  width: 360px;
+  padding: 20px;
+  background: var(--bg);
+}
+
+#app > * {
+  margin: 0 0 14px;
+}
+
+/* filter: blur on a card with text and a border. */
+#blur {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 56px;
+  padding: 0 16px;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  background: var(--panel);
+  filter: blur(3px);
+}
+
+#blur i {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* drop-shadow follows the icon's shape, not its box. */
+#shadow {
+  width: 80px;
+  height: 64px;
+  padding: 8px;
+  filter: drop-shadow(4px 6px 5px var(--hard));
+}
+
+/* Gradients stand in for a photo: grayscale, brightness, contrast, hue and saturate, in order. */
+#photo {
+  height: 70px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #ef4444, #22c55e, #3b82f6);
+  filter: grayscale(0.6) brightness(1.2) contrast(1.1) hue-rotate(40deg) saturate(1.5);
+}
+
+#heading {
+  font-size: 28px;
+  line-height: 36px;
+  text-shadow: 2px 3px 4px var(--hard);
+}
+
+#layers {
+  font-size: 28px;
+  line-height: 36px;
+  color: #ffffff;
+  text-shadow:
+    0 0 8px var(--glow),
+    2px 2px 0 var(--accent);
+}
+
+#avatar {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #f97316, #8b5cf6);
+  clip-path: circle(50%);
+}
+
+#shapes {
+  display: flex;
+  gap: 12px;
+}
+
+#shapes i {
+  width: 70px;
+  height: 70px;
+  background: var(--accent);
+}
+
+#shapes i:nth-child(1) {
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+#shapes i:nth-child(2) {
+  clip-path: inset(10px 6px round 14px);
+}
+
+#shapes i:nth-child(3) {
+  clip-path: ellipse(50% 30% at 50% 50%);
+}
+
+/* shadcn's scroll fade: the last lines fade out. */
+#fade {
+  height: 90px;
+  overflow: hidden;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: var(--panel);
+  mask-image: linear-gradient(to bottom, black 55%, transparent);
+}
+
+#fade p {
+  margin: 0;
+  line-height: 30px;
+}
+
+/* An SVG tile as the mask, repeated. */
+#stamp {
+  height: 60px;
+  background: var(--accent);
+  mask: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3e%3ccircle cx='5' cy='5' r='3'/%3e%3c/svg%3e")
+    0 0 / 20px 20px;
+}

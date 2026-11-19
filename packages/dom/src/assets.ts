@@ -1,5 +1,5 @@
 import type { State } from "./record.ts";
-import type { ElementNode, Snapshot } from "./schema.ts";
+import type { Background, ElementNode, Snapshot } from "./schema.ts";
 
 export interface AssetOptions {
   /** How to download a URL. Defaults to the global `fetch`. */
@@ -58,26 +58,28 @@ const families = (node: ElementNode, into: Set<string>) => {
 const urls = (node: ElementNode, into: Set<string>) => {
   if (node.image && remote(node.image.src)) into.add(node.image.src);
 
-  for (const layer of node.backgrounds ?? [])
+  for (const layer of [...(node.backgrounds ?? []), ...(node.masks ?? [])])
     if (layer.kind === "image" && remote(layer.src)) into.add(layer.src);
 
   for (const child of node.children) if (child.type === "element") urls(child, into);
 };
 
+const inlined = (layers: readonly Background[], data: ReadonlyMap<string, string>) =>
+  layers.map((layer) =>
+    layer.kind === "image" ? { ...layer, src: data.get(layer.src) ?? layer.src } : layer,
+  );
+
 const rewrite = (node: ElementNode, data: ReadonlyMap<string, string>): ElementNode => ({
   ...node,
   ...(node.image && { image: { ...node.image, src: data.get(node.image.src) ?? node.image.src } }),
-  ...(node.backgrounds && {
-    backgrounds: node.backgrounds.map((layer) =>
-      layer.kind === "image" ? { ...layer, src: data.get(layer.src) ?? layer.src } : layer,
-    ),
-  }),
+  ...(node.backgrounds && { backgrounds: inlined(node.backgrounds, data) }),
+  ...(node.masks && { masks: inlined(node.masks, data) }),
   children: node.children.map((child) => (child.type === "element" ? rewrite(child, data) : child)),
 });
 
 /**
  * Downloads what each Snapshot (or each State's snapshot) points at and embeds it as `data:` URLs, so the scene needs no network:
- * `<img>` and background images, and the web fonts its text uses (the page's `@font-face` files; unused ones are dropped).
+ * `<img>`, background and mask images, and the web fonts its text uses (the page's `@font-face` files; unused ones are dropped).
  * Each URL is fetched once across all the snapshots. A URL that cannot be fetched throws.
  */
 export async function inlineAssets(

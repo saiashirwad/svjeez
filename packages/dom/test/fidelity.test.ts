@@ -6,6 +6,7 @@ import { serve } from "../src/bun.ts";
 import background from "./app/background.html";
 import form from "./app/form.html";
 import index from "./app/index.html";
+import effects from "./app/effects.html";
 import pseudo from "./app/pseudo.html";
 
 /** Mean absolute difference over the page's box (the scene may be larger, sized for its biggest state), RGB, 0 to 255, measured in Chromium. */
@@ -14,6 +15,8 @@ const difference = async (
   b: Uint8Array,
   /** Compare `a` with this part of `b` (in `b`'s px) rather than all of it. */
   region?: { x: number; y: number; width: number; height: number },
+  /** Take this part of `a` too, when it is the whole page rather than the part itself. */
+  of?: { x: number; y: number; width: number; height: number },
 ): Promise<number> => {
   const { page, close } = await openPage({ url: "about:blank" });
 
@@ -23,7 +26,7 @@ const difference = async (
     );
 
     return await page.evaluate(
-      async ([first, second, part]) => {
+      async ([first, second, part, cut]) => {
         const load = (src: string) =>
           new Promise<HTMLImageElement>((done, fail) => {
             const image = new Image();
@@ -37,7 +40,7 @@ const difference = async (
         const [width, height] = part ? [part.width, part.height] : [x.width, x.height];
         const canvas = new OffscreenCanvas(width, height);
         const context = canvas.getContext("2d", { willReadFrequently: true })!;
-        context.drawImage(x, 0, 0);
+        context.drawImage(x, -(cut?.x ?? 0), -(cut?.y ?? 0));
         const before = context.getImageData(0, 0, width, height).data;
         context.clearRect(0, 0, width, height);
         context.drawImage(y, -(part?.x ?? 0), -(part?.y ?? 0));
@@ -53,7 +56,7 @@ const difference = async (
         return total / (before.length / 4) / 3;
       },
       // SAFETY: `urls` is mapped from the two-element list above.
-      [...(urls as [string, string]), region] as const,
+      [...(urls as [string, string]), region, of] as const,
     );
   } finally {
     await close();
@@ -249,6 +252,89 @@ describe("film", () => {
 
         for (const id of IDS)
           gaps.push({ id, gap: await difference(shotsOf[id]![scheme], drawn, parts[id]) });
+
+        expect(gaps.filter(({ gap }) => gap >= 4)).toEqual([]);
+      } finally {
+        await view.close();
+      }
+    }
+  }, 90_000);
+
+  test("filters, text-shadow, clip-path and masks match the page in both schemes", async () => {
+    const IDS = [
+      "blur",
+      "shadow",
+      "photo",
+      "heading",
+      "layers",
+      "avatar",
+      "shapes",
+      "fade",
+      "stamp",
+    ] as const;
+
+    const shots: Record<"light" | "dark", Uint8Array> = {
+      light: new Uint8Array(),
+      dark: new Uint8Array(),
+    };
+
+    let parts: Record<string, { x: number; y: number; width: number; height: number }> = {};
+    const diagnostics: string[] = [];
+
+    const scene = await film(
+      serve(effects, { selector: "#app" }),
+      async ({ page, snap }) => {
+        await snap("effects");
+        const app = (await page.locator("#app").boundingBox())!;
+
+        // A filter or shadow reaches past its box, so each part is compared with a margin around it.
+        parts = Object.fromEntries(
+          await Promise.all(
+            IDS.map(async (id) => {
+              const found = (await page.locator(`#${id}`).boundingBox())!;
+              const pad = 12;
+
+              return [
+                id,
+                {
+                  x: found.x - app.x - pad,
+                  y: found.y - app.y - pad,
+                  width: found.width + pad * 2,
+                  height: found.height + pad * 2,
+                },
+              ] as const;
+            }),
+          ),
+        );
+
+        for (const scheme of ["light", "dark"] as const) {
+          await page.emulateMedia({ colorScheme: scheme });
+          shots[scheme] = await page.locator("#app").screenshot();
+        }
+      },
+      {
+        scheme: "both",
+        viewport: { width: 400, height: 1000 },
+        onDiagnostics: (found) => diagnostics.push(...found.map(({ what }) => what)),
+      },
+    );
+
+    // Everything on the page is drawn.
+    expect(diagnostics).toEqual([]);
+
+    const markup = svg.emit(scene);
+
+    for (const scheme of ["light", "dark"] as const) {
+      const view = await openScene(markup, { colorScheme: scheme });
+
+      try {
+        const drawn = await view.capture(0.1);
+        const gaps = [{ id: "page", gap: await difference(shots[scheme], drawn) }];
+
+        for (const id of IDS) {
+          // The scene and the screenshot are the same size: the same region of both.
+          gaps.push({ id, gap: await difference(shots[scheme], drawn, parts[id], parts[id]) });
+        }
 
         expect(gaps.filter(({ gap }) => gap >= 4)).toEqual([]);
       } finally {

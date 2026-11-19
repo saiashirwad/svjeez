@@ -5,6 +5,7 @@ import type { ElementNode, Rect } from "../schema.ts";
 import type { Context } from "./context.ts";
 import { BIG, add, innerRadii, inset, outline, sub, type Radii, type Vec } from "./geometry.ts";
 import { control } from "./control.tsx";
+import { clipOf, filters, maskOf } from "./effects.tsx";
 import { image } from "./image.tsx";
 import { backgrounds, border, hides, outlineOf, shadows, widthsOf, type Where } from "./paint.tsx";
 import { isElement, type Paired } from "./pair.ts";
@@ -34,6 +35,41 @@ const BLENDS: readonly Blend[] = [
 
 const blendOf = (mode: string | undefined): Blend | undefined =>
   BLENDS.find((blend) => blend === mode);
+
+/**
+ * What `filter`, `clip-path` and `mask-image` do to everything the element draws, in CSS order: the filter first, the clip-path over it, then the mask.
+ * Each is a group of its own, so the order is not up to a backend.
+ */
+const dressed = (el: ElementNode, drawn: SceneElement[], where: Where): SceneElement[] => {
+  let out = drawn;
+
+  if (el.filter) {
+    const { effects, opacity } = filters(el.filter, where);
+
+    if (effects.length > 0 || opacity !== 1)
+      out = [
+        <Group key="@filter" effects={effects} {...(opacity !== 1 && { opacity })}>
+          {out}
+        </Group>,
+      ];
+  }
+
+  if (el.clipPath)
+    out = [
+      <Group key="@clip-path" clip={clipOf(el.clipPath, [where.box.x, where.box.y])}>
+        {out}
+      </Group>,
+    ];
+
+  if (el.masks)
+    out = [
+      <Group key="@mask" mask={maskOf(el.masks, where)}>
+        {out}
+      </Group>,
+    ];
+
+  return out;
+};
 
 /**
  * An element as a group in its own frame: the origin of its transform, or its top-left corner without one.
@@ -119,7 +155,7 @@ export const element = (
       ? open
       : padding.box;
 
-  const children: SceneElement[] = [
+  const drawn: SceneElement[] = [
     ...(cast?.below ?? []),
     ...backgrounds(
       el.background,
@@ -140,6 +176,8 @@ export const element = (
       : content),
     ...(el.outline ? outlineOf(el.outline, where) : []),
   ];
+
+  const children = dressed(el, drawn, where);
 
   const turned =
     placed &&

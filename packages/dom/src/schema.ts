@@ -135,6 +135,54 @@ export interface Shadow {
   readonly inset: boolean;
 }
 
+/** One function of a CSS `filter` list, in the order written. Lengths are px, `hue-rotate` is degrees, the rest are fractions (`1` is unchanged, or fully applied for `grayscale`, `invert`, `sepia`, `opacity`). */
+export type FilterFn =
+  | { readonly fn: "blur"; readonly radius: number }
+  | {
+      readonly fn: "drop-shadow";
+      readonly x: number;
+      readonly y: number;
+      readonly blur: number;
+      readonly color: Color;
+    }
+  | {
+      readonly fn: "brightness" | "contrast" | "saturate" | "grayscale" | "opacity" | "hue-rotate";
+      readonly amount: number;
+    };
+
+/** A `clip-path` shape, resolved to px from the element's border box's top-left corner. */
+export type ClipShape =
+  | {
+      readonly kind: "inset";
+      readonly rect: Rect;
+      readonly radii?: readonly [Corner, Corner, Corner, Corner];
+    }
+  | {
+      readonly kind: "ellipse";
+      readonly center: readonly [x: number, y: number];
+      readonly radius: readonly [x: number, y: number];
+    }
+  | {
+      readonly kind: "polygon";
+      readonly points: readonly (readonly [x: number, y: number])[];
+      readonly rule: "nonzero" | "evenodd";
+    }
+  /** SVG path data, in px from `at` (the reference box's corner, itself in px from the border box's). */
+  | {
+      readonly kind: "path";
+      readonly d: string;
+      readonly at: readonly [x: number, y: number];
+      readonly rule: "nonzero" | "evenodd";
+    };
+
+/** One `text-shadow`: the glyphs' shadow, blurred by a standard deviation of half of `blur`. */
+export interface TextShadow {
+  readonly x: number;
+  readonly y: number;
+  readonly blur: number;
+  readonly color: Color;
+}
+
 export interface Font {
   readonly family: string;
   readonly weight: number;
@@ -163,6 +211,8 @@ export interface Run {
   readonly letterSpacing: number;
   readonly color: Color;
   readonly decoration?: Decoration;
+  /** `text-shadow`, topmost first. */
+  readonly shadows?: readonly TextShadow[];
 }
 
 export interface TextNode {
@@ -257,6 +307,12 @@ export interface ElementNode {
     readonly style: BorderStyle;
   };
   readonly shadows?: readonly Shadow[];
+  /** `filter`, applied in order to the element, its shadows and its children. */
+  readonly filter?: readonly FilterFn[];
+  /** `clip-path`. */
+  readonly clipPath?: ClipShape;
+  /** `mask-image` layers (topmost first), each placed by `mask-size`, `-position`, `-repeat`, `-origin` and `-clip`. Only their alpha counts. */
+  readonly masks?: readonly Background[];
   readonly image?: ImageContent;
   readonly svg?: SvgNode;
   readonly control?: Control;
