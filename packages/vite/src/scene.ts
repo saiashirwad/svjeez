@@ -4,7 +4,20 @@ import { isScene, svg as backend, type Scene } from "svjeez/tools";
 import { register, ROUTE } from "./assets.ts";
 import { poster, type PosterOptions, type Scheme } from "./posters.ts";
 
-export type SceneSource = string | Scene | (() => string | Scene);
+/** What a `?svjeez` import is. */
+export interface SceneModule {
+  readonly src: string;
+  readonly width: number;
+  readonly height: number;
+  readonly title: string;
+  readonly desc: string;
+  readonly posters?: { readonly light: string; readonly dark: string };
+  /** The SVG's markup, in server code only (SSR, an Astro page): a browser bundle gets the URL alone. */
+  readonly svg?: string;
+}
+
+/** SVG markup, a scene, a function that makes either, or a `?svjeez` import in server code. */
+export type SceneSource = string | Scene | (() => string | Scene) | SceneModule;
 
 export interface SceneImage {
   readonly src: string;
@@ -31,8 +44,21 @@ const compiled = new WeakMap<Exclude<SceneSource, string>, string>();
 
 const isSvgText = (scene: SceneSource): scene is string => typeof scene === "string";
 
+const isModule = (scene: SceneSource): scene is SceneModule =>
+  typeof scene === "object" && "src" in scene;
+
 const compile = (scene: SceneSource) => {
   if (isSvgText(scene)) return scene;
+
+  if (isModule(scene)) {
+    if (scene.svg === undefined)
+      throw new Error(
+        `getScene() got the ?svjeez import of ${scene.src} without its markup, which only server code (SSR, an Astro page) gets.`,
+      );
+
+    return scene.svg;
+  }
+
   const known = compiled.get(scene);
 
   if (known !== undefined) return known;

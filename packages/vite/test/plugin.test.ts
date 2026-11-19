@@ -203,6 +203,11 @@ export default scene({ size: [120, 80], duration: 1, title: "Model" }, () => (
     expect(module).toContain(`"width": 120`);
     const src = /"src":\s*"([^"]+)"/.exec(module)![1]!;
     expect(await (await fetch(origin + src)).text()).toContain('<circle cx="60" cy="40" r="10"');
+    // The browser gets the URL alone; server code also gets the markup, which getScene() takes.
+    expect(module).not.toContain("<svg");
+    const { default: ssr } = await server.ssrLoadModule(join(dir, "scene.tsx?svjeez"));
+    expect(ssr.svg).toContain('<circle cx="60" cy="40" r="10"');
+    expect(getScene(ssr)).toMatchObject({ width: 120, height: 80, title: "Model" });
   } finally {
     await server.close();
   }
@@ -253,6 +258,12 @@ export default () => scene({ size: [100, 100], duration: 1, title: label }, () =
     await server.close();
   }
 }, 60_000);
+
+test("getScene() names a ?svjeez import that has no markup", () => {
+  const module = { src: "/x.svg", width: 1, height: 1, title: "", desc: "" };
+
+  expect(() => getScene(module)).toThrow("only server code (SSR, an Astro page) gets");
+});
 
 test("getScene() names an svg with no viewBox", () => {
   expect(() => getScene("<svg></svg>")).toThrow("getScene() needs a scene whose svg has a viewBox");
