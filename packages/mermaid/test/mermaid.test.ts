@@ -133,8 +133,8 @@ describe("parse errors", () => {
   });
 
   test("reject another diagram type", () => {
-    expect(message('pie title Pets\n"Dogs": 3')).toContain("Supported diagram types");
-    expect(message("erDiagram\nA ||--o{ B : has")).toContain("mermaid:1:");
+    expect(message("sankey-beta\nA,B,10")).toContain("Supported diagram types");
+    expect(message("quadrantChart\ntitle Q")).toContain("mermaid:1:");
   });
 
   test("reject empty text, a bad direction and an unclosed subgraph", () => {
@@ -342,5 +342,33 @@ describe("mermaid", () => {
         line: 10,
       }),
     ).toThrow(/^flow\.ts:12:/);
+  });
+});
+
+describe("every supported diagram type", () => {
+  const sources = {
+    class: "classDiagram\nAnimal <|-- Duck\nclass Duck {\n  +swim()\n}",
+    er: "erDiagram\nCUSTOMER ||--o{ ORDER : places",
+    gantt: "gantt\ndateFormat YYYY-MM-DD\nsection A\nPlan :a, 2026-01-01, 3d\nBuild :after a, 2d",
+    journey: "journey\ntitle Day\nsection Work\nCode: 5: Me",
+    pie: 'pie title Pets\n"Dogs" : 3\n"Cats" : 2',
+    mindmap: "mindmap\n  root\n    A\n    B",
+    git: "gitGraph\ncommit\nbranch dev\ncommit\ncheckout main\nmerge dev",
+  } as const;
+
+  for (const [kind, text] of Object.entries(sources))
+    test(kind, () => {
+      const d = mermaid(text, { font: mono });
+      // SAFETY: the keys of `sources` are the diagram kinds.
+      expect(d.kind).toBe(kind as typeof d.kind);
+      expect(d.size[0]).toBeGreaterThan(0);
+      const out = svg.emit(scene({ size: [800, 600], duration: 1, title: kind }, () => d.node));
+      expect(out).toContain("<svg");
+    });
+
+  test("a direction on a pie is rejected", () => {
+    expect(() => mermaid(sources.pie, { font: mono, direction: "LR" })).toThrow(
+      /pie chart has no direction/,
+    );
   });
 });

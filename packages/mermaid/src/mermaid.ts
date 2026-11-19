@@ -2,8 +2,15 @@ import {
   flowchart,
   sequence,
   stateMachine,
+  type ClassDiagram,
   type Diagram,
   type DiagramOptions,
+  type ErDiagram,
+  type Gantt,
+  type GitGraph,
+  type Journey,
+  type Mindmap,
+  type Pie,
   type Flowchart,
   type NodeRole,
   type Sequence,
@@ -13,9 +20,23 @@ import {
 } from "@svjeez/diagrams";
 import type { Span } from "svjeez";
 import { SceneError } from "svjeez/tools";
+import { drawClass } from "./class.ts";
+import { drawEr } from "./er.ts";
+import { drawGantt } from "./gantt.ts";
+import { drawGit } from "./git.ts";
+import { drawJourney } from "./journey.ts";
+import { drawMindmap } from "./mindmap.ts";
 import { parseMermaid } from "./parse.ts";
+import { drawPie } from "./pie.ts";
 import type {
+  ClassDoc,
+  ErDoc,
   FlowchartDoc,
+  GanttDoc,
+  GitDoc,
+  JourneyDoc,
+  MindmapDoc,
+  PieDoc,
   FlowForm,
   MermaidDoc,
   ParseOptions,
@@ -32,7 +53,14 @@ export interface MermaidOptions extends DiagramOptions, ParseOptions {
 export type MermaidDiagram =
   | (Flowchart<string, string> & { readonly kind: "flowchart"; readonly doc: FlowchartDoc })
   | (Sequence<string> & { readonly kind: "sequence"; readonly doc: SequenceDoc })
-  | (StateMachine<string> & { readonly kind: "state"; readonly doc: StateDoc });
+  | (StateMachine<string> & { readonly kind: "state"; readonly doc: StateDoc })
+  | (ClassDiagram<string, string> & { readonly kind: "class"; readonly doc: ClassDoc })
+  | (ErDiagram<string> & { readonly kind: "er"; readonly doc: ErDoc })
+  | (Gantt & { readonly kind: "gantt"; readonly doc: GanttDoc })
+  | (Journey & { readonly kind: "journey"; readonly doc: JourneyDoc })
+  | (Pie<string> & { readonly kind: "pie"; readonly doc: PieDoc })
+  | (Mindmap<string> & { readonly kind: "mindmap"; readonly doc: MindmapDoc })
+  | (GitGraph & { readonly kind: "git"; readonly doc: GitDoc });
 
 const FORM_ROLES: Record<FlowForm, NodeRole> = {
   rect: "task",
@@ -43,6 +71,15 @@ const FORM_ROLES: Record<FlowForm, NodeRole> = {
   subroutine: "tool",
   cylinder: "store",
 };
+
+const NAMES = {
+  sequence: "sequence diagram",
+  gantt: "gantt chart",
+  journey: "user journey",
+  pie: "pie chart",
+  mindmap: "mindmap",
+  git: "git graph",
+} as const;
 
 const stateSpec = (n: StateNode): StateSpec => {
   if (n.inner)
@@ -97,14 +134,30 @@ export function mermaid(text: string, options: MermaidOptions): MermaidDiagram {
     );
   }
 
-  if (doc.kind === "sequence") {
-    if (asked)
-      throw new SceneError(
-        "A sequence diagram has no direction.",
-        "Drop { direction } from mermaid().",
-        { source: doc.source },
-      );
+  if (doc.kind === "class")
+    return drawn(drawClass(doc, { ...diagramOptions, direction: asked }), "class", doc);
 
+  if (doc.kind === "er")
+    return drawn(drawEr(doc, { ...diagramOptions, direction: asked }), "er", doc);
+
+  if (doc.kind !== "state" && asked)
+    throw new SceneError(
+      `A ${NAMES[doc.kind]} has no direction.`,
+      "Drop { direction } from mermaid().",
+      { source: doc.source },
+    );
+
+  if (doc.kind === "gantt") return drawn(drawGantt(doc, diagramOptions), "gantt", doc);
+
+  if (doc.kind === "journey") return drawn(drawJourney(doc, diagramOptions), "journey", doc);
+
+  if (doc.kind === "pie") return drawn(drawPie(doc, diagramOptions), "pie", doc);
+
+  if (doc.kind === "mindmap") return drawn(drawMindmap(doc, diagramOptions), "mindmap", doc);
+
+  if (doc.kind === "git") return drawn(drawGit(doc, diagramOptions), "git", doc);
+
+  if (doc.kind === "sequence") {
     return drawn(
       sequence(
         {

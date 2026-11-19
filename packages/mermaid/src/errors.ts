@@ -5,6 +5,8 @@ export interface Line {
   readonly file: string;
   readonly line: number;
   readonly text: string;
+  /** Width of the whitespace before the text, for indentation-sensitive diagrams such as mindmap. */
+  readonly indent?: number;
 }
 
 export const sourceOf = (l: Line): Place => ({ file: l.file, line: l.line });

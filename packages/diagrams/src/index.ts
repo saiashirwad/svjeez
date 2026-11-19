@@ -9,7 +9,45 @@ export {
   type Reveal,
 } from "./kit.tsx";
 
+export {
+  classDiagram,
+  type ClassDiagram,
+  type ClassDiagramOptions,
+  type ClassEnd,
+  type ClassNamespace,
+  type ClassRelation,
+  type ClassSpec,
+} from "./class.tsx";
+
+export {
+  erDiagram,
+  type ErAttribute,
+  type ErCard,
+  type ErDiagram,
+  type ErDiagramOptions,
+  type ErEntity,
+  type ErRelation,
+} from "./er.tsx";
+
 export { flowchart, type Flowchart, type FlowchartOptions } from "./flowchart.tsx";
+
+export {
+  gantt,
+  type Gantt,
+  type GanttOptions,
+  type GanttSection,
+  type GanttSpec,
+  type GanttTask,
+} from "./gantt.tsx";
+
+export {
+  journey,
+  type Journey,
+  type JourneyOptions,
+  type JourneySection,
+  type JourneySpec,
+  type JourneyTask,
+} from "./journey.tsx";
 
 export { lanes, type Lanes, type LanesOptions } from "./lanes.tsx";
 
@@ -24,3 +62,22 @@ export {
 } from "./state.tsx";
 
 export { tree, type Tree, type TreeOptions } from "./tree.tsx";
+
+export { pie, type Pie, type PieOptions, type PieSlice } from "./pie.tsx";
+
+export {
+  mindmap,
+  type Mindmap,
+  type MindmapOptions,
+  type MindNode,
+  type MindShape,
+  type MindSpec,
+} from "./mindmap.tsx";
+
+export {
+  gitGraph,
+  type GitCommit,
+  type GitGraph,
+  type GitGraphOptions,
+  type GitKind,
+} from "./git.tsx";
