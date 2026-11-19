@@ -684,3 +684,106 @@ describe("text along an outline", () => {
     expect(() => along({}, "a\nb")).toThrow("takes one line, but its text has 2");
   });
 });
+
+describe("pre-measured runs", () => {
+  const packed = font(Uint8Array.from([...Buffer.from("wOF2"), ...new Uint8Array(40)]), {
+    family: "Packed",
+  });
+
+  const system = font.system("Helvetica Neue", { weight: 500, fallback: ["Arial", "sans-serif"] });
+
+  const set = (face: typeof packed, advances: number[] | undefined, extra = {}) =>
+    made(() => (
+      <Text key="t" font={face} size={10} fill="#000000">
+        <Run advances={advances} {...extra}>
+          abc
+        </Run>
+      </Text>
+    ));
+
+  test("a WOFF2 font sets text from the advances it is given", () => {
+    const model = set(packed, [5, 6, 7]);
+    const node = textOf(model);
+
+    expect(node.lines[0]!.runs[0]!.advances).toEqual([5, 6, 7]);
+    expect(node.box.width).toBe(18);
+    expect(node.lines[0]!.runs[0]!.outline).toBeUndefined();
+
+    const needs = {
+      name: "Outlines",
+      supports: { ...svg.supports, unoutlinedText: { level: "none", note: "x" } as const },
+    };
+
+    expect(diagnose(model, needs).map((each) => each.feature)).toEqual(["unoutlinedText"]);
+    expect(svg.emit(model)).toContain("font-family");
+    expect(svg.emit(model)).toContain("abc");
+  });
+
+  test("a system family needs no font file and writes no @font-face", () => {
+    const model = set(system, [4, 4, 4]);
+    const out = svg.emit(model);
+
+    expect(textOf(model).box.width).toBe(12);
+    expect(out).not.toContain("@font-face");
+    expect(out).toContain("'Helvetica Neue', Arial, sans-serif");
+    expect(out).toContain('font-weight="500"');
+  });
+
+  test("advances wrap with the text and cut at the characters they belong to", () => {
+    const model = made(() => (
+      <Text key="t" font={system} size={10} width={9} fill="#000000">
+        <Run advances={[4, 4, 4, 4]}>abcd</Run>
+      </Text>
+    ));
+
+    expect(textOf(model).lines.map((line) => line.runs.map((run) => run.text))).toEqual([
+      ["ab"],
+      ["cd"],
+    ]);
+  });
+
+  test("missing advances in a font that can't be measured say so", () => {
+    for (const face of [packed, system])
+      expect(() =>
+        made(() => (
+          <Text key="t" font={face} size={10} fill="#000000">
+            hello
+          </Text>
+        )),
+      ).toThrow(/a font svjeez can't measure, and gave no advances for it/);
+  });
+
+  test("advances must match the characters", () => {
+    expect(() => set(packed, [5, 6])).toThrow("3 characters");
+  });
+
+  test("letterSpacing widens the layout and is written as letter-spacing", () => {
+    const plain = made(() => (
+      <Text key="t" font={regular} size={10} fill="#000000">
+        abc
+      </Text>
+    ));
+
+    const spaced = made(() => (
+      <Text key="t" font={regular} size={10} letterSpacing={2} fill="#000000">
+        abc
+      </Text>
+    ));
+
+    expect(textOf(spaced).box.width).toBeCloseTo(textOf(plain).box.width + 6, 5);
+    expect(textOf(spaced).lines[0]!.runs[0]!.letterSpacing).toBe(2);
+    expect(textOf(spaced).lines[0]!.runs[0]!.outline).toBeDefined();
+    expect(emit(spaced)).toContain('letter-spacing="2"');
+    expect(emit(plain)).not.toContain("letter-spacing");
+  });
+
+  test("a run can space its own letters", () => {
+    const model = made(() => (
+      <Text key="t" font={regular} size={10} fill="#000000">
+        a<Run letterSpacing={3}>bc</Run>
+      </Text>
+    ));
+
+    expect(emit(model)).toContain('letter-spacing="3"');
+  });
+});

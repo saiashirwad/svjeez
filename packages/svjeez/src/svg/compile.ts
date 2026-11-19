@@ -72,10 +72,11 @@ const fontFamily = (state: State, value: FontValue): string => {
   const family = `'${prefix}${plain.slice(1)}`;
 
   for (const { name, font } of faces) {
+    if (font.format === "system") continue;
     const slot = slotOf(name, font);
     const taken = state.fonts.get(slot);
 
-    if (taken?.href === font.href) {
+    if (taken && taken.href === font.href) {
       if (taken.subset && !font.subset) {
         state.fonts.set(slot, font);
         state.faces.splice(

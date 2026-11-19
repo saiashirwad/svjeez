@@ -142,7 +142,7 @@ describe("subset: false", () => {
         </Group>
       ));
 
-      expect(out).toContain(whole.href);
+      expect(out).toContain(whole.href!);
       expect(out.match(/@font-face/g)).toHaveLength(1);
     });
 });

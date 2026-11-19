@@ -17,6 +17,10 @@ export interface TextPiece<S> {
   readonly text: string;
   readonly face: Font;
   readonly style: S;
+  /** Extra space after every glyph, in scene units. */
+  readonly spacing?: number;
+  /** One advance per character, already measured (and already spaced): the font is never read. */
+  readonly advances?: readonly number[];
 }
 
 export interface LaidRun<S> {
@@ -25,6 +29,7 @@ export interface LaidRun<S> {
   readonly advances: readonly number[];
   readonly face: Font;
   readonly style: S;
+  readonly spacing?: number;
   readonly outline?: readonly Contour[];
 }
 
@@ -43,19 +48,38 @@ const SHARE: Readonly<Record<TextAlign, number>> = { start: 0, center: 0.5, end:
 
 const isBlank = (text: string): boolean => /^\s+$/.test(text);
 
+const alike = <S>(a: TextPiece<S>, b: TextPiece<S>): boolean =>
+  a.face === b.face && (a.spacing ?? 0) === (b.spacing ?? 0) && !a.advances === !b.advances;
+
+const glue = <S>(a: TextPiece<S>, b: TextPiece<S>): TextPiece<S> => ({
+  ...b,
+  text: a.text + b.text,
+  ...(a.advances && b.advances && { advances: [...a.advances, ...b.advances] }),
+});
+
+/** The part of a piece from its `from`th character on, `count` characters long. */
+const sliced = <S>(
+  piece: TextPiece<S>,
+  text: string,
+  from: number,
+  count: number,
+): TextPiece<S> => {
+  const { advances, ...rest } = piece;
+
+  return { ...rest, text, ...(advances && { advances: advances.slice(from, from + count) }) };
+};
+
 const joined = <S>(parts: readonly TextPiece<S>[], part: TextPiece<S>): TextPiece<S>[] => {
   const last = parts.at(-1);
 
   if (part.text === "") return [...parts];
 
-  if (!last || last.face !== part.face) return [...parts, part];
+  if (!last || !alike(last, part)) return [...parts, part];
 
   if (last.style === part.style || isBlank(part.text))
-    return [...parts.slice(0, -1), { ...last, text: last.text + part.text }];
+    return [...parts.slice(0, -1), glue(last, { ...part, style: last.style })];
 
-  return isBlank(last.text)
-    ? [...parts.slice(0, -1), { ...part, text: last.text + part.text }]
-    : [...parts, part];
+  return isBlank(last.text) ? [...parts.slice(0, -1), glue(last, part)] : [...parts, part];
 };
 
 const concat = <S>(parts: readonly TextPiece<S>[], more: readonly TextPiece<S>[]): TextPiece<S>[] =>
@@ -72,7 +96,7 @@ const trimmed = <S>(parts: readonly TextPiece<S>[]): TextPiece<S>[] => {
     const text = last.text.trimEnd();
 
     if (text !== "") {
-      out[out.length - 1] = { ...last, text };
+      out[out.length - 1] = sliced(last, text, 0, [...text].length);
       break;
     }
 
@@ -85,16 +109,22 @@ const trimmed = <S>(parts: readonly TextPiece<S>[]): TextPiece<S>[] => {
 const tokens = <S>(paragraph: readonly TextPiece<S>[]): TextPiece<S>[][] => {
   const out: TextPiece<S>[][] = [];
 
-  for (const part of paragraph)
+  for (const part of paragraph) {
+    let at = 0;
+
     for (const text of part.text.split(/(\s+)/)) {
       if (text === "") continue;
       const last = out.at(-1);
-      const piece = { ...part, text };
+      const count = [...text].length;
+      const piece = sliced(part, text, at, count);
+
+      at += count;
 
       if (last && isBlank(textOf(last)) === isBlank(text))
         out[out.length - 1] = joined(last, piece);
       else out.push([piece]);
     }
+  }
 
   return out;
 };
@@ -107,14 +137,15 @@ const cutWord = <S>(
   let piece: TextPiece<S>[] = [];
 
   for (const part of word)
-    for (const char of part.text) {
-      const next = joined(piece, { ...part, text: char });
+    [...part.text].forEach((char, at) => {
+      const one = sliced(part, char, at, 1);
+      const next = joined(piece, one);
 
       if (piece.length > 0 && !fits(next)) {
         pieces.push(piece);
-        piece = [{ ...part, text: char }];
+        piece = [one];
       } else piece = next;
-    }
+    });
 
   return [...pieces, piece];
 };
@@ -158,7 +189,7 @@ const paragraphs = <S>(pieces: readonly TextPiece<S>[]): TextPiece<S>[][] => {
   for (const piece of pieces)
     piece.text.split(/\r?\n/).forEach((text, index) => {
       if (index > 0) out.push([]);
-      out[out.length - 1] = joined(out.at(-1)!, { text, face: piece.face, style: piece.style });
+      out[out.length - 1] = joined(out.at(-1)!, { ...piece, text });
     });
 
   return out;
@@ -187,8 +218,25 @@ export const layoutRuns = <S>(
   const { ascent, descent, lineGap } = base.metrics;
   const step = (lineHeight ?? ascent + descent + lineGap) * size;
 
+  const advancesOf = (part: TextPiece<S>): readonly number[] => {
+    if (part.advances) return part.advances;
+    const { face, text } = part;
+
+    if (text === "") return [];
+
+    if (!face.measurable)
+      throw new SceneError(
+        `${where} sets ${JSON.stringify(text.trim())} in ${face.family} ${face.weight}${face.italic ? " italic" : ""}, a font svjeez can't measure, and gave no advances for it.`,
+        "Give the <Run> its advances={[…]}, one per character as the browser measured them, or load the font as a TTF or OTF.",
+      );
+
+    const spacing = part.spacing ?? 0;
+
+    return face.advances(text, size).map((advance) => advance + spacing);
+  };
+
   const measure = (parts: readonly TextPiece<S>[]): number =>
-    parts.reduce((sum, part) => sum + part.face.measure(part.text, size), 0);
+    parts.reduce((sum, part) => sum + advancesOf(part).reduce((a, b) => a + b, 0), 0);
 
   const fits = (parts: readonly TextPiece<S>[]): boolean =>
     width === undefined || measure(parts) <= width;
@@ -207,22 +255,26 @@ export const layoutRuns = <S>(
     let x = start;
 
     const runs = parts.map((part): LaidRun<S> => {
-      const { text, face, style } = part;
+      const { text, face, style, spacing } = part;
 
-      const outlined = face.outlines ? face.path(text, { size, x, y }) : undefined;
+      const outlined =
+        face.outlines && !part.advances
+          ? face.path(text, { size, x, y, spacing: spacing ?? 0 })
+          : undefined;
+
+      const advances = outlined ? outlined.glyphs.map((glyph) => glyph.advance) : advancesOf(part);
 
       const run: LaidRun<S> = {
         text,
         at: [x, y],
-        advances: outlined
-          ? outlined.glyphs.map((glyph) => glyph.advance)
-          : face.advances(text, size),
+        advances,
         face,
         style,
+        ...(spacing && { spacing }),
         ...(outlined && { outline: ringsOf(outlined.d) }),
       };
 
-      x += face.measure(text, size);
+      x += advances.reduce((a, b) => a + b, 0);
 
       return run;
     });

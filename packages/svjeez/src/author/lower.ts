@@ -390,6 +390,7 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     fill: props.fill,
     ...(props.weight !== undefined && { weight: props.weight }),
     ...(props.italic !== undefined && { italic: props.italic }),
+    ...(props.letterSpacing !== undefined && { letterSpacing: props.letterSpacing }),
   };
 
   const styles = new Map<Asked, RunLook | undefined>();
@@ -534,12 +535,22 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     return styleOf({ ...wanted, fill: "#00000000" })!;
   };
 
-  const pieces = asked.map(({ text: words }, i) => {
+  const pieces = asked.map(({ text: words, asked: wanted, advances }, i) => {
     const look = found[i] ?? borrowed(i);
+    const spacing = wanted.letterSpacing;
+
+    if (spacing !== undefined && !Number.isFinite(spacing))
+      throw new SceneError(`${where} needs a finite letterSpacing, got ${spacing}.`);
 
     unseen(look, words);
 
-    return { text: words, face: look.font, style: look };
+    return {
+      text: words,
+      face: look.font,
+      style: look,
+      ...(spacing && { spacing }),
+      ...(advances && { advances }),
+    };
   });
 
   const outline = props.along === undefined ? undefined : outlineOf(props.along);
@@ -610,10 +621,11 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     ...(stroke && { stroke }),
     lines: lines.map((line): TextLine => ({
       at: line.at,
-      runs: line.runs.map(({ text: words, at, advances, outline, style }): TextRun => ({
+      runs: line.runs.map(({ text: words, at, advances, outline, style, spacing }): TextRun => ({
         text: words,
         at,
         advances,
+        ...(spacing && { letterSpacing: spacing }),
         face: style.face,
         fill: fillOf(style),
         ...(style.opacity !== undefined && { opacity: style.opacity }),

@@ -767,7 +767,8 @@ interface DrawnText {
   readonly children: SvgNode[];
 }
 
-const lookOf = (run: TextRun): string => JSON.stringify([run.face, run.fill, run.opacity ?? 1]);
+const lookOf = (run: TextRun): string =>
+  JSON.stringify([run.face, run.fill, run.opacity ?? 1, run.letterSpacing ?? 0]);
 
 const commonest = (runs: readonly TextRun[]): TextRun | undefined => {
   const counts = new Map<string, { run: TextRun; count: number }>();
@@ -866,6 +867,7 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
       ...(single && !along && where(start, start[0] + at[0] !== 0, start[1] + at[1] !== 0)),
       ...(base && facing(base.face, ctx.around)),
       "font-size": num(node.size),
+      ...(base?.letterSpacing && { "letter-spacing": num(base.letterSpacing) }),
       ...(along &&
         along.align !== "start" && { "text-anchor": along.align === "center" ? "middle" : "end" }),
       ...(node.lines.some((each) =>
@@ -927,6 +929,9 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
         painted(ctx, "fill", run.fill, tspan.attrs, own, at, node.key);
 
       if (!same(run.opacity ?? 1, base!.opacity ?? 1)) opacity(run, tspan.attrs, own);
+
+      if ((run.letterSpacing ?? 0) !== (base!.letterSpacing ?? 0))
+        tspan.attrs["letter-spacing"] = num(run.letterSpacing ?? 0);
 
       return {
         ...element("tspan", tspan.attrs, [{ kind: "text", value: run.text }]),

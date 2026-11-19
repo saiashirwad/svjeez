@@ -60,9 +60,9 @@ describe("font", () => {
 
   test("the bytes become a base64 data URI with the font's media type", async () => {
     const bytes = await readFile(fixture("ABeeZee-Regular"));
-    expect(sans.href.startsWith("data:font/ttf;base64,")).toBe(true);
-    expect(Buffer.from(sans.href.split(",")[1]!, "base64").equals(bytes)).toBe(true);
-    expect(sans.bytes).toBe(sans.href.length);
+    expect(sans.href!.startsWith("data:font/ttf;base64,")).toBe(true);
+    expect(Buffer.from(sans.href!.split(",")[1]!, "base64").equals(bytes)).toBe(true);
+    expect(sans.bytes).toBe(sans.href!.length);
   });
 
   test("rejects what it cannot read", () => {
@@ -81,7 +81,7 @@ describe("font", () => {
     });
 
     expect(woff2).toMatchObject({ format: "woff2", family: "Packed", weight: 400 });
-    expect(woff2.href.startsWith("data:font/woff2;base64,")).toBe(true);
+    expect(woff2.href!.startsWith("data:font/woff2;base64,")).toBe(true);
     expect(() => woff2.measure("Hi", 12)).toThrow("needs the TTF or OTF file");
     expect(() => woff2.path("Hi", { size: 12 })).toThrow("needs the TTF or OTF file");
   });
@@ -246,13 +246,13 @@ describe("embedding", () => {
   });
 
   test("text that forms ligatures embeds the whole font, so the browser can still form them", () => {
-    expect(written(black, "fi")).toContain(black.href);
+    expect(written(black, "fi")).toContain(black.href!);
   });
 
   test("text that could meet contextual alternates or mark positioning embeds the whole font", () => {
-    expect(written(jetbrains, "a // b")).toContain(jetbrains.href);
-    expect(written(sans, "e\u0301")).toContain(sans.href);
-    expect(written(jetbrains, "POST /login")).not.toContain(jetbrains.href);
+    expect(written(jetbrains, "a // b")).toContain(jetbrains.href!);
+    expect(written(sans, "e\u0301")).toContain(sans.href!);
+    expect(written(jetbrains, "POST /login")).not.toContain(jetbrains.href!);
   });
 
   test("with ligatures off, text draws one glyph per character and the font still cuts down", async () => {
@@ -283,7 +283,7 @@ describe("embedding", () => {
 
   test("subset: false embeds the whole file", async () => {
     const whole = font(await readFile(fixture("ABeeZee-Regular")), { subset: false });
-    expect(written(whole, "Hi")).toContain(whole.href);
+    expect(written(whole, "Hi")).toContain(whole.href!);
   });
 
   test("a large embedded font warns", () => {

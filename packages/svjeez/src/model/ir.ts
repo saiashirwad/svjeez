@@ -227,6 +227,8 @@ export interface TextRun {
   readonly text: string;
   readonly at: Vec;
   readonly advances: readonly number[];
+  /** Extra space after every glyph, already part of `advances`. */
+  readonly letterSpacing?: number;
   readonly face: Face;
   readonly fill: Animated<Paint>;
   readonly opacity?: Animated<number>;

@@ -18,6 +18,9 @@ import { readSource } from "../author/source";
 
 export type FontFormat = "ttf" | "otf" | "woff" | "woff2";
 
+/** What a font file is, or `"system"` for a family the viewer already has. */
+export type FontKind = FontFormat | "system";
+
 /** How CSS spells a face's slant. */
 export const cssFontStyle = (face: { readonly italic: boolean }): "normal" | "italic" =>
   face.italic ? "italic" : "normal";
@@ -31,10 +34,24 @@ export interface FontOptions {
   readonly fallback?: readonly string[];
   readonly subset?: boolean;
   readonly ligatures?: boolean;
+  /** Vertical metrics as fractions of the size, for a font svjeez can't read. */
+  readonly metrics?: {
+    readonly ascent: number;
+    readonly descent: number;
+    readonly lineGap?: number;
+  };
+}
+
+export interface SystemFontOptions {
+  readonly weight?: number;
+  readonly italic?: boolean;
+  readonly fallback?: readonly string[];
+  readonly metrics?: FontOptions["metrics"];
 }
 
 export interface PathOptions {
   readonly size: number;
+  readonly spacing?: number;
   readonly x?: number;
   readonly y?: number;
 }
@@ -90,6 +107,8 @@ const hash = (bytes: Uint8Array): string => {
   return (h >>> 0).toString(36);
 };
 
+const UNREAD: Metrics = { unitsPerEm: 1, ascent: 0.8, descent: 0.2, lineGap: 0 };
+
 export class Font {
   readonly #sfnt: Sfnt | undefined;
   readonly #bytes: Uint8Array;
@@ -101,13 +120,15 @@ export class Font {
   readonly fallback: readonly string[];
   readonly subset: boolean;
   readonly ligatures: boolean;
-  readonly format: FontFormat;
-  readonly href: `data:${string}`;
+  readonly format: FontKind;
+  readonly href: `data:${string}` | undefined;
   readonly bytes: number;
+  readonly #metrics: Metrics | undefined;
 
-  constructor(bytes: Uint8Array, format: FontFormat, options: FontOptions) {
+  constructor(bytes: Uint8Array, format: FontKind, options: FontOptions) {
     const readable = format === "ttf" || format === "otf" ? sfnt(bytes) : undefined;
     this.#sfnt = readable;
+    this.#metrics = options.metrics && { unitsPerEm: 1, lineGap: 0, ...options.metrics };
     this.#bytes = bytes;
     this.subset = options.subset ?? true;
     this.ligatures = options.ligatures ?? true;
@@ -121,14 +142,23 @@ export class Font {
 
     if (!(this.weight >= 1 && this.weight <= 1000))
       throw new SceneError(`font() needs a weight between 1 and 1000, got ${this.weight}.`);
-    this.href = `data:${FORMATS[format].mime};base64,${base64(bytes)}`;
-    this.bytes = this.href.length;
+    this.href =
+      format === "system" ? undefined : `data:${FORMATS[format].mime};base64,${base64(bytes)}`;
+    this.bytes = this.href?.length ?? 0;
+  }
+
+  /** Whether glyph advances can be read from the file; if not, a run must bring its own `advances`. */
+  get measurable(): boolean {
+    return this.#sfnt !== undefined;
   }
 
   #readable(what: string): Sfnt {
     if (!this.#sfnt)
       throw new SceneError(
-        `${what} needs the TTF or OTF file. A ${this.format.toUpperCase()} font embeds, but its tables are compressed.`,
+        this.format === "system"
+          ? `${what} needs a font file, and ${this.family} is only a family name the viewer supplies.`
+          : `${what} needs the TTF or OTF file. A ${this.format.toUpperCase()} font embeds, but its tables are compressed.`,
+        "Give the <Run> its advances={[…]} (one per character), or load a TTF or OTF.",
       );
 
     return this.#sfnt;
@@ -140,7 +170,7 @@ export class Font {
     return this.#typesetter.layoutGlyphs(text);
   }
 
-  embed(texts: readonly string[]): `data:${string}` {
+  embed(texts: readonly string[]): `data:${string}` | undefined {
     const font = this.#sfnt;
 
     if (!font || !this.subset || !font.tables.has("glyf")) return this.href;
@@ -156,7 +186,7 @@ export class Font {
       this.#typesetter ??= typesetter(font, this.ligatures);
       const active = this.#typesetter;
       const cut = subset(this.#bytes, font, active, texts, this.ligatures);
-      href = cut ? `data:font/ttf;base64,${base64(cut)}` : this.href;
+      href = cut ? `data:font/ttf;base64,${base64(cut)}` : this.href!;
       this.#embeds.set(key, href);
     }
 
@@ -164,7 +194,9 @@ export class Font {
   }
 
   get metrics(): Metrics {
-    return metrics(this.#readable("metrics"));
+    if (this.#metrics) return this.#metrics;
+
+    return this.#sfnt ? metrics(this.#sfnt) : UNREAD;
   }
 
   has(char: string): boolean {
@@ -194,7 +226,7 @@ export class Font {
     return this.format === "ttf" && this.#sfnt !== undefined;
   }
 
-  path(text: string, { size, x = 0, y = 0 }: PathOptions): TextPath {
+  path(text: string, { size, x = 0, y = 0, spacing = 0 }: PathOptions): TextPath {
     const font = this.#readable("path()");
 
     if (!this.outlines)
@@ -214,7 +246,7 @@ export class Font {
         char: glyph.chars,
         d: pathData(contours(font, glyph.glyph), scale, pen, y),
         x: pen,
-        advance: glyph.advance * scale,
+        advance: glyph.advance * scale + spacing,
       };
 
       pen += placed.advance;
@@ -290,7 +322,9 @@ export const fontFaces = (value: FontValue): FontFaces => {
 };
 
 export const fontFaceRule = (name: string, font: Font, texts: readonly string[] = []): string =>
-  `@font-face{font-family:${cssString(name)};src:url(${font.embed(texts)}) format('${FORMATS[font.format].css}');font-weight:${font.weight};font-style:${cssFontStyle(font)}}`;
+  font.format === "system"
+    ? ""
+    : `@font-face{font-family:${cssString(name)};src:url(${font.embed(texts)}) format('${FORMATS[font.format].css}');font-weight:${font.weight};font-style:${cssFontStyle(font)}}`;
 
 const SUPPORTED = Object.keys(FORMATS).join(", ");
 
@@ -318,6 +352,12 @@ export const font = Object.assign(
   {
     load: async (source: string | URL, options: FontOptions = {}): Promise<Font> =>
       font(await readSource(source), options),
+    system: (family: string, options: SystemFontOptions = {}): Font => {
+      if (family.trim() === "")
+        throw new SceneError("font.system() needs a family name, got an empty string.");
+
+      return new Font(new Uint8Array(0), "system", { ...options, family });
+    },
     family: (...faces: readonly [Font, ...Font[]]): FontFamily => {
       if (faces.length === 0)
         throw new SceneError("font.family() needs at least one font, got none.");

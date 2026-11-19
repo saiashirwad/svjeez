@@ -78,6 +78,8 @@ export interface RunStyle {
   readonly italic?: boolean;
   readonly fill?: Anim<Paint>;
   readonly opacity?: Anim<number>;
+  /** Extra space after every glyph, in scene units. */
+  readonly letterSpacing?: number;
 }
 
 export type TextChild =
@@ -90,6 +92,8 @@ export type TextChild =
   | readonly TextChild[];
 
 export interface RunProps extends RunStyle {
+  /** One advance per character, in scene units and including any letter spacing, as a browser measured them. The font is then never read, so it can be a WOFF2 or a `font.system()` family. */
+  readonly advances?: readonly number[];
   readonly children?: TextChild;
 }
 
@@ -100,6 +104,7 @@ export interface TextProps extends Omit<Common, "anchor"> {
   readonly italic?: boolean;
   readonly size: number;
   readonly fill?: Anim<Paint>;
+  readonly letterSpacing?: number;
   readonly stroke?: StrokeProps;
   readonly align?: "start" | "center" | "end";
   readonly width?: number;
