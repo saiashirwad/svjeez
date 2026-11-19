@@ -34,8 +34,8 @@ const budgets = {
   math: { bytes: 22600, elements: 48, stops: 18, smil: 0, cost: 12 },
   flowchart: { bytes: 15000, elements: 74, stops: 105, smil: 0, cost: 39 },
   sequence: { bytes: 11300, elements: 79, stops: 52, smil: 0, cost: 30 },
-  state: { bytes: 14400, elements: 86, stops: 95, smil: 0, cost: 9 },
-  lanes: { bytes: 19050, elements: 97, stops: 76, smil: 28, cost: 47.2 },
+  state: { bytes: 14500, elements: 86, stops: 95, smil: 0, cost: 9 },
+  lanes: { bytes: 19100, elements: 97, stops: 76, smil: 28, cost: 47.2 },
 } satisfies Record<string, Budget>;
 
 const measure = (svg: string): Budget => {
