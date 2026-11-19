@@ -187,6 +187,18 @@ export interface Jumps {
 /** The share of a full hop's air time that a hop of `height` takes. */
 const lift = (height: number) => Math.sqrt(Math.min(1, Math.max(0.25, height / 64)));
 
+/** When a hop is off the ground, from the launch to the landing: move Blip across over this span. */
+export const flight = ({ land, height }: Hop): Span =>
+  span(land - 0.4 * lift(height), 0.4 * lift(height));
+
+/** The bulb lighting up for a moment at each of `times`, for Blip's `glow`. */
+export const flashes = (times: readonly number[], lit: Paint = "#FFF3B0"): Track<Paint> =>
+  times.reduce((t, at) => {
+    const on = span(at, 0.05);
+
+    return t.to(lit, on).to(BLIP.yellow, on.next(0.45));
+  }, track<Paint>(BLIP.yellow));
+
 /**
  * Hops, each landing at its own time: a crouch, a launch, a little air and a squashy landing with a rebound. A hop
  * starts and ends at rest, and hops must be at least a second apart.
