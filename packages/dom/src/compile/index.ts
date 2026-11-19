@@ -1,8 +1,9 @@
-import { ease, morph, span, type Curve, type SceneElement, type Span } from "svjeez";
+import { ease, morph, span, type Curve, type SceneElement, type Span, type Vec } from "svjeez";
 import type { Snapshot } from "../schema.ts";
 import type { EaseName, State } from "../record.ts";
 import { element } from "./box.tsx";
 import { context, type Diagnostic } from "./context.ts";
+import { withCursor, type Beat } from "./cursor.tsx";
 import { normalize } from "./normalize.ts";
 import { pair, type PairBy, type Paired } from "./pair.ts";
 import { animate, watchFor, type Slot } from "./waapi.ts";
@@ -117,9 +118,33 @@ export const compile = (
 
   const sizes = roots.map(({ node }) => node.rect);
 
+  const page =
+    trees.length === 1 ? trees[0]! : morph.between(normalize(trees), spans, { curve: curves });
+
+  // The mouse, where the states recorded it (`cursor: true`), in each state's root frame.
+  const beats = states.map(({ pointer, snapshot: { root } }, i): Beat => {
+    const local = ([x, y]: readonly [number, number]): Vec => [x - root.rect.x, y - root.rect.y];
+    const { start, over, end } = slots[i]!;
+    const before = slots[i - 1];
+
+    return {
+      ...(pointer && {
+        pointer: {
+          at: local(pointer.at),
+          down: pointer.down,
+          presses: pointer.presses.map(local),
+        },
+      }),
+      start,
+      over,
+      end,
+      rest: before ? before.end - before.start - before.over : 0,
+      curve: eases[i],
+    };
+  });
+
   return {
-    element:
-      trees.length === 1 ? trees[0]! : morph.between(normalize(trees), spans, { curve: curves }),
+    element: withCursor(page, beats),
     size: [
       Math.max(...sizes.map(({ width }) => width)),
       Math.max(...sizes.map(({ height }) => height)),

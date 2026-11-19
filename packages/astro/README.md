@@ -14,17 +14,19 @@ import { defineConfig } from "astro/config";
 export default defineConfig({ integrations: [svjeez()] });
 ```
 
-Add `/** @jsxImportSource svjeez */` at the top of scene files imported by Astro pages, then render with `<Scene>`:
+Import scenes with `?svjeez` and render them with `<Scene>`:
 
 ```astro
 ---
 import Scene from "@svjeez/astro/Scene.astro";
-import hero from "../scenes/hero.tsx";
+import hero from "../scenes/hero.tsx?svjeez";
+import board from "../scenes/board.film.tsx?svjeez";
 ---
 
 <Scene scene={hero} />
+<Scene scene={board} alt="The board, filmed" />
 ```
 
-Use `getScene(scene, { posters: { scale: 2 } })` from `@svjeez/astro/scene` for custom markup or poster URLs. Poster generation requires `playwright-core` and `npx playwright-core install chromium-headless-shell`.
+A `?svjeez` import is compiled by `@svjeez/vite` in its own JSX environment, so scene files need no pragma, and a [`@svjeez/dom` film](../vite/README.md#films) works the same way. `getScene(scene, { posters: { scale: 2 } })` from `@svjeez/astro/scene` takes a `?svjeez` import (films too) and returns its URL, size, markup, gzip size and posters. `<Scene>` and `getScene` also take a scene file's default export, imported without `?svjeez`; Astro compiles that file itself, so it needs `/** @jsxImportSource svjeez */`. Poster generation requires `playwright-core` and `npx playwright-core install chromium-headless-shell`.
 
 [Example Astro app](https://github.com/saiashirwad/svjeez/tree/next/packages/astro/test/consumer) · [API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/web.md)

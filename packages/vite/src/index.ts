@@ -4,19 +4,13 @@ import type { Plugin, ResolvedConfig } from "vite";
 import { assets, ROUTE } from "./assets.ts";
 import type { PosterOptions } from "./posters.ts";
 import { createRunner, type Runner } from "./runner.ts";
+import type { SceneModule } from "./scene.ts";
 
 export { ROUTE, writeScenes } from "./assets.ts";
 
 export type { PosterOptions } from "./posters.ts";
 
-export interface SceneModule {
-  readonly src: string;
-  readonly width: number;
-  readonly height: number;
-  readonly title: string;
-  readonly desc: string;
-  readonly posters?: { readonly light: string; readonly dark: string };
-}
+export type { SceneModule } from "./scene.ts";
 
 export interface SvjeezOptions {
   readonly posters?: PosterOptions;
@@ -27,6 +21,7 @@ const QUERY = /\?svjeez(&posters)?$/;
 
 export default function svjeez(options: SvjeezOptions = {}): Plugin {
   let config: ResolvedConfig;
+  let inFilm = false;
   const runners = new Map<string, Runner>();
 
   return {
@@ -34,9 +29,15 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
     enforce: "pre",
     configResolved(resolved) {
       config = resolved;
+
+      // The server that `runFilm` loads a film file with may load this app's config: leave the app's settings alone.
+      inFilm = resolved.plugins.some((plugin) => plugin.name === "svjeez-dom");
+
+      if (inFilm) return;
       assets.cache = pathToFileURL(`${options.cacheDir ?? join(config.cacheDir, "svjeez")}/`);
     },
     configureServer(server) {
+      if (inFilm) return;
       assets.limit = 500;
 
       server.middlewares.use(ROUTE, async (request, response, next) => {
@@ -75,9 +76,11 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
 
       for (const dependency of dependencies) this.addWatchFile(dependency);
       const { src, width, height, title, desc, svg, posters } = image;
+      // Server code (SSR, an Astro page) also gets the markup; a browser bundle gets the URL alone.
+      const server = this.environment.config.consumer === "server";
 
       if (config.command === "serve")
-        return `export default ${JSON.stringify({ src, width, height, title, desc, posters } satisfies SceneModule)}`;
+        return `export default ${JSON.stringify({ src, width, height, title, desc, posters, ...(server && { svg }) } satisfies SceneModule)}`;
 
       const name = basename(file, extname(file));
 
@@ -93,7 +96,7 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
   height: ${height},
   title: ${JSON.stringify(title)},
   desc: ${JSON.stringify(desc)},
-  posters: ${posters ? `{ light: ${await still(posters.light, "light")}, dark: ${await still(posters.dark, "dark")} }` : "undefined"},
+  posters: ${posters ? `{ light: ${await still(posters.light, "light")}, dark: ${await still(posters.dark, "dark")} }` : "undefined"},${server ? `\n  svg: ${JSON.stringify(svg)},` : ""}
 };`;
     },
     async closeBundle() {

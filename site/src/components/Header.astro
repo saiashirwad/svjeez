@@ -1,0 +1,79 @@
+---
+interface Props {
+  current?: "examples";
+  wide?: boolean;
+}
+
+const { current, wide } = Astro.props;
+
+// Tabler's outline icons, drawn at 24 units with a 2-unit stroke.
+const ICONS = {
+  github: "M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21",
+  sun: "M12 12m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0M3 12h1m8-9v1m8 8h1m-9 8v1M5.6 5.6l.7.7m12.1-.7-.7.7m0 11.4.7.7m-12.1-.7-.7.7",
+  system: "M3 5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zM7 20h10M9 16v4m6-4v4",
+  moon: "M12 3h.4a7.5 7.5 0 0 0 8.4 12.5A9 9 0 1 1 12 3z",
+} as const;
+
+const icon = (name: keyof typeof ICONS) =>
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${ICONS[name]}"/></svg>`;
+---
+
+<header class:list={["wrap top", { wide }]}>
+  <a class="brand" href="/"><img src="/favicon.svg" width="26" height="26" alt="" /><span>svjeez</span></a>
+  <nav aria-label="Main">
+    <a href="https://github.com/saiashirwad/svjeez/tree/main/examples" aria-current={current === "examples" ? "page" : undefined}><span>Examples</span></a>
+    <a href="https://github.com/saiashirwad/svjeez" aria-label="GitHub"><span class="gh nav-ico" aria-hidden="true" set:html={icon("github")} /></a>
+    <div class="controls">
+      <div class="scheme" role="radiogroup" aria-label="Color scheme" data-at="system">
+        <span class="knob" aria-hidden="true"><img src="/favicon.svg" width="26" height="26" alt="" /></span>
+        <button type="button" role="radio" aria-checked="false" data-scheme="light" aria-label="Light" title="Light"><span class="nav-ico" aria-hidden="true" set:html={icon("sun")} /></button>
+        <button type="button" role="radio" aria-checked="true" data-scheme="system" aria-label="System" title="System"><span class="nav-ico" aria-hidden="true" set:html={icon("system")} /></button>
+        <button type="button" role="radio" aria-checked="false" data-scheme="dark" aria-label="Dark" title="Dark"><span class="nav-ico" aria-hidden="true" set:html={icon("moon")} /></button>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<script>
+  import { scheme, THEMECHANGE } from "../scripts/scheme";
+
+  // The slider picks light, system or dark. It sets `color-scheme` on the page, and Chromium hands that to every <img>
+  // SVG on it; system removes the choice so the page follows the OS again. The mark on the knob hops on every move.
+  const slider = document.querySelector<HTMLElement>(".scheme")!;
+  const stops = [...slider.querySelectorAll<HTMLButtonElement>("[data-scheme]")];
+  const chosen = () => document.documentElement.dataset.theme ?? "system";
+
+  const showScheme = () => {
+    slider.dataset.at = chosen();
+    stops.forEach((stop) => stop.setAttribute("aria-checked", String(stop.dataset.scheme === chosen())));
+  };
+
+  const bump = (element: HTMLElement) => {
+    element.removeAttribute("data-bump");
+    void element.offsetWidth;
+    element.setAttribute("data-bump", "");
+  };
+
+  showScheme();
+
+  slider.addEventListener("click", (event) => {
+    const stop = event.target instanceof Element ? event.target.closest<HTMLButtonElement>("[data-scheme]") : null;
+    const next = stop?.dataset.scheme;
+
+    if (!next || next === chosen()) return;
+    const before = scheme();
+
+    if (next === "system") delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = next;
+
+    try {
+      if (next === "system") localStorage.removeItem("theme");
+      else localStorage.setItem("theme", next);
+    } catch {}
+
+    showScheme();
+    bump(slider);
+
+    if (scheme() !== before) dispatchEvent(new Event(THEMECHANGE));
+  });
+</script>

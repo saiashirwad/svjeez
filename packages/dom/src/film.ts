@@ -18,6 +18,11 @@ export interface FilmOptions {
   readonly scheme?: "light" | "dark" | "both";
   /** The scene's title (the SVG's `<title>`, which assistive tech reads). Default: the component's name (`Card`), else the page's `<title>` (Vite `serve`), else the film file's name (`board.film.tsx` -> "board"; `index.tsx` -> its folder's name). */
   readonly title?: string;
+  /**
+   * Draw the mouse: wherever the script moves it (`page.mouse`, `locator.click()`, `hover()`, `dragTo()`), an arrow follows it
+   * from snap to snap above the page, dipping and ringing where a button goes down. Nothing is added to the app. Default false.
+   */
+  readonly cursor?: boolean;
   /** The browser window. Default 1280x720. */
   readonly viewport?: { readonly width: number; readonly height: number };
   /**
@@ -118,7 +123,7 @@ export const film = async <Props = never>(
   run: (context: FilmContext<Props>) => Promise<void>,
   options: FilmOptions = {},
 ): Promise<Scene> => {
-  const { scheme, viewport, cache, onDiagnostics = warn, executablePath } = options;
+  const { scheme, cursor, viewport, cache, onDiagnostics = warn, executablePath } = options;
   // Before the first await, while the film file is still on the stack.
   const caller = callerFile();
   const app = await target;
@@ -185,7 +190,7 @@ export const film = async <Props = never>(
                 check();
               },
             }),
-          { ...(scheme && { scheme }), identify: IDENTIFY },
+          { ...(scheme && { scheme }), ...(cursor && { cursor }), identify: IDENTIFY },
         );
 
         check();
@@ -211,6 +216,7 @@ export const film = async <Props = never>(
               selector,
               scheme: scheme ?? null,
               viewport: viewport ?? null,
+              ...(cursor && { cursor }),
               script: scriptInputs(run, app.film ?? caller),
             },
             async () => toPortable(await capture(), origin, base),

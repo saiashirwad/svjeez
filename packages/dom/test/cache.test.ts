@@ -96,7 +96,7 @@ describe("film cache location", () => {
     rmSync(next, { force: true });
   });
 
-  test("a relative cache lands next to the film file, whatever the cwd, under Bun and runFilm", async () => {
+  test("a relative cache lands next to the film file, whatever the cwd, under Bun and Vite", async () => {
     rmSync(out, { recursive: true, force: true });
     const cwd = process.cwd();
 

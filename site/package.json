@@ -1,0 +1,48 @@
+{
+  "name": "svjeez-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --conditions @svjeez/source --bun astro dev",
+    "build": "bun --conditions @svjeez/source --bun astro build",
+    "preview": "bun --conditions @svjeez/source --bun astro preview",
+    "deploy": "bun --conditions @svjeez/source --bun alchemy deploy",
+    "destroy": "bun --conditions @svjeez/source --bun alchemy destroy",
+    "typecheck": "astro check && tsc --noEmit -p src/scenes/board"
+  },
+  "dependencies": {
+    "@alchemy.run/cloudflare": "2.0.0-beta.87",
+    "@effect/platform-bun": "^4.1.4",
+    "@effect/platform-node": "^4.0.6",
+    "@svjeez/astro": "workspace:*",
+    "@svjeez/charts": "workspace:*",
+    "@svjeez/code": "workspace:*",
+    "@svjeez/diagrams": "workspace:*",
+    "@svjeez/dom": "workspace:*",
+    "@svjeez/fonts": "workspace:*",
+    "@svjeez/geo": "workspace:*",
+    "@svjeez/icons": "workspace:*",
+    "@svjeez/math": "workspace:*",
+    "@svjeez/mermaid": "workspace:*",
+    "@svjeez/vite": "workspace:*",
+    "alchemy": "2.0.0-beta.87",
+    "astro": "^7.4.3",
+    "effect": "^4.1.4",
+    "svjeez": "workspace:*",
+    "world-atlas": "^2.0.2"
+  },
+  "devDependencies": {
+    "@alchemy.run/frontend-frameworks": "2.0.0-beta.87",
+    "@astrojs/check": "^0.9.12",
+    "@types/bun": "^1.4.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "lucide-react": "^1.76.0",
+    "playwright-core": "^1.64.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "typescript": "6",
+    "vite": "8.3.5"
+  }
+}

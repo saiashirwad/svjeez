@@ -2,6 +2,7 @@
 /// <reference types="../../client.d.ts" />
 import { createRoot } from "react-dom/client";
 import basic from "../../../../examples/readme/basic.tsx?svjeez&posters";
+import card from "./card.film.tsx?svjeez";
 
 const App = () => (
   <main style={{ display: "grid", gap: 16, maxWidth: basic.width, margin: "24px auto" }}>
@@ -24,6 +25,7 @@ const App = () => (
         style={{ maxWidth: "100%", height: "auto" }}
       />
     </picture>
+    <img id="film" src={card.src} width={card.width} height={card.height} alt={card.title} />
   </main>
 );
 

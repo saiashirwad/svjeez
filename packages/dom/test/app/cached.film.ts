@@ -2,7 +2,7 @@ import { film } from "../../src/index.ts";
 import { serve } from "../../src/vite.ts";
 
 export default await film(
-  serve({ root: import.meta.dirname, selector: "#app" }),
+  serve({ selector: "#app" }),
   async ({ snap }) => {
     await snap("start");
   },

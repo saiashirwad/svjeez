@@ -2,18 +2,28 @@ import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
 import { boxesOf, svg } from "svjeez/tools";
 import { film } from "../src/index.ts";
-import { component as viteComponent, runFilm } from "../src/vite.ts";
+import { component as viteComponent, runFilm as filmFile } from "../src/vite.ts";
 import { component } from "../src/bun.ts";
 import { serializeProps, type Prop } from "../src/props.ts";
 import Card, { Named } from "./component/Card.tsx";
 
 const dir = join(import.meta.dir, "component");
 
+const runFilm = async (file: string) => (await filmFile(file)).scene;
+
 describe("component through Vite", () => {
   test("films a React component, loads css, and update() merges props", async () => {
     const scene = await runFilm(join(dir, "react.film.ts"));
 
     expect(scene.duration).toBeGreaterThan(0);
+  }, 90_000);
+
+  test("lists the files the film was made from, for a watcher", async () => {
+    const { files } = await filmFile(join(dir, "react.film.ts"));
+
+    expect(files).toContain(join(dir, "react.film.ts"));
+    expect(files).toContain(join(dir, "Card.tsx"));
+    expect(files.some((file) => file.includes("/node_modules/"))).toBe(false);
   }, 90_000);
 
   test("the scene is titled after the component", async () => {

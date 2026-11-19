@@ -32,9 +32,81 @@ test("a build emits the scene and its posters, and the bundle holds only their U
     ).toBe("WEBP");
   }
 
+  const card = files.find((file) => /^card\.film-.*\.svg$/.test(file));
+  expect(readFileSync(join(outDir, "assets", card!), "utf8")).toMatch(/<title[^>]*>Card<\/title>/);
+
   const bundle = readFileSync(join(outDir, "assets", js!), "utf8");
   expect(bundle).toContain(`/assets/${svg}`);
+  expect(bundle).toContain(`/assets/${card}`);
   expect(bundle).not.toContain("@keyframes");
+}, 180_000);
+
+test("the dev server films a React component, and films it again when the component changes", async () => {
+  const dir = join(scratch, "film");
+  mkdirSync(dir);
+  writeFileSync(join(dir, "main.ts"), `export { default } from "./label.film.tsx?svjeez";`);
+
+  const label = (text: string) =>
+    `export default function Label({ text }: { text: string }) {
+  return <p id="label" style={{ margin: 0, font: "16px sans-serif" }}>{text} ${text}</p>;
+}`;
+
+  writeFileSync(join(dir, "Label.tsx"), label("first"));
+  writeFileSync(
+    join(dir, "label.film.tsx"),
+    `import { film } from "@svjeez/dom";
+import { component } from "@svjeez/dom/vite";
+import Label from "./Label.tsx";
+
+export default await film(component(Label, { text: "x" }), async ({ snap }) => {
+  await snap("only");
+}, { viewport: { width: 200, height: 40 }, onDiagnostics: () => {} });`,
+  );
+
+  const server = await createServer({
+    ...appConfig(dir),
+    server: { port: 0, fs: { allow: [join(import.meta.dirname, "../..")] } },
+  });
+
+  const sent: HotPayload[] = [];
+  const send = server.environments.client.hot.send.bind(server.environments.client.hot);
+  server.environments.client.hot.send = (payload: HotPayload) => (
+    sent.push(payload),
+    send(payload)
+  );
+  await server.listen();
+  const origin = server.resolvedUrls!.local[0]!.replace(/\/$/, "");
+
+  const load = async () => {
+    const main = await (await fetch(`${origin}/main.ts`)).text();
+    const module = await (await fetch(origin + /from "([^"]+[?&]svjeez)"/.exec(main)![1]!)).text();
+    const src = /"src":\s*"([^"]+)"/.exec(module)![1]!;
+
+    return { module, svg: await (await fetch(origin + src)).text() };
+  };
+
+  try {
+    const first = await load();
+    expect(first.module).toContain(`"title": "Label"`);
+    expect(first.svg).toContain("first");
+
+    sent.length = 0;
+    writeFileSync(join(dir, "Label.tsx"), label("second"));
+
+    for (
+      let i = 0;
+      i < 100 &&
+      !sent.some((payload) => payload.type === "full-reload" || payload.type === "update");
+      i++
+    )
+      await Bun.sleep(50);
+
+    const second = await load();
+    expect(second.svg).toContain("second");
+    expect(second.svg).not.toContain("first");
+  } finally {
+    await server.close();
+  }
 }, 120_000);
 
 test("the dev server serves a scene and reloads it when the scene or a file it imports changes", async () => {
@@ -131,6 +203,11 @@ export default scene({ size: [120, 80], duration: 1, title: "Model" }, () => (
     expect(module).toContain(`"width": 120`);
     const src = /"src":\s*"([^"]+)"/.exec(module)![1]!;
     expect(await (await fetch(origin + src)).text()).toContain('<circle cx="60" cy="40" r="10"');
+    // The browser gets the URL alone; server code also gets the markup, which getScene() takes.
+    expect(module).not.toContain("<svg");
+    const { default: ssr } = await server.ssrLoadModule(join(dir, "scene.tsx?svjeez"));
+    expect(ssr.svg).toContain('<circle cx="60" cy="40" r="10"');
+    expect(getScene(ssr)).toMatchObject({ width: 120, height: 80, title: "Model" });
   } finally {
     await server.close();
   }
@@ -181,6 +258,12 @@ export default () => scene({ size: [100, 100], duration: 1, title: label }, () =
     await server.close();
   }
 }, 60_000);
+
+test("getScene() names a ?svjeez import that has no markup", () => {
+  const module = { src: "/x.svg", width: 1, height: 1, title: "", desc: "" };
+
+  expect(() => getScene(module)).toThrow("only server code (SSR, an Astro page) gets");
+});
 
 test("getScene() names an svg with no viewBox", () => {
   expect(() => getScene("<svg></svg>")).toThrow("getScene() needs a scene whose svg has a viewBox");

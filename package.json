@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "examples"
+    "examples",
+    "site"
   ],
   "type": "module",
   "scripts": {
@@ -14,7 +15,9 @@
     "format:check": "oxfmt --check .",
     "typecheck": "tsc --noEmit && bun run --filter '*' typecheck",
     "test": "cd scripts && bun test && cd .. && bun run --filter '*' test",
-    "build:examples": "bun run --filter svjeez-examples build"
+    "build:examples": "bun run --filter svjeez-examples build",
+    "dev": "bun run --filter svjeez-site dev",
+    "deploy": "bun run --filter svjeez-site deploy"
   },
   "devDependencies": {
     "@oxlint/plugins": "1.90.0",

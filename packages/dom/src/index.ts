@@ -15,6 +15,8 @@ export {
   record,
   type EaseName,
   type OpenPageOptions,
+  type Point,
+  type Pointer,
   type RecordOptions,
   type Snap,
   type State,

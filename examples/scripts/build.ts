@@ -50,7 +50,7 @@ const build = async (name: string): Promise<boolean> => {
 
     // `*.vite.tsx` films a component through Vite, which has to load the film file itself.
     const exported: Made | (() => Made) = file.endsWith(".vite.tsx")
-      ? await runFilm(file)
+      ? (await runFilm(file)).svg
       : (await import(file)).default;
 
     const svg = svgOf(exported);

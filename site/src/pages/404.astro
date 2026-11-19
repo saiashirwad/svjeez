@@ -1,0 +1,20 @@
+---
+import lost from "../scenes/lost";
+import LiveScene from "../components/LiveScene.astro";
+import Base from "../layouts/Base.astro";
+import { live } from "../live";
+import { REPO } from "../links";
+
+const scene = live(lost);
+---
+
+<Base title="Not on the timeline · svjeez" description="This page isn't here. The home page is." class="lost" card="lost">
+  <main class="wrap lost-page">
+    <div class="big">
+      <div class="win">
+        <LiveScene scene={scene} name="404" alt={scene.desc || "Page not found"} />
+      </div>
+    </div>
+    <p class="more"><a class="btn primary" href="/">Back to the start</a><a class="btn" href={`${REPO}/tree/main/examples`}>Browse the examples</a></p>
+  </main>
+</Base>
