@@ -1,4 +1,5 @@
 import type { Where } from "svjeez/tools";
+import type { ArchitectureDoc } from "./architecture.ts";
 import type { BlockDoc } from "./block.ts";
 import type { ClassDoc } from "./class.ts";
 import type { ErDoc } from "./er.ts";
@@ -213,7 +214,8 @@ export type MermaidDoc =
   | QuadrantDoc
   | XyChartDoc
   | SankeyDoc
-  | BlockDoc;
+  | BlockDoc
+  | ArchitectureDoc;
 
 export interface ParseOptions {
   readonly file?: string;
@@ -221,6 +223,7 @@ export interface ParseOptions {
 }
 
 export type {
+  ArchitectureDoc,
   BlockDoc,
   ClassDoc,
   ErDoc,

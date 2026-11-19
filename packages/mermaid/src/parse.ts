@@ -1,5 +1,6 @@
 import { SceneError } from "svjeez/tools";
 import { fail, type Line } from "./errors.ts";
+import { parseArchitecture } from "./architecture.ts";
 import { parseBlock } from "./block.ts";
 import { parseClass } from "./class.ts";
 import { parseEr } from "./er.ts";
@@ -18,7 +19,7 @@ import { parseXyChart } from "./xychart.ts";
 import type { MermaidDoc, ParseOptions } from "./types.ts";
 
 const KINDS =
-  "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `classDiagram`, `stateDiagram`/`stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `mindmap`, `gitGraph`, `journey`, `timeline`, `quadrantChart`, `xychart-beta`/`xychart`, `sankey-beta` and `block-beta`.";
+  "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `classDiagram`, `stateDiagram`/`stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `mindmap`, `gitGraph`, `journey`, `timeline`, `quadrantChart`, `xychart-beta`/`xychart`, `sankey-beta`, `block-beta` and `architecture-beta`.";
 
 const lines = (text: string, file: string, first: number): Line[] =>
   text.split(/\r?\n/).flatMap((raw, i): Line[] => {
@@ -67,6 +68,8 @@ export function parseMermaid(text: string, options: ParseOptions = {}): MermaidD
   if ((word === "sankey-beta" || word === "sankey") && exact) return parseSankey(first, body);
 
   if ((word === "block-beta" || word === "block") && exact) return parseBlock(first, body);
+
+  if (word === "architecture-beta" && exact) return parseArchitecture(first, body);
 
   if (word === "pie") return parsePie(first, body);
 

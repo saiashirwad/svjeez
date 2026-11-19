@@ -26,3 +26,5 @@ export type * from "./xychart.ts";
 export type * from "./sankey.ts";
 
 export type * from "./block.ts";
+
+export type * from "./architecture.ts";

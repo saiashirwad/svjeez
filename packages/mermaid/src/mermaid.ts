@@ -2,6 +2,7 @@ import {
   flowchart,
   sequence,
   stateMachine,
+  type Architecture,
   type BlockDiagram,
   type ClassDiagram,
   type Diagram,
@@ -27,6 +28,7 @@ import {
 } from "@svjeez/diagrams";
 import type { Span } from "svjeez";
 import { SceneError } from "svjeez/tools";
+import { drawArchitecture } from "./architecture.ts";
 import { drawBlock } from "./block.ts";
 import { drawClass } from "./class.ts";
 import { drawEr } from "./er.ts";
@@ -41,6 +43,7 @@ import { drawTimeline } from "./timeline.ts";
 import { drawXyChart } from "./xychart.ts";
 import { drawSankey } from "./sankey.ts";
 import type {
+  ArchitectureDoc,
   BlockDoc,
   ClassDoc,
   ErDoc,
@@ -85,7 +88,8 @@ export type MermaidDiagram =
   | (QuadrantChart & { readonly kind: "quadrant"; readonly doc: QuadrantDoc })
   | (XyChart & { readonly kind: "xychart"; readonly doc: XyChartDoc })
   | (Sankey & { readonly kind: "sankey"; readonly doc: SankeyDoc })
-  | (BlockDiagram & { readonly kind: "block"; readonly doc: BlockDoc });
+  | (BlockDiagram & { readonly kind: "block"; readonly doc: BlockDoc })
+  | (Architecture & { readonly kind: "architecture"; readonly doc: ArchitectureDoc });
 
 const FORM_NODES: Record<FlowForm, { readonly role: NodeRole; readonly shape?: NodeShape }> = {
   rect: { role: "task" },
@@ -118,6 +122,7 @@ const NAMES = {
   xychart: "xy chart",
   sankey: "sankey diagram",
   block: "block diagram",
+  architecture: "cloud architecture diagram",
 } as const;
 
 const stateRegion = (r: StateRegion) => ({
@@ -259,6 +264,9 @@ export function mermaid(text: string, options: MermaidOptions): MermaidDiagram {
   if (doc.kind === "sankey") return drawn(drawSankey(doc, diagramOptions), "sankey", doc);
 
   if (doc.kind === "block") return drawn(drawBlock(doc, diagramOptions), "block", doc);
+
+  if (doc.kind === "architecture")
+    return drawn(drawArchitecture(doc, diagramOptions), "architecture", doc);
 
   if (doc.kind === "sequence") {
     return drawn(

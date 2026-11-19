@@ -132,3 +132,16 @@ export {
   type BlockSpace,
   type BlockSpec,
 } from "./block.tsx";
+
+export {
+  architecture,
+  type Architecture,
+  type ArchitectureEdge,
+  type ArchitectureEdgeOptions,
+  type ArchitectureGroup,
+  type ArchitectureIcon,
+  type ArchitectureOptions,
+  type ArchitectureService,
+  type ArchitectureSide,
+  type ArchitectureSpec,
+} from "./architecture.tsx";
