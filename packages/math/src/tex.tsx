@@ -2,11 +2,11 @@
 import {
   Group,
   Shape,
-  draw,
   enter,
   exit,
   path,
   span,
+  track,
   type Anim,
   type Geometry,
   type Paint,
@@ -295,7 +295,7 @@ export function Tex({
             geometry={geometry}
             at={at}
             stroke={{ color: paint, width: round(size * 0.025), join: "round" }}
-            trim={draw(span(begin, stroke * 0.7))}
+            draw={track(0).to(1, span(begin, stroke * 0.7))}
             motion={exit(span(begin + stroke * 0.7, stroke * 0.3))}
           />,
         );

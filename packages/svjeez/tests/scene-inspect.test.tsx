@@ -12,7 +12,6 @@ import {
   Text,
   blur,
   circle,
-  draw,
   linear,
   motion,
   rect,
@@ -404,11 +403,13 @@ group("timing", () => {
   test("a fill showing while its stroke draws in", () => {
     const stroked = { color: "#000000", width: 2 } as const;
 
-    expect(codes(made(() => <Dot stroke={stroked} trim={draw(span(0, 1))} />))).toContain(
+    expect(codes(made(() => <Dot stroke={stroked} draw={track(0).to(1, span(0, 1))} />))).toContain(
       "visible-at-zero",
     );
     expect(
-      codes(made(() => <Dot fill={undefined} stroke={stroked} trim={draw(span(0, 1))} />)),
+      codes(
+        made(() => <Dot fill={undefined} stroke={stroked} draw={track(0).to(1, span(0, 1))} />),
+      ),
     ).not.toContain("visible-at-zero");
   });
 

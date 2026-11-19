@@ -8,7 +8,6 @@ import { blendVec, breaksOf, follow, laneFrom, unrolled, valueAt } from "../mode
 import { ease } from "./spring";
 import type { Connect } from "./settle";
 import type { Anim } from "./track";
-import { through } from "./derived";
 import { lookOf, paintedBoxOf } from "../model/painted";
 
 export interface ArrowProps extends Omit<Common, "at" | "anchor" | "origin" | "rotate" | "scale"> {
@@ -375,7 +374,7 @@ export const Arrow = (props: ArrowProps): SceneElement => {
           key: "shaft",
           geometry: { kind: "line", from: [0, 0], to: [1, 0] },
           stroke: drawn,
-          ...(draw !== undefined && { trim: through(draw, (progress): Vec => [0, progress]) }),
+          ...(draw !== undefined && { draw }),
         },
       },
       ...(size > 0

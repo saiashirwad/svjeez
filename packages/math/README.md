@@ -8,7 +8,7 @@ npm i -D @svjeez/math@next svjeez@next
 
 ```tsx
 import { Axes, Tex, plane } from "@svjeez/math";
-import { Group, Shape, draw, morph, scene, span } from "svjeez";
+import { Group, Shape, morph, scene, span } from "svjeez";
 
 const graph = plane({ x: [-4, 2], y: [0, 9], size: [440, 340] });
 
@@ -21,7 +21,7 @@ export default scene({ size: [960, 540], duration: 6, title: "(a + b)²" }, () =
     )}
     <Group at={[462, 84]}>
       <Axes plane={graph} stroke={{ color: "#6E6E73" }} />
-      <Shape geometry={graph.plot((a) => (a + 1) ** 2)} stroke={{ color: "#0A6CFF", width: 2.5 }} trim={draw(span(0.5, 1.5))} />
+      <Shape geometry={graph.plot((a) => (a + 1) ** 2)} stroke={{ color: "#0A6CFF", width: 2.5 }} draw={track(0).to(1, span(0.5, 1.5))} />
     </Group>
   </Group>
 ));

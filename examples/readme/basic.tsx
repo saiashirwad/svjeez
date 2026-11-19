@@ -1,4 +1,4 @@
-import { Group, Shape, canvas, circle, draw, ease, enter, path, scene, span } from "svjeez";
+import { Group, Shape, canvas, circle, ease, enter, path, scene, span, track } from "svjeez";
 import { theme } from "../theme";
 
 export default scene(
@@ -17,7 +17,7 @@ export default scene(
       <Shape
         geometry={path().moveTo([20, 100]).curveTo([60, 20], [140, 20], [180, 100])}
         stroke={{ color: "#FF5FA8", width: 4 }}
-        trim={draw(span(0.2, 1.2))}
+        draw={track(0).to(1, span(0.2, 1.2))}
       />
       <Shape
         geometry={circle(8)}

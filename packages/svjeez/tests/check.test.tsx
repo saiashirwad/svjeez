@@ -5,7 +5,6 @@ import {
   Group,
   Shape,
   Text,
-  draw,
   ease,
   font,
   motion,
@@ -189,7 +188,7 @@ describe.if(browser)("checkScene", () => {
         at={[x, 10]}
         {...(fill !== undefined && { fill })}
         stroke={{ color: "#0088FF" }}
-        trim={draw(span(0.5, 1))}
+        draw={track(0).to(1, span(0.5, 1))}
       />
     );
 
@@ -294,7 +293,7 @@ describe.if(browser)("checkScene", () => {
           <Shape
             geometry={path().moveTo([20, 80]).lineTo([180, 80])}
             stroke={{ color: "#FFFFFF", width: 4 }}
-            trim={draw(span(0.2, 1))}
+            draw={track(0).to(1, span(0.2, 1))}
           />
         </Group>
       )),

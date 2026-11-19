@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Group, Stack, draw, enter, scene, span, tokens, track, type SceneElement } from "svjeez";
+import { Group, Stack, enter, scene, span, tokens, track, type SceneElement } from "svjeez";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
 import { SceneError, boxesOf, svg, type Model } from "svjeez/tools";
 import { Icon, type IconData, type IconProps } from "../src/index.ts";
@@ -105,7 +105,7 @@ describe("Icon", () => {
     expect(boxes["row/b"]!.x).toBeCloseTo(boxes["row/a"]!.x + boxes["row/a"]!.width, 3);
   });
 
-  test("a trim function gets each piece's place and a trim can animate", () => {
+  test("a draw function gets each piece's place and a draw can animate", () => {
     const seen: [number, number][] = [];
 
     const markup = svg.emit(
@@ -113,10 +113,10 @@ describe("Icon", () => {
         icon({
           icon: two,
           color: "#111111",
-          trim: (piece, pieces) => {
+          draw: (piece, pieces) => {
             seen.push([piece, pieces]);
 
-            return draw(span(0.2, 0.5).shift(piece * 0.5));
+            return track(0).to(1, span(0.2, 0.5).shift(piece * 0.5));
           },
         }),
       ),
@@ -167,9 +167,9 @@ describe("Icon", () => {
 });
 
 describe("Icon errors", () => {
-  test("a trim on a solid icon says what to do instead", () => {
+  test("a draw on a solid icon says what to do instead", () => {
     const error = thrown(() =>
-      draws(icon({ icon: solid, color: "#111111", trim: draw(span(0, 1)) }, 4)),
+      draws(icon({ icon: solid, color: "#111111", draw: track(0).to(1, span(0, 1)) }, 4)),
     );
 
     expect(error.node).toBe("<Icon>");

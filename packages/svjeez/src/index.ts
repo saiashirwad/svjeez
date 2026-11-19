@@ -46,7 +46,7 @@ export { motion, track, type Anim, type Track } from "./author/track";
 
 export { through, within } from "./author/derived";
 
-export { draw, enter, exit, sampled, wiggle } from "./author/recipes";
+export { enter, exit, sampled, wiggle } from "./author/recipes";
 
 export { ease, type Curve } from "./author/spring";
 

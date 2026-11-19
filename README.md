@@ -34,14 +34,14 @@ Save this as `tsconfig.json`:
 Save this as `scene.tsx`:
 
 ```tsx
-import { Group, Shape, circle, draw, ease, enter, path, scene, span } from "svjeez";
+import { Group, Shape, circle, ease, enter, path, scene, span } from "svjeez";
 
 export default scene({ size: [200, 120], duration: 4, title: "Hello" }, () => (
   <Group>
     <Shape
       geometry={path().moveTo([20, 100]).curveTo([60, 20], [140, 20], [180, 100])}
       stroke={{ color: "#FF5FA8", width: 4 }}
-      trim={draw(span(0.2, 1.2))}
+      draw={track(0).to(1, span(0.2, 1.2))}
     />
     <Shape
       geometry={circle(8)}

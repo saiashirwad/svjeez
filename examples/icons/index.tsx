@@ -10,7 +10,7 @@ import {
   search,
   starFilled,
 } from "@svjeez/icons/tabler";
-import { Center, Grid, Shape, Stack, Group, canvas, draw, ease, enter, scene, span } from "svjeez";
+import { Center, Grid, Shape, Stack, Group, canvas, ease, enter, scene, span, track } from "svjeez";
 import { theme } from "../theme";
 
 const SIZE = 64;
@@ -50,7 +50,7 @@ export default scene(
                   size={SIZE}
                   color={theme.text}
                   width={1.75}
-                  trim={(piece) => draw(span(0.3, 0.7).shift(index * 0.3 + piece * 0.25))}
+                  draw={(piece) => track(0).to(1, span(0.3, 0.7).shift(index * 0.3 + piece * 0.25))}
                 />
               </Center>
             ))}

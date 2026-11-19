@@ -1,5 +1,5 @@
 import { Axes, Tex, brace, plane } from "@svjeez/math";
-import { Group, Shape, Stack, Text, canvas, draw, enter, exit, morph, scene, span } from "svjeez";
+import { Group, Shape, Stack, Text, canvas, enter, exit, morph, scene, span, track } from "svjeez";
 import { mono, theme } from "../theme";
 
 const D = 9;
@@ -72,7 +72,7 @@ export default scene(
           <Shape
             geometry={graph.plot((a) => (a + 1) ** 2)}
             stroke={{ color: theme.blue, width: 2.5, cap: "round", join: "round" }}
-            trim={draw(drawn)}
+            draw={track(0).to(1, drawn)}
           />
         </Group>
       </Group>

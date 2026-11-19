@@ -10,7 +10,6 @@ import {
   Text,
   blur,
   circle,
-  draw,
   ease,
   font,
   motion,
@@ -142,7 +141,7 @@ describe.if(browser)("renderFrames", () => {
         <Shape
           geometry={path().moveTo([10, 30]).curveTo([31.25, 30], [47.08, 19.52], [62.1, 7.48])}
           stroke={{ color: "#000000", width: 2, cap: "round" }}
-          trim={draw(span(0, 0.45), { curve: ease.inOut })}
+          draw={track(0).to(1, span(0, 0.45), ease.inOut)}
         />
         <Shape geometry={rect(45, 40)} fill="#FFFFFF" />
       </Group>

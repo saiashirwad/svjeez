@@ -102,16 +102,6 @@ export const wiggle = (amplitude: LayerValues, options: WiggleOptions): Motion =
   return layer.loop(period);
 };
 
-export interface DrawOptions {
-  readonly curve?: Curve;
-}
-
-export const draw = (when: Span, { curve = DEFAULT_EASE }: DrawOptions = {}): Track<Vec> => {
-  const { start, over } = closed(when, "draw()");
-
-  return track([0, 0]).to([0, 1], span(start, over), curve);
-};
-
 export interface SampledOptions {
   readonly step?: Seconds;
   readonly tolerance: number;

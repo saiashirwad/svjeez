@@ -10,7 +10,7 @@ npm i @svjeez/icons@next svjeez@next
 /** @jsxImportSource svjeez */
 import { Icon } from "@svjeez/icons";
 import { rocket } from "@svjeez/icons/tabler";
-import { draw, scene, span } from "svjeez";
+import { scene, span } from "svjeez";
 
 export default scene({ size: [128, 128], duration: 2, title: "Rocket" }, () => (
   <Icon
@@ -18,7 +18,7 @@ export default scene({ size: [128, 128], duration: 2, title: "Rocket" }, () => (
     at={[40, 40]}
     size={48}
     color="#FFFFFF"
-    trim={(piece) => draw(span(0.2, 0.6).shift(piece * 0.1))}
+    draw={(piece) => track(0).to(1, span(0.2, 0.6).shift(piece * 0.1))}
   />
 ));
 ```

@@ -2,7 +2,7 @@ export {
   Icon,
   type IconData,
   type IconProps,
-  type IconTrim,
+  type IconDraw,
   type OwnIconProps,
   type SharedIconProps,
 } from "./icon.tsx";

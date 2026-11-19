@@ -16,9 +16,9 @@ export interface IconData {
   readonly paths: readonly string[];
 }
 
-type PerPiece = (piece: number, pieces: number) => Anim<Vec>;
+type PerPiece = (piece: number, pieces: number) => Anim<number>;
 
-export type IconTrim = Anim<Vec> | PerPiece;
+export type IconDraw = Anim<number> | PerPiece;
 
 interface Base extends Common, Framed {
   readonly icon: IconData;
@@ -28,14 +28,14 @@ interface Base extends Common, Framed {
 
 export interface OwnIconProps extends Base {
   readonly color: Anim<Paint>;
-  readonly trim?: IconTrim;
+  readonly draw?: IconDraw;
   readonly shared?: false;
 }
 
 export interface SharedIconProps extends Base {
   readonly color: Color;
   readonly shared: true;
-  readonly trim?: undefined;
+  readonly draw?: undefined;
 }
 
 export type IconProps = OwnIconProps | SharedIconProps;
@@ -48,7 +48,7 @@ const isColor = (color: Anim<Paint>): color is Color =>
 
 const positive = (value: number): boolean => Number.isFinite(value) && value > 0;
 
-const isPerPiece = (trim: IconTrim | undefined): trim is PerPiece => typeof trim === "function";
+const isPerPiece = (draw: IconDraw | undefined): draw is PerPiece => typeof draw === "function";
 
 const check = (icon: IconData, size: number, props: IconProps): void => {
   if (!icon || !Array.isArray(icon.paths))
@@ -93,9 +93,9 @@ const check = (icon: IconData, size: number, props: IconProps): void => {
       "Give it a positive width in the icon's own units, such as 2.",
     );
 
-  if (props.trim !== undefined && icon.kind === "fill")
+  if (props.draw !== undefined && icon.kind === "fill")
     throw new SceneError(
-      "<Icon> is given a trim, but its icon is solid, so it has no outline to draw.",
+      "<Icon> is given a draw, but its icon is solid, so it has no outline to draw.",
       "Bring it in with motion, such as enter(), or use an outline icon.",
     );
 
@@ -133,15 +133,15 @@ interface PieceProps {
   readonly color: Anim<Paint>;
   readonly width: number;
   readonly by: number;
-  readonly trim: Anim<Vec> | undefined;
+  readonly draw: Anim<number> | undefined;
 }
 
-const Piece = ({ icon, index, color, width, by, trim }: PieceProps): SceneElement => (
+const Piece = ({ icon, index, color, width, by, draw }: PieceProps): SceneElement => (
   <Shape
     geometry={scaled(icon.paths[index]!, by)}
     fill={icon.kind === "stroke" ? undefined : color}
     stroke={icon.kind === "stroke" ? { color, width, cap: "round", join: "round" } : undefined}
-    trim={trim}
+    draw={draw}
   />
 );
 
@@ -150,7 +150,7 @@ const drawn = (
   color: Anim<Paint>,
   width: number,
   by: number,
-  trim: IconTrim | undefined,
+  draw: IconDraw | undefined,
 ): SceneElement[] =>
   icon.paths.map((_, index) => (
     <Piece
@@ -160,7 +160,7 @@ const drawn = (
       color={color}
       width={width}
       by={by}
-      trim={isPerPiece(trim) ? trim(index, icon.paths.length) : trim}
+      draw={isPerPiece(draw) ? draw(index, icon.paths.length) : draw}
     />
   ));
 
@@ -180,7 +180,7 @@ const sharedSymbol = (icon: IconData, color: Color, width: number, by: number): 
 };
 
 export function Icon(props: IconProps): SceneElement {
-  const { icon, size = icon?.grid, width, color: _c, trim: _t, shared: _s, ...placement } = props;
+  const { icon, size = icon?.grid, width, color: _c, draw: _d, shared: _s, ...placement } = props;
 
   check(icon, size, props);
   const by = size / icon.grid;
@@ -189,5 +189,5 @@ export function Icon(props: IconProps): SceneElement {
   if (props.shared)
     return <Instance {...placement} of={sharedSymbol(icon, props.color, stroke, by)} />;
 
-  return <Group {...placement}>{drawn(icon, props.color, stroke, by, props.trim)}</Group>;
+  return <Group {...placement}>{drawn(icon, props.color, stroke, by, props.draw)}</Group>;
 }

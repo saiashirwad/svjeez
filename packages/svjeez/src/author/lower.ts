@@ -79,7 +79,7 @@ import {
   type Timing,
 } from "../model/steps";
 import { isTrack, layersOf, readOf, reading, type Anim, type LayerMotion } from "./track";
-import { derivedOf, isDerived, restOf } from "./derived";
+import { derivedOf, isDerived, restOf, through } from "./derived";
 import { withGoals } from "./goals";
 import type { NodeElement } from "./nodes";
 import {
@@ -318,15 +318,22 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
 
   const stroke = written && strokeOf(ctx, written, timing, where, outline);
 
+  if (props.draw !== undefined && props.trim !== undefined)
+    throw new SceneError(
+      `${where} has both draw and trim, but draw is trim [0, draw].`,
+      "Pick one: draw for a stroke that draws on, or trim for a window [from, to].",
+    );
+  const window = props.draw === undefined ? props.trim : through(props.draw, (d): Vec => [0, d]);
+
   const trim =
-    props.trim === undefined
+    window === undefined
       ? undefined
-      : animated<Vec, Vec>(props.trim, keep, timing, mixVec, `trim on ${where}`);
+      : animated<Vec, Vec>(window, keep, timing, mixVec, `trim on ${where}`);
 
   if (stroke?.dashOffset !== undefined && trim !== undefined)
     throw new SceneError(
-      `${where} has both a trim and a stroke dashOffset, and both drive the dash.`,
-      "Pick one: animate trim to draw the stroke on, or dashOffset to march its dashes.",
+      `${where} has both a draw or trim and a stroke dashOffset, and both drive the dash.`,
+      "Pick one: animate draw to draw the stroke on, or dashOffset to march its dashes.",
     );
 
   const box = paintedBoxOf(rest, lookOf({ stroke, trim }));

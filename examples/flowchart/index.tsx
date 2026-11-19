@@ -1,5 +1,5 @@
 import { flowchart } from "@svjeez/diagrams";
-import { Align, Group, Shape, canvas, circle, draw, ease, exit, scene, span, track } from "svjeez";
+import { Align, Group, Shape, canvas, circle, ease, exit, scene, span, track } from "svjeez";
 import { mono, theme } from "../theme";
 
 export const chart = flowchart(
@@ -74,7 +74,7 @@ export default scene(
             <Shape
               geometry={route.geometry}
               stroke={{ color: theme.orange, width: 2.5, cap: "round" }}
-              trim={draw(trip, { curve: ease.linear })}
+              draw={track(0).to(1, trip, ease.linear)}
             />,
           )}
           <Shape

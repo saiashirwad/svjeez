@@ -5,7 +5,6 @@ import {
   Text,
   canvas,
   circle,
-  draw,
   ease,
   enter,
   exit,
@@ -468,7 +467,7 @@ const Label = ({ name, note, at: [x, y], to, stop, after = 0, end }: Note): Scen
       <Shape
         geometry={line(tail, to)}
         stroke={{ color: "#ECE9E2B3", width: size * 0.05 }}
-        trim={draw(span(shown.start + 0.2, 1))}
+        draw={track(0).to(1, span(shown.start + 0.2, 1))}
       />
       <Shape geometry={circle(size * 0.14)} at={to} anchor="center" fill={INK} />
       <Text

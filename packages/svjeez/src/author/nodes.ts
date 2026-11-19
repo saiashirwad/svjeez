@@ -38,7 +38,7 @@ export interface StrokeProps {
   readonly cap?: "butt" | "round" | "square";
   readonly join?: "miter" | "round" | "bevel";
   readonly dash?: readonly number[];
-  /** Slides the dash pattern along the stroke. Needs `dash`, and can't be combined with `trim`. */
+  /** Slides the dash pattern along the stroke. Needs `dash`, and can't be combined with `draw` or `trim`. */
   readonly dashOffset?: Anim<number>;
   readonly nonScaling?: boolean;
   /** Draw the stroke under the fill. */
@@ -63,6 +63,9 @@ export interface ShapeProps extends Common {
   readonly geometry: Anim<Geometry>;
   readonly fill?: Anim<Paint>;
   readonly stroke?: StrokeProps;
+  /** How much of the outline is drawn, from 0 to 1: the same as `trim` of [0, draw]. Give draw or trim, not both. */
+  readonly draw?: Anim<number>;
+  /** The window of the outline that shows, [from, to] from 0 to 1. */
   readonly trim?: Anim<Vec>;
 }
 
