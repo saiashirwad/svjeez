@@ -718,6 +718,7 @@ describe("every supported diagram type", () => {
     mindmap: "mindmap\n  root\n    A\n    B",
     timeline: "timeline\ntitle T\nsection S\n2021 : a : b\n     : c",
     quadrant: "quadrantChart\ntitle Q\nx-axis Low --> High\nA: [0.3, 0.6]",
+    xychart: "xychart-beta\ntitle T\nx-axis [a, b]\nbar [1, 2]\nline [2, 1]",
     git: "gitGraph\ncommit\nbranch dev\ncommit\ncheckout main\nmerge dev",
   } as const;
 

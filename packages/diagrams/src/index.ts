@@ -101,3 +101,14 @@ export {
   type QuadrantChartSpec,
   type QuadrantPoint,
 } from "./quadrant.tsx";
+
+export {
+  xyChart,
+  type XyCategories,
+  type XyChart,
+  type XyChartOptions,
+  type XyChartSpec,
+  type XyRange,
+  type XySeries,
+  type XyValues,
+} from "./xychart.tsx";

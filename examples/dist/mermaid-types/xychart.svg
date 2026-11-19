@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 501 514" width="501" height="514" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">XY chart</title>
+  <desc id="d">A Mermaid xychart diagram drawn by @svjeez/mermaid.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--border-25-background:#26272A;--border-70-background:#5A5A5F}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0;--border-25-background:#E3E3E4;--border-70-background:#B0B0B3}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,3.75%{translate:0 6px;opacity:0}7.5%,100%{translate:0 0;opacity:1}}
+.m1{animation-name:k1}
+@keyframes k2{0%,7.5%{stroke-dashoffset:1;visibility:hidden}11.25%,100%{stroke-dashoffset:0;visibility:visible}}
+.m2{animation-name:k2}
+@keyframes k3{0%,7.5%{opacity:0}11.25%,100%{opacity:1}}
+.m3{animation-name:k3}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-7.5s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="501" height="514" fill="var(--background)"/>
+  <g transform="translate(48.14 32.103)">
+    <text x="146.5" y="30.32" font-size="16" fill="var(--text)">Monthly revenue</text>
+    <rect x="137.405" y="42.5" width="12" height="12" rx="3" fill="var(--magenta)"/>
+    <text x="155.405" y="52.478" font-size="11.05" fill="var(--text)">Revenue</text>
+    <rect x="221.815" y="42.5" width="12" height="12" rx="3" fill="var(--blue)"/>
+    <text x="239.815" y="52.478" font-size="11.05" fill="var(--text)">Target</text>
+    <line x1="63" y1="392" x2="423" y2="392" fill="none" stroke="var(--border-25-background)" stroke-dasharray="1 4"/>
+    <text x="47.37" y="395.978" font-size="11.05" fill="var(--muted)">0</text>
+    <line x1="63" y1="338.667" x2="423" y2="338.667" fill="none" stroke="var(--border-25-background)" stroke-dasharray="1 4"/>
+    <text x="40.74" y="342.645" font-size="11.05" fill="var(--muted)">20</text>
+    <line x1="63" y1="285.333" x2="423" y2="285.333" fill="none" stroke="var(--border-25-background)" stroke-dasharray="1 4"/>
+    <text x="40.74" y="289.311" font-size="11.05" fill="var(--muted)">40</text>
+    <line x1="63" y1="232" x2="423" y2="232" fill="none" stroke="var(--border-25-background)" stroke-dasharray="1 4"/>
+    <text x="40.74" y="235.978" font-size="11.05" fill="var(--muted)">60</text>
+    <line x1="63" y1="178.667" x2="423" y2="178.667" fill="none" stroke="var(--border-25-background)" stroke-dasharray="1 4"/>
+    <text x="40.74" y="182.645" font-size="11.05" fill="var(--muted)">80</text>
+    <line x1="63" y1="125.333" x2="423" y2="125.333" fill="none" stroke="var(--border-25-background)" stroke-dasharray="1 4"/>
+    <text x="34.11" y="129.311" font-size="11.05" fill="var(--muted)">100</text>
+    <line x1="63" y1="72" x2="423" y2="72" fill="none" stroke="var(--border-25-background)" stroke-dasharray="1 4"/>
+    <text x="34.11" y="75.978" font-size="11.05" fill="var(--muted)">120</text>
+    <text x="83.055" y="411.271" font-size="11.05" fill="var(--muted)">jan</text>
+    <text x="143.055" y="411.271" font-size="11.05" fill="var(--muted)">feb</text>
+    <text x="203.055" y="411.271" font-size="11.05" fill="var(--muted)">mar</text>
+    <text x="263.055" y="411.271" font-size="11.05" fill="var(--muted)">apr</text>
+    <text x="323.055" y="411.271" font-size="11.05" fill="var(--muted)">may</text>
+    <text x="383.055" y="411.271" font-size="11.05" fill="var(--muted)">jun</text>
+    <line x1="63" y1="392" x2="423" y2="392" fill="none" stroke="var(--border-70-background)" stroke-width="1.2"/>
+    <line x1="63" y1="72" x2="63" y2="392" fill="none" stroke="var(--border-70-background)" stroke-width="1.2"/>
+    <text x="-18.28" y="235.978" font-size="11.05" fill="var(--muted)" style="transform-origin:21.5px 232px;rotate:-90deg">Revenue (k$)</text>
+    <text x="226.425" y="432.478" font-size="11.05" fill="var(--muted)">Month</text>
+    <g class="a m1" fill="var(--magenta)">
+      <rect x="74" y="280" width="38" height="112"/>
+      <rect x="134" y="245.333" width="38" height="146.667"/>
+      <rect x="194" y="229.333" width="38" height="162.667"/>
+      <rect x="254" y="184" width="38" height="208"/>
+      <rect x="314" y="152" width="38" height="240"/>
+      <rect x="374" y="114.667" width="38" height="277.333"/>
+    </g>
+    <path d="M93 258.667L153 232L213 205.333L273 178.667L333 152L393 125.333" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
+    <circle cx="93" cy="258.667" r="3.5" fill="var(--blue)" stroke="var(--background)" stroke-width="1.5" class="a m3"/>
+    <circle cx="153" cy="232" r="3.5" fill="var(--blue)" stroke="var(--background)" stroke-width="1.5" class="a m3"/>
+    <circle cx="213" cy="205.333" r="3.5" fill="var(--blue)" stroke="var(--background)" stroke-width="1.5" class="a m3"/>
+    <circle cx="273" cy="178.667" r="3.5" fill="var(--blue)" stroke="var(--background)" stroke-width="1.5" class="a m3"/>
+    <circle cx="333" cy="152" r="3.5" fill="var(--blue)" stroke="var(--background)" stroke-width="1.5" class="a m3"/>
+    <circle cx="393" cy="125.333" r="3.5" fill="var(--blue)" stroke="var(--background)" stroke-width="1.5" class="a m3"/>
+  </g>
+</svg>
