@@ -119,9 +119,11 @@ It works with Playwright, Puppeteer or raw CDP `Runtime.evaluate`. Do not pass `
 
 Capture reads the page as it renders now. Running animations and transitions are captured mid-flight: the layout shows that moment, and `animations` carries the keyframes and `currentTime`.
 
+Capture never drops CSS silently. Anything it cannot represent is a short phrase in the element's `notes` (`conic-gradient() is not drawn`, `a 3D transform is flattened to 2D`, `filter is not drawn`, `<canvas> is not drawn`, an open shadow root, `::before counter() content is not drawn`, ...), and `compile` forwards each as a diagnostic. Closed shadow roots cannot be seen from the page, so they are not noted.
+
 ## Snapshot
 
-`{ version: 1, viewport, root }`. Every node is an element (`rect`, `radii`, `transform`, `opacity`, `clip`, `background`, `backgrounds`, `border`, `outline`, `shadows`, `image`, `svg`, `animations`, `children`) or a text node of `runs`. Rects are the border box in page px before the element's own transform; each ancestor's transform composes on top. See `src/schema.ts`.
+`{ version: 1, viewport, root }`. Every node is an element (`rect`, `radii`, `transform`, `opacity`, `clip`, `background`, `backgrounds`, `border`, `outline`, `shadows`, `image`, `svg`, `animations`, `notes`, `children`) or a text node of `runs`. Rects are the border box in page px before the element's own transform; each ancestor's transform composes on top. See `src/schema.ts`.
 
 `checkVersion` throws on a Snapshot from another version. Snapshots are not migrated: capture again.
 
@@ -142,7 +144,7 @@ Each element is a group framed at its transform origin (or its top-left corner),
 
 Drawn with core primitives: rounded boxes (per-corner radii), background colors and linear/radial gradients, opacity, blend, 2D transforms, overflow clips, `<img>` data URLs as pictures, inline svg paths and basic shapes, text runs at their captured baselines and advances. Built from plain geometry: borders and outlines (a stroke pulled inside the box, or wedges cut to a ring when sides differ), outer shadows (core `shadow()` on a shape cut away under the box), spread and inset shadows (blurred shapes), and text decorations (thin rects).
 
-`diagnostics` lists what is not faithful, as `{ path, what }`: an elliptical radial gradient, `groove`/`ridge`/`inset`/`outset` borders, background images, `<img>` sources that are not `data:` URLs, svg text, paint servers and other elements, animated properties other than `transform`, `opacity` and `background-color`, and a keyed element that moves between parents it cannot ride across.
+`diagnostics` lists what is not faithful, as `{ path, what }`: everything the Snapshot's `notes` say, an elliptical radial gradient, `groove`/`ridge`/`inset`/`outset` borders, background images, `<img>` sources that are not `data:` URLs, svg text, paint servers and other elements, animated properties other than `transform`, `opacity` and `background-color`, and a keyed element that moves between parents it cannot ride across.
 
 ## Animating between states
 

@@ -214,6 +214,8 @@ export interface ElementNode {
   readonly svg?: SvgNode;
   readonly control?: Control;
   readonly animations?: readonly Animation[];
+  /** CSS on this element that capture could not represent, one short phrase each. Compile forwards them as diagnostics. */
+  readonly notes?: readonly string[];
   readonly children: readonly (ElementNode | TextNode)[];
 }
 

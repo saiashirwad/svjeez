@@ -55,6 +55,8 @@ export const element = (
     height: rect.height,
   };
 
+  for (const note of el.notes ?? []) ctx.note(path, note);
+
   const radii: Radii | undefined = el.radii;
   const where: Where = { box, radii, path, ctx };
 

@@ -775,6 +775,8 @@ export const capture = (root: Element): Snapshot => {
     origin: readonly [number, number];
     kids: (ElementNode | TextNode)[];
     animations: Animation[];
+    /** What the caller could not represent, besides what the style says. */
+    notes?: string[];
     bare?: boolean;
     clip?: boolean;
     image?: ElementNode["image"];
@@ -784,6 +786,73 @@ export const capture = (root: Element): Snapshot => {
     /** Names a pseudo-element's node among its siblings. */
     part?: string;
   }
+
+  const NO_SIZE = new Set(["auto", "auto auto"]);
+
+  /** The CSS an element has that the Snapshot cannot represent, as short phrases, for `notes`. */
+  const unsupported = (style: CSSStyleDeclaration, d: Draw): string[] => {
+    const out: string[] = [];
+    const get = (name: string) => style.getPropertyValue(name).trim();
+    const set = (name: string) => !["", "none", "normal"].includes(get(name));
+    const hasText = d.kids.some((kid) => kid.type === "text");
+
+    if (d.bare !== true) {
+      let layers = 0;
+
+      for (const one of split(style.backgroundImage, ",")) {
+        if (one === "none") continue;
+
+        if (layer(one, d.rect.width, d.rect.height)) layers++;
+        else out.push(`${/^[\w-]+/.exec(one)?.[0] ?? "background-image"}() is not drawn`);
+      }
+
+      if (layers > 0) {
+        if (!split(style.backgroundSize, ",").every((size) => NO_SIZE.has(size)))
+          out.push("background-size is not drawn");
+
+        if (!split(style.backgroundPosition, ",").every((at) => at === "0% 0%" || at === "0px 0px"))
+          out.push("background-position is not drawn");
+
+        if (!split(style.backgroundRepeat, ",").every((repeat) => repeat === "repeat"))
+          out.push("background-repeat is not drawn");
+      }
+
+      if (/\btext\b/.test(get("background-clip"))) out.push("background-clip: text is not drawn");
+    }
+
+    if (
+      !d.own.is2D ||
+      style.rotate.split(" ").length > 1 ||
+      style.translate.split(" ").length > 2 ||
+      style.scale.split(" ").length > 2
+    )
+      out.push("a 3D transform is flattened to 2D");
+
+    if (set("perspective")) out.push("perspective is not drawn");
+
+    if (get("transform-style") === "preserve-3d")
+      out.push("transform-style: preserve-3d is not drawn");
+
+    if (set("filter")) out.push("filter is not drawn");
+
+    if (set("backdrop-filter")) out.push("backdrop-filter is not drawn");
+
+    if (set("clip-path")) out.push("clip-path is not drawn");
+
+    if (set("mask-image") || set("-webkit-mask-image")) out.push("mask-image is not drawn");
+
+    if (hasText && set("text-shadow")) out.push("text-shadow is not drawn");
+
+    if (hasText && !get("writing-mode").startsWith("horizontal"))
+      out.push("a vertical writing-mode is not drawn");
+
+    if (d.el?.localName === "canvas" || d.el?.localName === "video")
+      out.push(`<${d.el.localName}> is not drawn`);
+
+    if (d.el?.shadowRoot) out.push("a shadow root is not walked");
+
+    return out;
+  };
 
   const draw = (style: CSSStyleDeclaration, d: Draw): ElementNode => {
     const { rect, own, origin, animations } = d;
@@ -876,6 +945,10 @@ export const capture = (root: Element): Snapshot => {
 
     if (animations.length > 0) node.animations = animations;
 
+    const notes = [...new Set([...(d.notes ?? []), ...unsupported(style, d)])];
+
+    if (notes.length > 0) node.notes = notes;
+
     return node;
   };
 
@@ -920,12 +993,14 @@ export const capture = (root: Element): Snapshot => {
 
   /**
    * What a pseudo-element's `content` says, as text and an optional image.
-   * `counter()`, `counters()` and gradients have no value outside the cascade, so they draw nothing.
+   * `counter()`, `counters()` and gradients have no value outside the cascade, so they draw nothing, and `notes` says so.
    */
   const contentOf = (el: Element, style: CSSStyleDeclaration) => {
     const quotes = /"((?:[^"\\]|\\.)*)"/gs;
     const pairs = [...style.quotes.matchAll(quotes)].map((m) => unquote(m[0]));
-    const [open = "“", close = "”"] = pairs;
+    const none = style.quotes === "none";
+    const [open = none ? "" : "“", close = none ? "" : "”"] = pairs;
+    const notes: string[] = [];
     let text = "";
     let url: string | undefined;
 
@@ -940,11 +1015,15 @@ export const capture = (root: Element): Snapshot => {
           .slice(4, -1)
           .trim()
           .replace(/^["']|["']$/g, "");
-      else if (token === "open-quote") text += open;
-      else if (token === "close-quote") text += close;
+      else if (token === "open-quote" || token === "close-quote") {
+        text += token === "open-quote" ? open : close;
+
+        if (pairs.length === 0 && !none) notes.push("quotes: auto is drawn as “ ”");
+      } else if (/^[\w-]+\(/.test(token) && !token.startsWith("attr(") && !token.startsWith("url("))
+        notes.push(`${/^[\w-]+/.exec(token)![0]}() content is not drawn`);
     }
 
-    return { text, url };
+    return { text, url, notes };
   };
 
   /** Properties that would start something on the stand-in that the pseudo-element does not run. */
@@ -966,6 +1045,8 @@ export const capture = (root: Element): Snapshot => {
     el: Element,
     which: Pseudo,
     a: DOMMatrix,
+    /** Where to say what the content cannot draw: the host's notes. */
+    sink: string[],
     host?: { rect: Draw["rect"]; style: CSSStyleDeclaration },
   ): (ElementNode | TextNode)[] => {
     if (el instanceof SVGElement || REPLACED.has(el.localName)) return [];
@@ -1049,7 +1130,10 @@ export const capture = (root: Element): Snapshot => {
       return [draw(style, { tag: which, part: which, rect, own, origin, kids: [], animations })];
     }
 
-    const { text, url } = contentOf(el, style);
+    const { text, url, notes } = contentOf(el, style);
+
+    // The stand-in may draw nothing at all (an empty span has no box), so the host carries what its content could not say.
+    sink.push(...notes.map((note) => `${which} ${note}`));
 
     // Read everything off the pseudo-element before it is switched off.
     const worn: [string, string][] = [];
@@ -1123,7 +1207,11 @@ export const capture = (root: Element): Snapshot => {
       return [];
 
     if (style.display === "contents")
-      return [...pseudo(el, "::before", a), ...children(el, a), ...pseudo(el, "::after", a)];
+      return [
+        ...pseudo(el, "::before", a, []),
+        ...children(el, a),
+        ...pseudo(el, "::after", a, []),
+      ];
 
     const box = pageRect(el);
     const inline = style.display === "inline" && !(el instanceof HTMLImageElement);
@@ -1190,10 +1278,16 @@ export const capture = (root: Element): Snapshot => {
     const real = form?.kids ?? (leaf ? [] : children(el, inner));
     const host = { rect, style };
 
+    const notes: string[] = [];
+
     const kids =
       form || leaf || stand
         ? real
-        : [...pseudo(el, "::before", inner, host), ...real, ...pseudo(el, "::after", inner, host)];
+        : [
+            ...pseudo(el, "::before", inner, notes, host),
+            ...real,
+            ...pseudo(el, "::after", inner, notes, host),
+          ];
 
     if ((box.width === 0 || box.height === 0) && kids.length === 0) return [];
 
@@ -1215,6 +1309,7 @@ export const capture = (root: Element): Snapshot => {
       origin,
       kids,
       animations: stand?.animations ?? animationsOf(el),
+      notes,
       ...(stand ? { part: stand.tag } : { el }),
       bare: form?.native === true,
       ...(form?.clip && { clip: true }),

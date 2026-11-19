@@ -513,6 +513,136 @@ describe("pseudo-elements", () => {
   });
 });
 
+describe("notes: what capture cannot represent", () => {
+  const noted = async (html: string, id = "n") => byId(await snap(html), id).notes ?? [];
+
+  test("plain CSS has none", async () => {
+    const snapshot = await snap(
+      `<div id="n" style="width:20px;height:20px;background:linear-gradient(red,blue) 0 0/auto repeat;transform:rotate(5deg);filter:none">x</div>`,
+    );
+
+    expect(byId(snapshot, "n").notes).toBeUndefined();
+  });
+
+  test("conic and repeating gradients", async () => {
+    expect(
+      await noted(
+        `<div id="n" style="width:20px;height:20px;background-image:conic-gradient(red,blue),repeating-conic-gradient(red 0 10%,blue 0 20%),repeating-linear-gradient(red,blue 10px),linear-gradient(red,blue)"></div>`,
+      ),
+    ).toEqual([
+      "conic-gradient() is not drawn",
+      "repeating-conic-gradient() is not drawn",
+      "repeating-linear-gradient() is not drawn",
+    ]);
+  });
+
+  test("background size, position and repeat", async () => {
+    expect(
+      await noted(
+        `<div id="n" style="width:20px;height:20px;background:linear-gradient(red,blue) 5px 5px/10px 10px no-repeat"></div>`,
+      ),
+    ).toEqual([
+      "background-size is not drawn",
+      "background-position is not drawn",
+      "background-repeat is not drawn",
+    ]);
+  });
+
+  test("3D transforms are flattened, with perspective and preserve-3d", async () => {
+    const flat = "a 3D transform is flattened to 2D";
+
+    expect(
+      await noted(`<div id="n" style="width:20px;height:20px;transform:rotateX(40deg)"></div>`),
+    ).toEqual([flat]);
+    expect(
+      await noted(`<div id="n" style="width:20px;height:20px;rotate:1 0 0 40deg"></div>`),
+    ).toEqual([flat]);
+    expect(
+      await noted(`<div id="n" style="width:20px;height:20px;translate:1px 2px 3px"></div>`),
+    ).toEqual([flat]);
+    expect(
+      await noted(
+        `<div id="n" style="width:20px;height:20px;perspective:100px;transform-style:preserve-3d"><i></i></div>`,
+      ),
+    ).toEqual(["perspective is not drawn", "transform-style: preserve-3d is not drawn"]);
+  });
+
+  test("filter, backdrop-filter, clip-path and mask-image", async () => {
+    expect(
+      await noted(
+        `<div id="n" style="width:20px;height:20px;filter:blur(2px);backdrop-filter:blur(2px);clip-path:circle(50%);mask-image:linear-gradient(red,blue)"></div>`,
+      ),
+    ).toEqual([
+      "filter is not drawn",
+      "backdrop-filter is not drawn",
+      "clip-path is not drawn",
+      "mask-image is not drawn",
+    ]);
+  });
+
+  test("text-shadow, background-clip: text and vertical writing-mode, on the element that has the text", async () => {
+    const snapshot = await snap(
+      `<div id="n" style="text-shadow:1px 1px red;background:red;background-clip:text;writing-mode:vertical-rl">hi<b id="k"><i id="e" style="display:block;width:5px;height:5px"></i></b></div>`,
+    );
+
+    expect(byId(snapshot, "n").notes).toEqual([
+      "background-clip: text is not drawn",
+      "text-shadow is not drawn",
+      "a vertical writing-mode is not drawn",
+    ]);
+    // Inherited, but this element draws no text of its own.
+    expect(byId(snapshot, "e").notes).toBeUndefined();
+  });
+
+  test("canvas and video", async () => {
+    const snapshot = await snap(
+      `<canvas id="c" width="10" height="10"></canvas><video id="v" width="10" height="10"></video>`,
+    );
+
+    expect(byId(snapshot, "c").notes).toEqual(["<canvas> is not drawn"]);
+    expect(byId(snapshot, "v").notes).toEqual(["<video> is not drawn"]);
+  });
+
+  test("an open shadow root", async () => {
+    const snapshot = await snap(`<div id="n" style="height:10px"></div>`);
+
+    expect(byId(snapshot, "n").notes).toBeUndefined();
+
+    await page.evaluate(() => {
+      const root = document.getElementById("n")!.attachShadow({ mode: "open" });
+
+      root.innerHTML = "<p>shadow</p>";
+    });
+    expect(byId(await grab(), "n").notes).toEqual(["a shadow root is not walked"]);
+  });
+
+  test("pseudo-element content that cannot resolve is said on the host", async () => {
+    expect(
+      await noted(
+        `<style>#n{counter-reset:k}#n::before{content:counter(k)}#n::after{content:open-quote "x" close-quote;quotes:auto}</style><div id="n">x</div>`,
+      ),
+    ).toEqual(["::before counter() content is not drawn", "::after quotes: auto is drawn as “ ”"]);
+
+    expect(
+      await noted(
+        `<style>#n::before{content:open-quote "x" close-quote;quotes:"<" ">"}</style><div id="n">x</div>`,
+      ),
+    ).toEqual([]);
+  });
+
+  test("a pseudo-element's own style is noted on its node", async () => {
+    const snapshot = await snap(
+      `<style>#n::before{content:"x";display:block;width:10px;height:10px;filter:blur(1px)}</style><div id="n">y</div>`,
+    );
+
+    const [before] = byId(snapshot, "n").children.filter(
+      (c): c is ElementNode => c.type === "element" && c.tag === "::before",
+    );
+
+    expect(before!.notes).toEqual(["filter is not drawn"]);
+  });
+});
+
 describe("checkVersion", () => {
   test("accepts version 1", () => {
     expect(checkVersion({ version: 1 }).version).toBe(1);

@@ -656,3 +656,29 @@ describe("pseudo-elements", () => {
     expect(out.svg).toContain(">new</text>");
   });
 });
+
+describe("notes from capture", () => {
+  test("each is forwarded as a diagnostic with the element's path", () => {
+    const out = compile(
+      snapshot(
+        box({
+          id: "app",
+          notes: ["filter is not drawn"],
+          children: [
+            box({
+              key: "card",
+              notes: ["a 3D transform is flattened to 2D", "filter is not drawn"],
+            }),
+            box({ key: "plain" }),
+          ],
+        }),
+      ),
+    );
+
+    expect(out.diagnostics).toEqual([
+      { path: "app", what: "filter is not drawn" },
+      { path: "app/card", what: "a 3D transform is flattened to 2D" },
+      { path: "app/card", what: "filter is not drawn" },
+    ]);
+  });
+});
