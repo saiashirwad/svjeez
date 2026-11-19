@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { basename, dirname } from "node:path";
 import { scene } from "svjeez";
 import type { Scene } from "svjeez/tools";
@@ -85,6 +86,19 @@ const warn = (diagnostics: readonly Diagnostic[]) => {
     console.warn(
       `svjeez/dom: ${diagnostics.length} approximation${diagnostics.length === 1 ? "" : "s"}\n${diagnostics.map(({ path, what }) => `  ${path}: ${what}`).join("\n")}`,
     );
+};
+
+/** What the interaction script is, for the cache: the `run` function's source (whitespace-normalized) and the film file's text. */
+export const scriptInputs = (run: Function, film: string | undefined): string => {
+  let file = "";
+
+  try {
+    if (film) file = readFileSync(film, "utf8");
+  } catch {
+    // Not a readable file: the function source alone stands in.
+  }
+
+  return `${run.toString().replace(/\s+/g, " ")}\n${file}`;
 };
 
 /**
@@ -197,6 +211,7 @@ export const film = async <Props = never>(
               selector,
               scheme: scheme ?? null,
               viewport: viewport ?? null,
+              script: scriptInputs(run, app.film ?? caller),
             },
             async () => toPortable(await capture(), origin, base),
           ),

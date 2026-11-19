@@ -11,6 +11,14 @@ const FS = "/@fs";
 /** What follows `/@fs` in a URL: the absolute path, up to the end of the URL. */
 const FS_PATH = /\/@fs(\/[^"'()\s?#\\]*)/g;
 
+const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Whether `base` is in `text` as a path root (`<base>/...` right after a quote, `(`, `=`, `file://` or `@fs`), not as a substring of `/app-icon.png` or prose. */
+const leaks = (text: string, base: string): boolean =>
+  new RegExp(
+    `(?:["'(=]|file://|@fs)${escape(JSON.stringify(base).slice(1, -1))}(?:/|["'?#)\\\\])`,
+  ).test(text);
+
 /**
  * The snapshots as they are kept in a cache file: the server's origin becomes a placeholder, and Vite's `/@fs/<absolute path>`
  * URLs (files outside its root) become paths relative to `base`, so the file is the same on every machine and checkout.
@@ -22,7 +30,7 @@ export const toPortable = (states: State[], origin: string, base: string): State
     .replaceAll(origin, ORIGIN)
     .replace(FS_PATH, (_, path: string) => `${BASE}${relative(base, path)}`);
 
-  if (base.length > 1 && text.includes(base))
+  if (base.length > 1 && leaks(text, base))
     throw new Error(
       `film: the recorded page leaks the absolute path ${base} into the cache file. Cached states must not hold absolute paths.`,
     );
