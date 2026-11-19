@@ -164,3 +164,12 @@ export {
   type C4Options,
   type C4Relation,
 } from "./c4.tsx";
+
+export {
+  kanban,
+  type Kanban,
+  type KanbanCard,
+  type KanbanColumn,
+  type KanbanOptions,
+  type KanbanPriority,
+} from "./kanban.tsx";

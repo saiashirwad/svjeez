@@ -9,6 +9,7 @@ import { parseFlowchart } from "./flowchart.ts";
 import { parseGantt } from "./gantt.ts";
 import { parseGit } from "./git.ts";
 import { parseJourney } from "./journey.ts";
+import { parseKanban } from "./kanban.ts";
 import { parseMindmap } from "./mindmap.ts";
 import { parsePie } from "./pie.ts";
 import { parseQuadrant } from "./quadrant.ts";
@@ -76,6 +77,8 @@ export function parseMermaid(text: string, options: ParseOptions = {}): MermaidD
   if (word === "requirementDiagram" && exact) return parseRequirement(first, body);
 
   if (word?.startsWith("C4") && exact) return parseC4(first, body);
+
+  if (word === "kanban" && exact) return parseKanban(first, body);
 
   if (word === "pie") return parsePie(first, body);
 

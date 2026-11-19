@@ -33,3 +33,5 @@ export type * from "./architecture.ts";
 export type * from "./requirement.ts";
 
 export type * from "./c4.ts";
+
+export type * from "./kanban.ts";

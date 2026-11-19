@@ -12,6 +12,7 @@ import {
   type Gantt,
   type GitGraph,
   type Journey,
+  type Kanban,
   type Mindmap,
   type Pie,
   type QuadrantChart,
@@ -38,6 +39,7 @@ import { drawEr } from "./er.ts";
 import { drawGantt } from "./gantt.ts";
 import { drawGit } from "./git.ts";
 import { drawJourney } from "./journey.ts";
+import { drawKanban } from "./kanban.ts";
 import { drawMindmap } from "./mindmap.ts";
 import { parseMermaid } from "./parse.ts";
 import { drawPie } from "./pie.ts";
@@ -56,6 +58,7 @@ import type {
   GanttDoc,
   GitDoc,
   JourneyDoc,
+  KanbanDoc,
   MindmapDoc,
   PieDoc,
   QuadrantDoc,
@@ -98,7 +101,8 @@ export type MermaidDiagram =
   | (Architecture & { readonly kind: "architecture"; readonly doc: ArchitectureDoc })
   | (RequirementDiagram<string> & { readonly kind: "requirement"; readonly doc: RequirementDoc })
   | (RequirementDiagram<string> & { readonly kind: "requirement"; readonly doc: RequirementDoc })
-  | (C4<string> & { readonly kind: "c4"; readonly doc: C4Doc });
+  | (C4<string> & { readonly kind: "c4"; readonly doc: C4Doc })
+  | (Kanban<string> & { readonly kind: "kanban"; readonly doc: KanbanDoc });
 
 const FORM_NODES: Record<FlowForm, { readonly role: NodeRole; readonly shape?: NodeShape }> = {
   rect: { role: "task" },
@@ -123,6 +127,7 @@ const NAMES = {
   sequence: "sequence diagram",
   gantt: "gantt chart",
   journey: "user journey",
+  kanban: "kanban board",
   pie: "pie chart",
   mindmap: "mindmap",
   git: "git graph",
@@ -263,6 +268,8 @@ export function mermaid(text: string, options: MermaidOptions): MermaidDiagram {
   if (doc.kind === "gantt") return drawn(drawGantt(doc, diagramOptions), "gantt", doc);
 
   if (doc.kind === "journey") return drawn(drawJourney(doc, diagramOptions), "journey", doc);
+
+  if (doc.kind === "kanban") return drawn(drawKanban(doc, diagramOptions), "kanban", doc);
 
   if (doc.kind === "pie") return drawn(drawPie(doc, diagramOptions), "pie", doc);
 

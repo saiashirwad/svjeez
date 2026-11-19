@@ -721,6 +721,7 @@ describe("every supported diagram type", () => {
     xychart: "xychart-beta\ntitle T\nx-axis [a, b]\nbar [1, 2]\nline [2, 1]",
     git: "gitGraph\ncommit\nbranch dev\ncommit\ncheckout main\nmerge dev",
     c4: 'C4Context\nPerson(a, "A")\nSystem(b, "B")\nRel(a, b, "Uses")',
+    kanban: "kanban\n  todo[Todo]\n    a[Card]@{ ticket: X-1 }\n  done[Done]",
     requirement:
       "requirementDiagram\nrequirement r {\nid: 1\n}\nelement e {\ntype: x\n}\ne - satisfies -> r",
   } as const;

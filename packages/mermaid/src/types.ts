@@ -7,6 +7,7 @@ import type { ErDoc } from "./er.ts";
 import type { GanttDoc } from "./gantt.ts";
 import type { GitDoc } from "./git.ts";
 import type { JourneyDoc } from "./journey.ts";
+import type { KanbanDoc } from "./kanban.ts";
 import type { MindmapDoc } from "./mindmap.ts";
 import type { PieDoc } from "./pie.ts";
 import type { QuadrantDoc } from "./quadrant.ts";
@@ -220,7 +221,8 @@ export type MermaidDoc =
   | ArchitectureDoc
   | RequirementDoc
   | RequirementDoc
-  | C4Doc;
+  | C4Doc
+  | KanbanDoc;
 
 export interface ParseOptions {
   readonly file?: string;
@@ -236,6 +238,7 @@ export type {
   GanttDoc,
   GitDoc,
   JourneyDoc,
+  KanbanDoc,
   MindmapDoc,
   PieDoc,
   QuadrantDoc,
