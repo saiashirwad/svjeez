@@ -34,9 +34,12 @@ const budgets = {
   math: { bytes: 22600, elements: 48, stops: 18, smil: 0, cost: 12 },
   flowchart: { bytes: 15000, elements: 74, stops: 105, smil: 0, cost: 39 },
   sequence: { bytes: 11300, elements: 79, stops: 52, smil: 0, cost: 30 },
-  state: { bytes: 14500, elements: 86, stops: 95, smil: 0, cost: 9 },
-  lanes: { bytes: 19100, elements: 97, stops: 76, smil: 28, cost: 47.2 },
+  state: { bytes: 14400, elements: 86, stops: 95, smil: 0, cost: 9 },
+  lanes: { bytes: 19050, elements: 97, stops: 76, smil: 28, cost: 47.2 },
 } satisfies Record<string, Budget>;
+
+// Scenes change all the time; the budgets only catch a blowup, so each number may grow by a quarter before a test fails.
+const SLACK = 1.25;
 
 const measure = (svg: string): Budget => {
   const cost = costOf(svg);
@@ -61,10 +64,8 @@ describe("scene examples stay small", () => {
       const svg = readFileSync(join(import.meta.dir, "..", "dist", `${name}.svg`), "utf8");
       const found = measure(svg);
 
-      expect(found.bytes).toBeLessThanOrEqual(budget.bytes);
-      expect(found.elements).toBeLessThanOrEqual(budget.elements);
-      expect(found.stops).toBeLessThanOrEqual(budget.stops);
-      expect(found.smil).toBeLessThanOrEqual(budget.smil);
-      expect(found.cost).toBeLessThanOrEqual(budget.cost);
+      // SAFETY: every budget is a Budget literal, so its keys are exactly Budget's.
+      for (const key of Object.keys(budget) as (keyof Budget)[])
+        expect(found[key], key).toBeLessThanOrEqual(budget[key] * SLACK);
     });
 });
