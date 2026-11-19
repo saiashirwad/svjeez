@@ -3,7 +3,8 @@ import { toPortable } from "../src/portable.ts";
 import { scriptInputs } from "../src/film.ts";
 import type { State } from "../src/record.ts";
 
-const state = (html: string) => [{ html }] as unknown as State[];
+// SAFETY: the portable pass only stringifies and rewrites the states, so a stand-in object with one string field is enough.
+const state = (html: string): State[] => JSON.parse(JSON.stringify([{ html }]));
 const origin = "http://localhost:1234";
 
 describe("toPortable with a short base", () => {
@@ -27,9 +28,9 @@ describe("toPortable with a short base", () => {
 
 describe("scriptInputs", () => {
   test("changes with the script, not its whitespace", () => {
-    const a = scriptInputs(async () => { await 1; }, undefined);
-    const b = scriptInputs(async () => {   await 1;   }, undefined);
-    const c = scriptInputs(async () => { await 1; await 2; }, undefined);
+    const a = scriptInputs(new Function("return 1;"), undefined);
+    const b = scriptInputs(new Function("return   1;"), undefined);
+    const c = scriptInputs(new Function("return 1; return 2;"), undefined);
 
     expect(a).toBe(b);
     expect(a).not.toBe(c);

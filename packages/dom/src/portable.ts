@@ -15,7 +15,9 @@ const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 /** Whether `base` is in `text` as a path root (`<base>/...` right after a quote, `(`, `=`, `file://` or `@fs`), not as a substring of `/app-icon.png` or prose. */
 const leaks = (text: string, base: string): boolean =>
-  new RegExp(`(?:["'(=]|file://|@fs)${escape(JSON.stringify(base).slice(1, -1))}(?:/|["'?#)\\\\])`).test(text);
+  new RegExp(
+    `(?:["'(=]|file://|@fs)${escape(JSON.stringify(base).slice(1, -1))}(?:/|["'?#)\\\\])`,
+  ).test(text);
 
 /**
  * The snapshots as they are kept in a cache file: the server's origin becomes a placeholder, and Vite's `/@fs/<absolute path>`
