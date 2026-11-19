@@ -39,3 +39,5 @@ export type * from "./c4.ts";
 export type * from "./kanban.ts";
 
 export type * from "./radar.ts";
+
+export type * from "./treemap.ts";

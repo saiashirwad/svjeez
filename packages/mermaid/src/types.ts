@@ -17,6 +17,7 @@ import type { TimelineDoc } from "./timeline.ts";
 import type { SankeyDoc } from "./sankey.ts";
 import type { RequirementDoc } from "./requirement.ts";
 import type { RadarDoc } from "./radar.ts";
+import type { TreemapDoc } from "./treemap.ts";
 
 export type Place = NonNullable<Where["source"]>;
 
@@ -226,7 +227,8 @@ export type MermaidDoc =
   | KanbanDoc
   | PacketDoc
   | PacketDoc
-  | RadarDoc;
+  | RadarDoc
+  | TreemapDoc;
 
 export interface ParseOptions {
   readonly file?: string;
@@ -255,4 +257,5 @@ export type {
   PacketDoc,
   PieDoc,
   RadarDoc,
+  TreemapDoc,
 };

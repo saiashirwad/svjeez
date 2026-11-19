@@ -25,6 +25,11 @@ import type { MermaidDoc, ParseOptions } from "./types.ts";
 
 const KINDS =
   "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `classDiagram`, `stateDiagram`/`stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `mindmap`, `gitGraph`, `journey`, `timeline`, `quadrantChart`, `xychart-beta`/`xychart`, `sankey-beta`, `block-beta`, `architecture-beta`, `requirementDiagram`, `C4Context` (and the other C4 headers), `kanban`, `packet-beta`, `radar-beta` and `treemap-beta`.";
+import { parseTreemap } from "./treemap.ts";
+import type { MermaidDoc, ParseOptions } from "./types.ts";
+
+const KINDS =
+  "Supported diagram types: `flowchart`/`graph`, `sequenceDiagram`, `classDiagram`, `stateDiagram`/`stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `mindmap`, `gitGraph`, `journey`, `packet-beta`, `radar-beta` and `treemap-beta`.";
 
 const lines = (text: string, file: string, first: number): Line[] =>
   text.split(/\r?\n/).flatMap((raw, i): Line[] => {
@@ -97,6 +102,8 @@ export function parseMermaid(text: string, options: ParseOptions = {}): MermaidD
   if (word === "packet-beta" || word === "packet") return parsePacket(first, body);
 
   if (word === "radar-beta") return parseRadar(first, body);
+
+  if (word === "treemap-beta" || word === "treemap") return parseTreemap(first, body);
 
   return fail(first, `the first line must name a diagram type. ${KINDS}`);
 }

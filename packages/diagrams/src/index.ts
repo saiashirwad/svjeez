@@ -177,3 +177,11 @@ export {
   type KanbanOptions,
   type KanbanPriority,
 } from "./kanban.tsx";
+
+export {
+  treemap,
+  type Treemap,
+  type TreemapNode,
+  type TreemapOptions,
+  type TreemapSpec,
+} from "./treemap.tsx";
