@@ -791,7 +791,16 @@ const driveOf = (el: ElementNode, path: string, ctx: Context): Drives | undefine
         animation,
         TRANSFORM,
         (frame) => {
-          const parsed = poseOf(frame.props, el.rect);
+          // The four compose into one transform, so a keyframe of one keeps the static values of the others.
+          const merged: Record<string, string> = {};
+
+          for (const name of TRANSFORM) {
+            const value = frame.props[name] ?? under?.[name];
+
+            if (value !== undefined) merged[name] = value;
+          }
+
+          const parsed = poseOf(merged, el.rect);
 
           if (parsed instanceof Reason) return parsed;
 
@@ -885,7 +894,7 @@ const withCurve = <T>(move: Move<T>, curve: Curve | undefined): Move<T> =>
 
 /** The move cut short at scene time `end`. */
 const cutAt = <T>(move: Move<T>, end: number, mix: (a: T, b: T, u: number) => T): Move<T> => {
-  if (move.at + move.over <= end + 1e-9) return move;
+  if (move.at + move.over <= end + 1e-9 || move.over <= 0) return move;
 
   const u = (end - move.at) / move.over;
 
@@ -992,7 +1001,7 @@ const lane = <T extends NonNullable<unknown>>(
       for (const move of run.moves) {
         const at = round(start + k * (run.period ?? 0) + move.at);
 
-        if (at >= end - 1e-9 && move.over > 0) break outer;
+        if (at >= end - 1e-9) break outer;
 
         const placed = cutAt({ ...move, at }, end, mix);
 
