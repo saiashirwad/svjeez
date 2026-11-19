@@ -2,14 +2,14 @@
   import type { Task } from "../dom-react/Task.ts";
   import Card from "./Card.svelte";
 
-  let tasks: Task[] = $state([
+  let tasks = $state<Task[]>([
     { id: 1, title: "Sketch the board", note: "Two columns, soft shadows", done: false },
     { id: 2, title: "Wire up the cards", note: "Buttons move them across", done: false },
     { id: 3, title: "Ship the first draft", note: "Light and dark, both", done: true },
   ]);
 
   const finish = (id: number) => {
-    for (const task of tasks) if (task.id === id) task.done = true;
+    tasks = tasks.map((task) => (task.id === id ? { ...task, done: true } : task));
   };
 </script>
 

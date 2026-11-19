@@ -11,7 +11,7 @@
     "test": "bun test",
     "test:browsers": "bun test ./scripts/browsers.ts",
     "test:node": "tsx scripts/node-check.ts",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react && tsc --noEmit -p dom-react-vite && tsc --noEmit -p dom-component && tsc --noEmit -p dom-svelte"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react && tsc --noEmit -p dom-react-vite && tsc --noEmit -p dom-component && svelte-check --tsconfig dom-svelte/tsconfig.json --fail-on-warnings"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
@@ -33,9 +33,10 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "svelte": "^5.58.0",
+    "svelte-check": "^4.7.8",
     "svjeez": "workspace:*",
     "tsx": "^4.23.15",
-    "typescript": "latest",
+    "typescript": "~6.0.0",
     "vite": "8.3.5",
     "world-atlas": "^2.0.2"
   }
