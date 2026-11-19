@@ -3,6 +3,7 @@ import {
   Group,
   Run,
   Shape,
+  Stack,
   Text,
   count,
   ease,
@@ -315,6 +316,36 @@ describe("a counting Text", () => {
     expect(() => made(() => morph(state(0, 50), state(80, 60), span(2, 1)))).toThrow(
       'morph() can\'t blend <Text> "n": it counts, and what it counts differs between states.',
     );
+  });
+
+  test("keeps its single-line height and anchor when a sibling morph lifts a parent Stack", () => {
+    const value = track(0).to(100, span(0.2, 1));
+
+    const model = made(() => (
+      <Stack key="row" direction="row" gap={12}>
+        <Stack key="card" height={60} padding={8}>
+          <Group key="stage">
+            <Shape geometry={rect(100, 44)} fill="#FFFFFF" />
+            <Text key="n" font={mono} size={14} at={[50, 22]} anchor="center" fill="#000000">
+              {count(value)}%
+            </Text>
+          </Group>
+        </Stack>
+        {morph(
+          <Shape key="box" geometry={rect(20, 20)} fill="#000000" />,
+          <Shape key="box" geometry={rect(20, 40)} fill="#000000" />,
+          span(0.2, 1),
+        )}
+      </Stack>
+    ));
+
+    const { node } = counted(model, "row/card/stage/n");
+
+    expect(node.box.height).toBeLessThan(25);
+    expect(isLane(node.at) ? valueAt(node.at, 0) : node.at).toEqual([
+      expect.closeTo(50 - node.box.width / 2, 1),
+      expect.closeTo(22 - node.box.height / 2, 1),
+    ]);
   });
 });
 

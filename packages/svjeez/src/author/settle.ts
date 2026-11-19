@@ -734,16 +734,23 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
     ).map((child) => arranged(child));
 
     const pin = (box: Box): Animated<Vec> => {
-      if (note?.framed || note?.anchor || outsider(node, into) !== undefined) return node.at;
+      if (
+        note?.kind !== "group" ||
+        !note.placed ||
+        note.framed ||
+        note.pinned ||
+        note.anchor ||
+        outsider(node, into) !== undefined
+      )
+        return node.at;
 
-      if (!note?.placed) return node.at;
       into.nodes.set(node.key, { ...into.nodes.get(node.key)!, pinned: true });
 
       return homed(node.at, pinned(note?.pin, box, `${names.named(node.key)}`));
     };
 
     if (asked?.kind !== "arrange") {
-      const box = around(children);
+      const box = node.authored?.count ? node.box : around(children);
 
       return {
         ...node,
