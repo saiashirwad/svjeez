@@ -36,7 +36,20 @@ The Vite adapter serves a `<link>`/`<script>` in `index.html` that points outsid
 
 A target is `{ url, selector, sources(), close() }`. `sources()` returns a hash of the app's source, which keys the cache. The Bun adapter hashes the bundled page and its assets; the Vite adapter hashes the entry HTML and every project module it imports.
 
-Options: `scheme` (`"light" | "dark" | "both"`), `title` (default: the component's name, else the page `<title>` with Vite, else the film file's name), `viewport` (default 1280x720), `cache` (a JSON file; reused while the source and options are unchanged, `SVJEEZ_DOM_REFRESH=1` records again. `true` is `<film file>.states.json`; a relative path is relative to the film file, not the cwd; an absolute path is kept. The film file is known when Vite loads it (`?svjeez` or `runFilm`), or under Bun from the caller's stack frame (one helper, `callerFile`)), `settle` (see below), `onDiagnostics` (default: one `console.warn` listing what is not faithful), `executablePath`.
+Options: `scheme` (`"light" | "dark" | "both"`), `cursor` (see below), `title` (default: the component's name, else the page `<title>` with Vite, else the film file's name), `viewport` (default 1280x720), `cache` (a JSON file; reused while the source and options are unchanged, `SVJEEZ_DOM_REFRESH=1` records again. `true` is `<film file>.states.json`; a relative path is relative to the film file, not the cwd; an absolute path is kept. The film file is known when Vite loads it (`?svjeez` or `runFilm`), or under Bun from the caller's stack frame (one helper, `callerFile`)), `settle` (see below), `onDiagnostics` (default: one `console.warn` listing what is not faithful), `executablePath`.
+
+## The mouse
+
+`cursor: true` draws the mouse over the page. Drive it with plain Playwright (`locator.click()`, `hover()`, `dragTo()`, `page.mouse`): `record` follows the page's own pointer events (an init script and a binding, so it survives `page.reload()`; nothing is added to the app's DOM) and keeps each snap's position, whether a button is held, and where buttons went down since the previous snap, as the state's `pointer`. The compile draws an arrow on its own layer above the page: it moves with each snap's move on the morph's easing, reaches a press just before the page reacts, dips while a button is held and leaves a ring where it pressed. It is dark with a light edge, so it reads in either scheme. Until the mouse first moves it is hidden; move it to a resting point before the first snap (and again before the last, for a seamless loop).
+
+```tsx
+export default await film(serve({ selector: "#root" }), async ({ page, snap }) => {
+  await page.mouse.move(680, 410);
+  await snap("idle");
+  await page.getByRole("button", { name: "New issue" }).click();
+  await snap("dialog", { over: 0.4 });
+}, { cursor: true });
+```
 
 ## One component
 

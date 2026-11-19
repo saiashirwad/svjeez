@@ -19,10 +19,25 @@ export interface Timing {
   readonly ease?: EaseName;
 }
 
+/** A point in page px (viewport plus scroll), the frame every Snapshot rect is in. */
+export type Point = readonly [x: number, y: number];
+
+/** The mouse at a snap, as the page's pointer events saw it. */
+export interface Pointer {
+  /** Where it is. */
+  readonly at: Point;
+  /** Whether a button is held. */
+  readonly down: boolean;
+  /** Where a button went down since the previous snap, in order. */
+  readonly presses: readonly Point[];
+}
+
 /** One named moment of the page, as `snap` saw it. */
 export interface State extends Timing {
   readonly name: string;
   readonly snapshot: Snapshot;
+  /** Where the mouse was (`cursor: true`), unless it had not moved yet. */
+  readonly pointer?: Pointer;
 }
 
 export type Snap = (name: string, timing?: Timing) => Promise<State>;
@@ -39,7 +54,57 @@ export interface RecordOptions {
    * node's `identity`. `film` uses it to hand the framework's identities (React keys) to `pair`.
    */
   readonly identify?: string;
+  /**
+   * Record the mouse into each state's `pointer`: whatever moves it (`page.mouse`, `locator.click()`, `hover()`, `dragTo()`),
+   * read from the page's own pointer events, across navigations and reloads. Nothing is added to the page's DOM.
+   */
+  readonly cursor?: boolean;
 }
+
+/** The page function the pointer watcher reports to. */
+const BINDING = "__svjeezPointer";
+
+/** Reports the top frame's pointer events, in page px. Runs in every new document (`addInitScript`) and once in the current one. */
+const WATCH = `(() => {
+  if (window !== window.top || window.__svjeezWatching) return;
+  window.__svjeezWatching = true;
+  const tell = (kind) => (e) => window.${BINDING}(kind, e.pageX, e.pageY);
+  for (const [type, kind] of [["pointermove", "move"], ["pointerdown", "down"], ["pointerup", "up"], ["dragover", "move"], ["drop", "up"]])
+    addEventListener(type, tell(kind), true);
+})()`;
+
+const round = (n: number) => Math.round(n * 100) / 100;
+
+/** Follows the page's mouse from now on; `take()` is the pointer as it is, and starts a new list of presses. */
+const watchPointer = async (page: Page): Promise<{ take: () => Pointer | undefined }> => {
+  let at: Point | undefined;
+  let down = false;
+  let presses: Point[] = [];
+
+  // Bindings and init scripts live on the page, so they survive navigation and reload; the mouse keeps its place in the browser.
+  await page.exposeBinding(BINDING, (_, kind: "move" | "down" | "up", x: number, y: number) => {
+    at = [round(x), round(y)];
+
+    if (kind === "down") {
+      down = true;
+      presses.push(at);
+    }
+
+    if (kind === "up") down = false;
+  });
+  await page.addInitScript(WATCH);
+  await page.evaluate(WATCH);
+
+  return {
+    take: () => {
+      const pointer = at && { at, down, presses };
+
+      presses = [];
+
+      return pointer;
+    },
+  };
+};
 
 const grab = async (page: Page, selector: string, identify?: string): Promise<Snapshot> =>
   checkVersion(
@@ -85,9 +150,10 @@ export const record = async (
   page: Page,
   selector: string,
   run: (snap: Snap) => Promise<void>,
-  { scheme, identify }: RecordOptions = {},
+  { scheme, identify, cursor }: RecordOptions = {},
 ): Promise<State[]> => {
   const states: State[] = [];
+  const mouse = cursor ? await watchPointer(page) : undefined;
 
   if (scheme === "light" || scheme === "dark") await page.emulateMedia({ colorScheme: scheme });
 
@@ -113,7 +179,8 @@ export const record = async (
       snapshot = mergeSchemes(light, dark);
     } else snapshot = await grab(page, selector, identify);
 
-    const state: State = { name, snapshot, ...timing };
+    const pointer = mouse?.take();
+    const state: State = { name, snapshot, ...timing, ...(pointer && { pointer }) };
 
     states.push(state);
 
