@@ -123,12 +123,18 @@
       "peerDependencies": {
         "bun-plugin-svelte": ">=0.0.6",
         "playwright-core": ">=1.49",
+        "react": ">=18",
+        "react-dom": ">=18",
+        "svelte": ">=5",
         "svjeez": "workspace:^",
         "vite": ">=6",
       },
       "optionalPeers": [
         "bun-plugin-svelte",
         "playwright-core",
+        "react",
+        "react-dom",
+        "svelte",
         "vite",
       ],
     },
