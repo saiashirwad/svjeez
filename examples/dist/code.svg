@@ -14,26 +14,26 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m2{animation-name:k2;animation-timing-function:cubic-bezier(.77,0,.175,1)}
 @keyframes k3{0%,6.504%{opacity:0}9.756%,100%{opacity:0.18}}
 @keyframes k4{0%,19.512%{translate:50px 160px}26.829%,46.341%{translate:50px 187px}53.659%,100%{translate:50px 214px}}
-.m3{animation-name:k3,k4;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
+.m3{animation-name:k3,k4}
 @keyframes k5{0%,19.512%{opacity:1}26.829%,100%{opacity:0}}
-.m4{animation-name:k5;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m4{animation-name:k5}
 @keyframes k6{0%,19.512%,53.659%,100%{opacity:0}26.829%,46.341%{opacity:1}}
-.m5{animation-name:k6;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m5{animation-name:k6}
 @keyframes k7{0%,46.341%,80.488%,100%{opacity:0}53.659%,73.171%{opacity:1}}
-.m6{animation-name:k7;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m6{animation-name:k7}
 @keyframes k8{0%,73.171%{opacity:0}80.488%,100%{opacity:1}}
-.m7{animation-name:k8;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m7{animation-name:k8}
 @keyframes k9{0%,46.341%{opacity:0}53.659%,100%{opacity:1}}
-.m8{animation-name:k9;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m8{animation-name:k9}
 @keyframes k10{0%,46.341%,80.488%,100%{opacity:1}53.659%,73.171%{opacity:0}}
-.m9{animation-name:k10;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m9{animation-name:k10}
 @keyframes k11{0%,19.512%{opacity:0}26.829%,100%{opacity:1}}
-.m10{animation-name:k11;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m10{animation-name:k11}
 @keyframes k12{0%,19.512%{translate:0px 54px}26.829%,46.341%{translate:0px 81px}53.659%,100%{translate:0px 108px}}
-.m11{animation-name:k12;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+.m11{animation-name:k12}
 @keyframes k13{0%,19.512%,53.659%,100%{opacity:1}26.829%,46.341%{opacity:0}}
 @keyframes k14{0%,46.341%{translate:0px 81px}53.659%,100%{translate:0px 135px}}
-.m12{animation-name:k13,k14;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.77,0,.175,1)}
+.m12{animation-name:k13,k14}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-10.455s!important;animation-play-state:paused!important}}
 ]]></style>
   <defs>

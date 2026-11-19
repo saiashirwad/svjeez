@@ -1,7 +1,7 @@
 import { SceneError } from "../model/scene-error";
 import { named, whereOf } from "./names";
 import { num } from "../model/format";
-import { EPSILON, type Seconds } from "../model/time";
+import { DEFAULT_EASE, EPSILON, type Seconds } from "../model/time";
 import { checkWindow, span, type Span } from "./span";
 import { matched, mixGeometry } from "../model/geometry";
 import { isPlaced, placedLike } from "./identity";
@@ -24,7 +24,7 @@ import type {
 } from "../model/ir";
 import { isLane, pair } from "../model/lane";
 import { flat, type Child, type SceneElement } from "./nodes";
-import { ease, isSpring, type Curve } from "./spring";
+import { isSpring, type Curve } from "./spring";
 import {
   Passage,
   laneOf,
@@ -575,7 +575,7 @@ const clear = (like: Animated<Paint> | undefined): Paint =>
     : NONE;
 
 const paintCurve = (plan: Plan): Curve | undefined =>
-  isSpring(plan.curve) ? ease.inOut : undefined;
+  isSpring(plan.curve) ? DEFAULT_EASE : undefined;
 
 const paints = (
   plan: Plan,
@@ -977,7 +977,7 @@ export const merge = (
 
   const plan: Plan = {
     timing,
-    curve: options.curve ?? ease.inOut,
+    curve: options.curve ?? DEFAULT_EASE,
     enter: layerOf(options.enter ?? { opacity: 0 }),
     exit: layerOf(options.exit ?? { opacity: 0 }),
     windows,

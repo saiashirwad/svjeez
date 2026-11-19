@@ -71,7 +71,7 @@ export class Passage<V extends object> {
     return new Passage({ ...this.data, ...patch });
   }
 
-  to(values: Partial<V>, when: Span, curve: Curve = ease.out): Passage<V> {
+  to(values: Partial<V>, when: Span, curve: Curve = DEFAULT_EASE): Passage<V> {
     if (!isSpan(when))
       throw new SceneError(
         `to() takes a span, got ${String(when)}. Write .to(value, span(start, over)); a step right after another is span.next(over).`,
@@ -166,7 +166,7 @@ export class Passage<V extends object> {
     return this.#with({ steps: copies, repeated: true });
   }
 
-  rewind(over: Seconds, curve: Curve = ease.out): Passage<V> {
+  rewind(over: Seconds, curve: Curve = DEFAULT_EASE): Passage<V> {
     if (!(time(over, "rewind()") > 0))
       throw new SceneError(`rewind() needs a positive duration, got ${over}.`);
 
@@ -438,7 +438,7 @@ const segmentsOf = <T>(
 };
 
 const heldOf = <T>(initial: T, segments: readonly Segment<T>[], period: Seconds): Held<T>[] => {
-  const keys: Held<T>[] = [{ t: 0, value: initial, ease: ease.out }];
+  const keys: Held<T>[] = [{ t: 0, value: initial, ease: DEFAULT_EASE }];
   const nudge = period * NUDGE;
   let current = initial;
 
@@ -452,25 +452,26 @@ const heldOf = <T>(initial: T, segments: readonly Segment<T>[], period: Seconds)
       if (contiguous)
         keys[keys.length - 1] = { t: last.t, value: last.value, ease: segment.ease, ...via };
       else keys.push({ t: segment.start, value: current, ease: segment.ease, ...via });
-      keys.push({ t: segment.start + segment.over, value: segment.value, ease: ease.out });
+      keys.push({ t: segment.start + segment.over, value: segment.value, ease: DEFAULT_EASE });
     } else if (keys.length === 1 && segment.start === 0) {
       keys[0] = { ...last, value: segment.value };
     } else if (contiguous && last.t + nudge > period + EPSILON) {
       keys[keys.length - 1] = { ...last, t: last.t - nudge, ease: ease.hold };
-      keys.push({ t: period, value: segment.value, ease: ease.out });
+      keys.push({ t: period, value: segment.value, ease: DEFAULT_EASE });
     } else {
       keys[keys.length - 1] = { ...last, ease: ease.hold };
       keys.push({
         t: contiguous ? last.t + nudge : segment.start,
         value: segment.value,
-        ease: ease.out,
+        ease: DEFAULT_EASE,
       });
     }
 
     current = segment.value;
   }
 
-  if (keys.at(-1)!.t < period - EPSILON) keys.push({ t: period, value: current, ease: ease.out });
+  if (keys.at(-1)!.t < period - EPSILON)
+    keys.push({ t: period, value: current, ease: DEFAULT_EASE });
 
   return keys;
 };

@@ -103,13 +103,13 @@ describe("SceneError", () => {
 
   test("an arrow's parts are named after the arrow and point at it", () => {
     const model = made(() => {
-      const a = ref("a");
-      const b = ref("b");
+      const a = ref();
+      const b = ref();
 
       return (
         <Group>
-          <Shape ref={a} geometry={rect(10, 10)} at={[10, 10]} fill="#000000" />
-          <Shape ref={b} geometry={rect(10, 10)} at={[100, 10]} fill="#000000" />
+          <Shape key="a" ref={a} geometry={rect(10, 10)} at={[10, 10]} fill="#000000" />
+          <Shape key="b" ref={b} geometry={rect(10, 10)} at={[100, 10]} fill="#000000" />
           {jsxDEV(
             Arrow,
             { key: "link", from: a.right, to: b.left, stroke: { color: "#000000" } },

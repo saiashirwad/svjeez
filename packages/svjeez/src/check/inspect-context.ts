@@ -89,9 +89,9 @@ export const shownBoxes = (
 
 export const add = (
   survey: Survey,
-  finding: Omit<Finding, "source" | "related"> & { readonly related?: readonly string[] },
+  finding: Omit<Finding, "related"> & { readonly related?: readonly string[] },
 ): void => {
-  const source = survey.sources.get(finding.key);
+  const source = finding.source ?? survey.sources.get(finding.key);
   const { related, ...rest } = finding;
 
   survey.out.push({

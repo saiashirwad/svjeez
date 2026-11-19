@@ -254,12 +254,13 @@ describe("at places the anchor point of the box", () => {
 describe("curved motion keeps its curve when the anchor point is not the frame's origin", () => {
   test("a box centered on a point that goes round, and one that follows it, stay on it", () => {
     const angle = track(0).to(360, span(0, 2), ease.inOut);
-    const dot = ref("dot");
+    const dot = ref();
 
     const model = made(() => (
       <Group>
         <Shape
           fill="#000000"
+          key="dot"
           ref={dot}
           geometry={rect(6, 6)}
           anchor="center"
@@ -364,11 +365,12 @@ describe("a box is what the shape paints", () => {
   });
 
   test("anchors on a ref are on the painted box, and so is a hit", () => {
-    const card = ref("card");
+    const card = ref();
 
     const model = made(() => (
       <Group>
         <Shape
+          key="card"
           ref={card}
           geometry={rect(40, 20)}
           at={[10, 10]}
@@ -385,7 +387,7 @@ describe("a box is what the shape paints", () => {
 
 describe("tracks move the anchor point", () => {
   test("a track to a point moves the point at names there; to an anchor lands it", () => {
-    const pin = ref("pin");
+    const pin = ref();
 
     const model = made(() => {
       const [one, two] = span(0, 1).chain(1);
@@ -393,7 +395,7 @@ describe("tracks move the anchor point", () => {
 
       return (
         <Group>
-          <Shape fill="#000000" ref={pin} geometry={rect(20, 20)} at={[150, 10]} />
+          <Shape fill="#000000" key="pin" ref={pin} geometry={rect(20, 20)} at={[150, 10]} />
           <Shape fill="#000000" key="dot" geometry={circle(5)} at={dot} anchor="center" />
         </Group>
       );
@@ -504,11 +506,11 @@ describe("the nine places", () => {
   ] as const;
 
   test("each is a ref's anchor and an anchor string, naming the same point", () => {
-    const card = ref("card");
+    const card = ref();
 
     const found = boxes(() => (
       <Group>
-        <Shape ref={card} geometry={rect(40, 20)} at={[60, 30]} fill="#000000" />
+        <Shape key="card" ref={card} geometry={rect(40, 20)} at={[60, 30]} fill="#000000" />
         {PLACES.map(([place, property]) => (
           <Shape
             key={place}

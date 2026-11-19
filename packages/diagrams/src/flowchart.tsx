@@ -180,8 +180,7 @@ export function flowchart<
     }),
   ]);
 
-  const name = options.name ?? "flowchart";
-  const handle = partsOf<Id | (keyof G & string) | EdgeId<E[number]>>(WHAT, name, parts);
+  const handle = partsOf<Id | (keyof G & string) | EdgeId<E[number]>>(WHAT, parts);
 
   const draw = (between?: Child): SceneElement => (
     <Group ref={handle.ref}>

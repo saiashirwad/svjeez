@@ -45,9 +45,9 @@ const star = symbol(() => (
 ));
 
 export default scene({ size: [320, 200], duration: 4, title: "Integration", theme }, () => {
-  const grid = ref("grid");
-  const card = ref("card");
-  const dot = ref("dot");
+  const grid = ref();
+  const card = ref();
+  const dot = ref();
   const angle = track(0).to(270, span(0.5, 2.5), ease.inOut);
   const dim = track(1).to(0.3, span(0, 0.6));
   const cardAt = track<Vec>([60, 110]);
@@ -61,7 +61,7 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
   return (
     <Group>
       <Shape geometry={rect(320, 200)} fill={theme.paper} />
-      <Grid ref={grid} columns={2} gap={4} at={[12, 12]}>
+      <Grid key="grid" ref={grid} columns={2} gap={4} at={[12, 12]}>
         <Shape key="a" geometry={rect(16, 16)} fill={theme.cool} />
         <Shape key="b" geometry={rect(16, 16)} fill={theme.accent} opacity={dim} />
         <Group rotate={turn}>
@@ -69,7 +69,7 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
         </Group>
         <Image src={badge} width={16} />
       </Grid>
-      <Group ref={card} offset={cardAt}>
+      <Group key="card" ref={card} offset={cardAt}>
         <Shape geometry={rect(70, 40, { radius: 6 })} fill={theme.soft} />
         <Text font={mono} size={11} width={60} at={[6, 16]} anchor="baseline-left" fill={theme.ink}>
           {"a card that wraps"}
@@ -104,6 +104,7 @@ export default scene({ size: [320, 200], duration: 4, title: "Integration", them
         trim={angle.map((a) => [0, a / 270] as const)}
       />
       <Shape
+        key="dot"
         ref={dot}
         geometry={circle(3)}
         fill={theme.cool}

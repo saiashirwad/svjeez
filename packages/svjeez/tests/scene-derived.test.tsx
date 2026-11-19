@@ -297,11 +297,11 @@ describe("derived tracks", () => {
 
   test("an anchor can be mapped in the frame of the box it is on", () => {
     const model = made(() => {
-      const card = ref("card");
+      const card = ref();
 
       return (
         <Group>
-          <Shape fill="#000000" ref={card} geometry={rect(20, 10)} at={[10, 10]} />
+          <Shape fill="#000000" key="card" ref={card} geometry={rect(20, 10)} at={[10, 10]} />
           <Shape
             fill="#000000"
             geometry={circle(2)}

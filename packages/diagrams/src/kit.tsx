@@ -54,7 +54,6 @@ export interface DiagramOptions {
   readonly size?: number;
   readonly weight?: number;
   readonly colors?: DiagramColors;
-  readonly name?: string;
   /** Drive an edge's drawing from your own timeline, 0 to 1, by its id ("a->b"). An edge a reveal also draws can't have one. */
   readonly draw?: Draws;
 }
@@ -693,10 +692,9 @@ export interface Parts<Id extends string> {
 
 export const partsOf = <Id extends string>(
   what: string,
-  name: string,
   parts: ReadonlyMap<string, Spanned | undefined>,
 ): Parts<Id> => {
-  const handle = ref(name);
+  const handle = ref();
 
   const find = (id: string): string => {
     if (!parts.has(id))

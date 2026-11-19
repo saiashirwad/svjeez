@@ -1,5 +1,5 @@
 import { SceneError } from "../model/scene-error";
-import { NUDGE, ease, type Ease, type Seconds } from "../model/time";
+import { DEFAULT_EASE, NUDGE, ease, type Ease, type Seconds } from "../model/time";
 import { random } from "./random";
 import { checkWindow, span, type Span } from "./span";
 import { contoursOf } from "../model/geometry";
@@ -31,7 +31,7 @@ export interface EnterOptions {
 
 export const enter = (
   when: Span,
-  { from = { opacity: 0 }, curve = ease.out }: EnterOptions = {},
+  { from = { opacity: 0 }, curve = DEFAULT_EASE }: EnterOptions = {},
 ): Motion => {
   const { start, over } = closed(when, "enter()");
 
@@ -45,7 +45,7 @@ export interface ExitOptions {
 
 export const exit = (
   when: Span,
-  { to = { opacity: 0 }, curve = ease.out }: ExitOptions = {},
+  { to = { opacity: 0 }, curve = DEFAULT_EASE }: ExitOptions = {},
 ): Motion => {
   const { start, over } = closed(when, "exit()");
 
@@ -96,7 +96,7 @@ export const wiggle = (amplitude: LayerValues, options: WiggleOptions): Motion =
     layer = layer.to(
       at(i),
       span(((i - 1) * period) / count, period / count),
-      options.curve ?? ease.inOut,
+      options.curve ?? DEFAULT_EASE,
     );
 
   return layer.loop(period);
@@ -106,7 +106,7 @@ export interface DrawOptions {
   readonly curve?: Curve;
 }
 
-export const draw = (when: Span, { curve = ease.out }: DrawOptions = {}): Track<Vec> => {
+export const draw = (when: Span, { curve = DEFAULT_EASE }: DrawOptions = {}): Track<Vec> => {
   const { start, over } = closed(when, "draw()");
 
   return track([0, 0]).to([0, 1], span(start, over), curve);

@@ -74,7 +74,7 @@ const HOLD = 2.4;
 const OVER = 0.9;
 const moves = FIB.slice(1).map((_, i) => span(HOLD * (i + 1) + OVER * i, OVER));
 
-const fib = ref("fib");
+const fib = ref();
 
 const Version = ({ lang, keys, source }: (typeof FIB)[number]): SceneElement => (
   <Code

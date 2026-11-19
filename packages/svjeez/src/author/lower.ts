@@ -833,7 +833,7 @@ const lowerAll = (
       return merged;
     }
 
-    const name = given.props.key ?? given.props.ref?.key;
+    const name = given.props.key;
 
     if (name !== undefined && taken.has(name))
       throw new SceneError(
@@ -1342,7 +1342,10 @@ const lowerScene = (options: SceneOptions, build: () => SceneElement): Scene => 
     root,
     ...(refs.length > 0 && {
       authored: {
-        refs: refs.map((each) => ({ key: each.key, attached: ctx.notes.refs.has(each) })),
+        refs: refs.map((each) => ({
+          ...(each.source && { source: each.source }),
+          attached: ctx.notes.refs.has(each),
+        })),
       },
     }),
   };

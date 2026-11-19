@@ -62,8 +62,8 @@ interface DesktopProps {
 }
 
 const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
-  const win = ref("window");
-  const cursor = ref("cursor");
+  const win = ref();
+  const cursor = ref();
   const grip = win.part("titlebar");
   const key = keycap("opt");
   const winAt = track<Vec>(from);

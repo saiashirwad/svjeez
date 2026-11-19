@@ -117,7 +117,7 @@ export function tree<const N extends Record<string, TreeSpec<string>>>(
     ...out.edges.map((e) => [edgeKey(e.from, e.to), drawn(e.from, e.to)] as const),
   ]);
 
-  const handle = partsOf<Id | TreeEdges<N>>(WHAT, options.name ?? "tree", parts);
+  const handle = partsOf<Id | TreeEdges<N>>(WHAT, parts);
 
   const draw = (between?: Child): SceneElement => (
     <Group ref={handle.ref}>
