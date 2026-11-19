@@ -58,12 +58,12 @@ interface Vertex {
 }
 
 const LOOP = 20;
-const PORT = 12;
+const PITCH = 16;
+const MARGIN = 10;
 const TRACK = 14;
-
-const SNAP = 6;
-
-const MERGE = 16;
+const SNAP = 8;
+const SLOPE = 0.125;
+const MAX_GAP = 3;
 
 export const BEND = 16;
 
@@ -197,66 +197,11 @@ export function layered(input: LayeredInput): LayeredLayout {
     lr,
   });
 
-  const ports = (v: number): Map<number, number> => {
-    const { node, down, outs } = vertices[v]!;
-
-    if (node === undefined) return new Map(outs.map((id) => [id, xs.center[v]!]));
-
-    const sorted = down
-      .map((o, k) => ({ o, id: outs[k]! }))
-      .sort((a, b) => xs.center[a.o]! - xs.center[b.o]! || a.id - b.id);
-
-    const step = Math.min(PORT, vertices[v]!.w / (sorted.length + 1));
-    const packed = sorted.map((_, k) => xs.center[v]! + (k - (sorted.length - 1) / 2) * step);
-    const reach = sorted.length < 2 ? 0 : Math.max(0, vertices[v]!.w / 2 - PORT * 1.5);
-
-    const [lo, hi] = [
-      Math.min(xs.center[v]! - reach, packed[0]!),
-      Math.max(xs.center[v]! + reach, packed.at(-1)!),
-    ];
-
-    const port = sorted.map(({ o }, k) =>
-      reach === 0 ? packed[k]! : Math.min(hi, Math.max(lo, xs.center[o]!)),
-    );
-
-    for (let k = 1; k < port.length; k++)
-      port[k] = Math.min(hi, Math.max(port[k]!, port[k - 1]! + step));
-
-    for (let k = port.length - 2; k >= 0; k--) port[k] = Math.min(port[k]!, port[k + 1]! - step);
-
-    return new Map(sorted.map(({ id }, k) => [id, port[k]!]));
-  };
-
-  const outPorts = vertices.map((_, v) => ports(v));
-
-  const ends = crossing.map(({ a, b }, id): Crossing => {
-    const [xa, center] = [outPorts[a]!.get(id)!, xs.center[b]!];
-
-    const straight =
-      vertices[b]!.node !== undefined &&
-      Math.abs(xa - center) <= Math.min(SNAP, vertices[b]!.w / 2);
-
-    return { id, xa, xb: straight ? xa : center };
-  });
-
-  const into = (c: Crossing) => crossing[c.id]!.b;
-
-  const merging = new Set(
-    ends.flatMap((c) =>
-      vertices[into(c)]!.node !== undefined &&
-      ends.some((d) => d !== c && into(d) === into(c) && Math.abs(d.xb - c.xb) < 0.5)
-        ? [c.id]
-        : [],
-    ),
-  );
+  const ends = spread(vertices, crossing, xs.center);
 
   const thick = layers.map((layer) => Math.max(0, ...layer.map((v) => vertices[v]!.h)));
   const inGap = (r: number) => ends.filter((c) => vertices[crossing[c.id]!.a]!.rank === r);
-  const lanes = thick.slice(1).map((_, r) => tracks(inGap(r), merging));
-
-  const merges = lanes.map((_, r) =>
-    inGap(r).some((c) => merging.has(c.id) && Math.abs(c.xa - c.xb) > 0.5),
-  );
+  const lanes = thick.slice(1).map((_, r) => tracks(inGap(r)));
 
   const padTop = groups.map((g) => groupPad + (lr ? 0 : g.label.h + 4));
 
@@ -282,10 +227,14 @@ export function layered(input: LayeredInput): LayeredLayout {
     const run = tallest[r]! > 0 ? tallest[r]! + 2 * BEND + 4 : BEND;
     const spread = Math.max(0, count - 1) * TRACK;
 
+    // A gap grows for the widest edge crossing it, so that edge keeps a clear slope.
+    const wide = Math.max(0, ...inGap(r).map((c) => Math.abs(c.xa - c.xb)));
+
     return Math.max(
       rankGap,
       below + above + 16,
-      merges[r] ? run + spread + MERGE : 2 * run + spread,
+      2 * run + spread,
+      Math.min(MAX_GAP * rankGap, wide * SLOPE),
     );
   });
 
@@ -298,9 +247,7 @@ export function layered(input: LayeredInput): LayeredLayout {
     const { track, count } = lanes[r]!;
     const k = track.get(id) ?? (count - 1) / 2;
 
-    return merges[r]
-      ? top[r + 1]! - MERGE - (count - 1 - k) * TRACK
-      : bottom(r) + gaps[r]! / 2 + (k - (count - 1) / 2) * TRACK;
+    return bottom(r) + gaps[r]! / 2 + (k - (count - 1) / 2) * TRACK;
   };
 
   const box = (v: number): Box => {
@@ -313,7 +260,7 @@ export function layered(input: LayeredInput): LayeredLayout {
     const b = box(v);
     const end = sides[v]!.left.includes(edge) ? "left" : "right";
     const list = sides[v]![end];
-    const step = Math.min(PORT, b.h / (list.length + 1));
+    const step = Math.min(PITCH, b.h / (list.length + 1));
 
     return {
       x: end === "left" ? b.x : b.x + b.w,
@@ -429,6 +376,77 @@ export function layered(input: LayeredInput): LayeredLayout {
   };
 }
 
+// Spreads the ends of segments along the node sides they meet. Each end wants to sit level
+// with the other end of its segment, so a segment runs straight where both nodes have room
+// for it; a side with several ends keeps them a pitch apart, in the order the other ends lie.
+// A lone end only leaves the middle of its side when it can then run straight. Ends on
+// dummies stay put. A few rounds let the two ends of a segment settle on one another.
+const spread = (
+  vertices: readonly Vertex[],
+  crossing: readonly { a: number; b: number }[],
+  center: readonly number[],
+): Crossing[] => {
+  const ends = crossing.map((_, id): Crossing => ({ id, xa: 0, xb: 0 }));
+  const xa = crossing.map(({ a }) => center[a]!);
+  const xb = crossing.map(({ b }) => center[b]!);
+
+  const sides = (key: "a" | "b") => {
+    const by = new Map<number, number[]>();
+
+    crossing.forEach((c, id) => {
+      if (vertices[c[key]]!.node !== undefined) by.set(c[key], [...(by.get(c[key]) ?? []), id]);
+    });
+
+    return [...by];
+  };
+
+  const [leaving, arriving] = [sides("a"), sides("b")];
+
+  const fit = (v: number, ids: readonly number[], want: readonly number[], x: number[]) => {
+    const [c, half] = [center[v]!, Math.max(0, vertices[v]!.w / 2 - MARGIN)];
+
+    if (ids.length === 1) {
+      x[ids[0]!] = Math.abs(want[0]! - c) <= half ? want[0]! : c;
+
+      return;
+    }
+
+    const pitch = Math.min(PITCH, (2 * half) / (ids.length - 1));
+    const at = ids.map((_, k) => k).sort((p, q) => want[p]! - want[q]! || p - q);
+    const p = at.map((k) => Math.min(c + half, Math.max(c - half, want[k]!)));
+
+    for (let k = 1; k < p.length; k++) p[k] = Math.max(p[k]!, p[k - 1]! + pitch);
+    p[p.length - 1] = Math.min(p.at(-1)!, c + half);
+
+    for (let k = p.length - 2; k >= 0; k--) p[k] = Math.min(p[k]!, p[k + 1]! - pitch);
+    at.forEach((k, i) => (x[ids[k]!] = p[i]!));
+  };
+
+  for (let round = 0; round < 4; round++) {
+    for (const [v, ids] of leaving)
+      fit(
+        v,
+        ids,
+        ids.map((id) => xb[id]!),
+        xa,
+      );
+
+    for (const [v, ids] of arriving)
+      fit(
+        v,
+        ids,
+        ids.map((id) => xa[id]!),
+        xb,
+      );
+  }
+
+  return ends.map((c) => ({
+    ...c,
+    xa: xa[c.id]!,
+    xb: Math.abs(xa[c.id]! - xb[c.id]!) < 1e-6 ? xa[c.id]! : xb[c.id]!,
+  }));
+};
+
 const backEdges = (
   count: number,
   edges: readonly { i: number; u: number; v: number }[],
@@ -465,34 +483,113 @@ const backEdges = (
 const longestPath = (count: number, edges: readonly { u: number; v: number }[]): number[] => {
   const rank = Array.from({ length: count }, () => 0);
   const indegree = Array.from({ length: count }, () => 0);
+  const into = Array.from({ length: count }, (): number[] => []);
+  const out = Array.from({ length: count }, (): number[] => []);
 
-  for (const e of edges) indegree[e.v]!++;
+  for (const e of edges) {
+    indegree[e.v]!++;
+    out[e.u]!.push(e.v);
+    into[e.v]!.push(e.u);
+  }
+
   const queue = rank.flatMap((_, i) => (indegree[i] === 0 ? [i] : []));
 
   for (let k = 0; k < queue.length; k++) {
     const u = queue[k]!;
 
-    for (const e of edges) {
-      if (e.u !== u) continue;
-      rank[e.v] = Math.max(rank[e.v]!, rank[u]! + 1);
+    for (const v of out[u]!) {
+      rank[v] = Math.max(rank[v]!, rank[u]! + 1);
 
-      if (--indegree[e.v]! === 0) queue.push(e.v);
+      if (--indegree[v]! === 0) queue.push(v);
     }
   }
 
-  return rank;
+  // Longest-path ranks leave loosely attached nodes far from their neighbours. Sweeping
+  // from the bottom, a node with more edges leaving than arriving moves down beside its
+  // targets, and one with more arriving than leaving moves up beside its sources.
+  for (let pass = 0, changed = true; changed && pass < 8; pass++) {
+    changed = false;
+
+    for (const v of [...queue].reverse()) {
+      const next =
+        out[v]!.length > into[v]!.length
+          ? Math.min(...out[v]!.map((w) => rank[w]! - 1))
+          : out[v]!.length < into[v]!.length
+            ? Math.max(...into[v]!.map((u) => rank[u]! + 1))
+            : rank[v]!;
+
+      if (next !== rank[v]) [rank[v], changed] = [next, true];
+    }
+  }
+
+  const top = Math.min(...rank);
+
+  return rank.map((r) => r - top);
+};
+
+const SWEEPS = 24;
+const STALE = 4;
+const BIG = 600;
+
+// Counts crossings between each pair of neighbouring layers: pairs of segments whose ends
+// come in opposite order. Sorting by source and counting inversions of the targets with a
+// Fenwick tree keeps it O(E log V).
+const countCrossings = (vertices: readonly Vertex[], layers: readonly number[][]): number => {
+  const pos = new Int32Array(vertices.length);
+  layers.forEach((layer) => layer.forEach((v, k) => (pos[v] = k)));
+  let total = 0;
+
+  for (let r = 0; r + 1 < layers.length; r++) {
+    const pairs = layers[r]!.flatMap((v) =>
+      vertices[v]!.down.map((d) => [pos[v]!, pos[d]!] as const),
+    );
+
+    pairs.sort((p, q) => p[0] - q[0] || p[1] - q[1]);
+    const tree = new Int32Array(layers[r + 1]!.length + 1);
+
+    pairs.forEach(([, b], seen) => {
+      let below = 0;
+
+      for (let i = b + 1; i > 0; i -= i & -i) below += tree[i]!;
+      total += seen - below;
+
+      for (let i = b + 1; i < tree.length; i += i & -i) tree[i]!++;
+    });
+  }
+
+  return total;
+};
+
+// Depth-first from the top, so that what hangs off one node starts out side by side.
+const depthFirst = (vertices: readonly Vertex[], ranks: number): number[][] => {
+  const layers = Array.from({ length: ranks }, (): number[] => []);
+  const seen = new Uint8Array(vertices.length);
+
+  const roots = vertices.map((_, i) => i).sort((a, b) => vertices[a]!.rank - vertices[b]!.rank);
+
+  for (const root of roots) {
+    const stack = [root];
+
+    while (stack.length > 0) {
+      const v = stack.pop()!;
+
+      if (seen[v]) continue;
+      seen[v] = 1;
+      layers[vertices[v]!.rank]!.push(v);
+
+      for (let k = vertices[v]!.down.length - 1; k >= 0; k--) stack.push(vertices[v]!.down[k]!);
+    }
+  }
+
+  return layers;
 };
 
 const mean = (values: readonly number[]): number | undefined =>
   values.length === 0 ? undefined : values.reduce((a, b) => a + b, 0) / values.length;
 
 const order = (vertices: readonly Vertex[], ranks: number, groups: number) => {
-  const layers = Array.from({ length: ranks }, (): number[] => []);
-  vertices.forEach((v, i) => layers[v.rank]!.push(i));
+  const small = vertices.length <= BIG;
   const pos = new Float64Array(vertices.length);
-
-  const index = () =>
-    layers.forEach((layer) => layer.forEach((v, k) => (pos[v] = (k + 0.5) / layer.length)));
 
   const pin = (layer: number[]) =>
     layer.splice(
@@ -510,12 +607,10 @@ const order = (vertices: readonly Vertex[], ranks: number, groups: number) => {
     pin(layer);
   };
 
-  layers.forEach(pin);
-  index();
+  const index = (layers: readonly number[][]) =>
+    layers.forEach((layer) => layer.forEach((v, k) => (pos[v] = (k + 0.5) / layer.length)));
 
-  for (let sweep = 0; sweep < 8; sweep++) {
-    const down = sweep % 2 === 0;
-
+  const sweep = (layers: number[][], down: boolean) => {
     for (let k = 1; k < ranks; k++) {
       const layer = layers[down ? k : ranks - 1 - k]!;
 
@@ -540,10 +635,92 @@ const order = (vertices: readonly Vertex[], ranks: number, groups: number) => {
         (v) => (vertices[v]!.group >= 0 ? groupBary.get(vertices[v]!.group)! : b(v)),
         b,
       );
-      index();
+      index(layers);
     }
-  }
+  };
 
+  // Swaps neighbours in a layer while that removes crossings. A node and the back-edge
+  // dummies anchored to it move together; nodes of different groups never swap.
+  const transpose = (layers: number[][]) => {
+    for (let pass = 0; pass < 8; pass++) {
+      let changed = false;
+
+      for (const layer of layers) {
+        const units: number[][] = [];
+
+        for (const v of layer)
+          if (vertices[v]!.anchor === undefined || units.length === 0) units.push([v]);
+          else units.at(-1)!.push(v);
+
+        const near = (unit: readonly number[]) =>
+          unit.flatMap((v) => [...vertices[v]!.up, ...vertices[v]!.down]);
+
+        const rank = new Map(layers.flatMap((l) => l.map((v, k) => [v, k] as const)));
+
+        const between = (left: readonly number[], right: readonly number[]) => {
+          let n = 0;
+
+          for (const x of near(left))
+            for (const y of near(right))
+              if (vertices[x]!.rank === vertices[y]!.rank && rank.get(x)! > rank.get(y)!) n++;
+
+          return n;
+        };
+
+        for (let i = 0; i + 1 < units.length; i++) {
+          const [a, b] = [units[i]!, units[i + 1]!];
+
+          if (vertices[a[0]!]!.group !== vertices[b[0]!]!.group) continue;
+
+          if (between(b, a) < between(a, b)) {
+            [units[i], units[i + 1]] = [b, a];
+            layer.splice(0, layer.length, ...units.flat());
+            layer.forEach((v, k) => rank.set(v, k));
+            changed = true;
+          }
+        }
+      }
+
+      if (!changed) break;
+      index(layers);
+    }
+  };
+
+  const climb = (start: number[][], flip: boolean) => {
+    let layers = start.map((layer) => [...layer]);
+    layers.forEach(pin);
+    index(layers);
+
+    let best = groups === 0 ? countCrossings(vertices, layers) : Infinity;
+    let kept = layers.map((layer) => [...layer]);
+    let stale = 0;
+
+    for (let i = 0; i < SWEEPS && stale < STALE && best > 0; i++, stale++) {
+      sweep(layers, (i % 2 === 0) !== flip);
+      const n = countCrossings(vertices, layers);
+
+      if (n < best) [best, kept, stale] = [n, layers.map((layer) => [...layer]), 0];
+    }
+
+    layers = kept;
+
+    if (small && best > 0) {
+      index(layers);
+      transpose(layers);
+      best = countCrossings(vertices, layers);
+    }
+
+    return { layers, crossings: best };
+  };
+
+  const plain = Array.from({ length: ranks }, (): number[] => []);
+  vertices.forEach((v, i) => plain[v.rank]!.push(i));
+
+  const first = climb(depthFirst(vertices, ranks), false);
+  const second = small ? climb(plain, true) : first;
+  const { layers } = second.crossings < first.crossings ? second : first;
+
+  index(layers);
   const settled = Float64Array.from(pos);
 
   const groupKey = Array.from(
@@ -790,6 +967,34 @@ const place = (
       }
 
       set(it, Math.min(hi, Math.max(lo, want)));
+    }
+  }
+
+  // Closes small jogs in a long edge: a bend is moved into line with a neighbouring bend of
+  // the same edge when the row has room for it.
+  const dummies = items.filter(
+    (it) => it.kind === "v" && vertices[it.id]!.node === undefined && !outer(it),
+  );
+
+  for (let sweep = 0; sweep < 4; sweep++) {
+    for (const it of sweep % 2 ? [...dummies].reverse() : dummies) {
+      const v = vertices[it.id]!;
+      let [lo, hi] = [-Infinity, Infinity];
+
+      for (const { row, k } of occurrences.get(`v${it.id}`)!) {
+        if (k > 0 && !outer(row[k - 1]!))
+          lo = Math.max(lo, get(row[k - 1]!) + sep(row[k - 1]!, it));
+
+        if (k < row.length - 1 && !outer(row[k + 1]!))
+          hi = Math.min(hi, get(row[k + 1]!) - sep(it, row[k + 1]!));
+      }
+
+      const near = [...v.up, ...v.down]
+        .flatMap((n) => (vertices[n]!.node === undefined ? [center(n)] : []))
+        .filter((x) => x !== get(it) && Math.abs(x - get(it)) <= SNAP && x >= lo && x <= hi)
+        .sort((a, b) => Math.abs(a - get(it)) - Math.abs(b - get(it)));
+
+      if (near.length > 0 && v.group < 0) set(it, near[0]!);
     }
   }
 

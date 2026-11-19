@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { union, type Box, type Point } from "../src/layout/box.ts";
 import { lanes } from "../src/layout/lanes.ts";
 import { layered, type LayeredInput } from "../src/layout/layered.ts";
+import { curve } from "../src/curve.ts";
 import { sequence } from "../src/layout/sequence.ts";
 import { tree } from "../src/layout/tree.ts";
 
@@ -258,25 +259,14 @@ describe("layered", () => {
         const out = layered({ ...graph, direction });
         const lines = out.edges.map((e) => ({ ...e, segments: segments(e.points) }));
 
-        test(`${name} ${direction}: no two edges share a stretch of line, except a final approach into one port`, () => {
-          const merging = (
-            e: (typeof lines)[number],
-            s: (typeof e.segments)[number],
-            f: (typeof lines)[number],
-            t: (typeof f.segments)[number],
-          ) => {
-            const [p, q] = [e.points.at(-1)!, f.points.at(-1)!];
-
-            return s === e.segments.at(-1) && t === f.segments.at(-1) && p.x === q.x && p.y === q.y;
-          };
-
+        test(`${name} ${direction}: no two edges share a stretch of line`, () => {
           for (const [i, e] of lines.entries())
             for (const f of lines.slice(i + 1))
               for (const s of e.segments)
                 for (const t of f.segments)
-                  expect(
-                    `${e.from}>${e.to} / ${f.from}>${f.to}: ${collinear(s, t) && !merging(e, s, f, t)}`,
-                  ).toEndWith("false");
+                  expect(`${e.from}>${e.to} / ${f.from}>${f.to}: ${collinear(s, t)}`).toEndWith(
+                    "false",
+                  );
         });
 
         test(`${name} ${direction}: no edge runs through a node`, () => {
@@ -311,6 +301,129 @@ describe("layered", () => {
         });
       }
     }
+  });
+
+  describe("crossings and ports", () => {
+    const wires = (out: ReturnType<typeof layered>) =>
+      out.edges.flatMap((e, i) => e.points.slice(1).map((q, k) => [e.points[k]!, q, i] as const));
+
+    const crossings = (out: ReturnType<typeof layered>) => {
+      const ccw = (a: Point, b: Point, c: Point) =>
+        (c.y - a.y) * (b.x - a.x) - (b.y - a.y) * (c.x - a.x);
+
+      const all = wires(out);
+      let n = 0;
+
+      for (const [i, [a, b, e]] of all.entries())
+        for (const [c, d, f] of all.slice(i + 1))
+          if (e !== f && ccw(a, b, c) * ccw(a, b, d) < 0 && ccw(c, d, a) * ccw(c, d, b) < 0) n++;
+
+      return n;
+    };
+
+    test("a shuffled matching comes out with no crossings", () => {
+      const out = layered({
+        nodes: nodes("a1 a2 a3 a4 a5 b1 b2 b3 b4 b5"),
+        edges: edges("a1>b3 a2>b5 a3>b1 a4>b4 a5>b2"),
+      });
+
+      expect(crossings(out)).toBe(0);
+    });
+
+    test("a tree declared in a scrambled order comes out with no crossings", () => {
+      const out = layered({
+        nodes: nodes("r a b c a1 a2 b1 b2 c1 c2 c3"),
+        edges: edges("r>c r>a r>b c>c2 a>a2 b>b1 c>c1 a>a1 b>b2 c>c3"),
+      });
+
+      expect(crossings(out)).toBe(0);
+    });
+
+    test("a three-layer lattice is drawn with the fewest crossings it allows", () => {
+      const out = layered({
+        nodes: nodes("a b c d e f g h i"),
+        edges: edges("a>d a>e b>d b>f c>e c>f d>g d>h e>h e>i f>g f>i"),
+      });
+
+      expect(crossings(out)).toBeLessThanOrEqual(2);
+    });
+
+    test("edges leaving one node start at separate points along its side", () => {
+      const out = layered({
+        nodes: [{ id: "hub", w: 200, h: 40 }, ...nodes("a b c")],
+        edges: edges("hub>a hub>b hub>c"),
+      });
+
+      const xs = out.edges.map((e) => e.points[0]!.x).sort((p, q) => p - q);
+      expect(new Set(xs).size).toBe(3);
+
+      for (let k = 1; k < xs.length; k++) expect(xs[k]! - xs[k - 1]!).toBeGreaterThanOrEqual(8);
+    });
+
+    test("edges entering one node end at separate points along its side", () => {
+      const out = layered({
+        nodes: [{ id: "hub", w: 200, h: 40 }, ...nodes("a b c")],
+        edges: edges("a>hub b>hub c>hub"),
+      });
+
+      const xs = out.edges.map((e) => e.points.at(-1)!.x).sort((p, q) => p - q);
+      expect(new Set(xs).size).toBe(3);
+
+      for (let k = 1; k < xs.length; k++) expect(xs[k]! - xs[k - 1]!).toBeGreaterThanOrEqual(8);
+    });
+
+    test("a lone edge between nodes with overlapping spans runs straight", () => {
+      const out = layered({
+        nodes: [
+          { id: "a", w: 200, h: 40 },
+          { id: "b", w: 60, h: 40 },
+        ],
+        edges: edges("a>b"),
+      });
+
+      expect(out.edges[0]!.points).toHaveLength(2);
+    });
+
+    test("a node hanging off a long chain sits next to its only neighbour", () => {
+      const out = layered({ nodes: nodes("a b c d x"), edges: edges("a>b b>c c>d x>d") });
+
+      expect(out.rank.get("x")).toBe(out.rank.get("c"));
+    });
+
+    test("the same input gives the same layout", () => {
+      const input = {
+        nodes: nodes("a b c d e f"),
+        edges: edges("a>b a>c b>d c>d d>e e>f f>b a>f"),
+      };
+
+      expect(layered(input)).toEqual(layered(input));
+    });
+  });
+
+  describe("curve", () => {
+    const jog = [
+      { x: 0, y: 0 },
+      { x: 0, y: 30 },
+      { x: 100, y: 30 },
+      { x: 100, y: 60 },
+    ];
+
+    test("starts and ends on its points", () => {
+      const { samples } = curve(jog);
+      expect(samples[0]).toEqual([0, 0]);
+      expect(samples.at(-1)).toEqual([100, 60]);
+    });
+
+    test("a jog is one S that never leaves the box of its points or doubles back", () => {
+      const { samples } = curve(jog);
+
+      for (const [k, [x, y]] of samples.entries()) {
+        expect(x).toBeGreaterThanOrEqual(-1e-6);
+        expect(x).toBeLessThanOrEqual(100 + 1e-6);
+
+        if (k > 0) expect(y).toBeGreaterThanOrEqual(samples[k - 1]![1] - 1e-6);
+      }
+    });
   });
 
   test("unknown ids and a node in two groups throw", () => {

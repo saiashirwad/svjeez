@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 398 406" width="398" height="406" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">Class diagram</title>
+  <desc id="d">A Mermaid class diagram drawn by @svjeez/mermaid.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--magenta-6-background:#14121B;--magenta-22-background:#322641}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0;--magenta-6-background:#F9F5FD;--magenta-22-background:#E9D9F8}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,7.5%{stroke-dashoffset:1;visibility:hidden}11.25%,100%{stroke-dashoffset:0;visibility:visible}}
+.m1{animation-name:k1}
+@keyframes k2{0%,7.499%{visibility:hidden}7.5%,100%{visibility:visible}}
+.m2{animation-name:k2}
+@keyframes k3{0%,8.652%{visibility:hidden}8.653%,100%{visibility:visible}}
+.m3{animation-name:k3}
+@keyframes k4{0%,11.25%{stroke-dashoffset:1;visibility:hidden}15%,100%{stroke-dashoffset:0;visibility:visible}}
+.m4{animation-name:k4}
+@keyframes k5{0%,11.249%{visibility:hidden}11.25%,100%{visibility:visible}}
+.m5{animation-name:k5}
+@keyframes k6{0%,12.4%{visibility:hidden}12.401%,100%{visibility:visible}}
+.m6{animation-name:k6}
+@keyframes k7{0%,8.939%{visibility:hidden}8.94%,100%{visibility:visible}}
+.m7{animation-name:k7}
+@keyframes k8{0%,12.505%{visibility:hidden}12.506%,100%{visibility:visible}}
+.m8{animation-name:k8}
+@keyframes k9{0%,3.75%{translate:0 6px;opacity:0}7.5%,100%{translate:0 0;opacity:1}}
+.m9{animation-name:k9}
+@keyframes k10{0%,11.25%{translate:0 6px;opacity:0}15%,100%{translate:0 0;opacity:1}}
+.m10{animation-name:k10}
+@keyframes k11{0%,15%{translate:0 6px;opacity:0}18.75%,100%{translate:0 0;opacity:1}}
+.m11{animation-name:k11}
+@keyframes k12{0%,7.5%{translate:0 6px;opacity:0}11.25%,100%{translate:0 0;opacity:1}}
+.m12{animation-name:k12}
+@keyframes k13{0%,11.25%{translate:0 6px;opacity:0}14.375%,100%{translate:0 0;opacity:1}}
+.m13{animation-name:k13}
+@keyframes k14{0%,15%{translate:0 6px;opacity:0}18.125%,100%{translate:0 0;opacity:1}}
+.m14{animation-name:k14}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-7.5s!important;animation-play-state:paused!important}}
+]]></style>
+  <defs>
+    <clipPath id="c1">
+      <rect width="139" height="128" rx="6"/>
+    </clipPath>
+    <clipPath id="c2">
+      <rect width="85" height="92" rx="6"/>
+    </clipPath>
+    <clipPath id="c3">
+      <rect width="139" height="94" rx="6"/>
+    </clipPath>
+    <clipPath id="c4">
+      <rect width="155" height="72" rx="6"/>
+    </clipPath>
+  </defs>
+  <rect width="398" height="406" fill="var(--background)"/>
+  <g transform="translate(32 32)" font-size="13" fill="var(--text)">
+    <path d="M42.5 128L42.5 249" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
+    <polygon points="42.5 128 36.5 140 48.5 140" fill="var(--background)" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m2"/>
+    <g class="a m3"/>
+    <path d="M129 128L129 134C129 171.82 130.14 195 132 195C133.86 195 135 212.86 135 242L135 248" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <polygon points="129 128 123 140 135 140" fill="var(--background)" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m5"/>
+    <g class="a m6"/>
+    <path d="M189 100L189 106C189 152.5 167.34 181 132 181C96.66 181 75 204.56 75 243L75 249" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
+    <polygon points="189 100 184 108 189 116 194 108" fill="var(--background)" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m2"/>
+    <g class="a m7"/>
+    <path d="M205 100L205 248" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <polygon points="205 100 200 108 205 116 210 108" fill="var(--border)" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m5"/>
+    <g class="a m8"/>
+    <g class="a m9">
+      <g clip-path="url(#c1)">
+        <rect width="139" height="128" fill="var(--magenta-6-background)"/>
+        <rect width="139" height="48" fill="var(--magenta-22-background)"/>
+      </g>
+      <line x1="0" y1="48" x2="139" y2="48" fill="none" stroke="var(--magenta)"/>
+      <line x1="0" y1="98" x2="139" y2="98" fill="none" stroke="var(--magenta)"/>
+      <rect width="139" height="128" rx="6" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="36.35" y="17.978" font-size="11.05" fill="var(--muted)">«abstract»</text>
+      <text x="43.76" y="36.148" font-size="14.3">Animal</text>
+      <text x="11" y="67.68">+String name</text>
+      <text x="11" y="87.68">+int age</text>
+      <text x="11" y="117.68">+speak() String</text>
+    </g>
+    <g transform="translate(0 249)" class="a m10">
+      <g clip-path="url(#c2)">
+        <rect width="85" height="92" fill="var(--magenta-6-background)"/>
+        <rect width="85" height="34" fill="var(--magenta-22-background)"/>
+      </g>
+      <line x1="0" y1="34" x2="85" y2="34" fill="none" stroke="var(--magenta)"/>
+      <line x1="0" y1="42" x2="85" y2="42" fill="none" stroke="var(--magenta)"/>
+      <rect width="85" height="92" rx="6" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="25.34" y="22.148" font-size="14.3">Duck</text>
+      <text x="11" y="61.68">+swim()</text>
+      <text x="11" y="81.68">+quack()</text>
+    </g>
+    <g transform="translate(125 248)" class="a m11">
+      <g clip-path="url(#c3)">
+        <rect width="139" height="94" fill="var(--magenta-6-background)"/>
+        <rect width="139" height="34" fill="var(--magenta-22-background)"/>
+      </g>
+      <line x1="0" y1="34" x2="139" y2="34" fill="none" stroke="var(--magenta)"/>
+      <line x1="0" y1="64" x2="139" y2="64" fill="none" stroke="var(--magenta)"/>
+      <rect width="139" height="94" rx="6" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="52.34" y="22.148" font-size="14.3">Fish</text>
+      <text x="11" y="53.68">-int sizeInFeet</text>
+      <text x="11" y="83.68">-canEat()</text>
+    </g>
+    <g transform="translate(179 28)" class="a m12">
+      <g clip-path="url(#c4)">
+        <rect width="155" height="72" fill="var(--magenta-6-background)"/>
+        <rect width="155" height="34" fill="var(--magenta-22-background)"/>
+      </g>
+      <line x1="0" y1="34" x2="155" y2="34" fill="none" stroke="var(--magenta)"/>
+      <line x1="0" y1="64" x2="155" y2="64" fill="none" stroke="var(--magenta)"/>
+      <rect width="155" height="72" rx="6" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="60.34" y="22.148" font-size="14.3">Pond</text>
+      <text x="11" y="53.68" font-size="13">+List&lt;Duck&gt; ducks</text>
+    </g>
+    <g class="a m13">
+      <rect x="53.43" y="206.5" width="43.15" height="17" rx="3" fill="var(--background)"/>
+      <text x="58.43" y="218.978" font-size="11.05" fill="var(--muted)">hosts</text>
+    </g>
+    <g class="a m14">
+      <rect x="173.48" y="181.5" width="63.04" height="17" rx="3" fill="var(--background)"/>
+      <text x="178.48" y="193.978" font-size="11.05" fill="var(--muted)">contains</text>
+    </g>
+    <g class="a m13">
+      <rect x="197" y="118" width="14.63" height="17" rx="3" fill="var(--background)"/>
+      <text x="201" y="130.478" font-size="11.05" fill="var(--muted)">1</text>
+    </g>
+    <g class="a m13">
+      <rect x="83" y="228" width="14.63" height="17" rx="3" fill="var(--background)"/>
+      <text x="87" y="240.478" font-size="11.05" fill="var(--muted)">*</text>
+    </g>
+  </g>
+</svg>

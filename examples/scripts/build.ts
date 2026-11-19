@@ -14,7 +14,7 @@ const flat = (dir: string) =>
 
 const examples = [...new Bun.Glob("*/index.tsx").scanSync(ROOT)]
   .map((entry) => basename(dirname(entry)))
-  .concat(flat("readme"), flat("dom-component"), flat("dom-svelte"))
+  .concat(flat("readme"), flat("mermaid-types"), flat("dom-component"), flat("dom-svelte"))
   .sort();
 
 const wanted = process.argv.slice(2);

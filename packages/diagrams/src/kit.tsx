@@ -48,6 +48,8 @@ export interface DiagramColors {
   readonly muted?: Color;
   readonly highlight?: Color;
   readonly roles?: Readonly<Partial<Record<NodeRole, Color>>>;
+  /** Colors for categories such as pie slices and git branches; by default the distinct role colors. */
+  readonly series?: readonly Color[];
 }
 
 export interface DiagramOptions {
@@ -100,6 +102,8 @@ const palette = tokens({
     "diagram-magenta": "#C58AFF",
   },
 });
+
+const ROLES: readonly NodeRole[] = ["task", "input", "output", "tool", "decision", "store"];
 
 export const defaultColors: DiagramColors = {
   background: palette["diagram-background"],
@@ -156,7 +160,9 @@ export interface Look {
   readonly size: number;
   readonly small: number;
   readonly weight: number | undefined;
-  readonly colors: Required<Omit<DiagramColors, "roles">>;
+  readonly colors: Required<Omit<DiagramColors, "roles" | "series">>;
+  /** Categorical colors, at least one. */
+  readonly series: readonly Color[];
   measure(text: string, size: number, weight?: number): number;
   tint(role: NodeRole): Color;
   wash(role: NodeRole, share?: number): Color;
@@ -175,6 +181,7 @@ export const look = (options: DiagramOptions | undefined, what: string): Look =>
   const muted = colors.muted ?? colors.text;
   const washes = new Map<string, Color>();
   const tint = (role: NodeRole): Color => colors.roles?.[role] ?? colors.accent;
+  const series = colors.series?.length ? colors.series : [...new Set(ROLES.map(tint))];
 
   return {
     font,
@@ -189,6 +196,7 @@ export const look = (options: DiagramOptions | undefined, what: string): Look =>
       muted,
       highlight: colors.highlight ?? colors.accent,
     },
+    series,
     measure: (text, at, w) => (isFamily(font) ? font.face(w ?? 400) : font).measure(text, at),
     tint,
     wash: (role, share = 0.22) => {

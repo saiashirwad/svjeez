@@ -1,4 +1,11 @@
 import type { Where } from "svjeez/tools";
+import type { ClassDoc } from "./class.ts";
+import type { ErDoc } from "./er.ts";
+import type { GanttDoc } from "./gantt.ts";
+import type { GitDoc } from "./git.ts";
+import type { JourneyDoc } from "./journey.ts";
+import type { MindmapDoc } from "./mindmap.ts";
+import type { PieDoc } from "./pie.ts";
 
 export type Place = NonNullable<Where["source"]>;
 
@@ -90,9 +97,21 @@ export interface StateDoc {
   readonly transitions: readonly MermaidStateTransition[];
 }
 
-export type MermaidDoc = FlowchartDoc | SequenceDoc | StateDoc;
+export type MermaidDoc =
+  | FlowchartDoc
+  | SequenceDoc
+  | ClassDoc
+  | StateDoc
+  | ErDoc
+  | GanttDoc
+  | PieDoc
+  | MindmapDoc
+  | GitDoc
+  | JourneyDoc;
 
 export interface ParseOptions {
   readonly file?: string;
   readonly line?: number;
 }
+
+export type { ClassDoc, ErDoc, GanttDoc, GitDoc, JourneyDoc, MindmapDoc, PieDoc };

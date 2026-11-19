@@ -1,11 +1,12 @@
 import { path, type Vec } from "svjeez";
 import type { PathBuilder } from "svjeez/tools";
 import type { Point } from "./layout/box.ts";
-import { BEND } from "./layout/layered.ts";
 
-const CORNER = 10;
+// How far from its end a line starts to turn, so the arrowhead meets straight line.
+const LEAD = 6;
 
-const ROUND = 0.55;
+// Share of a turn's reach that its control points sit at, 0 being a sharp corner.
+const HANDLE = 0.62;
 
 interface Piece {
   readonly from: Point;
@@ -40,28 +41,26 @@ export const curve = (points: readonly Point[]): Curve => {
     Math.hypot(points[i + 1]!.x - points[i]!.x, points[i + 1]!.y - points[i]!.y);
 
   const dir = (i: number) => unit(points[i]!, points[i + 1]!);
-  const budget = (i: number) => (i === 0 || i === n - 2 ? length(i) - 2 : length(i) / 2);
+
+  // A turn takes the whole of a leg that ends at a node, short of the straight run into
+  // the arrowhead, and half of a leg it shares with the next turn. Where two turns share a
+  // run of line this makes a jog one eased S, however far across it goes.
+  const reach = (i: number, other: number) =>
+    other === 0 || other === n - 1 ? Math.max(0, length(i) - LEAD) : length(i) / 2;
+
   const pieces: Piece[] = [];
 
   for (let i = 1; i < n - 1; i++) {
-    const [din, dmid] = [dir(i - 1), dir(i)];
-    const dout = i + 1 < n - 1 ? dir(i + 1) : undefined;
+    const [din, dout] = [dir(i - 1), dir(i)];
+    const [before, after] = [reach(i - 1, i - 1), reach(i, i + 1)];
+    const [a, b] = [along(points[i]!, din, -before), along(points[i]!, dout, after)];
 
-    if (dout && same(din, dout) && !same(din, dmid)) {
-      const [s1, s2] = [Math.min(BEND, budget(i - 1)), Math.min(BEND, budget(i + 1))];
-      pieces.push({
-        from: along(points[i]!, din, -s1),
-        c1: points[i]!,
-        c2: points[i + 1]!,
-        to: along(points[i + 1]!, dout, s2),
-      });
-      i++;
-      continue;
-    }
-
-    const r = Math.max(0, Math.min(CORNER, budget(i - 1), budget(i)));
-    const [a, b] = [along(points[i]!, din, -r), along(points[i]!, dmid, r)];
-    pieces.push({ from: a, c1: along(a, din, r * ROUND), c2: along(b, dmid, -r * ROUND), to: b });
+    pieces.push({
+      from: a,
+      c1: along(points[i]!, din, -before * (1 - HANDLE)),
+      c2: along(points[i]!, dout, after * (1 - HANDLE)),
+      to: b,
+    });
   }
 
   const at = (p: Piece, t: number): Point => {
