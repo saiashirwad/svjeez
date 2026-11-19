@@ -694,19 +694,3 @@ kbd {
   padding: 12px 14px 12px 18px;
   border-top: 1px solid var(--line);
 }
-
-/* The pointer, drawn by the film script; it is part of the page, so it moves with the recorded states. */
-.cursor {
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 10;
-  pointer-events: none;
-}
-
-.cursor path {
-  fill: var(--bg);
-  stroke: var(--text);
-  stroke-width: 1.2;
-  stroke-linejoin: round;
-}

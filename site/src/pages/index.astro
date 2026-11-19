@@ -1,6 +1,6 @@
 ---
 import { Code } from "astro:components";
-import board from "../scenes/board/board.film.tsx";
+import board from "../scenes/board/board.film.tsx?svjeez";
 import charts from "@examples/charts/index.tsx";
 import code from "@examples/code/index.tsx";
 import count from "@examples/count/index.tsx";
@@ -56,38 +56,42 @@ const tiles = [
 
 const pkg = (name: string) => `${REPO}/tree/main/packages/${name}`;
 
-const film = `export default await film(
-  serve({ root, selector: "#root" }),
+const film = `selectors.setTestIdAttribute("data-part");
+
+export default await film(
+  serve({ selector: "#root" }),
   async ({ page, snap }) => {
+    const part = (id: string) =>
+      page.getByTestId(id);
+
     await snap("idle", { hold: 1.2 });
 
     await page.keyboard
       .press("ControlOrMeta+k");
     await snap("palette", { over: 0.35 });
 
-    await page.locator("[data-part=query]")
-      .fill("new iss");
+    await part("query").fill("new iss");
     await snap("narrowed", { over: 0.4 });
 
-    await click("cmd-new-issue");
-    await page.locator("[data-part=title]")
+    await part("cmd-new-issue").click();
+    await part("title")
       .fill("Save drafts offline");
     await snap("titled", { over: 1.1 });
 
-    await click("label-feature");
-    await click("who-mara");
-    await click("create");
+    await part("label-feature").click();
+    await part("who-mara").click();
+    await part("create").click();
     await snap("created", { over: 0.6 });
 
-    await drag("card-ENG-143",
-      "lane-progress");
+    await part("card-ENG-143").dragTo(
+      part("lane-progress"));
     await snap("dropped", { over: 0.6 });
 
-    await click("status-ENG-143");
-    await click("set-done");
+    await part("status-ENG-143").click();
+    await part("set-done").click();
     await snap("done", { over: 0.7 });
   },
-  { scheme: "both", cache: "states.json" },
+  { scheme: "both", cursor: true },
 );`;
 
 const theming = `const theme = tokens({

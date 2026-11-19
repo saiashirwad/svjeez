@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "inputs": "88b65dc849461feddf7b558fbb951b9c657068a2d239b36197b76b363af12709",
+  "inputs": "4c607525c01719f5d38a065876710b73c239aab217221a0a3a7e7ad4c2413a78",
   "value": [
     {
       "name": "idle",
@@ -4898,59 +4898,6 @@
                       "part": "board"
                     }
                   ]
-                },
-                {
-                  "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 680, 410], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(680px, 410px)"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
                 }
               ],
               "radii": [
@@ -4988,7 +4935,8 @@
           "id": "root"
         }
       },
-      "hold": 1.2
+      "hold": 1.2,
+      "pointer": { "at": [680, 410], "down": false, "presses": [] }
     },
     {
       "name": "palette",
@@ -9889,59 +9837,6 @@
                 },
                 {
                   "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 680, 410], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(680px, 410px)"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "element",
                   "tag": "div",
                   "rect": { "x": 1, "y": 1, "width": 798, "height": 448 },
                   "children": [
@@ -11706,7 +11601,8 @@
           "id": "root"
         }
       },
-      "over": 0.35
+      "over": 0.35,
+      "pointer": { "at": [680, 410], "down": false, "presses": [] }
     },
     {
       "name": "query",
@@ -16607,59 +16503,6 @@
                 },
                 {
                   "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 680, 410], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(680px, 410px)"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "element",
                   "tag": "div",
                   "rect": { "x": 1, "y": 1, "width": 798, "height": 448 },
                   "children": [
@@ -17688,7 +17531,8 @@
           "id": "root"
         }
       },
-      "over": 0.45
+      "over": 0.45,
+      "pointer": { "at": [680, 410], "down": false, "presses": [] }
     },
     {
       "name": "narrowed",
@@ -22589,59 +22433,6 @@
                 },
                 {
                   "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 680, 410], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(680px, 410px)"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "element",
                   "tag": "div",
                   "rect": { "x": 1, "y": 1, "width": 798, "height": 448 },
                   "children": [
@@ -23270,7 +23061,8 @@
         }
       },
       "over": 0.4,
-      "hold": 0.4
+      "hold": 0.4,
+      "pointer": { "at": [680, 410], "down": false, "presses": [] }
     },
     {
       "name": "dialog",
@@ -28171,59 +27963,6 @@
                 },
                 {
                   "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 318.8, 164.391], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(318.8px, 164.391px);"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "element",
                   "tag": "div",
                   "rect": { "x": 1, "y": 1, "width": 798, "height": 448 },
                   "children": [
@@ -29360,59 +29099,6 @@
                     "light": "rgba(255, 255, 255, 0.549)",
                     "dark": "rgba(22, 24, 27, 0.549)"
                   }
-                },
-                {
-                  "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 680, 410], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(680px, 410px)"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
                 }
               ],
               "radii": [
@@ -29450,7 +29136,8 @@
           "id": "root"
         }
       },
-      "over": 0.3
+      "over": 0.3,
+      "pointer": { "at": [400, 164.39], "down": false, "presses": [[400, 164.39]] }
     },
     {
       "name": "titled",
@@ -34351,59 +34038,6 @@
                 },
                 {
                   "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 318.8, 164.391], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(318.8px, 164.391px);"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "element",
                   "tag": "div",
                   "rect": { "x": 1, "y": 1, "width": 798, "height": 448 },
                   "children": [
@@ -35541,59 +35175,6 @@
                     "light": "rgba(255, 255, 255, 0.549)",
                     "dark": "rgba(22, 24, 27, 0.549)"
                   }
-                },
-                {
-                  "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 680, 410], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(680px, 410px)"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
                 }
               ],
               "radii": [
@@ -35632,7 +35213,8 @@
         }
       },
       "over": 1.1,
-      "hold": 0.3
+      "hold": 0.3,
+      "pointer": { "at": [400, 164.39], "down": false, "presses": [] }
     },
     {
       "name": "labelled",
@@ -40533,59 +40115,6 @@
                 },
                 {
                   "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 355.867, 179.172], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(355.867px, 179.172px);"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "element",
                   "tag": "div",
                   "rect": { "x": 1, "y": 1, "width": 798, "height": 448 },
                   "children": [
@@ -41727,59 +41256,6 @@
                     "light": "rgba(255, 255, 255, 0.549)",
                     "dark": "rgba(22, 24, 27, 0.549)"
                   }
-                },
-                {
-                  "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 680, 410], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(680px, 410px)"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
                 }
               ],
               "radii": [
@@ -41818,7 +41294,8 @@
         }
       },
       "over": 0.2,
-      "hold": 0.35
+      "hold": 0.35,
+      "pointer": { "at": [355.86, 179.17], "down": false, "presses": [[355.86, 179.17]] }
     },
     {
       "name": "assigned",
@@ -46719,59 +46196,6 @@
                 },
                 {
                   "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 271, 219.172], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(271px, 219.172px);"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "element",
                   "tag": "div",
                   "rect": { "x": 1, "y": 1, "width": 798, "height": 448 },
                   "children": [
@@ -47938,59 +47362,6 @@
                     "light": "rgba(255, 255, 255, 0.549)",
                     "dark": "rgba(22, 24, 27, 0.549)"
                   }
-                },
-                {
-                  "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 680, 410], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(680px, 410px)"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
                 }
               ],
               "radii": [
@@ -48029,7 +47400,8 @@
         }
       },
       "over": 0.2,
-      "hold": 0.4
+      "hold": 0.4,
+      "pointer": { "at": [271, 219.17], "down": false, "presses": [[271, 219.17]] }
     },
     {
       "name": "created",
@@ -53254,112 +52626,6 @@
                       "part": "board"
                     }
                   ]
-                },
-                {
-                  "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 572.164, 278.172], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(572.164px, 278.172px);"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 680, 410], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(680px, 410px)"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
                 }
               ],
               "radii": [
@@ -53398,7 +52664,8 @@
         }
       },
       "over": 0.6,
-      "hold": 0.9
+      "hold": 0.9,
+      "pointer": { "at": [572.16, 278.17], "down": false, "presses": [[572.16, 278.17]] }
     },
     {
       "name": "carried",
@@ -58691,112 +57958,6 @@
                       "part": "board"
                     }
                   ]
-                },
-                {
-                  "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 471.992, 159.4], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(471.992px, 159.4px);"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 680, 410], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(680px, 410px)"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
                 }
               ],
               "radii": [
@@ -58834,7 +57995,8 @@
           "id": "root"
         }
       },
-      "over": 0.6
+      "over": 0.6,
+      "pointer": { "at": [471.99, 253], "down": true, "presses": [[261.32, 167]] }
     },
     {
       "name": "dropped",
@@ -64100,112 +63262,6 @@
                       "part": "board"
                     }
                   ]
-                },
-                {
-                  "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 471.992, 159.4], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(471.992px, 159.4px);"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 680, 410], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(680px, 410px)"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
                 }
               ],
               "radii": [
@@ -64244,7 +63300,8 @@
         }
       },
       "over": 0.2,
-      "hold": 0.6
+      "hold": 0.6,
+      "pointer": { "at": [471.99, 253], "down": false, "presses": [] }
     },
     {
       "name": "menu",
@@ -70060,112 +69117,6 @@
                       "part": "board"
                     }
                   ]
-                },
-                {
-                  "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 395.156, 156.094], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(395.156px, 156.094px);"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 680, 410], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(680px, 410px)"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
                 }
               ],
               "radii": [
@@ -70204,7 +69155,8 @@
         }
       },
       "over": 0.25,
-      "hold": 0.4
+      "hold": 0.4,
+      "pointer": { "at": [395.15, 156.09], "down": false, "presses": [[395.15, 156.09]] }
     },
     {
       "name": "done",
@@ -75509,112 +74461,6 @@
                 },
                 {
                   "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 436.656, 239], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(436.656px, 239px);"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 680, 410], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(680px, 410px)"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "element",
                   "tag": "div",
                   "rect": { "x": 536.375, "y": 395, "width": 246.625, "height": 38 },
                   "children": [
@@ -75866,7 +74712,8 @@
         }
       },
       "over": 0.7,
-      "hold": 2.8
+      "hold": 2.8,
+      "pointer": { "at": [457.65, 239], "down": false, "presses": [[457.65, 239]] }
     },
     {
       "name": "again",
@@ -80764,59 +79611,6 @@
                       "part": "board"
                     }
                   ]
-                },
-                {
-                  "type": "element",
-                  "tag": "svg",
-                  "rect": { "x": 1, "y": 1, "width": 14, "height": 22 },
-                  "children": [],
-                  "transform": { "matrix": [1, 0, 0, 1, 680, 410], "origin": [8, 12] },
-                  "clip": { "x": true, "y": true },
-                  "svg": {
-                    "tag": "svg",
-                    "attrs": {
-                      "class": "cursor",
-                      "width": "14",
-                      "height": "22",
-                      "viewBox": "0 0 14 22",
-                      "style": "transform: translate(680px, 410px)"
-                    },
-                    "style": {
-                      "fill": "rgb(0, 0, 0)",
-                      "fill-opacity": "1",
-                      "fill-rule": "nonzero",
-                      "stroke": "none",
-                      "stroke-width": "1px",
-                      "stroke-opacity": "1",
-                      "stroke-linecap": "butt",
-                      "stroke-linejoin": "miter",
-                      "stroke-miterlimit": "4",
-                      "stroke-dasharray": "none",
-                      "stroke-dashoffset": "0px",
-                      "opacity": "1"
-                    },
-                    "children": [
-                      {
-                        "tag": "path",
-                        "attrs": { "d": "M0 0V17.6l4.6-4.2 3.3 7.5 3.1-1.3-3.3-7.3H13.2Z" },
-                        "style": {
-                          "fill": { "light": "rgb(255, 255, 255)", "dark": "rgb(21, 23, 28)" },
-                          "fill-opacity": "1",
-                          "fill-rule": "nonzero",
-                          "stroke": { "light": "rgb(27, 29, 36)", "dark": "rgb(232, 234, 240)" },
-                          "stroke-width": "1.2px",
-                          "stroke-opacity": "1",
-                          "stroke-linecap": "butt",
-                          "stroke-linejoin": "round",
-                          "stroke-miterlimit": "4",
-                          "stroke-dasharray": "none",
-                          "stroke-dashoffset": "0px",
-                          "opacity": "1"
-                        },
-                        "children": []
-                      }
-                    ]
-                  }
                 }
               ],
               "radii": [
@@ -80855,7 +79649,8 @@
         }
       },
       "over": 0.9,
-      "hold": 0.4
+      "hold": 0.4,
+      "pointer": { "at": [680, 410], "down": false, "presses": [] }
     }
   ]
 }

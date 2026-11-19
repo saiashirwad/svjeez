@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
+    "dev": "bun --conditions @svjeez/source --bun astro dev",
+    "build": "bun --conditions @svjeez/source --bun astro build",
+    "preview": "bun --conditions @svjeez/source --bun astro preview",
     "deploy": "alchemy deploy",
     "destroy": "alchemy destroy",
     "typecheck": "astro check && tsc --noEmit -p src/scenes/board",
