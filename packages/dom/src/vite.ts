@@ -182,6 +182,8 @@ const PREFIX = "virtual:svjeez-dom/";
 
 const pages = (pagesById: Map<string, Page>): Plugin => ({
   name: "svjeez-dom",
+  // The film file and this package must share one copy of `svjeez` and `@svjeez/dom`, so Vite leaves them to the runtime's own loader. Vite merges this with the project's `ssr.external`.
+  config: () => ({ ssr: { external: ["svjeez", "@svjeez/dom"] } }),
   resolveId: (id) => (id.startsWith(PREFIX) ? id : undefined),
   load: (id) => (id.startsWith(PREFIX) ? pagesById.get(id.slice(PREFIX.length))?.entry : undefined),
   configureServer: (server) => {

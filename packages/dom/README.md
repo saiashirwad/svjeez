@@ -57,7 +57,7 @@ The component is mounted alone in `#svjeez-root` (the capture selector, unless `
 
 **Finding the module.** The browser has to load the same component, so `component` finds the module whose export `=== Card`:
 
-- **Vite:** run the film file through Vite's SSR loader with `runFilm("./card.film.tsx")` (returns the `Scene`). Vite loads `.svelte` and `.tsx` itself, so the module graph holds every export; the page is a virtual module served by the same dev server (your plugins, CSS modules and `<style>` blocks included). Without `runFilm`, `component` throws and says so. In a repo that links `svjeez` as a workspace package, add `ssr: { external: ["svjeez", "@svjeez/dom"] }` to the Vite config so the film file shares the host's copies.
+- **Vite:** run the film file through Vite's SSR loader with `runFilm("./card.film.tsx")` (returns the `Scene`). Vite loads `.svelte` and `.tsx` itself, so the module graph holds every export; the page is a virtual module served by the same dev server (your plugins, CSS modules and `<style>` blocks included). Without `runFilm`, `component` throws and says so. `runFilm` marks `svjeez` and `@svjeez/dom` as `ssr.external` (merged with your own), so the film file shares the host's copies. Film files can run in parallel: each `runFilm` has its own server and dependency cache.
 - **Bun:** add `preload = ["@svjeez/dom/bun/preload"]` to `bunfig.toml`. The preload records each source module's live exports as it loads, and `component` bundles the page with Bun's HTML bundler. React only: Bun cannot bundle Svelte yet.
 
 A component defined in the film file itself, or one nothing exports, throws an error that says which.
