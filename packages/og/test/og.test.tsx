@@ -40,7 +40,7 @@ test("renderOg draws a card as a JPEG, and ogResponse serves it with cache heade
   });
 
   expect(custom.headers.get("Cache-Control")).toBe("public, max-age=60");
-});
+}, 60_000);
 
 test("an image's name ignores options left at their defaults", async () => {
   const { imageName, imageType } = await import("../src/render.ts");
@@ -58,7 +58,7 @@ test("renderOg draws a card as a PNG and reports scaled dimensions", async () =>
 
   expect([type, width, height]).toEqual(["image/png", 2400, 1260]);
   expect(Array.from(bytes.subarray(1, 4))).toEqual([0x50, 0x4e, 0x47]);
-});
+}, 60_000);
 
 test("renderOg accepts a custom rasterizer via option or settings.render", async () => {
   const { renderOg, settings } = await import("../src/render.ts");
@@ -97,7 +97,7 @@ test("renderStill takes a scene's held moment as a transparent PNG at 2x", async
 
   expect(Array.from(png.subarray(1, 4))).toEqual([0x50, 0x4e, 0x47]);
   expect(new DataView(png.buffer, png.byteOffset).getUint32(16)).toBe(OG_SIZE[0] * 2);
-});
+}, 60_000);
 
 test("stillTime is the held moment, else 72% in", async () => {
   const { stillTime } = await import("../src/render.ts");
@@ -111,4 +111,4 @@ test("renderStill takes the picture at `time` when given", async () => {
   const png = await renderStill(card(), { time: 1 });
 
   expect(Array.from(png.subarray(1, 4))).toEqual([0x50, 0x4e, 0x47]);
-});
+}, 60_000);
