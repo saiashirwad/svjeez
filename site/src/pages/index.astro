@@ -36,17 +36,17 @@ import { windowed } from "../window";
 const tile = (scene: Parameters<typeof windowed>[0], title: string) => live(windowed(scene, { size: [504, 340], title }));
 
 const s = {
-  board: live(board),
+  board: live(windowed(board, { size: [800], title: "board.film.tsx" })),
   pipeline: live(windowed(mermaidFlowchart, { size: [1032, 300], title: "flowchart.mmd" })),
   pipelineTall: live(windowed(flowchartTall, { size: [358], title: "flowchart.mmd" })),
   handshake: live(windowed(sequence, { size: [1032, 360], title: "sequence.tsx" })),
   handshakeTall: live(windowed(mermaidSequence, { size: [358], title: "sequence.mmd" })),
   explainer: tile(code, "code.tsx"),
   recording: tile(state, "state.tsx"),
-  metrics: live(charts),
-  dayNight: live(windowed(layout, { size: [1280, 720] })),
-  agents: live(windowed(lanes, { size: [1032, 560] })),
-  agentsTall: live(windowed(lanes, { size: [358] })),
+  metrics: live(windowed(charts, { size: [960], title: "charts.tsx" })),
+  dayNight: live(windowed(layout, { size: [704, 396], title: "layout.tsx" })),
+  agents: live(windowed(lanes, { size: [1032, 560], title: "lanes.tsx" })),
+  agentsTall: live(windowed(lanes, { size: [358], title: "lanes.tsx" })),
   whereReadme: live(windowed(readmeBasic, { size: [328, 264], title: "README.md", bar: 36 })),
   whereDocs: live(windowed(readmeLoops, { size: [328, 264], title: "Docs", bar: 36 })),
 };
@@ -123,7 +123,7 @@ const more = [
     name: "type",
     scene: tile(type, "type.tsx"),
     cost: 20,
-    label: "Your fonts",
+    label: "Google Fonts",
     from: "@svjeez/fonts",
     href: pkg("fonts"),
   },
@@ -156,7 +156,7 @@ npx svjeez dev scene.tsx
 npx svjeez check scene.tsx
 npx svjeez svg scene.tsx --out scene.svg`;
 
-const geo = tile(globe, "globe.tsx");
+const geo = live(windowed(globe, { size: [960], title: "globe.tsx" }));
 
 const files = new Map<string, FileFacts>(
   [...Object.values(s), ...tiles.math.map((tile) => tile.scene), ...tiles.data.map((tile) => tile.scene), geo, ...more.map((tile) => tile.scene)].map(
@@ -183,16 +183,16 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
     <Hero />
 
     <section class="wrap sec g" id="film">
-      <h2 class="c1-12 xl"><a class="anchor" href="#film">Recorded UI</a></h2>
-      <p class="sub c1-8">A real React app, recorded by <a href={pkg("dom")}>@svjeez/dom</a>.</p>
-      <figure class="c1-8"><div class="win"><LiveScene scene={s.board} cost={40} name="board" bar={0} alt={s.board.desc} /></div></figure>
+      <h2 class="c1-12 xl"><a class="anchor" href="#film">Film your real app</a></h2>
+      <p class="sub c1-8">Script the clicks. <a href={pkg("dom")}>@svjeez/dom</a> turns them into one SVG.</p>
+      <figure class="c1-8"><div class="win"><LiveScene scene={s.board} cost={40} name="board" alt={s.board.desc} /></div></figure>
       <Code class="code side c9-12" code={demo} lang="tsx" theme={shikiTheme} />
     </section>
 
     <div class="tint">
       <section class="wrap sec g" id="explain">
-        <h2 class="c1-12 xl"><a class="anchor" href="#explain">Code, diagrams and math</a></h2>
-        <p class="sub c1-8"><a href={pkg("code")}>@svjeez/code</a> · <a href={pkg("diagrams")}>diagrams</a> · <a href={pkg("mermaid")}>mermaid</a> · <a href={pkg("math")}>math</a></p>
+        <h2 class="c1-12 xl"><a class="anchor" href="#explain">Code, diagrams and math that move</a></h2>
+        <p class="sub c1-8"><a href={pkg("code")}>Code</a> types itself. <a href={pkg("mermaid")}>Mermaid</a> and <a href={pkg("diagrams")}>diagrams</a> draw in order. <a href={pkg("math")}>Equations</a> rearrange.</p>
         <div class="big c1-12">
           <div class="win">
             <LiveScene class="wide" scene={s.pipeline} cost={44} name="flowchart" alt={s.pipeline.desc} />
@@ -223,17 +223,17 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
     </div>
 
     <section class="wrap sec g" id="data">
-      <h2 class="c1-12 xl"><a class="anchor" href="#data">Charts and maps</a></h2>
+      <h2 class="c1-12 xl"><a class="anchor" href="#data">Charts and maps from your data</a></h2>
       <p class="sub c1-8"><code>svjeez svg scene.tsx --params data.json</code></p>
       <div class="wall c1-12">
         <figure class="tile strip">
-          <div class="win"><LiveScene scene={s.metrics} cost={25} name="charts" bar={0} alt={s.metrics.desc} /></div>
+          <div class="win"><LiveScene scene={s.metrics} cost={25} name="charts" alt={s.metrics.desc} /></div>
           <figcaption>
             <b>Charts</b> <a href={pkg("charts")}>@svjeez/charts</a>
           </figcaption>
         </figure>
         <figure class="tile strip">
-          <div class="win"><LiveScene scene={geo} cost={20} name="globe" bar={0} alt={geo.desc} /></div>
+          <div class="win"><LiveScene scene={geo} cost={20} name="globe" alt={geo.desc} /></div>
           <figcaption>
             <b>Maps</b> <a href={pkg("geo")}>@svjeez/geo</a>
           </figcaption>
@@ -254,7 +254,7 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
     </section>
 
     <section class="wrap sec g" id="light-dark">
-      <h2 class="c1-12"><a class="anchor" href="#light-dark">Light and dark</a></h2>
+      <h2 class="c1-12"><a class="anchor" href="#light-dark">Light and dark in one file</a></h2>
       <div class="stagewrap c1-8">
         <DayNight scene={s.dayNight} alt={s.dayNight.desc} />
       </div>
@@ -262,27 +262,27 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
     </section>
 
     <section class="wrap sec g" id="where">
-      <h2 class="c1-12"><a class="anchor" href="#where">Where it plays</a></h2>
-      <p class="sub c1-8">READMEs, docs, any web page. <code>svjeez video</code> for the rest.</p>
+      <h2 class="c1-12"><a class="anchor" href="#where">Plays anywhere an image does</a></h2>
+      <p class="sub c1-8">Need a video? <code>svjeez video</code>.</p>
       <figure class="c1-6"><div class="win"><LiveScene scene={s.whereReadme} cost={8} name="readme" bar={36} alt={s.whereReadme.desc} /></div><h3>READMEs</h3></figure>
       <figure class="c7-12"><div class="win"><LiveScene scene={s.whereDocs} cost={4} name="docs" bar={36} alt={s.whereDocs.desc} /></div><h3>Docs and blogs</h3></figure>
     </section>
 
     <div class="tint">
       <section class="wrap sec g" id="agents">
-        <h2 class="c1-12"><a class="anchor" href="#agents">Agent skill</a></h2>
+        <h2 class="c1-12"><a class="anchor" href="#agents">Your agent can write it</a></h2>
         <p class="sub c1-8"><code>npx svjeez skill --install</code></p>
         <div class="big c1-12">
           <div class="win desk">
-            <LiveScene class="wide" scene={s.agents} cost={52} name="agents" bar={0} alt={s.agents.desc} />
-            <LiveScene class="tall" scene={s.agentsTall} cost={40} name="agents" bar={0} alt={s.agentsTall.desc} />
+            <LiveScene class="wide" scene={s.agents} cost={52} name="agents" alt={s.agents.desc} />
+            <LiveScene class="tall" scene={s.agentsTall} cost={40} name="agents" alt={s.agentsTall.desc} />
           </div>
         </div>
       </section>
     </div>
 
     <section class="wrap sec g" id="more">
-      <h2 class="c1-12"><a class="anchor" href="#more">Also included</a></h2>
+      <h2 class="c1-12"><a class="anchor" href="#more">And more</a></h2>
       <div class="wall small c1-12">
         {
           more.map((tile) => (
@@ -299,26 +299,25 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
 
     <section class="wrap close" id="start">
       <h2><a class="anchor" href="#start">Get started</a></h2>
-      <p class="tally"><b>{files.size}</b> SVG files, <b>{Math.round(total("gzip") / 1024)} KB</b> gzipped, <b>{total("script")}</b> bytes of JavaScript.</p>
+      <p class="tally">This page: <b>{files.size}</b> SVGs, <b>{Math.round(total("gzip") / 1024)} KB</b> gzipped, <b>{total("script")}</b> bytes of JavaScript.</p>
       <div class="ways">
         <div class="way">
-          <h3>Start yourself</h3>
+          <h3>By hand</h3>
           <pre class="code">{start}</pre>
-          <p>Also: <a href={pkg("vite")}>Vite</a>, <a href={pkg("astro")}>Astro</a>, <a href={pkg("video")}>video</a>.</p>
+          <p>Plugs into <a href={pkg("vite")}>Vite</a> and <a href={pkg("astro")}>Astro</a>.</p>
         </div>
         <div class="way">
-          <h3>Or hand it to your agent</h3>
+          <h3>With your agent</h3>
           <pre class="code">npx svjeez skill --install</pre>
         </div>
       </div>
-      <p class="more"><a class="btn primary" href={`${REPO}/tree/main/examples`}>Explore the examples</a><a class="btn" href={REPO}>View on GitHub</a></p>
+      <p class="more"><a class="btn primary" href={`${REPO}/tree/main/examples`}>See examples</a><a class="btn" href={REPO}>GitHub</a></p>
       <aside class="fine" id="fine-print" aria-labelledby="fine-print-title">
-        <h3 id="fine-print-title">The fine print</h3>
+        <h3 id="fine-print-title">Requirements</h3>
         <ul>
           <li>Node 20+ or Bun. On Node, install <code>tsx</code>.</li>
-          <li>Frames need <code>playwright-core</code> and Chromium.</li>
-          <li>Fonts and images are embedded in the file.</li>
-        </ul>
+          <li>Filming and frames need <code>playwright-core</code> and Chromium.</li>
+                  </ul>
       </aside>
     </section>
   </main>

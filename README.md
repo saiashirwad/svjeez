@@ -10,7 +10,7 @@
   <sub><b>One spring track drives coil, morph, arrows, and counters</b> · 37 KB · 0 KB JS · <a href="examples/readme/hero.tsx"><code>examples/readme/hero.tsx</code></a></sub>
 </p>
 
-svjeez compiles JSX scenes into self-contained animated SVGs: CSS `@keyframes` by default, SMIL only for geometry, gradients, or filters. Each file bundles light and dark themes, a `prefers-reduced-motion` still frame, and subsetted fonts, so it works anywhere `<img>` works: GitHub READMEs, docs, blogs, and email.
+svjeez compiles JSX scenes into self-contained animated SVGs. Each file bundles light and dark themes, a `prefers-reduced-motion` still frame, and subsetted fonts, so it works anywhere `<img>` works: GitHub READMEs, docs, blogs, and email.
 
 Every graphic in this README is a live, zero-JS `.svg` built with svjeez. Toggle your theme to watch them adapt.
 
@@ -46,7 +46,7 @@ const [driver, stage, output] = [ref(), ref(), ref()];
 
 ## Quick start
 
-Install with npm or Bun (Node 20+; `.tsx` scenes load through `tsx` on Node):
+Install with npm or Bun. On Node 20+, also install `tsx` to load `.tsx` scenes:
 
 ```sh
 npm install svjeez
@@ -164,7 +164,7 @@ export default await film(
 
 ## Compile-time layout and refs
 
-`<Stack>`, `<Grid>`, `<Center>`, and `<Align>` measure text and boxes at build time instead of relying on manual pixel offsets. Attach `ref()` to any node and `<Arrow>` connectors or anchored elements stay locked to it while it moves:
+`<Stack>`, `<Grid>`, `<Center>`, and `<Align>` measure text and boxes at build time. Attach `ref()` to any node and `<Arrow>` connectors or anchored elements stay locked to it while it moves:
 
 <p align="center">
   <img src="examples/dist/layout.svg" alt="Cards arranged in a Stack with live ref-attached connectors" width="640">
@@ -188,15 +188,13 @@ Pass `--browser` to verify rendered bounding boxes and contrast in headless Chro
 ## Inside the compiled `.svg`
 
 - **Zero JavaScript**: Runs on GPU-friendly CSS `@keyframes` first, using SMIL only for attributes CSS cannot animate (path `d`, box dimensions, gradients, filters).
-- **Reduced motion**: Loops cleanly by default and freezes on your chosen `still` frame when `prefers-reduced-motion: reduce` is set.
+- **Reduced motion**: Freezes on your chosen `still` frame when `prefers-reduced-motion: reduce` is set.
 - **Dual light and dark mode**: `tokens()` compiles theme colors to CSS custom properties under `prefers-color-scheme`.
 - **Real `<text>`, subsetted fonts**: Keeps text crisp, selectable, and measurable, subsetting only used characters into embedded `@font-face` rules.
 - **Zero-JS counters**: `count()` renders tabular odometer strips animated purely with CSS steps.
 - **Accessible and deterministic**: Emits `role="img"`, `<title>`, and `<desc>`. Explicit `span(start, duration)` timing and seeded randomness produce byte-identical output.
 
 ## Add-on packages
-
-Optional `@svjeez/*` packages build on the same compiler and primitives.
 
 **Content & visualization**
 - `@svjeez/charts` — Animated bar, line, and area charts.
@@ -214,4 +212,4 @@ Optional `@svjeez/*` packages build on the same compiler and primitives.
 
 ## License
 
-svjeez is pre-1.0 (0.8), licensed under MIT.
+svjeez is pre-1.0 and MIT licensed.

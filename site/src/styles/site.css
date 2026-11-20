@@ -475,12 +475,6 @@ kbd {
   inset-inline-end: calc(100cqi * 12 / var(--native));
   translate: 0 -50%;
 }
-/* A scene with no title bar, like the agent's desktop, keeps its top for its own menu bar, so the chip sits low. */
-.proof.bare {
-  inset-block: auto 0.625rem;
-  inset-inline-end: 0.625rem;
-  translate: none;
-}
 .proof-chip {
   position: relative;
   display: flex;
@@ -956,7 +950,7 @@ pre.side {
 }
 .tag {
   position: absolute;
-  inset-block-start: 0.75rem;
+  inset-block-end: 0.75rem;
   padding: 0.3rem 0.65rem;
   font: 600 0.75rem / 1 var(--mono);
   letter-spacing: 0.04em;
