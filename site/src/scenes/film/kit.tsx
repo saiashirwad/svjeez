@@ -129,16 +129,3 @@ export const shown = (over: number, after = 0.3) => [
   enter(span(after, 0.45), { from: { opacity: 0, offset: [0, 12] }, curve: ease.out }),
   exit(span(over - 0.45, 0.35), { curve: ease.in }),
 ];
-
-/** The hairline between the code column and the result column, drawn in from `from`. */
-export const Divider = ({ from }: { readonly from: number }): SceneElement => {
-  const x = (CODE_COLUMN[0] + CODE_COLUMN[2] + RESULT_COLUMN[0]) / 2;
-
-  return (
-    <Shape
-      geometry={line([x, RESULT_COLUMN[1]], [x, RESULT_COLUMN[1] + RESULT_COLUMN[3]])}
-      stroke={{ color: theme.line, width: 1 }}
-      draw={track(0).to(1, span(from, 0.6), ease.inOut)}
-    />
-  );
-};

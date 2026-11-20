@@ -12,17 +12,7 @@ import {
   type SceneElement,
 } from "svjeez";
 import { Listing } from "./listing";
-import {
-  CODE_COLUMN,
-  Divider,
-  Header,
-  RESULT_COLUMN,
-  SHOTS,
-  mono,
-  shown,
-  spring,
-  theme,
-} from "./kit";
+import { CODE_COLUMN, Header, RESULT_COLUMN, SHOTS, mono, shown, spring, theme } from "./kit";
 
 // The morph() slide. A deploy card is written as one component with two states; the code steps aside and the card
 // morphs from building to ready. Two edits follow: the project is renamed, and a line is added, and the card follows.
@@ -123,7 +113,6 @@ export const MorphSlide = (): SceneElement => {
           edits={2}
           aside={{ box: CODE_COLUMN, when: aside }}
         />
-        <Divider from={aside.end} />
         <Group
           motion={enter(span(appear, 0.4), {
             from: { opacity: 0, offset: [0, 10] },

@@ -3,7 +3,7 @@ import { Pivot } from "../blip";
 import { APP, Filmed } from "./app";
 import { Listing } from "./listing";
 import { Note } from "./note";
-import { CODE_COLUMN, Divider, Header, RESULT_COLUMN, SHOTS, STAGE, shown } from "./kit";
+import { CODE_COLUMN, Header, RESULT_COLUMN, SHOTS, STAGE, shown } from "./kit";
 
 // The film slide. The script that films the app sits beside it, and a highlight steps down it a line at a time as the
 // app does that thing: idle, a click on New, a title typed, Add.
@@ -51,7 +51,6 @@ export const FilmingSlide = (): SceneElement => {
           size={19}
           full={{ box: CODE_COLUMN }}
         />
-        <Divider from={0.3} />
         <Sequence when={span(START)}>
           <Pivot
             around={[APP.card.x, APP.card.y]}

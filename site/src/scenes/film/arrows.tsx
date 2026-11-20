@@ -13,17 +13,7 @@ import {
   type Vec,
 } from "svjeez";
 import { Listing } from "./listing";
-import {
-  CODE_COLUMN,
-  Divider,
-  Header,
-  RESULT_COLUMN,
-  SHOTS,
-  mono,
-  shown,
-  spring,
-  theme,
-} from "./kit";
+import { CODE_COLUMN, Header, RESULT_COLUMN, SHOTS, mono, shown, spring, theme } from "./kit";
 
 // The layout slide. An architecture diagram is written as a row of nodes with arrows between them by reference, not
 // by coordinate. Two edits: a cache goes in the middle and the row makes room, then the gap tightens; the arrows hold
@@ -132,7 +122,6 @@ export const ArrowsSlide = (): SceneElement => {
           edits={2}
           aside={{ box: CODE_COLUMN, when: aside }}
         />
-        <Divider from={aside.end} />
         <Group
           motion={enter(span(appear, 0.4), {
             from: { opacity: 0, offset: [0, 10] },
