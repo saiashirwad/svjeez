@@ -3,7 +3,6 @@ import {
   Shape,
   Text,
   ease,
-  line,
   morph,
   rect,
   span,
@@ -19,26 +18,24 @@ import { STAGE, mono, spring, theme } from "./kit";
 // Code that writes itself the way a person (or an agent) does: not letter by letter, but a node, a call or an argument
 // at a time. Each state is the whole file; lines that stay are keyed by their text, so they slide apart to make room,
 // and lines that are new or changed fade in where they land. Then the listing steps aside to make room for what it
-// draws, and later states are edits: the changed line flashes as it swaps.
+// draws, and later states are edits: the changed line flashes as it swaps. There is no panel: the code sits on the
+// canvas under a small label, as large as its column lets it be.
 
-/** The strip on top, the padding on every side of the code, and the line height, as a share of the font size. */
-const BAR = 44;
-const PAD = 24;
+/** The label's row above the code, how far a highlight reaches past the code on each side, and the line height. */
+const LABEL = 40;
+const BLEED = 14;
 const LEADING = 1.5;
 
 /** Geist Mono's advance, as a share of the font size. */
 const ADVANCE = 0.6;
 
-/** The panel that holds every state of a listing at a font size, with the same padding on every side. */
+/** The room every state of a listing takes at a font size: its label, and its longest and tallest code. */
 const panelOf = (states: readonly string[], size: number): Vec => {
   const lines = states.map((source) => source.split("\n"));
   const longest = Math.max(...lines.flat().map((text) => text.length));
   const tallest = Math.max(...lines.map((rows) => rows.length));
 
-  return [
-    longest * size * ADVANCE + 2 * PAD,
-    BAR + 2 * PAD + (tallest - 1) * size * LEADING + size,
-  ];
+  return [longest * size * ADVANCE, LABEL + (tallest - 1) * size * LEADING + size];
 };
 
 /** A short name for a line's text: keys only take letters, digits, - and _. */
@@ -79,9 +76,16 @@ export interface ListingProps {
   /** The panel while the code is written, then where it steps aside to, and when. */
   /** The font size. The panel is sized to the code, and centered on the stage unless given a place. */
   readonly size: number;
-  readonly full?: { readonly at?: Vec; readonly scale?: number };
-  /** Where the listing steps aside to once written, if it does. */
-  readonly aside?: { readonly at: Vec; readonly scale: number; readonly when: Span };
+  readonly full?: {
+    readonly at?: Vec;
+    readonly scale?: number;
+    /** A box to fit the listing into, centered, in place of at and scale. */
+    readonly box?: readonly [number, number, number, number];
+  };
+  /** The box the listing steps aside into once written, if it does: it scales to fit it, centered in it. */
+  readonly aside?: { readonly box: readonly [number, number, number, number]; readonly when: Span };
+  /** A highlight that steps from line to line, a line (counting from 0) at each time: what is running now. */
+  readonly trace?: readonly { readonly line: number; readonly at: number }[];
 }
 
 export const Listing = ({
@@ -92,14 +96,23 @@ export const Listing = ({
   size,
   full = {},
   aside,
+  trace = [],
 }: ListingProps): SceneElement => {
   const [w, h] = panelOf(states, size);
-  const bar = BAR;
   const row = size * LEADING;
-  const scale = full.scale ?? 1;
-  const at = full.at ?? [STAGE.x + (STAGE.w - w) / 2, STAGE.y + (STAGE.h - h) / 2];
-  const moved = aside ? track<Vec>(at).to(aside.at, aside.when, spring) : at;
-  const scaled = aside ? track(scale).to(aside.scale, aside.when, ease.inOut) : scale;
+  const boxed = full.box && Math.min(full.box[2] / w, full.box[3] / h);
+  const scale = boxed ?? full.scale ?? 1;
+  const at: Vec =
+    full.box && boxed !== undefined
+      ? [full.box[0] + (full.box[2] - w * boxed) / 2, full.box[1] + (full.box[3] - h * boxed) / 2]
+      : (full.at ?? [STAGE.x + (STAGE.w - w) / 2, STAGE.y + (STAGE.h - h) / 2]);
+  const fit = aside && Math.min(aside.box[2] / w, aside.box[3] / h);
+  const tucked: Vec | undefined =
+    aside && fit !== undefined
+      ? [aside.box[0] + (aside.box[2] - w * fit) / 2, aside.box[1] + (aside.box[3] - h * fit) / 2]
+      : undefined;
+  const moved = aside && tucked ? track<Vec>(at).to(tucked, aside.when, spring) : at;
+  const scaled = aside && fit !== undefined ? track(scale).to(fit, aside.when, ease.inOut) : scale;
 
   const flashes = steps.slice(-edits || steps.length).map((when, i) => {
     const index = steps.length - edits + i;
@@ -107,45 +120,65 @@ export const Listing = ({
     return { when, line: changed(states[index]!, states[index + 1]!) };
   });
 
+  /** Where a highlight sits behind a line. */
+  const behind = (index: number): Vec => [-BLEED, LABEL + index * row - (row - size) / 2];
+  const bar = rect(w + 2 * BLEED, row, { radius: 6 });
+
+  const code = (source: string): SceneElement => (
+    <Code
+      lang="tsx"
+      font={mono}
+      size={size}
+      lineHeight={LEADING}
+      palette={geistCode}
+      keys={keysOf(source)}
+      at={[0, LABEL]}
+    >
+      {source}
+    </Code>
+  );
+
   return (
     <Pivot around={[0, 0]} at={[0, 0]} motion={[{ offset: moved }, { scale: scaled }]}>
-      <Shape
-        geometry={rect(w, h, { radius: 12 })}
-        fill={theme.surface}
-        stroke={{ color: theme.line, width: 1 }}
-      />
-      <Shape geometry={line([0, bar], [w, bar])} stroke={{ color: theme.line, width: 1 }} />
-      <Text font={mono} size={15} at={[22, bar / 2]} anchor="left" fill={theme.muted}>
-        {name}
+      <Text
+        font={mono}
+        size={13}
+        letterSpacing={1.2}
+        at={[0, 12]}
+        anchor="baseline-left"
+        fill={theme.faint}
+      >
+        {name.toUpperCase()}
       </Text>
       {edits > 0 &&
-        flashes.map(({ when, line: at }) => (
+        flashes.map(({ when, line: index }) => (
           <Shape
-            geometry={rect(w - PAD, row, { radius: 6 })}
-            at={[PAD / 2, bar + PAD + at * row - (row - size) / 2]}
+            geometry={bar}
+            at={behind(index)}
             fill={theme.blue}
             opacity={track(0)
               .to(0.14, span(when.start, 0.15))
               .to(0, span(when.start + 1.1, 0.5))}
           />
         ))}
-      {morph.between(
-        states.map((source) => (
-          <Code
-            lang="tsx"
-            font={mono}
-            size={size}
-            lineHeight={LEADING}
-            palette={geistCode}
-            keys={keysOf(source)}
-            at={[PAD, bar + PAD]}
-          >
-            {source}
-          </Code>
-        )),
-        steps,
-        { curve: steps.every(({ over }) => over >= spring.settle) ? spring : ease.out },
+      {trace.length > 0 && (
+        <Shape
+          geometry={bar}
+          at={trace
+            .slice(1)
+            .reduce(
+              (t, { line: index, at: when }) => t.to(behind(index), span(when, 0.25), ease.inOut),
+              track<Vec>(behind(trace[0]!.line)),
+            )}
+          fill={theme.blue}
+          opacity={track(0).to(0.14, span(trace[0]!.at, 0.2))}
+        />
       )}
+      {states.length === 1
+        ? code(states[0]!)
+        : morph.between(states.map(code), steps, {
+            curve: steps.every(({ over }) => over >= spring.settle) ? spring : ease.out,
+          })}
     </Pivot>
   );
 };

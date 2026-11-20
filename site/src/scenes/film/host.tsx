@@ -20,45 +20,41 @@ type Move =
 const EDGE = 140;
 
 const route: readonly Move[] = [
+  // Out of the tag and onto the stage as it opens.
   { hop: { land: 2.4, height: 150 }, to: [780, EDGE] },
-  { walk: span(3.0, 1.4), to: [980, EDGE], steps: 6 },
-  // The agent's session: Blip sits on it and hops as the calls come in, and cheers at the reply.
-  { hop: { land: 5.8, height: 30 }, to: [1000, 152] },
+  { walk: span(3.0, 1.4), to: [1000, EDGE], steps: 6 },
+  // The agent's session takes the stage's place: Blip stays on its top edge, hopping as the calls come in.
+  { hop: { land: 5.8, height: 30 } },
   { hop: { land: 7.7, height: 30 } },
   { hop: { land: 9.6, height: 30 } },
   { hop: { land: 11.5, height: 40 } },
   { hop: { land: 12.75, height: 80 } },
-  { walk: span(13.25, 0.7), to: [880, 152], steps: 3 },
-  // morph(): on the listing while it is written, then off it before it steps aside.
-  { hop: { land: 14.6, height: 30 }, to: [900, 144] },
-  { hop: { land: 18.2, height: 60 }, to: [1120, EDGE] },
-  { hop: { land: 19.4, height: 40 } },
+  // morph(): onto the listing as it is written, then onto the card it draws.
+  { hop: { land: 14.6, height: 40 }, to: [960, 169] },
+  { hop: { land: 18.5, height: 90 }, to: [1080, 280] },
+  { hop: { land: 19.6, height: 40 } },
   { hop: { land: 20.8, height: 40 } },
-  { hop: { land: 22.1, height: 50 } },
-  { walk: span(22.6, 1.2), to: [620, EDGE], steps: 5 },
-  // ref(): the same.
-  { hop: { land: 24.8, height: 40 }, to: [700, 170] },
-  { hop: { land: 27.6, height: 50 }, to: [880, EDGE] },
+  { hop: { land: 22.2, height: 50 } },
+  // The diagram: onto the listing, then onto it again once it has stepped aside.
+  { hop: { land: 24.8, height: 60 }, to: [900, 154] },
+  { hop: { land: 28.2, height: 70 }, to: [560, 193] },
   { hop: { land: 30.2, height: 40 } },
-  { hop: { land: 31.4, height: 40 } },
-  { walk: span(31.9, 1.0), to: [700, EDGE], steps: 4 },
+  { hop: { land: 31.6, height: 40 } },
   // The filmed app: onto it, and a hop at each click.
-  { hop: { land: 33.9, height: 60 }, to: [1100, 250] },
+  { hop: { land: 33.9, height: 90 }, to: [1100, 250] },
   { hop: { land: 36.2, height: 30 } },
   { hop: { land: 38.8, height: 40 } },
-  { hop: { land: 40.4, height: 70 }, to: [800, EDGE] },
-  // The montage.
-  { walk: span(41.0, 1.2), to: [520, EDGE], steps: 5 },
-  { hop: { land: 43.0, height: 40 } },
-  { hop: { land: 44.3, height: 40 } },
-  { walk: span(44.9, 1.3), to: [820, EDGE], steps: 5 },
-  // The handwritten line, and the facts.
-  { hop: { land: 48.0, height: 60 } },
-  { hop: { land: 49.2, height: 30 } },
-  { hop: { land: 50.4, height: 30 } },
-  { hop: { land: 51.5, height: 40 } },
+  // The montage: along the tops of its tiles.
+  { hop: { land: 41.6, height: 60 }, to: [520, 166] },
+  { walk: span(42.2, 1.8), to: [1000, 166], steps: 8 },
+  { hop: { land: 45.0, height: 40 } },
+  // Beside the handwritten line, then on the first fact.
+  { hop: { land: 47.0, height: 80 }, to: [1170, 420] },
+  { hop: { land: 48.6, height: 40 } },
+  { hop: { land: 50.6, height: 90 }, to: [1030, 280] },
+  { hop: { land: 51.8, height: 40 } },
   // Back into the tag, and cheers.
-  { hop: { land: 54.9, height: 70 }, to: [PILL.x + 150, PILL.y - PILL.h / 2] },
+  { hop: { land: 54.9, height: 90 }, to: [PILL.x + 150, PILL.y - PILL.h / 2] },
   { hop: { land: 56.5, height: 110 } },
   { hop: { land: 57.7, height: 60 } },
 ];

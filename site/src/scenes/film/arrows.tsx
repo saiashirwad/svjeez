@@ -5,6 +5,7 @@ import {
   Text,
   ease,
   enter,
+  morph,
   ref,
   span,
   track,
@@ -12,19 +13,33 @@ import {
   type Vec,
 } from "svjeez";
 import { Listing } from "./listing";
-import { Header, SHOTS, STAGE, mono, shown, spring, theme } from "./kit";
+import {
+  CODE_COLUMN,
+  Divider,
+  Header,
+  RESULT_COLUMN,
+  SHOTS,
+  mono,
+  shown,
+  spring,
+  theme,
+} from "./kit";
 
-// The ref() slide. Two cards and an arrow between them, written by reference rather than by coordinate: one card
-// drifts and the arrow keeps hold of it. Then two edits: the arrow bends, and it moves to the card's other edge.
+// The layout slide. An architecture diagram is written as a row of nodes with arrows between them by reference, not
+// by coordinate. Two edits: a cache goes in the middle and the row makes room, then the gap tightens; the arrows hold
+// on to the nodes through both.
 
-const base = `const [a, b] = [ref(), ref()];
-const drift = track([0, 0]).to([0, 120], span(0.5, 1)).rewind(1);
+const diagram = (nodes: readonly string[], gap: number) => `const [${nodes.join(", ")}] = refs();
 
 export default scene(opts, () => (
   <Group>
-    <Card ref={a} at={[40, 100]} label="api" />
-    <Card ref={b} at={[300, 40]} label="db" motion={{ offset: drift }} />
-    <Arrow from={a.right} to={b.left} />
+    <Stack direction="row" gap={${gap}}>
+${nodes.map((node) => `      <Node ref={${node}}>${node}</Node>`).join("\n")}
+    </Stack>
+${nodes
+  .slice(1)
+  .map((node, i) => `    <Arrow from={${nodes[i]}.right} to={${node}.left} />`)
+  .join("\n")}
   </Group>
 ));`;
 
@@ -34,123 +49,125 @@ const states = [
 ));`,
   `export default scene(opts, () => (
   <Group>
-    <Card ref={a} at={[40, 100]} label="api" />
-    <Card ref={b} at={[300, 40]} label="db" />
+    <Stack direction="row" gap={48}>
+      <Node>web</Node>
+      <Node>api</Node>
+      <Node>db</Node>
+    </Stack>
   </Group>
 ));`,
-  base
-    .replace(" motion={{ offset: drift }}", "")
-    .replace("const drift = track([0, 0]).to([0, 120], span(0.5, 1)).rewind(1);\n", ""),
-  base,
-  base.replace(
-    "<Arrow from={a.right} to={b.left} />",
-    "<Arrow from={a.right} to={b.left} bend={0.4} />",
-  ),
-  base.replace(
-    "<Arrow from={a.right} to={b.left} />",
-    "<Arrow from={a.right} to={b.bottom} bend={0.4} />",
-  ),
+  diagram(["web", "api", "db"], 48),
+  diagram(["web", "api", "cache", "db"], 48),
+  diagram(["web", "api", "cache", "db"], 20),
 ];
 
-const steps = [0.9, 1.8, 2.7, 6.0, 7.2].map((t) => span(t, spring.settle));
-const aside = span(3.4, spring.settle);
-const appear = 4.2;
-const [bent, moved] = [steps[3]!.start + 0.1, steps[4]!.start + 0.1];
+const steps = [0.9, 1.9, 6.0, 7.4].map((t) => span(t, spring.settle));
+const aside = span(3.1, spring.settle);
+const appear = 4.0;
+const [grown, tightened] = [steps[2]!.start + 0.1, steps[3]!.start + 0.1];
 
-const [a, b] = [ref(), ref()];
-const A: Vec = [760, 420];
-const B: Vec = [1000, 250];
+const NODE: Vec = [92, 60];
+const handles = { web: ref(), api: ref(), cache: ref(), db: ref() } as const;
 
-/** The db card bobs from the moment it appears to the end of the slide. */
-const drift = track<Vec>([0, 0])
-  .to([0, 150], span(appear + 0.3, 1), ease.inOut)
-  .to([0, 0], span(appear + 1.5, 1), ease.inOut)
-  .to([0, 150], span(appear + 2.7, 1), ease.inOut)
-  .to([0, 60], span(appear + 3.9, 0.9), ease.inOut);
+type Name = keyof typeof handles;
 
-const Card = ({
-  handle,
-  at,
-  label,
-  motion,
+/** The row the code lays out, the middle of the diagram's area held still as it grows. */
+const Row = ({
+  nodes,
+  gap,
 }: {
-  readonly handle: ReturnType<typeof ref>;
-  readonly at: Vec;
-  readonly label: string;
-  readonly motion?: { readonly offset: typeof drift };
-}): SceneElement => (
-  <Stack
-    ref={handle}
-    at={at}
-    width={120}
-    height={64}
-    align="center"
-    justify="center"
-    radius={10}
-    fill={theme.background}
-    stroke={{ color: theme.faint, width: 1 }}
-    motion={motion}
-  >
-    <Text font={mono} size={18} fill={theme.text}>
-      {label}
-    </Text>
-  </Stack>
-);
+  readonly nodes: readonly Name[];
+  readonly gap: number;
+}): SceneElement => {
+  const width = nodes.length * NODE[0] + (nodes.length - 1) * gap;
 
-const stroke = { color: theme.blue, width: 2, cap: "round" } as const;
+  return (
+    <Stack
+      direction="row"
+      gap={gap}
+      at={[
+        RESULT_COLUMN[0] + RESULT_COLUMN[2] / 2 - width / 2,
+        RESULT_COLUMN[1] + RESULT_COLUMN[3] / 2 - NODE[1] / 2,
+      ]}
+    >
+      {nodes.map((node) => (
+        <Stack
+          key={node}
+          ref={handles[node]}
+          width={NODE[0]}
+          height={NODE[1]}
+          align="center"
+          justify="center"
+          radius={10}
+          fill={theme.background}
+          stroke={{ color: theme.faint, width: 1 }}
+        >
+          <Text font={mono} size={20} fill={theme.text}>
+            {node}
+          </Text>
+        </Stack>
+      ))}
+    </Stack>
+  );
+};
 
-/** Each version of the arrow shows only while its line of code is the current one. */
-const window = (from: number, to?: number) =>
-  to === undefined
-    ? track(0).to(1, span(from, 0.2))
-    : track(0).to(1, span(from, 0.2)).to(0, span(to, 0.2));
+const stroke = { color: theme.blue, width: 2.5, cap: "round" } as const;
 
 export const ArrowsSlide = (): SceneElement => {
   const { over } = SHOTS.arrows;
 
   return (
     <Group>
-      <Header title="point at things, not coordinates" from="ref() · <Arrow>" over={over!} />
+      <Header
+        title="add a node, the diagram makes room"
+        from="<Stack> · ref() · <Arrow>"
+        over={over!}
+      />
       <Group motion={shown(over!, 0.1)}>
         <Listing
-          name="cards.tsx"
+          name="arch.tsx"
+          size={20}
           states={states}
           steps={steps}
           edits={2}
-          size={21}
-          aside={{ at: [STAGE.x + 20, STAGE.y + 90], scale: 0.6, when: aside }}
+          aside={{ box: CODE_COLUMN, when: aside }}
         />
+        <Divider from={aside.end} />
         <Group
           motion={enter(span(appear, 0.4), {
             from: { opacity: 0, offset: [0, 10] },
             curve: ease.out,
           })}
         >
-          <Card handle={a} at={A} label="api" />
-          <Card handle={b} at={B} label="db" motion={{ offset: drift }} />
+          {morph.between(
+            [
+              <Row nodes={["web", "api", "db"]} gap={48} />,
+              <Row nodes={["web", "api", "cache", "db"]} gap={48} />,
+              <Row nodes={["web", "api", "cache", "db"]} gap={20} />,
+            ],
+            [span(grown, 0.7), span(tightened, 0.6)],
+            { curve: ease.inOut },
+          )}
+          <Arrow from={handles.web.right} to={handles.api.left} inset={6} stroke={stroke} />
           <Arrow
-            from={a.right}
-            to={b.left}
+            from={handles.api.right}
+            to={handles.db.left}
             inset={6}
             stroke={stroke}
-            opacity={window(appear, bent)}
+            opacity={track(1).to(0, span(grown, 0.2))}
           />
-          <Arrow
-            from={a.right}
-            to={b.left}
-            inset={6}
-            bend={0.4}
-            stroke={stroke}
-            opacity={window(bent, moved)}
-          />
-          <Arrow
-            from={a.right}
-            to={b.bottom}
-            inset={6}
-            bend={0.4}
-            stroke={stroke}
-            opacity={window(moved)}
-          />
+          {[
+            [handles.api, handles.cache],
+            [handles.cache, handles.db],
+          ].map(([from, to]) => (
+            <Arrow
+              from={from!.right}
+              to={to!.left}
+              inset={6}
+              stroke={stroke}
+              draw={track(0).to(1, span(grown + 0.5, 0.35), ease.out)}
+            />
+          ))}
         </Group>
       </Group>
     </Group>

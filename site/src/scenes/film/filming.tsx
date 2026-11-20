@@ -3,10 +3,10 @@ import { Pivot } from "../blip";
 import { APP, Filmed } from "./app";
 import { Listing } from "./listing";
 import { Note } from "./note";
-import { Header, SHOTS, STAGE, shown } from "./kit";
+import { CODE_COLUMN, Divider, Header, RESULT_COLUMN, SHOTS, STAGE, shown } from "./kit";
 
-// The film slide. The script that films the app grows a line per action, each landing as the app beside it does that
-// thing: idle, a click on New, a title typed, Add.
+// The film slide. The script that films the app sits beside it, and a highlight steps down it a line at a time as the
+// app does that thing: idle, a click on New, a title typed, Add.
 
 const START = 1.4;
 const at = (t: number) => START + t;
@@ -36,7 +36,7 @@ const when = [
 
 export const FilmingSlide = (): SceneElement => {
   const { over } = SHOTS.filming;
-  const scale = 0.62;
+  const scale = RESULT_COLUMN[2] / APP.card.w;
 
   return (
     <Group>
@@ -44,16 +44,18 @@ export const FilmingSlide = (): SceneElement => {
       <Group motion={shown(over!, 0.1)}>
         <Listing
           name="film.tsx"
-          states={lines.map((_, i) => script(i)).concat(script(lines.length))}
-          steps={when.map((t) => span(t, 0.3))}
+          states={[script(lines.length)]}
+          steps={[]}
+          trace={when.map((at, i) => ({ line: i + 1, at }))}
           edits={0}
           size={19}
-          full={{ at: [STAGE.x + 20, STAGE.y + 90], scale: 0.66 }}
+          full={{ box: CODE_COLUMN }}
         />
+        <Divider from={0.3} />
         <Sequence when={span(START)}>
           <Pivot
             around={[APP.card.x, APP.card.y]}
-            at={[STAGE.x + 620, STAGE.y + 110]}
+            at={[RESULT_COLUMN[0], RESULT_COLUMN[1] + (RESULT_COLUMN[3] - APP.card.h * scale) / 2]}
             motion={{ scale }}
           >
             <Filmed />

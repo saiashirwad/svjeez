@@ -1,148 +1,145 @@
 import {
   Group,
   Shape,
+  Stack,
   Text,
+  circle,
   ease,
   enter,
+  morph,
   rect,
   span,
-  track,
-  type Paint,
   type SceneElement,
-  type Vec,
 } from "svjeez";
 import { Listing } from "./listing";
-import { Header, SHOTS, STAGE, mono, shown, spring, theme } from "./kit";
+import {
+  CODE_COLUMN,
+  Divider,
+  Header,
+  RESULT_COLUMN,
+  SHOTS,
+  mono,
+  shown,
+  spring,
+  theme,
+} from "./kit";
 
-// The morph() slide. The code writes itself across the stage, then steps aside; the bars it describes grow, morph
-// from one quarter to the next, and change as the code is edited: a color, then a gap.
+// The morph() slide. A deploy card is written as one component with two states; the code steps aside and the card
+// morphs from building to ready. Two edits follow: the project is renamed, and a line is added, and the card follows.
+
+const component = (name: string, extra: string) => `const Deploy = ({ ready = false }) => (
+  <Stack gap={12} padding={24} stroke={line}>
+    <Text key="name">${name}</Text>
+    <Bar key="progress" done={ready ? 1 : 0.4} />
+    <Status key="status" ready={ready} />
+    {ready && <Text key="url">${name}.app</Text>}${extra}
+  </Stack>
+);`;
+
+const use = `export default scene(opts, () =>
+  morph(<Deploy />, <Deploy ready />, span(1, 0.6)),
+);`;
+
+const TIME = `\n    {ready && <Text key="time">built in 38s</Text>}`;
 
 const states = [
-  `export default scene(opts, () => (
+  `export default scene(opts, () =>
   <Group />
-));`,
-  `export default scene(opts, () => (
-  <Group>
-    {morph(<Bars data={q1} />, <Bars data={q2} />, span(1, 0.8))}
-  </Group>
-));`,
-  `const Bars = ({ data }: { data: Quarter }) => (
-  <Stack direction="row" gap={12} align="end">
-    {data.map(({ region, value }) => (
-      <Shape key={region} geometry={rect(44, value)} fill={color} />
-    ))}
-  </Stack>
-);
-
-export default scene(opts, () => (
-  <Group>
-    {morph(<Bars data={q1} />, <Bars data={q2} />, span(1, 0.8))}
-  </Group>
-));`,
+);`,
+  use,
+  `${component("acme-web", "")}\n\n${use}`,
+  `${component("acme-docs", "")}\n\n${use}`,
+  `${component("acme-docs", TIME)}\n\n${use}`,
 ];
 
-const withColor = (source: string, color: string) => `const color = theme.${color};\n${source}`;
-const grown = withColor(states[2]!, "blue");
-const recolored = withColor(states[2]!, "pink");
-const spread = recolored.replace("gap={12}", "gap={28}");
+const steps = [1.0, 2.0, 6.4, 7.8].map((t) => span(t, spring.settle));
+const aside = span(3.3, spring.settle);
+const appear = 4.2;
+const ready = span(5.0, 0.6);
+const [renamed, timed] = [steps[2]!.start + 0.1, steps[3]!.start + 0.1];
 
-const steps = [1.0, 1.9, 2.8, 6.6, 7.9].map((t) => span(t, spring.settle));
-const aside = span(3.6, spring.settle);
-const appear = 4.4;
-const morphed = span(5.2, 0.8);
-const [recolor, respace] = [steps[3]!.start + 0.1, steps[4]!.start + 0.1];
+const W = 460;
+const BAR = W - 60;
 
-const q1 = [
-  ["us", 150],
-  ["eu", 110],
-  ["apac", 80],
-  ["latam", 40],
-] as const;
+interface CardProps {
+  readonly ready: boolean;
+  readonly name: string;
+  readonly time?: boolean;
+}
 
-const q2 = [
-  ["apac", 190],
-  ["us", 130],
-  ["eu", 90],
-  ["latam", 50],
-] as const;
-
-const BASE = 560;
-const LEFT = 740;
-const WIDTH = 44;
-const xAt = (rank: number, gap: number) => LEFT + rank * (WIDTH + gap);
-
-const Bar = ({ region }: { readonly region: string }): SceneElement => {
-  const before = q1.findIndex(([name]) => name === region);
-  const after = q2.findIndex(([name]) => name === region);
-  const [h1, h2] = [q1[before]![1], q2[after]![1]];
-
-  const at = track<Vec>([xAt(before, 12), BASE - h1])
-    .to([xAt(after, 12), BASE - h2], morphed, ease.inOut)
-    .to([xAt(after, 28), BASE - h2], span(respace, 0.6), ease.inOut);
-
-  const label = track<Vec>([xAt(before, 12) + WIDTH / 2, BASE + 26])
-    .to([xAt(after, 12) + WIDTH / 2, BASE + 26], morphed, ease.inOut)
-    .to([xAt(after, 28) + WIDTH / 2, BASE + 26], span(respace, 0.6), ease.inOut);
-
-  return (
-    <Group>
+/** The card the code describes, in the film's own colors. */
+const Card = ({ ready: done, name, time }: CardProps): SceneElement => (
+  <Stack
+    at={[RESULT_COLUMN[0] + (RESULT_COLUMN[2] - W) / 2, RESULT_COLUMN[1] + 120]}
+    width={W}
+    gap={18}
+    padding={28}
+    radius={12}
+    fill={theme.background}
+    stroke={{ color: theme.line, width: 1 }}
+  >
+    <Text key={`name-${name}`} font={mono} size={26} fill={theme.text}>
+      {name}
+    </Text>
+    <Group key="progress">
+      <Shape geometry={rect(BAR, 8, { radius: 4 })} fill={theme.line} />
       <Shape
-        geometry={track(rect(WIDTH, h1, { radius: 4 })).to(
-          rect(WIDTH, h2, { radius: 4 }),
-          morphed,
-          ease.inOut,
-        )}
-        at={at}
-        fill={track<Paint>(theme.blue).to(theme.pink, span(recolor, 0.4))}
+        key="fill"
+        geometry={rect(done ? BAR : BAR * 0.4, 8, { radius: 4 })}
+        fill={done ? theme.green : theme.blue}
       />
-      <Text font={mono} size={14} at={label} anchor="baseline" fill={theme.muted}>
-        {region}
-      </Text>
     </Group>
-  );
-};
+    <Stack key="status" direction="row" gap={10} align="center">
+      <Shape key="dot" geometry={circle(6)} fill={done ? theme.green : theme.clay} />
+      <Text key={done ? "ready" : "building"} font={mono} size={20} fill={theme.muted}>
+        {done ? "ready" : "building"}
+      </Text>
+    </Stack>
+    {done && (
+      <Text key={`url-${name}`} font={mono} size={20} fill={theme.blue}>
+        {`${name}.app`}
+      </Text>
+    )}
+    {done && time && (
+      <Text key="time" font={mono} size={20} fill={theme.muted}>
+        built in 38s
+      </Text>
+    )}
+  </Stack>
+);
 
 export const MorphSlide = (): SceneElement => {
   const { over } = SHOTS.morph;
 
   return (
     <Group>
-      <Header title="write two states, get the in-between" from="morph()" over={over!} />
+      <Header title="draw the before and the after" from="morph()" over={over!} />
       <Group motion={shown(over!, 0.1)}>
         <Listing
-          name="bars.tsx"
-          states={[states[0]!, states[1]!, states[2]!, grown, recolored, spread]}
+          name="deploy.tsx"
+          size={20}
+          states={states}
           steps={steps}
           edits={2}
-          size={18}
-          aside={{ at: [STAGE.x + 20, STAGE.y + 70], scale: 0.6, when: aside }}
+          aside={{ box: CODE_COLUMN, when: aside }}
         />
+        <Divider from={aside.end} />
         <Group
           motion={enter(span(appear, 0.4), {
             from: { opacity: 0, offset: [0, 10] },
             curve: ease.out,
           })}
         >
-          {["q1", "q2"].map((quarter, i) => (
-            <Text
-              font={mono}
-              size={15}
-              letterSpacing={1}
-              at={[LEFT, STAGE.y + 110]}
-              anchor="baseline-left"
-              fill={theme.muted}
-              opacity={
-                i === 0
-                  ? track(1).to(0, span(morphed.start, 0.2))
-                  : track(0).to(1, span(morphed.start, 0.2))
-              }
-            >
-              {`REVENUE · ${quarter.toUpperCase()}`}
-            </Text>
-          ))}
-          {q1.map(([region]) => (
-            <Bar region={region} />
-          ))}
+          {morph.between(
+            [
+              <Card ready={false} name="acme-web" />,
+              <Card ready name="acme-web" />,
+              <Card ready name="acme-docs" />,
+              <Card ready name="acme-docs" time />,
+            ],
+            [ready, span(renamed, 0.5), span(timed, 0.6)],
+            { curve: ease.inOut },
+          )}
         </Group>
       </Group>
     </Group>

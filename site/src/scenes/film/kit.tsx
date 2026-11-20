@@ -1,4 +1,16 @@
-import { Group, Text, ease, enter, exit, span, tokens, type SceneElement } from "svjeez";
+import {
+  Group,
+  Shape,
+  Text,
+  ease,
+  enter,
+  exit,
+  line,
+  span,
+  tokens,
+  track,
+  type SceneElement,
+} from "svjeez";
 import { google } from "@svjeez/fonts";
 import { geist } from "../../../../examples/fonts/faces";
 
@@ -70,6 +82,10 @@ export const SHOTS = {
 
 export const D = SHOTS.close.end;
 
+/** Where code sits once it steps aside, and the column beside it where what it draws plays: x, y, width, height. */
+export const CODE_COLUMN = [STAGE.x + 20, STAGE.y + 20, 540, STAGE.h - 40] as const;
+export const RESULT_COLUMN = [STAGE.x + 580, STAGE.y + 20, STAGE.w - 600, STAGE.h - 40] as const;
+
 interface HeaderProps {
   readonly title: string;
   readonly from: string;
@@ -113,3 +129,16 @@ export const shown = (over: number, after = 0.3) => [
   enter(span(after, 0.45), { from: { opacity: 0, offset: [0, 12] }, curve: ease.out }),
   exit(span(over - 0.45, 0.35), { curve: ease.in }),
 ];
+
+/** The hairline between the code column and the result column, drawn in from `from`. */
+export const Divider = ({ from }: { readonly from: number }): SceneElement => {
+  const x = (CODE_COLUMN[0] + CODE_COLUMN[2] + RESULT_COLUMN[0]) / 2;
+
+  return (
+    <Shape
+      geometry={line([x, RESULT_COLUMN[1]], [x, RESULT_COLUMN[1] + RESULT_COLUMN[3]])}
+      stroke={{ color: theme.line, width: 1 }}
+      draw={track(0).to(1, span(from, 0.6), ease.inOut)}
+    />
+  );
+};
