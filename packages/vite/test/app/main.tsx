@@ -15,10 +15,10 @@ const App = () => (
       style={{ maxWidth: "100%", height: "auto" }}
     />
     <picture>
-      <source srcSet={basic.posters.dark} media="(prefers-color-scheme: dark)" />
+      <source srcSet={basic.posters.dark[0]!.src} media="(prefers-color-scheme: dark)" />
       <img
         id="poster"
-        src={basic.posters.light}
+        src={basic.posters.light[0]!.src}
         width={basic.width}
         height={basic.height}
         alt=""

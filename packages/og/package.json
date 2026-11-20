@@ -1,0 +1,42 @@
+{
+  "name": "@svjeez/og",
+  "version": "0.8.0-next.0",
+  "private": true,
+  "description": "Link-preview cards for svjeez: write an og:image as a scene, render it to a JPEG or WebP in headless Chromium.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/og"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./render": "./src/render.ts",
+    "./settings": "./src/settings.ts"
+  },
+  "scripts": {
+    "test": "bun test --conditions @svjeez/source",
+    "typecheck": "tsc --noEmit",
+    "build:package": "bun ../../scripts/package-plugin.ts",
+    "test:package": "bun ../../scripts/package-plugin-check.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "playwright-core": "^1.64.1",
+    "svjeez": "workspace:*",
+    "typescript": "latest"
+  },
+  "peerDependencies": {
+    "playwright-core": ">=1.49",
+    "svjeez": "workspace:^"
+  },
+  "peerDependenciesMeta": {
+    "playwright-core": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
+}

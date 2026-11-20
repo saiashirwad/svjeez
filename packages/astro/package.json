@@ -14,11 +14,15 @@
     ".": "./src/index.ts",
     "./scene": "./src/scene.ts",
     "./Scene.astro": "./src/Scene.astro",
+    "./Og.astro": "./src/Og.astro",
+    "./dev/Gallery.astro": "./src/dev/Gallery.astro",
+    "./og": "./src/og.ts",
     "./client": {
       "types": "./client.d.ts"
     }
   },
   "scripts": {
+    "test": "bun test --conditions @svjeez/source",
     "typecheck": "tsc --noEmit",
     "build:package": "bun ../../scripts/package-plugin.ts",
     "test:package": "bun ../../scripts/package-plugin-check.ts"
@@ -28,9 +32,11 @@
   },
   "devDependencies": {
     "astro": "^7.4.3",
+    "svjeez": "workspace:*",
     "typescript": "6"
   },
   "peerDependencies": {
-    "astro": ">=7"
+    "astro": ">=7",
+    "svjeez": "workspace:^"
   }
 }

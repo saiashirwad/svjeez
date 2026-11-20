@@ -1,16 +1,19 @@
 import { basename, extname, join } from "node:path";
 import { pathToFileURL } from "node:url";
+import { settings } from "@svjeez/og/settings";
 import type { Plugin, ResolvedConfig, ViteDevServer } from "vite";
 import { assets, ROUTE } from "./assets.ts";
 import type { PosterOptions } from "./posters.ts";
 import { createRunner, type Runner } from "./runner.ts";
-import type { SceneModule } from "./scene.ts";
+import type { Poster, SceneModule } from "./scene.ts";
 
 export { ROUTE, writeScenes } from "./assets.ts";
 
 export type { PosterOptions } from "./posters.ts";
 
-export type { SceneModule } from "./scene.ts";
+export type { RenderOptions as StillOptions } from "@svjeez/og/render";
+
+export type { Poster, SceneModule } from "./scene.ts";
 
 export interface SvjeezOptions {
   readonly posters?: PosterOptions;
@@ -38,12 +41,12 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
       inFilm = resolved.plugins.some((plugin) => plugin.name === "svjeez-dom");
 
       if (inFilm) return;
-      assets.cache = pathToFileURL(`${options.cacheDir ?? join(config.cacheDir, "svjeez")}/`);
+      settings.cache = pathToFileURL(`${options.cacheDir ?? join(config.cacheDir, "svjeez")}/`);
     },
     configureServer(dev) {
       if (inFilm) return;
       devServer = dev;
-      assets.limit = 500;
+      assets.limit = settings.limit = 500;
 
       dev.middlewares.use(ROUTE, async (request, response, next) => {
         const asset = assets.files.get(
@@ -113,8 +116,11 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
       const emit = (fileName: string, source: string | Uint8Array) =>
         `import.meta.ROLLUP_FILE_URL_${this.emitFile({ type: "asset", name: fileName, source })}`;
 
-      const still = async (url: string, scheme: string) =>
-        emit(`${name}-${scheme}.webp`, await assets.files.get(url.slice(ROUTE.length))!.bytes());
+      const still = async ({ src: url, width: wide }: Poster, scheme: string) =>
+        `{ src: ${emit(`${name}-${scheme}-${wide}.webp`, await assets.files.get(url.slice(ROUTE.length))!.bytes())}, width: ${wide} }`;
+
+      const stills = async (list: readonly Poster[], scheme: string) =>
+        `[${(await Promise.all(list.map((one) => still(one, scheme)))).join(", ")}]`;
 
       return `export default {
   src: ${emit(`${name}.svg`, svg)},
@@ -122,7 +128,7 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
   height: ${height},
   title: ${JSON.stringify(title)},
   desc: ${JSON.stringify(desc)},
-  posters: ${posters ? `{ light: ${await still(posters.light, "light")}, dark: ${await still(posters.dark, "dark")} }` : "undefined"},${server ? `\n  svg: ${JSON.stringify(svg)},` : ""}
+  posters: ${posters ? `{ light: ${await stills(posters.light, "light")}, dark: ${await stills(posters.dark, "dark")} }` : "undefined"},${server ? `\n  svg: ${JSON.stringify(svg)},` : ""}
 };`;
     },
     async closeBundle() {
