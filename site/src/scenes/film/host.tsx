@@ -1,78 +1,122 @@
-import { ease, enter, span, track, type SceneElement, type Vec } from "svjeez";
-import { Blip, GROUND, Pivot, flashes, flight, jumps, type Hop } from "../blip";
-import { SHOTS, STAGE, W, H } from "./kit";
+import { Group, ease, enter, span, track, type SceneElement, type Span, type Vec } from "svjeez";
+import { Blip, GROUND, Pivot, flashes, flight, jumps, waddle, type Hop } from "../blip";
+import { H, W } from "./kit";
 import { PILL } from "./close";
 
-// Blip hosts the film. It pops out of the <img> tag as the stage opens, leaps onto the stage's top edge, and hops
-// whenever something on the stage happens. When the stage folds back into the tag, Blip rides it down and cheers.
+// Blip runs the film. It pops out of the <img> tag, and from then on goes where the action is: onto the agent's
+// session, across to the SVG it wrote, along the code as its lines move, onto the app, and onto the seam between
+// light and dark. At the end it rides the stage back into the tag and cheers.
 
-/** Blip's size in the film, and where it stands while the stage is open. */
+/** Blip's size in the film. */
 const S = 0.42;
-const PERCH: Vec = [780, STAGE.y];
 
-/** Where Blip's feet go, as an offset from the perch in Blip's own units. */
-const from = ([x, y]: Vec): Vec => [(x - PERCH[0]) / S, (y - PERCH[1]) / S];
+/** Blip's feet start on the top of the tag, and every place below is where its feet go, in the film's pixels. */
+const START: Vec = [W / 2 + 120, H / 2 - 36];
 
-const TAG_TOP: Vec = [W / 2 + 120, H / 2 - 36];
-const ON_PILL: Vec = [PILL.x + 150, PILL.y - PILL.h / 2];
+type Move =
+  | { readonly walk: Span; readonly to: Vec; readonly steps: number }
+  | { readonly hop: Hop; readonly to?: Vec };
 
-/** The moments a shot does its thing, in the film's seconds, and how high Blip hops for each. */
-const beats: Hop[] = [
-  { land: SHOTS.layout.start + 2.5, height: 60 },
-  { land: SHOTS.layout.start + 4.3, height: 40 },
-  { land: SHOTS.code.start + 2.6, height: 50 },
-  { land: SHOTS.math.start + 1.6, height: 40 },
-  { land: SHOTS.math.start + 3.3, height: 55 },
-  { land: SHOTS.diagram.start + 2.2, height: 60 },
-  { land: SHOTS.diagram.start + 3.6, height: 40 },
-  { land: SHOTS.data.start + 1.4, height: 40 },
-  { land: SHOTS.data.start + 2.6, height: 60 },
-  { land: SHOTS.app.start + 1.8, height: 40 },
-  { land: SHOTS.app.start + 4.4, height: 60 },
-  { land: SHOTS.themes.start + 1.8, height: 40 },
-  { land: SHOTS.themes.start + 4.4, height: 70 },
+const EDGE = 140;
+
+const route: readonly Move[] = [
+  { hop: { land: 2.4, height: 150 }, to: [780, EDGE] },
+  { walk: span(3.0, 1.6), to: [380, EDGE], steps: 6 },
+  // The agent writes a scene.
+  { hop: { land: 5.9, height: 40 }, to: [560, 180] },
+  { hop: { land: 7.1, height: 30 } },
+  { hop: { land: 9.6, height: 90 }, to: [1080, 400] },
+  { hop: { land: 10.7, height: 40 } },
+  { hop: { land: 12.2, height: 120 }, to: [900, EDGE] },
+  // Mermaid.
+  { walk: span(12.6, 0.9), to: [760, EDGE], steps: 4 },
+  { hop: { land: 14.8, height: 60 }, to: [520, 210] },
+  { hop: { land: 16.1, height: 40 } },
+  { hop: { land: 18.3, height: 70 }, to: [700, EDGE] },
+  // Data: over to the counter, then over to the map.
+  { walk: span(18.6, 1.4), to: [330, EDGE], steps: 6 },
+  { hop: { land: 21.2, height: 50 } },
+  { walk: span(22.0, 2.2), to: [960, EDGE], steps: 9 },
+  // Math.
+  { walk: span(25.0, 0.8), to: [760, EDGE], steps: 3 },
+  { hop: { land: 26.6, height: 50 } },
+  { hop: { land: 28.3, height: 60 } },
+  // Code: down onto the panel, and along it while its lines move.
+  { hop: { land: 31.3, height: 40 }, to: [300, 230] },
+  { walk: span(32.5, 2.2), to: [980, 230], steps: 9 },
+  { hop: { land: 36.2, height: 60 }, to: [980, EDGE] },
+  // The app, and its seam.
+  { hop: { land: 37.4, height: 40 }, to: [960, 196] },
+  { hop: { land: 38.5, height: 30 } },
+  { hop: { land: 40.9, height: 50 } },
+  { walk: span(41.6, 1.2), to: [640, 196], steps: 5 },
+  { hop: { land: 44.8, height: 40 } },
+  { hop: { land: 47.2, height: 70 } },
+  // Back into the tag, and cheers.
+  { hop: { land: 49.9, height: 70 }, to: [PILL.x + 150, PILL.y - PILL.h / 2] },
+  { hop: { land: 51.5, height: 110 } },
+  { hop: { land: 52.7, height: 60 } },
 ];
 
-const onto: Hop = { land: 2.4, height: 150 };
-const down: Hop = { land: SHOTS.close.start + 0.9, height: 70 };
+const isWalk = (move: Move): move is Extract<Move, { walk: Span }> => "walk" in move;
 
-const cheers: Hop[] = [
-  { land: SHOTS.close.start + 2.5, height: 110 },
-  { land: SHOTS.close.start + 3.7, height: 60 },
-];
+/** Feet positions as offsets from the start, in Blip's own units: it is drawn scaled. */
+const own = ([x, y]: Vec): Vec => [(x - START[0]) / S, (y - START[1]) / S];
 
-const hops = [onto, ...beats, down, ...cheers];
-const moves = jumps(hops);
+const travel = route.reduce(
+  (t, move) => {
+    if (isWalk(move)) return t.to(own(move.to), move.walk, ease.linear);
 
-const travel = track<Vec>(from(TAG_TOP))
-  .to([0, 0], flight(onto), ease.linear)
-  .to(from(ON_PILL), flight(down), ease.linear);
+    return move.to ? t.to(own(move.to), flight(move.hop), ease.linear) : t;
+  },
+  track<Vec>([0, 0]),
+);
 
-/** It glances down at the stage while the shots play, and up at you at the end. */
-const look = track<Vec>([0, 0])
-  .to([-6, 4], span(3, 0.3))
-  .to([0, -2], span(SHOTS.close.start + 1, 0.3));
+const hops = route.flatMap((move) => (isWalk(move) ? [] : [move.hop]));
+const leaps = jumps(hops);
+const walks = route.flatMap((move) => (isWalk(move) ? [waddle(move.walk, move.steps)] : []));
 
-const blinks = [1.9, 6.2, 10.4, 15.8, 21.1, 27.4, 32.6, 38.3, 44.9, 50.6];
+/** It looks the way it walks, and down at the stage otherwise; up at you at the end. */
+const look = route
+  .reduce(
+    (t, move, i) => {
+      if (!isWalk(move)) return t;
+      const before = route.slice(0, i).reduce<Vec>((at, m) => m.to ?? at, START);
+      const side = move.to[0] < before[0] ? -6 : 6;
+
+      return t
+        .to([side, 0], span(move.walk.start - 0.15, 0.15))
+        .to([0, 4], span(move.walk.start + move.walk.over, 0.2));
+    },
+    track<Vec>([0, 0]).to([0, 4], span(3, 0.3)),
+  )
+  .to([0, -2], span(50.5, 0.3));
+
+const blinks = [1.9, 6.6, 10.4, 15.8, 21.6, 27.4, 32.9, 38.9, 44.2, 51.0];
 
 export const Host = (): SceneElement => (
   <Pivot
     around={GROUND}
-    at={PERCH}
+    at={START}
     motion={[
       enter(span(1.05, 0.4), { from: { scale: 0 }, curve: ease.pop }),
       { scale: S },
       { offset: travel },
     ]}
   >
-    <Blip
-      blinks={blinks}
-      body={{ offset: moves.body }}
-      stretch={moves.stretch}
-      bulb={moves.bulb}
-      glow={flashes(hops.map((hop) => hop.land))}
-      look={look}
-      feet={{}}
-    />
+    <Group motion={walks.flatMap((walk) => walk.body)}>
+      <Blip
+        blinks={blinks}
+        body={{ offset: leaps.body }}
+        stretch={leaps.stretch}
+        bulb={leaps.bulb}
+        glow={flashes(hops.map((hop) => hop.land))}
+        look={look}
+        feet={{
+          left: walks.map((walk) => walk.feet.left),
+          right: walks.map((walk) => walk.feet.right),
+        }}
+      />
+    </Group>
   </Pivot>
 );

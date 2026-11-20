@@ -7,7 +7,7 @@ import { Header, SHOTS, STAGE, mono, shown, spring, theme } from "./kit";
 const SIZE = 25;
 
 /** Geist's syntax colors: plain text in the foreground, keywords pink, calls purple, numbers blue, strings green. */
-const geistCode = palette("film", {
+export const geistCode = palette("film", {
   light: {
     plain: "#171717",
     comment: "#8F8F8F",

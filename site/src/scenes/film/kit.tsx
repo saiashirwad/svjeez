@@ -49,14 +49,14 @@ export const spring = ease.spring({ stiffness: 170, damping: 17 });
 /** When each shot plays, in the film's seconds. */
 export const SHOTS = {
   open: span(0, 5),
-  layout: span(5, 6.5),
-  code: span(11.5, 6),
-  math: span(17.5, 5.5),
-  diagram: span(23, 6),
-  data: span(29, 6.5),
-  app: span(35.5, 6.5),
-  themes: span(42, 6),
-  close: span(48, 5.5),
+  agent: span(5, 7.5),
+  diagram: span(12.5, 6),
+  data: span(18.5, 6.5),
+  math: span(25, 5.5),
+  code: span(30.5, 6),
+  app: span(36.5, 6.5),
+  themes: span(43, 6),
+  close: span(49, 5.5),
 } as const;
 
 export const D = SHOTS.close.end;

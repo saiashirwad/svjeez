@@ -13,11 +13,11 @@ import {
 } from "svjeez";
 import { Close, PILL } from "./close";
 import { D, H, SHOTS, STAGE, W, theme } from "./kit";
+import { AgentShot } from "./agent";
 import { AppShot, ThemesShot } from "./app";
 import { CodeShot } from "./code";
 import { DataShot } from "./data";
 import { DiagramShot } from "./diagram";
-import { Layout } from "./layout";
 import { Host } from "./host";
 import { MathShot } from "./math";
 import { Open } from "./open";
@@ -102,20 +102,20 @@ export default scene(
       <Sequence when={SHOTS.open}>
         <Open />
       </Sequence>
-      <Sequence when={SHOTS.layout}>
-        <Layout />
-      </Sequence>
-      <Sequence when={SHOTS.code}>
-        <CodeShot />
-      </Sequence>
-      <Sequence when={SHOTS.math}>
-        <MathShot />
+      <Sequence when={SHOTS.agent}>
+        <AgentShot />
       </Sequence>
       <Sequence when={SHOTS.diagram}>
         <DiagramShot />
       </Sequence>
       <Sequence when={SHOTS.data}>
         <DataShot />
+      </Sequence>
+      <Sequence when={SHOTS.math}>
+        <MathShot />
+      </Sequence>
+      <Sequence when={SHOTS.code}>
+        <CodeShot />
       </Sequence>
       <Sequence when={SHOTS.app}>
         <AppShot />
