@@ -93,7 +93,7 @@ import { FontBook, charName, faceOf, piecesOf, type Asked } from "./runs";
 import { lookOf, paintedBoxOf } from "../model/painted";
 import { minus, pinned } from "./pin";
 import { layoutRuns, setAlong } from "./text";
-import { countedNodes, countingIn, formatOf, ticksOf } from "./count";
+import { countedNodes, countingIn, rateOf, ticksOf } from "./count";
 import { typedNodes, typedTicks, typing as typingMix, typingIn } from "./typed";
 import {
   blendable,
@@ -484,9 +484,10 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
         `${where} counts with no fill, so it paints nothing.`,
         "Give the <Text> a fill, as in fill={theme.text}.",
       );
-    const format = formatOf(counting.count.format, where);
+    const { format } = counting.count;
+    const rate = rateOf(counting.count, where);
     const value = animated(counting.count.value, keep, timing, mixNumber, `the count in ${where}`);
-    const ticks = ticksOf(value, ctx.duration, format, where);
+    const ticks = ticksOf(value, ctx.duration, format, rate, where);
     const { before, after } = counting;
 
     unseen(look, before + ticks.map((tick) => tick.text).join("") + after);

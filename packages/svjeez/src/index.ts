@@ -50,7 +50,14 @@ export { span, type Span } from "./author/span";
 
 export { morph } from "./author/morph";
 
-export { count, type Count, type CountFormat } from "./author/count";
+export {
+  count,
+  numeral,
+  type Count,
+  type CountOptions,
+  type NumberFormat,
+  type NumeralOptions,
+} from "./author/count";
 
 export {
   chars,

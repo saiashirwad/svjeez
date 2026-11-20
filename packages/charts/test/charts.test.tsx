@@ -227,6 +227,24 @@ describe("errors", () => {
     ).toBe('Two series are both named "bars".');
   });
 
+  test("a stagger function returns each bar's start, from 0 up to 1", () => {
+    const make = (stagger: number | ((band: number, bands: number) => number)) =>
+      chart([
+        bars(
+          { Jan: 10, Feb: 40, Mar: 25 },
+          { name: "a", color: theme.blue, draw: track(0).to(1, span(0, 2)), stagger },
+        ),
+      ]);
+
+    expect(svg.emit(sceneOf(make(() => 0)))).toBe(svg.emit(sceneOf(make(0))));
+    expect(svg.emit(sceneOf(make((i, n) => (0.5 * i) / n)))).not.toBe(svg.emit(sceneOf(make(0.3))));
+
+    expect(errorOf(make((i) => i)).message).toContain(
+      "stagger function that gave 1 for bar 1 of 3",
+    );
+    expect(errorOf(make(() => Number.NaN)).message).toContain("gave NaN");
+  });
+
   test("a plot area with no size", () => {
     expect(errorOf(chart([], { size: [0, 200] })).problem).toBe("size is [0, 200].");
   });

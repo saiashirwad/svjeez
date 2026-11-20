@@ -55,7 +55,7 @@ area(points, { …line options, baseline?, line? })
 - `data` of `bars` is a record `{ Q1: 12 }` or `[key, value]` pairs; `points` are `[x, y]` pairs, `x` a category string on a band axis or a number on a linear one.
 - `color` is required. `name` keys the series; two series in one chart need different names (default `"bars"`, `"line"`, `"area"`).
 - `draw` is how much of the series is drawn, 0 to 1, a number or a track: one timeline drives the whole series. Without it the series is just there, which is what you want inside a morph. Ease the `draw` track.
-- Several `bars` in one chart stand side by side in each band. `bars`: `stagger` is the share of the draw spent staggering the bars' starts (default 0.3), `radius` defaults to 3, `values: true` writes each number at its bar (or pass `(value) => string`).
+- Several `bars` in one chart stand side by side in each band. `bars`: `stagger` is a number, the share of the draw spent staggering the bars' starts (default 0.3, every bar then takes the rest of the draw), or a function `(band, bands) => start`, each bar's start as a share of the draw from 0 up to 1 (each bar then grows from its start to the end of the draw), `radius` defaults to 3, `values: true` writes each number at its bar (or pass `(value) => string`).
 - `line`: `curve` is `curve.linear` (default), `curve.monotone`, `curve.step`, or any d3-shape curve; `dots` is `true` (radius 4) or a radius; `stroke` restyles the line over its default (the series color, width 2.5, round cap and join); `label` is written past the last point, so leave room on the right.
 - `area`: a fill fading toward the baseline wipes in with the line. `baseline` is the y it reaches down to (default 0). `line: false` leaves the top edge unstroked.
 

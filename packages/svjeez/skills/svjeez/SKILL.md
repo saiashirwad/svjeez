@@ -75,7 +75,7 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 | --- | --- |
 | `<Shape geometry fill stroke draw trim>` | `stroke={{ color, width, cap, join, dash, dashOffset, fixedWidth, under }}`; `draw` is 0 to 1, `trim={[from, to]}` a window; not both |
 | `<Text font size fill weight italic width lineHeight align along start stroke>` | strings and `<Run weight fill italic opacity>` inside; `width` wraps; `along={geometry}` sets one line along an outline |
-| `count(value, { decimals, separator, point, pad, rate })` | a number that counts, as the only content of a `<Text>` besides strings |
+| `count(value, { format, rate })` | a number that counts, as the only content of a `<Text>` besides strings |
 | `typed(value, { by, caret })` | a string track typed out, last in a `<Text>`: each `.to()` erases back to the shared start, then types; `by` is `chars` (default), `words` or your own split |
 | `<Group offset>` | moves children together; `offset` is where their `[0, 0]` goes |
 | `<Picture src={picture(bytes)} width height>` | a PNG, JPEG, GIF, WebP or SVG; `picture.load(path)` reads a file |
@@ -221,7 +221,7 @@ Runtime errors. `…` stands for a value the message fills in.
 | `… is … …, but its children… and padding need ….` | a larger `width` or `height`, or leave it out |
 | `A child of … is keyed "background", which names the container's own fill and stroke.` | give the child another key |
 | `… holds … count()s, and a <Text> counts one number.` | a `<Text>` per number, side by side in a row |
-| `count() in … takes decimals from 0 to 10, got ….` | a whole number of decimals |
+| `numeral() takes decimals from 0 to 10, got ….` | a whole number of decimals |
 | `subtract() cuts holes that lie wholly inside the base or wholly outside it, and … crosses or touches the base's edge. Draw that outline with path() instead.` | draw that outline with `path()` |
 | `… has …, which spreads over the node's box, and this paint has no box to spread over. Give the gradient its points: …` | `linear({ from, to, stops })` |
 

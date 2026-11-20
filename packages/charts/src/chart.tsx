@@ -140,12 +140,31 @@ const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps)
   const { plot, zero } = layout;
   const { radius = 3, color, draw } = options;
   const stagger = options.stagger ?? 0.3;
+  const bands = layout.bands.length;
 
-  if (!(stagger >= 0 && stagger < 1))
+  const shared = (value: number) => value >= 0 && value < 1;
+
+  if (!(stagger instanceof Function) && !shared(stagger))
     throw new SceneError(
       `bars("${options.name}") has a stagger of ${stagger}.`,
       "Give a share of the draw from 0 up to, but not including, 1.",
     );
+
+  // Each bar's start and the share of the draw it grows over.
+  const windowOf = (i: number): readonly [start: number, length: number] => {
+    if (!(stagger instanceof Function))
+      return [bands > 1 ? (stagger * i) / (bands - 1) : 0, 1 - stagger];
+
+    const start = stagger(i, bands);
+
+    if (!(Number.isFinite(start) && shared(start)))
+      throw new SceneError(
+        `bars("${options.name}") has a stagger function that gave ${start} for bar ${i} of ${bands}.`,
+        "Return each bar's start as a share of the draw, from 0 up to, but not including, 1.",
+      );
+
+    return [start, 1 - start];
+  };
 
   const gap = slot.count > 1 ? 2 : 0;
   const width = plot.bandwidth / slot.count;
@@ -162,8 +181,8 @@ const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps)
     const length = Math.abs(zero - plot.y(value));
     const x = at + slot.index * width + gap / 2;
     const radii = up ? ([r, r, 0, 0] as const) : ([0, 0, r, r] as const);
-    const start = layout.bands.length > 1 ? (stagger * i) / (layout.bands.length - 1) : 0;
-    const grown = drawing(partOf(draw, start, start + 1 - stagger));
+    const [start, grow] = windowOf(i);
+    const grown = drawing(partOf(draw, start, start + grow));
 
     const bar = (
       <Shape
@@ -181,7 +200,7 @@ const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps)
 
     const rest: Vec = [x + barWidth / 2, plot.y(value) + (up ? -4 : 4)];
     const lift = up ? 4 : -4;
-    const shown = partOf(draw, start + 0.6 * (1 - stagger), start + 1 - stagger);
+    const shown = partOf(draw, start + 0.6 * grow, start + grow);
 
     return [
       bar,

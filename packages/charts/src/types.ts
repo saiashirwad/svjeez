@@ -37,8 +37,13 @@ export interface SeriesOptions {
 }
 
 export interface BarsOptions extends SeriesOptions {
-  /** The share of the draw spent staggering the bars' starts, from 0 to below 1. Default 0.3. */
-  readonly stagger?: number;
+  /**
+   * When each bar starts growing. A number is the share of the draw spent staggering the starts,
+   * from 0 to below 1 (default 0.3): every bar then takes the rest of the draw. A function
+   * `(band, bands) => start` gives each bar's start as a share of the draw, from 0 to below 1;
+   * each bar then grows from its start to the end of the draw.
+   */
+  readonly stagger?: number | ((band: number, bands: number) => number);
   readonly radius?: number;
   readonly values?: boolean | ((value: number) => string);
 }
