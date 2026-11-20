@@ -96,16 +96,25 @@ const ROWS: readonly (readonly (readonly [ExampleName, Span])[])[] = [
   ],
 ];
 
+/**
+ * When a card takes its picture, for an example whose still moment does not show what it is about: epicycles holds the
+ * finished pi, so its card catches the circles still tracing it.
+ */
+const MOMENTS: Partial<Record<ExampleName, number>> = { epicycles: 9.5 };
+
 export interface Example {
   readonly name: ExampleName;
   readonly span: Span;
   readonly scene: SceneImage;
+  /** When its link-preview card takes its picture, in seconds. The scene's still moment if not set. */
+  readonly moment?: number;
 }
 
 export const examples: readonly Example[] = ROWS.flat().map(([name, span]) => ({
   name,
   span,
   scene: getScene(SCENES[name], { posters: { widths: POSTER_WIDTHS, quality: 0.85 } }),
+  moment: MOMENTS[name],
 }));
 
 /** The example with this name, and its neighbors in the gallery's order (wrapping around). */

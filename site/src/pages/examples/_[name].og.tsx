@@ -13,21 +13,23 @@ const [MAX_W, MAX_H, BAR] = [440, 330, 40];
 const HERO = [920, 270] as const;
 const accents = [theme.blue, theme.magenta, theme.green, theme.orange, theme.cyan, theme.red];
 
-// Each example's card shows the example itself in a window, taken at the moment its poster shows, on a tilted card of
+// Each example's card shows the example itself in a window, taken at its moment (its poster's, unless it sets one), on a tilted card of
 // the example's own color. The color comes from the example's name, so it stays with the example wherever it moves in
 // the gallery, and it lights the timeline too.
 const hash = (name: string) =>
   [...name].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
 
 export default (async ({ params }) => {
-  const { name, scene } = example(params.name!);
+  const { name, scene, moment } = example(params.name!);
   const { title, width, height } = scene;
   const accent = accents[hash(name) % accents.length]!;
   const WIDTH = Math.min(MAX_W, Math.round(((MAX_H - BAR) * width) / height));
   const h = Math.round((WIDTH * height) / width) + BAR;
 
   const art = picture(
-    await renderStill(windowed(scene, { size: [WIDTH, h], title: `${name}.tsx` })),
+    await renderStill(windowed(scene, { size: [WIDTH, h], title: `${name}.tsx` }), {
+      time: moment,
+    }),
   );
 
   return ogScene({ theme, title, desc: `The ${name} example, in a window.` }, () => (

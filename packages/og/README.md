@@ -22,6 +22,6 @@ const { bytes, type, width, height } = await renderOg(card, { format: "jpeg", qu
 // or, in an endpoint or route handler: export const GET = () => ogResponse(card);
 ```
 
-`renderOg` takes a scene or SVG markup and an optional `time`, `scheme`, `format` (`"jpeg"` or `"webp"`), `quality` and `scale`. Renders are queued a few at a time, and kept in a folder when `settings.cache` is set. The browser closes itself after its last picture. `renderStill(scene)` takes a PNG of a scene at its still moment (the one it holds, else 72% in), transparent and at 2x by default, to place inside a card with `picture()`.
+`renderOg` takes a scene or SVG markup and an optional `time`, `scheme`, `format` (`"jpeg"` or `"webp"`), `quality` and `scale`. Renders are queued a few at a time, and kept in a folder when `settings.cache` is set. The browser closes itself after its last picture. `renderStill(scene)` takes a PNG of a scene at its still moment (the one it holds, else 72% in), transparent and at 2x by default, to place inside a card with `picture()`. Pass `time` (seconds, or a function of the duration) to take it at another moment.
 
 Rendering needs Chromium, so use it at build time or in a Node route, not on an edge runtime.
