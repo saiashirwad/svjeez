@@ -18,7 +18,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-3.4s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <defs>
-    <linearGradient id="g1" gradientUnits="userSpaceOnUse" y1="150.5" x2="480" y2="150.5">
+    <linearGradient id="g1" gradientUnits="userSpaceOnUse" y1="133" x2="960" y2="133">
       <stop stop-color="var(--blue)"/>
       <stop offset="1" stop-color="var(--background)"/>
     </linearGradient>

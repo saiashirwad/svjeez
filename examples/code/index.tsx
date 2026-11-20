@@ -21,7 +21,11 @@ export default scene(
       <Shape
         geometry={rect(canvas.width, 35)}
         at={fib.part("rec").topLeft.map(([, y]) => [-LEFT, y - 2])}
-        fill={linear.across({ stops: [theme.blue, theme.background] })}
+        fill={linear({
+          from: [0, 0],
+          to: [canvas.width * 2, 0],
+          stops: [theme.blue, theme.background],
+        })}
         opacity={track(0).to(0.3, span(2.4, 0.4))}
       />
       <Code
