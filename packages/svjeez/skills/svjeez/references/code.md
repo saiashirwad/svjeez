@@ -34,8 +34,7 @@ The source is one string child. `lang` is `ts`, `tsx`, `js`, `jsx`, `json`, `css
 
 - `typing={span(0.3, 1.5)}` types the code in over that span, character by character, line after line, at one speed. One clip per line, so it costs one lane per line. Typing is a track: with `morph`, every state must type the same way, so type code that is not morphed.
 - Each line is keyed `line-1`, `line-2`… A ref on the `<Code>` reaches them: `code.part("line-3").topLeft` places a highlight bar, an arrow or a cursor, and follows the line when it moves. `keys={["sig", "base", "rec"]}` names the lines yourself, one per line (empty ones included).
-- `morph.between` goes from one `<Code key="code">` to another: lines with the same key move, lines whose words change crossfade, new ones enter and old ones leave. Key the lines by what they are (`keys`), not their number, so a line that moves to another row keeps its identity. The repository's `examples/code` scene does this across four languages.
-- `highlight(source, lang, { tabSize, grammars })` returns the lines as `[role, text]` pieces for anything else that draws tokens.
+- `morph.between` goes from one `<Code key="code">` to another: lines with the same key move, lines whose words change crossfade, new ones enter and old ones leave. Key the lines by what they are (`keys`), not their number, so a line that moves to another row keeps its identity.- `highlight(source, lang, { tabSize, grammars })` returns the lines as `[role, text]` pieces for anything else that draws tokens.
 
 ## Errors
 

@@ -107,8 +107,8 @@ The same `morph()` works on plain geometry, syntax-highlighted code (`@svjeez/co
 ![A bar chart morphing across three quarters as bars reorder, resize, enter, and exit](examples/dist/morph.svg)
 *Keyed geometry morph — **11 KB** ([`examples/morph/index.tsx`](examples/morph/index.tsx))*
 
-![Fibonacci morphing between TypeScript, Python, Rust, and Go](examples/dist/code.svg)
-*Shiki code morph across 4 languages — **17 KB** ([`examples/code/index.tsx`](examples/code/index.tsx))*
+![A TypeScript function typing itself, with a bar on its recursive line](examples/dist/code.svg)
+*Shiki-colored code that types itself — **8 KB** ([`examples/code/index.tsx`](examples/code/index.tsx))*
 
 ![Quadratic equation rearranging step by step into the quadratic formula](examples/dist/math.svg)
 *Build-time TeX algebra derivation — **25 KB** ([`examples/math/index.tsx`](examples/math/index.tsx))*
