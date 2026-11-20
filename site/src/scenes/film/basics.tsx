@@ -21,12 +21,18 @@ import { ACCENTS, RESULT_COLUMN, SHOTS, mono, spring, theme } from "./kit";
 // lands. A circle pops in, a wave draws itself, a square springs across, a number counts up.
 
 const ELEMENTS = [
-  `    <Shape geometry={circle(30)} fill={blue}
-      motion={enter(span(0, 0.5))} />`,
-  `    <Shape geometry={wave} stroke={pink}
-      draw={track(0).to(1, span(0, 1))} />`,
-  `    <Shape geometry={rect(40, 40)} fill={teal}
-      at={track(a).to(b, span(0, 1), spring)} />`,
+  `    <Shape
+      geometry={circle(30)} fill={blue}
+      motion={enter(span(0, 0.5))}
+    />`,
+  `    <Shape
+      geometry={wave} stroke={pink}
+      draw={track(0).to(1, span(0, 1))}
+    />`,
+  `    <Shape
+      geometry={rect(40, 40)} fill={teal}
+      at={track(a).to(b, span(0, 1), spring)}
+    />`,
   `    <Text font={mono} size={44}>
       {count(track(0).to(1280, span(0, 1.5)))}
     </Text>`,

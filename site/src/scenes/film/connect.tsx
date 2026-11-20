@@ -65,12 +65,14 @@ const chartFile = (n: number): string => {
 ));`;
 
   return `${data}export default scene(opts, () => (
-  <Chart x={{ kind: "band", domain: quarters }}
+  <Chart
+    x={{ kind: "band", domain: quarters }}
     series={[
       bars(sales, { color: theme.blue, draw }),${
         n >= 3 ? `\n      line(sales, { color: theme.pink, draw }),` : ""
       }
-    ]} />
+    ]}
+  />
 ));`;
 };
 
