@@ -22,7 +22,7 @@ import { mono, spring, theme } from "./kit";
 // draws, and later states are edits: the changed line flashes as it swaps.
 
 export const SIZE = 19;
-export const LINE = SIZE * 1.6;
+export const LINE = SIZE * 1.5;
 
 /** A short name for a line's text: keys only take letters, digits, - and _. */
 const hash = (text: string): string =>
@@ -113,7 +113,7 @@ export const Listing = ({
             lang="tsx"
             font={mono}
             size={SIZE}
-            lineHeight={1.6}
+            lineHeight={1.5}
             palette={geistCode}
             keys={keysOf(source)}
             at={[26, bar + 22]}

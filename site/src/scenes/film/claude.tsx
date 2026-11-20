@@ -1,6 +1,6 @@
 import { Group, Shape, Text, rect, span, type SceneElement } from "svjeez";
 import { Session, Spinner, type Call } from "./session";
-import { SHOTS, STAGE, geist, mono, shown, theme } from "./kit";
+import { SHOTS, STAGE, mono, shown, theme } from "./kit";
 
 // The agent slide: a coding agent's session fills the stage. It is asked for an animated graphic, reads the svjeez
 // skill, writes the scene, checks it, renders frames and looks at them, and says what it made.
@@ -32,14 +32,7 @@ const Welcome = (): SceneElement => (
     <Group offset={[22, 24]}>
       <Spinner />
     </Group>
-    <Text
-      font={geist}
-      weight={600}
-      size={17}
-      at={[40, 29]}
-      anchor="baseline-left"
-      fill={theme.text}
-    >
+    <Text font={mono} size={16} at={[40, 29]} anchor="baseline-left" fill={theme.text}>
       Welcome back
     </Text>
     <Text font={mono} size={14} at={[22, 50]} anchor="baseline-left" fill={theme.muted}>

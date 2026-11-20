@@ -1,7 +1,14 @@
 import { Group, Text, ease, enter, exit, span, tokens, type SceneElement } from "svjeez";
-import { geist, mono } from "../../../../examples/fonts/faces";
+import { google } from "@svjeez/fonts";
+import { geist } from "../../../../examples/fonts/faces";
 
-export { geist, mono };
+export { geist };
+
+/** Geist Mono, for code, terminals and labels: the sans's own mono, with no slab serifs on its i, l and r. */
+export const mono = await google("Geist Mono", {
+  fallback: ["ui-monospace", "Menlo", "monospace"],
+  ligatures: false,
+});
 
 /** Geist's grays, hairlines and a few accents, used sparingly: black and white do most of the work. */
 export const theme = tokens({

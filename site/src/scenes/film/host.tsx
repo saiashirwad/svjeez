@@ -30,7 +30,7 @@ const route: readonly Move[] = [
   { hop: { land: 12.75, height: 80 } },
   { walk: span(13.25, 0.7), to: [880, 152], steps: 3 },
   // morph(): on the listing while it is written, then off it before it steps aside.
-  { hop: { land: 14.6, height: 30 }, to: [900, 154] },
+  { hop: { land: 14.6, height: 30 }, to: [900, 144] },
   { hop: { land: 18.2, height: 60 }, to: [1120, EDGE] },
   { hop: { land: 19.4, height: 40 } },
   { hop: { land: 20.8, height: 40 } },
