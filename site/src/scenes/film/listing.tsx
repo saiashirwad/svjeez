@@ -23,7 +23,7 @@ import { STAGE, mono, spring, theme } from "./kit";
 
 /** The label's row above the code, how far a highlight reaches past the code on each side, and the line height. */
 const LABEL = 40;
-const BLEED = 14;
+const BLEED = 10;
 const LEADING = 1.5;
 
 /** Geist Mono's advance, as a share of the font size. */
@@ -125,7 +125,10 @@ export const Listing = ({
   });
 
   /** Where a highlight sits behind a line. */
-  const behind = (index: number): Vec => [-BLEED, LABEL + index * row - (row - size) / 2];
+  // A line's text box runs from its top down the font's ascent and descent; the bar is centered on that, not on the size.
+  const { ascent, descent } = mono.metrics;
+  const middle = ((ascent + descent) / 2) * size;
+  const behind = (index: number): Vec => [-BLEED, LABEL + index * row + middle - row / 2];
   const bar = rect(w + 2 * BLEED, row, { radius: 6 });
 
   const code = (source: string): SceneElement => (
