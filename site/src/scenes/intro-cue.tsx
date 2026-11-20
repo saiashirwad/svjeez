@@ -1,7 +1,8 @@
+import { Lettering } from "@svjeez/fonts/handwriting";
 import { Group, Shape, ease, path, rect, scene, span, track, type Paint, type Vec } from "svjeez";
 import { theme } from "../../../examples/theme";
 import { BLIP, BULB, Blip, GROUND, Pivot, jumps } from "./blip";
-import { Lettering, S } from "./cue";
+import { S, hand } from "./cue";
 
 const W = 420;
 const H = 148;
@@ -51,7 +52,7 @@ export default scene(
   },
   () => (
     <Group>
-      <Lettering text="watch a film" />
+      <Lettering font={hand} text="watch a film" width={W} y={128} from={0.3} ink={theme.text} />
       <Shape
         geometry={path.parse(
           `M${LAMP[0]} ${LAMP[1]}L${SCREEN.x} ${SCREEN.y}V${SCREEN.y + SCREEN.h}Z`,
