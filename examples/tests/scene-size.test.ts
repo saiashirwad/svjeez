@@ -29,7 +29,7 @@ const budgets = {
   paint: { bytes: 8400, elements: 50, stops: 15, smil: 14, cost: 17.4 },
   epicycles: { bytes: 44550, elements: 145, stops: 119, smil: 0, cost: 84 },
   escapement: { bytes: 50850, elements: 140, stops: 122, smil: 0, cost: 48 },
-  code: { bytes: 4500, elements: 54, stops: 8, smil: 1, cost: 5 },
+  code: { bytes: 8100, elements: 98, stops: 25, smil: 1, cost: 12 },
   globe: { bytes: 435850, elements: 79, stops: 207, smil: 14, cost: 42.5 },
   math: { bytes: 22600, elements: 48, stops: 18, smil: 0, cost: 12 },
   flowchart: { bytes: 15000, elements: 74, stops: 105, smil: 0, cost: 39 },
