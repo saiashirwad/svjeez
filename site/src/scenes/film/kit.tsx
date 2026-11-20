@@ -1,16 +1,4 @@
-import {
-  Group,
-  Shape,
-  Text,
-  ease,
-  enter,
-  exit,
-  line,
-  span,
-  tokens,
-  track,
-  type SceneElement,
-} from "svjeez";
+import { Group, Text, ease, enter, exit, span, tokens, type SceneElement } from "svjeez";
 import { google } from "@svjeez/fonts";
 import { geist } from "../../../../examples/fonts/faces";
 
