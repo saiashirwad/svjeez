@@ -79,10 +79,10 @@ export interface ListingProps {
   readonly full?: {
     readonly at?: Vec;
     readonly scale?: number;
-    /** A box to fit the listing into, centered, in place of at and scale. */
+    /** A box to fit the listing into, against its left edge and centered top to bottom, in place of at and scale. */
     readonly box?: readonly [number, number, number, number];
   };
-  /** The box the listing steps aside into once written, if it does: it scales to fit it, centered in it. */
+  /** The box the listing steps aside into once written, if it does: it scales to fit it, against its left edge. */
   readonly aside?: { readonly box: readonly [number, number, number, number]; readonly when: Span };
   /** A highlight that steps from line to line, a line (counting from 0) at each time: what is running now. */
   readonly trace?: readonly { readonly line: number; readonly at: number }[];
@@ -105,14 +105,14 @@ export const Listing = ({
 
   const at: Vec =
     full.box && boxed !== undefined
-      ? [full.box[0] + (full.box[2] - w * boxed) / 2, full.box[1] + (full.box[3] - h * boxed) / 2]
+      ? [full.box[0], full.box[1] + (full.box[3] - h * boxed) / 2]
       : (full.at ?? [STAGE.x + (STAGE.w - w) / 2, STAGE.y + (STAGE.h - h) / 2]);
 
   const fit = aside && Math.min(aside.box[2] / w, aside.box[3] / h);
 
   const tucked: Vec | undefined =
     aside && fit !== undefined
-      ? [aside.box[0] + (aside.box[2] - w * fit) / 2, aside.box[1] + (aside.box[3] - h * fit) / 2]
+      ? [aside.box[0], aside.box[1] + (aside.box[3] - h * fit) / 2]
       : undefined;
 
   const moved = aside && tucked ? track<Vec>(at).to(tucked, aside.when, spring) : at;
