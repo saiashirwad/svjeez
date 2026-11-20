@@ -114,6 +114,7 @@ export const Listing = ({
     aside && fit !== undefined
       ? [aside.box[0] + (aside.box[2] - w * fit) / 2, aside.box[1] + (aside.box[3] - h * fit) / 2]
       : undefined;
+
   const moved = aside && tucked ? track<Vec>(at).to(tucked, aside.when, spring) : at;
   const scaled = aside && fit !== undefined ? track(scale).to(fit, aside.when, ease.inOut) : scale;
 
