@@ -1,6 +1,7 @@
 import { Group, ease, enter, span, track, type SceneElement, type Span, type Vec } from "svjeez";
 import { Blip, GROUND, Pivot, flashes, flight, jumps, waddle, type Hop } from "../blip";
 import { BASICS, TILE_TOPS } from "./basics";
+import { FILMING, FRAME_TOP } from "./filming";
 import { H, SHOTS, W } from "./kit";
 import { PILL } from "./close";
 
@@ -44,10 +45,11 @@ const route: readonly Move[] = [
   { hop: { land: SHOTS.diagram.start + 5.0, height: 30 } },
   // The card: beside the line.
   { hop: { land: SHOTS.card.start + 0.7, height: 80 }, to: [1150, 382] },
-  // The filmed app: onto it, and a hop at each click.
-  { hop: { land: SHOTS.filming.start + 0.9, height: 90 }, to: [1120, 262] },
-  { hop: { land: SHOTS.filming.start + 3.2, height: 30 } },
-  { hop: { land: SHOTS.filming.start + 5.8, height: 40 } },
+  // The filmed component: onto its frame, and a hop at each later snap.
+  { hop: { land: SHOTS.filming.start + 0.9, height: 90 }, to: FRAME_TOP },
+  ...FILMING.snaps
+    .slice(1)
+    .map((at): Move => ({ hop: { land: SHOTS.filming.start + at, height: 40 } })),
   // The montage: along the tops of its tiles.
   { hop: { land: SHOTS.montage.start + 0.6, height: 60 }, to: [520, 166] },
   { walk: span(SHOTS.montage.start + 1.2, 1.8), to: [1000, 166], steps: 8 },
