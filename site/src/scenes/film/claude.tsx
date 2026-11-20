@@ -40,13 +40,15 @@ const SPRITE = [
 ];
 
 const PIXEL = 5;
-const INK: Readonly<Record<string, string>> = {
-  y: BLIP.yellow,
-  s: BLIP.stem,
-  e: BLIP.ink,
-  b: BLIP.belly,
-  f: BLIP.foot,
-};
+
+/** Each letter of the sprite and the color it stands for. */
+const INK = new Map([
+  ["y", BLIP.yellow],
+  ["s", BLIP.stem],
+  ["e", BLIP.ink],
+  ["b", BLIP.belly],
+  ["f", BLIP.foot],
+]);
 
 const Sprite = (): SceneElement => (
   <Group>
@@ -58,7 +60,7 @@ const Sprite = (): SceneElement => (
               <Shape
                 geometry={rect(PIXEL, PIXEL)}
                 at={[x * PIXEL, y * PIXEL]}
-                fill={INK[pixel] ?? BLIP.yellow}
+                fill={INK.get(pixel) ?? BLIP.yellow}
               />,
             ],
       ),

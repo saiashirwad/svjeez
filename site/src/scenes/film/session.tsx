@@ -175,7 +175,7 @@ export const Session = ({
         at={[38, input + 26]}
         anchor="baseline-left"
         fill={theme.muted}
-        opacity={track(1).to(0, span(typing.start, 0.05))}
+        opacity={track(1).to(0, span(typing.start - 0.06, 0.05))}
       >
         {`Try "${placeholder}"`}
       </Text>
