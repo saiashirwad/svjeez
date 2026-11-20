@@ -22,3 +22,7 @@ Save closed unions for the rendering layer below (e.g. IR curves lowered to `cub
 ## Site
 
 `site/` is the Astro site at svjeez.texoport.in. Its own scenes and films live in `site/src/scenes/`; it also shows scenes from `examples/` through the `@examples/*` path. Its scripts run Astro under Bun with the `@svjeez/source` condition. Run `bun run dev` at the root, or `bun run build` and `bun run typecheck` inside `site/`. `bun run deploy` builds and deploys through Alchemy's `Cloudflare.Website.Astro` (`site/alchemy.run.ts`). The site pins TypeScript 6, because `astro check` does not support TypeScript 7.
+
+## Design
+
+Everything visual (the site, its scenes, films, examples) should look like Vercel's designers made it: Geist and Geist Mono, black and white with a gray scale, 1px hairlines instead of filled cards, tight negative letter-spacing on headings, small uppercase mono labels, and color used sparingly for what needs it. Maps and charts must look slick and clean, never jagged.
