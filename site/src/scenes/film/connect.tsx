@@ -12,6 +12,7 @@ import {
   span,
   track,
   type SceneElement,
+  type Vec,
 } from "svjeez";
 import type { Child } from "svjeez/tools";
 import { Builds } from "./builds";
@@ -23,12 +24,14 @@ const SKELETON = `export default scene(opts, () => (
   <Group />
 ));`;
 
-/** One tile filling the result column, appearing at `from`. */
+/** One tile filling the result column, appearing at `from`; bare, it has no background, and only its contents show. */
 const Tile = ({
   from,
+  bare = false,
   children,
 }: {
   readonly from: number;
+  readonly bare?: boolean;
   readonly children: Child;
 }): SceneElement => (
   <Group
@@ -38,11 +41,13 @@ const Tile = ({
       curve: ease.out,
     })}
   >
-    <Shape
-      geometry={rect(RESULT_COLUMN[2], RESULT_COLUMN[3], { radius: 12 })}
-      fill={theme.surface}
-      stroke={{ color: theme.line, width: 1 }}
-    />
+    {!bare && (
+      <Shape
+        geometry={rect(RESULT_COLUMN[2], RESULT_COLUMN[3], { radius: 12 })}
+        fill={theme.surface}
+        stroke={{ color: theme.line, width: 1 }}
+      />
+    )}
     {children}
   </Group>
 );
@@ -53,6 +58,16 @@ const sales = [
   ["Q3", 31],
   ["Q4", 87],
 ] as const;
+
+/** The chart fills the column, a little in from its edges for the axis labels. */
+const CHART_AT: Vec = [48, 40];
+const CHART_SIZE: Vec = [RESULT_COLUMN[2] - 60, RESULT_COLUMN[3] - 80];
+
+/** The top of the tallest bar, Q4, in the film's pixels, for Blip to stand on once it has grown. */
+export const TALLEST: Vec = [
+  RESULT_COLUMN[0] + CHART_AT[0] + CHART_SIZE[0] * 0.875,
+  RESULT_COLUMN[1] + CHART_AT[1] + CHART_SIZE[1] * (1 - 87 / 100),
+];
 
 const chartFile = (n: number): string => {
   if (n === 0) return SKELETON;
@@ -83,10 +98,10 @@ export const ChartSlide = (): SceneElement => (
     lands={[1.0, 2.6, 4.6]}
     over={SHOTS.chart.over!}
     result={([, grow, trend]) => (
-      <Tile from={grow!}>
+      <Tile from={grow!} bare>
         <Chart
-          at={[64, 48]}
-          size={[RESULT_COLUMN[2] - 104, RESULT_COLUMN[3] - 100]}
+          at={CHART_AT}
+          size={CHART_SIZE}
           x={{ kind: "band", domain: sales.map(([q]) => q), padding: 0.35 }}
           y={{ ticks: 4 }}
           axesIn={span(grow! - 0.2, 0.4)}
