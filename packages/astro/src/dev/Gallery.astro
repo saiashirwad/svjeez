@@ -84,12 +84,18 @@ const missing = entries.filter((entry) => !entry.image).length;
       body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, sans-serif; }
       main { max-width: 1280px; margin: 0 auto; padding: 32px 16px 64px; }
       h1 { margin: 0 0 4px; font-size: 22px; }
-      .sub { margin: 0 0 24px; color: var(--muted); }
+      .bar { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 0 24px; }
+      .sub { margin: 0; color: var(--muted); }
+      .toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); cursor: pointer; user-select: none; }
       .warn { color: var(--warn); }
       .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 20px; }
       article { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
-      article > a { display: block; aspect-ratio: 1200 / 630; background: var(--line); }
+      article > a { position: relative; display: block; aspect-ratio: 1200 / 630; background: var(--line); }
       img { display: block; width: 100%; height: 100%; object-fit: cover; }
+      .guides { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 120ms ease; }
+      .show-guides .guides { opacity: 1; }
+      .guides .safe { position: absolute; inset: 12.7% 6.67%; border: 1px dashed rgba(251, 191, 36, 0.9); }
+      .guides .square { position: absolute; top: 0; bottom: 0; left: 23.75%; right: 23.75%; border-inline: 1px dashed rgba(56, 189, 248, 0.9); }
       .none { display: grid; place-items: center; height: 100%; color: var(--warn); }
       .text { padding: 12px 14px 14px; display: grid; gap: 2px; }
       .host { color: var(--muted); font-size: 12px; text-transform: lowercase; }
@@ -97,21 +103,38 @@ const missing = entries.filter((entry) => !entry.image).length;
       .desc { color: var(--muted); }
       .path { margin-top: 8px; font: 12px ui-monospace, monospace; color: var(--muted); display: flex; gap: 8px; justify-content: space-between; }
       .path a { color: inherit; }
+      .meta { display: inline-flex; gap: 8px; }
     </style>
   </head>
   <body>
     <main>
       <h1>Link previews</h1>
-      <p class="sub">
-        {entries.length} pages, as a link preview shows them.
-        {missing > 0 && <span class="warn">{missing} without an og:image.</span>}
-      </p>
+      <div class="bar">
+        <p class="sub">
+          {entries.length} pages, as a link preview shows them.
+          {missing > 0 && <span class="warn">{missing} without an og:image.</span>}
+        </p>
+        <label class="toggle">
+          <input type="checkbox" id="guides-toggle" />
+          Safe zones (80px margin · 1:1 crop)
+        </label>
+      </div>
       <div class="grid">
         {
           entries.map((entry) => (
             <article>
               <a href={entry.image ?? entry.path}>
-                {entry.image ? <img src={entry.image} width={entry.width} height={entry.height} alt={entry.alt ?? ""} loading="lazy" /> : <span class="none">no og:image</span>}
+                {entry.image ? (
+                  <>
+                    <img src={entry.image} width={entry.width} height={entry.height} alt={entry.alt ?? ""} loading="lazy" />
+                    <span class="guides" aria-hidden="true">
+                      <span class="safe" />
+                      <span class="square" />
+                    </span>
+                  </>
+                ) : (
+                  <span class="none">no og:image</span>
+                )}
               </a>
               <div class="text">
                 <span class="host">{host}</span>
@@ -119,8 +142,11 @@ const missing = entries.filter((entry) => !entry.image).length;
                 <span class="desc">{entry.description}</span>
                 <span class="path">
                   <a href={entry.path}>{entry.path}</a>
-                  <span class:list={{ warn: entry.status >= 400 || (entry.width !== undefined && (entry.width !== 1200 || entry.height !== 630)) }}>
-                    {entry.status >= 400 ? entry.status : entry.width ? `${entry.width}×${entry.height}` : ""}
+                  <span class="meta">
+                    {entry.image && <span class="size" data-src={entry.image} />}
+                    <span class:list={{ warn: entry.status >= 400 || (entry.width !== undefined && (entry.width !== 1200 || entry.height !== 630)) }}>
+                      {entry.status >= 400 ? entry.status : entry.width ? `${entry.width}×${entry.height}` : ""}
+                    </span>
                   </span>
                 </span>
               </div>
@@ -129,5 +155,30 @@ const missing = entries.filter((entry) => !entry.image).length;
         }
       </div>
     </main>
+    <script is:inline>
+      const toggle = document.getElementById("guides-toggle");
+
+      toggle?.addEventListener("change", () => {
+        document.body.classList.toggle("show-guides", toggle.checked);
+      });
+
+      const showSize = (img) => {
+        const entry = performance.getEntriesByName(img.currentSrc || img.src).pop();
+        const bytes = entry?.encodedBodySize;
+
+        if (!bytes) return;
+        const badge = img.closest("article")?.querySelector(".size");
+
+        if (!badge) return;
+        badge.textContent = `${Math.round(bytes / 1024)} KB`;
+
+        if (bytes > 300 * 1024) badge.classList.add("warn");
+      };
+
+      for (const img of document.querySelectorAll("article img")) {
+        if (img.complete) showSize(img);
+        else img.addEventListener("load", () => showSize(img), { once: true });
+      }
+    </script>
   </body>
 </html>

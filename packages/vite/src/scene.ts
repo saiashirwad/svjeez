@@ -2,7 +2,12 @@ import { createHash } from "node:crypto";
 import { gzipSync } from "node:zlib";
 import { isScene, svg as backend, type Scene } from "svjeez/tools";
 import { register, ROUTE } from "./assets.ts";
-import { imageName, renderOg, type RenderOptions as StillOptions } from "@svjeez/og/render";
+import {
+  imageName,
+  imageType,
+  renderOg,
+  type RenderOptions as StillOptions,
+} from "@svjeez/og/render";
 import { poster, type PosterOptions, type Scheme } from "./posters.ts";
 
 /** A poster still of a scene: its URL and its width in pixels. */
@@ -153,16 +158,24 @@ export interface StillImage {
 }
 
 /**
- * A scene's picture at one moment (its first frame by default), as a JPEG or WebP asset in `/_svjeez/`: what a link
- * preview (`og:image`) needs, since crawlers do not draw SVG. Rendered when first requested in dev, and written into the
- * build by the integration.
+ * A scene's picture at one moment (its first frame by default), as a PNG, JPEG or WebP asset in `/_svjeez/`: what a
+ * link preview (`og:image`) needs, since crawlers do not draw SVG. Rendered when first requested in dev, and written
+ * into the build by the integration.
  */
 export const getStill = (scene: SceneSource, options: StillOptions = {}): StillImage => {
   const svg = compile(scene);
   const { width, height, title, desc } = describe("getStill()", svg);
+  const scale = options.scale ?? 1;
   const file = imageName(svg, options);
-  const type = file.endsWith(".webp") ? "image/webp" : "image/jpeg";
+  const type = imageType(options);
   register(file, { type, bytes: async () => (await renderOg(svg, options)).bytes });
 
-  return { src: ROUTE + file, width, height, type, title, desc };
+  return {
+    src: ROUTE + file,
+    width: Math.round(width * scale),
+    height: Math.round(height * scale),
+    type,
+    title,
+    desc,
+  };
 };

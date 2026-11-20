@@ -1,6 +1,4 @@
-import { renderFrames } from "svjeez/frames";
-import { assets } from "./assets.ts";
-import { cached, closeBrowser, encode, stillTime } from "@svjeez/og/render";
+import { cached, snapshot, stillTime } from "@svjeez/og/render";
 
 export type Scheme = "light" | "dark";
 
@@ -13,24 +11,23 @@ export interface PosterOptions {
   readonly background?: string;
 }
 
-assets.close = closeBrowser;
-
-const render = async (
+const render = (
   svg: string,
   scheme: Scheme,
   { scale = 1, quality = 0.8, background = "Canvas" }: PosterOptions,
-) => {
-  const { duration } = await renderFrames(svg, { times: [0], colorScheme: scheme });
-
-  const { frames } = await renderFrames(svg, {
-    times: [stillTime(svg, duration)],
-    colorScheme: scheme,
-    scale,
-    background,
-  });
-
-  return encode(frames[0]!.png, "webp", quality);
-};
+) =>
+  snapshot(
+    svg,
+    {
+      colorScheme: scheme,
+      scale,
+      background,
+      format: "webp",
+      quality,
+      at: (duration) => stillTime(svg, duration),
+    },
+    "poster()",
+  );
 
 export const poster = (
   file: string,

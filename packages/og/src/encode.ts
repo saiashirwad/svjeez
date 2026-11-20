@@ -1,78 +1,54 @@
-import type { Browser, Page } from "playwright-core";
+import { openScene, type SceneOptions } from "svjeez/frames";
 
-export type Format = "webp" | "jpeg";
+export type Format = "png" | "webp" | "jpeg";
 
-let browser: Promise<Browser> | undefined;
-let page: Promise<Page> | undefined;
+export interface SnapshotOptions extends SceneOptions {
+  /** When to take the picture, given the scene's loop length in seconds. */
+  readonly at: (duration: number) => number;
+  readonly format: Format;
+  readonly quality?: number;
+}
 
-const open = (): Promise<Page> => {
-  browser ??= import("playwright-core").then(async ({ chromium }) => {
-    try {
-      return await chromium.launch();
-    } catch {
-      return chromium.launch({ channel: "chrome" }).catch(() => {
-        throw new Error(
-          "No Chromium to encode posters with. Run `npx playwright-core install chromium-headless-shell`.",
-        );
-      });
-    }
-  });
-  page ??= browser.then((b) => b.newPage());
-
-  return page;
-};
-
-// The browser closes itself a moment after its last picture, so a script that only renders does not hang on it.
-const IDLE = 2000;
-let busy = 0;
-let idle: ReturnType<typeof setTimeout> | undefined;
-
-export const encode = async (
-  png: Uint8Array,
-  format: Format,
-  quality = 0.8,
+/**
+ * One picture of SVG markup in its own headless Chromium: captured as a PNG, then encoded in the same page, so a render
+ * opens one browser and closes it when done.
+ */
+export const snapshot = async (
+  svg: string,
+  { at, format, quality = 0.8, ...options }: SnapshotOptions,
+  caller = "snapshot()",
 ): Promise<Uint8Array> => {
-  clearTimeout(idle);
-  busy++;
+  const scene = await openScene(svg, options, caller);
 
   try {
-    return await draw(png, format, quality);
+    const png = await scene.capture(at(scene.duration));
+
+    if (format === "png") return png;
+
+    const base64 = await scene.evaluate(
+      async ({ data, format, quality }) => {
+        const image = new Image();
+        image.src = `data:image/png;base64,${data}`;
+        await image.decode();
+        const canvas = document.createElement("canvas");
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        const context = canvas.getContext("2d")!;
+
+        if (format === "jpeg") {
+          context.fillStyle = "#fff";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        context.drawImage(image, 0, 0);
+
+        return canvas.toDataURL(`image/${format}`, quality).split(",")[1]!;
+      },
+      { data: Buffer.from(png).toString("base64"), format, quality },
+    );
+
+    return Buffer.from(base64, "base64");
   } finally {
-    if (--busy === 0) idle = setTimeout(closeBrowser, IDLE);
+    await scene.close();
   }
-};
-
-const draw = async (png: Uint8Array, format: Format, quality: number): Promise<Uint8Array> => {
-  const p = await open();
-
-  const base64 = await p.evaluate(
-    async ({ data, format, quality }) => {
-      const image = new Image();
-      image.src = `data:image/png;base64,${data}`;
-      await image.decode();
-      const canvas = document.createElement("canvas");
-      canvas.width = image.naturalWidth;
-      canvas.height = image.naturalHeight;
-      const context = canvas.getContext("2d")!;
-
-      if (format === "jpeg") {
-        context.fillStyle = "#fff";
-        context.fillRect(0, 0, canvas.width, canvas.height);
-      }
-
-      context.drawImage(image, 0, 0);
-
-      return canvas.toDataURL(`image/${format}`, quality).split(",")[1]!;
-    },
-    { data: Buffer.from(png).toString("base64"), format, quality },
-  );
-
-  return Buffer.from(base64, "base64");
-};
-
-export const closeBrowser = async (): Promise<void> => {
-  const open = browser;
-  browser = page = undefined;
-
-  if (open) await (await open).close();
 };

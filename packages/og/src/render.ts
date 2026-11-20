@@ -1,13 +1,12 @@
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { renderFrames } from "svjeez/frames";
 import { isScene, svg as backend, type Scene } from "svjeez/tools";
-import { closeBrowser, encode, type Format } from "./encode.ts";
-import { settings } from "./settings.ts";
+import { snapshot, type Format, type SnapshotOptions } from "./encode.ts";
+import { settings, type Rasterizer } from "./settings.ts";
 
-export { closeBrowser, encode, settings, type Format };
+export { settings, snapshot, type Format, type SnapshotOptions };
 
-export type { RenderSettings } from "./settings.ts";
+export type { Rasterizer, RenderSettings } from "./settings.ts";
 
 const LANES = 4;
 let running = 0;
@@ -66,6 +65,8 @@ export interface RenderOptions {
   readonly format?: Format;
   readonly quality?: number;
   readonly scale?: number;
+  /** What draws the picture: `chromium` unless `settings.render` says otherwise. A `resvg` or `sharp` one works on an edge runtime. */
+  readonly render?: Rasterizer;
 }
 
 export interface Rendered {
@@ -76,19 +77,39 @@ export interface Rendered {
   readonly height: number;
 }
 
-const MIME = { jpeg: "image/jpeg", webp: "image/webp" } as const satisfies Record<Format, string>;
+const MIME = {
+  png: "image/png",
+  jpeg: "image/jpeg",
+  webp: "image/webp",
+} as const satisfies Record<Format, string>;
 
-const EXTENSION = { jpeg: "jpg", webp: "webp" } as const satisfies Record<Format, string>;
+const EXTENSION = {
+  png: "png",
+  jpeg: "jpg",
+  webp: "webp",
+} as const satisfies Record<Format, string>;
+
+const withDefaults = ({
+  time = 0,
+  scheme = "light",
+  format = "jpeg",
+  quality = 0.9,
+  scale = 1,
+}: RenderOptions) => ({ time, scheme, format, quality, scale });
 
 /** What a file for these options is called: the same scene and options always give the same name. */
-export const imageName = (
-  svg: string,
-  { format = "jpeg", ...options }: RenderOptions = {},
-): string =>
-  `${createHash("sha256")
-    .update(svg + JSON.stringify(options))
+export const imageName = (svg: string, options: RenderOptions = {}): string => {
+  const { format, ...rest } = withDefaults(options);
+
+  return `${createHash("sha256")
+    .update(svg + JSON.stringify(rest))
     .digest("base64url")
     .slice(0, 12)}.${EXTENSION[format]}`;
+};
+
+/** The MIME type of an image rendered with these options. */
+export const imageType = (options: RenderOptions = {}): string =>
+  MIME[withDefaults(options).format];
 
 const sizeOf = (svg: string) => {
   const box = /viewBox="[\d.-]+ [\d.-]+ ([\d.]+) ([\d.]+)"/.exec(svg);
@@ -98,21 +119,27 @@ const sizeOf = (svg: string) => {
   return { width: Number(box[1]), height: Number(box[2]) };
 };
 
-/** A scene, or SVG markup, as an image: its first frame unless `time` says otherwise. Needs `playwright-core`. */
+/** The built-in rasterizer: headless Chromium through `playwright-core`. */
+export const chromium: Rasterizer = (svg, { time, scheme, scale, format, quality }) =>
+  snapshot(svg, { colorScheme: scheme, scale, format, quality, at: () => time }, "renderOg()");
+
+/** A scene, or SVG markup, as an image: its first frame unless `time` says otherwise. */
 export const renderOg = async (
   source: Scene | string,
   options: RenderOptions = {},
 ): Promise<Rendered> => {
-  const { time = 0, scheme = "light", format = "jpeg", quality = 0.9, scale = 1 } = options;
+  const resolved = withDefaults(options);
   const svg = isScene(source) ? backend.emit(source) : source;
+  const render = options.render ?? settings.render ?? chromium;
+  const bytes = await cached(imageName(svg, options), () => render(svg, resolved));
+  const { width, height } = sizeOf(svg);
 
-  const bytes = await cached(imageName(svg, options), async () => {
-    const { frames } = await renderFrames(svg, { times: [time], colorScheme: scheme, scale });
-
-    return encode(frames[0]!.png, format, quality);
-  });
-
-  return { bytes, type: MIME[format], ...sizeOf(svg) };
+  return {
+    bytes,
+    type: MIME[resolved.format],
+    width: Math.round(width * resolved.scale),
+    height: Math.round(height * resolved.scale),
+  };
 };
 
 /** When a scene is still: the moment it holds, else 72% in. Posters and `renderStill` take their picture here. */
@@ -147,26 +174,43 @@ export const renderStill = (
     .digest("base64url")
     .slice(0, 12)}.png`;
 
-  return cached(name, async () => {
-    const { duration } = await renderFrames(svg, { times: [0], colorScheme: scheme });
-
-    const { frames } = await renderFrames(svg, {
-      times: [time ?? stillTime(svg, duration)],
-      colorScheme: scheme,
-      scale,
-      background,
-    });
-
-    return frames[0]!.png;
-  });
+  return cached(name, () =>
+    snapshot(
+      svg,
+      {
+        colorScheme: scheme,
+        scale,
+        background,
+        format: "png",
+        at: (duration) => time ?? stillTime(svg, duration),
+      },
+      "renderStill()",
+    ),
+  );
 };
+
+export interface OgResponseOptions extends RenderOptions {
+  /** Headers to add, or to replace the defaults (`Content-Type`, `ETag`, and an hour's `Cache-Control`). */
+  readonly headers?: HeadersInit;
+}
+
+const CACHE_CONTROL = "public, max-age=3600, stale-while-revalidate=86400";
 
 /** `renderOg` as a web-standard `Response`, for an Astro endpoint, a Next route handler or any fetch-style server. */
 export const ogResponse = async (
   source: Scene | string,
-  options: RenderOptions = {},
+  options: OgResponseOptions = {},
 ): Promise<Response> => {
-  const { bytes, type } = await renderOg(source, options);
+  const svg = isScene(source) ? backend.emit(source) : source;
+  const { bytes, type } = await renderOg(svg, options);
 
-  return new Response(new Uint8Array(bytes), { headers: { "Content-Type": type } });
+  const headers = new Headers({
+    "Content-Type": type,
+    ETag: `"${imageName(svg, options)}"`,
+    "Cache-Control": CACHE_CONTROL,
+  });
+
+  new Headers(options.headers).forEach((value, key) => headers.set(key, value));
+
+  return new Response(new Uint8Array(bytes), { headers });
 };

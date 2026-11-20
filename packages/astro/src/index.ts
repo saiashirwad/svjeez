@@ -1,28 +1,20 @@
-import { existsSync } from "node:fs";
-import { basename, dirname, extname, join, resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import svjeez, { ROUTE, writeScenes } from "@svjeez/vite";
 import type { AstroIntegration } from "astro";
+import { cardBeside } from "./cards.ts";
 
 // The pages with a fixed address, for the dev gallery at /_og to start from: it finds the rest by following links.
 const ROUTES = "virtual:svjeez/routes";
 
-// The route-to-card map the middleware reads: each page's card is a file beside it, `_<page>.og.tsx`.
+// The route-to-card map the middleware reads: each page's card is found by `cardBeside`.
 const CARDS = "virtual:svjeez/og";
-const EXTENSIONS = ["tsx", "ts", "jsx", "js"];
-
-const cardBeside = (file: string): string | undefined => {
-  const name = basename(file, extname(file));
-
-  return EXTENSIONS.flatMap((extension) => [`_${name}.og.${extension}`, `${name}.og.${extension}`])
-    .map((candidate) => join(dirname(file), candidate))
-    .find((candidate) => existsSync(candidate));
-};
 
 export default function integration(): AstroIntegration {
   let pages: string[] = [];
   let cards: Record<string, string> = {};
   let root = process.cwd();
+  let pagesDir = resolve(root, "src/pages");
   let invalidate = () => {};
 
   return {
@@ -30,6 +22,7 @@ export default function integration(): AstroIntegration {
     hooks: {
       "astro:config:setup": ({ addMiddleware, command, config, injectRoute, updateConfig }) => {
         root = fileURLToPath(config.root);
+        pagesDir = fileURLToPath(new URL("pages", config.srcDir));
 
         addMiddleware({
           order: "post",
@@ -106,7 +99,9 @@ export default function integration(): AstroIntegration {
         cards = Object.fromEntries(
           routes.flatMap((route) => {
             const file =
-              route.type === "page" ? cardBeside(resolve(root, route.entrypoint)) : undefined;
+              route.type === "page"
+                ? cardBeside(resolve(root, route.entrypoint), pagesDir)
+                : undefined;
 
             return file ? [[route.pattern, file]] : [];
           }),
