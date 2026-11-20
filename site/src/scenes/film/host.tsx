@@ -41,7 +41,7 @@ const route: readonly Move[] = [
   { hop: { land: 30.2, height: 40 } },
   { hop: { land: 31.6, height: 40 } },
   // The filmed app: onto it, and a hop at each click.
-  { hop: { land: 33.9, height: 90 }, to: [1100, 250] },
+  { hop: { land: 33.9, height: 90 }, to: [1120, 262] },
   { hop: { land: 36.2, height: 30 } },
   { hop: { land: 38.8, height: 40 } },
   // The montage: along the tops of its tiles.

@@ -224,10 +224,13 @@ const App = ({ ink, played }: AppProps): SceneElement => (
 
 const CURSOR = path.parse("M0 0V26l7-6.2 5 11 4.6-2-5-10.8H20Z");
 
-const cursorAt = track<Vec>([CARD.x + CARD.w - 40, CARD.y + CARD.h + 40])
+/** The cursor rests inside the app, low and to the right, when it isn't clicking anything. */
+const REST: Vec = [CARD.x + CARD.w - 150, CARD.y + CARD.h - 60];
+
+const cursorAt = track<Vec>(REST)
   .to([BUTTON[0] + 64, BUTTON[1] + 26], span(0.7, 0.9), ease.inOut)
   .to([BUTTON[0] + 70, BUTTON[1] + 30], span(3.6, 0.5), ease.inOut)
-  .to([CARD.x + CARD.w - 30, CARD.y + CARD.h - 20], span(added + 0.4, 0.8), ease.inOut);
+  .to(REST, span(added + 0.4, 0.8), ease.inOut);
 
 const Click = ({ at }: { readonly at: number }): SceneElement => (
   <Shape
@@ -251,6 +254,7 @@ export const Filmed = (): SceneElement => (
     <Shape
       geometry={CURSOR}
       at={cursorAt}
+      opacity={track(0).to(1, span(0.3, 0.3))}
       fill={theme.text}
       stroke={{ color: theme.background, width: 1.5, join: "round" }}
     />
