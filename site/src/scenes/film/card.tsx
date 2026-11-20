@@ -6,7 +6,7 @@ import { SHOTS, STAGE, W, geist, shown, theme } from "./kit";
 // One sentence on its own, in capitals, between writing scenes and filming apps: the frameworks it films are named
 // with their logos beside them, each logo drawing itself as its line comes in.
 
-const SIZE = 54;
+const SIZE = 46;
 
 const LOGOS = {
   react: { icon: brandReact, color: "#149ECA" },
@@ -17,8 +17,8 @@ type Piece = string | keyof typeof LOGOS;
 
 /** The sentence, a line at a time: words, and the logos that sit after the frameworks they name. */
 const LINES: readonly (readonly Piece[])[] = [
-  ["FILM THE REACT", "react", "AND SVELTE", "svelte"],
-  ["COMPONENTS YOU ALREADY HAVE.", "MORE SOON."],
+  ["RECORD REAL REACT", "react", "AND SVELTE", "svelte"],
+  ["COMPONENTS AS ANIMATED SVG — MORE SOON."],
 ];
 
 const isLogo = (piece: Piece): piece is keyof typeof LOGOS => piece in LOGOS;

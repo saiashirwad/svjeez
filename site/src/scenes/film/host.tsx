@@ -44,7 +44,7 @@ const route: readonly Move[] = [
   { hop: { land: SHOTS.diagram.start + 3.6, height: 30 } },
   { hop: { land: SHOTS.diagram.start + 5.0, height: 30 } },
   // The card: beside the line.
-  { hop: { land: SHOTS.card.start + 0.7, height: 80 }, to: [1150, 382] },
+  { hop: { land: SHOTS.card.start + 0.7, height: 80 }, to: [1150, 372] },
   // The filmed component: onto its frame, and a hop at each later snap.
   { hop: { land: SHOTS.filming.start + 0.9, height: 90 }, to: FRAME_TOP },
   ...FILMING.snaps
