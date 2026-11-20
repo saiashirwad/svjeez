@@ -1,7 +1,7 @@
 import { ogScene } from "@svjeez/og";
 import { Align, Group, Shape, rect } from "svjeez";
 import { theme } from "@examples/theme";
-import { Backdrop, Copy, Timeline, Window } from "../../og/kit";
+import { Backdrop, Copy, Mascot, Timeline, Window } from "../../og/kit";
 
 const [W, H] = [250, 170];
 
@@ -46,6 +46,8 @@ export default ogScene(
       <Window size={[W, H]} at={[1040, 335]} rotate={7} title="globe.tsx">
         <Example color={theme.green} wide={80} />
       </Window>
+      {/* Blip peeks over the top of the front window, leaning to see in. */}
+      <Mascot at={[945, 138]} size={150} pose={{ tilt: -6, look: [-3, 6] }} />
       <Window size={[W, H]} at={[915, 205]} rotate={-2} title="code.tsx">
         <Example color={theme.magenta} wide={140} />
       </Window>

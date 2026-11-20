@@ -6,7 +6,7 @@ import {
   circle,
   ease,
   line,
-  pattern,
+  path,
   radial,
   rect,
   shadow,
@@ -19,7 +19,7 @@ import {
 import { OG_SIZE } from "@svjeez/og";
 import { geist, mono } from "@examples/fonts/faces";
 import { theme } from "@examples/theme";
-import { Bulb } from "../scenes/bulb";
+import { BLIP, Blip, GROUND, Pivot } from "../scenes/blip";
 
 // The parts a link-preview card is built from. A page's own `_*.og.tsx` writes its scene in JSX and takes what it
 // wants from here, so no two cards need share a layout.
@@ -29,19 +29,9 @@ export const MARGIN = 80;
 
 type Kids = SceneElement | readonly SceneElement[];
 
-const dots = pattern({
-  size: [24, 24],
-  tile: (
-    <Shape geometry={circle(1.2)} at={[12, 12]} anchor="center" fill={theme.border} opacity={0.3} />
-  ),
-});
-
-/** The page's background and its dotted grid. */
+/** The card's plain background. */
 export const Backdrop = (): SceneElement => (
-  <Group>
-    <Shape geometry={rect(...SIZE)} fill={theme.background} />
-    <Shape geometry={rect(...SIZE)} fill={dots} />
-  </Group>
+  <Shape geometry={rect(...SIZE)} fill={theme.background} />
 );
 
 interface TimelineProps {
@@ -215,17 +205,77 @@ export const Glow = ({
 );
 
 const bob = span(0, 2);
-const bobbing = track(0).to(-10, bob, ease.inOut).to(0, bob.next(2), ease.inOut).loop(4);
+const bobbing = track(0).to(-8, bob, ease.inOut).to(0, bob.next(2), ease.inOut).loop(4);
 
-/** The svjeez mascot, bobbing over a card that is already complete at frame 0. */
+/** How Blip holds itself on a card. Every part is optional; Blip's resting pose is the favicon. */
+export interface Pose {
+  /** Degrees Blip leans about its feet; 180 stands it on its head. */
+  readonly tilt?: number;
+  /** Width and height scales about its feet: [1.2, 0.8] squashes, [0.85, 1.2] stretches. */
+  readonly stretch?: Vec;
+  /** Where the eyes look, in Blip's own units, within about 6 either way. */
+  readonly look?: Vec;
+  /** The antenna bulb lit up. */
+  readonly lit?: boolean;
+  /** Feet under the body, each moved by its own offset (and turned, for a kick). */
+  readonly feet?: { readonly left?: Vec; readonly right?: Vec; readonly kick?: number };
+  /** Facing the other way. */
+  readonly flip?: boolean;
+}
+
+/**
+ * Blip, the svjeez mascot, posed. `at` is where its feet touch down and `size` its width; it bobs gently over a card
+ * that is already complete at frame 0.
+ */
 export const Mascot = ({
-  mood,
   at,
-  size = 230,
+  size = 200,
+  pose: { tilt = 0, stretch, look, lit, feet, flip } = {},
 }: {
-  mood: "happy" | "lost";
   at: Vec;
   size?: number;
-}): SceneElement => (
-  <Bulb mood={mood} size={size} at={at} motion={{ offset: bobbing.map((y): Vec => [0, y]) }} />
+  pose?: Pose;
+}): SceneElement => {
+  const scale = size / 208;
+
+  return (
+    <Group motion={{ offset: bobbing.map((y): Vec => [0, y]) }}>
+      <Pivot
+        around={GROUND}
+        at={at}
+        motion={{ rotate: tilt, scale: [flip ? -scale : scale, scale] }}
+      >
+        <Blip
+          stretch={stretch && track<Vec>(stretch)}
+          look={look && track<Vec>(look)}
+          glow={lit ? track<Paint>("#FFF3B0") : undefined}
+          feet={
+            feet && {
+              left: { offset: feet.left ?? [0, 0], rotate: -(feet.kick ?? 0) },
+              right: { offset: feet.right ?? [0, 0], rotate: feet.kick ?? 0 },
+            }
+          }
+        />
+      </Pivot>
+    </Group>
+  );
+};
+
+/** A four-point sparkle. */
+export const Sparkle = ({
+  at,
+  size = 14,
+  color = BLIP.yellow,
+}: {
+  at: Vec;
+  size?: number;
+  color?: Paint;
+}) => (
+  <Shape
+    geometry={path.parse("M0 -1L0.25 -0.25L1 0L0.25 0.25L0 1L-0.25 0.25L-1 0L-0.25 -0.25Z")}
+    at={at}
+    anchor="center"
+    scale={size}
+    fill={color}
+  />
 );

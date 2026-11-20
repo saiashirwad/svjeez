@@ -3,7 +3,7 @@ import { ogScene } from "@svjeez/og";
 import { Picture, Group, Shape, picture, rect } from "svjeez";
 import { theme } from "@examples/theme";
 import { Align } from "svjeez";
-import { Backdrop, Copy, Timeline } from "../../og/kit";
+import { Backdrop, Copy, Mascot, Timeline } from "../../og/kit";
 import { renderStill } from "@svjeez/og/render";
 import { example } from "../../examples";
 import { windowed } from "../../window";
@@ -57,6 +57,17 @@ export default (async ({ params }) => {
         opacity={0.12}
       />
       <Picture src={art} width={WIDTH} at={HERO} anchor="center" />
+      {/* Blip sits on the window's top edge, feet over the side, leaning in to watch the example. */}
+      <Mascot
+        at={[HERO[0] + WIDTH / 2 - 70, HERO[1] - h / 2 + 4]}
+        size={110}
+        pose={{
+          tilt: -8,
+          stretch: [1.08, 0.92],
+          look: [-5, 5],
+          feet: { left: [-4, 6], right: [6, 8], kick: 12 },
+        }}
+      />
       <Timeline accent={accent} active={hash(name) % 5} />
       <Align place="left" inset={80}>
         <Copy
