@@ -6,6 +6,7 @@ import {
   Sequence,
   Shape,
   Stack,
+  spread,
   Text,
   circle,
   ease,
@@ -32,7 +33,7 @@ const Toggle = ({ label, when }: { readonly label: string; readonly when: Span }
   const knob = track<Vec>([13, 13]).to([WIDTH - 13, 13], when, ease.pop);
 
   return (
-    <Stack direction="row" gap={14} align="center" width={220} justify="spread">
+    <Stack direction="row" gap={14} align="center" width={220} justify={spread}>
       <Text font={sans} size={14} fill={theme.text}>
         {label}
       </Text>

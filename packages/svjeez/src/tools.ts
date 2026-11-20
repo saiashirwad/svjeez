@@ -42,7 +42,14 @@ export type { Anchor, Edge, Place } from "./author/refs";
 
 export type { AnchorPlace, TextAnchorPlace } from "./author/pin";
 
-export type { AlignProps, Alignment, GridProps, StackProps } from "./author/layout";
+export type {
+  AlignProps,
+  Alignment,
+  Distribute,
+  GridProps,
+  Justify,
+  StackProps,
+} from "./author/layout";
 
 export type { ArrowProps } from "./author/arrow";
 

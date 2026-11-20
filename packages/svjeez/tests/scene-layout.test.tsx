@@ -8,6 +8,7 @@ import {
   Group,
   Shape,
   Stack,
+  spread,
   Text,
   arc,
   circle,
@@ -21,6 +22,7 @@ import {
   track,
   type SceneElement,
 } from "svjeez";
+import type { StackProps } from "svjeez/tools";
 import { isLane, placements, svg, valueAt, type Model } from "svjeez/tools";
 
 const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
@@ -354,7 +356,7 @@ describe("containers that draw themselves", () => {
         <Stack
           key="row"
           direction="row"
-          justify="spread"
+          justify={spread}
           align="center"
           width={width}
           height={20}
@@ -428,9 +430,29 @@ describe("containers that draw themselves", () => {
     expect(background.kind === "shape" && isLane(background.stroke!.color)).toBe(true);
   });
 
+  test("justify and align take a fraction, and justify a function of the free room and child count", () => {
+    const col = (props: Partial<StackProps>) =>
+      made(() => (
+        <Stack key="col" height={50} width={20} {...props}>
+          <Shape fill="#000000" key="a" geometry={rect(10, 10)} />
+          <Shape fill="#000000" key="b" geometry={rect(10, 10)} />
+        </Stack>
+      ));
+
+    const quarter = col({ justify: 0.25, align: 0.5 });
+
+    expect(placed(find(quarter, "col/a"))).toEqual({ x: 5, y: 7.5, width: 10, height: 10 });
+
+    const last = col({ justify: (free: number, count: number) => [0, free].slice(0, count) });
+
+    expect(placed(find(last, "col/b"))).toEqual({ x: 0, y: 40, width: 10, height: 10 });
+    expect(() => col({ justify: 2 })).toThrow("<Stack> justify takes");
+    expect(() => col({ justify: () => [0] })).toThrow("gave 1 offsets for 2 children");
+  });
+
   test("align stretch widens each container child to the stack's inner width, in a morph too", () => {
     const window = () => (
-      <Stack key="w" align="stretch" fill="#ffffff" stroke={{ color: "#000000", width: 2 }}>
+      <Stack key="w" stretch fill="#ffffff" stroke={{ color: "#000000", width: 2 }}>
         <Stack key="bar" direction="row" padding={2} fill="#cccccc">
           <Shape fill="#000000" key="dot" geometry={circle(2)} />
         </Stack>

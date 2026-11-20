@@ -358,7 +358,24 @@ describe("morph", () => {
     expect(times("a/dot")).toEqual([0, 1, 1.5, 4]);
     expect(times("c/bar")).toEqual([0, 1.5, 2, 4]);
     expect(() => made(() => morph(bars(10), bars(20), span(1, 1), { stagger: 0.5 }))).toThrow(
-      "stagger of 0.5s across the 3 things",
+      "delays the last of the 3 things",
+    );
+  });
+
+  test("a stagger function gives each changing sibling its own delay, and must return 0 or more", () => {
+    const bars = (h: number) =>
+      ["a", "b", "c"].map((key) => <Shape fill="#000000" key={key} geometry={rect(5, h)} />);
+
+    const model = made(() =>
+      morph(bars(10), bars(20), span(1, 1), { stagger: (i, count) => (count - 1 - i) * 0.25 }),
+    );
+
+    const times = (key: string) => lane(shape(model, key).geometry).keys.map((k) => k.t);
+
+    expect(times("c")).toEqual([0, 1, 1.5, 4]);
+    expect(times("a")).toEqual([0, 1.5, 2, 4]);
+    expect(() => made(() => morph(bars(10), bars(20), span(1, 1), { stagger: () => -1 }))).toThrow(
+      "delay of 0 or more seconds",
     );
   });
 

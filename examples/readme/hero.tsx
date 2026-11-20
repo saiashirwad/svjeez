@@ -16,6 +16,7 @@ import {
   ref,
   scene,
   span,
+  spread,
   track,
   type Paint,
   type Ref,
@@ -109,13 +110,13 @@ const Card = ({
     width={width}
     height={160}
     padding={[14, 12]}
-    justify="spread"
+    justify={spread}
     radius={12}
     fill={theme.surface}
     stroke={{ color: theme.border, width: 1 }}
     motion={lift ? { offset: signal.map((v): Vec => [0, -24 * v]) } : undefined}
   >
-    <Stack direction="row" width={width - 30} justify="spread" align="center">
+    <Stack direction="row" width={width - 30} justify={spread} align="center">
       <Stack direction="row" gap={7} align="center">
         <Shape geometry={circle(4)} fill={dot} />
         <Text font={mono} size={12} fill={theme.text}>

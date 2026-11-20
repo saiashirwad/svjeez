@@ -14,7 +14,7 @@ export {
 
 export type { Ref } from "./author/refs";
 
-export { Align, Center, Grid, Stack } from "./author/layout";
+export { Align, Center, Grid, spread, Stack } from "./author/layout";
 
 export { Arrow } from "./author/arrow";
 

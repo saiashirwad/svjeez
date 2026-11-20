@@ -110,7 +110,7 @@ Every node also takes `key ref at anchor origin rotate scale skew opacity motion
 
 | Layout | |
 | --- | --- |
-| `<Stack direction gap align justify padding width height>` | children in a row or column; `justify="spread"` spaces them across a fixed size |
+| `<Stack direction gap align justify padding width height>` | children in a row or column; `justify={spread}` spaces them across a fixed size; `stretch` widens children |
 | `<Grid columns gap justify align padding>` | rows of cells as wide as their widest child |
 | `<Center padding width height>` | children centered on each other: a label on a shape, a pill |
 | `fill stroke radius` on those three | a background as big as the container: a card, a window, a row |

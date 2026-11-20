@@ -84,7 +84,7 @@ const Desktop = ({ x, start, from, to }: DesktopProps): SceneElement => {
           at={winAt}
           width={104}
           height={72}
-          align="stretch"
+          stretch
           radius={RADIUS}
           fill={theme.surface}
           stroke={{ color: theme.border, width: LINE }}

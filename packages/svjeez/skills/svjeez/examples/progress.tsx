@@ -5,6 +5,7 @@ import {
   Group,
   Shape,
   Stack,
+  spread,
   Text,
   circle,
   count,
@@ -68,7 +69,7 @@ export default scene(
             />
           </Center>
           <Stack gap={10}>
-            <Stack direction="row" justify="spread" align="end" width={BAR}>
+            <Stack direction="row" justify={spread} align="end" width={BAR}>
               <Text font={sans} weight={600} size={15} fill={theme.text}>
                 scene.svg
               </Text>

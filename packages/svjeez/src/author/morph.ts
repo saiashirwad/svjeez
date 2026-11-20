@@ -43,7 +43,7 @@ export interface MorphOptions {
   readonly curve?: Curve | readonly Curve[];
   readonly enter?: LayerValues;
   readonly exit?: LayerValues;
-  readonly stagger?: Seconds;
+  readonly stagger?: Seconds | ((index: number, count: number) => Seconds);
 }
 
 export interface MorphElement {
@@ -79,7 +79,7 @@ const between = (
 
   const { stagger = 0 } = options;
 
-  if (!(stagger >= 0 && Number.isFinite(stagger)))
+  if (!(stagger instanceof Function) && !(stagger >= 0 && Number.isFinite(stagger)))
     throw new SceneError(`morph() needs a stagger of 0 or more seconds, got ${stagger}.`);
 
   return { type: "morph", states: states.map(flat), spans, options };
@@ -969,16 +969,31 @@ export const merge = (
 ): SceneNode[] => {
   const top = entries(names, states);
   const { stagger = 0 } = options;
+
+  const delay = stagger instanceof Function ? stagger : (index: number) => index * stagger;
   const windows = new Map<Entry, Window[]>();
   const all = preorder(top);
 
   spans.forEach(({ start, over }, i) => {
     const moving = units(top, i);
-    const length = over - stagger * (moving.length - 1);
+
+    const waits = moving.map((_, r) => {
+      const wait = delay(r, moving.length);
+
+      if (!(wait >= 0 && Number.isFinite(wait)))
+        throw new SceneError(
+          `morph()'s stagger needs a delay of 0 or more seconds for each piece, got ${wait} for piece ${r + 1} of ${moving.length}.`,
+        );
+
+      return wait;
+    });
+
+    const latest = Math.max(0, ...waits);
+    const length = over - latest;
 
     if (moving.length > 1 && !(length > EPSILON))
       throw new SceneError(
-        `morph()'s stagger of ${num(stagger)}s across the ${moving.length} things that change in transition ${i + 1} takes the whole ${num(over)}s span. Give it a longer span or a shorter stagger.`,
+        `morph()'s stagger delays the last of the ${moving.length} things that change in transition ${i + 1} by ${num(latest)}s, which takes the whole ${num(over)}s span. Give it a longer span or a shorter stagger.`,
       );
 
     const rank = new Map(
@@ -987,10 +1002,10 @@ export const merge = (
 
     for (const entry of all) {
       const own = windows.get(entry) ?? [];
-      const wait = (rank.get(entry) ?? 0) * stagger;
+      const wait = waits[rank.get(entry) ?? 0] ?? 0;
 
       own.push(
-        stagger > 0 && moving.length > 1 ? { start: start + wait, over: length } : { start, over },
+        latest > 0 && moving.length > 1 ? { start: start + wait, over: length } : { start, over },
       );
       windows.set(entry, own);
     }

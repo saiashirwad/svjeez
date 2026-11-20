@@ -6,21 +6,38 @@ import { restOf } from "./derived";
 import { Anchor, canvasAnchor, fractionOf, placeIn, Ref, type Place } from "./refs";
 import type { Arrange, Size } from "./settle";
 
-export type Alignment = "start" | "center" | "end";
+/** Where something sits in free room: a name, or a fraction from 0 (start) to 1 (end). */
+export type Alignment = "start" | "center" | "end" | number;
 
-/** Where children sit along the stack; "spread" puts the first and last at its ends, with equal gaps between. */
-export type Justify = Alignment | "spread";
+/** Each child's extra offset along the stack, given the free length and the child count; added to its packed position. */
+export type Distribute = (free: number, count: number) => readonly number[];
 
-const SHARE: Readonly<Record<Alignment, number>> = { start: 0, center: 0.5, end: 1 };
+/** Where children sit along the stack: an Alignment shifts them together, a function places each. */
+export type Justify = Alignment | Distribute;
+
+/** Every child moves by the same share of the free room. */
+const together =
+  (along: number): Distribute =>
+  (free, count) =>
+    Array.from({ length: count }, () => free * along);
+
+const NAMED = { start: 0, center: 0.5, end: 1 } as const;
 
 const share = (value: Alignment, what: string): number => {
-  const found = SHARE[value];
+  // SAFETY: an unknown key just misses NAMED and falls through to the validation below.
+  const found: unknown = NAMED[value as keyof typeof NAMED] ?? value;
 
-  if (found === undefined)
-    throw new SceneError(`${what} takes "start", "center" or "end", got "${String(value)}".`);
+  if (!(found === Number(found) && Number(found) >= 0 && Number(found) <= 1))
+    throw new SceneError(
+      `${what} takes "start", "center", "end" or a number from 0 to 1, got ${JSON.stringify(value)}.`,
+    );
 
-  return found;
+  return Number(found);
 };
+
+/** The first child at the start and the last at the end, with equal gaps between. */
+export const spread: Distribute = (free, count) =>
+  Array.from({ length: count }, (_, i) => (count > 1 ? (free * i) / (count - 1) : 0));
 
 const isPair = (value: number | Vec): value is Vec => Array.isArray(value);
 
@@ -92,7 +109,9 @@ const fits = (
 export interface StackProps extends Common, Backdrop {
   readonly direction?: "row" | "column";
   readonly gap?: number;
-  readonly align?: Alignment | "stretch";
+  readonly align?: Alignment;
+  /** Widen each container child to the stack's inner breadth; `align` then has nothing left to place. */
+  readonly stretch?: boolean;
   readonly justify?: Justify;
   readonly padding?: number | Vec;
   readonly width?: number;
@@ -104,6 +123,7 @@ export const Stack = ({
   direction = "column",
   gap = 0,
   align = "start",
+  stretch = false,
   justify = "start",
   padding = 0,
   width,
@@ -120,10 +140,11 @@ export const Stack = ({
     throw new SceneError(`<Stack> takes direction "row" or "column", got "${String(direction)}".`);
   const [space] = room(gap, "<Stack> gap");
   const { backdrop, inset } = paint(label, { fill, stroke, radius }, padding);
-  const stretch = align === "stretch";
-  const cross = stretch ? 0 : share(align, '<Stack> align, or "stretch",');
-  const between = justify === "spread";
-  const along = between ? 0 : share(justify, '<Stack> justify, or "spread",');
+  const cross = share(align, "<Stack> align");
+
+  const distribute =
+    justify instanceof Function ? justify : together(share(justify, "<Stack> justify"));
+
   const row = direction === "row";
   const [wide, tall] = [size(width, "<Stack> width"), size(height, "<Stack> height")];
 
@@ -141,11 +162,17 @@ export const Stack = ({
       const breadth = fits(label, where, crossSide, fixedCross, widest + edge * 2);
       const free = length - lead * 2 - content;
       const across = breadth - edge * 2;
-      const spread = between && boxes.length > 1 ? free / (boxes.length - 1) : 0;
-      const { starts } = run(mains, lead + (between ? 0 : free * along), space + spread);
+      const shifts = distribute(free, boxes.length);
 
-      const slots = starts.map((start, i): Vec => {
+      if (shifts.length !== boxes.length || !shifts.every(Number.isFinite))
+        throw new SceneError(
+          `<Stack> justify gave ${shifts.length} offsets for ${boxes.length} children; it needs one finite number for each.`,
+        );
+      const { starts } = run(mains, lead, space);
+
+      const slots = starts.map((packed, i): Vec => {
         const side = edge + (across - sides[i]!) * cross;
+        const start = packed + shifts[i]!;
 
         return row ? [start, side] : [side, start];
       });
