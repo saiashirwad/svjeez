@@ -16,7 +16,6 @@ import {
   type Vec,
 } from "svjeez";
 import { geistCode } from "./code";
-import { Note } from "./note";
 import { Session } from "./session";
 import type { Child } from "svjeez/tools";
 import { Header, SHOTS, STAGE, mono, shown, theme } from "./kit";
@@ -35,7 +34,6 @@ export const COPY = {
   reply: "wrote cache-flow.svg · 18 KB",
   file: "cache-flow.tsx",
   result: "cache-flow.svg",
-  note: "never opened a browser",
 } as const;
 
 const SESSION = { x: STAGE.x + 40, y: STAGE.y + 40, w: 500, h: STAGE.h - 80 } as const;
@@ -252,13 +250,6 @@ export const AgentShot = (): SceneElement => {
             <Result />
           </Panel>
         </Group>
-        <Note
-          text={COPY.note}
-          at={[RESULT.x + RESULT.w / 2, RESULT.y + RESULT.h + 32]}
-          from={shipped + 0.4}
-          size={28}
-          tilt={-3}
-        />
       </Group>
     </Group>
   );
