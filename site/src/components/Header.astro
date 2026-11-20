@@ -14,7 +14,7 @@ const { current, wide } = Astro.props;
 
 const blip = getScene(mascot);
 
-const links: { href: string; label: string; page?: string }[] = [{ href: "https://github.com/saiashirwad/svjeez", label: "GitHub" }];
+const links: { href: string; label: string; page?: string }[] = [{ href: "/examples", label: "Examples", page: "examples" }, { href: "https://github.com/saiashirwad/svjeez", label: "GitHub" }];
 
 const optional: string[] = [];
 const SWATCH = ["background", "red", "green", "blue", "magenta"] as const;
@@ -22,10 +22,10 @@ const swatches = ({ theme }: Palette) => SWATCH.map((name, i) => `--s${i}: light
 
 // The icons are inlined, so they paint with the page's own colors: their ink is currentColor and their --bg the page's.
 const icon = (scene: Parameters<typeof svg.emit>[0], prefix: string) =>
-  svg
-    .emit(scene, { prefix })
-    .replace(/^.*svg\.\w+root\{--ink.*\n/gm, "")
-    .replaceAll("var(--ink)", "currentColor");
+  svg.emit(scene, {
+    prefix,
+    resolve: { ink: "currentColor", ...("bg" in scene.tokens && { bg: "inherit" }) },
+  });
 ---
 
 <header class:list={["wrap top", { wide }]}>

@@ -1203,6 +1203,415 @@ pre.side {
   }
 }
 
+/* Examples gallery and one example. */
+.page-head {
+  padding-block: 2rem 0.5rem;
+}
+.page-head h1 {
+  font-size: clamp(2.25rem, 1.5rem + 3.5vw, 3.5rem);
+  letter-spacing: -0.03em;
+}
+/* "you" is struck through by hand and "your agent" written in above it. */
+.page-head h1 {
+  padding-block-start: 0.5em;
+  line-height: 1.35;
+}
+.edit {
+  position: relative;
+  display: inline-block;
+}
+.edit s {
+  text-decoration: none;
+}
+.edit > svg {
+  position: absolute;
+  inset: 22% -6% 18%;
+  inline-size: 112%;
+  block-size: 60%;
+  overflow: visible;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 0.09em;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+}
+/* "your agent" is a scene (examples/site/your-agent.tsx) inlined here; its ink is currentColor. */
+.edit ins svg {
+  display: block;
+  inline-size: 6.4em;
+  max-inline-size: none;
+  block-size: 1.92em;
+  overflow: visible;
+}
+.edit ins span:first-child {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: clip;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.edit ins {
+  position: absolute;
+  inset-block-end: 82%;
+  inset-inline-start: 0.1em;
+  font-size: 0.42em;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--accent);
+  rotate: -4deg;
+  transform-origin: 0 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .edit > svg path {
+    animation: scratch 0.7s 0.5s var(--out) backwards;
+  }
+}
+/* On a phone "you" wraps to the second line, so the lines part enough for "your agent" to be written between them. */
+@media (width < 40rem) {
+  .page-head h1 {
+    line-height: 1.7;
+  }
+}
+@keyframes scratch {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+/* The gallery is set like a front page: a wide card and a narrow one, then three, on the page's twelve columns, so
+   every scene draws near its own size and the diagrams can be read. Each card's span is in --span. Cards sit on their
+   captions, so over the narrow card of a pair there is air, and the lead's size is written into it. Two columns on a
+   tablet, with the lead across both, and one on a phone. */
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem var(--gap);
+  margin-block-start: 1.25rem;
+}
+@media (min-width: 40rem) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .grid .card:first-child {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 56rem) {
+  .grid {
+    position: relative;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2.5rem var(--gap);
+  }
+  .grid .card,
+  .grid .card:first-child {
+    grid-column: span var(--span);
+  }
+}
+/* Each card is two rows of the grid, the picture and its caption, so pictures in a row share a bottom edge and captions
+   a top one, however long a title runs. The title is the card's link and stretches over all of it; only the size chip
+   sits above it. */
+.card {
+  position: relative;
+  display: grid;
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  row-gap: 0.75rem;
+  min-inline-size: 0;
+  color: inherit;
+  text-decoration: none;
+}
+.card .shot {
+  position: relative;
+  display: block;
+  align-self: end;
+  aspect-ratio: 16 / 9;
+  overflow: clip;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 0 0 1px var(--ring);
+}
+.card .shot img {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: 50% 25%;
+}
+/* The caption: the title, then the file's proof chip, which opens the same menu as on the landing page. */
+.card .cap {
+  align-self: start;
+  padding-inline: 0.25rem;
+  font: 400 1rem / 1.3 var(--sans);
+}
+.card .title {
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+}
+.card .title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+/* The chip follows the title's last word, and wraps with it, a little up from the baseline so it centers on the line. */
+.card .proof {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  inset: auto;
+  margin-inline-start: 0.5rem;
+  vertical-align: 0.0625rem;
+  translate: none;
+}
+.card .proof-chip {
+  margin-block: -0.25rem;
+  background: none;
+}
+/* The ring goes on the picture, with its corners, not round the card. */
+.card .title:focus-visible {
+  outline: none;
+}
+.card:has(.title:focus-visible) .shot {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.card:has(.title:focus-visible) .shot,
+.card:has(.title:active) .shot {
+  box-shadow:
+    0 0 0 1px var(--ring),
+    0 1.25rem 2.5rem -1rem var(--shadow);
+}
+@media (hover: hover) and (pointer: fine) {
+  .card:hover:not(:has(.proof:hover)) .shot {
+    box-shadow:
+      0 0 0 1px var(--ring),
+      0 1.25rem 2.5rem -1rem var(--shadow);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .card .shot {
+    transition:
+      translate 0.2s var(--out),
+      box-shadow 0.2s var(--out);
+  }
+  .card:has(.title:focus-visible) .shot {
+    translate: 0 -3px;
+  }
+  .card:has(.title:active) .shot {
+    translate: 0 -2px;
+  }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .card:hover:not(:has(.proof:hover)) .shot {
+    translate: 0 -3px;
+  }
+}
+/* While a card's SVG downloads, a hairline draws along the bottom of the picture; it completes and fades as the scene
+   crossfades in, so the wait is seen. Only for a pointer: on a touch screen scenes play as they come into view. */
+@media (hover: hover) and (pointer: fine) {
+  .gallery .shot::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    block-size: 2px;
+    background: var(--accent);
+    transform-origin: 0 50%;
+    scale: 0 1;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 0.2s,
+      scale 0s 0.2s;
+  }
+  .gallery .shot:has(img[data-state="loading"], img[data-state="live"])::after {
+    scale: 0.7 1;
+    opacity: 1;
+    transition: scale 0.6s var(--out);
+  }
+  .gallery .shot:has(img[data-state="live"])::after {
+    scale: 1 1;
+    opacity: 0;
+    transition:
+      scale 0.15s var(--out),
+      opacity 0.3s 0.1s var(--out);
+  }
+}
+/* The first two rows rise into place behind the headline's scratch. The rest are below the fold and simply there. */
+@media (prefers-reduced-motion: no-preference) {
+  .grid .card:nth-child(-n + 5) {
+    animation: rise 0.5s 0.15s var(--out) backwards;
+  }
+  .grid .card:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  .grid .card:nth-child(3) {
+    animation-delay: 0.25s;
+  }
+  .grid .card:nth-child(4) {
+    animation-delay: 0.3s;
+  }
+  .grid .card:nth-child(5) {
+    animation-delay: 0.35s;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+/* The lead's size, a scene (examples/site/gallery-note.tsx) inlined so its ink takes the accent. It sits in the first
+   row's area over the second card, on a 16:9 block as wide as that card, so it lands just above the picture at any width
+   and points back at the first. */
+.note {
+  display: none;
+}
+@media (min-width: 56rem) {
+  .note {
+    position: absolute;
+    grid-row: 1 / 2;
+    grid-column: 8 / -1;
+    inset-block-end: 0;
+    inset-inline: 0;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+  }
+  .note::after {
+    content: "";
+    aspect-ratio: 16 / 9;
+  }
+  .note > span {
+    inline-size: min(10rem, 14vw);
+    margin: 0 0 0.5rem -1.5rem;
+    color: var(--accent);
+    rotate: -3deg;
+  }
+  .note svg {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    overflow: visible;
+  }
+}
+/* The page ends on the way to the playground. */
+.end {
+  display: block;
+  inline-size: min(18rem, 60vw);
+  margin: 3rem auto 0;
+  border-radius: var(--radius);
+}
+.end .cue {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+.viewer main {
+  /* The scene and the row under it share one width: the window's, or less so a wide scene fits its height. */
+  inline-size: min(100% - 2 * var(--gutter), var(--content), calc((100dvh - 12rem) * var(--ratio)));
+  padding-block: 1rem 0;
+}
+.plate {
+  margin: 0;
+  aspect-ratio: var(--ratio);
+  overflow: clip;
+  background: var(--surface) var(--poster) center / cover;
+  border-radius: var(--radius);
+  box-shadow: 0 0 0 1px var(--ring);
+}
+.plate img {
+  inline-size: 100%;
+  block-size: 100%;
+}
+/* Under another palette a page scene waits, unseen, for its recolored copy instead of flashing the built-in colors. */
+:root[data-palette] .plate:has(img[data-themed]) {
+  background-image: none;
+}
+:root[data-palette] :is(.plate, .reel) img[data-themed]:not([data-shown]) {
+  visibility: hidden;
+}
+.viewer .meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-block-start: 1rem;
+}
+.viewer .meta h1 {
+  flex: 1;
+  min-inline-size: 0;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+.viewer .source {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font: 500 0.875rem / 1 var(--sans);
+  color: var(--muted);
+  text-decoration: none;
+}
+.viewer .source svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+}
+.viewer .step {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.viewer .step a {
+  display: grid;
+  place-items: center;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  color: var(--ink);
+}
+.viewer .step a + a {
+  border-inline-start: 1px solid var(--line);
+}
+.viewer .step svg {
+  inline-size: 1rem;
+  block-size: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@media (hover: hover) and (pointer: fine) {
+  .viewer .source:hover,
+  .viewer .step a:hover {
+    color: var(--accent);
+  }
+}
+/* The intro page: the reel fills the window under the header, as large as it fits. */
+.cinema {
+  display: flex;
+  flex-direction: column;
+  block-size: 100dvh;
+}
+.reel {
+  flex: 1;
+  min-block-size: 0;
+  display: grid;
+  place-items: center;
+  padding: 0 var(--gutter) var(--gutter);
+}
+.reel img {
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  inline-size: auto;
+  block-size: auto;
+}
+.caption {
+  margin-block-start: 0.9rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+  text-align: center;
+}
+
 /* A header that sheds links on a phone. */
 .top nav a[aria-current="page"] {
   color: var(--ink);
