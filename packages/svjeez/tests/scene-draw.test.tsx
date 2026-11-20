@@ -154,3 +154,40 @@ describe("Arrow head", () => {
     ]);
   });
 });
+
+describe("anchor on a shape whose geometry animates", () => {
+  test("throws, since the anchor would drift as the box changes", () => {
+    const grows = () =>
+      emit(() => (
+        <Shape
+          geometry={track(rect(10, 10)).to(rect(80, 40), span(0, 1))}
+          at={[50, 50]}
+          anchor="center"
+          fill="#FF0000"
+        />
+      ));
+
+    expect(grows).toThrow(/anchor="center" and a geometry whose box moves/);
+  });
+
+  test("a fixed geometry keeps its anchor", () => {
+    const still = () =>
+      emit(() => <Shape geometry={rect(10, 10)} at={[50, 50]} anchor="center" fill="#FF0000" />);
+
+    expect(still).not.toThrow();
+  });
+});
+
+test("an animated geometry whose box keeps its anchor point keeps working", () => {
+  const swells = () =>
+    emit(() => (
+      <Shape
+        geometry={track(circle(10)).to(circle(30), span(0, 1))}
+        at={[50, 50]}
+        anchor="center"
+        fill="#FF0000"
+      />
+    ));
+
+  expect(swells).not.toThrow();
+});

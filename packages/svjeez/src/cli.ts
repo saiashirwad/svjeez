@@ -777,6 +777,23 @@ const COMMANDS = new Map([
 ]);
 
 const [command = "", ...args] = process.argv.slice(2);
+const HELP = ["--help", "-h", "help"];
+
+if (HELP.includes(command) || args.some((arg) => arg === "--help" || arg === "-h")) {
+  console.log(USAGE);
+  process.exit(0);
+}
+
 const run = COMMANDS.get(command) ?? (() => fail(USAGE));
 
-await run(args).catch((error: Error) => fail(error.stack ?? error.message));
+/** A flag the command doesn't take is the caller's slip, not a crash: say which, and how the command is called. */
+const isArgError = (error: Error): boolean =>
+  "code" in error && String(error.code).startsWith("ERR_PARSE_ARGS");
+
+await run(args).catch((error: Error) =>
+  fail(
+    isArgError(error)
+      ? `svjeez ${command}: ${error.message}\n\n${USAGE}`
+      : (error.stack ?? error.message),
+  ),
+);
