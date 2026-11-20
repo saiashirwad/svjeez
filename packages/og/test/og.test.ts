@@ -47,13 +47,9 @@ test("stillTime is the held moment, else 72% in", async () => {
   expect(stillTime("<svg/>", 10)).toBeCloseTo(7.2);
 });
 
-test("renderStill takes the picture at `time` when given, as seconds or from the duration", async () => {
+test("renderStill takes the picture at `time` when given", async () => {
   const { renderStill } = await import("../src/render.ts");
-  const [a, b] = await Promise.all([
-    renderStill(card(), { time: 1 }),
-    renderStill(card(), { time: (d) => d / 4 }),
-  ]);
+  const png = await renderStill(card(), { time: 1 });
 
-  expect(Array.from(a.subarray(1, 4))).toEqual([0x50, 0x4e, 0x47]);
-  expect(Array.from(b.subarray(1, 4))).toEqual([0x50, 0x4e, 0x47]);
+  expect(Array.from(png.subarray(1, 4))).toEqual([0x50, 0x4e, 0x47]);
 });

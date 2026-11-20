@@ -123,8 +123,8 @@ export const stillTime = (svg: string, duration: number): number => {
 };
 
 export interface StillOptions {
-  /** When to take the picture, in seconds: a number, or a function of the scene's duration. The still moment by default. */
-  readonly time?: number | ((duration: number) => number);
+  /** When to take the picture, in seconds. The scene's still moment by default. */
+  readonly time?: number;
   readonly scheme?: "light" | "dark";
   /** How much bigger than the scene's own size the picture is. 2 by default, so it stays sharp when a card scales it. */
   readonly scale?: number;
@@ -143,7 +143,7 @@ export const renderStill = (
   const svg = isScene(source) ? backend.emit(source) : source;
 
   const name = `${createHash("sha256")
-    .update(svg + JSON.stringify({ time: String(time), scheme, scale, background }))
+    .update(svg + JSON.stringify({ time, scheme, scale, background }))
     .digest("base64url")
     .slice(0, 12)}.png`;
 
@@ -151,13 +151,7 @@ export const renderStill = (
     const { duration } = await renderFrames(svg, { times: [0], colorScheme: scheme });
 
     const { frames } = await renderFrames(svg, {
-      times: [
-        time === undefined
-          ? stillTime(svg, duration)
-          : typeof time === "number"
-            ? time
-            : time(duration),
-      ],
+      times: [time ?? stillTime(svg, duration)],
       colorScheme: scheme,
       scale,
       background,
