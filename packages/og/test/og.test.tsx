@@ -42,6 +42,16 @@ test("renderOg draws a card as a JPEG, and ogResponse serves it with cache heade
   expect(custom.headers.get("Cache-Control")).toBe("public, max-age=60");
 });
 
+test("an image's name ignores options left at their defaults", async () => {
+  const { imageName, imageType } = await import("../src/render.ts");
+  const markup = svg.emit(card());
+
+  expect(imageName(markup, { time: 0, scheme: "light", scale: 1 })).toBe(imageName(markup));
+  expect(imageName(markup, { scale: 2 })).not.toBe(imageName(markup));
+  expect(imageName(markup, { format: "png" })).toEndWith(".png");
+  expect([imageType(), imageType({ format: "webp" })]).toEqual(["image/jpeg", "image/webp"]);
+});
+
 test("renderOg draws a card as a PNG and reports scaled dimensions", async () => {
   const { renderOg } = await import("../src/render.ts");
   const { bytes, type, width, height } = await renderOg(card(), { format: "png", scale: 2 });

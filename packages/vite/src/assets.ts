@@ -8,7 +8,6 @@ export interface Asset {
 export interface Assets {
   readonly files: Map<string, Asset>;
   limit?: number;
-  close?: () => Promise<void>;
 }
 
 export const ROUTE = "/_svjeez/";
@@ -36,7 +35,6 @@ export const writeScenes = async (dir: URL): Promise<number> => {
       writeFile(new URL(file, out), await asset.bytes()),
     ),
   );
-  await assets.close?.();
 
   return assets.files.size;
 };

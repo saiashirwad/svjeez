@@ -135,7 +135,6 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
       const runner = runners.get(this.environment.name);
       runners.delete(this.environment.name);
       await runner?.close();
-      await assets.close?.();
     },
   };
 }

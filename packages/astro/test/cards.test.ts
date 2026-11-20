@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { cardBeside } from "../src/index.ts";
+import { cardBeside } from "../src/cards.ts";
 
 test("cardBeside prefers a page's own card, else walks up to _default.og.* inside pages", () => {
   const root = mkdtempSync(join(tmpdir(), "svjeez-astro-cards-"));
@@ -26,6 +26,8 @@ test("cardBeside prefers a page's own card, else walks up to _default.og.* insid
     expect(cardBeside(join(nested, "post.astro"), pages)).toBe(ownCard);
     expect(cardBeside(join(nested, "other.astro"), pages)).toBe(blogFallback);
     expect(cardBeside(join(pages, "about.astro"), pages)).toBe(rootFallback);
+
+    expect(cardBeside(join(root, "src/about.astro"), pages)).toBeUndefined();
 
     rmSync(rootFallback);
     expect(cardBeside(join(pages, "about.astro"), pages)).toBeUndefined();
