@@ -73,8 +73,8 @@ export const SHOTS = {
 export const D = SHOTS.close.end;
 
 /** Where code sits once it steps aside, and the column beside it where what it draws plays: x, y, width, height. */
-export const CODE_COLUMN = [STAGE.x, STAGE.y + 20, 540, STAGE.h - 40] as const;
-export const RESULT_COLUMN = [STAGE.x + 580, STAGE.y + 20, STAGE.w - 580, STAGE.h - 40] as const;
+export const CODE_COLUMN = [STAGE.x, 90, 540, 580] as const;
+export const RESULT_COLUMN = [STAGE.x + 580, 90, STAGE.w - 580, 580] as const;
 
 interface HeaderProps {
   readonly title: string;

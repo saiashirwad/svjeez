@@ -121,16 +121,26 @@ const diagramFile = (n: number): string => {
   if (n === 0) return SKELETON;
 
   const arrows = [
-    `    <Arrow from={app.right} to={api.left} />`,
-    `    <Arrow from={api.right} to={db.left} />`,
-  ].slice(0, n - 1);
+    ["app", "api"],
+    ["api", "db"],
+  ]
+    .slice(0, n - 1)
+    .flatMap(([from, to]) => [
+      "    <Arrow",
+      `      from={${from}.right}`,
+      `      to={${to}.left}`,
+      "    />",
+    ]);
 
   return [
     "const [app, api, db] = refs();",
     "",
     "export default scene(opts, () => (",
     "  <Group>",
-    '    <Stack direction="row" gap={72}>',
+    "    <Stack",
+    '      direction="row"',
+    "      gap={72}",
+    "    >",
     ...NODES.map((node) => `      <Box ref={${node}}>${node}</Box>`),
     "    </Stack>",
     ...arrows,
