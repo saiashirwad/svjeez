@@ -63,6 +63,7 @@ const isLogo = (piece: Piece): piece is keyof typeof LOGOS => piece in LOGOS;
 const lineAt = (i: number) => 0.15 + i * 0.25;
 /** Each line's box is the font's ascent and descent tall (Geist's, which Geist Mono shares); the lines sit a little
  * apart, and the block is centered. */
+
 const { ascent, descent } = mono.metrics;
 
 const LINE = (ascent + descent) * SIZE;
@@ -73,6 +74,7 @@ const BLOCK = LINES.length * PITCH - GAP + SOON_BELOW;
 const TOP = STAGE.y + (STAGE.h - BLOCK) / 2;
 
 const SOON = { text: "more soon", size: 70, at: lineAt(LINES.length) + 0.5 } as const;
+
 const soonEnd = handwrite(hand, SOON.text, {
   width: STAGE.w,
   y: 0,
