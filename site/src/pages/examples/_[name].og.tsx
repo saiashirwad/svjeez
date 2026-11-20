@@ -8,16 +8,10 @@ import { renderStill } from "@svjeez/og/render";
 import { example } from "../../examples";
 import { windowed } from "../../window";
 
-const WIDTH = 440;
+/** The window's widest and tallest: a wide scene takes the full width, a tall or square one the full height. */
+const [MAX_W, MAX_H, BAR] = [440, 330, 40];
 const HERO = [920, 270] as const;
 const accents = [theme.blue, theme.magenta, theme.green, theme.orange, theme.cyan, theme.red];
-
-// A card has room for about three lines of the description.
-const brief = (text: string, max = 100) => {
-  if (text.length <= max) return text;
-
-  return `${text.slice(0, text.lastIndexOf(" ", max)).replace(/[,:;]$/, "")}…`;
-};
 
 // Each example's card shows the example itself in a window, taken at the moment its poster shows, on a tilted card of
 // the example's own color. The color comes from the example's name, so it stays with the example wherever it moves in
@@ -27,9 +21,10 @@ const hash = (name: string) =>
 
 export default (async ({ params }) => {
   const { name, scene } = example(params.name!);
-  const { title, desc, width, height } = scene;
+  const { title, width, height } = scene;
   const accent = accents[hash(name) % accents.length]!;
-  const h = Math.round((WIDTH * height) / width) + 40;
+  const WIDTH = Math.min(MAX_W, Math.round(((MAX_H - BAR) * width) / height));
+  const h = Math.round((WIDTH * height) / width) + BAR;
 
   const art = picture(
     await renderStill(windowed(scene, { size: [WIDTH, h], title: `${name}.tsx` })),
@@ -70,13 +65,8 @@ export default (async ({ params }) => {
       />
       <Timeline accent={accent} active={hash(name) % 5} />
       <Align place="left" inset={80}>
-        <Copy
-          title={title}
-          titleSize={64}
-          text={brief(desc)}
-          textSize={32}
-          note={`examples/${name}  ·  ${width}×${height}`}
-        />
+        {/* Just the example's name: the picture says the rest. */}
+        <Copy title={name} titleSize={96} note="svjeez example" />
       </Align>
     </Group>
   ));
