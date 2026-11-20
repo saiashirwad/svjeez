@@ -1,5 +1,5 @@
 /** @jsxImportSource svjeez */
-import { area as d3area, curveLinear, curveMonotoneX, curveStep, line as d3line } from "d3-shape";
+import { area as d3area, line as d3line } from "d3-shape";
 import {
   Group,
   Shape,
@@ -16,18 +16,10 @@ import {
   type Vec,
 } from "svjeez";
 import { SceneError, type PathBuilder, type StrokeProps } from "svjeez/tools";
+import { curve } from "./curve.ts";
 import { TICK, layoutOf, type Layout } from "./layout.ts";
-import type {
-  AreaOptions,
-  BarsOptions,
-  ChartProps,
-  Datum,
-  LineCurve,
-  LineOptions,
-  Series,
-} from "./types.ts";
+import type { AreaOptions, BarsOptions, ChartProps, Datum, LineOptions, Series } from "./types.ts";
 
-const CURVES = { linear: curveLinear, monotone: curveMonotoneX, step: curveStep } as const;
 const DOT_POP = 0.08;
 const LABEL_IN = 0.15;
 
@@ -46,13 +38,6 @@ const partOf = (
 
 const strokes = (...rows: readonly (readonly [Vec, Vec])[]): PathBuilder =>
   rows.reduce((p, [from, to]) => p.moveTo(from).lineTo(to), path());
-
-const curveOf = (curve: LineCurve = "linear") => {
-  if (!(curve in CURVES))
-    throw new SceneError(`curve is "${curve}".`, 'Use "linear", "monotone" or "step".');
-
-  return CURVES[curve];
-};
 
 interface Look {
   readonly chart: ChartProps;
@@ -256,7 +241,7 @@ const Line = ({
   const d = d3line<Vec>()
     .x((p) => p[0])
     .y((p) => p[1])
-    .curve(curveOf(options.curve))
+    .curve(options.curve ?? curve.linear)
     .digits(1)(points);
 
   const radius = options.dots === true ? 4 : options.dots || 0;
@@ -333,7 +318,7 @@ const Area = ({ look, data, options }: AreaProps): SceneElement => {
     .x((p) => p[0])
     .y0(base)
     .y1((p) => p[1])
-    .curve(curveOf(options.curve))
+    .curve(options.curve ?? curve.linear)
     .digits(1)(points);
 
   const fade = (

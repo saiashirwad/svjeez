@@ -1,4 +1,4 @@
-import { xyChart, type DiagramOptions, type XyChart } from "@svjeez/diagrams";
+import { xyBar, xyChart, xyLine, type DiagramOptions, type XyChart } from "@svjeez/diagrams";
 import type { Span } from "svjeez";
 import { clean, fail, sourceOf, unquote, type Line } from "./errors.ts";
 import type { Place } from "./types.ts";
@@ -196,7 +196,9 @@ export const drawXyChart = (
       horizontal: doc.horizontal,
       x: doc.xAxis,
       y: doc.yAxis,
-      series: doc.series,
+      series: doc.series.map((s) =>
+        (s.type === "bar" ? xyBar : xyLine)(s.values, { label: s.label }),
+      ),
     },
     options,
   );

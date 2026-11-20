@@ -107,13 +107,17 @@ export {
 } from "./quadrant.tsx";
 
 export {
+  xyBar,
   xyChart,
+  xyLine,
   type XyCategories,
   type XyChart,
   type XyChartOptions,
   type XyChartSpec,
+  type XyMark,
   type XyRange,
   type XySeries,
+  type XySeriesOptions,
   type XyValues,
 } from "./xychart.tsx";
 

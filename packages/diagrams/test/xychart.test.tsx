@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test";
 import { Group, font, scene, span } from "svjeez";
 import type { DiagramColors } from "../src/kit.tsx";
 import { SceneError, check, svg, type Child } from "svjeez/tools";
-import { xyChart, type XyChartSpec } from "../src/xychart.tsx";
+import { xyBar, xyChart, xyLine, type XyChartSpec } from "../src/xychart.tsx";
 
 const mono = await font.load(
   new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
@@ -44,8 +44,8 @@ const sales: XyChartSpec = {
   x: { title: "Month", categories: ["jan", "feb", "mar", "apr"] },
   y: { title: "Revenue", min: 0, max: 100 },
   series: [
-    { type: "bar", label: "Revenue", values: [40, 60, 55, 80] },
-    { type: "line", label: "Trend", values: [30, 50, 60, 90] },
+    xyBar([40, 60, 55, 80], { label: "Revenue" }),
+    xyLine([30, 50, 60, 90], { label: "Trend" }),
   ],
 };
 
@@ -65,7 +65,7 @@ describe("xyChart", () => {
       {
         horizontal: true,
         x: { min: 0, max: 30 },
-        series: [{ type: "bar", values: [-5, 10, 20] }],
+        series: [xyBar([-5, 10, 20])],
       },
       options,
     );
@@ -75,7 +75,7 @@ describe("xyChart", () => {
   });
 
   test("numbers the points of a chart with no x axis, and fits a flat series", () => {
-    const chart = xyChart({ series: [{ type: "line", values: [3, 3, 3] }] }, options);
+    const chart = xyChart({ series: [xyLine([3, 3, 3])] }, options);
 
     expect(errorsOf(chart.node)).toEqual([]);
   });
@@ -96,24 +96,17 @@ describe("xyChart", () => {
       thrown(() =>
         xyChart(
           {
-            series: [
-              { type: "bar", values: [1, 2] },
-              { type: "line", values: [1] },
-            ],
+            series: [xyBar([1, 2]), xyLine([1])],
           },
           options,
         ),
       ).message,
     ).toContain("series 2 has 1 values, but series 1 has 2");
     expect(
-      thrown(() =>
-        xyChart({ x: { categories: ["a"] }, series: [{ type: "bar", values: [1, 2] }] }, options),
-      ).message,
+      thrown(() => xyChart({ x: { categories: ["a"] }, series: [xyBar([1, 2])] }, options)).message,
     ).toContain("1 categories but its series have 2");
     expect(
-      thrown(() =>
-        xyChart({ y: { min: 5, max: 5 }, series: [{ type: "bar", values: [1] }] }, options),
-      ).message,
+      thrown(() => xyChart({ y: { min: 5, max: 5 }, series: [xyBar([1])] }, options)).message,
     ).toContain("y range needs min below max");
     expect(
       thrown(() => xyChart(sales, { ...options, reveal: { nope: span(0, 1) } })).message,

@@ -48,7 +48,8 @@ export interface RiemannOptions {
   readonly from: number;
   readonly to: number;
   readonly n: number;
-  readonly rule?: "left" | "mid" | "right";
+  /** Where in each bar f is sampled: 0 is the left edge, 0.5 the middle, 1 the right. Default 0. */
+  readonly at?: number;
 }
 
 export interface Bar {
@@ -272,21 +273,23 @@ const build = (options: PlaneOptions, map: (p: Vec) => Vec, curved: boolean): Pl
         lower.length > 2,
       ).close();
     },
-    riemann: (f, { from, to, n, rule = "left" }) => {
+    riemann: (f, { from, to, n, at = 0 }) => {
       checkSpan(from, to, "riemann()");
 
       if (!(Number.isInteger(n) && n > 0))
         throw new SceneError(`riemann() needs a whole number of bars above 0, got n = ${n}.`);
       const width = (to - from) / n;
-      const pick = { left: 0, mid: 0.5, right: 1 }[rule];
+
+      if (!(Number.isFinite(at) && at >= 0 && at <= 1))
+        throw new SceneError(`riemann() needs at between 0 and 1, got at = ${at}.`);
 
       const bars = Array.from({ length: n }, (_, i): Bar => {
         const left = from + i * width;
-        const value = f(left + width * pick);
+        const value = f(left + width * at);
 
         if (!Number.isFinite(value))
           throw new SceneError(
-            `riemann() can't draw a bar where the function is ${value}, at x = ${left + width * pick}.`,
+            `riemann() can't draw a bar where the function is ${value}, at x = ${left + width * at}.`,
           );
 
         return {

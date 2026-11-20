@@ -1,4 +1,4 @@
-import { Chart, area, bars } from "@svjeez/charts";
+import { Chart, area, bars, curve } from "@svjeez/charts";
 import {
   Group,
   Shape,
@@ -115,7 +115,7 @@ export default scene(
               {
                 name: "median",
                 color: theme.magenta,
-                curve: "monotone",
+                curve: curve.monotone,
                 dots: 3.5,
                 label: "median",
                 draw: track(0).to(1, span(1.2, 1.8), ease.linear),

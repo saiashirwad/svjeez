@@ -230,25 +230,6 @@ describe("errors", () => {
   test("a plot area with no size", () => {
     expect(errorOf(chart([], { size: [0, 200] })).problem).toBe("size is [0, 200].");
   });
-
-  test("an unknown curve", () => {
-    expect(
-      errorOf(
-        chart([
-          line(
-            [
-              ["Jan", 1],
-              ["Feb", 2],
-            ],
-            {
-              color: theme.blue, // SAFETY: a JavaScript caller can pass any string.
-              curve: "wavy" as "linear",
-            },
-          ),
-        ]),
-      ).fix,
-    ).toBe('Use "linear", "monotone" or "step".');
-  });
 });
 
 describe("stroke and grid", () => {

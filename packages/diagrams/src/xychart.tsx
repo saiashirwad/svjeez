@@ -27,12 +27,39 @@ import {
 } from "./kit.tsx";
 import { series as tint } from "./series.ts";
 
+/** How a series is drawn. Make a series with `xyBar` or `xyLine`. */
+export interface XyMark {
+  readonly name: "bar" | "line";
+}
+
+const BAR: XyMark = { name: "bar" };
+const LINE: XyMark = { name: "line" };
+
 export interface XySeries {
-  readonly type: "bar" | "line";
+  readonly mark: XyMark;
   /** Shown in a legend when any series has one. */
   readonly label?: string;
   readonly values: readonly number[];
 }
+
+export interface XySeriesOptions {
+  /** Shown in a legend when any series has one. */
+  readonly label?: string;
+}
+
+/** A series drawn as bars, one per value. */
+export const xyBar = (values: readonly number[], { label }: XySeriesOptions = {}): XySeries => ({
+  mark: BAR,
+  ...(label !== undefined && { label }),
+  values,
+});
+
+/** A series drawn as a line through its values. */
+export const xyLine = (values: readonly number[], { label }: XySeriesOptions = {}): XySeries => ({
+  mark: LINE,
+  ...(label !== undefined && { label }),
+  values,
+});
 
 export interface XyCategories {
   readonly title?: string;
@@ -142,7 +169,7 @@ export function xyChart(spec: XyChartSpec, options: XyChartOptions): XyChart {
   const ids = all.map((_, i) => `series-${i + 1}`);
   const beats = schedule(options.reveal, ids, WHAT);
   const horizontal = spec.horizontal === true;
-  const hasBars = all.some((s) => s.type === "bar");
+  const hasBars = all.some((s) => s.mark === BAR);
 
   const data = all.flatMap((s) => s.values);
 
@@ -221,7 +248,7 @@ export function xyChart(spec: XyChartSpec, options: XyChartOptions): XyChart {
   const grid = mix(l.colors.line, l.colors.background, 0.25);
   const axis = mix(l.colors.line, l.colors.background, 0.7);
   const every = Math.max(1, Math.ceil((horizontal ? lineH : Math.ceil(widest) + 12) / slot));
-  const bars = all.map((s, i) => [s, i] as const).filter(([s]) => s.type === "bar");
+  const bars = all.map((s, i) => [s, i] as const).filter(([s]) => s.mark === BAR);
   const lane = Math.min((slot * 0.72) / Math.max(bars.length, 1), 40);
 
   const label = (
@@ -335,7 +362,7 @@ export function xyChart(spec: XyChartSpec, options: XyChartOptions): XyChart {
     const pts = s.values.map((v, i) => at(i, v));
     const nth = bars.findIndex(([, j]) => j === k);
 
-    if (s.type === "bar") {
+    if (s.mark === BAR) {
       return (
         <Group key={ids[k]} motion={when && pop(when)}>
           {s.values.map((v, i) => {

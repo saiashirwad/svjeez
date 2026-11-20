@@ -41,8 +41,9 @@ describe("plane()", () => {
     expect(two.bars.map((bar) => bar.key)).toEqual(["0", "1"]);
     expect(four.bars.map((bar) => bar.key)).toEqual(["0", "0.5", "1", "1.5"]);
     expect(four.sum).toBeCloseTo(0.5 * (0 + 0.25 + 1 + 2.25));
-    expect(graph.riemann(f, { from: 0, to: 2, n: 2, rule: "right" }).sum).toBeCloseTo(5);
+    expect(graph.riemann(f, { from: 0, to: 2, n: 2, at: 1 }).sum).toBeCloseTo(5);
     expect(() => graph.riemann(f, { from: 0, to: 2, n: 1.5 })).toThrow("whole number of bars");
+    expect(() => graph.riemann(f, { from: 0, to: 2, n: 2, at: 2 })).toThrow("at between 0 and 1");
 
     const bars = (n: number) => (
       <Group>

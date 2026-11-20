@@ -1,5 +1,7 @@
 export { Chart } from "./chart.tsx";
 
+export { curve, type CurveFactory } from "./curve.ts";
+
 export { area, bars, line } from "./series.ts";
 
 export type {
@@ -8,7 +10,6 @@ export type {
   BarsOptions,
   ChartProps,
   Datum,
-  LineCurve,
   LineOptions,
   LinearX,
   Plot,

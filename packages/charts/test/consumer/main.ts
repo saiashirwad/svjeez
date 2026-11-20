@@ -1,4 +1,4 @@
-import { Chart, area, bars, line, type ChartProps, type Series } from "@svjeez/charts";
+import { Chart, area, bars, curve, line, type ChartProps, type Series } from "@svjeez/charts";
 import { font } from "svjeez";
 
 const face = await font.load("ABeeZee-Regular.ttf");
@@ -10,7 +10,7 @@ const series: readonly Series[] = [
       ["Q1", 12],
       ["Q2", 48],
     ],
-    { color: "#E5453B", curve: "monotone", dots: true },
+    { color: "#E5453B", curve: curve.monotone, dots: true },
   ),
   area(
     [

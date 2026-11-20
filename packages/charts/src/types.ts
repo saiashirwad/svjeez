@@ -1,7 +1,8 @@
+import type { CurveFactory } from "d3-shape";
 import type { Anim, Paint, Span, Vec } from "svjeez";
 import type { Child, FontValue, StrokeProps } from "svjeez/tools";
 
-export type LineCurve = "linear" | "monotone" | "step";
+export type { CurveFactory } from "d3-shape";
 
 export interface BandX {
   readonly kind: "band";
@@ -43,7 +44,8 @@ export interface BarsOptions extends SeriesOptions {
 }
 
 export interface LineOptions extends SeriesOptions {
-  readonly curve?: LineCurve;
+  /** How the line runs between points: `curve.monotone`, or any d3-shape curve. Default `curve.linear`. */
+  readonly curve?: CurveFactory;
   readonly dots?: boolean | number;
   /** Restyles the line over its default: the series color, width 2.5, round cap and join. */
   readonly stroke?: Partial<StrokeProps>;

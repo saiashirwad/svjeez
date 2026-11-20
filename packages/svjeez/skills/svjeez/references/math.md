@@ -39,7 +39,7 @@ The repository's `examples/math` puts this beside a plot and a brace on the cros
 | `p.plot(f, { from, to, samples })` | the curve, split where it leaves the y range |
 | `p.parametric(f, [t0, t1])`, `p.segment(a, b)`, `p.polygon(points)` | curves and outlines in plane coordinates |
 | `p.area(f, { from, to, base })` | the region between `f` and `base` (a number or a function) |
-| `p.riemann(f, { from, to, n, rule })` | `{ bars, sum }`: one `{ key, geometry, height }` per bar, keyed by its left edge |
+| `p.riemann(f, { from, to, n, at })` | `{ bars, sum }`: one `{ key, geometry, height }` per bar, keyed by its left edge |
 | `p.slope(f, x)`, `p.tangent(f, x, { length })`, `p.secant(f, x, h, { length })` | slopes and lines `length` pixels long through `(x, f(x))` |
 | `p.vector(to, { from, width, head })` | an arrow as one filled outline |
 | `p.grid(step)`, `p.axes()` | the grid and axis lines |
