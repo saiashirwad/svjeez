@@ -21,41 +21,46 @@ const EDGE = 140;
 
 const route: readonly Move[] = [
   { hop: { land: 2.4, height: 150 }, to: [780, EDGE] },
-  { walk: span(3.0, 1.6), to: [380, EDGE], steps: 6 },
-  // The agent writes a scene.
-  { hop: { land: 5.9, height: 40 }, to: [560, 180] },
-  { hop: { land: 7.1, height: 30 } },
-  { hop: { land: 10.2, height: 90 }, to: [1125, 428] },
-  { hop: { land: 11.2, height: 40 } },
-  { hop: { land: 12.3, height: 120 }, to: [900, EDGE] },
-  // Mermaid.
-  { walk: span(12.75, 0.8), to: [760, EDGE], steps: 4 },
-  { hop: { land: 14.8, height: 60 }, to: [520, 210] },
-  { hop: { land: 16.1, height: 40 } },
-  { hop: { land: 18.3, height: 70 }, to: [700, EDGE] },
-  // Data: over to the counter, then over to the map.
-  { walk: span(18.6, 1.4), to: [330, EDGE], steps: 6 },
-  { hop: { land: 21.2, height: 50 } },
-  { walk: span(22.0, 2.2), to: [960, EDGE], steps: 9 },
-  // Math.
-  { walk: span(25.0, 0.8), to: [760, EDGE], steps: 3 },
-  { hop: { land: 26.6, height: 50 } },
-  { hop: { land: 28.3, height: 60 } },
-  // Code: down onto the panel, and along it while its lines move.
-  { hop: { land: 31.3, height: 40 }, to: [300, 230] },
-  { walk: span(32.5, 2.2), to: [980, 230], steps: 9 },
-  { hop: { land: 36.2, height: 60 }, to: [980, EDGE] },
-  // The app, and its seam.
-  { hop: { land: 37.4, height: 40 }, to: [960, 196] },
-  { hop: { land: 38.5, height: 30 } },
-  { hop: { land: 40.9, height: 50 } },
-  { walk: span(41.6, 1.2), to: [640, 196], steps: 5 },
-  { hop: { land: 44.8, height: 40 } },
-  { hop: { land: 47.2, height: 70 } },
+  { walk: span(3.0, 1.4), to: [980, EDGE], steps: 6 },
+  // The agent's session: Blip sits on it and hops as the calls come in, and cheers at the reply.
+  { hop: { land: 5.8, height: 30 }, to: [1000, 152] },
+  { hop: { land: 7.7, height: 30 } },
+  { hop: { land: 9.6, height: 30 } },
+  { hop: { land: 11.5, height: 40 } },
+  { hop: { land: 12.75, height: 80 } },
+  { walk: span(13.25, 0.7), to: [880, 152], steps: 3 },
+  // morph(): on the listing while it is written, then off it before it steps aside.
+  { hop: { land: 14.6, height: 30 }, to: [900, 154] },
+  { hop: { land: 18.2, height: 60 }, to: [1120, EDGE] },
+  { hop: { land: 19.4, height: 40 } },
+  { hop: { land: 20.8, height: 40 } },
+  { hop: { land: 22.1, height: 50 } },
+  { walk: span(22.6, 1.2), to: [620, EDGE], steps: 5 },
+  // ref(): the same.
+  { hop: { land: 24.8, height: 40 }, to: [700, 170] },
+  { hop: { land: 27.6, height: 50 }, to: [880, EDGE] },
+  { hop: { land: 30.2, height: 40 } },
+  { hop: { land: 31.4, height: 40 } },
+  { walk: span(31.9, 1.0), to: [700, EDGE], steps: 4 },
+  // The filmed app: onto it, and a hop at each click.
+  { hop: { land: 33.9, height: 60 }, to: [1100, 250] },
+  { hop: { land: 36.2, height: 30 } },
+  { hop: { land: 38.8, height: 40 } },
+  { hop: { land: 40.4, height: 70 }, to: [800, EDGE] },
+  // The montage.
+  { walk: span(41.0, 1.2), to: [520, EDGE], steps: 5 },
+  { hop: { land: 43.0, height: 40 } },
+  { hop: { land: 44.3, height: 40 } },
+  { walk: span(44.9, 1.3), to: [820, EDGE], steps: 5 },
+  // The handwritten line, and the facts.
+  { hop: { land: 48.0, height: 60 } },
+  { hop: { land: 49.2, height: 30 } },
+  { hop: { land: 50.4, height: 30 } },
+  { hop: { land: 51.5, height: 40 } },
   // Back into the tag, and cheers.
-  { hop: { land: 49.9, height: 70 }, to: [PILL.x + 150, PILL.y - PILL.h / 2] },
-  { hop: { land: 51.5, height: 110 } },
-  { hop: { land: 52.7, height: 60 } },
+  { hop: { land: 54.9, height: 70 }, to: [PILL.x + 150, PILL.y - PILL.h / 2] },
+  { hop: { land: 56.5, height: 110 } },
+  { hop: { land: 57.7, height: 60 } },
 ];
 
 const isWalk = (move: Move): move is Extract<Move, { walk: Span }> => "walk" in move;
@@ -90,9 +95,9 @@ const look = route
     },
     track<Vec>([0, 0]).to([0, 4], span(3, 0.3)),
   )
-  .to([0, -2], span(50.5, 0.3));
+  .to([0, -2], span(55.5, 0.3));
 
-const blinks = [1.9, 6.6, 10.4, 15.8, 21.6, 27.4, 32.9, 38.9, 44.2, 51.0];
+const blinks = [1.9, 6.6, 10.4, 15.8, 21.6, 27.4, 32.9, 38.9, 44.2, 49.6, 53.2, 56.0];
 
 export const Host = (): SceneElement => (
   <Pivot

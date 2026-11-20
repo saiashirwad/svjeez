@@ -1,29 +1,13 @@
 import { createRequire } from "node:module";
 import { Chart, bars, curve, line as plotted } from "@svjeez/charts";
 import { project, type LonLat, type Topology } from "@svjeez/geo";
-import {
-  Group,
-  Shape,
-  Text,
-  circle,
-  count,
-  ease,
-  line,
-  numeral,
-  path,
-  span,
-  track,
-  type SceneElement,
-  type Vec,
-} from "svjeez";
-import { Note } from "./note";
-import { Header, SHOTS, STAGE, geist, mono, shown, theme } from "./kit";
+import { Group, Shape, circle, ease, path, span, track, type SceneElement, type Vec } from "svjeez";
+import { mono, theme } from "./kit";
 
 const world: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
 
-const SIZE: Vec = [490, 246];
-const AT: Vec = [680, 300];
-const CELL = 6.5;
+const SIZE: Vec = [400, 200];
+const CELL = 5.4;
 
 const map = project(world, {
   size: SIZE,
@@ -54,8 +38,6 @@ const routes: LonLat[] = [
   [28.05, -26.2],
 ];
 
-const flights = span(1.2, 1.1).cascade(routes.length, 0.25);
-
 const week = [
   ["Mon", 62],
   ["Tue", 74],
@@ -65,12 +47,6 @@ const week = [
   ["Sat", 58],
   ["Sun", 64],
 ] as const;
-
-const Label = ({ at, children }: { readonly at: Vec; readonly children: string }): SceneElement => (
-  <Text font={mono} size={13} letterSpacing={1.2} at={at} anchor="baseline-left" fill={theme.muted}>
-    {children.toUpperCase()}
-  </Text>
-);
 
 const Pin = ({ at, when }: { readonly at: LonLat; readonly when: number }): SceneElement => {
   const point = map.point(at);
@@ -98,102 +74,58 @@ const Pin = ({ at, when }: { readonly at: LonLat; readonly when: number }): Scen
   );
 };
 
-/** Shot 5: a week of requests charted on the left, the routes they took drawn on a dot map on the right. */
-export const DataShot = (): SceneElement => {
-  const { over } = SHOTS.data;
-  const left = STAGE.x + 60;
-  const right = 690;
+/** The dot map with its routes flying out of Frankfurt, starting at `start`, drawn from its own [0, 0]. */
+export const DotMap = ({ start }: { readonly start: number }): SceneElement => {
+  const flights = span(start + 0.3, 1).cascade(routes.length, 0.2);
 
   return (
     <Group>
-      <Header
-        title="charts and maps without a runtime"
-        from="@svjeez/charts · @svjeez/geo"
-        over={over!}
-      />
-      <Group motion={shown(over!)}>
-        <Label at={[left, STAGE.y + 58]}>Requests this week</Label>
-        <Text
-          font={geist}
-          weight={600}
-          size={44}
-          letterSpacing={-1.6}
-          at={[left, STAGE.y + 112]}
-          anchor="baseline-left"
-          fill={theme.text}
-        >
-          {count(track(0).to(510_204, span(0.6, 1.8), ease.out), {
-            format: numeral({ separator: "," }),
-          })}
-        </Text>
-        <Note
-          text="that counter is pure css"
-          at={[left + 380, STAGE.y + 100]}
-          from={1.2}
-          size={24}
-          tilt={-6}
-          to={[-50, 14]}
-        />
-        <Chart
-          at={[left + 30, STAGE.y + 160]}
-          size={[450, 290]}
-          x={{ kind: "band", domain: week.map(([day]) => day), padding: 0.35 }}
-          y={{ ticks: 4 }}
-          series={[
-            bars([...week], {
-              color: theme.strong,
-              radius: 3,
-              draw: track(0).to(1, span(0.6, 1.2), ease.out),
-            }),
-            plotted([...week], {
-              color: theme.blue,
-              curve: curve.monotone,
-              dots: 4,
-              stroke: { width: 2 },
-              draw: track(0).to(1, span(1.5, 1.2), ease.inOut),
-            }),
-          ]}
-          font={mono}
-          textSize={13}
-          axis={theme.line}
-          label={theme.faint}
-          grid={{ color: theme.line, width: 1 }}
-          axesIn={span(0.4, 0.5)}
-        />
+      <Shape geometry={dots} stroke={{ color: theme.strong, width: 3, cap: "round" }} />
+      {routes.map((to, i) => (
         <Shape
-          geometry={line([640, STAGE.y + 36], [640, STAGE.y + STAGE.h - 36])}
-          stroke={{ color: theme.line, width: 1 }}
+          geometry={map.route(HUB, to)}
+          stroke={{ color: theme.blue, width: 1.5, cap: "round" }}
+          draw={track(0).to(1, flights[i]!, ease.inOut)}
         />
-        <Label at={[right, STAGE.y + 58]}>p95 latency</Label>
-        <Text
-          font={geist}
-          weight={600}
-          size={44}
-          letterSpacing={-1.6}
-          at={[right, STAGE.y + 112]}
-          anchor="baseline-left"
-          fill={theme.text}
-        >
-          {count(track(42.8).to(18.4, span(1.2, 2.2), ease.out), {
-            format: numeral({ decimals: 1 }),
-          })}{" "}
-          ms
-        </Text>
-        <Group offset={AT}>
-          <Shape geometry={dots} stroke={{ color: theme.strong, width: 3.4, cap: "round" }} />
-          {routes.map((to, i) => (
-            <Shape
-              geometry={map.route(HUB, to)}
-              stroke={{ color: theme.blue, width: 1.5, cap: "round" }}
-              draw={track(0).to(1, flights[i]!, ease.inOut)}
-            />
-          ))}
-          <Pin at={HUB} when={0.9} />
-          {routes.map((to, i) => (
-            <Pin at={to} when={flights[i]!.end} />
-          ))}
-        </Group>
-      </Group>
+      ))}
+      <Pin at={HUB} when={start + 0.1} />
+      {routes.map((to, i) => (
+        <Pin at={to} when={flights[i]!.end} />
+      ))}
     </Group>
   );
 };
+
+/** A week of requests as bars with a line drawn over them, starting at `start`, drawn from its own [0, 0]. */
+export const WeekChart = ({
+  start,
+  size,
+}: {
+  readonly start: number;
+  readonly size: Vec;
+}): SceneElement => (
+  <Chart
+    size={size}
+    x={{ kind: "band", domain: week.map(([day]) => day), padding: 0.35 }}
+    y={{ ticks: 3 }}
+    series={[
+      bars([...week], {
+        color: theme.strong,
+        radius: 3,
+        draw: track(0).to(1, span(start, 1), ease.out),
+      }),
+      plotted([...week], {
+        color: theme.blue,
+        curve: curve.monotone,
+        dots: 3.5,
+        stroke: { width: 2 },
+        draw: track(0).to(1, span(start + 0.8, 1), ease.inOut),
+      }),
+    ]}
+    font={mono}
+    textSize={12}
+    axis={theme.line}
+    label={theme.faint}
+    grid={{ color: theme.line, width: 1 }}
+  />
+);

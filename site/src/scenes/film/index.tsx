@@ -13,13 +13,13 @@ import {
 } from "svjeez";
 import { Close, PILL } from "./close";
 import { D, H, SHOTS, STAGE, W, theme } from "./kit";
-import { AgentShot } from "./agent";
-import { AppShot, ThemesShot } from "./app";
-import { CodeShot } from "./code";
-import { DataShot } from "./data";
-import { DiagramShot } from "./diagram";
 import { Host } from "./host";
-import { MathShot } from "./math";
+import { ArrowsSlide } from "./arrows";
+import { ClaudeSlide } from "./claude";
+import { FilmingSlide } from "./filming";
+import { Anything, Facts } from "./lines";
+import { Montage } from "./montage";
+import { MorphSlide } from "./morphs";
 import { Open } from "./open";
 
 // The launch film. It lives in one <img> tag: the tag opens into a stage, the stage plays a shot for each thing svjeez
@@ -73,7 +73,7 @@ export default scene(
     size: [W, H],
     duration: D,
     title: "svjeez promo film: animated SVGs from TSX, written by coding agents",
-    desc: "An animated film compiled into a single SVG file with no JavaScript, opening from an img tag and closing back into it, with the yellow mascot Blip. It shows a coding agent writing a TSX graphic, running svjeez check, looking at stills from svjeez frames, and writing an 18 KB SVG. Then it shows graphics an agent can make with svjeez: a Mermaid flowchart, a weekly request chart beside a world map, a quadratic equation typeset at build time, a code diff, a filmed task app, and a light and dark split with lint checks, before ending with the install commands.",
+    desc: "A film compiled into a single SVG file with no JavaScript, opening from an img tag and closing back into it, with the yellow mascot Blip hopping around it. A coding agent is asked for an animated graphic and reads the svjeez skill, writes the scene, checks it and looks at its frames. Code then writes itself and draws beside it: bars that morph between two states and change as the code is edited, arrows that hold on to a moving card, and a script that films a web app line by line. A montage shows a Mermaid flowchart, a world map, an equation and a chart, the words anything you can describe are handwritten, and three facts close it: no JavaScript, one file, plays in an img tag.",
     theme,
     loop: false,
     still: D - 0.05,
@@ -102,26 +102,26 @@ export default scene(
       <Sequence when={SHOTS.open}>
         <Open />
       </Sequence>
-      <Sequence when={SHOTS.agent}>
-        <AgentShot />
+      <Sequence when={SHOTS.claude}>
+        <ClaudeSlide />
       </Sequence>
-      <Sequence when={SHOTS.diagram}>
-        <DiagramShot />
+      <Sequence when={SHOTS.morph}>
+        <MorphSlide />
       </Sequence>
-      <Sequence when={SHOTS.data}>
-        <DataShot />
+      <Sequence when={SHOTS.arrows}>
+        <ArrowsSlide />
       </Sequence>
-      <Sequence when={SHOTS.math}>
-        <MathShot />
+      <Sequence when={SHOTS.filming}>
+        <FilmingSlide />
       </Sequence>
-      <Sequence when={SHOTS.code}>
-        <CodeShot />
+      <Sequence when={SHOTS.montage}>
+        <Montage />
       </Sequence>
-      <Sequence when={SHOTS.app}>
-        <AppShot />
+      <Sequence when={SHOTS.anything}>
+        <Anything />
       </Sequence>
-      <Sequence when={SHOTS.themes}>
-        <ThemesShot />
+      <Sequence when={SHOTS.facts}>
+        <Facts />
       </Sequence>
       <Sequence when={SHOTS.close}>
         <Close />

@@ -1,5 +1,3 @@
-import { Icon } from "@svjeez/icons";
-import { circleCheck } from "@svjeez/icons/tabler";
 import {
   Group,
   line,
@@ -11,7 +9,6 @@ import {
   enter,
   exit,
   path,
-  polygon,
   rect,
   span,
   track,
@@ -21,8 +18,7 @@ import {
   type SceneElement,
   type Vec,
 } from "svjeez";
-import { Note } from "./note";
-import { ACCENTS, H, Header, SHOTS, W, geist, mono, shown, spring, theme } from "./kit";
+import { ACCENTS, geist, mono, spring, theme } from "./kit";
 
 const CARD = { x: 260, y: 196, w: 760, h: 360 } as const;
 const ROW = { h: 58, pitch: 58, top: 86 } as const;
@@ -51,30 +47,6 @@ const tokens: Ink = {
   button: theme.text,
   onButton: theme.background,
   focus: theme.blue,
-};
-
-const light: Ink = {
-  card: "#FFFFFF",
-  line: "#EBEBEB",
-  badge: "#FAFAFA",
-  text: "#171717",
-  muted: "#666666",
-  accents: ["#0070F3", "#8E4EC6", "#E93D82", "#0F9F8D"],
-  button: "#171717",
-  onButton: "#FFFFFF",
-  focus: "#0070F3",
-};
-
-const dark: Ink = {
-  card: "#0A0A0A",
-  line: "#242424",
-  badge: "#111111",
-  text: "#EDEDED",
-  muted: "#A1A1A1",
-  accents: ["#3291FF", "#A475F9", "#F75F8F", "#0AC5B3"],
-  button: "#EDEDED",
-  onButton: "#0A0A0A",
-  focus: "#3291FF",
 };
 
 const TASKS = [
@@ -252,10 +224,10 @@ const App = ({ ink, played }: AppProps): SceneElement => (
 
 const CURSOR = path.parse("M0 0V26l7-6.2 5 11 4.6-2-5-10.8H20Z");
 
-const cursorAt = track<Vec>([1080, 600])
+const cursorAt = track<Vec>([CARD.x + CARD.w - 40, CARD.y + CARD.h + 40])
   .to([BUTTON[0] + 64, BUTTON[1] + 26], span(0.7, 0.9), ease.inOut)
   .to([BUTTON[0] + 70, BUTTON[1] + 30], span(3.6, 0.5), ease.inOut)
-  .to([1080, 620], span(added + 0.4, 0.8), ease.inOut);
+  .to([CARD.x + CARD.w - 30, CARD.y + CARD.h - 20], span(added + 0.4, 0.8), ease.inOut);
 
 const Click = ({ at }: { readonly at: number }): SceneElement => (
   <Shape
@@ -270,139 +242,20 @@ const Click = ({ at }: { readonly at: number }): SceneElement => (
   />
 );
 
-const snaps = [
-  { label: 'snap("idle")', at: 0.4 },
-  { label: 'snap("typed")', at: typing.start },
-  { label: 'snap("added")', at: added },
-];
+/** The app being used, as a film of it would show it: the cursor clicks New, a title is typed, Add files it. */
+export const Filmed = (): SceneElement => (
+  <Group>
+    <App ink={tokens} played />
+    <Click at={clicked} />
+    <Click at={added - 0.1} />
+    <Shape
+      geometry={CURSOR}
+      at={cursorAt}
+      fill={theme.text}
+      stroke={{ color: theme.background, width: 1.5, join: "round" }}
+    />
+  </Group>
+);
 
-/** Shot 6: a small task app is used: New, a title typed in, Add. Under it, the snapshots a film is cut from. */
-export const AppShot = (): SceneElement => {
-  const { over } = SHOTS.app;
-
-  return (
-    <Group>
-      <Header title="film your real web app as an svg" from="@svjeez/dom" over={over!} />
-      <Group motion={shown(over!, 0.1)}>
-        <App ink={tokens} played />
-        <Note
-          text="not redrawn by hand"
-          at={[1070, CARD.y + CARD.h + 58]}
-          from={2.2}
-          size={30}
-          tilt={-5}
-        />
-        <Click at={clicked} />
-        <Click at={added - 0.1} />
-        <Shape
-          geometry={CURSOR}
-          at={cursorAt}
-          fill={theme.text}
-          stroke={{ color: theme.background, width: 1.5, join: "round" }}
-        />
-        <Stack direction="row" gap={28} at={[W / 2, CARD.y + CARD.h + 44]} anchor="center">
-          {snaps.map(({ label, at }) => (
-            <Text
-              font={mono}
-              size={16}
-              fill={track<Paint>(theme.faint).to(theme.text, span(at, 0.2))}
-            >
-              {label}
-            </Text>
-          ))}
-        </Stack>
-      </Group>
-    </Group>
-  );
-};
-
-/** The part of the frame right of x, as a clip. */
-const rightOf = (x: number) => polygon([x, 0], [W, 0], [W, H], [x, H]);
-
-const checks = ["contrast ok", "0 overlaps", "loop seam ok", "zero js"];
-
-/** Shot 7: the same app, light on the left and dark on the right of a moving seam, then checked. */
-export const ThemesShot = (): SceneElement => {
-  const { over } = SHOTS.themes;
-  const seam = span(0.4, 1.3);
-  const close = span(3.1, 0.8);
-  const left = CARD.x + CARD.w;
-  const middle = CARD.x + CARD.w / 2;
-
-  return (
-    <Group>
-      <Header title="light and dark, checked by cli" from="tokens() · svjeez check" over={over!} />
-      <Group motion={shown(over!, 0)}>
-        <App ink={light} played={false} />
-        <Note
-          text="still one file, somehow"
-          at={[236, CARD.y + CARD.h + 52]}
-          from={1.0}
-          size={24}
-          tilt={-4}
-        />
-        <Group
-          clip={track(rightOf(left))
-            .to(rightOf(middle), seam, ease.inOut)
-            .to(rightOf(left), close, ease.inOut)}
-        >
-          <App ink={dark} played={false} />
-        </Group>
-        <Shape
-          geometry={rect(1.5, CARD.h + 40)}
-          at={track<Vec>([left, CARD.y - 20])
-            .to([middle, CARD.y - 20], seam, ease.inOut)
-            .to([left, CARD.y - 20], close, ease.inOut)}
-          fill={theme.text}
-          opacity={track(0).to(1, span(0.3, 0.2)).to(0, span(close.end, 0.2))}
-        />
-        <Group motion={[enter(span(seam.end, 0.3)), exit(span(close.start, 0.25))]}>
-          <Text
-            font={mono}
-            size={14}
-            letterSpacing={1.2}
-            at={[CARD.x, CARD.y - 16]}
-            anchor="baseline-left"
-            fill={theme.muted}
-          >
-            LIGHT
-          </Text>
-          <Text
-            font={mono}
-            size={14}
-            letterSpacing={1.2}
-            at={[left, CARD.y - 16]}
-            anchor="baseline-right"
-            fill={theme.muted}
-          >
-            DARK
-          </Text>
-        </Group>
-        <Stack direction="row" gap={30} at={[780, CARD.y + CARD.h + 44]} anchor="center">
-          {checks.map((label, i) => (
-            <Stack
-              direction="row"
-              gap={10}
-              align="center"
-              motion={enter(span(close.end + i * 0.2, 0.35), {
-                from: { opacity: 0, scale: 0.7 },
-                curve: ease.pop,
-              })}
-            >
-              <Icon
-                icon={circleCheck}
-                size={22}
-                color={theme.green}
-                stroke={{ width: 1.75 }}
-                draw={(piece) => track(0).to(1, span(close.end + i * 0.2 + piece * 0.1, 0.4))}
-              />
-              <Text font={mono} size={16} fill={theme.text}>
-                {label}
-              </Text>
-            </Stack>
-          ))}
-        </Stack>
-      </Group>
-    </Group>
-  );
-};
+/** Where the app sits and when it does what, so a script beside it can keep time with it. */
+export const APP = { card: CARD, clicked, opened: opened.start, typing, added } as const;

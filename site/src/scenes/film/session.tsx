@@ -13,6 +13,7 @@ import {
   span,
   track,
   typed,
+  words,
   type SceneElement,
   type Span,
 } from "svjeez";
@@ -40,6 +41,10 @@ interface SessionProps {
   readonly typing: Span;
   /** When each call, then the reply, shows up. */
   readonly steps: readonly Span[];
+  /** Where the sent message sits, below anything drawn above it; the calls follow. */
+  readonly top?: number;
+  /** Drawn at the top of the session, above the conversation. */
+  readonly children?: SceneElement;
 }
 
 const SIZE = 15;
@@ -52,7 +57,7 @@ const appear = (when: Span) =>
 const hook = path().moveTo([0, -12]).lineTo([0, -5]).lineTo([8, -5]);
 
 /** The spinner's ✻: six spokes, turning. */
-const Spinner = (): SceneElement => (
+export const Spinner = (): SceneElement => (
   <Group motion={{ rotate: track(0).to(180, span(0, 1.2), ease.linear).loop(1.2) }}>
     {[0, 60, 120].map((turn) => (
       <Shape
@@ -73,10 +78,12 @@ export const Session = ({
   reply,
   typing,
   steps,
+  top = BAR + 36,
+  children,
 }: SessionProps): SceneElement => {
   const sent = typing.start + typing.over + 0.25;
   const box = { y: h - 58, h: 40 } as const;
-  const row = (i: number) => BAR + 84 + i * 46;
+  const row = (i: number) => top + 46 + i * 40;
   const done = steps.at(-1)!.start;
 
   return (
@@ -91,11 +98,13 @@ export const Session = ({
         {title}
       </Text>
 
+      {children}
+
       {/* The message, once it is sent. */}
       <Text
         font={mono}
         size={SIZE}
-        at={[18, BAR + 36]}
+        at={[18, top]}
         anchor="baseline-left"
         fill={theme.muted}
         motion={appear(span(sent, 0.2))}
@@ -110,7 +119,7 @@ export const Session = ({
             <Run>{tool}</Run>
             <Run fill={theme.muted}>{`(${input})`}</Run>
           </Text>
-          <Group offset={[22, 22]} motion={appear(span(steps[i]!.start + 0.3, 0.2))}>
+          <Group offset={[22, 20]} motion={appear(span(steps[i]!.start + 0.3, 0.2))}>
             <Shape
               geometry={hook}
               stroke={{ color: theme.faint, width: 1.4, cap: "round", join: "round" }}
@@ -167,7 +176,7 @@ export const Session = ({
         anchor="baseline-left"
         fill={theme.text}
       >
-        {typed(track("").to(prompt, typing).to("", span(sent, 0.05)), { caret: true })}
+        {typed(track("").to(prompt, typing).to("", span(sent, 0.05)), { by: words, caret: true })}
       </Text>
     </Group>
   );
