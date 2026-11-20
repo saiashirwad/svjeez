@@ -25,7 +25,7 @@ const route: readonly Move[] = [
   // The agent writes a scene.
   { hop: { land: 5.9, height: 40 }, to: [560, 180] },
   { hop: { land: 7.1, height: 30 } },
-  { hop: { land: 10.2, height: 90 }, to: [1080, 400] },
+  { hop: { land: 10.2, height: 90 }, to: [1125, 428] },
   { hop: { land: 11.2, height: 40 } },
   { hop: { land: 12.3, height: 120 }, to: [900, EDGE] },
   // Mermaid.

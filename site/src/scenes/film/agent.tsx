@@ -1,6 +1,4 @@
 import { Code } from "@svjeez/code";
-import { mermaid } from "@svjeez/mermaid";
-import { Pivot } from "../blip";
 import {
   Group,
   Shape,
@@ -13,7 +11,9 @@ import {
   span,
   track,
   typed,
+  count,
   type SceneElement,
+  type Vec,
 } from "svjeez";
 import { geistCode } from "./code";
 import { Note } from "./note";
@@ -39,8 +39,8 @@ export const COPY = {
 } as const;
 
 const SESSION = { x: STAGE.x + 40, y: STAGE.y + 40, w: 500, h: STAGE.h - 80 } as const;
-const SOURCE = { x: 660, y: STAGE.y + 40, w: 500, h: 200, bar: 40 } as const;
-const RESULT = { x: 660, y: STAGE.y + 260, w: 500, h: 200, bar: 40 } as const;
+const SOURCE = { x: 660, y: STAGE.y + 40, w: 500, h: 232, bar: 40 } as const;
+const RESULT = { x: 660, y: STAGE.y + 288, w: 500, h: 172, bar: 40 } as const;
 
 const typing = span(0.6, 1.3);
 
@@ -48,45 +48,126 @@ const steps = span(2.0, 0.25).cascade(COPY.calls.length + 1, 0.75);
 const writing = span(steps[0]!.start + 0.1, 1.2);
 const shipped = steps.at(-1)!.start;
 
-const FLOW = `flowchart LR
-  req([request]) --> cache{cache}
-  cache -->|hit · 2 ms| res([response])
-  cache -->|miss| origin[origin · 48 ms]
-  origin -->|write back| cache`;
+const code = `const trip = (t: number, miss: boolean) =>
+  track(client).to(cache, span(t, 0.25)).to(
+    miss ? origin : client, span(t + 0.25, 0.4));
 
-const code = `export default scene(opts, () => (
-  <Align>{mermaid(\`flowchart LR
-    req([request]) --> cache{cache}
-    cache -->|hit · 2 ms| res([response])
-    cache -->|miss| origin[origin · 48 ms]
-  \`, { font, reveal }).node}</Align>
+export default scene({ size: [480, 160] }, () => (
+  <Group>{packets.map(({ t, miss }) => (
+    <Shape geometry={dot} at={trip(t, miss)} />
+  ))}</Group>
 ));`;
 
-const flow = mermaid(FLOW, {
-  font: mono,
-  textSize: 15,
-  reveal: span(shipped + 0.3, 0.3),
-  colors: {
-    background: theme.surface,
-    text: theme.text,
-    line: theme.faint,
-    muted: theme.muted,
-    accent: theme.green,
-    highlight: theme.pink,
-    roles: {
-      input: theme.blue,
-      task: theme.purple,
-      tool: theme.teal,
-      output: theme.green,
-      store: theme.purple,
-      decision: theme.pink,
-    },
-  },
-});
+// The result: requests travel from the client to the cache as dots. A hit comes straight back; a miss goes on to the
+// origin and back, slower. Every node and dot is the film's own, the way the agent's scene would be.
+const LANE = 96;
+const NODES = { client: 70, cache: 250, origin: 430 } as const;
+const go = shipped + 0.25;
+const misses = new Set([1, 4]);
+const packets = Array.from({ length: 6 }, (_, i) => ({ at: go + i * 0.22, miss: misses.has(i) }));
 
-/** The diagram fits the result panel under its strip. */
-const room = { w: RESULT.w - 32, h: RESULT.h - RESULT.bar - 20 } as const;
-const fit = Math.min(room.w / flow.size[0], room.h / flow.size[1]);
+const client: Vec = [NODES.client, LANE];
+const cache: Vec = [NODES.cache, LANE];
+const origin: Vec = [NODES.origin, LANE];
+
+const routeOf = ({ at, miss }: { readonly at: number; readonly miss: boolean }) => {
+  const there = track<Vec>(client).to(cache, span(at, 0.25), ease.inOut);
+
+  return miss
+    ? {
+        path: there
+          .to(origin, span(at + 0.25, 0.4), ease.inOut)
+          .to(client, span(at + 0.7, 0.45), ease.inOut),
+        end: at + 1.15,
+      }
+    : { path: there.to(client, span(at + 0.25, 0.2), ease.inOut), end: at + 0.45 };
+};
+
+const Node = ({ x, name }: { readonly x: number; readonly name: string }): SceneElement => (
+  <Group offset={[x, LANE]}>
+    <Shape
+      geometry={rect(96, 40, { radius: 8 })}
+      at={[0, 0]}
+      anchor="center"
+      fill={theme.background}
+      stroke={{ color: theme.faint, width: 1 }}
+    />
+    <Text font={mono} size={14} at={[0, 0]} anchor="center" fill={theme.text}>
+      {name}
+    </Text>
+  </Group>
+);
+
+const Result = (): SceneElement => (
+  <Group>
+    <Shape
+      geometry={line([NODES.client, LANE], [NODES.origin, LANE])}
+      stroke={{ color: theme.line, width: 1.5, dash: [4, 5] }}
+    />
+    {packets.map((packet) => {
+      const { path, end } = routeOf(packet);
+
+      return (
+        <Shape
+          geometry={circle(6)}
+          at={path}
+          anchor="center"
+          fill={packet.miss ? theme.clay : theme.green}
+          opacity={track(0).to(1, span(packet.at, 0.05)).to(0, span(end, 0.08))}
+        />
+      );
+    })}
+    <Node x={NODES.client} name="client" />
+    <Node x={NODES.cache} name="cache" />
+    <Node x={NODES.origin} name="origin" />
+    <Text
+      font={mono}
+      size={13}
+      at={[NODES.client - 48, 148]}
+      anchor="baseline-left"
+      fill={theme.muted}
+    >
+      {"hit "}
+    </Text>
+    <Text
+      font={mono}
+      size={13}
+      at={[NODES.client - 14, 148]}
+      anchor="baseline-left"
+      fill={theme.green}
+    >
+      2 ms
+    </Text>
+    <Text
+      font={mono}
+      size={13}
+      at={[NODES.client + 40, 148]}
+      anchor="baseline-left"
+      fill={theme.muted}
+    >
+      miss
+    </Text>
+    <Text
+      font={mono}
+      size={13}
+      at={[NODES.client + 82, 148]}
+      anchor="baseline-left"
+      fill={theme.clay}
+    >
+      48 ms
+    </Text>
+    <Text
+      font={mono}
+      size={13}
+      at={[NODES.origin + 48, 148]}
+      anchor="baseline-right"
+      fill={theme.muted}
+    >
+      {"hit rate "}
+      {count(track(0).to(67, span(go, 1.6), ease.out))}%
+    </Text>
+  </Group>
+);
 
 /** A hairline panel with a strip on top naming what it holds. */
 const Panel = ({
@@ -168,16 +249,7 @@ export const AgentShot = (): SceneElement => {
             bar={RESULT.bar}
             name={COPY.result}
           >
-            <Pivot
-              around={[0, 0]}
-              at={[
-                (RESULT.w - flow.size[0] * fit) / 2,
-                RESULT.bar + 10 + (room.h - flow.size[1] * fit) / 2,
-              ]}
-              motion={{ scale: fit }}
-            >
-              {flow.node}
-            </Pivot>
+            <Result />
           </Panel>
         </Group>
         <Note
