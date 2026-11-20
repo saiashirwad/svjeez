@@ -1,5 +1,5 @@
 import { SceneError } from "../model/scene-error";
-import { DEFAULT_EASE, EPSILON, type Seconds } from "../model/time";
+import { DEFAULT_EASE, EPSILON, ease, type Seconds } from "../model/time";
 import { num } from "../model/format";
 import { span, type Interval, type Span, type When } from "./span";
 import type { Vec } from "../model/ir";
@@ -38,6 +38,11 @@ export interface Track<T> {
 
 export type Anim<T> = T | Track<T> | Derived<T>;
 
+/** The curve a step takes unless told: keystrokes come at an even pace, so a string track's steps are linear. */
+const curveFor = <T>(value: T): Curve => (isText(value) ? ease.linear : DEFAULT_EASE);
+
+const isText = <T>(value: T): value is T & string => typeof value === "string";
+
 // SAFETY: a step may hold an anchor where a point track expects a point; goals.ts resolves it before any mix sees it, and readOf refuses it anywhere else.
 const stored = <T>(goal: Goal<T>): T => goal as T;
 
@@ -60,7 +65,7 @@ export class ValueTrack<T> implements Track<T> {
     return this.#last;
   }
 
-  to(value: Goal<T>, when: Interval, curve: Curve = DEFAULT_EASE): Track<T> {
+  to(value: Goal<T>, when: Interval, curve: Curve = curveFor(value)): Track<T> {
     return new ValueTrack(
       this.passage.to({ value: stored(value) }, when, curve),
       span(when.start, when.over),
@@ -79,7 +84,7 @@ export class ValueTrack<T> implements Track<T> {
     return new ValueTrack(this.passage.repeat(times), this.#last);
   }
 
-  rewind(over: Seconds, curve: Curve = DEFAULT_EASE): Track<T> {
+  rewind(over: Seconds, curve: Curve = curveFor(this.passage.data.initial.value)): Track<T> {
     return new ValueTrack(this.passage.rewind(over, curve), this.#last);
   }
 

@@ -7,7 +7,7 @@ import { inlineAssets } from "./assets.ts";
 import { cached, cachePath } from "./cache.ts";
 import { callerFile } from "./component.ts";
 import { reactIdentifyScript } from "./frameworks/react.identify.ts";
-import { compile, type Diagnostic } from "./compile/index.ts";
+import { compile, type Diagnostic, type TextPolicy } from "./compile/index.ts";
 import { themeCss } from "./compile/theme.ts";
 import { fromPortable, toPortable } from "./portable.ts";
 import { openPage, record, type OpenPageOptions, type Snap, type State } from "./record.ts";
@@ -39,6 +39,13 @@ export interface FilmOptions {
    * relative to the film file, not the working directory; an absolute path is used as is. `SVJEEZ_DOM_REFRESH=1` records again.
    */
   readonly cache?: boolean | string;
+  /**
+   * How text that changes between states gets there: a policy that sees each change and returns `typing()` or `fade`.
+   * Default `typeInFields`: what changes in a focused `<input>` or `<textarea>` is typed, the rest fades. A snap can
+   * give its own (`snap(name, { text })`), except in a cached film, which can't keep a function: there, decide by
+   * `change.state` here.
+   */
+  readonly text?: TextPolicy;
   /** Called with what the compile could not draw faithfully. Default: one `console.warn` listing them. */
   readonly onDiagnostics?: (diagnostics: readonly Diagnostic[]) => void;
   /**
@@ -131,7 +138,7 @@ export const film = async <Props = never>(
   run: (context: FilmContext<Props>) => Promise<void>,
   options: FilmOptions = {},
 ): Promise<Scene> => {
-  const { theme, cursor, viewport, cache, onDiagnostics = warn, executablePath } = options;
+  const { theme, cursor, viewport, cache, text, onDiagnostics = warn, executablePath } = options;
 
   const scheme = theme ? "both" : options.scheme;
   // Before the first await, while the film file is still on the stack.
@@ -188,6 +195,11 @@ export const film = async <Props = never>(
             run({
               page,
               snap: async (name, timing) => {
+                if (file && timing?.text)
+                  throw new Error(
+                    `film: snap("${name}") has a text policy, which a cached film can't keep. Give it to film's text option instead, and decide by change.state.`,
+                  );
+
                 await settle(page, selector);
 
                 return snap(name, timing);
@@ -246,6 +258,7 @@ export const film = async <Props = never>(
     // Bundled fonts and images have hashed URLs that only this server knows.
     const { element, size, duration, diagnostics } = compile(await inlineAssets(states), {
       ...(theme && { theme }),
+      ...(text && { text }),
     });
 
     onDiagnostics(diagnostics);

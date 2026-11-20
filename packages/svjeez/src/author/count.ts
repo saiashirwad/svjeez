@@ -19,6 +19,7 @@ import type {
 import type { Anim } from "./track";
 import type { SceneElement, TextChild } from "./nodes";
 import { layoutRuns, type TextAlign } from "./text";
+import { isTyped, type Typed } from "./typed";
 
 export interface CountFormat {
   readonly decimals?: number;
@@ -34,7 +35,7 @@ export interface Count {
   readonly format: CountFormat;
 }
 
-export type TextContent = TextChild | Count | readonly TextContent[];
+export type TextContent = TextChild | Count | Typed | readonly TextContent[];
 
 export const count = (value: Anim<number>, format: CountFormat = {}): Count => ({
   kind: "count",
@@ -111,9 +112,11 @@ const isList = (content: TextContent): content is readonly TextContent[] => Arra
 const isWords = (content: TextContent): content is string | number =>
   typeof content === "string" || typeof content === "number";
 
-const isWord = (item: string | Count | SceneElement): item is string => typeof item === "string";
+const isWord = (item: string | Count | Typed | SceneElement): item is string =>
+  typeof item === "string";
 
-const flatten = (content: TextContent): (string | Count | SceneElement)[] => {
+/** A <Text>'s content as one list: its strings, elements, count()s and typed()s, in order. */
+export const flatten = (content: TextContent): (string | Count | Typed | SceneElement)[] => {
   if (content === undefined || content === null || content === false) return [];
 
   if (isList(content)) return content.flatMap(flatten);
@@ -135,13 +138,19 @@ export const countingIn = (content: TextContent, where: string): Counting | unde
       'Give each number a <Text> of its own, side by side in a <Stack direction="row">.',
     );
 
+  if (items.some(isTyped))
+    throw new SceneError(
+      `${where} both counts and types. A <Text> does one or the other.`,
+      "Style the whole <Text>, or put the styled words in a <Text> beside it.",
+    );
+
   if (items.some((item) => !isWord(item) && !isCount(item)))
     throw new SceneError(
       `${where} counts, so it holds strings around its count() and no <Run>s.`,
       "Style the whole <Text>, or put the styled words in a <Text> beside it.",
     );
   const at = items.indexOf(counts[0]!);
-  const words = (part: readonly (string | Count | SceneElement)[]) => part.join("");
+  const words = (part: readonly (string | Count | Typed | SceneElement)[]) => part.join("");
   const [before, after] = [words(items.slice(0, at)), words(items.slice(at + 1))];
 
   if (/\n/.test(before + after))
@@ -179,10 +188,16 @@ export const ticksOf = (
     return formatted(at, format);
   };
 
-  const ticks: Tick[] = [{ t: 0, text: show(0) }];
+  return isLane(value) ? changesOf(show, duration, 1 / format.rate) : [{ t: 0, text: show(0) }];
+};
 
-  if (!isLane(value)) return ticks;
-  const gap = 1 / format.rate;
+/** Each time what `show` shows changes in the scene's `duration`, at most once every `gap` seconds. */
+export const changesOf = (
+  show: (t: Seconds) => string,
+  duration: Seconds,
+  gap: Seconds,
+): Tick[] => {
+  const ticks: Tick[] = [{ t: 0, text: show(0) }];
   let t = later(gap);
 
   while (t < duration) {
@@ -245,7 +260,8 @@ const rounded = (n: number): number => Math.round(n * 1000) / 1000 || 0;
 
 const sum = (values: readonly number[]): number => values.reduce((total, each) => total + each, 0);
 
-const placed = (ticks: readonly Tick[], place: (text: string) => Vec): Animated<Vec> => {
+/** A position that steps with the text shown, held between ticks. */
+export const placed = (ticks: readonly Tick[], place: (text: string) => Vec): Animated<Vec> => {
   const keys: Key<Vec>[] = [];
 
   for (const { t, text } of ticks) {

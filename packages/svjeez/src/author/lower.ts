@@ -94,6 +94,7 @@ import { lookOf, paintedBoxOf } from "../model/painted";
 import { minus, pinned } from "./pin";
 import { layoutRuns, setAlong } from "./text";
 import { countedNodes, countingIn, formatOf, ticksOf } from "./count";
+import { typedNodes, typedTicks, typing as typingMix, typingIn } from "./typed";
 import {
   blendable,
   gradientOf,
@@ -523,6 +524,85 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
   })();
 
   if (counted && "node" in counted) return counted.node;
+
+  const typing = typingIn(props.children, where);
+
+  if (typing) {
+    const refuse = (what: string, fix: string): never => {
+      throw new SceneError(`${where} types, and typed text ${what}.`, fix);
+    };
+
+    if (props.along !== undefined)
+      refuse("can't be set along an outline", "Drop along, or write the words as plain text.");
+
+    if (props.width !== undefined)
+      refuse(
+        "is one line, so it takes no width",
+        "Drop width: the <Text> is as wide as the longest text it types.",
+      );
+
+    if ((props.align ?? "start") !== "start")
+      refuse(
+        "grows from its start, so it takes no align",
+        "Drop align, and place the <Text> with anchor or a layout.",
+      );
+    const look = styleOf(own);
+
+    if (!look)
+      throw new SceneError(
+        `${where} types with no fill, so it paints nothing.`,
+        "Give the <Text> a fill, as in fill={theme.text}.",
+      );
+    const spacing = props.letterSpacing ?? 0;
+
+    if (!Number.isFinite(spacing))
+      throw new SceneError(`${where} needs a finite letterSpacing, got ${spacing}.`);
+    const { before, typed } = typing;
+
+    const value = animated(
+      typed.value,
+      keep,
+      timing,
+      typingMix(typed.by),
+      `the typed text in ${where}`,
+    );
+
+    const ticks = typedTicks(value, typed.by, ctx.duration, where);
+
+    unseen(look, before + ticks.map((tick) => tick.text).join(""));
+
+    const caret =
+      typed.caret?.opacity === undefined
+        ? undefined
+        : animated(typed.caret.opacity, keep, timing, mixNumber, `the caret's opacity in ${where}`);
+
+    const { box, baseline, node } = typedNodes(
+      {
+        key,
+        where,
+        font: look.font,
+        face: look.face,
+        size,
+        spacing,
+        fill: look.fill,
+        ...(caret !== undefined && { caret }),
+      },
+      typing,
+      ticks,
+      ctx.duration,
+    );
+
+    const stroke = props.stroke && strokeOf(ctx, props.stroke, timing, where, box);
+    const drawn = strokedBox(box, stroke);
+    const home = pinned(props.anchor, drawn, where, baseline);
+
+    return {
+      ...base(ctx, props, drawn, key, timing, home),
+      authored: { count: { ticks: ticks.map(({ t, text }) => ({ t, text: before + text })) } },
+      kind: "group",
+      children: [stroke ? stroked(node, stroke) : node],
+    };
+  }
 
   const asked = piecesOf(counted ? counted.words : props.children, own, where);
   const found = asked.map((piece) => styleOf(piece.asked));

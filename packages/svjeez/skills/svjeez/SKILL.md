@@ -76,6 +76,7 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 | `<Shape geometry fill stroke draw trim>` | `stroke={{ color, width, cap, join, dash, dashOffset, fixedWidth, under }}`; `draw` is 0 to 1, `trim={[from, to]}` a window; not both |
 | `<Text font size fill weight italic width lineHeight align along start stroke>` | strings and `<Run weight fill italic opacity>` inside; `width` wraps; `along={geometry}` sets one line along an outline |
 | `count(value, { decimals, separator, point, pad, rate })` | a number that counts, as the only content of a `<Text>` besides strings |
+| `typed(value, { by, caret })` | a string track typed out, last in a `<Text>`: each `.to()` erases back to the shared start, then types; `by` is `chars` (default), `words` or your own split |
 | `<Group offset>` | moves children together; `offset` is where their `[0, 0]` goes |
 | `<Picture src={picture(bytes)} width height>` | a PNG, JPEG, GIF, WebP or SVG; `picture.load(path)` reads a file |
 | `<Sequence when={span}>` | a local clock: tracks inside count from the span's start |
@@ -125,6 +126,7 @@ Fonts and data: `font(bytes)`, `font.load(path)`, `font.family(...faces)`, `goog
 - **Something draws itself**: `draw={track(0).to(1, span(…))}` on a `<Shape>`, an `<Arrow>`, a chart series.
 - **Two layouts of one picture** (chart values, before/after code): `morph` between keyed states, not hand-written tracks per node.
 - **A changing number**: `count()` in a `<Text>`, never texts crossfaded per value.
+- **Typing**: `typed(track("").to("Save drafts", span(0.2, 1)))`, never a `<Run>` per letter faded in.
 - **One number drives many props**: one track and `.map()` from it, not parallel tracks that can drift apart.
 - **A card or a pill**: a container with `fill`, `stroke` and `radius`, not a rect of a size you worked out.
 - **A label on a shape**: `<Center>`. **Against the canvas or another node**: `<Align>` or a ref's anchor.

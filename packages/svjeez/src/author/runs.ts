@@ -3,6 +3,7 @@ import { Font, FontFamily, type FontValue } from "../font/font";
 import type { Face } from "../model/ir";
 import type { RunProps, RunStyle, SceneElement } from "./nodes";
 import { isCount, type TextContent } from "./count";
+import { isTyped } from "./typed";
 
 export type Asked = RunStyle & Required<Pick<RunStyle, "font">>;
 
@@ -21,7 +22,11 @@ const isRun = (child: SceneElement): child is { readonly type: "run"; readonly p
   child.type === "run";
 
 const isElement = (child: TextContent): child is SceneElement =>
-  typeof child === "object" && child !== null && !isList(child) && !isCount(child);
+  typeof child === "object" &&
+  child !== null &&
+  !isList(child) &&
+  !isCount(child) &&
+  !isTyped(child);
 
 const over = (style: Asked, run: RunProps): Asked => ({
   ...style,
@@ -71,6 +76,12 @@ export const piecesOf = (children: TextContent, style: Asked, where: string): As
     throw new SceneError(
       `${where} holds a count() inside a <Run>, and a count goes straight in its <Text>.`,
       "Write <Text …>{count(…)}</Text>, and style the whole <Text>.",
+    );
+
+  if (isTyped(children))
+    throw new SceneError(
+      `${where} holds a typed() inside a <Run>, and typed() goes straight in its <Text>.`,
+      "Write <Text …>{typed(…)}</Text>, and style the whole <Text>.",
     );
 
   if (isWords(children)) return [{ text: String(children), asked: style }];

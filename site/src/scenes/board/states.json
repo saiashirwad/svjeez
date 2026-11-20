@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "inputs": "60ab64c6b5682ac33aeb89d445768ff30ab38b086d3eca98f1d3386edae34637",
+  "inputs": "1731582471a630e902785e0b710a1cc77a1786638fd1441b59455b8521c766c9",
   "value": [
     {
       "name": "idle",
@@ -9950,6 +9950,7 @@
                                   "children": [
                                     {
                                       "type": "text",
+                                      "placeholder": true,
                                       "runs": [
                                         {
                                           "x": 233,
@@ -9977,6 +9978,7 @@
                                       ]
                                     }
                                   ],
+                                  "focused": true,
                                   "part": "query",
                                   "clip": { "x": true, "y": true }
                                 },
@@ -16635,6 +16637,7 @@
                                       ]
                                     }
                                   ],
+                                  "focused": true,
                                   "part": "query",
                                   "clip": { "x": true, "y": true }
                                 },
@@ -22564,6 +22567,7 @@
                                       ]
                                     }
                                   ],
+                                  "focused": true,
                                   "part": "query",
                                   "clip": { "x": true, "y": true }
                                 },
@@ -28120,6 +28124,7 @@
                               "children": [
                                 {
                                   "type": "text",
+                                  "placeholder": true,
                                   "runs": [
                                     {
                                       "x": 184,
@@ -28145,6 +28150,7 @@
                                   ]
                                 }
                               ],
+                              "focused": true,
                               "part": "title",
                               "clip": { "x": true, "y": true }
                             },
@@ -34218,6 +34224,7 @@
                                   ]
                                 }
                               ],
+                              "focused": true,
                               "part": "title",
                               "clip": { "x": true, "y": true }
                             },
@@ -40509,6 +40516,7 @@
                                     }
                                   ],
                                   "identity": "|div0|div3|div0|div0|div3|Feature",
+                                  "focused": true,
                                   "part": "label-feature",
                                   "radii": [
                                     [13, 13],
@@ -46817,6 +46825,7 @@
                                     }
                                   ],
                                   "identity": "|div0|div3|div0|div0|div4|mara",
+                                  "focused": true,
                                   "part": "who-mara",
                                   "radii": [
                                     [15, 15],
@@ -66505,6 +66514,7 @@
                                           ]
                                         }
                                       ],
+                                      "focused": true,
                                       "part": "status-ENG-143"
                                     },
                                     {

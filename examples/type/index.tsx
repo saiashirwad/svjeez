@@ -1,4 +1,4 @@
-import { Group, Run, Shape, Stack, Text, scene, span, track } from "svjeez";
+import { Group, Run, Shape, Stack, Text, scene, span, track, typed, words } from "svjeez";
 import { geistText } from "../fonts/faces";
 import { mono, theme } from "../theme";
 
@@ -9,12 +9,16 @@ const glowing = track(theme.text)
   .to(theme.text, span(2.2, 0.5))
   .loop(3);
 
-const WORDS = ["One", "word", "at", "a", "time,", "on", "one", "line."];
+// A string track types each edit: it erases back to what the two strings share, then types the rest.
+const sentence = track("")
+  .to("One word at a time, on one line.", span(0.5, 1.6))
+  .to("", span(5.3, 0.4));
 
-const appear = (i: number) =>
-  track(0)
-    .to(1, span(0.5 + i * 0.22, 0.3))
-    .to(0, span(5.4, 0.3));
+const command = track("")
+  .to("git commit -m 'drafts'", span(0.6, 1.1))
+  .to("git commit -m '", span(2.3, 0.35))
+  .to("git commit -m 'offline drafts'", span(2.9, 0.9))
+  .to("", span(5.2, 0.5));
 
 export default scene(
   { size: [480, 300], duration: 6, theme, title: "Type, measured" },
@@ -41,9 +45,10 @@ export default scene(
           <Run fill={theme.magenta}>const</Run> total = <Run fill={theme.blue}>42</Run>;
         </Text>
         <Text font={geistText} size={14} fill={theme.text}>
-          {WORDS.map((word, i) => (
-            <Run opacity={appear(i)}>{i === 0 ? word : ` ${word}`}</Run>
-          ))}
+          {typed(sentence, { by: words })}
+        </Text>
+        <Text font={mono} size={13} fill={theme.text}>
+          $ {typed(command, { caret: true })}
         </Text>
       </Stack>
     </Group>

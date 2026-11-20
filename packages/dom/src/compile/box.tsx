@@ -128,7 +128,8 @@ export const element = (
   const content: SceneElement[] = [];
 
   for (const kid of kids)
-    if (kid.node.type === "text") content.push(...text(kid.node, origin, kid.key, ctx));
+    if (kid.node.type === "text")
+      content.push(...text(kid.node, origin, kid.key, `${path}/${kid.key}`, ctx));
     else if (isElement(kid)) content.push(element(kid, origin, `${path}/${kid.key}`, ctx));
 
   // The names the compiler gives its own parts start with "@", which no sibling key does.

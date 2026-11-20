@@ -23,7 +23,7 @@ const budgets = {
   morph: { bytes: 7750, elements: 29, stops: 38, smil: 6, cost: 31.7 },
   derived: { bytes: 8800, elements: 19, stops: 43, smil: 1, cost: 4 },
   count: { bytes: 15350, elements: 49, stops: 170, smil: 0, cost: 26 },
-  type: { bytes: 3700, elements: 33, stops: 18, smil: 0, cost: 9 },
+  type: { bytes: 6400, elements: 34, stops: 100, smil: 0, cost: 9 },
   icons: { bytes: 9300, elements: 32, stops: 36, smil: 0, cost: 18 },
   charts: { bytes: 15050, elements: 98, stops: 70, smil: 0, cost: 35 },
   paint: { bytes: 8400, elements: 50, stops: 15, smil: 14, cost: 17.4 },

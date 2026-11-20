@@ -2,6 +2,7 @@ import type { Page } from "playwright-core";
 import { captureScript } from "./capture.ts";
 import { mergeSchemes } from "./scheme.ts";
 import { checkVersion, type Snapshot } from "./schema.ts";
+import type { TextPolicy } from "./compile/typing.ts";
 
 /** The core easings, by name. */
 export type EaseName = "linear" | "in" | "out" | "inOut" | "pop" | "hold";
@@ -17,6 +18,12 @@ export interface Timing {
   readonly hold?: number;
   /** The easing of the move into this state. */
   readonly ease?: EaseName;
+  /**
+   * How each text that changes in the move gets there: a policy that sees the change and returns `typing()` (erase back
+   * to what the two texts share, then type the rest), `fade`, or undefined to fade. Default: compile's `text`, which
+   * defaults to `typeInFields`. A function: a cached film can't keep it, so give a cached film's policy to `film`.
+   */
+  readonly text?: TextPolicy;
 }
 
 /** A point in page px (viewport plus scroll), the frame every Snapshot rect is in. */

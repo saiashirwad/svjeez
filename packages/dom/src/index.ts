@@ -8,6 +8,13 @@ export {
   type Compiled,
   type Diagnostic,
   type PairBy,
+  fade,
+  typeInFields,
+  typing,
+  type TextChange,
+  type TextPolicy,
+  type TextTransition,
+  type TypingOptions,
 } from "./compile/index.ts";
 
 export {

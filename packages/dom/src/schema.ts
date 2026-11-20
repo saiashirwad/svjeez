@@ -219,6 +219,8 @@ export interface Run {
 
 export interface TextNode {
   readonly type: "text";
+  /** The placeholder an empty `<input>` or `<textarea>` shows, not its value. */
+  readonly placeholder?: true;
   readonly runs: readonly Run[];
 }
 
@@ -290,6 +292,8 @@ export interface ElementNode {
   readonly identity?: string;
   /** `data-part` */
   readonly part?: string;
+  /** The element has focus (`document.activeElement`): a text field being typed in. */
+  readonly focused?: true;
   /** The border box, before this element's own transform (ancestor transforms compose on top). */
   readonly rect: Rect;
   /** Corner radii [top-left, top-right, bottom-right, bottom-left], already clamped to the box. */

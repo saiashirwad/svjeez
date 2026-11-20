@@ -1,12 +1,14 @@
 import { ease, morph, span, type Curve, type SceneElement, type Span, type Vec } from "svjeez";
 import type { Theme } from "svjeez/tools";
-import type { Snapshot } from "../schema.ts";
+import type { Run, Snapshot } from "../schema.ts";
 import type { EaseName, State } from "../record.ts";
 import { element } from "./box.tsx";
 import { context, withTheme, type Diagnostic } from "./context.ts";
 import { withCursor, type Beat } from "./cursor.tsx";
 import { normalize } from "./normalize.ts";
 import { pair, type PairBy, type Paired } from "./pair.ts";
+import { face } from "./text.tsx";
+import { typeInFields, typings, type TextPolicy } from "./typing.ts";
 import { animate, watchFor, type Slot } from "./waapi.ts";
 
 const DEFAULT_HOLD = 0.8;
@@ -14,6 +16,16 @@ const DEFAULT_HOLD = 0.8;
 export type { Diagnostic } from "./context.ts";
 
 export type { PairBy } from "./pair.ts";
+
+export {
+  fade,
+  typeInFields,
+  typing,
+  type TextChange,
+  type TextPolicy,
+  type TextTransition,
+  type TypingOptions,
+} from "./typing.ts";
 
 export interface CompileOptions {
   /** Seconds a move between states takes unless the state says. Default 0.6. */
@@ -36,6 +48,8 @@ export interface CompileOptions {
    * restyles the scene. Other colors stay as captured.
    */
   readonly theme?: Theme;
+  /** How text that changes between states gets there, unless the state says (`Timing.text`). Default `typeInFields`. */
+  readonly text?: TextPolicy;
 }
 
 export interface Compiled {
@@ -61,7 +75,7 @@ const pathsOf = ({ node, children }: Paired, path: string, into: Set<string>): v
  *
  * Given states (see `record`), the page is shown as the first, moves into the second over `over` seconds, rests for `hold`, and so on.
  * Elements are paired across states (see `pair`), and core's `morph.between()` does the blending: what a pair shares moves,
- * resizes and recolors, text crossfades, and what has no pair fades in or out.
+ * resizes and recolors, text crossfades (or is typed, see `Timing.text`), and what has no pair fades in or out.
  *
  *     const { element, size, duration } = compile(await inlineAssets(await record(page, "#app", run)));
  */
@@ -72,7 +86,7 @@ export const compile = (
 
 const compileStates = (
   input: Snapshot | readonly State[],
-  { over = 0.6, hold, ease: easing = "inOut", pairBy }: CompileOptions,
+  { over = 0.6, hold, ease: easing = "inOut", pairBy, text: policy = typeInFields }: CompileOptions,
 ): Compiled => {
   const states: readonly State[] = "root" in input ? [{ name: "", snapshot: input }] : input;
 
@@ -120,6 +134,11 @@ const compileStates = (
     slots.push({ start, over: length, end: duration });
     eases.push(i > 0 ? curves.at(-1) : undefined);
   });
+
+  const measurable = (run: Run) => face(ctx, run.font).measurable;
+
+  for (const [path, typing] of typings(roots, states, spans, policy, measurable))
+    ctx.typings.set(path, typing);
 
   // Animations are tracks over the whole timeline, put on each state's copy of an element alike: the morph has no lane to blend.
   for (const [path, motion] of animate(roots, slots, eases, ctx)) ctx.motions.set(path, motion);

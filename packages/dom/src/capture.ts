@@ -1197,6 +1197,7 @@ export const capture = (root: Element): Snapshot => {
 
       return {
         type: "text",
+        ...(tint && { placeholder: true }),
         runs: node.runs.map((run) => ({
           ...run,
           x: round(run.x + left),
@@ -1383,6 +1384,8 @@ export const capture = (root: Element): Snapshot => {
     const identity = d.el?.getAttribute("data-svjeez-id");
 
     if (identity) node.identity = identity;
+
+    if (d.el && d.el === document.activeElement) node.focused = true;
 
     if (part ?? d.part) node.part = (part ?? d.part)!;
 

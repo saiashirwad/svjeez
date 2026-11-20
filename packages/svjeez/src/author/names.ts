@@ -1,6 +1,7 @@
 import type { Source } from "../model/ir";
 import type { SceneElement } from "./nodes";
 import { isCount, type TextContent } from "./count";
+import { isTyped } from "./typed";
 import { SceneError, located, type Where } from "../model/scene-error";
 import { thrownFrom } from "../svg/traced";
 import { sourceFrom } from "./identity";
@@ -71,7 +72,11 @@ export const quoted = (words: string): string => {
 };
 
 const isElement = (child: TextContent): child is SceneElement =>
-  typeof child === "object" && child !== null && !Array.isArray(child) && !isCount(child);
+  typeof child === "object" &&
+  child !== null &&
+  !Array.isArray(child) &&
+  !isCount(child) &&
+  !isTyped(child);
 
 const isWords = (child: TextContent): child is string | number =>
   typeof child === "string" || typeof child === "number";

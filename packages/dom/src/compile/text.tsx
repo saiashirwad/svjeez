@@ -1,5 +1,5 @@
 /** @jsxImportSource svjeez */
-import { Run, Shape, Text, blur, font, rect, shadow, type SceneElement } from "svjeez";
+import { Run, Shape, Text, blur, font, rect, shadow, type Anim, type SceneElement } from "svjeez";
 import type { Effect, Font } from "svjeez/tools";
 import type { Run as Captured, TextNode } from "../schema.ts";
 import { painted, type Context, type Solid } from "./context.ts";
@@ -18,7 +18,7 @@ const embedded = (ctx: Context, family: string, weight: number, italic: boolean)
     .sort((a, b) => Math.abs(a.weight - weight) - Math.abs(b.weight - weight))[0];
 
 /** `"Helvetica Neue", Arial, sans-serif` as the page's embedded font of that name, or else a system font. */
-const face = (ctx: Context, { family, weight, italic }: Captured["font"]): Font => {
+export const face = (ctx: Context, { family, weight, italic }: Captured["font"]): Font => {
   const id = `${family}\0${weight}\0${italic}`;
   const known = ctx.fonts.get(id);
 
@@ -57,7 +57,13 @@ const LINES = {
   "line-through": (size: number, thickness: number) => -size * 0.3 - thickness / 2,
 } as const;
 
-const run = (one: Captured, at: Vec, key: string, ctx: Context): SceneElement[] => {
+const run = (
+  one: Captured,
+  at: Vec,
+  key: string,
+  ctx: Context,
+  opacity?: Anim<number>,
+): SceneElement[] => {
   const fill = painted(one.color);
 
   // A right-to-left piece is an isolate, so the SVG text orders it by itself, whichever way the text around it reads.
@@ -78,6 +84,7 @@ const run = (one: Captured, at: Vec, key: string, ctx: Context): SceneElement[] 
         fill={color}
         {...(one.letterSpacing !== 0 && { letterSpacing: one.letterSpacing })}
         {...(effects && { effects })}
+        {...(opacity !== undefined && { opacity })}
         at={where}
         anchor="baseline-left"
       >
@@ -143,6 +150,47 @@ const run = (one: Captured, at: Vec, key: string, ctx: Context): SceneElement[] 
   return out;
 };
 
-/** A text node's line fragments, positioned by their baseline in the parent's frame `origin`. */
-export const text = (node: TextNode, origin: Vec, key: string, ctx: Context): SceneElement[] =>
-  node.runs.flatMap((one, i) => run(one, sub([one.x, one.y], origin), `${key}.${i}`, ctx));
+/**
+ * A text node's line fragments, positioned by their baseline in the parent's frame `origin`. A node typed from state to
+ * state (see `typings`) is its typed text instead, starting where its text (or its placeholder) does, with the placeholder
+ * drawn as usual under the opacity that hides it while there is text.
+ */
+export const text = (
+  node: TextNode,
+  origin: Vec,
+  key: string,
+  path: string,
+  ctx: Context,
+): SceneElement[] => {
+  const typing = ctx.typings.get(path);
+
+  if (!typing)
+    return node.runs.flatMap((one, i) => run(one, sub([one.x, one.y], origin), `${key}.${i}`, ctx));
+
+  const { look } = typing;
+  const [first] = node.runs;
+  const fill = painted(look.color);
+
+  return [
+    ...(node.placeholder
+      ? node.runs.flatMap((one, i) =>
+          run(one, sub([one.x, one.y], origin), `${key}.${i}`, ctx, typing.hint),
+        )
+      : []),
+    ...(first && fill
+      ? [
+          <Text
+            key={`${key}.typed`}
+            font={face(ctx, look.font)}
+            size={look.font.size}
+            fill={fill.rgba}
+            {...(look.letterSpacing !== 0 && { letterSpacing: look.letterSpacing })}
+            at={sub([first.x, first.y], origin)}
+            anchor="baseline-left"
+          >
+            {typing.text}
+          </Text>,
+        ]
+      : []),
+  ];
+};

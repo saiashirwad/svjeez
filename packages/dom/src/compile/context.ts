@@ -1,6 +1,7 @@
 import type { Font, Hex, Theme, Token } from "svjeez/tools";
 import { isThemed, type Color, type WebFont } from "../schema.ts";
 import { fromTheme } from "./theme.ts";
+import type { Typing } from "./typing.ts";
 import type { Motion } from "./waapi.ts";
 
 /** One place where the scene is not faithful to the page. */
@@ -19,6 +20,8 @@ export interface Context {
   readonly clips: ReadonlySet<string>;
   /** What the animations on each element drive, by the element's path. */
   readonly motions: Map<string, Motion>;
+  /** The text nodes typed from state to state, by their path. */
+  readonly typings: Map<string, Typing>;
   note(path: string, what: string): void;
 }
 
@@ -35,6 +38,7 @@ export const context = (
     faces,
     clips,
     motions: new Map(),
+    typings: new Map(),
     note: (path, what) => {
       const id = `${path}\0${what}`;
 

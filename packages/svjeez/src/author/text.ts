@@ -195,6 +195,55 @@ const paragraphs = <S>(pieces: readonly TextPiece<S>[]): TextPiece<S>[][] => {
   return out;
 };
 
+/** A piece's advances, one per character: its own, or measured in its font at `size` and spaced. */
+export const advancesIn = <S>(
+  part: TextPiece<S>,
+  size: number,
+  where: string,
+): readonly number[] => {
+  if (part.advances) return part.advances;
+  const { face, text } = part;
+
+  if (text === "") return [];
+
+  if (!face.measurable)
+    throw new SceneError(
+      `${where} sets ${JSON.stringify(text.trim())} in ${face.family} ${face.weight}${face.italic ? " italic" : ""}, a font svjeez can't measure, and gave no advances for it.`,
+      "Give the <Run> its advances={[…]}, one per character as the browser measured them, or load the font as a TTF or OTF.",
+    );
+
+  const spacing = part.spacing ?? 0;
+
+  return face.advances(text, size).map((advance) => advance + spacing);
+};
+
+/** One piece set as a run with its baseline's start at `at`, outlined when its font can be. */
+export const setRun = <S>(
+  part: TextPiece<S>,
+  [x, y]: Vec,
+  size: number,
+  where: string,
+): LaidRun<S> => {
+  const { text, face, style, spacing } = part;
+
+  const outlined =
+    face.outlines && !part.advances
+      ? face.path(text, { size, x, y, spacing: spacing ?? 0 })
+      : undefined;
+
+  return {
+    text,
+    at: [x, y],
+    advances: outlined
+      ? outlined.glyphs.map((glyph) => glyph.advance)
+      : advancesIn(part, size, where),
+    face,
+    style,
+    ...(spacing && { spacing }),
+    ...(outlined && { outline: ringsOf(outlined.d) }),
+  };
+};
+
 export const layoutRuns = <S>(
   base: Font,
   pieces: readonly TextPiece<S>[],
@@ -218,25 +267,8 @@ export const layoutRuns = <S>(
   const { ascent, descent, lineGap } = base.metrics;
   const step = (lineHeight ?? ascent + descent + lineGap) * size;
 
-  const advancesOf = (part: TextPiece<S>): readonly number[] => {
-    if (part.advances) return part.advances;
-    const { face, text } = part;
-
-    if (text === "") return [];
-
-    if (!face.measurable)
-      throw new SceneError(
-        `${where} sets ${JSON.stringify(text.trim())} in ${face.family} ${face.weight}${face.italic ? " italic" : ""}, a font svjeez can't measure, and gave no advances for it.`,
-        "Give the <Run> its advances={[…]}, one per character as the browser measured them, or load the font as a TTF or OTF.",
-      );
-
-    const spacing = part.spacing ?? 0;
-
-    return face.advances(text, size).map((advance) => advance + spacing);
-  };
-
   const measure = (parts: readonly TextPiece<S>[]): number =>
-    parts.reduce((sum, part) => sum + advancesOf(part).reduce((a, b) => a + b, 0), 0);
+    parts.reduce((sum, part) => sum + advancesIn(part, size, where).reduce((a, b) => a + b, 0), 0);
 
   const fits = (parts: readonly TextPiece<S>[]): boolean =>
     width === undefined || measure(parts) <= width;
@@ -255,26 +287,9 @@ export const layoutRuns = <S>(
     let x = start;
 
     const runs = parts.map((part): LaidRun<S> => {
-      const { text, face, style, spacing } = part;
+      const run = setRun(part, [x, y], size, where);
 
-      const outlined =
-        face.outlines && !part.advances
-          ? face.path(text, { size, x, y, spacing: spacing ?? 0 })
-          : undefined;
-
-      const advances = outlined ? outlined.glyphs.map((glyph) => glyph.advance) : advancesOf(part);
-
-      const run: LaidRun<S> = {
-        text,
-        at: [x, y],
-        advances,
-        face,
-        style,
-        ...(spacing && { spacing }),
-        ...(outlined && { outline: ringsOf(outlined.d) }),
-      };
-
-      x += advances.reduce((a, b) => a + b, 0);
+      x += run.advances.reduce((a, b) => a + b, 0);
 
       return run;
     });

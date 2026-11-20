@@ -52,6 +52,16 @@ export { morph } from "./author/morph";
 
 export { count, type Count, type CountFormat } from "./author/count";
 
+export {
+  chars,
+  typed,
+  words,
+  type Caret,
+  type Split,
+  type Typed,
+  type TypedOptions,
+} from "./author/typed";
+
 export { param } from "./params";
 
 export { picture } from "./author/picture";
