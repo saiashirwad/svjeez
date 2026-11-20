@@ -6,6 +6,7 @@ import {
   Stack,
   Text,
   count,
+  numeral,
   ease,
   font,
   morph,
@@ -30,7 +31,7 @@ import {
   type TextProps,
 } from "svjeez/tools";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
-import { formatOf, formatted, ticksOf } from "../src/author/count";
+import { ticksOf } from "../src/author/count";
 import { blendNumber, valueAt as sampleAt } from "../src/model/sample";
 import { mixVec } from "../src/model/steps";
 import { ease as modelEase } from "../src/model/time";
@@ -108,7 +109,7 @@ const drawnAt = (model: Model.Scene, key: string, t: number): string =>
     .join("");
 
 describe("format", () => {
-  const as = (value: number, options = {}) => formatted(value, formatOf(options, "a <Text>"));
+  const as = (value: number, options = {}) => numeral(options)(value);
 
   test("rounds to its decimals and groups thousands", () => {
     expect(as(0)).toBe("0");
@@ -129,14 +130,52 @@ describe("format", () => {
   });
 
   test("a format that can't be read says what it takes", () => {
-    expect(() => formatOf({ decimals: 1.5 }, "x")).toThrow(
-      "count() in x takes decimals from 0 to 10, got 1.5.",
+    expect(() => numeral({ decimals: 1.5 })).toThrow(
+      "numeral() takes decimals from 0 to 10, got 1.5.",
     );
-    expect(() => formatOf({ rate: 0 }, "x")).toThrow("needs a positive rate");
-    expect(() => formatOf({ separator: "ab" }, "x")).toThrow("groups thousands with one character");
-    expect(() => formatOf({ point: "," }, "x")).toThrow(
+    expect(() => numeral({ separator: "ab" })).toThrow("groups thousands with one character");
+    expect(() => numeral({ point: "," })).toThrow(
       'marks its decimals with "," and groups thousands with it too',
     );
+  });
+
+  test("count takes any function from number to text, and checks its rate", () => {
+    const k = (n: number) => `$${(n / 1000).toFixed(1)}K`;
+
+    const ticks = ticksOf(
+      {
+        kind: "lane",
+        keys: [
+          { t: 0, value: 0 },
+          { t: 2, value: 3000, ease: modelEase.linear },
+        ],
+      },
+      3,
+      k,
+      10,
+      "x",
+    );
+
+    expect(ticks[0]!.text).toBe("$0.0K");
+    expect(ticks.at(-1)!.text).toBe("$3.0K");
+
+    const model = made(() => (
+      <Group>
+        <Shape geometry={rect(200, 60)} fill="#FFFFFF" />
+        <Text key="n" font={mono} size={20} at={[10, 10]} fill="#000000">
+          {count(track(0).to(45, span(0, 1), ease.linear), { format: (n) => `${Math.round(n)}%` })}
+        </Text>
+      </Group>
+    ));
+
+    expect(counted(model).ticks.at(-1)!.text).toBe("45%");
+    expect(() =>
+      made(() => (
+        <Text key="n" font={mono} size={20} fill="#000000">
+          {count(1, { rate: 0 })}
+        </Text>
+      )),
+    ).toThrow("needs a positive rate");
   });
 });
 
@@ -151,14 +190,14 @@ describe("ticks", () => {
   });
 
   test("each tick shows the value at its time, no faster than the rate, and the last shows where it ends", () => {
-    const format = formatOf({ rate: 20 }, "x");
-    const ticks = ticksOf(lane(12345), 3, format, "x");
+    const format = numeral();
+    const ticks = ticksOf(lane(12345), 3, format, 20, "x");
 
     expect(ticks[0]).toEqual({ t: 0, text: "0" });
     expect(ticks.at(-1)!.text).toBe("12,345");
 
     for (const tick of ticks)
-      expect(tick.text).toBe(formatted(sampleAt(lane(12345), tick.t, blendNumber), format));
+      expect(tick.text).toBe(format(sampleAt(lane(12345), tick.t, blendNumber)));
 
     for (let i = 1; i < ticks.length; i++) {
       expect(ticks[i]!.t - ticks[i - 1]!.t).toBeGreaterThanOrEqual(1 / 20 - 1e-4);
@@ -176,7 +215,8 @@ describe("ticks", () => {
         ],
       },
       3,
-      formatOf({}, "x"),
+      numeral(),
+      30,
       "x",
     );
 
@@ -246,7 +286,7 @@ describe("a counting Text", () => {
     const node = find(
       made(() => (
         <Text key="n" font={mono} size={20} fill="#000000">
-          {count(1234.5, { decimals: 1 })}%
+          {count(1234.5, { format: numeral({ decimals: 1 }) })}%
         </Text>
       )),
       "n",
@@ -400,7 +440,6 @@ describe("misuse", () => {
       '<Text> "n" counts, and a count doesn\'t wrap, so it takes no width.',
     ],
     [count(1), { fill: undefined }, '<Text> "n" counts with no fill, so it paints nothing.'],
-    [count(1, { decimals: -1 }), {}, 'count() in <Text> "n" takes decimals from 0 to 10, got -1.'],
     [
       count(track(0).to(Number.NaN, span(0, 1))),
       {},

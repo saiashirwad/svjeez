@@ -122,9 +122,11 @@ export default scene(
             draw={track(0).to(1, toTargets[i]!)}
           />
         ))}
-        {targets.map((target, i) => (
-          <Packet to={target} when={span(2.6 + i * 1.3, 0.5)} />
-        ))}
+        {span(2.6, 0.5)
+          .cascade(targets.length, 1.3)
+          .map((when, i) => (
+            <Packet to={targets[i]!} when={when} />
+          ))}
       </Group>
     </Group>
   ),

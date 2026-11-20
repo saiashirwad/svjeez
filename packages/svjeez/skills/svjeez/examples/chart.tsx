@@ -76,7 +76,7 @@ const Signups = ({ name, bars }: Quarter): SceneElement => (
 const STEP = 2.6;
 const TURN = 1;
 
-const turns = [1, 2, 3].map((i) => span(STEP * i - TURN, TURN));
+const turns = span(STEP - TURN, TURN).cascade(3, STEP);
 
 export default scene(
   {

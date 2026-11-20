@@ -7,6 +7,7 @@ import {
   Text,
   circle,
   count,
+  numeral,
   ease,
   line,
   morph,
@@ -162,7 +163,7 @@ export default scene(
             width={168}
             footer={
               <Text font={mono} size={11} fill={theme.muted}>
-                value {count(signal, { decimals: 2, rate: 14 })}
+                value {count(signal, { format: numeral({ decimals: 2 }), rate: 14 })}
               </Text>
             }
           >

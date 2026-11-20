@@ -21,32 +21,41 @@ import type { SceneElement, TextChild } from "./nodes";
 import { layoutRuns, type TextAlign } from "./text";
 import { isTyped, type Typed } from "./typed";
 
-export interface CountFormat {
+/** How a number is written: any function from the number to its text. */
+export type NumberFormat = (value: number) => string;
+
+export interface CountOptions {
+  /** How the number is written at each moment (default `numeral()`). */
+  readonly format?: NumberFormat;
+  /** The most times a second the number changes (default 30). */
+  readonly rate?: number;
+}
+
+export interface NumeralOptions {
   readonly decimals?: number;
   readonly separator?: string;
   readonly point?: string;
   readonly pad?: number;
-  readonly rate?: number;
 }
 
 export interface Count {
   readonly kind: "count";
   readonly value: Anim<number>;
-  readonly format: CountFormat;
+  readonly format: NumberFormat;
+  readonly rate: number;
 }
 
 export type TextContent = TextChild | Count | Typed | readonly TextContent[];
 
-export const count = (value: Anim<number>, format: CountFormat = {}): Count => ({
+export const count = (value: Anim<number>, options: CountOptions = {}): Count => ({
   kind: "count",
   value,
-  format,
+  format: options.format ?? numeral(),
+  rate: options.rate ?? 30,
 });
 
 export const isCount = (value: unknown): value is Count =>
   typeof value === "object" && value !== null && "kind" in value && value.kind === "count";
-
-export type Format = Required<CountFormat>;
 
 const DIGITS = "0123456789";
 
@@ -56,49 +65,51 @@ const whole = (value: number, from: number, to: number): boolean =>
 const mark = (value: string): boolean =>
   [...value].length === 1 && !DIGITS.includes(value) && value !== "-" && !/\s/.test(value);
 
-export const formatOf = (format: CountFormat, where: string): Format => {
-  const { decimals = 0, separator = ",", point = ".", pad = 1, rate = 30 } = format;
-
-  if (!whole(decimals, 0, 10))
-    throw new SceneError(`count() in ${where} takes decimals from 0 to 10, got ${decimals}.`);
-
-  if (!whole(pad, 1, 20))
-    throw new SceneError(`count() in ${where} takes a pad of 1 to 20 digits, got ${pad}.`);
-
+/** The rate of a count(), checked, naming the <Text> it sits in. */
+export const rateOf = ({ rate }: Count, where: string): number => {
   if (!(rate > 0 && Number.isFinite(rate)))
     throw new SceneError(
       `count() in ${where} needs a positive rate, the most times a second the number changes, got ${rate}.`,
     );
 
+  return rate;
+};
+
+/** The built-in format: rounded to `decimals`, thousands grouped, integer digits zero-padded to `pad`. */
+export const numeral = (options: NumeralOptions = {}): NumberFormat => {
+  const { decimals = 0, separator = ",", point = ".", pad = 1 } = options;
+
+  if (!whole(decimals, 0, 10))
+    throw new SceneError(`numeral() takes decimals from 0 to 10, got ${decimals}.`);
+
+  if (!whole(pad, 1, 20))
+    throw new SceneError(`numeral() takes a pad of 1 to 20 digits, got ${pad}.`);
+
   if (separator !== "" && separator !== " " && !mark(separator))
     throw new SceneError(
-      `count() in ${where} groups thousands with one character that isn't a digit or a minus sign, got ${JSON.stringify(separator)}.`,
+      `numeral() groups thousands with one character that isn't a digit or a minus sign, got ${JSON.stringify(separator)}.`,
       'Write separator="," or separator=" ", or separator="" for none.',
     );
 
   if (!mark(point))
     throw new SceneError(
-      `count() in ${where} marks its decimals with one character that isn't a digit or a minus sign, got ${JSON.stringify(point)}.`,
+      `numeral() marks its decimals with one character that isn't a digit or a minus sign, got ${JSON.stringify(point)}.`,
     );
 
   if (point === separator)
     throw new SceneError(
-      `count() in ${where} marks its decimals with ${JSON.stringify(point)} and groups thousands with it too, so the two can't be told apart.`,
+      `numeral() marks its decimals with ${JSON.stringify(point)} and groups thousands with it too, so the two can't be told apart.`,
       `Give it another separator, as in { point: ${JSON.stringify(point)}, separator: ${JSON.stringify(point === "." ? "," : ".")} }.`,
     );
 
-  return { decimals, separator, point, pad, rate };
-};
+  return (value) => {
+    const [int = "", frac] = Math.abs(value).toFixed(decimals).split(".");
+    const digits = int.padStart(pad, "0");
+    const grouped = separator ? digits.replace(/\B(?=(\d{3})+$)/g, separator) : digits;
+    const body = frac === undefined ? grouped : `${grouped}${point}${frac}`;
 
-export const formatted = (value: number, format: Format): string => {
-  const [int = "", frac] = Math.abs(value).toFixed(format.decimals).split(".");
-  const digits = int.padStart(format.pad, "0");
-
-  const grouped = format.separator ? digits.replace(/\B(?=(\d{3})+$)/g, format.separator) : digits;
-
-  const body = frac === undefined ? grouped : `${grouped}${format.point}${frac}`;
-
-  return value < 0 && /[1-9]/.test(body) ? `-${body}` : body;
+    return value < 0 && /[1-9]/.test(body) ? `-${body}` : body;
+  };
 };
 
 export interface Counting {
@@ -174,7 +185,8 @@ const later = (t: Seconds): Seconds => Math.ceil(t * 1e4 - 1e-6) / 1e4;
 export const ticksOf = (
   value: Animated<number>,
   duration: Seconds,
-  format: Format,
+  format: NumberFormat,
+  rate: number,
   where: string,
 ): Tick[] => {
   const show = (t: Seconds): string => {
@@ -185,10 +197,17 @@ export const ticksOf = (
         `count() in ${where} reads ${at} at ${Math.round(t * 1000) / 1000}s, which isn't a number it can show.`,
       );
 
-    return formatted(at, format);
+    const text = format(at);
+
+    if (!text)
+      throw new SceneError(
+        `count() in ${where} formats ${at} as ${JSON.stringify(text)} at ${Math.round(t * 1000) / 1000}s, and a format must return some text.`,
+      );
+
+    return text;
   };
 
-  return isLane(value) ? changesOf(show, duration, 1 / format.rate) : [{ t: 0, text: show(0) }];
+  return isLane(value) ? changesOf(show, duration, 1 / rate) : [{ t: 0, text: show(0) }];
 };
 
 /** Each time what `show` shows changes in the scene's `duration`, at most once every `gap` seconds. */

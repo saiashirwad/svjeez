@@ -5,6 +5,7 @@ import {
   Stack,
   Text,
   count,
+  numeral,
   ease,
   enter,
   exit,
@@ -67,7 +68,7 @@ export default scene(
             {count(climb(0, 48213, 0.65))}
           </Stat>
           <Stat label="Uptime" at={span(0.5, 0.4)}>
-            {count(climb(90, 99.98, 0.8), { decimals: 2 })}%
+            {count(climb(90, 99.98, 0.8), { format: numeral({ decimals: 2 }) })}%
           </Stat>
         </Stack>
       </Align>
