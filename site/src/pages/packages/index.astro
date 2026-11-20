@@ -5,7 +5,7 @@ import { packages } from "../../packages";
 
 <Base
   title="Packages · svjeez"
-  description="The svjeez packages: the core library and the charts, code, maps, math, diagrams and tools built on it."
+  description="The svjeez core and its add-ons: charts, code, maps, math, diagrams and more."
   share={{
     title: "svjeez packages",
     description: `${packages.length} small packages for motion in TypeScript.`,
@@ -13,7 +13,6 @@ import { packages } from "../../packages";
 >
   <main class="wrap list">
     <h1>Packages</h1>
-    <p class="lede">The core library is one package. Everything else is a small package you add when you need it.</p>
     <ul>
       {
         packages.map(({ name, description, href }) => (
@@ -29,8 +28,7 @@ import { packages } from "../../packages";
 
 <style is:global>
   .list { padding-block: 3rem 5rem; }
-  .list h1 { margin: 0; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -0.02em; }
-  .list .lede { color: var(--muted); margin: 0.5rem 0 2rem; max-width: 40rem; }
+  .list h1 { margin: 0 0 2rem; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -0.02em; }
   .list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); }
   .list li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 1rem 1.1rem; }
   .list li a { color: inherit; font-weight: 600; }

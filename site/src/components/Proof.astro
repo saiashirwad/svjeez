@@ -8,7 +8,7 @@ interface Props {
   /** Names the download, as in svjeez-<name>.svg. */
   name: string;
   alt: string;
-  /** The height of the scene's title bar in its own pixels, or 0 for a scene without one. */
+  /** The height of the scene's title bar in its own pixels. */
   bar?: number;
   class?: string | null;
 }
@@ -18,7 +18,7 @@ const file = proof(facts(scene), name, alt);
 const id = `proof-${name}-${scene.src.slice(-16, -4)}`;
 ---
 
-<div class:list={["proof", className, { bare: bar === 0 }]} style={`--native: ${scene.width}; --bar: ${bar}`}>
+<div class:list={["proof", className]} style={`--native: ${scene.width}; --bar: ${bar}`}>
   <button class="proof-chip" type="button" popovertarget={id} aria-label={`${file.size} SVG file. Open, copy or download it.`}>
     <span data-proof-size>{file.size}</span>
     <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5"></path></svg>
