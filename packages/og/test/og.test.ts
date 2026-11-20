@@ -31,3 +31,18 @@ test("renderOg draws a card as a JPEG, and ogResponse serves it", async () => {
   expect(response.headers.get("Content-Type")).toBe("image/jpeg");
   expect((await response.arrayBuffer()).byteLength).toBe(bytes.length);
 });
+
+test("renderStill takes a scene's held moment as a transparent PNG at 2x", async () => {
+  const { renderStill } = await import("../src/render.ts");
+  const png = await renderStill(card());
+
+  expect(Array.from(png.subarray(1, 4))).toEqual([0x50, 0x4e, 0x47]);
+  expect(new DataView(png.buffer, png.byteOffset).getUint32(16)).toBe(OG_SIZE[0] * 2);
+});
+
+test("stillTime is the held moment, else 72% in", async () => {
+  const { stillTime } = await import("../src/render.ts");
+
+  expect(stillTime("animation-delay:-1.5s!important", 4)).toBe(1.5);
+  expect(stillTime("<svg/>", 10)).toBeCloseTo(7.2);
+});

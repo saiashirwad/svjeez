@@ -4,8 +4,9 @@ import { Picture, Group, Shape, picture, rect } from "svjeez";
 import { theme } from "@examples/theme";
 import { Align } from "svjeez";
 import { Backdrop, Copy, Timeline } from "../../og/kit";
-import { still } from "../../og-art";
-import { examples } from "../../examples";
+import { renderStill } from "@svjeez/og/render";
+import { example } from "../../examples";
+import { windowed } from "../../window";
 
 const WIDTH = 440;
 const HERO = [920, 270] as const;
@@ -19,13 +20,20 @@ const brief = (text: string, max = 100) => {
 };
 
 // Each example's card shows the example itself in a window, taken at the moment its poster shows, on a tilted card of
-// the example's own color. The color is the example's by its place in the list, and it lights the timeline too.
-export default (async ({ props: { i } }) => {
-  const { name, scene } = examples[i]!;
+// the example's own color. The color comes from the example's name, so it stays with the example wherever it moves in
+// the gallery, and it lights the timeline too.
+const hash = (name: string) =>
+  [...name].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
+
+export default (async ({ params }) => {
+  const { name, scene } = example(params.name!);
   const { title, desc, width, height } = scene;
-  const accent = accents[i % accents.length]!;
+  const accent = accents[hash(name) % accents.length]!;
   const h = Math.round((WIDTH * height) / width) + 40;
-  const art = picture(await still(name, scene, { size: [WIDTH, h], title: `${name}.tsx` }));
+
+  const art = picture(
+    await renderStill(windowed(scene, { size: [WIDTH, h], title: `${name}.tsx` })),
+  );
 
   return ogScene({ theme, title, desc: `The ${name} example, in a window.` }, () => (
     <Group>
@@ -49,7 +57,7 @@ export default (async ({ props: { i } }) => {
         opacity={0.12}
       />
       <Picture src={art} width={WIDTH} at={HERO} anchor="center" />
-      <Timeline accent={accent} active={i % 5} />
+      <Timeline accent={accent} active={hash(name) % 5} />
       <Align place="left" inset={80}>
         <Copy
           title={title}
@@ -61,4 +69,4 @@ export default (async ({ props: { i } }) => {
       </Align>
     </Group>
   ));
-}) satisfies OgCard<{ i: number }>;
+}) satisfies OgCard;

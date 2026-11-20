@@ -28,6 +28,8 @@ export default defineConfig({
   site: "https://svjeez.texoport.in",
   build: { format: "preserve" },
   integrations: [svjeez()],
+  // Links marked data-astro-prefetch fetch their page when the pointer rests on them.
+  prefetch: { defaultStrategy: "hover" },
   // The font every code block and scene on the site uses, self-hosted.
   fonts: [
     {

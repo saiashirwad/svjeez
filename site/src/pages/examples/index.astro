@@ -5,20 +5,16 @@ import { kb } from "../../proof";
 import Base from "../../layouts/Base.astro";
 import Proof from "../../components/Proof.astro";
 import Scene from "@svjeez/astro/Scene.astro";
-import { svg } from "svjeez/tools";
+import { inline } from "../../inline";
 import yourAgent from "../../scenes/your-agent";
 import { note } from "../../scenes/gallery-note";
 
-/** A handwritten scene, inlined so it paints with the page's colors: its `ink` is currentColor, whatever the heading's color is. */
-const inlined = (scene: Parameters<typeof svg.emit>[0], prefix: string) =>
-  svg.emit(scene, { prefix, resolve: { ink: "currentColor" } });
-
 /** "your agent", handwritten by a scene, so it takes the accent color. */
-const handwriting = inlined(yourAgent, "ya");
+const handwriting = inline(yourAgent, "ya");
 
 /** The lead's size, handwritten over the card beside it and pointing back. Measured here, so it is always true. */
 const [lead] = examples;
-const sizeNote = inlined(note(kb(lead!.scene.gzip)), "gn");
+const sizeNote = inline(note(kb(lead!.scene.gzip)), "gn");
 
 /** The cards in the first row, which load at once at high priority; the second row loads at once too. */
 const FIRST_ROW = 2;
@@ -30,12 +26,9 @@ const WIDTH: Record<Span, string> = { 4: "21rem", 5: "27rem", 6: "32rem", 7: "38
 const sizes = (span: Span, i: number) =>
   `(min-width: 56rem) ${WIDTH[span]}, (min-width: 40rem) ${i === 0 ? "100vw" : "50vw"}, 100vw`;
 
-/** Fetch an example's page when the pointer rests on its link. The page is tiny; its SVG loads once you are there. */
-const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { href_matches: "/examples/*" }, eagerness: "moderate" }] });
 ---
 
 <Base title="Examples · svjeez" description="Explore animated scenes and building blocks made with svjeez. Each is a self-contained SVG." class="gallery" current="examples">
-  <script slot="head" type="speculationrules" is:inline set:html={speculation} />
   <main class="wrap">
     <div class="page-head">
       <h1>
@@ -51,7 +44,7 @@ const speculation = JSON.stringify({ prefetch: [{ source: "document", where: { h
             <span class="shot">
               <Scene scene={scene} alt="" poster={{ sizes: sizes(span, i) }} data-themed={themed(scene.svg) ? "" : undefined} {...loading} />
             </span>
-            <span class="cap"><a class="title" href={`/examples/${name}`}>{scene.title}</a>{"\u2060"}<Proof scene={scene} name={name} alt={scene.desc || scene.title} /></span>
+            <span class="cap"><a class="title" href={`/examples/${name}`} data-astro-prefetch>{scene.title}</a>{"\u2060"}<Proof scene={scene} name={name} alt={scene.desc || scene.title} /></span>
           </div>
         );
       })}

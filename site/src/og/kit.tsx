@@ -161,7 +161,11 @@ export const Window = ({
         {title}
       </Text>
     )}
-    <Group at={[0, BAR]}>{children}</Group>
+    {/* The body's own frame, so children are placed from its top-left, not from wherever their bounds start. */}
+    <Group at={[0, BAR]}>
+      <Shape geometry={rect(w, h - BAR)} fill={theme.surface} opacity={0} />
+      {children}
+    </Group>
   </Group>
 );
 

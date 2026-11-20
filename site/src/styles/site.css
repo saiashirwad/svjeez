@@ -1552,9 +1552,9 @@ pre.side {
   color: var(--muted);
   text-decoration: none;
 }
-.viewer .source svg {
-  inline-size: 1rem;
-  block-size: 1rem;
+.viewer .source .nav-ico {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
 }
 .viewer .step {
   display: flex;

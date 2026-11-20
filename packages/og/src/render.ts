@@ -115,6 +115,50 @@ export const renderOg = async (
   return { bytes, type: MIME[format], ...sizeOf(svg) };
 };
 
+/** When a scene is still: the moment it holds, else 72% in. Posters and `renderStill` take their picture here. */
+export const stillTime = (svg: string, duration: number): number => {
+  const held = /animation-delay:-([\d.]+)s!important/.exec(svg);
+
+  return held ? Number(held[1]) : duration * 0.72;
+};
+
+export interface StillOptions {
+  readonly scheme?: "light" | "dark";
+  /** How much bigger than the scene's own size the picture is. 2 by default, so it stays sharp when a card scales it. */
+  readonly scale?: number;
+  /** What shows behind the scene. Transparent by default, so it sits on whatever the card draws beneath it. */
+  readonly background?: string;
+}
+
+/**
+ * A scene, or SVG markup, as a PNG taken at its still moment (see `stillTime`): a picture of it to place inside a
+ * card with `picture()`. Renders are cached like `renderOg`'s.
+ */
+export const renderStill = (
+  source: Scene | string,
+  { scheme = "light", scale = 2, background = "transparent" }: StillOptions = {},
+): Promise<Uint8Array> => {
+  const svg = isScene(source) ? backend.emit(source) : source;
+
+  const name = `${createHash("sha256")
+    .update(svg + JSON.stringify({ scheme, scale, background }))
+    .digest("base64url")
+    .slice(0, 12)}.png`;
+
+  return cached(name, async () => {
+    const { duration } = await renderFrames(svg, { times: [0], colorScheme: scheme });
+
+    const { frames } = await renderFrames(svg, {
+      times: [stillTime(svg, duration)],
+      colorScheme: scheme,
+      scale,
+      background,
+    });
+
+    return frames[0]!.png;
+  });
+};
+
 /** `renderOg` as a web-standard `Response`, for an Astro endpoint, a Next route handler or any fetch-style server. */
 export const ogResponse = async (
   source: Scene | string,

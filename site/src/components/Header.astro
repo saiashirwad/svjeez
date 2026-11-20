@@ -1,6 +1,6 @@
 ---
 import { getScene } from "@svjeez/astro/scene";
-import { svg } from "svjeez/tools";
+import { inline as icon } from "../inline";
 import mascot from "../scenes/mascot";
 import { github, moon, sun, system } from "../scenes/nav-icons";
 import { PALETTES, type Palette } from "../palettes";
@@ -20,12 +20,6 @@ const optional: string[] = [];
 const SWATCH = ["background", "red", "green", "blue", "magenta"] as const;
 const swatches = ({ theme }: Palette) => SWATCH.map((name, i) => `--s${i}: light-dark(${theme[name].light}, ${theme[name].dark})`).join("; ");
 
-// The icons are inlined, so they paint with the page's own colors: their ink is currentColor and their --bg the page's.
-const icon = (scene: Parameters<typeof svg.emit>[0], prefix: string) =>
-  svg.emit(scene, {
-    prefix,
-    resolve: { ink: "currentColor", ...("bg" in scene.tokens && { bg: "inherit" }) },
-  });
 ---
 
 <header class:list={["wrap top", { wide }]}>

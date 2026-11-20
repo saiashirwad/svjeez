@@ -5,13 +5,28 @@ import { Backdrop, Copy, Timeline, Window } from "../../og/kit";
 
 const [W, H] = [250, 170];
 
-// A window of an example: a bar of its color, then two lines of text.
+const PAD = 18;
+
+// A window of an example, inset from its edges: a bar of its color, two lines of text, then a block of its color.
 const Example = ({ color, wide }: { color: typeof theme.red; wide: number }) => (
-  <Group at={[18, 20]}>
-    <Shape geometry={rect(wide, 14, { radius: 7 })} fill={color} />
-    <Shape geometry={rect(W - 36, 10, { radius: 5 })} at={[0, 36]} fill={theme.raised} />
-    <Shape geometry={rect(W - 90, 10, { radius: 5 })} at={[0, 58]} fill={theme.raised} />
-    <Shape geometry={rect(W - 36, 46, { radius: 8 })} at={[0, 84]} fill={color} opacity={0.15} />
+  <Group>
+    <Shape geometry={rect(wide, 14, { radius: 7 })} at={[PAD, PAD]} fill={color} />
+    <Shape
+      geometry={rect(W - 2 * PAD, 10, { radius: 5 })}
+      at={[PAD, PAD + 30]}
+      fill={theme.raised}
+    />
+    <Shape
+      geometry={rect(W - 2 * PAD - 54, 10, { radius: 5 })}
+      at={[PAD, PAD + 50]}
+      fill={theme.raised}
+    />
+    <Shape
+      geometry={rect(W - 2 * PAD, 40, { radius: 8 })}
+      at={[PAD, PAD + 74]}
+      fill={color}
+      opacity={0.15}
+    />
   </Group>
 );
 

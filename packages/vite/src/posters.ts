@@ -1,6 +1,6 @@
 import { renderFrames } from "svjeez/frames";
 import { assets } from "./assets.ts";
-import { cached, closeBrowser, encode } from "@svjeez/og/render";
+import { cached, closeBrowser, encode, stillTime } from "@svjeez/og/render";
 
 export type Scheme = "light" | "dark";
 
@@ -15,12 +15,6 @@ export interface PosterOptions {
 
 assets.close = closeBrowser;
 
-const stillAt = (svg: string, duration: number) => {
-  const held = /animation-delay:-([\d.]+)s!important/.exec(svg);
-
-  return held ? Number(held[1]) : duration * 0.72;
-};
-
 const render = async (
   svg: string,
   scheme: Scheme,
@@ -29,7 +23,7 @@ const render = async (
   const { duration } = await renderFrames(svg, { times: [0], colorScheme: scheme });
 
   const { frames } = await renderFrames(svg, {
-    times: [stillAt(svg, duration)],
+    times: [stillTime(svg, duration)],
     colorScheme: scheme,
     scale,
     background,
