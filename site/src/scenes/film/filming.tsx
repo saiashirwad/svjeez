@@ -47,7 +47,8 @@ export const FilmingSlide = (): SceneElement => {
           states={lines.map((_, i) => script(i)).concat(script(lines.length))}
           steps={when.map((t) => span(t, 0.3))}
           edits={0}
-          full={{ at: [STAGE.x + 20, STAGE.y + 60], size: [800, 380], scale: 0.66 }}
+          size={19}
+          full={{ at: [STAGE.x + 20, STAGE.y + 90], scale: 0.66 }}
         />
         <Sequence when={span(START)}>
           <Pivot

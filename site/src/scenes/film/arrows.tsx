@@ -117,7 +117,7 @@ export const ArrowsSlide = (): SceneElement => {
           states={states}
           steps={steps}
           edits={2}
-          full={{ at: [STAGE.x + 110, STAGE.y + 30], size: [900, 400] }}
+          size={21}
           aside={{ at: [STAGE.x + 20, STAGE.y + 90], scale: 0.6, when: aside }}
         />
         <Group

@@ -114,7 +114,7 @@ export const MorphSlide = (): SceneElement => {
           states={[states[0]!, states[1]!, states[2]!, grown, recolored, spread]}
           steps={steps}
           edits={2}
-          full={{ at: [STAGE.x + 110, STAGE.y + 4], size: [900, 492] }}
+          size={18}
           aside={{ at: [STAGE.x + 20, STAGE.y + 70], scale: 0.6, when: aside }}
         />
         <Group
