@@ -1,8 +1,9 @@
 import { Code } from "@svjeez/code";
 import { tomorrow } from "@svjeez/code/palettes";
-import { Group, Shape, rect, ref, scene, span, track } from "svjeez";
+import { Group, Shape, linear, rect, ref, scene, span, track } from "svjeez";
 import { mono, theme } from "../theme";
 
+const LEFT = 48;
 const fib = ref();
 
 export default scene(
@@ -18,10 +19,10 @@ export default scene(
     <Group>
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Shape
-        geometry={rect(400, 36, { radius: 6 })}
-        at={fib.part("rec").topLeft.map(([x, y]) => [x - 12, y - 4])}
-        fill={theme.blue}
-        opacity={track(0).to(0.18, span(2.4, 0.4))}
+        geometry={rect(canvas.width, 36)}
+        at={fib.part("rec").topLeft.map(([, y]) => [-LEFT, y - 4])}
+        fill={linear.across({ stops: [theme.blue, theme.background] })}
+        opacity={track(0).to(0.3, span(2.4, 0.4))}
       />
       <Code
         ref={fib}
@@ -31,7 +32,7 @@ export default scene(
         size={20}
         lineHeight={1.6}
         palette={tomorrow}
-        at={[48, 112]}
+        at={[LEFT, 112]}
         typing={span(0.3, 1.8)}
       >
         {`function fib(n: number): number {

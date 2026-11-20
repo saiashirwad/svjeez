@@ -13,11 +13,15 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m2{animation-name:k2;animation-timing-function:steps(22)}
 @keyframes k3{0%,35.309%{scale:0 1}51.994%,100%{scale:1 1}}
 .m3{animation-name:k3;animation-timing-function:steps(33)}
-@keyframes k4{0%,60%{opacity:0}70%,100%{opacity:0.18}}
+@keyframes k4{0%,60%{opacity:0}70%,100%{opacity:0.3}}
 .m4{animation-name:k4}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-3.4s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <defs>
+    <linearGradient id="g1" gradientUnits="userSpaceOnUse" y1="190" x2="480" y2="190">
+      <stop stop-color="var(--blue)"/>
+      <stop offset="1" stop-color="var(--background)"/>
+    </linearGradient>
     <clipPath id="c1">
       <rect width="396" height="26.4" style="transform-origin:0 0" class="a m1"/>
     </clipPath>
@@ -35,7 +39,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     </clipPath>
   </defs>
   <rect width="480" height="340" fill="var(--background)"/>
-  <rect x="36" y="172" width="400" height="36" rx="6" fill="var(--blue)" class="a m4"/>
+  <rect y="172" width="480" height="36" fill="url(#g1)" class="a m4"/>
   <g transform="translate(48 112)" font-size="20" fill="var(--tomorrow-punctuation)">
     <text clip-path="url(#c1)"><tspan y="20.4" fill="var(--tomorrow-keyword)">function </tspan><tspan x="108" fill="var(--tomorrow-function)">fib</tspan><tspan x="144">(</tspan><tspan x="156" fill="var(--tomorrow-plain)">n</tspan><tspan x="168">: </tspan><tspan x="192" fill="var(--tomorrow-type)">number</tspan><tspan x="264">): </tspan><tspan x="300" fill="var(--tomorrow-type)">number </tspan><tspan x="384">{</tspan></text>
     <text xml:space="preserve" clip-path="url(#c2)"><tspan y="52.4" fill="var(--tomorrow-keyword)">  if </tspan><tspan x="60">(</tspan><tspan x="72" fill="var(--tomorrow-plain)">n </tspan><tspan x="96">&lt; </tspan><tspan x="120" fill="var(--tomorrow-number)">2</tspan><tspan x="132">) </tspan><tspan x="156" fill="var(--tomorrow-keyword)">return </tspan><tspan x="240" fill="var(--tomorrow-plain)">n</tspan><tspan x="252">;</tspan></text>
