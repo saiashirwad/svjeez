@@ -1,3 +1,4 @@
+/** @jsxImportSource svjeez */
 import { Group, Shape, ease, path, span, track, type Paint, type SceneElement } from "svjeez";
 import { strokeFont, type StrokeFont } from "./stroke-font.ts";
 

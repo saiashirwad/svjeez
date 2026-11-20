@@ -20,13 +20,13 @@
     "test:package": "bun ../../scripts/package-plugin-check.ts"
   },
   "dependencies": {
+    "@types/d3-shape": "3.2.0",
     "d3-scale": "4.0.2",
     "d3-shape": "3.2.0"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/d3-scale": "4.0.9",
-    "@types/d3-shape": "3.2.0",
     "svjeez": "workspace:*",
     "typescript": "latest"
   },

@@ -1,12 +1,13 @@
+/** @jsxImportSource svjeez */
 import { expect, test } from "bun:test";
 import { Shape, rect } from "svjeez";
 import { svg } from "svjeez/tools";
 import { OG_SIZE, ogScene } from "../src/index.ts";
 
 const card = (options: Partial<Parameters<typeof ogScene>[0]> = {}) =>
-  ogScene({ title: "Card", ...options }, () =>
-    Shape({ geometry: rect(...OG_SIZE), fill: "#000000" }),
-  );
+  ogScene({ title: "Card", ...options }, () => (
+    <Shape geometry={rect(...OG_SIZE)} fill="#000000" />
+  ));
 
 test("an og scene is a link preview's size", () => {
   expect(svg.emit(card())).toContain('viewBox="0 0 1200 630"');
