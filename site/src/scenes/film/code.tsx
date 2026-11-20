@@ -1,6 +1,7 @@
 import { Code } from "@svjeez/code";
 import { palette } from "@svjeez/code/palettes";
 import { Group, Shape, Text, line, morph, rect, span, type SceneElement } from "svjeez";
+import { Note } from "./note";
 import { Header, SHOTS, STAGE, mono, shown, spring, theme } from "./kit";
 
 const SIZE = 25;
@@ -98,6 +99,12 @@ export const CodeShot = (): SceneElement => {
       <Header title="Code that refactors itself." from="@svjeez/code" over={over!} />
       <Group motion={shown(over!)}>
         <Panel />
+        <Note
+          text="no keyframes, just keys"
+          at={[STAGE.x + STAGE.w / 2, PANEL.y + PANEL.h + 70]}
+          from={3.2}
+          tilt={-2}
+        />
         {morph(
           <Listing source={before} keys={["y", "up-eased", "down-eased"]} />,
           <Listing source={after} keys={["spring", "y", "up-sprung", "down-sprung"]} />,

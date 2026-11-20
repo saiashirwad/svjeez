@@ -16,7 +16,9 @@ import { D, H, SHOTS, STAGE, W, theme } from "./kit";
 import { AppShot, ThemesShot } from "./app";
 import { CodeShot } from "./code";
 import { DataShot } from "./data";
+import { DiagramShot } from "./diagram";
 import { Layout } from "./layout";
+import { Host } from "./host";
 import { MathShot } from "./math";
 import { Open } from "./open";
 
@@ -109,6 +111,9 @@ export default scene(
       <Sequence when={SHOTS.math}>
         <MathShot />
       </Sequence>
+      <Sequence when={SHOTS.diagram}>
+        <DiagramShot />
+      </Sequence>
       <Sequence when={SHOTS.data}>
         <DataShot />
       </Sequence>
@@ -121,6 +126,7 @@ export default scene(
       <Sequence when={SHOTS.close}>
         <Close />
       </Sequence>
+      <Host />
     </Group>
   ),
 );

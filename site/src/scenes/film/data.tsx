@@ -16,6 +16,7 @@ import {
   type SceneElement,
   type Vec,
 } from "svjeez";
+import { Note } from "./note";
 import { Header, SHOTS, STAGE, geist, mono, shown, theme } from "./kit";
 
 const world: Topology = createRequire(import.meta.url)("world-atlas/countries-110m.json");
@@ -125,6 +126,14 @@ export const DataShot = (): SceneElement => {
             format: numeral({ separator: "," }),
           })}
         </Text>
+        <Note
+          text="counted in CSS"
+          at={[left + 400, STAGE.y + 100]}
+          from={1.2}
+          size={32}
+          tilt={-6}
+          to={[-50, 14]}
+        />
         <Chart
           at={[left + 30, STAGE.y + 160]}
           size={[450, 290]}

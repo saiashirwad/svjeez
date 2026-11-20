@@ -1,5 +1,6 @@
 import { Tex } from "@svjeez/math";
 import { Group, morph, span, type SceneElement, type Vec } from "svjeez";
+import { Note } from "./note";
 import { ACCENTS, Header, SHOTS, STAGE, shown, theme } from "./kit";
 
 const SIZE = 64;
@@ -34,6 +35,12 @@ export const MathShot = (): SceneElement => {
     <Group>
       <Header title="And math, typeset at build time." from="@svjeez/math" over={over!} />
       <Group motion={shown(over!)}>
+        <Note
+          text="no MathJax in your browser"
+          at={[STAGE.x + STAGE.w / 2, STAGE.y + STAGE.h - 70]}
+          from={1.1}
+          tilt={-2}
+        />
         {morph.between(
           steps.map((source) => (
             <Tex size={SIZE} at={centered(source)} fill={theme.text} colors={colors}>

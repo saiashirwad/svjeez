@@ -21,6 +21,7 @@ import {
   type SceneElement,
   type Vec,
 } from "svjeez";
+import { Note } from "./note";
 import { ACCENTS, H, Header, SHOTS, W, geist, mono, shown, spring, theme } from "./kit";
 
 const CARD = { x: 260, y: 196, w: 760, h: 360 } as const;
@@ -284,6 +285,13 @@ export const AppShot = (): SceneElement => {
       <Header title="Film your real app." from="@svjeez/dom" over={over!} />
       <Group motion={shown(over!, 0.1)}>
         <App ink={tokens} played />
+        <Note
+          text="your app, filmed"
+          at={[1070, CARD.y + CARD.h + 58]}
+          from={2.2}
+          size={30}
+          tilt={-5}
+        />
         <Click at={clicked} />
         <Click at={added - 0.1} />
         <Shape
@@ -326,6 +334,14 @@ export const ThemesShot = (): SceneElement => {
       <Header title="Light and dark. Checked." from="tokens() · svjeez check" over={over!} />
       <Group motion={shown(over!, 0)}>
         <App ink={light} played={false} />
+        <Note
+          text="same file!"
+          at={[170, CARD.y + 120]}
+          from={1.0}
+          size={30}
+          tilt={-8}
+          to={[36, 34]}
+        />
         <Group
           clip={track(rightOf(left))
             .to(rightOf(middle), seam, ease.inOut)

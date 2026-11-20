@@ -52,10 +52,11 @@ export const SHOTS = {
   layout: span(5, 6.5),
   code: span(11.5, 6),
   math: span(17.5, 5.5),
-  data: span(23, 6.5),
-  app: span(29.5, 6.5),
-  themes: span(36, 6),
-  close: span(42, 5.5),
+  diagram: span(23, 6),
+  data: span(29, 6.5),
+  app: span(35.5, 6.5),
+  themes: span(42, 6),
+  close: span(48, 5.5),
 } as const;
 
 export const D = SHOTS.close.end;

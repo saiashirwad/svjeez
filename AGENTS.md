@@ -25,4 +25,6 @@ Save closed unions for the rendering layer below (e.g. IR curves lowered to `cub
 
 ## Design
 
-Everything visual (the site, its scenes, films, examples) should look like Vercel's designers made it: Geist and Geist Mono, black and white with a gray scale, 1px hairlines instead of filled cards, tight negative letter-spacing on headings, small uppercase mono labels, and color used sparingly for what needs it. Maps and charts must look slick and clean, never jagged.
+UI and data (pages, panels, code blocks, app mock-ups, charts, maps) should look like Vercel's designers made them: Geist and Geist Mono, black and white with a gray scale, 1px hairlines instead of filled cards, tight negative letter-spacing on headings, small uppercase mono labels, and color used sparingly. Maps and charts must look slick and clean, never jagged. Around that, keep the landing page's whimsy: Blip the mascot hopping and reacting, handwritten notes in the marker font, squiggles. Films and heroes get both.
+
+The launch film lives in `site/src/scenes/film/`. `bun run film` in `site/` previews it with a scrubber and live reload; `bun run film:svg` writes `site/film.svg`.

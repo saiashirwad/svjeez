@@ -13,6 +13,7 @@ import {
   type SceneElement,
   type Vec,
 } from "svjeez";
+import { Note } from "./note";
 import { ACCENTS, Header, SHOTS, STAGE, geist, shown, spring, theme } from "./kit";
 
 const CARD = { w: 210, h: 140, gap: 60 } as const;
@@ -80,6 +81,7 @@ export const Layout = (): SceneElement => {
             </Text>
           </Stack>
         ))}
+        <Note text="boing!" at={[cards[1]!.x + CARD.w / 2, STAGE.y + 70]} from={2.45} tilt={-8} />
         {cards.slice(1).map(({ handle }, i) => (
           <Arrow
             from={cards[i]!.handle.right}
