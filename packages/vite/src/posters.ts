@@ -1,23 +1,19 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { renderFrames } from "svjeez/frames";
 import { assets } from "./assets.ts";
-import { close, encode } from "./encode.ts";
+import { cached, closeBrowser, encode, stillTime } from "@svjeez/og/render";
 
 export type Scheme = "light" | "dark";
 
 export interface PosterOptions {
+  /** How much bigger than the scene's own size the poster is. 1 by default. Ignored when `widths` is given. */
   readonly scale?: number;
+  /** Posters at each of these widths, in device pixels, for a `srcset`: a card that draws 600 wide takes a 600 and a 1200. */
+  readonly widths?: readonly number[];
   readonly quality?: number;
   readonly background?: string;
 }
 
-assets.close = close;
-
-const stillAt = (svg: string, duration: number) => {
-  const held = /animation-delay:-([\d.]+)s!important/.exec(svg);
-
-  return held ? Number(held[1]) : duration * 0.72;
-};
+assets.close = closeBrowser;
 
 const render = async (
   svg: string,
@@ -27,7 +23,7 @@ const render = async (
   const { duration } = await renderFrames(svg, { times: [0], colorScheme: scheme });
 
   const { frames } = await renderFrames(svg, {
-    times: [stillAt(svg, duration)],
+    times: [stillTime(svg, duration)],
     colorScheme: scheme,
     scale,
     background,
@@ -36,54 +32,9 @@ const render = async (
   return encode(frames[0]!.png, "webp", quality);
 };
 
-const LANES = 4;
-let running = 0;
-const queue: (() => void)[] = [];
-
-const limit = async <T>(task: () => Promise<T>): Promise<T> => {
-  if (running >= LANES) await new Promise<void>((resolve) => queue.push(resolve));
-  running++;
-
-  try {
-    return await task();
-  } finally {
-    running--;
-    queue.shift()?.();
-  }
-};
-
-const pending = new Map<string, Promise<Uint8Array>>();
-
 export const poster = (
   file: string,
   svg: string,
   scheme: Scheme,
   options: PosterOptions,
-): Promise<Uint8Array> => {
-  let job = pending.get(file);
-
-  if (!job) {
-    const cached = assets.cache && new URL(file, assets.cache);
-    job = (cached ? readFile(cached) : Promise.reject()).catch(() =>
-      limit(async () => {
-        const bytes = await render(svg, scheme, options);
-
-        if (assets.cache && cached) {
-          await mkdir(assets.cache, { recursive: true });
-          await writeFile(cached, bytes);
-        }
-
-        return bytes;
-      }),
-    );
-    pending.set(file, job);
-    job.catch(() => pending.delete(file));
-
-    for (const old of pending.keys()) {
-      if (pending.size <= (assets.limit ?? Infinity)) break;
-      pending.delete(old);
-    }
-  }
-
-  return job;
-};
+): Promise<Uint8Array> => cached(file, () => render(svg, scheme, options));

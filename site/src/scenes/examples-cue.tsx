@@ -1,3 +1,4 @@
+import { Lettering } from "@svjeez/fonts/handwriting";
 import {
   Group,
   Shape,
@@ -13,7 +14,7 @@ import {
 } from "svjeez";
 import { theme } from "../../../examples/theme";
 import { BLIP, Blip, GROUND, Pivot, jumps } from "./blip";
-import { Lettering, S } from "./cue";
+import { S, hand } from "./cue";
 
 const W = 420;
 const H = 148;
@@ -69,7 +70,7 @@ export default scene(
   },
   () => (
     <Group>
-      <Lettering text="browse examples" />
+      <Lettering font={hand} text="browse examples" width={W} y={128} from={0.3} ink={theme.text} />
       {PICTURES.map((picture, i) => (
         <Pivot
           key={`card${i}`}

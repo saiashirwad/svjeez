@@ -1,0 +1,50 @@
+---
+import type { GetStaticPaths } from "astro";
+import { example, examples, REPO, SOURCES } from "../../examples";
+import Scene from "@svjeez/astro/Scene.astro";
+import Base from "../../layouts/Base.astro";
+import { inline } from "../../inline";
+import { themed } from "../../palettes";
+import { github } from "../../scenes/nav-icons";
+
+export const getStaticPaths = (() => examples.map(({ name }) => ({ params: { name } }))) satisfies GetStaticPaths;
+
+const { name, scene, prev, next } = example(Astro.params.name!);
+const poster = scene.posters!.light.at(-1)!.src;
+---
+
+<Base title={`${scene.title} · svjeez`} description={scene.desc || `${scene.title}, made with svjeez`} class="viewer" current="examples">
+  <main class="wrap" style={`--ratio: ${(scene.width / scene.height).toFixed(4)}`}>
+    <figure class="plate" style={`--poster: url(${poster})`}>
+      <Scene scene={scene} data-themed={themed(scene.svg) ? "" : undefined} />
+    </figure>
+    <div class="meta">
+      <h1>{scene.title}</h1>
+      <a class="source" href={`${SOURCES}/${name}`}>
+        <span class="nav-ico" aria-hidden="true" set:html={inline(github, "src")} />
+        Source
+      </a>
+      <nav class="step" aria-label="Examples">
+        <a href={`/examples/${prev.name}`} data-astro-prefetch title={prev.scene.title} aria-label={`Previous: ${prev.scene.title}`}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" /></svg></a>
+        <a href={`/examples/${next.name}`} data-astro-prefetch title={next.scene.title} aria-label={`Next: ${next.scene.title}`}><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" /></svg></a>
+      </nav>
+    </div>
+  </main>
+  <footer class="wrap foot"><span>One animated SVG, no runtime JavaScript.</span><nav aria-label="Footer"><a href={REPO}>GitHub</a><a href="/">Home</a></nav></footer>
+</Base>
+
+<script>
+  import { follow } from "../../scripts/follow";
+
+  follow(document.querySelector(".plate img")!);
+
+  const [prev, next] = document.querySelectorAll<HTMLAnchorElement>(".step a");
+
+  addEventListener("keydown", (event: KeyboardEvent) => {
+    if (event.metaKey || event.ctrlKey || event.altKey || event.target instanceof HTMLInputElement) return;
+
+    if (event.key === "ArrowLeft") prev!.click();
+
+    if (event.key === "ArrowRight") next!.click();
+  });
+</script>

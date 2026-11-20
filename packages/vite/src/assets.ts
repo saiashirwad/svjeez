@@ -7,7 +7,6 @@ export interface Asset {
 
 export interface Assets {
   readonly files: Map<string, Asset>;
-  cache?: URL;
   limit?: number;
   close?: () => Promise<void>;
 }

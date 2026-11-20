@@ -25,7 +25,7 @@ import hero from "./scenes/hero.tsx?svjeez";
 - Compiles scenes in their own JSX environment (`svjeez`), so a React app needs no pragma to run them; for `tsc`, start scene files with `/** @jsxImportSource svjeez */` when the app's tsconfig uses React's JSX.
 - Hot reloads when the scene or anything it imports changes.
 - In server code (SSR, an Astro page) the import also carries the markup as `svg`, and `getScene()` from `@svjeez/vite/scene` takes it; a browser bundle gets the URL alone.
-- Append `&posters` to generate light and dark WebP stills (configure via `svjeez({ posters: { scale, quality, background } })`; requires `playwright-core` and `chromium-headless-shell`).
+- Append `&posters` to generate light and dark WebP stills, each a list of `{ src, width }` from narrowest to widest (configure via `svjeez({ posters: { scale, widths, quality, background } })`, where `widths` makes one per width for a `srcset`; requires `playwright-core` and `chromium-headless-shell`).
 
 ## Films
 

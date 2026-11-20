@@ -1,18 +1,7 @@
-import {
-  Group,
-  Shape,
-  ease,
-  path,
-  scene,
-  span,
-  track,
-  type Paint,
-  type SceneElement,
-  type Vec,
-} from "svjeez";
+import { Group, ease, scene, span, track, type Paint, type Vec } from "svjeez";
+import { Lettering, casual } from "@svjeez/fonts/handwriting";
 import { theme } from "../../../examples/theme";
 import { BLIP, Blip, GROUND, Pivot, jumps, waddle } from "./blip";
-import { strokeFont } from "./stroke-font";
 
 const W = 420;
 const H = 148;
@@ -22,56 +11,8 @@ const D = 8;
 export const S = 0.38;
 const HOME: Vec = [W / 2, 84];
 
-const casual = await strokeFont.load(new URL("fonts/EMSCasualHand.svg", import.meta.url));
-
-/** The length of a stroke's polyline through every point of its path data, control points included. */
-const lengthOf = (d: string) => {
-  const xy = (d.match(/-?[\d.]+/g) ?? []).map(Number);
-  let sum = 0;
-
-  for (let i = 2; i + 1 < xy.length; i += 2)
-    sum += Math.hypot(xy[i]! - xy[i - 2]!, xy[i + 1]! - xy[i - 1]!);
-
-  return sum;
-};
-
-/** `text` handwritten in a marker, centered across `width` on a baseline at `y`, one stroke after another from 0.3s. */
-export const Lettering = ({
-  text,
-  width = W,
-  y = 128,
-}: {
-  readonly text: string;
-  readonly width?: number;
-  readonly y?: number;
-}): SceneElement => {
-  const xs = (casual.path(text, { size: 40 }).match(/-?[\d.]+/g) ?? [])
-    .map(Number)
-    .filter((_, i) => i % 2 === 0);
-
-  const left = Math.min(...xs);
-  const d = casual.path(text, { size: 40, x: (width - (Math.max(...xs) - left)) / 2 - left, y });
-  let at = 0.3;
-
-  return (
-    <Group>
-      {d.split(/(?=M)/).map((piece, i) => {
-        const over = Math.max(0.06, lengthOf(piece) / 600);
-        const draw = track(0).to(1, span(at, over), ease.linear);
-        at += over + 0.02;
-
-        return (
-          <Shape
-            key={`stroke${i}`}
-            geometry={path.parse(piece)}
-            stroke={{ color: theme.text, width: 3.4, cap: "round", join: "round" }}
-            draw={draw}
-          />
-        );
-      })}
-    </Group>
-  );
-};
+/** The marker the cues write in. */
+export const hand = await casual();
 
 const legs = [span(0.3, 1.2), span(3.1, 1.4), span(6.8, 0.9)] as const;
 const walks = [waddle(legs[0], 5), waddle(legs[1], 7), waddle(legs[2], 4)];
@@ -119,7 +60,14 @@ export default scene(
   },
   () => (
     <Group>
-      <Lettering text="play with svjeez" />
+      <Lettering
+        font={hand}
+        text="play with svjeez"
+        width={W}
+        y={128}
+        from={0.3}
+        ink={theme.text}
+      />
       <Pivot around={GROUND} at={HOME} motion={[{ scale: S }, { offset: travel }]}>
         <Group motion={{ offset: hops.body }}>
           <Pivot around={[GROUND[0], 110]} motion={{ rotate: spin }}>

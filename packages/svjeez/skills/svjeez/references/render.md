@@ -19,13 +19,13 @@ Render each beat's start, middle and end, `0`, and just before `duration`, in bo
 
 ## The SVG
 
-One self-contained file: animation as CSS keyframes (and SMIL where CSS can't reach), fonts as embedded subsets, colors as CSS variables with a light and a dark value, and a still frame at `still` for viewers who ask for less motion. It runs no JavaScript, so it works in `<img>`, READMEs and docs. In code, `svg.emit(scene)` from `svjeez/tools` writes it, with `{ prefix }` to keep two scenes' ids apart on one page, `{ playbackRate }` to play faster or slower, and `{ sources: true }` for an editor (one element per node, with `data-source`). `validateSvg(svg)` and `costOf(svg)` come from `svjeez/frames`.
+One self-contained file: animation as CSS keyframes (and SMIL where CSS can't reach), fonts as embedded subsets, colors as CSS variables with a light and a dark value, and a still frame at `still` for viewers who ask for less motion. It runs no JavaScript, so it works in `<img>`, READMEs and docs. In code, `svg.emit(scene)` from `svjeez/tools` writes it, with `{ prefix }` to keep two scenes' ids apart on one page, `{ resolve: { ink: "currentColor" } }` to set tokens to one CSS value for a scene inlined in a page (`"inherit"` takes the page's own custom property of that name), `{ playbackRate }` to play faster or slower, and `{ sources: true }` for an editor (one element per node, with `data-source`). `validateSvg(svg)` and `costOf(svg)` come from `svjeez/frames`.
 
 `dev` serves the preview and rebuilds it when a file beside the scene changes. Its **Timeline** lists every animated lane (`key · lane`) with its spans, and its Check button runs `check --json --browser`.
 
 ## Embedding and scrubbing
 
-Use the file in `<img src="scene.svg" alt="…">`. For scroll-driven or scrubbed playback, `svjeez/page` has `seek(time, root?)`, which pauses every animation in the root and jumps to scene seconds, `loopLength(root?)`, and `restyle(svg, { css, theme, at, paused, still, timeline, range })`, which returns the SVG with extra CSS, its tokens repainted from a `tokens()` `theme` (mixes follow), frozen at `at`, or driven by a CSS scroll or view `timeline` (`"view()"`). A scene with a morph, a geometry that changes size or an animated effect can't follow a `timeline`: call `seek()` on scroll instead. Frameworks: [web.md](web.md).
+Use the file in `<img src="scene.svg" alt="…">`. For scroll-driven or scrubbed playback, `svjeez/page` has `seek(time, root?)`, which pauses every animation in the root and jumps to scene seconds, `loopLength(root?)`, and `restyle(svg, { css, theme, scheme, at, paused, still, timeline, range })`, which returns the SVG with extra CSS, its tokens repainted from a `tokens()` `theme` (mixes follow), its prefers-color-scheme queries answered for `scheme` (Safari answers an `<img>` SVG with the OS's scheme, whatever the page says), frozen at `at`, or driven by a CSS scroll or view `timeline` (`"view()"`). A scene with a morph, a geometry that changes size or an animated effect can't follow a `timeline`: call `seek()` on scroll instead. Frameworks: [web.md](web.md).
 
 ## Video
 

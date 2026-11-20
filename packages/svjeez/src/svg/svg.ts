@@ -58,6 +58,11 @@ import { REDUCED_MOTION, length } from "./css";
 
 export interface SvgOptions {
   readonly prefix?: string;
+  /**
+   * Tokens to set to one CSS value in place of their light and dark ones, by name: `{ ink: "currentColor" }` paints the
+   * scene with the color of the page it is inlined in, and `"inherit"` takes the page's own custom property of that name.
+   */
+  readonly resolve?: Readonly<Record<string, string>>;
   readonly playbackRate?: number;
   readonly sources?: boolean;
 }
@@ -1291,12 +1296,23 @@ const schemeCss = (schemes: ReadonlySet<Scheme>, prefix: string): string =>
 
 // A token's light and dark values sit on the root, light under a prefers-color-scheme query. A mix() token is blended
 // from its two by color-mix(), so CSS that restyles those, as restyle() does with a theme, restyles it too.
-const tokenCss = (scene: Scene, prefix: string): string => {
+const tokenCss = (
+  scene: Scene,
+  prefix: string,
+  resolve: Readonly<Record<string, string>> = {},
+): string => {
   const names = Object.keys(scene.tokens);
+  const unknown = Object.keys(resolve).filter((name) => !names.includes(name));
+
+  if (unknown.length > 0)
+    throw new Error(
+      `svg.emit() was asked to resolve ${unknown.map((name) => `"${name}"`).join(", ")}, which this scene has no token for. Its tokens are ${names.map((name) => `"${name}"`).join(", ") || "none"}.`,
+    );
 
   if (names.length === 0) return "";
   const scope = prefix ? `svg.${prefix}root` : "svg";
-  const base = names.filter((name) => !scene.tokens[name]!.mix);
+  const fixed = Object.entries(resolve).map(([name, value]) => `--${name}:${value}`);
+  const base = names.filter((name) => !scene.tokens[name]!.mix && !(name in resolve));
 
   const mixed = names.flatMap((name) => {
     const { mix } = scene.tokens[name]!;
@@ -1311,7 +1327,7 @@ const tokenCss = (scene: Scene, prefix: string): string => {
   const declared = (scheme: "light" | "dark") =>
     base.map((name) => `--${name}:${colorText(scene.tokens[name]![scheme])}`);
 
-  return `${scope}{${[...declared("dark"), ...mixed].join(";")}}\n@media (prefers-color-scheme:light){${scope}{${declared("light").join(";")}}}`;
+  return `${scope}{${[...fixed, ...declared("dark"), ...mixed].join(";")}}\n@media (prefers-color-scheme:light){${scope}{${declared("light").join(";")}}}`;
 };
 
 const aroundOf = (scene: Scene): Partial<Face> => {
@@ -1389,7 +1405,7 @@ export const svg: Backend<string, SvgOptions> = {
         title: scene.title,
         ...(scene.desc !== undefined && { desc: scene.desc }),
         css: [
-          tokenCss(scene, prefix),
+          tokenCss(scene, prefix, options.resolve),
           schemeCss(ctx.schemes, prefix),
           stills.length > 0 && `${REDUCED_MOTION}${stills.join("")}}`,
         ]

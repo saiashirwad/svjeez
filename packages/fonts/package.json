@@ -2,7 +2,7 @@
   "name": "@svjeez/fonts",
   "version": "0.8.0-next.0",
   "private": true,
-  "description": "Google Fonts for svjeez: a family name in, an embeddable Font out, cached on disk.",
+  "description": "Fonts for svjeez: Google Fonts by family name, cached on disk, and a bundled single-line handwriting font.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -11,7 +11,10 @@
   },
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./handwriting": "./src/handwriting.tsx",
+    "./fonts/EMSCasualHand.svg": "./src/fonts/EMSCasualHand.svg",
+    "./fonts/EMSCasualHand-OFL.txt": "./src/fonts/EMSCasualHand-OFL.txt"
   },
   "scripts": {
     "test": "bun test --conditions @svjeez/source",

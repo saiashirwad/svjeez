@@ -1,0 +1,19 @@
+---
+// The link-preview tags for one page, drawn from a scene, for a page that wants to say so itself. A card beside the
+// page (`_about.og.tsx`) needs no component: the integration adds its tags.
+import { getStill, type SceneSource, type StillOptions } from "@svjeez/vite/scene";
+import { ogTags } from "./tags";
+
+type Props = {
+  /** The card: a scene, a function that makes one, or a `?svjeez` import. */
+  scene: SceneSource;
+  /** What the picture shows, for readers who cannot see it. Defaults to the scene's description. */
+  alt?: string;
+  /** Which moment of the scene to take the picture at, and how to encode it. */
+  still?: StillOptions;
+};
+
+const { scene, alt, still } = Astro.props;
+---
+
+<Fragment set:html={ogTags(getStill(scene, still), Astro.site ?? Astro.url, alt)} />

@@ -1,0 +1,133 @@
+---
+// Dev only, at /_og: every page of the site with the link preview it shares, found by crawling the running dev
+// server from the static routes and following internal links. Visiting it renders each page, and so each card.
+import routes from "virtual:svjeez/routes";
+
+const origin = Astro.url.origin;
+const LIMIT = 80;
+
+const decode = (text: string) =>
+  text.replace(/&(amp|lt|gt|quot|#39);/g, (_, name: string) => ({ amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'" })[name]!);
+
+const meta = (html: string, key: string) => {
+  const tag = html.match(new RegExp(`<meta\\s[^>]*(?:property|name)="${key}"[^>]*>`))?.[0];
+  const value = tag?.match(/content="([^"]*)"/)?.[1];
+
+  return value === undefined ? undefined : decode(value);
+};
+
+interface Entry {
+  path: string;
+  status: number;
+  title?: string;
+  description?: string;
+  image?: string;
+  width?: number;
+  height?: number;
+  alt?: string;
+}
+
+const seen = new Set<string>();
+const queue = [...new Set(["/", ...routes])];
+const entries: Entry[] = [];
+
+while (queue.length && seen.size < LIMIT) {
+  const path = queue.shift()!;
+
+  if (seen.has(path)) continue;
+  seen.add(path);
+
+  const response = await fetch(origin + path).catch(() => undefined);
+  const type = response?.headers.get("content-type") ?? "";
+
+  if (!response || !type.includes("text/html")) continue;
+  const html = await response.text();
+
+  for (const [, href] of html.matchAll(/<a\s[^>]*href="(\/[^"#?]*)"/g)) {
+    const last = href!.split("/").pop()!;
+
+    if (href!.startsWith("/_") || (last.includes(".") && !last.endsWith(".html"))) continue;
+
+    if (!seen.has(href!)) queue.push(href!);
+  }
+
+  const image = meta(html, "og:image");
+
+  entries.push({
+    path,
+    status: response.status,
+    title: meta(html, "og:title") ?? html.match(/<title>([^<]*)<\/title>/)?.[1],
+    description: meta(html, "og:description"),
+    image: image && new URL(image).pathname,
+    width: Number(meta(html, "og:image:width")) || undefined,
+    height: Number(meta(html, "og:image:height")) || undefined,
+    alt: meta(html, "og:image:alt"),
+  });
+}
+
+const host = new URL(Astro.site ?? origin).host;
+const missing = entries.filter((entry) => !entry.image).length;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex" />
+    <title>Link previews</title>
+    <style>
+      :root { --bg: #f4f4f5; --card: #fff; --ink: #18181b; --muted: #71717a; --line: #e4e4e7; --warn: #b45309; }
+      @media (prefers-color-scheme: dark) { :root { --bg: #0b0b0c; --card: #17171a; --ink: #f4f4f5; --muted: #a1a1aa; --line: #2a2a2e; --warn: #fbbf24; } }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, sans-serif; }
+      main { max-width: 1280px; margin: 0 auto; padding: 32px 16px 64px; }
+      h1 { margin: 0 0 4px; font-size: 22px; }
+      .sub { margin: 0 0 24px; color: var(--muted); }
+      .warn { color: var(--warn); }
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); gap: 20px; }
+      article { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; }
+      article > a { display: block; aspect-ratio: 1200 / 630; background: var(--line); }
+      img { display: block; width: 100%; height: 100%; object-fit: cover; }
+      .none { display: grid; place-items: center; height: 100%; color: var(--warn); }
+      .text { padding: 12px 14px 14px; display: grid; gap: 2px; }
+      .host { color: var(--muted); font-size: 12px; text-transform: lowercase; }
+      .title { font-weight: 600; }
+      .desc { color: var(--muted); }
+      .path { margin-top: 8px; font: 12px ui-monospace, monospace; color: var(--muted); display: flex; gap: 8px; justify-content: space-between; }
+      .path a { color: inherit; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Link previews</h1>
+      <p class="sub">
+        {entries.length} pages, as a link preview shows them.
+        {missing > 0 && <span class="warn">{missing} without an og:image.</span>}
+      </p>
+      <div class="grid">
+        {
+          entries.map((entry) => (
+            <article>
+              <a href={entry.image ?? entry.path}>
+                {entry.image ? <img src={entry.image} width={entry.width} height={entry.height} alt={entry.alt ?? ""} loading="lazy" /> : <span class="none">no og:image</span>}
+              </a>
+              <div class="text">
+                <span class="host">{host}</span>
+                <span class="title">{entry.title}</span>
+                <span class="desc">{entry.description}</span>
+                <span class="path">
+                  <a href={entry.path}>{entry.path}</a>
+                  <span class:list={{ warn: entry.status >= 400 || (entry.width !== undefined && (entry.width !== 1200 || entry.height !== 630)) }}>
+                    {entry.status >= 400 ? entry.status : entry.width ? `${entry.width}×${entry.height}` : ""}
+                  </span>
+                </span>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </main>
+  </body>
+</html>

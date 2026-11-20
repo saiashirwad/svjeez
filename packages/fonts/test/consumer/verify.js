@@ -3,6 +3,7 @@ import { mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { google } from "@svjeez/fonts";
+import { casual, handwrite } from "@svjeez/fonts/handwriting";
 import { Text, scene } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
 import { svg as backend } from "svjeez/tools";
@@ -12,6 +13,7 @@ const cache = mkdtempSync(join(tmpdir(), "svjeez-fonts-consumer-"));
 process.env.SVJEEZ_FONTS_CACHE = cache;
 
 try {
+  assert.ok(handwrite(await casual(), "hi", { width: 100, y: 40 }).strokes.length > 0);
   const geist = await google("Geist", { weight: 500, ligatures: false });
   const width = geist.measure("Hello", 24);
 

@@ -1,18 +1,56 @@
 ---
 import type { HTMLAttributes } from "astro/types";
-import type { SceneModule } from "@svjeez/vite";
+import type { Poster, SceneModule } from "@svjeez/vite";
 import { getScene, type SceneSource } from "@svjeez/vite/scene";
 
-type Props = Omit<HTMLAttributes<"img">, "src" | "width" | "height"> & {
+type Props = Omit<HTMLAttributes<"img">, "src" | "srcset" | "sizes" | "width" | "height"> & {
   /** A `?svjeez` import, or a scene file's default export. */
   scene: SceneModule | SceneSource;
+  /**
+   * Show the scene's poster until something plays it, such as `player()` from `svjeez/page`, and say how wide the img
+   * draws, for the browser to pick a poster by (`sizes`). The scene needs posters (`?svjeez&posters`, or
+   * `getScene(scene, { posters: { widths } })`). Without it, a scene that has posters plays, and viewers who asked for
+   * reduced motion get its poster.
+   */
+  poster?: true | { readonly sizes?: string };
 };
 
 const isModule = (scene: SceneModule | SceneSource): scene is SceneModule =>
   typeof scene === "object" && "src" in scene;
 
-const { scene, alt, ...attributes } = Astro.props;
+const { scene, alt, poster, ...attributes } = Astro.props;
 const image = isModule(scene) ? scene : getScene(scene);
+const posters = image.posters;
+const text = alt ?? (image.desc || image.title);
+
+const set = (list: readonly Poster[]) => list.map((one) => `${one.src} ${one.width}w`).join(", ");
+const sizes = poster && poster !== true ? poster.sizes : undefined;
+const widest = (list: readonly Poster[]) => list.at(-1)!.src;
 ---
 
-<img src={image.src} width={image.width} height={image.height} alt={alt ?? (image.desc || image.title)} {...attributes} />
+{
+  posters && poster ? (
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset={set(posters.dark)} sizes={sizes} />
+      <img
+        src={posters.light[0]!.src}
+        srcset={set(posters.light)}
+        sizes={sizes}
+        width={image.width}
+        height={image.height}
+        alt={text}
+        decoding="async"
+        data-svjeez={JSON.stringify({ live: image.src, posters })}
+        {...attributes}
+      />
+    </picture>
+  ) : posters ? (
+    <picture>
+      <source media="(prefers-reduced-motion: reduce) and (prefers-color-scheme: dark)" srcset={widest(posters.dark)} />
+      <source media="(prefers-reduced-motion: reduce)" srcset={widest(posters.light)} />
+      <img src={image.src} width={image.width} height={image.height} alt={text} {...attributes} />
+    </picture>
+  ) : (
+    <img src={image.src} width={image.width} height={image.height} alt={text} {...attributes} />
+  )
+}

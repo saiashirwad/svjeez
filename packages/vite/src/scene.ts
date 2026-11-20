@@ -2,7 +2,14 @@ import { createHash } from "node:crypto";
 import { gzipSync } from "node:zlib";
 import { isScene, svg as backend, type Scene } from "svjeez/tools";
 import { register, ROUTE } from "./assets.ts";
+import { imageName, renderOg, type RenderOptions as StillOptions } from "@svjeez/og/render";
 import { poster, type PosterOptions, type Scheme } from "./posters.ts";
+
+/** A poster still of a scene: its URL and its width in pixels. */
+export interface Poster {
+  readonly src: string;
+  readonly width: number;
+}
 
 /** What a `?svjeez` import is. */
 export interface SceneModule {
@@ -11,7 +18,8 @@ export interface SceneModule {
   readonly height: number;
   readonly title: string;
   readonly desc: string;
-  readonly posters?: { readonly light: string; readonly dark: string };
+  /** The scene's stills by scheme, narrowest first. */
+  readonly posters?: Readonly<Record<Scheme, readonly Poster[]>>;
   /** The SVG's markup, in server code only (SSR, an Astro page): a browser bundle gets the URL alone. */
   readonly svg?: string;
 }
@@ -27,7 +35,8 @@ export interface SceneImage {
   readonly desc: string;
   readonly svg: string;
   readonly gzip: number;
-  readonly posters?: Readonly<Record<Scheme, string>>;
+  /** The scene's stills by scheme, narrowest first. */
+  readonly posters?: Readonly<Record<Scheme, readonly Poster[]>>;
 }
 
 const hash = (text: string) => createHash("sha256").update(text).digest("base64url").slice(0, 12);
@@ -69,6 +78,19 @@ const compile = (scene: SceneSource) => {
   return svg;
 };
 
+const describe = (caller: string, svg: string) => {
+  const box = /viewBox="([\d.-]+) ([\d.-]+) ([\d.]+) ([\d.]+)"/.exec(svg);
+
+  if (!box) throw new Error(`${caller} needs a scene whose svg has a viewBox, found none.`);
+
+  return {
+    width: Number(box[3]),
+    height: Number(box[4]),
+    title: unescape(/<title[^>]*>([^<]*)<\/title>/.exec(svg)?.[1] ?? ""),
+    desc: unescape(/<desc[^>]*>([^<]*)<\/desc>/.exec(svg)?.[1] ?? ""),
+  };
+};
+
 export const getScene = (
   scene: SceneSource,
   options: { posters?: boolean | PosterOptions } = {},
@@ -78,37 +100,69 @@ export const getScene = (
   const text = new TextEncoder().encode(svg);
   register(`${name}.svg`, { type: "image/svg+xml", bytes: async () => text });
 
-  const box = /viewBox="([\d.-]+) ([\d.-]+) ([\d.]+) ([\d.]+)"/.exec(svg);
+  const { width, height, title, desc } = describe("getScene()", svg);
 
-  if (!box) throw new Error("getScene() needs a scene whose svg has a viewBox, found none.");
-
-  const [width, height] = [Number(box[3]), Number(box[4])];
-
-  let posters: Record<Scheme, string> | undefined;
+  let posters: Record<Scheme, readonly Poster[]> | undefined;
 
   if (options.posters) {
     const settings = options.posters === true ? {} : options.posters;
-    const variant = hash(JSON.stringify([settings.scale, settings.quality, settings.background]));
-    posters = { light: "", dark: "" };
 
-    for (const scheme of ["light", "dark"] as const) {
-      const file = `${name}-${variant}-${scheme}.webp`;
-      register(file, {
-        type: "image/webp",
-        bytes: () => poster(file, svg, scheme, settings),
+    const widths = [...(settings.widths ?? [Math.round(width * (settings.scale ?? 1))])].sort(
+      (a, b) => a - b,
+    );
+
+    const variant = hash(JSON.stringify([widths, settings.quality, settings.background]));
+
+    const made = (scheme: Scheme): Poster[] =>
+      widths.map((wide) => {
+        const file = `${name}-${variant}-${wide}-${scheme}.webp`;
+
+        register(file, {
+          type: "image/webp",
+          bytes: () => poster(file, svg, scheme, { ...settings, scale: wide / width }),
+        });
+
+        return { src: ROUTE + file, width: wide };
       });
-      posters[scheme] = ROUTE + file;
-    }
+
+    posters = { light: made("light"), dark: made("dark") };
   }
 
   return {
     src: `${ROUTE}${name}.svg`,
     width,
     height,
-    title: unescape(/<title[^>]*>([^<]*)<\/title>/.exec(svg)?.[1] ?? ""),
-    desc: unescape(/<desc[^>]*>([^<]*)<\/desc>/.exec(svg)?.[1] ?? ""),
+    title,
+    desc,
     svg,
     gzip: gzipSync(svg).length,
     posters,
   };
+};
+
+export type { StillOptions };
+
+export interface StillImage {
+  readonly src: string;
+  readonly width: number;
+  readonly height: number;
+  /** The image's MIME type. */
+  readonly type: string;
+  readonly title: string;
+  readonly desc: string;
+}
+
+/**
+ * A scene's picture at one moment (its first frame by default), as a JPEG or WebP asset in `/_svjeez/`: what a link
+ * preview (`og:image`) needs, since crawlers do not draw SVG. Rendered when first requested in dev, and written into the
+ * build by the integration.
+ */
+export const getStill = (scene: SceneSource, options: StillOptions = {}): StillImage => {
+  const svg = compile(scene);
+  const { width, height, title, desc } = describe("getStill()", svg);
+  const file = imageName(svg, options);
+  const type = file.endsWith(".webp") ? "image/webp" : "image/jpeg";
+  register(file, { type, bytes: async () => (await renderOg(svg, options)).bytes });
+
+  return { src: ROUTE + file, width, height, type, title, desc };
 };

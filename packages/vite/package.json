@@ -13,7 +13,6 @@
   "exports": {
     ".": "./src/index.ts",
     "./scene": "./src/scene.ts",
-    "./encode": "./src/encode.ts",
     "./client": {
       "types": "./client.d.ts"
     }
@@ -24,6 +23,9 @@
     "typecheck": "tsc --noEmit",
     "build:package": "bun ../../scripts/package-plugin.ts",
     "test:package": "bun ../../scripts/package-plugin-check.ts"
+  },
+  "dependencies": {
+    "@svjeez/og": "workspace:^"
   },
   "devDependencies": {
     "@svjeez/dom": "workspace:*",

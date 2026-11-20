@@ -1,4 +1,5 @@
-import { frozen, playing, replay, show } from "./frame";
+import { player, type Player } from "svjeez/page";
+import { look } from "./look";
 import { PALETTECHANGE } from "./palette";
 import { calm, scheme, THEMECHANGE } from "./scheme";
 
@@ -11,36 +12,27 @@ const COST = 30;
 
 const posterOf = (img: HTMLImageElement) => img.dataset[img.dataset.scheme ?? scheme()];
 
-export const still = (img: HTMLImageElement, { fade = false } = {}) => {
-  img.dataset.want = "still";
-  img.dataset.state = "still";
-  show(img, frozen(img, img.dataset.live!, posterOf(img)), { fade });
+const players = new Map<HTMLImageElement, Player>();
+
+const playerOf = (img: HTMLImageElement) => {
+  let known = players.get(img);
+
+  if (!known) {
+    known = player(img, { look, poster: (kind, one) => one.dataset[kind], near: 500 });
+    players.set(img, known);
+  }
+
+  return known;
 };
 
-export const play = (img: HTMLImageElement) => {
-  if (calm.matches) return img.dataset.state === "still" ? undefined : still(img);
+export const still = (img: HTMLImageElement, { fade = false } = {}) =>
+  playerOf(img).still({ fade });
 
-  if (img.dataset.want === "live") return;
-  img.dataset.want = "live";
-
-  return show(img, playing(img, img.dataset.live!)).then((shown) => {
-    if (shown) img.dataset.state = "live";
-  });
-};
+export const play = (img: HTMLImageElement) => playerOf(img).play();
 
 const scenes = document.querySelectorAll<HTMLImageElement>(".scene[data-live]");
 
-const near = new IntersectionObserver(
-  (entries) =>
-    entries.forEach((entry) => {
-      const { target } = entry;
-
-      if (!(target instanceof HTMLImageElement)) return;
-
-      if (entry.isIntersecting && !target.dataset.want) still(target);
-    }),
-  { rootMargin: "500px 0px" },
-);
+scenes.forEach(playerOf);
 
 const ratio = new Map<HTMLImageElement, number>();
 
@@ -73,7 +65,7 @@ const balance = () => {
     if ("manual" in img.dataset) return;
 
     if (wanted.has(img)) play(img);
-    else if (img.dataset.state === "live") still(img);
+    else playerOf(img).stop({ fade: false });
   });
 };
 
@@ -89,8 +81,6 @@ const view = new IntersectionObserver(
 );
 
 scenes.forEach((img) => {
-  near.observe(img);
-
   if (!("manual" in img.dataset)) view.observe(img);
 });
 
@@ -114,24 +104,11 @@ if (document.readyState === "complete") warm();
 else addEventListener("load", warm, { once: true });
 
 calm.addEventListener("change", () =>
-  scenes.forEach((img) => (img.dataset.state === "live" && calm.matches ? still(img) : undefined)),
+  players.forEach((one) => (one.state === "live" && calm.matches ? one.still() : undefined)),
 );
 
 // A playing scene is shown again, so Safari gets a copy pinned to the new scheme, or the plain file when the OS's is it.
-addEventListener(THEMECHANGE, () =>
-  scenes.forEach((img) => {
-    if (img.dataset.state === "live") replay(img);
-    else if (img.dataset.state === "still") still(img);
-  }),
-);
+addEventListener(THEMECHANGE, () => players.forEach((one) => one.refresh()));
 
 // Another palette: a playing scene goes on from where it is in the new colors, and a still is made again in them.
-addEventListener(PALETTECHANGE, () =>
-  scenes.forEach((img) => {
-    if (img.dataset.state === "live") replay(img);
-    else if (img.dataset.want === "live") {
-      delete img.dataset.want;
-      play(img);
-    } else if (img.dataset.want) still(img, { fade: true });
-  }),
-);
+addEventListener(PALETTECHANGE, () => players.forEach((one) => one.refresh({ fade: true })));

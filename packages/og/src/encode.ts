@@ -22,11 +22,27 @@ const open = (): Promise<Page> => {
   return page;
 };
 
+// The browser closes itself a moment after its last picture, so a script that only renders does not hang on it.
+const IDLE = 2000;
+let busy = 0;
+let idle: ReturnType<typeof setTimeout> | undefined;
+
 export const encode = async (
   png: Uint8Array,
   format: Format,
   quality = 0.8,
 ): Promise<Uint8Array> => {
+  clearTimeout(idle);
+  busy++;
+
+  try {
+    return await draw(png, format, quality);
+  } finally {
+    if (--busy === 0) idle = setTimeout(closeBrowser, IDLE);
+  }
+};
+
+const draw = async (png: Uint8Array, format: Format, quality: number): Promise<Uint8Array> => {
   const p = await open();
 
   const base64 = await p.evaluate(
@@ -54,7 +70,7 @@ export const encode = async (
   return Buffer.from(base64, "base64");
 };
 
-export const close = async (): Promise<void> => {
+export const closeBrowser = async (): Promise<void> => {
   const open = browser;
   browser = page = undefined;
 

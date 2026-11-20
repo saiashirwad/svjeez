@@ -26,8 +26,8 @@ const { scene, cost, scheme, manual, name, bar, alt, class: className, ...attrib
 <img
   class:list={["scene", className]}
   data-live={scene.src}
-  data-light={scene.posters!.light}
-  data-dark={scene.posters!.dark}
+  data-light={scene.posters!.light.at(-1)!.src}
+  data-dark={scene.posters!.dark.at(-1)!.src}
   data-cost={cost}
   data-scheme={scheme}
   data-manual={manual ? "" : undefined}

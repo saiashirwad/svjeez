@@ -1,1 +1,9 @@
-export { getScene, type SceneImage, type SceneSource } from "@svjeez/vite/scene";
+export {
+  getScene,
+  getStill,
+  type Poster,
+  type SceneImage,
+  type SceneSource,
+  type StillImage,
+  type StillOptions,
+} from "@svjeez/vite/scene";

@@ -13,13 +13,10 @@ interface Props {
   class?: string;
   current?: "examples";
   wide?: boolean;
-  /** Which link-preview card the page shares: one of /og/<card>.jpg. */
-  card?: string;
 }
 
-const { title, description, share = { title, description }, class: className, current, wide, card = "home" } = Astro.props;
+const { title, description, share = { title, description }, class: className, current, wide } = Astro.props;
 const url = new URL(Astro.url.pathname, Astro.site);
-const image = new URL(`/og/${card}.jpg`, Astro.site);
 const home = Astro.url.pathname === "/";
 
 const site = { "@type": "WebSite", name: "svjeez", url: new URL("/", Astro.site).href };
@@ -60,15 +57,8 @@ const picked = PALETTES.map(({ id }) => id).filter((id) => id !== DEFAULT_PALETT
     <meta property="og:url" content={url} />
     <meta property="og:title" content={share.title} />
     <meta property="og:description" content={share.description} />
-    <meta property="og:image" content={image} />
-    <meta property="og:image:type" content="image/jpeg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    {share.alt && <meta property="og:image:alt" content={share.alt} />}
-    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={share.title} />
     <meta name="twitter:description" content={share.description} />
-    <meta name="twitter:image" content={image} />
     <script is:inline define:vars={{ picked }}>
       try {
         var t = localStorage.getItem("theme");
