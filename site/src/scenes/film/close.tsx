@@ -1,4 +1,4 @@
-import { Group, Run, Stack, Text, ease, enter, span, type SceneElement } from "svjeez";
+import { Group, Stack, Text, ease, enter, span, type SceneElement } from "svjeez";
 import { Tag } from "./open";
 import { W, geist, mono, theme } from "./kit";
 
@@ -7,30 +7,6 @@ export const PILL = { x: W / 2, y: 112, w: 440, h: 64 } as const;
 
 const rise = (at: number) =>
   enter(span(at, 0.5), { from: { opacity: 0, offset: [0, 14] }, curve: ease.out });
-
-const Chip = ({
-  label,
-  command,
-}: {
-  readonly label: string;
-  readonly command: string;
-}): SceneElement => (
-  <Stack
-    gap={12}
-    padding={[24, 18]}
-    radius={6}
-    fill={theme.background}
-    stroke={{ color: theme.line, width: 1 }}
-  >
-    <Text font={mono} size={13} letterSpacing={1.2} fill={theme.muted}>
-      {label.toUpperCase()}
-    </Text>
-    <Text font={mono} size={22} fill={theme.text}>
-      <Run fill={theme.muted}>{"$ "}</Run>
-      {command}
-    </Text>
-  </Stack>
-);
 
 /** Shot 8, five and a half seconds: the stage has folded back into the tag; the name and how to get it come in under it. */
 export const Close = (): SceneElement => (
@@ -59,10 +35,9 @@ export const Close = (): SceneElement => (
           {"tsx → one .svg · zero js · works in <img>"}
         </Text>
       </Stack>
-      <Stack direction="row" gap={16} motion={rise(2.45)}>
-        <Chip label="for your repo" command="npm i svjeez" />
-        <Chip label="for your agent" command="npx svjeez skill --install" />
-      </Stack>
+      <Text font={mono} size={28} fill={theme.text} motion={rise(2.45)}>
+        npm i svjeez
+      </Text>
     </Stack>
   </Group>
 );
