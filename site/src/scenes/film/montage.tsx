@@ -14,7 +14,7 @@ import {
 } from "svjeez";
 import { Pivot } from "../blip";
 import { DotMap, WeekChart } from "./data";
-import { ACCENTS, Header, SHOTS, STAGE, mono, shown, theme } from "./kit";
+import { ACCENTS, SHOTS, STAGE, mono, shown, theme } from "./kit";
 
 // The montage: four tiles of what else the same code makes, each drawing itself a beat after the last.
 
@@ -127,11 +127,6 @@ export const Montage = (): SceneElement => {
 
   return (
     <Group>
-      <Header
-        title="and the rest of the toolbox"
-        from="mermaid · geo · math · charts"
-        over={over!}
-      />
       <Group motion={shown(over!, 0)}>
         {tiles.map(({ label, body }, i) => (
           <Group
