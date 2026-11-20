@@ -1,4 +1,5 @@
-import { Chart, bars, curve, line as plotted } from "@svjeez/charts";
+import { Icon } from "@svjeez/icons";
+import { circleCheck, packageImport, rocket, testPipe } from "@svjeez/icons/tabler";
 import {
   Arrow,
   Group,
@@ -18,7 +19,8 @@ import type { Child } from "svjeez/tools";
 import { Builds } from "./builds";
 import { RESULT_COLUMN, SHOTS, mono, theme } from "./kit";
 
-// Two more code slides in the same shape as the basics: data becomes a chart, and named boxes become a diagram.
+// Two more code slides in the same shape as the basics: a list of steps becomes a pipeline, and named boxes become a
+// diagram.
 
 const SKELETON = `export default scene(opts, () => (
   <Group />
@@ -52,80 +54,127 @@ const Tile = ({
   </Group>
 );
 
-const sales = [
-  ["Q1", 12],
-  ["Q2", 48],
-  ["Q3", 31],
-  ["Q4", 87],
+// The pipeline: a few steps mapped to rows, each a drawn icon, a label, a translucent track that fills and a check that
+// pops when it is done. No outline: just the pieces, composed, and moving.
+
+const STEPS = [
+  { name: "install", icon: packageImport },
+  { name: "test", icon: testPipe },
+  { name: "deploy", icon: rocket },
 ] as const;
 
-/** The chart fills the column, a little in from its edges for the axis labels. */
-const CHART_AT: Vec = [48, 40];
-const CHART_SIZE: Vec = [RESULT_COLUMN[2] - 60, RESULT_COLUMN[3] - 80];
-
-/** The top of the tallest bar, Q4, in the film's pixels, for Blip to stand on once it has grown. */
-export const TALLEST: Vec = [
-  RESULT_COLUMN[0] + CHART_AT[0] + CHART_SIZE[0] * 0.875,
-  RESULT_COLUMN[1] + CHART_AT[1] + CHART_SIZE[1] * (1 - 87 / 100),
-];
-
-const chartFile = (n: number): string => {
+const pipelineFile = (n: number): string => {
   if (n === 0) return SKELETON;
 
-  const data = `const sales = { Q1: 12, Q2: 48, Q3: 31, Q4: 87 };\n\n`;
-
-  if (n === 1)
-    return `${data}export default scene(opts, () => (
-  <Group />
-));`;
-
-  return `${data}export default scene(opts, () => (
-  <Chart
-    x={{ kind: "band", domain: quarters }}
-    series={[
-      bars(sales, { color: theme.blue, draw }),${
-        n >= 3 ? `\n      line(sales, { color: theme.pink, draw }),` : ""
-      }
-    ]}
-  />
-));`;
+  return [
+    'const steps = ["install", "test", "deploy"];',
+    "",
+    "export default scene(opts, () => (",
+    "  <Stack gap={24}>",
+    "    {steps.map((name, i) => (",
+    "      <Step",
+    "        icon={icons[i]}",
+    "        label={name}",
+    ...(n >= 2 ? ["        done={span(1 + i * 0.7, 0.6)}"] : []),
+    "        motion={enter(span(i * 0.3, 0.5))}",
+    "      />",
+    "    ))}",
+    "  </Stack>",
+    "));",
+  ].join("\n");
 };
 
-export const ChartSlide = (): SceneElement => (
-  <Builds
-    name="sales.tsx"
-    file={chartFile}
-    lands={[1.0, 2.6, 4.6]}
-    over={SHOTS.chart.over!}
-    result={([, grow, trend]) => (
-      <Tile from={grow!} bare>
-        <Chart
-          at={CHART_AT}
-          size={CHART_SIZE}
-          x={{ kind: "band", domain: sales.map(([q]) => q), padding: 0.35 }}
-          y={{ ticks: 4 }}
-          axesIn={span(grow! - 0.2, 0.4)}
-          series={[
-            bars([...sales], {
-              color: theme.blue,
-              radius: 4,
-              draw: track(0).to(1, span(grow!, 1), ease.out),
-            }),
-            plotted([...sales], {
-              color: theme.pink,
-              curve: curve.monotone,
-              dots: 4.5,
-              stroke: { width: 2.5 },
-              draw: track(0).to(1, span(trend!, 1), ease.inOut),
-            }),
-          ]}
-          font={mono}
-          textSize={14}
-          axis={theme.line}
-          label={theme.faint}
-          grid={{ color: theme.line, width: 1 }}
+const ROW = { w: 530, h: 84, gap: 30, track: [232, 460] as const } as const;
+
+const ROWS_TOP =
+  RESULT_COLUMN[1] + (RESULT_COLUMN[3] - (STEPS.length * (ROW.h + ROW.gap) - ROW.gap)) / 2;
+
+const ROWS_LEFT = RESULT_COLUMN[0] + (RESULT_COLUMN[2] - ROW.w) / 2;
+
+/** Where Blip stands: on the first row, over its check. */
+export const PIPELINE_TOP: Vec = [ROWS_LEFT + ROW.w - 20, ROWS_TOP + 6];
+
+const Step = ({
+  index,
+  appears,
+  done,
+}: {
+  readonly index: number;
+  readonly appears: number;
+  readonly done: number;
+}): SceneElement => {
+  const { name, icon } = STEPS[index]!;
+  const fills = span(done, 0.6);
+  const [from, to] = ROW.track;
+
+  return (
+    <Group
+      offset={[ROWS_LEFT, ROWS_TOP + index * (ROW.h + ROW.gap)]}
+      motion={enter(span(appears, 0.5), {
+        from: { opacity: 0, offset: [-16, 0] },
+        curve: ease.out,
+      })}
+    >
+      <Icon
+        icon={icon}
+        size={44}
+        at={[0, ROW.h / 2 - 22]}
+        color={theme.text}
+        stroke={{ width: 1.6 }}
+        draw={(part) => track(0).to(1, span(appears + 0.1 + part * 0.08, 0.5))}
+      />
+      <Text
+        font={mono}
+        size={30}
+        at={[64, ROW.h / 2 + 10]}
+        anchor="baseline-left"
+        fill={theme.text}
+      >
+        {name}
+      </Text>
+      <Shape
+        geometry={rect(to - from, 10, { radius: 5 })}
+        at={[from, ROW.h / 2 - 5]}
+        fill={theme.blue}
+        opacity={0.18}
+      />
+      <Shape
+        geometry={track(rect(0.01, 10, { radius: 5 })).to(
+          rect(to - from, 10, { radius: 5 }),
+          fills,
+          ease.inOut,
+        )}
+        at={[from, ROW.h / 2 - 5]}
+        fill={theme.blue}
+        opacity={0.85}
+      />
+      <Group
+        motion={enter(span(fills.end, 0.4), { from: { opacity: 0, scale: 0.4 }, curve: ease.pop })}
+      >
+        <Icon
+          icon={circleCheck}
+          size={44}
+          at={[ROW.w - 44, ROW.h / 2 - 22]}
+          color={theme.green}
+          stroke={{ width: 1.8 }}
         />
-      </Tile>
+      </Group>
+    </Group>
+  );
+};
+
+export const PipelineSlide = (): SceneElement => (
+  <Builds
+    name="deploy.tsx"
+    file={pipelineFile}
+    lands={[1.0, 3.4]}
+    over={SHOTS.pipeline.over!}
+    result={([rows, done]) => (
+      <Group>
+        {STEPS.map((_, i) => (
+          <Step index={i} appears={rows! + i * 0.3} done={done! + i * 0.7} />
+        ))}
+      </Group>
     )}
   />
 );

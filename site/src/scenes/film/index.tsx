@@ -5,7 +5,7 @@ import { Host } from "./host";
 import { BasicsSlide } from "./basics";
 import { FilmCard } from "./card";
 import { ClaudeSlide } from "./claude";
-import { ChartSlide, DiagramSlide } from "./connect";
+import { DiagramSlide, PipelineSlide } from "./connect";
 import { FilmingSlide } from "./filming";
 import { Anything, Facts } from "./lines";
 import { Montage } from "./montage";
@@ -60,8 +60,8 @@ export default scene(
       <Sequence when={SHOTS.basics}>
         <BasicsSlide />
       </Sequence>
-      <Sequence when={SHOTS.chart}>
-        <ChartSlide />
+      <Sequence when={SHOTS.pipeline}>
+        <PipelineSlide />
       </Sequence>
       <Sequence when={SHOTS.diagram}>
         <DiagramSlide />

@@ -60,7 +60,7 @@ export const SHOTS = {
   open: span(0, 5),
   claude: span(5, 9),
   basics: span(14, 10),
-  chart: span(24, 8),
+  pipeline: span(24, 8),
   diagram: span(32, 8),
   card: span(40, 4),
   filming: span(44, 8),

@@ -2,7 +2,7 @@ import { Group, ease, enter, span, track, type SceneElement, type Span, type Vec
 import { Blip, GROUND, Pivot, flashes, flight, jumps, waddle, type Hop } from "../blip";
 import { BASICS, TILE_TOPS } from "./basics";
 import { SOON_END } from "./card";
-import { TALLEST } from "./connect";
+import { PIPELINE_TOP } from "./connect";
 import { FILMING, FRAME_TOP } from "./filming";
 import { H, RESULT_COLUMN, SHOTS, W } from "./kit";
 import { PILL } from "./close";
@@ -39,9 +39,10 @@ const route: readonly Move[] = [
     to: TILE_TOPS[i]!,
   })),
   { hop: { land: SHOTS.basics.start + 8.2, height: 40 } },
-  // The chart and the diagram: on the tile they draw in, a hop as each piece plays.
-  { hop: { land: SHOTS.chart.start + 4.5, height: 90 }, to: TALLEST },
-  { hop: { land: SHOTS.chart.start + 5.8, height: 40 } },
+  // The pipeline and the diagram: on what they draw, a hop as each piece plays.
+  { hop: { land: SHOTS.pipeline.start + 2.4, height: 90 }, to: PIPELINE_TOP },
+  { hop: { land: SHOTS.pipeline.start + 4.4, height: 30 } },
+  { hop: { land: SHOTS.pipeline.start + 5.8, height: 40 } },
   { hop: { land: SHOTS.diagram.start + 1.6, height: 90 }, to: [1100, RESULT_COLUMN[1]] },
   { hop: { land: SHOTS.diagram.start + 3.6, height: 30 } },
   { hop: { land: SHOTS.diagram.start + 5.0, height: 30 } },
