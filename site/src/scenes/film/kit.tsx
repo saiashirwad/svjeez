@@ -59,12 +59,15 @@ export const spring = ease.spring({ stiffness: 170, damping: 17 });
 export const SHOTS = {
   open: span(0, 5),
   claude: span(5, 9),
-  basics: span(14, 11),
-  filming: span(25, 8),
-  montage: span(33, 5.5),
-  anything: span(38.5, 3.5),
-  facts: span(42, 4),
-  close: span(46, 5.5),
+  basics: span(14, 10),
+  chart: span(24, 8),
+  diagram: span(32, 8),
+  card: span(40, 3.5),
+  filming: span(43.5, 8),
+  montage: span(51.5, 5.5),
+  anything: span(57, 3.5),
+  facts: span(60.5, 4),
+  close: span(64.5, 5.5),
 } as const;
 
 export const D = SHOTS.close.end;

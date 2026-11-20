@@ -36,24 +36,31 @@ const route: readonly Move[] = [
     to: TILE_TOPS[i]!,
   })),
   { hop: { land: SHOTS.basics.start + 8.2, height: 40 } },
-  { hop: { land: SHOTS.basics.start + 9.4, height: 50 } },
+  // The chart and the diagram: on the tile they draw in, a hop as each piece plays.
+  { hop: { land: SHOTS.chart.start + 3.3, height: 90 }, to: [1100, 160] },
+  { hop: { land: SHOTS.chart.start + 5.2, height: 40 } },
+  { hop: { land: SHOTS.diagram.start + 1.6, height: 40 } },
+  { hop: { land: SHOTS.diagram.start + 3.6, height: 30 } },
+  { hop: { land: SHOTS.diagram.start + 5.0, height: 30 } },
+  // The card: beside the line.
+  { hop: { land: SHOTS.card.start + 0.7, height: 80 }, to: [1150, 382] },
   // The filmed app: onto it, and a hop at each click.
-  { hop: { land: 25.9, height: 90 }, to: [1120, 262] },
-  { hop: { land: 28.2, height: 30 } },
-  { hop: { land: 30.8, height: 40 } },
+  { hop: { land: SHOTS.filming.start + 0.9, height: 90 }, to: [1120, 262] },
+  { hop: { land: SHOTS.filming.start + 3.2, height: 30 } },
+  { hop: { land: SHOTS.filming.start + 5.8, height: 40 } },
   // The montage: along the tops of its tiles.
-  { hop: { land: 33.6, height: 60 }, to: [520, 166] },
-  { walk: span(34.2, 1.8), to: [1000, 166], steps: 8 },
-  { hop: { land: 37.0, height: 40 } },
+  { hop: { land: SHOTS.montage.start + 0.6, height: 60 }, to: [520, 166] },
+  { walk: span(SHOTS.montage.start + 1.2, 1.8), to: [1000, 166], steps: 8 },
+  { hop: { land: SHOTS.montage.start + 4.0, height: 40 } },
   // Beside the handwritten line, then on the first fact.
-  { hop: { land: 39.0, height: 80 }, to: [1170, 420] },
-  { hop: { land: 40.6, height: 40 } },
-  { hop: { land: 42.6, height: 90 }, to: [1030, 280] },
-  { hop: { land: 43.8, height: 40 } },
+  { hop: { land: SHOTS.anything.start + 0.5, height: 80 }, to: [1170, 420] },
+  { hop: { land: SHOTS.anything.start + 2.1, height: 40 } },
+  { hop: { land: SHOTS.facts.start + 0.6, height: 90 }, to: [1030, 280] },
+  { hop: { land: SHOTS.facts.start + 1.8, height: 40 } },
   // Back into the tag, and cheers.
-  { hop: { land: 46.9, height: 90 }, to: [PILL.x + 150, PILL.y - PILL.h / 2] },
-  { hop: { land: 48.5, height: 110 } },
-  { hop: { land: 49.7, height: 60 } },
+  { hop: { land: SHOTS.close.start + 0.9, height: 90 }, to: [PILL.x + 150, PILL.y - PILL.h / 2] },
+  { hop: { land: SHOTS.close.start + 2.5, height: 110 } },
+  { hop: { land: SHOTS.close.start + 3.7, height: 60 } },
 ];
 
 const isWalk = (move: Move): move is Extract<Move, { walk: Span }> => "walk" in move;
@@ -88,9 +95,9 @@ const look = route
     },
     track<Vec>([0, 0]).to([0, 4], span(3, 0.3)),
   )
-  .to([0, -2], span(47.5, 0.3));
+  .to([0, -2], span(SHOTS.close.start + 1.5, 0.3));
 
-const blinks = [1.9, 6.6, 10.4, 16.3, 21.6, 27.4, 32.4, 36.2, 41.4, 45.1, 48.0];
+const blinks = [1.9, 6.6, 10.4, 16.3, 21.6, 27.4, 33.1, 38.4, 42.2, 47.6, 53.4, 58.2, 62.6, 66.0];
 
 export const Host = (): SceneElement => (
   <Pivot

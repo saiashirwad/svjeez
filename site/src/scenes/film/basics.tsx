@@ -14,8 +14,8 @@ import {
   type SceneElement,
   type Vec,
 } from "svjeez";
-import { Listing } from "./listing";
-import { ACCENTS, CODE_COLUMN, RESULT_COLUMN, SHOTS, mono, shown, spring, theme } from "./kit";
+import { Builds, playsOf } from "./builds";
+import { ACCENTS, RESULT_COLUMN, SHOTS, mono, spring, theme } from "./kit";
 
 // The first code slide: a scene grows an element at a time, and each one plays in its own tile the moment its code
 // lands. A circle pops in, a wave draws itself, a square springs across, a number counts up.
@@ -42,8 +42,7 @@ const file = (n: number) =>
   ].join("\n");
 
 const lands = [1.0, 2.7, 4.4, 6.1];
-const steps = lands.map((t) => span(t, spring.settle));
-const plays = lands.map((t) => t + 0.6);
+const plays = playsOf(lands);
 
 /** The four tiles, two by two, filling the column beside the code. */
 const GAP = 20;
@@ -116,35 +115,31 @@ export const TILE_TOPS: readonly Vec[] = [0, 1, 2, 3].map((i) => [
 
 export const BASICS = { plays } as const;
 
-export const BasicsSlide = (): SceneElement => {
-  const { over } = SHOTS.basics;
-
-  return (
-    <Group motion={shown(over!, 0.1)}>
-      <Listing
-        name="scene.tsx"
-        size={20}
-        states={[0, 1, 2, 3, 4].map(file)}
-        steps={steps}
-        edits={0}
-        full={{ box: CODE_COLUMN }}
-      />
-      {pieces.map((piece, i) => (
-        <Group
-          offset={corner(i)}
-          motion={enter(span(plays[i]! - 0.35, 0.3), {
-            from: { opacity: 0, offset: [0, 8] },
-            curve: ease.out,
-          })}
-        >
-          <Shape
-            geometry={rect(TILE[0], TILE[1], { radius: 12 })}
-            fill={theme.surface}
-            stroke={{ color: theme.line, width: 1 }}
-          />
-          {piece(plays[i]!)}
-        </Group>
-      ))}
-    </Group>
-  );
-};
+export const BasicsSlide = (): SceneElement => (
+  <Builds
+    name="scene.tsx"
+    file={file}
+    lands={lands}
+    over={SHOTS.basics.over!}
+    result={(times) => (
+      <Group>
+        {pieces.map((piece, i) => (
+          <Group
+            offset={corner(i)}
+            motion={enter(span(times[i]! - 0.35, 0.3), {
+              from: { opacity: 0, offset: [0, 8] },
+              curve: ease.out,
+            })}
+          >
+            <Shape
+              geometry={rect(TILE[0], TILE[1], { radius: 12 })}
+              fill={theme.surface}
+              stroke={{ color: theme.line, width: 1 }}
+            />
+            {piece(times[i]!)}
+          </Group>
+        ))}
+      </Group>
+    )}
+  />
+);

@@ -3,7 +3,9 @@ import { Close, PILL } from "./close";
 import { D, H, SHOTS, STAGE, W, theme } from "./kit";
 import { Host } from "./host";
 import { BasicsSlide } from "./basics";
+import { FilmCard } from "./card";
 import { ClaudeSlide } from "./claude";
+import { ChartSlide, DiagramSlide } from "./connect";
 import { FilmingSlide } from "./filming";
 import { Anything, Facts } from "./lines";
 import { Montage } from "./montage";
@@ -57,6 +59,15 @@ export default scene(
       </Sequence>
       <Sequence when={SHOTS.basics}>
         <BasicsSlide />
+      </Sequence>
+      <Sequence when={SHOTS.chart}>
+        <ChartSlide />
+      </Sequence>
+      <Sequence when={SHOTS.diagram}>
+        <DiagramSlide />
+      </Sequence>
+      <Sequence when={SHOTS.card}>
+        <FilmCard />
       </Sequence>
       <Sequence when={SHOTS.filming}>
         <FilmingSlide />
