@@ -292,6 +292,9 @@ const geometryOf = (
   return laneOf(lane, lane.initial.value!, timing, mixGeometry, `${what} on ${where}`);
 };
 
+/** How far, in px, an anchor's point may move across a geometry's keys before the anchor no longer holds. */
+const DRIFT = 0.5;
+
 const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeNode => {
   const where = ctx.notes.names.named(key);
 
@@ -307,6 +310,19 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
       "Give it a fill, as in fill={theme.text}, or a stroke, as in stroke={{ color: theme.text }}.",
     );
   const geometry = geometryOf(props.geometry, timing, where);
+
+  // An anchor names a point of the box at rest. When the geometry animates and that point moves with it, as a rect
+  // growing from its corner does, it drifts away from at as it plays, which reads as the anchor being ignored.
+  if (props.anchor !== undefined && isLane(geometry)) {
+    const points = geometry.keys.map((key) => pinned(props.anchor, outlineBoxOf(key.value), where));
+
+    if (points.some(([x, y]) => Math.hypot(x - points[0]![0], y - points[0]![1]) > DRIFT))
+      throw new SceneError(
+        `${where} has anchor=${JSON.stringify(props.anchor)} and a geometry whose box moves that point as it animates, but the anchor is read from the box at rest, so it stops holding once the geometry changes.`,
+        "Drop at and anchor and wrap it in <Group offset={…}>, which puts the geometry's own [0, 0] there; or keep the geometry and animate scale.",
+      );
+  }
+
   const rest = atRest(geometry);
   const outline = outlineBoxOf(rest);
   const paint = (value: Paint) => colorOf(ctx, value, where, timing, outline);
