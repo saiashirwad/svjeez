@@ -62,12 +62,12 @@ export const SHOTS = {
   basics: span(14, 10),
   chart: span(24, 8),
   diagram: span(32, 8),
-  card: span(40, 3.5),
-  filming: span(43.5, 8),
-  montage: span(51.5, 5.5),
-  anything: span(57, 3.5),
-  facts: span(60.5, 4),
-  close: span(64.5, 5.5),
+  card: span(40, 4),
+  filming: span(44, 8),
+  montage: span(52, 5.5),
+  anything: span(57.5, 3.5),
+  facts: span(61, 4),
+  close: span(65, 5.5),
 } as const;
 
 export const D = SHOTS.close.end;

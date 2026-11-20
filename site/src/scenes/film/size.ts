@@ -3,4 +3,4 @@
  * written down: after changing the film, build it (bun run film:svg) and update this if `gzip -c film.svg | wc -c`
  * rounds to a different number.
  */
-export const FILM_SIZE = "51 KB";
+export const FILM_SIZE = "53 KB";
