@@ -40,7 +40,13 @@ const SPRITE = [
 ];
 
 const PIXEL = 5;
-const INK = { y: BLIP.yellow, s: BLIP.stem, e: BLIP.ink, b: BLIP.belly, f: BLIP.foot } as const;
+const INK: Readonly<Record<string, string>> = {
+  y: BLIP.yellow,
+  s: BLIP.stem,
+  e: BLIP.ink,
+  b: BLIP.belly,
+  f: BLIP.foot,
+};
 
 const Sprite = (): SceneElement => (
   <Group>
@@ -52,7 +58,7 @@ const Sprite = (): SceneElement => (
               <Shape
                 geometry={rect(PIXEL, PIXEL)}
                 at={[x * PIXEL, y * PIXEL]}
-                fill={INK[pixel as keyof typeof INK]}
+                fill={INK[pixel] ?? BLIP.yellow}
               />,
             ],
       ),

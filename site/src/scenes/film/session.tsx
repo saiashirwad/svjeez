@@ -180,7 +180,10 @@ export const Session = ({
         {`Try "${placeholder}"`}
       </Text>
       <Text font={mono} size={SIZE} at={[38, input + 26]} anchor="baseline-left" fill={theme.text}>
-        {typed(track("").to(prompt, typing).to("", span(sent, 0.05)), { by: words, caret: true })}
+        {typed(track("").to(prompt, typing).to("", span(sent, 0.05)), {
+          by: words,
+          caret: { opacity: track(0).to(1, span(typing.start, 0.01)) },
+        })}
       </Text>
       <Text
         font={mono}
