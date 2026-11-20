@@ -33,4 +33,4 @@ A `?svjeez` import is compiled by `@svjeez/vite` in its own JSX environment, so 
 
 ## Link previews
 
-Put a card beside its page, as `_about.og.tsx` for `about.astro`: its default export is a scene (or, for a dynamic page, a function from `{ params, props, url }` to one), written with `ogScene` from [`@svjeez/og`](../og/README.md). The integration adds `og:image` and `twitter:image` to that page, rendered as a JPEG at build time. In `astro dev`, `/_og` shows every page with its card.
+Put a card beside its page, as `_about.og.tsx` for `about.astro` (or `_default.og.tsx` in a folder as a fallback for pages beneath it): its default export is a scene (or, for a dynamic page, a function from `{ params, props, url }` to one), written with `ogScene` from [`@svjeez/og`](../og/README.md). The integration adds `og:image` and `twitter:image` tags to that page, rendered at build time. In `astro dev`, `/_og` shows every page with its card, file size and safe-zone overlays.

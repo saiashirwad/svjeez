@@ -7,22 +7,49 @@ import type { AstroIntegration } from "astro";
 // The pages with a fixed address, for the dev gallery at /_og to start from: it finds the rest by following links.
 const ROUTES = "virtual:svjeez/routes";
 
-// The route-to-card map the middleware reads: each page's card is a file beside it, `_<page>.og.tsx`.
+// The route-to-card map the middleware reads: each page's card is a file beside it (`_<page>.og.tsx`), or a
+// directory-level fallback (`_default.og.tsx`) in the page's folder or an ancestor inside `src/pages`.
 const CARDS = "virtual:svjeez/og";
 const EXTENSIONS = ["tsx", "ts", "jsx", "js"];
 
-const cardBeside = (file: string): string | undefined => {
+export const cardBeside = (file: string, pagesDir?: string): string | undefined => {
+  const dir = dirname(file);
   const name = basename(file, extname(file));
 
-  return EXTENSIONS.flatMap((extension) => [`_${name}.og.${extension}`, `${name}.og.${extension}`])
-    .map((candidate) => join(dirname(file), candidate))
+  const direct = EXTENSIONS.flatMap((extension) => [
+    `_${name}.og.${extension}`,
+    `${name}.og.${extension}`,
+  ])
+    .map((candidate) => join(dir, candidate))
     .find((candidate) => existsSync(candidate));
+
+  if (direct || !pagesDir) return direct;
+
+  const stop = resolve(pagesDir);
+  let current = resolve(dir);
+
+  while (current === stop || current.startsWith(`${stop}/`) || current.startsWith(`${stop}\\`)) {
+    const fallback = EXTENSIONS.map((extension) => join(current, `_default.og.${extension}`)).find(
+      (candidate) => existsSync(candidate),
+    );
+
+    if (fallback) return fallback;
+
+    if (current === stop) break;
+    const parent = dirname(current);
+
+    if (parent === current) break;
+    current = parent;
+  }
+
+  return undefined;
 };
 
 export default function integration(): AstroIntegration {
   let pages: string[] = [];
   let cards: Record<string, string> = {};
   let root = process.cwd();
+  let pagesDir = resolve(root, "src/pages");
   let invalidate = () => {};
 
   return {
@@ -30,6 +57,7 @@ export default function integration(): AstroIntegration {
     hooks: {
       "astro:config:setup": ({ addMiddleware, command, config, injectRoute, updateConfig }) => {
         root = fileURLToPath(config.root);
+        pagesDir = fileURLToPath(new URL("pages", config.srcDir));
 
         addMiddleware({
           order: "post",
@@ -106,7 +134,9 @@ export default function integration(): AstroIntegration {
         cards = Object.fromEntries(
           routes.flatMap((route) => {
             const file =
-              route.type === "page" ? cardBeside(resolve(root, route.entrypoint)) : undefined;
+              route.type === "page"
+                ? cardBeside(resolve(root, route.entrypoint), pagesDir)
+                : undefined;
 
             return file ? [[route.pattern, file]] : [];
           }),

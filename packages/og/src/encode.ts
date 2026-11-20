@@ -1,6 +1,8 @@
 import type { Browser, Page } from "playwright-core";
 
-export type Format = "webp" | "jpeg";
+export type Format = "png" | "webp" | "jpeg";
+
+type Evaluate = <A, R>(fn: (arg: A) => R | Promise<R>, arg: A) => Promise<R>;
 
 let browser: Promise<Browser> | undefined;
 let page: Promise<Page> | undefined;
@@ -27,25 +29,15 @@ const IDLE = 2000;
 let busy = 0;
 let idle: ReturnType<typeof setTimeout> | undefined;
 
-export const encode = async (
+export const encodeWith = async (
+  evaluate: Evaluate,
   png: Uint8Array,
   format: Format,
   quality = 0.8,
 ): Promise<Uint8Array> => {
-  clearTimeout(idle);
-  busy++;
+  if (format === "png") return png;
 
-  try {
-    return await draw(png, format, quality);
-  } finally {
-    if (--busy === 0) idle = setTimeout(closeBrowser, IDLE);
-  }
-};
-
-const draw = async (png: Uint8Array, format: Format, quality: number): Promise<Uint8Array> => {
-  const p = await open();
-
-  const base64 = await p.evaluate(
+  const base64 = await evaluate(
     async ({ data, format, quality }) => {
       const image = new Image();
       image.src = `data:image/png;base64,${data}`;
@@ -68,6 +60,31 @@ const draw = async (png: Uint8Array, format: Format, quality: number): Promise<U
   );
 
   return Buffer.from(base64, "base64");
+};
+
+export const encode = async (
+  png: Uint8Array,
+  format: Format,
+  quality = 0.8,
+): Promise<Uint8Array> => {
+  if (format === "png") return png;
+  clearTimeout(idle);
+  busy++;
+
+  try {
+    const p = await open();
+
+    return await encodeWith(
+      // SAFETY: Playwright types the argument as Unboxed<A>, which is A itself for the plain data encodeWith passes.
+      <A, R>(fn: (arg: A) => R | Promise<R>, arg: A) =>
+        p.evaluate<R, A>(fn as Parameters<typeof p.evaluate<R, A>>[0], arg),
+      png,
+      format,
+      quality,
+    );
+  } finally {
+    if (--busy === 0) idle = setTimeout(closeBrowser, IDLE);
+  }
 };
 
 export const closeBrowser = async (): Promise<void> => {

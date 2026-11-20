@@ -9,8 +9,9 @@ const card = (options: Partial<Parameters<typeof ogScene>[0]> = {}) =>
     <Shape geometry={rect(...OG_SIZE)} fill="#000000" />
   ));
 
-test("an og scene is a link preview's size", () => {
+test("an og scene is a link preview's size, unless overridden", () => {
   expect(svg.emit(card())).toContain('viewBox="0 0 1200 630"');
+  expect(svg.emit(card({ size: [1200, 1200] }))).toContain('viewBox="0 0 1200 1200"');
 });
 
 test("an og scene holds frame 0 and runs 4 seconds unless told otherwise", () => {
@@ -20,7 +21,7 @@ test("an og scene holds frame 0 and runs 4 seconds unless told otherwise", () =>
   );
 });
 
-test("renderOg draws a card as a JPEG, and ogResponse serves it", async () => {
+test("renderOg draws a card as a JPEG, and ogResponse serves it with cache headers", async () => {
   const { renderOg, ogResponse } = await import("../src/render.ts");
   const { bytes, type, width, height } = await renderOg(card());
 
@@ -30,7 +31,54 @@ test("renderOg draws a card as a JPEG, and ogResponse serves it", async () => {
   const response = await ogResponse(card());
 
   expect(response.headers.get("Content-Type")).toBe("image/jpeg");
+  expect(response.headers.get("ETag")).toMatch(/^"[A-Za-z0-9_-]{12}\.jpg"$/);
+  expect(response.headers.get("Cache-Control")).toContain("public");
   expect((await response.arrayBuffer()).byteLength).toBe(bytes.length);
+
+  const custom = await ogResponse(card(), {
+    headers: { "Cache-Control": "public, max-age=60" },
+  });
+
+  expect(custom.headers.get("Cache-Control")).toBe("public, max-age=60");
+});
+
+test("renderOg draws a card as a PNG and reports scaled dimensions", async () => {
+  const { renderOg } = await import("../src/render.ts");
+  const { bytes, type, width, height } = await renderOg(card(), { format: "png", scale: 2 });
+
+  expect([type, width, height]).toEqual(["image/png", 2400, 1260]);
+  expect(Array.from(bytes.subarray(1, 4))).toEqual([0x50, 0x4e, 0x47]);
+});
+
+test("renderOg accepts a custom rasterizer via option or settings.render", async () => {
+  const { renderOg, settings } = await import("../src/render.ts");
+  const fake = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
+  let received: { format: string; scale: number } | undefined;
+
+  const one = await renderOg(card({ title: "Custom option" }), {
+    format: "png",
+    scale: 1.5,
+    render: async (_svg, opts) => {
+      received = { format: opts.format, scale: opts.scale };
+
+      return fake;
+    },
+  });
+
+  expect(one.bytes).toEqual(fake);
+  expect([one.type, one.width, one.height]).toEqual(["image/png", 1800, 945]);
+  expect(received).toEqual({ format: "png", scale: 1.5 });
+
+  const previous = settings.render;
+  settings.render = async () => fake;
+
+  try {
+    const two = await renderOg(card({ title: "Custom settings" }), { format: "webp" });
+    expect(two.bytes).toEqual(fake);
+    expect(two.type).toBe("image/webp");
+  } finally {
+    settings.render = previous;
+  }
 });
 
 test("renderStill takes a scene's held moment as a transparent PNG at 2x", async () => {

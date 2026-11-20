@@ -1,13 +1,13 @@
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { renderFrames } from "svjeez/frames";
+import { openScene } from "svjeez/frames";
 import { isScene, svg as backend, type Scene } from "svjeez/tools";
-import { closeBrowser, encode, type Format } from "./encode.ts";
-import { settings } from "./settings.ts";
+import { closeBrowser, encode, encodeWith, type Format } from "./encode.ts";
+import { settings, type Rasterizer } from "./settings.ts";
 
-export { closeBrowser, encode, settings, type Format };
+export { closeBrowser, encode, encodeWith, settings, type Format };
 
-export type { RenderSettings } from "./settings.ts";
+export type { Rasterizer, RenderSettings } from "./settings.ts";
 
 const LANES = 4;
 let running = 0;
@@ -66,6 +66,8 @@ export interface RenderOptions {
   readonly format?: Format;
   readonly quality?: number;
   readonly scale?: number;
+  /** Custom rasterizer to use instead of headless Chromium (e.g. `resvg` or `sharp`). */
+  readonly render?: Rasterizer;
 }
 
 export interface Rendered {
@@ -76,17 +78,25 @@ export interface Rendered {
   readonly height: number;
 }
 
-const MIME = { jpeg: "image/jpeg", webp: "image/webp" } as const satisfies Record<Format, string>;
+const MIME = {
+  png: "image/png",
+  jpeg: "image/jpeg",
+  webp: "image/webp",
+} as const satisfies Record<Format, string>;
 
-const EXTENSION = { jpeg: "jpg", webp: "webp" } as const satisfies Record<Format, string>;
+const EXTENSION = {
+  png: "png",
+  jpeg: "jpg",
+  webp: "webp",
+} as const satisfies Record<Format, string>;
 
 /** What a file for these options is called: the same scene and options always give the same name. */
 export const imageName = (
   svg: string,
-  { format = "jpeg", ...options }: RenderOptions = {},
+  { time, scheme, format = "jpeg", quality, scale }: RenderOptions = {},
 ): string =>
   `${createHash("sha256")
-    .update(svg + JSON.stringify(options))
+    .update(svg + JSON.stringify({ time, scheme, quality, scale }))
     .digest("base64url")
     .slice(0, 12)}.${EXTENSION[format]}`;
 
@@ -98,21 +108,39 @@ const sizeOf = (svg: string) => {
   return { width: Number(box[1]), height: Number(box[2]) };
 };
 
+const renderWithChromium: Rasterizer = async (svg, { time, scheme, scale, format, quality }) => {
+  const scene = await openScene(svg, { colorScheme: scheme, scale });
+
+  try {
+    const png = await scene.capture(time);
+
+    return await encodeWith(scene.evaluate, png, format, quality);
+  } finally {
+    await scene.close();
+  }
+};
+
 /** A scene, or SVG markup, as an image: its first frame unless `time` says otherwise. Needs `playwright-core`. */
 export const renderOg = async (
   source: Scene | string,
   options: RenderOptions = {},
 ): Promise<Rendered> => {
-  const { time = 0, scheme = "light", format = "jpeg", quality = 0.9, scale = 1 } = options;
+  const { time = 0, scheme = "light", format = "jpeg", quality = 0.9, scale = 1, render } = options;
   const svg = isScene(source) ? backend.emit(source) : source;
+  const rasterize = render ?? settings.render ?? renderWithChromium;
 
-  const bytes = await cached(imageName(svg, options), async () => {
-    const { frames } = await renderFrames(svg, { times: [time], colorScheme: scheme, scale });
+  const bytes = await cached(imageName(svg, options), () =>
+    rasterize(svg, { time, scheme, scale, format, quality }),
+  );
 
-    return encode(frames[0]!.png, format, quality);
-  });
+  const { width, height } = sizeOf(svg);
 
-  return { bytes, type: MIME[format], ...sizeOf(svg) };
+  return {
+    bytes,
+    type: MIME[format],
+    width: Math.round(width * scale),
+    height: Math.round(height * scale),
+  };
 };
 
 /** When a scene is still: the moment it holds, else 72% in. Posters and `renderStill` take their picture here. */
@@ -148,25 +176,39 @@ export const renderStill = (
     .slice(0, 12)}.png`;
 
   return cached(name, async () => {
-    const { duration } = await renderFrames(svg, { times: [0], colorScheme: scheme });
+    const scene = await openScene(svg, { colorScheme: scheme, scale, background });
 
-    const { frames } = await renderFrames(svg, {
-      times: [time ?? stillTime(svg, duration)],
-      colorScheme: scheme,
-      scale,
-      background,
-    });
-
-    return frames[0]!.png;
+    try {
+      return await scene.capture(time ?? stillTime(svg, scene.duration));
+    } finally {
+      await scene.close();
+    }
   });
 };
+
+export interface OgResponseOptions extends RenderOptions {
+  /** Extra or overriding response headers (e.g. a custom `Cache-Control`). */
+  readonly headers?: HeadersInit;
+}
+
+const DEFAULT_CACHE_CONTROL = "public, max-age=3600, stale-while-revalidate=86400";
 
 /** `renderOg` as a web-standard `Response`, for an Astro endpoint, a Next route handler or any fetch-style server. */
 export const ogResponse = async (
   source: Scene | string,
-  options: RenderOptions = {},
+  options: OgResponseOptions = {},
 ): Promise<Response> => {
-  const { bytes, type } = await renderOg(source, options);
+  const svg = isScene(source) ? backend.emit(source) : source;
+  const { bytes, type } = await renderOg(svg, options);
 
-  return new Response(new Uint8Array(bytes), { headers: { "Content-Type": type } });
+  const headers = new Headers({
+    "Content-Type": type,
+    ETag: `"${imageName(svg, options)}"`,
+    "Cache-Control": DEFAULT_CACHE_CONTROL,
+  });
+
+  if (options.headers)
+    new Headers(options.headers).forEach((value, key) => headers.set(key, value));
+
+  return new Response(new Uint8Array(bytes), { headers });
 };
