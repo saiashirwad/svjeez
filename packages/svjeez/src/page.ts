@@ -3,6 +3,17 @@ import type { Seconds } from "./model/time";
 
 export { restyle, type RestyleOptions } from "./restyle";
 
+export {
+  hovered,
+  player,
+  seen,
+  type Look,
+  type Player,
+  type PlayerOptions,
+  type Scheme,
+  type Trigger,
+} from "./player";
+
 export const seek: (time: Seconds, root?: Document | Element) => void = seekBrowser;
 
 export const loopLength = (root: Document | Element = document): Seconds => {

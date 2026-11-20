@@ -8,6 +8,8 @@ export interface RestyleOptions {
   readonly css?: string;
   /** New light and dark values for the scene's tokens, by name, as tokens() makes them. Mixes of them follow. */
   readonly theme?: Theme;
+  /** Answers the SVG's prefers-color-scheme queries for this scheme, so it shows it in any browser whatever the viewer's. */
+  readonly scheme?: "light" | "dark";
   readonly at?: Seconds;
   readonly paused?: boolean;
   readonly still?: boolean;
@@ -121,9 +123,14 @@ const themeCss = (svg: string, theme: Theme): string => {
   return `${scope}{${declared("dark")}}@media (prefers-color-scheme:light){${scope}{${declared("light")}}}`;
 };
 
+const pinned = (svg: string, scheme: "light" | "dark"): string =>
+  svg.replace(/\(\s*prefers-color-scheme\s*:\s*(light|dark)\s*\)/g, (_, query: string) =>
+    query === scheme ? "(min-width: 0)" : "(max-width: -1px)",
+  );
+
 export const restyle = (
   svg: string,
-  { css, theme, at, paused, still, timeline, range }: RestyleOptions,
+  { css, theme, scheme, at, paused, still, timeline, range }: RestyleOptions,
 ): string => {
   if (at !== undefined && !(Number.isFinite(at) && at >= 0))
     throw new Error(`restyle() needs at of 0 or more, got ${at}.`);
@@ -174,5 +181,5 @@ export const restyle = (
     out = `${out.slice(0, close)}<style>${extra}</style>${out.slice(close)}`;
   }
 
-  return out;
+  return scheme === undefined ? out : pinned(out, scheme);
 };
