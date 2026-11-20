@@ -102,7 +102,7 @@ const Result = (): SceneElement => (
   <Group>
     <Shape
       geometry={line([NODES.client, LANE], [NODES.origin, LANE])}
-      stroke={{ color: theme.line, width: 1.5, dash: [4, 5] }}
+      stroke={{ color: theme.faint, width: 1, dash: [3, 5] }}
     />
     {packets.map((packet) => {
       const { path, end } = routeOf(packet);
