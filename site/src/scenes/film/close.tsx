@@ -18,7 +18,7 @@ const Chip = ({
   <Stack
     gap={12}
     padding={[24, 18]}
-    radius={10}
+    radius={6}
     fill={theme.background}
     stroke={{ color: theme.line, width: 1 }}
   >

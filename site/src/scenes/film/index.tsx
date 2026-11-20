@@ -20,9 +20,12 @@ const TAG = { w: 440, h: 72 } as const;
 const opened = span(1.45, 0.75);
 const folded = span(SHOTS.close.start, 0.75);
 
-const stageSize = track(rect(TAG.w, TAG.h, { radius: TAG.h / 2 }))
-  .to(rect(STAGE.w, STAGE.h, { radius: STAGE.radius }), opened, ease.pop)
-  .to(rect(PILL.w, PILL.h, { radius: PILL.h / 2 }), folded, ease.pop);
+/** A tight corner, the same on the tag and the stage, rather than a pill. */
+const CORNER = 6;
+
+const stageSize = track(rect(TAG.w, TAG.h, { radius: CORNER }))
+  .to(rect(STAGE.w, STAGE.h, { radius: CORNER }), opened, ease.pop)
+  .to(rect(PILL.w, PILL.h, { radius: CORNER }), folded, ease.pop);
 
 const stageAt = track<Vec>(corner(TAG.w, TAG.h, [W / 2, H / 2]))
   .to([STAGE.x, STAGE.y], opened, ease.pop)
