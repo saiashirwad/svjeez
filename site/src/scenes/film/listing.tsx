@@ -102,11 +102,14 @@ export const Listing = ({
   const row = size * LEADING;
   const boxed = full.box && Math.min(full.box[2] / w, full.box[3] / h);
   const scale = boxed ?? full.scale ?? 1;
+
   const at: Vec =
     full.box && boxed !== undefined
       ? [full.box[0] + (full.box[2] - w * boxed) / 2, full.box[1] + (full.box[3] - h * boxed) / 2]
       : (full.at ?? [STAGE.x + (STAGE.w - w) / 2, STAGE.y + (STAGE.h - h) / 2]);
+
   const fit = aside && Math.min(aside.box[2] / w, aside.box[3] / h);
+
   const tucked: Vec | undefined =
     aside && fit !== undefined
       ? [aside.box[0] + (aside.box[2] - w * fit) / 2, aside.box[1] + (aside.box[3] - h * fit) / 2]
