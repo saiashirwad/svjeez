@@ -24,7 +24,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @keyframes k8{0%,25.319%{scale:0 1}26.8%,100%{scale:1 1}}
 .m8{animation-name:k8;animation-timing-function:steps(12)}
 @keyframes k9{0%,42.308%,84.615%,100%{scale:1 1}48.718%,60.256%{scale:1 5}66.667%,78.205%{scale:1 2}}
-@keyframes k10{0%,25.641%{opacity:0}30.769%,100%{opacity:0.3}}
+@keyframes k10{0%,25.641%{opacity:0}30.769%,100%{opacity:0.2}}
 @keyframes k11{0%,42.308%{translate:0 46.2px}48.718%,60.256%{translate:0 71.4px}66.667%,78.205%{translate:0 121.8px}84.615%,100%{translate:0 197.4px}}
 .m9{animation-name:k9,k10,k11;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1),cubic-bezier(.77,0,.175,1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-6.63s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}

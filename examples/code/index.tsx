@@ -55,7 +55,7 @@ export default scene(
           to: [canvas.width * 2, 0],
           stops: [theme.blue, theme.background],
         })}
-        opacity={track(0).to(0.3, span(START - 0.4, 0.4))}
+        opacity={track(0).to(0.2, span(START - 0.4, 0.4))}
       />
       <Code
         lang="ts"
