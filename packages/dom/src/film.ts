@@ -1,18 +1,20 @@
 import { readFileSync } from "node:fs";
 import { basename, dirname } from "node:path";
-import { scene } from "svjeez";
+import { scene, type Curve } from "svjeez";
 import type { Scene, Theme } from "svjeez/tools";
 import type { Page } from "playwright-core";
 import { inlineAssets } from "./assets.ts";
 import { cached, cachePath } from "./cache.ts";
 import { callerFile } from "./component.ts";
-import { reactIdentifyScript } from "./frameworks/react.identify.ts";
+import { reactIdentify } from "./frameworks/react.identify.ts";
 import { compile, type Diagnostic, type TextPolicy } from "./compile/index.ts";
 import { themeCss } from "./compile/theme.ts";
 import { fromPortable, toPortable } from "./portable.ts";
 import { openPage, record, type OpenPageOptions, type Snap, type State } from "./record.ts";
 import { serializeProps, type Bag } from "./props.ts";
 import type { Target } from "./target.ts";
+// For `window.__svjeez`, which boot.ts declares.
+import type {} from "./boot.ts";
 
 export interface FilmOptions {
   /** Which `prefers-color-scheme` to capture under; `"both"` makes a scene that follows the viewer's. Default: the page as it is, or `"both"` with a `theme`. */
@@ -46,6 +48,11 @@ export interface FilmOptions {
    * `change.state` here.
    */
   readonly text?: TextPolicy;
+  /**
+   * The easing of every move unless a snap gives its own (`snap(name, { ease })`): any `Curve` (`ease.out`, `ease.spring()`).
+   * Default `ease.inOut`. A curve is not JSON, so a cached film can't keep a per-snap one (`snap` throws): give it here.
+   */
+  readonly ease?: Curve;
   /** Called with what the compile could not draw faithfully. Default: one `console.warn` listing them. */
   readonly onDiagnostics?: (diagnostics: readonly Diagnostic[]) => void;
   /**
@@ -86,11 +93,8 @@ export const settleScript = (selector: string) => `(async () => {
   }
 })()`;
 
-/**
- * Where capture gets framework identities: the mounted adapter's `identify` (component targets), else React's, which finds
- * its fibers on any page (app targets) and says nothing on a page without React.
- */
-const IDENTIFY = `(window.__svjeez?.identify ?? ${reactIdentifyScript})`;
+/** A component target's identities, from its mounted adapter. Self-contained, so `record` can ship it as source. */
+const mountedIdentify = (el: Element): string | undefined => window.__svjeez?.identify?.(el);
 
 /** A title from the film file's path: `board.film.tsx` is "board", `index.tsx` is the folder it is in. */
 export const titleFromFile = (file: string | undefined): string => {
@@ -138,7 +142,16 @@ export const film = async <Props = never>(
   run: (context: FilmContext<Props>) => Promise<void>,
   options: FilmOptions = {},
 ): Promise<Scene> => {
-  const { theme, cursor, viewport, cache, text, onDiagnostics = warn, executablePath } = options;
+  const {
+    theme,
+    cursor,
+    viewport,
+    cache,
+    text,
+    ease,
+    onDiagnostics = warn,
+    executablePath,
+  } = options;
 
   const scheme = theme ? "both" : options.scheme;
   // Before the first await, while the film file is still on the stack.
@@ -188,6 +201,12 @@ export const film = async <Props = never>(
         await settle(page, selector);
         check();
 
+        // A mounted adapter's `identify` (component targets) when it has one, else React's, which finds its fibers on any page
+        // (app targets) and says nothing on a page without React.
+        const identify = (await page.evaluate("Boolean(window.__svjeez?.identify)"))
+          ? mountedIdentify
+          : reactIdentify;
+
         const recorded = await record(
           page,
           selector,
@@ -198,6 +217,11 @@ export const film = async <Props = never>(
                 if (file && timing?.text)
                   throw new Error(
                     `film: snap("${name}") has a text policy, which a cached film can't keep. Give it to film's text option instead, and decide by change.state.`,
+                  );
+
+                if (file && timing?.ease)
+                  throw new Error(
+                    `film: snap("${name}") has its own ease, which a cached film can't keep (a spring is not JSON). Give it to film's ease option instead.`,
                   );
 
                 await settle(page, selector);
@@ -218,7 +242,7 @@ export const film = async <Props = never>(
                 check();
               },
             }),
-          { ...(scheme && { scheme }), ...(cursor && { cursor }), identify: IDENTIFY },
+          { ...(scheme && { scheme }), ...(cursor && { cursor }), identify },
         );
 
         check();
@@ -259,6 +283,7 @@ export const film = async <Props = never>(
     const { element, size, duration, diagnostics } = compile(await inlineAssets(states), {
       ...(theme && { theme }),
       ...(text && { text }),
+      ...(ease && { ease }),
     });
 
     onDiagnostics(diagnostics);

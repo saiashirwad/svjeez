@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { scene } from "svjeez";
+import { ease, scene } from "svjeez";
 import { boxesOf, svg } from "svjeez/tools";
 import { compile, type ElementNode, type State } from "../src/index.ts";
 import { box, snapshot, words } from "./fixtures.ts";
@@ -66,7 +66,7 @@ describe("compileStates", () => {
 
   test("a move into a state takes that state's ease", () => {
     const a = state("a", page(at("box", 0, 0)));
-    const b = state("b", page(at("box", 100, 0)), { ease: "linear" });
+    const b = state("b", page(at("box", 100, 0)), { ease: ease.linear });
 
     const mid = drawn([a, b]).boxes(1.5)["app/@track/box"]!;
 

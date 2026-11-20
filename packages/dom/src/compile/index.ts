@@ -1,7 +1,7 @@
 import { ease, morph, span, type Curve, type SceneElement, type Span, type Vec } from "svjeez";
 import type { Theme } from "svjeez/tools";
 import type { Run, Snapshot } from "../schema.ts";
-import type { EaseName, State } from "../record.ts";
+import type { State } from "../record.ts";
 import { element } from "./box.tsx";
 import { context, withTheme, type Diagnostic } from "./context.ts";
 import { withCursor, type Beat } from "./cursor.tsx";
@@ -35,8 +35,8 @@ export interface CompileOptions {
    * as long as they need to be seen: the longest one still to run, or a cycle of an endless one.
    */
   readonly hold?: number;
-  /** The easing of a move unless the state says. Default `"inOut"`. */
-  readonly ease?: EaseName;
+  /** The easing of a move unless the state says: any `Curve` (`ease.out`, `ease.spring()`, ...). Default `ease.inOut`. */
+  readonly ease?: Curve;
   /**
    * Names an element so it is the same thing in every state: it keeps its identity and moves, where an unnamed one is matched by place and wording.
    * Return undefined to leave it to `data-key`, the framework identity, `data-part`, `id`, then matching.
@@ -86,7 +86,13 @@ export const compile = (
 
 const compileStates = (
   input: Snapshot | readonly State[],
-  { over = 0.6, hold, ease: easing = "inOut", pairBy, text: policy = typeInFields }: CompileOptions,
+  {
+    over = 0.6,
+    hold,
+    ease: easing = ease.inOut,
+    pairBy,
+    text: policy = typeInFields,
+  }: CompileOptions,
 ): Compiled => {
   const states: readonly State[] = "root" in input ? [{ name: "", snapshot: input }] : input;
 
@@ -126,7 +132,7 @@ const compileStates = (
 
     if (i > 0) {
       spans.push(span(duration, length));
-      curves.push(ease[state.ease ?? easing]);
+      curves.push(state.ease ?? easing);
       duration += length;
     }
 

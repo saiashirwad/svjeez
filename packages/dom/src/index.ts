@@ -20,7 +20,6 @@ export {
 export {
   openPage,
   record,
-  type EaseName,
   type OpenPageOptions,
   type Point,
   type Pointer,

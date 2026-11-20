@@ -1,11 +1,9 @@
 import type { Page } from "playwright-core";
+import type { Curve } from "svjeez";
 import { captureScript } from "./capture.ts";
 import { mergeSchemes } from "./scheme.ts";
 import { checkVersion, type Snapshot } from "./schema.ts";
 import type { TextPolicy } from "./compile/typing.ts";
-
-/** The core easings, by name. */
-export type EaseName = "linear" | "in" | "out" | "inOut" | "pop" | "hold";
 
 /**
  * How the scene gets from the previous state to this one. States play in the order they were snapped, one after another.
@@ -16,8 +14,11 @@ export interface Timing {
   readonly over?: number;
   /** How long this state rests before the move to the next one. */
   readonly hold?: number;
-  /** The easing of the move into this state. */
-  readonly ease?: EaseName;
+  /**
+   * The easing of the move into this state: any `Curve` (`ease.out`, `ease.spring()`, ...). A curve is not JSON (a spring is
+   * a class), so a cached film can't keep one per snap: it throws. Give a cached film's curve to `film`'s `ease` instead.
+   */
+  readonly ease?: Curve;
   /**
    * How each text that changes in the move gets there: a policy that sees the change and returns `typing()` (erase back
    * to what the two texts share, then type the rest), `fade`, or undefined to fade. Default: compile's `text`, which
@@ -56,11 +57,12 @@ export interface RecordOptions {
    */
   readonly scheme?: "light" | "dark" | "both";
   /**
-   * A page expression that evaluates to `(el: Element) => string | undefined` (or nothing). Before each capture, every element
-   * under the root is stamped `data-svjeez-id` with its result (and unstamped when it is undefined), which capture reads as the
-   * node's `identity`. `film` uses it to hand the framework's identities (React keys) to `pair`.
+   * Names an element for `pair`. Before each capture, every element under the root is stamped `data-svjeez-id` with its
+   * result (and unstamped when it is undefined), which capture reads as the node's `identity`. `film` uses it to hand the
+   * framework's identities (React keys) to `pair`. It runs in the page, serialized with `.toString()`, so it must be
+   * self-contained: no closures, no imports, nothing from outside the function.
    */
-  readonly identify?: string;
+  readonly identify?: (el: Element) => string | undefined;
   /**
    * Record the mouse into each state's `pointer`: whatever moves it (`page.mouse`, `locator.click()`, `hover()`, `dragTo()`),
    * read from the page's own pointer events, across navigations and reloads. Nothing is added to the page's DOM.
@@ -113,13 +115,17 @@ const watchPointer = async (page: Page): Promise<{ take: () => Pointer | undefin
   };
 };
 
-const grab = async (page: Page, selector: string, identify?: string): Promise<Snapshot> =>
+const grab = async (
+  page: Page,
+  selector: string,
+  identify?: RecordOptions["identify"],
+): Promise<Snapshot> =>
   checkVersion(
     await page.evaluate(
       `(() => {
         const root = document.querySelector(${JSON.stringify(selector)});
         if (!root) throw new Error("record: nothing on the page matches " + ${JSON.stringify(JSON.stringify(selector))});
-        const identify = ${identify ?? "undefined"};
+        const identify = ${identify ? `(${identify.toString()})` : "undefined"};
         if (identify)
           for (const el of [root, ...root.querySelectorAll("*")]) {
             const id = identify(el);

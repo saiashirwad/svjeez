@@ -188,7 +188,7 @@ Drawn with core primitives: `filter` (`blur()` as core `blur`, `drop-shadow()` a
 
 ## Animating between states
 
-`compile(states, options?)` takes the `State[]` that `record` returns. The first state shows, moves into the second over `over` seconds, rests for `hold`, and so on. Defaults: `over` 0.6, `hold` 0.8, `ease` `"inOut"`; set them in the options, or per state (`over` and `ease` are for the move into that state, `hold` for resting in it). `duration` is the total: use it as the scene's duration.
+`compile(states, options?)` takes the `State[]` that `record` returns. The first state shows, moves into the second over `over` seconds, rests for `hold`, and so on. Defaults: `over` 0.6, `hold` 0.8, `ease` `ease.inOut`; set them in the options, or per state (`over` and `ease` are for the move into that state, `hold` for resting in it). `ease` is any curve from `svjeez` (`ease.out`, `ease.spring()`); a cached film (`film`'s `cache`) can't keep a per-snap one, so it takes `film`'s `ease` option instead. `duration` is the total: use it as the scene's duration.
 
 The blending is core's `morph.between()`. What a pair of elements shares moves, resizes and recolors; text that changes crossfades, or is typed (see below); an element with no pair in the next state fades out, and one with no pair in the previous fades in.
 

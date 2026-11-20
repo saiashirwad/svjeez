@@ -4,7 +4,7 @@
  * React keys are per list, so `key=1` in two lists is two things: the key is prefixed with its parent element's identity (that
  * parent's own scoped key when it has one, else its tag and position, up to the nearest keyed ancestor). A keyed item that moves
  * to another list is therefore a new one; give it a `data-key` to follow it. Self-contained (no imports, nothing outside the
- * function), so `reactIdentifyScript` can be its own source: it also runs in app pages that are not mounted by `component()`.
+ * function), so `record` can ship it as its own source (`.toString()`): it runs in app pages that are not mounted by `component()` too.
  */
 export const reactIdentify = (el: Element): string | undefined => {
   interface Fiber {
@@ -66,5 +66,3 @@ export const reactIdentify = (el: Element): string | undefined => {
 
   return identify(el);
 };
-
-export const reactIdentifyScript = `(${reactIdentify.toString()})`;

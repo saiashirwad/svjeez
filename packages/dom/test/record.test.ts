@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { scene } from "svjeez";
+import { ease, scene } from "svjeez";
 import { svg } from "svjeez/tools";
 import { compile, inlineAssets, openPage, record } from "../src/index.ts";
 import { PNG } from "./fixtures.ts";
@@ -66,13 +66,13 @@ describe("record", () => {
       async (snap) => {
         await snap("empty");
         await page.click("button");
-        await snap("typed", { over: 0.8, ease: "out" });
+        await snap("typed", { over: 0.8, ease: ease.out });
       },
       { scheme: "both" },
     );
 
     expect(states.map((s) => s.name)).toEqual(["empty", "typed"]);
-    expect(states[1]).toMatchObject({ over: 0.8, ease: "out" });
+    expect(states[1]).toMatchObject({ over: 0.8, ease: ease.out });
     expect(states[0]!.snapshot.fonts?.[0]).toMatchObject({ family: "Space" });
     expect(states[0]!.snapshot.root.background).toEqual({
       light: "rgb(255, 255, 255)",
