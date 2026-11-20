@@ -1,14 +1,22 @@
-# svjeez
+<h1 align="center">svjeez</h1>
 
-**Write motion in TypeScript and JSX. Ship a single, zero-JavaScript `.svg`.**
+<p align="center">
+  <b>Write motion in TypeScript and JSX. Ship one zero-JS <code>.svg</code>.</b>
+</p>
 
-svjeez compiles declarative JSX scenes into self-contained animated SVGs—CSS `@keyframes` by default, SMIL only where geometry, gradients, or filters require it. Every file bundles its own light and dark themes, a `prefers-reduced-motion` still frame, and subsetted fonts, so it works anywhere an `<img>` tag works: GitHub READMEs, docs sites, blog posts, or email.
+<p align="center">
+  <img src="examples/dist/readme/hero.svg" alt="One spring track stretches a coil with a live readout, lifts a card whose tiles morph from a grid into bars while ref-attached arrows follow its edges, and drives a ring gauge with a zero-JS counter" width="720">
+  <br>
+  <sub><b>One spring track drives coil, morph, arrows, and counters</b> · 37 KB · 0 KB JS · <a href="examples/readme/hero.tsx"><code>examples/readme/hero.tsx</code></a></sub>
+</p>
 
-*Every graphic in this README is a live, zero-JS `.svg` built with svjeez, adapting automatically to light and dark mode.*
+svjeez compiles JSX scenes into self-contained animated SVGs: CSS `@keyframes` by default, SMIL only for geometry, gradients, or filters. Each file bundles light and dark themes, a `prefers-reduced-motion` still frame, and subsetted fonts, so it works anywhere `<img>` works: GitHub READMEs, docs, blogs, and email.
 
-![One spring track stretches a coil with a live readout, lifts a card whose tiles morph from a grid into bars while ref-attached arrows follow its edges, and drives a ring gauge with a zero-JS counter](examples/dist/readme/hero.svg)
+Every graphic in this README is a live, zero-JS `.svg` built with svjeez. Toggle your theme to watch them adapt.
 
-Above: **37 KB**, **0 KB JS** ([`examples/readme/hero.tsx`](examples/readme/hero.tsx)). One spring `track` drives the entire composition—stretching the coil, lifting the middle card while its keyed tiles `morph()` from a grid into bars, keeping both `ref()` `<Arrow>` connectors locked to the moving card's edges, and ticking two zero-JS `count()` readouts:
+## How the hero works
+
+One spring `track` drives the scene: stretching the coil, lifting the center card as its keyed tiles `morph()` from a grid into bars, pinning both `ref()` `<Arrow>` connectors to the moving edges, and ticking two zero-JS `count()` readouts.
 
 ```tsx
 const spring = ease.spring({ stiffness: 185, damping: 15 });
@@ -18,7 +26,6 @@ const signal = track(0)
 
 const [driver, stage, output] = [ref(), ref(), ref()];
 
-// One signal feeds layout lift, geometry, stroke draw, and zero-JS counters:
 <Stack ref={stage} motion={{ offset: signal.map((v) => [0, -24 * v]) }}>
   {morph.between([gridState, barsState, gridState], [span(0.4, 0.7), span(3.4, 0.7)], {
     curve: ease.pop,
@@ -29,7 +36,11 @@ const [driver, stage, output] = [ref(), ref(), ref()];
 <Arrow from={driver.right} to={stage.left} inset={8} stroke={{ color: theme.blue, width: 2 }} />
 <Arrow from={stage.right} to={output.left} inset={8} stroke={{ color: theme.magenta, width: 2 }} />
 
-<Shape geometry={circle(28)} draw={signal.map((v) => clamp(v, 0.02, 1))} ... />
+<Shape
+  geometry={circle(28)}
+  draw={signal.map((v) => clamp(v, 0.02, 1))}
+  stroke={{ color: theme.green, width: 5.5, cap: "round" }}
+/>
 <Text font={mono} size={14}>{count(signal.map((v) => clamp(v) * 100))}%</Text>
 ```
 
@@ -42,7 +53,7 @@ npm install svjeez
 npx svjeez svg scene.tsx --out scene.svg
 ```
 
-Scenes are JSX, so point TypeScript at svjeez's JSX runtime in `tsconfig.json`:
+Point TypeScript at svjeez's JSX runtime in `tsconfig.json`:
 
 ```json
 {
@@ -56,7 +67,7 @@ Scenes are JSX, so point TypeScript at svjeez's JSX runtime in `tsconfig.json`:
 }
 ```
 
-During authoring, `npx svjeez dev scene.tsx` opens a local preview with a timeline scrubber and live reload on save.
+Run `npx svjeez dev scene.tsx` for a local preview with a timeline scrubber and live reload.
 
 A minimal scene default-exports `scene(options, (canvas) => ...)`:
 
@@ -92,30 +103,37 @@ export default scene(
 );
 ```
 
-Compiled, that scene is **1.5 KB**:
+<p align="center">
+  <img src="examples/dist/readme/basic.svg" alt="A curve draws itself, then a dot pops in above it">
+  <br>
+  <sub><b>A curve draws, a dot pops in</b> · 1.5 KB</sub>
+</p>
 
-![A curve draws itself, then a dot pops in above it](examples/dist/readme/basic.svg)
+## Morph shapes, code, and math
 
-## What you can compose
+Add a `key` across two or more JSX states and `morph()` diffs the tree at compile time—reordering, resizing, recoloring, entering, and exiting without manual keyframes. The same primitive works on plain geometry, Shiki-highlighted code (`@svjeez/code`), and MathJax TeX equations (`@svjeez/math`).
 
-### One `morph()` across shapes, code, and math
+<p align="center">
+  <img src="examples/dist/morph.svg" alt="A bar chart morphing across three quarters as bars reorder, resize, enter, and exit" width="640">
+  <br>
+  <sub><b>Keyed geometry morph</b> · 11 KB · <a href="examples/morph/index.tsx"><code>examples/morph/index.tsx</code></a></sub>
+</p>
 
-Give elements a `key` across two or more JSX states and `morph()` reconciles the tree at compile time—reordering, resizing, recoloring, and entering or exiting elements without hand-tweened coordinates.
+<p align="center">
+  <img src="examples/dist/code.svg" alt="A TypeScript function typing itself, with a highlight walking through its blocks" width="480">
+  <br>
+  <sub><b>Shiki code that types itself</b> · 13 KB · <a href="examples/code/index.tsx"><code>examples/code/index.tsx</code></a></sub>
+</p>
 
-The same `morph()` works on plain geometry, syntax-highlighted code (`@svjeez/code` with Shiki), and build-time TeX equations (`@svjeez/math` with MathJax):
+<p align="center">
+  <img src="examples/dist/math.svg" alt="Quadratic equation rearranging step by step into the quadratic formula" width="640">
+  <br>
+  <sub><b>Build-time TeX derivation</b> · 25 KB · <a href="examples/math/index.tsx"><code>examples/math/index.tsx</code></a></sub>
+</p>
 
-![A bar chart morphing across three quarters as bars reorder, resize, enter, and exit](examples/dist/morph.svg)
-*Keyed geometry morph — **11 KB** ([`examples/morph/index.tsx`](examples/morph/index.tsx))*
+## Film a real web app
 
-![A TypeScript function typing itself, with a highlight walking through its blocks](examples/dist/code.svg)
-*Shiki-colored code that types itself — **13 KB** ([`examples/code/index.tsx`](examples/code/index.tsx))*
-
-![Quadratic equation rearranging step by step into the quadratic formula](examples/dist/math.svg)
-*Build-time TeX algebra derivation — **25 KB** ([`examples/math/index.tsx`](examples/math/index.tsx))*
-
-### Film a real web app into a plain `.svg`
-
-You don't have to redraw your UI by hand. `@svjeez/dom` drives a real React, Svelte, or HTML app in Playwright, snapshots DOM states in light and dark mode, and compiles the transitions between them into a lightweight zero-JS SVG:
+Skip redrawing UI by hand. `@svjeez/dom` drives a React, Svelte, or HTML app in Playwright, snapshots DOM states in light and dark mode, and compiles the transitions into one zero-JS `.svg`:
 
 ```tsx
 import { film } from "@svjeez/dom";
@@ -138,19 +156,25 @@ export default await film(
 );
 ```
 
-![A live React sprint board filmed into an animated light/dark SVG](examples/dist/dom-react.svg)
-*Real React app compiled to a dual-theme `.svg` — **33 KB** ([`examples/dom-react/index.tsx`](examples/dom-react/index.tsx))*
+<p align="center">
+  <img src="examples/dist/dom-react.svg" alt="A live React sprint board filmed into an animated light/dark SVG" width="680">
+  <br>
+  <sub><b>A real React app, filmed to a dual-theme SVG</b> · 33 KB · <a href="examples/dom-react/index.tsx"><code>examples/dom-react/index.tsx</code></a></sub>
+</p>
 
-### Compile-time layout and moving anchors
+## Compile-time layout and refs
 
-`<Stack>`, `<Grid>`, `<Center>`, and `<Align>` measure text and boxes at build time so you rarely compute pixel offsets by hand. Attach a `ref()` to any node and `<Arrow>` or anchored elements stay connected even while their targets animate:
+`<Stack>`, `<Grid>`, `<Center>`, and `<Align>` measure text and boxes at build time instead of relying on manual pixel offsets. Attach `ref()` to any node and `<Arrow>` connectors or anchored elements stay locked to it while it moves:
 
-![Cards arranged in a Stack with live ref-attached connectors](examples/dist/layout.svg)
-*Compile-time `<Stack>` layout and live `ref()` anchors — **18 KB** ([`examples/layout/index.tsx`](examples/layout/index.tsx))*
+<p align="center">
+  <img src="examples/dist/layout.svg" alt="Cards arranged in a Stack with live ref-attached connectors" width="640">
+  <br>
+  <sub><b>Build-time <code>&lt;Stack&gt;</code> layout with moving <code>ref()</code> arrows</b> · 18 KB · <a href="examples/layout/index.tsx"><code>examples/layout/index.tsx</code></a></sub>
+</p>
 
-### Lint visuals and motion before shipping
+## Lint with `svjeez check`
 
-`svjeez check` analyzes the compiled scene model without launching a browser—catching overlapping siblings, clipped elements, WCAG contrast failures in both light and dark themes, broken loop seams, unreadable font sizes, and animation/repaint cost, with source locations and concrete fixes:
+`svjeez check` inspects the compiled scene model without launching a browser. It catches overlapping siblings, clipped elements, WCAG contrast failures in light and dark themes, broken loop seams, unreadable font sizes, and animation or repaint cost—with source locations and concrete fixes:
 
 ```sh
 $ svjeez check examples/readme/hero.tsx
@@ -159,35 +183,35 @@ cost: 32.8 animations, 0 repaint
 lanes: 27 css, 4 smil
 ```
 
-Add `--browser` to verify rendered bounding boxes and contrast in headless Chromium, `--at 0,0.75,2.5` to inspect scene layout at specific timestamps, or run `svjeez frames scene.tsx --sheet` to export a PNG contact sheet.
+Pass `--browser` to verify rendered bounding boxes and contrast in headless Chromium, `--at 0,0.75,2.5` to inspect layout at specific timestamps, or run `svjeez frames scene.tsx --sheet` for a PNG contact sheet.
 
-## What the compiled `.svg` handles
+## Inside the compiled `.svg`
 
-- **Zero JavaScript**: Motion runs on GPU-friendly CSS `@keyframes` first, falling back to SMIL only for attributes CSS cannot animate (such as path `d`, box dimensions, gradients, or filters).
-- **Reduced motion built in**: Animations loop cleanly by default and automatically freeze on your chosen `still` frame when `prefers-reduced-motion: reduce` is set.
-- **Dual light and dark mode in one file**: `tokens()` compiles theme colors to CSS custom properties under `prefers-color-scheme`.
-- **Real `<text>` with subsetted fonts**: Text stays crisp, selectable, and measurable, with only the characters your scene uses subsetted and embedded as `@font-face`.
-- **Zero-JS animated numbers**: `count()` renders tabular odometer strips animated purely with CSS steps.
-- **Accessible and deterministic**: Every SVG carries `role="img"`, `<title>`, and `<desc>`. Time is explicit (`span(start, duration)`) and randomness is seeded, so the same scene always produces the exact same bytes.
+- **Zero JavaScript**: Runs on GPU-friendly CSS `@keyframes` first, using SMIL only for attributes CSS cannot animate (path `d`, box dimensions, gradients, filters).
+- **Reduced motion**: Loops cleanly by default and freezes on your chosen `still` frame when `prefers-reduced-motion: reduce` is set.
+- **Dual light and dark mode**: `tokens()` compiles theme colors to CSS custom properties under `prefers-color-scheme`.
+- **Real `<text>`, subsetted fonts**: Keeps text crisp, selectable, and measurable, subsetting only used characters into embedded `@font-face` rules.
+- **Zero-JS counters**: `count()` renders tabular odometer strips animated purely with CSS steps.
+- **Accessible and deterministic**: Emits `role="img"`, `<title>`, and `<desc>`. Explicit `span(start, duration)` timing and seeded randomness produce byte-identical output.
 
 ## Add-on packages
 
-Optional `@svjeez/*` packages build on the same compiler and primitives:
+Optional `@svjeez/*` packages build on the same compiler and primitives.
 
 **Content & visualization**
-- `@svjeez/charts`: animated bar, line, and area charts.
-- `@svjeez/code`: syntax-highlighted code blocks (Shiki) that type in and morph across edits or languages.
-- `@svjeez/math`: build-time TeX equations (MathJax), plots, and geometric constructions.
-- `@svjeez/diagrams` and `@svjeez/mermaid`: animated flowcharts, sequence diagrams, state machines, and Mermaid input.
-- `@svjeez/icons`: Tabler and Lucide icons that draw stroke by stroke.
-- `@svjeez/geo`: maps and rotating globes from GeoJSON or TopoJSON.
-- `@svjeez/fonts`: fetches and caches Google Fonts on disk for subsetting.
+- `@svjeez/charts` — Animated bar, line, and area charts.
+- `@svjeez/code` — Shiki syntax-highlighted code that types in and morphs across edits or languages.
+- `@svjeez/math` — Build-time MathJax TeX equations, plots, and geometric constructions.
+- `@svjeez/diagrams`, `@svjeez/mermaid` — Animated flowcharts, sequence diagrams, state machines, and Mermaid input.
+- `@svjeez/icons` — Tabler and Lucide icons that draw stroke by stroke.
+- `@svjeez/geo` — Maps and rotating globes from GeoJSON or TopoJSON.
+- `@svjeez/fonts` — Fetches and caches Google Fonts on disk for subsetting.
 
 **Capture, frameworks & export**
-- `@svjeez/dom`: films live web apps with Playwright into animated light/dark SVGs.
-- `@svjeez/vite` and `@svjeez/astro`: Vite imports and an Astro `<Scene>` component.
-- `@svjeez/video`: MP4 and WebM export via `svjeez video`.
+- `@svjeez/dom` — Films live web apps with Playwright into animated light/dark SVGs.
+- `@svjeez/vite`, `@svjeez/astro` — Vite imports and an Astro `<Scene>` component.
+- `@svjeez/video` — MP4 and WebM export via `svjeez video`.
 
 ## License
 
-svjeez is pre-1.0 (currently 0.8) and licensed under MIT.
+svjeez is pre-1.0 (0.8), licensed under MIT.
