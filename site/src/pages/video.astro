@@ -15,8 +15,8 @@ const reel = live(windowed(film, { size: [1280], title: "film.svg" }));
   class="video"
 >
   <main class="wrap video-page">
-    <h1>The film</h1>
-    <p class="lede">One SVG, no JavaScript. Reload to watch it again.</p>
+    <h1>film.svg</h1>
+    <p class="lede">One .svg in <code>&lt;img&gt;</code>, zero js. Plays once; reload to replay.</p>
     <div class="win"><LiveScene scene={reel} cost={60} name="film" alt={reel.desc} /></div>
     <p class="more"><a class="btn primary" href="/">Home</a><a class="btn" href={REPO}>GitHub</a></p>
   </main>

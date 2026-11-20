@@ -33,10 +33,10 @@ export const MathShot = (): SceneElement => {
 
   return (
     <Group>
-      <Header title="And math, typeset at build time." from="@svjeez/math" over={over!} />
+      <Header title="equations typeset at build time" from="@svjeez/math" over={over!} />
       <Group motion={shown(over!)}>
         <Note
-          text="no MathJax in your browser"
+          text="sorry for the flashback"
           at={[STAGE.x + STAGE.w / 2, STAGE.y + STAGE.h - 70]}
           from={1.1}
           tilt={-2}

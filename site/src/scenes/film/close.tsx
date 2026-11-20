@@ -52,16 +52,16 @@ export const Close = (): SceneElement => (
             svjeez
           </Text>
           <Text font={geist} size={34} letterSpacing={-0.8} fill={theme.muted} motion={rise(2.15)}>
-            Write TSX. Ship one SVG.
+            animated svgs your agent can write
           </Text>
         </Stack>
         <Text font={mono} size={17} fill={theme.muted} motion={rise(2.3)}>
-          One file · 0 B of JavaScript · Light and dark
+          {"tsx → one .svg · zero js · works in <img>"}
         </Text>
       </Stack>
       <Stack direction="row" gap={16} motion={rise(2.45)}>
-        <Chip label="Install" command="npm i svjeez" />
-        <Chip label="Agent skill" command="npx svjeez skill --install" />
+        <Chip label="for your repo" command="npm i svjeez" />
+        <Chip label="for your agent" command="npx svjeez skill --install" />
       </Stack>
     </Stack>
   </Group>

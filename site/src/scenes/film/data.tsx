@@ -107,7 +107,7 @@ export const DataShot = (): SceneElement => {
   return (
     <Group>
       <Header
-        title="Charts and maps, from your data."
+        title="charts and maps without a runtime"
         from="@svjeez/charts · @svjeez/geo"
         over={over!}
       />
@@ -127,10 +127,10 @@ export const DataShot = (): SceneElement => {
           })}
         </Text>
         <Note
-          text="counted in CSS"
-          at={[left + 400, STAGE.y + 100]}
+          text="that counter is pure css"
+          at={[left + 380, STAGE.y + 100]}
           from={1.2}
-          size={32}
+          size={24}
           tilt={-6}
           to={[-50, 14]}
         />

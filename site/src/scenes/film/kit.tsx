@@ -18,6 +18,7 @@ export const theme = tokens({
     pink: "#E93D82",
     teal: "#0F9F8D",
     green: "#1F9D4A",
+    clay: "#C96442",
   },
   dark: {
     background: "#000000",
@@ -32,6 +33,7 @@ export const theme = tokens({
     pink: "#F75F8F",
     teal: "#0AC5B3",
     green: "#3DD68C",
+    clay: "#D97757",
   },
 });
 

@@ -35,7 +35,7 @@ export const Open = (): SceneElement => (
       ]}
     >
       <Text font={geist} weight={600} size={76} letterSpacing={-3.4} fill={theme.text}>
-        This film is an SVG.
+        this whole film is one svg
       </Text>
       <Text
         font={geist}
@@ -44,7 +44,7 @@ export const Open = (): SceneElement => (
         fill={theme.muted}
         motion={enter(span(2.75, 0.6), { from: { opacity: 0, offset: [0, 12] }, curve: ease.out })}
       >
-        No player. Zero JavaScript.
+        compiled from tsx, zero js inside
       </Text>
     </Stack>
   </Group>

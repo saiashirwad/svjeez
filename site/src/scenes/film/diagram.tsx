@@ -61,7 +61,7 @@ export const DiagramShot = (): SceneElement => {
 
   return (
     <Group>
-      <Header title="Diagrams from plain text." from="@svjeez/mermaid" over={over!} />
+      <Header title="agents already speak mermaid" from="@svjeez/mermaid" over={over!} />
       <Group motion={shown(over!)}>
         <Group offset={[PANEL.x, PANEL.y]}>
           <Shape
@@ -89,7 +89,7 @@ export const DiagramShot = (): SceneElement => {
           ))}
         </Group>
         <Note
-          text="just text!"
+          text="same .mmd, now it moves"
           at={[PANEL.x + PANEL.w / 2, PANEL.y + PANEL.h + 64]}
           from={1.9}
           size={34}

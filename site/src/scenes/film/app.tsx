@@ -78,12 +78,12 @@ const dark: Ink = {
 };
 
 const TASKS = [
-  { title: "Fix loop seam", status: "Done" },
-  { title: "Subset fonts", status: "Active" },
-  { title: "Check contrast", status: "Todo" },
+  { title: "teach blip to hop", status: "Done" },
+  { title: "film the task app", status: "Active" },
+  { title: "run svjeez check", status: "Todo" },
 ];
 
-const ADDED = { title: "Ship dark mode", status: "Todo" };
+const ADDED = { title: "ship to readme", status: "Todo" };
 
 interface RowProps {
   readonly ink: Ink;
@@ -180,7 +180,7 @@ const App = ({ ink, played }: AppProps): SceneElement => (
       anchor="baseline-left"
       fill={ink.text}
     >
-      Sprint 14
+      film.svg
     </Text>
     <Group offset={[BUTTON[0] - CARD.x, BUTTON[1] - CARD.y]}>
       <Shape geometry={rect(108, 40, { radius: 6 })} fill={ink.button} />
@@ -282,11 +282,11 @@ export const AppShot = (): SceneElement => {
 
   return (
     <Group>
-      <Header title="Film your real app." from="@svjeez/dom" over={over!} />
+      <Header title="film your real web app as an svg" from="@svjeez/dom" over={over!} />
       <Group motion={shown(over!, 0.1)}>
         <App ink={tokens} played />
         <Note
-          text="your app, filmed"
+          text="not redrawn by hand"
           at={[1070, CARD.y + CARD.h + 58]}
           from={2.2}
           size={30}
@@ -319,7 +319,7 @@ export const AppShot = (): SceneElement => {
 /** The part of the frame right of x, as a clip. */
 const rightOf = (x: number) => polygon([x, 0], [W, 0], [W, H], [x, H]);
 
-const checks = ["Contrast", "No overlaps", "Clean loop", "0 B of JS"];
+const checks = ["contrast ok", "0 overlaps", "loop seam ok", "zero js"];
 
 /** Shot 7: the same app, light on the left and dark on the right of a moving seam, then checked. */
 export const ThemesShot = (): SceneElement => {
@@ -331,16 +331,15 @@ export const ThemesShot = (): SceneElement => {
 
   return (
     <Group>
-      <Header title="Light and dark. Checked." from="tokens() · svjeez check" over={over!} />
+      <Header title="light and dark, checked by cli" from="tokens() · svjeez check" over={over!} />
       <Group motion={shown(over!, 0)}>
         <App ink={light} played={false} />
         <Note
-          text="same file!"
-          at={[170, CARD.y + 120]}
+          text="still one file, somehow"
+          at={[236, CARD.y + CARD.h + 52]}
           from={1.0}
-          size={30}
-          tilt={-8}
-          to={[36, 34]}
+          size={24}
+          tilt={-4}
         />
         <Group
           clip={track(rightOf(left))
@@ -379,7 +378,7 @@ export const ThemesShot = (): SceneElement => {
             DARK
           </Text>
         </Group>
-        <Stack direction="row" gap={36} at={[W / 2, CARD.y + CARD.h + 44]} anchor="center">
+        <Stack direction="row" gap={30} at={[780, CARD.y + CARD.h + 44]} anchor="center">
           {checks.map((label, i) => (
             <Stack
               direction="row"

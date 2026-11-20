@@ -72,8 +72,8 @@ export default scene(
   {
     size: [W, H],
     duration: D,
-    title: "svjeez: a film that is one SVG",
-    desc: "An img tag opens into a stage. On it, cards spring around with arrows pinned to their edges, code refactors itself, the quadratic formula derives itself, a bar chart reorders with counters ticking, a task app is used, and it is shown in light and dark and checked. The stage folds back into the img tag above the svjeez name, the line Write TSX. Ship one SVG., and the commands to install it.",
+    title: "svjeez promo film: animated SVGs from TSX, written by coding agents",
+    desc: "An animated film compiled into a single SVG file with no JavaScript, opening from an img tag and closing back into it, with the yellow mascot Blip. It shows a coding agent writing a TSX graphic, running svjeez check, looking at stills from svjeez frames, and writing an 18 KB SVG. Then it shows graphics an agent can make with svjeez: a Mermaid flowchart, a weekly request chart beside a world map, a quadratic equation typeset at build time, a code diff, a filmed task app, and a light and dark split with lint checks, before ending with the install commands.",
     theme,
     loop: false,
     still: D - 0.05,

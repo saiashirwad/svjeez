@@ -25,11 +25,11 @@ const route: readonly Move[] = [
   // The agent writes a scene.
   { hop: { land: 5.9, height: 40 }, to: [560, 180] },
   { hop: { land: 7.1, height: 30 } },
-  { hop: { land: 9.6, height: 90 }, to: [1080, 400] },
-  { hop: { land: 10.7, height: 40 } },
-  { hop: { land: 12.2, height: 120 }, to: [900, EDGE] },
+  { hop: { land: 10.2, height: 90 }, to: [1080, 400] },
+  { hop: { land: 11.2, height: 40 } },
+  { hop: { land: 12.3, height: 120 }, to: [900, EDGE] },
   // Mermaid.
-  { walk: span(12.6, 0.9), to: [760, EDGE], steps: 4 },
+  { walk: span(12.75, 0.8), to: [760, EDGE], steps: 4 },
   { hop: { land: 14.8, height: 60 }, to: [520, 210] },
   { hop: { land: 16.1, height: 40 } },
   { hop: { land: 18.3, height: 70 }, to: [700, EDGE] },

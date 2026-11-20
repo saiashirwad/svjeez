@@ -96,11 +96,11 @@ export const CodeShot = (): SceneElement => {
 
   return (
     <Group>
-      <Header title="Code that refactors itself." from="@svjeez/code" over={over!} />
+      <Header title="code diffs that move line by line" from="@svjeez/code" over={over!} />
       <Group motion={shown(over!)}>
         <Panel />
         <Note
-          text="no keyframes, just keys"
+          text="beats a blurry gif"
           at={[STAGE.x + STAGE.w / 2, PANEL.y + PANEL.h + 70]}
           from={3.2}
           tilt={-2}
