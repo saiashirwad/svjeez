@@ -1,0 +1,280 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 280" width="360" height="280" role="img" aria-labelledby="bot-t bot-d" data-states="{&quot;idle&quot;:{&quot;alive&quot;:&quot;loop&quot;,&quot;lookX&quot;:0.5,&quot;lookY&quot;:0.5,&quot;attend&quot;:0,&quot;shy&quot;:0,&quot;whistle&quot;:1,&quot;think&quot;:0,&quot;spin&quot;:1,&quot;sad&quot;:0,&quot;cheer&quot;:0,&quot;party&quot;:1},&quot;email&quot;:{&quot;alive&quot;:&quot;loop&quot;,&quot;attend&quot;:1,&quot;lookY&quot;:1,&quot;shy&quot;:0,&quot;whistle&quot;:1,&quot;think&quot;:0,&quot;spin&quot;:1,&quot;sad&quot;:0,&quot;cheer&quot;:0,&quot;party&quot;:1},&quot;password&quot;:{&quot;alive&quot;:&quot;loop&quot;,&quot;attend&quot;:1,&quot;shy&quot;:1,&quot;whistle&quot;:&quot;loop&quot;,&quot;think&quot;:0,&quot;spin&quot;:1,&quot;sad&quot;:0,&quot;cheer&quot;:0,&quot;party&quot;:1},&quot;checking&quot;:{&quot;alive&quot;:&quot;loop&quot;,&quot;attend&quot;:0,&quot;think&quot;:1,&quot;spin&quot;:&quot;loop&quot;,&quot;whistle&quot;:1,&quot;sad&quot;:0,&quot;cheer&quot;:0,&quot;party&quot;:1},&quot;failed&quot;:{&quot;alive&quot;:&quot;loop&quot;,&quot;attend&quot;:0,&quot;sad&quot;:1,&quot;shy&quot;:0,&quot;think&quot;:0,&quot;spin&quot;:1,&quot;whistle&quot;:1,&quot;cheer&quot;:0,&quot;party&quot;:1},&quot;success&quot;:{&quot;alive&quot;:&quot;loop&quot;,&quot;attend&quot;:0,&quot;cheer&quot;:1,&quot;party&quot;:&quot;loop&quot;,&quot;shy&quot;:0,&quot;think&quot;:0,&quot;spin&quot;:1,&quot;whistle&quot;:1,&quot;sad&quot;:0}}" class="bot-root">
+  <title id="bot-t">Robot mascot</title>
+  <desc id="bot-d">A cream robot with a dark visor face watches a sign-in form. Its glowing eyes look around and blink, then look down as an email is typed; for the password it pulls privacy blinds over its eyes and whistles; while checking, its ear dials spin; a failed sign-in gets a sad shake and a drooping antenna, and success gets happy eyes, raised arms and confetti.</desc>
+  <style><![CDATA[
+svg.bot-root{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF}
+@media (prefers-color-scheme:light){svg.bot-root{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0}}
+
+.bot-a{animation-duration:14s;animation-iteration-count:1;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+.bot-fb{transform-box:fill-box;transform-origin:center}
+@keyframes bot-k1{0%,100%{opacity:1}50%{opacity:0.45}}
+.bot-m1{animation-name:bot-k1;animation-duration:3.5s;animation-iteration-count:4;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes bot-k2{0%,71.429%{rotate:0deg}77%,100%{rotate:28deg}}
+.bot-m2{animation-name:bot-k2;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes bot-k3{0%,84.286%{scale:1}90%,100%{scale:3.2}}
+@keyframes bot-k4{0%,84.286%,90%,100%{opacity:0}84.643%{opacity:0.9}}
+.bot-m3{animation-name:bot-k3,bot-k4}
+@keyframes bot-k5{0%,90%{scale:1}95.714%,100%{scale:3.2}}
+@keyframes bot-k6{0%,90%,95.714%,100%{opacity:0}90.357%{opacity:0.9}}
+.bot-m4{animation-name:bot-k5,bot-k6}
+@keyframes bot-k7{0%,84.286%{rotate:0deg}91.429%,100%{rotate:-300deg}}
+@keyframes bot-k8{0%,84.286%,91.429%,100%{opacity:0}85%,89.286%{opacity:1}}
+@keyframes bot-k9{0%,84.286%{translate:24px -12px}91.429%,100%{translate:6px 150px}}
+.bot-m5{animation-name:bot-k7,bot-k8,bot-k9;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k10{0%,84.786%{rotate:0deg}91.929%,100%{rotate:300deg}}
+@keyframes bot-k11{0%,84.786%,91.929%,100%{opacity:0}85.5%,89.786%{opacity:1}}
+@keyframes bot-k12{0%,84.786%{translate:133.5px -17.5px}91.929%,100%{translate:151.5px 144.5px}}
+.bot-m6{animation-name:bot-k10,bot-k11,bot-k12;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k13{0%,85.286%{rotate:0deg}92.429%,100%{rotate:-300deg}}
+@keyframes bot-k14{0%,85.286%,92.429%,100%{opacity:0}86%,90.286%{opacity:1}}
+@keyframes bot-k15{0%,85.286%{translate:246.5px -17.5px}92.429%,100%{translate:228.5px 144.5px}}
+.bot-m7{animation-name:bot-k13,bot-k14,bot-k15;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k16{0%,85.786%{rotate:0deg}92.929%,100%{rotate:300deg}}
+@keyframes bot-k17{0%,85.786%,92.929%,100%{opacity:0}86.5%,90.786%{opacity:1}}
+@keyframes bot-k18{0%,85.786%{translate:51px -12px}92.929%,100%{translate:69px 150px}}
+.bot-m8{animation-name:bot-k16,bot-k17,bot-k18;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k19{0%,86.286%{rotate:0deg}93.429%,100%{rotate:-300deg}}
+@keyframes bot-k20{0%,86.286%,93.429%,100%{opacity:0}87%,91.286%{opacity:1}}
+@keyframes bot-k21{0%,86.286%{translate:160.5px -17.5px}93.429%,100%{translate:142.5px 144.5px}}
+.bot-m9{animation-name:bot-k19,bot-k20,bot-k21;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k22{0%,86.786%{rotate:0deg}93.929%,100%{rotate:300deg}}
+@keyframes bot-k23{0%,86.786%,93.929%,100%{opacity:0}87.5%,91.786%{opacity:1}}
+@keyframes bot-k24{0%,86.786%{translate:273.5px -17.5px}93.929%,100%{translate:291.5px 144.5px}}
+.bot-m10{animation-name:bot-k22,bot-k23,bot-k24;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k25{0%,87.286%{rotate:0deg}94.429%,100%{rotate:-300deg}}
+@keyframes bot-k26{0%,87.286%,94.429%,100%{opacity:0}88%,92.286%{opacity:1}}
+@keyframes bot-k27{0%,87.286%{translate:78px -12px}94.429%,100%{translate:60px 150px}}
+.bot-m11{animation-name:bot-k25,bot-k26,bot-k27;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k28{0%,87.786%{rotate:0deg}94.929%,100%{rotate:300deg}}
+@keyframes bot-k29{0%,87.786%,94.929%,100%{opacity:0}88.5%,92.786%{opacity:1}}
+@keyframes bot-k30{0%,87.786%{translate:187.5px -17.5px}94.929%,100%{translate:205.5px 144.5px}}
+.bot-m12{animation-name:bot-k28,bot-k29,bot-k30;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k31{0%,84.357%{rotate:0deg}91.5%,100%{rotate:-300deg}}
+@keyframes bot-k32{0%,84.357%,91.5%,100%{opacity:0}85.071%,89.357%{opacity:1}}
+@keyframes bot-k33{0%,84.357%{translate:300.5px -17.5px}91.5%,100%{translate:282.5px 144.5px}}
+.bot-m13{animation-name:bot-k31,bot-k32,bot-k33;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k34{0%,84.857%{rotate:0deg}92%,100%{rotate:300deg}}
+@keyframes bot-k35{0%,84.857%,92%,100%{opacity:0}85.571%,89.857%{opacity:1}}
+@keyframes bot-k36{0%,84.857%{translate:105px -12px}92%,100%{translate:123px 150px}}
+.bot-m14{animation-name:bot-k34,bot-k35,bot-k36;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k37{0%,85.357%{rotate:0deg}92.5%,100%{rotate:-300deg}}
+@keyframes bot-k38{0%,85.357%,92.5%,100%{opacity:0}86.071%,90.357%{opacity:1}}
+@keyframes bot-k39{0%,85.357%{translate:214.5px -17.5px}92.5%,100%{translate:196.5px 144.5px}}
+.bot-m15{animation-name:bot-k37,bot-k38,bot-k39;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k40{0%,85.857%{rotate:0deg}93%,100%{rotate:300deg}}
+@keyframes bot-k41{0%,85.857%,93%,100%{opacity:0}86.571%,90.857%{opacity:1}}
+@keyframes bot-k42{0%,85.857%{translate:327.5px -17.5px}93%,100%{translate:345.5px 144.5px}}
+.bot-m16{animation-name:bot-k40,bot-k41,bot-k42;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k43{0%,86.357%{rotate:0deg}93.5%,100%{rotate:-300deg}}
+@keyframes bot-k44{0%,86.357%,93.5%,100%{opacity:0}87.071%,91.357%{opacity:1}}
+@keyframes bot-k45{0%,86.357%{translate:132px -12px}93.5%,100%{translate:114px 150px}}
+.bot-m17{animation-name:bot-k43,bot-k44,bot-k45;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k46{0%,86.857%{rotate:0deg}94%,100%{rotate:300deg}}
+@keyframes bot-k47{0%,86.857%,94%,100%{opacity:0}87.571%,91.857%{opacity:1}}
+@keyframes bot-k48{0%,86.857%{translate:241.5px -17.5px}94%,100%{translate:259.5px 144.5px}}
+.bot-m18{animation-name:bot-k46,bot-k47,bot-k48;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k49{0%,87.357%{rotate:0deg}94.5%,100%{rotate:-300deg}}
+@keyframes bot-k50{0%,87.357%,94.5%,100%{opacity:0}88.071%,92.357%{opacity:1}}
+@keyframes bot-k51{0%,87.357%{translate:42.5px -17.5px}94.5%,100%{translate:24.5px 144.5px}}
+.bot-m19{animation-name:bot-k49,bot-k50,bot-k51;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k52{0%,87.857%{rotate:0deg}95%,100%{rotate:300deg}}
+@keyframes bot-k53{0%,87.857%,95%,100%{opacity:0}88.571%,92.857%{opacity:1}}
+@keyframes bot-k54{0%,87.857%{translate:159px -12px}95%,100%{translate:177px 150px}}
+.bot-m20{animation-name:bot-k52,bot-k53,bot-k54;animation-timing-function:linear,cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k55{0%,57.143%{rotate:0deg}65.714%,100%{rotate:360deg}}
+.bot-m21{animation-name:bot-k55;animation-timing-function:linear}
+@keyframes bot-k56{0%,72.857%{opacity:0}73.929%,100%{opacity:1}}
+@keyframes bot-k57{0%,72.857%{translate:270px 51.944px}77.143%,100%{translate:276px 65.944px}}
+.bot-m22{animation-name:bot-k56,bot-k57;animation-timing-function:cubic-bezier(.23,1,.32,1),cubic-bezier(.55,.06,.68,.19)}
+@keyframes bot-k58{0%,4.286%{translate:-20px 0}11.429%,100%{translate:20px 0}}
+.bot-m23{animation-name:bot-k58;animation-timing-function:linear}
+@keyframes bot-k59{0%,11.429%,15%{translate:98px 58px}18.571%,100%{translate:98px 68px}}
+.bot-m24{animation-name:bot-k59;animation-timing-function:linear}
+@keyframes bot-k60{0%,11.429%{translate:98px 127px}15%,18.571%,100%{translate:98px 134px}}
+.bot-m25{animation-name:bot-k60;animation-timing-function:linear}
+@keyframes bot-k61{0%,87.714%,95.429%,100%{translate:98px 56px}82.857%,90.571%{translate:98px 56px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}84.857%,92.571%{translate:98px 76px}}
+.bot-m26{animation-name:bot-k61;animation-duration:3.5s;animation-iteration-count:4}
+@keyframes bot-k62{0%,87.714%,95.429%,100%{translate:98px 136px}82.857%,90.571%{translate:98px 136px;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}84.857%,92.571%{translate:98px 116px}}
+.bot-m27{animation-name:bot-k62;animation-duration:3.5s;animation-iteration-count:4}
+@keyframes bot-k63{0%,11.429%{translate:0 -3px}18.571%,100%{translate:0 3px}}
+.bot-m28{animation-name:bot-k63;animation-timing-function:linear}
+@keyframes bot-k64{0%,20%{opacity:1}21.071%,100%{opacity:0}}
+.bot-m29{animation-name:bot-k64}
+@keyframes bot-k65{0%,20.357%{scale:0.2}22.143%,100%{scale:1}}
+@keyframes bot-k66{0%,20.357%{opacity:0}21.071%,100%{opacity:1}}
+.bot-m30{animation-name:bot-k65,bot-k66;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.23,1,.32,1)}
+@keyframes bot-k67{0%,32.857%{translate:95.75px 56.75px}36.071%,100%{translate:95.75px 76.75px}}
+.bot-m31{animation-name:bot-k67;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes bot-k68{0%,33.5%{translate:95.75px 56.75px}36.714%,100%{translate:95.75px 92.75px}}
+.bot-m32{animation-name:bot-k68;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes bot-k69{0%,34.143%{translate:95.75px 56.75px}37.357%,100%{translate:95.75px 108.75px}}
+.bot-m33{animation-name:bot-k69;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes bot-k70{0%,34.786%{translate:95.75px 56.75px}38%,100%{translate:95.75px 124.75px}}
+.bot-m34{animation-name:bot-k70;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes bot-k71{0%,36.786%{scale:0}39.286%,100%{scale:1}}
+@keyframes bot-k72{0%,36.786%{opacity:0}37.5%,100%{opacity:1}}
+.bot-m35{animation-name:bot-k71,bot-k72;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.23,1,.32,1)}
+@keyframes bot-k73{0%,55.714%{opacity:0}56.786%,100%{opacity:1}}
+.bot-m36{animation-name:bot-k73}
+@keyframes bot-k74{0%,57.143%,61.786%,100%{translate:0 0;opacity:0}58.929%{translate:0 -5px;opacity:1}}
+.bot-m37{animation-name:bot-k74}
+@keyframes bot-k75{0%,58.571%,63.214%,100%{translate:0 0;opacity:0}60.357%{translate:0 -5px;opacity:1}}
+.bot-m38{animation-name:bot-k75}
+@keyframes bot-k76{0%,60%,64.643%,100%{translate:0 0;opacity:0}61.786%{translate:0 -5px;opacity:1}}
+.bot-m39{animation-name:bot-k76}
+@keyframes bot-k77{0%,71.786%{opacity:0}73.929%,100%{opacity:1}}
+.bot-m40{animation-name:bot-k77}
+@keyframes bot-k78{0%,72.143%{translate:0 0}75.714%,100%{translate:0 5px}}
+.bot-m41{animation-name:bot-k78;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes bot-k79{0%,67.857%,72.143%,100%{translate:0 0}68.571%{translate:-8px 0}69.429%{translate:8px 0}70.286%{translate:-6px 0}71.143%{translate:4px 0}}
+.bot-m42{animation-name:bot-k79}
+@keyframes bot-k80{0%,67.143%{opacity:0}68%,100%{opacity:1}}
+.bot-m43{animation-name:bot-k80}
+@keyframes bot-k81{0%,80.357%{scale:0.3}83.214%,100%{scale:1}}
+.bot-m44{animation-name:bot-k81;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes bot-k82{0%,80.714%{scale:0.2}83.571%,100%{scale:1}}
+.bot-m45{animation-name:bot-k82;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes bot-k83{0%,80%{opacity:0}80.714%,100%{opacity:1}}
+.bot-m46{animation-name:bot-k83}
+@keyframes bot-k84{0%,37.857%{rotate:-10deg;translate:196px 140px}46.429%,100%{rotate:12deg;translate:286px 78px}}
+@keyframes bot-k85{0%,37.857%,46.429%,100%{opacity:0}39.286%,43.571%{opacity:1}}
+.bot-m47{animation-name:bot-k84,bot-k85}
+@keyframes bot-k86{0%,42.857%{rotate:-10deg;translate:196px 140px}51.429%,100%{rotate:18deg;translate:300px 52px}}
+@keyframes bot-k87{0%,42.857%,51.429%,100%{opacity:0}44.286%,48.571%{opacity:1}}
+.bot-m48{animation-name:bot-k86,bot-k87}
+@keyframes bot-k88{0%,45.357%{rotate:-10deg;translate:196px 140px}53.929%,100%{rotate:12deg;translate:286px 78px}}
+@keyframes bot-k89{0%,45.357%,53.929%,100%{opacity:0}46.786%,51.071%{opacity:1}}
+.bot-m49{animation-name:bot-k88,bot-k89}
+@keyframes bot-k90{0%,80%{rotate:24deg}84.286%,100%{rotate:128deg}}
+.bot-m50{animation-name:bot-k90;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes bot-k91{0%,80%{rotate:-24deg}84.286%,100%{rotate:-128deg}}
+.bot-m51{animation-name:bot-k91;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@media (prefers-reduced-motion:reduce){.bot-a{animation-delay:-12.6s!important;animation-play-state:paused!important}}
+]]></style>
+  <defs>
+    <g id="bot-u1" fill="#FF8A3D">
+      <ellipse cy="18" rx="6.5" ry="5" style="transform-origin:0 18px;rotate:-20deg"/>
+      <rect x="3.5" y="-1" width="3" height="20"/>
+      <polyline points="5 0 13 5 13 11" fill="none" stroke="#FF8A3D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <linearGradient id="bot-g1" gradientUnits="userSpaceOnUse" x1="181.5" y1="199.5" x2="181.5" y2="319.5">
+      <stop stop-color="#F6F1E7"/>
+      <stop offset="0.62" stop-color="#F6F1E7"/>
+      <stop offset="1" stop-color="#E4D9C6"/>
+    </linearGradient>
+    <linearGradient id="bot-g2" gradientUnits="userSpaceOnUse" x1="181.5" y1="45.5" x2="181.5" y2="205.5">
+      <stop stop-color="#F6F1E7"/>
+      <stop offset="0.62" stop-color="#F6F1E7"/>
+      <stop offset="1" stop-color="#E4D9C6"/>
+    </linearGradient>
+    <clipPath id="bot-c1">
+      <path d="M134 72L226 72C245.882 72 262 88.118 262 108L262 140C262 159.882 245.882 176 226 176L134 176C114.118 176 98 159.882 98 140L98 108C98 88.118 114.118 72 134 72Z"/>
+    </clipPath>
+  </defs>
+  <rect x="106.5" y="199.5" width="150" height="120" rx="36" fill="url(#bot-g1)" stroke="#262233" stroke-width="3"/>
+  <circle cx="180" cy="236" r="7" fill="#7DF3E1" stroke="#262233" stroke-width="2.5" data-clock="alive" data-clock-at="0" data-clock-over="14" class="bot-a bot-m1"/>
+  <g style="transform-origin:180px 49.5px" data-clock="sad" data-clock-at="9.4" data-clock-over="1.4" class="bot-a bot-m2" fill="none" stroke="#262233">
+    <line x1="180" y1="46" x2="180" y2="26" stroke-width="7" stroke-linecap="round"/>
+    <line x1="180" y1="46" x2="180" y2="26" stroke="#E4D9C6" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="180" cy="18" r="9" fill="#FF8A3D" stroke-width="3"/>
+  </g>
+  <circle cx="180" cy="18" r="10" fill="none" stroke="#FF8A3D" stroke-width="3" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m3 bot-fb"/>
+  <circle cx="180" cy="18" r="10" fill="none" stroke="#FF8A3D" stroke-width="3" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m4 bot-fb"/>
+  <circle r="4" fill="#FF8A3D" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m5 bot-fb"/>
+  <rect width="7" height="11" rx="2" fill="#7DF3E1" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m6 bot-fb"/>
+  <rect width="7" height="11" rx="2" fill="#FF8FA3" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m7 bot-fb"/>
+  <circle r="4" fill="#FFD166" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m8 bot-fb"/>
+  <rect width="7" height="11" rx="2" fill="#9BB0FF" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m9 bot-fb"/>
+  <rect width="7" height="11" rx="2" fill="#FF8A3D" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m10 bot-fb"/>
+  <circle r="4" fill="#7DF3E1" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m11 bot-fb"/>
+  <rect width="7" height="11" rx="2" fill="#FF8FA3" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m12 bot-fb"/>
+  <rect width="7" height="11" rx="2" fill="#FFD166" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m13 bot-fb"/>
+  <circle r="4" fill="#9BB0FF" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m14 bot-fb"/>
+  <rect width="7" height="11" rx="2" fill="#FF8A3D" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m15 bot-fb"/>
+  <rect width="7" height="11" rx="2" fill="#7DF3E1" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m16 bot-fb"/>
+  <circle r="4" fill="#FF8FA3" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m17 bot-fb"/>
+  <rect width="7" height="11" rx="2" fill="#FFD166" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m18 bot-fb"/>
+  <rect width="7" height="11" rx="2" fill="#9BB0FF" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m19 bot-fb"/>
+  <circle r="4" fill="#FF8A3D" data-clock="party" data-clock-at="11.8" data-clock-over="1.6" class="bot-a bot-m20 bot-fb"/>
+  <circle cx="73" cy="124" r="20" fill="#FF8A3D" stroke="#262233" stroke-width="3"/>
+  <circle cx="73" cy="124" r="9" fill="#E4D9C6" stroke="#262233" stroke-width="2"/>
+  <rect x="71.5" y="115" width="3" height="9" rx="1.5" fill="#262233" style="transform-origin:73px 124px" data-clock="spin" data-clock-at="8" data-clock-over="1.2" class="bot-a bot-m21"/>
+  <circle cx="287" cy="124" r="20" fill="#FF8A3D" stroke="#262233" stroke-width="3"/>
+  <circle cx="287" cy="124" r="9" fill="#E4D9C6" stroke="#262233" stroke-width="2"/>
+  <rect x="285.5" y="115" width="3" height="9" rx="1.5" fill="#262233" style="transform-origin:287px 124px" data-clock="spin" data-clock-at="8" data-clock-over="1.2" class="bot-a bot-m21"/>
+  <rect x="74.5" y="45.5" width="214" height="160" rx="56" fill="url(#bot-g2)" stroke="#262233" stroke-width="3"/>
+  <ellipse cx="112" cy="62" rx="22" ry="9" fill="#FFFFFF" opacity="0.7" style="transform-origin:112px 62px;rotate:-18deg"/>
+  <path d="M0 0C3 5 7 8 7 12C7 16 3.5 19 0 19C-3.5 19 -7 16 -7 12C-7 8 -3 5 0 0Z" fill="#9AD8FF" stroke="#262233" stroke-width="2" data-clock="sad" data-clock-at="9.4" data-clock-over="1.4" class="bot-a bot-m22"/>
+  <rect x="99.5" y="73.5" width="164" height="104" rx="36" fill="#171A2C" stroke="#262233" stroke-width="3" paint-order="stroke"/>
+  <g clip-path="url(#bot-c1)" fill="none">
+    <g data-clock="lookX" data-clock-at="0.6" data-clock-over="2.2" class="bot-a bot-m23">
+      <rect x="139" y="100" width="22" height="32" rx="11" fill="#7DF3E1"/>
+      <circle cx="154" cy="109" r="3.5" fill="#FFFFFF"/>
+      <rect x="199" y="100" width="22" height="32" rx="11" fill="#7DF3E1"/>
+      <circle cx="214" cy="109" r="3.5" fill="#FFFFFF"/>
+    </g>
+    <rect width="164" height="40" fill="#171A2C" data-clock="lookY" data-clock-at="1.6" data-clock-over="1" class="bot-a bot-m24"/>
+    <rect width="164" height="40" fill="#171A2C" data-clock="lookY" data-clock-at="1.6" data-clock-over="1" class="bot-a bot-m25"/>
+    <rect width="164" height="40" fill="#171A2C" data-clock="alive" data-clock-at="0" data-clock-over="14" class="bot-a bot-m26"/>
+    <rect width="164" height="40" fill="#171A2C" data-clock="alive" data-clock-at="0" data-clock-over="14" class="bot-a bot-m27"/>
+    <g data-clock="lookY" data-clock-at="1.6" data-clock-over="1" class="bot-a bot-m28" fill="#FF8FA3">
+      <ellipse cx="128" cy="148" rx="12" ry="6" opacity="0.5"/>
+      <ellipse cx="232" cy="148" rx="12" ry="6" opacity="0.5"/>
+    </g>
+    <path d="M168 150C176 156.667 184 156.667 192 150" stroke="#7DF3E1" stroke-width="4" stroke-linecap="round" data-clock="attend" data-clock-at="2.8" data-clock-over="0.3" class="bot-a bot-m29"/>
+    <circle cx="180" cy="154" r="5.5" stroke="#7DF3E1" stroke-width="3.5" data-clock="attend" data-clock-at="2.8" data-clock-over="0.3" class="bot-a bot-m30 bot-fb"/>
+    <rect width="170" height="14" rx="4" fill="#2A3152" stroke="#3A4370" stroke-width="1.5" data-clock="shy" data-clock-at="4.6" data-clock-over="0.9" class="bot-a bot-m31"/>
+    <rect width="170" height="14" rx="4" fill="#2A3152" stroke="#3A4370" stroke-width="1.5" data-clock="shy" data-clock-at="4.6" data-clock-over="0.9" class="bot-a bot-m32"/>
+    <rect width="170" height="14" rx="4" fill="#2A3152" stroke="#3A4370" stroke-width="1.5" data-clock="shy" data-clock-at="4.6" data-clock-over="0.9" class="bot-a bot-m33"/>
+    <rect width="170" height="14" rx="4" fill="#2A3152" stroke="#3A4370" stroke-width="1.5" data-clock="shy" data-clock-at="4.6" data-clock-over="0.9" class="bot-a bot-m34"/>
+    <g style="transform-origin:180px 106.25px" data-clock="shy" data-clock-at="4.6" data-clock-over="0.9" class="bot-a bot-m35">
+      <path d="M-6 0A6 6 0 0 1 6 0" transform="translate(180 100.5)" fill="none" stroke="#7DF3E1" stroke-width="3" stroke-linecap="round"/>
+      <rect x="170" y="104.5" width="20" height="15" rx="4" fill="#7DF3E1"/>
+      <circle cx="180" cy="112" r="2.2" fill="#2A3152"/>
+    </g>
+    <g data-clock="think" data-clock-at="7.8" data-clock-over="0.3" class="bot-a bot-m36" fill="#7DF3E1">
+      <rect x="98" y="72" width="164" height="104" rx="36" fill="#171A2C"/>
+      <rect x="152" y="95" width="20" height="26" rx="10"/>
+      <rect x="212" y="95" width="20" height="26" rx="10"/>
+    </g>
+    <circle cx="166" cy="152" r="4" fill="#7DF3E1" data-clock="spin" data-clock-at="8" data-clock-over="1.2" class="bot-a bot-m37"/>
+    <circle cx="180" cy="152" r="4" fill="#7DF3E1" data-clock="spin" data-clock-at="8" data-clock-over="1.2" class="bot-a bot-m38"/>
+    <circle cx="194" cy="152" r="4" fill="#7DF3E1" data-clock="spin" data-clock-at="8" data-clock-over="1.2" class="bot-a bot-m39"/>
+    <g data-clock="sad" data-clock-at="9.4" data-clock-over="1.4" class="bot-a bot-m43">
+      <rect x="98" y="72" width="164" height="104" rx="36" fill="#171A2C"/>
+      <g class="bot-a bot-m42">
+        <g class="bot-a bot-m41">
+          <rect x="139" y="101" width="22" height="30" rx="11" fill="#7DF3E1"/>
+          <polygon points="132 96 168 96 132 114" fill="#171A2C" class="bot-a bot-m40"/>
+          <rect x="199" y="101" width="22" height="30" rx="11" fill="#7DF3E1"/>
+          <polygon points="228 96 192 96 228 114" fill="#171A2C" class="bot-a bot-m40"/>
+          <path d="M168 156C176 149.333 184 149.333 192 156" fill="none" stroke="#7DF3E1" stroke-width="4" stroke-linecap="round"/>
+        </g>
+      </g>
+    </g>
+    <g data-clock="cheer" data-clock-at="11.2" data-clock-over="0.9" class="bot-a bot-m46">
+      <rect x="98" y="72" width="164" height="104" rx="36" fill="#171A2C"/>
+      <path d="M-11 0A11 11 0 0 1 11 0" transform="translate(163.5 135.5)" stroke="#7DF3E1" stroke-width="5" stroke-linecap="round" style="transform-origin:163.5px 135.5px" class="bot-a bot-m44"/>
+      <path d="M-11 0A11 11 0 0 1 11 0" transform="translate(223.5 135.5)" stroke="#7DF3E1" stroke-width="5" stroke-linecap="round" style="transform-origin:223.5px 135.5px" class="bot-a bot-m44"/>
+      <path d="M160 140L200 140C200 156 191 164 180 164C169 164 160 156 160 140Z" fill="#7DF3E1" style="transform-origin:180px 140px" class="bot-a bot-m45"/>
+      <ellipse cx="124" cy="146" rx="14" ry="7" fill="#FF8FA3" opacity="0.8"/>
+      <ellipse cx="236" cy="146" rx="14" ry="7" fill="#FF8FA3" opacity="0.8"/>
+    </g>
+    <path d="M112 96C114.667 85.333 122.667 79.333 136 78" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" opacity="0.14"/>
+  </g>
+  <use style="transform-origin:4px 10.75px" data-clock="whistle" data-clock-at="5.2" data-clock-over="2.4" class="bot-a bot-m47" href="#bot-u1"/>
+  <use style="transform-origin:4px 10.75px" data-clock="whistle" data-clock-at="5.2" data-clock-over="2.4" class="bot-a bot-m48" href="#bot-u1"/>
+  <g style="transform-origin:0 11px" data-clock="whistle" data-clock-at="5.2" data-clock-over="2.4" class="bot-a bot-m49" fill="#FF8A3D">
+    <ellipse cy="18" rx="6.5" ry="5" style="transform-origin:0 18px;rotate:-20deg"/>
+    <rect x="3.5" y="-1" width="3" height="20"/>
+  </g>
+  <rect x="2.25" y="252.75" width="357" height="60" rx="20" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
+  <g data-clock="cheer" data-clock-at="11.2" data-clock-over="0.9" stroke="#262233" stroke-width="3">
+    <rect x="107" y="209.14" width="22" height="50" rx="11" fill="#F6F1E7" style="transform-origin:118px 214px" class="bot-a bot-m50"/>
+    <circle cx="118" cy="262.67" r="14" fill="#FF8A3D" style="transform-origin:118px 214px" class="bot-a bot-m50"/>
+  </g>
+  <g data-clock="cheer" data-clock-at="11.2" data-clock-over="0.9" stroke="#262233" stroke-width="3">
+    <rect x="231" y="209.14" width="22" height="50" rx="11" fill="#F6F1E7" style="transform-origin:242px 214px" class="bot-a bot-m51"/>
+    <circle cx="242" cy="262.67" r="14" fill="#FF8A3D" style="transform-origin:242px 214px" class="bot-a bot-m51"/>
+  </g>
+</svg>
