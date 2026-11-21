@@ -101,7 +101,7 @@ Every node also takes `key ref at anchor origin rotate scale skew opacity motion
 | Time and motion | |
 | --- | --- |
 | `span(start, over)`, `span(start)` | `.end .next(over, gap) .shift(dt) .chain(...overs) .cascade(n, step)` |
-| `track(v).to(v2, span, curve?).set(v3, when).loop(p).repeat(n).rewind(over)` | also `.span` (of the last step), `.map(fn)`, `.with(other)` |
+| `track(v).to(v2, span, curve?).set(v3, when).loop(p, { phase }).repeat(n).rewind(over)` | also `.span` (of the last step), `.map(fn)`, `.with(other)` |
 | `through(value, fn)`, `within(draw, from, to)` | map a number or track; a part's own 0-to-1 share of a whole's progress |
 | `motion={[{ opacity: track… }, enter(span, { from }), exit(span, { to }), wiggle(amp, { seed }), along(path, progress, { turn })]}` | layers: plain objects of `offset rotate scale skew opacity`; first outermost, the node's own props innermost; `along` rides a path by arc length like `draw` (same track = at the line's tip) |
 | `sampled(fn, span, { tolerance })` | any function of time (`t` from 0) fitted to few keys |

@@ -17,6 +17,12 @@ import {
   type ValuesOf,
 } from "./derived";
 
+/** Options of `loop()`. */
+export interface LoopOptions {
+  /** Seconds into the cycle the loop starts at; the track at t shows the unshifted loop at t + phase. Default 0. */
+  readonly phase?: Seconds;
+}
+
 /** What a step of a track can go to: a point track can also go to an anchor, resolved after layout. */
 export type Goal<T> = T extends Vec ? T | Anchor : T;
 
@@ -34,8 +40,12 @@ export interface Track<T> {
    * first step, so a motion that starts at 0.4s waits 0.4s in every cycle. The motion must end within the period (a
    * longer one is an error); the track holds its last value until the cycle restarts, and the period snaps to divide
    * the scene's duration. For "this motion again, back to back, from where it starts" use `repeat()`.
+   *
+   * `{ phase }` (seconds, any sign, wrapped into the period) starts the loop that far into its cycle: at time t the
+   * track shows what the unshifted loop shows at t + phase. Give each of many streaks or fireflies its own phase,
+   * with the period dividing the scene's duration so the seam stays seamless.
    */
-  loop(period: Seconds): Track<T>;
+  loop(period: Seconds, options?: LoopOptions): Track<T>;
   repeat(times: number | { readonly until: Seconds }): Track<T>;
   rewind(over: Seconds, curve?: Curve): Track<T>;
   map<const U>(fn: (value: T) => U, options?: MapOptions): Derived<U>;
@@ -82,8 +92,8 @@ export class ValueTrack<T> implements Track<T> {
     return new ValueTrack(this.passage.set({ value: stored(value) }, when), span(when.start, 0));
   }
 
-  loop(period: Seconds): Track<T> {
-    return new ValueTrack(this.passage.loop(period), this.#last);
+  loop(period: Seconds, { phase = 0 }: LoopOptions = {}): Track<T> {
+    return new ValueTrack(this.passage.loop(period, phase), this.#last);
   }
 
   repeat(times: number | { readonly until: Seconds }): Track<T> {

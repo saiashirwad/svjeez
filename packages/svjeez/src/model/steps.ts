@@ -28,6 +28,8 @@ export interface PassageData<V> {
   readonly initial: Partial<V>;
   readonly steps: readonly Step<V>[];
   readonly period?: Seconds;
+  /** Where in its cycle a loop starts: the lane at t shows the unshifted loop at t + phase. */
+  readonly phase?: Seconds;
   readonly rewind?: { readonly over: Seconds; readonly ease: Curve };
   readonly repeated?: boolean;
 }
@@ -102,9 +104,12 @@ export class Passage<V extends object> {
     return this.#push({ start: time(when.start, "set()"), over: 0, ease: ease.hold, values });
   }
 
-  loop(period: Seconds): Passage<V> {
+  loop(period: Seconds, phase: Seconds = 0): Passage<V> {
     if (!(time(period, "loop()") > 0))
       throw new SceneError(`loop() needs a positive period, got ${period}.`);
+
+    if (!Number.isFinite(phase))
+      throw new SceneError(`loop() needs a finite phase in seconds, got ${phase}.`);
     const last = Math.max(0, ...this.data.steps.map(end));
 
     if (last > period + EPSILON) {
@@ -119,7 +124,7 @@ export class Passage<V extends object> {
       );
     }
 
-    return this.#with({ period });
+    return this.#with({ period, phase });
   }
 
   repeat(times: number | { readonly until: Seconds }): Passage<V> {
@@ -694,14 +699,18 @@ const written = <T>(
     period,
   );
 
+  const shift = looped ? ((clock.offset % snapped) / snapped) * period - (data.phase ?? 0) : 0;
+
   const keys =
-    looped && clock.offset > 0
+    looped && (clock.offset > 0 || data.phase)
       ? rotated(
           held,
-          ((clock.offset % snapped) / snapped) * period,
+          shift,
           period,
           mix,
-          `A loop on ${where} inside ${clock.clips.at(-1)?.label ?? "a sequence"}`,
+          clock.offset > 0
+            ? `A loop on ${where} inside ${clock.clips.at(-1)?.label ?? "a sequence"}`
+            : `A loop on ${where} with a phase`,
         )
       : held;
 
