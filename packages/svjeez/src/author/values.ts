@@ -4,11 +4,12 @@ import { lineCubic, quadraticCubic } from "../model/curve";
 import { ringsOf } from "../model/paths";
 import type { Contour, Cubic, Geometry as Outline, Rgba, Vec } from "../model/ir";
 import type { Gradient, Pattern } from "./paint";
+import { isTrack } from "./track";
 
 export type { Hex };
 
 const positive = (value: number, what: string): number => {
-  if (typeof value === "object" && value !== null)
+  if (isTrack(value))
     throw new SceneError(
       `${what} takes plain numbers, but got an animated value.`,
       `To animate the size, track the shape: geometry={track(${what.replace("()", "(w0, h0)")}).to(${what.replace("()", "(w1, h1)")}, span(0, 1), ease.inOut)}.`,

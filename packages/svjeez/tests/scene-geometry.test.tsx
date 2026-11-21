@@ -774,24 +774,30 @@ describe("sampled", () => {
 describe("animated sizes", () => {
   test("rect, circle and ellipse take numbers and point at track(rect(...)) for animation", () => {
     const wide = track(10).to(50, span(0, 1));
-    const tries = [
-      () => rect(wide as unknown as number, 10),
-      () => circle(wide as unknown as number),
-      () => ellipse(5, wide as unknown as number),
+
+    const caught = (attempt: () => ReturnType<typeof rect>): string => {
+      try {
+        attempt();
+      } catch (error) {
+        return String(error instanceof Error ? error.stack : error);
+      }
+
+      return "";
+    };
+
+    const messages = [
+      // @ts-expect-error a track is not a number
+      caught(() => rect(wide, 10)),
+      // @ts-expect-error a track is not a number
+      caught(() => circle(wide)),
+      // @ts-expect-error a track is not a number
+      caught(() => ellipse(5, wide)),
     ];
 
-    for (const attempt of tries) {
-      const error = (() => {
-        try {
-          attempt();
-        } catch (caught) {
-          return caught as Error;
-        }
-      })();
-
-      expect(error?.message).toContain("takes plain numbers");
-      expect(error?.message).not.toContain("[object Object]");
-      expect(String(error?.stack ?? error)).toContain("track(");
+    for (const message of messages) {
+      expect(message).toContain("takes plain numbers");
+      expect(message).not.toContain("[object Object]");
+      expect(message).toContain("track(");
     }
   });
 });
