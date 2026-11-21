@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
-import type { Problem } from "svjeez/tools";
+import { typeErrors, type Hint, type Problem } from "svjeez/tools";
 import type * as TS from "typescript";
 import { assets, type Assets } from "./assets";
 
@@ -72,20 +72,12 @@ export const COMPILER_OPTIONS = {
   types: ["node"],
 } as const;
 
-const hint = (diagnostic: TS.Diagnostic, message: string, carried: readonly string[]): string => {
-  if (
-    message.includes("`#${string}`") ||
-    /Type 'string' is not assignable to type '[^']*\b(Paint|Color)\b/.test(message)
-  )
-    return 'Colors are hex literals: write "#RRGGBB" where it is used, mark the array or object that holds them `as const`, or type it as Color from svjeez.';
-
-  if (diagnostic.code === 2307)
-    return `The svjeez binary carries ${carried.join(", ")}; any other package needs a node_modules beside the scene.`;
-
-  if (diagnostic.code === 7006 || diagnostic.code === 7031) return "Give the parameter a type.";
-
-  return "Change it to the type the message names.";
-};
+const hint =
+  (carried: readonly string[]): Hint =>
+  (diagnostic) =>
+    diagnostic.code === 2307
+      ? `The svjeez binary carries ${carried.join(", ")}; any other package needs a node_modules beside the scene.`
+      : undefined;
 
 let typescript: Promise<typeof TS> | undefined;
 
@@ -111,39 +103,7 @@ export const typeProblems = async (file: string): Promise<readonly Problem[]> =>
     (name) => name === "svjeez" || /^@svjeez\/[^/]+$/.test(name),
   );
 
-  const own = program
-    .getSourceFiles()
-    .filter((source) => !source.isDeclarationFile && !source.fileName.includes("/node_modules/"));
-
-  const diagnostics = [
-    ...program.getOptionsDiagnostics(),
-    ...program.getGlobalDiagnostics(),
-    ...own.flatMap((source) => [
-      ...program.getSyntacticDiagnostics(source),
-      ...program.getSemanticDiagnostics(source),
-    ]),
-  ];
-
-  return diagnostics.map((diagnostic): Problem => {
-    const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n  ");
-
-    const at =
-      diagnostic.file && diagnostic.start !== undefined
-        ? diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start)
-        : undefined;
-
-    return {
-      code: "type-error",
-      severity: "error",
-      key: "",
-      ...(diagnostic.file &&
-        at && {
-          source: { file: diagnostic.file.fileName, line: at.line + 1, column: at.character + 1 },
-        }),
-      message: `TS${diagnostic.code}: ${message}`,
-      fix: hint(diagnostic, message, carried),
-    };
-  });
+  return typeErrors(ts, program, hint(carried));
 };
 
 const forward = (folder: string, path: string): string =>

@@ -1,3 +1,5 @@
+export { typeErrors, type Hint } from "./check/type-errors";
+
 export { svg, type SvgOptions } from "./svg/svg";
 
 export type { Backend, Diagnostic, Feature, LaneReport, Support } from "./model/backend";

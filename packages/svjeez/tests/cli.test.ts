@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { LaneReport } from "svjeez/tools";
@@ -328,4 +328,33 @@ test("frames and check --browser sample the scene's duration, not the shorter pe
 
   const checked = cli("check", scene, "--browser");
   expect(checked.stdout.toString()).toContain("loop 8s");
+});
+
+test("svjeez check reports type errors in the scene with file:line, using the project's tsconfig", () => {
+  const dir = mkdtempSync(join(import.meta.dir, "tmp-types-"));
+
+  try {
+    const file = join(dir, "scene.tsx");
+
+    writeFileSync(
+      file,
+      [
+        'import { Shape, circle, scene } from "svjeez";',
+        "",
+        'export const wrong: number = "text";',
+        "",
+        'export default scene({ size: [10, 10], duration: 1, loop: false, title: "t", desc: "d" }, () => (',
+        '  <Shape geometry={circle(2)} fill="#fff" />',
+        "));",
+        "",
+      ].join("\n"),
+    );
+
+    const result = cli("check", file);
+
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout.toString()).toContain("scene.tsx:3:14  type-error  error: TS2322");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

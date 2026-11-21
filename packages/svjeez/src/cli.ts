@@ -6,6 +6,7 @@ import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { examine } from "./check/report";
+import { projectTypeProblems } from "./check/type-errors";
 import { costOf, type Cost } from "./svg/cost";
 import { checkPixels, renderFrames, type FrameTimes } from "./frames";
 import { parse, type Json, type JsonObject, type Param, type Schema, type Values } from "./params";
@@ -671,7 +672,13 @@ const checkCommand = async (args: string[]): Promise<void> => {
   }
 
   // Type errors first: a wrong type is often why the scene threw or looks wrong.
-  if (host.check && !file.endsWith(".svg")) found.unshift(...(await host.check(resolve(file))));
+  if (!file.endsWith(".svg")) {
+    const typed = await (host.check ?? projectTypeProblems)(resolve(file));
+
+    if (typed) found.unshift(...typed);
+    else if (!values.json)
+      console.error("type check skipped: no TypeScript 5 or 6 installed beside the scene");
+  }
 
   if (values.browser && svgText !== undefined) {
     const sources = model ? sourcesOf(model) : new Map<string, Source>();

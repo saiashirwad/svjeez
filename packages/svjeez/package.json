@@ -83,7 +83,7 @@
     "publint": "^0.3.25",
     "sucrase": "^3.35.1",
     "tsx": "^4.23.15",
-    "typescript": "latest"
+    "typescript": "~6.0.0"
   },
   "peerDependencies": {
     "playwright-core": ">=1.49",
