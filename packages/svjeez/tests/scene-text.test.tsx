@@ -140,6 +140,24 @@ describe("faces", () => {
         </Text>
       )),
     ).toThrow("asks for Space Mono 400 italic, but its font is the one face Space Mono 400");
+
+    expect(() =>
+      made(() => (
+        <Text key="t" font={regular} weight={700} size={10} fill="#000000">
+          x
+        </Text>
+      )),
+    ).toThrow(
+      'Only Space Mono 400 is loaded. To use Space Mono 700, load it as well: font={await google.family("Space Mono", [{ weight: 400 }, { weight: 700 }])}',
+    );
+
+    expect(() =>
+      made(() => (
+        <Text key="t" font={space} weight={600} size={10} fill="#000000">
+          x
+        </Text>
+      )),
+    ).toThrow('google.family("Space Mono", [{ weight: 600 }, …])');
   });
 
   test("two different files can't be one family's same face", () => {
