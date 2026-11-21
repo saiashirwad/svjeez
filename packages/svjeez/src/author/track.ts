@@ -32,7 +32,7 @@ export interface Track<T> {
   loop(period: Seconds): Track<T>;
   repeat(times: number | { readonly until: Seconds }): Track<T>;
   rewind(over: Seconds, curve?: Curve): Track<T>;
-  map<U>(fn: (value: T) => U, options?: MapOptions): Derived<U>;
+  map<const U>(fn: (value: T) => U, options?: MapOptions): Derived<U>;
   with<const S extends readonly Source[]>(...others: S): Together<[T, ...ValuesOf<S>]>;
 }
 
@@ -88,7 +88,7 @@ export class ValueTrack<T> implements Track<T> {
     return new ValueTrack(this.passage.rewind(over, curve), this.#last);
   }
 
-  map<U>(fn: (value: T) => U, options: MapOptions = {}): Derived<U> {
+  map<const U>(fn: (value: T) => U, options: MapOptions = {}): Derived<U> {
     return mappedTrack(this, fn, options);
   }
 

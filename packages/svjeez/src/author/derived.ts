@@ -31,7 +31,7 @@ export class Derived<T> {
     this.tolerance = tolerance;
   }
 
-  map<U>(fn: (value: T) => U, options: MapOptions = {}): Derived<U> {
+  map<const U>(fn: (value: T) => U, options: MapOptions = {}): Derived<U> {
     return new Derived(
       this.sources,
       (values) => fn(this.read(values)),
@@ -78,7 +78,7 @@ type ValueOf<S> = S extends Track<infer T> ? T : S extends Derived<infer T> ? T 
 export type ValuesOf<S extends readonly unknown[]> = { -readonly [K in keyof S]: ValueOf<S[K]> };
 
 export interface Together<V extends readonly unknown[]> {
-  map<U>(fn: (...values: V) => U, options?: MapOptions): Derived<U>;
+  map<const U>(fn: (...values: V) => U, options?: MapOptions): Derived<U>;
 }
 
 export const together = <const S extends readonly Source[]>(sources: S): Together<ValuesOf<S>> => ({
