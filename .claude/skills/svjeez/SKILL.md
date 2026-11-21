@@ -107,8 +107,7 @@ With `loop: true`, end every motion where it began: `track(0).to(1, a).to(0, b)`
 From the repo root, after every change (`my/scene` is `examples/my/scene.tsx`, `examples/my/scene/index.tsx`, `site:<name>` or a path):
 
 ```sh
-bun run scene check my/scene
-bunx tsc --noEmit -p examples      # type errors: check from source does NOT run TypeScript (only the bin does)
+bun run scene check my/scene       # also reports type errors (type-error) from the project's tsconfig
 bun run scene frames my/scene --sheet --out /tmp/frames   # Read /tmp/frames/sheet.png
 ```
 

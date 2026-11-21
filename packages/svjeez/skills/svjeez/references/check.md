@@ -61,7 +61,7 @@ Use it to confirm a beat before rendering frames: where a node landed, whether i
 
 | Code | Severity | Reports |
 | --- | --- | --- |
-| `type-error` | error | TypeScript rejects the scene file; only the single-file `svjeez` binary, which carries TypeScript, reports it |
+| `type-error` | error | TypeScript rejects the scene or a local file it imports, checked with the tsconfig.json above it (or strict defaults); skipped, with a note on stderr, when no TypeScript 5 or 6 is installed beside the scene |
 | `compile-error` | error | the scene threw while it was built |
 | `compile-warning` | warning | an SVG file or string the scene was given carries a warning |
 | `never-visible` | warning | a node hidden at every time (opacity or scale 0), painting nothing, cut away by an empty clip, or covered by an opaque still rect drawn after it |

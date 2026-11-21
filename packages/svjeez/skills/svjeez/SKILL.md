@@ -53,7 +53,7 @@ npm i svjeez@next && npm i -D tsx typescript playwright-core && npx playwright-c
 bun add svjeez@next    # under Bun, run the CLI as: bunx --bun svjeez
 ```
 
-In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `"strict": true`, or start each scene file with the pragma above. Companion packages (`@svjeez/fonts`, `icons`, `charts`, `code`, `diagrams`, `mermaid`, `geo`, `math`, `video`) install as `@svjeez/<name>@next`. With no Node project at all, use the single-file `svjeez` binary from svjeez's GitHub releases: it carries svjeez, every companion package and TypeScript, so a lone `scene.tsx` in any folder works; `svjeez init <dir>` writes a `tsconfig.json`, editor types and a starter scene, and its `check` also reports type errors as `type-error`.
+In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `"strict": true`, or start each scene file with the pragma above. Companion packages (`@svjeez/fonts`, `icons`, `charts`, `code`, `diagrams`, `mermaid`, `geo`, `math`, `video`) install as `@svjeez/<name>@next`. With no Node project at all, use the single-file `svjeez` binary from svjeez's GitHub releases: it carries svjeez, every companion package and TypeScript, so a lone `scene.tsx` in any folder works; `svjeez init <dir>` writes a `tsconfig.json`, editor types and a starter scene, and `check` reports type errors as `type-error` there too.
 
 `scene()` takes `size` (`[width, height]`), `duration` (seconds of one loop), `title` (required, read by screen readers), `desc`, `theme` (tokens), `loop` (`false` plays once and holds) and `still` (the second a viewer who asked for less motion sees, held still; 85% through by default, or `false`). The default export may be a function that returns a scene, which is how a scene takes params: `export const params = { n: param.count(3, { max: 8 }) }` ([`references/params.md`](references/params.md)).
 
@@ -139,8 +139,7 @@ Fonts and data: `font(bytes)`, `font.load(path)`, `font.family(...faces)`, `goog
 Never call a scene done from its source. Run these, in order, after every change:
 
 ```sh
-npx tsc --noEmit
-npx svjeez check scene.tsx                  # the model and the SVG it emits: problems, lanes, cost; no browser
+npx svjeez check scene.tsx                  # type errors (type-error, when TypeScript 5 or 6 is installed), the model and the SVG it emits: problems, lanes, cost; no browser
 npx svjeez check scene.tsx --at 0,1.5       # also what is on screen at those seconds, and what moves it
 npx svjeez frames scene.tsx --sheet --out frames/   # look: open frames/sheet.png
 ```
@@ -152,7 +151,7 @@ npx svjeez frames scene.tsx --sheet --out frames/   # look: open frames/sheet.pn
 
 | Code | Means |
 | --- | --- |
-| `type-error` | TypeScript rejects the file (the single-file `svjeez` binary checks types itself) |
+| `type-error` | TypeScript rejects the file (`check` runs the project's TypeScript with its tsconfig) |
 | `compile-error` | the scene threw while it was built: the message says what to write |
 | `compile-warning` | an SVG file or string the scene was given carries a warning |
 | `never-visible`, `zero-size` | a node hidden, painting nothing or covered at every time; geometry, text or an image with no size |
