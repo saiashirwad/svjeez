@@ -102,6 +102,16 @@ export const lowContrast = (survey: Survey): void => {
         return;
       const { box } = at;
 
+      // A digit strip rolled out of its clip window is not on screen.
+      if (
+        entry.ancestors.some((above) => {
+          const window = above.clip === undefined ? undefined : frame.get(above.key)?.box;
+
+          return window !== undefined && sharedArea(window, box) <= 0;
+        })
+      )
+        return;
+
       const backs = schemes.flatMap((scheme) => {
         const back = behind(survey, entry, frame, box, t, scheme);
 

@@ -89,11 +89,22 @@ export const shownBoxes = (
   });
 };
 
+/** Where a node was written; a node the library made (a count's digits, a swap's texts) borrows the nearest ancestor's. */
+const sourceFor = (survey: Survey, key: string): Source | undefined => {
+  const entry = survey.entries.find((each) => each.node.key === key);
+
+  if (!entry) return survey.sources.get(key);
+
+  return [entry.node, ...entry.ancestors.toReversed()]
+    .map((node) => survey.sources.get(node.key))
+    .find((found) => found !== undefined);
+};
+
 export const add = (
   survey: Survey,
   finding: Omit<Problem, "related"> & { readonly related?: readonly string[] },
 ): void => {
-  const source = finding.source ?? survey.sources.get(finding.key);
+  const source = finding.source ?? sourceFor(survey, finding.key);
   const { related, ...rest } = finding;
 
   survey.out.push({

@@ -1,6 +1,7 @@
 import { describe as group, expect, test } from "bun:test";
 import {
   Arrow,
+  count,
   enter,
   exit,
   line,
@@ -23,6 +24,7 @@ import {
   type Paint,
   type SceneElement,
 } from "svjeez";
+import { jsxDEV } from "svjeez/jsx-dev-runtime";
 import { describe, check, type Code, type Problem, type Model } from "svjeez/tools";
 
 const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
@@ -380,6 +382,36 @@ group("low-contrast", () => {
     expect(codes(streak([0, 0]))).not.toContain("low-contrast");
     // Held on the moon, it is a real problem.
     expect(codes(streak([95, 0], [95, 0]))).toContain("low-contrast");
+  });
+
+  test("a count's digits rolled out of their window are not judged, and the rest are located", () => {
+    const counting = (y: number) =>
+      made(() => (
+        <Group>
+          <Shape key="bar" geometry={rect(200, 36)} fill="#808080" />
+          {jsxDEV(
+            Text,
+            {
+              key: "n",
+              font: mono,
+              size: 12,
+              fill: "#808080",
+              at: [20, y],
+              children: count(track(179).to(70, span(0, 2))),
+            },
+            undefined,
+            false,
+            { fileName: "scene.tsx", lineNumber: 9, columnNumber: 3 },
+          )}
+        </Group>
+      ));
+
+    // Below the bar, the strips of the other digits roll across it but are clipped away.
+    expect(codes(counting(40))).not.toContain("low-contrast");
+
+    const [found] = only(counting(2), "low-contrast");
+
+    expect(found!.source).toEqual({ file: "scene.tsx", line: 9, column: 3 });
   });
 
   test("silent when what is behind is two colors", () => {

@@ -70,7 +70,7 @@ Use it to confirm a beat before rendering frames: where a node landed, whether i
 | `text-overflow` | warning | text past the canvas at rest, or a line wider than the width it wraps to |
 | `overlap` | warning | two different texts over each other while both are fully shown |
 | `missing-glyph` | error | characters the text's face has no glyph for; no other font fills in |
-| `low-contrast` | warning, info | text or a thin line too close to the flat color behind it, in either scheme; a moving thin line is judged by the backdrop it spends most of its time on, so a streak that only passes over something is not reported |
+| `low-contrast` | warning, info | text or a thin line too close to the flat color behind it, in either scheme; a moving thin line is judged by the backdrop it spends most of its time on, so a streak that only passes over something is not reported; digits a `count()` has rolled out of view are not judged; every finding carries the location of the nearest authored ancestor when the node itself was made by the library |
 | `loop-seam` | warning | a looping scene jumps when it starts again: a value ends where it didn't start, a node enters and never leaves, or an arrow's ends follow a node that scales or moves in |
 | `visible-at-zero` | error | shown at 0s and cut straight back in, or filled while its stroke draws in |
 | `nothing-enters` | info | everything is on screen from 0s and nothing enters (not reported for a steady loop: true scene) |
