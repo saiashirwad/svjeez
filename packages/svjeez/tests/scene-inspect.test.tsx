@@ -570,7 +570,7 @@ group("timing", () => {
   });
 
   test("a count's own strips and slots are not judged, only the motion written on the text", () => {
-    const counted = (motion?: object) =>
+    const counted = () =>
       made(() => (
         <Text
           font={mono}
@@ -578,7 +578,6 @@ group("timing", () => {
           fill="#808080"
           at={[20, 20]}
           opacity={track(0).to(1, span(1, 0.2))}
-          {...(motion && { motion })}
         >
           {count(track(179).to(70, span(0, 0.8)))}
         </Text>
