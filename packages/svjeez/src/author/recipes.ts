@@ -1,5 +1,5 @@
 import { SceneError } from "../model/scene-error";
-import { DEFAULT_EASE, NUDGE, ease, type Ease, type Seconds } from "../model/time";
+import { DEFAULT_EASE, NUDGE, ease, type Seconds } from "../model/time";
 import { random } from "./random";
 import { checkWindow, span, type Interval } from "./span";
 import { alongOutline, contoursOf, lengthOf } from "../model/geometry";
@@ -69,7 +69,7 @@ export const exit = (when: Interval, { to, curve = DEFAULT_EASE }: ExitOptions =
 export interface WiggleOptions {
   readonly seed: string | number;
   readonly rate?: number;
-  readonly curve?: Ease;
+  readonly curve?: Curve;
   readonly period?: Seconds;
 }
 

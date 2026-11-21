@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { Shape, ease, enter, rect, scene, span, track, type Curve } from "svjeez";
+import { Shape, ease, enter, rect, wiggle, scene, span, track, type Curve } from "svjeez";
 import { isLane, valueAt } from "svjeez/tools";
 
 const blend = (a: number, b: number, k: number) => a + (b - a) * k;
@@ -80,4 +80,10 @@ test("a function curve works in enter(), and k => k is linear", () => {
 test("a function curve must run from 0 to 1", () => {
   expect(() => opacityOf((k) => k + 1)).toThrow("must return 0 at progress 0 and 1 at progress 1");
   expect(() => opacityOf(() => Number.NaN)).toThrow("finite");
+});
+
+test("a function curve works in wiggle()", () => {
+  const layer = wiggle({ rotate: 10 }, { seed: 1, curve: (k) => k });
+
+  expect(layer.rotate).toBeDefined();
 });
