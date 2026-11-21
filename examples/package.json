@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "bun run scripts/build.ts",
+    "scene": "bun ../scripts/scene.ts",
     "dev": "bun run ../packages/svjeez/src/cli.ts dev",
     "render-png": "bun run ../packages/svjeez/src/cli.ts frames",
     "perf": "bun run scripts/perf.ts",

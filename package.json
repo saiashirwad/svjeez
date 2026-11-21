@@ -16,6 +16,8 @@
     "typecheck": "tsc --noEmit && bun run --filter '*' typecheck",
     "test": "cd scripts && bun test && cd .. && bun run --filter '*' test",
     "build:examples": "bun run --filter svjeez-examples build",
+    "example": "cd examples && bun scripts/build.ts",
+    "scene": "bun scripts/scene.ts",
     "dev": "bun run --filter svjeez-site dev",
     "deploy": "bun run --filter svjeez-site deploy"
   },

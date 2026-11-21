@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun --conditions @svjeez/source --bun astro dev",
+    "scene": "bun ../scripts/scene.ts",
     "build": "bun --conditions @svjeez/source --bun astro build",
     "preview": "bun --conditions @svjeez/source --bun astro preview",
     "deploy": "bun --conditions @svjeez/source --bun alchemy deploy",
