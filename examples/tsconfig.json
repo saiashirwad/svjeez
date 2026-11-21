@@ -30,6 +30,7 @@
     "dom-component",
     "react-widgets",
     "shader-site",
+    "field-site",
     "dom-svelte"
   ]
 }
