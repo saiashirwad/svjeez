@@ -78,7 +78,7 @@ export default scene({ size: [200, 100], duration: 2, title: "Lone", desc: "Dots
   expect(code).toBe(0);
 });
 
-test("a number as a key is a type error with a hint, and the scene still builds", () => {
+test("a number as a key type-checks and builds", () => {
   const file = write(
     "keyed.tsx",
     `import { Group, Shape, circle, scene } from "svjeez";
@@ -93,8 +93,7 @@ export default scene({ size: [100, 100], duration: 1, loop: false, title: "K", d
 
   const { out } = run("check", file);
 
-  expect(out).toContain("keyed.tsx:5:31  type-error");
-  expect(out).toContain("A key is text");
+  expect(out).not.toContain("type-error");
   expect(out).not.toContain("compile-error");
 });
 

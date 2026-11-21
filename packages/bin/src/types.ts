@@ -79,14 +79,6 @@ const hint = (diagnostic: TS.Diagnostic, message: string, carried: readonly stri
   )
     return 'Colors are hex literals: write "#RRGGBB" where it is used, mark the array or object that holds them `as const`, or type it as Color from svjeez.';
 
-  const written =
-    diagnostic.file && diagnostic.start !== undefined
-      ? diagnostic.file.text.slice(diagnostic.start, diagnostic.start + (diagnostic.length ?? 0))
-      : "";
-
-  if (written === "key")
-    return "A key is text: write key={`dot-${i}`}, or key={String(i)}, not a bare number.";
-
   if (diagnostic.code === 2307)
     return `The svjeez binary carries ${carried.join(", ")}; any other package needs a node_modules beside the scene.`;
 
