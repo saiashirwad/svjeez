@@ -279,6 +279,10 @@ const runOne = async (
   const result: RunResult = { task: task.name, model, repeat, dir, build, change };
 
   await writeFile(join(out, `../${run}.json`), JSON.stringify(result, null, 2));
+  const denied = build.metrics.permissionDenials + (change?.metrics.permissionDenials ?? 0);
+
+  if (denied > 0) console.log(`warning: ${run} had ${denied} denied tool calls`);
+
   console.log(
     `done ${run}: ${(build.wallMs / 1000).toFixed(0)}s, ${build.metrics.turns} turns, built=${build.grade.built}`,
   );
