@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "customConditions": ["@svjeez/source"],
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "svjeez",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["bun"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "paths": {
+      "svjeez": ["../svjeez/src/index.ts"],
+      "svjeez/tools": ["../svjeez/src/tools.ts"],
+      "svjeez/frames": ["../svjeez/src/frames.ts"],
+      "svjeez/page": ["../svjeez/src/page.ts"],
+      "svjeez/jsx-runtime": ["../svjeez/src/jsx-runtime.ts"],
+      "svjeez/jsx-dev-runtime": ["../svjeez/src/jsx-dev-runtime.ts"]
+    }
+  },
+  "include": ["src", "scripts", "test"],
+  "exclude": ["test/scenes"]
+}

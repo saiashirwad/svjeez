@@ -53,3 +53,36 @@ jobs:
       - env:
           GH_TOKEN: ${{ github.token }}
         run: bun scripts/release.ts publish
+
+  # The single-file svjeez for every platform, attached to the svjeez release (v<version>) it was built beside, which
+  # packages/bin/install.sh downloads from. It builds on a Mac because a Mac binary has to be signed again on one; the
+  # other platforms cross-compile. They go up as one set with their checksums; a release that has them keeps them, so a
+  # later dispatch doesn't change what a version installs.
+  binaries:
+    needs: [ci, publish]
+    if: github.event_name == 'workflow_dispatch' && !failure() && !cancelled()
+    runs-on: macos-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun scripts/build.ts --all
+        working-directory: packages/bin
+      - name: Attach them to the svjeez release
+        working-directory: packages/bin/dist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="v$(jq -r .version ../../svjeez/package.json)"
+          if ! gh release view "$tag" > /dev/null 2>&1; then
+            echo "::notice::svjeez has no $tag release yet, so the binaries wait for it."
+            exit 0
+          fi
+          if gh release view "$tag" --json assets --jq '.assets[].name' | grep -qx svjeez-checksums.txt; then
+            echo "$tag already has its binaries."
+            exit 0
+          fi
+          gh release upload "$tag" svjeez-*

@@ -1,0 +1,36 @@
+{
+  "name": "@svjeez/bin",
+  "version": "0.8.0-next.0",
+  "private": true,
+  "description": "svjeez as one executable: write a scene file anywhere and run svjeez check, frames, svg, dev or video on it, with no package.json or node_modules.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/bin"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "bun scripts/build.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@svjeez/charts": "workspace:*",
+    "@svjeez/code": "workspace:*",
+    "@svjeez/diagrams": "workspace:*",
+    "@svjeez/fonts": "workspace:*",
+    "@svjeez/geo": "workspace:*",
+    "@svjeez/icons": "workspace:*",
+    "@svjeez/math": "workspace:*",
+    "@svjeez/mermaid": "workspace:*",
+    "@svjeez/video": "workspace:*",
+    "@types/node": "26.6.5",
+    "playwright-core": "1.64.1",
+    "svjeez": "workspace:*",
+    "typescript": "6.0.3"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

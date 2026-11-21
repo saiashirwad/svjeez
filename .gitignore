@@ -7,3 +7,5 @@ packages/vite/test/.scratch-*
 site/dist
 site/.astro
 site/.alchemy
+packages/bin/.build
+packages/bin/dist
