@@ -1,4 +1,4 @@
-# Interactive scenes: clocks, hit names and state machines
+# Interactive scenes: clocks, hit names, state machines and XState
 
 The page code moves parts of a scene; every animation inside is authored once, in the scene. The `.svg` still plays on its own, so `<img>` embeds, `frames` and `check` show it.
 
@@ -34,7 +34,7 @@ Every node takes `hit="name"`: its outermost SVG element gets `data-hit="name"`,
 
 ## State machines
 
-`machine(scene, { initial, states, on })` from `svjeez/page`. A state says where each clock rests, as progress 0 to 1; moving to it runs those clocks from where they are to their places.
+`machine(scene, { initial, states, on })` from `svjeez/page` is the shorthand for simple widgets. A state says where each clock rests, as progress 0 to 1; moving to it runs those clocks from where they are to their places.
 
 ```ts
 import { machine, mount } from "svjeez/page";
@@ -57,3 +57,20 @@ power.subscribe((state, from) => (card.dataset.state = state));
 - `initial` shows its state at once, with no animation. Under reduced motion every move jumps.
 - A machine throws, saying what to change, for an `initial` that is not a state, a clock the SVG doesn't have, a place outside 0 to 1, or an event that leads to an unknown state.
 - Scenes inlined on one page need an `svg.emit` `prefix` each (see [`render.md`](render.md)), or their classes and keyframes collide.
+
+## Any source of state: `rests`
+
+`rests(scene, places)` is the visual half of `machine()`: `places` maps a state to its clock rests, as above, and the `View` it returns has `go(value)`, `show(value)`, `state` and `stop()`. `go` animates every named clock to its rest, retargets mid-way and resolves as `machine.go` does; `show` jumps with no animation, for the first paint. It throws for an unknown clock or a place outside 0 to 1.
+
+A value is a name, or an object of regions as XState reports nested and parallel states: `{ form: "editing", menu: { open: "hovered" } }`. It is flattened into active paths ("form", "form.editing", "menu", "menu.open", "menu.open.hovered"); the rests of every `places` key equal to one of them apply, outermost first, so a deeper path overrides a clock a shallower one set. Keys are names or dotted paths. A value matching no key changes nothing and resolves false.
+
+```ts
+import { rests } from "svjeez/page";
+import { createActor } from "xstate"; // svjeez doesn't depend on it
+
+const view = rests(scene, { "field.valid": { check: 1 }, "submit.sending": { spin: 1 } });
+const actor = createActor(form);
+view.show(actor.getSnapshot().value);
+actor.subscribe((snapshot) => view.go(snapshot.value));
+actor.start();
+```

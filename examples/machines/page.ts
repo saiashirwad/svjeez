@@ -1,8 +1,10 @@
-import { machine, mount, type Mounted } from "svjeez/page";
+import { machine, mount, rests, type Mounted } from "svjeez/page";
+import { createActor, setup, stateIn, assign } from "xstate";
 import hoverCard from "../dist/hover-card.svg" with { type: "text" };
 import stepper from "../dist/stepper.svg" with { type: "text" };
 import tabs from "../dist/tabs.svg" with { type: "text" };
 import toggle from "../dist/toggle.svg" with { type: "text" };
+import form from "../dist/xstate-form.svg" with { type: "text" };
 
 interface Watched {
   readonly state: string;
@@ -99,3 +101,101 @@ follow(cardBox, card);
 listen(cardScene, "card", "pointerenter", () => card.send("enter"));
 
 listen(cardScene, "card", "pointerleave", () => card.send("leave"));
+
+// XState decides what happens; rests() only says where each clock sits in each state.
+const [formScene, formBox] = show("xstate-form", form);
+
+const email = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+interface Form {
+  readonly address: string;
+}
+
+type FormEvent =
+  | { readonly type: "input"; readonly address: string }
+  | { readonly type: "check" }
+  | { readonly type: "submit" };
+
+// SAFETY: XState reads these placeholders only as types and never uses them as values.
+const types = { context: {} as Form, events: {} as FormEvent };
+
+const signUp = setup({
+  types,
+  guards: { looksValid: ({ context }) => email.test(context.address) },
+}).createMachine({
+  id: "signUp",
+  type: "parallel",
+  context: { address: "" },
+  states: {
+    field: {
+      initial: "empty",
+      states: {
+        empty: {},
+        typing: {},
+        valid: {},
+        invalid: {},
+      },
+      on: {
+        input: [
+          {
+            guard: ({ event }) => event.address === "",
+            target: ".empty",
+            actions: assign({ address: ({ event }) => event.address }),
+          },
+          { target: ".typing", actions: assign({ address: ({ event }) => event.address }) },
+        ],
+        check: [
+          { guard: "looksValid", target: ".valid" },
+          { guard: ({ context }) => context.address !== "", target: ".invalid" },
+        ],
+      },
+    },
+    submit: {
+      initial: "idle",
+      states: {
+        idle: { on: { submit: { guard: stateIn({ field: "valid" }), target: "sending" } } },
+        sending: { after: { 1400: "done" } },
+        done: {},
+      },
+      on: { input: ".idle" },
+    },
+  },
+});
+
+const places = rests(formScene, {
+  "field.empty": { focus: 0, verdict: 0, ready: 0 },
+  "field.typing": { focus: 1, verdict: 0, ready: 0 },
+  "field.valid": { focus: 1, verdict: 0.5, ready: 1 },
+  "field.invalid": { focus: 1, verdict: 1, ready: 0 },
+  "submit.idle": { send: 0 },
+  "submit.sending": { send: 0.5 },
+  "submit.done": { send: 1 },
+});
+
+const actor = createActor(signUp);
+
+places.show(actor.getSnapshot().value);
+
+actor.subscribe((snapshot) => {
+  formBox.dataset.state = JSON.stringify(snapshot.value);
+  places.go(snapshot.value);
+});
+
+actor.start();
+
+// The scene draws the field; a real input sits over it.
+const input = formBox.appendChild(document.createElement("input"));
+
+input.placeholder = "you@example.com";
+
+input.autocomplete = "off";
+
+input.addEventListener("input", () => actor.send({ type: "input", address: input.value }));
+
+input.addEventListener("blur", () => actor.send({ type: "check" }));
+
+input.addEventListener("keydown", ({ key }) => {
+  if (key === "Enter") actor.send({ type: "check" });
+});
+
+listen(formScene, "submit", "click", () => actor.send({ type: "submit" }));

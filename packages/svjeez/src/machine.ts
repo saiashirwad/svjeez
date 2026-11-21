@@ -26,40 +26,60 @@ export interface Machine<S extends string, E extends string> {
   stop(): void;
 }
 
+/** What XState reports for a state: a name, or for nested and parallel states an object of regions. */
+export type StateValue = string | { readonly [region: string]: StateValue | undefined };
+
+export interface View {
+  /** What it last went to; a value that matched no place doesn't count. */
+  readonly state: StateValue | undefined;
+  /**
+   * Run every clock the state names from wherever it is to its resting place. Resolves true when all have arrived, and
+   * false when something else moved first, or the value matches no place and nothing moves.
+   */
+  go(state: StateValue): Promise<boolean>;
+  /** Jump to a state with no animation, for the first paint. */
+  show(state: StateValue): void;
+  /** Halt any move, leaving the clocks where they are. */
+  stop(): void;
+}
+
 type Leads<S extends string> =
   | Readonly<Record<string, string | undefined>>
   | ((state: S) => S | undefined);
 
+type Places = Readonly<Record<string, number>>;
+
 const listed = (names: Iterable<string>) =>
   [...names].map((name) => `"${name}"`).join(", ") || "none";
 
+// A value's active paths: each region and state on the way down, as "menu", "menu.open", "menu.open.hovered".
+const paths = (value: StateValue | undefined, parent = ""): string[] => {
+  if (value === undefined) return [];
+
+  if (!(value instanceof Object)) return [parent + value];
+
+  return Object.entries(value).flatMap(([region, inside]) => [
+    parent + region,
+    ...paths(inside, `${parent}${region}.`),
+  ]);
+};
+
+const depth = (path: string) => path.split(".").length;
+
 /**
- * A state machine over the clocks of a mounted scene. A state says where each clock rests; moving to it runs those
- * clocks from wherever they are, so the scene's own easing plays, and moving again mid-way retargets from there.
+ * Where the clocks of a mounted scene rest in each state, and the way to move them there. `table` maps a state to
+ * its clock rests, as progress from 0 to 1; going to a state runs those clocks from wherever they are, so the scene's
+ * own easing plays, and going again mid-way retargets from there.
+ *
+ * A state value is a name or, as XState reports nested and parallel states, an object of regions. It is flattened into
+ * its active paths, `{ menu: { open: "hovered" } }` into "menu", "menu.open" and "menu.open.hovered", and the rests of
+ * every key in `table` that is one of those paths apply, outermost first, so a deeper state overrides a clock a
+ * shallower one set. Keys are names or dotted paths. A value that matches no key changes nothing and resolves false.
+ * Any source of state drives it: `actor.subscribe((s) => view.go(s.value))`.
  */
-export const machine = <S extends string, E extends string>(
-  scene: Mounted,
-  spec: MachineSpec<S, E>,
-): Machine<S, E> => {
-  const states: Readonly<Record<string, Readonly<Record<string, number>>>> = spec.states;
-  const events: Readonly<Record<string, Leads<S>>> = spec.on;
-
-  const rests = new Map(
-    Object.entries(states).map(([state, places]) => [state, Object.entries(places)]),
-  );
-
-  const names = [...rests.keys()];
-
-  const known = (state: string | undefined): state is S =>
-    state !== undefined && names.includes(state);
-
-  if (!known(spec.initial))
-    throw new Error(
-      `The machine starts in "${spec.initial}", which is not a state; the states are ${listed(names)}. Set initial to one of them.`,
-    );
-
-  for (const [state, places] of rests)
-    for (const [name, amount] of places) {
+export const rests = (scene: Mounted, table: Readonly<Record<string, Places>>): View => {
+  for (const [state, clocks] of Object.entries(table))
+    for (const [name, amount] of Object.entries(clocks)) {
       if (!scene.clocks.has(name))
         throw new Error(
           `State "${state}" names the clock "${name}", but this SVG has ${listed(scene.clocks.keys())}. Name one of them.`,
@@ -71,6 +91,86 @@ export const machine = <S extends string, E extends string>(
         );
     }
 
+  let state: StateValue | undefined;
+  let moves = 0;
+  let moving: string[] = [];
+
+  // The rest of each clock the value names, or undefined when it matches no key.
+  const resting = (value: StateValue): Map<string, number> | undefined => {
+    const active = paths(value)
+      .filter((path) => Object.hasOwn(table, path))
+      .sort((a, b) => depth(a) - depth(b));
+
+    if (active.length === 0) return undefined;
+
+    return new Map(active.flatMap((path) => Object.entries(table[path]!)));
+  };
+
+  const stop = () => {
+    moves++;
+
+    for (const name of moving) scene.clock(name).pause();
+    moving = [];
+  };
+
+  return {
+    get state() {
+      return state;
+    },
+    go: (value) => {
+      const at = resting(value);
+
+      if (at === undefined) return Promise.resolve(false);
+
+      const mine = ++moves;
+
+      // A clock the last move was still running and this one doesn't name stays where it is.
+      for (const name of moving) if (!at.has(name)) scene.clock(name).pause();
+      moving = [...at.keys()];
+      state = value;
+
+      return Promise.all(
+        [...at].map(([name, amount]) => {
+          const clock = scene.clock(name);
+
+          return clock.to(amount * clock.over);
+        }),
+      ).then((arrived) => mine === moves && arrived.every(Boolean));
+    },
+    show: (value) => {
+      const at = resting(value);
+
+      if (at === undefined) return;
+
+      stop();
+      state = value;
+
+      for (const [name, amount] of at) scene.clock(name).progress(amount);
+    },
+    stop,
+  };
+};
+
+/**
+ * A state machine over the clocks of a mounted scene: `rests()` for the visuals, and the events that lead from one
+ * state to the next. The shorthand for simple widgets; an XState actor can drive `rests()` directly.
+ */
+export const machine = <S extends string, E extends string>(
+  scene: Mounted,
+  spec: MachineSpec<S, E>,
+): Machine<S, E> => {
+  const events: Readonly<Record<string, Leads<S>>> = spec.on;
+  const view = rests(scene, spec.states);
+  const names = Object.keys(spec.states);
+
+  const known = (state: string | undefined): state is S =>
+    state !== undefined && names.includes(state);
+
+  if (!known(spec.initial))
+    throw new Error(
+      `The machine starts in "${spec.initial}", which is not a state; the states are ${listed(names)}. Set initial to one of them.`,
+    );
+
   for (const [event, leads] of Object.entries(events))
     if (!(leads instanceof Function))
       for (const [from, next] of Object.entries(leads))
@@ -81,40 +181,17 @@ export const machine = <S extends string, E extends string>(
 
   const listeners = new Set<(state: S, from: S) => void>();
   let state = spec.initial;
-  let moves = 0;
-  let moving: string[] = [];
 
-  const rest = (name: string, amount: number) => {
-    const clock = scene.clock(name);
-
-    return clock.to(amount * clock.over);
-  };
-
-  for (const [name, amount] of rests.get(state)!) scene.clock(name).progress(amount);
-
-  const stop = () => {
-    moves++;
-
-    for (const name of moving) scene.clock(name).pause();
-    moving = [];
-  };
+  view.show(state);
 
   const go = (to: S): Promise<boolean> => {
     const from = state;
-    const places = rests.get(to)!;
-    const mine = ++moves;
 
-    // A clock the last move was still running and this one doesn't name stays where it is.
-    for (const name of moving)
-      if (!places.some(([named]) => named === name)) scene.clock(name).pause();
-    moving = places.map(([name]) => name);
     state = to;
 
     if (from !== to) for (const listener of listeners) listener(to, from);
 
-    return Promise.all(places.map(([name, amount]) => rest(name, amount))).then(
-      (arrived) => mine === moves && arrived.every(Boolean),
-    );
+    return view.go(to);
   };
 
   return {
@@ -140,6 +217,6 @@ export const machine = <S extends string, E extends string>(
 
       return () => void listeners.delete(listener);
     },
-    stop,
+    stop: view.stop,
   };
 };
