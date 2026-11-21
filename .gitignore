@@ -9,5 +9,7 @@ site/.astro
 site/.alchemy
 examples/shader-site/dist
 examples/shader-site/.alchemy
+examples/field-site/dist
+examples/field-site/.alchemy
 packages/bin/.build
 packages/bin/dist
