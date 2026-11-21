@@ -21,7 +21,9 @@ import {
   span,
   tokens,
   track,
+  type Color,
   type Paint,
+  type Track,
   type SceneElement,
 } from "svjeez";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
@@ -555,16 +557,16 @@ group("timing", () => {
   test("a swapped text's shared fill may change while any of its values shows", () => {
     const words = track("one").to("two", span(1, 0.1)).to("three", span(2, 0.1));
 
-    const swapped = (fill: Paint) =>
+    const swapped = (fill: Paint | Track<Color>) =>
       made(() => (
         <Text font={mono} size={12} fill={fill} at={[10, 20]}>
           {words}
         </Text>
       ));
 
-    expect(only(swapped(track("#112233").to("#445566", span(3, 0.5))), "wasted-motion")).toEqual(
-      [],
-    );
+    expect(
+      only(swapped(track<Color>("#112233").to("#445566", span(3, 0.5))), "wasted-motion"),
+    ).toEqual([]);
   });
 
   test("motion an attached arrow takes from its ends is not reported", () => {
