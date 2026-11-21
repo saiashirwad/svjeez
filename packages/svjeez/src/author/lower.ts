@@ -943,6 +943,7 @@ const lowered = (
     el.type,
     el.type === "group" ? el.settle : undefined,
     backdrop,
+    el.type === "group" ? el.points : undefined,
   );
 
   const aimed = (node: SceneNode): SceneNode => {
@@ -985,6 +986,7 @@ const lowered = (
         ),
         ...(el.layout && { authored: { layout: el.layout } }),
         ...(el.slot !== undefined && { slot: el.slot }),
+        ...(el.shader && { shader: el.shader }),
         kind: "group",
         children,
       };

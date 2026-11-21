@@ -431,6 +431,7 @@ const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed
   const scheme = agreed(plan, entry, (node) => node.scheme, "scheme");
   const hit = agreed(plan, entry, (node) => node.hit, "hit");
   const slot = agreed(plan, entry, (node) => node.slot, "slot");
+  const shader = agreed(plan, entry, (node) => node.shader, "shader");
 
   return {
     key: entry.key,
@@ -452,6 +453,7 @@ const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed
     ...(scheme !== undefined && { scheme }),
     ...(hit !== undefined && { hit }),
     ...(slot !== undefined && { slot }),
+    ...(shader && { shader }),
     effects: effectsOf(plan, entry),
   };
 };

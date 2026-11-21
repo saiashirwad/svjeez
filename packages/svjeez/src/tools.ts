@@ -1,5 +1,12 @@
 export { svg, type SvgOptions } from "./svg/svg";
 
+export {
+  loadTypeGpu,
+  typegpuPlugin,
+  type LoadTypeGpuOptions,
+  type TypeGpuPlugin,
+} from "./load-typegpu";
+
 export type { Backend, Diagnostic, Feature, LaneReport, Support } from "./model/backend";
 
 export type { SceneOptions } from "./author/lower";

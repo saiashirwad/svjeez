@@ -203,6 +203,33 @@ export interface Source {
   readonly column?: number;
 }
 
+/** What page code writes into one field of a shader's uniform buffer each frame. */
+export type ShaderValue =
+  /** Seconds since the shader started. */
+  | { readonly kind: "time" }
+  /** The canvas's width and height in device pixels. */
+  | { readonly kind: "resolution" }
+  /** How far the named clock has run, from 0 to 1. */
+  | { readonly kind: "clock"; readonly name: string }
+  | { readonly kind: "number"; readonly value: number }
+  | { readonly kind: "vec"; readonly value: Vec }
+  /** A point in the slot's pixels, from its top left corner; the layout puts it where its anchor rests. */
+  | { readonly kind: "point"; readonly value: Vec }
+  /** A color's red, green and blue from 0 to 1, in each color scheme. */
+  | { readonly kind: "color"; readonly light: Rgb; readonly dark: Rgb };
+
+export type Rgb = readonly [red: number, green: number, blue: number];
+
+/** A named field of a shader's uniform struct, `at` bytes in. */
+export type ShaderField = ShaderValue & { readonly name: string; readonly at: number };
+
+/** The WGSL a `<Shader>` is drawn with, and the uniform struct it reads, `size` bytes of `fields`. */
+export interface ShaderMark {
+  readonly wgsl: string;
+  readonly size: number;
+  readonly fields: readonly ShaderField[];
+}
+
 /** The clock a node's animations run on when page code drives them: its name, where it plays in the static file, and its length. */
 export interface ClockMark {
   readonly name: string;
@@ -229,6 +256,8 @@ interface Base {
   readonly hit?: string;
   /** The name of the <Slot> this group is: page code puts its own HTML in the group's box. */
   readonly slot?: string;
+  /** Set on a <Shader>'s group, which is also a slot: what a page draws in the box. */
+  readonly shader?: ShaderMark;
   /** Set on the top nodes of a clocked `<Sequence>`; the nodes inside them run on that clock too. */
   readonly clock?: ClockMark;
 }

@@ -39,7 +39,7 @@ const budgets = {
   mascot: { bytes: 29500, elements: 115, stops: 200, smil: 0, cost: 106 },
   deploy: { bytes: 48600, elements: 262, stops: 240, smil: 0, cost: 119 },
   watch: { bytes: 51300, elements: 144, stops: 366, smil: 0, cost: 64 },
-  "gpu-card": { bytes: 9450, elements: 86, stops: 6, smil: 0, cost: 9 },
+  "gpu-card": { bytes: 13550, elements: 86, stops: 6, smil: 0, cost: 9 },
 } satisfies Record<string, Budget>;
 
 // Scenes change all the time; the budgets only catch a blowup, so each number may grow by a quarter before a test fails.

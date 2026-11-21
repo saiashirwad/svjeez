@@ -6,7 +6,7 @@ import { num } from "../model/format";
 import { moving, type Key as Held } from "./keys";
 import { DEFAULT_EASE, EPSILON, isHold } from "../model/time";
 import { render } from "./render";
-import { element, type AttrValue, type Element, type SvgNode } from "./tree";
+import { element, text, type AttrValue, type Element, type SvgNode } from "./tree";
 import { admit, type Backend, type Feature, type LaneReport, type Support } from "../model/backend";
 import { foldLayers } from "../model/fold";
 import { drawMoving, isStraight, type GeometrySlot } from "./svg-geometry";
@@ -28,6 +28,7 @@ import type {
   Rgba,
   SceneNode,
   Scheme,
+  ShaderMark,
   ShapeNode,
   Stroke,
   TextNode,
@@ -1024,6 +1025,17 @@ const slotAttrs = (slot: string, { x, y, width, height }: Box) => ({
 });
 
 /**
+ * What a page's shader runner needs: the uniform layout as an attribute of the slot's group, and the WGSL in a script
+ * that browsers do not run, the first child of the group.
+ */
+const shaderAttrs = ({ size, fields }: ShaderMark) => ({
+  "data-shader-inputs": JSON.stringify({ size, fields }),
+});
+
+const shaderScript = ({ wgsl }: ShaderMark): Element =>
+  element("script", { type: "text/wgsl" }, [text(wgsl)]);
+
+/**
  * A node blends with what is drawn beneath it in its nearest isolated group, so a group
  * whose children blend is isolated: they blend with their earlier siblings and never
  * with whatever the group itself sits on. The root counts as a group.
@@ -1256,8 +1268,9 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
         ...drawn.attrs,
         ...dress(inner!),
         ...(node.slot !== undefined && slotAttrs(node.slot, node.box)),
+        ...(node.shader && shaderAttrs(node.shader)),
       },
-      children,
+      node.shader ? [shaderScript(node.shader), ...children] : children,
     ),
     ...(innerLanes.length > 0 && { lanes: innerLanes }),
     ...(still && { drawn: Object.keys(drawn.attrs) }),

@@ -189,7 +189,20 @@ art.hit("card").forEach((el) => el.addEventListener("click", () => art.clock("op
 art.clock("grow").follow(scrolled(card));
 ```
 
-A `<Slot name="field" width={w} height={h}>` leaves a box in the layout for the page's own HTML: `art.slot("field").host(canvas)` puts a canvas there, moved by the scene's clocks, and the slot's children are the fallback the plain `.svg` shows. The [Signal card](examples/react-widgets/GpuCard.tsx) fills one with a live TypeGPU shader that reads the scene's storm clock every frame.
+A `<Slot name="field" width={w} height={h}>` leaves a box in the layout for the page's own HTML: `art.slot("field").host(canvas)` puts a canvas there, moved by the scene's clocks, and the slot's children are the fallback the plain `.svg` shows.
+
+A `<Shader>` is a slot the page runs for you: write the TypeGPU function in the scene, and the build turns it into WGSL inside the SVG while the page draws it with WebGPU, reading the scene's clocks, anchors and colors. The plain `.svg` shows the children.
+
+```tsx
+<Shader name="sky" width={520} height={220} inputs={{ storm, focus: card.center }} fragment={(uv, input) => {
+  "use gpu";
+  return d.vec4f(uv.x, uv.y, input.storm, 1);
+}}>
+  <Still />
+</Shader>
+```
+
+The [Signal card](examples/gpu-card/index.tsx) is a live aurora that follows its storm clock; it needs `typegpu` and `unplugin-typegpu` installed.
 
 ## Film a real web app
 
