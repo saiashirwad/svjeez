@@ -152,7 +152,7 @@ card.addEventListener("click", () => (open.time > 0 ? open.reverse() : open.play
 scene.clock("grow").follow(scrolled(card));
 ```
 
-The `.svg` still plays the span on its own, so an `<img>` embed keeps working. Inside a clock only CSS-animated properties are allowed (offset, scale, rotate, opacity, colors, draw), and anything that would need SMIL is a compile error.
+The `.svg` still plays the span on its own, so an `<img>` embed keeps working. Everything animates on a clock: when the page mounts it, the clock also takes over the SMIL inside it (morphs, moving gradients, filters, text-path starts) and sets those attributes itself.
 
 <p align="center">
   <img src="examples/dist/clocks.svg" alt="A settings card: a panel slides open, bars grow, a status dot pulses" width="480">

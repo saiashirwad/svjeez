@@ -4,9 +4,12 @@ import {
   Sequence,
   Shape,
   Stack,
+  Text,
   circle,
   clock,
   enter,
+  font,
+  line,
   linear,
   morph,
   rect,
@@ -17,6 +20,11 @@ import {
   type SceneElement,
 } from "svjeez";
 import { svg, type Model } from "svjeez/tools";
+
+const space = font.family(
+  await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url)),
+  await font.load(new URL("./fixtures/SpaceMono-Bold.ttf", import.meta.url)),
+);
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Test" }, build);
@@ -285,33 +293,32 @@ describe("what a clock refuses", () => {
     ).not.toThrow();
   });
 
-  test("an animation that plays by SMIL, which has one clock per SVG", () => {
+  test("a morph, a moving gradient and a text-path start play by SMIL, which the page's clock takes over", () => {
     const g = (x: number) => linear({ from: [0, 0], to: [x, 0], stops: ["#000000", "#ff0000"] });
 
-    expect(() =>
-      emitted(() => (
-        <Sequence clock={open}>
-          <Shape
-            key="bar"
-            geometry={rect(20, 20)}
-            fill={track<Paint>(g(10)).to(g(30), span(0, 0.4))}
-          />
-        </Sequence>
-      )),
-    ).toThrow(
-      '"bar" animates its x2 with SMIL, which plays only on the scene clock, but it is inside <Sequence clock="open">',
-    );
+    const out = emitted(() => (
+      <Sequence clock={open}>
+        <Shape
+          key="bar"
+          geometry={track(rect(20, 20)).to(circle(10), span(0, 0.4))}
+          fill={track<Paint>(g(10)).to(g(30), span(0, 0.4))}
+        />
+        <Text
+          key="word"
+          font={space}
+          size={10}
+          fill="#000000"
+          along={line([0, 50], [180, 50])}
+          start={track(0).to(1, span(0, 0.4))}
+        >
+          Hi
+        </Text>
+      </Sequence>
+    ));
 
-    expect(() =>
-      emitted(() => (
-        <Sequence when={span(0.5, 0.4)}>
-          <Shape
-            key="bar"
-            geometry={rect(20, 20)}
-            fill={track<Paint>(g(10)).to(g(30), span(0, 0.4))}
-          />
-        </Sequence>
-      )),
-    ).not.toThrow();
+    expect(out).toContain('attributeName="d"');
+    expect(out).toContain('attributeName="x2"');
+    expect(out).toContain('attributeName="startOffset"');
+    expect(out).toMatch(/<linearGradient id="g1"[^>]*data-clock="open"/);
   });
 });
