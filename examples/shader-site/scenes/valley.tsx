@@ -5,6 +5,7 @@ import {
   Shape,
   circle,
   clock,
+  moved,
   polygon,
   rect,
   sampled,
@@ -142,71 +143,80 @@ interface RangeProps {
   readonly cell: number;
 }
 
-/** A ridge of mountains: a crisp vector outline over facets the GPU lights by where the sun stands. */
-const Range = ({ name, peaks, haze, cell }: RangeProps) => (
-  <Shader
-    name={name}
-    width={WIDTH}
-    height={HORIZON}
-    clip={outline(peaks, cell * 0.08)}
-    inputs={{ hour, a: peaks[0], b: peaks[1], c: peaks[2], haze, cell }}
-    fragment={(uv, input) => {
-      "use gpu";
-      const p = std.mul(uv, d.vec2f(WIDTH, HORIZON));
+/**
+ * A ridge of mountains: a crisp vector outline over facets the GPU lights by where the sun stands. Its shader covers
+ * only the band from just above the highest peak down to the horizon, so the sky above it costs the GPU nothing.
+ */
+const Range = ({ name, peaks, haze, cell }: RangeProps) => {
+  const tall = Math.ceil(Math.max(...peaks.map(([, height]) => height)) + cell * 0.1);
+  const crest = HORIZON - tall;
 
-      const lattice = Lattice({
-        cell: d.vec2f(input.cell, input.cell * 0.82),
-        loose: 0.8,
-        time: 0,
-        sway: 0,
-      });
+  return (
+    <Shader
+      name={name}
+      at={[0, crest]}
+      width={WIDTH}
+      height={tall}
+      clip={moved(outline(peaks, cell * 0.08), [0, -crest])}
+      inputs={{ hour, a: peaks[0], b: peaks[1], c: peaks[2], haze, cell, crest }}
+      fragment={(uv, input) => {
+        "use gpu";
+        const p = d.vec2f(uv.x * WIDTH, input.crest + uv.y * (HORIZON - input.crest));
 
-      const at = facet(p, lattice);
-      const id = at.xy;
+        const lattice = Lattice({
+          cell: d.vec2f(input.cell, input.cell * 0.82),
+          loose: 0.8,
+          time: 0,
+          sway: 0,
+        });
 
-      const ia = std.add(id, d.vec2f(at.z, 0));
-      const ib = std.add(id, d.vec2f(1, at.z));
-      const ic = std.add(id, d.vec2f(0, 1));
-      const a = lift(corner(ia, lattice), ia, input.a, input.b, input.c, input.cell);
-      const b = lift(corner(ib, lattice), ib, input.a, input.b, input.c, input.cell);
-      const c = lift(corner(ic, lattice), ic, input.a, input.b, input.c, input.cell);
-      const facing = std.normalize(std.cross(std.sub(b, a), std.sub(c, a)));
-      const normal = std.mul(facing, std.sign(facing.z));
-      const middle = std.div(std.add(std.add(a, b), c), 3);
+        const at = facet(p, lattice);
+        const id = at.xy;
 
-      const sunAtNow = sunAt(input.hour);
+        const ia = std.add(id, d.vec2f(at.z, 0));
+        const ib = std.add(id, d.vec2f(1, at.z));
+        const ic = std.add(id, d.vec2f(0, 1));
+        const a = lift(corner(ia, lattice), ia, input.a, input.b, input.c, input.cell);
+        const b = lift(corner(ib, lattice), ib, input.a, input.b, input.c, input.cell);
+        const c = lift(corner(ic, lattice), ic, input.a, input.b, input.c, input.cell);
+        const facing = std.normalize(std.cross(std.sub(b, a), std.sub(c, a)));
+        const normal = std.mul(facing, std.sign(facing.z));
+        const middle = std.div(std.add(std.add(a, b), c), 3);
 
-      const toward = std.normalize(
-        d.vec3f(sunAtNow.x - middle.x, HORIZON - sunAtNow.y - middle.y, 380),
-      );
+        const sunAtNow = sunAt(input.hour);
 
-      // With the sun down, a faint light from high on the left keeps the facets apart.
-      const day = std.smoothstep(-0.08, 0.3, heightOf(sunAtNow));
-      const from = std.normalize(std.mix(d.vec3f(-0.5, 0.7, 0.5), toward, day));
-      const light = std.clamp(std.dot(normal, from), 0, 1) * (0.35 + 0.65 * day);
+        const toward = std.normalize(
+          d.vec3f(sunAtNow.x - middle.x, HORIZON - sunAtNow.y - middle.y, 380),
+        );
 
-      // Nearer ridges are darker; farther ones and the foot of each fade toward the horizon's color.
-      const ground = std.mul(land(input.hour), 0.62 + 0.38 * input.haze);
-      const lit = std.mix(std.mul(ground, 1.14), sun(input.hour), 0.16 * day + 0.04);
-      const shade = std.mul(std.mix(ground, top(input.hour), 0.25), 0.86);
-      const foot = 1 - std.smoothstep(0, 130, middle.y);
-      const mist = input.haze + (1 - input.haze) * 0.28 * foot;
+        // With the sun down, a faint light from high on the left keeps the facets apart.
+        const day = std.smoothstep(-0.08, 0.3, heightOf(sunAtNow));
+        const from = std.normalize(std.mix(d.vec3f(-0.5, 0.7, 0.5), toward, day));
+        const light = std.clamp(std.dot(normal, from), 0, 1) * (0.35 + 0.65 * day);
 
-      return d.vec4f(std.mix(std.mix(shade, lit, light), horizon(input.hour), mist), 1);
-    }}
-  >
-    <Sequence clock={hour}>
-      <Shape geometry={rect(WIDTH, HORIZON)} fill={shifting("land", hour.over)} />
-      {haze > 0 && (
-        <Shape
-          geometry={rect(WIDTH, HORIZON)}
-          fill={shifting("horizon", hour.over)}
-          opacity={haze}
-        />
-      )}
-    </Sequence>
-  </Shader>
-);
+        // Nearer ridges are darker; farther ones and the foot of each fade toward the horizon's color.
+        const ground = std.mul(land(input.hour), 0.62 + 0.38 * input.haze);
+        const lit = std.mix(std.mul(ground, 1.14), sun(input.hour), 0.16 * day + 0.04);
+        const shade = std.mul(std.mix(ground, top(input.hour), 0.25), 0.86);
+        const foot = 1 - std.smoothstep(0, 130, middle.y);
+        const mist = input.haze + (1 - input.haze) * 0.28 * foot;
+
+        return d.vec4f(std.mix(std.mix(shade, lit, light), horizon(input.hour), mist), 1);
+      }}
+    >
+      <Sequence clock={hour}>
+        <Shape geometry={rect(WIDTH, tall)} fill={shifting("land", hour.over)} />
+        {haze > 0 && (
+          <Shape
+            geometry={rect(WIDTH, tall)}
+            fill={shifting("horizon", hour.over)}
+            opacity={haze}
+          />
+        )}
+      </Sequence>
+    </Shader>
+  );
+};
 
 export default scene(
   {
@@ -271,6 +281,7 @@ export default scene(
             ))}
           </Group>
           <Shape
+            hit="sun"
             geometry={circle(RADIUS)}
             anchor="center"
             fill={shifting("sun", hour.over)}

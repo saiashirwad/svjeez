@@ -190,6 +190,27 @@ const colors = (png: Buffer) =>
 
 const shot = (page: Page) => page.locator("foreignObject canvas").screenshot();
 
+/** Two shaders side by side, or one of `width` by `height` alone. */
+const many = (count: number, width = 80, height = 60) =>
+  svg.emit(
+    scene({ size: [count * width, height], duration: 2, title: "Shaders" }, () => (
+      <>
+        {Array.from({ length: count }, (_, index) => (
+          <Shader
+            key={String(index)}
+            name={`sky${index}`}
+            width={width}
+            height={height}
+            at={[index * width, 0]}
+            fragment={turning}
+          >
+            <Shape geometry={rect(20, 20)} fill="#00ff00" />
+          </Shader>
+        ))}
+      </>
+    )),
+  );
+
 describe("the shader runner", () => {
   gpu("hosts a canvas over the slot's box, in device pixels, and hides the fallback", async () => {
     const { page, noise } = await open(build(gradient));
@@ -333,6 +354,61 @@ describe("the shader runner", () => {
     expect(noise).toEqual([]);
     await page.close();
   });
+
+  gpu(
+    "shaders on one page share one device, and hand the GPU each frame in one submit",
+    async () => {
+      const { page, noise } = await open(many(2));
+
+      await run(page, MOUNT);
+      await settle(page);
+
+      const counted = await run<{ frames: number; submits: number }>(
+        page,
+        `const from = seen.submits;
+       let frames = 0;
+       await new Promise((done) => {
+         const count = () => (++frames < 30 ? requestAnimationFrame(count) : done());
+         requestAnimationFrame(count);
+       });
+       return { frames, submits: seen.submits - from };`,
+      );
+
+      expect(await run<number>(page, "return document.querySelectorAll('canvas').length;")).toBe(2);
+      expect(await run<number>(page, "return seen.devices.length;")).toBe(1);
+      expect(counted.submits).toBeGreaterThan(counted.frames / 2);
+      expect(counted.submits).toBeLessThanOrEqual(counted.frames + 1);
+
+      await run(page, "scene.unmount();");
+      expect(
+        await run<boolean[]>(page, "return seen.devices.map((one) => one.destroyed);"),
+      ).toEqual([true]);
+      expect(noise).toEqual([]);
+      await page.close();
+    },
+  );
+
+  gpu(
+    "a large box draws at a lower density, so its canvas stays within the pixel budget",
+    async () => {
+      const { page, noise } = await open(many(1, 1600, 1000));
+
+      await run(page, MOUNT);
+      await settle(page);
+
+      const [width, height] = await run<[number, number]>(
+        page,
+        "const canvas = document.querySelector('foreignObject canvas'); return [canvas.width, canvas.height];",
+      );
+
+      // At the page's density of 2 it would be 3200 by 2000; it keeps the box's shape at 1.5 million pixels.
+      expect(width * height).toBeLessThanOrEqual(1_500_000);
+      expect(width * height).toBeGreaterThan(1_450_000);
+      expect(Math.abs(width / height - 1.6)).toBeLessThan(0.01);
+      expect(noise).toEqual([]);
+      await page.close();
+    },
+  );
 
   gpu("a shader that does not compile keeps the fallback, and says nothing", async () => {
     const { page, noise } = await open(build(gradient, "nope"));

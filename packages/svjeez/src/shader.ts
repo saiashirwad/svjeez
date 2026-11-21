@@ -11,6 +11,95 @@ type Scene = Pick<Mounted, "clocks" | "slot">;
 
 const CANVAS: Partial<CSSStyleDeclaration> = { display: "block", width: "100%", height: "100%" };
 
+/**
+ * The most pixels one canvas draws. A larger box draws at a lower density, up to its size: a shader is redrawn every
+ * frame, and a full-window one at the screen's density costs the GPU far more than the eye sees.
+ */
+const BUDGET = 1_500_000;
+
+interface Shared {
+  readonly device: Promise<GPUDevice | undefined>;
+  users: number;
+}
+
+/** The page's one device, which every shader on it draws with. */
+let shared: Shared | undefined;
+
+const opened = async (): Promise<GPUDevice | undefined> => {
+  const adapter = await navigator.gpu.requestAdapter();
+
+  if (!adapter) return undefined;
+  const device = await adapter.requestDevice();
+
+  // The page's console is not told about a shader that fails: its fallback is the picture.
+  device.addEventListener("uncapturederror", (event) => event.preventDefault());
+
+  return device;
+};
+
+/** A shader's hold on the page's device: the device, once it is made, and the function that gives it back. */
+interface Loan {
+  readonly device: Promise<GPUDevice | undefined>;
+  readonly back: () => void;
+}
+
+/** Borrows the page's device, made on first use; the last shader to give it back destroys it. */
+const borrow = (): Loan => {
+  const held: Shared = shared ?? { device: opened(), users: 0 };
+  let returned = false;
+
+  const forget = () => {
+    if (shared === held) shared = undefined;
+  };
+
+  if (!shared) {
+    shared = held;
+    held.device.then((device) => device?.lost.then(forget), forget);
+  }
+
+  held.users++;
+
+  return {
+    device: held.device,
+    back: () => {
+      if (returned) return;
+      returned = true;
+      held.users--;
+
+      if (held.users > 0) return;
+      forget();
+      held.device.then((device) => device?.destroy(), forget);
+    },
+  };
+};
+
+/** A shader's frame: its commands for this frame, or nothing when it has nothing new to draw. */
+type Draw = () => { readonly queue: GPUQueue; readonly commands: GPUCommandBuffer } | undefined;
+
+/** Every shader on screen, drawn in one animation frame and handed to the GPU in one submit. */
+const drawing = new Set<Draw>();
+let ticking = 0;
+
+const tick = () => {
+  ticking = drawing.size > 0 ? requestAnimationFrame(tick) : 0;
+  const queues = new Map<GPUQueue, GPUCommandBuffer[]>();
+
+  for (const draw of drawing) {
+    const drawn = draw();
+
+    if (drawn) queues.set(drawn.queue, [...(queues.get(drawn.queue) ?? []), drawn.commands]);
+  }
+
+  queues.forEach((commands, queue) => queue.submit(commands));
+};
+
+const draws = (draw: Draw, on: boolean) => {
+  if (on) drawing.add(draw);
+  else drawing.delete(draw);
+
+  if (on && ticking === 0) ticking = requestAnimationFrame(tick);
+};
+
 const parsed = (group: Element): { readonly table: Table; readonly code: string } | undefined => {
   const code = group.querySelector(':scope > script[type="text/wgsl"]')?.textContent;
 
@@ -25,7 +114,7 @@ const parsed = (group: Element): { readonly table: Table; readonly code: string 
 
 /**
  * Draws the WebGPU shader of one `<Shader>` group in its slot: a canvas the size of the box, redrawn every frame while it
- * is on screen. Any failure, or a page without WebGPU, leaves the fallback as the picture.
+ * is on screen, with the page's other shaders. Any failure, or a page without WebGPU, leaves the fallback as the picture.
  */
 const run = (group: Element, scene: Scene): (() => void) => {
   const source = parsed(group);
@@ -37,30 +126,25 @@ const run = (group: Element, scene: Scene): (() => void) => {
   const dark = matchMedia("(prefers-color-scheme: dark)");
   const calm = matchMedia("(prefers-reduced-motion: reduce)");
   const data = new Float32Array(table.size / 4);
+  const lent = borrow();
   let gone = false;
   let release: (() => void) | undefined;
-  let frame = 0;
-  let device: GPUDevice | undefined;
+  let draw: Draw | undefined;
   let watcher: IntersectionObserver | undefined;
 
   const stop = () => {
     gone = true;
-    cancelAnimationFrame(frame);
+
+    if (draw) draws(draw, false);
     watcher?.disconnect();
     release?.();
-    device?.destroy();
+    lent.back();
   };
 
   const start = async () => {
-    const adapter = await navigator.gpu.requestAdapter();
+    const made = await lent.device;
 
-    if (!adapter || gone) return;
-    const made = await adapter.requestDevice();
-
-    if (gone) return made.destroy();
-    device = made;
-    // The page's console is not told about a shader that fails: its fallback is the picture.
-    made.addEventListener("uncapturederror", (event) => event.preventDefault());
+    if (!made || gone) return;
     void made.lost.then(stop);
 
     const canvas = document.createElement("canvas");
@@ -104,7 +188,6 @@ const run = (group: Element, scene: Scene): (() => void) => {
     };
 
     const begun = performance.now();
-    let visible = true;
     let last = "";
 
     // What a field holds now, as the numbers the shader reads.
@@ -127,11 +210,11 @@ const run = (group: Element, scene: Scene): (() => void) => {
       }
     };
 
-    const draw = () => {
-      frame = visible ? requestAnimationFrame(draw) : 0;
+    const frame: Draw = () => {
       const { width, height } = canvas.getBoundingClientRect();
-      const w = Math.max(1, Math.round(width * devicePixelRatio));
-      const h = Math.max(1, Math.round(height * devicePixelRatio));
+      const density = Math.min(devicePixelRatio, Math.sqrt(BUDGET / Math.max(1, width * height)));
+      const w = Math.max(1, Math.round(width * density));
+      const h = Math.max(1, Math.round(height * density));
 
       if (canvas.width !== w || canvas.height !== h) Object.assign(canvas, { width: w, height: h });
 
@@ -140,7 +223,7 @@ const run = (group: Element, scene: Scene): (() => void) => {
       // Under reduced motion nothing moves but the clocks: draw only when a value has changed.
       const now = data.join();
 
-      if (calm.matches && now === last) return;
+      if (calm.matches && now === last) return undefined;
       last = now;
 
       made.queue.writeBuffer(buffer, 0, data);
@@ -161,18 +244,19 @@ const run = (group: Element, scene: Scene): (() => void) => {
       pass.setBindGroup(0, bindings);
       pass.draw(3);
       pass.end();
-      made.queue.submit([encoder.finish()]);
+
+      return { queue: made.queue, commands: encoder.finish() };
     };
 
-    // An element that is off screen is not drawn: its loop stops until it comes back.
-    watcher = new IntersectionObserver((entries) => {
-      visible = entries.at(-1)?.isIntersecting ?? true;
+    draw = frame;
 
-      if (visible && frame === 0 && !gone) frame = requestAnimationFrame(draw);
+    // An element that is off screen is not drawn until it comes back.
+    watcher = new IntersectionObserver((entries) => {
+      if (!gone) draws(frame, entries.at(-1)?.isIntersecting ?? true);
     });
 
     watcher.observe(canvas);
-    frame = requestAnimationFrame(draw);
+    draws(frame, true);
   };
 
   start().catch(stop);
