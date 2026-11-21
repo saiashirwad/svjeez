@@ -151,6 +151,12 @@ const animated = <A, T>(
 ): Animated<T> => {
   if (isDerived(value)) return derivedOf(value, change, timing, where, curves);
 
+  if (Array.isArray(value) && value.some((part) => isTrack(part) || isDerived(part)))
+    throw new SceneError(
+      `${where} is a point with a track inside it, but a track moves the whole point.`,
+      "Write the point as one track, as in track([0, 0]).to([0, -55], span(…)); track(…).map((y) => [0, y]) moves one axis.",
+    );
+
   if (!isTrack(value)) return change(value);
   // SAFETY: a value that is not undefined is an A, and undefined is itself one when A allows it, so change() takes it either way.
   const data = mapped(readOf(value, timing, where).data, "value", (given) => change(given as A));

@@ -218,4 +218,23 @@ describe("two steps on one track", () => {
     );
     expect(error.fix).toStartWith("Start the later step at 2s or later");
   });
+
+  test("a point with a track inside it is refused at its node, with the whole-point track to write", () => {
+    const error = thrown(() =>
+      made(() => (
+        <Shape
+          key="dot"
+          geometry={circle(4)}
+          // @ts-expect-error a point is one track, not a track per axis
+          offset={[0, track(0).to(-55, span(1, 1))]}
+          fill="#FF0000"
+        />
+      )),
+    );
+
+    expect(error.problem).toBe(
+      'offset on <Shape> "dot" is a point with a track inside it, but a track moves the whole point.',
+    );
+    expect(error.fix).toContain("track([0, 0]).to([0, -55]");
+  });
 });

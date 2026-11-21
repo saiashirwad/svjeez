@@ -210,6 +210,7 @@ Runtime errors. `…` stands for a value the message fills in.
 | `Two nodes are both keyed "…"….` | keys are unique among siblings; `key` is a string or a number (`key={year}`), and `1` and `"1"` collide (unkeyed siblings are keyed `#0`, `#1`… by position, so they never collide with yours) |
 | `Two steps move … at once: one …, and another …, before the first ends.` | start the second step when the first ends (`first.next(over)`) |
 | `… and … read the same track, but they count time on different clocks: … and ….` | make a track per clock, or put both nodes in one `<Sequence>` |
+| `… is a point with a track inside it, but a track moves the whole point.` | one track for the point: `track([0, 0]).to([0, -55], span)`, or `track(0).map((y) => [0, y])` for one axis |
 | `A track starts at a value, but track(…) starts at an anchor.` | `track([0, 0]).to(anchor, span)`: start at a point |
 | `… goes to an anchor, but the … it sits in places it.` | a container's child can't follow an anchor: wrap it in a `<Group>` |
 | `to() takes a span, got …. Write .to(value, span(start, over)); a step right after another is span.next(over).` | pass a span |
