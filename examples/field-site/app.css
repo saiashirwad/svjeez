@@ -133,9 +133,7 @@ button {
 }
 
 .controls button[aria-checked="true"] {
-  position: relative;
-  border-color: #c9f27a;
-  color: #c9f27a;
+  background: #222b38;
 }
 
 .controls button:hover,

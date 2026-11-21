@@ -22,14 +22,11 @@ const CODE = trimmed(file);
 /** Which layer the stage shows: both, only the vector one svjeez draws, or only the field the GPU draws. */
 const LAYERS = [
   { show: "both", label: "Both", key: "1" },
-  { show: "svg", label: "SVG · svjeez", key: "2" },
-  { show: "gpu", label: "GPU · TypeGPU", key: "3" },
+  { show: "svg", label: "svjeez", key: "2" },
+  { show: "gpu", label: "TypeGPU", key: "3" },
 ] as const;
 
 type Show = (typeof LAYERS)[number]["show"];
-
-/** How far peeling lifts the vector layer, in scene units: the scene's own "peeled" offset. */
-const LIFT = -14;
 
 type Name = (typeof CHARGES)[number]["name"] | "p";
 
@@ -93,7 +90,6 @@ export const App = () => {
   const stage = useRef<HTMLDivElement>(null);
   const grab = useRef<{ name: Name; from: Vec; at: Vec } | undefined>(undefined);
   const [places, setPlaces] = useState(START);
-  const [peeled, setPeeled] = useState(false);
   const [open, setOpen] = useState(false);
   const [moved, setMoved] = useState(false);
   const [layer, setLayer] = useState<Show>("both");
@@ -111,8 +107,6 @@ export const App = () => {
         event.altKey
       )
         return;
-
-      if (event.key === "l" || event.key === "L") setPeeled((was) => !was);
 
       if (event.key === "Escape") setOpen(false);
 
@@ -182,7 +176,6 @@ export const App = () => {
       <div className="stage" ref={stage} data-show={layer}>
         <Scene
           scene={fields}
-          state={peeled ? "peeled" : "flat"}
           onMount={(mounted) => {
             scene.current = mounted;
             show(mounted, places);
@@ -190,14 +183,7 @@ export const App = () => {
             return () => (scene.current = undefined);
           }}
         />
-        <div
-          className="handles"
-          style={{
-            transform: peeled
-              ? `translate(${(LIFT / WIDTH) * 100}%, ${(LIFT / HEIGHT) * 100}%)`
-              : undefined,
-          }}
-        >
+        <div className="handles">
           {HANDLES.map(({ name, label }) => (
             <button
               key={name}
@@ -239,14 +225,6 @@ export const App = () => {
         </div>
         <button
           type="button"
-          aria-pressed={peeled}
-          aria-keyshortcuts="L"
-          onClick={() => setPeeled((was) => !was)}
-        >
-          Peel layers <kbd>L</kbd>
-        </button>
-        <button
-          type="button"
           aria-expanded={open}
           aria-controls="source"
           onClick={() => setOpen((was) => !was)}
@@ -267,7 +245,7 @@ export const App = () => {
         <Source code={CODE} />
       </aside>
       <p className={moved ? "hint gone" : "hint"} aria-hidden>
-        drag a charge or the probe · 1 2 3 show each layer · L peels them apart
+        drag a charge or the probe · 1 2 3 show each layer
       </p>
       <p className="lockup">
         <a href="https://svjeez.texoport.in">svjeez</a> <span aria-label="loves">♥</span>{" "}

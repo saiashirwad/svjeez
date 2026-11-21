@@ -18,7 +18,7 @@ import {
 } from "svjeez";
 import { d, std } from "typegpu";
 import { BOTTOM, CHARGES, HEIGHT, LEFT, RIGHT, STEP, TOP, UNIT, WIDTH } from "./field";
-import { Fallback, Plate, Rulers } from "./frame";
+import { Fallback, Rulers } from "./frame";
 import { COOL, INK, MUTED, TEXT, WARM, mono } from "./style";
 
 // source: begin
@@ -44,9 +44,6 @@ const [px, py] = [clock("px", DRAG), clock("py", DRAG)];
 /** What the probe reads, worked out by the page: the field's heading and length, its strength and the potential. */
 const [heading, reach] = [clock("heading", DRAG), clock("reach", DRAG)];
 const [strength, potential] = [clock("strength", DRAG), clock("potential", DRAG)];
-
-/** Peeling lifts the vector layer off the GPU layer: the "peeled" state runs it to 1. */
-const peel = clock("peel", span(0, 0.8));
 
 /** Where progress on an x or y clock puts a thing. The vector tracks and the shader both read it from here. */
 const across = (progress: number): number => {
@@ -89,7 +86,7 @@ const Field = () => (
     name="field"
     width={WIDTH}
     height={HEIGHT}
-    inputs={{ ax, ay, bx, by, cx, cy, dx, dy, peel }}
+    inputs={{ ax, ay, bx, by, cx, cy, dx, dy }}
     fragment={(uv, input) => {
       "use gpu";
       const p = std.mul(uv, d.vec2f(WIDTH, HEIGHT));
@@ -127,10 +124,7 @@ const Field = () => (
         std.mul(std.mix(d.vec3f(0.7, 0.75, 0.82), tint, 0.5), along * (0.1 + 0.5 * dash * near)),
       );
 
-      // Peeled, the field steps back: grey and dim, so the vector layer stands out.
-      const grey = d.vec3f(std.dot(lit, d.vec3f(0.3, 0.59, 0.11)) * 0.6);
-
-      return d.vec4f(std.mix(lit, grey, input.peel * 0.85), 1);
+      return d.vec4f(lit, 1);
     }}
   >
     <Fallback />
@@ -249,8 +243,6 @@ const Probe = () => (
   </Sequence>
 );
 
-const fade = track(0).to(1, span(0.3, 0.5));
-
 export default scene(
   {
     size: [WIDTH, HEIGHT],
@@ -259,25 +251,16 @@ export default scene(
     still: false,
     title: "Fields",
     desc: "Four line charges, +2q, -2q, +q and -q, and the electric field around them: equipotential rings and field lines with light running along them, a probe reading the field, and rulers.",
-    states: { flat: { peel: 0 }, peeled: { peel: 1 } },
   },
   (canvas) => (
     <Group>
       <Shape geometry={canvas.rect} fill={INK} />
-      <Sequence clock={peel}>
-        <Group offset={track<Vec>([0, 0]).to([26, 26], span(0, peel.over), ease.inOut)}>
-          <Field />
-          <Plate tag="WebGPU · TypeGPU" at={[1060, 880]} point={[1150, 800]} opacity={fade} />
-        </Group>
-        <Group offset={track<Vec>([0, 0]).to([-14, -14], span(0, peel.over), ease.inOut)}>
-          <Rulers />
-          {CHARGES.map(({ name, q }) => (
-            <Charge key={name} name={name} q={q} x={AXES[name][0]} y={AXES[name][1]} />
-          ))}
-          <Probe />
-          <Plate tag="SVG · svjeez" at={[200, 120]} point={[150, 52]} opacity={fade} />
-        </Group>
-      </Sequence>
+      <Field />
+      <Rulers />
+      {CHARGES.map(({ name, q }) => (
+        <Charge key={name} name={name} q={q} x={AXES[name][0]} y={AXES[name][1]} />
+      ))}
+      <Probe />
     </Group>
   ),
 );

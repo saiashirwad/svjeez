@@ -1,26 +1,6 @@
-import { Arrow, Group, Shape, Text, moved, path, rect, type Anim, type Vec } from "svjeez";
+import { Group, Shape, Text, moved, path, rect } from "svjeez";
 import { HEIGHT, STEP, UNIT, WIDTH, equipotential } from "./field";
-import { ACCENT, COOL, INK, MUTED, TEXT, WARM, mono } from "./style";
-
-/** A small tag on a leader, shown while peeled. */
-export const Plate = ({
-  tag,
-  at,
-  point,
-  opacity,
-}: {
-  tag: string;
-  at: Vec;
-  point: Vec;
-  opacity: Anim<number>;
-}) => (
-  <Group opacity={opacity}>
-    <Arrow from={at} to={point} head={5} inset={4} stroke={{ color: ACCENT, width: 1 }} />
-    <Text font={mono} size={13} fill={ACCENT} at={at} anchor={[0, 0]}>
-      {tag}
-    </Text>
-  </Group>
-);
+import { COOL, INK, MUTED, TEXT, WARM, mono } from "./style";
 
 /** The engineering frame: a hairline border, rulers along the top and left in u, and a scale bar. */
 export const Rulers = () => {
