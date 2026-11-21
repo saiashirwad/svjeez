@@ -10,13 +10,19 @@ export interface ClockControl {
   readonly over: Seconds;
   /** Where the clock is now, from 0 to `over`. */
   readonly time: Seconds;
-  /** Show the clock at `time`, kept within 0 to `over`. Stops a play() or reverse() in progress. */
+  /** Show the clock at `time`, kept within 0 to `over`. Stops a to(), play() or reverse() in progress. */
   seek(time: Seconds): void;
   /** Seek to `amount` of the way through the clock, from 0 to 1. */
   progress(amount: number): void;
-  /** Run forward to `over` in real time. Resolves true if it got there, false if something else moved the clock first. */
+  /**
+   * Run from where the clock is to `time` (kept within 0 to `over`) in real time, so the scene's own easing plays,
+   * forward or backward. Resolves true if it got there, false if something else moved the clock first. Under reduced
+   * motion it jumps.
+   */
+  to(time: Seconds): Promise<boolean>;
+  /** Run forward to `over` in real time, as to(over) does. */
   play(): Promise<boolean>;
-  /** Run back to 0 in real time, resolving as play() does. */
+  /** Run back to 0 in real time, as to(0) does. */
   reverse(): Promise<boolean>;
   /** Stop where the clock is. */
   pause(): void;
@@ -28,7 +34,9 @@ export interface Mounted {
   readonly clocks: ReadonlyMap<string, ClockControl>;
   /** The clock called `name`. Throws, naming the clocks the SVG has, when there is none. */
   clock(name: string): ClockControl;
-  /** Stop every driver and every play() or reverse(), leaving the picture where it is. */
+  /** The elements marked `hit="name"` in the scene. Throws, naming the hit names the SVG has, when there are none. */
+  hit(name: string): readonly Element[];
+  /** Stop every driver and every move of a clock, leaving the picture where it is. */
   unmount(): void;
 }
 
@@ -271,8 +279,10 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
     ending = undefined;
   };
 
-  const run = (to: Seconds) =>
-    new Promise<boolean>((resolve) => {
+  const run = (end: Seconds) => {
+    const to = clamp(end, over);
+
+    return new Promise<boolean>((resolve) => {
       halt();
 
       if (calm() || time === to) {
@@ -300,6 +310,7 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
       ending = resolve;
       frame = requestAnimationFrame(tick);
     });
+  };
 
   const seek = (at: Seconds) => {
     halt();
@@ -331,6 +342,7 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
     },
     seek,
     progress,
+    to: run,
     play: () => run(over),
     reverse: () => run(0),
     pause: halt,
@@ -362,6 +374,21 @@ export const mount = (root: Element): Mounted => {
         throw new Error(
           `This SVG has no clock "${name}"; it has ${clocks.size ? [...clocks.keys()].map((one) => `"${one}"`).join(", ") : "none"}`,
         );
+
+      return found;
+    },
+    hit: (name) => {
+      const found = [...root.querySelectorAll(`[data-hit="${CSS.escape(name)}"]`)];
+
+      if (!found.length) {
+        const names = new Set(
+          [...root.querySelectorAll("[data-hit]")].map((one) => one.getAttribute("data-hit")),
+        );
+
+        throw new Error(
+          `This SVG has no hit "${name}"; it has ${names.size ? [...names].map((one) => `"${one}"`).join(", ") : "none"}`,
+        );
+      }
 
       return found;
     },

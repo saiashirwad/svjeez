@@ -18,6 +18,8 @@ export { Ref, ref } from "./refs";
 
 export interface Common {
   readonly key?: string;
+  /** A name page code finds this node by: its outermost SVG element gets `data-hit="name"`. Several nodes may share one. */
+  readonly hit?: string;
   readonly ref?: Ref;
   readonly at?: Anim<Vec> | Anchor;
   readonly anchor?: AnchorPlace;
