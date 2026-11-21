@@ -579,21 +579,50 @@ const wasted = (
   named: readonly Named[],
 ): void => {
   const { duration, loop } = survey.scene;
-  const visible = shownOf(hidden, duration);
+  const own = shownOf(hidden, duration);
 
-  if (hidden.length === 0 || visible.length === 0) return;
-  const [first, last] = [visible[0]![0], visible.at(-1)![1]];
+  if (hidden.length === 0 || own.length === 0) return;
   const before = new Map<string, Stretch[]>();
   const after = new Map<string, Stretch[]>();
+  let [first, last] = [own[0]![0], own.at(-1)![1]];
+
+  // A swap's texts share the authored values (the fill, say): such a value is seen while any of them shows.
+  const parent = entry.ancestors.at(-1);
+  const swap = parent?.kind === "group" && parent.authored?.count ? parent.children : [];
+
+  // Each text lowers its own copy of a shared value, so compare them by content.
+  const visibleFor = (item: Named): readonly Stretch[] => {
+    const same = JSON.stringify(item.value);
+
+    const shared = swap.filter((sibling) =>
+      valuesOf(sibling).some(
+        (other) => other.name === item.name && JSON.stringify(other.value) === same,
+      ),
+    );
+
+    return shared.length < 2
+      ? own
+      : shared.flatMap((sibling) => shownOf(survey.hidden.get(sibling.key) ?? [], duration));
+  };
 
   for (const item of named) {
     const { name, value } = item;
 
     if (!isLane(value) || value.period !== undefined) continue;
+    const visible = visibleFor(item);
+
+    const [from, to] = [
+      Math.min(...visible.map(([a]) => a)),
+      Math.max(...visible.map(([, b]) => b)),
+    ];
 
     for (const change of changesOf(value, duration)) {
-      if (change[1] < first - 1e-6) before.set(name, [...(before.get(name) ?? []), change]);
-      else if (change[0] > last + 1e-6 && change[0] < duration) {
+      if (change[1] < from - 1e-6) {
+        first = Math.min(first, from);
+        before.set(name, [...(before.get(name) ?? []), change]);
+      } else if (change[0] > to + 1e-6 && change[0] < duration) {
+        last = Math.max(last, to);
+
         if (loop && gap(survey, entry, item, [change[1], 0], 1) === undefined) continue;
         after.set(name, [...(after.get(name) ?? []), change]);
       }
