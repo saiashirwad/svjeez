@@ -47,6 +47,8 @@ export { through, within, type Derived, type MapOptions } from "./author/derived
 
 export { enter, exit, sampled, wiggle } from "./author/recipes";
 
+export { random } from "./author/random";
+
 export { ease, type Curve } from "./author/spring";
 
 export { span, type Interval, type Span, type When } from "./author/span";
