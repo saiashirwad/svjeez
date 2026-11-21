@@ -16,6 +16,8 @@ export type { Ref } from "./author/refs";
 
 export { Align, Center, Grid, spread, Stack } from "./author/layout";
 
+export type { AnchorPlace, TextAnchorPlace } from "./author/pin";
+
 export { Arrow } from "./author/arrow";
 
 export {

@@ -3,6 +3,7 @@ import {
   linear,
   track,
   type Color,
+  type TextAnchorPlace,
   type Anim,
   type Curve,
   type Derived,
@@ -24,6 +25,12 @@ const anim: Anim<number> = scaled(keyframes([[{ start: 0, over: 1 }, 5]], 0), 2)
 
 // Stops built from computed colors are typed Color, not string, so no casts are needed.
 const sky = (a: Color, b: Color): Paint => linear({ from: [0, 0], to: [0, 100], stops: [a, b] });
+
+const where: TextAnchorPlace = "baseline-right";
+
+test("text anchor names are exported", () => {
+  expect(where).toBe("baseline-right");
+});
 
 test("gradient stops take Color values", () => {
   expect(sky("#fff", "#000")).toMatchObject({ kind: "linear" });
