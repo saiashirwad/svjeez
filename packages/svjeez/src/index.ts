@@ -45,7 +45,7 @@ export { track, type Anim, type Goal, type Track } from "./author/track";
 
 export { through, within, type Derived, type MapOptions } from "./author/derived";
 
-export { enter, exit, sampled, wiggle } from "./author/recipes";
+export { along, enter, exit, sampled, wiggle } from "./author/recipes";
 
 export { random } from "./author/random";
 

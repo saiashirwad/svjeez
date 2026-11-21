@@ -40,6 +40,7 @@ motion={[
 
 - `enter(span, { from, curve })` arrives from `from` to rest; `exit(span, { to, curve })` leaves rest for `to`. Both merge over `{ opacity: 0 }`, so a node is hidden before its enter and after its exit unless you pass `opacity` yourself (`from: { scale: 0.9 }` fades and scales; `from: { offset: [0, 8], opacity: 1 }` slides without fading). Both return a layer.
 - `wiggle(amplitude, { seed, rate, period, curve })` is seeded noise around rest that loops seamlessly; change `seed` to reroll.
+- `along(path, progress, { turn })` puts the node's [0,0] at fraction `progress` (a number or track, by arc length, the share `draw` uses) of a path, held at the ends; `turn: true` also rotates it to the heading in degrees (0 faces +x, so draw the marker pointing right). Give the node the path's coordinate space (usually at the origin) and the same track as `draw={p}`: `<Shape geometry={route} draw={p} />` then `<Shape … motion={along(route, p, { turn: true })} />`. Loops when the track does.
 - `sampled(fn, span, { tolerance })` is a track, so a sampled layer is `{ offset: sampled((t): Vec => orbit(t), span(0, 4), { tolerance: 0.5 }) }`.
 
 ## Springs

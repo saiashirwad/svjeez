@@ -103,8 +103,7 @@ Every node also takes `key ref at anchor origin rotate scale skew opacity motion
 | `span(start, over)`, `span(start)` | `.end .next(over, gap) .shift(dt) .chain(...overs) .cascade(n, step)` |
 | `track(v).to(v2, span, curve?).set(v3, when).loop(p).repeat(n).rewind(over)` | also `.span` (of the last step), `.map(fn)`, `.with(other)` |
 | `through(value, fn)`, `within(draw, from, to)` | map a number or track; a part's own 0-to-1 share of a whole's progress |
-| `motion={[{ opacity: track… }, enter(span, { from }), exit(span, { to }), wiggle(amp, { seed })]}` | layers: plain objects of `offset rotate scale skew opacity`; first outermost, the node's own props innermost |
-| `motion={along(path, progress, { turn? })}` | a layer that moves the node's [0,0] along a path by arc length (`progress` 0..1, a number or a track; `turn` faces the heading); drive it with the same track as the line's `draw` and it sits at the tip |
+| `motion={[{ opacity: track… }, enter(span, { from }), exit(span, { to }), wiggle(amp, { seed }), along(path, progress, { turn })]}` | layers: plain objects of `offset rotate scale skew opacity`; first outermost, the node's own props innermost; `along` rides a path by arc length like `draw` (same track = at the line's tip) |
 | `sampled(fn, span, { tolerance })` | any function of time (`t` from 0) fitted to few keys |
 | `ease.out`, `ease.in`, `ease.inOut`, `ease.pop`, `ease.linear`, `ease.spring()` | curves (default `ease.out`); a spring's `.settle` is the span it needs |
 | `morph(a, b, span)`, `morph.between(states, spans, { stagger, enter, exit, curve })` | state to state by key |
