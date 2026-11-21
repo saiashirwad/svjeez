@@ -374,6 +374,13 @@ const strokeOf = (
       "Give the stroke a dash, as in stroke={{ color, dash: [4, 4], dashOffset }}.",
     );
 
+  // The type says array, but plain JS callers can pass a number.
+  if (written.dash && !Array.isArray(written.dash))
+    throw new SceneError(
+      `${where} has a stroke dash of ${String(written.dash)}, which is not a list.`,
+      "Give the dash as an array of lengths, as in stroke={{ color, dash: [2, 2] }}; dash: [2] is 2 on, 2 off.",
+    );
+
   return {
     color: blendable(
       animated(

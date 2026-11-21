@@ -55,6 +55,24 @@ describe("SceneError", () => {
     expect(error.message).toStartWith('scene.tsx:7:3: <Shape> "dot" paints nothing');
   });
 
+  test("a stroke dash that is not an array is a located error", () => {
+    const error = thrown(() =>
+      made(() =>
+        jsxDEV(
+          Shape,
+          // SAFETY: the type says array; this is the plain-JS mistake under test.
+          { key: "dot", geometry: circle(4), stroke: { color: "#000000", dash: 2 as never } },
+          undefined,
+          false,
+          at(7, 3),
+        ),
+      ),
+    );
+
+    expect(error.problem).toContain("not a list");
+    expect(error.source).toEqual({ file: "scene.tsx", line: 7, column: 3 });
+  });
+
   test("names a node with no key by its component and its words, never by its path", () => {
     const error = thrown(() =>
       made(() => (
