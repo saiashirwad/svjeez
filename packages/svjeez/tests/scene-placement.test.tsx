@@ -691,7 +691,7 @@ describe("errors say what to write", () => {
         />
       )),
     ).toThrow(
-      'anchor on <Shape> "p" names the point its at places, but it has no at, so it stays where its coordinates put it. Give it an at, or drop anchor.',
+      'anchor on <Shape> "p" names the point its at places, but it has no at, so it stays where its coordinates put it. Add at, such as at={[100, 50]} anchor="center", or at={box.bottom} with a ref box to pin it to another node, or drop anchor.',
     );
     expect(() =>
       made(() => (

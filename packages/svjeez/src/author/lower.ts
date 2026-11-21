@@ -987,7 +987,7 @@ const placement = (
   )
     throw new SceneError(
       `anchor on ${where} names the point its at places, but it has no at, so it stays where its coordinates put it.`,
-      "Give it an at, or drop anchor.",
+      `Add at, such as at={[100, 50]} anchor=${JSON.stringify(props.anchor)}, or at={box.bottom} with a ref box to pin it to another node, or drop anchor.`,
     );
 };
 
