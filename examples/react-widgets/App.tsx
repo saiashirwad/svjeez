@@ -1,4 +1,5 @@
 import { Deploy } from "./Deploy.tsx";
+import { GpuCard } from "./GpuCard.tsx";
 import { Mascot } from "./Mascot.tsx";
 import { Watch } from "./Watch.tsx";
 
@@ -34,6 +35,14 @@ export const App = () => (
         camera and clocks do the rest.
       </p>
       <Watch />
+    </section>
+    <section aria-labelledby="signal">
+      <h2 id="signal">A card with a GPU inside</h2>
+      <p>
+        The scene draws the frame, the words and the scale, and leaves a slot; TypeGPU renders a
+        live aurora into it that follows the same storm clock as the badge and the readouts.
+      </p>
+      <GpuCard />
     </section>
   </main>
 );
