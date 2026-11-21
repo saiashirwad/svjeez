@@ -3,8 +3,9 @@ import { expect, test } from "bun:test";
 import type { Metrics } from "./parse.ts";
 import { render, summarize, type PhaseResult, type RunResult } from "./summary.ts";
 
-const phase = (wallMs: number, turns: number, errors: number): PhaseResult => ({
+const phase = (wallMs: number, turns: number, errors: number, timedOut = false): PhaseResult => ({
   wallMs,
+  timedOut,
   // SAFETY: the summary reads only these fields of a run's metrics.
   metrics: {
     turns,
@@ -14,7 +15,16 @@ const phase = (wallMs: number, turns: number, errors: number): PhaseResult => ({
     sourceLookups: 0,
     costUsd: 0.5,
   } as Metrics,
-  grade: { built: true, errors, warnings: 1, infos: 0, codes: {}, lines: 10, sheet: "" },
+  grade: {
+    built: true,
+    errors,
+    warnings: 1,
+    infos: 0,
+    codes: {},
+    lines: 10,
+    sheet: "",
+    timedOut: false,
+  },
 });
 
 const run = (repeat: number, build: PhaseResult, change?: PhaseResult): RunResult => ({
@@ -47,4 +57,12 @@ test("renders deltas against a baseline", () => {
   expect(text).toContain("4 (-2)");
   expect(text).toContain("0 (=)");
   expect(render(now)).not.toContain("(");
+});
+
+test("marks phases that timed out in the row and the table", () => {
+  const summary = summarize("t", [run(1, phase(600_000, 4, 0, true)), run(2, phase(10_000, 4, 0))]);
+
+  expect(summary.rows[0]).toMatchObject({ runs: 2, built: 2, timedOut: 1 });
+  expect(render(summary)).toContain("2/2 (1 timed out)");
+  expect(render(summarize("t", [run(1, phase(10_000, 4, 0))]))).not.toContain("timed out");
 });

@@ -10,7 +10,9 @@ bun run bench --model sonnet,opus --repeat 3 --label before-x
 bun run bench --model sonnet --repeat 3 --label after-x --compare before-x
 ```
 
-Flags: `--model a,b` (default sonnet), `--tasks a,b` (default all of `bench/tasks/`), `--repeat n` (1), `--concurrency n` (4), `--label name` (timestamp), `--compare <results dir, label or baseline json>`.
+Flags: `--model a,b` (default sonnet), `--tasks a,b` (default all of `bench/tasks/`), `--repeat n` (1), `--concurrency n` (4), `--label name` (timestamp), `--compare <results dir, label or baseline json>`, `--agent-timeout s` (600), `--grade-timeout s` (120).
+
+A process that outlives its timeout is killed with its children and recorded as timed out (`timedOut` on the phase and its grade, "(n timed out)" in the built column), so one pathological scene cannot stall the suite. A timed-out agent is still graded on what it wrote; a timed-out `scene check` counts as not built.
 
 Each task x model x repeat gets `examples/bench/<label>/<task>-<model>-<i>/`. A fresh agent builds the scene from `prompt.md`; tasks with a `## Change` section then get a second fresh agent running `change-prompt.md` on the result (the first version stays as `index.build.tsx`). Both are graded.
 

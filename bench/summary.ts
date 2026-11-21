@@ -10,10 +10,14 @@ export interface Grade {
   codes: Record<string, number>;
   lines: number;
   sheet: string;
+  /** scene check or frames outlived the grading limit and was killed. */
+  timedOut: boolean;
 }
 
 export interface PhaseResult {
   wallMs: number;
+  /** The agent outlived its limit and was killed. */
+  timedOut: boolean;
   metrics: Metrics;
   grade: Grade;
 }
@@ -33,6 +37,8 @@ export interface Row {
   phase: "build" | "change";
   runs: number;
   built: number;
+  /** Phases where the agent or the grading was killed for running too long. */
+  timedOut: number;
   timeS: number;
   turns: number;
   toolCalls: number;
@@ -50,7 +56,7 @@ export interface Summary {
   runs: RunResult[];
 }
 
-type Measure = Exclude<keyof Row, "task" | "model" | "phase" | "runs" | "built">;
+type Measure = Exclude<keyof Row, "task" | "model" | "phase" | "runs" | "built" | "timedOut">;
 
 export const COLUMNS: [Measure, string][] = [
   ["timeS", "time s"],
@@ -73,6 +79,7 @@ const rowOf = (task: string, model: string, phase: Row["phase"], phases: PhaseRe
   phase,
   runs: phases.length,
   built: phases.filter((p) => p.grade.built).length,
+  timedOut: phases.filter((p) => p.timedOut || p.grade.timedOut).length,
   timeS: mean(phases.map((p) => p.wallMs / 1000)),
   turns: mean(phases.map((p) => p.metrics.turns)),
   toolCalls: mean(phases.map((p) => p.metrics.toolCalls)),
@@ -123,6 +130,9 @@ const cell = (value: number, base: number | undefined, digits: number): string =
 const sameRow = (a: Row, b: Row): boolean =>
   a.task === b.task && a.model === b.model && a.phase === b.phase;
 
+const built = (row: Row): string =>
+  `${row.built}/${row.runs}${row.timedOut > 0 ? ` (${row.timedOut} timed out)` : ""}`;
+
 export const render = (summary: Summary, baseline?: Summary): string => {
   const head = ["task", "model", "n", "built", ...COLUMNS.map(([, title]) => title)];
 
@@ -135,7 +145,7 @@ export const render = (summary: Summary, baseline?: Summary): string => {
 
     const name = row.phase === "change" ? `${row.task} (change)` : row.task;
 
-    return [name, row.model, String(row.runs), `${row.built}/${row.runs}`, ...measures];
+    return [name, row.model, String(row.runs), built(row), ...measures];
   });
 
   const table = [head, head.map(() => "---"), ...lines].map((cells) => `| ${cells.join(" | ")} |`);

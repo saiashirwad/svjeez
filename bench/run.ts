@@ -1,9 +1,9 @@
-// Agent benchmark: bun run bench [--model sonnet,haiku] [--tasks orrery,...] [--repeat n] [--concurrency n] [--label name] [--compare dir|json]
+// Agent benchmark: bun run bench [--model sonnet,haiku] [--tasks orrery,...] [--repeat n] [--concurrency n] [--label name] [--compare dir|json] [--agent-timeout s] [--grade-timeout s]
 // Runs a headless Claude Code agent per task x model x repeat, grades each scene mechanically and writes bench/results/<label>/.
 
 import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { join, relative, resolve } from "node:path";
 
 import { metrics, parseStream, type RunContext } from "./parse.ts";
 import {
@@ -17,8 +17,12 @@ import {
 
 const ROOT = resolve(import.meta.dir, "..");
 const BENCH = join(ROOT, "bench");
-const AGENT_TIMEOUT_MS = 20 * 60_000;
-const GRADE_TIMEOUT_MS = 3 * 60_000;
+
+/** Seconds a process may run before it is killed. */
+interface Limits {
+  agentS: number;
+  gradeS: number;
+}
 
 interface Task {
   name: string;
@@ -33,6 +37,7 @@ interface Options {
   concurrency: number;
   label: string;
   compare?: string;
+  limits: Limits;
 }
 
 const parseArgs = (argv: string[]): Options => {
@@ -44,7 +49,7 @@ const parseArgs = (argv: string[]): Options => {
 
     if (!flag.startsWith("--") || value === undefined)
       throw new Error(
-        `usage: bun run bench [--model a,b] [--tasks a,b] [--repeat n] [--concurrency n] [--label name] [--compare dir|json]\n(bad argument: ${flag})`,
+        `usage: bun run bench [--model a,b] [--tasks a,b] [--repeat n] [--concurrency n] [--label name] [--compare dir|json] [--agent-timeout s] [--grade-timeout s]\n(bad argument: ${flag})`,
       );
 
     flags.set(flag.slice(2), value);
@@ -60,6 +65,10 @@ const parseArgs = (argv: string[]): Options => {
     concurrency: Number(flags.get("concurrency") ?? 4),
     label: flags.get("label") ?? new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19),
     compare: flags.get("compare"),
+    limits: {
+      agentS: Number(flags.get("agent-timeout") ?? 600),
+      gradeS: Number(flags.get("grade-timeout") ?? 120),
+    },
   };
 };
 
@@ -105,12 +114,59 @@ const allowedTools = (dir: string): string[] => [
   ]),
 ];
 
+const killTree = (pid: number): void => {
+  const children = Bun.spawnSync(["pgrep", "-P", String(pid)])
+    .stdout.toString()
+    .split("\n");
+
+  for (const child of children) if (child !== "") killTree(Number(child));
+
+  try {
+    process.kill(pid, "SIGKILL");
+  } catch {
+    // Already gone.
+  }
+};
+
+interface Finished {
+  stdout: string;
+  stderr: string;
+  code: number | null;
+  timedOut: boolean;
+}
+
+/** Runs a command, killing it and its children when it outlives the limit. */
+const runLimited = async (
+  cmd: string[],
+  options: { cwd: string; env?: Record<string, string | undefined> },
+  limitS: number,
+): Promise<Finished> => {
+  const proc = Bun.spawn(cmd, { ...options, stdin: "ignore", stdout: "pipe", stderr: "pipe" });
+  let timedOut = false;
+
+  const timer = setTimeout(() => {
+    timedOut = true;
+    killTree(proc.pid);
+  }, limitS * 1000);
+
+  const [stdout, stderr, code] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+    proc.exited,
+  ]);
+
+  clearTimeout(timer);
+
+  return { stdout, stderr, code, timedOut };
+};
+
 const spawnAgent = async (
   prompt: string,
   model: string,
   dir: string,
   streamFile: string,
-): Promise<number> => {
+  limitS: number,
+): Promise<{ wallMs: number; timedOut: boolean }> => {
   const args = [
     "-p",
     prompt,
@@ -135,53 +191,38 @@ const spawnAgent = async (
 
   const started = Date.now();
 
-  const proc = Bun.spawn(["claude", ...args], {
-    cwd: ROOT,
-    stdin: "ignore",
-    stdout: "pipe",
-    stderr: "pipe",
-    // The user's global CLAUDE.md is read regardless of --setting-sources; these keep it and auto-memory out.
-    env: {
-      ...process.env,
-      CLAUDE_CODE_DISABLE_CLAUDE_MDS: "1",
-      CLAUDE_CODE_DISABLE_AUTO_MEMORY: "1",
+  const { stdout, stderr, timedOut } = await runLimited(
+    ["claude", ...args],
+    {
+      cwd: ROOT,
+      // The user's global CLAUDE.md is read regardless of --setting-sources; these keep it and auto-memory out.
+      env: {
+        ...process.env,
+        CLAUDE_CODE_DISABLE_CLAUDE_MDS: "1",
+        CLAUDE_CODE_DISABLE_AUTO_MEMORY: "1",
+      },
     },
-  });
+    limitS,
+  );
 
-  const timer = setTimeout(() => proc.kill(), AGENT_TIMEOUT_MS);
+  await writeFile(streamFile, stdout);
 
-  const [out, err] = await Promise.all([
-    new Response(proc.stdout).text(),
-    new Response(proc.stderr).text(),
-    proc.exited,
-  ]);
+  if (stderr.trim()) await writeFile(`${streamFile}.stderr`, stderr);
 
-  clearTimeout(timer);
-  await writeFile(streamFile, out);
-
-  if (err.trim()) await writeFile(`${streamFile}.stderr`, err);
-
-  return Date.now() - started;
+  return { wallMs: Date.now() - started, timedOut };
 };
 
-const sceneCli = async (args: string[]): Promise<{ stdout: string; code: number }> => {
-  const proc = Bun.spawn(["bun", "--silent", "run", "scene", ...args], {
-    cwd: ROOT,
-    stdout: "pipe",
-    stderr: "pipe",
-  });
+const sceneCli = async (
+  args: string[],
+  limitS: number,
+): Promise<{ stdout: string; timedOut: boolean }> => {
+  const { stdout, timedOut } = await runLimited(
+    ["bun", "--silent", "run", "scene", ...args],
+    { cwd: ROOT },
+    limitS,
+  );
 
-  const timer = setTimeout(() => proc.kill(), GRADE_TIMEOUT_MS);
-
-  const [stdout, code] = await Promise.all([
-    new Response(proc.stdout).text(),
-    proc.exited,
-    new Response(proc.stderr).text(),
-  ]);
-
-  clearTimeout(timer);
-
-  return { stdout, code };
+  return { stdout, timedOut };
 };
 
 interface CheckProblem {
@@ -194,10 +235,10 @@ interface CheckReport {
   problems?: CheckProblem[];
 }
 
-const grade = async (dir: string, framesDir: string): Promise<Grade> => {
+const grade = async (dir: string, framesDir: string, limitS: number): Promise<Grade> => {
   const file = join(ROOT, dir, "index.tsx");
   const source = existsSync(file) ? await readFile(file, "utf8") : "";
-  const { stdout } = await sceneCli(["check", file, "--json"]);
+  const { stdout, timedOut: checkTimedOut } = await sceneCli(["check", file, "--json"], limitS);
   const start = stdout.indexOf("{");
   let report: CheckReport = {};
 
@@ -218,7 +259,9 @@ const grade = async (dir: string, framesDir: string): Promise<Grade> => {
   const built = report.scene !== undefined && !codes["compile-error"];
   const sheet = join(framesDir, "sheet.png");
 
-  if (built) await sceneCli(["frames", file, "--sheet", "--out", framesDir]);
+  const frames = built
+    ? await sceneCli(["frames", file, "--sheet", "--out", framesDir], limitS)
+    : undefined;
 
   return {
     built,
@@ -227,7 +270,8 @@ const grade = async (dir: string, framesDir: string): Promise<Grade> => {
     infos: count("info"),
     codes,
     lines: source === "" ? 0 : source.trimEnd().split("\n").length,
-    sheet: existsSync(sheet) ? sheet : "",
+    sheet: existsSync(sheet) ? relative(ROOT, sheet) : "",
+    timedOut: checkTimedOut || frames?.timedOut === true,
   };
 };
 
@@ -237,15 +281,28 @@ const phase = async (
   model: string,
   dir: string,
   out: string,
+  limits: Limits,
 ): Promise<PhaseResult> => {
-  const wallMs = await spawnAgent(prompt, model, dir, join(out, `${name}.jsonl`));
+  const { wallMs, timedOut } = await spawnAgent(
+    prompt,
+    model,
+    dir,
+    join(out, `${name}.jsonl`),
+    limits.agentS,
+  );
+
   const ctx: RunContext = { root: ROOT, dir };
   const m = metrics(parseStream(await readFile(join(out, `${name}.jsonl`), "utf8")), ctx);
 
   return {
     wallMs,
+    timedOut,
     metrics: m,
-    grade: await grade(dir, join(out, name === "build" ? "frames" : `frames-${name}`)),
+    grade: await grade(
+      dir,
+      join(out, name === "build" ? "frames" : `frames-${name}`),
+      limits.gradeS,
+    ),
   };
 };
 
@@ -255,6 +312,7 @@ const runOne = async (
   repeat: number,
   label: string,
   templates: [string, string],
+  limits: Limits,
 ): Promise<RunResult> => {
   const run = `${task.name}-${model.replace(/[^\w.-]+/g, "-")}-${repeat}`;
   const dir = `examples/bench/${label}/${run}`;
@@ -264,7 +322,7 @@ const runOne = async (
   await mkdir(out, { recursive: true });
 
   const values = { dir, task: task.name, spec: task.spec, change: task.change ?? "" };
-  const build = await phase("build", fill(templates[0], values), model, dir, out);
+  const build = await phase("build", fill(templates[0], values), model, dir, out, limits);
   let change: PhaseResult | undefined;
 
   if (task.change !== undefined) {
@@ -273,7 +331,7 @@ const runOne = async (
 
     if (existsSync(file)) await Bun.write(join(ROOT, dir, "index.build.tsx"), Bun.file(file));
 
-    change = await phase("change", fill(templates[1], values), model, dir, out);
+    change = await phase("change", fill(templates[1], values), model, dir, out, limits);
   }
 
   const result: RunResult = { task: task.name, model, repeat, dir, build, change };
@@ -283,8 +341,10 @@ const runOne = async (
 
   if (denied > 0) console.log(`warning: ${run} had ${denied} denied tool calls`);
 
+  const timedOut = [build, change].some((p) => p?.timedOut === true || p?.grade.timedOut === true);
+
   console.log(
-    `done ${run}: ${(build.wallMs / 1000).toFixed(0)}s, ${build.metrics.turns} turns, built=${build.grade.built}`,
+    `done ${run}: ${(build.wallMs / 1000).toFixed(0)}s, ${build.metrics.turns} turns, built=${build.grade.built}${timedOut ? " (timed out)" : ""}`,
   );
 
   return result;
@@ -320,7 +380,7 @@ const main = async (): Promise<void> => {
     options.models.flatMap((model) =>
       Array.from(
         { length: options.repeat },
-        (_, i) => () => runOne(task, model, i + 1, options.label, templates),
+        (_, i) => () => runOne(task, model, i + 1, options.label, templates, options.limits),
       ),
     ),
   );
