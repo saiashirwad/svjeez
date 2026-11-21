@@ -129,7 +129,7 @@ export interface SceneOptions {
    */
   readonly still?: Seconds | false;
   /**
-   * Where the scene's named clocks rest in each state, as progress from 0 to 1. A state is a name, or for nested and
+   * Where the scene's named clocks rest in each state, as progress from 0 to 1, or `looping` to run on repeat. A state is a name, or for nested and
    * parallel states a dotted path such as "menu.open". The page passes the current state and the scene moves its clocks
    * there; see `rests()` and `attach()` in svjeez/page.
    */
@@ -1340,6 +1340,9 @@ const lifted = (container: SceneElement & { readonly type: "group" }): MorphElem
   };
 };
 
+/** A place that runs its clock on repeat for as long as the state lasts, instead of resting it: `{ building: { pulse: looping } }`. */
+export const looping = "loop" as const;
+
 const checkStates = (states: States, clocks: ReadonlyMap<string, Clock>): void => {
   const names = [...clocks.keys()].map((name) => `"${name}"`).join(", ") || "none";
 
@@ -1357,10 +1360,10 @@ const checkStates = (states: States, clocks: ReadonlyMap<string, Clock>): void =
           "Name a clock made with clock() and used by a <Sequence>.",
         );
 
-      if (!Number.isFinite(place) || place < 0 || place > 1)
+      if (place !== looping && (!Number.isFinite(place) || place < 0 || place > 1))
         throw new SceneError(
           `State "${state}" rests the clock "${name}" at ${place}, but a place is progress from 0 to 1.`,
-          "Give each clock a place from 0 (its start) to 1 (its end).",
+          "Give each clock a place from 0 (its start) to 1 (its end), or looping to run it on repeat.",
         );
     }
   }

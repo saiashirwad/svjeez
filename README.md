@@ -181,7 +181,7 @@ const power = machine(scene, {
 scene.hit("switch").forEach((el) => el.addEventListener("click", () => power.send("press")));
 ```
 
-A scene can declare its states itself, `scene({ ..., states: { off: { flip: 0 }, on: { flip: 1 } } })`, so page code, or a framework wrapper using `attach(element, { state })`, only passes the current state. `machine()` is the shorthand. For logic that needs more, `rests(scene, places)` is just the visual half: `view.go(state)` moves the clocks to where that state rests, and any source of state can call it. An [XState](https://stately.ai/docs/xstate) actor does, nested and parallel states included:
+A scene can declare its states itself, `scene({ ..., states: { off: { flip: 0 }, on: { flip: 1 } } })`, so page code, or a framework wrapper using `attach(element, { state })`, only passes the current state; a place of `looping` plays that clock on repeat while the state lasts. `machine()` is the shorthand. For logic that needs more, `rests(scene, places)` is just the visual half: `view.go(state)` moves the clocks to where that state rests, and any source of state can call it. An [XState](https://stately.ai/docs/xstate) actor does, nested and parallel states included:
 
 ```ts
 const view = rests(scene, { "field.valid": { check: 1 }, "submit.sending": { spin: 1 } });

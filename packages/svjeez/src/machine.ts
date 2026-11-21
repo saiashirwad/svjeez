@@ -1,10 +1,16 @@
 import type { Mounted } from "./clocks";
+import type { Place } from "./model/ir";
+
+/** A place that runs its clock on repeat while the state lasts, instead of resting it. The same value as the scene's `looping`, so page code needn't load the authoring bundle. */
+export const looping = "loop" as const;
+
+export type { Place };
 
 export interface MachineSpec<S extends string, E extends string> {
   /** The state it starts in: its clocks are shown at their resting places at once. */
   readonly initial: NoInfer<S>;
-  /** Where each clock rests in each state, as progress from 0 to 1. Clocks a state doesn't name stay where they are. */
-  readonly states: { readonly [K in S]: Readonly<Record<string, number>> };
+  /** Where each clock rests in each state, as progress from 0 to 1, or `looping` to run it on repeat. Clocks a state doesn't name stay where they are, and one that was looping pauses. */
+  readonly states: { readonly [K in S]: Readonly<Record<string, Place>> };
   /** For each event, the state it leads to from each state; a state it doesn't name ignores it. A function decides from the current state. */
   readonly on: {
     readonly [K in E]: Partial<Record<NoInfer<S>, NoInfer<S>>> | ((state: S) => S | undefined);
@@ -33,8 +39,9 @@ export interface View {
   /** What it last went to; a value that matched no place doesn't count. */
   readonly state: StateValue | undefined;
   /**
-   * Run every clock the state names from wherever it is to its resting place. Resolves true when all have arrived, and
-   * false when something else moved first, or the value matches no place and nothing moves.
+   * Run every clock the state names from wherever it is to its resting place, or on repeat for a `looping` one.
+   * Resolves true when all the resting clocks have arrived, and false when something else moved first, or the value
+   * matches no place and nothing moves.
    */
   go(state: StateValue): Promise<boolean>;
   /** Jump to a state with no animation, for the first paint. */
@@ -47,7 +54,7 @@ type Leads<S extends string> =
   | Readonly<Record<string, string | undefined>>
   | ((state: S) => S | undefined);
 
-type Places = Readonly<Record<string, number>>;
+type Places = Readonly<Record<string, Place>>;
 
 const listed = (names: Iterable<string>) =>
   [...names].map((name) => `"${name}"`).join(", ") || "none";
@@ -68,8 +75,9 @@ const depth = (path: string) => path.split(".").length;
 
 /**
  * Where the clocks of a mounted scene rest in each state, and the way to move them there. `table` maps a state to
- * its clock rests, as progress from 0 to 1; going to a state runs those clocks from wherever they are, so the scene's
- * own easing plays, and going again mid-way retargets from there.
+ * its clock rests, as progress from 0 to 1 or `looping`; going to a state runs those clocks from wherever they are, so
+ * the scene's own easing plays, and going again mid-way retargets from there. A clock a state names as `looping` runs
+ * on from where it is, wrapping from its end to 0, until a later state rests it, or leaves it unnamed, which pauses it.
  *
  * A state value is a name or, as XState reports nested and parallel states, an object of regions. It is flattened into
  * its active paths, `{ menu: { open: "hovered" } }` into "menu", "menu.open" and "menu.open.hovered", and the rests of
@@ -95,7 +103,7 @@ export const rests = (
           `State "${state}" names the clock "${name}", but this SVG has ${listed(scene.clocks.keys())}. Name one of them.`,
         );
 
-      if (!Number.isFinite(amount) || amount < 0 || amount > 1)
+      if (amount !== looping && (!Number.isFinite(amount) || amount < 0 || amount > 1))
         throw new Error(
           `State "${state}" rests the clock "${name}" at ${amount}, but a place is progress from 0 to 1.`,
         );
@@ -106,7 +114,7 @@ export const rests = (
   let moving: string[] = [];
 
   // The rest of each clock the value names, or undefined when it matches no key.
-  const resting = (value: StateValue): Map<string, number> | undefined => {
+  const resting = (value: StateValue): Map<string, Place> | undefined => {
     const active = paths(value)
       .filter((path) => Object.hasOwn(table, path))
       .sort((a, b) => depth(a) - depth(b));
@@ -140,10 +148,14 @@ export const rests = (
       state = value;
 
       return Promise.all(
-        [...at].map(([name, amount]) => {
+        [...at].map(([name, place]) => {
           const clock = scene.clock(name);
 
-          return clock.to(amount * clock.over);
+          if (place !== looping) return clock.to(place * clock.over);
+
+          clock.loop();
+
+          return true;
         }),
       ).then((arrived) => mine === moves && arrived.every(Boolean));
     },
@@ -155,7 +167,16 @@ export const rests = (
       stop();
       state = value;
 
-      for (const [name, amount] of at) scene.clock(name).progress(amount);
+      moving = [];
+
+      for (const [name, place] of at) {
+        const clock = scene.clock(name);
+
+        if (place === looping) {
+          clock.loop();
+          moving.push(name);
+        } else clock.progress(place);
+      }
     },
     stop,
   };

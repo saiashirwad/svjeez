@@ -1,8 +1,11 @@
 import type { FontFamily } from "../font/font";
 import type { Ease, Seconds } from "./time";
 
-/** Where each named clock rests in each state, as progress from 0 to 1. */
-export type States = { readonly [state: string]: { readonly [clock: string]: number } };
+/** Where a state puts a clock: at a place from 0 to 1, or "loop" to run it on repeat. */
+export type Place = number | "loop";
+
+/** Where each named clock rests in each state. */
+export type States = { readonly [state: string]: { readonly [clock: string]: Place } };
 
 export interface Scene {
   readonly size: Vec;

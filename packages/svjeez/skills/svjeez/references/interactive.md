@@ -54,6 +54,7 @@ power.subscribe((state, from) => (card.dataset.state = state));
 - `send(event)` follows `on`; `go(state)` goes straight to a state. Both resolve true when every clock has arrived. `state` is the current state, `subscribe` hears each change at the start of its move, `stop()` halts where the clocks are.
 - An event leads from each state to another; a state it doesn't name ignores it, and `send` resolves false. A function `(state) => next` decides from the state: clamp at the ends of a stepper by returning the same state.
 - A clock a state doesn't name stays where it is. Clocks with several stops are rested at fractions: four stops 0.5s apart on a 1.5s clock rest at 0, 1/3, 2/3 and 1.
+- A place may be `looping` (from `svjeez` in a scene, from `svjeez/page` in a table): `{ building: { build: 1, pulse: looping } }` runs `pulse` on repeat, from where it is, wrapping at its end, until a later state rests it (it runs there from wherever it is) or leaves it unnamed (it pauses). `go` resolves when the resting clocks arrive. Under reduced motion it shows 0. `clock.loop()` is the same on one clock; seek, progress, to and pause stop it. The scene writes it as `"loop"` in `data-states`.
 - Moving again mid-way retargets from the current time, so two quick clicks on a toggle reverse smoothly; the earlier move resolves false.
 - `initial` shows its state at once, with no animation. Under reduced motion every move jumps.
 - A machine throws, saying what to change, for an `initial` that is not a state, a clock the SVG doesn't have, a place outside 0 to 1, or an event that leads to an unknown state.
@@ -78,7 +79,7 @@ actor.start();
 
 ## States in the scene, and `attach` for frameworks
 
-`scene({ ..., states })` declares the states, in the shape `rests` takes: `{ off: { flip: 0 }, on: { flip: 1 }, "menu.open": { drawer: 1 } }`. It throws, with the fix, for a clock the scene doesn't use, a place outside 0 to 1 or an empty state name, and writes the table on the root `<svg>` as `data-states` (only when given). `rests(scene)` then needs no places, and `scene.states` (from `mount()`) holds them; with neither, `rests` throws.
+`scene({ ..., states })` declares the states, in the shape `rests` takes: `{ off: { flip: 0 }, on: { flip: 1 }, "menu.open": { drawer: 1 } }`. It throws, with the fix, for a clock the scene doesn't use, a place that is neither 0 to 1 nor `looping`, or an empty state name, and writes the table on the root `<svg>` as `data-states` (only when given). `rests(scene)` then needs no places, and `scene.states` (from `mount()`) holds them; with neither, `rests` throws.
 
 `attach(element, { state, places, onMount })` from `svjeez/page` is the one binding a framework adapter wraps, in the shape of a Svelte action. The framework owns state, events, focus and the accessible role (a Radix or React Aria Switch); the scene is only the picture, so hide it with `aria-hidden` on the wrapper when it is decorative. React: `<Scene>` from `@svjeez/react` ([`web.md`](web.md)).
 
