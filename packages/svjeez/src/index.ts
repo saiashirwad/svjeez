@@ -49,6 +49,8 @@ export { ease, type Curve } from "./author/spring";
 
 export { span, type Span } from "./author/span";
 
+export { clock, type Clock } from "./author/clock";
+
 export { morph } from "./author/morph";
 
 export {

@@ -3,11 +3,12 @@ import type { ChannelValues } from "./channels";
 import type { Canvas, Lane as CssLane } from "./compile";
 import { num } from "../model/format";
 import { animate, windowEnd } from "./smil";
-import { element, type SvgNode } from "./tree";
+import { element, type Element, type SvgNode } from "./tree";
 import { contoursOf, outlineBoxOf, smilSafeWith } from "../model/geometry";
 import type {
   Animated,
   Box,
+  ClockMark,
   Color,
   Effect,
   Geometry,
@@ -38,7 +39,16 @@ export interface Defs {
     route: "css" | "smil",
   ) => CssLane;
   readonly draw: (node: SceneNode) => SvgNode;
+  /** The clock of the clocked sequence whose node is being drawn, if it is in one. */
+  readonly clock: () => ClockMark | undefined;
 }
+
+/** The attributes that let page code find what runs on a clock: its name, where it plays in the static file, and its length. */
+export const clockAttrs = (mark: ClockMark) => ({
+  "data-clock": mark.name,
+  "data-clock-at": num(mark.start),
+  "data-clock-over": num(mark.over),
+});
 
 const isRgba = (color: Color): color is Rgba => Array.isArray(color);
 
@@ -97,7 +107,7 @@ const smil = (
 };
 
 interface Built {
-  readonly node: SvgNode;
+  readonly node: Element;
   readonly moves: boolean;
 }
 
@@ -112,18 +122,30 @@ const twinned = (
   base: string,
   build: (id: string, still: boolean) => Built,
 ): Written => {
-  const known = defs.ids.get(signature);
+  const mark = defs.clock();
+  // A definition drawn inside a clock is stamped with it, so one drawn on two clocks is two definitions.
+  const sign = mark ? `${signature}${JSON.stringify(mark)}` : signature;
+  const known = defs.ids.get(sign);
 
-  if (known !== undefined) return { id: known, twin: defs.ids.has(`${signature}#still`) };
+  if (known !== undefined) return { id: known, twin: defs.ids.has(`${sign}#still`) };
   const id = nextId(defs, base);
-  const { node, moves } = build(id, false);
 
-  defs.ids.set(signature, id);
+  const stamped = (own: string, still: boolean): Built => {
+    const built = build(own, still);
+
+    return mark
+      ? { ...built, node: { ...built.node, attrs: { ...built.node.attrs, ...clockAttrs(mark) } } }
+      : built;
+  };
+
+  const { node, moves } = stamped(id, false);
+
+  defs.ids.set(sign, id);
   defs.nodes.push(node);
 
   if (!moves || defs.scene.still === undefined) return { id, twin: false };
-  defs.ids.set(`${signature}#still`, `${id}s`);
-  defs.nodes.push(build(`${id}s`, true).node);
+  defs.ids.set(`${sign}#still`, `${id}s`);
+  defs.nodes.push(stamped(`${id}s`, true).node);
 
   return { id, twin: true };
 };

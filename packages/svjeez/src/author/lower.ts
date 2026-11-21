@@ -2,6 +2,7 @@ import type { Font } from "../font/font";
 import { num } from "../model/format";
 import { EPSILON, type Seconds } from "../model/time";
 import { checkWindow } from "./span";
+import type { Clock } from "./clock";
 import {
   lengthOf as outlineLength,
   growBox,
@@ -136,6 +137,7 @@ interface Ctx {
   readonly notes: Notes;
   readonly patterns: Map<Pattern, ModelPattern>;
   readonly reads: Map<object, Reading>;
+  readonly clocks: Map<string, Clock>;
 }
 
 const keep = <T>(value: T): T => value;
@@ -774,20 +776,35 @@ const sceneTiming = ({ duration, reads }: Ctx): Timing => ({
   reads,
 });
 
-const label = (begin: Seconds, over: Seconds | undefined): string =>
-  `<Sequence when={span(${num(begin)}${over === undefined ? "" : `, ${num(over)}`})}>`;
+const label = (begin: Seconds, over: Seconds | undefined, named?: Clock): string =>
+  named
+    ? `<Sequence clock="${named.name}">`
+    : `<Sequence when={span(${num(begin)}${over === undefined ? "" : `, ${num(over)}`})}>`;
 
-const inside = (timing: Timing, begin: Seconds, over: Seconds | undefined): Timing => {
+const inside = (
+  timing: Timing,
+  begin: Seconds,
+  over: Seconds | undefined,
+  named?: Clock,
+): Timing => {
   checkWindow(begin, over ?? 1, "<Sequence>");
   const parent = timing.clock;
   const start = parent.offset + begin;
   const end = over === undefined ? parent.end : start + over;
-  const name = label(begin, over);
+  const name = label(begin, over, named);
+
+  if (named && parent.named)
+    throw new SceneError(
+      `A ${name} sits inside a <Sequence clock="${parent.named.name}">, and clocks don't nest.`,
+      "Put the two side by side, each with the nodes it drives.",
+    );
 
   if (start > parent.end + EPSILON || end > parent.end + EPSILON)
     throw new SceneError(
       `A ${name} runs until ${num(end - parent.offset)}s, past the ${num(parent.end - parent.offset)}s ${parent.clips.at(-1)?.label ?? "scene"}.`,
     );
+
+  const mark = named && { name: named.name, start, over: named.over };
 
   return {
     ...timing,
@@ -795,8 +812,21 @@ const inside = (timing: Timing, begin: Seconds, over: Seconds | undefined): Timi
       offset: start,
       end,
       clips: [...parent.clips, { label: name, start, end, open: over === undefined }],
+      ...((mark ?? parent.named) && { named: mark ?? parent.named }),
     },
   };
+};
+
+const claimed = (ctx: Ctx, named: Clock): void => {
+  const known = ctx.clocks.get(named.name);
+
+  if (known !== undefined && known !== named)
+    throw new SceneError(
+      `Two clocks are both named "${named.name}".`,
+      "Make the clock once with clock() and give that one value to each <Sequence>, or name them apart.",
+    );
+
+  ctx.clocks.set(named.name, named);
 };
 
 const lowerAll = (
@@ -812,7 +842,13 @@ const lowerAll = (
     if (given.type === "fragment") return lowerAll(ctx, given.children, timing, parent, taken);
 
     if (given.type === "sequence") {
-      return lowerAll(ctx, given.children, inside(timing, given.start, given.over), parent, taken);
+      const within = inside(timing, given.start, given.over, given.clock);
+
+      if (given.clock) claimed(ctx, given.clock);
+      const nodes = lowerAll(ctx, given.children, within, parent, taken);
+      const { named } = within.clock;
+
+      return given.clock ? nodes.map((node) => ({ ...node, clock: named! })) : nodes;
     }
 
     if (given.type === "morph" && given.only !== undefined) {
@@ -1336,6 +1372,7 @@ const lowerScene = (
     notes: notes(names),
     patterns: new Map(),
     reads: new Map(),
+    clocks: new Map(),
   };
 
   for (const token of Object.values(options.theme ?? {})) solidOf(ctx, token, "scene()");
