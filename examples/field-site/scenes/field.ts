@@ -31,6 +31,12 @@ export const CHARGES: readonly Charge[] = [
 
 export const PROBE: Vec = [330, 700];
 
+/** The longest arrow at the probe, in scene units: the page scales the field and each charge's share by one factor to fit it. */
+export const LONGEST = 140;
+
+/** The farthest the distance callout reaches, about the canvas's diagonal. */
+export const FARTHEST = 1700;
+
 /** Equipotentials sit this far apart in potential. */
 export const STEP = 0.5;
 

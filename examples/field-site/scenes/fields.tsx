@@ -18,6 +18,7 @@ import {
 } from "svjeez";
 import { d, std } from "typegpu";
 import { BOTTOM, CHARGES, HEIGHT, LEFT, RIGHT, STEP, TOP, UNIT, WIDTH } from "./field";
+import { Distance, Equations, Legend, Reveal, Superposition } from "./annotations";
 import { Fallback, Rulers } from "./frame";
 import { COOL, INK, MUTED, TEXT, WARM, mono } from "./style";
 
@@ -193,12 +194,14 @@ const Probe = () => (
     <Group offset={slideX(px)}>
       <Sequence clock={py}>
         <Group offset={slideY(py)}>
+          <Distance />
+          <Superposition />
           <Sequence clock={heading}>
             <Group rotate={track(-180).to(180, span(0, heading.over), ease.linear)}>
               <Shape
                 geometry={line([-150, 0], [150, 0])}
                 stroke={{ color: MUTED, width: 1, dash: [3, 5] }}
-                opacity={0.7}
+                opacity={0.45}
               />
               <Sequence clock={reach}>
                 <Arrow
@@ -206,7 +209,7 @@ const Probe = () => (
                   to={[140, 0]}
                   inset={0}
                   head={10}
-                  draw={track(0.12).to(1, span(0, reach.over), ease.linear)}
+                  draw={track(0).to(1, span(0, reach.over), ease.linear)}
                   stroke={{ color: TEXT, width: 2, cap: "round" }}
                 />
               </Sequence>
@@ -246,7 +249,7 @@ const Probe = () => (
 export default scene(
   {
     size: [WIDTH, HEIGHT],
-    duration: 1,
+    duration: 1.2,
     loop: false,
     still: false,
     title: "Fields",
@@ -257,10 +260,18 @@ export default scene(
       <Shape geometry={canvas.rect} fill={INK} />
       <Field />
       <Rulers />
-      {CHARGES.map(({ name, q }) => (
-        <Charge key={name} name={name} q={q} x={AXES[name][0]} y={AXES[name][1]} />
+      <Equations />
+      <Legend potential={potential} />
+      {CHARGES.map(({ name, q }, index) => (
+        <Reveal key={name} when={span(0.3 + 0.08 * index, 0.4)}>
+          <Charge name={name} q={q} x={AXES[name][0]} y={AXES[name][1]} />
+        </Reveal>
       ))}
-      <Probe />
+      <Reveal when={span(0.7, 0.4)}>
+        <Group clip={canvas.rect}>
+          <Probe />
+        </Group>
+      </Reveal>
     </Group>
   ),
 );

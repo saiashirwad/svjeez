@@ -5,8 +5,10 @@ import file from "./scenes/fields.tsx?raw";
 import {
   BOTTOM,
   CHARGES,
+  FARTHEST,
   HEIGHT,
   LEFT,
+  LONGEST,
   PROBE,
   RIGHT,
   TOP,
@@ -53,16 +55,38 @@ const clamp = (value: number, low: number, high: number) => Math.min(high, Math.
 const within = ([x, y]: Vec): Vec => [clamp(x, LEFT, RIGHT), clamp(y, TOP, BOTTOM)];
 const units = (value: number) => (value / UNIT).toFixed(1);
 
-/** What the probe reads where it stands, from where the charges are. */
+/** A clock's progress for a heading of -π to π. */
+const turned = (angle: number) => (angle / Math.PI + 1) / 2;
+
+/** What the probe reads where it stands, from where the charges are: the field, each charge's share, the nearest charge. */
 const reading = (places: Record<Name, Vec>) => {
   const { e, phi } = sample(
     places.p,
     CHARGES.map(({ name, q }) => ({ q, at: places[name] })),
   );
 
+  const parts = CHARGES.map(({ name, q }) => {
+    const [x, y] = sample(places.p, [{ q, at: places[name] }]).e;
+
+    return { name, angle: Math.atan2(y, x), length: Math.hypot(x, y) };
+  });
+
+  const nearest = CHARGES.map(({ name }) => {
+    const [x, y] = [places[name][0] - places.p[0], places[name][1] - places.p[1]];
+
+    return { name, angle: Math.atan2(y, x), distance: Math.hypot(x, y) };
+  }).reduce((best, each) => (each.distance < best.distance ? each : best));
+
   const strength = Math.hypot(e[0], e[1]);
 
-  return { e, phi, strength, angle: Math.atan2(e[1], e[0]) };
+  return { e, phi, strength, angle: Math.atan2(e[1], e[0]), parts, nearest };
+};
+
+/** One scale for every arrow at the probe, so the total is drawn as the sum of the shares: the longest fits LONGEST, gently. */
+const scaling = (lengths: readonly number[]) => {
+  const most = Math.max(...lengths, 1e-6);
+
+  return (LONGEST * (1 - Math.exp(-most / 1.5))) / most;
 };
 
 /**
@@ -77,10 +101,26 @@ const show = (scene: Mounted, places: Record<Name, Vec>) => {
     scene.clock(`${name}y`).progress((y - TOP) / (BOTTOM - TOP));
   }
 
-  const { phi, strength, angle } = reading(places);
+  const { phi, strength, angle, parts, nearest } = reading(places);
+  const scale = scaling([strength, ...parts.map(({ length }) => length)]);
 
-  scene.clock("heading").progress((angle / Math.PI + 1) / 2);
-  scene.clock("reach").progress((1 - Math.exp(-strength / 1.2) - 0.12) / 0.88);
+  scene.clock("heading").progress(turned(angle));
+  scene.clock("reach").progress((strength * scale) / LONGEST);
+
+  // Each charge's share: its heading, its turn from the share before it (tip to tail), and its length.
+  parts.forEach(({ name, angle: heading, length }, index) => {
+    const before = index === 0 ? 0 : parts[index - 1]!.angle;
+    const turn = Math.atan2(Math.sin(heading - before), Math.cos(heading - before));
+
+    scene.clock(`${name}angle`).progress(turned(heading));
+    scene.clock(`${name}turn`).progress(turned(turn));
+    scene.clock(`${name}length`).progress((length * scale) / LONGEST);
+  });
+
+  // The distance callout: its heading and length; its label turns back by the same heading to stay upright.
+  scene.clock("bearing").progress(turned(nearest.angle));
+  scene.clock("upright").progress(turned(-nearest.angle));
+  scene.clock("gap").progress(nearest.distance / FARTHEST);
   scene.clock("strength").progress((Math.log10(Math.max(strength, 0.01)) + 2) / 4);
   scene.clock("potential").progress((phi + 8) / 16);
 };
@@ -179,6 +219,8 @@ export const App = () => {
           onMount={(mounted) => {
             scene.current = mounted;
             show(mounted, places);
+            // The vector layer draws itself in once; under reduced motion the clock jumps to its end.
+            void mounted.clock("intro").play();
 
             return () => (scene.current = undefined);
           }}
@@ -206,7 +248,7 @@ export const App = () => {
         </div>
       </div>
       <p className="sr-only" aria-live="polite">
-        {`Field at the probe: ${probe.strength.toFixed(2)} q per u, potential ${probe.phi.toFixed(1)}.`}
+        {`Field at the probe: ${probe.strength.toFixed(2)} q per u, potential ${probe.phi.toFixed(1)}; nearest charge ${HANDLES.find(({ name }) => name === probe.nearest.name)?.label.slice(7) ?? ""}, ${units(probe.nearest.distance)} u away.`}
       </p>
       <div className="controls">
         <div className="layers" role="radiogroup" aria-label="Show layer">
