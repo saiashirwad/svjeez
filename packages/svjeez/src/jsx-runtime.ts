@@ -42,7 +42,9 @@ export const build = <P extends { readonly children?: Child }>(
     // A number key, as from .map((item, i) => ...), reads as its text. Anything else passes through for the node to
     // refuse with an error that names it.
     return type(
-      key === undefined ? props : { ...props, key: isCount(key) && Number.isFinite(key) ? String(key) : key },
+      key === undefined
+        ? props
+        : { ...props, key: isCount(key) && Number.isFinite(key) ? String(key) : key },
     );
   } catch (error) {
     if (!(error instanceof Error)) throw error;
