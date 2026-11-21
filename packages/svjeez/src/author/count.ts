@@ -27,7 +27,7 @@ export type NumberFormat = (value: number) => string;
 export interface CountOptions {
   /** How the number is written at each moment (default `numeral()`). */
   readonly format?: NumberFormat;
-  /** The most times a second the number changes (default 30). */
+  /** The most times per second (Hz) the number may change, default 30. Between changes it holds, so a fast climb skips values; it never skips or delays the track's end value, which shows from the moment the track reaches it. */
   readonly rate?: number;
 }
 
@@ -207,7 +207,19 @@ export const ticksOf = (
     return text;
   };
 
-  return isLane(value) ? changesOf(show, duration, 1 / rate) : [{ t: 0, text: show(0) }];
+  if (!isLane(value)) return [{ t: 0, text: show(0) }];
+
+  return settled(changesOf(show, duration, 1 / rate), value.keys.at(-1)!.t);
+};
+
+/** The rate limit may push the end value past the moment its track reaches it; pull it back to that moment. */
+const settled = (ticks: Tick[], end: Seconds): Tick[] => {
+  const last = ticks.at(-1)!;
+
+  if (!(end > 0) || last.t <= end) return ticks;
+  const kept = ticks.filter((tick) => tick.t < end);
+
+  return kept.at(-1)?.text === last.text ? kept : [...kept, { t: end, text: last.text }];
 };
 
 /** Each time what `show` shows changes in the scene's `duration`, at most once every `gap` seconds. */

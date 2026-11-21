@@ -205,6 +205,22 @@ describe("ticks", () => {
     }
   });
 
+  test("the end value shows the moment the track reaches it, whatever the rate", () => {
+    const linear = {
+      kind: "lane",
+      keys: [
+        { t: 0, value: 0 },
+        { t: 1, value: 100, ease: modelEase.linear },
+      ],
+    } as const;
+
+    const ticks = ticksOf(linear, 3, numeral(), 30, "x");
+    const at = (t: number) => ticks.findLast((tick) => tick.t <= t)!.text;
+
+    expect(at(1)).toBe("100");
+    expect(ticks.at(-1)).toEqual({ t: 1, text: "100" });
+  });
+
   test("a slow count ticks when its number changes, not on the rate's beat", () => {
     const ticks = ticksOf(
       {
