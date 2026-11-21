@@ -105,6 +105,7 @@ export class ValueTrack<T> implements Track<T> {
 }
 
 export function track(initial: number): Track<number>;
+export function track(initial: string): Track<string>;
 export function track(initial: Vec): Track<Vec>;
 export function track(initial: Geometry): Track<Geometry>;
 export function track<T>(initial: T): Track<T>;
