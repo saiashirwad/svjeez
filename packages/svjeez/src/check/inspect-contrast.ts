@@ -87,6 +87,7 @@ export const lowContrast = (survey: Survey): void => {
     const schemes = schemesOf(entry);
     let worst: Contrast | undefined;
     const low: Seconds[] = [];
+    let judged = 0;
     let need = 0;
 
     survey.frames.forEach(({ t, frame }) => {
@@ -146,7 +147,10 @@ export const lowContrast = (survey: Survey): void => {
           };
       }
 
-      if (!found || found.ratio >= threshold) return;
+      if (!found) return;
+      judged++;
+
+      if (found.ratio >= threshold) return;
       low.push(t);
       need = Math.max(need, threshold);
 
@@ -155,6 +159,9 @@ export const lowContrast = (survey: Survey): void => {
 
     if (!worst) continue;
     const text = node.kind === "text";
+
+    // A thin line that moves across a backdrop only passes over it: judge it by where it spends most of its time.
+    if (!text && low.length * 2 < judged) continue;
     const floor = text ? 3 : 1.5;
 
     const what = text ? `${spoken(node, 24)}` : `the stroke of ${label(node)}`;

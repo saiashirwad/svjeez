@@ -361,6 +361,27 @@ group("low-contrast", () => {
     expect(codes(on(undefined, "#808080"))).not.toContain("low-contrast");
   });
 
+  test("a moving thin line is judged by the backdrop it spends most of its time on", () => {
+    const streak = (from: Vec, to: Vec = [200, 0]) =>
+      made(() => (
+        <Group>
+          <Shape key="sky" geometry={rect(200, 100)} fill="#000000" />
+          <Shape key="moon" geometry={rect(20, 100)} at={[90, 0]} fill="#FFFFFF" />
+          <Shape
+            key="rain"
+            geometry={line([0, 0], [0, 20])}
+            stroke={{ color: "#FFFFFF", width: 1 }}
+            at={track(from).to(to, span(0, 4))}
+          />
+        </Group>
+      ));
+
+    // Crosses the moon only briefly, and is plain against the sky the rest of the time.
+    expect(codes(streak([0, 0]))).not.toContain("low-contrast");
+    // Held on the moon, it is a real problem.
+    expect(codes(streak([95, 0], [95, 0]))).toContain("low-contrast");
+  });
+
   test("silent when what is behind is two colors", () => {
     expect(
       codes(
