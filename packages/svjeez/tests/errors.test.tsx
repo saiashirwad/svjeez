@@ -237,4 +237,19 @@ describe("two steps on one track", () => {
     );
     expect(error.fix).toContain("track([0, 0]).to([0, -55]");
   });
+
+  test("a loop shorter than a late motion says the period counts from 0s", () => {
+    const error = thrown(() =>
+      made(() => {
+        const wobble = track(0).to(-6, span(0.4, 0.15)).to(0, span(0.55, 0.15)).loop(0.6);
+
+        return <Shape geometry={circle(4)} rotate={wobble} fill="#FF0000" />;
+      }),
+    );
+
+    expect(error.problem).toBe(
+      "loop(0.6) is shorter than the motion, which runs until 0.7s, and it starts at 0.4s, not 0s. A loop's period counts from 0s, not from the first step.",
+    );
+    expect(error.fix).toStartWith("Use loop(0.7) or longer, or start the motion at 0s");
+  });
 });

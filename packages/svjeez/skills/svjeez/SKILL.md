@@ -217,7 +217,7 @@ Runtime errors. `…` stands for a value the message fills in.
 | `The spring on … from …s needs …s to settle, but its span is …s. Give it a longer span, a stiffer or more damped spring, or cut it with a later step.` | make the span `spring.settle` long |
 | `… runs until …s…, past the …s scene. End it by then, or give scene() a longer duration.` | end it sooner, or a longer `duration` |
 | `rewind(…) on … needs the last …s of its …s clock, but the motion runs until …s.` | a shorter rewind, or end the motion earlier |
-| `loop(…) is shorter than the motion, which runs until …s.` | a longer period |
+| `loop(…) is shorter than the motion, which runs until …s` | a loop's period counts from 0s, so it must reach the motion's end: a longer period, or start the motion at 0s |
 | `motion on … takes layers: plain objects of offset, rotate, scale, skew and opacity, each a value or a track.` | `motion={{ opacity: track(0).to(1, span(1, 0.3)) }}`, or `enter()`, `exit()`, `wiggle()` |
 | `A motion layer holds offset, rotate, scale, skew and opacity, and … gives it "…".` | keep those five keys; put the rest on the node |
 | `… has both draw and trim, but draw is trim [0, draw].` | give `draw` or `trim`, not both |

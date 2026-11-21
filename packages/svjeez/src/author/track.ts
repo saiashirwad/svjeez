@@ -29,6 +29,12 @@ export interface Track<T> {
   readonly span: Span;
   to(value: Goal<T>, when: Interval, curve?: Curve): Track<T>;
   set(value: Goal<T>, when: When): Track<T>;
+  /**
+   * Repeats the clock's first `period` seconds forever: the cycle is [0, period), counted from 0s and not from the
+   * first step, so a motion that starts at 0.4s waits 0.4s in every cycle. The motion must end within the period (a
+   * longer one is an error); the track holds its last value until the cycle restarts, and the period snaps to divide
+   * the scene's duration. For "this motion again, back to back, from where it starts" use `repeat()`.
+   */
   loop(period: Seconds): Track<T>;
   repeat(times: number | { readonly until: Seconds }): Track<T>;
   rewind(over: Seconds, curve?: Curve): Track<T>;

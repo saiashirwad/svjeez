@@ -100,10 +100,17 @@ export class Passage<V extends object> {
       throw new SceneError(`loop() needs a positive period, got ${period}.`);
     const last = Math.max(0, ...this.data.steps.map(end));
 
-    if (last > period + EPSILON)
+    if (last > period + EPSILON) {
+      const first = Math.min(...this.data.steps.map((step) => step.start));
+      const lead = first > EPSILON ? `, and it starts at ${num(first)}s, not 0s` : "";
+
       throw new SceneError(
-        `loop(${period}) is shorter than the motion, which runs until ${last}s.`,
+        `loop(${period}) is shorter than the motion, which runs until ${num(last)}s${lead}. A loop's period counts from 0s, not from the first step.`,
+        first > EPSILON
+          ? `Use loop(${num(last)}) or longer, or start the motion at 0s so the period only has to cover its ${num(last - first)}s (.repeat({ until }) repeats from the first step instead).`
+          : `Use loop(${num(last)}) or longer, or shorten the motion.`,
       );
+    }
 
     return this.#with({ period });
   }
