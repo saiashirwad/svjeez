@@ -30,10 +30,6 @@
     "dom-component",
     "react-widgets",
     "dom-svelte",
-    "live-editor",
-    "clocks/page.ts",
-    "clocks/env.d.ts",
-    "machines/page.ts",
-    "machines/env.d.ts"
+    "live-editor"
   ]
 }

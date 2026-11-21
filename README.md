@@ -131,105 +131,63 @@ Add a `key` across two or more JSX states and `morph()` diffs the tree at compil
   <sub><b>Build-time TeX derivation</b> · 25 KB · <a href="examples/math/index.tsx"><code>examples/math/index.tsx</code></a></sub>
 </p>
 
-## Drive part of a scene from the page
+## Draw a component, let the page own its state
 
-Give a `<Sequence>` a `clock` and page code can play it, reverse it, or scrub it from scroll or the pointer. The span is where the clock plays in the plain file.
-
-```tsx
-const open = clock("open", span(1, 0.5));
-
-<Sequence clock={open}>{/* tracks count from 0 inside */}</Sequence>;
-```
-
-```ts
-import { mount, scrolled } from "svjeez/page";
-
-const scene = mount(document.querySelector("#card svg")!); // an inline <svg>
-const open = scene.clock("open");
-
-card.addEventListener("click", () => (open.time > 0 ? open.reverse() : open.play()));
-
-scene.clock("grow").follow(scrolled(card));
-```
-
-The `.svg` still plays the span on its own, so an `<img>` embed keeps working. Everything animates on a clock: when the page mounts it, the clock also takes over the SMIL inside it (morphs, moving gradients, filters, text-path starts) and sets those attributes itself.
-
-<p align="center">
-  <img src="examples/dist/clocks.svg" alt="A settings card: a panel slides open, bars grow, a status dot pulses" width="480">
-  <br>
-  <sub><b>Two clocks and a status dot</b> · 12 KB · <a href="examples/clocks/index.tsx"><code>examples/clocks/index.tsx</code></a> · <a href="examples/clocks/page.ts"><code>page.ts</code></a></sub>
-</p>
-
-### State machines
-
-A state says where each clock rests. Moving to one runs those clocks from wherever they are, at real speed, so the scene's own easing plays, forward or back, and an interrupted move turns around smoothly. Mark shapes with `hit` and listen with plain `addEventListener`:
-
-```tsx
-<Group hit="switch">{/* a track, a knob and a label inside <Sequence clock={flip}> */}</Group>
-```
-
-```ts
-import { machine, mount } from "svjeez/page";
-
-const scene = mount(document.querySelector("#toggle svg")!);
-const power = machine(scene, {
-  initial: "off",
-  states: { off: { flip: 0 }, on: { flip: 1 } },
-  on: { press: { off: "on", on: "off" } },
-});
-
-scene.hit("switch").forEach((el) => el.addEventListener("click", () => power.send("press")));
-```
-
-A scene can declare its states itself, `scene({ ..., states: { off: { flip: 0 }, on: { flip: 1 } } })`, so page code, or a framework wrapper using `attach(element, { state })`, only passes the current state; a place of `looping` plays that clock on repeat while the state lasts. `machine()` is the shorthand. For logic that needs more, `rests(scene, places)` is just the visual half: `view.go(state)` moves the clocks to where that state rests, and any source of state can call it. An [XState](https://stately.ai/docs/xstate) actor does, nested and parallel states included:
-
-```ts
-const view = rests(scene, { "field.valid": { check: 1 }, "submit.sending": { spin: 1 } });
-actor.subscribe((snapshot) => view.go(snapshot.value));
-```
+A scene can declare named clocks and the states that rest them, so a framework keeps the state, the events and the accessibility, and the scene only draws. Each demo below is one scene plus a normal React component; the `.svg` plays a walk-through on its own.
 
 <table align="center">
   <tr>
-    <td align="center">
-      <img src="examples/dist/toggle.svg" alt="A switch that slides on and off" width="230">
+    <td align="center" valign="top">
+      <img src="examples/dist/mascot.svg" alt="A robot above a sign-in form, its eyes following the pointer, covering them for the password" width="260">
       <br>
-      <sub><b>Toggle</b> · 6 KB · <a href="examples/toggle/index.tsx"><code>toggle</code></a></sub>
+      <sub><b>Robot sign-in</b> · 29 KB · <a href="examples/mascot/index.tsx"><code>scene</code></a> · <a href="examples/react-widgets/Mascot.tsx"><code>form</code></a></sub>
     </td>
-    <td align="center">
-      <img src="examples/dist/tabs.svg" alt="Three tabs with a sliding pill and a changing panel" width="230">
+    <td align="center" valign="top">
+      <img src="examples/dist/deploy.svg" alt="A deploy pipeline moving through build, test and release, with a failing test" width="260">
       <br>
-      <sub><b>Tabs</b> · 14 KB · <a href="examples/tabs/index.tsx"><code>tabs</code></a></sub>
+      <sub><b>Deploy pipeline (XState)</b> · 62 KB · <a href="examples/deploy/index.tsx"><code>scene</code></a> · <a href="examples/react-widgets/Deploy.tsx"><code>machine</code></a></sub>
     </td>
-    <td align="center">
-      <img src="examples/dist/stepper.svg" alt="A four-step progress with a morphing icon" width="230">
+    <td align="center" valign="top">
+      <img src="examples/dist/watch.svg" alt="A watch escapement, the camera zooming to the wheel, the fork and the balance" width="260">
       <br>
-      <sub><b>Stepper</b> · 11 KB · <a href="examples/stepper/index.tsx"><code>stepper</code></a></sub>
-    </td>
-    <td align="center">
-      <img src="examples/dist/hover-card.svg" alt="A card that lifts and reveals a detail row" width="230">
-      <br>
-      <sub><b>Hover card</b> · 9 KB · <a href="examples/hover-card/index.tsx"><code>hover-card</code></a></sub>
+      <sub><b>Watch escapement</b> · 58 KB · <a href="examples/watch/index.tsx"><code>scene</code></a> · <a href="examples/react-widgets/Watch.tsx"><code>controls</code></a></sub>
     </td>
   </tr>
 </table>
 
-All four run on [`examples/machines/page.ts`](examples/machines/page.ts), next to a sign-up form whose parallel regions XState runs ([`xstate-form`](examples/xstate-form/index.tsx)).
-
-## Use it in React
-
-React owns the state, the events and the accessibility; the scene only draws. Declare `states` in the scene file, import it with `?svjeez&inline`, and give `<Scene>` from `@svjeez/react` the current state (a string or an XState `snapshot.value`). It is hidden from assistive technology by default, so it sits inside the control that carries the role:
+Run them all with `cd examples/react-widgets && bunx --bun vite`. The scene gives a `<Sequence>` a `clock` and names where each state rests it; the span is where the clock plays in the plain file:
 
 ```tsx
-import * as Switch from "@radix-ui/react-switch";
+const flip = clock("flip", span(0.5, 1));
+
+export default scene(
+  { size: [240, 120], duration: 2, title: "Switch", states: { off: { flip: 0 }, on: { flip: 1 } } },
+  <Sequence clock={flip}>{/* a track and a knob; tracks count from 0 inside */}</Sequence>,
+);
+```
+
+In React, `<Scene>` from `@svjeez/react` takes the current state and sits inside a real control, which brings the role, the keyboard and the focus. The scene is hidden from assistive technology; import it with `?svjeez&inline` (`@svjeez/vite`):
+
+```tsx
 import { Scene } from "@svjeez/react";
-import toggleArt from "./toggle.tsx?svjeez&inline";
+import art from "./switch.tsx?svjeez&inline";
 
 <Switch.Root checked={on} onCheckedChange={setOn} aria-label="Notifications">
-  <Scene scene={toggleArt} state={on ? "on" : "off"} />
+  <Scene scene={art} state={on ? "on" : "off"} />
 </Switch.Root>;
 ```
 
-The first state shows at once and each change animates from wherever the clocks are. [`examples/react-widgets`](examples/react-widgets) does it with a Radix switch and tabs, an XState form and a Zustand store.
+The first state shows at once and each change plays from wherever the clocks are, at real speed, so an interrupted move turns around smoothly. `state` can be an [XState](https://stately.ai/docs/xstate) `snapshot.value`, nested and parallel states included (the deploy demo); `rests(scene, places)` is the same visual half for any other source of state. Another framework wraps `attach(element, { state })` from `svjeez/page`: attach on mount, `update` on change, `destroy` on unmount. See [`@svjeez/react`](packages/react/README.md).
+
+Without a framework, `mount()` gives page code each clock to play, reverse, scrub or follow, and `hit="name"` marks shapes to listen on. The runtime also takes over the SMIL inside a clock (morphs, moving gradients, filters), and clocks nest, so a hop and a gaze compose:
+
+```ts
+import { mount, scrolled } from "svjeez/page";
+
+const art = mount(document.querySelector("#card svg")!); // an inline <svg>
+art.hit("card").forEach((el) => el.addEventListener("click", () => art.clock("open").play()));
+art.clock("grow").follow(scrolled(card));
+```
 
 ## Film a real web app
 
