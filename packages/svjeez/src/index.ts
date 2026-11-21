@@ -39,15 +39,15 @@ export { linear, pattern, radial } from "./author/paint";
 
 export { adjust, blur, displace, shadow } from "./author/effects";
 
-export { track, type Anim, type Track } from "./author/track";
+export { track, type Anim, type Goal, type Track } from "./author/track";
 
-export { through, within } from "./author/derived";
+export { through, within, type Derived, type MapOptions } from "./author/derived";
 
 export { enter, exit, sampled, wiggle } from "./author/recipes";
 
 export { ease, type Curve } from "./author/spring";
 
-export { span, type Span } from "./author/span";
+export { span, type Interval, type Span, type When } from "./author/span";
 
 export { morph } from "./author/morph";
 
