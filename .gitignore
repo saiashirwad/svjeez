@@ -1,4 +1,6 @@
 node_modules
+bench/results
+examples/bench
 package-dist
 .preview
 packages/svjeez/README.md

@@ -11,5 +11,5 @@
     "types": ["bun"],
     "lib": ["ESNext"]
   },
-  "include": ["scripts"]
+  "include": ["scripts", "bench"]
 }
