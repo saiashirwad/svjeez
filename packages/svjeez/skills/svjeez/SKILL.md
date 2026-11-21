@@ -157,16 +157,14 @@ npx svjeez frames scene.tsx --sheet --out frames/   # look: open frames/sheet.pn
 | `compile-warning` | an SVG file or string the scene was given carries a warning |
 | `never-visible`, `zero-size` | a node hidden, painting nothing or covered at every time; geometry, text or an image with no size |
 | `off-canvas` | outside the canvas at every time (error), or cut by its edge at rest |
-| `text-overflow` | text past the canvas at rest, or a line wider than its `width` |
-| `overlap` | two texts drawn over each other while both are fully shown |
-| `missing-glyph` | characters the font has no glyph for; no other font fills in |
+| `text-overflow`, `missing-glyph` | text past the canvas at rest, or a line wider than its `width`; characters the font has no glyph for (no other font fills in) |
+| `overlap`, `layout-overlap` | two texts drawn over each other while both are fully shown; two children of a `<Stack>` or `<Grid>` overlapping because motion carried one onto another |
 | `low-contrast` | text or a thin line too close in color to the flat color behind it, per scheme |
 | `loop-seam` | a looping scene jumps when it starts again: end where you started (`.rewind()`, `exit()`) |
 | `visible-at-zero` | shown at 0s and cut straight back in, or filled while its stroke draws in |
 | `nothing-enters`, `static`, `wasted-motion` | nothing enters; nothing moves; a value changes while no one sees it |
 | `moving-filter` | a filter redrawn every frame because its parameters or its content move |
 | `moving-box` | a `<Group>` placed by `at` or an anchor whose content moves, so the pin only holds at 0s; use `offset` |
-| `layout-overlap` | two children of a `<Stack>` or `<Grid>` overlap: motion carried one onto another |
 | `word-cut` | a word wider than the `width` its text wraps to, cut across two lines |
 | `unsupported`, `approximate` | the SVG backend can't draw a feature, or draws it a little differently |
 
@@ -182,7 +180,6 @@ Type errors:
 | --- | --- |
 | `Type '"red"' is not assignable to type 'Anim<Paint> \| undefined'` | colors are `"#RRGGBB"` hex or tokens |
 | `Type 'string' is not assignable to type 'Anim<Paint> \| undefined'` | the color sits in a `string[]` or a `string` field: type it `Color` from svjeez, or mark it `as const` |
-| `Type 'number' is not assignable to type 'string'`, on `key` | a key is text: ``key={`dot-${i}`}`` |
 | `Type 'string' is not assignable to type 'Anchor \| Anim<Vec> \| undefined'` | `at` is a point or an anchor; a place name goes in `anchor` |
 | `Type 'string' is not assignable to type 'StrokeProps'` | `stroke={{ color: theme.text, width: 2 }}` |
 | `Property 'font' is missing in type '…' but required in type 'TextProps'` | `<Text>` needs `font` and `size`, and a `fill` to paint |
