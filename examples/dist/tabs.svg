@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 280" width="480" height="280" role="img" aria-labelledby="tabs-t tabs-d" font-family="'tabs-Geist'" font-weight="400" class="tabs-root">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 280" width="480" height="280" role="img" aria-labelledby="tabs-t tabs-d" data-states="{&quot;overview&quot;:{&quot;pill&quot;:0,&quot;panel&quot;:0},&quot;usage&quot;:{&quot;pill&quot;:0.5,&quot;panel&quot;:0.5},&quot;billing&quot;:{&quot;pill&quot;:1,&quot;panel&quot;:1}}" font-family="'tabs-Geist'" font-weight="400" class="tabs-root">
   <title id="tabs-t">Tabs</title>
   <desc id="tabs-d">A segmented control with three tabs on two clocks: a pill slides under the chosen tab while the panel below crossfades its text and morphs its shape and color. Page code rests both clocks at a tab's place and goes to the tab that is clicked.</desc>
   <style><![CDATA[

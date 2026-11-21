@@ -61,6 +61,21 @@ addEventListener("themechange", () => scene.refresh()); // shows it again in a n
 
 A player shows the poster, plays the plain SVG file, goes back to the poster on `stop()`, and keeps a playing scene's time when its look changes. When the look differs from the OS's scheme or the scene as built (Safari pins an `<img>` SVG to the OS's scheme; a palette is another `theme`), it plays a restyled copy instead. `img.dataset.state` is `"loading"`, `"live"` or `"still"`, for CSS. `player(img, { adopt: true })` is for an img that already plays its `src` from the HTML.
 
+## React (`@svjeez/react`)
+
+React owns the state, events and accessibility; the scene draws. Declare `states` in the scene, import it with `?svjeez&inline`, pass the current state:
+
+```tsx
+import { Scene, useScene } from "@svjeez/react";
+import toggleArt from "./toggle.tsx?svjeez&inline"; // { svg, width, height, title, desc }
+
+<Switch.Root checked={on} onCheckedChange={setOn} aria-label="Notifications">
+  <Scene scene={toggleArt} state={on ? "on" : "off"} />
+</Switch.Root>;
+```
+
+`state` is a string or an XState `snapshot.value`: the first shows at once, each change animates, an equal value does nothing. `places` stands in for `states` (a new one attaches afresh); `onMount(scene)` gets the `Mounted` once and may return a cleanup. The scene is `aria-hidden` by default, as it sits inside the control that has the role; `label` shows it as the SVG's own image, named by its title and description, and `label="Name"` puts `role="img"` and that `aria-label` on the wrapper. `<Scene>` is one `<span>` (ref, `className`, span props; `style={{ width }}` scales it) whose markup React sets once. `useScene(art, options)` returns the ref for your own element with `art.svg` as its markup. For real controls over drawn ones (an input, a tab trigger), put them where the scene draws them, in percentages of its size, with transparent text. Another framework wraps `attach` the same way: attach on mount, `update` on change, `destroy` on unmount. Example: `examples/react-widgets`.
+
 ## Scrubbing and stills
 
 The compiled SVG is the same file `svjeez svg` writes ([render.md](render.md)): use it in `<img>`, or inline for scroll-driven playback with `seek()` and `restyle()` from `svjeez/page`.

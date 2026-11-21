@@ -93,6 +93,7 @@ export default scene(
     desc: "A four-step progress on one clock with four stops: an icon morphs from step to step, a bar fills and the label changes. Page code rests the clock at a stop and moves it with Back and Next, which stop at the ends.",
     theme,
     loop: false,
+    states: { plan: { step: 0 }, build: { step: 1 / 3 }, test: { step: 2 / 3 }, ship: { step: 1 } },
   },
   (canvas) => (
     <Group>

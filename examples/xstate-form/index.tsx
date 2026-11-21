@@ -35,6 +35,15 @@ export default scene(
     desc: "A sign-up card with two independent regions. The email field's border turns blue while typing, then green with a check mark or red with an error; the button wakes when the email is valid, spins while sending and turns into a check. XState decides the state; page code only tells the view where each clock rests.",
     theme,
     loop: false,
+    states: {
+      "field.empty": { focus: 0, verdict: 0, ready: 0 },
+      "field.typing": { focus: 1, verdict: 0, ready: 0 },
+      "field.valid": { focus: 1, verdict: 0.5, ready: 1 },
+      "field.invalid": { focus: 1, verdict: 1, ready: 0 },
+      "submit.idle": { send: 0 },
+      "submit.sending": { send: 0.5 },
+      "submit.done": { send: 1 },
+    },
   },
   (canvas) => (
     <Group>

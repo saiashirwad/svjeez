@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 220" width="360" height="220" role="img" aria-labelledby="toggle-t toggle-d" font-family="'toggle-Geist'" font-weight="400" class="toggle-root">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 220" width="360" height="220" role="img" aria-labelledby="toggle-t toggle-d" data-states="{&quot;off&quot;:{&quot;flip&quot;:0},&quot;on&quot;:{&quot;flip&quot;:1}}" font-family="'toggle-Geist'" font-weight="400" class="toggle-root">
   <title id="toggle-t">Toggle</title>
   <desc id="toggle-d">A switch with two states on one clock: the knob slides, the track turns green and the label crossfades from Off to On. Page code rests the clock at 0 or 1 and flips it on a click, from wherever it is.</desc>
   <style><![CDATA[

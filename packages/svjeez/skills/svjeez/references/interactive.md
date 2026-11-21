@@ -80,7 +80,7 @@ actor.start();
 
 `scene({ ..., states })` declares the states, in the shape `rests` takes: `{ off: { flip: 0 }, on: { flip: 1 }, "menu.open": { drawer: 1 } }`. It throws, with the fix, for a clock the scene doesn't use, a place outside 0 to 1 or an empty state name, and writes the table on the root `<svg>` as `data-states` (only when given). `rests(scene)` then needs no places, and `scene.states` (from `mount()`) holds them; with neither, `rests` throws.
 
-`attach(element, { state, places, onMount })` from `svjeez/page` is the one binding a framework adapter wraps, in the shape of a Svelte action. The framework owns state, events, focus and the accessible role (a Radix or React Aria Switch); the scene is only the picture, so hide it with `aria-hidden` on the wrapper when it is decorative.
+`attach(element, { state, places, onMount })` from `svjeez/page` is the one binding a framework adapter wraps, in the shape of a Svelte action. The framework owns state, events, focus and the accessible role (a Radix or React Aria Switch); the scene is only the picture, so hide it with `aria-hidden` on the wrapper when it is decorative. React: `<Scene>` from `@svjeez/react` ([`web.md`](web.md)).
 
 ```ts
 const attached = attach(host, { state: "off", onMount: (scene) => () => {} }); // shows "off" at once; onMount's cleanup runs on destroy

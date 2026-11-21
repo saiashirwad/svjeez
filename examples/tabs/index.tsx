@@ -72,6 +72,11 @@ export default scene(
     desc: "A segmented control with three tabs on two clocks: a pill slides under the chosen tab while the panel below crossfades its text and morphs its shape and color. Page code rests both clocks at a tab's place and goes to the tab that is clicked.",
     theme,
     loop: false,
+    states: {
+      overview: { pill: 0, panel: 0 },
+      usage: { pill: 0.5, panel: 0.5 },
+      billing: { pill: 1, panel: 1 },
+    },
   },
   (canvas) => (
     <Group>

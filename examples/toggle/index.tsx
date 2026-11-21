@@ -28,6 +28,7 @@ export default scene(
     desc: "A switch with two states on one clock: the knob slides, the track turns green and the label crossfades from Off to On. Page code rests the clock at 0 or 1 and flips it on a click, from wherever it is.",
     theme,
     loop: false,
+    states: { off: { flip: 0 }, on: { flip: 1 } },
   },
   (canvas) => (
     <Group>

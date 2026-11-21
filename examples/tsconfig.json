@@ -28,6 +28,7 @@
     "dom-react",
     "dom-react-vite",
     "dom-component",
+    "react-widgets",
     "dom-svelte",
     "clocks/page.ts",
     "clocks/env.d.ts",
