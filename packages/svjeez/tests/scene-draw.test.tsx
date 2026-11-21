@@ -154,3 +154,43 @@ describe("Arrow head", () => {
     ]);
   });
 });
+
+describe("Arrow between two moving ends", () => {
+  test("a spring under both ends compiles: keys the sampler writes never share a moment", () => {
+    const spring = ease.spring({ stiffness: 170, damping: 17 });
+
+    const bounce = track(0)
+      .to(1, span(2.4, spring.settle), spring)
+      .to(0, span(4.2, spring.settle), spring);
+
+    const [a, b] = [ref(), ref()];
+
+    const card = (handle: typeof a, x: number, lift: number) => (
+      <Shape
+        ref={handle}
+        geometry={rect(40, 30)}
+        at={bounce.map((v): [number, number] => [x, 60 + lift * v])}
+        fill="#FFFFFF"
+      />
+    );
+
+    const film = () =>
+      svg.emit(
+        scene({ size: [400, 200], duration: 47.5, title: "Test" }, () => (
+          <Group>
+            {card(a, 40, -70)}
+            {card(b, 200, 56)}
+            <Arrow
+              from={a.right}
+              to={b.left}
+              inset={8}
+              stroke={stroke}
+              draw={track(0).to(1, span(1, 0.5))}
+            />
+          </Group>
+        )),
+      );
+
+    expect(film).not.toThrow();
+  });
+});

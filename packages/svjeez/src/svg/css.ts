@@ -31,7 +31,7 @@ interface Stops {
   readonly before: readonly (string | undefined)[];
 }
 
-const percents = (keys: readonly Key[], period: Seconds): Stops => {
+const percents = (lane: string, keys: readonly Key[], period: Seconds): Stops => {
   for (const places of [3, 4]) {
     const at = keys.map((key) => (key.t / period) * 100);
     const out = at.map((value) => `${num(value, places)}%`);
@@ -56,7 +56,7 @@ const percents = (keys: readonly Key[], period: Seconds): Stops => {
   }
 
   throw new Error(
-    `Two keys are too close to tell apart on a ${num(period)}s timeline: ${keys.map((key) => key.t).join(", ")}.`,
+    `Two keys of ${lane} are too close to tell apart on a ${num(period)}s timeline: ${keys.map((key) => key.t).join(", ")}.`,
   );
 };
 
@@ -90,7 +90,7 @@ const frames = (
   );
 
   const blocks = new Map<string, { selectors: string[]; suffix: string; set: string }>();
-  const stops = percents(keys, period);
+  const stops = percents(lane, keys, period);
   const { at } = stops;
   const before = holds ? stops.before : stops.before.map(() => undefined);
   keys.forEach((key, index) => {

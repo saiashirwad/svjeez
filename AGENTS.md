@@ -37,3 +37,9 @@ After writing or changing a scene, run `bun run scene check` and `bun run typech
 ## Site
 
 `site/` is the Astro site at svjeez.texoport.in. Its own scenes and films live in `site/src/scenes/`; it also shows scenes from `examples/` through the `@examples/*` path. Its scripts run Astro under Bun with the `@svjeez/source` condition. Run `bun run dev` at the root, or `bun run build` and `bun run typecheck` inside `site/`. `bun run deploy` builds and deploys through Alchemy's `Cloudflare.Website.Astro` (`site/alchemy.run.ts`). The site pins TypeScript 6, because `astro check` does not support TypeScript 7.
+
+## Design
+
+UI and data (pages, panels, code blocks, app mock-ups, charts, maps) should look like Vercel's designers made them: Geist and Geist Mono, black and white with a gray scale, 1px hairlines instead of filled cards, tight negative letter-spacing on headings, small uppercase mono labels, and color used sparingly. Maps and charts must look slick and clean, never jagged. Around that, keep the landing page's whimsy: Blip the mascot hopping and reacting, handwritten notes in the marker font, squiggles. Films and heroes get both.
+
+The launch film lives in `site/src/scenes/film/`. `bun run film` in `site/` previews it with a scrubber and live reload; `bun run film:svg` writes `site/film.svg`.

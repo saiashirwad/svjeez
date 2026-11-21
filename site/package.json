@@ -7,6 +7,8 @@
     "scene": "bun ../scripts/scene.ts",
     "build": "bun --conditions @svjeez/source --bun astro build",
     "preview": "bun --conditions @svjeez/source --bun astro preview",
+    "film": "bun --conditions @svjeez/source ../packages/svjeez/src/cli.ts dev src/scenes/film/index.tsx",
+    "film:svg": "bun --conditions @svjeez/source ../packages/svjeez/src/cli.ts svg src/scenes/film/index.tsx --out film.svg",
     "deploy": "bun --conditions @svjeez/source --bun alchemy deploy",
     "destroy": "bun --conditions @svjeez/source --bun alchemy destroy",
     "typecheck": "astro check && tsc --noEmit -p src/scenes/board"

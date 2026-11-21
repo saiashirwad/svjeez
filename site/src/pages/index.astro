@@ -1,6 +1,7 @@
 ---
 import { Code } from "astro:components";
 import board from "../scenes/board/board.film.tsx?svjeez";
+import film from "../scenes/film";
 import flowchartTall from "../scenes/flowchart-tall";
 import charts from "@examples/charts/index.tsx";
 import code from "@examples/code/index.tsx";
@@ -36,6 +37,7 @@ import { windowed } from "../window";
 const tile = (scene: Parameters<typeof windowed>[0], title: string) => live(windowed(scene, { size: [504, 340], title }));
 
 const s = {
+  reel: live(windowed(film, { size: [1280], title: "film.svg" })),
   board: live(windowed(board, { size: [800], title: "board.film.tsx" })),
   pipeline: live(windowed(mermaidFlowchart, { size: [1032, 300], title: "flowchart.mmd" })),
   pipelineTall: live(windowed(flowchartTall, { size: [358], title: "flowchart.mmd" })),
@@ -181,6 +183,12 @@ const total = (field: "gzip" | "script") => [...files.values()].reduce((sum, fil
   <link slot="head" rel="preload" as="image" href={hero.src} media="(prefers-reduced-motion: no-preference)" />
   <main>
     <Hero />
+
+    <section class="wrap sec g" id="reel">
+      <h2 class="c1-12 xl"><a class="anchor" href="#reel">a minute, one svg</a></h2>
+      <p class="sub c1-8">One compiled .svg in an <code>&lt;img&gt;</code> tag. <a href="/video">Watch on /video →</a></p>
+      <figure class="c1-12"><div class="win"><LiveScene scene={s.reel} cost={60} name="film" alt={s.reel.desc} /></div></figure>
+    </section>
 
     <section class="wrap sec g" id="film">
       <h2 class="c1-12 xl"><a class="anchor" href="#film">Film your real app</a></h2>
