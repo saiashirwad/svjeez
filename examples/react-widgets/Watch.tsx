@@ -82,7 +82,8 @@ const styles = {
 
 /**
  * An explainer of a watch escapement. React owns which part is in focus and whether the mechanism runs; the scene
- * declares those states, loops its "tick" clock while playing and rests a spotlight clock per part. The range input
+ * declares those states, loops its "tick" clock while playing, and moves a camera (a "lens" clock that zooms and a
+ * clock per part that pans to it) around the mechanism, which ticks on inside it. The range input
  * scrubs "tick" through follow(), and the clock moves the thumb back while it plays.
  */
 export const Watch = () => {

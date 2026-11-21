@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="1000" height="600" role="img" aria-labelledby="watch-t watch-d" data-states="{&quot;motion.playing&quot;:{&quot;tick&quot;:&quot;loop&quot;},&quot;motion.paused&quot;:{},&quot;focus.overview&quot;:{&quot;escape&quot;:0,&quot;fork&quot;:0,&quot;balance&quot;:0},&quot;focus.escape&quot;:{&quot;escape&quot;:0.23529411764705885,&quot;fork&quot;:0,&quot;balance&quot;:0},&quot;focus.fork&quot;:{&quot;escape&quot;:0,&quot;fork&quot;:0.23529411764705885,&quot;balance&quot;:0},&quot;focus.balance&quot;:{&quot;escape&quot;:0,&quot;fork&quot;:0,&quot;balance&quot;:0.23529411764705885}}" font-family="'watch-Geist'" class="watch-root">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="1000" height="600" role="img" aria-labelledby="watch-t watch-d" data-states="{&quot;motion.playing&quot;:{&quot;tick&quot;:&quot;loop&quot;},&quot;motion.paused&quot;:{},&quot;focus.overview&quot;:{&quot;lens&quot;:0.05333333333333334,&quot;escape&quot;:0.05333333333333334,&quot;fork&quot;:0.30666666666666664,&quot;balance&quot;:0.56},&quot;focus.escape&quot;:{&quot;lens&quot;:0.14,&quot;escape&quot;:0.14666666666666667,&quot;fork&quot;:0.30666666666666664,&quot;balance&quot;:0.56},&quot;focus.fork&quot;:{&quot;lens&quot;:0.14,&quot;escape&quot;:0.05333333333333334,&quot;fork&quot;:0.4,&quot;balance&quot;:0.56},&quot;focus.balance&quot;:{&quot;lens&quot;:0.14,&quot;escape&quot;:0.05333333333333334,&quot;fork&quot;:0.30666666666666664,&quot;balance&quot;:0.6533333333333334}}" font-family="'watch-Geist'" class="watch-root">
   <title id="watch-t">How a watch escapement keeps time</title>
-  <desc id="watch-d">A Swiss lever escapement running ten times slower than life. The balance wheel swings on its hairspring, its pin throws the pallet fork from one banking pin to the other, and each throw lets the escape wheel advance half a tooth before a ruby stone locks it again. A spotlight visits the escape wheel, the pallet fork and the balance wheel in turn, each with its name and a leader line.</desc>
+  <desc id="watch-d">A Swiss lever escapement running ten times slower than life. The balance wheel swings on its hairspring, its pin throws the pallet fork from one banking pin to the other, and each throw lets the escape wheel advance half a tooth before a ruby stone locks it again. A camera zooms in on the escape wheel, the pallet fork and the balance wheel in turn, each with its name and a leader line, and pulls back out.</desc>
   <style><![CDATA[
 svg.watch-root{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--plate:#15171B;--groove:#1C1F24;--shade:#00000052}
 @media (prefers-color-scheme:light){svg.watch-root{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0;--plate:#F6F5F2;--groove:#D6D3CC;--shade:#0000001A}}
@@ -8,254 +8,304 @@ svg.watch-root{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:
 @font-face{font-family:'watch-Geist';src:url(data:font/ttf;base64,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) format('truetype');font-weight:600;font-style:normal}
 @font-face{font-family:'watch-JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
 .watch-a{animation-duration:15s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
-@keyframes watch-k1{0%,100%{rotate:-10.16deg}22%{rotate:-15.44deg}24%{rotate:-16.2deg}26%{rotate:-8.01deg}28%{rotate:-5.2deg}72%{rotate:-15.76deg}74%{rotate:-15.96deg}76%{rotate:-7.42deg}78%{rotate:-4.88deg}}
-.watch-m1{animation-name:watch-k1;animation-duration:2.5s;animation-timing-function:linear}
-@keyframes watch-k2{0%{rotate:0deg}100%{rotate:144deg}}
-.watch-m2{animation-name:watch-k2;animation-timing-function:linear}
-@keyframes watch-k3{0%,100%{rotate:250deg}50%{rotate:-250deg}}
-.watch-m3{animation-name:watch-k3;animation-duration:2.5s;animation-timing-function:cubic-bezier(.37,0,.63,1)}
-@keyframes watch-k4{0%,100%{rotate:25deg}50%{rotate:-25deg}}
-.watch-m4{animation-name:watch-k4;animation-duration:2.5s;animation-timing-function:cubic-bezier(.37,0,.63,1)}
-@keyframes watch-k5{0%,100%{rotate:50deg}50%{rotate:-50deg}}
-.watch-m5{animation-name:watch-k5;animation-duration:2.5s;animation-timing-function:cubic-bezier(.37,0,.63,1)}
-@keyframes watch-k6{0%,100%{rotate:75deg}50%{rotate:-75deg}}
+@keyframes watch-k1{0%,10.667%{stroke-dashoffset:1}14.667%,100%{stroke-dashoffset:0}}
+.watch-m1{animation-name:watch-k1;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes watch-k2{0%,36%{stroke-dashoffset:1}40%,100%{stroke-dashoffset:0}}
+.watch-m2{animation-name:watch-k2;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes watch-k3{0%,61.333%{stroke-dashoffset:1}65.333%,100%{stroke-dashoffset:0}}
+.watch-m3{animation-name:watch-k3;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes watch-k4{0%,100%{rotate:-10.16deg}22%{rotate:-15.44deg}24%{rotate:-16.2deg}26%{rotate:-8.01deg}28%{rotate:-5.2deg}72%{rotate:-15.76deg}74%{rotate:-15.96deg}76%{rotate:-7.42deg}78%{rotate:-4.88deg}}
+.watch-m4{animation-name:watch-k4;animation-duration:2.5s;animation-timing-function:linear}
+@keyframes watch-k5{0%{rotate:0deg}100%{rotate:144deg}}
+.watch-m5{animation-name:watch-k5;animation-timing-function:linear}
+@keyframes watch-k6{0%,100%{rotate:250deg}50%{rotate:-250deg}}
 .watch-m6{animation-name:watch-k6;animation-duration:2.5s;animation-timing-function:cubic-bezier(.37,0,.63,1)}
-@keyframes watch-k7{0%,100%{rotate:100deg}50%{rotate:-100deg}}
+@keyframes watch-k7{0%,100%{rotate:25deg}50%{rotate:-25deg}}
 .watch-m7{animation-name:watch-k7;animation-duration:2.5s;animation-timing-function:cubic-bezier(.37,0,.63,1)}
-@keyframes watch-k8{0%,100%{rotate:125deg}50%{rotate:-125deg}}
+@keyframes watch-k8{0%,100%{rotate:50deg}50%{rotate:-50deg}}
 .watch-m8{animation-name:watch-k8;animation-duration:2.5s;animation-timing-function:cubic-bezier(.37,0,.63,1)}
-@keyframes watch-k9{0%,100%{rotate:150deg}50%{rotate:-150deg}}
+@keyframes watch-k9{0%,100%{rotate:75deg}50%{rotate:-75deg}}
 .watch-m9{animation-name:watch-k9;animation-duration:2.5s;animation-timing-function:cubic-bezier(.37,0,.63,1)}
-@keyframes watch-k10{0%,100%{rotate:175deg}50%{rotate:-175deg}}
+@keyframes watch-k10{0%,100%{rotate:100deg}50%{rotate:-100deg}}
 .watch-m10{animation-name:watch-k10;animation-duration:2.5s;animation-timing-function:cubic-bezier(.37,0,.63,1)}
-@keyframes watch-k11{0%,100%{rotate:200deg}50%{rotate:-200deg}}
+@keyframes watch-k11{0%,100%{rotate:125deg}50%{rotate:-125deg}}
 .watch-m11{animation-name:watch-k11;animation-duration:2.5s;animation-timing-function:cubic-bezier(.37,0,.63,1)}
-@keyframes watch-k12{0%,100%{rotate:225deg}50%{rotate:-225deg}}
+@keyframes watch-k12{0%,100%{rotate:150deg}50%{rotate:-150deg}}
 .watch-m12{animation-name:watch-k12;animation-duration:2.5s;animation-timing-function:cubic-bezier(.37,0,.63,1)}
-@keyframes watch-k13{0%,22%,78%,100%{rotate:-5.5deg}24%,76%{rotate:-3.57deg}26%,74%{rotate:3.57deg}28%,72%{rotate:5.5deg}}
-.watch-m13{animation-name:watch-k13;animation-duration:2.5s;animation-timing-function:linear}
-@keyframes watch-k14{0%,8%,30.667%,100%{opacity:0}13.333%,26.667%{opacity:0.78}}
-.watch-m14{animation-name:watch-k14;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes watch-k15{0%,8.667%{stroke-dashoffset:1}12.667%,100%{stroke-dashoffset:0}}
-@keyframes watch-k16{0%,26.667%{opacity:1}30.667%,100%{opacity:0}}
-.watch-m15{animation-name:watch-k15,watch-k16;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes watch-k17{0%,10.333%,30.667%,100%{opacity:0}13.333%,26.667%{opacity:1}}
-.watch-m16{animation-name:watch-k17}
-@keyframes watch-k18{0%,10%,30.667%,100%{stroke-dashoffset:1;visibility:hidden}13.333%,26.667%{stroke-dashoffset:0;visibility:visible}}
-.watch-m17{animation-name:watch-k18}
-@keyframes watch-k19{0%,10%,30.667%,100%{translate:0 0}13.333%,26.667%{translate:118.865px 0}}
-.watch-m18{animation-name:watch-k19}
-@keyframes watch-k20{0%,10.041%,28.448%,100%{visibility:hidden}10.042%,28.447%{visibility:visible}}
-.watch-m19{animation-name:watch-k20}
-@keyframes watch-k21{0%,11%,30.667%,100%{stroke-dashoffset:1;visibility:hidden}13.333%,26.667%{stroke-dashoffset:0;visibility:visible}}
-.watch-m20{animation-name:watch-k21}
-@keyframes watch-k22{0%,11.007%,29.021%,100%{rotate:-13.292deg}11.014%{rotate:-12.885deg;animation-timing-function:cubic-bezier(.333,.332,.667,.666)}11.028%,28.354%,28.493%{rotate:-12.065deg}11.035%,11.042%,28.243%,28.347%{rotate:-11.654deg}11.048%{rotate:-11.241deg;animation-timing-function:cubic-bezier(.333,.332,.667,.666)}11.062%,27.986%,28.056%{rotate:-10.412deg}11.069%,11.076%,27.924%,27.979%{rotate:-9.996deg}11.097%,11.104%,27.764%,27.806%{rotate:-8.741deg}11.125%,11.132%,27.639%,27.674%{rotate:-7.477deg}11.152%,11.159%,27.542%,27.563%{rotate:-6.207deg}11.18%,27.451%,27.472%{rotate:-4.93deg}11.187%{rotate:-4.93deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}11.201%,27.396%,27.417%{rotate:-4.075deg}11.208%{rotate:-4.075deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}11.222%,27.347%,27.361%{rotate:-3.219deg}11.228%{rotate:-3.219deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}11.242%,27.299%,27.313%{rotate:-2.362deg}11.249%{rotate:-2.362deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}11.263%,27.257%,27.271%{rotate:-1.504deg}11.27%{rotate:-1.504deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}11.284%,11.291%,27.215%,27.229%{rotate:-0.645deg}11.298%,27.194%,27.208%{rotate:-0.215deg}11.305%{rotate:-0.215deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}11.318%,11.325%,27.153%,27.167%{rotate:0.645deg}11.332%,11.339%,27.139%,27.146%{rotate:1.074deg}11.346%,11.353%,27.118%,27.132%{rotate:1.504deg}11.36%,27.097%,27.111%{rotate:1.933deg}11.367%{rotate:1.933deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}11.381%,11.388%,27.063%,27.076%{rotate:2.791deg}11.395%,11.409%,27.049%,27.056%{rotate:3.219deg}11.415%,11.422%,27.028%,27.042%{rotate:3.648deg}11.429%,11.436%,27.014%,27.021%{rotate:4.075deg}11.443%,11.45%,26.993%,27.007%{rotate:4.503deg}11.457%,11.471%,26.979%,26.986%{rotate:4.93deg}11.478%,11.485%,26.958%,26.972%{rotate:5.356deg}11.492%,11.505%,26.944%,26.951%{rotate:5.781deg}11.512%,11.519%,26.931%,26.938%{rotate:6.207deg}11.526%,11.54%,26.91%,26.924%{rotate:6.631deg}11.547%,11.561%,26.896%,26.903%{rotate:7.054deg}11.568%,11.589%,26.882%,26.889%{rotate:7.477deg}11.595%,11.609%,26.868%,26.875%{rotate:7.899deg}11.616%,11.637%,26.847%,26.861%{rotate:8.321deg}11.644%,11.665%,26.833%,26.84%{rotate:8.741deg}11.672%,11.692%,26.819%,26.826%{rotate:9.16deg}11.699%,11.727%,26.806%,26.813%{rotate:9.578deg}11.734%,11.769%,26.792%,26.799%{rotate:9.996deg}11.775%,11.81%,26.771%,26.785%{rotate:10.412deg}11.817%,11.859%,26.757%,26.764%{rotate:10.827deg}11.865%,11.914%,26.743%,26.75%{rotate:11.241deg}11.921%,11.983%,26.729%,26.736%{rotate:11.654deg}11.99%,12.066%,26.715%,26.722%{rotate:12.065deg}12.073%,12.184%,26.701%,26.708%{rotate:12.476deg}12.191%,12.364%,26.687%,26.694%{rotate:12.885deg}12.371%,26.681%{rotate:13.292deg}27.083%,27.09%{rotate:2.362deg}27.174%,27.187%{rotate:0.215deg}27.236%,27.25%{rotate:-1.074deg}27.278%,27.292%{rotate:-1.933deg}27.319%,27.34%{rotate:-2.791deg}27.368%,27.389%{rotate:-3.648deg}27.424%,27.444%{rotate:-4.503deg}27.479%,27.5%{rotate:-5.356deg}27.507%,27.535%{rotate:-5.781deg}27.569%,27.597%{rotate:-6.631deg}27.604%,27.632%{rotate:-7.054deg}27.681%,27.715%{rotate:-7.899deg}27.722%,27.757%{rotate:-8.321deg}27.813%,27.861%{rotate:-9.16deg}27.868%,27.917%{rotate:-9.578deg}28.062%,28.139%{rotate:-10.827deg}28.146%,28.236%{rotate:-11.241deg}28.5%,28.694%{rotate:-12.476deg}28.701%,29.014%{rotate:-12.885deg}}
-.watch-m21{animation-name:watch-k22;animation-timing-function:linear}
-@keyframes watch-k23{0%,11%{offset-distance:0%}13.333%,26.667%{offset-distance:50%}30.667%,100%{offset-distance:100%}}
-.watch-m22{animation-name:watch-k23}
-@keyframes watch-k24{0%,11.034%,28.392%,100%{visibility:hidden}11.035%,28.391%{visibility:visible}}
-.watch-m23{animation-name:watch-k24}
-@keyframes watch-k25{0%,26.667%,49.333%,100%{opacity:0}32%,45.333%{opacity:0.78}}
-.watch-m24{animation-name:watch-k25;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes watch-k26{0%,27.333%{stroke-dashoffset:1}31.333%,100%{stroke-dashoffset:0}}
-@keyframes watch-k27{0%,45.333%{opacity:1}49.333%,100%{opacity:0}}
-.watch-m25{animation-name:watch-k26,watch-k27;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes watch-k28{0%,29%,49.333%,100%{opacity:0}32%,45.333%{opacity:1}}
-.watch-m26{animation-name:watch-k28}
-@keyframes watch-k29{0%,28.667%,49.333%,100%{stroke-dashoffset:1;visibility:hidden}32%,45.333%{stroke-dashoffset:0;visibility:visible}}
-.watch-m27{animation-name:watch-k29}
-@keyframes watch-k30{0%,28.667%,49.333%,100%{translate:0 0}32%,45.333%{translate:139.279px 0}}
-.watch-m28{animation-name:watch-k30}
-@keyframes watch-k31{0%,28.704%,47.194%,100%{visibility:hidden}28.705%,47.193%{visibility:visible}}
-.watch-m29{animation-name:watch-k31}
-@keyframes watch-k32{0%,29.667%,49.333%,100%{stroke-dashoffset:1;visibility:hidden}32%,45.333%{stroke-dashoffset:0;visibility:visible}}
-.watch-m30{animation-name:watch-k32}
-@keyframes watch-k33{0%,29.667%,49.333%,100%{translate:0 0}32%,45.333%{translate:43.2px 0}}
-.watch-m31{animation-name:watch-k33}
-@keyframes watch-k34{0%,29.77%,46.438%,100%{visibility:hidden}29.771%,46.437%{visibility:visible}}
-.watch-m32{animation-name:watch-k34}
-@keyframes watch-k35{0%,45.333%,68%,100%{opacity:0}50.667%,64%{opacity:0.78}}
-.watch-m33{animation-name:watch-k35;animation-timing-function:cubic-bezier(.77,0,.175,1)}
-@keyframes watch-k36{0%,46%{stroke-dashoffset:1}50%,100%{stroke-dashoffset:0}}
-@keyframes watch-k37{0%,64%{opacity:1}68%,100%{opacity:0}}
-.watch-m34{animation-name:watch-k36,watch-k37;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
-@keyframes watch-k38{0%,47.667%,68%,100%{opacity:0}50.667%,64%{opacity:1}}
-.watch-m35{animation-name:watch-k38}
-@keyframes watch-k39{0%,47.333%,68%,100%{stroke-dashoffset:1;visibility:hidden}50.667%,64%{stroke-dashoffset:0;visibility:visible}}
-.watch-m36{animation-name:watch-k39}
-@keyframes watch-k40{0%,47.333%,68%,100%{translate:0 0}50.667%,64%{translate:51.582px 0}}
-.watch-m37{animation-name:watch-k40}
-@keyframes watch-k41{0%,47.43%,65.34%,100%{visibility:hidden}47.431%,65.339%{visibility:visible}}
-.watch-m38{animation-name:watch-k41}
-@keyframes watch-k42{0%,48.333%,68%,100%{stroke-dashoffset:1;visibility:hidden}50.667%,64%{stroke-dashoffset:0;visibility:visible}}
-.watch-m39{animation-name:watch-k42}
-@keyframes watch-k43{0%,48.34%,66.354%,100%{rotate:-13.292deg}48.347%{rotate:-12.885deg;animation-timing-function:cubic-bezier(.333,.332,.667,.666)}48.361%,65.688%,65.826%{rotate:-12.065deg}48.368%,48.375%,65.576%,65.681%{rotate:-11.654deg}48.382%{rotate:-11.241deg;animation-timing-function:cubic-bezier(.333,.332,.667,.666)}48.396%,65.319%,65.389%{rotate:-10.412deg}48.403%,48.41%,65.257%,65.313%{rotate:-9.996deg}48.431%,48.438%,65.097%,65.139%{rotate:-8.741deg}48.458%,48.465%,64.972%,65.007%{rotate:-7.477deg}48.486%,48.493%,64.875%,64.896%{rotate:-6.207deg}48.514%,64.785%,64.806%{rotate:-4.93deg}48.521%{rotate:-4.93deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}48.535%,48.542%,64.729%,64.75%{rotate:-4.075deg}48.563%,64.653%,64.674%{rotate:-2.791deg}48.569%{rotate:-2.791deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}48.583%,48.59%,64.611%,64.625%{rotate:-1.933deg}48.597%,64.59%,64.604%{rotate:-1.504deg}48.604%{rotate:-1.504deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}48.618%,64.549%,64.563%{rotate:-0.645deg}48.625%{rotate:-0.645deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}48.639%,48.646%,64.507%,64.521%{rotate:0.215deg}48.653%,48.66%,64.486%,64.5%{rotate:0.645deg}48.667%,48.674%,64.472%,64.479%{rotate:1.074deg}48.681%,64.451%,64.465%{rotate:1.504deg}48.688%{rotate:1.504deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}48.701%,48.708%,64.417%,64.424%{rotate:2.362deg}48.715%,48.722%,64.396%,64.41%{rotate:2.791deg}48.729%,48.736%,64.382%,64.389%{rotate:3.219deg}48.743%,48.75%,64.361%,64.375%{rotate:3.648deg}48.757%,48.771%,64.347%,64.354%{rotate:4.075deg}48.778%,48.785%,64.326%,64.34%{rotate:4.503deg}48.792%,48.799%,64.313%,64.319%{rotate:4.93deg}48.806%,48.819%,64.292%,64.306%{rotate:5.356deg}48.826%,48.833%,64.278%,64.285%{rotate:5.781deg}48.84%,48.854%,64.264%,64.271%{rotate:6.207deg}48.861%,48.875%,64.243%,64.257%{rotate:6.631deg}48.882%,48.896%,64.229%,64.236%{rotate:7.054deg}48.903%,48.917%,64.215%,64.222%{rotate:7.477deg}48.924%,48.944%,64.201%,64.208%{rotate:7.899deg}48.951%,48.972%,64.181%,64.194%{rotate:8.321deg}48.979%,49%,64.167%,64.174%{rotate:8.741deg}49.007%,49.028%,64.153%,64.16%{rotate:9.16deg}49.035%,49.063%,64.139%,64.146%{rotate:9.578deg}49.069%,49.097%,64.125%,64.132%{rotate:9.996deg}49.104%,49.139%,64.104%,64.118%{rotate:10.412deg}49.146%,49.188%,64.09%,64.097%{rotate:10.827deg}49.194%,49.243%,64.076%,64.083%{rotate:11.241deg}49.25%,49.313%,64.063%,64.069%{rotate:11.654deg}49.319%,49.396%,64.049%,64.056%{rotate:12.065deg}49.403%,49.514%,64.035%,64.042%{rotate:12.476deg}49.521%,49.701%,64.021%,64.028%{rotate:12.885deg}49.708%,64.014%{rotate:13.292deg}64.431%,64.444%{rotate:1.933deg}64.528%,64.542%{rotate:-0.215deg}64.569%,64.583%{rotate:-1.074deg}64.632%,64.646%{rotate:-2.362deg}64.681%,64.694%{rotate:-3.219deg}64.701%,64.722%{rotate:-3.648deg}64.757%,64.778%{rotate:-4.503deg}64.813%,64.833%{rotate:-5.356deg}64.84%,64.868%{rotate:-5.781deg}64.903%,64.931%{rotate:-6.631deg}64.937%,64.965%{rotate:-7.054deg}65.014%,65.049%{rotate:-7.899deg}65.056%,65.09%{rotate:-8.321deg}65.146%,65.194%{rotate:-9.16deg}65.201%,65.25%{rotate:-9.578deg}65.396%,65.472%{rotate:-10.827deg}65.479%,65.569%{rotate:-11.241deg}65.833%,66.028%{rotate:-12.476deg}66.035%,66.347%{rotate:-12.885deg}}
-.watch-m40{animation-name:watch-k43;animation-timing-function:linear}
-@keyframes watch-k44{0%,48.333%{offset-distance:0%}50.667%,64%{offset-distance:50%}68%,100%{offset-distance:100%}}
-.watch-m41{animation-name:watch-k44}
-@keyframes watch-k45{0%,48.367%,65.684%,100%{visibility:hidden}48.368%,65.683%{visibility:visible}}
-.watch-m42{animation-name:watch-k45}
-@keyframes watch-k46{0%,48.34%,66.354%,100%{rotate:13.292deg}48.347%{rotate:12.885deg;animation-timing-function:cubic-bezier(.333,.332,.667,.666)}48.361%,65.688%,65.826%{rotate:12.065deg}48.368%,48.375%,65.576%,65.681%{rotate:11.654deg}48.382%{rotate:11.241deg;animation-timing-function:cubic-bezier(.333,.332,.667,.666)}48.396%,65.319%,65.389%{rotate:10.412deg}48.403%,48.41%,65.257%,65.313%{rotate:9.996deg}48.431%,48.438%,65.097%,65.139%{rotate:8.741deg}48.458%,48.465%,64.972%,65.007%{rotate:7.477deg}48.486%,48.493%,64.875%,64.896%{rotate:6.207deg}48.514%,64.785%,64.806%{rotate:4.93deg}48.521%{rotate:4.93deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}48.535%,48.542%,64.729%,64.75%{rotate:4.075deg}48.563%,64.653%,64.674%{rotate:2.791deg}48.569%{rotate:2.791deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}48.583%,48.59%,64.611%,64.625%{rotate:1.933deg}48.597%,64.59%,64.604%{rotate:1.504deg}48.604%{rotate:1.504deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}48.618%,64.549%,64.563%{rotate:0.645deg}48.625%{rotate:0.645deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}48.639%,48.646%,64.507%,64.521%{rotate:-0.215deg}48.653%,48.66%,64.486%,64.5%{rotate:-0.645deg}48.667%,48.674%,64.472%,64.479%{rotate:-1.074deg}48.681%,64.451%,64.465%{rotate:-1.504deg}48.688%{rotate:-1.504deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}48.701%,48.708%,64.417%,64.424%{rotate:-2.362deg}48.715%,48.722%,64.396%,64.41%{rotate:-2.791deg}48.729%,48.736%,64.382%,64.389%{rotate:-3.219deg}48.743%,48.75%,64.361%,64.375%{rotate:-3.648deg}48.757%,48.771%,64.347%,64.354%{rotate:-4.075deg}48.778%,48.785%,64.326%,64.34%{rotate:-4.503deg}48.792%,48.799%,64.313%,64.319%{rotate:-4.93deg}48.806%,48.819%,64.292%,64.306%{rotate:-5.356deg}48.826%,48.833%,64.278%,64.285%{rotate:-5.781deg}48.84%,48.854%,64.264%,64.271%{rotate:-6.207deg}48.861%,48.875%,64.243%,64.257%{rotate:-6.631deg}48.882%,48.896%,64.229%,64.236%{rotate:-7.054deg}48.903%,48.917%,64.215%,64.222%{rotate:-7.477deg}48.924%,48.944%,64.201%,64.208%{rotate:-7.899deg}48.951%,48.972%,64.181%,64.194%{rotate:-8.321deg}48.979%,49%,64.167%,64.174%{rotate:-8.741deg}49.007%,49.028%,64.153%,64.16%{rotate:-9.16deg}49.035%,49.063%,64.139%,64.146%{rotate:-9.578deg}49.069%,49.097%,64.125%,64.132%{rotate:-9.996deg}49.104%,49.139%,64.104%,64.118%{rotate:-10.412deg}49.146%,49.188%,64.09%,64.097%{rotate:-10.827deg}49.194%,49.243%,64.076%,64.083%{rotate:-11.241deg}49.25%,49.313%,64.063%,64.069%{rotate:-11.654deg}49.319%,49.396%,64.049%,64.056%{rotate:-12.065deg}49.403%,49.514%,64.035%,64.042%{rotate:-12.476deg}49.521%,49.701%,64.021%,64.028%{rotate:-12.885deg}49.708%,64.014%{rotate:-13.292deg}64.431%,64.444%{rotate:-1.933deg}64.528%,64.542%{rotate:0.215deg}64.569%,64.583%{rotate:1.074deg}64.632%,64.646%{rotate:2.362deg}64.681%,64.694%{rotate:3.219deg}64.701%,64.722%{rotate:3.648deg}64.757%,64.778%{rotate:4.503deg}64.813%,64.833%{rotate:5.356deg}64.84%,64.868%{rotate:5.781deg}64.903%,64.931%{rotate:6.631deg}64.937%,64.965%{rotate:7.054deg}65.014%,65.049%{rotate:7.899deg}65.056%,65.09%{rotate:8.321deg}65.146%,65.194%{rotate:9.16deg}65.201%,65.25%{rotate:9.578deg}65.396%,65.472%{rotate:10.827deg}65.479%,65.569%{rotate:11.241deg}65.833%,66.028%{rotate:12.476deg}66.035%,66.347%{rotate:12.885deg}}
-.watch-m43{animation-name:watch-k46;animation-timing-function:linear}
+@keyframes watch-k13{0%,100%{rotate:175deg}50%{rotate:-175deg}}
+.watch-m13{animation-name:watch-k13;animation-duration:2.5s;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes watch-k14{0%,100%{rotate:200deg}50%{rotate:-200deg}}
+.watch-m14{animation-name:watch-k14;animation-duration:2.5s;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes watch-k15{0%,100%{rotate:225deg}50%{rotate:-225deg}}
+.watch-m15{animation-name:watch-k15;animation-duration:2.5s;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes watch-k16{0%,22%,78%,100%{rotate:-5.5deg}24%,76%{rotate:-3.57deg}26%,74%{rotate:3.57deg}28%,72%{rotate:5.5deg}}
+.watch-m16{animation-name:watch-k16;animation-duration:2.5s;animation-timing-function:linear}
+@keyframes watch-k17{0%,56%,90%,100%{translate:0 0}64.667%,81.333%{translate:-69.518px 0}}
+.watch-m17{animation-name:watch-k17;animation-timing-function:cubic-bezier(.65,0,.35,1)}
+@keyframes watch-k18{0%,56%,90%,100%{scale:1}64.667%,81.333%{scale:0.829}}
+.watch-m18{animation-name:watch-k18;animation-timing-function:cubic-bezier(.65,0,.35,1)}
+@keyframes watch-k19{0%,30.667%,64.667%,100%{translate:0 0}39.333%,56%{translate:37.6px -4.545px}}
+.watch-m19{animation-name:watch-k19;animation-timing-function:cubic-bezier(.65,0,.35,1)}
+@keyframes watch-k20{0%,30.667%,64.667%,100%{scale:1}39.333%,56%{scale:1.257}}
+.watch-m20{animation-name:watch-k20;animation-timing-function:cubic-bezier(.65,0,.35,1)}
+@keyframes watch-k21{0%,5.333%,39.333%,100%{translate:0 0}14%,30.667%{translate:292.286px 0}}
+.watch-m21{animation-name:watch-k21;animation-timing-function:cubic-bezier(.65,0,.35,1)}
+@keyframes watch-k22{0%,5.333%,90%,100%{scale:1}14%,81.333%{scale:1.75}}
+.watch-m22{animation-name:watch-k22;animation-timing-function:cubic-bezier(.65,0,.35,1)}
+@keyframes watch-k23{0%,56%,90%,100%{opacity:1}58%,88%{opacity:0}}
+.watch-m23{animation-name:watch-k23;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes watch-k24{0%,30.667%,64.667%,100%{opacity:1}32.667%,62.667%{opacity:0}}
+.watch-m24{animation-name:watch-k24;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes watch-k25{0%,5.333%,39.333%,100%{opacity:1}7.333%,37.333%{opacity:0}}
+.watch-m25{animation-name:watch-k25;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes watch-k26{0%,7.333%,30.667%,100%{opacity:0}16%,27.667%{opacity:0.62}}
+.watch-m26{animation-name:watch-k26;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes watch-k27{0%,27.667%{opacity:1}30.667%,100%{opacity:0}}
+.watch-m27{animation-name:watch-k27}
+@keyframes watch-k28{0%,11%,30.667%,100%{opacity:0}14.333%,27.667%{opacity:1}}
+.watch-m28{animation-name:watch-k28}
+@keyframes watch-k29{0%,11.667%,30.667%,100%{stroke-dashoffset:1;visibility:hidden}14.667%,27.667%{stroke-dashoffset:0;visibility:visible}}
+.watch-m29{animation-name:watch-k29}
+@keyframes watch-k30{0%,11.667%,30.667%,100%{translate:0 0}14.667%,27.667%{translate:122.6px 0}}
+.watch-m30{animation-name:watch-k30}
+@keyframes watch-k31{0%,11.704%,29.014%,100%{visibility:hidden}11.705%,29.013%{visibility:visible}}
+.watch-m31{animation-name:watch-k31}
+@keyframes watch-k32{0%,12%,30.667%,100%{stroke-dashoffset:1;visibility:hidden}14.667%,27.667%{stroke-dashoffset:0;visibility:visible}}
+.watch-m32{animation-name:watch-k32}
+@keyframes watch-k33{0%,29.433%,100%{rotate:-13.292deg}12.007%{rotate:-13.292deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}12.021%,29.045%,29.191%{rotate:-12.476deg}12.028%{rotate:-12.476deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}12.042%,12.048%,28.844%,28.928%{rotate:-11.654deg}12.069%,28.657%,28.706%{rotate:-10.412deg}12.076%{rotate:-10.412deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}12.09%,28.567%,28.602%{rotate:-9.578deg}12.097%{rotate:-9.578deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}12.111%,28.491%,28.519%{rotate:-8.741deg}12.118%{rotate:-8.741deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}12.132%,28.429%,28.45%{rotate:-7.899deg}12.139%{rotate:-7.899deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}12.152%,28.373%,28.394%{rotate:-7.054deg}12.159%{rotate:-7.054deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}12.173%,28.318%,28.339%{rotate:-6.207deg}12.18%{rotate:-6.207deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}12.194%,12.201%,28.276%,28.29%{rotate:-5.356deg}12.208%,28.256%,28.269%{rotate:-4.93deg}12.215%{rotate:-4.93deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}12.229%,12.235%,28.214%,28.228%{rotate:-4.075deg}12.242%,28.193%,28.207%{rotate:-3.648deg}12.249%{rotate:-3.648deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}12.263%,12.27%,28.159%,28.172%{rotate:-2.791deg}12.277%,28.145%,28.152%{rotate:-2.362deg}12.284%{rotate:-2.362deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}12.298%,12.305%,28.11%,28.117%{rotate:-1.504deg}12.312%,12.319%,28.096%,28.103%{rotate:-1.074deg}12.326%,12.332%,28.075%,28.089%{rotate:-0.645deg}12.339%,12.346%,28.062%,28.069%{rotate:-0.215deg}12.353%,12.36%,28.048%,28.055%{rotate:0.215deg}12.367%,12.374%,28.034%,28.041%{rotate:0.645deg}12.381%,12.388%,28.02%,28.027%{rotate:1.074deg}12.395%,12.402%,28.006%,28.013%{rotate:1.504deg}12.409%,12.416%,27.992%,27.999%{rotate:1.933deg}12.423%,12.429%,27.978%,27.985%{rotate:2.362deg}12.436%,12.45%,27.965%,27.972%{rotate:2.791deg}12.457%,12.464%,27.951%,27.958%{rotate:3.219deg}12.471%,12.478%,27.937%,27.944%{rotate:3.648deg}12.485%,12.499%,27.923%,27.93%{rotate:4.075deg}12.506%,12.519%{rotate:4.503deg}12.526%,12.533%,27.902%{rotate:4.93deg}12.54%,12.554%,27.888%,27.895%{rotate:5.356deg}12.561%,12.575%,27.875%,27.881%{rotate:5.781deg}12.582%,12.596%,27.861%,27.868%{rotate:6.207deg}12.603%,12.623%{rotate:6.631deg}12.63%,12.644%,27.84%{rotate:7.054deg}12.651%,12.672%,27.826%,27.833%{rotate:7.477deg}12.679%,12.7%{rotate:7.899deg}12.706%,12.727%,27.805%{rotate:8.321deg}12.734%,12.762%,27.791%,27.798%{rotate:8.741deg}12.769%,12.797%{rotate:9.16deg}12.803%,12.831%,27.771%{rotate:9.578deg}12.838%,12.873%,27.757%,27.764%{rotate:9.996deg}12.88%,12.921%{rotate:10.412deg}12.928%,12.977%,27.736%{rotate:10.827deg}12.984%,13.046%,27.722%,27.729%{rotate:11.241deg}13.053%,13.122%{rotate:11.654deg}13.129%,13.219%,27.701%{rotate:12.065deg}13.226%,13.351%{rotate:12.476deg}13.358%,13.565%,27.681%{rotate:12.885deg}13.572%,27.674%{rotate:13.292deg}27.687%{rotate:12.885deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}27.708%{rotate:12.065deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}27.743%{rotate:10.827deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}27.778%{rotate:9.578deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}27.812%{rotate:8.321deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}27.847%{rotate:7.054deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}27.909%{rotate:4.93deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}28.124%,28.138%{rotate:-1.933deg}28.179%,28.186%{rotate:-3.219deg}28.235%,28.249%{rotate:-4.503deg}28.297%,28.311%{rotate:-5.781deg}28.346%,28.366%{rotate:-6.631deg}28.401%,28.422%{rotate:-7.477deg}28.457%,28.484%{rotate:-8.321deg}28.526%,28.56%{rotate:-9.16deg}28.609%,28.651%{rotate:-9.996deg}28.713%,28.768%{rotate:-10.827deg}28.775%,28.838%{rotate:-11.241deg}28.935%,29.038%{rotate:-12.065deg}29.198%,29.426%{rotate:-12.885deg}}
+.watch-m33{animation-name:watch-k33;animation-timing-function:linear}
+@keyframes watch-k34{0%,12%{offset-distance:0%}12.446%{offset-distance:30.208%;animation-timing-function:cubic-bezier(.183,1,.4,1)}14.667%,27.667%{offset-distance:50%}28.169%{offset-distance:80.208%;animation-timing-function:cubic-bezier(.183,1,.4,1)}30.667%,100%{offset-distance:100%}}
+.watch-m34{animation-name:watch-k34;animation-timing-function:cubic-bezier(.365,.44,.671,.763)}
+@keyframes watch-k35{0%,12.034%,29.017%,100%{visibility:hidden}12.035%,29.016%{visibility:visible}}
+.watch-m35{animation-name:watch-k35}
+@keyframes watch-k36{0%,32.667%,56%,100%{opacity:0}41.333%,53%{opacity:0.62}}
+.watch-m36{animation-name:watch-k36;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes watch-k37{0%,53%{opacity:1}56%,100%{opacity:0}}
+.watch-m37{animation-name:watch-k37}
+@keyframes watch-k38{0%,36.333%,56%,100%{opacity:0}39.667%,53%{opacity:1}}
+.watch-m38{animation-name:watch-k38}
+@keyframes watch-k39{0%,37%,56%,100%{stroke-dashoffset:1;visibility:hidden}40%,53%{stroke-dashoffset:0;visibility:visible}}
+.watch-m39{animation-name:watch-k39}
+@keyframes watch-k40{0%,37%,56%,100%{translate:0 0}40%,53%{translate:230.444px 0}}
+.watch-m40{animation-name:watch-k40}
+@keyframes watch-k41{0%,37.02%,54.58%,100%{visibility:hidden}37.021%,54.579%{visibility:visible}}
+.watch-m41{animation-name:watch-k41}
+@keyframes watch-k42{0%,37.333%,56%,100%{stroke-dashoffset:1;visibility:hidden}40%,53%{stroke-dashoffset:0;visibility:visible}}
+.watch-m42{animation-name:watch-k42}
+@keyframes watch-k43{0%,37.333%,56%,100%{translate:0 0}40%,53%{translate:95.04px 0}}
+.watch-m43{animation-name:watch-k43}
+@keyframes watch-k44{0%,37.398%,54.069%,100%{visibility:hidden}37.399%,54.068%{visibility:visible}}
+.watch-m44{animation-name:watch-k44}
+@keyframes watch-k45{0%,58%,81.333%,100%{opacity:0}66.667%,78.333%{opacity:0.62}}
+.watch-m45{animation-name:watch-k45;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes watch-k46{0%,78.333%{opacity:1}81.333%,100%{opacity:0}}
+.watch-m46{animation-name:watch-k46}
+@keyframes watch-k47{0%,61.667%,81.333%,100%{opacity:0}65%,78.333%{opacity:1}}
+.watch-m47{animation-name:watch-k47}
+@keyframes watch-k48{0%,62.333%,81.333%,100%{stroke-dashoffset:1;visibility:hidden}65.333%,78.333%{stroke-dashoffset:0;visibility:visible}}
+.watch-m48{animation-name:watch-k48}
+@keyframes watch-k49{0%,62.333%,81.333%,100%{translate:0 0}65.333%,78.333%{translate:134.463px 0}}
+.watch-m49{animation-name:watch-k49}
+@keyframes watch-k50{0%,62.367%,79.715%,100%{visibility:hidden}62.368%,79.714%{visibility:visible}}
+.watch-m50{animation-name:watch-k50}
+@keyframes watch-k51{0%,62.667%,81.333%,100%{stroke-dashoffset:1;visibility:hidden}65.333%,78.333%{stroke-dashoffset:0;visibility:visible}}
+.watch-m51{animation-name:watch-k51}
+@keyframes watch-k52{0%,80.097%,100%{rotate:-13.292deg}62.674%{rotate:-13.292deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}62.687%,79.708%,79.854%{rotate:-12.476deg}62.694%{rotate:-12.476deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}62.708%,62.715%,79.514%,79.597%{rotate:-11.654deg}62.736%,79.326%,79.375%{rotate:-10.412deg}62.743%{rotate:-10.412deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}62.757%,79.236%,79.271%{rotate:-9.578deg}62.764%{rotate:-9.578deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}62.777%,79.16%,79.187%{rotate:-8.741deg}62.784%{rotate:-8.741deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}62.798%,79.097%,79.118%{rotate:-7.899deg}62.805%{rotate:-7.899deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}62.819%,79.042%,79.056%{rotate:-7.054deg}62.826%{rotate:-7.054deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}62.84%,78.986%,79.007%{rotate:-6.207deg}62.847%{rotate:-6.207deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}62.861%,62.868%,78.944%,78.958%{rotate:-5.356deg}62.874%,78.924%,78.938%{rotate:-4.93deg}62.881%{rotate:-4.93deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}62.895%,62.902%,78.882%,78.896%{rotate:-4.075deg}62.909%,78.861%,78.875%{rotate:-3.648deg}62.916%{rotate:-3.648deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}62.93%,62.937%,78.826%,78.84%{rotate:-2.791deg}62.944%,78.806%,78.819%{rotate:-2.362deg}62.951%{rotate:-2.362deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}62.965%,62.971%,78.778%,78.785%{rotate:-1.504deg}62.978%,62.985%,78.757%,78.771%{rotate:-1.074deg}62.992%,62.999%,78.743%,78.75%{rotate:-0.645deg}63.006%,63.013%,78.729%,78.736%{rotate:-0.215deg}63.02%,63.027%,78.715%,78.722%{rotate:0.215deg}63.034%,63.041%,78.701%,78.708%{rotate:0.645deg}63.048%,63.055%,78.688%,78.694%{rotate:1.074deg}63.061%,63.068%,78.674%,78.681%{rotate:1.504deg}63.075%,63.082%,78.66%,78.667%{rotate:1.933deg}63.089%,63.096%,78.646%,78.653%{rotate:2.362deg}63.103%,63.117%,78.632%,78.639%{rotate:2.791deg}63.124%,63.131%,78.618%,78.625%{rotate:3.219deg}63.138%,63.145%,78.604%,78.611%{rotate:3.648deg}63.152%,63.165%,78.59%,78.597%{rotate:4.075deg}63.172%,63.186%,78.576%,78.583%{rotate:4.503deg}63.193%,63.2%{rotate:4.93deg}63.207%,63.221%,78.556%{rotate:5.356deg}63.228%,63.242%,78.542%,78.549%{rotate:5.781deg}63.248%,63.262%,78.528%,78.535%{rotate:6.207deg}63.269%,63.29%{rotate:6.631deg}63.297%,63.311%,78.507%{rotate:7.054deg}63.318%,63.339%,78.493%,78.5%{rotate:7.477deg}63.345%,63.366%{rotate:7.899deg}63.373%,63.394%,78.472%{rotate:8.321deg}63.401%,63.429%,78.458%,78.465%{rotate:8.741deg}63.435%,63.463%{rotate:9.16deg}63.47%,63.498%,78.438%{rotate:9.578deg}63.505%,63.539%,78.424%,78.431%{rotate:9.996deg}63.546%,63.588%{rotate:10.412deg}63.595%,63.643%,78.403%{rotate:10.827deg}63.65%,63.713%,78.389%,78.396%{rotate:11.241deg}63.719%,63.789%{rotate:11.654deg}63.796%,63.886%,78.368%{rotate:12.065deg}63.893%,64.017%{rotate:12.476deg}64.024%,64.232%,78.347%{rotate:12.885deg}64.239%,78.34%{rotate:13.292deg}78.354%{rotate:12.885deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}78.375%{rotate:12.065deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}78.41%{rotate:10.827deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}78.444%{rotate:9.578deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}78.479%{rotate:8.321deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}78.514%{rotate:7.054deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}78.563%{rotate:5.356deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}78.792%,78.799%{rotate:-1.933deg}78.847%,78.854%{rotate:-3.219deg}78.903%,78.917%{rotate:-4.503deg}78.965%,78.979%{rotate:-5.781deg}79.014%,79.035%{rotate:-6.631deg}79.063%,79.09%{rotate:-7.477deg}79.125%,79.153%{rotate:-8.321deg}79.194%,79.229%{rotate:-9.16deg}79.278%,79.319%{rotate:-9.996deg}79.382%,79.438%{rotate:-10.827deg}79.444%,79.507%{rotate:-11.241deg}79.604%,79.701%{rotate:-12.065deg}79.861%,80.09%{rotate:-12.885deg}}
+.watch-m52{animation-name:watch-k52;animation-timing-function:linear}
+@keyframes watch-k53{0%,62.667%{offset-distance:0%}63.146%{offset-distance:31.771%;animation-timing-function:cubic-bezier(.183,1,.408,1)}65.333%,78.333%{offset-distance:50%}78.873%{offset-distance:81.771%;animation-timing-function:cubic-bezier(.183,1,.408,1)}81.333%,100%{offset-distance:100%}}
+.watch-m53{animation-name:watch-k53;animation-timing-function:cubic-bezier(.365,.449,.667,.771)}
+@keyframes watch-k54{0%,62.7%,79.663%,100%{visibility:hidden}62.701%,79.662%{visibility:visible}}
+.watch-m54{animation-name:watch-k54}
+@keyframes watch-k55{0%,80.097%,100%{rotate:13.292deg}62.674%{rotate:13.292deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}62.687%,79.708%,79.854%{rotate:12.476deg}62.694%{rotate:12.476deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}62.708%,62.715%,79.514%,79.597%{rotate:11.654deg}62.736%,79.326%,79.375%{rotate:10.412deg}62.743%{rotate:10.412deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}62.757%,79.236%,79.271%{rotate:9.578deg}62.764%{rotate:9.578deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}62.777%,79.16%,79.187%{rotate:8.741deg}62.784%{rotate:8.741deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}62.798%,79.097%,79.118%{rotate:7.899deg}62.805%{rotate:7.899deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}62.819%,79.042%,79.056%{rotate:7.054deg}62.826%{rotate:7.054deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}62.84%,78.986%,79.007%{rotate:6.207deg}62.847%{rotate:6.207deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}62.861%,62.868%,78.944%,78.958%{rotate:5.356deg}62.874%,78.924%,78.938%{rotate:4.93deg}62.881%{rotate:4.93deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}62.895%,62.902%,78.882%,78.896%{rotate:4.075deg}62.909%,78.861%,78.875%{rotate:3.648deg}62.916%{rotate:3.648deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}62.93%,62.937%,78.826%,78.84%{rotate:2.791deg}62.944%,78.806%,78.819%{rotate:2.362deg}62.951%{rotate:2.362deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}62.965%,62.971%,78.778%,78.785%{rotate:1.504deg}62.978%,62.985%,78.757%,78.771%{rotate:1.074deg}62.992%,62.999%,78.743%,78.75%{rotate:0.645deg}63.006%,63.013%,78.729%,78.736%{rotate:0.215deg}63.02%,63.027%,78.715%,78.722%{rotate:-0.215deg}63.034%,63.041%,78.701%,78.708%{rotate:-0.645deg}63.048%,63.055%,78.688%,78.694%{rotate:-1.074deg}63.061%,63.068%,78.674%,78.681%{rotate:-1.504deg}63.075%,63.082%,78.66%,78.667%{rotate:-1.933deg}63.089%,63.096%,78.646%,78.653%{rotate:-2.362deg}63.103%,63.117%,78.632%,78.639%{rotate:-2.791deg}63.124%,63.131%,78.618%,78.625%{rotate:-3.219deg}63.138%,63.145%,78.604%,78.611%{rotate:-3.648deg}63.152%,63.165%,78.59%,78.597%{rotate:-4.075deg}63.172%,63.186%,78.576%,78.583%{rotate:-4.503deg}63.193%,63.2%{rotate:-4.93deg}63.207%,63.221%,78.556%{rotate:-5.356deg}63.228%,63.242%,78.542%,78.549%{rotate:-5.781deg}63.248%,63.262%,78.528%,78.535%{rotate:-6.207deg}63.269%,63.29%{rotate:-6.631deg}63.297%,63.311%,78.507%{rotate:-7.054deg}63.318%,63.339%,78.493%,78.5%{rotate:-7.477deg}63.345%,63.366%{rotate:-7.899deg}63.373%,63.394%,78.472%{rotate:-8.321deg}63.401%,63.429%,78.458%,78.465%{rotate:-8.741deg}63.435%,63.463%{rotate:-9.16deg}63.47%,63.498%,78.438%{rotate:-9.578deg}63.505%,63.539%,78.424%,78.431%{rotate:-9.996deg}63.546%,63.588%{rotate:-10.412deg}63.595%,63.643%,78.403%{rotate:-10.827deg}63.65%,63.713%,78.389%,78.396%{rotate:-11.241deg}63.719%,63.789%{rotate:-11.654deg}63.796%,63.886%,78.368%{rotate:-12.065deg}63.893%,64.017%{rotate:-12.476deg}64.024%,64.232%,78.347%{rotate:-12.885deg}64.239%,78.34%{rotate:-13.292deg}78.354%{rotate:-12.885deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}78.375%{rotate:-12.065deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}78.41%{rotate:-10.827deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}78.444%{rotate:-9.578deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}78.479%{rotate:-8.321deg;animation-timing-function:cubic-bezier(.333,.166,.667,.833)}78.514%{rotate:-7.054deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}78.563%{rotate:-5.356deg;animation-timing-function:cubic-bezier(.333,.167,.667,.833)}78.792%,78.799%{rotate:1.933deg}78.847%,78.854%{rotate:3.219deg}78.903%,78.917%{rotate:4.503deg}78.965%,78.979%{rotate:5.781deg}79.014%,79.035%{rotate:6.631deg}79.063%,79.09%{rotate:7.477deg}79.125%,79.153%{rotate:8.321deg}79.194%,79.229%{rotate:9.16deg}79.278%,79.319%{rotate:9.996deg}79.382%,79.438%{rotate:10.827deg}79.444%,79.507%{rotate:11.241deg}79.604%,79.701%{rotate:12.065deg}79.861%,80.09%{rotate:12.885deg}}
+.watch-m55{animation-name:watch-k55;animation-timing-function:linear}
 @media (prefers-reduced-motion:reduce){.watch-a{animation-delay:-2.4s!important;animation-play-state:paused!important}}
 ]]></style>
   <defs>
-    <pattern id="watch-p1" patternUnits="userSpaceOnUse" x="0" y="0" width="40" height="40">
+    <pattern id="watch-p1" patternUnits="userSpaceOnUse" x="-1000" y="-600" width="40" height="40" data-clock="balance" data-clock-at="0" data-clock-over="15">
       <circle cx="20" cy="20" r="17" fill="none" stroke="var(--groove)"/>
       <circle r="17" fill="none" stroke="var(--groove)"/>
       <circle cx="40" r="17" fill="none" stroke="var(--groove)"/>
       <circle cy="40" r="17" fill="none" stroke="var(--groove)"/>
       <circle cx="40" cy="40" r="17" fill="none" stroke="var(--groove)"/>
     </pattern>
-    <radialGradient id="watch-g1" gradientUnits="userSpaceOnUse" cx="282" cy="300" r="170" data-clock="escape" data-clock-at="1.2" data-clock-over="3.4">
+    <radialGradient id="watch-g1" gradientUnits="userSpaceOnUse" cx="630" cy="300" r="300" data-clock="escape" data-clock-at="0" data-clock-over="15">
       <stop stop-color="#00000000"/>
-      <stop offset="0.8" stop-color="#00000000"/>
+      <stop offset="0.82" stop-color="#00000000"/>
       <stop offset="1" stop-color="#000000"/>
     </radialGradient>
-    <mask id="watch-m1" maskUnits="userSpaceOnUse" x="-1" y="-1" width="1002" height="602" mask-type="alpha" data-clock="escape" data-clock-at="1.2" data-clock-over="3.4">
+    <mask id="watch-m1" maskUnits="userSpaceOnUse" x="-1" y="-1" width="1002" height="602" mask-type="alpha" data-clock="escape" data-clock-at="0" data-clock-over="15">
       <rect width="1000" height="600" fill="url(#watch-g1)"/>
     </mask>
-    <radialGradient id="watch-g2" gradientUnits="userSpaceOnUse" cx="512.4" cy="300" r="150" data-clock="fork" data-clock-at="4" data-clock-over="3.4">
+    <mask id="watch-m2" maskUnits="userSpaceOnUse" x="354" y="24" width="552" height="552" mask-type="alpha" data-clock="escape" data-clock-at="0" data-clock-over="15">
+      <circle cx="630" cy="300" r="272" fill="none" stroke="#FFFFFF" stroke-width="1.5" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m1"/>
+    </mask>
+    <radialGradient id="watch-g2" gradientUnits="userSpaceOnUse" cx="610" cy="290" r="340" data-clock="fork" data-clock-at="0" data-clock-over="15">
       <stop stop-color="#00000000"/>
-      <stop offset="0.8" stop-color="#00000000"/>
+      <stop offset="0.82" stop-color="#00000000"/>
       <stop offset="1" stop-color="#000000"/>
     </radialGradient>
-    <mask id="watch-m2" maskUnits="userSpaceOnUse" x="-1" y="-1" width="1002" height="602" mask-type="alpha" data-clock="fork" data-clock-at="4" data-clock-over="3.4">
+    <mask id="watch-m3" maskUnits="userSpaceOnUse" x="-1" y="-1" width="1002" height="602" mask-type="alpha" data-clock="fork" data-clock-at="0" data-clock-over="15">
       <rect width="1000" height="600" fill="url(#watch-g2)"/>
     </mask>
-    <radialGradient id="watch-g3" gradientUnits="userSpaceOnUse" cx="652.277" cy="300" r="240" data-clock="balance" data-clock-at="6.8" data-clock-over="3.4">
+    <mask id="watch-m4" maskUnits="userSpaceOnUse" x="306" y="66" width="608" height="448" mask-type="alpha" data-clock="fork" data-clock-at="0" data-clock-over="15">
+      <ellipse cx="610" cy="290" rx="300" ry="220" fill="none" stroke="#FFFFFF" stroke-width="1.5" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m2"/>
+    </mask>
+    <radialGradient id="watch-g3" gradientUnits="userSpaceOnUse" cx="620" cy="300" r="330" data-clock="balance" data-clock-at="0" data-clock-over="15">
       <stop stop-color="#00000000"/>
-      <stop offset="0.8" stop-color="#00000000"/>
+      <stop offset="0.82" stop-color="#00000000"/>
       <stop offset="1" stop-color="#000000"/>
     </radialGradient>
-    <mask id="watch-m3" maskUnits="userSpaceOnUse" x="-1" y="-1" width="1002" height="602" mask-type="alpha" data-clock="balance" data-clock-at="6.8" data-clock-over="3.4">
+    <mask id="watch-m5" maskUnits="userSpaceOnUse" x="-1" y="-1" width="1002" height="602" mask-type="alpha" data-clock="balance" data-clock-at="0" data-clock-over="15">
       <rect width="1000" height="600" fill="url(#watch-g3)"/>
+    </mask>
+    <mask id="watch-m6" maskUnits="userSpaceOnUse" x="298" y="-22" width="644" height="644" mask-type="alpha" data-clock="balance" data-clock-at="0" data-clock-over="15">
+      <circle cx="620" cy="300" r="318" fill="none" stroke="#FFFFFF" stroke-width="1.5" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m3"/>
     </mask>
   </defs>
   <rect width="1000" height="600" fill="var(--plate)"/>
-  <rect width="1000" height="600" fill="url(#watch-p1)"/>
-  <g transform="translate(282 300)" style="transform-origin:282px 300px;scale:2.4;rotate:90deg" fill="none">
-    <circle cx="2.5" cy="4" r="56.4" stroke="var(--shade)" stroke-width="8.4"/>
-    <circle cx="2.5" cy="-150.282" r="82.72" stroke="var(--shade)" stroke-width="12.32"/>
-    <circle cx="-8.6" cy="-99.282" r="2.2" fill="#B4BCC8" stroke="#4E5663" stroke-width="0.4"/>
-    <circle cx="8.6" cy="-99.282" r="2.2" fill="#B4BCC8" stroke="#4E5663" stroke-width="0.4"/>
-    <g style="transform-origin:0 0" data-clock="tick" data-clock-at="0" data-clock-over="15" data-hit="escape" class="watch-a watch-m2">
-      <path d="M-10.16 -40.75L-7.01 -47.49L-6.3 -56.15L-3.35 -59.91L1.6 -57.38L-2.85 -47.92L-4.03 -41.81C-0.254 -42.172 3.554 -42.021 7.29 -41.36L12.91 -46.23L17.08 -53.86L21.31 -56.09L24.8 -51.77L16.89 -44.93L13.33 -39.83C16.927 -38.626 20.345 -36.941 23.49 -34.82L30.6 -36.98L37.51 -42.25L42.28 -42.57L43.71 -37.2L33.7 -34.18L28.37 -30.97C31.169 -28.408 33.608 -25.478 35.62 -22.26L42.99 -21.34L51.45 -23.34L55.94 -21.7L55.06 -16.21L44.69 -17.51L38.52 -16.75C40.031 -13.272 41.063 -9.605 41.59 -5.85L47.96 -2.01L56.5 -0.39L59.93 2.93L56.9 7.59L47.95 2.18L42 0.37C41.965 4.163 41.417 7.934 40.37 11.58L44.63 17.67L51.77 22.62L53.56 27.05L48.89 30.08L42.92 21.49L38.22 17.42C36.645 20.872 34.61 24.095 32.17 27L33.58 34.29L38.1 41.72L37.92 46.5L32.43 47.36L30.47 37.09L27.83 31.46C24.988 33.972 21.82 36.088 18.41 37.75L16.73 44.99L17.83 53.61L15.73 57.9L10.36 56.46L12.75 46.28L12.63 40.06C9.013 41.197 5.259 41.84 1.47 41.97L-3.01 47.91L-5.51 56.23L-9.18 59.29L-13.5 55.79L-7.18 47.46L-4.75 41.73C-8.519 41.3 -12.213 40.362 -15.73 38.94L-22.24 42.54L-27.91 49.13L-32.5 50.43L-35.02 45.48L-25.86 40.44L-21.32 36.19C-24.586 34.265 -27.577 31.907 -30.21 29.18L-37.62 29.82L-45.48 33.53L-50.21 32.85L-50.49 27.3L-40.07 26.42L-34.19 24.39C-36.395 21.301 -38.171 17.927 -39.47 14.36L-46.49 11.94L-55.18 12.13L-59.23 9.59L-57.23 4.4L-47.36 7.84L-41.16 8.37C-41.916 4.654 -42.165 0.853 -41.9 -2.93L-47.33 -8L-55.35 -11.36L-58.01 -15.33L-54.07 -19.25L-46.45 -12.1L-41 -9.09C-40.179 -12.794 -38.861 -16.37 -37.08 -19.72L-39.98 -26.56L-45.94 -32.89L-46.76 -37.6L-41.57 -39.58L-37.51 -29.95L-33.76 -24.98C-31.505 -28.031 -28.848 -30.763 -25.86 -33.1L-25.72 -40.53L-28.59 -48.73L-27.43 -53.36L-21.87 -53.07L-22.09 -42.62L-20.68 -36.55C-17.379 -38.419 -13.84 -39.831 -10.16 -40.75ZM2.1 -8.24L2.1 -36.44C16.355 -35.62 28.823 -26.563 34.01 -13.26L7.18 -4.54C6.022 -6.377 4.204 -7.701 2.1 -8.24ZM8.48 -0.55L35.3 -9.26C38.926 4.549 34.167 19.205 23.12 28.25L6.54 5.43C7.927 3.758 8.621 1.618 8.48 -0.55ZM3.14 7.9L19.72 30.71C7.705 38.424 -7.705 38.424 -19.72 30.71L-3.14 7.9C-1.123 8.702 1.123 8.702 3.14 7.9ZM-6.54 5.43L-23.12 28.25C-34.167 19.205 -38.926 4.549 -35.3 -9.26L-8.48 -0.55C-8.621 1.618 -7.927 3.758 -6.54 5.43ZM-7.18 -4.54L-34.01 -13.26C-28.823 -26.563 -16.355 -35.62 -2.1 -36.44L-2.1 -8.24C-4.204 -7.701 -6.022 -6.377 -7.18 -4.54Z" fill-rule="evenodd" fill="#B4BCC8" stroke="#4E5663" stroke-width="0.4" stroke-linejoin="round" style="transform-origin:0 0" class="watch-a watch-m1"/>
-    </g>
-    <path d="M88 0C88 48.601 48.601 88 0 88C-48.601 88 -88 48.601 -88 0C-88 -48.601 -48.601 -88 0 -88C48.601 -88 88 -48.601 88 0ZM7.18 -5.43L41.49 -64.87C63.618 -50.719 77.006 -26.266 77.006 0C77.006 26.266 63.618 50.719 41.49 64.87L7.18 5.43C9.61 2.218 9.61 -2.218 7.18 -5.43ZM1.11 8.93L35.43 68.37C12.112 80.454 -15.757 79.82 -38.501 66.688C-61.246 53.555 -75.728 29.736 -76.92 3.5L-8.29 3.5C-6.724 7.209 -2.885 9.426 1.11 8.93ZM-8.29 -3.5L-76.92 -3.5C-75.728 -29.736 -61.246 -53.555 -38.501 -66.688C-15.757 -79.82 12.112 -80.454 35.43 -68.37L1.11 -8.93C-2.885 -9.426 -6.724 -7.209 -8.29 -3.5Z" fill-rule="evenodd" transform="translate(0 -154.282)" fill="#D9BC7A" stroke="#6E5626" stroke-width="0.5" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" data-hit="balance" class="watch-a watch-m3"/>
-    <path d="M36.2 -19.25C39.233 -13.344 40.781 -6.789 40.71 -0.15C40.638 6.444 38.96 12.921 35.82 18.72C32.706 24.473 28.237 29.382 22.8 33.02C17.4 36.632 11.201 38.873 4.74 39.55C-1.676 40.225 -8.16 39.326 -14.15 36.93C-20.092 34.549 -25.364 30.756 -29.51 25.88" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" data-clock="tick" data-clock-at="0" data-clock-over="15"/>
-    <path d="M-14.33 36.86C-20.262 34.449 -25.517 30.629 -29.64 25.73C-33.734 20.871 -36.583 15.088 -37.94 8.88C-39.284 2.717 -39.105 -3.681 -37.42 -9.76C-35.749 -15.795 -32.632 -21.331 -28.34 -25.89C-24.078 -30.412 -18.779 -33.827 -12.9 -35.84C-7.066 -37.838 -0.833 -38.383 5.26 -37.43C11.306 -36.487 17.031 -34.084 21.94 -30.43C26.807 -26.801 30.717 -22.04 33.33 -16.56C35.927 -11.122 37.16 -5.132 36.92 0.89C36.68 6.863 34.988 12.688 31.99 17.86C29.018 22.99 24.841 27.318 19.82 30.47C14.836 33.595 9.166 35.459 3.3 35.9" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m4"/>
-    <path d="M19.66 30.57C14.663 33.67 8.986 35.507 3.12 35.92C-2.703 36.33 -8.538 35.314 -13.88 32.96C-19.176 30.625 -23.824 27.035 -27.42 22.5C-30.986 18.002 -33.403 12.702 -34.46 7.06C-35.509 1.465 -35.18 -4.301 -33.5 -9.74C-31.834 -15.135 -28.879 -20.044 -24.89 -24.04C-20.932 -27.999 -16.068 -30.934 -10.72 -32.59C-5.418 -34.233 0.204 -34.559 5.66 -33.54C11.071 -32.53 16.154 -30.217 20.47 -26.8C24.752 -23.413 28.143 -19.033 30.35 -14.04C32.532 -9.091 33.476 -3.685 33.1 1.71C32.73 7.06 31.062 12.24 28.24 16.8" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m5"/>
-    <path d="M33.09 1.88C32.691 7.227 30.996 12.396 28.15 16.94C25.327 21.444 21.448 25.192 16.85 27.86C12.295 30.506 7.164 32.003 1.9 32.22C-3.317 32.431 -8.507 31.367 -13.22 29.12C-17.889 26.895 -21.946 23.565 -25.04 19.42C-28.106 15.31 -30.124 10.515 -30.92 5.45C-31.709 0.432 -31.263 -4.703 -29.62 -9.51C-27.992 -14.269 -25.229 -18.559 -21.57 -22.01C-17.942 -25.431 -13.535 -27.916 -8.73 -29.25C-3.973 -30.574 1.035 -30.718 5.86 -29.67C10.637 -28.629 15.089 -26.439 18.83 -23.29C22.536 -20.172 25.426 -16.197 27.25 -11.71" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m6"/>
-    <path d="M18.95 -23.19C22.636 -20.052 25.502 -16.064 27.3 -11.57C29.084 -7.119 29.757 -2.3 29.26 2.47C28.763 7.193 27.122 11.724 24.48 15.67C21.868 19.578 18.343 22.791 14.21 25.03C10.116 27.245 5.544 28.429 0.89 28.48C-3.715 28.528 -8.263 27.454 -12.36 25.35C-16.417 23.266 -19.904 20.225 -22.52 16.49C-25.108 12.792 -26.756 8.519 -27.32 4.04C-27.88 -0.39 -27.351 -4.89 -25.78 -9.07C-24.224 -13.205 -21.684 -16.898 -18.38 -19.83C-15.111 -22.73 -11.184 -24.789 -6.94 -25.83C-2.741 -26.859 1.646 -26.848 5.84 -25.8" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m7"/>
-    <path d="M-6.81 -25.86C-2.606 -26.869 1.781 -26.838 5.97 -25.77C10.114 -24.712 13.938 -22.659 17.11 -19.79C20.243 -16.955 22.639 -13.399 24.09 -9.43C25.525 -5.502 25.982 -1.284 25.42 2.86C24.865 6.956 23.321 10.855 20.92 14.22C18.543 17.544 15.392 20.238 11.74 22.07C8.129 23.884 4.13 24.79 0.09 24.71C-3.903 24.629 -7.816 23.575 -11.31 21.64C-14.758 19.73 -17.69 17.008 -19.85 13.71C-21.988 10.451 -23.299 6.72 -23.67 2.84C-24.034 -0.994 -23.457 -4.859 -21.99 -8.42C-20.539 -11.936 -18.253 -15.046 -15.33 -17.48" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m8"/>
-    <path d="M-21.94 -8.53C-20.474 -12.04 -18.174 -15.139 -15.24 -17.56C-12.343 -19.95 -8.907 -21.597 -5.23 -22.36C-1.6 -23.111 2.158 -22.967 5.72 -21.94C9.241 -20.923 12.461 -19.063 15.1 -16.52C17.703 -14.014 19.656 -10.911 20.79 -7.48C21.906 -4.094 22.181 -0.486 21.59 3.03C21.007 6.503 19.586 9.781 17.45 12.58C15.342 15.339 12.592 17.543 9.44 19C6.332 20.438 2.92 21.097 -0.5 20.92C-3.875 20.745 -7.157 19.75 -10.06 18.02C-12.922 16.314 -15.325 13.935 -17.06 11.09C-18.767 8.289 -19.765 5.114 -19.97 1.84" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m9"/>
-    <path d="M-17.11 11.01C-18.807 8.196 -19.792 5.011 -19.98 1.73C-20.163 -1.501 -19.555 -4.727 -18.21 -7.67C-16.885 -10.57 -14.874 -13.103 -12.35 -15.05C-9.863 -16.969 -6.945 -18.253 -3.85 -18.79C-0.802 -19.317 2.328 -19.094 5.27 -18.14C8.169 -17.199 10.795 -15.565 12.92 -13.38C15.011 -11.228 16.545 -8.599 17.39 -5.72C18.224 -2.887 18.354 0.106 17.77 3C17.192 5.847 15.929 8.511 14.09 10.76C12.28 12.976 9.956 14.716 7.32 15.83C4.732 16.919 1.918 17.362 -0.88 17.12C-3.636 16.886 -6.292 15.983 -8.62 14.49" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m10"/>
-    <path d="M-0.97 17.12C-3.723 16.868 -6.373 15.948 -8.69 14.44C-10.967 12.958 -12.848 10.943 -14.17 8.57C-15.468 6.239 -16.178 3.627 -16.24 0.96C-16.301 -1.663 -15.721 -4.262 -14.55 -6.61C-13.401 -8.912 -11.709 -10.899 -9.62 -12.4C-7.563 -13.875 -5.178 -14.826 -2.67 -15.17C-0.213 -15.507 2.29 -15.239 4.62 -14.39C6.904 -13.554 8.95 -12.175 10.58 -10.37C12.182 -8.602 13.328 -6.471 13.92 -4.16C14.5 -1.892 14.517 0.484 13.97 2.76C13.434 4.987 12.363 7.05 10.85 8.77C9.365 10.456 7.491 11.753 5.39 12.55" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m11"/>
-    <path d="M10.8 8.82C9.309 10.496 7.431 11.783 5.33 12.57C3.27 13.342 1.052 13.6 -1.13 13.32C-3.262 13.043 -5.294 12.25 -7.05 11.01C-8.769 9.798 -10.166 8.184 -11.12 6.31C-12.048 4.477 -12.515 2.445 -12.48 0.39C-12.451 -1.618 -11.932 -3.588 -10.97 -5.35C-10.026 -7.069 -8.677 -8.531 -7.04 -9.61C-5.44 -10.662 -3.607 -11.308 -1.7 -11.49C0.158 -11.672 2.032 -11.397 3.76 -10.69C5.441 -9.995 6.928 -8.9 8.09 -7.5C9.225 -6.14 10.011 -4.523 10.38 -2.79C10.736 -1.101 10.674 0.65 10.2 2.31" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m12"/>
-    <path d="M10.39 -2.74C10.736 -1.048 10.664 0.702 10.18 2.36C9.71 3.968 8.855 5.437 7.69 6.64C6.554 7.81 5.151 8.685 3.6 9.19C2.093 9.678 0.49 9.792 -1.07 9.52C-2.582 9.253 -4.007 8.622 -5.22 7.68C-6.397 6.769 -7.334 5.585 -7.95 4.23" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m3"/>
-    <g transform="translate(0 -69.282)" style="transform-origin:0 -69.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" data-hit="fork" class="watch-a watch-m13" stroke="#4E5663" stroke-width="0.3">
-      <path d="M-34.21 2.5C-20.737 -1.167 -9.333 -2 0 0C9.333 -2 22.91 0.087 40.73 6.26" stroke-width="9.8" stroke-linecap="round"/>
-      <path d="M-34.21 2.5C-20.737 -1.167 -9.333 -2 0 0C9.333 -2 22.91 0.087 40.73 6.26" stroke="#B4BCC8" stroke-width="9" stroke-linecap="round"/>
-      <path d="M-4.6 0L-2.6 -52.95L-7.4 -63.95L-7.4 -73.45L-2.5 -73.45L-2.5 -65.75L2.5 -65.75L2.5 -73.45L7.4 -73.45L7.4 -63.95L2.6 -52.95L4.6 0Z" fill="#B4BCC8" stroke-width="0.4" stroke-linejoin="round"/>
-      <path d="M-32.33 19.21L-26.15 18.3L-31.12 2.04L-37.3 2.96Z" fill="#E0356A" stroke="#7C1236" stroke-linejoin="round"/>
-      <path d="M27.2 16.25L31.08 21.14L42.68 8.71L38.79 3.82Z" fill="#E0356A" stroke="#7C1236" stroke-linejoin="round"/>
-    </g>
-    <g transform="translate(0 -154.282)" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m3">
-      <circle r="20.55" fill="#B4BCC847" stroke="#B4BCC8" stroke-width="0.6"/>
-      <circle cy="16.05" r="2.2" fill="#E0356A" stroke="#7C1236" stroke-width="0.3"/>
-    </g>
-    <circle cx="36.201" cy="-173.53" r="2.2" fill="#B4BCC8" stroke="#4E5663" stroke-width="0.4"/>
-    <g transform="translate(0 -69.282)">
-      <circle r="5.78" fill="#D9BC7A" stroke="#6E5626" stroke-width="0.4"/>
-      <circle r="3.4" fill="#E0356A" stroke="#7C1236" stroke-width="0.5"/>
-      <circle r="1.224" fill="#B4BCC8"/>
-    </g>
-    <circle r="5.78" fill="#D9BC7A" stroke="#6E5626" stroke-width="0.4"/>
-    <circle r="3.4" fill="#E0356A" stroke="#7C1236" stroke-width="0.5"/>
-    <circle r="1.224" fill="#B4BCC8"/>
-    <g transform="translate(0 -154.282)">
-      <circle r="8.5" fill="#D9BC7A" stroke="#6E5626" stroke-width="0.4"/>
-      <circle r="5" fill="#E0356A" stroke="#7C1236" stroke-width="0.5"/>
-      <circle r="1.8" fill="#B4BCC8"/>
-    </g>
-  </g>
-  <text x="56" y="540" font-weight="600" font-size="16" fill="var(--text)">Swiss lever escapement</text>
-  <text x="56" y="562" font-family="'watch-JetBrains Mono'" font-size="12" fill="var(--muted)">28,800 beats an hour, shown 10× slower</text>
-  <rect width="1000" height="600" fill="var(--background)" mask="url(#watch-m1)" data-clock="escape" data-clock-at="1.2" data-clock-over="3.4" class="watch-a watch-m14"/>
-  <circle cx="282" cy="300" r="158" fill="none" stroke="var(--blue)" stroke-width="2" data-clock="escape" data-clock-at="1.2" data-clock-over="3.4" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m15"/>
-  <g data-clock="escape" data-clock-at="1.2" data-clock-over="3.4" class="watch-a watch-m16">
-    <text x="56" y="70" font-weight="600" font-size="22" fill="var(--text)">Escape wheel</text>
-    <text x="56" y="92" font-family="'watch-JetBrains Mono'" font-size="13" fill="var(--muted)">15 teeth · half a tooth a beat</text>
-  </g>
-  <g data-clock="escape" data-clock-at="1.2" data-clock-over="3.4">
-    <line x1="86" y1="103.9" x2="204.865" y2="103.9" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:86px 103.9px;rotate:45.034deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m17"/>
-    <g style="transform-origin:86px 103.9px;rotate:45.034deg" class="watch-a watch-m19">
-      <polyline points="-6.303 -3.045 0 0 -6.303 3.045" transform="translate(86 103.9)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="watch-a watch-m18"/>
-    </g>
-  </g>
-  <g data-clock="escape" data-clock-at="1.2" data-clock-over="3.4">
-    <path d="M0 0C45.412 -10.899 90.824 -10.899 136.235 0" transform="translate(221.12 467.265)" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:221.12px 467.265px;rotate:-137.5deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m20"/>
-    <g style="transform-origin:221.12px 467.265px;rotate:-137.5deg" class="watch-a watch-m23">
-      <g style="scale:.0625;offset-path:path('M0 0C734.6 -173.6 1445.2 -173.6 2179.8 0C1445.2 -173.6 734.6 -173.6 0 0');offset-rotate:0deg" class="watch-a watch-m22">
-        <g style="scale:16">
-          <polyline points="-8.104 -3.915 0 0 -8.104 3.915" transform="translate(221.12 467.265)" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:221.12px 467.265px" class="watch-a watch-m21"/>
+  <g style="transform-origin:500px 300px" data-clock="lens" data-clock-at="0" data-clock-over="15" class="watch-a watch-m22">
+    <g data-clock="escape" data-clock-at="0" data-clock-over="15">
+      <g class="watch-a watch-m21">
+        <g style="transform-origin:500px 300px" data-clock="fork" data-clock-at="0" data-clock-over="15" class="watch-a watch-m20">
+          <g class="watch-a watch-m19">
+            <g style="transform-origin:500px 300px" data-clock="balance" data-clock-at="0" data-clock-over="15" class="watch-a watch-m18">
+              <g class="watch-a watch-m17">
+                <rect x="-1000" y="-600" width="3000" height="1800" fill="url(#watch-p1)"/>
+                <g transform="translate(282 300)" style="transform-origin:282px 300px;scale:2.4;rotate:90deg" fill="none">
+                  <circle cx="2.5" cy="4" r="56.4" stroke="var(--shade)" stroke-width="8.4"/>
+                  <circle cx="2.5" cy="-150.282" r="82.72" stroke="var(--shade)" stroke-width="12.32"/>
+                  <circle cx="-8.6" cy="-99.282" r="2.2" fill="#B4BCC8" stroke="#4E5663" stroke-width="0.4"/>
+                  <circle cx="8.6" cy="-99.282" r="2.2" fill="#B4BCC8" stroke="#4E5663" stroke-width="0.4"/>
+                  <g style="transform-origin:0 0" data-clock="tick" data-clock-at="0" data-clock-over="15" data-hit="escape" class="watch-a watch-m5">
+                    <path d="M-10.16 -40.75L-7.01 -47.49L-6.3 -56.15L-3.35 -59.91L1.6 -57.38L-2.85 -47.92L-4.03 -41.81C-0.254 -42.172 3.554 -42.021 7.29 -41.36L12.91 -46.23L17.08 -53.86L21.31 -56.09L24.8 -51.77L16.89 -44.93L13.33 -39.83C16.927 -38.626 20.345 -36.941 23.49 -34.82L30.6 -36.98L37.51 -42.25L42.28 -42.57L43.71 -37.2L33.7 -34.18L28.37 -30.97C31.169 -28.408 33.608 -25.478 35.62 -22.26L42.99 -21.34L51.45 -23.34L55.94 -21.7L55.06 -16.21L44.69 -17.51L38.52 -16.75C40.031 -13.272 41.063 -9.605 41.59 -5.85L47.96 -2.01L56.5 -0.39L59.93 2.93L56.9 7.59L47.95 2.18L42 0.37C41.965 4.163 41.417 7.934 40.37 11.58L44.63 17.67L51.77 22.62L53.56 27.05L48.89 30.08L42.92 21.49L38.22 17.42C36.645 20.872 34.61 24.095 32.17 27L33.58 34.29L38.1 41.72L37.92 46.5L32.43 47.36L30.47 37.09L27.83 31.46C24.988 33.972 21.82 36.088 18.41 37.75L16.73 44.99L17.83 53.61L15.73 57.9L10.36 56.46L12.75 46.28L12.63 40.06C9.013 41.197 5.259 41.84 1.47 41.97L-3.01 47.91L-5.51 56.23L-9.18 59.29L-13.5 55.79L-7.18 47.46L-4.75 41.73C-8.519 41.3 -12.213 40.362 -15.73 38.94L-22.24 42.54L-27.91 49.13L-32.5 50.43L-35.02 45.48L-25.86 40.44L-21.32 36.19C-24.586 34.265 -27.577 31.907 -30.21 29.18L-37.62 29.82L-45.48 33.53L-50.21 32.85L-50.49 27.3L-40.07 26.42L-34.19 24.39C-36.395 21.301 -38.171 17.927 -39.47 14.36L-46.49 11.94L-55.18 12.13L-59.23 9.59L-57.23 4.4L-47.36 7.84L-41.16 8.37C-41.916 4.654 -42.165 0.853 -41.9 -2.93L-47.33 -8L-55.35 -11.36L-58.01 -15.33L-54.07 -19.25L-46.45 -12.1L-41 -9.09C-40.179 -12.794 -38.861 -16.37 -37.08 -19.72L-39.98 -26.56L-45.94 -32.89L-46.76 -37.6L-41.57 -39.58L-37.51 -29.95L-33.76 -24.98C-31.505 -28.031 -28.848 -30.763 -25.86 -33.1L-25.72 -40.53L-28.59 -48.73L-27.43 -53.36L-21.87 -53.07L-22.09 -42.62L-20.68 -36.55C-17.379 -38.419 -13.84 -39.831 -10.16 -40.75ZM2.1 -8.24L2.1 -36.44C16.355 -35.62 28.823 -26.563 34.01 -13.26L7.18 -4.54C6.022 -6.377 4.204 -7.701 2.1 -8.24ZM8.48 -0.55L35.3 -9.26C38.926 4.549 34.167 19.205 23.12 28.25L6.54 5.43C7.927 3.758 8.621 1.618 8.48 -0.55ZM3.14 7.9L19.72 30.71C7.705 38.424 -7.705 38.424 -19.72 30.71L-3.14 7.9C-1.123 8.702 1.123 8.702 3.14 7.9ZM-6.54 5.43L-23.12 28.25C-34.167 19.205 -38.926 4.549 -35.3 -9.26L-8.48 -0.55C-8.621 1.618 -7.927 3.758 -6.54 5.43ZM-7.18 -4.54L-34.01 -13.26C-28.823 -26.563 -16.355 -35.62 -2.1 -36.44L-2.1 -8.24C-4.204 -7.701 -6.022 -6.377 -7.18 -4.54Z" fill-rule="evenodd" fill="#B4BCC8" stroke="#4E5663" stroke-width="0.4" stroke-linejoin="round" style="transform-origin:0 0" class="watch-a watch-m4"/>
+                  </g>
+                  <path d="M88 0C88 48.601 48.601 88 0 88C-48.601 88 -88 48.601 -88 0C-88 -48.601 -48.601 -88 0 -88C48.601 -88 88 -48.601 88 0ZM7.18 -5.43L41.49 -64.87C63.618 -50.719 77.006 -26.266 77.006 0C77.006 26.266 63.618 50.719 41.49 64.87L7.18 5.43C9.61 2.218 9.61 -2.218 7.18 -5.43ZM1.11 8.93L35.43 68.37C12.112 80.454 -15.757 79.82 -38.501 66.688C-61.246 53.555 -75.728 29.736 -76.92 3.5L-8.29 3.5C-6.724 7.209 -2.885 9.426 1.11 8.93ZM-8.29 -3.5L-76.92 -3.5C-75.728 -29.736 -61.246 -53.555 -38.501 -66.688C-15.757 -79.82 12.112 -80.454 35.43 -68.37L1.11 -8.93C-2.885 -9.426 -6.724 -7.209 -8.29 -3.5Z" fill-rule="evenodd" transform="translate(0 -154.282)" fill="#D9BC7A" stroke="#6E5626" stroke-width="0.5" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" data-hit="balance" class="watch-a watch-m6"/>
+                  <path d="M36.2 -19.25C39.233 -13.344 40.781 -6.789 40.71 -0.15C40.638 6.444 38.96 12.921 35.82 18.72C32.706 24.473 28.237 29.382 22.8 33.02C17.4 36.632 11.201 38.873 4.74 39.55C-1.676 40.225 -8.16 39.326 -14.15 36.93C-20.092 34.549 -25.364 30.756 -29.51 25.88" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" data-clock="tick" data-clock-at="0" data-clock-over="15"/>
+                  <path d="M-14.33 36.86C-20.262 34.449 -25.517 30.629 -29.64 25.73C-33.734 20.871 -36.583 15.088 -37.94 8.88C-39.284 2.717 -39.105 -3.681 -37.42 -9.76C-35.749 -15.795 -32.632 -21.331 -28.34 -25.89C-24.078 -30.412 -18.779 -33.827 -12.9 -35.84C-7.066 -37.838 -0.833 -38.383 5.26 -37.43C11.306 -36.487 17.031 -34.084 21.94 -30.43C26.807 -26.801 30.717 -22.04 33.33 -16.56C35.927 -11.122 37.16 -5.132 36.92 0.89C36.68 6.863 34.988 12.688 31.99 17.86C29.018 22.99 24.841 27.318 19.82 30.47C14.836 33.595 9.166 35.459 3.3 35.9" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m7"/>
+                  <path d="M19.66 30.57C14.663 33.67 8.986 35.507 3.12 35.92C-2.703 36.33 -8.538 35.314 -13.88 32.96C-19.176 30.625 -23.824 27.035 -27.42 22.5C-30.986 18.002 -33.403 12.702 -34.46 7.06C-35.509 1.465 -35.18 -4.301 -33.5 -9.74C-31.834 -15.135 -28.879 -20.044 -24.89 -24.04C-20.932 -27.999 -16.068 -30.934 -10.72 -32.59C-5.418 -34.233 0.204 -34.559 5.66 -33.54C11.071 -32.53 16.154 -30.217 20.47 -26.8C24.752 -23.413 28.143 -19.033 30.35 -14.04C32.532 -9.091 33.476 -3.685 33.1 1.71C32.73 7.06 31.062 12.24 28.24 16.8" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m8"/>
+                  <path d="M33.09 1.88C32.691 7.227 30.996 12.396 28.15 16.94C25.327 21.444 21.448 25.192 16.85 27.86C12.295 30.506 7.164 32.003 1.9 32.22C-3.317 32.431 -8.507 31.367 -13.22 29.12C-17.889 26.895 -21.946 23.565 -25.04 19.42C-28.106 15.31 -30.124 10.515 -30.92 5.45C-31.709 0.432 -31.263 -4.703 -29.62 -9.51C-27.992 -14.269 -25.229 -18.559 -21.57 -22.01C-17.942 -25.431 -13.535 -27.916 -8.73 -29.25C-3.973 -30.574 1.035 -30.718 5.86 -29.67C10.637 -28.629 15.089 -26.439 18.83 -23.29C22.536 -20.172 25.426 -16.197 27.25 -11.71" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m9"/>
+                  <path d="M18.95 -23.19C22.636 -20.052 25.502 -16.064 27.3 -11.57C29.084 -7.119 29.757 -2.3 29.26 2.47C28.763 7.193 27.122 11.724 24.48 15.67C21.868 19.578 18.343 22.791 14.21 25.03C10.116 27.245 5.544 28.429 0.89 28.48C-3.715 28.528 -8.263 27.454 -12.36 25.35C-16.417 23.266 -19.904 20.225 -22.52 16.49C-25.108 12.792 -26.756 8.519 -27.32 4.04C-27.88 -0.39 -27.351 -4.89 -25.78 -9.07C-24.224 -13.205 -21.684 -16.898 -18.38 -19.83C-15.111 -22.73 -11.184 -24.789 -6.94 -25.83C-2.741 -26.859 1.646 -26.848 5.84 -25.8" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m10"/>
+                  <path d="M-6.81 -25.86C-2.606 -26.869 1.781 -26.838 5.97 -25.77C10.114 -24.712 13.938 -22.659 17.11 -19.79C20.243 -16.955 22.639 -13.399 24.09 -9.43C25.525 -5.502 25.982 -1.284 25.42 2.86C24.865 6.956 23.321 10.855 20.92 14.22C18.543 17.544 15.392 20.238 11.74 22.07C8.129 23.884 4.13 24.79 0.09 24.71C-3.903 24.629 -7.816 23.575 -11.31 21.64C-14.758 19.73 -17.69 17.008 -19.85 13.71C-21.988 10.451 -23.299 6.72 -23.67 2.84C-24.034 -0.994 -23.457 -4.859 -21.99 -8.42C-20.539 -11.936 -18.253 -15.046 -15.33 -17.48" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m11"/>
+                  <path d="M-21.94 -8.53C-20.474 -12.04 -18.174 -15.139 -15.24 -17.56C-12.343 -19.95 -8.907 -21.597 -5.23 -22.36C-1.6 -23.111 2.158 -22.967 5.72 -21.94C9.241 -20.923 12.461 -19.063 15.1 -16.52C17.703 -14.014 19.656 -10.911 20.79 -7.48C21.906 -4.094 22.181 -0.486 21.59 3.03C21.007 6.503 19.586 9.781 17.45 12.58C15.342 15.339 12.592 17.543 9.44 19C6.332 20.438 2.92 21.097 -0.5 20.92C-3.875 20.745 -7.157 19.75 -10.06 18.02C-12.922 16.314 -15.325 13.935 -17.06 11.09C-18.767 8.289 -19.765 5.114 -19.97 1.84" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m12"/>
+                  <path d="M-17.11 11.01C-18.807 8.196 -19.792 5.011 -19.98 1.73C-20.163 -1.501 -19.555 -4.727 -18.21 -7.67C-16.885 -10.57 -14.874 -13.103 -12.35 -15.05C-9.863 -16.969 -6.945 -18.253 -3.85 -18.79C-0.802 -19.317 2.328 -19.094 5.27 -18.14C8.169 -17.199 10.795 -15.565 12.92 -13.38C15.011 -11.228 16.545 -8.599 17.39 -5.72C18.224 -2.887 18.354 0.106 17.77 3C17.192 5.847 15.929 8.511 14.09 10.76C12.28 12.976 9.956 14.716 7.32 15.83C4.732 16.919 1.918 17.362 -0.88 17.12C-3.636 16.886 -6.292 15.983 -8.62 14.49" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m13"/>
+                  <path d="M-0.97 17.12C-3.723 16.868 -6.373 15.948 -8.69 14.44C-10.967 12.958 -12.848 10.943 -14.17 8.57C-15.468 6.239 -16.178 3.627 -16.24 0.96C-16.301 -1.663 -15.721 -4.262 -14.55 -6.61C-13.401 -8.912 -11.709 -10.899 -9.62 -12.4C-7.563 -13.875 -5.178 -14.826 -2.67 -15.17C-0.213 -15.507 2.29 -15.239 4.62 -14.39C6.904 -13.554 8.95 -12.175 10.58 -10.37C12.182 -8.602 13.328 -6.471 13.92 -4.16C14.5 -1.892 14.517 0.484 13.97 2.76C13.434 4.987 12.363 7.05 10.85 8.77C9.365 10.456 7.491 11.753 5.39 12.55" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m14"/>
+                  <path d="M10.8 8.82C9.309 10.496 7.431 11.783 5.33 12.57C3.27 13.342 1.052 13.6 -1.13 13.32C-3.262 13.043 -5.294 12.25 -7.05 11.01C-8.769 9.798 -10.166 8.184 -11.12 6.31C-12.048 4.477 -12.515 2.445 -12.48 0.39C-12.451 -1.618 -11.932 -3.588 -10.97 -5.35C-10.026 -7.069 -8.677 -8.531 -7.04 -9.61C-5.44 -10.662 -3.607 -11.308 -1.7 -11.49C0.158 -11.672 2.032 -11.397 3.76 -10.69C5.441 -9.995 6.928 -8.9 8.09 -7.5C9.225 -6.14 10.011 -4.523 10.38 -2.79C10.736 -1.101 10.674 0.65 10.2 2.31" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m15"/>
+                  <path d="M10.39 -2.74C10.736 -1.048 10.664 0.702 10.18 2.36C9.71 3.968 8.855 5.437 7.69 6.64C6.554 7.81 5.151 8.685 3.6 9.19C2.093 9.678 0.49 9.792 -1.07 9.52C-2.582 9.253 -4.007 8.622 -5.22 7.68C-6.397 6.769 -7.334 5.585 -7.95 4.23" transform="translate(0 -154.282)" stroke="#5B7FE0" stroke-width="0.8" stroke-linecap="round" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m6"/>
+                  <g transform="translate(0 -69.282)" style="transform-origin:0 -69.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" data-hit="fork" class="watch-a watch-m16" stroke="#4E5663" stroke-width="0.3">
+                    <path d="M-34.21 2.5C-20.737 -1.167 -9.333 -2 0 0C9.333 -2 22.91 0.087 40.73 6.26" stroke-width="9.8" stroke-linecap="round"/>
+                    <path d="M-34.21 2.5C-20.737 -1.167 -9.333 -2 0 0C9.333 -2 22.91 0.087 40.73 6.26" stroke="#B4BCC8" stroke-width="9" stroke-linecap="round"/>
+                    <path d="M-4.6 0L-2.6 -52.95L-7.4 -63.95L-7.4 -73.45L-2.5 -73.45L-2.5 -65.75L2.5 -65.75L2.5 -73.45L7.4 -73.45L7.4 -63.95L2.6 -52.95L4.6 0Z" fill="#B4BCC8" stroke-width="0.4" stroke-linejoin="round"/>
+                    <path d="M-32.33 19.21L-26.15 18.3L-31.12 2.04L-37.3 2.96Z" fill="#E0356A" stroke="#7C1236" stroke-linejoin="round"/>
+                    <path d="M27.2 16.25L31.08 21.14L42.68 8.71L38.79 3.82Z" fill="#E0356A" stroke="#7C1236" stroke-linejoin="round"/>
+                  </g>
+                  <g transform="translate(0 -154.282)" style="transform-origin:0 -154.282px" data-clock="tick" data-clock-at="0" data-clock-over="15" class="watch-a watch-m6">
+                    <circle r="20.55" fill="#B4BCC847" stroke="#B4BCC8" stroke-width="0.6"/>
+                    <circle cy="16.05" r="2.2" fill="#E0356A" stroke="#7C1236" stroke-width="0.3"/>
+                  </g>
+                  <circle cx="36.201" cy="-173.53" r="2.2" fill="#B4BCC8" stroke="#4E5663" stroke-width="0.4"/>
+                  <g transform="translate(0 -69.282)">
+                    <circle r="5.78" fill="#D9BC7A" stroke="#6E5626" stroke-width="0.4"/>
+                    <circle r="3.4" fill="#E0356A" stroke="#7C1236" stroke-width="0.5"/>
+                    <circle r="1.224" fill="#B4BCC8"/>
+                  </g>
+                  <circle r="5.78" fill="#D9BC7A" stroke="#6E5626" stroke-width="0.4"/>
+                  <circle r="3.4" fill="#E0356A" stroke="#7C1236" stroke-width="0.5"/>
+                  <circle r="1.224" fill="#B4BCC8"/>
+                  <g transform="translate(0 -154.282)">
+                    <circle r="8.5" fill="#D9BC7A" stroke="#6E5626" stroke-width="0.4"/>
+                    <circle r="5" fill="#E0356A" stroke="#7C1236" stroke-width="0.5"/>
+                    <circle r="1.8" fill="#B4BCC8"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
         </g>
       </g>
     </g>
   </g>
-  <rect width="1000" height="600" fill="var(--background)" mask="url(#watch-m2)" data-clock="fork" data-clock-at="4" data-clock-over="3.4" class="watch-a watch-m24"/>
-  <ellipse cx="512.4" cy="300" rx="128" ry="96" fill="none" stroke="var(--blue)" stroke-width="2" data-clock="fork" data-clock-at="4" data-clock-over="3.4" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m25"/>
-  <g data-clock="fork" data-clock-at="4" data-clock-over="3.4" class="watch-a watch-m26">
-    <text x="512" y="552" font-weight="600" font-size="22" fill="var(--text)">Pallet fork</text>
-    <text x="512" y="574" font-family="'watch-JetBrains Mono'" font-size="13" fill="var(--muted)">rocks 11° between two pins</text>
-  </g>
-  <g data-clock="fork" data-clock-at="4" data-clock-over="3.4">
-    <line x1="502" y1="535.89" x2="641.279" y2="535.89" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:502px 535.89px;rotate:-85.718deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m27"/>
-    <g style="transform-origin:502px 535.89px;rotate:-85.718deg" class="watch-a watch-m29">
-      <polyline points="-6.303 -3.045 0 0 -6.303 3.045" transform="translate(502 535.89)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="watch-a watch-m28"/>
+  <g data-clock="escape" data-clock-at="0" data-clock-over="15" class="watch-a watch-m25">
+    <g data-clock="fork" data-clock-at="0" data-clock-over="15" class="watch-a watch-m24">
+      <g data-clock="balance" data-clock-at="0" data-clock-over="15" class="watch-a watch-m23">
+        <text x="56" y="540" font-weight="600" font-size="16" fill="var(--text)">Swiss lever escapement</text>
+        <text x="56" y="562" font-family="'watch-JetBrains Mono'" font-size="12" fill="var(--muted)">28,800 beats an hour, shown 10× slower</text>
+      </g>
     </g>
   </g>
-  <g data-clock="fork" data-clock-at="4" data-clock-over="3.4">
-    <line x1="550.8" y1="266.4" x2="594" y2="266.4" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:550.8px 266.4px;rotate:-90deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m30"/>
-    <g style="transform-origin:550.8px 266.4px;rotate:-90deg" class="watch-a watch-m32">
-      <polyline points="-8.104 -3.915 0 0 -8.104 3.915" transform="translate(550.8 266.4)" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="watch-a watch-m31"/>
+  <rect width="1000" height="600" fill="var(--background)" mask="url(#watch-m1)" data-clock="escape" data-clock-at="0" data-clock-over="15" class="watch-a watch-m26"/>
+  <circle cx="630" cy="300" r="272" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="6 6" mask="url(#watch-m2)" data-clock="escape" data-clock-at="0" data-clock-over="15" class="watch-a watch-m27"/>
+  <g data-clock="escape" data-clock-at="0" data-clock-over="15" class="watch-a watch-m28">
+    <text x="64" y="92" font-weight="600" font-size="26" fill="var(--text)">Escape wheel</text>
+    <text x="64" y="118" font-family="'watch-JetBrains Mono'" font-size="13" fill="var(--muted)">15 teeth · half a tooth a beat</text>
+  </g>
+  <g data-clock="escape" data-clock-at="0" data-clock-over="15">
+    <line x1="314" y1="93.885" x2="436.6" y2="93.885" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:314px 93.885px;rotate:5.671deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m29"/>
+    <g style="transform-origin:314px 93.885px;rotate:5.671deg" class="watch-a watch-m31">
+      <polyline points="-6.303 -3.045 0 0 -6.303 3.045" transform="translate(314 93.885)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="watch-a watch-m30"/>
     </g>
   </g>
-  <g data-clock="fork" data-clock-at="4" data-clock-over="3.4">
-    <line x1="550.8" y1="333.6" x2="594" y2="333.6" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:550.8px 333.6px;rotate:90deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m30"/>
-    <g style="transform-origin:550.8px 333.6px;rotate:90deg" class="watch-a watch-m32">
-      <polyline points="-8.104 -3.915 0 0 -8.104 3.915" transform="translate(550.8 333.6)" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="watch-a watch-m31"/>
-    </g>
-  </g>
-  <rect width="1000" height="600" fill="var(--background)" mask="url(#watch-m3)" data-clock="balance" data-clock-at="6.8" data-clock-over="3.4" class="watch-a watch-m33"/>
-  <circle cx="652.277" cy="300" r="224" fill="none" stroke="var(--blue)" stroke-width="2" data-clock="balance" data-clock-at="6.8" data-clock-over="3.4" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m34"/>
-  <g data-clock="balance" data-clock-at="6.8" data-clock-over="3.4" class="watch-a watch-m35">
-    <text x="806.11" y="62" font-weight="600" font-size="22" fill="var(--text)">Balance wheel</text>
-    <text x="804" y="84" font-family="'watch-JetBrains Mono'" font-size="13" fill="var(--muted)">swings 250° each way</text>
-  </g>
-  <g data-clock="balance" data-clock-at="6.8" data-clock-over="3.4">
-    <line x1="798" y1="91.9" x2="849.582" y2="91.9" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:798px 91.9px;rotate:76.231deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m36"/>
-    <g style="transform-origin:798px 91.9px;rotate:76.231deg" class="watch-a watch-m38">
-      <polyline points="-6.303 -3.045 0 0 -6.303 3.045" transform="translate(798 91.9)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="watch-a watch-m37"/>
-    </g>
-  </g>
-  <g data-clock="balance" data-clock-at="6.8" data-clock-over="3.4">
-    <path d="M0 0C41.756 -10.021 83.512 -10.021 125.268 0" transform="translate(850.512 161.195)" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:850.512px 161.195px;rotate:70deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m39"/>
-    <g style="transform-origin:850.512px 161.195px;rotate:70deg" class="watch-a watch-m42">
-      <g style="scale:.0625;offset-path:path('M0 0C675.5 -159.6 1328.8 -159.6 2004.3 0C1328.8 -159.6 675.5 -159.6 0 0');offset-rotate:0deg" class="watch-a watch-m41">
+  <g data-clock="escape" data-clock-at="0" data-clock-over="15">
+    <path d="M0 0C63.844 -15.323 127.688 -15.323 191.531 0" transform="translate(534.234 563.114)" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:534.234px 563.114px;rotate:-140deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m32"/>
+    <g style="transform-origin:534.234px 563.114px;rotate:-140deg" class="watch-a watch-m35">
+      <g style="scale:.0625;offset-path:path('M0 0C611.6 -144.5 1226.1 -207.7 1854.4 -175.7C2265 -154.8 2664.6 -94.5 3064.5 0C2452.9 -144.5 1838.4 -207.7 1210.1 -175.7C799.5 -154.8 399.9 -94.5 0 0');offset-rotate:0deg" class="watch-a watch-m34">
         <g style="scale:16">
-          <polyline points="-8.104 -3.915 0 0 -8.104 3.915" transform="translate(850.512 161.195)" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:850.512px 161.195px" class="watch-a watch-m40"/>
+          <polyline points="-9.905 -4.785 0 0 -9.905 4.785" transform="translate(534.234 563.114)" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:534.234px 563.114px" class="watch-a watch-m33"/>
         </g>
       </g>
     </g>
   </g>
-  <g data-clock="balance" data-clock-at="6.8" data-clock-over="3.4">
-    <path d="M0 0C41.756 10.021 83.512 10.021 125.268 0" transform="translate(850.512 438.805)" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:850.512px 438.805px;rotate:-70deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m39"/>
-    <g style="transform-origin:850.512px 438.805px;rotate:-70deg" class="watch-a watch-m42">
-      <g style="scale:.0625;offset-path:path('M0 0C675.5 159.6 1328.8 159.6 2004.3 0C1328.8 159.6 675.5 159.6 0 0');offset-rotate:0deg" class="watch-a watch-m41">
+  <rect width="1000" height="600" fill="var(--background)" mask="url(#watch-m3)" data-clock="fork" data-clock-at="0" data-clock-over="15" class="watch-a watch-m36"/>
+  <ellipse cx="610" cy="290" rx="300" ry="220" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="6 6" mask="url(#watch-m4)" data-clock="fork" data-clock-at="0" data-clock-over="15" class="watch-a watch-m37"/>
+  <g data-clock="fork" data-clock-at="0" data-clock-over="15" class="watch-a watch-m38">
+    <text x="64" y="556" font-weight="600" font-size="26" fill="var(--text)">Pallet fork</text>
+    <text x="64" y="582" font-family="'watch-JetBrains Mono'" font-size="13" fill="var(--muted)">rocks 11° between two pins</text>
+  </g>
+  <g data-clock="fork" data-clock-at="0" data-clock-over="15">
+    <line x1="282.8" y1="557.885" x2="513.244" y2="557.885" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:282.8px 557.885px;rotate:-15.371deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m39"/>
+    <g style="transform-origin:282.8px 557.885px;rotate:-15.371deg" class="watch-a watch-m41">
+      <polyline points="-6.303 -3.045 0 0 -6.303 3.045" transform="translate(282.8 557.885)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="watch-a watch-m40"/>
+    </g>
+  </g>
+  <g data-clock="fork" data-clock-at="0" data-clock-over="15">
+    <line x1="694.48" y1="216.08" x2="789.52" y2="216.08" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:694.48px 216.08px;rotate:-90deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m42"/>
+    <g style="transform-origin:694.48px 216.08px;rotate:-90deg" class="watch-a watch-m44">
+      <polyline points="-9.905 -4.785 0 0 -9.905 4.785" transform="translate(694.48 216.08)" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="watch-a watch-m43"/>
+    </g>
+  </g>
+  <g data-clock="fork" data-clock-at="0" data-clock-over="15">
+    <line x1="694.48" y1="363.92" x2="789.52" y2="363.92" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:694.48px 363.92px;rotate:90deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m42"/>
+    <g style="transform-origin:694.48px 363.92px;rotate:90deg" class="watch-a watch-m44">
+      <polyline points="-9.905 -4.785 0 0 -9.905 4.785" transform="translate(694.48 363.92)" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="watch-a watch-m43"/>
+    </g>
+  </g>
+  <rect width="1000" height="600" fill="var(--background)" mask="url(#watch-m5)" data-clock="balance" data-clock-at="0" data-clock-over="15" class="watch-a watch-m45"/>
+  <circle cx="620" cy="300" r="318" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="6 6" mask="url(#watch-m6)" data-clock="balance" data-clock-at="0" data-clock-over="15" class="watch-a watch-m46"/>
+  <g data-clock="balance" data-clock-at="0" data-clock-over="15" class="watch-a watch-m47">
+    <text x="64" y="92" font-weight="600" font-size="26" fill="var(--text)">Balance wheel</text>
+    <text x="64" y="118" font-family="'watch-JetBrains Mono'" font-size="13" fill="var(--muted)">swings 250° each way</text>
+  </g>
+  <g data-clock="balance" data-clock-at="0" data-clock-over="15">
+    <line x1="261.87" y1="93.885" x2="396.333" y2="93.885" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:261.87px 93.885px;rotate:-8.074deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m48"/>
+    <g style="transform-origin:261.87px 93.885px;rotate:-8.074deg" class="watch-a watch-m50">
+      <polyline points="-6.303 -3.045 0 0 -6.303 3.045" transform="translate(261.87 93.885)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="watch-a watch-m49"/>
+    </g>
+  </g>
+  <g data-clock="balance" data-clock-at="0" data-clock-over="15">
+    <path d="M0 0C60.546 -14.531 121.093 -14.531 181.639 0" transform="translate(907.44 98.732)" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:907.44px 98.732px;rotate:70deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m51"/>
+    <g style="transform-origin:907.44px 98.732px;rotate:70deg" class="watch-a watch-m54">
+      <g style="scale:.0625;offset-path:path('M0 0C610.5 -144.2 1223.6 -202.7 1850.1 -161.3C2208.2 -137.7 2557.1 -82.5 2906.2 0C2295.7 -144.2 1682.7 -202.7 1056.1 -161.3C698 -137.7 349.1 -82.5 0 0');offset-rotate:0deg" class="watch-a watch-m53">
         <g style="scale:16">
-          <polyline points="-8.104 -3.915 0 0 -8.104 3.915" transform="translate(850.512 438.805)" fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:850.512px 438.805px" class="watch-a watch-m43"/>
+          <polyline points="-9.905 -4.785 0 0 -9.905 4.785" transform="translate(907.44 98.732)" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:907.44px 98.732px" class="watch-a watch-m52"/>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g data-clock="balance" data-clock-at="0" data-clock-over="15">
+    <path d="M0 0C60.546 14.531 121.093 14.531 181.639 0" transform="translate(907.44 501.268)" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:907.44px 501.268px;rotate:-70deg" pathLength="1" stroke-dasharray="1 2" class="watch-a watch-m51"/>
+    <g style="transform-origin:907.44px 501.268px;rotate:-70deg" class="watch-a watch-m54">
+      <g style="scale:.0625;offset-path:path('M0 0C610.5 144.2 1223.6 202.7 1850.1 161.3C2208.2 137.7 2557.1 82.5 2906.2 0C2295.7 144.2 1682.7 202.7 1056.1 161.3C698 137.7 349.1 82.5 0 0');offset-rotate:0deg" class="watch-a watch-m53">
+        <g style="scale:16">
+          <polyline points="-9.905 -4.785 0 0 -9.905 4.785" transform="translate(907.44 501.268)" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:907.44px 501.268px" class="watch-a watch-m55"/>
         </g>
       </g>
     </g>
