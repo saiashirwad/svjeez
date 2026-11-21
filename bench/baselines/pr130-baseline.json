@@ -1,0 +1,1538 @@
+{
+  "label": "pr130-baseline",
+  "rows": [
+    {
+      "task": "bouncing-ball",
+      "model": "haiku",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 114.04,
+      "turns": 18,
+      "toolCalls": 14,
+      "checkRuns": 2,
+      "frameLooks": 3,
+      "sourceLookups": 8,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 1,
+      "costUsd": 0.025150530000000004
+    },
+    {
+      "task": "bouncing-ball",
+      "model": "sonnet",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 57.357,
+      "turns": 11,
+      "toolCalls": 9,
+      "checkRuns": 1,
+      "frameLooks": 1,
+      "sourceLookups": 3,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 3,
+      "costUsd": 0.17540069999999996
+    },
+    {
+      "task": "city-day-night",
+      "model": "haiku",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 872.999,
+      "turns": 2,
+      "toolCalls": 13,
+      "checkRuns": 2,
+      "frameLooks": 0,
+      "sourceLookups": 7,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 1,
+      "costUsd": 0.034528300000000005
+    },
+    {
+      "task": "city-day-night",
+      "model": "haiku",
+      "phase": "change",
+      "runs": 1,
+      "built": 0,
+      "timedOut": 0,
+      "timeS": 1085.553,
+      "turns": 17,
+      "toolCalls": 22,
+      "checkRuns": 6,
+      "frameLooks": 0,
+      "sourceLookups": 10,
+      "errors": 1,
+      "warnings": 0,
+      "denied": 2,
+      "costUsd": 0.027108979999999998
+    },
+    {
+      "task": "city-day-night",
+      "model": "sonnet",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 80.552,
+      "turns": 10,
+      "toolCalls": 8,
+      "checkRuns": 2,
+      "frameLooks": 1,
+      "sourceLookups": 2,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 0,
+      "costUsd": 0.21348270000000003
+    },
+    {
+      "task": "city-day-night",
+      "model": "sonnet",
+      "phase": "change",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 57.773,
+      "turns": 21,
+      "toolCalls": 19,
+      "checkRuns": 2,
+      "frameLooks": 1,
+      "sourceLookups": 3,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 1,
+      "costUsd": 0.2148222
+    },
+    {
+      "task": "download-button",
+      "model": "haiku",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 74.846,
+      "turns": 28,
+      "toolCalls": 26,
+      "checkRuns": 4,
+      "frameLooks": 3,
+      "sourceLookups": 9,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 1,
+      "costUsd": 0.019068469999999997
+    },
+    {
+      "task": "download-button",
+      "model": "sonnet",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 31.761,
+      "turns": 8,
+      "toolCalls": 7,
+      "checkRuns": 2,
+      "frameLooks": 2,
+      "sourceLookups": 2,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 0,
+      "costUsd": 0.12015079999999999
+    },
+    {
+      "task": "kanban-move",
+      "model": "haiku",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 81.388,
+      "turns": 22,
+      "toolCalls": 18,
+      "checkRuns": 4,
+      "frameLooks": 2,
+      "sourceLookups": 7,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 0,
+      "costUsd": 0.021843650000000003
+    },
+    {
+      "task": "kanban-move",
+      "model": "sonnet",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 42.235,
+      "turns": 11,
+      "toolCalls": 9,
+      "checkRuns": 2,
+      "frameLooks": 1,
+      "sourceLookups": 3,
+      "errors": 0,
+      "warnings": 2,
+      "denied": 0,
+      "costUsd": 0.1557937
+    },
+    {
+      "task": "map-route",
+      "model": "haiku",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 64.458,
+      "turns": 15,
+      "toolCalls": 12,
+      "checkRuns": 2,
+      "frameLooks": 2,
+      "sourceLookups": 6,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 0,
+      "costUsd": 0.01348632
+    },
+    {
+      "task": "map-route",
+      "model": "haiku",
+      "phase": "change",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 84.591,
+      "turns": 23,
+      "toolCalls": 18,
+      "checkRuns": 4,
+      "frameLooks": 3,
+      "sourceLookups": 8,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 1,
+      "costUsd": 0.020595710000000003
+    },
+    {
+      "task": "map-route",
+      "model": "sonnet",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 30.552,
+      "turns": 10,
+      "toolCalls": 8,
+      "checkRuns": 2,
+      "frameLooks": 1,
+      "sourceLookups": 2,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 0,
+      "costUsd": 0.1240801
+    },
+    {
+      "task": "map-route",
+      "model": "sonnet",
+      "phase": "change",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 34.127,
+      "turns": 10,
+      "toolCalls": 8,
+      "checkRuns": 1,
+      "frameLooks": 1,
+      "sourceLookups": 1,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 0,
+      "costUsd": 0.1332217
+    },
+    {
+      "task": "orrery",
+      "model": "haiku",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 70.96,
+      "turns": 16,
+      "toolCalls": 13,
+      "checkRuns": 2,
+      "frameLooks": 2,
+      "sourceLookups": 6,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 0,
+      "costUsd": 0.01765004
+    },
+    {
+      "task": "orrery",
+      "model": "sonnet",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 23.641,
+      "turns": 7,
+      "toolCalls": 5,
+      "checkRuns": 1,
+      "frameLooks": 1,
+      "sourceLookups": 1,
+      "errors": 0,
+      "warnings": 1,
+      "denied": 0,
+      "costUsd": 0.11020580000000002
+    },
+    {
+      "task": "tcp-handshake",
+      "model": "haiku",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 115.704,
+      "turns": 31,
+      "toolCalls": 26,
+      "checkRuns": 4,
+      "frameLooks": 4,
+      "sourceLookups": 9,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 1,
+      "costUsd": 0.029190789999999998
+    },
+    {
+      "task": "tcp-handshake",
+      "model": "haiku",
+      "phase": "change",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 28.322,
+      "turns": 14,
+      "toolCalls": 11,
+      "checkRuns": 2,
+      "frameLooks": 1,
+      "sourceLookups": 4,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 0,
+      "costUsd": 0.00926222
+    },
+    {
+      "task": "tcp-handshake",
+      "model": "sonnet",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 44.532,
+      "turns": 13,
+      "toolCalls": 11,
+      "checkRuns": 3,
+      "frameLooks": 1,
+      "sourceLookups": 0,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 1,
+      "costUsd": 0.1586198
+    },
+    {
+      "task": "tcp-handshake",
+      "model": "sonnet",
+      "phase": "change",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 27.327,
+      "turns": 12,
+      "toolCalls": 10,
+      "checkRuns": 1,
+      "frameLooks": 2,
+      "sourceLookups": 0,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 1,
+      "costUsd": 0.12574079999999999
+    },
+    {
+      "task": "typing-chat",
+      "model": "haiku",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 159.339,
+      "turns": 24,
+      "toolCalls": 22,
+      "checkRuns": 5,
+      "frameLooks": 3,
+      "sourceLookups": 13,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 2,
+      "costUsd": 0.03724272000000001
+    },
+    {
+      "task": "typing-chat",
+      "model": "sonnet",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timedOut": 0,
+      "timeS": 56.582,
+      "turns": 19,
+      "toolCalls": 18,
+      "checkRuns": 4,
+      "frameLooks": 2,
+      "sourceLookups": 5,
+      "errors": 0,
+      "warnings": 0,
+      "denied": 1,
+      "costUsd": 0.1987734
+    }
+  ],
+  "runs": [
+    {
+      "task": "bouncing-ball",
+      "model": "haiku",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/bouncing-ball-haiku-1",
+      "build": {
+        "wallMs": 114040,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 113153,
+          "apiMs": 107306,
+          "turns": 18,
+          "costUsd": 0.025150530000000004,
+          "inputTokens": 26,
+          "outputTokens": 20899,
+          "cacheReadTokens": 599383,
+          "cacheWriteTokens": 43523,
+          "toolCalls": 14,
+          "tools": {
+            "Skill": 1,
+            "Bash": 8,
+            "Write": 1,
+            "Read": 3,
+            "Edit": 1
+          },
+          "toolErrors": 1,
+          "permissionDenials": 1,
+          "denied": [
+            {
+              "tool": "Bash",
+              "detail": "bun run scene frames examples/bench/pr130-baseline/bouncing-ball-haiku-1/index.tsx --sheet --out /tmp/bouncing-ball-frames --times 0.3,0.6,0.8,0.85,1.0,1.3,1.9,2.2,2.8,3.1,3.6,3.95 2>&1 | tail -5; ls /tmp/bouncing-ball-frames"
+            }
+          ],
+          "checkRuns": 2,
+          "frameRuns": 3,
+          "svgRuns": 0,
+          "frameLooks": 3,
+          "sourceLookups": 8,
+          "report": "The bouncing-ball scene is written to `examples/bench/pr130-baseline/bouncing-ball-haiku-1/index.tsx`. It is a 600×300, 4 s looping scene: the red ball enters from the left, makes three landings with shrinking arcs (peaks 120, 60, 22 px), squashes on each landing and stretches with its speed, then exits right. A soft shadow on the floor grows and darkens as the ball comes down, and small dust puffs fade at each landing. The sky and floor line are simple theme-token shapes. `bun run scene check` on the file reports 0 errors, 0 warnings and 0 info in both colour schemes. I read the light-scheme contact sheet at the default times and at 0.7, 0.9, 1.85, 2.0, 2.75 and 2.95 s, and the dark scheme at 0.9, 2.0 and 3.0 s. The frames show the squash at each landing, the puffs, the shadow and the exit. The loop seam holds because the ball is off canvas at both t=0 and t=4, so the ball's path has no visible seam. The first attempt to render frames with `--out` into `/tmp` was denied, so the frames went to the default svjeez temp folder instead; nothing else was written outside the scene folder. Still imperfect: the squash snaps on at the landing frame instead of blending from the pre-landing stretch, the third bounce is small and mostly leaves the canvas, the puffs are small at full-canvas size, and the shadow is subtle in the dark scheme. I did not commit anything."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 148,
+          "sheet": "bench/results/pr130-baseline/bouncing-ball-haiku-1/frames/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    },
+    {
+      "task": "bouncing-ball",
+      "model": "sonnet",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/bouncing-ball-sonnet-1",
+      "build": {
+        "wallMs": 57357,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 56573,
+          "apiMs": 54009,
+          "turns": 11,
+          "costUsd": 0.17540069999999996,
+          "inputTokens": 14,
+          "outputTokens": 7135,
+          "cacheReadTokens": 158707,
+          "cacheWriteTokens": 22038,
+          "toolCalls": 9,
+          "tools": {
+            "Read": 2,
+            "Write": 1,
+            "Bash": 3,
+            "Edit": 3
+          },
+          "toolErrors": 3,
+          "permissionDenials": 3,
+          "denied": [
+            {
+              "tool": "Edit",
+              "detail": "examples/bench/pr130-baseline/bouncing-ball-sonnet-1/index.tsx"
+            },
+            {
+              "tool": "Edit",
+              "detail": "examples/bench/pr130-baseline/bouncing-ball-sonnet-1/index.tsx"
+            },
+            {
+              "tool": "Edit",
+              "detail": "examples/bench/pr130-baseline/bouncing-ball-sonnet-1/index.tsx"
+            }
+          ],
+          "checkRuns": 1,
+          "frameRuns": 1,
+          "svgRuns": 0,
+          "frameLooks": 1,
+          "sourceLookups": 3,
+          "report": "I stopped before finishing the scene. Edit was denied (the session is in don't-ask mode), so I couldn't make the last change.\n\n**What's in place.** `examples/bench/pr130-baseline/bouncing-ball-sonnet-1/index.tsx` is a 600×300, 4s looping scene:\n- **Ball:** a red ball enters off the left edge, bounces three times with decreasing height, and leaves off the right edge.\n- **Squash and stretch:** it squashes at each impact (wider, shorter) and stretches before and after.\n- **Shadow:** a floor shadow grows and darkens as the ball nears the floor.\n- **Dust:** two puffs at each impact.\n- **Background:** a sky gradient and a floor with a line.\n\n**What I checked.** `bun run scene check` reports 0 errors, 0 warnings and 0 info. I read frame sheets at 0.3, 0.9, 1.2, 1.45, 2.0, 2.2, 2.9 and 3.2s. The bounce arc, squash and shadow all read correctly.\n\n**What's still wrong.** The dust puffs are nearly invisible. They are small and pale on the green floor, and they start tiny at the moment of impact. I tried to fix this with three edits, all denied:\n- the puff radius from `circle(7)` to `circle(9)` (line 94);\n- the puff scale from 0.4 start / about 1.5 peak to 0.7 start / about 1.7 peak (lines 103–106);\n- `dustColor` from `#F1E6D2` to `#FFF8EA` (line 50).\n\nI haven't re-checked or looked at any frames of the puffs since then. Also, the third bounce is followed by a rise that continues off the right edge rather than a landing.\n\nShould I retry the edits, or would you rather allow Edit for that directory?"
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 133,
+          "sheet": "bench/results/pr130-baseline/bouncing-ball-sonnet-1/frames/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    },
+    {
+      "task": "city-day-night",
+      "model": "haiku",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/city-day-night-haiku-1",
+      "build": {
+        "wallMs": 872999,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 5048,
+          "apiMs": 168128,
+          "turns": 2,
+          "costUsd": 0.034528300000000005,
+          "inputTokens": 6,
+          "outputTokens": 769,
+          "cacheReadTokens": 129838,
+          "cacheWriteTokens": 2214,
+          "toolCalls": 13,
+          "tools": {
+            "Read": 3,
+            "Bash": 9,
+            "Write": 1
+          },
+          "toolErrors": 4,
+          "permissionDenials": 1,
+          "denied": [
+            {
+              "tool": "Bash",
+              "detail": "bun run scene check examples/bench/pr130-baseline/city-day-night-haiku-1/index.tsx > /tmp/city-check.log 2>&1; echo EXIT $?"
+            }
+          ],
+          "checkRuns": 2,
+          "frameRuns": 0,
+          "svgRuns": 0,
+          "frameLooks": 0,
+          "sourceLookups": 7,
+          "report": "The scene is still unverified. The background `svjeez check` was killed at its time limit before it reported anything, and I can't restart it because Bash is now denied in this session's permission mode.\n\nThe scene file is written at `examples/bench/pr130-baseline/city-day-night-haiku-1/index.tsx`. Nothing has been compiled, checked or rendered, so I don't know yet whether it type-checks, whether the sky gradient works (the riskiest part), or whether the loop seam closes.\n\nThe check ran for more than two minutes at 100% CPU without output, which may mean the scene is too heavy. The roughly 130 window tracks and the 46 star tracks are the likely cause, and I would trim them if the check confirms it.\n\nTo continue, I need Bash allowed for `bun run scene check` and `bun run scene frames`. With that, I would read the check result, fix any errors, render frames at several times plus a seam pair, and then report. If you'd rather I not run the check, tell me and I'll stop here with the file as it stands."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 254,
+          "sheet": "",
+          "timedOut": false
+        },
+        "timedOut": false
+      },
+      "change": {
+        "wallMs": 1085553,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 356156,
+          "apiMs": 115793,
+          "turns": 17,
+          "costUsd": 0.027108979999999998,
+          "inputTokens": 22,
+          "outputTokens": 25050,
+          "cacheReadTokens": 525078,
+          "cacheWriteTokens": 46655,
+          "toolCalls": 22,
+          "tools": {
+            "Skill": 1,
+            "Bash": 12,
+            "Write": 1,
+            "Glob": 1,
+            "Read": 4,
+            "ToolSearch": 1,
+            "Monitor": 1,
+            "Edit": 1
+          },
+          "toolErrors": 5,
+          "permissionDenials": 2,
+          "denied": [
+            {
+              "tool": "Bash",
+              "detail": "ls -la /tmp/frames-city /tmp/frames-city-set 2>&1; ps aux | grep -c \"scene\" "
+            },
+            {
+              "tool": "Monitor",
+              "detail": "D=/tmp/claude/tasks; for i in $(seq 1 280); do a=$(wc -c < $D/b09mqk61w.output 2>/dev/null || echo 0); b=$(wc -c < $D/b17v1hgju.output 2>/dev/null || echo 0); if [ \"$a\" -gt 0 ] && [ \"$b\" -gt 0 ]; then echo \"check and frames both wrote output\"; break; fi; sleep 2; done; echo \"poll done\""
+            }
+          ],
+          "checkRuns": 6,
+          "frameRuns": 2,
+          "svgRuns": 0,
+          "frameLooks": 0,
+          "sourceLookups": 10,
+          "report": "Both background runs are still going and have written no output yet, so I can't report on the check or the frames. I'll wait for their completion notifications before going further.\n\nStatus so far:\n\n- **Edited:** `examples/bench/pr130-baseline/city-day-night-haiku-1/index.tsx` is rewritten for the change. `index.build.tsx` in the same folder is untouched.\n- **Timeline:** every authored time is scaled by 20/16 through a `tm()` helper, so the day/night phases keep their shares of the cycle.\n- **Second car:** a mirrored car in a nearer lane (y 450) drives right-to-left with headlights that come on at night. Its colours are blue, so it reads as a separate car.\n- **Rain:** 110 streaks fall continuously at one fall per second. They fade in from authored 9.0 to 10.0 and out from 11.5 to 12.5, so they are gone before the sky turns to day.\n- **Seam fix (not in your request):** the original first car started at offset -100, so a sliver of it was visible on the left edge at t=0 and gone at the seam. I moved its start to -170 so it begins fully off canvas, and the second car's span is set the same way.\n\nStill open:\n\n- The `scene check` and `scene frames` runs were started in the background and have not returned yet. The first foreground call hit the 120s timeout, and I could not start a second run while it was going.\n- Monitor and `ps` are blocked in this permission mode, so I cannot watch them with a timed wait.\n- I have not yet read any frame, so the visual result, the seam and the rain timing are unverified.\n\nI'll wait for the two background notifications and then read the check output and frames."
+        },
+        "grade": {
+          "built": false,
+          "errors": 1,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 300,
+          "sheet": "",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    },
+    {
+      "task": "city-day-night",
+      "model": "sonnet",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/city-day-night-sonnet-1",
+      "build": {
+        "wallMs": 80552,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 79725,
+          "apiMs": 75360,
+          "turns": 10,
+          "costUsd": 0.21348270000000003,
+          "inputTokens": 12,
+          "outputTokens": 9916,
+          "cacheReadTokens": 130827,
+          "cacheWriteTokens": 25304,
+          "toolCalls": 8,
+          "tools": {
+            "Read": 2,
+            "Write": 1,
+            "Bash": 2,
+            "Edit": 3
+          },
+          "toolErrors": 0,
+          "permissionDenials": 0,
+          "denied": [],
+          "checkRuns": 2,
+          "frameRuns": 0,
+          "svgRuns": 0,
+          "frameLooks": 1,
+          "sourceLookups": 2,
+          "report": "I wrote the scene to `examples/bench/pr130-baseline/city-day-night-sonnet-1/index.tsx`. `bun run scene check` reports 0 errors, 0 warnings and 0 info.\n\nIt is a 900×500, 16s loop with 12 buildings of varied heights. Sky gradient layers crossfade day, sunset, night, dawn and back to day. The sun and moon travel opposite arcs, so the sun sets behind the skyline around 4s and the moon rises. Stars fade in at night and twinkle on 2, 4 or 8s loops. About 130 windows light up in scattered order between roughly 4.4s and 7.6s and switch off between about 9.8s and 12s. A red car crosses the road in front of the buildings from off-canvas to off-canvas, so its position matches at the seam. Its headlights and beam fade in at night.\n\nI read a sheet of frames at 0, 2.5, 4, 6, 8, 10, 12.5, 14 and 15.9s, and they match the spec. The 0s and 15.9s frames are visually identical.\n\nWhat is still imperfect:\n- **Sky timing:** the sky is still pinkish with stars visible at 10s.\n- **Sunset frame:** the sun is hidden behind the buildings at the 4s frame, because the 6s frame was already full night.\n- **Window timing:** some windows are still lit at 10s, since they switch off over a range of times.\n- **Sun glow:** I removed the blur on the sun because the checker flagged it as redrawn every frame, so there is no glow.\n- **Dark-scheme frames:** I only ran `check` in both colour schemes, which passed, and did not render dark-scheme frames."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 170,
+          "sheet": "bench/results/pr130-baseline/city-day-night-sonnet-1/frames/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      },
+      "change": {
+        "wallMs": 57773,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 57077,
+          "apiMs": 52944,
+          "turns": 21,
+          "costUsd": 0.2148222,
+          "inputTokens": 22,
+          "outputTokens": 7661,
+          "cacheReadTokens": 321402,
+          "cacheWriteTokens": 26507,
+          "toolCalls": 19,
+          "tools": {
+            "Read": 3,
+            "Bash": 4,
+            "Edit": 12
+          },
+          "toolErrors": 1,
+          "permissionDenials": 1,
+          "denied": [
+            {
+              "tool": "Bash",
+              "detail": "cd examples/bench/pr130-baseline/city-day-night-sonnet-1 && python3 - <<'E' 2>&1 || echo nopy\nE\nls"
+            }
+          ],
+          "checkRuns": 2,
+          "frameRuns": 1,
+          "svgRuns": 0,
+          "frameLooks": 1,
+          "sourceLookups": 3,
+          "report": "I changed the scene in place to a 20s cycle and added the second car and the rain. `bun run scene check` reports 0 errors, 0 warnings and 0 info. I read the six-frame sheet but not the two extra frames I rendered at 12.3s and 14.7s.\n\n- **20s cycle:** `D` is now 20. All the phase times (sky layers, building fills, sun colour, star and light fades, window on/off times, headlight times) were written for 16s and are now scaled by `D/16`, so every phase keeps its proportion. The first car still crosses once per loop, and everything starts and ends at the same values.\n- **Twinkle periods:** I changed the star twinkle periods from 2, 4 and 8s to 2, 4 and 5s. 8 doesn't divide 20, so the old values would have broken the seam.\n- **Second car:** a blue car drives right-to-left in a lane closer to the viewer, with its y 8px lower than the first car's. It is the same car mirrored, and its headlights use the same fade as the first car's.\n- **Rain:** 70 slanted streaks fall on short 0.5–1s loops whose periods divide 20. The rain fades in from 10.5s to 12s and is at full strength until 14s. It fades out between 14s and 15.5s, before the day sky returns.\n\nOn the frame sheet:\n- The sky runs day, sunset, night, dawn and back to day.\n- The sun and moon swap places.\n- The windows are lit at night.\n- Both cars have headlights on at night.\n- The rain shows in the 13.3s frame and is gone by 16.7s.\n- The 16.7s frame is already in the day sky, so it ends close to the 0s frame.\n\nStill imperfect:\n- The two cars overlap visually at around 10s, because they pass each other in the same stretch of road.\n- The windows now switch off between 12.25s and 15s, which is the same proportion as before. That means some are still lit as the dawn sky comes up, but all are off before day.\n- The rain streaks are thin and faint against the dark buildings."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 224,
+          "sheet": "bench/results/pr130-baseline/city-day-night-sonnet-1/frames-change/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    },
+    {
+      "task": "download-button",
+      "model": "haiku",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/download-button-haiku-1",
+      "build": {
+        "wallMs": 74846,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 74040,
+          "apiMs": 69190,
+          "turns": 28,
+          "costUsd": 0.019068469999999997,
+          "inputTokens": 30,
+          "outputTokens": 13855,
+          "cacheReadTokens": 540677,
+          "cacheWriteTokens": 33656,
+          "toolCalls": 26,
+          "tools": {
+            "Skill": 1,
+            "Read": 6,
+            "Glob": 1,
+            "Grep": 1,
+            "Write": 1,
+            "Edit": 10,
+            "Bash": 6
+          },
+          "toolErrors": 1,
+          "permissionDenials": 1,
+          "denied": [
+            {
+              "tool": "Bash",
+              "detail": "bun run scene frames bench/pr130-baseline/download-button-haiku-1 --sheet --out /tmp/dlbtn 2>&1 | tail -5; ls /tmp/dlbtn"
+            }
+          ],
+          "checkRuns": 4,
+          "frameRuns": 2,
+          "svgRuns": 0,
+          "frameLooks": 3,
+          "sourceLookups": 9,
+          "report": "The scene is at `examples/bench/pr130-baseline/download-button-haiku-1/index.tsx`. It is a 360×240, 5 s, one-shot scene (`loop: false`). A dark \"Download\" pill holds for about half a second, then morphs into a light disc over 0.5–1.2 s. A grey track ring appears, and a blue arc fills clockwise from the top while a counter climbs from 0% to 100% (1.2–3.4 s). The counter holds at 100%, the arc turns green, and a green check draws in at 4.0–4.5 s and holds to the end. `bun run scene check` reports 0 errors, 0 warnings and 0 info. I read frames at 0.2, 1, 1.3, 2, 3.2, 3.7, 4.2 and 4.9 s from a contact sheet. The pill, morph, counter, the 100% state and the check all look right, and the check is centred in the ring. I did not render the dark scheme. The first check flagged the \"Download\" label's contrast against the pill, and I fixed it by making the pill ink the text colour and the label the background colour. What is still imperfect: the spec's \"ring turns into a check\" is implemented as the ring turning green with the check drawn inside it, not a true shape morph. The ring stays visible around the check. At 0% the round cap leaves a small dot at the top of the ring. The Bash denial for the `--out /tmp` frames flag meant I rendered frames to the default temp directory instead."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 111,
+          "sheet": "bench/results/pr130-baseline/download-button-haiku-1/frames/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    },
+    {
+      "task": "download-button",
+      "model": "sonnet",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/download-button-sonnet-1",
+      "build": {
+        "wallMs": 31761,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 30939,
+          "apiMs": 27668,
+          "turns": 8,
+          "costUsd": 0.12015079999999999,
+          "inputTokens": 12,
+          "outputTokens": 3536,
+          "cacheReadTokens": 149588,
+          "cacheWriteTokens": 17452,
+          "toolCalls": 7,
+          "tools": {
+            "Read": 3,
+            "Write": 1,
+            "Bash": 2,
+            "Edit": 1
+          },
+          "toolErrors": 0,
+          "permissionDenials": 0,
+          "denied": [],
+          "checkRuns": 2,
+          "frameRuns": 0,
+          "svgRuns": 0,
+          "frameLooks": 2,
+          "sourceLookups": 2,
+          "report": "The scene is written to `examples/bench/pr130-baseline/download-button-sonnet-1/index.tsx`. `check` reports 0 errors, 0 warnings and 0 info. I read the frame sheet at 0, 0.9, 1.2, 2, 3, 4 and 5s, in the light scheme only.\n\n**What I built:** a 360×240 scene that plays once and holds the final frame.\n- **0.7–1.3s:** a blue \"Download\" pill shrinks into a 60px circle, the label fades out and a grey outline appears.\n- **1.4–3.6s:** a blue progress ring fills with an eased 0→100 counter in the middle.\n- **3.6–4.4s:** the counter and blue ring fade out, a green ring fades in, and a green check mark draws on and holds.\n\n**What's still imperfect:**\n- **First pass was misplaced.** The pill sat off-centre until I placed it with a tracked `offset` instead of `at` and `anchor`.\n- **Pill morph:** the grey outline snaps on at the start of the morph (the pill fill fades instead of the outline growing). `check` also notes that the pill's size and corner changes use SMIL animation rather than CSS; I left that.\n- **Counter:** it reads 95 at 3s and reaches 100 at 3.6s, so the ring and number agree.\n- **Not checked:** I didn't render the dark scheme."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 87,
+          "sheet": "bench/results/pr130-baseline/download-button-sonnet-1/frames/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    },
+    {
+      "task": "kanban-move",
+      "model": "haiku",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/kanban-move-haiku-1",
+      "build": {
+        "wallMs": 81388,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 80698,
+          "apiMs": 75731,
+          "turns": 22,
+          "costUsd": 0.021843650000000003,
+          "inputTokens": 38,
+          "outputTokens": 14387,
+          "cacheReadTokens": 752315,
+          "cacheWriteTokens": 35616,
+          "toolCalls": 18,
+          "tools": {
+            "Skill": 1,
+            "Bash": 7,
+            "Write": 1,
+            "Edit": 7,
+            "Read": 2
+          },
+          "toolErrors": 0,
+          "permissionDenials": 0,
+          "denied": [],
+          "checkRuns": 4,
+          "frameRuns": 1,
+          "svgRuns": 0,
+          "frameLooks": 2,
+          "sourceLookups": 7,
+          "report": "The scene is at `examples/bench/pr130-baseline/kanban-move-haiku-1/index.tsx`. It is an 8s, 760×420 one-shot (`loop: false`) kanban board with Todo, Doing and Done columns, each 220 wide. Cards wrap their titles at a fixed text width and size to fit. The sequence runs through `morph.between` over seven states: card \"Write onboarding copy\" lifts with a shadow and -3° tilt in Todo, travels to the top of Doing while Todo closes its gap and Doing opens one, then settles. \"Ship release notes\" then lifts in Doing, moves to the top of Done, and settles. `bun run scene check` reports 0 errors and 0 warnings in both colour schemes; the three remaining info items are expected: the scene has nothing entering, and the two lifted cards animate their shadow opacity, which redraws each frame during the lift. I read the light sheet and a dark-scheme sheet, and the lift, reflow and drop look right in both, with the flying card drawn above the columns mid-flight. Still imperfect: the columns are a fixed 300 tall, so Done and the lower part of Todo show empty space; I did not check the scene in a browser beyond the frame renders; and I did not compare it against the sonnet sibling. I wrote only the one file, and the frame renders went to `/tmp`."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 3,
+          "codes": {
+            "nothing-enters": 1,
+            "moving-filter": 2
+          },
+          "lines": 133,
+          "sheet": "bench/results/pr130-baseline/kanban-move-haiku-1/frames/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    },
+    {
+      "task": "kanban-move",
+      "model": "sonnet",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/kanban-move-sonnet-1",
+      "build": {
+        "wallMs": 42235,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 41536,
+          "apiMs": 38958,
+          "turns": 11,
+          "costUsd": 0.1557937,
+          "inputTokens": 18,
+          "outputTokens": 4859,
+          "cacheReadTokens": 218037,
+          "cacheWriteTokens": 21341,
+          "toolCalls": 9,
+          "tools": {
+            "Read": 2,
+            "Bash": 4,
+            "Write": 1,
+            "Edit": 2
+          },
+          "toolErrors": 0,
+          "permissionDenials": 0,
+          "denied": [],
+          "checkRuns": 2,
+          "frameRuns": 0,
+          "svgRuns": 0,
+          "frameLooks": 1,
+          "sourceLookups": 3,
+          "report": "I built `examples/bench/pr130-baseline/kanban-move-sonnet-1/index.tsx`, a 760×420, 8s one-shot scene. It has three columns (Todo, Doing, Done) holding 3, 2 and 1 cards. Each card sizes to its wrapped title and has a small tag label. The card \"Write onboarding docs…\" lifts with a shadow, scale-up and −3° tilt, then travels from Todo to Doing while the Todo cards close the gap and the Doing cards make room. At about 3.7s \"Migrate billing…\" lifts the same way and moves from Doing to Done, and the Doing column closes up again. Both moves use `morph.between` with keyed cards and columns, so the layout follows the wrapped title heights.\n\nI ran `check`, which reported 0 errors, 2 warnings and 1 info, and I read a frame sheet at 0, 1, 1.8, 2.6, 3.5, 4.8, 5.6 and 7.5s. The frames show the lift, the travel, the reflow in both columns and the final board, and the text and cards look clean.\n\n**Still imperfect:**\n- **`moving-filter` warnings:** the lift shadow's opacity is animated (12% of the canvas on each lifted card), so those two warnings remain.\n- **`nothing-enters` info:** nothing fades in; the board is on screen from 0s.\n- **Other schemes:** I only looked at light-scheme frames and did not render the dark scheme. `check` tests both schemes and raised no contrast issues."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 2,
+          "infos": 1,
+          "codes": {
+            "moving-filter": 2,
+            "nothing-enters": 1
+          },
+          "lines": 123,
+          "sheet": "bench/results/pr130-baseline/kanban-move-sonnet-1/frames/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    },
+    {
+      "task": "map-route",
+      "model": "haiku",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/map-route-haiku-1",
+      "build": {
+        "wallMs": 64458,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 63815,
+          "apiMs": 59740,
+          "turns": 15,
+          "costUsd": 0.01348632,
+          "inputTokens": 20,
+          "outputTokens": 10094,
+          "cacheReadTokens": 308452,
+          "cacheWriteTokens": 26764,
+          "toolCalls": 12,
+          "tools": {
+            "Skill": 1,
+            "Bash": 6,
+            "Write": 1,
+            "Edit": 2,
+            "Read": 2
+          },
+          "toolErrors": 0,
+          "permissionDenials": 0,
+          "denied": [],
+          "checkRuns": 2,
+          "frameRuns": 0,
+          "svgRuns": 0,
+          "frameLooks": 2,
+          "sourceLookups": 6,
+          "report": "I wrote the map-route scene to `examples/bench/pr130-baseline/map-route-haiku-1/index.tsx`. It is 700×420 and 8s, one-shot (`loop: false`). It has a stylised map with three land blocks, a lake and three roads drawn as paths. A blue route line draws from A to B along one curvy path over 0.4–6.0s. An orange car rides that same path with `along(..., { turn: true })`, so it stays on the line and turns with the curve. The ETA card counts from 12 min to 0 on the same timing. `bun run scene check` reports 0 errors, 0 warnings and 0 info after the final edit. I read the contact sheet at 0–7.9s and a zoomed pair at 2.5s and 3.5s: the car sits at the tip of the drawn line and points along the heading, and the ETA reads 12, 10, 3 and 0 at the times I sampled. What is still imperfect: the car is a plain rounded rectangle with a windscreen stripe, so it reads as a generic marker rather than a detailed car; the land and lake are a fairly faint grey on white, and the \"A\" and \"B\" labels are small; the ETA counts with an ease-in-out curve, so it is not a strict linear countdown; and I did not check the dark colour scheme or the frames between 4.5s and 5.5s."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 108,
+          "sheet": "bench/results/pr130-baseline/map-route-haiku-1/frames/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      },
+      "change": {
+        "wallMs": 84591,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 83876,
+          "apiMs": 76116,
+          "turns": 23,
+          "costUsd": 0.020595710000000003,
+          "inputTokens": 32,
+          "outputTokens": 14435,
+          "cacheReadTokens": 589641,
+          "cacheWriteTokens": 37393,
+          "toolCalls": 18,
+          "tools": {
+            "Skill": 1,
+            "Read": 4,
+            "Bash": 8,
+            "Edit": 5
+          },
+          "toolErrors": 1,
+          "permissionDenials": 1,
+          "denied": [
+            {
+              "tool": "Bash",
+              "detail": "mkdir -p /tmp/map-route-c && bun run scene frames bench/pr130-baseline/map-route-haiku-1 --sheet --times 0,1,2,3,3.5,4,5,6,7.5 --out /tmp/map-route-c 2>&1 | tail -5; ls /tmp/map-route-c"
+            }
+          ],
+          "checkRuns": 4,
+          "frameRuns": 2,
+          "svgRuns": 0,
+          "frameLooks": 3,
+          "sourceLookups": 8,
+          "report": "I added stop C to the map-route scene and kept the 8s duration. The route now runs A → B → C along one path, and the car holds at B for 0.5s before continuing. The ETA follows the car's progress, so it reads 12 min at A, holds at B, and reaches 0 at C. Changes are in `examples/bench/pr130-baseline/map-route-haiku-1/index.tsx` only. C is a red marker with a \"C\" label below it, and the description now mentions C. The scene passes `check` with 0 errors, 0 warnings and 0 info in both colour schemes. I read contact sheets at 0.5–7.9s and the car sits on B, then reaches C by about 6.0s, with the ETA at 0 from 6.2s. Three things are still imperfect. The car looks stationary at B for roughly 1.2s, not 0.5s, because the `inOut` and `ease.out` curves slow it near the stop; the 0.5s hold itself is exact. The ETA label uses `Math.ceil`, which I changed from `Math.round` so it doesn't show 0 before the car arrives, and that also changes how the label rounds elsewhere in the scene. I didn't commit anything, and the frames I rendered are in `/tmp`."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 146,
+          "sheet": "bench/results/pr130-baseline/map-route-haiku-1/frames-change/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    },
+    {
+      "task": "map-route",
+      "model": "sonnet",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/map-route-sonnet-1",
+      "build": {
+        "wallMs": 30552,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 29844,
+          "apiMs": 26068,
+          "turns": 10,
+          "costUsd": 0.1240801,
+          "inputTokens": 14,
+          "outputTokens": 3905,
+          "cacheReadTokens": 149821,
+          "cacheWriteTokens": 17505,
+          "toolCalls": 8,
+          "tools": {
+            "Read": 2,
+            "Write": 1,
+            "Bash": 2,
+            "Edit": 3
+          },
+          "toolErrors": 0,
+          "permissionDenials": 0,
+          "denied": [],
+          "checkRuns": 2,
+          "frameRuns": 0,
+          "svgRuns": 0,
+          "frameLooks": 1,
+          "sourceLookups": 2,
+          "report": "I wrote the scene to `examples/bench/pr130-baseline/map-route-sonnet-1/index.tsx`, and `bun run scene check` now reports 0 errors, 0 warnings and 0 info.\n\n**What I built:** a 700×420, 8 s one-shot scene with three rounded land shapes and three grey curved roads drawn as paths. A blue route draws from A (green ring, bottom-left) to B (red ring, top-right) along a four-bend curve between 0.8 s and 7.2 s. A small car marker rides the same path with `along(route, progress, { turn: true })`, using the same linear timing as the route's `draw`, so it follows the line and turns to its heading. An \"ETA N min\" pill at the bottom centre counts down from 12 to 0 with `count`.\n\n**What I checked:**\n- The first check run gave three low-contrast infos, on the \"A\" and \"B\" letters and the ETA label. I fixed them by giving the letters a `theme.background` fill with a coloured ring and by making the ETA label `theme.text`.\n- I read frames at 0.3, 2, 4, 6, 7.5 and 8 s. The route draws in as expected, the car sits on the line's tip and turns with the curve, and the ETA reads 12, 10, 6, 3, 0 and 0 min.\n- I only rendered the light scheme. `check` tests both schemes and is clean, but I didn't look at a dark frame.\n\n**Still imperfect:**\n- The car is small, about 26×14, and reads more as a dark capsule than a car.\n- The ETA pill sits on top of one land shape and a road.\n- The car arrives at B at 7.2 s, so the last 0.8 s is a static hold."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 84,
+          "sheet": "bench/results/pr130-baseline/map-route-sonnet-1/frames/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      },
+      "change": {
+        "wallMs": 34127,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 33431,
+          "apiMs": 30784,
+          "turns": 10,
+          "costUsd": 0.1332217,
+          "inputTokens": 14,
+          "outputTokens": 4076,
+          "cacheReadTokens": 155897,
+          "cacheWriteTokens": 19211,
+          "toolCalls": 8,
+          "tools": {
+            "Read": 3,
+            "Bash": 2,
+            "Edit": 3
+          },
+          "toolErrors": 0,
+          "permissionDenials": 0,
+          "denied": [],
+          "checkRuns": 1,
+          "frameRuns": 0,
+          "svgRuns": 0,
+          "frameLooks": 1,
+          "sourceLookups": 1,
+          "report": "I added stop C to `examples/bench/pr130-baseline/map-route-sonnet-1/index.tsx`, and `check` came back with 0 errors, 0 warnings and 0 info.\n\n**What changed**\n- **Route and markers:** The route gets a fifth curve from B at [630, 90] that hooks round to C at [610, 190]. B is still where it was, now orange, and C is a new red marker with its own \"C\" label.\n- **Timing:** The car pauses 0.5s at B. Progress holds at the A→B fraction of the route (0.8471, computed offline) between about 5.97s and 6.47s. Motion still starts at 0.8s and now ends at 7.4s, inside the unchanged 8s duration.\n- **Line and ETA:** The line draws with the same progress track as the car. The ETA is that track mapped to 12 × (1 − progress), so it counts down to 0 at C and holds through the pause.\n- **Description:** I updated the scene's `desc` to match the new route.\n\n**What I checked**\nI rendered frames at 0.5, 3, 5.9, 6.2, 6.9 and 7.6s and looked at the sheet. The car sits on the line and turns with it, and it waits at B. At 7.6s it sits on C with \"0 min\". I did not render a dark-scheme frame, though `check` covers both colour schemes.\n\n**Still imperfect**\n- The ETA shows 2 min while the car waits at B (1.8, rounded up). I kept it linear with distance rather than adding a step at the pause.\n- The B→C hook turns sharply, so the car swings its heading quickly just after leaving B.\n- The A→B fraction is hard-coded, so changing the route means recomputing it."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 101,
+          "sheet": "bench/results/pr130-baseline/map-route-sonnet-1/frames-change/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    },
+    {
+      "task": "orrery",
+      "model": "haiku",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/orrery-haiku-1",
+      "build": {
+        "wallMs": 70960,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 70195,
+          "apiMs": 64409,
+          "turns": 16,
+          "costUsd": 0.01765004,
+          "inputTokens": 26,
+          "outputTokens": 12550,
+          "cacheReadTokens": 445844,
+          "cacheWriteTokens": 34570,
+          "toolCalls": 13,
+          "tools": {
+            "Read": 3,
+            "Bash": 6,
+            "Write": 1,
+            "Edit": 3
+          },
+          "toolErrors": 0,
+          "permissionDenials": 0,
+          "denied": [],
+          "checkRuns": 2,
+          "frameRuns": 0,
+          "svgRuns": 0,
+          "frameLooks": 2,
+          "sourceLookups": 6,
+          "report": "The two images look like the same light and dark frame sheets I just rendered, and your message doesn't say what you want done with them. The scene is built and passes `check` with 0 errors, 0 warnings and 0 info, so I've treated the sheets as the review and I'm reporting on it below.\n\nThe scene is at `examples/bench/pr130-baseline/orrery-haiku-1/index.tsx`. It is 500×500 with a 12 s seamless loop. A yellow sun with a soft halo sits at the centre. Four planets (Mercury, Venus, Earth, Mars) move on visible orbit rings with periods of 2, 3, 4 and 6 s, each in its own theme colour. Each planet is a group that carries its dot and an upright label, so the labels never rotate. Earth has a moon on a 22 px ring with a 1 s period. A \"Day N\" counter in the top-left counts to 365 by 11.4 s, holds, then fades out so the reset to Day 0 is hidden.\n\nI checked it with `bun run scene check`, which is clean. I rendered six frames in light and dark (0, 2, 4, 6, 8, 10 s) and read the sheets. The planets, rings, labels, moon and counter all appear where they should, and the labels are upright in every frame. Things that are still imperfect: the counter fades in from 0 to 0.2 s and is invisible at 0 s, so the first frame shows no \"Day\" text. The counter reaches 365 at 11.4 s rather than exactly at the 12 s end, because the spec's count-up and the seamless loop conflict and I resolved that with the fade. Some planet labels sit on top of orbit rings where they cross. Nothing enters or animates in at the start, since the spec didn't ask for it. I did not run the scene in a browser, only the svjeez frame renderer.\n\nIf the two images are meant for something else, tell me what to check and I'll look again."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 122,
+          "sheet": "bench/results/pr130-baseline/orrery-haiku-1/frames/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    },
+    {
+      "task": "orrery",
+      "model": "sonnet",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/orrery-sonnet-1",
+      "build": {
+        "wallMs": 23641,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 22997,
+          "apiMs": 20499,
+          "turns": 7,
+          "costUsd": 0.11020580000000002,
+          "inputTokens": 12,
+          "outputTokens": 2944,
+          "cacheReadTokens": 117738,
+          "cacheWriteTokens": 17242,
+          "toolCalls": 5,
+          "tools": {
+            "Read": 2,
+            "Write": 1,
+            "Edit": 1,
+            "Bash": 1
+          },
+          "toolErrors": 0,
+          "permissionDenials": 0,
+          "denied": [],
+          "checkRuns": 1,
+          "frameRuns": 0,
+          "svgRuns": 0,
+          "frameLooks": 1,
+          "sourceLookups": 1,
+          "report": "I built the scene at `examples/bench/pr130-baseline/orrery-sonnet-1/index.tsx`. It has a 500×500 canvas and a 12s loop, with a glowing sun at the centre and four planets on grey orbit rings. Mercury (orange, 2s), Venus (yellow, 3s), Earth (blue, 4s) and Mars (red, 6s) all complete whole turns per loop. Earth, the third planet, has a small moon that circles it once per second. Each label sits in the planet's own group, so it follows the planet and never rotates. The top-left counter reads \"Day N\" and counts from 0 to 365 across the loop.\n\n`bun run scene check` reports 0 errors, 1 warning and 1 info. I rendered the contact sheet at 0, 2, 4, 6, 8 and 10s and read it. The orbits, colours, labels, moon and counter all look as specified.\n\nWhat is still imperfect:\n- **Counter jump:** the `loop-seam` warning is real: the counter reads \"Day 365\" at the end and snaps back to \"Day 0\" when the loop restarts. The spec's 0 to 365 count over one loop makes that unavoidable, so I left it.\n- **Label crowding:** the Mercury and Venus labels crowd each other when the planets line up, as at 0s and 6s.\n- **Moon in the frames:** the moon looks parked beside Earth in the sampled frames because its 1s period divides every sample time. I didn't render any off-grid frames to confirm it moves.\n- **Light scheme only:** I only viewed the light scheme. `check` covers both schemes without complaint, but I didn't look at a dark frame."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 1,
+          "infos": 1,
+          "codes": {
+            "loop-seam": 1,
+            "nothing-enters": 1
+          },
+          "lines": 90,
+          "sheet": "bench/results/pr130-baseline/orrery-sonnet-1/frames/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    },
+    {
+      "task": "tcp-handshake",
+      "model": "haiku",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/tcp-handshake-haiku-1",
+      "build": {
+        "wallMs": 115704,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 115040,
+          "apiMs": 109726,
+          "turns": 31,
+          "costUsd": 0.029190789999999998,
+          "inputTokens": 44,
+          "outputTokens": 22005,
+          "cacheReadTokens": 967509,
+          "cacheWriteTokens": 42544,
+          "toolCalls": 26,
+          "tools": {
+            "Skill": 1,
+            "Bash": 9,
+            "Write": 1,
+            "Edit": 11,
+            "Read": 4
+          },
+          "toolErrors": 2,
+          "permissionDenials": 1,
+          "denied": [
+            {
+              "tool": "Bash",
+              "detail": "ls -la /tmp/frames-tcp /tmp/frames-tcp2 /tmp/frames-tcp-dark 2>&1 | head -30; file /tmp/frames-tcp*/*.png 2>/dev/null | head -20"
+            }
+          ],
+          "checkRuns": 4,
+          "frameRuns": 2,
+          "svgRuns": 0,
+          "frameLooks": 4,
+          "sourceLookups": 9,
+          "report": "The image is the same 2448×494 size as the last one, with no caption, so I can't tell what it shows. I'm treating it as a re-send of the sheet I just rendered, which is the latest state of the scene.\n\nThe scene is at `examples/bench/pr130-baseline/tcp-handshake-haiku-1/index.tsx`. `scene check` reports 0 errors, 0 warnings and 0 info, and the frames at 2s, 4.1s and 7s match the spec: captions 1–3, the SYN, SYN-ACK and ACK arrows in flight, and the badge sequences.\n\n**What I built:** 800×450, 10s, looping. Client and Server headers with state badges above vertical timelines. Three diagonal arrows in sequence (SYN, SYN-ACK, ACK), each with its seq/ack label, and a caption bar that changes per phase. The whole diagram fades out at 9.0–9.8s and restarts from invisible.\n\n**Choices I made that you may want to change:**\n- Client goes ESTABLISHED when the ACK departs (6.0s). Server goes ESTABLISHED when the ACK arrives (7.4s). Server goes SYN_RECEIVED when the SYN arrives (2.4s). Real TCP has the client reach ESTABLISHED earlier, on SYN-ACK receipt, but the spec's badge sequence put it at the last step, so I followed that.\n- Non-established badges use a 30% blue tint and ESTABLISHED a 30% green tint, so the text passes contrast in both colour schemes. The spec only fixed the green for ESTABLISHED.\n\n**What I checked:** `check` clean, and frames read at 2s, 4.1s and 7s, plus a dark-scheme pair at 4.1s and 7s before the last label change. The earlier frames showed the labels crossing the timelines, so I moved each label to a fixed spot above its lane's midpoint. The later frames show them clear of the timelines.\n\n**Still imperfect:**\n- The labels are fixed at canvas centre rather than riding with their arrows, so each arrow sits about 30px below its label. I chose this to keep labels off the timelines; it does not follow the arrow.\n- After the label change I re-ran `check` and rendered three frames, but not the dark scheme or the 9.4s fade frame.\n- Bash was denied once mid-session for a `ls` on `/tmp`; the `check` and `frames` runs after that went through.\n- I haven't committed anything."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 174,
+          "sheet": "bench/results/pr130-baseline/tcp-handshake-haiku-1/frames/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      },
+      "change": {
+        "wallMs": 28322,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 27609,
+          "apiMs": 25257,
+          "turns": 14,
+          "costUsd": 0.00926222,
+          "inputTokens": 12,
+          "outputTokens": 5579,
+          "cacheReadTokens": 172832,
+          "cacheWriteTokens": 23716,
+          "toolCalls": 11,
+          "tools": {
+            "Skill": 1,
+            "Read": 2,
+            "Edit": 4,
+            "Bash": 4
+          },
+          "toolErrors": 0,
+          "permissionDenials": 0,
+          "denied": [],
+          "checkRuns": 2,
+          "frameRuns": 2,
+          "svgRuns": 0,
+          "frameLooks": 1,
+          "sourceLookups": 4,
+          "report": "The scene now runs for 14s: after the handshake, the client sends `DATA seq=101 len=50` (8.0–9.4s) and the server replies `ACK ack=151` (9.8–11.2s), with captions \"4. Client sends data\" at 7.8s and \"5. Server acknowledges\" at 9.6s. I edited only `examples/bench/pr130-baseline/tcp-handshake-haiku-1/index.tsx`. The existing phases keep their original timing, and the fade-out moved from 9.0s to 13.0s so the hold before it is the same 1.6s as before. `scene check` on the file reports 0 errors, 0 warnings and 0 info. I rendered a contact sheet at nine times from 0.5s to 13.4s and read it: every phase, caption and badge appears in order, the badges stay green through the data exchange, and the diagram is fully faded by the end. I did not commit anything. Still imperfect: the new DATA label is centred at x=400, so the arrow crosses it mid-flight at about 8.6s, the same way the SYN-ACK label is crossed at about 4s in the existing scene (I left the existing labels alone). I also followed the spec literally for the reply and labelled it `ACK ack=151` with no `seq`, although the server's sequence number at that point is 301. I also updated the `desc` text to mention the data exchange, which the spec did not ask for. The `scene` CLI would not resolve the directory form of the path, so I ran it against the `index.tsx` file."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 196,
+          "sheet": "bench/results/pr130-baseline/tcp-handshake-haiku-1/frames-change/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    },
+    {
+      "task": "tcp-handshake",
+      "model": "sonnet",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/tcp-handshake-sonnet-1",
+      "build": {
+        "wallMs": 44532,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 43941,
+          "apiMs": 40008,
+          "turns": 13,
+          "costUsd": 0.1586198,
+          "inputTokens": 18,
+          "outputTokens": 5630,
+          "cacheReadTokens": 214438,
+          "cacheWriteTokens": 20210,
+          "toolCalls": 11,
+          "tools": {
+            "Read": 3,
+            "Bash": 4,
+            "Write": 1,
+            "Edit": 3
+          },
+          "toolErrors": 1,
+          "permissionDenials": 1,
+          "denied": [
+            {
+              "tool": "Bash",
+              "detail": "mkdir -p examples/bench/pr130-baseline/tcp-handshake-sonnet-1 && head -30 examples/theme.ts && grep -n \"export\" examples/fonts/faces.ts"
+            }
+          ],
+          "checkRuns": 3,
+          "frameRuns": 0,
+          "svgRuns": 0,
+          "frameLooks": 1,
+          "sourceLookups": 0,
+          "report": "I wrote the scene to `examples/bench/pr130-baseline/tcp-handshake-sonnet-1/index.tsx`, and `bun run scene check` reports 0 errors, 0 warnings and 0 info (it tests both colour schemes).\n\n**What I built:** The scene is 800×450 and runs 10s as a loop.\n- \"Client\" and \"Server\" sit at the top, each with a vertical timeline and a state badge.\n- Three diagonal arrows draw in sequence, each with a label that fades in as it travels: SYN seq=100, SYN-ACK seq=300, ack=101, and ACK seq=101, ack=301.\n- A caption bar at the bottom shows \"1. Client asks to connect\", \"2. Server agrees\" and \"3. Connection established\".\n- The badges step through CLOSED → SYN_SENT → ESTABLISHED on the client and LISTEN → SYN_RECEIVED → ESTABLISHED on the server.\n- The ESTABLISHED badges turn green.\n- The final state holds until 8.8s, then everything fades out and the scene restarts.\n\n**What I checked:** I read the frame sheet before the last edit and it matched the spec: arrows, labels, badge states and green ESTABLISHED badges were all as intended. The first check also flagged low contrast on the ESTABLISHED text. I fixed it by using a translucent green fill instead of a solid one. After that I moved caption 3 to appear when the ACK is sent (5.4s) rather than when the connection completes. I re-ran `check` after that edit but did not re-render frames, so the final caption timing is unseen in a frame.\n\n**What is still imperfect:**\n- The labels are horizontal over slightly slanted arrows.\n- Both ESTABLISHED badges are only about 30% green, so the green is subtle.\n- Frame 0 is blank because the scene fades in from nothing."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 122,
+          "sheet": "bench/results/pr130-baseline/tcp-handshake-sonnet-1/frames/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      },
+      "change": {
+        "wallMs": 27327,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 26546,
+          "apiMs": 23501,
+          "turns": 12,
+          "costUsd": 0.12574079999999999,
+          "inputTokens": 14,
+          "outputTokens": 3155,
+          "cacheReadTokens": 159588,
+          "cacheWriteTokens": 19551,
+          "toolCalls": 10,
+          "tools": {
+            "Read": 4,
+            "Bash": 3,
+            "Edit": 3
+          },
+          "toolErrors": 1,
+          "permissionDenials": 1,
+          "denied": [
+            {
+              "tool": "Bash",
+              "detail": "f=examples/bench/pr130-baseline/tcp-handshake-sonnet-1/index.tsx && echo ok"
+            }
+          ],
+          "checkRuns": 1,
+          "frameRuns": 1,
+          "svgRuns": 0,
+          "frameLooks": 2,
+          "sourceLookups": 0,
+          "report": "I added the DATA and ACK phases to `examples/bench/pr130-baseline/tcp-handshake-sonnet-1/index.tsx`. `bun run scene check` reports 0 errors, 0 warnings and 0 info. The scene now runs 14s.\n\n- **New packets:** DATA (`seq=101, len=50`) goes client→server, starting at 7.2s. ACK (`ack=151`) goes server→client, starting at 9.5s. Both travel for 1.6s like the others.\n- **Captions:** \"4. Client sends data\" appears at 7.2s and \"5. Server acknowledges\" at 9.5s.\n- **Ending:** the fade-out now starts at 12.8s. The final ACK lands at 11.1s, so the hold is about 1.7s, close to the original 1.8s.\n- **Existing phases:** the original packet, caption and state-badge start times (0.8, 3.1, 5.4, 7.0s) are unchanged, and ESTABLISHED still turns green at the same moments.\n- **Layout change:** I moved the five packets closer together (16px gap, 36px drop). The original three would otherwise not leave room for five above the caption bar.\n- **Description:** I also extended the scene's `desc` to mention the data exchange.\n\nI read the frame sheet and the fade frame at 13.2s. In the sheet, packets, labels, badges and captions look right, and there are no overlaps. The fade frame fades everything out cleanly.\n\nThe three original arrows now have shallower slopes than before, and the 14px labels sit close to the arrow above them. I only looked at the light scheme in frames; `check` covers both schemes. The loop restart itself isn't covered by any frame."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 126,
+          "sheet": "bench/results/pr130-baseline/tcp-handshake-sonnet-1/frames-change/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    },
+    {
+      "task": "typing-chat",
+      "model": "haiku",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/typing-chat-haiku-1",
+      "build": {
+        "wallMs": 159339,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 158585,
+          "apiMs": 151413,
+          "turns": 24,
+          "costUsd": 0.03724272000000001,
+          "inputTokens": 46,
+          "outputTokens": 30358,
+          "cacheReadTokens": 1110672,
+          "cacheWriteTokens": 54762,
+          "toolCalls": 22,
+          "tools": {
+            "Skill": 1,
+            "Bash": 15,
+            "Write": 2,
+            "Read": 3,
+            "Edit": 1
+          },
+          "toolErrors": 2,
+          "permissionDenials": 2,
+          "denied": [
+            {
+              "tool": "Bash",
+              "detail": "python3 - <<'EOF'\nimport re\np=\"examples/bench/pr130-baseline/typing-chat-haiku-1/index.tsx\"\ns=open(p).read()\nold=s[s.index(\"// Three dots bounce\"):s.index(\"const Typing\")]\nnew='''// Three dots bounce inside one typing window; each dot lags the one before it.\nconst bounce = (from: number, to: number, delay: number) => {\n  const frames: [number, Vec][] = [[0, [0, 0]]];\n  for (let t = from + delay; t + 0.3 <= to + 1e-9; t += 0.5) {\n    frames.push([t, [0, 0]], [t + 0.15, [0, -5]], [t + 0.3, [0, 0]]);\n  }\n  return keyframes(frames);\n};\n\n'''\ns=s.replace(old,new)\ns=s.replace(\"motion={{ offset: bounce(i * 0.12) }}\",\"motion={{ offset: bounce(from, to, i * 0.12) }}\")\ns=s.replace(\"const Typing = ({ side, window }: { side: \\\"left\\\" | \\\"right\\\"; window: [number, number] }) => {\\n  const mine = side === \\\"right\\\";\\n  const [from, to] = window;\",\n\"const Typing = ({ side, window: [from, to] }: { side: \\\"left\\\" | \\\"right\\\"; window: [number, number] }) => {\\n  const mine = side === \\\"right\\\";\")\nopen(p,\"w\").write(s)\nEOF\nbun run scene check bench/pr130-baseline/typing-chat-haiku-1 2>&1 | tail -30"
+            },
+            {
+              "tool": "Bash",
+              "detail": "bun run scene frames bench/pr130-baseline/typing-chat-haiku-1 --sheet --times 0.8,1.6,2.3,3.4,4.6,5.2,5.8,8 --out /tmp/frames-typing-haiku1 2>&1 | tail -5; ls /tmp/frames-typing-haiku1"
+            }
+          ],
+          "checkRuns": 5,
+          "frameRuns": 3,
+          "svgRuns": 0,
+          "frameLooks": 3,
+          "sourceLookups": 13,
+          "report": "The scene is at `examples/bench/pr130-baseline/typing-chat-haiku-1/index.tsx`, a 380×520, 9-second one-shot (`loop: false`) chat. It has a header, a clipped message list and a composer. Three bubbles arrive left, right, left, each after a typing indicator whose three dots bounce, and the list scrolls up by 120px as the third bubble lands at 5.4s. Bubbles size to their wrapped text (a 216px text width inside a padded Stack), and each typing indicator sits in its bubble's slot via `Align` so it is replaced in place. `scene check` reports 0 errors, 0 warnings and 0 info after the final edit. I read frames in both schemes: light at 0.8–8s and the scroll at 5.6/6.2/8.9s, dark at 0.9/3.4/8.5s. Everything matches the spec in both, and the colours hold contrast in both. Still imperfect: the 120px scroll is hand-tuned from frames rather than measured from the bubble height, so it will drift if the text changes; the top message is clipped mid-bubble during and after the scroll, which is expected for a scroll but may read as cramped; the lower part of the list is empty for most of the run; and the bounce is a fixed 5px rise with a 0.12s stagger per dot, not eased per dot. I wrote only the scene file. The contact-sheet PNGs went to the default temp directory because a `--out` path was denied, and a few Bash calls (a Python patch and a `--out` frames run) were blocked, so I used Write for the rewrite."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 177,
+          "sheet": "bench/results/pr130-baseline/typing-chat-haiku-1/frames/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    },
+    {
+      "task": "typing-chat",
+      "model": "sonnet",
+      "repeat": 1,
+      "dir": "examples/bench/pr130-baseline/typing-chat-sonnet-1",
+      "build": {
+        "wallMs": 56582,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 55873,
+          "apiMs": 51807,
+          "turns": 19,
+          "costUsd": 0.1987734,
+          "inputTokens": 22,
+          "outputTokens": 7065,
+          "cacheReadTokens": 319154,
+          "cacheWriteTokens": 24041,
+          "toolCalls": 18,
+          "tools": {
+            "Read": 4,
+            "Bash": 5,
+            "Write": 1,
+            "Edit": 8
+          },
+          "toolErrors": 1,
+          "permissionDenials": 1,
+          "denied": [
+            {
+              "tool": "Bash",
+              "detail": "cd examples/bench/pr130-baseline/typing-chat-sonnet-1 && python3 - <<'E'\np='index.tsx'\ns=open(p).read()\ns=s.replace('<Stack offsetless gap={14}','<Stack gap={14}')\ns=s.replace('''<Stack key={i} direction=\"row\" width={W - 32} align=\"start\">\n                {m.side === \"right\" ? <Shape geometry={rect(1, 1)} fill=\"#00000000\" /> : null}\n''','''<Stack key={i} width={W - 32} align={m.side === \"left\" ? \"start\" : \"end\"}>\n''')\ns=s.replace('      <Shape geometry={circle(4)} offset={[0, 0]} fill=\"#00000000\" />\\n','')\ns=s.replace('  const hold = span(t, 1.4);\\n','')\ns=s.replace('Shape, Stack, Text, circle,','Shape, Stack, Text,')\nopen(p,'w').write(s)\nE\ncd - >/dev/null; bun run scene check bench/pr130-baseline/typing-chat-sonnet-1 2>&1 | tail -30"
+            }
+          ],
+          "checkRuns": 4,
+          "frameRuns": 0,
+          "svgRuns": 0,
+          "frameLooks": 2,
+          "sourceLookups": 5,
+          "report": "I built the scene at `examples/bench/pr130-baseline/typing-chat-sonnet-1/index.tsx`. It's a 380×520, 9s chat with a \"Sam\" header and an input bar, and `check` reports 0 errors, 0 warnings, 0 info.\n\n- **Messages:** three bubbles (left, right, left) appear in turn, each after a typing indicator with three bouncing dots. The indicator sits on the same side as the bubble that follows it.\n- **Sizing and scroll:** the bubbles wrap their text at 230 wide and size to it. The list scrolls up 90px as the third message arrives, at about 6.9s.\n- **What I checked:** I read frames at 1, 2.2, 3.5, 5.7, 7.3, 7.5 and 8.8s. The first run showed the second indicator on the wrong side. I fixed that and re-read frames at 3.5, 5.7, 7.3 and 8.8s, where it now sits on the right and the scroll works.\n- **Imperfect:**\n  - The scroll amount is a hand-tuned constant, so the first bubble ends up half-hidden under the header rather than fully off-screen.\n  - The right side of the input bar is empty, with no placeholder text.\n  - I did not render the dark colour scheme.\n\nAlong the way I tried a `python3` edit, which the rules don't allow; I redid it with the Edit tool."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 82,
+          "sheet": "bench/results/pr130-baseline/typing-chat-sonnet-1/frames/sheet.png",
+          "timedOut": false
+        },
+        "timedOut": false
+      }
+    }
+  ]
+}

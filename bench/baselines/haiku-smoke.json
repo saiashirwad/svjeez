@@ -1,0 +1,193 @@
+{
+  "label": "smoke-b",
+  "rows": [
+    {
+      "task": "city-day-night",
+      "model": "haiku",
+      "phase": "build",
+      "runs": 1,
+      "built": 0,
+      "timeS": 143.708,
+      "turns": 11,
+      "toolCalls": 10,
+      "checkRuns": 1,
+      "frameLooks": 0,
+      "sourceLookups": 5,
+      "errors": 3,
+      "warnings": 0,
+      "costUsd": 0.027271029999999998
+    },
+    {
+      "task": "city-day-night",
+      "model": "haiku",
+      "phase": "change",
+      "runs": 1,
+      "built": 1,
+      "timeS": 81.859,
+      "turns": 15,
+      "toolCalls": 13,
+      "checkRuns": 4,
+      "frameLooks": 0,
+      "sourceLookups": 5,
+      "errors": 0,
+      "warnings": 0,
+      "costUsd": 0.01943007
+    },
+    {
+      "task": "orrery",
+      "model": "haiku",
+      "phase": "build",
+      "runs": 1,
+      "built": 1,
+      "timeS": 57.196,
+      "turns": 13,
+      "toolCalls": 9,
+      "checkRuns": 2,
+      "frameLooks": 2,
+      "sourceLookups": 4,
+      "errors": 0,
+      "warnings": 0,
+      "costUsd": 0.01319785
+    }
+  ],
+  "runs": [
+    {
+      "task": "city-day-night",
+      "model": "haiku",
+      "repeat": 1,
+      "dir": "examples/bench/smoke-b/city-day-night-haiku-1",
+      "build": {
+        "wallMs": 143708,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 142969,
+          "apiMs": 142162,
+          "turns": 11,
+          "costUsd": 0.027271029999999998,
+          "inputTokens": 18,
+          "outputTokens": 29769,
+          "cacheReadTokens": 356913,
+          "cacheWriteTokens": 44078,
+          "toolCalls": 10,
+          "tools": {
+            "Read": 1,
+            "Bash": 5,
+            "Write": 1,
+            "Edit": 3
+          },
+          "toolErrors": 1,
+          "permissionDenials": 1,
+          "checkRuns": 1,
+          "frameRuns": 0,
+          "svgRuns": 0,
+          "frameLooks": 0,
+          "sourceLookups": 5,
+          "report": "I wrote the scene to `examples/bench/smoke-b/city-day-night-haiku-1/index.tsx`, but I have not checked or rendered it. Bash was denied in this session, so I could not run `bun run scene check` or `bun run scene frames`, and I could not look at any frames. The scene is unverified. Built from the spec: a 900×500, 16 s looping scene where the sky goes day, sunset, night, dawn, day, and each stage is a crossfaded overlay. The sun sets behind 11 buildings of varied heights and the moon rises after dusk and sets at dawn. About 64 windows light in a scattered order between 5.6 s and 9 s and switch off between 9.5 s and 10.4 s, before dawn. Stars fade in at night and twinkle on loop periods of 2 or 4 s. A car crosses the road, starting and ending off canvas, with headlights that come on at night. Every track starts and ends at its resting value, so the seam should line up. Still to do: run `check` and `frames` (and look at the sheet), and fix whatever they flag. The riskiest parts are `Group opacity`, `linear.across` gradient direction, `.loop(..., { phase })` on a track built with `.to`, and `keyframes(...).map(y => [x, y])` used as an offset. Lint and formatting have not been run either."
+        },
+        "grade": {
+          "built": false,
+          "errors": 3,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {
+            "type-error": 2,
+            "compile-error": 1
+          },
+          "lines": 238,
+          "sheet": ""
+        }
+      },
+      "change": {
+        "wallMs": 81859,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 81220,
+          "apiMs": 79617,
+          "turns": 15,
+          "costUsd": 0.01943007,
+          "inputTokens": 16,
+          "outputTokens": 18019,
+          "cacheReadTokens": 311277,
+          "cacheWriteTokens": 36531,
+          "toolCalls": 13,
+          "tools": {
+            "Skill": 1,
+            "Read": 1,
+            "Bash": 5,
+            "Write": 1,
+            "Edit": 4,
+            "Grep": 1
+          },
+          "toolErrors": 1,
+          "permissionDenials": 1,
+          "checkRuns": 4,
+          "frameRuns": 0,
+          "svgRuns": 0,
+          "frameLooks": 0,
+          "sourceLookups": 5,
+          "report": "I could not finish the verification step. The edits to `examples/bench/smoke-b/city-day-night-haiku-1/index.tsx` are in place, but Bash was denied partway through, so I have not run `scene check` or looked at any frames. What I changed: the whole timeline now runs 20 s, with every keyframe, span and the star twinkle period scaled by 1.25 so the phases keep their proportions and the seam still closes. I added a second car in a lane closer to the viewer (y≈466, against the first car at y≈426), driving right to left with a blue body and left-facing headlight and beam that fade in at night. I also added 40 seeded rain streaks on loops whose periods divide 20 s, under a fade that ramps in 10–11.25 s, holds, and is gone by 15 s, while the dawn tint starts at 13.5 s. Fixing the build turned up a bug that was already in the original: the scene used svjeez's `linear` (the gradient builder) as a motion curve, so it failed type-check and would not build. I changed all four curve uses to `ease.linear` and left the gradients on `linear.across`. A grep confirms no bare curve `linear` remains. Still unverified: the type-check, the seam check, the `wasted-motion` info that rain and the second car will likely raise while hidden, whether the rain loops wrap cleanly, and the headlight and beam placement for the second car. The identical `index.build.tsx` copy still has the same bug, and I left it untouched."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 283,
+          "sheet": "/Users/texoport/worktrees/svjeez/agent-benchmark-harness/bench/results/smoke-b/city-day-night-haiku-1/frames-change/sheet.png"
+        }
+      }
+    },
+    {
+      "task": "orrery",
+      "model": "haiku",
+      "repeat": 1,
+      "dir": "examples/bench/smoke-b/orrery-haiku-1",
+      "build": {
+        "wallMs": 57196,
+        "metrics": {
+          "finished": true,
+          "isError": false,
+          "stopReason": "completed",
+          "durationMs": 56455,
+          "apiMs": 50903,
+          "turns": 13,
+          "costUsd": 0.01319785,
+          "inputTokens": 20,
+          "outputTokens": 9925,
+          "cacheReadTokens": 307595,
+          "cacheWriteTokens": 25787,
+          "toolCalls": 9,
+          "tools": {
+            "Skill": 1,
+            "Bash": 4,
+            "Write": 1,
+            "Edit": 1,
+            "Read": 2
+          },
+          "toolErrors": 0,
+          "permissionDenials": 0,
+          "checkRuns": 2,
+          "frameRuns": 1,
+          "svgRuns": 0,
+          "frameLooks": 2,
+          "sourceLookups": 4,
+          "report": "I wrote the orrery scene to `examples/bench/smoke-b/orrery-haiku-1/index.tsx`. It is a 500×500, 12s seamless loop with a glowing sun at the centre, four planets on visible orbit rings with periods of 2s, 3s, 4s and 6s, and a moon orbiting the third planet (Earth) on a 1s period. Each planet's label rides in the same group as its dot, so it moves with the planet and stays upright. The \"Day N\" counter sits top-left. `bun run scene check` reports 0 errors, 0 warnings and 0 info, and I read the light-scheme frame sheet at 7 times plus a dark-scheme sheet at 4 times, both of which look right. Three things are still imperfect. The counter fades out from 11.2s and back in at the loop start, so it never shows Day 365 and the reset to Day 0 is hidden; this is my choice to clear the `loop-seam` warning, and the spec's \"0 to 365 over the loop\" is only reached in the hidden portion. Some planet labels sit on or cross an orbit ring at certain phases (Mercury around 6s, Earth near 11.5s). The sun's glow is three flat translucent discs rather than a smooth falloff. I did not run the scene in a browser beyond these rendered frames."
+        },
+        "grade": {
+          "built": true,
+          "errors": 0,
+          "warnings": 0,
+          "infos": 0,
+          "codes": {},
+          "lines": 100,
+          "sheet": "/Users/texoport/worktrees/svjeez/agent-benchmark-harness/bench/results/smoke-b/orrery-haiku-1/frames/sheet.png"
+        }
+      }
+    }
+  ]
+}
