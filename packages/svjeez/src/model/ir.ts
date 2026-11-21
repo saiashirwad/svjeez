@@ -196,6 +196,13 @@ export interface Source {
   readonly column?: number;
 }
 
+/** The clock a node's animations run on when page code drives them: its name, where it plays in the static file, and its length. */
+export interface ClockMark {
+  readonly name: string;
+  readonly start: Seconds;
+  readonly over: Seconds;
+}
+
 interface Base {
   readonly key: string;
   readonly name?: string;
@@ -211,6 +218,8 @@ interface Base {
   /** The one color scheme it shows in; it shows in both without one. */
   readonly scheme?: Scheme;
   readonly authored?: Authored;
+  /** Set on the top nodes of a clocked `<Sequence>`; the nodes inside them run on that clock too. */
+  readonly clock?: ClockMark;
 }
 
 export interface GroupNode extends Base {

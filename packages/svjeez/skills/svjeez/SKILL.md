@@ -79,7 +79,7 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 | `typed(value, { by, caret })` | a string track typed out, last in a `<Text>`: each `.to()` erases back to the shared start, then types; `by` is `chars` (default), `words` or your own split |
 | `<Group offset>` | moves children together; `offset` is where their `[0, 0]` goes |
 | `<Picture src={picture(bytes)} width height>` | a PNG, JPEG, GIF, WebP or SVG; `picture.load(path)` reads a file |
-| `<Sequence when={span}>` | a local clock: tracks inside count from the span's start |
+| `<Sequence when={span}>`, `<Sequence clock={clock(name, span)}>` | a local clock: tracks inside count from the span's start; a `clock()` is one page code can play or scrub ([`references/time.md`](references/time.md)) |
 | `<Arrow from to stroke bend inset head draw>` | between points or anchors; follows them as they move |
 
 Every node also takes `key ref at anchor origin rotate scale skew opacity motion clip mask effects blend scheme`. `scheme="light"` or `"dark"` shows a node in that color scheme only ([`references/paint.md`](references/paint.md)).
@@ -231,7 +231,7 @@ Runtime errors. `…` stands for a value the message fills in.
 ## Detail
 
 - Tracks, layers and stacking, recipes, springs, derived and sampled values: [`references/motion.md`](references/motion.md)
-- Spans, clocks, `<Sequence>`, loops and seams: [`references/time.md`](references/time.md)
+- Spans, clocks, `<Sequence>`, clocks the page drives, loops and seams: [`references/time.md`](references/time.md)
 - Containers, text, runs and counting numbers: [`references/layout-text.md`](references/layout-text.md)
 - Refs, anchors, parts and `<Arrow>`: [`references/refs-arrows.md`](references/refs-arrows.md)
 - Paint, clip, mask, effects: [`references/paint.md`](references/paint.md)
