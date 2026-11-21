@@ -672,7 +672,7 @@ group("describe", () => {
     const { text } = describe(model, [2]);
 
     expect(text).toContain(
-      "  row group 50×10 at 10,10\n    {0,1,2} ×3 shape rect 10×10 at 10,10; 30,10; 50,10 fill #FF0000",
+      "  row group 50×10 at 10,10\n    {#0,#1,#2} ×3 shape rect 10×10 at 10,10; 30,10; 50,10 fill #FF0000",
     );
     expect(text).toContain("ball: shown throughout; at 1s–3s");
     expect(text).toContain("title: shown 0.5s–end; opacity 0.5s–1s");

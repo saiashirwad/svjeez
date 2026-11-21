@@ -32,6 +32,18 @@ describe("key", () => {
     ).toThrow('Two nodes are both keyed "1"');
   });
 
+  test("an explicit key never collides with the position of an unkeyed sibling", () => {
+    const model = made(() => (
+      <Group>
+        <Shape geometry={circle(2)} fill="#000000" />
+        <Shape geometry={circle(2)} fill="#000000" />
+        <Shape key={1} geometry={circle(2)} fill="#000000" />
+      </Group>
+    ));
+
+    expect(new Set(keysOf(model)).size).toBe(3);
+  });
+
   test("refuses anything else, naming the node", () => {
     const bad = (key: string) =>
       made(() => (

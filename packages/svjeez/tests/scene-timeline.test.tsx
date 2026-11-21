@@ -235,7 +235,7 @@ describe("tracks that go to anchors", () => {
     });
 
     expect(times(find(model, "a").at).at(-1)).toEqual([4, [117, 67]]);
-    expect(times(find(model, "2/b").at).at(-1)).toEqual([4, [117, 67]]);
+    expect(times(find(model, "#2/b").at).at(-1)).toEqual([4, [117, 67]]);
   });
 
   test("a step to a moving anchor lands where the anchor is when the step ends", () => {

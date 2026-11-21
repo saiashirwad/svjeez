@@ -54,10 +54,10 @@ describe("lowering", () => {
 
     const [dot, card] = model.root.children;
 
-    expect(dot!.key).toBe("0");
+    expect(dot!.key).toBe("#0");
     expect(card?.kind === "group" && card.children.map((child) => child.key)).toEqual([
       "card/title",
-      "card/1",
+      "card/#1",
     ]);
   });
 
@@ -484,7 +484,7 @@ describe("motion layers", () => {
   });
 
   const matrixAt = (model: Model.Scene, t: number) =>
-    placements(model, t).find((placed) => placed.key === "0")!.matrix;
+    placements(model, t).find((placed) => placed.key === "#0")!.matrix;
 
   test("an outer layer's offset is not scaled by what is inside it", () => {
     const model = made(() => (

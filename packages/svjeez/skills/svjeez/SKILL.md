@@ -207,7 +207,7 @@ Runtime errors. `…` stands for a value the message fills in.
 | `anchor on … names the point its at places, but it has no at, so it stays where its coordinates put it.` | give the node an `at`, or drop `anchor` |
 | `… is a ref that is on no node.` | put the ref on a node the scene draws |
 | `A ref is on two nodes, … and ….` | one ref per node |
-| `Two nodes are both keyed "…"….` | keys are unique among siblings; `key` is a string or a number (`key={year}`), and `1` and `"1"` collide |
+| `Two nodes are both keyed "…"….` | keys are unique among siblings; `key` is a string or a number (`key={year}`), and `1` and `"1"` collide (unkeyed siblings are keyed `#0`, `#1`… by position, so they never collide with yours) |
 | `Two steps move … at once: one …, and another …, before the first ends.` | start the second step when the first ends (`first.next(over)`) |
 | `… and … read the same track, but they count time on different clocks: … and ….` | make a track per clock, or put both nodes in one `<Sequence>` |
 | `A track starts at a value, but track(…) starts at an anchor.` | `track([0, 0]).to(anchor, span)`: start at a point |

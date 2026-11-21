@@ -936,8 +936,9 @@ const lowerAll = (
       });
     let own = name;
 
+    // An unkeyed node is keyed by position, in a "#" namespace so key={1} can't collide with the second child.
     for (let index = taken.size; own === undefined; index++)
-      if (!taken.has(String(index))) own = String(index);
+      if (!taken.has(`#${index}`)) own = `#${index}`;
     taken.add(own);
     const key = parent ? `${parent}/${own}` : own;
     const entry = nameFor(ctx, given, name, parent);
