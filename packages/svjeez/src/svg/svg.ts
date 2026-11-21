@@ -6,7 +6,7 @@ import { num } from "../model/format";
 import { moving, type Key as Held } from "./keys";
 import { DEFAULT_EASE, EPSILON, isHold } from "../model/time";
 import { render } from "./render";
-import { element, type AttrValue, type Element, type SvgNode } from "./tree";
+import { element, text, type AttrValue, type Element, type SvgNode } from "./tree";
 import { admit, type Backend, type Feature, type LaneReport, type Support } from "../model/backend";
 import { foldLayers } from "../model/fold";
 import { drawMoving, isStraight, type GeometrySlot } from "./svg-geometry";
@@ -28,6 +28,7 @@ import type {
   Rgba,
   SceneNode,
   Scheme,
+  ShaderMark,
   ShapeNode,
   Stroke,
   TextNode,
@@ -1017,6 +1018,23 @@ const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Dra
 
 const ISOLATE = "isolation:isolate";
 
+/** What lets page code find a <Slot>: its name, and its box in the units of the group that holds its fallback. */
+const slotAttrs = (slot: string, { x, y, width, height }: Box) => ({
+  "data-slot": slot,
+  "data-slot-box": [x, y, width, height].map(num).join(" "),
+});
+
+/**
+ * What a page's shader runner needs: the uniform layout as an attribute of the slot's group, and the WGSL in a script
+ * that browsers do not run, the first child of the group.
+ */
+const shaderAttrs = ({ size, fields }: ShaderMark) => ({
+  "data-shader-inputs": JSON.stringify({ size, fields }),
+});
+
+const shaderScript = ({ wgsl }: ShaderMark): Element =>
+  element("script", { type: "text/wgsl" }, [text(wgsl)]);
+
 /**
  * A node blends with what is drawn beneath it in its nearest isolated group, so a group
  * whose children blend is isolated: they blend with their earlier siblings and never
@@ -1031,6 +1049,7 @@ const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
 
   if (
     child!.clock !== undefined ||
+    node.slot !== undefined ||
     (node.hit !== undefined && child!.hit !== undefined) ||
     node.clip !== undefined ||
     node.mask !== undefined ||
@@ -1243,7 +1262,16 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
   const still = lanes.length === 0 && drawn.tag !== "g" && !drawn.scale && !drawn.offset;
 
   const first: Element = {
-    ...element(drawn.tag, { ...drawn.attrs, ...dress(inner!) }, children),
+    ...element(
+      drawn.tag,
+      {
+        ...drawn.attrs,
+        ...dress(inner!),
+        ...(node.slot !== undefined && slotAttrs(node.slot, node.box)),
+        ...(node.shader && shaderAttrs(node.shader)),
+      },
+      node.shader ? [shaderScript(node.shader), ...children] : children,
+    ),
     ...(innerLanes.length > 0 && { lanes: innerLanes }),
     ...(still && { drawn: Object.keys(drawn.attrs) }),
   };

@@ -348,6 +348,9 @@ test("typos in names are type errors", () => {
       throw new Error("no clocks");
     },
     hit: () => [],
+    slot: () => {
+      throw new Error("no slots");
+    },
     unmount: () => undefined,
   };
 

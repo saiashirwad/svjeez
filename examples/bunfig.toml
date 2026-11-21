@@ -1,1 +1,1 @@
-preload = ["@svjeez/dom/bun/preload"]
+preload = ["./scripts/typegpu.ts", "@svjeez/dom/bun/preload"]

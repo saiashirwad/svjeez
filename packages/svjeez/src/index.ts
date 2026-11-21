@@ -52,6 +52,10 @@ export { span, type Span } from "./author/span";
 
 export { clock, type Clock } from "./author/clock";
 
+export { Slot, type SlotProps } from "./author/slot";
+
+export { Shader, type ShaderInput, type ShaderInputs, type ShaderProps } from "./author/shader";
+
 export { morph } from "./author/morph";
 
 export {

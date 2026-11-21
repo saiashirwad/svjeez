@@ -7,6 +7,7 @@ import {
   Group,
   Sequence,
   Shape,
+  Slot,
   Text,
   circle,
   clock,
@@ -19,6 +20,7 @@ import {
   scene,
   span,
   track,
+  type Vec,
 } from "svjeez";
 import { svg } from "svjeez/tools";
 
@@ -628,5 +630,102 @@ test("the outer clock does not move the inner one", async () => {
   expect(after.fade).toBe(before.fade);
   expect(after.morph).toBe(before.morph);
   expect(await run(page, "return scene.clock('face').time;")).toBe(0.6);
+  await page.close();
+});
+
+const slide = clock("slide", span(0, 1));
+
+// A slot that a clock carries 60 right and 10 down.
+const slotted = () =>
+  svg.emit(
+    scene({ size: [200, 120], duration: 2, title: "Slots" }, () => (
+      <Sequence clock={slide}>
+        <Group motion={{ offset: track<Vec>([0, 0]).to([60, 10], span(0, 1), ease.linear) }}>
+          <Slot name="field" width={80} height={50} at={[20, 30]}>
+            <Shape geometry={rect(80, 50)} fill="#00aa00" />
+          </Slot>
+        </Group>
+      </Sequence>
+    )),
+  );
+
+const HOST = `${MOUNT}
+  globalThis.div = document.createElement("div");
+  div.style.cssText = "width: 100%; height: 100%; background: #ff0000";
+  globalThis.release = scene.slot("field").host(div);`;
+
+// Where the hosted node and the fallback are on the page, and how the fallback shows.
+const PLACES = `
+  const box = (one) => { const r = one.getBoundingClientRect(); return [r.x, r.y, r.width, r.height].map(Math.round); };
+  const fallback = document.querySelector("[data-slot] > rect");
+  return {
+    hosted: div.isConnected ? box(div) : null,
+    fallback: box(fallback),
+    opacity: getComputedStyle(fallback).opacity,
+    style: fallback.getAttribute("style"),
+  };`;
+
+interface Places {
+  readonly hosted: readonly number[] | null;
+  readonly fallback: readonly number[];
+  readonly opacity: string;
+  readonly style: string | null;
+}
+
+test("a slot hosts a node in its box over its hidden fallback, and gives the fallback back", async () => {
+  const page = await page_(slotted());
+
+  await run(page, HOST);
+
+  expect(await run(page, "return scene.slot('field').box;")).toEqual({
+    x: 20,
+    y: 30,
+    width: 80,
+    height: 50,
+  });
+  expect(await run<Places>(page, PLACES)).toEqual({
+    hosted: [20, 30, 80, 50],
+    fallback: [20, 30, 80, 50],
+    opacity: "0",
+    style: "opacity: 0 !important; pointer-events: none !important;",
+  });
+
+  await run(page, "release();");
+
+  expect(await run<Places>(page, PLACES)).toEqual({
+    hosted: null,
+    fallback: [20, 30, 80, 50],
+    opacity: "1",
+    style: null,
+  });
+  expect(await run(page, "return document.querySelectorAll('foreignObject').length;")).toBe(0);
+  await page.close();
+});
+
+test("a hosted node moves with the clock that moves its slot", async () => {
+  const page = await page_(slotted());
+
+  await run(page, HOST);
+  await run(page, "scene.clock('slide').seek(1);");
+
+  const { hosted, fallback } = await run<Places>(page, PLACES);
+
+  expect(hosted).toEqual([80, 40, 80, 50]);
+  expect(fallback).toEqual([80, 40, 80, 50]);
+  await page.close();
+});
+
+test("hosting again replaces the node, and slot() names the slots the SVG has", async () => {
+  const page = await page_(slotted());
+
+  await run(page, HOST);
+  await run(page, "scene.slot('field').host(document.createElement('canvas'));");
+
+  expect(
+    await run(page, "return [div.isConnected, document.querySelectorAll('foreignObject').length];"),
+  ).toEqual([false, 1]);
+  expect(await run(page, "try { scene.slot('fx'); } catch (error) { return error.message; }")).toBe(
+    'This SVG has no slot "fx"; it has "field"',
+  );
   await page.close();
 });

@@ -2,7 +2,8 @@ import svjeez from "@svjeez/vite";
 import react from "@vitejs/plugin-react";
 import { defaultClientConditions, defaultServerConditions, defineConfig } from "vite";
 
-// `@svjeez/source` resolves the workspace's packages to their sources, so no build comes first.
+// `@svjeez/source` resolves the workspace's packages to their sources, so no build comes first. The svjeez plugin
+// compiles the scenes' TypeGPU shaders itself, as the gpu-card scene's <Shader> asks.
 export default defineConfig({
   plugins: [react(), svjeez()],
   resolve: { conditions: ["@svjeez/source", ...defaultClientConditions] },

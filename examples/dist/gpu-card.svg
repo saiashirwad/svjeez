@@ -1,0 +1,193 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 562 418" width="562" height="418" role="img" aria-labelledby="gpu-card-t gpu-card-d" data-states="{&quot;calm&quot;:{&quot;storm&quot;:0},&quot;storm&quot;:{&quot;storm&quot;:1}}" font-family="'gpu-card-JetBrains Mono'" class="gpu-card-root">
+  <title id="gpu-card-t">Signal</title>
+  <desc id="gpu-card-d">A signal card. Its title, a calm or storm badge, a scale and three readouts are vectors; the field in the middle is a slot that a page fills with a live WebGPU shader, and shows a still gradient aurora without one. Here the card goes from calm to storm: the badge turns orange, the readouts climb and the aurora turns from cyan and blue to magenta and orange.</desc>
+  <style><![CDATA[
+svg.gpu-card-root{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--cyan-62-text:color-mix(in srgb,var(--cyan) 62%,var(--text));--orange-62-text:color-mix(in srgb,var(--orange) 62%,var(--text));--blue-10-background:color-mix(in srgb,var(--blue) 10%,var(--background));--blue-10-background-55-blue-10-background:color-mix(in srgb,var(--blue-10-background) 55%,var(--blue-10-background));--cyan-55-blue-10-background:color-mix(in srgb,var(--cyan) 55%,var(--blue-10-background));--blue-55-blue-10-background:color-mix(in srgb,var(--blue) 55%,var(--blue-10-background));--magenta-55-blue-10-background:color-mix(in srgb,var(--magenta) 55%,var(--blue-10-background));--orange-55-blue-10-background:color-mix(in srgb,var(--orange) 55%,var(--blue-10-background));--orange-35-text:color-mix(in srgb,var(--orange) 35%,var(--text));--cyan-14-surface:color-mix(in srgb,var(--cyan) 14%,var(--surface));--orange-14-surface:color-mix(in srgb,var(--orange) 14%,var(--surface));--background-20-blue-10-background:color-mix(in srgb,var(--background) 20%,var(--blue-10-background))}
+@media (prefers-color-scheme:light){svg.gpu-card-root{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0}}
+
+@font-face{font-family:'gpu-card-JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+@font-face{font-family:'gpu-card-Geist';src:url(data:font/ttf;base64,AAEAAAANAIAAAwBQT1MvMj1OcAQAAADcAAAAYGNtYXACJwJSAAABPAAAAHRnYXNwAAAAEAAAAbAAAAAIZ2x5Zpn9di4AAAG4AAAEgmhlYWQzD4ffAAAGPAAAADZoaGVhDEoJXQAABnQAAAAkaG10eCKdA0wAAAaYAAAAQGtlcm4AZAAMAAAG2AAAAE5sb2NhCscJngAABygAAAAibWF4cAAqANgAAAdMAAAAIG5hbWUA7AU7AAAHbAAAABxwb3N0/58AMgAAB4gAAAAgcHJlcGgGjIUAAAeoAAAABwAEAmsCWAAFAAACigJYAAAASwKKAlgAAAFeADIBQAAAAAAAAAAAAAAAAKEAAv9QAeR7AAAAAAAAAABWUkNMAMAAIPsCA+3+2QAABEABBiAAAJcAAAAAAhYCxgAAACAACgAAAAEAAwABAAAADAAEAGgAAAAWABAAAwAGAEEAQwBNAE8AVABhAGcAaQBsAG7//wAAAEEAQwBMAE8AUgBhAGcAaQBsAG7////A/7//t/+2/7T/qP+j/6L/oP+fAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAf//AA8ABAAoAAACNQLGAAMABwALAA8AADMRIRElIREhEycBFwMBNwEoAg3+FAHL/jUIFQHQFRX+MBUB0ALG/TokAn79bx0Chx39eQKHHf15AAIAEwAAArICxgAHAAoAADMBMwEjJyEHEzMDEwEAnwEAiDv+5zthzWYCxv06qKgBFwEsAAABACv/8AKuAtYAHgAABSImJjU0NjYzMhYXByYmIyIGBhUUFhYzMjY3Fw4CAXRhlFRSlGSIlheIDVZKPFgwMVg6T1cMiA5QgxBZpXRyp1uHeQdGUEB0T1BzPldMB1N5QQABAFAAAAIjAsYABgAAMxEzESchFVCCRwGYAsb9YklxAAEAUAAAAzYCxgAMAAAzETMTEzMRIxEDIwMRUK/ExK+Cs3yzAsb92gIm/ToB6v4XAen+FgACACv/8ALQAtYADwAfAAAFIiYmNTQ2NjMyFhYVFAYGJzI2NjU0JiYjIgYGFRQWFgF9aZhRUZhpa5dRUZdrQVsxMVtBP1wxMVwQWaZzc6daWqdzc6ZZcT1zUVF0Pj50UVFzPQAAAgBQAAACegLGABYAHwAAMxEhMhYWFRQGBgcnMhYXFyMnJiYjIxERMzI2NTQmIyNQASlNcD4qRysFRUsFEoQPAzA4qp87QkNAmQLGNGBBMUwuBQo+QM26Kij+9AF+ODM0OAABADX/8AJnAtYAMAAABSImJic3HgIzMjY2NTQmJicuAjU0NjYzMhYWFwcuAiMiBhUUFhYXHgIVFAYGAVxYgEkGhAYpRTEqOx8aSklYajA+clBVdkQIgwUlPy04QRtGP19wMEJ4ED5vSgguQCEVKR4bKyMRFDNNOj5fNT1qRQYnOiEzKh0mGw8UPlI1QV8zAAABAAsAAAI8AsYABwAAMxEjNSEVIxHj2AIx1wJVcXH9qwAAAgAn//QCNQIiACUAMQAAFyImNTQ2Nzc0JiMiBgcnNjYzMhYVFRQWMzMVBgYjIiYmNRcOAicyNjY1NQcGBhUUFuFUZlZYsTQzLjUKghB8Y3J1Dw8RBhsOITQcCwg1UBgrPiKKKyUpDE1FRU4RIzk5KygGVVtza8IVEF0CAhU1LggjNx5dIjwpHhwJIxwfIgAAAgAn/14CJgIiACAALQAABSImJic3FhYzMjY1NQYGIyImJjU0NjYzMhYXNTMRFAYGAzI2NzYmJiMiBhUUFgEqRmQ9DIQKMTQ7QBNUNEJnOjlmQjpUE30/cU45RAEBHzknO0FDoiZFLQkeIjU4RCcvQXVNTXVDNCtT/hlEXi8BIFVLMkcnV0lJVwD//wBEAAAAyQLPACYADgAAAAYADx0AAAEARgAAARUCxgALAAAzIiY1ETMRFBYzMxXGOkaAFRMnPEICSP3FFBRjAAEARgAAAhMCIgAXAAAzETMXJz4CMzIWFhURIxE0JiYjIgYVEUZ0BQ8IMkgrO1EqgBIpIjM9AhaWBjhEIDRbPP6pAS4tPiFIRP7SAAABAEYAAADGAhYAAwAAMxEzEUaAAhb96gABACcCXQCsAs8AAwAAEzUzFSeFAl1ycgAAAAEAAAABzM0Du+MSXw889QADA+gAAAAA5almUwAAAADl9BCn/zj/BwkiBC4AAAAGAAIAAAAAAAAAAQAAA+3+2QAACWD/OP0sCSID6AAAAAAAAAAAAAAAAAAAABACWAAoAsUAEwLUACsCSgBQA4YAUAL7ACsCsQBQApwANQJIAAsCRAAnAmwAJwENAEQBKQBGAlkARgENAEYAAAAnAAAAAQAAAEoAAQAKADAAAwAMAAEAA//vAAIAAf/kAAMABP/aAAUABgAJAAcACP/YAAcACwAJAAgABf/YAAkADP/2AAsACv/2AA0ACf/0AAAAAAAmAEAAcACAAJoAzAD9AUUBVgGeAeMB7gIDAikCNQJBAAAAAQAAABAAeAAQAF4ABQABAAAAAAAAAAAAAAAAAAQAAQAAAAEAEgADAAEECQABAAoAAABHAGUAaQBzAHQAAwAAAAAAAP+cADIAAAAAAAAAAAAAAAAAAAAAAAAAALgB/4WwBI0A) format('truetype');font-weight:600;font-style:normal}
+.gpu-card-a{animation-duration:4s;animation-iteration-count:1;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes gpu-card-k1{0%,35%{opacity:1}50%,100%{opacity:0}}
+.gpu-card-m1{animation-name:gpu-card-k1;animation-timing-function:linear}
+@keyframes gpu-card-k2{0%,50%{opacity:0}65%,100%{opacity:1}}
+.gpu-card-m2{animation-name:gpu-card-k2;animation-timing-function:linear}
+@keyframes gpu-card-k3{0%,35%{opacity:0}65%,100%{opacity:1}}
+.gpu-card-m3{animation-name:gpu-card-k3;animation-timing-function:linear}
+@media (prefers-reduced-motion:reduce){.gpu-card-a{animation-delay:-3.6s!important;animation-play-state:paused!important}}
+]]></style>
+  <defs>
+    <linearGradient id="gpu-card-g1" gradientUnits="userSpaceOnUse" x1="524.939" y1="13.57" x2="-4.939" y2="206.43">
+      <stop stop-color="var(--blue-10-background-55-blue-10-background)"/>
+      <stop offset="0.333" stop-color="var(--cyan-55-blue-10-background)"/>
+      <stop offset="0.667" stop-color="var(--blue-55-blue-10-background)"/>
+      <stop offset="1" stop-color="var(--blue-10-background-55-blue-10-background)"/>
+    </linearGradient>
+    <linearGradient id="gpu-card-g2" gradientUnits="userSpaceOnUse" x1="524.939" y1="13.57" x2="-4.939" y2="206.43" data-clock="storm" data-clock-at="1.4" data-clock-over="1.2">
+      <stop stop-color="var(--blue-10-background-55-blue-10-background)"/>
+      <stop offset="0.333" stop-color="var(--magenta-55-blue-10-background)"/>
+      <stop offset="0.667" stop-color="var(--orange-55-blue-10-background)"/>
+      <stop offset="1" stop-color="var(--blue-10-background-55-blue-10-background)"/>
+    </linearGradient>
+    <clipPath id="gpu-card-c1">
+      <rect width="520" height="220" rx="12"/>
+    </clipPath>
+  </defs>
+  <rect x="1.5" y="1.5" width="562" height="414.12" rx="20" fill="var(--surface)" stroke="var(--raised)"/>
+  <g transform="translate(22 22)">
+    <text y="18.09" font-family="'gpu-card-Geist'" font-weight="600" font-size="18" fill="var(--text)">Signal</text>
+    <text y="39.62" font-size="11" fill="var(--muted)">ch 07 · 2.4 GHz · aurora</text>
+  </g>
+  <g transform="translate(22 22)" data-clock="storm" data-clock-at="1.4" data-clock-over="1.2">
+    <g transform="translate(432 8.46)" class="gpu-card-a gpu-card-m1">
+      <rect width="88" height="26" rx="13" fill="var(--cyan-14-surface)"/>
+      <circle cx="22.891" cy="13" r="3.5" fill="var(--cyan)"/>
+      <text x="33.391" y="16.905" font-family="'gpu-card-Geist'" font-weight="600" font-size="11" letter-spacing="1" fill="var(--cyan-62-text)">CALM</text>
+    </g>
+    <g transform="translate(432 8.46)" class="gpu-card-a gpu-card-m2">
+      <rect width="88" height="26" rx="13" fill="var(--orange-14-surface)"/>
+      <circle cx="18.558" cy="13" r="3.5" fill="var(--orange)"/>
+      <text x="29.058" y="16.905" font-family="'gpu-card-Geist'" font-weight="600" font-size="11" letter-spacing="1" fill="var(--orange-62-text)">STORM</text>
+    </g>
+  </g>
+  <g transform="translate(22 80.92)" clip-path="url(#gpu-card-c1)" data-slot="field" data-slot-box="0 0 520 220" data-shader-inputs="{&quot;size&quot;:112,&quot;fields&quot;:[{&quot;kind&quot;:&quot;time&quot;,&quot;name&quot;:&quot;time&quot;,&quot;at&quot;:0},{&quot;kind&quot;:&quot;resolution&quot;,&quot;name&quot;:&quot;resolution&quot;,&quot;at&quot;:8},{&quot;kind&quot;:&quot;clock&quot;,&quot;name&quot;:&quot;storm&quot;,&quot;at&quot;:16},{&quot;kind&quot;:&quot;color&quot;,&quot;light&quot;:[0.9058823529411765,0.9411764705882353,1],&quot;dark&quot;:[0.07058823529411765,0.09803921568627451,0.1411764705882353],&quot;name&quot;:&quot;ground&quot;,&quot;at&quot;:32},{&quot;kind&quot;:&quot;color&quot;,&quot;light&quot;:[0.10588235294117647,0.6039215686274509,0.6666666666666666],&quot;dark&quot;:[0.39215686274509803,0.8235294117647058,1],&quot;name&quot;:&quot;calmA&quot;,&quot;at&quot;:48},{&quot;kind&quot;:&quot;color&quot;,&quot;light&quot;:[0.0392156862745098,0.4235294117647059,1],&quot;dark&quot;:[0.3686274509803922,0.6274509803921569,1],&quot;name&quot;:&quot;calmB&quot;,&quot;at&quot;:64},{&quot;kind&quot;:&quot;color&quot;,&quot;light&quot;:[0.6078431372549019,0.3176470588235294,0.8784313725490196],&quot;dark&quot;:[0.7725490196078432,0.5411764705882353,1],&quot;name&quot;:&quot;stormA&quot;,&quot;at&quot;:80},{&quot;kind&quot;:&quot;color&quot;,&quot;light&quot;:[0.9098039215686274,0.4588235294117647,0.10196078431372549],&quot;dark&quot;:[1,0.6235294117647059,0.0392156862745098],&quot;name&quot;:&quot;stormB&quot;,&quot;at&quot;:96}]}">
+    <script type="text/wgsl">struct Inputs {
+  time: f32,
+  resolution: vec2f,
+  storm: f32,
+  ground: vec3f,
+  calmA: vec3f,
+  calmB: vec3f,
+  stormA: vec3f,
+  stormB: vec3f,
+}
+
+fn hash(p: vec2f) -&gt; f32 {
+  return fract((sin(dot(p, vec2f(127.0999984741211, 311.70001220703125))) * 43758.5453f));
+}
+
+fn noise(p: vec2f) -&gt; f32 {
+  let cell = floor(p);
+  let f = fract(p);
+  let u = ((f * f) * (vec2f(3) - (f * 2f)));
+  let a = hash(cell);
+  let b = hash((cell + vec2f(1, 0)));
+  let c = hash((cell + vec2f(0, 1)));
+  let e = hash((cell + vec2f(1)));
+  return mix(mix(a, b, u.x), mix(c, e, u.x), u.y);
+}
+
+fn fbm(start: vec2f) -&gt; f32 {
+  var p = start;
+  var sum = 0f;
+  var weight = 0.5f;
+  for (var octave = 0; (octave &lt; 5i); octave++) {
+    sum += (weight * noise(p));
+    p = (p * 2.03f);
+    weight *= 0.5f;
+  }
+  return sum;
+}
+
+fn shade(uv: vec2f, input: Inputs) -&gt; vec4f {
+  let s = input.storm;
+  let t = (input.time * mix(0.12f, 0.55f, s));
+  let p = vec2f(((uv.x * input.resolution.x) / input.resolution.y), uv.y);
+  let scale = mix(1.3f, 2.4f, s);
+  let q = vec2f(fbm(((p * scale) + vec2f((t * 0.6f), 0f))), fbm(((p * scale) + vec2f(5.2f, (1.3f - (t * 0.5f))))));
+  let n = fbm((((p * scale) + (q * mix(1.2f, 3.2f, s))) + vec2f(t, (-(t) * 0.4f))));
+  let bend = ((n - 0.5f) * mix(0.7f, 1.1f, s));
+  let ribbon = exp(-(pow((((uv.y - 0.55f) - bend) * mix(5f, 3.2f, s)), 2f)));
+  let second = (exp(-(pow((((uv.y - 0.3f) + (bend * 0.6f)) * mix(9f, 5f, s)), 2f))) * 0.55f);
+  let streaks = (smoothstep(0.58f, 0.85f, n) * s);
+  let flicker = (1f + ((s * 0.2f) * sin(((input.time * 11f) + (p.x * 9f)))));
+  let a = mix(input.calmA, input.stormA, s);
+  let b = mix(input.calmB, input.stormB, s);
+  let band = mix(a, b, clamp(((n * 1.4f) - 0.2f), 0f, 1f));
+  let glow = clamp((((((ribbon + second) * flicker) * 0.85f) + (n * 0.25f)) + (streaks * 0.7f)), 0f, 1f);
+  let edge = smoothstep(0f, 0.12f, min(uv.x, (1f - uv.x)));
+  return vec4f(mix(input.ground, band, (glow * edge)), 1f);
+}
+@group(0) @binding(0) var&lt;uniform&gt; svjeez_inputs: Inputs;
+
+struct SvjeezVarying {
+  @builtin(position) position: vec4f,
+  @location(0) uv: vec2f,
+}
+
+@vertex fn svjeez_vertex(@builtin(vertex_index) index: u32) -&gt; SvjeezVarying {
+  let corner = vec2f(f32((index &lt;&lt; 1u) &amp; 2u), f32(index &amp; 2u));
+
+  return SvjeezVarying(vec4f(corner * 2 - 1, 0, 1), vec2f(corner.x, 1 - corner.y));
+}
+
+@fragment fn svjeez_fragment(vertex: SvjeezVarying) -&gt; @location(0) vec4f {
+  return shade(vertex.uv, svjeez_inputs);
+}
+</script>
+    <rect width="520" height="220" rx="12" fill="var(--blue-10-background)"/>
+    <rect width="520" height="220" rx="12" fill="url(#gpu-card-g1)"/>
+    <rect width="520" height="220" rx="12" fill="url(#gpu-card-g2)" data-clock="storm" data-clock-at="1.4" data-clock-over="1.2" class="gpu-card-a gpu-card-m3"/>
+  </g>
+  <g transform="translate(22.5 316.92)" fill="none" stroke="var(--muted)">
+    <line x1="0" y1="0" x2="0" y2="8" fill="none" stroke="var(--muted)"/>
+    <text y="22.2" font-size="10" fill="var(--muted)">0</text>
+    <line x1="20.8" y1="0" x2="20.8" y2="4"/>
+    <line x1="41.6" y1="0" x2="41.6" y2="4"/>
+    <line x1="62.4" y1="0" x2="62.4" y2="4"/>
+    <line x1="83.2" y1="0" x2="83.2" y2="4"/>
+    <line x1="104" y1="0" x2="104" y2="8" fill="none" stroke="var(--muted)"/>
+    <text x="95" y="22.2" font-size="10" fill="var(--muted)">100</text>
+    <line x1="124.8" y1="0" x2="124.8" y2="4"/>
+    <line x1="145.6" y1="0" x2="145.6" y2="4"/>
+    <line x1="166.4" y1="0" x2="166.4" y2="4"/>
+    <line x1="187.2" y1="0" x2="187.2" y2="4"/>
+    <line x1="208" y1="0" x2="208" y2="8" fill="none" stroke="var(--muted)"/>
+    <text x="199" y="22.2" font-size="10" fill="var(--muted)">200</text>
+    <line x1="228.8" y1="0" x2="228.8" y2="4"/>
+    <line x1="249.6" y1="0" x2="249.6" y2="4"/>
+    <line x1="270.4" y1="0" x2="270.4" y2="4"/>
+    <line x1="291.2" y1="0" x2="291.2" y2="4"/>
+    <line x1="312" y1="0" x2="312" y2="8" fill="none" stroke="var(--muted)"/>
+    <text x="303" y="22.2" font-size="10" fill="var(--muted)">300</text>
+    <line x1="332.8" y1="0" x2="332.8" y2="4"/>
+    <line x1="353.6" y1="0" x2="353.6" y2="4"/>
+    <line x1="374.4" y1="0" x2="374.4" y2="4"/>
+    <line x1="395.2" y1="0" x2="395.2" y2="4"/>
+    <line x1="416" y1="0" x2="416" y2="8" fill="none" stroke="var(--muted)"/>
+    <text x="407" y="22.2" font-size="10" fill="var(--muted)">400</text>
+    <line x1="436.8" y1="0" x2="436.8" y2="4"/>
+    <line x1="457.6" y1="0" x2="457.6" y2="4"/>
+    <line x1="478.4" y1="0" x2="478.4" y2="4"/>
+    <line x1="499.2" y1="0" x2="499.2" y2="4"/>
+    <line x1="520" y1="0" x2="520" y2="8" fill="none" stroke="var(--muted)"/>
+    <text x="502" y="22.2" font-size="10" fill="var(--muted)">500</text>
+  </g>
+  <g transform="translate(22 358.12)">
+    <text y="10.2" font-size="10" letter-spacing="1" fill="var(--muted)">AMPLITUDE</text>
+    <g transform="translate(0 17.2)" data-clock="storm" data-clock-at="1.4" data-clock-over="1.2" font-size="15">
+      <text y="15.3" fill="var(--text)" class="gpu-card-a gpu-card-m1">0.18 V</text>
+      <text y="15.3" fill="var(--orange-35-text)" class="gpu-card-a gpu-card-m2">0.92 V</text>
+    </g>
+  </g>
+  <g transform="translate(22 358.12)">
+    <text x="233" y="10.2" font-size="10" letter-spacing="1" fill="var(--muted)">FLOW</text>
+    <g transform="translate(233 17.2)" data-clock="storm" data-clock-at="1.4" data-clock-over="1.2" font-size="15">
+      <text y="15.3" fill="var(--text)" class="gpu-card-a gpu-card-m1">0.4 m/s</text>
+      <text y="15.3" fill="var(--orange-35-text)" class="gpu-card-a gpu-card-m2">3.1 m/s</text>
+    </g>
+  </g>
+  <g transform="translate(22 358.12)">
+    <text x="466" y="10.2" font-size="10" letter-spacing="1" fill="var(--muted)">NOISE</text>
+    <g transform="translate(466 17.2)" data-clock="storm" data-clock-at="1.4" data-clock-over="1.2" font-size="15">
+      <text y="15.3" fill="var(--text)" class="gpu-card-a gpu-card-m1">-62 dB</text>
+      <text y="15.3" fill="var(--orange-35-text)" class="gpu-card-a gpu-card-m2">-31 dB</text>
+    </g>
+  </g>
+  <g transform="translate(419 96.92)">
+    <rect width="107" height="21.2" rx="6" fill="var(--background-20-blue-10-background)"/>
+    <text x="8" y="14.2" font-size="10" letter-spacing="0.5" fill="var(--text)">TypeGPU shader</text>
+  </g>
+  <path d="M472 114.92C446.333 163.587 406.333 192.253 352 200.92" fill="none" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="359.676 203.174 352 200.92 358.537 196.308" fill="none" stroke="var(--text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

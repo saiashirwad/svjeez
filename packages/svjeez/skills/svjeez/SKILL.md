@@ -231,7 +231,7 @@ Runtime errors. `…` stands for a value the message fills in.
 ## Detail
 
 - Tracks, layers and stacking, recipes, springs, derived and sampled values: [`references/motion.md`](references/motion.md)
-- Spans, clocks, `<Sequence>`, loops and seams: [`references/time.md`](references/time.md); clocks the page drives, `hit` names, state machines, `rests` for XState: [`references/interactive.md`](references/interactive.md); React: [`references/web.md`](references/web.md)
+- Spans, clocks, `<Sequence>`, loops and seams: [`references/time.md`](references/time.md); clocks the page drives, `hit` names, `<Slot>` boxes for page HTML, state machines, `rests` for XState: [`references/interactive.md`](references/interactive.md); WebGPU `<Shader>` written in TypeGPU: [`references/shader.md`](references/shader.md); React: [`references/web.md`](references/web.md)
 - Containers, text, runs and counting numbers: [`references/layout-text.md`](references/layout-text.md)
 - Refs, anchors, parts and `<Arrow>`: [`references/refs-arrows.md`](references/refs-arrows.md)
 - Paint, clip, mask, effects: [`references/paint.md`](references/paint.md)

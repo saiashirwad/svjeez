@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "jsxImportSource": "react",
+    "types": ["bun", "@webgpu/types"]
+  },
+  "include": ["."],
+  "exclude": ["scenes"]
+}
