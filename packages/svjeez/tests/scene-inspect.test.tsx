@@ -337,6 +337,22 @@ group("low-contrast", () => {
     expect(found!.message).toContain("ink on paper");
   });
 
+  test("text on a pill switched in by opacity is judged against the pill, even at the switch", () => {
+    const shown = track(0).set(1, span(2));
+
+    const model = made(() => (
+      <Group>
+        <Shape key="back" geometry={rect(200, 100)} fill="#FFFFFF" />
+        <Shape key="pill" geometry={rect(100, 40)} at={[10, 30]} fill="#000000" opacity={shown} />
+        <Text key="words" font={mono} size={12} fill="#FFFFFF" at={[20, 50]} opacity={shown}>
+          words
+        </Text>
+      </Group>
+    ));
+
+    expect(codes(model)).not.toContain("low-contrast");
+  });
+
   test("silent on good contrast, a gradient behind, or nothing behind", () => {
     expect(codes(on("#FFFFFF", "#000000"))).not.toContain("low-contrast");
     expect(

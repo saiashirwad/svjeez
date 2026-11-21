@@ -92,7 +92,13 @@ export const lowContrast = (survey: Survey): void => {
     survey.frames.forEach(({ t, frame }) => {
       const at = frame.get(node.key);
 
-      if (!at || at.opacity < 0.99 || fading(entry, t)) return;
+      if (
+        !at ||
+        at.opacity < 0.99 ||
+        fading(entry, t) ||
+        inside(survey.hidden.get(node.key) ?? [], t)
+      )
+        return;
       const { box } = at;
 
       const backs = schemes.flatMap((scheme) => {
