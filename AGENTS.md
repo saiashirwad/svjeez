@@ -1,6 +1,6 @@
 This is a fresh new library without any users, we're good to make breaking changes - in fact, when changes make for a more coherent, simpler, cleaner library that agents can use more effectively, I actively encourage making those changes.
 
-we have temporarily deleted the svjeez skill so don't bother looking for it - just do everything based on code
+The agent skill that ships with svjeez lives in `packages/svjeez/skills/svjeez` (SKILL.md, references/, examples/). It is documentation for users of the library; work in this repo from the code. When you change the API, the CLI or a check code, update the skill too: `packages/svjeez/tests/skill.test.ts` fails when a check code or CLI command is missing from it, and its examples must pass `check` with no warnings.
 
 ## API design: open for authors, closed for renderers
 
@@ -33,6 +33,15 @@ bun run typecheck              # tsc catches what the build does not, like a num
 ```
 
 After writing or changing a scene, run `bun run scene check` and `bun run typecheck`, then look at frames. A ✓ from the build only means it compiled. The root `bun run check` is lint, format and tsc, not `svjeez check`.
+
+## Before you commit
+
+`bun run check` (oxlint, oxfmt, tsc) and `bun run test` must pass; `bun run format` fixes formatting. The lint config carries strict house rules, so write to them from the start:
+
+- a blank line before any statement that spans several lines, and before a `return` after other statements;
+- a `// SAFETY:` comment on the line before every type assertion; prefer a typed parse or a type guard to an assertion;
+- `typeof` checks only inside type guard functions (`(x: T): x is string => typeof x === "string"`);
+- no `unknown` in return types or open `Record<string, unknown>` dictionaries; name the type.
 
 ## The single-file binary
 

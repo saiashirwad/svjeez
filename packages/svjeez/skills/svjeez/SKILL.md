@@ -54,7 +54,7 @@ npm i svjeez@next && npm i -D tsx typescript playwright-core && npx playwright-c
 bun add svjeez@next    # under Bun, run the CLI as: bunx --bun svjeez
 ```
 
-In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `"strict": true`, or start each scene file with the pragma above. Companion packages (`@svjeez/fonts`, `icons`, `charts`, `code`, `diagrams`, `mermaid`, `geo`, `math`, `video`) install as `@svjeez/<name>@next`.
+In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `"strict": true`, or start each scene file with the pragma above. Companion packages (`@svjeez/fonts`, `icons`, `charts`, `code`, `diagrams`, `mermaid`, `geo`, `math`, `video`) install as `@svjeez/<name>@next`. With no Node project at all, use the single-file `svjeez` binary from svjeez's GitHub releases: it carries svjeez, every companion package and TypeScript, so a lone `scene.tsx` in any folder works; `svjeez init <dir>` writes a `tsconfig.json`, editor types and a starter scene, and its `check` also reports type errors as `type-error`.
 
 `scene()` takes `size` (`[width, height]`), `duration` (seconds of one loop), `title` (required, read by screen readers), `desc`, `theme` (tokens), `loop` (`false` plays once and holds) and `still` (the second a viewer who asked for less motion sees, held still; 85% through by default, or `false`). The default export may be a function that returns a scene, which is how a scene takes params: `export const params = { n: param.count(3, { max: 8 }) }` ([`references/params.md`](references/params.md)).
 
@@ -93,7 +93,7 @@ Every node also takes `key ref at anchor origin rotate scale skew opacity motion
 
 | Paint | |
 | --- | --- |
-| `tokens({ light, dark })`, `"#RRGGBB"`, `"#RRGGBBAA"` | named colors with a value per scheme; plain hex is the same in both |
+| `tokens({ light, dark })`, `"#RRGGBB"`, `"#RRGGBBAA"` | named colors with a value per scheme; plain hex is the same in both; type a palette `readonly Color[]` or `as const` |
 | `mix(a, b, share)` | `share` (0 to 1) of `a` blended into `b`; with a token in either, a token the SVG blends live from the two |
 | `linear()`, `linear.across()`, `radial()`, `radial.across()`, `pattern({ size, tile, offset })` | gradients at points or across the box; a tile of nodes repeated |
 | `blur(r)`, `shadow({ color, offset, blur })`, `adjust({ hue, saturate })`, `displace({ scale, frequency, seed })` | `effects={[…]}`; also `clip`, `mask` and `blend` ([`references/paint.md`](references/paint.md)) |
@@ -180,6 +180,8 @@ Type errors:
 | Message | Fix |
 | --- | --- |
 | `Type '"red"' is not assignable to type 'Anim<Paint> \| undefined'` | colors are `"#RRGGBB"` hex or tokens |
+| `Type 'string' is not assignable to type 'Anim<Paint> \| undefined'` | the color sits in a `string[]` or a `string` field: type it `Color` from svjeez, or mark it `as const` |
+| `Type 'number' is not assignable to type 'string'`, on `key` | a key is text: ``key={`dot-${i}`}`` |
 | `Type 'string' is not assignable to type 'Anchor \| Anim<Vec> \| undefined'` | `at` is a point or an anchor; a place name goes in `anchor` |
 | `Type 'string' is not assignable to type 'StrokeProps'` | `stroke={{ color: theme.text, width: 2 }}` |
 | `Property 'font' is missing in type '…' but required in type 'TextProps'` | `<Text>` needs `font` and `size`, and a `fill` to paint |
