@@ -1,5 +1,6 @@
 import type { States } from "./model/ir";
 import type { Seconds } from "./model/time";
+import { runShaders } from "./shader";
 import { RATE_ATTR } from "./svg/rate";
 
 /** Calls `progress` with 0 to 1 whenever it likes, and returns the function that stops it. */
@@ -507,7 +508,7 @@ export const mount = (root: Element): Mounted => {
   const made = [...groups].map(([name, group]) => [name, control(name, group)] as const);
   const clocks = new Map(made.map(([name, { clock }]) => [name, clock]));
 
-  return {
+  const mounted: Omit<Mounted, "unmount"> = {
     states: statesOf(svg),
     clocks,
     clock: (name) => {
@@ -536,7 +537,16 @@ export const mount = (root: Element): Mounted => {
       return found;
     },
     slot: (name) => slotOf(root, name),
-    unmount: () => made.forEach(([, { release }]) => release()),
+  };
+
+  const stopShaders = runShaders(root, mounted);
+
+  return {
+    ...mounted,
+    unmount: () => {
+      stopShaders();
+      made.forEach(([, { release }]) => release());
+    },
   };
 };
 

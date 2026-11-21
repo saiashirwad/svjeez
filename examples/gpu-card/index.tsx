@@ -3,8 +3,8 @@ import {
   Center,
   Group,
   Sequence,
+  Shader,
   Shape,
-  Slot,
   Stack,
   Text,
   circle,
@@ -24,6 +24,7 @@ import {
   type SceneElement,
   type Vec,
 } from "svjeez";
+import { d, std } from "typegpu";
 import { geist } from "../fonts/faces";
 import { mono, theme } from "../theme";
 
@@ -34,7 +35,7 @@ const WIDTH = 520;
 const FIELD = 220;
 const RADIUS = 12;
 
-/** The page moves this clock between calm (0) and storm (1); a shader in the slot reads where it is. */
+/** The page moves this clock between calm (0) and storm (1); the shader reads where it is. */
 const storm = clock("storm", span(1.4, 1.2));
 
 const states = { calm: { storm: 0 }, storm: { storm: 1 } };
@@ -67,6 +68,49 @@ const Sky = ({
     opacity={opacity}
   />
 );
+
+const hash = (p: d.v2f): number => {
+  "use gpu";
+
+  return std.fract(std.sin(std.dot(p, d.vec2f(127.1, 311.7))) * 43758.5453);
+};
+
+const noise = (p: d.v2f): number => {
+  "use gpu";
+  const cell = std.floor(p);
+  const f = std.fract(p);
+  const u = std.mul(std.mul(f, f), std.sub(d.vec2f(3), std.mul(f, 2)));
+  const a = hash(cell);
+  const b = hash(std.add(cell, d.vec2f(1, 0)));
+  const c = hash(std.add(cell, d.vec2f(0, 1)));
+  const e = hash(std.add(cell, d.vec2f(1, 1)));
+
+  return std.mix(std.mix(a, b, u.x), std.mix(c, e, u.x), u.y);
+};
+
+/** Five octaves of noise, each twice as fine and half as strong. */
+const fbm = (start: d.v2f): number => {
+  "use gpu";
+  let p = d.vec2f(start);
+  let sum = d.f32(0);
+  let weight = d.f32(0.5);
+
+  for (let octave = 0; octave < 5; octave++) {
+    sum += weight * noise(p);
+    p = std.mul(p, 2.03);
+    weight *= 0.5;
+  }
+
+  return sum;
+};
+
+const FIELD_COLORS = {
+  ground,
+  calmA: theme.cyan,
+  calmB: theme.blue,
+  stormA: theme.magenta,
+  stormB: theme.orange,
+};
 
 /** The fallback: a still aurora of gradients, what the plain SVG and a page with no WebGPU show. */
 const Still = (): SceneElement => (
@@ -207,9 +251,58 @@ export default scene(
             </Center>
           </Sequence>
         </Stack>
-        <Slot ref={field} name="field" width={WIDTH} height={FIELD}>
+        <Shader
+          ref={field}
+          name="field"
+          width={WIDTH}
+          height={FIELD}
+          clip={rect(WIDTH, FIELD, { radius: RADIUS })}
+          inputs={{ storm, ...FIELD_COLORS }}
+          fragment={(uv, input) => {
+            "use gpu";
+            // Two noise fields warp a third; the storm speeds it up, roughens it and turns its colors.
+            const s = input.storm;
+            const t = input.time * std.mix(0.12, 0.55, s);
+            const p = d.vec2f((uv.x * input.resolution.x) / input.resolution.y, uv.y);
+            const scale = std.mix(1.3, 2.4, s);
+
+            const q = d.vec2f(
+              fbm(std.add(std.mul(p, scale), d.vec2f(t * 0.6, 0))),
+              fbm(std.add(std.mul(p, scale), d.vec2f(5.2, 1.3 - t * 0.5))),
+            );
+
+            const n = fbm(
+              std.add(
+                std.add(std.mul(p, scale), std.mul(q, std.mix(1.2, 3.2, s))),
+                d.vec2f(t, -t * 0.4),
+              ),
+            );
+
+            const bend = (n - 0.5) * std.mix(0.7, 1.1, s);
+            const ribbon = std.exp(-std.pow((uv.y - 0.55 - bend) * std.mix(5, 3.2, s), 2));
+
+            const second =
+              std.exp(-std.pow((uv.y - 0.3 + bend * 0.6) * std.mix(9, 5, s), 2)) * 0.55;
+
+            const streaks = std.smoothstep(0.58, 0.85, n) * s;
+            const flicker = 1 + s * 0.2 * std.sin(input.time * 11 + p.x * 9);
+            const a = std.mix(input.calmA, input.stormA, s);
+            const b = std.mix(input.calmB, input.stormB, s);
+            const band = std.mix(a, b, std.clamp(n * 1.4 - 0.2, 0, 1));
+
+            const glow = std.clamp(
+              (ribbon + second) * flicker * 0.85 + n * 0.25 + streaks * 0.7,
+              0,
+              1,
+            );
+
+            const edge = std.smoothstep(0, 0.12, std.min(uv.x, 1 - uv.x));
+
+            return d.vec4f(std.mix(input.ground, band, glow * edge), 1);
+          }}
+        >
           <Still />
-        </Slot>
+        </Shader>
         <Scale />
         <Stack direction="row" justify={spread} width={WIDTH}>
           <Readout label="AMPLITUDE" calm="0.18 V" stormy="0.92 V" />
@@ -225,7 +318,7 @@ export default scene(
         padding={[8, 4]}
       >
         <Text font={mono} size={10} letterSpacing={0.5} fill={theme.text}>
-          TypeGPU slot
+          TypeGPU shader
         </Text>
       </Center>
       <Arrow

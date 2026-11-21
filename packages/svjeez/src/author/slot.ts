@@ -20,7 +20,13 @@ const isLength = (value: number) => value > 0 && Number.isFinite(value);
  * size, and draws its children until the page hosts something. It is written as a `<g data-slot="name"
  * data-slot-box="x y width height">` around the children, the box in the group's own units.
  */
-export const Slot = ({ name, width, height, children, ...props }: SlotProps): SceneElement => {
+export const Slot = ({
+  name,
+  width,
+  height,
+  children,
+  ...props
+}: SlotProps): Extract<SceneElement, { readonly type: "group" }> => {
   if (!NAME.test(name))
     throw new SceneError(
       `<Slot> needs a name of letters, digits, - and _ that starts with a letter, got ${JSON.stringify(name)}.`,
