@@ -1,30 +1,75 @@
 :root {
   color-scheme: light dark;
-  background: light-dark(#eef4fb, #050a16);
+  background: light-dark(#d6ecf4, #0c1332);
 }
 
 body {
   margin: 0;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* The scene covers the viewport at its own aspect, cut at the sides or the foot, and the slider rests over its foot. */
+main {
+  position: fixed;
+  inset: 0;
   display: grid;
   place-items: center;
-}
-
-/* The scene fills the viewport at its own aspect, and the slider rests over its foot. */
-main {
-  position: relative;
-  width: min(96vw, 170vh);
-}
-
-main span {
-  border-radius: 16px;
   overflow: hidden;
+}
+
+main > span {
+  flex: none;
+  width: max(100vw, 177.78vh);
 }
 
 input {
   position: absolute;
-  left: 25%;
-  bottom: 6%;
-  width: 50%;
-  accent-color: light-dark(#0a5bd6, #5ea0ff);
+  bottom: 6vh;
+  width: min(320px, 60vw);
+  height: 20px;
+  margin: 0;
+  background: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+input::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: 1px;
+  background: rgb(255 255 255 / 0.35);
+}
+
+input::-moz-range-track {
+  height: 2px;
+  border-radius: 1px;
+  background: rgb(255 255 255 / 0.35);
+}
+
+input::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -6px;
+  border: none;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.9);
+  box-shadow: 0 0 0 5px rgb(255 255 255 / 0.15);
+  appearance: none;
+}
+
+input::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.9);
+  box-shadow: 0 0 0 5px rgb(255 255 255 / 0.15);
+}
+
+input:focus-visible {
+  outline: none;
+}
+
+input:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 5px rgb(255 255 255 / 0.4);
 }
