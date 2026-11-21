@@ -1,8 +1,8 @@
 import { Scene, type Mounted } from "@svjeez/react";
 import { useRef } from "react";
-import dusk from "./scenes/dusk.tsx?svjeez&inline";
+import valley from "./scenes/valley.tsx?svjeez&inline";
 
-const START = 0.35;
+const START = 0.74;
 
 export const App = () => {
   const mounted = useRef<Mounted>(undefined);
@@ -10,8 +10,7 @@ export const App = () => {
   return (
     <main>
       <Scene
-        scene={dusk}
-        style={{ width: "100%" }}
+        scene={valley}
         onMount={(scene) => {
           mounted.current = scene;
           scene.clock("hour").progress(START);
