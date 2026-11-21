@@ -138,7 +138,7 @@ A scene can declare named clocks and the states that rest them, so a framework k
 <table align="center">
   <tr>
     <td align="center" valign="top">
-      <img src="examples/dist/mascot.svg" alt="A robot above a sign-in form, its eyes following the pointer, covering them for the password" width="260">
+      <img src="examples/dist/mascot.svg" alt="A robot above a sign-in form, its eyes following the pointer, lowering privacy blinds for the password" width="260">
       <br>
       <sub><b>Robot sign-in</b> · 29 KB · <a href="examples/mascot/index.tsx"><code>scene</code></a> · <a href="examples/react-widgets/Mascot.tsx"><code>form</code></a></sub>
     </td>
