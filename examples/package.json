@@ -12,9 +12,12 @@
     "test": "bun test",
     "test:browsers": "bun test ./scripts/browsers.ts",
     "test:node": "tsx scripts/node-check.ts",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react && tsc --noEmit -p dom-react-vite && tsc --noEmit -p dom-component && tsc --noEmit -p react-widgets && tsc --noEmit -p shader-site && tsc --noEmit -p shader-site/scenes && svelte-check --tsconfig dom-svelte/tsconfig.json --fail-on-warnings"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react && tsc --noEmit -p dom-react-vite && tsc --noEmit -p dom-component && tsc --noEmit -p react-widgets && tsc --noEmit -p shader-site && tsc --noEmit -p shader-site/scenes && svelte-check --tsconfig dom-svelte/tsconfig.json --fail-on-warnings",
+    "deploy:shader-site": "cd shader-site && bun --bun alchemy deploy"
   },
   "devDependencies": {
+    "@alchemy.run/cloudflare": "2.0.0-beta.87",
+    "@effect/platform-bun": "^4.1.4",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@svjeez/charts": "workspace:*",
     "@svjeez/code": "workspace:*",
@@ -34,7 +37,9 @@
     "@vitejs/plugin-react": "^6.1.2",
     "@webgpu/types": "^0.1.74",
     "@xstate/react": "^6.1.0",
+    "alchemy": "2.0.0-beta.87",
     "bun-plugin-svelte": "^0.0.6",
+    "effect": "^4.1.4",
     "playwright-core": "^1.64.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

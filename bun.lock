@@ -15,6 +15,8 @@
     "examples": {
       "name": "svjeez-examples",
       "devDependencies": {
+        "@alchemy.run/cloudflare": "2.0.0-beta.87",
+        "@effect/platform-bun": "^4.1.4",
         "@sveltejs/vite-plugin-svelte": "^7.3.1",
         "@svjeez/charts": "workspace:*",
         "@svjeez/code": "workspace:*",
@@ -34,7 +36,9 @@
         "@vitejs/plugin-react": "^6.1.2",
         "@webgpu/types": "^0.1.74",
         "@xstate/react": "^6.1.0",
+        "alchemy": "2.0.0-beta.87",
         "bun-plugin-svelte": "^0.0.6",
+        "effect": "^4.1.4",
         "playwright-core": "^1.64.1",
         "react": "^19.3.1",
         "react-dom": "^19.3.1",
