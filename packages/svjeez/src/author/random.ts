@@ -18,6 +18,12 @@ const mulberry32 = (seed: number) => () => {
 
 const isText = (seed: number | string): seed is string => typeof seed === "string";
 
+/**
+ * A seeded random: a function that returns the next number in [0, 1) each call.
+ * The same seed (a whole number or a string) gives the same numbers on every build,
+ * so scenes using it still emit byte-identical SVGs. Make one per thing you scatter,
+ * e.g. `random(\`firefly-\${i}\`)`, and draw from it in a fixed order. Never use Math.random().
+ */
 export const random = (seed: number | string): (() => number) => {
   if (isText(seed)) return mulberry32(fnv1a(seed));
 

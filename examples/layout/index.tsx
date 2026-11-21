@@ -44,7 +44,7 @@ const Card = ({ handle, title, dot, when, children, drift }: CardProps): SceneEl
     fill={theme.surface}
     stroke={{ color: theme.raised, width: 1.5 }}
     motion={[
-      enter(when, { from: { opacity: 0, offset: [0, 10] } }),
+      enter(when, { from: { offset: [0, 10] } }),
       drift && {
         offset: track<Vec>([0, 0])
           .to([0, 56], span(3.2, 1.1), ease.inOut)

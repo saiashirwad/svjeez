@@ -24,7 +24,7 @@ const arrive = span(0.3, 0.6);
 const [header, body, footer] = arrive.next(0.45, -0.25).cascade(3, 0.15);
 const leave = span(4.4, 0.4);
 
-const rise = (when: Span) => enter(when, { from: { opacity: 0, offset: [0, 8] } });
+const rise = (when: Span) => enter(when, { from: { offset: [0, 8] } });
 
 const Pill = ({
   label,
@@ -60,8 +60,8 @@ export default scene(
           fill={theme.surface}
           stroke={{ color: theme.border, width: 1 }}
           motion={[
-            enter(arrive, { from: { opacity: 0, offset: [0, 24], scale: 0.96 } }),
-            exit(leave, { to: { opacity: 0, offset: [0, -12] } }),
+            enter(arrive, { from: { offset: [0, 24], scale: 0.96 } }),
+            exit(leave, { to: { offset: [0, -12] } }),
           ]}
         >
           <Stack direction="row" gap={12} align="center" motion={rise(header)}>

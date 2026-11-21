@@ -106,10 +106,7 @@ export default scene(
         at={question}
         anchor="bottom"
         fill={theme.blue}
-        motion={[
-          enter(wonder, { from: { opacity: 0, scale: 0.4 }, curve: ease.pop }),
-          exit(settle),
-        ]}
+        motion={[enter(wonder, { from: { scale: 0.4 }, curve: ease.pop }), exit(settle)]}
       >
         ?
       </Text>

@@ -30,6 +30,8 @@ const CHANNELS = {
   drawStart: { value: number, pins: { pathLength: "1", "stroke-dasharray": "1 2" } },
   strokeWidth: { value: number },
   dashOffset: { value: number },
+  /** 1 once a drawn stroke is whole, so its dashes are dropped and a closed shape gets its join back. */
+  whole: { value: number },
   d: { value: pathData },
   offsetDistance: { value: number },
   startOffset: { value: number },

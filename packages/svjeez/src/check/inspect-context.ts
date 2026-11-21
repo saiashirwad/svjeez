@@ -29,6 +29,7 @@ export const RULES = {
   static: "Nothing in the scene moves, or a value changes only after the scene ends.",
   "moving-filter":
     "A filter that is redrawn every frame because its parameters or what it filters move.",
+  "moving-box": "A group placed by at or an anchor whose box moves, so the pin only holds at 0s.",
   "layout-overlap": "Two children of a <Stack> or <Grid> overlap: motion carried one onto another.",
   "word-cut": "A word wider than the width its text wraps to, cut across two lines.",
   unsupported: "A feature the chosen backend can't draw.",
@@ -88,11 +89,22 @@ export const shownBoxes = (
   });
 };
 
+/** Where a node was written; a node the library made (a count's digits, a swap's texts) borrows the nearest ancestor's. */
+const sourceFor = (survey: Survey, key: string): Source | undefined => {
+  const entry = survey.entries.find((each) => each.node.key === key);
+
+  if (!entry) return survey.sources.get(key);
+
+  return [entry.node, ...entry.ancestors.toReversed()]
+    .map((node) => survey.sources.get(node.key))
+    .find((found) => found !== undefined);
+};
+
 export const add = (
   survey: Survey,
   finding: Omit<Problem, "related"> & { readonly related?: readonly string[] },
 ): void => {
-  const source = finding.source ?? survey.sources.get(finding.key);
+  const source = finding.source ?? sourceFor(survey, finding.key);
   const { related, ...rest } = finding;
 
   survey.out.push({

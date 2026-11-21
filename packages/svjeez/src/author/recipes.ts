@@ -1,12 +1,13 @@
 import { SceneError } from "../model/scene-error";
-import { DEFAULT_EASE, NUDGE, ease, type Ease, type Seconds } from "../model/time";
+import { DEFAULT_EASE, NUDGE, ease, type Seconds } from "../model/time";
 import { random } from "./random";
 import { checkWindow, span, type Interval } from "./span";
-import { contoursOf } from "../model/geometry";
+import { alongOutline, contoursOf, lengthOf } from "../model/geometry";
+import { through } from "./derived";
 import type { Vec } from "../model/ir";
 import { pair } from "../model/lane";
 import type { Curve } from "./spring";
-import { track, type Goal, type Layer, type LayerValues, type Track } from "./track";
+import { track, type Anim, type Goal, type Layer, type LayerValues, type Track } from "./track";
 import { outlineOf, type Geometry } from "./values";
 
 const REST = { offset: [0, 0], rotate: 0, scale: 1, skew: 0, opacity: 1 } as const;
@@ -40,37 +41,35 @@ const between = (from: LayerValues, to: LayerValues, when: Interval, curve: Curv
 });
 
 export interface EnterOptions {
+  /** Where it starts, merged over `{ opacity: 0 }`: it is hidden before its span unless you pass an `opacity` yourself. */
   readonly from?: LayerValues;
   readonly curve?: Curve;
 }
 
-export const enter = (
-  when: Interval,
-  { from = { opacity: 0 }, curve = DEFAULT_EASE }: EnterOptions = {},
-): Layer => {
+export const enter = (when: Interval, { from, curve = DEFAULT_EASE }: EnterOptions = {}): Layer => {
   const { start, over } = closed(when, "enter()");
+  const first: LayerValues = { opacity: 0, ...from };
 
-  return between(from, rest(from), span(start, over), curve);
+  return between(first, rest(first), span(start, over), curve);
 };
 
 export interface ExitOptions {
+  /** Where it ends, merged over `{ opacity: 0 }`: it is gone after its span unless you pass an `opacity` yourself. */
   readonly to?: LayerValues;
   readonly curve?: Curve;
 }
 
-export const exit = (
-  when: Interval,
-  { to = { opacity: 0 }, curve = DEFAULT_EASE }: ExitOptions = {},
-): Layer => {
+export const exit = (when: Interval, { to, curve = DEFAULT_EASE }: ExitOptions = {}): Layer => {
   const { start, over } = closed(when, "exit()");
+  const last: LayerValues = { opacity: 0, ...to };
 
-  return between(rest(to), to, span(start, over), curve);
+  return between(rest(last), last, span(start, over), curve);
 };
 
 export interface WiggleOptions {
   readonly seed: string | number;
   readonly rate?: number;
-  readonly curve?: Ease;
+  readonly curve?: Curve;
   readonly period?: Seconds;
 }
 
@@ -117,6 +116,32 @@ export const wiggle = (amplitude: LayerValues, options: WiggleOptions): Layer =>
     ...(rotate && { rotate: looped(track(rotate[0]!), (i) => rotate[i]!) }),
     ...(scale && { scale: looped(track(grown(0)), grown) }),
     ...(offset && { offset: looped(track(shifted(0)), shifted) }),
+  };
+};
+
+export interface AlongOptions {
+  /** Also rotate to the path's heading (degrees; 0 faces +x, so draw the marker pointing right). */
+  readonly turn?: boolean;
+}
+
+/**
+ * A layer that moves the node's [0, 0] to the point `progress` (0 to 1, a number or a track) of the way along
+ * `geometry` by arc length, the share `draw` and `trim` use: a node driven by the same track as a drawn line sits at the
+ * line's tip. The path's coordinates are the node's own, so put the node at the origin of the path's space. Held at
+ * the ends; with `turn`, it also faces the path's heading.
+ */
+export const along = (
+  geometry: Geometry,
+  progress: Anim<number>,
+  { turn = false }: AlongOptions = {},
+): Layer => {
+  const outline = outlineOf(geometry);
+  const length = lengthOf(outline);
+  const at = (share: number) => alongOutline(outline, Math.min(1, Math.max(0, share)) * length);
+
+  return {
+    offset: through(progress, (share): Vec => at(share).point),
+    ...(turn && { rotate: through(progress, (share) => (at(share).angle * 180) / Math.PI) }),
   };
 };
 

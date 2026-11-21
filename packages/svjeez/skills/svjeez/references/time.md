@@ -28,7 +28,7 @@ A scene loops every `duration` seconds unless `loop: false` (play once and hold 
 
 - A value that ends elsewhere: finish with `.rewind(over)` on the track, or fade the node out before the end (`exit`). The check adds a node's layers up, so `enter()` and `exit()` on the same value are a loop that ends where it began.
 - A node that enters and never leaves vanishes at the seam: `exit()` it, or have it on screen from 0s.
-- `.loop(period)` snaps the period to divide `duration`; a looped track never seams. A steady spin is `track(0).to(360, span(0, 2), ease.linear).loop(2)`.
+- `.loop(period)` snaps the period to divide `duration`; a looped track never seams. A steady spin is `track(0).to(360, span(0, 2), ease.linear).loop(2)`. `.loop(2, { phase })` starts it `phase` seconds into the cycle (the track at t shows the plain loop at t + phase), so each of many streaks or fireflies gets its own offset and the seam still closes.
 - A track that runs past the scene (`… runs until …s, past the …s scene`) throws: end it by `duration`.
 
 ## Reduced motion

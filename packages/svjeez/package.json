@@ -46,6 +46,11 @@
       "types": "./package-dist/tools.d.ts",
       "default": "./package-dist/tools.js"
     },
+    "./typecheck": {
+      "@svjeez/source": "./src/typecheck.ts",
+      "types": "./package-dist/typecheck.d.ts",
+      "default": "./package-dist/typecheck.js"
+    },
     "./frames": {
       "@svjeez/source": "./src/frames.ts",
       "types": "./package-dist/frames.d.ts",
@@ -83,7 +88,7 @@
     "publint": "^0.3.25",
     "sucrase": "^3.35.1",
     "tsx": "^4.23.15",
-    "typescript": "latest"
+    "typescript": "~6.0.0"
   },
   "peerDependencies": {
     "playwright-core": ">=1.49",

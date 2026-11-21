@@ -11,28 +11,28 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m1{animation-name:k1}
 @keyframes k2{0%,3.75%{stroke-dashoffset:1;visibility:hidden}7.5%,100%{stroke-dashoffset:0;visibility:visible}}
 .m2{animation-name:k2}
-@keyframes k3{0%,6.234%{visibility:hidden}6.235%,100%{visibility:visible}}
-.m3{animation-name:k3}
+@keyframes k3{0%{visibility:hidden}6.235%,100%{visibility:visible}}
+.m3{animation-name:k3;animation-timing-function:steps(1)}
 @keyframes k4{0%,7.5%{stroke-dashoffset:1;visibility:hidden}11.25%,100%{stroke-dashoffset:0;visibility:visible}}
 .m4{animation-name:k4}
-@keyframes k5{0%,9.984%{visibility:hidden}9.985%,100%{visibility:visible}}
-.m5{animation-name:k5}
+@keyframes k5{0%{visibility:hidden}9.985%,100%{visibility:visible}}
+.m5{animation-name:k5;animation-timing-function:steps(1)}
 @keyframes k6{0%,18.75%{stroke-dashoffset:1;visibility:hidden}22.5%,100%{stroke-dashoffset:0;visibility:visible}}
 .m6{animation-name:k6}
-@keyframes k7{0%,21.269%{visibility:hidden}21.27%,100%{visibility:visible}}
-.m7{animation-name:k7}
+@keyframes k7{0%{visibility:hidden}21.27%,100%{visibility:visible}}
+.m7{animation-name:k7;animation-timing-function:steps(1)}
 @keyframes k8{0%,11.25%{stroke-dashoffset:1;visibility:hidden}15%,100%{stroke-dashoffset:0;visibility:visible}}
 .m8{animation-name:k8}
-@keyframes k9{0%,14.127%{visibility:hidden}14.128%,100%{visibility:visible}}
-.m9{animation-name:k9}
+@keyframes k9{0%{visibility:hidden}14.127%,100%{visibility:visible}}
+.m9{animation-name:k9;animation-timing-function:steps(1)}
 @keyframes k10{0%,11.249%{stroke-dashoffset:1;visibility:hidden}11.25%,100%{stroke-dashoffset:0;visibility:visible}}
 .m10{animation-name:k10}
-@keyframes k11{0%,11.354%{visibility:hidden}11.355%,100%{visibility:visible}}
-.m11{animation-name:k11}
+@keyframes k11{0%{visibility:hidden}11.355%,100%{visibility:visible}}
+.m11{animation-name:k11;animation-timing-function:steps(1)}
 @keyframes k12{0%,15%{stroke-dashoffset:1;visibility:hidden}18.75%,100%{stroke-dashoffset:0;visibility:visible}}
 .m12{animation-name:k12}
-@keyframes k13{0%,17.719%{visibility:hidden}17.72%,100%{visibility:visible}}
-.m13{animation-name:k13}
+@keyframes k13{0%{visibility:hidden}17.719%,100%{visibility:visible}}
+.m13{animation-name:k13;animation-timing-function:steps(1)}
 @keyframes k14{0%,3.75%{translate:0 6px;opacity:0}7.5%,100%{translate:0 0;opacity:1}}
 .m14{animation-name:k14}
 @keyframes k15{0%,7.5%{translate:0 6px;opacity:0}11.25%,100%{translate:0 0;opacity:1}}

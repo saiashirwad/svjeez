@@ -16,9 +16,17 @@ import type { Geometry, Paint } from "./values";
 export { Ref, ref } from "./refs";
 
 export interface Common {
-  readonly key?: string;
+  /** Names the node among its siblings. A number is the same as its text, as in React. */
+  readonly key?: string | number;
   readonly ref?: Ref;
+  /** Puts the anchor point of this node's box here (the top-left unless `anchor` says otherwise). Not with `offset`. */
   readonly at?: Anim<Vec> | Anchor;
+  /**
+   * Moves this node's own coordinate frame by this vector: what it draws around [0, 0] lands at the offset. A circle
+   * drawn around [0, 0] goes to `offset={[120, 44]}` with no anchor; a text's own [0, 0] is the top-left of its first line.
+   * The same as the `offset` of a motion layer, but static or a track. Not with `at` or `anchor`.
+   */
+  readonly offset?: Anim<Vec> | Anchor;
   readonly anchor?: AnchorPlace;
   readonly origin?: Origin;
   readonly rotate?: Anim<number>;
@@ -129,11 +137,7 @@ export interface PictureProps extends Common {
   readonly height?: number;
 }
 
-export interface Framed {
-  readonly offset?: Anim<Vec> | Anchor;
-}
-
-export interface GroupProps extends Common, Framed, Backdrop {}
+export interface GroupProps extends Common, Backdrop {}
 
 export interface SequenceProps {
   readonly when: When;
@@ -219,7 +223,7 @@ export const flat = (child: Child): SceneElement[] => {
 export const Group = ({
   children,
   ...props
-}: Common & Framed & { readonly children?: Child }): SceneElement => ({
+}: Common & { readonly children?: Child }): SceneElement => ({
   type: "group",
   props,
   children: flat(children),

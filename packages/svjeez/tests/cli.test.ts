@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { LaneReport } from "svjeez/tools";
@@ -32,6 +32,23 @@ test("svjeez skill --install copies the skill, its references and its examples, 
     const shipped = readdirSync(join(import.meta.dir, "../skills/svjeez", sub)).sort();
     expect(shipped.length).toBeGreaterThan(0);
     expect(readdirSync(join(dir, "svjeez", sub)).sort()).toEqual(shipped);
+  }
+});
+
+test("--help and -h print usage for every command and the bare CLI, and exit 0", () => {
+  const commands = ["svg", "dev", "frames", "check", "video", "skill"];
+
+  for (const args of [
+    ["--help"],
+    ["-h"],
+    ...commands.flatMap((c) => [
+      [c, "--help"],
+      [c, "-h"],
+    ]),
+  ]) {
+    const result = cli(...args);
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout.toString()).toContain("usage:");
   }
 });
 
@@ -160,7 +177,7 @@ test("svjeez svg emits a scene model default export, and --json reports its buil
 
   const build: Build = JSON.parse(cli("svg", file, "--json").stdout.toString());
 
-  expect(build.svg).toContain(`data-key="1" data-source="${file}:`);
+  expect(build.svg).toContain(`data-key="#1" data-source="${file}:`);
   expect(build.svg.replace(/ data-(key|source)="[^"]*"/g, "")).toBe(out.stdout.toString());
   expect(build).toMatchObject({ duration: 2, loop: true, warnings: [] });
 });
@@ -258,3 +275,86 @@ test("svjeez dev serves the scene with its params and rebuilds it when the scene
     server.kill();
   }
 }, 20_000);
+
+const ONCE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 60" width="100" height="60" role="img" aria-labelledby="t">
+  <title id="t">c</title>
+  <style><![CDATA[
+.a{animation-duration:5s;animation-iteration-count:1;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%{translate:15px 35px}100%{translate:95px 35px}}
+.m1{animation-name:k1;animation-timing-function:linear}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-4.25s!important;animation-play-state:paused!important}}
+]]></style>
+  <circle r="5" fill="#000000" class="a m1"/>
+</svg>`;
+
+test("svjeez frames samples a scene that plays once to its end and clears the frames an earlier run wrote", () => {
+  const dir = mkdtempSync(join(tmpdir(), "svjeez-once-"));
+  const file = join(dir, "once.svg");
+  const out = join(dir, "out");
+  writeFileSync(file, ONCE);
+  mkdirSync(out);
+
+  for (const stale of ["frame-09-9_000s.png", "sheet.png"]) writeFileSync(join(out, stale), "old");
+  writeFileSync(join(out, "notes.txt"), "keep");
+  const result = cli("frames", file, "--out", out, "--count", "3");
+
+  if (result.exitCode !== 0 && /Chromium|playwright-core/.test(result.stderr.toString())) return;
+  expect(result.exitCode).toBe(0);
+  expect(result.stdout.toString()).toContain("plays once, 5s");
+  expect(result.stdout.toString()).not.toContain("loop 5s");
+
+  expect(readdirSync(out).sort()).toEqual([
+    "frame-00-0_000s.png",
+    "frame-01-2_500s.png",
+    "frame-02-5_000s.png",
+    "notes.txt",
+  ]);
+});
+
+test("frames and check --browser sample the scene's duration, not the shorter period of its tracks", () => {
+  const scene = join(import.meta.dir, "fixtures/check/short-loop-scene.tsx");
+  const dir = mkdtempSync(join(tmpdir(), "svjeez-period-"));
+  const result = cli("frames", scene, "--out", dir, "--count", "4");
+
+  if (result.exitCode !== 0 && /Chromium|playwright-core/.test(result.stderr.toString())) return;
+  expect(result.exitCode).toBe(0);
+  expect(result.stdout.toString()).toContain("loop 8s");
+  expect(readdirSync(dir).sort()).toEqual([
+    "frame-00-0_000s.png",
+    "frame-01-2_000s.png",
+    "frame-02-4_000s.png",
+    "frame-03-6_000s.png",
+  ]);
+
+  const checked = cli("check", scene, "--browser");
+  expect(checked.stdout.toString()).toContain("loop 8s");
+}, 60_000);
+
+test("svjeez check reports type errors in the scene with file:line, using the project's tsconfig", () => {
+  const dir = mkdtempSync(join(import.meta.dir, "tmp-types-"));
+
+  try {
+    const file = join(dir, "scene.tsx");
+
+    writeFileSync(
+      file,
+      [
+        'import { Shape, circle, scene } from "svjeez";',
+        "",
+        'export const wrong: number = "text";',
+        "",
+        'export default scene({ size: [10, 10], duration: 1, loop: false, title: "t", desc: "d" }, () => (',
+        '  <Shape geometry={circle(2)} fill="#fff" />',
+        "));",
+        "",
+      ].join("\n"),
+    );
+
+    const result = cli("check", file);
+
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout.toString()).toContain("scene.tsx:3:14  type-error  error: TS2322");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}, 60_000);

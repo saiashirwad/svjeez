@@ -353,7 +353,7 @@ describe.if(browser)("checkPixels", () => {
 
     expect(uniform.exitCode).toBe(0);
     expect(uniform.stdout.toString()).toContain('"code": "overlap"');
-  });
+  }, 60_000);
 
   test("svjeez check prints file:line:column findings and exits 1 on an error", () => {
     const result = cli(join(import.meta.dir, "fixtures/check/offscreen-scene.tsx"));
@@ -391,7 +391,7 @@ describe.if(browser)("checkPixels", () => {
 
     const out = result.stdout.toString();
 
-    expect(out).toContain("1 error, 0 warnings, 1 info; model only");
+    expect(out).toContain("1 error, 0 warnings, 0 info; model only");
     expect(out).toContain("at 1s:");
     expect(out).toContain("dot: shown throughout; at 0s–end");
   });

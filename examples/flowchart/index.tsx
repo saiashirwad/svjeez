@@ -79,9 +79,8 @@ export default scene(
           )}
           <Shape
             geometry={circle(5)}
-            anchor="center"
             fill={theme.orange}
-            at={route.travel(trip)}
+            offset={route.travel(trip)}
             opacity={track(0)
               .to(1, span(trip.start, 0.15))
               .to(0, span(trip.end - 0.2, 0.2))}

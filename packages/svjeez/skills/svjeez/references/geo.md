@@ -19,7 +19,7 @@ const brazil = map.region("Brazil");
   <Shape geometry={brazil.geometry} fill={theme.green} />
   <Text font={mono} size={11} fill={theme.text} at={brazil.center} anchor="center">Brazil</Text>
   <Shape geometry={map.route(london, tokyo)} stroke={{ color: theme.orange, width: 2 }} draw={track(0).to(1, span(0.5, 2))} />
-  <Shape geometry={circle(4)} at={map.point(london)} anchor="center" fill={theme.red} />
+  <Shape geometry={circle(4)} offset={map.point(london)} fill={theme.red} />
 </Group>
 ```
 

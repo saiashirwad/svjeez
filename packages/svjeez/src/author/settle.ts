@@ -820,6 +820,13 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
 const unmoved = (note: Note | undefined): boolean => note?.framed === true || note?.still === true;
 
 const placedInside = (names: Names, key: string, note: Note | undefined, label: string): void => {
+  if (note?.placed && note.settle?.label === "<Align>")
+    throw new SceneError(
+      `${names.named(key)} places itself against the canvas or a ref, so it can't sit inside the ${label}, which places its children.`,
+      `Move the <Align> out of the ${label} into a <Group>, and put what it centers inside the <Align>.`,
+      names.whereOf(key),
+    );
+
   if (note?.placed) {
     const prop = note.framed ? "offset" : "at";
 

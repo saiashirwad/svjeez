@@ -61,9 +61,8 @@ export default scene(
           {login.node}
           <Shape
             geometry={circle(4)}
-            anchor="center"
             fill={theme.orange}
-            at={last.route.travel(home)}
+            offset={last.route.travel(home)}
             opacity={track(0).set(1, home).to(0, home.next(0.2))}
           />
         </Group>

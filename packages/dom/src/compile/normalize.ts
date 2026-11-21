@@ -6,7 +6,7 @@ type Node = Extract<SceneElement, { type: "group" | "shape" | "text" | "picture"
 const isNode = (el: SceneElement): el is Node =>
   el.type === "group" || el.type === "shape" || el.type === "text" || el.type === "picture";
 
-const keyOf = (el: Node): string => el.props.key ?? "";
+const keyOf = (el: Node): string => String(el.props.key ?? "");
 
 /** What morph() needs equal for two nodes to blend, and the effects, which it only needs to agree in kind. */
 const traits = (el: Node) => {

@@ -211,7 +211,7 @@ export interface TypedNodes {
 /** Half a blink: the caret is on this long, then off this long, while nothing is typed. */
 const BLINK = 0.5;
 
-const still = (opacity: Animated<number>): Layer => ({
+export const still = (opacity: Animated<number>): Layer => ({
   offset: [0, 0],
   rotate: 0,
   scale: [1, 1],
@@ -220,7 +220,7 @@ const still = (opacity: Animated<number>): Layer => ({
 });
 
 /** Keys that hold each value from its time until the next, dropping repeats. */
-const stepped = (values: readonly { t: Seconds; value: number }[]): Animated<number> => {
+export const stepped = (values: readonly { t: Seconds; value: number }[]): Animated<number> => {
   const keys: Key<number>[] = [];
 
   for (const { t, value } of values) {

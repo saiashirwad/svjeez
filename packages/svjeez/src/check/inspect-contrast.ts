@@ -87,13 +87,30 @@ export const lowContrast = (survey: Survey): void => {
     const schemes = schemesOf(entry);
     let worst: Contrast | undefined;
     const low: Seconds[] = [];
+    let judged = 0;
     let need = 0;
 
     survey.frames.forEach(({ t, frame }) => {
       const at = frame.get(node.key);
 
-      if (!at || at.opacity < 0.99 || fading(entry, t)) return;
+      if (
+        !at ||
+        at.opacity < 0.99 ||
+        fading(entry, t) ||
+        inside(survey.hidden.get(node.key) ?? [], t)
+      )
+        return;
       const { box } = at;
+
+      // A digit strip rolled out of its clip window is not on screen.
+      if (
+        entry.ancestors.some((above) => {
+          const window = above.clip === undefined ? undefined : frame.get(above.key)?.box;
+
+          return window !== undefined && sharedArea(window, box) <= 0;
+        })
+      )
+        return;
 
       const backs = schemes.flatMap((scheme) => {
         const back = behind(survey, entry, frame, box, t, scheme);
@@ -140,7 +157,10 @@ export const lowContrast = (survey: Survey): void => {
           };
       }
 
-      if (!found || found.ratio >= threshold) return;
+      if (!found) return;
+      judged++;
+
+      if (found.ratio >= threshold) return;
       low.push(t);
       need = Math.max(need, threshold);
 
@@ -149,6 +169,9 @@ export const lowContrast = (survey: Survey): void => {
 
     if (!worst) continue;
     const text = node.kind === "text";
+
+    // A thin line that moves across a backdrop only passes over it: judge it by where it spends most of its time.
+    if (!text && low.length * 2 < judged) continue;
     const floor = text ? 3 : 1.5;
 
     const what = text ? `${spoken(node, 24)}` : `the stroke of ${label(node)}`;

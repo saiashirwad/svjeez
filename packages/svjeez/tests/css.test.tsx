@@ -15,7 +15,7 @@ const lane = (keys: Key[], name = "opacity", period = 4) => ({
 });
 
 describe("holds", () => {
-  test("a hold is a stop just before the next key, with no steps(1)", () => {
+  test("a visibility hold steps exactly with steps(1), never a stop just before the next key", () => {
     const { body, timing } = cssKeyframes(
       "opacity",
       "visibility",
@@ -23,19 +23,8 @@ describe("holds", () => {
       4,
     );
 
-    expect(body).toBe("0%,24.999%{visibility:hidden}25%,100%{visibility:visible}");
-    expect(timing).not.toContain("steps");
-  });
-
-  test("a hold that would land on another stop keeps steps(1)", () => {
-    const { body } = cssKeyframes(
-      "opacity",
-      "visibility",
-      [key(0, { opacity: 0 }, ease.hold), key(1, { opacity: 1 }), key(100000, { opacity: 1 })],
-      100000,
-    );
-
-    expect(body).toContain("steps(1)");
+    expect(body).toBe("0%{visibility:hidden}25%,100%{visibility:visible}");
+    expect(timing).toBe("steps(1)");
   });
 
   test("real steps with more than one jump are untouched", () => {
@@ -101,13 +90,13 @@ describe("lanes that share stops", () => {
   });
 });
 
-test("a track that holds a value writes a hold, not steps(1)", () => {
+test("a track that holds a value steps its visibility", () => {
   const out = svg.emit(
     scene({ size: [100, 100], duration: 4, title: "Hold" }, () => (
       <Shape geometry={rect(10, 10)} fill="#000000" opacity={track(0).set(1, span(1, 0))} />
     )),
   );
 
-  expect(out).not.toContain("steps(1)");
-  expect(out).toMatch(/0%,24\.999%\{visibility:hidden\}25%,100%\{visibility:visible\}/);
+  expect(out).toContain("steps(1)");
+  expect(out).toMatch(/0%\{visibility:hidden\}25%,100%\{visibility:visible\}/);
 });

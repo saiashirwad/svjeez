@@ -7,6 +7,8 @@ import {
   Stack,
   circle,
   ease,
+  enter,
+  exit,
   rect,
   ref,
   scene,
@@ -233,7 +235,7 @@ describe("tracks that go to anchors", () => {
     });
 
     expect(times(find(model, "a").at).at(-1)).toEqual([4, [117, 67]]);
-    expect(times(find(model, "2/b").at).at(-1)).toEqual([4, [117, 67]]);
+    expect(times(find(model, "#2/b").at).at(-1)).toEqual([4, [117, 67]]);
   });
 
   test("a step to a moving anchor lands where the anchor is when the step ends", () => {
@@ -523,5 +525,26 @@ describe("clocks", () => {
       [2.5, [10, 0]],
       [4, [10, 0]],
     ]);
+  });
+});
+
+describe("enter() and exit() defaults", () => {
+  const opacityAt = (motion: ReturnType<typeof enter>, t: number): number => {
+    const model = made(() => <Shape key="s" fill="#000000" geometry={circle(4)} motion={motion} />);
+    const layer = find(model, "s").layers[0]!;
+
+    return valueAt(layer.opacity, t, (a: number, b: number, u: number) => a + (b - a) * u);
+  };
+
+  test("a from without opacity still starts hidden, and an explicit opacity wins", () => {
+    expect(opacityAt(enter(span(1, 1), { from: { scale: 0.9 } }), 0)).toBe(0);
+    expect(opacityAt(enter(span(1, 1), { from: { scale: 0.9 } }), 3)).toBe(1);
+    expect(opacityAt(enter(span(1, 1), { from: { opacity: 0.5, scale: 0.9 } }), 0)).toBe(0.5);
+  });
+
+  test("a to without opacity still ends hidden, and an explicit opacity wins", () => {
+    expect(opacityAt(exit(span(1, 1), { to: { offset: [0, 9] } }), 3)).toBe(0);
+    expect(opacityAt(exit(span(1, 1), { to: { offset: [0, 9] } }), 0)).toBe(1);
+    expect(opacityAt(exit(span(1, 1), { to: { opacity: 0.5 } }), 3)).toBe(0.5);
   });
 });

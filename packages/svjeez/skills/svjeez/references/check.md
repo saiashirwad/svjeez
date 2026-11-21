@@ -61,7 +61,7 @@ Use it to confirm a beat before rendering frames: where a node landed, whether i
 
 | Code | Severity | Reports |
 | --- | --- | --- |
-| `type-error` | error | TypeScript rejects the scene file; only the single-file `svjeez` binary, which carries TypeScript, reports it |
+| `type-error` | error | TypeScript rejects the scene or a local file it imports, checked with the tsconfig.json above it (or strict defaults); skipped, with a note on stderr, when no TypeScript 5 or 6 is installed beside the scene |
 | `compile-error` | error | the scene threw while it was built |
 | `compile-warning` | warning | an SVG file or string the scene was given carries a warning |
 | `never-visible` | warning | a node hidden at every time (opacity or scale 0), painting nothing, cut away by an empty clip, or covered by an opaque still rect drawn after it |
@@ -70,13 +70,14 @@ Use it to confirm a beat before rendering frames: where a node landed, whether i
 | `text-overflow` | warning | text past the canvas at rest, or a line wider than the width it wraps to |
 | `overlap` | warning | two different texts over each other while both are fully shown |
 | `missing-glyph` | error | characters the text's face has no glyph for; no other font fills in |
-| `low-contrast` | warning, info | text or a thin line too close to the flat color behind it, in either scheme |
+| `low-contrast` | warning, info | text or a thin line too close to the flat color behind it, in either scheme; a moving thin line is judged by the backdrop it spends most of its time on, so a streak that only passes over something is not reported; digits a `count()` has rolled out of view are not judged; every finding carries the location of the nearest authored ancestor when the node itself was made by the library |
 | `loop-seam` | warning | a looping scene jumps when it starts again: a value ends where it didn't start, a node enters and never leaves, or an arrow's ends follow a node that scales or moves in |
 | `visible-at-zero` | error | shown at 0s and cut straight back in, or filled while its stroke draws in |
-| `nothing-enters` | info | everything is on screen from 0s and nothing enters |
+| `nothing-enters` | info | everything is on screen from 0s and nothing enters (not reported for a steady loop: true scene) |
 | `wasted-motion` | info | a value changes before the node is first seen, or after it is gone for good |
 | `static` | warning, info | nothing in the scene moves, or a value changes only after the scene ends |
 | `moving-filter` | warning, info | a filter redrawn every frame; a warning when it covers a tenth of the canvas or more |
+| `moving-box` | warning | a `<Group>` placed by `at` or an anchor whose content moves: `at` matches its box as it is at 0s, so the group drifts off the point. Use `offset`, or pin an outer group that holds still |
 | `layout-overlap` | warning | two children of a `<Stack>` or `<Grid>` overlap: motion carried one onto another |
 | `word-cut` | warning | a word wider than the width its text wraps to, cut across two lines |
 | `unsupported` | error | a feature the SVG backend can't draw |

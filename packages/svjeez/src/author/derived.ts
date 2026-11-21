@@ -31,7 +31,7 @@ export class Derived<T> {
     this.tolerance = tolerance;
   }
 
-  map<U>(fn: (value: T) => U, options: MapOptions = {}): Derived<U> {
+  map<const U>(fn: (value: T) => U, options: MapOptions = {}): Derived<U> {
     return new Derived(
       this.sources,
       (values) => fn(this.read(values)),
@@ -78,7 +78,7 @@ type ValueOf<S> = S extends Track<infer T> ? T : S extends Derived<infer T> ? T 
 export type ValuesOf<S extends readonly unknown[]> = { -readonly [K in keyof S]: ValueOf<S[K]> };
 
 export interface Together<V extends readonly unknown[]> {
-  map<U>(fn: (...values: V) => U, options?: MapOptions): Derived<U>;
+  map<const U>(fn: (...values: V) => U, options?: MapOptions): Derived<U>;
 }
 
 export const together = <const S extends readonly Source[]>(sources: S): Together<ValuesOf<S>> => ({
@@ -274,6 +274,11 @@ const affine = <T>(
 
 const MEASURE = 60;
 
+/** One step of an 8-bit color channel: a color mapped through hex rounding moves in steps this size, which no fit should chase. */
+const BYTE = 1 / 255;
+
+const COLOR_SHAPE = "[0,0,0,0]";
+
 const sampledLane = <T>(
   lanes: readonly Animated<Read>[],
   out: (values: readonly Read[]) => T,
@@ -309,7 +314,7 @@ const sampledLane = <T>(
   const keys = follow(
     at,
     breaksOf(lanes, window),
-    tolerance ?? Math.min(0.05, Math.max(range * 1e-3, 1e-6)),
+    tolerance ?? Math.min(0.05, Math.max(range * 1e-3, shape.includes(COLOR_SHAPE) ? BYTE : 1e-6)),
     [],
     lanes,
     curves && shape === "[0,0]",
@@ -361,10 +366,31 @@ const steppedLane = <T>(
     return { t: high, value: values[i]!, ease: ease.hold };
   });
 
-  const [next, ...rest] = keys;
+  // A value held for one instant (a floor() that hits an integer only at a peak) has no width to draw; drop it,
+  // and the key that returns to the value before it.
+  const blip = window * 1e-5;
+  const kept: Key<T>[] = [{ t: 0, value: values[0]! }];
+
+  for (const [i, key] of keys.entries()) {
+    const after = keys[i + 1];
+
+    if (after !== undefined && after.t - key.t < blip) continue;
+    const before = i > 0 ? keys[i - 1]! : undefined;
+    const last = kept[kept.length - 1]!;
+
+    if (
+      before !== undefined &&
+      key.t - before.t < blip &&
+      JSON.stringify(key.value) === JSON.stringify(last.value)
+    )
+      continue;
+    kept.push(key);
+  }
+
+  const [next, ...rest] = kept.slice(1);
 
   if (!next) return undefined;
-  const lane: Lane<T> = { kind: "lane", keys: [{ t: 0, value: values[0]! }, next, ...rest] };
+  const lane: Lane<T> = { kind: "lane", keys: [kept[0]!, next, ...rest] };
 
   return period === undefined ? lane : { ...lane, period };
 };

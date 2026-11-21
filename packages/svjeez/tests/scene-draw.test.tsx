@@ -5,6 +5,7 @@ import {
   Shape,
   circle,
   ease,
+  line,
   rect,
   ref,
   scene,
@@ -21,6 +22,32 @@ const emit = (shape: () => SceneElement): string =>
 const stroke = { color: "#FF0000" as const };
 
 describe("Shape draw", () => {
+  test("a whole draw drops its dashes, so a closed shape keeps its join at the first vertex", () => {
+    const out = emit(() => (
+      <Shape
+        geometry={circle(10)}
+        stroke={stroke}
+        draw={track(0).to(1, span(0, 1)).to(0.5, span(1, 1))}
+      />
+    ));
+
+    // dashed up to the instant the draw is whole, plain while it stays whole, dashed again as it leaves
+    expect(out).toContain("49.998%,50.002%{stroke-dashoffset:0;stroke-dasharray:1 2}");
+    expect(out).toContain("50%{stroke-dashoffset:0;stroke-dasharray:none}");
+  });
+
+  test("an open stroke has no join to keep, so a whole draw adds no dash stops", () => {
+    const out = emit(() => (
+      <Shape
+        geometry={line([0, 0], [10, 0])}
+        stroke={stroke}
+        draw={track(0).to(1, span(0, 1)).to(0.5, span(1, 1))}
+      />
+    ));
+
+    expect(out).not.toContain("stroke-dasharray:");
+  });
+
   test("draw is trim [0, draw]", () => {
     const drawn = emit(() => (
       <Shape geometry={circle(10)} stroke={stroke} draw={track(0).to(1, span(0, 1))} />

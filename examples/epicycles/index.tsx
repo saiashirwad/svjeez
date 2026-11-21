@@ -184,7 +184,7 @@ const Chain = ({ from }: { readonly from: number }): SceneElement => {
       {from + 1 < terms.length ? (
         <Chain from={from + 1} />
       ) : (
-        <Shape geometry={circle(4)} at={arm} anchor="center" fill={theme.orange} />
+        <Shape geometry={circle(4)} offset={arm} fill={theme.orange} />
       )}
     </Group>
   );

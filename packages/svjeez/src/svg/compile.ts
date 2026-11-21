@@ -35,6 +35,8 @@ export interface Lane {
   readonly period: number;
   readonly snapped: number;
   readonly emit: Emit;
+  /** A drawn closed shape: its dashes drop once the stroke is whole, so it keeps its join. */
+  readonly joins?: boolean;
 }
 
 interface State {

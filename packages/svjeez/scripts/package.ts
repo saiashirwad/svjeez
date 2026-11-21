@@ -8,6 +8,7 @@ const result = await Bun.build({
     "./src/jsx-runtime.ts",
     "./src/jsx-dev-runtime.ts",
     "./src/tools.ts",
+    "./src/typecheck.ts",
     "./src/frames.ts",
     "./src/page.ts",
     "./src/cli.ts",

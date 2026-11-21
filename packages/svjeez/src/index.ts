@@ -16,6 +16,8 @@ export type { Ref } from "./author/refs";
 
 export { Align, Center, Grid, spread, Stack } from "./author/layout";
 
+export type { AnchorPlace, TextAnchorPlace } from "./author/pin";
+
 export { Arrow } from "./author/arrow";
 
 export {
@@ -39,15 +41,25 @@ export { linear, pattern, radial } from "./author/paint";
 
 export { adjust, blur, displace, shadow } from "./author/effects";
 
-export { track, type Anim, type Track } from "./author/track";
+export {
+  keyframes,
+  track,
+  type Anim,
+  type Goal,
+  type Keyframe,
+  type LoopOptions,
+  type Track,
+} from "./author/track";
 
-export { through, within } from "./author/derived";
+export { through, within, type Derived, type MapOptions } from "./author/derived";
 
-export { enter, exit, sampled, wiggle } from "./author/recipes";
+export { along, enter, exit, sampled, wiggle } from "./author/recipes";
+
+export { random } from "./author/random";
 
 export { ease, type Curve } from "./author/spring";
 
-export { span, type Span } from "./author/span";
+export { span, type Interval, type Span, type When } from "./author/span";
 
 export { morph } from "./author/morph";
 

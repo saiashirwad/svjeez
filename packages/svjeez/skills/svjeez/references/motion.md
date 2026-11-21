@@ -20,7 +20,8 @@ scale={track(1).to(0.8, shrink, ease.in).set(1, span(shrink.end))}
 
 - `track(initial)` holds `initial` until the first step. `.to(value, span, curve?)` moves during the span (default `ease.out`); between steps the value holds. `.set(value, when)` is a cut at the span's start: `.set(1, span(2))`.
 - Every method returns a new track and leaves the receiver as it was, so one track can be the base of two chains and a component given a track can't schedule motion behind your back. `track.span` is the span of the last step (it throws on a track with no step), so `track(0).to(1, pos.span.next(0.3))` follows `pos`.
-- `.loop(period)` repeats forever; `.repeat(n)` or `.repeat({ until })` plays the steps so far again. `.rewind(over, curve?)` glides back to the first value over the clock's last `over` seconds, which is how a loop closes; nothing can follow it.
+- `.loop(period, { phase })` (phase in seconds, default 0) shows the plain loop at t + phase, to stagger many copies; `.loop(period)` repeats the clock's `[0, period)` forever, counted from 0s and not from the first step: a motion starting at 0.4s waits 0.4s in every cycle and must end within the period. `.repeat(n)` and `.repeat({ until })` count from the first step instead; `.repeat(n)` or `.repeat({ until })` plays the steps so far again. `.rewind(over, curve?)` glides back to the first value over the clock's last `over` seconds, which is how a loop closes; nothing can follow it.
+- `keyframes([[0, 0], [0.4, -30, ease.out], [1, 0, ease.in]])` is a track through values at absolute times; each later frame is a `.to()` from the previous frame's time with its own curve, so a bounce is one list instead of chained spans. Times must increase; chain `.loop()` on it like any track.
 - Two steps that overlap on one track throw, unless the first is a spring, which the next step cuts and hands its speed to.
 - A track of geometry morphs: `track(rect(36, 36)).to(rect(96, 64, { radius: 20 }), span(0.4, 1))`. Rects stay rects, arcs stay arcs, any other pair is matched point for point.
 - A track of paint blends colors, and gradients of one kind ([paint.md](paint.md)).
@@ -32,14 +33,15 @@ scale={track(1).to(0.8, shrink, ease.in).set(1, span(shrink.end))}
 
 ```tsx
 motion={[
-  enter(span(0.3, 0.6), { from: { opacity: 0, offset: [0, 24], scale: 0.96 } }),
+  enter(span(0.3, 0.6), { from: { offset: [0, 24], scale: 0.96 } }),
   { rotate: track(0).to(360, span(0, 3), ease.linear).loop(3) },
-  exit(span(4.4, 0.4), { to: { opacity: 0 } }),
+  exit(span(4.4, 0.4)),
 ]}
 ```
 
-- `enter(span, { from, curve })` arrives from `from` (default `{ opacity: 0 }`) to rest; `exit(span, { to, curve })` leaves rest for `to`. Both return a layer.
+- `enter(span, { from, curve })` arrives from `from` to rest; `exit(span, { to, curve })` leaves rest for `to`. Both merge over `{ opacity: 0 }`, so a node is hidden before its enter and after its exit unless you pass `opacity` yourself (`from: { scale: 0.9 }` fades and scales; `from: { offset: [0, 8], opacity: 1 }` slides without fading). Both return a layer.
 - `wiggle(amplitude, { seed, rate, period, curve })` is seeded noise around rest that loops seamlessly; change `seed` to reroll.
+- `along(path, progress, { turn })` puts the node's [0,0] at fraction `progress` (a number or track, by arc length, the share `draw` uses) of a path, held at the ends; `turn: true` also rotates it to the heading in degrees (0 faces +x, so draw the marker pointing right). Give the node the path's coordinate space (usually at the origin) and the same track as `draw={p}`: `<Shape geometry={route} draw={p} />` then `<Shape … motion={along(route, p, { turn: true })} />`. Loops when the track does.
 - `sampled(fn, span, { tolerance })` is a track, so a sampled layer is `{ offset: sampled((t): Vec => orbit(t), span(0, 4), { tolerance: 0.5 }) }`.
 
 ## Springs

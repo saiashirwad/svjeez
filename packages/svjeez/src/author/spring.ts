@@ -71,7 +71,8 @@ const progressOf = (curve: Ease, u: number): number => {
   return 3 * y1 * u * (1 - u) ** 2 + 3 * y2 * u * u * (1 - u) + u ** 3;
 };
 
-const strays = (samples: readonly Sample[], a: number, b: number): number => {
+/** The widest miss of a hermite span between samples a and b; stops as soon as it passes limit, which is all a fit asks. */
+const strays = (samples: readonly Sample[], a: number, b: number, limit = Infinity): number => {
   const [from, to] = [samples[a]!, samples[b]!];
   const curve = b - a > 1 ? hermite(from, to) : eases.linear;
   let worst = 0;
@@ -79,14 +80,17 @@ const strays = (samples: readonly Sample[], a: number, b: number): number => {
   for (let i = a + 1; i < b; i++) {
     const p = progressOf(curve, (samples[i]!.t - from.t) / (to.t - from.t));
 
-    worst = Math.max(
-      worst,
-      Math.hypot(
-        ...samples[i]!.values.map(
-          (value, c) => value - (from.values[c]! + (to.values[c]! - from.values[c]!) * p),
-        ),
-      ),
-    );
+    let sum = 0;
+
+    for (const [c, value] of samples[i]!.values.entries()) {
+      const off = value - (from.values[c]! + (to.values[c]! - from.values[c]!) * p);
+
+      sum += off * off;
+    }
+
+    worst = Math.max(worst, Math.sqrt(sum));
+
+    if (worst > limit) return worst;
   }
 
   return worst;
@@ -155,6 +159,8 @@ const straysCurved = (samples: readonly Sample[], a: number, b: number): number 
 const inside = (curve: Ease): boolean =>
   curve.kind !== "bezier" || curve.points.every((value) => value >= 0 && value <= 1);
 
+const BISECT_UP_TO = 1024;
+
 const reachOf = (
   last: number,
   from: number,
@@ -163,7 +169,19 @@ const reachOf = (
 ): number => {
   let [reach, beyond] = [from + 1, last + 1];
 
-  if (strays(last) <= tolerance) return last;
+  if (last <= BISECT_UP_TO && strays(last) <= tolerance) return last;
+
+  // A long run is searched by galloping out from the start, so a key costs its own length and not the whole run's.
+  for (let step = 1; last > BISECT_UP_TO && reach < last; step *= 2) {
+    const probe = Math.min(last, reach + step);
+
+    if (strays(probe) > tolerance) {
+      beyond = probe;
+      break;
+    }
+
+    reach = probe;
+  }
 
   while (beyond - reach > 1) {
     const middle = Math.floor((reach + beyond) / 2);
@@ -187,7 +205,7 @@ export const fittedCurves = (samples: readonly Sample[], tolerance: number): Run
       (b) =>
         b - from > 1 && !inside(hermite(samples[from]!, samples[b]!))
           ? Infinity
-          : strays(samples, from, b),
+          : strays(samples, from, b, tolerance),
       tolerance,
     );
 
@@ -233,7 +251,7 @@ const straightKeys = (samples: readonly Sample[], tolerance: number): RunKey[] =
   let from = 0;
 
   while (from < last) {
-    const reach = reachOf(last, from, (to) => strays(samples, from, to), tolerance);
+    const reach = reachOf(last, from, (to) => strays(samples, from, to, tolerance), tolerance);
     const to = samples[reach]!;
 
     keys.push({
@@ -393,9 +411,64 @@ export class Spring {
   }
 }
 
-export type Curve = Ease | Spring;
+/** Your own easing: progress 0..1 in, how far along the move it is out (0 at 0, 1 at 1; it may overshoot between). Sampled into linear pieces when the scene builds, so the SVG carries no code. */
+export type CurveFn = (progress: number) => number;
+
+export type Curve = Ease | Spring | CurveFn;
+
+export const isCurveFn = (curve: Curve): curve is CurveFn => curve instanceof Function;
 
 export const isSpring = (curve: Curve): curve is Spring => curve instanceof Spring;
+
+const SAMPLE_BASE = 16;
+const SAMPLE_DEPTH = 6;
+const SAMPLE_TOLERANCE = 5e-4;
+
+/** The progress values to sample a CurveFn at: even, then halved wherever a straight piece misses the curve by more than a visible amount. Deterministic. */
+export const sampleCurve = (fn: CurveFn): readonly (readonly [at: number, value: number])[] => {
+  const at = (p: number): number => {
+    const value = fn(p);
+
+    if (!Number.isFinite(value))
+      throw new SceneError(
+        `A curve function returned ${value} for progress ${p}. It must return a finite number.`,
+      );
+
+    return value;
+  };
+
+  const [start, finish] = [at(0), at(1)];
+
+  if (Math.abs(start) > 1e-6 || Math.abs(finish - 1) > 1e-6)
+    throw new SceneError(
+      `A curve function must return 0 at progress 0 and 1 at progress 1, got ${start} and ${finish}. Shape the way there, and let the track's values set where it starts and ends.`,
+    );
+  const out: (readonly [number, number])[] = [[0, 0]];
+
+  const refine = (a: number, fa: number, b: number, fb: number, depth: number): void => {
+    const mid = (a + b) / 2;
+    const fm = at(mid);
+
+    if (depth < SAMPLE_DEPTH && Math.abs(fm - (fa + fb) / 2) > SAMPLE_TOLERANCE) {
+      refine(a, fa, mid, fm, depth + 1);
+      refine(mid, fm, b, fb, depth + 1);
+    } else {
+      out.push([mid, fm], [b, fb]);
+    }
+  };
+
+  let [prev, fprev] = [0, 0];
+
+  for (let i = 1; i <= SAMPLE_BASE; i++) {
+    const p = i / SAMPLE_BASE;
+    const fp = i === SAMPLE_BASE ? 1 : at(p);
+
+    refine(prev, fprev, p, fp, 0);
+    [prev, fprev] = [p, fp];
+  }
+
+  return out;
+};
 
 export const endSlope = (curve: Ease): number => {
   switch (curve.kind) {

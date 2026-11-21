@@ -129,7 +129,7 @@ export const faceOf = (
     if ((weight ?? value.weight) === value.weight && slanted === value.italic) return value;
 
     throw new SceneError(
-      `${where} asks for ${faceName(value.family, weight ?? value.weight, slanted)}, but its font is the one face ${faceName(value.family, value.weight, value.italic)}. Load that face too and pass font.family(…) or google.family("${value.family}", […]), or ask for ${value.weight}${value.italic ? " italic" : ""}.`,
+      `${where} asks for ${faceName(value.family, weight ?? value.weight, slanted)}, but its font is the one face ${faceName(value.family, value.weight, value.italic)}. Only ${faceName(value.family, value.weight, value.italic)} is loaded. To use ${faceName(value.family, weight ?? value.weight, slanted)}, load it as well: font={await google.family("${value.family}", [{ weight: ${value.weight}${value.italic ? ", italic: true" : ""} }, { weight: ${weight ?? value.weight}${slanted ? ", italic: true" : ""} }])}, or font.family(…) over your font files. Or ask for ${value.weight}${value.italic ? " italic" : ""}.`,
     );
   }
 
@@ -142,7 +142,7 @@ export const faceOf = (
   const has = value.faces.map((face) => `${face.weight}${face.italic ? " italic" : ""}`);
 
   throw new SceneError(
-    `${where} asks for ${faceName(value.name, asked, slanted)}, which its family doesn't have: it has ${has.join(", ")}. Load that face into the family, or ask for one it has.`,
+    `${where} asks for ${faceName(value.name, asked, slanted)}, which its family doesn't have: it has ${has.join(", ")}. Load it into the family, e.g. google.family("${value.name}", [{ weight: ${asked}${slanted ? ", italic: true" : ""} }, …]) or font.family(…) with that face's file, or ask for one it has.`,
   );
 };
 

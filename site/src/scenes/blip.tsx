@@ -115,8 +115,7 @@ export const Blip = ({
               <Shape
                 key={`foot${i}`}
                 geometry={ellipse(12, 6)}
-                at={[EYES[i]!, 162]}
-                anchor="center"
+                offset={[EYES[i]!, 162]}
                 fill={BLIP.foot}
                 motion={motion}
               />
@@ -126,8 +125,7 @@ export const Blip = ({
         <Shape geometry={stem} stroke={{ color: BLIP.stem, width: 7, cap: "round" }} />
         <Shape
           geometry={circle(9)}
-          at={BULB}
-          anchor="center"
+          offset={BULB}
           fill={glow ?? BLIP.yellow}
           motion={bulb && { offset: bulb.map(up) }}
         />
@@ -137,8 +135,7 @@ export const Blip = ({
           <Shape
             key={`cheek${x}`}
             geometry={ellipse(9, 6)}
-            at={[x, 124]}
-            anchor="center"
+            offset={[x, 124]}
             fill={BLIP.cheek}
             opacity={0.55}
           />
@@ -147,14 +144,13 @@ export const Blip = ({
           {EYES.map((x) => (
             <Group key={`eye${x}`}>
               <Group opacity={open}>
-                <Shape geometry={ellipse(7, 9)} at={[x, 110]} anchor="center" fill={BLIP.ink} />
-                <Shape geometry={circle(2.4)} at={[x + 2, 106]} anchor="center" fill="#FFFFFF" />
+                <Shape geometry={ellipse(7, 9)} offset={[x, 110]} fill={BLIP.ink} />
+                <Shape geometry={circle(2.4)} offset={[x + 2, 106]} fill="#FFFFFF" />
               </Group>
               {blinks.length > 0 && (
                 <Shape
                   geometry={ellipse(7.5, 1.6)}
-                  at={[x, 112]}
-                  anchor="center"
+                  offset={[x, 112]}
                   fill={BLIP.ink}
                   opacity={shut}
                 />
