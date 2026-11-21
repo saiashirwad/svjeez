@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>State machines</title>
+    <style>
+      body {
+        margin: 0;
+        font: 15px system-ui, sans-serif;
+        color-scheme: light dark;
+        text-align: center;
+      }
+      p {
+        margin: 2rem 1rem;
+        color: GrayText;
+      }
+      main {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(360px, 92vw), 1fr));
+        gap: 2rem;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 1rem 3rem;
+      }
+      main > div {
+        width: min(480px, 92vw);
+        margin: 0 auto;
+      }
+      main svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      [data-hit] {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Click the switch and the tabs. Step with Back and Next or the arrow keys. Hover the card.</p>
+    <main>
+      <div id="toggle"></div>
+      <div id="tabs"></div>
+      <div id="stepper"></div>
+      <div id="hover-card"></div>
+    </main>
+    <script type="module" src="./page.ts"></script>
+  </body>
+</html>

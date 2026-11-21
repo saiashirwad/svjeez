@@ -160,6 +160,54 @@ The `.svg` still plays the span on its own, so an `<img>` embed keeps working. E
   <sub><b>Two clocks and a status dot</b> · 12 KB · <a href="examples/clocks/index.tsx"><code>examples/clocks/index.tsx</code></a> · <a href="examples/clocks/page.ts"><code>page.ts</code></a></sub>
 </p>
 
+### State machines
+
+A state says where each clock rests. Moving to one runs those clocks from wherever they are, at real speed, so the scene's own easing plays, forward or back, and an interrupted move turns around smoothly. Mark shapes with `hit` and listen with plain `addEventListener`:
+
+```tsx
+<Group hit="switch">{/* a track, a knob and a label inside <Sequence clock={flip}> */}</Group>
+```
+
+```ts
+import { machine, mount } from "svjeez/page";
+
+const scene = mount(document.querySelector("#toggle svg")!);
+const power = machine(scene, {
+  initial: "off",
+  states: { off: { flip: 0 }, on: { flip: 1 } },
+  on: { press: { off: "on", on: "off" } },
+});
+
+scene.hit("switch").forEach((el) => el.addEventListener("click", () => power.send("press")));
+```
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="examples/dist/toggle.svg" alt="A switch that slides on and off" width="230">
+      <br>
+      <sub><b>Toggle</b> · 6 KB · <a href="examples/toggle/index.tsx"><code>toggle</code></a></sub>
+    </td>
+    <td align="center">
+      <img src="examples/dist/tabs.svg" alt="Three tabs with a sliding pill and a changing panel" width="230">
+      <br>
+      <sub><b>Tabs</b> · 14 KB · <a href="examples/tabs/index.tsx"><code>tabs</code></a></sub>
+    </td>
+    <td align="center">
+      <img src="examples/dist/stepper.svg" alt="A four-step progress with a morphing icon" width="230">
+      <br>
+      <sub><b>Stepper</b> · 11 KB · <a href="examples/stepper/index.tsx"><code>stepper</code></a></sub>
+    </td>
+    <td align="center">
+      <img src="examples/dist/hover-card.svg" alt="A card that lifts and reveals a detail row" width="230">
+      <br>
+      <sub><b>Hover card</b> · 9 KB · <a href="examples/hover-card/index.tsx"><code>hover-card</code></a></sub>
+    </td>
+  </tr>
+</table>
+
+All four run on [`examples/machines/page.ts`](examples/machines/page.ts).
+
 ## Film a real web app
 
 Skip redrawing UI by hand. `@svjeez/dom` drives a React, Svelte, or HTML app in Playwright, snapshots DOM states in light and dark mode, and compiles the transitions into one zero-JS `.svg`:
