@@ -215,6 +215,22 @@ actor.subscribe((snapshot) => view.go(snapshot.value));
 
 All four run on [`examples/machines/page.ts`](examples/machines/page.ts), next to a sign-up form whose parallel regions XState runs ([`xstate-form`](examples/xstate-form/index.tsx)).
 
+## Use it in React
+
+React owns the state, the events and the accessibility; the scene only draws. Declare `states` in the scene file, import it with `?svjeez&inline`, and give `<Scene>` from `@svjeez/react` the current state (a string or an XState `snapshot.value`). It is hidden from assistive technology by default, so it sits inside the control that carries the role:
+
+```tsx
+import * as Switch from "@radix-ui/react-switch";
+import { Scene } from "@svjeez/react";
+import toggleArt from "./toggle.tsx?svjeez&inline";
+
+<Switch.Root checked={on} onCheckedChange={setOn} aria-label="Notifications">
+  <Scene scene={toggleArt} state={on ? "on" : "off"} />
+</Switch.Root>;
+```
+
+The first state shows at once and each change animates from wherever the clocks are. [`examples/react-widgets`](examples/react-widgets) does it with a Radix switch and tabs, an XState form and a Zustand store.
+
 ## Film a real web app
 
 Skip redrawing UI by hand. `@svjeez/dom` drives a React, Svelte, or HTML app in Playwright, snapshots DOM states in light and dark mode, and compiles the transitions into one zero-JS `.svg`:
@@ -292,6 +308,7 @@ Pass `--browser` to verify rendered bounding boxes and contrast in headless Chro
 **Capture, frameworks & export**
 - `@svjeez/dom` — Films live web apps with Playwright into animated light/dark SVGs.
 - `@svjeez/vite`, `@svjeez/astro` — Vite imports and an Astro `<Scene>` component.
+- `@svjeez/react` — A `<Scene>` that animates to the state React, Radix or XState owns.
 - `@svjeez/video` — MP4 and WebM export via `svjeez video`.
 
 ## License
