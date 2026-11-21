@@ -660,18 +660,24 @@ describe("morph between containers", () => {
 
   test("a key that changes containers travels from its old box to its new one, above the columns", () => {
     const model = moving(board(["a", "b"], ["c"]), board(["b"], ["c", "a"]));
-    const [start, mid, end] = [0, 2, 4].map((t) => boxesOf(model, t));
-    const at = (box: Model.Box | undefined) => [box!.x, box!.y];
-    const [from, to] = [at(start["board/doing/a"]), at(end["board/doing/a"])];
+
+    const at = (t: number): [number, number] => {
+      const box = boxesOf(model, t)["board/doing/a"];
+
+      if (!box) throw new Error("board/doing/a has no box");
+
+      return [box.x, box.y];
+    };
+
+    const [from, mid, to] = [at(0), at(2), at(4)];
 
     // "a" has one key, the one it has in the last state, the whole way.
-    expect(from[0]).toBeLessThan(to[0]!);
-    expect(to[0]).toBeGreaterThan(from[0]!);
-    expect(to[1]).toBeGreaterThan(from[1]!);
-    expect(at(mid["board/doing/a"])[0]).toBeGreaterThan(from[0]!);
-    expect(at(mid["board/doing/a"])[0]).toBeLessThan(to[0]!);
-    expect(at(mid["board/doing/a"])[1]).toBeGreaterThan(from[1]!);
-    expect(at(mid["board/doing/a"])[1]).toBeLessThan(to[1]!);
+    expect(from[0]).toBeLessThan(to[0]);
+    expect(to[1]).toBeGreaterThan(from[1]);
+    expect(mid[0]).toBeGreaterThan(from[0]);
+    expect(mid[0]).toBeLessThan(to[0]);
+    expect(mid[1]).toBeGreaterThan(from[1]);
+    expect(mid[1]).toBeLessThan(to[1]);
   });
 
   test("it moves instead of fading, and siblings reflow by moving", () => {
@@ -687,9 +693,15 @@ describe("morph between containers", () => {
 
   test("the travelling node is drawn after both containers", () => {
     const model = moving(board(["a"], []), board([], ["a"]));
-    const kids = (find(model, "board") as Model.GroupNode).children.map((child) => child.key);
+    const root = find(model, "board");
 
-    expect(kids).toEqual(["board/todo", "board/doing", "board/doing/a"]);
+    if (root.kind !== "group") throw new Error("board is not a group");
+
+    expect(root.children.map((child) => child.key)).toEqual([
+      "board/todo",
+      "board/doing",
+      "board/doing/a",
+    ]);
   });
 
   test("a key that repeats inside a state keeps matching per parent", () => {
