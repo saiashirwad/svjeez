@@ -35,6 +35,23 @@ test("svjeez skill --install copies the skill, its references and its examples, 
   }
 });
 
+test("--help and -h print usage for every command and the bare CLI, and exit 0", () => {
+  const commands = ["svg", "dev", "frames", "check", "video", "skill"];
+
+  for (const args of [
+    ["--help"],
+    ["-h"],
+    ...commands.flatMap((c) => [
+      [c, "--help"],
+      [c, "-h"],
+    ]),
+  ]) {
+    const result = cli(...args);
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout.toString()).toContain("usage:");
+  }
+});
+
 test("svjeez frames rejects an unknown --color-scheme before launching a browser", () => {
   const dir = mkdtempSync(join(tmpdir(), "svjeez-frames-"));
   const file = join(dir, "scene.svg");
