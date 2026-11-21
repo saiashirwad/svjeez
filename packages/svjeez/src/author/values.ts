@@ -8,6 +8,12 @@ import type { Gradient, Pattern } from "./paint";
 export type { Hex };
 
 const positive = (value: number, what: string): number => {
+  if (typeof value === "object" && value !== null)
+    throw new SceneError(
+      `${what} takes plain numbers, but got an animated value.`,
+      `To animate the size, track the shape: geometry={track(${what.replace("()", "(w0, h0)")}).to(${what.replace("()", "(w1, h1)")}, span(0, 1), ease.inOut)}.`,
+    );
+
   if (!(value >= 0 && Number.isFinite(value)))
     throw new SceneError(`${what} needs a finite size of 0 or more, got ${value}.`);
 

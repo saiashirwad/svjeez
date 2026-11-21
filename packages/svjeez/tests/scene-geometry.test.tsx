@@ -770,3 +770,28 @@ describe("sampled", () => {
     ).toThrow("doesn't match the first sample");
   });
 });
+
+describe("animated sizes", () => {
+  test("rect, circle and ellipse take numbers and point at track(rect(...)) for animation", () => {
+    const wide = track(10).to(50, span(0, 1));
+    const tries = [
+      () => rect(wide as unknown as number, 10),
+      () => circle(wide as unknown as number),
+      () => ellipse(5, wide as unknown as number),
+    ];
+
+    for (const attempt of tries) {
+      const error = (() => {
+        try {
+          attempt();
+        } catch (caught) {
+          return caught as Error;
+        }
+      })();
+
+      expect(error?.message).toContain("takes plain numbers");
+      expect(error?.message).not.toContain("[object Object]");
+      expect(String(error?.stack ?? error)).toContain("track(");
+    }
+  });
+});
