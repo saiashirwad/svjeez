@@ -29,6 +29,7 @@
     "dom-react-vite",
     "dom-component",
     "react-widgets",
+    "shader-site",
     "dom-svelte",
     "live-editor"
   ]

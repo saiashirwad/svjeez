@@ -1,0 +1,30 @@
+:root {
+  color-scheme: light dark;
+  background: light-dark(#eef4fb, #050a16);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+/* The scene fills the viewport at its own aspect, and the slider rests over its foot. */
+main {
+  position: relative;
+  width: min(96vw, 170vh);
+}
+
+main span {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+input {
+  position: absolute;
+  left: 25%;
+  bottom: 6%;
+  width: 50%;
+  accent-color: light-dark(#0a5bd6, #5ea0ff);
+}
