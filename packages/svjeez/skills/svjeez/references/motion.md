@@ -32,13 +32,13 @@ scale={track(1).to(0.8, shrink, ease.in).set(1, span(shrink.end))}
 
 ```tsx
 motion={[
-  enter(span(0.3, 0.6), { from: { opacity: 0, offset: [0, 24], scale: 0.96 } }),
+  enter(span(0.3, 0.6), { from: { offset: [0, 24], scale: 0.96 } }),
   { rotate: track(0).to(360, span(0, 3), ease.linear).loop(3) },
-  exit(span(4.4, 0.4), { to: { opacity: 0 } }),
+  exit(span(4.4, 0.4)),
 ]}
 ```
 
-- `enter(span, { from, curve })` arrives from `from` (default `{ opacity: 0 }`) to rest; `exit(span, { to, curve })` leaves rest for `to`. Both return a layer.
+- `enter(span, { from, curve })` arrives from `from` to rest; `exit(span, { to, curve })` leaves rest for `to`. Both merge over `{ opacity: 0 }`, so a node is hidden before its enter and after its exit unless you pass `opacity` yourself (`from: { scale: 0.9 }` fades and scales; `from: { offset: [0, 8], opacity: 1 }` slides without fading). Both return a layer.
 - `wiggle(amplitude, { seed, rate, period, curve })` is seeded noise around rest that loops seamlessly; change `seed` to reroll.
 - `sampled(fn, span, { tolerance })` is a track, so a sampled layer is `{ offset: sampled((t): Vec => orbit(t), span(0, 4), { tolerance: 0.5 }) }`.
 

@@ -33,7 +33,7 @@ const Stat = ({ label, at, children }: StatProps) => (
     width={196}
     radius={12}
     fill={theme.surface}
-    motion={[enter(at, { from: { opacity: 0, offset: [0, 8] } }), exit(leave)]}
+    motion={[enter(at, { from: { offset: [0, 8] } }), exit(leave)]}
   >
     <Text font={geist} size={12} fill={theme.muted}>
       {label}

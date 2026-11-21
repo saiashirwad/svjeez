@@ -40,31 +40,29 @@ const between = (from: LayerValues, to: LayerValues, when: Interval, curve: Curv
 });
 
 export interface EnterOptions {
+  /** Where it starts, merged over `{ opacity: 0 }`: it is hidden before its span unless you pass an `opacity` yourself. */
   readonly from?: LayerValues;
   readonly curve?: Curve;
 }
 
-export const enter = (
-  when: Interval,
-  { from = { opacity: 0 }, curve = DEFAULT_EASE }: EnterOptions = {},
-): Layer => {
+export const enter = (when: Interval, { from, curve = DEFAULT_EASE }: EnterOptions = {}): Layer => {
   const { start, over } = closed(when, "enter()");
+  const first: LayerValues = { opacity: 0, ...from };
 
-  return between(from, rest(from), span(start, over), curve);
+  return between(first, rest(first), span(start, over), curve);
 };
 
 export interface ExitOptions {
+  /** Where it ends, merged over `{ opacity: 0 }`: it is gone after its span unless you pass an `opacity` yourself. */
   readonly to?: LayerValues;
   readonly curve?: Curve;
 }
 
-export const exit = (
-  when: Interval,
-  { to = { opacity: 0 }, curve = DEFAULT_EASE }: ExitOptions = {},
-): Layer => {
+export const exit = (when: Interval, { to, curve = DEFAULT_EASE }: ExitOptions = {}): Layer => {
   const { start, over } = closed(when, "exit()");
+  const last: LayerValues = { opacity: 0, ...to };
 
-  return between(rest(to), to, span(start, over), curve);
+  return between(rest(last), last, span(start, over), curve);
 };
 
 export interface WiggleOptions {

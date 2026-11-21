@@ -112,8 +112,7 @@ const drift = [
   },
 ];
 
-const arrive = (when: Span): Layers =>
-  enter(when, { from: { opacity: 0, offset: [0, -10] }, curve: ease.pop });
+const arrive = (when: Span): Layers => enter(when, { from: { offset: [0, -10] }, curve: ease.pop });
 
 /** The closing line rides under the last line in, starting where the second line will be. */
 const closing = lines.reduce(
