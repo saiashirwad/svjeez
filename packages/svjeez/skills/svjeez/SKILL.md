@@ -76,6 +76,7 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 | `<Text font size fill weight italic width lineHeight align along start stroke>` | strings and `<Run weight fill italic opacity>` inside; `width` wraps; `along={geometry}` sets one line along an outline |
 | `count(value, { format, rate })` | a number that counts, as the only content of a `<Text>` besides strings |
 | `typed(value, { by, caret })` | a string track typed out, last in a `<Text>`: each `.to()` erases back to the shared start, then types; `by` is `chars` (default), `words` or your own split |
+| a string track as the only child of a `<Text>` | a label that swaps: each value shows instantly, a `.set()` at its time and a `.to()` when its span is over (never partway), each measured with the real font and anchored on its own, so a centred label stays centred. `<Text font size fill at={[x, y]} anchor="center">{track("CLOSED").set("SYN_SENT", span(0.9, 0)).set("ESTABLISHED", span(5, 0))}</Text>` |
 | `<Group offset>` | moves children together; `offset` is where the group's `[0, 0]` goes, as on any node |
 | `<Picture src={picture(bytes)} width height>` | a PNG, JPEG, GIF, WebP or SVG; `picture.load(path)` reads a file |
 | `<Sequence when={span}>` | a local clock: tracks inside count from the span's start |
@@ -125,7 +126,7 @@ Fonts and data: `font(bytes)`, `font.load(path)`, `font.family(...faces)`, `goog
 - **Scattered things** (stars, particles): `const rand = random("stars")` gives a seeded generator of numbers in [0, 1), so every build is the same. Never `Math.random()`.
 - **Something draws itself**: `draw={track(0).to(1, span(…))}` on a `<Shape>`, an `<Arrow>`, a chart series.
 - **Two layouts of one picture** (chart values, before/after code): `morph` between keyed states, not hand-written tracks per node.
-- **A changing number**: `count()` in a `<Text>`, never texts crossfaded per value.
+- **A changing number**: `count()` in a `<Text>`; a label that changes at times (a state badge, a year): a string track in a `<Text>`. Never texts crossfaded per value.
 - **Typing**: `typed(track("").to("Save drafts", span(0.2, 1)))`, never a `<Run>` per letter faded in.
 - **One number drives many props**: one track and `.map()` from it, not parallel tracks that can drift apart.
 - **A card or a pill**: a container with `fill`, `stroke` and `radius`, not a rect of a size you worked out.

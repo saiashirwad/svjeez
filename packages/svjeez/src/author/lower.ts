@@ -94,6 +94,7 @@ import { lookOf, paintedBoxOf } from "../model/painted";
 import { minus, pinned } from "./pin";
 import { layoutRuns, setAlong } from "./text";
 import { countedNodes, countingIn, rateOf, ticksOf } from "./count";
+import { shown, swapIn, swapTicks, swapping, textsOf, unionOf } from "./swap";
 import { typedNodes, typedTicks, typing as typingMix, typingIn } from "./typed";
 import {
   blendable,
@@ -609,6 +610,68 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     };
   }
 
+  const swap = swapIn(props.children, where);
+
+  if (swap) {
+    const value = animated(swap, keep, timing, swapping, `the text in ${where}`);
+    const ticks = swapTicks(value, ctx.duration);
+    const texts = textsOf(ticks);
+
+    if (texts.length === 0)
+      throw new SceneError(`${where} swaps a string track, but it never shows any text.`);
+
+    // Each text is a <Text> of its own, so its width and anchor are its own; they share an anchor point.
+    const quiet = {
+      at: undefined,
+      offset: undefined,
+      origin: undefined,
+      rotate: undefined,
+      scale: undefined,
+      skew: undefined,
+      opacity: undefined,
+      motion: undefined,
+    };
+
+    const alone = texts.map((words) => {
+      const node = text(ctx, { ...props, ...quiet, children: words }, key, timing);
+
+      if (node.kind !== "text")
+        throw new SceneError(`${where} swaps text, and ${words} didn't lower to text.`);
+      const baseline = node.lines[0]?.at[1] ?? 0;
+      const [x, y] = pinned(props.anchor, node.box, where, baseline);
+
+      return { words, node, home: [x, y] as const, baseline: baseline - y };
+    });
+
+    const around = unionOf(
+      alone.map(({ node, home }) => ({
+        ...node.box,
+        x: node.box.x - home[0],
+        y: node.box.y - home[1],
+      })),
+    );
+
+    const home = pinned(props.anchor, around, where, alone[0]!.baseline);
+    const place = (own: Vec): Vec => [home[0] - own[0], home[1] - own[1]];
+
+    return {
+      ...base(
+        ctx,
+        props,
+        { ...around, x: around.x + home[0], y: around.y + home[1] },
+        key,
+        timing,
+        home,
+      ),
+      authored: { count: { ticks } },
+      kind: "group",
+      children: alone.map(({ words, node, home: own }, i) => ({
+        ...shown(node, words, ticks, place(own)),
+        key: `${key}/${i + 1}`,
+      })),
+    };
+  }
+
   const asked = piecesOf(counted ? counted.words : props.children, own, where);
   const found = asked.map((piece) => styleOf(piece.asked));
 
@@ -888,6 +951,25 @@ const lowerAll = (
     }
   });
 
+const isWord = (key: string | number): key is string => typeof key === "string";
+
+const isNumber = (key: string | number): key is number => typeof key === "number";
+
+/** The key a node was given, as text: a number reads as its digits, anything but a string or number is refused. */
+const keyOf = (given: Extract<SceneElement, { readonly props: object }>): string | undefined => {
+  const key = "key" in given.props ? given.props.key : undefined;
+
+  if (key === undefined || isWord(key)) return key;
+
+  if (isNumber(key) && Number.isFinite(key)) return String(key);
+
+  throw new SceneError(
+    `A key is a string or a number, got ${String(key)}.`,
+    'Write key="name" or key={index}.',
+    { ...(writtenAt(given) && { source: writtenAt(given)! }) },
+  );
+};
+
 const lowered = (
   ctx: Ctx,
   given: NodeElement,
@@ -951,25 +1033,6 @@ const lowered = (
         kind: "group",
         children,
       };
-const isWord = (key: string | number): key is string => typeof key === "string";
-
-const isNumber = (key: string | number): key is number => typeof key === "number";
-
-/** The key a node was given, as text: a number reads as its digits, anything but a string or number is refused. */
-const keyOf = (given: Extract<SceneElement, { readonly props: object }>): string | undefined => {
-  const key = "key" in given.props ? given.props.key : undefined;
-
-  if (key === undefined || isWord(key)) return key;
-
-  if (isNumber(key) && Number.isFinite(key)) return String(key);
-
-  throw new SceneError(
-    `A key is a string or a number, got ${String(key)}.`,
-    'Write key="name" or key={index}.',
-    { ...(writtenAt(given) && { source: writtenAt(given)! }) },
-  );
-};
-
 
       return done(node);
     }

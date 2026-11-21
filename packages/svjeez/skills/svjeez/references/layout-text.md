@@ -43,7 +43,7 @@ The nine places, for `anchor`, `place` and `radial.across({ center })`: `top-lef
 - `<Run>` changes `font`, `weight`, `italic`, `fill` and `opacity` for part of a text and inherits the rest. A run's `opacity` and `fill` take tracks. A `<Run>` outside a `<Text>` throws.
 - `stroke` (the same `StrokeProps`; `under: true` draws it below the fill) counts in the box. `size` is a plain number: to grow text, use `scale` or a layer.
 - `along={circle(40)}` sets one line along any geometry (no `width`); `start` is a fraction of the path's length, a number or track, and `align` is relative to it.
-- A `<Text>` holds strings, numbers, `<Run>`s, or one `count()`. Its words can't change over time: crossfade two texts, or `morph` between states that key the same `<Text>`.
+- A `<Text>` holds strings, numbers, `<Run>`s, one `count()`, one `typed()`, or one string track. Plain words can't change over time: for a label that changes, give the `<Text>` a string track (below).
 
 ## Numbers that count
 
@@ -51,5 +51,7 @@ The nine places, for `anchor`, `place` and `radial.across({ center })`: `top-lef
 <Text font={sans} weight={600} size={28} fill={theme.text}>${count(track(0).to(1284500, span(0.5, 2)))}</Text>
 <Text font={sans} size={14} fill={theme.text}>{count(track(0).to(9.5, span(0, 1.5)), { format: numeral({ decimals: 1, point: ",", separator: "." }) })} km</Text>
 ```
+
+A string track as the only child swaps the label instantly: `<Text font={f} size={14} fill={ink} at={[150, 40]} anchor="center">{track("CLOSED").set("SYN_SENT", span(0.9, 0)).set("ESTABLISHED", span(5, 0))}</Text>`. A `.set()` shows its value at its time; a `.to()` shows its value when its span ends (the text is never partway). Each value is measured with the real font and the `anchor` applies to each, so a centred label stays centred as it widens. It lowers to one `<text>` per distinct value, shown by step. No other words beside it; use `typed()` to type instead.
 
 `count(value, { format?, rate? })` shows a number, a track or a derived value at every moment. `format` is any `(n: number) => string`, such as `(n) => `$${(n / 1000).toFixed(1)}K``, `(n) => `${n}%``, or `mm:ss` from seconds; the default is `numeral()`. `numeral({ decimals, separator, point, pad })` is the built-in: `decimals` (0), `separator` between thousands (`","`; `""` for none), `point` (`"."`) and `pad` (fewest integer digits, zero-filled). `rate` (30) is the most changes a second. Strings before and after go with it. A counting `<Text>` draws one line in one style: one `count()`, no `<Run>`s, no `width`. Digits sit in slots as wide as the widest digit, so the number doesn't jitter; `align="end"` keeps the right edge still. A long fast count costs bytes: keep the span short or lower `rate`. In a morph, key the text in every state with the same `count()`.

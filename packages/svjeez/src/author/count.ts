@@ -16,7 +16,8 @@ import type {
   TextRun,
   Vec,
 } from "../model/ir";
-import type { Anim } from "./track";
+import type { Anim, Track } from "./track";
+import type { Derived } from "./derived";
 import type { SceneElement, TextChild } from "./nodes";
 import { layoutRuns, type TextAlign } from "./text";
 import { isTyped, type Typed } from "./typed";
@@ -45,7 +46,8 @@ export interface Count {
   readonly rate: number;
 }
 
-export type TextContent = TextChild | Count | Typed | readonly TextContent[];
+/** What a <Text> holds: strings and runs; a count(), typed() or string track, alone; or a list of these. */
+export type TextContent = TextChild | Count | Typed | Track<string> | readonly TextContent[];
 
 export const count = (value: Anim<number>, options: CountOptions = {}): Count => ({
   kind: "count",
@@ -123,11 +125,12 @@ const isList = (content: TextContent): content is readonly TextContent[] => Arra
 const isWords = (content: TextContent): content is string | number =>
   typeof content === "string" || typeof content === "number";
 
-const isWord = (item: string | Count | Typed | SceneElement): item is string =>
-  typeof item === "string";
+type Item = string | Count | Typed | Track<string> | Derived<string> | SceneElement;
+
+const isWord = (item: Item): item is string => typeof item === "string";
 
 /** A <Text>'s content as one list: its strings, elements, count()s and typed()s, in order. */
-export const flatten = (content: TextContent): (string | Count | Typed | SceneElement)[] => {
+export const flatten = (content: TextContent): Item[] => {
   if (content === undefined || content === null || content === false) return [];
 
   if (isList(content)) return content.flatMap(flatten);
@@ -161,7 +164,7 @@ export const countingIn = (content: TextContent, where: string): Counting | unde
       "Style the whole <Text>, or put the styled words in a <Text> beside it.",
     );
   const at = items.indexOf(counts[0]!);
-  const words = (part: readonly (string | Count | Typed | SceneElement)[]) => part.join("");
+  const words = (part: readonly Item[]) => part.join("");
   const [before, after] = [words(items.slice(0, at)), words(items.slice(at + 1))];
 
   if (/\n/.test(before + after))
