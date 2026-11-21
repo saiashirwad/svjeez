@@ -31,10 +31,15 @@ interface Stops {
   readonly before: readonly (string | undefined)[];
 }
 
-const percents = (keys: readonly Key[], period: Seconds): Stops => {
+/** `down` rounds each stop to the tick at or before its time, so a step that lands at t is already in force at t. */
+const percents = (keys: readonly Key[], period: Seconds, down = false): Stops => {
   for (const places of [3, 4]) {
     const at = keys.map((key) => (key.t / period) * 100);
-    const out = at.map((value) => `${num(value, places)}%`);
+
+    const out = at.map(
+      (value) =>
+        `${num(down ? Math.floor(value * 10 ** places + 1e-6) / 10 ** places : value, places)}%`,
+    );
 
     if (new Set(out).size !== out.length) continue;
     const taken = new Set(out);
@@ -90,7 +95,7 @@ const frames = (
   );
 
   const blocks = new Map<string, { selectors: string[]; suffix: string; set: string }>();
-  const stops = percents(keys, period);
+  const stops = percents(keys, period, emit === "visibility");
   const { at } = stops;
   const before = holds ? stops.before : stops.before.map(() => undefined);
   keys.forEach((key, index) => {
@@ -125,13 +130,17 @@ export const cssFrames = (
   all: readonly Key[],
   period: Seconds,
 ): Frames => {
-  const exact = frames(lane, emit, all, period, true);
   const classic = frames(lane, emit, all, period, false);
 
   const said =
     classic.timing === timing(ease.hold)
       ? `animation-timing-function:${classic.timing};`.length
       : 0;
+
+  // visibility interpolates to "visible" anywhere between a visible and a hidden stop, so a stop just before the next key
+  // would show both values at the key's own instant: those lanes must step exactly.
+  if (emit === "visibility") return classic;
+  const exact = frames(lane, emit, all, period, true);
 
   return bodyOf(exact).length <= bodyOf(classic).length + said ? exact : classic;
 };
