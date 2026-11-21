@@ -46,13 +46,15 @@ export default scene(
 
 - Box = the node's paint, stroke included. `at={p}` puts the node's `anchor` point of its box at p (default `"top-left"`). `anchor` without `at` is an error.
 - `offset={p}` moves the node's own `[0, 0]` to p, on every node, no anchor. Use it for `circle`, `ellipse`, `arc` (drawn around `[0, 0]`) and for Groups used as frames. `at` with `offset` is an error.
-- `anchor`: `"top-left" "top" "top-right" "left" "center" "right" "bottom-left" "bottom" "bottom-right"` or `[0.5, 1]`; Text adds `"baseline-left" "baseline" "baseline-right"` (type `AnchorPlace`, `TextAnchorPlace`). Nothing else (`"middle"`, `"start"`) is valid.
+- `anchor`: `"top-left" "top" "top-right" "left" "center" "right" "bottom-left" "bottom" "bottom-right"` or `[0.5, 1]`; Text adds `"baseline-left" "baseline" "baseline-right"`. Nothing else (`"middle"`, `"start"`) is valid. **`anchor="baseline"` centres the text horizontally on `at`; left-aligned labels need `baseline-left`** (`check` can't tell).
 - `rotate`, `scale`, `skew` turn around `origin`: a place name (default `"center"`), `[x, y]` from the box's top-left, or `"at"` (the point `at`/`offset` places).
 - `rect` has its corner at `[0, 0]`; `line`, `polygon`, `path` stay where their points are.
-- `Stack`/`Grid`/`Center` children take no `at`. `<Align place="center" inset={16}>` places against the canvas, or `to={ref}`.
-- Refs: `const a = ref()`, `<Stack ref={a}>`, then `a.right`, `a.center`, ... are points: `<Arrow from={a.right} to={b.left} stroke={{ color, width: 2 }} head={8} inset={4} />` (`head`: size or `"none"`; also `bend`, `draw`).
+- `Stack`/`Grid`/`Center` size to their content and take `fill`, `stroke`, `radius`, `padding` (`gap`, `align`, `width`/`height` optional): a card needs no measured size. Their children take no `at`/`offset` (the container places them); to move one, wrap it in `<Group motion={{ offset: track }}>`.
+- `<Align place="center" inset={16}>` puts that place of its content on the same place of the canvas, or of `to={ref}`; it follows the ref's animated box, so an enter `scale` on the ref shifts it.
+- A label following a moving point: `<Group offset={pointTrack}>` with the dot and the label inside.
+- Refs: `const a = ref()`, `<Stack ref={a}>`, then `a.right`, `a.center`, ... are points (never sizes): `<Arrow from={a.right} to={b.left} stroke={{ color, width: 2 }} head={8} inset={4} />` (`head`: size or `"none"`; also `bend`, `draw`).
 - Nothing inherits: each `Text` needs `font`, `size`, `fill`; a `Shape` needs `geometry` and a `fill` or `stroke`.
-- Keys: `key="x"` or `key={3}`, unique among siblings. Unkeyed siblings are keyed by position, so `key={1}` on the third child collides with the sibling at index 1.
+- Keys: `key="x"` or `key={3}`, unique among siblings (needed for morph).
 
 ## Geometry
 
@@ -61,13 +63,14 @@ export default scene(
 ## Time
 
 - `span(start, over)` is a window in seconds; `s.next(over, gap?)`, `s.shift(dt)`, `s.end`.
-- `track(v)`: `.to(value, span, curve?)`, `.set(value, span)`, `.loop(period)`, `.repeat(n)`, `.rewind(over)`, `.map(fn)`, `.span`. Each returns a new track. The curve is the third argument of `.to`, never part of `span`: `.to(1, span(0, 1), ease.linear)`. Steps must not overlap: start the next at `first.next(over)`.
+- `track(v)`: `.to(value, span, curve?)`, `.set(value, span)`, `.loop(period)`, `.repeat(n)`, `.rewind(over)`, `.map(fn)`, `.span`. Each returns a new track. `.set` cuts at `span.start`; its length is ignored. `loop(period)` counts from 0s (a motion starting at 0.4s waits 0.4s each cycle); `repeat()` counts from the first step. The curve is the third argument of `.to`, never part of `span`: `.to(1, span(0, 1), ease.linear)`. Steps must not overlap: start the next at `first.next(over)`.
 - Curves: `ease.out` (default), `ease.in`, `ease.inOut`, `ease.pop`, `ease.linear`, `ease.spring()` (`.settle` is its span).
 - Tracks work for: `at offset rotate scale skew opacity fill`, stroke `color`/`width`, `draw`, `trim`, `clip`, `geometry`, effect values. Plain numbers only: `Text size`, `width`, `letterSpacing`, `rect()`/`circle()` arguments, `dash`.
-- One number driving several props: one track plus `.map()`.
+- One number driving several props: one track plus `.map()`; `t.map((v) => [x, y])` is already a point, no annotation. A track inside a point (`[0, track]`) is an error: map to the whole point.
+- Orbit or ellipse: `const u = track(0).to(1, span(0, duration), ease.linear)`, then `u.map((k) => [cx + rx * Math.cos(k * 2 * Math.PI), cy + ry * Math.sin(k * 2 * Math.PI)])`; use whole turns per loop (`k * 4 * Math.PI` is two) so the seam closes.
 - `draw` (0..1) draws a stroke on; a circle starts at 3 o'clock, so add `rotate={-90}` to start at the top. A fill showing at 0s while the stroke draws in is a `visible-at-zero` error: fade the fill in.
 - `<Sequence when={span(...)}>` starts a local clock for its children. `random(seed)` is a seeded `() => number`; never `Math.random()`.
-- Typing a track in a variable: `track<Vec>(zero)` (`type Vec`), since `const zero = [0, 0]` infers `Track<number[]>`. Generic helpers can use `Goal`, `Derived`, `Anim`.
+- `import { type Vec, type Color } from "svjeez"`. Only `track(zero)` of a variable needs `track<Vec>(zero)`, since `const zero = [0, 0]` infers `number[]`. Generic helpers can use `Goal`, `Derived`, `Anim`.
 
 ## Motion layers
 
@@ -78,14 +81,14 @@ export default scene(
 - No default font. Examples: `geist` (400, 600), `geistText` (400, 600, 400 italic) from `examples/fonts/faces.ts`; `mono` (JetBrains Mono 400) and `theme` from `examples/theme.ts`. Use `geist.face(600)` or `weight={600}`. A weight you did not load is an error.
 - Other fonts: `await google.family("Inter", [{ weight: 400 }, { weight: 700 }])` from `"@svjeez/fonts"`, or `font.family(await font.load("A.ttf", { weight: 400 }), ...)`.
 - Wrap with `width`; inline styles with `<Run weight={600}>`.
-- `<Text>{label}</Text>` with a `Track<string>` swaps the text instantly. `{typed(track("").to("Hello", span(0, 1)), { by: words, caret: true })}` types it (`by`: `chars` default, `words`, or your own split). `{count(track(0).to(100, span(0, 2)), { rate: 10, format: numeral({ decimals: 1 }) })}` counts: `rate` is changes per second (default 30), `format` is `(n) => string`. One `<Text>` counts or types, not both.
+- `<Text>{label}</Text>` with a `Track<string>` swaps the text instantly. `{typed(track("").to("Hello", span(0, 1)), { by: words, caret: true })}` types it (`by`: `chars` default, `words`, or your own split). `{count(track(0).to(100, span(0, 2)), { rate: 10, format: numeral({ decimals: 1 }) })}` counts: `rate` is changes per second (default 30), `format` is `(n) => string`; the default is `numeral()`: rounded to `decimals` (0), thousands grouped (`9,000`), `pad` digits. One `<Text>` counts or types, not both.
 - Code: `@svjeez/code` has `<Code lang="ts" font={mono} size={12} palette={tomorrow} typing={span(0, 1)}>{"const x = 1;"}</Code>` (`tomorrow` from `@svjeez/code/palettes`), Shiki-highlighted from the scene's palette; see `examples/code/index.tsx`.
 
 ## Paint
 
-- Colors: `"#RRGGBB"` / `"#RRGGBBAA"` or theme tokens. Not `"red"`. The theme is optional: hex works alone. Tokens in `examples/colors.ts`: `background surface raised border muted text red orange yellow green cyan blue magenta`.
-- A color in a variable: type it `Color` (exported), or `as const`; a plain `string` fails with an `Anim<Paint>` error. Same for gradient stops built outside the call.
-- `mix(a, b, share)` blends `share` of a into b. It is NOT a translucent colour: `mix(theme.background, theme.yellow, 0.2)` is 20% background, 80% yellow. For a faint colour: `mix(theme.yellow, "#00000000", 0.2)`, or `"#RRGGBBAA"`.
+- Colors (theme tokens switch per colour scheme by themselves): `"#RRGGBB"` / `"#RRGGBBAA"` or theme tokens. Not `"red"`. The theme is optional: hex works alone. Tokens in `examples/colors.ts`: `background surface raised border muted text red orange yellow green cyan blue magenta`.
+- A color in a variable: type it `Color`, or `as const`; a plain `string` fails with an `Anim<Paint>` error. Same for gradient stops built outside the call.
+- `mix(a, b, share)` blends `share` of a into b. It is NOT a translucent colour: `mix(theme.background, theme.yellow, 0.2)` is 20% background, 80% yellow. For a faint colour: `mix(theme.yellow, "#00000000", 0.2)`, or `"#RRGGBBAA"`. A translucent thin stroke trips `low-contrast`: give it width or a stronger colour.
 - `stroke={{ color, width, cap, join, dash }}`. Gradients: `linear.across({ angle: 90, stops: [theme.blue, theme.cyan] })`, `linear({ from, to, stops })`, `radial.across({ stops })`, `radial({ center, radius, stops })`; stops are colors or `[offset, color]`, not mixed. `pattern({ size, tile })`. Effects: `effects={[blur(4), shadow({ color, blur: 6 })]}`; a blur under 1.5 units warns (WebKit draws it softer), so avoid it.
 
 ## Morph
@@ -106,11 +109,9 @@ npx tsc --noEmit -p . 2>&1 | grep my/scene   # check does NOT run TypeScript; th
 bun ../packages/svjeez/src/cli.ts frames my/scene.tsx --sheet --out /tmp/frames   # Read /tmp/frames/sheet.png
 ```
 
-`--times 0,1,2` picks frames, `--color-scheme dark` checks dark. One-shot scenes are sampled to their end; `frames` and `check` use the scene's `duration`. Fix every error, read each warning against a frame. `examples/tsconfig.json` has `noUncheckedIndexedAccess`: index `as const` tuples or per-item objects, not `arr[i]` of a plain array. `wasted-motion` (info) means a node changes while hidden; fine to leave when intentional, otherwise start it at its shown value. `moving-box` warns when a group placed with `at`/`anchor` has moving content; use `offset`. More patterns: `examples/readme/hero.tsx`, `layout/`, `springs/`, `epicycles/`.
+`--times 0,1,2` picks frames. `check` tests both colour schemes; `--color-scheme dark` on `frames` renders dark. **Always Read a frame**: `check` misses mis-anchored text and some overlaps of your own shapes. One-shot scenes are sampled to their end; `frames` and `check` use the scene's `duration`. Fix every error, read each warning against a frame. `examples/tsconfig.json` has `noUncheckedIndexedAccess`: index `as const` tuples or per-item objects, not `arr[i]` of a plain array. `wasted-motion` (info) means a node changes while hidden; fine to leave when intentional, otherwise start it at its shown value. `moving-box` warns when a group placed with `at`/`anchor` has moving content; use `offset`. More patterns: `examples/readme/hero.tsx`, `layout/`, `springs/`, `epicycles/`.
 
 ## Traps
 
 - `at` + `anchor` on a Group pins its measured box, which includes animated children. To move children as a unit, use `offset`.
-- A font has only the weights you loaded; `geist.face(w)` snaps to the nearest.
 - `rect(track(w), h)` is an error: track the whole geometry.
-- A `Color`/stop list typed as `string`/`(string | number)[][]` fails; use `Color` or `as const`.
