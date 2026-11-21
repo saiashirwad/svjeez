@@ -60,6 +60,7 @@ const Bar = ({
     geometry={rect(24, height, { radius: 5 })}
     at={[x, 120]}
     anchor="bottom-left"
+    origin="at"
     fill={theme.blue}
     scale={track<Vec>([1, 0]).to([1, 1], span(index * 0.15, 0.6), ease.out)}
   />
