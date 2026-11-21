@@ -181,6 +181,13 @@ const power = machine(scene, {
 scene.hit("switch").forEach((el) => el.addEventListener("click", () => power.send("press")));
 ```
 
+`machine()` is the shorthand. For logic that needs more, `rests(scene, places)` is just the visual half: `view.go(state)` moves the clocks to where that state rests, and any source of state can call it. An [XState](https://stately.ai/docs/xstate) actor does, nested and parallel states included:
+
+```ts
+const view = rests(scene, { "field.valid": { check: 1 }, "submit.sending": { spin: 1 } });
+actor.subscribe((snapshot) => view.go(snapshot.value));
+```
+
 <table align="center">
   <tr>
     <td align="center">
@@ -206,7 +213,7 @@ scene.hit("switch").forEach((el) => el.addEventListener("click", () => power.sen
   </tr>
 </table>
 
-All four run on [`examples/machines/page.ts`](examples/machines/page.ts).
+All four run on [`examples/machines/page.ts`](examples/machines/page.ts), next to a sign-up form whose parallel regions XState runs ([`xstate-form`](examples/xstate-form/index.tsx)).
 
 ## Film a real web app
 

@@ -21,6 +21,7 @@ const budgets = {
   tabs: { bytes: 5300, elements: 24, stops: 12, smil: 1, cost: 7 },
   stepper: { bytes: 7000, elements: 23, stops: 26, smil: 1, cost: 13 },
   "hover-card": { bytes: 3300, elements: 18, stops: 8, smil: 1, cost: 5 },
+  "xstate-form": { bytes: 5100, elements: 19, stops: 24, smil: 0, cost: 12 },
   clips: { bytes: 4300, elements: 30, stops: 16, smil: 0, cost: 6 },
   geometry: { bytes: 6850, elements: 19, stops: 10, smil: 5, cost: 8.8 },
   springs: { bytes: 7500, elements: 28, stops: 54, smil: 0, cost: 4 },

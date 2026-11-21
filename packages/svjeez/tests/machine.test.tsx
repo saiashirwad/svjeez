@@ -39,7 +39,7 @@ beforeAll(async () => {
   const entry = join(dir, "entry.ts");
   writeFileSync(
     entry,
-    `import * as lib from ${JSON.stringify(join(import.meta.dir, "../src/page.ts"))};\n(globalThis as any).lib = lib;\n`,
+    `import * as lib from ${JSON.stringify(join(import.meta.dir, "../src/page.ts"))};\nimport * as xstate from ${JSON.stringify(Bun.resolveSync("xstate", import.meta.dir))};\n(globalThis as any).lib = lib;\n(globalThis as any).xstate = xstate;\n`,
   );
   const built = await Bun.build({ entrypoints: [entry], target: "browser", format: "iife" });
   library = await built.outputs[0]!.text();
@@ -370,5 +370,195 @@ test("hit finds the marked elements, and a click on one can send an event", asyn
   await page.waitForFunction("scene.clock('open').time === 0.4");
 
   expect(await run(page, "return m.state;")).toBe("opened");
+  await page.close();
+});
+
+const PLACES = `${MOUNT}
+  globalThis.view = lib.rests(scene, {
+    closed: { open: 0 },
+    opened: { open: 1 },
+  });`;
+
+test("rests moves clocks to the places of a state name and remembers it", async () => {
+  const page = await mounted(PLACES);
+
+  expect(await run(page, "return [view.state, scene.clock('open').time];")).toEqual([undefined, 0]);
+
+  expect(
+    await run(
+      page,
+      `view.show("closed");
+       const ok = await view.go("opened");
+       return [ok, view.state, scene.clock('open').time];`,
+    ),
+  ).toEqual([true, "opened", 0.4]);
+
+  expect(
+    await run(page, "return [await view.go('closed'), view.state, scene.clock('open').time];"),
+  ).toEqual([true, "closed", 0]);
+  await page.close();
+});
+
+test("going again mid-way retargets from where the clock is", async () => {
+  const page = await mounted(PLACES);
+
+  const result = await run<[boolean, number, boolean, number]>(
+    page,
+    `const first = view.go("opened");
+     await new Promise((r) => setTimeout(r, 150));
+     const between = scene.clock('open').time;
+     const second = view.go("closed");
+     return [await first, between, await second, scene.clock('open').time];`,
+  );
+
+  expect(result[0]).toBe(false);
+  expect(result[1]).toBeGreaterThan(0);
+  expect(result[1]).toBeLessThan(0.4);
+  expect(result.slice(2)).toEqual([true, 0]);
+  await page.close();
+});
+
+test("show jumps with no animation and halts a move", async () => {
+  const page = await mounted(PLACES);
+
+  expect(
+    await run(
+      page,
+      `const moving = view.go("opened");
+       view.show("closed");
+       view.show("opened");
+       const at = scene.clock('open').time;
+       const ok = await moving;
+       return [ok, at, scene.clock('open').time, view.state];`,
+    ),
+  ).toEqual([false, 0.4, 0.4, "opened"]);
+  await page.close();
+});
+
+test("a nested value applies the parent's rests, then the child's over them", async () => {
+  const page = await mounted(`${MOUNT}
+    globalThis.view = lib.rests(scene, {
+      form: { open: 0.5, grow: 0 },
+      "form.editing": { open: 1 },
+      "menu.open.hovered": { step: 1 },
+      unused: { grow: 1 },
+    });`);
+
+  const times = "[scene.clock('open').time, scene.clock('grow').time, scene.clock('step').time]";
+
+  expect(
+    await run(page, `const ok = await view.go({ form: "editing" }); return [ok, ...${times}];`),
+  ).toEqual([true, 0.4, 0, 0]);
+
+  expect(await run(page, `view.show({ form: "idle" }); return ${times};`)).toEqual([0.2, 0, 0]);
+
+  expect(
+    await run(
+      page,
+      `const ok = await view.go({ menu: { open: "hovered" } }); return [ok, ...${times}];`,
+    ),
+  ).toEqual([true, 0.2, 0, 0.9]);
+  await page.close();
+});
+
+test("parallel regions move different clocks at once", async () => {
+  const page = await mounted(`${MOUNT}
+    globalThis.view = lib.rests(scene, {
+      "field.typing": { open: 1 },
+      "submit.sending": { grow: 1 },
+    });`);
+
+  expect(
+    await run(
+      page,
+      `const ok = await view.go({ field: "typing", submit: "sending" });
+       return [ok, scene.clock('open').time, scene.clock('grow').time];`,
+    ),
+  ).toEqual([true, 0.4, 0.4]);
+  await page.close();
+});
+
+test("a value that matches no place changes nothing and resolves false", async () => {
+  const page = await mounted(PLACES);
+
+  expect(
+    await run(
+      page,
+      `await view.go("opened");
+       return [await view.go("nope"), await view.go({ other: "x" }), view.state, scene.clock('open').time];`,
+    ),
+  ).toEqual([false, false, "opened", 0.4]);
+  await page.close();
+});
+
+test("places that do not fit the scene are refused with the fix", async () => {
+  const page = await mounted(MOUNT);
+
+  const refused = (places: string) =>
+    run<string>(
+      page,
+      `try { lib.rests(scene, ${places}); return ""; } catch (error) { return error.message; }`,
+    );
+
+  expect(await refused("{ a: { nope: 0 } }")).toBe(
+    'State "a" names the clock "nope", but this SVG has "open", "grow", "step". Name one of them.',
+  );
+  expect(await refused("{ a: { open: 2 } }")).toBe(
+    'State "a" rests the clock "open" at 2, but a place is progress from 0 to 1.',
+  );
+  await page.close();
+});
+
+test("an XState actor drives a view: parallel regions reach their rests", async () => {
+  const page = await mounted(`${MOUNT}
+    globalThis.view = lib.rests(scene, {
+      "field.empty": { open: 0 },
+      "field.typing": { open: 0.5 },
+      "field.valid": { open: 1 },
+      "submit.idle": { grow: 0 },
+      "submit.sending": { grow: 1 },
+    });
+    const form = xstate.createMachine({
+      type: "parallel",
+      states: {
+        field: {
+          initial: "empty",
+          states: {
+            empty: { on: { type: "typing" } },
+            typing: { on: { done: "valid" } },
+            valid: {},
+          },
+        },
+        submit: {
+          initial: "idle",
+          states: { idle: { on: { send: { guard: xstate.stateIn({ field: "valid" }), target: "sending" } } }, sending: {} },
+        },
+      },
+    });
+    globalThis.actor = xstate.createActor(form);
+    view.show(actor.getSnapshot().value);
+    actor.subscribe((snapshot) => view.go(snapshot.value));
+    actor.start();`);
+
+  const times = "[scene.clock('open').time, scene.clock('grow').time]";
+
+  expect(await run(page, `return ${times};`)).toEqual([0, 0]);
+
+  await run(page, "actor.send({ type: 'type' });");
+  await page.waitForFunction("scene.clock('open').time === 0.2");
+
+  // The guard holds the button back until the field is valid.
+  await run(page, "actor.send({ type: 'send' });");
+  expect(await run(page, `return ${times};`)).toEqual([0.2, 0]);
+
+  await run(page, "actor.send({ type: 'done' });");
+  await page.waitForFunction("scene.clock('open').time === 0.4");
+  await run(page, "actor.send({ type: 'send' });");
+  await page.waitForFunction("scene.clock('grow').time === 0.4");
+
+  expect(await run(page, `return [${times}, actor.getSnapshot().value];`)).toEqual([
+    [0.4, 0.4],
+    { field: "valid", submit: "sending" },
+  ]);
   await page.close();
 });

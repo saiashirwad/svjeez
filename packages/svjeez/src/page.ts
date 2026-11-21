@@ -3,7 +3,14 @@ import type { Seconds } from "./model/time";
 
 export { mount, pointer, scrolled, type ClockControl, type Driver, type Mounted } from "./clocks";
 
-export { machine, type Machine, type MachineSpec } from "./machine";
+export {
+  machine,
+  rests,
+  type Machine,
+  type MachineSpec,
+  type StateValue,
+  type View,
+} from "./machine";
 
 export { restyle, type RestyleOptions } from "./restyle";
 

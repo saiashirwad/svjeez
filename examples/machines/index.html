@@ -32,18 +32,38 @@
         width: 100%;
         height: auto;
       }
+      #xstate-form {
+        position: relative;
+      }
+      #xstate-form input {
+        position: absolute;
+        left: 10%;
+        top: 25.3%;
+        width: 62%;
+        height: 16%;
+        padding: 0 0 0 16px;
+        border: 0;
+        background: none;
+        font: inherit;
+        color: inherit;
+        outline: none;
+      }
       [data-hit] {
         cursor: pointer;
       }
     </style>
   </head>
   <body>
-    <p>Click the switch and the tabs. Step with Back and Next or the arrow keys. Hover the card.</p>
+    <p>
+      Click the switch and the tabs. Step with Back and Next or the arrow keys. Hover the card. Type
+      an email into the form.
+    </p>
     <main>
       <div id="toggle"></div>
       <div id="tabs"></div>
       <div id="stepper"></div>
       <div id="hover-card"></div>
+      <div id="xstate-form"></div>
     </main>
     <script type="module" src="./page.ts"></script>
   </body>
