@@ -104,12 +104,12 @@ With `loop: true`, end every motion where it began: `track(0).to(1, a).to(0, b)`
 
 ## Check workflow
 
-From `examples/`, after every change:
+From the repo root, after every change (`my/scene` is `examples/my/scene.tsx`, `examples/my/scene/index.tsx`, `site:<name>` or a path):
 
 ```sh
-bun ../packages/svjeez/src/cli.ts check my/scene.tsx
-npx tsc --noEmit -p . 2>&1 | grep my/scene   # check does NOT run TypeScript; the repo-wide run has unrelated errors
-bun ../packages/svjeez/src/cli.ts frames my/scene.tsx --sheet --out /tmp/frames   # Read /tmp/frames/sheet.png
+bun run scene check my/scene
+bunx tsc --noEmit -p examples      # type errors: check from source does NOT run TypeScript (only the bin does)
+bun run scene frames my/scene --sheet --out /tmp/frames   # Read /tmp/frames/sheet.png
 ```
 
 `--times 0,1,2` picks frames. `check` tests both colour schemes; `--color-scheme dark` on `frames` renders dark. **Always Read a frame**: `check` misses mis-anchored text and some overlaps of your own shapes. One-shot scenes are sampled to their end; `frames` and `check` use the scene's `duration`. Fix every error, read each warning against a frame. `examples/tsconfig.json` has `noUncheckedIndexedAccess`: index `as const` tuples or per-item objects, not `arr[i]` of a plain array. `wasted-motion` (info) means a node changes while hidden; fine to leave when intentional, otherwise start it at its shown value. `moving-box` warns when a group placed with `at`/`anchor` has moving content; use `offset`. More patterns: `examples/readme/hero.tsx`, `layout/`, `springs/`, `epicycles/`.
