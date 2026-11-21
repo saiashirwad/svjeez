@@ -34,6 +34,10 @@ bun run typecheck              # tsc catches what the build does not, like a num
 
 After writing or changing a scene, run `bun run scene check` and `bun run typecheck`, then look at frames. A ✓ from the build only means it compiled. The root `bun run check` is lint, format and tsc, not `svjeez check`.
 
+## The single-file binary
+
+`packages/bin` compiles the CLI and every add-on package into one executable (`bun run build:bin` writes `packages/bin/dist/svjeez`), for scenes with no `package.json` or `node_modules` beside them. Its `check` also reports TypeScript errors as `type-error`. When a package gains or loses an export, update `packages/bin/src/modules.ts`; its test fails until you do. If a package starts reading a file beside its code, make sure the build's embed plugin handles it (`packages/bin/scripts/build.ts`).
+
 ## Site
 
 `site/` is the Astro site at svjeez.texoport.in. Its own scenes and films live in `site/src/scenes/`; it also shows scenes from `examples/` through the `@examples/*` path. Its scripts run Astro under Bun with the `@svjeez/source` condition. Run `bun run dev` at the root, or `bun run build` and `bun run typecheck` inside `site/`. `bun run deploy` builds and deploys through Alchemy's `Cloudflare.Website.Astro` (`site/alchemy.run.ts`). The site pins TypeScript 6, because `astro check` does not support TypeScript 7.
