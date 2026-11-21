@@ -29,6 +29,8 @@
     "dom-react-vite",
     "dom-component",
     "dom-svelte",
-    "live-editor"
+    "live-editor",
+    "clocks/page.ts",
+    "clocks/env.d.ts"
   ]
 }

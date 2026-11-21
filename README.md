@@ -131,6 +131,35 @@ Add a `key` across two or more JSX states and `morph()` diffs the tree at compil
   <sub><b>Build-time TeX derivation</b> · 25 KB · <a href="examples/math/index.tsx"><code>examples/math/index.tsx</code></a></sub>
 </p>
 
+## Drive part of a scene from the page
+
+Give a `<Sequence>` a `clock` and page code can play it, reverse it, or scrub it from scroll or the pointer. The span is where the clock plays in the plain file.
+
+```tsx
+const open = clock("open", span(1, 0.5));
+
+<Sequence clock={open}>{/* tracks count from 0 inside */}</Sequence>;
+```
+
+```ts
+import { mount, scrolled } from "svjeez/page";
+
+const scene = mount(document.querySelector("#card svg")!); // an inline <svg>
+const open = scene.clock("open");
+
+card.addEventListener("click", () => (open.time > 0 ? open.reverse() : open.play()));
+
+scene.clock("grow").follow(scrolled(card));
+```
+
+The `.svg` still plays the span on its own, so an `<img>` embed keeps working. Inside a clock only CSS-animated properties are allowed (offset, scale, rotate, opacity, colors, draw), and anything that would need SMIL is a compile error.
+
+<p align="center">
+  <img src="examples/dist/clocks.svg" alt="A settings card: a panel slides open, bars grow, a status dot pulses" width="480">
+  <br>
+  <sub><b>Two clocks and a status dot</b> · 12 KB · <a href="examples/clocks/index.tsx"><code>examples/clocks/index.tsx</code></a> · <a href="examples/clocks/page.ts"><code>page.ts</code></a></sub>
+</p>
+
 ## Film a real web app
 
 Skip redrawing UI by hand. `@svjeez/dom` drives a React, Svelte, or HTML app in Playwright, snapshots DOM states in light and dark mode, and compiles the transitions into one zero-JS `.svg`:
