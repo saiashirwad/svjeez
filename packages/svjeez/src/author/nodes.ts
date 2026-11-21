@@ -23,6 +23,8 @@ export interface Common {
    * Inside a component that has an id it is scoped by it: `card1/note`. Unique in its scope.
    */
   readonly id?: string;
+  /** A name page code finds this node by: its outermost SVG element gets `data-hit="name"`. Several nodes may share one. */
+  readonly hit?: string;
   readonly ref?: Ref;
   readonly at?: Anim<Vec> | Anchor;
   readonly anchor?: AnchorPlace;

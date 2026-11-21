@@ -1036,6 +1036,7 @@ const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
 
   if (
     child!.clock !== undefined ||
+    (node.hit !== undefined && child!.hit !== undefined) ||
     node.clip !== undefined ||
     node.mask !== undefined ||
     node.blend !== undefined ||
@@ -1051,6 +1052,7 @@ const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
   return lifted(ctx, {
     ...child!,
     ...(node.clock && { clock: node.clock }),
+    ...(node.hit !== undefined && { hit: node.hit }),
     at: homed(node.at, [-x, -y]),
     ...(node.layers.length > 0 && {
       layers: node.layers,
@@ -1261,9 +1263,14 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
 
   const shown = node.scheme === undefined ? wrapped : schemed(ctx, node.scheme, wrapped);
 
-  const out = node.clock
+  const marked = node.clock
     ? { ...shown, attrs: { ...shown.attrs, ...clockAttrs(node.clock) } }
     : shown;
+
+  const out =
+    node.hit === undefined
+      ? marked
+      : { ...marked, attrs: { ...marked.attrs, "data-hit": node.hit } };
 
   if (ctx.sources)
     return {
