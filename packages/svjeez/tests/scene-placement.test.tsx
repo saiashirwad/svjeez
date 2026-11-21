@@ -732,6 +732,20 @@ describe("errors say what to write", () => {
     );
   });
 
+  test("an Align inside a Stack is told it can't sit there, not that it has an offset", () => {
+    expect(() =>
+      made(() => (
+        <Stack key="col">
+          <Align key="a" place="center">
+            <Shape fill="#000000" geometry={rect(10, 10)} />
+          </Align>
+        </Stack>
+      )),
+    ).toThrow(
+      '<Align> "a" places itself against the canvas or a ref, so it can\'t sit inside the <Stack>',
+    );
+  });
+
   test("an anchor on a path with no at, on a container's child, on Align and on a connector", () => {
     expect(() =>
       made(() => (

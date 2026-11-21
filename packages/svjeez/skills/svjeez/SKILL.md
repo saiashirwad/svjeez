@@ -104,6 +104,7 @@ Every node also takes `key ref at anchor origin rotate scale skew opacity motion
 | `track(v).to(v2, span, curve?).set(v3, when).loop(p).repeat(n).rewind(over)` | also `.span` (of the last step), `.map(fn)`, `.with(other)` |
 | `through(value, fn)`, `within(draw, from, to)` | map a number or track; a part's own 0-to-1 share of a whole's progress |
 | `motion={[{ opacity: track… }, enter(span, { from }), exit(span, { to }), wiggle(amp, { seed })]}` | layers: plain objects of `offset rotate scale skew opacity`; first outermost, the node's own props innermost |
+| `motion={along(path, progress, { turn? })}` | a layer that moves the node's [0,0] along a path by arc length (`progress` 0..1, a number or a track; `turn` faces the heading); drive it with the same track as the line's `draw` and it sits at the tip |
 | `sampled(fn, span, { tolerance })` | any function of time (`t` from 0) fitted to few keys |
 | `ease.out`, `ease.in`, `ease.inOut`, `ease.pop`, `ease.linear`, `ease.spring()` | curves (default `ease.out`); a spring's `.settle` is the span it needs |
 | `morph(a, b, span)`, `morph.between(states, spans, { stagger, enter, exit, curve })` | state to state by key |
@@ -203,6 +204,7 @@ Runtime errors. `…` stands for a value the message fills in.
 | `JSX holds <…>, an SVG tag, which a scene doesn't draw: every node is a component, such as <Shape geometry={rect(w, h)} />.` | write components, and put the JSX pragma at the top of the file |
 | `… holds a <Run>, which draws only inside a <Text>. Put it in one, as in <Text font={…} size={…} fill={…}>a <Run weight={600}>bold</Run> word</Text>.` | put the `<Run>` in a `<Text>` |
 | `… has its own …, but the … it sits in places it.` | a container places its children: drop `at`, or nudge with a layer's `offset` |
+| `<Align> … places itself against the canvas or a ref, so it can't sit inside the <Stack>, ….` | move the `<Align>` out of the Stack/Grid/Center into a `<Group>` |
 | `… has both at and offset. at puts a point of its box somewhere; offset moves its own [0, 0] there.` | keep one: `offset` to move the node's own frame, `at` for a point of its box |
 | `anchor on … names the point its at places, but it has no at, so it stays where its coordinates put it.` | give the node an `at`, or drop `anchor` |
 | `… is a ref that is on no node.` | put the ref on a node the scene draws |
