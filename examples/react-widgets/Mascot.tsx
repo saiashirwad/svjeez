@@ -106,7 +106,9 @@ export const Mascot = () => {
 
     setResult(ok ? "success" : "failed");
 
-    if (!ok) passwordInput.current?.focus();
+    // Success replaces the form, and a removed input never blurs.
+    if (ok) setField(undefined);
+    else passwordInput.current?.focus();
   };
 
   const reset = () => {
