@@ -546,7 +546,8 @@ export const timing = (survey: Survey): void => {
         });
     }
 
-    wasted(survey, entry, hidden, named);
+    // An attached arrow's shaft and head move because the nodes they attach to do: not the author's to change.
+    if (!entry.ancestors.some((each) => each.authored?.ends)) wasted(survey, entry, hidden, named);
   }
 
   if (!moves && duration > 0)

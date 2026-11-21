@@ -499,6 +499,43 @@ group("timing", () => {
     ).not.toContain("wasted-motion");
   });
 
+  test("motion an attached arrow takes from its ends is not reported", () => {
+    const wired = made(() => {
+      const a = ref();
+      const b = ref();
+
+      return (
+        <Group>
+          <Shape
+            key="a"
+            ref={a}
+            geometry={rect(30, 20)}
+            at={[20, 30]}
+            fill="#336699"
+            motion={enter(span(0.2, 0.5), { from: { scale: 0 } })}
+          />
+          <Shape
+            key="b"
+            ref={b}
+            geometry={rect(30, 20)}
+            at={[150, 30]}
+            fill="#336699"
+            motion={enter(span(0.3, 0.5), { from: { scale: 0 } })}
+          />
+          <Arrow
+            key="link"
+            from={a.right}
+            to={b.left}
+            stroke={{ color: "#222222" }}
+            motion={enter(span(2, 0.5))}
+          />
+        </Group>
+      );
+    });
+
+    expect(only(wired, "wasted-motion")).toEqual([]);
+  });
+
   test("a scene where nothing moves, and one where nothing enters", () => {
     expect(
       only(
