@@ -430,6 +430,7 @@ const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed
   const mode = agreed(plan, entry, (node) => node.blend ?? "normal", "blend");
   const scheme = agreed(plan, entry, (node) => node.scheme, "scheme");
   const hit = agreed(plan, entry, (node) => node.hit, "hit");
+  const slot = agreed(plan, entry, (node) => node.slot, "slot");
 
   return {
     key: entry.key,
@@ -450,6 +451,7 @@ const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed
     ...(mode !== "normal" && { blend: mode }),
     ...(scheme !== undefined && { scheme }),
     ...(hit !== undefined && { hit }),
+    ...(slot !== undefined && { slot }),
     effects: effectsOf(plan, entry),
   };
 };
