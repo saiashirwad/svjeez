@@ -11,7 +11,7 @@ export interface ClockControl {
   readonly over: Seconds;
   /** Where the clock is now, from 0 to `over`. */
   readonly time: Seconds;
-  /** Show the clock at `time`, kept within 0 to `over`. Stops a to(), play() or reverse() in progress. */
+  /** Show the clock at `time`, kept within 0 to `over`. Stops a to(), play(), reverse() or loop() in progress. */
   seek(time: Seconds): void;
   /** Seek to `amount` of the way through the clock, from 0 to 1. */
   progress(amount: number): void;
@@ -25,6 +25,11 @@ export interface ClockControl {
   play(): Promise<boolean>;
   /** Run back to 0 in real time, as to(0) does. */
   reverse(): Promise<boolean>;
+  /**
+   * Run forward from where the clock is, in real time and without end: at `over` it wraps back to 0. Stopped by
+   * seek, progress, to, play, reverse and pause. Under reduced motion the clock shows 0 and doesn't run.
+   */
+  loop(): void;
   /** Stop where the clock is. */
   pause(): void;
   /** Let a driver move the clock. Returns the function that stops following. */
@@ -315,6 +320,26 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
     });
   };
 
+  const loop = () => {
+    halt();
+
+    if (calm()) {
+      show(0);
+
+      return;
+    }
+
+    const from = time;
+    const started = performance.now();
+
+    const tick = () => {
+      show((from + ((performance.now() - started) / 1000) * rate) % over);
+      frame = requestAnimationFrame(tick);
+    };
+
+    frame = requestAnimationFrame(tick);
+  };
+
   const seek = (at: Seconds) => {
     halt();
     show(clamp(at, over));
@@ -348,6 +373,7 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
     to: run,
     play: () => run(over),
     reverse: () => run(0),
+    loop,
     pause: halt,
     follow,
   };

@@ -1,4 +1,4 @@
-export { scene } from "./author/lower";
+export { looping, scene } from "./author/lower";
 
 export {
   Group,

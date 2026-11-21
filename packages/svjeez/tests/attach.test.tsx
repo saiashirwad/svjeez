@@ -3,13 +3,13 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { chromium, type Browser, type Page } from "playwright-core";
-import { Sequence, Shape, clock, enter, rect, scene, span } from "svjeez";
+import { Sequence, Shape, clock, enter, looping, rect, scene, span } from "svjeez";
 import { svg } from "svjeez/tools";
 
 const open = clock("open", span(0, 0.4));
 const grow = clock("grow", span(1, 0.4));
 
-const build = (states?: Record<string, Record<string, number>>) =>
+const build = (states?: Record<string, Record<string, number | typeof looping>>) =>
   svg.emit(
     scene({ size: [60, 40], duration: 4, title: "Attach", states }, () => (
       <>
@@ -175,5 +175,28 @@ test("mounted scenes list the states the scene declared", async () => {
 
   await run(page, ATTACH("{}"));
   expect(await run(page, "return attached.scene.states;")).toEqual(DECLARED);
+  await page.close();
+});
+
+test("a state the scene declares as looping runs its clock, and the next state rests it", async () => {
+  const page = await page_(
+    build({ idle: { open: 0 }, busy: { open: 1, grow: looping }, done: { grow: 1 } }),
+  );
+
+  expect(
+    await run(page, "return lib.attach(document.getElementById('host')).scene.states.busy;"),
+  ).toEqual({
+    open: 1,
+    grow: "loop",
+  });
+
+  await run(page, ATTACH("{ state: 'busy' }"));
+  await page.waitForFunction("attached.scene.clock('grow').time > 0");
+  expect(await run(page, "return attached.scene.clock('open').time;")).toBe(0.4);
+
+  await run(page, "attached.update({ state: 'done' });");
+  await page.waitForFunction("attached.scene.clock('grow').time === 0.4");
+  await page.waitForTimeout(100);
+  expect(await run(page, "return attached.scene.clock('grow').time;")).toBe(0.4);
   await page.close();
 });

@@ -563,3 +563,122 @@ test("an XState actor drives a view: parallel regions reach their rests", async 
   ]);
   await page.close();
 });
+
+const LOOPS = `${MOUNT}
+  globalThis.view = lib.rests(scene, {
+    idle: { open: 0 },
+    busy: { open: 1, grow: lib.looping },
+    done: { grow: 1 },
+    spin: { grow: lib.looping },
+  });
+  globalThis.sample = async (ms) => {
+    const times = [];
+    const end = performance.now() + ms;
+    while (performance.now() < end) {
+      times.push(scene.clock('grow').time);
+      await new Promise(requestAnimationFrame);
+    }
+    return times;
+  };`;
+
+test("a looping clock resolves at once, keeps running and wraps from its end back to 0", async () => {
+  const page = await mounted(LOOPS);
+
+  const result = await run<[boolean, number, number, boolean, boolean]>(
+    page,
+    `const t = performance.now(); const ok = await view.go("spin");
+     const quick = performance.now() - t < 100;
+     const times = await sample(1200);
+     return [ok, Math.max(...times), Math.min(...times.slice(5)), times.some((x, i) => i && x < times[i - 1]), quick];`,
+  );
+
+  expect(result[0]).toBe(true);
+  expect(result[1]).toBeGreaterThan(0.3);
+  expect(result[1]).toBeLessThanOrEqual(0.4);
+  expect(result[2]).toBeLessThan(0.1);
+  expect(result.slice(3)).toEqual([true, true]);
+  await page.close();
+});
+
+test("leaving a loop for a state that rests the clock runs it to the rest", async () => {
+  const page = await mounted(LOOPS);
+
+  expect(
+    await run(
+      page,
+      `await view.go("busy"); await new Promise((r) => setTimeout(r, 120));
+       const ok = await view.go("done"); return [ok, scene.clock('grow').time];`,
+    ),
+  ).toEqual([true, 0.4]);
+  await page.close();
+});
+
+test("leaving a loop for a state that does not name the clock pauses it where it is", async () => {
+  const page = await mounted(LOOPS);
+
+  const result = await run<[number, number, number]>(
+    page,
+    `await view.go("busy"); await new Promise((r) => setTimeout(r, 120));
+     await view.go("idle");
+     const paused = scene.clock('grow').time;
+     await new Promise((r) => setTimeout(r, 150));
+     return [paused, scene.clock('grow').time, scene.clock('open').time];`,
+  );
+
+  expect(result[0]).toBeGreaterThan(0);
+  expect(result[1]).toBe(result[0]);
+  expect(result[2]).toBe(0);
+  await page.close();
+});
+
+test("show starts a loop with no animation, and a later state still ends it", async () => {
+  const page = await mounted(LOOPS);
+
+  const result = await run<[number, boolean, number]>(
+    page,
+    `view.show("busy"); const open = scene.clock('open').time;
+     const times = await sample(300);
+     view.show("idle");
+     const held = scene.clock('grow').time;
+     await new Promise((r) => setTimeout(r, 100));
+     return [open, Math.max(...times) > 0, scene.clock('grow').time - held];`,
+  );
+
+  expect(result).toEqual([0.4, true, 0]);
+  await page.close();
+});
+
+test("under reduced motion a looping clock shows 0 and does not run", async () => {
+  const page = await mounted(LOOPS, "reduce");
+
+  expect(
+    await run(
+      page,
+      `const ok = await view.go("busy"); const times = await sample(300);
+       view.show("busy"); const shown = scene.clock('grow').time;
+       return [ok, Math.max(...times), shown];`,
+    ),
+  ).toEqual([true, 0, 0]);
+  await page.close();
+});
+
+test("a machine takes looping places, and the loop string from a scene's data-states means the same", async () => {
+  const page = await mounted(`${MOUNT}
+    globalThis.m = lib.machine(scene, {
+      initial: "idle",
+      states: { idle: { grow: 0 }, busy: { grow: "loop" } },
+      on: { start: { idle: "busy" }, stop: { busy: "idle" } },
+    });`);
+
+  expect(
+    await run(
+      page,
+      `const loops = lib.looping; const ok = await m.send("start");
+       await new Promise((r) => setTimeout(r, 120));
+       const running = scene.clock('grow').time > 0;
+       m.stop();
+       return [loops, ok, running, m.state];`,
+    ),
+  ).toEqual(["loop", true, true, "busy"]);
+  await page.close();
+});

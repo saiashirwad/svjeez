@@ -10,6 +10,7 @@ import {
   enter,
   font,
   line,
+  looping,
   linear,
   morph,
   rect,
@@ -350,5 +351,14 @@ describe("states", () => {
     );
     expect(() => stated({ shut: { open: NaN } })).toThrow("a place is progress from 0 to 1");
     expect(() => stated({ "": { open: 0 } })).toThrow("a state with an empty name");
+  });
+
+  test('may name a clock as looping, written as "loop", and nothing else', () => {
+    expect(stated({ busy: { open: looping } })).toContain(
+      `data-states="{&quot;busy&quot;:{&quot;open&quot;:&quot;loop&quot;}}"`,
+    );
+    expect(looping).toBe("loop");
+    // @ts-expect-error a place is a number or looping
+    expect(() => stated({ busy: { open: "spin" } })).toThrow("a place is progress from 0 to 1");
   });
 });
