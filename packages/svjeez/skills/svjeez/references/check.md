@@ -73,7 +73,7 @@ Use it to confirm a beat before rendering frames: where a node landed, whether i
 | `low-contrast` | warning, info | text or a thin line too close to the flat color behind it, in either scheme |
 | `loop-seam` | warning | a looping scene jumps when it starts again: a value ends where it didn't start, a node enters and never leaves, or an arrow's ends follow a node that scales or moves in |
 | `visible-at-zero` | error | shown at 0s and cut straight back in, or filled while its stroke draws in |
-| `nothing-enters` | info | everything is on screen from 0s and nothing enters |
+| `nothing-enters` | info | everything is on screen from 0s and nothing enters (not reported for a steady loop: true scene) |
 | `wasted-motion` | info | a value changes before the node is first seen, or after it is gone for good |
 | `static` | warning, info | nothing in the scene moves, or a value changes only after the scene ends |
 | `moving-filter` | warning, info | a filter redrawn every frame; a warning when it covers a tenth of the canvas or more |

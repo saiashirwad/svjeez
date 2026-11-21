@@ -481,6 +481,10 @@ const arrives = (scene: Scene, node: SceneNode): boolean => {
   );
 };
 
+/** A looping scene whose end meets its start: nothing enters there, since entering would break the loop. */
+const steadyLoop = (survey: Survey): boolean =>
+  survey.scene.loop && !survey.out.some((found) => found.code === "loop-seam");
+
 export const timing = (survey: Survey): void => {
   const { scene } = survey;
   const { duration } = scene;
@@ -558,7 +562,7 @@ export const timing = (survey: Survey): void => {
       message: `Nothing in the scene moves in its ${seconds(duration)}.`,
       fix: "Animate something, or make it a still picture with a duration of 0.",
     });
-  else if (moves && !enters)
+  else if (moves && !enters && !steadyLoop(survey))
     add(survey, {
       code: "nothing-enters",
       severity: "info",
