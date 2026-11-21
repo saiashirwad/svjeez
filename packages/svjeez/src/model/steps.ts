@@ -6,7 +6,14 @@ import { num } from "./format";
 import { isCurved, splitCurve, type Controls } from "./curve";
 import type { Animated, Key, Lane, Vec } from "./ir";
 import { isLane } from "./lane";
-import { endSlope, isSpring, type Curve, type Spring } from "../author/spring";
+import {
+  endSlope,
+  isCurveFn,
+  isSpring,
+  sampleCurve,
+  type Curve,
+  type Spring,
+} from "../author/spring";
 
 export interface Step<V> {
   readonly start: Seconds;
@@ -367,6 +374,26 @@ const segmentsOf = <T>(
         : undefined;
   };
 
+  /** A CurveFn move, from `current`, as linear pieces through the curve's samples. `until` cuts it short. */
+  const sweep = (fn: (p: number) => number, step: Step<{ readonly value: T }>, value: T): void => {
+    const from = current;
+    const share = Math.min(1, (end(step) - step.start) / step.over);
+    const samples = sampleCurve(fn).filter(([p]) => p <= share + EPSILON);
+
+    if (share < 1 - EPSILON) samples.push([share, fn(share)]);
+
+    samples.slice(1).forEach(([p, f], i) => {
+      const [before] = samples[i]!;
+
+      apply({
+        start: step.start + step.over * before,
+        over: step.over * (p - before),
+        ease: ease.linear,
+        value: p >= 1 - EPSILON ? value : mix(from, value, f, where),
+      });
+    });
+  };
+
   const spring = (curve: Spring, start: Seconds, stop: Seconds, value: T, ends: boolean): void => {
     const parts = componentsOf(mix, where);
     const from = parts.split(current);
@@ -415,7 +442,8 @@ const segmentsOf = <T>(
       const stop = Math.min(close, cut, step.until ?? Infinity);
 
       spring(curve, step.start, stop, value, stop === close && cut > close + EPSILON);
-    } else if (step.until !== undefined && step.until < step.start + step.over - EPSILON) {
+    } else if (isCurveFn(curve)) sweep(curve, step, value);
+    else if (step.until !== undefined && step.until < step.start + step.over - EPSILON) {
       const progress = (step.until - step.start) / step.over;
       const [head] = splitEase(curve, progress, "repeat({ until })");
 
@@ -438,6 +466,12 @@ const segmentsOf = <T>(
       );
 
     if (isSpring(curve)) spring(curve, start, clockEnd, initial, true);
+    else if (isCurveFn(curve))
+      sweep(
+        curve,
+        { start, over: data.rewind.over, ease: curve, values: { value: initial } },
+        initial,
+      );
     else apply({ start, over: data.rewind.over, ease: curve, value: initial });
   }
 

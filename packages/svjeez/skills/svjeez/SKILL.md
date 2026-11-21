@@ -105,7 +105,7 @@ Every node also takes `key ref at anchor origin rotate scale skew opacity motion
 | `through(value, fn)`, `within(draw, from, to)` | map a number or track; a part's own 0-to-1 share of a whole's progress |
 | `motion={[{ opacity: track… }, enter(span, { from }), exit(span, { to }), wiggle(amp, { seed }), along(path, progress, { turn })]}` | layers: plain objects of `offset rotate scale skew opacity`; first outermost, the node's own props innermost; `along` rides a path by arc length like `draw` (same track = at the line's tip) |
 | `sampled(fn, span, { tolerance })` | any function of time (`t` from 0) fitted to few keys |
-| `ease.out`, `ease.in`, `ease.inOut`, `ease.pop`, `ease.linear`, `ease.spring()` | curves (default `ease.out`); a spring's `.settle` is the span it needs |
+| `ease.out`, `ease.in`, `ease.inOut`, `ease.pop`, `ease.linear`, `ease.spring()` | curves (default `ease.out`); a spring's `.settle` is the span it needs. Any `(k) => number` is a curve too, running 0 at `k = 0` to 1 at `k = 1` (overshoot between is fine); it is sampled into linear pieces, no code ships |
 | `morph(a, b, span)`, `morph.between(states, spans, { stagger, enter, exit, curve })` | state to state by key |
 
 | Layout | |
@@ -155,8 +155,7 @@ npx svjeez frames scene.tsx --sheet --out frames/   # look: open frames/sheet.pn
 | `type-error` | TypeScript rejects the file (the single-file `svjeez` binary checks types itself) |
 | `compile-error` | the scene threw while it was built: the message says what to write |
 | `compile-warning` | an SVG file or string the scene was given carries a warning |
-| `never-visible` | a node hidden, painting nothing or covered at every time |
-| `zero-size` | geometry, text or an image with no size |
+| `never-visible`, `zero-size` | a node hidden, painting nothing or covered at every time; geometry, text or an image with no size |
 | `off-canvas` | outside the canvas at every time (error), or cut by its edge at rest |
 | `text-overflow` | text past the canvas at rest, or a line wider than its `width` |
 | `overlap` | two texts drawn over each other while both are fully shown |
@@ -203,7 +202,7 @@ Runtime errors. `…` stands for a value the message fills in.
 | `JSX holds <…>, an SVG tag, which a scene doesn't draw: every node is a component, such as <Shape geometry={rect(w, h)} />.` | write components, and put the JSX pragma at the top of the file |
 | `… holds a <Run>, which draws only inside a <Text>. Put it in one, as in <Text font={…} size={…} fill={…}>a <Run weight={600}>bold</Run> word</Text>.` | put the `<Run>` in a `<Text>` |
 | `… has its own …, but the … it sits in places it.` | a container places its children: drop `at`, or nudge with a layer's `offset` |
-| `<Align> … places itself against the canvas or a ref, so it can't sit inside the <Stack>, ….` | move the `<Align>` out of the Stack/Grid/Center into a `<Group>` |
+| `… places itself against the canvas or a ref, so it can't sit inside the …, which places its children.` | an `<Align>` can't be a Stack/Grid/Center child: put it in a `<Group>` |
 | `… has both at and offset. at puts a point of its box somewhere; offset moves its own [0, 0] there.` | keep one: `offset` to move the node's own frame, `at` for a point of its box |
 | `anchor on … names the point its at places, but it has no at, so it stays where its coordinates put it.` | give the node an `at`, or drop `anchor` |
 | `… is a ref that is on no node.` | put the ref on a node the scene draws |

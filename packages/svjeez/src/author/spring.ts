@@ -393,9 +393,64 @@ export class Spring {
   }
 }
 
-export type Curve = Ease | Spring;
+/** Your own easing: progress 0..1 in, how far along the move it is out (0 at 0, 1 at 1; it may overshoot between). Sampled into linear pieces when the scene builds, so the SVG carries no code. */
+export type CurveFn = (progress: number) => number;
+
+export type Curve = Ease | Spring | CurveFn;
+
+export const isCurveFn = (curve: Curve): curve is CurveFn => curve instanceof Function;
 
 export const isSpring = (curve: Curve): curve is Spring => curve instanceof Spring;
+
+const SAMPLE_BASE = 16;
+const SAMPLE_DEPTH = 6;
+const SAMPLE_TOLERANCE = 5e-4;
+
+/** The progress values to sample a CurveFn at: even, then halved wherever a straight piece misses the curve by more than a visible amount. Deterministic. */
+export const sampleCurve = (fn: CurveFn): readonly (readonly [at: number, value: number])[] => {
+  const at = (p: number): number => {
+    const value = fn(p);
+
+    if (!Number.isFinite(value))
+      throw new SceneError(
+        `A curve function returned ${value} for progress ${p}. It must return a finite number.`,
+      );
+
+    return value;
+  };
+
+  const [start, finish] = [at(0), at(1)];
+
+  if (Math.abs(start) > 1e-6 || Math.abs(finish - 1) > 1e-6)
+    throw new SceneError(
+      `A curve function must return 0 at progress 0 and 1 at progress 1, got ${start} and ${finish}. Shape the way there, and let the track's values set where it starts and ends.`,
+    );
+  const out: (readonly [number, number])[] = [[0, 0]];
+
+  const refine = (a: number, fa: number, b: number, fb: number, depth: number): void => {
+    const mid = (a + b) / 2;
+    const fm = at(mid);
+
+    if (depth < SAMPLE_DEPTH && Math.abs(fm - (fa + fb) / 2) > SAMPLE_TOLERANCE) {
+      refine(a, fa, mid, fm, depth + 1);
+      refine(mid, fm, b, fb, depth + 1);
+    } else {
+      out.push([mid, fm], [b, fb]);
+    }
+  };
+
+  let [prev, fprev] = [0, 0];
+
+  for (let i = 1; i <= SAMPLE_BASE; i++) {
+    const p = i / SAMPLE_BASE;
+    const fp = i === SAMPLE_BASE ? 1 : at(p);
+
+    refine(prev, fprev, p, fp, 0);
+    [prev, fprev] = [p, fp];
+  }
+
+  return out;
+};
 
 export const endSlope = (curve: Ease): number => {
   switch (curve.kind) {
