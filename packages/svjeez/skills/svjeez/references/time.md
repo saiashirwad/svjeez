@@ -25,29 +25,7 @@ const [crouch, leap, land] = span(0.1, 0.3).chain(0.12, 0.25);
 
 ## Clocks the page drives
 
-`clock(name, span)` makes a clock that page code can play, reverse or scrub. `<Sequence clock={c}>` runs its children on it, and tracks inside count from 0 as in any `<Sequence>`. The span is where the clock plays in the plain `.svg`, so `<img>` embeds, `frames` and `check` show it there.
-
-```tsx
-const open = clock("open", span(1, 0.5));
-
-<Sequence clock={open}>
-  <Panel />              {/* its tracks run from 0 to 0.5s on "open" */}
-</Sequence>
-```
-
-```ts
-import { mount, scrolled } from "svjeez/page";
-
-const scene = mount(document.querySelector("#card svg")!); // an inline <svg>, not an <img>
-const open = scene.clock("open");
-
-card.addEventListener("click", () => (open.time > 0 ? open.reverse() : open.play()));
-scene.clock("grow").follow(scrolled(card));
-```
-
-- A clock has `seek(seconds)`, `progress(amount)` (0 to 1), `play()` and `reverse()` (promises that resolve false when something else moves the clock first), `pause()`, `time`, `over` and `follow(driver)`. A driver is a function `(progress) => stop`; `scrolled(el)` and `pointer(el, { axis })` are built in. Under reduced motion, `play()` and `reverse()` jump straight to where they're going. Animations on the scene's own clock keep playing.
-- Everything animates on a clock. Mounting also takes over the SMIL inside it (a morph, a moving gradient, an animated effect, a text-path start), replacing it with attributes the clock sets; the `.svg` on its own still plays it.
-- Clocks don't nest, two `clock()` values can't share a name, and a track belongs to one clock.
+`clock(name, span)` and `<Sequence clock={c}>` put part of a scene on a clock that page code can play, scrub or rest at a state: [`interactive.md`](interactive.md).
 
 ## Loops and seams
 
