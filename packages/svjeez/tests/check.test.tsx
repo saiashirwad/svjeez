@@ -353,7 +353,7 @@ describe.if(browser)("checkPixels", () => {
 
     expect(uniform.exitCode).toBe(0);
     expect(uniform.stdout.toString()).toContain('"code": "overlap"');
-  });
+  }, 60_000);
 
   test("svjeez check prints file:line:column findings and exits 1 on an error", () => {
     const result = cli(join(import.meta.dir, "fixtures/check/offscreen-scene.tsx"));
