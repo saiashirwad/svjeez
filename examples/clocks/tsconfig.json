@@ -1,0 +1,5 @@
+{
+  "extends": "../tsconfig.json",
+  "include": ["page.ts", "env.d.ts"],
+  "exclude": []
+}

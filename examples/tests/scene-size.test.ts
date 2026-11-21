@@ -16,6 +16,7 @@ const budgets = {
   "readme/basic": { bytes: 1600, elements: 7, stops: 4, smil: 0, cost: 2 },
   "readme/loops": { bytes: 2200, elements: 7, stops: 20, smil: 0, cost: 3 },
   "readme/motion": { bytes: 1600, elements: 6, stops: 5, smil: 0, cost: 2 },
+  clocks: { bytes: 4700, elements: 33, stops: 20, smil: 0, cost: 10 },
   clips: { bytes: 4300, elements: 30, stops: 16, smil: 0, cost: 6 },
   geometry: { bytes: 6850, elements: 19, stops: 10, smil: 5, cost: 8.8 },
   springs: { bytes: 7500, elements: 28, stops: 54, smil: 0, cost: 4 },
