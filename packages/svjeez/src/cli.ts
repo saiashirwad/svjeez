@@ -777,6 +777,13 @@ const COMMANDS = new Map([
 ]);
 
 const [command = "", ...args] = process.argv.slice(2);
+const HELP = new Set(["help", "--help", "-h"]);
+
+if (HELP.has(command) || args.some((arg) => arg === "--help" || arg === "-h")) {
+  console.log(USAGE);
+  process.exit(0);
+}
+
 const run = COMMANDS.get(command) ?? (() => fail(USAGE));
 
 await run(args).catch((error: Error) => fail(error.stack ?? error.message));

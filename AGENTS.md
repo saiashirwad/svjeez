@@ -19,6 +19,21 @@ track("").to("Save drafts", span(0, 1), ease.out);
 
 Save closed unions for the rendering layer below (e.g. IR curves lowered to `cubic-bezier` or `steps`), where every backend must handle every case. String unions are still fine for genuinely fixed facts, like `scheme: "light" | "dark"`.
 
+## Checking a scene
+
+Run these from the root (or from `examples/` or `site/`). `<scene>` is an example name (`pendulum`, `readme/hero`), `site:<name>` for `site/src/scenes`, or a path.
+
+```sh
+bun run scene check <scene>    # problems with file:line and a fix; exits 1 on errors
+bun run scene frames <scene>   # PNG frames to look at (add --sheet, --times 0,1.5)
+bun run scene dev <scene>      # live preview with a scrubber
+bun run scene svg <scene> --out x.svg
+bun run example <name...>      # build examples into examples/dist/
+bun run typecheck              # tsc catches what the build does not, like a number as a key
+```
+
+After writing or changing a scene, run `bun run scene check` and `bun run typecheck`, then look at frames. A ✓ from the build only means it compiled. The root `bun run check` is lint, format and tsc, not `svjeez check`.
+
 ## Site
 
 `site/` is the Astro site at svjeez.texoport.in. Its own scenes and films live in `site/src/scenes/`; it also shows scenes from `examples/` through the `@examples/*` path. Its scripts run Astro under Bun with the `@svjeez/source` condition. Run `bun run dev` at the root, or `bun run build` and `bun run typecheck` inside `site/`. `bun run deploy` builds and deploys through Alchemy's `Cloudflare.Website.Astro` (`site/alchemy.run.ts`). The site pins TypeScript 6, because `astro check` does not support TypeScript 7.

@@ -69,7 +69,14 @@ const build = async (name: string): Promise<boolean> => {
 
     return true;
   } catch (error) {
-    console.error(`✗ ${name}\n  ${error instanceof Error ? error.message : String(error)}`);
+    // A SceneError's message says what to change; anything else is a crash, and its stack says where.
+    const detail = !(error instanceof Error)
+      ? String(error)
+      : error.name === "SceneError"
+        ? error.message
+        : (error.stack ?? error.message);
+
+    console.error(`✗ ${name}\n  ${detail}`);
 
     return false;
   }
