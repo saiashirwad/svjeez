@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { LaneReport } from "svjeez/tools";
@@ -275,3 +275,38 @@ test("svjeez dev serves the scene with its params and rebuilds it when the scene
     server.kill();
   }
 }, 20_000);
+
+const ONCE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 60" width="100" height="60" role="img" aria-labelledby="t">
+  <title id="t">c</title>
+  <style><![CDATA[
+.a{animation-duration:5s;animation-iteration-count:1;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%{translate:15px 35px}100%{translate:95px 35px}}
+.m1{animation-name:k1;animation-timing-function:linear}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-4.25s!important;animation-play-state:paused!important}}
+]]></style>
+  <circle r="5" fill="#000000" class="a m1"/>
+</svg>`;
+
+test("svjeez frames samples a scene that plays once to its end and clears the frames an earlier run wrote", () => {
+  const dir = mkdtempSync(join(tmpdir(), "svjeez-once-"));
+  const file = join(dir, "once.svg");
+  const out = join(dir, "out");
+  writeFileSync(file, ONCE);
+  mkdirSync(out);
+
+  for (const stale of ["frame-09-9_000s.png", "sheet.png"]) writeFileSync(join(out, stale), "old");
+  writeFileSync(join(out, "notes.txt"), "keep");
+  const result = cli("frames", file, "--out", out, "--count", "3");
+
+  if (result.exitCode !== 0 && /Chromium|playwright-core/.test(result.stderr.toString())) return;
+  expect(result.exitCode).toBe(0);
+  expect(result.stdout.toString()).toContain("plays once, 5s");
+  expect(result.stdout.toString()).not.toContain("loop 5s");
+
+  expect(readdirSync(out).sort()).toEqual([
+    "frame-00-0_000s.png",
+    "frame-01-2_500s.png",
+    "frame-02-5_000s.png",
+    "notes.txt",
+  ]);
+});

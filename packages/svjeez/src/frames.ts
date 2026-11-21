@@ -242,7 +242,8 @@ export const renderFrames = async (svg: string, options: FrameOptions): Promise<
     const { duration, loops, colorScheme, capture } = await stage(browser, svg, settings);
 
     // A loop is sampled over [0, duration); a scene that plays once also shows its held last frame.
-    const spread = loops || options.times !== undefined ? undefined : Math.max(1, options.count - 1);
+    const spread =
+      loops || options.times !== undefined ? undefined : Math.max(1, options.count - 1);
 
     const times =
       options.times ??
