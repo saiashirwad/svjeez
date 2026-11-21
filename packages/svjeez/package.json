@@ -46,6 +46,11 @@
       "types": "./package-dist/tools.d.ts",
       "default": "./package-dist/tools.js"
     },
+    "./typecheck": {
+      "@svjeez/source": "./src/typecheck.ts",
+      "types": "./package-dist/typecheck.d.ts",
+      "default": "./package-dist/typecheck.js"
+    },
     "./frames": {
       "@svjeez/source": "./src/frames.ts",
       "types": "./package-dist/frames.d.ts",

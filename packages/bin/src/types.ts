@@ -2,7 +2,8 @@ import { existsSync } from "node:fs";
 import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
-import { typeErrors, type Hint, type Problem } from "svjeez/tools";
+import type { Problem } from "svjeez/tools";
+import { typeErrors, type Hint } from "svjeez/typecheck";
 import type * as TS from "typescript";
 import { assets, type Assets } from "./assets";
 
