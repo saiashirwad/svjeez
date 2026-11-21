@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">The pendulum wave</title>
+  <desc id="d">Fifteen pendulums released together from one angle. Their periods are whole-number ratios, so the row falls into traveling waves, folds into an S, and returns to a straight line every twelve seconds.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:12s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,12.5%,25%,37.5%,50%,62.5%,75%,87.5%,100%{rotate:24deg}6.25%,18.75%,31.25%,43.75%,56.25%,68.75%,81.25%,93.75%{rotate:-24deg}}
+.m1{animation-name:k1;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes k2{0%,11.111%,22.222%,33.333%,44.444%,55.556%,66.667%,77.778%,88.889%,100%{rotate:24deg}5.556%,16.667%,27.778%,38.889%,50%,61.111%,72.222%,83.333%,94.444%{rotate:-24deg}}
+.m2{animation-name:k2;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes k3{0%,10%,20%,30%,40%,50%,60%,70%,80%,90%,100%{rotate:24deg}5%,15%,25%,35%,45%,55%,65%,75%,85%,95%{rotate:-24deg}}
+.m3{animation-name:k3;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes k4{0%,9.091%,18.182%,27.273%,36.364%,45.455%,54.545%,63.636%,72.727%,81.818%,90.909%,100%{rotate:24deg}4.545%,13.636%,22.727%,31.818%,40.909%,50%,59.091%,68.182%,77.273%,86.364%,95.455%{rotate:-24deg}}
+.m4{animation-name:k4;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes k5{0%,8.333%,16.667%,25%,33.333%,41.667%,50%,58.333%,66.667%,75%,83.333%,91.667%,100%{rotate:24deg}4.167%,12.5%,20.833%,29.167%,37.5%,45.833%,54.167%,62.5%,70.833%,79.167%,87.5%,95.833%{rotate:-24deg}}
+.m5{animation-name:k5;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes k6{0%,7.692%,15.385%,23.077%,30.769%,38.462%,46.154%,53.846%,61.538%,69.231%,76.923%,84.615%,92.308%,100%{rotate:24deg}3.846%,11.538%,19.231%,26.923%,34.615%,42.308%,50%,57.692%,65.385%,73.077%,80.769%,88.462%,96.154%{rotate:-24deg}}
+.m6{animation-name:k6;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes k7{0%,7.143%,14.286%,21.429%,28.571%,35.714%,42.857%,50%,57.143%,64.286%,71.429%,78.571%,85.714%,92.857%,100%{rotate:24deg}3.571%,10.714%,17.857%,25%,32.143%,39.286%,46.429%,53.571%,60.714%,67.857%,75%,82.143%,89.286%,96.429%{rotate:-24deg}}
+.m7{animation-name:k7;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes k8{0%,6.667%,13.333%,20%,26.667%,33.333%,40%,46.667%,53.333%,60%,66.667%,73.333%,80%,86.667%,93.333%,100%{rotate:24deg}3.333%,10%,16.667%,23.333%,30%,36.667%,43.333%,50%,56.667%,63.333%,70%,76.667%,83.333%,90%,96.667%{rotate:-24deg}}
+.m8{animation-name:k8;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes k9{0%,6.25%,12.5%,18.75%,25%,31.25%,37.5%,43.75%,50%,56.25%,62.5%,68.75%,75%,81.25%,87.5%,93.75%,100%{rotate:24deg}3.125%,9.375%,15.625%,21.875%,28.125%,34.375%,40.625%,46.875%,53.125%,59.375%,65.625%,71.875%,78.125%,84.375%,90.625%,96.875%{rotate:-24deg}}
+.m9{animation-name:k9;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes k10{0%,5.882%,11.765%,17.647%,23.529%,29.412%,35.294%,41.176%,47.059%,52.941%,58.824%,64.706%,70.588%,76.471%,82.353%,88.235%,94.118%,100%{rotate:24deg}2.941%,8.824%,14.706%,20.588%,26.471%,32.353%,38.235%,44.118%,50%,55.882%,61.765%,67.647%,73.529%,79.412%,85.294%,91.176%,97.059%{rotate:-24deg}}
+.m10{animation-name:k10;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes k11{0%,5.556%,11.111%,16.667%,22.222%,27.778%,33.333%,38.889%,44.444%,50%,55.556%,61.111%,66.667%,72.222%,77.778%,83.333%,88.889%,94.444%,100%{rotate:24deg}2.778%,8.333%,13.889%,19.444%,25%,30.556%,36.111%,41.667%,47.222%,52.778%,58.333%,63.889%,69.444%,75%,80.556%,86.111%,91.667%,97.222%{rotate:-24deg}}
+.m11{animation-name:k11;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes k12{0%,5.263%,10.526%,15.789%,21.053%,26.316%,31.579%,36.842%,42.105%,47.368%,52.632%,57.895%,63.158%,68.421%,73.684%,78.947%,84.211%,89.474%,94.737%,100%{rotate:24deg}2.632%,7.895%,13.158%,18.421%,23.684%,28.947%,34.211%,39.474%,44.737%,50%,55.263%,60.526%,65.789%,71.053%,76.316%,81.579%,86.842%,92.105%,97.368%{rotate:-24deg}}
+.m12{animation-name:k12;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes k13{0%,5%,10%,15%,20%,25%,30%,35%,40%,45%,50%,55%,60%,65%,70%,75%,80%,85%,90%,95%,100%{rotate:24deg}2.5%,7.5%,12.5%,17.5%,22.5%,27.5%,32.5%,37.5%,42.5%,47.5%,52.5%,57.5%,62.5%,67.5%,72.5%,77.5%,82.5%,87.5%,92.5%,97.5%{rotate:-24deg}}
+.m13{animation-name:k13;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes k14{0%,4.762%,9.524%,14.286%,19.048%,23.81%,28.571%,33.333%,38.095%,42.857%,47.619%,52.381%,57.143%,61.905%,66.667%,71.429%,76.19%,80.952%,85.714%,90.476%,95.238%,100%{rotate:24deg}2.381%,7.143%,11.905%,16.667%,21.429%,26.19%,30.952%,35.714%,40.476%,45.238%,50%,54.762%,59.524%,64.286%,69.048%,73.81%,78.571%,83.333%,88.095%,92.857%,97.619%{rotate:-24deg}}
+.m14{animation-name:k14;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes k15{0%,4.545%,9.091%,13.636%,18.182%,22.727%,27.273%,31.818%,36.364%,40.909%,45.455%,50%,54.545%,59.091%,63.636%,68.182%,72.727%,77.273%,81.818%,86.364%,90.909%,95.455%,100%{rotate:24deg}2.273%,6.818%,11.364%,15.909%,20.455%,25%,29.545%,34.091%,38.636%,43.182%,47.727%,52.273%,56.818%,61.364%,65.909%,70.455%,75%,79.545%,84.091%,88.636%,93.182%,97.727%{rotate:-24deg}}
+.m15{animation-name:k15;animation-timing-function:cubic-bezier(.37,0,.63,1)}
+@keyframes k16{0%,83.194%{translate:0 -22px}83.195%,100%{translate:0 0}}
+.m16{animation-name:k16}
+@keyframes k17{0%,83.195%{translate:0 0}8.195%,91.528%{translate:0 -22px}16.25%,99.862%,100%{translate:0 -44px}24.583%{translate:0 -66px}32.917%{translate:0 -88px}41.25%{translate:0 -110px}49.583%{translate:0 -132px}57.917%{translate:0 -154px}66.528%{translate:0 -176px}74.862%{translate:0 -198px}}
+.m17{animation-name:k17;animation-timing-function:steps(1)}
+@keyframes k18{0%,8.195%,16.25%,24.583%,32.917%,41.25%,49.583%,57.917%,66.528%,74.862%,83.195%,91.528%,99.862%,100%{translate:0 0}0.417%,8.75%,17.362%,25.695%,34.028%,42.362%,50.695%,58.75%,67.083%,75.417%,83.75%,92.083%{translate:0 -22px}1.528%,9.862%,18.195%,26.25%,34.583%,42.917%,51.25%,59.583%,67.917%,76.25%,84.583%,92.917%{translate:0 -44px}2.083%,10.417%,18.75%,27.083%,35.417%,43.75%,52.083%,60.417%,68.75%,77.083%,85.417%,93.75%{translate:0 -66px}3.195%,11.25%,19.583%,27.917%,36.528%,44.862%,53.195%,61.528%,69.862%,78.195%,86.528%,94.862%{translate:0 -88px}4.028%,12.362%,20.417%,28.75%,37.083%,45.417%,54.028%,62.083%,70.695%,79.028%,87.362%,95.695%{translate:0 -110px}4.583%,12.917%,21.528%,29.862%,38.195%,46.528%,54.862%,63.195%,71.25%,79.583%,87.917%,96.25%{translate:0 -132px}5.417%,14.028%,22.362%,30.695%,38.75%,47.083%,55.417%,63.75%,72.083%,80.417%,88.75%,97.083%{translate:0 -154px}6.25%,14.583%,22.917%,31.25%,39.583%,47.917%,56.25%,64.583%,72.917%,81.25%,89.583%,97.917%{translate:0 -176px}7.362%,15.417%,23.75%,32.083%,40.695%,49.028%,57.362%,65.695%,74.028%,82.362%,90.695%,99.028%{translate:0 -198px}}
+.m18{animation-name:k18;animation-timing-function:steps(1)}
+@keyframes k19{0%,83.194%{translate:-7.2px 0}83.195%,100%{translate:0 0}}
+.m19{animation-name:k19}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-2.7s!important;animation-play-state:paused!important}}
+]]></style>
+  <defs>
+    <clipPath id="c1">
+      <polygon points="-12 -3 84 -3 84 18.84 -12 18.84"/>
+    </clipPath>
+  </defs>
+  <rect width="960" height="540" fill="var(--background)"/>
+  <rect x="48.5" y="88.5" width="864" height="18" rx="9" fill="var(--raised)" stroke="var(--border)"/>
+  <circle cx="150" cy="97" r="2.6" fill="var(--border)"/>
+  <circle cx="197.143" cy="97" r="2.6" fill="var(--border)"/>
+  <circle cx="244.286" cy="97" r="2.6" fill="var(--border)"/>
+  <circle cx="291.429" cy="97" r="2.6" fill="var(--border)"/>
+  <circle cx="338.571" cy="97" r="2.6" fill="var(--border)"/>
+  <circle cx="385.714" cy="97" r="2.6" fill="var(--border)"/>
+  <circle cx="432.857" cy="97" r="2.6" fill="var(--border)"/>
+  <circle cx="480" cy="97" r="2.6" fill="var(--border)"/>
+  <circle cx="527.143" cy="97" r="2.6" fill="var(--border)"/>
+  <circle cx="574.286" cy="97" r="2.6" fill="var(--border)"/>
+  <circle cx="621.429" cy="97" r="2.6" fill="var(--border)"/>
+  <circle cx="668.571" cy="97" r="2.6" fill="var(--border)"/>
+  <circle cx="715.714" cy="97" r="2.6" fill="var(--border)"/>
+  <circle cx="762.857" cy="97" r="2.6" fill="var(--border)"/>
+  <circle cx="810" cy="97" r="2.6" fill="var(--border)"/>
+  <g transform="translate(150 106)" style="transform-origin:150px 106px" class="a m1">
+    <line x1="0" y1="0" x2="0" y2="300" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+    <circle cy="300" r="11" fill="var(--orange)"/>
+    <circle cx="-3.5" cy="296.5" r="4" fill="var(--background)" opacity="0.55"/>
+  </g>
+  <g transform="translate(197.143 106)" style="transform-origin:197.143px 106px" class="a m2">
+    <line x1="0" y1="0" x2="0" y2="237.037" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+    <circle cy="237.037" r="11" fill="var(--orange)"/>
+    <circle cx="-3.5" cy="233.537" r="4" fill="var(--background)" opacity="0.55"/>
+  </g>
+  <g transform="translate(244.286 106)" style="transform-origin:244.286px 106px" class="a m3">
+    <line x1="0" y1="0" x2="0" y2="192" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+    <circle cy="192" r="11" fill="var(--orange)"/>
+    <circle cx="-3.5" cy="188.5" r="4" fill="var(--background)" opacity="0.55"/>
+  </g>
+  <g transform="translate(291.429 106)" style="transform-origin:291.429px 106px" class="a m4">
+    <line x1="0" y1="0" x2="0" y2="158.678" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+    <circle cy="158.678" r="11" fill="var(--orange)"/>
+    <circle cx="-3.5" cy="155.178" r="4" fill="var(--background)" opacity="0.55"/>
+  </g>
+  <g transform="translate(338.571 106)" style="transform-origin:338.571px 106px" class="a m5">
+    <line x1="0" y1="0" x2="0" y2="133.333" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+    <circle cy="133.333" r="11" fill="var(--orange)"/>
+    <circle cx="-3.5" cy="129.833" r="4" fill="var(--background)" opacity="0.55"/>
+  </g>
+  <g transform="translate(385.714 106)" style="transform-origin:385.714px 106px" class="a m6">
+    <line x1="0" y1="0" x2="0" y2="113.609" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+    <circle cy="113.609" r="11" fill="var(--orange)"/>
+    <circle cx="-3.5" cy="110.109" r="4" fill="var(--background)" opacity="0.55"/>
+  </g>
+  <g transform="translate(432.857 106)" style="transform-origin:432.857px 106px" class="a m7">
+    <line x1="0" y1="0" x2="0" y2="97.959" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+    <circle cy="97.959" r="11" fill="var(--orange)"/>
+    <circle cx="-3.5" cy="94.459" r="4" fill="var(--background)" opacity="0.55"/>
+  </g>
+  <g transform="translate(480 106)" style="transform-origin:480px 106px" class="a m8">
+    <line x1="0" y1="0" x2="0" y2="85.333" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+    <circle cy="85.333" r="11" fill="var(--orange)"/>
+    <circle cx="-3.5" cy="81.833" r="4" fill="var(--background)" opacity="0.55"/>
+  </g>
+  <g transform="translate(527.143 106)" style="transform-origin:527.143px 106px" class="a m9">
+    <line x1="0" y1="0" x2="0" y2="75" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+    <circle cy="75" r="11" fill="var(--orange)"/>
+    <circle cx="-3.5" cy="71.5" r="4" fill="var(--background)" opacity="0.55"/>
+  </g>
+  <g transform="translate(574.286 106)" style="transform-origin:574.286px 106px" class="a m10">
+    <line x1="0" y1="0" x2="0" y2="66.436" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+    <circle cy="66.436" r="11" fill="var(--orange)"/>
+    <circle cx="-3.5" cy="62.936" r="4" fill="var(--background)" opacity="0.55"/>
+  </g>
+  <g transform="translate(621.429 106)" style="transform-origin:621.429px 106px" class="a m11">
+    <line x1="0" y1="0" x2="0" y2="59.259" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+    <circle cy="59.259" r="11" fill="var(--orange)"/>
+    <circle cx="-3.5" cy="55.759" r="4" fill="var(--background)" opacity="0.55"/>
+  </g>
+  <g transform="translate(668.571 106)" style="transform-origin:668.571px 106px" class="a m12">
+    <line x1="0" y1="0" x2="0" y2="53.186" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+    <circle cy="53.186" r="11" fill="var(--orange)"/>
+    <circle cx="-3.5" cy="49.686" r="4" fill="var(--background)" opacity="0.55"/>
+  </g>
+  <g transform="translate(715.714 106)" style="transform-origin:715.714px 106px" class="a m13">
+    <line x1="0" y1="0" x2="0" y2="48" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+    <circle cy="48" r="11" fill="var(--orange)"/>
+    <circle cx="-3.5" cy="44.5" r="4" fill="var(--background)" opacity="0.55"/>
+  </g>
+  <g transform="translate(762.857 106)" style="transform-origin:762.857px 106px" class="a m14">
+    <line x1="0" y1="0" x2="0" y2="43.537" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+    <circle cy="43.537" r="11" fill="var(--orange)"/>
+    <circle cx="-3.5" cy="40.037" r="4" fill="var(--background)" opacity="0.55"/>
+  </g>
+  <g transform="translate(810 106)" style="transform-origin:810px 106px" class="a m15">
+    <line x1="0" y1="0" x2="0" y2="39.669" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+    <circle cy="39.669" r="11" fill="var(--orange)"/>
+    <circle cx="-3.5" cy="36.169" r="4" fill="var(--background)" opacity="0.55"/>
+  </g>
+  <g transform="translate(840 499.76)" clip-path="url(#c1)" font-size="12" fill="var(--muted)">
+    <g class="a m19">
+      <text x="28.8" y="12.24" class="a m16">1</text>
+      <text x="36 36 36 36 36 36 36 36 36 36" y="12.24 34.24 56.24 78.24 100.24 122.24 144.24 166.24 188.24 210.24" class="a m17">0123456789</text>
+      <text x="43.2" y="12.24">.</text>
+      <text x="50.4 50.4 50.4 50.4 50.4 50.4 50.4 50.4 50.4 50.4" y="12.24 34.24 56.24 78.24 100.24 122.24 144.24 166.24 188.24 210.24" class="a m18">0123456789</text>
+    </g>
+    <text y="12.24">t =</text>
+    <text x="57.6" y="12.24" xml:space="preserve" class="a m19"> s</text>
+  </g>
+</svg>
