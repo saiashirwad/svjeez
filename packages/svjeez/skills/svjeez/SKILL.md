@@ -66,7 +66,7 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 5. **Time is spans on clocks.** `span(start, over)` is when; build each beat from the one before (`a.next(0.4)`, `a.chain(…)`, `a.cascade(3, 0.1)`, `a.shift(dt)`). A plain number is only ever a length. `<Sequence when={span(…)}>` starts a clock of its own.
 6. **Containers place children.** `<Stack>`, `<Grid>`, `<Center>` and `<Align>` measure boxes and set each child's place; a child in one takes no `at`. Prefer them to coordinates you compute.
 7. **Refs are handles that move nothing.** `const card = ref()`, `<Group ref={card}>`, then `card.right`, `card.center`, `card.part("title")` from anywhere: arrows attach to them, `<Align to={card}>` places against them, a track's `at` goes to them.
-8. **Morph goes between keyed states.** `morph.between([a, b, c], spans)` matches nodes by `key`: one in both states moves, resizes and recolors; one only in the later state enters; one only in the earlier leaves.
+8. **Morph goes between keyed states.** `morph.between([a, b, c], spans)` matches nodes by `key`: one in both states moves, resizes and recolors, even into another container (it travels above both); one only in the later state enters; one only in the earlier leaves.
 
 ## Cheat sheet
 
