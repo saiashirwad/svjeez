@@ -858,7 +858,7 @@ const lowerAll = (
       return merged;
     }
 
-    const name = given.props.key;
+    const name = keyOf(given);
 
     if (name !== undefined && taken.has(name))
       throw new SceneError(
@@ -951,6 +951,25 @@ const lowered = (
         kind: "group",
         children,
       };
+const isWord = (key: string | number): key is string => typeof key === "string";
+
+const isNumber = (key: string | number): key is number => typeof key === "number";
+
+/** The key a node was given, as text: a number reads as its digits, anything but a string or number is refused. */
+const keyOf = (given: Extract<SceneElement, { readonly props: object }>): string | undefined => {
+  const key = "key" in given.props ? given.props.key : undefined;
+
+  if (key === undefined || isWord(key)) return key;
+
+  if (isNumber(key) && Number.isFinite(key)) return String(key);
+
+  throw new SceneError(
+    `A key is a string or a number, got ${String(key)}.`,
+    'Write key="name" or key={index}.',
+    { ...(writtenAt(given) && { source: writtenAt(given)! }) },
+  );
+};
+
 
       return done(node);
     }

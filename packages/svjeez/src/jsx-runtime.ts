@@ -20,6 +20,8 @@ export const componentName = <P>(type: Given<P>): string | undefined =>
 /** What JSX takes as a key: text, or a number such as a list index. */
 export type Key = string | number;
 
+const isCount = (key: Key): key is number => typeof key === "number";
+
 export const build = <P extends { readonly children?: Child }>(
   type: Given<P>,
   props: P,
@@ -37,8 +39,11 @@ export const build = <P extends { readonly children?: Child }>(
     );
 
   try {
-    // Types ask for a text key, but untyped JSX may hand a number, as from .map((item, i) => ...): use its text.
-    return type(key === undefined ? props : { ...props, key: String(key) });
+    // A number key, as from .map((item, i) => ...), reads as its text. Anything else passes through for the node to
+    // refuse with an error that names it.
+    return type(
+      key === undefined ? props : { ...props, key: isCount(key) && Number.isFinite(key) ? String(key) : key },
+    );
   } catch (error) {
     if (!(error instanceof Error)) throw error;
     const thrown = thrownFrom(error);

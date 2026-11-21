@@ -16,7 +16,8 @@ import type { Geometry, Paint } from "./values";
 export { Ref, ref } from "./refs";
 
 export interface Common {
-  readonly key?: string;
+  /** Names the node among its siblings. A number is the same as its text, as in React. */
+  readonly key?: string | number;
   readonly ref?: Ref;
   /** Puts the anchor point of this node's box here (the top-left unless `anchor` says otherwise). Not with `offset`. */
   readonly at?: Anim<Vec> | Anchor;
