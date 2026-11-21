@@ -122,6 +122,7 @@ Fonts and data: `font(bytes)`, `font.load(path)`, `font.family(...faces)`, `goog
 
 - **A prop changes on its own schedule**: give the prop a track. `fill={track(theme.text).to(theme.blue, span(1, 0.3))}`.
 - **A node arrives, leaves or wobbles**: a layer in `motion` (`enter`, `exit`, `wiggle`, or `{ opacity: track(…) }`). Layers multiply opacity and add offsets on top of the node's own props, so an entrance never fights a prop's track.
+- **Scattered things** (stars, particles): `const rand = random("stars")` gives a seeded generator of numbers in [0, 1), so every build is the same. Never `Math.random()`.
 - **Something draws itself**: `draw={track(0).to(1, span(…))}` on a `<Shape>`, an `<Arrow>`, a chart series.
 - **Two layouts of one picture** (chart values, before/after code): `morph` between keyed states, not hand-written tracks per node.
 - **A changing number**: `count()` in a `<Text>`, never texts crossfaded per value.
