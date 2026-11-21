@@ -247,6 +247,8 @@ const straightKeys = (samples: readonly Sample[], tolerance: number): RunKey[] =
   return keys;
 };
 
+const KNOWN = ["stiffness", "damping", "mass"];
+
 const finite = (value: number, what: string): number => {
   if (!(value > 0 && Number.isFinite(value)))
     throw new SceneError(`ease.spring() needs a positive, finite ${what}, got ${value}.`);
@@ -263,7 +265,16 @@ export class Spring {
   readonly zeta: number;
   #settle: Seconds | undefined;
 
-  constructor({ stiffness = 170, damping = 26, mass = 1 }: SpringOptions) {
+  constructor(options: SpringOptions) {
+    const { stiffness = 170, damping = 26, mass = 1 } = options;
+    const unknown = Object.keys(options).filter((key) => !KNOWN.includes(key));
+
+    if (unknown.length > 0)
+      throw new SceneError(
+        `ease.spring() doesn't take ${unknown.map((key) => `"${key}"`).join(", ")}; its options are ${KNOWN.join(", ")}.`,
+        "Write it as ease.spring({ stiffness: 170, damping: 26, mass: 1 }).",
+      );
+
     this.stiffness = finite(stiffness, "stiffness");
     this.damping = finite(damping, "damping");
     this.mass = finite(mass, "mass");

@@ -31,6 +31,29 @@ const build = () =>
     )),
   );
 
+const trunk = clock("trunk", span(0, 0.4));
+const eyes = clock("eyes", span(0.1, 0.2));
+
+const nestedBuild = () =>
+  svg.emit(
+    scene({ size: [60, 40], duration: 4, title: "Nested machine" }, () => (
+      <Sequence clock={trunk}>
+        <Group key="trunk" at={[0, 0]} motion={enter(span(0, 0.4))}>
+          <Shape key="body" geometry={rect(20, 20)} fill="#ff0000" />
+          <Sequence clock={eyes}>
+            <Shape
+              key="eye"
+              at={[5, 5]}
+              geometry={rect(5, 5)}
+              fill="#0000ff"
+              motion={enter(span(0, 0.2))}
+            />
+          </Sequence>
+        </Group>
+      </Sequence>
+    )),
+  );
+
 let browser: Browser;
 let library = "";
 
@@ -50,9 +73,10 @@ afterAll(() => browser.close());
 
 const page_ = async (
   reducedMotion: "no-preference" | "reduce" = "no-preference",
+  markup = build(),
 ): Promise<Page> => {
   const page = await browser.newPage({ reducedMotion, viewport: { width: 400, height: 300 } });
-  await page.setContent(`<!doctype html><body style="margin:0">${build()}</body>`);
+  await page.setContent(`<!doctype html><body style="margin:0">${markup}</body>`);
   await page.addScriptTag({ content: library });
 
   return page;
@@ -570,6 +594,7 @@ const LOOPS = `${MOUNT}
     busy: { open: 1, grow: lib.looping },
     done: { grow: 1 },
     spin: { grow: lib.looping },
+    early: { grow: 0.1 },
   });
   globalThis.sample = async (ms) => {
     const times = [];
@@ -610,6 +635,44 @@ test("leaving a loop for a state that rests the clock runs it to the rest", asyn
        const ok = await view.go("done"); return [ok, scene.clock('grow').time];`,
     ),
   ).toEqual([true, 0.4]);
+  await page.close();
+});
+
+test("leaving a loop for a rest behind the clock runs on through the end, never backward", async () => {
+  const page = await mounted(LOOPS);
+
+  const result = await run<[boolean, number[]]>(
+    page,
+    `await view.go("busy"); await new Promise((r) => setTimeout(r, 150));
+     const start = scene.clock('grow').time;
+     const moving = view.go("early");
+     const times = [start, ...(await sample(150))];
+     const ok = await moving;
+     return [ok, [...times, scene.clock('grow').time]];`,
+  );
+
+  const times = result[1];
+  const drops = times.filter((time, at) => at > 0 && time < times[at - 1]!);
+
+  expect(result[0]).toBe(true);
+  expect(times[0]).toBeGreaterThan(0.1);
+  expect(drops).toHaveLength(1);
+  expect(drops[0]).toBeLessThan(0.1);
+  expect(times.at(-1)).toBeCloseTo(0.04, 9);
+  await page.close();
+});
+
+test("a clock that is not looping still runs backward to a rest behind it", async () => {
+  const page = await mounted(LOOPS);
+
+  const result = await run<number[]>(
+    page,
+    `scene.clock('grow').seek(0.3); const moving = view.go("early");
+     const times = await sample(60); await moving;
+     return times;`,
+  );
+
+  expect(result.every((time, at) => at === 0 || time <= result[at - 1]!)).toBe(true);
   await page.close();
 });
 
@@ -680,5 +743,28 @@ test("a machine takes looping places, and the loop string from a scene's data-st
        return [loops, ok, running, m.state];`,
     ),
   ).toEqual(["loop", true, true, "busy"]);
+  await page.close();
+});
+
+test("a state rests an outer clock and the clock nested in it, each at its own place", async () => {
+  const page = await page_("no-preference", nestedBuild());
+
+  const result = await run<unknown[]>(
+    page,
+    `${MOUNT}
+     const view = lib.rests(scene, {
+       closed: { trunk: 0, eyes: 0 },
+       awake: { trunk: 1 },
+       "awake.watching": { eyes: 1 },
+     });
+     const ok = await view.go({ awake: "watching" });
+     const opacity = (name) => getComputedStyle(document.querySelector('[data-clock="' + name + '"]')).opacity;
+     const times = [scene.clock('trunk').time, scene.clock('eyes').time, opacity('trunk'), opacity('eyes')];
+     await view.go("awake");
+     const rested = [scene.clock('trunk').time, scene.clock('eyes').time];
+     return [ok, times, rested];`,
+  );
+
+  expect(result).toEqual([true, [0.4, 0.2, "1", "1"], [0.4, 0.2]]);
   await page.close();
 });

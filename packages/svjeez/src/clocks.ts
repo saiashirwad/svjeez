@@ -18,9 +18,10 @@ export interface ClockControl {
   /**
    * Run from where the clock is to `time` (kept within 0 to `over`) in real time, so the scene's own easing plays,
    * forward or backward. Resolves true if it got there, false if something else moved the clock first. Under reduced
-   * motion it jumps.
+   * motion it jumps. With `forward`, a `time` behind the clock is reached by running on through `over`, wrapping to 0 and
+   * on to `time`, so the clock never runs backward.
    */
-  to(time: Seconds): Promise<boolean>;
+  to(time: Seconds, options?: { readonly forward?: boolean }): Promise<boolean>;
   /** Run forward to `over` in real time, as to(over) does. */
   play(): Promise<boolean>;
   /** Run back to 0 in real time, as to(0) does. */
@@ -30,6 +31,8 @@ export interface ClockControl {
    * seek, progress, to, play, reverse and pause. Under reduced motion the clock shows 0 and doesn't run.
    */
   loop(): void;
+  /** True while loop() runs the clock, until something else moves it. */
+  readonly looping: boolean;
   /** Stop where the clock is. */
   pause(): void;
   /** Let a driver move the clock. Returns the function that stops following. */
@@ -266,6 +269,7 @@ const grouped = (root: Element): Map<string, Group> => {
 const control = (name: string, { over, rate, parts, tweens }: Group) => {
   let time = 0;
   let frame = 0;
+  let looping = false;
   let ending: ((reached: boolean) => void) | undefined;
   const drivers = new Set<() => void>();
 
@@ -282,12 +286,13 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
   };
 
   const halt = () => {
+    looping = false;
     cancelAnimationFrame(frame);
     ending?.(false);
     ending = undefined;
   };
 
-  const run = (end: Seconds) => {
+  const run = (end: Seconds, forward = false) => {
     const to = clamp(end, over);
 
     return new Promise<boolean>((resolve) => {
@@ -302,11 +307,17 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
 
       const from = time;
       const started = performance.now();
-      const length = (Math.abs(to - from) / rate) * 1000;
+      const wraps = forward && to < from;
+      const distance = wraps ? over - from + to : Math.abs(to - from);
+      const length = (distance / rate) * 1000;
 
       const tick = () => {
         const done = Math.min(1, (performance.now() - started) / length);
-        show(from + (to - from) * done);
+
+        const along = from + distance * done;
+
+        if (!wraps) show(from + (to - from) * done);
+        else show(done === 1 ? to : along >= over ? along - over : along);
 
         if (done < 1) frame = requestAnimationFrame(tick);
         else {
@@ -331,6 +342,8 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
 
     const from = time;
     const started = performance.now();
+
+    looping = true;
 
     const tick = () => {
       show((from + ((performance.now() - started) / 1000) * rate) % over);
@@ -370,7 +383,10 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
     },
     seek,
     progress,
-    to: run,
+    to: (time, { forward = false } = {}) => run(time, forward),
+    get looping() {
+      return looping;
+    },
     play: () => run(over),
     reverse: () => run(0),
     loop,
