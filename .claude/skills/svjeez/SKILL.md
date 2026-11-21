@@ -65,6 +65,7 @@ export default scene(
 
 - `span(start, over)` is a window in seconds; `s.next(over, gap?)`, `s.shift(dt)`, `s.end`.
 - `track(v)`: `.to(value, span, curve?)`, `.set(value, span)`, `.loop(period, { phase })`, `.repeat(n)`, `.rewind(over)`, `.map(fn)`, `.span`. Each returns a new track. `.set` cuts at `span.start`; its length is ignored. `loop(period)` counts from 0s (a motion starting at 0.4s waits 0.4s each cycle); `repeat()` counts from the first step. The curve is the third argument of `.to`, never part of `span`: `.to(1, span(0, 1), ease.linear)`. Steps must not overlap: start the next at `first.next(over)`.
+- `keyframes([[t, value, curve?], …])`: a track through values at absolute times (increasing); each curve shapes the leg arriving at its frame. Use it for bounces instead of chained `.to`.
 - Curves: `ease.out` (default), `ease.in`, `ease.inOut`, `ease.pop`, `ease.linear`, `ease.spring()` (`.settle` is its span), `ease.steps(n)`/`ease.hold` (jumps), or any `(k) => number` on 0..1 (`(k) => k * k`).
 - Stepped motion: `track(0).to(4, span(0, 4), ease.linear).map((v) => Math.floor(v) * 25)` (4 jumps of 25), or `.to(4, span, ease.steps(4))` when the curve alone is enough. Motion periodic on whole seconds hides at `--times 0,1,2`: sample off-grid (`0.3,1.3`).
 - Tracks work for: `at offset rotate scale skew opacity fill`, stroke `color`/`width`, `draw`, `trim`, `clip`, `geometry`, effect values. Plain numbers only: `Text size`, `width`, `letterSpacing`, `rect()`/`circle()` arguments, and `dash` (a plain array such as `[4, 4]`, not a number).

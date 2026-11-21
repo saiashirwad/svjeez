@@ -41,7 +41,15 @@ export { linear, pattern, radial } from "./author/paint";
 
 export { adjust, blur, displace, shadow } from "./author/effects";
 
-export { track, type Anim, type Goal, type LoopOptions, type Track } from "./author/track";
+export {
+  keyframes,
+  track,
+  type Anim,
+  type Goal,
+  type Keyframe,
+  type LoopOptions,
+  type Track,
+} from "./author/track";
 
 export { through, within, type Derived, type MapOptions } from "./author/derived";
 
