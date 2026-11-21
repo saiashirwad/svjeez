@@ -1,3 +1,4 @@
+import type { States } from "./model/ir";
 import type { Seconds } from "./model/time";
 import { RATE_ATTR } from "./svg/rate";
 
@@ -31,12 +32,14 @@ export interface ClockControl {
 }
 
 export interface Mounted {
+  /** Where each clock rests in each state, as the scene declared in `states`: empty when it declared none. */
+  readonly states: States;
   readonly clocks: ReadonlyMap<string, ClockControl>;
   /** The clock called `name`. Throws, naming the clocks the SVG has, when there is none. */
   clock(name: string): ClockControl;
   /** The elements marked `hit="name"` in the scene. Throws, naming the hit names the SVG has, when there are none. */
   hit(name: string): readonly Element[];
-  /** Stop every driver and every move of a clock, leaving the picture where it is. */
+  /** Stop every driver and every move of a clock, leaving the picture where it is. The SVG can be mounted again. */
   unmount(): void;
 }
 
@@ -357,15 +360,29 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
   return { clock, release };
 };
 
+// What a mount took over, by SVG: the SMIL it removed can't be read a second time, so a mount after an unmount reuses it.
+const taken = new WeakMap<Element, Map<string, Group>>();
+
+const statesOf = (svg: Element): States => JSON.parse(svg.getAttribute("data-states") ?? "{}");
+
 /**
  * Takes over the clocks of an inline SVG svjeez made (or of the SVGs inside `root`): their animations pause, their SMIL
  * is replaced by attributes the controls set, and the controls move them. Animations that are not on a clock go on playing.
+ *
+ * Mounting the same SVG again, as a framework that remounts does (mount, unmount, mount), works the same: the clocks
+ * start at 0 again.
  */
 export const mount = (root: Element): Mounted => {
-  const made = [...grouped(root)].map(([name, group]) => [name, control(name, group)] as const);
+  const svg = root.localName === "svg" ? root : (root.querySelector("svg") ?? root);
+  const groups = taken.get(svg) ?? grouped(root);
+
+  taken.set(svg, groups);
+
+  const made = [...groups].map(([name, group]) => [name, control(name, group)] as const);
   const clocks = new Map(made.map(([name, { clock }]) => [name, clock]));
 
   return {
+    states: statesOf(svg),
     clocks,
     clock: (name) => {
       const found = clocks.get(name);

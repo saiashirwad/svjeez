@@ -494,3 +494,32 @@ test("a clock's SMIL is replaced by attributes, and SMIL on the scene's own cloc
   expect(await run<string>(page, `return ${free};`)).not.toBe(first);
   await page.close();
 });
+
+test("mounting again after an unmount takes over the same clocks: a remount keeps morphs working", async () => {
+  const markup = moving({});
+  const expected = await page_(markup);
+  const page = await page_(markup);
+
+  await run(page, MOUNT);
+  await run(page, "scene.unmount();");
+  await run(page, MOUNT);
+
+  expect(await run(page, "return [...scene.clocks.keys()];")).toEqual(["open"]);
+
+  for (const share of [0.25, 0.5, 1]) {
+    await run(expected, `lib.seek(${1 + share * 0.6});`);
+    await run(page, `scene.clock('open').seek(${share * 0.6});`);
+
+    const want = await run<Look>(expected, ATTRIBUTES);
+    const got = await run<Look>(page, ATTRIBUTES);
+
+    expect(got.x2).toBeCloseTo(want.x2, 2);
+    expect(numbersOf(got.d).length).toBe(numbersOf(want.d).length);
+    numbersOf(got.d).forEach((value, index) =>
+      expect(value).toBeCloseTo(numbersOf(want.d)[index]!, 2),
+    );
+  }
+
+  await expected.close();
+  await page.close();
+});

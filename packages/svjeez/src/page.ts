@@ -12,6 +12,10 @@ export {
   type View,
 } from "./machine";
 
+export { attach, type Attached, type AttachOptions } from "./attach";
+
+export type { States } from "./model/ir";
+
 export { restyle, type RestyleOptions } from "./restyle";
 
 export {

@@ -29,6 +29,7 @@ import type {
   Scene,
   SceneNode,
   ShapeNode,
+  States,
   Face,
   TextLine,
   TextRun,
@@ -128,6 +129,12 @@ export interface SceneOptions {
    * left out), or false to play the motion for them too.
    */
   readonly still?: Seconds | false;
+  /**
+   * Where the scene's named clocks rest in each state, as progress from 0 to 1. A state is a name, or for nested and
+   * parallel states a dotted path such as "menu.open". The page passes the current state and the scene moves its clocks
+   * there; see `rests()` and `attach()` in svjeez/page.
+   */
+  readonly states?: States;
 }
 
 interface Ctx {
@@ -1337,6 +1344,32 @@ const lifted = (container: SceneElement & { readonly type: "group" }): MorphElem
   };
 };
 
+const checkStates = (states: States, clocks: ReadonlyMap<string, Clock>): void => {
+  const names = [...clocks.keys()].map((name) => `"${name}"`).join(", ") || "none";
+
+  for (const [state, places] of Object.entries(states)) {
+    if (state === "")
+      throw new SceneError(
+        "scene() got a state with an empty name.",
+        "Name each state in states, as in { open: { card: 1 } }.",
+      );
+
+    for (const [name, place] of Object.entries(places)) {
+      if (!clocks.has(name))
+        throw new SceneError(
+          `State "${state}" names the clock "${name}", but the scene's clocks are ${names}.`,
+          "Name a clock made with clock() and used by a <Sequence>.",
+        );
+
+      if (!Number.isFinite(place) || place < 0 || place > 1)
+        throw new SceneError(
+          `State "${state}" rests the clock "${name}" at ${place}, but a place is progress from 0 to 1.`,
+          "Give each clock a place from 0 (its start) to 1 (its end).",
+        );
+    }
+  }
+};
+
 const isBare = (el: SceneElement): boolean =>
   el.type === "fragment" ||
   (el.type === "group" && Object.keys(el.props).length === 0 && el.settle === undefined);
@@ -1407,6 +1440,8 @@ const lowerScene = (
     children,
   };
 
+  if (options.states) checkStates(options.states, ctx.clocks);
+
   const root = settle(drafted, ctx.notes, duration);
 
   const still =
@@ -1421,6 +1456,7 @@ const lowerScene = (
     ...(options.desc !== undefined && { desc: options.desc }),
     loop: options.loop ?? true,
     ...(still !== undefined && { still }),
+    ...(options.states && { states: options.states }),
     tokens: Object.fromEntries(ctx.tokens),
     fonts: ctx.fonts.families(),
     root,

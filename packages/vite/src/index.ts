@@ -1,4 +1,5 @@
-import { basename, extname, join } from "node:path";
+import { createHash } from "node:crypto";
+import { basename, extname, join, relative } from "node:path";
 import { pathToFileURL } from "node:url";
 import { settings } from "@svjeez/og/settings";
 import type { Plugin, ResolvedConfig, ViteDevServer } from "vite";
@@ -20,7 +21,10 @@ export interface SvjeezOptions {
   readonly cacheDir?: string;
 }
 
-const QUERY = /\?svjeez(&posters)?$/;
+/** A prefix for an inline scene that names none: letters and digits from where the file is, so two inline scenes never share one. */
+const hash = (path: string) => `s${createHash("sha256").update(path).digest("hex").slice(0, 8)}`;
+
+const QUERY = /\?svjeez(&posters)?(&inline)?$/;
 
 export default function svjeez(options: SvjeezOptions = {}): Plugin {
   let config: ResolvedConfig;
@@ -89,9 +93,12 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
 
       if (!runner) runners.set(this.environment.name, (runner = createRunner(config)));
 
+      const inline = query[2] !== undefined;
+
       const { image, dependencies } = await runner.load(
         file,
         query[1] ? (options.posters ?? true) : false,
+        inline ? hash(relative(config.root, file)) : undefined,
       );
 
       for (const dependency of dependencies) {
@@ -105,8 +112,8 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
       }
 
       const { src, width, height, title, desc, svg, posters } = image;
-      // Server code (SSR, an Astro page) also gets the markup; a browser bundle gets the URL alone.
-      const server = this.environment.config.consumer === "server";
+      // Server code (SSR, an Astro page) and an `&inline` import also get the markup; a browser bundle gets the URL alone.
+      const server = this.environment.config.consumer === "server" || inline;
 
       if (config.command === "serve")
         return `export default ${JSON.stringify({ src, width, height, title, desc, posters, ...(server && { svg }) } satisfies SceneModule)}`;
