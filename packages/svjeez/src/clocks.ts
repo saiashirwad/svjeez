@@ -1,3 +1,4 @@
+import type { States } from "./model/ir";
 import type { Seconds } from "./model/time";
 import { RATE_ATTR } from "./svg/rate";
 
@@ -10,14 +11,28 @@ export interface ClockControl {
   readonly over: Seconds;
   /** Where the clock is now, from 0 to `over`. */
   readonly time: Seconds;
-  /** Show the clock at `time`, kept within 0 to `over`. Stops a play() or reverse() in progress. */
+  /** Show the clock at `time`, kept within 0 to `over`. Stops a to(), play(), reverse() or loop() in progress. */
   seek(time: Seconds): void;
   /** Seek to `amount` of the way through the clock, from 0 to 1. */
   progress(amount: number): void;
-  /** Run forward to `over` in real time. Resolves true if it got there, false if something else moved the clock first. */
+  /**
+   * Run from where the clock is to `time` (kept within 0 to `over`) in real time, so the scene's own easing plays,
+   * forward or backward. Resolves true if it got there, false if something else moved the clock first. Under reduced
+   * motion it jumps. With `forward`, a `time` behind the clock is reached by running on through `over`, wrapping to 0 and
+   * on to `time`, so the clock never runs backward.
+   */
+  to(time: Seconds, options?: { readonly forward?: boolean }): Promise<boolean>;
+  /** Run forward to `over` in real time, as to(over) does. */
   play(): Promise<boolean>;
-  /** Run back to 0 in real time, resolving as play() does. */
+  /** Run back to 0 in real time, as to(0) does. */
   reverse(): Promise<boolean>;
+  /**
+   * Run forward from where the clock is, in real time and without end: at `over` it wraps back to 0. Stopped by
+   * seek, progress, to, play, reverse and pause. Under reduced motion the clock shows 0 and doesn't run.
+   */
+  loop(): void;
+  /** True while loop() runs the clock, until something else moves it. */
+  readonly looping: boolean;
   /** Stop where the clock is. */
   pause(): void;
   /** Let a driver move the clock. Returns the function that stops following. */
@@ -25,10 +40,14 @@ export interface ClockControl {
 }
 
 export interface Mounted {
+  /** Where each clock rests in each state, as the scene declared in `states`: empty when it declared none. */
+  readonly states: States;
   readonly clocks: ReadonlyMap<string, ClockControl>;
   /** The clock called `name`. Throws, naming the clocks the SVG has, when there is none. */
   clock(name: string): ClockControl;
-  /** Stop every driver and every play() or reverse(), leaving the picture where it is. */
+  /** The elements marked `hit="name"` in the scene. Throws, naming the hit names the SVG has, when there are none. */
+  hit(name: string): readonly Element[];
+  /** Stop every driver and every move of a clock, leaving the picture where it is. The SVG can be mounted again. */
   unmount(): void;
 }
 
@@ -250,6 +269,7 @@ const grouped = (root: Element): Map<string, Group> => {
 const control = (name: string, { over, rate, parts, tweens }: Group) => {
   let time = 0;
   let frame = 0;
+  let looping = false;
   let ending: ((reached: boolean) => void) | undefined;
   const drivers = new Set<() => void>();
 
@@ -266,13 +286,16 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
   };
 
   const halt = () => {
+    looping = false;
     cancelAnimationFrame(frame);
     ending?.(false);
     ending = undefined;
   };
 
-  const run = (to: Seconds) =>
-    new Promise<boolean>((resolve) => {
+  const run = (end: Seconds, forward = false) => {
+    const to = clamp(end, over);
+
+    return new Promise<boolean>((resolve) => {
       halt();
 
       if (calm() || time === to) {
@@ -284,11 +307,17 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
 
       const from = time;
       const started = performance.now();
-      const length = (Math.abs(to - from) / rate) * 1000;
+      const wraps = forward && to < from;
+      const distance = wraps ? over - from + to : Math.abs(to - from);
+      const length = (distance / rate) * 1000;
 
       const tick = () => {
         const done = Math.min(1, (performance.now() - started) / length);
-        show(from + (to - from) * done);
+
+        const along = from + distance * done;
+
+        if (!wraps) show(from + (to - from) * done);
+        else show(done === 1 ? to : along >= over ? along - over : along);
 
         if (done < 1) frame = requestAnimationFrame(tick);
         else {
@@ -300,6 +329,29 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
       ending = resolve;
       frame = requestAnimationFrame(tick);
     });
+  };
+
+  const loop = () => {
+    halt();
+
+    if (calm()) {
+      show(0);
+
+      return;
+    }
+
+    const from = time;
+    const started = performance.now();
+
+    looping = true;
+
+    const tick = () => {
+      show((from + ((performance.now() - started) / 1000) * rate) % over);
+      frame = requestAnimationFrame(tick);
+    };
+
+    frame = requestAnimationFrame(tick);
+  };
 
   const seek = (at: Seconds) => {
     halt();
@@ -331,8 +383,13 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
     },
     seek,
     progress,
+    to: (time, { forward = false } = {}) => run(time, forward),
+    get looping() {
+      return looping;
+    },
     play: () => run(over),
     reverse: () => run(0),
+    loop,
     pause: halt,
     follow,
   };
@@ -345,15 +402,29 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
   return { clock, release };
 };
 
+// What a mount took over, by SVG: the SMIL it removed can't be read a second time, so a mount after an unmount reuses it.
+const taken = new WeakMap<Element, Map<string, Group>>();
+
+const statesOf = (svg: Element): States => JSON.parse(svg.getAttribute("data-states") ?? "{}");
+
 /**
  * Takes over the clocks of an inline SVG svjeez made (or of the SVGs inside `root`): their animations pause, their SMIL
  * is replaced by attributes the controls set, and the controls move them. Animations that are not on a clock go on playing.
+ *
+ * Mounting the same SVG again, as a framework that remounts does (mount, unmount, mount), works the same: the clocks
+ * start at 0 again.
  */
 export const mount = (root: Element): Mounted => {
-  const made = [...grouped(root)].map(([name, group]) => [name, control(name, group)] as const);
+  const svg = root.localName === "svg" ? root : (root.querySelector("svg") ?? root);
+  const groups = taken.get(svg) ?? grouped(root);
+
+  taken.set(svg, groups);
+
+  const made = [...groups].map(([name, group]) => [name, control(name, group)] as const);
   const clocks = new Map(made.map(([name, { clock }]) => [name, clock]));
 
   return {
+    states: statesOf(svg),
     clocks,
     clock: (name) => {
       const found = clocks.get(name);
@@ -362,6 +433,21 @@ export const mount = (root: Element): Mounted => {
         throw new Error(
           `This SVG has no clock "${name}"; it has ${clocks.size ? [...clocks.keys()].map((one) => `"${one}"`).join(", ") : "none"}`,
         );
+
+      return found;
+    },
+    hit: (name) => {
+      const found = [...root.querySelectorAll(`[data-hit="${CSS.escape(name)}"]`)];
+
+      if (!found.length) {
+        const names = new Set(
+          [...root.querySelectorAll("[data-hit]")].map((one) => one.getAttribute("data-hit")),
+        );
+
+        throw new Error(
+          `This SVG has no hit "${name}"; it has ${names.size ? [...names].map((one) => `"${one}"`).join(", ") : "none"}`,
+        );
+      }
 
       return found;
     },

@@ -1,6 +1,12 @@
 import type { FontFamily } from "../font/font";
 import type { Ease, Seconds } from "./time";
 
+/** Where a state puts a clock: at a place from 0 to 1, or "loop" to run it on repeat. */
+export type Place = number | "loop";
+
+/** Where each named clock rests in each state. */
+export type States = { readonly [state: string]: { readonly [clock: string]: Place } };
+
 export interface Scene {
   readonly size: Vec;
   readonly duration: Seconds;
@@ -8,6 +14,7 @@ export interface Scene {
   readonly desc?: string;
   readonly loop: boolean;
   readonly still?: Seconds;
+  readonly states?: States;
   readonly tokens: Readonly<Record<string, TokenValue>>;
   readonly fonts: Readonly<Record<string, FontFamily>>;
   readonly root: GroupNode;
@@ -218,6 +225,8 @@ interface Base {
   /** The one color scheme it shows in; it shows in both without one. */
   readonly scheme?: Scheme;
   readonly authored?: Authored;
+  /** The name page code finds this node by, written to its element as `data-hit`. */
+  readonly hit?: string;
   /** Set on the top nodes of a clocked `<Sequence>`; the nodes inside them run on that clock too. */
   readonly clock?: ClockMark;
 }

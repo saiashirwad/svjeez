@@ -3,6 +3,21 @@ import type { Seconds } from "./model/time";
 
 export { mount, pointer, scrolled, type ClockControl, type Driver, type Mounted } from "./clocks";
 
+export {
+  looping,
+  machine,
+  rests,
+  type Machine,
+  type MachineSpec,
+  type Place,
+  type StateValue,
+  type View,
+} from "./machine";
+
+export { attach, type Attached, type AttachOptions } from "./attach";
+
+export type { States } from "./model/ir";
+
 export { restyle, type RestyleOptions } from "./restyle";
 
 export {

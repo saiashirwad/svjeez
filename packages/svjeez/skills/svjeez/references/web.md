@@ -19,7 +19,7 @@ import hero from "./scenes/hero.tsx?svjeez";
 <img src={hero.src} width={hero.width} height={hero.height} alt={hero.desc || hero.title} />;
 ```
 
-The app receives a URL, the size and the scene's `title` and `desc` as accessible text (server code, such as SSR or an Astro page, also gets the markup as `svg`). The plugin compiles the scene in its own JSX environment and reloads when a scene dependency changes. A file that imports `@svjeez/dom/vite` is a `@svjeez/dom` film (`export default await film(component(Card, props), script, { cache: "states.json" })`): the same import films it with the nearest `vite.config.*` above it, again on change in dev, and from its states cache in a build; `cursor: true` draws the mouse the script moves. Add `&posters` to the query for light and dark WebP stills, each a list of `{ src, width }` from narrowest to widest; configure them with `svjeez({ posters: { scale, widths, quality, background } })` (`widths` makes one per width, for a `srcset`). Posters need `playwright-core` and `npx playwright-core install chromium-headless-shell`.
+The app receives a URL, the size and the scene's `title` and `desc` as accessible text (server code, such as SSR or an Astro page, also gets the markup as `svg`). The plugin compiles the scene in its own JSX environment and reloads when a scene dependency changes. A file that imports `@svjeez/dom/vite` is a `@svjeez/dom` film (`export default await film(component(Card, props), script, { cache: "states.json" })`): the same import films it with the nearest `vite.config.*` above it, again on change in dev, and from its states cache in a build; `cursor: true` draws the mouse the script moves. Add `&posters` to the query for light and dark WebP stills, each a list of `{ src, width }` from narrowest to widest; configure them with `svjeez({ posters: { scale, widths, quality, background } })` (`widths` makes one per width, for a `srcset`). Add `&inline` (`?svjeez&inline`) and the module also carries the markup as `svg` in the browser bundle, for inline SVG that `mount()` or `attach()` can drive (reference `@svjeez/vite/client` types cover it). Each inline scene gets a prefix of its own from its file path, so several share a page; a scene exporting `prefix` uses that. Posters need `playwright-core` and `npx playwright-core install chromium-headless-shell`.
 
 ## Astro (`@svjeez/astro`, Astro 7)
 
@@ -60,6 +60,21 @@ addEventListener("themechange", () => scene.refresh()); // shows it again in a n
 ```
 
 A player shows the poster, plays the plain SVG file, goes back to the poster on `stop()`, and keeps a playing scene's time when its look changes. When the look differs from the OS's scheme or the scene as built (Safari pins an `<img>` SVG to the OS's scheme; a palette is another `theme`), it plays a restyled copy instead. `img.dataset.state` is `"loading"`, `"live"` or `"still"`, for CSS. `player(img, { adopt: true })` is for an img that already plays its `src` from the HTML.
+
+## React (`@svjeez/react`)
+
+React owns the state, events and accessibility; the scene draws. Declare `states` in the scene, import it with `?svjeez&inline`, pass the current state:
+
+```tsx
+import { Scene, useScene } from "@svjeez/react";
+import toggleArt from "./toggle.tsx?svjeez&inline"; // { svg, width, height, title, desc }
+
+<Switch.Root checked={on} onCheckedChange={setOn} aria-label="Notifications">
+  <Scene scene={toggleArt} state={on ? "on" : "off"} />
+</Switch.Root>;
+```
+
+`state` is a string or an XState `snapshot.value`: the first shows at once, each change animates, an equal value does nothing. `places` stands in for `states` (a new one attaches afresh); `onMount(scene)` gets the `Mounted` once and may return a cleanup. The scene is `aria-hidden` by default, as it sits inside the control that has the role; `label` shows it as the SVG's own image, named by its title and description, and `label="Name"` puts `role="img"` and that `aria-label` on the wrapper. `<Scene>` is one `<span>` (ref, `className`, span props; `style={{ width }}` scales it) whose markup React sets once. `useScene(art, options)` returns the ref for your own element with `art.svg` as its markup. For real controls over drawn ones (an input, a tab trigger), put them where the scene draws them, in percentages of its size, with transparent text. Another framework wraps `attach` the same way: attach on mount, `update` on change, `destroy` on unmount. Examples: `examples/react-widgets` has a sign-in form with a robot (`Mascot.tsx`), an XState deploy pipeline (`Deploy.tsx`) and a scrubbable watch (`Watch.tsx`).
 
 ## Scrubbing and stills
 

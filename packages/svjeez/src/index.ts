@@ -1,4 +1,4 @@
-export { scene } from "./author/lower";
+export { looping, scene } from "./author/lower";
 
 export {
   Group,
@@ -9,10 +9,11 @@ export {
   Text,
   ref,
   type Bounds,
+  type Child,
   type SceneElement,
 } from "./author/nodes";
 
-export type { Ref } from "./author/refs";
+export type { Anchor, Ref } from "./author/refs";
 
 export { Align, Center, Grid, spread, Stack } from "./author/layout";
 

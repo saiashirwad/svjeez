@@ -2,7 +2,7 @@ import type { Font } from "../font/font";
 import { num } from "../model/format";
 import { EPSILON, type Seconds } from "../model/time";
 import { checkWindow } from "./span";
-import type { Clock } from "./clock";
+import { NAME, type Clock } from "./clock";
 import {
   lengthOf as outlineLength,
   growBox,
@@ -29,6 +29,7 @@ import type {
   Scene,
   SceneNode,
   ShapeNode,
+  States,
   Face,
   TextLine,
   TextRun,
@@ -127,6 +128,12 @@ export interface SceneOptions {
    * left out), or false to play the motion for them too.
    */
   readonly still?: Seconds | false;
+  /**
+   * Where the scene's named clocks rest in each state, as progress from 0 to 1, or `looping` to run on repeat. A state is a name, or for nested and
+   * parallel states a dotted path such as "menu.open". The page passes the current state and the scene moves its clocks
+   * there; see `rests()` and `attach()` in svjeez/page.
+   */
+  readonly states?: States;
 }
 
 interface Ctx {
@@ -793,12 +800,6 @@ const inside = (
   const end = over === undefined ? parent.end : start + over;
   const name = label(begin, over, named);
 
-  if (named && parent.named)
-    throw new SceneError(
-      `A ${name} sits inside a <Sequence clock="${parent.named.name}">, and clocks don't nest.`,
-      "Put the two side by side, each with the nodes it drives.",
-    );
-
   if (start > parent.end + EPSILON || end > parent.end + EPSILON)
     throw new SceneError(
       `A ${name} runs until ${num(end - parent.offset)}s, past the ${num(parent.end - parent.offset)}s ${parent.clips.at(-1)?.label ?? "scene"}.`,
@@ -848,7 +849,7 @@ const lowerAll = (
       const nodes = lowerAll(ctx, given.children, within, parent, taken);
       const { named } = within.clock;
 
-      return given.clock ? nodes.map((node) => ({ ...node, clock: named! })) : nodes;
+      return given.clock ? nodes.map((node) => ({ ...node, clock: node.clock ?? named! })) : nodes;
     }
 
     if (given.type === "morph" && given.only !== undefined) {
@@ -1174,13 +1175,20 @@ const dressed = (
 ): SceneNode => {
   const where = ctx.notes.names.named(node.key);
   const own = boundsOf(node.box);
-  const { effects = [], blend, scheme } = props;
+  const { effects = [], blend, scheme, hit } = props;
 
   if (scheme !== undefined && scheme !== "light" && scheme !== "dark")
     throw new SceneError(
       `${where} has scheme ${JSON.stringify(scheme)}, but a scheme is "light" or "dark".`,
       'Write scheme="light" or scheme="dark", or leave it out to show it in both.',
     );
+
+  if (hit !== undefined && !NAME.test(hit))
+    throw new SceneError(
+      `${where} has hit ${JSON.stringify(hit)}, but a hit name is letters, digits, - and _ that starts with a letter.`,
+      'Name it as in hit="save".',
+    );
+
   const clip = byBox(props.clip) ? props.clip(own) : props.clip;
   const asked = byBox(props.mask) ? props.mask(own) : props.mask;
 
@@ -1202,6 +1210,7 @@ const dressed = (
     effects: effects.map((effect) => effectOf(ctx, effect, timing, where)),
     ...(blend !== undefined && blend !== "normal" && { blend }),
     ...(scheme !== undefined && { scheme }),
+    ...(hit !== undefined && { hit }),
   };
 };
 
@@ -1325,6 +1334,35 @@ const lifted = (container: SceneElement & { readonly type: "group" }): MorphElem
   };
 };
 
+/** A place that runs its clock on repeat for as long as the state lasts, instead of resting it: `{ building: { pulse: looping } }`. */
+export const looping = "loop" as const;
+
+const checkStates = (states: States, clocks: ReadonlyMap<string, Clock>): void => {
+  const names = [...clocks.keys()].map((name) => `"${name}"`).join(", ") || "none";
+
+  for (const [state, places] of Object.entries(states)) {
+    if (state === "")
+      throw new SceneError(
+        "scene() got a state with an empty name.",
+        "Name each state in states, as in { open: { card: 1 } }.",
+      );
+
+    for (const [name, place] of Object.entries(places)) {
+      if (!clocks.has(name))
+        throw new SceneError(
+          `State "${state}" names the clock "${name}", but the scene's clocks are ${names}.`,
+          "Name a clock made with clock() and used by a <Sequence>.",
+        );
+
+      if (place !== looping && (!Number.isFinite(place) || place < 0 || place > 1))
+        throw new SceneError(
+          `State "${state}" rests the clock "${name}" at ${place}, but a place is progress from 0 to 1.`,
+          "Give each clock a place from 0 (its start) to 1 (its end), or looping to run it on repeat.",
+        );
+    }
+  }
+};
+
 const isBare = (el: SceneElement): boolean =>
   el.type === "fragment" ||
   (el.type === "group" && Object.keys(el.props).length === 0 && el.settle === undefined);
@@ -1395,6 +1433,8 @@ const lowerScene = (
     children,
   };
 
+  if (options.states) checkStates(options.states, ctx.clocks);
+
   const root = settle(drafted, ctx.notes, duration);
 
   const still =
@@ -1409,6 +1449,7 @@ const lowerScene = (
     ...(options.desc !== undefined && { desc: options.desc }),
     loop: options.loop ?? true,
     ...(still !== undefined && { still }),
+    ...(options.states && { states: options.states }),
     tokens: Object.fromEntries(ctx.tokens),
     fonts: ctx.fonts.families(),
     root,

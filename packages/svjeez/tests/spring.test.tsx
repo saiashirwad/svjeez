@@ -125,6 +125,13 @@ describe("spring physics", () => {
     expect(() => ease.spring({ stiffness: 100, damping: 0 })).toThrow("positive, finite damping");
     expect(() => ease.spring({ stiffness: -1, damping: 10 })).toThrow("stiffness");
   });
+
+  test("a spring refuses an option it does not know, naming the ones it does", () => {
+    // @ts-expect-error bounce is not a spring option
+    expect(() => ease.spring({ bounce: 2 })).toThrow(
+      'ease.spring() doesn\'t take "bounce"; its options are stiffness, damping, mass',
+    );
+  });
 });
 
 describe("spring steps", () => {

@@ -10,6 +10,7 @@ import {
   enter,
   font,
   line,
+  looping,
   linear,
   morph,
   rect,
@@ -213,21 +214,86 @@ describe("<Sequence clock>", () => {
   });
 });
 
+describe("clocks inside clocks", () => {
+  const outer = clock("body", span(0.5, 1));
+  const inner = clock("eye", span(0.2, 0.4));
+
+  const nested = (when: boolean) => (
+    <Group key="body" rotate={track(0).to(90, span(0, 1))}>
+      {when ? (
+        <Sequence when={span(0.2, 0.4)}>{card("eye")}</Sequence>
+      ) : (
+        <Sequence clock={inner}>{card("eye")}</Sequence>
+      )}
+    </Group>
+  );
+
+  test("each node belongs to its nearest clock and each mark is its clock's own absolute start", () => {
+    const out = emitted(() => <Sequence clock={outer}>{nested(false)}</Sequence>);
+
+    expect(out).toMatch(/data-clock="body" data-clock-at="0.5" data-clock-over="1"/);
+    expect(out).toMatch(/data-clock="eye" data-clock-at="0.7" data-clock-over="0.4"/);
+    expect(out.match(/data-clock="body"/g)).toHaveLength(1);
+  });
+
+  test("lowers like sequences nested with when, apart from the marks", () => {
+    const clocked = emitted(() => <Sequence clock={outer}>{nested(false)}</Sequence>);
+    const timed = emitted(() => <Sequence when={span(0.5, 1)}>{nested(true)}</Sequence>);
+
+    expect(unmarked(clocked)).toBe(timed);
+  });
+
+  test("inner nodes keep the inner clock, and the outer clock marks the rest", () => {
+    const model = made(() => (
+      <Sequence clock={outer}>
+        {nested(false)}
+        <Sequence clock={inner}>{card("direct")}</Sequence>
+        {card("plain")}
+      </Sequence>
+    ));
+
+    const marks = {
+      body: { name: "body", start: 0.5, over: 1 },
+      eye: { name: "eye", start: 0.7, over: 0.4 },
+    };
+
+    expect(model.root.children.map((node) => [node.key, node.clock])).toEqual([
+      ["body", marks.body],
+      ["direct", marks.eye],
+      ["plain", marks.body],
+    ]);
+    expect(model.root.children[0]).toMatchObject({
+      children: [{ key: "body/eye", clock: marks.eye }],
+    });
+  });
+
+  test("a track belongs to one clock even when the clocks nest", () => {
+    const grow = track(0).to(1, span(0, 0.2));
+
+    expect(() =>
+      made(() => (
+        <Sequence clock={outer}>
+          <Shape key="a" geometry={rect(5, 5)} fill="#000000" opacity={grow} />
+          <Sequence clock={inner}>
+            <Shape key="b" geometry={rect(5, 5)} fill="#000000" opacity={grow} />
+          </Sequence>
+        </Sequence>
+      )),
+    ).toThrow("count time on different clocks");
+  });
+});
+
 describe("what a clock refuses", () => {
-  test("a clocked sequence inside another", () => {
-    const inner = clock("inner", span(0, 0.2));
+  test("a clocked sequence that runs past the clock it sits in", () => {
+    const late = clock("late", span(0.2, 0.4));
 
     expect(() =>
       made(() => (
         <Sequence clock={open}>
-          <Sequence when={span(0.1)}>
-            <Sequence clock={inner}>{card("a")}</Sequence>
-          </Sequence>
+          <Sequence clock={late}>{card("a")}</Sequence>
         </Sequence>
       )),
-    ).toThrow(
-      '<Sequence clock="inner"> sits inside a <Sequence clock="open">, and clocks don\'t nest',
-    );
+    ).toThrow('A <Sequence clock="late"> runs until 0.6s, past the 0.4s <Sequence clock="open">');
   });
 
   test("two different clocks with one name, but not one clock used twice", () => {
@@ -320,5 +386,44 @@ describe("what a clock refuses", () => {
     expect(out).toContain('attributeName="x2"');
     expect(out).toContain('attributeName="startOffset"');
     expect(out).toMatch(/<linearGradient id="g1"[^>]*data-clock="open"/);
+  });
+});
+
+describe("states", () => {
+  const stated = (states?: Parameters<typeof scene>[0]["states"]) =>
+    svg.emit(
+      scene({ size: [200, 100], duration: 4, title: "Test", states }, () => (
+        <Sequence clock={open}>{card("a")}</Sequence>
+      )),
+    );
+
+  test("ride on the root svg as compact JSON, and only when given", () => {
+    const out = stated({ closed: { open: 0 }, "menu.open": { open: 1 } });
+
+    expect(out).toContain(
+      `data-states="{&quot;closed&quot;:{&quot;open&quot;:0},&quot;menu.open&quot;:{&quot;open&quot;:1}}"`,
+    );
+    expect(stated()).not.toContain("data-states");
+    expect(out.replace(/ data-states="[^"]*"/, "")).toBe(stated());
+  });
+
+  test("name clocks the scene uses, at places from 0 to 1", () => {
+    expect(() => stated({ shut: { nope: 0 } })).toThrow(
+      'State "shut" names the clock "nope", but the scene\'s clocks are "open".',
+    );
+    expect(() => stated({ shut: { open: 2 } })).toThrow(
+      'State "shut" rests the clock "open" at 2, but a place is progress from 0 to 1.',
+    );
+    expect(() => stated({ shut: { open: NaN } })).toThrow("a place is progress from 0 to 1");
+    expect(() => stated({ "": { open: 0 } })).toThrow("a state with an empty name");
+  });
+
+  test('may name a clock as looping, written as "loop", and nothing else', () => {
+    expect(stated({ busy: { open: looping } })).toContain(
+      `data-states="{&quot;busy&quot;:{&quot;open&quot;:&quot;loop&quot;}}"`,
+    );
+    expect(looping).toBe("loop");
+    // @ts-expect-error a place is a number or looping
+    expect(() => stated({ busy: { open: "spin" } })).toThrow("a place is progress from 0 to 1");
   });
 });

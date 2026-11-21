@@ -1,0 +1,522 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 684 304" width="684" height="304" role="img" aria-labelledby="deploy-t deploy-d" data-states="{&quot;pipeline.idle&quot;:{&quot;build&quot;:0,&quot;build-busy&quot;:0,&quot;build-done&quot;:0,&quot;test&quot;:0,&quot;test-busy&quot;:0,&quot;test-done&quot;:0,&quot;deploy&quot;:0,&quot;deploy-busy&quot;:0,&quot;deploy-done&quot;:0,&quot;running&quot;:0,&quot;fail&quot;:0,&quot;live&quot;:0,&quot;beacon&quot;:0,&quot;jolt&quot;:0.39166666666666666,&quot;cheer&quot;:0.7999999999999999},&quot;pipeline.running.build&quot;:{&quot;build&quot;:1,&quot;build-busy&quot;:&quot;loop&quot;,&quot;build-done&quot;:0,&quot;test&quot;:0,&quot;test-busy&quot;:0,&quot;test-done&quot;:0,&quot;deploy&quot;:0,&quot;deploy-busy&quot;:0,&quot;deploy-done&quot;:0,&quot;running&quot;:1,&quot;fail&quot;:0,&quot;live&quot;:0,&quot;beacon&quot;:0,&quot;jolt&quot;:0.39166666666666666,&quot;cheer&quot;:0.7999999999999999},&quot;pipeline.running.test&quot;:{&quot;build&quot;:1,&quot;build-busy&quot;:0,&quot;build-done&quot;:1,&quot;test&quot;:1,&quot;test-busy&quot;:&quot;loop&quot;,&quot;test-done&quot;:0,&quot;deploy&quot;:0,&quot;deploy-busy&quot;:0,&quot;deploy-done&quot;:0,&quot;running&quot;:1,&quot;fail&quot;:0,&quot;live&quot;:0,&quot;beacon&quot;:0,&quot;jolt&quot;:0.39166666666666666,&quot;cheer&quot;:0.7999999999999999},&quot;pipeline.running.deploy&quot;:{&quot;build&quot;:1,&quot;build-busy&quot;:0,&quot;build-done&quot;:1,&quot;test&quot;:1,&quot;test-busy&quot;:0,&quot;test-done&quot;:1,&quot;deploy&quot;:1,&quot;deploy-busy&quot;:&quot;loop&quot;,&quot;deploy-done&quot;:0,&quot;running&quot;:1,&quot;fail&quot;:0,&quot;live&quot;:0,&quot;beacon&quot;:0,&quot;jolt&quot;:0.39166666666666666,&quot;cheer&quot;:0.7999999999999999},&quot;pipeline.failed&quot;:{&quot;build&quot;:1,&quot;build-busy&quot;:0,&quot;build-done&quot;:1,&quot;test&quot;:1,&quot;test-busy&quot;:0,&quot;test-done&quot;:0,&quot;deploy&quot;:0,&quot;deploy-busy&quot;:0,&quot;deploy-done&quot;:0,&quot;running&quot;:0,&quot;fail&quot;:0.4,&quot;live&quot;:0,&quot;beacon&quot;:0,&quot;jolt&quot;:0.45416666666666666,&quot;cheer&quot;:0.7999999999999999},&quot;pipeline.live&quot;:{&quot;build&quot;:1,&quot;build-busy&quot;:0,&quot;build-done&quot;:1,&quot;test&quot;:1,&quot;test-busy&quot;:0,&quot;test-done&quot;:1,&quot;deploy&quot;:1,&quot;deploy-busy&quot;:0,&quot;deploy-done&quot;:1,&quot;running&quot;:0,&quot;fail&quot;:0,&quot;live&quot;:1,&quot;beacon&quot;:&quot;loop&quot;,&quot;jolt&quot;:0.39166666666666666,&quot;cheer&quot;:0.9208333333333334},&quot;tests.passing&quot;:{&quot;flaky&quot;:0},&quot;tests.failing&quot;:{&quot;flaky&quot;:0.08108108108108107}}" font-family="'deploy-Geist'" font-weight="400" class="deploy-root">
+  <title id="deploy-t">Deploy pipeline</title>
+  <desc id="deploy-d">A deploy of one commit through Build, Test, Deploy and Live. The working stage glows blue and pulses while packets flow along the arrow into it; a finished stage turns green with a check. Here the tests are flagged to fail: Test turns red and shakes, the stages after it dim behind a stop sign and a banner says the pipeline halted. Then the flag clears, Test passes, the deploy rolls out and Live lights up and broadcasts. The page passes the XState value; the scene's states say where each clock rests.</desc>
+  <style><![CDATA[
+svg.deploy-root{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--muted-62-text:color-mix(in srgb,var(--muted) 62%,var(--text));--blue-62-text:color-mix(in srgb,var(--blue) 62%,var(--text));--red-62-text:color-mix(in srgb,var(--red) 62%,var(--text));--green-62-text:color-mix(in srgb,var(--green) 62%,var(--text));--blue-12-background:color-mix(in srgb,var(--blue) 12%,var(--background));--green-55-cyan:color-mix(in srgb,var(--green) 55%,var(--cyan));--border-80-surface:color-mix(in srgb,var(--border) 80%,var(--surface));--muted-14-surface:color-mix(in srgb,var(--muted) 14%,var(--surface));--blue-14-surface:color-mix(in srgb,var(--blue) 14%,var(--surface));--red-14-surface:color-mix(in srgb,var(--red) 14%,var(--surface));--green-14-surface:color-mix(in srgb,var(--green) 14%,var(--surface));--red-12-surface:color-mix(in srgb,var(--red) 12%,var(--surface));--green-12-surface:color-mix(in srgb,var(--green) 12%,var(--surface))}
+@media (prefers-color-scheme:light){svg.deploy-root{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0}}
+
+@font-face{font-family:'deploy-Geist';src:url(data:font/ttf;base64,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) format('truetype');font-weight:600;font-style:normal}
+@font-face{font-family:'deploy-Geist';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+@font-face{font-family:'deploy-JetBrains Mono';src:url(data:font/ttf;base64,AAEAAAAMAIAAAwBAT1MvMhDxBoEAAADMAAAAYGNtYXADMgKWAAABLAAAAIRnYXNwAAAAEAAAAbAAAAAIZ2x5ZgQoVgcAAAG4AAAIVGhlYWQUkPFDAAAKDAAAADZoaGVhAcoBMgAACkQAAAAkaG10eEP4CwQAAApoAAAAeGxvY2EhYB86AAAK4AAAAD5tYXhwAJYCbwAACyAAAAAgbmFtZQKIBvAAAAtAAAAALnBvc3T/aAAzAAALcAAAACBwcmVwaAaMhQAAC5AAAAAHAAQCWgGQAAUAAAKKAlgAAABLAooCWAAAAV4AMgFAAAACAAAJAAAAAAAAoAAC/xAA+OsAAAAIAAAAAEpCAAAAwAAN/v8D/P7UAAAD/AEsIAABn9/XAAACJgLaAAAAIAAFAAAAAQADAAEAAAAMAAQAeAAAABoAEAADAAoAIAAvADMAOgBjAGYAaQBrAHAAdAB5ALf//wAAACAALwAxADkAYQBlAGgAawBtAHIAdwC3////4f/T/9L/zf+n/6b/pf+k/6P/ov+g/2MAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAf//AA8AAwBaAAAB/gLaAAMABgAJAAAzESERJSERAQEhWgGk/qIBLP7AASz+1ALa/SYyAjv+AAI7AAEAS/+SAg0DPgADAAAXATMBSwFjX/6dbgOs/FQAAAEAWgAAAhwC2gAKAAAzNTMRBzU3MxEzFVrGxqV7olICPZRke/14UgABAEgAAAIOAuQAGgAAMzU3NjY1NCYjIgYVIz4CMzIWFhUUBgcHIRVc3zk0QzpASVoCOWVDQmE0Qku0AU1c7T1fLD1GSD9CYTQzXkE+ek66UgAAAQBG//YB/gLaAB8AAAUiJiY1MxQWMzI2NTU0JiMjNTchNSEVBzUyFhUVFAYGASFCYzZaRT0+REQ+S7X+2AGDw2R2N2QKNV4/PUVIOjQ+RFqwUlq9C3JgND9eNQACAEQAAAIUAuQAFQAhAAAzEycGBiMiJiY1NDY2MzIWFhUUBgcDEzI2NTQmIyIGFRQWu88EE0IpO1kwOmhFRmk6Hx+3DUBOTkBATk4BTAMcHjhnRUdpOztpRzdqMf7ZAV5VRkZVVUZGVQAAAgDZ//YBfwIwAAsAFwAAASImNTQ2MzIWFRQGAyImNTQ2MzIWFRQGASwlLi4lJi0tJiUuLiUmLS0BmikiIikpIiIp/lwpIiIpKSIiKQAAAgBB//YB/gIwABwAJwAAFyImNTQ2MzM1NCYjIgYHIzY2MzIWFREjNSM3FAYnMjY1NSMiBhUUFvxXZGRVqj04MUIFWgl0V19uWA8PXTdAUqgtND8KWUxNWDczNykjR1RiVP6GaQ88RkdAMk4yKy41AAIAXP/2AgMC2gAWACQAAAUiJjUXIxUjETMVBzMHNDYzMhYVFRQGJzI2NTU0JiMiBhUVFBYBTERSEhJaWgIUElNDU2RkcTlCQjk3QUEKST8VaQLaoH0VPkpuX6Febk5EQJZAREY+lj5GAAABAFX/9gIGAjAAHQAABSImJjU1NDY2MzIWFyMmJiMiBhUVFBYzMjY3MwYGATBCYzY2Y0JfdANaA0E4O0ZGOzhBA1oDdAoyX0GWQl4yZlg1OUM+lz5EOjRYZgACAFX/9gIDAjAAGQAjAAAFIiYmNTU0NjYzMhYWFRUhFRQWMzI2NzMGBhM1NCYjIgYVFSEBLEFhNTVhQUFhNf6qQj00QAdaCXUoQT49QgEFCjRfP5ZAXjQ0XkBhNUFFJSVFUQFDJUFGRkEdAAABADwAAAIXAtoAEwAAMxEjNTM1NDYzMxUjIgYVFTMVIxHcoKBSSKGhHyHh4QGdUl9BS1IdHV9S/mMAAQBcAAAB/gLaABYAADMRMxUVMwc0NjMyFhURIxE0JiMiBhURXFoTE05FU2JaPzY4QQLatGkVQUdmWP6OAWg7QUZA/qIA//8AVQAAAisDCQImABsAAAAGABwPAAABAF8AAAItAtoADAAAMxEzETM3MwMTIycjFV9aaqBnubxpoGsC2v5p4/76/uD19QABAEIAAAIWAjAAJwAAMxEzFTMHNDYzMhYVJzMHNDYzMhYVESMRNCYjIgYVESMRNCYjIgYVEUJPEg4xKi4yGyoTMyo0OVMdHBsfSB8cHBwCJkIYLjZEPjYYLjZOQP5eAaMiJiUi/lwBoyMlJSL+XAAAAQBcAAAB/gIwABUAADMRMxUzBzQ2MzIWFREjETQmIyIGFRFcWhMTTkVTYlo/NjhBAiZpFUFHZlj+jgFoOz9EQP6iAAACAFX/+AIDAi4AEQAfAAAFIiYmNTU0NjYzMhYWFRUUBgYnMjY1NTQmIyIGFRUUFgEsQmA1NWBCQmA1NWBCO0JCOzpDQwgyX0GSQl4yMl5Bk0FfMlBCQJJAQkJAkkBCAAACAFz/TAIDAjAAFwAlAAAXETMVMwc0NjMyFhUVFAYGIyImNRcjFxU3MjY1NTQmIyIGFRUUFlxaEhJTRFNjLVE4Q1QSFAJ5OUFBOTdCQrQC2mkVP0ltX6E/XDJKPhV9oPhEQJZAREY+lj5GAAABAG8AAAIWAjAAFQAAMxEzFTMHNDYzMhYVFSM1NCYjIgYVEW9YFR1NTFdnWj86OUECJmlBWVttXSEZQUVGQP6iAAABAFr/+AIIAi4ALAAABSImJiczFhYzMzI2NTQmJycmJjU0NjMzMhYXIyYmIyMiBhUUFhcXFhYVFAYjARs4UzEFWgY1LCo1NC8uSlFPXl4mT2AKWgYwKSYzLygrSllRYWIII0AsHSIrJCMpBwwOSUZKUUo/Gh8mJiIgBwwOTEhMVwAAAQA3AAACCALBABIAACEiJjURIzUzNTMVMxUjERQzMxUBaEdPm5ta3Nw8lkxFAUNSm5tS/r0/UgABACMAAAI1AiYAHgAAMwMzExYWFzY2NxMzExYWFzY2NxMzAyMDJiYnBgYHA3tYUDcDBwICCQM9Vj0DCQICCQM5TFxjOwQKAgIIBT4CJv56FjMRETMWAYb+ehYzEREzFgGG/doBfBw4EBA4HP6EAAEAMgAAAiYCJgAXAAAzEwMzFxYWFzY2NzczAxMjJyYmJwYGBwcyw7dqbQcNBAMNB25pt8JqdgcNBQQPCHcBGwELqgsaCAgaC6r+9P7mtAsdCQkdC7QAAQA3/0wCIQImAA0AABc3AzMTFhYXNjY3EzMBslHMZIAHDAQEDAZ4Yf7xtNYCBP6sES8QEC8RAVT9JgD//wDZAQQBfwGqAgcAHQAAAQ4AAQBVAAACKwImAAkAADM1MxEjNSERMxVVw6oBBLlSAYJS/ixSAAABAOUCiQFzAwkACwAAASImNTQ2MzIWFRQGASwhJiYhISYmAokiHR4jIx4dIgAAAQDZ//YBfwCcAAsAAAUiJjU0NjMyFhUUBgEsJi0tJiYtLQosJScuLiclLAABAAAAAjYE0KxJHl8PPPUAAwPoAAAAANvSppoAAAAA29rQ8vk5/tQEkgP8AAAABgACAAAAAAAAAAEAAAP8/tQAAASw+Tn9jwSSAAEAAAAAAAAAAAAAAAAAAAAeAlgAWgJYAAACWABLAlgAWgJYAEgCWABGAlgARAJYANkCWABBAlgAXAJYAFUCWABVAlgAPAJYAFwCWABVAlgAXwJYAEICWABcAlgAVQJYAFwCWABvAlgAWgJYADcCWAAjAlgAMgJYADcCWADZAlgAVQAAAOUCWADZAAAAGgAaACkAPQBmAJQAyQDwASgBXQGKAcAB3QIAAgsCIwJbAn0CrQLjAwQDRQNhA5gDwwPhA+oD/QQUBCoAAAABAAAAHgG4AG4AtAAGAAEAAAAAAAAAAAAAAAAAAwACAAAAAQASAAMAAQQJAAEAHAAAAEoAZQB0AEIAcgBhAGkAbgBzACAATQBvAG4AbwAAAAMAAAAAAAD/ZQAyAAAAAQAAAAAAAAAAAAAAAAAAAAC4Af+FsASNAA==) format('truetype');font-weight:400;font-style:normal}
+.deploy-a{animation-duration:12.4s;animation-iteration-count:1;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+.deploy-fb{transform-box:fill-box;transform-origin:center}
+@keyframes deploy-k1{0%,4.032%{opacity:0}6.452%,100%{opacity:1}}
+.deploy-m1{animation-name:deploy-k1}
+@keyframes deploy-k2{0%,39.516%,54.032%,100%{opacity:0}41.935%,50.806%{opacity:1}}
+.deploy-m2{animation-name:deploy-k2}
+@keyframes deploy-k3{0%,77.419%{opacity:0}79.839%,100%{opacity:1}}
+.deploy-m3{animation-name:deploy-k3}
+@keyframes deploy-k4{0%,78.629%{scale:1}83.468%,100%{scale:1.38}}
+@keyframes deploy-k5{0%,78.629%,83.468%,100%{opacity:0}79.032%{opacity:0.7;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.deploy-m4{animation-name:deploy-k4,deploy-k5}
+@keyframes deploy-k6{0%,78.629%,82.661%,100%{scale:1}79.758%{scale:1.12;animation-timing-function:cubic-bezier(.77,0,.175,1)}}
+.deploy-m5{animation-name:deploy-k6}
+@keyframes deploy-k7{0%,8.065%{scale:1}16.129%,100%{scale:1.55}}
+@keyframes deploy-k8{0%,8.065%,16.129%,100%{opacity:0}8.871%{opacity:0.55;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.deploy-m6{animation-name:deploy-k7,deploy-k8}
+@keyframes deploy-k9{0%,11.29%{scale:1}19.355%,100%{scale:1.55}}
+@keyframes deploy-k10{0%,11.29%,19.355%,100%{opacity:0}12.097%{opacity:0.55;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.deploy-m7{animation-name:deploy-k9,deploy-k10}
+@keyframes deploy-k11{0%,4.839%{opacity:0}7.258%,100%{opacity:1}}
+.deploy-m8{animation-name:deploy-k11}
+@keyframes deploy-k12{0%,19.355%{scale:0.6;opacity:0}22.177%,100%{scale:1;opacity:1}}
+.deploy-m9{animation-name:deploy-k12;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes deploy-k13{0%,80.242%{scale:1}85.081%,100%{scale:1.38}}
+@keyframes deploy-k14{0%,80.242%,85.081%,100%{opacity:0}80.645%{opacity:0.7;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.deploy-m10{animation-name:deploy-k13,deploy-k14}
+@keyframes deploy-k15{0%,80.242%,84.274%,100%{scale:1}81.371%{scale:1.12;animation-timing-function:cubic-bezier(.77,0,.175,1)}}
+.deploy-m11{animation-name:deploy-k15}
+@keyframes deploy-k16{0%,19.355%{opacity:0}21.774%,100%{opacity:1}}
+.deploy-m12{animation-name:deploy-k16}
+@keyframes deploy-k17{0%,26.613%{scale:1}34.677%,100%{scale:1.55}}
+@keyframes deploy-k18{0%,26.613%,34.677%,100%{opacity:0}27.419%{opacity:0.55;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.deploy-m13{animation-name:deploy-k17,deploy-k18}
+@keyframes deploy-k19{0%,29.839%{scale:1}37.903%,100%{scale:1.55}}
+@keyframes deploy-k20{0%,29.839%,37.903%,100%{opacity:0}30.645%{opacity:0.55;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.deploy-m14{animation-name:deploy-k19,deploy-k20}
+@keyframes deploy-k21{0%,23.387%{opacity:0}25.806%,100%{opacity:1}}
+.deploy-m15{animation-name:deploy-k21}
+@keyframes deploy-k22{0%,54.839%{scale:0.6;opacity:0}57.661%,100%{scale:1;opacity:1}}
+.deploy-m16{animation-name:deploy-k22;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes deploy-k23{0%,37.903%{scale:0.6}40.726%,100%{scale:1}}
+@keyframes deploy-k24{0%,54.032%,100%{opacity:0}37.903%{opacity:0;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}40.726%,50.806%{opacity:1}}
+.deploy-m17{animation-name:deploy-k23,deploy-k24;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.23,1,.32,1)}
+@keyframes deploy-k25{0%,81.855%{scale:1}86.694%,100%{scale:1.38}}
+@keyframes deploy-k26{0%,81.855%,86.694%,100%{opacity:0}82.258%{opacity:0.7;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.deploy-m18{animation-name:deploy-k25,deploy-k26}
+@keyframes deploy-k27{0%,81.855%,85.887%,100%{scale:1}82.984%{scale:1.12;animation-timing-function:cubic-bezier(.77,0,.175,1)}}
+.deploy-m19{animation-name:deploy-k27}
+@keyframes deploy-k28{0%,39.919%,43.306%,100%{translate:0 0}40.484%{translate:-6px 0}41.048%{translate:6px 0}41.613%{translate:-4px 0}42.177%{translate:4px 0}42.742%{translate:-2px 0}}
+.deploy-m20{animation-name:deploy-k28}
+@keyframes deploy-k29{0%,54.839%{opacity:0}57.258%,100%{opacity:1}}
+.deploy-m21{animation-name:deploy-k29}
+@keyframes deploy-k30{0%,62.097%{scale:1}70.161%,100%{scale:1.55}}
+@keyframes deploy-k31{0%,62.097%,70.161%,100%{opacity:0}62.903%{opacity:0.55;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.deploy-m22{animation-name:deploy-k30,deploy-k31}
+@keyframes deploy-k32{0%,65.323%{scale:1}73.387%,100%{scale:1.55}}
+@keyframes deploy-k33{0%,65.323%,73.387%,100%{opacity:0}66.129%{opacity:0.55;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.deploy-m23{animation-name:deploy-k32,deploy-k33}
+@keyframes deploy-k34{0%,58.871%{opacity:0}61.29%,100%{opacity:1}}
+.deploy-m24{animation-name:deploy-k34}
+@keyframes deploy-k35{0%,73.387%{scale:0.6;opacity:0}76.21%,100%{scale:1;opacity:1}}
+.deploy-m25{animation-name:deploy-k35;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes deploy-k36{0%,83.468%{scale:1}88.306%,100%{scale:1.38}}
+@keyframes deploy-k37{0%,83.468%,88.306%,100%{opacity:0}83.871%{opacity:0.7;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.deploy-m26{animation-name:deploy-k36,deploy-k37}
+@keyframes deploy-k38{0%,83.468%,87.5%,100%{scale:1}84.597%{scale:1.12;animation-timing-function:cubic-bezier(.77,0,.175,1)}}
+.deploy-m27{animation-name:deploy-k38}
+@keyframes deploy-k39{0%,73.387%{opacity:0}75.806%,100%{opacity:1}}
+.deploy-m28{animation-name:deploy-k39}
+@keyframes deploy-k40{0%,82.258%{scale:1}91.935%,100%{scale:1.55}}
+@keyframes deploy-k41{0%,82.258%,91.935%,100%{opacity:0}83.065%{opacity:0.55;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.deploy-m29{animation-name:deploy-k40,deploy-k41}
+@keyframes deploy-k42{0%,85.484%{scale:1}95.161%,100%{scale:1.55}}
+@keyframes deploy-k43{0%,85.484%,95.161%,100%{opacity:0}86.29%{opacity:0.55;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.deploy-m30{animation-name:deploy-k42,deploy-k43}
+@keyframes deploy-k44{0%,77.419%{scale:0.6;opacity:0}80.242%,100%{scale:1;opacity:1}}
+.deploy-m31{animation-name:deploy-k44;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+@keyframes deploy-k45{0%,85.081%{scale:1}89.919%,100%{scale:1.38}}
+@keyframes deploy-k46{0%,85.081%,89.919%,100%{opacity:0}85.484%{opacity:0.7;animation-timing-function:cubic-bezier(.55,.06,.68,.19)}}
+.deploy-m32{animation-name:deploy-k45,deploy-k46}
+@keyframes deploy-k47{0%,85.081%,89.113%,100%{scale:1}86.21%{scale:1.12;animation-timing-function:cubic-bezier(.77,0,.175,1)}}
+.deploy-m33{animation-name:deploy-k47}
+@keyframes deploy-k48{0%,4.839%{stroke-dashoffset:1;visibility:hidden}8.065%,100%{stroke-dashoffset:0;visibility:visible}}
+.deploy-m34{animation-name:deploy-k48;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes deploy-k49{0%,4.839%{translate:6px 0}8.065%,100%{translate:50px 0}}
+@keyframes deploy-k50{0%,5.989%{visibility:hidden}5.99%,100%{visibility:visible}}
+.deploy-m35{animation-name:deploy-k49,deploy-k50;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes deploy-k51{0%,8.065%,13.71%,100%{opacity:0}9.032%,12.742%{opacity:1}}
+@keyframes deploy-k52{0%,8.064%{translate:0 0}8.065%{translate:124px 127.24px}13.71%,100%{translate:158px 127.24px}}
+.deploy-m36{animation-name:deploy-k51,deploy-k52;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k53{0%,10.887%,16.532%,100%{opacity:0}11.855%,15.565%{opacity:1}}
+@keyframes deploy-k54{0%,10.886%{translate:0 0}10.887%{translate:124px 127.24px}16.532%,100%{translate:158px 127.24px}}
+.deploy-m37{animation-name:deploy-k53,deploy-k54;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k55{0%,13.71%,19.355%,100%{opacity:0}14.677%,18.387%{opacity:1}}
+@keyframes deploy-k56{0%,13.709%{translate:0 0}13.71%{translate:124px 127.24px}19.355%,100%{translate:158px 127.24px}}
+.deploy-m38{animation-name:deploy-k55,deploy-k56;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k57{0%,79.032%,80.645%,100%{opacity:0}79.355%,80.323%{opacity:0.4}}
+@keyframes deploy-k58{0%,79.031%{translate:0 0}79.032%{translate:116px 127.24px}80.645%,100%{translate:172px 127.24px}}
+.deploy-m39{animation-name:deploy-k57,deploy-k58;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k59{0%,78.831%,80.444%,100%{opacity:0}79.153%,80.121%{opacity:0.7}}
+@keyframes deploy-k60{0%,78.83%{translate:0 0}78.831%{translate:116px 127.24px}80.444%,100%{translate:172px 127.24px}}
+.deploy-m40{animation-name:deploy-k59,deploy-k60;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k61{0%,78.629%,80.242%,100%{opacity:0}78.952%,79.919%{opacity:1}}
+@keyframes deploy-k62{0%,78.628%{translate:0 0}78.629%{translate:116px 127.24px}80.242%,100%{translate:172px 127.24px}}
+.deploy-m41{animation-name:deploy-k61,deploy-k62;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k63{0%,23.387%{stroke-dashoffset:1;visibility:hidden}26.613%,100%{stroke-dashoffset:0;visibility:visible}}
+.deploy-m42{animation-name:deploy-k63;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes deploy-k64{0%,23.387%{translate:6px 0}26.613%,100%{translate:50px 0}}
+@keyframes deploy-k65{0%,24.537%{visibility:hidden}24.538%,100%{visibility:visible}}
+.deploy-m43{animation-name:deploy-k64,deploy-k65;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes deploy-k66{0%,26.613%,32.258%,100%{opacity:0}27.581%,31.29%{opacity:1}}
+@keyframes deploy-k67{0%,26.612%{translate:0 0}26.613%{translate:256px 127.24px}32.258%,100%{translate:290px 127.24px}}
+.deploy-m44{animation-name:deploy-k66,deploy-k67;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k68{0%,29.435%,35.081%,100%{opacity:0}30.403%,34.113%{opacity:1}}
+@keyframes deploy-k69{0%,29.434%{translate:0 0}29.435%{translate:256px 127.24px}35.081%,100%{translate:290px 127.24px}}
+.deploy-m45{animation-name:deploy-k68,deploy-k69;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k70{0%,32.258%,37.903%,100%{opacity:0}33.226%,36.935%{opacity:1}}
+@keyframes deploy-k71{0%,32.257%{translate:0 0}32.258%{translate:256px 127.24px}37.903%,100%{translate:290px 127.24px}}
+.deploy-m46{animation-name:deploy-k70,deploy-k71;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k72{0%,80.645%,82.258%,100%{opacity:0}80.968%,81.935%{opacity:0.4}}
+@keyframes deploy-k73{0%,80.644%{translate:0 0}80.645%{translate:248px 127.24px}82.258%,100%{translate:304px 127.24px}}
+.deploy-m47{animation-name:deploy-k72,deploy-k73;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k74{0%,80.444%,82.056%,100%{opacity:0}80.766%,81.734%{opacity:0.7}}
+@keyframes deploy-k75{0%,80.443%{translate:0 0}80.444%{translate:248px 127.24px}82.056%,100%{translate:304px 127.24px}}
+.deploy-m48{animation-name:deploy-k74,deploy-k75;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k76{0%,80.242%,81.855%,100%{opacity:0}80.565%,81.532%{opacity:1}}
+@keyframes deploy-k77{0%,80.241%{translate:0 0}80.242%{translate:248px 127.24px}81.855%,100%{translate:304px 127.24px}}
+.deploy-m49{animation-name:deploy-k76,deploy-k77;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k78{0%,58.871%{stroke-dashoffset:1;visibility:hidden}62.097%,100%{stroke-dashoffset:0;visibility:visible}}
+.deploy-m50{animation-name:deploy-k78;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes deploy-k79{0%,58.871%{translate:6px 0}62.097%,100%{translate:50px 0}}
+@keyframes deploy-k80{0%,60.021%{visibility:hidden}60.022%,100%{visibility:visible}}
+.deploy-m51{animation-name:deploy-k79,deploy-k80;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes deploy-k81{0%,62.097%,67.742%,100%{opacity:0}63.065%,66.774%{opacity:1}}
+@keyframes deploy-k82{0%,62.096%{translate:0 0}62.097%{translate:388px 127.24px}67.742%,100%{translate:422px 127.24px}}
+.deploy-m52{animation-name:deploy-k81,deploy-k82;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k83{0%,64.919%,70.565%,100%{opacity:0}65.887%,69.597%{opacity:1}}
+@keyframes deploy-k84{0%,64.918%{translate:0 0}64.919%{translate:388px 127.24px}70.565%,100%{translate:422px 127.24px}}
+.deploy-m53{animation-name:deploy-k83,deploy-k84;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k85{0%,67.742%,73.387%,100%{opacity:0}68.71%,72.419%{opacity:1}}
+@keyframes deploy-k86{0%,67.741%{translate:0 0}67.742%{translate:388px 127.24px}73.387%,100%{translate:422px 127.24px}}
+.deploy-m54{animation-name:deploy-k85,deploy-k86;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k87{0%,82.258%,83.871%,100%{opacity:0}82.581%,83.548%{opacity:0.4}}
+@keyframes deploy-k88{0%,82.257%{translate:0 0}82.258%{translate:380px 127.24px}83.871%,100%{translate:436px 127.24px}}
+.deploy-m55{animation-name:deploy-k87,deploy-k88;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k89{0%,82.056%,83.669%,100%{opacity:0}82.379%,83.347%{opacity:0.7}}
+@keyframes deploy-k90{0%,82.055%{translate:0 0}82.056%{translate:380px 127.24px}83.669%,100%{translate:436px 127.24px}}
+.deploy-m56{animation-name:deploy-k89,deploy-k90;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k91{0%,81.855%,83.468%,100%{opacity:0}82.177%,83.145%{opacity:1}}
+@keyframes deploy-k92{0%,81.854%{translate:0 0}81.855%{translate:380px 127.24px}83.468%,100%{translate:436px 127.24px}}
+.deploy-m57{animation-name:deploy-k91,deploy-k92;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k93{0%,77.419%{stroke-dashoffset:1;visibility:hidden}80.645%,100%{stroke-dashoffset:0;visibility:visible}}
+.deploy-m58{animation-name:deploy-k93;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes deploy-k94{0%,77.419%{translate:6px 0}80.645%,100%{translate:50px 0}}
+@keyframes deploy-k95{0%,78.569%{visibility:hidden}78.57%,100%{visibility:visible}}
+.deploy-m59{animation-name:deploy-k94,deploy-k95;animation-timing-function:cubic-bezier(.77,0,.175,1),cubic-bezier(.23,1,.32,1)}
+@keyframes deploy-k96{0%,83.871%,85.484%,100%{opacity:0}84.194%,85.161%{opacity:0.4}}
+@keyframes deploy-k97{0%,83.87%{translate:0 0}83.871%{translate:512px 127.24px}85.484%,100%{translate:568px 127.24px}}
+.deploy-m60{animation-name:deploy-k96,deploy-k97;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k98{0%,83.669%,85.282%,100%{opacity:0}83.992%,84.96%{opacity:0.7}}
+@keyframes deploy-k99{0%,83.668%{translate:0 0}83.669%{translate:512px 127.24px}85.282%,100%{translate:568px 127.24px}}
+.deploy-m61{animation-name:deploy-k98,deploy-k99;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k100{0%,83.468%,85.081%,100%{opacity:0}83.79%,84.758%{opacity:1}}
+@keyframes deploy-k101{0%,83.467%{translate:0 0}83.468%{translate:512px 127.24px}85.081%,100%{translate:568px 127.24px}}
+.deploy-m62{animation-name:deploy-k100,deploy-k101;animation-timing-function:cubic-bezier(.23,1,.32,1),linear}
+@keyframes deploy-k102{0%,17.742%{scale:0.4}20.161%,100%{scale:1}}
+@keyframes deploy-k103{0%,47.581%,100%{opacity:0}17.742%{opacity:0;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}20.161%,45.161%{opacity:1}}
+@keyframes deploy-k104{0%,39.919%,43.306%,100%{translate:350.5px 95.74px}40.484%{translate:356.5px 95.74px}41.048%{translate:344.5px 95.74px}41.613%{translate:354.5px 95.74px}42.177%{translate:346.5px 95.74px}42.742%{translate:352.5px 95.74px}}
+.deploy-m63{animation-name:deploy-k102,deploy-k103,deploy-k104;animation-timing-function:cubic-bezier(.34,1.56,.64,1),cubic-bezier(.23,1,.32,1),cubic-bezier(.23,1,.32,1)}
+@media (prefers-reduced-motion:reduce){.deploy-a{animation-delay:-12s!important;animation-play-state:paused!important}}
+]]></style>
+  <defs>
+    <g id="deploy-u1">
+      <rect width="112" height="18" fill="var(--surface)"/>
+      <text x="34.64" y="13.26" font-size="12" fill="var(--muted-62-text)">Queued</text>
+    </g>
+    <linearGradient id="deploy-g1" gradientUnits="userSpaceOnUse" x1="29.25" y1="1.25" x2="29.25" y2="57.25" data-clock="build-done" data-clock-at="2.4" data-clock-over="0.5">
+      <stop stop-color="var(--green)"/>
+      <stop offset="1" stop-color="var(--green-55-cyan)"/>
+    </linearGradient>
+    <linearGradient id="deploy-g2" gradientUnits="userSpaceOnUse" x1="29.25" y1="1.25" x2="29.25" y2="57.25" data-clock="test-done" data-clock-at="6.8" data-clock-over="0.5">
+      <stop stop-color="var(--green)"/>
+      <stop offset="1" stop-color="var(--green-55-cyan)"/>
+    </linearGradient>
+    <linearGradient id="deploy-g3" gradientUnits="userSpaceOnUse" x1="29.25" y1="1.25" x2="29.25" y2="57.25" data-clock="deploy-done" data-clock-at="9.1" data-clock-over="0.5">
+      <stop stop-color="var(--green)"/>
+      <stop offset="1" stop-color="var(--green-55-cyan)"/>
+    </linearGradient>
+    <linearGradient id="deploy-g4" gradientUnits="userSpaceOnUse" x1="29.25" y1="1.25" x2="29.25" y2="57.25" data-clock="live" data-clock-at="9.6" data-clock-over="0.6">
+      <stop stop-color="var(--green)"/>
+      <stop offset="1" stop-color="var(--green-55-cyan)"/>
+    </linearGradient>
+  </defs>
+  <rect x="1.5" y="1.5" width="681" height="302.24" rx="20" fill="var(--surface)" stroke="var(--raised)"/>
+  <g transform="translate(22 22)">
+    <text y="18.09" font-weight="600" font-size="18" fill="var(--text)">Production deploy</text>
+    <text y="41.64" font-family="'deploy-JetBrains Mono'" font-size="12" fill="var(--muted)">acme/web · main · 3f9c2a1</text>
+  </g>
+  <g transform="translate(22 22)">
+    <g transform="translate(528 8.62)">
+      <rect width="112" height="28" rx="14" fill="var(--muted-14-surface)"/>
+      <circle cx="34.41" cy="14" r="3.5" fill="var(--muted)"/>
+      <text x="44.91" y="18.26" font-weight="600" font-size="12" fill="var(--muted-62-text)">Ready</text>
+    </g>
+    <g transform="translate(528 8.62)" data-clock="running" data-clock-at="0.5" data-clock-over="0.3" class="deploy-a deploy-m1">
+      <rect width="112" height="28" rx="14" fill="var(--blue-14-surface)"/>
+      <circle cx="23.574" cy="14" r="3.5" fill="var(--blue)"/>
+      <text x="34.074" y="18.26" font-weight="600" font-size="12" fill="var(--blue-62-text)">Deploying</text>
+    </g>
+    <g transform="translate(528 8.62)" data-clock="fail" data-clock-at="4.7" data-clock-over="2" class="deploy-a deploy-m2">
+      <rect width="112" height="28" rx="14" fill="var(--red-14-surface)"/>
+      <circle cx="35.094" cy="14" r="3.5" fill="var(--red)"/>
+      <text x="45.594" y="18.26" font-weight="600" font-size="12" fill="var(--red-62-text)">Failed</text>
+    </g>
+    <g transform="translate(528 8.62)" data-clock="live" data-clock-at="9.6" data-clock-over="0.6" class="deploy-a deploy-m3">
+      <rect width="112" height="28" rx="14" fill="var(--green-14-surface)"/>
+      <circle cx="40.776" cy="14" r="3.5" fill="var(--green)"/>
+      <text x="51.276" y="18.26" font-weight="600" font-size="12" fill="var(--green-62-text)">Live</text>
+    </g>
+  </g>
+  <g transform="translate(22 89.24)">
+    <g transform="translate(18 0)" style="transform-origin:56px 38px" data-clock="cheer" data-clock-at="0" data-clock-over="12" class="deploy-a deploy-m5" fill="none" stroke-width="2">
+      <circle cx="38" cy="38" r="28" fill="var(--background)" stroke="var(--raised)"/>
+      <g transform="translate(25 25)" stroke="var(--text)" stroke-width="1.896" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9.75 13C9.75 14.795 11.205 16.25 13 16.25C14.795 16.25 16.25 14.795 16.25 13C16.25 11.205 14.795 9.75 13 9.75C11.205 9.75 9.75 11.205 9.75 13"/>
+        <path d="M13 3.25L13 9.75"/>
+        <path d="M13 16.25L13 22.75"/>
+      </g>
+      <circle cx="38" cy="38" r="29" stroke="var(--green)" class="deploy-a deploy-m4 deploy-fb"/>
+    </g>
+    <text x="29.869" y="98.07" font-weight="600" font-size="14" fill="var(--text)">Commit</text>
+    <rect y="110.2" width="112" height="18" fill="var(--surface)"/>
+    <text x="33.794" y="123.46" font-size="12" fill="var(--muted-62-text)">3f9c2a1</text>
+  </g>
+  <g transform="translate(22 89.24)">
+    <g transform="translate(132 0)" fill="none" stroke-width="2">
+      <g transform="translate(18 0)" data-clock="build-busy" data-clock-at="1" data-clock-over="1.4" stroke="var(--blue)">
+        <circle cx="38" cy="38" r="28" class="deploy-a deploy-m6 deploy-fb"/>
+        <circle cx="38" cy="38" r="28" class="deploy-a deploy-m7 deploy-fb"/>
+      </g>
+      <g transform="translate(18 0)" style="transform-origin:56px 38px" data-clock="cheer" data-clock-at="0" data-clock-over="12" class="deploy-a deploy-m11">
+        <circle cx="38" cy="38" r="28" fill="var(--background)" stroke="var(--raised)"/>
+        <g transform="translate(24.776 24.776)" stroke="var(--muted)" stroke-width="1.896" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12.365 10.833L4.367 18.87C3.939 19.295 3.698 19.873 3.698 20.477C3.698 21.08 3.939 21.659 4.367 22.084C5.259 22.971 6.699 22.971 7.591 22.084L15.615 14.083"/>
+          <path d="M19.631 16.567L22.433 13.766C22.855 13.343 22.855 12.657 22.433 12.234L14.214 4.016C13.791 3.593 13.106 3.593 12.683 4.016L9.881 6.817C9.458 7.24 9.458 7.926 9.881 8.349L18.099 16.567C18.522 16.99 19.208 16.99 19.631 16.567"/>
+        </g>
+        <g transform="translate(8.75 8.75)" data-clock="build" data-clock-at="0.6" data-clock-over="0.4" class="deploy-a deploy-m8" stroke="var(--blue)">
+          <circle cx="29.25" cy="29.25" r="28" fill="var(--blue-12-background)" stroke-width="2.5"/>
+          <g transform="translate(16.026 16.026)" fill="none" stroke-width="1.896" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.365 10.833L4.367 18.87C3.939 19.295 3.698 19.873 3.698 20.477C3.698 21.08 3.939 21.659 4.367 22.084C5.259 22.971 6.699 22.971 7.591 22.084L15.615 14.083"/>
+            <path d="M19.631 16.567L22.433 13.766C22.855 13.343 22.855 12.657 22.433 12.234L14.214 4.016C13.791 3.593 13.106 3.593 12.683 4.016L9.881 6.817C9.458 7.24 9.458 7.926 9.881 8.349L18.099 16.567C18.522 16.99 19.208 16.99 19.631 16.567"/>
+          </g>
+        </g>
+        <g transform="translate(8.75 8.75)" style="transform-origin:38px 38px" data-clock="build-done" data-clock-at="2.4" data-clock-over="0.5" class="deploy-a deploy-m9">
+          <circle cx="29.25" cy="29.25" r="28" fill="url(#deploy-g1)" stroke="url(#deploy-g1)" stroke-width="2.5"/>
+          <path d="M5.417 13L10.833 18.417L21.667 7.583" transform="translate(15.708 16.25)" fill="none" stroke="#FFFFFF" stroke-width="2.438" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <circle cx="38" cy="38" r="29" stroke="var(--green)" class="deploy-a deploy-m10 deploy-fb"/>
+      </g>
+    </g>
+    <g transform="translate(132 0)">
+      <text x="38.906" y="98.07" font-weight="600" font-size="14" fill="var(--text)">Build</text>
+      <g transform="translate(0 84)">
+        <use transform="translate(0 26.2)" href="#deploy-u1"/>
+        <g transform="translate(0 26.2)" data-clock="build" data-clock-at="0.6" data-clock-over="0.4" class="deploy-a deploy-m8">
+          <rect width="112" height="18" fill="var(--surface)"/>
+          <text x="28.364" y="13.26" font-size="12" fill="var(--blue-62-text)">Compiling</text>
+        </g>
+        <g transform="translate(0 26.2)" data-clock="build-done" data-clock-at="2.4" data-clock-over="0.5" class="deploy-a deploy-m12">
+          <rect width="112" height="18" fill="var(--surface)"/>
+          <text x="47.126" y="13.26" font-size="12" fill="var(--green-62-text)">41s</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g transform="translate(22 89.24)">
+    <g transform="translate(264 0)">
+      <g transform="translate(18 0)" data-clock="jolt" data-clock-at="0" data-clock-over="12" class="deploy-a deploy-m20" fill="none" stroke-width="2">
+        <g data-clock="test-busy" data-clock-at="3.3" data-clock-over="1.4" stroke="var(--blue)">
+          <circle cx="38" cy="38" r="28" class="deploy-a deploy-m13 deploy-fb"/>
+          <circle cx="38" cy="38" r="28" class="deploy-a deploy-m14 deploy-fb"/>
+        </g>
+        <g style="transform-origin:38px 38px" data-clock="cheer" data-clock-at="0" data-clock-over="12" class="deploy-a deploy-m19">
+          <circle cx="38" cy="38" r="28" fill="var(--background)" stroke="var(--raised)"/>
+          <g transform="translate(25 25)" stroke="var(--muted)" stroke-width="1.896" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9.75 3.25L16.25 3.25"/>
+            <path d="M10.833 9.75L15.167 9.75"/>
+            <path d="M10.833 3.25L10.833 9.75L6.5 21.667C6.394 21.88 6.394 22.13 6.501 22.343C6.607 22.556 6.808 22.707 7.042 22.75L18.958 22.75C19.192 22.707 19.393 22.556 19.499 22.343C19.606 22.13 19.606 21.88 19.5 21.667L15.167 9.75L15.167 3.25"/>
+          </g>
+          <g transform="translate(8.75 8.75)" data-clock="test" data-clock-at="2.9" data-clock-over="0.4" class="deploy-a deploy-m15" stroke="var(--blue)">
+            <circle cx="29.25" cy="29.25" r="28" fill="var(--blue-12-background)" stroke-width="2.5"/>
+            <g transform="translate(16.25 16.25)" fill="none" stroke-width="1.896" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9.75 3.25L16.25 3.25"/>
+              <path d="M10.833 9.75L15.167 9.75"/>
+              <path d="M10.833 3.25L10.833 9.75L6.5 21.667C6.394 21.88 6.394 22.13 6.501 22.343C6.607 22.556 6.808 22.707 7.042 22.75L18.958 22.75C19.192 22.707 19.393 22.556 19.499 22.343C19.606 22.13 19.606 21.88 19.5 21.667L15.167 9.75L15.167 3.25"/>
+            </g>
+          </g>
+          <g transform="translate(8.75 8.75)" style="transform-origin:38px 38px" data-clock="test-done" data-clock-at="6.8" data-clock-over="0.5" class="deploy-a deploy-m16">
+            <circle cx="29.25" cy="29.25" r="28" fill="url(#deploy-g2)" stroke="url(#deploy-g2)" stroke-width="2.5"/>
+            <path d="M5.417 13L10.833 18.417L21.667 7.583" transform="translate(15.708 16.25)" fill="none" stroke="#FFFFFF" stroke-width="2.438" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <g transform="translate(8.75 8.75)" style="transform-origin:38px 38px" data-clock="fail" data-clock-at="4.7" data-clock-over="2" class="deploy-a deploy-m17">
+            <circle cx="29.25" cy="29.25" r="28" fill="var(--red)" stroke="var(--red)" stroke-width="2.5"/>
+            <g transform="translate(16.25 16.25)" fill="none" stroke="#FFFFFF" stroke-width="2.438" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19.5 6.5L6.5 19.5"/>
+              <path d="M6.5 6.5L19.5 19.5"/>
+            </g>
+          </g>
+          <circle cx="38" cy="38" r="29" stroke="var(--green)" class="deploy-a deploy-m18 deploy-fb"/>
+        </g>
+      </g>
+    </g>
+    <g transform="translate(264 84)" data-clock="jolt" data-clock-at="0" data-clock-over="12" class="deploy-a deploy-m20">
+      <text x="41.741" y="14.07" font-weight="600" font-size="14" fill="var(--text)">Test</text>
+      <use transform="translate(0 26.2)" href="#deploy-u1"/>
+      <g transform="translate(0 26.2)" data-clock="test" data-clock-at="2.9" data-clock-over="0.4" class="deploy-a deploy-m15">
+        <rect width="112" height="18" fill="var(--surface)"/>
+        <text x="28.706" y="13.26" font-size="12" fill="var(--blue-62-text)">128 specs</text>
+      </g>
+      <g transform="translate(0 26.2)" data-clock="test-done" data-clock-at="6.8" data-clock-over="0.5" class="deploy-a deploy-m21">
+        <rect width="112" height="18" fill="var(--surface)"/>
+        <text x="25.058" y="13.26" font-size="12" fill="var(--green-62-text)">128 passed</text>
+      </g>
+      <g transform="translate(0 26.2)" data-clock="fail" data-clock-at="4.7" data-clock-over="2" class="deploy-a deploy-m2">
+        <rect width="112" height="18" fill="var(--surface)"/>
+        <text x="35.528" y="13.26" font-size="12" fill="var(--red-62-text)">3 failed</text>
+      </g>
+    </g>
+  </g>
+  <g transform="translate(22 89.24)">
+    <g transform="translate(396 0)" fill="none" stroke-width="2">
+      <g transform="translate(18 0)" data-clock="deploy-busy" data-clock-at="7.7" data-clock-over="1.4" stroke="var(--blue)">
+        <circle cx="38" cy="38" r="28" class="deploy-a deploy-m22 deploy-fb"/>
+        <circle cx="38" cy="38" r="28" class="deploy-a deploy-m23 deploy-fb"/>
+      </g>
+      <g transform="translate(18 0)" style="transform-origin:56px 38px" data-clock="cheer" data-clock-at="0" data-clock-over="12" class="deploy-a deploy-m27">
+        <circle cx="38" cy="38" r="28" fill="var(--background)" stroke="var(--raised)"/>
+        <g transform="translate(25.027 24.973)" stroke="var(--muted)" stroke-width="1.896" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4.333 14.083C8.309 14.556 11.444 17.691 11.917 21.667C13.863 20.544 15.092 18.496 15.167 16.25C18.887 14.941 21.452 11.521 21.667 7.583C21.667 5.788 20.212 4.333 18.417 4.333C14.479 4.548 11.059 7.113 9.75 10.833C7.504 10.908 5.456 12.137 4.333 14.083"/>
+          <path d="M7.583 15.167C5.277 16.469 3.991 19.04 4.333 21.667C6.96 22.009 9.531 20.723 10.833 18.417"/>
+          <path d="M15.167 9.75C15.167 10.348 15.652 10.833 16.25 10.833C16.848 10.833 17.333 10.348 17.333 9.75C17.333 9.152 16.848 8.667 16.25 8.667C15.652 8.667 15.167 9.152 15.167 9.75"/>
+        </g>
+        <g transform="translate(8.75 8.75)" data-clock="deploy" data-clock-at="7.3" data-clock-over="0.4" class="deploy-a deploy-m24" stroke="var(--blue)">
+          <circle cx="29.25" cy="29.25" r="28" fill="var(--blue-12-background)" stroke-width="2.5"/>
+          <g transform="translate(16.277 16.223)" fill="none" stroke-width="1.896" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4.333 14.083C8.309 14.556 11.444 17.691 11.917 21.667C13.863 20.544 15.092 18.496 15.167 16.25C18.887 14.941 21.452 11.521 21.667 7.583C21.667 5.788 20.212 4.333 18.417 4.333C14.479 4.548 11.059 7.113 9.75 10.833C7.504 10.908 5.456 12.137 4.333 14.083"/>
+            <path d="M7.583 15.167C5.277 16.469 3.991 19.04 4.333 21.667C6.96 22.009 9.531 20.723 10.833 18.417"/>
+            <path d="M15.167 9.75C15.167 10.348 15.652 10.833 16.25 10.833C16.848 10.833 17.333 10.348 17.333 9.75C17.333 9.152 16.848 8.667 16.25 8.667C15.652 8.667 15.167 9.152 15.167 9.75"/>
+          </g>
+        </g>
+        <g transform="translate(8.75 8.75)" style="transform-origin:38px 38px" data-clock="deploy-done" data-clock-at="9.1" data-clock-over="0.5" class="deploy-a deploy-m25">
+          <circle cx="29.25" cy="29.25" r="28" fill="url(#deploy-g3)" stroke="url(#deploy-g3)" stroke-width="2.5"/>
+          <path d="M5.417 13L10.833 18.417L21.667 7.583" transform="translate(15.708 16.25)" fill="none" stroke="#FFFFFF" stroke-width="2.438" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <circle cx="38" cy="38" r="29" stroke="var(--green)" class="deploy-a deploy-m26 deploy-fb"/>
+      </g>
+    </g>
+    <g transform="translate(396 0)">
+      <text x="32.564" y="98.07" font-weight="600" font-size="14" fill="var(--text)">Deploy</text>
+      <g transform="translate(0 84)">
+        <use transform="translate(0 26.2)" href="#deploy-u1"/>
+        <g transform="translate(0 26.2)" data-clock="deploy" data-clock-at="7.3" data-clock-over="0.4" class="deploy-a deploy-m24">
+          <rect width="112" height="18" fill="var(--surface)"/>
+          <text x="26.546" y="13.26" font-size="12" fill="var(--blue-62-text)">Rolling out</text>
+        </g>
+        <g transform="translate(0 26.2)" data-clock="deploy-done" data-clock-at="9.1" data-clock-over="0.5" class="deploy-a deploy-m28">
+          <rect width="112" height="18" fill="var(--surface)"/>
+          <text x="30.692" y="13.26" font-size="12" fill="var(--green-62-text)">3 regions</text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g transform="translate(22 89.24)">
+    <g transform="translate(528 0)" fill="none" stroke-width="2">
+      <g transform="translate(18 0)" data-clock="beacon" data-clock-at="10.2" data-clock-over="1.6" stroke="var(--green)">
+        <circle cx="38" cy="38" r="28" class="deploy-a deploy-m29 deploy-fb"/>
+        <circle cx="38" cy="38" r="28" class="deploy-a deploy-m30 deploy-fb"/>
+      </g>
+      <g transform="translate(18 0)" style="transform-origin:56px 38px" data-clock="cheer" data-clock-at="0" data-clock-over="12" class="deploy-a deploy-m33">
+        <circle cx="38" cy="38" r="28" fill="var(--background)" stroke="var(--raised)"/>
+        <g transform="translate(25 25)" stroke="var(--muted)" stroke-width="1.896" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3.25 13C3.25 18.385 7.615 22.75 13 22.75C18.385 22.75 22.75 18.385 22.75 13C22.75 7.615 18.385 3.25 13 3.25C7.615 3.25 3.25 7.615 3.25 13"/>
+          <path d="M3.9 9.75L22.1 9.75"/>
+          <path d="M3.9 16.25L22.1 16.25"/>
+          <path d="M12.458 3.25C8.735 9.217 8.735 16.783 12.458 22.75"/>
+          <path d="M13.542 3.25C17.265 9.217 17.265 16.783 13.542 22.75"/>
+        </g>
+        <g transform="translate(8.75 8.75)" style="transform-origin:38px 38px" data-clock="live" data-clock-at="9.6" data-clock-over="0.6" class="deploy-a deploy-m31">
+          <circle cx="29.25" cy="29.25" r="28" fill="url(#deploy-g4)" stroke="url(#deploy-g4)" stroke-width="2.5"/>
+          <g transform="translate(16.25 16.25)" fill="none" stroke="#FFFFFF" stroke-width="2.438" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3.25 13C3.25 18.385 7.615 22.75 13 22.75C18.385 22.75 22.75 18.385 22.75 13C22.75 7.615 18.385 3.25 13 3.25C7.615 3.25 3.25 7.615 3.25 13"/>
+            <path d="M3.9 9.75L22.1 9.75"/>
+            <path d="M3.9 16.25L22.1 16.25"/>
+            <path d="M12.458 3.25C8.735 9.217 8.735 16.783 12.458 22.75"/>
+            <path d="M13.542 3.25C17.265 9.217 17.265 16.783 13.542 22.75"/>
+          </g>
+        </g>
+        <circle cx="38" cy="38" r="29" stroke="var(--green)" class="deploy-a deploy-m32 deploy-fb"/>
+      </g>
+    </g>
+    <text x="570.322" y="98.07" font-weight="600" font-size="14" fill="var(--text)">Live</text>
+    <g transform="translate(528 0)">
+      <g transform="translate(0 110.2)">
+        <rect width="112" height="18" fill="var(--surface)"/>
+        <text x="38.99" y="13.26" font-size="12" fill="var(--muted-62-text)">v2.4.0</text>
+      </g>
+      <g transform="translate(0 110.2)" data-clock="live" data-clock-at="9.6" data-clock-over="0.6" class="deploy-a deploy-m3">
+        <rect width="112" height="18" fill="var(--surface)"/>
+        <text x="29.39" y="13.26" font-size="12" fill="var(--green-62-text)">acme.app</text>
+      </g>
+    </g>
+  </g>
+  <g transform="translate(22 243.24)">
+    <rect width="640" height="40" rx="10" fill="var(--background)"/>
+    <text x="154.4" y="24.32" font-family="'deploy-JetBrains Mono'" font-size="12" fill="var(--muted)">fix: refresh session tokens before they expire</text>
+  </g>
+  <g transform="translate(22 243.24)" data-clock="fail" data-clock-at="4.7" data-clock-over="2" class="deploy-a deploy-m2">
+    <rect width="640" height="40" rx="10" fill="var(--red-12-surface)"/>
+    <g transform="translate(121.613 12)" fill="none" stroke="var(--red-62-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 4L4 12"/>
+      <path d="M4 4L12 12"/>
+    </g>
+    <text x="142.363" y="24.615" font-weight="600" font-size="13" fill="var(--red-62-text)">3 of 128 specs failed in auth/session.test.ts · pipeline halted</text>
+  </g>
+  <g transform="translate(22 243.24)" data-clock="live" data-clock-at="9.6" data-clock-over="0.6" class="deploy-a deploy-m3">
+    <rect width="640" height="40" rx="10" fill="var(--green-12-surface)"/>
+    <path d="M3.333 8L6.667 11.333L13.333 4.667" transform="translate(192.363 12)" fill="none" stroke="var(--green-62-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="214.447" y="24.615" font-weight="600" font-size="13" fill="var(--green-62-text)">Live on acme.app · v2.4.0 in 3 regions</text>
+  </g>
+  <line x1="122" y1="127.24" x2="166" y2="127.24" fill="none" stroke="var(--border-80-surface)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="159.697 124.195 166 127.24 159.697 130.285" fill="none" stroke="var(--border-80-surface)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <g data-clock="build" data-clock-at="0.6" data-clock-over="0.4" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="122" y1="127.24" x2="166" y2="127.24" pathLength="1" stroke-dasharray="1 2" class="deploy-a deploy-m34"/>
+    <polyline points="-6.303 -3.045 0 0 -6.303 3.045" transform="translate(116 127.24)" class="deploy-a deploy-m35"/>
+  </g>
+  <circle r="3" fill="var(--blue)" data-clock="build-busy" data-clock-at="1" data-clock-over="1.4" class="deploy-a deploy-m36"/>
+  <circle r="3" fill="var(--blue)" data-clock="build-busy" data-clock-at="1" data-clock-over="1.4" class="deploy-a deploy-m37"/>
+  <circle r="3" fill="var(--blue)" data-clock="build-busy" data-clock-at="1" data-clock-over="1.4" class="deploy-a deploy-m38"/>
+  <g data-clock="build-done" data-clock-at="2.4" data-clock-over="0.5" class="deploy-a deploy-m12" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="122" y1="127.24" x2="166" y2="127.24"/>
+    <polyline points="159.697 124.195 166 127.24 159.697 130.285"/>
+  </g>
+  <g data-clock="cheer" data-clock-at="0" data-clock-over="12" fill="#FFFFFF" stroke="var(--green)" stroke-width="2">
+    <circle r="2" class="deploy-a deploy-m39"/>
+    <circle r="3" class="deploy-a deploy-m40"/>
+    <circle r="4" class="deploy-a deploy-m41"/>
+  </g>
+  <line x1="254" y1="127.24" x2="298" y2="127.24" fill="none" stroke="var(--border-80-surface)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="291.697 124.195 298 127.24 291.697 130.285" fill="none" stroke="var(--border-80-surface)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <g data-clock="test" data-clock-at="2.9" data-clock-over="0.4" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="254" y1="127.24" x2="298" y2="127.24" pathLength="1" stroke-dasharray="1 2" class="deploy-a deploy-m42"/>
+    <polyline points="-6.303 -3.045 0 0 -6.303 3.045" transform="translate(248 127.24)" class="deploy-a deploy-m43"/>
+  </g>
+  <circle r="3" fill="var(--blue)" data-clock="test-busy" data-clock-at="3.3" data-clock-over="1.4" class="deploy-a deploy-m44"/>
+  <circle r="3" fill="var(--blue)" data-clock="test-busy" data-clock-at="3.3" data-clock-over="1.4" class="deploy-a deploy-m45"/>
+  <circle r="3" fill="var(--blue)" data-clock="test-busy" data-clock-at="3.3" data-clock-over="1.4" class="deploy-a deploy-m46"/>
+  <g data-clock="test-done" data-clock-at="6.8" data-clock-over="0.5" class="deploy-a deploy-m21" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="254" y1="127.24" x2="298" y2="127.24"/>
+    <polyline points="291.697 124.195 298 127.24 291.697 130.285"/>
+  </g>
+  <g data-clock="fail" data-clock-at="4.7" data-clock-over="2" class="deploy-a deploy-m2" fill="none" stroke="var(--red)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="254" y1="127.24" x2="298" y2="127.24"/>
+    <polyline points="291.697 124.195 298 127.24 291.697 130.285"/>
+  </g>
+  <g data-clock="cheer" data-clock-at="0" data-clock-over="12" fill="#FFFFFF" stroke="var(--green)" stroke-width="2">
+    <circle r="2" class="deploy-a deploy-m47"/>
+    <circle r="3" class="deploy-a deploy-m48"/>
+    <circle r="4" class="deploy-a deploy-m49"/>
+  </g>
+  <line x1="386" y1="127.24" x2="430" y2="127.24" fill="none" stroke="var(--border-80-surface)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="423.697 124.195 430 127.24 423.697 130.285" fill="none" stroke="var(--border-80-surface)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <g data-clock="deploy" data-clock-at="7.3" data-clock-over="0.4" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="386" y1="127.24" x2="430" y2="127.24" pathLength="1" stroke-dasharray="1 2" class="deploy-a deploy-m50"/>
+    <polyline points="-6.303 -3.045 0 0 -6.303 3.045" transform="translate(380 127.24)" class="deploy-a deploy-m51"/>
+  </g>
+  <circle r="3" fill="var(--blue)" data-clock="deploy-busy" data-clock-at="7.7" data-clock-over="1.4" class="deploy-a deploy-m52"/>
+  <circle r="3" fill="var(--blue)" data-clock="deploy-busy" data-clock-at="7.7" data-clock-over="1.4" class="deploy-a deploy-m53"/>
+  <circle r="3" fill="var(--blue)" data-clock="deploy-busy" data-clock-at="7.7" data-clock-over="1.4" class="deploy-a deploy-m54"/>
+  <g data-clock="deploy-done" data-clock-at="9.1" data-clock-over="0.5" class="deploy-a deploy-m28" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="386" y1="127.24" x2="430" y2="127.24"/>
+    <polyline points="423.697 124.195 430 127.24 423.697 130.285"/>
+  </g>
+  <g data-clock="cheer" data-clock-at="0" data-clock-over="12" fill="#FFFFFF" stroke="var(--green)" stroke-width="2">
+    <circle r="2" class="deploy-a deploy-m55"/>
+    <circle r="3" class="deploy-a deploy-m56"/>
+    <circle r="4" class="deploy-a deploy-m57"/>
+  </g>
+  <line x1="518" y1="127.24" x2="562" y2="127.24" fill="none" stroke="var(--border-80-surface)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="555.697 124.195 562 127.24 555.697 130.285" fill="none" stroke="var(--border-80-surface)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <g data-clock="live" data-clock-at="9.6" data-clock-over="0.6" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="518" y1="127.24" x2="562" y2="127.24" pathLength="1" stroke-dasharray="1 2" class="deploy-a deploy-m58"/>
+    <polyline points="-6.303 -3.045 0 0 -6.303 3.045" transform="translate(512 127.24)" class="deploy-a deploy-m59"/>
+  </g>
+  <g data-clock="cheer" data-clock-at="0" data-clock-over="12" fill="#FFFFFF" stroke="var(--green)" stroke-width="2">
+    <circle r="2" class="deploy-a deploy-m60"/>
+    <circle r="3" class="deploy-a deploy-m61"/>
+    <circle r="4" class="deploy-a deploy-m62"/>
+  </g>
+  <g data-clock="fail" data-clock-at="4.7" data-clock-over="2" class="deploy-a deploy-m2">
+    <rect x="418" y="85.24" width="244" height="140" fill="var(--surface)" opacity="0.72"/>
+    <g transform="translate(395.5 114.74)">
+      <circle cx="12.5" cy="12.5" r="11" fill="var(--red)" stroke="var(--surface)" stroke-width="3"/>
+      <rect x="7.5" y="11" width="10" height="3" rx="1.5" fill="#FFFFFF"/>
+    </g>
+  </g>
+  <g data-clock="jolt" data-clock-at="0" data-clock-over="12" class="deploy-a deploy-m20">
+    <g style="transform-origin:11.5px 11.5px" data-clock="flaky" data-clock-at="2.2" data-clock-over="3.7" class="deploy-a deploy-m63">
+      <circle cx="11.5" cy="11.5" r="10" fill="var(--orange)" stroke="var(--surface)" stroke-width="3"/>
+      <text x="9.921" y="16.115" font-weight="600" font-size="13" fill="#FFFFFF">!</text>
+    </g>
+  </g>
+</svg>

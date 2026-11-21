@@ -12,7 +12,7 @@
     "test": "bun test",
     "test:browsers": "bun test ./scripts/browsers.ts",
     "test:node": "tsx scripts/node-check.ts",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react && tsc --noEmit -p dom-react-vite && tsc --noEmit -p dom-component && tsc --noEmit -p clocks && svelte-check --tsconfig dom-svelte/tsconfig.json --fail-on-warnings"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react && tsc --noEmit -p dom-react-vite && tsc --noEmit -p dom-component && tsc --noEmit -p react-widgets && svelte-check --tsconfig dom-svelte/tsconfig.json --fail-on-warnings"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
@@ -25,11 +25,14 @@
     "@svjeez/icons": "workspace:*",
     "@svjeez/math": "workspace:*",
     "@svjeez/mermaid": "workspace:*",
+    "@svjeez/react": "workspace:*",
     "@svjeez/video": "workspace:*",
+    "@svjeez/vite": "workspace:*",
     "@types/bun": "latest",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "@xstate/react": "^6.1.0",
     "bun-plugin-svelte": "^0.0.6",
     "playwright-core": "^1.64.1",
     "react": "^19.3.1",
@@ -40,6 +43,7 @@
     "tsx": "^4.23.15",
     "typescript": "~6.0.0",
     "vite": "8.3.5",
-    "world-atlas": "^2.0.2"
+    "world-atlas": "^2.0.2",
+    "xstate": "^5.33.4"
   }
 }
