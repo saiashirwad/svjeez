@@ -26,6 +26,10 @@ const DIFFERS = new Map<string, { props: string[]; why: string }>(
       props: ["bcx", "bcy"],
       why: "A curved path turns inside rotating groups. Firefox bounds the turned curve and Chromium its turned box, so the centres of the two differ while the frames are the same pixels.",
     },
+    "firefox jellyfish.svg": {
+      props: ["bcx", "bcy"],
+      why: "The tentacles are curved paths inside swaying, rotating groups. Same as escapement.svg: Firefox bounds the turned curve and Chromium its turned box, so the centres differ while the frames are the same pixels.",
+    },
     "firefox layout.svg": {
       props: ["bcx"],
       why: "An arrow head turns inside a group that rotates it about the arrow's start, so as it tilts Firefox bounds the turned head and Chromium its turned box. The frames are the same pixels in both.",
