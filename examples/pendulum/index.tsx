@@ -12,7 +12,7 @@ import {
   span,
   track,
 } from "svjeez";
-import { geist, mono } from "../fonts/faces";
+import { mono } from "../fonts/faces";
 import { theme } from "../theme";
 
 // Fifteen pendulums, periods in whole-number ratios, released from one angle.
@@ -32,7 +32,9 @@ const lengths = (() => {
     { length: COUNT },
     (_, i) => GRAVITY * (SECONDS / (2 * Math.PI * (FIRST + i))) ** 2,
   );
+
   const scale = ROD_MAX / raw[0]!;
+
   return raw.map((length) => length * scale);
 })();
 
@@ -43,8 +45,10 @@ const sine = ease.bezier(0.37, 0, 0.63, 1);
 const swing = (n: number) => {
   const half = SECONDS / (2 * n);
   let lane = track(AMPLITUDE);
+
   for (let i = 1; i <= n * 2; i++)
     lane = lane.to(i % 2 === 1 ? -AMPLITUDE : AMPLITUDE, span((i - 1) * half, half), sine);
+
   return lane;
 };
 

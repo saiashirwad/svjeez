@@ -2,6 +2,7 @@ import type { Seconds } from "./model/time";
 import { loopLength, seek } from "./page";
 import { rateOf } from "./svg/rate";
 import { systemColorScheme } from "./scheme";
+import { hostOf } from "./host";
 
 export { costOf, type Cost } from "./svg/cost";
 
@@ -66,7 +67,7 @@ const launch = async (caller: string, executablePath?: string) => {
 
     return chromium.launch({ channel: "chrome" }).catch(() => {
       throw new Error(
-        `No Chromium to render with. Run \`npx playwright-core install chromium-headless-shell\`, or pass executablePath.\n${error instanceof Error ? error.message : error}`,
+        `No Chromium to render with. Run \`${hostOf().installBrowser ?? "npx playwright-core install chromium-headless-shell"}\`, or pass executablePath.\n${error instanceof Error ? error.message : error}`,
       );
     });
   }

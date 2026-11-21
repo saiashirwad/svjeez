@@ -17,10 +17,13 @@ const isTag = <P>(type: Given<P>): type is string => typeof type === "string";
 export const componentName = <P>(type: Given<P>): string | undefined =>
   isFragment(type) || isTag(type) || !type.name ? undefined : type.name;
 
+/** What JSX takes as a key: text, or a number such as a list index. */
+export type Key = string | number;
+
 export const build = <P extends { readonly children?: Child }>(
   type: Given<P>,
   props: P,
-  key: string | undefined,
+  key: Key | undefined,
   source: JsxSource | undefined,
 ): SceneElement => {
   if (isFragment(type)) return { type: "fragment", children: flat(props.children) };
@@ -34,7 +37,8 @@ export const build = <P extends { readonly children?: Child }>(
     );
 
   try {
-    return type(key === undefined ? props : { ...props, key });
+    // Types ask for a text key, but untyped JSX may hand a number, as from .map((item, i) => ...): use its text.
+    return type(key === undefined ? props : { ...props, key: String(key) });
   } catch (error) {
     if (!(error instanceof Error)) throw error;
     const thrown = thrownFrom(error);
@@ -50,13 +54,13 @@ export const build = <P extends { readonly children?: Child }>(
 export function jsx(
   type: typeof Fragment,
   props: { readonly children?: Child },
-  key?: string,
+  key?: Key,
 ): SceneElement;
-export function jsx<P>(type: Component<P>, props: P, key?: string): SceneElement;
+export function jsx<P>(type: Component<P>, props: P, key?: Key): SceneElement;
 export function jsx<P extends { readonly children?: Child }>(
   type: Component<P> | typeof Fragment,
   props: P,
-  key?: string,
+  key?: Key,
 ): SceneElement {
   const source = caller();
 
@@ -68,7 +72,7 @@ export { jsx as jsxs, jsx as jsxDEV };
 export namespace JSX {
   export type Element = SceneElement;
   export interface IntrinsicAttributes {
-    key?: string;
+    key?: Key;
   }
   export interface ElementChildrenAttribute {
     children: {};
