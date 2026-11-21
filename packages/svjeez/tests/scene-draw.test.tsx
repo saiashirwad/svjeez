@@ -21,6 +21,20 @@ const emit = (shape: () => SceneElement): string =>
 const stroke = { color: "#FF0000" as const };
 
 describe("Shape draw", () => {
+  test("a whole draw drops its dashes, so a closed shape keeps its join at the first vertex", () => {
+    const out = emit(() => (
+      <Shape
+        geometry={circle(10)}
+        stroke={stroke}
+        draw={track(0).to(1, span(0, 1)).to(0.5, span(1, 1))}
+      />
+    ));
+
+    // dashed up to the instant the draw is whole, plain while it stays whole, dashed again as it leaves
+    expect(out).toContain("49.998%,50.002%{stroke-dashoffset:0;stroke-dasharray:1 2}");
+    expect(out).toContain("50%{stroke-dashoffset:0;stroke-dasharray:none}");
+  });
+
   test("draw is trim [0, draw]", () => {
     const drawn = emit(() => (
       <Shape geometry={circle(10)} stroke={stroke} draw={track(0).to(1, span(0, 1))} />
@@ -133,7 +147,7 @@ describe("Arrow head", () => {
       ".a{animation-duration:2s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}",
       "@keyframes k1{0%{translate:10px 10px}50%,100%{translate:10px 60px}}",
       ".m1{animation-name:k1}",
-      "@keyframes k2{0%{stroke-dashoffset:0.067}1.59%{stroke-dashoffset:0.065;animation-timing-function:cubic-bezier(.341,.352,.673,.685)}3.274%{stroke-dashoffset:0.062;animation-timing-function:cubic-bezier(.339,.358,.67,.691)}5.268%{stroke-dashoffset:0.055;animation-timing-function:cubic-bezier(.334,.366,.665,.698)}7.601%{stroke-dashoffset:0.045;animation-timing-function:cubic-bezier(.324,.379,.654,.711)}10.633%{stroke-dashoffset:0.033;animation-timing-function:cubic-bezier(.307,.413,.634,.74)}15.508%{stroke-dashoffset:0.018;animation-timing-function:cubic-bezier(.199,1,.481,1)}50%,100%{stroke-dashoffset:0}}",
+      "@keyframes k2{0%{stroke-dashoffset:0.067}1.59%{stroke-dashoffset:0.065;animation-timing-function:cubic-bezier(.341,.352,.673,.685)}3.274%{stroke-dashoffset:0.062;animation-timing-function:cubic-bezier(.339,.358,.67,.691)}5.268%{stroke-dashoffset:0.055;animation-timing-function:cubic-bezier(.334,.366,.665,.698)}7.601%{stroke-dashoffset:0.045;animation-timing-function:cubic-bezier(.324,.379,.654,.711)}10.633%{stroke-dashoffset:0.033;animation-timing-function:cubic-bezier(.307,.413,.634,.74)}15.508%{stroke-dashoffset:0.018;animation-timing-function:cubic-bezier(.199,1,.481,1)}49.998%{stroke-dashoffset:0;stroke-dasharray:1 2;animation-timing-function:linear}50%,100%{stroke-dashoffset:0;stroke-dasharray:none}}",
       "@keyframes k3{0%{rotate:0deg}4.527%{rotate:-7.982deg;animation-timing-function:cubic-bezier(.335,.384,.663,.715)}8.173%{rotate:-12.864deg;animation-timing-function:cubic-bezier(.314,.41,.639,.738)}13.03%{rotate:-16.935deg;animation-timing-function:cubic-bezier(.264,.551,.576,.844)}25.512%{rotate:-20.435deg;animation-timing-function:cubic-bezier(.245,1,.563,1)}50%,100%{rotate:-21.038deg}}",
       "@keyframes k4{0%{translate:20px 15px}50%,100%{translate:20px 65px}}",
       ".m2{animation-name:k2,k3,k4;animation-timing-function:cubic-bezier(.342,.35,.675,.683),cubic-bezier(.356,.385,.682,.716),cubic-bezier(.23,1,.32,1)}",

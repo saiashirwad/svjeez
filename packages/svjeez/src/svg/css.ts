@@ -82,7 +82,8 @@ const frames = (
   period: Seconds,
   holds: boolean,
 ): Frames => {
-  const keys = emit === "value" ? foldKeys(lane, all) : all;
+  const folded = emit === "value" ? foldKeys(lane, all) : all;
+  const keys = lane === "draw" ? joinedKeys(folded, period) : folded;
   const counts = new Map<string, number>();
   keys.forEach((key, index) => {
     if (moving(keys, index) && !(holds && isHold(key.ease)))
@@ -213,6 +214,38 @@ export const length = (value: number): string => {
   return text === "0" ? text : `${text}px`;
 };
 
+const isWhole = (values: ChannelValues): boolean =>
+  values.drawStart === undefined && (values.whole ?? ((values.draw ?? 0) >= 1 ? 1 : 0)) === 1;
+
+/**
+ * A dash pattern ends in caps, so a closed shape drawn in full would lack the join at its first vertex. Once the draw is whole its dashes are
+ * dropped. A dash list only flips between two stops (halfway), so each flip gets a stop a hair before or after the key, holding the dashes.
+ */
+const joinedKeys = (keys: readonly Key[], period: Seconds): readonly Key[] => {
+  const step = period / 50000;
+
+  return keys.flatMap((key, index): Key[] => {
+    if (!isWhole(key.values)) return [key];
+    const [previous, next] = [keys[index - 1], keys[index + 1]];
+    const before = previous && !isWhole(previous.values);
+    const after = next && !isWhole(next.values);
+
+    return [
+      ...(before ? [{ ...key, t: key.t - step, values: { ...key.values, whole: 0 } }] : []),
+      key,
+      ...(after ? [{ ...key, t: key.t + step, values: { ...key.values, whole: 0 } }] : []),
+    ];
+  });
+};
+
+/** Only the stops around a whole draw say their dashes; every other stop leaves the pinned "1 2" alone. */
+const dashed = (values: ChannelValues): string =>
+  isWhole(values)
+    ? ";stroke-dasharray:none"
+    : values.whole === undefined
+      ? ""
+      : ";stroke-dasharray:1 2";
+
 export const cssDeclarations = (lane: string, emit: Emit, values: ChannelValues): string => {
   if (emit === "visibility") return `visibility:${values.opacity === 0 ? "hidden" : "visible"}`;
 
@@ -224,7 +257,7 @@ export const cssDeclarations = (lane: string, emit: Emit, values: ChannelValues)
     return emit === "dash" ? dash : `${dash};visibility:${length > 0 ? "visible" : "hidden"}`;
   }
 
-  if (emit === "dash") return `stroke-dashoffset:${num(1 - (values.draw ?? 0))}`;
+  if (emit === "dash") return `stroke-dashoffset:${num(1 - (values.draw ?? 0))}${dashed(values)}`;
 
   switch (lane) {
     case "translate":
@@ -242,7 +275,7 @@ export const cssDeclarations = (lane: string, emit: Emit, values: ChannelValues)
     case "draw": {
       const drawn = values.draw ?? 0;
 
-      return `stroke-dashoffset:${num(1 - drawn)};visibility:${drawn > 0 ? "visible" : "hidden"}`;
+      return `stroke-dashoffset:${num(1 - drawn)}${dashed(values)};visibility:${drawn > 0 ? "visible" : "hidden"}`;
     }
 
     default: {
