@@ -189,6 +189,8 @@ art.hit("card").forEach((el) => el.addEventListener("click", () => art.clock("op
 art.clock("grow").follow(scrolled(card));
 ```
 
+A `<Slot name="field" width={w} height={h}>` leaves a box in the layout for the page's own HTML: `art.slot("field").host(canvas)` puts a canvas there, moved by the scene's clocks, and the slot's children are the fallback the plain `.svg` shows. The [Signal card](examples/react-widgets/GpuCard.tsx) fills one with a live TypeGPU shader that reads the scene's storm clock every frame.
+
 ## Film a real web app
 
 Skip redrawing UI by hand. `@svjeez/dom` drives a React, Svelte, or HTML app in Playwright, snapshots DOM states in light and dark mode, and compiles the transitions into one zero-JS `.svg`:

@@ -1,7 +1,8 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "jsxImportSource": "react"
+    "jsxImportSource": "react",
+    "types": ["bun", "@webgpu/types"]
   },
   "include": ["."],
   "exclude": []
