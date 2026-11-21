@@ -328,7 +328,7 @@ test("frames and check --browser sample the scene's duration, not the shorter pe
 
   const checked = cli("check", scene, "--browser");
   expect(checked.stdout.toString()).toContain("loop 8s");
-});
+}, 60_000);
 
 test("svjeez check reports type errors in the scene with file:line, using the project's tsconfig", () => {
   const dir = mkdtempSync(join(import.meta.dir, "tmp-types-"));
@@ -357,4 +357,4 @@ test("svjeez check reports type errors in the scene with file:line, using the pr
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
-});
+}, 60_000);

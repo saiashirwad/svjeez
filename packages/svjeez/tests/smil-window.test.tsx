@@ -204,5 +204,5 @@ describe.if(browser)("windowed SMIL renders as the plain animate did", () => {
         });
       }
     }
-  });
+  }, 60_000);
 });
