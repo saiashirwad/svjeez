@@ -98,6 +98,46 @@ button {
   backdrop-filter: blur(6px);
 }
 
+/* Show one layer: the GPU field lives in the shader's foreignObject, everything else is svjeez's vector. */
+.stage[data-show="svg"] foreignObject {
+  visibility: hidden;
+}
+
+.stage[data-show="gpu"] svg * {
+  visibility: hidden;
+}
+
+.stage[data-show="gpu"] foreignObject,
+.stage[data-show="gpu"] foreignObject * {
+  visibility: visible;
+}
+
+.layers {
+  display: flex;
+}
+
+.controls .layers button {
+  border-radius: 0;
+}
+
+.controls .layers button + button {
+  margin-left: -1px;
+}
+
+.controls .layers button:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+.controls .layers button:last-child {
+  border-radius: 0 4px 4px 0;
+}
+
+.controls button[aria-checked="true"] {
+  position: relative;
+  border-color: #c9f27a;
+  color: #c9f27a;
+}
+
 .controls button:hover,
 .source header button:hover {
   border-color: #4a5568;

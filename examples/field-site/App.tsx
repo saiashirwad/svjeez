@@ -19,6 +19,15 @@ import type { Vec } from "svjeez";
 
 const CODE = trimmed(file);
 
+/** Which layer the stage shows: both, only the vector one svjeez draws, or only the field the GPU draws. */
+const LAYERS = [
+  { show: "both", label: "Both", key: "1" },
+  { show: "svg", label: "SVG · svjeez", key: "2" },
+  { show: "gpu", label: "GPU · TypeGPU", key: "3" },
+] as const;
+
+type Show = (typeof LAYERS)[number]["show"];
+
 /** How far peeling lifts the vector layer, in scene units: the scene's own "peeled" offset. */
 const LIFT = -14;
 
@@ -87,6 +96,7 @@ export const App = () => {
   const [peeled, setPeeled] = useState(false);
   const [open, setOpen] = useState(false);
   const [moved, setMoved] = useState(false);
+  const [layer, setLayer] = useState<Show>("both");
 
   useEffect(() => {
     if (scene.current) show(scene.current, places);
@@ -105,6 +115,10 @@ export const App = () => {
       if (event.key === "l" || event.key === "L") setPeeled((was) => !was);
 
       if (event.key === "Escape") setOpen(false);
+
+      const picked = LAYERS.find(({ key }) => key === event.key);
+
+      if (picked) setLayer(picked.show);
     };
 
     addEventListener("keydown", onKey);
@@ -165,7 +179,7 @@ export const App = () => {
 
   return (
     <main className={open ? "open" : undefined}>
-      <div className="stage" ref={stage}>
+      <div className="stage" ref={stage} data-show={layer}>
         <Scene
           scene={fields}
           state={peeled ? "peeled" : "flat"}
@@ -209,6 +223,20 @@ export const App = () => {
         {`Field at the probe: ${probe.strength.toFixed(2)} q per u, potential ${probe.phi.toFixed(1)}.`}
       </p>
       <div className="controls">
+        <div className="layers" role="radiogroup" aria-label="Show layer">
+          {LAYERS.map(({ show, label, key }) => (
+            <button
+              key={show}
+              type="button"
+              role="radio"
+              aria-checked={layer === show}
+              aria-keyshortcuts={key}
+              onClick={() => setLayer(show)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <button
           type="button"
           aria-pressed={peeled}
@@ -239,7 +267,7 @@ export const App = () => {
         <Source code={CODE} />
       </aside>
       <p className={moved ? "hint gone" : "hint"} aria-hidden>
-        drag a charge or the probe · L peels the layers apart
+        drag a charge or the probe · 1 2 3 show each layer · L peels them apart
       </p>
       <p className="lockup">
         <a href="https://svjeez.texoport.in">svjeez</a> <span aria-label="loves">♥</span>{" "}
