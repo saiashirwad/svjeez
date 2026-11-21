@@ -359,7 +359,7 @@ const cssLane = <T>(
     period,
     snapped: period,
     emit: emit ?? (cuts && slot === "opacity" && isCut(keys) ? "visibility" : "value"),
-    ...(joins ? { joins } : {}),
+    joins,
   };
 
   report(ctx, slot, written);
