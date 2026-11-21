@@ -109,7 +109,7 @@ From the repo root, after every change (`my/scene` is `examples/my/scene.tsx`, `
 
 ```sh
 bun run scene check my/scene       # also reports type errors (type-error) from the project's tsconfig
-bun run scene frames my/scene --sheet --out /tmp/frames   # Read /tmp/frames/sheet.png
+bun run scene frames my/scene --sheet --out examples/my/scene/frames   # Read its sheet.png; keep frames beside the scene
 ```
 
 `--times 0,1,2` picks frames. `check` tests both colour schemes; `--color-scheme dark` on `frames` renders dark. **Always Read a frame**: `check` misses mis-anchored text and some overlaps of your own shapes. One-shot scenes are sampled to their end; `frames` and `check` use the scene's `duration`. Fix every error, read each warning against a frame. `examples/tsconfig.json` has `noUncheckedIndexedAccess`: index `as const` tuples or per-item objects, not `arr[i]` of a plain array. `wasted-motion` (info) means a node changes while hidden; fine to leave when intentional, otherwise start it at its shown value. `moving-box` warns when a group placed with `at`/`anchor` has moving content; use `offset`. More patterns: `examples/readme/hero.tsx`, `layout/`, `springs/`, `epicycles/`.
