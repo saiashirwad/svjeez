@@ -361,10 +361,31 @@ const steppedLane = <T>(
     return { t: high, value: values[i]!, ease: ease.hold };
   });
 
-  const [next, ...rest] = keys;
+  // A value held for one instant (a floor() that hits an integer only at a peak) has no width to draw; drop it,
+  // and the key that returns to the value before it.
+  const blip = window * 1e-5;
+  const kept: Key<T>[] = [{ t: 0, value: values[0]! }];
+
+  for (const [i, key] of keys.entries()) {
+    const after = keys[i + 1];
+
+    if (after !== undefined && after.t - key.t < blip) continue;
+    const before = i > 0 ? keys[i - 1]! : undefined;
+    const last = kept[kept.length - 1]!;
+
+    if (
+      before !== undefined &&
+      key.t - before.t < blip &&
+      JSON.stringify(key.value) === JSON.stringify(last.value)
+    )
+      continue;
+    kept.push(key);
+  }
+
+  const [next, ...rest] = kept.slice(1);
 
   if (!next) return undefined;
-  const lane: Lane<T> = { kind: "lane", keys: [{ t: 0, value: values[0]! }, next, ...rest] };
+  const lane: Lane<T> = { kind: "lane", keys: [kept[0]!, next, ...rest] };
 
   return period === undefined ? lane : { ...lane, period };
 };

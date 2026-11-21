@@ -411,3 +411,17 @@ describe("a derived value that switches", () => {
     ).toContain("@keyframes");
   });
 });
+
+test("a step function of a track that goes up and comes back compiles", () => {
+  const up = track(0).to(4, span(0, 2), ease.linear).to(0, span(2, 2), ease.linear);
+
+  const model = made(() => (
+    <Shape fill="#000000" geometry={rect(10, 10)} rotate={up.map((v) => Math.floor(v) * 90)} />
+  ));
+
+  const out = svg.emit(model);
+
+  // Every whole value is held for its own stretch; the one-instant peak at 4 draws nothing.
+  expect(out).toContain("rotate:270deg");
+  expect(out).not.toContain("rotate:360deg");
+});
