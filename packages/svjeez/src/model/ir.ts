@@ -21,6 +21,8 @@ export interface Authored {
   };
   readonly wrap?: { readonly width: number; readonly cuts: readonly number[] };
   readonly backdrop?: true;
+  /** A group placed by at or an anchor: the point it was given is matched to its box as it is at 0s. */
+  readonly pinned?: true;
   readonly ends?: readonly string[];
   readonly count?: { readonly ticks: readonly { readonly t: Seconds; readonly text: string }[] };
 }

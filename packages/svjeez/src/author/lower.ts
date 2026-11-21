@@ -897,7 +897,9 @@ const lowered = (
   const offset = el.type === "group" ? el.props.offset : undefined;
 
   placement(ctx, el.props, offset, key, parent);
-  const still = el.props.at === undefined && offset === undefined && !ctx.notes.aims.has(key);
+  const aim = ctx.notes.aims.has(key);
+  const still = el.props.at === undefined && offset === undefined && !aim;
+  const pins = (el.props.at !== undefined || aim) && offset === undefined;
 
   note(
     ctx.notes,
@@ -946,7 +948,9 @@ const lowered = (
           timing,
           [0, 0],
         ),
-        ...(el.layout && { authored: { layout: el.layout } }),
+        ...((el.layout || pins) && {
+          authored: { ...(el.layout && { layout: el.layout }), ...(pins && { pinned: true }) },
+        }),
         kind: "group",
         children,
       };

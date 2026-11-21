@@ -77,6 +77,7 @@ Use it to confirm a beat before rendering frames: where a node landed, whether i
 | `wasted-motion` | info | a value changes before the node is first seen, or after it is gone for good |
 | `static` | warning, info | nothing in the scene moves, or a value changes only after the scene ends |
 | `moving-filter` | warning, info | a filter redrawn every frame; a warning when it covers a tenth of the canvas or more |
+| `moving-box` | warning | a `<Group>` placed by `at` or an anchor whose content moves: `at` matches its box as it is at 0s, so the group drifts off the point. Use `offset`, or pin an outer group that holds still |
 | `layout-overlap` | warning | two children of a `<Stack>` or `<Grid>` overlap: motion carried one onto another |
 | `word-cut` | warning | a word wider than the width its text wraps to, cut across two lines |
 | `unsupported` | error | a feature the SVG backend can't draw |

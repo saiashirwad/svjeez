@@ -376,6 +376,36 @@ group("low-contrast", () => {
   });
 });
 
+group("moving-box", () => {
+  const pinned = (props: Partial<Parameters<typeof Group>[0]>) =>
+    made(() => (
+      <Group {...props}>
+        <Dot at={track<Vec>([0, 0]).to([100, 0], span(0, 2))} />
+      </Group>
+    ));
+
+  test("a group pinned by at whose content moves is flagged", () => {
+    const [found] = only(pinned({ at: [0, 0] }), "moving-box");
+
+    expect(found).toMatchObject({ severity: "warning" });
+    expect(found!.message).toContain("100");
+  });
+
+  test("offset, or content that holds still, is not", () => {
+    expect(codes(pinned({ offset: [0, 0] }))).not.toContain("moving-box");
+    expect(codes(pinned({}))).not.toContain("moving-box");
+    expect(
+      codes(
+        made(() => (
+          <Group at={[50, 50]}>
+            <Dot at={[0, 0]} />
+          </Group>
+        )),
+      ),
+    ).not.toContain("moving-box");
+  });
+});
+
 group("loop-seam off canvas", () => {
   const lap = (on: boolean) =>
     made(() => (

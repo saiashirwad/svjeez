@@ -165,6 +165,7 @@ npx svjeez frames scene.tsx --sheet --out frames/   # look: open frames/sheet.pn
 | `visible-at-zero` | shown at 0s and cut straight back in, or filled while its stroke draws in |
 | `nothing-enters`, `static`, `wasted-motion` | nothing enters; nothing moves; a value changes while no one sees it |
 | `moving-filter` | a filter redrawn every frame because its parameters or its content move |
+| `moving-box` | a `<Group>` placed by `at` or an anchor whose content moves, so the pin only holds at 0s; use `offset` |
 | `layout-overlap` | two children of a `<Stack>` or `<Grid>` overlap: motion carried one onto another |
 | `word-cut` | a word wider than the `width` its text wraps to, cut across two lines |
 | `unsupported`, `approximate` | the SVG backend can't draw a feature, or draws it a little differently |
