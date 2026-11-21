@@ -30,6 +30,8 @@
     "dom-component",
     "dom-svelte",
     "clocks/page.ts",
-    "clocks/env.d.ts"
+    "clocks/env.d.ts",
+    "machines/page.ts",
+    "machines/env.d.ts"
   ]
 }

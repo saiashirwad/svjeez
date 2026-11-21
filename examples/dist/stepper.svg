@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 270" width="480" height="270" role="img" aria-labelledby="stepper-t stepper-d" font-family="'stepper-Geist'" class="stepper-root">
+  <title id="stepper-t">Stepper</title>
+  <desc id="stepper-d">A four-step progress on one clock with four stops: an icon morphs from step to step, a bar fills and the label changes. Page code rests the clock at a stop and moves it with Back and Next, which stop at the ends.</desc>
+  <style><![CDATA[
+svg.stepper-root{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF}
+@media (prefers-color-scheme:light){svg.stepper-root{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0}}
+
+@font-face{font-family:'stepper-Geist';src:url(data:font/ttf;base64,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) format('truetype');font-weight:600;font-style:normal}
+.stepper-a{animation-duration:3s;animation-iteration-count:1;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes stepper-k1{0%,20%{scale:0 1}36.667%{scale:0.333 1}53.333%{scale:0.667 1}70%,100%{scale:1 1}}
+.stepper-m1{animation-name:stepper-k1;animation-timing-function:linear}
+@keyframes stepper-k2{0%,30%{fill:var(--raised)}36.667%,100%{fill:var(--blue)}}
+.stepper-m2{animation-name:stepper-k2}
+@keyframes stepper-k3{0%,46.667%{fill:var(--raised)}53.333%,100%{fill:var(--blue)}}
+.stepper-m3{animation-name:stepper-k3}
+@keyframes stepper-k4{0%,63.333%{fill:var(--raised)}70%,100%{fill:var(--blue)}}
+.stepper-m4{animation-name:stepper-k4}
+@keyframes stepper-k5{0%,20%{fill:var(--blue)}36.667%{fill:var(--orange)}53.333%{fill:var(--cyan)}70%,100%{fill:var(--green)}}
+.stepper-m5{animation-name:stepper-k5}
+@keyframes stepper-k6{0%,20%{opacity:1}26.667%,100%{opacity:0}}
+.stepper-m6{animation-name:stepper-k6}
+@keyframes stepper-k7{0%,30%,43.333%,100%{opacity:0}36.667%{opacity:1}}
+.stepper-m7{animation-name:stepper-k7}
+@keyframes stepper-k8{0%,46.667%,60%,100%{opacity:0}53.333%{opacity:1}}
+.stepper-m8{animation-name:stepper-k8}
+@keyframes stepper-k9{0%,63.333%{opacity:0}70%,100%{opacity:1}}
+.stepper-m9{animation-name:stepper-k9}
+@keyframes stepper-k10{0%,20%{opacity:0.4}26.667%,100%{opacity:1}}
+.stepper-m10{animation-name:stepper-k10}
+@keyframes stepper-k11{0%,63.333%{opacity:1}70%,100%{opacity:0.4}}
+.stepper-m11{animation-name:stepper-k11}
+@media (prefers-reduced-motion:reduce){.stepper-a{animation-delay:-2.55s!important;animation-play-state:paused!important}.stepper-dm{display:none}.stepper-ds{display:inline}}
+]]></style>
+  <rect width="480" height="270" fill="var(--background)"/>
+  <rect x="60" y="36" width="360" height="6" rx="3" fill="var(--raised)"/>
+  <rect x="60" y="36" width="360" height="6" rx="3" fill="var(--blue)" style="transform-origin:60px 36px" data-clock="step" data-clock-at="0.6" data-clock-over="1.5" class="stepper-a stepper-m1"/>
+  <circle cx="60" cy="39" r="9" fill="var(--blue)" data-clock="step" data-clock-at="0.6" data-clock-over="1.5"/>
+  <circle cx="180" cy="39" r="9" fill="var(--raised)" data-clock="step" data-clock-at="0.6" data-clock-over="1.5" class="stepper-a stepper-m2"/>
+  <circle cx="300" cy="39" r="9" fill="var(--raised)" data-clock="step" data-clock-at="0.6" data-clock-over="1.5" class="stepper-a stepper-m3"/>
+  <circle cx="420" cy="39" r="9" fill="var(--raised)" data-clock="step" data-clock-at="0.6" data-clock-over="1.5" class="stepper-a stepper-m4"/>
+  <path d="M0 -40l6.89 23.37l21.39 -11.65l-11.65 21.39l23.37 6.89l-23.37 6.89l11.65 21.39l-21.39 -11.65l-6.89 23.37l-6.89 -23.37l-21.39 11.65l11.65 -21.39l-23.37 -6.89l23.37 -6.89l-11.65 -21.39l21.39 11.65z" transform="translate(240 118)" fill="var(--blue)" data-clock="step" data-clock-at="0.6" data-clock-over="1.5" class="stepper-a stepper-m5 stepper-dm">
+    <animate attributeName="d" values="M0-30l11.48 2.28l9.73 6.51l6.51 9.73l2.28 11.48l-2.28 11.48l-6.51 9.73l-9.73 6.51l-11.48 2.28l-11.48-2.28l-9.73-6.51l-6.51-9.73l-2.28-11.48l2.28-11.48l6.51-9.73l9.73-6.51z;M0-30l11.48 2.28l9.73 6.51l6.51 9.73l2.28 11.48l-2.28 11.48l-6.51 9.73l-9.73 6.51l-11.48 2.28l-11.48-2.28l-9.73-6.51l-6.51-9.73l-2.28-11.48l2.28-11.48l6.51-9.73l9.73-6.51z;M0-40l10.72 14.13l9.08 6.07l6.07 9.08l14.13 10.72l-14.13 10.72l-6.07 9.08l-9.08 6.07l-10.72 14.13l-10.72-14.13l-9.08-6.07l-6.07-9.08l-14.13-10.72l14.13-10.72l6.07-9.08l9.08-6.07z;M0-40l8.42 19.67l7.14 4.77l4.77 7.14l1.67 8.42l-1.67 8.42l-4.77 7.14l-7.14 4.77l-8.42 19.67l-8.42-19.67l-7.14-4.77l-4.77-7.14l-1.67-8.42l1.67-8.42l4.77-7.14l7.14-4.77z;M0-40l6.89 23.37l21.39-11.65l-11.65 21.39l23.37 6.89l-23.37 6.89l11.65 21.39l-21.39-11.65l-6.89 23.37l-6.89-23.37l-21.39 11.65l11.65-21.39l-23.37-6.89l23.37-6.89l-11.65-21.39l21.39 11.65z;M0-40l6.89 23.37l21.39-11.65l-11.65 21.39l23.37 6.89l-23.37 6.89l11.65 21.39l-21.39-11.65l-6.89 23.37l-6.89-23.37l-21.39 11.65l11.65-21.39l-23.37-6.89l23.37-6.89l-11.65-21.39l21.39 11.65z" keyTimes="0;0.2;0.36667;0.53333;0.7;1" calcMode="spline" keySplines="0 0 1 1;0.77 0 0.175 1;0.77 0 0.175 1;0.77 0 0.175 1;0 0 1 1" dur="3s" repeatCount="1" fill="freeze"/>
+  </path>
+  <path d="M0 -40l6.89 23.37l21.39 -11.65l-11.65 21.39l23.37 6.89l-23.37 6.89l11.65 21.39l-21.39 -11.65l-6.89 23.37l-6.89 -23.37l-21.39 11.65l11.65 -21.39l-23.37 -6.89l23.37 -6.89l-11.65 -21.39l21.39 11.65z" transform="translate(240 118)" fill="var(--blue)" data-clock="step" data-clock-at="0.6" data-clock-over="1.5" class="stepper-a stepper-m5 stepper-ds" display="none"/>
+  <text x="214.279" y="188" font-weight="600" font-size="17" fill="var(--text)" data-clock="step" data-clock-at="0.6" data-clock-over="1.5" class="stepper-a stepper-m6">1. Plan</text>
+  <text x="209.868" y="188" font-weight="600" font-size="17" fill="var(--text)" data-clock="step" data-clock-at="0.6" data-clock-over="1.5" class="stepper-a stepper-m7">2. Build</text>
+  <text x="213.353" y="188" font-weight="600" font-size="17" fill="var(--text)" data-clock="step" data-clock-at="0.6" data-clock-over="1.5" class="stepper-a stepper-m8">3. Test</text>
+  <text x="212.188" y="188" font-weight="600" font-size="17" fill="var(--text)" data-clock="step" data-clock-at="0.6" data-clock-over="1.5" class="stepper-a stepper-m9">4. Ship</text>
+  <g transform="translate(140 206)" data-clock="step" data-clock-at="0.6" data-clock-over="1.5" data-hit="back">
+    <rect width="96" height="36" rx="10" fill="var(--raised)" class="stepper-a stepper-m10"/>
+    <text x="30.808" y="23" font-weight="600" font-size="14" fill="var(--text)">Back</text>
+  </g>
+  <g transform="translate(244 206)" data-clock="step" data-clock-at="0.6" data-clock-over="1.5" data-hit="next">
+    <rect width="96" height="36" rx="10" fill="var(--blue)" class="stepper-a stepper-m11"/>
+    <text x="32.068" y="23" font-weight="600" font-size="14" fill="var(--background)">Next</text>
+  </g>
+</svg>

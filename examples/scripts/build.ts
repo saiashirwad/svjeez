@@ -29,10 +29,10 @@ type Made = string | Scene;
 
 const isBuild = (value: Made | (() => Made)): value is () => Made => typeof value === "function";
 
-const svgOf = (exported: Made | (() => Made)): string => {
+const svgOf = (exported: Made | (() => Made), prefix?: string): string => {
   const made = isBuild(exported) ? exported() : exported;
 
-  return isScene(made) ? backend.emit(made) : made;
+  return isScene(made) ? backend.emit(made, { prefix }) : made;
 };
 
 const xmllint = Bun.which("xmllint");
@@ -49,11 +49,11 @@ const build = async (name: string): Promise<boolean> => {
     const file = join(ROOT, name.includes("/") ? `${name}.tsx` : join(name, "index.tsx"));
 
     // `*.vite.tsx` films a component through Vite, which has to load the film file itself.
-    const exported: Made | (() => Made) = file.endsWith(".vite.tsx")
-      ? (await runFilm(file)).svg
-      : (await import(file)).default;
+    // A scene that shares a page with others exports a `prefix`, which keeps its classes, keyframes and fonts apart.
+    const loaded = file.endsWith(".vite.tsx") ? undefined : await import(file);
+    const exported: Made | (() => Made) = loaded ? loaded.default : (await runFilm(file)).svg;
 
-    const svg = svgOf(exported);
+    const svg = svgOf(exported, loaded?.prefix);
     const { warnings } = validateSvg(svg);
     const problem = lint(svg);
 

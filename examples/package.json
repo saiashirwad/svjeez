@@ -12,7 +12,7 @@
     "test": "bun test",
     "test:browsers": "bun test ./scripts/browsers.ts",
     "test:node": "tsx scripts/node-check.ts",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react && tsc --noEmit -p dom-react-vite && tsc --noEmit -p dom-component && tsc --noEmit -p clocks && svelte-check --tsconfig dom-svelte/tsconfig.json --fail-on-warnings"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react && tsc --noEmit -p dom-react-vite && tsc --noEmit -p dom-component && tsc --noEmit -p clocks && tsc --noEmit -p machines && svelte-check --tsconfig dom-svelte/tsconfig.json --fail-on-warnings"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
