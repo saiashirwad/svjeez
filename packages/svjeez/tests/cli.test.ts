@@ -310,3 +310,22 @@ test("svjeez frames samples a scene that plays once to its end and clears the fr
     "notes.txt",
   ]);
 });
+
+test("frames and check --browser sample the scene's duration, not the shorter period of its tracks", () => {
+  const scene = join(import.meta.dir, "fixtures/check/short-loop-scene.tsx");
+  const dir = mkdtempSync(join(tmpdir(), "svjeez-period-"));
+  const result = cli("frames", scene, "--out", dir, "--count", "4");
+
+  if (result.exitCode !== 0 && /Chromium|playwright-core/.test(result.stderr.toString())) return;
+  expect(result.exitCode).toBe(0);
+  expect(result.stdout.toString()).toContain("loop 8s");
+  expect(readdirSync(dir).sort()).toEqual([
+    "frame-00-0_000s.png",
+    "frame-01-2_000s.png",
+    "frame-02-4_000s.png",
+    "frame-03-6_000s.png",
+  ]);
+
+  const checked = cli("check", scene, "--browser");
+  expect(checked.stdout.toString()).toContain("loop 8s");
+});

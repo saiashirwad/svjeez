@@ -21,6 +21,8 @@ export interface SceneOptions {
   readonly colorScheme?: ColorScheme | "system";
   readonly background?: string;
   readonly executablePath?: string;
+  /** The scene's length in seconds, when the caller knows it. Without it the length is read from the animations' periods, which can be shorter than the scene (a `duration: 8` scene whose tracks all `.loop(4)` measures 4s). */
+  readonly duration?: Seconds;
 }
 
 export type FrameOptions = FrameTimes &
@@ -114,6 +116,7 @@ type Browser = Awaited<ReturnType<typeof launch>>;
 
 type Stage = Pick<Scene, "width" | "height" | "scale" | "colorScheme" | "playbackRate"> & {
   readonly background: string;
+  readonly duration: Seconds | undefined;
 };
 
 const resolve = (caller: string, svg: string, options: SceneOptions): Stage => {
@@ -138,6 +141,7 @@ const resolve = (caller: string, svg: string, options: SceneOptions): Stage => {
     colorScheme,
     playbackRate: rateOf(svg),
     background: options.background ?? "Canvas",
+    duration: options.duration,
   };
 };
 
@@ -146,7 +150,7 @@ const ORIGIN = "https://svjeez.local/";
 const stage = async (
   browser: Browser,
   svg: string,
-  { width, height, scale, colorScheme, playbackRate, background }: Stage,
+  { width, height, scale, colorScheme, playbackRate, background, duration: given }: Stage,
 ): Promise<Omit<Scene, "close">> => {
   const page = await browser.newPage({
     viewport: { width: Math.ceil(width), height: Math.ceil(height) },
@@ -162,7 +166,7 @@ const stage = async (
   );
   await page.goto(ORIGIN);
   await page.evaluate(() => document.fonts.ready);
-  const duration = await page.evaluate(loopLength, undefined);
+  const duration = given ?? (await page.evaluate(loopLength, undefined));
 
   const loops = await page.evaluate(
     () =>

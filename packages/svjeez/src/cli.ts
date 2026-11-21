@@ -470,11 +470,13 @@ const framesCommand = async (args: string[]): Promise<void> => {
   });
 
   const scheme = parseScheme(values["color-scheme"]);
-  const svg = await loadSvg(positionals[0] ?? fail(USAGE), values);
+  const built = await loadBuilt(positionals[0] ?? fail(USAGE), values);
+  const svg = built.svg;
   report(svg);
 
   const { duration, loops, colorScheme, frames, sheet } = await renderFrames(svg, {
     ...when(values.times, values.count),
+    duration: built.scene?.duration,
     scale: number("scale", values.scale),
     colorScheme: scheme,
     background: values.background,
@@ -681,6 +683,7 @@ const checkCommand = async (args: string[]): Promise<void> => {
       : undefined;
 
     const pixels = await checkPixels(svgText, {
+      duration: model?.duration,
       ...(times ? { times } : cues && { cues }),
       colorScheme: scheme,
     });
