@@ -101,3 +101,54 @@ test("counts reads of PNGs as frame looks and shell reads as lookups", () => {
   expect(m.frameRuns).toBe(1);
   expect(m.sourceLookups).toBe(2);
 });
+
+const use = (id: string, name: string, input: ToolInput) => ({
+  type: "assistant",
+  message: { id, content: [{ type: "tool_use", id, name, input }] },
+});
+
+const refused = (id: string) => ({
+  type: "user",
+  message: {
+    content: [
+      {
+        type: "tool_result",
+        tool_use_id: id,
+        is_error: true,
+        content:
+          "Permission to use Bash has been denied because Claude Code is running in don't ask mode.",
+      },
+    ],
+  },
+});
+
+test("lists denied calls from the result event", () => {
+  const m = metrics(
+    [
+      use("1", "Bash", { command: "python3 x.py" }),
+      {
+        type: "result",
+        permission_denials: [
+          { tool_name: "Bash", tool_input: { command: "python3 x.py" } },
+          { tool_name: "Edit", tool_input: { file_path: "/a/b.tsx" } },
+        ],
+      },
+    ],
+    ctx,
+  );
+
+  expect(m.permissionDenials).toBe(2);
+  expect(m.denied).toEqual([
+    { tool: "Bash", detail: "python3 x.py" },
+    { tool: "Edit", detail: "/a/b.tsx" },
+  ]);
+});
+
+test("falls back to denied tool results when the run was killed before its result event", () => {
+  const m = metrics(
+    [use("1", "Bash", { command: "ps aux" }), refused("1"), use("2", "Read", { file_path: "/x" })],
+    ctx,
+  );
+
+  expect(m.denied).toEqual([{ tool: "Bash", detail: "ps aux" }]);
+});

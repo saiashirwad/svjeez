@@ -101,6 +101,38 @@ const loadTasks = async (wanted: string[]): Promise<Task[]> => {
 const fill = (template: string, values: Record<string, string>): string =>
   template.replace(/\{\{(\w+)\}\}/g, (_, key: string) => values[key] ?? "");
 
+const ALLOWED_BASH = [
+  // The svjeez CLI and scripts.
+  "bun",
+  "bunx",
+  // Read-only inspection, and the glue the agent chains it with.
+  "ls",
+  "cat",
+  "head",
+  "tail",
+  "wc",
+  "find",
+  "grep",
+  "rg",
+  "file",
+  "stat",
+  "du",
+  "pwd",
+  "echo",
+  "cd",
+  "sort",
+  "uniq",
+  "cut",
+  "tr",
+  "seq",
+  "diff",
+  "ps",
+  "which",
+  "sleep",
+  // Scratch directories for frames.
+  "mkdir",
+];
+
 // Read-only Bash plus bun for the svjeez CLI. Writes are confined to the run's own directory.
 const allowedTools = (dir: string): string[] => [
   "Read",
@@ -108,10 +140,7 @@ const allowedTools = (dir: string): string[] => [
   "Grep",
   `Write(${dir}/**)`,
   `Edit(${dir}/**)`,
-  ...["bun", "bunx", "ls", "cat", "head", "tail", "wc", "find", "grep", "rg"].flatMap((cmd) => [
-    `Bash(${cmd})`,
-    `Bash(${cmd} *)`,
-  ]),
+  ...ALLOWED_BASH.flatMap((cmd) => [`Bash(${cmd})`, `Bash(${cmd} *)`]),
 ];
 
 const killTree = (pid: number): void => {

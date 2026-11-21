@@ -47,6 +47,7 @@ export interface Row {
   sourceLookups: number;
   errors: number;
   warnings: number;
+  denied: number;
   costUsd: number;
 }
 
@@ -67,6 +68,7 @@ export const COLUMNS: [Measure, string][] = [
   ["sourceLookups", "lookups"],
   ["errors", "errors"],
   ["warnings", "warns"],
+  ["denied", "denied"],
   ["costUsd", "cost $"],
 ];
 
@@ -88,6 +90,7 @@ const rowOf = (task: string, model: string, phase: Row["phase"], phases: PhaseRe
   sourceLookups: mean(phases.map((p) => p.metrics.sourceLookups)),
   errors: mean(phases.map((p) => p.grade.errors)),
   warnings: mean(phases.map((p) => p.grade.warnings)),
+  denied: mean(phases.map((p) => p.metrics.permissionDenials ?? 0)),
   costUsd: mean(phases.map((p) => p.metrics.costUsd)),
 });
 
@@ -133,6 +136,39 @@ const sameRow = (a: Row, b: Row): boolean =>
 const built = (row: Row): string =>
   `${row.built}/${row.runs}${row.timedOut > 0 ? ` (${row.timedOut} timed out)` : ""}`;
 
+/** The distinct denied calls with counts, to tune the allow list from. Empty when nothing was denied. */
+export const deniedCalls = (
+  runs: RunResult[],
+): { tool: string; detail: string; count: number }[] => {
+  const counts = new Map<string, { tool: string; detail: string; count: number }>();
+
+  for (const run of runs)
+    for (const phase of [run.build, run.change])
+      for (const { tool, detail } of phase?.metrics.denied ?? []) {
+        const key = `${tool}\t${detail}`;
+        const entry = counts.get(key) ?? { tool, detail, count: 0 };
+
+        entry.count++;
+        counts.set(key, entry);
+      }
+
+  return [...counts.values()].sort((a, b) => b.count - a.count || a.tool.localeCompare(b.tool));
+};
+
+const renderDenied = (summary: Summary): string => {
+  const calls = deniedCalls(summary.runs);
+
+  if (calls.length === 0) return "";
+
+  const lines = calls.map(({ tool, detail, count }) => {
+    const text = detail.replace(/\s+/g, " ").trim();
+
+    return `- ${tool} x${count}: \`${text.length > 160 ? `${text.slice(0, 160)}...` : text}\``;
+  });
+
+  return `\n## Denied tool calls\n\n${lines.join("\n")}\n`;
+};
+
 export const render = (summary: Summary, baseline?: Summary): string => {
   const head = ["task", "model", "n", "built", ...COLUMNS.map(([, title]) => title)];
 
@@ -151,5 +187,5 @@ export const render = (summary: Summary, baseline?: Summary): string => {
   const table = [head, head.map(() => "---"), ...lines].map((cells) => `| ${cells.join(" | ")} |`);
   const versus = baseline ? ` vs ${baseline.label}` : "";
 
-  return `# bench ${summary.label}${versus}\n\n${table.join("\n")}\n`;
+  return `# bench ${summary.label}${versus}\n\n${table.join("\n")}\n${renderDenied(summary)}`;
 };

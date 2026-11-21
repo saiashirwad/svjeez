@@ -7,6 +7,7 @@ export interface ToolInput {
   path?: string;
   pattern?: string;
   command?: string;
+  description?: string;
 }
 
 export interface ContentBlock {
@@ -16,6 +17,8 @@ export interface ContentBlock {
   input?: ToolInput;
   is_error?: boolean;
   text?: string;
+  tool_use_id?: string;
+  content?: string | ContentBlock[];
 }
 
 export interface Usage {
@@ -37,7 +40,18 @@ export interface StreamEvent {
   is_error?: boolean;
   terminal_reason?: string;
   result?: string;
-  permission_denials?: unknown[];
+  permission_denials?: PermissionDenial[];
+}
+
+export interface PermissionDenial {
+  tool_name?: string;
+  tool_input?: ToolInput;
+}
+
+/** One tool call the permission mode refused: the tool and what it tried (the command or the path). */
+export interface Denial {
+  tool: string;
+  detail: string;
 }
 
 export interface Metrics {
@@ -56,6 +70,7 @@ export interface Metrics {
   tools: Record<string, number>;
   toolErrors: number;
   permissionDenials: number;
+  denied: Denial[];
   checkRuns: number;
   frameRuns: number;
   svgRuns: number;
@@ -147,6 +162,36 @@ const lookedUp = (call: ContentBlock, ctx: RunContext): boolean => {
   return false;
 };
 
+/** The part of a call a person needs to tune an allow list: the command, the path or the pattern. */
+const detailOf = (input: ToolInput = {}): string =>
+  input.command ?? input.file_path ?? input.path ?? input.pattern ?? input.description ?? "";
+
+const isDenied = (block: ContentBlock): boolean =>
+  block.type === "tool_result" &&
+  block.is_error === true &&
+  JSON.stringify(block.content ?? "").includes("has been denied because");
+
+/**
+ * Denied calls. The result event lists them; a run killed before it ends has none, so fall back to the tool results.
+ */
+export const denials = (events: StreamEvent[], calls: Map<string, ContentBlock>): Denial[] => {
+  const listed = events.filter((event) => event.type === "result").at(-1)?.permission_denials;
+
+  if (listed !== undefined)
+    return listed.map((d) => ({ tool: d.tool_name ?? "?", detail: detailOf(d.tool_input) }));
+
+  return events
+    .filter((event) => event.type === "user")
+    .flatMap(blocksOf)
+    .flatMap((block) => {
+      if (!isDenied(block)) return [];
+
+      const call = calls.get(block.tool_use_id ?? "");
+
+      return [{ tool: call?.name ?? "?", detail: detailOf(call?.input) }];
+    });
+};
+
 const isFrameLook = (call: ContentBlock): boolean =>
   call.name === "Read" && /\.(png|jpe?g|webp)$/i.test(call.input?.file_path ?? "");
 
@@ -189,6 +234,7 @@ export const metrics = (events: StreamEvent[], ctx: RunContext): Metrics => {
   }
 
   const usage = results?.usage ?? {};
+  const denied = denials(events, calls);
 
   return {
     finished: results !== undefined,
@@ -205,7 +251,8 @@ export const metrics = (events: StreamEvent[], ctx: RunContext): Metrics => {
     toolCalls: calls.size,
     tools,
     toolErrors,
-    permissionDenials: results?.permission_denials?.length ?? 0,
+    permissionDenials: denied.length,
+    denied,
     checkRuns: runs.check,
     frameRuns: runs.frames,
     svgRuns: runs.svg,

@@ -66,3 +66,27 @@ test("marks phases that timed out in the row and the table", () => {
   expect(render(summary)).toContain("2/2 (1 timed out)");
   expect(render(summarize("t", [run(1, phase(10_000, 4, 0))]))).not.toContain("timed out");
 });
+
+test("lists distinct denied calls with counts at the end", () => {
+  const denied = (detail: string): PhaseResult => {
+    const p = phase(1000, 1, 0);
+
+    p.metrics.denied = [{ tool: "Bash", detail }];
+    p.metrics.permissionDenials = 1;
+
+    return p;
+  };
+
+  const summary = summarize("d", [
+    run(1, denied("ps aux")),
+    run(2, denied("ps aux"), denied("kill 1")),
+  ]);
+
+  const text = render(summary);
+
+  expect(summary.rows[0]?.denied).toBe(1);
+  expect(summary.rows[1]?.denied).toBe(1);
+  expect(text).toContain("## Denied tool calls");
+  expect(text.indexOf("Bash x2: `ps aux`")).toBeLessThan(text.indexOf("Bash x1: `kill 1`"));
+  expect(render(summarize("d", [run(1, phase(1000, 1, 0))]))).not.toContain("Denied");
+});

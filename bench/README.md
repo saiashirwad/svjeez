@@ -23,7 +23,7 @@ Each task x model x repeat gets `examples/bench/<label>/<task>-<model>-<i>/`. A 
 - `--setting-sources project`: no user settings, hooks or user skills; the repo's `.claude/` still applies.
 - `CLAUDE_CODE_DISABLE_CLAUDE_MDS=1` and `CLAUDE_CODE_DISABLE_AUTO_MEMORY=1`: `--setting-sources` does not stop the user's global CLAUDE.md or memory from loading, these do. (`--bare` would too, but it drops OAuth login.)
 - `--permission-mode dontAsk --permission-prompts none`: anything not allowed is denied, never asked.
-- Allowed: Read, Glob, Grep, Write and Edit inside the run's directory, Bash for bun, bunx, ls, cat, head, tail, wc, find, grep, rg. A denied call shows as a tool error and in `permissionDenials`.
+- Allowed: Read, Glob, Grep, Write and Edit inside the run's directory, Bash for bun, bunx and read-only helpers (the `ALLOWED_BASH` list in `run.ts`: ls, cat, grep, ps, echo, cd, mkdir and so on). A denied call shows as a tool error and in `permissionDenials`; `denied` in the json lists each one's tool and command or path, the summary has a "denied" column, and `summary.md` ends with the distinct denied calls and counts, so the allow list can be tuned from a run.
 
 ## Results
 
