@@ -3,8 +3,28 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { chromium, type Browser, type Page } from "playwright-core";
-import { Sequence, Shape, clock, enter, linear, rect, scene, span, track } from "svjeez";
+import {
+  Sequence,
+  Shape,
+  Text,
+  circle,
+  clock,
+  ease,
+  enter,
+  font,
+  line,
+  linear,
+  rect,
+  scene,
+  span,
+  track,
+} from "svjeez";
 import { svg } from "svjeez/tools";
+
+const space = font.family(
+  await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url)),
+  await font.load(new URL("./fixtures/SpaceMono-Bold.ttf", import.meta.url)),
+);
 
 const open = clock("open", span(1, 0.4));
 const grow = clock("grow", span(2, 1));
@@ -347,5 +367,130 @@ test("a playback rate divides scene seconds into playback seconds, for seek and 
 
   expect(took).toBeGreaterThan(180);
   expect(took).toBeLessThan(350);
+  await page.close();
+});
+
+// A clock whose picture moves by SMIL: a morph, a gradient whose points move, and a text path's start. A shape on no
+// clock morphs on the scene's own.
+const moving = (options: {
+  loop?: boolean;
+  playbackRate?: number;
+  duration?: number;
+  at?: number;
+  over?: number;
+}) => {
+  const { loop = true, playbackRate = 1, duration = 4, at = 1, over = 0.6 } = options;
+  const g = (x: number) => linear({ from: [0, 0], to: [x, 0], stops: ["#ff0000", "#000000"] });
+
+  return svg.emit(
+    scene({ size: [200, 100], duration, title: "SMIL on a clock", loop }, () => (
+      <>
+        <Sequence clock={clock("open", span(at, over))}>
+          <Shape
+            key="morph"
+            geometry={track(rect(20, 20)).to(circle(10), span(0, over), ease.out)}
+            fill={track(g(10)).to(g(40), span(0, over), ease.inOut)}
+          />
+          <Text
+            key="word"
+            font={space}
+            size={10}
+            fill="#000000"
+            along={line([0, 50], [180, 50])}
+            start={track(0).to(1, span(0, over))}
+          >
+            Hi
+          </Text>
+        </Sequence>
+        <Shape
+          key="free"
+          geometry={track(rect(20, 20)).to(circle(10), span(0, duration / 2))}
+          fill="#000000"
+        />
+      </>
+    )),
+    { playbackRate },
+  );
+};
+
+// What the clock's SMIL-driven attributes show now: the path's d, the gradient's x2 and the text path's startOffset.
+const ATTRIBUTES = `
+  const path = document.querySelector('path[data-clock="open"][fill^="url"]');
+  const gradient = document.querySelector(path.getAttribute('fill').slice(4, -1));
+  const word = document.querySelector('textPath');
+  return {
+    d: getComputedStyle(path).getPropertyValue('d'),
+    x2: gradient.x2.animVal.value,
+    start: word.startOffset.animVal.value,
+  };`;
+
+interface Look {
+  readonly d: string;
+  readonly x2: number;
+  readonly start: number;
+}
+
+const numbersOf = (text: string) => (text.match(/-?\d*\.?\d+(?:e-?\d+)?/g) ?? []).map(Number);
+
+test("a clock takes over the SMIL inside it, and shows what the browser's SMIL shows", async () => {
+  const cases = [
+    { name: "a looping scene's window", options: {} },
+    { name: "a scene that plays once", options: { loop: false } },
+    { name: "a playback rate of 2", options: { playbackRate: 2 } },
+    { name: "a window too long to cut, which repeats", options: { duration: 1, at: 0, over: 0.9 } },
+  ];
+
+  for (const { name, options } of cases) {
+    const markup = moving(options);
+    const over = options.over ?? 0.6;
+    const at = options.at ?? 1;
+    const expected = await page_(markup);
+    const page = await page_(markup);
+
+    await run(page, MOUNT);
+
+    for (const share of [0, 0.05, 0.25, 0.5, 0.75, 1]) {
+      const time = share * over;
+      await run(expected, `lib.seek(${at + time});`);
+      await run(page, `scene.clock('open').seek(${time});`);
+
+      const want = await run<Look>(expected, ATTRIBUTES);
+      const got = await run<Look>(page, ATTRIBUTES);
+
+      expect(got.x2, `${name}: x2 at ${share}`).toBeCloseTo(want.x2, 2);
+      expect(got.start, `${name}: startOffset at ${share}`).toBeCloseTo(want.start, 2);
+
+      const wanted = numbersOf(want.d);
+      const shown = numbersOf(got.d);
+
+      expect(shown.length, `${name}: d at ${share}`).toBe(wanted.length);
+      shown.forEach((value, index) => expect(value).toBeCloseTo(wanted[index]!, 2));
+    }
+
+    await expected.close();
+    await page.close();
+  }
+});
+
+test("a clock's SMIL is replaced by attributes, and SMIL on the scene's own clock goes on", async () => {
+  const page = await page_(moving({}));
+
+  const count = (selector: string) =>
+    run<number>(page, `return document.querySelectorAll('${selector}').length;`);
+
+  expect(await count("[data-clock] animate, [data-clock] set, defs animate")).toBeGreaterThan(0);
+
+  const free =
+    "getComputedStyle(document.querySelector('path:not([data-clock])')).getPropertyValue('d')";
+
+  await run(page, MOUNT);
+
+  expect(await count("[data-clock] animate, [data-clock] set, defs animate")).toBe(0);
+  expect(await count("animate")).toBe(1);
+
+  const first = await run<string>(page, `return ${free};`);
+  await page.waitForTimeout(250);
+
+  expect(await run<string>(page, `return ${free};`)).not.toBe(first);
   await page.close();
 });

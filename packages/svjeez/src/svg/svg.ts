@@ -35,7 +35,7 @@ import type {
   Vec,
 } from "../model/ir";
 import { curveLength, isCurved } from "../model/curve";
-import { SceneError, placeOf } from "../model/scene-error";
+import { placeOf } from "../model/scene-error";
 import { atRest, isLane, mapLane } from "../model/lane";
 import { mixNumber, same } from "../model/steps";
 import { homed } from "../author/pin";
@@ -347,15 +347,6 @@ const cssLane = <T>(
   }: { readonly route?: Route; readonly cuts?: boolean; readonly emit?: Emit } = {},
 ): CssLane => {
   const { keys, period } = held(lane, ctx.scene.duration, values);
-
-  if (route === "smil" && ctx.clock && keys.some((_, index) => moving(keys, index)))
-    throw new SceneError(
-      `${ctx.current ? `"${ctx.current.key}"` : "A node"} animates its ${slot} with SMIL, which plays only on the scene clock, but it is inside <Sequence clock="${ctx.clock.name}">.`,
-      "Animate it with a motion layer, opacity, a fill or stroke color, or a stroke trim, or move it out of the clocked sequence.",
-      ctx.current
-        ? { key: ctx.current.key, ...(ctx.current.source && { source: ctx.current.source }) }
-        : {},
-    );
 
   const written: CssLane = {
     key: slot,
