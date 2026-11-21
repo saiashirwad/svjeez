@@ -66,6 +66,34 @@ input::-moz-range-thumb {
   box-shadow: 0 0 0 5px rgb(255 255 255 / 0.15);
 }
 
+/* svjeez <3 TypeGPU: Blip and TypeGPU's mark at one height, a heart two fifths of it between them, over the sky. */
+.lockup {
+  --logo: clamp(48px, 7vw, 80px);
+  --heart: calc(var(--logo) * 0.4);
+  position: absolute;
+  top: 5vh;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--logo) * 0.3);
+  filter: drop-shadow(0 3px 12px rgb(12 19 50 / 0.25));
+}
+
+.lockup a {
+  display: block;
+  line-height: 0;
+  border-radius: 10px;
+  outline-offset: 8px;
+}
+
+.lockup a:focus-visible {
+  outline: 2px solid rgb(255 255 255 / 0.8);
+}
+
+/* Each scene is trimmed to its art, so the flex row lines them up; Blip hops and the mark lifts out of their boxes. */
+.lockup svg {
+  overflow: visible;
+}
+
 input:focus-visible {
   outline: none;
 }
