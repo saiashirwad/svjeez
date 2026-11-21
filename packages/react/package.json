@@ -1,0 +1,40 @@
+{
+  "name": "@svjeez/react",
+  "version": "0.8.0-next.1",
+  "private": true,
+  "description": "React bindings for svjeez: a <Scene> that draws a component's visuals and animates them to the state React owns.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/react"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "bun test --conditions @svjeez/source",
+    "typecheck": "tsc --noEmit",
+    "build:package": "bun ../../scripts/package-plugin.ts",
+    "test:package": "bun ../../scripts/package-plugin-check.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "playwright-core": "^1.64.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "svjeez": "workspace:*",
+    "typescript": "latest"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "svjeez": "workspace:^"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
