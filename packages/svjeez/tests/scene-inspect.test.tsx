@@ -360,6 +360,25 @@ group("low-contrast", () => {
   });
 });
 
+group("loop-seam off canvas", () => {
+  const lap = (on: boolean) =>
+    made(() => (
+      <Group offset={track<Vec>([-60, 0]).to([260, 0], span(0, 4), ease.linear)}>
+        <Dot at={[0, 20]} />
+        <Dot at={[20, 20]} opacity={0} />
+        {on && <Dot at={[200, 20]} />}
+      </Group>
+    ));
+
+  test("a group off canvas at both ends of the loop does not jump visibly", () => {
+    expect(codes(lap(false))).not.toContain("loop-seam");
+  });
+
+  test("a visible leaf on canvas at the end still jumps", () => {
+    expect(codes(lap(true))).toContain("loop-seam");
+  });
+});
+
 group("loop-seam", () => {
   test("a value that ends where it didn't start jumps, by how far in scene units", () => {
     const [found] = only(

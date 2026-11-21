@@ -263,6 +263,31 @@ const restarts = (
   );
 };
 
+/** Whether none of what a node draws at `t` is on the canvas: its visible leaves all lie outside it. */
+const beyond = (
+  survey: Survey,
+  node: SceneNode,
+  frame: ReadonlyMap<string, Placed>,
+  t: Seconds,
+): boolean => {
+  const [width, height] = survey.scene.size;
+
+  return !survey.entries.some((entry) => {
+    if (!isLeaf(entry) || (entry.node !== node && !entry.ancestors.includes(node))) return false;
+    const placed = frame.get(entry.node.key);
+
+    return (
+      placed !== undefined &&
+      placed.opacity > VISIBLE &&
+      !inside(survey.hidden.get(entry.node.key) ?? [], t) &&
+      placed.box.x + placed.box.width > 0 &&
+      placed.box.y + placed.box.height > 0 &&
+      placed.box.x < width &&
+      placed.box.y < height
+    );
+  });
+};
+
 export const loopSeam = (survey: Survey): void => {
   const { scene } = survey;
   const { duration } = scene;
@@ -305,6 +330,7 @@ export const loopSeam = (survey: Survey): void => {
       b &&
       b.opacity > VISIBLE &&
       !inside(hidden, end) &&
+      !beyond(survey, node, last, end) &&
       (!a || a.opacity <= VISIBLE || inside(hidden, 0)) &&
       !(above && above !== scene.root && inside(survey.hidden.get(above.key) ?? [], 0)) &&
       !restarts(survey, entry, first, end)
@@ -328,7 +354,8 @@ export const loopSeam = (survey: Survey): void => {
       a.opacity <= VISIBLE ||
       b.opacity <= VISIBLE ||
       inside(hidden, 0) ||
-      inside(hidden, end)
+      inside(hidden, end) ||
+      (beyond(survey, node, first, 0) && beyond(survey, node, last, end))
     )
       continue;
     const parent = entry.ancestors.at(-1);
