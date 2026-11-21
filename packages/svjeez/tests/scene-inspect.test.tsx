@@ -569,6 +569,24 @@ group("timing", () => {
     ).toEqual([]);
   });
 
+  test("a count's own strips and slots are not judged, only the motion written on the text", () => {
+    const counted = (motion?: object) =>
+      made(() => (
+        <Text
+          font={mono}
+          size={12}
+          fill="#808080"
+          at={[20, 20]}
+          opacity={track(0).to(1, span(1, 0.2))}
+          {...(motion && { motion })}
+        >
+          {count(track(179).to(70, span(0, 0.8)))}
+        </Text>
+      ));
+
+    expect(only(counted(), "wasted-motion").map((p) => p.message)).toEqual([]);
+  });
+
   test("motion an attached arrow takes from its ends is not reported", () => {
     const wired = made(() => {
       const a = ref();

@@ -550,8 +550,14 @@ export const timing = (survey: Survey): void => {
         });
     }
 
-    // An attached arrow's shaft and head move because the nodes they attach to do: not the author's to change.
-    if (!entry.ancestors.some((each) => each.authored?.ends)) wasted(survey, entry, hidden, named);
+    // An attached arrow's shaft and head move because the nodes they attach to do, and a count's or typed text's
+    // strips, slots and caret because the library animates them: not the author's to change. A swap's texts (the
+    // count group's own text children) carry values the author wrote.
+    const parent = entry.ancestors.at(-1);
+    const libraryMade = inCount(entry) && !(parent && countOf(parent) && node.kind === "text");
+
+    if (!entry.ancestors.some((each) => each.authored?.ends) && !libraryMade)
+      wasted(survey, entry, hidden, named);
   }
 
   if (!moves && duration > 0)
