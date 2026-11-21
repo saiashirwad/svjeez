@@ -214,21 +214,86 @@ describe("<Sequence clock>", () => {
   });
 });
 
+describe("clocks inside clocks", () => {
+  const outer = clock("body", span(0.5, 1));
+  const inner = clock("eye", span(0.2, 0.4));
+
+  const nested = (when: boolean) => (
+    <Group key="body" rotate={track(0).to(90, span(0, 1))}>
+      {when ? (
+        <Sequence when={span(0.2, 0.4)}>{card("eye")}</Sequence>
+      ) : (
+        <Sequence clock={inner}>{card("eye")}</Sequence>
+      )}
+    </Group>
+  );
+
+  test("each node belongs to its nearest clock and each mark is its clock's own absolute start", () => {
+    const out = emitted(() => <Sequence clock={outer}>{nested(false)}</Sequence>);
+
+    expect(out).toMatch(/data-clock="body" data-clock-at="0.5" data-clock-over="1"/);
+    expect(out).toMatch(/data-clock="eye" data-clock-at="0.7" data-clock-over="0.4"/);
+    expect(out.match(/data-clock="body"/g)).toHaveLength(1);
+  });
+
+  test("lowers like sequences nested with when, apart from the marks", () => {
+    const clocked = emitted(() => <Sequence clock={outer}>{nested(false)}</Sequence>);
+    const timed = emitted(() => <Sequence when={span(0.5, 1)}>{nested(true)}</Sequence>);
+
+    expect(unmarked(clocked)).toBe(timed);
+  });
+
+  test("inner nodes keep the inner clock, and the outer clock marks the rest", () => {
+    const model = made(() => (
+      <Sequence clock={outer}>
+        {nested(false)}
+        <Sequence clock={inner}>{card("direct")}</Sequence>
+        {card("plain")}
+      </Sequence>
+    ));
+
+    const marks = {
+      body: { name: "body", start: 0.5, over: 1 },
+      eye: { name: "eye", start: 0.7, over: 0.4 },
+    };
+
+    expect(model.root.children.map((node) => [node.key, node.clock])).toEqual([
+      ["body", marks.body],
+      ["direct", marks.eye],
+      ["plain", marks.body],
+    ]);
+    expect(model.root.children[0]).toMatchObject({
+      children: [{ key: "body/eye", clock: marks.eye }],
+    });
+  });
+
+  test("a track belongs to one clock even when the clocks nest", () => {
+    const grow = track(0).to(1, span(0, 0.2));
+
+    expect(() =>
+      made(() => (
+        <Sequence clock={outer}>
+          <Shape key="a" geometry={rect(5, 5)} fill="#000000" opacity={grow} />
+          <Sequence clock={inner}>
+            <Shape key="b" geometry={rect(5, 5)} fill="#000000" opacity={grow} />
+          </Sequence>
+        </Sequence>
+      )),
+    ).toThrow("count time on different clocks");
+  });
+});
+
 describe("what a clock refuses", () => {
-  test("a clocked sequence inside another", () => {
-    const inner = clock("inner", span(0, 0.2));
+  test("a clocked sequence that runs past the clock it sits in", () => {
+    const late = clock("late", span(0.2, 0.4));
 
     expect(() =>
       made(() => (
         <Sequence clock={open}>
-          <Sequence when={span(0.1)}>
-            <Sequence clock={inner}>{card("a")}</Sequence>
-          </Sequence>
+          <Sequence clock={late}>{card("a")}</Sequence>
         </Sequence>
       )),
-    ).toThrow(
-      '<Sequence clock="inner"> sits inside a <Sequence clock="open">, and clocks don\'t nest',
-    );
+    ).toThrow('A <Sequence clock="late"> runs until 0.6s, past the 0.4s <Sequence clock="open">');
   });
 
   test("two different clocks with one name, but not one clock used twice", () => {

@@ -78,6 +78,7 @@ const depth = (path: string) => path.split(".").length;
  * its clock rests, as progress from 0 to 1 or `looping`; going to a state runs those clocks from wherever they are, so
  * the scene's own easing plays, and going again mid-way retargets from there. A clock a state names as `looping` runs
  * on from where it is, wrapping from its end to 0, until a later state rests it, or leaves it unnamed, which pauses it.
+ * A later state that rests a looping clock runs it forward to the rest, wrapping through the end if the rest is behind.
  *
  * A state value is a name or, as XState reports nested and parallel states, an object of regions. It is flattened into
  * its active paths, `{ menu: { open: "hovered" } }` into "menu", "menu.open" and "menu.open.hovered", and the rests of
@@ -151,7 +152,8 @@ export const rests = (
         [...at].map(([name, place]) => {
           const clock = scene.clock(name);
 
-          if (place !== looping) return clock.to(place * clock.over);
+          // A looping clock is released forward, wrapping through its end, as the loop itself does.
+          if (place !== looping) return clock.to(place * clock.over, { forward: clock.looping });
 
           clock.loop();
 

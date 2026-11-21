@@ -801,12 +801,6 @@ const inside = (
   const end = over === undefined ? parent.end : start + over;
   const name = label(begin, over, named);
 
-  if (named && parent.named)
-    throw new SceneError(
-      `A ${name} sits inside a <Sequence clock="${parent.named.name}">, and clocks don't nest.`,
-      "Put the two side by side, each with the nodes it drives.",
-    );
-
   if (start > parent.end + EPSILON || end > parent.end + EPSILON)
     throw new SceneError(
       `A ${name} runs until ${num(end - parent.offset)}s, past the ${num(parent.end - parent.offset)}s ${parent.clips.at(-1)?.label ?? "scene"}.`,
@@ -856,7 +850,7 @@ const lowerAll = (
       const nodes = lowerAll(ctx, given.children, within, parent, taken);
       const { named } = within.clock;
 
-      return given.clock ? nodes.map((node) => ({ ...node, clock: named! })) : nodes;
+      return given.clock ? nodes.map((node) => ({ ...node, clock: node.clock ?? named! })) : nodes;
     }
 
     if (given.type === "morph" && given.only !== undefined) {
