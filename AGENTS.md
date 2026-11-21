@@ -29,7 +29,7 @@ bun run scene frames <scene>   # PNG frames to look at (add --sheet, --times 0,1
 bun run scene dev <scene>      # live preview with a scrubber
 bun run scene svg <scene> --out x.svg
 bun run example <name...>      # build examples into examples/dist/
-bun run typecheck              # tsc catches what the build does not, like a number as a key
+bun run typecheck              # tsc catches what the build does not, like a wrong prop type
 ```
 
 After writing or changing a scene, run `bun run scene check` and `bun run typecheck`, then look at frames. A ✓ from the build only means it compiled. The root `bun run check` is lint, format and tsc, not `svjeez check`.
