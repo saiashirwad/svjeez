@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { realpathSync } from "node:fs";
-import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -42,7 +42,7 @@ returning either.
 [params] is --params data.json and any number of --param key=value. They fill the module's exported \`params\` schema
 (built with param from svjeez), are checked against it, and are passed to the default export; a key left out keeps its default.
 --param sets one value that is not a list, and wins over the file.
-Times are scene seconds. Without --times, frames takes --count frames (default 6) across one loop.
+Times are scene seconds. Without --times, frames takes --count frames (default 6) across one loop, or from 0 to the end of a scene that plays once (loop: false).
 dev serves a preview with a scrubber and a timeline, and rebuilds it when a file beside it changes.
 svg --json prints { svg, warnings, lanes }: the SVG, its warnings and every animated lane, in scene seconds.
 video encodes --loops loops of the scene, through @svjeez/video. Its format follows --out's extension, else mp4.
@@ -473,7 +473,7 @@ const framesCommand = async (args: string[]): Promise<void> => {
   const svg = await loadSvg(positionals[0] ?? fail(USAGE), values);
   report(svg);
 
-  const { duration, colorScheme, frames, sheet } = await renderFrames(svg, {
+  const { duration, loops, colorScheme, frames, sheet } = await renderFrames(svg, {
     ...when(values.times, values.count),
     scale: number("scale", values.scale),
     colorScheme: scheme,
@@ -485,6 +485,11 @@ const framesCommand = async (args: string[]): Promise<void> => {
   });
 
   await mkdir(values.out, { recursive: true });
+
+  // Only the names an earlier run wrote, so old frames never sit beside new ones.
+  for (const name of await readdir(values.out))
+    if (/^frame-\d+-\d+_\d+s\.png$/.test(name) || name === "sheet.png")
+      await rm(join(values.out, name));
 
   const written = await Promise.all(
     frames.map(async ({ time, png }, index) => {
@@ -504,7 +509,11 @@ const framesCommand = async (args: string[]): Promise<void> => {
     await writeFile(join(values.out, "sheet.png"), sheet);
   }
 
-  console.log(`loop ${Number(duration.toFixed(3))}s, ${colorScheme}\n${written.join("\n")}`);
+  const length = `${Number(duration.toFixed(3))}s`;
+
+  console.log(
+    `${loops ? `loop ${length}` : `plays once, ${length}, last frame held`}, ${colorScheme}\n${written.join("\n")}`,
+  );
 };
 
 const SKILL = fileURLToPath(new URL("../skills/svjeez", import.meta.url));

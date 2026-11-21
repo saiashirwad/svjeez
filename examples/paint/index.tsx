@@ -113,7 +113,7 @@ export default scene(
           geometry={card}
           fill={radial.across({ center: "top-left", stops: [theme.yellow, theme.red] })}
         />
-        <Shape geometry={circle(18)} at={[56, 56]} anchor="center" fill={theme.background} />
+        <Shape geometry={circle(18)} offset={[56, 56]} fill={theme.background} />
       </Group>
       <Label i={2}>masked reveal</Label>
 

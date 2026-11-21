@@ -6,7 +6,7 @@ Every node has a box, the area it paints with its stroke included, known when th
 
 ```tsx
 <Align place="bottom-right" inset={16}>
-  <Center width={72} height={28} radius={14} fill={theme.raised} motion={enter(span(0.2, 0.4), { from: { opacity: 0, scale: 0.8 } })}>
+  <Center width={72} height={28} radius={14} fill={theme.raised} motion={enter(span(0.2, 0.4), { from: { scale: 0.8 } })}>
     <Text font={sans} weight={600} size={12} fill={theme.text}>NEW</Text>
   </Center>
 </Align>
@@ -26,7 +26,7 @@ The nine places, for `anchor`, `place` and `radial.across({ center })`: `top-lef
 
 ## Placing without a container
 
-`at` puts the node's `anchor` point (top-left by default) at a point of its parent's frame, on every node. A node with no `at` stays where its coordinates put it: circles, ellipses and arcs are drawn around their own `[0, 0]`, lines, polygons and paths stay on their points. `<Shape geometry={circle(8)} at={[60, 40]} anchor="center" />` centers one on a point. To use a `<Group>` as a frame, give it `offset`: where its children's `[0, 0]` goes (a point, a track or an anchor). `offset` takes no `at` or `anchor`.
+`at` puts the node's `anchor` point (top-left by default) at a point of its parent's frame, on every node. A node with no `at` stays where its coordinates put it: circles, ellipses and arcs are drawn around their own `[0, 0]`, lines, polygons and paths stay on their points. `<Shape geometry={circle(8)} offset={[60, 40]} />` centers one on a point. `offset` is the other way to place any node (Shape, Text, Picture, Group, a container): it moves the node's own `[0, 0]` there (a point, a track or an anchor), so a `<Group>` frame keeps its children's coordinates and a circle needs no `anchor`. A text's `[0, 0]` is the top-left of its first line. `offset` takes no `at` or `anchor`, and a container's child takes neither.
 
 ## Text
 

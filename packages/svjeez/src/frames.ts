@@ -33,6 +33,8 @@ export interface Scene {
   readonly height: number;
   readonly scale: number;
   readonly duration: Seconds;
+  /** Whether the scene repeats. When it plays once, `duration` is its length and the last frame is held. */
+  readonly loops: boolean;
   readonly playbackRate: number;
   readonly colorScheme: ColorScheme;
   capture(time: Seconds): Promise<Uint8Array>;
@@ -49,6 +51,7 @@ export interface Frame {
 export interface Frames {
   readonly colorScheme: ColorScheme;
   readonly duration: Seconds;
+  readonly loops: boolean;
   readonly frames: readonly Frame[];
   readonly sheet?: Uint8Array;
 }
@@ -160,6 +163,17 @@ const stage = async (
   await page.goto(ORIGIN);
   await page.evaluate(() => document.fonts.ready);
   const duration = await page.evaluate(loopLength, undefined);
+
+  const loops = await page.evaluate(
+    () =>
+      document.getAnimations().some((each) => each.effect?.getTiming().iterations === Infinity) ||
+      [...document.querySelectorAll("animate, animateTransform, animateMotion, set")].some(
+        (each) =>
+          each.getAttribute("repeatCount") === "indefinite" ||
+          (each.getAttribute("begin") ?? "").includes(".begin+"),
+      ),
+  );
+
   const locator = page.locator("#stage");
 
   return {
@@ -168,6 +182,7 @@ const stage = async (
     scale,
     colorScheme,
     duration,
+    loops,
     playbackRate,
     capture: async (time) => {
       await page.evaluate(seek, time);
@@ -224,17 +239,22 @@ export const renderFrames = async (svg: string, options: FrameOptions): Promise<
   const browser = await launch("renderFrames()", options.executablePath);
 
   try {
-    const { duration, colorScheme, capture } = await stage(browser, svg, settings);
+    const { duration, loops, colorScheme, capture } = await stage(browser, svg, settings);
+
+    // A loop is sampled over [0, duration); a scene that plays once also shows its held last frame.
+    const spread = loops || options.times !== undefined ? undefined : Math.max(1, options.count - 1);
 
     const times =
       options.times ??
-      Array.from({ length: options.count }, (_, i) => (i * duration) / options.count);
+      Array.from({ length: options.count }, (_, i) =>
+        spread === undefined ? (i * duration) / options.count : (i * duration) / spread,
+      );
 
     const frames: Frame[] = [];
 
     for (const time of times) frames.push({ time, png: await capture(time) });
 
-    if (!options.sheet) return { duration, colorScheme, frames };
+    if (!options.sheet) return { duration, loops, colorScheme, frames };
     const across = Math.min(columns ?? 4, frames.length);
     const { width, height, scale } = settings;
 
@@ -252,7 +272,7 @@ export const renderFrames = async (svg: string, options: FrameOptions): Promise<
     await sheetPage.setContent(sheetHtml(frames, width, across));
     const sheet = new Uint8Array(await sheetPage.locator("body").screenshot());
 
-    return { duration, colorScheme, frames, sheet };
+    return { duration, loops, colorScheme, frames, sheet };
   } finally {
     await browser.close();
   }

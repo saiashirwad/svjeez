@@ -98,13 +98,7 @@ const Revenue = ({ name, bars, change }: Quarter): SceneElement => (
     })}
     <Group key="badge">
       {change === "" ? (
-        <Shape
-          key="shape"
-          geometry={circle(14)}
-          at={[520, 110]}
-          anchor="center"
-          fill={theme.raised}
-        />
+        <Shape key="shape" geometry={circle(14)} offset={[520, 110]} fill={theme.raised} />
       ) : (
         <Shape
           key="shape"

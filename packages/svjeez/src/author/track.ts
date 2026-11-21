@@ -160,8 +160,8 @@ export const readOf = <T>(
 ): Passage<{ readonly value: T }> => {
   if (goesToAnchor(value))
     throw new SceneError(
-      `${where} follows a track with a step that goes to an anchor, which only the at of a node (or a group's offset) can follow.`,
-      "Use that track for at, or write a point track of its own here.",
+      `${where} follows a track with a step that goes to an anchor, which only the at or offset of a node can follow.`,
+      "Use that track for at or offset, or write a point track of its own here.",
     );
 
   return readGoals(value, timing, where);

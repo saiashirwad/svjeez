@@ -34,8 +34,7 @@ export default scene(
       />
       <Shape
         geometry={circle(8)}
-        at={[120, 44]}
-        anchor="center"
+        offset={[120, 44]}
         fill={theme.text}
         motion={enter(span(1.2, 0.5), { from: { scale: 0 }, curve: ease.pop })}
       />
@@ -61,7 +60,7 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 ## The model in eight rules
 
 1. **Every node has a box**: what it paints, its stroke included, measured when the scene compiles. Text too.
-2. **`at` places the node's `anchor`**, the box's top-left unless `anchor` names another point (`"center"`, `"bottom-right"`, `[0.5, 1]`, and for text `"baseline"`). A node with no `at` stays where its coordinates put it; `anchor` without `at` is an error. A `<Group>` used as a frame takes `offset` (where its children's `[0, 0]` goes) instead of `at`. `rotate`, `scale` and `skew` (degrees of shear along x, before scale and rotate) turn around `origin`: `"center"` of the box by default, or `"at"`, a place, or a point.
+2. **`at` places the node's `anchor`**, the box's top-left unless `anchor` names another point (`"center"`, `"bottom-right"`, `[0.5, 1]`, and for text `"baseline"`). A node with no `at` stays where its coordinates put it; `anchor` without `at` is an error. `offset` (any node, not with `at`) moves the node's own `[0, 0]` there instead: a circle drawn around `[0, 0]` goes with `offset={[120, 44]}` and no `anchor`, and a `<Group>` frame's children keep their own coordinates inside it. Text's `[0, 0]` is the top-left of its first line. `rotate`, `scale` and `skew` (degrees of shear along x, before scale and rotate) turn around `origin`: `"center"` of the box by default, or `"at"`, a place, or a point.
 3. **Nothing is inherited.** A shape with no fill has none; every `<Text>` needs its own `font`, `size` and `fill`. There is no default font. Share styles with components or spread objects.
 4. **A prop takes a value or a track**, and tracks are immutable values: `opacity={track(0).to(1, span(0.5, 0.3))}`. Name the spans first, build each track, then write the JSX. `to`, `set`, `loop`, `repeat` and `rewind` return a new track.
 5. **Time is spans on clocks.** `span(start, over)` is when; build each beat from the one before (`a.next(0.4)`, `a.chain(…)`, `a.cascade(3, 0.1)`, `a.shift(dt)`). A plain number is only ever a length. `<Sequence when={span(…)}>` starts a clock of its own.
@@ -77,7 +76,7 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 | `<Text font size fill weight italic width lineHeight align along start stroke>` | strings and `<Run weight fill italic opacity>` inside; `width` wraps; `along={geometry}` sets one line along an outline |
 | `count(value, { format, rate })` | a number that counts, as the only content of a `<Text>` besides strings |
 | `typed(value, { by, caret })` | a string track typed out, last in a `<Text>`: each `.to()` erases back to the shared start, then types; `by` is `chars` (default), `words` or your own split |
-| `<Group offset>` | moves children together; `offset` is where their `[0, 0]` goes |
+| `<Group offset>` | moves children together; `offset` is where the group's `[0, 0]` goes, as on any node |
 | `<Picture src={picture(bytes)} width height>` | a PNG, JPEG, GIF, WebP or SVG; `picture.load(path)` reads a file |
 | `<Sequence when={span}>` | a local clock: tracks inside count from the span's start |
 | `<Arrow from to stroke bend inset head draw>` | between points or anchors; follows them as they move |
@@ -202,7 +201,7 @@ Runtime errors. `…` stands for a value the message fills in.
 | `JSX holds <…>, an SVG tag, which a scene doesn't draw: every node is a component, such as <Shape geometry={rect(w, h)} />.` | write components, and put the JSX pragma at the top of the file |
 | `… holds a <Run>, which draws only inside a <Text>. Put it in one, as in <Text font={…} size={…} fill={…}>a <Run weight={600}>bold</Run> word</Text>.` | put the `<Run>` in a `<Text>` |
 | `… has its own …, but the … it sits in places it.` | a container places its children: drop `at`, or nudge with a layer's `offset` |
-| `… has both at and offset. at places a point of its box; offset places its children's [0, 0].` | keep one: `offset` for a frame, `at` for its box |
+| `… has both at and offset. at puts a point of its box somewhere; offset moves its own [0, 0] there.` | keep one: `offset` to move the node's own frame, `at` for a point of its box |
 | `anchor on … names the point its at places, but it has no at, so it stays where its coordinates put it.` | give the node an `at`, or drop `anchor` |
 | `… is a ref that is on no node.` | put the ref on a node the scene draws |
 | `A ref is on two nodes, … and ….` | one ref per node |

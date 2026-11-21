@@ -22,8 +22,7 @@ export default scene(
       />
       <Shape
         geometry={circle(8)}
-        at={[120, 44]}
-        anchor="center"
+        offset={[120, 44]}
         fill={theme.text}
         motion={enter(span(1.2, 0.5), { from: { scale: 0 }, curve: ease.pop })}
       />

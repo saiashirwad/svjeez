@@ -240,6 +240,10 @@ const base = (
 ) => {
   const where = ctx.notes.names.named(key);
 
+  const framed = props.offset !== undefined;
+  const start: Vec = framed ? [0, 0] : home;
+  const point = props.offset ?? props.at;
+
   const own: Layer = {
     offset: [0, 0],
     rotate: animated(props.rotate ?? 0, keep, timing, mixNumber, `rotate on ${where}`),
@@ -251,17 +255,17 @@ const base = (
   return {
     key,
     box,
-    at: isAnchor(props.at)
+    at: isAnchor(point)
       ? NOWHERE
       : animated<Vec, Vec>(
-          props.at ?? home,
-          (point) => minus(point, home),
+          point ?? start,
+          (value) => minus(value, start),
           timing,
           mixVec,
-          `at on ${where}`,
+          `${framed ? "offset" : "at"} on ${where}`,
           true,
         ),
-    origin: originOf(ctx.notes.names, props.origin, box, key, () => home),
+    origin: originOf(ctx.notes.names, props.origin, box, key, () => start),
     layers: [
       ...layersOf(props.motion, where).map((layer) => layerOf(layer, timing, where)),
       own,
@@ -894,7 +898,7 @@ const lowered = (
 ): SceneNode[] => {
   const el = withGoals(given, key, timing, ctx.notes, parent);
   const backdrop = el.type === "group" ? backdropOf(ctx, el.props, key, timing) : undefined;
-  const offset = el.type === "group" ? el.props.offset : undefined;
+  const { offset } = el.props;
 
   placement(ctx, el.props, offset, key, parent);
   const aim = ctx.notes.aims.has(key);
@@ -940,14 +944,7 @@ const lowered = (
         );
 
       const node: GroupNode = {
-        ...base(
-          ctx,
-          offset === undefined ? el.props : { ...el.props, at: offset },
-          around(children),
-          key,
-          timing,
-          [0, 0],
-        ),
+        ...base(ctx, el.props, around(children), key, timing, [0, 0]),
         ...((el.layout || pins) && {
           authored: { ...(el.layout && { layout: el.layout }), ...(pins && { pinned: true }) },
         }),
@@ -971,13 +968,13 @@ const placement = (
 
   if (offset !== undefined && props.at !== undefined)
     throw new SceneError(
-      `${where} has both at and offset. at places a point of its box; offset places its children's [0, 0].`,
+      `${where} has both at and offset. at puts a point of its box somewhere; offset moves its own [0, 0] there.`,
       "Keep one of them.",
     );
 
   if (offset !== undefined && props.anchor !== undefined)
     throw new SceneError(
-      `${where} has anchor=${JSON.stringify(props.anchor)} and offset, but anchor names the point at places, and offset places its children's [0, 0], not a point of its box.`,
+      `${where} has anchor=${JSON.stringify(props.anchor)} and offset, but anchor names the point at places, and offset moves its own [0, 0], not a point of its box.`,
       "Place it with at and anchor, or drop anchor.",
     );
 
