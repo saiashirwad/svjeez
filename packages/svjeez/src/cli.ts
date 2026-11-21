@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { realpathSync } from "node:fs";
 import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
@@ -23,6 +24,9 @@ import { momentsOf, namesOf, sourcesOf } from "./check/survey";
 import { startTrace, stopTrace, traceOf } from "./svg/traced";
 import { validateSvg } from "./svg/validate";
 import { isSceneError } from "./model/scene-error";
+import { hostOf } from "./host";
+
+const host = hostOf();
 
 const USAGE = `usage:
   svjeez svg <file> [--out file.svg] [--json] [params]
@@ -31,6 +35,7 @@ const USAGE = `usage:
   svjeez check <file> [--json] [--browser] [--at 0,1.5] [--times 0,0.5,1] [--color-scheme system|light|dark] [params]
   svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
   svjeez skill [--install [--dir .claude/skills]]
+  svjeez version
 
 <file> is an .svg, or a module whose default export is a scene from svjeez, an SVG string, or a function
 returning either.
@@ -50,7 +55,7 @@ headless Chromium. --at 0,1.5 also describes what is on screen at those times. -
 --json prints { ok, file, scene?, problems, lanes, cost?, measured?, frames?, timeline? }, cost being { animations, repaint }. It exits 1 when any problem is an
 error, the scene failing to build included. With --browser and no --times the browser measures 0, seven times across
 the loop, just before the end, and the scene's keys.
-skill prints the agent skill for writing svjeez scenes; --install copies it, with its references and examples, into <dir>/svjeez.`;
+skill prints the agent skill for writing svjeez scenes; --install copies it, with its references and examples, into <dir>/svjeez.${host.usage ? `\n\n${host.usage}` : ""}`;
 
 const SCHEMES = ["system", "light", "dark"] as const;
 
@@ -148,6 +153,17 @@ const valuesFor = async (
     return parse(schema, { ...given, ...Object.fromEntries(pairs) });
   } catch (error) {
     return fail(`${file}: ${error instanceof Error ? error.message : String(error)}`);
+  }
+};
+
+// Stacks name a file by its real path (macOS's /tmp is /private/tmp), so trace the real directory.
+const sceneDir = (file: string): string => {
+  const dir = dirname(resolve(file));
+
+  try {
+    return realpathSync(dir);
+  } catch {
+    return dir;
   }
 };
 
@@ -292,7 +308,7 @@ const loadBuild = async (file: string, flags: ParamFlags, sources = false): Prom
   const diagnosed: string[] = [];
   const lanes: LaneReport[] = [];
 
-  startTrace({ within: sources && !file.endsWith(".svg") ? dirname(resolve(file)) : undefined });
+  startTrace({ within: sources && !file.endsWith(".svg") ? sceneDir(file) : undefined });
 
   try {
     const built = await loadBuilt(
@@ -367,6 +383,10 @@ interface VideoModule {
 const VIDEO = "@svjeez/video";
 
 const loadOptional = async (name: string, command: string): Promise<object> => {
+  const carried = host.module?.(name);
+
+  if (carried) return carried;
+
   const from = (base: string) => {
     try {
       return pathToFileURL(createRequire(base).resolve(name)).href;
@@ -498,14 +518,24 @@ const skillCommand = async (args: string[]): Promise<void> => {
     },
   });
 
+  const carried = await host.skill?.();
+
   if (!values.install) {
-    process.stdout.write(await readFile(join(SKILL, "SKILL.md"), "utf8"));
+    process.stdout.write(
+      carried?.get("SKILL.md") ?? (await readFile(join(SKILL, "SKILL.md"), "utf8")),
+    );
 
     return;
   }
 
   const target = resolve(values.dir, "svjeez");
-  await cp(SKILL, target, { recursive: true, force: true });
+
+  if (carried)
+    for (const [path, text] of carried) {
+      await mkdir(dirname(join(target, path)), { recursive: true });
+      await writeFile(join(target, path), text);
+    }
+  else await cp(SKILL, target, { recursive: true, force: true });
   console.log(`installed the svjeez skill in ${relative(process.cwd(), target) || "."}`);
 };
 
@@ -595,7 +625,7 @@ const checkCommand = async (args: string[]): Promise<void> => {
   let cost: Cost | undefined;
   let measured: Report["measured"];
 
-  startTrace({ within: file.endsWith(".svg") ? undefined : dirname(resolve(file)), sources: true });
+  startTrace({ within: file.endsWith(".svg") ? undefined : sceneDir(file), sources: true });
 
   try {
     const value = await loadValue(file, values, (message) => {
@@ -628,6 +658,9 @@ const checkCommand = async (args: string[]): Promise<void> => {
   } finally {
     stopTrace();
   }
+
+  // Type errors first: a wrong type is often why the scene threw or looks wrong.
+  if (host.check && !file.endsWith(".svg")) found.unshift(...(await host.check(resolve(file))));
 
   if (values.browser && svgText !== undefined) {
     const sources = model ? sourcesOf(model) : new Map<string, Source>();
@@ -758,13 +791,26 @@ const devCommand = async (args: string[]): Promise<void> => {
 
   await dev({
     file,
-    cli: self,
+    command: host.self ?? [process.execPath, ...process.execArgv, self],
     args: paramArgs(values),
     files: values.params === undefined ? [] : [values.params],
     dirs: self.endsWith(".ts") ? [dirname(self)] : [],
     port,
     out: values.out,
   });
+};
+
+// The manifest sits beside cli.js in the published package, and one folder up from src/cli.ts.
+const versionCommand = async (): Promise<void> => {
+  if (host.version) return console.log(host.version);
+
+  for (const at of ["./package.json", "../package.json"]) {
+    const text = await readFile(new URL(at, import.meta.url), "utf8").catch(() => undefined);
+
+    if (text !== undefined) return console.log(JSON.parse(text).version);
+  }
+
+  console.log("unknown");
 };
 
 const COMMANDS = new Map([
@@ -774,6 +820,8 @@ const COMMANDS = new Map([
   ["frames", framesCommand],
   ["video", videoCommand],
   ["skill", skillCommand],
+  ["version", versionCommand],
+  ...(host.commands ?? []),
 ]);
 
 const [command = "", ...args] = process.argv.slice(2);

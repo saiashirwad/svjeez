@@ -9,6 +9,7 @@ npx svjeez frames scene.tsx --times 0,0.5,1.2,3 --scale 2 --color-scheme dark --
 npx svjeez dev scene.tsx --port 5173                            # a live preview with a scrubber and timeline
 npx svjeez video scene.tsx --out scene.mp4                      # needs @svjeez/video
 npx svjeez skill --install --dir .claude/skills                 # copy this skill into a project
+npx svjeez version                                              # the version of svjeez that runs
 ```
 
 ## Frames

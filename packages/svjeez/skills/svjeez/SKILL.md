@@ -151,6 +151,7 @@ npx svjeez frames scene.tsx --sheet --out frames/   # look: open frames/sheet.pn
 
 | Code | Means |
 | --- | --- |
+| `type-error` | TypeScript rejects the file (the single-file `svjeez` binary checks types itself) |
 | `compile-error` | the scene threw while it was built: the message says what to write |
 | `compile-warning` | an SVG file or string the scene was given carries a warning |
 | `never-visible` | a node hidden, painting nothing or covered at every time |

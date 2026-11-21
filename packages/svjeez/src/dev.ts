@@ -9,7 +9,8 @@ import type { LaneReport } from "./model/backend";
 
 export interface DevOptions {
   readonly file: string;
-  readonly cli: string;
+  /** The argv that runs the CLI, executable first: node or bun and the script, or a compiled svjeez on its own. */
+  readonly command: readonly string[];
   readonly args?: readonly string[];
   readonly files?: readonly string[];
   readonly dirs?: readonly string[];
@@ -184,20 +185,18 @@ const page = (title: string) => `<!doctype html>
 </script>`;
 
 const run = (
-  cli: string,
+  cli: readonly string[],
   command: string,
   file: string,
   args: readonly string[],
   extra: readonly string[] = [],
 ) =>
   new Promise<{ output: string; log: string; code: number | null }>((done) => {
-    const child = spawn(
-      process.execPath,
-      [...process.execArgv, cli, command, file, "--json", ...extra, ...args],
-      {
-        stdio: ["ignore", "pipe", "pipe"],
-      },
-    );
+    const [executable = process.execPath, ...prefix] = cli;
+
+    const child = spawn(executable, [...prefix, command, file, "--json", ...extra, ...args], {
+      stdio: ["ignore", "pipe", "pipe"],
+    });
 
     const out: Buffer[] = [];
     const err: Buffer[] = [];
@@ -228,7 +227,7 @@ export const dev = async (options: DevOptions): Promise<string> => {
     let problem: string | undefined;
 
     try {
-      const built = await run(options.cli, "svg", source, args);
+      const built = await run(options.command, "svg", source, args);
 
       if (built.code !== 0) throw new Error(built.log || `exited with ${built.code}`);
       const next: Preview = JSON.parse(built.output);
@@ -327,7 +326,7 @@ export const dev = async (options: DevOptions): Promise<string> => {
         }
 
         if (checking?.version !== version) {
-          const task = run(options.cli, "check", source, args, ["--browser"]);
+          const task = run(options.command, "check", source, args, ["--browser"]);
           checking = { version, run: task };
           void task.finally(() => {
             if (checking?.run === task) checking = undefined;

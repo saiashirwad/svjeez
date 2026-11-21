@@ -105,6 +105,8 @@ export {
 
 export { check, type Check, type CheckOptions } from "./check/report";
 
+export { setHost, type Host } from "./host";
+
 export {
   describe,
   type Description,

@@ -12,6 +12,7 @@ import {
 } from "./survey";
 
 export const RULES = {
+  "type-error": "TypeScript rejects the scene file: a value or prop has the wrong type.",
   "compile-error": "The scene threw while it was built.",
   "compile-warning": "An SVG file or string the scene was given carries a warning.",
   "never-visible": "A node can't be seen at any time: hidden, painting nothing, or covered.",

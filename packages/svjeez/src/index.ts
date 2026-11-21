@@ -28,6 +28,7 @@ export {
   polygon,
   rect,
   tokens,
+  type Color,
   type Geometry,
   type Paint,
 } from "./author/values";
