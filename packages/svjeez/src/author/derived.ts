@@ -274,6 +274,11 @@ const affine = <T>(
 
 const MEASURE = 60;
 
+/** One step of an 8-bit color channel: a color mapped through hex rounding moves in steps this size, which no fit should chase. */
+const BYTE = 1 / 255;
+
+const COLOR_SHAPE = "[0,0,0,0]";
+
 const sampledLane = <T>(
   lanes: readonly Animated<Read>[],
   out: (values: readonly Read[]) => T,
@@ -309,7 +314,7 @@ const sampledLane = <T>(
   const keys = follow(
     at,
     breaksOf(lanes, window),
-    tolerance ?? Math.min(0.05, Math.max(range * 1e-3, 1e-6)),
+    tolerance ?? Math.min(0.05, Math.max(range * 1e-3, shape.includes(COLOR_SHAPE) ? BYTE : 1e-6)),
     [],
     lanes,
     curves && shape === "[0,0]",
