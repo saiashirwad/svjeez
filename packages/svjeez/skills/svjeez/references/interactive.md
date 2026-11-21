@@ -58,6 +58,8 @@ power.subscribe((state, from) => (card.dataset.state = state));
 - Moving again mid-way retargets from the current time, so two quick clicks on a toggle reverse smoothly; the earlier move resolves false.
 - `initial` shows its state at once, with no animation. Under reduced motion every move jumps.
 - A machine throws, saying what to change, for an `initial` that is not a state, a clock the SVG doesn't have, a place outside 0 to 1, or an event that leads to an unknown state.
+
+Worked examples, each a scene of nested clocks and declared states with a React page in `examples/react-widgets`: `examples/mascot` (a form the robot watches, its eyes on page-driven clocks), `examples/deploy` (XState nested and parallel states, looping states) and `examples/watch` (a camera clock and a scrubbed timeline).
 - Scenes inlined on one page need an `svg.emit` `prefix` each (see [`render.md`](render.md)), or their classes and keyframes collide.
 
 ## Any source of state: `rests`

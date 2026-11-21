@@ -1,14 +1,22 @@
 :root {
   color-scheme: light dark;
   font-family: system-ui, sans-serif;
+  background: light-dark(#ffffff, #090a0c);
+  color: light-dark(#1d1d1f, #e5e5ea);
 }
 
 main {
   display: grid;
-  gap: 1.5rem;
-  max-width: 520px;
+  gap: 2.5rem;
+  max-width: 800px;
   margin: 2rem auto;
   padding: 0 1rem;
+}
+
+header,
+section {
+  display: grid;
+  gap: 0.75rem;
 }
 
 h1,
@@ -18,52 +26,9 @@ p {
 }
 
 h2 {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.15rem;
 }
 
-/* A real control with the scene's picture standing in for its looks. */
-.control {
-  all: unset;
-  cursor: pointer;
-}
-
-.control:focus-visible,
-.field:focus-visible {
-  outline: 2px solid #5ea0ff;
-  outline-offset: 2px;
-}
-
-.stage {
-  position: relative;
-  max-width: 100%;
-}
-
-.row {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.row > .control {
-  flex: 1;
-}
-
-/* Text that is there for assistive technology while the scene draws it. */
-.ghost {
-  color: transparent;
-  margin: 0;
-  overflow: hidden;
-}
-
-.field {
-  box-sizing: border-box;
-  padding: 0 14px;
-  border: 0;
-  background: transparent;
-  color: CanvasText;
-  font: inherit;
-}
-
-.field:focus-visible {
-  outline-offset: -2px;
+p {
+  color: light-dark(#6e6e73, #a1a1a6);
 }

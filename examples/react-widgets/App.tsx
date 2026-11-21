@@ -1,47 +1,39 @@
-import { useState } from "react";
-import * as Switch from "@radix-ui/react-switch";
-import { Scene } from "@svjeez/react";
-import { SignUp } from "./SignUp.tsx";
-import { Stepper, StepperJump } from "./Stepper.tsx";
-import { Tabs } from "./Tabs.tsx";
-import toggleArt from "../toggle/index.tsx?svjeez&inline";
-
-// Radix brings the role, the keyboard and the focus; the scene draws the switch and moves with `on`.
-const Notifications = () => {
-  const [on, setOn] = useState(false);
-
-  return (
-    <Switch.Root
-      className="control"
-      checked={on}
-      onCheckedChange={setOn}
-      aria-label="Notifications"
-    >
-      <Scene scene={toggleArt} state={on ? "on" : "off"} style={{ width: 240 }} />
-    </Switch.Root>
-  );
-};
+import { Deploy } from "./Deploy.tsx";
+import { Mascot } from "./Mascot.tsx";
+import { Watch } from "./Watch.tsx";
 
 export const App = () => (
   <main>
-    <h1>svjeez in React</h1>
-    <p>React and its libraries own the state, the keyboard and the labels; scenes only draw.</p>
-    <section>
-      <h2>Switch (Radix, useState)</h2>
-      <Notifications />
+    <header>
+      <h1>svjeez in React</h1>
+      <p>
+        React owns the state, the events and the accessibility. A scene declares its states and
+        draws them, moving from wherever it is whenever the state changes.
+      </p>
+    </header>
+    <section aria-labelledby="mascot">
+      <h2 id="mascot">Sign in, with a robot watching</h2>
+      <p>
+        A plain form keeps its focus, errors and announcements; the robot follows the pointer, the
+        caret, and the result.
+      </p>
+      <Mascot />
     </section>
-    <section>
-      <h2>Tabs (Radix)</h2>
-      <Tabs />
+    <section aria-labelledby="deploy">
+      <h2 id="deploy">A deploy pipeline</h2>
+      <p>
+        XState runs the pipeline and React the buttons; the scene draws whatever state XState is in,
+        nested regions included.
+      </p>
+      <Deploy />
     </section>
-    <section>
-      <h2>Form (XState)</h2>
-      <SignUp />
-    </section>
-    <section>
-      <h2>Stepper (Zustand, buttons elsewhere)</h2>
-      <Stepper />
-      <StepperJump />
+    <section aria-labelledby="watch">
+      <h2 id="watch">How a watch keeps time</h2>
+      <p>
+        Radio buttons and a slider choose what to look at and where in the motion; the scene's
+        camera and clocks do the rest.
+      </p>
+      <Watch />
     </section>
   </main>
 );

@@ -16,12 +16,6 @@ const budgets = {
   "readme/basic": { bytes: 1600, elements: 7, stops: 4, smil: 0, cost: 2 },
   "readme/loops": { bytes: 2200, elements: 7, stops: 20, smil: 0, cost: 3 },
   "readme/motion": { bytes: 1600, elements: 6, stops: 5, smil: 0, cost: 2 },
-  clocks: { bytes: 4700, elements: 33, stops: 20, smil: 0, cost: 10 },
-  toggle: { bytes: 2600, elements: 11, stops: 8, smil: 0, cost: 4 },
-  tabs: { bytes: 5300, elements: 24, stops: 12, smil: 1, cost: 7 },
-  stepper: { bytes: 7000, elements: 23, stops: 26, smil: 1, cost: 13 },
-  "hover-card": { bytes: 3300, elements: 18, stops: 8, smil: 1, cost: 5 },
-  "xstate-form": { bytes: 5100, elements: 19, stops: 24, smil: 0, cost: 12 },
   clips: { bytes: 4300, elements: 30, stops: 16, smil: 0, cost: 6 },
   geometry: { bytes: 6850, elements: 19, stops: 10, smil: 5, cost: 8.8 },
   springs: { bytes: 7500, elements: 28, stops: 54, smil: 0, cost: 4 },
@@ -42,6 +36,9 @@ const budgets = {
   sequence: { bytes: 11300, elements: 79, stops: 52, smil: 0, cost: 30 },
   state: { bytes: 14400, elements: 86, stops: 95, smil: 0, cost: 9 },
   lanes: { bytes: 19050, elements: 97, stops: 76, smil: 28, cost: 47.2 },
+  mascot: { bytes: 29500, elements: 115, stops: 200, smil: 0, cost: 106 },
+  deploy: { bytes: 48600, elements: 262, stops: 240, smil: 0, cost: 119 },
+  watch: { bytes: 51300, elements: 144, stops: 366, smil: 0, cost: 64 },
 } satisfies Record<string, Budget>;
 
 // Scenes change all the time; the budgets only catch a blowup, so each number may grow by a quarter before a test fails.

@@ -12,11 +12,9 @@
     "test": "bun test",
     "test:browsers": "bun test ./scripts/browsers.ts",
     "test:node": "tsx scripts/node-check.ts",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react && tsc --noEmit -p dom-react-vite && tsc --noEmit -p dom-component && tsc --noEmit -p clocks && tsc --noEmit -p machines && tsc --noEmit -p react-widgets && svelte-check --tsconfig dom-svelte/tsconfig.json --fail-on-warnings"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react && tsc --noEmit -p dom-react-vite && tsc --noEmit -p dom-component && tsc --noEmit -p react-widgets && svelte-check --tsconfig dom-svelte/tsconfig.json --fail-on-warnings"
   },
   "devDependencies": {
-    "@radix-ui/react-switch": "^1.4.1",
-    "@radix-ui/react-tabs": "^1.2.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@svjeez/charts": "workspace:*",
     "@svjeez/code": "workspace:*",
@@ -46,7 +44,6 @@
     "typescript": "~6.0.0",
     "vite": "8.3.5",
     "world-atlas": "^2.0.2",
-    "xstate": "^5.33.4",
-    "zustand": "^5.1.0"
+    "xstate": "^5.33.4"
   }
 }

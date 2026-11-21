@@ -9,24 +9,26 @@ npm i @svjeez/react@next svjeez@next
 The scene file declares its states, so the component only passes the current one. Import it with `?svjeez&inline` from [`@svjeez/vite`](../vite/README.md):
 
 ```tsx
-import * as Switch from "@radix-ui/react-switch";
 import { Scene } from "@svjeez/react";
-import toggleArt from "./toggle.tsx?svjeez&inline";
+import mascot from "./mascot.tsx?svjeez&inline";
 
-const Toggle = () => {
-  const [on, setOn] = useState(false);
+// A real form keeps its inputs, focus and errors; the robot above it draws whichever state it is in.
+const SignIn = () => {
+  const [field, setField] = useState<"email" | "password" | undefined>();
 
   return (
-    <Switch.Root checked={on} onCheckedChange={setOn} aria-label="Notifications">
-      <Scene scene={toggleArt} state={on ? "on" : "off"} />
-    </Switch.Root>
+    <form>
+      <Scene scene={mascot} state={field ?? "idle"} />
+      <input type="email" aria-label="Email" onFocus={() => setField("email")} onBlur={() => setField(undefined)} />
+      <input type="password" aria-label="Password" onFocus={() => setField("password")} onBlur={() => setField(undefined)} />
+    </form>
   );
 };
 ```
 
 ```ts
-// toggle.tsx: where each named clock rests in each state
-export default scene({ size: [360, 220], duration: 2, title: "Toggle", states: { off: { flip: 0 }, on: { flip: 1 } } }, …);
+// mascot.tsx: where each named clock rests in each state
+export default scene({ size: [360, 220], duration: 14, title: "Robot mascot", states: { idle: { … }, email: { … }, password: { … } } }, …);
 ```
 
 ## `<Scene>`
@@ -69,4 +71,4 @@ export const scene = (element: HTMLElement, options: AttachOptions) => {
 
 A Vue directive is the same three calls: `mounted` attaches and keeps the result on the element, `updated` calls `update({ state: binding.value })`, and `unmounted` calls `destroy()`. Solid does it in `onMount`, `createEffect` and `onCleanup`.
 
-[Example app](https://github.com/saiashirwad/svjeez/tree/next/examples/react-widgets) · [API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/web.md)
+Demos: a [sign-in form with a robot](https://github.com/saiashirwad/svjeez/blob/next/examples/react-widgets/Mascot.tsx), an [XState deploy pipeline](https://github.com/saiashirwad/svjeez/blob/next/examples/react-widgets/Deploy.tsx) and a [watch you can scrub](https://github.com/saiashirwad/svjeez/blob/next/examples/react-widgets/Watch.tsx) · [Example app](https://github.com/saiashirwad/svjeez/tree/next/examples/react-widgets) · [API reference](https://github.com/saiashirwad/svjeez/blob/next/packages/svjeez/skills/svjeez/references/web.md)
