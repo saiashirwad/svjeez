@@ -322,3 +322,33 @@ describe("what a clock refuses", () => {
     expect(out).toMatch(/<linearGradient id="g1"[^>]*data-clock="open"/);
   });
 });
+
+describe("states", () => {
+  const stated = (states?: Parameters<typeof scene>[0]["states"]) =>
+    svg.emit(
+      scene({ size: [200, 100], duration: 4, title: "Test", states }, () => (
+        <Sequence clock={open}>{card("a")}</Sequence>
+      )),
+    );
+
+  test("ride on the root svg as compact JSON, and only when given", () => {
+    const out = stated({ closed: { open: 0 }, "menu.open": { open: 1 } });
+
+    expect(out).toContain(
+      `data-states="{&quot;closed&quot;:{&quot;open&quot;:0},&quot;menu.open&quot;:{&quot;open&quot;:1}}"`,
+    );
+    expect(stated()).not.toContain("data-states");
+    expect(out.replace(/ data-states="[^"]*"/, "")).toBe(stated());
+  });
+
+  test("name clocks the scene uses, at places from 0 to 1", () => {
+    expect(() => stated({ shut: { nope: 0 } })).toThrow(
+      'State "shut" names the clock "nope", but the scene\'s clocks are "open".',
+    );
+    expect(() => stated({ shut: { open: 2 } })).toThrow(
+      'State "shut" rests the clock "open" at 2, but a place is progress from 0 to 1.',
+    );
+    expect(() => stated({ shut: { open: NaN } })).toThrow("a place is progress from 0 to 1");
+    expect(() => stated({ "": { open: 0 } })).toThrow("a state with an empty name");
+  });
+});

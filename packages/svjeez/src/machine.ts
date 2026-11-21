@@ -76,8 +76,18 @@ const depth = (path: string) => path.split(".").length;
  * every key in `table` that is one of those paths apply, outermost first, so a deeper state overrides a clock a
  * shallower one set. Keys are names or dotted paths. A value that matches no key changes nothing and resolves false.
  * Any source of state drives it: `actor.subscribe((s) => view.go(s.value))`.
+ *
+ * `table` is optional: it defaults to the states the scene declared with `states` in scene(), which the SVG carries.
  */
-export const rests = (scene: Mounted, table: Readonly<Record<string, Places>>): View => {
+export const rests = (
+  scene: Mounted,
+  table: Readonly<Record<string, Places>> = scene.states,
+): View => {
+  if (Object.keys(table).length === 0)
+    throw new Error(
+      "This SVG declares no states and rests() got no places. Give scene() a states option, or pass the places as the second argument.",
+    );
+
   for (const [state, clocks] of Object.entries(table))
     for (const [name, amount] of Object.entries(clocks)) {
       if (!scene.clocks.has(name))

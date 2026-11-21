@@ -3,6 +3,13 @@ declare module "*?svjeez" {
   export default scene;
 }
 
+declare module "*?svjeez&inline" {
+  const scene: import("@svjeez/vite").SceneModule &
+    Required<Pick<import("@svjeez/vite").SceneModule, "svg">>;
+
+  export default scene;
+}
+
 declare module "*?svjeez&posters" {
   const scene: import("@svjeez/vite").SceneModule &
     Required<Pick<import("@svjeez/vite").SceneModule, "posters">>;

@@ -1433,6 +1433,7 @@ export const svg: Backend<string, SvgOptions> = {
           .filter(Boolean)
           .join("\n"),
         loop: scene.loop,
+        ...(scene.states && { states: scene.states }),
         share: !ctx.sources,
         still: scene.still === undefined ? false : { at: scene.still },
         ...(options.prefix !== undefined && { prefix: options.prefix }),

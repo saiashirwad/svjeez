@@ -1,6 +1,9 @@
 import type { FontFamily } from "../font/font";
 import type { Ease, Seconds } from "./time";
 
+/** Where each named clock rests in each state, as progress from 0 to 1. */
+export type States = { readonly [state: string]: { readonly [clock: string]: number } };
+
 export interface Scene {
   readonly size: Vec;
   readonly duration: Seconds;
@@ -8,6 +11,7 @@ export interface Scene {
   readonly desc?: string;
   readonly loop: boolean;
   readonly still?: Seconds;
+  readonly states?: States;
   readonly tokens: Readonly<Record<string, TokenValue>>;
   readonly fonts: Readonly<Record<string, FontFamily>>;
   readonly root: GroupNode;

@@ -1,4 +1,4 @@
-# Interactive scenes: clocks, hit names, state machines and XState
+# Interactive scenes: clocks, hit names, state machines, XState and framework components
 
 The page code moves parts of a scene; every animation inside is authored once, in the scene. The `.svg` still plays on its own, so `<img>` embeds, `frames` and `check` show it.
 
@@ -26,6 +26,7 @@ scene.clock("grow").follow(scrolled(card));
 
 - A clock has `seek(seconds)`, `progress(amount)` (0 to 1), `to(seconds)`, `play()` and `reverse()`, `pause()`, `time`, `over` and `follow(driver)`. `to`, `play` and `reverse` run at real speed, so the scene's own easing plays, forward or back; they resolve false when something else moves the clock first. A driver is a function `(progress) => stop`; `scrolled(el)` and `pointer(el, { axis })` are built in. Under reduced motion they jump to where they are going. Animations on the scene's own clock keep playing.
 - Everything animates on a clock. Mounting also takes over the SMIL inside it (a morph, a moving gradient, an animated effect, a text-path start), replacing it with attributes the clock sets; the `.svg` on its own still plays it.
+- Mounting the same SVG again after `unmount()` (a framework remounting) works: what the first mount took over is kept per SVG, and the clocks start at 0.
 - Clocks don't nest, two `clock()` values can't share a name, and a track belongs to one clock.
 
 ## Finding shapes: `hit`
@@ -73,4 +74,16 @@ const actor = createActor(form);
 view.show(actor.getSnapshot().value);
 actor.subscribe((snapshot) => view.go(snapshot.value));
 actor.start();
+```
+
+## States in the scene, and `attach` for frameworks
+
+`scene({ ..., states })` declares the states, in the shape `rests` takes: `{ off: { flip: 0 }, on: { flip: 1 }, "menu.open": { drawer: 1 } }`. It throws, with the fix, for a clock the scene doesn't use, a place outside 0 to 1 or an empty state name, and writes the table on the root `<svg>` as `data-states` (only when given). `rests(scene)` then needs no places, and `scene.states` (from `mount()`) holds them; with neither, `rests` throws.
+
+`attach(element, { state, places, onMount })` from `svjeez/page` is the one binding a framework adapter wraps, in the shape of a Svelte action. The framework owns state, events, focus and the accessible role (a Radix or React Aria Switch); the scene is only the picture, so hide it with `aria-hidden` on the wrapper when it is decorative.
+
+```ts
+const attached = attach(host, { state: "off", onMount: (scene) => () => {} }); // shows "off" at once; onMount's cleanup runs on destroy
+attached.update({ state: "on" }); // animates; the same value (objects compared deeply) does nothing
+attached.destroy(); // cleanup, stop, unmount: attach(host) again works
 ```

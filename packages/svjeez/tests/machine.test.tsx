@@ -318,6 +318,7 @@ test("a spec that does not fit the scene is refused with the fix", async () => {
 
 test("typos in names are type errors", () => {
   const none: Mounted = {
+    states: {},
     clocks: new Map(),
     clock: () => {
       throw new Error("no clocks");

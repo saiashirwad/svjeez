@@ -3,6 +3,7 @@ import { compile } from "./compile";
 import { cssFontStyle, type FontValue } from "../font/font";
 import { RATE_ATTR } from "./rate";
 import { num } from "../model/format";
+import type { States } from "../model/ir";
 import type { Seconds } from "../model/time";
 import { element, raw, serialize, text, type SvgNode } from "./tree";
 import { inherit } from "./inherit";
@@ -18,6 +19,7 @@ export interface RenderOptions {
   readonly css?: string;
   readonly playbackRate?: number;
   readonly prefix?: string;
+  readonly states?: States;
   readonly still?: { readonly at: Seconds } | false;
   readonly loop?: boolean;
   readonly font?: RootFont;
@@ -75,6 +77,7 @@ export const render = (options: RenderOptions, nodes: readonly SvgNode[]): strin
   const rated = {
     ...rootAttributes,
     ...(playbackRate !== 1 && { [RATE_ATTR]: num(playbackRate) }),
+    ...(options.states && { "data-states": JSON.stringify(options.states) }),
     ...compiled.root,
   };
 

@@ -25,7 +25,7 @@ export interface SceneModule {
   readonly desc: string;
   /** The scene's stills by scheme, narrowest first. */
   readonly posters?: Readonly<Record<Scheme, readonly Poster[]>>;
-  /** The SVG's markup, in server code only (SSR, an Astro page): a browser bundle gets the URL alone. */
+  /** The SVG's markup, in server code (SSR, an Astro page) and in an `?svjeez&inline` import: any other browser bundle gets the URL alone. */
   readonly svg?: string;
 }
 
@@ -61,7 +61,7 @@ const isSvgText = (scene: SceneSource): scene is string => typeof scene === "str
 const isModule = (scene: SceneSource): scene is SceneModule =>
   typeof scene === "object" && "src" in scene;
 
-const compile = (scene: SceneSource) => {
+const compile = (scene: SceneSource, prefix?: string) => {
   if (isSvgText(scene)) return scene;
 
   if (isModule(scene)) {
@@ -73,12 +73,13 @@ const compile = (scene: SceneSource) => {
     return scene.svg;
   }
 
-  const known = compiled.get(scene);
+  const known = prefix === undefined ? compiled.get(scene) : undefined;
 
   if (known !== undefined) return known;
   const made = isScene(scene) ? scene : scene();
-  const svg = isSvgText(made) ? made : backend.emit(made);
-  compiled.set(scene, svg);
+  const svg = isSvgText(made) ? made : backend.emit(made, { prefix });
+
+  if (prefix === undefined) compiled.set(scene, svg);
 
   return svg;
 };
@@ -98,9 +99,9 @@ const describe = (caller: string, svg: string) => {
 
 export const getScene = (
   scene: SceneSource,
-  options: { posters?: boolean | PosterOptions } = {},
+  options: { posters?: boolean | PosterOptions; prefix?: string } = {},
 ): SceneImage => {
-  const svg = compile(scene);
+  const svg = compile(scene, options.prefix);
   const name = hash(svg);
   const text = new TextEncoder().encode(svg);
   register(`${name}.svg`, { type: "image/svg+xml", bytes: async () => text });
