@@ -33,6 +33,10 @@ scene.clock("grow").follow(scrolled(card));
 
 Every node takes `hit="name"`: its outermost SVG element gets `data-hit="name"`, and several nodes may share a name. `scene.hit(name)` (from `mount()`) returns those elements, and throws, listing the names the SVG has, when there are none. Events are plain DOM events on them (`addEventListener`); give them `[data-hit] { cursor: pointer }` in the page's CSS. A shape needs a paint to catch the pointer: a fully transparent fill is flagged `never-visible`, so use a visible fill.
 
+## Page HTML inside a scene: `<Slot>`
+
+`<Slot name="field" width={w} height={h}>{fallback}</Slot>` is a box of w by h that lays out like a `<Center>` of that size and draws its children as the fallback: what the plain `.svg`, an `<img>` and a page with no JS or no GPU show. It is written as `<g data-slot="field" data-slot-box="x y w h">` (the box in the group's own units). `scene.slot(name).host(node)` puts an HTML node (a canvas, a video) in a `<foreignObject>` over the box inside that group, so layout, motion and clocks move it, and hides the fallback; it returns the function that takes the node out. `slot(name)` also gives `element` and `box`, and throws listing the slot names when there is none. A name is letters, digits, - and _; each slot has its own. Safari draws a `<foreignObject>` under transforms with known quirks, so keep the fallback presentable. Worked example: `examples/gpu-card`, filled with a TypeGPU shader in `examples/react-widgets/GpuCard.tsx` that reads the scene's clock each frame.
+
 ## State machines
 
 `machine(scene, { initial, states, on })` from `svjeez/page` is the shorthand for simple widgets. A state says where each clock rests, as progress 0 to 1; moving to it runs those clocks from where they are to their places.

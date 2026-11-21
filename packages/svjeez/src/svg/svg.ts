@@ -1020,6 +1020,12 @@ const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Dra
 
 const ISOLATE = "isolation:isolate";
 
+/** What lets page code find a <Slot>: its name, and its box in the units of the group that holds its fallback. */
+const slotAttrs = (slot: string, { x, y, width, height }: Box) => ({
+  "data-slot": slot,
+  "data-slot-box": [x, y, width, height].map(num).join(" "),
+});
+
 /**
  * A node blends with what is drawn beneath it in its nearest isolated group, so a group
  * whose children blend is isolated: they blend with their earlier siblings and never
@@ -1036,6 +1042,7 @@ const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
 
   if (
     child!.clock !== undefined ||
+    node.slot !== undefined ||
     (node.hit !== undefined && child!.hit !== undefined) ||
     node.clip !== undefined ||
     node.mask !== undefined ||
@@ -1248,7 +1255,15 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
   const still = lanes.length === 0 && drawn.tag !== "g" && !drawn.scale && !drawn.offset;
 
   const first: Element = {
-    ...element(drawn.tag, { ...drawn.attrs, ...dress(inner!) }, children),
+    ...element(
+      drawn.tag,
+      {
+        ...drawn.attrs,
+        ...dress(inner!),
+        ...(node.slot !== undefined && slotAttrs(node.slot, node.box)),
+      },
+      children,
+    ),
     ...(innerLanes.length > 0 && { lanes: innerLanes }),
     ...(still && { drawn: Object.keys(drawn.attrs) }),
   };

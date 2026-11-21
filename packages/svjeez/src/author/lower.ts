@@ -988,6 +988,7 @@ const lowered = (
           [0, 0],
         ),
         ...(el.layout && { authored: { layout: el.layout } }),
+        ...(el.slot !== undefined && { slot: el.slot }),
         kind: "group",
         children,
       };
@@ -1367,6 +1368,25 @@ const checkStates = (states: States, clocks: ReadonlyMap<string, Clock>): void =
   }
 };
 
+/** Each <Slot> has a name of its own, so the page finds one box by it. */
+const checkSlots = (root: GroupNode): void => {
+  const seen = new Set<string>();
+
+  const visit = (node: SceneNode): void => {
+    if (node.slot !== undefined && seen.has(node.slot))
+      throw new SceneError(
+        `Two <Slot>s are both named "${node.slot}".`,
+        "Give each slot a name of its own.",
+      );
+
+    if (node.slot !== undefined) seen.add(node.slot);
+
+    if (node.kind === "group") node.children.forEach(visit);
+  };
+
+  visit(root);
+};
+
 const isBare = (el: SceneElement): boolean =>
   el.type === "fragment" ||
   (el.type === "group" && Object.keys(el.props).length === 0 && el.settle === undefined);
@@ -1440,6 +1460,8 @@ const lowerScene = (
   if (options.states) checkStates(options.states, ctx.clocks);
 
   const root = settle(drafted, ctx.notes, duration);
+
+  checkSlots(root);
 
   const still =
     options.still === false

@@ -157,6 +157,8 @@ export type SceneElement =
       readonly settle?: Settle;
       readonly layout?: Authored["layout"];
       readonly paints?: true;
+      /** Set by <Slot>: the name page code finds its box by. */
+      readonly slot?: string;
     }
   | { readonly type: "shape"; readonly props: ShapeProps }
   | { readonly type: "text"; readonly props: TextProps }
