@@ -89,6 +89,9 @@ const blocksOf = (event: StreamEvent): ContentBlock[] => {
 };
 
 const READ_ONLY = new Set(["cat", "head", "tail", "wc", "find", "grep", "rg", "ls"]);
+// Helpers the prompt hands to the agent, so using them is not a lookup.
+
+const SHARED = ["examples/theme.ts", "examples/fonts/"];
 const LIBRARY_ROOTS = ["packages", "examples", "site", "scripts", "tools"];
 
 /** Which svjeez command a Bash line runs: `bun run scene check x`, `svjeez frames x`, `cli.ts svg x`. */
@@ -104,6 +107,8 @@ export const isSourceLookup = (path: string, ctx: RunContext): boolean => {
   const rel = relative(ctx.root, isAbsolute(path) ? path : join(ctx.root, path));
 
   if (rel.startsWith("..") || rel.includes("/skills/") || rel.startsWith(".claude/")) return false;
+
+  if (SHARED.some((shared) => rel === shared || rel.startsWith(shared))) return false;
 
   if (rel === ctx.dir || rel.startsWith(`${ctx.dir}/`)) return false;
 

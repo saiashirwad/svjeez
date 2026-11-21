@@ -72,6 +72,8 @@ test("source lookups are library or other-example paths, not the run's own files
   expect(isSourceLookup("/repo/.claude/skills/svjeez/SKILL.md", ctx)).toBe(false);
   expect(isSourceLookup("/repo/packages/svjeez/skills/svjeez/references/a.md", ctx)).toBe(false);
   expect(isSourceLookup("/elsewhere/x.ts", ctx)).toBe(false);
+  expect(isSourceLookup("examples/theme.ts", ctx)).toBe(false);
+  expect(isSourceLookup("examples/fonts/faces.ts", ctx)).toBe(false);
 });
 
 test("counts reads of PNGs as frame looks and shell reads as lookups", () => {
