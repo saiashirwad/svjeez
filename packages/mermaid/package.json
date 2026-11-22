@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/mermaid",
-  "version": "0.8.0-next.0",
+  "version": "0.8.0-next.1",
   "private": true,
   "description": "Mermaid text drawn as svjeez diagrams, from flowcharts and sequence diagrams to pie, radar and xy charts.",
   "license": "MIT",

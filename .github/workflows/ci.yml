@@ -108,8 +108,8 @@ jobs:
     strategy:
       matrix:
         packages:
-          - fonts icons charts code geo math
-          - diagrams mermaid vite video astro
+          - fonts icons charts code geo math og
+          - diagrams mermaid vite video astro live
     steps:
       - uses: actions/checkout@v4
       - run: npm install --global bun

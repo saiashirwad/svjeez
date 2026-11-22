@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/icons",
-  "version": "0.8.0-next.0",
+  "version": "0.8.0-next.1",
   "private": true,
   "description": "Tabler and Lucide icons for svjeez scenes: an <Icon> that draws, recolors and animates each piece.",
   "license": "MIT",

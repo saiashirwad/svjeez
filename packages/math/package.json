@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/math",
-  "version": "0.8.0-next.0",
+  "version": "0.8.0-next.1",
   "private": true,
   "description": "TeX, plots, constructions and transformations for svjeez: formulas typeset to glyph outlines while the scene builds, ready for morph() and refs.",
   "license": "MIT",

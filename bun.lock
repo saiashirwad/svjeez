@@ -49,7 +49,7 @@
     },
     "packages/astro": {
       "name": "@svjeez/astro",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "dependencies": {
         "@svjeez/vite": "workspace:^",
       },
@@ -65,7 +65,7 @@
     },
     "packages/bin": {
       "name": "@svjeez/bin",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "dependencies": {
         "@svjeez/charts": "workspace:*",
         "@svjeez/code": "workspace:*",
@@ -87,7 +87,7 @@
     },
     "packages/charts": {
       "name": "@svjeez/charts",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "dependencies": {
         "@types/d3-shape": "3.2.0",
         "d3-scale": "4.0.2",
@@ -105,7 +105,7 @@
     },
     "packages/code": {
       "name": "@svjeez/code",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "dependencies": {
         "shiki": "4.5.0",
       },
@@ -120,7 +120,7 @@
     },
     "packages/diagrams": {
       "name": "@svjeez/diagrams",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "devDependencies": {
         "@types/bun": "latest",
         "svjeez": "workspace:*",
@@ -132,7 +132,7 @@
     },
     "packages/dom": {
       "name": "@svjeez/dom",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "devDependencies": {
         "@sveltejs/vite-plugin-svelte": "^7.3.1",
         "@types/bun": "latest",
@@ -168,7 +168,7 @@
     },
     "packages/fonts": {
       "name": "@svjeez/fonts",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "devDependencies": {
         "@types/bun": "latest",
         "svjeez": "workspace:*",
@@ -180,7 +180,7 @@
     },
     "packages/geo": {
       "name": "@svjeez/geo",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "dependencies": {
         "@types/d3-geo": "^3.1.0",
         "@types/geojson": "^7946.0.16",
@@ -201,7 +201,7 @@
     },
     "packages/icons": {
       "name": "@svjeez/icons",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "devDependencies": {
         "@tabler/icons": "3.50.0",
         "@types/bun": "latest",
@@ -215,7 +215,7 @@
     },
     "packages/live": {
       "name": "@svjeez/live",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "dependencies": {
         "@lezer/common": "^1.5.4",
         "@lezer/javascript": "^1.5.6",
@@ -230,7 +230,7 @@
     },
     "packages/math": {
       "name": "@svjeez/math",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "dependencies": {
         "mathjax-full": "3.2.2",
       },
@@ -245,7 +245,7 @@
     },
     "packages/mermaid": {
       "name": "@svjeez/mermaid",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "dependencies": {
         "@svjeez/diagrams": "workspace:^",
       },
@@ -260,7 +260,7 @@
     },
     "packages/og": {
       "name": "@svjeez/og",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "devDependencies": {
         "@types/bun": "latest",
         "playwright-core": "^1.64.1",
@@ -277,7 +277,7 @@
     },
     "packages/svjeez": {
       "name": "svjeez",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "bin": {
         "svjeez": "./package-dist/cli.js",
       },
@@ -310,7 +310,7 @@
     },
     "packages/video": {
       "name": "@svjeez/video",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "dependencies": {
         "mediabunny": "1.63.0",
       },
@@ -327,7 +327,7 @@
     },
     "packages/vite": {
       "name": "@svjeez/vite",
-      "version": "0.8.0-next.0",
+      "version": "0.8.0-next.1",
       "dependencies": {
         "@svjeez/og": "workspace:^",
       },
