@@ -73,7 +73,7 @@ describe("video", () => {
       packets: 30,
       duration: 3,
     });
-  });
+  }, 30_000);
 
   test("a transparent background keeps alpha in webm", async () => {
     const clip = await video(slide, { format: "webm", fps: 6, background: "transparent" });

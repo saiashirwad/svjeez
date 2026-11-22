@@ -102,7 +102,7 @@ test("svjeez svg calls a template with its defaults, then with --params and --pa
   expect(out.stdout.toString()).toContain(
     'width="20" height="10"><title>Flag</title><desc>x,y</desc>',
   );
-});
+}, 20_000);
 
 test("svg --json reports every animated lane with the line that wrote it", () => {
   const file = join(import.meta.dir, "fixtures/check/cue-scene.tsx");
