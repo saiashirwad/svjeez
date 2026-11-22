@@ -302,12 +302,13 @@ describe("Shader", () => {
   });
 
   test("a function the transform did not compile says to use the CLI or @svjeez/vite", () => {
-    // This file was loaded before TypeGPU's transform, so a function written here has no WGSL to give.
-    const plain = (uv: d.v2f): d.v4f => {
-      "use gpu";
-
-      return d.vec4f(uv, 0, 1);
-    };
+    // Made at run time, which TypeGPU's transform never sees, wherever this file sits among the ones that install it: it has
+    // no WGSL to give.
+    // SAFETY: the source is a "use gpu" function from `d.v2f` to `d.v4f`.
+    const plain: (uv: d.v2f) => d.v4f = new Function(
+      "d",
+      "return (uv) => { 'use gpu'; return d.vec4f(uv, 0, 1); };",
+    )(d);
 
     expect(() =>
       emitted(() => <Shader name="sky" width={10} height={10} fragment={plain} />),
