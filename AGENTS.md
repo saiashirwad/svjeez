@@ -54,3 +54,7 @@ After writing or changing a scene, run `bun run scene check` and `bun run typech
 ## Releasing
 
 Every package shares one version. `bun scripts/release.ts version next` bumps them all and `bun.lock` (`minor` and `major` start a new `-next.0` line, `stable` drops the suffix, or pass an exact version). Push to main, then run `gh workflow run release.yml --ref main`: prereleases go to npm's `next` tag, stable versions to `latest`.
+
+- A new package releases only when it has `build:package` and `test:package` scripts, a README and a `test/consumer` check (copy `packages/og`), and is in the `packages` matrix in `.github/workflows/ci.yml`. Otherwise the release skips it without failing.
+- A package's first publish needs a person logged in to npm: `bun scripts/release.ts claim packages/<name>`, then approve the staged version on npmjs.com. An agent can't do that step.
+- A new version can take a few minutes to appear in `npm view`; a 404 right after the workflow passes isn't a failure. The workflow log's `Released` lines are the record.
