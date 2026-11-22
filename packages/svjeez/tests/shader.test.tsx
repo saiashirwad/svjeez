@@ -78,9 +78,44 @@ const probe = await browser.newPage();
 
 await served(probe, "");
 
+// An adapter is not enough: software WebGPU on a headless Linux machine can have one and still lose its device the first
+// time it presents to a canvas. The probe draws one frame to a canvas and sees whether the device survives.
 const webgpu = await probe.evaluate(async () => {
   try {
-    return Boolean(await navigator.gpu?.requestAdapter());
+    const adapter = await navigator.gpu?.requestAdapter();
+
+    if (!adapter) return false;
+    const device = await adapter.requestDevice();
+    let lost = false;
+
+    void device.lost.then(() => (lost = true));
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("webgpu");
+
+    if (!context) return false;
+    const format = navigator.gpu.getPreferredCanvasFormat();
+
+    context.configure({ device, format, alphaMode: "premultiplied" });
+    const encoder = device.createCommandEncoder();
+
+    encoder
+      .beginRenderPass({
+        colorAttachments: [
+          {
+            view: context.getCurrentTexture().createView(),
+            clearValue: [0, 0, 0, 0],
+            loadOp: "clear",
+            storeOp: "store",
+          },
+        ],
+      })
+      .end();
+
+    device.queue.submit([encoder.finish()]);
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    device.destroy();
+
+    return !lost;
   } catch {
     return false;
   }
@@ -88,7 +123,7 @@ const webgpu = await probe.evaluate(async () => {
 
 afterAll(() => browser.close());
 
-// WebGPU is not on every CI machine: these tests are skipped where the browser has no adapter.
+// WebGPU is not on every CI machine: these tests are skipped where the browser cannot draw to a canvas with it.
 const gpu = webgpu ? test : test.skip;
 
 interface Opened {

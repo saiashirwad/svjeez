@@ -1,6 +1,5 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { loadTypeGpu, typegpuPlugin } from "svjeez/tools";
 import {
   createRunnableDevEnvironment,
   defaultServerConditions,
@@ -103,6 +102,9 @@ export const createRunner = (app: ResolvedConfig): Runner => {
       app.environments.ssr?.resolve ?? {};
 
     // A scene with a <Shader> is written with TypeGPU, whose "use gpu" functions this environment compiles as it loads them.
+    // Imported here, not at the top: Astro loads this file to read its config, before svjeez has a built entry to resolve.
+    const { loadTypeGpu, typegpuPlugin } = await import("svjeez/tools");
+
     const make = (await loadTypeGpu(app.root, { transform: false }))
       ? await typegpuPlugin("vite", app.root)
       : undefined;

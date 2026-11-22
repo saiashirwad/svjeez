@@ -1,4 +1,4 @@
-import { createRequire } from "node:module";
+import * as nodeModule from "node:module";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { provideTypeGpu } from "./author/typegpu";
@@ -9,6 +9,12 @@ export interface LoadTypeGpuOptions {
    * plugin or Node hook. Leave it off where a bundler's own plugin does that, as in `@svjeez/vite`. On by default.
    */
   readonly transform?: boolean;
+  /**
+   * The source files Bun's plugin compiles, as one regular expression on the path. It answers for every file it matches, and
+   * Bun runs one plugin per file, so narrow it to the modules with `"use gpu"` when a later preload must see the rest.
+   * Defaults to every source file outside `node_modules`.
+   */
+  readonly include?: RegExp;
 }
 
 /** What unplugin-typegpu exports for a build tool: a function that makes the plugin, from the options it takes. */
@@ -34,7 +40,7 @@ const installed = new Set<string>();
 /** The path of `name` as a project at `from` (a directory) would import it, or undefined when it is not installed. */
 const found = (name: string, from: string): string | undefined => {
   try {
-    return createRequire(join(from, "package.json")).resolve(name);
+    return nodeModule.createRequire(join(from, "package.json")).resolve(name);
   } catch {
     return undefined;
   }
@@ -57,9 +63,14 @@ export const typegpuPlugin = async (
   return isPlugin(loaded) ? loaded : loaded.default;
 };
 
-const install = async (from: string): Promise<void> => {
+const install = async (from: string, include: RegExp): Promise<void> => {
   const { Bun: bun } = runtime;
   const kind = bun ? "bun" : "node";
+
+  // unplugin-typegpu's Node hook is `module.registerHooks`, which Node 20 does not have: its scenes with a "use gpu"
+  // function can't be loaded there, and the rest still can.
+  if (!bun && !("registerHooks" in nodeModule)) return;
+
   const make = await typegpuPlugin(kind, from);
 
   if (!make || installed.has(kind)) return;
@@ -71,7 +82,7 @@ const install = async (from: string): Promise<void> => {
     return;
   }
 
-  bun.plugin(make({ include: SOURCE }));
+  bun.plugin(make({ include }));
 };
 
 /**
@@ -84,13 +95,13 @@ const install = async (from: string): Promise<void> => {
  */
 export const loadTypeGpu = async (
   from: string,
-  { transform = true }: LoadTypeGpuOptions = {},
+  { transform = true, include = SOURCE }: LoadTypeGpuOptions = {},
 ): Promise<boolean> => {
   const entry = found("typegpu", from);
 
   if (!entry) return false;
 
-  if (transform) await install(from);
+  if (transform) await install(from, include);
   provideTypeGpu(await import(/* @vite-ignore */ pathToFileURL(entry).href));
 
   return true;

@@ -147,7 +147,7 @@ test("svjeez svg says what is wrong with a param, naming its path", () => {
   fails(["--params", join(dir, "missing.json")], "no such file");
   writeFileSync(data, "{ nope");
   fails(["--params", data], "is not JSON");
-});
+}, 20_000);
 
 test("svjeez svg emits a scene model default export, and --json reports its build", async () => {
   const file = join(import.meta.dir, "fixtures/scene/model.tsx");

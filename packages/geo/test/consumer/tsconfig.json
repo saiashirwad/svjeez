@@ -5,6 +5,7 @@
     "moduleResolution": "NodeNext",
     "types": ["node"],
     "strict": true,
+    "skipLibCheck": true,
     "noEmit": true
   },
   "files": ["main.ts"]

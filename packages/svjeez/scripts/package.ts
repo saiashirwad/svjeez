@@ -36,7 +36,15 @@ for (const file of await readdir("package-dist", { recursive: true })) {
   if (!file.endsWith(".d.ts")) continue;
   const path = `package-dist/${file}`;
   const contents = await readFile(path, "utf8");
-  await writeFile(path, contents.replace(/(from\s+["'])(\.\.?\/[^"']+)(["'])/g, "$1$2.js$3"));
+
+  // typegpu is an optional peer, and the types that name it must still compile for a consumer without it (as `any`), which
+  // `skipLibCheck: false` would otherwise report as a missing module.
+  const optional = contents.replace(
+    /^(import\s[^\n]*\sfrom\s+"typegpu";)$/gm,
+    "// @ts-ignore typegpu is an optional peer\n$1",
+  );
+
+  await writeFile(path, optional.replace(/(from\s+["'])(\.\.?\/[^"']+)(["'])/g, "$1$2.js$3"));
 }
 
 for (const file of ["README.md", "LICENSE"]) await copyFile(`../../${file}`, file);
