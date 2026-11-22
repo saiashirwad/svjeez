@@ -1,5 +1,6 @@
 import { execFileSync, spawn } from "node:child_process";
-import { appendFileSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { appendFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { nextVersion, packageDirs, sharedVersion } from "./package-manifest.ts";
 import { tmpdir } from "node:os";
 import { join, relative, resolve } from "node:path";
 
@@ -48,9 +49,7 @@ const load = (dir: string): Package | undefined => {
 };
 
 const packages = (): Package[] => {
-  const all = readdirSync(join(ROOT, "packages")).flatMap(
-    (name) => load(join(ROOT, "packages", name)) ?? [],
-  );
+  const all = packageDirs().flatMap((dir) => load(dir) ?? []);
 
   const sorted: Package[] = [];
 
@@ -324,9 +323,33 @@ const claim = async (dir: string | undefined) => {
   );
 };
 
+// Moves every package to the next version together, and bun.lock with them.
+const version = (bump: string | undefined) => {
+  if (!bump)
+    throw new Error(
+      "Name the bump, as in `bun scripts/release.ts version next`: next, minor, major, stable or a version.",
+    );
+  const dirs = packageDirs();
+  const current = sharedVersion(dirs);
+  const target = nextVersion(current, bump);
+
+  for (const dir of dirs) {
+    const file = join(dir, "package.json");
+
+    writeFileSync(
+      file,
+      readFileSync(file, "utf8").replace(`"version": "${current}"`, `"version": "${target}"`),
+    );
+  }
+
+  run("bun", ["install"]);
+  console.log(`${current} → ${target}. Commit, push to main, then run release.yml.`);
+};
+
 const [command, arg] = process.argv.slice(2);
 
 if (command === "plan") await plan();
 else if (command === "publish") await publish();
 else if (command === "claim") await claim(arg);
-else throw new Error("Usage: bun scripts/release.ts plan | publish | claim <dir>");
+else if (command === "version") version(arg);
+else throw new Error("Usage: bun scripts/release.ts plan | publish | claim <dir> | version <bump>");

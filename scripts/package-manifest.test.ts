@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { publishedRanges } from "./package-manifest.ts";
+import { nextVersion, packageDirs, publishedRanges, sharedVersion } from "./package-manifest.ts";
 
 const versions = new Map([["svjeez", "1.2.3"]]);
 
@@ -33,4 +33,19 @@ test("a field the package does not have is not added, and a workspace range to n
       versions,
     ),
   ).toThrow("nope");
+});
+
+test("every package shares one version", () => {
+  expect(() => sharedVersion(packageDirs())).not.toThrow();
+});
+
+test("next, minor and major bump to a prerelease, stable drops it, and anything else is an exact version", () => {
+  expect(nextVersion("0.8.0-next.1", "next")).toBe("0.8.0-next.2");
+  expect(nextVersion("0.7.1", "next")).toBe("0.7.2-next.0");
+  expect(nextVersion("0.8.0-next.1", "minor")).toBe("0.9.0-next.0");
+  expect(nextVersion("0.8.0-next.1", "major")).toBe("1.0.0-next.0");
+  expect(nextVersion("0.8.0-next.1", "stable")).toBe("0.8.0");
+  expect(nextVersion("0.8.0-next.1", "0.8.3")).toBe("0.8.3");
+  expect(() => nextVersion("0.8.0", "stable")).toThrow("already stable");
+  expect(() => nextVersion("0.8.0", "huge")).toThrow("huge");
 });
