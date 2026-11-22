@@ -35,27 +35,31 @@ export const defineEdit = <
 }): CustomEdit<Input, Output, Failure> => ({
   name: definition.name,
   input: definition.input,
-  expand: (raw, state) =>
-    Effect.suspend((): Effect.Effect<readonly Edit[], InvalidValue | Failure> => {
-      const result = definition.input["~standard"].validate(raw);
+  expand: (raw, state) => {
+    const invalid = (issue: string) =>
+      new InvalidValue({ target: definition.name, prop: "", issue });
 
-      if (result instanceof Promise)
-        return Effect.fail(
-          new InvalidValue({
-            target: definition.name,
-            prop: "",
-            issue: "the input schema validates asynchronously",
-          }),
-        );
+    const message = (thrown: Error | string) =>
+      invalid(thrown instanceof Error ? thrown.message : thrown);
 
-      return result.issues
-        ? Effect.fail(
-            new InvalidValue({
-              target: definition.name,
-              prop: "",
-              issue: result.issues.map(issueText).join("; "),
-            }),
-          )
-        : definition.expand(result.value, state);
-    }),
+    return Effect.try({
+      try: () => definition.input["~standard"].validate(raw),
+      catch: (thrown) => message(thrown instanceof Error ? thrown : String(thrown)),
+    }).pipe(
+      // A schema may answer at once or with a promise: both end up as one result.
+      Effect.flatMap((result) =>
+        result instanceof Promise
+          ? Effect.tryPromise({
+              try: () => result,
+              catch: (thrown) => message(thrown instanceof Error ? thrown : String(thrown)),
+            })
+          : Effect.succeed(result),
+      ),
+      Effect.flatMap((result): Effect.Effect<readonly Edit[], InvalidValue | Failure> =>
+        result.issues
+          ? Effect.fail(invalid(result.issues.map(issueText).join("; ")))
+          : definition.expand(result.value, state),
+      ),
+    );
+  },
 });

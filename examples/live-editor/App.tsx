@@ -1,8 +1,8 @@
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useId, useRef } from "react";
 import type { MouseEvent } from "react";
 import { RegistryContext, useAtom, useAtomValue } from "@effect/atom-react";
 import { locate } from "@svjeez/live";
-import type { Range, State } from "@svjeez/live";
+import type { Json, JsonObject, Range, State } from "@svjeez/live";
 import {
   apply,
   bannerAtom,
@@ -16,13 +16,14 @@ import {
   recolor,
   recolorFromAtom,
   recolorToAtom,
+  rename as renameNode,
   renameToAtom,
+  renderedAtom,
   replayAtom,
   reset,
   select,
   selectionAtom,
   stateAtom,
-  svgTextAtom,
   valuesAtom,
 } from "./atoms.ts";
 import { ValueControl, PropField } from "./controls.tsx";
@@ -62,10 +63,34 @@ const Source = ({ text, range }: { readonly text: string; readonly range?: Range
   );
 };
 
+const ParamRow = ({
+  name,
+  schema,
+  value,
+  onCommit,
+}: {
+  readonly name: string;
+  readonly schema: JsonObject;
+  readonly value: Json;
+  readonly onCommit: (value: Json) => void;
+}) => {
+  const id = useId();
+
+  return (
+    <div className="field">
+      <label className="field-name" htmlFor={id}>
+        {name}
+      </label>
+      <ValueControl value={value} schema={schema} id={id} onCommit={onCommit} />
+    </div>
+  );
+};
+
 export const App = () => {
   const registry = useContext(RegistryContext);
   const state = useAtomValue(stateAtom);
-  const svg = useAtomValue(svgTextAtom);
+  const rendered = useAtomValue(renderedAtom);
+  const svg = rendered?.svg ?? "";
   const values = useAtomValue(valuesAtom);
   const banner = useAtomValue(bannerAtom);
   const diff = useAtomValue(diffAtom);
@@ -85,7 +110,9 @@ export const App = () => {
     (state && selection?.svgId ? locate(state.parsed, selection.svgId) : undefined) ?? node?.range;
 
   const onStageClick = (event: MouseEvent) => {
-    if (!state || !(event.target instanceof Element)) return;
+    // The drawing may be a revision behind `state`; its ids could name different nodes there.
+    if (!state || rendered?.revision !== state.revision || !(event.target instanceof Element))
+      return;
     const svgId = event.target.closest("[data-svz-id]")?.getAttribute("data-svz-id");
 
     if (svgId) pick(registry, state, svgId);
@@ -96,10 +123,7 @@ export const App = () => {
 
     if (!node || to === "" || to === node.id) return;
 
-    return apply(registry, [{ op: "rename", target: node.id, to }], () => {
-      registry.set(selectionAtom, { id: to });
-      setRenameTo("");
-    });
+    return renameNode(registry, node.id, to);
   };
 
   const colors = state ? colorsIn(state) : [];
@@ -163,18 +187,19 @@ export const App = () => {
           {isObject(paramProperties) && Object.keys(paramProperties).length > 0 && (
             <div className="group">
               <h3>Scene params</h3>
-              {Object.entries(paramProperties).map(([name, property]) => (
-                <div className="field" key={name}>
-                  <span className="field-name">{name}</span>
-                  {isObject(property) && values[name] !== undefined && (
-                    <ValueControl
-                      value={values[name]}
-                      schema={property}
-                      onCommit={(value) => setParams({ ...params, [name]: value })}
-                    />
-                  )}
-                </div>
-              ))}
+              {Object.entries(paramProperties).map(([name, property]) => {
+                const value = values[name];
+
+                return isObject(property) && value !== undefined ? (
+                  <ParamRow
+                    key={name}
+                    name={name}
+                    schema={property}
+                    value={value}
+                    onCommit={(next) => setParams({ ...params, [name]: next })}
+                  />
+                ) : null;
+              })}
             </div>
           )}
         </section>

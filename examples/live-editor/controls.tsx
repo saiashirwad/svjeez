@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { Json, JsonObject, Prop, UiHint } from "@svjeez/live";
 import { isBoolean, isNumber, isString, optionsOf } from "./guards.ts";
 
@@ -10,16 +10,19 @@ interface ValueProps {
   readonly value: Json;
   readonly schema: JsonObject;
   readonly ui?: UiHint | undefined;
+  /** The id of the control's input, so a `<label htmlFor>` can name it. */
+  readonly id?: string | undefined;
   readonly onCommit: (value: Json) => void;
 }
 
 interface DraftProps {
   readonly value: string | number;
+  readonly id?: string | undefined;
   readonly onCommit: (value: Json) => void;
 }
 
 /** A text or number box that sends its value on Enter or blur, so typing does not edit the source key by key. */
-const Draft = ({ value, onCommit }: DraftProps) => {
+const Draft = ({ value, id, onCommit }: DraftProps) => {
   const [draft, setDraft] = useState(String(value));
 
   useEffect(() => {
@@ -43,6 +46,7 @@ const Draft = ({ value, onCommit }: DraftProps) => {
 
   return (
     <input
+      id={id}
       className="input"
       type={isNumber(value) ? "number" : "text"}
       value={draft}
@@ -56,7 +60,7 @@ const Draft = ({ value, onCommit }: DraftProps) => {
 };
 
 /** One control for one JSON value, chosen from its schema and `x-ui` hint, then from the shape of the value. */
-export const ValueControl = ({ value, schema, ui, onCommit }: ValueProps) => {
+export const ValueControl = ({ value, schema, ui, id, onCommit }: ValueProps) => {
   const control = ui?.control;
   const options = optionsOf(schema);
   const minimum = schema["minimum"];
@@ -71,6 +75,7 @@ export const ValueControl = ({ value, schema, ui, onCommit }: ValueProps) => {
     return (
       <label className="slider">
         <input
+          id={id}
           type="range"
           min={low}
           max={high}
@@ -86,12 +91,13 @@ export const ValueControl = ({ value, schema, ui, onCommit }: ValueProps) => {
 
   if (control === "segmented" && options.length > 0)
     return (
-      <div className="segmented" role="group">
+      <div className="segmented" role="group" id={id}>
         {options.map((option) => (
           <button
             key={option}
             type="button"
             className={option === value ? "on" : ""}
+            aria-pressed={option === value}
             onClick={() => onCommit(option)}
           >
             {option}
@@ -102,7 +108,12 @@ export const ValueControl = ({ value, schema, ui, onCommit }: ValueProps) => {
 
   if (isString(value) && options.length > 0)
     return (
-      <select className="input" value={value} onChange={(event) => onCommit(event.target.value)}>
+      <select
+        id={id}
+        className="input"
+        value={value}
+        onChange={(event) => onCommit(event.target.value)}
+      >
         {options.map((option) => (
           <option key={option}>{option}</option>
         ))}
@@ -111,7 +122,12 @@ export const ValueControl = ({ value, schema, ui, onCommit }: ValueProps) => {
 
   if (isString(value) && EASES.includes(value))
     return (
-      <select className="input" value={value} onChange={(event) => onCommit(event.target.value)}>
+      <select
+        id={id}
+        className="input"
+        value={value}
+        onChange={(event) => onCommit(event.target.value)}
+      >
         {EASES.map((ease) => (
           <option key={ease}>{ease}</option>
         ))}
@@ -122,6 +138,7 @@ export const ValueControl = ({ value, schema, ui, onCommit }: ValueProps) => {
     return (
       <label className="color">
         <input
+          id={id}
           type="color"
           className="swatch"
           value={value}
@@ -131,11 +148,12 @@ export const ValueControl = ({ value, schema, ui, onCommit }: ValueProps) => {
       </label>
     );
 
-  if (isNumber(value)) return <Draft value={value} onCommit={onCommit} />;
+  if (isNumber(value)) return <Draft value={value} id={id} onCommit={onCommit} />;
 
   if (isBoolean(value))
     return (
       <input
+        id={id}
         type="checkbox"
         className="checkbox"
         checked={value}
@@ -143,7 +161,7 @@ export const ValueControl = ({ value, schema, ui, onCommit }: ValueProps) => {
       />
     );
 
-  if (isString(value)) return <Draft value={value} onCommit={onCommit} />;
+  if (isString(value)) return <Draft value={value} id={id} onCommit={onCommit} />;
 
   const json = JSON.stringify(value);
 
@@ -161,16 +179,28 @@ interface PropFieldProps {
 }
 
 /** A prop row: a control when the source holds a literal, otherwise why it cannot be edited and what it says. */
-export const PropField = ({ name, prop, onCommit }: PropFieldProps) => (
-  <div className="field">
-    <span className="field-name">{name}</span>
-    {prop.editable ? (
-      <ValueControl value={prop.value} schema={prop.schema} ui={prop.ui} onCommit={onCommit} />
-    ) : (
-      <span className="chip" title={`Read-only ${prop.reason}: ${prop.text}`}>
-        <span className="chip-reason">{prop.reason}</span>
-        <code>{prop.text}</code>
-      </span>
-    )}
-  </div>
-);
+export const PropField = ({ name, prop, onCommit }: PropFieldProps) => {
+  const id = useId();
+
+  return (
+    <div className="field">
+      <label className="field-name" htmlFor={prop.editable ? id : undefined}>
+        {name}
+      </label>
+      {prop.editable ? (
+        <ValueControl
+          value={prop.value}
+          schema={prop.schema}
+          ui={prop.ui}
+          id={id}
+          onCommit={onCommit}
+        />
+      ) : (
+        <span className="chip" title={`Read-only ${prop.reason}: ${prop.text}`}>
+          <span className="chip-reason">{prop.reason}</span>
+          <code>{prop.text}</code>
+        </span>
+      )}
+    </div>
+  );
+};

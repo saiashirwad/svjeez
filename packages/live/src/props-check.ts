@@ -2,7 +2,7 @@ import { Effect } from "effect";
 import type { StandardSchemaV1 } from "svjeez";
 import { InvalidValue } from "./errors.ts";
 import type { Program } from "./program.ts";
-import { elementOf } from "./source.ts";
+import { elementOf, registeredName } from "./source.ts";
 import type { Edit, Json, Parsed } from "./types.ts";
 
 type Issue = StandardSchemaV1.Issue;
@@ -74,33 +74,57 @@ const literalsOf = (parsed: Parsed, id: string): Readonly<Record<string, Json>> 
   );
 };
 
-/** Fails with `InvalidValue` when a `set` or `insert` writes a prop value its component's props schema rejects. */
-export const checkEdit = (
-  parsed: Parsed,
+/** The id an element has after `rename` gives it a new local id. */
+const renamedTo = (target: string, to: string): string =>
+  `${target.slice(0, target.lastIndexOf("/") + 1)}${to}`;
+
+/**
+ * Fails with `InvalidValue` when the props a batch writes are ones their component's props schema rejects. The check
+ * reads the source the whole batch made, not the source each edit started from: a batch that moves `max` and then `min`
+ * is fine in the end, an element an earlier edit inserted or renamed is checked under its new id, and an `unset` is
+ * checked as a prop that is no longer there.
+ */
+export const checkEdits = (
+  candidate: Parsed,
   program: Program,
-  e: Edit,
+  edits: readonly Edit[],
 ): Effect.Effect<void, InvalidValue> => {
-  if (e.op === "set") {
-    const el = elementOf(parsed, e.target);
+  const written = new Map<string, Set<string>>();
 
-    return el
-      ? checkProps(
-          program,
-          e.target,
-          el.component,
-          { ...literalsOf(parsed, e.target), [e.prop]: e.value },
-          [e.prop],
-        )
-      : Effect.void;
+  const note = (id: string, props: Iterable<string>) =>
+    written.set(id, new Set([...(written.get(id) ?? []), ...props]));
+
+  for (const e of edits) {
+    if (e.op === "set" || e.op === "unset") note(e.target, [e.prop]);
+    else if (e.op === "insert") {
+      // The parent's scope is its id up to the last `/`, which holds even if an earlier edit renamed it.
+      const cut = e.parent.lastIndexOf("/");
+
+      note(
+        cut < 0 ? e.element.id : `${e.parent.slice(0, cut)}/${e.element.id}`,
+        Object.keys(e.element.props ?? {}),
+      );
+    } else if (e.op === "rename") {
+      const props = written.get(e.target);
+
+      if (props) {
+        written.delete(e.target);
+        note(renamedTo(e.target, e.to), props);
+      }
+    }
   }
 
-  if (e.op === "insert") {
-    const props = e.element.props ?? {};
-    const parent = elementOf(parsed, e.parent);
-    const full = parent?.scope ? `${parent.scope}/${e.element.id}` : e.element.id;
+  return Effect.forEach(
+    written,
+    ([id, props]) => {
+      const el = elementOf(candidate, id);
 
-    return checkProps(program, full, e.element.component, props, Object.keys(props));
-  }
-
-  return Effect.void;
+      return el
+        ? checkProps(program, id, registeredName(candidate, el), literalsOf(candidate, id), [
+            ...props,
+          ])
+        : Effect.void;
+    },
+    { discard: true },
+  );
 };

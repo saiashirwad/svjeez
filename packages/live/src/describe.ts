@@ -1,4 +1,4 @@
-import { elementOf } from "./source.ts";
+import { elementOf, registeredName } from "./source.ts";
 import type { Program } from "./program.ts";
 import type {
   Attribute,
@@ -41,12 +41,9 @@ const inferred = (attribute: Attribute & { readonly kind: "literal" }): JsonSche
 };
 
 /** What the component's JSON Schema says about one prop, if it says anything. */
-const declared = (program: Program, element: Element, name: string): JsonSchema | undefined => {
+const declared = (program: Program, component: string, name: string): JsonSchema | undefined => {
   const { components } = program;
-
-  const entry = Object.hasOwn(components, element.component)
-    ? components[element.component]
-    : undefined;
+  const entry = Object.hasOwn(components, component) ? components[component] : undefined;
 
   const properties = entry?.jsonSchema?.["properties"];
 
@@ -56,7 +53,7 @@ const declared = (program: Program, element: Element, name: string): JsonSchema 
   return isObject(property) ? property : undefined;
 };
 
-const propOf = (program: Program, element: Element, attribute: Attribute): Prop => {
+const propOf = (program: Program, component: string, attribute: Attribute): Prop => {
   if (attribute.kind !== "literal")
     return {
       editable: false,
@@ -66,7 +63,7 @@ const propOf = (program: Program, element: Element, attribute: Attribute): Prop 
       ...(attribute.param !== undefined && { param: attribute.param }),
     };
 
-  const schema = declared(program, element, attribute.name);
+  const schema = declared(program, component, attribute.name);
   const ui = schema?.["x-ui"];
 
   return {
@@ -78,17 +75,21 @@ const propOf = (program: Program, element: Element, attribute: Attribute): Prop 
   };
 };
 
-const nodeOf = (program: Program, element: Element): Node => ({
-  id: element.id,
-  component: element.component,
-  range: element.range,
-  props: Object.fromEntries(
-    element.attributes
-      .filter((attribute) => attribute.name !== "id")
-      .map((attribute) => [attribute.name, propOf(program, element, attribute)]),
-  ),
-  children: element.children,
-});
+const nodeOf = (parsed: Parsed, program: Program, element: Element): Node => {
+  const component = registeredName(parsed, element);
+
+  return {
+    id: element.id,
+    component,
+    range: element.range,
+    props: Object.fromEntries(
+      element.attributes
+        .filter((attribute) => attribute.name !== "id")
+        .map((attribute) => [attribute.name, propOf(program, component, attribute)]),
+    ),
+    children: element.children,
+  };
+};
 
 /**
  * What a host needs to build a form: every addressable element with its props, each marked editable (a literal, with
@@ -106,7 +107,9 @@ export const describe = (parsed: Parsed, program: Program): Description => {
       )?.id ??
       parsed.order[0] ??
       "",
-    nodes: Object.fromEntries(elements.map((element) => [element.id, nodeOf(program, element)])),
+    nodes: Object.fromEntries(
+      elements.map((element) => [element.id, nodeOf(parsed, program, element)]),
+    ),
     params: program.params,
   };
 };

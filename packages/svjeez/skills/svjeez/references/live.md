@@ -16,7 +16,7 @@ A rendered `data-svz-id` is a runtime instance path instead (`"card1/note"`, fro
 
 ## Runners
 
-`BunRunner` runs in this process (source you trust). `BrowserRunner` runs in a worker, `WorkerLoaderRunner` in a Cloudflare isolate. Provide one as a layer.
+`BunRunner` and `BrowserRunner` run the source in the current realm, with its globals: use them only for source you trust. `BrowserRunner` is a browser adapter (`new Function`, no `vm`), not a sandbox; it is no Web Worker unless you run it inside one. `WorkerLoaderRunner` is the boundary for untrusted source: a Cloudflare isolate with no network. Provide one as a layer.
 
 ## A session
 
@@ -46,13 +46,13 @@ Effect.runPromise(
 );
 ```
 
-`apply(edits, { requestId, hashes })`: a replayed `requestId` returns the earlier state (safe retries); `hashes` from `parsed.hashes` fail with `StaleSource` when the source moved on. `state.changes` is a stream of every kept state.
+`apply(edits, { requestId, hashes })`: a replayed `requestId` returns the earlier state (safe retries); `hashes` from `parsed.hashes` fail with `StaleSource` when the source moved on. `session.changes` (on `Session`, not on `State`) is a stream of the current state, then every kept one.
 
-`limits`: `maxSourceBytes`, `maxFiles`, `maxNodes`, `maxTreeDepth`, `maxRevisions`, `rateLimit: { maxEdits, windowMs }` fail with `Denied`; `maxSvgBytes` fails `render` with `RenderError`.
+`limits`: `maxSourceBytes`, `maxFiles`, `maxNodes`, `maxTreeDepth`, `maxBatchEdits`, `maxRevisions`, `rateLimit: { maxEdits, windowMs }` fail with `Denied`; `maxSvgBytes` fails `render` with `RenderError`.
 
 ## Hooks
 
-`Hooks` wraps every batch: `beforeEdit(edit, state)` denies (`Denied`) or rewrites an edit (`state` is the state before the batch, for every edit in it), `validate(state)` may refuse the compiled result (`Rejected`), `afterEdit(change, edits)` runs after a batch is kept. `NoHooks` passes everything.
+`Hooks` wraps every batch: `beforeEdit(edit, state)` denies (`Denied`) or rewrites an edit (`state` is the state before the batch, for every edit in it), `validate(state)` may refuse the compiled result (`Rejected`), `afterEdit(change, edits, { requestId })` runs uninterruptibly once a batch compiles and validates (may fail with `StorageError`), before `Session` publishes the state to subscribers or remembers the `requestId`. `NoHooks` passes everything.
 
 ```ts
 import { Effect, Layer } from "effect";
@@ -75,3 +75,25 @@ export const Room = Layer.succeed(
 ## Your own edits
 
 `defineEdit({ name, input, expand })` takes a Standard Schema (Effect Schema, Zod, Valibot) and an `expand(value, state)` that returns primitive edits. `expand(raw, state)` on the result checks `raw` and fails `InvalidValue` when it is wrong; pass its edits to `session.apply`, so hooks and limits see only primitives.
+
+## On Cloudflare: persist in `afterEdit`, run source in an isolate
+
+```ts
+import { DurableObject } from "cloudflare:workers";
+import { Effect, Layer } from "effect";
+import { Hooks, Session, WorkerLoaderRunner } from "@svjeez/live";
+
+export class Room extends DurableObject<{ LOADER: Parameters<typeof WorkerLoaderRunner>[0] }> {
+  save = Layer.succeed(
+    Hooks,
+    Hooks.of({
+      beforeEdit: (edit) => Effect.succeed(edit),
+      afterEdit: (change) => Effect.promise(() => this.ctx.storage.put("files", change.files)),
+    }),
+  );
+  session = (files: Record<string, string>) =>
+    Session.layer({ files, entry: "scene.tsx" }).pipe(
+      Layer.provide(Layer.mergeAll(WorkerLoaderRunner(this.env.LOADER), this.save)),
+    );
+}
+```

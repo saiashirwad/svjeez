@@ -4,7 +4,7 @@ import { Atom, AsyncResult } from "effect/reactivity";
 import type { AtomRegistry } from "effect/reactivity";
 import { Effect, Option, Stream, SubscriptionRef } from "effect";
 import { boot, freshId } from "./engine.ts";
-import type { Engine, Outcome } from "./engine.ts";
+import type { Engine, Outcome, Rendered } from "./engine.ts";
 import { isObject } from "./guards.ts";
 
 export interface Selection {
@@ -32,6 +32,7 @@ export const engineAtom = Atom.make((get) =>
       try: () =>
         boot(
           () => get.registry.get(lockedAtom),
+          () => get.registry.get(valuesAtom),
           (diff) => get.registry.set(diffAtom, diff),
         ),
       catch: (thrown) => (thrown instanceof Error ? thrown.message : String(thrown)),
@@ -87,12 +88,13 @@ export const svgAtom = Atom.make((get) => {
   });
 });
 
-export const svgTextAtom = Atom.map(svgAtom, (result) =>
-  Option.getOrElse(AsyncResult.value(result), () => ""),
+/** The drawing on the stage, with the revision that produced it. */
+export const renderedAtom = Atom.map(svgAtom, (result): Rendered | undefined =>
+  Option.getOrUndefined(AsyncResult.value(result)),
 );
 
 /** The render failure the person has not dismissed yet. */
-const dismissedAtom = Atom.make<AsyncResult.AsyncResult<string, string> | undefined>(undefined);
+const dismissedAtom = Atom.make<AsyncResult.AsyncResult<Rendered, string> | undefined>(undefined);
 
 /** One line for the banner: a refused edit, a session that would not open, or a scene that would not draw. */
 export const bannerAtom = Atom.make((get): string | undefined => {
@@ -122,32 +124,59 @@ export const reset = (registry: AtomRegistry.AtomRegistry) => {
   });
 };
 
-const engineOf = (registry: AtomRegistry.AtomRegistry): Engine | undefined =>
-  Option.getOrUndefined(AsyncResult.value(registry.get(engineAtom)));
+/** The session, once it is open; nothing while a fresh one is opening. */
+const engineOf = (registry: AtomRegistry.AtomRegistry): Engine | undefined => {
+  const result = registry.get(engineAtom);
 
-/** Runs an edit; a kept batch becomes the new state, a refused one becomes the banner and leaves the source alone. */
+  return AsyncResult.isWaiting(result)
+    ? undefined
+    : Option.getOrUndefined(AsyncResult.value(result));
+};
+
+/**
+ * Runs an edit; a kept batch becomes the new state, a refused one becomes the banner and leaves the source alone. An
+ * answer from a session that has since been replaced (Reset) is dropped.
+ */
 const commit = async (
   registry: AtomRegistry.AtomRegistry,
-  pending: Promise<Outcome<State>> | undefined,
-  after?: () => void,
+  run: (engine: Engine) => Promise<Outcome<State>>,
+  after?: (state: State) => void,
 ) => {
-  const out = await pending;
+  const engine = engineOf(registry);
 
-  if (!out) return;
+  if (!engine) return;
+
+  const out = await run(engine);
+
+  if (engineOf(registry) !== engine) return;
 
   if (!out.ok) return registry.set(problemAtom, out.message);
   registry.set(problemAtom, undefined);
-  after?.();
+  after?.(out.value);
 };
 
 export const apply = (
   registry: AtomRegistry.AtomRegistry,
   edits: readonly Edit[],
-  after?: () => void,
-) => commit(registry, engineOf(registry)?.apply(edits), after);
+  after?: (state: State) => void,
+) => commit(registry, (engine) => engine.apply(edits), after);
 
 export const recolor = (registry: AtomRegistry.AtomRegistry, from: string, to: string) =>
-  commit(registry, engineOf(registry)?.recolor(from, to));
+  commit(registry, (engine) => engine.recolor(from, to));
+
+/** Renames a node, then selects it under its new id: a scoped id keeps its scope (`NoteCard/note` → `NoteCard/caption`). */
+export const rename = (registry: AtomRegistry.AtomRegistry, id: string, to: string) =>
+  commit(
+    registry,
+    (engine) => engine.apply([{ op: "rename", target: id, to }]),
+    (state) => {
+      const scope = id.slice(0, id.lastIndexOf("/") + 1);
+      const renamed = [scope + to, to].find((candidate) => state.describe.nodes[candidate]);
+
+      registry.set(selectionAtom, renamed === undefined ? undefined : { id: renamed });
+      registry.set(renameToAtom, "");
+    },
+  );
 
 /** Selects what was clicked on the stage and opens its file. */
 export const pick = (registry: AtomRegistry.AtomRegistry, state: State, svgId: string) => {

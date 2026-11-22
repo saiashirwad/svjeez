@@ -353,6 +353,47 @@ describe("id", () => {
     ]);
   });
 
+  test("a plain function that forwards its id under a registered component is not scoped twice", () => {
+    const Wrap = ({ id }: { readonly id?: string }): SceneElement => (
+      <Shape id={id} geometry={rect(4, 4)} fill="#000000" />
+    );
+
+    const Outer = component({
+      name: "Outer",
+      render: () => (
+        <Group>
+          <Wrap id="w" />
+        </Group>
+      ),
+    });
+
+    const model = made(() => <Outer id="outer" />);
+
+    expect(ids(model.root)).toEqual(["outer", "outer/w"]);
+  });
+
+  test("keyed registered components that return nodes with their own ids keep their keys when reordered", () => {
+    const Item = component({
+      name: "Item",
+      render: () => <Shape id="dot" geometry={rect(4, 4)} fill="#000000" />,
+    });
+
+    const keysOf = (order: readonly string[]): string[] => {
+      const model = made(() => (
+        <Group>
+          {order.map((name) => (
+            <Item key={name} id={name} />
+          ))}
+        </Group>
+      ));
+
+      return model.root.kind === "group" ? model.root.children.map((child) => child.key) : [];
+    };
+
+    expect(keysOf(["a", "b"]).map((key) => key.split("/").pop())).toEqual(["a", "b"]);
+    expect(keysOf(["b", "a"]).map((key) => key.split("/").pop())).toEqual(["b", "a"]);
+  });
+
   test("a component with no id leaves the ids inside it unscoped", () => {
     const model = made(() => <NoteCard title="hi" />);
 

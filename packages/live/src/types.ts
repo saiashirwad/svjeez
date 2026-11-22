@@ -119,6 +119,7 @@ export interface Element {
   readonly local: string;
   /** The `component({ name })` it is written inside, or `""` for scene code. */
   readonly scope: string;
+  /** The tag as written, `NoteCard` in `<NoteCard />`. See `registeredName` for the component's own name. */
   readonly component: string;
   readonly range: Range;
   /** The opening tag, or the whole tag when it is self-closing. */
@@ -130,6 +131,8 @@ export interface Element {
   readonly closeStart: number;
   /** The `"…"` of `id="…"`, quotes included. */
   readonly idRange: Range;
+  /** The elements and `{…}` holes written directly between its tags, ids or not, in source order. */
+  readonly childRanges: readonly Range[];
   readonly props: Readonly<Record<string, Attribute>>;
   /** Attributes in source order, `{...spread}` included. */
   readonly attributes: readonly Attribute[];
@@ -155,6 +158,13 @@ export interface Duplicate {
 /** A set of files read into an index of elements, props and refs. Nothing in the source ran. */
 export interface Parsed {
   readonly files: Files;
+  /** The deepest nesting of JSX elements in any file, counting the ones with no id. */
+  readonly maxDepth: number;
+  /**
+   * The `component({ name })` a JSX tag stands for, by file and tag, for the tags that go by another name:
+   * `<Alias>` for `const Alias = component({ name: "Stable" })`, or `import { X as Alias }`.
+   */
+  readonly aliases: Readonly<Record<string, Readonly<Record<string, string>>>>;
   /** A short hash of each file's text, to tell whether the source an edit was planned against has changed. */
   readonly hashes: Readonly<Record<string, string>>;
   /** Every element with an id, in source order. */

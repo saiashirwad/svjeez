@@ -5,9 +5,9 @@ import type { CompileOptions } from "./compile.ts";
 import { describe } from "./describe.ts";
 import { edit } from "./edit.ts";
 import { Denied, RenderError, StaleSource } from "./errors.ts";
-import type { CompileError, EditError, ParseError, Rejected } from "./errors.ts";
+import type { CompileError, EditError, ParseError, Rejected, StorageError } from "./errors.ts";
 import { Hooks } from "./hooks.ts";
-import { checkEdit } from "./props-check.ts";
+import { checkEdits } from "./props-check.ts";
 import { Runner } from "./runner.ts";
 import { parse } from "./source.ts";
 import type { Description, Edit, Files, JsonObject, Parsed } from "./types.ts";
@@ -34,6 +34,8 @@ export interface Limits {
   readonly maxSvgBytes?: number;
   /** Edit batches a session keeps before it refuses more. */
   readonly maxRevisions?: number;
+  /** Edits in one call to `apply`. Each one reparses the source, so this bounds the work a call can ask for. */
+  readonly maxBatchEdits?: number;
   /** At most `maxEdits` calls to `apply` in any `windowMs`. */
   readonly rateLimit?: { readonly maxEdits: number; readonly windowMs: number };
 }
@@ -67,14 +69,19 @@ const denyAbove = (
     ? Effect.fail(new Denied({ reason: `${what}: ${count} is over the limit of ${max}.` }))
     : Effect.void;
 
-const depthOf = (parsed: Parsed): number => {
-  const depth = (id: string): number => {
-    const parent = parsed.elements[id]?.parent;
-
-    return parent === undefined ? 1 : 1 + depth(parent);
-  };
-
-  return Math.max(0, ...parsed.order.map(depth));
+/** An upper bound on how many bytes an edit adds to the source, from the edit alone. */
+const growth = (e: Edit, parsed: Parsed): number => {
+  switch (e.op) {
+    case "set":
+    case "insert":
+      return bytes(JSON.stringify(e));
+    case "rename":
+      return bytes(e.to) * (1 + parsed.refs.length);
+    case "unset":
+    case "remove":
+    case "move":
+      return 0;
+  }
 };
 
 /**
@@ -90,7 +97,10 @@ export class Session extends Context.Service<
     readonly apply: (
       edits: readonly Edit[],
       opts?: ApplyOptions,
-    ) => Effect.Effect<State, EditError | Denied | Rejected | CompileError | ParseError>;
+    ) => Effect.Effect<
+      State,
+      EditError | Denied | Rejected | StorageError | CompileError | ParseError
+    >;
     readonly render: (params?: JsonObject) => Effect.Effect<string, RenderError>;
   }
 >()("@svjeez/live/Session") {
@@ -107,8 +117,8 @@ const makeSession = (options: SessionOptions) =>
     const { limits = {} } = options;
     const lock = yield* Semaphore.make(1);
 
-    /** Parse, compile and describe `files`, within the limits. */
-    const derive = (files: Files, revision: number) =>
+    /** Parse `files`, within the limits. Pass the parse an edit already made to skip a second one. */
+    const read = (files: Files, known?: Parsed) =>
       Effect.gen(function* () {
         const names = Object.keys(files);
 
@@ -119,11 +129,18 @@ const makeSession = (options: SessionOptions) =>
           limits.maxSourceBytes,
         );
 
-        const parsed = yield* parse(files);
+        const parsed = known ?? (yield* parse(files));
 
         yield* denyAbove("nodes", parsed.order.length, limits.maxNodes);
-        yield* denyAbove("tree depth", depthOf(parsed), limits.maxTreeDepth);
+        // The deepest JSX nesting, so wrappers with no id count too.
+        yield* denyAbove("tree depth", parsed.maxDepth, limits.maxTreeDepth);
 
+        return parsed;
+      });
+
+    /** Compile and describe what `read` parsed. */
+    const build = (files: Files, parsed: Parsed, revision: number) =>
+      Effect.gen(function* () {
         const program = yield* compile(files, { ...options.compile, entry: options.entry }).pipe(
           Effect.provideService(Runner, runner),
         );
@@ -135,6 +152,11 @@ const makeSession = (options: SessionOptions) =>
           describe: describe(parsed, program),
           revision,
         } satisfies State;
+      });
+
+    const derive = (files: Files, revision: number) =>
+      Effect.gen(function* () {
+        return yield* build(files, yield* read(files), revision);
       });
 
     const ref = yield* SubscriptionRef.make(yield* derive(options.files, 0));
@@ -174,23 +196,43 @@ const makeSession = (options: SessionOptions) =>
         yield* denyAbove("revisions", current.revision + 1, limits.maxRevisions);
         yield* checkRate;
 
+        yield* denyAbove("edits in a batch", edits.length, limits.maxBatchEdits);
+
         const rewritten: Edit[] = [];
 
-        for (const e of edits) {
-          const allowed = yield* hooks.beforeEdit(e, current);
+        for (const e of edits) rewritten.push(yield* hooks.beforeEdit(e, current));
 
-          yield* checkEdit(current.parsed, current.program, allowed);
-          rewritten.push(allowed);
+        // Every edit reparses the source, so refuse a batch that could not fit before it starts.
+        if (limits.maxSourceBytes !== undefined) {
+          const size = Object.values(current.files).reduce((sum, text) => sum + bytes(text), 0);
+
+          yield* denyAbove(
+            "source bytes after the edits",
+            rewritten.reduce((sum, e) => sum + growth(e, current.parsed), size),
+            limits.maxSourceBytes,
+          );
         }
 
-        const change = yield* edit(current.parsed, rewritten);
-        const next = yield* derive(change.files, current.revision + 1);
+        const { parsed, ...change } = yield* edit(current.parsed, rewritten);
+        const candidate = yield* read(change.files, parsed);
+
+        // The batch is checked as a whole: its props against the source it wrote, not the source each edit began from.
+        yield* checkEdits(candidate, current.program, rewritten);
+        const next = yield* build(change.files, candidate, current.revision + 1);
 
         yield* hooks.validate?.(next) ?? Effect.void;
-        // Observers see the state only once `afterEdit` has taken it, so a host that fails to persist keeps the old one.
-        yield* hooks.afterEdit(change, rewritten);
-        yield* SubscriptionRef.set(ref, next);
-        remember(opts.requestId, next);
+
+        // Once the host has the change, the session must hold it too: an interrupt between the two would leave
+        // storage a revision ahead of what a retry with the same `requestId` sees.
+        yield* Effect.uninterruptible(
+          Effect.gen(function* () {
+            yield* hooks.afterEdit(change, rewritten, {
+              ...(opts.requestId !== undefined && { requestId: opts.requestId }),
+            });
+            yield* SubscriptionRef.set(ref, next);
+            remember(opts.requestId, next);
+          }),
+        );
 
         return next;
       });

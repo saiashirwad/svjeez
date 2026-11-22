@@ -1,4 +1,12 @@
-import { Denied, Hooks, Session, browserRunner, defaultAllowlist, defineEdit } from "@svjeez/live";
+import {
+  Denied,
+  Hooks,
+  Rejected,
+  Session,
+  browserRunner,
+  defaultAllowlist,
+  defineEdit,
+} from "@svjeez/live";
 import type {
   CompileError,
   Edit,
@@ -6,9 +14,9 @@ import type {
   JsonObject,
   ParseError,
   RawInput,
-  Rejected,
   RenderError,
   State,
+  StorageError,
 } from "@svjeez/live";
 import { Effect, Layer, ManagedRuntime, Result, SubscriptionRef } from "effect";
 import { font } from "svjeez";
@@ -17,7 +25,14 @@ import geistUrl from "./Geist-400.ttf?url";
 import { isString } from "./guards.ts";
 import { ENTRY, FONT_MODULE, INITIAL_FILES } from "./sample.ts";
 
-export type Failure = EditError | Denied | Rejected | CompileError | ParseError | RenderError;
+export type Failure =
+  | EditError
+  | Denied
+  | Rejected
+  | StorageError
+  | CompileError
+  | ParseError
+  | RenderError;
 
 export type Outcome<A> =
   | { readonly ok: true; readonly value: A }
@@ -30,6 +45,8 @@ export const messageOf = (failure: Failure): string => {
       return `Denied: ${failure.reason}`;
     case "Rejected":
       return `Rejected: ${failure.reason}`;
+    case "StorageError":
+      return `StorageError: ${failure.reason}`;
     case "InvalidValue":
       return `InvalidValue: ${failure.target}${failure.prop ? `.${failure.prop}` : ""}: ${failure.issue}`;
     case "NotEditable":
@@ -113,12 +130,18 @@ export const freshId = (state: State, base: string): string => {
   return `${base}${n}`;
 };
 
+/** A drawing and the session revision that produced it. */
+export interface Rendered {
+  readonly svg: string;
+  readonly revision: number;
+}
+
 export interface Engine {
   /** The session's state: it changes whenever a batch is kept. */
   readonly state: SubscriptionRef.SubscriptionRef<State>;
   readonly apply: (edits: readonly Edit[]) => Promise<Outcome<State>>;
   readonly recolor: (from: string, to: string) => Promise<Outcome<State>>;
-  readonly render: (params: JsonObject) => Promise<Outcome<string>>;
+  readonly render: (params: JsonObject) => Promise<Outcome<Rendered>>;
   readonly dispose: () => Promise<void>;
 }
 
@@ -126,11 +149,13 @@ const touchesSeal = (edit: Edit): boolean => "target" in edit && edit.target ===
 
 /**
  * Opens a session on the sample files. The runner is the browser's (`new Function`); the font reaches the scene as an
- * extra library, since a browser cannot load one by name. `isLocked` is asked on every edit; `onDiff` hears the diff of
- * every batch the session keeps.
+ * extra library, since a browser cannot load one by name. `isLocked` is asked on every edit; `paramsNow` gives the
+ * params the stage renders with, so an edit that would leave the scene unrenderable is rejected before it is kept;
+ * `onDiff` hears the diff of every batch the session keeps.
  */
 export const boot = async (
   isLocked: () => boolean,
+  paramsNow: () => JsonObject,
   onDiff: (diff: string) => void,
 ): Promise<Engine> => {
   const bytes = new Uint8Array(await (await fetch(geistUrl)).arrayBuffer());
@@ -143,6 +168,13 @@ export const boot = async (
         isLocked() && touchesSeal(edit)
           ? Effect.fail(new Denied({ reason: "policy: the seal is locked." }))
           : Effect.succeed(edit),
+      validate: (next) =>
+        next.program.render(paramsNow()).pipe(
+          Effect.asVoid,
+          Effect.mapError(
+            (error) => new Rejected({ reason: `the scene would not render: ${messageOf(error)}` }),
+          ),
+        ),
       afterEdit: (change) => Effect.sync(() => onDiff(change.diff)),
     }),
   );
@@ -179,7 +211,17 @@ export const boot = async (
           return yield* session.apply(edits);
         }),
       ),
-    render: (params) => attempt(Session.use((session) => session.render(params))),
+    render: (params) =>
+      attempt(
+        Effect.gen(function* () {
+          const session = yield* Session;
+          // Render the state that is read here, so the drawing and its revision cannot come from different states.
+          const { program, revision } = yield* SubscriptionRef.get(session.state);
+          const svg = yield* program.render(params);
+
+          return { svg, revision };
+        }),
+      ),
     dispose: () => runtime.dispose(),
   };
 };

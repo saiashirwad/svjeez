@@ -132,14 +132,22 @@ const withKey = (element: SceneElement, key: string): SceneElement =>
     : { type: "group", props: { key }, children: [element] };
 
 /** The element with this id: set on a node that has none, otherwise the element goes in a <Group> that has it. */
-export const withId = (element: SceneElement, id: string): SceneElement =>
+export const withId = (element: SceneElement, id: string, key?: string): SceneElement =>
   isNode(element) && element.props.id === undefined
     ? setId(element, id)
-    : { type: "group", props: { id }, children: [element] };
+    : { type: "group", props: { id, ...(key !== undefined && { key }) }, children: [element] };
 
 /**
  * What a plain function component wrote, with `id`: its own `id` of `raw` made `id` (its path through the components
  * it was written in), or else `id` put on what it wrote, as `component()` does.
  */
-export const scopedAs = (element: SceneElement, raw: string, id: string): SceneElement =>
-  isNode(element) && element.props.id === raw ? setId(element, id) : withId(element, id);
+export const scopedAs = (
+  element: SceneElement,
+  raw: string,
+  id: string,
+  key?: string,
+): SceneElement =>
+  // An id equal to `id` was scoped already, by a registered component the function was written in.
+  isNode(element) && (element.props.id === raw || element.props.id === id)
+    ? setId(element, id)
+    : withId(element, id, key);

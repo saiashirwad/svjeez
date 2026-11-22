@@ -4,9 +4,8 @@ import { asError, failure } from "./commonjs.ts";
 import { CompileError, RenderError } from "./errors.ts";
 import { schemaOf, NO_PARAMS } from "./param-schema.ts";
 import type { Program } from "./program.ts";
-import { GUARD, Runner, libraryPath } from "./runner.ts";
+import { GUARD, HOST, Runner, isGenerated, libraryPath } from "./runner.ts";
 import type { Modules } from "./runner.ts";
-import { hash } from "./text.ts";
 import type { JsonObject, JsonSchema } from "./types.ts";
 
 /** What a Worker Loader needs to start an isolate: a subset of Cloudflare's `WorkerCode`, so a binding takes it as is. */
@@ -42,9 +41,16 @@ export interface WorkerLoaderOptions {
   readonly compatibilityDate?: string;
   /** CPU time a request may use. Left out, the binding's own limit applies. `workerd` run on its own ignores it. */
   readonly cpuMs?: number;
+  /**
+   * Names the pool of warm isolates this runner draws from. The loader reuses a worker, with whatever its modules hold in
+   * memory, for every run that has the same code; runners with different scopes never share one. Give each session
+   * (or tenant) its own scope when scene code could keep state between renders.
+   */
+  readonly scope?: string;
+  /** Start a new isolate for every run, so no module state outlives it. Costs a cold start each time. */
+  readonly fresh?: boolean;
 }
 
-const HOST = "/@host.js";
 const ORIGIN = "https://scene.invalid/";
 const COMPATIBILITY_DATE = "2025-06-01";
 
@@ -108,6 +114,18 @@ const workerCode = (
   { libraries = {}, compatibilityDate = COMPATIBILITY_DATE, cpuMs }: WorkerLoaderOptions,
 ): Effect.Effect<WorkerCode, CompileError> => {
   const wanted = [...new Set([...modules.libraries, "svjeez/tools"])];
+
+  const reserved = Object.keys(modules.files).filter((path) => path !== GUARD && isGenerated(path));
+
+  if (reserved.length > 0)
+    return Effect.fail(
+      new CompileError({
+        file: reserved[0]?.slice(1) ?? "",
+        line: 1,
+        col: 1,
+        message: `${reserved.map((path) => `"${path.slice(1)}"`).join(", ")} is a path the worker generates modules at. Rename the file.`,
+      }),
+    );
 
   const missing = wanted.filter((name) => libraries[name] === undefined);
 
@@ -185,19 +203,32 @@ const programOf = (worker: WorkerEntrypoint, described: Described): Program => (
     : (described.params.json ?? NO_PARAMS),
 });
 
-/** What names the isolate a run needs: the compiled files and everything else that shapes its code. */
-const keyOf = (modules: Modules, ids: boolean, libraryKey: string, options: WorkerLoaderOptions) =>
-  hash(
-    JSON.stringify([
-      modules.entry,
-      modules.files,
-      modules.libraries,
-      ids,
-      libraryKey,
-      options.compatibilityDate,
-      options.cpuMs,
-    ]),
-  );
+const hex = (bytes: ArrayBuffer): string =>
+  [...new Uint8Array(bytes)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+
+/**
+ * What names the isolate: SHA-256 over everything the loader would start it from (its entry, every module's text, the
+ * compatibility date and limits, the network setting), the scope, and a nonce for a `fresh` run. The loader reuses a
+ * worker by this id, so two different workers must never share one.
+ */
+const idOf = (code: WorkerCode, { scope, fresh }: WorkerLoaderOptions): Effect.Effect<string> =>
+  Effect.promise(async () => {
+    const modules = Object.entries(code.modules)
+      .map(([path, { js }]) => [path, js] as const)
+      .toSorted(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+
+    const text = JSON.stringify([
+      code.compatibilityDate,
+      code.mainModule,
+      modules,
+      code.globalOutbound,
+      code.limits?.cpuMs ?? null,
+      scope ?? null,
+      fresh ? crypto.randomUUID() : null,
+    ]);
+
+    return hex(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text)));
+  });
 
 /**
  * Runs scenes in a Cloudflare isolate through the Worker Loader binding (`env.LOADER`). The isolate has no network
@@ -208,17 +239,12 @@ export const WorkerLoaderRunner = (
   loader: WorkerLoader,
   options: WorkerLoaderOptions = {},
 ): Layer.Layer<Runner> => {
-  // The bundles are large and fixed, so they are hashed once, not with every run.
-  const libraryKey = hash(JSON.stringify(Object.entries(options.libraries ?? {}).toSorted()));
-
   return Layer.succeed(Runner, {
     run: (modules, { ids = true } = {}) =>
       Effect.gen(function* () {
         const code = yield* workerCode(modules, ids, options);
 
-        const worker = loader
-          .get(keyOf(modules, ids, libraryKey, options), () => code)
-          .getEntrypoint();
+        const worker = loader.get(yield* idOf(code, options), () => code).getEntrypoint();
 
         const described = yield* Effect.tryPromise({
           // SAFETY: the front door in `hostSource` answers every GET with this shape.

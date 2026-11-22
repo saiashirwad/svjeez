@@ -51,6 +51,22 @@ const ENTITIES = new Map([
   ["gt", ">"],
   ["quot", '"'],
   ["apos", "'"],
+  ["nbsp", "\u00a0"],
+  ["copy", "\u00a9"],
+  ["reg", "\u00ae"],
+  ["trade", "\u2122"],
+  ["hellip", "\u2026"],
+  ["mdash", "\u2014"],
+  ["ndash", "\u2013"],
+  ["lsquo", "\u2018"],
+  ["rsquo", "\u2019"],
+  ["ldquo", "\u201c"],
+  ["rdquo", "\u201d"],
+  ["bull", "\u2022"],
+  ["middot", "\u00b7"],
+  ["times", "\u00d7"],
+  ["deg", "\u00b0"],
+  ["euro", "\u20ac"],
 ]);
 
 /** What a JSX attribute string holds: no backslash escapes, but HTML entities are read. */

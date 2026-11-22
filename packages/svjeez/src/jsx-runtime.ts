@@ -43,7 +43,8 @@ export const build = <P extends { readonly children?: Child; readonly id?: strin
 
   try {
     // Types ask for a text key, but untyped JSX may hand a number, as from .map((item, i) => ...): use its text.
-    const given = key === undefined ? props : { ...props, key: String(key) };
+    const text = key === undefined ? undefined : String(key);
+    const given = text === undefined ? props : { ...props, key: text };
 
     if (props.id === undefined) return type(given);
     const id = scoped(props.id);
@@ -53,10 +54,11 @@ export const build = <P extends { readonly children?: Child; readonly id?: strin
       return withId(
         within(props.id, () => type(given)),
         id,
+        text,
       );
 
     // Any other function hands its id to a node it writes, which was scoped by the open components as it was written.
-    return scopedAs(type(given), props.id, id);
+    return scopedAs(type(given), props.id, id, text);
   } catch (error) {
     if (!(error instanceof Error)) throw error;
     const thrown = thrownFrom(error);

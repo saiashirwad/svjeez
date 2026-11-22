@@ -1,7 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import { Effect } from "effect";
-import { edit, elementAt, elementOf, locate, parse } from "../src/index.ts";
-import type { Edit, Files, Parsed } from "../src/index.ts";
+import {
+  describe as describeScene,
+  edit,
+  elementAt,
+  elementOf,
+  locate,
+  parse,
+} from "../src/index.ts";
+import type { Edit, Files, Parsed, Program } from "../src/index.ts";
 
 const scene = `import { Layer, Rect, Text, scene, ref, ease } from "svjeez";
 
@@ -377,8 +384,9 @@ describe("locate and elementAt", () => {
     expect(locate(parsed, "nope")).toBeUndefined();
   });
 
-  test("locate follows an instance path to its last segment when that is unambiguous", () => {
-    expect(locate(parsed, "card1/inner")).toEqual(locate(parsed, "inner"));
+  test("locate does not guess the last segment of a path whose instance does not exist", () => {
+    expect(locate(parsed, "card1/inner")).toBeUndefined();
+    expect(locate(parsed, "box/nope")).toBeUndefined();
   });
 
   test("elementAt finds the innermost element", () => {
@@ -503,5 +511,341 @@ export default scene({ size: [10, 10], duration: 1, title: "T" }, () => (
         _tag: "InvalidValue",
       });
     }
+  });
+});
+
+describe("component identity", () => {
+  const card = `import { Group, Shape, component, rect } from "svjeez";
+
+export const NoteCard = component({
+  name: "StableA",
+  render: () => (
+    <Group id="back">
+      <Shape id="note" geometry={rect(4, 4)} fill="#000000" />
+    </Group>
+  ),
+});
+
+export default component({ name: "StableD", render: () => <Group id="d" /> });
+`;
+
+  const main = `import { Group, component, scene } from "svjeez";
+import { NoteCard as Alias } from "./card.tsx";
+import Third from "./card.tsx";
+import * as Cards from "./card.tsx";
+
+const Local = component({
+  name: "StableB",
+  render: () => <Group id="inside" />,
+});
+
+export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
+  <Group id="all">
+    <Alias id="one" />
+    <Local id="two" />
+    <Third id="three" />
+    <Cards.NoteCard id="four" />
+  </Group>
+));
+`;
+
+  const parsed = read({ "scene.tsx": main, "card.tsx": card });
+
+  const program: Program = {
+    render: () => Effect.succeed(""),
+    components: { StableA: { jsonSchema: { properties: { label: { type: "string" } } } } },
+    params: {},
+  };
+
+  test("maps an aliased or local tag to its registered name", () => {
+    expect(parsed.aliases["scene.tsx"]).toEqual({
+      Alias: "StableA",
+      Local: "StableB",
+      Third: "StableD",
+      "Cards.NoteCard": "StableA",
+    });
+  });
+
+  test("locate follows an instance path through the registered name, not the tag", () => {
+    const note = elementOf(parsed, "StableA/note")!.range;
+
+    expect(locate(parsed, "one/note")).toEqual(note);
+    expect(locate(parsed, "four/note")).toEqual(note);
+    expect(locate(parsed, "two/inside")).toEqual(elementOf(parsed, "StableB/inside")!.range);
+  });
+
+  test("locate returns nothing for an instance that does not exist, even if the last segment does", () => {
+    expect(locate(parsed, "unknown/note")).toBeUndefined();
+    expect(locate(parsed, "one/missing")).toBeUndefined();
+  });
+
+  test("describe names the registered component and reads its schema", () => {
+    const description = describeScene(parsed, program);
+
+    expect(description.nodes["one"]?.component).toBe("StableA");
+    expect(description.nodes["two"]?.component).toBe("StableB");
+  });
+});
+
+describe("renaming", () => {
+  const card = `import { Group, Shape, component, ref, rect } from "svjeez";
+
+export const NoteCard = component({
+  name: "NoteCard",
+  render: () => (
+    <Group id="back">
+      <Shape id="body" geometry={rect(4, 4)} fill="#000000" />
+      <Shape id="mark" geometry={rect(1, 1)} fill={ref("note")} />
+    </Group>
+  ),
+});
+`;
+
+  const main = `import { Group, Shape, rect, scene } from "svjeez";
+import { NoteCard } from "./card.tsx";
+
+export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
+  <Group id="all">
+    <NoteCard id="card1" />
+    <Shape id="note" geometry={rect(9, 9)} fill="#ffffff" />
+  </Group>
+));
+`;
+
+  const both: Files = { "scene.tsx": main, "card.tsx": card };
+
+  test("refuses a rename that a component's own element of that name would shadow", () => {
+    const error = fail([{ op: "rename", target: "note", to: "body" }], both);
+
+    expect(error._tag).toBe("InvalidValue");
+
+    if (error._tag === "InvalidValue") {
+      expect(error.prop).toBe("id");
+      expect(error.issue).toContain('ref("note")');
+      expect(error.issue).toContain('"body"');
+    }
+  });
+
+  test("still renames a scene element to a name no component has", () => {
+    const changed = run([{ op: "rename", target: "note", to: "paper" }], both);
+
+    expect(changed.files["card.tsx"]).toContain('ref("paper")');
+  });
+
+  test("writes a rewritten ref as a string, so a quote in the untouched suffix still parses", () => {
+    const source = String.raw`import { Group, scene, ref } from "svjeez";
+
+export default scene({ size: [10, 10] }, () => (
+  <Group id="box">
+    <Arrow id="a" from={ref('box/in"ner')} to={ref("box/it's")} />
+  </Group>
+));
+`;
+
+    const changed = run([{ op: "rename", target: "box", to: "crate" }], { "scene.tsx": source });
+    const out = changed.files["scene.tsx"]!;
+
+    expect(out).toContain(String.raw`ref("crate/in\"ner")`);
+    expect(out).toContain(`ref("crate/it's")`);
+    expect(() => read({ "scene.tsx": out })).not.toThrow();
+  });
+});
+
+describe("placing elements", () => {
+  const wrapped = `import { Group, Shape, rect, scene } from "svjeez";
+
+export default scene({ size: [10, 10] }, () => (
+  <Group id="all">
+    <Group>
+      <Shape id="inner" geometry={rect(1, 1)} />
+    </Group>
+  </Group>
+));
+`;
+
+  test("insert at 0 goes directly inside the named parent, beside an id-less wrapper", () => {
+    const changed = run(
+      [{ op: "insert", parent: "all", at: 0, element: { component: "Shape", id: "first" } }],
+      { "scene.tsx": wrapped },
+    );
+
+    const out = changed.files["scene.tsx"]!;
+    const parsed = read({ "scene.tsx": out });
+
+    expect(out).toContain('<Group id="all">\n    <Shape id="first" />\n    <Group>');
+    expect(parsed.elements["first"]?.parent).toBe("all");
+  });
+
+  test("insert after a child that sits in a wrapper goes after the wrapper", () => {
+    const out = text(
+      [
+        {
+          op: "insert",
+          parent: "all",
+          at: { after: "inner" },
+          element: { component: "Shape", id: "next" },
+        },
+      ],
+      { "scene.tsx": wrapped },
+    );
+
+    expect(out).toContain('    </Group>\n    <Shape id="next" />\n  </Group>');
+  });
+
+  test("moving an only child to its own position changes nothing", () => {
+    const only = `import { Group, Shape, scene } from "svjeez";
+
+export default scene({ size: [10, 10] }, () => (
+  <Group id="all">
+    <Shape id="a" />
+  </Group>
+));
+`;
+
+    const changed = run([{ op: "move", target: "a", parent: "all", at: 0 }], { "scene.tsx": only });
+
+    expect(changed.files["scene.tsx"]).toBe(only);
+    expect(changed.diff).toBe("");
+  });
+
+  test("moving after the element it already follows changes nothing", () => {
+    const changed = run([{ op: "move", target: "bg", parent: "card", at: 0 }]);
+
+    expect(changed.files["scene.tsx"]).toBe(scene);
+
+    const after = run([{ op: "move", target: "name", parent: "card", at: { after: "bg" } }]);
+
+    expect(after.files["scene.tsx"]).toBe(scene);
+  });
+
+  test("a move leaves the spaces inside a template literal as they were", () => {
+    const source = `import { Group, Shape, Text, scene } from "svjeez";
+
+export default scene({ size: [10, 10] }, () => (
+  <Group id="all">
+    <Text id="t" text={\`line one
+      line two
+        line three\`} />
+    <Shape id="s" />
+  </Group>
+));
+`;
+
+    const out = text([{ op: "move", target: "t", parent: "all", at: { after: "s" } }], {
+      "scene.tsx": source,
+    });
+
+    expect(out).toContain("line one\n      line two\n        line three`");
+    expect(out.indexOf('id="s"')).toBeLessThan(out.indexOf('id="t"'));
+  });
+});
+
+describe("attributes in effective order", () => {
+  const one = (attrs: string): Files => ({
+    "scene.tsx": `import { Group, Shape, scene } from "svjeez";
+
+export default scene({ size: [10, 10] }, () => (
+  <Group id="all">
+    <Shape id="s" ${attrs} />
+  </Group>
+));
+`,
+  });
+
+  test("the last of two ids is the one JSX takes", () => {
+    const parsed = read({
+      "scene.tsx": `export default <Shape id="a" id={computed} />;\n`,
+    });
+
+    expect(parsed.order).toEqual([]);
+    expect(read({ "scene.tsx": `export default <Shape id={computed} id="a" />;\n` }).order).toEqual(
+      ["a"],
+    );
+  });
+
+  test("a literal before a later spread is read-only, one after it is not", () => {
+    const parsed = read(one('fill="#ffffff" {...rest} stroke="#000000"'));
+    const props = elementOf(parsed, "s")!.props;
+
+    expect(props["fill"]).toMatchObject({ kind: "spread" });
+    expect(props["stroke"]).toMatchObject({ kind: "literal" });
+
+    expect(
+      Effect.runSync(
+        Effect.flip(edit(parsed, [{ op: "set", target: "s", prop: "fill", value: "#111111" }])),
+      ),
+    ).toMatchObject({ _tag: "NotEditable", reason: "spread" });
+  });
+
+  test("a sparse array or a spread in an array is an expression, not JSON", () => {
+    for (const written of ["[1, , 3]", "[, 1]", "[1, ...more]", "{ a: 1, ...more }"]) {
+      const parsed = read(one(`size={${written}}`));
+
+      expect(elementOf(parsed, "s")!.props["size"], written).toMatchObject({ kind: "expression" });
+    }
+
+    expect(elementOf(read(one("size={[1, 2, ]}")), "s")!.props["size"]).toMatchObject({
+      kind: "literal",
+      value: [1, 2],
+    });
+  });
+
+  test("a string attribute reads HTML entities as JSX does", () => {
+    const parsed = read(
+      one('text="a&nbsp;b &amp; c &lt;&gt; &quot;q&quot; &#65;&#x42; &unknown;"'),
+    );
+
+    expect(elementOf(parsed, "s")!.props["text"]).toMatchObject({
+      value: 'a\u00a0b & c <> "q" AB &unknown;',
+    });
+  });
+
+  test("a prop named like a prototype key stays an own property", () => {
+    const props = elementOf(read(one('__proto__="x" constructor="y"')), "s")!.props;
+
+    expect(Object.getPrototypeOf(props)).toBe(Object.prototype);
+    expect(Object.hasOwn(props, "__proto__")).toBe(true);
+    expect(props["constructor"]).toMatchObject({ kind: "literal", value: "y" });
+  });
+});
+
+describe("syntax depth", () => {
+  test("counts nested JSX with no id", () => {
+    const parsed = read({
+      "scene.tsx": `export default <A id="a"><B><C><D id="d" /></C></B></A>;\n`,
+    });
+
+    expect(parsed.maxDepth).toBe(4);
+  });
+});
+
+describe("edit against a full snapshot", () => {
+  const two: Files = { "scene.tsx": scene, "other.tsx": "export const x = 1;\n" };
+
+  test("refuses a snapshot that deleted a file the edits were planned against", () => {
+    const { "other.tsx": _, ...without } = two;
+
+    expect(
+      Effect.runSync(
+        Effect.flip(
+          edit(read(two), [{ op: "set", target: "bg", prop: "width", value: 1 }], without),
+        ),
+      ),
+    ).toMatchObject({ _tag: "StaleSource", file: "other.tsx", actual: "" });
+  });
+
+  test("refuses a snapshot that added a file", () => {
+    expect(
+      Effect.runSync(
+        Effect.flip(edit(read(files), [{ op: "set", target: "bg", prop: "width", value: 1 }], two)),
+      ),
+    ).toMatchObject({ _tag: "StaleSource", file: "other.tsx", expected: "" });
+  });
+
+  test("lets an identical snapshot through", () => {
+    expect(
+      Effect.runSync(edit(read(two), [{ op: "set", target: "bg", prop: "width", value: 1 }], two))
+        .files["scene.tsx"],
+    ).toContain("width={1}");
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Effect, Fiber, Layer, Stream, SubscriptionRef } from "effect";
+import { Deferred, Effect, Fiber, Layer, Stream, SubscriptionRef } from "effect";
 import type { StandardSchemaV1 } from "svjeez";
 import {
   BunRunner,
@@ -11,6 +11,7 @@ import {
   RenderError,
   Session,
   StaleSource,
+  StorageError,
   defineEdit,
 } from "../src/index.ts";
 import type { ApplyOptions, Change, Edit, Limits, RawInput, State } from "../src/index.ts";
@@ -299,6 +300,73 @@ describe("hooks", () => {
 
     expect(commits).toEqual(["2 edits", "1 edits"]);
   });
+
+  test("interrupting apply while afterEdit stores the change still publishes it, and a retry does not apply twice", async () => {
+    const started = Effect.runSync(Deferred.make<void>());
+    const release = Effect.runSync(Deferred.make<void>());
+
+    const stored: { readonly requestId: string | undefined; readonly revisionSource: string }[] =
+      [];
+
+    const hooks = hooksLayer({
+      afterEdit: (change, _, meta) =>
+        Effect.gen(function* () {
+          yield* Deferred.succeed(started, undefined);
+          yield* Deferred.await(release);
+          stored.push({
+            requestId: meta.requestId,
+            revisionSource: change.files["scene.tsx"] ?? "",
+          });
+        }),
+    });
+
+    const outcome = await run(
+      Effect.gen(function* () {
+        const session = yield* Session;
+        const edits = [recolor("box", "#111111")];
+        const fiber = yield* Effect.forkChild(session.apply(edits, { requestId: "r1" }));
+
+        yield* Deferred.await(started);
+        const interrupting = yield* Effect.forkChild(Fiber.interrupt(fiber));
+
+        yield* Effect.yieldNow;
+        yield* Deferred.succeed(release, undefined);
+        yield* Fiber.join(interrupting);
+
+        const after = yield* SubscriptionRef.get(session.state);
+        const retried = yield* session.apply(edits, { requestId: "r1" });
+
+        return { after, retried };
+      }),
+      { hooks },
+    );
+
+    expect(stored).toHaveLength(1);
+    expect(stored[0]?.requestId).toBe("r1");
+    expect(outcome.after.revision).toBe(1);
+    expect(sourceOf(outcome.after)).toBe(stored[0]?.revisionSource);
+    expect(outcome.retried).toBe(outcome.after);
+    expect(stored).toHaveLength(1);
+  });
+
+  test("afterEdit fails with StorageError, which keeps the old state", async () => {
+    const hooks = hooksLayer({
+      afterEdit: () => Effect.fail(new StorageError({ reason: "disk full" })),
+    });
+
+    const outcome = await run(
+      Effect.gen(function* () {
+        const session = yield* Session;
+        const error = yield* Effect.flip(session.apply([recolor("box", "#111111")]));
+
+        return { error, state: yield* SubscriptionRef.get(session.state) };
+      }),
+      { hooks },
+    );
+
+    expect(outcome.error).toEqual(new StorageError({ reason: "disk full" }));
+    expect(outcome.state.revision).toBe(0);
+  });
 });
 
 describe("defineEdit", () => {
@@ -350,6 +418,59 @@ describe("defineEdit", () => {
     expect(await failure(expanding({ color: 7 }))).toEqual(
       new InvalidValue({ target: "recolor", prop: "", issue: "color must be a string" }),
     );
+  });
+
+  test("a schema that validates asynchronously is awaited, and its issues are InvalidValue", async () => {
+    const later: StandardSchemaV1<Recolor> = {
+      "~standard": {
+        version: 1,
+        vendor: "test",
+        validate: async (value) =>
+          isRecolor(value) ? { value } : { issues: [{ message: "color must be a string" }] },
+      },
+    };
+
+    const asynchronous = defineEdit({
+      name: "later",
+      input: later,
+      expand: ({ color }) => Effect.succeed([recolor("box", color)]),
+    });
+
+    const state = await run(expanding({ color: "#123456" }, asynchronous));
+
+    expect(sourceOf(state)).toContain('fill="#123456"');
+
+    expect(await failure(expanding({ color: 7 }, asynchronous))).toEqual(
+      new InvalidValue({ target: "later", prop: "", issue: "color must be a string" }),
+    );
+  });
+
+  test("a schema whose validate throws or rejects is InvalidValue, not a defect", async () => {
+    const broken = (validate: StandardSchemaV1<Recolor>["~standard"]["validate"]) =>
+      defineEdit({
+        name: "broken",
+        input: { "~standard": { version: 1, vendor: "test", validate } },
+        expand: () => Effect.succeed([]),
+      });
+
+    const thrown = await failure(
+      expanding(
+        {},
+        broken(() => {
+          throw new Error("boom");
+        }),
+      ),
+    );
+
+    const rejected = await failure(
+      expanding(
+        {},
+        broken(() => Promise.reject(new Error("nope"))),
+      ),
+    );
+
+    expect(thrown).toEqual(new InvalidValue({ target: "broken", prop: "", issue: "boom" }));
+    expect(rejected).toEqual(new InvalidValue({ target: "broken", prop: "", issue: "nope" }));
   });
 
   test("an expand that denies surfaces Denied", async () => {
@@ -565,5 +686,167 @@ export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
     );
 
     expect(revision).toBe(0);
+  });
+});
+
+describe("Session batches", () => {
+  const GAUGE = `import { Group, Shape, component, rect } from "svjeez";
+
+const props = {
+  "~standard": {
+    version: 1,
+    vendor: "test",
+    validate: (value) => {
+      if (typeof value.label !== "string")
+        return { issues: [{ message: "label is required", path: ["label"] }] };
+
+      return value.min > value.max
+        ? { issues: [{ message: "min must not exceed max", path: ["min"] }] }
+        : { value };
+    },
+  },
+};
+
+export const Gauge = component({
+  name: "Gauge",
+  props,
+  render: ({ min }) => (
+    <Group id="dial">
+      <Shape id="needle" geometry={rect(min + 1, 4)} fill="#000000" />
+    </Group>
+  ),
+});
+`;
+
+  const SCENE = `import { Group, scene } from "svjeez";
+import { Gauge } from "./gauge.tsx";
+
+export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
+  <Group id="all">
+    <Gauge id="g" label="L" min={0} max={10} />
+  </Group>
+));
+`;
+
+  const files = { "scene.tsx": SCENE, "gauge.tsx": GAUGE };
+
+  const apply = (edits: readonly Edit[], limits?: Limits) =>
+    Effect.runPromise(
+      Effect.flip(
+        Session.use((session) => session.apply(edits)).pipe(
+          Effect.provide(
+            Session.layer({ files, entry: "scene.tsx", ...(limits && { limits }) }).pipe(
+              Layer.provide(Layer.mergeAll(BunRunner, NoHooks)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+  const succeed = (edits: readonly Edit[]) =>
+    Effect.runPromise(
+      Session.use((session) => session.apply(edits)).pipe(
+        Effect.provide(
+          Session.layer({ files, entry: "scene.tsx" }).pipe(
+            Layer.provide(Layer.mergeAll(BunRunner, NoHooks)),
+          ),
+        ),
+      ),
+    );
+
+  const set = (target: string, prop: string, value: number): Edit => ({
+    op: "set",
+    target,
+    prop,
+    value,
+  });
+
+  test("an ordered batch is checked as a whole: min <= max holds at the end, whatever it did on the way", async () => {
+    const up = await succeed([set("g", "max", 30), set("g", "min", 20)]);
+    const down = await succeed([set("g", "min", 20), set("g", "max", 30)]);
+
+    expect(up.revision).toBe(1);
+    expect(down.revision).toBe(1);
+    expect(await apply([set("g", "max", 30), set("g", "min", 50)])).toMatchObject({
+      _tag: "InvalidValue",
+      target: "g",
+      prop: "min",
+    });
+  });
+
+  test("a set on an element inserted earlier in the batch is validated", async () => {
+    const insert: Edit = {
+      op: "insert",
+      parent: "all",
+      at: 1,
+      element: { component: "Gauge", id: "h", props: { label: "H", min: 0, max: 5 } },
+    };
+
+    expect((await succeed([insert, set("h", "max", 9)])).parsed.order).toContain("h");
+    expect(await apply([insert, set("h", "min", 9)])).toMatchObject({
+      _tag: "InvalidValue",
+      target: "h",
+      prop: "min",
+    });
+  });
+
+  test("a set on an element renamed earlier in the batch is validated under its new id", async () => {
+    expect(
+      await apply([{ op: "rename", target: "g", to: "g2" }, set("g2", "min", 99)]),
+    ).toMatchObject({ _tag: "InvalidValue", target: "g2", prop: "min" });
+  });
+
+  test("unset of a required prop is refused", async () => {
+    expect(await apply([{ op: "unset", target: "g", prop: "label" }])).toMatchObject({
+      _tag: "InvalidValue",
+      target: "g",
+      prop: "label",
+    });
+  });
+
+  test("maxBatchEdits refuses a batch with too many edits", async () => {
+    const error = await apply([set("g", "min", 1), set("g", "min", 2), set("g", "min", 3)], {
+      maxBatchEdits: 2,
+    });
+
+    expect(error).toBeInstanceOf(Denied);
+  });
+
+  test("maxSourceBytes refuses a batch that cannot fit before applying any of it", async () => {
+    const size = new TextEncoder().encode(SCENE + GAUGE).length;
+    const grow = Array.from({ length: 6 }, (_, i) => set("g", `extra${i}`, 12_345_678));
+    const error = await apply(grow, { maxSourceBytes: size + 40 });
+
+    expect(error).toBeInstanceOf(Denied);
+    expect(error).toMatchObject({ reason: expect.stringContaining("after the edits") });
+  });
+
+  test("maxTreeDepth counts nested JSX that has no id", async () => {
+    const nest = (depth: number) =>
+      `import { Group, Shape, scene } from "svjeez";
+
+export default scene({ size: [10, 10], duration: 1, title: "T" }, () => (
+  <Group id="all">
+${"<Group>".repeat(depth)}<Shape id="box" />${"</Group>".repeat(depth)}
+  </Group>
+));
+`;
+
+    const open = (source: string) =>
+      Effect.runPromise(
+        Effect.flip(
+          Session.use((session) => SubscriptionRef.get(session.state)).pipe(
+            Effect.provide(
+              Session.layer({
+                files: { "scene.tsx": source },
+                entry: "scene.tsx",
+                limits: { maxTreeDepth: 4 },
+              }).pipe(Layer.provide(Layer.mergeAll(BunRunner, NoHooks))),
+            ),
+          ),
+        ),
+      );
+
+    expect(await open(nest(10))).toBeInstanceOf(Denied);
   });
 });

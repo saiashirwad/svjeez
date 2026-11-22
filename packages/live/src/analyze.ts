@@ -56,10 +56,9 @@ export interface Analysis {
   readonly guards: readonly Change[];
 }
 
-const TYPE_ONLY = /^(?:import|export)\s+type\b/;
-
+/** The module an import, or an `export … from`, names. A bare `export default "text"` names none. */
 const specifierOf = (source: string, declaration: SyntaxNode): Specifier | undefined => {
-  if (TYPE_ONLY.test(source.slice(declaration.from, declaration.to))) return undefined;
+  if (declaration.name === "ExportDeclaration" && !declaration.getChild("from")) return undefined;
 
   for (let child = declaration.firstChild; child; child = child.nextSibling)
     if (child.name === "String")
@@ -101,7 +100,11 @@ const guardsOf = (loop: SyntaxNode): readonly Change[] => {
 
 const LOOPS: ReadonlySet<string> = new Set(["ForStatement", "WhileStatement", "DoStatement"]);
 
-/** Reads a file for its imports, the names it must not use and the loops that need a guard. */
+/**
+ * Reads a file for its imports, the names it must not use and the loops that need a guard. Pass JavaScript with its
+ * types already erased: whatever import is left runs, so `import type from "./mod"`, a default import named `type`,
+ * is seen for what it is, and `import type { T }` is gone.
+ */
 export const analyze = (source: string): Analysis => {
   const imports: Specifier[] = [];
   const escapes: Escape[] = [];

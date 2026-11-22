@@ -58,4 +58,9 @@ export class Rejected extends Data.TaggedError("Rejected")<{
   readonly node?: Id;
 }> {}
 
+/** An `afterEdit` hook could not keep an edit, so the session keeps its old state. */
+export class StorageError extends Data.TaggedError("StorageError")<{
+  readonly reason: string;
+}> {}
+
 export type EditError = UnknownId | NotEditable | InvalidValue | DuplicateId | StaleSource;

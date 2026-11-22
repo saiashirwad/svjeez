@@ -30,6 +30,14 @@ export const libraryPath = (specifier: string): string => `${LIBRARY}${specifier
 /** The loop guard: `tick()` counts a loop iteration, `reset()` starts a new count. A runner resets it before each render. */
 export const GUARD = "/@guard.js";
 
+/** The module the loop guard, the host and the entry are generated into. A scene file may not take their paths. */
+export const HOST = "/@host.js";
+export const ENTRY = "/@entry.js";
+
+/** Whether a canonical path is one a runner generates, which no scene file may take. */
+export const isGenerated = (path: string): boolean =>
+  path === GUARD || path === HOST || path === ENTRY || path.startsWith(LIBRARY);
+
 /**
  * Where compiled modules run. The compiler turns scene files into `Modules`; a runner loads them wherever it can do so
  * safely (this process, a browser worker, a Cloudflare isolate) and answers with the `Program` they make.

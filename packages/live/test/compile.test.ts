@@ -9,6 +9,7 @@ import {
   BunRunner,
   CompileError,
   RenderError,
+  Runner,
   WorkerLoaderRunner,
   compile,
 } from "../src/index.ts";
@@ -266,6 +267,54 @@ describe("imports", () => {
 
     expect(error.file).toBe("other.tsx");
   });
+
+  test("check a default import named `type`, which is a runtime import", async () => {
+    const error = await failed({
+      "scene.tsx": `import type from "node:fs";\nexport default type;\n`,
+    });
+
+    expect(error.message).toContain("node:fs");
+  });
+
+  test("rewrite a default import named `type` to the file it names", async () => {
+    const program = await run(
+      compiled({
+        "scene.tsx": `import type from "./mod";\nimport { Shape, rect, scene } from "svjeez";\nexport default scene({ size: [1, 1], duration: 1, title: type }, () => <Shape id="a" geometry={rect(1, 1)} fill="#000000" />);\n`,
+        "mod.ts": `export default "T";\n`,
+      }),
+    );
+
+    expect(await run(program.render())).toBeDefined();
+  });
+
+  test("let a type-only import through: it is erased and never runs", async () => {
+    const program = await run(
+      compiled({
+        "scene.tsx": `import type { Stats } from "node:fs";\nimport { Shape, rect, scene } from "svjeez";\nexport type T = Stats;\nexport default scene({ size: [1, 1], duration: 1, title: "T" }, () => <Shape id="a" geometry={rect(1, 1)} fill="#000000" />);\n`,
+      }),
+    );
+
+    expect(await run(program.render())).toBeDefined();
+  });
+});
+
+describe("file paths", () => {
+  test("refuse two names for one canonical path", async () => {
+    const error = await failed({ "scene.tsx": SCENE, "/scene.tsx": SCENE });
+
+    expect(error.file).toBe("/scene.tsx");
+    expect(error.message).toContain("same file");
+  });
+
+  test.each(["@guard.js", "/@guard.js", "@entry.js", "@host.js", "@lib/svjeez", "@lib/x/y.js"])(
+    "refuse the generated path %s",
+    async (name) => {
+      const error = await failed({ "scene.tsx": SCENE, [name]: "export {};\n" });
+
+      expect(error.file).toBe(name);
+      expect(error.message).toContain("generates modules");
+    },
+  );
 });
 
 describe("static scan", () => {
@@ -635,6 +684,77 @@ export default ({ width }) => scene({ size: [100, 80], duration: 1, title: "T" }
 
     expect(ids[0]).toBe(ids[1]);
     expect(ids[2]).not.toBe(ids[0]);
+  });
+
+  test("names a worker by a SHA-256 of everything that shapes it", async () => {
+    const { loader, ids } = fakeLoader();
+    const libraries = { ...BUNDLES, "svjeez/tools": "// other bundle" };
+
+    const compileWith = (files: Files, runner: ReturnType<typeof WorkerLoaderRunner>) =>
+      run(compile(files, options).pipe(Effect.provide(runner)));
+
+    await compileWith(MULTI, WorkerLoaderRunner(loader, { libraries: BUNDLES }));
+    await compileWith(MULTI, WorkerLoaderRunner(loader, { libraries: BUNDLES }));
+    await compileWith(MULTI, WorkerLoaderRunner(loader, { libraries }));
+    await compileWith(MULTI, WorkerLoaderRunner(loader, { libraries: BUNDLES, cpuMs: 50 }));
+    await compileWith(MULTI, WorkerLoaderRunner(loader, { libraries: BUNDLES, cpuMs: 51 }));
+
+    await compileWith(
+      MULTI,
+      WorkerLoaderRunner(loader, { libraries: BUNDLES, compatibilityDate: "2025-07-01" }),
+    );
+
+    await compileWith(
+      { ...MULTI, "components/NoteCard.tsx": CARD.replace('"NoteCard"', '"NoteCard2"') },
+      WorkerLoaderRunner(loader, { libraries: BUNDLES }),
+    );
+
+    for (const id of ids) expect(id).toMatch(/^[0-9a-f]{64}$/);
+    expect(ids[0]).toBe(ids[1]);
+    expect(new Set(ids).size).toBe(ids.length - 1);
+  });
+
+  test("a scope gives a runner its own workers, and fresh a new one every run", async () => {
+    const { loader, ids } = fakeLoader();
+
+    const compileWith = (runner: ReturnType<typeof WorkerLoaderRunner>) =>
+      run(compile(MULTI, options).pipe(Effect.provide(runner)));
+
+    const alpha = WorkerLoaderRunner(loader, { libraries: BUNDLES, scope: "alpha" });
+
+    await compileWith(alpha);
+    await compileWith(alpha);
+    await compileWith(WorkerLoaderRunner(loader, { libraries: BUNDLES, scope: "beta" }));
+    await compileWith(WorkerLoaderRunner(loader, { libraries: BUNDLES }));
+
+    const fresh = WorkerLoaderRunner(loader, { libraries: BUNDLES, fresh: true });
+
+    await compileWith(fresh);
+    await compileWith(fresh);
+
+    expect(ids[0]).toBe(ids[1]);
+    expect(new Set(ids.slice(0, 4)).size).toBe(3);
+    expect(new Set(ids).size).toBe(5);
+  });
+
+  test("refuses a file at a path the worker generates", async () => {
+    const { loader } = fakeLoader();
+
+    const error = await run(
+      Effect.flip(
+        Effect.gen(function* () {
+          const runner = yield* Runner;
+
+          return yield* runner.run({
+            entry: "/scene.tsx",
+            files: { "/scene.tsx": "export {};", "/@host.js": "export {};" },
+            libraries: [],
+          });
+        }).pipe(Effect.provide(WorkerLoaderRunner(loader, { libraries: BUNDLES }))),
+      ),
+    );
+
+    expect(error.message).toContain("@host.js");
   });
 
   test("reports a module that throws as it loads in the isolate", async () => {

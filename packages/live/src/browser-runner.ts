@@ -24,7 +24,11 @@ const core = async (): Promise<Readonly<Record<string, Namespace>>> => ({
 /**
  * Runs scenes where `new Function` is the only way to run text, a browser or a Web Worker. Libraries cannot be
  * imported by name there, so `svjeez` is bundled in and an add-on a scene may import is passed in `libraries`.
- * Run it in a Worker: the code shares that worker's globals.
+ *
+ * This is a trusted, in-realm adapter, not a sandbox. The scene's code runs in the realm that calls it and shares its
+ * globals, `window` and `document` included, and the compiler's checks only catch mistakes. Use it for code the user
+ * wrote themselves, ideally inside a dedicated Web Worker. For code somebody else wrote, run it in a Worker you can
+ * terminate, or through `WorkerLoaderRunner`, whose isolate has no network and no way to the host's globals.
  */
 export const browserRunner = (
   libraries: Readonly<Record<string, Namespace>> = {},

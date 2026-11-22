@@ -3,7 +3,8 @@ import { transform } from "sucrase";
 import { analyze, applied, placeOf } from "./analyze.ts";
 import type { Change } from "./analyze.ts";
 import { CompileError } from "./errors.ts";
-import { GUARD, Runner, libraryPath } from "./runner.ts";
+import { canonical, isRelative, resolveRelative } from "./paths.ts";
+import { GUARD, Runner, isGenerated, libraryPath } from "./runner.ts";
 import type { Modules } from "./runner.ts";
 import { guardImport, guardSource } from "./guard.ts";
 import type { Program } from "./program.ts";
@@ -48,37 +49,7 @@ export interface CompileOptions {
 
 const CODE = /\.(?:tsx?|jsx?|mjs)$/;
 
-const EXTENSIONS = [
-  ".tsx",
-  ".ts",
-  ".jsx",
-  ".js",
-  "/index.tsx",
-  "/index.ts",
-  "/index.jsx",
-  "/index.js",
-];
-
 const MAX_LOOP_ITERATIONS = 5_000_000;
-
-/** A file name as the canonical path of a module: one leading `/`, no `./`. */
-const canonical = (name: string): string => `/${name.replace(/^(?:\.?\/)+/, "")}`;
-
-/** `./a/../b` from `/x` as `/x/b`, or undefined when it climbs out of the root. */
-const joined = (from: string, relative: string): string | undefined => {
-  const parts = from.split("/").slice(0, -1);
-
-  for (const part of relative.split("/")) {
-    if (part === "..") {
-      if (parts.length <= 1) return undefined;
-      parts.pop();
-    } else if (part !== "." && part !== "") parts.push(part);
-  }
-
-  return parts.join("/");
-};
-
-const isRelative = (name: string): boolean => name.startsWith("./") || name.startsWith("../");
 
 interface Compiling {
   readonly files: Readonly<Record<string, string>>;
@@ -99,11 +70,14 @@ const syntaxError = (file: string, error: Error): CompileError => {
   });
 };
 
-const transpiled = (file: string, source: string): string => {
+/** `erase` drops the types and leaves the JSX as written; the final pass turns the JSX into calls to the runtime. */
+const transpiled = (file: string, source: string, erase = false): string => {
   try {
     return transform(source, {
       transforms: ["typescript", "jsx"],
-      jsxRuntime: "automatic",
+      jsxRuntime: erase ? "preserve" : "automatic",
+      // An import nothing uses still runs in a runner that loads it, so it is checked all the same.
+      keepUnusedImports: erase,
       jsxImportSource: libraryPath("svjeez"),
       filePath: file,
     }).code;
@@ -119,10 +93,11 @@ interface Built {
 
 /** One scene file as an ES module that names its imports by canonical path. Throws `CompileError`. */
 const build = (context: Compiling, file: string, source: string): Built => {
-  // Syntax comes first: the checks below read a tree that is only right for a file that parses.
-  transpiled(file, source);
-  const found = analyze(source);
-  const at = (offset: number) => ({ file, ...placeOf(source, offset) });
+  // Syntax comes first: the checks below read a tree that is only right for a file that parses. They read the
+  // file with its types erased, so an import is checked when it runs: `import type from "./m"` does, `import type { T }` does not.
+  const erased = transpiled(file, source, true);
+  const found = analyze(erased);
+  const at = (offset: number) => ({ file, ...placeOf(erased, offset) });
 
   const escape = found.escapes[0];
 
@@ -135,12 +110,11 @@ const build = (context: Compiling, file: string, source: string): Built => {
 
   const rewrites = found.imports.map((use): Change => {
     if (isRelative(use.name)) {
-      const base = joined(canonical(file), use.name);
-
-      const target =
-        base === undefined
-          ? undefined
-          : [base, ...EXTENSIONS.map((e) => base + e)].find((p) => Object.hasOwn(context.files, p));
+      const target = resolveRelative(
+        (path) => Object.hasOwn(context.files, path),
+        canonical(file),
+        use.name,
+      );
 
       if (target === undefined)
         throw new CompileError({
@@ -167,7 +141,7 @@ const build = (context: Compiling, file: string, source: string): Built => {
     return { from: use.from, to: use.to, text: JSON.stringify(libraryPath(use.name)) };
   });
 
-  const code = transpiled(file, applied(source, [...rewrites, ...found.guards]));
+  const code = transpiled(file, applied(erased, [...rewrites, ...found.guards]));
 
   return {
     // The guard's import goes first, on the file's first line: a loop may run before an import further down would.
@@ -182,9 +156,36 @@ const build = (context: Compiling, file: string, source: string): Built => {
  * iterations. Throws `CompileError`.
  */
 const modulesOf = (files: Files, options: CompileOptions): Modules => {
-  const names = Object.fromEntries(
-    Object.entries(files).map(([name, source]) => [canonical(name), source]),
-  );
+  const names: Record<string, string> = {};
+  const written = new Map<string, string>();
+
+  for (const [name, source] of Object.entries(files)) {
+    const path = canonical(name);
+    const other = written.get(path);
+
+    if (other !== undefined)
+      throw new CompileError({
+        file: name,
+        line: 1,
+        col: 1,
+        message: `"${name}" and "${other}" are the same file, ${path}.`,
+      });
+
+    if (isGenerated(path))
+      throw new CompileError({
+        file: name,
+        line: 1,
+        col: 1,
+        message: `"${name}" is a path the compiler generates modules at. Rename the file.`,
+      });
+    written.set(path, name);
+    Object.defineProperty(names, path, {
+      value: source,
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
+  }
 
   const entry = canonical(options.entry);
   const limit = options.maxLoopIterations ?? MAX_LOOP_ITERATIONS;

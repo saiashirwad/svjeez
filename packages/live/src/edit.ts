@@ -7,8 +7,8 @@ import {
   UnknownId,
   type EditError,
 } from "./errors.ts";
-import { chainOf, elementOf, parse } from "./source.ts";
-import { attributeValue, hash, PROTOTYPE_KEYS, unified } from "./text.ts";
+import { chainOf, elementOf, parse, verbatimBreaks } from "./source.ts";
+import { attributeValue, hash, jsString, PROTOTYPE_KEYS, unified } from "./text.ts";
 import type {
   Attribute,
   Change,
@@ -19,6 +19,7 @@ import type {
   Json,
   Parsed,
   Position,
+  Range,
   Ref,
 } from "./types.ts";
 
@@ -70,19 +71,30 @@ const startsLine = (text: string, offset: number) =>
 const own = (props: Readonly<Record<string, Attribute>>, name: string): Attribute | undefined =>
   Object.hasOwn(props, name) ? props[name] : undefined;
 
+/** Changes every line after the first, except the ones that begin inside a template literal or a string. */
+const eachLine = (text: string, change: (line: string) => string) => {
+  const verbatim = verbatimBreaks(text);
+  let start = 0;
+
+  return text
+    .split("\n")
+    .map((line, i) => {
+      const at = start;
+
+      start += line.length + 1;
+
+      return i > 0 && !verbatim.has(at - 1) ? change(line) : line;
+    })
+    .join("\n");
+};
+
 /** The lines after the first lose `indent`, so the text can be placed at any depth. */
 const dedent = (text: string, indent: string) =>
-  text
-    .split("\n")
-    .map((line, i) => (i > 0 && line.startsWith(indent) ? line.slice(indent.length) : line))
-    .join("\n");
+  eachLine(text, (line) => (line.startsWith(indent) ? line.slice(indent.length) : line));
 
 /** The lines after the first gain `indent`; blank lines stay blank. */
 const reindent = (text: string, indent: string) =>
-  text
-    .split("\n")
-    .map((line, i) => (i > 0 && line ? indent + line : line))
-    .join("\n");
+  eachLine(text, (line) => (line ? indent + line : line));
 
 const need = (parsed: Parsed, target: Id): Effect.Effect<Element, UnknownId | DuplicateId> => {
   const twice = parsed.duplicates.find((d) => d.id === target);
@@ -221,6 +233,12 @@ const place = (
     const kids = parent.children.filter((id) => id !== moving);
     const first = kids[0] ? elementOf(parsed, kids[0]) : undefined;
 
+    // A child may sit inside an id-less wrapper; a new sibling goes beside the wrapper, directly in `parent`.
+    const direct = (child: Element): Range =>
+      parent.childRanges.find(
+        (r) => r.file === child.range.file && r.from <= child.range.from && child.range.to <= r.to,
+      ) ?? child.range;
+
     const unit =
       first && startsLine(src(parsed, first.range.file), first.range.from)
         ? indentAt(src(parsed, first.range.file), first.range.from).slice(parentIndent.length) ||
@@ -233,14 +251,15 @@ const place = (
       const anchor = kids.includes(at.after) ? elementOf(parsed, at.after) : undefined;
 
       if (!anchor) return yield* Effect.fail(new UnknownId({ target: at.after }));
-      const anchorCode = src(parsed, anchor.range.file);
-      const own = startsLine(anchorCode, anchor.range.from);
-      const indent = indentAt(anchorCode, anchor.range.from);
+      const beside = direct(anchor);
+      const anchorCode = src(parsed, beside.file);
+      const own = startsLine(anchorCode, beside.from);
+      const indent = indentAt(anchorCode, beside.from);
 
       return {
-        file: anchor.range.file,
-        from: anchor.range.to,
-        to: anchor.range.to,
+        file: beside.file,
+        from: beside.to,
+        to: beside.to,
         text: own ? `\n${indent}${reindent(text, indent)}` : text,
       };
     }
@@ -256,14 +275,15 @@ const place = (
     const anchor = kids[at] ? elementOf(parsed, kids[at]) : undefined;
 
     if (anchor) {
-      const anchorCode = src(parsed, anchor.range.file);
-      const indent = indentAt(anchorCode, anchor.range.from);
-      const own = startsLine(anchorCode, anchor.range.from);
+      const beside = direct(anchor);
+      const anchorCode = src(parsed, beside.file);
+      const indent = indentAt(anchorCode, beside.from);
+      const own = startsLine(anchorCode, beside.from);
 
       return {
-        file: anchor.range.file,
-        from: anchor.range.from,
-        to: anchor.range.from,
+        file: beside.file,
+        from: beside.from,
+        to: beside.from,
         text: own ? `${reindent(text, indent)}\n${indent}` : text,
       };
     }
@@ -373,6 +393,15 @@ const moveElement = (parsed: Parsed, e: Extract<Edit, { op: "move" }>) =>
 
     if (isAfter(e.at) && e.at.after === el.id)
       return yield* refuse("an element can't move after itself");
+
+    // Where it is already: nothing to write.
+    if (parent.id === el.parent) {
+      const index = parent.children.indexOf(el.id);
+
+      if (isAfter(e.at) ? parent.children[index - 1] === e.at.after : e.at === index)
+        return parsed.files;
+    }
+
     const code = src(parsed, el.range.file);
     const text = dedent(code.slice(el.range.from, el.range.to), indentAt(code, el.range.from));
     const position = yield* place(parsed, parent, e.at, text, el.id);
@@ -414,13 +443,29 @@ const renameElement = (parsed: Parsed, e: Extract<Edit, { op: "rename" }>) =>
       const rewritten = renamedRef(parsed, ref, el, full, e.to);
 
       if (rewritten === undefined) continue;
-      const quote = src(parsed, ref.range.file)[ref.range.from] ?? '"';
+      const head = rewritten.text.split("/")[0] ?? "";
 
-      edits.push({ ...ref.range, text: `${quote}${rewritten}${quote}` });
+      // The ref reached a scene element from inside a component. If that component has an element of the new name, the ref would reach that one.
+      if (rewritten.fromScene && ref.scope && elementOf(parsed, `${ref.scope}/${head}`))
+        return yield* Effect.fail(
+          new InvalidValue({
+            target: e.target,
+            prop: "id",
+            issue: `ref("${ref.id}") in ${ref.scope} would point at that component's own "${head}", not at this element`,
+          }),
+        );
+
+      edits.push({ ...ref.range, text: jsString(rewritten.text) });
     }
 
     return applyText(parsed.files, edits);
   });
+
+/** What a `ref` becomes, and whether it got there by falling through from a component to the scene. */
+interface Rewritten {
+  readonly text: string;
+  readonly fromScene: boolean;
+}
 
 /**
  * What a `ref` becomes when `el` is renamed, or undefined when it doesn't point at `el` or below it. A ref follows
@@ -433,19 +478,20 @@ const renamedRef = (
   el: Element,
   full: Id,
   to: string,
-): string | undefined => {
+): Rewritten | undefined => {
   const head = id.split("/")[0] ?? "";
   const shadow = scope ? elementOf(parsed, `${scope}/${head}`) : undefined;
 
-  if (!shadow && (id === el.id || id.startsWith(`${el.id}/`))) return full + id.slice(el.id.length);
+  if (!shadow && (id === el.id || id.startsWith(`${el.id}/`)))
+    return { text: full + id.slice(el.id.length), fromScene: true };
 
   if (scope && scope === el.scope && (id === el.local || id.startsWith(`${el.local}/`)))
-    return to + id.slice(el.local.length);
+    return { text: to + id.slice(el.local.length), fromScene: false };
 
   // `card1/note` reaches `NoteCard/note` through the instance `card1`: only its last segment names `el`.
   const at = chainOf(parsed, scope, id)?.findIndex((step) => step === el) ?? -1;
 
-  if (at > 0) return id.split("/").with(at, to).join("/");
+  if (at > 0) return { text: id.split("/").with(at, to).join("/"), fromScene: false };
 
   return undefined;
 };
@@ -469,6 +515,11 @@ const applyOne = (parsed: Parsed, e: Edit): Effect.Effect<Files, EditError> => {
 
 const targetOf = (e: Edit): Id => (e.op === "insert" ? e.parent : e.target);
 
+/** What `edit` made: the change, and the source it parses to, so a caller need not parse it again. */
+export interface Edited extends Change {
+  readonly parsed: Parsed;
+}
+
 /**
  * Apply edits in order, each against the source the one before left. Only the text an edit names changes, so
  * everything else reprints byte for byte. Pass `current` (the files as they are now) to refuse edits planned
@@ -478,14 +529,22 @@ export const edit = (
   parsed: Parsed,
   edits: readonly Edit[],
   current?: Files,
-): Effect.Effect<Change, EditError> =>
+): Effect.Effect<Edited, EditError> =>
   Effect.gen(function* () {
-    for (const [file, text] of Object.entries(current ?? {})) {
-      const expected = parsed.hashes[file];
-      const actual = hash(text);
+    // `current` is a full snapshot: a file it dropped, or one it added, is a change the plan never saw.
+    if (current) {
+      const names = new Set([...Object.keys(parsed.files), ...Object.keys(current)]);
 
-      if (expected !== undefined && expected !== actual)
-        return yield* Effect.fail(new StaleSource({ file, expected, actual }));
+      for (const file of names) {
+        const expected = Object.hasOwn(parsed.hashes, file) ? parsed.hashes[file] : undefined;
+        const text = Object.hasOwn(current, file) ? current[file] : undefined;
+        const actual = text === undefined ? undefined : hash(text);
+
+        if (expected !== actual)
+          return yield* Effect.fail(
+            new StaleSource({ file, expected: expected ?? "", actual: actual ?? "" }),
+          );
+      }
     }
 
     let state = parsed;
@@ -509,5 +568,5 @@ export const edit = (
       .map((file) => unified(file, parsed.files[file] ?? "", state.files[file] ?? ""))
       .join("");
 
-    return { files: state.files, diff };
+    return { files: state.files, diff, parsed: state };
   });

@@ -289,6 +289,7 @@
         "@svjeez/fonts": "workspace:*",
         "@svjeez/geo": "workspace:*",
         "@svjeez/icons": "workspace:*",
+        "@svjeez/live": "workspace:*",
         "@svjeez/math": "workspace:*",
         "@svjeez/mermaid": "workspace:*",
         "@types/bun": "latest",

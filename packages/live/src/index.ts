@@ -2,7 +2,7 @@ export * from "./errors.ts";
 
 export { edit } from "./edit.ts";
 
-export { elementAt, elementOf, locate, parse } from "./source.ts";
+export { elementAt, elementOf, locate, parse, registeredName } from "./source.ts";
 
 export { compile, defaultAllowlist } from "./compile.ts";
 
@@ -11,6 +11,8 @@ export type { Allowlist, CompileOptions } from "./compile.ts";
 export { describe } from "./describe.ts";
 
 export { Hooks, NoHooks } from "./hooks.ts";
+
+export type { EditMeta } from "./hooks.ts";
 
 export { defineEdit } from "./define-edit.ts";
 
