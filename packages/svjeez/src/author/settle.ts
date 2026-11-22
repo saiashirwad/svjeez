@@ -1,11 +1,11 @@
 import type { Names } from "./names";
-import { SceneError, located } from "../model/scene-error";
+import { SceneError, located, placeOf } from "../model/scene-error";
 
 import { EPSILON, type Seconds } from "../model/time";
-import type { Animated, Box, Layer, SceneNode, Vec } from "../model/ir";
+import type { Animated, Box, Layer, SceneNode, Source, Vec } from "../model/ir";
 import { atRest, isLane } from "../model/lane";
 import { isDerived } from "./derived";
-import { isAnchor, type Anchor, type Place, type Ref } from "./refs";
+import { isAnchor, type Anchor, type ById, type Place, type Ref } from "./refs";
 import { mixGeometry } from "../model/geometry";
 import { blendNumber, blendVec, breaksOf, follow, laneFrom, valueAt } from "../model/sample";
 import { isTrack } from "./track";
@@ -85,6 +85,8 @@ export type Aim = (
 export interface Notes {
   readonly nodes: Map<string, Note>;
   readonly refs: Map<Ref, string>;
+  /** The node key of each `id` written in the scene, by its scoped id. */
+  readonly ids: Map<string, { readonly key: string; readonly source?: Source }>;
   readonly aims: Map<string, Aim>;
   readonly onAnchor: Set<string>;
   readonly resized: Set<string>;
@@ -94,11 +96,29 @@ export interface Notes {
 export const notes = (names: Names): Notes => ({
   nodes: new Map(),
   refs: new Map(),
+  ids: new Map(),
   aims: new Map(),
   onAnchor: new Set(),
   resized: new Set(),
   names,
 });
+
+const where = (source: Source | undefined): string =>
+  source ? placeOf(source) : "an unknown place";
+
+/** Records the id a node was written with. Two nodes with one id in a scope is an error, and nothing renames either. */
+export const noteId = (into: Notes, id: string, key: string, source: Source | undefined): void => {
+  const taken = into.ids.get(id);
+
+  // The same node lowered again, as in each state of a morph(), is not a second one.
+  if (taken !== undefined && taken.key !== key)
+    throw new SceneError(
+      `Two nodes have the id "${id}": ${into.names.named(taken.key)} at ${where(taken.source)} and ${into.names.named(key)} at ${where(source)}.`,
+      "Give each an id of its own; ids inside a component with an id are scoped by it.",
+      into.names.whereOf(key),
+    );
+  into.ids.set(id, { key, ...(source && { source }) });
+};
 
 export const noteResized = (
   into: Notes,
@@ -142,6 +162,13 @@ export const note = (
   const point = props.at ?? props.offset;
 
   if (ref) {
+    if (ref.named)
+      throw new SceneError(
+        `${names.named(key)} is given ref={${ref.label}}, but ref("id") finds a node by its id, never given.`,
+        `Give the node id="${ref.named.id}", and use ref() for ref={…}.`,
+        names.whereOf(key),
+      );
+
     if (ref.within)
       throw new SceneError(
         `${names.named(key)} is given ref={${ref.label}}, but a part is found inside its node, never given.`,
@@ -350,7 +377,7 @@ const isPoint = (end: unknown): end is Vec =>
 
 export const settle = <G extends SceneNode & { readonly kind: "group" }>(
   root: G,
-  { nodes, refs, aims, resized, names }: Notes,
+  { nodes, refs, ids, aims, resized, names }: Notes,
   duration: Seconds,
 ): G => {
   const top = draft(root, undefined, nodes);
@@ -375,11 +402,28 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
   const attached = new Map<Draft, string[]>();
 
+  const keyOfId = ({ id, scope }: ById, label: string, source: Source | undefined): string => {
+    // The innermost scope that holds the id wins, so ref("note") in a component finds its own note first.
+    for (let depth = scope.length; depth >= 0; depth--) {
+      const found = ids.get([...scope.slice(0, depth), id].join("/"));
+
+      if (found) return found.key;
+    }
+
+    const known = [...ids.keys()];
+
+    throw new SceneError(
+      `${label} names the id "${id}", but no node has it.${known.length > 0 ? ` The ids written are ${known.map((each) => `"${each}"`).join(", ")}.` : " No node has an id."}`,
+      `Give a node id="${id}", or ref an id that is written.`,
+      source && { source },
+    );
+  };
+
   const target = (anchor: Anchor): Draft => {
     if (anchor.of === "canvas") return top;
     const { within } = anchor.of;
     const owner = within?.ref ?? anchor.of;
-    const key = refs.get(owner);
+    const key = owner.named ? keyOfId(owner.named, anchor.label, owner.source) : refs.get(owner);
 
     if (key === undefined)
       throw new SceneError(

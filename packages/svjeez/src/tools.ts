@@ -140,3 +140,7 @@ export {
   type TextParam,
   type Values,
 } from "./params";
+
+export { componentMeta, isComponent, type ComponentMeta } from "./author/component";
+
+export { isStandardJsonSchema } from "./author/standard";

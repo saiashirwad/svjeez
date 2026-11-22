@@ -116,7 +116,7 @@ Every node also takes `key ref at anchor origin rotate scale skew opacity motion
 | `fill stroke radius` on those three | a background as big as the container: a card, a window, a row |
 | `<Align to place inset>` | places children against the canvas (default), a box or a ref |
 
-Refs: `ref()`, anchors `center left right top bottom topLeft topRight bottomLeft bottomRight`, `side(edge, t)`, `.map(([x, y]) => …)`, `.part(key)`.
+Refs: `ref()`, anchors `center left right top bottom topLeft topRight bottomLeft bottomRight`, `side(edge, t)`, `.map(([x, y]) => …)`, `.part(key)`. Ids: `id="note"` on any node, scoped by the `component({ name, props, render })` it sits in (`<NoteCard id="card1">` holds `card1/note`); `ref("card1/note")` finds it, and `svg.emit(scene, { ids: true })` writes `data-svz-id`. `props` is any Standard Schema.
 Fonts and data: `font(bytes)`, `font.load(path)`, `font.family(...faces)`, `google()` from `@svjeez/fonts`, `picture()`, `param.number`, `param.count`, `param.seconds`, `param.color`, `param.easing`, `param.choice`, `param.text`, `param.list`.
 
 ## One way to do each thing
@@ -242,7 +242,7 @@ Runtime errors. `…` stands for a value the message fills in.
 - Fonts and pictures: [`references/fonts-pictures.md`](references/fonts-pictures.md)
 - Icons, charts, code: [`references/icons.md`](references/icons.md), [`references/charts.md`](references/charts.md), [`references/code.md`](references/code.md)
 - Diagrams, Mermaid, maps and globes, math: [`references/diagrams.md`](references/diagrams.md), [`references/mermaid.md`](references/mermaid.md), [`references/geo.md`](references/geo.md), [`references/math.md`](references/math.md)
-- Vite and Astro: [`references/web.md`](references/web.md)
+- Vite and Astro; editing a scene's source from a program: [`references/web.md`](references/web.md), [`references/live.md`](references/live.md)
 
 ## Examples
 

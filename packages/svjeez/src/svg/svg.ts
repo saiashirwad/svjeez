@@ -65,6 +65,8 @@ export interface SvgOptions {
   readonly resolve?: Readonly<Record<string, string>>;
   readonly playbackRate?: number;
   readonly sources?: boolean;
+  /** Emit `data-svz-id` on every element whose node has an `id`, for a host that finds and drives them. Off by default. */
+  readonly ids?: boolean;
 }
 
 const EXACT: Support = { level: "exact" };
@@ -102,6 +104,7 @@ interface Ctx {
   readonly prefix: string;
   readonly hides: Map<string, boolean>;
   readonly sources: boolean;
+  readonly ids: boolean;
   readonly around: Partial<Face>;
   readonly defs: Defs;
   readonly onLane?: (lane: LaneReport) => void;
@@ -1023,6 +1026,8 @@ const isolates = (children: readonly SceneNode[]): boolean =>
 
 const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
   if (ctx.sources || node.kind !== "group" || node.children.length !== 1) return node;
+
+  if (ctx.ids && node.id !== undefined) return node;
   const [child] = node.children;
 
   if (
@@ -1255,8 +1260,12 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
         ...out.attrs,
         "data-key": node.key,
         ...(node.source && { "data-source": placeOf(node.source) }),
+        ...(ctx.ids && node.id !== undefined && { "data-svz-id": node.id }),
       },
     };
+
+  if (ctx.ids && node.id !== undefined)
+    return { ...out, attrs: { ...out.attrs, "data-svz-id": node.id } };
 
   return node.kind === "group" &&
     out.tag === "g" &&
@@ -1377,6 +1386,7 @@ export const svg: Backend<string, SvgOptions> = {
       prefix,
       hides: new Map(),
       sources: options.sources ?? false,
+      ids: options.ids ?? false,
       ...(options.onLane && { onLane: options.onLane }),
       reported: new Set(),
       schemes: new Set(),

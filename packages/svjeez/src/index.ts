@@ -14,6 +14,10 @@ export {
 
 export type { Ref } from "./author/refs";
 
+export { component, type ComponentOptions, type Slots } from "./author/component";
+
+export type { StandardJSONSchemaV1, StandardSchemaV1, JsonSchema } from "./author/standard";
+
 export { Align, Center, Grid, spread, Stack } from "./author/layout";
 
 export { Arrow } from "./author/arrow";
