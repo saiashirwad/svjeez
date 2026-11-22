@@ -175,30 +175,11 @@ button.icon {
   border-bottom: 1px solid var(--line);
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.logo {
-  display: block;
-  width: 18px;
-  height: 18px;
-}
-
 .bar h1 {
   margin: 0;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: -0.01em;
-}
-
-.bar-hint {
-  padding-left: 16px;
-  color: var(--muted);
-  border-left: 1px solid var(--line);
-  line-height: 20px;
 }
 
 .spacer {
@@ -289,8 +270,8 @@ button.icon {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 12px 16px 0;
-  padding: 8px 8px 8px 14px;
+  margin: 8px 16px 0;
+  padding: 6px 6px 6px 12px;
   color: var(--red);
   background: var(--red-soft);
   border: 1px solid var(--red-line);
@@ -338,14 +319,14 @@ button.icon {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 44px;
+  min-height: 40px;
   margin: 0 -16px 12px;
   padding: 0 16px;
   border-bottom: 1px solid var(--line);
 }
 
 .pane-head:not(:first-child) {
-  margin-top: 20px;
+  margin-top: 16px;
   border-top: 1px solid var(--line);
 }
 
@@ -367,40 +348,15 @@ button.icon {
   color: var(--muted);
 }
 
-.hint {
-  margin: 0 0 14px;
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.hint code,
-.switch code {
-  font-size: 11.5px;
-}
-
 .group {
-  margin-top: 20px;
-  padding-top: 16px;
+  margin-top: 12px;
+  padding-top: 12px;
   border-top: 1px solid var(--line);
 }
 
 .empty {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-top: 20px;
-  padding: 20px 16px;
-  text-align: center;
+  margin: 12px 0 0;
   color: var(--muted);
-  font-size: 12px;
-  border: 1px dashed var(--line-strong);
-  border-radius: 8px;
-}
-
-.empty strong {
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 500;
 }
 
 /* Stage */
@@ -408,13 +364,6 @@ button.icon {
 .canvas {
   display: grid;
   place-items: center;
-  padding: 28px;
-  background-color: var(--subtle);
-  background-image: radial-gradient(var(--line-strong) 1px, transparent 1px);
-  background-size: 16px 16px;
-  background-position: 8px 8px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
 }
 
 .canvas svg {
@@ -423,10 +372,8 @@ button.icon {
   max-width: 440px;
   height: auto;
   max-height: 64vh;
-  border-radius: 8px;
-  box-shadow:
-    0 0 0 1px var(--line-strong),
-    0 8px 24px -12px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--line);
+  border-radius: 6px;
   cursor: crosshair;
 }
 
@@ -437,12 +384,8 @@ button.icon {
   grid-template-columns: 88px minmax(0, 1fr);
   align-items: center;
   gap: 12px;
-  min-height: 40px;
-  padding: 4px 0;
-}
-
-.field + .field {
-  border-top: 1px solid var(--line);
+  min-height: 36px;
+  padding: 2px 0;
 }
 
 .field-name {
@@ -680,25 +623,18 @@ select.input {
   min-width: 0;
   width: fit-content;
   height: 24px;
-  padding: 0 8px 0 4px;
+  padding: 0 8px;
+  padding-left: 8px;
   color: var(--muted);
   background: var(--subtle);
-  border: 1px solid var(--line);
   border-radius: var(--radius);
   cursor: help;
 }
 
-.chip:not(:has(.chip-reason)) {
-  padding-left: 8px;
-}
-
 .chip-reason {
   flex: none;
-  padding: 1px 5px;
-  font: 500 10.5px/1.4 var(--sans);
-  color: var(--muted);
-  background: var(--hover);
-  border-radius: 4px;
+  font: 11px var(--sans);
+  color: var(--faint);
 }
 
 .chip code {
@@ -717,13 +653,12 @@ select.input {
 }
 
 .nodes button {
-  position: relative;
   display: flex;
-  align-items: stretch;
-  justify-content: flex-start;
-  gap: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   width: 100%;
-  height: 28px;
+  height: 26px;
   padding: 0 8px;
   font: 12.5px var(--mono);
   color: var(--text);
@@ -741,32 +676,8 @@ select.input {
   background: var(--accent-soft);
 }
 
-.nodes button.on::before {
-  content: "";
-  position: absolute;
-  top: 6px;
-  bottom: 6px;
-  left: 0;
-  width: 2px;
-  background: var(--accent);
-  border-radius: 2px;
-}
-
-.guide {
-  flex: none;
-  width: 14px;
-  margin-left: 5px;
-  border-left: 1px solid var(--line-strong);
-}
-
-.guide:first-child {
-  margin-left: 2px;
-}
-
 .node-id {
-  flex: 1;
   min-width: 0;
-  align-self: center;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -774,31 +685,11 @@ select.input {
 
 .nodes button.on .node-id {
   color: var(--accent);
-  font-weight: 500;
 }
 
-.tag {
-  flex: none;
-  align-self: center;
-  margin-left: 8px;
-  padding: 0 6px;
+.nodes em {
   font-size: 11px;
-  line-height: 18px;
   color: var(--faint);
-  border: 1px solid var(--line);
-  border-radius: 4px;
-}
-
-.node-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.pane h3.node-title {
-  margin-bottom: 6px;
-  font: 500 13px var(--mono);
-  color: var(--text);
 }
 
 .row {
@@ -810,10 +701,6 @@ select.input {
 
 .row .input {
   flex: 1;
-}
-
-.arrow {
-  color: var(--faint);
 }
 
 /* Source */
@@ -889,7 +776,7 @@ select.input {
 }
 
 .code mark {
-  padding: 2px 0;
+  padding: 1px 0;
   color: inherit;
   background: var(--accent-mark);
   border-radius: 4px;
@@ -933,10 +820,6 @@ select.input {
     position: sticky;
     top: 0;
     z-index: 1;
-  }
-
-  .bar-hint {
-    display: none;
   }
 
   .panes {

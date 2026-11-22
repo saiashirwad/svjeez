@@ -217,13 +217,7 @@ export const App = () => {
   return (
     <div className="app">
       <header className="bar">
-        <div className="brand">
-          <svg className="logo" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-            <path d="M12 2 22 20H2Z" fill="currentColor" />
-          </svg>
-          <h1>svjeez live</h1>
-        </div>
-        <span className="bar-hint">Click the scene to find its source</span>
+        <h1>svjeez live</h1>
         <span className="spacer" />
         <label className="switch">
           <input
@@ -268,7 +262,7 @@ export const App = () => {
             </button>
           </div>
           {selection?.svgId && (
-            <style>{`.canvas [data-svz-id="${CSS.escape(selection.svgId)}"] { filter: drop-shadow(0 0 4px var(--accent)) drop-shadow(0 0 1px var(--accent)); }`}</style>
+            <style>{`.canvas [data-svz-id="${CSS.escape(selection.svgId)}"] { outline: 1.5px solid var(--accent); outline-offset: 2px; }`}</style>
           )}
           <div
             key={replay}
@@ -305,13 +299,11 @@ export const App = () => {
                 <button
                   type="button"
                   className={id === selection?.id ? "on" : ""}
+                  style={{ paddingLeft: 8 + depthOf(state, id) * 14 }}
                   onClick={() => select(id)}
                 >
-                  {Array.from({ length: depthOf(state, id) }, (_, i) => (
-                    <span key={i} className="guide" aria-hidden="true" />
-                  ))}
                   <span className="node-id">{id}</span>
-                  <em className="tag">{state.describe.nodes[id]?.component}</em>
+                  <em>{state.describe.nodes[id]?.component}</em>
                 </button>
               </li>
             ))}
@@ -319,8 +311,8 @@ export const App = () => {
 
           {node && state ? (
             <div className="group">
-              <h3 className="node-title">
-                <span>{node.id}</span> <em className="tag">{node.component}</em>
+              <h3>
+                <span>{node.id}</span> <em>{node.component}</em>
               </h3>
               {Object.entries(node.props).map(([name, prop]) => (
                 <PropField
@@ -332,10 +324,7 @@ export const App = () => {
               ))}
             </div>
           ) : (
-            <div className="empty">
-              <strong>Select an element</strong>
-              <span>Pick one from the tree above, or click it on the stage.</span>
-            </div>
+            <p className="empty">Select an element.</p>
           )}
 
           <div className="group actions">
@@ -352,9 +341,6 @@ export const App = () => {
                 Rename
               </button>
             </div>
-            <p className="hint">
-              Renaming rewrites every <code>ref("…")</code> that points at it.
-            </p>
             <div className="row">
               <button type="button" className="primary" disabled={!state} onClick={insert}>
                 Insert NoteCard
@@ -380,9 +366,7 @@ export const App = () => {
                   <option key={color}>{color}</option>
                 ))}
               </select>
-              <span className="arrow" aria-hidden="true">
-                →
-              </span>
+              <span aria-hidden="true">→</span>
               <input
                 type="color"
                 className="swatch"
@@ -398,9 +382,6 @@ export const App = () => {
                 Recolor
               </button>
             </div>
-            <p className="hint">
-              A custom edit made with <code>defineEdit</code>: one click, every matching color.
-            </p>
           </div>
         </section>
 
@@ -438,10 +419,7 @@ export const App = () => {
               ))}
             </pre>
           ) : (
-            <div className="empty">
-              <strong>No edits yet</strong>
-              <span>Change a prop or run an action and the minimal diff shows here.</span>
-            </div>
+            <p className="empty">No edits yet.</p>
           )}
         </section>
       </main>
