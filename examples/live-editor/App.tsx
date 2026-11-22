@@ -217,10 +217,15 @@ export const App = () => {
   return (
     <div className="app">
       <header className="bar">
-        <h1>svjeez live</h1>
-        <span className="muted">click the scene to find its source</span>
+        <div className="brand">
+          <svg className="logo" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path d="M12 2 22 20H2Z" fill="currentColor" />
+          </svg>
+          <h1>svjeez live</h1>
+        </div>
+        <span className="bar-hint">Click the scene to find its source</span>
         <span className="spacer" />
-        <label className="check">
+        <label className="switch">
           <input
             type="checkbox"
             checked={locked}
@@ -229,19 +234,24 @@ export const App = () => {
               setLocked(event.target.checked);
             }}
           />
+          <span className="switch-track" aria-hidden="true" />
           Lock <code>seal</code>
         </label>
-        <span className="rev">rev {state?.revision ?? 0}</span>
-        <button type="button" onClick={reset}>
+        <span className="rev" title="Session revision">
+          rev {state?.revision ?? 0}
+        </span>
+        <button type="button" className="secondary" onClick={reset}>
           Reset
         </button>
       </header>
 
       {banner && (
         <div className="banner" role="alert">
-          <span>{banner}</span>
+          <span className="banner-text">{banner}</span>
           <button
             type="button"
+            className="ghost icon"
+            aria-label="Dismiss"
             onClick={() => (setProblem(undefined), setRenderProblem(undefined))}
           >
             ×
@@ -251,14 +261,14 @@ export const App = () => {
 
       <main className="panes">
         <section className="pane stage">
-          <h2>
-            Stage
-            <button type="button" onClick={() => setReplay((n) => n + 1)}>
+          <div className="pane-head">
+            <h2>Stage</h2>
+            <button type="button" className="ghost small" onClick={() => setReplay((n) => n + 1)}>
               Replay
             </button>
-          </h2>
+          </div>
           {selection?.svgId && (
-            <style>{`.canvas [data-svz-id="${CSS.escape(selection.svgId)}"] { filter: drop-shadow(0 0 4px #38bdf8) drop-shadow(0 0 1px #38bdf8); }`}</style>
+            <style>{`.canvas [data-svz-id="${CSS.escape(selection.svgId)}"] { filter: drop-shadow(0 0 4px var(--accent)) drop-shadow(0 0 1px var(--accent)); }`}</style>
           )}
           <div
             key={replay}
@@ -286,18 +296,22 @@ export const App = () => {
         </section>
 
         <section className="pane inspector">
-          <h2>Inspector</h2>
+          <div className="pane-head">
+            <h2>Inspector</h2>
+          </div>
           <ul className="nodes">
             {state?.parsed.order.map((id) => (
               <li key={id}>
                 <button
                   type="button"
                   className={id === selection?.id ? "on" : ""}
-                  style={{ paddingLeft: 8 + depthOf(state, id) * 12 }}
                   onClick={() => select(id)}
                 >
-                  <span>{id}</span>
-                  <em>{state.describe.nodes[id]?.component}</em>
+                  {Array.from({ length: depthOf(state, id) }, (_, i) => (
+                    <span key={i} className="guide" aria-hidden="true" />
+                  ))}
+                  <span className="node-id">{id}</span>
+                  <em className="tag">{state.describe.nodes[id]?.component}</em>
                 </button>
               </li>
             ))}
@@ -305,8 +319,8 @@ export const App = () => {
 
           {node && state ? (
             <div className="group">
-              <h3>
-                {node.id} <em>{node.component}</em>
+              <h3 className="node-title">
+                <span>{node.id}</span> <em className="tag">{node.component}</em>
               </h3>
               {Object.entries(node.props).map(([name, prop]) => (
                 <PropField
@@ -318,7 +332,10 @@ export const App = () => {
               ))}
             </div>
           ) : (
-            <p className="muted">Pick an element, or click the scene.</p>
+            <div className="empty">
+              <strong>Select an element</strong>
+              <span>Pick one from the tree above, or click it on the stage.</span>
+            </div>
           )}
 
           <div className="group actions">
@@ -331,7 +348,7 @@ export const App = () => {
                 onChange={(event) => setRenameTo(event.target.value)}
                 onKeyDown={(event) => event.key === "Enter" && rename()}
               />
-              <button type="button" disabled={!node} onClick={rename}>
+              <button type="button" className="secondary" disabled={!node} onClick={rename}>
                 Rename
               </button>
             </div>
@@ -339,11 +356,12 @@ export const App = () => {
               Renaming rewrites every <code>ref("…")</code> that points at it.
             </p>
             <div className="row">
-              <button type="button" disabled={!state} onClick={insert}>
+              <button type="button" className="primary" disabled={!state} onClick={insert}>
                 Insert NoteCard
               </button>
               <button
                 type="button"
+                className="danger"
                 disabled={!node}
                 onClick={() =>
                   node && apply([{ op: "remove", target: node.id }], () => setSelection(undefined))
@@ -362,14 +380,18 @@ export const App = () => {
                   <option key={color}>{color}</option>
                 ))}
               </select>
-              <span>→</span>
+              <span className="arrow" aria-hidden="true">
+                →
+              </span>
               <input
                 type="color"
+                className="swatch"
                 value={recolorTo}
                 onChange={(event) => setRecolorTo(event.target.value)}
               />
               <button
                 type="button"
+                className="secondary"
                 disabled={!engine || from === ""}
                 onClick={() => commit(engine?.recolor(from, recolorTo))}
               >
@@ -383,12 +405,16 @@ export const App = () => {
         </section>
 
         <section className="pane source">
-          <h2>Source</h2>
-          <div className="tabs">
+          <div className="pane-head">
+            <h2>Source</h2>
+          </div>
+          <div className="tabs" role="tablist">
             {files.map((name) => (
               <button
                 key={name}
                 type="button"
+                role="tab"
+                aria-selected={name === file}
                 className={name === file ? "on" : ""}
                 onClick={() => setFile(name)}
               >
@@ -400,7 +426,9 @@ export const App = () => {
             text={state?.files[file] ?? ""}
             range={range?.file === file ? range : undefined}
           />
-          <h2>Last diff</h2>
+          <div className="pane-head">
+            <h2>Last diff</h2>
+          </div>
           {diff ? (
             <pre className="diff">
               {diff.split("\n").map((line, i) => (
@@ -410,7 +438,10 @@ export const App = () => {
               ))}
             </pre>
           ) : (
-            <p className="muted">Edit something and the minimal diff shows here.</p>
+            <div className="empty">
+              <strong>No edits yet</strong>
+              <span>Change a prop or run an action and the minimal diff shows here.</span>
+            </div>
           )}
         </section>
       </main>

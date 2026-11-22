@@ -3,7 +3,7 @@ import type { Files } from "@svjeez/live";
 /** The module a scene imports its font from. The page provides it, since a browser cannot load a font by name. */
 export const FONT_MODULE = "example-fonts";
 
-const NOTE_CARD = `import { Group, Shape, Text, component, enter, rect, span } from "svjeez";
+const NOTE_CARD = `import { Group, Shape, Text, component, ease, enter, moved, rect, span, track } from "svjeez";
 import { sans } from "${FONT_MODULE}";
 
 // A props schema is any Standard Schema; this one also writes itself as JSON Schema,
@@ -48,11 +48,16 @@ export const NoteCard = component({
   },
   render: ({ width, reveal, accent, note }) => (
     <Group
-      motion={[
-        enter(span(1.2, 0.7), {
-          from: reveal === "wipe" ? { opacity: 0, offset: [-40, 0] } : { opacity: 0 },
-        }),
-      ]}
+      motion={[reveal === "fade" && enter(span(1.7, 0.7), { from: { opacity: 0, scale: 0.96 } })]}
+      clip={
+        reveal === "wipe"
+          ? track(moved(rect(0, 116), [-3, -3])).to(
+              moved(rect(width + 6, 116), [-3, -3]),
+              span(1.7, 0.7),
+              ease.inOut,
+            )
+          : undefined
+      }
     >
       <Shape
         id="frame"
@@ -60,7 +65,8 @@ export const NoteCard = component({
         fill="#1e293b"
         stroke={{ color: accent, width: 2 }}
       />
-      <Text id="note" font={sans} size={14} fill="#e2e8f0" at={[18, 55]} anchor="baseline-left">
+      <Shape geometry={rect(4, 46, { radius: 2 })} at={[20, 55]} anchor="left" fill={accent} />
+      <Text id="note" font={sans} size={15} fill="#e2e8f0" at={[38, 55]} anchor="left">
         {note}
       </Text>
     </Group>
@@ -77,6 +83,7 @@ const DESIGN = `import {
   ease,
   enter,
   param,
+  radial,
   rect,
   ref,
   scene,
@@ -91,17 +98,37 @@ export const params = {
 };
 
 export default ({ guest }) =>
-  scene({ size: [420, 520], duration: 4, title: "Invitation" }, () => (
+  scene({ size: [420, 520], duration: 4, loop: false, title: "Invitation" }, () => (
     <Group id="invitation">
       <Shape id="paper" geometry={rect(420, 520)} fill="#0f172a" />
+      <Shape
+        geometry={rect(420, 520)}
+        fill={radial.across({ center: "top", stops: ["#6366f126", "#6366f100"] })}
+      />
+      <Shape
+        geometry={rect(388, 488, { radius: 12 })}
+        at={[16, 16]}
+        fill="#00000000"
+        stroke={{ color: "#1e293b", width: 1 }}
+      />
+      <Text
+        font={sans}
+        size={12}
+        fill="#f59e0b"
+        at={[210, 76]}
+        anchor="baseline"
+        motion={[enter(span(0.1, 0.5), { from: { opacity: 0, offset: [0, 8] } })]}
+      >
+        AN INVITATION
+      </Text>
       <Text
         id="title"
         font={sans}
-        size={26}
+        size={34}
         fill="#f8fafc"
-        at={[40, 120]}
-        anchor="baseline-left"
-        motion={[enter(span(0.2, 0.6))]}
+        at={[210, 122]}
+        anchor="baseline"
+        motion={[enter(span(0.2, 0.6), { from: { opacity: 0, offset: [0, 12] } })]}
       >
         You are invited
       </Text>
@@ -109,29 +136,43 @@ export default ({ guest }) =>
         font={sans}
         size={16}
         fill="#94a3b8"
-        at={[40, 156]}
-        anchor="baseline-left"
-        motion={[enter(span(0.5, 0.6))]}
+        at={[210, 154]}
+        anchor="baseline"
+        motion={[enter(span(0.35, 0.6), { from: { opacity: 0, offset: [0, 12] } })]}
       >
         {"Dear " + guest + ", join us."}
       </Text>
       <Shape
         id="seal"
         geometry={circle(26)}
-        at={[66, 300]}
+        at={[210, 228]}
+        anchor="center"
+        origin="center"
         fill="#f59e0b"
-        scale={track(0.2).to(1, span(0.8, 0.5), ease.pop)}
+        stroke={{ color: "#fcd34d", width: 2 }}
+        scale={track(0).to(1, span(0.8, 0.6), ease.pop)}
       />
       <Arrow
         id="pointer"
-        from={ref("seal").right}
-        to={ref("note").left}
+        from={ref("seal").bottom}
+        to={ref("note").top}
+        inset={8}
         stroke={{ color: "#f59e0b", width: 2 }}
-        draw={track(0).to(1, span(1.1, 0.6), ease.out)}
+        draw={track(0).to(1, span(1.4, 0.45), ease.out)}
       />
-      <Group id="slot" at={[130, 245]}>
+      <Group id="slot" at={[210, 312]} anchor="top">
         <NoteCard id="note" width={240} reveal="fade" accent="#7c3aed" note="Bring a friend." />
       </Group>
+      <Text
+        font={sans}
+        size={12}
+        fill="#64748b"
+        at={[210, 472]}
+        anchor="baseline"
+        motion={[enter(span(2.3, 0.6))]}
+      >
+        Saturday at seven · RSVP by Friday
+      </Text>
     </Group>
   ));
 `;

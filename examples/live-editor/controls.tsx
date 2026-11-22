@@ -63,13 +63,18 @@ export const ValueControl = ({ value, schema, ui, onCommit }: ValueProps) => {
   const maximum = schema["maximum"];
   const step = ui?.["step"];
 
-  if (control === "slider" && isNumber(value))
+  if (control === "slider" && isNumber(value)) {
+    const low = isNumber(minimum) ? minimum : 0;
+    const high = isNumber(maximum) ? maximum : 100;
+    const filled = high > low ? ((value - low) / (high - low)) * 100 : 0;
+
     return (
       <label className="slider">
         <input
           type="range"
-          min={isNumber(minimum) ? minimum : 0}
-          max={isNumber(maximum) ? maximum : 100}
+          min={low}
+          max={high}
+          style={{ backgroundSize: `${Math.min(100, Math.max(0, filled))}% 100%` }}
           step={isNumber(step) ? step : 1}
           value={value}
           onChange={(event) => onCommit(Number(event.target.value))}
@@ -77,6 +82,7 @@ export const ValueControl = ({ value, schema, ui, onCommit }: ValueProps) => {
         <output>{value}</output>
       </label>
     );
+  }
 
   if (control === "segmented" && options.length > 0)
     return (
@@ -115,7 +121,12 @@ export const ValueControl = ({ value, schema, ui, onCommit }: ValueProps) => {
   if (isString(value) && (schema["format"] === "color" || HEX.test(value)) && HEX.test(value))
     return (
       <label className="color">
-        <input type="color" value={value} onChange={(event) => onCommit(event.target.value)} />
+        <input
+          type="color"
+          className="swatch"
+          value={value}
+          onChange={(event) => onCommit(event.target.value)}
+        />
         <code>{value}</code>
       </label>
     );
@@ -124,12 +135,23 @@ export const ValueControl = ({ value, schema, ui, onCommit }: ValueProps) => {
 
   if (isBoolean(value))
     return (
-      <input type="checkbox" checked={value} onChange={(event) => onCommit(event.target.checked)} />
+      <input
+        type="checkbox"
+        className="checkbox"
+        checked={value}
+        onChange={(event) => onCommit(event.target.checked)}
+      />
     );
 
   if (isString(value)) return <Draft value={value} onCommit={onCommit} />;
 
-  return <code>{JSON.stringify(value)}</code>;
+  const json = JSON.stringify(value);
+
+  return (
+    <span className="chip" title={json}>
+      <code>{json}</code>
+    </span>
+  );
 };
 
 interface PropFieldProps {
@@ -145,8 +167,8 @@ export const PropField = ({ name, prop, onCommit }: PropFieldProps) => (
     {prop.editable ? (
       <ValueControl value={prop.value} schema={prop.schema} ui={prop.ui} onCommit={onCommit} />
     ) : (
-      <span className="pill" title={`not editable: ${prop.reason}`}>
-        <b>{prop.reason}</b>
+      <span className="chip" title={`Read-only ${prop.reason}: ${prop.text}`}>
+        <span className="chip-reason">{prop.reason}</span>
         <code>{prop.text}</code>
       </span>
     )}
