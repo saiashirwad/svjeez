@@ -10,9 +10,10 @@
     "perf": "bun run scripts/perf.ts",
     "render-video": "bun run ../packages/svjeez/src/cli.ts video",
     "test": "bun test",
+    "live": "vite live-editor",
     "test:browsers": "bun test ./scripts/browsers.ts",
     "test:node": "tsx scripts/node-check.ts",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react && tsc --noEmit -p dom-react-vite && tsc --noEmit -p dom-component && svelte-check --tsconfig dom-svelte/tsconfig.json --fail-on-warnings"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react && tsc --noEmit -p dom-react-vite && tsc --noEmit -p dom-component && tsc --noEmit -p live-editor && svelte-check --tsconfig dom-svelte/tsconfig.json --fail-on-warnings"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
@@ -23,6 +24,7 @@
     "@svjeez/fonts": "workspace:*",
     "@svjeez/geo": "workspace:*",
     "@svjeez/icons": "workspace:*",
+    "@svjeez/live": "workspace:*",
     "@svjeez/math": "workspace:*",
     "@svjeez/mermaid": "workspace:*",
     "@svjeez/video": "workspace:*",
@@ -31,6 +33,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "bun-plugin-svelte": "^0.0.6",
+    "effect": "^4.1.4",
     "playwright-core": "^1.64.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
