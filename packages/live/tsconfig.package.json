@@ -5,7 +5,8 @@
     "declaration": true,
     "rewriteRelativeImportExtensions": true,
     "rootDir": "./src",
-    "outDir": "./package-dist"
+    "outDir": "./package-dist",
+    "paths": {}
   },
   "include": ["src"]
 }
