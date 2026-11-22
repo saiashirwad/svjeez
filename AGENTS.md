@@ -50,3 +50,7 @@ After writing or changing a scene, run `bun run scene check` and `bun run typech
 ## Site
 
 `site/` is the Astro site at svjeez.texoport.in. Its own scenes and films live in `site/src/scenes/`; it also shows scenes from `examples/` through the `@examples/*` path. Its scripts run Astro under Bun with the `@svjeez/source` condition. Run `bun run dev` at the root, or `bun run build` and `bun run typecheck` inside `site/`. `bun run deploy` builds and deploys through Alchemy's `Cloudflare.Website.Astro` (`site/alchemy.run.ts`). The site pins TypeScript 6, because `astro check` does not support TypeScript 7.
+
+## Releasing
+
+Every package shares one version. `bun scripts/release.ts version next` bumps them all and `bun.lock` (`minor` and `major` start a new `-next.0` line, `stable` drops the suffix, or pass an exact version). Push to main, then run `gh workflow run release.yml --ref main`: prereleases go to npm's `next` tag, stable versions to `latest`.
