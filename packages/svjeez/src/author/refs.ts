@@ -2,6 +2,7 @@ import { SceneError } from "../model/scene-error";
 import type { Box, Source, Vec } from "../model/ir";
 import { caller } from "../svg/traced";
 import { sourceFrom } from "./identity";
+import { checkedId, scopeNow } from "./scope";
 import { PLACE_LIST, PLACES } from "./pin";
 
 export type Edge = "left" | "right" | "top" | "bottom";
@@ -46,20 +47,32 @@ const fraction = (t: number, what: string): number => {
   return t;
 };
 
+/** The node a ref("id") names, and the ids of the components it was written in, which it looks in first. */
+export interface ById {
+  readonly id: string;
+  readonly scope: readonly string[];
+}
+
 export class Ref {
   readonly source: Source | undefined;
   readonly within: { readonly ref: Ref; readonly path: readonly string[] } | undefined;
+  readonly named: ById | undefined;
 
   constructor(
     source: Source | undefined,
     within?: { readonly ref: Ref; readonly path: readonly string[] },
+    named?: ById,
   ) {
     this.source = source;
     this.within = within;
+    this.named = named;
   }
 
   get label(): string {
-    return this.within ? `ref().part("${this.within.path.join("/")}")` : "ref()";
+    const root = this.within?.ref ?? this;
+    const base = root.named ? `ref("${root.named.id}")` : "ref()";
+
+    return this.within ? `${base}.part("${this.within.path.join("/")}")` : base;
   }
 
   part(key: string): Ref {
@@ -128,10 +141,18 @@ export class Ref {
   }
 }
 
-export const ref = (): Ref => {
+/**
+ * A name for one node, to anchor to it. `ref()` is anonymous: give it to one node as ref={…}. `ref("id")` names the node
+ * written with that id, found from inside a component by its scoped id (`ref("note")` in <NoteCard id="card1"> is
+ * `card1/note`), and from anywhere by its full path: `ref("card1/note")`.
+ */
+export const ref = (id?: string): Ref => {
   const at = caller();
+  const source = at && sourceFrom(at);
 
-  return new Ref(at && sourceFrom(at));
+  if (id === undefined) return new Ref(source);
+
+  return new Ref(source, undefined, { id: checkedId(id, "ref()"), scope: scopeNow() });
 };
 
 export type Place = keyof typeof PLACES;

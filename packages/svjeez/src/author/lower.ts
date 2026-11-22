@@ -54,6 +54,7 @@ import {
   arrangeState,
   around,
   note,
+  noteId,
   noteResized,
   notes,
   originOf,
@@ -897,6 +898,8 @@ const lowered = (
   const offset = el.type === "group" ? el.props.offset : undefined;
 
   placement(ctx, el.props, offset, key, parent);
+
+  if (el.props.id !== undefined) noteId(ctx.notes, el.props.id, key, writtenAt(given));
   const still = el.props.at === undefined && offset === undefined && !ctx.notes.aims.has(key);
 
   note(
@@ -918,6 +921,7 @@ const lowered = (
       name,
       dressed(ctx, el.props, sized(ctx, el.props, aimed(node)), timing),
       ctx.notes.names.entryOf(key),
+      el.props.id,
     ),
   ];
 

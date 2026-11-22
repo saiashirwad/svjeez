@@ -34,6 +34,10 @@ const DIFFERS = new Map<string, { props: string[]; why: string }>(
       props: ["bcy"],
       why: "Same as layout.svg: the magenta arrow head turns inside a group that rotates it about the arrow's start, so Firefox bounds the turned head and Chromium its turned box.",
     },
+    "firefox jellyfish.svg": {
+      props: ["bcx", "bcy"],
+      why: "Same as escapement.svg: curved paths turn inside rotating groups, so Firefox bounds the turned curve and Chromium its turned box.",
+    },
   }),
 );
 

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  Arrow,
   Group,
   Sequence,
   Shape,
@@ -8,6 +9,7 @@ import {
   ease,
   morph,
   path,
+  ref,
   rect,
   scene,
   span,
@@ -21,6 +23,7 @@ import {
   hitTest,
   check,
   isLane,
+  SceneError,
   svg,
   valueAt,
   type Model,
@@ -476,6 +479,36 @@ describe("morph", () => {
 
     expect(out).toContain('attributeName="d"');
     expect(out).toContain("@keyframes");
+  });
+});
+
+describe("morph ids", () => {
+  test("a node keeps the id its states agree on", () => {
+    const model = made(() => (
+      <Group>
+        {morph(
+          <Shape key="a" id="shape" geometry={rect(10, 10)} at={[0, 0]} fill="#ff0000" />,
+          <Shape key="a" id="shape" geometry={rect(40, 20)} at={[50, 30]} fill="#0000ff" />,
+          span(1, 2),
+        )}
+        <Arrow key="link" from={ref("shape").right} to={[100, 20]} stroke={{ color: "#000000" }} />
+      </Group>
+    ));
+
+    expect(shape(model, "a").id).toBe("shape");
+    expect(svg.emit(model, { ids: true })).toContain('data-svz-id="shape"');
+  });
+
+  test("states with different ids fail", () => {
+    expect(() =>
+      made(() =>
+        morph(
+          <Shape key="a" id="one" geometry={rect(10, 10)} fill="#ff0000" />,
+          <Shape key="a" id="two" geometry={rect(40, 20)} fill="#0000ff" />,
+          span(1, 2),
+        ),
+      ),
+    ).toThrow(SceneError);
   });
 });
 

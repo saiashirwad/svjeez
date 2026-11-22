@@ -422,6 +422,25 @@ const layersOf = (plan: Plan, entry: Entry, origin: Vec): Layer[] => {
 
 const firstPresent = (entry: Entry): SceneNode => entry.filled[entry.present.indexOf(true)]!;
 
+/** The id the states of a node give it, which every state that has one agrees on. */
+const idOf = (plan: Plan, entry: Entry): string | undefined => {
+  const ids = [
+    ...new Set(
+      entry.filled.flatMap((node, s) =>
+        entry.present[s] && node.id !== undefined ? [node.id] : [],
+      ),
+    ),
+  ];
+
+  if (ids.length > 1)
+    throw new SceneError(
+      `morph() can't merge ${plan.names.named(entry.key)}: its states have different ids (${ids.map((id) => `"${id}"`).join(", ")}), and a node has one.`,
+      "Give the node the same id in every state, or leave it off all but one.",
+    );
+
+  return ids[0];
+};
+
 const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed = plan.exit) => {
   const rest = firstPresent(entry);
   const shown = presence(plan, entry, enter, exit);
@@ -430,8 +449,11 @@ const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed
   const mode = agreed(plan, entry, (node) => node.blend ?? "normal", "blend");
   const scheme = agreed(plan, entry, (node) => node.scheme, "scheme");
 
+  const id = idOf(plan, entry);
+
   return {
     key: entry.key,
+    ...(id !== undefined && { id }),
     ...(rest.name !== undefined && { name: rest.name }),
     ...(rest.source && { source: rest.source }),
     box: rest.box,

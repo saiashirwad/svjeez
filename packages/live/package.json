@@ -1,0 +1,34 @@
+{
+  "name": "@svjeez/live",
+  "version": "0.8.0-next.0",
+  "private": true,
+  "description": "Read, edit and run a svjeez scene's source from a program: a parser, minimal-diff edits and a sandboxed compiler with pluggable runners. Headless and Effect-native.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saiashirwad/svjeez.git",
+    "directory": "packages/live"
+  },
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "bun test --conditions @svjeez/source",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@lezer/common": "^1.5.4",
+    "@lezer/javascript": "^1.5.6",
+    "effect": "^4.1.4",
+    "sucrase": "^3.35.1",
+    "svjeez": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "latest"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

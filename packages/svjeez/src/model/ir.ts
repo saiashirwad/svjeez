@@ -198,6 +198,8 @@ export interface Source {
 
 interface Base {
   readonly key: string;
+  /** The `id` its author gave it, scoped by the components it sits in (`card1/note`). Unique in the scene. */
+  readonly id?: string;
   readonly name?: string;
   readonly source?: Source;
   readonly box: Box;

@@ -22,7 +22,7 @@ export function jsxDEV<P>(
   isStaticChildren?: boolean,
   source?: JsxSource,
 ): SceneElement;
-export function jsxDEV<P extends { readonly children?: Child }>(
+export function jsxDEV<P extends { readonly children?: Child; readonly id?: string }>(
   type: Component<P> | typeof Fragment,
   props: P,
   key?: Key,

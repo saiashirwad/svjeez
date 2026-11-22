@@ -17,6 +17,11 @@ export { Ref, ref } from "./refs";
 
 export interface Common {
   readonly key?: string;
+  /**
+   * A name for this node that a ref("id") finds it by, and that `svg.emit(scene, { ids: true })` writes as `data-svz-id`.
+   * Inside a component that has an id it is scoped by it: `card1/note`. Unique in its scope.
+   */
+  readonly id?: string;
   readonly ref?: Ref;
   readonly at?: Anim<Vec> | Anchor;
   readonly anchor?: AnchorPlace;

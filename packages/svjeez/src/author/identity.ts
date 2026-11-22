@@ -46,6 +46,7 @@ export const identified = <N extends SceneNode>(
   name: string | undefined,
   node: N,
   named?: { readonly name: string; readonly source?: Source },
+  id?: string,
 ): N => {
   const source = written.get(element) ?? named?.source;
   const readable = named?.name;
@@ -53,6 +54,7 @@ export const identified = <N extends SceneNode>(
   const out = {
     ...node,
     ...(readable !== undefined && { name: readable }),
+    ...(id !== undefined && { id }),
     ...(source && { source }),
   };
 

@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "jsxImportSource": "react",
+    "customConditions": ["@svjeez/source"]
+  },
+  "include": ["."],
+  "exclude": []
+}
