@@ -1,30 +1,33 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useRef } from "react";
 import type { MouseEvent } from "react";
-import { elementAt, locate } from "@svjeez/live";
-import type { Edit, Json, JsonObject, Range, State } from "@svjeez/live";
+import { RegistryContext, useAtom, useAtomValue } from "@effect/atom-react";
+import { locate } from "@svjeez/live";
+import type { Range, State } from "@svjeez/live";
+import {
+  apply,
+  bannerAtom,
+  dismissBanner,
+  diffAtom,
+  fileAtom,
+  insertNote,
+  lockedAtom,
+  paramsAtom,
+  pick,
+  recolor,
+  recolorFromAtom,
+  recolorToAtom,
+  renameToAtom,
+  replayAtom,
+  reset,
+  select,
+  selectionAtom,
+  stateAtom,
+  svgTextAtom,
+  valuesAtom,
+} from "./atoms.ts";
 import { ValueControl, PropField } from "./controls.tsx";
-import { boot, colorsIn, freshId } from "./engine.ts";
-import type { Engine, Outcome, Policy } from "./engine.ts";
+import { colorsIn } from "./engine.ts";
 import { isObject } from "./guards.ts";
-
-interface Selection {
-  readonly id: string;
-  /** The `data-svz-id` that was clicked, if the selection came from the stage. */
-  readonly svgId?: string;
-}
-
-/** The defaults a scene's params schema declares, which the stage renders with until a control changes one. */
-const defaultsOf = (schema: JsonObject): JsonObject => {
-  const properties = schema["properties"];
-
-  if (!isObject(properties)) return {};
-
-  return Object.fromEntries(
-    Object.entries(properties).flatMap(([name, property]): [string, Json][] =>
-      isObject(property) && property["default"] !== undefined ? [[name, property["default"]]] : [],
-    ),
-  );
-};
 
 const depthOf = (state: State, id: string): number => {
   const parent = state.parsed.elements[id]?.parent;
@@ -60,82 +63,20 @@ const Source = ({ text, range }: { readonly text: string; readonly range?: Range
 };
 
 export const App = () => {
-  const policy = useRef<Policy>({ lockSeal: false });
-  const [generation, setGeneration] = useState(0);
-  const [engine, setEngine] = useState<Engine>();
-  const [state, setState] = useState<State>();
-  const [svg, setSvg] = useState("");
-  const [replay, setReplay] = useState(0);
-  const [params, setParams] = useState<JsonObject>({});
-  const [selection, setSelection] = useState<Selection>();
-  const [file, setFile] = useState("design.tsx");
-  const [diff, setDiff] = useState("");
-  const [locked, setLocked] = useState(false);
-  const [problem, setProblem] = useState<string>();
-  const [renderProblem, setRenderProblem] = useState<string>();
-  const [renameTo, setRenameTo] = useState("");
-  const [recolorFrom, setRecolorFrom] = useState("");
-  const [recolorTo, setRecolorTo] = useState("#ef4444");
-
-  // One session per generation: Reset opens a fresh one on the sample files.
-  useEffect(() => {
-    let cancelled = false;
-    let opened: Engine | undefined;
-
-    boot(policy.current, setDiff).then(
-      async (next) => {
-        opened = next;
-
-        if (cancelled) return next.dispose();
-        setEngine(next);
-        setState(await next.read());
-      },
-      (thrown) => setProblem(thrown instanceof Error ? thrown.message : String(thrown)),
-    );
-
-    return () => {
-      cancelled = true;
-      void opened?.dispose();
-    };
-  }, [generation]);
-
-  const values = useMemo(
-    () => ({ ...defaultsOf(state?.describe.params ?? {}), ...params }),
-    [state, params],
-  );
-
-  // Draw the scene again whenever the source or a param changes.
-  useEffect(() => {
-    if (!engine || !state) return;
-    let stale = false;
-
-    engine.render(values).then((out) => {
-      if (stale) return;
-
-      if (out.ok) {
-        setSvg(out.value);
-        setRenderProblem(undefined);
-      } else setRenderProblem(out.message);
-    });
-
-    return () => {
-      stale = true;
-    };
-  }, [engine, state, values]);
-
-  /** Runs an edit; a kept batch becomes the new state, a refused one becomes the banner and leaves the source alone. */
-  const commit = async (pending: Promise<Outcome<State>> | undefined, after?: () => void) => {
-    const out = await pending;
-
-    if (!out) return;
-
-    if (!out.ok) return setProblem(out.message);
-    setProblem(undefined);
-    setState(out.value);
-    after?.();
-  };
-
-  const apply = (edits: readonly Edit[], after?: () => void) => commit(engine?.apply(edits), after);
+  const registry = useContext(RegistryContext);
+  const state = useAtomValue(stateAtom);
+  const svg = useAtomValue(svgTextAtom);
+  const values = useAtomValue(valuesAtom);
+  const banner = useAtomValue(bannerAtom);
+  const diff = useAtomValue(diffAtom);
+  const selection = useAtomValue(selectionAtom);
+  const [params, setParams] = useAtom(paramsAtom);
+  const [file, setFile] = useAtom(fileAtom);
+  const [locked, setLocked] = useAtom(lockedAtom);
+  const [replay, setReplay] = useAtom(replayAtom);
+  const [renameTo, setRenameTo] = useAtom(renameToAtom);
+  const [recolorFrom, setRecolorFrom] = useAtom(recolorFromAtom);
+  const [recolorTo, setRecolorTo] = useAtom(recolorToAtom);
 
   const node = state && selection ? state.describe.nodes[selection.id] : undefined;
 
@@ -143,58 +84,11 @@ export const App = () => {
   const range =
     (state && selection?.svgId ? locate(state.parsed, selection.svgId) : undefined) ?? node?.range;
 
-  const pick = (event: MouseEvent) => {
+  const onStageClick = (event: MouseEvent) => {
     if (!state || !(event.target instanceof Element)) return;
     const svgId = event.target.closest("[data-svz-id]")?.getAttribute("data-svz-id");
 
-    if (!svgId) return;
-    const where = locate(state.parsed, svgId);
-    const id = where && elementAt(state.parsed, where.file, where.from);
-
-    if (!where || !id) return setProblem(`Nothing in the source matches "${svgId}".`);
-    setProblem(undefined);
-    setSelection({ id, svgId });
-    setFile(where.file);
-  };
-
-  const select = (id: string) => {
-    setSelection({ id });
-    const where = state?.describe.nodes[id]?.range;
-
-    if (where) setFile(where.file);
-  };
-
-  const reset = () => {
-    setEngine(undefined);
-    setState(undefined);
-    setSvg("");
-    setParams({});
-    setSelection(undefined);
-    setDiff("");
-    setProblem(undefined);
-    setGeneration((n) => n + 1);
-  };
-
-  const insert = () => {
-    if (!state) return;
-    const root = state.describe.root;
-    const id = freshId(state, "note");
-
-    return apply(
-      [
-        {
-          op: "insert",
-          parent: root,
-          at: state.describe.nodes[root]?.children.length ?? 0,
-          element: {
-            component: "NoteCard",
-            id,
-            props: { note: "A new note", width: 200, accent: "#10b981", reveal: "wipe" },
-          },
-        },
-      ],
-      () => setSelection({ id }),
-    );
+    if (svgId) pick(registry, state, svgId);
   };
 
   const rename = () => {
@@ -202,8 +96,8 @@ export const App = () => {
 
     if (!node || to === "" || to === node.id) return;
 
-    return apply([{ op: "rename", target: node.id, to }], () => {
-      setSelection({ id: to });
+    return apply(registry, [{ op: "rename", target: node.id, to }], () => {
+      registry.set(selectionAtom, { id: to });
       setRenameTo("");
     });
   };
@@ -212,7 +106,6 @@ export const App = () => {
   const from = colors.includes(recolorFrom) ? recolorFrom : (colors[0] ?? "");
   const paramProperties = state?.describe.params["properties"];
   const files = state ? Object.keys(state.files) : [];
-  const banner = problem ?? renderProblem;
 
   return (
     <div className="app">
@@ -223,10 +116,7 @@ export const App = () => {
           <input
             type="checkbox"
             checked={locked}
-            onChange={(event) => {
-              policy.current.lockSeal = event.target.checked;
-              setLocked(event.target.checked);
-            }}
+            onChange={(event) => setLocked(event.target.checked)}
           />
           <span className="switch-track" aria-hidden="true" />
           Lock <code>seal</code>
@@ -234,7 +124,7 @@ export const App = () => {
         <span className="rev" title="Session revision">
           rev {state?.revision ?? 0}
         </span>
-        <button type="button" className="secondary" onClick={reset}>
+        <button type="button" className="secondary" onClick={() => reset(registry)}>
           Reset
         </button>
       </header>
@@ -246,7 +136,7 @@ export const App = () => {
             type="button"
             className="ghost icon"
             aria-label="Dismiss"
-            onClick={() => (setProblem(undefined), setRenderProblem(undefined))}
+            onClick={() => dismissBanner(registry)}
           >
             ×
           </button>
@@ -257,7 +147,7 @@ export const App = () => {
         <section className="pane stage">
           <div className="pane-head">
             <h2>Stage</h2>
-            <button type="button" className="ghost small" onClick={() => setReplay((n) => n + 1)}>
+            <button type="button" className="ghost small" onClick={() => setReplay(replay + 1)}>
               Replay
             </button>
           </div>
@@ -267,7 +157,7 @@ export const App = () => {
           <div
             key={replay}
             className="canvas"
-            onClick={pick}
+            onClick={onStageClick}
             dangerouslySetInnerHTML={{ __html: svg }}
           />
           {isObject(paramProperties) && Object.keys(paramProperties).length > 0 && (
@@ -300,7 +190,7 @@ export const App = () => {
                   type="button"
                   className={id === selection?.id ? "on" : ""}
                   style={{ paddingLeft: 8 + depthOf(state, id) * 14 }}
-                  onClick={() => select(id)}
+                  onClick={() => select(registry, state, id)}
                 >
                   <span className="node-id">{id}</span>
                   <em>{state.describe.nodes[id]?.component}</em>
@@ -319,7 +209,9 @@ export const App = () => {
                   key={name}
                   name={name}
                   prop={prop}
-                  onCommit={(value) => apply([{ op: "set", target: node.id, prop: name, value }])}
+                  onCommit={(value) =>
+                    apply(registry, [{ op: "set", target: node.id, prop: name, value }])
+                  }
                 />
               ))}
             </div>
@@ -342,7 +234,12 @@ export const App = () => {
               </button>
             </div>
             <div className="row">
-              <button type="button" className="primary" disabled={!state} onClick={insert}>
+              <button
+                type="button"
+                className="primary"
+                disabled={!state}
+                onClick={() => state && insertNote(registry, state)}
+              >
                 Insert NoteCard
               </button>
               <button
@@ -350,7 +247,10 @@ export const App = () => {
                 className="danger"
                 disabled={!node}
                 onClick={() =>
-                  node && apply([{ op: "remove", target: node.id }], () => setSelection(undefined))
+                  node &&
+                  apply(registry, [{ op: "remove", target: node.id }], () =>
+                    registry.set(selectionAtom, undefined),
+                  )
                 }
               >
                 Remove {node?.id ?? ""}
@@ -376,8 +276,8 @@ export const App = () => {
               <button
                 type="button"
                 className="secondary"
-                disabled={!engine || from === ""}
-                onClick={() => commit(engine?.recolor(from, recolorTo))}
+                disabled={!state || from === ""}
+                onClick={() => recolor(registry, from, recolorTo)}
               >
                 Recolor
               </button>

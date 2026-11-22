@@ -17,11 +17,6 @@ import geistUrl from "./Geist-400.ttf?url";
 import { isString } from "./guards.ts";
 import { ENTRY, FONT_MODULE, INITIAL_FILES } from "./sample.ts";
 
-/** What the Lock checkbox flips. The `beforeEdit` hook reads it on every edit. */
-export interface Policy {
-  lockSeal: boolean;
-}
-
 export type Failure = EditError | Denied | Rejected | CompileError | ParseError | RenderError;
 
 export type Outcome<A> =
@@ -119,7 +114,8 @@ export const freshId = (state: State, base: string): string => {
 };
 
 export interface Engine {
-  readonly read: () => Promise<State>;
+  /** The session's state: it changes whenever a batch is kept. */
+  readonly state: SubscriptionRef.SubscriptionRef<State>;
   readonly apply: (edits: readonly Edit[]) => Promise<Outcome<State>>;
   readonly recolor: (from: string, to: string) => Promise<Outcome<State>>;
   readonly render: (params: JsonObject) => Promise<Outcome<string>>;
@@ -130,9 +126,13 @@ const touchesSeal = (edit: Edit): boolean => "target" in edit && edit.target ===
 
 /**
  * Opens a session on the sample files. The runner is the browser's (`new Function`); the font reaches the scene as an
- * extra library, since a browser cannot load one by name. `onDiff` hears the diff of every batch the session keeps.
+ * extra library, since a browser cannot load one by name. `isLocked` is asked on every edit; `onDiff` hears the diff of
+ * every batch the session keeps.
  */
-export const boot = async (policy: Policy, onDiff: (diff: string) => void): Promise<Engine> => {
+export const boot = async (
+  isLocked: () => boolean,
+  onDiff: (diff: string) => void,
+): Promise<Engine> => {
   const bytes = new Uint8Array(await (await fetch(geistUrl)).arrayBuffer());
   const sans = font(bytes);
 
@@ -140,7 +140,7 @@ export const boot = async (policy: Policy, onDiff: (diff: string) => void): Prom
     Hooks,
     Hooks.of({
       beforeEdit: (edit) =>
-        policy.lockSeal && touchesSeal(edit)
+        isLocked() && touchesSeal(edit)
           ? Effect.fail(new Denied({ reason: "policy: the seal is locked." }))
           : Effect.succeed(edit),
       afterEdit: (change) => Effect.sync(() => onDiff(change.diff)),
@@ -164,13 +164,10 @@ export const boot = async (policy: Policy, onDiff: (diff: string) => void): Prom
   };
 
   // Building the layer opens the session, so a scene that does not compile fails here.
-  const read = () =>
-    runtime.runPromise(Session.use((session) => SubscriptionRef.get(session.state)));
-
-  await read();
+  const state = await runtime.runPromise(Session.use((session) => Effect.succeed(session.state)));
 
   return {
-    read,
+    state,
     apply: (edits) => attempt(Session.use((session) => session.apply(edits))),
     recolor: (from, to) =>
       attempt(
