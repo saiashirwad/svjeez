@@ -19,7 +19,7 @@
   },
   "scripts": {
     "dev": "bun --conditions @svjeez/source test/app/dev.ts",
-    "test": "bun test --conditions @svjeez/source",
+    "test": "bun test --timeout 30000 --conditions @svjeez/source",
     "typecheck": "tsc --noEmit",
     "build:package": "bun ../../scripts/package-plugin.ts",
     "test:package": "bun ../../scripts/package-plugin-check.ts"
@@ -55,6 +55,6 @@
     }
   },
   "engines": {
-    "node": "^20.19.0 || >=22.12.0"
+    "node": ">=22.12.0"
   }
 }

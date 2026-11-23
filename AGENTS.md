@@ -36,7 +36,7 @@ After writing or changing a scene, run `bun run scene check` and `bun run typech
 
 ## Before you commit
 
-`bun run check` (oxlint, oxfmt, tsc) and `bun run test` must pass; `bun run format` fixes formatting. The lint config carries strict house rules, so write to them from the start:
+`bun run check` (oxlint, oxfmt, tsc) and `bun run test` must pass; `bun run format` fixes formatting. `hk.pkl` runs the same checks before every push once hk is set up (`mise use -g hk`, then `hk install`); `hk fix` runs the fixers. CI on a pull request that touches only `AGENTS.md`, `UPGRADING.md`, `.vscode/` or `site/` runs just `check`. The lint config carries strict house rules, so write to them from the start:
 
 - a blank line before any statement that spans several lines, and before a `return` after other statements;
 - a `// SAFETY:` comment on the line before every type assertion; prefer a typed parse or a type guard to an assertion;

@@ -1,5 +1,4 @@
 import { SceneError } from "svjeez/tools";
-import { groupBy } from "./group.ts";
 import {
   around,
   flip,
@@ -980,7 +979,7 @@ const place = (
   settle(slots, links, at, gapBetween, (s) => slotItem[s]!.kind === "v" && dummy(slotItem[s]!.id));
   slotItem.forEach((it, s) => set(it, at[s]!));
 
-  const channels = groupBy(
+  const channels = Map.groupBy(
     rows.flatMap((row) => row.flatMap((it, k) => (outer(it) ? [{ it, row, k }] : []))),
     ({ it }) => vertices[it.id]!.back!,
   );

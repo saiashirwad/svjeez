@@ -16,6 +16,28 @@ concurrency:
 # a HOME owned by another user, which is how Actions starts the container.
 
 jobs:
+  # Pull requests that touch only these paths skip every job but check. Pushes to main always run everything.
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: read
+    outputs:
+      code: ${{ github.event_name != 'pull_request' || steps.filter.outputs.code == 'true' }}
+    steps:
+      - id: filter
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v3
+        with:
+          predicate-quantifier: every
+          filters: |
+            code:
+              - "**"
+              - "!AGENTS.md"
+              - "!UPGRADING.md"
+              - "!.vscode/**"
+              - "!site/**"
+
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -29,6 +51,8 @@ jobs:
 
   # Not in Playwright's image: @svjeez/dom's tests measure text in the runner's system fonts, which the image doesn't have.
   test:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -44,6 +68,8 @@ jobs:
 
   # dist/ is built on macOS. Linux libm differs in the last bit of Math.sin and friends, which changes some printed floats.
   dist:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: macos-latest
     timeout-minutes: 15
     steps:
@@ -60,6 +86,8 @@ jobs:
 
   # Every example must play and seek the same in Chromium, Firefox and WebKit. dist/ is committed, so nothing is built.
   browsers:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     container: mcr.microsoft.com/playwright:v1.64.1-noble
@@ -72,24 +100,22 @@ jobs:
       - run: bun run test:browsers
         working-directory: examples
 
-  # The core package on every supported Node: its tests, the examples, and the packed CLI and entry points.
+  # The core package on Node: its tests, the examples, and the packed CLI and entry points.
   node:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     container: mcr.microsoft.com/playwright:v1.64.1-noble
     env:
       HOME: /root
-    strategy:
-      matrix:
-        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
       - run: npm install --global bun
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 22
       - run: bun install --frozen-lockfile
-      - run: node --version
       - run: npm run test:node
         working-directory: packages/svjeez
       - run: npm run test:node
@@ -97,9 +123,10 @@ jobs:
       - run: npm run test:package
         working-directory: packages/svjeez
 
-  # The add-on packages' packed checks don't depend on the Node version, so they run once, on 22 (Astro 7 needs it),
-  # split in two so they finish alongside the other jobs.
+  # The add-on packages' packed checks, split in two so they finish alongside the other jobs.
   packages:
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     container: mcr.microsoft.com/playwright:v1.64.1-noble

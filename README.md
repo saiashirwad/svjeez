@@ -46,7 +46,7 @@ const [driver, stage, output] = [ref(), ref(), ref()];
 
 ## Quick start
 
-Install with npm or Bun. On Node 20+, also install `tsx` to load `.tsx` scenes:
+Install with npm or Bun. On Node 22+, also install `tsx` to load `.tsx` scenes:
 
 ```sh
 npm install svjeez
