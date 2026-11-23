@@ -5,6 +5,7 @@ export {
   Picture,
   Run,
   Sequence,
+  Series,
   Shape,
   Text,
   ref,
@@ -15,6 +16,8 @@ export {
 export type { Ref } from "./author/refs";
 
 export { component, type ComponentOptions, type Slots } from "./author/component";
+
+export { context, type Context } from "./author/expand";
 
 export type { StandardJSONSchemaV1, StandardSchemaV1, JsonSchema } from "./author/standard";
 

@@ -114,7 +114,7 @@ describe("component()", () => {
     expect(isComponent(NoteCard)).toBe(true);
     expect(isComponent(Group)).toBe(false);
     expect(componentMeta(Group)).toBeUndefined();
-    expect(NoteCard({ title: "hi" }).type).toBe("group");
+    expect(NoteCard({ title: "hi" }).type).toBe("call");
   });
 
   test("props are optional: a component with none takes only children and an id", () => {

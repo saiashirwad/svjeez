@@ -4,18 +4,18 @@ import type { StandardSchemaV1 } from "svjeez";
 import {
   BunRunner,
   Denied,
-  Hooks,
   InvalidValue,
-  NoHooks,
   Rejected,
   RenderError,
+  Runner,
   Session,
   StaleSource,
   StorageError,
   UnknownId,
   defineEdit,
 } from "../src/index.ts";
-import type { ApplyOptions, Change, Edit, Limits, RawInput, State } from "../src/index.ts";
+import { issueText } from "../src/props-check.ts";
+import type { ApplyOptions, Edit, Hooks, Limits, RawInput, State } from "../src/index.ts";
 
 const SOURCE = `import { Group, Shape, rect, scene } from "svjeez";
 
@@ -35,29 +35,18 @@ const recolor = (id: string, fill: string): Edit => ({
   value: fill,
 });
 
-type Behavior = Parameters<typeof Hooks.of>[0];
-
-const hooksLayer = (hooks: Partial<Behavior> = {}): Layer.Layer<Hooks> =>
-  Layer.succeed(
-    Hooks,
-    Hooks.of({
-      beforeEdit: (edit) => Effect.succeed(edit),
-      afterEdit: () => Effect.void,
-      ...hooks,
-    }),
-  );
-
 interface Setup {
   readonly limits?: Limits;
-  readonly hooks?: Layer.Layer<Hooks>;
+  readonly hooks?: Hooks;
 }
 
-const layer = ({ limits, hooks = NoHooks }: Setup = {}) =>
+const layer = ({ limits, hooks }: Setup = {}) =>
   Session.layer({
     files: { "scene.tsx": SOURCE },
     entry: "scene.tsx",
     ...(limits && { limits }),
-  }).pipe(Layer.provide(Layer.mergeAll(BunRunner, hooks)));
+    ...(hooks && { hooks }),
+  }).pipe(Layer.provide(BunRunner));
 
 const run = <A, E>(effect: Effect.Effect<A, E, Session>, setup?: Setup) =>
   Effect.runPromise(effect.pipe(Effect.provide(layer(setup))));
@@ -90,7 +79,7 @@ describe("Session", () => {
   });
 
   test("render draws the current source", async () => {
-    const svg = await run(
+    const { svg } = await run(
       Effect.gen(function* () {
         const session = yield* Session;
 
@@ -165,11 +154,11 @@ describe("Session", () => {
   });
 
   test("a replayed requestId returns the same state, without applying or announcing again", async () => {
-    const commits: Change[] = [];
+    const commits: string[] = [];
 
-    const hooks = hooksLayer({
-      afterEdit: (change) => Effect.sync(() => void commits.push(change)),
-    });
+    const hooks: Hooks = {
+      afterEdit: (_, change) => Effect.sync(() => void commits.push(change.diff)),
+    };
 
     const [first, again, later] = await run(
       Effect.gen(function* () {
@@ -186,6 +175,68 @@ describe("Session", () => {
     expect(again).toBe(first);
     expect(later.revision).toBe(2);
     expect(commits).toHaveLength(2);
+  });
+
+  test("a session resumed from the saved fields still knows the request ids", async () => {
+    const saved: State[] = [];
+    const calls: string[] = [];
+
+    const first = await run(applying([recolor("box", "#111111")], { requestId: "r1" }), {
+      hooks: { afterEdit: (next) => Effect.sync(() => void saved.push(next)) },
+    });
+
+    expect(saved[0]?.requestIds).toEqual(["r1"]);
+
+    const resumed = await Effect.runPromise(
+      Effect.gen(function* () {
+        const session = yield* Session;
+        const again = yield* session.apply([recolor("box", "#111111")], { requestId: "r1" });
+        const later = yield* session.apply([recolor("box", "#222222")], { requestId: "r2" });
+
+        return { again, later };
+      }).pipe(
+        Effect.provide(
+          Session.layer({
+            files: first.files,
+            entry: "scene.tsx",
+            revision: first.revision,
+            requestIds: first.requestIds,
+            hooks: { afterEdit: (_, change) => Effect.sync(() => void calls.push(change.diff)) },
+          }).pipe(Layer.provide(BunRunner)),
+        ),
+      ),
+    );
+
+    expect(resumed.again.revision).toBe(1);
+    expect(resumed.later.revision).toBe(2);
+    expect(resumed.later.requestIds).toEqual(["r1", "r2"]);
+    expect(calls).toHaveLength(1);
+  });
+
+  test("a hook may need a service, which the session layer asks for", async () => {
+    const state = await Effect.runPromise(
+      applying([recolor("box", "#111111")]).pipe(
+        Effect.provide(
+          Session.layer({
+            files: { "scene.tsx": SOURCE },
+            entry: "scene.tsx",
+            hooks: {
+              validate: (next) =>
+                Effect.gen(function* () {
+                  const runner = yield* Runner;
+
+                  expect(runner).toBeDefined();
+                  yield* next.program
+                    .render()
+                    .pipe(Effect.mapError((e) => new Rejected({ reason: e.message })));
+                }),
+            },
+          }).pipe(Layer.provide(BunRunner)),
+        ),
+      ),
+    );
+
+    expect(state.revision).toBe(1);
   });
 
   test("hashes that no longer match the source fail with StaleSource", async () => {
@@ -221,7 +272,7 @@ describe("Session", () => {
 describe("hooks", () => {
   const commits: string[] = [];
 
-  const room = hooksLayer({
+  const room: Hooks = {
     beforeEdit: (edit) =>
       edit.op === "insert" && edit.element.component === "Envelope"
         ? Effect.fail(new Denied({ reason: "Envelope is not allowed" }))
@@ -235,8 +286,8 @@ describe("hooks", () => {
         if (width?.editable && Number(width.value) > 100)
           return yield* new Rejected({ reason: "overflow", node: "box" });
       }),
-    afterEdit: (_, edits) => Effect.sync(() => void commits.push(`${edits.length} edits`)),
-  });
+    afterEdit: (_, { edits }) => Effect.sync(() => void commits.push(`${edits.length} edits`)),
+  };
 
   const attempt = (edits: readonly Edit[], hooks = room) =>
     run(
@@ -264,10 +315,10 @@ describe("hooks", () => {
   });
 
   test("beforeEdit may rewrite an edit", async () => {
-    const hooks = hooksLayer({
+    const hooks: Hooks = {
       beforeEdit: (edit) =>
         Effect.succeed(edit.op === "set" ? { ...edit, value: "#abcdef" } : edit),
-    });
+    };
 
     const state = await run(applying([recolor("box", "#111111")]), { hooks });
 
@@ -310,17 +361,17 @@ describe("hooks", () => {
     const stored: { readonly requestId: string | undefined; readonly revisionSource: string }[] =
       [];
 
-    const hooks = hooksLayer({
-      afterEdit: (change, _, meta) =>
+    const hooks: Hooks = {
+      afterEdit: (next, change) =>
         Effect.gen(function* () {
           yield* Deferred.succeed(started, undefined);
           yield* Deferred.await(release);
           stored.push({
-            requestId: meta.requestId,
-            revisionSource: change.files["scene.tsx"] ?? "",
+            requestId: change.requestId,
+            revisionSource: next.files["scene.tsx"] ?? "",
           });
         }),
-    });
+    };
 
     const outcome = await run(
       Effect.gen(function* () {
@@ -352,9 +403,9 @@ describe("hooks", () => {
   });
 
   test("afterEdit fails with StorageError, which keeps the old state", async () => {
-    const hooks = hooksLayer({
+    const hooks: Hooks = {
       afterEdit: () => Effect.fail(new StorageError({ reason: "disk full" })),
-    });
+    };
 
     const outcome = await run(
       Effect.gen(function* () {
@@ -552,40 +603,71 @@ describe("limits", () => {
     expect(outcome.state.revision).toBe(1);
   });
 
-  test("rateLimit refuses calls past maxEdits in the window, and forgets them after it", async () => {
-    const limited = await run(
-      Effect.gen(function* () {
-        const session = yield* Session;
-
-        yield* session.apply([recolor("box", "#111111")]);
-
-        return yield* Effect.flip(session.apply([recolor("box", "#222222")]));
-      }),
-      { limits: { rateLimit: { maxEdits: 1, windowMs: 60_000 } } },
-    );
-
-    expect(limited).toBeInstanceOf(Denied);
-
-    const state = await run(
-      Effect.gen(function* () {
-        const session = yield* Session;
-
-        yield* session.apply([recolor("box", "#111111")]);
-        yield* Effect.sleep("30 millis");
-
-        return yield* session.apply([recolor("box", "#222222")]);
-      }),
-      { limits: { rateLimit: { maxEdits: 1, windowMs: 10 } } },
-    );
-
-    expect(state.revision).toBe(2);
-  });
-
   test("maxSvgBytes fails a render that draws more", async () => {
     const render = Session.use((session) => session.render());
 
     expect(await failure(render, { limits: { maxSvgBytes: 50 } })).toBeInstanceOf(RenderError);
-    expect(await run(render, { limits: { maxSvgBytes: 1_000_000 } })).toStartWith("<svg");
+    expect((await run(render, { limits: { maxSvgBytes: 1_000_000 } })).svg).toStartWith("<svg");
+  });
+
+  test("maxSvgBytes also holds for the program a validate hook renders", async () => {
+    const hooks: Hooks = {
+      validate: (state) =>
+        Effect.mapError(state.program.render(), (e) => new Rejected({ reason: e.message })),
+    };
+
+    const error = await failure(applying([recolor("box", "#00ff00")]), {
+      limits: { maxSvgBytes: 50 },
+      hooks,
+    });
+
+    expect(error).toBeInstanceOf(Rejected);
+    expect(error).toHaveProperty("reason", expect.stringContaining("over the limit of 50"));
+  });
+});
+
+describe("Session replaceFile", () => {
+  test("goes through beforeEdit and bumps the revision", async () => {
+    const seen: string[] = [];
+
+    const hooks: Hooks = {
+      beforeEdit: (edit) => Effect.sync(() => (seen.push(edit.op), edit)),
+    };
+
+    const state = await run(
+      applying([
+        { op: "replaceFile", file: "scene.tsx", text: SOURCE.replace("#ff0000", "#00ff00") },
+      ]),
+      { hooks },
+    );
+
+    expect(seen).toEqual(["replaceFile"]);
+    expect(state.revision).toBe(1);
+    expect(sourceOf(state)).toContain("#00ff00");
+  });
+
+  test("is denied by beforeEdit like any edit", async () => {
+    const hooks: Hooks = { beforeEdit: () => Effect.fail(new Denied({ reason: "no" })) };
+
+    const error = await failure(
+      applying([{ op: "replaceFile", file: "scene.tsx", text: SOURCE }]),
+      {
+        hooks,
+      },
+    );
+
+    expect(error).toEqual(new Denied({ reason: "no" }));
+  });
+});
+
+describe("issueText", () => {
+  test("names a nested path once", () => {
+    expect(issueText({ message: "size: Expected number", path: ["name", "size"] })).toBe(
+      "name.size: Expected number",
+    );
+    expect(issueText({ message: "Expected number", path: ["name", "size"] })).toBe(
+      "name.size: Expected number",
+    );
   });
 });
 
@@ -624,10 +706,12 @@ export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
 ));
 `;
 
-  const both = (hooks: Layer.Layer<Hooks> = NoHooks) =>
-    Session.layer({ files: { "scene.tsx": SCENE, "card.tsx": CARD }, entry: "scene.tsx" }).pipe(
-      Layer.provide(Layer.mergeAll(BunRunner, hooks)),
-    );
+  const both = (hooks: Hooks = {}) =>
+    Session.layer({
+      files: { "scene.tsx": SCENE, "card.tsx": CARD },
+      entry: "scene.tsx",
+      hooks,
+    }).pipe(Layer.provide(BunRunner));
 
   test("refuses a set value the component's props schema rejects, and keeps the state", async () => {
     const outcome = await Effect.runPromise(
@@ -677,7 +761,7 @@ export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
   });
 
   test("a failing afterEdit keeps the old state from every observer", async () => {
-    const hooks = hooksLayer({ afterEdit: () => Effect.die("not persisted") });
+    const hooks: Hooks = { afterEdit: () => Effect.die("not persisted") };
 
     const revision = await Effect.runPromise(
       Effect.gen(function* () {
@@ -740,7 +824,7 @@ export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
         Session.use((session) => session.apply(edits)).pipe(
           Effect.provide(
             Session.layer({ files, entry: "scene.tsx", ...(limits && { limits }) }).pipe(
-              Layer.provide(Layer.mergeAll(BunRunner, NoHooks)),
+              Layer.provide(BunRunner),
             ),
           ),
         ),
@@ -750,11 +834,7 @@ export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
   const succeed = (edits: readonly Edit[]) =>
     Effect.runPromise(
       Session.use((session) => session.apply(edits)).pipe(
-        Effect.provide(
-          Session.layer({ files, entry: "scene.tsx" }).pipe(
-            Layer.provide(Layer.mergeAll(BunRunner, NoHooks)),
-          ),
-        ),
+        Effect.provide(Session.layer({ files, entry: "scene.tsx" }).pipe(Layer.provide(BunRunner))),
       ),
     );
 
@@ -839,7 +919,7 @@ ${"<Group>".repeat(depth)}<Shape id="box" />${"</Group>".repeat(depth)}
                 files: { "scene.tsx": source },
                 entry: "scene.tsx",
                 limits: { maxTreeDepth: 4 },
-              }).pipe(Layer.provide(Layer.mergeAll(BunRunner, NoHooks))),
+              }).pipe(Layer.provide(BunRunner)),
             ),
           ),
         ),

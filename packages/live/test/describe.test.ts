@@ -80,8 +80,8 @@ suite("describe", () => {
       "one",
       "box",
       "dyn",
-      "NoteCard/back",
-      "NoteCard/note",
+      "card.tsx#NoteCard/back",
+      "card.tsx#NoteCard/note",
     ]);
     expect(description.nodes["all"]?.children).toEqual(["one", "box"]);
     expect(description.params).toEqual({
@@ -91,7 +91,7 @@ suite("describe", () => {
     });
   });
 
-  test("takes a prop's schema and x-ui hint from the component's JSON Schema", async () => {
+  test("takes a prop's schema, x-ui hint included, from the component's JSON Schema", async () => {
     const { description } = await load();
     const label = editable(description.nodes["one"]?.props["label"]);
 
@@ -101,8 +101,6 @@ suite("describe", () => {
       title: "Label",
       "x-ui": { control: "textarea", rows: 3 },
     });
-    expect(label.ui).toEqual({ control: "textarea", rows: 3 });
-    expect(editable(description.nodes["one"]?.props["size"]).ui).toBeUndefined();
     expect(editable(description.nodes["one"]?.props["size"]).schema).toEqual({
       type: "number",
       minimum: 1,
@@ -160,30 +158,29 @@ suite("describe", () => {
     expect(description.root).toBe("all");
   });
 
-  test("reads an Effect schema's JSON Schema, with an x-ui hint the host adds", async () => {
-    // Effect writes only the annotations it knows, so a hint is added to the JSON Schema it writes.
+  test("reads an Effect schema's JSON Schema, with the x-ui annotation it keeps", async () => {
     const effectCard = `import { Schema } from "effect";
 import { Group, Shape, component, rect } from "svjeez";
 
 const Props = Schema.Struct({
-  label: Schema.String.annotate({ title: "Label" }),
+  label: Schema.String.annotate({ title: "Label", "x-ui": { control: "textarea" } }),
   size: Schema.Number,
 });
 
 const checked = Schema.toStandardSchemaV1(Props)["~standard"];
-const written = Schema.toStandardJSONSchemaV1(Props)["~standard"].jsonSchema;
-
-const withUi = (schema) => ({
-  ...schema,
-  properties: { ...schema.properties, label: { ...schema.properties.label, "x-ui": { control: "textarea" } } },
-});
 
 const props = {
   "~standard": {
     ...checked,
     jsonSchema: {
-      input: (options) => withUi(written.input(options)),
-      output: (options) => written.output(options),
+      input: () => {
+        const { schema, definitions } = Schema.toJsonSchemaDocument(Props, {
+          includeAnnotationKey: (key) => key === "x-ui",
+        });
+
+        return { ...schema, $defs: definitions };
+      },
+      output: () => ({}),
     },
   },
 };
@@ -219,15 +216,18 @@ export const NoteCard = component({
     const { nodes } = describe(parsed, program);
     const label = editable(nodes["one"]?.props["label"]);
 
-    expect(label.schema).toMatchObject({ type: "string", title: "Label" });
-    expect(label.ui).toEqual({ control: "textarea" });
-    expect(editable(nodes["one"]?.props["size"]).ui).toBeUndefined();
+    expect(label.schema).toMatchObject({
+      type: "string",
+      title: "Label",
+      "x-ui": { control: "textarea" },
+    });
+    expect(editable(nodes["one"]?.props["size"]).schema).not.toHaveProperty("x-ui");
   });
 
   test("locate finds the node of every data-svz-id in the rendered SVG", async () => {
     const { parsed, program } = await load();
 
-    const svg = await Effect.runPromise(program.render());
+    const { svg } = await Effect.runPromise(program.render());
     const ids = [...svg.matchAll(/data-svz-id="([^"]+)"/g)].map((match) => match[1]!);
 
     expect(ids).toContain("one/note");

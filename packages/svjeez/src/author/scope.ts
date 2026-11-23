@@ -1,9 +1,9 @@
 import { SceneError } from "../model/scene-error";
 
 /** The ids of the components being built, outermost first: what an `id` or a `ref("id")` written inside is scoped by. */
-const open: string[] = [];
+let open: readonly string[] = [];
 
-export const scopeNow = (): readonly string[] => [...open];
+export const scopeNow = (): readonly string[] => open;
 
 export const checkedId = (id: string, what: string): string => {
   if (id === "" || id.split("/").some((step) => step === ""))
@@ -25,12 +25,14 @@ export const scoped = (id: string): string => {
   return [...open, id].join("/");
 };
 
-export const within = <T>(id: string, build: () => T): T => {
-  open.push(id);
+/** Runs `build` with `path` as the whole scope, as it was when the JSX that asked for it was written. */
+export const within = <T>(path: readonly string[], build: () => T): T => {
+  const before = open;
+  open = path;
 
   try {
     return build();
   } finally {
-    open.pop();
+    open = before;
   }
 };

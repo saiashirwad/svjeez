@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import vm from "node:vm";
-import { Effect } from "effect";
+import { Effect, Layer } from "effect";
 import * as svjeez from "svjeez";
 import * as jsxDevRuntime from "svjeez/jsx-dev-runtime";
 import * as tools from "svjeez/tools";
@@ -8,9 +8,12 @@ import {
   BrowserRunner,
   BunRunner,
   CompileError,
+  InvalidValue,
   RenderError,
   Runner,
+  Session,
   WorkerLoaderRunner,
+  bunRunner,
   compile,
 } from "../src/index.ts";
 import type {
@@ -97,7 +100,7 @@ const place = (error: CompileError) => `${error.file}:${error.line}:${error.col}
 describe("compile", () => {
   test("renders a single file with data-svz-id", async () => {
     const program = await run(compiled({ "scene.tsx": SCENE }));
-    const svg = await run(program.render());
+    const { svg } = await run(program.render());
 
     expect(svg).toStartWith("<svg");
     expect(svg).toContain('data-svz-id="box"');
@@ -106,12 +109,12 @@ describe("compile", () => {
   test("leaves ids out when asked", async () => {
     const program = await run(compiled({ "scene.tsx": SCENE }, { ...options, ids: false }));
 
-    expect(await run(program.render())).not.toContain("data-svz-id");
+    expect((await run(program.render())).svg).not.toContain("data-svz-id");
   });
 
   test("renders files that import each other across folders, with extensions or without", async () => {
     const program = await run(compiled(MULTI));
-    const svg = await run(program.render());
+    const { svg } = await run(program.render());
 
     expect(svg).toContain('data-svz-id="one/back"');
     expect(svg).toContain('data-svz-id="one/note"');
@@ -120,12 +123,12 @@ describe("compile", () => {
   test("finds components by name in every file, with their JSON Schema", async () => {
     const program = await run(compiled(MULTI));
 
-    expect(Object.keys(program.components)).toEqual(["NoteCard"]);
-    expect(program.components["NoteCard"]?.jsonSchema).toEqual({
+    expect(Object.keys(program.components)).toEqual(["/components/NoteCard.tsx#NoteCard"]);
+    expect(program.components["/components/NoteCard.tsx#NoteCard"]?.jsonSchema).toEqual({
       type: "object",
       properties: { label: { type: "string" } },
     });
-    expect(program.components["NoteCard"]?.props).toBeDefined();
+    expect(program.components["/components/NoteCard.tsx#NoteCard"]?.props).toBeDefined();
   });
 
   test("reads params declared with param.*, and passes the checked values to the scene", async () => {
@@ -153,8 +156,8 @@ export default ({ width, tone }) =>
         tone: { type: "string", enum: ["red", "blue"], default: "red" },
       },
     });
-    expect(await run(program.render({ width: 80, tone: "blue" }))).toContain('width="80"');
-    expect(await run(program.render())).toContain('width="40"');
+    expect((await run(program.render({ width: 80, tone: "blue" }))).svg).toContain('width="80"');
+    expect((await run(program.render())).svg).toContain('width="40"');
 
     const error = await run(Effect.flip(program.render({ width: 500 })));
 
@@ -183,7 +186,7 @@ export default ({ size }) =>
     );
 
     expect(program.params).toEqual({ type: "object", required: ["size"] });
-    expect(await run(program.render({ size: 25 }))).toContain('width="25"');
+    expect((await run(program.render({ size: 25 }))).svg).toContain('width="25"');
     expect((await run(Effect.flip(program.render({})))).message).toContain("size must be a number");
   });
 
@@ -245,6 +248,17 @@ describe("imports", () => {
     expect(program.message).not.toContain("not available");
   });
 
+  test("a custom allowlist's refusal does not list the default imports", async () => {
+    const error = await run(
+      compiled(
+        { "scene.tsx": `import x from "nope";\nexport default x;\n` },
+        { ...options, modules: () => false },
+      ).pipe(Effect.flip),
+    );
+
+    expect(error.message).toBe('"nope" is not available to scenes.');
+  });
+
   test("refuse a relative import that matches no file, at the import", async () => {
     const error = await failed({
       "scene.tsx": `import { Missing } from "./nope";\nexport default Missing;\n`,
@@ -284,7 +298,7 @@ describe("imports", () => {
       }),
     );
 
-    expect(await run(program.render())).toBeDefined();
+    expect((await run(program.render())).svg).toBeDefined();
   });
 
   test("let a type-only import through: it is erased and never runs", async () => {
@@ -294,7 +308,7 @@ describe("imports", () => {
       }),
     );
 
-    expect(await run(program.render())).toBeDefined();
+    expect((await run(program.render())).svg).toBeDefined();
   });
 });
 
@@ -340,6 +354,11 @@ describe("static scan", () => {
     expect(place(await scan("export const r = require('fs');"))).toBe("scene.tsx:2:18");
   });
 
+  test("refuses self and WebAssembly", async () => {
+    expect(place(await scan("export const s = self;"))).toBe("scene.tsx:2:18");
+    expect(place(await scan("export const w = WebAssembly;"))).toBe("scene.tsx:2:18");
+  });
+
   test("refuses __proto__ and import()", async () => {
     expect(place(await scan("const o = {}; o.__proto__ = {};"))).toBe("scene.tsx:2:17");
     expect(place(await scan("export const m = import('x');"))).toBe("scene.tsx:2:18");
@@ -352,7 +371,7 @@ describe("static scan", () => {
       }),
     );
 
-    expect(await run(program.render())).toContain("data-svz-id");
+    expect((await run(program.render())).svg).toContain("data-svz-id");
   });
 });
 
@@ -392,8 +411,8 @@ export const params = { n: { kind: "number", value: 100, min: 0, max: 1e9, step:
       ),
     );
 
-    expect(await run(program.render({ n: 500 }))).toContain('width="501"');
-    expect(await run(program.render({ n: 500 }))).toContain('width="501"');
+    expect((await run(program.render({ n: 500 }))).svg).toContain('width="501"');
+    expect((await run(program.render({ n: 500 }))).svg).toContain('width="501"');
 
     const error = await run(Effect.flip(program.render({ n: 5000 })));
 
@@ -495,13 +514,61 @@ describe("errors", () => {
   });
 });
 
+describe("warnings", () => {
+  test("render returns what the SVG backend warns about", async () => {
+    const program = await run(
+      compiled({
+        "scene.tsx": `import { Shape, blur, rect, scene } from "svjeez";
+
+export default scene({ size: [100, 80], duration: 1, title: "T" }, () => (
+  <Shape id="dot" geometry={rect(4, 4)} fill="#ff0000" effects={[blur(1)]} />
+));
+`,
+      }),
+    );
+
+    const { warnings } = await run(program.render());
+
+    expect(warnings.map((warning) => warning.feature)).toEqual(["softBlur"]);
+    expect(
+      (await run(compiled({ "scene.tsx": SCENE }).pipe(Effect.flatMap((p) => p.render()))))
+        .warnings,
+    ).toEqual([]);
+  });
+});
+
+describe("library components", () => {
+  const badge = svjeez.component({
+    name: "Badge",
+    render: () => svjeez.Group({ id: "badge" }),
+  });
+
+  test("an add-on's components are in Program.components, svjeez's own are not", async () => {
+    const program = await run(
+      compile(
+        {
+          "scene.tsx": `import { Group, scene } from "svjeez";
+import { Badge } from "@test/badge";
+
+export const keep = Badge;
+export default scene({ size: [10, 10], duration: 1, title: "T" }, () => <Group id="g" />);
+`,
+        },
+        { ...options, modules: () => true },
+      ).pipe(Effect.provide(bunRunner({ "@test/badge": { Badge: badge } }))),
+    );
+
+    expect(Object.keys(program.components)).toEqual(["/scene.tsx#keep", "@test/badge#Badge"]);
+  });
+});
+
 describe("BrowserRunner", () => {
   test("runs a multi-file scene with new Function", async () => {
     const program = await run(compile(MULTI, options).pipe(Effect.provide(BrowserRunner)));
-    const svg = await run(program.render());
+    const { svg } = await run(program.render());
 
     expect(svg).toContain('data-svz-id="one/note"');
-    expect(Object.keys(program.components)).toEqual(["NoteCard"]);
+    expect(Object.keys(program.components)).toEqual(["/components/NoteCard.tsx#NoteCard"]);
   });
 
   test("reports where a module threw, past the lines new Function adds", async () => {
@@ -574,7 +641,7 @@ const fakeLoader = () => {
               if (!(thrown instanceof CompileError)) throw thrown;
 
               throw new Error(
-                `${thrown.message}\n    at /${thrown.file}:${thrown.line}:${thrown.col}`,
+                `Failed to start Worker:\nUncaught Error: ${thrown.message}\n    at /${thrown.file}:${thrown.line}:${thrown.col}`,
               );
             }
           },
@@ -637,8 +704,8 @@ describe("WorkerLoaderRunner", () => {
 
     const program = await run(compile(MULTI, options).pipe(Effect.provide(layer)));
 
-    expect(await run(program.render())).toContain('data-svz-id="one/back"');
-    expect(program.components["NoteCard"]?.jsonSchema).toEqual({
+    expect((await run(program.render())).svg).toContain('data-svz-id="one/back"');
+    expect(program.components["/components/NoteCard.tsx#NoteCard"]?.jsonSchema).toEqual({
       type: "object",
       properties: { label: { type: "string" } },
     });
@@ -657,8 +724,38 @@ export default ({ width }) => scene({ size: [100, 80], duration: 1, title: "T" }
     );
 
     expect(params.params).toMatchObject({ properties: { width: { type: "number", maximum: 90 } } });
-    expect(await run(params.render({ width: 70 }))).toContain('width="70"');
+    expect((await run(params.render({ width: 70 }))).svg).toContain('width="70"');
     expect((await run(Effect.flip(params.render({ width: 500 })))).message).toContain("width");
+  });
+
+  test("refuses a prop the component's own schema rejects, as BunRunner does", async () => {
+    const { loader } = fakeLoader();
+
+    const card = CARD.replace(
+      "validate: (value) => ({ value }),",
+      'validate: (value) => typeof value.label === "string" && value.label ? { value } : { issues: [{ message: "Expected a non-empty string", path: ["label"] }] },',
+    );
+
+    const files = { ...MULTI, "components/NoteCard.tsx": card };
+
+    const layer = Session.layer({ files, entry: "scene.tsx" }).pipe(
+      Layer.provide(WorkerLoaderRunner(loader, { libraries: BUNDLES })),
+    );
+
+    const error = await run(
+      Effect.flip(
+        Session.use((session) =>
+          session.apply([{ op: "set", target: "one", prop: "label", value: "" }]),
+        ).pipe(Effect.provide(layer)),
+      ),
+    );
+
+    expect(error).toBeInstanceOf(InvalidValue);
+    expect(error).toMatchObject({
+      target: "one",
+      prop: "label",
+      issue: "label: Expected a non-empty string",
+    });
   });
 
   test("asks for a bundle of every library the scene imports", async () => {
@@ -770,5 +867,36 @@ export default ({ width }) => scene({ size: [100, 80], duration: 1, title: "T" }
 
     expect(error).toBeInstanceOf(CompileError);
     expect(place(error)).toStartWith("scene.tsx:2:");
+    expect(error.message).toBe("late");
+  });
+
+  test("always sends disallow_eval_during_startup, and flags change the id", async () => {
+    const { loader, codes, ids } = fakeLoader();
+
+    const compileWith = (runner: ReturnType<typeof WorkerLoaderRunner>) =>
+      run(compile(MULTI, options).pipe(Effect.provide(runner)));
+
+    await compileWith(WorkerLoaderRunner(loader, { libraries: BUNDLES }));
+    await compileWith(
+      WorkerLoaderRunner(loader, { libraries: BUNDLES, compatibilityFlags: ["nodejs_compat"] }),
+    );
+
+    expect(codes[0]?.compatibilityFlags).toEqual(["disallow_eval_during_startup"]);
+    expect(codes[1]?.compatibilityFlags).toEqual(["disallow_eval_during_startup", "nodejs_compat"]);
+    expect(ids[0]).not.toBe(ids[1]);
+  });
+
+  test("ships every library given, so a bundle can import a shared chunk", async () => {
+    const { loader, codes } = fakeLoader();
+
+    await run(
+      compile(MULTI, options).pipe(
+        Effect.provide(
+          WorkerLoaderRunner(loader, { libraries: { ...BUNDLES, "chunk/shared": "// chunk" } }),
+        ),
+      ),
+    );
+
+    expect(codes[0]?.modules["@lib/chunk/shared"]?.js).toBe("// chunk");
   });
 });

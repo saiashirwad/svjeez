@@ -1,5 +1,5 @@
 import { ease, morph, span, type Curve, type SceneElement, type Span, type Vec } from "svjeez";
-import type { Theme } from "svjeez/tools";
+import { expand, type Theme } from "svjeez/tools";
 import type { Run, Snapshot } from "../schema.ts";
 import type { State } from "../record.ts";
 import { element } from "./box.tsx";
@@ -150,7 +150,7 @@ const compileStates = (
   for (const [path, motion] of animate(roots, slots, eases, ctx)) ctx.motions.set(path, motion);
 
   const trees = roots.map((root) =>
-    element(root, [root.node.rect.x, root.node.rect.y], root.key, ctx),
+    expand(element(root, [root.node.rect.x, root.node.rect.y], root.key, ctx)),
   );
 
   const sizes = roots.map(({ node }) => node.rect);
@@ -181,7 +181,7 @@ const compileStates = (
   });
 
   return {
-    element: withCursor(page, beats),
+    element: expand(withCursor(page, beats)),
     size: [
       Math.max(...sizes.map(({ width }) => width)),
       Math.max(...sizes.map(({ height }) => height)),

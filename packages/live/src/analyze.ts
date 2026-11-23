@@ -10,6 +10,8 @@ const ESCAPES: ReadonlySet<string> = new Set([
   "Function",
   "require",
   "globalThis",
+  "self",
+  "WebAssembly",
   "process",
 ]);
 

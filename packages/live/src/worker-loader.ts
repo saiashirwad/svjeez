@@ -1,9 +1,10 @@
 import { Effect, Layer } from "effect";
-import type { Schema } from "svjeez/tools";
+import type { StandardSchemaV1 } from "svjeez";
+import type { Diagnostic, Schema } from "svjeez/tools";
 import { asError, failure } from "./commonjs.ts";
 import { CompileError, RenderError } from "./errors.ts";
 import { schemaOf, NO_PARAMS } from "./param-schema.ts";
-import type { Program } from "./program.ts";
+import type { Program, Rendered } from "./program.ts";
 import { GUARD, HOST, Runner, isGenerated, libraryPath } from "./runner.ts";
 import type { Modules } from "./runner.ts";
 import type { JsonObject, JsonSchema } from "./types.ts";
@@ -16,6 +17,7 @@ export interface WorkerCode {
   /** `null` cuts the isolate off from the network: it can neither fetch nor connect. */
   readonly globalOutbound: null;
   readonly limits?: { readonly cpuMs?: number };
+  readonly compatibilityFlags?: readonly string[];
 }
 
 export interface WorkerEntrypoint {
@@ -36,9 +38,12 @@ export interface WorkerLoaderOptions {
    * `svjeez/jsx-dev-runtime`, `svjeez/tools` (the runner itself needs it) and every add-on. An isolate has nothing to
    * import from, so each one is a bundle. Bundles that share code must import one another as `/@lib/<specifier>`,
    * not inline it, or `svjeez/tools` would not see the components `svjeez` registered.
+   * Every entry is shipped, so a shared chunk a bundle imports as `/@lib/<specifier>` belongs here under that specifier.
    */
   readonly libraries?: Readonly<Record<string, string>>;
   readonly compatibilityDate?: string;
+  /** Extra compatibility flags. `disallow_eval_during_startup` is always sent, so a scene cannot compile code while it loads. */
+  readonly compatibilityFlags?: readonly string[];
   /** CPU time a request may use. Left out, the binding's own limit applies. `workerd` run on its own ignores it. */
   readonly cpuMs?: number;
   /**
@@ -60,24 +65,26 @@ const COMPATIBILITY_DATE = "2025-06-01";
  */
 const hostSource = (modules: Modules, ids: boolean): string => {
   const others = Object.keys(modules.files).filter((p) => p !== modules.entry && p !== GUARD);
+  const addons = modules.libraries.filter((name) => !name.startsWith("svjeez"));
 
   return `import { isScene, isComponent, componentMeta, isStandardJsonSchema, parse, svg, SceneError } from "${libraryPath("svjeez/tools")}";
 import { reset } from "${GUARD}";
 import * as entry from ${JSON.stringify(modules.entry)};
 ${others.map((path, i) => `import * as other${i} from ${JSON.stringify(path)};`).join("\n")}
-const namespaces = [entry, ${others.map((_, i) => `other${i}`).join(", ")}];
+${addons.map((name, i) => `import * as addon${i} from ${JSON.stringify(libraryPath(name))};`).join("\n")}
+const namespaces = {
+${[[modules.entry, "entry"], ...others.map((path, i) => [path, `other${i}`]), ...addons.map((name, i) => [name, `addon${i}`])].map(([name, ns]) => `  ${JSON.stringify(name)}: ${ns},`).join("\n")}
+};
 const isObject = (v) => v !== null && typeof v === "object";
 const isStandard = (v) => isObject(v) && "~standard" in v;
 const isParams = (v) => isObject(v) && !isScene(v) && !isStandard(v) && Object.values(v).every((p) => isObject(p) && "kind" in p);
 const jsonSchemaOf = (schema) => {
   try { return isStandardJsonSchema(schema) ? schema["~standard"].jsonSchema.input({ target: "draft-2020-12" }) : undefined; } catch { return undefined; }
 };
+const components = Object.fromEntries(Object.entries(namespaces).flatMap(([module, ns]) => Object.entries(ns).filter(([, v]) => typeof v === "function" && isComponent(v)).map(([name, fn]) => [module + "#" + name, componentMeta(fn).props])));
 const describe = () => ({
   params: isParams(entry.params) ? { declared: entry.params } : { json: isStandard(entry.params) ? jsonSchemaOf(entry.params) : undefined },
-  components: Object.fromEntries(namespaces.flatMap((ns) => Object.values(ns).filter((v) => typeof v === "function" && isComponent(v)).map((fn) => {
-    const { name, props } = componentMeta(fn);
-    return [name, { jsonSchema: props ? jsonSchemaOf(props) : undefined }];
-  }))),
+  components: Object.fromEntries(Object.entries(components).map(([key, props]) => [key, { jsonSchema: props ? jsonSchemaOf(props) : undefined, hasProps: Boolean(props) }])),
 });
 const valuesOf = (declared, given) => {
   if (isParams(declared)) return parse(declared, given);
@@ -90,15 +97,22 @@ const valuesOf = (declared, given) => {
 const draw = (given) => {
   const made = typeof entry.default === "function" ? entry.default(valuesOf(entry.params, given)) : entry.default;
   if (!isScene(made)) throw new SceneError("The entry needs a scene as its default export.");
-  return svg.emit(made, { ids: ${ids} });
+  const warnings = [];
+  const drawn = svg.emit(made, { ids: ${ids}, onWarning: (warning) => warnings.push(warning) });
+  return { svg: drawn, warnings };
 };
 export default {
   async fetch(request) {
     if (request.method === "GET") return Response.json(describe());
     try {
       reset();
-      const { params } = await request.json();
-      return Response.json({ svg: draw(params ?? {}) });
+      const body = await request.json();
+      if (body.validate) {
+        const props = components[body.validate.key];
+        return Response.json(props ? await props["~standard"].validate(body.validate.props) : {});
+      }
+      const { params } = body;
+      return Response.json(draw(params ?? {}));
     } catch (error) {
       return Response.json({ error: { message: error.message, node: error instanceof SceneError ? error.node : undefined } });
     }
@@ -111,9 +125,14 @@ export default {
 const workerCode = (
   modules: Modules,
   ids: boolean,
-  { libraries = {}, compatibilityDate = COMPATIBILITY_DATE, cpuMs }: WorkerLoaderOptions,
+  {
+    libraries = {},
+    compatibilityDate = COMPATIBILITY_DATE,
+    compatibilityFlags = [],
+    cpuMs,
+  }: WorkerLoaderOptions,
 ): Effect.Effect<WorkerCode, CompileError> => {
-  const wanted = [...new Set([...modules.libraries, "svjeez/tools"])];
+  const wanted = [...new Set([...modules.libraries, "svjeez/tools", ...Object.keys(libraries)])];
 
   const reserved = Object.keys(modules.files).filter((path) => path !== GUARD && isGenerated(path));
 
@@ -147,6 +166,7 @@ const workerCode = (
 
   return Effect.succeed({
     compatibilityDate,
+    compatibilityFlags: [...new Set(["disallow_eval_during_startup", ...compatibilityFlags])],
     mainModule: HOST.slice(1),
     modules: Object.fromEntries(
       Object.entries(sources).map(([path, js]) => [path.slice(1), { js }]),
@@ -158,15 +178,21 @@ const workerCode = (
 
 interface Described {
   readonly params: { readonly declared?: Schema; readonly json?: JsonSchema };
-  readonly components: Readonly<Record<string, { readonly jsonSchema?: JsonSchema }>>;
+  readonly components: Readonly<
+    Record<string, { readonly jsonSchema?: JsonSchema; readonly hasProps?: boolean }>
+  >;
 }
 
 interface Reply {
   readonly svg?: string;
+  readonly warnings?: readonly Diagnostic[];
   readonly error?: { readonly message: string; readonly node?: string };
 }
 
-const render = (worker: WorkerEntrypoint, params: JsonObject): Effect.Effect<string, RenderError> =>
+const render = (
+  worker: WorkerEntrypoint,
+  params: JsonObject,
+): Effect.Effect<Rendered, RenderError> =>
   Effect.tryPromise({
     try: async () => {
       const response = await worker.fetch(
@@ -182,7 +208,7 @@ const render = (worker: WorkerEntrypoint, params: JsonObject): Effect.Effect<str
           ...(reply.error?.node !== undefined && { node: reply.error.node }),
         });
 
-      return reply.svg;
+      return { svg: reply.svg, warnings: reply.warnings ?? [] };
     },
     catch: (thrown) =>
       thrown instanceof RenderError
@@ -190,12 +216,31 @@ const render = (worker: WorkerEntrypoint, params: JsonObject): Effect.Effect<str
         : new RenderError({ message: asError(thrown).message }),
   });
 
+/** A props schema that asks the isolate to run the component's own `validate`, so the host needs no copy of it. */
+const propsIn = (worker: WorkerEntrypoint, key: string): StandardSchemaV1 => ({
+  "~standard": {
+    version: 1,
+    vendor: "svjeez-worker",
+    validate: async (props) => {
+      const response = await worker.fetch(
+        new Request(ORIGIN, {
+          method: "POST",
+          body: JSON.stringify({ validate: { key, props } }),
+        }),
+      );
+
+      // SAFETY: the front door in `hostSource` answers a validate with a Standard Schema result.
+      return (await response.json()) as StandardSchemaV1.Result<unknown>;
+    },
+  },
+});
+
 const programOf = (worker: WorkerEntrypoint, described: Described): Program => ({
   render: (params = {}) => render(worker, params),
   components: Object.fromEntries(
-    Object.entries(described.components).map(([name, { jsonSchema }]) => [
-      name,
-      jsonSchema ? { jsonSchema } : {},
+    Object.entries(described.components).map(([key, { jsonSchema, hasProps }]) => [
+      key,
+      { ...(jsonSchema && { jsonSchema }), ...(hasProps && { props: propsIn(worker, key) }) },
     ]),
   ),
   params: described.params.declared
@@ -208,7 +253,7 @@ const hex = (bytes: ArrayBuffer): string =>
 
 /**
  * What names the isolate: SHA-256 over everything the loader would start it from (its entry, every module's text, the
- * compatibility date and limits, the network setting), the scope, and a nonce for a `fresh` run. The loader reuses a
+ * compatibility date and flags, limits, the network setting), the scope, and a nonce for a `fresh` run. The loader reuses a
  * worker by this id, so two different workers must never share one.
  */
 const idOf = (code: WorkerCode, { scope, fresh }: WorkerLoaderOptions): Effect.Effect<string> =>
@@ -219,6 +264,7 @@ const idOf = (code: WorkerCode, { scope, fresh }: WorkerLoaderOptions): Effect.E
 
     const text = JSON.stringify([
       code.compatibilityDate,
+      code.compatibilityFlags ?? [],
       code.mainModule,
       modules,
       code.globalOutbound,

@@ -1,3 +1,5 @@
+export { expand, propsOf } from "./author/expand";
+
 export { svg, type SvgOptions } from "./svg/svg";
 
 export type { Backend, Diagnostic, Feature, LaneReport, Support } from "./model/backend";

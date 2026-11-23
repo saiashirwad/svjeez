@@ -2,10 +2,11 @@ import type { SyntaxNode } from "@lezer/common";
 import { parser as js } from "@lezer/javascript";
 import { Effect } from "effect";
 import { ParseError } from "./errors.ts";
-import { canonical, resolveRelative } from "./paths.ts";
+import { canonical, isRelative, resolveRelative } from "./paths.ts";
 import { entities, hash, isNumber, isString, unescape } from "./text.ts";
 import type {
   Attribute,
+  Definition,
   Duplicate,
   Element,
   Files,
@@ -185,28 +186,29 @@ const literalOf = (src: string, node: SyntaxNode): Literal | undefined => {
   }
 };
 
-/** The name in a `component({ name: "…" })` call, or undefined when the node is no such call or the name is not a string. */
-const componentNameOf = (src: string, call: SyntaxNode | null | undefined): string | undefined => {
+const DEFAULT = "default";
+
+/** What a `component(…)` call is bound to: the `const` it initialises, or `default` for `export default component(…)`. Undefined when the node is no such call or is bound to nothing. */
+const bindingOf = (src: string, call: SyntaxNode | null | undefined): string | undefined => {
   if (call?.name !== "CallExpression" || textOf(src, call.firstChild) !== "component")
     return undefined;
-  const object = call.getChild("ArgList")?.getChild("ObjectExpression");
+  const { parent } = call;
 
-  for (const property of object ? items(object) : []) {
-    if (property.name !== "Property" || keyOf(src, property) !== "name") continue;
-    const value = property.lastChild;
+  if (parent?.name === "VariableDeclaration") {
+    const local = parent.getChild("VariableDefinition");
 
-    if (value?.name === "String") return unescape(textOf(src, value).slice(1, -1));
+    return local ? textOf(src, local) : undefined;
   }
 
-  return undefined;
+  return parent?.name === "ExportDeclaration" ? DEFAULT : undefined;
 };
 
-/** The `component({ name: "…" })` call the node is written inside, or `""` for scene code. */
-const scopeOf = (src: string, node: SyntaxNode): string => {
+/** `file#binding` of the `component(…)` the node is written inside, or `""` for scene code. */
+const scopeOf = (src: string, file: string, node: SyntaxNode): string => {
   for (let at = node.parent; at; at = at.parent) {
-    const name = componentNameOf(src, at);
+    const binding = bindingOf(src, at);
 
-    if (name !== undefined) return name;
+    if (binding !== undefined) return `${file}#${binding}`;
   }
 
   return "";
@@ -214,19 +216,16 @@ const scopeOf = (src: string, node: SyntaxNode): string => {
 
 /** What a file says about the names its components go by, before any other file is read. */
 interface Facts {
-  /** `const Alias = component({ name })`: the local name, and the registered `name`. */
-  readonly bindings: Map<string, string>;
+  /** The local names bound to a `component(…)`. */
+  readonly components: Set<string>;
   /** What the file exports: the exported name, and the local name it stands for. */
   readonly exports: Map<string, string>;
   /** `import { imported as local } from "from"`. `imported` is `*` for a namespace and `default` for a default import. */
   readonly imports: Map<string, { readonly imported: string; readonly from: string }>;
 }
 
-const DEFAULT = "default";
-const ANONYMOUS = "*default*";
-
 const factsOf = (src: string, root: SyntaxNode): Facts => {
-  const facts: Facts = { bindings: new Map(), exports: new Map(), imports: new Map() };
+  const facts: Facts = { components: new Set(), exports: new Map(), imports: new Map() };
 
   const visit = (node: SyntaxNode) => {
     if (node.name === "ImportDeclaration") {
@@ -261,10 +260,10 @@ const factsOf = (src: string, root: SyntaxNode): Facts => {
       }
     } else if (node.name === "VariableDeclaration") {
       const local = node.getChild("VariableDefinition");
-      const name = componentNameOf(src, node.getChild("CallExpression"));
+      const binding = bindingOf(src, node.getChild("CallExpression"));
 
-      if (local && name !== undefined) {
-        facts.bindings.set(textOf(src, local), name);
+      if (local && binding !== undefined) {
+        facts.components.add(binding);
 
         if (node.parent?.name === "ExportDeclaration")
           facts.exports.set(textOf(src, local), textOf(src, local));
@@ -287,12 +286,11 @@ const factsOf = (src: string, root: SyntaxNode): Facts => {
           else if (name.name === ",") flush();
         flush();
       } else if (node.getChild("default")) {
-        const name = componentNameOf(src, node.getChild("CallExpression"));
         const variable = node.getChild("VariableName");
 
-        if (name !== undefined) {
-          facts.bindings.set(ANONYMOUS, name);
-          facts.exports.set(DEFAULT, ANONYMOUS);
+        if (bindingOf(src, node.getChild("CallExpression")) !== undefined) {
+          facts.components.add(DEFAULT);
+          facts.exports.set(DEFAULT, DEFAULT);
         } else if (variable) facts.exports.set(DEFAULT, textOf(src, variable));
       }
     }
@@ -437,7 +435,7 @@ const parseFile = (file: string, src: string, found: Found[], refs: Ref[]): Read
         if (arg?.name === "String")
           refs.push({
             id: unescape(textOf(src, arg).slice(1, -1)),
-            scope: scopeOf(src, node),
+            scope: scopeOf(src, file, node),
             range: { file, from: arg.from, to: arg.to },
           });
 
@@ -504,7 +502,7 @@ const parseFile = (file: string, src: string, found: Found[], refs: Ref[]): Read
         ancestors,
         element: {
           local: idAttr.value,
-          scope: scopeOf(src, node),
+          scope: scopeOf(src, file, node),
           component: textOf(src, name),
           range: { file, from: node.from, to: node.to },
           open: { file, from: open.from, to: open.to },
@@ -529,79 +527,59 @@ const parseFile = (file: string, src: string, found: Found[], refs: Ref[]): Read
 
 const fullId = (scope: string, local: string): Id => (scope ? `${scope}/${local}` : local);
 
-/**
- * The `component({ name })` a local name stands for in `file`: a binding made there, or an import of one, followed
- * through the files it names.
- */
-const registeredIn = (
-  files: ReadonlyMap<string, Facts>,
-  paths: ReadonlyMap<string, string>,
-  file: string,
-  local: string,
-  seen: ReadonlySet<string> = new Set(),
-): string | undefined => {
-  const here = files.get(file);
-  const bound = here?.bindings.get(local);
-
-  if (bound !== undefined) return bound;
-  const use = here?.imports.get(local);
-
-  if (!use || seen.has(`${file}:${local}`)) return undefined;
-  const target = resolveRelative((path) => paths.has(path), canonical(file), use.from);
-  const other = target === undefined ? undefined : paths.get(target);
-  const exported = other === undefined ? undefined : files.get(other)?.exports.get(use.imported);
-
-  return other === undefined || exported === undefined
-    ? undefined
-    : registeredIn(files, paths, other, exported, new Set([...seen, `${file}:${local}`]));
-};
-
-/** The registered name each tag goes by in each file, for the tags that are an alias: `<Alias>` for `component({ name: "Stable" })`. */
-const aliasesOf = (
+/** What each tag stands for in each file, for the tags that name a component: where it is defined, and the key of its export in `Program.components`. */
+const definitionsOf = (
   files: ReadonlyMap<string, Facts>,
   tags: ReadonlyMap<string, ReadonlySet<string>>,
-): Readonly<Record<string, Readonly<Record<string, string>>>> => {
+): Parsed["definitions"] => {
   const paths = new Map([...files.keys()].map((file) => [canonical(file), file] as const));
+
+  const exported = (file: string, from: string, name: string): Definition => {
+    const other = isRelative(from)
+      ? paths.get(resolveRelative((path) => paths.has(path), canonical(file), from) ?? "")
+      : undefined;
+
+    if (other === undefined) return { key: `${from}#${name}` };
+    const facts = files.get(other);
+    const binding = facts?.exports.get(name);
+
+    return {
+      key: `${canonical(other)}#${name}`,
+      ...(binding !== undefined &&
+        facts?.components.has(binding) && { scope: `${other}#${binding}` }),
+    };
+  };
 
   return Object.fromEntries(
     [...tags].map(([file, used]) => {
-      const names = [...used].flatMap((tag) => {
+      const facts = files.get(file);
+
+      const found = [...used].flatMap((tag): [string, Definition][] => {
         const [head = "", member] = tag.split(/\.(.*)/s);
-        const space = member === undefined ? undefined : files.get(file)?.imports.get(head);
+        const space = member === undefined ? undefined : facts?.imports.get(head);
 
-        const registered =
-          space?.imported === "*" && member !== undefined
-            ? namespaced(files, paths, file, space.from, member)
-            : registeredIn(files, paths, file, tag);
+        if (space?.imported === "*" && member !== undefined)
+          return [[tag, exported(file, space.from, member)]];
 
-        return registered === undefined || registered === tag ? [] : [[tag, registered] as const];
+        if (facts?.components.has(tag)) {
+          const name = [...facts.exports].find(([, local]) => local === tag)?.[0] ?? tag;
+
+          return [[tag, { key: `${canonical(file)}#${name}`, scope: `${file}#${tag}` }]];
+        }
+
+        const use = facts?.imports.get(tag);
+
+        return use ? [[tag, exported(file, use.from, use.imported)]] : [];
       });
 
-      return [file, Object.fromEntries(names)] as const;
+      return [file, Object.fromEntries(found)] as const;
     }),
   );
 };
 
-/** `Name` in `NS.Name`, when `import * as NS from "from"`. */
-const namespaced = (
-  files: ReadonlyMap<string, Facts>,
-  paths: ReadonlyMap<string, string>,
-  file: string,
-  from: string,
-  member: string,
-): string | undefined => {
-  const target = resolveRelative((path) => paths.has(path), canonical(file), from);
-  const other = target === undefined ? undefined : paths.get(target);
-  const exported = other === undefined ? undefined : files.get(other)?.exports.get(member);
-
-  return other === undefined || exported === undefined
-    ? undefined
-    : registeredIn(files, paths, other, exported);
-};
-
 /**
  * Read files into elements, props and refs. Lezer does the reading, so no code runs. An element is listed when it has
- * a literal `id`; its id is `scope/id` inside a `component({ name: "scope" })` and just `id` in scene code. A prop is
+ * a literal `id`; its id is `file#binding/id` inside a `component(…)` bound to `binding` and just `id` in scene code. A prop is
  * a literal (JSON, `ease.out`, a hex color) or read-only: `param`, `expression` or `spread`.
  */
 export const parse = (files: Files): Effect.Effect<Parsed, ParseError> =>
@@ -683,7 +661,7 @@ export const parse = (files: Files): Effect.Effect<Parsed, ParseError> =>
     return Effect.succeed({
       files,
       maxDepth,
-      aliases: aliasesOf(facts, tags),
+      definitions: definitionsOf(facts, tags),
       hashes: Object.fromEntries(Object.entries(files).map(([file, src]) => [file, hash(src)])),
       order: kept.map((row) => row.id),
       elements,
@@ -692,16 +670,14 @@ export const parse = (files: Files): Effect.Effect<Parsed, ParseError> =>
     });
   });
 
-/** The name a `component({ name })` registers, for the tag an element is written with: `Stable` for `<Alias>`. */
-export const registeredName = (
+/** What the tag an element is written with stands for: the key of its component in `Program.components`, and the scope its elements' ids have when its source is among the files. */
+export const definitionOf = (
   parsed: Parsed,
   element: Pick<Element, "component" | "range">,
-): string => {
-  const file = parsed.aliases[element.range.file];
+): Definition | undefined => {
+  const file = parsed.definitions[element.range.file];
 
-  return file && Object.hasOwn(file, element.component)
-    ? (file[element.component] ?? element.component)
-    : element.component;
+  return file && Object.hasOwn(file, element.component) ? file[element.component] : undefined;
 };
 
 export const elementOf = (parsed: Parsed, id: Id): Element | undefined =>
@@ -727,7 +703,9 @@ export const chainOf = (
   const chain = [current];
 
   for (const segment of rest) {
-    current = elementOf(parsed, `${registeredName(parsed, current)}/${segment}`);
+    const inside: string | undefined = definitionOf(parsed, current)?.scope;
+
+    current = inside === undefined ? undefined : elementOf(parsed, `${inside}/${segment}`);
 
     if (!current) return undefined;
     chain.push(current);

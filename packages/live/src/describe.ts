@@ -1,4 +1,4 @@
-import { elementOf, registeredName } from "./source.ts";
+import { definitionOf, elementOf } from "./source.ts";
 import type { Program } from "./program.ts";
 import type {
   Attribute,
@@ -10,14 +10,10 @@ import type {
   Node,
   Parsed,
   Prop,
-  UiHint,
 } from "./types.ts";
 
 const isObject = (value: Json | undefined): value is JsonObject =>
   typeof value === "object" && value !== null && !Array.isArray(value);
-
-const isUi = (value: Json | undefined): value is JsonObject & UiHint =>
-  isObject(value) && (value["control"] === undefined || typeof value["control"] === "string");
 
 /** A JSON Schema for a value the component declares nothing about, read from how the literal is written. */
 const inferred = (attribute: Attribute & { readonly kind: "literal" }): JsonSchema => {
@@ -41,9 +37,17 @@ const inferred = (attribute: Attribute & { readonly kind: "literal" }): JsonSche
 };
 
 /** What the component's JSON Schema says about one prop, if it says anything. */
-const declared = (program: Program, component: string, name: string): JsonSchema | undefined => {
+const declared = (
+  program: Program,
+  definition: string | undefined,
+  name: string,
+): JsonSchema | undefined => {
   const { components } = program;
-  const entry = Object.hasOwn(components, component) ? components[component] : undefined;
+
+  const entry =
+    definition !== undefined && Object.hasOwn(components, definition)
+      ? components[definition]
+      : undefined;
 
   const properties = entry?.jsonSchema?.["properties"];
 
@@ -53,7 +57,7 @@ const declared = (program: Program, component: string, name: string): JsonSchema
   return isObject(property) ? property : undefined;
 };
 
-const propOf = (program: Program, component: string, attribute: Attribute): Prop => {
+const propOf = (program: Program, definition: string | undefined, attribute: Attribute): Prop => {
   if (attribute.kind !== "literal")
     return {
       editable: false,
@@ -63,29 +67,28 @@ const propOf = (program: Program, component: string, attribute: Attribute): Prop
       ...(attribute.param !== undefined && { param: attribute.param }),
     };
 
-  const schema = declared(program, component, attribute.name);
-  const ui = schema?.["x-ui"];
+  const schema = declared(program, definition, attribute.name);
 
   return {
     editable: true,
     value: attribute.value,
     schema: schema ?? inferred(attribute),
-    ...(isUi(ui) && { ui }),
     range: attribute.range,
   };
 };
 
 const nodeOf = (parsed: Parsed, program: Program, element: Element): Node => {
-  const component = registeredName(parsed, element);
+  const definition = definitionOf(parsed, element)?.key;
 
   return {
     id: element.id,
-    component,
+    component: element.component,
+    ...(definition !== undefined && { definition }),
     range: element.range,
     props: Object.fromEntries(
       element.attributes
         .filter((attribute) => attribute.name !== "id")
-        .map((attribute) => [attribute.name, propOf(program, component, attribute)]),
+        .map((attribute) => [attribute.name, propOf(program, definition, attribute)]),
     ),
     children: element.children,
   };
@@ -93,7 +96,7 @@ const nodeOf = (parsed: Parsed, program: Program, element: Element): Node => {
 
 /**
  * What a host needs to build a form: every addressable element with its props, each marked editable (a literal, with
- * its schema and UI hint) or read-only (a param, an expression, a spread), plus the scene's params.
+ * its schema) or read-only (a param, an expression, a spread), plus the scene's params.
  */
 export const describe = (parsed: Parsed, program: Program): Description => {
   const elements = parsed.order.flatMap((id) => elementOf(parsed, id) ?? []);

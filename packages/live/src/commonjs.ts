@@ -38,11 +38,18 @@ const FRAME = /([^\s():]+):(\d+):(\d+)/g;
 /** Where an error left a scene file: the first stack frame inside one of the modules. `offset` is the lines an engine adds above a file. */
 export const failure = (
   at: string,
-  { message, stack = "" }: Error,
+  error: Error,
   files: Modules["files"],
   offset: number,
 ): CompileError => {
-  for (const [, found, line, col] of stack.matchAll(FRAME)) {
+  const { stack = "" } = error;
+
+  const message = error.message
+    .replace(/^Failed to start Worker:\s*/, "")
+    .replace(/^Uncaught (?:\w+: )?/, "")
+    .replace(/\n\s+at [\s\S]*$/, "");
+
+  for (const [, found, line, col] of `${stack}\n${error.message}`.matchAll(FRAME)) {
     const file = found?.startsWith("/") ? found : `/${found}`;
 
     if (file !== GUARD && Object.hasOwn(files, file))
@@ -64,8 +71,8 @@ const isReset = (value: Exported): value is () => void => typeof value === "func
 export interface Instance {
   /** The exports of `modules.entry`. */
   readonly entry: Namespace;
-  /** The exports of every file. */
-  readonly namespaces: readonly Namespace[];
+  /** The exports of every file by its canonical path, and of every add-on library (not `svjeez` itself) they import by its specifier. */
+  readonly namespaces: Readonly<Record<string, Namespace>>;
   /** Restarts the loop guard. */
   readonly reset: () => void;
 }
@@ -81,14 +88,21 @@ export const instantiate = (
 ): Instance => {
   const offset = headerLines(define);
   const loaded = new Map<string, Namespace>();
+  const addons: { [specifier: string]: Namespace } = {};
 
   const requireFrom = (path: string): Namespace => {
     const done = loaded.get(path);
 
     if (done) return done;
-    const library = path.startsWith(LIBRARY) ? libraries[path.slice(LIBRARY.length)] : undefined;
+    const specifier = path.startsWith(LIBRARY) ? path.slice(LIBRARY.length) : undefined;
+    const library = specifier === undefined ? undefined : libraries[specifier];
 
-    if (library) return namespaceOf(library);
+    if (specifier !== undefined && library) {
+      if (!specifier.startsWith("svjeez")) addons[specifier] = library;
+
+      return namespaceOf(library);
+    }
+
     const source = modules.files[path];
 
     if (source === undefined) throw new Error(`Cannot find module "${path}".`);
@@ -116,7 +130,7 @@ export const instantiate = (
 
   return {
     entry: requireFrom(modules.entry),
-    namespaces: [...loaded.values()],
+    namespaces: { ...Object.fromEntries(loaded), ...addons },
     reset: () => {
       const reset = guard?.["reset"];
 

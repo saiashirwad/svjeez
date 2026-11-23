@@ -78,6 +78,7 @@ import {
 import { isTrack, layersOf, readOf, type Anim, type Layer as Written } from "./track";
 import { derivedOf, isDerived, restOf, through } from "./derived";
 import { withGoals } from "./goals";
+import { expand, rootLength } from "./expand";
 import type { NodeElement } from "./nodes";
 import {
   outlineOf,
@@ -117,7 +118,8 @@ const PROBE: Box = { x: 0, y: 0, width: 1, height: 1 };
 
 export interface SceneOptions {
   readonly size: Vec;
-  readonly duration: Seconds;
+  /** How long it plays. Left out, it is the length of the root: where its last `<Sequence>` ends. */
+  readonly duration?: Seconds;
   readonly title: string;
   readonly desc?: string;
   readonly theme?: Theme;
@@ -172,7 +174,14 @@ const patternOf = (ctx: Ctx, given: Pattern, where: string, timing: Timing): Mod
 
   if (known) return known;
   const root = `pattern${ctx.patterns.size + 1}`;
-  const tile = groupOf(ctx, given.tile, root, `a pattern painting ${where}`, timing);
+
+  const tile = groupOf(
+    ctx,
+    flat(given.tile).map(expand),
+    root,
+    `a pattern painting ${where}`,
+    timing,
+  );
 
   if (tile === undefined)
     throw new SceneError(
@@ -1312,15 +1321,12 @@ const lowerScene = (
   build: (canvas: Bounds) => SceneElement,
   names: Names,
 ): Scene => {
-  const { size, duration } = options;
+  const { size } = options;
 
   if (!size.every((side) => side > 0 && side < Infinity))
     throw new SceneError(
       `scene() needs a positive width and height, got ${size[0]} by ${size[1]}.`,
     );
-
-  if (!(duration > 0 && duration < Infinity))
-    throw new SceneError(`scene() needs a positive duration, got ${duration}.`);
 
   if (options.still !== undefined && options.still !== false && !Number.isFinite(options.still))
     throw new SceneError(
@@ -1328,9 +1334,20 @@ const lowerScene = (
     );
 
   const top = sceneElement(
-    build(boundsOf({ x: 0, y: 0, width: size[0], height: size[1] })),
+    expand(build(boundsOf({ x: 0, y: 0, width: size[0], height: size[1] }))),
     "scene()'s callback",
   );
+
+  const duration = options.duration ?? rootLength(top);
+
+  if (duration === undefined)
+    throw new SceneError(
+      "scene() needs a duration, or a root that has a length.",
+      "Pass duration, or put <Sequence when={span(0, n)}> at the root.",
+    );
+
+  if (!(duration > 0 && duration < Infinity))
+    throw new SceneError(`scene() needs a positive duration, got ${duration}.`);
 
   const ctx: Ctx = {
     tokens: new Map(),

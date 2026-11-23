@@ -9,7 +9,7 @@ import {
   svg,
 } from "svjeez/tools";
 import type { StandardSchemaV1 } from "svjeez";
-import type { Scene, Schema } from "svjeez/tools";
+import type { Diagnostic, Scene, Schema } from "svjeez/tools";
 import { RenderError } from "./errors.ts";
 import { NO_PARAMS, schemaOf, toJson } from "./param-schema.ts";
 import type { JsonObject, JsonSchema } from "./types.ts";
@@ -20,10 +20,16 @@ export interface ComponentEntry {
   readonly jsonSchema?: JsonSchema;
 }
 
+/** What a render makes: the SVG, and what the SVG backend warns it cannot draw faithfully. */
+export interface Rendered {
+  readonly svg: string;
+  readonly warnings: readonly Diagnostic[];
+}
+
 /** A compiled scene: draw it with params, and what it declares for a host to build a form from. */
 export interface Program {
-  readonly render: (params?: JsonObject) => Effect.Effect<string, RenderError>;
-  /** Every `component()` the files export, by its name. */
+  readonly render: (params?: JsonObject) => Effect.Effect<Rendered, RenderError>;
+  /** Every `component()` the scene files and the add-on libraries they import export, by `module#exportName`: `/groups/a/card.tsx#Card`, `wedding#Card`. */
   readonly components: Readonly<Record<string, ComponentEntry>>;
   /** The params the entry takes, as JSON Schema. */
   readonly params: JsonSchema;
@@ -73,16 +79,21 @@ const jsonSchemaOf = (schema: StandardSchemaV1): JsonSchema | undefined => {
   }
 };
 
-const componentsOf = (namespaces: readonly Namespace[]): Readonly<Record<string, ComponentEntry>> =>
+const componentsOf = (
+  namespaces: Readonly<Record<string, Namespace>>,
+): Readonly<Record<string, ComponentEntry>> =>
   Object.fromEntries(
-    namespaces.flatMap((namespace) =>
-      Object.values(namespace)
-        .filter(isRegistered)
-        .map((component) => {
-          const { name, props } = componentMeta(component) ?? { name: "" };
+    Object.entries(namespaces).flatMap(([module, namespace]) =>
+      Object.entries(namespace)
+        .filter((entry): entry is [string, ComponentFunction] => isRegistered(entry[1]))
+        .map(([name, component]) => {
+          const props = componentMeta(component)?.props;
           const jsonSchema = props && jsonSchemaOf(props);
 
-          return [name, { ...(props && { props }), ...(jsonSchema && { jsonSchema }) }] as const;
+          return [
+            `${module}#${name}`,
+            { ...(props && { props }), ...(jsonSchema && { jsonSchema }) },
+          ] as const;
         }),
     ),
   );
@@ -139,10 +150,10 @@ export interface Hooks {
   readonly reset: () => void;
 }
 
-/** The program a loaded entry makes. `namespaces` are all the modules, so a component is found wherever it is exported. */
+/** The program a loaded entry makes. `namespaces` are all the modules (by path) and add-on libraries (by specifier), so a component is found wherever it is exported. */
 export const programOf = (
   entry: Namespace,
-  namespaces: readonly Namespace[],
+  namespaces: Readonly<Record<string, Namespace>>,
   { ids, reset }: Hooks,
 ): Program => ({
   render: (params = {}) =>
@@ -150,7 +161,14 @@ export const programOf = (
       try: () => {
         reset();
 
-        return svg.emit(sceneOf(entry, params), { ids });
+        const warnings: Diagnostic[] = [];
+
+        const drawn = svg.emit(sceneOf(entry, params), {
+          ids,
+          onWarning: (warning) => warnings.push(warning),
+        });
+
+        return { svg: drawn, warnings };
       },
       catch: (thrown) => renderError(thrown instanceof Error ? thrown : new Error(String(thrown))),
     }),

@@ -319,7 +319,7 @@ const place = (
 const insertElement = (parsed: Parsed, e: Extract<Edit, { op: "insert" }>) =>
   Effect.gen(function* () {
     const parent = yield* need(parsed, e.parent);
-    const { component, id, props = {} } = e.element;
+    const { component, id, props = {}, from } = e.element;
 
     if (!COMPONENT.test(component))
       return yield* Effect.fail(
@@ -337,7 +337,16 @@ const insertElement = (parsed: Parsed, e: Extract<Edit, { op: "insert" }>) =>
       return yield* Effect.fail(new DuplicateId({ id: full, ranges: [clash.range, parent.range] }));
     const text = yield* elementText(component, id, props, full);
 
-    return applyText(parsed.files, [yield* place(parsed, parent, e.at, text)]);
+    const file = parent.range.file;
+    const name = component.split(".")[0] ?? component;
+    const imported = new RegExp(`^import\\s[^;]*\\b${name}\\b[^;]*\\sfrom\\s`, "m");
+
+    return applyText(parsed.files, [
+      yield* place(parsed, parent, e.at, text),
+      ...(from === undefined || imported.test(src(parsed, file))
+        ? []
+        : [{ file, from: 0, to: 0, text: `import { ${name} } from ${JSON.stringify(from)};\n` }]),
+    ]);
   });
 
 /** The whole lines an element is alone on, else just the element. */
@@ -510,10 +519,21 @@ const applyOne = (parsed: Parsed, e: Edit): Effect.Effect<Files, EditError> => {
       return moveElement(parsed, e);
     case "rename":
       return renameElement(parsed, e);
+    case "replaceFile":
+      return Effect.succeed({ ...parsed.files, [e.file]: e.text });
   }
 };
 
-const targetOf = (e: Edit): Id => (e.op === "insert" ? e.parent : e.target);
+const targetOf = (e: Edit): Id => {
+  switch (e.op) {
+    case "insert":
+      return e.parent;
+    case "replaceFile":
+      return e.file;
+    default:
+      return e.target;
+  }
+};
 
 /** What `edit` made: the change, and the source it parses to, so a caller need not parse it again. */
 export interface Edited extends Change {
