@@ -132,6 +132,14 @@ export interface PictureProps extends Common {
   readonly src: PictureData;
   readonly width?: number;
   readonly height?: number;
+  /**
+   * How the picture meets a box whose shape differs from its own, when both `width` and `height` are given:
+   * `cover` fills the box and crops the overflow, `contain` shows all of it and leaves the rest empty, `fill`
+   * stretches it. Default `cover`. Frame it with `clip`, such as `clip={(own) => rect(own.width, own.height, { radius: 24 })}`.
+   */
+  readonly fit?: "cover" | "contain" | "fill";
+  /** The point of the picture that stays in view when `fit` crops or leaves room, as fractions of its width and height. Default `[0.5, 0.5]`; a face a third from the top is `[0.5, 0.33]`. */
+  readonly focus?: Vec;
 }
 
 export interface Framed {

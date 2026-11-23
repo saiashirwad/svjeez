@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Group, Picture, picture, scene } from "svjeez";
+import { Group, Picture, picture, rect, scene } from "svjeez";
 import { svg } from "svjeez/tools";
 import { validateSvg } from "svjeez/frames";
 
@@ -137,7 +137,8 @@ describe("picture", () => {
   });
 
   test("raster bytes become a base64 data URI that round-trips", () => {
-    const { data: href, bytes: cost } = picture(fixtures.png);
+    const { href, bytes: cost, mode } = picture(fixtures.png);
+    expect(mode).toBe("embed");
     expect(href.startsWith("data:image/png;base64,")).toBe(true);
     expect(cost).toBe(href.length);
     expect(Buffer.from(href.split(",")[1]!, "base64").equals(Buffer.from(fixtures.png))).toBe(true);
@@ -146,7 +147,7 @@ describe("picture", () => {
   test("a large raster encodes without overflowing the call stack", () => {
     const big = new Uint8Array(3_000_000);
     big.set(fixtures.png);
-    expect(picture(big).data.length).toBeGreaterThan(4_000_000);
+    expect(picture(big).href.length).toBeGreaterThan(4_000_000);
   });
 
   test("SVG takes its size from width and height, else the viewBox", () => {
@@ -219,7 +220,7 @@ describe("picture", () => {
 
   test("SVG goes in as percent-encoded text and decodes back to the markup", () => {
     const markup = '<svg viewBox="0 0 10 10"><rect fill="#f00" width="10%" height="10"/></svg>';
-    const { data: href } = picture(markup);
+    const { href } = picture(markup);
     expect(href.startsWith("data:image/svg+xml,")).toBe(true);
     expect(href).not.toContain("base64");
     expect(href).not.toMatch(/[<>"#]/);
@@ -230,7 +231,7 @@ describe("picture", () => {
     const markup =
       '<svg viewBox="0 0 10 10"><text xml:space="preserve">a="\t\tb</text>\n<rect fill="#00f" width="1" height="1"/></svg>';
 
-    expect(decodeURIComponent(picture(markup).data.slice("data:image/svg+xml,".length))).toBe(
+    expect(decodeURIComponent(picture(markup).href.slice("data:image/svg+xml,".length))).toBe(
       markup,
     );
   });
@@ -304,7 +305,7 @@ describe("<Picture>", () => {
   });
 
   test("the picture's bytes go in as its data URI", () => {
-    expect(emit(() => <Picture src={photo} at={[10, 20]} />)).toContain(`href="${photo.data}"`);
+    expect(emit(() => <Picture src={photo} at={[10, 20]} />)).toContain(`href="${photo.href}"`);
   });
 
   test("the output validates, including a data URI image", () => {
@@ -316,6 +317,77 @@ describe("<Picture>", () => {
     ));
 
     expect(validateSvg(out).errors).toEqual([]);
+  });
+});
+
+describe("<Picture> fit and focus", () => {
+  const photo = picture(fixtures.png);
+
+  const emit = (node: () => ReturnType<typeof Picture>) =>
+    svg.emit(scene({ size: [400, 300], duration: 1, title: "Pic" }, node));
+
+  const view = (out: string) => [...out.matchAll(/<svg [^>]*viewBox="([^"]*)"/g)][1]?.[1];
+
+  test("cover crops the overflow around the focus point", () => {
+    const wide = emit(() => <Picture src={photo} width={100} height={100} />);
+    expect(view(wide)).toBe("50 0 200 200");
+    const left = emit(() => <Picture src={photo} width={100} height={100} focus={[0, 0.5]} />);
+    expect(view(left)).toBe("0 0 200 200");
+    const right = emit(() => <Picture src={photo} width={100} height={100} focus={[1, 0.5]} />);
+    expect(view(right)).toBe("100 0 200 200");
+  });
+
+  test("contain shows all of it, centred or at the focus", () => {
+    const out = emit(() => <Picture src={photo} width={100} height={100} fit="contain" />);
+    expect(view(out)).toBe("0 -50 300 300");
+  });
+
+  test("fill stretches, and a matching box needs no crop", () => {
+    const out = emit(() => <Picture src={photo} width={100} height={100} fit="fill" />);
+    expect(view(out)).toBeUndefined();
+    expect(out).toContain('width="100" height="100" preserveAspectRatio="none"');
+    expect(view(emit(() => <Picture src={photo} width={150} height={100} />))).toBeUndefined();
+  });
+
+  test("a focus outside the picture is an error", () => {
+    expect(() =>
+      emit(() => <Picture src={photo} width={50} height={50} focus={[1.5, 0]} />),
+    ).toThrow("focus");
+  });
+
+  test("a clip frames the cropped picture in the box's own units", () => {
+    const out = emit(() => (
+      <Picture
+        src={photo}
+        width={100}
+        height={100}
+        clip={(own) => rect(own.width, own.height, { radius: [50, 50, 0, 0] })}
+      />
+    ));
+
+    expect(out).toMatch(/<g [^>]*clip-path="url\(#c1\)"[^>]*>\s*<svg/);
+    expect(validateSvg(out).errors).toEqual([]);
+  });
+});
+
+describe("picture.ref", () => {
+  const ref = picture.ref("https://cdn.test/couple.jpg", { width: 800, height: 1200 });
+
+  const emit = (node: () => ReturnType<typeof Picture>) =>
+    svg.emit(scene({ size: [400, 300], duration: 1, title: "Pic" }, node));
+
+  test("draws the URL itself and costs only its length", () => {
+    expect(ref).toMatchObject({ mode: "ref", bytes: 27, format: undefined });
+    const out = emit(() => <Picture src={ref} width={100} height={100} />);
+    expect(out).toContain('href="https://cdn.test/couple.jpg"');
+    expect(out.length).toBeLessThan(2_000);
+  });
+
+  test("needs the image's size, and the output warns that <img> will not load it", () => {
+    expect(() => picture.ref("a.jpg", { width: 0, height: 10 })).toThrow("width and height");
+    const { errors, warnings } = validateSvg(emit(() => <Picture src={ref} width={100} />));
+    expect(errors).toEqual([]);
+    expect(warnings.some((warning) => warning.includes("<img>"))).toBe(true);
   });
 });
 
@@ -334,7 +406,7 @@ describe("image validation", () => {
       const { errors, warnings } = validateSvg(wrap(tag));
       expect(errors).toEqual([]);
       expect(
-        warnings.some((warning) => warning.includes("<img>") && warning.includes("picture.load()")),
+        warnings.some((warning) => warning.includes("<img>") && warning.includes("picture.ref()")),
       ).toBe(true);
     }
   });

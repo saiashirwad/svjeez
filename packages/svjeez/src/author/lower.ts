@@ -760,12 +760,30 @@ const picture = (ctx: Ctx, props: PictureProps, key: string, timing: Timing): Pi
     );
 
   const box = { x: 0, y: 0, width, height };
+  const [fx, fy] = props.focus ?? [0.5, 0.5];
+  const fit = props.fit ?? "cover";
+
+  if (!(fx >= 0 && fx <= 1 && fy >= 0 && fy <= 1))
+    throw new SceneError(
+      `${ctx.notes.names.named(key)} has a focus of [${fx}, ${fy}], which must be fractions from 0 to 1.`,
+    );
+
+  const scale =
+    fit === "contain"
+      ? Math.min(width / src.width, height / src.height)
+      : Math.max(width / src.width, height / src.height);
+
+  const [vw, vh] = [width / scale, height / scale];
+  const whole = Math.abs(vw - src.width) < 1e-6 && Math.abs(vh - src.height) < 1e-6;
 
   return {
     ...base(ctx, props, box, key, timing, pinned(props.anchor, box, ctx.notes.names.named(key))),
     kind: "picture",
     size: [width, height],
-    data: src.data,
+    href: src.href,
+    natural: [src.width, src.height],
+    ...(fit !== "fill" &&
+      !whole && { view: [(src.width - vw) * fx, (src.height - vh) * fy, vw, vh] }),
   };
 };
 

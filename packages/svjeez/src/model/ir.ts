@@ -267,7 +267,10 @@ export interface TextNode extends Base {
 export interface PictureNode extends Base {
   readonly kind: "picture";
   readonly size: Vec;
-  readonly data: string;
+  readonly href: string;
+  /** The picture's own size, and the part of it the box shows as x, y, width, height in those units. */
+  readonly natural: Vec;
+  readonly view?: readonly [number, number, number, number];
 }
 
 export type SceneNode = GroupNode | ShapeNode | TextNode | PictureNode;

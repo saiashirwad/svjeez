@@ -453,7 +453,9 @@ describe("morph between states that hold layout, text, connectors, images", () =
       made(() =>
         morph(<Picture key="i" src={badge} />, <Picture key="i" src={other} />, span(1, 1)),
       ),
-    ).toThrow('morph() can\'t blend <Picture> "i": its picture or size differs between states');
+    ).toThrow(
+      'morph() can\'t blend <Picture> "i": its picture, size or crop differs between states',
+    );
   });
 });
 

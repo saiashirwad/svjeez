@@ -85,6 +85,7 @@ export const image = (
     <Picture
       key={scale !== undefined && (width > box.width || height > box.height) ? "picture" : key}
       src={src}
+      fit="fill"
       width={width}
       height={height}
       at={[
