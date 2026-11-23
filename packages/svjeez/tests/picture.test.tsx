@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { Group, Picture, picture, rect, scene } from "svjeez";
+import { Group, Picture, ease, picture, rect, scene, span, track, type Vec } from "svjeez";
 import { svg } from "svjeez/tools";
 import { validateSvg } from "svjeez/frames";
+import { blendVec, valueAt } from "../src/model/sample";
 
 const isText = (part: number | string): part is string => typeof part === "string";
 
@@ -353,6 +354,50 @@ describe("<Picture> fit and focus", () => {
     expect(() =>
       emit(() => <Picture src={photo} width={50} height={50} focus={[1.5, 0]} />),
     ).toThrow("focus");
+  });
+
+  test("zoom pushes in past the fit around the focus", () => {
+    const cover = emit(() => <Picture src={photo} width={100} height={100} zoom={2} />);
+    expect(view(cover)).toBe("100 50 100 100");
+    const fill = emit(() => <Picture src={photo} width={100} height={100} fit="fill" zoom={2} />);
+    expect(view(fill)).toBe("75 50 150 100");
+  });
+
+  test("a zoom of 0 or below is an error, in a track too", () => {
+    expect(() => emit(() => <Picture src={photo} width={50} height={50} zoom={0} />)).toThrow(
+      "zoom of 0",
+    );
+    expect(() =>
+      emit(() => <Picture src={photo} width={50} height={50} zoom={track(1).to(-1, span(0, 1))} />),
+    ).toThrow("zoom of -1");
+  });
+
+  test("a moving focus and zoom move the picture inside a box that stays put", () => {
+    const moving = scene({ size: [400, 300], duration: 1, title: "Pic" }, () => (
+      <Picture
+        src={photo}
+        width={100}
+        height={100}
+        at={[200, 150]}
+        anchor="center"
+        focus={track<Vec>([0, 0.5]).to([1, 0.5], span(0, 1), ease.linear)}
+        zoom={track(1).to(2, span(0, 1), ease.linear)}
+      />
+    ));
+
+    const frame = moving.root.kind === "group" ? moving.root.children[0] : undefined;
+    expect(frame).toMatchObject({
+      kind: "group",
+      box: { width: 100, height: 100 },
+      at: [150, 100],
+    });
+    const crop = frame?.kind === "group" ? frame.children[0] : undefined;
+    expect(crop?.clip).toBeDefined();
+    const image = crop?.kind === "group" ? crop.children[0] : undefined;
+    const at = (t: number) => valueAt(image!.at, t, blendVec).map((n) => Math.round(n) + 0);
+    expect(at(0)).toEqual([0, 0]);
+    expect(at(1)).toEqual([-200, -50]);
+    expect(validateSvg(svg.emit(moving)).errors).toEqual([]);
   });
 
   test("a clip frames the cropped picture in the box's own units", () => {

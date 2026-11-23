@@ -75,8 +75,8 @@ import {
   type Reading,
   type Timing,
 } from "../model/steps";
-import { isTrack, layersOf, readOf, type Anim, type Layer as Written } from "./track";
-import { derivedOf, isDerived, restOf, through } from "./derived";
+import { isTrack, layersOf, passageOf, readOf, type Anim, type Layer as Written } from "./track";
+import { derivedOf, isDerived, restOf, through, together } from "./derived";
 import { withGoals } from "./goals";
 import type { NodeElement } from "./nodes";
 import {
@@ -748,42 +748,101 @@ const stroked = (node: SceneNode, stroke: Stroke): SceneNode =>
       ? { ...node, children: node.children.map((child) => stroked(child, stroke)) }
       : node;
 
-const picture = (ctx: Ctx, props: PictureProps, key: string, timing: Timing): PictureNode => {
+const valuesOf = <T>(value: Anim<T>): T[] =>
+  isDerived(value)
+    ? []
+    : isTrack(value)
+      ? [
+          passageOf(value).data.initial.value,
+          ...passageOf(value).data.steps.map((step) => step.values.value),
+        ].flatMap((given) => (given === undefined ? [] : [given]))
+      : [value];
+
+const picture = (ctx: Ctx, props: PictureProps, key: string, timing: Timing): SceneNode => {
   const { src } = props;
+  const where = ctx.notes.names.named(key);
   const ratio = src.width / src.height;
   const width = props.width ?? (props.height === undefined ? src.width : props.height * ratio);
   const height = props.height ?? (props.width === undefined ? src.height : props.width / ratio);
 
   if (!(width > 0 && height > 0 && Number.isFinite(width) && Number.isFinite(height)))
-    throw new SceneError(
-      `${ctx.notes.names.named(key)} needs a positive width and height, got ${width} by ${height}.`,
-    );
+    throw new SceneError(`${where} needs a positive width and height, got ${width} by ${height}.`);
 
   const box = { x: 0, y: 0, width, height };
-  const [fx, fy] = props.focus ?? [0.5, 0.5];
+  const focus = props.focus ?? [0.5, 0.5];
+  const zoom = props.zoom ?? 1;
   const fit = props.fit ?? "cover";
 
-  if (!(fx >= 0 && fx <= 1 && fy >= 0 && fy <= 1))
-    throw new SceneError(
-      `${ctx.notes.names.named(key)} has a focus of [${fx}, ${fy}], which must be fractions from 0 to 1.`,
-    );
+  for (const [fx, fy] of valuesOf(focus))
+    if (!(fx >= 0 && fx <= 1 && fy >= 0 && fy <= 1))
+      throw new SceneError(
+        `${where} has a focus of [${fx}, ${fy}], which must be fractions from 0 to 1.`,
+      );
 
-  const scale =
-    fit === "contain"
-      ? Math.min(width / src.width, height / src.height)
-      : Math.max(width / src.width, height / src.height);
+  for (const z of valuesOf(zoom))
+    if (!(z > 0 && Number.isFinite(z)))
+      throw new SceneError(`${where} has a zoom of ${z}, which must be above 0.`);
 
-  const [vw, vh] = [width / scale, height / scale];
+  const cover = (fit === "contain" ? Math.min : Math.max)(width / src.width, height / src.height);
+  const [sx, sy] = fit === "fill" ? [width / src.width, height / src.height] : [cover, cover];
+  const [bw, bh] = [src.width * sx, src.height * sy];
+  const home = pinned(props.anchor, box, where);
+
+  if (isTrack(zoom) || isDerived(zoom) || isTrack(focus) || isDerived(focus)) {
+    const image: PictureNode = {
+      key: `${key}/image`,
+      box: { x: 0, y: 0, width: bw, height: bh },
+      at: animated(
+        together([zoom, focus]).map((z, [fx, fy]): Vec => [
+          (width - bw * z) * fx,
+          (height - bh * z) * fy,
+        ]),
+        keep,
+        timing,
+        mixVec,
+        `focus on ${where}`,
+        true,
+      ),
+      origin: [0, 0],
+      layers: [{ ...IDLE, scale: animated(zoom, pair, timing, mixVec, `zoom on ${where}`) }],
+      effects: [],
+      kind: "picture",
+      size: [bw, bh],
+      href: src.href,
+      natural: [src.width, src.height],
+    };
+
+    return {
+      ...base(ctx, props, box, key, timing, home),
+      kind: "group",
+      authored: { frame: true },
+      children: [
+        {
+          kind: "group",
+          key: `${key}/crop`,
+          box,
+          at: [0, 0],
+          origin: [0, 0],
+          layers: [],
+          effects: [],
+          clip: outlineOf(rect(width, height)),
+          children: [image],
+        },
+      ],
+    };
+  }
+
+  const [fx, fy] = focus;
+  const [vw, vh] = [width / (sx * zoom), height / (sy * zoom)];
   const whole = Math.abs(vw - src.width) < 1e-6 && Math.abs(vh - src.height) < 1e-6;
 
   return {
-    ...base(ctx, props, box, key, timing, pinned(props.anchor, box, ctx.notes.names.named(key))),
+    ...base(ctx, props, box, key, timing, home),
     kind: "picture",
     size: [width, height],
     href: src.href,
     natural: [src.width, src.height],
-    ...(fit !== "fill" &&
-      !whole && { view: [(src.width - vw) * fx, (src.height - vh) * fy, vw, vh] }),
+    ...(!whole && { view: [(src.width - vw) * fx, (src.height - vh) * fy, vw, vh] }),
   };
 };
 

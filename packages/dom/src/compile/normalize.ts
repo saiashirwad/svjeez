@@ -26,6 +26,7 @@ const traits = (el: Node) => {
       el.props.height,
       el.props.fit,
       el.props.focus,
+      el.props.zoom,
     ],
   ]);
 

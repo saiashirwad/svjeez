@@ -560,7 +560,10 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
         measure(child);
       }
 
-      d.box = d.note?.arranged || d.node.authored?.count ? d.node.box : around(d.children);
+      d.box =
+        d.note?.arranged || d.node.authored?.count || d.node.authored?.frame
+          ? d.node.box
+          : around(d.children);
     }
 
     d.origin = originOf(
@@ -794,7 +797,7 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
     };
 
     if (asked?.kind !== "arrange") {
-      const box = node.authored?.count ? node.box : around(children);
+      const box = node.authored?.count || node.authored?.frame ? node.box : around(children);
 
       return {
         ...node,

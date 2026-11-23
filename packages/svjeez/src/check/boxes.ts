@@ -132,7 +132,7 @@ export const placements = (scene: Scene, at: Seconds = 0): Placed[] => {
     if (node.kind !== "group" || node.children.length === 0) return initial;
     const children = node.children.map((child) => visit(child, own, opacity, depth + 1));
 
-    if (depth === 0 || node.authored?.count) return initial;
+    if (depth === 0 || node.authored?.count || node.authored?.frame) return initial;
 
     const back = inverse(own);
     const childBounds = boundsOfPoints(children.flatMap((child) => boxCorners(child.box)));

@@ -23,6 +23,8 @@ export interface Authored {
   readonly backdrop?: true;
   readonly ends?: readonly string[];
   readonly count?: { readonly ticks: readonly { readonly t: Seconds; readonly text: string }[] };
+  /** A <Picture> whose zoom or focus moves: its box is the frame the picture is clipped to, not its children's. */
+  readonly frame?: true;
 }
 
 export type { Ease, Seconds };

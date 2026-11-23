@@ -138,8 +138,16 @@ export interface PictureProps extends Common {
    * stretches it. Default `cover`. Frame it with `clip`, such as `clip={(own) => rect(own.width, own.height, { radius: 24 })}`.
    */
   readonly fit?: "cover" | "contain" | "fill";
-  /** The point of the picture that stays in view when `fit` crops or leaves room, as fractions of its width and height. Default `[0.5, 0.5]`; a face a third from the top is `[0.5, 0.33]`. */
-  readonly focus?: Vec;
+  /**
+   * The point of the picture that stays in view when `fit` crops or `zoom` pushes in, as fractions of its width and
+   * height. Default `[0.5, 0.5]`; a face a third from the top is `[0.5, 0.33]`. A track pans the picture inside its box.
+   */
+  readonly focus?: Anim<Vec>;
+  /**
+   * How far the picture is pushed in past its `fit`, around `focus`: 1 (default) is the fit itself, 1.2 shows the
+   * middle 1/1.2 of it. The box stays put, so a track is a camera move inside the frame.
+   */
+  readonly zoom?: Anim<number>;
 }
 
 export interface Framed {
