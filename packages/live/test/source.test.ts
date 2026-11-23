@@ -81,7 +81,7 @@ describe("parse", () => {
 export default scene({}, () => <Layer id="a"><Rect id="x" /><Rect id="x" /><Text id="note" /></Layer>);`,
     });
 
-    expect(parsed.order).toContain("NoteCard/note");
+    expect(parsed.order).toContain("a.tsx#Card/note");
     expect(parsed.order).toContain("note");
     expect(parsed.duplicates.map((d) => d.id)).toEqual(["x"]);
   });
@@ -469,7 +469,9 @@ export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
   test("locate resolves an instance path through the instance's component, not a scene element of the same name", () => {
     const parsed = read(both);
 
-    expect(locate(parsed, "card1/note")).toEqual(elementOf(parsed, "NoteCard/note")!.range);
+    expect(locate(parsed, "card1/note")).toEqual(
+      elementOf(parsed, "card.tsx#NoteCard/note")!.range,
+    );
     expect(locate(parsed, "note")).toEqual(elementOf(parsed, "note")!.range);
   });
 
@@ -490,16 +492,20 @@ export const Board = component({
     const nested: Files = {
       ...both,
       "board.tsx": outer,
-      "scene.tsx": main.replace('<NoteCard id="card1" />', '<Board id="b" />'),
+      "scene.tsx": main
+        .replace('<NoteCard id="card1" />', '<Board id="b" />')
+        .replace('import { NoteCard } from "./card.tsx"', 'import { Board } from "./board.tsx"'),
     };
 
     const parsed = read(nested);
 
-    expect(locate(parsed, "b/slot/note")).toEqual(elementOf(parsed, "NoteCard/note")!.range);
+    expect(locate(parsed, "b/slot/note")).toEqual(
+      elementOf(parsed, "card.tsx#NoteCard/note")!.range,
+    );
   });
 
   test("renaming inside a component also rewrites instance-path refs to it", () => {
-    const change = run([{ op: "rename", target: "NoteCard/note", to: "body" }], both);
+    const change = run([{ op: "rename", target: "card.tsx#NoteCard/note", to: "body" }], both);
 
     expect(sourceOf(change, "card.tsx")).toContain('id="body"');
     expect(sourceOf(change, "card.tsx")).toContain('ref("body")');
@@ -593,25 +599,30 @@ export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
 
   const program: Program = {
     render: () => Effect.succeed({ svg: "", warnings: [] }),
-    components: { StableA: { jsonSchema: { properties: { label: { type: "string" } } } } },
+    components: {
+      "/card.tsx#NoteCard": { jsonSchema: { properties: { label: { type: "string" } } } },
+    },
     params: {},
   };
 
-  test("maps an aliased or local tag to its registered name", () => {
-    expect(parsed.aliases["scene.tsx"]).toEqual({
-      Alias: "StableA",
-      Local: "StableB",
-      Third: "StableD",
-      "Cards.NoteCard": "StableA",
+  test("maps a tag to the component it stands for, whatever it is called there", () => {
+    expect(parsed.definitions["scene.tsx"]).toEqual({
+      Alias: { key: "/card.tsx#NoteCard", scope: "card.tsx#NoteCard" },
+      Local: { key: "/scene.tsx#Local", scope: "scene.tsx#Local" },
+      Third: { key: "/card.tsx#default", scope: "card.tsx#default" },
+      "Cards.NoteCard": { key: "/card.tsx#NoteCard", scope: "card.tsx#NoteCard" },
+      Group: { key: "svjeez#Group" },
     });
   });
 
   test("locate follows an instance path through the registered name, not the tag", () => {
-    const note = elementOf(parsed, "StableA/note")!.range;
+    const note = elementOf(parsed, "card.tsx#NoteCard/note")!.range;
 
     expect(locate(parsed, "one/note")).toEqual(note);
     expect(locate(parsed, "four/note")).toEqual(note);
-    expect(locate(parsed, "two/inside")).toEqual(elementOf(parsed, "StableB/inside")!.range);
+    expect(locate(parsed, "two/inside")).toEqual(
+      elementOf(parsed, "scene.tsx#Local/inside")!.range,
+    );
   });
 
   test("locate returns nothing for an instance that does not exist, even if the last segment does", () => {
@@ -619,11 +630,72 @@ export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
     expect(locate(parsed, "one/missing")).toBeUndefined();
   });
 
-  test("describe names the registered component and reads its schema", () => {
+  test("describe keeps the tag as written, names the definition and reads its schema", () => {
     const description = describeScene(parsed, program);
 
-    expect(description.nodes["one"]?.component).toBe("StableA");
-    expect(description.nodes["two"]?.component).toBe("StableB");
+    expect(description.nodes["one"]?.component).toBe("Alias");
+    expect(description.nodes["one"]?.definition).toBe("/card.tsx#NoteCard");
+    expect(description.nodes["two"]?.definition).toBe("/scene.tsx#Local");
+  });
+});
+
+describe("two components with one name", () => {
+  const define = (file: string) => `import { Text, component } from "svjeez";
+
+export const Card = component({
+  name: "Card",
+  render: () => <Text id="title" content="${file}" />,
+});
+`;
+
+  const parsed = read({
+    "a.tsx": define("a"),
+    "b.tsx": define("b"),
+    "scene.tsx": `import { Group, scene } from "svjeez";
+import { Card as A } from "./a.tsx";
+import { Card as B } from "./b.tsx";
+
+export default scene({ size: [10, 10], duration: 1, title: "T" }, () => (
+  <Group id="all">
+    <A id="one" label="x" />
+    <B id="two" label="y" />
+  </Group>
+));
+`,
+  });
+
+  const program: Program = {
+    render: () => Effect.succeed({ svg: "", warnings: [] }),
+    components: {
+      "/a.tsx#Card": { jsonSchema: { properties: { label: { title: "from a" } } } },
+      "/b.tsx#Card": { jsonSchema: { properties: { label: { title: "from b" } } } },
+    },
+    params: {},
+  };
+
+  test("lists both elements, each under its own file", () => {
+    expect(parsed.order).toEqual(["a.tsx#Card/title", "b.tsx#Card/title", "all", "one", "two"]);
+  });
+
+  test("each is edited on its own", () => {
+    const changed = Effect.runSync(
+      edit(parsed, [{ op: "set", target: "b.tsx#Card/title", prop: "content", value: "changed" }]),
+    );
+
+    expect(changed.files["a.tsx"]).toContain('content="a"');
+    expect(changed.files["b.tsx"]).toContain('content="changed"');
+  });
+
+  test("each gets its own schema", () => {
+    const { nodes } = describeScene(parsed, program);
+
+    expect(nodes["one"]?.props["label"]).toMatchObject({ schema: { title: "from a" } });
+    expect(nodes["two"]?.props["label"]).toMatchObject({ schema: { title: "from b" } });
+  });
+
+  test("locate resolves both instance paths", () => {
+    expect(locate(parsed, "one/title")).toEqual(elementOf(parsed, "a.tsx#Card/title")!.range);
+    expect(locate(parsed, "two/title")).toEqual(elementOf(parsed, "b.tsx#Card/title")!.range);
   });
 });
 

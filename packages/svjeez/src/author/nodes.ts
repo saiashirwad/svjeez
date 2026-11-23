@@ -165,11 +165,28 @@ export type SceneElement =
       readonly children: readonly SceneElement[];
     }
   | { readonly type: "fragment"; readonly children: readonly SceneElement[] }
-  | MorphElement;
+  | MorphElement
+  | {
+      readonly type: "call";
+      readonly component: (props: never) => SceneElement;
+      readonly props: object;
+      readonly key?: string;
+      readonly scope: readonly string[];
+    }
+  | {
+      readonly type: "provide";
+      readonly context: object;
+      readonly value: {} | null | undefined;
+      readonly children: readonly SceneElement[];
+    }
+  | { readonly type: "series"; readonly children: readonly SceneElement[] };
+
+/** What JSX writes and expansion removes before a scene is lowered. */
+export type Authoring = Extract<SceneElement, { readonly type: "call" | "provide" | "series" }>;
 
 export type NodeElement = Exclude<
   SceneElement,
-  { readonly type: "fragment" | "sequence" | "morph" | "run" }
+  { readonly type: "fragment" | "sequence" | "morph" | "run" | Authoring["type"] }
 >;
 
 export type Child = SceneElement | false | null | undefined | readonly Child[];
@@ -192,13 +209,13 @@ const isText = (value: SceneElement | string | number): value is string | number
 
 const isPlaceable = (
   value: SceneElement,
-): value is Exclude<SceneElement, { readonly type: "run" }> =>
+): value is Exclude<SceneElement, { readonly type: "run" | Authoring["type"] }> =>
   isObject(value) && value.type !== "run" && TYPES.has(value.type);
 
 export const sceneElement = (
   value: SceneElement,
   where: string,
-): Exclude<SceneElement, { readonly type: "run" }> => {
+): Exclude<SceneElement, { readonly type: "run" | Authoring["type"] }> => {
   if (isObject(value) && value.type === "run")
     throw new SceneError(
       `${where} holds a <Run>, which draws only inside a <Text>. Put it in one, as in <Text font={…} size={…} fill={…}>a <Run weight={600}>bold</Run> word</Text>.`,
@@ -251,3 +268,9 @@ export const Sequence = ({ when, children }: SequenceProps): SceneElement => {
     children: flat(children),
   };
 };
+
+/** Plays its children one after another: each starts where the one before it ends. Each needs a length, as a root of `<Sequence when={span(0, n)}>` gives it. */
+export const Series = ({ children }: { readonly children?: Child }): SceneElement => ({
+  type: "series",
+  children: flat(children),
+});

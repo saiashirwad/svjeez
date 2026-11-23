@@ -1,6 +1,6 @@
 import { useEffect, useId, useState } from "react";
-import type { Json, JsonObject, Prop, UiHint } from "@svjeez/live";
-import { isBoolean, isNumber, isString, optionsOf } from "./guards.ts";
+import type { Json, JsonObject, Prop } from "@svjeez/live";
+import { isBoolean, isNumber, isObject, isString, optionsOf } from "./guards.ts";
 
 const EASES = ["ease.linear", "ease.in", "ease.out", "ease.inOut", "ease.pop"];
 
@@ -9,7 +9,6 @@ const HEX = /^#[0-9a-f]{6}$/i;
 interface ValueProps {
   readonly value: Json;
   readonly schema: JsonObject;
-  readonly ui?: UiHint | undefined;
   /** The id of the control's input, so a `<label htmlFor>` can name it. */
   readonly id?: string | undefined;
   readonly onCommit: (value: Json) => void;
@@ -60,12 +59,14 @@ const Draft = ({ value, id, onCommit }: DraftProps) => {
 };
 
 /** One control for one JSON value, chosen from its schema and `x-ui` hint, then from the shape of the value. */
-export const ValueControl = ({ value, schema, ui, id, onCommit }: ValueProps) => {
-  const control = ui?.control;
+export const ValueControl = ({ value, schema, id, onCommit }: ValueProps) => {
+  const ui = schema["x-ui"];
+  const hint = isObject(ui) ? ui : {};
+  const control = hint["control"];
   const options = optionsOf(schema);
   const minimum = schema["minimum"];
   const maximum = schema["maximum"];
-  const step = ui?.["step"];
+  const step = hint["step"];
 
   if (control === "slider" && isNumber(value)) {
     const low = isNumber(minimum) ? minimum : 0;
@@ -188,13 +189,7 @@ export const PropField = ({ name, prop, onCommit }: PropFieldProps) => {
         {name}
       </label>
       {prop.editable ? (
-        <ValueControl
-          value={prop.value}
-          schema={prop.schema}
-          ui={prop.ui}
-          id={id}
-          onCommit={onCommit}
-        />
+        <ValueControl value={prop.value} schema={prop.schema} id={id} onCommit={onCommit} />
       ) : (
         <span className="chip" title={`Read-only ${prop.reason}: ${prop.text}`}>
           <span className="chip-reason">{prop.reason}</span>

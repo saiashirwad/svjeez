@@ -1,6 +1,5 @@
 import {
   Denied,
-  Hooks,
   Rejected,
   Session,
   browserRunner,
@@ -156,9 +155,11 @@ export const boot = async (
   const bytes = new Uint8Array(await (await fetch(geistUrl)).arrayBuffer());
   const sans = font(bytes);
 
-  const hooks = Layer.succeed(
-    Hooks,
-    Hooks.of({
+  const layer = Session.layer({
+    files: INITIAL_FILES,
+    entry: ENTRY,
+    compile: { modules: (name) => name === FONT_MODULE || defaultAllowlist(name) },
+    hooks: {
       beforeEdit: (edit) =>
         isLocked() && touchesSeal(edit)
           ? Effect.fail(new Denied({ reason: "policy: the seal is locked." }))
@@ -170,15 +171,9 @@ export const boot = async (
             (error) => new Rejected({ reason: `the scene would not render: ${messageOf(error)}` }),
           ),
         ),
-      afterEdit: (change) => Effect.sync(() => onDiff(change.diff)),
-    }),
-  );
-
-  const layer = Session.layer({
-    files: INITIAL_FILES,
-    entry: ENTRY,
-    compile: { modules: (name) => name === FONT_MODULE || defaultAllowlist(name) },
-  }).pipe(Layer.provide(Layer.mergeAll(browserRunner({ [FONT_MODULE]: { sans } }), hooks)));
+      afterEdit: (_, change) => Effect.sync(() => onDiff(change.diff)),
+    },
+  }).pipe(Layer.provide(browserRunner({ [FONT_MODULE]: { sans } })));
 
   const runtime = ManagedRuntime.make(layer);
 

@@ -9,7 +9,6 @@ import {
   BunRunner,
   CompileError,
   InvalidValue,
-  NoHooks,
   RenderError,
   Runner,
   Session,
@@ -124,12 +123,12 @@ describe("compile", () => {
   test("finds components by name in every file, with their JSON Schema", async () => {
     const program = await run(compiled(MULTI));
 
-    expect(Object.keys(program.components)).toEqual(["NoteCard"]);
-    expect(program.components["NoteCard"]?.jsonSchema).toEqual({
+    expect(Object.keys(program.components)).toEqual(["/components/NoteCard.tsx#NoteCard"]);
+    expect(program.components["/components/NoteCard.tsx#NoteCard"]?.jsonSchema).toEqual({
       type: "object",
       properties: { label: { type: "string" } },
     });
-    expect(program.components["NoteCard"]?.props).toBeDefined();
+    expect(program.components["/components/NoteCard.tsx#NoteCard"]?.props).toBeDefined();
   });
 
   test("reads params declared with param.*, and passes the checked values to the scene", async () => {
@@ -559,7 +558,7 @@ export default scene({ size: [10, 10], duration: 1, title: "T" }, () => <Group i
       ).pipe(Effect.provide(bunRunner({ "@test/badge": { Badge: badge } }))),
     );
 
-    expect(Object.keys(program.components)).toEqual(["Badge"]);
+    expect(Object.keys(program.components)).toEqual(["/scene.tsx#keep", "@test/badge#Badge"]);
   });
 });
 
@@ -569,7 +568,7 @@ describe("BrowserRunner", () => {
     const { svg } = await run(program.render());
 
     expect(svg).toContain('data-svz-id="one/note"');
-    expect(Object.keys(program.components)).toEqual(["NoteCard"]);
+    expect(Object.keys(program.components)).toEqual(["/components/NoteCard.tsx#NoteCard"]);
   });
 
   test("reports where a module threw, past the lines new Function adds", async () => {
@@ -706,7 +705,7 @@ describe("WorkerLoaderRunner", () => {
     const program = await run(compile(MULTI, options).pipe(Effect.provide(layer)));
 
     expect((await run(program.render())).svg).toContain('data-svz-id="one/back"');
-    expect(program.components["NoteCard"]?.jsonSchema).toEqual({
+    expect(program.components["/components/NoteCard.tsx#NoteCard"]?.jsonSchema).toEqual({
       type: "object",
       properties: { label: { type: "string" } },
     });
@@ -740,7 +739,7 @@ export default ({ width }) => scene({ size: [100, 80], duration: 1, title: "T" }
     const files = { ...MULTI, "components/NoteCard.tsx": card };
 
     const layer = Session.layer({ files, entry: "scene.tsx" }).pipe(
-      Layer.provide(Layer.mergeAll(WorkerLoaderRunner(loader, { libraries: BUNDLES }), NoHooks)),
+      Layer.provide(WorkerLoaderRunner(loader, { libraries: BUNDLES })),
     );
 
     const error = await run(

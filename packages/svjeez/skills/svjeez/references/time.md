@@ -22,6 +22,18 @@ const [crouch, leap, land] = span(0.1, 0.3).chain(0.12, 0.25);
 ```
 
 `<Sequence when>` is a clock of its own: every track and recipe inside counts from the span's start, so a component is written from 0 and placed anywhere, and sequences inside sequences add up. With a length, everything inside must end by then; `when={span(4)}` runs to the end. A track is read on one clock: two nodes on different clocks reading one track throws, so make a track for each.
+## One after another, and values from above
+
+```tsx
+const Accent = context("#3ddc97");           // Accent.read() is the nearest <Accent value> above, else this
+
+<Accent value="#ff6b6b">
+  <Series><Beat /><Beat /></Series>          {/* each starts where the one before ends */}
+</Accent>
+```
+
+JSX runs top-down when the scene is built, so a component sees the contexts around it, and `propsOf(el, Card)` (from `svjeez/tools`) reads the props an unbuilt `<Card>` was written with. A node's length is where its last `<Sequence>` ends, seen through fragments and groups; a `<Series>` child needs one (`<Sequence when={span(0, n)}>` at its root). Leave `duration` out and the scene is as long as its root. See `examples/series.tsx`.
+
 ## Loops and seams
 
 A scene loops every `duration` seconds unless `loop: false` (play once and hold the last frame). A looping scene must end where it began, or `check` reports a `loop-seam`:

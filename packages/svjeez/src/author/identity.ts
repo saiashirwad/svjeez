@@ -28,9 +28,9 @@ export const sourced = (from: SceneElement, to: SceneElement): SceneElement => {
 
   const component = components.get(from);
 
-  if (source) written.set(to, source);
+  if (source && !written.has(to)) written.set(to, source);
 
-  if (component) components.set(to, component);
+  if (component && !components.has(to)) components.set(to, component);
 
   return to;
 };

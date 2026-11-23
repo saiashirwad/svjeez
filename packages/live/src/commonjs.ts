@@ -71,8 +71,8 @@ const isReset = (value: Exported): value is () => void => typeof value === "func
 export interface Instance {
   /** The exports of `modules.entry`. */
   readonly entry: Namespace;
-  /** The exports of every file, and of every add-on library (not `svjeez` itself) they import. */
-  readonly namespaces: readonly Namespace[];
+  /** The exports of every file by its canonical path, and of every add-on library (not `svjeez` itself) they import by its specifier. */
+  readonly namespaces: Readonly<Record<string, Namespace>>;
   /** Restarts the loop guard. */
   readonly reset: () => void;
 }
@@ -88,16 +88,17 @@ export const instantiate = (
 ): Instance => {
   const offset = headerLines(define);
   const loaded = new Map<string, Namespace>();
-  const addons = new Set<Namespace>();
+  const addons: { [specifier: string]: Namespace } = {};
 
   const requireFrom = (path: string): Namespace => {
     const done = loaded.get(path);
 
     if (done) return done;
-    const library = path.startsWith(LIBRARY) ? libraries[path.slice(LIBRARY.length)] : undefined;
+    const specifier = path.startsWith(LIBRARY) ? path.slice(LIBRARY.length) : undefined;
+    const library = specifier === undefined ? undefined : libraries[specifier];
 
-    if (library) {
-      if (!path.startsWith(`${LIBRARY}svjeez`)) addons.add(library);
+    if (specifier !== undefined && library) {
+      if (!specifier.startsWith("svjeez")) addons[specifier] = library;
 
       return namespaceOf(library);
     }
@@ -129,7 +130,7 @@ export const instantiate = (
 
   return {
     entry: requireFrom(modules.entry),
-    namespaces: [...loaded.values(), ...addons],
+    namespaces: { ...Object.fromEntries(loaded), ...addons },
     reset: () => {
       const reset = guard?.["reset"];
 

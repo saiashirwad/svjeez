@@ -9,7 +9,7 @@ export interface JsonObject {
 /** A JSON Schema document. */
 export type JsonSchema = JsonObject;
 
-/** An element's id: `"note"`, or `"NoteCard/note"` when written inside a `component({ name: "NoteCard" })`. */
+/** An element's id: `"note"`, or `"card.tsx#NoteCard/note"` when written inside the component `NoteCard` of `card.tsx`. */
 export type Id = string;
 
 export type Files = Readonly<Record<string, string>>;
@@ -44,11 +44,6 @@ export type Edit =
   /** Replaces a whole file, or creates it. */
   | { readonly op: "replaceFile"; readonly file: string; readonly text: string };
 
-export interface UiHint {
-  readonly control?: string;
-  readonly [key: string]: Json | undefined;
-}
-
 export type ReadOnlyReason = "param" | "expression" | "spread";
 
 export type Prop =
@@ -56,7 +51,6 @@ export type Prop =
       readonly editable: true;
       readonly value: Json;
       readonly schema: JsonSchema;
-      readonly ui?: UiHint;
       readonly range: Range;
     }
   | {
@@ -69,7 +63,10 @@ export type Prop =
 
 export interface Node {
   readonly id: Id;
+  /** The tag as written. */
   readonly component: string;
+  /** The key of its component in `Program.components`, when the tag names one. */
+  readonly definition?: string;
   readonly range: Range;
   readonly props: Readonly<Record<string, Prop>>;
   readonly children: readonly Id[];
@@ -121,9 +118,9 @@ export interface Element {
   readonly id: Id;
   /** The id as written in the source, without the scope. */
   readonly local: string;
-  /** The `component({ name })` it is written inside, or `""` for scene code. */
+  /** The `file#binding` of the `component(…)` it is written inside, or `""` for scene code. */
   readonly scope: string;
-  /** The tag as written, `NoteCard` in `<NoteCard />`. See `registeredName` for the component's own name. */
+  /** The tag as written, `NoteCard` in `<NoteCard />`. See `definitionOf` for the component it stands for. */
   readonly component: string;
   readonly range: Range;
   /** The opening tag, or the whole tag when it is self-closing. */
@@ -144,11 +141,19 @@ export interface Element {
   readonly children: readonly Id[];
 }
 
+/** The component a JSX tag stands for. */
+export interface Definition {
+  /** Its export in `Program.components`: `/groups/a/card.tsx#Card` for a scene file, `wedding#Card` for a library. */
+  readonly key: string;
+  /** The scope of the ids written inside it, `card.tsx#Card`, when its source is among the files. */
+  readonly scope?: string;
+}
+
 /** A `ref("…")` call. */
 export interface Ref {
   /** The string it holds. */
   readonly id: string;
-  /** The `component({ name })` it is written inside, or `""`. */
+  /** The `file#binding` of the `component(…)` it is written inside, or `""`. */
   readonly scope: string;
   /** The quoted string, quotes included. */
   readonly range: Range;
@@ -164,11 +169,8 @@ export interface Parsed {
   readonly files: Files;
   /** The deepest nesting of JSX elements in any file, counting the ones with no id. */
   readonly maxDepth: number;
-  /**
-   * The `component({ name })` a JSX tag stands for, by file and tag, for the tags that go by another name:
-   * `<Alias>` for `const Alias = component({ name: "Stable" })`, or `import { X as Alias }`.
-   */
-  readonly aliases: Readonly<Record<string, Readonly<Record<string, string>>>>;
+  /** What each JSX tag stands for, by file and tag. See `definitionOf`. */
+  readonly definitions: Readonly<Record<string, Readonly<Record<string, Definition>>>>;
   /** A short hash of each file's text, to tell whether the source an edit was planned against has changed. */
   readonly hashes: Readonly<Record<string, string>>;
   /** Every element with an id, in source order. */

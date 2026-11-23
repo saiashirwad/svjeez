@@ -72,20 +72,19 @@ import { reset } from "${GUARD}";
 import * as entry from ${JSON.stringify(modules.entry)};
 ${others.map((path, i) => `import * as other${i} from ${JSON.stringify(path)};`).join("\n")}
 ${addons.map((name, i) => `import * as addon${i} from ${JSON.stringify(libraryPath(name))};`).join("\n")}
-const namespaces = [entry, ${[...others.map((_, i) => `other${i}`), ...addons.map((_, i) => `addon${i}`)].join(", ")}];
+const namespaces = {
+${[[modules.entry, "entry"], ...others.map((path, i) => [path, `other${i}`]), ...addons.map((name, i) => [name, `addon${i}`])].map(([name, ns]) => `  ${JSON.stringify(name)}: ${ns},`).join("\n")}
+};
 const isObject = (v) => v !== null && typeof v === "object";
 const isStandard = (v) => isObject(v) && "~standard" in v;
 const isParams = (v) => isObject(v) && !isScene(v) && !isStandard(v) && Object.values(v).every((p) => isObject(p) && "kind" in p);
 const jsonSchemaOf = (schema) => {
   try { return isStandardJsonSchema(schema) ? schema["~standard"].jsonSchema.input({ target: "draft-2020-12" }) : undefined; } catch { return undefined; }
 };
-const components = Object.fromEntries(namespaces.flatMap((ns) => Object.values(ns).filter((v) => typeof v === "function" && isComponent(v)).map((fn) => {
-  const { name, props } = componentMeta(fn);
-  return [name, props];
-})));
+const components = Object.fromEntries(Object.entries(namespaces).flatMap(([module, ns]) => Object.entries(ns).filter(([, v]) => typeof v === "function" && isComponent(v)).map(([name, fn]) => [module + "#" + name, componentMeta(fn).props])));
 const describe = () => ({
   params: isParams(entry.params) ? { declared: entry.params } : { json: isStandard(entry.params) ? jsonSchemaOf(entry.params) : undefined },
-  components: Object.fromEntries(Object.entries(components).map(([name, props]) => [name, { jsonSchema: props ? jsonSchemaOf(props) : undefined, hasProps: Boolean(props) }])),
+  components: Object.fromEntries(Object.entries(components).map(([key, props]) => [key, { jsonSchema: props ? jsonSchemaOf(props) : undefined, hasProps: Boolean(props) }])),
 });
 const valuesOf = (declared, given) => {
   if (isParams(declared)) return parse(declared, given);
@@ -109,7 +108,7 @@ export default {
       reset();
       const body = await request.json();
       if (body.validate) {
-        const props = components[body.validate.component];
+        const props = components[body.validate.key];
         return Response.json(props ? await props["~standard"].validate(body.validate.props) : {});
       }
       const { params } = body;
@@ -218,7 +217,7 @@ const render = (
   });
 
 /** A props schema that asks the isolate to run the component's own `validate`, so the host needs no copy of it. */
-const propsIn = (worker: WorkerEntrypoint, component: string): StandardSchemaV1 => ({
+const propsIn = (worker: WorkerEntrypoint, key: string): StandardSchemaV1 => ({
   "~standard": {
     version: 1,
     vendor: "svjeez-worker",
@@ -226,7 +225,7 @@ const propsIn = (worker: WorkerEntrypoint, component: string): StandardSchemaV1 
       const response = await worker.fetch(
         new Request(ORIGIN, {
           method: "POST",
-          body: JSON.stringify({ validate: { component, props } }),
+          body: JSON.stringify({ validate: { key, props } }),
         }),
       );
 
@@ -239,9 +238,9 @@ const propsIn = (worker: WorkerEntrypoint, component: string): StandardSchemaV1 
 const programOf = (worker: WorkerEntrypoint, described: Described): Program => ({
   render: (params = {}) => render(worker, params),
   components: Object.fromEntries(
-    Object.entries(described.components).map(([name, { jsonSchema, hasProps }]) => [
-      name,
-      { ...(jsonSchema && { jsonSchema }), ...(hasProps && { props: propsIn(worker, name) }) },
+    Object.entries(described.components).map(([key, { jsonSchema, hasProps }]) => [
+      key,
+      { ...(jsonSchema && { jsonSchema }), ...(hasProps && { props: propsIn(worker, key) }) },
     ]),
   ),
   params: described.params.declared

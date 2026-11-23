@@ -2,7 +2,7 @@ import { Effect } from "effect";
 import type { StandardSchemaV1 } from "svjeez";
 import { InvalidValue } from "./errors.ts";
 import type { Program } from "./program.ts";
-import { elementOf, registeredName } from "./source.ts";
+import { definitionOf, elementOf } from "./source.ts";
 import type { Edit, Json, Parsed } from "./types.ts";
 
 type Issue = StandardSchemaV1.Issue;
@@ -45,13 +45,14 @@ const propOf = (issue: Issue): string | undefined => {
 const checkProps = (
   program: Program,
   target: string,
-  component: string,
+  definition: string | undefined,
   known: Readonly<Record<string, Json>>,
   written: readonly string[],
 ): Effect.Effect<void, InvalidValue> => {
-  const schema = Object.hasOwn(program.components, component)
-    ? program.components[component]?.props
-    : undefined;
+  const schema =
+    definition !== undefined && Object.hasOwn(program.components, definition)
+      ? program.components[definition]?.props
+      : undefined;
 
   if (!schema) return Effect.void;
 
@@ -137,7 +138,7 @@ export const checkEdits = (
       const el = elementOf(candidate, id);
 
       return el
-        ? checkProps(program, id, registeredName(candidate, el), literalsOf(candidate, id), [
+        ? checkProps(program, id, definitionOf(candidate, el)?.key, literalsOf(candidate, id), [
             ...props,
           ])
         : Effect.void;

@@ -1,9 +1,9 @@
-import { caller, thrownFrom } from "./svg/traced";
+import { caller } from "./svg/traced";
 import { remember, sourceFrom } from "./author/identity";
-import { componentMeta, scopedAs, withId } from "./author/component";
-import { scoped, within } from "./author/scope";
+import { componentMeta } from "./author/component";
+import { scopeNow } from "./author/scope";
 import { flat, type Child, type SceneElement } from "./author/nodes";
-import { SceneError, located } from "./model/scene-error";
+import { SceneError } from "./model/scene-error";
 import type { JsxSource } from "./author/sources";
 
 export const Fragment = Symbol.for("svjeez.scene.fragment");
@@ -32,43 +32,23 @@ export const build = <P extends { readonly children?: Child; readonly id?: strin
   source: JsxSource | undefined,
 ): SceneElement => {
   if (isFragment(type)) return { type: "fragment", children: flat(props.children) };
-  const at = source && sourceFrom(source);
 
   if (isTag(type))
     throw new SceneError(
       `JSX holds <${type}>, an SVG tag, which a scene doesn't draw: every node is a component, such as <Shape geometry={rect(w, h)} />.`,
       "Write components, and put the JSX pragma at the top of the file.",
-      { node: `<${type}>`, ...(at && { source: at }) },
+      { node: `<${type}>`, ...(source && { source: sourceFrom(source) }) },
     );
 
-  try {
-    // Types ask for a text key, but untyped JSX may hand a number, as from .map((item, i) => ...): use its text.
-    const text = key === undefined ? undefined : String(key);
-    const given = text === undefined ? props : { ...props, key: text };
-
-    if (props.id === undefined) return type(given);
-    const id = scoped(props.id);
-
-    // A component() with an id is the scope of the ids written inside it, and carries its own id out.
-    if (componentMeta(type))
-      return withId(
-        within(props.id, () => type(given)),
-        id,
-        text,
-      );
-
-    // Any other function hands its id to a node it writes, which was scoped by the open components as it was written.
-    return scopedAs(type(given), props.id, id, text);
-  } catch (error) {
-    if (!(error instanceof Error)) throw error;
-    const thrown = thrownFrom(error);
-    const name = componentName(type);
-
-    throw located(error, {
-      ...(name && { node: `<${name}>` }),
-      ...((thrown ?? source) && { source: sourceFrom((thrown ?? source)!) }),
-    });
-  }
+  // The component runs when the scene is built, top-down, with the contexts and ids around it. Types ask for a text
+  // key, but untyped JSX may hand a number, as from .map((item, i) => ...): use its text.
+  return {
+    type: "call",
+    component: type,
+    props,
+    ...(key !== undefined && { key: String(key) }),
+    scope: scopeNow(),
+  };
 };
 
 export function jsx(
