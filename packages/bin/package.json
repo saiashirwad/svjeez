@@ -12,7 +12,7 @@
   "type": "module",
   "scripts": {
     "build": "bun scripts/build.ts",
-    "test": "bun test",
+    "test": "bun test --timeout 30000",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

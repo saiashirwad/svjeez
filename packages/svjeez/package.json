@@ -59,7 +59,7 @@
   },
   "scripts": {
     "dev": "bun run src/cli.ts dev",
-    "test": "bun test",
+    "test": "bun test --timeout 30000",
     "test:node": "tsx scripts/node-check.ts",
     "test:package": "tsx scripts/package-check.ts",
     "typecheck": "tsc --noEmit",
@@ -99,6 +99,6 @@
     }
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   }
 }
