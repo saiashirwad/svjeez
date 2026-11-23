@@ -11,7 +11,7 @@ import { checkEdits } from "./props-check.ts";
 import { Runner } from "./runner.ts";
 import { parse } from "./source.ts";
 import type { Description, Edit, Files, JsonObject, Parsed } from "./types.ts";
-import type { Program } from "./program.ts";
+import type { Program, Rendered } from "./program.ts";
 
 /** Everything a host reads after an edit lands: the source, what it parses to, what it compiles to, and the form for it. */
 export interface State {
@@ -74,6 +74,7 @@ const growth = (e: Edit, parsed: Parsed): number => {
   switch (e.op) {
     case "set":
     case "insert":
+    case "replaceFile":
       return bytes(JSON.stringify(e));
     case "rename":
       return bytes(e.to) * (1 + parsed.refs.length);
@@ -101,7 +102,7 @@ export class Session extends Context.Service<
       State,
       EditError | Denied | Rejected | StorageError | CompileError | ParseError
     >;
-    readonly render: (params?: JsonObject) => Effect.Effect<string, RenderError>;
+    readonly render: (params?: JsonObject) => Effect.Effect<Rendered, RenderError>;
   }
 >()("@svjeez/live/Session") {
   static layer = (
@@ -141,9 +142,23 @@ const makeSession = (options: SessionOptions) =>
     /** Compile and describe what `read` parsed. */
     const build = (files: Files, parsed: Parsed, revision: number) =>
       Effect.gen(function* () {
-        const program = yield* compile(files, { ...options.compile, entry: options.entry }).pipe(
+        const compiled = yield* compile(files, { ...options.compile, entry: options.entry }).pipe(
           Effect.provideService(Runner, runner),
         );
+
+        const program: Program = {
+          ...compiled,
+          render: (params) =>
+            Effect.flatMap(compiled.render(params), (rendered) =>
+              limits.maxSvgBytes !== undefined && bytes(rendered.svg) > limits.maxSvgBytes
+                ? Effect.fail(
+                    new RenderError({
+                      message: `The SVG is ${bytes(rendered.svg)} bytes, over the limit of ${limits.maxSvgBytes}.`,
+                    }),
+                  )
+                : Effect.succeed(rendered),
+            ),
+        };
 
         return {
           files,
@@ -249,16 +264,6 @@ const makeSession = (options: SessionOptions) =>
           }),
         ),
       render: (params) =>
-        Effect.gen(function* () {
-          const { program } = yield* SubscriptionRef.get(ref);
-          const svg = yield* program.render(params);
-
-          if (limits.maxSvgBytes !== undefined && bytes(svg) > limits.maxSvgBytes)
-            return yield* new RenderError({
-              message: `The SVG is ${bytes(svg)} bytes, over the limit of ${limits.maxSvgBytes}.`,
-            });
-
-          return svg;
-        }),
+        Effect.flatMap(SubscriptionRef.get(ref), ({ program }) => program.render(params)),
     });
   });

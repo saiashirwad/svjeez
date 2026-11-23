@@ -17,11 +17,17 @@ const key = (segment: PropertyKey | StandardSchemaV1.PathSegment): string =>
 /** Where an issue is, as `size.0`, or `""` for the value as a whole. */
 export const issuePath = (issue: Issue): string => (issue.path ?? []).map(key).join(".");
 
-/** An issue as one line: `size.0: Expected a number`. */
+/** An issue as one line: `size.0: Expected a number`. A message that already starts with its field's name, as `size: Expected a number` does, is not given the name twice. */
 export const issueText = (issue: Issue): string => {
   const path = issuePath(issue);
+  const last = issue.path?.length ? key(issue.path[issue.path.length - 1] ?? "") : "";
 
-  return path ? `${path}: ${issue.message}` : issue.message;
+  const message =
+    last && issue.message.startsWith(`${last}: `)
+      ? issue.message.slice(last.length + 2)
+      : issue.message;
+
+  return path ? `${path}: ${message}` : message;
 };
 
 /** The first prop an issue is about, when it names one. */
@@ -34,7 +40,7 @@ const propOf = (issue: Issue): string | undefined => {
 /**
  * Checks the props an edit writes against the component's props schema. The schema sees only the literal props known
  * here, so an issue counts only when it is about a prop the edit writes: a missing prop that is a param or an
- * expression in the source is none of its business. A schema that validates asynchronously is not consulted.
+ * expression in the source is none of its business. A schema that validates asynchronously is awaited.
  */
 const checkProps = (
   program: Program,
@@ -48,19 +54,30 @@ const checkProps = (
     : undefined;
 
   if (!schema) return Effect.void;
-  const result = schema["~standard"].validate(known);
 
-  if (result instanceof Promise || !result.issues) return Effect.void;
+  return Effect.tryPromise({
+    try: async () => schema["~standard"].validate(known),
+    catch: (thrown) =>
+      new InvalidValue({
+        target,
+        prop: "",
+        issue: thrown instanceof Error ? thrown.message : String(thrown),
+      }),
+  }).pipe(
+    Effect.flatMap((result) => {
+      const issue = result.issues?.find((i) => {
+        const prop = propOf(i);
 
-  const issue = result.issues.find((i) => {
-    const prop = propOf(i);
+        return prop !== undefined && written.includes(prop);
+      });
 
-    return prop !== undefined && written.includes(prop);
-  });
-
-  return issue
-    ? Effect.fail(new InvalidValue({ target, prop: propOf(issue) ?? "", issue: issueText(issue) }))
-    : Effect.void;
+      return issue
+        ? Effect.fail(
+            new InvalidValue({ target, prop: propOf(issue) ?? "", issue: issueText(issue) }),
+          )
+        : Effect.void;
+    }),
+  );
 };
 
 /** The literal props an element is written with. */

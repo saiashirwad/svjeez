@@ -134,7 +134,7 @@ const build = (context: Compiling, file: string, source: string): Built => {
     if (!context.allowed(use.name))
       throw new CompileError({
         ...at(use.from),
-        message: `"${use.name}" is not available to scenes. A scene can import svjeez, the @svjeez add-ons and its own files.`,
+        message: `"${use.name}" is not available to scenes.${context.allowed === defaultAllowlist ? " A scene can import svjeez, the @svjeez add-ons and its own files." : ""}`,
       });
     libraries.push(use.name);
 

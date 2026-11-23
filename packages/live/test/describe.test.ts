@@ -227,7 +227,7 @@ export const NoteCard = component({
   test("locate finds the node of every data-svz-id in the rendered SVG", async () => {
     const { parsed, program } = await load();
 
-    const svg = await Effect.runPromise(program.render());
+    const { svg } = await Effect.runPromise(program.render());
     const ids = [...svg.matchAll(/data-svz-id="([^"]+)"/g)].map((match) => match[1]!);
 
     expect(ids).toContain("one/note");

@@ -26,9 +26,9 @@ export { Runner } from "./runner.ts";
 
 export type { Modules, RunOptions } from "./runner.ts";
 
-export type { ComponentEntry, Program } from "./program.ts";
+export type { ComponentEntry, Program, Rendered } from "./program.ts";
 
-export { BunRunner } from "./bun-runner.ts";
+export { BunRunner, bunRunner } from "./bun-runner.ts";
 
 export { BrowserRunner, browserRunner } from "./browser-runner.ts";
 

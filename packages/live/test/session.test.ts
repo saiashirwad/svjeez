@@ -15,6 +15,7 @@ import {
   UnknownId,
   defineEdit,
 } from "../src/index.ts";
+import { issueText } from "../src/props-check.ts";
 import type { ApplyOptions, Change, Edit, Limits, RawInput, State } from "../src/index.ts";
 
 const SOURCE = `import { Group, Shape, rect, scene } from "svjeez";
@@ -90,7 +91,7 @@ describe("Session", () => {
   });
 
   test("render draws the current source", async () => {
-    const svg = await run(
+    const { svg } = await run(
       Effect.gen(function* () {
         const session = yield* Session;
 
@@ -585,7 +586,67 @@ describe("limits", () => {
     const render = Session.use((session) => session.render());
 
     expect(await failure(render, { limits: { maxSvgBytes: 50 } })).toBeInstanceOf(RenderError);
-    expect(await run(render, { limits: { maxSvgBytes: 1_000_000 } })).toStartWith("<svg");
+    expect((await run(render, { limits: { maxSvgBytes: 1_000_000 } })).svg).toStartWith("<svg");
+  });
+
+  test("maxSvgBytes also holds for the program a validate hook renders", async () => {
+    const hooks = hooksLayer({
+      validate: (state) =>
+        Effect.mapError(state.program.render(), (e) => new Rejected({ reason: e.message })),
+    });
+
+    const error = await failure(applying([recolor("box", "#00ff00")]), {
+      limits: { maxSvgBytes: 50 },
+      hooks,
+    });
+
+    expect(error).toBeInstanceOf(Rejected);
+    expect(error).toHaveProperty("reason", expect.stringContaining("over the limit of 50"));
+  });
+});
+
+describe("Session replaceFile", () => {
+  test("goes through beforeEdit and bumps the revision", async () => {
+    const seen: string[] = [];
+
+    const hooks = hooksLayer({
+      beforeEdit: (edit) => Effect.sync(() => (seen.push(edit.op), edit)),
+    });
+
+    const state = await run(
+      applying([
+        { op: "replaceFile", file: "scene.tsx", text: SOURCE.replace("#ff0000", "#00ff00") },
+      ]),
+      { hooks },
+    );
+
+    expect(seen).toEqual(["replaceFile"]);
+    expect(state.revision).toBe(1);
+    expect(sourceOf(state)).toContain("#00ff00");
+  });
+
+  test("is denied by beforeEdit like any edit", async () => {
+    const hooks = hooksLayer({ beforeEdit: () => Effect.fail(new Denied({ reason: "no" })) });
+
+    const error = await failure(
+      applying([{ op: "replaceFile", file: "scene.tsx", text: SOURCE }]),
+      {
+        hooks,
+      },
+    );
+
+    expect(error).toEqual(new Denied({ reason: "no" }));
+  });
+});
+
+describe("issueText", () => {
+  test("names a nested path once", () => {
+    expect(issueText({ message: "size: Expected number", path: ["name", "size"] })).toBe(
+      "name.size: Expected number",
+    );
+    expect(issueText({ message: "Expected number", path: ["name", "size"] })).toBe(
+      "name.size: Expected number",
+    );
   });
 });
 

@@ -34,11 +34,15 @@ export type Edit =
         readonly component: string;
         readonly id: Id;
         readonly props?: Readonly<Record<string, Json>>;
+        /** The module that exports `component`. When the file does not import it yet, `import { component } from "from"` is added. */
+        readonly from?: string;
       };
     }
   | { readonly op: "remove"; readonly target: Id }
   | { readonly op: "move"; readonly target: Id; readonly parent: Id; readonly at: Position }
-  | { readonly op: "rename"; readonly target: Id; readonly to: Id };
+  | { readonly op: "rename"; readonly target: Id; readonly to: Id }
+  /** Replaces a whole file, or creates it. */
+  | { readonly op: "replaceFile"; readonly file: string; readonly text: string };
 
 export interface UiHint {
   readonly control?: string;

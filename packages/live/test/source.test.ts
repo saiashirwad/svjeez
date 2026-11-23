@@ -255,6 +255,39 @@ describe("edit", () => {
     });
   });
 
+  describe("insert with from", () => {
+    const insert = (component: string, id: string, from: string, parent = "card"): Edit => ({
+      op: "insert",
+      parent,
+      at: 0,
+      element: { component, id, from },
+    });
+
+    test("adds the import at the top, once", () => {
+      const out = text([
+        insert("Circle", "dot", "svjeez-shapes"),
+        insert("Circle", "dot2", "svjeez-shapes"),
+      ]);
+
+      expect(out).toStartWith(`import { Circle } from "svjeez-shapes";\n${scene.split("\n")[0]}\n`);
+      expect(out.match(/import \{ Circle \}/g)).toHaveLength(1);
+    });
+
+    test("leaves a name the file already imports, and starts a file with no imports", () => {
+      expect(text([insert("Rect", "dot", "x")])).not.toContain('from "x"');
+      expect(
+        text([insert("Circle", "dot", "lib", "n")], { "scene.tsx": '<Layer id="n"></Layer>\n' }),
+      ).toStartWith('import { Circle } from "lib";\n<Layer id="n">');
+    });
+  });
+
+  test("replaceFile swaps or creates a file", () => {
+    const out = run([{ op: "replaceFile", file: "new.tsx", text: "x" }]);
+
+    expect(out.files["new.tsx"]).toBe("x");
+    expect(out.files["scene.tsx"]).toBe(scene);
+  });
+
   test("remove drops the element and its lines", () => {
     const out = text([{ op: "remove", target: "box" }]);
 
@@ -559,7 +592,7 @@ export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
   const parsed = read({ "scene.tsx": main, "card.tsx": card });
 
   const program: Program = {
-    render: () => Effect.succeed(""),
+    render: () => Effect.succeed({ svg: "", warnings: [] }),
     components: { StableA: { jsonSchema: { properties: { label: { type: "string" } } } } },
     params: {},
   };
