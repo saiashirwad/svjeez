@@ -1,42 +1,70 @@
-import { copyFile, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { BunRuntime } from "@effect/platform-bun";
+import { Effect, FileSystem, Path } from "effect";
+import { ChildProcess, ChildProcessSpawner } from "effect/process";
+import { Exited, ScriptError } from "../../../scripts/errors";
+import * as Services from "../../../scripts/services";
 
-await rm("package-dist", { recursive: true, force: true });
+Effect.gen(function* () {
+  const fs = yield* FileSystem.FileSystem;
+  const path = yield* Path.Path;
+  const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
 
-const result = await Bun.build({
-  entrypoints: [
-    "./src/index.ts",
-    "./src/jsx-runtime.ts",
-    "./src/jsx-dev-runtime.ts",
-    "./src/tools.ts",
-    "./src/frames.ts",
-    "./src/page.ts",
-    "./src/cli.ts",
-  ],
-  external: ["playwright-core"],
-  root: "./src",
-  outdir: "./package-dist",
-  target: "node",
-  splitting: true,
-});
+  yield* fs.remove("package-dist", { recursive: true, force: true });
 
-if (!result.success) {
-  for (const log of result.logs) console.error(log);
-  process.exit(1);
-}
+  yield* Effect.tryPromise({
+    try: () =>
+      Bun.build({
+        entrypoints: [
+          "./src/index.ts",
+          "./src/jsx-runtime.ts",
+          "./src/jsx-dev-runtime.ts",
+          "./src/tools.ts",
+          "./src/frames.ts",
+          "./src/page.ts",
+          "./src/cli.ts",
+        ],
+        external: ["playwright-core"],
+        root: "./src",
+        outdir: "./package-dist",
+        target: "node",
+        splitting: true,
+        throw: true,
+      }),
+    catch: (cause) => new ScriptError({ message: "Bundling package-dist failed.", cause }),
+  });
 
-const tsc = Bun.spawnSync(["./node_modules/.bin/tsc", "-p", "tsconfig.package.json"]);
+  const code = yield* spawner.exitCode(
+    ChildProcess.make({
+      stdout: "inherit",
+      stderr: "inherit",
+    })`./node_modules/.bin/tsc -p tsconfig.package.json`,
+  );
 
-if (tsc.exitCode !== 0) {
-  process.stderr.write(tsc.stderr);
-  process.stdout.write(tsc.stdout);
-  process.exit(tsc.exitCode);
-}
+  if (code !== 0) return yield* new Exited({ code });
 
-for (const file of await readdir("package-dist", { recursive: true })) {
-  if (!file.endsWith(".d.ts")) continue;
-  const path = `package-dist/${file}`;
-  const contents = await readFile(path, "utf8");
-  await writeFile(path, contents.replace(/(from\s+["'])(\.\.?\/[^"']+)(["'])/g, "$1$2.js$3"));
-}
+  yield* Effect.forEach(
+    (yield* fs.glob("**/*.d.ts", { root: "package-dist" })).map((file) =>
+      path.join("package-dist", file),
+    ),
+    (file) =>
+      fs
+        .readFileString(file)
+        .pipe(
+          Effect.flatMap((contents) =>
+            fs.writeFileString(
+              file,
+              contents.replace(/(from\s+["'])(\.\.?\/[^"']+)(["'])/g, "$1$2.js$3"),
+            ),
+          ),
+        ),
+    { concurrency: "unbounded" },
+  );
 
-for (const file of ["README.md", "LICENSE"]) await copyFile(`../../${file}`, file);
+  yield* Effect.forEach(
+    ["README.md", "LICENSE"],
+    (file) => fs.copyFile(path.join("../..", file), file),
+    {
+      concurrency: "unbounded",
+    },
+  );
+}).pipe(Effect.provide(Services.layer), BunRuntime.runMain);

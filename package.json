@@ -23,8 +23,10 @@
     "deploy": "bun run --filter svjeez-site deploy"
   },
   "devDependencies": {
+    "@effect/platform-bun": "^4.1.4",
     "@oxlint/plugins": "1.90.0",
     "@types/bun": "latest",
+    "effect": "^4.1.4",
     "oxfmt": "0.75.0",
     "oxlint": "1.90.0",
     "typescript": "latest"

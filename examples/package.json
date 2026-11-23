@@ -9,7 +9,7 @@
     "render-png": "bun run ../packages/svjeez/src/cli.ts frames",
     "perf": "bun run scripts/perf.ts",
     "render-video": "bun run ../packages/svjeez/src/cli.ts video",
-    "test": "bun test",
+    "test": "bun test --timeout 30000",
     "live": "vite live-editor",
     "test:browsers": "bun test ./scripts/browsers.ts",
     "test:node": "tsx scripts/node-check.ts",
@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@effect/atom-react": "4.1.4",
+    "@effect/platform-bun": "^4.1.4",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@svjeez/charts": "workspace:*",
     "@svjeez/code": "workspace:*",

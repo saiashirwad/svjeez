@@ -1,21 +1,52 @@
-import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { BunRuntime } from "@effect/platform-bun";
+import { Array, Console, Effect, FileSystem, Function, Option, Path } from "effect";
+import { ChildProcess } from "effect/process";
+import { ScriptError } from "../../../scripts/errors";
+import { run } from "../../../scripts/process";
+import * as Services from "../../../scripts/services";
 
-const ROOT = join(import.meta.dirname, "..");
-const BIN = join(ROOT, "node_modules/.bin");
+Effect.gen(function* () {
+  const fs = yield* FileSystem.FileSystem;
+  const path = yield* Path.Path;
+  const root = path.join(import.meta.dirname, "..");
+  const bin = path.join(root, "node_modules/.bin");
+  const dir = yield* fs.makeTempDirectoryScoped({ prefix: "svjeez-package-" });
+  const consumer = path.join(dir, "consumer");
+  const quickstart = path.join(dir, "quickstart");
 
-const ENTRIES = [
-  "svjeez",
-  "svjeez/jsx-runtime",
-  "svjeez/jsx-dev-runtime",
-  "svjeez/tools",
-  "svjeez/frames",
-  "svjeez/page",
-];
+  const check = <A, E, R>(name: string, effect: Effect.Effect<A, E, R>) =>
+    effect.pipe(
+      Effect.andThen(Console.log(`✓ ${name}`)),
+      Effect.mapError(
+        (cause) => new ScriptError({ message: `The "${name}" check failed.`, cause }),
+      ),
+      Effect.tapCause(Effect.logError),
+      Effect.mapError(() => name),
+    );
 
-const CONSUMER = `import { Shape, circle, ease, enter, param, scene, span } from "svjeez";
+  const tarball = path.join(
+    dir,
+    (yield* run(
+      ChildProcess.make({
+        cwd: root,
+        stdin: "ignore",
+      })`npm pack --silent --pack-destination ${dir}`,
+    ))
+      .split("\n")
+      .at(-1) ?? "",
+  );
+
+  yield* fs.makeDirectory(path.join(consumer, "node_modules/svjeez"), { recursive: true });
+  yield* run(
+    ChildProcess.make({
+      cwd: root,
+      stdin: "ignore",
+    })`tar -xzf ${tarball} -C ${path.join(consumer, "node_modules/svjeez")} --strip-components=1`,
+  );
+
+  yield* fs.writeFileString(
+    path.join(consumer, "index.tsx"),
+    `import { Shape, circle, ease, enter, param, scene, span } from "svjeez";
 import { svg as backend } from "svjeez/tools";
 import { renderFrames } from "svjeez/frames";
 
@@ -25,156 +56,192 @@ export const speed = param.number(1, { min: 0, max: 4 });
 circle("2");
 export const svg: string = backend.emit(scene({ size: [10, 10], duration: 1, title: "t" }, () => <Shape geometry={circle(2)} fill="#000000" motion={enter(span(0, 1), { from: { scale: 0 }, curve: ease.pop })} />));
 export { renderFrames };
-`;
-
-const COMPILERS = [
-  { name: "TypeScript 5.4", tsc: ["npx", "--yes", "--package", "typescript@5.4", "tsc"] },
-  { name: "TypeScript latest", tsc: [join(BIN, "tsc")] },
-] satisfies readonly { name: string; tsc: readonly [command: string, ...args: string[]] }[];
-
-const RESOLUTIONS = [
-  { moduleResolution: "node10", module: "commonjs", type: "commonjs" },
-  { moduleResolution: "node16", module: "node16", type: "module" },
-  { moduleResolution: "nodenext", module: "nodenext", type: "module" },
-  { moduleResolution: "bundler", module: "esnext", type: "module" },
-];
-
-const run = (command: string, args: readonly string[], cwd = ROOT): string => {
-  try {
-    return execFileSync(command, args, {
-      cwd,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"],
-    });
-  } catch (error) {
-    // SAFETY: execFileSync runs with encoding utf8, so the stdout and stderr on its error are strings when the command ran; the defaults cover a command that never started.
-    const { stdout = "", stderr = "" } = error as { stdout?: string; stderr?: string };
-    throw new Error(`${command} ${args.join(" ")}\n${stdout}${stderr}`);
-  }
-};
-
-const dir = mkdtempSync(join(tmpdir(), "svjeez-package-"));
-let failed = 0;
-
-const check = (name: string, body: () => void) => {
-  try {
-    body();
-    console.log(`✓ ${name}`);
-  } catch (error) {
-    failed++;
-    console.error(`✗ ${name}\n  ${error instanceof Error ? error.message : error}`);
-  }
-};
-
-try {
-  const tarball = join(
-    dir,
-    run("npm", ["pack", "--silent", "--pack-destination", dir]).trim().split("\n").at(-1)!,
+`,
   );
 
-  check("publint", () => run(join(BIN, "publint"), ["--strict"]));
-  check("arethetypeswrong", () =>
-    run(join(BIN, "attw"), [tarball, "--ignore-rules", "cjs-resolves-to-esm"]),
+  const compilers = yield* Effect.forEach(
+    [
+      { compiler: "TypeScript 5.4", tsc: ["npx", "--yes", "--package", "typescript@5.4", "tsc"] },
+      { compiler: "TypeScript latest", tsc: [path.join(bin, "tsc")] },
+    ],
+    ({ compiler, tsc }) =>
+      run(ChildProcess.make({ cwd: root, stdin: "ignore" })`${tsc} --version`).pipe(
+        Effect.map((version) =>
+          [
+            { moduleResolution: "node10", module: "commonjs", type: "commonjs" },
+            { moduleResolution: "node16", module: "node16", type: "module" },
+            { moduleResolution: "nodenext", module: "nodenext", type: "module" },
+            { moduleResolution: "bundler", module: "esnext", type: "module" },
+          ].flatMap(({ moduleResolution, module, type }) =>
+            moduleResolution === "node10" && !version.startsWith("Version 5.")
+              ? []
+              : [
+                  check(
+                    `${compiler} under ${moduleResolution}`,
+                    Effect.all([
+                      fs.writeFileString(
+                        path.join(consumer, "package.json"),
+                        JSON.stringify({ type }),
+                      ),
+                      fs.writeFileString(
+                        path.join(consumer, "tsconfig.json"),
+                        JSON.stringify({
+                          compilerOptions: {
+                            module,
+                            moduleResolution,
+                            target: "es2022",
+                            lib: ["es2022", "dom"],
+                            types: [],
+                            jsx: "react-jsx",
+                            jsxImportSource: "svjeez",
+                            strict: true,
+                            noEmit: true,
+                            skipLibCheck: false,
+                          },
+                          files: ["index.tsx"],
+                        }),
+                      ),
+                      run(
+                        ChildProcess.make({
+                          cwd: root,
+                          stdin: "ignore",
+                          stdout: "inherit",
+                        })`${tsc} -p ${consumer}`,
+                      ),
+                    ]),
+                  ),
+                ],
+          ),
+        ),
+      ),
   );
 
-  const consumer = join(dir, "consumer");
-  mkdirSync(join(consumer, "node_modules/svjeez"), { recursive: true });
-  run("tar", [
-    "-xzf",
-    tarball,
-    "-C",
-    join(consumer, "node_modules/svjeez"),
-    "--strip-components=1",
-  ]);
-  writeFileSync(join(consumer, "index.tsx"), CONSUMER);
+  const [, failed] = yield* Effect.partition(
+    [
+      check(
+        "publint",
+        run(
+          ChildProcess.make({ cwd: root, stdin: "ignore" })`${path.join(bin, "publint")} --strict`,
+        ),
+      ),
+      check(
+        "arethetypeswrong",
+        run(
+          ChildProcess.make({
+            cwd: root,
+            stdin: "ignore",
+          })`${path.join(bin, "attw")} ${tarball} --ignore-rules cjs-resolves-to-esm`,
+        ),
+      ),
+      ...compilers.flat(),
+      check(
+        "README quickstart on the packed CLI",
+        Effect.gen(function* () {
+          const readme = yield* fs.readFileString(
+            path.join(consumer, "node_modules/svjeez/README.md"),
+          );
 
-  for (const {
-    name,
-    tsc: [command, ...args],
-  } of COMPILERS) {
-    const version = run(command, [...args, "--version"]).trim();
+          const block = (lang: string, marker: string) =>
+            Array.findFirst(readme.split("```" + lang + "\n").slice(1), (rest) =>
+              rest.includes(marker),
+            ).pipe(
+              Option.map((rest) => rest.split("\n```")[0] ?? ""),
+              Effect.fromOption(
+                () => new ScriptError({ message: `The README quickstart has no ${lang} block.` }),
+              ),
+            );
 
-    for (const { moduleResolution, module, type } of RESOLUTIONS) {
-      if (moduleResolution === "node10" && !version.startsWith("Version 5.")) continue;
-      check(`${name} under ${moduleResolution}`, () => {
-        writeFileSync(join(consumer, "package.json"), JSON.stringify({ type }));
+          const scene = yield* block("tsx", "export default scene(");
 
-        const compilerOptions = {
-          module,
-          moduleResolution,
-          target: "es2022",
-          lib: ["es2022", "dom"],
-          types: [],
-          jsx: "react-jsx",
-          jsxImportSource: "svjeez",
-          strict: true,
-          noEmit: true,
-          skipLibCheck: false,
-        };
+          const title = yield* Option.fromNullishOr(/title: "([^"]+)"/.exec(scene)?.[1]).pipe(
+            Effect.fromOption(
+              () => new ScriptError({ message: "The README quickstart sets no scene title." }),
+            ),
+          );
 
-        writeFileSync(
-          join(consumer, "tsconfig.json"),
-          JSON.stringify({ compilerOptions, files: ["index.tsx"] }),
-        );
-        run(command, [...args, "-p", consumer]);
-      });
-    }
-  }
+          yield* fs.makeDirectory(quickstart);
+          yield* run(ChildProcess.make({ cwd: quickstart, stdin: "ignore" })`npm init -y`);
+          yield* run(
+            ChildProcess.make({ cwd: quickstart, stdin: "ignore" })`npm pkg set type=module`,
+          );
+          yield* run(
+            ChildProcess.make({
+              cwd: quickstart,
+              stdin: "ignore",
+            })`npm install --no-audit --no-fund ${tarball}`,
+          );
+          yield* run(
+            ChildProcess.make({
+              cwd: quickstart,
+              stdin: "ignore",
+            })`npm install --no-audit --no-fund -D tsx typescript`,
+          );
+          yield* fs.writeFileString(
+            path.join(quickstart, "tsconfig.json"),
+            yield* block("json", "jsxImportSource"),
+          );
+          yield* fs.writeFileString(path.join(quickstart, "scene.tsx"), scene);
+          yield* run(
+            ChildProcess.make({
+              cwd: quickstart,
+              stdin: "ignore",
+              stdout: "inherit",
+            })`${path.join(quickstart, "node_modules/.bin/tsc")} --noEmit`,
+          );
 
-  check("README quickstart on the packed CLI", () => {
-    const quickstart = join(dir, "quickstart");
-    mkdirSync(quickstart);
-    const readme = readFileSync(join(consumer, "node_modules/svjeez/README.md"), "utf8");
+          yield* run(
+            ChildProcess.make({
+              cwd: quickstart,
+              stdin: "ignore",
+            })`${process.execPath} node_modules/svjeez/package-dist/cli.js svg scene.tsx --out hello.svg`,
+          );
 
-    // The first block in that language that holds `marker`, so snippets earlier in the README don't count.
-    const block = (lang: string, marker: string) => {
-      const example = readme
-        .split("```" + lang + "\n")
-        .slice(1)
-        .map((rest) => rest.split("\n```")[0])
-        .find((code) => code?.includes(marker));
+          if (
+            !(yield* fs.readFileString(path.join(quickstart, "hello.svg"))).includes(
+              `>${title}</title>`,
+            )
+          )
+            return yield* new ScriptError({
+              message: "The README quickstart did not render its scene.",
+            });
+        }),
+      ),
+      ...[
+        "svjeez",
+        "svjeez/jsx-runtime",
+        "svjeez/jsx-dev-runtime",
+        "svjeez/tools",
+        "svjeez/frames",
+        "svjeez/page",
+      ].map((entry) =>
+        check(
+          `import and require ${entry}`,
+          Effect.all([
+            run(
+              ChildProcess.make({
+                cwd: consumer,
+                stdin: "ignore",
+              })`${process.execPath} --input-type=module -e ${`await import(${JSON.stringify(entry)})`}`,
+            ),
+            run(
+              ChildProcess.make({
+                cwd: consumer,
+                stdin: "ignore",
+              })`${process.execPath} -e ${`require(${JSON.stringify(entry)})`}`,
+            ),
+          ]),
+        ),
+      ),
+    ],
+    Function.identity,
+  );
 
-      if (!example) throw new Error(`Missing the README ${lang} quickstart block.`);
+  yield* Console.log(
+    `package checks ${failed.length === 0 ? "passed" : "failed"} on ${process.version}`,
+  );
 
-      return example;
-    };
-
-    run("npm", ["init", "-y"], quickstart);
-    run("npm", ["pkg", "set", "type=module"], quickstart);
-    run("npm", ["install", "--no-audit", "--no-fund", tarball], quickstart);
-    run("npm", ["install", "--no-audit", "--no-fund", "-D", "tsx", "typescript"], quickstart);
-    writeFileSync(join(quickstart, "tsconfig.json"), block("json", "jsxImportSource"));
-    const scene = block("tsx", "export default scene(");
-    const title = /title: "([^"]+)"/.exec(scene)?.[1];
-
-    if (!title) throw new Error("The README tsx quickstart sets no scene title to check for.");
-
-    writeFileSync(join(quickstart, "scene.tsx"), scene);
-    run(join(quickstart, "node_modules/.bin/tsc"), ["--noEmit"], quickstart);
-    run(
-      process.execPath,
-      ["node_modules/svjeez/package-dist/cli.js", "svg", "scene.tsx", "--out", "hello.svg"],
-      quickstart,
-    );
-
-    if (!readFileSync(join(quickstart, "hello.svg"), "utf8").includes(`>${title}</title>`))
-      throw new Error("The README scene did not render the expected SVG.");
-  });
-
-  for (const entry of ENTRIES) {
-    check(`import and require ${entry}`, () => {
-      run(
-        process.execPath,
-        ["--input-type=module", "-e", `await import(${JSON.stringify(entry)})`],
-        consumer,
-      );
-      run(process.execPath, ["-e", `require(${JSON.stringify(entry)})`], consumer);
+  if (failed.length > 0)
+    return yield* new ScriptError({
+      message: `Package checks ${failed.join(", ")} failed on ${process.version}.`,
     });
-  }
-} finally {
-  rmSync(dir, { recursive: true, force: true });
-}
-
-console.log(`package checks ${failed === 0 ? "passed" : "failed"} on ${process.version}`);
-
-if (failed > 0) process.exit(1);
+}).pipe(Effect.scoped, Effect.provide(Services.layer), BunRuntime.runMain);

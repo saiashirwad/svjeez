@@ -1,43 +1,56 @@
-import { readdir } from "node:fs/promises";
-import { join } from "node:path";
+import { BunRuntime } from "@effect/platform-bun";
+import { Console, Effect, FileSystem, Function, Path, Predicate } from "effect";
 import { validateSvg } from "svjeez/frames";
-import { isScene, svg as backend, type Scene } from "svjeez/tools";
+import { isScene, svg as backend } from "svjeez/tools";
+import { ScriptError } from "../../../scripts/errors";
+import * as Services from "../../../scripts/services";
 
-const ROOT = join(import.meta.dirname, "..");
+Effect.gen(function* () {
+  const fs = yield* FileSystem.FileSystem;
+  const path = yield* Path.Path;
+  const root = path.join(import.meta.dirname, "..");
 
-const scenes = (await readdir(join(ROOT, "skills/svjeez/examples")))
-  .filter((name) => name.endsWith(".tsx"))
-  .map((name) => join("skills/svjeez/examples", name));
+  const scenes = yield* fs.glob("skills/svjeez/examples/*.tsx", { root });
 
-type Made = string | Scene;
+  const [passed, failed] = yield* Effect.partition(
+    scenes,
+    Effect.fn(
+      function* (scene) {
+        const svg = yield* Effect.tryPromise({
+          try: async (): Promise<string> => {
+            const { default: exported } = await import(path.join(root, scene));
+            const made = Predicate.isFunction(exported) ? exported() : exported;
 
-const isBuild = (value: Made | (() => Made)): value is () => Made => typeof value === "function";
+            return isScene(made) ? backend.emit(made) : made;
+          },
+          catch: Function.identity,
+        });
 
-const svgOf = (exported: Made | (() => Made)): string => {
-  const made = isBuild(exported) ? exported() : exported;
+        const { errors } = validateSvg(svg);
 
-  return isScene(made) ? backend.emit(made) : made;
-};
+        if (errors.length > 0)
+          return yield* new ScriptError({ message: `The SVG is invalid: ${errors.join(" ")}` });
 
-let failed = 0;
+        if (!svg.includes("@keyframes"))
+          return yield* new ScriptError({ message: "The scene has no animation." });
 
-for (const scene of scenes) {
-  try {
-    const { default: exported }: { default: Made | (() => Made) } = await import(join(ROOT, scene));
+        yield* Console.log(`✓ ${scene}`);
+      },
+      (effect, scene) =>
+        effect.pipe(
+          Effect.mapError(
+            (cause) => new ScriptError({ message: `Rendering "${scene}" failed.`, cause }),
+          ),
+          Effect.tapCause(Effect.logError),
+          Effect.mapError(() => scene),
+        ),
+    ),
+  );
 
-    const svg = svgOf(exported);
-    const { errors } = validateSvg(svg);
+  yield* Console.log(`${passed.length}/${scenes.length} scenes rendered on ${process.version}`);
 
-    if (errors.length > 0) throw new Error(errors.join("\n"));
-
-    if (!svg.includes("@keyframes")) throw new Error("the scene has no animation.");
-    console.log(`✓ ${scene}`);
-  } catch (error) {
-    failed++;
-    console.error(`✗ ${scene}\n  ${error instanceof Error ? error.message : error}`);
-  }
-}
-
-console.log(`${scenes.length - failed}/${scenes.length} scenes rendered on ${process.version}`);
-
-if (failed > 0) process.exit(1);
+  if (failed.length > 0)
+    return yield* new ScriptError({
+      message: `Rendering ${failed.join(", ")} failed on ${process.version}.`,
+    });
+}).pipe(Effect.provide(Services.layer), BunRuntime.runMain);

@@ -12,6 +12,7 @@ import {
   Session,
   StaleSource,
   StorageError,
+  UnknownId,
   defineEdit,
 } from "../src/index.ts";
 import type { ApplyOptions, Change, Edit, Limits, RawInput, State } from "../src/index.ts";
@@ -113,7 +114,8 @@ describe("Session", () => {
       }),
     );
 
-    expect(outcome.error).toMatchObject({ _tag: "UnknownId", target: "nope" });
+    expect(outcome.error).toBeInstanceOf(UnknownId);
+    expect(outcome.error).toMatchObject({ target: "nope" });
     expect(outcome.state.revision).toBe(0);
   });
 
@@ -640,8 +642,9 @@ export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
       }).pipe(Effect.provide(both())),
     );
 
+    expect(outcome.error).toBeInstanceOf(InvalidValue);
+
     expect(outcome.error).toMatchObject({
-      _tag: "InvalidValue",
       target: "one",
       prop: "label",
       issue: "label: Expected a non-empty string",
@@ -663,7 +666,8 @@ export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
       ),
     );
 
-    expect(error).toMatchObject({ _tag: "InvalidValue", target: "two", prop: "label" });
+    expect(error).toBeInstanceOf(InvalidValue);
+    expect(error).toMatchObject({ target: "two", prop: "label" });
 
     const state = await Effect.runPromise(
       Session.use((session) => session.apply([insert("Hi")])).pipe(Effect.provide(both())),
@@ -767,11 +771,9 @@ export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
 
     expect(up.revision).toBe(1);
     expect(down.revision).toBe(1);
-    expect(await apply([set("g", "max", 30), set("g", "min", 50)])).toMatchObject({
-      _tag: "InvalidValue",
-      target: "g",
-      prop: "min",
-    });
+    const error = await apply([set("g", "max", 30), set("g", "min", 50)]);
+    expect(error).toBeInstanceOf(InvalidValue);
+    expect(error).toMatchObject({ target: "g", prop: "min" });
   });
 
   test("a set on an element inserted earlier in the batch is validated", async () => {
@@ -783,25 +785,21 @@ export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
     };
 
     expect((await succeed([insert, set("h", "max", 9)])).parsed.order).toContain("h");
-    expect(await apply([insert, set("h", "min", 9)])).toMatchObject({
-      _tag: "InvalidValue",
-      target: "h",
-      prop: "min",
-    });
+    const error = await apply([insert, set("h", "min", 9)]);
+    expect(error).toBeInstanceOf(InvalidValue);
+    expect(error).toMatchObject({ target: "h", prop: "min" });
   });
 
   test("a set on an element renamed earlier in the batch is validated under its new id", async () => {
-    expect(
-      await apply([{ op: "rename", target: "g", to: "g2" }, set("g2", "min", 99)]),
-    ).toMatchObject({ _tag: "InvalidValue", target: "g2", prop: "min" });
+    const error = await apply([{ op: "rename", target: "g", to: "g2" }, set("g2", "min", 99)]);
+    expect(error).toBeInstanceOf(InvalidValue);
+    expect(error).toMatchObject({ target: "g2", prop: "min" });
   });
 
   test("unset of a required prop is refused", async () => {
-    expect(await apply([{ op: "unset", target: "g", prop: "label" }])).toMatchObject({
-      _tag: "InvalidValue",
-      target: "g",
-      prop: "label",
-    });
+    const error = await apply([{ op: "unset", target: "g", prop: "label" }]);
+    expect(error).toBeInstanceOf(InvalidValue);
+    expect(error).toMatchObject({ target: "g", prop: "label" });
   });
 
   test("maxBatchEdits refuses a batch with too many edits", async () => {

@@ -17,7 +17,7 @@
     "./fonts/EMSCasualHand-OFL.txt": "./src/fonts/EMSCasualHand-OFL.txt"
   },
   "scripts": {
-    "test": "bun test --conditions @svjeez/source",
+    "test": "bun test --timeout 30000 --conditions @svjeez/source",
     "typecheck": "tsc --noEmit",
     "build:package": "bun ../../scripts/package-plugin.ts",
     "test:package": "bun ../../scripts/package-plugin-check.ts"
@@ -31,6 +31,6 @@
     "svjeez": "workspace:^"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   }
 }

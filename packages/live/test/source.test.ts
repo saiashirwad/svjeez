@@ -2,11 +2,17 @@ import { describe, expect, test } from "bun:test";
 import { Effect } from "effect";
 import {
   describe as describeScene,
+  DuplicateId,
   edit,
   elementAt,
   elementOf,
+  InvalidValue,
   locate,
+  NotEditable,
   parse,
+  ParseError,
+  StaleSource,
+  UnknownId,
 } from "../src/index.ts";
 import type { Edit, Files, Parsed, Program } from "../src/index.ts";
 
@@ -83,7 +89,7 @@ export default scene({}, () => <Layer id="a"><Rect id="x" /><Rect id="x" /><Text
   test("fails on source that is not TSX", () => {
     const error = Effect.runSync(Effect.flip(parse({ "x.tsx": "const = <A" })));
 
-    expect(error._tag).toBe("ParseError");
+    expect(error).toBeInstanceOf(ParseError);
   });
 
   test("never mistakes __proto__ keys in literals for a prototype", () => {
@@ -239,13 +245,13 @@ describe("edit", () => {
 
       const props = JSON.parse('{"__proto__":1}');
 
-      expect(fail([insert("bg")])._tag).toBe("DuplicateId");
-      expect(fail([insert("a b")])._tag).toBe("InvalidValue");
+      expect(fail([insert("bg")])).toBeInstanceOf(DuplicateId);
+      expect(fail([insert("a b")])).toBeInstanceOf(InvalidValue);
       expect(
         fail([
           { op: "insert", parent: "card", at: 0, element: { component: "Circle", id: "z", props } },
-        ])._tag,
-      ).toBe("InvalidValue");
+        ]),
+      ).toBeInstanceOf(InvalidValue);
     });
   });
 
@@ -253,7 +259,7 @@ describe("edit", () => {
     const out = text([{ op: "remove", target: "box" }]);
 
     expect(out).toBe(scene.replace(/    <Group id="box">[\s\S]*?<\/Group>\n/, ""));
-    expect(fail([{ op: "remove", target: "card" }])._tag).toBe("InvalidValue");
+    expect(fail([{ op: "remove", target: "card" }])).toBeInstanceOf(InvalidValue);
   });
 
   describe("move", () => {
@@ -286,12 +292,12 @@ describe("edit", () => {
     });
 
     test("refuses a cycle and an unknown anchor", () => {
-      expect(fail([{ op: "move", target: "box", parent: "inner", at: 0 }])._tag).toBe(
-        "InvalidValue",
+      expect(fail([{ op: "move", target: "box", parent: "inner", at: 0 }])).toBeInstanceOf(
+        InvalidValue,
       );
-      expect(fail([{ op: "move", target: "bg", parent: "box", at: { after: "nope" } }])._tag).toBe(
-        "UnknownId",
-      );
+      expect(
+        fail([{ op: "move", target: "bg", parent: "box", at: { after: "nope" } }]),
+      ).toBeInstanceOf(UnknownId);
     });
   });
 
@@ -312,7 +318,7 @@ describe("edit", () => {
     });
 
     test("refuses an existing id", () => {
-      expect(fail([{ op: "rename", target: "bg", to: "name" }])._tag).toBe("DuplicateId");
+      expect(fail([{ op: "rename", target: "bg", to: "name" }])).toBeInstanceOf(DuplicateId);
     });
 
     test("renaming to itself changes nothing", () => {
@@ -322,46 +328,46 @@ describe("edit", () => {
 
   describe("refusals", () => {
     test("param, expression and spread props are not editable", () => {
-      expect(fail([{ op: "set", target: "name", prop: "text", value: "x" }])).toMatchObject({
-        _tag: "NotEditable",
-        reason: "param",
-        prop: "text",
-      });
-      expect(fail([{ op: "set", target: "arrow", prop: "label", value: "x" }])).toMatchObject({
-        _tag: "NotEditable",
-        reason: "expression",
-      });
-      expect(fail([{ op: "unset", target: "arrow", prop: "from" }])).toMatchObject({
-        _tag: "NotEditable",
-        reason: "expression",
-      });
-      expect(fail([{ op: "set", target: "arrow", prop: "...rest", value: 1 }])).toMatchObject({
-        _tag: "NotEditable",
-        reason: "spread",
-      });
+      const param = fail([{ op: "set", target: "name", prop: "text", value: "x" }]);
+      const label = fail([{ op: "set", target: "arrow", prop: "label", value: "x" }]);
+      const unset = fail([{ op: "unset", target: "arrow", prop: "from" }]);
+      const spread = fail([{ op: "set", target: "arrow", prop: "...rest", value: 1 }]);
+
+      expect(param).toBeInstanceOf(NotEditable);
+      expect(param).toMatchObject({ reason: "param", prop: "text" });
+      expect(label).toBeInstanceOf(NotEditable);
+      expect(label).toMatchObject({ reason: "expression" });
+      expect(unset).toBeInstanceOf(NotEditable);
+      expect(unset).toMatchObject({ reason: "expression" });
+      expect(spread).toBeInstanceOf(NotEditable);
+      expect(spread).toMatchObject({ reason: "spread" });
     });
 
     test("prototype keys are refused as props and inside values", () => {
       for (const prop of ["__proto__", "constructor", "prototype"])
-        expect(fail([{ op: "set", target: "bg", prop, value: 1 }])._tag).toBe("InvalidValue");
+        expect(fail([{ op: "set", target: "bg", prop, value: 1 }])).toBeInstanceOf(InvalidValue);
       const value = JSON.parse('{"a":{"__proto__":{"x":1}}}');
 
-      expect(fail([{ op: "set", target: "bg", prop: "p", value }])._tag).toBe("InvalidValue");
-      expect(fail([{ op: "set", target: "bg", prop: "p", value: { constructor: 1 } }])._tag).toBe(
-        "InvalidValue",
-      );
+      expect(fail([{ op: "set", target: "bg", prop: "p", value }])).toBeInstanceOf(InvalidValue);
+      expect(
+        fail([{ op: "set", target: "bg", prop: "p", value: { constructor: 1 } }]),
+      ).toBeInstanceOf(InvalidValue);
     });
 
     test("unknown ids, non-finite numbers and id edits", () => {
-      expect(fail([{ op: "set", target: "nope", prop: "x", value: 1 }])).toMatchObject({
-        _tag: "UnknownId",
-        target: "nope",
-      });
-      expect(fail([{ op: "set", target: "bg", prop: "x", value: Number.NaN }])._tag).toBe(
-        "InvalidValue",
+      const unknown = fail([{ op: "set", target: "nope", prop: "x", value: 1 }]);
+
+      expect(unknown).toBeInstanceOf(UnknownId);
+      expect(unknown).toMatchObject({ target: "nope" });
+      expect(fail([{ op: "set", target: "bg", prop: "x", value: Number.NaN }])).toBeInstanceOf(
+        InvalidValue,
       );
-      expect(fail([{ op: "set", target: "bg", prop: "id", value: "z" }])._tag).toBe("InvalidValue");
-      expect(fail([{ op: "set", target: "toString", prop: "x", value: 1 }])._tag).toBe("UnknownId");
+      expect(fail([{ op: "set", target: "bg", prop: "id", value: "z" }])).toBeInstanceOf(
+        InvalidValue,
+      );
+      expect(fail([{ op: "set", target: "toString", prop: "x", value: 1 }])).toBeInstanceOf(
+        UnknownId,
+      );
     });
 
     test("a stale source is refused", () => {
@@ -369,7 +375,7 @@ describe("edit", () => {
         Effect.flip(edit(read(), [], { "scene.tsx": `${scene}// changed\n` })),
       );
 
-      expect(error._tag).toBe("StaleSource");
+      expect(error).toBeInstanceOf(StaleSource);
     });
   });
 });
@@ -493,9 +499,9 @@ export default scene({ size: [10, 10], duration: 1, title: "T" }, () => (
   test("an edit that names a duplicated id fails with both ranges instead of editing the first", () => {
     const error = fail([{ op: "set", target: "dup", prop: "fill", value: "#ffffff" }], twice);
 
-    expect(error._tag).toBe("DuplicateId");
+    expect(error).toBeInstanceOf(DuplicateId);
 
-    if (error._tag === "DuplicateId") {
+    if (error instanceof DuplicateId) {
       expect(error.id).toBe("dup");
       expect(error.ranges).toHaveLength(2);
     }
@@ -503,13 +509,14 @@ export default scene({ size: [10, 10], duration: 1, title: "T" }, () => (
 
   test("insert and move at a position past the end or before the start fail", () => {
     for (const at of [99, -1]) {
-      expect(
-        fail([{ op: "insert", parent: "card", at, element: { component: "Rect", id: "x" } }]),
-      ).toMatchObject({ _tag: "InvalidValue" });
+      const insertError = fail([
+        { op: "insert", parent: "card", at, element: { component: "Rect", id: "x" } },
+      ]);
 
-      expect(fail([{ op: "move", target: "bg", parent: "card", at }])).toMatchObject({
-        _tag: "InvalidValue",
-      });
+      const moveError = fail([{ op: "move", target: "bg", parent: "card", at }]);
+
+      expect(insertError).toBeInstanceOf(InvalidValue);
+      expect(moveError).toBeInstanceOf(InvalidValue);
     }
   });
 });
@@ -617,9 +624,9 @@ export default scene({ size: [200, 100], duration: 1, title: "T" }, () => (
   test("refuses a rename that a component's own element of that name would shadow", () => {
     const error = fail([{ op: "rename", target: "note", to: "body" }], both);
 
-    expect(error._tag).toBe("InvalidValue");
+    expect(error).toBeInstanceOf(InvalidValue);
 
-    if (error._tag === "InvalidValue") {
+    if (error instanceof InvalidValue) {
       expect(error.prop).toBe("id");
       expect(error.issue).toContain('ref("note")');
       expect(error.issue).toContain('"body"');
@@ -770,11 +777,12 @@ export default scene({ size: [10, 10] }, () => (
     expect(props["fill"]).toMatchObject({ kind: "spread" });
     expect(props["stroke"]).toMatchObject({ kind: "literal" });
 
-    expect(
-      Effect.runSync(
-        Effect.flip(edit(parsed, [{ op: "set", target: "s", prop: "fill", value: "#111111" }])),
-      ),
-    ).toMatchObject({ _tag: "NotEditable", reason: "spread" });
+    const error = Effect.runSync(
+      Effect.flip(edit(parsed, [{ op: "set", target: "s", prop: "fill", value: "#111111" }])),
+    );
+
+    expect(error).toBeInstanceOf(NotEditable);
+    expect(error).toMatchObject({ reason: "spread" });
   });
 
   test("a sparse array or a spread in an array is an expression, not JSON", () => {
@@ -825,21 +833,21 @@ describe("edit against a full snapshot", () => {
   test("refuses a snapshot that deleted a file the edits were planned against", () => {
     const { "other.tsx": _, ...without } = two;
 
-    expect(
-      Effect.runSync(
-        Effect.flip(
-          edit(read(two), [{ op: "set", target: "bg", prop: "width", value: 1 }], without),
-        ),
-      ),
-    ).toMatchObject({ _tag: "StaleSource", file: "other.tsx", actual: "" });
+    const error = Effect.runSync(
+      Effect.flip(edit(read(two), [{ op: "set", target: "bg", prop: "width", value: 1 }], without)),
+    );
+
+    expect(error).toBeInstanceOf(StaleSource);
+    expect(error).toMatchObject({ file: "other.tsx", actual: "" });
   });
 
   test("refuses a snapshot that added a file", () => {
-    expect(
-      Effect.runSync(
-        Effect.flip(edit(read(files), [{ op: "set", target: "bg", prop: "width", value: 1 }], two)),
-      ),
-    ).toMatchObject({ _tag: "StaleSource", file: "other.tsx", expected: "" });
+    const error = Effect.runSync(
+      Effect.flip(edit(read(files), [{ op: "set", target: "bg", prop: "width", value: 1 }], two)),
+    );
+
+    expect(error).toBeInstanceOf(StaleSource);
+    expect(error).toMatchObject({ file: "other.tsx", expected: "" });
   });
 
   test("lets an identical snapshot through", () => {

@@ -1,116 +1,94 @@
-// Runs the svjeez CLI from source on one scene, named the short way:
-//   bun run scene check pendulum           examples/pendulum/index.tsx
-//   bun run scene frames readme/hero       examples/readme/hero.tsx
-//   bun run scene dev site:hero            site/src/scenes/hero.tsx
-//   bun run scene svg ./any/path/scene.tsx
-// The CLI runs inside the scene's package (examples/ or site/), so that package's bunfig.toml preloads apply.
-
-import { existsSync } from "node:fs";
+import { BunRuntime } from "@effect/platform-bun";
 import { tmpdir } from "node:os";
-import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
+import { Effect, FileSystem, Path } from "effect";
+import { Argument, Command } from "effect/cli";
+import { ChildProcess, ChildProcessSpawner } from "effect/process";
+import { Exited, ScriptError } from "./errors.ts";
+import * as Services from "./services.ts";
 
-const ROOT = join(import.meta.dir, "..");
-const CLI = join(ROOT, "packages/svjeez/src/cli.ts");
-const EXAMPLES = join(ROOT, "examples");
-const SITE = join(ROOT, "site");
-const SCENES = join(SITE, "src/scenes");
+const svjeez = Effect.fn("svjeez")(function* (
+  command: string,
+  scene: string,
+  rest: ReadonlyArray<string>,
+) {
+  const fs = yield* FileSystem.FileSystem;
+  const path = yield* Path.Path;
+  const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
+  const root = path.join(import.meta.dirname, "..");
+  const examples = path.join(root, "examples");
+  const site = path.join(root, "site");
+  const scenes = path.join(site, "src/scenes");
+  const name = scene.replace(/^site:/, "");
 
-// A folder with an index.tsx is one scene; a folder without one holds a scene per file (readme/, mermaid-types/).
-const exampleNames = (): string[] => {
-  const files = [...new Bun.Glob("*/*.tsx").scanSync({ cwd: EXAMPLES })].filter(
-    (file) => !file.startsWith("node_modules/") && !file.startsWith("scripts/"),
+  const tried = scene.startsWith("site:")
+    ? [path.join(scenes, `${name}.tsx`), path.join(scenes, name, "index.tsx")]
+    : [
+        path.resolve(name),
+        path.join(examples, name, "index.tsx"),
+        path.join(examples, `${name}.tsx`),
+        path.join(examples, name),
+        path.join(scenes, `${name}.tsx`),
+        path.join(scenes, name, "index.tsx"),
+      ];
+
+  const file = yield* Effect.findFirst(
+    tried.filter((file) => /\.(tsx?|jsx?|svg)$/.test(file)),
+    fs.exists,
+  ).pipe(
+    Effect.flatMap(
+      Effect.fromOption(
+        () =>
+          new ScriptError({ message: `No scene called "${scene}". Tried ${tried.join(", ")}.` }),
+      ),
+    ),
   );
 
-  const whole = new Set(
-    files.flatMap((file) => (file.endsWith("/index.tsx") ? [dirname(file)] : [])),
+  const flags = rest.map((arg, i) =>
+    ["--out", "-o", "--params"].includes(rest[i - 1] ?? "") ? path.resolve(arg) : arg,
   );
 
-  return files
-    .flatMap((file) => (whole.has(dirname(file)) ? [] : [file.slice(0, -".tsx".length)]))
-    .concat([...whole])
-    .sort();
-};
+  const out =
+    command === "frames" && !rest.some((arg) => arg === "--out" || arg === "-o")
+      ? ["--out", path.join(tmpdir(), "svjeez", path.basename(name.replace(/\.tsx?$/, "")))]
+      : [];
 
-const candidates = (name: string): string[] => {
-  if (name.startsWith("site:")) {
-    const rest = name.slice("site:".length);
-
-    return [join(SCENES, `${rest}.tsx`), join(SCENES, rest, "index.tsx")];
-  }
-
-  return [
-    resolve(process.cwd(), name),
-    join(EXAMPLES, name, "index.tsx"),
-    join(EXAMPLES, `${name}.tsx`),
-    join(EXAMPLES, name),
-    join(SCENES, `${name}.tsx`),
-    join(SCENES, name, "index.tsx"),
-  ];
-};
-
-const find = (name: string): string | undefined =>
-  candidates(name).find((file) => existsSync(file) && file.match(/\.(tsx?|jsx?|svg)$/));
-
-// The package whose bunfig.toml and node_modules a scene expects.
-const homeOf = (file: string): string => {
-  if (!relative(EXAMPLES, file).startsWith("..")) return EXAMPLES;
-
-  if (!relative(SITE, file).startsWith("..")) return SITE;
-
-  return dirname(file);
-};
-
-// Flags whose values are paths: resolved against where you ran the command, not the package.
-const PATH_FLAGS = new Set(["--out", "-o", "--params"]);
-
-const USAGE = `usage: bun run scene <svg|dev|check|frames|video> <scene> [flags]
-
-<scene> is an example name (pendulum, readme/hero, mermaid-types/pie), site:<name> for
-site/src/scenes, or a path. Flags go straight to the svjeez CLI, whose usage follows.
-frames writes to ${join(tmpdir(), "svjeez", "<scene>")} unless you pass --out.
-
-examples: ${exampleNames().join(", ")}`;
-
-const [command, target, ...rest] = process.argv.slice(2);
-
-if (command === undefined || command === "help" || command === "--help" || command === "-h") {
-  console.log(USAGE);
-  Bun.spawnSync(["bun", CLI, "--help"], { stdout: "inherit", stderr: "inherit" });
-  process.exit(0);
-}
-
-if (target === undefined) {
-  console.error(USAGE);
-  process.exit(1);
-}
-
-const file = find(target);
-
-if (!file) {
-  console.error(
-    `No scene called ${JSON.stringify(target)}. Tried:\n  ${candidates(target).join("\n  ")}\n`,
+  const code = yield* spawner.exitCode(
+    ChildProcess.make({
+      cwd: [examples, site].find((dir) => file.startsWith(dir + path.sep)) ?? path.dirname(file),
+      stdin: "inherit",
+      stdout: "inherit",
+      stderr: "inherit",
+    })`bun --conditions @svjeez/source ${path.join(root, "packages/svjeez/src/cli.ts")} ${command} ${file} ${flags} ${out}`,
   );
-  console.error(USAGE);
-  process.exit(1);
-}
 
-const flags = rest.map((arg, i) =>
-  i > 0 && PATH_FLAGS.has(rest[i - 1]!) && !isAbsolute(arg) ? resolve(process.cwd(), arg) : arg,
-);
-
-const name = target
-  .replace(/^site:/, "")
-  .replace(/[/\\]/g, "-")
-  .replace(/\.tsx?$/, "");
-
-if (command === "frames" && !rest.some((arg) => arg === "--out" || arg === "-o"))
-  flags.push("--out", join(tmpdir(), "svjeez", basename(name)));
-
-const run = Bun.spawnSync(["bun", "--conditions", "@svjeez/source", CLI, command, file, ...flags], {
-  cwd: homeOf(file),
-  stdin: "inherit",
-  stdout: "inherit",
-  stderr: "inherit",
+  if (code !== 0) return yield* new Exited({ code });
 });
 
-process.exit(run.exitCode ?? 1);
+Command.make("scene").pipe(
+  Command.withDescription(
+    `Runs the svjeez CLI from source on one scene. frames writes to ${tmpdir()}/svjeez/<scene> unless you pass --out.`,
+  ),
+  Command.withSubcommands(
+    ["svg", "dev", "check", "frames", "video"].map((command) =>
+      Command.make(command, {
+        scene: Argument.String("scene").pipe(
+          Argument.withDescription(
+            "an example name (pendulum, readme/hero, mermaid-types/pie), site:<name> for site/src/scenes, or a path",
+          ),
+        ),
+        flags: Argument.String("flags").pipe(
+          Argument.variadic(),
+          Argument.withDescription(
+            "after --, passed to the svjeez CLI (bun packages/svjeez/src/cli.ts --help)",
+          ),
+        ),
+      }).pipe(
+        Command.withDescription(`svjeez ${command} <scene> -- [flags]`),
+        Command.withHandler(({ scene, flags }) => svjeez(command, scene, flags)),
+      ),
+    ),
+  ),
+  Command.run({ version: "internal" }),
+  Effect.provide(Services.layer),
+  BunRuntime.runMain,
+);
