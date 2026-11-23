@@ -12,6 +12,10 @@ on:
 jobs:
   ci:
     uses: ./.github/workflows/ci.yml
+    # ci.yml's changes job reads the pull request's files, and a called workflow can't ask for more than its caller grants.
+    permissions:
+      contents: read
+      pull-requests: read
 
   plan:
     runs-on: ubuntu-latest
