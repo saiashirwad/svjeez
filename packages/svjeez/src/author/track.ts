@@ -1,12 +1,12 @@
 import { SceneError } from "../model/scene-error";
 import { DEFAULT_EASE, EPSILON, ease, type Seconds } from "../model/time";
 import { num } from "../model/format";
-import { span, type Interval, type Span, type When } from "./span";
+import { span, type Span, type When } from "./span";
 import type { Vec } from "../model/ir";
-import type { Curve } from "./spring";
+import { isSpring, type Curve } from "./spring";
 import { isAnchor, type Anchor } from "./refs";
 import type { Geometry } from "./values";
-import { Passage, type Timing } from "../model/steps";
+import { Passage, type LoopOptions, type Timing } from "../model/steps";
 import {
   mappedTrack,
   together,
@@ -27,9 +27,9 @@ export type Goal<T> = T extends Vec ? T | Anchor : T;
 export interface Track<T> {
   /** The span of the last step. */
   readonly span: Span;
-  to(value: Goal<T>, when: Interval, curve?: Curve): Track<T>;
+  to(value: Goal<T>, when: When, curve?: Curve): Track<T>;
   set(value: Goal<T>, when: When): Track<T>;
-  loop(period: Seconds): Track<T>;
+  loop(period: Seconds, options?: LoopOptions): Track<T>;
   repeat(times: number | { readonly until: Seconds }): Track<T>;
   rewind(over: Seconds, curve?: Curve): Track<T>;
   map<U>(fn: (value: T) => U, options?: MapOptions): Derived<U>;
@@ -65,19 +65,19 @@ export class ValueTrack<T> implements Track<T> {
     return this.#last;
   }
 
-  to(value: Goal<T>, when: Interval, curve: Curve = curveFor(value)): Track<T> {
-    return new ValueTrack(
-      this.passage.to({ value: stored(value) }, when, curve),
-      span(when.start, when.over),
-    );
+  to(value: Goal<T>, when: When, curve: Curve = curveFor(value)): Track<T> {
+    const next = this.passage.to({ value: stored(value) }, when, curve);
+    const over = when.over ?? (isSpring(curve) ? curve.settle : 0);
+
+    return new ValueTrack(next, span(when.start, over));
   }
 
   set(value: Goal<T>, when: When): Track<T> {
     return new ValueTrack(this.passage.set({ value: stored(value) }, when), span(when.start, 0));
   }
 
-  loop(period: Seconds): Track<T> {
-    return new ValueTrack(this.passage.loop(period), this.#last);
+  loop(period: Seconds, options?: LoopOptions): Track<T> {
+    return new ValueTrack(this.passage.loop(period, options), this.#last);
   }
 
   repeat(times: number | { readonly until: Seconds }): Track<T> {

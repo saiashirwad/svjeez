@@ -31,12 +31,12 @@ export const times = (m: Matrix, n: Matrix): Matrix => [
 
 const moveBy = ([x, y]: Vec): Matrix => [1, 0, 0, 1, x, y];
 
-const apply = (m: Matrix, [x, y]: Vec): Vec => [
+export const apply = (m: Matrix, [x, y]: Vec): Vec => [
   m[0] * x + m[2] * y + m[4],
   m[1] * x + m[3] * y + m[5],
 ];
 
-const inverse = (m: Matrix): Matrix | undefined => {
+export const inverse = (m: Matrix): Matrix | undefined => {
   const det = m[0] * m[3] - m[1] * m[2];
 
   if (Math.abs(det) < 1e-12) return undefined;

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { spawnSync } from "node:child_process";
 import { realpathSync } from "node:fs";
 import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
@@ -32,7 +33,7 @@ const USAGE = `usage:
   svjeez svg <file> [--out file.svg] [--json] [params]
   svjeez dev <file> [--port 5173] [--out file.svg] [params]
   svjeez frames <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
-  svjeez check <file> [--json] [--browser] [--at 0,1.5] [--times 0,0.5,1] [--color-scheme system|light|dark] [params]
+  svjeez check <file> [--json | --format json|text] [--fail-on error|warning] [--browser] [--at 0,1.5] [--times 0,0.5,1] [--color-scheme system|light|dark] [params]
   svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
   svjeez skill [--install [--dir .claude/skills]]
   svjeez version
@@ -208,11 +209,22 @@ const loadValue = async (
 
         return import(new URL(isText(entry) ? entry : entry.default, pathToFileURL(manifest)).href);
       })
-      .catch(() =>
-        fail(
+      .catch(() => {
+        if (process.env.SVJEEZ_REEXEC !== "1") {
+          const self = fileURLToPath(import.meta.url);
+
+          const rerun = spawnSync("bun", [self, ...process.argv.slice(2)], {
+            stdio: "inherit",
+            env: { ...process.env, SVJEEZ_REEXEC: "1" },
+          });
+
+          if (!rerun.error) process.exit(rerun.status ?? 1);
+        }
+
+        return fail(
           `Node cannot load ${file}. Install tsx, run \`bunx --bun svjeez\`, or compile it to .js first.`,
-        ),
-      );
+        );
+      });
 
     register();
 
@@ -344,7 +356,10 @@ const svgCommand = async (args: string[]): Promise<void> => {
 
   if (!values.json) reportWarnings(built.warnings);
 
-  if (values.out) await writeFile(values.out, built.svg);
+  if (values.out) {
+    await mkdir(dirname(resolve(values.out)), { recursive: true });
+    await writeFile(values.out, built.svg);
+  }
 
   if (values.json) console.log(JSON.stringify(built));
   else if (!values.out) process.stdout.write(built.svg);
@@ -446,6 +461,7 @@ const videoCommand = async (args: string[]): Promise<void> => {
     background: values.background,
   });
 
+  await mkdir(dirname(resolve(out)), { recursive: true });
   await writeFile(out, video.bytes);
   console.log(
     `${out}: ${video.codec}, ${video.frames} frames, ${Number(video.playTime.toFixed(3))}s, ${video.colorScheme}`,
@@ -608,11 +624,24 @@ const checkCommand = async (args: string[]): Promise<void> => {
       times: { type: "string", short: "t" },
       at: { type: "string" },
       json: { type: "boolean" },
+      format: { type: "string" },
+      "fail-on": { type: "string" },
       browser: { type: "boolean" },
       "color-scheme": { type: "string" },
       ...PARAM_OPTIONS,
     },
   });
+
+  const format = values.format ?? (values.json ? "json" : "text");
+
+  if (format !== "json" && format !== "text") fail(`--format is text or json, got "${format}".`);
+
+  const failOn = values["fail-on"] ?? "error";
+
+  if (failOn !== "error" && failOn !== "warning")
+    fail(`--fail-on is error or warning, got "${failOn}".`);
+
+  const asJson = format === "json";
 
   const file = positionals[0] ?? fail(USAGE);
   const scheme = parseScheme(values["color-scheme"]);
@@ -716,7 +745,7 @@ const checkCommand = async (args: string[]): Promise<void> => {
   const described = model && at ? describe(model, at) : undefined;
 
   const report: Report = {
-    ok: by("error").length === 0,
+    ok: by("error").length === 0 && (failOn !== "warning" || by("warning").length === 0),
     file,
     ...(model && { scene: { size: model.size, duration: model.duration, loop: model.loop } }),
     problems: placed,
@@ -726,7 +755,7 @@ const checkCommand = async (args: string[]): Promise<void> => {
     ...(described && { frames: described.frames, timeline: described.timeline }),
   };
 
-  if (values.json) console.log(JSON.stringify(report, null, 2));
+  if (asJson) console.log(JSON.stringify(report, null, 2));
   else {
     const place = (source: Source | undefined): string =>
       source

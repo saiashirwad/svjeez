@@ -5,7 +5,8 @@
 ```sh
 npx svjeez check scene.tsx                   # the model and the emitted SVG, at once
 npx svjeez check scene.tsx --at 0,1.5,3      # and what is on screen at those times
-npx svjeez check scene.tsx --json            # for a script
+npx svjeez check scene.tsx --json            # for a script (same as --format json)
+npx svjeez check scene.tsx --fail-on warning # exit 1 on warnings too
 npx svjeez check scene.tsx --browser         # also measure the SVG in headless Chromium
 npx svjeez check scene.tsx --browser --times 0,0.5 --color-scheme dark
 ```

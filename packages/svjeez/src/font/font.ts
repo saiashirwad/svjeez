@@ -1,7 +1,7 @@
 import { SceneError } from "../model/scene-error";
 import { contours, pathData } from "./glyf";
 import { typesetter, type Typesetter } from "./shape";
-import { subset } from "./subset";
+import { subsetWithReason } from "./subset";
 import {
   isFixedPitch,
   isItalic,
@@ -34,12 +34,18 @@ export interface FontOptions {
   readonly fallback?: readonly string[];
   readonly subset?: boolean;
   readonly ligatures?: boolean;
+  /** OpenType single-substitution features to activate (e.g. `["lnum"]`, `["tnum"]`, `["smcp"]`). */
+  readonly features?: readonly string[];
   /** Vertical metrics as fractions of the size, for a font svjeez can't read. */
   readonly metrics?: {
     readonly ascent: number;
     readonly descent: number;
     readonly lineGap?: number;
   };
+}
+
+export interface MeasureOptions {
+  readonly letterSpacing?: number;
 }
 
 export interface SystemFontOptions {
@@ -109,55 +115,176 @@ const hash = (bytes: Uint8Array): string => {
 
 const UNREAD: Metrics = { unitsPerEm: 1, ascent: 0.8, descent: 0.2, lineGap: 0 };
 
+export type FontBytes = Uint8Array | ArrayBuffer;
+
+export type FontSource = FontBytes | (() => FontBytes);
+
+const isLazySource = (source: FontSource): source is () => FontBytes =>
+  typeof source === "function";
+
+const detectBytes = (source: FontBytes) => {
+  const bytes = source instanceof Uint8Array ? source : new Uint8Array(source);
+
+  if (bytes.length < 12) throw new SceneError("This font is empty or truncated.");
+  const signature = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(0);
+
+  if (signature === tag("ttcf"))
+    throw new SceneError(
+      "This is a font collection (.ttc). Extract one face to a .ttf or .otf and load that.",
+    );
+
+  // SAFETY: FORMATS has exactly the FontFormat keys, so every key Object.keys returns is a FontFormat.
+  const format = (Object.keys(FORMATS) as FontFormat[]).find((key) =>
+    FORMATS[key].matches(signature),
+  );
+
+  if (!format) throw new SceneError(`Unknown font format. font() reads ${SUPPORTED}.`);
+
+  return { bytes, format };
+};
+
 export class Font {
-  readonly #sfnt: Sfnt | undefined;
-  readonly #bytes: Uint8Array;
+  #sfnt: Sfnt | undefined;
+  #bytes: Uint8Array;
+  #loader: (() => FontBytes) | undefined;
+  #loaded: boolean;
   #typesetter: Typesetter | undefined;
-  readonly #embeds = new Map<string, `data:${string}`>();
-  readonly family: string;
-  readonly weight: number;
-  readonly italic: boolean;
-  readonly fallback: readonly string[];
+  readonly #embeds = new Map<
+    string,
+    { readonly href: `data:${string}`; readonly reason?: string }
+  >();
+  #family: string | undefined;
+  #weight: number | undefined;
+  #italic: boolean | undefined;
+  #fallback: readonly string[] | undefined;
   readonly subset: boolean;
   readonly ligatures: boolean;
-  readonly format: FontKind;
-  readonly href: `data:${string}` | undefined;
-  readonly bytes: number;
+  readonly features: readonly string[];
+  #format: FontKind | undefined;
+  #href: `data:${string}` | undefined;
   readonly #metrics: Metrics | undefined;
+  readonly #options: FontOptions;
 
-  constructor(bytes: Uint8Array, format: FontKind, options: FontOptions) {
-    const readable = format === "ttf" || format === "otf" ? sfnt(bytes) : undefined;
-    this.#sfnt = readable;
+  constructor(
+    bytes: Uint8Array | (() => FontBytes),
+    format: FontKind | undefined,
+    options: FontOptions,
+  ) {
+    this.#options = options;
     this.#metrics = options.metrics && { unitsPerEm: 1, lineGap: 0, ...options.metrics };
-    this.#bytes = bytes;
     this.subset = options.subset ?? true;
     this.ligatures = options.ligatures ?? true;
-    this.format = format;
-    this.family = options.family ?? (readable && name(readable, 16, 1)) ?? `font-${hash(bytes)}`;
-    this.weight = options.weight ?? (readable ? weightOf(readable) : 400);
-    this.italic = options.italic ?? (readable !== undefined && isItalic(readable));
-    this.fallback = options.fallback ?? [
+    this.features = options.features ?? [];
+    this.#family = options.family;
+    this.#weight = options.weight;
+    this.#italic = options.italic;
+    this.#fallback = options.fallback;
+
+    if (options.weight !== undefined && !(options.weight >= 1 && options.weight <= 1000))
+      throw new SceneError(`font() needs a weight between 1 and 1000, got ${options.weight}.`);
+
+    if (isLazySource(bytes)) {
+      this.#bytes = new Uint8Array(0);
+      this.#loader = bytes;
+      this.#loaded = false;
+      this.#format = format;
+    } else {
+      this.#bytes = bytes;
+      this.#loaded = true;
+      this.#init(bytes, format!);
+    }
+  }
+
+  #init(bytes: Uint8Array, format: FontKind): void {
+    const readable = format === "ttf" || format === "otf" ? sfnt(bytes) : undefined;
+    this.#sfnt = readable;
+    this.#bytes = bytes;
+    this.#format = format;
+    this.#family =
+      this.#options.family ?? (readable && name(readable, 16, 1)) ?? `font-${hash(bytes)}`;
+    this.#weight = this.#options.weight ?? (readable ? weightOf(readable) : 400);
+    this.#italic = this.#options.italic ?? (readable !== undefined && isItalic(readable));
+    this.#fallback = this.#options.fallback ?? [
       readable && isFixedPitch(readable) ? "monospace" : "sans-serif",
     ];
 
-    if (!(this.weight >= 1 && this.weight <= 1000))
-      throw new SceneError(`font() needs a weight between 1 and 1000, got ${this.weight}.`);
-    this.href =
+    if (!(this.#weight >= 1 && this.#weight <= 1000))
+      throw new SceneError(`font() needs a weight between 1 and 1000, got ${this.#weight}.`);
+    this.#href =
       format === "system" ? undefined : `data:${FORMATS[format].mime};base64,${base64(bytes)}`;
-    this.bytes = this.href?.length ?? 0;
+  }
+
+  #ensure(): void {
+    if (this.#loaded) return;
+    const loader = this.#loader!;
+    this.#loader = undefined;
+    this.#loaded = true;
+    const { bytes, format } = detectBytes(loader());
+
+    this.#init(bytes, format);
+  }
+
+  get family(): string {
+    if (this.#family !== undefined) return this.#family;
+    this.#ensure();
+
+    return this.#family!;
+  }
+
+  get weight(): number {
+    if (this.#weight !== undefined) return this.#weight;
+    this.#ensure();
+
+    return this.#weight!;
+  }
+
+  get italic(): boolean {
+    if (this.#italic !== undefined) return this.#italic;
+    this.#ensure();
+
+    return this.#italic!;
+  }
+
+  get fallback(): readonly string[] {
+    if (this.#fallback !== undefined) return this.#fallback;
+    this.#ensure();
+
+    return this.#fallback!;
+  }
+
+  get format(): FontKind {
+    this.#ensure();
+
+    return this.#format!;
+  }
+
+  get href(): `data:${string}` | undefined {
+    this.#ensure();
+
+    return this.#href;
+  }
+
+  get bytes(): number {
+    this.#ensure();
+
+    return this.#href?.length ?? 0;
   }
 
   /** Whether glyph advances can be read from the file; if not, a run must bring its own `advances`. */
   get measurable(): boolean {
+    this.#ensure();
+
     return this.#sfnt !== undefined;
   }
 
   #readable(what: string): Sfnt {
+    this.#ensure();
+
     if (!this.#sfnt)
       throw new SceneError(
-        this.format === "system"
+        this.#format === "system"
           ? `${what} needs a font file, and ${this.family} is only a family name the viewer supplies.`
-          : `${what} needs the TTF or OTF file. A ${this.format.toUpperCase()} font embeds, but its tables are compressed.`,
+          : `${what} needs the TTF or OTF file. A ${this.#format!.toUpperCase()} font embeds, but its tables are compressed.`,
         "Give the <Run> its advances={[…]} (one per character), or load a TTF or OTF.",
       );
 
@@ -165,36 +292,53 @@ export class Font {
   }
 
   #typeset(text: string, what: string) {
-    this.#typesetter ??= typesetter(this.#readable(what), this.ligatures);
+    this.#typesetter ??= typesetter(this.#readable(what), this.ligatures, this.features);
 
     return this.#typesetter.layoutGlyphs(text);
   }
 
-  embed(texts: readonly string[]): `data:${string}` | undefined {
+  #embedEntry(
+    texts: readonly string[],
+  ): { readonly href: `data:${string}`; readonly reason?: string } | undefined {
+    this.#ensure();
     const font = this.#sfnt;
 
-    if (!font || !this.subset || !font.tables.has("glyf")) return this.href;
+    if (!font || !this.subset || !font.tables.has("glyf"))
+      return this.#href === undefined ? undefined : { href: this.#href };
 
     const key =
       [...new Set(texts.flatMap((text) => [...text]))].sort().join("") +
       "\u0000" +
       texts.join("\u0000");
 
-    let href = this.#embeds.get(key);
+    let entry = this.#embeds.get(key);
 
-    if (!href) {
-      this.#typesetter ??= typesetter(font, this.ligatures);
+    if (!entry) {
+      this.#typesetter ??= typesetter(font, this.ligatures, this.features);
       const active = this.#typesetter;
-      const cut = subset(this.#bytes, font, active, texts, this.ligatures);
-      href = cut ? `data:font/ttf;base64,${base64(cut)}` : this.href!;
-      this.#embeds.set(key, href);
+      const cut = subsetWithReason(this.#bytes, font, active, texts, this.ligatures);
+
+      entry = cut.bytes
+        ? { href: `data:font/ttf;base64,${base64(cut.bytes)}` }
+        : { href: this.#href!, ...(cut.reason && { reason: cut.reason }) };
+      this.#embeds.set(key, entry);
     }
 
-    return href;
+    return entry;
+  }
+
+  embed(texts: readonly string[]): `data:${string}` | undefined {
+    return this.#embedEntry(texts)?.href;
+  }
+
+  /** Explains why subsetting fell back to the full font for `texts`, if it did. */
+  subsetSkipReason(texts: readonly string[]): string | undefined {
+    return this.#embedEntry(texts)?.reason;
   }
 
   get metrics(): Metrics {
     if (this.#metrics) return this.#metrics;
+    this.#ensure();
 
     return this.#sfnt ? metrics(this.#sfnt) : UNREAD;
   }
@@ -202,18 +346,18 @@ export class Font {
   has(char: string): boolean {
     if (char === "") return false;
 
-    this.#typesetter ??= typesetter(this.#readable("has()"), this.ligatures);
+    this.#typesetter ??= typesetter(this.#readable("has()"), this.ligatures, this.features);
 
     return this.#typesetter.glyph(char) !== 0;
   }
 
-  measure(text: string, size: number): number {
+  measure(text: string, size: number, options?: MeasureOptions): number {
     const scale = size / this.metrics.unitsPerEm;
+    const glyphs = this.#typeset(text, "measure()");
+    const spacing = options?.letterSpacing ?? 0;
+    const base = glyphs.reduce((width, glyph) => width + glyph.advance * scale, 0);
 
-    return this.#typeset(text, "measure()").reduce(
-      (width, glyph) => width + glyph.advance * scale,
-      0,
-    );
+    return base + (glyphs.length > 1 ? spacing * (glyphs.length - 1) : 0);
   }
 
   advances(text: string, size: number): number[] {
@@ -223,7 +367,9 @@ export class Font {
   }
 
   get outlines(): boolean {
-    return this.format === "ttf" && this.#sfnt !== undefined;
+    this.#ensure();
+
+    return this.#format === "ttf" && this.#sfnt !== undefined;
   }
 
   path(text: string, { size, x = 0, y = 0, spacing = 0 }: PathOptions): TextPath {
@@ -241,12 +387,16 @@ export class Font {
     const scale = size / this.metrics.unitsPerEm;
     let pen = x;
 
-    const glyphs = this.#typeset(text, "path()").map((glyph): GlyphPath => {
+    const placedList = this.#typeset(text, "path()");
+
+    const glyphs = placedList.map((glyph, index): GlyphPath => {
+      const gap = index + 1 < placedList.length ? spacing : 0;
+
       const placed = {
         char: glyph.chars,
         d: pathData(contours(font, glyph.glyph), scale, pen, y),
         x: pen,
-        advance: glyph.advance * scale + spacing,
+        advance: glyph.advance * scale + gap,
       };
 
       pen += placed.advance;
@@ -329,31 +479,25 @@ export const fontFaces = (value: FontValue, prefix = ""): FontFaces => {
   };
 };
 
-export const fontFaceRule = (name: string, font: Font, texts: readonly string[] = []): string =>
-  font.format === "system"
-    ? ""
-    : `@font-face{font-family:${cssString(name)};src:url(${font.embed(texts)}) format('${FORMATS[font.format].css}');font-weight:${font.weight};font-style:${cssFontStyle(font)}}`;
+export const fontFaceRule = (name: string, font: Font, texts: readonly string[] = []): string => {
+  if (font.format === "system") return "";
+  const reason = font.subsetSkipReason(texts);
+  const note = reason ? `/* subset-skip: ${reason.replace(/\*\//g, "")} */` : "";
+
+  const features =
+    font.features.length > 0
+      ? `;font-feature-settings:${font.features.map((feature) => `"${feature}"`).join(",")}`
+      : "";
+
+  return `@font-face{font-family:${cssString(name)};src:url(${font.embed(texts)}) format('${FORMATS[font.format].css}');font-weight:${font.weight};font-style:${cssFontStyle(font)}${features}${note}}`;
+};
 
 const SUPPORTED = Object.keys(FORMATS).join(", ");
 
 export const font = Object.assign(
-  (source: Uint8Array | ArrayBuffer, options: FontOptions = {}): Font => {
-    const bytes = source instanceof Uint8Array ? source : new Uint8Array(source);
-
-    if (bytes.length < 12) throw new SceneError("This font is empty or truncated.");
-    const signature = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(0);
-
-    if (signature === tag("ttcf"))
-      throw new SceneError(
-        "This is a font collection (.ttc). Extract one face to a .ttf or .otf and load that.",
-      );
-
-    // SAFETY: FORMATS has exactly the FontFormat keys, so every key Object.keys returns is a FontFormat.
-    const format = (Object.keys(FORMATS) as FontFormat[]).find((key) =>
-      FORMATS[key].matches(signature),
-    );
-
-    if (!format) throw new SceneError(`Unknown font format. font() reads ${SUPPORTED}.`);
+  (source: FontSource, options: FontOptions = {}): Font => {
+    if (isLazySource(source)) return new Font(source, undefined, options);
+    const { bytes, format } = detectBytes(source);
 
     return new Font(bytes, format, options);
   },

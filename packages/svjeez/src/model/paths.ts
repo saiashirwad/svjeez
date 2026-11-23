@@ -21,7 +21,7 @@ const ARITY = new Map([
   ["Z", 0],
 ]);
 
-const arc = (
+export const arcToCubics = (
   from: Vec,
   rx: number,
   ry: number,
@@ -189,7 +189,7 @@ const parse = (d: string): Ring[] => {
 
         default:
           next = abs(v[5]!, v[6]!);
-          curves.push(...arc(pen, v[0]!, v[1]!, v[2]!, v[3] !== 0, v[4] !== 0, next));
+          curves.push(...arcToCubics(pen, v[0]!, v[1]!, v[2]!, v[3] !== 0, v[4] !== 0, next));
       }
 
       pen = next;

@@ -14,7 +14,7 @@ Every node has a box, the area it paints with its stroke included, known when th
 <Grid columns={3} gap={8} justify="center" at={[16, 80]}>…</Grid>
 ```
 
-- `<Stack direction="row" | "column" gap align justify padding width height>`: children one after another. `align` (`start`, `center`, `end`, or a fraction 0 to 1) places each across the stack; `stretch` makes each container child as wide as the stack's inside. `width` and `height` fix the stack's size, and `justify` (`start`, `center`, `end`, a fraction, or a function `(free, count) => offsets` such as `spread`) spends the room left along it: a label left and a switch right is `<Stack direction="row" justify={spread} width={300}>`. `padding` is one length or `[across, down]`. A stack too small for its children says how much they need.
+- `<Stack direction="row" | "column" gap align justify padding width height>`: children one after another (`gap` may be negative to tighten spacing). `align` (`start`, `center`, `end`, `"baseline"` for horizontal rows, or a fraction 0 to 1) places each across the stack; `stretch` makes each container child as wide as the stack's inside. `width` and `height` fix the stack's size, and `justify` (`start`, `center`, `end`, a fraction, or a function `(free, count) => offsets` such as `spread`) spends the room left along it: a label left and a switch right is `<Stack direction="row" justify={spread} width={300}>`. `padding` is one length or `[across, down]`. A stack too small for its children says how much they need and names the widest child.
 - `<Center padding width height>`: lays its children over each other, each centered on the others: a label on a shape, a pill.
 - `<Grid columns gap justify align padding>`: rows of `columns` cells; each column as wide as its widest child, each row as tall as its tallest. `justify` places a child across its cell, `align` down it.
 - `<Align to place inset>`: places its children against `to`: the canvas (default), a box `{ x, y, width, height }` in the parent's frame, or a ref (it follows that node as it moves). `place` names the point of `to` and the same point of each child (`"center"` by default); `inset` moves in from the edges. It places itself, so it takes no `at` or `anchor`.
@@ -22,7 +22,7 @@ Every node has a box, the area it paints with its stroke included, known when th
 - A child in a container takes no `at` or `anchor`. To nudge it, give it a layer with an `offset`. Its `rotate`, `scale` and motion apply around where it was placed, since layout reads the box at rest.
 - A container is a group: give it `at` and `anchor` to place it (`anchor="bottom-left"` on a row of bars keeps their baseline still while they grow), `motion` to move it, `ref` to point at it. A container around a `morph()` reflows with it ([morph.md](morph.md)). Containers cost nothing in the output beyond placements and their backdrop rect.
 
-The nine places, for `anchor`, `place` and `radial.across({ center })`: `top-left`, `top`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom`, `bottom-right`. `anchor` also takes fractions `[0.5, 1]`; `origin` takes a place, a point from the box's top-left, or `"at"`.
+The nine places, for `anchor`, `place` and `radial.across({ center })`: `top-left`, `top`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom`, `bottom-right`. `anchor` also takes fractions `[0.5, 1]`; `origin` takes a place, a point from the box's top-left, `{ frame: [x, y] }` in parent coordinates, or `"at"`.
 
 ## Placing without a container
 
@@ -37,11 +37,11 @@ The nine places, for `anchor`, `place` and `radial.across({ center })`: `top-lef
 </Text>
 ```
 
-- `font`, `size` and `fill` are on every text: nothing is inherited and there is no default font. `font` is a face or a family ([fonts-pictures.md](fonts-pictures.md)); `weight` and `italic` pick a face of the family, and that face must be loaded.
-- `width` wraps at spaces; without it lines break only at line breaks. A word wider than `width` is cut (`word-cut`). `align` (`start`, `center`, `end`) places lines in the column. `lineHeight` is baseline to baseline in multiples of `size`.
+- `font`, `size` (or `fit={{ width, maxSize, minSize?, lines? }}`) and `fill` (or `stroke`) are on every text: nothing is inherited and there is no default font. `font` is a face or a family ([fonts-pictures.md](fonts-pictures.md)); `weight` and `italic` pick a face of the family (`italic` without `weight` picks the family's available italic face).
+- `width` wraps at spaces (`balance` evens line widths to avoid orphan words); without it lines break only at line breaks. A word wider than `width` is cut (`word-cut`). `align` (`start`, `center`, `end`) places lines in the column. `lineHeight` is baseline to baseline in multiples of `size`.
 - The box runs from the tallest ascent to the deepest descent, so `at` places the top of the text; `anchor="baseline"`, `"baseline-left"` or `"baseline-right"` names a point on the first line's baseline.
 - `<Run>` changes `font`, `weight`, `italic`, `fill` and `opacity` for part of a text and inherits the rest. A run's `opacity` and `fill` take tracks. A `<Run>` outside a `<Text>` throws.
-- `stroke` (the same `StrokeProps`; `under: true` draws it below the fill) counts in the box. `size` is a plain number: to grow text, use `scale` or a layer.
+- `stroke` (the same `StrokeProps`; `under: true` draws it below the fill) counts in the box. `draw={0..1}` or `trim={[from, to]}` traces the glyph outlines stroke by stroke; pair with `fillOpacity` to fade the fill in after the draw. `size` is a plain number: to grow text, use `scale` or a layer.
 - `along={circle(40)}` sets one line along any geometry (no `width`); `start` is a fraction of the path's length, a number or track, and `align` is relative to it.
 - A `<Text>` holds strings, numbers, `<Run>`s, or one `count()`. Its words can't change over time: crossfade two texts, or `morph` between states that key the same `<Text>`.
 

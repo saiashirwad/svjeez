@@ -21,6 +21,8 @@ import type { Color, Paint } from "./values";
 
 export type Stops = readonly Color[] | readonly (readonly [offset: number, color: Color])[];
 
+export type RadialFit = "cover" | "inside";
+
 export type Gradient =
   | { readonly kind: "linear"; readonly from: Vec; readonly to: Vec; readonly stops: Stops }
   | { readonly kind: "linear"; readonly angle: number; readonly stops: Stops }
@@ -30,19 +32,27 @@ export type Gradient =
       readonly radius: number;
       readonly stops: Stops;
     }
-  | { readonly kind: "radial"; readonly center: Place; readonly stops: Stops };
+  | {
+      readonly kind: "radial";
+      readonly center: Place | Vec;
+      readonly fit?: RadialFit;
+      readonly stops: Stops;
+    };
 
 export interface Pattern {
   readonly kind: "pattern";
   readonly size: Vec;
   readonly tile: Child;
   readonly offset: Anim<Vec>;
+  readonly rotate: number;
 }
 
 export interface PatternOptions {
   readonly size: Vec;
   readonly tile: Child;
   readonly offset?: Anim<Vec>;
+  /** Clockwise rotation of the pattern tile grid in degrees (default 0). */
+  readonly rotate?: number;
 }
 
 export interface LinearOptions {
@@ -63,7 +73,10 @@ export interface RadialOptions {
 }
 
 export interface RadialAcrossOptions {
-  readonly center?: Place;
+  /** A named place or fractional `[fx, fy]` point across the node's box (default `"center"`). */
+  readonly center?: Place | Vec;
+  /** `"cover"` (default) reaches the farthest corner; `"inside"` reaches the nearest edge (inscribed circle). */
+  readonly fit?: RadialFit;
   readonly stops: Stops;
 }
 
@@ -115,6 +128,8 @@ export const linear = Object.assign(
   },
 );
 
+const isVec = (value: Place | Vec): value is Vec => Array.isArray(value);
+
 export const radial = Object.assign(
   ({ center, radius, stops }: RadialOptions): Gradient => {
     if (!finite(center))
@@ -126,21 +141,32 @@ export const radial = Object.assign(
     return { kind: "radial", center, radius, stops: checked(stops, "radial()") };
   },
   {
-    across: ({ center = "center", stops }: RadialAcrossOptions): Gradient => ({
-      kind: "radial",
-      center,
-      stops: checked(stops, "radial.across()"),
-    }),
+    across: ({ center = "center", fit = "cover", stops }: RadialAcrossOptions): Gradient => {
+      if (isVec(center) && !finite(center))
+        throw new SceneError(
+          `radial.across() needs a finite fractional center, got [${center.join(", ")}].`,
+        );
+
+      return {
+        kind: "radial",
+        center,
+        fit,
+        stops: checked(stops, "radial.across()"),
+      };
+    },
   },
 );
 
-export const pattern = ({ size, tile, offset = [0, 0] }: PatternOptions): Pattern => {
+export const pattern = ({ size, tile, offset = [0, 0], rotate = 0 }: PatternOptions): Pattern => {
   if (!size.every((side) => side > 0 && Number.isFinite(side)))
     throw new SceneError(
       `pattern() needs a tile size of two positive numbers, got [${size.join(", ")}].`,
     );
 
-  return { kind: "pattern", size, tile, offset };
+  if (!Number.isFinite(rotate))
+    throw new SceneError(`pattern() needs a finite rotate angle, got ${rotate}.`);
+
+  return { kind: "pattern", size, tile, offset, rotate };
 };
 
 const DEG = Math.PI / 180;
@@ -202,14 +228,29 @@ export const gradientOf = (
   if ("radius" in given)
     return { kind: "radial", center: given.center, radius: given.radius, stops: pairs };
   const area = measured("radial.across()");
-  const center = placeIn(area, given.center, [0, 0], "radial.across()");
+
+  const center: Vec = isVec(given.center)
+    ? [area.x + given.center[0] * area.width, area.y + given.center[1] * area.height]
+    : placeIn(area, given.center, [0, 0], "radial.across()");
+
+  const inside = Math.min(
+    center[0] - area.x,
+    area.x + area.width - center[0],
+    center[1] - area.y,
+    area.y + area.height - center[1],
+  );
+
+  const radius =
+    given.fit === "inside"
+      ? inside > 0
+        ? inside
+        : Math.min(area.width, area.height) / 2
+      : Math.max(...boxCorners(area).map(([px, py]) => Math.hypot(px - center[0], py - center[1])));
 
   return {
     kind: "radial",
     center,
-    radius: Math.max(
-      ...boxCorners(area).map(([px, py]) => Math.hypot(px - center[0], py - center[1])),
-    ),
+    radius,
     stops: pairs,
   };
 };

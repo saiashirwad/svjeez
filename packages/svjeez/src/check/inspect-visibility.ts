@@ -13,8 +13,9 @@ import type {
 import { isLane } from "../model/lane";
 import { isColor } from "../model/painted";
 import { placed, reachOf } from "../model/reach";
+import { mixNumber } from "../model/steps";
 import type { Seconds } from "../model/time";
-import type { Placed } from "./boxes";
+import { valueAt, type Placed } from "./boxes";
 import { add, isGone, isLeaf, label, shownBoxes, spoken, type Survey } from "./inspect-context";
 import {
   between,
@@ -94,7 +95,11 @@ const unpainted = (
   duration: Seconds,
   schemes: readonly Scheme[],
 ): string | undefined => {
-  if (!clearThroughout(scene, node.fill, schemes)) return undefined;
+  const fillClear =
+    clearThroughout(scene, node.fill, schemes) ||
+    (node.fillOpacity !== undefined && covers(zerosOf(node.fillOpacity, duration), 0, duration));
+
+  if (!fillClear) return undefined;
   const fill = node.fill === undefined ? "no fill" : "a fill that is fully transparent";
   const { stroke } = node;
 
@@ -120,6 +125,17 @@ const unwritten = (
   const runs = runsOf(node).filter((run) => run.text.trim() !== "");
 
   if (runs.length === 0) return undefined;
+
+  const stroked =
+    node.stroke !== undefined &&
+    !clearThroughout(scene, node.stroke.color, schemes) &&
+    !covers(zerosOf(node.stroke.width, duration), 0, duration) &&
+    !trimmedAway(node.trim);
+
+  if (stroked) return undefined;
+
+  if (node.fillOpacity !== undefined && covers(zerosOf(node.fillOpacity, duration), 0, duration))
+    return "its fillOpacity is 0 at every time";
 
   if (runs.every((run) => clearThroughout(scene, run.fill, schemes)))
     return "every run's fill is fully transparent";
@@ -269,6 +285,9 @@ const coverOf = (survey: Survey, entry: Entry): Cover | undefined => {
     return undefined;
 
   if (node.fill === undefined || isLane(node.fill)) return undefined;
+
+  if (node.fillOpacity !== undefined && (isLane(node.fillOpacity) || node.fillOpacity < 1))
+    return undefined;
 
   if (!schemesOf(entry).every((scheme) => opaque(survey.scene, node.fill, scheme)))
     return undefined;
@@ -445,6 +464,9 @@ export const flatAt = (
   const { node } = entry;
 
   if (node.kind !== "shape" || node.fill === undefined || at.opacity < 0.999) return undefined;
+
+  if (node.fillOpacity !== undefined && valueAt(node.fillOpacity, t, mixNumber) < 0.999)
+    return undefined;
 
   if (
     [...entry.ancestors, node].some(

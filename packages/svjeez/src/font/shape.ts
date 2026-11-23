@@ -277,6 +277,19 @@ const mayApply = (
   );
 };
 
+const singleSub = (f: Sfnt, subtable: number, glyph: number): number | undefined => {
+  const index = coverage(f, subtable + u16(f, subtable + 2), glyph);
+
+  if (index < 0) return undefined;
+  const format = u16(f, subtable);
+
+  if (format === 1) return (glyph + i16(f, subtable + 4)) & 0xffff;
+
+  if (format === 2 && index < u16(f, subtable + 4)) return u16(f, subtable + 6 + 2 * index);
+
+  return undefined;
+};
+
 const ligate = (f: Sfnt, subtable: number, run: Placed[], i: number): number => {
   const index = coverage(f, subtable + u16(f, subtable + 2), run[i]!.glyph);
 
@@ -358,8 +371,31 @@ export interface Typesetter {
   readonly beyond: (runs: readonly (readonly number[])[]) => boolean;
 }
 
-export const typesetter = (f: Sfnt, withLigatures = true): Typesetter => {
+export const typesetter = (
+  f: Sfnt,
+  withLigatures = true,
+  features: readonly string[] = [],
+): Typesetter => {
   const map = charMap(f);
+
+  const singles =
+    features.length > 0 ? lookups(f, "GSUB", features, 7).filter((l) => l.type === 1) : [];
+
+  const substitute = (glyph: number): number => {
+    let current = glyph;
+
+    for (const { subtables } of singles) {
+      for (const s of subtables) {
+        const next = singleSub(f, s, current);
+
+        if (next === undefined) continue;
+        current = next;
+        break;
+      }
+    }
+
+    return current;
+  };
 
   const ligatures = withLigatures
     ? lookups(f, "GSUB", ["liga", "clig", "rlig"], 7).filter((l) => l.type === 4)
@@ -386,9 +422,11 @@ export const typesetter = (f: Sfnt, withLigatures = true): Typesetter => {
     return total;
   };
 
-  const applied = new Set(
-    [...ligatures, ...kerning].map((l) => `${l.type === 4 ? "GSUB" : "GPOS"} ${l.index}`),
-  );
+  const applied = new Set([
+    ...singles.map((l) => `GSUB ${l.index}`),
+    ...ligatures.map((l) => `GSUB ${l.index}`),
+    ...kerning.map((l) => `GPOS ${l.index}`),
+  ]);
 
   const others = (["GSUB", "GPOS"] as const).flatMap((tag) =>
     defaultLookups(f, tag, tag === "GSUB" ? 7 : 9)
@@ -396,8 +434,10 @@ export const typesetter = (f: Sfnt, withLigatures = true): Typesetter => {
       .map((lookup) => ({ tag, lookup })),
   );
 
+  const glyphOf = (char: string): number => substitute(map(char.codePointAt(0)!));
+
   return {
-    glyph: (char) => map(char.codePointAt(0)!),
+    glyph: glyphOf,
     kern: pair,
     beyond: (runs) =>
       others.some(({ tag, lookup }) =>
@@ -405,7 +445,7 @@ export const typesetter = (f: Sfnt, withLigatures = true): Typesetter => {
       ),
     layoutGlyphs: (text) => {
       const run: Placed[] = [...text].map((chars) => ({
-        glyph: map(chars.codePointAt(0)!),
+        glyph: glyphOf(chars),
         chars,
         advance: 0,
       }));

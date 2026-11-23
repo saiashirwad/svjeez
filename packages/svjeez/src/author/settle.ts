@@ -25,9 +25,15 @@ export interface Size {
   readonly height?: number;
 }
 
+export interface ChildMeta {
+  readonly name: string;
+  readonly baseline?: number;
+}
+
 export type Arrange = (
   boxes: readonly Box[],
   where: string,
+  meta?: readonly ChildMeta[],
 ) => {
   readonly slots: readonly Vec[];
   readonly box: Box;
@@ -273,9 +279,12 @@ export const around = (
   return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
 };
 
-export type Origin = Place | Vec | "at";
+export type Origin = Place | Vec | "at" | { readonly frame: Vec };
 
 const isOffset = (origin: Origin): origin is Vec => Array.isArray(origin);
+
+const isFrameOrigin = (origin: Origin): origin is { readonly frame: Vec } =>
+  typeof origin === "object" && origin !== null && !Array.isArray(origin) && "frame" in origin;
 
 export const originOf = (
   names: Names,
@@ -290,9 +299,20 @@ export const originOf = (
 
   if (isOffset(origin)) return [box.x + origin[0], box.y + origin[1]];
 
+  if (isFrameOrigin(origin)) {
+    if (!isPoint(origin.frame))
+      throw new SceneError(
+        `origin on ${names.named(key)} needs a finite frame point [x, y], got ${JSON.stringify(origin.frame)}.`,
+        undefined,
+        names.whereOf(key),
+      );
+
+    return origin.frame;
+  }
+
   if (!Object.hasOwn(PLACES, origin))
     throw new SceneError(
-      `origin on ${names.named(key)} takes a place, one of ${PLACE_LIST}, a point measured from its box's top-left, such as [20, 0], or "at" for the point its at places, got ${JSON.stringify(origin)}.`,
+      `origin on ${names.named(key)} takes a place, one of ${PLACE_LIST}, a point measured from its box's top-left, such as [20, 0], { frame: [x, y] } in its parent's coordinates, or "at" for the point its at places, got ${JSON.stringify(origin)}.`,
       undefined,
       names.whereOf(key),
     );
@@ -506,10 +526,19 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
         measure(child);
       }
 
+      const meta: ChildMeta[] = d.children.map((child) => ({
+        name: names.named(child.node.key),
+        ...(child.node.kind === "text" &&
+          child.node.lines[0] !== undefined && {
+            baseline: child.node.lines[0].at[1] - child.box.y,
+          }),
+      }));
+
       const { slots, box, sizes } = laidOut(names, d.node.key, () =>
         asked.arrange(
           d.children.map((child) => child.box),
           names.named(d.node.key),
+          meta,
         ),
       );
 
@@ -714,11 +743,20 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
   const build = (d: Draft): SceneNode => {
     const ends = attached.get(d);
 
+    const frameOrigin =
+      d.note?.origin && isFrameOrigin(d.note.origin) ? d.note.origin.frame : undefined;
+
+    const settledAt = atRest(d.at);
+
+    const origin: Vec = frameOrigin
+      ? [frameOrigin[0] - settledAt[0], frameOrigin[1] - settledAt[1]]
+      : d.origin;
+
     const placed = {
       ...d.node,
       at: d.at,
       box: d.box,
-      origin: d.origin,
+      origin,
       ...(ends && ends.length > 0 && { authored: { ...d.node.authored, ends } }),
     };
 

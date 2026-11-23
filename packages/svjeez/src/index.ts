@@ -10,10 +10,16 @@ export {
   Text,
   ref,
   type Bounds,
+  type Child,
+  type GroupProps,
   type SceneElement,
+  type ShapeProps,
+  type TextProps,
 } from "./author/nodes";
 
 export type { Ref } from "./author/refs";
+
+export type { Origin } from "./author/settle";
 
 export { component, type ComponentOptions, type Slots } from "./author/component";
 
@@ -21,11 +27,12 @@ export { context, type Context } from "./author/expand";
 
 export type { StandardJSONSchemaV1, StandardSchemaV1, JsonSchema } from "./author/standard";
 
-export { Align, Center, Grid, spread, Stack } from "./author/layout";
+export { Align, Center, Grid, spread, Stack, type StackAlignment } from "./author/layout";
 
 export { Arrow } from "./author/arrow";
 
 export {
+  alpha,
   arc,
   circle,
   ellipse,
@@ -33,6 +40,7 @@ export {
   mix,
   path,
   polygon,
+  random,
   rect,
   tokens,
   type Color,
@@ -42,19 +50,47 @@ export {
 
 export { moved, subtract } from "./author/holes";
 
-export { linear, pattern, radial } from "./author/paint";
+export {
+  along,
+  around,
+  bounds,
+  length,
+  merge,
+  mirrored,
+  pointAt,
+  reversed,
+  rotated,
+  scaled,
+  spline,
+  type AroundOptions,
+  type PointAt,
+  type SplineOptions,
+} from "./author/geometry";
+
+export {
+  linear,
+  pattern,
+  radial,
+  type Pattern,
+  type PatternOptions,
+  type RadialFit,
+} from "./author/paint";
 
 export { adjust, blur, displace, shadow } from "./author/effects";
 
 export { track, type Anim, type Track } from "./author/track";
 
+export type { LoopOptions } from "./model/steps";
+
 export { through, within } from "./author/derived";
+
+export { timeAt } from "./author/window";
 
 export { enter, exit, sampled, wiggle } from "./author/recipes";
 
 export { ease, type Curve } from "./author/spring";
 
-export { span, type Span } from "./author/span";
+export { span, type PaceOptions, type Span } from "./author/span";
 
 export { morph } from "./author/morph";
 
@@ -77,10 +113,20 @@ export {
   type TypedOptions,
 } from "./author/typed";
 
-export { param } from "./params";
+export { defaults, param, parse, type Values } from "./params";
 
 export { picture, type PictureData } from "./author/picture";
 
-export { font } from "./font/font";
+export {
+  font,
+  type Font,
+  type FontFamily,
+  type FontOptions,
+  type FontSource,
+  type FontValue,
+  type MeasureOptions,
+} from "./font/font";
+
+export type { TextFitOptions } from "./author/text";
 
 export type { Vec } from "./model/ir";

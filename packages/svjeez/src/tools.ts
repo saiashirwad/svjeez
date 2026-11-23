@@ -56,11 +56,13 @@ export type {
 export type { ArrowProps } from "./author/arrow";
 
 export {
+  fitSizeForRuns,
   layoutRuns,
   layoutText,
   type LaidLine,
   type LaidRun,
   type TextAlign,
+  type TextFitOptions,
   type TextLayout,
   type TextLayoutOptions,
   type TextPiece,
@@ -80,7 +82,10 @@ export type {
   Gradient,
   LinearAcrossOptions,
   LinearOptions,
+  Pattern,
+  PatternOptions,
   RadialAcrossOptions,
+  RadialFit,
   RadialOptions,
   Stops,
 } from "./author/paint";

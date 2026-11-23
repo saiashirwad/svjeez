@@ -9,6 +9,9 @@ import type { Arrange, Size } from "./settle";
 /** Where something sits in free room: a name, or a fraction from 0 (start) to 1 (end). */
 export type Alignment = "start" | "center" | "end" | number;
 
+/** Stack cross-axis alignment, including `"baseline"` for horizontal rows of text. */
+export type StackAlignment = Alignment | "baseline";
+
 /** Each child's extra offset along the stack, given the free length and the child count; added to its packed position. */
 export type Distribute = (free: number, count: number) => readonly number[];
 
@@ -94,13 +97,14 @@ const fits = (
   side: "wide" | "tall",
   given: number | undefined,
   need: number,
+  culprit?: string,
 ): number => {
   if (given === undefined) return need;
 
   if (given < need - EPSILON)
     throw new SceneError(
       `${where} is ${given} ${side}, but its children${label === "<Stack>" ? ", gaps" : ""} and padding need ${Math.ceil(need * 100) / 100}.`,
-      `Make it ${side === "wide" ? "wider" : "taller"}, or leave out ${side === "wide" ? "width" : "height"} so it fits them.`,
+      `Make it ${side === "wide" ? "wider" : "taller"}, or leave out ${side === "wide" ? "width" : "height"} so it fits them.${culprit ? ` (${culprit})` : ""}`,
     );
 
   return given;
@@ -109,7 +113,7 @@ const fits = (
 export interface StackProps extends Common, Backdrop {
   readonly direction?: "row" | "column";
   readonly gap?: number;
-  readonly align?: Alignment;
+  readonly align?: StackAlignment;
   /** Widen each container child to the stack's inner breadth; `align` then has nothing left to place. */
   readonly stretch?: boolean;
   readonly justify?: Justify;
@@ -138,28 +142,70 @@ export const Stack = ({
 
   if (direction !== "row" && direction !== "column")
     throw new SceneError(`<Stack> takes direction "row" or "column", got "${String(direction)}".`);
-  const [space] = room(gap, "<Stack> gap");
+
+  if (!Number.isFinite(gap)) throw new SceneError(`<Stack> gap needs a finite length, got ${gap}.`);
+  const space = gap;
   const { backdrop, inset } = paint(label, { fill, stroke, radius }, padding);
-  const cross = share(align, "<Stack> align");
+  const row = direction === "row";
+
+  if (align === "baseline" && !row)
+    throw new SceneError('<Stack> align="baseline" only applies when direction="row".');
+  const baseline = align === "baseline";
+  const cross = baseline ? 0 : share(align, "<Stack> align");
 
   const distribute =
     justify instanceof Function ? justify : together(share(justify, "<Stack> justify"));
 
-  const row = direction === "row";
   const [wide, tall] = [size(width, "<Stack> width"), size(height, "<Stack> height")];
 
   const sized = (given: Size): Arrange => {
     const [fixedMain, fixedCross] = row ? [given.width, given.height] : [given.height, given.width];
 
-    return (boxes, where) => {
+    return (boxes, where, meta) => {
       const mains = boxes.map((box) => (row ? box.width : box.height));
       const sides = boxes.map((box) => (row ? box.height : box.width));
       const [lead, edge] = row ? inset : [inset[1], inset[0]];
-      const content = run(mains, 0, space).end;
-      const widest = Math.max(0, ...sides);
+      const content = Math.max(0, run(mains, 0, space).end);
+
+      const above = baseline ? sides.map((height, i) => meta?.[i]?.baseline ?? height) : [];
+
+      const maxAbove = baseline ? Math.max(0, ...above) : 0;
+
+      const maxBelow = baseline ? Math.max(0, ...sides.map((height, i) => height - above[i]!)) : 0;
+
+      const widest = baseline ? maxAbove + maxBelow : Math.max(0, ...sides);
       const [mainSide, crossSide] = row ? (["wide", "tall"] as const) : (["tall", "wide"] as const);
-      const length = fits(label, where, mainSide, fixedMain, content + lead * 2);
-      const breadth = fits(label, where, crossSide, fixedCross, widest + edge * 2);
+
+      const largest = (list: readonly number[], unit: "wide" | "tall"): string | undefined => {
+        if (!meta || list.length === 0) return undefined;
+        let best = 0;
+
+        for (let i = 1; i < list.length; i++) if (list[i]! > list[best]!) best = i;
+        const name = meta[best]?.name;
+
+        return name
+          ? `widest child is ${name} at ${Math.ceil(list[best]! * 100) / 100} ${unit}`
+          : undefined;
+      };
+
+      const length = fits(
+        label,
+        where,
+        mainSide,
+        fixedMain,
+        content + lead * 2,
+        largest(mains, mainSide),
+      );
+
+      const breadth = fits(
+        label,
+        where,
+        crossSide,
+        fixedCross,
+        widest + edge * 2,
+        largest(sides, crossSide),
+      );
+
       const free = length - lead * 2 - content;
       const across = breadth - edge * 2;
       const shifts = distribute(free, boxes.length);
@@ -171,7 +217,10 @@ export const Stack = ({
       const { starts } = run(mains, lead, space);
 
       const slots = starts.map((packed, i): Vec => {
-        const side = edge + (across - sides[i]!) * cross;
+        const side = baseline
+          ? edge + (across - widest) / 2 + (maxAbove - above[i]!)
+          : edge + (across - sides[i]!) * cross;
+
         const start = packed + shifts[i]!;
 
         return row ? [start, side] : [side, start];

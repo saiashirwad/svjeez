@@ -1,7 +1,7 @@
 import { SceneError } from "./scene-error";
 import { easeAt, splitEase, staysInside } from "./ease-at";
 import { DEFAULT_EASE, EPSILON, NUDGE, ease, type Ease, type Seconds } from "./time";
-import { isWhen, type Interval, type When } from "../author/span";
+import { isWhen, type When } from "../author/span";
 import { num } from "./format";
 import { isCurved, splitCurve, type Controls } from "./curve";
 import type { Animated, Key, Lane, Vec } from "./ir";
@@ -17,10 +17,15 @@ export interface Step<V> {
   readonly until?: Seconds;
 }
 
+export interface LoopOptions {
+  readonly phase?: Seconds;
+}
+
 export interface PassageData<V> {
   readonly initial: Partial<V>;
   readonly steps: readonly Step<V>[];
   readonly period?: Seconds;
+  readonly phase?: Seconds;
   readonly rewind?: { readonly over: Seconds; readonly ease: Curve };
   readonly repeated?: boolean;
 }
@@ -40,9 +45,6 @@ const end = <V>(step: Step<V>): Seconds =>
 const isUntil = (
   value: number | { readonly until: Seconds },
 ): value is { readonly until: Seconds } => typeof value === "object";
-
-const isSpan = (when: Interval | Seconds | null | undefined): when is Interval =>
-  typeof when === "object" && when !== null;
 
 // SAFETY: values is a Partial<V>, so its own keys are keys of V.
 const names = <V extends object>(values: Partial<V>): (keyof V)[] =>
@@ -71,12 +73,21 @@ export class Passage<V extends object> {
     return new Passage({ ...this.data, ...patch });
   }
 
-  to(values: Partial<V>, when: Interval, curve: Curve = DEFAULT_EASE): Passage<V> {
-    if (!isSpan(when))
+  to(values: Partial<V>, when: When, curve: Curve = DEFAULT_EASE): Passage<V> {
+    if (!isWhen(when))
       throw new SceneError(
         `to() takes a span, got ${String(when)}. Write .to(value, span(start, over)); a step right after another is span.next(over).`,
       );
     const start = time(when.start, "to()");
+
+    if (when.over === undefined) {
+      if (!isSpring(curve))
+        throw new SceneError(
+          "to() with an open span (span(start)) needs a spring, which supplies its own settle duration. Pass span(start, over) for an ease.",
+        );
+
+      return this.#push({ start, over: curve.settle, ease: curve, values });
+    }
 
     if (!(time(when.over, "to()") > 0))
       throw new SceneError(
@@ -95,9 +106,13 @@ export class Passage<V extends object> {
     return this.#push({ start: time(when.start, "set()"), over: 0, ease: ease.hold, values });
   }
 
-  loop(period: Seconds): Passage<V> {
+  loop(period: Seconds, options?: LoopOptions): Passage<V> {
     if (!(time(period, "loop()") > 0))
       throw new SceneError(`loop() needs a positive period, got ${period}.`);
+    const phase = options?.phase;
+
+    if (phase !== undefined && !Number.isFinite(phase))
+      throw new SceneError(`loop() needs a finite phase in seconds, got ${phase}.`);
     const last = Math.max(0, ...this.data.steps.map(end));
 
     if (last > period + EPSILON)
@@ -105,7 +120,7 @@ export class Passage<V extends object> {
         `loop(${period}) is shorter than the motion, which runs until ${last}s.`,
       );
 
-    return this.#with({ period });
+    return this.#with({ period, ...(phase !== undefined && { phase }) });
   }
 
   repeat(times: number | { readonly until: Seconds }): Passage<V> {
@@ -653,14 +668,20 @@ const written = <T>(
     period,
   );
 
+  const clockShift = looped && clock.offset > 0 ? ((clock.offset % snapped) / snapped) * period : 0;
+  const phaseShift = looped && data.phase !== undefined ? -data.phase : 0;
+  const totalShift = clockShift + phaseShift;
+
   const keys =
-    looped && clock.offset > 0
+    looped && Math.abs(totalShift) > EPSILON
       ? rotated(
           held,
-          ((clock.offset % snapped) / snapped) * period,
+          totalShift,
           period,
           mix,
-          `A loop on ${where} inside ${clock.clips.at(-1)?.label ?? "a sequence"}`,
+          data.phase !== undefined
+            ? `A phase-shifted loop on ${where}`
+            : `A loop on ${where} inside ${clock.clips.at(-1)?.label ?? "a sequence"}`,
         )
       : held;
 
