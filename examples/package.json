@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@effect/atom-react": "4.1.4",
+    "@effect/platform-bun": "^4.1.4",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@svjeez/charts": "workspace:*",
     "@svjeez/code": "workspace:*",

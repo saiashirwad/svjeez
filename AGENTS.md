@@ -25,9 +25,9 @@ Run these from the root (or from `examples/` or `site/`). `<scene>` is an exampl
 
 ```sh
 bun run scene check <scene>    # problems with file:line and a fix; exits 1 on errors
-bun run scene frames <scene>   # PNG frames to look at (add --sheet, --times 0,1.5)
+bun run scene frames <scene>   # PNG frames to look at (add -- --sheet --times 0,1.5)
 bun run scene dev <scene>      # live preview with a scrubber
-bun run scene svg <scene> --out x.svg
+bun run scene svg <scene> -- --out x.svg
 bun run example <name...>      # build examples into examples/dist/
 bun run typecheck              # tsc catches what the build does not, like a number as a key
 ```
@@ -43,9 +43,22 @@ After writing or changing a scene, run `bun run scene check` and `bun run typech
 - `typeof` checks only inside type guard functions (`(x: T): x is string => typeof x === "string"`);
 - no `unknown` in return types or open `Record<string, unknown>` dictionaries; name the type.
 
+## Scripts are Effect programs
+
+Every script (build, release, check, codegen, one-off tasks) is an Effect program. `scripts/scene.ts` is the model to copy.
+
+- Define commands with `Command`, `Argument` and `Flag` from `effect/cli` and run them with `Command.run`, which reads arguments from `Stdio`. Don't read `process.argv`.
+- When Effect has a module for something, use it instead of `node:*` or `Bun.*`. That means `FileSystem` and `Path` for files, `ChildProcess` and `ChildProcessSpawner` from `effect/process` for subprocesses, `Console` for output and `Config` for environment variables. Parse JSON with `Schema`, compare versions with `SemVer`, and loop with `Effect.forEach` with an explicit `concurrency`.
+- Every script ends with `.pipe(Effect.provide(Services.layer), BunRuntime.runMain)`, where `Services` is `scripts/services.ts`. Its one layer provides the Bun platform services (FileSystem, Path, ChildProcessSpawner, Stdio, Terminal), `Digest` and an `HttpClient`, and works under Bun, Node and `tsx` alike. Add `Effect.scoped` before it when the script acquires scoped resources. Reach for `Bun.*` (such as `Bun.build`) only where Effect has no module for the job, and wrap it in `Effect.tryPromise`.
+- Fail with the two errors in `scripts/errors.ts`; don't define error classes per script. `ScriptError({ message, cause })` is every failure: the message is one sentence in a single template string with names quoted inline, such as `` `No scene called "${name}".` ``, and `cause` carries the underlying error for the runtime to print. `Exited({ code })` is for a child process that already printed its own failure; it exits with that code and prints nothing more. Never call `process.exit`.
+- Don't define a constant, helper or type that is used once. Inline it where it's used. Name something only when two places share it.
+- Write shared effects with `Effect.fn("name")` and inline ones with `Effect.gen`. A function that can fail returns an `Effect` or a `Result` instead of throwing.
+- Prefer Effect combinators to hand-rolled branching, for example `Effect.findFirst(...).pipe(Effect.flatMap(Effect.fromOption(() => new NotFound(...))))`. Use template commands like ``ChildProcess.make(options)`bun ${file} ${flags}` ``, where an array interpolates as one argument per item. Don't rewrite argv to work around a parser; when a command passes flags through to another tool, they go after `--`.
+- Don't write comments in scripts. The code should read without them.
+
 ## The single-file binary
 
-`packages/bin` compiles the CLI and every add-on package into one executable (`bun run build:bin` writes `packages/bin/dist/svjeez`), for scenes with no `package.json` or `node_modules` beside them. Its `check` also reports TypeScript errors as `type-error`. When a package gains or loses an export, update `packages/bin/src/modules.ts`; its test fails until you do. If a package starts reading a file beside its code, make sure the build's embed plugin handles it (`packages/bin/scripts/build.ts`).
+`packages/bin` compiles the CLI and every add-on package into one executable (`bun run build:bin` writes `packages/bin/dist/svjeez`), for scenes with no `package.json` or `node_modules` beside them. Its `check` also reports TypeScript errors as `type-error`. When a package gains or loses an export, update `packages/bin/src/modules.ts`; its test fails until you do. If a package starts reading a file beside its code, make sure the build's embed plugin handles it (`packages/bin/scripts/binary.ts`).
 
 ## Site
 

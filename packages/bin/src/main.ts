@@ -9,7 +9,7 @@ import { USAGE, browserCommand, downloadChild, initCommand } from "./commands";
 import { MODULES } from "./modules";
 import { typeProblems } from "./types";
 
-// scripts/build.ts defines it in the binary; from source it is unset.
+// scripts/binary.ts defines it in the binary; from source it is unset.
 const built = process.env.SVJEEZ_VERSION;
 const compiled = built !== undefined;
 const version = built ?? "source";

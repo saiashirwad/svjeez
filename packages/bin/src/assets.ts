@@ -1,6 +1,6 @@
 import pack from "../.build/assets.pack" with { type: "file" };
 
-/** What scripts/build.ts packs into the binary beside the code: read only by the commands that need it. */
+/** What scripts/binary.ts packs into the binary beside the code: read only by the commands that need it. */
 export interface Assets {
   readonly version: string;
   /** A hash of everything below, naming the cache folder they unpack to. */

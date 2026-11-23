@@ -5,8 +5,10 @@
     "": {
       "name": "svjeez",
       "devDependencies": {
+        "@effect/platform-bun": "^4.1.4",
         "@oxlint/plugins": "1.90.0",
         "@types/bun": "latest",
+        "effect": "^4.1.4",
         "oxfmt": "0.75.0",
         "oxlint": "1.90.0",
         "typescript": "latest",
@@ -16,6 +18,7 @@
       "name": "svjeez-examples",
       "devDependencies": {
         "@effect/atom-react": "4.1.4",
+        "@effect/platform-bun": "^4.1.4",
         "@sveltejs/vite-plugin-svelte": "^7.3.1",
         "@svjeez/charts": "workspace:*",
         "@svjeez/code": "workspace:*",
@@ -82,7 +85,9 @@
         "typescript": "6.0.3",
       },
       "devDependencies": {
+        "@effect/platform-bun": "^4.1.4",
         "@types/bun": "latest",
+        "effect": "^4.1.4",
       },
     },
     "packages/charts": {
@@ -203,8 +208,10 @@
       "name": "@svjeez/icons",
       "version": "0.8.0-next.1",
       "devDependencies": {
+        "@effect/platform-bun": "^4.1.4",
         "@tabler/icons": "3.50.0",
         "@types/bun": "latest",
+        "effect": "^4.1.4",
         "lucide-static": "1.63.0",
         "svjeez": "workspace:*",
         "typescript": "latest",
@@ -221,7 +228,7 @@
         "@lezer/javascript": "^1.5.6",
         "effect": "^4.1.4",
         "sucrase": "^3.35.1",
-        "svjeez": "workspace:*",
+        "svjeez": "workspace:^",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -283,6 +290,7 @@
       },
       "devDependencies": {
         "@arethetypeswrong/cli": "^0.18.5",
+        "@effect/platform-bun": "^4.1.4",
         "@svjeez/charts": "workspace:*",
         "@svjeez/code": "workspace:*",
         "@svjeez/diagrams": "workspace:*",
@@ -293,6 +301,7 @@
         "@svjeez/math": "workspace:*",
         "@svjeez/mermaid": "workspace:*",
         "@types/bun": "latest",
+        "effect": "^4.1.4",
         "playwright-core": "^1.64.1",
         "publint": "^0.3.25",
         "sucrase": "^3.35.1",

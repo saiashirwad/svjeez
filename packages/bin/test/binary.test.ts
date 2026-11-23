@@ -1,8 +1,10 @@
 import { afterAll, beforeAll, expect, test } from "bun:test";
+import { Effect } from "effect";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { compile, pack } from "../scripts/build";
+import { compile, pack } from "../scripts/binary.ts";
+import * as Services from "../../../scripts/services.ts";
 
 // Builds the binary for this machine once, then runs it on scenes in a temp folder (behind a symlink on macOS, where
 // /var is /private/var) with no package.json, node_modules or tsconfig.
@@ -12,8 +14,12 @@ let dir = "";
 
 beforeAll(async () => {
   dir = mkdtempSync(join(tmpdir(), "svjeez-bin-"));
-  await pack("0.0.0-test");
-  bin = await compile("0.0.0-test", undefined, join(dir, "out"));
+  bin = await Effect.runPromise(
+    pack("0.0.0-test").pipe(
+      Effect.andThen(compile("0.0.0-test", undefined, join(dir, "out"))),
+      Effect.provide(Services.layer),
+    ),
+  );
 }, 120_000);
 
 afterAll(() => rmSync(dir, { recursive: true, force: true }));

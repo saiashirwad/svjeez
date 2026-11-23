@@ -1,93 +1,100 @@
-import { mkdir } from "node:fs/promises";
-import { basename, dirname, join } from "node:path";
+import { BunRuntime } from "@effect/platform-bun";
 import { runFilm } from "@svjeez/dom/vite";
+import { Console, Effect, FileSystem, Function, Path, Predicate, Stream, String } from "effect";
+import { Argument, Command } from "effect/cli";
+import { ChildProcess, ChildProcessSpawner } from "effect/process";
 import { validateSvg } from "svjeez/frames";
-import { isScene, svg as backend, type Scene } from "svjeez/tools";
+import { isScene, svg as backend } from "svjeez/tools";
+import { ScriptError } from "../../scripts/errors.ts";
+import * as Services from "../../scripts/services.ts";
 
-const ROOT = join(import.meta.dir, "..");
-const OUT = join(ROOT, "dist");
+Effect.gen(function* () {
+  const fs = yield* FileSystem.FileSystem;
+  const path = yield* Path.Path;
+  const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
+  const root = path.join(import.meta.dirname, "..");
 
-const flat = (dir: string) =>
-  [...new Bun.Glob(`${dir}/*.tsx`).scanSync(ROOT)].map(
-    (entry) => `${dir}/${basename(entry, ".tsx")}`,
-  );
+  const examples = [
+    ...(yield* fs.glob("*/index.tsx", { root })).map(path.dirname),
+    ...(yield* fs.glob("{readme,mermaid-types,dom-component,dom-svelte}/*.tsx", { root })).map(
+      (file) => file.slice(0, -".tsx".length),
+    ),
+  ].sort();
 
-const examples = [...new Bun.Glob("*/index.tsx").scanSync(ROOT)]
-  .map((entry) => basename(dirname(entry)))
-  .concat(flat("readme"), flat("mermaid-types"), flat("dom-component"), flat("dom-svelte"))
-  .sort();
+  return yield* Command.make(
+    "example",
+    {
+      names: Argument.ChoiceWithValue(
+        "example",
+        examples.map((name): [string, string] => [name, name]),
+      ).pipe(Argument.variadic()),
+    },
+    Effect.fn(function* ({ names }) {
+      const xmllint = yield* spawner
+        .exitCode(ChildProcess.make({ stdout: "ignore", stderr: "ignore" })`xmllint --version`)
+        .pipe(Effect.isSuccess);
 
-const wanted = process.argv.slice(2);
-const unknown = wanted.filter((name) => !examples.includes(name));
+      const [, failed] = yield* Effect.partition(
+        names.length > 0 ? names : examples,
+        Effect.fn(
+          function* (name) {
+            const file = path.join(root, name.includes("/") ? `${name}.tsx` : `${name}/index.tsx`);
 
-if (unknown.length > 0) {
-  console.error(`unknown example: ${unknown.join(", ")}\navailable: ${examples.join(", ")}`);
-  process.exit(1);
-}
+            const svg = yield* Effect.tryPromise({
+              try: async (): Promise<string> => {
+                const exported = file.endsWith(".vite.tsx")
+                  ? (await runFilm(file)).svg
+                  : (await import(file)).default;
 
-type Made = string | Scene;
+                const made = Predicate.isFunction(exported) ? exported() : exported;
 
-const isBuild = (value: Made | (() => Made)): value is () => Made => typeof value === "function";
+                return isScene(made) ? backend.emit(made) : made;
+              },
+              catch: Function.identity,
+            });
 
-const svgOf = (exported: Made | (() => Made)): string => {
-  const made = isBuild(exported) ? exported() : exported;
+            const problem = xmllint
+              ? yield* spawner
+                  .string(
+                    ChildProcess.make({
+                      stdin: Stream.encodeText(Stream.make(svg)),
+                    })`xmllint --noout -`,
+                    { includeStderr: true },
+                  )
+                  .pipe(Effect.map(String.trim))
+              : "";
 
-  return isScene(made) ? backend.emit(made) : made;
-};
+            if (problem !== "") return yield* Effect.fail(new Error(`xmllint: ${problem}`));
 
-const xmllint = Bun.which("xmllint");
+            yield* fs.makeDirectory(path.join(root, "dist", path.dirname(name)), {
+              recursive: true,
+            });
+            yield* fs.writeFileString(path.join(root, "dist", `${name}.svg`), svg);
 
-const lint = (svg: string): string | undefined => {
-  if (!xmllint) return;
-  const result = Bun.spawnSync([xmllint, "--noout", "-"], { stdin: Buffer.from(svg) });
+            yield* Console.log(
+              `✓ dist/${name}.svg  ${(svg.length / 1024).toFixed(1)} KB · ${svg.match(/@keyframes /g)?.length ?? 0} keyframes · ${svg.match(/animation-name:/g)?.length ?? 0} tracks`,
+            );
 
-  return result.exitCode === 0 ? undefined : result.stderr.toString().trim();
-};
+            yield* Effect.forEach(validateSvg(svg).warnings, (warning) =>
+              Console.warn(`  warning: ${warning}`),
+            );
+          },
+          (effect, name) =>
+            effect.pipe(
+              Effect.mapError(
+                (cause) => new ScriptError({ message: `Building "${name}" failed.`, cause }),
+              ),
+              Effect.tapCause(Effect.logError),
+              Effect.mapError(() => name),
+            ),
+        ),
+        { concurrency: "unbounded" },
+      );
 
-const build = async (name: string): Promise<boolean> => {
-  try {
-    const file = join(ROOT, name.includes("/") ? `${name}.tsx` : join(name, "index.tsx"));
+      if (!xmllint) yield* Console.warn("xmllint not installed, skipped");
 
-    // `*.vite.tsx` films a component through Vite, which has to load the film file itself.
-    const exported: Made | (() => Made) = file.endsWith(".vite.tsx")
-      ? (await runFilm(file)).svg
-      : (await import(file)).default;
-
-    const svg = svgOf(exported);
-    const { warnings } = validateSvg(svg);
-    const problem = lint(svg);
-
-    if (problem) throw new Error(`xmllint: ${problem}`);
-    await Bun.write(join(OUT, `${name}.svg`), svg);
-    const keyframes = svg.match(/@keyframes /g)?.length ?? 0;
-    const tracks = svg.match(/animation-name:/g)?.length ?? 0;
-    console.log(
-      `✓ dist/${name}.svg  ${(svg.length / 1024).toFixed(1)} KB · ${keyframes} keyframes · ${tracks} tracks`,
-    );
-
-    for (const warning of warnings) console.warn(`  warning: ${warning}`);
-
-    return true;
-  } catch (error) {
-    // A SceneError's message says what to change; anything else is a crash, and its stack says where.
-    const detail = !(error instanceof Error)
-      ? String(error)
-      : error.name === "SceneError"
-        ? error.message
-        : (error.stack ?? error.message);
-
-    console.error(`✗ ${name}\n  ${detail}`);
-
-    return false;
-  }
-};
-
-await mkdir(join(OUT, "readme"), { recursive: true });
-
-const names = wanted.length > 0 ? wanted : examples;
-
-const results = await Promise.all(names.map(build));
-
-if (!xmllint) console.warn("xmllint not installed, skipped");
-
-if (results.includes(false)) process.exit(1);
+      if (failed.length > 0)
+        return yield* new ScriptError({ message: `${failed.join(", ")} failed to build.` });
+    }),
+  ).pipe(Command.run({ version: "internal" }));
+}).pipe(Effect.provide(Services.layer), BunRuntime.runMain);

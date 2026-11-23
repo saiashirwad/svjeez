@@ -24,8 +24,10 @@
     "test:package": "bun ../../scripts/package-plugin-check.ts"
   },
   "devDependencies": {
+    "@effect/platform-bun": "^4.1.4",
     "@tabler/icons": "3.50.0",
     "@types/bun": "latest",
+    "effect": "^4.1.4",
     "lucide-static": "1.63.0",
     "svjeez": "workspace:*",
     "typescript": "latest"

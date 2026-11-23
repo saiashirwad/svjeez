@@ -1,56 +1,60 @@
-import { existsSync } from "node:fs";
-import { readdir } from "node:fs/promises";
-import { join } from "node:path";
+import { BunRuntime } from "@effect/platform-bun";
+import { Console, Effect, FileSystem, Function, Path, Predicate } from "effect";
 import { validateSvg } from "svjeez/frames";
-import { isScene, svg as backend, type Scene } from "svjeez/tools";
+import { isScene, svg as backend } from "svjeez/tools";
+import { ScriptError } from "../../scripts/errors.ts";
+import * as Services from "../../scripts/services.ts";
 
-const ROOT = join(import.meta.dirname, "..");
+Effect.gen(function* () {
+  const fs = yield* FileSystem.FileSystem;
+  const path = yield* Path.Path;
+  const root = path.join(import.meta.dirname, "..");
 
-const flat = async (dir: string) =>
-  (await readdir(join(ROOT, dir)))
-    .filter((name) => name.endsWith(".tsx"))
-    .map((name) => join(dir, name));
+  const scenes = [
+    ...(yield* Effect.filter(yield* fs.glob("*/index.tsx", { root }), (scene) =>
+      fs
+        .exists(path.join(root, path.dirname(scene), "index.html"))
+        .pipe(Effect.map((film) => !film)),
+    )),
+    ...(yield* fs.glob("readme/*.tsx", { root })),
+  ];
 
-// A directory with an index.html is a film of a web page. Its index.tsx imports that HTML (Bun only) and
-// needs Chromium, so `bun run build` covers it and Node can't load it.
-const scenes = [
-  ...(await readdir(ROOT, { withFileTypes: true }))
-    .filter(
-      (entry) =>
-        entry.isDirectory() &&
-        existsSync(join(ROOT, entry.name, "index.tsx")) &&
-        !existsSync(join(ROOT, entry.name, "index.html")),
-    )
-    .map((entry) => join(entry.name, "index.tsx")),
-  ...(await flat("readme")),
-];
+  const [passed, failed] = yield* Effect.partition(
+    scenes,
+    Effect.fn(
+      function* (scene) {
+        const svg = yield* Effect.tryPromise({
+          try: async (): Promise<string> => {
+            const { default: exported } = await import(path.join(root, scene));
+            const made = Predicate.isFunction(exported) ? exported() : exported;
 
-type Made = string | Scene;
+            return isScene(made) ? backend.emit(made) : made;
+          },
+          catch: Function.identity,
+        });
 
-const isBuild = (value: Made | (() => Made)): value is () => Made => typeof value === "function";
+        const { errors } = validateSvg(svg);
 
-const svgOf = (exported: Made | (() => Made)): string => {
-  const made = isBuild(exported) ? exported() : exported;
+        if (errors.length > 0)
+          return yield* new ScriptError({ message: `The SVG is invalid: ${errors.join(" ")}` });
 
-  return isScene(made) ? backend.emit(made) : made;
-};
+        yield* Console.log(`✓ ${scene}`);
+      },
+      (effect, scene) =>
+        effect.pipe(
+          Effect.mapError(
+            (cause) => new ScriptError({ message: `Rendering "${scene}" failed.`, cause }),
+          ),
+          Effect.tapCause(Effect.logError),
+          Effect.mapError(() => scene),
+        ),
+    ),
+  );
 
-let failed = 0;
+  yield* Console.log(`${passed.length}/${scenes.length} scenes rendered on ${process.version}`);
 
-for (const scene of scenes) {
-  try {
-    const { default: exported }: { default: Made | (() => Made) } = await import(join(ROOT, scene));
-
-    const { errors } = validateSvg(svgOf(exported));
-
-    if (errors.length > 0) throw new Error(errors.join("\n"));
-    console.log(`✓ ${scene}`);
-  } catch (error) {
-    failed++;
-    console.error(`✗ ${scene}\n  ${error instanceof Error ? error.message : error}`);
-  }
-}
-
-console.log(`${scenes.length - failed}/${scenes.length} scenes rendered on ${process.version}`);
-
-if (failed > 0) process.exit(1);
+  if (failed.length > 0)
+    return yield* new ScriptError({
+      message: `Rendering ${failed.join(", ")} failed on ${process.version}.`,
+    });
+}).pipe(Effect.provide(Services.layer), BunRuntime.runMain);

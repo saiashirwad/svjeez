@@ -1,5 +1,10 @@
-console.error(
-  "Run `bun run test` at the root, or `bun test` inside a workspace such as packages/svjeez.",
-);
+import { BunRuntime } from "@effect/platform-bun";
+import { Effect } from "effect";
+import { ScriptError } from "./errors.ts";
 
-process.exit(1);
+Effect.fail(
+  new ScriptError({
+    message:
+      "Run `bun run test` at the root, or `bun test` inside a workspace such as packages/svjeez.",
+  }),
+).pipe(BunRuntime.runMain);
