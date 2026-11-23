@@ -170,7 +170,7 @@ const imageOf = (
           const data =
             `data:image/svg+xml,${markup.trim().replace(/[%#<>"\r\n\t]/g, encodeURIComponent)}` as const;
 
-          return { data, width, height, format: "svg", bytes: data.length };
+          return { href: data, width, height, format: "svg", bytes: data.length, mode: "embed" };
         },
         intrinsic: undefined,
       };
@@ -235,7 +235,14 @@ const tile = (
 ): SceneElement | undefined => {
   if (layer.kind === "image")
     return (
-      <Picture key={key} src={src!} width={box.width} height={box.height} at={[box.x, box.y]} />
+      <Picture
+        key={key}
+        src={src!}
+        fit="fill"
+        width={box.width}
+        height={box.height}
+        at={[box.x, box.y]}
+      />
     );
 
   if (layer.kind === "linear") {

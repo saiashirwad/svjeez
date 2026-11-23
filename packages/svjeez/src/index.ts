@@ -79,7 +79,7 @@ export {
 
 export { param } from "./params";
 
-export { picture } from "./author/picture";
+export { picture, type PictureData } from "./author/picture";
 
 export { font } from "./font/font";
 

@@ -68,7 +68,7 @@ const imageHrefs = (source: string): string[] => {
 
     if (href === undefined || href.startsWith("#") || href.startsWith("data:")) continue;
     warnings.push(
-      `<${tag} href="${href.length > 60 ? `${href.slice(0, 57)}...` : href}"> will not load when the SVG is shown through <img> (GitHub, Markdown). Embed the image as a data URI: load it with picture.load() and draw it with <Picture>.`,
+      `<${tag} href="${href.length > 60 ? `${href.slice(0, 57)}...` : href}"> will not load when the SVG is shown through <img> (GitHub, Markdown). Embed the image as a data URI (picture.load() and <Picture>) for a file that must work in every delivery mode; picture.ref() is for an SVG opened directly or inlined in HTML.`,
     );
   }
 

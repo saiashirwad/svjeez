@@ -20,7 +20,14 @@ const traits = (el: Node) => {
     blend ?? "normal",
     stroke && [stroke.cap, stroke.join, stroke.dash, stroke.fixedWidth, stroke.under],
     holes,
-    el.type === "picture" && [el.props.src.data, el.props.width, el.props.height],
+    el.type === "picture" && [
+      el.props.src.href,
+      el.props.width,
+      el.props.height,
+      el.props.fit,
+      el.props.focus,
+      el.props.zoom,
+    ],
   ]);
 
   return { base, effects: (effects ?? []).map((effect) => effect.kind).join() };

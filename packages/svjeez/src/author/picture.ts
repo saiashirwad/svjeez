@@ -4,11 +4,15 @@ import { readSource } from "./source";
 export type ImageFormat = "svg" | "png" | "jpeg" | "gif" | "webp";
 
 export interface PictureData {
-  readonly data: `data:${string}`;
+  /** A `data:` URI when the bytes are embedded, or the URL itself for a `picture.ref`. */
+  readonly href: string;
   readonly width: number;
   readonly height: number;
-  readonly format: ImageFormat;
+  readonly format: ImageFormat | undefined;
+  /** What it adds to the SVG: the whole data URI, or the length of a referenced URL. */
   readonly bytes: number;
+  /** `embed` travels inside the SVG; `ref` is fetched by the viewer, so it fails where an SVG may not fetch (`<img>`, CSS background). */
+  readonly mode: "embed" | "ref";
 }
 
 interface Size {
@@ -221,9 +225,18 @@ export const picture = Object.assign(
         ? svgHref(new TextDecoder().decode(bytes))
         : (`data:${codec.mime};base64,${base64(bytes)}` as const);
 
-    return { data, ...size, format, bytes: data.length };
+    return { href: data, ...size, format, bytes: data.length, mode: "embed" };
   },
   {
+    /** Draws an image by URL instead of embedding it. The size is the file's own, as the SVG cannot read it. */
+    ref: (href: string, size: Size): PictureData => {
+      if (!(size.width > 0 && size.height > 0))
+        throw new SceneError(
+          `picture.ref() needs the image's width and height, got ${size.width} by ${size.height}.`,
+        );
+
+      return { href, ...size, format: undefined, bytes: href.length, mode: "ref" };
+    },
     load: async (source: string | URL): Promise<PictureData> => picture(await readSource(source)),
   },
 );

@@ -970,11 +970,19 @@ const build = (plan: Plan, entry: Entry): SceneNode => {
         agreed(
           plan,
           entry,
-          (node) => (node.kind === "picture" ? [node.size, node.data] : []),
-          "picture or size",
+          (node) =>
+            node.kind === "picture" ? [node.size, node.href, node.natural, node.view] : [],
+          "picture, size or crop",
         );
 
-        return { ...placed(plan, entry), kind: "picture", size: rest.size, data: rest.data };
+        return {
+          ...placed(plan, entry),
+          kind: "picture",
+          size: rest.size,
+          href: rest.href,
+          natural: rest.natural,
+          view: rest.view,
+        };
       }
     }
   })();

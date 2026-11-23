@@ -23,6 +23,8 @@ export interface Authored {
   readonly backdrop?: true;
   readonly ends?: readonly string[];
   readonly count?: { readonly ticks: readonly { readonly t: Seconds; readonly text: string }[] };
+  /** A <Picture> whose zoom or focus moves: its box is the frame the picture is clipped to, not its children's. */
+  readonly frame?: true;
 }
 
 export type { Ease, Seconds };
@@ -267,7 +269,10 @@ export interface TextNode extends Base {
 export interface PictureNode extends Base {
   readonly kind: "picture";
   readonly size: Vec;
-  readonly data: string;
+  readonly href: string;
+  /** The picture's own size, and the part of it the box shows as x, y, width, height in those units. */
+  readonly natural: Vec;
+  readonly view?: readonly [number, number, number, number];
 }
 
 export type SceneNode = GroupNode | ShapeNode | TextNode | PictureNode;

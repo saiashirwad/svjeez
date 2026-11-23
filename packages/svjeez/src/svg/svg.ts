@@ -1154,18 +1154,52 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
     case "picture": {
       const [width, height] = node.size;
 
-      drawn = {
-        tag: "image",
-        attrs: {
-          ...(at[0] !== 0 && { x: num(at[0]) }),
-          ...(at[1] !== 0 && { y: num(at[1]) }),
-          width: num(width),
-          height: num(height),
-          preserveAspectRatio: "none",
-          href: node.data,
-        },
-        placed: true,
+      const place = {
+        ...(at[0] !== 0 && { x: num(at[0]) }),
+        ...(at[1] !== 0 && { y: num(at[1]) }),
       };
+
+      if (node.view) {
+        // The viewBox sits on a nested <svg> inside a <g>, so a clip or mask on the picture is drawn in the box's own units.
+        const inner = element(
+          "image",
+          {
+            width: num(node.natural[0]),
+            height: num(node.natural[1]),
+            preserveAspectRatio: "none",
+            href: node.href,
+          },
+          [],
+        );
+
+        children = [
+          element(
+            "svg",
+            {
+              width: num(width),
+              height: num(height),
+              viewBox: node.view.map(num).join(" "),
+              preserveAspectRatio: "none",
+            },
+            [inner],
+          ),
+        ];
+
+        drawn = { tag: "g", attrs: moved(at), placed: false };
+      } else {
+        drawn = {
+          tag: "image",
+          attrs: {
+            ...place,
+            width: num(width),
+            height: num(height),
+            preserveAspectRatio: "none",
+            href: node.href,
+          },
+          placed: true,
+        };
+      }
+
       break;
     }
 
