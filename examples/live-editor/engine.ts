@@ -18,7 +18,7 @@ import type {
   State,
   StorageError,
 } from "@svjeez/live";
-import { Effect, Layer, ManagedRuntime, Result, SubscriptionRef } from "effect";
+import { Effect, Layer, ManagedRuntime, Match, Result, SubscriptionRef } from "effect";
 import { font } from "svjeez";
 import type { StandardSchemaV1 } from "svjeez";
 import geistUrl from "./Geist-400.ttf?url";
@@ -39,32 +39,27 @@ export type Outcome<A> =
   | { readonly ok: false; readonly message: string };
 
 /** Every failure a session can report, as one line a person can read. */
-export const messageOf = (failure: Failure): string => {
-  switch (failure._tag) {
-    case "Denied":
-      return `Denied: ${failure.reason}`;
-    case "Rejected":
-      return `Rejected: ${failure.reason}`;
-    case "StorageError":
-      return `StorageError: ${failure.reason}`;
-    case "InvalidValue":
-      return `InvalidValue: ${failure.target}${failure.prop ? `.${failure.prop}` : ""}: ${failure.issue}`;
-    case "NotEditable":
-      return `NotEditable: ${failure.target}.${failure.prop} is read-only (${failure.reason}).`;
-    case "DuplicateId":
-      return `DuplicateId: "${failure.id}" is already used in this scope.`;
-    case "UnknownId":
-      return `UnknownId: nothing has the id "${failure.target}".`;
-    case "StaleSource":
-      return `StaleSource: ${failure.file} changed since the edit was planned.`;
-    case "CompileError":
-      return `CompileError: ${failure.file}:${failure.line}:${failure.col} ${failure.message}`;
-    case "ParseError":
-      return `ParseError: ${failure.file}:${failure.line}:${failure.col} ${failure.message}`;
-    case "RenderError":
-      return `RenderError: ${failure.message}${failure.node ? ` (at ${failure.node})` : ""}`;
-  }
-};
+export const messageOf = (failure: Failure): string =>
+  Match.value(failure).pipe(
+    Match.tagsExhaustive({
+      Denied: (failure) => `Denied: ${failure.reason}`,
+      Rejected: (failure) => `Rejected: ${failure.reason}`,
+      StorageError: (failure) => `StorageError: ${failure.reason}`,
+      InvalidValue: (failure) =>
+        `InvalidValue: ${failure.target}${failure.prop ? `.${failure.prop}` : ""}: ${failure.issue}`,
+      NotEditable: (failure) =>
+        `NotEditable: ${failure.target}.${failure.prop} is read-only (${failure.reason}).`,
+      DuplicateId: (failure) => `DuplicateId: "${failure.id}" is already used in this scope.`,
+      UnknownId: (failure) => `UnknownId: nothing has the id "${failure.target}".`,
+      StaleSource: (failure) => `StaleSource: ${failure.file} changed since the edit was planned.`,
+      CompileError: (failure) =>
+        `CompileError: ${failure.file}:${failure.line}:${failure.col} ${failure.message}`,
+      ParseError: (failure) =>
+        `ParseError: ${failure.file}:${failure.line}:${failure.col} ${failure.message}`,
+      RenderError: (failure) =>
+        `RenderError: ${failure.message}${failure.node ? ` (at ${failure.node})` : ""}`,
+    }),
+  );
 
 const HEX = /^#[0-9a-f]{6}$/i;
 
