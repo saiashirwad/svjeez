@@ -17,7 +17,7 @@ import {
 import { Argument, Command } from "effect/cli";
 import { HttpClient, HttpClientResponse } from "effect/http";
 import { ChildProcess, ChildProcessSpawner } from "effect/process";
-import { nextVersion, packageDirs, read, sharedVersion } from "./package-manifest.ts";
+import { nextVersion, packageDirs, publishable, sharedVersion } from "./package-manifest.ts";
 import { ScriptError } from "./errors.ts";
 import { run } from "./process.ts";
 import * as Services from "./services.ts";
@@ -27,16 +27,15 @@ const tagFor = (name: string, version: string) =>
 
 const distTag = (version: string) => (version.includes("-") ? "next" : "latest");
 
-const load = Effect.fn("load")(function* (dir: string) {
-  const path = yield* Path.Path;
-  const manifest = yield* read(dir);
-
-  if (!manifest.private) return Option.some({ dir, out: dir, manifest });
-
-  if (manifest.scripts?.["build:package"])
-    return Option.some({ dir, out: path.join(dir, "package-dist"), manifest });
-
-  return Option.none();
+const build = Effect.fn("build")(function* (pkg: { dir: string; out: string }) {
+  if (pkg.out !== pkg.dir)
+    yield* run(
+      ChildProcess.make({
+        cwd: pkg.dir,
+        stdin: "inherit",
+        stderr: "inherit",
+      })`bun run build:package`,
+    );
 });
 
 const published = Effect.fn("published")(function* (name: string) {
@@ -72,7 +71,7 @@ const pending = Effect.gen(function* () {
   const warn = (message: string) => Console.log(actions ? `::warning::${message}` : message);
 
   const packages = Array.getSomes(
-    yield* Effect.forEach(yield* packageDirs, load, { concurrency: "unbounded" }),
+    yield* Effect.forEach(yield* packageDirs, publishable, { concurrency: "unbounded" }),
   );
 
   const byName = new Map(packages.map((pkg) => [pkg.manifest.name, pkg]));
@@ -151,14 +150,7 @@ const publish = Command.make("publish", {}, () =>
         const { name, version } = pkg.manifest;
         const prerelease = version.includes("-");
 
-        if (pkg.out !== pkg.dir)
-          yield* run(
-            ChildProcess.make({
-              cwd: pkg.dir,
-              stdin: "inherit",
-              stderr: "inherit",
-            })`bun run build:package`,
-          );
+        yield* build(pkg);
 
         const tarball = path.join(
           tmp,
@@ -239,12 +231,12 @@ const claim = Command.make(
       const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
       const stdio = yield* Stdio.Stdio;
 
-      const pkg = yield* load(path.resolve(dir)).pipe(
+      const pkg = yield* publishable(path.resolve(dir)).pipe(
         Effect.flatMap(
           Effect.fromOption(
             () =>
               new ScriptError({
-                message: `${dir} is private and has no build:package script, so it isn't released.`,
+                message: `${dir} is private, so it isn't released.`,
               }),
           ),
         ),
@@ -270,8 +262,7 @@ const claim = Command.make(
       if (Option.isSome(yield* published(name)))
         yield* Console.log(`${name} is already on npm, so this only adds the trusted publisher.`);
       else {
-        if (pkg.out !== pkg.dir)
-          yield* run(ChildProcess.make({ cwd: pkg.dir, stderr: "inherit" })`bun run build:package`);
+        yield* build(pkg);
 
         const staged = yield* Effect.scoped(
           Effect.gen(function* () {
@@ -350,6 +341,24 @@ const claim = Command.make(
     }),
 );
 
+const preview = Command.make("preview", {}, () =>
+  Effect.gen(function* () {
+    const packages = Array.getSomes(
+      yield* Effect.forEach(yield* packageDirs, publishable, { concurrency: "unbounded" }),
+    );
+
+    yield* Effect.forEach(packages, build);
+
+    yield* run(
+      ChildProcess.make({
+        stdin: "inherit",
+        stdout: "inherit",
+        stderr: "inherit",
+      })`bun run pkg-pr-new publish --commentWithSha --packageManager=bun ${packages.map(({ out }) => out)}`,
+    );
+  }),
+);
+
 const version = Command.make(
   "version",
   {
@@ -400,6 +409,11 @@ Command.make("release").pipe(
     claim.pipe(
       Command.withDescription(
         "Stage a new package's first version on npm and trust release.yml to publish it",
+      ),
+    ),
+    preview.pipe(
+      Command.withDescription(
+        "Build every package and publish this commit's preview to pkg.pr.new",
       ),
     ),
     version.pipe(Command.withDescription("Move every package to the next version together")),

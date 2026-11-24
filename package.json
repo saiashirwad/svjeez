@@ -29,6 +29,7 @@
     "effect": "^4.1.4",
     "oxfmt": "0.75.0",
     "oxlint": "1.90.0",
+    "pkg-pr-new": "^0.0.94",
     "typescript": "latest"
   }
 }

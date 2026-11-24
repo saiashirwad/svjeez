@@ -68,6 +68,8 @@ Every script (build, release, check, codegen, one-off tasks) is an Effect progra
 
 Every package shares one version. `bun scripts/release.ts version next` bumps them all and `bun.lock` (`minor` and `major` start a new `-next.0` line, `stable` drops the suffix, or pass an exact version). Push to main, then run `gh workflow run release.yml --ref main`: prereleases go to npm's `next` tag, stable versions to `latest`.
 
-- A new package releases only when it has `build:package` and `test:package` scripts, a README and a `test/consumer` check (copy `packages/og`), and is in the `packages` matrix in `.github/workflows/ci.yml`. Otherwise the release skips it without failing.
+- Every package except `packages/bin` releases. An add-on's own `package.json` exports `src/`, so the workspace and `bun link` read source; its `build:package` writes the published package to `package-dist/`, which `publishConfig.directory` names and the release packs. Its `prepublishOnly` fails on purpose, so `npm publish` in the package folder can't ship `src/`.
+- A new package needs `build:package` and `test:package` scripts, `publishConfig.directory`, the `prepublishOnly` guard, a README and a `test/consumer` check (copy `packages/og`), and must be in the `packages` matrix in `.github/workflows/ci.yml`.
+- Every push also publishes every package to pkg.pr.new (`.github/workflows/preview.yml`, which runs `bun scripts/release.ts preview`): `bun add https://pkg.pr.new/svjeez@<sha>` or `@main` installs it with no npm release.
 - A package's first publish needs a person logged in to npm: `bun scripts/release.ts claim packages/<name>`, then approve the staged version on npmjs.com. An agent can't do that step.
 - A new version can take a few minutes to appear in `npm view`; a 404 right after the workflow passes isn't a failure. The workflow log's `Released` lines are the record.

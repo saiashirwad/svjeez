@@ -1,7 +1,6 @@
 {
   "name": "@svjeez/astro",
   "version": "0.8.0-next.2",
-  "private": true,
   "description": "Astro integration for svjeez: import a scene into a page and get an animated SVG, with poster stills.",
   "license": "MIT",
   "repository": {
@@ -21,11 +20,15 @@
       "types": "./client.d.ts"
     }
   },
+  "publishConfig": {
+    "directory": "package-dist"
+  },
   "scripts": {
     "test": "bun test --timeout 30000 --conditions @svjeez/source",
     "typecheck": "tsc --noEmit",
     "build:package": "bun ../../scripts/package-plugin.ts",
-    "test:package": "bun ../../scripts/package-plugin-check.ts"
+    "test:package": "bun ../../scripts/package-plugin-check.ts",
+    "prepublishOnly": "echo \"Publish package-dist instead: bun scripts/release.ts publishes it.\" >&2 && exit 1"
   },
   "dependencies": {
     "@svjeez/vite": "workspace:^"

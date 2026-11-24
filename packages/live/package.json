@@ -1,7 +1,6 @@
 {
   "name": "@svjeez/live",
   "version": "0.8.0-next.2",
-  "private": true,
   "description": "Read, edit and run a svjeez scene's source from a program: a parser, minimal-diff edits and a sandboxed compiler with pluggable runners. Headless and Effect-native.",
   "license": "MIT",
   "repository": {
@@ -13,11 +12,15 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "publishConfig": {
+    "directory": "package-dist"
+  },
   "scripts": {
     "test": "bun test --timeout 30000 --conditions @svjeez/source",
     "typecheck": "tsc --noEmit",
     "build:package": "bun ../../scripts/package-plugin.ts",
-    "test:package": "bun ../../scripts/package-plugin-check.ts"
+    "test:package": "bun ../../scripts/package-plugin-check.ts",
+    "prepublishOnly": "echo \"Publish package-dist instead: bun scripts/release.ts publishes it.\" >&2 && exit 1"
   },
   "dependencies": {
     "@lezer/common": "^1.5.4",

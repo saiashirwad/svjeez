@@ -9,6 +9,7 @@ export const Manifest = Schema.StructWithRest(
     name: Schema.String,
     version: Schema.String,
     private: Schema.optional(Schema.Boolean),
+    publishConfig: Schema.optional(Schema.Struct({ directory: Schema.optional(Schema.String) })),
     scripts: Strings,
     dependencies: Strings,
     peerDependencies: Strings,
@@ -25,6 +26,21 @@ export const read = Effect.fn("read")(function* (dir: string) {
   return yield* fs
     .readFileString(path.join(dir, "package.json"))
     .pipe(Effect.flatMap(Schema.decodeEffect(Schema.fromJsonString(Manifest))));
+});
+
+export const publishable = Effect.fn("publishable")(function* (dir: string) {
+  const path = yield* Path.Path;
+  const manifest = yield* read(dir);
+
+  if (manifest.private) return Option.none();
+
+  const directory = manifest.publishConfig?.directory;
+
+  return Option.some({
+    dir,
+    out: directory === undefined ? dir : path.join(dir, directory),
+    manifest,
+  });
 });
 
 export const packageDirs = Effect.gen(function* () {
@@ -138,7 +154,13 @@ export const writeManifest = Effect.fn("writeManifest")(function* <Target>(
     ),
   );
 
-  const { private: _, scripts: __, devDependencies: ___, ...manifest } = yield* read(dir);
+  const {
+    private: _,
+    publishConfig: __,
+    scripts: ___,
+    devDependencies: ____,
+    ...manifest
+  } = yield* read(dir);
 
   yield* fs.writeFileString(
     path.join(out, "package.json"),

@@ -1,7 +1,6 @@
 {
   "name": "@svjeez/fonts",
   "version": "0.8.0-next.2",
-  "private": true,
   "description": "Fonts for svjeez: Google Fonts by family name, cached on disk, and a bundled single-line handwriting font.",
   "license": "MIT",
   "repository": {
@@ -16,11 +15,15 @@
     "./fonts/EMSCasualHand.svg": "./src/fonts/EMSCasualHand.svg",
     "./fonts/EMSCasualHand-OFL.txt": "./src/fonts/EMSCasualHand-OFL.txt"
   },
+  "publishConfig": {
+    "directory": "package-dist"
+  },
   "scripts": {
     "test": "bun test --timeout 30000 --conditions @svjeez/source",
     "typecheck": "tsc --noEmit",
     "build:package": "bun ../../scripts/package-plugin.ts",
-    "test:package": "bun ../../scripts/package-plugin-check.ts"
+    "test:package": "bun ../../scripts/package-plugin-check.ts",
+    "prepublishOnly": "echo \"Publish package-dist instead: bun scripts/release.ts publishes it.\" >&2 && exit 1"
   },
   "devDependencies": {
     "@types/bun": "latest",

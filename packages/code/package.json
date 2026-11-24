@@ -1,7 +1,6 @@
 {
   "name": "@svjeez/code",
   "version": "0.8.0-next.2",
-  "private": true,
   "description": "Syntax-highlighted code for svjeez scenes: a <Code> node that colors Shiki tokens from the scene's palette and can type itself in.",
   "license": "MIT",
   "repository": {
@@ -15,11 +14,15 @@
     ".": "./src/index.ts",
     "./palettes": "./src/palettes.ts"
   },
+  "publishConfig": {
+    "directory": "package-dist"
+  },
   "scripts": {
     "test": "bun test --timeout 30000 --conditions @svjeez/source",
     "typecheck": "tsc --noEmit",
     "build:package": "bun ../../scripts/package-plugin.ts",
-    "test:package": "bun ../../scripts/package-plugin-check.ts"
+    "test:package": "bun ../../scripts/package-plugin-check.ts",
+    "prepublishOnly": "echo \"Publish package-dist instead: bun scripts/release.ts publishes it.\" >&2 && exit 1"
   },
   "dependencies": {
     "shiki": "4.5.0"

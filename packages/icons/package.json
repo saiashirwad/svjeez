@@ -1,7 +1,6 @@
 {
   "name": "@svjeez/icons",
   "version": "0.8.0-next.2",
-  "private": true,
   "description": "Tabler and Lucide icons for svjeez scenes: an <Icon> that draws, recolors and animates each piece.",
   "license": "MIT",
   "repository": {
@@ -16,12 +15,16 @@
     "./tabler": "./src/tabler.ts",
     "./lucide": "./src/lucide.ts"
   },
+  "publishConfig": {
+    "directory": "package-dist"
+  },
   "scripts": {
     "generate": "bun scripts/generate.ts",
     "test": "bun test --timeout 30000 --conditions @svjeez/source",
     "typecheck": "tsc --noEmit",
     "build:package": "bun ../../scripts/package-plugin.ts",
-    "test:package": "bun ../../scripts/package-plugin-check.ts"
+    "test:package": "bun ../../scripts/package-plugin-check.ts",
+    "prepublishOnly": "echo \"Publish package-dist instead: bun scripts/release.ts publishes it.\" >&2 && exit 1"
   },
   "devDependencies": {
     "@effect/platform-bun": "^4.1.4",

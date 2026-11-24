@@ -1,7 +1,6 @@
 {
   "name": "@svjeez/dom",
   "version": "0.8.0-next.2",
-  "private": true,
   "description": "Capture a live DOM subtree as a plain, versioned JSON Snapshot that svjeez can compile into a scene, or film a web app into one.",
   "license": "MIT",
   "repository": {
@@ -19,11 +18,15 @@
     "./react": "./src/frameworks/react.ts",
     "./svelte": "./src/frameworks/svelte.ts"
   },
+  "publishConfig": {
+    "directory": "package-dist"
+  },
   "scripts": {
     "test": "bun test --timeout 30000 --conditions @svjeez/source",
     "typecheck": "tsc --noEmit",
     "build:package": "bun ../../scripts/package-plugin.ts",
-    "test:package": "bun ../../scripts/package-plugin-check.ts"
+    "test:package": "bun ../../scripts/package-plugin-check.ts",
+    "prepublishOnly": "echo \"Publish package-dist instead: bun scripts/release.ts publishes it.\" >&2 && exit 1"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
