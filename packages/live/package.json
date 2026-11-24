@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/live",
-  "version": "0.8.0-next.2",
+  "version": "0.8.0-next.3",
   "description": "Read, edit and run a svjeez scene's source from a program: a parser, minimal-diff edits and a sandboxed compiler with pluggable runners. Headless and Effect-native.",
   "license": "MIT",
   "repository": {

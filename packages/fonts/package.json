@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/fonts",
-  "version": "0.8.0-next.2",
+  "version": "0.8.0-next.3",
   "description": "Fonts for svjeez: Google Fonts by family name, cached on disk, and a bundled single-line handwriting font.",
   "license": "MIT",
   "repository": {
