@@ -58,7 +58,7 @@ scene.clock("grow").follow(scrolled(card));
 
 - A clock has `seek(seconds)`, `progress(amount)` (0 to 1), `to(seconds)`, `play()` and `reverse()` (promises that run in real time and resolve false when something else moves the clock first), `pause()`, `time`, `over` and `follow(driver)`. A driver is a function `(progress) => stop`; `scrolled(el)` and `pointer(el, { axis })` are built in. Under reduced motion, `to()`, `play()` and `reverse()` jump straight to where they're going. Animations on the scene's own clock keep playing.
 - Everything animates on a clock. Mounting also takes over the SMIL inside it (a morph, a moving gradient, an animated effect, a text-path start), replacing it with attributes the clock sets; the `.svg` on its own still plays it.
-- Clocks don't nest, two `clock()` values can't share a name, and a track belongs to one clock.
+- Clocks nest as layers: a node belongs to its nearest clocked `<Sequence>`. The outer clock moves the outer nodes' own props (a group's transform or opacity), the inner clock moves the nodes inside, and transforms compose because they sit on different elements. The inner span starts at the outer start plus its own and must end inside the outer span. Two `clock()` values can't share a name, and a track belongs to one clock.
 
 ## Loops and seams
 

@@ -638,3 +638,109 @@ test("hosting again replaces the node, and slot() names the slots the SVG has", 
   );
   await page.close();
 });
+
+const body = clock("body", span(1, 1));
+const face = clock("face", span(0.2, 0.6));
+
+// A body that turns on one clock while its face, on another inside it, fades in and morphs.
+const nested = () =>
+  svg.emit(
+    scene({ size: [60, 60], duration: 4, title: "Nested clocks" }, () => (
+      <Sequence clock={body}>
+        <Group key="body" rotate={track(0).to(90, span(0, 1), ease.linear)}>
+          <Shape key="trunk" geometry={rect(20, 20)} fill="#0000ff" />
+          <Sequence clock={face}>
+            <Shape
+              key="eye"
+              at={[30, 30]}
+              geometry={track(rect(10, 10)).to(circle(5), span(0, 0.6), ease.linear)}
+              fill="#00ff00"
+              opacity={track(0).to(1, span(0, 0.6), ease.linear)}
+            />
+          </Sequence>
+        </Group>
+      </Sequence>
+    )),
+  );
+
+// The turn of the body and the opacity and shape of the eye.
+const PARTS = `
+  const numbers = (text) => text.replace(/-?\\d*\\.?\\d+(e-?\\d+)?/g, (n) => (+n).toFixed(3));
+  const eye = document.querySelector('[data-clock="face"]');
+  const shape = eye.localName === "path" ? eye : eye.querySelector("path");
+  return {
+    turn: numbers(getComputedStyle(document.querySelector('[data-clock="body"]')).rotate),
+    fade: numbers(getComputedStyle(eye).opacity),
+    morph: numbers(getComputedStyle(shape).getPropertyValue("d")),
+  };`;
+
+interface Parts {
+  readonly turn: string;
+  readonly fade: string;
+  readonly morph: string;
+}
+
+/** What page seek() shows of each part at scene `time`, with no clocks mounted. */
+const seen = async (markup: string, time: number) => {
+  const page = await page_(markup);
+  await run(page, `lib.seek(${time});`);
+  const out = await run<Parts>(page, PARTS);
+  await page.close();
+
+  return out;
+};
+
+test("a clock inside another moves its own nodes, each seeking apart and equal to seek()", async () => {
+  const markup = nested();
+  const page = await page_(markup);
+
+  await run(page, MOUNT);
+
+  expect(await run(page, "return [...scene.clocks.keys()];")).toEqual(["body", "face"]);
+  expect(await run(page, "return [scene.clock('body').over, scene.clock('face').over];")).toEqual([
+    1, 0.6,
+  ]);
+
+  // Both at scene time 1.5, then each away from the other: the body at 2, the face at 1.2 + 0.1.
+  const cases = [
+    { body: 0.5, face: 0.3 },
+    { body: 1, face: 0 },
+    { body: 0, face: 0.6 },
+  ];
+
+  for (const { body: at, face: inside } of cases) {
+    await run(page, `scene.clock('body').seek(${at}); scene.clock('face').seek(${inside});`);
+
+    const got = await run<Parts>(page, PARTS);
+    const [turned, shown] = [await seen(markup, 1 + at), await seen(markup, 1.2 + inside)];
+
+    expect(got.turn).toBe(turned.turn);
+    expect(got.fade).toBe(shown.fade);
+    expect(got.morph).toBe(shown.morph);
+  }
+
+  const [early, late] = [await seen(markup, 1.2), await seen(markup, 1.8)];
+
+  expect(early.fade).not.toBe(late.fade);
+  expect(early.morph).not.toBe(late.morph);
+  await page.close();
+});
+
+test("the outer clock does not move the inner one", async () => {
+  const page = await page_(nested());
+
+  await run(page, MOUNT);
+  await run(page, "scene.clock('face').seek(0.6);");
+
+  const before = await run<Parts>(page, PARTS);
+
+  await run(page, "scene.clock('body').seek(1);");
+
+  const after = await run<Parts>(page, PARTS);
+
+  expect(after.turn).not.toBe(before.turn);
+  expect(after.fade).toBe(before.fade);
+  expect(after.morph).toBe(before.morph);
+  expect(await run(page, "return scene.clock('face').time;")).toBe(0.6);
+  await page.close();
+});
