@@ -2,6 +2,7 @@ import { valueOf, type Channel, type ChannelValue, type ChannelValues } from "./
 import { easeAt } from "../model/ease-at";
 import { EPSILON, type Ease, type Seconds } from "../model/time";
 import { blendPaths } from "../model/paths";
+import { isNumber } from "../model/guards";
 
 export interface Key {
   readonly t: Seconds;
@@ -72,9 +73,6 @@ export const moving = (keys: readonly Key[], index: number): boolean => {
   return next !== undefined && !same(keys[index]!.values, next.values);
 };
 
-export const isNumber = (value: ChannelValue | undefined): value is number =>
-  typeof value === "number";
-
 const blend = (
   target: Channel,
   a: ChannelValue,
@@ -88,7 +86,7 @@ const blend = (
   return blendPaths(String(a), String(b), amount);
 };
 
-export const valueAt = (keys: readonly Key[], t: Seconds): ChannelValues => {
+export const channelsAt = (keys: readonly Key[], t: Seconds): ChannelValues => {
   const index = keys.findLastIndex((key) => key.t <= t + EPSILON);
   const [from, to] = [keys[index]!, keys[index + 1]];
 

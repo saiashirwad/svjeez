@@ -8,6 +8,7 @@ import { pair } from "../model/lane";
 import type { Curve } from "./spring";
 import { track, type Goal, type Layer, type LayerValues, type Track } from "./track";
 import { outlineOf, type Geometry } from "./values";
+import { isNumber, isArray } from "../model/guards";
 
 const REST = { offset: [0, 0], rotate: 0, scale: 1, skew: 0, opacity: 1 } as const;
 
@@ -271,10 +272,6 @@ const roundTo = (precision: number | undefined, what: string): ((value: number) 
   return (value) => Math.round(value * factor) / factor;
 };
 
-const isNumber = (value: number | Vec | Geometry): value is number => typeof value === "number";
-
-const isVec = (value: Vec | Geometry): value is Vec => Array.isArray(value);
-
 const measured = (outline: ReturnType<typeof outlineOf>) =>
   contoursOf(outline, outline.kind === "arc" ? 4 : undefined);
 
@@ -299,11 +296,11 @@ export function sampled<T extends number | Vec | Geometry>(
 
     if (isNumber(value)) return round(value);
 
-    return isVec(value) ? [round(value[0]), round(value[1])] : value;
+    return isArray(value) ? [round(value[0]), round(value[1])] : value;
   };
 
   const points = (value: number | Vec | Geometry, t: Seconds): number[][] => {
-    if (isNumber(value) || isVec(value)) {
+    if (isNumber(value) || isArray(value)) {
       const each = isNumber(value) ? [value] : [...value];
 
       if (!each.every(Number.isFinite))

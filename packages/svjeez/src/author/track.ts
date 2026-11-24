@@ -16,6 +16,7 @@ import {
   type Together,
   type ValuesOf,
 } from "./derived";
+import { isString } from "../model/guards";
 
 /** What a step of a track can go to: a point track can also go to an anchor, resolved after layout. */
 export type Goal<T> = T extends Vec ? T | Anchor : T;
@@ -39,14 +40,12 @@ export interface Track<T> {
 export type Anim<T> = T | Track<T> | Derived<T>;
 
 /** The curve a step takes unless told: keystrokes come at an even pace, so a string track's steps are linear. */
-const curveFor = <T>(value: T): Curve => (isText(value) ? ease.linear : DEFAULT_EASE);
-
-const isText = <T>(value: T): value is T & string => typeof value === "string";
+const curveFor = <T>(value: T): Curve => (isString(value) ? ease.linear : DEFAULT_EASE);
 
 // SAFETY: a step may hold an anchor where a point track expects a point; goals.ts resolves it before any mix sees it, and readOf refuses it anywhere else.
 const stored = <T>(goal: Goal<T>): T => goal as T;
 
-export class ValueTrack<T> implements Track<T> {
+class ValueTrack<T> implements Track<T> {
   readonly passage: Passage<{ readonly value: T }>;
   readonly #last: Span | undefined;
 

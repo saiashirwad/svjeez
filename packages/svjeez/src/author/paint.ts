@@ -18,6 +18,7 @@ import { noMix, same, type Mix } from "../model/steps";
 import type { Child } from "./nodes";
 import type { Anim } from "./track";
 import type { Color, Paint } from "./values";
+import { isArray } from "../model/guards";
 
 export type Stops = readonly Color[] | readonly (readonly [offset: number, color: Color])[];
 
@@ -80,9 +81,6 @@ export interface RadialAcrossOptions {
   readonly stops: Stops;
 }
 
-const isPair = (stop: Color | readonly [number, Color]): stop is readonly [number, Color] =>
-  Array.isArray(stop);
-
 const finite = (point: Vec): boolean => point.every((value) => Number.isFinite(value));
 
 const checked = (stops: Stops, caller: string): Stops => {
@@ -90,7 +88,7 @@ const checked = (stops: Stops, caller: string): Stops => {
     throw new SceneError(
       `${caller} needs two stops or more, got ${stops.length}. For one color, fill with the color itself.`,
     );
-  const pairs = stops.filter(isPair);
+  const pairs = stops.filter(isArray);
 
   if (pairs.length !== 0 && pairs.length !== stops.length)
     throw new SceneError(
@@ -128,8 +126,6 @@ export const linear = Object.assign(
   },
 );
 
-const isVec = (value: Place | Vec): value is Vec => Array.isArray(value);
-
 export const radial = Object.assign(
   ({ center, radius, stops }: RadialOptions): Gradient => {
     if (!finite(center))
@@ -142,7 +138,7 @@ export const radial = Object.assign(
   },
   {
     across: ({ center = "center", fit = "cover", stops }: RadialAcrossOptions): Gradient => {
-      if (isVec(center) && !finite(center))
+      if (isArray(center) && !finite(center))
         throw new SceneError(
           `radial.across() needs a finite fractional center, got [${center.join(", ")}].`,
         );
@@ -189,7 +185,7 @@ export const gradientOf = (
   where: string,
 ): ModelGradient => {
   const pairs = given.stops.map((stop, i): Stop => {
-    const [offset, value] = isPair(stop) ? stop : [i / (given.stops.length - 1), stop];
+    const [offset, value] = isArray(stop) ? stop : [i / (given.stops.length - 1), stop];
 
     return { offset, color: color(value) };
   });
@@ -229,7 +225,7 @@ export const gradientOf = (
     return { kind: "radial", center: given.center, radius: given.radius, stops: pairs };
   const area = measured("radial.across()");
 
-  const center: Vec = isVec(given.center)
+  const center: Vec = isArray(given.center)
     ? [area.x + given.center[0] * area.width, area.y + given.center[1] * area.height]
     : placeIn(area, given.center, [0, 0], "radial.across()");
 

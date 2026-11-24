@@ -15,8 +15,9 @@ import {
   type Sfnt,
 } from "./sfnt";
 import { readSource } from "../author/source";
+import { base64 } from "../model/base64";
 
-export type FontFormat = "ttf" | "otf" | "woff" | "woff2";
+type FontFormat = "ttf" | "otf" | "woff" | "woff2";
 
 /** What a font file is, or `"system"` for a family the viewer already has. */
 export type FontKind = FontFormat | "system";
@@ -24,8 +25,6 @@ export type FontKind = FontFormat | "system";
 /** How CSS spells a face's slant. */
 export const cssFontStyle = (face: { readonly italic: boolean }): "normal" | "italic" =>
   face.italic ? "italic" : "normal";
-
-export type { Metrics as FontMetrics };
 
 export interface FontOptions {
   readonly family?: string;
@@ -62,7 +61,7 @@ export interface PathOptions {
   readonly y?: number;
 }
 
-export interface GlyphPath {
+interface GlyphPath {
   readonly char: string;
   readonly d: string;
   readonly x: number;
@@ -93,16 +92,6 @@ const FORMATS: Readonly<Record<FontFormat, Format>> = {
   otf: { mime: "font/otf", css: "opentype", matches: (t) => t === SFNT_CFF },
   woff: { mime: "font/woff", css: "woff", matches: (t) => t === tag("wOFF") },
   woff2: { mime: "font/woff2", css: "woff2", matches: (t) => t === tag("wOF2") },
-};
-
-const base64 = (bytes: Uint8Array): string => {
-  const CHUNK = 0x8000;
-  let binary = "";
-
-  for (let at = 0; at < bytes.length; at += CHUNK)
-    binary += String.fromCharCode(...bytes.subarray(at, at + CHUNK));
-
-  return btoa(binary);
 };
 
 const hash = (bytes: Uint8Array): string => {

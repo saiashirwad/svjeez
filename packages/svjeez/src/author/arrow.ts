@@ -9,6 +9,8 @@ import { ease } from "./spring";
 import type { Connect } from "./settle";
 import type { Anim } from "./track";
 import { lookOf, paintedBoxOf } from "../model/painted";
+import { isNumber } from "../model/guards";
+import { add } from "../model/vec";
 
 export interface ArrowProps extends Omit<
   Common,
@@ -33,8 +35,6 @@ const turn = ([x, y]: Vec, degrees: number): Vec => {
 
   return [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)];
 };
-
-const add = (a: Vec, b: Vec): Vec => [a[0] + b[0], a[1] + b[1]];
 
 const bow = (bend: number): readonly [Vec, Vec, Vec, Vec] => {
   const control: Vec = [0.5, bend];
@@ -252,10 +252,9 @@ const connect =
     };
 
     const depth = size * Math.cos(SPREAD);
-    const lengthAt = (t: Seconds): number => pose(t).length * path.total;
 
     const shownAt = (t: Seconds): boolean => {
-      const length = lengthAt(t);
+      const length = pose(t).length * path.total;
       const [a, b] = valueAt(trim, t, blendVec);
 
       return length > EPSILON && (b - a) * length >= Math.min(depth, length) - EPSILON;
@@ -374,8 +373,6 @@ const connect =
       ),
     ];
   };
-
-const isNumber = (value: Anim<number>): value is number => typeof value === "number";
 
 export const Arrow = (props: ArrowProps): SceneElement => {
   const label = "<Arrow>";

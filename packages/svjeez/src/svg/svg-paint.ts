@@ -14,7 +14,6 @@ import type {
   Gradient,
   Lane,
   Pattern,
-  Rgba,
   Scene,
   SceneNode,
   ShapeNode,
@@ -23,6 +22,7 @@ import type {
 import { atRest, isLane, mapLane } from "../model/lane";
 import { blendNumber, valueAt } from "../model/sample";
 import { mixNumber, same } from "../model/steps";
+import { isArray } from "../model/guards";
 
 export interface Defs {
   readonly scene: Scene;
@@ -40,8 +40,6 @@ export interface Defs {
   readonly draw: (node: SceneNode) => SvgNode;
 }
 
-const isRgba = (color: Color): color is Rgba => Array.isArray(color);
-
 const byte = (unit: number): string =>
   Math.round(Math.min(1, Math.max(0, unit)) * 255)
     .toString(16)
@@ -49,7 +47,7 @@ const byte = (unit: number): string =>
     .toUpperCase();
 
 export const colorText = (color: Color): CssColor =>
-  isRgba(color)
+  isArray(color)
     ? `#${byte(color[0])}${byte(color[1])}${byte(color[2])}${color[3] < 1 ? byte(color[3]) : ""}`
     : `var(--${color.name})`;
 
@@ -328,7 +326,7 @@ const idle = (effect: Effect): boolean => {
     case "shadow":
       return (
         (!isLane(effect.opacity) && effect.opacity <= 0) ||
-        (!isLane(effect.color) && isRgba(effect.color) && effect.color[3] <= 0)
+        (!isLane(effect.color) && isArray(effect.color) && effect.color[3] <= 0)
       );
   }
 };

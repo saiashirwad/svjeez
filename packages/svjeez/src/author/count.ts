@@ -20,6 +20,7 @@ import type { Anim } from "./track";
 import type { SceneElement, TextChild } from "./nodes";
 import { layoutRuns, type TextAlign } from "./text";
 import { isTyped, type Typed } from "./typed";
+import { isArray, isObject, isString } from "../model/guards";
 
 /** How a number is written: any function from the number to its text. */
 export type NumberFormat = (value: number) => string;
@@ -54,7 +55,7 @@ export const count = (value: Anim<number>, options: CountOptions = {}): Count =>
   rate: options.rate ?? 30,
 });
 
-export const isCount = (value: unknown): value is Count =>
+export const isCount = (value: TextContent): value is Count =>
   typeof value === "object" && value !== null && "kind" in value && value.kind === "count";
 
 const DIGITS = "0123456789";
@@ -118,19 +119,17 @@ export interface Counting {
   readonly after: string;
 }
 
-const isList = (content: TextContent): content is readonly TextContent[] => Array.isArray(content);
-
-const isWords = (content: TextContent): content is string | number =>
+export const isWords = (content: TextContent): content is string | number =>
   typeof content === "string" || typeof content === "number";
 
-const isWord = (item: string | Count | Typed | SceneElement): item is string =>
-  typeof item === "string";
+export const isElement = (content: TextContent): content is SceneElement =>
+  isObject(content) && !isArray(content) && !isCount(content) && !isTyped(content);
 
 /** A <Text>'s content as one list: its strings, elements, count()s and typed()s, in order. */
 export const flatten = (content: TextContent): (string | Count | Typed | SceneElement)[] => {
   if (content === undefined || content === null || content === false) return [];
 
-  if (isList(content)) return content.flatMap(flatten);
+  if (isArray(content)) return content.flatMap(flatten);
 
   if (isWords(content)) return [String(content)];
 
@@ -155,7 +154,7 @@ export const countingIn = (content: TextContent, where: string): Counting | unde
       "Style the whole <Text>, or put the styled words in a <Text> beside it.",
     );
 
-  if (items.some((item) => !isWord(item) && !isCount(item)))
+  if (items.some((item) => !isString(item) && !isCount(item)))
     throw new SceneError(
       `${where} counts, so it holds strings around its count() and no <Run>s.`,
       "Style the whole <Text>, or put the styled words in a <Text> beside it.",

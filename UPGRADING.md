@@ -17,6 +17,7 @@
 - **Refs.** `ref("card")` is `ref()`: a ref is a handle with no name and moves nothing. A ref only makes a handle, so there is no unattached-ref check; an anchor of a ref that is on no node throws at layout, with the ref's source. The node it is on keeps its own `key` (add `key="card"` where a morph or a part path used the old one). Errors and checks name that node. The diagrams' `name` option is gone.
 - **Params.** `svjeez/params` is gone: `param` comes from the root (`param.number`, `param.count`, `param.seconds`, `param.color`, `param.easing`, `param.choice`, `param.text`, `param.list`), and `defaults`, `parse` and the param types come from `svjeez/tools`. `import { number } from "svjeez/params"` is `param.number(…)`.
 - **Span types.** `Span` is the type `span()` returns, and `OpenSpan` the open one; `svjeez/tools` no longer exports `Spanned` or `OpenSpanned`.
+- **Text layout.** `svjeez/tools` no longer exports `layoutText`, `layoutRuns`, `fitSizeForRuns`, `nodeName` or the types that described their results (`LaidLine`, `LaidRun`, `TextLayout`, `TextLayoutOptions`, `TextPiece`). Lay text out with `<Text>`, and read where it landed with `boxesOf(scene, t)`.
 - **Names.** One name per idea; each old name is a type error.
   - Stroke: cap `"butt"` is `"flat"`; join `"miter"` and `"bevel"` are `"sharp"` and `"flat"`; `nonScaling` is `fixedWidth`.
   - Geometry: `pathData(d)` is `path.parse(text)`; `polyline(pts)` is `line(...points)` (two or more points); `polygon(pts)` is `polygon(...points)`, variadic like `line`.

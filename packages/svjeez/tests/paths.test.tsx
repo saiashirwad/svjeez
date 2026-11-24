@@ -2,7 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { Shape, ease, path, sampled, scene, span, track, type SceneElement } from "svjeez";
 import { svg } from "svjeez/tools";
 import { contoursOf } from "../src/model/geometry";
-import { blendPaths, commandsOf, matchRings, ringsOf, type Ring } from "../src/model/paths";
+import { blendPaths, matchRings, ringsOf, type Ring } from "../src/model/paths";
+import { segments } from "../src/model/pathTokens";
 
 const emit = (build: () => SceneElement, still?: number | false) =>
   svg.emit(
@@ -146,6 +147,10 @@ describe("sampled with path data", () => {
 describe("blendPaths", () => {
   test("reads packed arc flags as two flags", () => {
     expect(blendPaths("M0 0a5 5 0 1010 0", "M10 0a5 5 0 1010 0", 0.5)).toBe("M5 0a5 5 0 1 0 10 0");
-    expect(commandsOf("M0 0a5 5 0 1010 0")).toBe("M##a#######");
+    expect(
+      segments("M0 0a5 5 0 1010 0")
+        .map((s) => s.letter + "#".repeat(s.numbers.length))
+        .join(""),
+    ).toBe("M##a#######");
   });
 });

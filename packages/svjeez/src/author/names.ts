@@ -1,7 +1,5 @@
 import type { Source } from "../model/ir";
-import type { SceneElement } from "./nodes";
-import { isCount, type TextContent } from "./count";
-import { isTyped } from "./typed";
+import { isElement, isWords, type TextContent } from "./count";
 import { SceneError, located, type Where } from "../model/scene-error";
 import { thrownFrom } from "../svg/traced";
 import { sourceFrom } from "./identity";
@@ -70,16 +68,6 @@ export const quoted = (words: string): string => {
 
   return JSON.stringify(flat.length > SHORT ? `${flat.slice(0, SHORT - 1)}…` : flat);
 };
-
-const isElement = (child: TextContent): child is SceneElement =>
-  typeof child === "object" &&
-  child !== null &&
-  !Array.isArray(child) &&
-  !isCount(child) &&
-  !isTyped(child);
-
-const isWords = (child: TextContent): child is string | number =>
-  typeof child === "string" || typeof child === "number";
 
 export const wordsOf = (children: TextContent): string => {
   if (isWords(children)) return String(children);

@@ -5,6 +5,7 @@ import { contoursOf } from "../model/geometry";
 import { arcToCubics, ringsOf } from "../model/paths";
 import type { Contour, Cubic, Geometry as Outline, Rgba, Vec } from "../model/ir";
 import type { Gradient, Pattern } from "./paint";
+import { isArray } from "../model/guards";
 
 export type { Hex };
 
@@ -114,13 +115,9 @@ export interface RectOptions {
   readonly radius?: number | readonly [number, number, number, number];
 }
 
-const isEach = (
-  radius: number | readonly [number, number, number, number],
-): radius is readonly [number, number, number, number] => Array.isArray(radius);
-
 export const rect = (width: number, height: number, options: RectOptions = {}): Geometry => {
   const radius = options.radius ?? 0;
-  const each = isEach(radius) ? radius : ([radius, radius, radius, radius] as const);
+  const each = isArray(radius) ? radius : ([radius, radius, radius, radius] as const);
   const most = Math.min(positive(width, "rect()"), positive(height, "rect()")) / 2;
 
   return {

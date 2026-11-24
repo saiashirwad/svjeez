@@ -4,7 +4,8 @@ import { isLane } from "../model/lane";
 import { nodeName } from "../model/naming";
 import { mixNumber, mixVec, same, type Mix } from "../model/steps";
 import type { Seconds } from "../model/time";
-import { layerMatrix, times, valueAt, type Matrix, type Placed } from "./boxes";
+import { layerMatrix, times, type Matrix, type Placed } from "./boxes";
+import { valueAt } from "../model/sample";
 import { VISIBLE, add, isGone, isLeaf, label, type Survey } from "./inspect-context";
 import {
   SCHEMES,
@@ -126,13 +127,11 @@ const vecGap = (name: string, b: Vec, a: Vec, scale: number): string | undefined
   return by > 0.5 ? `its ${name} moves it ${units(by)}` : undefined;
 };
 
-/** A value as the seam sees it: a lane that loops on its own period counts as its value at 0. */
-const seamAt = <T>(value: Animated<T>, t: Seconds, mix: Mix<T>): T =>
-  valueAt(value, isLane(value) && value.period !== undefined ? 0 : t, mix);
-
 /** What all of a node's layers come to at `t`: the transform they make, and each kind of value combined. */
 const composed = (node: SceneNode, t: Seconds) => {
-  const at = <T>(value: Animated<T>, mix: Mix<T>): T => seamAt(value, t, mix);
+  /** A value as the seam sees it: a lane that loops on its own period counts as its value at 0. */
+  const at = <T>(value: Animated<T>, mix: Mix<T>): T =>
+    valueAt(value, isLane(value) && value.period !== undefined ? 0 : t, mix);
 
   const still = node.layers.map((layer) => ({
     offset: at(layer.offset, mixVec),

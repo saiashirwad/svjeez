@@ -4,15 +4,14 @@ import { num } from "../model/format";
 import { moving, type Key } from "./keys";
 import type { Seconds } from "../model/time";
 import { element, type SvgNode } from "./tree";
-
-const isNumeric = (value: ChannelValues[Channel]): value is number => typeof value === "number";
+import { isNumber } from "../model/guards";
 
 const lerp = (
   from: ChannelValues[Channel],
   to: ChannelValues[Channel],
   amount: number,
 ): ChannelValues[Channel] =>
-  isNumeric(from) && isNumeric(to) ? from + (to - from) * amount : amount < 1 ? from : to;
+  isNumber(from) && isNumber(to) ? from + (to - from) * amount : amount < 1 ? from : to;
 
 interface Point {
   t: Seconds;

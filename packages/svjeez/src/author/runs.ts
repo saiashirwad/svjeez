@@ -2,8 +2,9 @@ import { SceneError } from "../model/scene-error";
 import { Font, FontFamily, type FontValue } from "../font/font";
 import type { Face } from "../model/ir";
 import type { RunProps, RunStyle, SceneElement } from "./nodes";
-import { isCount, type TextContent } from "./count";
+import { isCount, isElement, isWords, type TextContent } from "./count";
 import { isTyped } from "./typed";
+import { isArray } from "../model/guards";
 
 export type Asked = RunStyle & Required<Pick<RunStyle, "font">>;
 
@@ -13,20 +14,8 @@ export interface AskedPiece {
   readonly advances?: readonly number[];
 }
 
-const isList = (child: TextContent): child is readonly TextContent[] => Array.isArray(child);
-
-const isWords = (child: TextContent): child is string | number =>
-  typeof child === "string" || typeof child === "number";
-
 const isRun = (child: SceneElement): child is { readonly type: "run"; readonly props: RunProps } =>
   child.type === "run";
-
-const isElement = (child: TextContent): child is SceneElement =>
-  typeof child === "object" &&
-  child !== null &&
-  !isList(child) &&
-  !isCount(child) &&
-  !isTyped(child);
 
 const over = (style: Asked, run: RunProps): Asked => ({
   ...style,
@@ -41,7 +30,7 @@ const over = (style: Asked, run: RunProps): Asked => ({
 const wordsOf = (child: TextContent): string | undefined => {
   if (isWords(child)) return String(child);
 
-  return isList(child) && child.every(isWords) ? child.join("") : undefined;
+  return isArray(child) && child.every(isWords) ? child.join("") : undefined;
 };
 
 const measured = (run: RunProps, style: Asked, where: string): AskedPiece[] => {
@@ -86,7 +75,7 @@ export const piecesOf = (children: TextContent, style: Asked, where: string): As
 
   if (isWords(children)) return [{ text: String(children), asked: style }];
 
-  if (isList(children)) return children.flatMap((child) => piecesOf(child, style, where));
+  if (isArray(children)) return children.flatMap((child) => piecesOf(child, style, where));
 
   if (isElement(children) && isRun(children) && children.props.advances !== undefined)
     return measured(children.props, style, where);

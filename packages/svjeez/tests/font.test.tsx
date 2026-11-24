@@ -6,7 +6,7 @@ import { validateSvg } from "svjeez/frames";
 import { contours, pathData } from "../src/font/glyf";
 import { required, sfnt, u16 } from "../src/font/sfnt";
 import { typesetter } from "../src/font/shape";
-import { subset } from "../src/font/subset";
+import { subsetWithReason } from "../src/font/subset";
 import { fontFixture, type FixtureFont } from "../../../fixtures/fonts";
 
 const sans = await font.load(fontFixture("ABeeZee-Regular"));
@@ -280,7 +280,7 @@ describe("embedding", () => {
     const real = typesetter(parsed);
     const clef = "\u{1d11e}";
     const remapped = { ...real, glyph: (char: string) => real.glyph(char === clef ? "H" : char) };
-    const cut = font(subset(bytes, parsed, remapped, [`${clef}i`])!);
+    const cut = font(subsetWithReason(bytes, parsed, remapped, [`${clef}i`]).bytes!);
     expect(cut.has(clef) && cut.has("i")).toBe(true);
     expect(cut.has("H")).toBe(false);
   });
@@ -310,7 +310,7 @@ describe("subset", () => {
   test("renumbers the kept glyphs and keeps every advance and the kerning of adjacent pairs", async () => {
     const { bytes, parsed, real } = await load("ABeeZee-Regular");
     const texts = ["To AVA", "Wave"];
-    const cut = sfnt(subset(bytes, parsed, real, texts)!);
+    const cut = sfnt(subsetWithReason(bytes, parsed, real, texts).bytes!);
     const mine = typesetter(cut, false);
     const chars = [...new Set(texts.join(""))];
 
@@ -356,7 +356,7 @@ describe("subset", () => {
 
   test("a composite glyph keeps its components, renumbered, and draws the same outline", async () => {
     const { bytes, parsed, real } = await load("SpaceMono-Regular");
-    const cut = sfnt(subset(bytes, parsed, real, ["é"])!);
+    const cut = sfnt(subsetWithReason(bytes, parsed, real, ["é"]).bytes!);
     const mine = typesetter(cut, false);
 
     expect(u16(cut, required(cut, "maxp") + 4)).toBeGreaterThan(2);

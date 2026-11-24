@@ -11,6 +11,7 @@ import { blendNumber, blendVec, breaksOf, follow, laneFrom, valueAt } from "../m
 import { isTrack } from "./track";
 import { lookOf, paintedBoxOf } from "../model/painted";
 import { PLACE_LIST, PLACES, homed, homeOf, pinned, type TextAnchorPlace } from "./pin";
+import { isArray, isPoint } from "../model/guards";
 
 const laidOut = <T>(names: Names, key: string, run: () => T): T => {
   try {
@@ -25,7 +26,7 @@ export interface Size {
   readonly height?: number;
 }
 
-export interface ChildMeta {
+interface ChildMeta {
   readonly name: string;
   readonly baseline?: number;
 }
@@ -281,8 +282,6 @@ export const around = (
 
 export type Origin = Place | Vec | "at" | { readonly frame: Vec };
 
-const isOffset = (origin: Origin): origin is Vec => Array.isArray(origin);
-
 const isFrameOrigin = (origin: Origin): origin is { readonly frame: Vec } =>
   typeof origin === "object" && origin !== null && !Array.isArray(origin) && "frame" in origin;
 
@@ -297,7 +296,7 @@ export const originOf = (
 
   if (origin === "at") return home();
 
-  if (isOffset(origin)) return [box.x + origin[0], box.y + origin[1]];
+  if (isArray(origin)) return [box.x + origin[0], box.y + origin[1]];
 
   if (isFrameOrigin(origin)) {
     if (!isPoint(origin.frame))
@@ -391,9 +390,6 @@ const inward = (
 };
 
 const TOLERANCE = 0.05;
-
-const isPoint = (end: unknown): end is Vec =>
-  Array.isArray(end) && end.length === 2 && end.every((n) => Number.isFinite(n));
 
 export const settle = <G extends SceneNode & { readonly kind: "group" }>(
   root: G,

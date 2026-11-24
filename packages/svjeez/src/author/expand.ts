@@ -3,11 +3,11 @@ import { SceneError, located } from "../model/scene-error";
 import type { Seconds } from "../model/time";
 import { componentName } from "../jsx-runtime";
 import { componentMeta, scopedAs, withId } from "./component";
-import { isCount, type TextContent } from "./count";
+import { isElement, type TextContent } from "./count";
 import { sourced, sourceFrom, writtenAt } from "./identity";
 import { flat, type Child, type Common, type SceneElement, type TextChild } from "./nodes";
 import { scoped, within } from "./scope";
-import { isTyped } from "./typed";
+import { isString } from "../model/guards";
 
 type Call = Extract<SceneElement, { readonly type: "call" }>;
 
@@ -64,14 +64,12 @@ export const propsOf = <P>(
   // SAFETY: a call of `component` was written with its props.
   element.type === "call" && element.component === component ? (element.props as P) : undefined;
 
-const isText = (value: unknown): value is string => typeof value === "string";
-
 const run = (call: Call): SceneElement => {
   const { component, props, key, scope } = call;
   const at = writtenAt(call);
   const name = componentName(component);
   const given = key === undefined ? props : { ...props, key };
-  const id = "id" in props && isText(props.id) ? props.id : undefined;
+  const id = "id" in props && isString(props.id) ? props.id : undefined;
 
   try {
     return within(scope, () => {
@@ -97,13 +95,6 @@ const run = (call: Call): SceneElement => {
     });
   }
 };
-
-const isElement = (child: TextContent): child is SceneElement =>
-  typeof child === "object" &&
-  child !== null &&
-  !Array.isArray(child) &&
-  !isCount(child) &&
-  !isTyped(child);
 
 function inText(child: TextChild): TextChild;
 function inText(child: TextContent): TextContent;

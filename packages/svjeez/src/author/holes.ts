@@ -2,6 +2,7 @@ import { SceneError } from "../model/scene-error";
 import { contoursOf } from "../model/geometry";
 import type { Contour, Geometry as Outline, Vec } from "../model/ir";
 import { outlineOf, type Geometry } from "./values";
+import { add } from "../model/vec";
 
 const PIECES = 24;
 
@@ -117,8 +118,6 @@ const closed = (outline: Outline, what: string): Contour[] => {
   return contours;
 };
 
-const plus = ([x, y]: Vec, [dx, dy]: Vec): Vec => [x + dx, y + dy];
-
 export const moved = (geometry: Geometry, by: Vec): Outline => {
   const outline = outlineOf(geometry);
 
@@ -127,16 +126,16 @@ export const moved = (geometry: Geometry, by: Vec): Outline => {
 
   switch (outline.kind) {
     case "line":
-      return { ...outline, from: plus(outline.from, by), to: plus(outline.to, by) };
+      return { ...outline, from: add(outline.from, by), to: add(outline.to, by) };
     case "points":
-      return { ...outline, points: outline.points.map((point) => plus(point, by)) };
+      return { ...outline, points: outline.points.map((point) => add(point, by)) };
     default:
       return {
         kind: "path",
         contours: contoursOf(outline).map((contour) => ({
-          start: plus(contour.start, by),
+          start: add(contour.start, by),
           curves: contour.curves.map(
-            ([c1, c2, to]) => [plus(c1, by), plus(c2, by), plus(to, by)] as const,
+            ([c1, c2, to]) => [add(c1, by), add(c2, by), add(to, by)] as const,
           ),
           closed: contour.closed,
         })),

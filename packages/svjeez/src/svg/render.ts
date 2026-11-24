@@ -25,7 +25,7 @@ export interface RenderOptions {
   readonly share?: boolean;
 }
 
-export interface RootFont {
+interface RootFont {
   readonly family?: FontValue;
   readonly weight?: number;
   readonly italic?: boolean;

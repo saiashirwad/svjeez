@@ -55,18 +55,7 @@ export type {
 
 export type { ArrowProps } from "./author/arrow";
 
-export {
-  fitSizeForRuns,
-  layoutRuns,
-  layoutText,
-  type LaidLine,
-  type LaidRun,
-  type TextAlign,
-  type TextFitOptions,
-  type TextLayout,
-  type TextLayoutOptions,
-  type TextPiece,
-} from "./author/text";
+export type { TextAlign, TextFitOptions } from "./author/text";
 
 export type { Ease, Seconds } from "./model/time";
 
@@ -94,13 +83,13 @@ export type { AdjustOptions, DisplaceOptions, Effect, ShadowOptions } from "./au
 
 export type { MorphOptions } from "./author/morph";
 
-export { boxesOf, hitTest, placements, valueAt, type Matrix, type Placed } from "./check/boxes";
+export { boxesOf, hitTest, placements, type Matrix, type Placed } from "./check/boxes";
+
+export { valueAt } from "./model/sample";
 
 export { isScene } from "./model/is-scene";
 
 export { SceneError, type Where } from "./model/scene-error";
-
-export { nodeName } from "./model/naming";
 
 export {
   RULES,

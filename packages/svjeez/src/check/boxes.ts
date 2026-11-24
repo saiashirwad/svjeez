@@ -1,9 +1,10 @@
 import type { Seconds } from "../model/time";
 import { boundsOfPoints, boxCorners, mixGeometry, outlineBoxOf } from "../model/geometry";
 import type { Animated, Box, Geometry, Layer, Scene, SceneNode, Source, Vec } from "../model/ir";
-import { valueAt as sampleAt } from "../model/sample";
-import { mixNumber, mixVec, type Mix } from "../model/steps";
+import { valueAt } from "../model/sample";
+import { mixNumber, mixVec } from "../model/steps";
 import { lookOf, paintedBoxOf } from "../model/painted";
+import { isArray } from "../model/guards";
 
 export type Matrix = readonly [a: number, b: number, c: number, d: number, e: number, f: number];
 
@@ -50,9 +51,6 @@ export const inverse = (m: Matrix): Matrix | undefined => {
     (m[1] * m[4] - m[0] * m[5]) / det,
   ];
 };
-
-export const valueAt = <T>(value: Animated<T>, t: Seconds, mix: Mix<T>, where = "a lane"): T =>
-  sampleAt(value, t, (a, b, amount) => mix(a, b, amount, where));
 
 const number = (value: Animated<number>, t: Seconds): number => valueAt(value, t, mixNumber);
 
@@ -179,7 +177,7 @@ export const hitTest = (
   point: Vec,
   at: Seconds = 0,
 ): Placed | undefined => {
-  const list = isPlacedList(scene) ? scene : placements(scene, at);
+  const list = isArray(scene) ? scene : placements(scene, at);
 
   return list.findLast((placed) => {
     if (placed.depth === 0 || placed.opacity <= 1e-6) return false;
@@ -188,6 +186,3 @@ export const hitTest = (
     return back !== undefined && inside(placed.frame, apply(back, point));
   });
 };
-
-const isPlacedList = (value: Scene | readonly Placed[]): value is readonly Placed[] =>
-  Array.isArray(value);

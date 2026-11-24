@@ -42,7 +42,7 @@ const groups = (pairs: readonly (readonly [number, number])[]): Group[] => {
   return merged;
 };
 
-export const charMap = (pairs: readonly (readonly [number, number])[]): Uint8Array => {
+const charMap = (pairs: readonly (readonly [number, number])[]): Uint8Array => {
   const all = groups(pairs);
 
   const segments: Group[] = [
@@ -523,11 +523,3 @@ export const subsetWithReason = (
 
   return { bytes: assemble(tables) };
 };
-
-export const subset = (
-  bytes: Uint8Array,
-  f: Sfnt,
-  typesetter: Typesetter,
-  texts: readonly string[],
-  layout = true,
-): Uint8Array | undefined => subsetWithReason(bytes, f, typesetter, texts, layout).bytes;

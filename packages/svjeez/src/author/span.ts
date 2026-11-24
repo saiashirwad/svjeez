@@ -6,7 +6,7 @@ export interface Interval {
   readonly over: Seconds;
 }
 
-export interface OpenInterval {
+interface OpenInterval {
   readonly start: Seconds;
   readonly over?: undefined;
 }
@@ -16,7 +16,7 @@ export type When = Interval | OpenInterval;
 export const isWhen = (when: When | Seconds | null | undefined): when is When =>
   typeof when === "object" && when !== null && Number.isFinite(when.start);
 
-export type Spans<N extends number, Done extends Span[] = []> = number extends N
+type Spans<N extends number, Done extends Span[] = []> = number extends N
   ? Span[]
   : Done["length"] extends N
     ? Done

@@ -9,7 +9,7 @@ import { parseArgs } from "node:util";
 import { examine } from "./check/report";
 import { costOf, type Cost } from "./svg/cost";
 import { checkPixels, renderFrames, type FrameTimes } from "./frames";
-import { parse, type Json, type JsonObject, type Param, type Schema, type Values } from "./params";
+import { isRecord, parse, type Json, type Param, type Schema, type Values } from "./params";
 import {
   describe,
   isScene,
@@ -26,6 +26,7 @@ import { startTrace, stopTrace, traceOf } from "./svg/traced";
 import { validateSvg } from "./svg/validate";
 import { isSceneError } from "./model/scene-error";
 import { hostOf } from "./host";
+import { isString } from "./model/guards";
 
 const host = hostOf();
 
@@ -81,16 +82,11 @@ interface SceneModule {
 
 const isBuild = (value: SceneModule["default"]): value is Build => typeof value === "function";
 
-const isText = (value: unknown): value is string => typeof value === "string";
-
 const isParam = (p: Param | undefined): p is Param =>
   typeof p === "object" && p !== null && "kind" in p;
 
 const isSchema = (value: SceneModule["params"]): value is Schema =>
   typeof value === "object" && value !== null && Object.values(value).every(isParam);
-
-const isJsonObject = (value: Json): value is JsonObject =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 interface ParamFlags {
   readonly params?: string;
@@ -146,7 +142,7 @@ const valuesFor = async (
     return [key, declared?.kind === "number" && Number.isFinite(asNumber) ? asNumber : raw];
   });
 
-  const given = isJsonObject(json)
+  const given = isRecord(json)
     ? json
     : fail(`--params ${flags.params} needs a JSON object keyed by param name.`);
 
@@ -167,8 +163,6 @@ const sceneDir = (file: string): string => {
     return dir;
   }
 };
-
-const warn = (warning: Diagnostic): void => console.warn(`warning: ${warning.message}`);
 
 const loadValue = async (
   file: string,
@@ -207,7 +201,9 @@ const loadValue = async (
 
         if (!entry) throw error;
 
-        return import(new URL(isText(entry) ? entry : entry.default, pathToFileURL(manifest)).href);
+        return import(
+          new URL(isString(entry) ? entry : entry.default, pathToFileURL(manifest)).href
+        );
       })
       .catch(() => {
         if (process.env.SVJEEZ_REEXEC !== "1") {
@@ -244,7 +240,7 @@ const loadValue = async (
     ? await (values === undefined ? module.default() : module.default(values))
     : module.default;
 
-  if (isScene(value) || isText(value)) return value;
+  if (isScene(value) || isString(value)) return value;
 
   return problem(
     `${file} must export default a scene, as in \`export default scene({ ... }, () => ...)\`, an SVG string, or a function that returns either.`,
@@ -254,7 +250,7 @@ const loadValue = async (
 const loadBuilt = async (
   file: string,
   flags: ParamFlags = {},
-  onWarning: (warning: Diagnostic) => void = warn,
+  onWarning = (warning: Diagnostic): void => console.warn(`warning: ${warning.message}`),
   onLane?: (lane: LaneReport) => void,
 ): Promise<{ readonly svg: string; readonly scene?: Scene }> => {
   const value = await loadValue(file, flags);
@@ -418,8 +414,6 @@ const loadOptional = async (name: string, command: string): Promise<object> => {
   return import(url);
 };
 
-const loadVideo = (): Promise<VideoModule> => loadOptional(VIDEO, "video");
-
 const videoCommand = async (args: string[]): Promise<void> => {
   const { values, positionals } = parseArgs({
     args,
@@ -446,7 +440,7 @@ const videoCommand = async (args: string[]): Promise<void> => {
     fail(`--format ${format} doesn't match --out ${values.out}. Pass one, or make them agree.`);
   const out = values.out ?? `${basename(file, extname(file))}.${format}`;
   const colorScheme = parseScheme(values["color-scheme"]);
-  const loaded = await loadVideo();
+  const loaded: VideoModule = await loadOptional(VIDEO, "video");
   const encode = loaded.video ?? fail(`${VIDEO} has no video().`);
   const svg = await loadSvg(file, values);
   report(svg);

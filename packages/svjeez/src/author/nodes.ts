@@ -13,8 +13,9 @@ import type { Effect } from "./effects";
 import type { TextContent } from "./count";
 import type { TextFitOptions } from "./text";
 import type { Geometry, Paint } from "./values";
+import { isArray, isNumber, isObject, isString } from "../model/guards";
 
-export { Ref, ref } from "./refs";
+export { ref } from "./refs";
 
 export interface Common {
   readonly key?: string;
@@ -67,7 +68,7 @@ export interface Bounds extends Box {
   readonly rect: Geometry;
 }
 
-export type Radius = number | readonly [number, number, number, number];
+type Radius = number | readonly [number, number, number, number];
 
 export interface Backdrop {
   readonly fill?: Anim<Paint>;
@@ -230,12 +231,6 @@ const TYPES: ReadonlySet<string> = new Set([
   "morph",
 ]);
 
-const isObject = (value: SceneElement): value is SceneElement =>
-  typeof value === "object" && value !== null;
-
-const isText = (value: SceneElement | string | number): value is string | number =>
-  typeof value === "string" || typeof value === "number";
-
 const isPlaceable = (
   value: SceneElement,
 ): value is Exclude<SceneElement, { readonly type: "run" | Authoring["type"] }> =>
@@ -253,18 +248,16 @@ export const sceneElement = (
   if (isPlaceable(value)) return value;
 
   throw new SceneError(
-    isText(value)
+    isString(value) || isNumber(value)
       ? `${where} holds the bare text "${String(value)}". Write text in a <Text font={…} size={…} fill={…}>.`
       : `${where} holds ${isObject(value) ? "JSX that another runtime built" : String(value)}, not a scene node. Put \`/** @jsxImportSource svjeez */\` at the top of the file, so its JSX builds scene nodes.`,
   );
 };
 
-const isList = (child: Child): child is readonly Child[] => Array.isArray(child);
-
 export const flat = (child: Child): SceneElement[] => {
   if (!child || child === true) return [];
 
-  return isList(child) ? child.flatMap(flat) : [child];
+  return isArray(child) ? child.flatMap(flat) : [child];
 };
 
 export const Group = ({

@@ -3,6 +3,8 @@ import type { Names } from "./names";
 import type { Animated, Box, SceneNode, Vec } from "../model/ir";
 import { isLane } from "../model/lane";
 import type { Place } from "./refs";
+import { isPoint } from "../model/guards";
+import { sub } from "../model/vec";
 
 export type AnchorPlace = Place | readonly [across: number, down: number];
 
@@ -37,9 +39,6 @@ const isBaseline = (
   name: Exclude<TextAnchorPlace, readonly number[]>,
 ): name is keyof typeof BASELINE => Object.hasOwn(BASELINE, name);
 
-const isPair = (value: TextAnchorPlace | undefined): value is readonly [number, number] =>
-  Array.isArray(value) && value.length === 2 && value.every((n) => Number.isFinite(n));
-
 const isName = (
   value: TextAnchorPlace | undefined,
 ): value is Exclude<TextAnchorPlace, readonly number[]> => typeof value === "string";
@@ -54,7 +53,7 @@ export const pinned = (
   const named = isName(anchor) && isPlace(anchor) ? PLACES[anchor] : undefined;
   const along = isName(anchor) && isBaseline(anchor) ? BASELINE[anchor] : undefined;
 
-  if (!named && !isPair(anchor) && along === undefined)
+  if (!named && !isPoint(anchor) && along === undefined)
     throw new SceneError(
       `anchor on ${where} takes a place, one of ${PLACE_LIST}${baseline === undefined ? "" : ', or on a text "baseline-left", "baseline" or "baseline-right"'}, or two fractions of the box such as [0.5, 1], got ${isName(anchor) ? `"${anchor}"` : JSON.stringify(anchor)}.`,
     );
@@ -70,7 +69,7 @@ export const pinned = (
     );
 
   if (along !== undefined) return [box.x + box.width * along, baseline!];
-  const [u, v] = named ?? (isPair(anchor) ? anchor : [0, 0]);
+  const [u, v] = named ?? (isPoint(anchor) ? anchor : [0, 0]);
 
   return [box.x + box.width * u, box.y + box.height * v];
 };
@@ -94,17 +93,15 @@ const baselineOf = (node: SceneNode): number => {
   return node.kind === "group" && node.children[0] ? baselineOf(node.children[0]) : 0;
 };
 
-export const minus = ([x, y]: Vec, [dx, dy]: Vec): Vec => [x - dx, y - dy];
-
 export const homed = (at: Animated<Vec>, home: Vec): Animated<Vec> => {
   if (home[0] === 0 && home[1] === 0) return at;
 
-  if (!isLane(at)) return minus(at, home);
+  if (!isLane(at)) return sub(at, home);
 
   const [head, next, ...rest] = at.keys.map((key) => ({
     ...key,
-    value: minus(key.value, home),
-    ...(key.via && { via: [minus(key.via[0], home), minus(key.via[1], home)] as const }),
+    value: sub(key.value, home),
+    ...(key.via && { via: [sub(key.via[0], home), sub(key.via[1], home)] as const }),
   }));
 
   return { ...at, keys: [head!, next!, ...rest] };
