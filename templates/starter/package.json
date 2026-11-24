@@ -9,6 +9,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@svjeez/charts": "next",
+    "@svjeez/code": "next",
+    "@svjeez/icons": "next",
     "svjeez": "next"
   },
   "devDependencies": {
