@@ -4,7 +4,7 @@ import { DEFAULT_EASE, EPSILON, NUDGE, ease, type Ease, type Seconds } from "./t
 import { isWhen, type When } from "../author/span";
 import { num } from "./format";
 import { isCurved, splitCurve, type Controls } from "./curve";
-import type { Animated, Key, Lane, Vec } from "./ir";
+import type { Animated, ClockMark, Key, Lane, Vec } from "./ir";
 import { isLane } from "./lane";
 import {
   endSlope,
@@ -279,6 +279,8 @@ interface Clock {
   readonly offset: Seconds;
   readonly end: Seconds;
   readonly clips: readonly ClipFrame[];
+  /** The clock page code drives that this one counts on, with `start` as an absolute time in the scene. */
+  readonly named?: ClockMark;
 }
 
 export interface Parts<T> {
@@ -635,6 +637,8 @@ const reach = (
 /** Where a track was first read: tracks are read on one clock per scene, the clock of the node that reads them. */
 export interface Reading {
   readonly offset: Seconds;
+  /** The name of the page-driven clock it was read on, if it was read on one. */
+  readonly clock?: string;
   readonly where: string;
 }
 

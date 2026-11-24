@@ -79,7 +79,7 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 | a string track as the only child of a `<Text>` | a label that swaps: each value shows instantly, a `.set()` at its time and a `.to()` when its span is over (never partway), each measured with the real font and anchored on its own, so a centred label stays centred. `<Text font size fill at={[x, y]} anchor="center">{track("CLOSED").set("SYN_SENT", span(0.9, 0)).set("ESTABLISHED", span(5, 0))}</Text>` |
 | `<Group offset>` | moves children together; `offset` is where the group's `[0, 0]` goes, as on any node |
 | `<Picture src={picture(bytes)} width height>` | a PNG, JPEG, GIF, WebP or SVG; `picture.load(path)` reads a file |
-| `<Sequence when={span}>` | a local clock: tracks inside count from the span's start |
+| `<Sequence when={span}>`, `<Sequence clock={clock(name, span)}>` | a local clock: tracks inside count from the span's start; a `clock()` is one page code can play or scrub ([`references/time.md`](references/time.md)) |
 | `<Arrow from to stroke bend inset head draw>` | between points or anchors; follows them as they move |
 
 Every node also takes `key ref at anchor origin rotate scale skew opacity motion clip mask effects blend scheme`. `origin` takes a place, `[x, y]` from box top-left, `{ frame: [x, y] }` in parent coordinates, or `"at"`. `scheme="light"` or `"dark"` shows a node in that color scheme only ([`references/paint.md`](references/paint.md)).
@@ -231,7 +231,7 @@ Runtime errors. `…` stands for a value the message fills in.
 ## Detail
 
 - Tracks, layers and stacking, recipes, springs, derived and sampled values: [`references/motion.md`](references/motion.md)
-- Spans, clocks, `<Sequence>`, `<Series>`, context, loops and seams: [`references/time.md`](references/time.md)
+- Spans, clocks, `<Sequence>`, `<Series>`, context, clocks the page drives, loops and seams: [`references/time.md`](references/time.md)
 - Containers, text, runs and counting numbers: [`references/layout-text.md`](references/layout-text.md)
 - Refs, anchors, parts and `<Arrow>`: [`references/refs-arrows.md`](references/refs-arrows.md)
 - Paint, clip, mask, effects: [`references/paint.md`](references/paint.md)

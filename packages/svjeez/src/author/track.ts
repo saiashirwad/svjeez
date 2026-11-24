@@ -169,8 +169,12 @@ export const passageOf = <T>(value: Track<T>): Passage<{ readonly value: T }> =>
   return value.passage;
 };
 
-const clockOf = (offset: Seconds): string =>
-  offset === 0 ? "the scene's clock" : `the clock of a sequence that starts at ${num(offset)}s`;
+const clockOf = (offset: Seconds, named: string | undefined): string =>
+  named !== undefined
+    ? `the clock "${named}"`
+    : offset === 0
+      ? "the scene's clock"
+      : `the clock of a sequence that starts at ${num(offset)}s`;
 
 /** Whether any step of a track goes to an anchor, which only a node's at can follow. */
 export const goesToAnchor = <T>(value: Track<T>): boolean =>
@@ -188,13 +192,25 @@ export const readGoals = <T>(
   const first = reads.get(value);
 
   if (passage.data.period === undefined) {
-    if (first && Math.abs(first.offset - clock.offset) > EPSILON)
+    const named = clock.named?.name;
+
+    // Two sequences on one named clock count the same time, wherever each plays in the static file.
+    if (
+      first &&
+      (first.clock !== named ||
+        (named === undefined && Math.abs(first.offset - clock.offset) > EPSILON))
+    )
       throw new SceneError(
-        `${first.where} and ${where} read the same track, but they count time on different clocks: ${clockOf(first.offset)} and ${clockOf(clock.offset)}.`,
+        `${first.where} and ${where} read the same track, but they count time on different clocks: ${clockOf(first.offset, first.clock)} and ${clockOf(clock.offset, named)}.`,
         "A track's spans mean one clock. Make a track for each clock, or put both nodes in the same <Sequence>.",
       );
 
-    if (!first) reads.set(value, { offset: clock.offset, where });
+    if (!first)
+      reads.set(value, {
+        offset: clock.offset,
+        where,
+        ...(named !== undefined && { clock: named }),
+      });
   }
 
   return passage;

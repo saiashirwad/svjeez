@@ -95,6 +95,8 @@ export { ease, type Curve } from "./author/spring";
 
 export { span, type Interval, type PaceOptions, type Span, type When } from "./author/span";
 
+export { clock, type Clock } from "./author/clock";
+
 export { morph } from "./author/morph";
 
 export {
