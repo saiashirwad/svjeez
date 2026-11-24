@@ -19,6 +19,7 @@ import {
 } from "svjeez";
 import { svg, type Code, type Hex, type Layer, type Problem } from "svjeez/tools";
 import { startTrace, stopTrace } from "../src/svg/traced";
+import { fontFixture } from "../../../fixtures/fonts";
 
 const made = (build: () => SceneElement, duration = 2, sources = false): string =>
   svg.emit(scene({ size: [200, 100], duration, title: "Check" }, build), { sources });
@@ -40,7 +41,7 @@ const browser = await renderFrames(
   },
 );
 
-const sans = await font.load(new URL("./fixtures/ABeeZee-Regular.ttf", import.meta.url));
+const sans = await font.load(fontFixture("ABeeZee-Regular"));
 
 const findings = async (svg: string, code: Code): Promise<Problem[]> =>
   (await checkPixels(svg, { colorScheme: "light" })).problems.filter(

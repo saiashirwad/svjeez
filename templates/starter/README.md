@@ -8,4 +8,4 @@ npm run check   # problems with file:line and a fix
 npm run svg     # writes scene.svg
 ```
 
-It uses `svjeez` and three of its add-ons: `@svjeez/code` for the highlighted snippet, `@svjeez/icons` for the Tabler icons and `@svjeez/charts` for the chart. The scene loads Geist (SIL Open Font License) from jsDelivr when it builds, so it needs a network connection.
+It uses `svjeez` and four of its add-ons: `@svjeez/code` for the highlighted snippet, `@svjeez/icons` for the Tabler icons, `@svjeez/charts` for the chart and `@svjeez/fonts` for Geist and Geist Mono (SIL Open Font License), which it fetches from Google Fonts on the first build and caches, so that build needs a network connection.

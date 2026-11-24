@@ -35,8 +35,9 @@ import { ticksOf } from "../src/author/count";
 import { blendNumber, valueAt as sampleAt } from "../src/model/sample";
 import { mixVec } from "../src/model/steps";
 import { ease as modelEase } from "../src/model/time";
+import { fontFixture } from "../../../fixtures/fonts";
 
-const mono = await font.load(new URL("./fixtures/JetBrainsMono.ttf", import.meta.url));
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const made = (build: () => SceneElement, duration = 4, loop = true): Model.Scene =>
   scene({ size: [200, 60], duration, title: "Count", loop, still: 3.5 }, build);

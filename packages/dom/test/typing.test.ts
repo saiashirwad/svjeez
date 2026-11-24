@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { scene, words } from "svjeez";
 import { valueAt, type Model } from "svjeez/tools";
 import {
@@ -13,10 +12,11 @@ import {
   type TextNode,
 } from "../src/index.ts";
 import { box, snapshot } from "./fixtures.ts";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const SPACE = `data:font/ttf;base64,${readFileSync(
-  join(import.meta.dir, "../../svjeez/tests/fixtures/SpaceMono-Regular.ttf"),
-).toString("base64")}`;
+const SPACE = `data:font/ttf;base64,${readFileSync(fontFixture("SpaceMono-Regular")).toString(
+  "base64",
+)}`;
 
 const FONT = { family: "Space", weight: 400, italic: false, stretch: 100, size: 14 };
 

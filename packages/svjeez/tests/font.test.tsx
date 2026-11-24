@@ -7,14 +7,14 @@ import { contours, pathData } from "../src/font/glyf";
 import { required, sfnt, u16 } from "../src/font/sfnt";
 import { typesetter } from "../src/font/shape";
 import { subset } from "../src/font/subset";
+import { fontFixture, type FixtureFont } from "../../../fixtures/fonts";
 
-const fixture = (name: string) => new URL(`./fixtures/${name}.ttf`, import.meta.url);
-const sans = await font.load(fixture("ABeeZee-Regular"));
-const italic = await font.load(fixture("ABeeZee-Italic"));
-const mono = await font.load(fixture("SpaceMono-Regular"));
-const monoBold = await font.load(fixture("SpaceMono-Bold"));
-const black = await font.load(fixture("ArchivoBlack-Regular"));
-const jetbrains = await font.load(fixture("JetBrainsMono"));
+const sans = await font.load(fontFixture("ABeeZee-Regular"));
+const italic = await font.load(fontFixture("ABeeZee-Italic"));
+const mono = await font.load(fontFixture("SpaceMono-Regular"));
+const monoBold = await font.load(fontFixture("SpaceMono-Bold"));
+const black = await font.load(fontFixture("ArchivoBlack-Regular"));
+const jetbrains = await font.load(fontFixture("JetBrainsMono"));
 
 const emit = (build: () => SceneElement) =>
   svg.emit(scene({ size: [200, 100], duration: 1, title: "Fonts" }, build));
@@ -47,7 +47,7 @@ describe("font", () => {
   });
 
   test("options override what the file says", async () => {
-    const bytes = await readFile(fixture("ABeeZee-Regular"));
+    const bytes = await readFile(fontFixture("ABeeZee-Regular"));
     expect(
       font(bytes, { family: "Body", weight: 500, italic: true, fallback: ["Georgia", "serif"] }),
     ).toMatchObject({
@@ -59,7 +59,7 @@ describe("font", () => {
   });
 
   test("the bytes become a base64 data URI with the font's media type", async () => {
-    const bytes = await readFile(fixture("ABeeZee-Regular"));
+    const bytes = await readFile(fontFixture("ABeeZee-Regular"));
     expect(sans.href!.startsWith("data:font/ttf;base64,")).toBe(true);
     expect(Buffer.from(sans.href!.split(",")[1]!, "base64").equals(bytes)).toBe(true);
     expect(sans.bytes).toBe(sans.href!.length);
@@ -134,7 +134,7 @@ describe("font.family", () => {
   });
 
   test("follows CSS weight matching when no face is exact", async () => {
-    const bytes = await readFile(fixture("ABeeZee-Regular"));
+    const bytes = await readFile(fontFixture("ABeeZee-Regular"));
     const at = (weight: number) => font(bytes, { family: "W", weight });
     const [w300, w500, w1000] = [at(300), at(500), at(1000)];
     expect(font.family(w300, w500).face(400)).toBe(w500);
@@ -183,7 +183,7 @@ describe("embedding", () => {
   });
 
   test("the same file loaded twice embeds once", async () => {
-    const again = await font.load(fixture("ABeeZee-Regular"));
+    const again = await font.load(fontFixture("ABeeZee-Regular"));
 
     const out = emit(() => (
       <Group>
@@ -200,7 +200,7 @@ describe("embedding", () => {
   });
 
   test("a family name cannot break out of the CSS string", async () => {
-    const hostile = font(await readFile(fixture("ABeeZee-Regular")), {
+    const hostile = font(await readFile(fontFixture("ABeeZee-Regular")), {
       family: "x\n;}svg *{display:none}/*",
     });
 
@@ -211,7 +211,7 @@ describe("embedding", () => {
   });
 
   test("two different files claiming one family slot is an error", async () => {
-    const impostor = font(await readFile(fixture("SpaceMono-Regular")), { family: "ABeeZee" });
+    const impostor = font(await readFile(fontFixture("SpaceMono-Regular")), { family: "ABeeZee" });
 
     expect(() =>
       emit(() => (
@@ -260,14 +260,14 @@ describe("embedding", () => {
   });
 
   test("with ligatures off, text draws one glyph per character and the font still cuts down", async () => {
-    const plain = font(await readFile(fixture("ArchivoBlack-Regular")), { ligatures: false });
+    const plain = font(await readFile(fontFixture("ArchivoBlack-Regular")), { ligatures: false });
     expect(plain.path("fi", { size: 10 }).glyphs.map((glyph) => glyph.char)).toEqual(["f", "i"]);
     expect(plain.measure("fi", 100)).toBeCloseTo(
       plain.measure("f", 100) + plain.measure("i", 100),
       6,
     );
     expect(written(plain, "fi")).not.toContain(plain.href);
-    const code = font(await readFile(fixture("JetBrainsMono")), { ligatures: false });
+    const code = font(await readFile(fontFixture("JetBrainsMono")), { ligatures: false });
     const out = written(code, "a // b => c");
     expect(out).not.toContain(code.href);
     const cut = cutOf(out);
@@ -275,7 +275,7 @@ describe("embedding", () => {
   });
 
   test("the cut maps characters beyond the BMP", async () => {
-    const bytes = new Uint8Array(await readFile(fixture("ABeeZee-Regular")));
+    const bytes = new Uint8Array(await readFile(fontFixture("ABeeZee-Regular")));
     const parsed = sfnt(bytes);
     const real = typesetter(parsed);
     const clef = "\u{1d11e}";
@@ -286,7 +286,7 @@ describe("embedding", () => {
   });
 
   test("subset: false embeds the whole file", async () => {
-    const whole = font(await readFile(fixture("ABeeZee-Regular")), { subset: false });
+    const whole = font(await readFile(fontFixture("ABeeZee-Regular")), { subset: false });
     expect(written(whole, "Hi")).toContain(whole.href!);
   });
 
@@ -300,8 +300,8 @@ describe("embedding", () => {
 });
 
 describe("subset", () => {
-  const load = async (name: string) => {
-    const bytes = new Uint8Array(await readFile(fixture(name)));
+  const load = async (name: FixtureFont) => {
+    const bytes = new Uint8Array(await readFile(fontFixture(name)));
     const parsed = sfnt(bytes);
 
     return { bytes, parsed, real: typesetter(parsed, false) };

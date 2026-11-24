@@ -15,8 +15,9 @@ import {
   type Vec,
 } from "svjeez";
 import { check, describe as describeScene, type Model } from "svjeez/tools";
+import { fontFixture } from "../../../fixtures/fonts";
 
-const regular = await font.load(new URL("./fixtures/ABeeZee-Regular.ttf", import.meta.url));
+const regular = await font.load(fontFixture("ABeeZee-Regular"));
 
 describe("timing helpers: open-span springs, loop phase, ease.at, timeAt, distribute, pace", () => {
   test("open-span spring automatically uses spring.settle", () => {

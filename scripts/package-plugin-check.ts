@@ -74,6 +74,7 @@ Effect.gen(function* () {
   );
 
   yield* fs.copy(path.join(dir, "test/consumer"), consumer);
+  yield* fs.copy(path.join(root, "fixtures/fonts"), path.join(consumer, "fonts"));
   yield* run(
     ChildProcess.make({
       cwd: consumer,

@@ -2,13 +2,13 @@ import { describe, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { Group, Run, Text, font, scene, type SceneElement } from "svjeez";
 import { svg } from "svjeez/tools";
+import { fontFixture } from "../../../fixtures/fonts";
 
-const fixture = (name: string) => new URL(`./fixtures/${name}.ttf`, import.meta.url);
-const regular = await font.load(fixture("SpaceMono-Regular"));
-const bold = await font.load(fixture("SpaceMono-Bold"));
+const regular = await font.load(fontFixture("SpaceMono-Regular"));
+const bold = await font.load(fontFixture("SpaceMono-Bold"));
 const family = font.family(regular, bold);
-const sans = await font.load(fixture("ABeeZee-Regular"));
-const sansItalic = await font.load(fixture("ABeeZee-Italic"));
+const sans = await font.load(fontFixture("ABeeZee-Regular"));
+const sansItalic = await font.load(fontFixture("ABeeZee-Italic"));
 const slanted = font.family(sans, sansItalic);
 
 const emit = (build: () => SceneElement) =>
@@ -126,7 +126,7 @@ describe("per-face subsetting", () => {
 describe("subset: false", () => {
   for (const order of ["cut first", "whole first"])
     test(`a copy loaded with subset: false embeds the whole file, ${order}`, async () => {
-      const bytes = await readFile(fixture("ABeeZee-Regular"));
+      const bytes = await readFile(fontFixture("ABeeZee-Regular"));
       const cut = font(bytes);
       const whole = font(bytes, { subset: false });
       const [first, second] = order === "cut first" ? [cut, whole] : [whole, cut];

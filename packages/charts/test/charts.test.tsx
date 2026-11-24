@@ -2,15 +2,14 @@ import { describe, expect, test } from "bun:test";
 import { Group, font, morph, scene, span, tokens, track, type SceneElement } from "svjeez";
 import { SceneError, boxesOf, check, svg, type Scene } from "svjeez/tools";
 import { Chart, area, bars, line, type Plot } from "../src/index.ts";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
 const theme = tokens({
   light: { bg: "#FFFFFF", ink: "#111111", soft: "#888888", blue: "#0A6CFF", red: "#E5453B" },
   dark: { bg: "#000000", ink: "#EEEEEE", soft: "#999999", blue: "#5EA0FF", red: "#FF6961" },
 });
 
-const mono = await font.load(
-  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url).pathname,
-);
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const look = { font: mono, axis: theme.soft, label: theme.ink, at: [50, 20] } as const;
 const months = ["Jan", "Feb", "Mar"];

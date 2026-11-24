@@ -19,6 +19,10 @@ track("").to("Save drafts", span(0, 1), ease.out);
 
 Save closed unions for the rendering layer below (e.g. IR curves lowered to `cubic-bezier` or `steps`), where every backend must handle every case. String unions are still fine for genuinely fixed facts, like `scheme: "light" | "dark"`.
 
+## Fonts
+
+Font files live only in `fixtures/fonts/`, and only tests load them, through `fontFixture("JetBrainsMono")` from `fixtures/fonts.ts`, so tests stay offline. Scenes, examples, templates, site scenes and the skill load fonts by name with `google()` from `@svjeez/fonts`. Code that runs in a browser, where `google()` can't cache to disk, loads a pinned TTF URL instead, such as `https://cdn.jsdelivr.net/fontsource/fonts/geist@5.3.0/latin-400-normal.ttf`. `scripts/fonts.test.ts` fails on a font file anywhere else or a local `font.load` or CSS `url()` in scene code.
+
 ## Checking a scene
 
 Run these from the root (or from `examples/` or `site/`). `<scene>` is an example name (`pendulum`, `readme/hero`), `site:<name>` for `site/src/scenes`, or a path.

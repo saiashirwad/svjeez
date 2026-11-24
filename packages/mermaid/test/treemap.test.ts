@@ -4,10 +4,9 @@ import { SceneError, svg } from "svjeez/tools";
 import type { Line } from "../src/errors.ts";
 import { parseMermaid } from "../src/parse.ts";
 import { drawTreemap, parseTreemap, type TreemapDoc } from "../src/treemap.ts";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const mono = await font.load(
-  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
-);
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const lines = (text: string): Line[] =>
   text.split("\n").flatMap((raw, i): Line[] => {

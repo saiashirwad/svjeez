@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Bidi Test";
-  src: url("../fixtures/NotoSansBidi-Subset.ttf") format("truetype");
+  src: url("../../../../fixtures/fonts/NotoSansBidi-Subset.ttf") format("truetype");
 }
 html,
 body {

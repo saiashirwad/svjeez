@@ -10,8 +10,9 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { google } from "../src/index.ts";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const fixture = new URL("../../svjeez/tests/fixtures/ABeeZee-Regular.ttf", import.meta.url);
+const fixture = fontFixture("ABeeZee-Regular");
 
 const online = await fetch("https://fonts.googleapis.com/", {
   method: "HEAD",

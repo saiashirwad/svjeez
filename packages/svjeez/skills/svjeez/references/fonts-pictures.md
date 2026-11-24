@@ -12,20 +12,18 @@ const inter = await google("Inter");                                        // o
 const geist = await google.family("Geist", [{ weight: 400 }, { weight: 600 }, { weight: 400, italic: true }]);
 const mono = await google("JetBrains Mono", { ligatures: false });
 
-const local = font.family(
-  await font.load(new URL("./fonts/Geist-400.ttf", import.meta.url)),
-  await font.load(new URL("./fonts/Geist-600.ttf", import.meta.url)),
-);
+const own = await font.load(new URL("./Brand-Regular.ttf", import.meta.url));   // a font file of your own
 ```
 
-- `@svjeez/fonts` (`npm i @svjeez/fonts@next`) downloads a Google font by family name once and caches it on disk (`SVJEEZ_FONTS_CACHE`, else `~/.cache/svjeez/fonts`). It is the only part of svjeez that uses the network.
+- Load fonts by name with `@svjeez/fonts` (`npm i @svjeez/fonts@next`). It downloads a Google font once and caches it on disk (`SVJEEZ_FONTS_CACHE`, else `~/.cache/svjeez/fonts`), so a scene needs no font files beside it and works anywhere it can reach the network once. It is the only part of svjeez that uses the network.
+- Reach for `font.load` only for a font that isn't on Google Fonts: a file of your own, or a pinned TTF URL such as `https://cdn.jsdelivr.net/fontsource/fonts/<id>@<version>/latin-400-normal.ttf`.
 - `font.load(path | URL)` reads a TTF or OTF from disk or http(s); `font(bytes)` takes bytes, or `font(() => bytes)` decodes lazily on first use. `font.family(...faces)` groups faces under the first one's family name; `family.face(weight, italic)` picks one. `font.measure(text, size, { letterSpacing })` measures width; `font.metrics` exposes `ascent`, `descent`, `capHeight`, `xHeight`. WOFF and WOFF2 embed but can't be measured: use TTF or OTF.
 - `<Text weight={600} italic>` and `<Run weight={600}>` pick a face of the family (`italic` without `weight` picks the family's available italic face). A face the family doesn't have is an error that lists the ones it has: the browser never makes up a bold or a slant.
 - Options: `ligatures: false` (one glyph per character, so a coding font stays small), `features: ["lnum", "tnum"]` (OpenType single-substitution features), `subset: false` (embed the whole file), `fallback` (families a viewer without the embedded font sees), `family`, `weight`, `italic`.
 - A character a face lacks is a `missing-glyph` error; nothing falls back silently.
 - Each face a scene uses costs its glyph subset, usually the largest part of a small SVG. Use one family, two weights.
 
-The skill's examples load Geist from `examples/fonts/` through `examples/style.ts`, so they work offline.
+The skill's examples load Geist with `google.family` in `examples/style.ts`.
 
 ## Pictures
 

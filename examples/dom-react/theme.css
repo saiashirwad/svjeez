@@ -1,11 +1,13 @@
 @font-face {
   font-family: Body;
-  src: url("../../packages/svjeez/tests/fixtures/ABeeZee-Regular.ttf") format("truetype");
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/abeezee@5.3.0/latin-400-normal.ttf")
+    format("truetype");
 }
 
 @font-face {
   font-family: Display;
-  src: url("../../packages/svjeez/tests/fixtures/ArchivoBlack-Regular.ttf") format("truetype");
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/archivo-black@5.3.0/latin-400-normal.ttf")
+    format("truetype");
 }
 
 :root {

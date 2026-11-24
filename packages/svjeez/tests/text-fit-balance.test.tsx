@@ -4,12 +4,12 @@ import { readFile } from "node:fs/promises";
 import { Group, Text, font, scene } from "svjeez";
 import { validateSvg } from "svjeez/frames";
 import { svg, type Model } from "svjeez/tools";
+import { fontFixture } from "../../../fixtures/fonts";
 
-const fixture = (name: string): URL => new URL(`./fixtures/${name}.ttf`, import.meta.url);
-const regular = await font.load(fixture("ABeeZee-Regular"));
-const italic = await font.load(fixture("ABeeZee-Italic"));
-const black = await font.load(fixture("ArchivoBlack-Regular"));
-const mono = await font.load(fixture("SpaceMono-Regular"));
+const regular = await font.load(fontFixture("ABeeZee-Regular"));
+const italic = await font.load(fontFixture("ABeeZee-Italic"));
+const black = await font.load(fontFixture("ArchivoBlack-Regular"));
+const mono = await font.load(fontFixture("SpaceMono-Regular"));
 
 const textOf = (model: Model.Scene, key = "t"): Model.TextNode => {
   const node = model.root.children.find((each) => each.key === key);
@@ -29,8 +29,8 @@ describe("typography: letterSpacing, italic fallback, fit, balance", () => {
   });
 
   test("italic without explicit weight resolves to the family's available italic face", async () => {
-    const bytesReg = await readFile(fixture("ABeeZee-Regular"));
-    const bytesItal = await readFile(fixture("ABeeZee-Italic"));
+    const bytesReg = await readFile(fontFixture("ABeeZee-Regular"));
+    const bytesItal = await readFile(fontFixture("ABeeZee-Italic"));
 
     const family = font.family(
       font(bytesReg, { family: "Serif", weight: 500 }),
@@ -147,7 +147,7 @@ describe("typography: letterSpacing, italic fallback, fit, balance", () => {
 
 describe("fonts: lazy loader, features, ligature subsetting and warnings", () => {
   test("font(() => bytes) defers decoding until first use and invokes loader once", async () => {
-    const raw = await readFile(fixture("ABeeZee-Regular"));
+    const raw = await readFile(fontFixture("ABeeZee-Regular"));
     let loads = 0;
 
     const lazy = font(
@@ -172,7 +172,7 @@ describe("fonts: lazy loader, features, ligature subsetting and warnings", () =>
   });
 
   test("features option emits font-feature-settings and keeps subset valid", async () => {
-    const raw = await readFile(fixture("ABeeZee-Regular"));
+    const raw = await readFile(fontFixture("ABeeZee-Regular"));
     const lined = font(raw, { features: ["lnum", "tnum"] });
 
     const model = scene({ size: [200, 100], duration: 1, title: "Features" }, () => (

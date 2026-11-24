@@ -1,4 +1,5 @@
-import { font, tokens } from "svjeez";
+import { google } from "@svjeez/fonts";
+import { tokens } from "svjeez";
 
 export const theme = tokens({
   light: {
@@ -31,6 +32,4 @@ export const theme = tokens({
   },
 });
 
-const face = (file: string) => font.load(new URL(`./fonts/${file}`, import.meta.url));
-
-export const sans = font.family(await face("Geist-400.ttf"), await face("Geist-600.ttf"));
+export const sans = await google.family("Geist", [{ weight: 400 }, { weight: 600 }]);

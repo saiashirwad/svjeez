@@ -1,14 +1,12 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { ease, scene } from "svjeez";
 import { svg } from "svjeez/tools";
 import { compile, inlineAssets, openPage, record } from "../src/index.ts";
 import { PNG } from "./fixtures.ts";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const FONT = readFileSync(
-  join(import.meta.dir, "../../svjeez/tests/fixtures/SpaceMono-Regular.ttf"),
-);
+const FONT = readFileSync(fontFixture("SpaceMono-Regular"));
 
 const IMAGE = Buffer.from(PNG.split(",")[1]!, "base64");
 

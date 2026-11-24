@@ -116,7 +116,7 @@ export const faceOf = (
         ? `${where} has no font.`
         : `${where} takes a font made by font(), font.load(), font.family() or @svjeez/fonts, got ${String(value)}.`,
       value === undefined
-        ? 'Give it one: font={await font.load("Inter.ttf")}, or a family from @svjeez/fonts such as font={await google("Inter")}. There is no default font and nothing is inherited.'
+        ? 'Give it one from @svjeez/fonts, such as font={await google("Inter")}, or load a file of your own with font.load(). There is no default font and nothing is inherited.'
         : undefined,
     );
 

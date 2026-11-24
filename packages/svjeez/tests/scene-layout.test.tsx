@@ -24,8 +24,9 @@ import {
 } from "svjeez";
 import type { StackProps } from "svjeez/tools";
 import { isLane, placements, svg, valueAt, type Model } from "svjeez/tools";
+import { fontFixture } from "../../../fixtures/fonts";
 
-const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
+const mono = await font.load(fontFixture("SpaceMono-Regular"));
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Test" }, build);

@@ -5,10 +5,9 @@ import { blockDiagram, type BlockSpec } from "../src/block.tsx";
 import type { DiagramColors } from "../src/kit.tsx";
 import type { Box } from "../src/layout/box.ts";
 import { block as place, type BlockCell } from "../src/layout/block.ts";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const mono = await font.load(
-  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
-);
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const colors: DiagramColors = {
   background: "#FFFFFF",

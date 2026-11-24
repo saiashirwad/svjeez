@@ -4,10 +4,9 @@ import { SceneError, check, svg, type Child } from "svjeez/tools";
 import type { DiagramColors } from "../src/kit.tsx";
 import { layoutTreemap } from "../src/layout/treemap.ts";
 import { treemap } from "../src/treemap.tsx";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const mono = await font.load(
-  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
-);
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const colors: DiagramColors = {
   background: "#FFFFFF",

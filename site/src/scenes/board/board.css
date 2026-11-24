@@ -1,13 +1,15 @@
 @font-face {
   font-family: Geist;
   font-weight: 400;
-  src: url("./Geist-400.ttf") format("truetype");
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/geist@5.3.0/latin-400-normal.ttf")
+    format("truetype");
 }
 
 @font-face {
   font-family: Geist;
   font-weight: 600;
-  src: url("./Geist-600.ttf") format("truetype");
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/geist@5.3.0/latin-600-normal.ttf")
+    format("truetype");
 }
 
 html,

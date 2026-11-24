@@ -32,8 +32,9 @@ import { mixGeometry } from "../src/model/geometry";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
 import { jsx } from "svjeez/jsx-runtime";
 import { readFileSync } from "node:fs";
+import { fontFixture } from "../../../fixtures/fonts";
 
-const mono = font(readFileSync(new URL("./fixtures/JetBrainsMono.ttf", import.meta.url)));
+const mono = font(readFileSync(fontFixture("JetBrainsMono")));
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Test" }, build);

@@ -32,8 +32,9 @@ import {
   type Model,
   type StrokeProps,
 } from "svjeez/tools";
+import { fontFixture } from "../../../fixtures/fonts";
 
-const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
+const mono = await font.load(fontFixture("SpaceMono-Regular"));
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Test" }, build);

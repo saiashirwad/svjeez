@@ -1,6 +1,7 @@
 import { Chart, area, line } from "@svjeez/charts";
 import { Code } from "@svjeez/code";
 import { tomorrow } from "@svjeez/code/palettes";
+import { google } from "@svjeez/fonts";
 import { Icon, type IconData } from "@svjeez/icons";
 import { flask, gitCommit, hammer, rocket } from "@svjeez/icons/tabler";
 import {
@@ -16,7 +17,6 @@ import {
   ease,
   enter,
   exit,
-  font,
   path,
   ref,
   scene,
@@ -54,15 +54,9 @@ const theme = tokens({
 });
 
 // Text is measured with the real font when the scene builds, and only the glyphs it uses are embedded.
-const geist = (file: string) =>
-  font.load(`https://cdn.jsdelivr.net/npm/geist@1.9.2/dist/fonts/${file}`);
-
-const sans = font.family(
-  await geist("geist-sans/Geist-Regular.ttf"),
-  await geist("geist-sans/Geist-SemiBold.ttf"),
-);
-
-const mono = await geist("geist-mono/GeistMono-Regular.ttf");
+// Fetched from Google Fonts on the first build, then read from ~/.cache/svjeez/fonts.
+const sans = await google.family("Geist", [{ weight: 400 }, { weight: 600 }]);
+const mono = await google("Geist Mono");
 
 const COMMIT = `const pop = ease.spring({
   stiffness: 320,

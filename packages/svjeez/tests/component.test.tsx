@@ -16,8 +16,9 @@ import {
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
 import { componentMeta, isComponent, isStandardJsonSchema, SceneError, svg } from "svjeez/tools";
 import type { Model } from "svjeez/tools";
+import { fontFixture } from "../../../fixtures/fonts";
 
-const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
+const mono = await font.load(fontFixture("SpaceMono-Regular"));
 
 const made = (build: () => SceneElement): Model.Scene =>
   scene({ size: [300, 200], duration: 2, title: "Components" }, build);

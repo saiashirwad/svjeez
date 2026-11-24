@@ -22,8 +22,9 @@ import {
   tokens,
   track,
 } from "svjeez";
+import { fontFixture } from "../../../../../fixtures/fonts";
 
-const mono = await font.load(new URL("../SpaceMono-Regular.ttf", import.meta.url));
+const mono = await font.load(fontFixture("SpaceMono-Regular"));
 
 const theme = tokens({
   light: { ink: "#14161A", paper: "#F4F1EA", accent: "#E0533D", cool: "#2F7FD0", soft: "#C9C2B4" },

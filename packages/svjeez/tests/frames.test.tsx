@@ -24,6 +24,7 @@ import {
 } from "svjeez";
 import { svg, type SceneOptions, type SvgOptions } from "svjeez/tools";
 import { systemColorScheme } from "../src/scheme";
+import { fontFixture } from "../../../fixtures/fonts";
 
 const emit = (
   [width, height]: readonly [number, number],
@@ -362,7 +363,7 @@ describe.if(browser)("renderFrames", () => {
 });
 
 describe.if(browser)("embedded fonts", async () => {
-  const sans = await font.load(new URL("./fixtures/ABeeZee-Regular.ttf", import.meta.url));
+  const sans = await font.load(fontFixture("ABeeZee-Regular"));
 
   const shot = async (out: string) =>
     (await renderFrames(out, { times: [0], colorScheme: "light", background: "#fff" })).frames[0]!
@@ -386,10 +387,7 @@ describe.if(browser)("embedded fonts", async () => {
   });
 
   test("a font cut down to the scene's glyphs paints the same as the whole file", async () => {
-    const whole = font(
-      await Bun.file(new URL("./fixtures/ABeeZee-Regular.ttf", import.meta.url)).bytes(),
-      { subset: false },
-    );
+    const whole = font(await Bun.file(fontFixture("ABeeZee-Regular")).bytes(), { subset: false });
 
     expect(
       same(

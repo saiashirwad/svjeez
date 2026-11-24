@@ -31,8 +31,9 @@ import {
 } from "svjeez";
 import { boxesOf, hitTest, isLane, svg, type Effect, type Model } from "svjeez/tools";
 import { diagnose } from "../src/model/backend";
+import { fontFixture } from "../../../fixtures/fonts";
 
-const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
+const mono = await font.load(fontFixture("SpaceMono-Regular"));
 
 const theme = tokens({
   light: { ink: "#111111", sky: "#2266FF" },

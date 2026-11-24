@@ -1,6 +1,6 @@
 @font-face {
   font-family: Mono;
-  src: url("../../../svjeez/tests/fixtures/SpaceMono-Regular.ttf") format("truetype");
+  src: url("../../../../fixtures/fonts/SpaceMono-Regular.ttf") format("truetype");
 }
 
 :root {

@@ -1,9 +1,8 @@
 import { font, span } from "svjeez";
 import { flowchart, lanes, sequence, stateMachine, tree } from "../src/index.ts";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const mono = await font.load(
-  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
-);
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const o = { font: mono };
 

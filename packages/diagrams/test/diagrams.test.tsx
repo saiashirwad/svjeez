@@ -11,10 +11,9 @@ import {
   tree,
   type DiagramColors,
 } from "../src/index.ts";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const mono = await font.load(
-  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
-);
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const colors: DiagramColors = {
   background: "#FFFFFF",

@@ -20,8 +20,9 @@ import {
   type Vec,
 } from "svjeez";
 import { boxesOf, check, svg, type Code, type Model, type Problem } from "svjeez/tools";
+import { fontFixture } from "../../../fixtures/fonts";
 
-const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
+const mono = await font.load(fontFixture("SpaceMono-Regular"));
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Scheme" }, build);

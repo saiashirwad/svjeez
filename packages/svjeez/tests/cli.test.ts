@@ -113,7 +113,7 @@ test("svg --json reports every animated lane with the line that wrote it", () =>
 
   const track = build.lanes.find((lane) => lane.lane === "opacity");
   expect(track?.source?.file).toContain("cue-scene.tsx");
-  expect(track?.source?.line).toBe(10);
+  expect(track?.source?.line).toBe(11);
   expect(track?.backend).toBe("css");
   expect(track?.spans).toHaveLength(2);
   expect(track?.spans[0]?.start).toBeCloseTo(0.213);

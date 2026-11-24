@@ -2,10 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { SceneError, svg } from "svjeez/tools";
 import { font, scene, span } from "svjeez";
 import { mermaid, parseMermaid, type FlowchartDoc, type StateDoc } from "../src/index";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const mono = await font.load(
-  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
-);
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const flow = (text: string): FlowchartDoc => {
   const doc = parseMermaid(text);
