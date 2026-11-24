@@ -1,7 +1,7 @@
 import { SceneError } from "../model/scene-error";
 import { readSource } from "./source";
 
-export type ImageFormat = "svg" | "png" | "jpeg" | "gif" | "webp";
+type ImageFormat = "svg" | "png" | "jpeg" | "gif" | "webp";
 
 export interface PictureData {
   /** A `data:` URI when the bytes are embedded, or the URL itself for a `picture.ref`. */

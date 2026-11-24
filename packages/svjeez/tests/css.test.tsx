@@ -1,10 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import { Shape, enter, ease, rect, scene, span, track } from "svjeez";
 import { svg } from "svjeez/tools";
-import { cssGroups, cssKeyframes } from "../src/svg/css";
+import { cssGroups, type Emit } from "../src/svg/css";
 import type { Key } from "../src/svg/keys";
 
 const key = (t: number, values: Key["values"], e = ease.linear): Key => ({ t, values, ease: e });
+
+const alone = (key: string, emit: Emit, keys: Key[], period: number) =>
+  cssGroups([{ key, emit, keys, period, snapped: period }])[0]!;
 
 const lane = (keys: Key[], name = "opacity", period = 4) => ({
   key: name,
@@ -16,7 +19,7 @@ const lane = (keys: Key[], name = "opacity", period = 4) => ({
 
 describe("holds", () => {
   test("a hold is a stop just before the next key, with no steps(1)", () => {
-    const { body, timing } = cssKeyframes(
+    const { body, timing } = alone(
       "opacity",
       "visibility",
       [key(0, { opacity: 0 }, ease.hold), key(1, { opacity: 1 }), key(4, { opacity: 1 })],
@@ -28,7 +31,7 @@ describe("holds", () => {
   });
 
   test("a hold that would land on another stop keeps steps(1)", () => {
-    const { body } = cssKeyframes(
+    const { body } = alone(
       "opacity",
       "visibility",
       [key(0, { opacity: 0 }, ease.hold), key(1, { opacity: 1 }), key(100000, { opacity: 1 })],
@@ -39,7 +42,7 @@ describe("holds", () => {
   });
 
   test("real steps with more than one jump are untouched", () => {
-    const { timing } = cssKeyframes(
+    const { timing } = alone(
       "translate",
       "value",
       [key(0, { x: 0, y: 0 }, ease.steps(3)), key(2, { x: 9, y: 0 }), key(4, { x: 9, y: 0 })],

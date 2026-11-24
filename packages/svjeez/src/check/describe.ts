@@ -25,7 +25,7 @@ import {
   type Stretch,
 } from "./survey";
 
-export interface Changing {
+interface Changing {
   readonly value: string;
   readonly from: Seconds;
   readonly to: Seconds;
@@ -53,7 +53,7 @@ export interface DescribedFrame {
   readonly nodes: readonly DescribedNode[];
 }
 
-export interface Animates {
+interface Animates {
   readonly value: string;
   readonly spans: readonly Stretch[];
   readonly every?: Seconds;

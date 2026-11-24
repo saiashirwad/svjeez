@@ -251,17 +251,14 @@ export const mapped = <V extends object, K extends keyof V, U>(
   };
 };
 
-export const touches = <V extends object>(data: PassageData<V>, name: keyof V): boolean =>
-  name in data.initial || data.steps.some((step) => name in step.values);
-
-export interface ClipFrame {
+interface ClipFrame {
   readonly label: string;
   readonly start: Seconds;
   readonly end: Seconds;
   readonly open: boolean;
 }
 
-export interface Clock {
+interface Clock {
   readonly offset: Seconds;
   readonly end: Seconds;
   readonly clips: readonly ClipFrame[];

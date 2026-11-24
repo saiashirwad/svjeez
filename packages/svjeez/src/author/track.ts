@@ -46,7 +46,7 @@ const isText = <T>(value: T): value is T & string => typeof value === "string";
 // SAFETY: a step may hold an anchor where a point track expects a point; goals.ts resolves it before any mix sees it, and readOf refuses it anywhere else.
 const stored = <T>(goal: Goal<T>): T => goal as T;
 
-export class ValueTrack<T> implements Track<T> {
+class ValueTrack<T> implements Track<T> {
   readonly passage: Passage<{ readonly value: T }>;
   readonly #last: Span | undefined;
 

@@ -186,7 +186,7 @@ export const changesOf = (value: Animated<unknown>, duration: Seconds): Stretch[
   return out;
 };
 
-export const isCut = (key: Key<unknown>): boolean => isHold(key.ease);
+const isCut = (key: Key<unknown>): boolean => isHold(key.ease);
 
 export const merged = (stretches: readonly Stretch[]): Stretch[] => {
   const sorted = [...stretches].sort((a, b) => a[0] - b[0]);

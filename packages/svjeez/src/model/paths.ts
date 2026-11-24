@@ -315,8 +315,3 @@ export const blendPaths = (a: string, b: string, amount: number): PathData => {
     )
     .join("") as PathData;
 };
-
-export const commandsOf = (d: string): string =>
-  segments(d)
-    .map((s) => s.letter + "#".repeat(s.numbers.length))
-    .join("");

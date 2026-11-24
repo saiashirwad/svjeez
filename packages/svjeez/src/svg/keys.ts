@@ -72,8 +72,7 @@ export const moving = (keys: readonly Key[], index: number): boolean => {
   return next !== undefined && !same(keys[index]!.values, next.values);
 };
 
-export const isNumber = (value: ChannelValue | undefined): value is number =>
-  typeof value === "number";
+const isNumber = (value: ChannelValue | undefined): value is number => typeof value === "number";
 
 const blend = (
   target: Channel,

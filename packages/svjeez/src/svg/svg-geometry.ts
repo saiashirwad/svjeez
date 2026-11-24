@@ -26,7 +26,7 @@ export type GeometrySlot =
   | "x2"
   | "y2";
 
-export interface Written {
+interface Written {
   readonly slot: GeometrySlot;
   readonly lane: Lane<ChannelValues>;
   readonly route: "css" | "smil";
@@ -398,13 +398,6 @@ const placesFor = (outlines: readonly (readonly Contour[])[]): number => {
   const size = Math.max(...outlines.map((contours) => extent(pointsOf(contours))));
 
   return size < 10 ? 3 : 2;
-};
-
-export const contoursPathData = (contours: readonly Contour[]): string => {
-  if (contours.length === 0) return "";
-  const outlines = [contours];
-
-  return writeData(contours, commandsOf(outlines), placesFor(outlines));
 };
 
 const morph = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving => {

@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import { foldKeys, type Key } from "../src/svg/keys";
 import { ease } from "../src/model/time";
-import { cssKeyframes } from "../src/svg/css";
+import { cssGroups } from "../src/svg/css";
 
 const key = (t: number, x: number, y: number, e = ease.linear): Key => ({
   t,
@@ -38,6 +38,7 @@ test("keeps drift beyond tolerance across a skipped run", () => {
 test("leaves other lanes alone and emits fewer keyframes", () => {
   const keys = [key(0, 0, 0), key(1, 10, 5), key(2, 20, 10)];
   expect(foldKeys("opacity", keys)).toBe(keys);
-  const body = cssKeyframes("translate", "value", keys, 2).body;
-  expect(body).not.toContain("50%");
+  const [group] = cssGroups([{ key: "translate", emit: "value", keys, period: 2, snapped: 2 }]);
+
+  expect(group!.body).not.toContain("50%");
 });

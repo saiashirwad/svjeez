@@ -41,7 +41,7 @@ export interface LaidRun<S> {
   readonly outline?: readonly Contour[];
 }
 
-export interface LaidLine<S> {
+interface LaidLine<S> {
   readonly at: Vec;
   readonly runs: readonly LaidRun<S>[];
 }
@@ -415,13 +415,6 @@ export const layoutRuns = <S>(
     cuts: broken.flatMap((line, index) => (cut.has(line) ? [index] : [])),
   };
 };
-
-export const layoutText = (
-  face: Font,
-  text: string,
-  options: TextLayoutOptions,
-  where: string,
-): TextLayout => layoutRuns(face, [{ text, face, style: face }], options, where);
 
 /** Sets a laid-out single line along an outline: each run starts where the path is, and the box wraps every glyph. */
 export const setAlong = <S>(

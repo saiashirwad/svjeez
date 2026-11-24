@@ -25,7 +25,7 @@ export interface Size {
   readonly height?: number;
 }
 
-export interface ChildMeta {
+interface ChildMeta {
   readonly name: string;
   readonly baseline?: number;
 }

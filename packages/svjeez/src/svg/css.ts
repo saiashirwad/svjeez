@@ -6,12 +6,11 @@ import { DEFAULT_EASE, ease, isHold, type Ease, type Seconds } from "../model/ti
 
 export type Emit = "value" | "visibility" | "dash";
 
-export const seconds = (canvas: Canvas, scene: Seconds): string =>
-  `${num(scene / canvas.playbackRate)}s`;
+const seconds = (canvas: Canvas, scene: Seconds): string => `${num(scene / canvas.playbackRate)}s`;
 
 const short = (value: number): string => num(value).replace(/^(-?)0\./, "$1.");
 
-export const timing = (curve: Ease): string => {
+const timing = (curve: Ease): string => {
   switch (curve.kind) {
     case "linear":
       return "linear";
@@ -119,12 +118,7 @@ const frames = (
 };
 
 /** The stops of one lane. A hold is written as a stop just before the next key, unless saying steps(1) once is shorter. */
-export const cssFrames = (
-  lane: string,
-  emit: Emit,
-  all: readonly Key[],
-  period: Seconds,
-): Frames => {
+const cssFrames = (lane: string, emit: Emit, all: readonly Key[], period: Seconds): Frames => {
   const exact = frames(lane, emit, all, period, true);
   const classic = frames(lane, emit, all, period, false);
 
@@ -140,13 +134,6 @@ const bodyOf = (frames: Frames): string =>
   frames.blocks
     .map(({ selectors, suffix, set }) => `${selectors}{${set}${suffix && `;${suffix}`}}`)
     .join("");
-
-/** The keyframes one lane needs, written alone. */
-export const cssKeyframes = (lane: string, emit: Emit, all: readonly Key[], period: Seconds) => {
-  const frames = cssFrames(lane, emit, all, period);
-
-  return { body: bodyOf(frames), timing: frames.timing };
-};
 
 /** What two lanes must share to run in one @keyframes: when each stop falls, how it eases, and the clock it runs on. */
 const skeleton = (frames: Frames, lane: { readonly period: Seconds; readonly snapped: Seconds }) =>

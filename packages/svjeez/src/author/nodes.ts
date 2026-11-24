@@ -14,7 +14,7 @@ import type { TextContent } from "./count";
 import type { TextFitOptions } from "./text";
 import type { Geometry, Paint } from "./values";
 
-export { Ref, ref } from "./refs";
+export { ref } from "./refs";
 
 export interface Common {
   readonly key?: string;
@@ -67,7 +67,7 @@ export interface Bounds extends Box {
   readonly rect: Geometry;
 }
 
-export type Radius = number | readonly [number, number, number, number];
+type Radius = number | readonly [number, number, number, number];
 
 export interface Backdrop {
   readonly fill?: Anim<Paint>;

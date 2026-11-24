@@ -990,7 +990,7 @@ const build = (plan: Plan, entry: Entry): SceneNode => {
   return placedLike(node, rest);
 };
 
-export const merge = (
+const merge = (
   states: readonly (readonly SceneNode[])[],
   spans: readonly Interval[],
   timing: Timing,

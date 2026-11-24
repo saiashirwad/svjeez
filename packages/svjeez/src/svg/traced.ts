@@ -1,6 +1,6 @@
 import type { JsxSource } from "../author/sources";
 
-export const TRACE: unique symbol = Symbol.for("svjeez.sources");
+const TRACE: unique symbol = Symbol.for("svjeez.sources");
 
 interface Trace {
   readonly within?: string;
