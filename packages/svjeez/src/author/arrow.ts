@@ -10,6 +10,7 @@ import type { Connect } from "./settle";
 import type { Anim } from "./track";
 import { lookOf, paintedBoxOf } from "../model/painted";
 import { isNumber } from "../model/guards";
+import { add } from "../model/vec";
 
 export interface ArrowProps extends Omit<
   Common,
@@ -34,8 +35,6 @@ const turn = ([x, y]: Vec, degrees: number): Vec => {
 
   return [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)];
 };
-
-const add = (a: Vec, b: Vec): Vec => [a[0] + b[0], a[1] + b[1]];
 
 const bow = (bend: number): readonly [Vec, Vec, Vec, Vec] => {
   const control: Vec = [0.5, bend];

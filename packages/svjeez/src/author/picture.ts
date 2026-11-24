@@ -1,6 +1,7 @@
 import { SceneError } from "../model/scene-error";
 import { readSource } from "./source";
 import { isString } from "../model/guards";
+import { base64 } from "../model/base64";
 
 type ImageFormat = "svg" | "png" | "jpeg" | "gif" | "webp";
 
@@ -177,16 +178,6 @@ const svg: Codec = {
 };
 
 const FORMATS: Readonly<Record<ImageFormat, Codec>> = { png, jpeg, gif, webp, svg };
-
-const base64 = (bytes: Uint8Array): string => {
-  const CHUNK = 0x8000;
-  let binary = "";
-
-  for (let at = 0; at < bytes.length; at += CHUNK)
-    binary += String.fromCharCode(...bytes.subarray(at, at + CHUNK));
-
-  return btoa(binary);
-};
 
 const svgHref = (markup: string): `data:${string}` =>
   `data:image/svg+xml,${markup.trim().replace(/[%#<>"\r\n\t]/g, encodeURIComponent)}`;

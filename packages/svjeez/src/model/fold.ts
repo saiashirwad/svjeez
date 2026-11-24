@@ -5,6 +5,7 @@ import type { Animated, Key, Lane, Layer, Vec } from "./ir";
 import { isLane, mapLane } from "./lane";
 import { mixNumber, mixVec, same, type Mix } from "./steps";
 import { valueAt as sampleAt } from "./sample";
+import { add } from "./vec";
 
 const valueAt = <T>(lane: Lane<T>, t: number, mix: Mix<T>): T =>
   sampleAt(lane, t, (a, b, amount) => mix(a, b, amount, "a folded layer"));
@@ -84,13 +85,7 @@ const joined = <T>(
   };
 };
 
-const add = (a: number, b: number): number => a + b;
-
-const addVec = (a: Vec, b: Vec): Vec => [a[0] + b[0], a[1] + b[1]];
-
 const timesVec = (a: Vec, b: Vec): Vec => [a[0] * b[0], a[1] * b[1]];
-
-const times = (a: number, b: number): number => a * b;
 
 const always = <T>(value: Animated<T>, rest: T): boolean =>
   isLane(value) ? value.keys.every((key) => same(key.value, rest)) : same(value, rest);
@@ -108,10 +103,10 @@ const fold = (outer: Layer, inner: Layer): Layer | undefined => {
 
   // The inner layer's skew stays the innermost step, so it carries over; an outer skew sits between the two turns and can't merge.
   if (!still || !turns || !always(outer.skew, 0)) return undefined;
-  const offset = joined(outer.offset, inner.offset, addVec, mixVec);
-  const rotate = joined(outer.rotate, inner.rotate, add, mixNumber);
+  const offset = joined(outer.offset, inner.offset, add, mixVec);
+  const rotate = joined(outer.rotate, inner.rotate, (a, b) => a + b, mixNumber);
   const scale = joined(outer.scale, inner.scale, timesVec, mixVec);
-  const opacity = joined(outer.opacity, inner.opacity, times, mixNumber);
+  const opacity = joined(outer.opacity, inner.opacity, (a, b) => a * b, mixNumber);
 
   if (!offset || rotate === undefined || !scale || opacity === undefined) return undefined;
 

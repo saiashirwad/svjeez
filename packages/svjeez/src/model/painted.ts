@@ -1,6 +1,7 @@
 import type { Box, Color, Cubic, Geometry, Paint, ShapeNode, Stroke, Vec } from "./ir";
 import { atRest } from "./lane";
 import { boundsOfPoints, growBox, onCircle, outlineBoxOf } from "./geometry";
+import { add, cross, dot, sub, times } from "./vec";
 
 export const MITER_LIMIT = 4;
 
@@ -15,12 +16,6 @@ export interface StrokeLook {
 }
 
 const EPS = 1e-9;
-
-const sub = (a: Vec, b: Vec): Vec => [a[0] - b[0], a[1] - b[1]];
-const add = (a: Vec, b: Vec): Vec => [a[0] + b[0], a[1] + b[1]];
-const times = (a: Vec, k: number): Vec => [a[0] * k, a[1] * k];
-const dot = (a: Vec, b: Vec): number => a[0] * b[0] + a[1] * b[1];
-const cross = (a: Vec, b: Vec): number => a[0] * b[1] - a[1] * b[0];
 
 const unit = (v: Vec): Vec | undefined => {
   const length = Math.hypot(v[0], v[1]);

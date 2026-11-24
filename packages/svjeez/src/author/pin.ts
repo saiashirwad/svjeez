@@ -4,6 +4,7 @@ import type { Animated, Box, SceneNode, Vec } from "../model/ir";
 import { isLane } from "../model/lane";
 import type { Place } from "./refs";
 import { isPoint } from "../model/guards";
+import { sub } from "../model/vec";
 
 export type AnchorPlace = Place | readonly [across: number, down: number];
 
@@ -92,17 +93,15 @@ const baselineOf = (node: SceneNode): number => {
   return node.kind === "group" && node.children[0] ? baselineOf(node.children[0]) : 0;
 };
 
-export const minus = ([x, y]: Vec, [dx, dy]: Vec): Vec => [x - dx, y - dy];
-
 export const homed = (at: Animated<Vec>, home: Vec): Animated<Vec> => {
   if (home[0] === 0 && home[1] === 0) return at;
 
-  if (!isLane(at)) return minus(at, home);
+  if (!isLane(at)) return sub(at, home);
 
   const [head, next, ...rest] = at.keys.map((key) => ({
     ...key,
-    value: minus(key.value, home),
-    ...(key.via && { via: [minus(key.via[0], home), minus(key.via[1], home)] as const }),
+    value: sub(key.value, home),
+    ...(key.via && { via: [sub(key.via[0], home), sub(key.via[1], home)] as const }),
   }));
 
   return { ...at, keys: [head!, next!, ...rest] };

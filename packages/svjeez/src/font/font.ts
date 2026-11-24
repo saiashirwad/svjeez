@@ -15,6 +15,7 @@ import {
   type Sfnt,
 } from "./sfnt";
 import { readSource } from "../author/source";
+import { base64 } from "../model/base64";
 
 type FontFormat = "ttf" | "otf" | "woff" | "woff2";
 
@@ -91,16 +92,6 @@ const FORMATS: Readonly<Record<FontFormat, Format>> = {
   otf: { mime: "font/otf", css: "opentype", matches: (t) => t === SFNT_CFF },
   woff: { mime: "font/woff", css: "woff", matches: (t) => t === tag("wOFF") },
   woff2: { mime: "font/woff2", css: "woff2", matches: (t) => t === tag("wOF2") },
-};
-
-const base64 = (bytes: Uint8Array): string => {
-  const CHUNK = 0x8000;
-  let binary = "";
-
-  for (let at = 0; at < bytes.length; at += CHUNK)
-    binary += String.fromCharCode(...bytes.subarray(at, at + CHUNK));
-
-  return btoa(binary);
 };
 
 const hash = (bytes: Uint8Array): string => {

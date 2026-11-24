@@ -93,7 +93,8 @@ import {
 } from "./values";
 import { FontBook, charName, faceOf, piecesOf, type Asked } from "./runs";
 import { lookOf, paintedBoxOf } from "../model/painted";
-import { minus, pinned } from "./pin";
+import { pinned } from "./pin";
+import { sub } from "../model/vec";
 import { fitSizeForRuns, layoutRuns, setAlong } from "./text";
 import { countedNodes, countingIn, rateOf, ticksOf } from "./count";
 import { typedNodes, typedTicks, typing as typingMix, typingIn } from "./typed";
@@ -266,7 +267,7 @@ const base = (
       ? NOWHERE
       : animated<Vec, Vec>(
           props.at ?? home,
-          (point) => minus(point, home),
+          (point) => sub(point, home),
           timing,
           mixVec,
           `at on ${where}`,
