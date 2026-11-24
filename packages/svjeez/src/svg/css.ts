@@ -30,10 +30,15 @@ interface Stops {
   readonly before: readonly (string | undefined)[];
 }
 
-const percents = (keys: readonly Key[], period: Seconds): Stops => {
+/** `down` rounds each stop to the tick at or before its time, so a step that lands at t is already in force at t. */
+const percents = (keys: readonly Key[], period: Seconds, down = false): Stops => {
   for (const places of [3, 4]) {
     const at = keys.map((key) => (key.t / period) * 100);
-    const out = at.map((value) => `${num(value, places)}%`);
+
+    const out = at.map(
+      (value) =>
+        `${num(down ? Math.floor(value * 10 ** places + 1e-6) / 10 ** places : value, places)}%`,
+    );
 
     if (new Set(out).size !== out.length) continue;
     const taken = new Set(out);
@@ -75,8 +80,10 @@ const frames = (
   all: readonly Key[],
   period: Seconds,
   holds: boolean,
+  joins: boolean,
 ): Frames => {
-  const keys = emit === "value" ? foldKeys(lane, all) : all;
+  const folded = emit === "value" ? foldKeys(lane, all) : all;
+  const keys = joins ? joinedKeys(folded, period) : folded;
   const counts = new Map<string, number>();
   keys.forEach((key, index) => {
     if (moving(keys, index) && !(holds && isHold(key.ease)))
@@ -89,7 +96,7 @@ const frames = (
   );
 
   const blocks = new Map<string, { selectors: string[]; suffix: string; set: string }>();
-  const stops = percents(keys, period);
+  const stops = percents(keys, period, emit === "visibility");
   const { at } = stops;
   const before = holds ? stops.before : stops.before.map(() => undefined);
   keys.forEach((key, index) => {
@@ -118,14 +125,24 @@ const frames = (
 };
 
 /** The stops of one lane. A hold is written as a stop just before the next key, unless saying steps(1) once is shorter. */
-const cssFrames = (lane: string, emit: Emit, all: readonly Key[], period: Seconds): Frames => {
-  const exact = frames(lane, emit, all, period, true);
-  const classic = frames(lane, emit, all, period, false);
+const cssFrames = (
+  lane: string,
+  emit: Emit,
+  all: readonly Key[],
+  period: Seconds,
+  joins = false,
+): Frames => {
+  const classic = frames(lane, emit, all, period, false, joins);
 
   const said =
     classic.timing === timing(ease.hold)
       ? `animation-timing-function:${classic.timing};`.length
       : 0;
+
+  // visibility interpolates to "visible" anywhere between a visible and a hidden stop, so a stop just before the next key
+  // would show both values at the key's own instant: those lanes must step exactly.
+  if (emit === "visibility") return classic;
+  const exact = frames(lane, emit, all, period, true, joins);
 
   return bodyOf(exact).length <= bodyOf(classic).length + said ? exact : classic;
 };
@@ -158,12 +175,13 @@ export const cssGroups = (
     readonly keys: readonly Key[];
     readonly period: Seconds;
     readonly snapped: Seconds;
+    readonly joins?: boolean;
   }[],
 ): Group[] => {
   const groups = new Map<string, { frames: Frames[]; snapped: Seconds }>();
 
   for (const lane of lanes) {
-    const frames = cssFrames(lane.key, lane.emit, lane.keys, lane.period);
+    const frames = cssFrames(lane.key, lane.emit, lane.keys, lane.period, lane.joins);
     const id = skeleton(frames, lane);
     const group = groups.get(id) ?? { frames: [], snapped: lane.snapped };
 
@@ -191,6 +209,36 @@ export const length = (value: number): string => {
   return text === "0" ? text : `${text}px`;
 };
 
+const isWhole = (values: ChannelValues): boolean =>
+  values.drawStart === undefined && (values.whole ?? ((values.draw ?? 0) >= 1 ? 1 : 0)) === 1;
+
+/**
+ * A dash pattern ends in caps, so a closed shape drawn in full would lack the join at its first vertex. Once the draw is whole its dashes are
+ * dropped. A dash list only flips between two stops (halfway), so each flip gets a stop a hair before or after the key, holding the dashes.
+ * Only lanes of closed shapes ask for this: an open stroke has no join to lose, so it keeps its stops.
+ */
+const joinedKeys = (keys: readonly Key[], period: Seconds): readonly Key[] => {
+  const step = period / 50000;
+
+  return keys.flatMap((key, index): Key[] => {
+    if (!isWhole(key.values)) return [key];
+    const whole = { ...key, values: { ...key.values, whole: 1 } };
+    const [previous, next] = [keys[index - 1], keys[index + 1]];
+    const before = previous && !isWhole(previous.values);
+    const after = next && !isWhole(next.values);
+
+    return [
+      ...(before ? [{ ...key, t: key.t - step, values: { ...key.values, whole: 0 } }] : []),
+      whole,
+      ...(after ? [{ ...key, t: key.t + step, values: { ...key.values, whole: 0 } }] : []),
+    ];
+  });
+};
+
+/** Only the stops around a whole draw say their dashes; every other stop leaves the pinned "1 2" alone. */
+const dashed = (values: ChannelValues): string =>
+  values.whole === undefined ? "" : `;stroke-dasharray:${values.whole === 1 ? "none" : "1 2"}`;
+
 export const cssDeclarations = (lane: string, emit: Emit, values: ChannelValues): string => {
   if (emit === "visibility") return `visibility:${values.opacity === 0 ? "hidden" : "visible"}`;
 
@@ -202,7 +250,7 @@ export const cssDeclarations = (lane: string, emit: Emit, values: ChannelValues)
     return emit === "dash" ? dash : `${dash};visibility:${length > 0 ? "visible" : "hidden"}`;
   }
 
-  if (emit === "dash") return `stroke-dashoffset:${num(1 - (values.draw ?? 0))}`;
+  if (emit === "dash") return `stroke-dashoffset:${num(1 - (values.draw ?? 0))}${dashed(values)}`;
 
   switch (lane) {
     case "translate":
@@ -220,7 +268,7 @@ export const cssDeclarations = (lane: string, emit: Emit, values: ChannelValues)
     case "draw": {
       const drawn = values.draw ?? 0;
 
-      return `stroke-dashoffset:${num(1 - drawn)};visibility:${drawn > 0 ? "visible" : "hidden"}`;
+      return `stroke-dashoffset:${num(1 - drawn)}${dashed(values)};visibility:${drawn > 0 ? "visible" : "hidden"}`;
     }
 
     default: {

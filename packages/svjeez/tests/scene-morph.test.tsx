@@ -4,6 +4,7 @@ import {
   Group,
   Sequence,
   Shape,
+  Stack,
   Text,
   circle,
   ease,
@@ -669,5 +670,98 @@ describe("source locations", () => {
 
     expect(find(model, "a").source?.line).toBe(7);
     expect(hitTest(model, [0.5, 0.5])?.source?.line).toBe(7);
+  });
+});
+
+describe("morph between containers", () => {
+  const card = (key: string, width = 40) => (
+    <Shape key={key} geometry={rect(width, 20)} fill="#123456" />
+  );
+
+  const board = (left: string[], right: string[]) => (
+    <Stack key="board" direction="row" gap={20}>
+      <Stack key="todo" gap={10} width={60}>
+        {left.map((key) => card(key))}
+      </Stack>
+      <Stack key="doing" gap={10} width={60}>
+        {right.map((key) => card(key))}
+      </Stack>
+    </Stack>
+  );
+
+  const moving = (a: SceneElement, b: SceneElement): Model.Scene =>
+    scene({ size: [200, 100], duration: 4, title: "Test" }, () => morph(a, b, span(1, 2)));
+
+  test("a key that changes containers travels from its old box to its new one, above the columns", () => {
+    const model = moving(board(["a", "b"], ["c"]), board(["b"], ["c", "a"]));
+
+    const at = (t: number): [number, number] => {
+      const box = boxesOf(model, t)["board/doing/a"];
+
+      if (!box) throw new Error("board/doing/a has no box");
+
+      return [box.x, box.y];
+    };
+
+    const [from, mid, to] = [at(0), at(2), at(4)];
+
+    // "a" has one key, the one it has in the last state, the whole way.
+    expect(from[0]).toBeLessThan(to[0]);
+    expect(to[1]).toBeGreaterThan(from[1]);
+    expect(mid[0]).toBeGreaterThan(from[0]);
+    expect(mid[0]).toBeLessThan(to[0]);
+    expect(mid[1]).toBeGreaterThan(from[1]);
+    expect(mid[1]).toBeLessThan(to[1]);
+  });
+
+  test("it moves instead of fading, and siblings reflow by moving", () => {
+    const model = moving(board(["a", "b"], ["c"]), board(["b"], ["c", "a"]));
+    const a = find(model, "board/doing/a");
+    const b = find(model, "board/todo/b");
+
+    expect(a.layers).toHaveLength(0);
+    expect(isLane(a.at)).toBe(true);
+    expect(b.layers).toHaveLength(0);
+    expect(isLane(b.at)).toBe(true);
+  });
+
+  test("the travelling node is drawn after both containers", () => {
+    const model = moving(board(["a"], []), board([], ["a"]));
+    const root = find(model, "board");
+
+    if (root.kind !== "group") throw new Error("board is not a group");
+
+    expect(root.children.map((child) => child.key)).toEqual([
+      "board/todo",
+      "board/doing",
+      "board/doing/a",
+    ]);
+  });
+
+  test("a key that repeats inside a state keeps matching per parent", () => {
+    const model = moving(board(["a"], ["a"]), board([], ["a"]));
+    const todo = find(model, "board/todo/a");
+
+    // todo's "a" leaves in place and doing's stays: nothing travels.
+    expect(todo.layers.length).toBeGreaterThan(0);
+    expect(isLane(find(model, "board/doing/a").layers[0]?.opacity)).toBe(false);
+  });
+
+  test("a node that would leave a container that clips fades out and in instead of travelling", () => {
+    const clipped = (left: string[], right: string[]) => (
+      <Stack key="board" direction="row" gap={20}>
+        <Stack key="todo" gap={10} width={60} clip={rect(60, 60)}>
+          {left.map((key) => card(key))}
+        </Stack>
+        <Stack key="doing" gap={10} width={60}>
+          {right.map((key) => card(key))}
+        </Stack>
+      </Stack>
+    );
+
+    const model = moving(clipped(["a"], []), clipped([], ["a"]));
+
+    expect(find(model, "board/todo/a").layers.length).toBeGreaterThan(0);
+    expect(find(model, "board/doing/a").layers.length).toBeGreaterThan(0);
   });
 });

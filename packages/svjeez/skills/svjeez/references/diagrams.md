@@ -38,9 +38,8 @@ export default scene({ size: [720, 200], duration: 5, title: "Review", theme, lo
         {chart.node}
         <Shape
           geometry={circle(4)}
-          anchor="center"
           fill={theme.red}
-          at={chart.route("pr", "post").travel(trip)}
+          offset={chart.route("pr", "post").travel(trip)}
           opacity={track(0).to(1, span(trip.start, 0.1)).to(0, span(trip.end - 0.2, 0.2))}
         />
       </Group>

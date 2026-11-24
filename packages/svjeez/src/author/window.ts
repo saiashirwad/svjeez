@@ -1,8 +1,8 @@
-import { DEFAULT_EASE, EPSILON, ease, isHold, type Ease, type Seconds } from "../model/time";
+import { DEFAULT_EASE, EPSILON, ease, isHold, type Seconds } from "../model/time";
 import { easeAt, easeBetween, staysInside } from "../model/ease-at";
 import type { Key, Lane } from "../model/ir";
 import { SceneError } from "../model/scene-error";
-import { isSpring } from "./spring";
+import { isCurveFn, isSpring } from "./spring";
 import { passageOf, type Track } from "./track";
 
 export const ramp = (value: number, from: number, to: number): number =>
@@ -23,14 +23,14 @@ export class Window {
 
 const unit = (x: number): number => Math.min(1, Math.max(0, x));
 
-/** The progress x of a segment at which its ease reaches y (the ease must rise from 0 to 1 without overshoot). */
-const curveTimeAt = (curve: Ease, y: number): number => {
+/** The progress x of a segment at which its curve reaches y (the curve must rise from 0 to 1 without overshoot). */
+const curveTimeAt = (curve: (x: number) => number, y: number): number => {
   let [lo, hi] = [0, 1];
 
   for (let i = 0; i < 50; i++) {
     const mid = (lo + hi) / 2;
 
-    if (easeAt(curve, mid) < y) lo = mid;
+    if (curve(mid) < y) lo = mid;
     else hi = mid;
   }
 
@@ -100,11 +100,11 @@ export const timeAt = (source: Track<number>, target: number): Seconds | undefin
       const y = unit((target - current) / (next - current));
       const curve = step.ease ?? DEFAULT_EASE;
 
-      if (isHold(curve)) {
-        if (Math.abs(next - target) <= 1e-9) return step.start + step.over;
-      } else {
-        return step.start + curveTimeAt(curve, y) * step.over;
-      }
+      if (isCurveFn(curve)) return step.start + curveTimeAt(curve, y) * step.over;
+
+      if (!isHold(curve)) return step.start + curveTimeAt((x) => easeAt(curve, x), y) * step.over;
+
+      if (Math.abs(next - target) <= 1e-9) return step.start + step.over;
     }
 
     current = next;
@@ -147,8 +147,8 @@ export const windowLane = (
         keys.push({ t: key.t, value: to, ease: ease.linear });
       } else {
         const [x1, x2] = [
-          y1 <= EPSILON ? 0 : curveTimeAt(curve, y1),
-          y2 >= 1 - EPSILON ? 1 : curveTimeAt(curve, y2),
+          y1 <= EPSILON ? 0 : curveTimeAt((x) => easeAt(curve, x), y1),
+          y2 >= 1 - EPSILON ? 1 : curveTimeAt((x) => easeAt(curve, x), y2),
         ];
 
         if (x1 > 0) keys.push({ t: before.t + x1 * dt, value: from, ease: ease.linear });

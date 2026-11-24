@@ -411,3 +411,57 @@ describe("a derived value that switches", () => {
     ).toContain("@keyframes");
   });
 });
+
+test("a step function of a track that goes up and comes back compiles", () => {
+  const up = track(0).to(4, span(0, 2), ease.linear).to(0, span(2, 2), ease.linear);
+
+  const model = made(() => (
+    <Shape fill="#000000" geometry={rect(10, 10)} rotate={up.map((v) => Math.floor(v) * 90)} />
+  ));
+
+  const out = svg.emit(model);
+
+  // Every whole value is held for its own stretch; the one-instant peak at 4 draws nothing.
+  expect(out).toContain("rotate:270deg");
+  expect(out).not.toContain("rotate:360deg");
+});
+
+test("many colors rounded to hex and many long sawtooth moves compile in seconds", () => {
+  const clock = track(0).to(1, span(0, 20), ease.linear);
+
+  const hex = (u: number) =>
+    Math.round(255 * u)
+      .toString(16)
+      .padStart(2, "0");
+
+  const model = made(
+    () => (
+      <Group>
+        {Array.from({ length: 12 }, (_, i) => (
+          <Shape
+            key={`c${i}`}
+            geometry={rect(8, 8)}
+            fill={clock.map(
+              (k) => `#${hex(0.2 + 0.5 * Math.sin(Math.PI * k) ** 2)}40${hex(k)}` as const,
+            )}
+          />
+        ))}
+        {Array.from({ length: 12 }, (_, i) => (
+          <Shape
+            key={`d${i}`}
+            geometry={circle(2)}
+            fill="#000000"
+            offset={clock.map((k): Vec => [i * 10, -20 + ((k * 20 + i / 12) % 1) * 150])}
+          />
+        ))}
+      </Group>
+    ),
+    20,
+  );
+
+  const start = performance.now();
+
+  svg.emit(model);
+  // Each of these lanes once took seconds on its own, so the scene took minutes.
+  expect(performance.now() - start).toBeLessThan(5000);
+});

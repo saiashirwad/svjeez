@@ -59,7 +59,7 @@ export default scene(
                 icon={heartFilled}
                 size={SIZE}
                 color={theme.red}
-                motion={enter(pop, { from: { scale: 0.3, opacity: 0 }, curve: ease.pop })}
+                motion={enter(pop, { from: { scale: 0.3 }, curve: ease.pop })}
               />
             </Center>
           </Grid>
@@ -70,7 +70,7 @@ export default scene(
                 size={24}
                 color={theme.yellow}
                 motion={enter(pop.shift(0.15 * (i + 1)), {
-                  from: { scale: 0.3, opacity: 0 },
+                  from: { scale: 0.3 },
                   curve: ease.pop,
                 })}
               />

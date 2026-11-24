@@ -43,7 +43,7 @@ const Toggle = ({ label, when }: { readonly label: string; readonly when: Span }
           fill={body}
           stroke={{ color: rim, width: 1.5 }}
         />
-        <Shape geometry={circle(9)} at={knob} anchor="center" fill="#FFFFFF" />
+        <Shape geometry={circle(9)} offset={knob} fill="#FFFFFF" />
       </Group>
     </Stack>
   );

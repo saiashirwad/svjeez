@@ -383,7 +383,7 @@ export const Center = ({
   };
 };
 
-export interface AlignProps extends Omit<Common, "at" | "anchor"> {
+export interface AlignProps extends Omit<Common, "at" | "anchor" | "offset"> {
   readonly to?: "canvas" | Box | Ref;
   readonly place?: Place;
   readonly inset?: number | Vec;
@@ -397,9 +397,11 @@ export const Align = ({
   children,
   ...props
 }: AlignProps): SceneElement => {
-  if ("at" in props || "anchor" in props)
+  const given = (["at", "offset", "anchor"] as const).find((name) => name in props);
+
+  if (given)
     throw new SceneError(
-      `<Align> places itself against its to, so it takes no ${"at" in props ? "at" : "anchor"}. Move it in with inset, and say which point lands where with place.`,
+      `<Align> places itself against its to, so it takes no ${given}. Move it in with inset, and say which point lands where with place.`,
     );
   const [u, v] = fractionOf(place, "<Align>");
   const gap = room(inset, "<Align> inset");

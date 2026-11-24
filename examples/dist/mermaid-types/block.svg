@@ -11,14 +11,14 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m1{animation-name:k1}
 @keyframes k2{0%,22.5%{stroke-dashoffset:1;visibility:hidden}26.25%,100%{stroke-dashoffset:0;visibility:visible}}
 .m2{animation-name:k2}
-@keyframes k3{0%,24.621%{visibility:hidden}24.622%,100%{visibility:visible}}
-.m3{animation-name:k3}
+@keyframes k3{0%{visibility:hidden}24.621%,100%{visibility:visible}}
+.m3{animation-name:k3;animation-timing-function:steps(1)}
 @keyframes k4{0%,26.25%{stroke-dashoffset:1;visibility:hidden}30%,100%{stroke-dashoffset:0;visibility:visible}}
 .m4{animation-name:k4}
-@keyframes k5{0%,28.684%{visibility:hidden}28.685%,100%{visibility:visible}}
-.m5{animation-name:k5}
-@keyframes k6{0%,28.371%{visibility:hidden}28.372%,100%{visibility:visible}}
-.m6{animation-name:k6}
+@keyframes k5{0%{visibility:hidden}28.684%,100%{visibility:visible}}
+.m5{animation-name:k5;animation-timing-function:steps(1)}
+@keyframes k6{0%{visibility:hidden}28.371%,100%{visibility:visible}}
+.m6{animation-name:k6;animation-timing-function:steps(1)}
 @keyframes k7{0%,3.75%{translate:0 6px;opacity:0}7.5%,100%{translate:0 0;opacity:1}}
 .m7{animation-name:k7}
 @keyframes k8{0%,7.5%{translate:0 6px;opacity:0}11.25%,100%{translate:0 0;opacity:1}}

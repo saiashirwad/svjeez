@@ -343,7 +343,13 @@ const cssLane = <T>(
     route = "css",
     cuts = true,
     emit,
-  }: { readonly route?: Route; readonly cuts?: boolean; readonly emit?: Emit } = {},
+    joins = false,
+  }: {
+    readonly route?: Route;
+    readonly cuts?: boolean;
+    readonly emit?: Emit;
+    readonly joins?: boolean;
+  } = {},
 ): CssLane => {
   const { keys, period } = held(lane, ctx.scene.duration, values);
 
@@ -356,6 +362,7 @@ const cssLane = <T>(
     period,
     snapped: period,
     emit: emit ?? (cuts && slot === "opacity" && isCut(keys) ? "visibility" : "value"),
+    joins,
   };
 
   report(ctx, slot, written);
@@ -713,7 +720,9 @@ const stroked = (
         "draw",
         trim,
         ([from, to]) => (moving ? { draw: to, drawStart: from } : { draw: to }),
-        trimHides(node) ? {} : { emit: "dash" },
+        trimHides(node)
+          ? { joins: closed(node.geometry) }
+          : { emit: "dash", joins: closed(node.geometry) },
       ),
     );
   } else if (trim[0] !== 0 || trim[1] !== 1) {
@@ -774,6 +783,23 @@ const shapeElement = (
   stroked(ctx, node, drawn.attrs, lanes, shift);
 
   return drawn;
+};
+
+/** Whether a stroke around this geometry has a join where it starts. An animated geometry might, so it counts. */
+const closed = (geometry: ShapeNode["geometry"]): boolean => {
+  if (isLane(geometry)) return true;
+
+  switch (geometry.kind) {
+    case "rect":
+    case "ellipse":
+      return true;
+    case "points":
+      return geometry.closed;
+    case "path":
+      return geometry.contours.some((contour) => contour.closed);
+    default:
+      return false;
+  }
 };
 
 const trimHides = (node: ShapeNode): boolean =>

@@ -657,9 +657,61 @@ describe("errors say what to write", () => {
     );
   });
 
+  test("offset moves any node's own [0, 0]: a circle, a text's own top-left, an image's corner", () => {
+    const found = boxes(() => (
+      <Group>
+        <Shape key="dot" fill="#000000" geometry={circle(5)} offset={[120, 44]} />
+        <Shape key="box" fill="#000000" geometry={rect(10, 10)} offset={[20, 30]} />
+        <Picture key="image" src={pic} offset={[7, 9]} />
+        <Text key="t" font={mono} size={10} fill="#000000" offset={[10, 50]}>
+          Hi
+        </Text>
+      </Group>
+    ));
+
+    expect(found.dot).toEqual([115, 39, 10, 10]);
+    expect(found.box).toEqual([20, 30, 10, 10]);
+    expect(found.image).toEqual([7, 9, 40, 20]);
+    expect(found.t![0]).toBeCloseTo(10);
+    expect(found.t![1]).toBeCloseTo(50);
+  });
+
+  test("offset follows a track, and one that goes to an anchor", () => {
+    const target = ref();
+
+    const model = made(() => (
+      <Group>
+        <Shape key="to" ref={target} fill="#000000" geometry={rect(10, 10)} offset={[100, 40]} />
+        <Shape
+          key="dot"
+          fill="#000000"
+          geometry={circle(5)}
+          offset={track<Vec>([10, 10]).to([50, 10], span(0, 1)).to(target.center, span(2, 1))}
+        />
+      </Group>
+    ));
+
+    expect(boxesOf(model, 0).dot).toMatchObject({ x: 5, y: 5 });
+    expect(boxesOf(model, 1).dot).toMatchObject({ x: 45, y: 5 });
+    expect(boxesOf(model, 3).dot).toMatchObject({ x: 100, y: 40 });
+  });
+
+  test("offset and at are exclusive on every node", () => {
+    expect(() =>
+      made(() => <Shape key="s" fill="#000000" geometry={circle(5)} at={[0, 0]} offset={[1, 1]} />),
+    ).toThrow('<Shape> "s" has both at and offset.');
+    expect(() =>
+      made(() => (
+        <Shape key="s" fill="#000000" geometry={circle(5)} offset={[1, 1]} anchor="center" />
+      )),
+    ).toThrow('<Shape> "s" has anchor="center" and offset');
+    // @ts-expect-error Align places itself, so it takes no offset.
+    expect(() => made(() => <Align offset={[1, 1]} />)).toThrow("<Align> places itself");
+  });
+
   test("offset takes no at or anchor, and a container's child takes no offset", () => {
     expect(() => made(() => <Group key="g" at={[0, 0]} offset={[10, 10]} />)).toThrow(
-      '<Group> "g" has both at and offset. at places a point of its box; offset places its children\'s [0, 0].',
+      '<Group> "g" has both at and offset. at puts a point of its box somewhere; offset moves its own [0, 0] there.',
     );
     expect(() =>
       made(() => (
@@ -681,6 +733,20 @@ describe("errors say what to write", () => {
     );
   });
 
+  test("an Align inside a Stack is told it can't sit there, not that it has an offset", () => {
+    expect(() =>
+      made(() => (
+        <Stack key="col">
+          <Align key="a" place="center">
+            <Shape fill="#000000" geometry={rect(10, 10)} />
+          </Align>
+        </Stack>
+      )),
+    ).toThrow(
+      '<Align> "a" places itself against the canvas or a ref, so it can\'t sit inside the <Stack>',
+    );
+  });
+
   test("an anchor on a path with no at, on a container's child, on Align and on a connector", () => {
     expect(() =>
       made(() => (
@@ -692,7 +758,7 @@ describe("errors say what to write", () => {
         />
       )),
     ).toThrow(
-      'anchor on <Shape> "p" names the point its at places, but it has no at, so it stays where its coordinates put it. Give it an at, or drop anchor.',
+      'anchor on <Shape> "p" names the point its at places, but it has no at, so it stays where its coordinates put it. Add at, such as at={[100, 50]} anchor="center", or at={box.bottom} with a ref box to pin it to another node, or drop anchor.',
     );
     expect(() =>
       made(() => (

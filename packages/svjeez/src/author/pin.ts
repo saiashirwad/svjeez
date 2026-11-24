@@ -6,8 +6,14 @@ import type { Place } from "./refs";
 import { isPoint } from "../model/guards";
 import { sub } from "../model/vec";
 
+/** Where on a box an anchor pins: one of the nine places, or two fractions `[across, down]` of the box. */
 export type AnchorPlace = Place | readonly [across: number, down: number];
 
+/**
+ * What `anchor` takes on a `<Text>`: an AnchorPlace ("top-left", "top", "top-right", "left", "center", "right",
+ * "bottom-left", "bottom", "bottom-right", or `[across, down]`) or a point on the text's baseline: "baseline-left",
+ * "baseline" (centered) or "baseline-right".
+ */
 export type TextAnchorPlace = AnchorPlace | "baseline-left" | "baseline" | "baseline-right";
 
 export const PLACES = {

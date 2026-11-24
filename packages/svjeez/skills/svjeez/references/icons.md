@@ -8,7 +8,7 @@ import { heartFilled, rocket } from "@svjeez/icons/tabler";
 import { enter, span, track } from "svjeez";
 
 <Icon icon={rocket} at={[40, 40]} size={48} color={theme.text} draw={(piece) => track(0).to(1, span(0.2, 0.6).shift(piece * 0.1))} />
-<Icon icon={heartFilled} size={48} color={theme.red} motion={enter(span(1, 0.5), { from: { scale: 0.3, opacity: 0 } })} />
+<Icon icon={heartFilled} size={48} color={theme.red} motion={enter(span(1, 0.5), { from: { scale: 0.3 } })} />
 ```
 
 ## Sets

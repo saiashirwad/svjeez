@@ -98,8 +98,7 @@ export default scene(
 
       <Shape
         geometry={circle(30)}
-        at={center(3)}
-        anchor="center"
+        offset={center(3)}
         stroke={{
           color: theme.green,
           width: track(2).to(18, span(0.4, 1.4), ease.inOut).rewind(1.2, ease.inOut),
@@ -107,16 +106,10 @@ export default scene(
       />
       <Label i={3}>stroke swells</Label>
 
+      <Shape geometry={circle(36)} offset={center(4)} stroke={{ color: theme.raised, width: 6 }} />
       <Shape
         geometry={circle(36)}
-        at={center(4)}
-        anchor="center"
-        stroke={{ color: theme.raised, width: 6 }}
-      />
-      <Shape
-        geometry={circle(36)}
-        at={center(4)}
-        anchor="center"
+        offset={center(4)}
         rotate={-90}
         stroke={{ color: theme.orange, width: 6, cap: "round" }}
         trim={track<Vec>([0, 0])

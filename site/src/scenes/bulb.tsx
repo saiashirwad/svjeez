@@ -37,15 +37,15 @@ export const Bulb = ({
   <Group at={at} anchor="center" origin="center" scale={size / 132} motion={motion}>
     <Group>
       <Shape geometry={cap} stroke={{ color: RIM, width: 7, cap: "round" }} />
-      <Shape geometry={circle(9)} at={[104, 38]} anchor="center" fill={GLASS} />
+      <Shape geometry={circle(9)} offset={[104, 38]} fill={GLASS} />
       <Shape geometry={body} fill={GLASS} />
       <Shape geometry={belly} fill={SHADE} />
-      <Shape geometry={ellipse(9, 6)} at={[66, 124]} anchor="center" fill={BLUSH} opacity={0.55} />
-      <Shape geometry={ellipse(9, 6)} at={[142, 124]} anchor="center" fill={BLUSH} opacity={0.55} />
-      <Shape geometry={ellipse(7, 9)} at={[84, 110]} anchor="center" fill={INK} />
-      <Shape geometry={ellipse(7, 9)} at={[124, 110]} anchor="center" fill={INK} />
-      <Shape geometry={circle(2.4)} at={[86, 106]} anchor="center" fill="#FFFFFF" />
-      <Shape geometry={circle(2.4)} at={[126, 106]} anchor="center" fill="#FFFFFF" />
+      <Shape geometry={ellipse(9, 6)} offset={[66, 124]} fill={BLUSH} opacity={0.55} />
+      <Shape geometry={ellipse(9, 6)} offset={[142, 124]} fill={BLUSH} opacity={0.55} />
+      <Shape geometry={ellipse(7, 9)} offset={[84, 110]} fill={INK} />
+      <Shape geometry={ellipse(7, 9)} offset={[124, 110]} fill={INK} />
+      <Shape geometry={circle(2.4)} offset={[86, 106]} fill="#FFFFFF" />
+      <Shape geometry={circle(2.4)} offset={[126, 106]} fill="#FFFFFF" />
       <Shape
         geometry={mood === "happy" ? smile : wobble}
         stroke={{ color: INK, width: 4.5, cap: "round" }}

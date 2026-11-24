@@ -18,7 +18,11 @@
 - **Params.** `svjeez/params` is gone: `param` comes from the root (`param.number`, `param.count`, `param.seconds`, `param.color`, `param.easing`, `param.choice`, `param.text`, `param.list`), and `defaults`, `parse` and the param types come from `svjeez/tools`. `import { number } from "svjeez/params"` is `param.number(…)`.
 - **Span types.** `Span` is the type `span()` returns, and `OpenSpan` the open one; `svjeez/tools` no longer exports `Spanned` or `OpenSpanned`.
 - **Text layout.** `svjeez/tools` no longer exports `layoutText`, `layoutRuns`, `fitSizeForRuns`, `nodeName` or the types that described their results (`LaidLine`, `LaidRun`, `TextLayout`, `TextLayoutOptions`, `TextPiece`). Lay text out with `<Text>`, and read where it landed with `boxesOf(scene, t)`.
+- **Keys.** A node with no key is keyed `#0`, `#1`, … among its siblings, not `0`, `1`, …, so `key={1}` never collides with a position. A part path or `boxesOf` lookup that spelled out a position (`"card/0"`) is now `"card/#0"`, or give the node a key. A key may be a number, which reads as its text.
 - **Anchors on moving geometry.** `anchor` on a `<Shape>` whose animated geometry moves the anchor point (a rect growing with `anchor="center"`) throws instead of drifting. Put the shape in `<Group offset={…}>` and draw it around `[0, 0]`.
+- **Seeded random.** `random(seed)` takes a whole number or a string; a fractional seed throws. Whole-number seeds give the same numbers as before.
+- **Enter and exit.** `enter(span, { from })` and `exit(span, { to })` merge `from` and `to` over `{ opacity: 0 }`, so a node stays hidden outside its span unless you pass an `opacity` yourself.
+- **Travelling nodes.** In `morph`, a keyed node that sits in a different container in the next state moves between the two instead of fading out of one and into the other, as long as neither container moves or clips. Key it differently in each container to keep the fade.
 - **Names.** One name per idea; each old name is a type error.
   - Stroke: cap `"butt"` is `"flat"`; join `"miter"` and `"bevel"` are `"sharp"` and `"flat"`; `nonScaling` is `fixedWidth`.
   - Geometry: `pathData(d)` is `path.parse(text)`; `polyline(pts)` is `line(...points)` (two or more points); `polygon(pts)` is `polygon(...points)`, variadic like `line`.

@@ -6,10 +6,17 @@ import { arcToCubics, ringsOf } from "../model/paths";
 import type { Contour, Cubic, Geometry as Outline, Rgba, Vec } from "../model/ir";
 import type { Gradient, Pattern } from "./paint";
 import { isArray } from "../model/guards";
+import { isTrack } from "./track";
 
 export type { Hex };
 
 const positive = (value: number, what: string): number => {
+  if (isTrack(value))
+    throw new SceneError(
+      `${what} takes plain numbers, but got an animated value.`,
+      `To animate the size, track the shape: geometry={track(${what.replace("()", "(w0, h0)")}).to(${what.replace("()", "(w1, h1)")}, span(0, 1), ease.inOut)}.`,
+    );
+
   if (!(value >= 0 && Number.isFinite(value)))
     throw new SceneError(`${what} needs a finite size of 0 or more, got ${value}.`);
 
@@ -282,21 +289,6 @@ export function alpha(color: Color, opacity: number): Color {
 
   return mix(color, "#00000000", opacity);
 }
-
-/** Deterministic PRNG (mulberry32) yielding numbers in `[0, 1)`, so every build draws the same random layout. */
-export const random = (seed: number): (() => number) => {
-  if (!Number.isFinite(seed)) throw new SceneError(`random() needs a finite seed, got ${seed}.`);
-
-  let state = seed | 0;
-
-  return (): number => {
-    state = (state + 0x6d2b79f5) | 0;
-    let t = Math.imul(state ^ (state >>> 15), 1 | state);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-};
 
 export const rgbaOf = (hex: Hex, caller: string): Rgba => {
   const [r, g, b, a] = hexBytes(hexOf(hex, caller, true));
