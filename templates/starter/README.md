@@ -8,4 +8,4 @@ npm run check   # problems with file:line and a fix
 npm run svg     # writes scene.svg
 ```
 
-Geist is under the SIL Open Font License, in `fonts/Geist-OFL.txt`.
+The scene loads Geist (SIL Open Font License) from jsDelivr when it builds, so it needs a network connection.

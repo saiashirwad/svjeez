@@ -18,9 +18,10 @@ const theme = tokens({
   dark: { background: "#0E1116", text: "#EEF1F5", blue: "#6EA2FF" },
 });
 
-const face = (file: string) => font.load(new URL(`./fonts/${file}`, import.meta.url));
+const face = (file: string) =>
+  font.load(`https://cdn.jsdelivr.net/npm/geist@1.9.2/dist/fonts/geist-sans/${file}`);
 
-const sans = font.family(await face("Geist-400.ttf"), await face("Geist-600.ttf"));
+const sans = font.family(await face("Geist-Regular.ttf"), await face("Geist-SemiBold.ttf"));
 
 export default scene(
   {
