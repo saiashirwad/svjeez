@@ -258,3 +258,22 @@ test("svjeez dev serves the scene with its params and rebuilds it when the scene
     server.kill();
   }
 }, 20_000);
+
+test("svjeez --help prints usage and exits 0, on its own or after a command", () => {
+  for (const args of [["--help"], ["frames", "--help"]]) {
+    const { exitCode, stdout } = cli(...args);
+
+    expect(exitCode).toBe(0);
+    expect(stdout.toString()).toContain("usage:");
+  }
+});
+
+test("svjeez names an unknown flag and prints the usage, with no stack trace", () => {
+  const { exitCode, stderr } = cli("svg", "scene.tsx", "--nope");
+  const err = stderr.toString();
+
+  expect(exitCode).toBe(1);
+  expect(err).toStartWith("svjeez svg: Unknown option '--nope'");
+  expect(err).toContain("usage:");
+  expect(err).not.toContain("    at ");
+});

@@ -18,6 +18,7 @@
 - **Params.** `svjeez/params` is gone: `param` comes from the root (`param.number`, `param.count`, `param.seconds`, `param.color`, `param.easing`, `param.choice`, `param.text`, `param.list`), and `defaults`, `parse` and the param types come from `svjeez/tools`. `import { number } from "svjeez/params"` is `param.number(…)`.
 - **Span types.** `Span` is the type `span()` returns, and `OpenSpan` the open one; `svjeez/tools` no longer exports `Spanned` or `OpenSpanned`.
 - **Text layout.** `svjeez/tools` no longer exports `layoutText`, `layoutRuns`, `fitSizeForRuns`, `nodeName` or the types that described their results (`LaidLine`, `LaidRun`, `TextLayout`, `TextLayoutOptions`, `TextPiece`). Lay text out with `<Text>`, and read where it landed with `boxesOf(scene, t)`.
+- **Anchors on moving geometry.** `anchor` on a `<Shape>` whose animated geometry moves the anchor point (a rect growing with `anchor="center"`) throws instead of drifting. Put the shape in `<Group offset={…}>` and draw it around `[0, 0]`.
 - **Names.** One name per idea; each old name is a type error.
   - Stroke: cap `"butt"` is `"flat"`; join `"miter"` and `"bevel"` are `"sharp"` and `"flat"`; `nonScaling` is `fixedWidth`.
   - Geometry: `pathData(d)` is `path.parse(text)`; `polyline(pts)` is `line(...points)` (two or more points); `polygon(pts)` is `polygon(...points)`, variadic like `line`.
