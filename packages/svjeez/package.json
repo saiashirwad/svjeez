@@ -59,7 +59,7 @@
   },
   "scripts": {
     "dev": "bun run src/cli.ts dev",
-    "test": "bun test --timeout 30000",
+    "test": "bun test --timeout 30000 --conditions @svjeez/source",
     "test:node": "tsx scripts/node-check.ts",
     "test:package": "tsx scripts/package-check.ts",
     "typecheck": "tsc --noEmit",
@@ -81,19 +81,30 @@
     "@svjeez/math": "workspace:*",
     "@svjeez/mermaid": "workspace:*",
     "@types/bun": "latest",
+    "@webgpu/types": "^0.1.74",
     "effect": "^4.1.4",
     "playwright-core": "^1.64.1",
     "publint": "^0.3.25",
     "sucrase": "^3.35.1",
     "tsx": "^4.23.15",
-    "typescript": "latest"
+    "typegpu": "^0.12.10",
+    "typescript": "latest",
+    "unplugin-typegpu": "^0.12.8"
   },
   "peerDependencies": {
     "playwright-core": ">=1.49",
-    "typescript": ">=5.4"
+    "typegpu": ">=0.12",
+    "typescript": ">=5.4",
+    "unplugin-typegpu": ">=0.12"
   },
   "peerDependenciesMeta": {
     "playwright-core": {
+      "optional": true
+    },
+    "typegpu": {
+      "optional": true
+    },
+    "unplugin-typegpu": {
       "optional": true
     },
     "typescript": {

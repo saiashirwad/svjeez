@@ -47,7 +47,8 @@ const sharedOf = (node: Element): Shared | undefined => {
   if (!DRAWN.has(node.tag)) return undefined;
 
   if (node.tag === "g") {
-    if (node.children.length === 0) return undefined;
+    // A slot's group is where the page puts its own HTML, so it stays in place.
+    if (node.children.length === 0 || "data-slot" in node.attrs) return undefined;
 
     return {
       key: `g ${node.children.map((child) => inline(child)).join("")}`,

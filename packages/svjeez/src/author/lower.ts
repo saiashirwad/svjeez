@@ -1112,6 +1112,7 @@ const lowered = (
     el.type,
     el.type === "group" ? el.settle : undefined,
     backdrop,
+    el.type === "group" ? el.points : undefined,
   );
 
   const aimed = (node: SceneNode): SceneNode => {
@@ -1154,6 +1155,8 @@ const lowered = (
           [0, 0],
         ),
         ...(el.layout && { authored: { layout: el.layout } }),
+        ...(el.slot !== undefined && { slot: el.slot }),
+        ...(el.shader && { shader: el.shader }),
         kind: "group",
         children,
       };
@@ -1496,6 +1499,25 @@ const lifted = (container: SceneElement & { readonly type: "group" }): MorphElem
   };
 };
 
+/** Each <Slot> has a name of its own, so the page finds one box by it. */
+const checkSlots = (root: GroupNode): void => {
+  const seen = new Set<string>();
+
+  const visit = (node: SceneNode): void => {
+    if (node.slot !== undefined && seen.has(node.slot))
+      throw new SceneError(
+        `Two <Slot>s are both named "${node.slot}".`,
+        "Give each slot a name of its own.",
+      );
+
+    if (node.slot !== undefined) seen.add(node.slot);
+
+    if (node.kind === "group") node.children.forEach(visit);
+  };
+
+  visit(root);
+};
+
 const isBare = (el: SceneElement): boolean =>
   el.type === "fragment" ||
   (el.type === "group" && Object.keys(el.props).length === 0 && el.settle === undefined);
@@ -1575,6 +1597,8 @@ const lowerScene = (
   };
 
   const root = settle(drafted, ctx.notes, duration);
+
+  checkSlots(root);
 
   const still =
     options.still === false

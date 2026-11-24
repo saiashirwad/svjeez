@@ -1,7 +1,16 @@
 import { seek as seekBrowser } from "./browser-seek";
 import type { Seconds } from "./model/time";
 
-export { mount, pointer, scrolled, type ClockControl, type Driver, type Mounted } from "./clocks";
+export {
+  mount,
+  pointer,
+  scrolled,
+  type ClockControl,
+  type Driver,
+  type Mounted,
+} from "./clocks";
+
+export type { SlotControl } from "./slots";
 
 export { restyle, type RestyleOptions } from "./restyle";
 

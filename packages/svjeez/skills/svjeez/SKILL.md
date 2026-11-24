@@ -78,7 +78,7 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 | `count(value, { format, rate })` | a number that counts, as the only content of a `<Text>` besides strings |
 | `typed(value, { by, caret })` | a string track typed out, last in a `<Text>`: each `.to()` erases back to the shared start, then types; `by` is `chars` (default), `words` or your own split |
 | `<Group offset>` | moves children together; `offset` is where their `[0, 0]` goes |
-| `<Picture src={picture(bytes)} width height>` | a PNG, JPEG, GIF, WebP or SVG; `picture.load(path)` reads a file |
+| `<Picture src={picture(bytes)} width height>`, `<Slot name width height>`, `<Shader name width height inputs fragment>` | a PNG, JPEG, GIF, WebP or SVG (`picture.load(path)` reads a file); a box the page fills with its own HTML; one it draws with a TypeGPU shader written in the scene ([`references/shader.md`](references/shader.md)) |
 | `<Sequence when={span}>`, `<Sequence clock={clock(name, span)}>` | a local clock: tracks inside count from the span's start; a `clock()` is one page code can play or scrub ([`references/time.md`](references/time.md)) |
 | `<Arrow from to stroke bend inset head draw>` | between points or anchors; follows them as they move |
 

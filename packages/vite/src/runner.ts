@@ -5,6 +5,7 @@ import {
   defaultServerConditions,
   resolveConfig,
   type EnvironmentModuleNode,
+  type PluginOption,
   type ResolvedConfig,
   type RunnableDevEnvironment,
 } from "vite";
@@ -100,9 +101,19 @@ export const createRunner = (app: ResolvedConfig): Runner => {
     const { conditions, externalConditions, noExternal, external } =
       app.environments.ssr?.resolve ?? {};
 
+    // A scene with a <Shader> is written with TypeGPU, whose "use gpu" functions this environment compiles as it loads them.
+    // Imported here, not at the top: Astro loads this file to read its config, before svjeez has a built entry to resolve.
+    const { loadTypeGpu, typegpuPlugin } = await import("svjeez/tools");
+
+    const make = (await loadTypeGpu(app.root, { transform: false }))
+      ? await typegpuPlugin("vite", app.root)
+      : undefined;
+
     const config = await resolveConfig(
       {
         configFile: false,
+        // SAFETY: unplugin-typegpu's Vite entry makes a Vite plugin.
+        plugins: make ? [make() as PluginOption] : [],
         envDir: false,
         root: app.root,
         cacheDir: app.cacheDir,

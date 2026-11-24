@@ -17,7 +17,7 @@ class Named implements Clock {
   ) {}
 }
 
-const NAME = /^[A-Za-z][A-Za-z0-9_-]*$/;
+export const NAME = /^[A-Za-z][A-Za-z0-9_-]*$/;
 
 export const isClock = (value: unknown): value is Clock => value instanceof Named;
 

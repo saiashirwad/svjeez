@@ -53,7 +53,12 @@ Effect.gen(function* () {
           Effect.flatMap((contents) =>
             fs.writeFileString(
               file,
-              contents.replace(/(from\s+["'])(\.\.?\/[^"']+)(["'])/g, "$1$2.js$3"),
+              contents
+                .replace(
+                  /^(import\s[^\n]*\sfrom\s+"typegpu";)$/gm,
+                  "// @ts-ignore typegpu is an optional peer\n$1",
+                )
+                .replace(/(from\s+["'])(\.\.?\/[^"']+)(["'])/g, "$1$2.js$3"),
             ),
           ),
         ),

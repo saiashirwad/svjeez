@@ -21,7 +21,7 @@ export type SvgNode =
 
 export type Element = Extract<SvgNode, { kind: "element" }>;
 
-const TEXT_TAGS = new Set(["text", "tspan", "title", "desc"]);
+const TEXT_TAGS = new Set(["text", "tspan", "title", "desc", "script"]);
 const RAW_TEXT_TAGS = new Set(["style"]);
 
 export const element = (

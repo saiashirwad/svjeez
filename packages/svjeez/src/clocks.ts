@@ -1,4 +1,6 @@
 import type { Seconds } from "./model/time";
+import { runShaders } from "./shader";
+import { slotOf, type SlotControl } from "./slots";
 import { RATE_ATTR } from "./svg/rate";
 
 /** Calls `progress` with 0 to 1 whenever it likes, and returns the function that stops it. */
@@ -34,6 +36,8 @@ export interface Mounted {
   readonly clocks: ReadonlyMap<string, ClockControl>;
   /** The clock called `name`. Throws, naming the clocks the SVG has, when there is none. */
   clock(name: string): ClockControl;
+  /** The slot called `name`. Throws, naming the slots the SVG has, when there is none. */
+  slot(name: string): SlotControl;
   /** Stop every driver and every move of a clock, leaving the picture where it is. The SVG can be mounted again. */
   unmount(): void;
 }
@@ -375,7 +379,7 @@ export const mount = (root: Element): Mounted => {
   const made = [...groups].map(([name, group]) => [name, control(name, group)] as const);
   const clocks = new Map(made.map(([name, { clock }]) => [name, clock]));
 
-  return {
+  const mounted: Omit<Mounted, "unmount"> = {
     clocks,
     clock: (name) => {
       const found = clocks.get(name);
@@ -387,7 +391,17 @@ export const mount = (root: Element): Mounted => {
 
       return found;
     },
-    unmount: () => made.forEach(([, { release }]) => release()),
+    slot: (name) => slotOf(root, name),
+  };
+
+  const stopShaders = runShaders(root, mounted);
+
+  return {
+    ...mounted,
+    unmount: () => {
+      stopShaders();
+      made.forEach(([, { release }]) => release());
+    },
   };
 };
 
