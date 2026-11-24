@@ -115,6 +115,52 @@ describe("google", () => {
     expect(readdirSync(cache)).toEqual(["ABeeZee-400-normal.ttf"]);
   });
 
+  test("when Google serves WOFF2, as it does to a browser, the TTF comes from Fontsource", async () => {
+    const whole = readFileSync(fixture);
+    const asked: string[] = [];
+
+    globalThis.fetch = Object.assign(
+      async (url: string | URL | Request) => {
+        asked.push(String(url));
+
+        if (String(url).includes("googleapis"))
+          return new Response("@font-face { src: url(https://fonts.gstatic.com/a.woff2) }");
+
+        return String(url).includes("gstatic")
+          ? new Response("wOF2 not a ttf")
+          : new Response(whole);
+      },
+      { preconnect: realFetch.preconnect },
+    );
+
+    const mono = await google("Geist Mono", { weight: 600 });
+
+    expect(mono.measure("Hello", 20)).toBeGreaterThan(0);
+    expect(asked.at(-1)).toBe(
+      "https://cdn.jsdelivr.net/fontsource/fonts/geist-mono@latest/latin-600-normal.ttf",
+    );
+    expect(readdirSync(cache)).toEqual(["Geist-Mono-600-normal.ttf"]);
+  });
+
+  test("when the fallback has no TTF either, the error names its URL", async () => {
+    globalThis.fetch = Object.assign(
+      async (url: string | URL | Request) => {
+        if (String(url).includes("googleapis"))
+          return new Response("@font-face { src: url(https://fonts.gstatic.com/a.woff2) }");
+
+        return String(url).includes("gstatic")
+          ? new Response("wOF2 not a ttf")
+          : new Response("Not Found", { status: 404 });
+      },
+      { preconnect: realFetch.preconnect },
+    );
+
+    await expect(google("ABeeZee")).rejects.toThrow(
+      /not a font, and the TTF fallback https:\/\/cdn\.jsdelivr\.net\/fontsource\/fonts\/abeezee@latest\/latin-400-normal\.ttf answered HTTP 404/,
+    );
+    expect(readdirSync(cache)).toEqual([]);
+  });
+
   test("a failed network on a cold cache names the family and the cache path", async () => {
     stubFetch(() => Promise.reject(new TypeError("fetch failed")));
 

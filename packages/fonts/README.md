@@ -17,6 +17,7 @@ const body = await google.family("Geist", [{ weight: 400 }, { weight: 600 }]);
 - Pass any loaded font or family to `<Text font={...}>`.
 - `weight` defaults to `400` and `italic` to `false`. `google.family()` groups faces so `<Text>` and `<Run>` can switch weights or italics.
 - Faces are cached on disk (`$XDG_CACHE_HOME/svjeez/fonts` or `~/.cache/svjeez/fonts`). Set `SVJEEZ_FONTS_CACHE` to share the cache in CI.
+- Google Fonts serves a TTF only to a script that sets its own user agent. Where it can't, as in StackBlitz, whose Node runs in the browser, Google serves WOFF2, and the face comes from Fontsource's TTF of the same font instead, with only its Latin characters.
 
 ## Handwriting
 

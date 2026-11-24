@@ -88,6 +88,27 @@ const download = async (family: string, weight: number, italic: boolean): Promis
   return new Uint8Array(await file.arrayBuffer());
 };
 
+/**
+ * Google picks the format by user agent. Where a script can't set one, as in StackBlitz, whose Node runs in the
+ * browser, it serves WOFF2, which svjeez can't measure. Fontsource mirrors Google's fonts as TTFs, one per subset.
+ */
+const fontsource = async (family: string, weight: number, italic: boolean): Promise<Uint8Array> => {
+  const id = family
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  const url = `https://cdn.jsdelivr.net/fontsource/fonts/${id}@latest/latin-${weight}-${slant(italic)}.ttf`;
+  const file = await fetch(url, { headers: HEADERS });
+
+  if (!file.ok)
+    throw new GoogleError(
+      `Google Fonts answered for ${family} ${weight} ${slant(italic)} with a file that is not a font, and the TTF fallback ${url} answered HTTP ${file.status}.`,
+    );
+
+  return new Uint8Array(await file.arrayBuffer());
+};
+
 const pending = new Map<string, Promise<Uint8Array>>();
 
 const bytesOf = (family: string, weight: number, italic: boolean): Promise<Uint8Array> => {
@@ -118,6 +139,8 @@ const load = async (
 
   try {
     bytes = await download(family, weight, italic);
+
+    if (!isFont(bytes)) bytes = await fontsource(family, weight, italic);
   } catch (error) {
     if (error instanceof GoogleError) throw error;
 
@@ -129,7 +152,7 @@ const load = async (
 
   if (!isFont(bytes))
     throw new GoogleError(
-      `Google Fonts answered for ${family} ${weight} ${slant(italic)} with a file that is not a font.`,
+      `Google Fonts answered for ${family} ${weight} ${slant(italic)} with a file that is not a font, and so did its TTF fallback on Fontsource.`,
     );
 
   const temp = `${path}.${process.pid}.${Date.now()}.tmp`;
