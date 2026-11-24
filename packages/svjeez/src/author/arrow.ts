@@ -9,6 +9,7 @@ import { ease } from "./spring";
 import type { Connect } from "./settle";
 import type { Anim } from "./track";
 import { lookOf, paintedBoxOf } from "../model/painted";
+import { isNumber } from "../model/guards";
 
 export interface ArrowProps extends Omit<
   Common,
@@ -374,8 +375,6 @@ const connect =
       ),
     ];
   };
-
-const isNumber = (value: Anim<number>): value is number => typeof value === "number";
 
 export const Arrow = (props: ArrowProps): SceneElement => {
   const label = "<Arrow>";

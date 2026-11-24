@@ -1,6 +1,5 @@
 import type { Scene } from "./ir";
-
-const isObject = (value: unknown): value is object => typeof value === "object" && value !== null;
+import { isObject } from "./guards";
 
 export const isScene = (value: unknown): value is Scene =>
   isObject(value) &&

@@ -4,6 +4,7 @@ import type { Animated, Box, Geometry, Layer, Scene, SceneNode, Source, Vec } fr
 import { valueAt as sampleAt } from "../model/sample";
 import { mixNumber, mixVec, type Mix } from "../model/steps";
 import { lookOf, paintedBoxOf } from "../model/painted";
+import { isArray } from "../model/guards";
 
 export type Matrix = readonly [a: number, b: number, c: number, d: number, e: number, f: number];
 
@@ -179,7 +180,7 @@ export const hitTest = (
   point: Vec,
   at: Seconds = 0,
 ): Placed | undefined => {
-  const list = isPlacedList(scene) ? scene : placements(scene, at);
+  const list = isArray(scene) ? scene : placements(scene, at);
 
   return list.findLast((placed) => {
     if (placed.depth === 0 || placed.opacity <= 1e-6) return false;
@@ -188,6 +189,3 @@ export const hitTest = (
     return back !== undefined && inside(placed.frame, apply(back, point));
   });
 };
-
-const isPlacedList = (value: Scene | readonly Placed[]): value is readonly Placed[] =>
-  Array.isArray(value);

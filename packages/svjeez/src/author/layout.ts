@@ -5,6 +5,7 @@ import { flat, type Backdrop, type Child, type Common, type SceneElement } from 
 import { restOf } from "./derived";
 import { Anchor, canvasAnchor, fractionOf, placeIn, Ref, type Place } from "./refs";
 import type { Arrange, Size } from "./settle";
+import { isArray } from "../model/guards";
 
 /** Where something sits in free room: a name, or a fraction from 0 (start) to 1 (end). */
 export type Alignment = "start" | "center" | "end" | number;
@@ -42,10 +43,8 @@ const share = (value: Alignment, what: string): number => {
 export const spread: Distribute = (free, count) =>
   Array.from({ length: count }, (_, i) => (count > 1 ? (free * i) / (count - 1) : 0));
 
-const isPair = (value: number | Vec): value is Vec => Array.isArray(value);
-
 const room = (value: number | Vec, what: string): Vec => {
-  const [x, y] = isPair(value) ? value : [value, value];
+  const [x, y] = isArray(value) ? value : [value, value];
 
   if (!(x >= 0 && y >= 0 && Number.isFinite(x + y)))
     throw new SceneError(`${what} needs finite lengths of 0 or more, got ${x} and ${y}.`);

@@ -6,12 +6,10 @@ import { outward, type Aim, type Notes } from "./settle";
 import { laneOf, mixVec, type Step, type Timing } from "../model/steps";
 import type { NodeElement } from "./nodes";
 import { goesToAnchor, isTrack, readGoals } from "./track";
+import { isPoint } from "../model/guards";
 
 const framed = (el: NodeElement): el is NodeElement & { readonly type: "group" } =>
   el.type === "group" && el.props.offset !== undefined;
-
-const isVec = (value: unknown): value is Vec =>
-  Array.isArray(value) && value.length === 2 && value.every(Number.isFinite);
 
 /**
  * A node whose at (or a group's offset) is a track with a step that goes to an anchor is placed after
@@ -46,7 +44,7 @@ export const withGoals = (
       "Go to the anchor in a track that does not loop.",
     );
 
-  if (!isVec(initial))
+  if (!isPoint(initial))
     throw new SceneError(
       `${where} starts at ${String(initial)}, but a track that goes to an anchor starts at a point.`,
       "Start it with track([x, y]).",

@@ -37,6 +37,7 @@ import {
 } from "../model/steps";
 import { blendable, isGradient, mixPaint } from "./paint";
 import type { LayerValues } from "./track";
+import { isArray } from "../model/guards";
 
 export interface MorphOptions {
   /** One curve for every transition, or one per transition. */
@@ -84,9 +85,6 @@ const between = (
 
   return { type: "morph", states: states.map(flat), spans, options };
 };
-
-const isCurves = (curve: Curve | readonly Curve[]): curve is readonly Curve[] =>
-  Array.isArray(curve);
 
 export const morph = Object.assign(
   (before: Child, after: Child, when: Interval, options: MorphOptions = {}): SceneElement =>
@@ -1046,7 +1044,7 @@ const merge = (
     curves: spans.map((_, i) => {
       const { curve = DEFAULT_EASE } = options;
 
-      return isCurves(curve) ? (curve[i] ?? DEFAULT_EASE) : curve;
+      return isArray(curve) ? (curve[i] ?? DEFAULT_EASE) : curve;
     }),
     enter: layerOf(options.enter ?? { opacity: 0 }),
     exit: layerOf(options.exit ?? { opacity: 0 }),

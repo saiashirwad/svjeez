@@ -7,6 +7,7 @@ import { breaksOf, follow, laneFrom, valueAt } from "../model/sample";
 import { laneOf, mixNumber, mixVec, type Mix, type Parts, type Timing } from "../model/steps";
 import { isTrack, passageOf, readOf, type Anim, type Track } from "./track";
 import { Window, ramp, windowLane } from "./window";
+import { isNumber } from "../model/guards";
 
 export interface MapOptions {
   readonly tolerance?: number;
@@ -144,8 +145,6 @@ export const within = (value: Anim<number>, from: number, to: number): Anim<numb
   // SAFETY: the one source is a window, which reads as a number.
   return new Derived([new Window(value, from, to)], ([progress]) => progress as number);
 };
-
-const isNumber = (value: Read | undefined): value is number => typeof value === "number";
 
 const readable = (value: Read): boolean =>
   isNumber(value)

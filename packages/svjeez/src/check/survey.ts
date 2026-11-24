@@ -24,6 +24,7 @@ import { breaksOf, segmentAt, unrolled } from "../model/sample";
 import { same } from "../model/steps";
 import { nodeName } from "../model/naming";
 import { walkScene } from "../model/walk";
+import { isArray } from "../model/guards";
 
 export interface Entry {
   readonly node: SceneNode;
@@ -344,10 +345,8 @@ export const schemesOf = (entry: Entry): readonly Scheme[] =>
 export const meet = (a: Entry, b: Entry): boolean =>
   schemesOf(a).some((scheme) => schemesOf(b).includes(scheme));
 
-const isRgba = (color: Color): color is Rgba => Array.isArray(color);
-
 export const rgbaIn = (scene: Scene, color: Color, scheme: Scheme): Rgba =>
-  isRgba(color) ? color : (scene.tokens[color.name]?.[scheme] ?? [0, 0, 0, 0]);
+  isArray(color) ? color : (scene.tokens[color.name]?.[scheme] ?? [0, 0, 0, 0]);
 
 export const colorAt = (
   scene: Scene,
@@ -391,7 +390,7 @@ const hex = (n: number): string =>
     .toUpperCase();
 
 const colorName = (color: Color): string =>
-  isRgba(color)
+  isArray(color)
     ? `#${hex(color[0])}${hex(color[1])}${hex(color[2])}${color[3] < 1 ? hex(color[3]) : ""}`
     : color.name;
 

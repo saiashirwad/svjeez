@@ -1,11 +1,10 @@
 import type { Animated, Key, Lane, Vec } from "./ir";
+import { isArray } from "./guards";
 
 export const isLane = <T>(value: Animated<T>): value is Lane<T> =>
   typeof value === "object" && value !== null && "kind" in value && value.kind === "lane";
 
-const isVec = (value: number | Vec): value is Vec => Array.isArray(value);
-
-export const pair = (value: number | Vec): Vec => (isVec(value) ? value : [value, value]);
+export const pair = (value: number | Vec): Vec => (isArray(value) ? value : [value, value]);
 
 export const atRest = <T>(value: Animated<T>): T => (isLane(value) ? value.keys[0].value : value);
 

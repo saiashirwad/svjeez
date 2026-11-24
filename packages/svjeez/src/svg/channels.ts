@@ -1,6 +1,7 @@
 import type { Color } from "../model/color";
 import { num } from "../model/format";
 import type { PathData } from "../model/paths";
+import { isNumber } from "../model/guards";
 
 const number: number = 0;
 
@@ -58,7 +59,5 @@ export const spec = (target: Channel): Spec => CHANNELS[target];
 
 export type Backend = "css" | "smil";
 
-const isNumeric = (value: ChannelValues[Channel]): value is number => typeof value === "number";
-
 export const formatValue = (value: ChannelValues[Channel]): string =>
-  isNumeric(value) ? num(value) : String(value);
+  isNumber(value) ? num(value) : String(value);

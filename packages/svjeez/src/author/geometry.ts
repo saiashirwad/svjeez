@@ -3,6 +3,7 @@ import { lineCubic } from "../model/curve";
 import type { Box, Contour, Cubic, Geometry as Outline, Vec } from "../model/ir";
 import { SceneError } from "../model/scene-error";
 import { outlineOf, type Geometry } from "./values";
+import { isNumber, isArray } from "../model/guards";
 
 export interface AroundOptions {
   readonly about?: Vec;
@@ -20,10 +21,6 @@ export interface SplineOptions {
 }
 
 const DEG = Math.PI / 180;
-
-const isVec = (value: number | Vec): value is Vec => Array.isArray(value);
-
-const isNumber = (value: "x" | "y" | number): value is number => typeof value === "number";
 
 const isBuilder = (
   shape: Geometry | ((deg: number, index: number) => Geometry),
@@ -78,7 +75,7 @@ export const rotated = (geometry: Geometry, deg: number, about: Vec = [0, 0]): O
 
 /** Scales `geometry` by `factor` (uniform or `[sx, sy]`) around `about` (default `[0, 0]`). */
 export const scaled = (geometry: Geometry, factor: number | Vec, about: Vec = [0, 0]): Outline => {
-  const [sx, sy] = isVec(factor) ? factor : [factor, factor];
+  const [sx, sy] = isArray(factor) ? factor : [factor, factor];
 
   finiteNumber(sx, "scaled()", "scale");
   finiteNumber(sy, "scaled()", "scale");

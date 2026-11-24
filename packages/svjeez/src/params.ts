@@ -1,6 +1,7 @@
 import { SceneError } from "./model/scene-error";
 import { hexOf, type Hex } from "./model/color";
 import { ease, type Ease } from "./model/time";
+import { isNumber, isString } from "./model/guards";
 
 type Point = { readonly x: number; readonly y: number };
 
@@ -207,12 +208,8 @@ const show = (v: Json | undefined): string => {
 const isScalar = (p: Param | Fields): p is ScalarParam =>
   typeof p.kind === "string" && p.kind !== "list";
 
-const isRecord = (v: Json | undefined): v is JsonObject =>
+export const isRecord = (v: Json | undefined): v is JsonObject =>
   typeof v === "object" && v !== null && !Array.isArray(v);
-
-const isNumber = (v: Json | undefined): v is number => typeof v === "number";
-
-const isString = (v: Json | undefined): v is string => typeof v === "string";
 
 const NAMED_EASES = ["linear", "in", "out", "inOut", "pop", "hold"] as const;
 

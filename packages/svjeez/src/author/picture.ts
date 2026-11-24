@@ -1,5 +1,6 @@
 import { SceneError } from "../model/scene-error";
 import { readSource } from "./source";
+import { isString } from "../model/guards";
 
 type ImageFormat = "svg" | "png" | "jpeg" | "gif" | "webp";
 
@@ -192,12 +193,9 @@ const svgHref = (markup: string): `data:${string}` =>
 
 const SUPPORTED = Object.keys(FORMATS).join(", ");
 
-const isText = (source: Uint8Array | ArrayBuffer | string): source is string =>
-  typeof source === "string";
-
 export const picture = Object.assign(
   (source: Uint8Array | ArrayBuffer | string): PictureData => {
-    const bytes = isText(source)
+    const bytes = isString(source)
       ? new TextEncoder().encode(source)
       : source instanceof Uint8Array
         ? source
