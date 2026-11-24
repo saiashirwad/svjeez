@@ -4,11 +4,8 @@ import { isCurved } from "./curve";
 import type { Animated, Key, Lane, Layer, Vec } from "./ir";
 import { isLane, mapLane } from "./lane";
 import { mixNumber, mixVec, same, type Mix } from "./steps";
-import { valueAt as sampleAt } from "./sample";
+import { valueAt } from "./sample";
 import { add } from "./vec";
-
-const valueAt = <T>(lane: Lane<T>, t: number, mix: Mix<T>): T =>
-  sampleAt(lane, t, (a, b, amount) => mix(a, b, amount, "a folded layer"));
 
 const windows = <T>(lane: Lane<T>): (readonly [number, number])[] =>
   lane.keys.slice(1).flatMap((key, i) => {
@@ -68,7 +65,7 @@ const joined = <T>(
     .filter((t, i, all) => i === 0 || t - all[i - 1]! > EPSILON);
 
   const keys = times.map((t, i): Key<T> => {
-    const value = op(valueAt(a, t, mix), valueAt(b, t, mix));
+    const value = op(valueAt(a, t, mix, "a folded layer"), valueAt(b, t, mix, "a folded layer"));
 
     if (i === 0) return { t, value };
     const before = times[i - 1]!;

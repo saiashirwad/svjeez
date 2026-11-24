@@ -4,7 +4,8 @@ import { isLane } from "../model/lane";
 import { nodeName } from "../model/naming";
 import { mixNumber, mixVec, same, type Mix } from "../model/steps";
 import type { Seconds } from "../model/time";
-import { layerMatrix, times, valueAt, type Matrix, type Placed } from "./boxes";
+import { layerMatrix, times, type Matrix, type Placed } from "./boxes";
+import { valueAt } from "../model/sample";
 import { VISIBLE, add, isGone, isLeaf, label, type Survey } from "./inspect-context";
 import {
   SCHEMES,

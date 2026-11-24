@@ -13,7 +13,7 @@ import {
   type FontCtx,
   type FontUse,
 } from "../font/usage";
-import { moving, valueAt, type Key } from "./keys";
+import { channelsAt, moving, type Key } from "./keys";
 import { animate, windowEnd } from "./smil";
 import { element, type AttrValue, type Element, type SvgNode } from "./tree";
 
@@ -197,7 +197,7 @@ const emitShell = (state: State, target: Element, lanes: readonly Lane[]): SvgNo
     if (lane.backend === "smil") {
       // SAFETY: a smil lane animates an SVG attribute, never a custom property, so its first target is a Channel.
       const value = formatValue(
-        valueAt(lane.keys, local(state, lane))[lane.channels[0] as Channel],
+        channelsAt(lane.keys, local(state, lane))[lane.channels[0] as Channel],
       );
 
       const nodes = animate(state.canvas, lane.key, lane, () => nextName(state, "w"));

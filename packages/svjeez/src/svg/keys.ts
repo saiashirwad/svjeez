@@ -86,7 +86,7 @@ const blend = (
   return blendPaths(String(a), String(b), amount);
 };
 
-export const valueAt = (keys: readonly Key[], t: Seconds): ChannelValues => {
+export const channelsAt = (keys: readonly Key[], t: Seconds): ChannelValues => {
   const index = keys.findLastIndex((key) => key.t <= t + EPSILON);
   const [from, to] = [keys[index]!, keys[index + 1]];
 

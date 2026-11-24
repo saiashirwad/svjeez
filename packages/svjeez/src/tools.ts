@@ -83,7 +83,9 @@ export type { AdjustOptions, DisplaceOptions, Effect, ShadowOptions } from "./au
 
 export type { MorphOptions } from "./author/morph";
 
-export { boxesOf, hitTest, placements, valueAt, type Matrix, type Placed } from "./check/boxes";
+export { boxesOf, hitTest, placements, type Matrix, type Placed } from "./check/boxes";
+
+export { valueAt } from "./model/sample";
 
 export { isScene } from "./model/is-scene";
 

@@ -15,7 +15,8 @@ import { isColor } from "../model/painted";
 import { placed, reachOf } from "../model/reach";
 import { mixNumber } from "../model/steps";
 import type { Seconds } from "../model/time";
-import { valueAt, type Placed } from "./boxes";
+import type { Placed } from "./boxes";
+import { valueAt } from "../model/sample";
 import { add, isGone, isLeaf, label, shownBoxes, spoken, type Survey } from "./inspect-context";
 import {
   between,

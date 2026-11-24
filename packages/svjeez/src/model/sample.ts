@@ -4,7 +4,7 @@ import { alongCurve, fitControls, hermiteControls, onCurve, type Controls } from
 import type { Animated, Key, Lane, Vec } from "./ir";
 import { isLane } from "./lane";
 import { fitted, fittedCurves, keyCost, type RunKey, type Sample } from "../author/spring";
-import { same } from "./steps";
+import { same, type Mix } from "./steps";
 
 export type Blend<T> = (a: T, b: T, amount: number) => T;
 
@@ -39,13 +39,14 @@ export const segmentAt = <T>(lane: Lane<T>, t: Seconds): Segment<T> => {
   return { from, to, amount: easeAt(to.ease ?? DEFAULT_EASE, (at - from.t) / (to.t - from.t)) };
 };
 
-export const valueAt = <T>(value: Animated<T>, t: Seconds, blend: Blend<T>): T => {
+/** A value at `t`. A lane mixes the two keys around `t` with `mix`; `where` names the value in its errors. */
+export const valueAt = <T>(value: Animated<T>, t: Seconds, mix: Mix<T>, where = "a lane"): T => {
   if (!isLane(value)) return value;
   const { from, to, amount } = segmentAt(value, t);
 
   if (from === to || amount === 0) return from.value;
 
-  return onCurve(from, to, amount) ?? blend(from.value, to.value, amount);
+  return onCurve(from, to, amount) ?? mix(from.value, to.value, amount, where);
 };
 
 export const breaksOf = (values: readonly Animated<unknown>[], duration: Seconds): Seconds[] => {
