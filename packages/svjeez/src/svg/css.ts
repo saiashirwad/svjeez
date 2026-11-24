@@ -31,7 +31,7 @@ interface Stops {
 }
 
 /** `down` rounds each stop to the tick at or before its time, so a step that lands at t is already in force at t. */
-const percents = (keys: readonly Key[], period: Seconds, down = false): Stops => {
+const percents = (lane: string, keys: readonly Key[], period: Seconds, down = false): Stops => {
   for (const places of [3, 4]) {
     const at = keys.map((key) => (key.t / period) * 100);
 
@@ -60,7 +60,7 @@ const percents = (keys: readonly Key[], period: Seconds, down = false): Stops =>
   }
 
   throw new Error(
-    `Two keys are too close to tell apart on a ${num(period)}s timeline: ${keys.map((key) => key.t).join(", ")}.`,
+    `Two keys of ${lane} are too close to tell apart on a ${num(period)}s timeline: ${keys.map((key) => key.t).join(", ")}.`,
   );
 };
 
@@ -96,7 +96,7 @@ const frames = (
   );
 
   const blocks = new Map<string, { selectors: string[]; suffix: string; set: string }>();
-  const stops = percents(keys, period, emit === "visibility");
+  const stops = percents(lane, keys, period, emit === "visibility");
   const { at } = stops;
   const before = holds ? stops.before : stops.before.map(() => undefined);
   keys.forEach((key, index) => {
