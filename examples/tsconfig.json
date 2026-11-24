@@ -28,9 +28,12 @@
     "dom-react",
     "dom-react-vite",
     "dom-component",
+    "field-site",
     "dom-svelte",
     "live-editor",
     "clocks/page.ts",
-    "clocks/env.d.ts"
+    "clocks/env.d.ts",
+    "gpu-card/page.ts",
+    "gpu-card/env.d.ts"
   ]
 }
