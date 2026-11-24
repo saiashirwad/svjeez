@@ -40,8 +40,10 @@ export const wideLines = (survey: Survey): void => {
     const widest = Math.max(
       0,
       ...node.lines.map((line) => {
+        // A run's advances end with the gap after its last letter, which draws nothing.
         const ends = line.runs.map(
-          (run) => run.at[0] + run.advances.reduce((sum, a) => sum + a, 0),
+          (run) =>
+            run.at[0] + run.advances.reduce((sum, a) => sum + a, 0) - (run.letterSpacing ?? 0),
         );
 
         return ends.length === 0 ? 0 : Math.max(...ends) - node.box.x;
