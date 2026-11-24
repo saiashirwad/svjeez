@@ -164,8 +164,6 @@ const sceneDir = (file: string): string => {
   }
 };
 
-const warn = (warning: Diagnostic): void => console.warn(`warning: ${warning.message}`);
-
 const loadValue = async (
   file: string,
   flags: ParamFlags = {},
@@ -252,7 +250,7 @@ const loadValue = async (
 const loadBuilt = async (
   file: string,
   flags: ParamFlags = {},
-  onWarning: (warning: Diagnostic) => void = warn,
+  onWarning = (warning: Diagnostic): void => console.warn(`warning: ${warning.message}`),
   onLane?: (lane: LaneReport) => void,
 ): Promise<{ readonly svg: string; readonly scene?: Scene }> => {
   const value = await loadValue(file, flags);
@@ -416,8 +414,6 @@ const loadOptional = async (name: string, command: string): Promise<object> => {
   return import(url);
 };
 
-const loadVideo = (): Promise<VideoModule> => loadOptional(VIDEO, "video");
-
 const videoCommand = async (args: string[]): Promise<void> => {
   const { values, positionals } = parseArgs({
     args,
@@ -444,7 +440,7 @@ const videoCommand = async (args: string[]): Promise<void> => {
     fail(`--format ${format} doesn't match --out ${values.out}. Pass one, or make them agree.`);
   const out = values.out ?? `${basename(file, extname(file))}.${format}`;
   const colorScheme = parseScheme(values["color-scheme"]);
-  const loaded = await loadVideo();
+  const loaded: VideoModule = await loadOptional(VIDEO, "video");
   const encode = loaded.video ?? fail(`${VIDEO} has no video().`);
   const svg = await loadSvg(file, values);
   report(svg);

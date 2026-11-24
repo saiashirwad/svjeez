@@ -69,8 +69,6 @@ const windowedAt = (tag: string, sets: string, clock: Seconds, paused?: boolean)
 
 const escaped = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const secondsOf = (list: string): number[] => list.split(",").map((one) => parseFloat(one));
-
 const timelineCss = (svg: string, timeline: string, range: string | undefined): string => {
   if (!/^(--[\w-]+|[a-z-]+\(.*\))$/.test(timeline))
     throw new Error(
@@ -98,7 +96,9 @@ const timelineCss = (svg: string, timeline: string, range: string | undefined): 
 
   for (const [, name, durations] of svg.matchAll(own))
     rules.push(
-      `.${name}{animation-iteration-count:${secondsOf(durations!)
+      `.${name}{animation-iteration-count:${durations!
+        .split(",")
+        .map((one) => parseFloat(one))
         .map((d) => num(loop / d))
         .join(",")}}`,
     );

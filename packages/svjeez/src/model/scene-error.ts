@@ -9,9 +9,6 @@ export interface Where {
 export const placeOf = ({ file, line, column }: Source): string =>
   [file || undefined, line, column].filter((part) => part !== undefined).join(":");
 
-const textOf = (problem: string, fix: string | undefined, source: Source | undefined): string =>
-  `${source ? `${placeOf(source)}: ` : ""}${problem}${fix ? ` ${fix}` : ""}`;
-
 export class SceneError extends Error {
   override readonly name = "SceneError";
   readonly problem: string;
@@ -21,7 +18,10 @@ export class SceneError extends Error {
   readonly source: Source | undefined;
 
   constructor(problem: string, fix?: string, where: Where = {}, options?: { cause?: unknown }) {
-    super(textOf(problem, fix, where.source), options);
+    super(
+      `${where.source ? `${placeOf(where.source)}: ` : ""}${problem}${fix ? ` ${fix}` : ""}`,
+      options,
+    );
     this.problem = problem;
     this.fix = fix;
     this.node = where.node;

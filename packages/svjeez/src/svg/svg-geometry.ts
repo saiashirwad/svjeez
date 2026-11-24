@@ -48,8 +48,6 @@ export type Moving =
       readonly lanes: readonly Written[];
     };
 
-const smilNumber = (value: number): ChannelValues => ({ width: value });
-
 const close = (a: number, b: number, size: number): boolean =>
   Math.abs(a - b) <= 1e-9 * Math.max(1, size);
 
@@ -151,7 +149,16 @@ const element = (
     placed: true,
     lanes: series.flatMap(({ name, each }): Written[] =>
       each.some((value) => value !== each[0])
-        ? [{ slot: name, lane: along(lane, each.map(smilNumber)), route: "smil" }]
+        ? [
+            {
+              slot: name,
+              lane: along(
+                lane,
+                each.map((width): ChannelValues => ({ width })),
+              ),
+              route: "smil",
+            },
+          ]
         : [],
     ),
   };
@@ -451,8 +458,6 @@ const framed = (node: ShapeNode): boolean =>
       ),
   );
 
-const scalable = (node: ShapeNode): boolean => node.stroke === undefined && !framed(node);
-
 type Arc = Extract<Geometry, { kind: "arc" }>;
 
 type Rect = Extract<Geometry, { kind: "rect" }>;
@@ -528,7 +533,7 @@ export const drawMoving = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Movi
 
   if (keys[0]!.kind === "arc") return dashed(node, lane, at) ?? morph(node, smil, at);
 
-  if (scalable(node)) {
+  if (node.stroke === undefined && !framed(node)) {
     const base = keys.reduce((best, key) =>
       extent(pointsOf(contoursOf(key))) > extent(pointsOf(contoursOf(best))) ? key : best,
     );

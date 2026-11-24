@@ -66,9 +66,6 @@ const checked = <Output>(
 
 const SLOTS: ReadonlySet<string> = new Set(["id", "key", "children"]);
 
-const childrenOf = (given: Slots): Slots =>
-  given.children === undefined ? {} : { children: given.children };
-
 /**
  * A component with a name that survives minification and, optionally, a Standard Schema for its props. It is called
  * from JSX like any function component, and also takes `id` and `children`: an `id` scopes the ids written inside it
@@ -87,7 +84,7 @@ export const component = <Input = {}, Output = {}>(
   const fn = (
     given: Input & Slots & { readonly id?: string; readonly key?: string },
   ): SceneElement => {
-    const slots = childrenOf(given);
+    const slots: Slots = given.children === undefined ? {} : { children: given.children };
 
     const rest = Object.fromEntries(Object.entries(given).filter(([prop]) => !SLOTS.has(prop)));
 

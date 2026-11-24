@@ -252,10 +252,9 @@ const connect =
     };
 
     const depth = size * Math.cos(SPREAD);
-    const lengthAt = (t: Seconds): number => pose(t).length * path.total;
 
     const shownAt = (t: Seconds): boolean => {
-      const length = lengthAt(t);
+      const length = pose(t).length * path.total;
       const [a, b] = valueAt(trim, t, blendVec);
 
       return length > EPSILON && (b - a) * length >= Math.min(depth, length) - EPSILON;
