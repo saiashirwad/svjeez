@@ -1,0 +1,19 @@
+{
+  "name": "svjeez-starter",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "svjeez dev scene.tsx",
+    "check": "svjeez check scene.tsx",
+    "svg": "svjeez svg scene.tsx --out scene.svg",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "svjeez": "next"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3"
+  }
+}

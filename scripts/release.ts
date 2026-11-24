@@ -354,7 +354,7 @@ const preview = Command.make("preview", {}, () =>
         stdin: "inherit",
         stdout: "inherit",
         stderr: "inherit",
-      })`bun run pkg-pr-new publish --commentWithSha --packageManager=bun ${packages.map(({ out }) => out)}`,
+      })`bun run pkg-pr-new publish --commentWithSha --packageManager=bun --template ./templates/* ${packages.map(({ out }) => out)}`,
     );
   }),
 );
