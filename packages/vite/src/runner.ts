@@ -15,6 +15,8 @@ export interface Runner {
   load(
     file: string,
     posters: boolean | PosterOptions,
+    /** The prefix for an inline scene that exports none of its own. */
+    inlinePrefix?: string,
   ): Promise<{ image: SceneImage; dependencies: string[] }>;
   invalidate(file: string): void;
   close(): Promise<void>;
@@ -135,10 +137,15 @@ export const createRunner = (app: ResolvedConfig): Runner => {
   })();
 
   return {
-    async load(file, posters) {
+    async load(file, posters, inlinePrefix) {
       const { runner, moduleGraph } = await ready;
 
       if (FILM.test(await readFile(file, "utf8"))) {
+        if (inlinePrefix !== undefined)
+          throw new Error(
+            `${file} is a film, whose markup is made by a browser and can't take a prefix, so it can't be imported with ?svjeez&inline. Import it with ?svjeez.`,
+          );
+
         const [{ getScene }, made] = await Promise.all([
           runner.import<typeof import("./scene.ts")>(SCENE),
           film(file, app, () => runner.import<typeof import("./film.ts")>(RUN_FILM)),
@@ -149,13 +156,16 @@ export const createRunner = (app: ResolvedConfig): Runner => {
 
       const [{ getScene }, scene] = await Promise.all([
         runner.import<typeof import("./scene.ts")>(SCENE),
-        runner.import<{ default: SceneSource }>(file),
+        runner.import<{ default: SceneSource; prefix?: string }>(file),
       ]);
 
       const [node] = moduleGraph.getModulesByFile(file) ?? [];
 
       return {
-        image: getScene(scene.default, { posters }),
+        image: getScene(scene.default, {
+          posters,
+          ...(inlinePrefix !== undefined && { prefix: scene.prefix ?? inlinePrefix }),
+        }),
         dependencies: node ? [...files(node)] : [file],
       };
     },
