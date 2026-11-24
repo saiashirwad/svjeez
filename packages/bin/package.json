@@ -1,7 +1,6 @@
 {
   "name": "@svjeez/bin",
   "version": "0.8.0-next.2",
-  "private": true,
   "description": "svjeez as one executable: write a scene file anywhere and run svjeez check, frames, svg, dev or video on it, with no package.json or node_modules.",
   "license": "MIT",
   "repository": {
@@ -10,12 +9,19 @@
     "directory": "packages/bin"
   },
   "type": "module",
+  "publishConfig": {
+    "directory": "package-dist"
+  },
   "scripts": {
     "build": "bun scripts/build.ts",
+    "build:package": "bun scripts/package.ts",
     "test": "bun test --timeout 30000",
-    "typecheck": "tsc --noEmit"
+    "test:package": "bun scripts/package-check.ts",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"Publish package-dist instead: bun scripts/release.ts publishes it.\" >&2 && exit 1"
   },
-  "dependencies": {
+  "devDependencies": {
+    "@effect/platform-bun": "^4.1.4",
     "@svjeez/charts": "workspace:*",
     "@svjeez/code": "workspace:*",
     "@svjeez/diagrams": "workspace:*",
@@ -25,14 +31,14 @@
     "@svjeez/math": "workspace:*",
     "@svjeez/mermaid": "workspace:*",
     "@svjeez/video": "workspace:*",
+    "@types/bun": "latest",
     "@types/node": "26.6.5",
+    "effect": "^4.1.4",
     "playwright-core": "1.64.1",
     "svjeez": "workspace:*",
     "typescript": "6.0.3"
   },
-  "devDependencies": {
-    "@effect/platform-bun": "^4.1.4",
-    "@types/bun": "latest",
-    "effect": "^4.1.4"
+  "engines": {
+    "node": ">=18"
   }
 }

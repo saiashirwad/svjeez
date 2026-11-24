@@ -8,6 +8,16 @@ curl -fsSL https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/bi
 
 `SVJEEZ_VERSION=v0.8.0` installs a given release, and `SVJEEZ_INSTALL=/usr/local/bin` installs somewhere other than `~/.local/bin`. On Windows, download `svjeez-windows-x64.exe` from the [releases](https://github.com/saiashirwad/svjeez/releases).
 
+## Through npm
+
+```sh
+npx @svjeez/bin@next check scenes/scene.tsx    # or bunx
+```
+
+`@svjeez/bin` is a small launcher, not the executable itself. The first run downloads the build for this machine from the `v<version>` GitHub release, checks it against `svjeez-checksums.txt`, keeps it in `~/.cache/svjeez/bin/<version>` and runs it; later runs start at once. So `npx` needs the network once, and a version can be run this way a few minutes after it reaches npm, once its release has the executables. `SVJEEZ_RELEASES=<url>` downloads from a mirror of the release downloads instead.
+
+The `svjeez` package ships its own `svjeez` command that reads the project's `node_modules`. This one carries everything, for a folder that has none; install one or the other.
+
 ## Use
 
 ```sh

@@ -54,10 +54,8 @@ Effect.gen(function* () {
     ),
   )((yield* read(dir)).exports ?? {});
 
-  yield* writeManifest(
-    dir,
-    out,
-    yield* Effect.all(
+  yield* writeManifest(dir, out, {
+    exports: yield* Effect.all(
       Record.map(exports, (target) => {
         if (!Predicate.isString(target))
           return copy(target.types, target.types).pipe(Effect.as(target));
@@ -73,5 +71,5 @@ Effect.gen(function* () {
       }),
       { concurrency: "unbounded" },
     ),
-  );
+  });
 }).pipe(Effect.provide(Services.layer), BunRuntime.runMain);

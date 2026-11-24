@@ -60,6 +60,8 @@ Every script (build, release, check, codegen, one-off tasks) is an Effect progra
 
 `packages/bin` compiles the CLI and every add-on package into one executable (`bun run build:bin` writes `packages/bin/dist/svjeez`), for scenes with no `package.json` or `node_modules` beside them. Its `check` also reports TypeScript errors as `type-error`. When a package gains or loses an export, update `packages/bin/src/modules.ts`; its test fails until you do. If a package starts reading a file beside its code, make sure the build's embed plugin handles it (`packages/bin/scripts/binary.ts`).
 
+On npm, `@svjeez/bin` is a small launcher (`src/svjeez.ts`, bundled by `scripts/package.ts`) that downloads the release's executable for the machine on first run, so `npx @svjeez/bin` needs no build. It fetches `v<version>`, whose executables the release workflow attaches a few minutes after `publish`.
+
 ## Site
 
 `site/` is the Astro site at svjeez.texoport.in. Its own scenes and films live in `site/src/scenes/`; it also shows scenes from `examples/` through the `@examples/*` path. Its scripts run Astro under Bun with the `@svjeez/source` condition. Run `bun run dev` at the root, or `bun run build` and `bun run typecheck` inside `site/`. `bun run deploy` builds and deploys through Alchemy's `Cloudflare.Website.Astro` (`site/alchemy.run.ts`). The site pins TypeScript 6, because `astro check` does not support TypeScript 7.
@@ -68,7 +70,7 @@ Every script (build, release, check, codegen, one-off tasks) is an Effect progra
 
 Every package shares one version. `bun scripts/release.ts version next` bumps them all and `bun.lock` (`minor` and `major` start a new `-next.0` line, `stable` drops the suffix, or pass an exact version). Push to main, then run `gh workflow run release.yml --ref main`: prereleases go to npm's `next` tag, stable versions to `latest`.
 
-- Every package except `packages/bin` releases. An add-on's own `package.json` exports `src/`, so the workspace and `bun link` read source; its `build:package` writes the published package to `package-dist/`, which `publishConfig.directory` names and the release packs. Its `prepublishOnly` fails on purpose, so `npm publish` in the package folder can't ship `src/`.
+- Every package releases. An add-on's own `package.json` exports `src/`, so the workspace and `bun link` read source; its `build:package` writes the published package to `package-dist/`, which `publishConfig.directory` names and the release packs. Its `prepublishOnly` fails on purpose, so `npm publish` in the package folder can't ship `src/`.
 - A new package needs `build:package` and `test:package` scripts, `publishConfig.directory`, the `prepublishOnly` guard, a README and a `test/consumer` check (copy `packages/og`), and must be in the `packages` matrix in `.github/workflows/ci.yml`.
 - Every push also publishes every package to pkg.pr.new (`.github/workflows/preview.yml`, which runs `bun scripts/release.ts preview`): `bun add https://pkg.pr.new/svjeez@<sha>` or `@main` installs it with no npm release. Each folder in `templates/` becomes a StackBlitz project on that preview, named after its `package.json` name, with its svjeez dependencies pointed at the commit; keep `templates/starter` working when the API changes.
 - A package's first publish needs a person logged in to npm: `bun scripts/release.ts claim packages/<name>`, then approve the staged version on npmjs.com. An agent can't do that step.

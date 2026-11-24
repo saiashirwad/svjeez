@@ -143,7 +143,7 @@ export const publishedRanges = Effect.fn("publishedRanges")(function* <
 export const writeManifest = Effect.fn("writeManifest")(function* <Target>(
   dir: string,
   out: string,
-  exports: Readonly<Record<string, Target>>,
+  published: Readonly<Record<string, Target>>,
 ) {
   const fs = yield* FileSystem.FileSystem;
   const path = yield* Path.Path;
@@ -164,7 +164,7 @@ export const writeManifest = Effect.fn("writeManifest")(function* <Target>(
 
   yield* fs.writeFileString(
     path.join(out, "package.json"),
-    `${JSON.stringify({ ...(yield* publishedRanges(manifest, versions)), exports }, null, 2)}\n`,
+    `${JSON.stringify({ ...(yield* publishedRanges(manifest, versions)), ...published }, null, 2)}\n`,
   );
 
   yield* fs.copyFile(path.join(dir, "README.md"), path.join(out, "README.md"));

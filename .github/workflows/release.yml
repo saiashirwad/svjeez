@@ -59,7 +59,7 @@ jobs:
         run: bun scripts/release.ts publish
 
   # The single-file svjeez for every platform, attached to the svjeez release (v<version>) it was built beside, which
-  # packages/bin/install.sh downloads from. It builds on a Mac because a Mac binary has to be signed again on one; the
+  # packages/bin/install.sh and the @svjeez/bin launcher download from. It builds on a Mac because a Mac binary has to be signed again on one; the
   # other platforms cross-compile. They go up as one set with their checksums; a release that has them keeps them, so a
   # later dispatch doesn't change what a version installs.
   binaries:
