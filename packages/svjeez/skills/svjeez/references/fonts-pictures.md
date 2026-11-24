@@ -19,9 +19,9 @@ const local = font.family(
 ```
 
 - `@svjeez/fonts` (`npm i @svjeez/fonts@next`) downloads a Google font by family name once and caches it on disk (`SVJEEZ_FONTS_CACHE`, else `~/.cache/svjeez/fonts`). It is the only part of svjeez that uses the network.
-- `font.load(path | URL)` reads a TTF or OTF from disk or http(s); `font(bytes)` takes the bytes. `font.family(...faces)` groups faces under the first one's family name; `family.face(weight, italic)` picks one. WOFF and WOFF2 embed but can't be measured: use TTF or OTF.
-- `<Text weight={600} italic>` and `<Run weight={600}>` pick a face of the family. A face the family doesn't have is an error that lists the ones it has: the browser never makes up a bold or a slant.
-- Options: `ligatures: false` (one glyph per character, so a coding font stays small), `subset: false` (embed the whole file), `fallback` (families a viewer without the embedded font sees), `family`, `weight`, `italic`.
+- `font.load(path | URL)` reads a TTF or OTF from disk or http(s); `font(bytes)` takes bytes, or `font(() => bytes)` decodes lazily on first use. `font.family(...faces)` groups faces under the first one's family name; `family.face(weight, italic)` picks one. `font.measure(text, size, { letterSpacing })` measures width; `font.metrics` exposes `ascent`, `descent`, `capHeight`, `xHeight`. WOFF and WOFF2 embed but can't be measured: use TTF or OTF.
+- `<Text weight={600} italic>` and `<Run weight={600}>` pick a face of the family (`italic` without `weight` picks the family's available italic face). A face the family doesn't have is an error that lists the ones it has: the browser never makes up a bold or a slant.
+- Options: `ligatures: false` (one glyph per character, so a coding font stays small), `features: ["lnum", "tnum"]` (OpenType single-substitution features), `subset: false` (embed the whole file), `fallback` (families a viewer without the embedded font sees), `family`, `weight`, `italic`.
 - A character a face lacks is a `missing-glyph` error; nothing falls back silently.
 - Each face a scene uses costs its glyph subset, usually the largest part of a small SVG. Use one family, two weights.
 

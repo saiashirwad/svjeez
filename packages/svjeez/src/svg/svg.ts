@@ -95,7 +95,7 @@ const supports: Readonly<Record<Feature, Support>> = {
   curvedMotion: EXACT,
   movingDashedTrim: {
     level: "close",
-    note: "a dash that starts just past a moving end of the trim can show a sliver of its cap there. Butt caps, a still trim or no dash draw it exactly.",
+    note: "a dash that starts just past a moving end of the trim can show a sliver of its cap there. Flat caps, a still trim or no dash draw it exactly.",
   },
 };
 
@@ -723,6 +723,24 @@ const stroked = (
   }
 };
 
+const applyFillOpacity = (
+  ctx: Ctx,
+  value: Animated<number> | undefined,
+  attrs: Record<string, AttrValue>,
+  lanes: CssLane[],
+): void => {
+  if (value === undefined) return;
+
+  if (!isLane(value)) {
+    if (value !== 1) attrs["fill-opacity"] = num(value);
+
+    return;
+  }
+
+  attrs["fill-opacity"] = num(value.keys[0].value);
+  lanes.push(cssLane(ctx, "fill-opacity", value, (each) => ({ fillOpacity: each })));
+};
+
 const shapeElement = (
   ctx: Ctx,
   node: ShapeNode,
@@ -752,6 +770,7 @@ const shapeElement = (
   const shift: Vec = drawn.placed ? at : [0, 0];
 
   painted(ctx, "fill", node.fill, drawn.attrs, lanes, shift, node.key);
+  applyFillOpacity(ctx, node.fillOpacity, drawn.attrs, lanes);
   stroked(ctx, node, drawn.attrs, lanes, shift);
 
   return drawn;
@@ -809,6 +828,40 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
   const { fonts } = ctx.scene;
   const runs = node.lines.flatMap((line) => line.runs);
   const base = commonest(runs);
+
+  if (node.trim !== undefined) {
+    const contours = runs.flatMap((run) => run.outline ?? []);
+    const clear: Rgba = [0, 0, 0, 0];
+
+    const fill = base && !same(base.fill, clear) ? base.fill : undefined;
+
+    const outlined: ShapeNode = {
+      kind: "shape",
+      key: node.key,
+      box: node.box,
+      at: [0, 0],
+      origin: node.origin,
+      layers: [],
+      effects: [],
+      geometry: { kind: "path", contours, rule: "nonzero" },
+      ...(fill !== undefined && { fill }),
+      ...(node.fillOpacity !== undefined && { fillOpacity: node.fillOpacity }),
+      ...(node.stroke && { stroke: node.stroke }),
+      trim: node.trim,
+    };
+
+    const drawn = shapeElement(ctx, outlined, at, lanes);
+
+    const words = node.lines
+      .map((each) => each.runs.map((run) => run.text).join(""))
+      .join(" ")
+      .trim();
+
+    if (words) drawn.attrs["aria-label"] = words;
+
+    return { drawn, children: [] };
+  }
+
   const [line, ...more] = node.lines;
   const single = more.length === 0 && (line?.runs.length ?? 0) <= 1;
 
@@ -901,6 +954,7 @@ const textElement = (ctx: Ctx, node: TextNode, at: Vec, lanes: CssLane[]): Drawn
     painted(ctx, "fill", base.fill, drawn.attrs, lanes, at, node.key);
 
     if (base.opacity !== undefined) opacity(base, drawn.attrs, lanes);
+    else applyFillOpacity(ctx, node.fillOpacity, drawn.attrs, lanes);
   } else drawn.attrs.fill = "none";
 
   if (node.stroke) strokeAttrs(ctx, node.stroke, drawn.attrs, lanes, at, node.key);
@@ -1059,7 +1113,7 @@ const dashedTrim = (node: SceneNode): GroupNode | undefined => {
   if (node.kind !== "shape" || !node.stroke?.dash || node.trim === undefined) return undefined;
 
   if (!isLane(node.trim) && !isLane(node.geometry)) return undefined;
-  const { kind: _, geometry, fill, stroke, trim, clip, mask, ...base } = node;
+  const { kind: _, geometry, fill, fillOpacity, stroke, trim, clip, mask, ...base } = node;
 
   const still = {
     box: node.box,
@@ -1095,7 +1149,16 @@ const dashedTrim = (node: SceneNode): GroupNode | undefined => {
     children: [
       ...(fill === undefined
         ? []
-        : [{ kind: "shape", ...still, key: `${node.key}#fill`, geometry, fill } as const]),
+        : [
+            {
+              kind: "shape",
+              ...still,
+              key: `${node.key}#fill`,
+              geometry,
+              fill,
+              ...(fillOpacity !== undefined && { fillOpacity }),
+            } as const,
+          ]),
       { kind: "shape", ...still, key: `${node.key}#stroke`, geometry, stroke, mask: outline },
     ],
   };

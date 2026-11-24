@@ -1,4 +1,5 @@
 import { SceneError } from "../model/scene-error";
+import { easeAt } from "../model/ease-at";
 import { ease as eases, type Ease, type Seconds } from "../model/time";
 import {
   alongCurve,
@@ -423,4 +424,17 @@ export const endSlope = (curve: Ease): number => {
 export const ease = {
   ...eases,
   spring: (options: SpringOptions = {}): Spring => new Spring(options),
+  /** Evaluates any easing curve or spring at normalized progress `t` in `[0, 1]`. */
+  at: (curve: Curve, progress: number): number => {
+    if (!(progress >= 0 && progress <= 1 && Number.isFinite(progress)))
+      throw new SceneError(`ease.at() needs progress from 0 to 1, got ${progress}.`);
+
+    if (progress === 0) return 0;
+
+    if (isSpring(curve)) return 1 - curve.state(1, 0, progress * curve.settle)[0];
+
+    if (progress === 1) return 1;
+
+    return easeAt(curve, progress);
+  },
 } as const;

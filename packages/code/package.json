@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/code",
-  "version": "0.8.0-next.1",
+  "version": "0.8.0-next.2",
   "private": true,
   "description": "Syntax-highlighted code for svjeez scenes: a <Code> node that colors Shiki tokens from the scene's palette and can type itself in.",
   "license": "MIT",

@@ -195,11 +195,11 @@ export type Handles<S extends Schema> = (values: Values<S>) => {
 
 export type Json = null | boolean | number | string | readonly Json[] | JsonObject;
 
-export type JsonObject = { readonly [key: string]: Json };
+export type JsonObject = { readonly [key: string]: Json | undefined };
 
 const show = (v: Json | undefined): string => {
   if (v === undefined) return "nothing";
-  const json = JSON.stringify(v) ?? String(v);
+  const json = JSON.stringify(v);
 
   return json.length > 40 ? `${json.slice(0, 37)}...` : json;
 };

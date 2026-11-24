@@ -73,8 +73,8 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 
 | Nodes | |
 | --- | --- |
-| `<Shape geometry fill stroke draw trim>` | `stroke={{ color, width, cap, join, dash, dashOffset, fixedWidth, under }}`; `draw` is 0 to 1, `trim={[from, to]}` a window; not both |
-| `<Text font size fill weight italic width lineHeight align along start stroke>` | strings and `<Run weight fill italic opacity>` inside; `width` wraps; `along={geometry}` sets one line along an outline |
+| `<Shape geometry fill fillOpacity stroke draw trim>` | `stroke={{ color, width, cap, join, dash, dashOffset, fixedWidth, under }}`; `draw` is 0 to 1, `trim={[from, to]}` a window; not both; `fillOpacity` animates fill independently of stroke |
+| `<Text font size fill fillOpacity weight italic width fit balance lineHeight align along start stroke draw trim>` | strings and `<Run weight fill italic opacity>` inside; `width` wraps (`balance` evens lines); `fit={{ width, maxSize, minSize, lines }}` sizes to fit; `along={geometry}` sets one line along an outline; `draw` traces glyph outlines |
 | `count(value, { format, rate })` | a number that counts, as the only content of a `<Text>` besides strings |
 | `typed(value, { by, caret })` | a string track typed out, last in a `<Text>`: each `.to()` erases back to the shared start, then types; `by` is `chars` (default), `words` or your own split |
 | `<Group offset>` | moves children together; `offset` is where their `[0, 0]` goes |
@@ -82,42 +82,42 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 | `<Sequence when={span}>` | a local clock: tracks inside count from the span's start |
 | `<Arrow from to stroke bend inset head draw>` | between points or anchors; follows them as they move |
 
-Every node also takes `key ref at anchor origin rotate scale skew opacity motion clip mask effects blend scheme`. `scheme="light"` or `"dark"` shows a node in that color scheme only ([`references/paint.md`](references/paint.md)).
+Every node also takes `key ref at anchor origin rotate scale skew opacity motion clip mask effects blend scheme`. `origin` takes a place, `[x, y]` from box top-left, `{ frame: [x, y] }` in parent coordinates, or `"at"`. `scheme="light"` or `"dark"` shows a node in that color scheme only ([`references/paint.md`](references/paint.md)).
 
 | Geometry (a track of them morphs) | |
 | --- | --- |
 | `rect(w, h, { radius })`, `circle(r)`, `ellipse(rx, ry)`, `arc({ radius, start, sweep })` | circles, ellipses and arcs are drawn around their own `[0, 0]` |
-| `line(...points)`, `polygon(...points)` | stay where their points are |
-| `path().moveTo(p).lineTo(p).curveTo(c1, c2, p).quadTo(c, p).close()`, `path.parse(d)` | a path built in code, or read from path data |
-| `moved(g, by)`, `subtract(base, ...cuts)`, `canvas.rect`, `canvas.size`, `canvas.center` | somewhere else; holes; the scene's own rect (`canvas` is the callback's argument) |
+| `line(...points)`, `polygon(...points)`, `spline(points, { closed, tension })` | stay where their points are; `spline` fits a smooth Catmull–Rom curve |
+| `path().moveTo(p).lineTo(p).curveTo(c1, c2, p).quadTo(c, p).arcTo(rx, ry, a, l, s, p).add(g).close()`, `path.parse(d)` | a path built in code, or read from path data |
+| `moved`, `rotated`, `scaled`, `mirrored`, `reversed`, `merge`, `around`, `subtract` | transform, combine, radially repeat, and cut holes; `bounds(g)`, `length(g)`, `pointAt(g, t)`, `along(g, n)` query outlines; `canvas.rect`, `canvas.size`, `canvas.center` |
 
 | Paint | |
 | --- | --- |
-| `tokens({ light, dark })`, `"#RRGGBB"`, `"#RRGGBBAA"` | named colors with a value per scheme; plain hex is the same in both; type a palette `readonly Color[]` or `as const` |
-| `mix(a, b, share)` | `share` (0 to 1) of `a` blended into `b`; with a token in either, a token the SVG blends live from the two |
-| `linear()`, `linear.across()`, `radial()`, `radial.across()`, `pattern({ size, tile, offset })` | gradients at points or across the box; a tile of nodes repeated |
+| `tokens({ light, dark })`, `"#RRGGBB"`, `"#RRGGBBAA"`, `alpha(color, a)` | named colors with a value per scheme; plain hex is the same in both; `alpha` sets opacity on hex or tokens; type a palette `readonly Color[]` or `as const` |
+| `mix(a, b, share)`, `random(seed)` | `share` (0 to 1) of `a` blended into `b` (live on tokens); `random(seed)` is a seeded deterministic PRNG returning `[0, 1)` |
+| `linear()`, `linear.across()`, `radial()`, `radial.across({ fit, center })`, `pattern({ size, tile, offset, rotate })` | gradients at points or across the box (`fit: "inside"` stays inside an inscribed circle); a tile of nodes repeated |
 | `blur(r)`, `shadow({ color, offset, blur })`, `adjust({ hue, saturate })`, `displace({ scale, frequency, seed })` | `effects={[…]}`; also `clip`, `mask` and `blend` ([`references/paint.md`](references/paint.md)) |
 
 | Time and motion | |
 | --- | --- |
-| `span(start, over)`, `span(start)` | `.end .next(over, gap) .shift(dt) .chain(...overs) .cascade(n, step)` |
-| `track(v).to(v2, span, curve?).set(v3, when).loop(p).repeat(n).rewind(over)` | also `.span` (of the last step), `.map(fn)`, `.with(other)` |
-| `through(value, fn)`, `within(draw, from, to)` | map a number or track; a part's own 0-to-1 share of a whole's progress |
+| `span(start, over)`, `span(start)` | `.end .next(over, gap) .shift(dt) .chain(...overs) .cascade(n, step) .distribute(n, over) .pace(weights, opts)` |
+| `track(v).to(v2, span, curve?).set(v3, when).loop(p, { phase }).repeat(n).rewind(over)` | also `.span` (of the last step), `.map(fn)`, `.with(other)`; open `span(start)` with a spring uses `spring.settle` |
+| `through(value, fn)`, `within(draw, from, to)`, `timeAt(track, target)` | map a number or track; a part's 0-to-1 share; time when a numeric track first crosses `target` |
 | `motion={[{ opacity: track… }, enter(span, { from }), exit(span, { to }), wiggle(amp, { seed })]}` | layers: plain objects of `offset rotate scale skew opacity`; first outermost, the node's own props innermost |
 | `sampled(fn, span, { tolerance })` | any function of time (`t` from 0) fitted to few keys |
-| `ease.out`, `ease.in`, `ease.inOut`, `ease.pop`, `ease.linear`, `ease.spring()` | curves (default `ease.out`); a spring's `.settle` is the span it needs |
+| `ease.out`, `ease.in`, `ease.inOut`, `ease.pop`, `ease.linear`, `ease.spring()`, `ease.at(curve, t)` | curves (default `ease.out`); a spring's `.settle` is the span it needs; `ease.at` evaluates any ease at `t` |
 | `morph(a, b, span)`, `morph.between(states, spans, { stagger, enter, exit, curve })` | state to state by key |
 
 | Layout | |
 | --- | --- |
-| `<Stack direction gap align justify padding width height>` | children in a row or column; `justify={spread}` spaces them across a fixed size; `stretch` widens children |
+| `<Stack direction gap align justify padding width height>` | children in a row or column (`gap` may be negative; row `align="baseline"` aligns text baselines); `justify={spread}` spaces across a fixed size; `stretch` widens children |
 | `<Grid columns gap justify align padding>` | rows of cells as wide as their widest child |
 | `<Center padding width height>` | children centered on each other: a label on a shape, a pill |
 | `fill stroke radius` on those three | a background as big as the container: a card, a window, a row |
 | `<Align to place inset>` | places children against the canvas (default), a box or a ref |
 
 Refs: `ref()`, anchors `center left right top bottom topLeft topRight bottomLeft bottomRight`, `side(edge, t)`, `.map(([x, y]) => …)`, `.part(key)`. Ids: `id="note"` on any node, scoped by the `component({ name, props, render })` it sits in (`<NoteCard id="card1">` holds `card1/note`); `ref("card1/note")` finds it, and `svg.emit(scene, { ids: true })` writes `data-svz-id`. `props` is any Standard Schema.
-Fonts and data: `font(bytes)`, `font.load(path)`, `font.family(...faces)`, `google()` from `@svjeez/fonts`, `picture()`, `param.number`, `param.count`, `param.seconds`, `param.color`, `param.easing`, `param.choice`, `param.text`, `param.list`.
+Fonts and data: `font(bytes | () => bytes)`, `font.load(path)`, `font.family(...faces)`, `google()` from `@svjeez/fonts`, `picture()`, `defaults`, `parse`, `param.number`, `param.count`, `param.seconds`, `param.color`, `param.easing`, `param.choice`, `param.text`, `param.list`.
 
 ## One way to do each thing
 
@@ -147,7 +147,7 @@ npx svjeez frames scene.tsx --sheet --out frames/   # look: open frames/sheet.pn
 1. Plan the beats as spans first. Fix type errors, then every `check` error: a scene that throws while it builds is one `compile-error` at the line of the node that is wrong, with a `fix:` line.
 2. Read each warning, open a frame at the times it names, and fix the scene unless the frame shows what you meant. `info` is advice. Key the nodes you will read so messages name them.
 3. Render a sheet at the start, middle and end of each beat (`--times 0,0.4,1.2`), in `--color-scheme light` and `dark`: things arrive and leave on cue, nothing is off center or clipped, text is legible, the last frame flows into the first.
-4. `--browser` adds a pixel pass in headless Chromium; `--json` prints the report. It exits 1 on any error. A problem is `file:line:column  code  severity: message` then `fix:`. After the count line, `cost:` is the running animations and the area of filters redrawn every frame, and `lanes:` is how many animated lanes CSS carries and how many SMIL (geometry, filters and gradients; SMIL can't follow a scroll timeline). Prefer CSS lanes. Detail: [`references/check.md`](references/check.md).
+4. `--browser` adds a pixel pass in headless Chromium; `--json` (or `--format json`) prints the report. It exits 1 on any error (`--fail-on warning` also fails on warnings). A problem is `file:line:column  code  severity: message` then `fix:`. After the count line, `cost:` is the running animations and the area of filters redrawn every frame, and `lanes:` is how many animated lanes CSS carries and how many SMIL (geometry, filters and gradients; SMIL can't follow a scroll timeline). Prefer CSS lanes. Detail: [`references/check.md`](references/check.md).
 
 | Code | Means |
 | --- | --- |

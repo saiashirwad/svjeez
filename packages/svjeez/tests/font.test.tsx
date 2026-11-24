@@ -245,8 +245,12 @@ describe("embedding", () => {
     expect(cut.measure("To", 100)).toBeCloseTo(sans.measure("To", 100), 6);
   });
 
-  test("text that forms ligatures embeds the whole font, so the browser can still form them", () => {
-    expect(written(black, "fi")).toContain(black.href!);
+  test("text that forms ligatures subsets the font while keeping ligature substitution", () => {
+    const out = written(black, "fi");
+    expect(out).not.toContain(black.href!);
+    const cut = cutOf(out);
+    expect(cut.path("fi", { size: 10 }).glyphs).toHaveLength(1);
+    expect(cut.measure("fi", 100)).toBeCloseTo(black.measure("fi", 100), 6);
   });
 
   test("text that could meet contextual alternates or mark positioning embeds the whole font", () => {
@@ -291,7 +295,7 @@ describe("embedding", () => {
 
     const out = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><style>@font-face{font-family:'Big';src:url(${big}) format('woff2')}</style><text font-family="'Big'">Hi</text></svg>`;
 
-    expect(validateSvg(out).warnings.join("\n")).toContain("An embedded font is");
+    expect(validateSvg(out).warnings.join("\n")).toContain('The embedded font "Big" is 300 KB');
   });
 });
 

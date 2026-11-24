@@ -770,7 +770,7 @@ describe("pre-measured runs", () => {
       </Text>
     ));
 
-    expect(textOf(spaced).box.width).toBeCloseTo(textOf(plain).box.width + 6, 5);
+    expect(textOf(spaced).box.width).toBeCloseTo(textOf(plain).box.width + 4, 5);
     expect(textOf(spaced).lines[0]!.runs[0]!.letterSpacing).toBe(2);
     expect(textOf(spaced).lines[0]!.runs[0]!.outline).toBeDefined();
     expect(emit(spaced)).toContain('letter-spacing="2"');

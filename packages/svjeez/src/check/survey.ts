@@ -122,6 +122,9 @@ export const valuesOf = (node: SceneNode): Named[] => {
 
     if (node.fill !== undefined) out.push({ name: "fill", kind: "paint", value: node.fill });
 
+    if (node.fillOpacity !== undefined)
+      out.push({ name: "fill opacity", kind: "number", value: node.fillOpacity });
+
     if (node.stroke)
       out.push(
         { name: "stroke color", kind: "paint", value: node.stroke.color },
@@ -131,13 +134,25 @@ export const valuesOf = (node: SceneNode): Named[] => {
     if (node.trim !== undefined) out.push({ name: "trim", kind: "vec", value: node.trim });
   }
 
-  if (node.kind === "text")
+  if (node.kind === "text") {
+    if (node.fillOpacity !== undefined)
+      out.push({ name: "fill opacity", kind: "number", value: node.fillOpacity });
+
+    if (node.stroke)
+      out.push(
+        { name: "stroke color", kind: "paint", value: node.stroke.color },
+        { name: "stroke width", kind: "number", value: node.stroke.width },
+      );
+
+    if (node.trim !== undefined) out.push({ name: "trim", kind: "vec", value: node.trim });
+
     for (const run of runsOf(node)) {
       out.push({ name: "text fill", kind: "paint", value: run.fill });
 
       if (run.opacity !== undefined)
         out.push({ name: "text opacity", kind: "number", value: run.opacity });
     }
+  }
 
   return out;
 };

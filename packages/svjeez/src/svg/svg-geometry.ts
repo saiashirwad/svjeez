@@ -400,6 +400,13 @@ const placesFor = (outlines: readonly (readonly Contour[])[]): number => {
   return size < 10 ? 3 : 2;
 };
 
+export const contoursPathData = (contours: readonly Contour[]): string => {
+  if (contours.length === 0) return "";
+  const outlines = [contours];
+
+  return writeData(contours, commandsOf(outlines), placesFor(outlines));
+};
+
 const morph = (node: ShapeNode, lane: Lane<Geometry>, at: Vec): Moving => {
   const written = blendable(lane, node.key);
 

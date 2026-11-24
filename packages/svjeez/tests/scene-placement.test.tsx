@@ -628,7 +628,7 @@ describe("origin is named on the box, as anchor is", () => {
       // @ts-expect-error: "middle" is not a place.
       made(() => <Shape key="s" geometry={rect(10, 10)} fill="#000000" origin="middle" />),
     ).toThrow(
-      'origin on <Shape> "s" takes a place, one of "top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right", a point measured from its box\'s top-left, such as [20, 0], or "at" for the point its at places, got "middle".',
+      'origin on <Shape> "s" takes a place, one of "top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right", a point measured from its box\'s top-left, such as [20, 0], { frame: [x, y] } in its parent\'s coordinates, or "at" for the point its at places, got "middle".',
     );
   });
 });

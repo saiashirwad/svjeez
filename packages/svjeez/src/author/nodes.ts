@@ -11,6 +11,7 @@ import { isWhen, type When } from "./span";
 import type { Anim, Layers } from "./track";
 import type { Effect } from "./effects";
 import type { TextContent } from "./count";
+import type { TextFitOptions } from "./text";
 import type { Geometry, Paint } from "./values";
 
 export { Ref, ref } from "./refs";
@@ -77,6 +78,8 @@ export interface Backdrop {
 export interface ShapeProps extends Common {
   readonly geometry: Anim<Geometry>;
   readonly fill?: Anim<Paint>;
+  /** Opacity of the fill alone (0 to 1), so one shape can draw its stroke first and fade in its fill after. */
+  readonly fillOpacity?: Anim<number>;
   readonly stroke?: StrokeProps;
   /** How much of the outline is drawn, from 0 to 1: the same as `trim` of [0, draw]. Give draw or trim, not both. */
   readonly draw?: Anim<number>;
@@ -114,10 +117,20 @@ export interface TextProps extends Omit<Common, "anchor"> {
   readonly font: FontValue;
   readonly weight?: number;
   readonly italic?: boolean;
-  readonly size: number;
+  readonly size?: number;
+  /** Shrinks the text size to fit within `width` and `lines` (default 1) without forced word cuts. */
+  readonly fit?: TextFitOptions;
+  /** Balances wrapped lines to a more even width while keeping the same line count. */
+  readonly balance?: boolean;
   readonly fill?: Anim<Paint>;
+  /** Opacity of the fill alone (0 to 1), useful alongside `draw` + `stroke`. */
+  readonly fillOpacity?: Anim<number>;
   readonly letterSpacing?: number;
   readonly stroke?: StrokeProps;
+  /** Draws glyph outlines stroke-by-stroke from 0 to 1 while preserving `<Text>` layout and checks. */
+  readonly draw?: Anim<number>;
+  /** The window of glyph outlines that shows, `[from, to]` from 0 to 1. */
+  readonly trim?: Anim<Vec>;
   readonly align?: "start" | "center" | "end";
   readonly width?: number;
   readonly lineHeight?: number;
@@ -205,7 +218,7 @@ export type NodeElement = Exclude<
   { readonly type: "fragment" | "sequence" | "morph" | "run" | Authoring["type"] }
 >;
 
-export type Child = SceneElement | false | null | undefined | readonly Child[];
+export type Child = SceneElement | boolean | "" | null | undefined | readonly Child[];
 
 const TYPES: ReadonlySet<string> = new Set([
   "group",
@@ -249,7 +262,7 @@ export const sceneElement = (
 const isList = (child: Child): child is readonly Child[] => Array.isArray(child);
 
 export const flat = (child: Child): SceneElement[] => {
-  if (!child) return [];
+  if (!child || child === true) return [];
 
   return isList(child) ? child.flatMap(flat) : [child];
 };

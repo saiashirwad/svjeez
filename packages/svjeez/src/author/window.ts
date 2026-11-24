@@ -1,7 +1,9 @@
-import { EPSILON, ease, isHold, type Ease } from "../model/time";
+import { DEFAULT_EASE, EPSILON, ease, isHold, type Ease, type Seconds } from "../model/time";
 import { easeAt, easeBetween, staysInside } from "../model/ease-at";
 import type { Key, Lane } from "../model/ir";
-import type { Track } from "./track";
+import { SceneError } from "../model/scene-error";
+import { isSpring } from "./spring";
+import { passageOf, type Track } from "./track";
 
 export const ramp = (value: number, from: number, to: number): number =>
   Math.min(1, Math.max(0, (value - from) / (to - from)));
@@ -22,7 +24,7 @@ export class Window {
 const unit = (x: number): number => Math.min(1, Math.max(0, x));
 
 /** The progress x of a segment at which its ease reaches y (the ease must rise from 0 to 1 without overshoot). */
-const timeAt = (curve: Ease, y: number): number => {
+const curveTimeAt = (curve: Ease, y: number): number => {
   let [lo, hi] = [0, 1];
 
   for (let i = 0; i < 50; i++) {
@@ -33,6 +35,82 @@ const timeAt = (curve: Ease, y: number): number => {
   }
 
   return (lo + hi) / 2;
+};
+
+/**
+ * The first scene time (in seconds) when a numeric `track` reaches `target`, or `undefined` if it never crosses it.
+ * Useful for firing an effect at the moment an eased `draw` track reaches a station along a path.
+ */
+export const timeAt = (source: Track<number>, target: number): Seconds | undefined => {
+  if (!Number.isFinite(target))
+    throw new SceneError(`timeAt() needs a finite target value, got ${target}.`);
+
+  const { initial, steps } = passageOf(source).data;
+  let current = initial.value ?? 0;
+
+  if (Math.abs(current - target) <= 1e-9) return 0;
+
+  const sorted = [...steps].sort((a, b) => a.start - b.start);
+
+  for (const step of sorted) {
+    const next = step.values.value;
+
+    if (next === undefined) continue;
+
+    if (step.over === 0) {
+      if (Math.abs(next - target) <= 1e-9) return step.start;
+      current = next;
+      continue;
+    }
+
+    const rising = next >= current;
+
+    const inRange = rising
+      ? target >= current - 1e-9 && target <= next + 1e-9
+      : target <= current + 1e-9 && target >= next - 1e-9;
+
+    if (isSpring(step.ease)) {
+      const SAMPLES = 128;
+      let prevT = 0;
+      let prevV = current;
+
+      for (let i = 1; i <= SAMPLES; i++) {
+        const dt = (step.over * i) / SAMPLES;
+        const val = next + step.ease.state(current - next, 0, dt)[0];
+
+        if ((prevV - target) * (val - target) <= 0) {
+          let [lo, hi] = [prevT, dt];
+          const up = val >= prevV;
+
+          for (let k = 0; k < 40; k++) {
+            const mid = (lo + hi) / 2;
+            const mv = next + step.ease.state(current - next, 0, mid)[0];
+
+            if (up ? mv < target : mv > target) lo = mid;
+            else hi = mid;
+          }
+
+          return step.start + (lo + hi) / 2;
+        }
+
+        prevT = dt;
+        prevV = val;
+      }
+    } else if (inRange && Math.abs(next - current) > 1e-12) {
+      const y = unit((target - current) / (next - current));
+      const curve = step.ease ?? DEFAULT_EASE;
+
+      if (isHold(curve)) {
+        if (Math.abs(next - target) <= 1e-9) return step.start + step.over;
+      } else {
+        return step.start + curveTimeAt(curve, y) * step.over;
+      }
+    }
+
+    current = next;
+  }
+
+  return undefined;
 };
 
 /**
@@ -69,8 +147,8 @@ export const windowLane = (
         keys.push({ t: key.t, value: to, ease: ease.linear });
       } else {
         const [x1, x2] = [
-          y1 <= EPSILON ? 0 : timeAt(curve, y1),
-          y2 >= 1 - EPSILON ? 1 : timeAt(curve, y2),
+          y1 <= EPSILON ? 0 : curveTimeAt(curve, y1),
+          y2 >= 1 - EPSILON ? 1 : curveTimeAt(curve, y2),
         ];
 
         if (x1 > 0) keys.push({ t: before.t + x1 * dt, value: from, ease: ease.linear });

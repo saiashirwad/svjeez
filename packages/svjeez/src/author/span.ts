@@ -22,6 +22,10 @@ export type Spans<N extends number, Done extends Span[] = []> = number extends N
     ? Done
     : Spans<N, [...Done, Span]>;
 
+export interface PaceOptions {
+  readonly gap?: Seconds;
+}
+
 export interface Span extends Interval {
   readonly end: Seconds;
   shift(dt: Seconds): Span;
@@ -30,6 +34,10 @@ export interface Span extends Interval {
     ...overs: O
   ): [Span, ...{ -readonly [K in keyof O]: Span }];
   cascade<const N extends number>(count: N, step: Seconds): Spans<N>;
+  /** Fits `count` spans of length `itemOver` evenly inside this span (first starts at `start`, last ends at `end`). */
+  distribute(count: number, itemOver: Seconds): Span[];
+  /** Splits this span proportionally across `weights` (e.g. stroke lengths), with an optional `gap` between consecutive spans. */
+  pace(weights: readonly number[], options?: PaceOptions): Span[];
 }
 
 export interface OpenSpan extends OpenInterval {
@@ -85,6 +93,62 @@ class Range implements Span {
     return Array.from({ length: count }, (_, i) =>
       build(this.start + i * step, this.over, "cascade()"),
     ) as Spans<N>;
+  }
+
+  distribute(count: number, itemOver: Seconds): Span[] {
+    if (!Number.isInteger(count) || count < 0)
+      throw new SceneError(`distribute() needs a whole count of 0 or more, got ${count}.`);
+
+    if (!(itemOver >= 0 && Number.isFinite(itemOver)))
+      throw new SceneError(
+        `distribute() needs a finite item duration of 0 or more, got ${itemOver}.`,
+      );
+
+    if (itemOver > this.over + 1e-9)
+      throw new SceneError(
+        `distribute() item duration (${itemOver}s) is longer than this span (${this.over}s).`,
+      );
+
+    if (count === 0) return [];
+
+    if (count === 1) return [build(this.start, itemOver, "distribute()")];
+
+    const step = (this.over - itemOver) / (count - 1);
+
+    return Array.from({ length: count }, (_, i) =>
+      build(this.start + i * step, itemOver, "distribute()"),
+    );
+  }
+
+  pace(weights: readonly number[], { gap = 0 }: PaceOptions = {}): Span[] {
+    if (!(gap >= 0 && Number.isFinite(gap)))
+      throw new SceneError(`pace() needs a finite gap of 0 or more, got ${gap}.`);
+
+    for (const weight of weights)
+      if (!(weight >= 0 && Number.isFinite(weight)))
+        throw new SceneError(`pace() needs finite weights of 0 or more, got ${weight}.`);
+
+    if (weights.length === 0) return [];
+
+    const totalGap = gap * (weights.length - 1);
+
+    if (totalGap > this.over + 1e-9)
+      throw new SceneError(
+        `pace() gaps (${totalGap}s) exceed this span's duration (${this.over}s).`,
+      );
+
+    const available = Math.max(0, this.over - totalGap);
+    const total = weights.reduce((sum, w) => sum + w, 0);
+    let at = this.start;
+
+    return weights.map((weight, i) => {
+      const share = total > 0 ? available * (weight / total) : available / weights.length;
+      const piece = build(at, share, "pace()");
+
+      at += share + (i + 1 < weights.length ? gap : 0);
+
+      return piece;
+    });
   }
 }
 

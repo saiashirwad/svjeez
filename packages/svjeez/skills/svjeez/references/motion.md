@@ -20,7 +20,7 @@ scale={track(1).to(0.8, shrink, ease.in).set(1, span(shrink.end))}
 
 - `track(initial)` holds `initial` until the first step. `.to(value, span, curve?)` moves during the span (default `ease.out`); between steps the value holds. `.set(value, when)` is a cut at the span's start: `.set(1, span(2))`.
 - Every method returns a new track and leaves the receiver as it was, so one track can be the base of two chains and a component given a track can't schedule motion behind your back. `track.span` is the span of the last step (it throws on a track with no step), so `track(0).to(1, pos.span.next(0.3))` follows `pos`.
-- `.loop(period)` repeats forever; `.repeat(n)` or `.repeat({ until })` plays the steps so far again. `.rewind(over, curve?)` glides back to the first value over the clock's last `over` seconds, which is how a loop closes; nothing can follow it.
+- `.loop(period, { phase? })` repeats forever (`phase` starts mid-cycle in seconds); `.repeat(n)` or `.repeat({ until })` plays the steps so far again. `.rewind(over, curve?)` glides back to the first value over the clock's last `over` seconds, which is how a loop closes; nothing can follow it.
 - Two steps that overlap on one track throw, unless the first is a spring, which the next step cuts and hands its speed to.
 - A track of geometry morphs: `track(rect(36, 36)).to(rect(96, 64, { radius: 20 }), span(0.4, 1))`. Rects stay rects, arcs stay arcs, any other pair is matched point for point.
 - A track of paint blends colors, and gradients of one kind ([paint.md](paint.md)).
@@ -50,7 +50,7 @@ const pop = ease.spring({ stiffness: 260, damping: 14 });   // defaults: 170, 26
 { scale: track(0.2).to(1, span(0.5, pop.settle), pop) }
 ```
 
-A spring is a curve that moves in real seconds from wherever the value is, at whatever speed it has. The span is the window it has and must be long enough for it to settle unless a later step cuts it: give it `pop.settle` seconds (the error names the time it needs). Springs move numbers, points and geometry, not colors. Lower `damping` bounces more; higher `stiffness` is faster.
+A spring is a curve that moves in real seconds from wherever the value is, at whatever speed it has. Pass an open `span(start)` to use `pop.settle` automatically, or give an explicit span at least `pop.settle` long unless a later step cuts it. Springs move numbers, points and geometry, not colors. Lower `damping` bounces more; higher `stiffness` is faster. `ease.at(curve, t)` evaluates any ease at progress `t`, and `timeAt(track, target)` returns the second a numeric track first crosses `target`.
 
 ## Derived values
 

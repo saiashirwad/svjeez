@@ -94,7 +94,7 @@ import {
 import { FontBook, charName, faceOf, piecesOf, type Asked } from "./runs";
 import { lookOf, paintedBoxOf } from "../model/painted";
 import { minus, pinned } from "./pin";
-import { layoutRuns, setAlong } from "./text";
+import { fitSizeForRuns, layoutRuns, setAlong } from "./text";
 import { countedNodes, countingIn, rateOf, ticksOf } from "./count";
 import { typedNodes, typedTicks, typing as typingMix, typingIn } from "./typed";
 import {
@@ -193,6 +193,7 @@ const patternOf = (ctx: Ctx, given: Pattern, where: string, timing: Timing): Mod
     kind: "pattern",
     size: given.size,
     offset: animated<Vec, Vec>(given.offset, keep, timing, mixVec, `pattern offset on ${where}`),
+    ...(given.rotate !== 0 && { rotate: given.rotate }),
     tile,
   };
 
@@ -302,6 +303,20 @@ const geometryOf = (
   return laneOf(lane, lane.initial.value!, timing, mixGeometry, `${what} on ${where}`);
 };
 
+const fillOpacityOf = (
+  value: Anim<number> | undefined,
+  timing: Timing,
+  where: string,
+): Animated<number> | undefined => {
+  if (value === undefined) return undefined;
+  const lowered = animated(value, keep, timing, mixNumber, `fillOpacity on ${where}`);
+
+  if (!isLane(lowered) && !(lowered >= 0 && lowered <= 1 && Number.isFinite(lowered)))
+    throw new SceneError(`fillOpacity on ${where} needs a number from 0 to 1, got ${lowered}.`);
+
+  return lowered;
+};
+
 const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeNode => {
   const where = ctx.notes.names.named(key);
 
@@ -329,6 +344,7 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
     );
 
   const stroke = written && strokeOf(ctx, written, timing, where, outline);
+  const fillOpacity = fillOpacityOf(props.fillOpacity, timing, where);
 
   if (props.draw !== undefined && props.trim !== undefined)
     throw new SceneError(
@@ -355,6 +371,7 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
     kind: "shape",
     geometry,
     ...(props.fill !== undefined && { fill: painted(props.fill, "fill") }),
+    ...(fillOpacity !== undefined && fillOpacity !== 1 && { fillOpacity }),
     ...(stroke && { stroke }),
     ...(trim !== undefined && { trim }),
   };
@@ -398,18 +415,36 @@ const strokeOf = (
 
 const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNode => {
   const where = ctx.notes.names.named(key);
-  const { size } = props;
+  const initialSize = props.size ?? props.fit?.maxSize;
 
-  if (!(size > 0 && Number.isFinite(size)))
+  if (initialSize === undefined || !(initialSize > 0 && Number.isFinite(initialSize)))
     throw new SceneError(
-      `${where} needs a size above 0, got ${size}.`,
+      `${where} needs a size above 0, got ${String(initialSize)}.`,
       "To grow text in from nothing, scale it in with motion={enter(…, { from: { scale: 0 } })}.",
     );
+
+  if (props.draw !== undefined && props.trim !== undefined)
+    throw new SceneError(
+      `${where} has both draw and trim, but draw is trim [0, draw].`,
+      "Pick one: draw for a stroke that draws on, or trim for a window [from, to].",
+    );
+
+  const trimWindow =
+    props.draw === undefined ? props.trim : through(props.draw, (d): Vec => [0, d]);
+
+  const trim =
+    trimWindow === undefined
+      ? undefined
+      : animated<Vec, Vec>(trimWindow, keep, timing, mixVec, `trim on ${where}`);
+
+  const fillOpacity = fillOpacityOf(props.fillOpacity, timing, where);
   const counting = countingIn(props.children, where);
+  const strokeOnly = props.fill === undefined && props.stroke !== undefined;
+  const size = initialSize;
 
   const own: Asked = {
     font: props.font,
-    fill: props.fill,
+    fill: props.fill ?? (strokeOnly ? "#00000000" : undefined),
     ...(props.weight !== undefined && { weight: props.weight }),
     ...(props.italic !== undefined && { italic: props.italic }),
     ...(props.letterSpacing !== undefined && { letterSpacing: props.letterSpacing }),
@@ -664,19 +699,12 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
       "Drop width, or drop along to wrap the text.",
     );
 
-  const flat = layoutRuns(
-    faceOf(props.font, props.weight, props.italic, where),
-    pieces,
-    {
-      size,
-      ...(props.width !== undefined && { width: props.width }),
-      ...(props.lineHeight !== undefined && { lineHeight: props.lineHeight }),
-      ...(props.align !== undefined && { align: props.align }),
-    },
-    where,
-  );
+  if (outline && trim !== undefined)
+    throw new SceneError(
+      `${where} has both draw/trim and along, which can't be combined.`,
+      "Drop along to draw glyph outlines, or drop draw to set text along a path.",
+    );
 
-  const start = animated(props.start ?? 0, keep, timing, mixNumber, `start on ${where}`);
   const reach = outline && outlineLength(outline);
 
   if (outline && !(reach! > 0))
@@ -685,16 +713,59 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
       "Give along an outline with some length, such as a line, circle(…) or path().moveTo(…).lineTo(…).",
     );
 
+  const fitWidth = props.fit ? (props.fit.width ?? reach ?? props.width) : undefined;
+
+  if (props.fit && fitWidth === undefined)
+    throw new SceneError(
+      `${where} has fit without a width to fit into.`,
+      "Pass fit={{ width, maxSize, minSize, lines }} or a width prop.",
+    );
+
+  const resolvedSize = props.fit
+    ? fitSizeForRuns(
+        pieces,
+        {
+          ...props.fit,
+          width: fitWidth!,
+          maxSize: props.fit.maxSize ?? size,
+        },
+        where,
+      )
+    : size;
+
+  const wrapWidth = props.width ?? (props.fit && (props.fit.lines ?? 1) > 1 ? fitWidth : undefined);
+
+  const flat = layoutRuns(
+    faceOf(props.font, props.weight, props.italic, where),
+    pieces,
+    {
+      size: resolvedSize,
+      ...(wrapWidth !== undefined && { width: wrapWidth }),
+      ...(props.lineHeight !== undefined && { lineHeight: props.lineHeight }),
+      ...(props.align !== undefined && { align: props.align }),
+      ...(props.balance && { balance: true }),
+    },
+    where,
+  );
+
+  const start = animated(props.start ?? 0, keep, timing, mixNumber, `start on ${where}`);
+
   if (outline && flat.lines.length > 1)
     throw new SceneError(
       `${where} sets text along an outline, which takes one line, but its text has ${flat.lines.length}.`,
       "Drop the line breaks, or use one <Text along={…}> per line.",
     );
 
-  if (outline && flat.box.width > reach!)
+  if (outline && flat.box.width > reach! + 0.05)
     throw new SceneError(
       `The text of ${where} is ${num(flat.box.width - reach!)} longer than the outline it is set along (${num(flat.box.width)} against ${num(reach!)}).`,
       "Give it a smaller size or a longer outline.",
+    );
+
+  if (trim !== undefined && flat.lines.some((line) => line.runs.some((run) => !run.outline)))
+    throw new SceneError(
+      `${where} uses draw/trim, which needs TrueType glyph outlines, but its font does not expose outlines.`,
+      "Load a .ttf font (not a system font or CFF .otf) when using <Text draw={…}>.",
     );
 
   const { lines, box, cuts } = outline
@@ -712,16 +783,25 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
   };
 
   const stroke = props.stroke && strokeOf(ctx, props.stroke, timing, where, box);
+
+  if (stroke?.dashOffset !== undefined && trim !== undefined)
+    throw new SceneError(
+      `${where} has both a draw or trim and a stroke dashOffset, and both drive the dash.`,
+      "Pick one: animate draw to draw the stroke on, or dashOffset to march its dashes.",
+    );
+
   const drawn = strokedBox(box, stroke);
   const home = pinned(props.anchor, drawn, where, lines[0]?.at[1] ?? 0);
 
   return {
     ...base(ctx, props, drawn, key, timing, home),
-    ...(props.width !== undefined && { authored: { wrap: { width: props.width, cuts } } }),
+    ...(wrapWidth !== undefined && { authored: { wrap: { width: wrapWidth, cuts } } }),
     kind: "text",
-    size,
+    size: resolvedSize,
+    ...(fillOpacity !== undefined && fillOpacity !== 1 && { fillOpacity }),
     ...(outline && { along: { path: outline, start, align: props.align ?? "start" } }),
     ...(stroke && { stroke }),
+    ...(trim !== undefined && { trim }),
     lines: lines.map((line): TextLine => ({
       at: line.at,
       runs: line.runs.map(({ text: words, at, advances, outline, style, spacing }): TextRun => ({

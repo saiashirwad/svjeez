@@ -236,23 +236,159 @@ const renumbered = (data: Uint8Array, renumber: (glyph: number) => number): Uint
 
 const HINTING = ["cvt ", "fpgm", "gasp", "prep"];
 
-export const subset = (
+interface UsedLigature {
+  readonly components: readonly number[];
+  readonly glyph: number;
+}
+
+const tagBytes = (tag: string): number[] => [...tag].map((c) => c.charCodeAt(0));
+
+/** Builds a minimal OpenType GSUB v1.0 table with DFLT + latn -> liga -> LookupType 4 Format 1. */
+const gsubLigatures = (ligatures: readonly UsedLigature[]): Uint8Array | undefined => {
+  if (ligatures.length === 0) return undefined;
+
+  const byFirst = new Map<number, UsedLigature[]>();
+
+  for (const lig of ligatures) {
+    const first = lig.components[0]!;
+    const list = byFirst.get(first) ?? [];
+
+    list.push(lig);
+    byFirst.set(first, list);
+  }
+
+  const firstGlyphs = [...byFirst.keys()].sort((a, b) => a - b);
+
+  // Build LigatureSubst Format 1 subtable
+  const covOffset = 6 + 2 * firstGlyphs.length;
+  const cov = new Writer().u16(1).u16(firstGlyphs.length);
+
+  for (const g of firstGlyphs) cov.u16(g);
+
+  const sets: Uint8Array[] = firstGlyphs.map((first) => {
+    const entries = [...byFirst.get(first)!].sort(
+      (a, b) => b.components.length - a.components.length,
+    );
+
+    const set = new Writer().u16(entries.length);
+    let ligOffset = 2 + 2 * entries.length;
+    const body: number[] = [];
+
+    for (const entry of entries) {
+      set.u16(ligOffset);
+
+      const ligW = new Writer().u16(entry.glyph).u16(entry.components.length);
+
+      for (const comp of entry.components.slice(1)) ligW.u16(comp);
+      body.push(...ligW.bytes);
+      ligOffset += ligW.bytes.length;
+    }
+
+    return Uint8Array.from([...set.bytes, ...body]);
+  });
+
+  const subtable = new Writer().u16(1).u16(covOffset).u16(firstGlyphs.length);
+  let setOffset = covOffset + cov.bytes.length;
+
+  for (const set of sets) {
+    subtable.u16(setOffset);
+    setOffset += set.length;
+  }
+
+  subtable.bytes.push(...cov.bytes);
+
+  for (const set of sets) subtable.bytes.push(...set);
+
+  // ScriptList: 2 scripts ("DFLT", "latn") sharing one Script table + DefaultLangSys -> feature 0
+  // ScriptList bytes: count(2) + 2*(tag(4)+off(2)) = 14; Script table at 14: defaultLangSysOff(2)=4, langSysCount(2)=0; LangSys at 18: lookupOrder(2)=0, req(2)=0xffff, featCount(2)=1, featIdx(2)=0 -> total 26 bytes
+  const scriptList = new Writer()
+    .u16(2)
+    .u32(
+      (tagBytes("DFLT")[0]! << 24) |
+        (tagBytes("DFLT")[1]! << 16) |
+        (tagBytes("DFLT")[2]! << 8) |
+        tagBytes("DFLT")[3]!,
+    )
+    .u16(14)
+    .u32(
+      (tagBytes("latn")[0]! << 24) |
+        (tagBytes("latn")[1]! << 16) |
+        (tagBytes("latn")[2]! << 8) |
+        tagBytes("latn")[3]!,
+    )
+    .u16(14)
+    .u16(4)
+    .u16(0)
+    .u16(0)
+    .u16(0xffff)
+    .u16(1)
+    .u16(0);
+
+  // FeatureList: 1 feature ("liga") -> lookup 0 -> 14 bytes
+  const featureList = new Writer()
+    .u16(1)
+    .u32(
+      (tagBytes("liga")[0]! << 24) |
+        (tagBytes("liga")[1]! << 16) |
+        (tagBytes("liga")[2]! << 8) |
+        tagBytes("liga")[3]!,
+    )
+    .u16(8)
+    .u16(0)
+    .u16(1)
+    .u16(0);
+
+  // LookupList: 1 lookup -> LookupType 4, flag 0, 1 subtable at offset 8
+  const lookupList = new Writer().u16(1).u16(4).u16(4).u16(0).u16(1).u16(8);
+
+  lookupList.bytes.push(...subtable.bytes);
+
+  const scriptOffset = 10;
+  const featureOffset = scriptOffset + scriptList.bytes.length;
+  const lookupOffset = featureOffset + featureList.bytes.length;
+
+  const gsub = new Writer().u16(1).u16(0).u16(scriptOffset).u16(featureOffset).u16(lookupOffset);
+
+  gsub.bytes.push(...scriptList.bytes, ...featureList.bytes, ...lookupList.bytes);
+
+  return gsub.done();
+};
+
+export interface SubsetOutcome {
+  readonly bytes?: Uint8Array;
+  readonly reason?: string;
+}
+
+export const subsetWithReason = (
   bytes: Uint8Array,
   f: Sfnt,
   typesetter: Typesetter,
   texts: readonly string[],
   layout = true,
-): Uint8Array | undefined => {
-  if (
-    layout &&
-    texts.some((text) =>
-      typesetter.layoutGlyphs(text).some((placed) => [...placed.chars].length > 1),
-    )
-  )
-    return undefined;
+): SubsetOutcome => {
   const runs = texts.map((text) => [...text].map(typesetter.glyph));
 
-  if (layout && typesetter.beyond(runs)) return undefined;
+  if (layout && typesetter.beyond(runs))
+    return {
+      reason: "it uses OpenType layout lookups that subsetting does not preserve yet",
+    };
+
+  const shaped = layout ? texts.map((text) => typesetter.layoutGlyphs(text)) : [];
+  const usedLigatures = new Map<string, UsedLigature>();
+
+  for (const line of shaped) {
+    for (const placed of line) {
+      const chars = [...placed.chars];
+
+      if (chars.length <= 1) continue;
+      const components = chars.map(typesetter.glyph);
+
+      if (components.some((g) => g === 0) || placed.glyph === 0) continue;
+      const key = `${components.join(",")}:${placed.glyph}`;
+
+      if (!usedLigatures.has(key)) usedLigatures.set(key, { components, glyph: placed.glyph });
+    }
+  }
 
   const mapped = [...new Set(texts.flatMap((text) => [...text]))]
     .flatMap((char) => {
@@ -273,6 +409,11 @@ export const subset = (
   };
 
   for (const [, glyph] of mapped) keep(glyph);
+
+  for (const lig of usedLigatures.values()) {
+    for (const comp of lig.components) keep(comp);
+    keep(lig.glyph);
+  }
 
   for (let i = 0; i < order.length; i++)
     for (const { glyph } of components(outline(order[i]!))) keep(glyph);
@@ -350,19 +491,43 @@ export const subset = (
     tables.set("post", post);
   }
 
+  const gsub = gsubLigatures(
+    [...usedLigatures.values()].map((lig) => ({
+      components: lig.components.map(renumber),
+      glyph: renumber(lig.glyph),
+    })),
+  );
+
+  if (gsub) tables.set("GSUB", gsub);
+
   const pairs = new Map<number, readonly [number, number, number]>();
 
-  for (const run of runs)
+  const addPairs = (run: readonly number[]) => {
     for (let i = 0; i + 1 < run.length; i++) {
       const [left, right] = [run[i]!, run[i + 1]!];
+
+      if (!ids.has(left) || !ids.has(right)) continue;
       const value = typesetter.kern(left, right);
 
       if (value !== 0) pairs.set(left * 65536 + right, [renumber(left), renumber(right), value]);
     }
+  };
+
+  for (const run of runs) addPairs(run);
+
+  for (const line of shaped) addPairs(line.map((placed) => placed.glyph));
 
   const kern = kernTable([...pairs.values()]);
 
   if (kern) tables.set("kern", kern);
 
-  return assemble(tables);
+  return { bytes: assemble(tables) };
 };
+
+export const subset = (
+  bytes: Uint8Array,
+  f: Sfnt,
+  typesetter: Typesetter,
+  texts: readonly string[],
+  layout = true,
+): Uint8Array | undefined => subsetWithReason(bytes, f, typesetter, texts, layout).bytes;

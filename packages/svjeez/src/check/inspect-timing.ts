@@ -443,14 +443,22 @@ const popsIn = (
 const length = ([from, to]: Vec): number => Math.abs(to - from);
 
 const arrives = (scene: Scene, node: SceneNode): boolean => {
-  if (node.kind === "shape") return node.trim !== undefined && isLane(node.trim);
+  if (node.kind === "shape")
+    return (
+      (node.trim !== undefined && isLane(node.trim)) ||
+      (node.fillOpacity !== undefined && isLane(node.fillOpacity))
+    );
 
   if (node.kind !== "text") return false;
 
-  return runsOf(node).some(
-    (run) =>
-      (run.opacity !== undefined && isLane(run.opacity)) ||
-      (isLane(run.fill) && run.fill.keys.some((key) => clearThroughout(scene, key.value))),
+  return (
+    (node.trim !== undefined && isLane(node.trim)) ||
+    (node.fillOpacity !== undefined && isLane(node.fillOpacity)) ||
+    runsOf(node).some(
+      (run) =>
+        (run.opacity !== undefined && isLane(run.opacity)) ||
+        (isLane(run.fill) && run.fill.keys.some((key) => clearThroughout(scene, key.value))),
+    )
   );
 };
 
@@ -498,25 +506,35 @@ export const timing = (survey: Survey): void => {
       });
 
     if (
-      node.kind === "shape" &&
+      (node.kind === "shape" || node.kind === "text") &&
       node.trim !== undefined &&
-      isLane(node.trim) &&
-      !isLane(node.fill ?? [0, 0, 0, 0]) &&
-      !clearThroughout(scene, node.fill)
+      isLane(node.trim)
     ) {
-      const trim = node.trim;
-      const atZero = between(trim, 0);
-      const drawn = trim.keys.findIndex((key) => length(key.value) >= 0.99);
+      const fill = node.kind === "shape" ? node.fill : runsOf(node)[0]?.fill;
 
-      if (length(atZero.from) < 0.01 && drawn > 0 && !inside(hidden, 0))
-        add(survey, {
-          code: "visible-at-zero",
-          severity: "error",
-          key: node.key,
-          message: `${label(node)} has its fill showing at 0s while its stroke only draws in by ${seconds(trim.keys[drawn]!.t)}.`,
-          fix: "Drop the fill, or fade the fill in after the draw.",
-          times: [0],
-        });
+      const fillAlphaAtZero =
+        node.fillOpacity === undefined ? 1 : valueAt(node.fillOpacity, 0, mixNumber);
+
+      if (
+        fill !== undefined &&
+        !isLane(fill) &&
+        !clearThroughout(scene, fill) &&
+        fillAlphaAtZero > VISIBLE
+      ) {
+        const trim = node.trim;
+        const atZero = between(trim, 0);
+        const drawn = trim.keys.findIndex((key) => length(key.value) >= 0.99);
+
+        if (length(atZero.from) < 0.01 && drawn > 0 && !inside(hidden, 0))
+          add(survey, {
+            code: "visible-at-zero",
+            severity: "error",
+            key: node.key,
+            message: `${label(node)} has its fill showing at 0s while its stroke only draws in by ${seconds(trim.keys[drawn]!.t)}.`,
+            fix: "Drop the fill, or animate fillOpacity in after the draw.",
+            times: [0],
+          });
+      }
     }
 
     wasted(survey, entry, hidden, named);

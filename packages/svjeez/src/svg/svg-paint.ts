@@ -279,7 +279,7 @@ export const patternUrl = (
 
   const { id, twin } = twinned(
     defs,
-    JSON.stringify(["p", pattern.tile.key, shift]),
+    JSON.stringify(["p", pattern.tile.key, shift, pattern.rotate ?? 0]),
     "p",
     (own, still) => ({
       moves: corner.some(([, written]) => written.nodes.length > 0),
@@ -291,6 +291,8 @@ export const patternUrl = (
           ...Object.fromEntries(corner.map(([name, written]) => [name, pick(written, still)])),
           width: num(pattern.size[0]),
           height: num(pattern.size[1]),
+          ...(pattern.rotate !== undefined &&
+            pattern.rotate !== 0 && { patternTransform: `rotate(${num(pattern.rotate)})` }),
         },
         [
           ...children(

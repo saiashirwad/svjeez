@@ -9,7 +9,7 @@ const [crouch, leap, land] = span(0.1, 0.3).chain(0.12, 0.25);
 ```
 
 - `.end` is `start + over`. `.next(over, gap?)` starts where this one ends (a negative `gap` overlaps). `.shift(dt)` moves it.
-- `.chain(...overs)` is this span then one more per length, end to end, as a tuple. `.cascade(count, step)` is `count` spans of the same length, `step` apart, typed as that many spans (so no `!` on a destructured literal count).
+- `.chain(...overs)` is this span then one more per length, end to end, as a tuple. `.cascade(count, step)` is `count` spans of the same length, `step` apart, typed as that many spans (so no `!` on a destructured literal count). `.distribute(count, over)` fits `count` spans of length `over` evenly within this span; `.pace(weights, { gap? })` splits this span proportionally across `weights` with optional gaps.
 - Build each beat from the one before, so moving one moves the rest. A span inside another is arithmetic: `span(trip.start, 0.15)` begins with it, `span(trip.end - 0.2, 0.2)` ends with it.
 - A span needs a start of 0 or later and a length of 0 or more; a `to()` step needs a length above 0 (use `set()` for a cut). Steps take spans, never bare numbers.
 

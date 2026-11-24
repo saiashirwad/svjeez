@@ -134,16 +134,36 @@ export const faceOf = (
   }
 
   const slanted = italic ?? false;
-  const asked = weight ?? 400;
-  const found = value.faces.find((face) => face.weight === asked && face.italic === slanted);
 
-  if (found) return found;
+  if (weight !== undefined) {
+    const found = value.faces.find((face) => face.weight === weight && face.italic === slanted);
 
-  const has = value.faces.map((face) => `${face.weight}${face.italic ? " italic" : ""}`);
+    if (found) return found;
 
-  throw new SceneError(
-    `${where} asks for ${faceName(value.name, asked, slanted)}, which its family doesn't have: it has ${has.join(", ")}. Load that face into the family, or ask for one it has.`,
-  );
+    const has = value.faces.map((face) => `${face.weight}${face.italic ? " italic" : ""}`);
+
+    throw new SceneError(
+      `${where} asks for ${faceName(value.name, weight, slanted)}, which its family doesn't have: it has ${has.join(", ")}. Load that face into the family, or ask for one it has.`,
+    );
+  }
+
+  const styled = value.faces.filter((face) => face.italic === slanted);
+
+  if (styled.length === 0) {
+    const has = value.faces.map((face) => `${face.weight}${face.italic ? " italic" : ""}`);
+
+    throw new SceneError(
+      `${where} asks for ${faceName(value.name, 400, slanted)}, which its family doesn't have: it has ${has.join(", ")}. Load that face into the family, or ask for one it has.`,
+    );
+  }
+
+  const exact = styled.find((face) => face.weight === 400);
+
+  if (exact) return exact;
+  const heavier = styled.filter((face) => face.weight > 400).sort((a, b) => a.weight - b.weight);
+  const lighter = styled.filter((face) => face.weight < 400).sort((a, b) => b.weight - a.weight);
+
+  return heavier.find((face) => face.weight <= 500) ?? lighter[0] ?? heavier[0]!;
 };
 
 interface Picked {

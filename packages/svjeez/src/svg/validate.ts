@@ -84,13 +84,25 @@ const imageHrefs = (source: string): string[] => {
 };
 
 const embeddedFonts = (source: string): string[] =>
-  [...source.matchAll(/@font-face\{[^}]*?url\((data:[^)]*)\)/g)].flatMap(([, uri = ""]) =>
-    uri.length > EMBED_WARN_BYTES
-      ? [
-          `An embedded font is ${Math.round(uri.length / 1024)} KB, and the whole file downloads before the first frame. Use a smaller font.`,
-        ]
-      : [],
-  );
+  [...source.matchAll(/@font-face\{([^}]*)\}/g)].flatMap(([, body = ""]) => {
+    const uri = /url\((data:[^)]*)\)/.exec(body)?.[1] ?? "";
+
+    if (uri.length <= EMBED_WARN_BYTES) return [];
+    const family = /font-family:'([^']*)'/.exec(body)?.[1];
+    const weight = /font-weight:(\d+)/.exec(body)?.[1];
+    const style = /font-style:([a-z]+)/.exec(body)?.[1];
+    const reason = /\/\*\s*subset-skip:\s*([^*]+?)\s*\*\//.exec(body)?.[1];
+
+    const label = family
+      ? `The embedded font "${family}"${weight ? ` ${weight}` : ""}${style === "italic" ? " italic" : ""}`
+      : "An embedded font";
+
+    const why = reason ? ` Subsetting was skipped because ${reason}.` : "";
+
+    return [
+      `${label} is ${Math.round(uri.length / 1024)} KB, and the whole file downloads before the first frame.${why} Use a smaller font.`,
+    ];
+  });
 
 export const validateSvg = (source: string): ValidationResult => {
   const errors: string[] = [];

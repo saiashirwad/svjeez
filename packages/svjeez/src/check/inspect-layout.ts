@@ -1,7 +1,8 @@
 import { FontBook, charName } from "../author/runs";
+import { boundsOfPoints, boxCorners } from "../model/geometry";
 import type { Box, SceneNode, TextNode, Vec } from "../model/ir";
 import type { Seconds } from "../model/time";
-import type { Placed } from "./boxes";
+import { apply, inverse, times as mulMatrix, type Placed } from "./boxes";
 import {
   VISIBLE,
   add,
@@ -72,6 +73,14 @@ const travelling = (entry: Entry, t: Seconds): boolean =>
       ),
   );
 
+const clippedOut = (entry: Entry, frame: ReadonlyMap<string, Placed>, box: Box): boolean =>
+  entry.ancestors.some((ancestor) => {
+    if (ancestor.clip === undefined) return false;
+    const clip = frame.get(ancestor.key);
+
+    return clip !== undefined && sharedArea(box, clip.box) <= 0;
+  });
+
 export const overlap = (survey: Survey): void => {
   const texts = survey.entries.filter(
     (entry) =>
@@ -86,12 +95,21 @@ export const overlap = (survey: Survey): void => {
     { readonly a: Entry; readonly b: Entry; readonly times: Seconds[] }
   >();
 
+  const covered = new Map<
+    string,
+    { readonly text: Entry; readonly cover: Entry; readonly times: Seconds[] }
+  >();
+
   survey.frames.forEach(({ t, frame }) => {
     const up = texts.flatMap((entry) => {
       const at = frame.get(entry.node.key);
 
-      return at && at.opacity > VISIBLE && !fading(entry, t) && !travelling(entry, t)
-        ? [{ entry, box: ink(at.box) }]
+      return at &&
+        at.opacity > VISIBLE &&
+        !fading(entry, t) &&
+        !travelling(entry, t) &&
+        !clippedOut(entry, frame, at.box)
+        ? [{ entry, box: ink(at.box), full: at.box }]
         : [];
     });
 
@@ -103,7 +121,7 @@ export const overlap = (survey: Survey): void => {
           continue;
         const shared = sharedArea(a.box, b.box);
 
-        if (shared <= 0.3 * Math.min(area(a.box), area(b.box))) continue;
+        if (shared <= 0.1 * Math.min(area(a.box), area(b.box))) continue;
 
         if (hiddenBetween(survey, frame, a.entry, b.entry, t)) continue;
         const key = `${a.entry.node.key}\u0000${b.entry.node.key}`;
@@ -112,6 +130,45 @@ export const overlap = (survey: Survey): void => {
         known.times.push(t);
         pairs.set(key, known);
       }
+
+    // Warn when a later opaque fill covers visible text (e.g. an opaque Stack backdrop over a message).
+    for (const item of up) {
+      for (const other of survey.entries) {
+        if (
+          other.order <= item.entry.order ||
+          other.node.kind !== "shape" ||
+          isGone(survey, other) ||
+          !meet(item.entry, other)
+        )
+          continue;
+        const at = frame.get(other.node.key);
+
+        if (!at || at.opacity <= 0.95 || fading(other, t) || travelling(other, t)) continue;
+
+        if (flatAt(survey, other, at, t) === undefined) continue;
+        const hit = sharedArea(item.box, at.box);
+
+        if (hit <= 0.25 * area(item.box)) continue;
+
+        // Intentional card/panel replacement: an opaque shape completely hides an earlier text
+        // while a later text sits over the same spot on top of that shape.
+        if (
+          hit > 0.8 * area(item.box) &&
+          up.some(
+            (later) =>
+              later.entry.order > other.order &&
+              sharedArea(item.box, later.box) > 0.1 * Math.min(area(item.box), area(later.box)),
+          )
+        )
+          continue;
+
+        const key = `${item.entry.node.key}\u0000${other.node.key}`;
+        const known = covered.get(key) ?? { text: item.entry, cover: other, times: [] };
+
+        known.times.push(t);
+        covered.set(key, known);
+      }
+    }
   });
 
   for (const { a, b, times } of pairs.values())
@@ -123,6 +180,17 @@ export const overlap = (survey: Survey): void => {
       fix: "Move one, or hide one while the other shows.",
       times,
       related: [b.node.key],
+    });
+
+  for (const { text, cover, times } of covered.values())
+    add(survey, {
+      code: "overlap",
+      severity: "warning",
+      key: text.node.key,
+      message: `${spoken(text.node, 24)} is covered by ${label(cover.node)} drawn after it, at ${list(times)}.`,
+      fix: `Move one of them, hide the text before "${cover.node.key}" appears, or draw the text after it.`,
+      times,
+      related: [cover.node.key],
     });
 };
 
@@ -205,6 +273,21 @@ const overlapOf = (a: Box, b: Box): Vec | undefined => {
   return across > 0.5 && down > 0.5 ? [across, down] : undefined;
 };
 
+const localBoxOf = (parent: Placed | undefined, child: Placed): Box => {
+  const back = parent ? inverse(parent.matrix) : undefined;
+
+  if (!back) return child.box;
+  const rel = mulMatrix(back, child.matrix);
+
+  return boundsOfPoints(boxCorners(child.frame).map((point) => apply(rel, point)));
+};
+
+const ownMoving = (node: SceneNode, t: Seconds): boolean =>
+  movingAt(node.at, t) ||
+  node.layers.some(
+    (layer) => movingAt(layer.offset, t) || movingAt(layer.opacity, t) || movingAt(layer.scale, t),
+  );
+
 export const layoutOverlap = (survey: Survey): void => {
   for (const entry of survey.entries) {
     const { node } = entry;
@@ -220,14 +303,19 @@ export const layoutOverlap = (survey: Survey): void => {
 
     if (isGone(survey, entry)) continue;
 
+    // Negative gap intentionally overlaps children along the stack axis.
+    const gap = node.authored?.layout?.gap;
+
+    if (gap !== undefined && (gap[0] < 0 || gap[1] < 0)) continue;
+
     const children = survey.entries
       .filter(
         (each) =>
           each.ancestors.at(-1) === node && !each.node.authored?.backdrop && !isGone(survey, each),
       )
-      .map((entry) => ({
-        entry,
-        boxes: new Map(shownBoxes(survey, entry).map(({ t, box }) => [t, box])),
+      .map((child) => ({
+        entry: child,
+        shown: new Set(shownBoxes(survey, child).map(({ t }) => t)),
       }));
 
     children.forEach((a, i) => {
@@ -235,9 +323,21 @@ export const layoutOverlap = (survey: Survey): void => {
         let most: Vec = [0, 0];
         const times: Seconds[] = [];
 
-        for (const { t } of survey.frames) {
-          const [x, y] = [a.boxes.get(t), b.boxes.get(t)];
-          const by = x && y ? overlapOf(x, y) : undefined;
+        for (const { t, frame } of survey.frames) {
+          if (!a.shown.has(t) || !b.shown.has(t)) continue;
+
+          if (ownMoving(a.entry.node, t) || ownMoving(b.entry.node, t)) continue;
+
+          const [pa, pb, parent] = [
+            frame.get(a.entry.node.key),
+            frame.get(b.entry.node.key),
+            frame.get(node.key),
+          ];
+
+          if (!pa || !pb) continue;
+
+          if (clippedOut(a.entry, frame, pa.box) || clippedOut(b.entry, frame, pb.box)) continue;
+          const by = overlapOf(localBoxOf(parent, pa), localBoxOf(parent, pb));
 
           if (!by) continue;
           times.push(t);

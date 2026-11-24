@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/bin",
-  "version": "0.8.0-next.1",
+  "version": "0.8.0-next.2",
   "private": true,
   "description": "svjeez as one executable: write a scene file anywhere and run svjeez check, frames, svg, dev or video on it, with no package.json or node_modules.",
   "license": "MIT",

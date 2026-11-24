@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/charts",
-  "version": "0.8.0-next.1",
+  "version": "0.8.0-next.2",
   "private": true,
   "description": "Animated bar, line and area charts for svjeez scenes: shared axes, scales fitted to the data, series that grow and draw on.",
   "license": "MIT",

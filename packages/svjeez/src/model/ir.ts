@@ -124,6 +124,7 @@ export interface Pattern {
   readonly kind: "pattern";
   readonly size: Vec;
   readonly offset: Animated<Vec>;
+  readonly rotate?: number;
   readonly tile: GroupNode;
 }
 
@@ -226,6 +227,7 @@ export interface ShapeNode extends Base {
   readonly kind: "shape";
   readonly geometry: Animated<Geometry>;
   readonly fill?: Animated<Paint>;
+  readonly fillOpacity?: Animated<number>;
   readonly stroke?: Stroke;
   readonly trim?: Animated<Vec>;
 }
@@ -256,7 +258,9 @@ export interface TextLine {
 export interface TextNode extends Base {
   readonly kind: "text";
   readonly size: number;
+  readonly fillOpacity?: Animated<number>;
   readonly stroke?: Stroke;
+  readonly trim?: Animated<Vec>;
   readonly lines: readonly TextLine[];
   /** Text set along an outline, from `start` (a fraction of its length), aligned to that point. */
   readonly along?: {

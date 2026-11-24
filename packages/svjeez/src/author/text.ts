@@ -11,6 +11,14 @@ export interface TextLayoutOptions {
   readonly width?: number;
   readonly lineHeight?: number;
   readonly align?: TextAlign;
+  readonly balance?: boolean;
+}
+
+export interface TextFitOptions {
+  readonly width?: number;
+  readonly maxSize?: number;
+  readonly minSize?: number;
+  readonly lines?: number;
 }
 
 export interface TextPiece<S> {
@@ -244,10 +252,101 @@ export const setRun = <S>(
   };
 };
 
+/** Trailing letter-spacing after the last glyph on a line does not widen the line visually. */
+const trailingSpacing = <S>(parts: readonly TextPiece<S>[]): number => {
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const part = parts[i]!;
+
+    if (part.text === "") continue;
+
+    return part.advances ? 0 : (part.spacing ?? 0);
+  }
+
+  return 0;
+};
+
+const measureLine = <S>(parts: readonly TextPiece<S>[], size: number, where: string): number => {
+  const total = parts.reduce(
+    (sum, part) => sum + advancesIn(part, size, where).reduce((a, b) => a + b, 0),
+    0,
+  );
+
+  return Math.max(0, total - trailingSpacing(parts));
+};
+
+const wrapAll = <S>(
+  paras: readonly (readonly TextPiece<S>[])[],
+  width: number | undefined,
+  size: number,
+  where: string,
+) => {
+  const fits = (parts: readonly TextPiece<S>[]): boolean =>
+    width === undefined || measureLine(parts, size, where) <= width;
+
+  const cut = new Set<readonly TextPiece<S>[]>();
+  const broken = paras.flatMap((paragraph) => wrap(paragraph, fits, cut));
+
+  return { broken, cut };
+};
+
+/** Binary-searches the largest static font size in `[minSize, maxSize]` fitting `width` and `lines`. */
+export const fitSizeForRuns = <S>(
+  pieces: readonly TextPiece<S>[],
+  {
+    width,
+    maxSize,
+    minSize = 1,
+    lines: maxLines = 1,
+  }: Required<Pick<TextFitOptions, "width" | "maxSize">> & TextFitOptions,
+  where: string,
+): number => {
+  if (!(width > 0 && Number.isFinite(width)))
+    throw new SceneError(`${where} fit needs a positive width, got ${width}.`);
+
+  if (!(maxSize > 0 && Number.isFinite(maxSize)))
+    throw new SceneError(`${where} fit needs a positive maxSize, got ${maxSize}.`);
+
+  if (!(minSize > 0 && Number.isFinite(minSize)) || minSize > maxSize)
+    throw new SceneError(
+      `${where} fit needs minSize between 0 and maxSize (${maxSize}), got ${minSize}.`,
+    );
+
+  if (!Number.isInteger(maxLines) || maxLines < 1)
+    throw new SceneError(`${where} fit needs lines of 1 or more, got ${maxLines}.`);
+
+  const paras = paragraphs(pieces);
+
+  const ok = (size: number): boolean => {
+    const { broken, cut } = wrapAll(paras, maxLines > 1 ? width : undefined, size, where);
+
+    return (
+      cut.size === 0 &&
+      broken.length <= maxLines &&
+      broken.every((parts) => measureLine(parts, size, where) <= width)
+    );
+  };
+
+  if (ok(maxSize)) return maxSize;
+
+  if (!ok(minSize)) return minSize;
+
+  let lo = minSize;
+  let hi = maxSize;
+
+  for (let i = 0; i < 20; i++) {
+    const mid = (lo + hi) / 2;
+
+    if (ok(mid)) lo = mid;
+    else hi = mid;
+  }
+
+  return Math.floor(lo * 100) / 100;
+};
+
 export const layoutRuns = <S>(
   base: Font,
   pieces: readonly TextPiece<S>[],
-  { size, width, lineHeight, align = "start" }: TextLayoutOptions,
+  { size, width, lineHeight, align = "start", balance = false }: TextLayoutOptions,
   where: string,
 ): TextLayout<S> => {
   if (!(size > 0 && Number.isFinite(size)))
@@ -266,16 +365,29 @@ export const layoutRuns = <S>(
     );
   const { ascent, descent, lineGap } = base.metrics;
   const step = (lineHeight ?? ascent + descent + lineGap) * size;
+  const paras = paragraphs(pieces);
+  let { broken, cut } = wrapAll(paras, width, size, where);
 
-  const measure = (parts: readonly TextPiece<S>[]): number =>
-    parts.reduce((sum, part) => sum + advancesIn(part, size, where).reduce((a, b) => a + b, 0), 0);
+  if (balance && width !== undefined && broken.length > 1 && cut.size === 0) {
+    const targetLines = broken.length;
+    let lo = 0;
+    let hi = width;
+    let best = broken;
 
-  const fits = (parts: readonly TextPiece<S>[]): boolean =>
-    width === undefined || measure(parts) <= width;
+    for (let i = 0; i < 18; i++) {
+      const mid = (lo + hi) / 2;
+      const trial = wrapAll(paras, mid, size, where);
 
-  const cut = new Set<readonly TextPiece<S>[]>();
-  const broken = paragraphs(pieces).flatMap((paragraph) => wrap(paragraph, fits, cut));
-  const measured = broken.map(measure);
+      if (trial.cut.size === 0 && trial.broken.length <= targetLines) {
+        best = trial.broken;
+        hi = mid;
+      } else lo = mid;
+    }
+
+    broken = best;
+  }
+
+  const measured = broken.map((parts) => measureLine(parts, size, where));
   const column = width ?? Math.max(0, ...measured);
   const faces = new Set([base, ...broken.flatMap((parts) => parts.map((part) => part.face))]);
   const top = Math.max(...[...faces].map((face) => face.metrics.ascent)) * size;
