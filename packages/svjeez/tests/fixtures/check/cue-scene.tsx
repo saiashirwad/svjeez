@@ -1,6 +1,7 @@
 import { Group, Text, font, scene, span, track } from "svjeez";
+import { fontFixture } from "../../../../../fixtures/fonts";
 
-const sans = await font.load(new URL("../ABeeZee-Regular.ttf", import.meta.url));
+const sans = await font.load(fontFixture("ABeeZee-Regular"));
 
 export default scene({ size: [200, 100], duration: 4, title: "Cue" }, () => (
   <Group>

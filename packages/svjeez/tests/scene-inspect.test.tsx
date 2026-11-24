@@ -24,8 +24,9 @@ import {
   type SceneElement,
 } from "svjeez";
 import { describe, check, type Code, type Problem, type Model } from "svjeez/tools";
+import { fontFixture } from "../../../fixtures/fonts";
 
-const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
+const mono = await font.load(fontFixture("SpaceMono-Regular"));
 
 const made = (build: () => SceneElement, duration = 4, loop = true): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Test", loop }, build);

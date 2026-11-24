@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { Run, Text, font, scene } from "svjeez";
 import { svg } from "svjeez/tools";
+import { fontFixture } from "../../../fixtures/fonts";
 
 const size: [number, number] = [200, 50];
 
@@ -32,7 +33,7 @@ describe("font families in svg", () => {
   });
 
   test("a prefix renames an embedded family", async () => {
-    const sans = await font.load(new URL("./fixtures/ABeeZee-Regular.ttf", import.meta.url));
+    const sans = await font.load(fontFixture("ABeeZee-Regular"));
 
     expect(emit(sans, "x")).toContain("'xABeeZee'");
   });
@@ -40,7 +41,7 @@ describe("font families in svg", () => {
 
 describe("runs with supplied advances", () => {
   test("skip the glyph-coverage check", async () => {
-    const sans = await font.load(new URL("./fixtures/ABeeZee-Regular.ttf", import.meta.url));
+    const sans = await font.load(fontFixture("ABeeZee-Regular"));
 
     const draw = (advances?: number[]) => () =>
       scene({ size, duration: 1, title: "F", desc: "D" }, () => (

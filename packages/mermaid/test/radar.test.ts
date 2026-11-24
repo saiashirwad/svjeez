@@ -4,10 +4,9 @@ import { SceneError, svg } from "svjeez/tools";
 import type { Line } from "../src/errors.ts";
 import { parseMermaid } from "../src/parse.ts";
 import { drawRadar, parseRadar, type RadarDoc } from "../src/radar.ts";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const mono = await font.load(
-  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
-);
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const parse = (text: string): RadarDoc => {
   const [header, ...body] = text

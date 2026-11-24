@@ -15,6 +15,7 @@ import {
   track,
 } from "svjeez";
 import { svg } from "svjeez/tools";
+import { fontFixture } from "../../../fixtures/fonts";
 
 const model = scene({ size: [100, 100], duration: 4, title: "P", desc: "D", still: 1 }, () => (
   <Group>
@@ -78,7 +79,7 @@ describe("prefix", () => {
   });
 
   test("a prefix renames embedded font families in the rule and its uses", async () => {
-    const sans = await font.load(new URL("./fixtures/ABeeZee-Regular.ttf", import.meta.url));
+    const sans = await font.load(fontFixture("ABeeZee-Regular"));
 
     const out = svg.emit(
       scene({ size: [100, 100], duration: 1, title: "F" }, () => (

@@ -17,13 +17,13 @@ import {
 } from "svjeez";
 import { boxesOf, isLane, svg, type Model, type StrokeProps } from "svjeez/tools";
 import { diagnose } from "../src/model/backend";
+import { fontFixture } from "../../../fixtures/fonts";
 
-const fixture = (name: string) => new URL(`./fixtures/${name}.ttf`, import.meta.url);
-const regular = await font.load(fixture("SpaceMono-Regular"));
-const bold = await font.load(fixture("SpaceMono-Bold"));
+const regular = await font.load(fontFixture("SpaceMono-Regular"));
+const bold = await font.load(fontFixture("SpaceMono-Bold"));
 const space = font.family(regular, bold);
-const sans = await font.load(fixture("ABeeZee-Regular"));
-const sansItalic = await font.load(fixture("ABeeZee-Italic"));
+const sans = await font.load(fontFixture("ABeeZee-Regular"));
+const sansItalic = await font.load(fontFixture("ABeeZee-Italic"));
 const abeezee = font.family(sans, sansItalic);
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
@@ -152,7 +152,7 @@ describe("faces", () => {
             a
           </Text>
           <Text
-            font={font(Buffer.from(require("node:fs").readFileSync(fixture("JetBrainsMono"))), {
+            font={font(Buffer.from(require("node:fs").readFileSync(fontFixture("JetBrainsMono"))), {
               family: "Space Mono",
             })}
             size={10}
@@ -348,7 +348,7 @@ describe("runs", () => {
   });
 
   test("a font svjeez can't outline draws as text and is named for a backend that needs outlines", async () => {
-    const bytes = new Uint8Array(await Bun.file(fixture("SpaceMono-Regular")).arrayBuffer());
+    const bytes = new Uint8Array(await Bun.file(fontFixture("SpaceMono-Regular")).arrayBuffer());
 
     bytes.set([0x4f, 0x54, 0x54, 0x4f], 0);
     const otf = font(bytes);

@@ -20,7 +20,6 @@ import type {
 import { Effect, Layer, ManagedRuntime, Match, Result, SubscriptionRef } from "effect";
 import { font } from "svjeez";
 import type { StandardSchemaV1 } from "svjeez";
-import geistUrl from "./Geist-400.ttf?url";
 import { isString } from "./guards.ts";
 import { ENTRY, FONT_MODULE, INITIAL_FILES } from "./sample.ts";
 
@@ -152,8 +151,9 @@ export const boot = async (
   paramsNow: () => JsonObject,
   onDiff: (diff: string) => void,
 ): Promise<Engine> => {
-  const bytes = new Uint8Array(await (await fetch(geistUrl)).arrayBuffer());
-  const sans = font(bytes);
+  const sans = await font.load(
+    "https://cdn.jsdelivr.net/fontsource/fonts/geist@5.3.0/latin-400-normal.ttf",
+  );
 
   const layer = Session.layer({
     files: INITIAL_FILES,

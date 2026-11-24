@@ -17,8 +17,9 @@ import { check, isLane, svg, valueAt, type Model, type TextProps } from "svjeez/
 import { editOf, typing } from "../src/author/typed";
 import { blendNumber } from "../src/model/sample";
 import { mixVec } from "../src/model/steps";
+import { fontFixture } from "../../../fixtures/fonts";
 
-const mono = await font.load(new URL("./fixtures/JetBrainsMono.ttf", import.meta.url));
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 // JetBrains Mono is 0.6em wide everywhere, so at size 10 every character is 6 across.
 const CHAR = 6;

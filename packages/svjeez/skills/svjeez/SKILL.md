@@ -117,7 +117,7 @@ Every node also takes `key ref at anchor origin rotate scale skew opacity motion
 | `<Align to place inset>` | places children against the canvas (default), a box or a ref |
 
 Refs: `ref()`, anchors `center left right top bottom topLeft topRight bottomLeft bottomRight`, `side(edge, t)`, `.map(([x, y]) => …)`, `.part(key)`. Ids: `id="note"` on any node, scoped by the `component({ name, props, render })` it sits in (`<NoteCard id="card1">` holds `card1/note`); `ref("card1/note")` finds it, and `svg.emit(scene, { ids: true })` writes `data-svz-id`. `props` is any Standard Schema.
-Fonts and data: `font(bytes | () => bytes)`, `font.load(path)`, `font.family(...faces)`, `google()` from `@svjeez/fonts`, `picture()`, `defaults`, `parse`, `param.number`, `param.count`, `param.seconds`, `param.color`, `param.easing`, `param.choice`, `param.text`, `param.list`.
+Fonts and data: `google()` and `google.family()` from `@svjeez/fonts` (load fonts by name), `font.load(path | url)` for a file of your own, `font(bytes | () => bytes)`, `font.family(...faces)`, `picture()`, `defaults`, `parse`, `param.number`, `param.count`, `param.seconds`, `param.color`, `param.easing`, `param.choice`, `param.text`, `param.list`.
 
 ## One way to do each thing
 
@@ -192,7 +192,7 @@ Runtime errors. `…` stands for a value the message fills in.
 
 | Message | Fix |
 | --- | --- |
-| `… has no font.` | `font={await font.load("Inter.ttf")}` or a family from `@svjeez/fonts`; nothing is inherited |
+| `… has no font.` | `font={await google("Inter")}` from `@svjeez/fonts`, or `font.load()` for a file of your own; nothing is inherited |
 | `… takes a font made by font(), font.load(), font.family() or @svjeez/fonts, got ….` | pass a `Font` or `FontFamily`, not a name |
 | `… has no geometry.` | give it `geometry`, such as `geometry={rect(40, 20)}` |
 | `… paints nothing: it has no fill and no stroke.` | give it `fill` or `stroke` |

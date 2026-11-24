@@ -5,9 +5,7 @@ import { jsx } from "svjeez/jsx-runtime";
 import { Group } from "svjeez";
 import { SceneError, svg } from "svjeez/tools";
 
-const sans = await font.load(
-  new URL("./node_modules/svjeez/skills/svjeez/examples/fonts/Geist-400.ttf", import.meta.url),
-);
+const sans = await font.load(new URL("./fonts/ABeeZee-Regular.ttf", import.meta.url));
 
 const chart = mermaid("flowchart LR\nA([Start]) --> B{OK?}\nB -->|yes| C[Ship]", { font: sans });
 

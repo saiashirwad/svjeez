@@ -31,8 +31,9 @@ import { boxesOf, hitTest, isLane, placements, svg, type Model } from "svjeez/to
 import { blendVec, valueAt } from "../src/model/sample";
 import { startTrace, stopTrace } from "../src/svg/traced";
 import integration from "./fixtures/scene/integration";
+import { fontFixture } from "../../../fixtures/fonts";
 
-const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
+const mono = await font.load(fontFixture("SpaceMono-Regular"));
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [200, 100], duration, title: "Test" }, build);

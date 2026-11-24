@@ -4,10 +4,9 @@ import { SceneError, svg } from "svjeez/tools";
 import { parseArchitecture, type ArchitectureDoc } from "../src/architecture.ts";
 import type { Line } from "../src/errors.ts";
 import { mermaid, parseMermaid } from "../src/index";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const mono = await font.load(
-  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
-);
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const parse = (text: string): ArchitectureDoc => {
   const [header, ...body] = text

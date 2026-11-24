@@ -4,10 +4,9 @@ import { SceneError, check, svg, type Child } from "svjeez/tools";
 import type { DiagramColors } from "../src/kit.tsx";
 import { sankey as place } from "../src/layout/sankey.ts";
 import { sankey, type SankeyLink } from "../src/sankey.tsx";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const mono = await font.load(
-  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
-);
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const colors: DiagramColors = {
   background: "#FFFFFF",

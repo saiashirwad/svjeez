@@ -3,10 +3,9 @@ import { font, scene } from "svjeez";
 import { SceneError, svg } from "svjeez/tools";
 import { drawEr, parseEr, type ErDoc } from "../src/er.ts";
 import type { Line } from "../src/errors.ts";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const mono = await font.load(
-  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
-);
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const lines = (text: string): Line[] =>
   text

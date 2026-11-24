@@ -6,9 +6,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Group, Shape, Stack, Text, enter, font, rect, scene, span, track } from "svjeez";
 import { check } from "svjeez/tools";
+import { fontFixture } from "../../../fixtures/fonts";
 
 const cli = join(import.meta.dir, "../src/cli.ts");
-const mono = await font.load(new URL("./fixtures/SpaceMono-Regular.ttf", import.meta.url));
+const mono = await font.load(fontFixture("SpaceMono-Regular"));
 
 describe("check fixes (#166)", () => {
   test("rotating parent does not trigger false layout-overlap on a Stack", () => {

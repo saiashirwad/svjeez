@@ -3,10 +3,9 @@ import { font, scene, span } from "svjeez";
 import { SceneError, svg } from "svjeez/tools";
 import type { Line } from "../src/errors.ts";
 import { drawXyChart, parseXyChart, type XyChartDoc } from "../src/xychart.ts";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const mono = await font.load(
-  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
-);
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const parse = (text: string): XyChartDoc => {
   const [header, ...body] = text

@@ -14,9 +14,7 @@ const runs: readonly (readonly (readonly [string, string])[])[] = highlight(
   },
 );
 
-const face = await font.load(
-  new URL("../skills/svjeez/examples/fonts/Geist-400.ttf", import.meta.resolve("svjeez")),
-);
+const face = await font.load(new URL("./fonts/ABeeZee-Regular.ttf", import.meta.url));
 
 const props: CodeProps = {
   lang,

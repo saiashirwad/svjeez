@@ -14,10 +14,9 @@ import { jsxDEV } from "svjeez/jsx-dev-runtime";
 import { SceneError, describe as describeScene, check, svg } from "svjeez/tools";
 import { Code, type CodeProps } from "../src/index.ts";
 import { tomorrow } from "../src/palettes.ts";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const mono = await font.load(
-  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
-);
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const SOURCE = "const a = 1;\n\n  return a;";
 

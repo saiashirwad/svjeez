@@ -4,7 +4,7 @@ import { jsx } from "svjeez/jsx-runtime";
 import { svg as backend } from "svjeez/tools";
 import { Chart, bars, line } from "@svjeez/charts";
 
-const face = await font.load("ABeeZee-Regular.ttf");
+const face = await font.load(new URL("./fonts/ABeeZee-Regular.ttf", import.meta.url));
 
 const out = backend.emit(
   scene({ size: [360, 260], duration: 3, title: "Sales by quarter" }, () =>

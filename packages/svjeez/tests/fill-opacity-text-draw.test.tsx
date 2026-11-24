@@ -18,8 +18,9 @@ import {
 } from "svjeez";
 import { validateSvg } from "svjeez/frames";
 import { check, svg } from "svjeez/tools";
+import { fontFixture } from "../../../fixtures/fonts";
 
-const regular = await font.load(new URL("./fixtures/ABeeZee-Regular.ttf", import.meta.url));
+const regular = await font.load(fontFixture("ABeeZee-Regular"));
 
 describe("fillOpacity, Text draw, radial.across, pattern.rotate, Child, exports", () => {
   test("fillOpacity animates fill independently of stroke and satisfies visible-at-zero", () => {

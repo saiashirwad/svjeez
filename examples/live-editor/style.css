@@ -3,10 +3,8 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src:
-    local("Geist"),
-    local("Geist Regular"),
-    url("./Geist-400.ttf") format("truetype");
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/geist@5.3.0/latin-400-normal.ttf")
+    format("truetype");
 }
 
 :root {

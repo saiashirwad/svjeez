@@ -11,6 +11,7 @@
   "dependencies": {
     "@svjeez/charts": "next",
     "@svjeez/code": "next",
+    "@svjeez/fonts": "next",
     "@svjeez/icons": "next",
     "svjeez": "next"
   },

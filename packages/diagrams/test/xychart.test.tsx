@@ -4,10 +4,9 @@ import { Group, font, scene, span } from "svjeez";
 import type { DiagramColors } from "../src/kit.tsx";
 import { SceneError, check, svg, type Child } from "svjeez/tools";
 import { xyBar, xyChart, xyLine, type XyChartSpec } from "../src/xychart.tsx";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const mono = await font.load(
-  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
-);
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const colors: DiagramColors = {
   background: "#FFFFFF",

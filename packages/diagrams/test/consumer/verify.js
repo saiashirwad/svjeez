@@ -4,9 +4,7 @@ import { Group, font, scene, span } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
 import { SceneError, svg } from "svjeez/tools";
 
-const sans = await font.load(
-  new URL("./node_modules/svjeez/skills/svjeez/examples/fonts/Geist-400.ttf", import.meta.url),
-);
+const sans = await font.load(new URL("./fonts/ABeeZee-Regular.ttf", import.meta.url));
 
 const o = { font: sans };
 

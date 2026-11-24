@@ -3,10 +3,9 @@ import { font, scene, span } from "svjeez";
 import { SceneError, svg } from "svjeez/tools";
 import type { Line } from "../src/errors.ts";
 import { drawMindmap, parseMindmap, type MindmapDoc } from "../src/mindmap.ts";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-const mono = await font.load(
-  new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url),
-);
+const mono = await font.load(fontFixture("JetBrainsMono"));
 
 const lines = (text: string): Line[] =>
   text.split("\n").flatMap((raw, i): Line[] => {

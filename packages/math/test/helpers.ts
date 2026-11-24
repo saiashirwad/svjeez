@@ -1,10 +1,9 @@
 import { readFileSync } from "node:fs";
 import { font, scene, type SceneElement } from "svjeez";
 import type { Model } from "svjeez/tools";
+import { fontFixture } from "../../../fixtures/fonts.ts";
 
-export const mono = font(
-  readFileSync(new URL("../../svjeez/tests/fixtures/JetBrainsMono.ttf", import.meta.url)),
-);
+export const mono = font(readFileSync(fontFixture("JetBrainsMono")));
 
 export const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [400, 240], duration, title: "Test" }, build);
