@@ -1,4 +1,4 @@
-import { Code } from "@svjeez/code";
+import { Code, ts } from "@svjeez/code";
 import { tomorrow } from "@svjeez/code/palettes";
 import { Group, Shape, ease, linear, rect, scene, span, track, type Vec } from "svjeez";
 import { mono, theme } from "../theme";
@@ -58,7 +58,7 @@ export default scene(
         opacity={track(0).to(0.2, span(START - 0.4, 0.4))}
       />
       <Code
-        lang="ts"
+        lang={ts}
         font={mono}
         size={SIZE}
         lineHeight={1.4}

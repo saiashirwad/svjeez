@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
-import { Code, highlight } from "@svjeez/code";
+import { Code, highlight, ts } from "@svjeez/code";
 import { gruvbox, rosePine, solarized, tomorrow } from "@svjeez/code/palettes";
 import { Group, font, scene } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
 import { SceneError, svg as backend } from "svjeez/tools";
 
-assert.deepEqual(highlight("const answer = 42;", "ts")[0][0], ["keyword", "const"]);
+assert.deepEqual(highlight("const answer = 42;", ts)[0][0], ["keyword", "const"]);
 
-assert.throws(() => highlight("x", "cobol"), SceneError);
+assert.throws(() => highlight("x", []), SceneError);
 
 const face = await font.load(new URL("./fonts/ABeeZee-Regular.ttf", import.meta.url));
 
@@ -15,7 +15,7 @@ const out = backend.emit(
   scene({ size: [240, 60], duration: 1, title: "Code" }, () =>
     jsx(Group, {
       children: jsx(Code, {
-        lang: "ts",
+        lang: ts,
         font: face,
         size: 16,
         palette: tomorrow,
