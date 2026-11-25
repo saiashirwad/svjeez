@@ -1,6 +1,7 @@
 import * as nodeModule from "node:module";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
+import type * as TypeGpu from "typegpu";
 import { cantCompile, provideTypeGpu } from "./author/typegpu";
 
 export interface LoadTypeGpuOptions {
@@ -70,11 +71,19 @@ const install = async (from: string, include: RegExp): Promise<void> => {
   // unplugin-typegpu's Node hook is `module.registerHooks`, which Node before 22.15 does not have: its scenes with a
   // "use gpu" function can't be compiled there, and the rest still load.
   if (!bun && !("registerHooks" in nodeModule))
-    return cantCompile(
-      `Node ${process.version} can't compile "use gpu" functions: unplugin-typegpu needs module.registerHooks, from Node 22.15.`,
-    );
+    return cantCompile({
+      why: `Node ${process.version} can't compile "use gpu" functions: unplugin-typegpu needs module.registerHooks, from Node 22.15.`,
+      fix: "Run the scene on Node 22.15 or later, or under Bun.",
+    });
 
-  const make = await typegpuPlugin(kind, from);
+  // A transform that fails to load (the single-file binary can't load unplugin-typegpu's dependencies) leaves the scenes
+  // without a "use gpu" function working: only a <Shader> needs it, and says why.
+  const make = await typegpuPlugin(kind, from).catch((error: Error) => {
+    cantCompile({
+      why: `unplugin-typegpu did not load, so "use gpu" functions are not compiled: ${error.message.split("\n")[0]}`,
+      fix: "Run the scene with the svjeez package from npm (npx svjeez), or with @svjeez/vite, where unplugin-typegpu loads from node_modules.",
+    });
+  });
 
   if (!make || installed.has(kind)) return;
   installed.add(kind);
@@ -105,7 +114,11 @@ export const loadTypeGpu = async (
   if (!entry) return false;
 
   if (transform) await install(from, include);
-  provideTypeGpu(await import(/* @vite-ignore */ pathToFileURL(entry).href));
 
-  return true;
+  // TypeGPU that fails to load (the single-file binary can't load its dependencies) leaves the scenes without a <Shader>
+  // working: a <Shader> says it needs TypeGPU.
+  return import(/* @vite-ignore */ pathToFileURL(entry).href).then(
+    (module: typeof TypeGpu) => (provideTypeGpu(module), true),
+    () => false,
+  );
 };

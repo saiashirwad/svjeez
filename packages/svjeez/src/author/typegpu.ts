@@ -6,7 +6,7 @@ const UNCOMPILED: unique symbol = Symbol.for("svjeez.typegpu.uncompiled");
 interface Scope {
   readonly Symbol: SymbolConstructor;
   [KEY]?: typeof TypeGpu;
-  [UNCOMPILED]?: string;
+  [UNCOMPILED]?: Uncompiled;
 }
 
 const scope: Scope = globalThis;
@@ -21,10 +21,15 @@ export const provideTypeGpu = (module: typeof TypeGpu): void => {
 
 export const typeGpuOf = (): typeof TypeGpu | undefined => scope[KEY];
 
+/** Why this runtime can't compile `"use gpu"` functions, and what to do instead. */
+export interface Uncompiled {
+  readonly why: string;
+  readonly fix: string;
+}
+
 /** Records why this runtime can't compile `"use gpu"` functions, for a `<Shader>` to say instead of a TypeGPU error. */
-export const cantCompile = (why: string): void => {
-  scope[UNCOMPILED] = why;
+export const cantCompile = (reason: Uncompiled): void => {
+  scope[UNCOMPILED] = reason;
 };
 
-/** Why this runtime can't compile `"use gpu"` functions, if it can't. */
-export const uncompiled = (): string | undefined => scope[UNCOMPILED];
+export const uncompiled = (): Uncompiled | undefined => scope[UNCOMPILED];

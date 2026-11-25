@@ -219,12 +219,12 @@ const wgslOf = (
     });
   } catch (error) {
     if (!(error instanceof Error)) throw error;
-    const why = uncompiled();
+    const reason = uncompiled();
 
-    if (why !== undefined)
+    if (reason)
       throw new SceneError(
-        `${label}'s fragment function can't be turned into WGSL. ${why}`,
-        "Run the scene on Node 22.15 or later, or under Bun.",
+        `${label}'s fragment function can't be turned into WGSL. ${reason.why}`,
+        reason.fix,
         {},
         { cause: error },
       );
