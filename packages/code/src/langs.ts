@@ -1,59 +1,31 @@
-import bash from "shiki/langs/bash.mjs";
-import css from "shiki/langs/css.mjs";
-import diff from "shiki/langs/diff.mjs";
-import go from "shiki/langs/go.mjs";
-import html from "shiki/langs/html.mjs";
-import javascript from "shiki/langs/javascript.mjs";
-import json from "shiki/langs/json.mjs";
-import jsx from "shiki/langs/jsx.mjs";
-import markdown from "shiki/langs/markdown.mjs";
-import python from "shiki/langs/python.mjs";
-import rust from "shiki/langs/rust.mjs";
-import sql from "shiki/langs/sql.mjs";
-import tsx from "shiki/langs/tsx.mjs";
-import typescript from "shiki/langs/typescript.mjs";
-import yaml from "shiki/langs/yaml.mjs";
+export { default as bash } from "shiki/langs/bash.mjs";
 
-export type DefaultLang =
-  | "ts"
-  | "typescript"
-  | "tsx"
-  | "js"
-  | "javascript"
-  | "jsx"
-  | "json"
-  | "css"
-  | "html"
-  | "bash"
-  | "sh"
-  | "shell"
-  | "zsh"
-  | "python"
-  | "py"
-  | "rust"
-  | "rs"
-  | "go"
-  | "sql"
-  | "yaml"
-  | "yml"
-  | "md"
-  | "markdown"
-  | "diff";
+export { default as css } from "shiki/langs/css.mjs";
 
-export const LANGS = [
-  bash,
-  css,
-  diff,
-  go,
-  html,
-  javascript,
-  json,
-  jsx,
-  markdown,
-  python,
-  rust,
-  sql,
-  tsx,
-  typescript,
-  yaml,
-];
+export { default as diff } from "shiki/langs/diff.mjs";
+
+export { default as go } from "shiki/langs/go.mjs";
+
+export { default as html } from "shiki/langs/html.mjs";
+
+export { default as js } from "shiki/langs/javascript.mjs";
+
+export { default as json } from "shiki/langs/json.mjs";
+
+export { default as jsx } from "shiki/langs/jsx.mjs";
+
+export { default as md } from "shiki/langs/markdown.mjs";
+
+export { default as ocaml } from "shiki/langs/ocaml.mjs";
+
+export { default as python } from "shiki/langs/python.mjs";
+
+export { default as rust } from "shiki/langs/rust.mjs";
+
+export { default as sql } from "shiki/langs/sql.mjs";
+
+export { default as ts } from "shiki/langs/typescript.mjs";
+
+export { default as tsx } from "shiki/langs/tsx.mjs";
+
+export { default as yaml } from "shiki/langs/yaml.mjs";

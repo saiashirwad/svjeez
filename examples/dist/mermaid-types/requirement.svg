@@ -9,12 +9,12 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%,11.25%{stroke-dashoffset:1;visibility:hidden}15%,100%{stroke-dashoffset:0;visibility:visible}}
 .m1{animation-name:k1}
-@keyframes k2{0%,11.249%{visibility:hidden}11.25%,100%{visibility:visible}}
-.m2{animation-name:k2}
+@keyframes k2{0%{visibility:hidden}11.25%,100%{visibility:visible}}
+.m2{animation-name:k2;animation-timing-function:steps(1)}
 @keyframes k3{0%,15%{stroke-dashoffset:1;visibility:hidden}18.75%,100%{stroke-dashoffset:0;visibility:visible}}
 .m3{animation-name:k3}
-@keyframes k4{0%,14.999%{visibility:hidden}15%,100%{visibility:visible}}
-.m4{animation-name:k4}
+@keyframes k4{0%{visibility:hidden}15%,100%{visibility:visible}}
+.m4{animation-name:k4;animation-timing-function:steps(1)}
 @keyframes k5{0%,11.25%{opacity:0}15%,100%{opacity:1}}
 .m5{animation-name:k5}
 @keyframes k6{0%,15%{opacity:0}18.75%,100%{opacity:1}}

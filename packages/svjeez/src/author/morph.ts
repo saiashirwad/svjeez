@@ -8,7 +8,6 @@ import { isPlaced, placedLike } from "./identity";
 import type {
   Authored,
   Effect,
-  Lane,
   Animated,
   Geometry,
   GroupNode,
@@ -38,6 +37,7 @@ import {
 import { blendable, isGradient, mixPaint } from "./paint";
 import type { LayerValues } from "./track";
 import { isArray } from "../model/guards";
+import { shifted, travelling } from "./travel";
 
 export interface MorphOptions {
   /** One curve for every transition, or one per transition. */
@@ -320,16 +320,6 @@ const rebased = (plan: Plan, entry: Entry, node: SceneNode, origin: Vec): readon
       offset: isLane(layer.offset) ? shifted(layer.offset, move) : move(layer.offset),
     };
   });
-};
-
-const shifted = (lane: Lane<Vec>, move: (value: Vec) => Vec): Lane<Vec> => {
-  const [head, next, ...rest] = lane.keys.map((key) => ({
-    ...key,
-    value: move(key.value),
-    ...(key.via && { via: [move(key.via[0]), move(key.via[1])] as const }),
-  }));
-
-  return { ...lane, keys: [head!, next!, ...rest] };
 };
 
 const presence = (plan: Plan, entry: Entry, enter: Fixed, exit: Fixed): Layer | undefined => {
@@ -999,7 +989,7 @@ const merge = (
   names: Names,
   options: MorphOptions = {},
 ): SceneNode[] => {
-  const top = entries(names, states);
+  const top = entries(names, travelling(states, names));
   const { stagger = 0 } = options;
 
   const delay = stagger instanceof Function ? stagger : (index: number) => index * stagger;

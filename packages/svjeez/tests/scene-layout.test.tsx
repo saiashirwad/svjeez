@@ -386,6 +386,8 @@ describe("containers that draw themselves", () => {
     expect(() => row(30)).toThrow(
       '<Stack> "row" is 30 wide, but its children, gaps and padding need 40. Make it wider, or leave out width so it fits them.',
     );
+    expect(find(row(39.2), "row").box.width).toBe(39.2);
+    expect(() => row(39)).toThrow('<Stack> "row" is 39 wide, but its children');
   });
 
   test("Center lays its children over each other, centered, and can draw a pill around them", () => {

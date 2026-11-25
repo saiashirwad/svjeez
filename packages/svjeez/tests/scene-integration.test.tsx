@@ -82,7 +82,7 @@ describe("timelines reach a node wherever it sits", () => {
       </Stack>
     ));
 
-    expect(at(find(model, "0/b"), 0)).toEqual([14, 0]);
+    expect(at(find(model, "#0/b"), 0)).toEqual([14, 0]);
   });
 
   test("inside a Grid, a track on one of its parts", () => {
@@ -376,7 +376,7 @@ describe("morph between states that hold layout, text, connectors, images", () =
       </Stack>
     ));
 
-    expect(boxesOf(model, 3)["0/b"]?.x).toBe(12);
+    expect(boxesOf(model, 3)["#0/b"]?.x).toBe(12);
   });
 
   test("text that rewraps crossfades between its two layouts", () => {
@@ -422,7 +422,7 @@ describe("morph between states that hold layout, text, connectors, images", () =
 
     for (const t of [0, 1.5, 3]) {
       const tip = placements(model, t).find((node) => node.key === "arrow/head");
-      const target = boxesOf(model, t)["0/b"]!;
+      const target = boxesOf(model, t)["#0/b"]!;
 
       expect(tip).toBeDefined();
       near(center(boxesOf(model, t)["arrow/head"]!), [target.x, target.y + 5], 6);
@@ -447,8 +447,8 @@ describe("morph between states that hold layout, text, connectors, images", () =
       ),
     );
 
-    expect(boxesOf(model, 2)["0/i"]).toEqual({ x: 50, y: 50, width: 20, height: 10 });
-    expect(boxesOf(model, 2)["0/s"]).toEqual({ x: 72, y: -8, width: 16, height: 16 });
+    expect(boxesOf(model, 2)["#0/i"]).toEqual({ x: 50, y: 50, width: 20, height: 10 });
+    expect(boxesOf(model, 2)["#0/s"]).toEqual({ x: 72, y: -8, width: 16, height: 16 });
 
     expect(() =>
       made(() =>
@@ -514,7 +514,7 @@ describe("anchors follow whatever moves their node", () => {
           {node}
         </Group>
       ),
-      "0/a",
+      "#0/a",
     );
   });
 
@@ -541,7 +541,7 @@ describe("anchors follow whatever moves their node", () => {
           {node}
         </Group>
       ),
-      "0/a",
+      "#0/a",
     );
   });
 

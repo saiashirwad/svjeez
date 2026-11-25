@@ -138,13 +138,7 @@ export const Window = ({
       effects={[shadow({ color: "#000000", offset: [0, 10], blur: 24, opacity: 0.1 })]}
     />
     {[theme.red, theme.yellow, theme.green].map((color, i) => (
-      <Shape
-        key={`l${i}`}
-        geometry={circle(4)}
-        at={[16 + i * 13, BAR / 2]}
-        anchor="center"
-        fill={color}
-      />
+      <Shape key={`l${i}`} geometry={circle(4)} offset={[16 + i * 13, BAR / 2]} fill={color} />
     ))}
     {title !== undefined && title !== "" && (
       <Text font={mono} size={12} at={[62, BAR / 2]} anchor="left" fill={theme.muted}>
@@ -174,7 +168,7 @@ export const Chip = ({ label, color, size: [w, h], at = [0, 0] }: ChipProps): Sc
       fill={theme.surface}
       stroke={{ color: theme.raised, width: 1.5 }}
     />
-    <Shape geometry={circle(5)} at={[h / 2, h / 2]} anchor="center" fill={color} />
+    <Shape geometry={circle(5)} offset={[h / 2, h / 2]} fill={color} />
     <Text font={mono} size={18} at={[h / 2 + 14, h / 2]} anchor="left" fill={theme.text}>
       {label}
     </Text>
@@ -193,8 +187,7 @@ export const Glow = ({
 }): SceneElement => (
   <Shape
     geometry={circle(r)}
-    at={at}
-    anchor="center"
+    offset={at}
     fill={radial.across({
       stops: [
         [0, `${color}59`],

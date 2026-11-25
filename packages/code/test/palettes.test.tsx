@@ -34,6 +34,7 @@ test("palette() names its tokens after the palette, so they never meet a scene's
     variable: "#123456",
     function: "#123456",
     type: "#123456",
+    attribute: "#123456",
     tag: "#123456",
     inserted: "#123456",
     deleted: "#123456",
@@ -54,5 +55,5 @@ test("palette() names its tokens after the palette, so they never meet a scene's
 });
 
 test("the package root leaves the palettes to the subpath", () => {
-  expect(Object.keys(root).toSorted()).toEqual(["Code", "ROLES", "highlight"]);
+  expect(Object.keys(root).filter((name) => name in palettes)).toEqual([]);
 });

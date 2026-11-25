@@ -6,7 +6,7 @@ Every node has a box, the area it paints with its stroke included, known when th
 
 ```tsx
 <Align place="bottom-right" inset={16}>
-  <Center width={72} height={28} radius={14} fill={theme.raised} motion={enter(span(0.2, 0.4), { from: { opacity: 0, scale: 0.8 } })}>
+  <Center width={72} height={28} radius={14} fill={theme.raised} motion={enter(span(0.2, 0.4), { from: { scale: 0.8 } })}>
     <Text font={sans} weight={600} size={12} fill={theme.text}>NEW</Text>
   </Center>
 </Align>
@@ -26,7 +26,7 @@ The nine places, for `anchor`, `place` and `radial.across({ center })`: `top-lef
 
 ## Placing without a container
 
-`at` puts the node's `anchor` point (top-left by default) at a point of its parent's frame, on every node. A node with no `at` stays where its coordinates put it: circles, ellipses and arcs are drawn around their own `[0, 0]`, lines, polygons and paths stay on their points. `<Shape geometry={circle(8)} at={[60, 40]} anchor="center" />` centers one on a point. To use a `<Group>` as a frame, give it `offset`: where its children's `[0, 0]` goes (a point, a track or an anchor). `offset` takes no `at` or `anchor`.
+`at` puts the node's `anchor` point (top-left by default) at a point of its parent's frame, on every node. A node with no `at` stays where its coordinates put it: circles, ellipses and arcs are drawn around their own `[0, 0]`, lines, polygons and paths stay on their points. `<Shape geometry={circle(8)} offset={[60, 40]} />` centers one on a point. `offset` is the other way to place any node (Shape, Text, Picture, Group, a container): it moves the node's own `[0, 0]` there (a point, a track or an anchor), so a `<Group>` frame keeps its children's coordinates and a circle needs no `anchor`. A text's `[0, 0]` is the top-left of its first line. `offset` takes no `at` or `anchor`, and a container's child takes neither.
 
 ## Text
 
@@ -43,7 +43,7 @@ The nine places, for `anchor`, `place` and `radial.across({ center })`: `top-lef
 - `<Run>` changes `font`, `weight`, `italic`, `fill` and `opacity` for part of a text and inherits the rest. A run's `opacity` and `fill` take tracks. A `<Run>` outside a `<Text>` throws.
 - `stroke` (the same `StrokeProps`; `under: true` draws it below the fill) counts in the box. `draw={0..1}` or `trim={[from, to]}` traces the glyph outlines stroke by stroke; pair with `fillOpacity` to fade the fill in after the draw. `size` is a plain number: to grow text, use `scale` or a layer.
 - `along={circle(40)}` sets one line along any geometry (no `width`); `start` is a fraction of the path's length, a number or track, and `align` is relative to it.
-- A `<Text>` holds strings, numbers, `<Run>`s, or one `count()`. Its words can't change over time: crossfade two texts, or `morph` between states that key the same `<Text>`.
+- A `<Text>` holds strings, numbers, `<Run>`s, one `count()`, one `typed()`, or one string track. Plain words can't change over time: for a label that changes, give the `<Text>` a string track (below).
 
 ## Numbers that count
 
@@ -51,5 +51,7 @@ The nine places, for `anchor`, `place` and `radial.across({ center })`: `top-lef
 <Text font={sans} weight={600} size={28} fill={theme.text}>${count(track(0).to(1284500, span(0.5, 2)))}</Text>
 <Text font={sans} size={14} fill={theme.text}>{count(track(0).to(9.5, span(0, 1.5)), { format: numeral({ decimals: 1, point: ",", separator: "." }) })} km</Text>
 ```
+
+A string track as the only child swaps the label instantly: `<Text font={f} size={14} fill={ink} at={[150, 40]} anchor="center">{track("CLOSED").set("SYN_SENT", span(0.9, 0)).set("ESTABLISHED", span(5, 0))}</Text>`. A `.set()` shows its value at its time; a `.to()` shows its value when its span ends (the text is never partway). Each value is measured with the real font and the `anchor` applies to each, so a centred label stays centred as it widens. It lowers to one `<text>` per distinct value, shown by step. No other words beside it; use `typed()` to type instead.
 
 `count(value, { format?, rate? })` shows a number, a track or a derived value at every moment. `format` is any `(n: number) => string`, such as `(n) => `$${(n / 1000).toFixed(1)}K``, `(n) => `${n}%``, or `mm:ss` from seconds; the default is `numeral()`. `numeral({ decimals, separator, point, pad })` is the built-in: `decimals` (0), `separator` between thousands (`","`; `""` for none), `point` (`"."`) and `pad` (fewest integer digits, zero-filled). `rate` (30) is the most changes a second. Strings before and after go with it. A counting `<Text>` draws one line in one style: one `count()`, no `<Run>`s, no `width`. Digits sit in slots as wide as the widest digit, so the number doesn't jitter; `align="end"` keeps the right edge still. A long fast count costs bytes: keep the span short or lower `rate`. In a morph, key the text in every state with the same `count()`.

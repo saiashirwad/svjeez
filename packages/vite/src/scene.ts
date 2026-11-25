@@ -146,6 +146,23 @@ export const getScene = (
   };
 };
 
+/** Inline imports need a scene model so its SVG IDs and CSS can receive a file-specific prefix. */
+export const getInlineScene = (
+  source: SceneSource,
+  file: string,
+  options: { readonly prefix: string; readonly posters: boolean | PosterOptions },
+): SceneImage => {
+  if (!isSvgText(source) && !isModule(source)) {
+    const made = isScene(source) ? source : source();
+
+    if (!isSvgText(made)) return getScene(made, options);
+  }
+
+  throw new Error(
+    `${file} exports SVG markup, which can't take a prefix. Import it with ?svjeez, or export a scene model for ?svjeez&inline.`,
+  );
+};
+
 export type { StillOptions };
 
 export interface StillImage {

@@ -30,10 +30,20 @@ export interface Track<T> {
   readonly span: Span;
   to(value: Goal<T>, when: When, curve?: Curve): Track<T>;
   set(value: Goal<T>, when: When): Track<T>;
+  /**
+   * Repeats the clock's first `period` seconds forever: the cycle is [0, period), counted from 0s and not from the
+   * first step, so a motion that starts at 0.4s waits 0.4s in every cycle. The motion must end within the period (a
+   * longer one is an error); the track holds its last value until the cycle restarts, and the period snaps to divide
+   * the scene's duration. For "this motion again, back to back, from where it starts" use `repeat()`.
+   *
+   * `{ phase }` (seconds, any sign, wrapped into the period) starts the loop that far into its cycle: at time t the
+   * track shows what the unshifted loop shows at t + phase. Give each of many streaks or fireflies its own phase,
+   * with the period dividing the scene's duration so the seam stays seamless.
+   */
   loop(period: Seconds, options?: LoopOptions): Track<T>;
   repeat(times: number | { readonly until: Seconds }): Track<T>;
   rewind(over: Seconds, curve?: Curve): Track<T>;
-  map<U>(fn: (value: T) => U, options?: MapOptions): Derived<U>;
+  map<const U>(fn: (value: T) => U, options?: MapOptions): Derived<U>;
   with<const S extends readonly Source[]>(...others: S): Together<[T, ...ValuesOf<S>]>;
 }
 
@@ -87,7 +97,7 @@ class ValueTrack<T> implements Track<T> {
     return new ValueTrack(this.passage.rewind(over, curve), this.#last);
   }
 
-  map<U>(fn: (value: T) => U, options: MapOptions = {}): Derived<U> {
+  map<const U>(fn: (value: T) => U, options: MapOptions = {}): Derived<U> {
     return mappedTrack(this, fn, options);
   }
 
@@ -98,6 +108,7 @@ class ValueTrack<T> implements Track<T> {
 }
 
 export function track(initial: number): Track<number>;
+export function track(initial: string): Track<string>;
 export function track(initial: Vec): Track<Vec>;
 export function track(initial: Geometry): Track<Geometry>;
 export function track<T>(initial: T): Track<T>;
@@ -109,6 +120,44 @@ export function track<T>(initial: T): Track<T> {
     );
 
   return new ValueTrack(new Passage({ initial: { value: initial }, steps: [] }));
+}
+
+/** A keyframe: the value reached at an absolute time, and the curve of the leg that arrives there. */
+export type Keyframe<T> = readonly [time: Seconds, value: Goal<T>, curve?: Curve];
+
+/**
+ * A track through keyframes at absolute times, in increasing order: `keyframes([[0, 0], [0.4, -30, ease.out], [1, 0, ease.in]])`.
+ * It starts at the first frame's value (held until the first time), then each later frame is a `.to()` that begins at
+ * the previous frame's time and arrives at its own, with its own curve (the default one when left out; the first
+ * frame's curve has no leg to shape and is ignored). It is an ordinary track: chain `.loop()`, `.set()` and the rest.
+ */
+export function keyframes(frames: readonly Keyframe<number>[]): Track<number>;
+export function keyframes(frames: readonly Keyframe<string>[]): Track<string>;
+export function keyframes(frames: readonly Keyframe<Vec>[]): Track<Vec>;
+export function keyframes<T>(frames: readonly Keyframe<T>[]): Track<T>;
+export function keyframes<T>(frames: readonly Keyframe<T>[]): Track<T> {
+  const [head, ...rest] = frames;
+
+  if (!head)
+    throw new SceneError(
+      "keyframes() needs at least one frame.",
+      "Write keyframes([[0, start], [1, end]]), each frame [time, value, curve?].",
+    );
+
+  let result = track<T>(stored(head[1]));
+  let previous = head[0];
+
+  for (const [time, value, curve] of rest) {
+    if (!(time > previous))
+      throw new SceneError(
+        `keyframes() takes times in increasing order, but ${num(time)}s comes after ${num(previous)}s.`,
+        "Sort the frames by time and give each its own time; use .set() for a cut.",
+      );
+    result = result.to(value, span(previous, time - previous), curve);
+    previous = time;
+  }
+
+  return result;
 }
 
 export const isTrack = <T>(value: Anim<T>): value is Track<T> => value instanceof ValueTrack;
@@ -175,8 +224,8 @@ export const readOf = <T>(
 ): Passage<{ readonly value: T }> => {
   if (goesToAnchor(value))
     throw new SceneError(
-      `${where} follows a track with a step that goes to an anchor, which only the at of a node (or a group's offset) can follow.`,
-      "Use that track for at, or write a point track of its own here.",
+      `${where} follows a track with a step that goes to an anchor, which only the at or offset of a node can follow.`,
+      "Use that track for at or offset, or write a point track of its own here.",
     );
 
   return readGoals(value, timing, where);

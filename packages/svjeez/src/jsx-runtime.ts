@@ -1,5 +1,5 @@
 import { caller } from "./svg/traced";
-import { remember, sourceFrom } from "./author/identity";
+import { keyText, remember, sourceFrom } from "./author/identity";
 import { componentMeta } from "./author/component";
 import { scopeNow } from "./author/scope";
 import { flat, type Child, type SceneElement } from "./author/nodes";
@@ -40,13 +40,12 @@ export const build = <P extends { readonly children?: Child; readonly id?: strin
       { node: `<${type}>`, ...(source && { source: sourceFrom(source) }) },
     );
 
-  // The component runs when the scene is built, top-down, with the contexts and ids around it. Types ask for a text
-  // key, but untyped JSX may hand a number, as from .map((item, i) => ...): use its text.
+  // The component runs when the scene is built, top-down, with the contexts and ids around it.
   return {
     type: "call",
     component: type,
     props,
-    ...(key !== undefined && { key: String(key) }),
+    ...(key !== undefined && { key: keyText(key, source && sourceFrom(source)) }),
     scope: scopeNow(),
   };
 };

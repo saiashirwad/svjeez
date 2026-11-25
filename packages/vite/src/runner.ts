@@ -197,7 +197,7 @@ export const createRunner = (app: ResolvedConfig): Runner => {
         return { image: getScene(made.svg, { posters }), dependencies: [...made.files] };
       }
 
-      const [{ getScene }, scene] = await Promise.all([
+      const [{ getInlineScene, getScene }, scene] = await Promise.all([
         runner.import<typeof import("./scene.ts")>(SCENE),
         runner.import<{ default: SceneSource; prefix?: string }>(file),
       ]);
@@ -205,10 +205,13 @@ export const createRunner = (app: ResolvedConfig): Runner => {
       const [node] = moduleGraph.getModulesByFile(file) ?? [];
 
       return {
-        image: getScene(scene.default, {
-          posters,
-          ...(inlinePrefix !== undefined && { prefix: scene.prefix ?? inlinePrefix }),
-        }),
+        image:
+          inlinePrefix === undefined
+            ? getScene(scene.default, { posters })
+            : getInlineScene(scene.default, file, {
+                posters,
+                prefix: scene.prefix ?? inlinePrefix,
+              }),
         dependencies: node ? [...files(node)] : [file],
       };
     },

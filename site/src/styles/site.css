@@ -785,7 +785,7 @@ kbd {
   block-size: auto;
 }
 /* The first section sits right under the hero, without a hairline. */
-#film {
+#reel {
   margin-block-start: clamp(3.5rem, 9vw, 6.5rem);
   padding-block-start: 0;
   border-block-start: 0;

@@ -8,7 +8,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .a{animation-duration:14s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
 @keyframes k1{0%,77.143%{opacity:0}81.429%,100%{opacity:1}}
 .m1{animation-name:k1}
-@keyframes k2{0%,5.714%{stroke-dashoffset:1;visibility:hidden}7.857%{stroke-dashoffset:0.973;visibility:visible}15.714%{stroke-dashoffset:0.86;visibility:visible}20.357%{stroke-dashoffset:0.799;visibility:visible}31.786%{stroke-dashoffset:0.635;visibility:visible}34.286%{stroke-dashoffset:0.602;visibility:visible}48.214%{stroke-dashoffset:0.405;visibility:visible}50.357%{stroke-dashoffset:0.378;visibility:visible}63.929%{stroke-dashoffset:0.184;visibility:visible}67.5%{stroke-dashoffset:0.137;visibility:visible}77.143%,100%{stroke-dashoffset:0;visibility:visible}}
+@keyframes k2{0%,5.714%{stroke-dashoffset:1;visibility:hidden}7.857%{stroke-dashoffset:0.973;visibility:visible}15.714%{stroke-dashoffset:0.86;visibility:visible}20.357%{stroke-dashoffset:0.799;visibility:visible}31.786%{stroke-dashoffset:0.635;visibility:visible}34.286%{stroke-dashoffset:0.602;visibility:visible}48.214%{stroke-dashoffset:0.405;visibility:visible}50.357%{stroke-dashoffset:0.378;visibility:visible}63.929%{stroke-dashoffset:0.184;visibility:visible}67.5%{stroke-dashoffset:0.137;visibility:visible}77.141%{stroke-dashoffset:0;stroke-dasharray:1 2;visibility:visible;animation-timing-function:cubic-bezier(.23,1,.32,1)}77.143%,100%{stroke-dashoffset:0;stroke-dasharray:none;visibility:visible}}
 .m2{animation-name:k2;animation-timing-function:linear}
 @keyframes k3{0%,91.429%{opacity:1}95.714%,100%{opacity:0}}
 .m3{animation-name:k3}

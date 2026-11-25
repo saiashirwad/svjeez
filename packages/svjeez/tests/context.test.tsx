@@ -132,6 +132,44 @@ describe("<Series>", () => {
     ]);
   });
 
+  test("gap puts seconds between children: negative overlaps them, positive leaves a pause", () => {
+    const series = (gap: number) =>
+      made(() => (
+        <Series gap={gap}>
+          {beat(2, "a")}
+          {beat(3, "b")}
+          {beat(1, "c")}
+        </Series>
+      ));
+
+    const overlapped = series(-0.5);
+
+    expect([
+      startOf(overlapped, "a", 2),
+      startOf(overlapped, "b", 3),
+      startOf(overlapped, "c", 1),
+    ]).toEqual([0, 1.5, 4]);
+    expect(overlapped.duration).toBe(5);
+
+    const paused = series(1);
+
+    expect([startOf(paused, "a", 2), startOf(paused, "b", 3), startOf(paused, "c", 1)]).toEqual([
+      0, 3, 7,
+    ]);
+    expect(paused.duration).toBe(8);
+  });
+
+  test("a gap that starts a child before the series is an error", () => {
+    expect(() =>
+      made(() => (
+        <Series gap={-3}>
+          {beat(2, "a")}
+          {beat(3, "b")}
+        </Series>
+      )),
+    ).toThrow("<Series> gap={-3} starts its child 2 at -1s, before the series starts.");
+  });
+
   test("a child with no length is an error that says how to give it one", () => {
     expect(() =>
       made(() => (

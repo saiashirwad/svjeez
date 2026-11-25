@@ -19,14 +19,22 @@ import { isArray, isNumber, isObject, isString } from "../model/guards";
 export { ref } from "./refs";
 
 export interface Common {
-  readonly key?: string;
+  /** Names the node among its siblings. A number is the same as its text, as in React. */
+  readonly key?: string | number;
   /**
    * A name for this node that a ref("id") finds it by, and that `svg.emit(scene, { ids: true })` writes as `data-svz-id`.
    * Inside a component that has an id it is scoped by it: `card1/note`. Unique in its scope.
    */
   readonly id?: string;
   readonly ref?: Ref;
+  /** Puts the anchor point of this node's box here (the top-left unless `anchor` says otherwise). Not with `offset`. */
   readonly at?: Anim<Vec> | Anchor;
+  /**
+   * Moves this node's own coordinate frame by this vector: what it draws around [0, 0] lands at the offset. A circle
+   * drawn around [0, 0] goes to `offset={[120, 44]}` with no anchor; a text's own [0, 0] is the top-left of its first line.
+   * The same as the `offset` of a motion layer, but static or a track. Not with `at` or `anchor`.
+   */
+  readonly offset?: Anim<Vec> | Anchor;
   readonly anchor?: AnchorPlace;
   readonly origin?: Origin;
   readonly rotate?: Anim<number>;
@@ -165,11 +173,7 @@ export interface PictureProps extends Common {
   readonly zoom?: Anim<number>;
 }
 
-export interface Framed {
-  readonly offset?: Anim<Vec> | Anchor;
-}
-
-export interface GroupProps extends Common, Framed, Backdrop {}
+export interface GroupProps extends Common, Backdrop {}
 
 /** Plays its children on the scene's clock from `when`, or on a `clock` that page code can drive. Give one of them. */
 export type SequenceProps = { readonly children?: Child } & (
@@ -218,7 +222,7 @@ export type SceneElement =
       readonly value: {} | null | undefined;
       readonly children: readonly SceneElement[];
     }
-  | { readonly type: "series"; readonly children: readonly SceneElement[] };
+  | { readonly type: "series"; readonly gap: Seconds; readonly children: readonly SceneElement[] };
 
 /** What JSX writes and expansion removes before a scene is lowered. */
 export type Authoring = Extract<SceneElement, { readonly type: "call" | "provide" | "series" }>;
@@ -272,7 +276,7 @@ export const flat = (child: Child): SceneElement[] => {
 export const Group = ({
   children,
   ...props
-}: Common & Framed & { readonly children?: Child }): SceneElement => ({
+}: Common & { readonly children?: Child }): SceneElement => ({
   type: "group",
   props,
   children: flat(children),
@@ -321,8 +325,15 @@ export const Sequence = ({ when, clock, children }: SequenceProps): SceneElement
   };
 };
 
-/** Plays its children one after another: each starts where the one before it ends. Each needs a length, as a root of `<Sequence when={span(0, n)}>` gives it. */
-export const Series = ({ children }: { readonly children?: Child }): SceneElement => ({
-  type: "series",
-  children: flat(children),
-});
+export interface SeriesProps {
+  /** Seconds between one child's end and the next one's start. Negative overlaps them, as a crossfade wants: `gap={-0.4}` starts each child 0.4s before the one before it ends. */
+  readonly gap?: Seconds;
+  readonly children?: Child;
+}
+
+/** Plays its children one after another: each starts `gap` (default 0) after the one before it ends. Each needs a length, as a root of `<Sequence when={span(0, n)}>` gives it. */
+export const Series = ({ gap = 0, children }: SeriesProps): SceneElement => {
+  if (!Number.isFinite(gap)) throw new SceneError(`<Series> needs a finite gap, got ${gap}.`);
+
+  return { type: "series", gap, children: flat(children) };
+};

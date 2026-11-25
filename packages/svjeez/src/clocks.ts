@@ -126,7 +126,13 @@ const bezier = ([x1, y1, x2, y2]: readonly number[], x: number) => {
 };
 
 /** An attribute's value at a time in playback seconds. */
-type Sample = (playback: number) => string;
+type Sample = (playback: number, end: boolean) => string;
+
+const wholeCycles = (time: number, period: number) => {
+  const cycles = Math.round(time / period);
+
+  return cycles > 0 && Math.abs(time - cycles * period) < 1e-9 ? cycles : 0;
+};
 
 /**
  * What an `<animate>` svjeez wrote shows at a playback time. A plain one cycles over `dur` until its repeats are done,
@@ -173,7 +179,9 @@ const sampled = (animate: Element): Sample => {
   };
 
   if (loop > 0)
-    return (playback) => {
+    return (playback, end) => {
+      if (end && wholeCycles(playback, loop)) return last;
+
       const inside = playback % loop;
       const start = begin || 0;
 
@@ -182,8 +190,10 @@ const sampled = (animate: Element): Sample => {
       return inside >= start + duration ? last : cycle((inside - start) / duration);
     };
 
-  return (playback) =>
-    playback >= repeats * duration ? last : cycle((playback % duration) / duration);
+  return (playback, end) =>
+    playback >= repeats * duration || (end && wholeCycles(playback, duration))
+      ? last
+      : cycle((playback % duration) / duration);
 };
 
 interface Tween {
@@ -207,6 +217,9 @@ interface Group {
   readonly parts: Part[];
   readonly tweens: Tween[];
 }
+
+// Mount removes the original SMIL. Store its samplers on the marker so each later mount only gets its own subtree.
+const taken = new WeakMap<Element, Tween[]>();
 
 /**
  * The animations under `root`, by the clock of the nearest marked element above their target. SMIL has one clock per
@@ -242,17 +255,27 @@ const grouped = (root: Element): Map<string, Group> => {
     const attribute = smil.getAttribute("attributeName");
 
     if (!marked || !target) continue;
-    const group = groupOf(marked);
 
-    if (smil.localName === "animate" && attribute)
-      group.tweens.push({
+    if (smil.localName === "animate" && attribute) {
+      const tweens = taken.get(marked) ?? [];
+
+      tweens.push({
         target,
         attribute,
         sample: sampled(smil),
         at: numberOf(marked, "data-clock-at"),
       });
+      taken.set(marked, tweens);
+    }
+
     smil.remove();
   }
+
+  const marked = [...root.querySelectorAll("[data-clock]")];
+
+  if (root.matches("[data-clock]")) marked.unshift(root);
+
+  for (const element of marked) groupOf(element).tweens.push(...(taken.get(element) ?? []));
 
   return groups;
 };
@@ -272,7 +295,7 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
         ((start + at) / rate) * 1000 + Number(animation.effect?.getTiming().delay ?? 0);
 
     for (const { target, attribute, sample, at: start } of tweens)
-      target.setAttribute(attribute, sample((start + at) / rate));
+      target.setAttribute(attribute, sample((start + at) / rate, at === over));
   };
 
   const halt = () => {
@@ -333,7 +356,16 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
     return drop;
   };
 
-  for (const { animation } of parts) animation.pause();
+  for (const { animation, at: start } of parts) {
+    const effect = animation.effect;
+    const timing = effect?.getComputedTiming();
+    const count = wholeCycles(((start + over) / rate) * 1000, Number(timing?.duration));
+
+    // Fill the final keyframe when the mounted clock ends on a repeat boundary.
+    if (timing?.iterations === Infinity && count) effect?.updateTiming({ iterations: count });
+    animation.pause();
+  }
+
   show(0);
 
   const clock: ClockControl = {
@@ -359,9 +391,6 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
   return { clock, release };
 };
 
-// What a mount took over, by SVG: the SMIL it removed can't be read a second time, so a mount after an unmount reuses it.
-const taken = new WeakMap<Element, Map<string, Group>>();
-
 /**
  * Takes over the clocks of an inline SVG svjeez made (or of the SVGs inside `root`): their animations pause, their SMIL
  * is replaced by attributes the controls set, and the controls move them. Animations that are not on a clock go on playing.
@@ -371,12 +400,7 @@ const taken = new WeakMap<Element, Map<string, Group>>();
  */
 
 export const mount = (root: Element): Mounted => {
-  const svg = root.localName === "svg" ? root : (root.querySelector("svg") ?? root);
-  const groups = taken.get(svg) ?? grouped(root);
-
-  taken.set(svg, groups);
-
-  const made = [...groups].map(([name, group]) => [name, control(name, group)] as const);
+  const made = [...grouped(root)].map(([name, group]) => [name, control(name, group)] as const);
   const clocks = new Map(made.map(([name, { clock }]) => [name, clock]));
 
   const mounted: Omit<Mounted, "unmount"> = {

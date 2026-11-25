@@ -17,6 +17,7 @@
     "paths": {
       "svjeez": ["../svjeez/src/index.ts"],
       "svjeez/tools": ["../svjeez/src/tools.ts"],
+      "svjeez/typecheck": ["../svjeez/src/typecheck.ts"],
       "svjeez/frames": ["../svjeez/src/frames.ts"],
       "svjeez/page": ["../svjeez/src/page.ts"],
       "svjeez/jsx-runtime": ["../svjeez/src/jsx-runtime.ts"],

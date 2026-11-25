@@ -3,7 +3,14 @@ import type { Scene } from "../model/ir";
 import type { Seconds } from "../model/time";
 import { add, type Problem, type Related, type Severity, type Survey } from "./inspect-context";
 import { lowContrast } from "./inspect-contrast";
-import { layoutOverlap, missingGlyphs, overlap, wideLines, wordCuts } from "./inspect-layout";
+import {
+  layoutOverlap,
+  missingGlyphs,
+  movingBox,
+  overlap,
+  wideLines,
+  wordCuts,
+} from "./inspect-layout";
 import { movingFilter } from "./inspect-cost";
 import { loopSeam, timing } from "./inspect-timing";
 import { svg } from "../svg/svg";
@@ -107,6 +114,7 @@ export const problemsOf = (scene: Scene, sampled?: readonly Seconds[]): Problem[
   loopSeam(survey);
   timing(survey);
   movingFilter(survey);
+  movingBox(survey);
   layoutOverlap(survey);
   wordCuts(survey);
   capabilities(survey);

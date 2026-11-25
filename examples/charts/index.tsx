@@ -29,7 +29,7 @@ const hours = [26, 28, 25, 27, 29, 26, 24, 15, 11, 9, 8, 7];
 
 const look = { font: mono, textSize: 12, axis: theme.border, label: theme.muted, grid: {} };
 
-const rise = (at: number) => enter(span(at, 0.6), { from: { opacity: 0, offset: [0, 10] } });
+const rise = (at: number) => enter(span(at, 0.6), { from: { offset: [0, 10] } });
 
 const heading = (x: number, title: string, note: string, at: number) => (
   <Group offset={[x, 124]} motion={rise(at)}>

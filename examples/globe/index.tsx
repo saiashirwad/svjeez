@@ -45,8 +45,7 @@ export default scene(
       <Group offset={[656, 270]}>
         <Shape
           geometry={circle(RADIUS + 14)}
-          at={[0, 0]}
-          anchor="center"
+          offset={[0, 0]}
           fill={theme.cyan}
           opacity={0.08}
           effects={[blur(10)]}

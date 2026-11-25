@@ -28,7 +28,8 @@ const hosting = new WeakMap<Element, () => void>();
 const SVG = "http://www.w3.org/2000/svg";
 
 export const slotOf = (root: Element, name: string): SlotControl => {
-  const element = root.querySelector(`g[data-slot="${CSS.escape(name)}"]`);
+  const selector = `g[data-slot="${CSS.escape(name)}"]`;
+  const element = root.matches(selector) ? root : root.querySelector(selector);
 
   if (!(element instanceof SVGGElement)) {
     const names = [...root.querySelectorAll("[data-slot]")].map(

@@ -1,0 +1,32 @@
+---
+import film from "../scenes/film";
+import { getScene } from "@svjeez/astro/scene";
+import Proof from "../components/Proof.astro";
+import Base from "../layouts/Base.astro";
+import { REPO } from "../links";
+import { windowed } from "../window";
+
+const reel = getScene(windowed(film, { size: [1280], title: "film.svg" }));
+---
+
+<Base
+  title="The film · svjeez"
+  description="A film about svjeez that is itself one SVG file, with no JavaScript."
+  class="video"
+>
+  <main class="wrap video-page">
+    <h1>film.svg</h1>
+    <p class="lede">One .svg in <code>&lt;img&gt;</code>, zero js. Plays once; reload to replay.</p>
+    <div class="win">
+      <img class="scene" src={reel.src} width={reel.width} height={reel.height} style={`--native: ${reel.width}`} alt={reel.desc} />
+      <Proof scene={reel} name="film" alt={reel.desc} />
+    </div>
+    <p class="more"><a class="btn primary" href="/">Home</a><a class="btn" href={REPO}>GitHub</a></p>
+  </main>
+</Base>
+
+<style is:global>
+  .video-page { padding-block: 3rem 5rem; display: grid; gap: 1.25rem; }
+  .video-page h1 { margin: 0; font-size: clamp(2rem, 5vw, 3.25rem); letter-spacing: -0.03em; }
+  .video-page .lede { margin: 0 0 0.75rem; }
+</style>

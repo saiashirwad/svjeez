@@ -11,11 +11,11 @@ export type { SceneOptions } from "./author/lower";
 export type {
   Child,
   Common,
-  Framed,
   PictureProps,
   RunProps,
   RunStyle,
   SequenceProps,
+  SeriesProps,
   ShapeProps,
   StrokeProps,
   TextChild,

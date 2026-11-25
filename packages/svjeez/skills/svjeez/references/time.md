@@ -22,6 +22,7 @@ const [crouch, leap, land] = span(0.1, 0.3).chain(0.12, 0.25);
 ```
 
 `<Sequence when>` is a clock of its own: every track and recipe inside counts from the span's start, so a component is written from 0 and placed anywhere, and sequences inside sequences add up. With a length, everything inside must end by then; `when={span(4)}` runs to the end. A track is read on one clock: two nodes on different clocks reading one track throws, so make a track for each.
+
 ## One after another, and values from above
 
 ```tsx
@@ -30,6 +31,21 @@ const Accent = context("#3ddc97");           // Accent.read() is the nearest <Ac
 <Accent value="#ff6b6b">
   <Series><Beat /><Beat /></Series>          {/* each starts where the one before ends */}
 </Accent>
+```
+
+`<Series gap={-0.4}>` starts each child 0.4s before the one before it ends, so shots that fade in and out over 0.4s crossfade with no start times worked out; a positive `gap` leaves a pause. A gap that would start a child before the series throws.
+
+```tsx
+const Shot = ({ over, children }: { over: number; children: Child }) => (
+  <Sequence when={span(0, over)}>
+    <Group motion={[enter(span(0, 0.4)), exit(span(over - 0.4, 0.4))]}>{children}</Group>
+  </Sequence>
+);
+
+<Series gap={-0.4}>
+  <Shot over={4.4}><Intro /></Shot>
+  <Shot over={9}><Demo /></Shot>
+</Series>
 ```
 
 JSX runs top-down when the scene is built, so a component sees the contexts around it, and `propsOf(el, Card)` (from `svjeez/tools`) reads the props an unbuilt `<Card>` was written with. A node's length is where its last `<Sequence>` ends, seen through fragments and groups; a `<Series>` child needs one (`<Sequence when={span(0, n)}>` at its root). Leave `duration` out and the scene is as long as its root. See `examples/series.tsx`.
@@ -66,7 +82,7 @@ A scene loops every `duration` seconds unless `loop: false` (play once and hold 
 
 - A value that ends elsewhere: finish with `.rewind(over)` on the track, or fade the node out before the end (`exit`). The check adds a node's layers up, so `enter()` and `exit()` on the same value are a loop that ends where it began.
 - A node that enters and never leaves vanishes at the seam: `exit()` it, or have it on screen from 0s.
-- `.loop(period)` snaps the period to divide `duration`; a looped track never seams. A steady spin is `track(0).to(360, span(0, 2), ease.linear).loop(2)`.
+- `.loop(period)` snaps the period to divide `duration`; a looped track never seams. A steady spin is `track(0).to(360, span(0, 2), ease.linear).loop(2)`. `.loop(2, { phase })` starts it `phase` seconds into the cycle (the track at t shows the plain loop at t + phase), so each of many streaks or fireflies gets its own offset and the seam still closes.
 - A track that runs past the scene (`… runs until …s, past the …s scene`) throws: end it by `duration`.
 
 ## Reduced motion

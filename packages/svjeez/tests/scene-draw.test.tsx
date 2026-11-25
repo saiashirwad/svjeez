@@ -5,6 +5,7 @@ import {
   Shape,
   circle,
   ease,
+  line,
   rect,
   ref,
   scene,
@@ -21,6 +22,32 @@ const emit = (shape: () => SceneElement): string =>
 const stroke = { color: "#FF0000" as const };
 
 describe("Shape draw", () => {
+  test("a whole draw drops its dashes, so a closed shape keeps its join at the first vertex", () => {
+    const out = emit(() => (
+      <Shape
+        geometry={circle(10)}
+        stroke={stroke}
+        draw={track(0).to(1, span(0, 1)).to(0.5, span(1, 1))}
+      />
+    ));
+
+    // dashed up to the instant the draw is whole, plain while it stays whole, dashed again as it leaves
+    expect(out).toContain("49.998%,50.002%{stroke-dashoffset:0;stroke-dasharray:1 2}");
+    expect(out).toContain("50%{stroke-dashoffset:0;stroke-dasharray:none}");
+  });
+
+  test("an open stroke has no join to keep, so a whole draw adds no dash stops", () => {
+    const out = emit(() => (
+      <Shape
+        geometry={line([0, 0], [10, 0])}
+        stroke={stroke}
+        draw={track(0).to(1, span(0, 1)).to(0.5, span(1, 1))}
+      />
+    ));
+
+    expect(out).not.toContain("stroke-dasharray:");
+  });
+
   test("draw is trim [0, draw]", () => {
     const drawn = emit(() => (
       <Shape geometry={circle(10)} stroke={stroke} draw={track(0).to(1, span(0, 1))} />
@@ -152,5 +179,82 @@ describe("Arrow head", () => {
       "  </g>",
       "</svg>",
     ]);
+  });
+});
+
+describe("anchor on a shape whose geometry animates", () => {
+  test("throws, since the anchor would drift as the box changes", () => {
+    const grows = () =>
+      emit(() => (
+        <Shape
+          geometry={track(rect(10, 10)).to(rect(80, 40), span(0, 1))}
+          at={[50, 50]}
+          anchor="center"
+          fill="#FF0000"
+        />
+      ));
+
+    expect(grows).toThrow(/anchor="center" and a geometry whose box moves/);
+  });
+
+  test("a fixed geometry keeps its anchor", () => {
+    const still = () =>
+      emit(() => <Shape geometry={rect(10, 10)} at={[50, 50]} anchor="center" fill="#FF0000" />);
+
+    expect(still).not.toThrow();
+  });
+
+  test("a geometry whose box keeps the anchor point, like a swelling circle, keeps its anchor", () => {
+    const swells = () =>
+      emit(() => (
+        <Shape
+          geometry={track(circle(10)).to(circle(30), span(0, 1))}
+          at={[50, 50]}
+          anchor="center"
+          fill="#FF0000"
+        />
+      ));
+
+    expect(swells).not.toThrow();
+  });
+});
+
+describe("Arrow between two moving ends", () => {
+  test("a spring under both ends compiles: keys the sampler writes never share a moment", () => {
+    const spring = ease.spring({ stiffness: 170, damping: 17 });
+
+    const bounce = track(0)
+      .to(1, span(2.4, spring.settle), spring)
+      .to(0, span(4.2, spring.settle), spring);
+
+    const [a, b] = [ref(), ref()];
+
+    const card = (handle: typeof a, x: number, lift: number) => (
+      <Shape
+        ref={handle}
+        geometry={rect(40, 30)}
+        at={bounce.map((v): [number, number] => [x, 60 + lift * v])}
+        fill="#FFFFFF"
+      />
+    );
+
+    const film = () =>
+      svg.emit(
+        scene({ size: [400, 200], duration: 47.5, title: "Test" }, () => (
+          <Group>
+            {card(a, 40, -70)}
+            {card(b, 200, 56)}
+            <Arrow
+              from={a.right}
+              to={b.left}
+              inset={8}
+              stroke={stroke}
+              draw={track(0).to(1, span(1, 0.5))}
+            />
+          </Group>
+        )),
+      );
+
+    expect(film).not.toThrow();
   });
 });

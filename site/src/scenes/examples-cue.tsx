@@ -35,7 +35,7 @@ const bar = (x: number, y: number, height: number) => (
 /** What each card shows, drawn about the middle of its bottom edge. */
 const PICTURES: readonly SceneElement[] = [
   <Group>
-    <Shape geometry={circle(8)} at={[0, -26]} anchor="center" fill={BLIP.yellow} />
+    <Shape geometry={circle(8)} offset={[0, -26]} fill={BLIP.yellow} />
     <Shape
       geometry={path.parse("M-12 -8H12")}
       stroke={{ color: theme.border, width: 2, cap: "round" }}

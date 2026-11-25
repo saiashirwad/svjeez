@@ -228,6 +228,8 @@ describe("skill docs", () => {
       "<Image",
       "reducedMotion",
       "hint:",
+      "DefaultLang",
+      "grammars={",
     ];
 
     const everything = [

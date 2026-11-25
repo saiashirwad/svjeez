@@ -172,6 +172,7 @@ export const CODE = {
   variable: "red",
   function: "blue",
   type: "yellow",
+  attribute: "yellow",
   tag: "red",
   inserted: "green",
   deleted: "red",

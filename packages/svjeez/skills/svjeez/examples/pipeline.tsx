@@ -69,7 +69,7 @@ const Packet = ({ to, when }: { readonly to: Ref; readonly when: Span }): SceneE
     .set(1, span(when.start))
     .set(0, span(second.end + 0.1));
 
-  return <Shape geometry={circle(5)} at={at} anchor="center" opacity={seen} fill={theme.blue} />;
+  return <Shape geometry={circle(5)} offset={at} opacity={seen} fill={theme.blue} />;
 };
 
 export default scene(

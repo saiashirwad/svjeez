@@ -1,5 +1,5 @@
 import { Chart, area, line } from "@svjeez/charts";
-import { Code } from "@svjeez/code";
+import { Code, ts } from "@svjeez/code";
 import { tomorrow } from "@svjeez/code/palettes";
 import { google } from "@svjeez/fonts";
 import { Icon, type IconData } from "@svjeez/icons";
@@ -203,7 +203,7 @@ export default scene(
               }
             >
               <Stack padding={12} radius={8} fill={theme.background}>
-                <Code lang="ts" font={mono} size={12} palette={tomorrow} typing={typing}>
+                <Code lang={ts} font={mono} size={12} palette={tomorrow} typing={typing}>
                   {COMMIT}
                 </Code>
               </Stack>

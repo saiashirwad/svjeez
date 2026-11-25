@@ -10,8 +10,9 @@ import {
   mixGeometry,
   outlineBoxOf,
 } from "../model/geometry";
-import { componentOf, identified, sourced, writtenAt } from "./identity";
+import { componentOf, identified, keyText, sourced, writtenAt } from "./identity";
 import { Names, quoted, wordsOf, type Named } from "./names";
+import { isArray } from "../model/guards";
 import { SceneError, located } from "../model/scene-error";
 import { tagOf } from "../model/naming";
 import type {
@@ -98,6 +99,7 @@ import { pinned } from "./pin";
 import { sub } from "../model/vec";
 import { fitSizeForRuns, layoutRuns, setAlong } from "./text";
 import { countedNodes, countingIn, rateOf, ticksOf } from "./count";
+import { shown, swapIn, swapTicks, swapping, textsOf, unionOf } from "./swap";
 import { typedNodes, typedTicks, typing as typingMix, typingIn } from "./typed";
 import {
   blendable,
@@ -155,6 +157,12 @@ const animated = <A, T>(
   curves = false,
 ): Animated<T> => {
   if (isDerived(value)) return derivedOf(value, change, timing, where, curves);
+
+  if (isArray(value) && value.some((part) => isTrack(part) || isDerived(part)))
+    throw new SceneError(
+      `${where} is a point with a track inside it, but a track moves the whole point.`,
+      "Write the point as one track, as in track([0, 0]).to([0, -55], span(…)); track(…).map((y) => [0, y]) moves one axis.",
+    );
 
   if (!isTrack(value)) return change(value);
   // SAFETY: a value that is not undefined is an A, and undefined is itself one when A allows it, so change() takes it either way.
@@ -254,6 +262,10 @@ const base = (
 ) => {
   const where = ctx.notes.names.named(key);
 
+  const framed = props.offset !== undefined;
+  const start: Vec = framed ? [0, 0] : home;
+  const point = props.offset ?? props.at;
+
   const own: Layer = {
     offset: [0, 0],
     rotate: animated(props.rotate ?? 0, keep, timing, mixNumber, `rotate on ${where}`),
@@ -265,17 +277,17 @@ const base = (
   return {
     key,
     box,
-    at: isAnchor(props.at)
+    at: isAnchor(point)
       ? NOWHERE
       : animated<Vec, Vec>(
-          props.at ?? home,
-          (point) => sub(point, home),
+          point ?? start,
+          (value) => sub(value, start),
           timing,
           mixVec,
-          `at on ${where}`,
+          `${framed ? "offset" : "at"} on ${where}`,
           true,
         ),
-    origin: originOf(ctx.notes.names, props.origin, box, key, () => home),
+    origin: originOf(ctx.notes.names, props.origin, box, key, () => start),
     layers: [
       ...layersOf(props.motion, where).map((layer) => layerOf(layer, timing, where)),
       own,
@@ -320,6 +332,9 @@ const fillOpacityOf = (
   return lowered;
 };
 
+/** How far, in px, an anchor's point may move across a geometry's keys before the anchor no longer holds. */
+const DRIFT = 0.5;
+
 const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeNode => {
   const where = ctx.notes.names.named(key);
 
@@ -335,6 +350,19 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
       "Give it a fill, as in fill={theme.text}, or a stroke, as in stroke={{ color: theme.text }}.",
     );
   const geometry = geometryOf(props.geometry, timing, where);
+
+  // An anchor names a point of the box at rest. When the geometry animates and that point moves with it, as a rect
+  // growing from its corner does, it drifts away from at as it plays, which reads as the anchor being ignored.
+  if (props.anchor !== undefined && isLane(geometry)) {
+    const points = geometry.keys.map((key) => pinned(props.anchor, outlineBoxOf(key.value), where));
+
+    if (points.some(([x, y]) => Math.hypot(x - points[0]![0], y - points[0]![1]) > DRIFT))
+      throw new SceneError(
+        `${where} has anchor=${JSON.stringify(props.anchor)} and a geometry whose box moves that point as it animates, but the anchor is read from the box at rest, so it stops holding once the geometry changes.`,
+        "Drop at and anchor and wrap it in <Group offset={…}>, which puts the geometry's own [0, 0] there; or keep the geometry and animate scale.",
+      );
+  }
+
   const rest = atRest(geometry);
   const outline = outlineBoxOf(rest);
   const paint = (value: Paint) => colorOf(ctx, value, where, timing, outline);
@@ -391,6 +419,13 @@ const strokeOf = (
     throw new SceneError(
       `${where} has a dashOffset but no dash to slide.`,
       "Give the stroke a dash, as in stroke={{ color, dash: [4, 4], dashOffset }}.",
+    );
+
+  // The type says array, but plain JS callers can pass a number.
+  if (written.dash && !isArray(written.dash))
+    throw new SceneError(
+      `${where} has a stroke dash of ${String(written.dash)}, which is not a list.`,
+      "Give the dash as an array of lengths, as in stroke={{ color, dash: [2, 2] }}; dash: [2] is 2 on, 2 off.",
     );
 
   return {
@@ -650,6 +685,68 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
       authored: { count: { ticks: ticks.map(({ t, text }) => ({ t, text: before + text })) } },
       kind: "group",
       children: [stroke ? stroked(node, stroke) : node],
+    };
+  }
+
+  const swap = swapIn(props.children, where);
+
+  if (swap) {
+    const value = animated(swap, keep, timing, swapping, `the text in ${where}`);
+    const ticks = swapTicks(value, ctx.duration);
+    const texts = textsOf(ticks);
+
+    if (texts.length === 0)
+      throw new SceneError(`${where} swaps a string track, but it never shows any text.`);
+
+    // Each text is a <Text> of its own, so its width and anchor are its own; they share an anchor point.
+    const quiet = {
+      at: undefined,
+      offset: undefined,
+      origin: undefined,
+      rotate: undefined,
+      scale: undefined,
+      skew: undefined,
+      opacity: undefined,
+      motion: undefined,
+    };
+
+    const alone = texts.map((words) => {
+      const node = text(ctx, { ...props, ...quiet, children: words }, key, timing);
+
+      if (node.kind !== "text")
+        throw new SceneError(`${where} swaps text, and ${words} didn't lower to text.`);
+      const baseline = node.lines[0]?.at[1] ?? 0;
+      const [x, y] = pinned(props.anchor, node.box, where, baseline);
+
+      return { words, node, home: [x, y] as const, baseline: baseline - y };
+    });
+
+    const around = unionOf(
+      alone.map(({ node, home }) => ({
+        ...node.box,
+        x: node.box.x - home[0],
+        y: node.box.y - home[1],
+      })),
+    );
+
+    const home = pinned(props.anchor, around, where, alone[0]!.baseline);
+    const place = (own: Vec): Vec => [home[0] - own[0], home[1] - own[1]];
+
+    return {
+      ...base(
+        ctx,
+        props,
+        { ...around, x: around.x + home[0], y: around.y + home[1] },
+        key,
+        timing,
+        home,
+      ),
+      authored: { count: { ticks } },
+      kind: "group",
+      children: alone.map(({ words, node, home: own }, i) => ({
+        ...shown(node, words, ticks, place(own)),
+        key: `${key}/${i + 1}`,
+      })),
     };
   }
 
@@ -1052,7 +1149,7 @@ const lowerAll = (
       return merged;
     }
 
-    const name = given.props.key;
+    const name = keyOf(given);
 
     if (name !== undefined && taken.has(name))
       throw new SceneError(
@@ -1067,8 +1164,9 @@ const lowerAll = (
       });
     let own = name;
 
+    // An unkeyed node is keyed by position, in a "#" namespace so key={1} can't collide with the second child.
     for (let index = taken.size; own === undefined; index++)
-      if (!taken.has(String(index))) own = String(index);
+      if (!taken.has(`#${index}`)) own = `#${index}`;
     taken.add(own);
     const key = parent ? `${parent}/${own}` : own;
     const entry = nameFor(ctx, given, name, parent);
@@ -1082,6 +1180,12 @@ const lowerAll = (
     }
   });
 
+const keyOf = (given: Extract<SceneElement, { readonly props: object }>): string | undefined => {
+  const key = "key" in given.props ? given.props.key : undefined;
+
+  return key === undefined ? undefined : keyText(key, writtenAt(given));
+};
+
 const lowered = (
   ctx: Ctx,
   given: NodeElement,
@@ -1092,12 +1196,14 @@ const lowered = (
 ): SceneNode[] => {
   const el = withGoals(given, key, timing, ctx.notes, parent);
   const backdrop = el.type === "group" ? backdropOf(ctx, el.props, key, timing) : undefined;
-  const offset = el.type === "group" ? el.props.offset : undefined;
+  const { offset } = el.props;
 
   placement(ctx, el.props, offset, key, parent);
 
   if (el.props.id !== undefined) noteId(ctx.notes, el.props.id, key, writtenAt(given));
-  const still = el.props.at === undefined && offset === undefined && !ctx.notes.aims.has(key);
+  const aim = ctx.notes.aims.has(key);
+  const still = el.props.at === undefined && offset === undefined && !aim;
+  const pins = (el.props.at !== undefined || aim) && offset === undefined;
 
   note(
     ctx.notes,
@@ -1140,15 +1246,10 @@ const lowered = (
         );
 
       const node: GroupNode = {
-        ...base(
-          ctx,
-          offset === undefined ? el.props : { ...el.props, at: offset },
-          around(children),
-          key,
-          timing,
-          [0, 0],
-        ),
-        ...(el.layout && { authored: { layout: el.layout } }),
+        ...base(ctx, el.props, around(children), key, timing, [0, 0]),
+        ...((el.layout || pins) && {
+          authored: { ...(el.layout && { layout: el.layout }), ...(pins && { pinned: true }) },
+        }),
         ...(el.slot !== undefined && { slot: el.slot }),
         ...(el.shader && { shader: el.shader }),
         kind: "group",
@@ -1171,13 +1272,13 @@ const placement = (
 
   if (offset !== undefined && props.at !== undefined)
     throw new SceneError(
-      `${where} has both at and offset. at places a point of its box; offset places its children's [0, 0].`,
+      `${where} has both at and offset. at puts a point of its box somewhere; offset moves its own [0, 0] there.`,
       "Keep one of them.",
     );
 
   if (offset !== undefined && props.anchor !== undefined)
     throw new SceneError(
-      `${where} has anchor=${JSON.stringify(props.anchor)} and offset, but anchor names the point at places, and offset places its children's [0, 0], not a point of its box.`,
+      `${where} has anchor=${JSON.stringify(props.anchor)} and offset, but anchor names the point at places, and offset moves its own [0, 0], not a point of its box.`,
       "Place it with at and anchor, or drop anchor.",
     );
 
@@ -1191,7 +1292,7 @@ const placement = (
   )
     throw new SceneError(
       `anchor on ${where} names the point its at places, but it has no at, so it stays where its coordinates put it.`,
-      "Give it an at, or drop anchor.",
+      `Add at, such as at={[100, 50]} anchor=${JSON.stringify(props.anchor)}, or at={box.bottom} with a ref box to pin it to another node, or drop anchor.`,
     );
 };
 

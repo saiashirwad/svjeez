@@ -26,6 +26,7 @@ import {
   schemesOf,
   sharedArea,
   textOf,
+  seconds,
   units,
   type Entry,
 } from "./survey";
@@ -39,8 +40,10 @@ export const wideLines = (survey: Survey): void => {
     const widest = Math.max(
       0,
       ...node.lines.map((line) => {
+        // A run's advances end with the gap after its last letter, which draws nothing.
         const ends = line.runs.map(
-          (run) => run.at[0] + run.advances.reduce((sum, a) => sum + a, 0),
+          (run) =>
+            run.at[0] + run.advances.reduce((sum, a) => sum + a, 0) - (run.letterSpacing ?? 0),
         );
 
         return ends.length === 0 ? 0 : Math.max(...ends) - node.box.x;
@@ -73,13 +76,21 @@ const travelling = (entry: Entry, t: Seconds): boolean =>
       ),
   );
 
-const clippedOut = (entry: Entry, frame: ReadonlyMap<string, Placed>, box: Box): boolean =>
-  entry.ancestors.some((ancestor) => {
-    if (ancestor.clip === undefined) return false;
-    const clip = frame.get(ancestor.key);
+/** The part of a box that its ancestors' clips let show at this frame. */
+const shownOf = (entry: Entry, frame: ReadonlyMap<string, Placed>, box: Box): Box =>
+  entry.ancestors.reduce((shown, ancestor) => {
+    const clip = ancestor.clip === undefined ? undefined : frame.get(ancestor.key);
 
-    return clip !== undefined && sharedArea(box, clip.box) <= 0;
-  });
+    if (clip === undefined) return shown;
+    const [x, y] = [Math.max(shown.x, clip.box.x), Math.max(shown.y, clip.box.y)];
+    const right = Math.min(shown.x + shown.width, clip.box.x + clip.box.width);
+    const bottom = Math.min(shown.y + shown.height, clip.box.y + clip.box.height);
+
+    return { x, y, width: Math.max(0, right - x), height: Math.max(0, bottom - y) };
+  }, box);
+
+const clippedOut = (entry: Entry, frame: ReadonlyMap<string, Placed>, box: Box): boolean =>
+  area(shownOf(entry, frame, box)) <= 0;
 
 export const overlap = (survey: Survey): void => {
   const texts = survey.entries.filter(
@@ -103,13 +114,15 @@ export const overlap = (survey: Survey): void => {
   survey.frames.forEach(({ t, frame }) => {
     const up = texts.flatMap((entry) => {
       const at = frame.get(entry.node.key);
+      const shown = at && shownOf(entry, frame, at.box);
 
       return at &&
+        shown &&
         at.opacity > VISIBLE &&
         !fading(entry, t) &&
         !travelling(entry, t) &&
-        !clippedOut(entry, frame, at.box)
-        ? [{ entry, box: ink(at.box), full: at.box }]
+        area(shown) > 0
+        ? [{ entry, box: ink(shown) }]
         : [];
     });
 
@@ -287,6 +300,48 @@ const ownMoving = (node: SceneNode, t: Seconds): boolean =>
   node.layers.some(
     (layer) => movingAt(layer.offset, t) || movingAt(layer.opacity, t) || movingAt(layer.scale, t),
   );
+
+/**
+ * A group's at and anchor match a point of its box as it is at 0s. When what is inside moves, the box's corner moves
+ * with it and the group sits off the point it was given, which only holds at 0s.
+ */
+export const movingBox = (survey: Survey): void => {
+  for (const entry of survey.entries) {
+    const { node } = entry;
+
+    if (
+      node.kind !== "group" ||
+      !node.authored?.pinned ||
+      node.authored.layout ||
+      node.authored.count ||
+      isGone(survey, entry)
+    )
+      continue;
+    const rest = node.box;
+    let worst: { by: number; t: Seconds } | undefined;
+
+    for (const { t, frame } of survey.frames) {
+      const now = frame.get(node.key)?.frame;
+
+      if (!now) continue;
+
+      const by = Math.max(Math.abs(now.x - rest.x), Math.abs(now.y - rest.y));
+
+      if (by > 1 && (!worst || by > worst.by)) worst = { by, t };
+    }
+
+    if (!worst) continue;
+
+    add(survey, {
+      code: "moving-box",
+      severity: "warning",
+      key: node.key,
+      message: `${label(node)} is placed by at or anchor against its box as it is at 0s, but what is inside it moves, so the corner it was pinned by has moved ${units(worst.by)} by ${seconds(worst.t)}, and the group has drifted off the point it was given.`,
+      fix: "Move the group with offset (where its children's [0, 0] go), or keep the moving parts in an inner group and place an outer group that holds still.",
+      times: [worst.t],
+    });
+  }
+};
 
 export const layoutOverlap = (survey: Survey): void => {
   for (const entry of survey.entries) {

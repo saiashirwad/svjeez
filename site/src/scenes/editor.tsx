@@ -1,4 +1,4 @@
-import { highlight, type CodeRole } from "@svjeez/code";
+import { highlight, tsx, type CodeRole } from "@svjeez/code";
 import {
   Center,
   Group,
@@ -133,7 +133,7 @@ export const CodeLine = ({
   scheme?: "light" | "dark";
 }) => (
   <Text key={key} font={mono} size={SIZE} motion={motion} scheme={scheme}>
-    {highlight(source, "tsx")[0]!.map(([role, text]) => (
+    {highlight(source, tsx)[0]!.map(([role, text]) => (
       <Run fill={ink(role)}>{text}</Run>
     ))}
   </Text>

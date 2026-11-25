@@ -414,6 +414,62 @@ describe("the shader runner", () => {
     await page.close();
   });
 
+  gpu(
+    "unmount frees one shader's resources while another shader holds the shared device",
+    async () => {
+      const { page } = await open(many(1));
+
+      await run(
+        page,
+        `let buffers = 0;
+       let contexts = 0;
+       const destroy = GPUBuffer.prototype.destroy;
+       const unconfigure = GPUCanvasContext.prototype.unconfigure;
+       GPUBuffer.prototype.destroy = function () { buffers++; return destroy.call(this); };
+       GPUCanvasContext.prototype.unconfigure = function () { contexts++; return unconfigure.call(this); };
+       const first = document.querySelector('svg');
+       const second = first.cloneNode(true);
+       document.body.append(second);
+       globalThis.a = lib.mount(first);
+       globalThis.b = lib.mount(second);
+       globalThis.released = () => [buffers, contexts, seen.devices.map((device) => device.destroyed)];`,
+      );
+      await page.waitForFunction('document.querySelectorAll("foreignObject canvas").length === 2');
+
+      expect(await run(page, "b.unmount(); return released();")).toEqual([1, 1, [false]]);
+      expect(await run(page, "a.unmount(); await Promise.resolve(); return released();")).toEqual([
+        2,
+        2,
+        [true],
+      ]);
+      await page.close();
+    },
+  );
+
+  gpu("a thin canvas respects the device's texture dimension limit", async () => {
+    const { page } = await open(many(1, 10_000, 20));
+
+    await run(
+      page,
+      `const request = GPUAdapter.prototype.requestDevice;
+       GPUAdapter.prototype.requestDevice = async function (...args) {
+         const device = await request.apply(this, args);
+         globalThis.limit = device.limits.maxTextureDimension2D;
+         return device;
+       };
+       ${MOUNT}`,
+    );
+    await settle(page);
+
+    expect(
+      await run(
+        page,
+        "return document.querySelector('foreignObject canvas').width === Math.min(20_000, limit);",
+      ),
+    ).toBe(true);
+    await page.close();
+  });
+
   gpu("mounting twice, as React's StrictMode does, leaves one canvas and one device", async () => {
     const { page, noise } = await open(build(turning));
 

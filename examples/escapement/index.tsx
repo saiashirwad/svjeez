@@ -279,8 +279,7 @@ const Pinion = ({ gear }: { readonly gear: Gear }): SceneElement => (
 const Shade = ({ c, r }: { readonly c: Vec; readonly r: number }): SceneElement => (
   <Shape
     geometry={circle(r * 0.94)}
-    at={add(c, [2.5, 4])}
-    anchor="center"
+    offset={add(c, [2.5, 4])}
     stroke={{ color: "#00000052", width: r * 0.14 }}
   />
 );
@@ -295,8 +294,7 @@ const Jewel = ({ c, r = 4.2 }: { readonly c: Vec; readonly r?: number }): SceneE
 const Pin = ({ c }: { readonly c: Vec }): SceneElement => (
   <Shape
     geometry={circle(2.2)}
-    at={c}
-    anchor="center"
+    offset={c}
     fill={STEEL}
     stroke={{ color: STEEL_EDGE, width: 0.4 }}
   />
@@ -462,7 +460,7 @@ const Label = ({ name, note, at: [x, y], to, stop, after = 0, end }: Note): Scen
         stroke={{ color: "#ECE9E2B3", width: size * 0.05 }}
         draw={track(0).to(1, span(shown.start + 0.2, 1))}
       />
-      <Shape geometry={circle(size * 0.14)} at={to} anchor="center" fill={INK} />
+      <Shape geometry={circle(size * 0.14)} offset={to} fill={INK} />
       <Text
         font={mono}
         size={Number(n(size, 2))}
@@ -681,8 +679,7 @@ export default scene(
           />
           <Shape
             geometry={circle(2.2)}
-            at={[0, PIN]}
-            anchor="center"
+            offset={[0, PIN]}
             fill={RUBY}
             stroke={{ color: RUBY_EDGE, width: 0.3 }}
           />

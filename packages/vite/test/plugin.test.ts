@@ -324,6 +324,27 @@ export default { a, b, own, plain };`,
   ]);
 }, 120_000);
 
+test("inline imports reject pre-rendered markup whose IDs cannot be prefixed", async () => {
+  const dir = join(scratch, "inline-markup");
+
+  mkdirSync(dir);
+  writeFileSync(
+    join(dir, "raw.ts"),
+    `export default () => '<svg viewBox="0 0 1 1"><title id="t">Raw</title></svg>';`,
+  );
+  writeFileSync(join(dir, "main.ts"), 'export { default } from "./raw.ts?svjeez&inline";');
+
+  await expect(
+    build({
+      ...appConfig(dir),
+      build: {
+        outDir: join(scratch, "inline-markup-dist"),
+        lib: { entry: join(dir, "main.ts"), formats: ["es"] },
+      },
+    }),
+  ).rejects.toThrow("exports SVG markup, which can't take a prefix");
+}, 120_000);
+
 test("getScene() prefixes a scene it emits, and leaves markup it is given", () => {
   const model = scene({ size: [30, 20], duration: 1, title: "Made" }, () => jsx(Group, {}));
 

@@ -2,13 +2,14 @@
 import type { Mounted } from "./clocks";
 import { isNumber, isObject, isPoint, isString } from "./model/guards";
 import type { Rgb, ShaderField } from "./model/ir";
+import { slotOf } from "./slots";
 
 interface Table {
   readonly size: number;
   readonly fields: readonly ShaderField[];
 }
 
-type Scene = Pick<Mounted, "clocks" | "slot">;
+type Scene = Pick<Mounted, "clocks">;
 
 const CANVAS: Partial<CSSStyleDeclaration> = { display: "block", width: "100%", height: "100%" };
 
@@ -20,7 +21,7 @@ const BUDGET = 1_500_000;
 
 interface Shared {
   readonly device: Promise<GPUDevice | undefined>;
-  users: number;
+  readonly users: Set<() => void>;
 }
 
 /** The page's one device, which every shader on it draws with. */
@@ -45,9 +46,8 @@ interface Loan {
 }
 
 /** Borrows the page's device, made on first use; the last shader to give it back destroys it. */
-const borrow = (): Loan => {
-  const held: Shared = shared ?? { device: opened(), users: 0 };
-  let returned = false;
+const borrow = (stop: () => void): Loan => {
+  const held: Shared = shared ?? { device: opened(), users: new Set() };
 
   const forget = () => {
     if (shared === held) shared = undefined;
@@ -55,19 +55,20 @@ const borrow = (): Loan => {
 
   if (!shared) {
     shared = held;
-    held.device.then((device) => device?.lost.then(forget), forget);
+    held.device.then((device) => {
+      void device?.lost.then(() => {
+        forget();
+        held.users.forEach((release) => release());
+      });
+    }, forget);
   }
 
-  held.users++;
+  held.users.add(stop);
 
   return {
     device: held.device,
     back: () => {
-      if (returned) return;
-      returned = true;
-      held.users--;
-
-      if (held.users > 0) return;
+      if (!held.users.delete(stop) || held.users.size > 0) return;
       forget();
       held.device.then((device) => device?.destroy(), forget);
     },
@@ -178,26 +179,31 @@ const run = (group: Element, scene: Scene): (() => void) => {
   const dark = matchMedia("(prefers-color-scheme: dark)");
   const calm = matchMedia("(prefers-reduced-motion: reduce)");
   const data = new Float32Array(table.size / 4);
-  const lent = borrow();
   let gone = false;
   let release: (() => void) | undefined;
   let draw: Draw | undefined;
   let watcher: IntersectionObserver | undefined;
+  let configured: GPUCanvasContext | undefined;
+  let uniform: GPUBuffer | undefined;
 
   const stop = () => {
+    if (gone) return;
     gone = true;
 
     if (draw) draws(draw, false);
     watcher?.disconnect();
     release?.();
+    configured?.unconfigure();
+    uniform?.destroy();
     lent.back();
   };
+
+  const lent = borrow(stop);
 
   const start = async () => {
     const made = await lent.device;
 
-    if (!made || gone) return;
-    void made.lost.then(stop);
+    if (!made || gone) return stop();
 
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("webgpu");
@@ -206,6 +212,7 @@ const run = (group: Element, scene: Scene): (() => void) => {
     const format = navigator.gpu.getPreferredCanvasFormat();
 
     context.configure({ device: made, format, alphaMode: "premultiplied" });
+    configured = context;
     made.pushErrorScope("validation");
     const module = made.createShaderModule({ code });
 
@@ -220,6 +227,8 @@ const run = (group: Element, scene: Scene): (() => void) => {
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
+    uniform = buffer;
+
     const bindings = made.createBindGroup({
       layout: pipeline.getBindGroupLayout(0),
       entries: [{ binding: 0, resource: { buffer } }],
@@ -229,7 +238,7 @@ const run = (group: Element, scene: Scene): (() => void) => {
 
     Object.assign(canvas, { ariaHidden: "true" });
     Object.assign(canvas.style, CANVAS);
-    const slot = scene.slot(name);
+    const slot = slotOf(group, name);
 
     release = slot.host(canvas);
 
@@ -264,9 +273,16 @@ const run = (group: Element, scene: Scene): (() => void) => {
 
     const frame: Draw = () => {
       const { width, height } = canvas.getBoundingClientRect();
-      const density = Math.min(devicePixelRatio, Math.sqrt(BUDGET / Math.max(1, width * height)));
-      const w = Math.max(1, Math.round(width * density));
-      const h = Math.max(1, Math.round(height * density));
+      const limit = made.limits.maxTextureDimension2D;
+
+      const density = Math.min(
+        devicePixelRatio,
+        Math.sqrt(BUDGET / Math.max(1, width * height)),
+        limit / Math.max(1, width, height),
+      );
+
+      const w = Math.max(1, Math.floor(width * density));
+      const h = Math.max(1, Math.floor(height * density));
 
       if (canvas.width !== w || canvas.height !== h) Object.assign(canvas, { width: w, height: h });
 
