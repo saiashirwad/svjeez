@@ -13,11 +13,9 @@
     "live": "vite live-editor",
     "test:browsers": "bun test ./scripts/browsers.ts",
     "test:node": "tsx scripts/node-check.ts",
-    "deploy:field-site": "cd field-site && bun --bun alchemy deploy",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react && tsc --noEmit -p dom-react-vite && tsc --noEmit -p dom-component && tsc --noEmit -p live-editor && tsc --noEmit -p clocks && tsc --noEmit -p gpu-card && tsc --noEmit -p field-site && tsc --noEmit -p field-site/scenes && svelte-check --tsconfig dom-svelte/tsconfig.json --fail-on-warnings"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p dom-react && tsc --noEmit -p dom-react-vite && tsc --noEmit -p dom-component && tsc --noEmit -p live-editor && tsc --noEmit -p clocks && tsc --noEmit -p gpu-card && svelte-check --tsconfig dom-svelte/tsconfig.json --fail-on-warnings"
   },
   "devDependencies": {
-    "@alchemy.run/cloudflare": "2.0.0-beta.87",
     "@effect/atom-react": "4.1.4",
     "@effect/platform-bun": "^4.1.4",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
@@ -32,13 +30,11 @@
     "@svjeez/math": "workspace:*",
     "@svjeez/mermaid": "workspace:*",
     "@svjeez/video": "workspace:*",
-    "@svjeez/vite": "workspace:*",
     "@types/bun": "latest",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "@webgpu/types": "^0.1.74",
-    "alchemy": "2.0.0-beta.87",
     "bun-plugin-svelte": "^0.0.6",
     "effect": "^4.1.4",
     "playwright-core": "^1.64.1",
