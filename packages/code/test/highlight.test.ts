@@ -70,6 +70,7 @@ describe("highlight", () => {
       json: ['{"a": true}', "constant"],
       jsx: ['<a href="#">x</a>', "tag"],
       md: ["# Title", "keyword"],
+      ocaml: ["let answer = 42", "keyword"],
       python: ["def f():\n  return None", "keyword"],
       rust: ["fn main() {}", "function"],
       sql: ["SELECT 1 FROM t", "keyword"],
@@ -86,13 +87,13 @@ describe("highlight", () => {
       expect(rolesOf(grammars.get(name)!, source), name).toContain(role);
   });
 
-  test("besides the grammars, the root exports only Code, ROLES and highlight", () => {
+  test("the root exports the authoring API alongside the grammars", () => {
     const names = Object.entries(code)
       .filter((entry) => !isGrammar(entry))
       .map(([name]) => name)
       .toSorted();
 
-    expect(names).toEqual(["Code", "ROLES", "highlight"]);
+    expect(names).toEqual(["Code", "ROLES", "codeLayout", "highlight", "lines", "tokens"]);
   });
 
   test("any other Shiki grammar highlights the same way", () => {

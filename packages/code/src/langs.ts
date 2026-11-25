@@ -16,6 +16,8 @@ export { default as jsx } from "shiki/langs/jsx.mjs";
 
 export { default as md } from "shiki/langs/markdown.mjs";
 
+export { default as ocaml } from "shiki/langs/ocaml.mjs";
+
 export { default as python } from "shiki/langs/python.mjs";
 
 export { default as rust } from "shiki/langs/rust.mjs";

@@ -32,6 +32,21 @@ const Accent = context("#3ddc97");           // Accent.read() is the nearest <Ac
 </Accent>
 ```
 
+`<Series gap={-0.4}>` starts each child 0.4s before the one before it ends, so shots that fade in and out over 0.4s crossfade with no start times worked out; a positive `gap` leaves a pause. A gap that would start a child before the series throws.
+
+```tsx
+const Shot = ({ over, children }: { over: number; children: Child }) => (
+  <Sequence when={span(0, over)}>
+    <Group motion={[enter(span(0, 0.4)), exit(span(over - 0.4, 0.4))]}>{children}</Group>
+  </Sequence>
+);
+
+<Series gap={-0.4}>
+  <Shot over={4.4}><Intro /></Shot>
+  <Shot over={9}><Demo /></Shot>
+</Series>
+```
+
 JSX runs top-down when the scene is built, so a component sees the contexts around it, and `propsOf(el, Card)` (from `svjeez/tools`) reads the props an unbuilt `<Card>` was written with. A node's length is where its last `<Sequence>` ends, seen through fragments and groups; a `<Series>` child needs one (`<Sequence when={span(0, n)}>` at its root). Leave `duration` out and the scene is as long as its root. See `examples/series.tsx`.
 
 ## Loops and seams
