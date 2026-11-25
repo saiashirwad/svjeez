@@ -1,7 +1,7 @@
 import * as nodeModule from "node:module";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { provideTypeGpu } from "./author/typegpu";
+import { cantCompile, provideTypeGpu } from "./author/typegpu";
 
 export interface LoadTypeGpuOptions {
   /**
@@ -18,7 +18,7 @@ export interface LoadTypeGpuOptions {
 }
 
 /** What unplugin-typegpu exports for a build tool: a function that makes the plugin, from the options it takes. */
-export type TypeGpuPlugin = (options?: { readonly include?: RegExp }) => object;
+type TypeGpuPlugin = (options?: { readonly include?: RegExp }) => object;
 
 // Bun's plugin reads every file a regular expression lets through, and rewrites a CommonJS dependency as a module.
 const SOURCE = /^(?!.*\/node_modules\/).*\.[cm]?[jt]sx?$/;
@@ -47,8 +47,8 @@ const found = (name: string, from: string): string | undefined => {
 };
 
 /** What unplugin-typegpu makes for `kind`, as the project at `from` has it installed; undefined without the package. */
-export const typegpuPlugin = async (
-  kind: "bun" | "node" | "vite",
+const typegpuPlugin = async (
+  kind: "bun" | "node",
   from: string,
 ): Promise<TypeGpuPlugin | undefined> => {
   const entry = found(`unplugin-typegpu/${kind}`, from);
@@ -67,9 +67,12 @@ const install = async (from: string, include: RegExp): Promise<void> => {
   const { Bun: bun } = runtime;
   const kind = bun ? "bun" : "node";
 
-  // unplugin-typegpu's Node hook is `module.registerHooks`, which Node 20 does not have: its scenes with a "use gpu"
-  // function can't be loaded there, and the rest still can.
-  if (!bun && !("registerHooks" in nodeModule)) return;
+  // unplugin-typegpu's Node hook is `module.registerHooks`, which Node before 22.15 does not have: its scenes with a
+  // "use gpu" function can't be compiled there, and the rest still load.
+  if (!bun && !("registerHooks" in nodeModule))
+    return cantCompile(
+      `Node ${process.version} can't compile "use gpu" functions: unplugin-typegpu needs module.registerHooks, from Node 22.15.`,
+    );
 
   const make = await typegpuPlugin(kind, from);
 

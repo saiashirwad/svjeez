@@ -11,7 +11,7 @@ export default Alchemy.Stack(
   },
   Effect.gen(function* () {
     const site = yield* Cloudflare.Website.StaticSite("Website", {
-      command: "bun --conditions @svjeez/source ../node_modules/vite/bin/vite.js build",
+      command: "bunx --bun vite build",
       outdir: "dist",
       domain: "fields.texoport.in",
     });

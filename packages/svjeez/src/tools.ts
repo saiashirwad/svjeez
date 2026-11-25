@@ -2,12 +2,7 @@ export { expand, propsOf } from "./author/expand";
 
 export { svg, type SvgOptions } from "./svg/svg";
 
-export {
-  loadTypeGpu,
-  typegpuPlugin,
-  type LoadTypeGpuOptions,
-  type TypeGpuPlugin,
-} from "./load-typegpu";
+export { loadTypeGpu, type LoadTypeGpuOptions } from "./load-typegpu";
 
 export type { Backend, Diagnostic, Feature, LaneReport, Support } from "./model/backend";
 

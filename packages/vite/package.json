@@ -40,7 +40,9 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "svjeez": "workspace:*",
+    "typegpu": "^0.12.10",
     "typescript": "latest",
+    "unplugin-typegpu": "^0.12.8",
     "vite": "8.3.5"
   },
   "peerDependencies": {

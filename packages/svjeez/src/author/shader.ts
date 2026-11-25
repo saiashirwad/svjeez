@@ -6,7 +6,7 @@ import { isClock, NAME, type Clock } from "./clock";
 import { Slot } from "./slot";
 import { isAnchor, type Anchor } from "./refs";
 import type { Child, Common, SceneElement } from "./nodes";
-import { typeGpuOf } from "./typegpu";
+import { typeGpuOf, uncompiled } from "./typegpu";
 import type { Color, Token } from "./values";
 
 /** What a shader reads: a clock's progress, a ref's point, a number, a point `[x, y]` or a color. */
@@ -219,6 +219,15 @@ const wgslOf = (
     });
   } catch (error) {
     if (!(error instanceof Error)) throw error;
+    const why = uncompiled();
+
+    if (why !== undefined)
+      throw new SceneError(
+        `${label}'s fragment function can't be turned into WGSL. ${why}`,
+        "Run the scene on Node 22.15 or later, or under Bun.",
+        {},
+        { cause: error },
+      );
 
     throw new SceneError(
       `${label}'s fragment function can't be turned into WGSL: ${causeOf(error)}`,

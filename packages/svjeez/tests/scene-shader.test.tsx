@@ -318,6 +318,28 @@ describe("Shader", () => {
     ).toThrow("build it with the svjeez CLI or @svjeez/vite");
   });
 
+  test("on a runtime that can't compile, it says why instead of TypeGPU's error", () => {
+    // SAFETY: the source is a "use gpu" function from `d.v2f` to `d.v4f`.
+    const plain: (uv: d.v2f) => d.v4f = new Function(
+      "d",
+      "return (uv) => { 'use gpu'; return d.vec4f(uv, 0, 1); };",
+    )(d);
+
+    const why = Symbol.for("svjeez.typegpu.uncompiled");
+
+    Reflect.set(globalThis, why, "Node v22.12.0 can't compile \"use gpu\" functions.");
+
+    try {
+      expect(() =>
+        emitted(() => <Shader name="sky" width={10} height={10} fragment={plain} />),
+      ).toThrow(
+        `<Shader name="sky">'s fragment function can't be turned into WGSL. Node v22.12.0 can't compile "use gpu" functions. Run the scene on Node 22.15 or later, or under Bun.`,
+      );
+    } finally {
+      Reflect.deleteProperty(globalThis, why);
+    }
+  });
+
   test("without TypeGPU loaded, it says what to install", async () => {
     Reflect.deleteProperty(globalThis, Symbol.for("svjeez.typegpu"));
 

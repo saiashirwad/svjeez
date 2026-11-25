@@ -1,5 +1,7 @@
 import { readFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
+import { join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   createRunnableDevEnvironment,
   defaultServerConditions,
@@ -25,6 +27,39 @@ export interface Runner {
 
 const SCENE = fileURLToPath(new URL("./scene", import.meta.url));
 const RUN_FILM = fileURLToPath(new URL("./film", import.meta.url));
+const TYPEGPU = fileURLToPath(new URL("./typegpu", import.meta.url));
+
+/** What unplugin-typegpu's Vite entry exports: a function that makes the plugin. */
+type MakePlugin = () => PluginOption;
+
+const isMaker = (value: MakePlugin | { readonly default: MakePlugin }): value is MakePlugin =>
+  typeof value === "function";
+
+/**
+ * unplugin-typegpu's Vite plugin, as the app at `root` has it installed beside typegpu, which compiles the `"use gpu"`
+ * functions of a scene's <Shader>; none in an app without them.
+ */
+const typegpu = async (root: string): Promise<PluginOption[]> => {
+  const require = createRequire(join(root, "package.json"));
+  const found = (name: string) => {
+    try {
+      return require.resolve(name);
+    } catch {
+      return undefined;
+    }
+  };
+
+  const entry = found("typegpu") && found("unplugin-typegpu/vite");
+
+  if (!entry) return [];
+
+  const { default: loaded }: { default: MakePlugin | { default: MakePlugin } } = await import(
+    /* @vite-ignore */ pathToFileURL(entry).href
+  );
+
+  // The path is the one `require` takes, which can be the package's CommonJS build: its function is then on `default`.
+  return [isMaker(loaded) ? loaded() : loaded.default()];
+};
 
 /** A file that imports `@svjeez/dom/vite` is a film: `runFilm` loads it through its own project's Vite config. */
 const FILM = /\bfrom\s*["']@svjeez\/dom\/vite["']/;
@@ -101,19 +136,11 @@ export const createRunner = (app: ResolvedConfig): Runner => {
     const { conditions, externalConditions, noExternal, external } =
       app.environments.ssr?.resolve ?? {};
 
-    // A scene with a <Shader> is written with TypeGPU, whose "use gpu" functions this environment compiles as it loads them.
-    // Imported here, not at the top: Astro loads this file to read its config, before svjeez has a built entry to resolve.
-    const { loadTypeGpu, typegpuPlugin } = await import("svjeez/tools");
-
-    const make = (await loadTypeGpu(app.root, { transform: false }))
-      ? await typegpuPlugin("vite", app.root)
-      : undefined;
-
     const config = await resolveConfig(
       {
         configFile: false,
-        // SAFETY: unplugin-typegpu's Vite entry makes a Vite plugin.
-        plugins: make ? [make() as PluginOption] : [],
+        // A scene with a <Shader> is written with TypeGPU, whose "use gpu" functions this environment compiles as it loads them.
+        plugins: await typegpu(app.root),
         envDir: false,
         root: app.root,
         cacheDir: app.cacheDir,
@@ -143,6 +170,10 @@ export const createRunner = (app: ResolvedConfig): Runner => {
       runnerOptions: { hmr: { logger: false } },
     });
     await environment.init();
+    // <Shader> resolves its function with the app's typegpu, handed to the copy of svjeez the scenes run with.
+    await environment.runner
+      .import<typeof import("./typegpu.ts")>(TYPEGPU)
+      .then(({ loadTypeGpu }) => loadTypeGpu(app.root, { transform: false }));
 
     return environment;
   })();

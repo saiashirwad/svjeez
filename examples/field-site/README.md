@@ -3,7 +3,7 @@
 Fields: four line charges and the electric field around them, at fields.texoport.in. Drag a charge or the probe; svjeez / TypeGPU (keys `1` `2` `3`) shows one layer on its own; Source shows the scene's own file.
 
 ```sh
-cd examples/field-site && bun --conditions @svjeez/source ../node_modules/vite/bin/vite.js
+cd examples/field-site && bunx --bun vite
 ```
 
 - `scenes/fields.tsx`: the scene. One TypeGPU `<Shader>` draws the field per pixel: equipotential rings, field lines (contours of the stream function) and light running down them. The charges, the probe and its arrow and readout, and the rulers are vectors; the rest of the vector figure is in `scenes/annotations.tsx`.

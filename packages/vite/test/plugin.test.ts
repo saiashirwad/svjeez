@@ -333,3 +333,40 @@ test("getScene() prefixes a scene it emits, and leaves markup it is given", () =
     '<svg viewBox="0 0 1 1"></svg>',
   );
 });
+
+test("a scene with a <Shader> compiles its \"use gpu\" function with the app's typegpu", async () => {
+  const dir = join(scratch, "shader");
+  mkdirSync(dir);
+
+  writeFileSync(
+    join(dir, "sky.tsx"),
+    `import { Shader, Shape, rect, scene } from "svjeez";
+import { d } from "typegpu";
+export default scene({ size: [100, 50], duration: 1, title: "Sky" }, () => (
+  <Shader name="sky" width={100} height={50} inputs={{ glow: 0.5 }} fragment={(uv, input) => {
+    "use gpu";
+    return d.vec4f(uv.x, uv.y, input.glow, 1);
+  }}>
+    <Shape geometry={rect(100, 50)} fill="#3EE6D6" />
+  </Shader>
+));`,
+  );
+  writeFileSync(join(dir, "main.ts"), `export { default } from "./sky.tsx?svjeez&inline";`);
+
+  const outDir = join(scratch, "shader-dist");
+
+  await build({
+    ...appConfig(dir),
+    build: {
+      outDir,
+      emptyOutDir: true,
+      lib: { entry: join(dir, "main.ts"), formats: ["es"], fileName: "main" },
+    },
+  });
+
+  const { default: made } = await import(join(outDir, "main.js"));
+
+  expect(made.svg).toContain('data-slot="sky"');
+  expect(made.svg).toContain('<script type="text/wgsl">');
+  expect(made.svg).toContain("svjeez_fragment");
+}, 120_000);
