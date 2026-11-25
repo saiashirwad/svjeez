@@ -1,7 +1,7 @@
 /** @jsxImportSource svjeez */
 import { Group, Run, Text, ease, rect, track, type Span } from "svjeez";
 import { SceneError, type Common, type FontValue } from "svjeez/tools";
-import { highlight, type Grammar, type Highlighted, type Lang } from "./highlight.ts";
+import { highlight, type Highlighted, type Lang } from "./highlight.ts";
 import type { Palette } from "./roles.ts";
 
 export interface CodeProps extends Common {
@@ -11,7 +11,6 @@ export interface CodeProps extends Common {
   readonly palette: Palette;
   readonly lineHeight?: number;
   readonly tabSize?: number;
-  readonly grammars?: readonly Grammar[];
   readonly keys?: readonly string[];
   readonly typing?: Span;
   readonly children: string;
@@ -34,7 +33,6 @@ export const Code = ({
   palette,
   lineHeight = 1.5,
   tabSize,
-  grammars,
   keys,
   typing,
   children,
@@ -52,10 +50,7 @@ export const Code = ({
   if (!(lineHeight > 0 && Number.isFinite(lineHeight)))
     throw new SceneError(`<Code> needs a positive lineHeight, got ${lineHeight}.`);
 
-  const lines = highlight(children, lang, {
-    ...(tabSize !== undefined && { tabSize }),
-    ...(grammars && { grammars }),
-  });
+  const lines = highlight(children, lang, { tabSize });
 
   if (keys && keys.length !== lines.length)
     throw new SceneError(

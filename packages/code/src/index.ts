@@ -1,9 +1,25 @@
 export { Code, type CodeProps } from "./code.tsx";
 
 export {
+  bash,
+  css,
+  diff,
+  go,
+  html,
+  js,
+  json,
+  jsx,
+  md,
+  python,
+  rust,
+  sql,
+  ts,
+  tsx,
+  yaml,
+} from "./langs.ts";
+
+export {
   highlight,
-  type DefaultLang,
-  type Grammar,
   type Highlighted,
   type HighlightOptions,
   type Lang,

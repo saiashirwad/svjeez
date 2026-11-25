@@ -7,7 +7,7 @@ npm i -D @svjeez/code@next @svjeez/fonts@next svjeez@next
 ```
 
 ```tsx
-import { Code } from "@svjeez/code";
+import { Code, ts } from "@svjeez/code";
 import { tomorrow } from "@svjeez/code/palettes";
 import { google } from "@svjeez/fonts";
 import { Group, Shape, scene, span } from "svjeez";
@@ -17,13 +17,14 @@ const mono = await google("JetBrains Mono", { ligatures: false });
 export default scene({ size: [360, 80], duration: 3, title: "Greeting", loop: false }, (canvas) => (
   <Group>
     <Shape geometry={canvas.rect} fill={tomorrow.plain} />
-    <Code lang="ts" font={mono} size={16} palette={tomorrow} at={[20, 20]} typing={span(0.3, 1.5)}>
+    <Code lang={ts} font={mono} size={16} palette={tomorrow} at={[20, 20]} typing={span(0.3, 1.5)}>
       {`export const greet = (name: string) => "hello " + name;`}
     </Code>
   </Group>
 ));
 ```
 
+- `lang` takes a grammar: `ts`, `tsx`, `js` and the other common ones come from the package, and any other language is its Shiki module, as `import toml from "shiki/langs/toml.mjs"`. A list highlights as its last grammar, so `lang={[ts, bash, md]}` is Markdown with TypeScript and Bash fences.
 - Built-in palettes in `@svjeez/code/palettes`: `tomorrow`, `solarized`, `gruvbox`, and `rosePine` (each with light and dark modes).
 - Define custom palettes with `palette(name, { light, dark })`.
 

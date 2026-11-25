@@ -12,7 +12,7 @@ import {
 } from "svjeez";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
 import { SceneError, describe as describeScene, check, svg } from "svjeez/tools";
-import { Code, type CodeProps } from "../src/index.ts";
+import { Code, ts, type CodeProps } from "../src/index.ts";
 import { tomorrow } from "../src/palettes.ts";
 import { fontFixture } from "../../../fixtures/fonts.ts";
 
@@ -26,7 +26,7 @@ const made = (build: (canvas: Bounds) => SceneElement, duration = 3, loop = true
 const snippet = (extra: Partial<CodeProps> = {}) =>
   jsxDEV(
     Code,
-    { lang: "ts", font: mono, size: 16, palette: tomorrow, children: SOURCE, ...extra },
+    { lang: ts, font: mono, size: 16, palette: tomorrow, children: SOURCE, ...extra },
     undefined,
     false,
     { fileName: "scene.tsx", lineNumber: 9, columnNumber: 5 },
@@ -167,15 +167,15 @@ describe("<Code>", () => {
 });
 
 describe("<Code> misuse", () => {
-  test("an unknown language names the line and says how to add it", () => {
-    const error = thrown(() => snippet({ lang: "cobol" }));
+  test("a lang with no grammar names the line and says what to give", () => {
+    const error = thrown(() => snippet({ lang: [] }));
 
     expect(error.source).toEqual({ file: "scene.tsx", line: 9, column: 5 });
     expect(error.node).toBe("<Code>");
-    expect(error.message).toStartWith(
-      'scene.tsx:9:5: "cobol" is not a language @svjeez/code knows.',
+    expect(error.message).toStartWith("scene.tsx:9:5: lang is an empty list of grammars.");
+    expect(error.fix).toBe(
+      "Give a grammar, such as ts from @svjeez/code, or a list that ends in one.",
     );
-    expect(error.fix).toContain("grammars={[toml]}");
   });
 
   test("source that is not one string says how to write it", () => {
@@ -183,7 +183,7 @@ describe("<Code> misuse", () => {
       jsxDEV(
         Code,
         {
-          lang: "ts",
+          lang: ts,
           font: mono,
           size: 16,
           palette: tomorrow,

@@ -1,10 +1,10 @@
-import { Code, highlight, type CodeProps, type Lang } from "@svjeez/code";
+import { Code, highlight, tsx, type CodeProps, type Lang } from "@svjeez/code";
 import { tomorrow } from "@svjeez/code/palettes";
 import { Group, Shape, font, scene } from "svjeez";
 import { jsx } from "svjeez/jsx-runtime";
 import { svg as backend } from "svjeez/tools";
 
-const lang: Lang = "tsx";
+const lang: Lang = tsx;
 
 const runs: readonly (readonly (readonly [string, string])[])[] = highlight(
   "const answer = 42;",
