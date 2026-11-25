@@ -208,7 +208,6 @@ const level = (parents: readonly (Slot | undefined)[], pairBy: PairBy | undefine
 
     const loose = slots.filter((slot) => !slot.named);
     const was = (before ?? []).filter((slot) => !slot.named);
-    // The order-keeping match is the default; a strong match overrides whatever it had for those two.
     const same = matching(was, loose);
 
     for (const [j, i] of strongMatches(was, loose)) {
@@ -225,7 +224,6 @@ const level = (parents: readonly (Slot | undefined)[], pairBy: PairBy | undefine
       if (match) matched.set(slot, match);
     });
 
-    // In document order, so a fresh key is numbered the same whichever way the rest matched.
     for (const slot of loose) {
       const match = matched.get(slot);
 
@@ -300,7 +298,6 @@ const lift = (roots: readonly Slot[], notes: Diagnostic[]): void => {
     return out;
   });
 
-  // Shallowest first: lifting a thing changes where the things inside it are, not which parent they have.
   const depths = new Map<string, number>();
 
   for (const mark of marks)
@@ -312,7 +309,6 @@ const lift = (roots: readonly Slot[], notes: Diagnostic[]): void => {
   for (const name of names) {
     const found = marks.map((mark) => mark.get(name));
 
-    // One thing per state, in at least two states.
     if (found.filter(Boolean).length < 2 || found.some((slots) => slots && slots.length > 1))
       continue;
 

@@ -97,20 +97,16 @@ const Field = () => (
       const f = std.add(std.add(a, b), std.add(c, pull(p, input.dx, input.dy, -1)));
       const e = std.max(std.length(f.xy), 0.0001);
 
-      // Device pixels to a u, so a line is as wide everywhere: a step of potential is 1 / e u across here.
       const scale = (input.resolution.x * UNIT) / WIDTH;
 
-      // Equipotentials: thin rings every STEP of potential, on bands that step a shade at each.
       const ring = (std.abs(std.fract(f.z / STEP + 0.5) - 0.5) * STEP * scale) / e;
       const iso = 1 - std.smoothstep(0.3, 1.3, ring);
 
-      // Field lines are where the stream function crosses a whole step: LINES a charge, more for +2q and -2q.
       const strand =
         (std.abs(std.fract((f.w * LINES) / TAU + 0.5) - 0.5) * (TAU / LINES) * scale) / e;
 
       const along = 1 - std.smoothstep(0.4, 1.6, strand);
 
-      // Light runs down each field line toward lower potential, as dashes that ride time.
       const dash = std.smoothstep(0.55, 1, std.fract(f.z * 1.2 + input.time * 0.45));
 
       const side = std.tanh(f.z * 0.4);

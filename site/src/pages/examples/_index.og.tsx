@@ -7,7 +7,6 @@ const [W, H] = [250, 170];
 
 const PAD = 18;
 
-// A window of an example, inset from its edges: a bar of its color, two lines of text, then a block of its color.
 const Example = ({ color, wide }: { color: typeof theme.red; wide: number }) => (
   <Group>
     <Shape geometry={rect(wide, 14, { radius: 7 })} at={[PAD, PAD]} fill={color} />
@@ -30,7 +29,6 @@ const Example = ({ color, wide }: { color: typeof theme.red; wide: number }) => 
   </Group>
 );
 
-// A fan of three windows, each a different example, leaning on each other.
 export default ogScene(
   {
     theme,
@@ -46,7 +44,6 @@ export default ogScene(
       <Window size={[W, H]} at={[1040, 335]} rotate={7} title="globe.tsx">
         <Example color={theme.green} wide={80} />
       </Window>
-      {/* Blip peeks over the top of the front window, leaning to see in. */}
       <Mascot at={[945, 138]} size={150} pose={{ tilt: -6, look: [-3, 6] }} />
       <Window size={[W, H]} at={[915, 205]} rotate={-2} title="code.tsx">
         <Example color={theme.magenta} wide={140} />

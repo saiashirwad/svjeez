@@ -11,10 +11,6 @@ import { Anything, Facts } from "./lines";
 import { Montage } from "./montage";
 import { Open } from "./open";
 
-// The launch film. It lives in one <img> tag: the tag opens into a stage, the stage plays a shot for each thing svjeez
-// does, and folds back into the tag at the end. The stage is one shape for the whole film, so the shots play on it.
-
-// The stage's corner moves with its size, on the same curve, so it grows and shrinks about its middle.
 const corner = (w: number, h: number, [x, y]: Vec): Vec => [x - w / 2, y - h / 2];
 const TAG = { w: 440, h: 72 } as const;
 const opened = span(1.45, 0.75);

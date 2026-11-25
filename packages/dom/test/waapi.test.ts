@@ -82,7 +82,6 @@ describe("a running animation continues from the captured moment", () => {
     expect(out.x(0)).toBeCloseTo(25, 3);
     expect(out.x(1)).toBeCloseTo(75, 3);
     expect(out.x(1.5)).toBeCloseTo(100, 3);
-    // Not filling, it lets go of the transform at the end.
     expect(out.x(3)).toBeCloseTo(0, 3);
 
     const fast = sampled([slide({ duration: 2000, currentTime: 500, playbackRate: 2 })]);
@@ -162,7 +161,6 @@ describe("a running animation continues from the captured moment", () => {
       slide({ iterations: "infinite", direction: "alternate", currentTime: 1500 }),
     ]);
 
-    // Half way back through its second, reversed pass.
     expect(back.x(0)).toBeCloseTo(50, 3);
     expect(back.x(0.25)).toBeCloseTo(25, 3);
     expect(back.x(0.5)).toBeCloseTo(0, 3);
@@ -218,7 +216,6 @@ describe("a running animation continues from the captured moment", () => {
       }),
     ]);
 
-    // 50% of the 20px box is 10px.
     expect(out.x(0)).toBeCloseTo(0, 3);
 
     const half = placements(out.model, 0.5).find((p) => p.key === "app/@track/b/@track")!;
@@ -300,7 +297,6 @@ describe("a running animation continues from the captured moment", () => {
     );
 
     expect(out.x(0)).toBeCloseTo(25, 3);
-    // After its end it is the base, not the last keyframe.
     expect(out.x(3)).toBeCloseTo(7, 3);
     expect(out.opacity(3)).toBeCloseTo(0.5, 3);
     expect(out.color(3)).toBe("#008000");
@@ -499,7 +495,6 @@ describe("animations across several states", () => {
   };
 
   test("a spinner present in every state keeps spinning through the moves, from the first capture's phase", () => {
-    // Each state was captured at a different phase of the same animation: the first one's counts.
     const out = film([[spin(250)], [spin(700)], [spin(100)]]);
 
     expect(out.diagnostics).toEqual([]);
@@ -515,7 +510,6 @@ describe("animations across several states", () => {
     turned(out.angle(1.5), 0);
     turned(out.angle(2.25), 90);
     turned(out.angle(2.75), 270);
-    // The turn is whole when the state ends, so the next state has nothing to undo.
     turned(out.angle(3.5), 0);
     turned(out.angle(4.5), 0);
   });
@@ -537,11 +531,9 @@ describe("animations across several states", () => {
   test("an element that enters or exits keeps animating while it fades", () => {
     const out = film([undefined, [spin()], undefined]);
 
-    // Entering over 1 to 2: its animation starts with the move.
     turned(out.angle(1.25), 90);
     expect(out.opacity(1.25)).toBeLessThan(1);
     turned(out.angle(2.5), 360 * 1.5);
-    // Leaving over 3 to 4: it spins on while it fades.
     turned(out.angle(3.5), 360 * 2.5);
     expect(out.opacity(3.5)).toBeLessThan(1);
     expect(out.opacity(3.5)).toBeGreaterThan(0);

@@ -7,7 +7,6 @@ import { react } from "@svjeez/dom/react";
 import { svelte } from "@svjeez/dom/svelte";
 import * as vite from "@svjeez/dom/vite";
 
-// The files the browser side is served from, resolved by path at runtime, must exist in the package.
 for (const framework of [react, svelte]) {
   assert.ok(existsSync(framework.client), `${framework.name} client missing: ${framework.client}`);
   assert.match(framework.client, /\.js$/);
@@ -17,7 +16,6 @@ assert.ok(vite.runFilm instanceof Function);
 
 assert.ok(vite.component instanceof Function);
 
-// `captureScript` is `capture.toString()`: it must stand alone in a page, with no helpers from the compile step.
 assert.match(captureScript, /^\(.*\)$/s);
 
 assert.doesNotMatch(captureScript, /\b(?:import|require)\b\s*[("']/);
@@ -42,7 +40,6 @@ try {
   await browser.close();
 }
 
-// The Bun entries import `bun`, so they are only checked where Bun is installed.
 try {
   execFileSync("bun", ["--version"], { stdio: "ignore" });
   execFileSync("bun", ["-e", `await import("@svjeez/dom/bun")`], { stdio: "inherit" });

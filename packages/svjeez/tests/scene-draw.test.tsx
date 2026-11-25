@@ -31,7 +31,6 @@ describe("Shape draw", () => {
       />
     ));
 
-    // dashed up to the instant the draw is whole, plain while it stays whole, dashed again as it leaves
     expect(out).toContain("49.998%,50.002%{stroke-dashoffset:0;stroke-dasharray:1 2}");
     expect(out).toContain("50%{stroke-dashoffset:0;stroke-dasharray:none}");
   });

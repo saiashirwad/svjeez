@@ -218,7 +218,6 @@ interface Group {
   readonly tweens: Tween[];
 }
 
-// Mount removes the original SMIL. Store its samplers on the marker so each later mount only gets its own subtree.
 const taken = new WeakMap<Element, Tween[]>();
 
 /**
@@ -286,7 +285,6 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
   let ending: ((reached: boolean) => void) | undefined;
   const drivers = new Set<() => void>();
 
-  // The animation shows its own time minus its delay: the reduced-motion rule gives it a negative one to freeze it.
   const show = (at: Seconds) => {
     time = at;
 
@@ -361,7 +359,6 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
     const timing = effect?.getComputedTiming();
     const count = wholeCycles(((start + over) / rate) * 1000, Number(timing?.duration));
 
-    // Fill the final keyframe when the mounted clock ends on a repeat boundary.
     if (timing?.iterations === Infinity && count) effect?.updateTiming({ iterations: count });
     animation.pause();
   }
@@ -439,7 +436,6 @@ export const scrolled =
       progress((innerHeight - top) / (innerHeight + height));
     };
 
-    // Capturing also hears the scrolling of anything the target sits in.
     addEventListener("scroll", update, { passive: true, capture: true });
     addEventListener("resize", update);
     update();

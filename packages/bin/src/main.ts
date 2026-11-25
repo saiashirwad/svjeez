@@ -1,6 +1,3 @@
-// The single-file svjeez: the CLI with every package it can carry inside it. A scene file anywhere imports svjeez and
-// @svjeez/* from here, with no package.json, node_modules or tsconfig beside it.
-
 import { plugin } from "bun";
 import { readFile } from "node:fs/promises";
 import { setHost } from "svjeez/tools";
@@ -9,7 +6,6 @@ import { USAGE, browserCommand, downloadChild, initCommand } from "./commands";
 import { MODULES } from "./modules";
 import { typeProblems } from "./types";
 
-// scripts/binary.ts defines it in the binary; from source it is unset.
 const built = process.env.SVJEEZ_VERSION;
 const compiled = built !== undefined;
 const version = built ?? "source";
@@ -21,8 +17,6 @@ if (!(await downloadChild(process.argv))) {
       for (const [specifier, load] of MODULES)
         build.module(specifier, async () => ({ exports: { ...(await load()) }, loader: "object" }));
 
-      // A lone scene has no tsconfig to name the JSX runtime, so name it in the file. On the first line, so every
-      // line keeps its number in stacks and messages.
       build.onLoad({ filter: /\.[jt]sx$/ }, async ({ path }) => ({
         contents: `/** @jsxImportSource svjeez */ ${await readFile(path, "utf8")}`,
         loader: path.endsWith(".jsx") ? "jsx" : "tsx",
@@ -32,7 +26,6 @@ if (!(await downloadChild(process.argv))) {
 
   setHost({
     version: `${version} (single-file binary, bun ${Bun.version})`,
-    // A compiled binary runs itself; from source, bun runs this file again.
     self: compiled ? [process.execPath] : [process.execPath, ...process.execArgv, Bun.main],
     skill: async () => {
       const { skill, skillBinary } = await assets();

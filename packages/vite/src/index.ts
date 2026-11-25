@@ -31,8 +31,6 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
   let inFilm = false;
   const runners = new Map<string, Runner>();
   let devServer: ViteDevServer | undefined;
-  // In dev, which `?svjeez` modules each source file feeds. They are watched, not added as imports: Vite counts
-  // `addWatchFile` in dev as an import, so a film's own CSS would land in the page that shows it.
   const feeds = new Map<string, Set<string>>();
 
   return {
@@ -41,7 +39,6 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
     configResolved(resolved) {
       config = resolved;
 
-      // The server that `runFilm` loads a film file with may load this app's config: leave the app's settings alone.
       inFilm = resolved.plugins.some((plugin) => plugin.name === "svjeez-dom");
 
       if (inFilm) return;
@@ -112,7 +109,6 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
       }
 
       const { src, width, height, title, desc, svg, posters } = image;
-      // Server code (SSR, an Astro page) and an `&inline` import also get the markup; a browser bundle gets the URL alone.
       const server = this.environment.config.consumer === "server" || inline;
 
       if (config.command === "serve")

@@ -1,10 +1,6 @@
 import { mix } from "svjeez";
 import type { Hex, Theme, Token } from "svjeez/tools";
 
-// A filmed app that paints with a theme's tokens (`var(--background)`, `color-mix(in srgb, var(--blue) 12%, var(--surface))`)
-// is recorded with the theme's values in each scheme. Each captured light/dark pair is read back as the token it is, or a
-// mix of two, or either at an alpha, so the scene paints with the tokens and restyling them restyles it.
-
 type Rgba = readonly [number, number, number, number];
 
 const bytes = (hex: Hex): Rgba => {
@@ -76,7 +72,6 @@ export const fromTheme = (light: Hex, dark: Hex, theme: Theme): Token | undefine
 
   if (alpha <= 0 || Math.abs(l[3] - d[3]) > 0.02) return undefined;
 
-  // An alpha color's channels come back from the browser rounded, then divided by it: the fainter, the looser.
   const color = opaque([...l.slice(0, 3), ...d.slice(0, 3)], theme, Math.min(2 / alpha, 16));
 
   if (!color || alpha >= 1) return color;

@@ -19,8 +19,6 @@ import {
 } from "svjeez";
 import { geist } from "../fonts/faces";
 
-// Photos from Unsplash via picsum.photos, under the Unsplash License: Alexey Topolyanskiy, Andrew Ridley,
-// Jared Erondu, Steve Carter, Wolfgang Lutz, Joseph Barrientos.
 const serif = await google("Instrument Serif");
 const load = (name: string) => picture.load(new URL(`./${name}.webp`, import.meta.url));
 

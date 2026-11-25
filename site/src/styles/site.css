@@ -1,6 +1,3 @@
-/* svjeez.texoport.in: one stylesheet for every page. System fonts, no framework.
-   One grid: a 66rem content box, twelve columns, and every block starts on column 1, 5, 7 or 9. */
-
 @property --split {
   syntax: "<percentage>";
   inherits: true;
@@ -84,7 +81,6 @@ a {
   text-decoration-color: color-mix(in oklch, currentColor 35%, transparent);
   text-underline-offset: 0.2em;
 }
-/* A heading that links to its own section, so a section can be shared by URL. */
 a.anchor {
   text-decoration: none;
 }
@@ -122,7 +118,6 @@ kbd {
   margin-inline: auto;
 }
 
-/* The grid. On a phone everything is one column; from 56rem each block names its columns. */
 .g {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -162,7 +157,6 @@ kbd {
   }
 }
 
-/* Buttons. */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -208,7 +202,6 @@ kbd {
   }
 }
 
-/* Header. */
 .top {
   display: flex;
   align-items: center;
@@ -249,8 +242,6 @@ kbd {
   inline-size: 1.25rem;
   block-size: 1.25rem;
 }
-/* The header's icons are svjeez scenes inlined in the page. They hold still until you point at their button, then play
-   a whole loop, and now and then one plays on its own. */
 .nav-ico {
   display: inline-flex;
 }
@@ -264,12 +255,10 @@ kbd {
 .nav-ico svg * {
   animation-play-state: paused !important;
 }
-/* A script sets data-on while an icon plays, and lets each run finish its loop before it rests again. */
 .nav-ico[data-on] svg,
 .nav-ico[data-on] svg * {
   animation-play-state: running !important;
 }
-/* The palette menu and the light and dark toggle, set like the links so the row stays even. */
 .controls {
   display: flex;
   align-items: center;
@@ -281,8 +270,6 @@ kbd {
   }
 }
 
-/* The palettes: four little color wheels, half each palette's own background and half two of its accents. Pointing spins one, and the one being worn sits
-   a size up with a ring. */
 .palettes {
   display: flex;
   align-items: center;
@@ -320,7 +307,6 @@ kbd {
   }
 }
 
-/* Light, system and dark on a little track, with a knob that slides between them and Blip riding on top. */
 .scheme {
   --i: 1;
   position: relative;
@@ -406,7 +392,6 @@ kbd {
   }
 }
 
-/* Copying: the two sheets give way to a check that draws itself, and a note says what happened, failure included. */
 .copy-icon .check {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
@@ -462,9 +447,6 @@ kbd {
   }
 }
 
-/* The proof chip: a scene's gzipped size, set in the right of the scene's own title bar as if the window knew it.
-   --native is the scene's width and --bar its title bar's height, both in the scene's pixels, so the chip lands in the
-   middle of the bar at any size the scene is drawn. */
 .win {
   position: relative;
   container-type: inline-size;
@@ -619,7 +601,6 @@ kbd {
 .proof-menu code {
   font-size: 0.85em;
 }
-/* The tag itself stays hidden until a blocked clipboard needs it on screen to be copied by hand. */
 .proof-tag {
   display: none;
   margin: 0.25rem 0.375rem 0.375rem;
@@ -633,7 +614,6 @@ kbd {
 .proof-menu:has([data-copied="failed"]) .proof-tag {
   display: block;
 }
-/* A popover clips what overflows it, so inside the menu the note is a line of its own under the actions. */
 .proof-menu .copy-say {
   position: static;
   inline-size: auto;
@@ -651,7 +631,6 @@ kbd {
   color: var(--warn);
 }
 
-/* Windows: every scene is a window with its own chrome, so the page only adds a shadow. */
 .win {
   border-radius: var(--radius);
   background: var(--win-bg);
@@ -663,8 +642,6 @@ kbd {
 .win > .daynight {
   border-radius: inherit;
 }
-/* A scene draws its own window, a 12px radius and a hairline in its own pixels, so the page's frame steps aside and the
-   scene casts the shadow itself, with its radius scaled to the size it is drawn at. One outline, one corner. */
 .win:has(> .scene) {
   background: none;
   box-shadow: none;
@@ -700,7 +677,6 @@ kbd {
     inline-size: 28rem;
   }
 }
-/* Hero: the headline says what the picture is, and the picture plays under it at its own size. */
 .hero {
   display: grid;
   grid-template-rows: auto auto auto 1fr;
@@ -708,7 +684,6 @@ kbd {
   row-gap: 1.25rem;
   padding-block: clamp(1.5rem, 4vw, 2.25rem) 0;
 }
-/* On a wide screen the first screen is the hero alone, with the way down to the editor at its foot. */
 @media (width >= 56rem) {
   .hero {
     min-block-size: calc(100svh - 4.25rem);
@@ -761,12 +736,10 @@ kbd {
   line-height: 1.5;
   color: var(--muted);
 }
-/* The promise in the lede: ink color and a step of weight, enough to catch the eye without shouting. */
 .lede strong {
   font-weight: 600;
   color: var(--ink);
 }
-/* With room for it, each sentence of the lede gets its own line. */
 @media (min-width: 48rem) {
   .lede {
     max-inline-size: none;
@@ -784,14 +757,12 @@ kbd {
   inline-size: 100%;
   block-size: auto;
 }
-/* The first section sits right under the hero, without a hairline. */
 #reel {
   margin-block-start: clamp(3.5rem, 9vw, 6.5rem);
   padding-block-start: 0;
   border-block-start: 0;
 }
 
-/* Sections: a hairline, a numbered label, a heading, and blocks on the grid. */
 .sec {
   padding-block: clamp(2.5rem, 6vw, 4.5rem) 0;
   margin-block-start: clamp(2.5rem, 7vw, 5.5rem);
@@ -877,13 +848,11 @@ pre.code {
     font-size: 0.71875rem;
   }
 }
-/* Code blocks are Astro's <Code> with the theme in styles/code.ts, colored by the --code-* palette the scenes share. */
 pre.code {
   --pre-bg: var(--sunken);
   font-variant-ligatures: none;
 }
 
-/* Light and dark, side by side. */
 .stagewrap {
   min-inline-size: 0;
 }
@@ -1018,9 +987,6 @@ pre.side {
   }
 }
 
-/* The wall: everything the packages draw, as equal tiles in two columns. At 66rem a column is about 516px, so every
-   504-wide scene draws at close to its own size and the title bars, chips and in-scene code all match from tile to
-   tile. Each tile is two rows of the wall's grid, so captions in a row share a baseline. */
 .wall {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -1080,7 +1046,6 @@ pre.side {
   }
 }
 
-/* The close: the line that was in the footer, said out loud, then the two ways to start and the honest limits. */
 .close {
   display: grid;
   gap: clamp(1.25rem, 2.5vw, 1.75rem);
@@ -1159,7 +1124,6 @@ pre.side {
   padding-inline-start: 1.1rem;
 }
 
-/* Start and footer. */
 .more {
   display: flex;
   flex-wrap: wrap;
@@ -1197,7 +1161,6 @@ pre.side {
   }
 }
 
-/* Examples gallery and one example. */
 .page-head {
   padding-block: 2rem 0.5rem;
 }
@@ -1205,7 +1168,6 @@ pre.side {
   font-size: clamp(2.25rem, 1.5rem + 3.5vw, 3.5rem);
   letter-spacing: -0.03em;
 }
-/* "you" is struck through by hand and "your agent" written in above it. */
 .page-head h1 {
   padding-block-start: 0.5em;
   line-height: 1.35;
@@ -1230,7 +1192,6 @@ pre.side {
   stroke-linejoin: round;
   stroke-dasharray: 1;
 }
-/* "your agent" is a scene (examples/site/your-agent.tsx) inlined here; its ink is currentColor. */
 .edit ins svg {
   display: block;
   inline-size: 6.4em;
@@ -1262,7 +1223,6 @@ pre.side {
     animation: scratch 0.7s 0.5s var(--out) backwards;
   }
 }
-/* On a phone "you" wraps to the second line, so the lines part enough for "your agent" to be written between them. */
 @media (width < 40rem) {
   .page-head h1 {
     line-height: 1.7;
@@ -1273,10 +1233,6 @@ pre.side {
     stroke-dashoffset: 1;
   }
 }
-/* The gallery is set like a front page: a wide card and a narrow one, then three, on the page's twelve columns, so
-   every scene draws near its own size and the diagrams can be read. Each card's span is in --span. Cards sit on their
-   captions, so over the narrow card of a pair there is air, and the lead's size is written into it. Two columns on a
-   tablet, with the lead across both, and one on a phone. */
 .grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -1302,9 +1258,6 @@ pre.side {
     grid-column: span var(--span);
   }
 }
-/* Each card is two rows of the grid, the picture and its caption, so pictures in a row share a bottom edge and captions
-   a top one, however long a title runs. The title is the card's link and stretches over all of it; only the size chip
-   sits above it. */
 .card {
   position: relative;
   display: grid;
@@ -1333,7 +1286,6 @@ pre.side {
   object-fit: cover;
   object-position: 50% 25%;
 }
-/* The caption: the title, then the file's proof chip, which opens the same menu as on the landing page. */
 .card .cap {
   align-self: start;
   padding-inline: 0.25rem;
@@ -1349,7 +1301,6 @@ pre.side {
   position: absolute;
   inset: 0;
 }
-/* The chip follows the title's last word, and wraps with it, a little up from the baseline so it centers on the line. */
 .card .proof {
   position: relative;
   z-index: 1;
@@ -1363,7 +1314,6 @@ pre.side {
   margin-block: -0.25rem;
   background: none;
 }
-/* The ring goes on the picture, with its corners, not round the card. */
 .card .title:focus-visible {
   outline: none;
 }
@@ -1402,8 +1352,6 @@ pre.side {
     translate: 0 -3px;
   }
 }
-/* While a card's SVG downloads, a hairline draws along the bottom of the picture; it completes and fades as the scene
-   crossfades in, so the wait is seen. Only for a pointer: on a touch screen scenes play as they come into view. */
 @media (hover: hover) and (pointer: fine) {
   .gallery .shot::after {
     content: "";
@@ -1432,7 +1380,6 @@ pre.side {
       opacity 0.3s 0.1s var(--out);
   }
 }
-/* The first two rows rise into place behind the headline's scratch. The rest are below the fold and simply there. */
 @media (prefers-reduced-motion: no-preference) {
   .grid .card:nth-child(-n + 5) {
     animation: rise 0.5s 0.15s var(--out) backwards;
@@ -1456,9 +1403,6 @@ pre.side {
     translate: 0 12px;
   }
 }
-/* The lead's size, a scene (examples/site/gallery-note.tsx) inlined so its ink takes the accent. It sits in the first
-   row's area over the second card, on a 16:9 block as wide as that card, so it lands just above the picture at any width
-   and points back at the first. */
 .note {
   display: none;
 }
@@ -1490,7 +1434,6 @@ pre.side {
     overflow: visible;
   }
 }
-/* The page ends on the way to the playground. */
 .end {
   display: block;
   inline-size: min(18rem, 60vw);
@@ -1503,7 +1446,6 @@ pre.side {
   block-size: auto;
 }
 .viewer main {
-  /* The scene and the row under it share one width: the window's, or less so a wide scene fits its height. */
   inline-size: min(100% - 2 * var(--gutter), var(--content), calc((100dvh - 12rem) * var(--ratio)));
   padding-block: 1rem 0;
 }
@@ -1519,7 +1461,6 @@ pre.side {
   inline-size: 100%;
   block-size: 100%;
 }
-/* Under another palette a page scene waits, unseen, for its recolored copy instead of flashing the built-in colors. */
 :root[data-palette] .plate:has(img[data-themed]) {
   background-image: none;
 }
@@ -1580,7 +1521,6 @@ pre.side {
     color: var(--accent);
   }
 }
-/* The intro page: the reel fills the window under the header, as large as it fits. */
 .cinema {
   display: flex;
   flex-direction: column;
@@ -1606,7 +1546,6 @@ pre.side {
   text-align: center;
 }
 
-/* A header that sheds links on a phone. */
 .top nav a[aria-current="page"] {
   color: var(--ink);
 }
@@ -1618,8 +1557,6 @@ pre.side {
     display: none;
   }
 }
-/* On a phone GitHub is its mark alone, and on the narrowest the logo stands for the name, so the menu and both
-   buttons still fit. The words stay for screen readers. */
 @media (max-width: 30rem) {
   .top nav .gh + span {
     position: absolute;
@@ -1641,7 +1578,6 @@ pre.side {
   }
 }
 
-/* Not found: a short heading, Blip, lost, and two ways home. */
 .lost-page {
   display: grid;
   gap: clamp(1.25rem, 3vw, 2rem);

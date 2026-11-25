@@ -16,7 +16,6 @@ export default ogScene(
     <Group>
       <Backdrop />
       <Glow at={HERO} />
-      {/* Blip mid-hop: stretched tall, leaning into it, bulb lit, one foot kicked back, and its shadow left behind. */}
       <Shape geometry={ellipse(70, 10)} offset={[920, 440]} fill={theme.raised} />
       <Mascot
         at={GROUND}

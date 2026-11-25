@@ -58,7 +58,6 @@ describe("animations on a real page", () => {
     const root = captured.root.children.flatMap((node) => (node.type === "element" ? [node] : []));
     const [spin, move] = root.map((node) => node.animations!);
 
-    // The phase each animation had when it was captured, a few milliseconds past 500.
     const spun = spin![0]!.currentTime;
     const moved = move![0]!.currentTime;
 
@@ -111,7 +110,6 @@ describe("animations on a real page", () => {
       `(${captureScript})(document.getElementById("app"))`,
     );
 
-    // Capturing left them running.
     const running = await page.evaluate(() =>
       document.getAnimations().map((animation) => animation.playState),
     );
@@ -129,14 +127,12 @@ describe("animations on a real page", () => {
       () => compiled.element,
     );
 
-    // About a quarter of the way from red to blue (a few milliseconds past it), then the page's own green after the end.
     const red = Number.parseInt(backgroundAt(model, "app/tint", 0).slice(1, 3), 16);
 
     expect(red).toBeGreaterThan(150);
     expect(red).toBeLessThan(200);
     expect(backgroundAt(model, "app/tint", 4)).toBe("#008000");
 
-    // The transition ends on its target.
     expect(backgroundAt(model, "app/fade", 4)).toBe("#c86432");
   }, 60_000);
 
@@ -184,7 +180,6 @@ describe("animations on a real page", () => {
     expect(Math.min(...scales)).toBeCloseTo(1, 2);
     expect(Math.max(...scales)).toBeGreaterThan(1.5);
 
-    // It goes up and down more than once over the film, through the moves too.
     const turns = scales.filter(
       (value, i) => i > 0 && i < 39 && value > scales[i - 1]! && value > scales[i + 1]!,
     );

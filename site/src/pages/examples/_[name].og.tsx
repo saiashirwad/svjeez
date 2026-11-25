@@ -16,9 +16,6 @@ const [MAX_W, MAX_H, BAR] = [470, 420, 40];
 const HERO = [PANEL.x + PANEL.w / 2, 335] as const;
 const accents = [theme.blue, theme.magenta, theme.green, theme.orange, theme.cyan, theme.red];
 
-// Each example's card is its name on the left and the example itself on the right: a window, taken at its moment (its
-// poster's, unless it sets one), lifted off a panel of the example's own color. The color comes from the example's
-// name, so it stays with the example wherever it moves in the gallery.
 const hash = (name: string) =>
   [...name].reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0, 7);
 
@@ -57,7 +54,6 @@ const perch = (name: string, left: number, width: number) => {
     pose: {
       tilt: between(-6, 14) * toward,
       stretch: [between(1, 1.12), between(0.9, 1)] as const,
-      // The eyes look in toward the example; a flipped Blip's eyes are mirrored, so they look the other way.
       look: [between(3, 6) * toward * (flip ? -1 : 1), between(3, 6)] as const,
       lit: random() < 0.3,
       flip,
@@ -96,10 +92,8 @@ export default (async ({ params }) => {
         effects={[shadow({ color: "#000000", offset: [0, 18], blur: 40, opacity: 0.16 })]}
       />
       <Picture src={art} width={WIDTH} at={HERO} anchor="center" />
-      {/* Blip sits somewhere on the window's top edge, leaning in to watch the example. */}
       <Mascot at={[blip.x, HERO[1] - h / 2 + 4]} size={blip.size} pose={blip.pose} />
       <Align place="left" inset={80}>
-        {/* Just the example's name: the picture says the rest. */}
         <Copy title={name} titleSize={80} width={500} note="svjeez example" />
       </Align>
     </Group>

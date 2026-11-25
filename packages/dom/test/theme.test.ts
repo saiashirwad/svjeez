@@ -18,7 +18,6 @@ describe("fromTheme", () => {
   });
 
   test("a color-mix() of two tokens is their mix() at a whole percent", () => {
-    // color-mix(in srgb, var(--blue) 12%, var(--background)), as Chromium paints it in each scheme.
     const made = mix(theme.blue, theme.background, 0.12);
     const token = fromTheme(made.light, made.dark, theme);
 
@@ -37,7 +36,6 @@ describe("fromTheme", () => {
 
   test("a color the theme does not make is left alone", () => {
     expect(fromTheme("#ff0000", "#00ff00", theme)).toBeUndefined();
-    // The same alpha in both schemes, or nothing.
     expect(fromTheme("#0a6cff24", "#5ea0ff80", theme)).toBeUndefined();
   });
 });

@@ -3,9 +3,6 @@ import { BLIP } from "../blip";
 import { Session, type Call } from "./session";
 import { SHOTS, STAGE, mono, shown, theme } from "./kit";
 
-// The agent slide: a coding agent's session fills the stage. It is asked for an animated graphic, reads the svjeez
-// skill, writes the scene, checks it, renders frames and looks at them, and says what it made.
-
 const PROMPT = "animate our cache hit/miss flow for the readme";
 
 const CALLS: readonly Call[] = [

@@ -567,9 +567,6 @@ export const timing = (survey: Survey): void => {
       }
     }
 
-    // An attached arrow's shaft and head move because the nodes they attach to do, and a count's or typed text's
-    // strips, slots and caret because the library animates them: not the author's to change. A swap's texts (the
-    // count group's own text children) carry values the author wrote.
     const parent = entry.ancestors.at(-1);
     const libraryMade = inCount(entry) && !(parent && countOf(parent) && node.kind === "text");
 
@@ -609,11 +606,9 @@ const wasted = (
   const after = new Map<string, Stretch[]>();
   let [first, last] = [own[0]![0], own.at(-1)![1]];
 
-  // A swap's texts share the authored values (the fill, say): such a value is seen while any of them shows.
   const parent = entry.ancestors.at(-1);
   const swap = parent?.kind === "group" && parent.authored?.count ? parent.children : [];
 
-  // Each text lowers its own copy of a shared value, so compare them by content.
   const visibleFor = (item: Named): readonly Stretch[] => {
     const same = JSON.stringify(item.value);
 

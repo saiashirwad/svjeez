@@ -31,7 +31,7 @@ Effect.gen(function* () {
   yield* writeManifest(dir, out, { bin: { svjeez: "./bin/svjeez.js" } });
 
   yield* Effect.forEach(
-    ["package.json", "README.md", "LICENSE"],
+    ["package.json", "LICENSE"],
     (name) => fs.chmod(path.join(out, name), 0o644),
     { concurrency: "unbounded" },
   );

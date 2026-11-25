@@ -340,7 +340,6 @@ export const typedNodes = (
     const known = widths.get(text);
 
     if (known !== undefined) return known;
-    // Summed, not laid out: a line drops the spaces it ends with, and the next word goes after them.
     const measured = advancesIn(piece(text), size, where).reduce((sum, each) => sum + each, 0);
 
     widths.set(text, measured);
@@ -353,8 +352,6 @@ export const typedNodes = (
   const box: Box = { x: 0, y: 0, width: reach + (caret ? thick : 0), height };
   const paint = fill(box);
   const { texts, shows } = branchesOf(ticks);
-  // Room above and below the line for glyphs that reach past it. The clip starts at the text's start, so each step is
-  // the one rectangle stretched across, which a backend can write as a scale.
   const down = size / 2;
 
   const window = (right: number): Geometry => ({

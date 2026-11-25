@@ -235,14 +235,12 @@ const lower = (node: SvgNode, key: string, parent: Lowering): SceneElement[] => 
 
   if (!shape) return [];
 
-  // The stroke's shape is backed off by half its width; the fill's is not.
   const bare = width > 0 ? (geometry(node, 0, here) ?? shape) : shape;
 
   const filled = node.tag === "line" ? undefined : fill;
   const parts: [string, ShapeProps][] = [];
 
   if (filled) {
-    // A polyline's fill closes it, though its stroke does not.
     const geometry =
       node.tag === "polyline"
         ? polygon(...points(node.attrs.points))
@@ -261,7 +259,6 @@ const lower = (node: SvgNode, key: string, parent: Lowering): SceneElement[] => 
 
   if (!only) return [];
 
-  // A fill and a stroke are two shapes of the one element: they share its group and its key.
   if (parts.length === 1 && !dressed) return [<Shape key={key} {...only[1]} />];
 
   return [

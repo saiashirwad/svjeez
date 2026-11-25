@@ -23,10 +23,6 @@ import {
 
 type Hex = `#${string}`;
 
-// A waterfront fireworks show over a midnight harbor.
-// Every shell follows closed-form linear air drag + gravity, distributed on a 3D Fibonacci sphere
-// and projected onto the sky; the PRNG seed is fixed so every loop is identical.
-
 const WIDTH = 960;
 const HEIGHT = 540;
 const WATER_Y = 386;
@@ -42,8 +38,6 @@ const rnd = (seed: number) => () => {
 };
 
 const q = (v: number): number => Math.round(v * 10) / 10;
-
-// --- sky & atmosphere -------------------------------------------------------
 
 const starRnd = rnd(20260721);
 
@@ -74,7 +68,6 @@ const stars: readonly Star[] = Array.from({ length: 96 }, (_, i) => {
   };
 });
 
-// Four shared twinkle tracks (periods divide SECONDS = 8 cleanly so the loop is seamless)
 const twinkles: readonly Track<number>[] = [
   track(0.22).to(0.95, span(0.4, 0.8), ease.inOut).to(0.22, span(1.2, 0.8), ease.inOut).loop(2),
   track(0.18).to(0.92, span(1.2, 1.0), ease.inOut).to(0.18, span(2.2, 1.0), ease.inOut).loop(4),
@@ -86,7 +79,6 @@ const MOON_AT: Vec = [104, 78];
 
 const crescentMoon = path.parse("M 3.5 -16.6 A 17 17 0 1 0 13.4 10.5 A 16 16 0 0 1 3.5 -16.6 Z");
 
-// Soft wispy night clouds drifting across the mid-sky
 const cloudPath = (cx: number, cy: number, rx: number, ry: number): Geometry =>
   path()
     .moveTo([q(cx - rx), q(cy + ry * 0.25)])
@@ -107,8 +99,6 @@ const cloudPath = (cx: number, cy: number, rx: number, ry: number): Geometry =>
     )
     .close();
 
-// --- physics & pyrotechnics -------------------------------------------------
-
 const smoothPath = (pts: readonly Vec[]): Geometry => {
   let p = path().moveTo([q(pts[0]![0]), q(pts[0]![1])]);
 
@@ -126,14 +116,12 @@ const smoothPath = (pts: readonly Vec[]): Geometry => {
   return p;
 };
 
-// Closed-form position under linear air drag `k` and downward gravity `g`
 const posAt = (vx: number, vy: number, drag: number, gravity: number, u: number): Vec => {
   const e = 1 - Math.exp(-drag * u);
 
   return [(vx / drag) * e, ((vy - gravity / drag) / drag) * e + (gravity / drag) * u];
 };
 
-// Normalized arc-length progression along a drag-dominated trajectory
 const progressAt = (u: number, life: number, drag: number): number => {
   const clamped = Math.max(0, Math.min(life, u));
   const dragFrac = (1 - Math.exp(-drag * clamped)) / (1 - Math.exp(-drag * life));
@@ -169,7 +157,6 @@ interface ShellSpec {
 
 const SHELLS: readonly ShellSpec[] = [
   {
-    // Shell 1: Golden Willow / Brocade (left-center)
     id: "willow",
     from: [292, WATER_Y + 6],
     at: [252, 160],
@@ -194,7 +181,6 @@ const SHELLS: readonly ShellSpec[] = [
     ],
   },
   {
-    // Shell 2: Sapphire & Pearl Double-Ring Chrysanthemum (right)
     id: "sapphire",
     from: [692, WATER_Y + 6],
     at: [724, 146],
@@ -231,7 +217,6 @@ const SHELLS: readonly ShellSpec[] = [
     ],
   },
   {
-    // Shell 3: Rose-Gold & Amethyst Peony (center-left)
     id: "rose",
     from: [435, WATER_Y + 6],
     at: [414, 128],
@@ -268,7 +253,6 @@ const SHELLS: readonly ShellSpec[] = [
     ],
   },
   {
-    // Shell 4: Emerald-Mint Accent (left bay, opening the finale)
     id: "emerald",
     from: [204, WATER_Y + 6],
     at: [184, 192],
@@ -293,7 +277,6 @@ const SHELLS: readonly ShellSpec[] = [
     ],
   },
   {
-    // Shell 5: Grand Finale Crown — Champagne Brocade + Coral-Rose Pistil (center-right)
     id: "finale",
     from: [548, WATER_Y + 6],
     at: [564, 122],
@@ -413,7 +396,6 @@ const buildShell = (spec: ShellSpec): BuiltShell => {
   const [ax, ay] = spec.at;
   const rise = spec.apex - spec.launch;
 
-  // Graceful slightly-curved launch trajectory
   const ctrlX = q((fx + ax) / 2 + (ax - fx) * 0.25);
   const ctrlY = q(fy - (fy - ay) * 0.62);
   const launchPath = path().moveTo(spec.from).quadTo([ctrlX, ctrlY], spec.at);
@@ -461,7 +443,6 @@ const buildShell = (spec: ShellSpec): BuiltShell => {
     const segments = 8;
 
     for (let i = 0; i < ring.count; i++) {
-      // 3D Fibonacci sphere projection for authentic volumetric depth
       const z = 1 - (2 * (i + 0.5)) / ring.count;
       const radialLen = Math.sqrt(Math.max(0, 1 - z * z));
       const theta = GOLDEN_ANGLE * i + phaseOffset + (sparkRnd() - 0.5) * 0.18;
@@ -532,7 +513,6 @@ const buildShell = (spec: ShellSpec): BuiltShell => {
       .to(0.95, span(spec.apex, ring.life * 0.55), ease.out)
       .to(0, span(spec.apex + ring.life * 0.55, ring.life * 0.45), ease.in);
 
-    // Three staggered glitter strobe tracks for weeping-willow / brocade tips
     const glitterTracks: Track<number>[] = ring.glitter
       ? [0, 0.14, 0.28].map((delay) => {
           const t0 = spec.apex + ring.life * 0.52 + delay;
@@ -577,8 +557,6 @@ const buildShell = (spec: ShellSpec): BuiltShell => {
 
 const builtShells = SHELLS.map(buildShell);
 
-// --- waterfront skyline & suspension bridge ---------------------------------
-
 const cityRnd = rnd(44219);
 
 interface BuildingSpec {
@@ -590,8 +568,6 @@ interface BuildingSpec {
   readonly crownLight?: boolean;
 }
 
-// Open harbor bay on the left (0..224) framed by a suspension bridge,
-// rising into an architectural downtown skyline across the center-right.
 const HERO_BUILDINGS: readonly BuildingSpec[] = [
   { x: 224, w: 38, top: 342, kind: "flat" },
   { x: 264, w: 34, top: 320, kind: "setback" },
@@ -612,7 +588,6 @@ const HERO_BUILDINGS: readonly BuildingSpec[] = [
   { x: 926, w: 42, top: 340, kind: "flat" },
 ];
 
-// Distant skyline layer for atmospheric depth
 const FAR_BUILDINGS: readonly { x: number; w: number; top: number }[] = [
   { x: 242, w: 40, top: 306 },
   { x: 334, w: 40, top: 310 },
@@ -722,7 +697,6 @@ const buildingSilhouette = (b: BuildingSpec): Geometry => {
   return rect(w, bot - top);
 };
 
-// Aviation beacon tracks (loop period 2s divides SECONDS = 8)
 const beaconA = track(0.15)
   .to(1, span(0, 0.35), ease.inOut)
   .to(0.15, span(0.35, 0.55), ease.inOut)
@@ -733,10 +707,8 @@ const beaconB = track(0.15)
   .to(0.15, span(1.35, 0.55), ease.inOut)
   .loop(2);
 
-// Waterfront promenade streetlamps along the downtown embankment
 const lamps = Array.from({ length: 19 }, (_, i) => q(232 + i * 40));
 
-// Suspension bridge spanning the open left harbor bay (x: -10..236)
 const BRIDGE_DECK_Y = 368;
 const TOWER_1_X = 56;
 const TOWER_2_X = 176;
@@ -748,7 +720,6 @@ const bridgeCable = path()
   .quadTo([(TOWER_1_X + TOWER_2_X) / 2, 366], [TOWER_2_X, TOWER_TOP_Y + 4])
   .quadTo([208, 352], [238, BRIDGE_DECK_Y]);
 
-// Sample points along the main suspension cable for vertical suspenders & string lights
 const bridgeLights: readonly Vec[] = [
   ...Array.from({ length: 4 }, (_, i): Vec => {
     const t = (i + 1) / 5;
@@ -780,7 +751,6 @@ const bridgeLights: readonly Vec[] = [
   }),
 ];
 
-// Water shimmer ripple tracks (periods divide 8s)
 const rippleA = track(0.42)
   .to(0.95, span(0, 1.0), ease.inOut)
   .to(0.42, span(1.0, 1.0), ease.inOut)
@@ -793,7 +763,6 @@ const rippleB = track(0.88)
 
 const renderRing = (ring: BuiltRing): SceneElement => (
   <Group key={ring.key}>
-    {/* Soft wide colored optical halo (no SVG blur filter needed — 60fps everywhere) */}
     <Group opacity={ring.tailOpacity}>
       {ring.rays.map((ray) => (
         <Shape
@@ -810,7 +779,6 @@ const renderRing = (ring: BuiltRing): SceneElement => (
       ))}
     </Group>
 
-    {/* Crisp vibrant curved streamers */}
     <Group opacity={ring.tailOpacity}>
       {ring.rays.map((ray) => (
         <Shape
@@ -827,7 +795,6 @@ const renderRing = (ring: BuiltRing): SceneElement => (
       ))}
     </Group>
 
-    {/* Incandescent white-hot leading heads */}
     {ring.hotHead && (
       <Group opacity={ring.headOpacity}>
         {ring.rays.map((ray) => (
@@ -846,7 +813,6 @@ const renderRing = (ring: BuiltRing): SceneElement => (
       </Group>
     )}
 
-    {/* Lingering willow / brocade tip glitter */}
     {ring.glitter && (
       <Group>
         {ring.rays.flatMap((ray, idx) =>
@@ -881,7 +847,6 @@ export default scene(
   },
   () => (
     <Group>
-      {/* 1. Deep twilight-to-midnight sky */}
       <Shape
         geometry={rect(WIDTH, WATER_Y + 2)}
         fill={linear({
@@ -896,7 +861,6 @@ export default scene(
         })}
       />
 
-      {/* Warm city light-pollution haze rising behind the skyline (feathered well inside shape) */}
       <Shape
         geometry={ellipse(540, 145)}
         at={[WIDTH * 0.56, WATER_Y + 18]}
@@ -911,7 +875,6 @@ export default scene(
         })}
       />
 
-      {/* 2. Starfield */}
       <Group>
         {stars.map((star, i) => (
           <Group key={`star-${i}`} opacity={star.twinkle ? twinkles[i % twinkles.length] : star.o}>
@@ -937,7 +900,6 @@ export default scene(
         ))}
       </Group>
 
-      {/* 3. Crescent Moon with seamless feathered atmospheric halo */}
       <Shape
         geometry={circle(96)}
         at={MOON_AT}
@@ -956,14 +918,12 @@ export default scene(
       <Shape geometry={circle(17)} at={MOON_AT} anchor="center" fill="#2A3558" opacity={0.22} />
       <Shape geometry={crescentMoon} at={MOON_AT} anchor="center" fill="#FFF7E2" />
 
-      {/* 4. Subtle night clouds */}
       <Group opacity={0.42}>
         <Shape geometry={cloudPath(220, 236, 138, 22)} fill="#0E1734" />
         <Shape geometry={cloudPath(680, 210, 162, 24)} fill="#0E1734" />
         <Shape geometry={cloudPath(470, 272, 128, 18)} fill="#131E40" />
       </Group>
 
-      {/* 5. Dynamic atmospheric sky illumination from each firework burst (zero hard edge) */}
       <Group blend="screen">
         {builtShells.map(({ spec, bloomOpacity }) => (
           <Shape
@@ -986,7 +946,6 @@ export default scene(
         ))}
       </Group>
 
-      {/* 6. Rising comet launch trails */}
       <Group blend="screen">
         {builtShells.map(({ spec, launchPath, launchTrim, launchHeadTrim, launchOpacity }) => (
           <Group key={`launch-${spec.id}`} opacity={launchOpacity}>
@@ -1010,12 +969,10 @@ export default scene(
         ))}
       </Group>
 
-      {/* 7. Fireworks luminous blooms, curved streamers & incandescent heads */}
       <Group blend="screen">
         {builtShells.map(({ spec, rings, flashOpacity, flashScale }) => (
           <Group key={`burst-${spec.id}`} offset={spec.at}>
             {rings.map(renderRing)}
-            {/* Hot ignition flash right at burst center */}
             <Group origin="at" motion={{ scale: flashScale }} opacity={flashOpacity}>
               <Shape
                 geometry={circle(62)}
@@ -1035,9 +992,7 @@ export default scene(
         ))}
       </Group>
 
-      {/* 8. Open-bay Suspension Bridge & Distant Skyline */}
       <Group>
-        {/* Bridge deck, vertical suspenders & catenary main cable */}
         {bridgeLights.map(([bx, by], i) => (
           <Shape
             key={`susp-${i}`}
@@ -1050,7 +1005,6 @@ export default scene(
           geometry={line([-10, BRIDGE_DECK_Y], [238, BRIDGE_DECK_Y])}
           stroke={{ color: "#0B1126", width: 3.4 }}
         />
-        {/* Twin suspension bridge towers with crossbars */}
         {[TOWER_1_X, TOWER_2_X].map((tx, i) => (
           <Group key={`tower-${i}`}>
             <Shape
@@ -1069,7 +1023,6 @@ export default scene(
             />
           </Group>
         ))}
-        {/* Warm golden necklace lights along the bridge cable */}
         {bridgeLights.map(([bx, by], i) => (
           <Shape
             key={`blight-${i}`}
@@ -1081,7 +1034,6 @@ export default scene(
           />
         ))}
 
-        {/* Far atmospheric buildings */}
         {FAR_BUILDINGS.map((b, i) => (
           <Shape
             key={`far-${i}`}
@@ -1092,7 +1044,6 @@ export default scene(
         ))}
       </Group>
 
-      {/* 9. Near foreground architectural skyline */}
       <Group>
         {HERO_BUILDINGS.map((b, i) => {
           const geom = buildingSilhouette(b);
@@ -1135,7 +1086,6 @@ export default scene(
           );
         })}
 
-        {/* Lit architectural windows */}
         {buildingWindows.map((w, i) => (
           <Shape
             key={`win-${i}`}
@@ -1146,7 +1096,6 @@ export default scene(
           />
         ))}
 
-        {/* Waterfront promenade embankment & warm streetlamps */}
         <Shape geometry={rect(WIDTH - 222, 4)} at={[222, WATER_Y - 2]} fill="#050814" />
         {lamps.map((lx, i) => (
           <Shape
@@ -1160,9 +1109,7 @@ export default scene(
         ))}
       </Group>
 
-      {/* 10. Shimmering Harbor Water */}
       <Group clip={rect(WIDTH, HEIGHT - WATER_Y)} offset={[0, WATER_Y]}>
-        {/* Midnight water surface */}
         <Shape
           geometry={rect(WIDTH, HEIGHT - WATER_Y)}
           fill={linear({
@@ -1176,7 +1123,6 @@ export default scene(
           })}
         />
 
-        {/* Mirrored dark skyline silhouette in water */}
         <Group opacity={0.45}>
           {HERO_BUILDINGS.map((b, i) => {
             const h = Math.min(82, (WATER_Y - b.top) * 0.62);
@@ -1187,7 +1133,6 @@ export default scene(
           })}
         </Group>
 
-        {/* Soft moonlight shimmer on water */}
         <Group opacity={0.42}>
           {[6, 15, 26, 39, 55, 74, 96].map((ry, i) => {
             const rw = q(28 - i * 3);
@@ -1207,7 +1152,6 @@ export default scene(
           })}
         </Group>
 
-        {/* Bridge necklace light reflections on the left bay */}
         <Group opacity={0.32}>
           {bridgeLights.flatMap(([bx], i) =>
             i % 2 === 0
@@ -1226,7 +1170,6 @@ export default scene(
           )}
         </Group>
 
-        {/* Promenade & city tower water reflections */}
         <Group opacity={0.36}>
           {lamps.map((lx, i) => (
             <Group key={`lamp-ref-${i}`}>
@@ -1245,7 +1188,6 @@ export default scene(
           ))}
         </Group>
 
-        {/* Subtle horizontal water texture lines */}
         <Group opacity={0.13}>
           {[14, 32, 54, 80, 110, 140].map((wy, i) => (
             <Shape
@@ -1256,7 +1198,6 @@ export default scene(
           ))}
         </Group>
 
-        {/* Crisp luminous waterline edge */}
         <Shape
           geometry={line([0, 0.8], [WIDTH, 0.8])}
           stroke={{ color: "#4C67A8", width: 1.2 }}
@@ -1264,11 +1205,9 @@ export default scene(
         />
       </Group>
 
-      {/* 11. Live Firework Reflections on the Harbor Water (feathered, organic ripples!) */}
       <Group clip={rect(WIDTH, HEIGHT - WATER_Y)} offset={[0, WATER_Y]} blend="screen">
         {builtShells.map(({ spec, reflectionOpacity, ripples }) => (
           <Group key={`water-ref-${spec.id}`} opacity={reflectionOpacity}>
-            {/* Soft feathered light pool on the water (stops reach 0 well before circle edge) */}
             <Shape
               geometry={ellipse(165, 105)}
               at={[spec.at[0], 56]}
@@ -1282,7 +1221,6 @@ export default scene(
                 ],
               })}
             />
-            {/* Organic staggered water shimmer dabs */}
             {ripples.map((seg, j) => (
               <Shape
                 key={`rip-${j}`}

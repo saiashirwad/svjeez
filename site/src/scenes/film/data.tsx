@@ -14,8 +14,6 @@ const map = project(world, {
   filter: (f) => f.properties?.["name"] !== "Antarctica",
 });
 
-// The map as a grid of dots: a cell is land when any point a degree apart falls in it, and its dot sits in its middle,
-// so every dot lines up with its neighbours however the coastline runs.
 const land = new Set(
   map.dots(0.45).map(({ point: [x, y] }) => `${Math.floor(x / CELL)},${Math.floor(y / CELL)}`),
 );

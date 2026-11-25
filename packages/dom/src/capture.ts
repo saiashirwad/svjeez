@@ -118,8 +118,6 @@ export const capture = (root: Element): Snapshot => {
     return out;
   };
 
-  // ---------------------------------------------------------------- geometry
-
   /** The 2D part of an element's own transform: translate, rotate, scale, then transform. */
   const ownMatrix = (style: CSSStyleDeclaration, width: number, height: number) => {
     const matrix = new DOMMatrix();
@@ -158,8 +156,6 @@ export const capture = (root: Element): Snapshot => {
       height: rect.height,
     };
   };
-
-  // ------------------------------------------------------------------ paint
 
   const radiusOf = (style: CSSStyleDeclaration, width: number, height: number) => {
     const read = (value: string): Corner => {
@@ -228,7 +224,7 @@ export const capture = (root: Element): Snapshot => {
     for (const arg of args) {
       const [first = "", ...positions] = words(arg);
 
-      if (/^[-\d.]/.test(first)) continue; // an interpolation hint
+      if (/^[-\d.]/.test(first)) continue;
 
       const offsets = positions.length === 0 ? [undefined] : positions;
 
@@ -286,7 +282,6 @@ export const capture = (root: Element): Snapshot => {
 
   /** A center word pair (`left`, `25%`, `10px top`, ...) as px from the top-left of a `width` by `height` box. */
   const placeOf = (given: string[], width: number, height: number): [number, number] => {
-    // `top` and `left` can come in either order.
     const [first = "center", second = "center"] =
       given[0] === "top" || given[0] === "bottom" ? [given[1], given[0]] : given;
 
@@ -338,7 +333,6 @@ export const capture = (root: Element): Snapshot => {
     const corner = keyword?.endsWith("corner") !== false;
     const [x, y] = closest ? [nearX, nearY] : [farX, farY];
 
-    // An explicit size wins; else the keyword (farthest-corner by default) decides.
     const [rx, ry] =
       lengths.length > 0
         ? circle
@@ -434,7 +428,6 @@ export const capture = (root: Element): Snapshot => {
       list("attachment"),
     ];
 
-    // Shorter lists repeat to the number of layers.
     const nth = (values: string[], i: number, none: string) =>
       values.length > 0 ? values[i % values.length]! : none;
 
@@ -489,7 +482,6 @@ export const capture = (root: Element): Snapshot => {
       if (url !== undefined) {
         const src = url.replace(/^["']|["']$/g, "").replace(/\\(["'])/g, "$1");
 
-        // A mask can point at an element in the page (`url(#mask)`), which is not an image.
         if (prefix === "mask" && src.startsWith("#")) {
           notes.push("mask-image: url(#...) is not drawn");
 
@@ -508,7 +500,6 @@ export const capture = (root: Element): Snapshot => {
         return;
       }
 
-      // A gradient has no size of its own: `auto`, `cover` and `contain` are the origin box.
       const whole = (word: Extent, of: number) => (word === "auto" ? of : word);
 
       const tile: [number, number] = keyword
@@ -692,7 +683,6 @@ export const capture = (root: Element): Snapshot => {
       const given = words(size);
       const diagonal = Math.hypot(ref.width, ref.height) / Math.SQRT2;
 
-      // An omitted radius is `closest-side`; a circle takes the nearest or farthest of all four sides.
       const radius = (word: string | undefined, axis: 0 | 1, of: number) =>
         word === "farthest-side"
           ? far[axis]
@@ -737,8 +727,6 @@ export const capture = (root: Element): Snapshot => {
 
     return { shape: { kind: "path", d, at: [ref.x, ref.y], rule }, notes };
   };
-
-  // ------------------------------------------------------------------- text
 
   const fontOf = (style: CSSStyleDeclaration): Font => ({
     family: style.fontFamily,
@@ -835,8 +823,6 @@ export const capture = (root: Element): Snapshot => {
         top = Math.min(from.y, to.y);
         width = Math.abs(to.x - from.x);
       } else {
-        // A rotated or skewed ancestor turns each character's box into a bounding box.
-        // A box's center survives the transform, so the box comes back from its center and the font's size.
         const centre = inverse.transformPoint(
           new DOMPoint(box.left + box.width / 2 + scrollX, box.top + box.height / 2 + scrollY),
         );
@@ -867,10 +853,6 @@ export const capture = (root: Element): Snapshot => {
 
       while (chars.length > 0 && /\s/.test(chars[chars.length - 1]!.char)) chars.pop();
 
-      // The characters are in logical order. A bidirectional line is cut into pieces that each read one way across the line:
-      // a character joins the piece it sits against (at its right edge, or at its left edge when the piece runs right to left)
-      // unless it is a letter of the other direction. The pieces come out in visual order, so each is one run the SVG text
-      // can shape and order by itself.
       const pieces: { chars: typeof chars; rtl: boolean; strong: "" | "rtl" | "ltr" }[] = [];
 
       for (const [i, c] of chars.entries()) {
@@ -902,10 +884,8 @@ export const capture = (root: Element): Snapshot => {
         pieces.push({ chars: [c], rtl: false, strong });
       }
 
-      // A piece with no letters in it (a bracket, a space) takes the line's own direction, which also mirrors a bracket.
       for (const piece of pieces) piece.rtl = piece.strong ? piece.strong === "rtl" : paragraphRtl;
 
-      // SVG text strips the spaces at the ends of a piece, and each piece is placed by its own x, so they are not needed.
       if (pieces.length > 1)
         for (const piece of pieces)
           piece.chars = piece.chars.slice(
@@ -943,8 +923,6 @@ export const capture = (root: Element): Snapshot => {
 
     return runs.length > 0 ? { type: "text", runs } : undefined;
   };
-
-  // -------------------------------------------------------------------- svg
 
   const SVG_PAINT = [
     "fill",
@@ -990,8 +968,6 @@ export const capture = (root: Element): Snapshot => {
     return node;
   };
 
-  // ------------------------------------------------------------- animations
-
   const TRANSFORMS = ["transform", "translate", "rotate", "scale"];
 
   /** Far enough ahead that no animation has started: with `fill: none`, an effect that has not started draws nothing. */
@@ -1026,7 +1002,6 @@ export const capture = (root: Element): Snapshot => {
       const style = getComputedStyle(el, pseudo);
 
       for (const name of names) {
-        // A keyframe names its property in camelCase (`cssFloat` for `float`).
         const css =
           name === "cssFloat" ? "float" : name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 
@@ -1048,7 +1023,6 @@ export const capture = (root: Element): Snapshot => {
   }
 
   const animationsOf = (el: Element, pseudo?: Pseudo): Found => {
-    // A pseudo-element's animations are listed with the subtree's, and only there.
     const live = el.getAnimations({ subtree: pseudo !== undefined }).filter((animation) => {
       const effect = animation.effect;
 
@@ -1111,13 +1085,10 @@ export const capture = (root: Element): Snapshot => {
       animations.flatMap(({ keyframes }) => keyframes.flatMap(({ props }) => Object.keys(props))),
     );
 
-    // The four compose into one transform, so a base for one needs the others.
     if (TRANSFORMS.some((name) => names.has(name))) for (const name of TRANSFORMS) names.add(name);
 
     return { animations, base: underlying(el, pseudo, live, [...names]) };
   };
-
-  // ------------------------------------------------------------ form controls
 
   const MIRRORED = [
     "font-family",
@@ -1173,7 +1144,6 @@ export const capture = (root: Element): Snapshot => {
 
     for (const name of MIRRORED) mirror.style.setProperty(name, style.getPropertyValue(name));
 
-    // The mirror sits under <html>, so what the control colors its text with has to be copied too.
     for (const name of ["color", "-webkit-text-fill-color", "text-shadow"])
       mirror.style.setProperty(name, style.getPropertyValue(name));
 
@@ -1190,7 +1160,6 @@ export const capture = (root: Element): Snapshot => {
 
       const content = Math.max(0, el.clientHeight - pt - pb);
       const lines = mirror.getBoundingClientRect().height;
-      // A single line sits in the middle of the content box; a textarea starts at its top.
       const dy = el instanceof HTMLTextAreaElement ? 0 : (content - lines) / 2;
       const left = rect.x + px(style.borderLeftWidth) + pl - scrollX - el.scrollLeft;
       const top = rect.y + px(style.borderTopWidth) + pt + dy - scrollY - el.scrollTop;
@@ -1351,7 +1320,6 @@ export const capture = (root: Element): Snapshot => {
 
   const draw = (style: CSSStyleDeclaration, d: Draw): ElementNode => {
     const { rect, own, origin, animations } = d;
-    // A native checkbox or radio has no CSS of its own to draw: compile draws it whole.
     const bare = d.bare === true;
     const radii = radiusOf(style, rect.width, rect.height);
     const border = bare ? undefined : sidesOf(style);
@@ -1391,7 +1359,6 @@ export const capture = (root: Element): Snapshot => {
 
     if (!bare && radii.some(([x, y]) => x > 0 || y > 0)) node.radii = radii;
 
-    // An animation of the transform needs the origin it turns about, even at a moment when the transform is none.
     const turns = animations.some(({ keyframes }) =>
       keyframes.some(({ props }) =>
         ["transform", "translate", "rotate", "scale"].some((name) => name in props),
@@ -1469,8 +1436,6 @@ export const capture = (root: Element): Snapshot => {
           .multiply(new DOMMatrix().translate(origin[0], origin[1]))
           .multiply(own)
           .multiply(new DOMMatrix().translate(-origin[0], -origin[1]));
-
-  // ---------------------------------------------------------- pseudo-elements
 
   /** Elements that draw their own content, so `::before` and `::after` do not apply to them. */
   const REPLACED = new Set([
@@ -1610,7 +1575,6 @@ export const capture = (root: Element): Snapshot => {
         "border-bottom-width",
       ]);
 
-      // `left` and `top` are measured from the host's padding box, to the pseudo-element's margin edge.
       const rect = {
         x: round(
           host.rect.x +
@@ -1643,10 +1607,8 @@ export const capture = (root: Element): Snapshot => {
 
     const { text, url, notes } = contentOf(el, style);
 
-    // The stand-in may draw nothing at all (an empty span has no box), so the host carries what its content could not say.
     sink.push(...notes.map((note) => `${which} ${note}`));
 
-    // Read everything off the pseudo-element before it is switched off.
     const worn: [string, string][] = [];
 
     for (const name of Array.from(style))
@@ -1673,8 +1635,6 @@ export const capture = (root: Element): Snapshot => {
     scope.adoptedStyleSheets = [...adopted, off];
 
     try {
-      // A shadow host's pseudo-elements sit around its shadow tree, so the stand-in goes inside the shadow root:
-      // in the host's light DOM it would be unslotted.
       const parent: Element | ShadowRoot = el.shadowRoot ?? el;
 
       if (which === "::before") parent.insertBefore(standIn, parent.firstChild);
@@ -1688,14 +1648,10 @@ export const capture = (root: Element): Snapshot => {
     }
   };
 
-  // ------------------------------------------------------------------- walk
-
   /** `a` carries the transforms of every ancestor, from layout space to the page. */
   const children = (el: Element, a: DOMMatrix): (ElementNode | TextNode)[] => {
     const out: (ElementNode | TextNode)[] = [];
 
-    // The composed tree: an open shadow root stands in for its host's own children (which show only where it has a <slot>),
-    // and a <slot> shows what is assigned to it, or else its fallback content.
     const assigned = el instanceof HTMLSlotElement ? el.assignedNodes({ flatten: true }) : [];
     const nodes = assigned.length > 0 ? assigned : (el.shadowRoot ?? el).childNodes;
 
@@ -1775,8 +1731,6 @@ export const capture = (root: Element): Snapshot => {
     let cy = box.top + box.height / 2;
 
     if (!flat && invertible(a)) {
-      // The page center is A(own(center)). With k the origin's offset from the center and L own's linear part,
-      // own(center) = center + k + t - L k, so the untransformed center comes back by undoing A and that shift.
       const page = a.inverse().transformPoint(new DOMPoint(cx, cy));
 
       cx = page.x - (kx + own.e - (own.a * kx + own.c * ky));
@@ -1795,7 +1749,6 @@ export const capture = (root: Element): Snapshot => {
     const form = formOf(el, style, rect);
     const leaf = el instanceof SVGElement || el instanceof HTMLImageElement;
 
-    // The real children come first: a pseudo-element's stand-in is inserted next to them afterwards, so it cannot restyle them.
     const real = form?.kids ?? (leaf ? [] : children(el, inner));
     const host = { rect, style };
 
@@ -1862,7 +1815,6 @@ export const capture = (root: Element): Snapshot => {
         continue;
       }
 
-      // @media, @supports, @layer { ... } and the like.
       if (!(rule instanceof CSSFontFaceRule)) {
         if (rule instanceof CSSGroupingRule) collect(rule.cssRules, base);
 
@@ -1900,7 +1852,6 @@ export const capture = (root: Element): Snapshot => {
     try {
       rules = sheet.cssRules;
     } catch {
-      // A cross-origin stylesheet without CORS hides its rules.
       return;
     }
 

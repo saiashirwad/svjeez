@@ -31,7 +31,6 @@ export const examine = (
 
   const emitted = svg.emit(scene, { sources: true, onLane: (lane) => lanes.push(lane) });
 
-  // The cost is the SVG as it ships, with the repeats shared and no source marks.
   return { problems, lanes, cost: costOf(svg.emit(scene)), svg: emitted };
 };
 

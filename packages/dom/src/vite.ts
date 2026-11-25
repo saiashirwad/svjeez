@@ -130,7 +130,6 @@ const crawl = async (server: ViteDevServer, urls: readonly string[]): Promise<Se
 
       if (!outdated || attempt >= 10) throw error;
 
-      // The optimizer's rerun has no promise to wait on.
       await new Promise((resolve) => setTimeout(resolve, 200));
     }
 };
@@ -161,7 +160,6 @@ export const serve = async ({
   config,
   entry = "index.html",
 }: ServeOptions): Promise<Target> => {
-  // Before the first await, while the film file is still on the stack.
   const host = hosts.getStore();
   const film = host?.film ?? callerFile();
   const root = given ?? (film && dirname(film));
@@ -177,7 +175,6 @@ export const serve = async ({
   const outside = outsideRoot(html, dirname(join(root, entry)), root);
   const fsUrl = (file: string) => `/@fs${file}`;
 
-  // Files the entry HTML links from outside the root must be servable: keep Vite's own allow-list and add their folders.
   const allow = [
     ...(config?.server?.fs?.allow ?? [searchForWorkspaceRoot(root)]),
     ...[...outside.values()].map((file) => dirname(file)),
@@ -270,10 +267,8 @@ const PREFIX = "virtual:svjeez-dom/";
 
 const pages = (pagesById: Map<string, Page>, film: string): Plugin => ({
   name: "svjeez-dom",
-  // The film file and this package must share one copy of `svjeez` and `@svjeez/dom`, so Vite leaves them to the runtime's own loader. Vite merges this with the project's `ssr.external`.
   config: () => ({ ssr: { external: ["svjeez", "@svjeez/dom"] } }),
   resolveId: (id) => (id.startsWith(PREFIX) ? id : undefined),
-  // Bun's `import.meta.dir` in the film file, so one written for Bun runs here too.
   transform: (code, id) =>
     id === film
       ? code.replace(/\bimport\.meta\.dir\b(?!name)/g, JSON.stringify(dirname(id)))
@@ -365,10 +360,8 @@ export const runFilm = async (file: string, options: RunFilmOptions = {}): Promi
     if (!isRunnableDevEnvironment(environment))
       throw new Error("runFilm: this Vite setup has no runnable SSR environment.");
 
-    // Starting the server also starts the plugins; the SSR loader needs them started.
     await listen(server);
 
-    // `component()` reads the bridge from the async context of the film file's evaluation, so films can run in parallel.
     const bridge: Bridge = {
       server,
       film,
@@ -384,7 +377,6 @@ export const runFilm = async (file: string, options: RunFilmOptions = {}): Promi
     for (const node of environment.moduleGraph.getModulesByFile(film) ?? [])
       project(node, bridge.files);
 
-    // This package's `svjeez` emits it: the film server's own copy may not read the scene's model.
     const { svg } = await import("svjeez/tools");
 
     return {
@@ -411,7 +403,6 @@ const locate = (host: Bridge, component: Prop): Located => {
       found.push({ file: node.file ?? node.id.split("?")[0]!, name, imports: node.imports });
   }
 
-  // A barrel that re-exports the component matches too; the module that imports no other match defines it.
   const ids = new Set(found.map((module) => module.file));
 
   const [defining] = found.filter(

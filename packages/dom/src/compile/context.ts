@@ -91,8 +91,6 @@ export const byte = (n: number): string =>
 
 const withAlpha = ({ hex, alpha }: Plain): Hex => (alpha >= 1 ? hex : `${hex}${byte(alpha * 255)}`);
 
-// The theme the compile in progress paints with (`compile(states, { theme })`). Compiling is synchronous, so it is set
-// and cleared around one compile.
 let theme: Theme | undefined;
 
 /** Runs `run` with `colors` as the theme the scheme pairs are read back into. */

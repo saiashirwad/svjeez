@@ -126,7 +126,6 @@ export const travelling = (
 
   const leaves = new Set(changes.map(([leaf]) => leaf));
 
-  // What sits inside a travelling node goes with it. A node whose containers can't carry it fades out and in instead.
   const travellers = changes.filter(([, seen]) => {
     const present = seen.filter((spot) => spot !== undefined);
     const depth = commonPrefix(present.map((spot) => spot.chain));

@@ -102,7 +102,6 @@ export const lowContrast = (survey: Survey): void => {
         return;
       const { box } = at;
 
-      // A digit strip rolled out of its clip window is not on screen.
       if (
         entry.ancestors.some((above) => {
           const window = above.clip === undefined ? undefined : frame.get(above.key)?.box;
@@ -170,7 +169,6 @@ export const lowContrast = (survey: Survey): void => {
     if (!worst) continue;
     const text = node.kind === "text";
 
-    // A thin line that moves across a backdrop only passes over it: judge it by where it spends most of its time.
     if (!text && low.length * 2 < judged) continue;
     const floor = text ? 3 : 1.5;
 

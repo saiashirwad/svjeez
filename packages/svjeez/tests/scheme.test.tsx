@@ -170,7 +170,6 @@ describe("scheme", () => {
 
     expect(restyle(out, { theme })).toContain(HIDE_IN_DARK);
 
-    // The site pins a scheme by answering each query, as site/src/scripts/scheme.ts does.
     const pinned = out.replace(/\(\s*prefers-color-scheme\s*:\s*(light|dark)\s*\)/g, (_, query) =>
       query === "light" ? "(min-width: 0)" : "(max-width: -1px)",
     );

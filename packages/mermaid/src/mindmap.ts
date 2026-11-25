@@ -73,7 +73,6 @@ export const parseMindmap = (header: Line, body: readonly Line[]): MindmapDoc =>
   let root: Open | undefined;
 
   for (const l of body) {
-    // Icons and style classes decorate the node above, and svjeez draws neither.
     if (/^::(icon\(.*\)|:\S.*)$/.test(l.text)) {
       if (root === undefined)
         return fail(l, "an icon or class belongs under a node, not before the root.");

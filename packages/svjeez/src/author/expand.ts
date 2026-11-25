@@ -79,10 +79,8 @@ const run = (call: Call): SceneElement => {
       if (id === undefined) return render();
       const path = scoped(id);
 
-      // A component() with an id is the scope of the ids written inside it, and carries its own id out.
       if (componentMeta(component)) return withId(within([...scope, id], render), path, key);
 
-      // Any other function hands its id to a node it writes, which was scoped by the components it was written in.
       return scopedAs(render(), id, path, key);
     });
   } catch (error) {

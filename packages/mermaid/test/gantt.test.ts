@@ -104,7 +104,6 @@ describe("parse gantt", () => {
 
     const [a, b] = tasks(doc);
 
-    // Thu 4th + 3 working days: Thu, Fri, Mon -> ends after Mon the 8th.
     expect(a!.end).toBe(day(2024, 1, 9));
     expect(b!.end).toBe(day(2024, 1, 8));
     expect(doc.excluded).toEqual([[day(2024, 1, 6), day(2024, 1, 8)]]);

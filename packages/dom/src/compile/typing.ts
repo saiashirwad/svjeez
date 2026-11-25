@@ -126,7 +126,6 @@ export const typings = (
 
     if (!look || runs.some((run) => !run || !sameLook(run, look)) || !measurable(look)) continue;
 
-    // What each state shows: a placeholder is an empty field, and a state without the node keeps the text around it.
     const shown = seen.map((one) =>
       one ? (one.node.placeholder ? "" : one.node.runs[0]!.text) : undefined,
     );

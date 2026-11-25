@@ -1,10 +1,6 @@
 import { ease, scene, span, track, type Paint, type Vec } from "svjeez";
 import { BLIP, Blip, Pivot } from "./blip";
 
-// Blip in the header, alive. It sits exactly as the favicon draws it for most of a 12 second loop, blinks, hops once
-// with its antenna bulb wobbling behind, blinks twice, and lights its bulb for a moment. Reduced motion holds frame 0,
-// which is the favicon.
-
 const [crouch, rise, fall] = span(5.8, 0.14).chain(0.2, 0.2);
 
 const hop = track<Vec>([0, 0])

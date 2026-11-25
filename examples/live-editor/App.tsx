@@ -105,12 +105,10 @@ export const App = () => {
 
   const node = state && selection ? state.describe.nodes[selection.id] : undefined;
 
-  // `locate` maps a clicked `data-svz-id` to its source range; a node picked from the list uses its own range.
   const range =
     (state && selection?.svgId ? locate(state.parsed, selection.svgId) : undefined) ?? node?.range;
 
   const onStageClick = (event: MouseEvent) => {
-    // The drawing may be a revision behind `state`; its ids could name different nodes there.
     if (!state || rendered?.revision !== state.revision || !(event.target instanceof Element))
       return;
     const svgId = event.target.closest("[data-svz-id]")?.getAttribute("data-svz-id");

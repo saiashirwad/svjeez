@@ -218,7 +218,6 @@ const hex = (rgb: readonly number[]): Color => {
 
 const band = (phi: number): Color => {
   const tint = phi >= 0 ? WARM_TINT : COOL_TINT;
-  // The shader tints at most 0.2 of the way; the legend goes three times as far so a slim bar still reads.
   const depth = Math.tanh(Math.floor(Math.abs(phi) / STEP) * STEP * 0.3) * 0.6;
 
   return hex(GROUND.map((ground, index) => ground + (tint[index]! - ground) * depth));

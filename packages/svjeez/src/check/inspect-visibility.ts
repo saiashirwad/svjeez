@@ -332,7 +332,6 @@ const covered = (survey: VisibilitySurvey): void => {
     if (!isLeaf(entry) || isGone(survey, entry)) continue;
     const schemes = schemesOf(entry);
 
-    // A cover hides the node only if it shows in every scheme the node does.
     const later = covers.filter(
       (cover) =>
         cover.entry.order > entry.order &&
@@ -482,7 +481,6 @@ export const flatAt = (
   const light = colorAt(survey.scene, node.fill, t, "light");
   const dark = colorAt(survey.scene, node.fill, t, "dark");
 
-  // Opaque in each scheme it shows in: what the other scheme would show is never asked for.
   if (!light || !dark || schemesOf(entry).some((scheme) => ({ light, dark })[scheme][3] < 0.999))
     return undefined;
   const fill = between(node.fill, t);

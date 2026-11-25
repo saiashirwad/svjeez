@@ -114,7 +114,6 @@ describe("cached states are portable", () => {
       expect(stored).not.toContain("/@fs");
       expect(stored).not.toContain("localhost");
       expect(first).toContain("data:font/ttf;base64,");
-      // Replayed from the cache: the same scene.
       expect(svg.emit(await make())).toBe(first);
     } finally {
       await rm(dir, { recursive: true, force: true });

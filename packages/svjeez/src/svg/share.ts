@@ -47,7 +47,6 @@ const sharedOf = (node: Element): Shared | undefined => {
   if (!DRAWN.has(node.tag)) return undefined;
 
   if (node.tag === "g") {
-    // A slot's group is where the page puts its own HTML, so it stays in place.
     if (node.children.length === 0 || "data-slot" in node.attrs) return undefined;
 
     return {
@@ -59,7 +58,6 @@ const sharedOf = (node: Element): Shared | undefined => {
 
   const { drawn } = node;
 
-  // A stroked drawing that moves is rasterised differently as a <use>, so it keeps its place.
   if (node.attrs.class !== undefined && node.attrs["stroke-width"] !== undefined) return undefined;
 
   if (!drawn && ["id", "class", "style"].some((name) => node.attrs[name] !== undefined))
@@ -144,7 +142,6 @@ export const share = (body: readonly SvgNode[], prefix: string): readonly SvgNod
     const saved = inline(entry.first).length - inline(entry.shared.copy(id)).length;
     const cost = inline(entry.shared.drawing(id, (node) => node)).length;
 
-    // The shared drawing, its copies and the <defs> that holds it normally come to fewer elements than the copies they replace.
     const before = elementsIn(entry.first) * entry.count;
     const after = elementsIn(entry.shared.drawing(id, (node) => node)) + entry.count + 1;
 

@@ -26,7 +26,6 @@ const opacityOf = (curve: Curve) => {
 const cubic = (a: number, b: number, u: number) =>
   3 * a * u * (1 - u) ** 2 + 3 * b * u * u * (1 - u) + u ** 3;
 
-// The bezier's y at progress x, by bisection on its x curve.
 const bezierAt = ([x1, y1, x2, y2]: readonly [number, number, number, number], x: number) => {
   let [lo, hi] = [0, 1];
 

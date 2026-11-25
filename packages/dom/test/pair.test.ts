@@ -183,7 +183,6 @@ describe("a node under different parents", () => {
     expect(one).toEqual(["li[0]", "li[1]"]);
     expect(two).toEqual(["::before", "li[0]", "li[1]", "::after"]);
 
-    // The ::after that moves from last to first of the list still pairs with itself.
     const [, , third = []] = pair([a, b, c]).roots.map((root) => root.children.map((k) => k.key));
 
     expect(third).toEqual(["::after", "li[0]", "li[1]"]);
@@ -204,7 +203,6 @@ describe("a node under different parents", () => {
     const two = list(item("done"), item("todo"), item("todo"));
     const [before = [], after = []] = keys(one, two);
 
-    // "done" is unique, so it moves. The "todo"s could be either: they keep the order-keeping match, never swapped by a guess.
     expect(after[0]![1]).toBe(before[2]![1]);
     expect(after[1]![1]).toBe(before[1]![1]);
     expect(after[2]![1]).not.toBe(before[0]![1]);

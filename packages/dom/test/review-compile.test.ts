@@ -47,7 +47,6 @@ describe("inline svg with fill and stroke", () => {
     const fillOnly = only({ fill: "rgb(255, 0, 0)", stroke: "none" });
     const grab = (out: string, tag: RegExp) => (out.match(tag) ?? [""])[0]!;
 
-    // The fill shape in the combined drawing matches the fill-only drawing's geometry.
     const geom = (out: string) =>
       out.match(/<(?:path|circle|ellipse)[^>]*\bfill="#FF0000"[^>]*>/)?.[0] ?? "";
 

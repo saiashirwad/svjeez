@@ -15,9 +15,6 @@ import {
 } from "svjeez";
 import { SHOTS, STAGE, W, geist, mono, shown, theme } from "./kit";
 
-// One sentence on its own, in capitals, between writing scenes and filming apps. The frameworks it films are named
-// with their logos beside them; each logo draws itself, then keeps moving a little. "more soon" is jotted under it.
-
 const hand = await casual();
 
 const SIZE = 76;

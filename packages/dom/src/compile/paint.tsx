@@ -57,7 +57,6 @@ export const backgrounds = (
   if (moving) out.push(<Shape key="background" {...shape} fill={moving} />);
   else if (fill) out.push(<Shape key="background" {...shape} fill={fill.rgba} />);
 
-  // CSS lists the topmost layer first.
   [...(layers ?? [])].reverse().forEach((one, i, all) => {
     const n = all.length - i;
     const drawn = layer(one, `${one.kind === "image" ? "image" : "gradient"}${n}`, where, visible);
@@ -178,7 +177,6 @@ export const border = (sides: readonly [Side, Side, Side, Side], where: Where): 
   if (new Set(drawn.map(({ paint }) => colorKey(paint.rgba))).size <= 1)
     return drawn[0] ? [<Shape key="border" geometry={edge} fill={drawn[0].paint.rgba} />] : [];
 
-  // One wedge per side, meeting along each corner's diagonal, and all of them cut to the ring.
   const { x, y, width: w, height: h } = box;
   const [t, r, b, l] = widths;
 
@@ -246,7 +244,6 @@ export const shadows = (
   const above: SceneElement[] = [];
   const { box, radii } = where;
 
-  // CSS paints the first shadow on top.
   [...list].reverse().forEach((one, i, all) => {
     const paint = painted(one.color);
     const n = all.length - i;
@@ -283,13 +280,10 @@ export const shadows = (
       return;
     }
 
-    // A shadow shows only outside the box, so the shape that casts it is cut away where the box is.
     const outside = expand(box, radii, reach);
     const cut = ring(outline(outside.box, outside.radii), outline(box, radii));
 
     if (one.spread === 0) {
-      // The caster is opaque: the shadow's alpha comes from its color alone (a themed color carries its alpha inside the
-      // token, so filling the caster with it too would square the alpha).
       below.push(
         <Group key={`shadow${n}`} clip={cut}>
           <Shape

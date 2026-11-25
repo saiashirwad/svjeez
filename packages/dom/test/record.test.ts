@@ -88,7 +88,6 @@ describe("record", () => {
     expect(out).toMatch(/--c-ffffff-111111:/);
     expect(out).toContain("var(--c-ffffff-111111");
 
-    // The page is back in light after recording.
     expect(await page.evaluate(() => matchMedia("(prefers-color-scheme: dark)").matches)).toBe(
       false,
     );

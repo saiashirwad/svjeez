@@ -100,7 +100,6 @@ export const wiggle = (amplitude: LayerValues, options: WiggleOptions): Layer =>
     return out.loop(period);
   };
 
-  // The draws happen in this order, so the same seed gives the same wiggle.
   const opacity = amplitude.opacity === undefined ? undefined : noise(amplitude.opacity);
   const rotate = amplitude.rotate === undefined ? undefined : noise(amplitude.rotate);
   const scale = amplitude.scale === undefined ? undefined : pair(amplitude.scale).map(noise);

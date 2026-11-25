@@ -1,9 +1,5 @@
 name: release
 
-# Every push to main runs CI and the plan; pull requests (next included) get CI from ci.yml. Publishing is gated: it runs only on a manual workflow_dispatch of this workflow.
-# A dispatch releases each package under packages/ whose version isn't on npm and GitHub yet.
-# On next, scripts/release.ts releases only prerelease versions, which go to npm's next dist-tag.
-# scripts/release.ts decides which ones. npm's trusted publisher for every package names this file and the npm environment.
 on:
   push:
     branches: [main]
@@ -12,7 +8,6 @@ on:
 jobs:
   ci:
     uses: ./.github/workflows/ci.yml
-    # ci.yml's changes job reads the pull request's files, and a called workflow can't ask for more than its caller grants.
     permissions:
       contents: read
       pull-requests: read
@@ -43,12 +38,10 @@ jobs:
       contents: write
       id-token: write
     steps:
-      # The release notes come from git log since the package's previous tag, so the job needs the history and tags.
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: oven-sh/setup-bun@v2
-      # npm 11.5.1+ for trusted publishing, which Node 24 ships.
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -58,10 +51,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: bun scripts/release.ts publish
 
-  # The single-file svjeez for every platform, attached to the svjeez release (v<version>) it was built beside, which
-  # packages/bin/install.sh and the @svjeez/bin launcher download from. It builds on a Mac because a Mac binary has to be signed again on one; the
-  # other platforms cross-compile. They go up as one set with their checksums; a release that has them keeps them, so a
-  # later dispatch doesn't change what a version installs.
   binaries:
     needs: [ci, publish]
     if: github.event_name == 'workflow_dispatch' && !failure() && !cancelled()

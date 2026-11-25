@@ -29,7 +29,6 @@ import {
   type Span,
 } from "svjeez";
 
-// Colors with a value per scheme: the SVG follows the viewer's light or dark mode.
 const theme = tokens({
   light: {
     background: "#F6F7F9",
@@ -53,8 +52,6 @@ const theme = tokens({
   },
 });
 
-// Text is measured with the real font when the scene builds, and only the glyphs it uses are embedded.
-// Fetched from Google Fonts on the first build, then read from ~/.cache/svjeez/fonts.
 const sans = await google.family("Geist", [{ weight: 400 }, { weight: 600 }]);
 const mono = await google("Geist Mono");
 
@@ -65,7 +62,6 @@ const COMMIT = `const pop = ease.spring({
 
 const INNER = 236;
 
-// Seconds each stage takes, and how long the whole deploy took on the runs before this one.
 const STAGES = [
   { name: "Build", icon: hammer, seconds: 42 },
   { name: "Test", icon: flask, seconds: 78 },
@@ -76,7 +72,6 @@ const THIS_RUN = "#47";
 const total = STAGES.reduce((sum, { seconds }) => sum + seconds, 0);
 const past = [171, 166, 174, 158, 162, 153].map((seconds, i) => [`#${41 + i}`, seconds] as const);
 
-// The beats, each built from the one before it: move one and everything after follows.
 const appear = span(0.3, 0.5);
 const typing = appear.next(1.2);
 const handoff = typing.next(0.4);

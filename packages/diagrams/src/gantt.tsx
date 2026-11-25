@@ -178,7 +178,6 @@ const ticksOf = (step: Step, min: number, max: number): number[] => {
   if ((max - min) / unit > MANY) return out;
 
   if ("ms" in step) {
-    // Weeks start on Monday, which is day 4 of the epoch.
     const origin = step.ms % WEEK === 0 ? 4 * DAY : 0;
 
     for (let t = origin + Math.ceil((min - origin) / step.ms) * step.ms; t <= max; t += step.ms)

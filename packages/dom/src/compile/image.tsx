@@ -95,7 +95,6 @@ export const image = (
     />
   );
 
-  // A picture that overflows its box (cover, none) is cut to it.
   return width > box.width || height > box.height ? (
     <Group key={key} clip={outline(box)}>
       {drawn}

@@ -201,7 +201,6 @@ describe("film", () => {
       dark: new Uint8Array(),
     };
 
-    // Where each part sits in #app, to compare it alone: a mean over the whole page would hide a small box going wrong.
     let parts: Record<string, { x: number; y: number; width: number; height: number }> = {};
     const shotsOf: Record<string, Record<"light" | "dark", Uint8Array>> = {};
 
@@ -239,7 +238,6 @@ describe("film", () => {
       },
     );
 
-    // Everything on the page is drawn.
     expect(diagnostics).toEqual([]);
 
     const markup = svg.emit(scene);
@@ -289,7 +287,6 @@ describe("film", () => {
         await snap("effects");
         const app = (await page.locator("#app").boundingBox())!;
 
-        // A filter or shadow reaches past its box, so each part is compared with a margin around it.
         parts = Object.fromEntries(
           await Promise.all(
             IDS.map(async (id) => {
@@ -321,7 +318,6 @@ describe("film", () => {
       },
     );
 
-    // Everything on the page is drawn.
     expect(diagnostics).toEqual([]);
 
     const markup = svg.emit(scene);
@@ -334,7 +330,6 @@ describe("film", () => {
         const gaps = [{ id: "page", gap: await difference(shots[scheme], drawn) }];
 
         for (const id of IDS) {
-          // The scene and the screenshot are the same size: the same region of both.
           gaps.push({ id, gap: await difference(shots[scheme], drawn, parts[id], parts[id]) });
         }
 

@@ -23,8 +23,6 @@ import type { Anchor, Child, Layers } from "svjeez/tools";
 import { mono, theme } from "../../../examples/theme";
 import { CODE } from "../palettes";
 
-// An editor's pieces: a window, a selection frame, and code that arrives a line at a time.
-
 export const BAR = 40;
 
 interface WindowProps {

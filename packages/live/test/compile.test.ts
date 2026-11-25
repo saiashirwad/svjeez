@@ -243,7 +243,6 @@ describe("imports", () => {
       ).pipe(Effect.flip),
     );
 
-    // The allowlist passed it; the runner then could not find the package.
     expect(program).toBeInstanceOf(CompileError);
     expect(program.message).not.toContain("not available");
   });
@@ -637,7 +636,6 @@ const fakeLoader = () => {
 
               return await host.fetch(request);
             } catch (thrown) {
-              // A real isolate answers a module that throws with its message and a frame in the file.
               if (!(thrown instanceof CompileError)) throw thrown;
 
               throw new Error(
@@ -686,7 +684,6 @@ describe("WorkerLoaderRunner", () => {
       "scene.tsx",
     ]);
 
-    // A file in a folder names its neighbours and the libraries by path from the root, not from its own folder.
     const card = worker?.modules["groups/card.tsx"]?.js ?? "";
 
     expect(card).toContain('from "/components/NoteCard.tsx"');

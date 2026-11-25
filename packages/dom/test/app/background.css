@@ -35,7 +35,6 @@ body {
   border-radius: 8px;
 }
 
-/* A photo that fills its box, and one that fits inside it. */
 #cover {
   height: 90px;
   background: url("./photo.png") center / cover;
@@ -46,7 +45,6 @@ body {
   background: url("./photo.png") right bottom / contain no-repeat var(--panel);
 }
 
-/* An SVG tile, repeated, from a data URI that has a viewBox and no width or height. */
 #dots {
   height: 60px;
   background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3e%3ccircle cx='5' cy='5' r='3' fill='%2394a3b8'/%3e%3c/svg%3e")
@@ -54,7 +52,6 @@ body {
   background-color: var(--panel);
 }
 
-/* @tailwindcss/forms: a select's chevron and a checked checkbox, both SVG data URIs. */
 #select {
   box-sizing: border-box;
   height: 38px;
@@ -86,7 +83,6 @@ body {
   background-repeat: no-repeat;
 }
 
-/* A glow that is wider than it is tall. */
 #glow {
   height: 70px;
   background:
@@ -94,7 +90,6 @@ body {
     radial-gradient(ellipse closest-side at 85% 60%, var(--accent), transparent), var(--panel);
 }
 
-/* Stripes: the repeating gradients, and a sized gradient tiled across. */
 #stripes {
   height: 50px;
   background: repeating-linear-gradient(45deg, var(--a) 0 10px, var(--b) 10px 20px);
@@ -113,7 +108,6 @@ body {
     linear-gradient(var(--a), var(--b)) 10px 5px / 30px 20px no-repeat;
 }
 
-/* Tiles that space out and stretch to fit, repeated along one axis. */
 #space {
   height: 50px;
   background: url("./photo.png") 0 0 / 70px 44px space no-repeat var(--panel);
@@ -126,7 +120,6 @@ body {
   background-repeat: round no-repeat;
 }
 
-/* Origin and clip boxes, with a translucent border the background shows through. */
 #boxes {
   box-sizing: border-box;
   height: 70px;

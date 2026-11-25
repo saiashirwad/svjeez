@@ -12,7 +12,6 @@ type Files = Readonly<Record<string, Uint8Array>>;
 
 const encoder = new TextEncoder();
 
-// A stand-in for the executable: it writes its arguments to `record`, one per line, and exits with `status`.
 const executable = (record: string, status: number): Uint8Array =>
   encoder.encode(`#!/bin/sh\nprintf '%s\\n' "$@" > ${record}\nexit ${status}\n`);
 
@@ -23,7 +22,6 @@ const sumsOf = (files: Files): Uint8Array =>
       .join("\n")}\n`,
   );
 
-// In a temp folder, removed afterwards.
 const inTemp = async (body: (dir: string) => Promise<void>): Promise<void> => {
   const dir = mkdtempSync(join(tmpdir(), "svjeez-launch-"));
 
@@ -34,7 +32,6 @@ const inTemp = async (body: (dir: string) => Promise<void>): Promise<void> => {
   }
 };
 
-// With a stand-in release serving `files`, for as long as `body` runs.
 const serving = <A>(files: Files, body: (release: StandIn) => Promise<A>): Promise<A> =>
   Effect.runPromise(
     standIn(files).pipe(

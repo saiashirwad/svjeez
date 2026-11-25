@@ -36,7 +36,6 @@ const target = (): Target => ({
 });
 
 const keys = (element: SceneElement, into: string[] = []): string[] => {
-  // A morph has no props of its own: its states are the page, not the cursor.
   if (!("props" in element)) return into;
 
   if ("key" in element.props && element.props.key) into.push(String(element.props.key));
@@ -137,7 +136,6 @@ describe("cursor", () => {
     expect(found).toContain("arrow");
     expect(found.filter((key) => key.startsWith("ring-"))).toHaveLength(1);
 
-    // A mouse that first shows up with a press fades in where it pressed, then moves on with the page.
     const late = await run(async (page, snap) => {
       await snap("still");
       await page.mouse.move(200, 20);
@@ -150,7 +148,6 @@ describe("cursor", () => {
     expect(late[1]!.pointer).toEqual({ at: [250, 150], down: false, presses: [[200, 20]] });
     svg.emit(scene({ size: [320, 240], duration: 2, title: "late" }, () => compile(late).element));
 
-    // Without the pointer, the same states compile to the page alone.
     const bare = compile(states.map(({ name, snapshot }) => ({ name, snapshot, over: 0.4 })));
 
     expect(keys(bare.element)).not.toContain("@cursor");

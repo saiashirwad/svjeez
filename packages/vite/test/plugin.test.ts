@@ -203,7 +203,6 @@ export default scene({ size: [120, 80], duration: 1, title: "Model" }, () => (
     expect(module).toContain(`"width": 120`);
     const src = /"src":\s*"([^"]+)"/.exec(module)![1]!;
     expect(await (await fetch(origin + src)).text()).toContain('<circle cx="60" cy="40" r="10"');
-    // The browser gets the URL alone; server code also gets the markup, which getScene() takes.
     expect(module).not.toContain("<svg");
     const { default: ssr } = await server.ssrLoadModule(join(dir, "scene.tsx?svjeez"));
     expect(ssr.svg).toContain('<circle cx="60" cy="40" r="10"');
@@ -312,7 +311,6 @@ export default { a, b, own, plain };`,
   expect(prefixOf(made.b.svg)).toMatch(/^s[0-9a-f]{8}$/);
   expect(prefixOf(made.a.svg)).not.toBe(prefixOf(made.b.svg));
   expect(prefixOf(made.own.svg)).toBe("mine");
-  // A plain import is as it was: the URL alone, and no prefix.
   expect(made.plain.svg).toBeUndefined();
   expect(Object.keys(made.plain).sort()).toEqual([
     "desc",

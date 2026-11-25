@@ -5,7 +5,6 @@ import { fontFixture } from "../../../fixtures/fonts";
 
 const mono = await font.load(fontFixture("JetBrainsMono"));
 
-// JetBrains Mono is 0.6em wide everywhere, so at size 10 every character is 6 across.
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
   scene({ size: [300, 40], duration, title: "Swap" }, build);
 
@@ -71,7 +70,6 @@ describe("a string track as the content of a <Text>", () => {
     const centred = holder(label("center"));
     const [closed, syn, established] = centred.children;
 
-    // Each text's own center sits on the same point: its width is 6 a character.
     expect(closed!.at).toEqual([-18, -6.6]);
     expect(syn!.at).toEqual([-24, -6.6]);
     expect(established!.at).toEqual([-33, -6.6]);

@@ -15,12 +15,6 @@ import { Pivot } from "../blip";
 import { geistCode } from "./palette";
 import { STAGE, mono, spring, theme } from "./kit";
 
-// Code that writes itself the way a person (or an agent) does: not letter by letter, but a node, a call or an argument
-// at a time. Each state is the whole file; lines that stay are keyed by their text, so they slide apart to make room,
-// and lines that are new or changed fade in where they land. Then the listing steps aside to make room for what it
-// draws, and later states are edits: the changed line flashes as it swaps. There is no panel: the code sits on the
-// canvas under a small label, as large as its column lets it be.
-
 /** The label's row above the code, how far a highlight reaches past the code on each side, and the line height. */
 const LABEL = 40;
 const BLEED = 10;
@@ -125,7 +119,6 @@ export const Listing = ({
   });
 
   /** Where a highlight sits behind a line. */
-  // A line's text box runs from its top down the font's ascent and descent; the bar is centered on that, not on the size.
   const { ascent, descent } = mono.metrics;
   const middle = ((ascent + descent) / 2) * size;
   const behind = (index: number): Vec => [-BLEED, LABEL + index * row + middle - row / 2];

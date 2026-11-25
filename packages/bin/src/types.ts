@@ -23,7 +23,6 @@ const unpack = async (dir: string, files: Readonly<Record<string, string>>): Pro
 
   await mkdir(dirname(dir), { recursive: true });
   await rename(staging, dir).catch(async (error: NodeJS.ErrnoException) => {
-    // Another process unpacked the same files first.
     await rm(staging, { recursive: true, force: true });
 
     if (!existsSync(dir)) throw error;

@@ -135,7 +135,6 @@ export const parseClass = (header: Line, body: readonly Line[]): ClassDoc => {
       continue;
     }
 
-    // Style classes only colour a diagram, and svjeez themes it itself.
     const l = { ...raw, text: raw.text.replace(/:::[\w-]+/g, "").trim() };
 
     if (IGNORED.test(l.text)) continue;

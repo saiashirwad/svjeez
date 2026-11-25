@@ -1,13 +1,10 @@
 #!/usr/bin/env node
-// @svjeez/bin's `svjeez` command: the single-file build for this machine, from the GitHub release of this package's
-// version. scripts/package.ts bundles it into package-dist/bin/svjeez.js.
 
 import { spawnSync } from "node:child_process";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { assetFor, launch } from "./launch";
 
-// scripts/package.ts defines it in the package; from source it is unset.
 const built = process.env.SVJEEZ_VERSION;
 
 if (built === undefined) {
@@ -17,7 +14,6 @@ if (built === undefined) {
   process.exit(1);
 }
 
-// A Node running under Rosetta reports x64 on Apple silicon, where the arm64 build is the faster one.
 const translated =
   process.platform === "darwin" &&
   process.arch === "x64" &&

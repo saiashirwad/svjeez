@@ -9,7 +9,6 @@ const glowing = track(theme.text)
   .to(theme.text, span(2.2, 0.5))
   .loop(3);
 
-// A string track types each edit: it erases back to what the two strings share, then types the rest.
 const sentence = track("")
   .to("One word at a time, on one line.", span(0.5, 1.6))
   .to("", span(5.3, 0.4));

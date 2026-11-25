@@ -2,10 +2,8 @@ import { path, type Vec } from "svjeez";
 import type { PathBuilder } from "svjeez/tools";
 import type { Point } from "./layout/box.ts";
 
-// How far from its end a line starts to turn, so the arrowhead meets straight line.
 const LEAD = 6;
 
-// Share of a turn's reach that its control points sit at, 0 being a sharp corner.
 const HANDLE = 0.62;
 
 interface Piece {
@@ -42,9 +40,6 @@ export const curve = (points: readonly Point[]): Curve => {
 
   const dir = (i: number) => unit(points[i]!, points[i + 1]!);
 
-  // A turn takes the whole of a leg that ends at a node, short of the straight run into
-  // the arrowhead, and half of a leg it shares with the next turn. Where two turns share a
-  // run of line this makes a jog one eased S, however far across it goes.
   const reach = (i: number, other: number) =>
     other === 0 || other === n - 1 ? Math.max(0, length(i) - LEAD) : length(i) / 2;
 

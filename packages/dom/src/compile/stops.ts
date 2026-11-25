@@ -57,7 +57,6 @@ export const unroll = (stops: readonly Stop[], lo: number, hi: number): Stop[] |
   for (let n = from; n <= to; n++)
     for (const stop of stops) all.push({ offset: stop.offset + n * period, color: stop.color });
 
-  // The color just after `lo` (a hard stop on it takes the later side) and just before `hi`.
   const at = (t: number, after: boolean): Color => {
     const i = after
       ? all.findLastIndex((stop) => stop.offset <= t)

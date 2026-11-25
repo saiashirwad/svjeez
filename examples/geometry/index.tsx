@@ -70,8 +70,6 @@ export default scene(
       />
       <Label i={0}>rect grows</Label>
 
-      {/* The arcs are drawn about their circle's middle, so a group puts that middle in place: an anchor would read
-          the box of a part of the arc, which moves as it opens. */}
       <Group offset={center(1)}>
         <Shape
           geometry={arc({ radius: 38, start: -90, sweep: 300 })}

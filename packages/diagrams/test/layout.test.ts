@@ -369,7 +369,6 @@ describe("layered", () => {
         edges: edges("a>d a>e b>d b>f c>e c>f d>g d>h e>h e>i f>g f>i"),
       });
 
-      // Four is the least any order of its layers allows.
       expect(crossings(out)).toBeLessThanOrEqual(4);
     });
 
@@ -428,7 +427,6 @@ describe("layered", () => {
   describe("straightening", () => {
     const center = (b: Box) => b.x + b.w / 2;
 
-    // Sideways steps along an edge, past the one it may take at each end to reach its ports.
     const kinks = (e: { readonly points: readonly Point[] }) =>
       Math.max(
         0,

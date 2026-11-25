@@ -44,7 +44,6 @@ const percents = (lane: string, keys: readonly Key[], period: Seconds, down = fa
     const taken = new Set(out);
     const step = 10 ** -places;
 
-    // A hold is written as the key's own stop up to one step before the next, so no steps(1) has to be said.
     const before = keys.map((_, index) => {
       if (!moving(keys, index) || !isHold(keys[index]!.ease)) return undefined;
       const stop = `${num(Number(num(at[index + 1]!, places)) - step, places)}%`;
@@ -139,8 +138,6 @@ const cssFrames = (
       ? `animation-timing-function:${classic.timing};`.length
       : 0;
 
-  // visibility interpolates to "visible" anywhere between a visible and a hidden stop, so a stop just before the next key
-  // would show both values at the key's own instant: those lanes must step exactly.
   if (emit === "visibility") return classic;
   const exact = frames(lane, emit, all, period, true, joins);
 

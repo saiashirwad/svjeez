@@ -103,7 +103,6 @@ const typescriptFor = async (file: string): Promise<typeof TS | undefined> => {
     const loaded: Api & { readonly default?: Api } = await import(/* @vite-ignore */ url);
     const api = loaded.default ?? loaded;
 
-    // TypeScript 7 is a native binary with no JavaScript API to check with.
     return isCompiler(api) ? api : undefined;
   } catch {
     return undefined;

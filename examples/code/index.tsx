@@ -8,7 +8,6 @@ const LINE = SIZE * 1.4;
 const LEFT = 28;
 const TOP = 21;
 
-// The blocks the highlight visits, as [first line, last line], counting from 0.
 const blocks: readonly (readonly [number, number])[] = [
   [1, 1],
   [2, 6],
@@ -23,7 +22,6 @@ const START = 2.4;
 const top = ([first]: readonly [number, number]): Vec => [0, TOP + first * LINE];
 const stretch = ([first, last]: readonly [number, number]): Vec => [1, last - first + 1];
 
-// One bar slides to each block and stretches to cover it.
 const walk = <T extends Vec>(of: (block: readonly [number, number]) => T) =>
   blocks
     .slice(1)

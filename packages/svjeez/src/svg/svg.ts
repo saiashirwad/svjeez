@@ -386,7 +386,6 @@ interface Shell {
   origin?: Vec;
 }
 
-// CSS applies translate, rotate and scale in that order, then transform: so skew, the innermost step, is the last rank.
 const RANK: Partial<Record<Slot, number>> = { translate: 0, rotate: 1, scale: 2, skew: 3 };
 
 const shell = (): Shell => ({
@@ -405,7 +404,6 @@ const open = (shells: Shell[], slot: Slot): Shell => {
   if (
     current.origin !== undefined ||
     current.taken.has(slot) ||
-    // The CSS `transform` that skews would replace the `transform` attribute a drawn element may carry, so a skew gets a wrapper of its own.
     (slot === "skew" && shells.length === 1) ||
     (rank !== undefined && rank >= current.rank) ||
     ((slot === "rotate" || slot === "scale") && current.taken.has("offset-distance"))
@@ -1276,7 +1274,6 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
       };
 
       if (node.view) {
-        // The viewBox sits on a nested <svg> inside a <g>, so a clip or mask on the picture is drawn in the box's own units.
         const inner = element(
           "image",
           {
@@ -1454,7 +1451,6 @@ const schemed = (ctx: Ctx, scheme: Scheme, out: Element): Element => {
   };
 };
 
-// Each scheme hides what shows only in the other. It is !important to win over an animated or still-frame display.
 const schemeCss = (schemes: ReadonlySet<Scheme>, prefix: string): string =>
   (["light", "dark"] as const)
     .flatMap((scheme) =>
@@ -1466,8 +1462,6 @@ const schemeCss = (schemes: ReadonlySet<Scheme>, prefix: string): string =>
     )
     .join("\n");
 
-// A token's light and dark values sit on the root, light under a prefers-color-scheme query. A mix() token is blended
-// from its two by color-mix(), so CSS that restyles those, as restyle() does with a theme, restyles it too.
 const tokenCss = (
   scene: Scene,
   prefix: string,

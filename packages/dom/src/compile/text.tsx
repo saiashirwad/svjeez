@@ -66,8 +66,6 @@ const run = (
 ): SceneElement[] => {
   const fill = painted(one.color);
 
-  // A right-to-left piece is an isolate, so the SVG text orders it by itself, whichever way the text around it reads.
-  // The two controls take up no room.
   const [words, advances] = one.rtl
     ? [`\u2067${one.text}\u2069`, [0, ...one.advances, 0]]
     : [one.text, one.advances];
@@ -97,7 +95,6 @@ const run = (
 
       const offset: Vec = [s.x, s.y];
 
-      // A blur radius, as in `box-shadow`: a deviation of half of it.
       return paint ? [{ paint, offset, sigma: s.blur / 2 }] : [];
     });
 
@@ -115,8 +112,6 @@ const run = (
         ]),
       );
     else {
-      // A shadow of the text and the shadows below it would shadow those too, so each shadow is its own copy of the glyphs.
-      // CSS paints the first shadow on top.
       [...shadows]
         .reverse()
         .forEach(({ paint, offset, sigma }, i) =>

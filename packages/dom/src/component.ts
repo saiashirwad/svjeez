@@ -87,9 +87,7 @@ export const exportNameOf = (exports: Bag, value: Prop): string | undefined => {
   for (const key of Object.keys(exports))
     try {
       if (exports[key] === value) return key;
-    } catch {
-      // not readable, so not it
-    }
+    } catch {}
 };
 
 /** The file of the first stack frame that is not in this package: the film file calling `component()`. */

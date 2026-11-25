@@ -185,7 +185,6 @@ export const boot = async (
       : { ok: false, message: messageOf(result.failure) };
   };
 
-  // Building the layer opens the session, so a scene that does not compile fails here.
   const state = await runtime.runPromise(Session.use((session) => Effect.succeed(session.state)));
 
   return {
@@ -205,7 +204,6 @@ export const boot = async (
       attempt(
         Effect.gen(function* () {
           const session = yield* Session;
-          // Render the state that is read here, so the drawing and its revision cannot come from different states.
           const { program, revision } = yield* SubscriptionRef.get(session.state);
           const { svg } = yield* program.render(params);
 

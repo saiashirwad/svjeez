@@ -233,7 +233,6 @@ export const tokens = <const K extends string>(values: {
   ) as Theme<K>;
 };
 
-// As CSS color-mix() blends, with premultiplied alpha: a mix with transparent is the color, fainter.
 const blend = (a: Hex, b: Hex, share: number): Hex => {
   const [x, y] = [hexBytes(a), hexBytes(b)];
   const alpha = x[3] * share + y[3] * (1 - share);

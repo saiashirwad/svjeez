@@ -36,7 +36,6 @@ export const serve = (html: HTMLBundle, { selector, port = 0 }: ServeOptions): T
   const server = Bun.serve({
     port,
     routes: { "/": html },
-    // Development mode breaks CSS modules in Bun 1.4.3 (`import_X_module is not defined`).
     development: false,
   });
 
@@ -94,7 +93,6 @@ const locate = (component: Prop): Located => {
     return name ? [{ file, name }] : [];
   });
 
-  // A barrel that re-exports the component matches too; prefer the shortest path of re-exports: the file it is written in.
   const [defining] = found.toSorted(
     (a, b) => Number(a.name !== "default") - Number(b.name !== "default"),
   );
@@ -142,7 +140,6 @@ export const component = async <C extends Fn>(
   const dir = await realpath(await mkdtemp(join(tmpdir(), "svjeez-dom-")));
 
   try {
-    // Stylesheets from `with { type: "file" }` are absolute paths; the bundler wants them relative to the page.
     const css = (options.css ?? []).map((href) => (isAbsolute(href) ? relative(dir, href) : href));
 
     await Bun.write(join(dir, "entry.ts"), entryModule(located, framework, wire));

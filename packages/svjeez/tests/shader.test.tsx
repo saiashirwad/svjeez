@@ -16,14 +16,12 @@ import {
 } from "svjeez";
 import { loadTypeGpu, svg } from "svjeez/tools";
 
-// A "use gpu" function is compiled as its module is imported, so the fragments live in a module imported after this.
 await loadTypeGpu(import.meta.dir);
 
 const { gradient, renamed, turning } = await import("./fixtures/shaders");
 
 const storm = clock("storm", span(0, 1));
 
-// A scene with a bar on the storm clock beside `sky`, the shader under test.
 const withShader = (sky: SceneElement) =>
   svg.emit(
     scene({ size: [120, 80], duration: 2, title: "Shader" }, () => (
@@ -48,7 +46,6 @@ const build = (fragment: typeof gradient | typeof turning, wrong?: string) => {
   return wrong === undefined ? markup : markup.replace("svjeez_vertex", wrong);
 };
 
-// Headless Chromium has WebGPU where the machine has a GPU or a software Vulkan: Metal on a Mac, SwiftShader elsewhere.
 const FLAGS =
   process.platform === "darwin"
     ? ["--enable-unsafe-webgpu", "--use-angle=metal", "--ignore-gpu-blocklist"]
@@ -72,7 +69,6 @@ const built = await Bun.build({ entrypoints: [entry], target: "browser", format:
 const library = await built.outputs[0]!.text();
 const browser: Browser = await chromium.launch({ args: FLAGS });
 
-// WebGPU needs a secure context, which localhost is: pages are served from it, by the browser's own routing.
 const ORIGIN = "http://localhost/";
 
 const served = async (page: Page, markup: string) => {
@@ -89,8 +85,6 @@ const probe = await browser.newPage();
 
 await served(probe, "");
 
-// An adapter is not enough: software WebGPU on a headless Linux machine can have one and still lose its device the first
-// time it presents to a canvas. The probe draws one frame to a canvas and sees whether the device survives.
 const webgpu = await probe.evaluate(async () => {
   try {
     const adapter = await navigator.gpu?.requestAdapter();
@@ -134,7 +128,6 @@ const webgpu = await probe.evaluate(async () => {
 
 afterAll(() => browser.close());
 
-// WebGPU is not on every CI machine: these tests are skipped where the browser cannot draw to a canvas with it.
 const gpu = webgpu ? test : test.skip;
 
 interface Opened {
@@ -165,7 +158,6 @@ const open = async (
   await served(page, `<div style="height:${below}px"></div>${markup}`);
   await page.addScriptTag({ content: library });
 
-  // What the page's WebGPU was asked for: the devices it made and the frames it submitted.
   await page.evaluate(() => {
     const devices: { destroyed: boolean }[] = [];
     const seen = { devices, submits: 0 };
@@ -309,7 +301,6 @@ describe("the shader runner", () => {
 
     expect(before.distinct).toBeGreaterThan(100);
     expect(after.distinct).toBeGreaterThan(100);
-    // The gradient's blue is the clock's progress.
     expect(before.blue).toBeLessThan(20);
     expect(after.blue).toBeGreaterThan(before.blue + 100);
     expect(calm.equals(stormy)).toBe(false);
@@ -377,7 +368,6 @@ describe("the shader runner", () => {
     await page.waitForTimeout(300);
     const hidden = await run<number>(page, "return seen.submits;");
 
-    // The frame or two before the browser says it is off screen are drawn; then it stops.
     await page.waitForTimeout(400);
     expect(await run<number>(page, "return seen.submits;")).toBe(hidden);
 
@@ -533,7 +523,6 @@ describe("the shader runner", () => {
         "const canvas = document.querySelector('foreignObject canvas'); return [canvas.width, canvas.height];",
       );
 
-      // At the page's density of 2 it would be 3200 by 2000; it keeps the box's shape at 1.5 million pixels.
       expect(width * height).toBeLessThanOrEqual(1_500_000);
       expect(width * height).toBeGreaterThan(1_450_000);
       expect(Math.abs(width / height - 1.6)).toBeLessThan(0.01);
@@ -543,7 +532,6 @@ describe("the shader runner", () => {
   );
 
   gpu("a layout that is not the build's keeps the fallback, and says nothing", async () => {
-    // A field past the end of the buffer, and one whose kind no build writes.
     const broken = [
       '{"size":16,"fields":[{"name":"storm","kind":"clock","clock":"storm","at":64}]}',
       '{"size":16,"fields":[{"name":"storm","kind":"noise","at":0}]}',

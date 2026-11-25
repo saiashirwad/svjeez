@@ -2,7 +2,6 @@ import { film } from "@svjeez/dom";
 import { component } from "@svjeez/dom/vite";
 import Lists from "./Lists.tsx";
 
-// Both lists are keyed 1 to 3 with the same text: only the scope of a key tells them apart.
 const rows = [
   { id: 1, text: "todo" },
   { id: 2, text: "todo" },

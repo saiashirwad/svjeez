@@ -167,6 +167,5 @@ export const writeManifest = Effect.fn("writeManifest")(function* <Target>(
     `${JSON.stringify({ ...(yield* publishedRanges(manifest, versions)), ...published }, null, 2)}\n`,
   );
 
-  yield* fs.copyFile(path.join(dir, "README.md"), path.join(out, "README.md"));
   yield* fs.copyFile(path.join(import.meta.dirname, "../LICENSE"), path.join(out, "LICENSE"));
 });

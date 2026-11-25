@@ -18,7 +18,6 @@ export const reactIdentify = (el: Element): string | undefined => {
     return: Fiber | null;
   }
 
-  // HostRoot, HostPortal, HostComponent, HostHoistable, HostSingleton: a key above one of these names another element.
   const hosts = [3, 4, 5, 26, 27];
 
   const fiberOf = (node: Element): Fiber | null => {

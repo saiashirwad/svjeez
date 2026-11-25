@@ -1,8 +1,5 @@
 name: preview
 
-# Every push and same-repo pull request publishes every package to pkg.pr.new, which needs its GitHub App on the repo.
-# Install a commit with `bun add https://pkg.pr.new/svjeez@<sha>`, or the latest on a branch with `...svjeez@main`.
-# Pull requests from forks don't publish, so nobody else's code gets an install URL under this repo.
 on:
   push:
     branches: ["**"]

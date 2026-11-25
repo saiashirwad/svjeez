@@ -194,7 +194,6 @@ export const readGoals = <T>(
   if (passage.data.period === undefined) {
     const named = clock.named?.name;
 
-    // Two sequences on one named clock count the same time, wherever each plays in the static file.
     if (
       first &&
       (first.clock !== named ||

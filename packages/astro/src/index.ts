@@ -4,10 +4,8 @@ import svjeez, { ROUTE, writeScenes } from "@svjeez/vite";
 import type { AstroIntegration } from "astro";
 import { cardBeside } from "./cards.ts";
 
-// The pages with a fixed address, for the dev gallery at /_og to start from: it finds the rest by following links.
 const ROUTES = "virtual:svjeez/routes";
 
-// The route-to-card map the middleware reads: each page's card is found by `cardBeside`.
 const CARDS = "virtual:svjeez/og";
 
 export default function integration(): AstroIntegration {

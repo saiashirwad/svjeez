@@ -1,4 +1,3 @@
-// The virtual modules and `astro:middleware` are typed by client.d.ts, which a package or workspace that compiles this file may not include.
 // oxlint-disable-next-line typescript/triple-slash-reference
 /// <reference path="../client.d.ts" />
 
@@ -8,7 +7,6 @@ import { getStill } from "@svjeez/vite/scene";
 import cards from "virtual:svjeez/og";
 import { ogTags } from "./tags";
 
-// Adds the link-preview tags to every page that has a card beside it and does not say its own `og:image`.
 export const onRequest = defineMiddleware(async (context, next) => {
   const response = await next();
   const load = cards[context.routePattern];

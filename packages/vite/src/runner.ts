@@ -58,7 +58,6 @@ const typegpu = async (root: string): Promise<PluginOption[]> => {
     /* @vite-ignore */ pathToFileURL(entry).href
   );
 
-  // The path is the one `require` takes, which can be the package's CommonJS build: its function is then on `default`.
   return [isMaker(loaded) ? loaded() : loaded.default()];
 };
 
@@ -87,7 +86,6 @@ const film = (
   if (known) return known.scene;
 
   const { conditions = [], externalConditions = [] } = app.environments.ssr?.resolve ?? {};
-  // `svjeez` and `@svjeez/dom` are external in the film's server: resolve them with the app's own conditions too.
   const custom = conditions.filter((condition) => !defaultServerConditions.includes(condition));
 
   const entry: Filmed = {
@@ -140,7 +138,6 @@ export const createRunner = (app: ResolvedConfig): Runner => {
     const config = await resolveConfig(
       {
         configFile: false,
-        // A scene with a <Shader> is written with TypeGPU, whose "use gpu" functions this environment compiles as it loads them.
         plugins: await typegpu(app.root),
         envDir: false,
         root: app.root,
@@ -155,8 +152,6 @@ export const createRunner = (app: ResolvedConfig): Runner => {
               conditions,
               externalConditions,
               noExternal: noExternal === true ? undefined : noExternal,
-              // The runtime's own `@svjeez/dom`, which the film file's server shares, not a copy compiled here (as a linked
-              // workspace package would be): a scene made by one copy of `svjeez` can't be emitted by another.
               external:
                 external === true ? true : [...(external ?? []), "@svjeez/dom", "@svjeez/dom/vite"],
             },
@@ -171,7 +166,6 @@ export const createRunner = (app: ResolvedConfig): Runner => {
       runnerOptions: { hmr: { logger: false } },
     });
     await environment.init();
-    // <Shader> resolves its function with the app's typegpu, handed to the copy of svjeez the scenes run with.
     await environment.runner
       .import<typeof import("./typegpu.ts")>(TYPEGPU)
       .then(({ loadTypeGpu }) => loadTypeGpu(app.root, { transform: false }));

@@ -361,7 +361,6 @@ for (const [name, type] of Object.entries(ENGINES)) {
   if (browser) launched.set(name, browser);
 }
 
-// Three engines closing in sequence can pass bun's 5 s hook timeout on a busy runner.
 afterAll(async () => {
   await Promise.all([...launched.values()].map((browser) => browser.close()));
 }, 30_000);

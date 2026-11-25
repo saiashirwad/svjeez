@@ -421,7 +421,6 @@ test("a step function of a track that goes up and comes back compiles", () => {
 
   const out = svg.emit(model);
 
-  // Every whole value is held for its own stretch; the one-instant peak at 4 draws nothing.
   expect(out).toContain("rotate:270deg");
   expect(out).not.toContain("rotate:360deg");
 });
@@ -462,6 +461,5 @@ test("many colors rounded to hex and many long sawtooth moves compile in seconds
   const start = performance.now();
 
   svg.emit(model);
-  // Each of these lanes once took seconds on its own, so the scene took minutes.
   expect(performance.now() - start).toBeLessThan(5000);
 });

@@ -32,7 +32,6 @@ const merge = (light: Json, dark: Json, path: string): Json => {
       );
     }
 
-    // Children are the page's structure and must match; any other list (shadows, gradient layers) keeps light's.
     if (light.length !== dark.length)
       return path.endsWith(".children")
         ? mismatch(path, `${light.length} entries in light, ${dark.length} in dark`)
@@ -49,19 +48,15 @@ const merge = (light: Json, dark: Json, path: string): Json => {
       const b = dark[key];
       const at = `${path}.${key}`;
 
-      // A color that is only set in one scheme (a transparent background in the other) pairs with clear.
       if (a === undefined && b !== undefined && isColor(b)) out[key] = merge(CLEAR, b, at);
       else if (b === undefined && a !== undefined && isColor(a)) out[key] = merge(a, CLEAR, at);
       else if (a === undefined || b === undefined) {
-        // Anything else set in one scheme only comes from light, and is dropped when only dark has it.
         if (IDENTITY.has(key) || key === "children")
           mismatch(at, `it is set in ${a === undefined ? "dark" : "light"} only`);
         else if (a !== undefined) out[key] = a;
       } else out[key] = merge(a, b, at);
     }
 
-    // Running animations were captured at different instants in the two schemes, so what they drive differs by phase,
-    // not by scheme: the animations and what they return to come from light, and so does the fill they animate.
     const { animations, base } = light;
 
     if (animations !== undefined && isList(animations) && animations.length > 0) {
@@ -87,7 +82,6 @@ const merge = (light: Json, dark: Json, path: string): Json => {
   if (IDENTITY.has(key))
     return mismatch(path, `${JSON.stringify(light)} in light, ${JSON.stringify(dark)} in dark`);
 
-  // Anything else (a sub-pixel of layout, an animation's time) keeps its light value.
   return light;
 };
 

@@ -21,9 +21,6 @@ import {
 import type { Anchor, Child, Layers } from "svjeez/tools";
 import { BLIP } from "./blip";
 
-// A picture that builds itself: a sky, hills, a sun that is a moon at night, a kite and a cloud. Each piece is drawn
-// about its own point `at`, in the sky's frame, and takes its entrance and its life as `motion`.
-
 /** The picture's own colors by day and by night, which a palette leaves be. */
 export const scenery = tokens({
   light: {

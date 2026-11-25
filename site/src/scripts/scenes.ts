@@ -5,8 +5,6 @@ import { calm, scheme, THEMECHANGE } from "./scheme";
 
 const SHOWN = 0.3;
 
-// Main-thread milliseconds per second the scenes on screen may cost together while they play, measured in headless
-// Chromium at 1440 wide. Each scene carries its own cost in data-cost.
 const BUDGET = 80;
 const COST = 30;
 
@@ -86,7 +84,6 @@ scenes.forEach((img) => {
 
 const warm = () => {
   // SAFETY: the Network Information API is missing from lib.dom, and Chromium is the only engine that has it, so every
-  // field is optional.
   if ((navigator as { connection?: { saveData?: boolean } }).connection?.saveData) return;
 
   new Set(
@@ -107,8 +104,6 @@ calm.addEventListener("change", () =>
   players.forEach((one) => (one.state === "live" && calm.matches ? one.still() : undefined)),
 );
 
-// A playing scene is shown again, so Safari gets a copy pinned to the new scheme, or the plain file when the OS's is it.
 addEventListener(THEMECHANGE, () => players.forEach((one) => one.refresh()));
 
-// Another palette: a playing scene goes on from where it is in the new colors, and a still is made again in them.
 addEventListener(PALETTECHANGE, () => players.forEach((one) => one.refresh({ fade: true })));

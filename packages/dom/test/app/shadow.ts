@@ -1,4 +1,3 @@
-// A card whose look lives in its open shadow root; the light DOM fills its slots.
 class XCard extends HTMLElement {
   constructor() {
     super();

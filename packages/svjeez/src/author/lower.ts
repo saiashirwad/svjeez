@@ -351,8 +351,6 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
     );
   const geometry = geometryOf(props.geometry, timing, where);
 
-  // An anchor names a point of the box at rest. When the geometry animates and that point moves with it, as a rect
-  // growing from its corner does, it drifts away from at as it plays, which reads as the anchor being ignored.
   if (props.anchor !== undefined && isLane(geometry)) {
     const points = geometry.keys.map((key) => pinned(props.anchor, outlineBoxOf(key.value), where));
 
@@ -421,7 +419,6 @@ const strokeOf = (
       "Give the stroke a dash, as in stroke={{ color, dash: [4, 4], dashOffset }}.",
     );
 
-  // The type says array, but plain JS callers can pass a number.
   if (written.dash && !isArray(written.dash))
     throw new SceneError(
       `${where} has a stroke dash of ${String(written.dash)}, which is not a list.`,
@@ -698,7 +695,6 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     if (texts.length === 0)
       throw new SceneError(`${where} swaps a string track, but it never shows any text.`);
 
-    // Each text is a <Text> of its own, so its width and anchor are its own; they share an anchor point.
     const quiet = {
       at: undefined,
       offset: undefined,
@@ -779,7 +775,6 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
     if (spacing !== undefined && !Number.isFinite(spacing))
       throw new SceneError(`${where} needs a finite letterSpacing, got ${spacing}.`);
 
-    // Supplied advances mean the browser already laid the run out, fallback fonts included.
     if (!advances) unseen(look, words);
 
     return {
@@ -1164,7 +1159,6 @@ const lowerAll = (
       });
     let own = name;
 
-    // An unkeyed node is keyed by position, in a "#" namespace so key={1} can't collide with the second child.
     for (let index = taken.size; own === undefined; index++)
       if (!taken.has(`#${index}`)) own = `#${index}`;
     taken.add(own);

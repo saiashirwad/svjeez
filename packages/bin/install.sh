@@ -1,10 +1,4 @@
 #!/bin/sh
-# Installs the single-file svjeez for this machine from the newest GitHub release that has one:
-#
-#   curl -fsSL https://raw.githubusercontent.com/saiashirwad/svjeez/main/packages/bin/install.sh | sh
-#
-# SVJEEZ_VERSION=v0.8.0 installs that release instead; SVJEEZ_INSTALL=/usr/local/bin installs there instead of
-# ~/.local/bin. On Windows, download svjeez-windows-x64.exe from the releases page.
 set -eu
 
 repo=saiashirwad/svjeez
@@ -25,7 +19,6 @@ case "$(uname -m)" in
   *) fail "no build for $(uname -m)" ;;
 esac
 
-# A shell running under Rosetta reports x86_64 on Apple silicon; the native build is faster.
 if [ "$os" = darwin ] && [ "$arch" = x64 ] && [ "$(sysctl -n sysctl.proc_translated 2>/dev/null || true)" = 1 ]; then
   arch=arm64
 fi
@@ -35,7 +28,6 @@ asset="svjeez-$os-$arch"
 if [ -n "${SVJEEZ_VERSION:-}" ]; then
   tag=$SVJEEZ_VERSION
 else
-  # Releases come newest first; svjeez's are tagged v<version>, the add-on packages' @svjeez/<name>@<version>.
   tag=$(curl -fsSL "https://api.github.com/repos/$repo/releases?per_page=50" |
     grep -o "/releases/download/v[^/\"]*/$asset\"" | head -n 1 | cut -d/ -f4) || true
   [ -n "$tag" ] || fail "no release has $asset yet"

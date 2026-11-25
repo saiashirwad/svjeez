@@ -478,7 +478,6 @@ export function stateMachine<
     into.notes.push(...from.notes.map((n) => ({ ...n, box: shift(n.box, dx, dy) })));
   };
 
-  // Concurrent regions sit side by side in a TB composite and stacked in an LR one.
   const join = (parts: readonly Local[], lr: boolean): Local => {
     const along = (x: Local) => (lr ? x.h : x.w);
     const across = (x: Local) => (lr ? x.w : x.h);
@@ -533,8 +532,6 @@ export function stateMachine<
       return box ? { w: Math.max(own.w, box.w + 2 * PAD), h: header + box.h + 2 * PAD } : own;
     };
 
-    // A state with notes is laid out in a slot wide enough for them on both sides, so its
-    // lines still meet it in the middle.
     const room = (n: Node, own: { w: number; h: number }) => {
       const mine = notes.map((x, i) => ({ x, i })).filter(({ x }) => x.of === n.id);
 
@@ -630,7 +627,6 @@ export function stateMachine<
       }
     }
 
-    // keep a line that ends on a roomy slot inside the state it points at, with a jog
     const keep = (points: Point[], id: string, end: 0 | -1): Point[] => {
       const [b, sb] = [boxes.get(id)!, slotBox.get(id)!];
 
@@ -928,7 +924,6 @@ export function stateMachine<
           return t.to(1, span(x.start, edge)).to(0, span(x.start + x.over - edge, edge));
         }, track(0));
 
-        // The ring keeps a clear gap from the state's border, with corners concentric to it.
         const pad = 6;
         const radius = (nodes.get(s)!.inner ? 10 : 8) + pad;
 

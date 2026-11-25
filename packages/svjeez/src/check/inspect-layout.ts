@@ -40,7 +40,6 @@ export const wideLines = (survey: Survey): void => {
     const widest = Math.max(
       0,
       ...node.lines.map((line) => {
-        // A run's advances end with the gap after its last letter, which draws nothing.
         const ends = line.runs.map(
           (run) =>
             run.at[0] + run.advances.reduce((sum, a) => sum + a, 0) - (run.letterSpacing ?? 0),
@@ -144,7 +143,6 @@ export const overlap = (survey: Survey): void => {
         pairs.set(key, known);
       }
 
-    // Warn when a later opaque fill covers visible text (e.g. an opaque Stack backdrop over a message).
     for (const item of up) {
       for (const other of survey.entries) {
         if (
@@ -163,8 +161,6 @@ export const overlap = (survey: Survey): void => {
 
         if (hit <= 0.25 * area(item.box)) continue;
 
-        // Intentional card/panel replacement: an opaque shape completely hides an earlier text
-        // while a later text sits over the same spot on top of that shape.
         if (
           hit > 0.8 * area(item.box) &&
           up.some(
@@ -358,7 +354,6 @@ export const layoutOverlap = (survey: Survey): void => {
 
     if (isGone(survey, entry)) continue;
 
-    // Negative gap intentionally overlaps children along the stack axis.
     const gap = node.authored?.layout?.gap;
 
     if (gap !== undefined && (gap[0] < 0 || gap[1] < 0)) continue;

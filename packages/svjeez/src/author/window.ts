@@ -138,7 +138,6 @@ export const windowLane = (
     } else if (from === to && before.value === key.value) {
       keys.push({ t: key.t, value: to, ease: ease.linear });
     } else {
-      // Where in the step the value is at the window's edges, in order of time.
       const rise = key.value - before.value;
       const [a, b] = [(window.from - before.value) / rise, (window.to - before.value) / rise];
       const [y1, y2] = [unit(Math.min(a, b)), unit(Math.max(a, b))];

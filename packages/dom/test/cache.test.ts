@@ -85,8 +85,6 @@ describe("film cache location", () => {
   const next = join(import.meta.dir, "app", "cached.film.states.json");
   const film = join(import.meta.dir, "app", "cached.film.ts");
 
-  // The film file loads this package's source, which imports `svjeez`. Vite leaves `svjeez` external and resolves it with only the
-  // `node` condition, i.e. to package-dist, which CI hasn't built; `bun test --conditions @svjeez/source` doesn't reach Vite's resolver.
   const source = {
     config: { ssr: { resolve: { externalConditions: ["node", "@svjeez/source"] } } },
   };

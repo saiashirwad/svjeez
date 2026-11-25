@@ -26,7 +26,6 @@ const SPEED = 1100;
 /** A handwritten aside on the stage, written stroke by stroke, with an arrow at what it is about. */
 export const Note = ({ text, at, from, size = 38, tilt = -4, to }: NoteProps): SceneElement => {
   const { end } = handwrite(hand, text, { width: WIDTH, y: 0, from, size, speed: SPEED });
-  // The arrow leaves from the side of the writing it points to, about where the marker stopped.
   const half = (text.length * size * 0.5) / 2 + 10;
   const start: Vec = to ? [Math.sign(to[0]) * half, -size * 0.3] : [0, 0];
   const tip: Vec = to ? [start[0] + to[0], start[1] + to[1]] : start;

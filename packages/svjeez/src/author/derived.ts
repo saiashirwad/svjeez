@@ -42,7 +42,6 @@ export class Derived<T> {
 
   with<const S extends readonly Source[]>(...others: S): Together<[T, ...ValuesOf<S>]> {
     // SAFETY: a derived track of anything but numbers or points is refused when it is lowered, where it is read, and
-    // its value comes first, as the tuple says.
     return together([this as Derived<number>, ...others]) as Together<[T, ...ValuesOf<S>]>;
   }
 }
@@ -365,8 +364,6 @@ const steppedLane = <T>(
     return { t: high, value: values[i]!, ease: ease.hold };
   });
 
-  // A value held for one instant (a floor() that hits an integer only at a peak) has no width to draw; drop it,
-  // and the key that returns to the value before it.
   const blip = window * 1e-5;
   const kept: Key<T>[] = [{ t: 0, value: values[0]! }];
 

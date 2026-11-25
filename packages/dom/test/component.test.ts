@@ -45,7 +45,6 @@ describe("component through Vite", () => {
   test("a React list reordered by key alone (no data-key) slides, not fades", async () => {
     const scene = await runFilm(join(dir, "reorder.film.ts"));
 
-    // Rows are 30px apart: [apple, banana, cherry] -> [cherry, apple, banana].
     const [start, mid, end] = [0.8, 1.3, 1.8].map((t) => rowAt(scene, "3", t));
 
     expect(rowAt(scene, "3", 0).y).toBeCloseTo(60, 0);
@@ -193,7 +192,6 @@ class Point {
   x = 1;
 }
 
-// These are the values the runtime check exists for; the types would refuse them.
 const loose = (value: any): Prop => value;
 
 describe("serializeProps", () => {

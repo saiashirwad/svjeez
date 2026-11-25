@@ -1,6 +1,3 @@
-// Every module a scene can import from the binary, by specifier. Each loads the first time a scene imports it, so a
-// command pays only for the packages its scene uses. test/modules.test.ts checks this against the packages' exports.
-
 export const PACKAGES = [
   "svjeez",
   "charts",

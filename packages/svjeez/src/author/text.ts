@@ -242,7 +242,6 @@ export const setRun = <S>(
   return {
     text,
     at: [x, y],
-    // path() leaves the gap after its last glyph out of the width, but the next run on the line starts after it.
     advances: outlined
       ? outlined.glyphs.map((glyph, i, all) =>
           i === all.length - 1 ? glyph.advance + (spacing ?? 0) : glyph.advance,

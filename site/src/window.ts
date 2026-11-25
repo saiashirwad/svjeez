@@ -3,9 +3,6 @@ import type { SceneSource } from "@svjeez/astro/scene";
 import { isScene, svg as backend } from "svjeez/tools";
 import { theme } from "@examples/colors.ts";
 
-// Every scene on the page is a window of a fixed size: traffic lights and a title bar over the scene, fitted into
-// what is left. The size is the slot's, so tiles in a row line up whatever their scenes' own sizes are.
-
 type SceneModule = Extract<SceneSource, { readonly src: string }>;
 
 const isText = (source: SceneSource): source is string => typeof source === "string";
@@ -30,8 +27,6 @@ const markup = (source: SceneSource): string => {
 
 const escape = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
-// The window paints with the examples theme's tokens, declared the way a scene declares them, so it follows the scheme
-// and a palette restyles it with the scene inside.
 const declared = (scheme: "light" | "dark") =>
   Object.values(theme)
     .map((token) => `--${token.name}:${token[scheme]}`)
@@ -71,7 +66,6 @@ export const windowed = (
   const name = /<title[^>]*>([^<]*)<\/title>/.exec(inner)?.[1] ?? "";
   const desc = /<desc[^>]*>([^<]*)<\/desc>/.exec(inner)?.[1];
 
-  // The scene's own <svg>, its title and description lifted to the window, placed in the space under the bar.
   const nested = inner
     .replace(/<title[^>]*>[^<]*<\/title>\s*/, "")
     .replace(/<desc[^>]*>[^<]*<\/desc>\s*/, "")

@@ -119,7 +119,6 @@ const where = (source: Source | undefined): string =>
 export const noteId = (into: Notes, id: string, key: string, source: Source | undefined): void => {
   const taken = into.ids.get(id);
 
-  // The same node lowered again, as in each state of a morph(), is not a second one.
   if (taken !== undefined && taken.key !== key)
     throw new SceneError(
       `Two nodes have the id "${id}": ${into.names.named(taken.key)} at ${where(taken.source)} and ${into.names.named(key)} at ${where(source)}.`,
@@ -423,7 +422,6 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
   const attached = new Map<Draft, string[]>();
 
   const keyOfId = ({ id, scope }: ById, label: string, source: Source | undefined): string => {
-    // The innermost scope that holds the id wins, so ref("note") in a component finds its own note first.
     for (let depth = scope.length; depth >= 0; depth--) {
       const found = ids.get([...scope.slice(0, depth), id].join("/"));
 
@@ -740,7 +738,6 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     d.node.clip === undefined &&
     d.node.mask === undefined;
 
-  // A shader's points rest where their anchors are, in the slot's own pixels: v1 does not follow an anchor that moves.
   const shaded = (d: Draft): Pick<SceneNode, "shader"> => {
     const { shader } = d.node;
     const { points } = d.note ?? {};

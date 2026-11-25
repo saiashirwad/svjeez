@@ -20,10 +20,6 @@ import { Listing } from "./listing";
 import { Note } from "./note";
 import { CODE_COLUMN, RESULT_COLUMN, SHOTS, geist, mono, shown, theme } from "./kit";
 
-// The film slide. A script films one React component on its own: it snaps it, re-renders it with new props, snaps it
-// again. A highlight steps down the script as the component beside it does each thing, and each snap flashes the
-// frame the component is filmed in.
-
 const SCRIPT = `import TaskCard from "./TaskCard.tsx";
 
 await film(

@@ -6,7 +6,6 @@ const toggle = document.querySelector<HTMLButtonElement>("#toggle")!;
 
 card.innerHTML = svg;
 
-// mount() takes over the storm clock and draws the <Shader> in its slot with WebGPU, over the still aurora.
 const storm = mount(card.querySelector("svg")!).clock("storm");
 
 toggle.addEventListener("click", () => {

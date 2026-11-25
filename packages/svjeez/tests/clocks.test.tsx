@@ -91,12 +91,10 @@ const page_ = async (
   return page;
 };
 
-// The page's own code runs as text: the library is the global `lib` there, and `scene` what mount() returned.
 const run = <T,>(page: Page, code: string) => page.evaluate<T>(`(async () => { ${code} })()`);
 
 const MOUNT = "globalThis.scene = lib.mount(document.querySelector('svg'));";
 
-// What the clock "open" shows: its elements' computed style, and the colors of its gradient.
 const LOOK = `
   const numbers = (text) => text.replace(/-?\\d*\\.?\\d+(e-?\\d+)?/g, (n) => (+n).toFixed(3));
   return [...document.querySelectorAll('[data-clock="open"], [data-clock="open"] > stop')].map((one) => {
@@ -316,7 +314,6 @@ test("scrolled runs the clock from the card entering the viewport to leaving it"
 
   expect(await run(page, "return scene.clock('open').time;")).toBe(0);
 
-  // The card is 200 tall in a 300 tall viewport: halfway is when its top is 50 from the top.
   await run(page, "scrollTo(0, 1000 - 50);");
   await page.waitForFunction("scene.clock('open').time > 0");
 
@@ -428,8 +425,6 @@ test("a playback rate divides scene seconds into playback seconds, for seek and 
   await page.close();
 });
 
-// A clock whose picture moves by SMIL: a morph, a gradient whose points move, and a text path's start. A shape on no
-// clock morphs on the scene's own.
 const moving = (options: {
   loop?: boolean;
   playbackRate?: number;
@@ -471,7 +466,6 @@ const moving = (options: {
   );
 };
 
-// What the clock's SMIL-driven attributes show now: the path's d, the gradient's x2 and the text path's startOffset.
 const ATTRIBUTES = `
   const path = document.querySelector('path[data-clock="open"][fill^="url"]');
   const gradient = document.querySelector(path.getAttribute('fill').slice(4, -1));
@@ -602,7 +596,6 @@ test("mounting again after an unmount takes over the same clocks: a remount keep
 
 const slide = clock("slide", span(0, 1));
 
-// A slot that a clock carries 60 right and 10 down.
 const slotted = () =>
   svg.emit(
     scene({ size: [200, 120], duration: 2, title: "Slots" }, () => (
@@ -621,7 +614,6 @@ const HOST = `${MOUNT}
   div.style.cssText = "width: 100%; height: 100%; background: #ff0000";
   globalThis.release = scene.slot("field").host(div);`;
 
-// Where the hosted node and the fallback are on the page, and how the fallback shows.
 const PLACES = `
   const box = (one) => { const r = one.getBoundingClientRect(); return [r.x, r.y, r.width, r.height].map(Math.round); };
   const fallback = document.querySelector("[data-slot] > rect");
@@ -700,7 +692,6 @@ test("hosting again replaces the node, and slot() names the slots the SVG has", 
 const body = clock("body", span(1, 1));
 const face = clock("face", span(0.2, 0.6));
 
-// A body that turns on one clock while its face, on another inside it, fades in and morphs.
 const nested = () =>
   svg.emit(
     scene({ size: [60, 60], duration: 4, title: "Nested clocks" }, () => (
@@ -721,7 +712,6 @@ const nested = () =>
     )),
   );
 
-// The turn of the body and the opacity and shape of the eye.
 const PARTS = `
   const numbers = (text) => text.replace(/-?\\d*\\.?\\d+(e-?\\d+)?/g, (n) => (+n).toFixed(3));
   const eye = document.querySelector('[data-clock="face"]');
@@ -759,7 +749,6 @@ test("a clock inside another moves its own nodes, each seeking apart and equal t
     1, 0.6,
   ]);
 
-  // Both at scene time 1.5, then each away from the other: the body at 2, the face at 1.2 + 0.1.
   const cases = [
     { body: 0.5, face: 0.3 },
     { body: 1, face: 0 },

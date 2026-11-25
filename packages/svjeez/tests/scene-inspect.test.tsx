@@ -413,9 +413,7 @@ group("low-contrast", () => {
         </Group>
       ));
 
-    // Crosses the moon only briefly, and is plain against the sky the rest of the time.
     expect(codes(streak([0, 0]))).not.toContain("low-contrast");
-    // Held on the moon, it is a real problem.
     expect(codes(streak([95, 0], [95, 0]))).toContain("low-contrast");
   });
 
@@ -441,7 +439,6 @@ group("low-contrast", () => {
         </Group>
       ));
 
-    // Below the bar, the strips of the other digits roll across it but are clipped away.
     expect(codes(counting(40))).not.toContain("low-contrast");
 
     const [found] = only(counting(2), "low-contrast");
@@ -666,9 +663,7 @@ group("timing", () => {
     const spin = () => <Dot rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)} />;
 
     expect(codes(made(spin, 4, false))).toContain("nothing-enters");
-    // A steady loop is meant to be on screen throughout: entering would break it.
     expect(codes(made(spin))).not.toContain("nothing-enters");
-    // A loop that jumps at its seam is reported as that, and keeps the note.
     expect(codes(made(() => <Dot rotate={track(0).to(90, span(0, 2), ease.linear)} />))).toContain(
       "loop-seam",
     );

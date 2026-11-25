@@ -88,7 +88,6 @@ const cursor = (beats: readonly Beat[]): SceneElement | undefined => {
 
     const [press] = pointer.presses;
 
-    // It fades in where it first pressed, or where it is.
     if (!shown) {
       const place = press ?? pointer.at;
 

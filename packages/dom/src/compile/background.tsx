@@ -86,7 +86,6 @@ const tileSize = (
 
   const [w, h] = size;
 
-  // An axis left `auto` keeps the image's ratio against the other, and is the whole box when there is no ratio.
   const side = (own: Extent, other: Extent, axis: 0 | 1): number =>
     own !== "auto"
       ? own
@@ -125,7 +124,6 @@ const axisOf = (
   const start = spaced ? o0 : o0 + offset.px + (offset.percent / 100) * (length - size);
   const every = spaced ? size + (length - count * size) / (count - 1) : size;
   const wanted = repeat !== "no-repeat" && (repeat !== "space" || spaced);
-  // One tile that already covers the clip needs no copies.
   const reaches = start <= c0 + EPS && start + size >= c0 + span - EPS;
 
   if (wanted && !reaches) return { start, size, period: every, repeats: true };
@@ -165,7 +163,6 @@ const imageOf = (
 
     if (/^\s*(<\?xml[^>]*\?>\s*)?<svg\b/i.test(markup))
       return {
-        // It scales with the tile it is drawn in, since the image has no size of its own to be scaled from.
         read: (width, height) => {
           const data =
             `data:image/svg+xml,${markup.trim().replace(/[%#<>"\r\n\t]/g, encodeURIComponent)}` as const;
@@ -254,7 +251,6 @@ const tile = (
       <Shape
         key={key}
         {...rounded(box, radii)}
-        // CSS 0deg points up, and core's 0 points right.
         fill={linear.across({ angle: layer.angle - 90, stops: drawn })}
       />
     );
@@ -271,7 +267,6 @@ const tile = (
   if (Math.abs(sx - sy) < 0.005) {
     const placed = rounded(box, radii);
 
-    // Local to the shape: its box corner, or the page's origin for a path.
     const center: Vec = [
       layer.at[0] + box.x - (placed.at?.[0] ?? 0),
       layer.at[1] + box.y - (placed.at?.[1] ?? 0),
@@ -396,7 +391,6 @@ export const layer = (
   if (same(one, cut)) {
     const whole = tile(layer, key, cut, cutRadii, src, where);
 
-    // A picture cannot have corners of its own.
     return whole && layer.kind === "image" && cutRadii ? (
       <Group key={key} clip={outline(cut, cutRadii)}>
         {whole}

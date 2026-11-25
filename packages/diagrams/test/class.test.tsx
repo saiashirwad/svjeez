@@ -87,7 +87,6 @@ describe("classDiagram", () => {
 
     expect(parent).toBeDefined();
     expect(child).toBeDefined();
-    // The marked end is the last point, and the layout ranks the parent first.
     const route = upright.edge("Child", "Parent");
     expect(route.points[0]![1]).toBeGreaterThan(route.points.at(-1)![1]);
   });
@@ -108,7 +107,6 @@ describe("classDiagram", () => {
     const d = zoo({ reveal: span(0.5, 0.4) });
 
     expect(d.when("Animal")?.start).toBe(0.5);
-    // Flyer is written below Duck but is its parent, so Duck enters last.
 
     for (const above of ["Animal", "Flyer", "Pond"] as const)
       expect(d.when(above)!.start).toBeLessThan(d.when("Duck")!.start);

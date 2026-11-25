@@ -16,7 +16,6 @@ const SCREEN = { x: 216, y: 10, w: 104, h: 64 };
 const [on, off, again] = span(0.4, 0.06).chain(0.06, 0.06);
 const dim = again.next(0.3, 4.3);
 
-// The bulb and its beam flicker on twice, then dim slowly.
 const glow = track<Paint>(BLIP.yellow)
   .to("#FFF3B0", on)
   .to(BLIP.yellow, off)

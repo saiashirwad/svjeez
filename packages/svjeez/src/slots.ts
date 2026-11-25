@@ -22,7 +22,6 @@ export interface SlotControl {
   host(node: HTMLElement): () => void;
 }
 
-// The node each slot's group hosts now, by group, and the function that takes it out.
 const hosting = new WeakMap<Element, () => void>();
 
 const SVG = "http://www.w3.org/2000/svg";
@@ -47,7 +46,6 @@ export const slotOf = (root: Element, name: string): SlotControl => {
 
   const box = { x, y, width, height };
 
-  // The fallback is made see-through rather than taken out of the page: a clock keeps hold of its animations.
   const host = (node: HTMLElement) => {
     hosting.get(element)?.();
     const fallback = [...element.children].filter((child) => child instanceof SVGElement);

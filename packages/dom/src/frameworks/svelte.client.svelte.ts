@@ -3,7 +3,6 @@ import type { BrowserAdapter } from "../framework.ts";
 import { withCallbacks } from "../callbacks.ts";
 import type { Bag } from "../props.ts";
 
-// A $state proxy as the props object is what lets `update` re-render without remounting.
 let props: Bag = $state({});
 let instance: Bag | undefined;
 

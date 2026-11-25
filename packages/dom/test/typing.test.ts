@@ -105,7 +105,6 @@ describe("typing between states", () => {
       "Save o",
       "Save on",
     ]);
-    // Each move takes its second, after a second's hold.
     expect(typedAt(model, 0.5)).toBe("");
     expect(typedAt(model, 2.1)).toBe("Save it");
     expect(typedAt(model, 4.1)).toBe("Save on");
@@ -115,7 +114,6 @@ describe("typing between states", () => {
     const model = lowered(editing);
     const hint = nodes(model).find((node) => node.kind === "text" && node.key.endsWith(".0"));
 
-    // Its own opacity, under the fade the morph gives it as it leaves.
     const own = hint!.layers.at(-1)!.opacity;
 
     expect(valueAt(own, 0.5, (a) => a)).toBe(1);

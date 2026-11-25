@@ -76,7 +76,6 @@ const transpiled = (file: string, source: string, erase = false): string => {
     return transform(source, {
       transforms: ["typescript", "jsx"],
       jsxRuntime: erase ? "preserve" : "automatic",
-      // An import nothing uses still runs in a runner that loads it, so it is checked all the same.
       keepUnusedImports: erase,
       jsxImportSource: libraryPath("svjeez"),
       filePath: file,
@@ -93,8 +92,6 @@ interface Built {
 
 /** One scene file as an ES module that names its imports by canonical path. Throws `CompileError`. */
 const build = (context: Compiling, file: string, source: string): Built => {
-  // Syntax comes first: the checks below read a tree that is only right for a file that parses. They read the
-  // file with its types erased, so an import is checked when it runs: `import type from "./m"` does, `import type { T }` does not.
   const erased = transpiled(file, source, true);
   const found = analyze(erased);
   const at = (offset: number) => ({ file, ...placeOf(erased, offset) });
@@ -144,7 +141,6 @@ const build = (context: Compiling, file: string, source: string): Built => {
   const code = transpiled(file, applied(erased, [...rewrites, ...found.guards]));
 
   return {
-    // The guard's import goes first, on the file's first line: a loop may run before an import further down would.
     code: found.guards.length > 0 ? `${guardImport} ${code}` : code,
     libraries: [...libraries, "svjeez/jsx-dev-runtime"],
   };

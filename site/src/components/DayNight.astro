@@ -40,7 +40,6 @@ const { scene, alt } = Astro.props;
       stage.onpointermove = at;
     });
     stage.addEventListener("pointerup", () => (stage.onpointermove = null));
-    // This one scene costs two images' worth, so it plays only while you point at it (or touch it), and rests as a still otherwise.
     const pair = [...stage.querySelectorAll<HTMLImageElement>(".scene")];
 
     const start = () => {

@@ -455,7 +455,6 @@ export const parseFlowchart = (header: Line, body: readonly Line[]): FlowchartDo
       return true;
     }
 
-    // Links do not apply to a scene.
     return /^click\s/.test(l.text);
   };
 
@@ -489,7 +488,6 @@ export const parseFlowchart = (header: Line, body: readonly Line[]): FlowchartDo
 
     const dir = /^direction\s+(\w+)$/.exec(l.text)?.[1];
 
-    // Groups are laid out with the diagram's direction, so a subgraph's own is accepted and ignored.
     if (dir !== undefined) {
       if (!open) fail(l, "direction goes in the header, or inside a subgraph.");
 
@@ -509,7 +507,6 @@ export const parseFlowchart = (header: Line, body: readonly Line[]): FlowchartDo
 
     const edgeLine = /^(\w+)@\{/.exec(l.text)?.[1];
 
-    // `e1@{ animate: true }` styles an edge id; it is not a node.
     if (edgeLine && edgeIds.has(edgeLine)) continue;
 
     let [group, rest] = readGroup(l, l.text);

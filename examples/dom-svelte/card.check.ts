@@ -1,5 +1,3 @@
-// Type-level test, checked by `svelte-check` and never run: every `@ts-expect-error` must be an error.
-// Plain `tsc` sees `.svelte` imports as untyped, so props are only checked by `svelte-check`.
 import { component } from "@svjeez/dom/vite";
 import type { Task } from "../dom-react/Task.ts";
 import Card from "./Card.svelte";

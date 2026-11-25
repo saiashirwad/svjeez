@@ -144,7 +144,6 @@ export const scopedAs = (
   id: string,
   key?: string,
 ): SceneElement =>
-  // An id equal to `id` was scoped already, by a registered component the function was written in.
   isNode(element) && (element.props.id === raw || element.props.id === id)
     ? setId(element, id)
     : withId(element, id, key);

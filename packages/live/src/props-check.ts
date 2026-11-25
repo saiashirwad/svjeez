@@ -115,7 +115,6 @@ export const checkEdits = (
   for (const e of edits) {
     if (e.op === "set" || e.op === "unset") note(e.target, [e.prop]);
     else if (e.op === "insert") {
-      // The parent's scope is its id up to the last `/`, which holds even if an earlier edit renamed it.
       const cut = e.parent.lastIndexOf("/");
 
       note(

@@ -121,7 +121,6 @@ const twinned = (
   build: (id: string, still: boolean) => Built,
 ): Written => {
   const mark = defs.clock();
-  // A definition drawn inside a clock is stamped with it, so one drawn on two clocks is two definitions.
   const sign = mark ? `${signature}${JSON.stringify(mark)}` : signature;
   const known = defs.ids.get(sign);
 
@@ -440,7 +439,6 @@ const primitivesOf = (
           numbers: [["values", smil(defs, "values", effect.hue, where)]],
         });
 
-      // The same animation is written once per channel, as each element needs its own ids.
       const transfer = (numbers: () => Primitive["numbers"]): Primitive => ({
         tag: "feComponentTransfer",
         attrs: {},
@@ -519,7 +517,6 @@ export const filterUrl = (
       continue;
     }
 
-    // Noise ignores its input, so the map reads the effects before it by name.
     const before = primitives.pop();
     const input = before === undefined ? "SourceGraphic" : `e${primitives.length}`;
     const noise = `n${primitives.length}`;

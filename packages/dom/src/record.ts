@@ -90,7 +90,6 @@ const watchPointer = async (page: Page): Promise<{ take: () => Pointer | undefin
   let down = false;
   let presses: Point[] = [];
 
-  // Bindings and init scripts live on the page, so they survive navigation and reload; the mouse keeps its place in the browser.
   await page.exposeBinding(BINDING, (_, kind: "move" | "down" | "up", x: number, y: number) => {
     at = [round(x), round(y)];
 
@@ -250,10 +249,8 @@ export const openPage = async ({
     page.on("console", (message) => {
       if (message.type() !== "error") return;
 
-      // The browser's own "Failed to load resource: ... 404" doesn't say which resource; the message's location does.
       const { url: failed } = message.location();
 
-      // Branded Chrome (the fallback when no headless shell is installed) asks every page for a favicon; a film page rarely has one.
       if (failed && new URL(failed).pathname === "/favicon.ico") return;
 
       onError(
@@ -262,7 +259,6 @@ export const openPage = async ({
           : message.text(),
       );
     });
-    // A dev server answers a path it does not serve with its HTML page, status 200: the asset silently never arrives.
     page.on("response", (response) => {
       const kind = response.request().resourceType();
       const type = response.headers()["content-type"] ?? "";

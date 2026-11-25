@@ -11,7 +11,6 @@ import {
 let browser: Browser;
 let page: Page;
 
-// The first test pays for launching Chromium, and the workspace's test scripts run in parallel, so a CI runner can pass 5s.
 beforeAll(async () => {
   browser = await chromium.launch().catch(() => chromium.launch({ channel: "chrome" }));
   page = await browser.newPage({ viewport: { width: 400, height: 300 } });
@@ -95,7 +94,6 @@ describe("capture", () => {
           { offset: 0.5, color: "rgb(0, 0, 255)" },
           { offset: 1, color: "rgb(0, 255, 0)" },
         ],
-        // The default origin is the padding box, inside the 3px border, and the default clip is the border box.
         place: {
           size: [100, 60],
           origin: { x: 3, y: 3, width: 100, height: 60 },
@@ -112,7 +110,6 @@ describe("capture", () => {
 
     const [layer] = byId(snapshot, "r").backgrounds!;
 
-    // The default size, farthest-corner, reaches the far corner: 75 across and 50 down.
     expect(layer).toMatchObject({ kind: "radial", at: [25, 50], radius: [90.139, 90.139] });
   });
 
@@ -128,7 +125,6 @@ describe("capture", () => {
     };
 
     expect(await radii("red")).toBeDefined();
-    // An ellipse reaches its corner in the same ratio as it reaches the sides.
     expect(await radii("ellipse farthest-corner at 25% 50%")).toEqual({
       at: [50, 50],
       radius: [212.132, 70.711],
@@ -173,7 +169,6 @@ describe("capture", () => {
     expect(linear).toMatchObject({ kind: "linear", repeating: true, angle: 45 });
 
     if (linear?.kind !== "linear") throw new Error("expected a linear layer");
-    // The line through a 100px square at 45deg is 141.42px long, so 10px is 0.0707 of it.
     expect(linear.stops.map((stop) => stop.offset)).toEqual([0, 0.071, 0.071, 0.141]);
   });
 
@@ -190,7 +185,7 @@ describe("capture", () => {
 
     const [first] = runs;
 
-    near(first!.advances[0], 9.6 + 2, 0.1); // a 16px monospace glyph plus the letter-spacing
+    near(first!.advances[0], 9.6 + 2, 0.1);
     expect(first!.advances).toHaveLength(4);
     expect(first).toMatchObject({
       x: 0,
@@ -199,7 +194,7 @@ describe("capture", () => {
       font: { weight: 400, italic: false, size: 16 },
       decoration: { lines: ["underline"], color: "rgb(0, 0, 255)" },
     });
-    near(first!.y, 16, 4); // the baseline sits inside the first 20px line
+    near(first!.y, 16, 4);
   });
 
   test("an inline svg icon", async () => {
@@ -231,7 +226,6 @@ describe("capture", () => {
 
     const outer = byId(snapshot, "x");
 
-    // The rect is the untransformed layout box.
     expect(outer.rect).toEqual({ x: 50, y: 50, width: 100, height: 40 });
     expect(outer.transform!.origin).toEqual([60, 55]);
     const [a, b, c, d, e, f] = outer.transform!.matrix;
@@ -246,7 +240,6 @@ describe("capture", () => {
     near(e, 0, 0.001);
     near(f, 0, 0.001);
 
-    // The child is laid out in the same flat space; the ancestor's transform composes on top.
     expect(byId(snapshot, "kid").rect).toEqual({ x: 80, y: 50, width: 20, height: 10 });
     expect(byId(snapshot, "kid").transform).toBeUndefined();
   });
@@ -291,7 +284,7 @@ describe("capture", () => {
       endDelay: 0,
       iterations: 3,
       direction: "alternate",
-      easing: "linear", // the animation-timing-function lives on each keyframe
+      easing: "linear",
       fill: "both",
       currentTime: 1500,
       playbackRate: 1,
@@ -305,7 +298,6 @@ describe("capture", () => {
       transform: "translateX(80px)",
       opacity: "0.2",
     });
-    // Layout already reflects the moment: 0.5s into the animation, so it has left the start.
     expect(byId(after, "a").opacity).toBeLessThan(1);
 
     const [transition] = byId(after, "b").animations!;
@@ -357,7 +349,6 @@ describe("form controls", () => {
     expect(texts(input)).toEqual(["Ada"]);
     expect(input.clip).toEqual({ x: true, y: true });
     near(run?.x, input.rect.x + 1 + 8);
-    // Centered in the 28px content box: a 20px line starts 4px down, and its baseline is below that.
     expect(run!.y).toBeGreaterThan(input.rect.y + 1 + 4);
     expect(run!.y).toBeLessThan(input.rect.y + 1 + 4 + 20);
     expect(run?.advances).toHaveLength(3);
@@ -463,7 +454,6 @@ describe("pseudo-elements", () => {
     const [dot] = pseudos(host);
 
     expect(dot).toMatchObject({ tag: "::after", part: "::after", background: "rgb(255, 0, 0)" });
-    // The host is 108 wide with a 4px border: right:8px leaves the dot 100 - 8 - 10 = 82 into the padding box.
     expect(dot!.rect).toEqual({ x: 20 + 4 + 82, y: 30 + 4 + 6, width: 10, height: 10 });
     expect(dot!.radii![0]).toEqual([5, 5]);
     expect(mutations).toBe(0);
@@ -485,7 +475,6 @@ describe("pseudo-elements", () => {
       background: "rgb(238, 238, 255)",
     });
     expect(badge.children[0]).toMatchObject({ type: "text", runs: [{ text: "3 new" }] });
-    // The badge sits before the real text, which starts to its right.
     expect(badge.rect.x).toBe(0);
     expect(text).toMatchObject({ type: "text" });
     expect(runsOf(text!)[0]!.x).toBeGreaterThanOrEqual(badge.rect.width - 0.5);
@@ -602,7 +591,6 @@ describe("background layers", () => {
         kind: "image",
         place: {
           size: [100, 20],
-          // `right 10px bottom 5px` is `calc(100% - 10px) calc(100% - 5px)`.
           position: [
             { percent: 100, px: -10 },
             { percent: 100, px: -5 },
@@ -615,7 +603,6 @@ describe("background layers", () => {
       {
         kind: "linear",
         place: {
-          // A gradient has no size of its own: cover is its origin box.
           size: [230, 130],
           position: [
             { percent: 50, px: 0 },
@@ -738,7 +725,6 @@ describe("filter, text-shadow, clip-path and mask-image", () => {
         "n",
       ).clipPath;
 
-    // The border box is 230 by 130.
     expect(await clip("inset(10px 5% round 8px 4px)")).toMatchObject({
       kind: "inset",
       rect: { x: 11.5, y: 10, width: 207, height: 110 },
@@ -992,7 +978,6 @@ describe("notes: what capture cannot represent", () => {
       "background-clip: text is not drawn",
       "a vertical writing-mode is not drawn",
     ]);
-    // Inherited, but this element draws no text of its own.
     expect(byId(snapshot, "e").notes).toBeUndefined();
   });
 
@@ -1058,7 +1043,6 @@ describe("animated values return to their base", () => {
 
     const after = await grab();
 
-    // Mid-flight, the layout shows the animation; the base is what it returns to.
     expect(byId(after, "a").base).toEqual({
       backgroundColor: "rgb(0, 128, 0)",
       transform: "matrix(1, 0, 0, 1, 0, 3)",
@@ -1076,7 +1060,6 @@ describe("animated values return to their base", () => {
   test("it leaves the animations running at the same phase, with no events", async () => {
     await snap(SHEET);
 
-    // Captured inside the page, between reading the animations' state and reading it again.
     const run = await page.evaluate<{
       events: string[];
       same: boolean;
@@ -1126,7 +1109,6 @@ describe("animated values return to their base", () => {
       expect(now.rate).toBe(was.rate);
       expect(now.timing).toEqual(was.timing);
 
-      // A paused animation has not moved; the others ran on by about the 300ms we waited, at their rate.
       const expected = was.state === "paused" ? 0 : 300 * was.rate;
 
       expect(Math.abs(now.t - was.t - expected)).toBeLessThan(120 * was.rate + 1);

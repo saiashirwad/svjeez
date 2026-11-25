@@ -1,7 +1,6 @@
 import { expect, test } from "bun:test";
 import { span, track, type Anim } from "svjeez";
 
-// Checked by tsc (bun run typecheck): a track of a literal-typed string or number holds string or number.
 test("a track of a literal const widens to its primitive", () => {
   const p = { monthly: ["$12", "$24"], yearly: ["$120", "$240"] } as const;
   const state = "CLOSED" as const;

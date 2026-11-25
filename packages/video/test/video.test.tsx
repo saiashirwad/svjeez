@@ -40,7 +40,6 @@ const read = async (bytes: Uint8Array) => {
 };
 
 describe("video", () => {
-  // The first test pays for launching Chromium, and the workspace's test scripts run in parallel, so a CI runner can pass 5s.
   test("webm is VP9 by default, one frame per 1/fps of the loop", async () => {
     const clip = await video(slide, { format: "webm", fps: 12, colorScheme: "light" });
 

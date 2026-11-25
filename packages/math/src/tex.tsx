@@ -248,7 +248,6 @@ export function Tex({
 
   const total = laid.marks.length;
 
-  // Each glyph's share of the draw, and how far its start moves from the last.
   const share = total > 1 ? 0.6 : 1;
   const step = total > 1 ? (1 - share) / (total - 1) : 0;
 

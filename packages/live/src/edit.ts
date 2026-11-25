@@ -233,7 +233,6 @@ const place = (
     const kids = parent.children.filter((id) => id !== moving);
     const first = kids[0] ? elementOf(parsed, kids[0]) : undefined;
 
-    // A child may sit inside an id-less wrapper; a new sibling goes beside the wrapper, directly in `parent`.
     const direct = (child: Element): Range =>
       parent.childRanges.find(
         (r) => r.file === child.range.file && r.from <= child.range.from && child.range.to <= r.to,
@@ -403,7 +402,6 @@ const moveElement = (parsed: Parsed, e: Extract<Edit, { op: "move" }>) =>
     if (isAfter(e.at) && e.at.after === el.id)
       return yield* refuse("an element can't move after itself");
 
-    // Where it is already: nothing to write.
     if (parent.id === el.parent) {
       const index = parent.children.indexOf(el.id);
 
@@ -416,7 +414,6 @@ const moveElement = (parsed: Parsed, e: Extract<Edit, { op: "move" }>) =>
     const position = yield* place(parsed, parent, e.at, text, el.id);
     const removed = removal(parsed, el);
 
-    // The removal and the insertion are in the same text, so both are made against the ranges as parsed.
     return applyText(parsed.files, [removed, position]);
   });
 
@@ -454,7 +451,6 @@ const renameElement = (parsed: Parsed, e: Extract<Edit, { op: "rename" }>) =>
       if (rewritten === undefined) continue;
       const head = rewritten.text.split("/")[0] ?? "";
 
-      // The ref reached a scene element from inside a component. If that component has an element of the new name, the ref would reach that one.
       if (rewritten.fromScene && ref.scope && elementOf(parsed, `${ref.scope}/${head}`))
         return yield* Effect.fail(
           new InvalidValue({
@@ -497,7 +493,6 @@ const renamedRef = (
   if (scope && scope === el.scope && (id === el.local || id.startsWith(`${el.local}/`)))
     return { text: to + id.slice(el.local.length), fromScene: false };
 
-  // `card1/note` reaches `NoteCard/note` through the instance `card1`: only its last segment names `el`.
   const at = chainOf(parsed, scope, id)?.findIndex((step) => step === el) ?? -1;
 
   if (at > 0) return { text: id.split("/").with(at, to).join("/"), fromScene: false };
@@ -551,7 +546,6 @@ export const edit = (
   current?: Files,
 ): Effect.Effect<Edited, EditError> =>
   Effect.gen(function* () {
-    // `current` is a full snapshot: a file it dropped, or one it added, is a change the plan never saw.
     if (current) {
       const names = new Set([...Object.keys(parsed.files), ...Object.keys(current)]);
 

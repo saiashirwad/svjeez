@@ -59,7 +59,7 @@ headless Chromium. --at 0,1.5 also describes what is on screen at those times. -
 --json prints { ok, file, scene?, problems, lanes, cost?, measured?, frames?, timeline? }, cost being { animations, repaint }. It exits 1 when any problem is an
 error, the scene failing to build included. With --browser and no --times the browser measures 0, seven times across
 the loop, just before the end, and the scene's keys.
-skill prints the agent skill for writing svjeez scenes; --install copies it, with its references and examples, into <dir>/svjeez.${host.usage ? `\n\n${host.usage}` : ""}`;
+skill prints the agent skill for writing svjeez scenes; --install copies it and its examples into <dir>/svjeez.${host.usage ? `\n\n${host.usage}` : ""}`;
 
 const SCHEMES = ["system", "light", "dark"] as const;
 
@@ -155,7 +155,6 @@ const valuesFor = async (
   }
 };
 
-// Stacks name a file by its real path (macOS's /tmp is /private/tmp), so trace the real directory.
 const sceneDir = (file: string): string => {
   const dir = dirname(resolve(file));
 
@@ -183,7 +182,6 @@ const loadValue = async (
 
   const url = pathToFileURL(path).href;
 
-  // A scene with a <Shader> is written with TypeGPU, whose "use gpu" functions its loader must compile as it imports them.
   await loadTypeGpu(dirname(path));
 
   const module: SceneModule = await import(url).catch(async (error: Error & { code?: string }) => {
@@ -503,7 +501,6 @@ const framesCommand = async (args: string[]): Promise<void> => {
 
   await mkdir(values.out, { recursive: true });
 
-  // Only the names an earlier run wrote, so old frames never sit beside new ones.
   for (const name of await readdir(values.out))
     if (/^frame-\d+-\d+_\d+s\.png$/.test(name) || name === "sheet.png")
       await rm(join(values.out, name));
@@ -698,7 +695,6 @@ const checkCommand = async (args: string[]): Promise<void> => {
     stopTrace();
   }
 
-  // Type errors first: a wrong type is often why the scene threw or looks wrong.
   if (!file.endsWith(".svg")) {
     const typed = await (host.check ?? projectTypeProblems)(resolve(file));
 
@@ -846,7 +842,6 @@ const devCommand = async (args: string[]): Promise<void> => {
   });
 };
 
-// The manifest sits beside cli.js in the published package, and one folder up from src/cli.ts.
 const versionCommand = async (): Promise<void> => {
   if (host.version) return console.log(host.version);
 

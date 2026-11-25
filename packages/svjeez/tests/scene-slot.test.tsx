@@ -23,7 +23,6 @@ const emitted = (build: () => SceneElement): string => flat(svg.emit(made(build)
 
 const fallback = <Shape geometry={rect(60, 40)} fill="#00ff00" />;
 
-// Two shapes, so a group of them is worth writing once and copying.
 const pair = (
   <>
     <Shape geometry={rect(60, 40)} fill="#00ff00" />

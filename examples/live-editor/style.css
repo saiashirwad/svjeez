@@ -76,8 +76,6 @@ em {
   box-shadow: var(--ring);
 }
 
-/* Buttons: secondary by default; .primary, .ghost and .danger change the fill. */
-
 button {
   display: inline-flex;
   align-items: center;
@@ -153,8 +151,6 @@ button.icon {
   font-size: 16px;
 }
 
-/* Layout */
-
 .app {
   display: flex;
   flex-direction: column;
@@ -196,8 +192,6 @@ button.icon {
   border-radius: 999px;
   font-variant-numeric: tabular-nums;
 }
-
-/* The Lock checkbox, drawn as a switch. The input stays real and focusable. */
 
 .switch {
   position: relative;
@@ -261,8 +255,6 @@ button.icon {
   color: var(--text);
 }
 
-/* Error banner */
-
 .banner {
   flex: none;
   display: flex;
@@ -291,8 +283,6 @@ button.icon {
   background: var(--red-soft);
   color: inherit;
 }
-
-/* Panes: one surface split by hairlines. */
 
 .panes {
   flex: 1;
@@ -357,8 +347,6 @@ button.icon {
   color: var(--muted);
 }
 
-/* Stage */
-
 .canvas {
   display: grid;
   place-items: center;
@@ -374,8 +362,6 @@ button.icon {
   border-radius: 6px;
   cursor: crosshair;
 }
-
-/* Form rows */
 
 .field {
   display: grid;
@@ -444,8 +430,6 @@ select.input {
   accent-color: var(--accent);
 }
 
-/* Slider: a thin track, a round thumb, filled to the value by background-size. */
-
 .slider {
   display: flex;
   align-items: center;
@@ -513,8 +497,6 @@ select.input {
   font-variant-numeric: tabular-nums;
 }
 
-/* Segmented control: one joined pill group. */
-
 .segmented {
   display: inline-flex;
   gap: 2px;
@@ -552,8 +534,6 @@ select.input {
 .segmented button.on:focus-visible {
   box-shadow: var(--ring);
 }
-
-/* Color: swatch and hex, framed like an input. */
 
 .color {
   display: inline-flex;
@@ -611,8 +591,6 @@ select.input {
   border-radius: var(--radius);
 }
 
-/* Read-only values: a quiet chip, full text in the tooltip. */
-
 .chip {
   display: inline-flex;
   align-items: center;
@@ -641,8 +619,6 @@ select.input {
   white-space: nowrap;
   font-size: 11.5px;
 }
-
-/* Inspector tree */
 
 .nodes {
   list-style: none;
@@ -700,8 +676,6 @@ select.input {
 .row .input {
   flex: 1;
 }
-
-/* Source */
 
 .tabs {
   display: flex;

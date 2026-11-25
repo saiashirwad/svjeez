@@ -30,7 +30,6 @@ describe("skew", () => {
       />
     ));
 
-    // rotate(90) · scale(2, 3) · skewX(45): the first column turns to [0, 2], the second to [-3, 2].
     expect(matrixOf(both, 0).map((n) => Math.round(n * 1e6) / 1e6)).toEqual([0, 2, -3, 2, 0, 0]);
   });
 

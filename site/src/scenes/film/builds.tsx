@@ -2,9 +2,6 @@ import { Group, span, type SceneElement, type Span } from "svjeez";
 import { Listing } from "./listing";
 import { CODE_COLUMN, shown, spring } from "./kit";
 
-// A code slide in one shape: a file grows a piece at a time in the code column, and each piece starts playing in the
-// result column a beat after it lands.
-
 export interface BuildsProps {
   readonly name: string;
   /** The file with its first n pieces in place. */

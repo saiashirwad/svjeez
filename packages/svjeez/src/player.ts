@@ -129,7 +129,6 @@ const crossfade = (img: HTMLImageElement, old: string, duration: number) => {
     });
 };
 
-// An img in a <picture>, or with a srcset, would keep choosing from them over a src set from here.
 const letGo = (img: HTMLImageElement) => {
   img.removeAttribute("srcset");
   img
@@ -179,7 +178,6 @@ const show = async (
 
 let lead = 0;
 
-// One observer for every player: which of them are near the viewport.
 const nearby = new Map<number, IntersectionObserver>();
 const watchers = new WeakMap<Element, (near: boolean) => void>();
 
@@ -224,7 +222,6 @@ export const player = (img: HTMLImageElement, options: PlayerOptions = {}): Play
   let wanted: "live" | "still" | undefined;
   let state: Player["state"];
   let near = false;
-  // The look the HTML was made for, and then whatever was last shown.
   let shown: Look = { scheme: systemScheme() };
 
   const pinTo = (now: Look) => (now.scheme === systemScheme() ? undefined : now.scheme);
@@ -261,7 +258,6 @@ export const player = (img: HTMLImageElement, options: PlayerOptions = {}): Play
     return ok;
   };
 
-  // For a style that shows what the img is doing: a hairline while the scene loads, say.
   const mark = (to: "loading" | "live" | "still") => {
     img.dataset.state = to;
   };
@@ -306,7 +302,6 @@ export const player = (img: HTMLImageElement, options: PlayerOptions = {}): Play
     return settle(now, ok);
   };
 
-  // An img with no src yet has nothing to show; one with a src shows the look the HTML was made for, until it changes.
   const stale = () => {
     const now = look(img);
 
@@ -329,8 +324,6 @@ export const player = (img: HTMLImageElement, options: PlayerOptions = {}): Play
     return false;
   };
 
-  // An img that plays its `src` from the HTML: it is swapped only when its look differs from what the HTML shows, and
-  // the scene it holds is the file itself when the viewer asked for less motion, which it then honors on its own.
   const follow = async (fade: boolean) => {
     const now = look(img);
 

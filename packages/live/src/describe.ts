@@ -102,7 +102,6 @@ export const describe = (parsed: Parsed, program: Program): Description => {
   const elements = parsed.order.flatMap((id) => elementOf(parsed, id) ?? []);
 
   return {
-    // The scene's own root, not the root of a component's definition, which sits earlier in a file that defines one.
     root:
       (
         elements.find((element) => element.parent === undefined && element.scope === "") ??

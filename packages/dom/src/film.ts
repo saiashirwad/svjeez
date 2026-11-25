@@ -13,7 +13,6 @@ import { fromPortable, toPortable } from "./portable.ts";
 import { openPage, record, type OpenPageOptions, type Snap, type State } from "./record.ts";
 import { serializeProps, type Bag } from "./props.ts";
 import type { Target } from "./target.ts";
-// For `window.__svjeez`, which boot.ts declares.
 import type {} from "./boot.ts";
 
 export interface FilmOptions {
@@ -118,9 +117,7 @@ export const scriptInputs = (run: Function, film: string | undefined): string =>
 
   try {
     if (film) file = readFileSync(film, "utf8");
-  } catch {
-    // Not a readable file: the function source alone stands in.
-  }
+  } catch {}
 
   return `${run.toString().replace(/\s+/g, " ")}\n${file}`;
 };
@@ -154,7 +151,6 @@ export const film = async <Props = never>(
   } = options;
 
   const scheme = theme ? "both" : options.scheme;
-  // Before the first await, while the film file is still on the stack.
   const caller = callerFile();
   const app = await target;
   const { selector } = app;
@@ -175,7 +171,6 @@ export const film = async <Props = never>(
       if (errors.length > 0) throw report();
     };
 
-    // A page that fails while it starts (a component that throws) never gets its selector: stop waiting for it.
     let fail: (error: Error) => void = () => {};
 
     const failed = new Promise<never>((_, reject) => {
@@ -201,8 +196,6 @@ export const film = async <Props = never>(
         await settle(page, selector);
         check();
 
-        // A mounted adapter's `identify` (component targets) when it has one, else React's, which finds its fibers on any page
-        // (app targets) and says nothing on a page without React.
         const identify = (await page.evaluate("Boolean(window.__svjeez?.identify)"))
           ? mountedIdentify
           : reactIdentify;
@@ -253,7 +246,6 @@ export const film = async <Props = never>(
       }
     };
 
-    // The port and the checkout's location change, so the cache keeps asset URLs relative to a placeholder origin and `base`.
     const origin = new URL(app.url).origin;
     const base = app.base ?? process.cwd();
 
@@ -279,7 +271,6 @@ export const film = async <Props = never>(
         )
       : await capture();
 
-    // Bundled fonts and images have hashed URLs that only this server knows.
     const { element, size, duration, diagnostics } = compile(await inlineAssets(states), {
       ...(theme && { theme }),
       ...(text && { text }),

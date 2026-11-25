@@ -14,7 +14,6 @@ const LOADERS = {
 
 const here = fileURLToPath(new URL(".", import.meta.url));
 
-// Source files only: not dependencies, and not this package.
 const skip = new RegExp(
   `^(?!${here.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}|.*/node_modules/).*\\.[cm]?[jt]sx?$`,
 );

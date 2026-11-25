@@ -114,7 +114,6 @@ describe("erDiagram", () => {
     expect(new Set(markups).size).toBe(4);
     const rings = markups.map((m) => m.split("<circle").length - 2);
 
-    // The scene backdrop is one circle: zero-one and zero-many add a ring each.
     expect(rings).toEqual([0, 1, 0, 1]);
   });
 

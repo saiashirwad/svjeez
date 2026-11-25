@@ -108,7 +108,6 @@ const show = (scene: Mounted, places: Record<Name, Vec>) => {
   scene.clock("heading").progress(turned(angle));
   scene.clock("reach").progress((strength * scale) / LONGEST);
 
-  // Each charge's share: its heading, its turn from the share before it (tip to tail), and its length.
   parts.forEach(({ name, angle: heading, length }, index) => {
     const before = index === 0 ? 0 : parts[index - 1]!.angle;
     const turn = Math.atan2(Math.sin(heading - before), Math.cos(heading - before));
@@ -118,7 +117,6 @@ const show = (scene: Mounted, places: Record<Name, Vec>) => {
     scene.clock(`${name}length`).progress((length * scale) / LONGEST);
   });
 
-  // The distance callout: its heading and length; its label turns back by the same heading to stay upright.
   scene.clock("bearing").progress(turned(nearest.angle));
   scene.clock("upright").progress(turned(-nearest.angle));
   scene.clock("gap").progress(nearest.distance / FARTHEST);
@@ -220,7 +218,6 @@ export const App = () => {
           onMount={(mounted) => {
             scene.current = mounted;
             show(mounted, places);
-            // The vector layer draws itself in once; under reduced motion the clock jumps to its end.
             void mounted.clock("intro").play();
 
             return () => (scene.current = undefined);

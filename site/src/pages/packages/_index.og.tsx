@@ -20,8 +20,6 @@ const [W, H, GAP] = [248, 42, 10];
 /** The top of the shelf of chips. */
 const SHELF = 560 - Math.ceil(packages.length / COLUMNS) * (H + GAP);
 
-// No timeline here: this card is a shelf. The title across the top, one chip for every package below it, so the
-// card is always the list the page shows.
 export default ogScene(
   { theme, title: "Packages", desc: "A shelf of the svjeez packages, each as a small chip." },
   () => (
@@ -35,7 +33,6 @@ export default ogScene(
           width={1040}
         />
       </Group>
-      {/* Blip does a handstand on top of the shelf, feet kicking in the air. */}
       <Mascot
         at={[1010, SHELF - 92]}
         size={130}

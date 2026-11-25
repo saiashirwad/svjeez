@@ -19,9 +19,6 @@ import type { Child } from "svjeez/tools";
 import { Builds } from "./builds";
 import { RESULT_COLUMN, SHOTS, mono, theme } from "./kit";
 
-// Two more code slides in the same shape as the basics: a list of steps becomes a pipeline, and named boxes become a
-// diagram.
-
 const SKELETON = `export default scene(opts, () => (
   <Group />
 ));`;
@@ -53,9 +50,6 @@ const Tile = ({
     {children}
   </Group>
 );
-
-// The pipeline: a few steps mapped to rows, each a drawn icon, a label, a translucent track that fills and a check that
-// pops when it is done. No outline: just the pieces, composed, and moving.
 
 const STEPS = [
   { name: "install", icon: packageImport },

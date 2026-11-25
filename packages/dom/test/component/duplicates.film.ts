@@ -2,7 +2,6 @@ import { film } from "@svjeez/dom";
 import { component } from "@svjeez/dom/vite";
 import List from "./List.tsx";
 
-// Three rows with the same text: only React's keys say which is which.
 const rows = [
   { id: 1, text: "todo" },
   { id: 2, text: "todo" },

@@ -23,7 +23,6 @@ const page = tokens({
   dark: { ink: "#f4f4f5" },
 });
 
-// An arrow's shaft from `from` and its head at `tip`, the head's arms `arm` long and swept back 0.6 radians.
 const arrow = (
   d: string,
   from: [number, number],

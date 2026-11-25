@@ -113,7 +113,6 @@ describe("states of a real page", () => {
       expect(start.y).toBeCloseTo(y, 1);
     }
 
-    // The card crosses between columns, and c moves up.
     const [cx] = first.get("card")!;
     const [lx] = last.get("card")!;
     const mid = find(0.8 + 0.3, "card")!;

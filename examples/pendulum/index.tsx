@@ -15,13 +15,11 @@ import {
 import { mono } from "../fonts/faces";
 import { theme } from "../theme";
 
-// Fifteen pendulums, periods in whole-number ratios, released from one angle.
-// Lengths are the real thing: L = g·(T / 2πn)², scaled so the slowest swing fills the shop.
 const SECONDS = 12;
 const GRAVITY = 9.81;
 const COUNT = 15;
-const FIRST = 8; // swings per cycle for the longest pendulum; the rest add one each
-const AMPLITUDE = 24; // degrees, same release angle for all
+const FIRST = 8;
+const AMPLITUDE = 24;
 const ROD_MAX = 300;
 const PIVOT_Y = 106;
 const FIRST_X = 150;
@@ -38,8 +36,6 @@ const lengths = (() => {
   return raw.map((length) => length * scale);
 })();
 
-// A swing is two bezier halves: ease.bezier(0.37, 0, 0.63, 1) tracks cosine closely, and every
-// pendulum starts and ends at full amplitude, so the 12 s cycle loops without a seam.
 const sine = ease.bezier(0.37, 0, 0.63, 1);
 
 const swing = (n: number) => {
@@ -88,7 +84,6 @@ export default scene(
         />
       ))}
 
-      {/* Longest to shortest, left to right */}
       {pendulums.map(({ x, length, lane }, i) => (
         <Group key={`n-${i}`} offset={[x, PIVOT_Y]} origin="at" rotate={lane}>
           <Shape

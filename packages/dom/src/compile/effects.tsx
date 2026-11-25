@@ -31,7 +31,6 @@ export const filters = (list: readonly FilterFn[], { path: where, ctx }: Where):
   list.forEach((one, i) => {
     switch (one.fn) {
       case "blur":
-        // CSS `blur()` is the Gaussian's standard deviation itself, which is what core's `blur()` takes.
         if (one.radius > 0) effects.push(blur(one.radius));
 
         return;
@@ -43,7 +42,6 @@ export const filters = (list: readonly FilterFn[], { path: where, ctx }: Where):
             shadow({
               color: paint.hex,
               offset: [one.x, one.y],
-              // Unlike `box-shadow`, a drop-shadow's blur is the standard deviation itself.
               blur: one.blur,
               opacity: paint.alpha,
             }),

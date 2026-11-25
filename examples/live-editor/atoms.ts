@@ -13,7 +13,6 @@ export interface Selection {
   readonly svgId?: string;
 }
 
-// Plain UI state.
 export const lockedAtom = Atom.make(false);
 export const selectionAtom = Atom.make<Selection | undefined>(undefined);
 export const paramsAtom = Atom.make<JsonObject>({});

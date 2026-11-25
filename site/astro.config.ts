@@ -2,8 +2,6 @@ import svjeez from "@svjeez/astro";
 import { defineConfig, fontProviders } from "astro/config";
 import { defaultClientConditions, defaultServerConditions, type Plugin } from "vite";
 
-// The workspace's own packages resolve to their TypeScript sources in every Vite environment, and Vite compiles them
-// instead of handing them to Node, so a library edit shows on reload.
 const source = "@svjeez/source";
 const workspace = ["svjeez", "@svjeez/vite", "@svjeez/astro"];
 
@@ -28,9 +26,7 @@ export default defineConfig({
   site: "https://svjeez.texoport.in",
   build: { format: "preserve" },
   integrations: [svjeez()],
-  // Links marked data-astro-prefetch fetch their page when the pointer rests on them.
   prefetch: { defaultStrategy: "hover" },
-  // The font every code block and scene on the site uses, self-hosted.
   fonts: [
     {
       provider: fontProviders.google(),
@@ -44,7 +40,6 @@ export default defineConfig({
   ],
   vite: {
     plugins: [workspaceSources],
-    // The pages import scenes from the svjeez package beside the site.
     server: { fs: { allow: [".."] } },
   },
 });

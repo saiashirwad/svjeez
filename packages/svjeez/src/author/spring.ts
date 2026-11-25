@@ -172,7 +172,6 @@ const reachOf = (
 
   if (last <= BISECT_UP_TO && strays(last) <= tolerance) return last;
 
-  // A long run is searched by galloping out from the start, so a key costs its own length and not the whole run's.
   for (let step = 1; last > BISECT_UP_TO && reach < last; step *= 2) {
     const probe = Math.min(last, reach + step);
 

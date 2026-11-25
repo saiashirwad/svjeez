@@ -46,7 +46,6 @@ export const defineEdit = <
       try: () => definition.input["~standard"].validate(raw),
       catch: (thrown) => message(thrown instanceof Error ? thrown : String(thrown)),
     }).pipe(
-      // A schema may answer at once or with a promise: both end up as one result.
       Effect.flatMap((result) =>
         result instanceof Promise
           ? Effect.tryPromise({

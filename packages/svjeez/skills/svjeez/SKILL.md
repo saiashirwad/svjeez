@@ -1,13 +1,13 @@
 ---
 name: svjeez
-description: Write animated SVGs with svjeez, a TypeScript library that compiles a scene of typed nodes, layout and tracks into one self-contained animated SVG (and frames or video) with no runtime JavaScript. Use when asked to make, edit or debug an animated SVG, a svjeez scene, an animated UI mockup, explainer, chart or loader in TypeScript, or when a project imports svjeez.
+description: Write animated SVGs with svjeez, a TypeScript library that compiles a JSX scene into one self-contained animated SVG (with no runtime JS) plus frames or video.
 ---
 
 # svjeez
 
 ## What a scene is
 
-A scene is a TypeScript file whose default export is `scene(options, build)`. `build` is handed the canvas and returns a tree of nodes (`<Shape>`, `<Text>`, `<Group>`, layout containers, `<Arrow>`). Every animated prop takes a value or a track over time. svjeez lays it out, measures the text with its real font, checks it, and writes one animated SVG that plays with no JavaScript, in light and dark. You never write SVG: no transforms, ids, defs, path strings for shapes, or CSS.
+A scene default-exports `scene(options, (canvas) => tree)`. svjeez measures layout and fonts at build time, validates the model, and emits one self-contained animated SVG with CSS keyframes, SMIL where needed, light/dark token variables, and a `prefers-reduced-motion` still frame.
 
 ```tsx
 /** @jsxImportSource svjeez */
@@ -49,208 +49,76 @@ export default scene(
 ## Setup
 
 ```sh
-npm i svjeez@next && npm i -D tsx typescript playwright-core && npx playwright-core install chromium-headless-shell
-bun add svjeez@next    # under Bun, run the CLI as: bunx --bun svjeez
+npm i svjeez@next && npm i -D tsx typescript playwright-core
+bun add svjeez@next    # run CLI under Bun with: bunx --bun svjeez
 ```
 
-In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `"strict": true`, or start each scene file with the pragma above. Companion packages (`@svjeez/fonts`, `icons`, `charts`, `code`, `diagrams`, `mermaid`, `geo`, `math`, `video`) install as `@svjeez/<name>@next`. With no Node project at all, use the single-file `svjeez` binary from svjeez's GitHub releases: it carries svjeez, every companion package and TypeScript, so a lone `scene.tsx` in any folder works; `svjeez init <dir>` writes a `tsconfig.json`, editor types and a starter scene, and `check` reports type errors as `type-error` there too.
+Set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"`, and `"strict": true` in `tsconfig.json`, or start scene files with `/** @jsxImportSource svjeez */`. `scene()` takes `size`, `duration`, `title`, `desc`, `theme`, `loop`, and `still`; export `params` (`param.*`, `defaults`) and a `(values) => scene(...)` function for parameterized scenes. Companion packages: `@svjeez/fonts`, `@svjeez/icons`, `@svjeez/charts`, `@svjeez/code`, `@svjeez/diagrams`, `@svjeez/mermaid`, `@svjeez/geo`, `@svjeez/math`, `@svjeez/dom`, `@svjeez/video`, `@svjeez/vite`, `@svjeez/astro`.
 
-`scene()` takes `size` (`[width, height]`), `duration` (seconds of one loop), `title` (required, read by screen readers), `desc`, `theme` (tokens), `loop` (`false` plays once and holds) and `still` (the second a viewer who asked for less motion sees, held still; 85% through by default, or `false`). The default export may be a function that returns a scene, which is how a scene takes params: `export const params = { n: param.count(3, { max: 8 }) }` ([`references/params.md`](references/params.md)).
+## Model
 
-## The model in eight rules
+1. Every node has a measured bounding box (including stroke and text).
+2. `at` places `anchor` (`"top-left"` by default; text supports `"baseline"`); `offset` moves the node's own `[0, 0]` instead (never pass both). `rotate`, `scale`, and `skew` pivot around `origin`.
+3. Nothing is inherited: every shape needs `fill` or `stroke`, and every `<Text>` needs `font`, `size`, and `fill`.
+4. Tracks are immutable (`to`, `set`, `loop`, `repeat`, `rewind`, `map`, `with`).
+5. `span(start, over)` marks time on a clock (`.next`, `.shift`, `.chain`, `.cascade`, `.distribute`, `.pace`); `<Sequence>` starts a child clock.
+6. Layout containers (`<Stack>`, `<Grid>`, `<Center>`, `<Align>`) place their children; don't set `at` on placed children.
+7. `ref()` creates a handle for anchors (`.left`, `.right`, `.center`, `.part`, `.side`) used by `<Arrow>`, `<Align>`, and tracks.
+8. `morph` / `morph.between` transitions keyed nodes across states.
 
-1. **Every node has a box**: what it paints, its stroke included, measured when the scene compiles. Text too.
-2. **`at` places the node's `anchor`**, the box's top-left unless `anchor` names another point (`"center"`, `"bottom-right"`, `[0.5, 1]`, and for text `"baseline"`). A node with no `at` stays where its coordinates put it; `anchor` without `at` is an error. `offset` (any node, not with `at`) moves the node's own `[0, 0]` there instead: a circle drawn around `[0, 0]` goes with `offset={[120, 44]}` and no `anchor`, and a `<Group>` frame's children keep their own coordinates inside it. Text's `[0, 0]` is the top-left of its first line. `rotate`, `scale` and `skew` (degrees of shear along x, before scale and rotate) turn around `origin`: `"center"` of the box by default, or `"at"`, a place, or a point.
-3. **Nothing is inherited.** A shape with no fill has none; every `<Text>` needs its own `font`, `size` and `fill`. There is no default font. Share styles with components or spread objects.
-4. **A prop takes a value or a track**, and tracks are immutable values: `opacity={track(0).to(1, span(0.5, 0.3))}`. Name the spans first, build each track, then write the JSX. `to`, `set`, `loop`, `repeat` and `rewind` return a new track.
-5. **Time is spans on clocks.** `span(start, over)` is when; build each beat from the one before (`a.next(0.4)`, `a.chain(…)`, `a.cascade(3, 0.1)`, `a.shift(dt)`). A plain number is only ever a length. `<Sequence when={span(…)}>` starts a clock of its own.
-6. **Containers place children.** `<Stack>`, `<Grid>`, `<Center>` and `<Align>` measure boxes and set each child's place; a child in one takes no `at`. Prefer them to coordinates you compute.
-7. **Refs are handles that move nothing.** `const card = ref()`, `<Group ref={card}>`, then `card.right`, `card.center`, `card.part("title")` from anywhere: arrows attach to them, `<Align to={card}>` places against them, a track's `at` goes to them.
-8. **Morph goes between keyed states.** `morph.between([a, b, c], spans)` matches nodes by `key`: one in both states moves, resizes and recolors, even into another container (it travels above both); one only in the later state enters; one only in the earlier leaves.
+## API
 
-## Cheat sheet
-
-| Nodes | |
+| Group | Exports |
 | --- | --- |
-| `<Shape geometry fill fillOpacity stroke draw trim>` | `stroke={{ color, width, cap, join, dash, dashOffset, fixedWidth, under }}`; `draw` is 0 to 1, `trim={[from, to]}` a window; not both; `fillOpacity` animates fill independently of stroke |
-| `<Text font size fill fillOpacity weight italic width fit balance lineHeight align along start stroke draw trim>` | strings and `<Run weight fill italic opacity>` inside; `width` wraps (`balance` evens lines); `fit={{ width, maxSize, minSize, lines }}` sizes to fit; `along={geometry}` sets one line along an outline; `draw` traces glyph outlines |
-| `count(value, { format, rate })` | a number that counts, as the only content of a `<Text>` besides strings |
-| `typed(value, { by, caret })` | a string track typed out, last in a `<Text>`: each `.to()` erases back to the shared start, then types; `by` is `chars` (default), `words` or your own split |
-| a string track as the only child of a `<Text>` | a label that swaps: each value shows instantly, a `.set()` at its time and a `.to()` when its span is over (never partway), each measured with the real font and anchored on its own, so a centred label stays centred. `<Text font size fill at={[x, y]} anchor="center">{track("CLOSED").set("SYN_SENT", span(0.9, 0)).set("ESTABLISHED", span(5, 0))}</Text>` |
-| `<Group offset>` | moves children together; `offset` is where the group's `[0, 0]` goes, as on any node |
-| `<Picture src={picture(bytes)} width height>`, `<Slot name width height>`, `<Shader name width height inputs fragment>` | a PNG, JPEG, GIF, WebP or SVG (`picture.load(path)` reads a file); a box the page fills with its own HTML; one it draws with a TypeGPU shader written in the scene ([`references/shader.md`](references/shader.md)) |
-| `<Sequence when={span}>`, `<Sequence clock={clock(name, span)}>` | tracks inside count from the span's start. Page code can play or scrub a named clock. `<Series gap>` plays children in order and a negative gap overlaps them for crossfades ([`references/time.md`](references/time.md)) |
-| `<Arrow from to stroke bend inset head draw>` | between points or anchors; follows them as they move |
+| Scene & components | `scene`, `component`, `context`, `param`, `defaults`, `parse`, `font`, `picture`, `random` |
+| Nodes | `<Shape>`, `<Text>`, `<Run>`, `<Group>`, `<Picture>`, `<Arrow>`, `<Sequence>`, `<Series>`, `<Slot>`, `<Shader>` |
+| Layout | `<Stack>`, `<Grid>`, `<Center>`, `<Align>`, `spread`, `ref` |
+| Geometry | `rect`, `circle`, `ellipse`, `arc`, `line`, `polygon`, `spline`, `path`, `moved`, `rotated`, `scaled`, `mirrored`, `reversed`, `merge`, `around`, `subtract`, `bounds`, `length`, `pointAt`, `along` |
+| Paint & effects | `tokens`, `alpha`, `mix`, `linear`, `radial`, `pattern`, `blur`, `shadow`, `adjust`, `displace` |
+| Time & motion | `span`, `track`, `keyframes`, `clock`, `ease`, `enter`, `exit`, `wiggle`, `ride`, `sampled`, `through`, `within`, `timeAt`, `morph` |
+| Text helpers | `count`, `numeral`, `typed`, `chars`, `words` |
 
-Every node also takes `key ref at anchor origin rotate scale skew opacity motion clip mask effects blend scheme`. `origin` takes a place, `[x, y]` from box top-left, `{ frame: [x, y] }` in parent coordinates, or `"at"`. `scheme="light"` or `"dark"` shows a node in that color scheme only ([`references/paint.md`](references/paint.md)).
-
-| Geometry (a track of them morphs) | |
-| --- | --- |
-| `rect(w, h, { radius })`, `circle(r)`, `ellipse(rx, ry)`, `arc({ radius, start, sweep })` | circles, ellipses and arcs are drawn around their own `[0, 0]` |
-| `line(...points)`, `polygon(...points)`, `spline(points, { closed, tension })` | stay where their points are; `spline` fits a smooth Catmull–Rom curve |
-| `path().moveTo(p).lineTo(p).curveTo(c1, c2, p).quadTo(c, p).arcTo(rx, ry, a, l, s, p).add(g).close()`, `path.parse(d)` | a path built in code, or read from path data |
-| `moved`, `rotated`, `scaled`, `mirrored`, `reversed`, `merge`, `around`, `subtract` | transform, combine, radially repeat, and cut holes; `bounds(g)`, `length(g)`, `pointAt(g, t)`, `along(g, n)` query outlines; `canvas.rect`, `canvas.size`, `canvas.center` |
-
-| Paint | |
-| --- | --- |
-| `tokens({ light, dark })`, `"#RRGGBB"`, `"#RRGGBBAA"`, `alpha(color, a)` | named colors with a value per scheme; plain hex is the same in both; `alpha` sets opacity on hex or tokens; type a palette `readonly Color[]` or `as const` |
-| `mix(a, b, share)`, `random(seed)` | `share` (0 to 1) of `a` blended into `b` (live on tokens); `random(seed)` is a seeded deterministic PRNG returning `[0, 1)` |
-| `linear()`, `linear.across()`, `radial()`, `radial.across({ fit, center })`, `pattern({ size, tile, offset, rotate })` | gradients at points or across the box (`fit: "inside"` stays inside an inscribed circle); a tile of nodes repeated |
-| `blur(r)`, `shadow({ color, offset, blur })`, `adjust({ hue, saturate })`, `displace({ scale, frequency, seed })` | `effects={[…]}`; also `clip`, `mask` and `blend` ([`references/paint.md`](references/paint.md)) |
-
-| Time and motion | |
-| --- | --- |
-| `span(start, over)`, `span(start)` | `.end .next(over, gap) .shift(dt) .chain(...overs) .cascade(n, step) .distribute(n, over) .pace(weights, opts)` |
-| `track(v).to(v2, span, curve?).set(v3, when).loop(p, { phase }).repeat(n).rewind(over)` | also `.span` (of the last step), `.map(fn)`, `.with(other)`; open `span(start)` with a spring uses `spring.settle` |
-| `keyframes([[t, value, curve?], …])` | a track through values at absolute times (a bounce is one list, not chained `.to`s); the curve shapes the leg arriving at that frame |
-| `through(value, fn)`, `within(draw, from, to)`, `timeAt(track, target)` | map a number or track; a part's 0-to-1 share; time when a numeric track first crosses `target` |
-| `motion={[{ opacity: track… }, enter(span, { from }), exit(span, { to }), wiggle(amp, { seed }), ride(path, progress, { turn })]}` | layers: plain objects of `offset rotate scale skew opacity`; first outermost, the node's own props innermost; `ride` moves along a path by arc length like `draw` (same track = at the line's tip) |
-| `sampled(fn, span, { tolerance })` | any function of time (`t` from 0) fitted to few keys |
-| `ease.out`, `ease.in`, `ease.inOut`, `ease.pop`, `ease.linear`, `ease.spring()`, `ease.at(curve, t)` | curves (default `ease.out`); a spring's `.settle` is the span it needs; `ease.at` evaluates any ease at `t`. Any `(k) => number` is a curve too, running 0 at `k = 0` to 1 at `k = 1` (overshoot between is fine); it is sampled into linear pieces, no code ships |
-| `morph(a, b, span)`, `morph.between(states, spans, { stagger, enter, exit, curve })` | state to state by key |
-
-| Layout | |
-| --- | --- |
-| `<Stack direction gap align justify padding width height>` | children in a row or column (`gap` may be negative; row `align="baseline"` aligns text baselines); `justify={spread}` spaces across a fixed size; `stretch` widens children |
-| `<Grid columns gap justify align padding>` | rows of cells as wide as their widest child |
-| `<Center padding width height>` | children centered on each other: a label on a shape, a pill |
-| `fill stroke radius` on those three | a background as big as the container: a card, a window, a row |
-| `<Align to place inset>` | places children against the canvas (default), a box or a ref |
-
-Refs: `ref()`, anchors `center left right top bottom topLeft topRight bottomLeft bottomRight`, `side(edge, t)`, `.map(([x, y]) => …)`, `.part(key)`. Ids: `id="note"` on any node, scoped by the `component({ name, props, render })` it sits in (`<NoteCard id="card1">` holds `card1/note`); `ref("card1/note")` finds it, and `svg.emit(scene, { ids: true })` writes `data-svz-id`. `props` is any Standard Schema.
-Fonts and data: `google()` and `google.family()` from `@svjeez/fonts` (load fonts by name), `font.load(path | url)` for a file of your own, `font(bytes | () => bytes)`, `font.family(...faces)`, `picture()`, `defaults`, `parse`, `param.number`, `param.count`, `param.seconds`, `param.color`, `param.easing`, `param.choice`, `param.text`, `param.list`.
-
-## One way to do each thing
-
-- **A prop changes on its own schedule**: give the prop a track. `fill={track(theme.text).to(theme.blue, span(1, 0.3))}`.
-- **A node arrives, leaves or wobbles**: a layer in `motion` (`enter`, `exit`, `wiggle`, or `{ opacity: track(…) }`). Layers multiply opacity and add offsets on top of the node's own props, so an entrance never fights a prop's track.
-- **Scattered things** (stars, particles): `const rand = random("stars")` gives a seeded generator of numbers in [0, 1), so every build is the same. Never `Math.random()`.
-- **Something draws itself**: `draw={track(0).to(1, span(…))}` on a `<Shape>`, an `<Arrow>`, a chart series.
-- **Two layouts of one picture** (chart values, before/after code): `morph` between keyed states, not hand-written tracks per node. Code that rewrites itself: two `<Code by={tokens}>` states; highlights from `codeLayout(style, source).find("name")`, never a column times a character width.
-- **A changing number**: `count()` in a `<Text>`; a label that changes at times (a state badge, a year): a string track in a `<Text>`. Never texts crossfaded per value.
-- **Typing**: `typed(track("").to("Save drafts", span(0.2, 1)))`, never a `<Run>` per letter faded in.
-- **One number drives many props**: one track and `.map()` from it, not parallel tracks that can drift apart.
-- **A card or a pill**: a container with `fill`, `stroke` and `radius`, not a rect of a size you worked out.
-- **A label on a shape**: `<Center>`. **Against the canvas or another node**: `<Align>` or a ref's anchor.
-- **Arrows between nodes**: `<Arrow from={a.right} to={b.left}>`. A token riding along: a point track whose steps go to anchors.
-- **Never two movers on one prop**: a prop is a value, a track, or a derived value, and a morph moves what a state leaves free.
-
-## Check, look, fix
-
-Never call a scene done from its source. Run these, in order, after every change:
+## CLI
 
 ```sh
-npx svjeez check scene.tsx                  # type errors (type-error, when TypeScript 5 or 6 is installed), the model and the SVG it emits: problems, lanes, cost; no browser
-npx svjeez check scene.tsx --at 0,1.5       # also what is on screen at those seconds, and what moves it
-npx svjeez frames scene.tsx --sheet --out frames/   # look: open frames/sheet.png
+npx svjeez check scene.tsx [--at 0,1.5] [--browser] [--json]
+npx svjeez frames scene.tsx --sheet --out frames/ [--color-scheme light|dark]
+npx svjeez svg scene.tsx --out scene.svg [--json]
+npx svjeez dev scene.tsx
+npx svjeez video scene.tsx --out scene.mp4
+npx svjeez skill [--install [--dir .claude/skills]]
+npx svjeez version
 ```
 
-1. Plan the beats as spans first. Fix type errors, then every `check` error: a scene that throws while it builds is one `compile-error` at the line of the node that is wrong, with a `fix:` line.
-2. Read each warning, open a frame at the times it names, and fix the scene unless the frame shows what you meant. `info` is advice. Key the nodes you will read so messages name them.
-3. Render a sheet at the start, middle and end of each beat (`--times 0,0.4,1.2`), in `--color-scheme light` and `dark`: things arrive and leave on cue, nothing is off center or clipped, text is legible, the last frame flows into the first.
-4. `--browser` adds a pixel pass in headless Chromium; `--json` (or `--format json`) prints the report. It exits 1 on any error (`--fail-on warning` also fails on warnings). A problem is `file:line:column  code  severity: message` then `fix:`. After the count line, `cost:` is the running animations and the area of filters redrawn every frame, and `lanes:` is how many animated lanes CSS carries and how many SMIL (geometry, filters and gradients; SMIL can't follow a scroll timeline). Prefer CSS lanes. Detail: [`references/check.md`](references/check.md).
+## Check
 
-| Code | Means |
+| Code | Meaning |
 | --- | --- |
-| `type-error` | TypeScript rejects the file (`check` runs the project's TypeScript with its tsconfig) |
-| `compile-error` | the scene threw while it was built: the message says what to write |
-| `compile-warning` | an SVG file or string the scene was given carries a warning |
-| `never-visible`, `zero-size` | a node hidden, painting nothing or covered at every time; geometry, text or an image with no size |
-| `off-canvas` | outside the canvas at every time (error), or cut by its edge at rest |
-| `text-overflow`, `missing-glyph` | text past the canvas at rest, or a line wider than its `width`; characters the font has no glyph for (no other font fills in) |
-| `overlap`, `layout-overlap` | two texts drawn over each other while both are fully shown; two children of a `<Stack>` or `<Grid>` overlapping because motion carried one onto another |
-| `low-contrast` | text or a thin line too close in color to the flat color behind it, per scheme |
-| `loop-seam` | a looping scene jumps when it starts again: end where you started (`.rewind()`, `exit()`) |
-| `visible-at-zero` | shown at 0s and cut straight back in, or filled while its stroke draws in |
-| `nothing-enters`, `static`, `wasted-motion` | nothing enters; nothing moves; a value changes while no one sees it |
-| `moving-filter` | a filter redrawn every frame because its parameters or its content move |
-| `moving-box` | a `<Group>` placed by `at` or an anchor whose content moves, so the pin only holds at 0s; use `offset` |
-| `word-cut` | a word wider than the `width` its text wraps to, cut across two lines |
-| `unsupported`, `approximate` | the SVG backend can't draw a feature, or draws it a little differently |
-
-## Size and speed
-
-What costs bytes: each font face a text uses (its glyph subset, usually most of a small file), sampled and derived curves that don't map key for key, springs, many nodes with lanes of their own. What is free: containers, refs, keys, anchors, `<Align>`, still values, and repeated still drawings (the SVG shares them). Use one family and two weights, let one track drive many props by `.map()`, animate `opacity`, `offset`, `scale` and `rotate` rather than geometry, paint or effects where either would do, and keep `blur` and `displace` still unless the blur is the point.
-
-## Errors
-
-Type errors:
-
-| Message | Fix |
-| --- | --- |
-| `Type '"red"' is not assignable to type 'Anim<Paint> \| undefined'` | colors are `"#RRGGBB"` hex or tokens |
-| `Type 'string' is not assignable to type 'Anim<Paint> \| undefined'` | the color sits in a `string[]` or a `string` field: type it `Color` from svjeez, or mark it `as const` |
-| `Type 'string' is not assignable to type 'Anchor \| Anim<Vec> \| undefined'` | `at` is a point or an anchor; a place name goes in `anchor` |
-| `Type 'string' is not assignable to type 'StrokeProps'` | `stroke={{ color: theme.text, width: 2 }}` |
-| `Property 'font' is missing in type '…' but required in type 'TextProps'` | `<Text>` needs `font` and `size`, and a `fill` to paint |
-| `Argument of type 'number' is not assignable to parameter of type 'Interval'` | steps take spans: `.to(1, span(0.5, 0.3))` |
-| `Property 'rect' does not exist on type 'JSX.IntrinsicElements'` | there are no SVG tags: `<Shape geometry={rect(w, h)} />` |
-
-Runtime errors. `…` stands for a value the message fills in.
-
-| Message | Fix |
-| --- | --- |
-| `… has no font.` | `font={await google("Inter")}` from `@svjeez/fonts`, or `font.load()` for a file of your own; nothing is inherited |
-| `… takes a font made by font(), font.load(), font.family() or @svjeez/fonts, got ….` | pass a `Font` or `FontFamily`, not a name |
-| `… has no geometry.` | give it `geometry`, such as `geometry={rect(40, 20)}` |
-| `… paints nothing: it has no fill and no stroke.` | give it `fill` or `stroke` |
-| `… draws "…" with no fill, so it paints nothing.` | `fill` on the `<Text>` or the `<Run>` |
-| `… holds the bare text "…". Write text in a <Text font={…} size={…} fill={…}>.` | wrap strings in `<Text>` |
-| `JSX holds <…>, an SVG tag, which a scene doesn't draw: every node is a component, such as <Shape geometry={rect(w, h)} />.` | write components, and put the JSX pragma at the top of the file |
-| `… holds a <Run>, which draws only inside a <Text>. Put it in one, as in <Text font={…} size={…} fill={…}>a <Run weight={600}>bold</Run> word</Text>.` | put the `<Run>` in a `<Text>` |
-| `… has its own …, but the … it sits in places it.` | a container places its children: drop `at`, or nudge with a layer's `offset` |
-| `… places itself against the canvas or a ref, so it can't sit inside the …, which places its children.` | an `<Align>` can't be a Stack/Grid/Center child: put it in a `<Group>` |
-| `… has both at and offset. at puts a point of its box somewhere; offset moves its own [0, 0] there.` | keep one: `offset` to move the node's own frame, `at` for a point of its box |
-| `anchor on … names the point its at places, but it has no at, so it stays where its coordinates put it.` | give the node an `at`, or drop `anchor` |
-| `… is a ref that is on no node.` | put the ref on a node the scene draws |
-| `A ref is on two nodes, … and ….` | one ref per node |
-| `Two nodes are both keyed "…"….` | keys are unique among siblings; `key` is a string or a number (`key={year}`), and `1` and `"1"` collide (unkeyed siblings are keyed `#0`, `#1`… by position, so they never collide with yours) |
-| `Two steps move … at once: one …, and another …, before the first ends.` | start the second step when the first ends (`first.next(over)`) |
-| `… and … read the same track, but they count time on different clocks: … and ….` | make a track per clock, or put both nodes in one `<Sequence>` |
-| `… is a point with a track inside it, but a track moves the whole point.` | one track for the point: `track([0, 0]).to([0, -55], span)`, or `track(0).map((y) => [0, y])` for one axis |
-| `A track starts at a value, but track(…) starts at an anchor.` | `track([0, 0]).to(anchor, span)`: start at a point |
-| `… goes to an anchor, but the … it sits in places it.` | a container's child can't follow an anchor: wrap it in a `<Group>` |
-| `to() takes a span, got …. Write .to(value, span(start, over)); a step right after another is span.next(over).` | pass a span |
-| `The spring on … from …s needs …s to settle, but its span is …s. Give it a longer span, a stiffer or more damped spring, or cut it with a later step.` | make the span `spring.settle` long |
-| `… runs until …s…, past the …s scene. End it by then, or give scene() a longer duration.` | end it sooner, or a longer `duration` |
-| `rewind(…) on … needs the last …s of its …s clock, but the motion runs until …s.` | a shorter rewind, or end the motion earlier |
-| `loop(…) is shorter than the motion, which runs until …s` | a loop's period counts from 0s, so it must reach the motion's end: a longer period, or start the motion at 0s |
-| `motion on … takes layers: plain objects of offset, rotate, scale, skew and opacity, each a value or a track.` | `motion={{ opacity: track(0).to(1, span(1, 0.3)) }}`, or `enter()`, `exit()`, `wiggle()` |
-| `A motion layer holds offset, rotate, scale, skew and opacity, and … gives it "…".` | keep those five keys; put the rest on the node |
-| `… has both draw and trim, but draw is trim [0, draw].` | give `draw` or `trim`, not both |
-| `morph() matches nodes by key, and … the states have … nodes with no key, so they would pair up by their place.` | `key` every node that comes, goes or changes |
-| `morph() can't turn the node keyed "…" from a … into a …: a node keeps its kind across states.…` | another key for the other kind |
-| `… lays out …, which a morph() resizes, brings in or takes away inside a <Sequence>, so the … can't make room for it.` | put the container inside the `<Sequence>` |
-| `… is … …, but its children… and padding need ….` | a larger `width` or `height`, or leave it out |
-| `A child of … is keyed "background", which names the container's own fill and stroke.` | give the child another key |
-| `… holds … count()s, and a <Text> counts one number.` | a `<Text>` per number, side by side in a row |
-| `numeral() takes decimals from 0 to 10, got ….` | a whole number of decimals |
-| `subtract() cuts holes that lie wholly inside the base or wholly outside it, and … crosses or touches the base's edge. Draw that outline with path() instead.` | draw that outline with `path()` |
-| `… has …, which spreads over the node's box, and this paint has no box to spread over. Give the gradient its points: …` | `linear({ from, to, stops })` |
-
-## Detail
-
-- Tracks, layers and stacking, recipes, springs, derived and sampled values: [`references/motion.md`](references/motion.md)
-- Spans, clocks, `<Sequence>`, `<Series>`, context, clocks the page drives, loops and seams: [`references/time.md`](references/time.md)
-- Containers, text, runs and counting numbers: [`references/layout-text.md`](references/layout-text.md)
-- Refs, anchors, parts and `<Arrow>`: [`references/refs-arrows.md`](references/refs-arrows.md)
-- Paint, clip, mask, effects: [`references/paint.md`](references/paint.md)
-- Morphing between states; the check report and every code: [`references/morph.md`](references/morph.md), [`references/check.md`](references/check.md)
-- SVG, frames, dev preview, video, embedding: [`references/render.md`](references/render.md)
-- Params; fonts and pictures: [`references/params.md`](references/params.md), [`references/fonts-pictures.md`](references/fonts-pictures.md)
-- Icons, charts, code, diagrams, Mermaid, maps and globes, math: [`references/icons.md`](references/icons.md), [`references/charts.md`](references/charts.md), [`references/code.md`](references/code.md), [`references/diagrams.md`](references/diagrams.md), [`references/mermaid.md`](references/mermaid.md), [`references/geo.md`](references/geo.md), [`references/math.md`](references/math.md)
-- Vite and Astro; editing a scene's source from a program: [`references/web.md`](references/web.md), [`references/live.md`](references/live.md)
+| `type-error` | TypeScript diagnostic from project tsconfig |
+| `compile-error` | Scene threw during build |
+| `compile-warning` | Warning from an embedded SVG file or string |
+| `never-visible`, `zero-size` | Hidden/covered at every time, or zero-sized geometry/text/image |
+| `off-canvas` | Outside or clipped by canvas |
+| `text-overflow`, `missing-glyph` | Text past canvas/width, or missing font glyph |
+| `overlap`, `layout-overlap` | Overlapping texts or container siblings colliding |
+| `low-contrast` | Insufficient contrast against background |
+| `loop-seam` | Loop end differs from start |
+| `visible-at-zero` | Shown at `0s` then immediately re-entering, or filled while drawing |
+| `nothing-enters`, `static`, `wasted-motion` | No entrance, no motion, or invisible animation |
+| `moving-filter` | Filter animated or filtering moving content |
+| `moving-box` | `at`-placed `<Group>` with moving children; use `offset` |
+| `word-cut` | Word wider than wrapped `width` |
+| `unsupported`, `approximate` | Unsupported or approximated SVG backend feature |
 
 ## Examples
 
-Each one renders and passes `check` with no warnings. They share `examples/style.ts` (a token palette and Geist from `examples/fonts/`).
-
-| File | Teaches |
+| File | Demonstrates |
 | --- | --- |
-| [`examples/hello.tsx`](examples/hello.tsx) | the scene above |
-| [`examples/card.tsx`](examples/card.tsx) | `Stack`, `Center` and `Align`, wrapped text with `<Run>`s, a cascade of spans, `enter` and `exit` layers |
-| [`examples/pipeline.tsx`](examples/pipeline.tsx) | refs and anchors, staggered `<Arrow draw>`, a dot whose `at` track goes to anchors |
-| [`examples/chart.tsx`](examples/chart.tsx) | `morph.between` keyed states: bars grow, recolor, trade places, enter and leave |
-| [`examples/progress.tsx`](examples/progress.tsx) | one track mapped to a ring's `draw`, a bar's geometry and a `count()`; a spring pop; a crossfade |
-| [`examples/reveal.tsx`](examples/reveal.tsx) | gradients, a clip track, a soft mask sized by the node's box, `subtract`, a looped rotate |
-| [`examples/steps.tsx`](examples/steps.tsx) | a component that takes a span prop, `<Sequence>` clocks, one track as the base of two chains |
+| [`examples/hello.tsx`](examples/hello.tsx) | Minimal scene above |
+| [`examples/card.tsx`](examples/card.tsx) | `Stack`, `Center`, `Align`, wrapped `<Text>` with `<Run>`, `enter`/`exit` |
+| [`examples/pipeline.tsx`](examples/pipeline.tsx) | `ref()` anchors, `<Arrow draw>`, anchor-targeted track |
+| [`examples/chart.tsx`](examples/chart.tsx) | Keyed `morph.between` bar chart |
+| [`examples/progress.tsx`](examples/progress.tsx) | Single track driving `draw`, `rect`, `count()`, and spring `ease.pop` |
+| [`examples/reveal.tsx`](examples/reveal.tsx) | Gradients, `clip`, `mask`, `subtract`, looped `rotate` |
+| [`examples/series.tsx`](examples/series.tsx) | `<Series>` sequencing and overlap |
+| [`examples/steps.tsx`](examples/steps.tsx) | Custom span component, `<Sequence>`, derived tracks |

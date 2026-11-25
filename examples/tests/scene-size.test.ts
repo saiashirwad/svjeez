@@ -40,7 +40,6 @@ const budgets = {
   lanes: { bytes: 19050, elements: 97, stops: 76, smil: 28, cost: 47.2 },
 } satisfies Record<string, Budget>;
 
-// Scenes change all the time; the budgets only catch a blowup, so each number may grow by a quarter before a test fails.
 const SLACK = 1.25;
 
 const measure = (svg: string): Budget => {

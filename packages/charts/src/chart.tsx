@@ -150,7 +150,6 @@ const Bars = ({ look: { chart, layout, size }, data, options, slot }: BarsProps)
       "Give a share of the draw from 0 up to, but not including, 1.",
     );
 
-  // Each bar's start and the share of the draw it grows over.
   const windowOf = (i: number): readonly [start: number, length: number] => {
     if (!(stagger instanceof Function))
       return [bands > 1 ? (stagger * i) / (bands - 1) : 0, 1 - stagger];
@@ -252,7 +251,6 @@ const Line = ({
 }: LineProps): SceneElement => {
   const { color, draw, label } = options;
   const stroke: StrokeProps = { color, width: 2.5, cap: "round", join: "round", ...options.stroke };
-  // The label sits past the line end: a plain-number width moves it, a track or derived width keeps the default.
   // SAFETY: Number.isFinite is true only for a plain number.
   const width = Number.isFinite(stroke.width) ? (stroke.width as number) : 2.5;
   const drawn = drawing(draw);
@@ -356,7 +354,6 @@ const Area = ({ look, data, options }: AreaProps): SceneElement => {
 
   const fill = <Shape key="fill" geometry={path.parse(shape!)} fill={color} mask={fade} />;
 
-  // Two nested clips wipe the fill open: the inner one slides in from the left while its content slides back.
   const wiped =
     draw === undefined ? (
       fill

@@ -177,7 +177,6 @@ const literalOf = (src: string, node: SyntaxNode): Literal | undefined => {
         entries.push([key, inner.value]);
       }
 
-      // Object.fromEntries defines "__proto__" as an own key; assigning it would change the prototype.
       return { value: Object.fromEntries(entries), lit: "json" };
     }
 
@@ -235,7 +234,6 @@ const factsOf = (src: string, root: SyntaxNode): Facts => {
       if (specifier === undefined) return;
 
       for (let at = node.firstChild; at; at = at.nextSibling) {
-        // A default import. The name after `* as` is a namespace, which the `Star` below takes.
         if (at.name === "VariableDefinition" && at.prevSibling?.name !== "as")
           facts.imports.set(textOf(src, at), { imported: DEFAULT, from: specifier });
 
@@ -465,14 +463,12 @@ const parseFile = (file: string, src: string, found: Found[], refs: Ref[]): Read
         .sort((a, b) => a.from - b.from)
         .map((attr) => attributeOf(src, file, attr, params));
 
-      // JSX takes the last of two attributes with one name, so that is the id.
       const idAttr = written.findLast((a) => a.name === "id");
 
       if (idAttr?.kind !== "literal" || !isString(idAttr.value) || !idAttr.valueRange)
         return undefined;
       const lastSpread = written.findLastIndex((a) => a.kind === "spread");
 
-      // A `{...spread}` after a prop may carry the same name, so the literal is not what the prop will be.
       const attributes = written.map((attribute, i): Attribute =>
         attribute.kind === "literal" && attribute.name !== "id" && i < lastSpread
           ? {
@@ -597,7 +593,6 @@ export const parse = (files: Files): Effect.Effect<Parsed, ParseError> =>
       maxDepth = Math.max(maxDepth, read.depth);
     }
 
-    // The same file's elements are in source order already, and files keep their order of insertion.
     const owner = new Map<string, Id>();
     const rows = found.map((f) => ({ ...f, id: fullId(f.element.scope, f.element.local) }));
 
@@ -618,7 +613,6 @@ export const parse = (files: Files): Effect.Effect<Parsed, ParseError> =>
     }
 
     const parentOf = (row: (typeof rows)[number]): Id | undefined => {
-      // The nearest enclosing element that has an id, through any id-less wrappers.
       for (const from of row.ancestors) {
         const id = owner.get(`${row.element.range.file}:${from}`);
 

@@ -13,7 +13,6 @@ export default ogScene(
   () => (
     <Group>
       <Backdrop />
-      {/* A giant 404 behind the mascot, there but faded: the frame that is not on the timeline. */}
       <Text
         font={geist}
         weight={600}
@@ -25,7 +24,6 @@ export default ogScene(
       >
         404
       </Text>
-      {/* Blip has toppled over on its side by the 404 and looks up at it, puzzled. */}
       <Mascot
         at={[870, 425]}
         size={190}
@@ -59,7 +57,6 @@ export default ogScene(
       >
         ?
       </Text>
-      {/* The timeline has a hole in it: the third keyframe is outlined in red and nothing is lit. */}
       <Timeline active={-1} missing={2} />
       <Align place="left" inset={80}>
         <Copy

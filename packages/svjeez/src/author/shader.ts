@@ -157,7 +157,6 @@ const layout = (label: string, inputs: ShaderInputs): Laid => {
   };
 };
 
-// The one full screen triangle every shader is drawn with: `uv` runs from the box's top left, down and to the right.
 const TEMPLATE = `
 @group(0) @binding(0) var<uniform> svjeez_inputs: SvjeezInputs;
 

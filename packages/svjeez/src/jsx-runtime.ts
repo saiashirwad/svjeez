@@ -40,7 +40,6 @@ export const build = <P extends { readonly children?: Child; readonly id?: strin
       { node: `<${type}>`, ...(source && { source: sourceFrom(source) }) },
     );
 
-  // The component runs when the scene is built, top-down, with the contexts and ids around it.
   return {
     type: "call",
     component: type,

@@ -76,7 +76,6 @@ describe("compileStates", () => {
   test("an element only in the second state fades in; one only in the first fades out", () => {
     const out = drawn([state("a", page(at("gone", 0, 0))), state("b", page(at("new", 100, 0)))]);
 
-    // Each fades: one opacity keyframe set down, one up.
     expect(out.svg).toContain("opacity:1}66.667%,100%{opacity:0");
     expect(out.svg).toContain("opacity:0}66.667%,100%{opacity:1");
   });
@@ -116,7 +115,6 @@ describe("compileStates", () => {
       ),
     ]);
 
-    // The shadow's spread grows the box's bounds by 2.
     expect(where(out.boxes(out.duration), "box")).toEqual([48, 0]);
   });
 

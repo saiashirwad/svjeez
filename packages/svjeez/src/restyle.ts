@@ -109,8 +109,6 @@ const timelineCss = (svg: string, timeline: string, range: string | undefined): 
   return `@supports (animation-timeline:scroll()){@media (prefers-reduced-motion:no-preference){${head}${rules.join("")}}}`;
 };
 
-// The theme's values in the scene's own form: dark on its root, light under a prefers-color-scheme query, so it still
-// follows the viewer's scheme and pins with it. Coming last, it wins over the scene's.
 const themeCss = (svg: string, theme: Theme): string => {
   const prefix = /^<svg\b[^>]*\sclass="([^"]*)root"/.exec(svg)?.[1];
   const scope = prefix ? `svg.${prefix}root` : "svg";

@@ -132,7 +132,6 @@ export function gitGraph<const B extends Record<string, string>>(
   const column = Math.max(0, ...pills.map((p) => p.w));
   const tagGap = 6;
 
-  // Along the time axis (u) and across the branches (v), before the direction is applied.
   const us: number[] = [];
   const vs: number[] = [];
   let [timeLength, laneLength, trackFrom] = [0, 0, 0];
@@ -385,7 +384,6 @@ export function gitGraph<const B extends Record<string, string>>(
     );
   };
 
-  // Left to right: the id under the dot and the tags stacked above it.
   const beneath = (c: GitCommit, color: ReturnType<typeof tint>): SceneElement[] => [
     ...(c.label === undefined
       ? []
@@ -415,7 +413,6 @@ export function gitGraph<const B extends Record<string, string>>(
     ),
   ];
 
-  // Top to bottom or bottom to top: the id and then the tags in a row to the right of the dot.
   const aside = (c: GitCommit, color: ReturnType<typeof tint>): SceneElement[] => {
     const text = c.label === undefined ? 0 : l.measure(c.label, small) + tagGap;
     let x = DOT + 6 + text;

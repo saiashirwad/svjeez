@@ -38,9 +38,7 @@ export const cached = async <T>(
       const stored: Stored<T> = JSON.parse(await readFile(file, "utf8"));
 
       if (stored.version === SNAPSHOT_VERSION && stored.inputs === key) return stored.value;
-    } catch {
-      // Missing or unreadable: record it again.
-    }
+    } catch {}
 
   const value = await fn();
   const stored: Stored<T> = { version: SNAPSHOT_VERSION, inputs: key, value };

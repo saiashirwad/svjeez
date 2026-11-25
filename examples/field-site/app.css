@@ -35,7 +35,6 @@ main {
   place-items: center;
 }
 
-/* The scene at its own aspect, as large as the window allows; the handles lie over it in the same box. */
 .stage {
   position: relative;
   width: min(100vw, 160vh);
@@ -106,7 +105,6 @@ button {
   backdrop-filter: blur(6px);
 }
 
-/* Show one layer: the GPU field lives in the shader's foreignObject, everything else is svjeez's vector. */
 .stage[data-show="svg"] foreignObject {
   visibility: hidden;
 }

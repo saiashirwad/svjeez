@@ -136,7 +136,6 @@ const makeSession = <R>({
         const parsed = known ?? (yield* parse(files));
 
         yield* denyAbove("nodes", parsed.order.length, limits.maxNodes);
-        // The deepest JSX nesting, so wrappers with no id count too.
         yield* denyAbove("tree depth", parsed.maxDepth, limits.maxTreeDepth);
 
         return parsed;
@@ -205,7 +204,6 @@ const makeSession = <R>({
               : e,
           );
 
-        // Every edit reparses the source, so refuse a batch that could not fit before it starts.
         if (limits.maxSourceBytes !== undefined) {
           const size = Object.values(current.files).reduce((sum, text) => sum + bytes(text), 0);
 
@@ -219,7 +217,6 @@ const makeSession = <R>({
         const { parsed, ...change } = yield* edit(current.parsed, rewritten);
         const candidate = yield* read(change.files, parsed);
 
-        // The batch is checked as a whole: its props against the source it wrote, not the source each edit began from.
         yield* checkEdits(candidate, current.program, rewritten);
 
         const next = yield* build(
@@ -233,8 +230,6 @@ const makeSession = <R>({
 
         if (hooks.validate) yield* hooks.validate(next).pipe(Effect.provideContext(context));
 
-        // Once the host has the change, the session must hold it too: an interrupt between the two would leave
-        // storage a revision ahead of what a retry with the same `requestId` sees.
         yield* Effect.uninterruptible(
           Effect.gen(function* () {
             if (hooks.afterEdit)

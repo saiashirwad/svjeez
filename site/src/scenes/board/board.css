@@ -18,11 +18,6 @@ body {
   background: transparent;
 }
 
-/*
- * The site's theme tokens (examples/colors.ts) paint the board: --background, --surface, --raised, --border, --muted,
- * --text and the hues. film() gives the page their values in each scheme and reads the colors back as the tokens, so
- * the scene recolors with the site's palette. Everything below is a token, or a color-mix() of them.
- */
 :root {
   color-scheme: light dark;
   --bg: var(--background);
@@ -93,8 +88,6 @@ kbd {
 .spacer {
   flex: 1;
 }
-
-/* Sidebar */
 
 .sidebar {
   width: 144px;
@@ -182,8 +175,6 @@ kbd {
   font-weight: 600;
   letter-spacing: 0.02em;
 }
-
-/* Main */
 
 .main {
   flex: 1;
@@ -289,8 +280,6 @@ kbd {
   color: var(--accent);
 }
 
-/* Board: one grid, so cards keep their element when they change column. */
-
 .board {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -338,12 +327,10 @@ kbd {
   background: var(--panel);
 }
 
-/* A card's status menu opens over the cards below it. */
 .card.open {
   z-index: 1;
 }
 
-/* Cards rest flat on their lane, so a board of them stays light; only a held one casts a shadow. */
 .card.lifted {
   box-shadow: var(--lift);
 }
@@ -469,8 +456,6 @@ kbd {
 .menu-item.current {
   background: var(--lane);
 }
-
-/* Overlays */
 
 .toast {
   position: absolute;

@@ -705,7 +705,6 @@ describe("morph between containers", () => {
 
     const [from, mid, to] = [at(0), at(2), at(4)];
 
-    // "a" has one key, the one it has in the last state, the whole way.
     expect(from[0]).toBeLessThan(to[0]);
     expect(to[1]).toBeGreaterThan(from[1]);
     expect(mid[0]).toBeGreaterThan(from[0]);
@@ -742,7 +741,6 @@ describe("morph between containers", () => {
     const model = moving(board(["a"], ["a"]), board([], ["a"]));
     const todo = find(model, "board/todo/a");
 
-    // todo's "a" leaves in place and doing's stays: nothing travels.
     expect(todo.layers.length).toBeGreaterThan(0);
     expect(isLane(find(model, "board/doing/a").layers[0]?.opacity)).toBe(false);
   });

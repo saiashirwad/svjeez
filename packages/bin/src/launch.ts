@@ -1,6 +1,3 @@
-// The npm package's `svjeez`: the single-file build for this machine, fetched from the GitHub release of the package's
-// own version the first time and run from the cache folder afterwards. install.sh does the same for ~/.local/bin.
-
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdir, open, rename, rm, stat } from "node:fs/promises";
@@ -58,7 +55,6 @@ const download = async (given: Given, file: string): Promise<boolean> => {
 
   if (!sums || !body) return false;
 
-  // As install.sh reads it: the sum in front of the asset's name.
   const expected = (await sums.text())
     .split("\n")
     .find((line) => line.endsWith(` ${given.asset}`))
@@ -88,7 +84,6 @@ const download = async (given: Given, file: string): Promise<boolean> => {
       return false;
     }
 
-    // Another run may have installed the same file first: POSIX replaces it with the same bytes, Windows refuses to.
     await rename(staging, file).catch(async (error: NodeJS.ErrnoException) => {
       if (!(await exists(file))) throw error;
     });
@@ -121,7 +116,6 @@ export const launch = async (given: Given): Promise<number> => {
   const child = spawn(file, [...given.argv], { stdio: "inherit" });
   const signals = ["SIGINT", "SIGTERM", "SIGHUP"] as const;
 
-  // A signal meant for this launcher alone, as from a tool that stops it, is the executable's to act on.
   const forward = (signal: NodeJS.Signals): void => void child.kill(signal);
 
   for (const signal of signals) process.on(signal, forward);
@@ -136,7 +130,6 @@ export const launch = async (given: Given): Promise<number> => {
         resolve(1);
       });
 
-      // A signal's own status, as a shell reports it.
       child.on("exit", (code, signal) =>
         resolve(code ?? (signal === null ? 1 : 128 + constants.signals[signal])),
       );

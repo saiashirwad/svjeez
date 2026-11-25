@@ -126,7 +126,6 @@ describe("on a real page", () => {
     const model = sceneOf(compiled);
     const key = (t: number) => placements(model, t).find((p) => p.key.endsWith("/s/@track"))!;
 
-    // The placed box is the rotated one: its center stays put (translate -50% -50% is kept while spinning).
     const center = (t: number) => {
       const { box } = key(t);
 
@@ -181,7 +180,6 @@ describe("on a real page", () => {
     const model = sceneOf(compiled);
     const fills = JSON.stringify(model.root);
 
-    // The fill is animated rather than held: more than one color shows up over time.
     expect(fills).toContain('"fill":{"kind":"lane"');
     expect(compiled.duration).toBeGreaterThan(0);
   });

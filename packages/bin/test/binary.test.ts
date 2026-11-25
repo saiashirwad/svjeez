@@ -6,9 +6,6 @@ import { join } from "node:path";
 import { compile, pack } from "../scripts/binary.ts";
 import * as Services from "../../../scripts/services.ts";
 
-// Builds the binary for this machine once, then runs it on scenes in a temp folder (behind a symlink on macOS, where
-// /var is /private/var) with no package.json, node_modules or tsconfig.
-
 let bin = "";
 let dir = "";
 

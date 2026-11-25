@@ -38,7 +38,6 @@ body {
   margin: 0 0 14px;
 }
 
-/* filter: blur on a card with text and a border. */
 #blur {
   display: flex;
   align-items: center;
@@ -58,7 +57,6 @@ body {
   background: var(--accent);
 }
 
-/* drop-shadow follows the icon's shape, not its box. */
 #shadow {
   width: 80px;
   height: 64px;
@@ -66,7 +64,6 @@ body {
   filter: drop-shadow(4px 6px 5px var(--hard));
 }
 
-/* Gradients stand in for a photo: grayscale, brightness, contrast, hue and saturate, in order. */
 #photo {
   height: 70px;
   border-radius: 8px;
@@ -119,7 +116,6 @@ body {
   clip-path: ellipse(50% 30% at 50% 50%);
 }
 
-/* shadcn's scroll fade: the last lines fade out. */
 #fade {
   height: 90px;
   overflow: hidden;
@@ -134,7 +130,6 @@ body {
   line-height: 30px;
 }
 
-/* An SVG tile as the mask, repeated. */
 #stamp {
   height: 60px;
   background: var(--accent);

@@ -1,4 +1,3 @@
-// Type-level tests, checked by `tsc` and never run: every `@ts-expect-error` must be an error.
 import type { Component } from "svelte";
 import { film } from "../src/index.ts";
 import { component } from "../src/vite.ts";
@@ -13,7 +12,6 @@ declare const Typed: Component<{
 }>;
 
 export const checks = async () => {
-  // Data props are required; function props are optional.
   await component(Card, { task });
   await component(Card, { task, onDone: () => {}, note: "n" });
   await component(Typed, { task, when: "now" });
@@ -30,7 +28,6 @@ export const checks = async () => {
   // @ts-expect-error unknown prop
   await component(Card, { task, nope: 1 });
 
-  // update() is typed against the component's props, partially.
   await film(component(Card, { task }), async ({ update }) => {
     await update({ note: "x" });
     await update({ task: { ...task, done: true } });
@@ -42,7 +39,6 @@ export const checks = async () => {
     await update({ task: { ...task, id: new Date() } });
   });
 
-  // An app target has no props to update.
   await film(
     { url: "", selector: "", sources: async () => "", close: async () => {} },
     async ({ update }) => {

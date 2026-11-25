@@ -259,7 +259,6 @@ const gsubLigatures = (ligatures: readonly UsedLigature[]): Uint8Array | undefin
 
   const firstGlyphs = [...byFirst.keys()].sort((a, b) => a - b);
 
-  // Build LigatureSubst Format 1 subtable
   const covOffset = 6 + 2 * firstGlyphs.length;
   const cov = new Writer().u16(1).u16(firstGlyphs.length);
 
@@ -299,8 +298,6 @@ const gsubLigatures = (ligatures: readonly UsedLigature[]): Uint8Array | undefin
 
   for (const set of sets) subtable.bytes.push(...set);
 
-  // ScriptList: 2 scripts ("DFLT", "latn") sharing one Script table + DefaultLangSys -> feature 0
-  // ScriptList bytes: count(2) + 2*(tag(4)+off(2)) = 14; Script table at 14: defaultLangSysOff(2)=4, langSysCount(2)=0; LangSys at 18: lookupOrder(2)=0, req(2)=0xffff, featCount(2)=1, featIdx(2)=0 -> total 26 bytes
   const scriptList = new Writer()
     .u16(2)
     .u32(
@@ -324,7 +321,6 @@ const gsubLigatures = (ligatures: readonly UsedLigature[]): Uint8Array | undefin
     .u16(1)
     .u16(0);
 
-  // FeatureList: 1 feature ("liga") -> lookup 0 -> 14 bytes
   const featureList = new Writer()
     .u16(1)
     .u32(
@@ -338,7 +334,6 @@ const gsubLigatures = (ligatures: readonly UsedLigature[]): Uint8Array | undefin
     .u16(1)
     .u16(0);
 
-  // LookupList: 1 lookup -> LookupType 4, flag 0, 1 subtable at offset 8
   const lookupList = new Writer().u16(1).u16(4).u16(4).u16(0).u16(1).u16(8);
 
   lookupList.bytes.push(...subtable.bytes);

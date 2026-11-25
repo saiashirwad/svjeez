@@ -2,7 +2,6 @@ import * as Cloudflare from "@alchemy.run/cloudflare";
 import * as Alchemy from "alchemy";
 import * as Effect from "effect/Effect";
 
-// svjeez.texoport.in: the Astro site, prerendered and served as static assets.
 export default Alchemy.Stack(
   "SvjeezSite",
   {
@@ -12,9 +11,7 @@ export default Alchemy.Stack(
   Effect.gen(function* () {
     const site = yield* Cloudflare.Website.Astro("Website", {
       astro: { output: "static" },
-      // Posters render in headless Chromium, which only Node can drive.
       prerenderEnvironment: "node",
-      // An assets-only deploy answers an unknown path with Cloudflare's bare 404 unless it is told to use ours.
       assets: { notFoundHandling: "404-page" },
       domain: "svjeez.texoport.in",
     });

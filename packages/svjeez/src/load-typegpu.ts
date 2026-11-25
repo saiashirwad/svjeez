@@ -21,7 +21,6 @@ export interface LoadTypeGpuOptions {
 /** What unplugin-typegpu exports for a build tool: a function that makes the plugin, from the options it takes. */
 type TypeGpuPlugin = (options?: { readonly include?: RegExp }) => object;
 
-// Bun's plugin reads every file a regular expression lets through, and rewrites a CommonJS dependency as a module.
 const SOURCE = /^(?!.*\/node_modules\/).*\.[cm]?[jt]sx?$/;
 
 const isPlugin = (
@@ -35,7 +34,6 @@ interface Runtime {
 
 const runtime: Runtime = globalThis;
 
-// The runtimes that were given the transform, so that a second load does not install it again.
 const installed = new Set<string>();
 
 /** The path of `name` as a project at `from` (a directory) would import it, or undefined when it is not installed. */
@@ -60,7 +58,6 @@ const typegpuPlugin = async (
     /* @vite-ignore */ pathToFileURL(entry).href
   );
 
-  // The path is the one `require` takes, which can be the package's CommonJS build: its function is then on `default`.
   return isPlugin(loaded) ? loaded : loaded.default;
 };
 
@@ -68,16 +65,12 @@ const install = async (from: string, include: RegExp): Promise<void> => {
   const { Bun: bun } = runtime;
   const kind = bun ? "bun" : "node";
 
-  // unplugin-typegpu's Node hook is `module.registerHooks`, which Node before 22.15 does not have: its scenes with a
-  // "use gpu" function can't be compiled there, and the rest still load.
   if (!bun && !("registerHooks" in nodeModule))
     return cantCompile({
       why: `Node ${process.version} can't compile "use gpu" functions: unplugin-typegpu needs module.registerHooks, from Node 22.15.`,
       fix: "Run the scene on Node 22.15 or later, or under Bun.",
     });
 
-  // A transform that fails to load (the single-file binary can't load unplugin-typegpu's dependencies) leaves the scenes
-  // without a "use gpu" function working: only a <Shader> needs it, and says why.
   const make = await typegpuPlugin(kind, from).catch((error: Error) => {
     cantCompile({
       why: `unplugin-typegpu did not load, so "use gpu" functions are not compiled: ${error.message.split("\n")[0]}`,
@@ -115,8 +108,6 @@ export const loadTypeGpu = async (
 
   if (transform) await install(from, include);
 
-  // TypeGPU that fails to load (the single-file binary can't load its dependencies) leaves the scenes without a <Shader>
-  // working: a <Shader> says it needs TypeGPU.
   return import(/* @vite-ignore */ pathToFileURL(entry).href).then(
     (module: typeof TypeGpu) => (provideTypeGpu(module), true),
     () => false,

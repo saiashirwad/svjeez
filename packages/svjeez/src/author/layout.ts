@@ -89,7 +89,6 @@ const paint = (label: string, { fill, stroke, radius }: Backdrop, padding: numbe
   };
 };
 
-// Text metrics leave fractions of a pixel: children that overflow a fixed size by less than one still fit.
 const SUBPIXEL = 1;
 
 const fits = (

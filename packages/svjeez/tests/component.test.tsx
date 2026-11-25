@@ -135,7 +135,6 @@ describe("component()", () => {
       </Frame>
     ));
 
-    // A child is written outside the component, so it is scoped by where it is written, not by where it lands.
     expect(ids(model.root)).toEqual(["frame", "dot"]);
   });
 
@@ -230,7 +229,6 @@ describe("component()", () => {
   });
 
   test("its registered name is used in errors even when the function's own name is lost", () => {
-    // What a minifier does: the function is called `a`, and says nothing of Minified.
     const holder = {
       a: component({
         name: "Minified",
@@ -567,7 +565,6 @@ describe('ref("id")', () => {
       </Group>
     ));
 
-    // box is 80 wide and the note text is narrower, so the two arrows start in different places.
     expect(links(model.root)[0]?.box.x).not.toBe(links(near.root)[0]?.box.x);
     expect(links(model.root)[0]?.box.x).toBeGreaterThan(70);
   });
@@ -589,7 +586,6 @@ describe('ref("id")', () => {
       ),
     });
 
-    // A top-level "a" far away must not capture the arrows inside each Pair.
     const model = made(() => (
       <Group>
         <Shape id="a" geometry={rect(10, 10)} at={[250, 150]} fill="#000000" />
@@ -604,7 +600,6 @@ describe('ref("id")', () => {
 
     expect(found.length).toBe(2);
 
-    // The gap in a Pair is 90 wide; the far-off top-level "a" would make it over 150.
     for (const arrow of found) {
       expect(arrow.box.width).toBeGreaterThan(85);
       expect(arrow.box.width).toBeLessThan(100);

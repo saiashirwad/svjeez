@@ -241,7 +241,6 @@ describe("edit", () => {
         at: 0,
         element: { component: "Circle", id },
       });
-      // A literal `{ __proto__: 1 }` would set a prototype, not a key; JSON.parse makes the key.
 
       const props = JSON.parse('{"__proto__":1}');
 

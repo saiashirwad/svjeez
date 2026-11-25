@@ -14,9 +14,6 @@ import {
 import { Builds, playsOf } from "./builds";
 import { ACCENTS, RESULT_COLUMN, SHOTS, spring, theme } from "./kit";
 
-// The first code slide: a scene grows an element at a time, and each one plays in its own tile the moment its code
-// lands. A circle pops in, a wave draws itself, a square springs across. Every prop sits on its own line.
-
 const ELEMENTS = [
   `    <Shape
       geometry={circle(30)}

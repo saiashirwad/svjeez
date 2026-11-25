@@ -21,7 +21,6 @@ import { fontFixture } from "../../../fixtures/fonts";
 
 const mono = await font.load(fontFixture("JetBrainsMono"));
 
-// JetBrains Mono is 0.6em wide everywhere, so at size 10 every character is 6 across.
 const CHAR = 6;
 
 const made = (build: () => SceneElement, duration = 4): Model.Scene =>
@@ -117,7 +116,6 @@ describe("edits", () => {
     expect(mix("ab", "ax", 0.5, "x")).toBe("a");
     expect(mix("ab", "ax", 0.99, "x")).toBe("a");
     expect(mix("ab", "ax", 1, "x")).toBe("ax");
-    // A spring that overshoots holds the end.
     expect(mix("ab", "ax", 1.2, "x")).toBe("ax");
   });
 });
@@ -155,7 +153,6 @@ describe("typed()", () => {
     expect(drawnAt(model, 2.0)).toBe("Save ");
     expect(drawnAt(model, 3)).toBe("Save on");
 
-    // Each longest text is drawn once, and "Save " sits in the same place in both.
     const { words } = partsOf(model);
 
     expect(words.map((node) => node.lines[0]!.runs[0]!.text)).toEqual(["Save it", "Save on"]);
@@ -170,7 +167,6 @@ describe("typed()", () => {
   });
 
   test("a split of its own types in its own units", () => {
-    // Two characters to a keystroke.
     const pairs: Split = (text) => text.match(/[^]{1,2}/gu) ?? [];
     const model = typedText(typed(track("").to("abcde", span(0, 1.5)), { by: pairs }));
 
@@ -212,7 +208,6 @@ describe("typed()", () => {
     const blink = caret.layers[0]!.opacity;
 
     expect(isLane(blink)).toBe(true);
-    // On while typing, off half a second after the last keystroke, on again half a second later.
     expect(valueAt(blink, 2.2, blendNumber)).toBe(1);
     expect(valueAt(blink, 2.7, blendNumber)).toBe(1);
     expect(valueAt(blink, 3.2, blendNumber)).toBe(0);

@@ -153,7 +153,6 @@ describe("boxes", () => {
     const [r, k] = [(rotate * Math.PI) / 180, Math.tan((skew * Math.PI) / 180)];
     const [cos, sin] = [Math.cos(r), Math.sin(r)];
 
-    // rotate · scale · skewX
     const back = [
       cos * scale[0],
       sin * scale[0],
@@ -750,7 +749,6 @@ describe("background images and gradient tiles", () => {
     );
 
     expect(out.diagnostics).toEqual([]);
-    // 100x60 around a square: 100x100, with 20px cut off above and below.
     expect(image$(out)).toEqual([expect.stringContaining('width="100" height="100"')]);
     expect(out.svg).toContain("clipPath");
     expect(out.svg).toMatch(/translate\(0[ ,]-20\)|y="-20"/);
@@ -815,7 +813,6 @@ describe("background images and gradient tiles", () => {
     const [, width, height] = /<pattern[^>]*width="([\d.]+)"[^>]*height="([\d.]+)"/.exec(out.svg)!;
 
     expect(Number(width)).toBe(30);
-    // Tall enough that no second tile reaches the box.
     expect(Number(height)).toBeGreaterThanOrEqual(60);
   });
 
@@ -824,7 +821,6 @@ describe("background images and gradient tiles", () => {
       box({ backgrounds: [image(png(30, 20), { size: [30, 20], repeat: ["round", "repeat"] })] }),
     );
 
-    // 100 / 30 rounds to 3 tiles, 33.33 wide.
     expect(out.svg).toMatch(/<pattern[^>]*width="33\.33/);
   });
 
@@ -833,7 +829,6 @@ describe("background images and gradient tiles", () => {
       box({ backgrounds: [image(png(30, 20), { size: [30, 20], repeat: ["space", "repeat"] })] }),
     );
 
-    // Three tiles of 30 in 100 leave 10, split between two gaps: a period of 35.
     expect(out.svg).toMatch(/<pattern[^>]*width="35"/);
   });
 
@@ -924,7 +919,6 @@ describe("background images and gradient tiles", () => {
       kind: "linear",
       angle: 90,
       stops: stops("red", "blue"),
-      // The default: the tile fills the padding box, and the clip is the border box.
       place: place({ size: [92, 52], origin: { x: 4, y: 4, width: 92, height: 52 } }),
     };
 
@@ -984,7 +978,6 @@ describe("background images and gradient tiles", () => {
             kind: "linear",
             angle: 90,
             repeating: true,
-            // 25px periods across 100px: four repeats.
             stops: [
               { offset: 0, color: "rgb(255, 0, 0)" },
               { offset: 0.25, color: "rgb(0, 0, 255)" },
@@ -1017,7 +1010,6 @@ describe("background images and gradient tiles", () => {
       }),
     );
 
-    // The far corner is 1.414 radii away: six periods of 0.25.
     expect(out.svg.match(/<stop /g)!.length).toBeGreaterThanOrEqual(12);
     expect(out.svg).toContain('r="141.42');
   });
@@ -1074,7 +1066,6 @@ describe("filter", () => {
       { fn: "saturate", amount: 2 },
     ]);
 
-    // One filter primitive per function, in the order written.
     const found = [
       ...out.svg.matchAll(/<(feColorMatrix|feFuncR)[^>]*?(?:values|slope)="([^"]+)"/g),
     ].map((m) => `${m[1]} ${m[2]}`);
@@ -1148,7 +1139,6 @@ describe("clip-path", () => {
   test("a circle is an ellipse about its center", () => {
     const out = clipped({ kind: "ellipse", center: [50, 30], radius: [30, 30] });
 
-    // A circle drawn about [50, 30] in the box's frame: its edge runs from x 20 to 80.
     expect(out.svg).toMatch(/<clipPath[^>]*>\s*<path d="M80 30C/);
     expect(out.diagnostics).toEqual([]);
   });

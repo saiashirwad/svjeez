@@ -427,8 +427,6 @@ const keysOf = (
     keys.push(...(before ? run.slice(1) : run));
   });
 
-  // A run one nudge long that jumps at its end pulls its last key back onto its first. Two keys at one moment can't
-  // be written as stops, so the later one, which holds the value the run reached, stands for both.
   const timed = keys.reduce<RunKey[]>((kept, key) => {
     if (kept.length > 0 && key.t - kept.at(-1)!.t <= EPSILON)
       kept[kept.length - 1] = { ...key, t: kept.at(-1)!.t };

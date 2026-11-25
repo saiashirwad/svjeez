@@ -55,7 +55,6 @@ const open = async (
 
 const IMG = '<img id="a" data-live="/scene.svg" width="40" height="40" style="display:block">';
 
-// The page's own code runs as text: the library is the global `lib` there, and `scene` the player a test makes.
 const run = (page: Page, code: string) =>
   page.evaluate<string | undefined>(`(async () => { ${code} })()`);
 

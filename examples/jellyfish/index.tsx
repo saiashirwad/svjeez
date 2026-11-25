@@ -20,16 +20,12 @@ import {
   type Vec,
 } from "svjeez";
 
-// Bioluminescent jellyfish drifting through an abyssal pelagic column.
-// Every bell contraction, scalloped margin, ruffled oral arm, and trailing tentacle
-// is solved analytically as a traveling fluid wave and lowered via sampled() geometry.
-
 type Hex = `#${string}`;
 
 const WIDTH = 960;
 const HEIGHT = 540;
 const SECONDS = 8;
-const CYCLE = 4; // propulsion cycle period (divides SECONDS = 8 cleanly)
+const CYCLE = 4;
 const TAU = Math.PI * 2;
 
 const rnd = (seed: number) => () => {
@@ -43,7 +39,6 @@ const rnd = (seed: number) => () => {
 
 const q = (v: number): number => Math.round(v * 10) / 10;
 
-// Smooth open Catmull-Rom cubic curve through control points (constant curve count for sampled())
 const smoothOpen = (pts: readonly Vec[]): Geometry => {
   let p = path().moveTo([q(pts[0]![0]), q(pts[0]![1])]);
 
@@ -61,20 +56,15 @@ const smoothOpen = (pts: readonly Vec[]): Geometry => {
   return p;
 };
 
-// --- fluid propulsion kinematics --------------------------------------------
-
-// Asymmetric contraction waveform: brisk power stroke, languid recovery coast (periodic in [0, 1))
 const pulseOf = (u: number): number => {
   const a = u * TAU;
 
   return Math.sin(a) + 0.24 * Math.sin(2 * a - 0.55);
 };
 
-// Vertical swimming surge (phase-lagged behind contraction as the shed vortex pushes the bell)
 const surgeOf = (u: number): number =>
   -Math.cos(u * TAU - 0.85) - 0.16 * Math.cos(2 * u * TAU - 1.4);
 
-// Scalloped bell silhouette: outer dome + 6 gentle marginal lappets, conserving volume as it pulses
 const bellGeometry = (u: number, rxBase: number, ryBase: number): Geometry => {
   const p = pulseOf(u);
   const rimLag = pulseOf(u - 0.08);
@@ -86,7 +76,6 @@ const bellGeometry = (u: number, rxBase: number, ryBase: number): Geometry => {
   const rimX = rx * (0.98 - 0.1 * rimLag);
   const rimY = ryBase * (0.14 + 0.1 * rimLag);
 
-  // Build outer dome from left rim over apex to right rim, then 6 scallops back to left rim
   let g = path()
     .moveTo([q(-rimX), q(rimY)])
     .curveTo([q(-waistX * 1.06), q(waistY)], [q(-rx * 0.62), q(crownY)], [0, q(crownY)])
@@ -112,7 +101,6 @@ const bellGeometry = (u: number, rxBase: number, ryBase: number): Geometry => {
   return g.close();
 };
 
-// Inner translucent subumbrella dome (sits softly inside the outer gelatinous bell)
 const innerBellGeometry = (u: number, rxBase: number, ryBase: number): Geometry => {
   const p = pulseOf(u);
   const rx = rxBase * 0.78 * (1 - 0.15 * p);
@@ -127,7 +115,6 @@ const innerBellGeometry = (u: number, rxBase: number, ryBase: number): Geometry 
     .close();
 };
 
-// Specular fresnel rim highlight arching across the upper-left gelatinous dome
 const highlightGeometry = (u: number, rxBase: number, ryBase: number): Geometry => {
   const p = pulseOf(u);
   const rx = rxBase * (1 - 0.16 * p);
@@ -142,7 +129,6 @@ const highlightGeometry = (u: number, rxBase: number, ryBase: number): Geometry 
     );
 };
 
-// Radial meridian rib running from apex to margin (used for bioluminescent nerve pulses)
 const meridianGeometry = (u: number, frac: number, rxBase: number, ryBase: number): Geometry => {
   const p = pulseOf(u);
   const rimLag = pulseOf(u - 0.08);
@@ -162,9 +148,8 @@ const meridianGeometry = (u: number, frac: number, rxBase: number, ryBase: numbe
     );
 };
 
-// Traveling-wave tentacle or oral arm attached directly to the pulsing bell margin
 interface TentacleSpec {
-  readonly attachFrac: number; // -1..1 across bell width
+  readonly attachFrac: number;
   readonly length: number;
   readonly amp: number;
   readonly freq: number;
@@ -209,8 +194,6 @@ const tentacleGeometry = (
   return smoothOpen(pts);
 };
 
-// --- jellyfish factory (reusable for hero + deep companions) ----------------
-
 interface JellyPalette {
   readonly outerTop: Hex;
   readonly outerMid: Hex;
@@ -231,7 +214,7 @@ interface JellyConfig {
   readonly at: Vec;
   readonly scale: number;
   readonly tilt: number;
-  readonly phaseShift: number; // 0..1 fraction of CYCLE
+  readonly phaseShift: number;
   readonly opacity: number;
   readonly detailed: boolean;
   readonly palette: JellyPalette;
@@ -328,7 +311,6 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
 
   const uAt = (t: number): number => (((t / CYCLE + phaseShift) % 1) + 1) % 1;
 
-  // Fluid body bob & gentle rotational sway synced to the propulsion cycle
   const bob = sampled(
     (t): Vec => {
       const u = uAt(t);
@@ -345,7 +327,6 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
     precision: 2,
   }).loop(CYCLE);
 
-  // Deforming bell geometries
   const outerBell = sampled((t) => bellGeometry(uAt(t), RX, RY), span(0, CYCLE), {
     step: 0.12,
     tolerance: 1.1,
@@ -361,14 +342,12 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
     tolerance: 1.1,
   }).loop(CYCLE);
 
-  // Bioluminescent heart pulse (peaks warmly during each contraction stroke)
   const heartPulse = sampled((t) => 0.68 + 0.32 * Math.max(0, pulseOf(uAt(t))), span(0, CYCLE), {
     step: 0.12,
     tolerance: 0.02,
     precision: 2,
   }).loop(CYCLE);
 
-  // Shed propulsion vortex ring drifting down and dissolving beneath the bell
   const vortexOffset = sampled(
     (t): Vec => {
       const u = uAt(t);
@@ -397,7 +376,6 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
     { step: 0.12, tolerance: 0.015, precision: 2 },
   ).loop(CYCLE);
 
-  // Radial bioluminescent comb-row nerve pulses
   const meridianFracs = detailed ? [-0.72, -0.45, -0.2, 0, 0.2, 0.45, 0.72] : [-0.55, 0, 0.55];
 
   const meridians = meridianFracs.map((frac, idx) => ({
@@ -432,7 +410,6 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
     { step: 0.1, tolerance: 0.02, precision: 2 },
   ).loop(CYCLE);
 
-  // Ruffled central oral arms
   const armFracs = detailed ? [-0.62, -0.22, 0.22, 0.62] : [-0.38, 0.38];
 
   const oralArms: readonly { spec: TentacleSpec; geom: Track<Geometry> }[] = armFracs.map(
@@ -461,7 +438,6 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
     },
   );
 
-  // Gossamer marginal stinging tentacles
   const tentacleCount = detailed ? 10 : 5;
 
   const tentacles: readonly { spec: TentacleSpec; geom: Track<Geometry> }[] = Array.from(
@@ -496,7 +472,6 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
   return (
     <Group key={cfg.id} offset={cfg.at} scale={cfg.scale} opacity={cfg.opacity} origin="at">
       <Group motion={{ offset: bob, rotate: sway }} origin="at">
-        {/* Soft feathered ambient bioluminescent aura around the jellyfish */}
         <Shape
           geometry={circle(165)}
           at={[0, 12]}
@@ -514,7 +489,6 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
           })}
         />
 
-        {/* Shed propulsion vortex ring drifting down beneath the bell */}
         {detailed && (
           <Group
             motion={{ offset: vortexOffset, scale: vortexScale }}
@@ -534,7 +508,6 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
           </Group>
         )}
 
-        {/* Gossamer marginal tentacles (back layer) */}
         <Group>
           {tentacles.map(({ spec, geom }, idx) => (
             <Group key={`tent-${idx}`} opacity={spec.opacity}>
@@ -553,7 +526,6 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
           ))}
         </Group>
 
-        {/* Ruffled central oral arms */}
         <Group>
           {oralArms.map(({ spec, geom }, idx) => (
             <Group key={`arm-${idx}`} opacity={spec.opacity}>
@@ -576,7 +548,6 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
           ))}
         </Group>
 
-        {/* Translucent outer gelatinous bell */}
         <Shape
           geometry={outerBell}
           fill={linear({
@@ -591,7 +562,6 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
           stroke={{ color: mix(palette.rimLine, "#00000000", 0.72), width: 1.8, join: "round" }}
         />
 
-        {/* Inner subumbrella cavity */}
         <Shape
           geometry={innerBell}
           fill={radial({
@@ -605,7 +575,6 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
           })}
         />
 
-        {/* Glowing warm bioluminescent gonads (soft 4-lobe radial clover inside the bell) */}
         <Group opacity={heartPulse}>
           <Shape
             geometry={circle(48)}
@@ -641,7 +610,6 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
           ))}
         </Group>
 
-        {/* Radial meridian ribs & traveling bioluminescent nerve pulses */}
         <Group>
           {meridians.map(({ key, geom }) => (
             <Group key={key}>
@@ -666,7 +634,6 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
           ))}
         </Group>
 
-        {/* Glassy fresnel dome highlight */}
         <Shape
           geometry={domeHighlight}
           opacity={0.62}
@@ -676,8 +643,6 @@ const buildJelly = (cfg: JellyConfig): SceneElement => {
     </Group>
   );
 };
-
-// --- pelagic ocean atmosphere: god-rays & bioluminescent plankton -----------
 
 const GOD_RAYS: readonly {
   readonly pts: readonly Vec[];
@@ -742,7 +707,6 @@ const plankton: readonly Plankton[] = Array.from({ length: 52 }, (_, i) => ({
   phase: i % 4,
 }));
 
-// Four shared seamless-loop drift & shimmer tracks for plankton
 const planktonDrifts: readonly Track<Vec>[] = [
   track<Vec>([0, 0])
     .to([14, -18], span(0, 4), ease.inOut)
@@ -779,7 +743,6 @@ export default scene(
   },
   () => (
     <Group>
-      {/* 1. Deep pelagic-to-abyssal ocean gradient */}
       <Shape
         geometry={rect(WIDTH, HEIGHT)}
         fill={linear({
@@ -794,7 +757,6 @@ export default scene(
         })}
       />
 
-      {/* Soft sunlit surface scatter at the top of the water column */}
       <Shape
         geometry={rect(WIDTH, 180)}
         fill={linear({
@@ -808,7 +770,6 @@ export default scene(
         })}
       />
 
-      {/* 2. Volumetric underwater god-rays swaying gently from the surface */}
       <Group blend="screen">
         {GOD_RAYS.map((ray, i) => {
           const breathe = track(ray.peak * 0.4)
@@ -861,7 +822,6 @@ export default scene(
         })}
       </Group>
 
-      {/* 3. Background marine snow & drifting bioluminescent plankton */}
       <Group blend="screen">
         {plankton.map((p, i) => (
           <Group
@@ -889,10 +849,8 @@ export default scene(
         ))}
       </Group>
 
-      {/* 4. Three bioluminescent jellyfish (back-to-front depth order) */}
       <Group blend="screen">{JELLIES.map(buildJelly)}</Group>
 
-      {/* 5. Subtle abyssal vignette at the bottom edge for deep-sea framing */}
       <Shape
         geometry={rect(WIDTH, 90)}
         at={[0, HEIGHT - 90]}

@@ -33,7 +33,6 @@ const opened = async (): Promise<GPUDevice | undefined> => {
   if (!adapter) return undefined;
   const device = await adapter.requestDevice();
 
-  // The page's console is not told about a shader that fails: its fallback is the picture.
   device.addEventListener("uncapturederror", (event) => event.preventDefault());
 
   return device;
@@ -251,7 +250,6 @@ const run = (group: Element, scene: Scene): (() => void) => {
     const begun = performance.now();
     let last = "";
 
-    // What a field holds now, as the numbers the shader reads.
     const valueOf = (field: ShaderField, w: number, h: number): readonly number[] => {
       switch (field.kind) {
         case "time":
@@ -288,7 +286,6 @@ const run = (group: Element, scene: Scene): (() => void) => {
 
       for (const field of table.fields) data.set(valueOf(field, w, h), field.at / 4);
 
-      // Under reduced motion nothing moves but the clocks: draw only when a value has changed.
       const now = data.join();
 
       if (calm.matches && now === last) return undefined;
@@ -318,7 +315,6 @@ const run = (group: Element, scene: Scene): (() => void) => {
 
     draw = frame;
 
-    // An element that is off screen is not drawn until it comes back.
     watcher = new IntersectionObserver((entries) => {
       if (!gone) draws(frame, entries.at(-1)?.isIntersecting ?? true);
     });

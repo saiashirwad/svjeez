@@ -34,8 +34,6 @@ const DEGREES = 180 / Math.PI;
 /** The most steps one property is unrolled to, so a fast animation on a long scene stays a scene. */
 const MAX_STEPS = 4000;
 
-// ----------------------------------------------------------------------------- values
-
 /** A transform as its parts. `rotate` winds: 360 is a full turn, where the matrix alone would say 0. */
 interface Pose {
   readonly translate: Vec;
@@ -337,8 +335,6 @@ const poseOf = (props: Readonly<Record<string, string>>, rect: Rect): Parsed | R
 const wound = (angle: number, near: number): number =>
   angle + 360 * Math.round((near - angle) / 360);
 
-// ----------------------------------------------------------------------------- timeline
-
 interface Stop<T> {
   readonly offset: number;
   readonly value: T;
@@ -534,7 +530,6 @@ const plan = <T>(
   const before = run < 0 ? (timing.fillsBefore ? (moves[0]?.from ?? first) : base) : undefined;
   const initial = before ?? moves[0]?.from ?? base;
 
-  // Past its last iteration the effect either holds its last value or lets go of it.
   const end = iterations * length;
 
   if (Number.isFinite(iterations) && through >= end - 1e-9) {
@@ -584,8 +579,6 @@ const trackOf = <T, U>({ initial, moves, period }: Plan<T>, pick: (value: T) => 
 
   return period === undefined ? made : made.loop(period);
 };
-
-// ----------------------------------------------------------------------------- reading an element
 
 const TRANSFORM = ["transform", "translate", "rotate", "scale"];
 
@@ -736,13 +729,11 @@ const driveOf = (el: ElementNode, path: string, ctx: Context): Drives | undefine
 
   const underAlpha = under?.opacity === undefined ? undefined : numberOf(under.opacity);
 
-  // A color that follows the color scheme is paired in the base too, and is not animated.
   const underFill =
     under?.backgroundColor === undefined || isThemed(under.backgroundColor)
       ? undefined
       : rgbaOf(under.backgroundColor);
 
-  // A later animation replaces an earlier one that drives the same thing.
   const given = new Set<string>();
 
   for (const animation of [...running].reverse()) {
@@ -766,7 +757,6 @@ const driveOf = (el: ElementNode, path: string, ctx: Context): Drives | undefine
 
     const timing = timingOf(animation);
     const id = JSON.stringify([animation.name, animation.keyframes]);
-    // What the element looks like with no animation: only known before the animation starts.
     const idle = animation.currentTime < animation.delay;
 
     if (animation.keyframes.length > 2 && timing.easing.kind !== "linear")
@@ -791,7 +781,6 @@ const driveOf = (el: ElementNode, path: string, ctx: Context): Drives | undefine
         animation,
         TRANSFORM,
         (frame) => {
-          // The four compose into one transform, so a keyframe of one keeps the static values of the others.
           const merged: Record<string, string> = {};
 
           for (const name of TRANSFORM) {
@@ -860,7 +849,6 @@ const driveOf = (el: ElementNode, path: string, ctx: Context): Drives | undefine
       );
 
       if (stops && drives_("fill")) {
-        // Without a recorded base, a color that lets go mid-flight has nothing to return to: it keeps its last keyframe.
         const holds = !underFill && !idle;
 
         if (holds && !timing.fillsAfter && Number.isFinite(timing.count))
@@ -933,7 +921,6 @@ const lane = <T extends NonNullable<unknown>>(
 
   const total = slots.at(-1)!.end;
 
-  // One run over everything, from the start: the animation as it is, an endless one a loop.
   if (
     drives.every((drive) => drive?.id === first.id) &&
     statics.every((value) => value !== undefined)

@@ -99,7 +99,6 @@ export const element = (
   const widths = widthsOf(el.border);
   const padding = { box: inset(box, widths), radii: innerRadii(radii, widths) };
 
-  // What animations drive replaces the static value the capture caught mid-flight.
   const motion = ctx.motions.get(path);
 
   const placed = transform && !motion?.transform ? decompose(transform.matrix) : undefined;
@@ -132,7 +131,6 @@ export const element = (
       content.push(...text(kid.node, origin, kid.key, `${path}/${kid.key}`, ctx));
     else if (isElement(kid)) content.push(element(kid, origin, `${path}/${kid.key}`, ctx));
 
-  // The names the compiler gives its own parts start with "@", which no sibling key does.
   if (el.image) {
     const drawn = image(el.image, padding.box, "@image", `${path}/image`, ctx);
 
@@ -197,7 +195,6 @@ export const element = (
       {...(el.opacity !== undefined && !motion?.opacity && { opacity: el.opacity })}
       {...(blend && { blend })}
     >
-      {/* An element's animations (`track()`) drive this group, so they never collide with the lanes a morph drives on the group around it. */}
       <Group
         key="@track"
         {...(motion?.transform && { origin: "at" as const, ...motion.transform })}

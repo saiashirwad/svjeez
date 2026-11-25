@@ -1,8 +1,5 @@
 import { d, std } from "typegpu";
 
-// Fragment functions for the <Shader> tests. They are in a module of their own, which the tests import once TypeGPU's
-// transform is loaded: a "use gpu" function is compiled as its module is imported.
-
 /** A gradient that reads nothing, for a scene that is only about how it is written. */
 export const solid = (uv: d.v2f): d.v4f => {
   "use gpu";

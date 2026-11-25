@@ -5,10 +5,8 @@ import examplesCue from "./scenes/examples-cue";
 import { live } from "./live";
 import { facts, kb } from "./proof";
 
-// Main-thread milliseconds per second the scene costs while it plays, measured in headless Chromium at 1056px wide.
 const COST = 60;
 
-// The hero draws its own windows, at the size the page lays it out for.
 export const heroImage = live(scene);
 
 export const heroFile = facts(heroImage);

@@ -25,7 +25,6 @@ const BULB = 64;
 const GROUND_Y = 232;
 const REST_Y = GROUND_Y - BULB / 2 - 2;
 
-// The track runs from START to END, then there is nothing.
 const START = MARGIN;
 const END = 520;
 const TICK = 40;
@@ -33,7 +32,6 @@ const STEP = 60;
 const EDGE_X = END - 24;
 const question: Vec = [EDGE_X, REST_Y - BULB / 2 - 12];
 
-// One loop: walk out, stop at the edge, look around, walk back.
 const walkOut = span(0.2, 1.8);
 const atEdge = walkOut.next(0.2);
 const lean = atEdge.next(0.35);
@@ -47,7 +45,6 @@ const x = track(START + 20)
   .to(START + 20, walkBack, ease.inOut)
   .loop(LOOP);
 
-// Hop on every STEP of ground covered, so the bulb only bounces while it moves.
 const hop = (at: number): number => -Math.abs(Math.sin((at / STEP) * Math.PI)) * 7;
 const body = x.map((at): Vec => [at, REST_Y + hop(at)]);
 

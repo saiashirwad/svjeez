@@ -107,14 +107,12 @@ const compileStates = (
 
   const single = states.length === 1;
 
-  // One state rests for its hold, or long enough for its animations to play. They compile only then: they run on the scene's clock.
   const resting =
     hold ??
     (single ? Math.max(DEFAULT_HOLD, ...roots.map(({ node }) => watchFor(node))) : DEFAULT_HOLD);
 
   const ctx = context(
     snapshots.flatMap((snapshot) => snapshot.fonts ?? []),
-    // Only a state-to-state blend needs a clip in every state.
     single ? new Set() : clips,
   );
 
@@ -146,7 +144,6 @@ const compileStates = (
   for (const [path, typing] of typings(roots, states, spans, policy, measurable))
     ctx.typings.set(path, typing);
 
-  // Animations are tracks over the whole timeline, put on each state's copy of an element alike: the morph has no lane to blend.
   for (const [path, motion] of animate(roots, slots, eases, ctx)) ctx.motions.set(path, motion);
 
   const trees = roots.map((root) =>
@@ -158,7 +155,6 @@ const compileStates = (
   const page =
     trees.length === 1 ? trees[0]! : morph.between(normalize(trees), spans, { curve: curves });
 
-  // The mouse, where the states recorded it (`cursor: true`), in each state's root frame.
   const beats = states.map(({ pointer, snapshot: { root } }, i): Beat => {
     const local = ([x, y]: readonly [number, number]): Vec => [x - root.rect.x, y - root.rect.y];
     const { start, over, end } = slots[i]!;

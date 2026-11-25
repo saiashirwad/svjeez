@@ -283,7 +283,6 @@ export function classDiagram<
   const stickyId = (i: number) => `#note-${i + 1}`;
   const tied = stickies.flatMap((n, i) => (n.target === undefined ? [] : [i]));
 
-  // The marked end (a parent, a whole) goes on top, whichever way the relation is written.
   const flipped = relations.map(
     (r) => HOLLOW.includes(r.end ?? "arrow") && !HOLLOW.includes(r.start ?? "none"),
   );
@@ -384,8 +383,6 @@ export function classDiagram<
   const overlaps = (a: Box) =>
     labels.some((b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h);
 
-  // A cardinality sits just beside its end of the line, off the line and clear of the marker,
-  // and moves to the other side of the line when a relation label is already there.
   const beside = (text: string, tip: Point, next: Point): Box => {
     const [w, h] = [l.measure(text, l.small) + 8, Math.round(l.small * 1.5)];
     const vertical = Math.abs(next.y - tip.y) >= Math.abs(next.x - tip.x);
@@ -393,7 +390,6 @@ export function classDiagram<
     if (vertical) {
       const toward = Math.sign(next.y - tip.y || 1);
 
-      // Right of the line, then left, then tucked closer to the node on either side.
       const spots = [18, 4].flatMap((gap) =>
         [tip.x + 8, tip.x - 8 - w].map((x) => ({
           x,

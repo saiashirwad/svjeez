@@ -1,7 +1,5 @@
 import { tokens } from "svjeez";
 
-// The examples' colors, apart from their fonts (theme.ts), so a browser can import them without loading a font.
-
 export const theme = tokens({
   light: {
     background: "#FFFFFF",

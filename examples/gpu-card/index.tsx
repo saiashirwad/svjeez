@@ -37,14 +37,11 @@ const storm = clock("storm", span(1.4, 1.2));
 
 const field = ref();
 
-// The field's ground, in both schemes a shade of the card: deep in dark, pale in light.
 const ground = mix(theme.blue, theme.background, 0.1);
 
 const glow = (colors: readonly Color[], share: number) =>
   colors.map((one) => mix(one, ground, share));
 
-// The sky turns evenly over the whole clock, as the shader reads it. Words swap halfway: the calm ones go over the
-// first half and the stormy ones come over the second, so the two never sit on each other.
 const turning = (): Anim<number> => track(0).to(1, span(0, storm.over), ease.linear);
 const HALF = storm.over / 2;
 const fading = (): Anim<number> => track(1).to(0, span(0, HALF), ease.linear);
@@ -254,7 +251,6 @@ export default scene(
           inputs={{ storm, ...FIELD_COLORS }}
           fragment={(uv, input) => {
             "use gpu";
-            // Two noise fields warp a third; the storm speeds it up, roughens it and turns its colors.
             const s = input.storm;
             const t = input.time * std.mix(0.12, 0.55, s);
             const p = d.vec2f((uv.x * input.resolution.x) / input.resolution.y, uv.y);

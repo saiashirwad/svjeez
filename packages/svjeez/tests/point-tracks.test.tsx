@@ -2,7 +2,6 @@ import { expect, test } from "bun:test";
 import { Shape, rect, scene, span, track, type Anim, type Vec } from "svjeez";
 import { svg } from "svjeez/tools";
 
-// These are checked by tsc (bun run typecheck): the body must compile, and the ts-expect-error lines must stay errors.
 const takesPoint = (point: Anim<Vec>) => point;
 
 test("a point track and a mapped point need no annotation", () => {

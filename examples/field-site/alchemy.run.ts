@@ -2,7 +2,6 @@ import * as Cloudflare from "@alchemy.run/cloudflare";
 import * as Alchemy from "alchemy";
 import * as Effect from "effect/Effect";
 
-// fields.texoport.in: this page, built by Vite and served as static assets.
 export default Alchemy.Stack(
   "FieldsSite",
   {

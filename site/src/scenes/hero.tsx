@@ -19,9 +19,6 @@ import { BLIP, Blip, GROUND, Pivot, flashes, flight, jumps, type Hop } from "./b
 import { BAR, CodeLine, Listing, ROW, Selection, Squiggle, Window, word } from "./editor";
 import { Burst, Cloud, Hills, Kite, Sky, Stars, Sun, scenery, summit } from "./landscape";
 
-// The home page hero. A scene's source fills in a line at a time while Blip hops down it, and each word Blip lands on
-// pops into the picture beside it as what it names. The source is this scene's own, in the API it is written in.
-
 const W = 936;
 const H = 452;
 const D = 14;
@@ -56,9 +53,6 @@ const STARS: Vec[] = [
   [30, 140],
 ];
 
-// When: Blip lands on a word every 1.4 seconds, its line having come in just before, and the word's piece pops in.
-// Then Blip leaps onto the hill to hold the kite string, hops twice more, and everything clears for the next loop.
-
 const BEAT = 1.4;
 const lines = span(1.55, 0.35).cascade(4, BEAT);
 const marks = span(2.2, 0.25).cascade(4, BEAT);
@@ -78,8 +72,6 @@ const hops: Hop[] = [
   { land: finale + 3.5, height: 40 },
 ];
 
-// What: the source's refs and the words Blip lands on.
-
 const [editor, code, sky] = [ref(), ref(), ref()];
 const words = ["Sun", "rise", "Kite", "drift"].map((text) => word(code, SOURCE, text));
 const moon = word(code, NIGHT, "Moon");
@@ -89,8 +81,6 @@ const stops = [
   ...words.map(({ baseline, width }) => baseline.map(([x, y]): Vec => [x + width / 2, y - 14])),
   sky.topLeft.map(([x, y]): Vec => [x + HILL[0], y + HILL[1]]),
 ];
-
-// How: tracks and layers, built as values.
 
 /** The picture's `i`th piece pops in after its word, and out a beat after the one before it. */
 const popped = (i: number): Layer[] => [
@@ -124,7 +114,6 @@ const jumping = jumps(hops);
 
 const travel = stops.reduce(
   (t, stop, i) => t.to(stop, flight(hops[i]!), ease.linear),
-  // Blip starts on the editor's top edge, near its right corner.
   track<Vec>([0, 0]).set(
     editor.topRight.map(([x, y]): Vec => [x - 60, y]),
     span(0),

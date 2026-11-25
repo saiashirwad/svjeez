@@ -3,9 +3,6 @@ import type { Hex, Theme } from "svjeez/tools";
 import type { CodeRole } from "@svjeez/code/palettes";
 import { theme } from "@examples/colors.ts";
 
-// The scenes paint with the examples theme's tokens. A palette is new values for them, which restyle() swaps into a
-// scene's SVG, and the page's own colors under :root[data-palette] (styles/code.ts).
-
 export type Name = keyof typeof theme;
 
 /** The theme's tokens in the order a palette lists them: the greys from background to text, then the accents. */
@@ -42,7 +39,6 @@ export interface Palette {
   readonly theme: Theme<Name>;
 }
 
-// The base16 palettes the old site wore, slot by slot: base00 to base05 for the greys, base08 to base0E for the accents.
 /** In picker order. The first is the default, the look the scenes are built with (examples/theme.ts). */
 export const PALETTES = [
   { id: "system", label: "System", theme },

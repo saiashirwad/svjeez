@@ -6,7 +6,6 @@ const W = 200;
 const H = 60;
 const DELAY = 1.05;
 
-// Inlined in the examples heading, which paints `ink` as currentColor, so the words take the accent color.
 const page = tokens({
   light: { ink: "#1c1c1f" },
   dark: { ink: "#f4f4f5" },

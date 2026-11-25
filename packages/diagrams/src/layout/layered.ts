@@ -228,7 +228,6 @@ export function layered(input: LayeredInput): LayeredLayout {
     const run = tallest[r]! > 0 ? tallest[r]! + 2 * BEND + 4 : BEND;
     const spread = Math.max(0, count - 1) * TRACK;
 
-    // A gap grows for the widest edge crossing it, so that edge keeps a clear slope.
     const wide = Math.max(0, ...inGap(r).map((c) => Math.abs(c.xa - c.xb)));
 
     return Math.max(
@@ -389,11 +388,6 @@ export function layered(input: LayeredInput): LayeredLayout {
   };
 }
 
-// Spreads the ends of segments along the node sides they meet. Each end wants to sit level
-// with the other end of its segment, so a segment runs straight where both nodes have room
-// for it; a side with several ends keeps them a pitch apart, in the order the other ends lie.
-// A lone end only leaves the middle of its side when it can then run straight. Ends on
-// dummies stay put. A few rounds let the two ends of a segment settle on one another.
 const spread = (
   vertices: readonly Vertex[],
   crossing: readonly { a: number; b: number }[],
@@ -517,9 +511,6 @@ const longestPath = (count: number, edges: readonly { u: number; v: number }[]):
     }
   }
 
-  // Longest-path ranks leave loosely attached nodes far from their neighbours. Sweeping
-  // from the bottom, a node with more edges leaving than arriving moves down beside its
-  // targets, and one with more arriving than leaving moves up beside its sources.
   for (let pass = 0, changed = true; changed && pass < 8; pass++) {
     changed = false;
 
@@ -544,9 +535,6 @@ const SWEEPS = 24;
 const STALE = 4;
 const BIG = 600;
 
-// Counts crossings between each pair of neighbouring layers: pairs of segments whose ends
-// come in opposite order. Sorting by source and counting inversions of the targets with a
-// Fenwick tree keeps it O(E log V).
 const countCrossings = (vertices: readonly Vertex[], layers: readonly number[][]): number => {
   const pos = new Int32Array(vertices.length);
   layers.forEach((layer) => layer.forEach((v, k) => (pos[v] = k)));
@@ -573,7 +561,6 @@ const countCrossings = (vertices: readonly Vertex[], layers: readonly number[][]
   return total;
 };
 
-// Depth-first from the top, so that what hangs off one node starts out side by side.
 const depthFirst = (vertices: readonly Vertex[], ranks: number): number[][] => {
   const layers = Array.from({ length: ranks }, (): number[] => []);
   const seen = new Uint8Array(vertices.length);
@@ -652,8 +639,6 @@ const order = (vertices: readonly Vertex[], ranks: number, groups: number) => {
     }
   };
 
-  // Swaps neighbours in a layer while that removes crossings. A node and the back-edge
-  // dummies anchored to it move together; nodes of different groups never swap.
   const transpose = (layers: number[][]) => {
     for (let pass = 0; pass < 8; pass++) {
       let changed = false;
@@ -905,8 +890,6 @@ const place = (
 
   const outer = (it: Item) => it.kind === "v" && vertices[it.id]!.outer !== undefined;
 
-  // Back-edge channels are placed last, outside everything else; the rest of each row is one
-  // slot per item, and a group has one slot in each row it spans.
   const slotItem: Item[] = [];
   const slotOf = new Map<string, number>();
 
@@ -958,8 +941,6 @@ const place = (
 
   slotItem.forEach((it, s) => set(it, xs[s]!));
 
-  // Balancing picks each slot's x from different layouts, which can, rarely, bring two
-  // slots closer than their gap; push those apart.
   for (let changed = true; changed;) {
     changed = false;
 
@@ -1009,8 +990,6 @@ const place = (
   };
 };
 
-// A segment between a slot and one in the next row. `da` and `db` are where it meets each
-// slot, from the slot's centre. A held link joins a group's slots, which always stay in line.
 interface Link {
   readonly a: number;
   readonly b: number;
@@ -1020,12 +999,6 @@ interface Link {
   readonly held?: boolean;
 }
 
-// Brandes–Köpf coordinate assignment. Each of four passes (aligning to the row above or
-// below, from the left or the right) lines each slot up with a median neighbour, so long
-// edges become straight blocks, then packs the blocks as tightly as their gaps allow. A
-// slot takes the mean of its two middle x values across the four, which centres a parent
-// over its children. A segment that would cross a bend-to-bend one is never aligned, so
-// long edges win over short ones.
 const balance = (
   rows: readonly (readonly number[])[],
   links: readonly Link[],
@@ -1132,8 +1105,6 @@ const balance = (
 
     for (const v of queue) for (const { to, w } of out[v]!) x[to] = Math.max(x[to]!, x[v]! + w);
 
-    // Longest paths leave a block hard against those before it; pull each back toward
-    // those after it, so blocks with nothing pushing them sit beside what they lead to.
     for (const v of [...queue].reverse()) {
       const room = Math.min(...out[v]!.map(({ to, w }) => x[to]! - w));
 
@@ -1180,10 +1151,6 @@ const balance = (
   });
 };
 
-// Pulls nearly straight segments straight, then pulls what is left toward its neighbours.
-// Slots already in line move as one block, so a straight edge stays straight. A segment's
-// smaller block moves, if every slot in it keeps its gap to those beside it, by up to SNAP,
-// or BEND_SNAP for a block of bends only.
 const settle = (
   rows: readonly (readonly number[])[],
   links: readonly Link[],
@@ -1218,7 +1185,6 @@ const settle = (
     touching[l.b]!.push(l);
   }
 
-  // How far a block can move left and right before one of its slots meets a neighbour.
   const room = (id: number) => {
     let [lo, hi] = [-Infinity, Infinity];
 
@@ -1278,8 +1244,6 @@ const settle = (
 
   snap();
 
-  // Each block moves toward the mean of where its other segments would run straight, so a
-  // node with two children ends up centred over them.
   for (let sweep = 0; sweep < 24; sweep++) {
     const ids = block.filter((id, s) => id === s);
 

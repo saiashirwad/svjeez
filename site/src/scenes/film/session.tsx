@@ -19,10 +19,6 @@ import {
 } from "svjeez";
 import { mono, theme } from "./kit";
 
-// A coding agent's terminal session, laid out the way Claude Code lays one out: the prompt typed between two rules,
-// sent up as a message, then each tool call as a dot and a name with its result hanging under it, and a little
-// spinner with a made-up verb while it works. The glyphs are shapes, since the film's mono font has none of them.
-
 export interface Call {
   /** The tool and what it was given, as in Bash(svjeez check scene.tsx). */
   readonly tool: string;
@@ -103,7 +99,6 @@ export const Session = ({
 
       {children}
 
-      {/* The message, once it is sent. */}
       <Text
         font={mono}
         size={SIZE}
@@ -146,7 +141,6 @@ export const Session = ({
         </Text>
       </Group>
 
-      {/* The spinner, while it works. */}
       <Group
         offset={[24, input - 16]}
         motion={[appear(span(sent + 0.1, 0.2)), exit(span(done, 0.2))]}
@@ -157,7 +151,6 @@ export const Session = ({
         </Text>
       </Group>
 
-      {/* The prompt, between two rules, with a hint while it is empty and the shortcuts under it. */}
       <Shape
         geometry={line([8, input], [w - 8, input])}
         stroke={{ color: theme.faint, width: 1 }}

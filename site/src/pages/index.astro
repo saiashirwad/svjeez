@@ -33,7 +33,6 @@ import { REPO } from "../links";
 import { shikiTheme } from "../styles/code";
 import { windowed } from "../window";
 
-// Each slot keeps its window's size, so the page lays out the same whatever scene it holds.
 const tile = (scene: Parameters<typeof windowed>[0], title: string) => live(windowed(scene, { size: [504, 340], title }));
 
 const s = {
@@ -54,8 +53,6 @@ const s = {
 };
 
 const pkg = (name: string) => `${REPO}/tree/main/packages/${name}`;
-
-const reference = (name: string) => `${REPO}/blob/main/packages/svjeez/skills/svjeez/references/${name}.md`;
 
 const tiles = {
   math: [
@@ -119,7 +116,7 @@ const more = [
     cost: 17,
     label: "Paint",
     from: "svjeez",
-    href: reference("paint"),
+    href: pkg("svjeez"),
   },
   {
     name: "type",

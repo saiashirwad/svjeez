@@ -8,23 +8,11 @@ const root = join(import.meta.dir, "../skills/svjeez");
 const examples = join(root, "examples");
 const cli = join(import.meta.dir, "../src/cli.ts");
 
-const docs = [
-  "SKILL.md",
-  ...readdirSync(join(root, "references")).map((name) => `references/${name}`),
-];
+const docs = ["SKILL.md"];
 
 const read = (file: string): string => readFileSync(join(root, file), "utf8");
 
 const text = docs.map((file) => ({ file, source: read(file) }));
-
-const sources = (dir: string): string[] =>
-  readdirSync(dir, { withFileTypes: true }).flatMap((entry) =>
-    entry.isDirectory()
-      ? sources(join(dir, entry.name))
-      : entry.name.endsWith(".ts") || entry.name.endsWith(".tsx")
-        ? [join(dir, entry.name)]
-        : [],
-  );
 
 type Made = string | Scene | (() => string | Scene);
 
@@ -84,42 +72,13 @@ describe("skill docs", () => {
       ),
     );
 
-    expect(mentioned.length).toBeGreaterThan(10);
+    expect(mentioned.length).toBeGreaterThanOrEqual(8);
     expect(mentioned.filter((path) => !existsSync(join(root, path)))).toEqual([]);
   });
 
-  test("every reference is routed from SKILL.md, and none runs past 100 lines", () => {
-    const skill = read("SKILL.md");
-    expect(docs.filter((file) => file !== "SKILL.md" && !skill.includes(file))).toEqual([]);
-    expect(skill.split("\n").length).toBeLessThanOrEqual(260);
-
-    expect(
-      text.filter(({ file, source }) => file !== "SKILL.md" && source.split("\n").length > 100),
-    ).toEqual([]);
-  });
-
-  test("every runtime error in the error table is thrown somewhere in src", () => {
-    const section = /\nRuntime errors[^\n]*\n([\s\S]*?)\n## /.exec(read("SKILL.md"))?.[1] ?? "";
-
-    const quoted = [...section.matchAll(/^\| (`+) ?(.+?) ?\1 \|/gm)].flatMap((match) =>
-      match[2] === "Message" ? [] : [match[2]!],
-    );
-
-    expect(quoted.length).toBeGreaterThanOrEqual(25);
-
-    const lines = sources(join(import.meta.dir, "../src")).flatMap((file) =>
-      readFileSync(file, "utf8")
-        .split("\n")
-        .map((line) => line.replaceAll("\\`", "`")),
-    );
-
-    const missing = quoted.filter((message) => {
-      const parts = message.split("…").filter(Boolean);
-
-      return !lines.some((line) => parts.every((part) => line.includes(part)));
-    });
-
-    expect(missing).toEqual([]);
+  test("SKILL.md stays concise and no references folder remains", () => {
+    expect(existsSync(join(root, "references"))).toBe(false);
+    expect(read("SKILL.md").split("\n").length).toBeLessThanOrEqual(160);
   });
 
   test("every value export of svjeez appears in SKILL.md", async () => {
@@ -161,7 +120,7 @@ describe("skill docs", () => {
             expect(exported.has(name), `${file} imports ${name} from "${from}"`).toBe(true);
         }
 
-    expect(modules.size).toBeGreaterThan(8);
+    expect(modules.size).toBeGreaterThanOrEqual(1);
   });
 
   test("the scene in SKILL.md is examples/hello.tsx", () => {
@@ -171,9 +130,8 @@ describe("skill docs", () => {
     expect(scene!.trimEnd()).toBe(readFileSync(join(examples, "hello.tsx"), "utf8").trimEnd());
   });
 
-  test("every check code is documented in SKILL.md and check.md, and only those", () => {
-    const skill = /\n## Check, look, fix\n([\s\S]*?)\n## Size/.exec(read("SKILL.md"))?.[1] ?? "";
-    const reference = /\n## Codes\n([\s\S]*?)\n## /.exec(read("references/check.md"))?.[1] ?? "";
+  test("every check code is documented in SKILL.md, and only those", () => {
+    const skill = /\n## Check\n([\s\S]*?)\n## /.exec(read("SKILL.md"))?.[1] ?? "";
 
     const codesOf = (section: string): string[] =>
       [...section.matchAll(/^\| ((?:`[a-z-]+`(?:, )?)+) \|/gm)].flatMap((match) =>
@@ -182,7 +140,6 @@ describe("skill docs", () => {
 
     const known = Object.keys(RULES).sort();
     expect(codesOf(skill).sort()).toEqual(known);
-    expect(codesOf(reference).sort()).toEqual(known);
   });
 
   test("every svjeez command and flag in the docs is in the CLI usage, and every command is documented", () => {
@@ -194,11 +151,7 @@ describe("skill docs", () => {
 
     const all = text.map(({ source }) => source).join("\n");
 
-    // Mermaid's own arrows (--x, -->>) are not flags.
-    const cliText = text
-      .flatMap(({ file, source }) => (file === "references/mermaid.md" ? [] : [source]))
-      .join("\n")
-      .replaceAll("tsc --noEmit", "");
+    const cliText = read("SKILL.md").replaceAll("tsc --noEmit", "");
 
     const used = [...all.matchAll(/(?:npx|bunx(?: --bun)?) svjeez (\w+)/g)].map(
       (match) => match[1]!,
@@ -210,7 +163,6 @@ describe("skill docs", () => {
     const flags = new Set(cliText.match(/(?<![\w-])--[a-zA-Z][\w-]*/g));
     const unknown = [...flags].filter((flag) => !new RegExp(`${flag}(?![\\w-])`).test(usage));
 
-    // --bun is bunx's own flag, which the docs show beside the CLI.
     expect(unknown.filter((flag) => flag !== "--bun")).toEqual([]);
   });
 

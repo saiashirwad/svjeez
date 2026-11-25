@@ -15,5 +15,4 @@ export const systemScheme = (): Scheme => (dark.matches ? "dark" : "light");
 
 export const THEMECHANGE = "themechange";
 
-// The OS switching changes what a page left on system shows, and which imgs Safari needs pinned under any choice.
 dark.addEventListener("change", () => dispatchEvent(new Event(THEMECHANGE)));

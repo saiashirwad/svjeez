@@ -3,7 +3,6 @@ import { serve } from "@svjeez/dom/vite";
 import { selectors } from "playwright-core";
 import { theme } from "../../../../examples/colors.ts";
 
-// The app names its parts for svjeez with data-part; let getByTestId find them too.
 selectors.setTestIdAttribute("data-part");
 
 export default await film(
@@ -34,7 +33,6 @@ export default await film(
     await part("create").click();
     await snap("created", { over: 0.6, hold: 0.9 });
 
-    // Drag the new card from Todo to In progress.
     await part("card-ENG-143").hover();
     await page.mouse.down();
     await part("lane-progress").hover({ force: true });
@@ -47,14 +45,12 @@ export default await film(
     await part("set-done").click();
     await snap("done", { over: 0.7, hold: 2.8 });
 
-    // Back to the first frame, so the loop is seamless.
     await page.reload();
     await part("board").waitFor();
     await rest();
     await snap("again", { over: 0.9, hold: 0.4 });
   },
   {
-    // The site's tokens: the board paints with them, so the site's palettes recolor it like its other scenes.
     theme,
     cursor: true,
     title: "A project board, filmed from its React app",

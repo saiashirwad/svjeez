@@ -21,7 +21,6 @@ import {
 import { d } from "typegpu";
 import { loadTypeGpu, svg, type Model } from "svjeez/tools";
 
-// A "use gpu" function is compiled as its module is imported, so the fragments live in a module imported after this.
 expect(await loadTypeGpu(import.meta.dir)).toBe(true);
 
 const { captured, everything, gradient, solid } = await import("./fixtures/shaders");
@@ -83,7 +82,6 @@ describe("Shader", () => {
       ),
     )?.[1];
 
-    // It is text in the markup, so < and & are escaped, and a page reads them back as they were.
     expect(wgsl).toContain("fn shade(uv: vec2f, input: Inputs) -&gt; vec4f {");
     expect(wgsl).toContain("return vec4f(uv.x, uv.y, input.storm, 1f);");
     expect(wgsl).toContain("struct Inputs {\n  time: f32,\n  resolution: vec2f,\n  storm: f32,\n}");
@@ -170,7 +168,6 @@ describe("Shader", () => {
     const by = Object.fromEntries(fields.map((field) => [field.name, field]));
 
     expect(by.storm).toMatchObject({ kind: "clock", clock: "storm" });
-    // An input named apart from its clock still reads that clock.
     expect(by.weather).toMatchObject({ kind: "clock", name: "weather", clock: "storm" });
     expect(by.gain).toMatchObject({ kind: "number", value: 0.5 });
     expect(by.off).toMatchObject({ kind: "vec", value: [7, 9] });
@@ -195,7 +192,6 @@ describe("Shader", () => {
       </Group>
     ));
 
-    // The target's center is at (120, 100); the slot's corner is at (30, 50).
     expect(fieldsOf(out).fields.find((field) => field.name === "focus")).toMatchObject({
       kind: "point",
       value: [90, 50],
@@ -221,14 +217,12 @@ describe("Shader", () => {
       </Group>
     ));
 
-    // The stack puts the slot 40 down from its own top, so its corner is at (20, 60).
     expect(fieldsOf(out).fields.find((field) => field.name === "focus")).toMatchObject({
       value: [180, 90],
     });
   });
 
   test("a function that reads an input it was not given fails by the node's name", () => {
-    // The types say so too: a shader's function is typed by its inputs.
     const unfed = () => (
       // @ts-expect-error The fragment reads inputs that this shader was not given.
       <Shader name="sky" width={80} height={60} fragment={everything} />
@@ -311,8 +305,6 @@ describe("Shader", () => {
   });
 
   test("a function the transform did not compile says to use the CLI or @svjeez/vite", () => {
-    // Made at run time, which TypeGPU's transform never sees, wherever this file sits among the ones that install it: it has
-    // no WGSL to give.
     // SAFETY: the source is a "use gpu" function from `d.v2f` to `d.v4f`.
     const plain: (uv: d.v2f) => d.v4f = new Function(
       "d",

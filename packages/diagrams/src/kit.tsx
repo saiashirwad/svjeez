@@ -607,7 +607,6 @@ export const Edge = ({ look: l, ...e }: EdgeProps): SceneElement => {
     join: "round",
   } as const;
 
-  // The head stays fixed at the end and shows once the drawn line reaches its base.
   const cut = head === "filled" ? HEAD - 1 : 0;
   const reach = Math.min(1, Math.max(0, 1 - (HEAD - cut) / (new Route([points]).length || 1)));
 

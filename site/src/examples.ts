@@ -56,7 +56,6 @@ const SCENES = {
 
 export type ExampleName = keyof typeof SCENES;
 
-// The gallery's order, set like a front page: rows of 7 + 5, 4 + 4 + 4, 5 + 7 and 6 + 6, so every row fills the twelve columns.
 const ROWS: readonly (readonly (readonly [ExampleName, Span])[])[] = [
   [
     ["globe", 7],

@@ -108,7 +108,6 @@ export const instantiate = (
     if (source === undefined) throw new Error(`Cannot find module "${path}".`);
     const exports: { [name: string]: Exported } = {};
 
-    // A module is registered before it runs, so two files that import each other see one another's exports so far.
     loaded.set(path, exports);
 
     try {

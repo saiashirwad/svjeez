@@ -121,7 +121,6 @@ describe("origin.frame and Stack baseline / negative gap / child-named errors", 
     ));
 
     const node = model.root.children[0]!;
-    // arm is placed at [50, 30], so parent point [60, 10] is local [10, -20]
     expect(node.origin).toEqual([10, -20]);
   });
 

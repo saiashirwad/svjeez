@@ -83,8 +83,6 @@ const swatches = ({ theme }: Palette) => SWATCH.map((name, i) => `--s${i}: light
     if (shown.length) play(shown[next++ % shown.length]!);
   }, 6000);
 
-  // The slider picks light, system or dark. It sets `color-scheme` on the page, and Chromium hands that to every <img>
-  // SVG on it; system removes the choice so the page follows the OS again. Blip on the knob hops on every move.
   const slider = document.querySelector<HTMLElement>(".scheme")!;
   const stops = [...slider.querySelectorAll<HTMLButtonElement>("[data-scheme]")];
   const chosen = () => document.documentElement.dataset.theme ?? "system";

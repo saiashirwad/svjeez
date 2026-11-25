@@ -16,8 +16,6 @@ import { Pivot } from "../blip";
 import { DotMap, WeekChart } from "./data";
 import { ACCENTS, SHOTS, STAGE, mono, shown, theme } from "./kit";
 
-// The montage: four tiles of what else the same code makes, each drawing itself a beat after the last.
-
 const TILE: Vec = [530, 214];
 const GAP = 20;
 const LEFT = STAGE.x + (STAGE.w - 2 * TILE[0] - GAP) / 2;

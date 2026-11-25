@@ -21,9 +21,6 @@ import { geist, mono } from "@examples/fonts/faces";
 import { theme } from "@examples/theme";
 import { BLIP, Blip, GROUND, Pivot } from "../scenes/blip";
 
-// The parts a link-preview card is built from. A page's own `_*.og.tsx` writes its scene in JSX and takes what it
-// wants from here, so no two cards need share a layout.
-
 export const SIZE: Vec = [...OG_SIZE];
 export const MARGIN = 80;
 
@@ -145,7 +142,6 @@ export const Window = ({
         {title}
       </Text>
     )}
-    {/* The body's own frame, so children are placed from its top-left, not from wherever their bounds start. */}
     <Group at={[0, BAR]}>
       <Shape geometry={rect(w, h - BAR)} fill={theme.surface} opacity={0} />
       {children}

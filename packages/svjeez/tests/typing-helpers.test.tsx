@@ -13,7 +13,6 @@ import {
   type Track,
 } from "svjeez";
 
-// A helper generic over the value type must be writable with exported types alone.
 const keyframes = <V,>(
   frames: readonly (readonly [Interval, Goal<V>, Curve?])[],
   from: V,
@@ -23,7 +22,6 @@ const scaled = (t: Track<number>, by: number): Derived<number> => t.map((v) => v
 
 const anim: Anim<number> = scaled(keyframes([[{ start: 0, over: 1 }, 5]], 0), 2);
 
-// Stops built from computed colors are typed Color, not string, so no casts are needed.
 const sky = (a: Color, b: Color): Paint => linear({ from: [0, 0], to: [0, 100], stops: [a, b] });
 
 const where: TextAnchorPlace = "baseline-right";
