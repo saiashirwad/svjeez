@@ -13,6 +13,7 @@ export type {
   RunProps,
   RunStyle,
   SequenceProps,
+  SeriesProps,
   ShapeProps,
   StrokeProps,
   TextChild,

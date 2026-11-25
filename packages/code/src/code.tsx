@@ -1,8 +1,10 @@
 /** @jsxImportSource svjeez */
 import { Group, Run, Text, ease, rect, track, type Span } from "svjeez";
 import { SceneError, type Common, type FontValue } from "svjeez/tools";
-import { highlight, type Grammar, type Highlighted, type Lang } from "./highlight.ts";
+import { highlight, type Lang, type Piece } from "./highlight.ts";
+import { faceOf } from "./layout.ts";
 import type { Palette } from "./roles.ts";
+import { lines, type Split } from "./split.ts";
 
 export interface CodeProps extends Common {
   readonly lang: Lang;
@@ -11,15 +13,17 @@ export interface CodeProps extends Common {
   readonly palette: Palette;
   readonly lineHeight?: number;
   readonly tabSize?: number;
-  readonly grammars?: readonly Grammar[];
+  /** How the code is cut into nodes and keyed: `lines` (the default), `tokens`, `tokens.across(a, b)` or your own split. */
+  readonly by?: Split;
+  /** Names the lines instead of `line-1`, `line-2`…, one per line, empty ones included. Only with `by={lines}`. */
   readonly keys?: readonly string[];
   readonly typing?: Span;
   readonly children: string;
 }
 
-const lengthOf = (line: Highlighted[number]): number =>
+const lengthOf = (pieces: readonly Piece[]): number =>
   [
-    ...line
+    ...pieces
       .map(([, text]) => text)
       .join("")
       .trimEnd(),
@@ -34,7 +38,7 @@ export const Code = ({
   palette,
   lineHeight = 1.5,
   tabSize,
-  grammars,
+  by = lines,
   keys,
   typing,
   children,
@@ -52,24 +56,28 @@ export const Code = ({
   if (!(lineHeight > 0 && Number.isFinite(lineHeight)))
     throw new SceneError(`<Code> needs a positive lineHeight, got ${lineHeight}.`);
 
-  const lines = highlight(children, lang, {
-    ...(tabSize !== undefined && { tabSize }),
-    ...(grammars && { grammars }),
-  });
+  const code = highlight(children, lang, { tabSize });
 
-  if (keys && keys.length !== lines.length)
+  if (keys && by !== lines)
     throw new SceneError(
-      `keys names ${keys.length} lines, but the code has ${lines.length}.`,
+      "keys names lines, but this <Code> is split another way.",
+      "Leave out keys, or split by={lines}.",
+    );
+
+  if (keys && keys.length !== code.length)
+    throw new SceneError(
+      `keys names ${keys.length} lines, but the code has ${code.length}.`,
       "Give one key per line, empty lines included.",
     );
 
-  const rows = lines.map((line) => ({ line, chars: lengthOf(line) }));
-  const total = rows.reduce((sum, { chars }) => sum + chars, 0);
+  const face = faceOf(font);
+  const parts = by(code).map((part) => ({ ...part, chars: lengthOf(part.pieces) }));
+  const total = parts.reduce((sum, { chars }) => sum + chars, 0);
   let typed = 0;
 
   return (
     <Group {...common}>
-      {rows.map(({ line, chars }, index) => {
+      {parts.map(({ key, line, col, pieces, chars }) => {
         if (chars === 0) return null;
 
         const when = typing && {
@@ -77,22 +85,27 @@ export const Code = ({
           over: (typing.over * chars) / total,
         };
 
+        const before = (code[line] ?? [])
+          .map(([, text]) => text)
+          .join("")
+          .slice(0, col);
+
         typed += chars;
 
         return (
           <Text
-            key={keys?.[index] ?? `line-${index + 1}`}
+            key={keys?.[line] ?? key}
             font={font}
             size={size}
             fill={palette.plain}
-            at={[0, index * lineHeight * size]}
+            at={[col === 0 ? 0 : face.measure(before, size), line * lineHeight * size]}
             clip={
               when &&
               ((own) =>
                 track(rect(0, own.height)).to(rect(own.width, own.height), when, ease.steps(chars)))
             }
           >
-            {line.map(([role, text]) => (
+            {pieces.map(([role, text]) => (
               <Run fill={palette[role]}>{text}</Run>
             ))}
           </Text>

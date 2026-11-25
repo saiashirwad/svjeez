@@ -55,5 +55,5 @@ test("palette() names its tokens after the palette, so they never meet a scene's
 });
 
 test("the package root leaves the palettes to the subpath", () => {
-  expect(Object.keys(root).toSorted()).toEqual(["Code", "ROLES", "highlight"]);
+  expect(Object.keys(root).filter((name) => name in palettes)).toEqual([]);
 });

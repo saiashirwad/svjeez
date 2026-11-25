@@ -116,7 +116,13 @@ const bezier = ([x1, y1, x2, y2]: readonly number[], x: number) => {
 };
 
 /** An attribute's value at a time in playback seconds. */
-type Sample = (playback: number) => string;
+type Sample = (playback: number, end: boolean) => string;
+
+const wholeCycles = (time: number, period: number) => {
+  const cycles = Math.round(time / period);
+
+  return cycles > 0 && Math.abs(time - cycles * period) < 1e-9 ? cycles : 0;
+};
 
 /**
  * What an `<animate>` svjeez wrote shows at a playback time. A plain one cycles over `dur` until its repeats are done,
@@ -163,7 +169,9 @@ const sampled = (animate: Element): Sample => {
   };
 
   if (loop > 0)
-    return (playback) => {
+    return (playback, end) => {
+      if (end && wholeCycles(playback, loop)) return last;
+
       const inside = playback % loop;
       const start = begin || 0;
 
@@ -172,8 +180,10 @@ const sampled = (animate: Element): Sample => {
       return inside >= start + duration ? last : cycle((inside - start) / duration);
     };
 
-  return (playback) =>
-    playback >= repeats * duration ? last : cycle((playback % duration) / duration);
+  return (playback, end) =>
+    playback >= repeats * duration || (end && wholeCycles(playback, duration))
+      ? last
+      : cycle((playback % duration) / duration);
 };
 
 interface Tween {
@@ -244,6 +254,10 @@ const grouped = (root: Element): Map<string, Group> => {
     smil.remove();
   }
 
+  if (root.matches("[data-clock]")) groupOf(root);
+
+  for (const marked of root.querySelectorAll("[data-clock]")) groupOf(marked);
+
   return groups;
 };
 
@@ -262,7 +276,7 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
         ((start + at) / rate) * 1000 + Number(animation.effect?.getTiming().delay ?? 0);
 
     for (const { target, attribute, sample, at: start } of tweens)
-      target.setAttribute(attribute, sample((start + at) / rate));
+      target.setAttribute(attribute, sample((start + at) / rate, at === over));
   };
 
   const halt = () => {
@@ -320,7 +334,16 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
     return drop;
   };
 
-  for (const { animation } of parts) animation.pause();
+  for (const { animation, at: start } of parts) {
+    const effect = animation.effect;
+    const timing = effect?.getComputedTiming();
+    const count = wholeCycles(((start + over) / rate) * 1000, Number(timing?.duration));
+
+    // Fill the final keyframe when the mounted clock ends on a repeat boundary.
+    if (timing?.iterations === Infinity && count) effect?.updateTiming({ iterations: count });
+    animation.pause();
+  }
+
   show(0);
 
   const clock: ClockControl = {

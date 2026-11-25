@@ -216,7 +216,7 @@ export type SceneElement =
       readonly value: {} | null | undefined;
       readonly children: readonly SceneElement[];
     }
-  | { readonly type: "series"; readonly children: readonly SceneElement[] };
+  | { readonly type: "series"; readonly gap: Seconds; readonly children: readonly SceneElement[] };
 
 /** What JSX writes and expansion removes before a scene is lowered. */
 export type Authoring = Extract<SceneElement, { readonly type: "call" | "provide" | "series" }>;
@@ -319,8 +319,15 @@ export const Sequence = ({ when, clock, children }: SequenceProps): SceneElement
   };
 };
 
-/** Plays its children one after another: each starts where the one before it ends. Each needs a length, as a root of `<Sequence when={span(0, n)}>` gives it. */
-export const Series = ({ children }: { readonly children?: Child }): SceneElement => ({
-  type: "series",
-  children: flat(children),
-});
+export interface SeriesProps {
+  /** Seconds between one child's end and the next one's start. Negative overlaps them, as a crossfade wants: `gap={-0.4}` starts each child 0.4s before the one before it ends. */
+  readonly gap?: Seconds;
+  readonly children?: Child;
+}
+
+/** Plays its children one after another: each starts `gap` (default 0) after the one before it ends. Each needs a length, as a root of `<Sequence when={span(0, n)}>` gives it. */
+export const Series = ({ gap = 0, children }: SeriesProps): SceneElement => {
+  if (!Number.isFinite(gap)) throw new SceneError(`<Series> needs a finite gap, got ${gap}.`);
+
+  return { type: "series", gap, children: flat(children) };
+};

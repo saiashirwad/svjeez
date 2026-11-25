@@ -377,3 +377,41 @@ test("svjeez check reports type errors in the scene with file:line, using the pr
     rmSync(dir, { recursive: true, force: true });
   }
 }, 60_000);
+
+test("svjeez check includes ambient declarations from the project's tsconfig", () => {
+  const dir = mkdtempSync(join(import.meta.dir, "tmp-ambient-"));
+
+  try {
+    const file = join(dir, "scene.tsx");
+
+    writeFileSync(
+      join(dir, "tsconfig.json"),
+      JSON.stringify({
+        extends: "../../tsconfig.json",
+        files: ["scene.tsx", "ambient.d.ts"],
+      }),
+    );
+    writeFileSync(
+      join(dir, "ambient.d.ts"),
+      'declare module "ambient" { export type Size = number; }',
+    );
+    writeFileSync(
+      file,
+      [
+        'import type { Size } from "ambient";',
+        'import { Shape, circle, scene } from "svjeez";',
+        "const radius: Size = 2;",
+        'export default scene({ size: [10, 10], duration: 1, loop: false, title: "t", desc: "d" }, () => (',
+        '  <Shape geometry={circle(radius)} fill="#fff" />',
+        "));",
+      ].join("\n"),
+    );
+
+    const result = cli("check", file);
+
+    expect(result.stdout.toString()).not.toContain("TS2307");
+    expect(result.exitCode).toBe(0);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}, 60_000);

@@ -1,6 +1,5 @@
 import { SceneError } from "../model/scene-error";
 import type { Box, Vec } from "../model/ir";
-import { EPSILON } from "../model/time";
 import { flat, type Backdrop, type Child, type Common, type SceneElement } from "./nodes";
 import { restOf } from "./derived";
 import { Anchor, canvasAnchor, fractionOf, placeIn, Ref, type Place } from "./refs";
@@ -90,6 +89,9 @@ const paint = (label: string, { fill, stroke, radius }: Backdrop, padding: numbe
   };
 };
 
+// Text metrics leave fractions of a pixel: children that overflow a fixed size by less than one still fit.
+const SUBPIXEL = 1;
+
 const fits = (
   label: string,
   where: string,
@@ -100,7 +102,7 @@ const fits = (
 ): number => {
   if (given === undefined) return need;
 
-  if (given < need - EPSILON)
+  if (given <= need - SUBPIXEL)
     throw new SceneError(
       `${where} is ${given} ${side}, but its children${label === "<Stack>" ? ", gaps" : ""} and padding need ${Math.ceil(need * 100) / 100}.`,
       `Make it ${side === "wide" ? "wider" : "taller"}, or leave out ${side === "wide" ? "width" : "height"} so it fits them.${culprit ? ` (${culprit})` : ""}`,

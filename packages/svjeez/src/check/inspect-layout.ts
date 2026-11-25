@@ -76,13 +76,21 @@ const travelling = (entry: Entry, t: Seconds): boolean =>
       ),
   );
 
-const clippedOut = (entry: Entry, frame: ReadonlyMap<string, Placed>, box: Box): boolean =>
-  entry.ancestors.some((ancestor) => {
-    if (ancestor.clip === undefined) return false;
-    const clip = frame.get(ancestor.key);
+/** The part of a box that its ancestors' clips let show at this frame. */
+const shownOf = (entry: Entry, frame: ReadonlyMap<string, Placed>, box: Box): Box =>
+  entry.ancestors.reduce((shown, ancestor) => {
+    const clip = ancestor.clip === undefined ? undefined : frame.get(ancestor.key);
 
-    return clip !== undefined && sharedArea(box, clip.box) <= 0;
-  });
+    if (clip === undefined) return shown;
+    const [x, y] = [Math.max(shown.x, clip.box.x), Math.max(shown.y, clip.box.y)];
+    const right = Math.min(shown.x + shown.width, clip.box.x + clip.box.width);
+    const bottom = Math.min(shown.y + shown.height, clip.box.y + clip.box.height);
+
+    return { x, y, width: Math.max(0, right - x), height: Math.max(0, bottom - y) };
+  }, box);
+
+const clippedOut = (entry: Entry, frame: ReadonlyMap<string, Placed>, box: Box): boolean =>
+  area(shownOf(entry, frame, box)) <= 0;
 
 export const overlap = (survey: Survey): void => {
   const texts = survey.entries.filter(
@@ -106,13 +114,15 @@ export const overlap = (survey: Survey): void => {
   survey.frames.forEach(({ t, frame }) => {
     const up = texts.flatMap((entry) => {
       const at = frame.get(entry.node.key);
+      const shown = at && shownOf(entry, frame, at.box);
 
       return at &&
+        shown &&
         at.opacity > VISIBLE &&
         !fading(entry, t) &&
         !travelling(entry, t) &&
-        !clippedOut(entry, frame, at.box)
-        ? [{ entry, box: ink(at.box), full: at.box }]
+        area(shown) > 0
+        ? [{ entry, box: ink(shown) }]
         : [];
     });
 

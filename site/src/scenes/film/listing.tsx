@@ -1,4 +1,4 @@
-import { Code } from "@svjeez/code";
+import { Code, tsx } from "@svjeez/code";
 import {
   Shape,
   Text,
@@ -133,7 +133,7 @@ export const Listing = ({
 
   const code = (source: string): SceneElement => (
     <Code
-      lang="tsx"
+      lang={tsx}
       font={mono}
       size={size}
       lineHeight={LEADING}

@@ -124,16 +124,25 @@ export const projectTypeProblems = async (
   if (!ts) return undefined;
 
   const config = ts.findConfigFile(dirname(path), (name) => existsSync(name));
+  const folder = config ? dirname(config) : dirname(path);
 
-  const options: TS.CompilerOptions = config
+  const project = config
     ? ts.parseJsonConfigFileContent(
         ts.readConfigFile(config, ts.sys.readFile).config,
         ts.sys,
-        dirname(config),
-      ).options
-    : ts.convertCompilerOptionsFromJson(FALLBACK, dirname(path)).options;
+        folder,
+        undefined,
+        config,
+      )
+    : undefined;
 
-  const program = ts.createProgram({ rootNames: [path], options: { ...options, noEmit: true } });
+  const options = project?.options ?? ts.convertCompilerOptionsFromJson(FALLBACK, folder).options;
 
-  return typeErrors(ts, program, undefined, `${config ? dirname(config) : dirname(path)}/`);
+  const program = ts.createProgram({
+    rootNames: [path, ...(project?.fileNames.filter((name) => /\.d\.[cm]?ts$/.test(name)) ?? [])],
+    options: { ...options, noEmit: true },
+    ...(project?.projectReferences && { projectReferences: project.projectReferences }),
+  });
+
+  return typeErrors(ts, program, undefined, `${folder}/`);
 };

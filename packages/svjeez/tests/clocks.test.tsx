@@ -164,6 +164,46 @@ test("clocks are independent of each other", async () => {
   await page.close();
 });
 
+test("mount finds a named clock with static content", async () => {
+  const page = await page_(
+    svg.emit(
+      scene({ size: [40, 40], duration: 1, title: "Static clock" }, () => (
+        <Sequence clock={clock("still", span(0, 1))}>
+          <Shape geometry={rect(10, 10)} fill="#000000" />
+        </Sequence>
+      )),
+    ),
+  );
+
+  await run(page, MOUNT);
+
+  expect(await run(page, "return scene.clock('still').over;")).toBe(1);
+  await page.close();
+});
+
+test("a mounted clock holds its last frame at the scene's loop boundary", async () => {
+  const page = await page_(
+    svg.emit(
+      scene({ size: [40, 40], duration: 1, title: "Whole scene clock" }, () => (
+        <Sequence clock={clock("whole", span(0, 1))}>
+          <Shape geometry={rect(20, 10)} fill="#000000" opacity={track(0).to(1, span(0, 1))} />
+        </Sequence>
+      )),
+    ),
+  );
+
+  await run(page, MOUNT);
+
+  expect(
+    await run(
+      page,
+      `scene.clock('whole').progress(1);
+       return getComputedStyle(document.querySelector('[data-clock="whole"]')).opacity;`,
+    ),
+  ).toBe("1");
+  await page.close();
+});
+
 test("play runs to the end of the clock and resolves true, and reverse runs back", async () => {
   const page = await page_(build());
 
@@ -469,6 +509,24 @@ test("a clock takes over the SMIL inside it, and shows what the browser's SMIL s
     }
 
     await expected.close();
+    await page.close();
+  }
+});
+
+test("a mounted clock holds its SMIL endpoint at the scene's loop boundary", async () => {
+  for (const options of [
+    { duration: 1, at: 0, over: 1 },
+    { duration: 1, at: 0.5, over: 0.5 },
+  ]) {
+    const page = await page_(moving(options));
+
+    await run(page, MOUNT);
+    await run(page, "scene.clock('open').progress(1);");
+
+    const end = await run<Look>(page, ATTRIBUTES);
+
+    expect(end.x2).toBe(40);
+    expect(end.start).toBe(180);
     await page.close();
   }
 });

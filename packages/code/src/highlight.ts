@@ -5,23 +5,18 @@ import {
 } from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
 import { SceneError } from "svjeez/tools";
-import { LANGS, type DefaultLang } from "./langs.ts";
 import { ROLES, type CodeRole } from "./roles.ts";
 import { SCOPES } from "./scopes.ts";
-
-export type { DefaultLang } from "./langs.ts";
 
 export type Piece = readonly [role: CodeRole, text: string];
 
 export type Highlighted = readonly (readonly Piece[])[];
 
-export type Lang = DefaultLang | (string & {});
-
-export type Grammar = LanguageRegistration | LanguageRegistration[];
+/** A Shiki grammar: one that `@svjeez/code` exports, or any language's own module, as `import toml from "shiki/langs/toml.mjs"`. A list loads them all and highlights as the last one, so `[ts, bash, md]` is Markdown whose fenced code is TypeScript or Bash. */
+export type Lang = LanguageRegistration | readonly Lang[];
 
 export interface HighlightOptions {
   readonly tabSize?: number;
-  readonly grammars?: readonly Grammar[];
 }
 
 const sentinel = (role: CodeRole) => `#${(ROLES.indexOf(role) + 1).toString(16).padStart(6, "0")}`;
@@ -46,11 +41,15 @@ let shiki: ReturnType<typeof createHighlighterCoreSync> | undefined;
 const highlighterOf = () =>
   (shiki ??= createHighlighterCoreSync({
     themes: [THEME],
-    langs: LANGS,
     engine: createJavaScriptRegexEngine(),
   }));
 
-const loaded = new WeakSet<object>();
+const loaded = new Set<string>();
+
+const isList = (lang: Lang): lang is readonly Lang[] => Array.isArray(lang);
+
+const registrationsOf = (lang: Lang): LanguageRegistration[] =>
+  isList(lang) ? lang.flatMap(registrationsOf) : [lang];
 
 const expandTabs = (line: string, tabSize: number): string => {
   let out = "";
@@ -71,45 +70,46 @@ const expandTabs = (line: string, tabSize: number): string => {
   return out;
 };
 
-const checkTabSize = (tabSize: number): void => {
+/** The source's lines as `<Code>` lays them out: line endings unified, a final newline dropped, tabs expanded. */
+export const sourceLines = (source: string, tabSize = 2): string[] => {
   if (!Number.isInteger(tabSize) || tabSize < 1)
     throw new SceneError(
       `tabSize is ${tabSize}.`,
       "Give a whole number of at least 1, the spaces a tab becomes.",
     );
+
+  return source
+    .replace(/\r\n?/g, "\n")
+    .replace(/\n$/, "")
+    .split("\n")
+    .map((line) => expandTabs(line, tabSize));
 };
 
 export const highlight = (
   source: string,
   lang: Lang,
-  { tabSize = 2, grammars = [] }: HighlightOptions = {},
+  { tabSize = 2 }: HighlightOptions = {},
 ): Highlighted => {
-  checkTabSize(tabSize);
-  const highlighter = highlighterOf();
+  const text = sourceLines(source, tabSize).join("\n");
+  const grammars = registrationsOf(lang);
+  const language = grammars.at(-1);
 
-  for (const grammar of grammars) {
-    if (loaded.has(grammar)) continue;
-    highlighter.loadLanguageSync(grammar);
-    loaded.add(grammar);
-  }
-
-  const known = highlighter.getLoadedLanguages();
-
-  if (!known.includes(lang))
+  if (!language)
     throw new SceneError(
-      `"${lang}" is not a language @svjeez/code knows. It knows: ${known.toSorted().join(", ")}.`,
-      'Use one of those, or add its grammar: grammars={[toml]} after import toml from "shiki/langs/toml.mjs".',
+      "lang is an empty list of grammars.",
+      "Give a grammar, such as ts from @svjeez/code, or a list that ends in one.",
     );
 
-  const text = source
-    .replace(/\r\n?/g, "\n")
-    .replace(/\n$/, "")
-    .split("\n")
-    .map((line) => expandTabs(line, tabSize))
-    .join("\n");
+  const highlighter = highlighterOf();
+
+  if (grammars.some(({ name }) => !loaded.has(name))) {
+    highlighter.loadLanguageSync(...grammars);
+
+    for (const { name } of grammars) loaded.add(name);
+  }
 
   const lines = highlighter.codeToTokensBase(text, {
-    lang,
+    lang: language.name,
     theme: THEME.name,
     tokenizeTimeLimit: 0,
   });
