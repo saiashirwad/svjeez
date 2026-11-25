@@ -69,7 +69,7 @@ Use it to confirm a beat before rendering frames: where a node landed, whether i
 | `zero-size` | warning | geometry, text or an image with no size at any time |
 | `off-canvas` | error, warning | outside the canvas at every time (error), or cut by its edge at rest (warning); backgrounds that bleed are left alone |
 | `text-overflow` | warning | text past the canvas at rest, or a line wider than the width it wraps to |
-| `overlap` | warning | two different texts over each other while both are fully shown |
+| `overlap` | warning | two different texts over each other while both are fully shown (only the part a group's `clip` lets show counts, so complementary wipes don't warn) |
 | `missing-glyph` | error | characters the text's face has no glyph for; no other font fills in |
 | `low-contrast` | warning, info | text or a thin line too close to the flat color behind it, in either scheme |
 | `loop-seam` | warning | a looping scene jumps when it starts again: a value ends where it didn't start, a node enters and never leaves, or an arrow's ends follow a node that scales or moves in |

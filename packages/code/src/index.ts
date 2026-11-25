@@ -1,5 +1,9 @@
 export { Code, type CodeProps } from "./code.tsx";
 
+export { codeLayout, type CodeBox, type CodeLayout, type CodeStyle } from "./layout.ts";
+
+export { lines, tokens, type CodePart, type Split } from "./split.ts";
+
 export {
   bash,
   css,
@@ -10,6 +14,7 @@ export {
   json,
   jsx,
   md,
+  ocaml,
   python,
   rust,
   sql,

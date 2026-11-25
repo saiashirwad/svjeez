@@ -70,12 +70,19 @@ const expandTabs = (line: string, tabSize: number): string => {
   return out;
 };
 
-const checkTabSize = (tabSize: number): void => {
+/** The source's lines as `<Code>` lays them out: line endings unified, a final newline dropped, tabs expanded. */
+export const sourceLines = (source: string, tabSize = 2): string[] => {
   if (!Number.isInteger(tabSize) || tabSize < 1)
     throw new SceneError(
       `tabSize is ${tabSize}.`,
       "Give a whole number of at least 1, the spaces a tab becomes.",
     );
+
+  return source
+    .replace(/\r\n?/g, "\n")
+    .replace(/\n$/, "")
+    .split("\n")
+    .map((line) => expandTabs(line, tabSize));
 };
 
 export const highlight = (
@@ -83,8 +90,7 @@ export const highlight = (
   lang: Lang,
   { tabSize = 2 }: HighlightOptions = {},
 ): Highlighted => {
-  checkTabSize(tabSize);
-
+  const text = sourceLines(source, tabSize).join("\n");
   const grammars = registrationsOf(lang);
   const language = grammars.at(-1);
 
@@ -101,13 +107,6 @@ export const highlight = (
 
     for (const { name } of grammars) loaded.add(name);
   }
-
-  const text = source
-    .replace(/\r\n?/g, "\n")
-    .replace(/\n$/, "")
-    .split("\n")
-    .map((line) => expandTabs(line, tabSize))
-    .join("\n");
 
   const lines = highlighter.codeToTokensBase(text, {
     lang: language.name,

@@ -152,7 +152,7 @@ export const expand = (element: SceneElement): SceneElement => {
     case "series": {
       let end = 0;
 
-      const children = element.children.map((child): SceneElement => {
+      const children = element.children.map((child, index): SceneElement => {
         const body = expand(child);
         const over = rootLength(body);
 
@@ -162,8 +162,15 @@ export const expand = (element: SceneElement): SceneElement => {
             "Wrap it in <Sequence when={span(0, n)}>.",
             { node: "<Series>", ...(writtenAt(child) && { source: writtenAt(child)! }) },
           );
-        const start = end;
-        end += over;
+        const start = index === 0 ? 0 : end + element.gap;
+
+        if (start < 0)
+          throw new SceneError(
+            `<Series> gap={${element.gap}} starts its child ${index + 1} at ${start}s, before the series starts.`,
+            "Make the gap smaller than the child before it is long.",
+            { node: "<Series>", ...(writtenAt(child) && { source: writtenAt(child)! }) },
+          );
+        end = start + over;
 
         return { type: "sequence", start, over, children: [body] };
       });

@@ -13,6 +13,7 @@ import {
   blur,
   circle,
   linear,
+  polygon,
   rect,
   ref,
   scene,
@@ -282,6 +283,37 @@ group("text", () => {
 
     expect(found).toHaveLength(1);
     expect(found[0]!.related).toHaveLength(1);
+  });
+
+  test("overlap stays silent for two texts that complementary clip wipes never show in the same place", () => {
+    const wipe = (from: number, to: number) => (w: number) =>
+      polygon(
+        [from === 0 ? 0 : w, 0],
+        [to === 0 ? w : 200, 0],
+        [to === 0 ? w : 200, 100],
+        [from === 0 ? 0 : w, 100],
+      );
+
+    const clips = (shape: (w: number) => ReturnType<typeof polygon>) =>
+      track(shape(200)).to(shape(0), span(1, 2), ease.linear);
+
+    const wiped = made(() => (
+      <Group>
+        <Group clip={clips(wipe(0, 0))}>{say("first", [20, 50])}</Group>
+        <Group clip={clips(wipe(1, 1))}>{say("second", [24, 52])}</Group>
+      </Group>
+    ));
+
+    expect(codes(wiped)).not.toContain("overlap");
+
+    const unclipped = made(() => (
+      <Group>
+        <Group clip={clips(wipe(0, 0))}>{say("first", [20, 50])}</Group>
+        <Group>{say("second", [24, 52])}</Group>
+      </Group>
+    ));
+
+    expect(codes(unclipped)).toContain("overlap");
   });
 
   test("overlap stays silent for the same words, text passing by, and text hidden under a shape", () => {

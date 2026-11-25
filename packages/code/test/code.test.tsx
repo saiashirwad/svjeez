@@ -12,7 +12,7 @@ import {
 } from "svjeez";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
 import { SceneError, describe as describeScene, check, svg } from "svjeez/tools";
-import { Code, ts, type CodeProps } from "../src/index.ts";
+import { Code, codeLayout, lines, tokens, ts, type CodeProps } from "../src/index.ts";
 import { tomorrow } from "../src/palettes.ts";
 import { fontFixture } from "../../../fixtures/fonts.ts";
 
@@ -213,5 +213,165 @@ describe("<Code> misuse", () => {
 
     expect(error.problem).toBe("keys names 2 lines, but the code has 3.");
     expect(error.fix).toBe("Give one key per line, empty lines included.");
+  });
+});
+
+describe("<Code by={tokens}>", () => {
+  const texts = (built: ReturnType<typeof made>, t: number) =>
+    describeScene(built, [t]).frames[0]!.nodes.filter(({ kind }) => kind === "text");
+
+  test("draws one text per token, keyed by its text and occurrence, set at its measured column", () => {
+    const nodes = texts(
+      made(() => snippet({ key: "code", by: tokens })),
+      0,
+    );
+
+    expect(nodes.map(({ key }) => key)).toEqual([
+      "code/const#0",
+      "code/a#0",
+      "code/=#0",
+      "code/1#0",
+      "code/;#0",
+      "code/return#0",
+      "code/a#1",
+      "code/;#1",
+    ]);
+
+    const at = (key: string) => nodes.find((node) => node.key === key)!.box;
+
+    expect(at("code/a#0")[0]).toBeCloseTo(mono.measure("const ", 16), 0);
+    expect(at("code/return#0")[0]).toBeCloseTo(mono.measure("  ", 16), 0);
+    expect(at("code/return#0")[1]).toBe(2 * 1.5 * 16);
+  });
+
+  test("by={lines} is the default, and keys only name lines", () => {
+    const keyed = (extra: Partial<CodeProps>) =>
+      texts(
+        made(() => snippet({ key: "code", ...extra })),
+        0,
+      ).map(({ key }) => key);
+
+    expect(keyed({ by: lines })).toEqual(keyed({}));
+    expect(thrown(() => snippet({ by: tokens, keys: ["a", "b", "c"] })).problem).toBe(
+      "keys names lines, but this <Code> is split another way.",
+    );
+  });
+
+  test("a morph moves the tokens both sources share, and fades the rest", () => {
+    const states = ["const a = 1;", "let total = a + 1;"].map((source) =>
+      snippet({ key: "code", by: tokens, children: source }),
+    );
+
+    const out = made(() => morph.between(states, [span(1, 1)]), 3);
+
+    expect(check(out).problems.filter(({ severity }) => severity === "error")).toEqual([]);
+
+    const x = (t: number, key: string) => texts(out, t).find((node) => node.key === key)?.box[0];
+
+    expect(x(0, "code/a#0")).toBeCloseTo(mono.measure("const ", 16), 0);
+    expect(x(2.5, "code/a#0")).toBeCloseTo(mono.measure("let total = ", 16), 0);
+    expect(x(1.5, "code/a#0")).toBeGreaterThan(x(0, "code/a#0")!);
+    expect(x(1.5, "code/a#0")).toBeLessThan(x(2.5, "code/a#0")!);
+    expect(x(0, "code/total#0")).toBeUndefined();
+    expect(x(2.5, "code/const#0")).toBeUndefined();
+  });
+
+  test("tokens.across keys by a diff, so dropping a line keeps the next one whole", () => {
+    const [before, after] = ["a = 1;\nb = 2;", "b = 2;"];
+
+    const keysOf = (source: string, by: CodeProps["by"]) =>
+      texts(
+        made(() => snippet({ key: "code", by, children: source })),
+        0,
+      ).map(({ key }) => key);
+
+    const diffed = tokens.across(before, after);
+
+    expect(keysOf(before, diffed)).toEqual(keysOf(before, tokens));
+    expect(keysOf(after, tokens)).toEqual(["code/b#0", "code/=#0", "code/2#0", "code/;#0"]);
+    expect(keysOf(after, diffed)).toEqual(["code/b#0", "code/=#1", "code/2#0", "code/;#1"]);
+    expect(thrown(() => snippet({ by: diffed, children: "g();" })).problem).toBe(
+      "This <Code>'s source is not one of the sources given to tokens.across().",
+    );
+  });
+
+  test("tokens.across pairs a token that moved out of order with its nearest twin", () => {
+    const diffed = tokens.across("f >>= fun key ->", "let key = f in");
+
+    const keys = texts(
+      made(() => snippet({ key: "code", by: diffed, children: "let key = f in" })),
+      0,
+    );
+
+    expect(keys.map(({ key }) => key)).toEqual([
+      "code/let#0",
+      "code/key#0",
+      "code/=#0",
+      "code/f#0",
+      "code/in#0",
+    ]);
+  });
+
+  test("typing still types every token in order", () => {
+    const { timeline } = describeScene(
+      made(() => snippet({ key: "code", by: tokens, typing: span(0, 1) })),
+      [0],
+    );
+
+    const spans = timeline
+      .map(({ animates }) => animates[0]!.spans[0]!)
+      .toSorted((a, b) => a[0] - b[0]);
+
+    expect(spans).toHaveLength(8);
+    expect(spans[0]![0]).toBeCloseTo(0);
+    expect(spans.at(-1)![1]).toBeCloseTo(1);
+    spans.slice(1).forEach((s, i) => expect(s[0]).toBeGreaterThanOrEqual(spans[i]![1] - 1e-9));
+  });
+});
+
+describe("codeLayout()", () => {
+  const style = { font: mono, size: 16, lineHeight: 2, at: [10, 20] as const };
+  const layout = codeLayout(style, SOURCE);
+  const { ascent, descent } = mono.metrics;
+  const lift = ((ascent + descent) * 16 - 32) / 2;
+
+  test("points and boxes use the font's advances and <Code>'s line placement, 0-based", () => {
+    expect(layout.lines).toEqual(["const a = 1;", "", "  return a;"]);
+    expect(layout.point(0)).toEqual([10, 20 + lift]);
+    expect(layout.point(2, 2)[0]).toBeCloseTo(10 + mono.measure("  ", 16));
+    expect(layout.point(2, 2)[1]).toBeCloseTo(20 + 2 * 32 + lift);
+
+    const box = layout.box(0, 6, 7);
+
+    expect(box.x).toBeCloseTo(10 + mono.measure("const ", 16));
+    expect(box.width).toBeCloseTo(mono.measure("a", 16));
+    expect(box.height).toBe(32);
+    expect(box.center[1]).toBeCloseTo(20 + ((ascent + descent) * 16) / 2);
+    expect(layout.box(2).width).toBeCloseTo(mono.measure("  return a;", 16));
+  });
+
+  test("find() boxes a substring, by occurrence", () => {
+    expect(layout.find("a")).toEqual(layout.box(0, 6, 7));
+    expect(layout.find("a", 1)).toEqual(layout.box(2, 9, 10));
+    expect(layout.find("return")).toEqual(layout.box(2, 2, 8));
+  });
+
+  test("the text's box sits inside its cell where <Code> draws it", () => {
+    const built = made(() => snippet({ key: "code", at: [10, 20], lineHeight: 2, by: tokens }));
+
+    const node = describeScene(built, [0]).frames[0]!.nodes.find(
+      ({ key }) => key === "code/return#0",
+    )!;
+
+    const cell = layout.find("return");
+
+    expect(node.box[0]).toBeCloseTo(cell.x, 0);
+    expect(node.box[1] + node.box[3] / 2).toBeCloseTo(cell.center[1], 0);
+  });
+
+  test("a line, a column or a text it doesn't have is refused", () => {
+    expect(() => layout.point(3)).toThrow("asks for line 3, but the code has lines 0 to 2.");
+    expect(() => layout.box(0, 0, 40)).toThrow("asks for column 40 of line 0");
+    expect(() => layout.find("b")).toThrow('looks for "b" number 0, but the code has it 0 times.');
   });
 });

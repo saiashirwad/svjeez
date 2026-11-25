@@ -79,7 +79,7 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 | `typed(value, { by, caret })` | a string track typed out, last in a `<Text>`: each `.to()` erases back to the shared start, then types; `by` is `chars` (default), `words` or your own split |
 | `<Group offset>` | moves children together; `offset` is where their `[0, 0]` goes |
 | `<Picture src={picture(bytes)} width height>` | a PNG, JPEG, GIF, WebP or SVG; `picture.load(path)` reads a file |
-| `<Sequence when={span}>` | a local clock: tracks inside count from the span's start |
+| `<Sequence when={span}>`, `<Series gap>` | a local clock: tracks inside count from the span's start; children one after another (`gap={-0.4}` overlaps each with the one before, for crossfades) |
 | `<Arrow from to stroke bend inset head draw>` | between points or anchors; follows them as they move |
 
 Every node also takes `key ref at anchor origin rotate scale skew opacity motion clip mask effects blend scheme`. `origin` takes a place, `[x, y]` from box top-left, `{ frame: [x, y] }` in parent coordinates, or `"at"`. `scheme="light"` or `"dark"` shows a node in that color scheme only ([`references/paint.md`](references/paint.md)).
@@ -124,7 +124,7 @@ Fonts and data: `google()` and `google.family()` from `@svjeez/fonts` (load font
 - **A prop changes on its own schedule**: give the prop a track. `fill={track(theme.text).to(theme.blue, span(1, 0.3))}`.
 - **A node arrives, leaves or wobbles**: a layer in `motion` (`enter`, `exit`, `wiggle`, or `{ opacity: track(…) }`). Layers multiply opacity and add offsets on top of the node's own props, so an entrance never fights a prop's track.
 - **Something draws itself**: `draw={track(0).to(1, span(…))}` on a `<Shape>`, an `<Arrow>`, a chart series.
-- **Two layouts of one picture** (chart values, before/after code): `morph` between keyed states, not hand-written tracks per node.
+- **Two layouts of one picture** (chart values, before/after code): `morph` between keyed states, not hand-written tracks per node. Code that rewrites itself: two `<Code by={tokens}>` states; highlights from `codeLayout(style, source).find("name")`, never a column times a character width.
 - **A changing number**: `count()` in a `<Text>`, never texts crossfaded per value.
 - **Typing**: `typed(track("").to("Save drafts", span(0.2, 1)))`, never a `<Run>` per letter faded in.
 - **One number drives many props**: one track and `.map()` from it, not parallel tracks that can drift apart.
