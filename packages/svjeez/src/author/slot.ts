@@ -1,5 +1,5 @@
 import { SceneError } from "../model/scene-error";
-import { NAME } from "./clock";
+import { checkName } from "./names";
 import { centered } from "./layout";
 import type { Child, Common, SceneElement } from "./nodes";
 
@@ -27,11 +27,7 @@ export const Slot = ({
   children,
   ...props
 }: SlotProps): Extract<SceneElement, { readonly type: "group" }> => {
-  if (!NAME.test(name))
-    throw new SceneError(
-      `<Slot> needs a name of letters, digits, - and _ that starts with a letter, got ${JSON.stringify(name)}.`,
-      'Name it as in <Slot name="field" width={240} height={160}>.',
-    );
+  checkName(name, "<Slot>", '<Slot name="field" width={240} height={160}>');
 
   if (!isLength(width) || !isLength(height))
     throw new SceneError(

@@ -41,6 +41,7 @@ const isMaker = (value: MakePlugin | { readonly default: MakePlugin }): value is
  */
 const typegpu = async (root: string): Promise<PluginOption[]> => {
   const require = createRequire(join(root, "package.json"));
+
   const found = (name: string) => {
     try {
       return require.resolve(name);

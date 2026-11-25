@@ -328,7 +328,7 @@ describe("Shader", () => {
     const why = Symbol.for("svjeez.typegpu.uncompiled");
 
     Reflect.set(globalThis, why, {
-      why: "Node v22.12.0 can't compile \"use gpu\" functions.",
+      why: 'Node v22.12.0 can\'t compile "use gpu" functions.',
       fix: "Run the scene on Node 22.15 or later, or under Bun.",
     });
 

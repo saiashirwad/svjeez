@@ -2,7 +2,8 @@ import type { d } from "typegpu";
 import { hexBytes, hexOf, type Hex } from "../model/color";
 import { SceneError } from "../model/scene-error";
 import type { Rgb, ShaderField, ShaderMark, ShaderValue, Vec } from "../model/ir";
-import { isClock, NAME, type Clock } from "./clock";
+import { isClock, type Clock } from "./clock";
+import { checkName } from "./names";
 import { Slot } from "./slot";
 import { isAnchor, type Anchor } from "./refs";
 import type { Child, Common, SceneElement } from "./nodes";
@@ -254,11 +255,7 @@ export const Shader = <const I extends ShaderInputs = {}>({
 }: ShaderProps<I>): SceneElement => {
   const label = `<Shader name="${name}">`;
 
-  if (!NAME.test(name))
-    throw new SceneError(
-      `<Shader> needs a name of letters, digits, - and _ that starts with a letter, got ${JSON.stringify(name)}.`,
-      'Name it as in <Shader name="sky" width={240} height={160} fragment={...} />.',
-    );
+  checkName(name, "<Shader>", '<Shader name="sky" width={240} height={160} fragment={...} />');
 
   if (!isFragment(fragment))
     throw new SceneError(

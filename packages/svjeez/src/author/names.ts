@@ -78,3 +78,15 @@ export const wordsOf = (children: TextContent): string => {
 
   return "";
 };
+
+/**
+ * Checks a name that page code finds a part of the scene by (a clock, a slot): letters, digits, - and _, starting with a
+ * letter, so it is safe in a selector and a data attribute. `what` names the caller in the error; `example` shows one.
+ */
+export const checkName = (name: string, what: string, example: string): void => {
+  if (!/^[A-Za-z][A-Za-z0-9_-]*$/.test(name))
+    throw new SceneError(
+      `${what} needs a name of letters, digits, - and _ that starts with a letter, got ${JSON.stringify(name)}.`,
+      `Name it as in ${example}.`,
+    );
+};

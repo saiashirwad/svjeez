@@ -334,7 +334,7 @@ test("getScene() prefixes a scene it emits, and leaves markup it is given", () =
   );
 });
 
-test("a scene with a <Shader> compiles its \"use gpu\" function with the app's typegpu", async () => {
+test('a scene with a <Shader> compiles its "use gpu" function with the app\'s typegpu', async () => {
   const dir = join(scratch, "shader");
   mkdirSync(dir);
 
