@@ -28,6 +28,7 @@ import { validateSvg } from "./svg/validate";
 import { isSceneError } from "./model/scene-error";
 import { hostOf } from "./host";
 import { isString } from "./model/guards";
+import { loadTypeGpu } from "./load-typegpu";
 
 const host = hostOf();
 
@@ -181,6 +182,9 @@ const loadValue = async (
   }
 
   const url = pathToFileURL(path).href;
+
+  // A scene with a <Shader> is written with TypeGPU, whose "use gpu" functions its loader must compile as it imports them.
+  await loadTypeGpu(dirname(path));
 
   const module: SceneModule = await import(url).catch(async (error: Error & { code?: string }) => {
     if (error.code !== "ERR_UNKNOWN_FILE_EXTENSION") throw error;

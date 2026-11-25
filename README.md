@@ -159,6 +159,27 @@ The `.svg` still plays the span on its own, so an `<img>` embed keeps working. E
   <sub><b>Two clocks and a status dot</b> · 12 KB · <a href="examples/clocks/index.tsx"><code>examples/clocks/index.tsx</code></a> · <a href="examples/clocks/page.ts"><code>page.ts</code></a></sub>
 </p>
 
+## Draw part of a scene with WebGPU
+
+A `<Shader>` is a box in the layout that the page draws with a [TypeGPU](https://docs.swmansion.com/TypeGPU) function written in the scene. The build turns it into WGSL inside the SVG, and `mount()` draws it every frame, reading the scene's clocks, anchors and colors. The children are the fallback that the plain `.svg`, an `<img>` and a browser without WebGPU show.
+
+```tsx
+<Shader name="sky" width={520} height={220} inputs={{ storm, focus: card.center }} fragment={(uv, input) => {
+  "use gpu";
+  return d.vec4f(uv.x, uv.y, input.storm, 1);
+}}>
+  <Still />
+</Shader>
+```
+
+A `<Slot>` is the same box for the page's own HTML: `mount(svg).slot("field").host(canvas)` puts a canvas there, and the scene's layout and clocks move it. Shaders need `typegpu` and `unplugin-typegpu` installed.
+
+<p align="center">
+  <img src="examples/dist/gpu-card.svg" alt="A signal card: a live aurora between a calm or storm badge and three readouts" width="480">
+  <br>
+  <sub><b>Signal</b> · the aurora is live on <a href="examples/gpu-card/page.ts"><code>the page</code></a> and a still gradient here · <a href="examples/gpu-card/index.tsx"><code>examples/gpu-card/index.tsx</code></a> · <a href="examples/field-site"><code>examples/field-site</code></a></sub>
+</p>
+
 ## Film a real web app
 
 Skip redrawing UI by hand. `@svjeez/dom` drives a React, Svelte, or HTML app in Playwright, snapshots DOM states in light and dark mode, and compiles the transitions into one zero-JS `.svg`:

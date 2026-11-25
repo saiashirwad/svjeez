@@ -78,7 +78,7 @@ In `tsconfig.json` set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"` and `
 | `typed(value, { by, caret })` | a string track typed out, last in a `<Text>`: each `.to()` erases back to the shared start, then types; `by` is `chars` (default), `words` or your own split |
 | a string track as the only child of a `<Text>` | a label that swaps: each value shows instantly, a `.set()` at its time and a `.to()` when its span is over (never partway), each measured with the real font and anchored on its own, so a centred label stays centred. `<Text font size fill at={[x, y]} anchor="center">{track("CLOSED").set("SYN_SENT", span(0.9, 0)).set("ESTABLISHED", span(5, 0))}</Text>` |
 | `<Group offset>` | moves children together; `offset` is where the group's `[0, 0]` goes, as on any node |
-| `<Picture src={picture(bytes)} width height>` | a PNG, JPEG, GIF, WebP or SVG; `picture.load(path)` reads a file |
+| `<Picture src={picture(bytes)} width height>`, `<Slot name width height>`, `<Shader name width height inputs fragment>` | a PNG, JPEG, GIF, WebP or SVG (`picture.load(path)` reads a file); a box the page fills with its own HTML; one it draws with a TypeGPU shader written in the scene ([`references/shader.md`](references/shader.md)) |
 | `<Sequence when={span}>`, `<Sequence clock={clock(name, span)}>` | tracks inside count from the span's start. Page code can play or scrub a named clock. `<Series gap>` plays children in order and a negative gap overlaps them for crossfades ([`references/time.md`](references/time.md)) |
 | `<Arrow from to stroke bend inset head draw>` | between points or anchors; follows them as they move |
 
@@ -235,13 +235,10 @@ Runtime errors. `…` stands for a value the message fills in.
 - Containers, text, runs and counting numbers: [`references/layout-text.md`](references/layout-text.md)
 - Refs, anchors, parts and `<Arrow>`: [`references/refs-arrows.md`](references/refs-arrows.md)
 - Paint, clip, mask, effects: [`references/paint.md`](references/paint.md)
-- Morphing between states: [`references/morph.md`](references/morph.md)
-- The check report and every code: [`references/check.md`](references/check.md)
+- Morphing between states; the check report and every code: [`references/morph.md`](references/morph.md), [`references/check.md`](references/check.md)
 - SVG, frames, dev preview, video, embedding: [`references/render.md`](references/render.md)
-- Params: [`references/params.md`](references/params.md)
-- Fonts and pictures: [`references/fonts-pictures.md`](references/fonts-pictures.md)
-- Icons, charts, code: [`references/icons.md`](references/icons.md), [`references/charts.md`](references/charts.md), [`references/code.md`](references/code.md)
-- Diagrams, Mermaid, maps and globes, math: [`references/diagrams.md`](references/diagrams.md), [`references/mermaid.md`](references/mermaid.md), [`references/geo.md`](references/geo.md), [`references/math.md`](references/math.md)
+- Params; fonts and pictures: [`references/params.md`](references/params.md), [`references/fonts-pictures.md`](references/fonts-pictures.md)
+- Icons, charts, code, diagrams, Mermaid, maps and globes, math: [`references/icons.md`](references/icons.md), [`references/charts.md`](references/charts.md), [`references/code.md`](references/code.md), [`references/diagrams.md`](references/diagrams.md), [`references/mermaid.md`](references/mermaid.md), [`references/geo.md`](references/geo.md), [`references/math.md`](references/math.md)
 - Vite and Astro; editing a scene's source from a program: [`references/web.md`](references/web.md), [`references/live.md`](references/live.md)
 
 ## Examples

@@ -9,3 +9,5 @@ site/.astro
 site/.alchemy
 packages/bin/.build
 packages/bin/dist
+examples/field-site/dist
+examples/field-site/.alchemy

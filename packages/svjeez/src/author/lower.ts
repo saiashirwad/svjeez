@@ -1058,12 +1058,6 @@ const inside = (
   const end = over === undefined ? parent.end : start + over;
   const name = label(begin, over, named);
 
-  if (named && parent.named)
-    throw new SceneError(
-      `A ${name} sits inside a <Sequence clock="${parent.named.name}">, and clocks don't nest.`,
-      "Put the two side by side, each with the nodes it drives.",
-    );
-
   if (start > parent.end + EPSILON || end > parent.end + EPSILON)
     throw new SceneError(
       `A ${name} runs until ${num(end - parent.offset)}s, past the ${num(parent.end - parent.offset)}s ${parent.clips.at(-1)?.label ?? "scene"}.`,
@@ -1113,7 +1107,7 @@ const lowerAll = (
       const nodes = lowerAll(ctx, given.children, within, parent, taken);
       const { named } = within.clock;
 
-      return given.clock ? nodes.map((node) => ({ ...node, clock: named! })) : nodes;
+      return given.clock ? nodes.map((node) => ({ ...node, clock: node.clock ?? named! })) : nodes;
     }
 
     if (given.type === "morph" && given.only !== undefined) {
@@ -1218,6 +1212,7 @@ const lowered = (
     el.type,
     el.type === "group" ? el.settle : undefined,
     backdrop,
+    el.type === "group" ? el.points : undefined,
   );
 
   const aimed = (node: SceneNode): SceneNode => {
@@ -1255,6 +1250,8 @@ const lowered = (
         ...((el.layout || pins) && {
           authored: { ...(el.layout && { layout: el.layout }), ...(pins && { pinned: true }) },
         }),
+        ...(el.slot !== undefined && { slot: el.slot }),
+        ...(el.shader && { shader: el.shader }),
         kind: "group",
         children,
       };
@@ -1597,6 +1594,25 @@ const lifted = (container: SceneElement & { readonly type: "group" }): MorphElem
   };
 };
 
+/** Each <Slot> has a name of its own, so the page finds one box by it. */
+const checkSlots = (root: GroupNode): void => {
+  const seen = new Set<string>();
+
+  const visit = (node: SceneNode): void => {
+    if (node.slot !== undefined && seen.has(node.slot))
+      throw new SceneError(
+        `Two <Slot>s are both named "${node.slot}".`,
+        "Give each slot a name of its own.",
+      );
+
+    if (node.slot !== undefined) seen.add(node.slot);
+
+    if (node.kind === "group") node.children.forEach(visit);
+  };
+
+  visit(root);
+};
+
 const isBare = (el: SceneElement): boolean =>
   el.type === "fragment" ||
   (el.type === "group" && Object.keys(el.props).length === 0 && el.settle === undefined);
@@ -1676,6 +1692,8 @@ const lowerScene = (
   };
 
   const root = settle(drafted, ctx.notes, duration);
+
+  checkSlots(root);
 
   const still =
     options.still === false

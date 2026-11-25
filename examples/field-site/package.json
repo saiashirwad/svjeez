@@ -1,0 +1,31 @@
+{
+  "name": "svjeez-field-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bunx --bun vite",
+    "build": "bunx --bun vite build",
+    "deploy": "bun --bun alchemy deploy",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p scenes"
+  },
+  "devDependencies": {
+    "@alchemy.run/cloudflare": "2.0.0-beta.87",
+    "@svjeez/fonts": "workspace:*",
+    "@svjeez/math": "workspace:*",
+    "@svjeez/vite": "workspace:*",
+    "@types/bun": "latest",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "@webgpu/types": "^0.1.74",
+    "alchemy": "2.0.0-beta.87",
+    "effect": "^4.1.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "svjeez": "workspace:*",
+    "typegpu": "^0.12.10",
+    "typescript": "~6.0.0",
+    "unplugin-typegpu": "^0.12.8",
+    "vite": "8.3.5"
+  }
+}

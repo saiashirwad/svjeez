@@ -1,10 +1,13 @@
 import { readFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
+import { join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   createRunnableDevEnvironment,
   defaultServerConditions,
   resolveConfig,
   type EnvironmentModuleNode,
+  type PluginOption,
   type ResolvedConfig,
   type RunnableDevEnvironment,
 } from "vite";
@@ -15,6 +18,8 @@ export interface Runner {
   load(
     file: string,
     posters: boolean | PosterOptions,
+    /** The prefix for an inline scene that exports none of its own. */
+    inlinePrefix?: string,
   ): Promise<{ image: SceneImage; dependencies: string[] }>;
   invalidate(file: string): void;
   close(): Promise<void>;
@@ -22,6 +27,40 @@ export interface Runner {
 
 const SCENE = fileURLToPath(new URL("./scene", import.meta.url));
 const RUN_FILM = fileURLToPath(new URL("./film", import.meta.url));
+const TYPEGPU = fileURLToPath(new URL("./typegpu", import.meta.url));
+
+/** What unplugin-typegpu's Vite entry exports: a function that makes the plugin. */
+type MakePlugin = () => PluginOption;
+
+const isMaker = (value: MakePlugin | { readonly default: MakePlugin }): value is MakePlugin =>
+  typeof value === "function";
+
+/**
+ * unplugin-typegpu's Vite plugin, as the app at `root` has it installed beside typegpu, which compiles the `"use gpu"`
+ * functions of a scene's <Shader>; none in an app without them.
+ */
+const typegpu = async (root: string): Promise<PluginOption[]> => {
+  const require = createRequire(join(root, "package.json"));
+
+  const found = (name: string) => {
+    try {
+      return require.resolve(name);
+    } catch {
+      return undefined;
+    }
+  };
+
+  const entry = found("typegpu") && found("unplugin-typegpu/vite");
+
+  if (!entry) return [];
+
+  const { default: loaded }: { default: MakePlugin | { default: MakePlugin } } = await import(
+    /* @vite-ignore */ pathToFileURL(entry).href
+  );
+
+  // The path is the one `require` takes, which can be the package's CommonJS build: its function is then on `default`.
+  return [isMaker(loaded) ? loaded() : loaded.default()];
+};
 
 /** A file that imports `@svjeez/dom/vite` is a film: `runFilm` loads it through its own project's Vite config. */
 const FILM = /\bfrom\s*["']@svjeez\/dom\/vite["']/;
@@ -101,6 +140,8 @@ export const createRunner = (app: ResolvedConfig): Runner => {
     const config = await resolveConfig(
       {
         configFile: false,
+        // A scene with a <Shader> is written with TypeGPU, whose "use gpu" functions this environment compiles as it loads them.
+        plugins: await typegpu(app.root),
         envDir: false,
         root: app.root,
         cacheDir: app.cacheDir,
@@ -130,15 +171,24 @@ export const createRunner = (app: ResolvedConfig): Runner => {
       runnerOptions: { hmr: { logger: false } },
     });
     await environment.init();
+    // <Shader> resolves its function with the app's typegpu, handed to the copy of svjeez the scenes run with.
+    await environment.runner
+      .import<typeof import("./typegpu.ts")>(TYPEGPU)
+      .then(({ loadTypeGpu }) => loadTypeGpu(app.root, { transform: false }));
 
     return environment;
   })();
 
   return {
-    async load(file, posters) {
+    async load(file, posters, inlinePrefix) {
       const { runner, moduleGraph } = await ready;
 
       if (FILM.test(await readFile(file, "utf8"))) {
+        if (inlinePrefix !== undefined)
+          throw new Error(
+            `${file} is a film, whose markup is made by a browser and can't take a prefix, so it can't be imported with ?svjeez&inline. Import it with ?svjeez.`,
+          );
+
         const [{ getScene }, made] = await Promise.all([
           runner.import<typeof import("./scene.ts")>(SCENE),
           film(file, app, () => runner.import<typeof import("./film.ts")>(RUN_FILM)),
@@ -147,15 +197,21 @@ export const createRunner = (app: ResolvedConfig): Runner => {
         return { image: getScene(made.svg, { posters }), dependencies: [...made.files] };
       }
 
-      const [{ getScene }, scene] = await Promise.all([
+      const [{ getInlineScene, getScene }, scene] = await Promise.all([
         runner.import<typeof import("./scene.ts")>(SCENE),
-        runner.import<{ default: SceneSource }>(file),
+        runner.import<{ default: SceneSource; prefix?: string }>(file),
       ]);
 
       const [node] = moduleGraph.getModulesByFile(file) ?? [];
 
       return {
-        image: getScene(scene.default, { posters }),
+        image:
+          inlinePrefix === undefined
+            ? getScene(scene.default, { posters })
+            : getInlineScene(scene.default, file, {
+                posters,
+                prefix: scene.prefix ?? inlinePrefix,
+              }),
         dependencies: node ? [...files(node)] : [file],
       };
     },

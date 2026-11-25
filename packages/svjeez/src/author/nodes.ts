@@ -2,7 +2,7 @@ import { SceneError } from "../model/scene-error";
 import type { FontValue } from "../font/font";
 import type { Seconds } from "../model/time";
 import type { PictureData } from "./picture";
-import type { Authored, Blend, Box, Scheme, Vec } from "../model/ir";
+import type { Authored, Blend, Box, Scheme, ShaderMark, Vec } from "../model/ir";
 import type { Anchor, Ref } from "./refs";
 import type { AnchorPlace, TextAnchorPlace } from "./pin";
 import type { Origin, Settle } from "./settle";
@@ -189,6 +189,12 @@ export type SceneElement =
       readonly settle?: Settle;
       readonly layout?: Authored["layout"];
       readonly paints?: true;
+      /** Set by <Slot>: the name page code finds its box by. */
+      readonly slot?: string;
+      /** Set by <Shader>: the WGSL its slot is drawn with. */
+      readonly shader?: ShaderMark;
+      /** Set by <Shader>: the anchors of its point fields, by field name, which layout turns into points. */
+      readonly points?: Readonly<Record<string, Anchor>>;
     }
   | { readonly type: "shape"; readonly props: ShapeProps }
   | { readonly type: "text"; readonly props: TextProps }

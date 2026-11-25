@@ -436,6 +436,8 @@ const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed
   const mask = agreed(plan, entry, (node) => node.mask, "mask");
   const mode = agreed(plan, entry, (node) => node.blend ?? "normal", "blend");
   const scheme = agreed(plan, entry, (node) => node.scheme, "scheme");
+  const slot = agreed(plan, entry, (node) => node.slot, "slot");
+  const shader = agreed(plan, entry, (node) => node.shader, "shader");
 
   const id = idOf(plan, entry);
 
@@ -458,6 +460,8 @@ const placed = (plan: Plan, entry: Entry, enter: Fixed = plan.enter, exit: Fixed
     ...(mask && { mask }),
     ...(mode !== "normal" && { blend: mode }),
     ...(scheme !== undefined && { scheme }),
+    ...(slot !== undefined && { slot }),
+    ...(shader && { shader }),
     effects: effectsOf(plan, entry),
   };
 };

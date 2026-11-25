@@ -1,5 +1,6 @@
 import { SceneError } from "../model/scene-error";
 import type { Seconds } from "../model/time";
+import { checkName } from "./names";
 import { checkWindow, isWhen, type Interval } from "./span";
 
 /** A clock that page code can drive: a part of the scene that counts its own `over` seconds, and plays at `start` in the static file. */
@@ -17,17 +18,11 @@ class Named implements Clock {
   ) {}
 }
 
-const NAME = /^[A-Za-z][A-Za-z0-9_-]*$/;
-
 export const isClock = (value: unknown): value is Clock => value instanceof Named;
 
 /** A clock named `name` that runs `demo.over` seconds, and plays at `demo.start` in the plain SVG. */
 export const clock = (name: string, demo: Interval): Clock => {
-  if (!NAME.test(name))
-    throw new SceneError(
-      `clock() needs a name of letters, digits, - and _ that starts with a letter, got ${JSON.stringify(name)}.`,
-      'Name it as in clock("open", span(1, 0.4)).',
-    );
+  checkName(name, "clock()", 'clock("open", span(1, 0.4))');
 
   if (!isWhen(demo) || demo.over === undefined)
     throw new SceneError(

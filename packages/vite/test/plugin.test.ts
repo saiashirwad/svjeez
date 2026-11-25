@@ -268,3 +268,126 @@ test("getScene() names a ?svjeez import that has no markup", () => {
 test("getScene() names an svg with no viewBox", () => {
   expect(() => getScene("<svg></svg>")).toThrow("getScene() needs a scene whose svg has a viewBox");
 });
+
+test("an inline import carries the markup in a browser bundle, each scene with a prefix of its own", async () => {
+  const dir = join(scratch, "inline");
+  mkdirSync(dir);
+
+  const scene = (title: string, extra = "") =>
+    `import { Shape, enter, rect, scene, span } from "svjeez";
+${extra}export default scene({ size: [100, 50], duration: 1, title: "${title}" }, () => (
+  <Shape geometry={rect(10, 10)} fill="#3EE6D6" motion={enter(span(0, 1))} />
+));`;
+
+  writeFileSync(join(dir, "a.tsx"), scene("A"));
+  writeFileSync(join(dir, "b.tsx"), scene("B"));
+  writeFileSync(join(dir, "own.tsx"), scene("Own", `export const prefix = "mine";\n`));
+  writeFileSync(
+    join(dir, "main.ts"),
+    `import a from "./a.tsx?svjeez&inline";
+import b from "./b.tsx?svjeez&inline";
+import own from "./own.tsx?svjeez&inline";
+import plain from "./a.tsx?svjeez";
+export default { a, b, own, plain };`,
+  );
+
+  const outDir = join(scratch, "inline-dist");
+
+  await build({
+    ...appConfig(dir),
+    build: {
+      outDir,
+      emptyOutDir: true,
+      lib: { entry: join(dir, "main.ts"), formats: ["es"], fileName: "main" },
+    },
+  });
+
+  const { default: made } = await import(join(outDir, "main.js"));
+  const prefixOf = (svg: string) => /class="(\w+)root"/.exec(svg)![1];
+
+  expect(made.a.svg).toStartWith("<svg");
+  expect(made.a).toMatchObject({ width: 100, height: 50, title: "A" });
+  expect(made.a.src).toEndWith(".svg");
+  expect(prefixOf(made.a.svg)).toMatch(/^s[0-9a-f]{8}$/);
+  expect(prefixOf(made.b.svg)).toMatch(/^s[0-9a-f]{8}$/);
+  expect(prefixOf(made.a.svg)).not.toBe(prefixOf(made.b.svg));
+  expect(prefixOf(made.own.svg)).toBe("mine");
+  // A plain import is as it was: the URL alone, and no prefix.
+  expect(made.plain.svg).toBeUndefined();
+  expect(Object.keys(made.plain).sort()).toEqual([
+    "desc",
+    "height",
+    "posters",
+    "src",
+    "title",
+    "width",
+  ]);
+}, 120_000);
+
+test("inline imports reject pre-rendered markup whose IDs cannot be prefixed", async () => {
+  const dir = join(scratch, "inline-markup");
+
+  mkdirSync(dir);
+  writeFileSync(
+    join(dir, "raw.ts"),
+    `export default () => '<svg viewBox="0 0 1 1"><title id="t">Raw</title></svg>';`,
+  );
+  writeFileSync(join(dir, "main.ts"), 'export { default } from "./raw.ts?svjeez&inline";');
+
+  await expect(
+    build({
+      ...appConfig(dir),
+      build: {
+        outDir: join(scratch, "inline-markup-dist"),
+        lib: { entry: join(dir, "main.ts"), formats: ["es"] },
+      },
+    }),
+  ).rejects.toThrow("exports SVG markup, which can't take a prefix");
+}, 120_000);
+
+test("getScene() prefixes a scene it emits, and leaves markup it is given", () => {
+  const model = scene({ size: [30, 20], duration: 1, title: "Made" }, () => jsx(Group, {}));
+
+  expect(getScene(model, { prefix: "p" }).svg).toContain('class="proot"');
+  expect(getScene(model).svg).not.toContain("proot");
+  expect(getScene('<svg viewBox="0 0 1 1"></svg>', { prefix: "p" }).svg).toBe(
+    '<svg viewBox="0 0 1 1"></svg>',
+  );
+});
+
+test('a scene with a <Shader> compiles its "use gpu" function with the app\'s typegpu', async () => {
+  const dir = join(scratch, "shader");
+  mkdirSync(dir);
+
+  writeFileSync(
+    join(dir, "sky.tsx"),
+    `import { Shader, Shape, rect, scene } from "svjeez";
+import { d } from "typegpu";
+export default scene({ size: [100, 50], duration: 1, title: "Sky" }, () => (
+  <Shader name="sky" width={100} height={50} inputs={{ glow: 0.5 }} fragment={(uv, input) => {
+    "use gpu";
+    return d.vec4f(uv.x, uv.y, input.glow, 1);
+  }}>
+    <Shape geometry={rect(100, 50)} fill="#3EE6D6" />
+  </Shader>
+));`,
+  );
+  writeFileSync(join(dir, "main.ts"), `export { default } from "./sky.tsx?svjeez&inline";`);
+
+  const outDir = join(scratch, "shader-dist");
+
+  await build({
+    ...appConfig(dir),
+    build: {
+      outDir,
+      emptyOutDir: true,
+      lib: { entry: join(dir, "main.ts"), formats: ["es"], fileName: "main" },
+    },
+  });
+
+  const { default: made } = await import(join(outDir, "main.js"));
+
+  expect(made.svg).toContain('data-slot="sky"');
+  expect(made.svg).toContain('<script type="text/wgsl">');
+  expect(made.svg).toContain("svjeez_fragment");
+}, 120_000);

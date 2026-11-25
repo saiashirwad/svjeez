@@ -75,6 +75,8 @@ interface Note {
   readonly origin: Origin | undefined;
   readonly settle?: Settle;
   readonly backdrop?: BackdropOf;
+  /** The anchors of a shader's point fields, by field name. */
+  readonly points?: Readonly<Record<string, Anchor>>;
 }
 
 export type BackdropOf = (box: Box) => SceneNode;
@@ -163,6 +165,7 @@ export const note = (
   kind: Kind,
   settle?: Settle,
   backdrop?: BackdropOf,
+  points?: Note["points"],
 ): void => {
   const { ref } = props;
   const { names } = into;
@@ -203,6 +206,7 @@ export const note = (
     origin: props.origin,
     ...(settle && { settle }),
     ...(backdrop && { backdrop }),
+    ...(points && { points }),
   });
 };
 
@@ -736,6 +740,29 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     d.node.clip === undefined &&
     d.node.mask === undefined;
 
+  // A shader's points rest where their anchors are, in the slot's own pixels: v1 does not follow an anchor that moves.
+  const shaded = (d: Draft): Pick<SceneNode, "shader"> => {
+    const { shader } = d.node;
+    const { points } = d.note ?? {};
+
+    if (!shader || !points) return {};
+    const [x, y] = [d.box.x, d.box.y];
+
+    return {
+      shader: {
+        ...shader,
+        fields: shader.fields.map((field) => {
+          const anchor = field.kind === "point" ? points[field.name] : undefined;
+
+          if (field.kind !== "point" || !anchor) return field;
+          const [px, py] = atRest(resolve(anchor, d));
+
+          return { ...field, value: [px - x, py - y] };
+        }),
+      },
+    };
+  };
+
   const build = (d: Draft): SceneNode => {
     const ends = attached.get(d);
 
@@ -750,6 +777,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 
     const placed = {
       ...d.node,
+      ...shaded(d),
       at: d.at,
       box: d.box,
       origin,
@@ -778,7 +806,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
 export const outsider = (node: SceneNode, notes: Notes): string | undefined => {
   const own = notes.nodes.get(node.key);
 
-  if (own?.anchor || own?.settle?.kind === "connect" || notes.onAnchor.has(node.key))
+  if (own?.anchor || own?.points || own?.settle?.kind === "connect" || notes.onAnchor.has(node.key))
     return node.key;
 
   if (node.kind !== "group") return undefined;

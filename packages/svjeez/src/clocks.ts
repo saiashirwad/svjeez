@@ -1,4 +1,6 @@
 import type { Seconds } from "./model/time";
+import { runShaders } from "./shader";
+import { slotOf, type SlotControl } from "./slots";
 import { RATE_ATTR } from "./svg/rate";
 
 /** Calls `progress` with 0 to 1 whenever it likes, and returns the function that stops it. */
@@ -10,13 +12,19 @@ export interface ClockControl {
   readonly over: Seconds;
   /** Where the clock is now, from 0 to `over`. */
   readonly time: Seconds;
-  /** Show the clock at `time`, kept within 0 to `over`. Stops a play() or reverse() in progress. */
+  /** Show the clock at `time`, kept within 0 to `over`. Stops a to(), play() or reverse() in progress. */
   seek(time: Seconds): void;
   /** Seek to `amount` of the way through the clock, from 0 to 1. */
   progress(amount: number): void;
-  /** Run forward to `over` in real time. Resolves true if it got there, false if something else moved the clock first. */
+  /**
+   * Run from where the clock is to `time` (kept within 0 to `over`) in real time, forward or back, so the scene's own
+   * easing plays. Resolves true if it got there, false if something else moved the clock first. Under reduced motion it
+   * jumps.
+   */
+  to(time: Seconds): Promise<boolean>;
+  /** Run forward to `over`, as to(over) does. */
   play(): Promise<boolean>;
-  /** Run back to 0 in real time, resolving as play() does. */
+  /** Run back to 0, as to(0) does. */
   reverse(): Promise<boolean>;
   /** Stop where the clock is. */
   pause(): void;
@@ -28,7 +36,9 @@ export interface Mounted {
   readonly clocks: ReadonlyMap<string, ClockControl>;
   /** The clock called `name`. Throws, naming the clocks the SVG has, when there is none. */
   clock(name: string): ClockControl;
-  /** Stop every driver and every play() or reverse(), leaving the picture where it is. */
+  /** The slot called `name`. Throws, naming the slots the SVG has, when there is none. */
+  slot(name: string): SlotControl;
+  /** Stop every driver and every move of a clock, leaving the picture where it is. The SVG can be mounted again. */
   unmount(): void;
 }
 
@@ -208,6 +218,9 @@ interface Group {
   readonly tweens: Tween[];
 }
 
+// Mount removes the original SMIL. Store its samplers on the marker so each later mount only gets its own subtree.
+const taken = new WeakMap<Element, Tween[]>();
+
 /**
  * The animations under `root`, by the clock of the nearest marked element above their target. SMIL has one clock per
  * SVG, so each `<animate>` on a clock is read into a sampler and removed, and the clock sets its attribute itself.
@@ -242,21 +255,27 @@ const grouped = (root: Element): Map<string, Group> => {
     const attribute = smil.getAttribute("attributeName");
 
     if (!marked || !target) continue;
-    const group = groupOf(marked);
 
-    if (smil.localName === "animate" && attribute)
-      group.tweens.push({
+    if (smil.localName === "animate" && attribute) {
+      const tweens = taken.get(marked) ?? [];
+
+      tweens.push({
         target,
         attribute,
         sample: sampled(smil),
         at: numberOf(marked, "data-clock-at"),
       });
+      taken.set(marked, tweens);
+    }
+
     smil.remove();
   }
 
-  if (root.matches("[data-clock]")) groupOf(root);
+  const marked = [...root.querySelectorAll("[data-clock]")];
 
-  for (const marked of root.querySelectorAll("[data-clock]")) groupOf(marked);
+  if (root.matches("[data-clock]")) marked.unshift(root);
+
+  for (const element of marked) groupOf(element).tweens.push(...(taken.get(element) ?? []));
 
   return groups;
 };
@@ -285,8 +304,10 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
     ending = undefined;
   };
 
-  const run = (to: Seconds) =>
-    new Promise<boolean>((resolve) => {
+  const run = (end: Seconds) => {
+    const to = clamp(end, over);
+
+    return new Promise<boolean>((resolve) => {
       halt();
 
       if (calm() || time === to) {
@@ -314,6 +335,7 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
       ending = resolve;
       frame = requestAnimationFrame(tick);
     });
+  };
 
   const seek = (at: Seconds) => {
     halt();
@@ -354,6 +376,7 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
     },
     seek,
     progress,
+    to: run,
     play: () => run(over),
     reverse: () => run(0),
     pause: halt,
@@ -371,12 +394,16 @@ const control = (name: string, { over, rate, parts, tweens }: Group) => {
 /**
  * Takes over the clocks of an inline SVG svjeez made (or of the SVGs inside `root`): their animations pause, their SMIL
  * is replaced by attributes the controls set, and the controls move them. Animations that are not on a clock go on playing.
+ *
+ * Mounting the same SVG again, as a framework that remounts does (mount, unmount, mount), works the same: the clocks
+ * start at 0 again.
  */
+
 export const mount = (root: Element): Mounted => {
   const made = [...grouped(root)].map(([name, group]) => [name, control(name, group)] as const);
   const clocks = new Map(made.map(([name, { clock }]) => [name, clock]));
 
-  return {
+  const mounted: Omit<Mounted, "unmount"> = {
     clocks,
     clock: (name) => {
       const found = clocks.get(name);
@@ -388,7 +415,17 @@ export const mount = (root: Element): Mounted => {
 
       return found;
     },
-    unmount: () => made.forEach(([, { release }]) => release()),
+    slot: (name) => slotOf(root, name),
+  };
+
+  const stopShaders = runShaders(root, mounted);
+
+  return {
+    ...mounted,
+    unmount: () => {
+      stopShaders();
+      made.forEach(([, { release }]) => release());
+    },
   };
 };
 

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Signal</title>
+    <style>
+      body {
+        margin: 0;
+        font: 15px system-ui, sans-serif;
+        color-scheme: light dark;
+        text-align: center;
+      }
+      p {
+        margin: 3rem 1rem 1.5rem;
+        color: GrayText;
+      }
+      button {
+        font: inherit;
+        padding: 0.4rem 1rem;
+        margin-bottom: 1.5rem;
+      }
+      #card {
+        width: min(562px, 92vw);
+        margin: 0 auto;
+      }
+      #card svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      The aurora is a TypeGPU shader written in the scene. It follows the storm clock with the
+      vectors around it.
+    </p>
+    <button id="toggle" type="button" aria-pressed="false">Storm</button>
+    <div id="card"></div>
+    <script type="module" src="./page.ts"></script>
+  </body>
+</html>

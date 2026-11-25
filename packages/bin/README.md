@@ -31,7 +31,7 @@ svjeez skill --install                   # the agent skill, into .claude/skills/
 svjeez browser install                   # headless Chromium for frames, video and check --browser
 ```
 
-A scene imports `svjeez` and `@svjeez/*` as usual. The binary supplies them, and supplies the JSX setup, so a lone `.tsx` file works. Its own relative imports work too. Any other package needs a `node_modules` beside the scene.
+A scene imports `svjeez` and `@svjeez/*` as usual. The binary supplies them, and supplies the JSX setup, so a lone `.tsx` file works. Its own relative imports work too. Any other package needs a `node_modules` beside the scene. A `<Shader>` scene can't run here, because TypeGPU and its transform don't load inside the binary; scenes without one still work beside a `node_modules` that has typegpu. Run shader scenes with the `svjeez` package or `@svjeez/vite`.
 
 `check` type-checks the scene with the TypeScript inside the binary (strict, without `noUncheckedIndexedAccess`) before checking the scene itself. `frames`, `video` and `check --browser` use the Chromium from `svjeez browser install`, or an installed Google Chrome. Fonts from `@svjeez/fonts` download once, then come from `~/.cache/svjeez/fonts`.
 

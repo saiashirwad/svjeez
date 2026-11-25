@@ -327,22 +327,16 @@ export interface CenterProps extends Common, Backdrop {
   readonly children?: Child;
 }
 
-export const Center = ({
-  padding = 0,
-  width,
-  height,
-  fill,
-  stroke,
-  radius,
-  children,
-  ...props
-}: CenterProps): SceneElement => {
-  const label = "<Center>";
+/** A box that centers its children, named `label` in errors: a <Center>, or a container built on one. */
+export const centered = (
+  label: string,
+  { padding = 0, width, height, fill, stroke, radius, children, ...props }: CenterProps,
+): Extract<SceneElement, { readonly type: "group" }> => {
   const { backdrop, inset } = paint(label, { fill, stroke, radius }, padding);
 
   const own: Size = {
-    ...(width !== undefined && { width: size(width, "<Center> width") }),
-    ...(height !== undefined && { height: size(height, "<Center> height") }),
+    ...(width !== undefined && { width: size(width, `${label} width`) }),
+    ...(height !== undefined && { height: size(height, `${label} height`) }),
   };
 
   const sized =
@@ -384,6 +378,8 @@ export const Center = ({
     paints: true,
   };
 };
+
+export const Center = (props: CenterProps): SceneElement => centered("<Center>", props);
 
 export interface AlignProps extends Omit<Common, "at" | "anchor" | "offset"> {
   readonly to?: "canvas" | Box | Ref;
