@@ -11,6 +11,7 @@ export const ROLES = [
   "variable",
   "function",
   "type",
+  "attribute",
   "tag",
   "inserted",
   "deleted",

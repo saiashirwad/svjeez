@@ -28,7 +28,7 @@ The source is one string child. `lang` takes a Shiki grammar. The values `ts`, `
 
 ## Palettes
 
-`palette` has one paint per role: `plain`, `comment`, `punctuation`, `keyword`, `string`, `number`, `constant`, `variable`, `function`, `type`, `tag`, `inserted`, `deleted`. Any object with those keys works, so a scene's own tokens do: `{ plain: theme.text, keyword: theme.magenta, … }`.
+`palette` has one paint per role: `plain`, `comment`, `punctuation`, `keyword`, `string`, `number`, `constant`, `variable`, `function`, `type`, `attribute` (a JSX or HTML attribute name), `tag`, `inserted`, `deleted`. Any object with those keys works, so a scene's own tokens do: `{ plain: theme.text, keyword: theme.magenta, … }`.
 
 `@svjeez/code/palettes` (it doesn't load Shiki) has `tomorrow`, `solarized`, `gruvbox` and `rosePine`, each a token set with a light and a dark value, so the SVG follows the viewer's scheme. `palette("name", { light, dark })` makes your own from a hex per role and scheme; its tokens are named `name-keyword` and so on.
 

@@ -93,8 +93,7 @@ export default scene(
       />
       <Shape
         geometry={circle(8)}
-        at={[100, 40]}
-        anchor="center"
+        offset={[100, 40]}
         fill="#3EE6D6"
         motion={enter(span(1.2, 0.5), { from: { scale: 0 }, curve: ease.pop })}
       />
@@ -129,6 +128,35 @@ Add a `key` across two or more JSX states and `morph()` diffs the tree at compil
   <img src="examples/dist/math.svg" alt="Quadratic equation rearranging step by step into the quadratic formula" width="640">
   <br>
   <sub><b>Build-time TeX derivation</b> · 25 KB · <a href="examples/math/index.tsx"><code>examples/math/index.tsx</code></a></sub>
+</p>
+
+## Drive part of a scene from the page
+
+Give a `<Sequence>` a `clock` and page code can play it, reverse it, or scrub it from scroll or the pointer. The span is where the clock plays in the plain file.
+
+```tsx
+const open = clock("open", span(1, 0.5));
+
+<Sequence clock={open}>{/* tracks count from 0 inside */}</Sequence>;
+```
+
+```ts
+import { mount, scrolled } from "svjeez/page";
+
+const scene = mount(document.querySelector("#card svg")!); // an inline <svg>
+const open = scene.clock("open");
+
+card.addEventListener("click", () => (open.time > 0 ? open.reverse() : open.play()));
+
+scene.clock("grow").follow(scrolled(card));
+```
+
+The `.svg` still plays the span on its own, so an `<img>` embed keeps working. Everything animates on a clock: when the page mounts it, the clock also takes over the SMIL inside it (morphs, moving gradients, filters, text-path starts) and sets those attributes itself.
+
+<p align="center">
+  <img src="examples/dist/clocks.svg" alt="A settings card: a panel slides open, bars grow, a status dot pulses" width="480">
+  <br>
+  <sub><b>Two clocks and a status dot</b> · 12 KB · <a href="examples/clocks/index.tsx"><code>examples/clocks/index.tsx</code></a> · <a href="examples/clocks/page.ts"><code>page.ts</code></a></sub>
 </p>
 
 ## Film a real web app

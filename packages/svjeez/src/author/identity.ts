@@ -1,6 +1,8 @@
 import type { JsxSource } from "./sources";
 import type { SceneNode, Source } from "../model/ir";
 import type { SceneElement } from "./nodes";
+import { SceneError } from "../model/scene-error";
+import { isNumber, isString } from "../model/guards";
 
 const written = new WeakMap<SceneElement, Source>();
 const components = new WeakMap<SceneElement, string>();
@@ -69,4 +71,17 @@ export const placedLike = <N extends SceneNode>(node: N, from: SceneNode): N => 
   if (keyedByPlace.has(from)) keyedByPlace.add(node);
 
   return node;
+};
+
+/** A key as text: a number reads as its digits, as in React; anything but a string or a finite number is refused. */
+export const keyText = (key: string | number, source: Source | undefined): string => {
+  if (isString(key)) return key;
+
+  if (isNumber(key) && Number.isFinite(key)) return String(key);
+
+  throw new SceneError(
+    `A key is a string or a number, got ${String(key)}.`,
+    'Write key="name" or key={index}.',
+    { ...(source && { source }) },
+  );
 };

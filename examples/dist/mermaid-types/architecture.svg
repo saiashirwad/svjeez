@@ -13,24 +13,24 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m2{animation-name:k2}
 @keyframes k3{0%,3.75%{stroke-dashoffset:1;visibility:hidden}7.5%,100%{stroke-dashoffset:0;visibility:visible}}
 .m3{animation-name:k3}
-@keyframes k4{0%,6.027%{visibility:hidden}6.028%,100%{visibility:visible}}
-.m4{animation-name:k4}
+@keyframes k4{0%{visibility:hidden}6.027%,100%{visibility:visible}}
+.m4{animation-name:k4;animation-timing-function:steps(1)}
 @keyframes k5{0%,7.5%{stroke-dashoffset:1;visibility:hidden}11.25%,100%{stroke-dashoffset:0;visibility:visible}}
 .m5{animation-name:k5}
 @keyframes k6{0%,11.25%{stroke-dashoffset:1;visibility:hidden}15%,100%{stroke-dashoffset:0;visibility:visible}}
 .m6{animation-name:k6}
-@keyframes k7{0%,13.465%{visibility:hidden}13.466%,100%{visibility:visible}}
-.m7{animation-name:k7}
+@keyframes k7{0%{visibility:hidden}13.465%,100%{visibility:visible}}
+.m7{animation-name:k7;animation-timing-function:steps(1)}
 @keyframes k8{0%,15%{stroke-dashoffset:1;visibility:hidden}18.75%,100%{stroke-dashoffset:0;visibility:visible}}
 .m8{animation-name:k8}
 @keyframes k9{0%,18.75%{stroke-dashoffset:1;visibility:hidden}22.5%,100%{stroke-dashoffset:0;visibility:visible}}
 .m9{animation-name:k9}
-@keyframes k10{0%,21.153%{visibility:hidden}21.154%,100%{visibility:visible}}
-.m10{animation-name:k10}
+@keyframes k10{0%{visibility:hidden}21.154%,100%{visibility:visible}}
+.m10{animation-name:k10;animation-timing-function:steps(1)}
 @keyframes k11{0%,22.5%{stroke-dashoffset:1;visibility:hidden}26.25%,100%{stroke-dashoffset:0;visibility:visible}}
 .m11{animation-name:k11}
-@keyframes k12{0%,24.942%{visibility:hidden}24.943%,100%{visibility:visible}}
-.m12{animation-name:k12}
+@keyframes k12{0%{visibility:hidden}24.943%,100%{visibility:visible}}
+.m12{animation-name:k12;animation-timing-function:steps(1)}
 @keyframes k13{0%,3.75%{translate:0 6px;opacity:0}7.5%,100%{translate:0 0;opacity:1}}
 .m13{animation-name:k13}
 @keyframes k14{0%,7.5%{translate:0 6px;opacity:0}11.25%,100%{translate:0 0;opacity:1}}

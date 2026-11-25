@@ -52,7 +52,7 @@ export const SCOPES = {
   "support.class": "type",
 
   "entity.name.tag": "tag",
-  "entity.other.attribute-name": "type",
+  "entity.other.attribute-name": "attribute",
   "entity.other.attribute-name.id": "function",
 
   "markup.heading": "keyword",

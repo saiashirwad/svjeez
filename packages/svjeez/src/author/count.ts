@@ -16,7 +16,8 @@ import type {
   TextRun,
   Vec,
 } from "../model/ir";
-import type { Anim } from "./track";
+import type { Anim, Track } from "./track";
+import type { Derived } from "./derived";
 import type { SceneElement, TextChild } from "./nodes";
 import { layoutRuns, type TextAlign } from "./text";
 import { isTyped, type Typed } from "./typed";
@@ -28,7 +29,7 @@ export type NumberFormat = (value: number) => string;
 export interface CountOptions {
   /** How the number is written at each moment (default `numeral()`). */
   readonly format?: NumberFormat;
-  /** The most times a second the number changes (default 30). */
+  /** The most times per second (Hz) the number may change, default 30. Between changes it holds, so a fast climb skips values; it never skips or delays the track's end value, which shows from the moment the track reaches it. */
   readonly rate?: number;
 }
 
@@ -46,7 +47,8 @@ export interface Count {
   readonly rate: number;
 }
 
-export type TextContent = TextChild | Count | Typed | readonly TextContent[];
+/** What a <Text> holds: strings and runs; a count(), typed() or string track, alone; or a list of these. */
+export type TextContent = TextChild | Count | Typed | Track<string> | readonly TextContent[];
 
 export const count = (value: Anim<number>, options: CountOptions = {}): Count => ({
   kind: "count",
@@ -55,7 +57,7 @@ export const count = (value: Anim<number>, options: CountOptions = {}): Count =>
   rate: options.rate ?? 30,
 });
 
-export const isCount = (value: TextContent): value is Count =>
+export const isCount = (value: TextContent | Item): value is Count =>
   typeof value === "object" && value !== null && "kind" in value && value.kind === "count";
 
 const DIGITS = "0123456789";
@@ -125,8 +127,11 @@ export const isWords = (content: TextContent): content is string | number =>
 export const isElement = (content: TextContent): content is SceneElement =>
   isObject(content) && !isArray(content) && !isCount(content) && !isTyped(content);
 
+/** One piece of a <Text>'s content once it is flattened. */
+export type Item = string | Count | Typed | Track<string> | Derived<string> | SceneElement;
+
 /** A <Text>'s content as one list: its strings, elements, count()s and typed()s, in order. */
-export const flatten = (content: TextContent): (string | Count | Typed | SceneElement)[] => {
+export const flatten = (content: TextContent): Item[] => {
   if (content === undefined || content === null || content === false) return [];
 
   if (isArray(content)) return content.flatMap(flatten);
@@ -160,7 +165,7 @@ export const countingIn = (content: TextContent, where: string): Counting | unde
       "Style the whole <Text>, or put the styled words in a <Text> beside it.",
     );
   const at = items.indexOf(counts[0]!);
-  const words = (part: readonly (string | Count | Typed | SceneElement)[]) => part.join("");
+  const words = (part: readonly Item[]) => part.join("");
   const [before, after] = [words(items.slice(0, at)), words(items.slice(at + 1))];
 
   if (/\n/.test(before + after))
@@ -206,7 +211,19 @@ export const ticksOf = (
     return text;
   };
 
-  return isLane(value) ? changesOf(show, duration, 1 / rate) : [{ t: 0, text: show(0) }];
+  if (!isLane(value)) return [{ t: 0, text: show(0) }];
+
+  return settled(changesOf(show, duration, 1 / rate), value.keys.at(-1)!.t);
+};
+
+/** The rate limit may push the end value past the moment its track reaches it; pull it back to that moment. */
+const settled = (ticks: Tick[], end: Seconds): Tick[] => {
+  const last = ticks.at(-1)!;
+
+  if (!(end > 0) || last.t <= end) return ticks;
+  const kept = ticks.filter((tick) => tick.t < end);
+
+  return kept.at(-1)?.text === last.text ? kept : [...kept, { t: end, text: last.text }];
 };
 
 /** Each time what `show` shows changes in the scene's `duration`, at most once every `gap` seconds. */

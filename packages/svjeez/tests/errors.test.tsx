@@ -56,6 +56,24 @@ describe("SceneError", () => {
     expect(error.message).toStartWith('scene.tsx:7:3: <Shape> "dot" paints nothing');
   });
 
+  test("a stroke dash that is not an array is a located error", () => {
+    const error = thrown(() =>
+      made(() =>
+        jsxDEV(
+          Shape,
+          // SAFETY: the type says array; this is the plain-JS mistake under test.
+          { key: "dot", geometry: circle(4), stroke: { color: "#000000", dash: 2 as never } },
+          undefined,
+          false,
+          at(7, 3),
+        ),
+      ),
+    );
+
+    expect(error.problem).toContain("not a list");
+    expect(error.source).toEqual({ file: "scene.tsx", line: 7, column: 3 });
+  });
+
   test("names a node with no key by its component and its words, never by its path", () => {
     const error = thrown(() =>
       made(() => (
@@ -218,5 +236,39 @@ describe("two steps on one track", () => {
       "Two steps move this track at once: one from 0s to 2s, and another from 1s to 3s, before the first ends.",
     );
     expect(error.fix).toStartWith("Start the later step at 2s or later");
+  });
+
+  test("a point with a track inside it is refused at its node, with the whole-point track to write", () => {
+    const error = thrown(() =>
+      made(() => (
+        <Shape
+          key="dot"
+          geometry={circle(4)}
+          // @ts-expect-error a point is one track, not a track per axis
+          offset={[0, track(0).to(-55, span(1, 1))]}
+          fill="#FF0000"
+        />
+      )),
+    );
+
+    expect(error.problem).toBe(
+      'offset on <Shape> "dot" is a point with a track inside it, but a track moves the whole point.',
+    );
+    expect(error.fix).toContain("track([0, 0]).to([0, -55]");
+  });
+
+  test("a loop shorter than a late motion says the period counts from 0s", () => {
+    const error = thrown(() =>
+      made(() => {
+        const wobble = track(0).to(-6, span(0.4, 0.15)).to(0, span(0.55, 0.15)).loop(0.6);
+
+        return <Shape geometry={circle(4)} rotate={wobble} fill="#FF0000" />;
+      }),
+    );
+
+    expect(error.problem).toBe(
+      "loop(0.6) is shorter than the motion, which runs until 0.7s, and it starts at 0.4s, not 0s. A loop's period counts from 0s, not from the first step.",
+    );
+    expect(error.fix).toStartWith("Use loop(0.7) or longer, or start the motion at 0s");
   });
 });

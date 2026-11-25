@@ -1,7 +1,7 @@
 /** @jsxImportSource svjeez */
 import { Group, Shape, path, through } from "svjeez";
 import type { Anim, Geometry, Paint, SceneElement, Vec } from "svjeez";
-import { SceneError, type Common, type Framed, type Model, type StrokeProps } from "svjeez/tools";
+import { SceneError, type Common, type Model, type StrokeProps } from "svjeez/tools";
 
 export interface IconData {
   readonly grid: number;
@@ -13,7 +13,7 @@ type PerPiece = (piece: number, pieces: number) => Anim<number>;
 
 export type IconDraw = Anim<number> | PerPiece;
 
-interface Base extends Common, Framed {
+interface Base extends Common {
   readonly icon: IconData;
   readonly size?: number;
   /** Over the default outline, whose width is in the icon's own grid units. */

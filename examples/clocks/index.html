@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Clocks</title>
+    <style>
+      body {
+        margin: 0;
+        font: 15px system-ui, sans-serif;
+        color-scheme: light dark;
+        text-align: center;
+      }
+      p {
+        margin: 3rem 1rem;
+        color: GrayText;
+      }
+      #card {
+        width: min(480px, 92vw);
+        margin: 0 auto;
+        cursor: pointer;
+      }
+      #card svg {
+        display: block;
+        width: 100%;
+        height: auto;
+      }
+      #end {
+        height: 110vh;
+      }
+    </style>
+  </head>
+  <body>
+    <p>Click the card to open its panel. Scroll to grow the bars.</p>
+    <div style="height: 60vh"></div>
+    <div id="card"></div>
+    <div id="end"></div>
+    <script type="module" src="./page.ts"></script>
+  </body>
+</html>

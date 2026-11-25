@@ -135,9 +135,7 @@ const Card = ({
 
 const dots = pattern({
   size: [20, 20],
-  tile: (
-    <Shape geometry={circle(1)} at={[10, 10]} anchor="center" fill={theme.border} opacity={0.35} />
-  ),
+  tile: <Shape geometry={circle(1)} offset={[10, 10]} fill={theme.border} opacity={0.35} />,
 });
 
 export default scene(
@@ -183,8 +181,7 @@ export default scene(
               />
               <Shape
                 geometry={circle(8.5)}
-                at={signal.map((v): Vec => [69, 52 - 28 * v])}
-                anchor="center"
+                offset={signal.map((v): Vec => [69, 52 - 28 * v])}
                 fill={theme.blue}
               />
             </Group>
@@ -228,14 +225,12 @@ export default scene(
               <Shape geometry={rect(138, 76, { radius: 8 })} fill={theme.background} />
               <Shape
                 geometry={circle(28)}
-                at={[69, 38]}
-                anchor="center"
+                offset={[69, 38]}
                 stroke={{ color: theme.raised, width: 5.5 }}
               />
               <Shape
                 geometry={circle(28)}
-                at={[69, 38]}
-                anchor="center"
+                offset={[69, 38]}
                 origin="center"
                 rotate={-90}
                 stroke={{ color: theme.green, width: 5.5, cap: "round" }}

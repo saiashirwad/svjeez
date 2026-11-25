@@ -7,6 +7,7 @@ import type { Anchor, Ref } from "./refs";
 import type { AnchorPlace, TextAnchorPlace } from "./pin";
 import type { Origin, Settle } from "./settle";
 import type { MorphElement } from "./morph";
+import { isClock, type Clock } from "./clock";
 import { isWhen, type When } from "./span";
 import type { Anim, Layers } from "./track";
 import type { Effect } from "./effects";
@@ -18,14 +19,22 @@ import { isArray, isNumber, isObject, isString } from "../model/guards";
 export { ref } from "./refs";
 
 export interface Common {
-  readonly key?: string;
+  /** Names the node among its siblings. A number is the same as its text, as in React. */
+  readonly key?: string | number;
   /**
    * A name for this node that a ref("id") finds it by, and that `svg.emit(scene, { ids: true })` writes as `data-svz-id`.
    * Inside a component that has an id it is scoped by it: `card1/note`. Unique in its scope.
    */
   readonly id?: string;
   readonly ref?: Ref;
+  /** Puts the anchor point of this node's box here (the top-left unless `anchor` says otherwise). Not with `offset`. */
   readonly at?: Anim<Vec> | Anchor;
+  /**
+   * Moves this node's own coordinate frame by this vector: what it draws around [0, 0] lands at the offset. A circle
+   * drawn around [0, 0] goes to `offset={[120, 44]}` with no anchor; a text's own [0, 0] is the top-left of its first line.
+   * The same as the `offset` of a motion layer, but static or a track. Not with `at` or `anchor`.
+   */
+  readonly offset?: Anim<Vec> | Anchor;
   readonly anchor?: AnchorPlace;
   readonly origin?: Origin;
   readonly rotate?: Anim<number>;
@@ -164,16 +173,13 @@ export interface PictureProps extends Common {
   readonly zoom?: Anim<number>;
 }
 
-export interface Framed {
-  readonly offset?: Anim<Vec> | Anchor;
-}
+export interface GroupProps extends Common, Backdrop {}
 
-export interface GroupProps extends Common, Framed, Backdrop {}
-
-export interface SequenceProps {
-  readonly when: When;
-  readonly children?: Child;
-}
+/** Plays its children on the scene's clock from `when`, or on a `clock` that page code can drive. Give one of them. */
+export type SequenceProps = { readonly children?: Child } & (
+  | { readonly when: When; readonly clock?: undefined }
+  | { readonly clock: Clock; readonly when?: undefined }
+);
 
 export type SceneElement =
   | {
@@ -192,6 +198,7 @@ export type SceneElement =
       readonly type: "sequence";
       readonly start: Seconds;
       readonly over?: Seconds;
+      readonly clock?: Clock;
       readonly children: readonly SceneElement[];
     }
   | { readonly type: "fragment"; readonly children: readonly SceneElement[] }
@@ -263,7 +270,7 @@ export const flat = (child: Child): SceneElement[] => {
 export const Group = ({
   children,
   ...props
-}: Common & Framed & { readonly children?: Child }): SceneElement => ({
+}: Common & { readonly children?: Child }): SceneElement => ({
   type: "group",
   props,
   children: flat(children),
@@ -277,7 +284,28 @@ export const Run = (props: RunProps): SceneElement => ({ type: "run", props });
 
 export const Picture = (props: PictureProps): SceneElement => ({ type: "picture", props });
 
-export const Sequence = ({ when, children }: SequenceProps): SceneElement => {
+export const Sequence = ({ when, clock, children }: SequenceProps): SceneElement => {
+  if (when !== undefined && clock !== undefined)
+    throw new SceneError(
+      "<Sequence> takes when or clock, not both.",
+      "Use when={span(start, over)} to play on the scene's clock, or clock={c} for a clock from clock().",
+    );
+
+  if (clock !== undefined) {
+    if (!isClock(clock))
+      throw new SceneError(
+        `<Sequence> takes clock={c} with a c from clock(name, span(start, over)), got ${String(clock)}.`,
+      );
+
+    return {
+      type: "sequence",
+      start: clock.start,
+      over: clock.over,
+      clock,
+      children: flat(children),
+    };
+  }
+
   if (!isWhen(when))
     throw new SceneError(
       `<Sequence> takes when={span(start, over)}, or when={span(start)} to run to the end, got ${String(when)}.`,

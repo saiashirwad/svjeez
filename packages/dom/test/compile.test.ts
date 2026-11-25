@@ -587,7 +587,10 @@ describe("keys", () => {
 
     const keys = (el: typeof element): string[] =>
       el.type === "group"
-        ? [...(el.props.key?.startsWith("@") ? [] : [el.props.key!]), ...el.children.flatMap(keys)]
+        ? [
+            ...(String(el.props.key).startsWith("@") ? [] : [String(el.props.key)]),
+            ...el.children.flatMap(keys),
+          ]
         : [];
 
     expect(keys(element)).toEqual(["card", "a", "p", "i", "div[0]", "p~2"]);

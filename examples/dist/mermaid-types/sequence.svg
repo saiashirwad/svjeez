@@ -19,14 +19,14 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m5{animation-name:k5}
 @keyframes k6{0%,3.75%{stroke-dashoffset:1;visibility:hidden}6.375%,100%{stroke-dashoffset:0;visibility:visible}}
 .m6{animation-name:k6}
-@keyframes k7{0%,5.659%{visibility:hidden}5.66%,100%{visibility:visible}}
-.m7{animation-name:k7}
+@keyframes k7{0%{visibility:hidden}5.659%,100%{visibility:visible}}
+.m7{animation-name:k7;animation-timing-function:steps(1)}
 @keyframes k8{0%,3.75%{translate:0 6px;opacity:0}6.875%,100%{translate:0 0;opacity:1}}
 .m8{animation-name:k8}
 @keyframes k9{0%,7.5%{stroke-dashoffset:1;visibility:hidden}10.125%,100%{stroke-dashoffset:0;visibility:visible}}
 .m9{animation-name:k9}
-@keyframes k10{0%,9.262%{visibility:hidden}9.263%,100%{visibility:visible}}
-.m10{animation-name:k10}
+@keyframes k10{0%{visibility:hidden}9.263%,100%{visibility:visible}}
+.m10{animation-name:k10;animation-timing-function:steps(1)}
 @keyframes k11{0%,7.5%{translate:0 6px;opacity:0}10.625%,100%{translate:0 0;opacity:1}}
 .m11{animation-name:k11}
 @keyframes k12{0%,11.25%{opacity:0}13.875%,100%{opacity:1}}
@@ -35,8 +35,8 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .m13{animation-name:k13}
 @keyframes k14{0%,15%{stroke-dashoffset:1;visibility:hidden}17.625%,100%{stroke-dashoffset:0;visibility:visible}}
 .m14{animation-name:k14}
-@keyframes k15{0%,16.514%{visibility:hidden}16.515%,100%{visibility:visible}}
-.m15{animation-name:k15}
+@keyframes k15{0%{visibility:hidden}16.514%,100%{visibility:visible}}
+.m15{animation-name:k15;animation-timing-function:steps(1)}
 @keyframes k16{0%,15%{translate:0 6px;opacity:0}18.125%,100%{translate:0 0;opacity:1}}
 .m16{animation-name:k16}
 @keyframes k17{0%,18.75%{translate:0 6px;opacity:0}21.875%,100%{translate:0 0;opacity:1}}

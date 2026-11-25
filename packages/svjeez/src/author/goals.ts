@@ -8,11 +8,8 @@ import type { NodeElement } from "./nodes";
 import { goesToAnchor, isTrack, readGoals } from "./track";
 import { isPoint } from "../model/guards";
 
-const framed = (el: NodeElement): el is NodeElement & { readonly type: "group" } =>
-  el.type === "group" && el.props.offset !== undefined;
-
 /**
- * A node whose at (or a group's offset) is a track with a step that goes to an anchor is placed after
+ * A node whose at or offset is a track with a step that goes to an anchor is placed after
  * layout, when the anchor is known. This registers how, and leaves the node placed at the track's start.
  */
 export const withGoals = (
@@ -22,12 +19,12 @@ export const withGoals = (
   notes: Notes,
   parent: string,
 ): NodeElement => {
-  const prop = framed(el) ? "offset" : "at";
-  const written = framed(el) ? el.props.offset : el.props.at;
+  const prop = el.props.offset === undefined ? "at" : "offset";
+  const written = el.props[prop];
 
   if (!isTrack(written) || !goesToAnchor(written)) return el;
 
-  const where = `at on ${notes.names.named(key)}`;
+  const where = `${prop} on ${notes.names.named(key)}`;
   const { data } = readGoals(written, timing, where);
   const initial = data.initial.value;
   const container = notes.nodes.get(parent)?.settle;

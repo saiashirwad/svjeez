@@ -43,7 +43,7 @@ const at = track<Vec>([0, 0])
   .set(model.right, second)
   .to(target.left, second, ease.out);
 
-<Shape geometry={circle(5)} at={at} anchor="center" fill={theme.blue} />
+<Shape geometry={circle(5)} offset={at} fill={theme.blue} />
 ```
 
 `.set(anchor, when)` cuts to an anchor, `.to(anchor, span)` moves to it; the node's `anchor` point lands there. The first value is a plain point, because a track starts at a value. See [`examples/pipeline.tsx`](../examples/pipeline.tsx).

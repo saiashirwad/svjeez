@@ -22,8 +22,7 @@ export default scene(
       />
       <Shape
         geometry={circle(10)}
-        at={[140, 60]}
-        anchor="center"
+        offset={[140, 60]}
         fill={theme.magenta}
         motion={[
           enter(span(0, 0.6)),

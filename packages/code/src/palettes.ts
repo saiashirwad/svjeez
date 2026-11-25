@@ -42,6 +42,7 @@ const colors = ([text, muted, soft, purple, blue, green, orange, yellow, red]: S
   variable: red,
   function: blue,
   type: yellow,
+  attribute: yellow,
   tag: red,
   inserted: green,
   deleted: red,

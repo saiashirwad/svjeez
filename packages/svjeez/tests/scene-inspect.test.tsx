@@ -1,6 +1,7 @@
 import { describe as group, expect, test } from "bun:test";
 import {
   Arrow,
+  count,
   enter,
   exit,
   line,
@@ -21,9 +22,12 @@ import {
   span,
   tokens,
   track,
+  type Color,
   type Paint,
+  type Track,
   type SceneElement,
 } from "svjeez";
+import { jsxDEV } from "svjeez/jsx-dev-runtime";
 import { describe, check, type Code, type Problem, type Model } from "svjeez/tools";
 import { fontFixture } from "../../../fixtures/fonts";
 
@@ -370,12 +374,79 @@ group("low-contrast", () => {
     expect(found!.message).toContain("ink on paper");
   });
 
+  test("text on a pill switched in by opacity is judged against the pill, even at the switch", () => {
+    const shown = track(0).set(1, span(2));
+
+    const model = made(() => (
+      <Group>
+        <Shape key="back" geometry={rect(200, 100)} fill="#FFFFFF" />
+        <Shape key="pill" geometry={rect(100, 40)} at={[10, 30]} fill="#000000" opacity={shown} />
+        <Text key="words" font={mono} size={12} fill="#FFFFFF" at={[20, 50]} opacity={shown}>
+          words
+        </Text>
+      </Group>
+    ));
+
+    expect(codes(model)).not.toContain("low-contrast");
+  });
+
   test("silent on good contrast, a gradient behind, or nothing behind", () => {
     expect(codes(on("#FFFFFF", "#000000"))).not.toContain("low-contrast");
     expect(
       codes(on(linear({ from: [0, 0], to: [200, 0], stops: ["#777777", "#888888"] }), "#808080")),
     ).not.toContain("low-contrast");
     expect(codes(on(undefined, "#808080"))).not.toContain("low-contrast");
+  });
+
+  test("a moving thin line is judged by the backdrop it spends most of its time on", () => {
+    const streak = (from: Vec, to: Vec = [200, 0]) =>
+      made(() => (
+        <Group>
+          <Shape key="sky" geometry={rect(200, 100)} fill="#000000" />
+          <Shape key="moon" geometry={rect(20, 100)} at={[90, 0]} fill="#FFFFFF" />
+          <Shape
+            key="rain"
+            geometry={line([0, 0], [0, 20])}
+            stroke={{ color: "#FFFFFF", width: 1 }}
+            at={track(from).to(to, span(0, 4))}
+          />
+        </Group>
+      ));
+
+    // Crosses the moon only briefly, and is plain against the sky the rest of the time.
+    expect(codes(streak([0, 0]))).not.toContain("low-contrast");
+    // Held on the moon, it is a real problem.
+    expect(codes(streak([95, 0], [95, 0]))).toContain("low-contrast");
+  });
+
+  test("a count's digits rolled out of their window are not judged, and the rest are located", () => {
+    const counting = (y: number) =>
+      made(() => (
+        <Group>
+          <Shape key="bar" geometry={rect(200, 36)} fill="#808080" />
+          {jsxDEV(
+            Text,
+            {
+              key: "n",
+              font: mono,
+              size: 12,
+              fill: "#808080",
+              at: [20, y],
+              children: count(track(179).to(70, span(0, 2))),
+            },
+            undefined,
+            false,
+            { fileName: "scene.tsx", lineNumber: 9, columnNumber: 3 },
+          )}
+        </Group>
+      ));
+
+    // Below the bar, the strips of the other digits roll across it but are clipped away.
+    expect(codes(counting(40))).not.toContain("low-contrast");
+
+    const [found] = only(counting(2), "low-contrast");
+
+    expect(found!.source).toEqual({ file: "scene.tsx", line: 9, column: 3 });
   });
 
   test("silent when what is behind is two colors", () => {
@@ -390,6 +461,55 @@ group("low-contrast", () => {
         )),
       ),
     ).not.toContain("low-contrast");
+  });
+});
+
+group("moving-box", () => {
+  const pinned = (props: Partial<Parameters<typeof Group>[0]>) =>
+    made(() => (
+      <Group {...props}>
+        <Dot at={track<Vec>([0, 0]).to([100, 0], span(0, 2))} />
+      </Group>
+    ));
+
+  test("a group pinned by at whose content moves is flagged", () => {
+    const [found] = only(pinned({ at: [0, 0] }), "moving-box");
+
+    expect(found).toMatchObject({ severity: "warning" });
+    expect(found!.message).toContain("100");
+  });
+
+  test("offset, or content that holds still, is not", () => {
+    expect(codes(pinned({ offset: [0, 0] }))).not.toContain("moving-box");
+    expect(codes(pinned({}))).not.toContain("moving-box");
+    expect(
+      codes(
+        made(() => (
+          <Group at={[50, 50]}>
+            <Dot at={[0, 0]} />
+          </Group>
+        )),
+      ),
+    ).not.toContain("moving-box");
+  });
+});
+
+group("loop-seam off canvas", () => {
+  const lap = (on: boolean) =>
+    made(() => (
+      <Group offset={track<Vec>([-60, 0]).to([260, 0], span(0, 4), ease.linear)}>
+        <Dot at={[0, 20]} />
+        <Dot at={[20, 20]} opacity={0} />
+        {on && <Dot at={[200, 20]} />}
+      </Group>
+    ));
+
+  test("a group off canvas at both ends of the loop does not jump visibly", () => {
+    expect(codes(lap(false))).not.toContain("loop-seam");
+  });
+
+  test("a visible leaf on canvas at the end still jumps", () => {
+    expect(codes(lap(true))).toContain("loop-seam");
   });
 });
 
@@ -467,6 +587,75 @@ group("timing", () => {
     ).not.toContain("wasted-motion");
   });
 
+  test("a swapped text's shared fill may change while any of its values shows", () => {
+    const words = track("one").to("two", span(1, 0.1)).to("three", span(2, 0.1));
+
+    const swapped = (fill: Paint | Track<Color>) =>
+      made(() => (
+        <Text font={mono} size={12} fill={fill} at={[10, 20]}>
+          {words}
+        </Text>
+      ));
+
+    expect(
+      only(swapped(track<Color>("#112233").to("#445566", span(3, 0.5))), "wasted-motion"),
+    ).toEqual([]);
+  });
+
+  test("a count's own strips and slots are not judged, only the motion written on the text", () => {
+    const counted = () =>
+      made(() => (
+        <Text
+          font={mono}
+          size={12}
+          fill="#808080"
+          at={[20, 20]}
+          opacity={track(0).to(1, span(1, 0.2))}
+        >
+          {count(track(179).to(70, span(0, 0.8)))}
+        </Text>
+      ));
+
+    expect(only(counted(), "wasted-motion").map((p) => p.message)).toEqual([]);
+  });
+
+  test("motion an attached arrow takes from its ends is not reported", () => {
+    const wired = made(() => {
+      const a = ref();
+      const b = ref();
+
+      return (
+        <Group>
+          <Shape
+            key="a"
+            ref={a}
+            geometry={rect(30, 20)}
+            at={[20, 30]}
+            fill="#336699"
+            motion={enter(span(0.2, 0.5), { from: { scale: 0 } })}
+          />
+          <Shape
+            key="b"
+            ref={b}
+            geometry={rect(30, 20)}
+            at={[150, 30]}
+            fill="#336699"
+            motion={enter(span(0.3, 0.5), { from: { scale: 0 } })}
+          />
+          <Arrow
+            key="link"
+            from={a.right}
+            to={b.left}
+            stroke={{ color: "#222222" }}
+            motion={enter(span(2, 0.5))}
+          />
+        </Group>
+      );
+    });
+
+    expect(only(wired, "wasted-motion")).toEqual([]);
+  });
+
   test("a scene where nothing moves, and one where nothing enters", () => {
     expect(
       only(
@@ -474,9 +663,15 @@ group("timing", () => {
         "static",
       )[0]!.message,
     ).toContain("Nothing in the scene moves");
-    expect(
-      codes(made(() => <Dot rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)} />)),
-    ).toContain("nothing-enters");
+    const spin = () => <Dot rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)} />;
+
+    expect(codes(made(spin, 4, false))).toContain("nothing-enters");
+    // A steady loop is meant to be on screen throughout: entering would break it.
+    expect(codes(made(spin))).not.toContain("nothing-enters");
+    // A loop that jumps at its seam is reported as that, and keeps the note.
+    expect(codes(made(() => <Dot rotate={track(0).to(90, span(0, 2), ease.linear)} />))).toContain(
+      "loop-seam",
+    );
     expect(codes(made(() => <Dot opacity={track(0).to(1, span(0, 1))} />))).not.toContain(
       "nothing-enters",
     );
@@ -603,7 +798,7 @@ group("describe", () => {
     const { text } = describe(model, [2]);
 
     expect(text).toContain(
-      "  row group 50×10 at 10,10\n    {0,1,2} ×3 shape rect 10×10 at 10,10; 30,10; 50,10 fill #FF0000",
+      "  row group 50×10 at 10,10\n    {#0,#1,#2} ×3 shape rect 10×10 at 10,10; 30,10; 50,10 fill #FF0000",
     );
     expect(text).toContain("ball: shown throughout; at 1s–3s");
     expect(text).toContain("title: shown 0.5s–end; opacity 0.5s–1s");

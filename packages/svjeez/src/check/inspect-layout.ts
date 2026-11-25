@@ -26,6 +26,7 @@ import {
   schemesOf,
   sharedArea,
   textOf,
+  seconds,
   units,
   type Entry,
 } from "./survey";
@@ -39,8 +40,10 @@ export const wideLines = (survey: Survey): void => {
     const widest = Math.max(
       0,
       ...node.lines.map((line) => {
+        // A run's advances end with the gap after its last letter, which draws nothing.
         const ends = line.runs.map(
-          (run) => run.at[0] + run.advances.reduce((sum, a) => sum + a, 0),
+          (run) =>
+            run.at[0] + run.advances.reduce((sum, a) => sum + a, 0) - (run.letterSpacing ?? 0),
         );
 
         return ends.length === 0 ? 0 : Math.max(...ends) - node.box.x;
@@ -297,6 +300,48 @@ const ownMoving = (node: SceneNode, t: Seconds): boolean =>
   node.layers.some(
     (layer) => movingAt(layer.offset, t) || movingAt(layer.opacity, t) || movingAt(layer.scale, t),
   );
+
+/**
+ * A group's at and anchor match a point of its box as it is at 0s. When what is inside moves, the box's corner moves
+ * with it and the group sits off the point it was given, which only holds at 0s.
+ */
+export const movingBox = (survey: Survey): void => {
+  for (const entry of survey.entries) {
+    const { node } = entry;
+
+    if (
+      node.kind !== "group" ||
+      !node.authored?.pinned ||
+      node.authored.layout ||
+      node.authored.count ||
+      isGone(survey, entry)
+    )
+      continue;
+    const rest = node.box;
+    let worst: { by: number; t: Seconds } | undefined;
+
+    for (const { t, frame } of survey.frames) {
+      const now = frame.get(node.key)?.frame;
+
+      if (!now) continue;
+
+      const by = Math.max(Math.abs(now.x - rest.x), Math.abs(now.y - rest.y));
+
+      if (by > 1 && (!worst || by > worst.by)) worst = { by, t };
+    }
+
+    if (!worst) continue;
+
+    add(survey, {
+      code: "moving-box",
+      severity: "warning",
+      key: node.key,
+      message: `${label(node)} is placed by at or anchor against its box as it is at 0s, but what is inside it moves, so the corner it was pinned by has moved ${units(worst.by)} by ${seconds(worst.t)}, and the group has drifted off the point it was given.`,
+      fix: "Move the group with offset (where its children's [0, 0] go), or keep the moving parts in an inner group and place an outer group that holds still.",
+      times: [worst.t],
+    });
+  }
+};
 
 export const layoutOverlap = (survey: Survey): void => {
   for (const entry of survey.entries) {

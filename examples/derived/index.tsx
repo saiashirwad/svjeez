@@ -36,8 +36,7 @@ export default scene(
       <Shape geometry={canvas.rect} fill={theme.background} />
       <Shape
         geometry={circle(RADIUS)}
-        at={CENTER}
-        anchor="center"
+        offset={CENTER}
         stroke={{ color: theme.border, width: 1.5 }}
       />
       <Shape
@@ -53,9 +52,9 @@ export default scene(
         rotate={theta.map((t) => -t)}
         stroke={{ color: theme.text, width: 2, cap: "round" }}
       />
-      <Shape geometry={circle(4)} at={CENTER} anchor="center" fill={theme.text} />
-      <Shape geometry={circle(7)} at={theta.map(onDial)} anchor="center" fill={theme.blue} />
-      <Shape geometry={circle(7)} at={theta.map(onWave)} anchor="center" fill={theme.orange} />
+      <Shape geometry={circle(4)} offset={CENTER} fill={theme.text} />
+      <Shape geometry={circle(7)} offset={theta.map(onDial)} fill={theme.blue} />
+      <Shape geometry={circle(7)} offset={theta.map(onWave)} fill={theme.orange} />
       <Shape
         geometry={rect(WAVE.width, 10, { radius: 5 })}
         at={[WAVE.x, 262]}

@@ -86,8 +86,7 @@ export const sun = scene({ size: [24, 24], duration: D, title: "Light", still: f
       />
       <Shape
         geometry={circle(4)}
-        at={[12, 12]}
-        anchor="center"
+        offset={[12, 12]}
         origin="center"
         stroke={stroke}
         scale={track(1)
@@ -140,7 +139,7 @@ export const system = scene({ size: [24, 24], duration: D, title: "System", stil
           geometry={path.parse("M12 4V0.5")}
           stroke={{ color: "#E3A100", width: 1.6, cap: "round" }}
         />
-        <Shape geometry={circle(1.6)} at={[12, 0.8]} anchor="center" fill={GOLD} />
+        <Shape geometry={circle(1.6)} offset={[12, 0.8]} fill={GOLD} />
       </Group>
       <Shape
         geometry={moved(rect(18, 12.5, { radius: 2 }), [3, 4])}

@@ -262,6 +262,31 @@ const restarts = (
   );
 };
 
+/** Whether none of what a node draws at `t` is on the canvas: its visible leaves all lie outside it. */
+const beyond = (
+  survey: Survey,
+  node: SceneNode,
+  frame: ReadonlyMap<string, Placed>,
+  t: Seconds,
+): boolean => {
+  const [width, height] = survey.scene.size;
+
+  return !survey.entries.some((entry) => {
+    if (!isLeaf(entry) || (entry.node !== node && !entry.ancestors.includes(node))) return false;
+    const placed = frame.get(entry.node.key);
+
+    return (
+      placed !== undefined &&
+      placed.opacity > VISIBLE &&
+      !inside(survey.hidden.get(entry.node.key) ?? [], t) &&
+      placed.box.x + placed.box.width > 0 &&
+      placed.box.y + placed.box.height > 0 &&
+      placed.box.x < width &&
+      placed.box.y < height
+    );
+  });
+};
+
 export const loopSeam = (survey: Survey): void => {
   const { scene } = survey;
   const { duration } = scene;
@@ -304,6 +329,7 @@ export const loopSeam = (survey: Survey): void => {
       b &&
       b.opacity > VISIBLE &&
       !inside(hidden, end) &&
+      !beyond(survey, node, last, end) &&
       (!a || a.opacity <= VISIBLE || inside(hidden, 0)) &&
       !(above && above !== scene.root && inside(survey.hidden.get(above.key) ?? [], 0)) &&
       !restarts(survey, entry, first, end)
@@ -327,7 +353,8 @@ export const loopSeam = (survey: Survey): void => {
       a.opacity <= VISIBLE ||
       b.opacity <= VISIBLE ||
       inside(hidden, 0) ||
-      inside(hidden, end)
+      inside(hidden, end) ||
+      (beyond(survey, node, first, 0) && beyond(survey, node, last, end))
     )
       continue;
     const parent = entry.ancestors.at(-1);
@@ -461,6 +488,10 @@ const arrives = (scene: Scene, node: SceneNode): boolean => {
   );
 };
 
+/** A looping scene whose end meets its start: nothing enters there, since entering would break the loop. */
+const steadyLoop = (survey: Survey): boolean =>
+  survey.scene.loop && !survey.out.some((found) => found.code === "loop-seam");
+
 export const timing = (survey: Survey): void => {
   const { scene } = survey;
   const { duration } = scene;
@@ -536,7 +567,14 @@ export const timing = (survey: Survey): void => {
       }
     }
 
-    wasted(survey, entry, hidden, named);
+    // An attached arrow's shaft and head move because the nodes they attach to do, and a count's or typed text's
+    // strips, slots and caret because the library animates them: not the author's to change. A swap's texts (the
+    // count group's own text children) carry values the author wrote.
+    const parent = entry.ancestors.at(-1);
+    const libraryMade = inCount(entry) && !(parent && countOf(parent) && node.kind === "text");
+
+    if (!entry.ancestors.some((each) => each.authored?.ends) && !libraryMade)
+      wasted(survey, entry, hidden, named);
   }
 
   if (!moves && duration > 0)
@@ -547,7 +585,7 @@ export const timing = (survey: Survey): void => {
       message: `Nothing in the scene moves in its ${seconds(duration)}.`,
       fix: "Animate something, or make it a still picture with a duration of 0.",
     });
-  else if (moves && !enters)
+  else if (moves && !enters && !steadyLoop(survey))
     add(survey, {
       code: "nothing-enters",
       severity: "info",
@@ -564,21 +602,50 @@ const wasted = (
   named: readonly Named[],
 ): void => {
   const { duration, loop } = survey.scene;
-  const visible = shownOf(hidden, duration);
+  const own = shownOf(hidden, duration);
 
-  if (hidden.length === 0 || visible.length === 0) return;
-  const [first, last] = [visible[0]![0], visible.at(-1)![1]];
+  if (hidden.length === 0 || own.length === 0) return;
   const before = new Map<string, Stretch[]>();
   const after = new Map<string, Stretch[]>();
+  let [first, last] = [own[0]![0], own.at(-1)![1]];
+
+  // A swap's texts share the authored values (the fill, say): such a value is seen while any of them shows.
+  const parent = entry.ancestors.at(-1);
+  const swap = parent?.kind === "group" && parent.authored?.count ? parent.children : [];
+
+  // Each text lowers its own copy of a shared value, so compare them by content.
+  const visibleFor = (item: Named): readonly Stretch[] => {
+    const same = JSON.stringify(item.value);
+
+    const shared = swap.filter((sibling) =>
+      valuesOf(sibling).some(
+        (other) => other.name === item.name && JSON.stringify(other.value) === same,
+      ),
+    );
+
+    return shared.length < 2
+      ? own
+      : shared.flatMap((sibling) => shownOf(survey.hidden.get(sibling.key) ?? [], duration));
+  };
 
   for (const item of named) {
     const { name, value } = item;
 
     if (!isLane(value) || value.period !== undefined) continue;
+    const visible = visibleFor(item);
+
+    const [from, to] = [
+      Math.min(...visible.map(([a]) => a)),
+      Math.max(...visible.map(([, b]) => b)),
+    ];
 
     for (const change of changesOf(value, duration)) {
-      if (change[1] < first - 1e-6) before.set(name, [...(before.get(name) ?? []), change]);
-      else if (change[0] > last + 1e-6 && change[0] < duration) {
+      if (change[1] < from - 1e-6) {
+        first = Math.min(first, from);
+        before.set(name, [...(before.get(name) ?? []), change]);
+      } else if (change[0] > to + 1e-6 && change[0] < duration) {
+        last = Math.max(last, to);
+
         if (loop && gap(survey, entry, item, [change[1], 0], 1) === undefined) continue;
         after.set(name, [...(after.get(name) ?? []), change]);
       }

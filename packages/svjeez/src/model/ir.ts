@@ -21,6 +21,8 @@ export interface Authored {
   };
   readonly wrap?: { readonly width: number; readonly cuts: readonly number[] };
   readonly backdrop?: true;
+  /** A group placed by at or an anchor: the point it was given is matched to its box as it is at 0s. */
+  readonly pinned?: true;
   readonly ends?: readonly string[];
   readonly count?: { readonly ticks: readonly { readonly t: Seconds; readonly text: string }[] };
   /** A <Picture> whose zoom or focus moves: its box is the frame the picture is clipped to, not its children's. */
@@ -199,6 +201,13 @@ export interface Source {
   readonly column?: number;
 }
 
+/** The clock a node's animations run on when page code drives them: its name, where it plays in the static file, and its length. */
+export interface ClockMark {
+  readonly name: string;
+  readonly start: Seconds;
+  readonly over: Seconds;
+}
+
 interface Base {
   readonly key: string;
   /** The `id` its author gave it, scoped by the components it sits in (`card1/note`). Unique in the scene. */
@@ -216,6 +225,8 @@ interface Base {
   /** The one color scheme it shows in; it shows in both without one. */
   readonly scheme?: Scheme;
   readonly authored?: Authored;
+  /** Set on the top nodes of a clocked `<Sequence>`; the nodes inside them run on that clock too. */
+  readonly clock?: ClockMark;
 }
 
 export interface GroupNode extends Base {

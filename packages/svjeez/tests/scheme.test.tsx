@@ -295,8 +295,8 @@ describe("loop-seam on layers together", () => {
 
   test("layers that don't come back together still jump", () => {
     const [jump] = popped([
-      enter(span(0.5, 0.5), { from: { offset: [0, 40] } }),
-      exit(span(3, 0.5), { to: { offset: [0, 10] } }),
+      enter(span(0.5, 0.5), { from: { offset: [0, 40], opacity: 1 } }),
+      exit(span(3, 0.5), { to: { offset: [0, 10], opacity: 1 } }),
     ]);
 
     expect(jump?.message).toContain("its offset moves it 30");

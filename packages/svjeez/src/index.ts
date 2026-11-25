@@ -29,6 +29,8 @@ export type { StandardJSONSchemaV1, StandardSchemaV1, JsonSchema } from "./autho
 
 export { Align, Center, Grid, spread, Stack, type StackAlignment } from "./author/layout";
 
+export type { AnchorPlace, TextAnchorPlace } from "./author/pin";
+
 export { Arrow } from "./author/arrow";
 
 export {
@@ -40,7 +42,6 @@ export {
   mix,
   path,
   polygon,
-  random,
   rect,
   tokens,
   type Color,
@@ -49,6 +50,8 @@ export {
 } from "./author/values";
 
 export { moved, subtract } from "./author/holes";
+
+export { random } from "./author/random";
 
 export {
   along,
@@ -78,19 +81,21 @@ export {
 
 export { adjust, blur, displace, shadow } from "./author/effects";
 
-export { track, type Anim, type Track } from "./author/track";
+export { keyframes, track, type Anim, type Goal, type Keyframe, type Track } from "./author/track";
 
 export type { LoopOptions } from "./model/steps";
 
-export { through, within } from "./author/derived";
+export { through, within, type Derived, type MapOptions } from "./author/derived";
 
 export { timeAt } from "./author/window";
 
-export { enter, exit, sampled, wiggle } from "./author/recipes";
+export { enter, exit, ride, sampled, wiggle } from "./author/recipes";
 
 export { ease, type Curve } from "./author/spring";
 
-export { span, type PaceOptions, type Span } from "./author/span";
+export { span, type Interval, type PaceOptions, type Span, type When } from "./author/span";
+
+export { clock, type Clock } from "./author/clock";
 
 export { morph } from "./author/morph";
 

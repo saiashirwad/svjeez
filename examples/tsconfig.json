@@ -16,6 +16,7 @@
       "svjeez": ["../packages/svjeez/src/index.ts"],
       "svjeez/jsx-runtime": ["../packages/svjeez/src/jsx-runtime.ts"],
       "svjeez/tools": ["../packages/svjeez/src/tools.ts"],
+      "svjeez/typecheck": ["../packages/svjeez/src/typecheck.ts"],
       "svjeez/jsx-dev-runtime": ["../packages/svjeez/src/jsx-dev-runtime.ts"],
       "svjeez/page": ["../packages/svjeez/src/page.ts"],
       "svjeez/frames": ["../packages/svjeez/src/frames.ts"]
@@ -29,6 +30,8 @@
     "dom-react-vite",
     "dom-component",
     "dom-svelte",
-    "live-editor"
+    "live-editor",
+    "clocks/page.ts",
+    "clocks/env.d.ts"
   ]
 }

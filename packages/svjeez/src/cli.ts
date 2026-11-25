@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
 import { realpathSync } from "node:fs";
-import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { examine } from "./check/report";
+import { projectTypeProblems } from "./check/type-errors";
 import { costOf, type Cost } from "./svg/cost";
 import { checkPixels, renderFrames, type FrameTimes } from "./frames";
 import { isRecord, parse, type Json, type Param, type Schema, type Values } from "./params";
@@ -44,7 +45,7 @@ returning either.
 [params] is --params data.json and any number of --param key=value. They fill the module's exported \`params\` schema
 (built with param from svjeez), are checked against it, and are passed to the default export; a key left out keeps its default.
 --param sets one value that is not a list, and wins over the file.
-Times are scene seconds. Without --times, frames takes --count frames (default 6) across one loop.
+Times are scene seconds. Without --times, frames takes --count frames (default 6) across one loop, or from 0 to the end of a scene that plays once (loop: false).
 dev serves a preview with a scrubber and a timeline, and rebuilds it when a file beside it changes.
 svg --json prints { svg, warnings, lanes }: the SVG, its warnings and every animated lane, in scene seconds.
 video encodes --loops loops of the scene, through @svjeez/video. Its format follows --out's extension, else mp4.
@@ -480,11 +481,13 @@ const framesCommand = async (args: string[]): Promise<void> => {
   });
 
   const scheme = parseScheme(values["color-scheme"]);
-  const svg = await loadSvg(positionals[0] ?? fail(USAGE), values);
+  const built = await loadBuilt(positionals[0] ?? fail(USAGE), values);
+  const svg = built.svg;
   report(svg);
 
-  const { duration, colorScheme, frames, sheet } = await renderFrames(svg, {
+  const { duration, loops, colorScheme, frames, sheet } = await renderFrames(svg, {
     ...when(values.times, values.count),
+    duration: built.scene?.duration,
     scale: number("scale", values.scale),
     colorScheme: scheme,
     background: values.background,
@@ -495,6 +498,11 @@ const framesCommand = async (args: string[]): Promise<void> => {
   });
 
   await mkdir(values.out, { recursive: true });
+
+  // Only the names an earlier run wrote, so old frames never sit beside new ones.
+  for (const name of await readdir(values.out))
+    if (/^frame-\d+-\d+_\d+s\.png$/.test(name) || name === "sheet.png")
+      await rm(join(values.out, name));
 
   const written = await Promise.all(
     frames.map(async ({ time, png }, index) => {
@@ -514,7 +522,11 @@ const framesCommand = async (args: string[]): Promise<void> => {
     await writeFile(join(values.out, "sheet.png"), sheet);
   }
 
-  console.log(`loop ${Number(duration.toFixed(3))}s, ${colorScheme}\n${written.join("\n")}`);
+  const length = `${Number(duration.toFixed(3))}s`;
+
+  console.log(
+    `${loops ? `loop ${length}` : `plays once, ${length}, last frame held`}, ${colorScheme}\n${written.join("\n")}`,
+  );
 };
 
 const SKILL = fileURLToPath(new URL("../skills/svjeez", import.meta.url));
@@ -683,7 +695,13 @@ const checkCommand = async (args: string[]): Promise<void> => {
   }
 
   // Type errors first: a wrong type is often why the scene threw or looks wrong.
-  if (host.check && !file.endsWith(".svg")) found.unshift(...(await host.check(resolve(file))));
+  if (!file.endsWith(".svg")) {
+    const typed = await (host.check ?? projectTypeProblems)(resolve(file));
+
+    if (typed) found.unshift(...typed);
+    else if (!values.json)
+      console.error("type check skipped: no TypeScript 5 or 6 installed beside the scene");
+  }
 
   if (values.browser && svgText !== undefined) {
     const sources = model ? sourcesOf(model) : new Map<string, Source>();
@@ -695,6 +713,7 @@ const checkCommand = async (args: string[]): Promise<void> => {
       : undefined;
 
     const pixels = await checkPixels(svgText, {
+      duration: model?.duration,
       ...(times ? { times } : cues && { cues }),
       colorScheme: scheme,
     });
@@ -857,4 +876,14 @@ if (HELP.has(command) || args.some((arg) => arg === "--help" || arg === "-h")) {
 
 const run = COMMANDS.get(command) ?? (() => fail(USAGE));
 
-await run(args).catch((error: Error) => fail(error.stack ?? error.message));
+/** A flag the command doesn't take is the caller's slip, not a crash: say which, and how the command is called. */
+const isArgError = (error: Error): boolean =>
+  "code" in error && String(error.code).startsWith("ERR_PARSE_ARGS");
+
+await run(args).catch((error: Error) =>
+  fail(
+    isArgError(error)
+      ? `svjeez ${command}: ${error.message}\n\n${USAGE}`
+      : (error.stack ?? error.message),
+  ),
+);

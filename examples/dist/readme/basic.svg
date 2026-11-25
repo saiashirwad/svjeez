@@ -9,7 +9,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 .fb{transform-box:fill-box;transform-origin:center}
 @keyframes k1{0%,5%{stroke-dashoffset:1}35%,100%{stroke-dashoffset:0}}
 .m1{animation-name:k1}
-@keyframes k2{0%,30%{scale:0}42.5%,100%{scale:1}}
+@keyframes k2{0%,30%{scale:0;opacity:0}42.5%,100%{scale:1;opacity:1}}
 .m2{animation-name:k2;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-3s!important;animation-play-state:paused!important}}
 ]]></style>

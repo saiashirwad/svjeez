@@ -22,6 +22,7 @@ const [crouch, leap, land] = span(0.1, 0.3).chain(0.12, 0.25);
 ```
 
 `<Sequence when>` is a clock of its own: every track and recipe inside counts from the span's start, so a component is written from 0 and placed anywhere, and sequences inside sequences add up. With a length, everything inside must end by then; `when={span(4)}` runs to the end. A track is read on one clock: two nodes on different clocks reading one track throws, so make a track for each.
+
 ## One after another, and values from above
 
 ```tsx
@@ -49,13 +50,39 @@ const Shot = ({ over, children }: { over: number; children: Child }) => (
 
 JSX runs top-down when the scene is built, so a component sees the contexts around it, and `propsOf(el, Card)` (from `svjeez/tools`) reads the props an unbuilt `<Card>` was written with. A node's length is where its last `<Sequence>` ends, seen through fragments and groups; a `<Series>` child needs one (`<Sequence when={span(0, n)}>` at its root). Leave `duration` out and the scene is as long as its root. See `examples/series.tsx`.
 
+## Clocks the page drives
+
+`clock(name, span)` makes a clock that page code can play, reverse or scrub. `<Sequence clock={c}>` runs its children on it, and tracks inside count from 0 as in any `<Sequence>`. The span is where the clock plays in the plain `.svg`, so `<img>` embeds, `frames` and `check` show it there.
+
+```tsx
+const open = clock("open", span(1, 0.5));
+
+<Sequence clock={open}>
+  <Panel />              {/* its tracks run from 0 to 0.5s on "open" */}
+</Sequence>
+```
+
+```ts
+import { mount, scrolled } from "svjeez/page";
+
+const scene = mount(document.querySelector("#card svg")!); // an inline <svg>, not an <img>
+const open = scene.clock("open");
+
+card.addEventListener("click", () => (open.time > 0 ? open.reverse() : open.play()));
+scene.clock("grow").follow(scrolled(card));
+```
+
+- A clock has `seek(seconds)`, `progress(amount)` (0 to 1), `play()` and `reverse()` (promises that resolve false when something else moves the clock first), `pause()`, `time`, `over` and `follow(driver)`. A driver is a function `(progress) => stop`; `scrolled(el)` and `pointer(el, { axis })` are built in. Under reduced motion, `play()` and `reverse()` jump straight to where they're going. Animations on the scene's own clock keep playing.
+- Everything animates on a clock. Mounting also takes over the SMIL inside it (a morph, a moving gradient, an animated effect, a text-path start), replacing it with attributes the clock sets; the `.svg` on its own still plays it.
+- Clocks don't nest, two `clock()` values can't share a name, and a track belongs to one clock.
+
 ## Loops and seams
 
 A scene loops every `duration` seconds unless `loop: false` (play once and hold the last frame). A looping scene must end where it began, or `check` reports a `loop-seam`:
 
 - A value that ends elsewhere: finish with `.rewind(over)` on the track, or fade the node out before the end (`exit`). The check adds a node's layers up, so `enter()` and `exit()` on the same value are a loop that ends where it began.
 - A node that enters and never leaves vanishes at the seam: `exit()` it, or have it on screen from 0s.
-- `.loop(period)` snaps the period to divide `duration`; a looped track never seams. A steady spin is `track(0).to(360, span(0, 2), ease.linear).loop(2)`.
+- `.loop(period)` snaps the period to divide `duration`; a looped track never seams. A steady spin is `track(0).to(360, span(0, 2), ease.linear).loop(2)`. `.loop(2, { phase })` starts it `phase` seconds into the cycle (the track at t shows the plain loop at t + phase), so each of many streaks or fireflies gets its own offset and the seam still closes.
 - A track that runs past the scene (`… runs until …s, past the …s scene`) throws: end it by `duration`.
 
 ## Reduced motion

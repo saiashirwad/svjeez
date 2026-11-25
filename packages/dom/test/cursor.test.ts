@@ -39,7 +39,7 @@ const keys = (element: SceneElement, into: string[] = []): string[] => {
   // A morph has no props of its own: its states are the page, not the cursor.
   if (!("props" in element)) return into;
 
-  if ("key" in element.props && element.props.key) into.push(element.props.key);
+  if ("key" in element.props && element.props.key) into.push(String(element.props.key));
 
   if ("children" in element) for (const child of element.children) keys(child, into);
 

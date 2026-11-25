@@ -140,6 +140,24 @@ describe("faces", () => {
         </Text>
       )),
     ).toThrow("asks for Space Mono 400 italic, but its font is the one face Space Mono 400");
+
+    expect(() =>
+      made(() => (
+        <Text key="t" font={regular} weight={700} size={10} fill="#000000">
+          x
+        </Text>
+      )),
+    ).toThrow(
+      'Only Space Mono 400 is loaded. To use Space Mono 700, load it as well: font={await google.family("Space Mono", [{ weight: 400 }, { weight: 700 }])}',
+    );
+
+    expect(() =>
+      made(() => (
+        <Text key="t" font={space} weight={600} size={10} fill="#000000">
+          x
+        </Text>
+      )),
+    ).toThrow('google.family("Space Mono", [{ weight: 600 }, …])');
   });
 
   test("two different files can't be one family's same face", () => {
@@ -785,5 +803,22 @@ describe("pre-measured runs", () => {
     ));
 
     expect(emit(model)).toContain('letter-spacing="3"');
+  });
+
+  test("a spaced run keeps the gap after its last letter before the next run, and the line fills its box", () => {
+    const model = made(() => (
+      <Text key="t" font={regular} size={10} letterSpacing={4} fill="#000000">
+        <Run>ab</Run>
+        <Run fill="#FF0000">cd</Run>
+      </Text>
+    ));
+
+    const node = textOf(model);
+    const [first, second] = node.lines[0]!.runs;
+    const end = (run: typeof first) => run!.at[0] + run!.advances.reduce((a, b) => a + b, 0);
+
+    expect(second!.at[0]).toBeCloseTo(end(first), 5);
+    expect(second!.at[0] - first!.at[0]).toBeCloseTo(regular.measure("ab", 10) + 8, 5);
+    expect(end(second) - 4).toBeCloseTo(node.box.x + node.box.width, 5);
   });
 });

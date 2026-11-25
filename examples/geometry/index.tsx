@@ -70,36 +70,35 @@ export default scene(
       />
       <Label i={0}>rect grows</Label>
 
-      <Shape
-        geometry={arc({ radius: 38, start: -90, sweep: 300 })}
-        at={center(1)}
-        anchor="center"
-        stroke={{ color: theme.raised, width: 8, cap: "round" }}
-      />
-      <Shape
-        geometry={track(arc({ radius: 38, start: -90, sweep: 0 }))
-          .to(arc({ radius: 38, start: -90, sweep: 300 }), span(0.4, 1.8), ease.inOut)
-          .rewind(0.8, ease.inOut)}
-        at={center(1)}
-        anchor="center"
-        stroke={{ color: theme.cyan, width: 8, cap: "round" }}
-      />
+      {/* The arcs are drawn about their circle's middle, so a group puts that middle in place: an anchor would read
+          the box of a part of the arc, which moves as it opens. */}
+      <Group offset={center(1)}>
+        <Shape
+          geometry={arc({ radius: 38, start: -90, sweep: 300 })}
+          stroke={{ color: theme.raised, width: 8, cap: "round" }}
+        />
+        <Shape
+          geometry={track(arc({ radius: 38, start: -90, sweep: 0 }))
+            .to(arc({ radius: 38, start: -90, sweep: 300 }), span(0.4, 1.8), ease.inOut)
+            .rewind(0.8, ease.inOut)}
+          stroke={{ color: theme.cyan, width: 8, cap: "round" }}
+        />
+      </Group>
       <Label i={1}>arc opens</Label>
 
-      <Shape
-        geometry={track(star)
-          .to(heart, span(0.6, 1.2), ease.inOut)
-          .to(star, span(2.8, 1.2), ease.inOut)}
-        at={center(2)}
-        anchor="center"
-        fill={theme.magenta}
-      />
+      <Group offset={center(2)}>
+        <Shape
+          geometry={track(star)
+            .to(heart, span(0.6, 1.2), ease.inOut)
+            .to(star, span(2.8, 1.2), ease.inOut)}
+          fill={theme.magenta}
+        />
+      </Group>
       <Label i={2}>star to heart</Label>
 
       <Shape
         geometry={circle(30)}
-        at={center(3)}
-        anchor="center"
+        offset={center(3)}
         stroke={{
           color: theme.green,
           width: track(2).to(18, span(0.4, 1.4), ease.inOut).rewind(1.2, ease.inOut),
@@ -107,16 +106,10 @@ export default scene(
       />
       <Label i={3}>stroke swells</Label>
 
+      <Shape geometry={circle(36)} offset={center(4)} stroke={{ color: theme.raised, width: 6 }} />
       <Shape
         geometry={circle(36)}
-        at={center(4)}
-        anchor="center"
-        stroke={{ color: theme.raised, width: 6 }}
-      />
-      <Shape
-        geometry={circle(36)}
-        at={center(4)}
-        anchor="center"
+        offset={center(4)}
         rotate={-90}
         stroke={{ color: theme.orange, width: 6, cap: "round" }}
         trim={track<Vec>([0, 0])

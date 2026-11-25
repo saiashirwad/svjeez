@@ -72,7 +72,7 @@ export const Sun = ({ at, motion, shine, out }: PieceProps & { shine: Span; out:
   <Group offset={at}>
     <Group
       origin="at"
-      motion={[enter(shine, { from: { opacity: 0, scale: 0.6 }, curve: ease.pop }), exit(out)]}
+      motion={[enter(shine, { from: { scale: 0.6 }, curve: ease.pop }), exit(out)]}
       rotate={track(0).to(30, span(shine.start, out.end - shine.start), ease.linear)}
     >
       {Array.from({ length: 10 }, (_, i) => (
@@ -83,7 +83,7 @@ export const Sun = ({ at, motion, shine, out }: PieceProps & { shine: Span; out:
     </Group>
     <Group origin="at" motion={motion}>
       <Shape geometry={circle(30)} fill={scenery.sun} />
-      <Shape geometry={circle(25)} at={[13, -9]} anchor="center" fill={scenery.bite} />
+      <Shape geometry={circle(25)} offset={[13, -9]} fill={scenery.bite} />
     </Group>
   </Group>
 );
@@ -94,10 +94,9 @@ export const Stars = ({ points, when, out }: { points: readonly Vec[]; when: Spa
     {points.map((at, i) => (
       <Shape
         geometry={circle(2.5)}
-        at={at}
-        anchor="center"
+        offset={at}
         fill={scenery.star}
-        motion={enter(when.shift(i * 0.15), { from: { opacity: 0, scale: 0 }, curve: ease.pop })}
+        motion={enter(when.shift(i * 0.15), { from: { scale: 0 }, curve: ease.pop })}
       />
     ))}
   </Group>
@@ -113,8 +112,8 @@ interface HillsProps {
 /** Two rolling hills along the bottom of a sky `size` big. */
 export const Hills = ({ size: [w, h], rise: [near, far], out }: HillsProps) => {
   const rising = (when: Span, depth: number): Layers => [
-    enter(when, { from: { offset: [0, depth] }, curve: ease.pop }),
-    exit(out, { to: { offset: [0, depth] }, curve: ease.in }),
+    enter(when, { from: { offset: [0, depth], opacity: 1 }, curve: ease.pop }),
+    exit(out, { to: { offset: [0, depth], opacity: 1 }, curve: ease.in }),
   ];
 
   return (
@@ -205,7 +204,7 @@ export const Burst = ({ bursts, angles, reach, fill = BLIP.yellow }: BurstProps)
   return (
     <Group>
       {angles.map((deg) => (
-        <Shape geometry={circle(3.5)} anchor="center" at={where} fill={fill} motion={fly(deg)} />
+        <Shape geometry={circle(3.5)} offset={where} fill={fill} motion={fly(deg)} />
       ))}
     </Group>
   );

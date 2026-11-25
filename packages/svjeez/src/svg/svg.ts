@@ -13,6 +13,7 @@ import { drawMoving, isStraight, type GeometrySlot } from "./svg-geometry";
 import type {
   Animated,
   Box,
+  ClockMark,
   Color,
   Gradient,
   Contour,
@@ -45,6 +46,7 @@ import { reachOf } from "../model/reach";
 import { walkScene } from "../model/walk";
 import {
   clipUrl,
+  clockAttrs,
   colorText,
   filterUrl,
   gradientUrl,
@@ -113,6 +115,8 @@ interface Ctx {
   readonly schemes: Set<Scheme>;
   /** The node being emitted: the owner of every lane written meanwhile. */
   current?: SceneNode;
+  /** The clock of the clocked sequence the node being emitted is in, if it is in one. */
+  clock: ClockMark | undefined;
 }
 
 const pt = ([x, y]: Vec): string => `${num(x)} ${num(y)}`;
@@ -343,7 +347,13 @@ const cssLane = <T>(
     route = "css",
     cuts = true,
     emit,
-  }: { readonly route?: Route; readonly cuts?: boolean; readonly emit?: Emit } = {},
+    joins = false,
+  }: {
+    readonly route?: Route;
+    readonly cuts?: boolean;
+    readonly emit?: Emit;
+    readonly joins?: boolean;
+  } = {},
 ): CssLane => {
   const { keys, period } = held(lane, ctx.scene.duration, values);
 
@@ -356,6 +366,7 @@ const cssLane = <T>(
     period,
     snapped: period,
     emit: emit ?? (cuts && slot === "opacity" && isCut(keys) ? "visibility" : "value"),
+    joins,
   };
 
   report(ctx, slot, written);
@@ -713,7 +724,9 @@ const stroked = (
         "draw",
         trim,
         ([from, to]) => (moving ? { draw: to, drawStart: from } : { draw: to }),
-        trimHides(node) ? {} : { emit: "dash" },
+        trimHides(node)
+          ? { joins: closed(node.geometry) }
+          : { emit: "dash", joins: closed(node.geometry) },
       ),
     );
   } else if (trim[0] !== 0 || trim[1] !== 1) {
@@ -774,6 +787,23 @@ const shapeElement = (
   stroked(ctx, node, drawn.attrs, lanes, shift);
 
   return drawn;
+};
+
+/** Whether a stroke around this geometry has a join where it starts. An animated geometry might, so it counts. */
+const closed = (geometry: ShapeNode["geometry"]): boolean => {
+  if (isLane(geometry)) return true;
+
+  switch (geometry.kind) {
+    case "rect":
+    case "ellipse":
+      return true;
+    case "points":
+      return geometry.closed;
+    case "path":
+      return geometry.contours.some((contour) => contour.closed);
+    default:
+      return false;
+  }
 };
 
 const trimHides = (node: ShapeNode): boolean =>
@@ -1085,6 +1115,7 @@ const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
   const [child] = node.children;
 
   if (
+    child!.clock !== undefined ||
     node.clip !== undefined ||
     node.mask !== undefined ||
     node.blend !== undefined ||
@@ -1099,6 +1130,7 @@ const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
 
   return lifted(ctx, {
     ...child!,
+    ...(node.clock && { clock: node.clock }),
     at: homed(node.at, [-x, -y]),
     ...(node.layers.length > 0 && {
       layers: node.layers,
@@ -1165,14 +1197,16 @@ const dashedTrim = (node: SceneNode): GroupNode | undefined => {
 };
 
 const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
-  const outer = ctx.current;
+  const [outer, outerClock] = [ctx.current, ctx.clock];
 
   ctx.current = given;
+  ctx.clock = given.clock ?? outerClock;
 
   try {
     return emitOne(ctx, given);
   } finally {
     ctx.current = outer;
+    ctx.clock = outerClock;
   }
 };
 
@@ -1348,7 +1382,11 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
     first,
   );
 
-  const out = node.scheme === undefined ? wrapped : schemed(ctx, node.scheme, wrapped);
+  const shown = node.scheme === undefined ? wrapped : schemed(ctx, node.scheme, wrapped);
+
+  const out = node.clock
+    ? { ...shown, attrs: { ...shown.attrs, ...clockAttrs(node.clock) } }
+    : shown;
 
   if (ctx.sources)
     return {
@@ -1487,6 +1525,7 @@ export const svg: Backend<string, SvgOptions> = {
       ...(options.onLane && { onLane: options.onLane }),
       reported: new Set(),
       schemes: new Set(),
+      clock: undefined,
       around,
       defs: {
         scene,
@@ -1497,6 +1536,7 @@ export const svg: Backend<string, SvgOptions> = {
         counts: new Map(),
         lane: (slot, lane, values, route) => cssLane(ctx, slot, lane, values, { route }),
         draw: (node) => emitNode(ctx, node),
+        clock: () => ctx.clock,
       },
     };
 

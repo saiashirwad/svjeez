@@ -19,6 +19,7 @@ export const MODULES = new Map<string, () => Promise<object>>([
   ["svjeez/jsx-runtime", () => import("svjeez/jsx-runtime")],
   ["svjeez/jsx-dev-runtime", () => import("svjeez/jsx-dev-runtime")],
   ["svjeez/tools", () => import("svjeez/tools")],
+  ["svjeez/typecheck", () => import("svjeez/typecheck")],
   ["svjeez/frames", () => import("svjeez/frames")],
   ["svjeez/page", () => import("svjeez/page")],
   ["@svjeez/charts", () => import("@svjeez/charts")],
