@@ -84,7 +84,7 @@ const typedOf = (label: string, name: string, input: ShaderInput): Typed => {
     return { type: "f32", value: { kind: "number", value: input } };
   }
 
-  if (isClock(input)) return { type: "f32", value: { kind: "clock", name: input.name } };
+  if (isClock(input)) return { type: "f32", value: { kind: "clock", clock: input.name } };
 
   if (isAnchor(input)) return { type: "vec2f", value: { kind: "point", value: [0, 0] } };
 

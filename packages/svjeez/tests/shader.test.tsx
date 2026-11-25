@@ -3,35 +3,46 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { chromium, type Browser, type Page } from "playwright-core";
-import { Sequence, Shader, Shape, clock, enter, rect, scene, span } from "svjeez";
+import {
+  Sequence,
+  Shader,
+  Shape,
+  clock,
+  enter,
+  rect,
+  scene,
+  span,
+  type SceneElement,
+} from "svjeez";
 import { loadTypeGpu, svg } from "svjeez/tools";
 
 // A "use gpu" function is compiled as its module is imported, so the fragments live in a module imported after this.
 await loadTypeGpu(import.meta.dir);
 
-const { gradient, turning } = await import("./fixtures/shaders");
+const { gradient, renamed, turning } = await import("./fixtures/shaders");
 
 const storm = clock("storm", span(0, 1));
 
-const build = (fragment: typeof gradient | typeof turning, wrong?: string) => {
-  const markup = svg.emit(
+// A scene with a bar on the storm clock beside `sky`, the shader under test.
+const withShader = (sky: SceneElement) =>
+  svg.emit(
     scene({ size: [120, 80], duration: 2, title: "Shader" }, () => (
       <>
         <Sequence clock={storm}>
           <Shape key="bar" geometry={rect(10, 10)} fill="#000000" motion={enter(span(0, 1))} />
         </Sequence>
-        <Shader
-          name="sky"
-          width={80}
-          height={60}
-          at={[20, 10]}
-          inputs={{ storm }}
-          fragment={fragment}
-        >
-          <Shape geometry={rect(20, 20)} fill="#00ff00" />
-        </Shader>
+        {sky}
       </>
     )),
+  );
+
+const FALLBACK = <Shape geometry={rect(20, 20)} fill="#00ff00" />;
+
+const build = (fragment: typeof gradient | typeof turning, wrong?: string) => {
+  const markup = withShader(
+    <Shader name="sky" width={80} height={60} at={[20, 10]} inputs={{ storm }} fragment={fragment}>
+      {FALLBACK}
+    </Shader>,
   );
 
   return wrong === undefined ? markup : markup.replace("svjeez_vertex", wrong);
@@ -306,6 +317,36 @@ describe("the shader runner", () => {
     await page.close();
   });
 
+  gpu("an input named apart from its clock follows that clock", async () => {
+    const { page, noise } = await open(
+      withShader(
+        <Shader
+          name="sky"
+          width={80}
+          height={60}
+          at={[20, 10]}
+          inputs={{ weather: storm }}
+          fragment={renamed}
+        >
+          {FALLBACK}
+        </Shader>,
+      ),
+    );
+
+    await run(page, MOUNT);
+    await run(page, "scene.clock('storm').progress(0);");
+    await settle(page);
+    const before = await colors(await shot(page));
+
+    await run(page, "scene.clock('storm').progress(1);");
+    await settle(page);
+    const after = await colors(await shot(page));
+
+    expect(after.blue).toBeGreaterThan(before.blue + 100);
+    expect(noise).toEqual([]);
+    await page.close();
+  });
+
   gpu("its time runs, and under reduced motion it stands still", async () => {
     const moving = await open(build(turning));
 
@@ -444,6 +485,31 @@ describe("the shader runner", () => {
       await page.close();
     },
   );
+
+  gpu("a layout that is not the build's keeps the fallback, and says nothing", async () => {
+    // A field past the end of the buffer, and one whose kind no build writes.
+    const broken = [
+      '{"size":16,"fields":[{"name":"storm","kind":"clock","clock":"storm","at":64}]}',
+      '{"size":16,"fields":[{"name":"storm","kind":"noise","at":0}]}',
+      "not json",
+    ];
+
+    for (const inputs of broken) {
+      const markup = build(gradient).replace(
+        /data-shader-inputs='[^']*'|data-shader-inputs="[^"]*"/,
+        `data-shader-inputs='${inputs}'`,
+      );
+
+      const { page, noise } = await open(markup);
+
+      await run(page, MOUNT);
+      await settle(page);
+
+      expect(await run<number>(page, "return document.querySelectorAll('canvas').length;")).toBe(0);
+      expect(noise).toEqual([]);
+      await page.close();
+    }
+  });
 
   gpu("a shader that does not compile keeps the fallback, and says nothing", async () => {
     const { page, noise } = await open(build(gradient, "nope"));

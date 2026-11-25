@@ -154,7 +154,14 @@ describe("Shader", () => {
           name="sky"
           width={80}
           height={60}
-          inputs={{ storm, gain: 0.5, off: [7, 9], tint: palette.sea, focus: "#00ff00" }}
+          inputs={{
+            storm,
+            weather: storm,
+            gain: 0.5,
+            off: [7, 9],
+            tint: palette.sea,
+            focus: "#00ff00",
+          }}
           fragment={solid}
         />
       )),
@@ -162,7 +169,9 @@ describe("Shader", () => {
 
     const by = Object.fromEntries(fields.map((field) => [field.name, field]));
 
-    expect(by.storm).toMatchObject({ kind: "clock", name: "storm" });
+    expect(by.storm).toMatchObject({ kind: "clock", clock: "storm" });
+    // An input named apart from its clock still reads that clock.
+    expect(by.weather).toMatchObject({ kind: "clock", name: "weather", clock: "storm" });
     expect(by.gain).toMatchObject({ kind: "number", value: 0.5 });
     expect(by.off).toMatchObject({ kind: "vec", value: [7, 9] });
     expect(by.tint).toMatchObject({ kind: "color", light: [1, 0, 0], dark: [0, 0, 1] });

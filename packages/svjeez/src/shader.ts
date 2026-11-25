@@ -1,6 +1,7 @@
 /// <reference types="@webgpu/types" />
 import type { Mounted } from "./clocks";
-import type { ShaderField } from "./model/ir";
+import { isNumber, isObject, isPoint, isString } from "./model/guards";
+import type { Rgb, ShaderField } from "./model/ir";
 
 interface Table {
   readonly size: number;
@@ -100,13 +101,64 @@ const draws = (draw: Draw, on: boolean) => {
   if (on && ticking === 0) ticking = requestAnimationFrame(tick);
 };
 
+const isRgb = (value: unknown): value is Rgb =>
+  Array.isArray(value) && value.length === 3 && value.every((n) => Number.isFinite(n));
+
+/** How many f32s a field fills from its offset: a point is two, a color three. */
+const FLOATS = { time: 1, resolution: 2, clock: 1, number: 1, vec: 2, point: 2, color: 3 };
+
+const isKind = (kind: unknown): kind is keyof typeof FLOATS => isString(kind) && kind in FLOATS;
+
+/** A field as the build writes it: a known kind with its values, at a 4-byte offset that fits in `size` bytes. */
+const isField =
+  (size: number) =>
+  (field: unknown): field is ShaderField => {
+    if (!isObject(field) || !("name" in field) || !("at" in field) || !("kind" in field))
+      return false;
+
+    const { name, at, kind } = field;
+
+    if (!isString(name) || !isNumber(at) || !isKind(kind) || at < 0 || at % 4 !== 0) return false;
+
+    if (at + FLOATS[kind] * 4 > size) return false;
+
+    const value = "value" in field ? field.value : undefined;
+
+    switch (kind) {
+      case "time":
+      case "resolution":
+        return true;
+      case "clock":
+        return "clock" in field && isString(field.clock);
+      case "number":
+        return isNumber(value) && Number.isFinite(value);
+      case "vec":
+      case "point":
+        return isPoint(value);
+      case "color":
+        return "light" in field && "dark" in field && isRgb(field.light) && isRgb(field.dark);
+    }
+  };
+
+/** The uniform layout a `<Shader>` group carries in `data-shader-inputs`, checked before a frame reads it. */
+const isTable = (table: unknown): table is Table =>
+  isObject(table) &&
+  "size" in table &&
+  "fields" in table &&
+  isNumber(table.size) &&
+  table.size > 0 &&
+  table.size % 4 === 0 &&
+  Array.isArray(table.fields) &&
+  table.fields.every(isField(table.size));
+
+/** The WGSL and uniform layout of a `<Shader>` group, or nothing when either is missing or malformed. */
 const parsed = (group: Element): { readonly table: Table; readonly code: string } | undefined => {
   const code = group.querySelector(':scope > script[type="text/wgsl"]')?.textContent;
 
   try {
-    const table: Table = JSON.parse(group.getAttribute("data-shader-inputs") ?? "");
+    const table: unknown = JSON.parse(group.getAttribute("data-shader-inputs") ?? "");
 
-    return code ? { table, code } : undefined;
+    return code && isTable(table) ? { table, code } : undefined;
   } catch {
     return undefined;
   }
@@ -198,7 +250,7 @@ const run = (group: Element, scene: Scene): (() => void) => {
         case "resolution":
           return [w, h];
         case "clock":
-          return [clockProgress(field.name)];
+          return [clockProgress(field.clock)];
         case "number":
           return [field.value];
         case "vec":

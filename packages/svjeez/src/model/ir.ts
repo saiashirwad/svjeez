@@ -206,7 +206,7 @@ export type ShaderValue =
   /** The canvas's width and height in device pixels. */
   | { readonly kind: "resolution" }
   /** How far the named clock has run, from 0 to 1. */
-  | { readonly kind: "clock"; readonly name: string }
+  | { readonly kind: "clock"; readonly clock: string }
   | { readonly kind: "number"; readonly value: number }
   | { readonly kind: "vec"; readonly value: Vec }
   /** A point in the slot's pixels, from its top left corner; the layout puts it where its anchor rests. */

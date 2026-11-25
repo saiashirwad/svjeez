@@ -17,6 +17,13 @@ export const gradient = (uv: d.v2f, input: { readonly storm: number }): d.v4f =>
   return d.vec4f(uv.x, uv.y, input.storm, 1);
 };
 
+/** The same picture, reading the storm clock under another name. */
+export const renamed = (uv: d.v2f, input: { readonly weather: number }): d.v4f => {
+  "use gpu";
+
+  return d.vec4f(uv.x, uv.y, input.weather, 1);
+};
+
 /** The same, with red turning with the seconds. */
 export const turning = (uv: d.v2f, input: { readonly time: number }): d.v4f => {
   "use gpu";
