@@ -24,28 +24,28 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-7.5s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
 ]]></style>
   <rect width="864" height="310" fill="var(--background)"/>
-  <g transform="translate(32 33.207)">
+  <g transform="translate(32 33.207)" font-size="11.05" fill="var(--text)">
     <rect y="41" width="800" height="56" fill="var(--border-10-background)"/>
-    <text x="12" y="72.978" font-size="11.05" fill="var(--text)">Design</text>
-    <text x="12" y="128.978" font-size="11.05" fill="var(--text)">Build</text>
+    <text x="12" y="72.978">Design</text>
+    <text x="12" y="128.978">Build</text>
     <rect y="153" width="800" height="56" fill="var(--border-10-background)"/>
-    <text x="12" y="184.978" font-size="11.05" fill="var(--text)">Ship</text>
+    <text x="12" y="184.978">Ship</text>
     <rect x="189.551" y="41" width="47.108" height="168" fill="var(--border-18-background)"/>
     <rect x="354.43" y="41" width="47.108" height="168" fill="var(--border-18-background)"/>
     <rect x="519.309" y="41" width="47.108" height="168" fill="var(--border-18-background)"/>
     <rect x="684.188" y="41" width="47.108" height="168" fill="var(--border-18-background)"/>
     <line x1="71.78" y1="41" x2="71.78" y2="213" fill="none" stroke="var(--border)" stroke-dasharray="1 3" opacity="0.7"/>
-    <text x="38.63" y="228.271" font-size="11.05" fill="var(--muted)">2026-03-02</text>
+    <text x="38.63" y="228.271" fill="var(--muted)">2026-03-02</text>
     <line x1="236.659" y1="41" x2="236.659" y2="213" fill="none" stroke="var(--border)" stroke-dasharray="1 3" opacity="0.7"/>
-    <text x="203.509" y="228.271" font-size="11.05" fill="var(--muted)">2026-03-09</text>
+    <text x="203.509" y="228.271" fill="var(--muted)">2026-03-09</text>
     <line x1="401.538" y1="41" x2="401.538" y2="213" fill="none" stroke="var(--border)" stroke-dasharray="1 3" opacity="0.7"/>
-    <text x="368.388" y="228.271" font-size="11.05" fill="var(--muted)">2026-03-16</text>
+    <text x="368.388" y="228.271" fill="var(--muted)">2026-03-16</text>
     <line x1="566.417" y1="41" x2="566.417" y2="213" fill="none" stroke="var(--border)" stroke-dasharray="1 3" opacity="0.7"/>
-    <text x="533.267" y="228.271" font-size="11.05" fill="var(--muted)">2026-03-23</text>
+    <text x="533.267" y="228.271" fill="var(--muted)">2026-03-23</text>
     <line x1="731.296" y1="41" x2="731.296" y2="213" fill="none" stroke="var(--border)" stroke-dasharray="1 3" opacity="0.7"/>
-    <text x="698.146" y="228.271" font-size="11.05" fill="var(--muted)">2026-03-30</text>
+    <text x="698.146" y="228.271" fill="var(--muted)">2026-03-30</text>
     <line x1="71.78" y1="209" x2="754.85" y2="209" fill="none" stroke="var(--border)"/>
-    <text x="12" y="28.32" font-size="16" fill="var(--text)">Launch plan</text>
+    <text x="12" y="28.32" font-size="16">Launch plan</text>
     <rect x="72.28" y="44.5" width="94.217" height="22" rx="4" fill="var(--border-35-background)" stroke="var(--border)" class="dm">
       <animate id="w1" attributeName="width" values="0;94.217" keyTimes="0;1" begin="0.3s;w1.begin+8s" dur="0.3s" fill="freeze" data-loop="8s"/>
       <set attributeName="width" to="0" begin="0s;w1.begin+7.7s" dur="0.3s" fill="freeze" data-loop="8s"/>
@@ -53,7 +53,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <set attributeName="rx" to="0" begin="0s;w2.begin+7.7s" dur="0.3s" fill="freeze" data-loop="8s"/>
     </rect>
     <rect x="72.28" y="44.5" width="94.217" height="22" rx="4" fill="var(--border-35-background)" stroke="var(--border)" class="ds" display="none"/>
-    <text x="92.368" y="58.978" font-size="11.05" fill="var(--text)" class="a m1">Research</text>
+    <text x="92.368" y="58.978" class="a m1">Research</text>
     <rect x="166.497" y="72.5" width="164.879" height="22" rx="4" fill="var(--blue-25-background)" stroke="var(--blue)" class="dm">
       <animate id="w3" attributeName="width" values="0;164.879" keyTimes="0;1" begin="0.6s;w3.begin+8s" dur="0.3s" fill="freeze" data-loop="8s"/>
       <set attributeName="width" to="0" begin="0s;w3.begin+7.4s" dur="0.6s" fill="freeze" data-loop="8s"/>
@@ -61,7 +61,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <set attributeName="rx" to="0" begin="0s;w4.begin+7.4s" dur="0.6s" fill="freeze" data-loop="8s"/>
     </rect>
     <rect x="166.497" y="72.5" width="164.879" height="22" rx="4" fill="var(--blue-25-background)" stroke="var(--blue)" class="ds" display="none"/>
-    <text x="215.286" y="86.978" font-size="11.05" fill="var(--text)" class="a m2">Wireframes</text>
+    <text x="215.286" y="86.978" class="a m2">Wireframes</text>
     <rect x="331.376" y="100.5" width="282.65" height="22" rx="4" fill="var(--orange)" stroke="var(--orange)" class="dm">
       <animate id="w5" attributeName="width" values="0;282.65" keyTimes="0;1" begin="0.9s;w5.begin+8s" dur="0.3s" fill="freeze" data-loop="8s"/>
       <set attributeName="width" to="0" begin="0s;w5.begin+7.1s" dur="0.9s" fill="freeze" data-loop="8s"/>
@@ -69,7 +69,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <set attributeName="rx" to="0" begin="0s;w6.begin+7.1s" dur="0.9s" fill="freeze" data-loop="8s"/>
     </rect>
     <rect x="331.376" y="100.5" width="282.65" height="22" rx="4" fill="var(--orange)" stroke="var(--orange)" class="ds" display="none"/>
-    <text x="462.255" y="114.978" font-size="11.05" fill="var(--background)" class="a m3">API</text>
+    <text x="462.255" y="114.978" fill="var(--background)" class="a m3">API</text>
     <rect x="331.376" y="128.5" width="329.758" height="22" rx="4" fill="var(--blue)" stroke="var(--blue)" class="dm">
       <animate id="w7" attributeName="width" values="0;329.758" keyTimes="0;1" begin="1.2s;w7.begin+8s" dur="0.3s" fill="freeze" data-loop="8s"/>
       <set attributeName="width" to="0" begin="0s;w7.begin+6.8s" dur="1.2s" fill="freeze" data-loop="8s"/>
@@ -77,9 +77,9 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <set attributeName="rx" to="0" begin="0s;w8.begin+6.8s" dur="1.2s" fill="freeze" data-loop="8s"/>
     </rect>
     <rect x="331.376" y="128.5" width="329.758" height="22" rx="4" fill="var(--blue)" stroke="var(--blue)" class="ds" display="none"/>
-    <text x="469.234" y="142.978" font-size="11.05" fill="var(--background)" class="a m4">Frontend</text>
+    <text x="469.234" y="142.978" fill="var(--background)" class="a m4">Frontend</text>
     <polygon points="0 -11 11 0 0 11 -11 0" transform="translate(660.633 167)" fill="var(--blue)" stroke="var(--blue)" stroke-width="1.5" style="transform-origin:660.633px 167px" class="a m5"/>
-    <text x="679.633" y="170.978" font-size="11.05" fill="var(--text)" class="a m6">Beta</text>
+    <text x="679.633" y="170.978" class="a m6">Beta</text>
     <rect x="661.133" y="184.5" width="94.217" height="22" rx="4" fill="var(--orange)" stroke="var(--orange)" class="dm">
       <animate id="w9" attributeName="width" values="0;94.217" keyTimes="0;1" begin="1.8s;w9.begin+8s" dur="0.3s" fill="freeze" data-loop="8s"/>
       <set attributeName="width" to="0" begin="0s;w9.begin+6.2s" dur="1.8s" fill="freeze" data-loop="8s"/>
@@ -87,6 +87,6 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <set attributeName="rx" to="0" begin="0s;w10.begin+6.2s" dur="1.8s" fill="freeze" data-loop="8s"/>
     </rect>
     <rect x="661.133" y="184.5" width="94.217" height="22" rx="4" fill="var(--orange)" stroke="var(--orange)" class="ds" display="none"/>
-    <text x="687.852" y="198.978" font-size="11.05" fill="var(--background)" class="a m7">Launch</text>
+    <text x="687.852" y="198.978" fill="var(--background)" class="a m7">Launch</text>
   </g>
 </svg>

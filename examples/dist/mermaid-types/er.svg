@@ -80,41 +80,41 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <text x="74.8" y="110.68" font-size="13" fill="var(--text)">email</text>
       <text x="129.8" y="109.978" font-size="11.05" fill="var(--muted)">UK</text>
     </g>
-    <g transform="translate(0 226)" class="a m8" fill="none">
+    <g transform="translate(0 226)" class="a m8" font-size="13" fill="var(--muted)">
       <g clip-path="url(#c2)">
         <rect width="202" height="120" fill="var(--magenta-5-background)"/>
         <rect width="202" height="36" fill="var(--magenta-22-background)"/>
         <rect y="64" width="202" height="28" fill="var(--magenta-11-background)"/>
       </g>
-      <line x1="0" y1="36" x2="202" y2="36" stroke="var(--magenta)"/>
-      <rect width="202" height="120" rx="6" stroke="var(--magenta)" stroke-width="1.5"/>
+      <line x1="0" y1="36" x2="202" y2="36" fill="none" stroke="var(--magenta)"/>
+      <rect width="202" height="120" rx="6" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
       <text x="79.55" y="23.148" font-size="14.3" fill="var(--text)">ORDER</text>
-      <text x="12" y="54.68" font-size="13" fill="var(--muted)">int</text>
-      <text x="74.8" y="54.68" font-size="13" fill="var(--text)">id</text>
-      <text x="176.6" y="53.978" font-size="11.05" fill="var(--muted)">PK</text>
-      <text x="12" y="82.68" font-size="13" fill="var(--muted)">string</text>
-      <text x="74.8" y="82.68" font-size="13" fill="var(--text)">customer_id</text>
-      <text x="176.6" y="81.978" font-size="11.05" fill="var(--muted)">FK</text>
-      <text x="12" y="110.68" font-size="13" fill="var(--muted)">date</text>
-      <text x="74.8" y="110.68" font-size="13" fill="var(--text)">placed</text>
+      <text x="12" y="54.68">int</text>
+      <text x="74.8" y="54.68" fill="var(--text)">id</text>
+      <text x="176.6" y="53.978" font-size="11.05">PK</text>
+      <text x="12" y="82.68">string</text>
+      <text x="74.8" y="82.68" fill="var(--text)">customer_id</text>
+      <text x="176.6" y="81.978" font-size="11.05">FK</text>
+      <text x="12" y="110.68">date</text>
+      <text x="74.8" y="110.68" fill="var(--text)">placed</text>
     </g>
-    <g transform="translate(129 452)" class="a m9" fill="none">
+    <g transform="translate(129 452)" class="a m9" font-size="13" fill="var(--muted)">
       <g clip-path="url(#c3)">
         <rect width="171" height="120" fill="var(--magenta-5-background)"/>
         <rect width="171" height="36" fill="var(--magenta-22-background)"/>
         <rect y="64" width="171" height="28" fill="var(--magenta-11-background)"/>
       </g>
-      <line x1="0" y1="36" x2="171" y2="36" stroke="var(--magenta)"/>
-      <rect width="171" height="120" rx="6" stroke="var(--magenta)" stroke-width="1.5"/>
+      <line x1="0" y1="36" x2="171" y2="36" fill="none" stroke="var(--magenta)"/>
+      <rect width="171" height="120" rx="6" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
       <text x="46.89" y="23.148" font-size="14.3" fill="var(--text)">LINE_ITEM</text>
-      <text x="12" y="54.68" font-size="13" fill="var(--muted)">int</text>
-      <text x="51.4" y="54.68" font-size="13" fill="var(--text)">order_id</text>
-      <text x="145.4" y="53.978" font-size="11.05" fill="var(--muted)">FK</text>
-      <text x="12" y="82.68" font-size="13" fill="var(--muted)">int</text>
-      <text x="51.4" y="82.68" font-size="13" fill="var(--text)">product_id</text>
-      <text x="145.4" y="81.978" font-size="11.05" fill="var(--muted)">FK</text>
-      <text x="12" y="110.68" font-size="13" fill="var(--muted)">int</text>
-      <text x="51.4" y="110.68" font-size="13" fill="var(--text)">quantity</text>
+      <text x="12" y="54.68">int</text>
+      <text x="51.4" y="54.68" fill="var(--text)">order_id</text>
+      <text x="145.4" y="53.978" font-size="11.05">FK</text>
+      <text x="12" y="82.68">int</text>
+      <text x="51.4" y="82.68" fill="var(--text)">product_id</text>
+      <text x="145.4" y="81.978" font-size="11.05">FK</text>
+      <text x="12" y="110.68">int</text>
+      <text x="51.4" y="110.68" fill="var(--text)">quantity</text>
     </g>
     <g transform="translate(250 226)" class="a m10">
       <use clip-path="url(#c1)" href="#u1"/>

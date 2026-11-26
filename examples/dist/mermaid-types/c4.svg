@@ -77,13 +77,13 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     <polygon points="520 600 524 608 516 608" fill="var(--border)" class="a m11"/>
     <path d="M536 600L536 606C536 654.36 500.57 684 442.75 684C384.94 684 349.5 707.56 349.5 746L349.5 752" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m12"/>
     <polygon points="349.5 759 345.5 751 353.5 751" fill="var(--border)" class="a m13"/>
-    <g transform="translate(506.5 40)" class="a m14">
+    <g transform="translate(506.5 40)" class="a m14" fill="var(--blue)">
       <rect width="221" height="116" rx="8" fill="var(--blue-20-background)" stroke="var(--blue)" stroke-width="1.5"/>
-      <circle cx="110.5" cy="19" r="5" fill="var(--blue)"/>
-      <path d="M100.5 38C100.5 26 120.5 26 120.5 38Z" fill="var(--blue)"/>
-      <text x="79.3" y="60.68" font-size="13">Customer</text>
+      <circle cx="110.5" cy="19" r="5"/>
+      <path d="M100.5 38C100.5 26 120.5 26 120.5 38Z"/>
+      <text x="79.3" y="60.68" font-size="13" fill="var(--text)">Customer</text>
       <text x="83.98" y="78.478" fill="var(--muted)">[Person]</text>
-      <text x="14.365" y="99.478">A bank customer with accounts</text>
+      <text x="14.365" y="99.478" fill="var(--text)">A bank customer with accounts</text>
     </g>
     <g transform="translate(526.5 296)" class="a m15">
       <rect width="181" height="82" rx="8" fill="var(--blue-20-background)" stroke="var(--blue)" stroke-width="1.5"/>

@@ -129,39 +129,39 @@ struct SvjeezVarying {
     <rect width="520" height="220" rx="12" fill="url(#g1)"/>
     <rect width="520" height="220" rx="12" fill="url(#g2)" data-clock="storm" data-clock-at="1.4" data-clock-over="1.2" class="a m3"/>
   </g>
-  <g transform="translate(22.5 316.92)" fill="none" stroke="var(--muted)">
-    <line x1="0" y1="0" x2="0" y2="8" fill="none" stroke="var(--muted)"/>
-    <text y="22.2" font-size="10" fill="var(--muted)">0</text>
-    <line x1="20.8" y1="0" x2="20.8" y2="4"/>
-    <line x1="41.6" y1="0" x2="41.6" y2="4"/>
-    <line x1="62.4" y1="0" x2="62.4" y2="4"/>
-    <line x1="83.2" y1="0" x2="83.2" y2="4"/>
-    <line x1="104" y1="0" x2="104" y2="8" fill="none" stroke="var(--muted)"/>
-    <text x="95" y="22.2" font-size="10" fill="var(--muted)">100</text>
-    <line x1="124.8" y1="0" x2="124.8" y2="4"/>
-    <line x1="145.6" y1="0" x2="145.6" y2="4"/>
-    <line x1="166.4" y1="0" x2="166.4" y2="4"/>
-    <line x1="187.2" y1="0" x2="187.2" y2="4"/>
-    <line x1="208" y1="0" x2="208" y2="8" fill="none" stroke="var(--muted)"/>
-    <text x="199" y="22.2" font-size="10" fill="var(--muted)">200</text>
-    <line x1="228.8" y1="0" x2="228.8" y2="4"/>
-    <line x1="249.6" y1="0" x2="249.6" y2="4"/>
-    <line x1="270.4" y1="0" x2="270.4" y2="4"/>
-    <line x1="291.2" y1="0" x2="291.2" y2="4"/>
-    <line x1="312" y1="0" x2="312" y2="8" fill="none" stroke="var(--muted)"/>
-    <text x="303" y="22.2" font-size="10" fill="var(--muted)">300</text>
-    <line x1="332.8" y1="0" x2="332.8" y2="4"/>
-    <line x1="353.6" y1="0" x2="353.6" y2="4"/>
-    <line x1="374.4" y1="0" x2="374.4" y2="4"/>
-    <line x1="395.2" y1="0" x2="395.2" y2="4"/>
-    <line x1="416" y1="0" x2="416" y2="8" fill="none" stroke="var(--muted)"/>
-    <text x="407" y="22.2" font-size="10" fill="var(--muted)">400</text>
-    <line x1="436.8" y1="0" x2="436.8" y2="4"/>
-    <line x1="457.6" y1="0" x2="457.6" y2="4"/>
-    <line x1="478.4" y1="0" x2="478.4" y2="4"/>
-    <line x1="499.2" y1="0" x2="499.2" y2="4"/>
-    <line x1="520" y1="0" x2="520" y2="8" fill="none" stroke="var(--muted)"/>
-    <text x="502" y="22.2" font-size="10" fill="var(--muted)">500</text>
+  <g transform="translate(22.5 316.92)" font-size="10" fill="none">
+    <line x1="0" y1="0" x2="0" y2="8" stroke="var(--muted)"/>
+    <text y="22.2" fill="var(--muted)">0</text>
+    <line x1="20.8" y1="0" x2="20.8" y2="4" stroke="var(--muted)"/>
+    <line x1="41.6" y1="0" x2="41.6" y2="4" stroke="var(--muted)"/>
+    <line x1="62.4" y1="0" x2="62.4" y2="4" stroke="var(--muted)"/>
+    <line x1="83.2" y1="0" x2="83.2" y2="4" stroke="var(--muted)"/>
+    <line x1="104" y1="0" x2="104" y2="8" stroke="var(--muted)"/>
+    <text x="95" y="22.2" fill="var(--muted)">100</text>
+    <line x1="124.8" y1="0" x2="124.8" y2="4" stroke="var(--muted)"/>
+    <line x1="145.6" y1="0" x2="145.6" y2="4" stroke="var(--muted)"/>
+    <line x1="166.4" y1="0" x2="166.4" y2="4" stroke="var(--muted)"/>
+    <line x1="187.2" y1="0" x2="187.2" y2="4" stroke="var(--muted)"/>
+    <line x1="208" y1="0" x2="208" y2="8" stroke="var(--muted)"/>
+    <text x="199" y="22.2" fill="var(--muted)">200</text>
+    <line x1="228.8" y1="0" x2="228.8" y2="4" stroke="var(--muted)"/>
+    <line x1="249.6" y1="0" x2="249.6" y2="4" stroke="var(--muted)"/>
+    <line x1="270.4" y1="0" x2="270.4" y2="4" stroke="var(--muted)"/>
+    <line x1="291.2" y1="0" x2="291.2" y2="4" stroke="var(--muted)"/>
+    <line x1="312" y1="0" x2="312" y2="8" stroke="var(--muted)"/>
+    <text x="303" y="22.2" fill="var(--muted)">300</text>
+    <line x1="332.8" y1="0" x2="332.8" y2="4" stroke="var(--muted)"/>
+    <line x1="353.6" y1="0" x2="353.6" y2="4" stroke="var(--muted)"/>
+    <line x1="374.4" y1="0" x2="374.4" y2="4" stroke="var(--muted)"/>
+    <line x1="395.2" y1="0" x2="395.2" y2="4" stroke="var(--muted)"/>
+    <line x1="416" y1="0" x2="416" y2="8" stroke="var(--muted)"/>
+    <text x="407" y="22.2" fill="var(--muted)">400</text>
+    <line x1="436.8" y1="0" x2="436.8" y2="4" stroke="var(--muted)"/>
+    <line x1="457.6" y1="0" x2="457.6" y2="4" stroke="var(--muted)"/>
+    <line x1="478.4" y1="0" x2="478.4" y2="4" stroke="var(--muted)"/>
+    <line x1="499.2" y1="0" x2="499.2" y2="4" stroke="var(--muted)"/>
+    <line x1="520" y1="0" x2="520" y2="8" stroke="var(--muted)"/>
+    <text x="502" y="22.2" fill="var(--muted)">500</text>
   </g>
   <g transform="translate(22 358.12)">
     <text y="10.2" font-size="10" letter-spacing="1" fill="var(--muted)">AMPLITUDE</text>
