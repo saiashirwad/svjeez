@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 598 313" width="598" height="313" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">A page takes over a scene clock</title>
+  <desc id="d">A Mermaid sequence diagram drawn by @svjeez/mermaid.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--magenta-22-background:color-mix(in srgb,var(--magenta) 22%,var(--background));--blue-12-background:color-mix(in srgb,var(--blue) 12%,var(--background))}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,3.75%{stroke-dashoffset:1;visibility:hidden}6.375%,100%{stroke-dashoffset:0;visibility:visible}}
+.m1{animation-name:k1}
+@keyframes k2{0%{visibility:hidden}5.6%,100%{visibility:visible}}
+.m2{animation-name:k2;animation-timing-function:steps(1)}
+@keyframes k3{0%,3.75%{translate:0 6px;opacity:0}6.875%,100%{translate:0 0;opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,7.5%{translate:0 6px;opacity:0}10.625%,100%{translate:0 0;opacity:1}}
+.m4{animation-name:k4}
+@keyframes k5{0%,11.25%{stroke-dashoffset:1;visibility:hidden}13.875%,100%{stroke-dashoffset:0;visibility:visible}}
+.m5{animation-name:k5}
+@keyframes k6{0%{visibility:hidden}13.1%,100%{visibility:visible}}
+.m6{animation-name:k6;animation-timing-function:steps(1)}
+@keyframes k7{0%,11.25%{translate:0 6px;opacity:0}14.375%,100%{translate:0 0;opacity:1}}
+.m7{animation-name:k7}
+@keyframes k8{0%,15%{stroke-dashoffset:1;visibility:hidden}17.625%,100%{stroke-dashoffset:0;visibility:visible}}
+.m8{animation-name:k8}
+@keyframes k9{0%{visibility:hidden}16.85%,100%{visibility:visible}}
+.m9{animation-name:k9;animation-timing-function:steps(1)}
+@keyframes k10{0%,15%{translate:0 6px;opacity:0}18.125%,100%{translate:0 0;opacity:1}}
+.m10{animation-name:k10}
+@keyframes k11{0%,18.75%{stroke-dashoffset:1;visibility:hidden}21.375%,100%{stroke-dashoffset:0;visibility:visible}}
+.m11{animation-name:k11}
+@keyframes k12{0%{visibility:hidden}20.6%,100%{visibility:visible}}
+.m12{animation-name:k12;animation-timing-function:steps(1)}
+@keyframes k13{0%,18.75%{translate:0 6px;opacity:0}21.875%,100%{translate:0 0;opacity:1}}
+.m13{animation-name:k13}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-7.5s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="598" height="313" fill="var(--background)"/>
+  <g transform="translate(32.49 32.375)" fill="none">
+    <line x1="49.4" y1="36" x2="49.4" y2="249" stroke="var(--border)" stroke-dasharray="3 4"/>
+    <line x1="270.41" y1="36" x2="270.41" y2="249" stroke="var(--border)" stroke-dasharray="3 4"/>
+    <line x1="491.42" y1="36" x2="491.42" y2="249" stroke="var(--border)" stroke-dasharray="3 4"/>
+    <rect width="98.8" height="36" rx="8" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+    <text x="14.3" y="22.68" font-size="13" fill="var(--text)">scene.tsx</text>
+    <g transform="translate(221.01 0)">
+      <rect width="98.8" height="36" rx="8" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="14.3" y="22.68" font-size="13" fill="var(--text)">scene.svg</text>
+    </g>
+    <g transform="translate(449.82 0)">
+      <rect width="83.2" height="36" rx="8" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="14.3" y="22.68" font-size="13" fill="var(--text)">page.ts</text>
+    </g>
+    <path d="M49.4 81L263.41 81" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
+    <polygon points="270.41 81 262.41 85 262.41 77" fill="var(--border)" class="a m2"/>
+    <g class="a m3">
+      <rect x="65.4" y="60" width="189.01" height="17" rx="3" fill="var(--background)"/>
+      <text x="70.4" y="72.478" font-size="11.05" fill="var(--text)">clock("open", span(1, 0.5))</text>
+    </g>
+    <g class="a m4">
+      <rect x="144.885" y="95.5" width="251.05" height="26" rx="4" fill="var(--blue-12-background)" stroke="var(--blue)"/>
+      <text x="154.385" y="112.478" font-size="11.05" fill="var(--text)">in an img, the span plays by itself</text>
+    </g>
+    <path d="M491.42 157L277.41 157" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m5"/>
+    <polygon points="270.41 157 278.41 153 278.41 161" fill="var(--border)" class="a m6"/>
+    <g class="a m7">
+      <rect x="296.35" y="136" width="169.12" height="17" rx="3" fill="var(--background)"/>
+      <text x="301.35" y="148.478" font-size="11.05" fill="var(--text)">mount(svg).clock("open")</text>
+    </g>
+    <path d="M491.42 192L277.41 192" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
+    <polygon points="270.41 192 278.41 188 278.41 196" fill="var(--border)" class="a m9"/>
+    <g class="a m10">
+      <rect x="286.41" y="171" width="189.01" height="17" rx="3" fill="var(--background)"/>
+      <text x="291.41" y="183.478" font-size="11.05" fill="var(--text)">play() / reverse() on click</text>
+    </g>
+    <path d="M491.42 227L277.41 227" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m11"/>
+    <polygon points="270.41 227 278.41 223 278.41 231" fill="var(--border)" class="a m12"/>
+    <g class="a m13">
+      <rect x="302.98" y="206" width="155.86" height="17" rx="3" fill="var(--background)"/>
+      <text x="307.98" y="218.478" font-size="11.05" fill="var(--text)">follow(scrolled(card))</text>
+    </g>
+  </g>
+</svg>

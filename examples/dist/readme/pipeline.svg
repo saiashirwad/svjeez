@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1131 316" width="1131" height="316" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">How svjeez builds a scene</title>
+  <desc id="d">A Mermaid flowchart diagram drawn by @svjeez/mermaid.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--magenta-22-background:color-mix(in srgb,var(--magenta) 22%,var(--background))}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:8s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,3.75%{stroke-dashoffset:1;visibility:hidden}7.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m1{animation-name:k1}
+@keyframes k2{0%{visibility:hidden}5.772%,100%{visibility:visible}}
+.m2{animation-name:k2;animation-timing-function:steps(1)}
+@keyframes k3{0%,7.5%{stroke-dashoffset:1;visibility:hidden}11.25%,100%{stroke-dashoffset:0;visibility:visible}}
+.m3{animation-name:k3}
+@keyframes k4{0%{visibility:hidden}9.522%,100%{visibility:visible}}
+.m4{animation-name:k4;animation-timing-function:steps(1)}
+@keyframes k5{0%,11.25%{stroke-dashoffset:1;visibility:hidden}15%,100%{stroke-dashoffset:0;visibility:visible}}
+.m5{animation-name:k5}
+@keyframes k6{0%{visibility:hidden}13.728%,100%{visibility:visible}}
+.m6{animation-name:k6;animation-timing-function:steps(1)}
+@keyframes k7{0%,15%{stroke-dashoffset:1;visibility:hidden}18.75%,100%{stroke-dashoffset:0;visibility:visible}}
+.m7{animation-name:k7}
+@keyframes k8{0%{visibility:hidden}17.271%,100%{visibility:visible}}
+.m8{animation-name:k8;animation-timing-function:steps(1)}
+@keyframes k9{0%,18.75%{stroke-dashoffset:1;visibility:hidden}22.5%,100%{stroke-dashoffset:0;visibility:visible}}
+.m9{animation-name:k9}
+@keyframes k10{0%{visibility:hidden}21.02%,100%{visibility:visible}}
+.m10{animation-name:k10;animation-timing-function:steps(1)}
+@keyframes k11{0%,22.5%{stroke-dashoffset:1;visibility:hidden}26.25%,100%{stroke-dashoffset:0;visibility:visible}}
+.m11{animation-name:k11}
+@keyframes k12{0%{visibility:hidden}25.015%,100%{visibility:visible}}
+.m12{animation-name:k12;animation-timing-function:steps(1)}
+@keyframes k13{0%,3.75%{translate:0 6px;opacity:0}7.5%,100%{translate:0 0;opacity:1}}
+.m13{animation-name:k13}
+@keyframes k14{0%,7.5%{translate:0 6px;opacity:0}11.25%,100%{translate:0 0;opacity:1}}
+.m14{animation-name:k14}
+@keyframes k15{0%,11.25%{translate:0 6px;opacity:0}15%,100%{translate:0 0;opacity:1}}
+.m15{animation-name:k15}
+@keyframes k16{0%,15%{translate:0 6px;opacity:0}18.75%,100%{translate:0 0;opacity:1}}
+.m16{animation-name:k16}
+@keyframes k17{0%,18.75%{translate:0 6px;opacity:0}22.5%,100%{translate:0 0;opacity:1}}
+.m17{animation-name:k17}
+@keyframes k18{0%,22.5%{translate:0 6px;opacity:0}26.25%,100%{translate:0 0;opacity:1}}
+.m18{animation-name:k18}
+@keyframes k19{0%,26.25%{translate:0 6px;opacity:0}30%,100%{translate:0 0;opacity:1}}
+.m19{animation-name:k19}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-7.5s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="1131" height="316" fill="var(--background)"/>
+  <g transform="translate(32.5 32)">
+    <path d="M184.6 126L225.6 126" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
+    <polygon points="232.6 126 224.6 130 224.6 122" fill="var(--border)" class="a m2"/>
+    <path d="M674.6 126L715.6 126" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m3"/>
+    <polygon points="722.6 126 714.6 130 714.6 122" fill="var(--border)" class="a m4"/>
+    <path d="M821.4 118L827.4 118C833.6 118 837.4 99 837.4 68C837.4 37 849.18 18 868.4 18L874.4 18" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m5"/>
+    <polygon points="881.4 18 873.4 22 873.4 14" fill="var(--border)" class="a m6"/>
+    <path d="M821.4 123.33L827.4 123.33C842.28 123.33 851.4 117 851.4 106.67C851.4 96.33 859.34 90 872.3 90L878.3 90" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m7"/>
+    <polygon points="885.3 90 877.3 94 877.3 86" fill="var(--border)" class="a m8"/>
+    <path d="M821.4 128.67L827.4 128.67C850.96 128.67 865.4 135 865.4 145.33C865.4 155.67 866.54 162 868.4 162L874.4 162" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m9"/>
+    <polygon points="881.4 162 873.4 166 873.4 158" fill="var(--border)" class="a m10"/>
+    <path d="M821.4 134L827.4 134C833.6 134 837.4 153 837.4 184C837.4 215 856.59 234 887.9 234L893.9 234" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m11"/>
+    <polygon points="900.9 234 892.9 238 892.9 230" fill="var(--border)" class="a m12"/>
+    <g transform="translate(0 108)" class="a m13">
+      <rect width="184.6" height="36" rx="8" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="14.3" y="22.68" font-size="13" fill="var(--text)">scene.tsx / scene.ts</text>
+    </g>
+    <g transform="translate(232.6 108)" class="a m14">
+      <rect width="442" height="36" rx="8" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="14.3" y="22.68" font-size="13" fill="var(--text)">build: measure text and layout, diff morphs, validate</text>
+    </g>
+    <g transform="translate(722.6 108)" class="a m15">
+      <rect width="98.8" height="36" rx="8" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="14.3" y="22.68" font-size="13" fill="var(--text)">scene.svg</text>
+    </g>
+    <g transform="translate(881.4 0)" class="a m16">
+      <rect width="184.6" height="36" rx="8" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="14.3" y="22.68" font-size="13" fill="var(--text)">CSS keyframes + SMIL</text>
+    </g>
+    <g transform="translate(885.3 72)" class="a m17">
+      <rect width="176.8" height="36" rx="8" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="14.3" y="22.68" font-size="13" fill="var(--text)">light + dark tokens</text>
+    </g>
+    <g transform="translate(881.4 144)" class="a m18">
+      <rect width="184.6" height="36" rx="8" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="14.3" y="22.68" font-size="13" fill="var(--text)">reduced-motion still</text>
+    </g>
+    <g transform="translate(900.9 216)" class="a m19">
+      <rect width="145.6" height="36" rx="8" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="14.3" y="22.68" font-size="13" fill="var(--text)">subsetted fonts</text>
+    </g>
+  </g>
+</svg>

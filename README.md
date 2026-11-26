@@ -12,15 +12,11 @@
 
 svjeez compiles a scene, written in JSX or with plain `h()` calls, into one animated SVG that works anywhere `<img>` works: READMEs, docs, blogs, and email. Every graphic here is a live svjeez `.svg`. Toggle your theme to watch them adapt.
 
-```mermaid
-flowchart LR
-  A["scene.tsx / scene.ts"] --> B["build: measure text and layout,<br/>diff morphs, validate"]
-  B --> C["scene.svg"]
-  C --> D["CSS keyframes + SMIL"]
-  C --> E["light + dark tokens"]
-  C --> F["reduced-motion still"]
-  C --> G["subsetted fonts"]
-```
+<p align="center">
+  <img src="examples/dist/readme/pipeline.svg" alt="scene.tsx or scene.ts goes through the build, which measures text and layout, diffs morphs and validates, into one scene.svg with CSS keyframes and SMIL, light and dark tokens, a reduced-motion still, and subsetted fonts" width="720">
+  <br>
+  <sub><b>From scene to one .svg</b> · drawn from Mermaid by <code>@svjeez/mermaid</code> · <a href="examples/readme/pipeline.ts"><code>examples/readme/pipeline.ts</code></a></sub>
+</p>
 
 ## Quick start
 
@@ -143,17 +139,11 @@ The same call works on geometry, Shiki code (`@svjeez/code`), and MathJax TeX (`
 
 A `<Sequence clock={open}>` plays its span on its own in the `.svg`. When page code mounts the inline SVG, it takes over the clock:
 
-```mermaid
-sequenceDiagram
-    participant Scene as scene.tsx
-    participant SVG as scene.svg
-    participant Page as page.ts
-    Scene->>SVG: clock("open", span(1, 0.5))
-    Note over SVG: in an &lt;img&gt;, the span plays by itself
-    Page->>SVG: mount(svg).clock("open")
-    Page->>SVG: play() / reverse() on click
-    Page->>SVG: follow(scrolled(card))
-```
+<p align="center">
+  <img src="examples/dist/readme/page-clock.svg" alt="scene.tsx declares clock open; in an img the svg plays its span by itself; page.ts mounts the svg, plays or reverses the clock on click, and follows scroll" width="600">
+  <br>
+  <sub><b>A page takes over a scene clock</b> · drawn from Mermaid by <code>@svjeez/mermaid</code> · <a href="examples/readme/page-clock.ts"><code>examples/readme/page-clock.ts</code></a></sub>
+</p>
 
 ```ts
 import { mount, scrolled } from "svjeez/page";
