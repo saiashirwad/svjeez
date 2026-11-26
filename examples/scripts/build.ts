@@ -14,12 +14,20 @@ Effect.gen(function* () {
   const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
   const root = path.join(import.meta.dirname, "..");
 
-  const examples = [
-    ...(yield* fs.glob("*/index.tsx", { root })).map(path.dirname),
-    ...(yield* fs.glob("{readme,mermaid-types,dom-component,dom-svelte}/*.tsx", { root })).map(
-      (file) => file.slice(0, -".tsx".length),
-    ),
-  ].sort();
+  const files = new Map<string, string>([
+    ...(yield* fs.glob("*/index.tsx", { root })).map((file): [string, string] => [
+      path.dirname(file),
+      file,
+    ]),
+    ...(yield* fs.glob(
+      "{readme/*.{ts,tsx},{mermaid-types,dom-component,dom-svelte}/*.tsx,plain-ts/*.ts}",
+      {
+        root,
+      },
+    )).map((file): [string, string] => [file.replace(/\.tsx?$/, ""), file]),
+  ]);
+
+  const examples = [...files.keys()].sort();
 
   return yield* Command.make(
     "example",
@@ -38,7 +46,7 @@ Effect.gen(function* () {
         names.length > 0 ? names : examples,
         Effect.fn(
           function* (name) {
-            const file = path.join(root, name.includes("/") ? `${name}.tsx` : `${name}/index.tsx`);
+            const file = path.join(root, files.get(name) ?? name);
 
             const svg = yield* Effect.tryPromise({
               try: async (): Promise<string> => {

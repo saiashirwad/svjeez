@@ -53,7 +53,7 @@ npm i svjeez@next && npm i -D tsx typescript playwright-core
 bun add svjeez@next    # run CLI under Bun with: bunx --bun svjeez
 ```
 
-Set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"`, and `"strict": true` in `tsconfig.json`, or start scene files with `/** @jsxImportSource svjeez */`. `scene()` takes `size`, `duration`, `title`, `desc`, `theme`, `loop`, and `still`; export `params` (`param.*`, `defaults`) and a `(values) => scene(...)` function for parameterized scenes. Companion packages: `@svjeez/fonts`, `@svjeez/icons`, `@svjeez/charts`, `@svjeez/code`, `@svjeez/diagrams`, `@svjeez/mermaid`, `@svjeez/geo`, `@svjeez/math`, `@svjeez/dom`, `@svjeez/video`, `@svjeez/vite`, `@svjeez/astro`.
+Set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"`, and `"strict": true` in `tsconfig.json`, or start scene files with `/** @jsxImportSource svjeez */`. Without JSX, build nodes in a plain `.ts` file with `h(Component, props | null, ...children)`: `h(Shape, { key: "a", geometry: circle(8), fill })` is `<Shape key="a" geometry={circle(8)} fill={fill} />`, and `h(Fragment, null, ...)` is `<>...</>`. `scene()` takes `size`, `duration`, `title`, `desc`, `theme`, `loop`, and `still`; export `params` (`param.*`, `defaults`) and a `(values) => scene(...)` function for parameterized scenes. Companion packages: `@svjeez/fonts`, `@svjeez/icons`, `@svjeez/charts`, `@svjeez/code`, `@svjeez/diagrams`, `@svjeez/mermaid`, `@svjeez/geo`, `@svjeez/math`, `@svjeez/dom`, `@svjeez/video`, `@svjeez/vite`, `@svjeez/astro`.
 
 ## Model
 
@@ -70,7 +70,7 @@ Set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"`, and `"strict": true` in
 
 | Group | Exports |
 | --- | --- |
-| Scene & components | `scene`, `component`, `context`, `param`, `defaults`, `parse`, `font`, `picture`, `random` |
+| Scene & components | `scene`, `h`, `Fragment`, `component`, `context`, `param`, `defaults`, `parse`, `font`, `picture`, `random` |
 | Nodes | `<Shape>`, `<Text>`, `<Run>`, `<Group>`, `<Picture>`, `<Arrow>`, `<Sequence>`, `<Series>`, `<Slot>`, `<Shader>` |
 | Layout | `<Stack>`, `<Grid>`, `<Center>`, `<Align>`, `spread`, `ref` |
 | Geometry | `rect`, `circle`, `ellipse`, `arc`, `line`, `polygon`, `spline`, `path`, `moved`, `rotated`, `scaled`, `mirrored`, `reversed`, `merge`, `around`, `subtract`, `bounds`, `length`, `pointAt`, `along` |

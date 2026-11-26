@@ -1,17 +1,33 @@
 .col {
   flex: 1;
-  padding: 12px;
-  border-radius: 16px;
-  background: var(--panel);
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--subtle);
   min-height: 230px;
 }
 
+.top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 8px 10px;
+}
+
 .col h2 {
-  margin: 2px 4px 12px;
+  margin: 0;
+  flex: 1;
   font:
-    13px/16px Body,
-    sans-serif;
-  letter-spacing: 1px;
+    500 12px/16px "Geist Mono",
+    monospace;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
   color: var(--muted);
+}
+
+.count {
+  font:
+    12px/16px "Geist Mono",
+    monospace;
+  color: var(--faint);
 }

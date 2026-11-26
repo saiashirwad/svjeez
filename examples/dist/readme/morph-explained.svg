@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" width="720" height="300" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">How morph() matches keys</title>
+  <desc id="d">Two states of keyed tiles: A holds a, b and c; B holds b, c and d. Dashed lines match b and c across the states, so they tween position, size and color; a exists only in A, so it exits, and d exists only in B, so it enters. The tiles morph from A to B and back, and the exit and enter labels swap with the direction.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:6.2s;animation-iteration-count:infinite;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+.fb{transform-box:fill-box;transform-origin:center}
+@keyframes k1{0%,53.226%,100%{opacity:1}59.677%,93.548%{opacity:0}}
+.m1{animation-name:k1}
+@keyframes k2{0%,53.226%,100%{opacity:0}59.677%,93.548%{opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,53.226%,100%{translate:274.8px 82.74px}59.677%,93.548%{translate:271.5px 82.74px}}
+.m3{animation-name:k3}
+@keyframes k4{0%,53.226%,100%{translate:415.5px 202.74px}59.677%,93.548%{translate:418.8px 202.74px}}
+.m4{animation-name:k4}
+@keyframes k5{0%,16.129%,85.484%,100%{scale:1;opacity:1}38.71%,62.903%{scale:0.4;opacity:0}}
+.m5{animation-name:k5;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k6{0%,16.129%,85.484%,100%{fill:var(--cyan);translate:130px 130px}38.71%,62.903%{fill:var(--green);translate:534px 70px}}
+.m6{animation-name:k6;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k7{0%,16.129%,85.484%,100%{translate:130px 190px}38.71%,62.903%{translate:544px 124px}}
+.m7{animation-name:k7;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@keyframes k8{0%,16.129%,85.484%,100%{scale:0.4;opacity:0}38.71%,62.903%{scale:1;opacity:1}}
+.m8{animation-name:k8;animation-timing-function:cubic-bezier(.77,0,.175,1)}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-2.1s!important;animation-play-state:paused!important}.dm{display:none}.ds{display:inline}}
+]]></style>
+  <rect width="720" height="300" fill="var(--background)"/>
+  <rect x="12.5" y="12.5" width="696" height="276" rx="12" fill="var(--background)" stroke="var(--raised)"/>
+  <text x="124.8" y="40" font-size="12" fill="var(--muted)">state A</text>
+  <text x="544.8" y="40" font-size="12" fill="var(--muted)">state B</text>
+  <rect x="126.5" y="66.5" width="48" height="48" rx="11" fill="none" stroke="var(--border)" stroke-dasharray="3 3"/>
+  <text x="70.4" y="94.32" font-size="12" fill="var(--muted)">"a"</text>
+  <rect x="126.5" y="126.5" width="48" height="48" rx="11" fill="none" stroke="var(--border)" stroke-dasharray="3 3"/>
+  <text x="70.4" y="154.32" font-size="12" fill="var(--muted)">"b"</text>
+  <rect x="126.5" y="186.5" width="48" height="48" rx="11" fill="none" stroke="var(--border)" stroke-dasharray="3 3"/>
+  <text x="70.4" y="214.32" font-size="12" fill="var(--muted)">"c"</text>
+  <rect x="530.5" y="66.5" width="80" height="48" rx="11" fill="none" stroke="var(--border)" stroke-dasharray="3 3"/>
+  <text x="628" y="94.32" font-size="12" fill="var(--muted)">"b"</text>
+  <rect x="540.5" y="120.5" width="60" height="60" rx="11" fill="none" stroke="var(--border)" stroke-dasharray="3 3"/>
+  <text x="628" y="154.32" font-size="12" fill="var(--muted)">"c"</text>
+  <rect x="546.5" y="186.5" width="48" height="48" rx="11" fill="none" stroke="var(--border)" stroke-dasharray="3 3"/>
+  <text x="628" y="214.32" font-size="12" fill="var(--muted)">"d"</text>
+  <line x1="180" y1="150" x2="524" y2="90" fill="none" stroke="var(--border)" stroke-dasharray="2 4"/>
+  <line x1="180" y1="210" x2="534" y2="150" fill="none" stroke="var(--border)" stroke-dasharray="2 4"/>
+  <line x1="180" y1="90" x2="260" y2="90" fill="none" stroke="var(--border)" stroke-dasharray="2 4"/>
+  <line x1="460" y1="210" x2="540" y2="210" fill="none" stroke="var(--border)" stroke-dasharray="2 4"/>
+  <rect x="332.5" y="109.105" width="56" height="20" rx="10" fill="var(--background)" stroke="var(--border)"/>
+  <text x="343.5" y="122.565" font-size="11" fill="var(--text)">tween</text>
+  <rect x="332.5" y="169.992" width="56" height="20" rx="10" fill="var(--background)" stroke="var(--border)"/>
+  <text x="343.5" y="183.452" font-size="11" fill="var(--text)">tween</text>
+  <rect x="260.5" y="80.5" width="56" height="20" rx="10" fill="var(--background)" stroke="var(--border)"/>
+  <rect x="404.5" y="200.5" width="56" height="20" rx="10" fill="var(--background)" stroke="var(--border)"/>
+  <g transform="translate(342 27.76)" font-size="12" fill="var(--text)">
+    <text y="12.24" class="a m1">A → B</text>
+    <text y="12.24" class="a m2">B → A</text>
+  </g>
+  <g class="a m3" font-size="11" fill="var(--text)">
+    <text y="11.22" class="a m1">exit</text>
+    <text y="11.22" class="a m2">enter</text>
+  </g>
+  <g class="a m4" font-size="11" fill="var(--text)">
+    <text y="11.22" class="a m1">enter</text>
+    <text y="11.22" class="a m2">exit</text>
+  </g>
+  <rect x="130" y="70" width="40" height="40" rx="8" fill="var(--blue)" class="a m5 fb"/>
+  <rect width="40" height="40" rx="8" fill="var(--cyan)" class="a m6 dm">
+    <animate id="w1" attributeName="width" values="40;72;72;40" keyTimes="0;0.32559;0.67441;1" calcMode="spline" keySplines="0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" begin="1s;w1.begin+6.2s" dur="4.3s" fill="freeze" data-loop="6.2s"/>
+    <set attributeName="width" to="40" begin="0s" dur="1s" fill="freeze" data-loop="6.2s"/>
+  </rect>
+  <rect width="71.035" height="40" rx="8" fill="var(--cyan)" class="a m6 ds" display="none"/>
+  <rect width="40" height="40" rx="8" fill="var(--magenta)" class="a m7 dm">
+    <animate id="w2" attributeName="width" values="40;52;52;40" keyTimes="0;0.32559;0.67441;1" calcMode="spline" keySplines="0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" begin="1s;w2.begin+6.2s" dur="4.3s" fill="freeze" data-loop="6.2s"/>
+    <set attributeName="width" to="40" begin="0s" dur="1s" fill="freeze" data-loop="6.2s"/>
+    <animate id="w3" attributeName="height" values="40;52;52;40" keyTimes="0;0.32559;0.67441;1" calcMode="spline" keySplines="0.77 0 0.175 1;0 0 1 1;0.77 0 0.175 1" begin="1s;w3.begin+6.2s" dur="4.3s" fill="freeze" data-loop="6.2s"/>
+    <set attributeName="height" to="40" begin="0s" dur="1s" fill="freeze" data-loop="6.2s"/>
+  </rect>
+  <rect width="51.638" height="51.638" rx="8" fill="var(--magenta)" class="a m7 ds" display="none"/>
+  <rect x="550" y="190" width="40" height="40" rx="8" fill="var(--orange)" class="a m8 fb"/>
+  <text x="135.6" y="268" font-size="11" fill="var(--muted)">key in both → tween · only in source → exit · only in target → enter</text>
+</svg>

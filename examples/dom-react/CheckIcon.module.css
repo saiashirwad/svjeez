@@ -1,6 +1,10 @@
 .check {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   flex: none;
-  color: var(--muted);
+  color: var(--faint);
+}
+
+.on {
+  color: var(--ok);
 }
