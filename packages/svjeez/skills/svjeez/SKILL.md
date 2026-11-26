@@ -1,124 +1,165 @@
 ---
 name: svjeez
-description: Write animated SVGs with svjeez, a TypeScript library that compiles a JSX scene into one self-contained animated SVG (with no runtime JS) plus frames or video.
+description: Author, check, and render svjeez animated SVG scenes in TypeScript/JSX (one self-contained SVG with zero runtime JS). Use when creating or editing svjeez scenes, debugging timing or `svjeez check` diagnostics, rendering frame sheets or MP4/WebM video, filming a live React/Svelte/HTML UI with `@svjeez/dom`, drawing charts, diagrams, Mermaid, math, code, maps, or icons, or wiring Vite, Astro, OG cards, live-editor sessions, or the single-file CLI binary.
 ---
 
 # svjeez
 
-## What a scene is
+Compiles a TypeScript/JSX scene into one self-contained animated SVG (CSS keyframes + SMIL where geometry/filters animate, zero runtime JS), plus PNG frame sheets and MP4/WebM video.
 
-A scene default-exports `scene(options, (canvas) => tree)`. svjeez measures layout and fonts at build time, validates the model, and emits one self-contained animated SVG with CSS keyframes, SMIL where needed, light/dark token variables, and a `prefers-reduced-motion` still frame.
+## Authoring loop
 
-```tsx
-/** @jsxImportSource svjeez */
-import { Group, Shape, Text, circle, ease, enter, path, scene, span, track } from "svjeez";
-import { sans, theme } from "./style";
+Follow these steps in order. A scene is **done** only when `svjeez check` reports **0 errors and 0 warnings** and you have **visually inspected `sheet.png`** and confirmed the layout, legibility, and motion match the intent.
 
-export default scene(
-  {
-    size: [240, 140],
-    duration: 4,
-    loop: false,
-    title: "Hello",
-    desc: "A curve draws itself, a dot pops in on top of it, and the word hello sits below.",
-    theme,
-    still: 2.5,
-  },
-  (canvas) => (
-    <Group>
-      <Shape geometry={canvas.rect} fill={theme.background} />
-      <Shape
-        geometry={path().moveTo([20, 110]).curveTo([80, 20], [160, 20], [220, 110])}
-        stroke={{ color: theme.blue, width: 4, cap: "round" }}
-        draw={track(0).to(1, span(0.2, 1.2))}
-      />
-      <Shape
-        geometry={circle(8)}
-        offset={[120, 44]}
-        fill={theme.text}
-        motion={enter(span(1.2, 0.5), { from: { scale: 0 }, curve: ease.pop })}
-      />
-      <Text font={sans} size={14} at={[120, 132]} anchor="baseline" fill={theme.text}>
-        hello
-      </Text>
-    </Group>
-  ),
-);
-```
+1. **Write the scene.** Start `.tsx` files with `/** @jsxImportSource svjeez */` (unless `tsconfig.json` sets `"jsxImportSource": "svjeez"`). Default-export `scene(options, (canvas) => tree)` with a full-canvas background `<Shape geometry={canvas.rect} fill={theme.background} />`, a `tokens({ light, dark })` theme, and `loop: false` for one-shot animations. See [examples/basic.tsx](examples/basic.tsx).
+2. **Check the model.** Run `svjeez check <file>` (fast, no browser). Use `--at 0,1.5,3` to inspect boxes, opacity, fills, and active lanes at specific times. Fix every error and warning (`--fail-on warning` enforces zero warnings).
+3. **Check rendered pixels.** Run `svjeez check <file> --browser` to measure rendered text bounds, overlap, and contrast in headless Chromium.
+4. **Inspect frames.** Run `svjeez frames <file> --sheet --out <dir>` and view `<dir>/sheet.png`. Passing `check` verifies constraints, not composition or visual timing.
+5. **Emit the output.** Run `svjeez svg <file> --out scene.svg` (or `svjeez video <file> --out scene.mp4`).
 
-## Setup
+## Mental model
 
-```sh
-npm i svjeez@next && npm i -D tsx typescript playwright-core
-bun add svjeez@next    # run CLI under Bun with: bunx --bun svjeez
-```
+- **Scene contract:** `scene({ size: [w, h], title, desc?, duration?, theme?, loop?, still? }, (canvas) => tree)`. `size` (inline tuple `[w, h]` or `as [number, number]`) and `title` are required. `duration` must be `> 0` (or omitted when the root is a `<Sequence when={span(0, n)}>`). `canvas` is a `Bounds` (`x, y, width, height, size, center, rect`).
+- **Nodes only:** Every element is a svjeez component (`Shape`, `Text`, `Run`, `Group`, `Picture`, `Arrow`, `Slot`, `Shader`, `Stack`, `Grid`, `Center`, `Align`, `Sequence`, `Series`). Text lives inside `<Text font size fill>`; inline styled spans use `<Run>` inside `<Text>`. Every `<Shape>` needs `fill` or `stroke`.
+- **Fonts are explicit:** There is no default or inherited font. Pass a `Font` or `FontFamily` (from `font()` or `@svjeez/fonts`) to every `<Text>`. Load every weight/italic you use; missing glyphs are a build error.
+- **Colors are hex or tokens:** Pass `#rgb`, `#rrggbb`, `#rrggbbaa`, or `tokens({ light, dark })` values (passed as `scene({ theme })` so light/dark CSS variables emit). Derive shades with `mix(a, b, share)` and `alpha(c, 0..1)`. Use `scheme="light" | "dark"` to show a node in one scheme only.
+- **Coordinates:** Top-left origin `[0, 0]`, y down. `offset` moves the node's own `[0, 0]` (for `circle(r)`, that is its center); `at` + `anchor` pins a point of its bounding box (`top-left`, `top`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom`, `bottom-right`; `<Text>` also accepts `baseline-*`). Use `at` or `offset`, never both.
+- **Layout containers:** `Stack` (`direction`, `gap`, `align`, `justify`, `padding`, `width`, `height`), `Grid` (`columns`, `gap`), `Center`, and `Align` (`to`, `place`, `inset`) place their children. Omit `at`/`offset` on children of a layout container; nudge a child with `motion={{ offset }}`. `Stack`, `Grid`, `Center`, and `Slot` accept backdrop props (`fill`, `stroke`, `radius`, `padding`); `<Group>` does not. `Fragment` flattens its children into the parent layout.
+- **Transforms, clips, and refs:** `rotate`, `scale`, `skew` pivot around `origin` (default `"center"` of the node's box; also a place name, `[x, y]` from box top-left, `{ frame: [x, y] }`, or `"at"`). `clip` and `mask` live in the node's own frame: center a circular clip with `moved(circle(r), own.center)`. `ref()` names a node so `Arrow` or `Align` can read settled anchors (`.center`, `.left`, `.right`, `.top`, `.bottom`, `.topLeft`, `.side(edge, t)`, `.part(key)`).
+- **Components and context:** Use plain functions `(props) => SceneElement` for typed props and pass `ref`/`motion` explicitly. Use `component({ name, props?, render })` when you need a minify-stable name or Standard Schema validation (without `props`, its JSX accepts only `children` and `id`). Share implicit values with `context(defaultValue)` (`<Ctx value={v}>` and `Ctx.read()`). Use `h(Component, props, ...children)` in plain `.ts` files without JSX.
+- **Geometry and determinism:** Geometry builders take plain numbers; animate geometry with `track(geomA).to(geomB, span)`. Use `random(seed)` (integer or string seed) for repeatable randomness.
 
-Set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"`, and `"strict": true` in `tsconfig.json`, or start scene files with `/** @jsxImportSource svjeez */`. Without JSX, build nodes in a plain `.ts` file with `h(Component, props | null, ...children)`: `h(Shape, { key: "a", geometry: circle(8), fill })` is `<Shape key="a" geometry={circle(8)} fill={fill} />`, and `h(Fragment, null, ...)` is `<>...</>`. `scene()` takes `size`, `duration`, `title`, `desc`, `theme`, `loop`, and `still`; export `params` (`param.*`, `defaults`) and a `(values) => scene(...)` function for parameterized scenes. Companion packages: `@svjeez/fonts`, `@svjeez/icons`, `@svjeez/charts`, `@svjeez/code`, `@svjeez/diagrams`, `@svjeez/mermaid`, `@svjeez/geo`, `@svjeez/math`, `@svjeez/dom`, `@svjeez/video`, `@svjeez/vite`, `@svjeez/astro`.
+## Timing
 
-## Model
+Timing is where most scene errors occur. Every span and track obeys strict clock rules. See [examples/timing.tsx](examples/timing.tsx) and [examples/morph.tsx](examples/morph.tsx).
 
-1. Every node has a measured bounding box (including stroke and text).
-2. `at` places `anchor` (`"top-left"` by default; text supports `"baseline"`); `offset` moves the node's own `[0, 0]` instead (never pass both). `rotate`, `scale`, and `skew` pivot around `origin`.
-3. Nothing is inherited: every shape needs `fill` or `stroke`, and every `<Text>` needs `font`, `size`, and `fill`.
-4. Tracks are immutable (`to`, `set`, `loop`, `repeat`, `rewind`, `map`, `with`).
-5. `span(start, over)` marks time on a clock (`.next`, `.shift`, `.chain`, `.cascade`, `.distribute`, `.pace`); `<Sequence>` starts a child clock.
-6. Layout containers (`<Stack>`, `<Grid>`, `<Center>`, `<Align>`) place their children; don't set `at` on placed children.
-7. `ref()` creates a handle for anchors (`.left`, `.right`, `.center`, `.part`, `.side`) used by `<Arrow>`, `<Align>`, and tracks.
-8. `morph` / `morph.between` transitions keyed nodes across states.
+### Clocks, `Sequence`, and `Series`
 
-## API
+- Every `span` is in seconds on the clock of its nearest enclosing `<Sequence>` (root clock = scene). Nested `<Sequence>` offsets add: `span(0.5, 1)` inside `<Sequence when={span(2, 6)}>` inside `<Sequence when={span(1, 3)}>` runs at `3.5s..4.5s`.
+- Nothing may run past its clock's end, and one `Track` instance cannot be read on two different clocks (build a track per clock with a helper function).
+- `<Sequence when={span(s, o)}>` shifts its children by `s` with length `o`; `<Sequence when={span(s)}>` (open span) runs to scene end. `<Sequence clock={clock("name", span(s, o))}>` plays on a page-driven clock (`svjeez/page`).
+- `<Series gap={g}>` plays children sequentially, starting each `g` seconds after the previous ends (negative `g` overlaps). Every direct child of `<Series>` must have a `<Sequence when={span(0, length)}>` at its root—always start at local `0`, since `<Series>` adds the offset.
+
+### `span` arithmetic
+
+Verified numbers for `span(start, over)`:
+
+| Expression | Result `[start, over]` | End | Notes |
+|---|---|---|---|
+| `span(1, 2)` | `[1, 2]` | `3` | Interval; `span(2)` is open (`end = Infinity`) |
+| `span(1, 2).shift(0.5)` | `[1.5, 2]` | `3.5` | Shift start by `dt` |
+| `span(1, 2).next(1)` | `[3, 1]` | `4` | Starts where this span ends |
+| `span(1, 2).next(1, 0.5)` | `[3.5, 1]` | `4.5` | Gap `0.5s` (`-0.5` overlaps to `[2.5, 1]`) |
+| `span(1, 2).chain(0.5, 1)` | `[1, 2]`, `[3, 0.5]`, `[3.5, 1]` | `4.5` | This span plus back-to-back lengths |
+| `span(1, 2).cascade(3, 0.2)` | `[1, 2]`, `[1.2, 2]`, `[1.4, 2]` | `3.4` | Same length, staggered by `step` |
+| `span(1, 2).distribute(3, 0.5)` | `[1, 0.5]`, `[1.75, 0.5]`, `[2.5, 0.5]` | `3` | First starts at `start`, last ends at `end` |
+| `span(0, 4).pace([1, 2, 1])` | `[0, 1]`, `[1, 2]`, `[3, 1]` | `4` | Proportional lengths; `{ gap: 0.5 }` gives `0.75, 1.5, 0.75` |
+
+Read the span of a track's last step with `t.span`. Find when a track reaches a value with `timeAt(t, value)` (returns seconds or `undefined`).
+
+### Tracks, `keyframes`, and derived values
+
+- `track(initial)` is immutable; `.to(value, span, curve?)` and `.set(value, span)` return new tracks. Steps cannot overlap—chain with `.next()`. Default curve is `ease.out` (string tracks default to `ease.linear`).
+- `keyframes([[t0, v0], [t1, v1, curve?], ...])` takes strictly increasing absolute times; `curve` shapes the leg arriving at that frame and returns a normal `Track`.
+- `.repeat(n)` plays `n` total runs back-to-back (snapping back to start each run). `.rewind(over, curve?)` winds back to the initial value over the **last `over` seconds of the scene** (not right after the last step). `.loop(period, { phase? })` repeats the first `period` seconds counted from `0s`—make `period >= motion end` and a divisor of `duration`.
+- Derived values: `t.map(fn, { tolerance? })`, `t1.with(t2).map((a, b) => ...)`, `through(val, fn)` (maps plain values or tracks), and `within(t, low, high)` (0..1 progress between two values—exact and cheaper than `.map`). Move points as one track: `track([0, 0]).to([0, -55], s)`.
+- `ease` presets: `linear`, `in`, `out`, `inOut`, `pop`, `hold`, `steps(n)`, `bezier(x1, y1, x2, y2)`, `spring({ stiffness?, damping?, mass? })`, `at(curve, progress)`. `ease.pop` overshoots—use it for scale/offset, and `ease.out`/`ease.inOut` for opacity.
+
+### Visibility, `enter` / `exit`, and `loop` / `still`
+
+- Bare nodes are visible from `0s`. `enter(span, { from?, curve? })` merges over `{ opacity: 0 }` so the node starts hidden and enters over `span`. `exit(span, { to?, curve? })` hides it before the end.
+- Compose motion layers with `motion={[layerA, cond && layerB]}` (falsy entries are skipped). Other layers: `ride(geometry, progressTrack, { turn? })`, `wiggle(amp, { seed, rate?, period?, curve? })`, and `sampled(fn, span, { tolerance })`.
+- `loop` defaults to `true`. Any node whose end state differs from `0s` warns `loop-seam`. For one-shot animations, set `loop: false`; for looping scenes, return every animated property to its `0s` state with `exit()` or `.rewind()`.
+- `still` sets the `prefers-reduced-motion: reduce` frame (defaults to 85% of `duration`, or `false` to disable). Pick a moment when the scene is readable and settled.
+
+### `morph` and `morph.between`
+
+- `morph(before, after, when, opts?)` and `morph.between(states, spans, opts?)` (`states.length - 1` sequential spans) blend between scene trees.
+- Give every node that arrives, leaves, or changes a stable `key`. Unkeyed sibling mismatches are a compile error. Options: `curve`, `enter`, `exit`, `stagger`.
+
+## Core API surface (`svjeez`)
+
+Hover types for full option objects. Every value export of `svjeez`:
 
 | Group | Exports |
-| --- | --- |
-| Scene & components | `scene`, `h`, `Fragment`, `component`, `context`, `param`, `defaults`, `parse`, `font`, `picture`, `random` |
-| Nodes | `<Shape>`, `<Text>`, `<Run>`, `<Group>`, `<Picture>`, `<Arrow>`, `<Sequence>`, `<Series>`, `<Slot>`, `<Shader>` |
-| Layout | `<Stack>`, `<Grid>`, `<Center>`, `<Align>`, `spread`, `ref` |
-| Geometry | `rect`, `circle`, `ellipse`, `arc`, `line`, `polygon`, `spline`, `path`, `moved`, `rotated`, `scaled`, `mirrored`, `reversed`, `merge`, `around`, `subtract`, `bounds`, `length`, `pointAt`, `along` |
-| Paint & effects | `tokens`, `alpha`, `mix`, `linear`, `radial`, `pattern`, `blur`, `shadow`, `adjust`, `displace` |
-| Time & motion | `span`, `track`, `keyframes`, `clock`, `ease`, `enter`, `exit`, `wiggle`, `ride`, `sampled`, `through`, `within`, `timeAt`, `morph` |
-| Text helpers | `count`, `numeral`, `typed`, `chars`, `words` |
+|---|---|
+| Scene & nodes | `scene`, `Group`, `Shape`, `Text`, `Run`, `Picture`, `picture`, `Arrow`, `Slot`, `Shader`, `Fragment`, `h` |
+| Layout & refs | `Stack`, `Grid`, `Center`, `Align`, `spread`, `ref` |
+| Components & state | `component`, `context`, `param`, `defaults`, `parse`, `random` |
+| Geometry builders | `rect`, `circle`, `ellipse`, `arc`, `line`, `polygon`, `path`, `spline` |
+| Geometry ops & measure | `moved`, `rotated`, `scaled`, `mirrored`, `merge`, `around`, `reversed`, `subtract`, `bounds`, `length`, `pointAt`, `along` |
+| Color, paint & effects | `tokens`, `mix`, `alpha`, `linear`, `radial`, `pattern`, `blur`, `shadow`, `adjust`, `displace` |
+| Time & motion | `span`, `clock`, `track`, `keyframes`, `ease`, `enter`, `exit`, `ride`, `sampled`, `wiggle`, `through`, `within`, `timeAt`, `Sequence`, `Series`, `morph` |
+| Text & fonts | `font`, `count`, `numeral`, `typed`, `chars`, `words` |
+
+Subpaths: `svjeez/tools` (`svg.emit`, `check`, `describe`, `RULES`, `SceneError`, `expand`, `propsOf`, `isScene`, `valueAt`, `boxesOf`), `svjeez/frames` (`renderFrames`, `openScene`, `checkPixels`, `costOf`, `validateSvg`), `svjeez/page` (`mount`, `player`, `scrolled`, `pointer`, `hovered`, `seen`, `restyle`, `seek`, `loopLength`), `svjeez/jsx-runtime`, `svjeez/typecheck`.
+
+Notes on specialized core features:
+- **`count` / `typed`:** Put `${count(track, { format: numeral({ decimals: 2 }) })}` and `{typed(stringTrack, { by: chars | words, caret })}` inside `<Text>`. When `caret: true` starts before the first keystroke, set `caret: { opacity: track(0).set(1, span(firstKeystroke)) }` to avoid `visible-at-zero`.
+- **`param`:** `export const params = { gap: param.number(40, { min: 10, max: 80 }) }` and default-export `(values) => scene(...)` (or read `defaults(params)`). Pass `--param key=value` or `--params file.json` on the CLI.
+- **`<Shader>`:** Needs `typegpu` + `unplugin-typegpu` and a page runner (`svjeez/page` `mount`); `svg`/`frames` render its fallback children.
+- **`<Text along={geom}>`:** Bake placement into `geom` via `moved(geom, [x, y])` rather than `offset`/`at` on `<Text>`.
 
 ## CLI
 
-```sh
-npx svjeez check scene.tsx [--at 0,1.5] [--browser] [--json]
-npx svjeez frames scene.tsx --sheet --out frames/ [--color-scheme light|dark]
-npx svjeez svg scene.tsx --out scene.svg [--json]
-npx svjeez dev scene.tsx
-npx svjeez video scene.tsx --out scene.mp4
-npx svjeez skill [--install [--dir .claude/skills]]
-npx svjeez version
-```
+Run `svjeez --help` for all flags. Every scene command accepts `[params]` (`--params data.json`, `--param key=value`).
 
-## Check
+| Command | Use |
+|---|---|
+| `svjeez check <file>` | Static model + TS check (`--browser`, `--at 0,1.5`, `--times`, `--fail-on warning`, `--json`, `--color-scheme`) |
+| `svjeez frames <file>` | Render PNG frames (`--sheet`, `--count 6`, `--times 0,1`, `--scale 2`, `--out dir`, `--color-scheme`, `--background`) |
+| `svjeez svg <file>` | Emit self-contained SVG (`--out file.svg`, `--json`) |
+| `svjeez video <file>` | Encode MP4/WebM via `@svjeez/video` (`--out`, `--format`, `--fps`, `--loops`, `--quality`, `--scale`, `--background`) |
+| `svjeez dev <file>` | Live-reloading preview server with scrubber (`--port 5173`, `--out`) |
+| `svjeez skill` | Print `SKILL.md` (`--install [--dir .claude/skills]`) |
+| `svjeez version` | Print installed version |
 
-| Code | Meaning |
-| --- | --- |
-| `type-error` | TypeScript diagnostic from project tsconfig |
-| `compile-error` | Scene threw during build |
-| `compile-warning` | Warning from an embedded SVG file or string |
-| `never-visible`, `zero-size` | Hidden/covered at every time, or zero-sized geometry/text/image |
-| `off-canvas` | Outside or clipped by canvas |
-| `text-overflow`, `missing-glyph` | Text past canvas/width, or missing font glyph |
-| `overlap`, `layout-overlap` | Overlapping texts or container siblings colliding |
-| `low-contrast` | Insufficient contrast against background |
-| `loop-seam` | Loop end differs from start |
-| `visible-at-zero` | Shown at `0s` then immediately re-entering, or filled while drawing |
-| `nothing-enters`, `static`, `wasted-motion` | No entrance, no motion, or invisible animation |
-| `moving-filter` | Filter animated or filtering moving content |
-| `moving-box` | `at`-placed `<Group>` with moving children; use `offset` |
-| `word-cut` | Word wider than wrapped `width` |
-| `unsupported`, `approximate` | Unsupported or approximated SVG backend feature |
+## Check rule codes
 
-## Examples
+`svjeez check` prints each problem with a `fix:` line. All 21 codes from `RULES`:
 
-| File | Demonstrates |
-| --- | --- |
-| [`examples/hello.tsx`](examples/hello.tsx) | Minimal scene above |
-| [`examples/card.tsx`](examples/card.tsx) | `Stack`, `Center`, `Align`, wrapped `<Text>` with `<Run>`, `enter`/`exit` |
-| [`examples/pipeline.tsx`](examples/pipeline.tsx) | `ref()` anchors, `<Arrow draw>`, anchor-targeted track |
-| [`examples/chart.tsx`](examples/chart.tsx) | Keyed `morph.between` bar chart |
-| [`examples/progress.tsx`](examples/progress.tsx) | Single track driving `draw`, `rect`, `count()`, and spring `ease.pop` |
-| [`examples/reveal.tsx`](examples/reveal.tsx) | Gradients, `clip`, `mask`, `subtract`, looped `rotate` |
-| [`examples/series.tsx`](examples/series.tsx) | `<Series>` sequencing and overlap |
-| [`examples/steps.tsx`](examples/steps.tsx) | Custom span component, `<Sequence>`, derived tracks |
+| Code | Fix |
+|---|---|
+| `type-error` | Fix the TypeScript prop/value type (check `jsxImportSource` and inline `size: [w, h]` tuples). |
+| `compile-error` | Follow the `SceneError` message (bad span/clock, unkeyed morph, missing font/glyph, layout child with `offset`/`at`). |
+| `compile-warning` | Fix the warning reported on an input `.svg` file/string. |
+| `never-visible` | Raise `opacity`/scale above `0` at some time, uncover the node, enlarge its clip, or remove it. |
+| `zero-size` | Give the geometry, text, or image a positive width and height, or remove it. |
+| `off-canvas` | Move the node inside the canvas bounds (or grow `size`), or remove it. |
+| `text-overflow` | Move text inside the canvas, shorten it, add `width` to wrap, or reduce `size`. |
+| `overlap` | Separate overlapping `<Text>` nodes (or opaque shapes covering text), or hide one while the other shows. |
+| `missing-glyph` | Switch to a font that contains the characters, or remove unsupported glyphs (no fallback font fills in). |
+| `low-contrast` | Pick theme tokens with sufficient contrast against the flat background in **both** light and dark schemes, or enlarge text. |
+| `loop-seam` | Set `loop: false` for one-shots, or return entering/moving nodes to their `0s` state with `exit()` / `.rewind()`. |
+| `visible-at-zero` | Start opacity/scale tracks hidden (use `enter()`), animate `fillOpacity` after `draw`, or gate `typed` caret opacity. |
+| `nothing-enters` | Info only: add `enter()` if the scene is meant to build up; ignore for pure-motion loops. |
+| `wasted-motion` | Start the track at its value when the node first becomes visible (or stop animating after it leaves). |
+| `static` | Animate at least one property within `duration` (`duration: 0` is rejected). |
+| `moving-filter` | Keep `effects` parameters static and animate the node's transform/opacity instead. |
+| `moving-box` | Place the `<Group>` with `offset` instead of `at`/`anchor`, or keep moving children in an inner `<Group>`. |
+| `layout-overlap` | Increase `Stack`/`Grid` `gap` or reduce the child's `motion` offset/scale/rotation. |
+| `word-cut` | Widen `<Text width>` or reduce `size` so long words fit on one line. |
+| `unsupported` | Replace the feature with one supported by the target backend. |
+| `approximate` | Avoid `blur` below `1.5` units (WebKit softens it) or accept the noted approximation. |
+
+## Companion modules
+
+Load the matching reference file only when your task hits its branch:
+
+| Package | Reach for it when… | Reference |
+|---|---|---|
+| `@svjeez/fonts` | Loading Google Fonts (`google`, `google.family`), caching fonts offline, or drawing stroke handwriting (`casual`, `Lettering`, `handwrite`). | [modules/fonts.md](modules/fonts.md) |
+| `@svjeez/charts` | Plotting numeric data on x/y axes: grouped `bars`, `line`, `area` with auto-fitted scales and plot annotations. | [modules/charts.md](modules/charts.md) |
+| `@svjeez/code` | Rendering syntax-highlighted `<Code>` listings, typing code in, morphing diffs (`tokens.across`), or aligning highlights (`codeLayout`). | [modules/code.md](modules/code.md) |
+| `@svjeez/diagrams` | Building auto-laid-out `flowchart`, `sequence`, `stateMachine`, `tree`, `lanes`, `pie`, `gantt`, `erDiagram`, `classDiagram`, and 15+ other diagram specs. | [modules/diagrams.md](modules/diagrams.md) |
+| `@svjeez/mermaid` | Turning existing Mermaid text (`flowchart`, `sequenceDiagram`, `stateDiagram-v2`, `pie`, etc.) into a themed, animated svjeez diagram. | [modules/mermaid.md](modules/mermaid.md) |
+| `@svjeez/icons` | Placing, stroking, drawing, or recoloring Tabler (`@svjeez/icons/tabler`) or Lucide (`@svjeez/icons/lucide`) vector icons. | [modules/icons.md](modules/icons.md) |
+| `@svjeez/math` | Typesetting `<Tex>` formulas (with `\textcolor`/`\cssId` morphs), plotting functions on `plane()`/`<Axes>`, linear transforms, or compass constructions. | [modules/math.md](modules/math.md) |
+| `@svjeez/geo` | Projecting GeoJSON/TopoJSON flat maps (`project`), dot maps, routes, or rotating Earth globes (`globe`, `<GlobeShape>`, `sun`/`night`). | [modules/geo.md](modules/geo.md) |
+| `@svjeez/dom` | Filming an existing HTML, React, or Svelte app/component in headless Chromium into a zero-JS animated SVG (`film`, `serve`, `component`). | [modules/dom.md](modules/dom.md) |
+| `@svjeez/video` | Encoding a finished scene/SVG to MP4 or WebM video via headless Chromium WebCodecs (`svjeez video` or `video()`). | [modules/video.md](modules/video.md) |
+| `@svjeez/vite` | Importing `.tsx?svjeez` (with `&posters` or `&inline`) in a Vite app so scenes ship as static SVG assets. | [modules/vite.md](modules/vite.md) |
+| `@svjeez/astro` | Embedding `<Scene>` in Astro pages and generating per-route `og:image` cards via `_<page>.og.tsx` / `<Og>`. | [modules/astro.md](modules/astro.md) |
+| `@svjeez/og` | Authoring 1200×630 `ogScene` link-preview cards and rasterizing scenes to JPEG/PNG/WebP (`renderOg`, `ogResponse`, `renderStill`). | [modules/og.md](modules/og.md) |
+| `@svjeez/live` | Building an editor, MCP server, or CLI that parses TSX scenes by `id`, applies minimal-diff literal edits, and compiles in a runner (`Effect`). | [modules/live.md](modules/live.md) |
+| `@svjeez/bin` | Running standalone `svjeez` single-file binary with no `package.json`, `svjeez init`, or `svjeez browser install`. | [modules/bin.md](modules/bin.md) |
