@@ -90,30 +90,23 @@ Each file in <a href="examples/plain-ts"><code>examples/plain-ts</code></a> is a
 
 ## How the hero works
 
-One spring track drives every moving part:
+One spring track drives every moving part: the `<Stack>` offset, the `morph`, the `ref()` arrows, the ring's `draw`, and the `count()` readout.
 
-```text
-signal = track(0) → spring to 1 → spring back to 0
-<Stack ref={stage}>      offset = signal.map(v => [0, -24 * v])
-  morph.between(grid → bars → grid)
-<Arrow>                  driver.right → stage.left, follows the Stack as it moves
-<Arrow>                  stage.right → output.left
-<Shape geometry={circle(28)}>   draw = signal (ring gauge)
-<Text>                   count(signal * 100)% (CSS-only counter)
-```
+<p align="center">
+  <img src="examples/dist/readme/hero-explained.svg" alt="A spring track plotted with a moving playhead fans out to five rows, Stack offset, morph, Arrow ref, Shape draw and Text count, each preview moving in sync with the same track" width="720">
+  <br>
+  <sub><b>One track, five consumers</b> · <a href="examples/readme/hero-explained.tsx"><code>examples/readme/hero-explained.tsx</code></a></sub>
+</p>
 
 ## Morph shapes, code, and math
 
-Give nodes the same `key` across states, and `morph()` diffs the trees at build time:
+Give nodes the same `key` across states, and `morph()` diffs the trees at build time. A key in both states tweens, a key only in the source exits, and a key only in the target enters.
 
-```text
-morph.between(states, spans)
-  for each pair of neighbouring states
-    match nodes by key
-      key in both    → tween position, size, color
-      key only after → enter
-      key only before → exit
-```
+<p align="center">
+  <img src="examples/dist/readme/morph-explained.svg" alt="Keys a, b, c in state A and b, c, d in state B: b and c slide and recolor along tween lines, a exits, d enters, then it plays back" width="720">
+  <br>
+  <sub><b>How morph() matches keys</b> · <a href="examples/readme/morph-explained.tsx"><code>examples/readme/morph-explained.tsx</code></a></sub>
+</p>
 
 The same call works on geometry, Shiki code (`@svjeez/code`), and MathJax TeX (`@svjeez/math`).
 
