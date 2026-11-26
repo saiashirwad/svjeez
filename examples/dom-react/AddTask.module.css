@@ -1,30 +1,30 @@
 .add {
   display: flex;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .add input {
   flex: 1;
   font:
-    15px/20px Body,
+    14px/20px Geist,
     sans-serif;
-  padding: 9px 14px;
-  border-radius: 12px;
+  padding: 7px 12px;
+  border-radius: 8px;
   outline: none;
   color: var(--ink);
-  background: var(--card);
+  background: var(--surface);
   border: 1px solid var(--line);
 }
 
 .add button {
   font:
-    13px/16px Body,
+    500 13px/16px Geist,
     sans-serif;
-  padding: 6px 12px;
-  border-radius: 10px;
+  padding: 0 14px;
+  border-radius: 8px;
   cursor: pointer;
-  color: #fff;
-  background: var(--accent);
+  color: var(--on-solid);
+  background: var(--solid);
   border: 0;
 }

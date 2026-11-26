@@ -199,7 +199,7 @@ light and dark snapshots → transitions → one zero-JS .svg
 <p align="center">
   <img src="examples/dist/dom-react.svg" alt="A live React sprint board filmed into an animated light/dark SVG" width="680">
   <br>
-  <sub><b>A real React app, filmed to a dual-theme SVG</b> · 33 KB · <a href="examples/dom-react/index.tsx"><code>examples/dom-react/index.tsx</code></a></sub>
+  <sub><b>A real React app, filmed to a dual-theme SVG</b> · 28 KB · <a href="examples/dom-react/index.tsx"><code>examples/dom-react/index.tsx</code></a></sub>
 </p>
 
 ## Compile-time layout and refs

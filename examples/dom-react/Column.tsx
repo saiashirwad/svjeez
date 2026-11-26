@@ -10,14 +10,17 @@ interface ColumnProps {
 }
 
 export default function Column({ name, done, tasks, onDone }: ColumnProps) {
+  const shown = tasks.filter((task) => task.done === done);
+
   return (
     <section className={styles.col} data-key={done ? "col-done" : "col-todo"}>
-      <h2>{name}</h2>
-      {tasks
-        .filter((task) => task.done === done)
-        .map((task) => (
-          <Card key={task.id} task={task} onDone={onDone} />
-        ))}
+      <div className={styles.top}>
+        <h2>{name}</h2>
+        <span className={styles.count}>{shown.length}</span>
+      </div>
+      {shown.map((task) => (
+        <Card key={task.id} task={task} onDone={onDone} />
+      ))}
     </section>
   );
 }

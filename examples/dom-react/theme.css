@@ -1,39 +1,68 @@
 @font-face {
-  font-family: Body;
-  src: url("https://cdn.jsdelivr.net/fontsource/fonts/abeezee@5.3.0/latin-400-normal.ttf")
+  font-family: Geist;
+  font-weight: 400;
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/geist@5.3.0/latin-400-normal.ttf")
     format("truetype");
 }
 
 @font-face {
-  font-family: Display;
-  src: url("https://cdn.jsdelivr.net/fontsource/fonts/archivo-black@5.3.0/latin-400-normal.ttf")
+  font-family: Geist;
+  font-weight: 500;
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/geist@5.3.0/latin-500-normal.ttf")
+    format("truetype");
+}
+
+@font-face {
+  font-family: Geist;
+  font-weight: 600;
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/geist@5.3.0/latin-600-normal.ttf")
+    format("truetype");
+}
+
+@font-face {
+  font-family: Geist Mono;
+  font-weight: 400;
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/geist-mono@5.3.0/latin-400-normal.ttf")
+    format("truetype");
+}
+
+@font-face {
+  font-family: Geist Mono;
+  font-weight: 500;
+  src: url("https://cdn.jsdelivr.net/fontsource/fonts/geist-mono@5.3.0/latin-500-normal.ttf")
     format("truetype");
 }
 
 :root {
   color-scheme: light dark;
-  --page: #eef1f7;
-  --panel: #e3e8f2;
-  --card: #ffffff;
-  --ink: #1c2233;
-  --muted: #6a7389;
-  --line: #d3d9e6;
-  --accent: #5b5bf0;
-  --ok: #1f9d6b;
-  --shadow: rgba(28, 34, 51, 0.16);
+  --page: #fafafa;
+  --surface: #ffffff;
+  --subtle: #f2f2f2;
+  --ink: #0a0a0a;
+  --muted: #6f6f6f;
+  --faint: #a1a1a1;
+  --line: #e5e5e5;
+  --solid: #0a0a0a;
+  --on-solid: #ffffff;
+  --ok: #0f9d58;
+  --ok-soft: #e6f6ec;
+  --shadow: rgba(0, 0, 0, 0.04);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --page: #12141c;
-    --panel: #1b1f2b;
-    --card: #262b3a;
-    --ink: #eceff7;
-    --muted: #9aa3ba;
-    --line: #353b4e;
-    --accent: #8b8bff;
-    --ok: #4ad19a;
-    --shadow: rgba(0, 0, 0, 0.5);
+    --page: #000000;
+    --surface: #0a0a0a;
+    --subtle: #161616;
+    --ink: #ededed;
+    --muted: #a1a1a1;
+    --faint: #6f6f6f;
+    --line: #262626;
+    --solid: #ededed;
+    --on-solid: #0a0a0a;
+    --ok: #3dd68c;
+    --ok-soft: #0d2a1c;
+    --shadow: rgba(0, 0, 0, 0.6);
   }
 }
 
@@ -46,7 +75,7 @@ body {
 body {
   padding: 20px;
   font:
-    15px/20px Body,
+    14px/20px Geist,
     system-ui,
     sans-serif;
   color: var(--ink);

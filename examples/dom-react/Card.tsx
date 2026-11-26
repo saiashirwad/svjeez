@@ -10,7 +10,7 @@ interface CardProps {
 export default function Card({ task, onDone }: CardProps) {
   return (
     <div className={`${styles.card} ${task.done ? styles.done : ""}`} data-key={`card-${task.id}`}>
-      <CheckIcon />
+      <CheckIcon done={task.done} />
       <div className={styles.text}>
         <div className={styles.title}>{task.title}</div>
         <div className={styles.note}>{task.note}</div>
