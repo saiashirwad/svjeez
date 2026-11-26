@@ -660,6 +660,12 @@ group("timing", () => {
         "static",
       )[0]!.message,
     ).toContain("Nothing in the scene moves");
+    expect(
+      only(
+        made(() => <Dot />),
+        "static",
+      )[0]!.fix,
+    ).not.toMatch(/duration of 0\b(?! is not)/);
     const spin = () => <Dot rotate={track(0).to(360, span(0, 2), ease.linear).loop(2)} />;
 
     expect(codes(made(spin, 4, false))).toContain("nothing-enters");

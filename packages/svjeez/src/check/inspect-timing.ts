@@ -580,7 +580,7 @@ export const timing = (survey: Survey): void => {
       severity: "warning",
       key: scene.root.key,
       message: `Nothing in the scene moves in its ${seconds(duration)}.`,
-      fix: "Animate something, or make it a still picture with a duration of 0.",
+      fix: "Animate something, even a slight sway or fade: a scene needs a positive duration, so a duration of 0 is not a still picture.",
     });
   else if (moves && !enters && !steadyLoop(survey))
     add(survey, {
