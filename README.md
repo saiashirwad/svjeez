@@ -1,7 +1,7 @@
 <h1 align="center">svjeez</h1>
 
 <p align="center">
-  <b>Write motion in TypeScript. Ship one zero-JS <code>.svg</code>.</b>
+  <b>Write motion in TypeScript, JSX optional. Ship one zero-JS <code>.svg</code>.</b>
 </p>
 
 <p align="center">
