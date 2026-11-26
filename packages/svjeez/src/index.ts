@@ -23,6 +23,8 @@ export type { Origin } from "./author/settle";
 
 export { component, type ComponentOptions, type Slots } from "./author/component";
 
+export { Fragment, h, type HProps } from "./h";
+
 export { context, type Context } from "./author/expand";
 
 export type { StandardJSONSchemaV1, StandardSchemaV1, JsonSchema } from "./author/standard";
