@@ -47,6 +47,11 @@
   --ok: #0f9d58;
   --ok-soft: #e6f6ec;
   --shadow: rgba(0, 0, 0, 0.04);
+
+  /* Older names that the Svelte, Vite and component examples still read. */
+  --panel: var(--subtle);
+  --card: var(--surface);
+  --accent: var(--solid);
 }
 
 @media (prefers-color-scheme: dark) {

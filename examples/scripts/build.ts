@@ -19,9 +19,12 @@ Effect.gen(function* () {
       path.dirname(file),
       file,
     ]),
-    ...(yield* fs.glob("{readme,mermaid-types,dom-component,dom-svelte,plain-ts}/*.{ts,tsx}", {
-      root,
-    })).map((file): [string, string] => [file.replace(/\.tsx?$/, ""), file]),
+    ...(yield* fs.glob(
+      "{readme/*.{ts,tsx},{mermaid-types,dom-component,dom-svelte}/*.tsx,plain-ts/*.ts}",
+      {
+        root,
+      },
+    )).map((file): [string, string] => [file.replace(/\.tsx?$/, ""), file]),
   ]);
 
   const examples = [...files.keys()].sort();
