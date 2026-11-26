@@ -21,16 +21,18 @@ test("svjeez skill prints the skill", () => {
   expect(cli("skill").stdout.toString()).toBe(skill);
 });
 
-test("svjeez skill --install copies the skill and its examples, and can run again", () => {
+test("svjeez skill --install copies the skill, its examples and its modules, and can run again", () => {
   const dir = mkdtempSync(join(tmpdir(), "svjeez-skill-"));
 
   for (let run = 0; run < 2; run++)
     expect(cli("skill", "--install", "--dir", dir).exitCode).toBe(0);
   expect(readFileSync(join(dir, "svjeez/SKILL.md"), "utf8")).toBe(skill);
 
-  const shipped = readdirSync(join(import.meta.dir, "../skills/svjeez/examples")).sort();
-  expect(shipped.length).toBeGreaterThan(0);
-  expect(readdirSync(join(dir, "svjeez/examples")).sort()).toEqual(shipped);
+  for (const folder of ["examples", "modules"]) {
+    const shipped = readdirSync(join(import.meta.dir, "../skills/svjeez", folder)).sort();
+    expect(shipped.length).toBeGreaterThan(0);
+    expect(readdirSync(join(dir, "svjeez", folder)).sort()).toEqual(shipped);
+  }
 });
 
 test("--help and -h print usage for every command and the bare CLI, and exit 0", () => {
