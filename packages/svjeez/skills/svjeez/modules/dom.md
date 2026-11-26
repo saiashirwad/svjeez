@@ -33,7 +33,7 @@ A film file default-exports `await film(target, script, options)` (returns a nor
 
 1. **Pipeline:** `capture(el)` (in-page) → `Snapshot` JSON → `record(page, selector, run)` collects `State[]` on each `snap(name, timing)` → `inlineAssets(states)` embeds `@font-face` and images as data URLs → `compile(states)` pairs elements and emits a `morph.between` scene tree. `film()` wraps all of this plus `openPage` and `scene()`.
 2. **Script & settling:** The script receives `{ page, snap, update }` (standard Playwright `page`). Before every `snap()` and after every `update(partialProps)`, `film()` automatically settles (framework tick, `document.fonts.ready`, CSS transitions, and 3 stable layout frames). Any uncaught page exception or `console.error` fails the film.
-3. **Timing & loops:** `snap(name, { over?, hold?, ease?, text? })`: `over` (default `0.6s`, ignored on the first snap) is the transition into this state; `hold` (default `0.8s`) is the rest before the next move. `film()` always produces a **looping** scene (`loop: false` is not an option on `film`), so end your script on a snap matching the first state (with a short `hold: 0.01`) to avoid `loop-seam` warnings.
+3. **Timing & loops:** `snap(name, { over?, hold?, ease?, text? })`: `over` (default `0.6s`, ignored on the first snap) is the transition into this state; `hold` (default `0.8s`) is the rest before the next move. Films loop by default, which warns `loop-seam` unless the last state matches the first. For a one-shot recording pass `loop: false` (and optionally `still`) in `film()` options; changing them reuses cached states.
 4. **What becomes scene nodes (and how elements pair):**
    - Each captured DOM node becomes positioned shapes, gradients/backgrounds, borders, shadows, clip-paths, masks, inline SVG subtrees, form controls, and per-line text runs with per-codepoint glyph advances.
    - `compile()` pairs nodes across states in precedence order: `pairBy(node)` → `data-key` → framework identity (React `key`) → `data-part` → `id` → unkeyed sibling order + tag/text similarity. Paired nodes slide, resize, and recolor; unpaired nodes fade in/out. Add `data-key="..."` (or stable React keys) to items that move across lists/columns (avoid clipping/transforming ancestors between old and new parents).
@@ -43,7 +43,7 @@ A film file default-exports `await film(target, script, options)` (returns a nor
    - `scheme: "both"` captures light and dark `prefers-color-scheme` and merges them into CSS variable tokens.
    - `theme` (a `tokens()` object) injects `--<token>` CSS vars into the page, films both schemes, and binds matching computed colors back to your theme tokens (your CSS must reference `var(--surface)`, etc.). Omit `scheme` when passing `theme`.
 7. **Caching (`cache: true | "states.json"`):** Saves recorded states next to the film file and skips Chromium while page sources, selector, scheme, theme, viewport, cursor, and script text are unchanged. Set `SVJEEZ_DOM_REFRESH=1` to force re-recording. Cached films cannot use per-snap `ease` or `text` functions—pass those in `film()` options instead.
-8. **Cursor (`cursor: true`):** Renders a pointer following Playwright mouse actions (`click`, `hover`, `mouse.move`, `dragTo`). Move the mouse to its start position before the first snap and back before the last snap to avoid `loop-seam` on the cursor arrow.
+8. **Cursor (`cursor: true`):** Renders a pointer following Playwright mouse actions (`click`, `hover`, `mouse.move`, `dragTo`). In a looping film, move the mouse back to its start position before the last snap, or the cursor arrow warns `loop-seam`.
 9. **Component props are JSON:** Data props must serialize as plain JSON (ISO strings for Dates); callback props (`on*`) become optional no-ops.
 
 ## API map
@@ -74,11 +74,8 @@ export default await film(
     await snap("one", { over: 0.4 });
     await page.click("#inc");
     await snap("two", { over: 0.4 });
-    await page.evaluate(() => { document.getElementById("n")!.textContent = "0"; });
-    await page.mouse.move(300, 150);
-    await snap("zero-again", { over: 0.4, hold: 0.01 });
   },
-  { scheme: "both", title: "Counter", cursor: true, viewport: { width: 400, height: 300 } },
+  { scheme: "both", title: "Counter", cursor: true, loop: false, viewport: { width: 400, height: 300 } },
 );
 ```
 
@@ -112,6 +109,6 @@ export default await film(
 - `record: there is already a state named "…"` → Give every `snap()` call a unique name.
 - `film: a theme is filmed in both schemes … not "light"` → Omit `scheme` (or set `"both"`) when passing `theme`.
 - `component: props.when is a Date, which is not JSON` → Pass JSON-serializable props (e.g. ISO date strings).
-- `loop-seam` warnings on states or `cursor: true` arrow → End on a snap matching the first state (and move the mouse back to its initial position).
+- `loop-seam` warnings on states or the `cursor: true` arrow → Pass `loop: false` to `film()` for a one-shot, or end a looping film on a snap matching the first state (cursor back at its start).
 - Input text fades instead of typing → Add a `placeholder` on the input and use Playwright `fill()`/`pressSequentially()` so the field is focused.
 - `film: snap("x") has its own ease, which a cached film can't keep` → Move `ease` / `text` options from `snap()` to `film()` options when `cache` is enabled.

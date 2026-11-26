@@ -26,7 +26,7 @@ Add `/// <reference types="@svjeez/vite/client" />` (or `"types": ["@svjeez/vite
 ## Mental model
 
 - **The import is an asset descriptor (`SceneModule`), not a component:** `{ src, width, height, title, desc, posters?, svg? }`. Render it with `<img src={scene.src} width={scene.width} height={scene.height} alt={scene.desc || scene.title} />`.
-- **Query suffixes (exact order required):** `?svjeez`, `?svjeez&posters`, `?svjeez&inline`, `?svjeez&posters&inline`.
+- **Query flags:** `?svjeez`, plus `&posters` and/or `&inline` in any order. An unknown flag throws an error naming the valid ones.
   - `&posters` renders light and dark WebP stills at the scene's still moment (`still`, else 72% of duration), returning `posters: { light: Poster[], dark: Poster[] }`.
   - `&inline` embeds prefixed SVG markup in `svg` (default prefix `s<hash>`, override via `export const prefix = "mine"` in the scene file) so multiple inline SVGs never collide. Films and raw SVG-string exports cannot be inlined.
   - Plain `?svjeez` includes `svg` only in server code (SSR / Astro frontmatter), never in the client bundle.
@@ -59,7 +59,6 @@ document.body.innerHTML = `<picture>
 
 ## Gotchas
 
-- Dev returns raw TSX (HTTP 200) instead of a `SceneModule` → Query order was `?svjeez&inline&posters`; write `?svjeez&posters&inline` (note `client.d.ts` only types the first three forms, so add a declaration if combining both).
 - `TS2307: Cannot find module './scene.tsx?svjeez'` → Add `/// <reference types="@svjeez/vite/client" />`.
 - `[plugin svjeez] TypeError: scene is not a function` → Default-export a `scene()`, a function returning one, or an SVG string from the imported file.
 - `getScene() got the ?svjeez import … without its markup` → Call `getScene()` in server/SSR code or import with `?svjeez&inline`.

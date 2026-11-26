@@ -98,7 +98,6 @@ Notes on specialized core features:
 - **`count` / `typed`:** Put `${count(track, { format: numeral({ decimals: 2 }) })}` and `{typed(stringTrack, { by: chars | words, caret })}` inside `<Text>`. When `caret: true` starts before the first keystroke, set `caret: { opacity: track(0).set(1, span(firstKeystroke)) }` to avoid `visible-at-zero`.
 - **`param`:** `export const params = { gap: param.number(40, { min: 10, max: 80 }) }` and default-export `(values) => scene(...)` (or read `defaults(params)`). Pass `--param key=value` or `--params file.json` on the CLI.
 - **`<Shader>`:** Needs `typegpu` + `unplugin-typegpu` and a page runner (`svjeez/page` `mount`); `svg`/`frames` render its fallback children.
-- **`<Text along={geom}>`:** Bake placement into `geom` via `moved(geom, [x, y])` rather than `offset`/`at` on `<Text>`.
 
 ## CLI
 
