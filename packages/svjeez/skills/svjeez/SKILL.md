@@ -16,6 +16,7 @@ Follow these steps in order. A scene is **done** only when `svjeez check` report
 3. **Check rendered pixels.** Run `svjeez check <file> --browser` to measure rendered text bounds, overlap, and contrast in headless Chromium.
 4. **Inspect frames.** Run `svjeez frames <file> --sheet --out <dir>` and view `<dir>/sheet.png`. Passing `check` verifies constraints, not composition or visual timing.
 5. **Emit the output.** Run `svjeez svg <file> --out scene.svg` (or `svjeez video <file> --out scene.mp4`).
+6. **Measure playback (optional, for long or heavy scenes).** Run `svjeez perf <file>` to play the scene in headless Chromium across its whole duration and report fps, p95 frame time, dropped frames, and the slowest stretch. `check` cannot see dropped frames; add `--fail-under 50` to gate on fps.
 
 ## Mental model
 
@@ -27,7 +28,7 @@ Follow these steps in order. A scene is **done** only when `svjeez check` report
 - **Gradients:** `linear({ from, to, stops })`, `radial({ center, radius, stops })`, and the box-relative `linear.across` / `radial.across`. `radius` may be `[rx, ry]` for an ellipse, and `radial.across({ shape: "ellipse" })` stretches to the node's box (vignettes), with `fit` read per axis. An ellipse's radius ratio and vertical center can't animate.
 - **Coordinates:** Top-left origin `[0, 0]`, y down. `offset` moves the node's own `[0, 0]` (for `circle(r)`, that is its center); `at` + `anchor` pins a point of its bounding box (`top-left`, `top`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom`, `bottom-right`; `<Text>` also accepts `baseline-*`). Use `at` or `offset`, never both. `at` places the box, so a `<Code>` whose split drops its first column, or a group holding a caret at x=-6, shifts; use `offset` there.
 - **Layout containers:** `Stack` (`direction`, `gap`, `align`, `justify`, `padding`, `width`, `height`), `Grid` (`columns`, `gap`), `Center`, and `Align` (`to`, `place`, `inset`) place their children. Omit `at`/`offset` on children of a layout container; nudge a child with `motion={{ offset }}`. `Stack`, `Grid`, `Center`, and `Slot` accept backdrop props (`fill`, `stroke`, `radius`, `padding`); `<Group>` does not. `Fragment` flattens its children into the parent layout.
-- **Transforms, clips, and refs:** `rotate`, `scale`, `skew` pivot around `origin` (default `"center"` of the node's box; also a place name, `[x, y]` from box top-left, `"at"`, `"own"` for the node's own `[0, 0]` where its `offset` puts it, `{ own: [x, y] }` in the node's own coordinates, or `{ frame: [x, y] }` in the PARENT's coordinates, so `frame: [0, 0]` is the parent's corner, not the node's). `rect(w, h)` is top-left anchored (covers `[0, 0]` to `[w, h]`) unless `anchor: "center"`; `circle`/`ellipse` are always centered. `clip` and `mask` live in the node's own frame: center a circular clip with `moved(circle(r), own.center)`. `ref()` names a node so `Arrow` or `Align` can read settled anchors (`.center`, `.left`, `.right`, `.top`, `.bottom`, `.topLeft`, `.side(edge, t)`, `.part(key)`).
+- **Transforms, clips, and refs:** `rotate`, `scale`, `skew` pivot around `origin` (default `"center"` of the node's box; also a place name, `[x, y]` from box top-left (so content bleeding past the frame moves it; pivot on a fixed point with `{ own: [x, y] }`), `"at"`, `"own"` for the node's own `[0, 0]` where its `offset` puts it, `{ own: [x, y] }` in the node's own coordinates, or `{ frame: [x, y] }` in the PARENT's coordinates, so `frame: [0, 0]` is the parent's corner, not the node's). `rect(w, h)` is top-left anchored (covers `[0, 0]` to `[w, h]`) unless `anchor: "center"`; `circle`/`ellipse` are always centered. `clip` and `mask` live in the node's own frame: center a circular clip with `moved(circle(r), own.center)`. `ref()` names a node so `Arrow` or `Align` can read settled anchors (`.center`, `.left`, `.right`, `.top`, `.bottom`, `.topLeft`, `.side(edge, t)`, `.part(key)`).
 - **Components and context:** Use plain functions `(props) => SceneElement` for typed props and pass `ref`/`motion` explicitly. Use `component({ name, props?, render })` when you need a minify-stable name or Standard Schema validation (without `props`, its JSX accepts only `children` and `id`). Share implicit values with `context(defaultValue)` (`<Ctx value={v}>` and `Ctx.read()`). Use `h(Component, props, ...children)` in plain `.ts` files without JSX.
 - **Geometry and determinism:** Geometry builders take plain numbers; animate geometry with `track(geomA).to(geomB, span)`. Use `random(seed)` (integer or string seed) for repeatable randomness.
 
@@ -73,6 +74,7 @@ Read the span of a track's last step with `t.span`. Find when a track reaches a 
 - Compose motion layers with `motion={[layerA, cond && layerB]}` (falsy entries are skipped). Other layers: `ride(geometry, progressTrack, { turn? })`, `wiggle(amp, { seed, rate?, period?, curve? })`, and `sampled(fn, span, { tolerance })`; `sampled.all(fn, span, opts)` takes a record-returning fn, calls it once per time and returns a track per key (use it when limbs share one solve).
 - `loop` defaults to `true`. Any node whose end state differs from `0s` warns `loop-seam`. For one-shot animations, set `loop: false`; for looping scenes, return every animated property to its `0s` state with `exit()` or `.rewind()`.
 - `still` sets the `prefers-reduced-motion: reduce` frame (defaults to 85% of `duration`, or `false` to disable). Pick a moment when the scene is readable and settled.
+- A `<Group>` with moving content that holds at opacity 0 (a film's shot before its `enter()` and after its `exit()`) costs nothing while hidden, filters included, unless the `still` frame shows it; so fade finished shots out rather than covering them.
 - `markers: { handoff: 4.5 }` names moments (seconds, from 0 to `duration`). `frames --times` and `check --at/--times` take the names mixed with numbers, as in `--times handoff,10.5`; an unknown name lists the known ones.
 
 ### `morph` and `morph.between`
@@ -110,6 +112,7 @@ Run `svjeez --help` for all flags. Every scene command accepts `[params]` (`--pa
 |---|---|
 | `svjeez check <file>` | Static model + TS check (`--browser`, `--at 0,1.5`, `--times`, `--fail-on warning`, `--json`, `--color-scheme`) |
 | `svjeez frames <file>` | Render PNG frames (`--sheet`, `--count 6`, `--times 0,1`, `--scale 2`, `--out dir`, `--color-scheme`, `--background`) |
+| `svjeez perf <file>` | Playback smoothness in headless Chromium: fps, p95 frame ms, dropped %, main-thread ms/s, slowest window (`--ms 3000`, `--windows 4`, `--fail-under <fps>`, `--json`, `--color-scheme`) |
 | `svjeez svg <file>` | Emit self-contained SVG (`--out file.svg`, `--json`) |
 | `svjeez video <file>` | Encode MP4/WebM via `@svjeez/video` (`--out`, `--format`, `--fps`, `--loops`, `--quality`, `--workers`, `--scale`, `--background`; `--preview` for a fast fps 12, scale 1, low-quality render) |
 | `svjeez dev <file>` | Live-reloading preview server with scrubber (`--port 5173`, `--out`) |
@@ -131,6 +134,7 @@ Run `svjeez --help` for all flags. Every scene command accepts `[params]` (`--pa
 | `text-overflow` | Move text inside the canvas, shorten it, add `width` to wrap, or reduce `size`. |
 | `overlap` | Separate overlapping `<Text>` nodes (or opaque shapes covering text), or hide one while the other shows. |
 | `missing-glyph` | Switch to a font that contains the characters, or remove unsupported glyphs (no fallback font fills in). |
+| `whole-font` | Info only: the font embeds whole (size and reason in the message). Load a TTF with TrueType outlines, or pass `subset: false` to accept it. |
 | `low-contrast` | Pick theme tokens with sufficient contrast against the flat background in **both** light and dark schemes, or enlarge text. |
 | `loop-seam` | Set `loop: false` for one-shots, or return entering/moving nodes to their `0s` state with `exit()` / `.rewind()`. |
 | `visible-at-zero` | Start opacity/scale tracks hidden (use `enter()`), animate `fillOpacity` after `draw`, or gate `typed` caret opacity. |

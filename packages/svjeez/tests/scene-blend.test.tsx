@@ -69,14 +69,17 @@ describe("blend", () => {
     expect(plain).not.toContain("isolation");
   });
 
-  test("a lone blending child keeps its group, so the group still isolates it", () => {
+  test("a lone blending child passes its blend to its group, so it reaches what is behind", () => {
     const out = emit(() => (
       <Group key="card" at={[5, 5]}>
         <Shape fill="#FF0000" geometry={rect(10, 10)} blend="multiply" />
       </Group>
     ));
 
-    expect(out).toContain("isolation:isolate");
+    expect(out).toMatch(
+      /<g transform="translate\(5 5\)" style="mix-blend-mode:multiply">\s*<rect[^>]*\/>/,
+    );
+    expect(out).not.toContain("isolation:isolate");
   });
 
   test("the scene root isolates its blending children", () => {

@@ -48,7 +48,7 @@ export interface Common {
   readonly clip?: Anim<Geometry> | ((own: Bounds) => Anim<Geometry>);
   readonly mask?: Child | ((own: Bounds) => Child);
   readonly effects?: readonly Effect[];
-  /** How it composites onto its earlier siblings. A group whose children blend is isolated, so they blend only with each other. */
+  /** How it composites onto its earlier siblings. A group whose children blend is isolated, so they blend only with each other; a lone blending child (as under a `clip`) passes its blend to the group, so it blends with what is behind. */
   readonly blend?: "normal" | Blend;
   /**
    * Shows it only in this color scheme (the viewer's `prefers-color-scheme`); without it, it shows in both. It still

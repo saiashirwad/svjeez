@@ -38,12 +38,13 @@ import type {
 import { curveLength, isCurved } from "../model/curve";
 import { placeOf } from "../model/scene-error";
 import { atRest, isLane, mapLane } from "../model/lane";
+import { culledOf } from "../model/dark";
 import { mixNumber, same } from "../model/steps";
 import { homed } from "../author/pin";
 import { growBox, lengthOf, onCircle, smilSafeWith } from "../model/geometry";
 import { blendable, isGradient } from "../author/paint";
 import { isColor } from "../model/painted";
-import { reachOf } from "../model/reach";
+import { placed, reachOf } from "../model/reach";
 import { walkScene } from "../model/walk";
 import {
   clipUrl,
@@ -1052,7 +1053,38 @@ interface Holder {
   readonly shift: Vec;
 }
 
-const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Drawn): void => {
+/**
+ * Whether a node's effects light it (emboss) while its own scale mirrors it. Chromium computes lighting
+ * filters in the filtered element's space and paints them black under a mirroring transform, so such a
+ * filter goes on a wrapper outside the node's transforms instead, where the light also keeps its direction.
+ */
+const litMirror = (node: SceneNode): boolean =>
+  working(node.effects).some((effect) => effect.kind === "emboss") &&
+  node.layers.some(({ scale }) =>
+    (isLane(scale) ? scale.keys.map((key) => key.value) : [scale]).some(([x, y]) => x < 0 || y < 0),
+  );
+
+/** Puts a mirrored, embossed node's filter on a shell outside its transforms; see {@link litMirror}. */
+const litOutside = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec): void => {
+  const effects = working(node.effects);
+  const reach = reachOf({ ...node, effects }, `the effects of "${node.key}"`);
+  const region = reach && placed(growBox(reach, 1), { ...node, at });
+
+  if (!region) return;
+  const own = shell();
+
+  shells.push(own);
+  own.attrs.filter = filterUrl(ctx.defs, effects, region, node.key);
+};
+
+const dressed = (
+  ctx: Ctx,
+  node: SceneNode,
+  shells: Shell[],
+  at: Vec,
+  drawn: Drawn,
+  filtered = true,
+): void => {
   const holder = (): Holder => {
     const current = shells.at(-1)!;
 
@@ -1090,7 +1122,7 @@ const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Dra
 
   const effects = working(node.effects);
 
-  if (effects.length === 0) return;
+  if (!filtered || effects.length === 0) return;
   const reach = reachOf({ ...node, effects }, `the effects of "${node.key}"`);
 
   if (!reach) return;
@@ -1125,6 +1157,22 @@ const shaderScript = ({ wgsl }: ShaderMark): Element =>
  */
 const isolates = (children: readonly SceneNode[]): boolean =>
   children.some((child) => child.blend !== undefined);
+
+/**
+ * A group whose only child blends takes that blend itself. Isolated, the child would have nothing in
+ * its group to blend with, so `<Group clip><Shape blend="multiply" /></Group>` would paint as normal;
+ * on the group, the clipped child blends with what is behind it, as authors mean.
+ */
+const blendHoisted = (node: SceneNode): SceneNode => {
+  if (node.kind !== "group" || node.blend !== undefined || node.children.length !== 1) return node;
+  const [child] = node.children;
+
+  if (child!.blend === undefined) return node;
+  const { blend, ...plain } = child!;
+
+  // SAFETY: plain is child without its optional blend, so it is still the same kind of SceneNode.
+  return { ...node, blend, children: [plain as SceneNode] };
+};
 
 const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
   if (ctx.sources || node.kind !== "group" || node.children.length !== 1) return node;
@@ -1216,6 +1264,13 @@ const dashedTrim = (node: SceneNode): GroupNode | undefined => {
   };
 };
 
+const SMIL_TAGS: ReadonlySet<string> = new Set(["animate", "set", "animateTransform"]);
+
+const moves = (node: SvgNode): boolean =>
+  node.kind === "element"
+    ? (node.lanes?.length ?? 0) > 0 || SMIL_TAGS.has(node.tag) || node.children.some(moves)
+    : node.kind === "fragment" && node.children.some(moves);
+
 const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
   const [outer, outerClock] = [ctx.current, ctx.clock];
 
@@ -1231,7 +1286,7 @@ const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
 };
 
 const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
-  const node = lifted(ctx, given);
+  const node = blendHoisted(lifted(ctx, given));
   const split = dashedTrim(node);
 
   if (split) return emitNode(ctx, split);
@@ -1343,9 +1398,13 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
 
   if (drawn.offset) travel(ctx, shells, drawn.offset);
 
-  dressed(ctx, node, shells, at, drawn);
+  const mirrorLit = litMirror(node);
+
+  dressed(ctx, node, shells, at, drawn, !mirrorLit);
 
   for (const layer of [...foldLayers(node.layers)].reverse()) place(ctx, shells, layer, cuts);
+
+  if (mirrorLit) litOutside(ctx, node, shells, at);
 
   if (isLane(node.at)) travel(ctx, shells, node.at);
 
@@ -1412,9 +1471,16 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
 
   const shown = node.scheme === undefined ? wrapped : schemed(ctx, node.scheme, wrapped);
 
-  const out = node.clock
+  const clocked = node.clock
     ? { ...shown, attrs: { ...shown.attrs, ...clockAttrs(node.clock) } }
     : shown;
+
+  const cull = culledOf(node, ctx.scene, {
+    moves: children.some(moves),
+    clocked: ctx.clock !== undefined,
+  });
+
+  const out = cull.length > 0 ? { ...clocked, cull } : clocked;
 
   if (ctx.sources)
     return {

@@ -8,6 +8,14 @@ export { costOf, type Cost } from "./svg/cost";
 
 export { validateSvg, type ValidationResult } from "./svg/validate";
 
+export {
+  measurePerf,
+  formatPerf,
+  type PerfOptions,
+  type PerfReport,
+  type PerfWindow,
+} from "./perf";
+
 export { checkPixels, type CheckOptions, type PixelReport } from "./check/check";
 
 export type ColorScheme = "light" | "dark";
@@ -66,12 +74,21 @@ export interface Frames {
   readonly sheet?: Uint8Array;
 }
 
-const launch = async (caller: string, executablePath?: string) => {
+/** `full` prefers a full Chrome or Chromium over the headless shell, which composites in software and so misjudges playback. */
+export const launch = async (caller: string, executablePath?: string, full = false) => {
   const { chromium } = await import("playwright-core").catch(() => {
     throw new Error(
       `${caller} needs playwright-core. Install it with \`npm i -D playwright-core\`, then \`npx playwright-core install chromium-headless-shell\`.`,
     );
   });
+
+  if (full && !executablePath)
+    for (const channel of ["chrome", "chromium"])
+      try {
+        return await chromium.launch({ channel });
+      } catch {
+        // Not installed: try the next one.
+      }
 
   try {
     return await chromium.launch({ executablePath });
@@ -86,7 +103,7 @@ const launch = async (caller: string, executablePath?: string) => {
   }
 };
 
-const size = (caller: string, svg: string) => {
+export const size = (caller: string, svg: string) => {
   const root = /<svg\b[^>]*>/.exec(svg)?.[0] ?? "";
   const width = parseFloat(/\swidth="([\d.]+)"/.exec(root)?.[1] ?? "");
   const height = parseFloat(/\sheight="([\d.]+)"/.exec(root)?.[1] ?? "");

@@ -36,7 +36,7 @@ test("svjeez skill --install copies the skill, its examples and its modules, and
 });
 
 test("--help and -h print usage for every command and the bare CLI, and exit 0", () => {
-  const commands = ["svg", "dev", "frames", "check", "video", "skill"];
+  const commands = ["svg", "dev", "frames", "check", "perf", "video", "skill"];
 
   for (const args of [
     ["--help"],
@@ -485,4 +485,33 @@ test("svjeez check --times with an unknown marker is an error too", () => {
   const result = cli("check", markers, "--times", "nope,1");
   expect(result.exitCode).toBe(1);
   expect(result.stderr.toString()).toContain('--times has "nope"');
+});
+
+const tiny = () => {
+  const dir = mkdtempSync(join(tmpdir(), "svjeez-perf-"));
+  const file = join(dir, "scene.svg");
+  writeFileSync(file, '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>');
+
+  return file;
+};
+
+test("svjeez perf rejects bad flags before launching a browser", () => {
+  const file = tiny();
+
+  const cases: [string[], string][] = [
+    [["--ms", "0"], "--ms needs a positive number of milliseconds, got 0."],
+    [["--ms", "fast"], '--ms needs a number, got "fast".'],
+    [["--windows", "1.5"], "--windows needs a positive whole number, got 1.5."],
+    [["--windows", "0"], "--windows needs a positive whole number, got 0."],
+    [["--fail-under=-3"], "--fail-under needs a positive fps, got -3."],
+    [["--color-scheme", "sepia"], '--color-scheme is system, light or dark, got "sepia".'],
+  ];
+
+  for (const [flags, message] of cases) {
+    const result = cli("perf", file, ...flags);
+    expect(result.exitCode).toBe(1);
+    expect(result.stderr.toString()).toContain(message);
+  }
+
+  expect(cli("perf").exitCode).toBe(1);
 });

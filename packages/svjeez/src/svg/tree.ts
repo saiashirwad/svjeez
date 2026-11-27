@@ -1,4 +1,5 @@
 import type { Lane } from "./compile";
+import type { Stretch } from "../model/dark";
 import { isFontValue, type FontValue } from "../font/font";
 import { escapeAttr, escapeText } from "../model/format";
 
@@ -14,6 +15,8 @@ export type SvgNode =
       readonly still?: Readonly<Record<string, AttrValue>>;
       /** The attributes that draw it. When given, every other one only places it, so a copy can carry those. */
       readonly drawn?: readonly string[];
+      /** When the node holds at opacity 0 long enough that the SVG stops drawing it, in scene seconds. */
+      readonly cull?: readonly Stretch[];
     }
   | { readonly kind: "text"; readonly value: string }
   | { readonly kind: "raw"; readonly value: string }

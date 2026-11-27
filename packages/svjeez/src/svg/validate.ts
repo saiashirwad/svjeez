@@ -83,11 +83,21 @@ const imageHrefs = (source: string): string[] => {
   return warnings;
 };
 
-const embeddedFonts = (source: string): string[] =>
-  [...source.matchAll(/@font-face\{([^}]*)\}/g)].flatMap(([, body = ""]) => {
-    const uri = /url\((data:[^)]*)\)/.exec(body)?.[1] ?? "";
+export interface EmbeddedFont {
+  /** `The embedded font "Family" 400 italic`, or `An embedded font`. */
+  readonly label: string;
+  /** Size of the data URI, in bytes. */
+  readonly bytes: number;
+  /** Why the font was embedded whole instead of subset, if it was. */
+  readonly reason?: string;
+}
 
-    if (uri.length <= EMBED_WARN_BYTES) return [];
+/** Every `@font-face` with a data URI in an SVG, with its size and any subset-skip reason. */
+export const embeddedFontsOf = (source: string): EmbeddedFont[] =>
+  [...source.matchAll(/@font-face\{([^}]*)\}/g)].flatMap(([, body = ""]) => {
+    const uri = /url\((data:[^)]*)\)/.exec(body)?.[1];
+
+    if (uri === undefined) return [];
     const family = /font-family:'([^']*)'/.exec(body)?.[1];
     const weight = /font-weight:(\d+)/.exec(body)?.[1];
     const style = /font-style:([a-z]+)/.exec(body)?.[1];
@@ -97,10 +107,17 @@ const embeddedFonts = (source: string): string[] =>
       ? `The embedded font "${family}"${weight ? ` ${weight}` : ""}${style === "italic" ? " italic" : ""}`
       : "An embedded font";
 
+    return [{ label, bytes: uri.length, ...(reason && { reason }) }];
+  });
+
+const embeddedFonts = (source: string): string[] =>
+  embeddedFontsOf(source).flatMap(({ label, bytes, reason }) => {
+    if (bytes <= EMBED_WARN_BYTES) return [];
+
     const why = reason ? ` Subsetting was skipped because ${reason}.` : "";
 
     return [
-      `${label} is ${Math.round(uri.length / 1024)} KB, and the whole file downloads before the first frame.${why} Use a smaller font.`,
+      `${label} is ${Math.round(bytes / 1024)} KB, and the whole file downloads before the first frame.${why} Use a smaller font.`,
     ];
   });
 

@@ -1,7 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { readFile } from "node:fs/promises";
 import { Group, Run, Text, font, scene, type SceneElement } from "svjeez";
-import { svg } from "svjeez/tools";
+import { check, svg } from "svjeez/tools";
+import { sfnt } from "../src/font/sfnt";
+import { typesetter } from "../src/font/shape";
+import { subsetWithReason } from "../src/font/subset";
 import { fontFixture } from "../../../fixtures/fonts";
 
 const regular = await font.load(fontFixture("SpaceMono-Regular"));
@@ -145,4 +148,49 @@ describe("subset: false", () => {
       expect(out).toContain(whole.href!);
       expect(out.match(/@font-face/g)).toHaveLength(1);
     });
+});
+
+describe("ligature lookups outside liga", () => {
+  // ArchivoBlack cut to "fi" keeps one f+i ligature under `liga`. Renaming the feature to `ccmp`
+  // makes it a lookup the subsetter does not carry, whose coverage holds "f", like Source Serif 4's
+  // ccmp covers every lowercase letter.
+  const ccmp = async () => {
+    const source = new Uint8Array(await readFile(fontFixture("ArchivoBlack-Regular")));
+    const face = sfnt(source)!;
+    const cut = subsetWithReason(source, face, typesetter(face), ["fi"]).bytes!;
+    const at = Buffer.from(cut).indexOf("liga");
+
+    expect(at).toBeGreaterThan(0);
+    cut.set(
+      [..."ccmp"].map((c) => c.charCodeAt(0)),
+      at,
+    );
+
+    return font(cut, { family: "Ccmp" });
+  };
+
+  test("subset when no whole ligature of the lookup occurs, even if its first glyph does", async () => {
+    const face = await ccmp();
+
+    expect(face.subsetSkipReason(["if"])).toBeUndefined();
+    expect(face.subsetSkipReason(["fi"])).toContain("OpenType layout lookups");
+  });
+
+  test("check says, as info, when a font embeds whole, with its size", async () => {
+    const face = await ccmp();
+
+    const at = (text: string) =>
+      check(
+        scene({ size: [200, 100], duration: 1, title: "Whole" }, () => (
+          <Text font={face} size={20} fill="#000000">
+            {text}
+          </Text>
+        )),
+      ).problems.filter((problem) => problem.code === "whole-font");
+
+    expect(at("if")).toEqual([]);
+    const [found] = at("fi");
+    expect(found?.severity).toBe("info");
+    expect(found?.message).toMatch(/"Ccmp" 400 embeds whole, \d+ KB, because it uses OpenType/);
+  });
 });

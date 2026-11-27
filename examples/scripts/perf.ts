@@ -1,12 +1,7 @@
 import { BunRuntime } from "@effect/platform-bun";
-import { brotliCompressSync, constants, gzipSync } from "node:zlib";
-import { Array, Console, Effect, FileSystem, Option, Path, Record, Schema } from "effect";
+import { Array, Console, Effect, FileSystem, Option, Path, Record } from "effect";
 import { Argument, Command, Flag } from "effect/cli";
-import { ChildProcess } from "effect/process";
-import { chromium } from "playwright-core";
-import { costOf } from "svjeez/frames";
-import { ScriptError } from "../../scripts/errors.ts";
-import { run } from "../../scripts/process.ts";
+import { measurePerf } from "svjeez/frames";
 import * as Services from "../../scripts/services.ts";
 
 type Metrics = Record<
@@ -18,11 +13,6 @@ const combine = (
   rows: Array.NonEmptyReadonlyArray<Metrics>,
   how: (values: Array.NonEmptyReadonlyArray<number>) => number,
 ): Metrics => Record.map(rows[0], (_, key) => how(Array.map(rows, (row) => row[key])));
-
-const mean = (values: ReadonlyArray<number>) => values.reduce((a, b) => a + b, 0) / values.length;
-
-const total = (events: ReadonlyArray<{ readonly dur: number }>) =>
-  events.reduce((sum, event) => sum + event.dur, 0);
 
 const delta = (now: number, was: number | undefined, unit = "") =>
   was === undefined || Math.abs(now - was) < 0.05 * Math.max(1, was)
@@ -53,212 +43,40 @@ Effect.gen(function* () {
     Effect.fn(function* (flags) {
       const fs = yield* FileSystem.FileSystem;
       const dist = path.resolve(flags.dist);
-      const work = yield* fs.makeTempDirectoryScoped({ prefix: "svjeez-perf-" });
-      const session = path.basename(work);
 
-      const browse = (...args: ReadonlyArray<string>) =>
-        run(ChildProcess.make`agent-browser --session ${session} --allow-file-access ${args}`);
+      const measure = Effect.fn("measure")(function* (file: string) {
+        const svg = yield* fs.readFileString(file);
 
-      yield* fs.copyFile(
-        path.join(import.meta.dirname, "perf-page.html"),
-        path.join(work, "bench.html"),
-      );
-
-      const measure = Effect.fn("measure")(function* (file: string, tag: string) {
         const all = yield* Effect.forEach(
           Array.range(1, flags.runs),
           () =>
-            Effect.gen(function* () {
-              const copy = path.join(work, `${tag}-${path.basename(file)}`);
-
-              yield* fs.copyFile(file, copy);
-              yield* browse(
-                "open",
-                `file://${path.join(work, "bench.html")}?svg=${path.basename(copy)}`,
-              );
-              yield* browse("eval", "ready");
-
-              if (flags.throttle > 1) {
-                const browser = yield* Effect.acquireRelease(
-                  browse("get", "cdp-url").pipe(
-                    Effect.flatMap((url) => Effect.tryPromise(() => chromium.connectOverCDP(url))),
-                  ),
-                  (browser) => Effect.promise(() => browser.close()),
-                );
-
-                const page = yield* Effect.fromOption(
-                  Array.findFirst(
-                    browser.contexts().flatMap((context) => context.pages()),
-                    (page) => page.url().includes("bench.html"),
-                  ),
-                  () =>
-                    new ScriptError({ message: `agent-browser has no page open on "bench.html".` }),
-                );
-
-                const cdp = yield* Effect.tryPromise(() => page.context().newCDPSession(page));
-
-                const spins = Effect.tryPromise(() => page.evaluate("spin()")).pipe(
-                  Effect.map(Number),
-                );
-
-                const before = yield* spins;
-
-                yield* Effect.tryPromise(() =>
-                  cdp.send("Emulation.setCPUThrottlingRate", { rate: flags.throttle }),
-                );
-
-                const slowed = before / (yield* spins);
-
-                if (slowed < flags.throttle * 0.5)
-                  return yield* new ScriptError({
-                    message: `CPU throttling ${flags.throttle}x did not take effect (${slowed.toFixed(1)}x).`,
-                  });
-              }
-
-              const parts = yield* Effect.forEach(
-                Array.range(0, flags.windows - 1),
-                (k) =>
-                  Effect.gen(function* () {
-                    const trace = path.join(work, `${tag}-${k}-${path.basename(file)}.json`);
-
-                    yield* browse("eval", `from(${k / flags.windows})`);
-                    yield* browse("eval", "frames()");
-                    yield* browse(
-                      "profiler",
-                      "start",
-                      "--categories",
-                      "devtools.timeline,blink,toplevel,disabled-by-default-devtools.timeline",
-                    );
-                    yield* browse("wait", String(flags.ms));
-                    yield* browse("profiler", "stop", trace);
-
-                    const frames = yield* browse("eval", "frames()").pipe(
-                      Effect.flatMap(
-                        Schema.decodeEffect(
-                          Schema.fromJsonString(
-                            Schema.fromJsonString(
-                              Schema.Struct({
-                                fps: Schema.Number,
-                                p95: Schema.Number,
-                                dropped: Schema.Number,
-                              }),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-
-                    const Events = Schema.Array(
-                      Schema.Struct({
-                        ph: Schema.optionalKey(Schema.String),
-                        name: Schema.String,
-                        pid: Schema.Number,
-                        tid: Schema.Number,
-                        ts: Schema.Number,
-                        dur: Schema.optionalKey(Schema.Number),
-                        args: Schema.optionalKey(
-                          Schema.Struct({ name: Schema.optionalKey(Schema.String) }),
-                        ),
-                      }),
-                    );
-
-                    const parsed = yield* fs
-                      .readFileString(trace)
-                      .pipe(
-                        Effect.flatMap(
-                          Schema.decodeEffect(
-                            Schema.fromJsonString(
-                              Schema.Union([Events, Schema.Struct({ traceEvents: Events })]),
-                            ),
-                          ),
-                        ),
-                      );
-
-                    const events = "traceEvents" in parsed ? parsed.traceEvents : parsed;
-
-                    const renderers = new Set(
-                      events.flatMap((e) =>
-                        e.ph === "M" &&
-                        e.name === "thread_name" &&
-                        e.args?.name === "CrRendererMain"
-                          ? [`${e.pid}:${e.tid}`]
-                          : [],
-                      ),
-                    );
-
-                    const [main = []] = Object.entries(
-                      Array.groupBy(
-                        events.flatMap((e) => (e.dur ? [{ ...e, dur: e.dur }] : [])),
-                        (e) => `${e.pid}:${e.tid}`,
-                      ),
-                    )
-                      .flatMap(([thread, timed]) => (renderers.has(thread) ? [timed] : []))
-                      .sort((a, b) => total(b) - total(a));
-
-                    const seconds =
-                      (main.reduce((last, e) => Math.max(last, e.ts + e.dur), 0) -
-                        main.reduce((first, e) => Math.min(first, e.ts), Infinity)) /
-                      1e6;
-
-                    const tasks = ["ThreadControllerImpl::RunTask", "RunTask"];
-
-                    const byName = Record.map(
-                      Array.groupBy(
-                        main.filter((e) => !tasks.includes(e.name)),
-                        (e) => e.name,
-                      ),
-                      (events) => total(events) / 1000 / seconds,
-                    );
-
-                    const running = main.filter((e) => tasks.includes(e.name));
-
-                    return {
-                      metrics: {
-                        main: Math.round(total(running) / 1000 / seconds),
-                        style: Math.round(byName["UpdateLayoutTree"] ?? 0),
-                        smil: Math.round(byName["PageAnimator::serviceScriptedAnimations"] ?? 0),
-                        paint: Math.round(byName["Paint"] ?? 0),
-                        worst: Math.round(Math.max(0, ...running.map((e) => e.dur)) / 100) / 10,
-                        ...frames,
-                        dropped: frames.dropped * 100,
-                      },
-                      byName,
-                    };
-                  }),
-                { concurrency: 1 },
-              );
-
-              const metrics = Array.map(parts, (part) => part.metrics);
-              const peak = combine(metrics, (values) => Math.max(...values));
-
-              return {
-                metrics: { ...combine(metrics, mean), worst: peak.worst, p95: peak.p95 },
-                byName: Record.map(
-                  Object.assign({}, ...parts.map((part) => part.byName)),
-                  (_, name) => mean(parts.map((part) => part.byName[name] ?? 0)),
-                ),
-              };
-            }).pipe(Effect.scoped),
+            Effect.tryPromise(() =>
+              measurePerf(svg, { ms: flags.ms, windows: flags.windows, throttle: flags.throttle }),
+            ),
           { concurrency: 1 },
         );
 
-        const bytes = yield* fs.readFile(file);
+        const metrics = Array.map(all, (run): Metrics => ({
+          main: Math.round(run.main),
+          style: Math.round(run.style),
+          smil: Math.round(run.smil),
+          paint: Math.round(run.paint),
+          worst: Math.round(run.worst * 10) / 10,
+          fps: run.fps,
+          p95: run.p95,
+          dropped: run.dropped,
+        }));
 
         return {
           ...combine(
-            Array.map(all, (run) => run.metrics),
+            metrics,
             (values) => [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)] ?? 0,
           ),
-          byName: all[Math.floor(flags.runs / 2)]?.byName ?? {},
-          running: Object.values(costOf(new TextDecoder().decode(bytes))).reduce(
-            (a, b) => a + b,
-            0,
-          ),
-          raw: bytes.length / 1024,
-          gzip: gzipSync(bytes).length / 1024,
-          brotli:
-            brotliCompressSync(bytes, { params: { [constants.BROTLI_PARAM_QUALITY]: 11 } }).length /
-            1024,
+          byName: all[Math.floor(flags.runs / 2)]?.events ?? {},
+          running: all[0]?.animations ?? 0,
+          raw: all[0]!.size.raw / 1024,
+          gzip: all[0]!.size.gzip / 1024,
+          brotli: all[0]!.size.brotli / 1024,
         };
       });
 
@@ -276,7 +94,7 @@ Effect.gen(function* () {
       const rows = yield* Effect.forEach(
         names,
         Effect.fn(function* (name) {
-          const now = yield* measure(path.join(dist, `${name}.svg`), "now");
+          const now = yield* measure(path.join(dist, `${name}.svg`));
 
           const was = yield* Effect.findFirst(
             Option.toArray(flags.base).map((base) => path.resolve(base, `${name}.svg`)),
@@ -285,7 +103,7 @@ Effect.gen(function* () {
             Effect.flatMap(
               Option.match({
                 onNone: () => Effect.succeed(undefined),
-                onSome: (file) => measure(file, "base"),
+                onSome: measure,
               }),
             ),
           );
@@ -315,10 +133,6 @@ Effect.gen(function* () {
           ];
         }),
         { concurrency: 1 },
-      ).pipe(
-        Effect.ensuring(
-          run(ChildProcess.make`agent-browser --session ${session} close`).pipe(Effect.ignore),
-        ),
       );
 
       const table = [

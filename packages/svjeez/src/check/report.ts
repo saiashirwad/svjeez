@@ -3,6 +3,7 @@ import type { Scene } from "../model/ir";
 import type { Seconds } from "../model/time";
 import { costOf, type Cost } from "../svg/cost";
 import { svg } from "../svg/svg";
+import { embeddedFontsOf } from "../svg/validate";
 import { problemsOf } from "./inspect";
 import type { Problem } from "./inspect-context";
 
@@ -31,7 +32,26 @@ export const examine = (
 
   const emitted = svg.emit(scene, { sources: true, onLane: (lane) => lanes.push(lane) });
 
-  return { problems, lanes, cost: costOf(svg.emit(scene)), svg: emitted };
+  const whole = embeddedFontsOf(emitted).flatMap(({ label, bytes, reason }): Problem[] =>
+    reason === undefined
+      ? []
+      : [
+          {
+            code: "whole-font",
+            severity: "info",
+            key: "",
+            message: `${label} embeds whole, ${Math.round(bytes / 1024)} KB, because ${reason}.`,
+            fix: "Load a TTF with TrueType outlines, or pass subset: false to the font to say the size is fine.",
+          },
+        ],
+  );
+
+  return {
+    problems: [...problems, ...whole],
+    lanes,
+    cost: costOf(svg.emit(scene)),
+    svg: emitted,
+  };
 };
 
 /** Check a scene without a browser: every problem with its source and fix, and every animated lane. */

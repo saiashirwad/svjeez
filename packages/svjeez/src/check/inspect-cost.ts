@@ -1,7 +1,9 @@
+import { culledOf, merged, outside } from "../model/dark";
+import type { SceneNode } from "../model/ir";
 import { isLane } from "../model/lane";
 import { reachOf } from "../model/reach";
 import { add, isGone, label, type Survey } from "./inspect-context";
-import { changesOf, seconds, units, valuesOf, type Stretch } from "./survey";
+import { changesOf, seconds, units, valuesOf, type Entry, type Stretch } from "./survey";
 
 /** What a filter reads: its own parameters. Anything else that moves under it makes it run again. */
 const PARAMETERS = /^(blur|adjust|displace|shadow|noise)\b/;
@@ -23,6 +25,36 @@ const SHARE = 0.1;
 export const movingFilter = (survey: Survey): void => {
   const { scene } = survey;
   const [width, height] = scene.size;
+  const culls = new Map<SceneNode, Stretch[]>();
+
+  /** When the SVG stops drawing `node`, as svg.emit culls it. */
+  const culled = (node: SceneNode, chain: readonly SceneNode[]): Stretch[] => {
+    const known = culls.get(node);
+
+    if (known) return known;
+
+    const found = culledOf(node, scene, {
+      moves: survey.entries.some(
+        (inner) =>
+          inner.ancestors.includes(node) && valuesOf(inner.node).some(({ value }) => isLane(value)),
+      ),
+      clocked: chain.some((each) => each.clock !== undefined),
+    });
+
+    culls.set(node, found);
+
+    return found;
+  };
+
+  /** What of `stretches` the entry is drawn for: the SVG skips it while it or a group above it is culled. */
+  const shown = (entry: Entry, stretches: readonly Stretch[]): Stretch[] => {
+    const chain = [...entry.ancestors, entry.node];
+
+    return outside(
+      stretches,
+      merged(chain.flatMap((node, index) => culled(node, chain.slice(0, index + 1)))),
+    );
+  };
 
   for (const entry of survey.entries) {
     const { node } = entry;
@@ -33,7 +65,7 @@ export const movingFilter = (survey: Survey): void => {
 
     for (const { name, value } of valuesOf(node)) {
       if (!isLane(value) || !(PARAMETERS.test(name) || OWN.has(name))) continue;
-      const stretches = changesOf(value, scene.duration);
+      const stretches = shown(entry, changesOf(value, scene.duration));
 
       if (stretches.length > 0)
         reasons.push({
@@ -47,8 +79,9 @@ export const movingFilter = (survey: Survey): void => {
     for (const inner of survey.entries) {
       if (!inner.ancestors.includes(node)) continue;
 
-      const stretches = valuesOf(inner.node).flatMap(({ value }) =>
-        changesOf(value, scene.duration),
+      const stretches = shown(
+        inner,
+        valuesOf(inner.node).flatMap(({ value }) => changesOf(value, scene.duration)),
       );
 
       if (stretches.length > 0)
