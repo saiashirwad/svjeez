@@ -214,7 +214,7 @@ const keep = (from: Vec, to: Vec, length: number): Vec => {
  * it, straight, when it is too far). Returns `lengths.length + 1` points, root first: draw them with `brush`, `line`
  * or circles. Two bones solve exactly; more bones solve by FABRIK from a pose bowed toward `bend`.
  */
-export const limb = (
+const solveLimb = (
   root: Vec,
   lengths: readonly number[],
   target: Vec,
@@ -284,15 +284,26 @@ export const limb = (
   return joints.map(point);
 };
 
-export interface LimbProps extends LimbOptions {
-  /** The fixed shoulder, where the first bone starts. */
-  readonly root: Vec;
+export interface LimbPoseProps extends LimbOptions {
+  /**
+   * The shoulder, where the first bone starts. A function moves it over time. `root`, `reach` and `aim` are all in
+   * the parent group's coordinates, so a foot target on the floor stays planted while the hip bobs.
+   */
+  readonly root: Vec | ((t: number) => Vec);
   /** Bone lengths, root first. */
   readonly bones: readonly number[];
-  /** Where the tip should be at time `t`, on the enclosing clock. */
+  /** Where the tip should be at time `t`, in the same frame as `root`. */
   readonly reach: (t: number) => Vec;
+}
+
+export interface LimbProps extends LimbPoseProps {
   /** The window `reach` is sampled over. */
   readonly over: Interval;
+  /**
+   * A world point the tip joint's content faces: its +x axis points at `aim(t)`, in the same frame as `root`.
+   * Without it the tip content turns with the last bone.
+   */
+  readonly aim?: (t: number) => Vec;
   /** Degrees an animated angle may be off by when keyframes are dropped (default 0.2). */
   readonly tolerance?: number;
   /** Seconds between samples (default: `sampled`'s own). */
@@ -303,39 +314,65 @@ export interface LimbProps extends LimbOptions {
   readonly joint?: (index: number) => Child;
 }
 
+export interface LimbPose {
+  /** `bones.length + 1` points, root first, in the parent's frame. */
+  readonly joints: Vec[];
+  /** Each bone's angle in the parent's frame, in degrees. */
+  readonly angles: number[];
+}
+
 const DEG = 180 / Math.PI;
 
 /** `angle` plus whole turns, so it lies within half a turn of `near`. */
 const nearest = (angle: number, near: number): number =>
   angle + 360 * Math.round((near - angle) / 360);
 
+const fixed = (root: LimbPoseProps["root"]): root is Vec => Array.isArray(root);
+
+const rootAt = (root: LimbPoseProps["root"], t: number): Vec => (fixed(root) ? root : root(t));
+
+/**
+ * The pose `<Limb>` draws at time `t`: its joints and each bone's world angle in degrees. One source of truth, so
+ * your own code (a light cone, a shadow, a hand) can never disagree with the chain. Angles are not unwrapped.
+ */
+const pose =
+  ({ root, bones, reach, bend }: LimbPoseProps): ((t: number) => LimbPose) =>
+  (t) => {
+    const joints = solveLimb(rootAt(root, t), bones, reach(t), bend === undefined ? {} : { bend });
+
+    const angles = bones.map((_, i) => {
+      const [a, b] = [joints[i]!, joints[i + 1]!];
+
+      return Math.atan2(b[1] - a[1], b[0] - a[0]) * DEG;
+    });
+
+    return { joints, angles };
+  };
+
+export const limb = Object.assign(solveLimb, { pose });
+
 /**
  * A chain of bones that moves as nested rotations: each bone is drawn once, and each joint has one animated
  * `rotate` track. Tiny next to `brush(limb(...))`, which stores every outline; use that for bending, organic shapes.
+ * With a function `root` the whole chain moves, and `reach` stays in the parent's frame.
  */
-export const Limb = ({
-  root,
-  bones,
-  reach,
-  over,
-  bend,
-  tolerance = 0.2,
-  step,
-  bone,
-  joint,
-}: LimbProps): SceneElement => {
-  const pose = (t: number): number[] => {
-    const joints = limb(root, bones, reach(t), bend === undefined ? {} : { bend });
-    let parent = 0;
+export const Limb = (props: LimbProps): SceneElement => {
+  const { root, bones, over, aim, tolerance = 0.2, step, bone, joint } = props;
+  const solve = pose(props);
+  const sampling = { tolerance, ...(step !== undefined && { step }) };
 
-    return bones.map((_, i) => {
-      const [a, b] = [joints[i]!, joints[i + 1]!];
-      const world = Math.atan2(b[1] - a[1], b[0] - a[0]) * DEG;
-      const local = world - parent;
-      parent = world;
+  // Local joint angles, then (with `aim`) the tip content's turn relative to the last bone.
+  const rowAt = (t: number): number[] => {
+    const { joints, angles } = solve(t);
+    const row = angles.map((world, i) => world - (angles[i - 1] ?? 0));
 
-      return local;
-    });
+    if (aim) {
+      const tip = joints.at(-1)!;
+      const to = aim(t);
+      row.push(Math.atan2(to[1] - tip[1], to[0] - tip[0]) * DEG - angles.at(-1)!);
+    }
+
+    return row;
   };
 
   // Angles are unwrapped against a fine table walked from the start, so no two samples jump by a turn.
@@ -343,7 +380,7 @@ export const Limb = ({
   const table: number[][] = [];
 
   for (let r = 0; r <= rows; r++) {
-    const row = pose(over.start + (over.over * r) / rows);
+    const row = rowAt(over.start + (over.over * r) / rows);
     const before = table.at(-1);
     table.push(before ? row.map((a, i) => nearest(a, before[i]!)) : row);
   }
@@ -351,24 +388,39 @@ export const Limb = ({
   const angle = (index: number) => (t: number) => {
     const at = Math.min(rows, Math.max(0, Math.round(((t - over.start) / over.over) * rows)));
 
-    return nearest(pose(t)[index]!, table[at]![index]!);
+    return nearest(rowAt(t)[index]!, table[at]![index]!);
+  };
+
+  const tip = (): Child => {
+    const content = joint?.(bones.length);
+
+    if (!aim || !content) return content;
+
+    return Group({
+      rotate: sampled(angle(bones.length), over, sampling),
+      origin: { frame: [0, 0] },
+      children: content,
+    });
   };
 
   const chain = (index: number): SceneElement =>
     Group({
-      rotate: sampled(angle(index), over, { tolerance, ...(step !== undefined && { step }) }),
+      rotate: sampled(angle(index), over, sampling),
       origin: { frame: [0, 0] },
       children: [
         bone(bones[index]!, index),
         joint?.(index),
         Group({
           offset: [bones[index]!, 0],
-          children: [index + 1 < bones.length ? chain(index + 1) : joint?.(index + 1)],
+          children: [index + 1 < bones.length ? chain(index + 1) : tip()],
         }),
       ],
     });
 
-  return Group({ offset: root, children: chain(0) });
+  return Group({
+    offset: fixed(root) ? root : sampled(root, over, sampling),
+    children: chain(0),
+  });
 };
 
 export interface ScatterOptions {

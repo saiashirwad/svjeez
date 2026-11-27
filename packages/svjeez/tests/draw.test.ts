@@ -314,6 +314,96 @@ describe("<Limb>", () => {
   });
 });
 
+describe("limb.pose, aim and a moving root", () => {
+  const bones = [60, 50, 30];
+  const reach = (t: number): Vec => [90 + 20 * Math.cos(t * 2), 40 + 30 * Math.sin(t * 3)];
+  const ball = (t: number): Vec => [200 + 80 * Math.cos(t), 150 + 60 * Math.sin(t * 1.7)];
+  const hip = (t: number): Vec => [100, 20 + 8 * Math.sin(t * 4)];
+
+  const tipBox = (made: ReturnType<typeof scene>, t: number) =>
+    Object.entries(boxesOf(made, t)).find(([key]) => key.endsWith("/tip"))![1];
+
+  const spot = (key: string) => (length: number, index: number) =>
+    Shape({
+      key: `${key}-${index}`,
+      geometry: line([0, 0], [length, 0]),
+      stroke: { color: "#000000" },
+    });
+
+  test("pose matches limb() joints and each bone's angle", () => {
+    const pose = limb.pose({ root: [10, 20], bones, reach, bend: -1 });
+
+    for (const t of [0, 0.7, 1.9, 3.3]) {
+      const { joints, angles } = pose(t);
+      const expected = limb([10, 20], bones, reach(t), { bend: -1 });
+
+      expect(joints).toEqual(expected);
+      expect(angles.length).toBe(bones.length);
+
+      angles.forEach((angle, i) => {
+        const [a, b] = [joints[i]!, joints[i + 1]!];
+
+        expect(angle).toBeCloseTo((Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI, 9);
+      });
+    }
+  });
+
+  test("with aim, the tip content faces the aim point", () => {
+    const made = scene({ size: [400, 300], duration: 6, title: "Aim" }, () =>
+      Limb({
+        root: [20, 20],
+        bones,
+        reach,
+        aim: ball,
+        over: span(0, 6),
+        tolerance: 0.05,
+        step: 0.05,
+        bone: spot("bone"),
+        joint: (index) =>
+          index === bones.length
+            ? Shape({ key: "tip", geometry: line([0, 0], [40, 0]), stroke: { color: "#FF0000" } })
+            : undefined,
+      }),
+    );
+
+    const pose = limb.pose({ root: [20, 20], bones, reach });
+
+    for (const t of [0, 1.1, 2.4, 3.7, 5.2]) {
+      const box = tipBox(made, t);
+      const tip = pose(t).joints.at(-1)!;
+      const [x, y] = ball(t);
+      const want = Math.atan2(y - tip[1], x - tip[0]);
+      const got = Math.atan2(box.y + box.height / 2 - tip[1], box.x + box.width / 2 - tip[0]);
+
+      expect(Math.abs(Math.sin((got - want) / 2)) * 2 * (180 / Math.PI)).toBeLessThan(1);
+    }
+  });
+
+  test("a function root keeps the tip on reach in the parent frame", () => {
+    const made = scene({ size: [400, 300], duration: 6, title: "Moving root" }, () =>
+      Limb({
+        root: hip,
+        bones: [60, 50],
+        reach: (t) => [130 + 10 * Math.cos(t), 100],
+        over: span(0, 6),
+        tolerance: 0.05,
+        step: 0.05,
+        bone: spot("bone"),
+        joint: (index) =>
+          index === 2 ? Shape({ key: "tip", geometry: circle(1), fill: "#FF0000" }) : undefined,
+      }),
+    );
+
+    for (const t of [0, 1, 2.5, 4, 5.5]) {
+      const box = tipBox(made, t);
+
+      expect(
+        apart([box.x + box.width / 2, box.y + box.height / 2], [130 + 10 * Math.cos(t), 100]),
+      ).toBeLessThan(1.5);
+    }
+  });
+});
+
 describe("array forms and sampled defaults", () => {
   test("polygon and line take one array of points as well", () => {
     const a: Vec = [0, 0];

@@ -21,7 +21,6 @@ const FLOOR = 336;
 const RADIUS = 14;
 const ROOT: Vec = [110, 312];
 const BONES = [125, 110, 85];
-const DEG = 180 / Math.PI;
 
 /** The ball at time t: rolls back and forth while it bounces three times per loop. */
 const ballAt = (t: number): Vec => {
@@ -40,20 +39,12 @@ const tipAt = (t: number): Vec => {
   return [300 + (x - 440) * 0.35, 100 + (y - 300) * 0.25];
 };
 
-/** Degrees of the head in the last bone's frame so that it faces the ball. */
-const headTurn = (t: number): number => {
-  const joints = limb(ROOT, BONES, tipAt(t), { bend: 1 });
-  const [a, b] = [joints.at(-2)!, joints.at(-1)!];
-  const arm = Math.atan2(b[1] - a[1], b[0] - a[0]) * DEG;
-  const [x, y] = ballAt(t);
-  const aim = Math.atan2(y - b[1], x - b[0]) * DEG;
+const lamp = limb.pose({ root: ROOT, bones: BONES, reach: tipAt, bend: 1 });
 
-  return ((((aim - arm) % 360) + 540) % 360) - 180;
-};
-
+/** Distance from the real tip joint to the ball, for the light cone. */
 const beam = (t: number): number => {
   const [x, y] = ballAt(t);
-  const [tx, ty] = tipAt(t);
+  const [tx, ty] = lamp(t).joints.at(-1)!;
 
   return Math.hypot(x - tx, y - ty);
 };
@@ -92,6 +83,7 @@ export default scene(
         root={ROOT}
         bones={BONES}
         reach={tipAt}
+        aim={ballAt}
         over={span(0, PERIOD)}
         bend={1}
         tolerance={0.2}
@@ -124,7 +116,7 @@ export default scene(
               <Shape geometry={circle(3.5)} fill="#E8B04B" />
             </Group>
           ) : (
-            <Group rotate={sampled(headTurn, span(0, PERIOD), SAMPLING)} origin={{ frame: [0, 0] }}>
+            <Group>
               <Shape
                 geometry={sampled(
                   (t) => {

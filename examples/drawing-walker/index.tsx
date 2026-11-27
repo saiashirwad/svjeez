@@ -50,10 +50,10 @@ interface LegProps {
   readonly joint: Color;
 }
 
-/** The hip lives in the bobbing body's frame, so the foot target subtracts the bob to stay on the floor. */
+/** The hip rides the body's bob as a moving root; the foot target is a plain floor position in the same frame. */
 const Leg = ({ hip, phase, bend, color, joint }: LegProps) => (
   <Limb
-    root={[hip, 0]}
+    root={(t) => [hip, bob(t)]}
     bones={[70, 70]}
     bend={bend}
     over={WHOLE}
@@ -61,7 +61,7 @@ const Leg = ({ hip, phase, bend, color, joint }: LegProps) => (
     reach={(t) => {
       const [x, y] = footPath(t, phase);
 
-      return [hip + x, DROP + y - bob(t)];
+      return [hip + x, DROP + y];
     }}
     bone={(length, index) => (
       <Shape
@@ -200,51 +200,50 @@ export default scene(
         offset={scroll(160, 80)}
       />
 
-      <Group
-        offset={sampled((t): Vec => [320, HIP_Y + bob(t)], WHOLE, {
-          tolerance: 0.05,
-          step: DURATION / 80,
-        })}
-      >
+      <Group offset={[320, HIP_Y]}>
         <Leg hip={66} phase={0.5} bend={-1} color="#3B4F7A" joint="#2A3A5C" />
         <Leg hip={-48} phase={0} bend={1} color="#3B4F7A" joint="#2A3A5C" />
-        <Limb
-          root={TAIL}
-          bones={[24, 22]}
-          bend={1}
-          over={WHOLE}
-          step={DURATION / 40}
-          reach={(t) => [TAIL[0] - 36, TAIL[1] - 6 + 14 * Math.sin((4 * Math.PI * t) / WALK + 1)]}
-          bone={(length) => (
-            <Shape
-              geometry={brush(
-                [
-                  [0, 0],
-                  [length, 0],
-                ],
-                [9, 5],
-              )}
-              fill="#3D5A80"
-            />
-          )}
-        />
-        <Shape geometry={BODY} fill="#5B7DB1" />
-        <Shape geometry={rect(70, 10, { radius: 5 })} at={[-30, -8]} fill="#3D5A80" />
-        <Shape
-          geometry={brush(
-            [
-              [88, -30],
-              [104, -50],
-            ],
-            [18, 14],
-          )}
-          fill="#3D5A80"
-        />
-        <Shape geometry={HEAD} fill="#7BA0D6" />
-        <Shape geometry={circle(8)} offset={[130, -50]} fill="#F7E8C4" />
-        <Shape geometry={circle(4)} offset={[132, -50]} fill="#1F2A44" />
-        <Antenna root={[110, -74]} phase={0} />
-        <Antenna root={[126, -76]} phase={Math.PI} />
+        <Group
+          offset={sampled((t): Vec => [0, bob(t)], WHOLE, { tolerance: 0.05, step: DURATION / 80 })}
+        >
+          <Limb
+            root={TAIL}
+            bones={[24, 22]}
+            bend={1}
+            over={WHOLE}
+            step={DURATION / 40}
+            reach={(t) => [TAIL[0] - 36, TAIL[1] - 6 + 14 * Math.sin((4 * Math.PI * t) / WALK + 1)]}
+            bone={(length) => (
+              <Shape
+                geometry={brush(
+                  [
+                    [0, 0],
+                    [length, 0],
+                  ],
+                  [9, 5],
+                )}
+                fill="#3D5A80"
+              />
+            )}
+          />
+          <Shape geometry={BODY} fill="#5B7DB1" />
+          <Shape geometry={rect(70, 10, { radius: 5 })} at={[-30, -8]} fill="#3D5A80" />
+          <Shape
+            geometry={brush(
+              [
+                [88, -30],
+                [104, -50],
+              ],
+              [18, 14],
+            )}
+            fill="#3D5A80"
+          />
+          <Shape geometry={HEAD} fill="#7BA0D6" />
+          <Shape geometry={circle(8)} offset={[130, -50]} fill="#F7E8C4" />
+          <Shape geometry={circle(4)} offset={[132, -50]} fill="#1F2A44" />
+          <Antenna root={[110, -74]} phase={0} />
+          <Antenna root={[126, -76]} phase={Math.PI} />
+        </Group>
         <Leg hip={50} phase={0} bend={-1} color="#4F6FA5" joint="#2F4570" />
         <Leg hip={-64} phase={0.5} bend={1} color="#4F6FA5" joint="#2F4570" />
       </Group>

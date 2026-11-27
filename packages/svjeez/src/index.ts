@@ -80,6 +80,8 @@ export {
   scatter,
   type BlobOptions,
   type LimbOptions,
+  type LimbPose,
+  type LimbPoseProps,
   type LimbProps,
   type ScatterOptions,
 } from "./author/draw";
