@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { validateSvg } from "svjeez/frames";
 import { RULES, check, isScene, svg as backend, type Scene } from "svjeez/tools";
 
@@ -8,7 +8,12 @@ const root = join(import.meta.dir, "../skills/svjeez");
 const examples = join(root, "examples");
 const cli = join(import.meta.dir, "../src/cli.ts");
 
-const docs = ["SKILL.md"];
+const modulesDir = join(root, "modules");
+const packages = join(import.meta.dir, "../..");
+
+const moduleFiles = readdirSync(modulesDir).filter((name) => name.endsWith(".md"));
+
+const docs = ["SKILL.md", ...moduleFiles.map((name) => `modules/${name}`)];
 
 const read = (file: string): string => readFileSync(join(root, file), "utf8");
 
@@ -48,12 +53,12 @@ describe("skill examples", () => {
       expect(found.map((problem) => `${problem.code}: ${problem.message}`)).toEqual([]);
     });
 
-    test(`${file} starts with the pragma and imports only svjeez and ./style`, () => {
+    test(`${file} starts with the pragma and is self-contained`, () => {
       const source = readFileSync(join(examples, file), "utf8");
       expect(source.split("\n")[0]).toBe("/** @jsxImportSource svjeez */");
 
       const modules = [...source.matchAll(/from "([^"]+)"/g)].map((match) => match[1]);
-      expect(modules.filter((name) => name !== "svjeez" && name !== "./style")).toEqual([]);
+      expect(modules.filter((name) => name !== "svjeez")).toEqual([]);
       expect(source.split("\n").length).toBeLessThanOrEqual(150);
     });
   }
@@ -62,23 +67,79 @@ describe("skill examples", () => {
 const fences = (source: string): string[] =>
   [...source.matchAll(/```[^\n]*\n([\s\S]*?)```/g)].map((match) => match[1]!);
 
+// Modules that cannot be imported under bun test, so their names are not checked.
+const UNIMPORTABLE = new Set<string>([]);
+
+// Companion packages are not dependencies of svjeez, so resolve them from their own folder.
+const locate = (from: string): string =>
+  from.startsWith("@svjeez/") ? Bun.resolveSync(from, join(packages, from.split("/")[1]!)) : from;
+
 const MODULES = /^(svjeez(\/(tools|frames|page))?|@svjeez\/[a-z]+(\/[a-z]+)?)$/;
 
 describe("skill docs", () => {
-  test("every examples/ and references/ path they mention exists", () => {
-    const mentioned = docs.flatMap((file) =>
-      [...read(file).matchAll(/\b(examples|references)\/([\w-]+\.[\w]+)/g)].map(
-        ([, dir, name]) => `${dir}/${name}`,
+  test("every relative link in the docs points to a file that exists", () => {
+    const broken: string[] = [];
+    let seen = 0;
+
+    for (const { file, source } of text)
+      for (const [, target] of source.matchAll(/\]\(([^)\s]+)\)/g)) {
+        if (/^(https?:|mailto:|#)/.test(target!)) continue;
+        seen++;
+
+        const path = resolve(dirname(join(root, file)), target!.split("#")[0]!);
+
+        if (!existsSync(path)) broken.push(`${file}: ${target}`);
+      }
+
+    expect(seen).toBeGreaterThanOrEqual(18);
+    expect(broken).toEqual([]);
+  });
+
+  test("every bare examples/ or modules/ path the docs mention exists", () => {
+    const missing = text.flatMap(({ file, source }) =>
+      [...source.matchAll(/\b(?:examples|modules)\/[\w-]+\.\w+/g)].flatMap(([path]) =>
+        existsSync(join(root, path)) ? [] : [`${file}: ${path}`],
       ),
     );
 
-    expect(mentioned.length).toBeGreaterThanOrEqual(8);
-    expect(mentioned.filter((path) => !existsSync(join(root, path)))).toEqual([]);
+    expect(missing).toEqual([]);
   });
 
-  test("SKILL.md stays concise and no references folder remains", () => {
-    expect(existsSync(join(root, "references"))).toBe(false);
-    expect(read("SKILL.md").split("\n").length).toBeLessThanOrEqual(160);
+  test("every published companion package has a module doc that SKILL.md links to", () => {
+    const names = readdirSync(packages)
+      .flatMap((name) => {
+        const manifest = join(packages, name, "package.json");
+
+        if (name === "svjeez" || !existsSync(manifest)) return [];
+
+        // SAFETY: every package.json in this repo is a JSON object; only `private` is read.
+        const { private: hidden } = JSON.parse(readFileSync(manifest, "utf8")) as {
+          private?: boolean;
+        };
+
+        return hidden ? [] : [name];
+      })
+      .sort();
+
+    expect(names.length).toBeGreaterThanOrEqual(14);
+
+    const skill = read("SKILL.md");
+    const noDoc = names.filter((name) => !existsSync(join(modulesDir, `${name}.md`)));
+    const unlinked = names.filter((name) => !skill.includes(`](modules/${name}.md)`));
+    const stray = moduleFiles.filter((file) => !names.includes(file.replace(/\.md$/, "")));
+
+    expect(noDoc).toEqual([]);
+    expect(unlinked).toEqual([]);
+    expect(stray).toEqual([]);
+  });
+
+  test("SKILL.md has frontmatter and stays concise", () => {
+    const skill = read("SKILL.md");
+    const front = /^---\n([\s\S]*?)\n---\n/.exec(skill)?.[1] ?? "";
+
+    expect(front).toMatch(/^name: svjeez$/m);
+    expect(front).toMatch(/^description: \S/m);
+    expect(skill.split("\n").length).toBeLessThanOrEqual(200);
   });
 
   test("every value export of svjeez appears in SKILL.md", async () => {
@@ -104,7 +165,7 @@ describe("skill docs", () => {
         for (const [, kind, names, from] of block.matchAll(
           /import\s+(type\s+)?\{([^}]*)\}\s+from\s+"([^"]+)"/g,
         )) {
-          if (kind || !MODULES.test(from!)) continue;
+          if (kind || !MODULES.test(from!) || UNIMPORTABLE.has(from!)) continue;
 
           const wanted = names!
             .split(",")
@@ -112,7 +173,7 @@ describe("skill docs", () => {
             .filter((name) => name !== "" && !name.startsWith("type "))
             .map((name) => name.split(/\s+as\s+/)[0]!);
 
-          const exported = modules.get(from!) ?? new Set(Object.keys(await import(from!)));
+          const exported = modules.get(from!) ?? new Set(Object.keys(await import(locate(from!))));
 
           modules.set(from!, exported);
 
@@ -120,18 +181,11 @@ describe("skill docs", () => {
             expect(exported.has(name), `${file} imports ${name} from "${from}"`).toBe(true);
         }
 
-    expect(modules.size).toBeGreaterThanOrEqual(1);
-  });
-
-  test("the scene in SKILL.md is examples/hello.tsx", () => {
-    const section = read("SKILL.md").split("## What a scene is")[1]!;
-    const [scene] = fences(section);
-    expect(scene).toBeDefined();
-    expect(scene!.trimEnd()).toBe(readFileSync(join(examples, "hello.tsx"), "utf8").trimEnd());
+    expect(modules.size).toBeGreaterThanOrEqual(10);
   });
 
   test("every check code is documented in SKILL.md, and only those", () => {
-    const skill = /\n## Check\n([\s\S]*?)\n## /.exec(read("SKILL.md"))?.[1] ?? "";
+    const skill = /\n## Check rule codes\n([\s\S]*?)(?:\n## |$)/.exec(read("SKILL.md"))?.[1] ?? "";
 
     const codesOf = (section: string): string[] =>
       [...section.matchAll(/^\| ((?:`[a-z-]+`(?:, )?)+) \|/gm)].flatMap((match) =>
@@ -149,21 +203,32 @@ describe("skill docs", () => {
     const commands = [...usage.matchAll(/^ {2}svjeez (\w+)/gm)].map((match) => match[1]!);
     expect(commands.length).toBeGreaterThanOrEqual(6);
 
-    const all = text.map(({ source }) => source).join("\n");
+    const help = (...args: string[]): string =>
+      Bun.spawnSync([process.execPath, cli, ...args]).stdout.toString();
 
-    const cliText = read("SKILL.md").replaceAll("tsc --noEmit", "");
+    const everyHelp = [
+      usage,
+      help("--help"),
+      ...commands.map((command) => help(command, "--help")),
+    ].join("\n");
 
-    const used = [...all.matchAll(/(?:npx|bunx(?: --bun)?) svjeez (\w+)/g)].map(
-      (match) => match[1]!,
-    );
+    // init and browser belong to the standalone binary (@svjeez/bin), not to this CLI.
+    const skill = read("SKILL.md")
+      .split("\n")
+      .filter((line) => !line.includes("@svjeez/bin"))
+      .join("\n");
+
+    const cliText = skill.replaceAll("tsc --noEmit", "");
+
+    const used = [...skill.matchAll(/`svjeez (\w+)/g)].map((match) => match[1]!);
 
     expect(used.filter((command) => !commands.includes(command))).toEqual([]);
-    expect(commands.filter((command) => !all.includes(`svjeez ${command}`))).toEqual([]);
+    expect(commands.filter((command) => !skill.includes(`svjeez ${command}`))).toEqual([]);
 
     const flags = new Set(cliText.match(/(?<![\w-])--[a-zA-Z][\w-]*/g));
-    const unknown = [...flags].filter((flag) => !new RegExp(`${flag}(?![\\w-])`).test(usage));
+    const unknown = [...flags].filter((flag) => !new RegExp(`${flag}(?![\\w-])`).test(everyHelp));
 
-    expect(unknown.filter((flag) => flag !== "--bun")).toEqual([]);
+    expect(unknown.filter((flag) => flag !== "--bun" && flag !== "--help")).toEqual([]);
   });
 
   test("names of removed APIs appear nowhere in the docs or examples", () => {

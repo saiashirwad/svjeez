@@ -61,13 +61,13 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-9s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="960" height="540" fill="var(--background)"/>
-  <g transform="translate(94.524 55.875)" class="a m25">
-    <line x1="66.95" y1="50" x2="66.95" y2="429" fill="none" stroke="var(--border)" stroke-dasharray="3 4"/>
-    <line x1="217.1" y1="50" x2="217.1" y2="429" fill="none" stroke="var(--border)" stroke-dasharray="3 4"/>
-    <line x1="332.3" y1="50" x2="332.3" y2="429" fill="none" stroke="var(--border)" stroke-dasharray="3 4"/>
-    <line x1="464.06" y1="55" x2="464.06" y2="429" fill="none" stroke="var(--border)" stroke-dasharray="3 4"/>
-    <line x1="582.46" y1="50" x2="582.46" y2="429" fill="none" stroke="var(--border)" stroke-dasharray="3 4"/>
-    <line x1="715.26" y1="55" x2="715.26" y2="429" fill="none" stroke="var(--border)" stroke-dasharray="3 4"/>
+  <g transform="translate(94.524 55.875)" class="a m25" fill="none">
+    <line x1="66.95" y1="50" x2="66.95" y2="429" stroke="var(--border)" stroke-dasharray="3 4"/>
+    <line x1="217.1" y1="50" x2="217.1" y2="429" stroke="var(--border)" stroke-dasharray="3 4"/>
+    <line x1="332.3" y1="50" x2="332.3" y2="429" stroke="var(--border)" stroke-dasharray="3 4"/>
+    <line x1="464.06" y1="55" x2="464.06" y2="429" stroke="var(--border)" stroke-dasharray="3 4"/>
+    <line x1="582.46" y1="50" x2="582.46" y2="429" stroke="var(--border)" stroke-dasharray="3 4"/>
+    <line x1="715.26" y1="55" x2="715.26" y2="429" stroke="var(--border)" stroke-dasharray="3 4"/>
     <g transform="translate(0 5)">
       <polygon points="15.75 0 133.9 0 118.15 45 0 45" fill="var(--blue-22-background)" stroke="var(--blue)" stroke-width="1.5"/>
       <text x="33.35" y="28.26" font-size="16" fill="var(--text)">Browser</text>
@@ -95,55 +95,55 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <path d="M0 5C0 7.762 25.071 10 56 10C86.929 10 112 7.762 112 5" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
       <text x="17.6" y="35.76" font-size="16" fill="var(--text)">Postgres</text>
     </g>
-    <path d="M66.95 103L210.1 103" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
+    <path d="M66.95 103L210.1 103" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
     <polygon points="217.1 103 209.1 107 209.1 99" fill="var(--border)" class="a m2"/>
     <g class="a m3">
       <rect x="92.15" y="79" width="99.76" height="20" rx="3" fill="var(--background)"/>
       <text x="97.15" y="93.896" font-size="13.6" fill="var(--text)">POST /login</text>
     </g>
-    <path d="M217.1 141L325.3 141" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <path d="M217.1 141L325.3 141" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
     <polygon points="332.3 141 324.3 145 324.3 137" fill="var(--border)" class="a m5"/>
     <g class="a m6">
       <rect x="241.14" y="117" width="67.12" height="20" rx="3" fill="var(--background)"/>
       <text x="246.14" y="131.896" font-size="13.6" fill="var(--text)">forward</text>
     </g>
-    <path d="M332.3 179L457.06 179" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m7"/>
+    <path d="M332.3 179L457.06 179" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m7"/>
     <polygon points="464.06 179 456.06 183 456.06 175" fill="var(--border)" class="a m8"/>
     <g class="a m9">
       <rect x="348.3" y="155" width="99.76" height="20" rx="3" fill="var(--background)"/>
       <text x="353.3" y="169.896" font-size="13.6" fill="var(--text)">get session</text>
     </g>
-    <path d="M464.06 217L339.3 217" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" class="a m10"/>
+    <path d="M464.06 217L339.3 217" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" class="a m10"/>
     <polygon points="332.3 217 340.3 213 340.3 221" fill="var(--border)" class="a m10"/>
     <g class="a m11">
       <rect x="376.86" y="193" width="42.64" height="20" rx="3" fill="var(--background)"/>
       <text x="381.86" y="207.896" font-size="13.6" fill="var(--text)">miss</text>
     </g>
-    <path d="M332.3 255L708.26 255" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m12"/>
+    <path d="M332.3 255L708.26 255" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m12"/>
     <polygon points="715.26 255 707.26 259 707.26 251" fill="var(--border)" class="a m13"/>
     <g class="a m14">
       <rect x="473.9" y="231" width="99.76" height="20" rx="3" fill="var(--background)"/>
       <text x="478.9" y="245.896" font-size="13.6" fill="var(--text)">select user</text>
     </g>
-    <path d="M715.26 293L339.3 293" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" class="a m15"/>
+    <path d="M715.26 293L339.3 293" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" class="a m15"/>
     <polygon points="332.3 293 340.3 289 340.3 297" fill="var(--border)" class="a m15"/>
     <g class="a m16">
       <rect x="506.54" y="269" width="34.48" height="20" rx="3" fill="var(--background)"/>
       <text x="511.54" y="283.896" font-size="13.6" fill="var(--text)">row</text>
     </g>
-    <path d="M332.3 331L575.46 331" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m17"/>
+    <path d="M332.3 331L575.46 331" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m17"/>
     <polygon points="582.46 331 574.46 335 574.46 327" fill="var(--border)" class="a m18"/>
     <g class="a m19">
       <rect x="411.58" y="307" width="91.6" height="20" rx="3" fill="var(--background)"/>
       <text x="416.58" y="321.896" font-size="13.6" fill="var(--text)">sign token</text>
     </g>
-    <path d="M582.46 369L339.3 369" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" class="a m20"/>
+    <path d="M582.46 369L339.3 369" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" class="a m20"/>
     <polygon points="332.3 369 340.3 365 340.3 373" fill="var(--border)" class="a m20"/>
     <g class="a m21">
       <rect x="440.14" y="345" width="34.48" height="20" rx="3" fill="var(--background)"/>
       <text x="445.14" y="359.896" font-size="13.6" fill="var(--text)">jwt</text>
     </g>
-    <path d="M332.3 407L73.95 407" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" class="a m22"/>
+    <path d="M332.3 407L73.95 407" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 4" class="a m22"/>
     <polygon points="66.95 407 74.95 403 74.95 411" fill="var(--border)" class="a m22"/>
     <g class="a m23">
       <rect x="129.35" y="383" width="140.56" height="20" rx="3" fill="var(--background)"/>

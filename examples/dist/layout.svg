@@ -32,7 +32,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-2.4s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="640" height="300" fill="var(--background)"/>
-  <g class="a m9">
+  <g class="a m9" fill="none">
     <g transform="translate(320 150)">
       <g transform="translate(-284 -56)" class="a m1">
         <rect x="0.75" y="0.75" width="154.5" height="110.5" rx="10" fill="var(--surface)" stroke="var(--raised)" stroke-width="1.5"/>
@@ -53,9 +53,9 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
         <text font-family="'Geist'" font-size="12.5" fill="var(--muted)"><tspan x="15.5" y="55.223">Arrows attach to</tspan><tspan x="15.5" y="72.723">edges and follow the</tspan><tspan x="15.5" y="90.223">node when it moves.</tspan></text>
       </g>
     </g>
-    <line x1="198" y1="150" x2="236" y2="150" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
-    <polyline points="-7.204 -3.48 0 0 -7.204 3.48" transform="translate(192 150)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m5"/>
-    <line x1="404" y1="150" x2="467.073" y2="150" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:398px 150px" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
+    <line x1="198" y1="150" x2="236" y2="150" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <polyline points="-7.204 -3.48 0 0 -7.204 3.48" transform="translate(192 150)" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m5"/>
+    <line x1="404" y1="150" x2="467.073" y2="150" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transform-origin:398px 150px" pathLength="1" stroke-dasharray="1 2" class="a m6"/>
     <g style="transform-origin:398px 150px" class="a m8">
       <polyline points="-7.204 -3.48 0 0 -7.204 3.48" transform="translate(398 150)" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m7"/>
     </g>

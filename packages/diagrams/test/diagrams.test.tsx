@@ -388,14 +388,19 @@ describe("sequence", () => {
 
     const cross = heads("cross");
 
-    const arrowPaths = (markup: string) =>
-      markup.match(/<path d="M[^"]*" fill="none" stroke="[^"]*"/g) ?? [];
+    // A path's fill is its own, or else the group it sits in gives it: either way it must be none.
+    const arrowPaths = (markup: string) => {
+      const group = markup.match(/<g transform="translate\(20 20\)"([^>]*)>/)?.[1] ?? "";
+      const paths = markup.match(/<path d="M[^"]*"[^>]*stroke="[^"]*"[^>]*>/g) ?? [];
+
+      return paths.filter(
+        (path) => /fill="none"/.test(path) || (!/fill=/.test(path) && /fill="none"/.test(group)),
+      );
+    };
 
     expect(arrowPaths(heads("none"))).toHaveLength(1);
     expect(arrowPaths(cross)).toHaveLength(2);
-    expect(cross).toMatch(
-      /<path d="M[\d. -]+L[\d. -]+M[\d. -]+L[\d. -]+" fill="none" stroke="#6E6E73"/,
-    );
+    expect(cross).toMatch(/<path d="M[\d. -]+L[\d. -]+M[\d. -]+L[\d. -]+"[^>]* stroke="#6E6E73"/);
   });
 
   test("a reveal record times rows by id, and names only rows that exist", () => {

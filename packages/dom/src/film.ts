@@ -32,6 +32,13 @@ export interface FilmOptions {
    * from snap to snap above the page, dipping and ringing where a button goes down. Nothing is added to the app. Default false.
    */
   readonly cursor?: boolean;
+  /**
+   * Whether the scene loops. Default true. Pass `false` when the script ends on a different state than it began on: the scene plays
+   * once and holds the last state, and `check` reports no `loop-seam`. It shapes only the scene, not the recording, so a cached film keeps its states.
+   */
+  readonly loop?: boolean;
+  /** The moment shown, held still, to viewers who ask for reduced motion: a time in seconds, or false to play the motion for them too. Default 85% of the duration. Not part of the cache, like `loop`. */
+  readonly still?: number | false;
   /** The browser window. Default 1280x720. */
   readonly viewport?: { readonly width: number; readonly height: number };
   /**
@@ -146,6 +153,8 @@ export const film = async <Props = never>(
     cache,
     text,
     ease,
+    loop,
+    still,
     onDiagnostics = warn,
     executablePath,
   } = options;
@@ -281,7 +290,16 @@ export const film = async <Props = never>(
 
     const title = options.title ?? app.title ?? titleFromFile(app.film ?? caller);
 
-    return scene({ size, duration, title }, () => element);
+    return scene(
+      {
+        size,
+        duration,
+        title,
+        ...(loop !== undefined && { loop }),
+        ...(still !== undefined && { still }),
+      },
+      () => element,
+    );
   } finally {
     await app.close();
   }

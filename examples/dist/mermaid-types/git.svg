@@ -113,8 +113,8 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       </g>
       <g transform="translate(330.36 269)" class="a m17">
         <circle r="7" fill="var(--cyan)" stroke="var(--background)" stroke-width="2"/>
-        <line x1="-3" y1="-3" x2="3" y2="3" fill="none" stroke="var(--background)" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="-3" y1="3" x2="3" y2="-3" fill="none" stroke="var(--background)" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="-3" y1="-3" x2="3" y2="3" stroke="var(--background)" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="-3" y1="3" x2="3" y2="-3" stroke="var(--background)" stroke-width="1.5" stroke-linecap="round"/>
         <text x="13" y="3.978" font-size="11.05" fill="var(--muted)">6-d289e22</text>
       </g>
       <g transform="translate(33.5 303)" class="a m18">

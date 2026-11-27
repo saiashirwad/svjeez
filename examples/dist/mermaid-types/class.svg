@@ -54,20 +54,20 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     </clipPath>
   </defs>
   <rect width="537" height="426" fill="var(--background)"/>
-  <g transform="translate(32.375 32)" font-size="13" fill="var(--text)">
-    <path d="M91 148L91 269" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
+  <g transform="translate(32.375 32)" font-size="13" fill="none">
+    <path d="M91 148L91 269" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
     <polygon points="91 148 85 160 97 160" fill="var(--background)" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m2"/>
     <g class="a m3"/>
-    <path d="M129 148L129 154C129 191.82 139.35 215 156.25 215C173.15 215 183.5 232.86 183.5 262L183.5 268" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <path d="M129 148L129 154C129 191.82 139.35 215 156.25 215C173.15 215 183.5 232.86 183.5 262L183.5 268" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
     <polygon points="129 148 123 160 135 160" fill="var(--background)" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m5"/>
     <g class="a m6"/>
-    <path d="M189 110L189 116C189 168.7 176.56 201 156.25 201C135.95 201 123.5 224.56 123.5 263L123.5 269" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
+    <path d="M189 110L189 116C189 168.7 176.56 201 156.25 201C135.95 201 123.5 224.56 123.5 263L123.5 269" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
     <polygon points="189 110 184 118 189 126 194 118" fill="var(--background)" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m2"/>
     <g class="a m7"/>
-    <path d="M243 110L243 268" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <path d="M243 110L243 268" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
     <polygon points="243 110 238 118 243 126 248 118" fill="var(--border)" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="a m5"/>
     <g class="a m8"/>
-    <path d="M324 110L324 116C324 168.7 340.82 201 368.25 201C395.69 201 412.5 236.15 412.5 293.5L412.5 299.5" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 4" class="a m9"/>
+    <path d="M324 110L324 116C324 168.7 340.82 201 368.25 201C395.69 201 412.5 236.15 412.5 293.5L412.5 299.5" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 4" class="a m9"/>
     <g class="a m9"/>
     <g class="a m9"/>
     <g class="a m10">
@@ -75,15 +75,15 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
         <rect width="139" height="148" fill="var(--magenta-6-background)"/>
         <rect width="139" height="48" fill="var(--magenta-22-background)"/>
       </g>
-      <line x1="0" y1="48" x2="139" y2="48" fill="none" stroke="var(--magenta)"/>
-      <line x1="0" y1="118" x2="139" y2="118" fill="none" stroke="var(--magenta)"/>
-      <rect width="139" height="148" rx="6" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
+      <line x1="0" y1="48" x2="139" y2="48" stroke="var(--magenta)"/>
+      <line x1="0" y1="118" x2="139" y2="118" stroke="var(--magenta)"/>
+      <rect width="139" height="148" rx="6" stroke="var(--magenta)" stroke-width="1.5"/>
       <text x="36.35" y="17.978" font-size="11.05" fill="var(--muted)">«abstract»</text>
-      <text x="43.76" y="36.148" font-size="14.3">Animal</text>
-      <text x="11" y="67.68">+String name</text>
-      <text x="11" y="87.68">+int age</text>
-      <text x="11" y="107.68" font-size="13" fill="var(--text)">+count</text>
-      <line x1="11" y1="110.8" x2="57.8" y2="110.8" fill="none" stroke="var(--text)"/>
+      <text x="43.76" y="36.148" font-size="14.3" fill="var(--text)">Animal</text>
+      <text x="11" y="67.68" fill="var(--text)">+String name</text>
+      <text x="11" y="87.68" fill="var(--text)">+int age</text>
+      <text x="11" y="107.68" fill="var(--text)">+count</text>
+      <line x1="11" y1="110.8" x2="57.8" y2="110.8" stroke="var(--text)"/>
       <text x="11" y="137.68" fill="var(--muted)">+speak() String</text>
     </g>
     <g transform="translate(48.5 269)" class="a m11">
@@ -91,35 +91,35 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
         <rect width="85" height="92" fill="var(--magenta-6-background)"/>
         <rect width="85" height="34" fill="var(--magenta-22-background)"/>
       </g>
-      <line x1="0" y1="34" x2="85" y2="34" fill="none" stroke="var(--magenta)"/>
-      <line x1="0" y1="42" x2="85" y2="42" fill="none" stroke="var(--magenta)"/>
-      <rect width="85" height="92" rx="6" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
-      <text x="25.34" y="22.148" font-size="14.3">Duck</text>
-      <text x="11" y="61.68">+swim()</text>
-      <text x="11" y="81.68">+quack()</text>
+      <line x1="0" y1="34" x2="85" y2="34" stroke="var(--magenta)"/>
+      <line x1="0" y1="42" x2="85" y2="42" stroke="var(--magenta)"/>
+      <rect width="85" height="92" rx="6" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="25.34" y="22.148" font-size="14.3" fill="var(--text)">Duck</text>
+      <text x="11" y="61.68" fill="var(--text)">+swim()</text>
+      <text x="11" y="81.68" fill="var(--text)">+quack()</text>
     </g>
     <g transform="translate(173.5 268)" class="a m12">
       <g clip-path="url(#c3)">
         <rect width="139" height="94" fill="var(--magenta-6-background)"/>
         <rect width="139" height="34" fill="var(--magenta-22-background)"/>
       </g>
-      <line x1="0" y1="34" x2="139" y2="34" fill="none" stroke="var(--magenta)"/>
-      <line x1="0" y1="64" x2="139" y2="64" fill="none" stroke="var(--magenta)"/>
-      <rect width="139" height="94" rx="6" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
-      <text x="52.34" y="22.148" font-size="14.3">Fish</text>
-      <text x="11" y="53.68">-int sizeInFeet</text>
-      <text x="11" y="83.68">-canEat()</text>
+      <line x1="0" y1="34" x2="139" y2="34" stroke="var(--magenta)"/>
+      <line x1="0" y1="64" x2="139" y2="64" stroke="var(--magenta)"/>
+      <rect width="139" height="94" rx="6" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="52.34" y="22.148" font-size="14.3" fill="var(--text)">Fish</text>
+      <text x="11" y="53.68" fill="var(--text)">-int sizeInFeet</text>
+      <text x="11" y="83.68" fill="var(--text)">-canEat()</text>
     </g>
     <g transform="translate(179 38)" class="a m13">
       <g clip-path="url(#c4)">
         <rect width="155" height="72" fill="var(--magenta-6-background)"/>
         <rect width="155" height="34" fill="var(--magenta-22-background)"/>
       </g>
-      <line x1="0" y1="34" x2="155" y2="34" fill="none" stroke="var(--magenta)"/>
-      <line x1="0" y1="64" x2="155" y2="64" fill="none" stroke="var(--magenta)"/>
-      <rect width="155" height="72" rx="6" fill="none" stroke="var(--magenta)" stroke-width="1.5"/>
-      <text x="60.34" y="22.148" font-size="14.3">Pond</text>
-      <text x="11" y="53.68" font-size="13">+List&lt;Duck&gt; ducks</text>
+      <line x1="0" y1="34" x2="155" y2="34" stroke="var(--magenta)"/>
+      <line x1="0" y1="64" x2="155" y2="64" stroke="var(--magenta)"/>
+      <rect width="155" height="72" rx="6" stroke="var(--magenta)" stroke-width="1.5"/>
+      <text x="60.34" y="22.148" font-size="14.3" fill="var(--text)">Pond</text>
+      <text x="11" y="53.68" font-size="13" fill="var(--text)">+List&lt;Duck&gt; ducks</text>
     </g>
     <g transform="translate(352.5 299.5)" class="a m14">
       <rect width="120" height="31" rx="4" fill="var(--blue-12-background)" stroke="var(--blue)"/>

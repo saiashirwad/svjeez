@@ -22,14 +22,14 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-2s!important;animation-play-state:paused!important}}
 ]]></style>
   <defs>
-    <g id="u1">
+    <g id="u1" fill="var(--border)">
       <rect x="0.75" y="0.75" width="102.5" height="70.5" rx="7" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>
       <path d="M6.25 0H94.75A6.25 6.25 0 0 1 101 6.25V16H0V6.25A6.25 6.25 0 0 1 6.25 0Z" transform="translate(1.5 1.5)" fill="var(--raised)"/>
       <circle cx="13.5" cy="9.5" r="3" fill="var(--red)"/>
       <circle cx="24.5" cy="9.5" r="3" fill="var(--yellow)"/>
       <circle cx="35.5" cy="9.5" r="3" fill="var(--green)"/>
-      <rect x="14.5" y="28.5" width="60" height="5" rx="2.5" fill="var(--border)"/>
-      <rect x="14.5" y="40.5" width="44" height="5" rx="2.5" fill="var(--border)"/>
+      <rect x="14.5" y="28.5" width="60" height="5" rx="2.5"/>
+      <rect x="14.5" y="40.5" width="44" height="5" rx="2.5"/>
     </g>
   </defs>
   <rect width="640" height="300" fill="var(--background)"/>

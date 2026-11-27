@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { svg } from "svjeez/tools";
+import { check, svg } from "svjeez/tools";
 import { scene, type SceneElement } from "svjeez";
 import {
   compile,
@@ -167,5 +167,23 @@ describe("cursor", () => {
 
     expect(on).toContain("svjeez-cursor-ring");
     expect(off).not.toContain("svjeez-cursor-ring");
+  }, 60_000);
+
+  test("film's loop: false lets the last state differ from the first without a loop-seam", async () => {
+    const script = async ({ page, snap }: FilmContext) => {
+      await snap("start");
+      await page.locator("button").click();
+      await snap("clicked");
+    };
+
+    const options = { viewport: { width: 320, height: 240 }, onDiagnostics: () => {} };
+
+    const seams = async (loop?: boolean) =>
+      check(
+        await film(target(), script, { ...options, ...(loop !== undefined && { loop }) }),
+      ).problems.filter((p) => p.code === "loop-seam");
+
+    expect((await seams()).length).toBeGreaterThan(0);
+    expect(await seams(false)).toEqual([]);
   }, 60_000);
 });

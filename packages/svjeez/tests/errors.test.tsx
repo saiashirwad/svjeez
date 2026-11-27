@@ -56,6 +56,18 @@ describe("SceneError", () => {
     expect(error.message).toStartWith('scene.tsx:7:3: <Shape> "dot" paints nothing');
   });
 
+  test("a scene without a title says so", () => {
+    const error = thrown(() =>
+      // SAFETY: the type requires title; this is the plain-JS mistake under test.
+      scene({ size: [200, 100], duration: 1 } as never, () =>
+        jsxDEV(Group, {}, undefined, false, at(1)),
+      ),
+    );
+
+    expect(error.problem).toBe("scene() needs a title.");
+    expect(error.fix).toContain("title:");
+  });
+
   test("a stroke dash that is not an array is a located error", () => {
     const error = thrown(() =>
       made(() =>

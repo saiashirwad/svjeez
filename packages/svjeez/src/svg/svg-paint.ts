@@ -606,16 +606,29 @@ export const clipUrl = (defs: Defs, clip: Animated<Geometry>, shift: Vec, key: s
   return `url(#${id})`;
 };
 
-/** The id of a <path> in defs that text runs along, drawn `shift` away from the origin. */
+/** The id of a <path> in defs that text runs along, written `shift` away from the origin. */
 export const pathId = (defs: Defs, path: Geometry, shift: Vec, key: string): string =>
   twinned(defs, JSON.stringify(["p", path, shift]), "p", (own) => {
-    const geometry: Geometry = { kind: "path", contours: contoursOf(path), rule: "nonzero" };
+    const [dx, dy] = shift;
+    const toward = ([x, y]: Vec): Vec => [x + dx, y + dy];
+
+    // A <textPath> reads its path in the text's own space and ignores a transform on the path, so the shift is written
+    // into the points.
+    const geometry: Geometry = {
+      kind: "path",
+      contours: contoursOf(path).map((contour) => ({
+        ...contour,
+        start: toward(contour.start),
+        curves: contour.curves.map(([a, b, c]) => [toward(a), toward(b), toward(c)] as const),
+      })),
+      rule: "nonzero",
+    };
 
     const drawn = defs.draw({
       kind: "shape",
       key: `${key}#path`,
       box: outlineBoxOf(geometry),
-      at: shift,
+      at: [0, 0],
       origin: [0, 0],
       layers: [],
       effects: [],
