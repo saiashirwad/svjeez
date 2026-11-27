@@ -12,7 +12,7 @@ import {
 } from "svjeez";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
 import { SceneError, describe as describeScene, check, svg } from "svjeez/tools";
-import { Code, codeLayout, lines, tokens, ts, type CodeProps } from "../src/index.ts";
+import { Code, codeLayout, codeTokens, lines, ts, type CodeProps } from "../src/index.ts";
 import { tomorrow } from "../src/palettes.ts";
 import { fontFixture } from "../../../fixtures/fonts.ts";
 
@@ -216,13 +216,13 @@ describe("<Code> misuse", () => {
   });
 });
 
-describe("<Code by={tokens}>", () => {
+describe("<Code by={codeTokens}>", () => {
   const texts = (built: ReturnType<typeof made>, t: number) =>
     describeScene(built, [t]).frames[0]!.nodes.filter(({ kind }) => kind === "text");
 
   test("draws one text per token, keyed by its text and occurrence, set at its measured column", () => {
     const nodes = texts(
-      made(() => snippet({ key: "code", by: tokens })),
+      made(() => snippet({ key: "code", by: codeTokens })),
       0,
     );
 
@@ -252,14 +252,14 @@ describe("<Code by={tokens}>", () => {
       ).map(({ key }) => key);
 
     expect(keyed({ by: lines })).toEqual(keyed({}));
-    expect(thrown(() => snippet({ by: tokens, keys: ["a", "b", "c"] })).problem).toBe(
+    expect(thrown(() => snippet({ by: codeTokens, keys: ["a", "b", "c"] })).problem).toBe(
       "keys names lines, but this <Code> is split another way.",
     );
   });
 
   test("a morph moves the tokens both sources share, and fades the rest", () => {
     const states = ["const a = 1;", "let total = a + 1;"].map((source) =>
-      snippet({ key: "code", by: tokens, children: source }),
+      snippet({ key: "code", by: codeTokens, children: source }),
     );
 
     const out = made(() => morph.between(states, [span(1, 1)]), 3);
@@ -276,7 +276,7 @@ describe("<Code by={tokens}>", () => {
     expect(x(2.5, "code/const#0")).toBeUndefined();
   });
 
-  test("tokens.across keys by a diff, so dropping a line keeps the next one whole", () => {
+  test("codeTokens.across keys by a diff, so dropping a line keeps the next one whole", () => {
     const [before, after] = ["a = 1;\nb = 2;", "b = 2;"];
 
     const keysOf = (source: string, by: CodeProps["by"]) =>
@@ -285,18 +285,18 @@ describe("<Code by={tokens}>", () => {
         0,
       ).map(({ key }) => key);
 
-    const diffed = tokens.across(before, after);
+    const diffed = codeTokens.across(before, after);
 
-    expect(keysOf(before, diffed)).toEqual(keysOf(before, tokens));
-    expect(keysOf(after, tokens)).toEqual(["code/b#0", "code/=#0", "code/2#0", "code/;#0"]);
+    expect(keysOf(before, diffed)).toEqual(keysOf(before, codeTokens));
+    expect(keysOf(after, codeTokens)).toEqual(["code/b#0", "code/=#0", "code/2#0", "code/;#0"]);
     expect(keysOf(after, diffed)).toEqual(["code/b#0", "code/=#1", "code/2#0", "code/;#1"]);
     expect(thrown(() => snippet({ by: diffed, children: "g();" })).problem).toBe(
-      "This <Code>'s source is not one of the sources given to tokens.across().",
+      "This <Code>'s source is not one of the sources given to codeTokens.across().",
     );
   });
 
-  test("tokens.across pairs a token that moved out of order with its nearest twin", () => {
-    const diffed = tokens.across("f >>= fun key ->", "let key = f in");
+  test("codeTokens.across pairs a token that moved out of order with its nearest twin", () => {
+    const diffed = codeTokens.across("f >>= fun key ->", "let key = f in");
 
     const keys = texts(
       made(() => snippet({ key: "code", by: diffed, children: "let key = f in" })),
@@ -314,7 +314,7 @@ describe("<Code by={tokens}>", () => {
 
   test("typing still types every token in order", () => {
     const { timeline } = describeScene(
-      made(() => snippet({ key: "code", by: tokens, typing: span(0, 1) })),
+      made(() => snippet({ key: "code", by: codeTokens, typing: span(0, 1) })),
       [0],
     );
 
@@ -357,7 +357,7 @@ describe("codeLayout()", () => {
   });
 
   test("the text's box sits inside its cell where <Code> draws it", () => {
-    const built = made(() => snippet({ key: "code", at: [10, 20], lineHeight: 2, by: tokens }));
+    const built = made(() => snippet({ key: "code", at: [10, 20], lineHeight: 2, by: codeTokens }));
 
     const node = describeScene(built, [0]).frames[0]!.nodes.find(
       ({ key }) => key === "code/return#0",

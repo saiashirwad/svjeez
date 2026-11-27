@@ -93,7 +93,7 @@ describe("highlight", () => {
       .map(([name]) => name)
       .toSorted();
 
-    expect(names).toEqual(["Code", "ROLES", "codeLayout", "highlight", "lines", "tokens"]);
+    expect(names).toEqual(["Code", "ROLES", "codeLayout", "codeTokens", "highlight", "lines"]);
   });
 
   test("any other Shiki grammar highlights the same way", () => {

@@ -19,16 +19,16 @@ npm install @svjeez/code @svjeez/fonts svjeez
 - **Children must be one string:** Always wrap multi-line code in a template literal `` {`...`} ``; bare JSX text collapses whitespace onto one line with no error.
 - **Splitting and morph keys (`by`):**
   - `by={lines}` (default): one `<Text key="line-N">` (1-based) per non-blank line. Pass `keys={[...]}` (one entry per line, including blank lines) so inserted/moved lines keep identity across `morph()`.
-  - `by={tokens}`: one `<Text>` per token keyed `text#occurrence`.
-  - `by={tokens.across(a, b, ...)}`: keys tokens by LCS diff across every state the morph visits so shared tokens slide cleanly. Every rendered source must be in the `across(...)` list.
-- **Typing:** `typing={span(start, over)}` steps a character clip across lines. Prefer `by={lines}` with `typing` (cheap CSS); `by={tokens}` + `typing` emits many SMIL clips.
+  - `by={codeTokens}`: one `<Text>` per token keyed `text#occurrence`.
+  - `by={codeTokens.across(a, b, ...)}`: keys tokens by LCS diff across every state the morph visits so shared tokens slide cleanly. Every rendered source must be in the `across(...)` list.
+- **Typing:** `typing={span(start, over)}` steps a character clip across lines. Prefer `by={lines}` with `typing` (cheap CSS); `by={codeTokens}` + `typing` emits many SMIL clips.
 - **Exact highlights with `codeLayout(style, source)`:** Pass the same `{ font, size, lineHeight, tabSize, at }` as `<Code>`. Use `.box(line, from?, to?)`, `.find(text, occurrence?)`, and `.point(line, col)` (0-based, after tab expansion) to place highlights, cursors, or arrows.
 
 ## API map
 
 | Entry | Exports |
 |---|---|
-| `@svjeez/code` | `<Code lang font size palette lineHeight? tabSize? by? keys? typing? ...Common>`, `lines`, `tokens` (`.across(...sources)`), `codeLayout(style, source)`, `highlight(source, lang, { tabSize? })`, `ROLES` |
+| `@svjeez/code` | `<Code lang font size palette lineHeight? tabSize? by? keys? typing? ...Common>`, `lines`, `codeTokens` (`.across(...sources)`), `codeLayout(style, source)`, `highlight(source, lang, { tabSize? })`, `ROLES` |
 | `@svjeez/code` grammars | `bash`, `css`, `diff`, `go`, `html`, `js`, `json`, `jsx`, `md`, `ocaml`, `python`, `rust`, `sql`, `ts`, `tsx`, `yaml` |
 | `@svjeez/code/palettes` | `palette(name, { light, dark })`, `tomorrow`, `solarized`, `gruvbox`, `rosePine` |
 
@@ -76,7 +76,7 @@ export default scene(
 
 - `Type 'string' is not assignable to type 'Lang'` → Import the grammar object (`import { ts } from "@svjeez/code"`), not `"ts"`.
 - Multi-line code renders on one line silently → Wrap the source in a JS template literal `` {`...`} `` instead of bare JSX text.
-- `check --browser` reports `text-overflow` on a partial-line highlight shape under whole-line `<Code>` → Highlight the full line with `codeLayout(style, src).box(line)`, or switch to `by={tokens}`.
+- `check --browser` reports `text-overflow` on a partial-line highlight shape under whole-line `<Code>` → Highlight the full line with `codeLayout(style, src).box(line)`, or switch to `by={codeTokens}`.
 - `check --browser` reports `text-overflow` past the right canvas edge → `<Code>` does not wrap; widen the canvas, shrink `size`, or shorten lines.
-- `This <Code>'s source is not one of the sources given to tokens.across()` → Pass every morph state's exact source string to `tokens.across(...)`.
+- `This <Code>'s source is not one of the sources given to codeTokens.across()` → Pass every morph state's exact source string to `codeTokens.across(...)`.
 - `keys names N lines, but the code has M` → Provide one key per line, including blank lines, and use `keys` only with `by={lines}`.

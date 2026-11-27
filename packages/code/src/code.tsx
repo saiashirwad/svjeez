@@ -13,7 +13,7 @@ export interface CodeProps extends Common {
   readonly palette: Palette;
   readonly lineHeight?: number;
   readonly tabSize?: number;
-  /** How the code is cut into nodes and keyed: `lines` (the default), `tokens`, `tokens.across(a, b)` or your own split. */
+  /** How the code is cut into nodes and keyed: `lines` (the default), `codeTokens`, `codeTokens.across(a, b)` or your own split. */
   readonly by?: Split;
   /** Names the lines instead of `line-1`, `line-2`…, one per line, empty ones included. Only with `by={lines}`. */
   readonly keys?: readonly string[];
