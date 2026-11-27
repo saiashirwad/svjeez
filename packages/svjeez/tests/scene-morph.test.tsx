@@ -384,6 +384,50 @@ describe("morph", () => {
     );
   });
 
+  test("each makes every changing sibling move for that long, spread over the span without a stagger", () => {
+    const bars = (h: number) =>
+      ["a", "b", "c"].map((key) => <Shape fill="#000000" key={key} geometry={rect(5, h)} />);
+
+    const model = made(() => morph(bars(10), bars(20), span(1, 1), { each: 0.4 }));
+    const times = (key: string) => lane(shape(model, key).geometry).keys.map((k) => k.t);
+
+    for (const [key, start] of [
+      ["a", 1],
+      ["b", 1.3],
+      ["c", 1.6],
+    ] as const) {
+      const [, from, to] = times(key);
+
+      expect(from).toBeCloseTo(start, 5);
+      expect(to).toBeCloseTo(start + 0.4, 5);
+    }
+  });
+
+  test("each starts at the stagger delay when both are given", () => {
+    const bars = (h: number) =>
+      ["a", "b", "c"].map((key) => <Shape fill="#000000" key={key} geometry={rect(5, h)} />);
+
+    const model = made(() => morph(bars(10), bars(20), span(1, 1), { stagger: 0.25, each: 0.4 }));
+    const times = (key: string) => lane(shape(model, key).geometry).keys.map((k) => k.t);
+
+    expect(times("a").slice(1, 3)).toEqual([1, 1.4]);
+    expect(times("c")[1]).toBeCloseTo(1.5, 5);
+    expect(times("c")[2]).toBeCloseTo(1.9, 5);
+  });
+
+  test("each throws when longer than the span, past it with the stagger, or not above 0", () => {
+    const bars = (h: number) =>
+      ["a", "b", "c"].map((key) => <Shape fill="#000000" key={key} geometry={rect(5, h)} />);
+
+    const build = (options: { stagger?: number; each: number }) => () =>
+      made(() => morph(bars(10), bars(20), span(1, 1), options));
+
+    expect(build({ each: 1.5 })).toThrow("longer than its");
+    expect(build({ stagger: 0.4, each: 0.5 })).toThrow("ends after the");
+
+    for (const each of [0, -1, Number.NaN]) expect(build({ each })).toThrow("more than 0 seconds");
+  });
+
   test("a track the states agree on is kept; one that differs between states throws, naming the key", () => {
     const spin = track(0).to(90, span(0, 1));
 

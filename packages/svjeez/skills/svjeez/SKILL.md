@@ -58,13 +58,13 @@ Set `"jsx": "react-jsx"`, `"jsxImportSource": "svjeez"`, and `"strict": true` in
 ## Model
 
 1. Every node has a measured bounding box (including stroke and text).
-2. `at` places `anchor` (`"top-left"` by default; text supports `"baseline"`); `offset` moves the node's own `[0, 0]` instead (never pass both). `rotate`, `scale`, and `skew` pivot around `origin`.
+2. `at` places `anchor` (`"top-left"` by default; text supports `"baseline"`); `offset` moves the node's own `[0, 0]` instead (never pass both). `at` places the node's box, so a `<Code>` whose split drops the first column, or a group with a caret at x=-6, shifts; use `offset` there. `rotate`, `scale`, and `skew` pivot around `origin`.
 3. Nothing is inherited: every shape needs `fill` or `stroke`, and every `<Text>` needs `font`, `size`, and `fill`.
 4. Tracks are immutable (`to`, `set`, `loop`, `repeat`, `rewind`, `map`, `with`).
 5. `span(start, over)` marks time on a clock (`.next`, `.shift`, `.chain`, `.cascade`, `.distribute`, `.pace`); `<Sequence>` starts a child clock.
 6. Layout containers (`<Stack>`, `<Grid>`, `<Center>`, `<Align>`) place their children; don't set `at` on placed children.
 7. `ref()` creates a handle for anchors (`.left`, `.right`, `.center`, `.part`, `.side`) used by `<Arrow>`, `<Align>`, and tracks.
-8. `morph` / `morph.between` transitions keyed nodes across states.
+8. `morph` / `morph.between` transitions keyed nodes across states. `stagger` delays each changing part; `each` sets how long each part moves.
 
 ## API
 
@@ -85,7 +85,7 @@ npx svjeez check scene.tsx [--at 0,1.5] [--browser] [--json]
 npx svjeez frames scene.tsx --sheet --out frames/ [--color-scheme light|dark]
 npx svjeez svg scene.tsx --out scene.svg [--json]
 npx svjeez dev scene.tsx
-npx svjeez video scene.tsx --out scene.mp4
+npx svjeez video scene.tsx --out scene.mp4 [--preview]   # --preview: fps 12, scale 1, quality low; --fps/--scale/--quality win
 npx svjeez skill [--install [--dir .claude/skills]]
 npx svjeez version
 ```

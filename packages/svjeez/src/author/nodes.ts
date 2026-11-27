@@ -27,7 +27,7 @@ export interface Common {
    */
   readonly id?: string;
   readonly ref?: Ref;
-  /** Puts the anchor point of this node's box here (the top-left unless `anchor` says otherwise). Not with `offset`. */
+  /** Puts the anchor point of this node's box here (the top-left unless `anchor` says otherwise). Not with `offset`. It places the box (the bounds), so a <Code> whose split drops its first column, or a group holding a caret at x=-6, shifts: use `offset` to place the node's own [0, 0]. */
   readonly at?: Anim<Vec> | Anchor;
   /**
    * Moves this node's own coordinate frame by this vector: what it draws around [0, 0] lands at the offset. A circle

@@ -37,7 +37,7 @@ const USAGE = `usage:
   svjeez dev <file> [--port 5173] [--out file.svg] [params]
   svjeez frames <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
   svjeez check <file> [--json | --format json|text] [--fail-on error|warning] [--browser] [--at 0,1.5] [--times 0,0.5,1] [--color-scheme system|light|dark] [params]
-  svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
+  svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--scale 2] [--preview] [--color-scheme system|light|dark] [--background css] [params]
   svjeez skill [--install [--dir .claude/skills]]
   svjeez version
 
@@ -51,6 +51,7 @@ dev serves a preview with a scrubber and a timeline, and rebuilds it when a file
 svg --json prints { svg, warnings, lanes }: the SVG, its warnings and every animated lane, in scene seconds.
 video encodes --loops loops of the scene, through @svjeez/video. Its format follows --out's extension, else mp4.
 --background transparent keeps alpha, in webm only.
+video --preview is a fast, small render for review loops: fps 12, scale 1, quality low. --fps, --scale and --quality still win over it.
 On Node, .tsx files load through tsx when it is installed.
 check reads the scene model and emits its SVG once, with no browser, and prints one problem per line,
 file:line:column  code  severity: message, with what to change on a fix: line below, then the count and the animated
@@ -428,6 +429,7 @@ const videoCommand = async (args: string[]): Promise<void> => {
       loops: { type: "string" },
       quality: { type: "string" },
       scale: { type: "string" },
+      preview: { type: "boolean" },
       "color-scheme": { type: "string" },
       background: { type: "string" },
       ...PARAM_OPTIONS,
@@ -450,10 +452,10 @@ const videoCommand = async (args: string[]): Promise<void> => {
 
   const video = await encode(svg, {
     format,
-    fps: number("fps", values.fps),
+    fps: number("fps", values.fps) ?? (values.preview ? 12 : undefined),
     loops: number("loops", values.loops),
-    quality: values.quality,
-    scale: number("scale", values.scale),
+    quality: values.quality ?? (values.preview ? "low" : undefined),
+    scale: number("scale", values.scale) ?? (values.preview ? 1 : undefined),
     colorScheme,
     background: values.background,
   });

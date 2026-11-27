@@ -45,6 +45,11 @@ export interface MorphOptions {
   readonly enter?: LayerValues;
   readonly exit?: LayerValues;
   readonly stagger?: Seconds | ((index: number, count: number) => Seconds);
+  /**
+   * Every changing part moves for this many seconds, starting at its stagger delay. With no
+   * stagger, the starts spread evenly over the span so the last part ends at the span's end.
+   */
+  readonly each?: Seconds;
 }
 
 export interface MorphElement {
@@ -82,6 +87,11 @@ const between = (
 
   if (!(stagger instanceof Function) && !(stagger >= 0 && Number.isFinite(stagger)))
     throw new SceneError(`morph() needs a stagger of 0 or more seconds, got ${stagger}.`);
+
+  const { each } = options;
+
+  if (each !== undefined && !(each > 0 && Number.isFinite(each)))
+    throw new SceneError(`morph() needs an each of more than 0 seconds, got ${each}.`);
 
   return { type: "morph", states: states.map(flat), spans, options };
 };
@@ -990,7 +1000,7 @@ const merge = (
   options: MorphOptions = {},
 ): SceneNode[] => {
   const top = entries(names, travelling(states, names));
-  const { stagger = 0 } = options;
+  const { stagger = 0, each } = options;
 
   const delay = stagger instanceof Function ? stagger : (index: number) => index * stagger;
   const windows = new Map<Entry, Window[]>();
@@ -999,8 +1009,20 @@ const merge = (
   spans.forEach(({ start, over }, i) => {
     const moving = units(top, i);
 
+    if (each !== undefined && each > over + EPSILON)
+      throw new SceneError(
+        `morph() transition ${i + 1} has each of ${num(each)}s, longer than its ${num(over)}s span.`,
+      );
+
+    const spread = each !== undefined && options.stagger === undefined;
+
     const waits = moving.map((_, r) => {
-      const wait = delay(r, moving.length);
+      const wait =
+        spread && each !== undefined
+          ? moving.length > 1
+            ? (r * (over - each)) / (moving.length - 1)
+            : 0
+          : delay(r, moving.length);
 
       if (!(wait >= 0 && Number.isFinite(wait)))
         throw new SceneError(
@@ -1011,9 +1033,14 @@ const merge = (
     });
 
     const latest = Math.max(0, ...waits);
-    const length = over - latest;
+    const length = each ?? over - latest;
 
-    if (moving.length > 1 && !(length > EPSILON))
+    if (each !== undefined && latest + each > over + EPSILON)
+      throw new SceneError(
+        `morph()'s stagger delays the last of the ${moving.length} things that change in transition ${i + 1} by ${num(latest)}s, and each of ${num(each)}s then ends after the ${num(over)}s span. Give it a longer span or a shorter stagger or each.`,
+      );
+
+    if (each === undefined && moving.length > 1 && !(length > EPSILON))
       throw new SceneError(
         `morph()'s stagger delays the last of the ${moving.length} things that change in transition ${i + 1} by ${num(latest)}s, which takes the whole ${num(over)}s span. Give it a longer span or a shorter stagger.`,
       );
@@ -1027,7 +1054,9 @@ const merge = (
       const wait = waits[rank.get(entry) ?? 0] ?? 0;
 
       own.push(
-        latest > 0 && moving.length > 1 ? { start: start + wait, over: length } : { start, over },
+        each !== undefined || (latest > 0 && moving.length > 1)
+          ? { start: start + wait, over: length }
+          : { start, over },
       );
       windows.set(entry, own);
     }
