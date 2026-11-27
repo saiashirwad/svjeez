@@ -2,7 +2,7 @@
  * Claude Pelican 1, the launch film: one pelican riding round a small world, a new medium each chapter. Each shot lives
  * in `shots/` and plays on its own clock; `Shot` crossfades them.
  */
-import { Group, Series, durationOf, scene } from "svjeez";
+import { Group, Series, durationOf, ease, exit, scene, span } from "svjeez";
 import { FADE, H, Shot, W } from "./kit";
 import { BLUEPRINT, Blueprint } from "./shots/blueprint";
 import { KRAFT, Kraft } from "./shots/kraft";
@@ -31,7 +31,10 @@ const film = (
       <Kraft />
     </Shot>
     <Shot length={LACE}>
-      <Lace />
+      {/* Lace fades out before Watercolour fades in: fading the rainy painting in over the textured doily rastered every doily filter again each frame (41 fps in svjeez perf). */}
+      <Group motion={exit(span(LACE - 2 * FADE, FADE), { curve: ease.inOut })}>
+        <Lace />
+      </Group>
     </Shot>
     <Shot length={WATERCOLOUR}>
       <Watercolour />
