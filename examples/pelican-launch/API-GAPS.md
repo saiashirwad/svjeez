@@ -42,3 +42,17 @@ Missing API:
 - **`<Text anchor="baseline-center">`** is rejected (only `baseline-left`, `baseline`, `baseline-right`).
 - **`typed()`** takes one style and one line: coloured code needs `<Code typing>`, and streamed multi-line text is one `<Text>` per line.
 - **Video can't render `<Shader>`.** Out of scope here (the film is SVG only).
+
+## Round 2: composable chapters (Source, Theory, Cartography, odometer, shared horizons)
+
+Fixed in this branch: `<Series share>` (morph across shots, in scene space), output that scales with what's on screen (hidden and looping derived lanes), a static `clip` sizing layout, `numeral({ prefix, suffix })`, `Look` paints taking tracks (rig), rig `joints(phase)` for arrows, and in @svjeez/geo: canvas culling with named pieces, `draw` on routes, `earth.ride()`.
+
+Still open:
+
+- **`typed` and `morph` don't combine.** `morph(<Code typing={…}>a</Code>, <Code>b</Code>, …)` fails ("can't blend the clip of <Text>"), so Source hands a typed listing off to a token morph at the same pixels.
+- **`share` refuses per-shot animation on the keyed node.** A `draw` on the horizon in one shot is an error, so the blueprint's drawn arcs stay unkeyed decoration.
+- **Tex parts inside a morph are nested.** `ref().part("thigh")` fails; it's `part("eq/thigh")`. And a `\cssId{c}` collides with the glyph key of the `c` in `\cos` with an unhelpful error.
+- **No public way to read an `Anim<number>` at a time.** `valueAt` rejects derived tracks, so `earth.ride` takes a span and an ease instead of a progress track.
+- **No scrolling-window chart.** The odometer's cadence sparkline is a long polyline slid under a clip.
+- **Video can't render `<Shader>`.** Out of scope here (the film is SVG only).
+
