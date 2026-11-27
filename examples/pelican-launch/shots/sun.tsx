@@ -379,9 +379,12 @@ const Prominence = (loop: Loop): SceneElement => {
   );
 };
 
-/** Everything fixed to the photosphere, turning a few degrees about the sun's centre over the shot. */
+/**
+ * Everything fixed to the photosphere. It holds still: turning it would re-filter the whole textured surface and the
+ * prominences every frame, and the rider moving along the limb already carries the motion.
+ */
 const Turning = (): SceneElement => (
-  <Group rotate={track(0).to(-2.6, span(0, SUN), ease.linear)} origin="own">
+  <Group>
     <Surface />
     <Prominence from={-86.8} to={-81.4} height={120} seed={3} strands={16} />
     <Prominence from={-104.6} to={-101.6} height={62} seed={8} strands={10} />

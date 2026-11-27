@@ -4,7 +4,6 @@ import {
   alpha,
   arc,
   circle,
-  ease,
   ellipse,
   emboss,
   line,
@@ -16,10 +15,9 @@ import {
   radial,
   rect,
   rotated,
+  none,
   shadow,
   subtract,
-  span,
-  track,
   type Color,
   type Geometry,
   type Paint,
@@ -242,22 +240,67 @@ const SIZE = 1.24;
 const GAP = 112;
 const FLOOR = 698;
 
+/** Raised thread on the static doily: lit from the upper left, casting a soft shadow onto the velvet. */
 const raised = [
   emboss({ light: { azimuth: 235, elevation: 38 }, depth: 2.2, radius: 0.9, specular: 0.35 }),
   shadow({ color: "#000000", offset: [2.5, 4], blur: 3, opacity: 0.85 }),
 ];
 
-const Pair = (): SceneElement => (
-  <Group>
-    <Group offset={[W / 2 - GAP, FLOOR]} scale={SIZE} origin="own" effects={raised}>
-      <Pelican look={look} />
-    </Group>
-    {/* Lit outside the flip: emboss inside a mirrored frame lights from the wrong side. */}
-    <Group effects={raised}>
-      <Group offset={[W / 2 + GAP, FLOOR]} scale={[-SIZE, SIZE]} origin="own">
+/**
+ * The birds move, so a live emboss would re-light them every frame. Their relief is faked instead: a soft dark copy
+ * offset down-right reads as the thread's shadow on the velvet, a pale copy offset up-left as its lit edge.
+ */
+const cast: Look = {
+  line: "#000000",
+  width: look.width * 1.6,
+  body: "#000000",
+  wing: "#000000",
+  primaries: "#000000",
+  beak: "#000000",
+  pouch: "#000000",
+  leg: "#000000",
+  frame: "#000000",
+  tyre: "#000000",
+  detail: false,
+  far: 1,
+};
+
+const lit: Look = {
+  ...cast,
+  line: "#FFF6E2",
+  body: none,
+  wing: none,
+  primaries: none,
+  beak: none,
+  pouch: none,
+  leg: "#FFF6E2",
+  frame: "#FFF6E2",
+  tyre: "#FFF6E2",
+  width: look.width * 0.9,
+};
+
+const Bird = ({ at, flip }: { readonly at: Vec; readonly flip: boolean }): SceneElement => {
+  const scale: Vec = [flip ? -SIZE : SIZE, SIZE];
+
+  return (
+    <Group>
+      <Group offset={[at[0] + 2.4, at[1] + 3.6]} scale={scale} origin="own" opacity={0.75}>
+        <Pelican look={cast} />
+      </Group>
+      <Group offset={[at[0] - 0.7, at[1] - 0.9]} scale={scale} origin="own" opacity={0.45}>
+        <Pelican look={lit} />
+      </Group>
+      <Group offset={at} scale={scale} origin="own">
         <Pelican look={look} />
       </Group>
     </Group>
+  );
+};
+
+const Pair = (): SceneElement => (
+  <Group>
+    <Bird at={[W / 2 - GAP, FLOOR]} flip={false} />
+    <Bird at={[W / 2 + GAP, FLOOR]} flip />
     {/* The cord they ride on, with a picot at each end. */}
     <Shape
       geometry={line([W / 2 - 230, FLOOR + 1.6], [W / 2 + 230, FLOOR + 1.6])}
@@ -325,12 +368,10 @@ const Velvet = (): SceneElement => (
   </Group>
 );
 
-const push = track(1).to(1.04, span(0, LACE), ease.linear);
-
 export const Lace = (): SceneElement => (
   <Group>
     <Velvet />
-    <Group scale={push} origin={{ frame: [W / 2, 470] }}>
+    <Group>
       <Group effects={raised}>
         <Doily />
       </Group>

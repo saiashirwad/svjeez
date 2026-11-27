@@ -289,7 +289,7 @@ const Rider = (): SceneElement => {
         fill={alpha("#2F4A24", 0.4)}
         effects={[blur(6)]}
       />
-      <Group blend="multiply" scale={s} origin="own" effects={wobble(0.5, 6)}>
+      <Group blend="multiply" scale={s} origin="own">
         <Pelican look={watercolor} />
       </Group>
     </Group>
@@ -334,13 +334,12 @@ export const Watercolour = (): SceneElement => (
     <Shape geometry={rect(W, H)} fill={paper} />
     <Sky />
     <Reserve />
-    <Rain w={190} h={170} count={9} tone="#7389A0" width={1} period={0.5} opacity={0.5} />
     <Hill />
+    <Granulation />
     <Ripples />
     <Rider />
     <Rain w={230} h={210} count={12} tone="#6F849A" width={1.6} period={0.45} opacity={0.6} />
     <Margin />
-    <Granulation />
     <Chapter numeral="VII" medium="Watercolour" fill={warmGrey} length={WATERCOLOUR} />
     <Caption when={[1.4, 4.2]} fill="#5E564B">
       Some days, it rains.
