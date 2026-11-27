@@ -30,20 +30,20 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-7.5s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="980" height="278" fill="var(--background)"/>
-  <g transform="translate(32 32)">
+  <g transform="translate(32 32)" font-size="13" fill="var(--text)">
     <g class="a m1">
       <rect width="220" height="214" rx="8" fill="var(--muted-14-background)"/>
       <text x="12" y="22.68" font-size="13" fill="var(--text)">Todo</text>
       <text x="201.37" y="21.978" font-size="11.05" fill="var(--muted)">2</text>
     </g>
-    <g transform="translate(8 36)" class="a m2" font-size="13" fill="var(--text)">
+    <g transform="translate(8 36)" class="a m2">
       <rect width="204" height="81" rx="6" fill="var(--background)" stroke="var(--border)"/>
       <rect x="2" y="6" width="3" height="69" rx="1.5" fill="var(--muted-55-background)"/>
       <text x="10" y="24.68">Write the launch blog</text>
       <text x="10" y="44.68">post</text>
       <text x="174.11" y="66.478" font-size="11.05" fill="var(--muted)">mia</text>
     </g>
-    <g transform="translate(8 125)" class="a m3" font-size="13" fill="var(--text)">
+    <g transform="translate(8 125)" class="a m3">
       <rect width="204" height="81" rx="6" fill="var(--background)" stroke="var(--border)"/>
       <rect x="2" y="6" width="3" height="69" rx="1.5" fill="var(--orange)"/>
       <text x="10" y="24.68">Checkout fails on</text>

@@ -116,7 +116,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <text y="18.09" font-weight="600" font-size="18" fill="var(--text)">Time to first review</text>
       <text y="39.065" font-size="13" fill="var(--muted)">Median hours, by week</text>
     </g>
-    <g transform="translate(84 196)">
+    <g transform="translate(84 196)" fill="var(--orange)">
       <g class="a m4" font-size="12" fill="var(--muted)">
         <path d="M0 290L380 290M0 217.5L380 217.5M0 145L380 145M0 72.5L380 72.5M0 0L380 0" fill="none" stroke="var(--border)" opacity="0.25"/>
         <path d="M-4 290L4 290M-4 217.5L4 217.5M-4 145L4 145M-4 72.5L4 72.5M-4 0L4 0" fill="none" stroke="var(--border)"/>
@@ -133,12 +133,12 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
         <text x="274.2" y="309.24">May</text>
         <text x="337.533" y="309.24">Jun</text>
       </g>
-      <path d="M3 0H17.167A3 3 0 0 1 20.167 3V152.25H0V3A3 3 0 0 1 3 0Z" transform="translate(10.5 137.75)" fill="var(--orange)" style="transform-origin:20.583px 290px" class="a m5"/>
-      <path d="M3 0H17.167A3 3 0 0 1 20.167 3V174H0V3A3 3 0 0 1 3 0Z" transform="translate(73.833 116)" fill="var(--orange)" style="transform-origin:83.917px 290px" class="a m6"/>
-      <path d="M3 0H17.167A3 3 0 0 1 20.167 3V184.875H0V3A3 3 0 0 1 3 0Z" transform="translate(137.167 105.125)" fill="var(--orange)" style="transform-origin:147.25px 290px" class="a m7"/>
-      <path d="M3 0H17.167A3 3 0 0 1 20.167 3V206.625H0V3A3 3 0 0 1 3 0Z" transform="translate(200.5 83.375)" fill="var(--orange)" style="transform-origin:210.583px 290px" class="a m8"/>
-      <path d="M3 0H17.167A3 3 0 0 1 20.167 3V228.375H0V3A3 3 0 0 1 3 0Z" transform="translate(263.833 61.625)" fill="var(--orange)" style="transform-origin:273.917px 290px" class="a m9"/>
-      <path d="M3 0H17.167A3 3 0 0 1 20.167 3V253.75H0V3A3 3 0 0 1 3 0Z" transform="translate(327.167 36.25)" fill="var(--orange)" style="transform-origin:337.25px 290px" class="a m10"/>
+      <path d="M3 0H17.167A3 3 0 0 1 20.167 3V152.25H0V3A3 3 0 0 1 3 0Z" transform="translate(10.5 137.75)" style="transform-origin:20.583px 290px" class="a m5"/>
+      <path d="M3 0H17.167A3 3 0 0 1 20.167 3V174H0V3A3 3 0 0 1 3 0Z" transform="translate(73.833 116)" style="transform-origin:83.917px 290px" class="a m6"/>
+      <path d="M3 0H17.167A3 3 0 0 1 20.167 3V184.875H0V3A3 3 0 0 1 3 0Z" transform="translate(137.167 105.125)" style="transform-origin:147.25px 290px" class="a m7"/>
+      <path d="M3 0H17.167A3 3 0 0 1 20.167 3V206.625H0V3A3 3 0 0 1 3 0Z" transform="translate(200.5 83.375)" style="transform-origin:210.583px 290px" class="a m8"/>
+      <path d="M3 0H17.167A3 3 0 0 1 20.167 3V228.375H0V3A3 3 0 0 1 3 0Z" transform="translate(263.833 61.625)" style="transform-origin:273.917px 290px" class="a m9"/>
+      <path d="M3 0H17.167A3 3 0 0 1 20.167 3V253.75H0V3A3 3 0 0 1 3 0Z" transform="translate(327.167 36.25)" style="transform-origin:337.25px 290px" class="a m10"/>
       <path d="M3 0H17.167A3 3 0 0 1 20.167 3V112.375H0V3A3 3 0 0 1 3 0Z" transform="translate(32.667 177.625)" fill="var(--blue)" style="transform-origin:42.75px 290px" class="a m11"/>
       <path d="M3 0H17.167A3 3 0 0 1 20.167 3V137.75H0V3A3 3 0 0 1 3 0Z" transform="translate(96 152.25)" fill="var(--blue)" style="transform-origin:106.083px 290px" class="a m12"/>
       <path d="M3 0H17.167A3 3 0 0 1 20.167 3V159.5H0V3A3 3 0 0 1 3 0Z" transform="translate(159.333 130.5)" fill="var(--blue)" style="transform-origin:169.417px 290px" class="a m13"/>
@@ -146,8 +146,8 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <path d="M3 0H17.167A3 3 0 0 1 20.167 3V232H0V3A3 3 0 0 1 3 0Z" transform="translate(286 58)" fill="var(--blue)" style="transform-origin:296.083px 290px" class="a m15"/>
       <path d="M3 0H17.167A3 3 0 0 1 20.167 3V261H0V3A3 3 0 0 1 3 0Z" transform="translate(349.333 29)" fill="var(--blue)" style="transform-origin:359.417px 290px" class="a m16"/>
     </g>
-    <g transform="translate(568 196)">
-      <g class="a m17" font-size="12" fill="var(--muted)">
+    <g transform="translate(568 196)" font-size="12" fill="var(--magenta)">
+      <g class="a m17" fill="var(--muted)">
         <path d="M0 290L300 290M0 193.333L300 193.333M0 96.667L300 96.667M0 0L300 0M0 0L0 290M27.273 0L27.273 290M54.545 0L54.545 290M81.818 0L81.818 290M109.091 0L109.091 290M136.364 0L136.364 290M163.636 0L163.636 290M190.909 0L190.909 290M218.182 0L218.182 290M245.455 0L245.455 290M272.727 0L272.727 290M300 0L300 290" fill="none" stroke="var(--border)" opacity="0.25"/>
         <path d="M-4 290L4 290M-4 193.333L4 193.333M-4 96.667L4 96.667M-4 0L4 0M0 286L0 294M27.273 286L27.273 294M54.545 286L54.545 294M81.818 286L81.818 294M109.091 286L109.091 294M136.364 286L136.364 294M163.636 286L163.636 294M190.909 286L190.909 294M218.182 286L218.182 294M245.455 286L245.455 294M272.727 286L272.727 294M300 286L300 294" fill="none" stroke="var(--border)"/>
         <path d="M0 0L0 290L300 290" fill="none" stroke="var(--border)" stroke-width="1.5"/>
@@ -174,19 +174,19 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
         </g>
       </g>
       <path d="M0 38.7C9.1 29 18.2 19.3 27.3 19.3C36.4 19.3 45.5 48.3 54.5 48.3C63.6 48.3 72.7 35.4 81.8 29C90.9 22.6 100 9.7 109.1 9.7C118.2 9.7 127.3 30.6 136.4 38.7C145.5 46.7 154.5 45.1 163.6 58C172.7 70.9 181.8 124.1 190.9 145C200 165.9 209.1 174 218.2 183.7C227.3 193.3 236.4 198.2 245.5 203C254.5 207.8 263.6 209.4 272.7 212.7L300 222.3" fill="none" stroke="var(--magenta)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m20"/>
-      <circle cy="38.667" r="3.5" fill="var(--magenta)" class="a m21 fb"/>
-      <circle cx="27.273" cy="19.333" r="3.5" fill="var(--magenta)" class="a m22 fb"/>
-      <circle cx="54.545" cy="48.333" r="3.5" fill="var(--magenta)" class="a m23 fb"/>
-      <circle cx="81.818" cy="29" r="3.5" fill="var(--magenta)" class="a m24 fb"/>
-      <circle cx="109.091" cy="9.667" r="3.5" fill="var(--magenta)" class="a m25 fb"/>
-      <circle cx="136.364" cy="38.667" r="3.5" fill="var(--magenta)" class="a m26 fb"/>
-      <circle cx="163.636" cy="58" r="3.5" fill="var(--magenta)" class="a m27 fb"/>
-      <circle cx="190.909" cy="145" r="3.5" fill="var(--magenta)" class="a m28 fb"/>
-      <circle cx="218.182" cy="183.667" r="3.5" fill="var(--magenta)" class="a m29 fb"/>
-      <circle cx="245.455" cy="203" r="3.5" fill="var(--magenta)" class="a m30 fb"/>
-      <circle cx="272.727" cy="212.667" r="3.5" fill="var(--magenta)" class="a m31 fb"/>
-      <circle cx="300" cy="222.333" r="3.5" fill="var(--magenta)" class="a m32 fb"/>
-      <text y="12.24" font-size="12" fill="var(--magenta)" class="a m33">median</text>
+      <circle cy="38.667" r="3.5" class="a m21 fb"/>
+      <circle cx="27.273" cy="19.333" r="3.5" class="a m22 fb"/>
+      <circle cx="54.545" cy="48.333" r="3.5" class="a m23 fb"/>
+      <circle cx="81.818" cy="29" r="3.5" class="a m24 fb"/>
+      <circle cx="109.091" cy="9.667" r="3.5" class="a m25 fb"/>
+      <circle cx="136.364" cy="38.667" r="3.5" class="a m26 fb"/>
+      <circle cx="163.636" cy="58" r="3.5" class="a m27 fb"/>
+      <circle cx="190.909" cy="145" r="3.5" class="a m28 fb"/>
+      <circle cx="218.182" cy="183.667" r="3.5" class="a m29 fb"/>
+      <circle cx="245.455" cy="203" r="3.5" class="a m30 fb"/>
+      <circle cx="272.727" cy="212.667" r="3.5" class="a m31 fb"/>
+      <circle cx="300" cy="222.333" r="3.5" class="a m32 fb"/>
+      <text y="12.24" class="a m33">median</text>
       <g class="a m34">
         <line x1="190.909" y1="0" x2="190.909" y2="290" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="4 4"/>
         <text x="200.909" y="12.615" font-family="'Geist'" font-size="13" fill="var(--text)">Review bot ships</text>

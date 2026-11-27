@@ -28,7 +28,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 ]]></style>
   <rect width="960" height="540" fill="var(--background)"/>
   <g transform="translate(480 270)" class="a m8">
-    <g transform="translate(-584.535 -151.5)" style="transform-origin:0 0;scale:0.77" fill="var(--text)">
+    <g transform="translate(-584.535 -151.5)" style="transform-origin:0 0;scale:0.77" font-size="11.9" fill="none">
       <g transform="translate(62 112.5)">
         <rect width="67.2" height="39" rx="8" fill="var(--blue-22-muted-8-background)" stroke="var(--blue)" stroke-width="1.5"/>
         <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Idle</text>
@@ -62,61 +62,61 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
         <rect width="142.8" height="39" rx="8" fill="var(--orange-22-muted-16-background)" stroke="var(--orange)" stroke-width="1.5"/>
         <text x="16.8" y="24.54" font-size="14" fill="var(--text)">Calling tools</text>
       </g>
-      <path d="M14 132L55 132" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M14 132L55 132" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="62 132 54 136 54 128" fill="var(--muted)"/>
-      <path d="M129.2 132L271.32 132" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M129.2 132L271.32 132" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="278.32 132 270.32 136 270.32 128" fill="var(--muted)"/>
-      <path d="M765.04 198L771.04 198C822.4 198 853.88 206.84 853.88 221.25C853.88 235.67 882.7 244.5 929.72 244.5L935.72 244.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M765.04 198L771.04 198C822.4 198 853.88 206.84 853.88 221.25C853.88 235.67 882.7 244.5 929.72 244.5L935.72 244.5" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="942.72 244.5 934.72 248.5 934.72 240.5" fill="var(--muted)"/>
-      <path d="M1022.52 264L1022.52 270C1022.52 288.6 927.36 300 772.1 300C616.84 300 521.68 269.98 521.68 221L521.68 215" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M1022.52 264L1022.52 270C1022.52 288.6 927.36 300 772.1 300C616.84 300 521.68 269.98 521.68 221L521.68 215" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="521.68 208 525.68 216 517.68 216" fill="var(--muted)"/>
-      <path d="M765.04 66L771.04 66C822.4 66 853.88 57.17 853.88 42.75C853.88 28.34 900.26 19.5 975.92 19.5L981.92 19.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M765.04 66L771.04 66C822.4 66 853.88 57.17 853.88 42.75C853.88 28.34 900.26 19.5 975.92 19.5L981.92 19.5" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="988.92 19.5 980.92 23.5 980.92 15.5" fill="var(--muted)"/>
-      <path d="M765.04 94.5L973.52 94.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M765.04 94.5L973.52 94.5" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="980.52 94.5 972.52 98.5 972.52 90.5" fill="var(--muted)"/>
-      <path d="M765.04 169.5L960.92 169.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M765.04 169.5L960.92 169.5" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="967.92 169.5 959.92 173.5 959.92 165.5" fill="var(--muted)"/>
-      <path d="M1056.12 19.5L1062.12 19.5C1101.92 19.5 1126.32 33.75 1126.32 57C1126.32 80.25 1130.5 94.5 1137.32 94.5L1143.32 94.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M1056.12 19.5L1062.12 19.5C1101.92 19.5 1126.32 33.75 1126.32 57C1126.32 80.25 1130.5 94.5 1137.32 94.5L1143.32 94.5" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="1150.32 94.5 1142.32 98.5 1142.32 90.5" fill="var(--muted)"/>
-      <path d="M1064.52 94.5L1143.32 94.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M1064.52 94.5L1143.32 94.5" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="1150.32 94.5 1142.32 98.5 1142.32 90.5" fill="var(--muted)"/>
-      <path d="M1077.12 169.5L1083.12 169.5C1109.9 169.5 1126.32 155.25 1126.32 132C1126.32 108.75 1130.5 94.5 1137.32 94.5L1143.32 94.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M1077.12 169.5L1083.12 169.5C1109.9 169.5 1126.32 155.25 1126.32 132C1126.32 108.75 1130.5 94.5 1137.32 94.5L1143.32 94.5" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="1150.32 94.5 1142.32 98.5 1142.32 90.5" fill="var(--muted)"/>
-      <path d="M308.32 127.5L349.32 127.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M308.32 127.5L349.32 127.5" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="356.32 127.5 348.32 131.5 348.32 123.5" fill="var(--muted)"/>
-      <path d="M457.12 127.5L599.24 127.5" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M457.12 127.5L599.24 127.5" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="606.24 127.5 598.24 131.5 598.24 123.5" fill="var(--muted)"/>
-      <path d="M677.64 147L677.64 153C677.64 171.6 626.17 183 542.18 183C458.19 183 406.72 174.26 406.72 160L406.72 154" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M677.64 147L677.64 153C677.64 171.6 626.17 183 542.18 183C458.19 183 406.72 174.26 406.72 160L406.72 154" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="406.72 147 410.72 155 402.72 155" fill="var(--muted)"/>
-      <circle cx="7" cy="132" r="7"/>
-      <circle cx="301.32" cy="127.5" r="7"/>
+      <circle cx="7" cy="132" r="7" fill="var(--text)"/>
+      <circle cx="301.32" cy="127.5" r="7" fill="var(--text)"/>
       <g transform="translate(1159.32 94.5)">
         <circle r="9" fill="none" stroke="var(--text)" stroke-width="1.5"/>
         <circle r="5" fill="var(--text)"/>
       </g>
-      <rect x="57" y="107.5" width="79.2" height="51" rx="14" fill="none" stroke="var(--orange)" stroke-width="2" class="a m1"/>
-      <rect x="273.32" y="51" width="498.72" height="164" rx="16" fill="none" stroke="var(--orange)" stroke-width="2" class="a m2"/>
-      <rect x="351.32" y="103" width="112.8" height="51" rx="14" fill="none" stroke="var(--orange)" stroke-width="2" class="a m3"/>
-      <rect x="601.24" y="103" width="154.8" height="51" rx="14" fill="none" stroke="var(--orange)" stroke-width="2" class="a m4"/>
-      <rect x="937.72" y="220" width="171.6" height="51" rx="14" fill="none" stroke="var(--orange)" stroke-width="2" class="a m5"/>
-      <rect x="983.92" y="-5" width="79.2" height="51" rx="14" fill="none" stroke="var(--orange)" stroke-width="2" class="a m6"/>
+      <rect x="57" y="107.5" width="79.2" height="51" rx="14" stroke="var(--orange)" stroke-width="2" class="a m1"/>
+      <rect x="273.32" y="51" width="498.72" height="164" rx="16" stroke="var(--orange)" stroke-width="2" class="a m2"/>
+      <rect x="351.32" y="103" width="112.8" height="51" rx="14" stroke="var(--orange)" stroke-width="2" class="a m3"/>
+      <rect x="601.24" y="103" width="154.8" height="51" rx="14" stroke="var(--orange)" stroke-width="2" class="a m4"/>
+      <rect x="937.72" y="220" width="171.6" height="51" rx="14" stroke="var(--orange)" stroke-width="2" class="a m5"/>
+      <rect x="983.92" y="-5" width="79.2" height="51" rx="14" stroke="var(--orange)" stroke-width="2" class="a m6"/>
       <circle r="5" fill="var(--orange)" class="a m7"/>
       <rect x="184.48" y="123" width="38.56" height="18" rx="3" fill="var(--background)"/>
-      <text x="189.48" y="136.284" font-size="11.9" fill="var(--text)">task</text>
+      <text x="189.48" y="136.284" fill="var(--text)">task</text>
       <rect x="793.75" y="189" width="31.42" height="18" rx="3" fill="var(--background)"/>
-      <text x="798.75" y="202.284" font-size="11.9" fill="var(--text)">ask</text>
+      <text x="798.75" y="202.284" fill="var(--text)">ask</text>
       <rect x="749.25" y="291" width="45.7" height="18" rx="3" fill="var(--background)"/>
-      <text x="754.25" y="304.284" font-size="11.9" fill="var(--text)">reply</text>
+      <text x="754.25" y="304.284" fill="var(--text)">reply</text>
       <rect x="894.98" y="10.5" width="52.84" height="18" rx="3" fill="var(--background)"/>
-      <text x="899.98" y="23.784" font-size="11.9" fill="var(--text)">finish</text>
+      <text x="899.98" y="23.784" fill="var(--text)">finish</text>
       <rect x="849.93" y="85.5" width="45.7" height="18" rx="3" fill="var(--background)"/>
-      <text x="854.93" y="98.784" font-size="11.9" fill="var(--text)">error</text>
+      <text x="854.93" y="98.784" fill="var(--text)">error</text>
       <rect x="840.06" y="160.5" width="52.84" height="18" rx="3" fill="var(--background)"/>
-      <text x="845.06" y="173.784" font-size="11.9" fill="var(--text)">cancel</text>
+      <text x="845.06" y="173.784" fill="var(--text)">cancel</text>
       <rect x="512.4" y="118.5" width="38.56" height="18" rx="3" fill="var(--muted-8-background)"/>
-      <text x="517.4" y="131.784" font-size="11.9" fill="var(--text)">plan</text>
+      <text x="517.4" y="131.784" fill="var(--text)">plan</text>
       <rect x="515.76" y="174" width="52.84" height="18" rx="3" fill="var(--muted-8-background)"/>
-      <text x="520.76" y="187.284" font-size="11.9" fill="var(--text)">result</text>
+      <text x="520.76" y="187.284" fill="var(--text)">result</text>
     </g>
   </g>
 </svg>

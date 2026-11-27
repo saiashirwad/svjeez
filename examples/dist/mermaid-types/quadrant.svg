@@ -22,20 +22,20 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-7.5s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="549" height="580" fill="var(--background)"/>
-  <g transform="translate(53.112 32.103)">
+  <g transform="translate(53.112 32.103)" font-size="11.05" fill="var(--muted)">
     <text x="84.1" y="28.32" font-size="16" fill="var(--text)">Reach and engagement of campaigns</text>
     <rect x="255" y="43" width="218" height="218" rx="4" fill="var(--border-10-background)"/>
-    <text x="310.96" y="62.271" font-size="11.05" fill="var(--muted)">We should expand</text>
+    <text x="310.96" y="62.271">We should expand</text>
     <rect x="33" y="43" width="218" height="218" rx="4" fill="var(--border-7-background)"/>
-    <text x="92.275" y="62.271" font-size="11.05" fill="var(--muted)">Need to promote</text>
+    <text x="92.275" y="62.271">Need to promote</text>
     <rect x="33" y="265" width="218" height="218" rx="4" fill="var(--border-4-background)"/>
-    <text x="105.535" y="284.271" font-size="11.05" fill="var(--muted)">Re-evaluate</text>
+    <text x="105.535" y="284.271">Re-evaluate</text>
     <rect x="255" y="265" width="218" height="218" rx="4" fill="var(--border-7-background)"/>
-    <text x="314.275" y="284.271" font-size="11.05" fill="var(--muted)">May be improved</text>
-    <text x="113.165" y="500.478" font-size="11.05" fill="var(--muted)">Low Reach</text>
-    <text x="329.85" y="500.478" font-size="11.05" fill="var(--muted)">High Reach</text>
-    <text x="-26.91" y="376.978" font-size="11.05" fill="var(--muted)" style="transform-origin:19.5px 373px;rotate:-90deg">Low Engagement</text>
-    <text x="-30.225" y="156.978" font-size="11.05" fill="var(--muted)" style="transform-origin:19.5px 153px;rotate:-90deg">High Engagement</text>
+    <text x="314.275" y="284.271">May be improved</text>
+    <text x="113.165" y="500.478">Low Reach</text>
+    <text x="329.85" y="500.478">High Reach</text>
+    <text x="-26.91" y="376.978" style="transform-origin:19.5px 373px;rotate:-90deg">Low Engagement</text>
+    <text x="-30.225" y="156.978" style="transform-origin:19.5px 153px;rotate:-90deg">High Engagement</text>
     <g class="a m1">
       <circle cx="165" cy="219" r="6" fill="var(--blue)" stroke="var(--background)" stroke-width="1.5"/>
       <text x="131.85" y="240.978" font-size="11.05" fill="var(--text)">Campaign A</text>

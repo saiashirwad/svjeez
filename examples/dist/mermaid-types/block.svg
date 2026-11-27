@@ -38,13 +38,13 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
 @media (prefers-reduced-motion:reduce){.a{animation-delay:-7.5s!important;animation-play-state:paused!important}}
 ]]></style>
   <rect width="544" height="405" fill="var(--background)"/>
-  <g transform="translate(32.28 32)">
-    <rect x="2" y="164" width="475.44" height="94" rx="10" fill="none" stroke="var(--border)" stroke-dasharray="4 3" class="a m1"/>
-    <path d="M89.24 234L89.24 240C89.24 258.6 86.2 270 81.24 270C76.28 270 73.24 270 73.24 270L73.24 275" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
+  <g transform="translate(32.28 32)" fill="none">
+    <rect x="2" y="164" width="475.44" height="94" rx="10" stroke="var(--border)" stroke-dasharray="4 3" class="a m1"/>
+    <path d="M89.24 234L89.24 240C89.24 258.6 86.2 270 81.24 270C76.28 270 73.24 270 73.24 270L73.24 275" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m2"/>
     <polygon points="73.24 282 69.24 274 77.24 274" fill="var(--border)" class="a m3"/>
-    <path d="M302.96 211L308.96 211C317.64 211 322.96 229.91 322.96 260.75C322.96 291.6 322.96 310.5 322.96 310.5L327.96 310.5" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <path d="M302.96 211L308.96 211C317.64 211 322.96 229.91 322.96 260.75C322.96 291.6 322.96 310.5 322.96 310.5L327.96 310.5" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
     <polygon points="334.96 310.5 326.96 314.5 326.96 306.5" fill="var(--border)" class="a m5"/>
-    <path d="M390.2 234L390.2 240C390.2 258.6 393.24 270 398.2 270C403.16 270 406.2 270 406.2 270L406.2 275" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
+    <path d="M390.2 234L390.2 240C390.2 258.6 393.24 270 398.2 270C403.16 270 406.2 270 406.2 270L406.2 275" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m4"/>
     <polygon points="406.2 282 402.2 274 410.2 274" fill="var(--border)" class="a m6"/>
     <g transform="translate(2 2)" class="a m7">
       <rect width="142.48" height="57" rx="3" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5" stroke-linejoin="round"/>

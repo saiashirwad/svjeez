@@ -674,6 +674,12 @@ describe("text along an outline", () => {
     expect(out).toMatch(/<textPath href="#\w+" startOffset="90">Hi<\/textPath>/);
   });
 
+  test("writes the node's placement into the path, which a textPath reads untransformed", () => {
+    const out = emit(along({ offset: [30, 20] }));
+
+    expect(out).toMatch(/<defs>\s*<path d="M30 70L210 70" id="\w+"\/>\s*<\/defs>/);
+  });
+
   test("a start track animates startOffset", () => {
     const out = emit(along({ start: track(0).to(1, span(0, 1), ease.linear) }));
 

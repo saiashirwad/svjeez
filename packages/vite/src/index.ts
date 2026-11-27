@@ -24,7 +24,9 @@ export interface SvjeezOptions {
 /** A prefix for an inline scene that names none: letters and digits from where the file is, so two inline scenes never share one. */
 const hash = (path: string) => `s${createHash("sha256").update(path).digest("hex").slice(0, 8)}`;
 
-const QUERY = /\?svjeez(&posters)?(&inline)?$/;
+/** `?svjeez` and any `&flag`s after it, in any order. */
+const QUERY = /\?svjeez((?:&[^&]*)*)$/;
+const FLAGS = ["posters", "inline"];
 
 export default function svjeez(options: SvjeezOptions = {}): Plugin {
   let config: ResolvedConfig;
@@ -90,11 +92,19 @@ export default function svjeez(options: SvjeezOptions = {}): Plugin {
 
       if (!runner) runners.set(this.environment.name, (runner = createRunner(config)));
 
-      const inline = query[2] !== undefined;
+      const flags = query[1]!.split("&").slice(1);
+      const unknown = flags.find((flag) => !FLAGS.includes(flag));
+
+      if (unknown !== undefined)
+        throw new Error(
+          `${id} has the unknown flag "${unknown}". The flags of ?svjeez are ${FLAGS.map((flag) => `&${flag}`).join(" and ")}, in any order.`,
+        );
+
+      const inline = flags.includes("inline");
 
       const { image, dependencies } = await runner.load(
         file,
-        query[1] ? (options.posters ?? true) : false,
+        flags.includes("posters") ? (options.posters ?? true) : false,
         inline ? hash(relative(config.root, file)) : undefined,
       );
 

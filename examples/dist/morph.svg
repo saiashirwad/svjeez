@@ -49,11 +49,11 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
     <text y="14.28" class="a m2">Revenue, Q2</text>
     <text y="14.28" class="a m3">Revenue, Q3</text>
   </g>
-  <g style="transform-origin:96px 217.8px" class="a m5">
-    <rect width="64" height="96" rx="6" fill="var(--blue)" class="a m4 dm">
+  <g style="transform-origin:96px 217.8px" class="a m5" fill="var(--blue)">
+    <rect width="64" height="96" rx="6" class="a m4 dm">
       <animate attributeName="height" values="60;60;96;96;60" keyTimes="0;0.17949;0.33333;0.84615;1" calcMode="spline" keySplines="0 0 1 1;0.23 1 0.32 1;0 0 1 1;0.23 1 0.32 1" dur="7.8s" repeatCount="indefinite"/>
     </rect>
-    <rect width="64" height="96" rx="6" fill="var(--blue)" class="a m4 ds" display="none"/>
+    <rect width="64" height="96" rx="6" class="a m4 ds" display="none"/>
     <text x="78" y="256" font-size="12" fill="var(--muted)">north</text>
   </g>
   <rect width="64" height="87" rx="6" fill="var(--blue)" class="a m6 dm">
@@ -66,12 +66,12 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
   </rect>
   <rect width="64" height="149.999" rx="6" fill="var(--blue)" class="a m8 ds" display="none"/>
   <text y="12.24" font-size="12" fill="var(--muted)" class="a m9">south</text>
-  <g style="transform-origin:408px 225.3px" class="a m12">
-    <rect width="64" height="114" rx="6" fill="var(--cyan)" class="a m10 dm">
+  <g style="transform-origin:408px 225.3px" class="a m12" fill="var(--cyan)">
+    <rect width="64" height="114" rx="6" class="a m10 dm">
       <animate id="w1" attributeName="height" values="45;114" keyTimes="0;1" calcMode="spline" keySplines="0.23 1 0.32 1" begin="4.24s;w1.begin+7.8s" dur="0.9s" fill="freeze" data-loop="7.8s"/>
       <set attributeName="height" to="45" begin="0s;w1.begin+3.56s" dur="4.24s" fill="freeze" data-loop="7.8s"/>
     </rect>
-    <rect width="64" height="113.962" rx="6" fill="var(--cyan)" class="a m10 ds" display="none"/>
+    <rect width="64" height="113.962" rx="6" class="a m10 ds" display="none"/>
     <text y="12.24" font-size="12" fill="var(--muted)" class="a m11">west</text>
   </g>
   <path d="M96 10c0 6.67 0 13.33 0 20c0 5.52 -4.48 10 -10 10c-25.33 0 -50.67 0 -76 0c-5.52 0 -10 -4.48 -10 -10c0 -6.67 0 -13.33 0 -20c0 -5.52 4.48 -10 10 -10c25.33 0 50.67 0 76 0c5.52 0 10 4.48 10 10z" fill="var(--raised)" class="a m13 dm">

@@ -212,6 +212,42 @@ export default scene({ size: [120, 80], duration: 1, title: "Model" }, () => (
   }
 }, 60_000);
 
+test("?svjeez takes its flags in any order and names an unknown one", async () => {
+  const dir = join(scratch, "flags");
+  mkdirSync(dir);
+  writeFileSync(
+    join(dir, "scene.tsx"),
+    `import { Shape, circle, scene } from "svjeez";
+export default scene({ size: [60, 40], duration: 1, title: "Flags" }, () => (
+  <Shape geometry={circle(10)} at={[30, 20]} anchor="center" fill="#3EE6D6" />
+));`,
+  );
+
+  const server = await createServer({
+    ...appConfig(dir),
+    server: { port: 0, fs: { allow: [join(import.meta.dirname, "../..")] } },
+  });
+
+  try {
+    const load = (query: string) => server.ssrLoadModule(join(dir, `scene.tsx?svjeez${query}`));
+    const forward = (await load("&posters&inline")).default;
+    const backward = (await load("&inline&posters")).default;
+
+    expect(backward.posters).toBeDefined();
+    expect(backward.posters).toEqual(forward.posters);
+    expect(backward.svg).toBe(forward.svg);
+    expect(backward.svg).toMatch(/class="s[0-9a-f]{8}root"/);
+    expect((await load("&inline")).default.posters).toBeUndefined();
+    expect((await load("&posters")).default.posters).toBeDefined();
+    await expect(load("&postrs")).rejects.toThrow(
+      'has the unknown flag "postrs". The flags of ?svjeez are &posters and &inline, in any order.',
+    );
+    await expect(load("&inline&nope")).rejects.toThrow('the unknown flag "nope"');
+  } finally {
+    await server.close();
+  }
+}, 60_000);
+
 test("getScene() takes a scene model, or a function that returns one", () => {
   const model = scene({ size: [30, 20], duration: 1, title: "Made" }, () => jsx(Group, {}));
 

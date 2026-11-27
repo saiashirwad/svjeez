@@ -50,7 +50,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <rect width="83.2" height="36" rx="8" fill="var(--magenta-22-background)" stroke="var(--magenta)" stroke-width="1.5"/>
       <text x="14.3" y="22.68" font-size="13" fill="var(--text)">page.ts</text>
     </g>
-    <path d="M49.4 81L263.41 81" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
+    <path d="M49.4 81L263.41 81" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m1"/>
     <polygon points="270.41 81 262.41 85 262.41 77" fill="var(--border)" class="a m2"/>
     <g class="a m3">
       <rect x="65.4" y="60" width="189.01" height="17" rx="3" fill="var(--background)"/>
@@ -60,19 +60,19 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
       <rect x="144.885" y="95.5" width="251.05" height="26" rx="4" fill="var(--blue-12-background)" stroke="var(--blue)"/>
       <text x="154.385" y="112.478" font-size="11.05" fill="var(--text)">in an img, the span plays by itself</text>
     </g>
-    <path d="M491.42 157L277.41 157" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m5"/>
+    <path d="M491.42 157L277.41 157" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m5"/>
     <polygon points="270.41 157 278.41 153 278.41 161" fill="var(--border)" class="a m6"/>
     <g class="a m7">
       <rect x="296.35" y="136" width="169.12" height="17" rx="3" fill="var(--background)"/>
       <text x="301.35" y="148.478" font-size="11.05" fill="var(--text)">mount(svg).clock("open")</text>
     </g>
-    <path d="M491.42 192L277.41 192" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
+    <path d="M491.42 192L277.41 192" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
     <polygon points="270.41 192 278.41 188 278.41 196" fill="var(--border)" class="a m9"/>
     <g class="a m10">
       <rect x="286.41" y="171" width="189.01" height="17" rx="3" fill="var(--background)"/>
       <text x="291.41" y="183.478" font-size="11.05" fill="var(--text)">play() / reverse() on click</text>
     </g>
-    <path d="M491.42 227L277.41 227" fill="none" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m11"/>
+    <path d="M491.42 227L277.41 227" stroke="var(--border)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1 2" class="a m11"/>
     <polygon points="270.41 227 278.41 223 278.41 231" fill="var(--border)" class="a m12"/>
     <g class="a m13">
       <rect x="302.98" y="206" width="155.86" height="17" rx="3" fill="var(--background)"/>

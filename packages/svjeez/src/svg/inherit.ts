@@ -47,8 +47,14 @@ const isInert = (node: Element): boolean => INERT.has(node.tag) || node.tag.star
 
 const isElement = (node: SvgNode): node is Element => node.kind === "element";
 
+/** A fragment writes its children in its place, so they are the group's children too. */
+const flat = (children: readonly SvgNode[]): Element[] =>
+  children.flatMap((child) =>
+    child.kind === "fragment" ? flat(child.children) : isElement(child) ? [child] : [],
+  );
+
 const drawnBy = (node: Element): Element[] =>
-  node.children.filter(isElement).filter((child) => !isInert(child));
+  flat(node.children).filter((child) => !isInert(child));
 
 const covered = (node: Element, name: string): boolean => {
   if (node.attrs[name] !== undefined || node.tag === "image") return true;
@@ -97,8 +103,8 @@ export const inherit = (
     if (new RegExp(`(?:^|;)\\s*${name}\\s*:`).test(style)) return true;
 
     if (
-      node.children.some(
-        (child) => isElement(child) && INERT.has(child.tag) && child.attrs.attributeName === name,
+      flat(node.children).some(
+        (child) => INERT.has(child.tag) && child.attrs.attributeName === name,
       )
     )
       return true;
@@ -145,20 +151,19 @@ export const inherit = (
           dropped.set(child, (dropped.get(child) ?? new Set()).add(name));
     }
 
-    return {
-      ...node,
-      attrs,
-      children: node.children.map((child) => {
-        const names = isElement(child) ? dropped.get(child) : undefined;
+    const drop = (child: SvgNode): SvgNode => {
+      if (child.kind === "fragment") return { ...child, children: child.children.map(drop) };
+      const names = isElement(child) ? dropped.get(child) : undefined;
 
-        if (!names || !isElement(child)) return child;
+      if (!names || !isElement(child)) return child;
 
-        return {
-          ...child,
-          attrs: Object.fromEntries(Object.entries(child.attrs).filter(([key]) => !names.has(key))),
-        };
-      }),
+      return {
+        ...child,
+        attrs: Object.fromEntries(Object.entries(child.attrs).filter(([key]) => !names.has(key))),
+      };
     };
+
+    return { ...node, attrs, children: node.children.map(drop) };
   };
 
   const visit = (node: SvgNode): SvgNode => {

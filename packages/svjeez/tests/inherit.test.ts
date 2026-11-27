@@ -1,8 +1,13 @@
 import { describe, expect, test } from "bun:test";
+import { Group, Shape, Text, font, h, rect as box, scene } from "svjeez";
+import { svg } from "svjeez/tools";
+import { fontFixture } from "../../../fixtures/fonts";
 import { inherit } from "../src/svg/inherit";
 import { element, type Element, type SvgNode } from "../src/svg/tree";
 
 type Attrs = Record<string, string>;
+
+const mono = await font.load(fontFixture("SpaceMono-Regular"));
 
 const red = { fill: "#FF0000" };
 const rect = (attrs: Attrs = {}): Element => element("rect", attrs);
@@ -123,5 +128,42 @@ describe("inherit", () => {
     const smil = group([rect(red), rect(red), element("animate", { attributeName: "fill" })]);
 
     expect(run(smil).attrs).toEqual({});
+  });
+
+  test("a fragment's children count as the group's, so text inside one blocks a stroke", () => {
+    const blue = { fill: "#0000FF", stroke: "#0000FF" };
+    const label: SvgNode = { kind: "fragment", children: [element("text", { fill: "#888888" })] };
+    const out = run(group([label, rect(blue), rect(blue)]));
+
+    expect(out.attrs).toEqual({ fill: "#0000FF" });
+    expect(names(out)).toEqual([undefined, { stroke: "#0000FF" }, { stroke: "#0000FF" }]);
+  });
+
+  test("a scene's text in a plain group keeps its paint when stroked bars sit beside it", () => {
+    const bar = (x: number) =>
+      h(Shape, {
+        key: x,
+        geometry: box(10, 10),
+        at: [x, 20],
+        fill: "#0000FF",
+        stroke: { color: "#0000FF", width: 1 },
+      });
+
+    const labels = h(
+      Group,
+      null,
+      h(Text, { key: 0, at: [0, 10], font: mono, size: 12, fill: "#888888" }, "1"),
+      h(Text, { key: 20, at: [20, 10], font: mono, size: 12, fill: "#888888" }, "2"),
+    );
+
+    const made = scene({ size: [60, 40], duration: 1, title: "Bars" }, () =>
+      h(Group, { offset: [5, 5] }, labels, bar(0), bar(20)),
+    );
+
+    const out = svg.emit(made);
+    const [, open] = out.match(/<g transform="translate\(5 5\)"([^>]*)>/) ?? [];
+
+    expect(open).toBeDefined();
+    expect(open).not.toContain("stroke");
   });
 });

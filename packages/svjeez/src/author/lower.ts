@@ -1629,6 +1629,12 @@ const lowerScene = (
 ): Scene => {
   const { size } = options;
 
+  if (options.title === undefined)
+    throw new SceneError(
+      "scene() needs a title.",
+      'Pass title, as in scene({ size: [800, 600], title: "Orbits" }, ...).',
+    );
+
   if (!size.every((side) => side > 0 && side < Infinity))
     throw new SceneError(
       `scene() needs a positive width and height, got ${size[0]} by ${size[1]}.`,
