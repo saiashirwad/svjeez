@@ -4,7 +4,7 @@ import { lineCubic, quadraticCubic } from "../model/curve";
 import { contoursOf } from "../model/geometry";
 import { arcToCubics, ringsOf } from "../model/paths";
 import type { Contour, Cubic, Geometry as Outline, Rgba, Vec } from "../model/ir";
-import type { Gradient, Pattern } from "./paint";
+import type { Gradient, Noise, None, Pattern } from "./paint";
 import { isArray } from "../model/guards";
 import { isTrack } from "./track";
 
@@ -119,15 +119,28 @@ export const outlineOf = (geometry: Geometry): Outline =>
     : geometry;
 
 export interface RectOptions {
+  /** Which point of the rectangle sits at the origin: `"top-left"` (default) or `"center"`. */
+  readonly anchor?: "top-left" | "center";
   readonly radius?: number | readonly [number, number, number, number];
 }
 
+/**
+ * A rectangle `width` by `height`. Its top-left corner sits at the origin, so it covers
+ * `[0, 0]` to `[width, height]`; pass `{ anchor: "center" }` to center it on the origin
+ * like `circle()` and `ellipse()`.
+ */
 export const rect = (width: number, height: number, options: RectOptions = {}): Geometry => {
+  const anchor = options.anchor ?? "top-left";
+
+  if (anchor !== "top-left" && anchor !== "center")
+    throw new SceneError(
+      `rect() anchor takes "top-left" or "center", got ${JSON.stringify(anchor)}.`,
+    );
   const radius = options.radius ?? 0;
   const each = isArray(radius) ? radius : ([radius, radius, radius, radius] as const);
   const most = Math.min(positive(width, "rect()"), positive(height, "rect()")) / 2;
 
-  return {
+  const sharp: Geometry = {
     kind: "rect",
     size: [width, height],
     radius: [
@@ -137,13 +150,35 @@ export const rect = (width: number, height: number, options: RectOptions = {}): 
       Math.min(most, positive(each[3], "rect()")),
     ],
   };
+
+  return anchor === "center" ? centered(sharp) : sharp;
 };
 
+/** The same rectangle as a path, shifted so its center sits on the origin. */
+const centered = (rectangle: Outline): Outline => {
+  const [dx, dy] =
+    rectangle.kind === "rect" ? [-rectangle.size[0] / 2, -rectangle.size[1] / 2] : [0, 0];
+
+  const shift = ([x, y]: Vec): Vec => [x + dx, y + dy];
+
+  return {
+    kind: "path",
+    rule: "nonzero",
+    contours: contoursOf(rectangle).map((contour) => ({
+      start: shift(contour.start),
+      curves: contour.curves.map(([c1, c2, to]) => [shift(c1), shift(c2), shift(to)] as const),
+      closed: contour.closed,
+    })),
+  };
+};
+
+/** A circle centered on the origin. */
 export const circle = (radius: number): Geometry => ({
   kind: "ellipse",
   radius: [positive(radius, "circle()"), radius],
 });
 
+/** An ellipse centered on the origin. */
 export const ellipse = (rx: number, ry: number): Geometry => ({
   kind: "ellipse",
   radius: [positive(rx, "ellipse()"), positive(ry, "ellipse()")],
@@ -198,7 +233,7 @@ export interface Token {
 
 export type Color = Hex | Token;
 
-export type Paint = Color | Gradient | Pattern;
+export type Paint = Color | Gradient | Pattern | Noise | None;
 
 export type Theme<K extends string = string> = { readonly [N in K]: Token };
 
@@ -238,7 +273,13 @@ const blend = (a: Hex, b: Hex, share: number): Hex => {
   const alpha = x[3] * share + y[3] * (1 - share);
   const byte = (n: number) => Math.round(n).toString(16).padStart(2, "0");
 
-  if (alpha === 0) return "#00000000";
+  // Fully transparent keeps the color of the one side that has any, so a gradient to `alpha(c, 0)` fades c out
+  // instead of greying through black.
+  if (alpha === 0) {
+    const kept = x[3] > 0 && y[3] === 0 ? x : y[3] > 0 && x[3] === 0 ? y : [0, 0, 0];
+
+    return `#${[0, 1, 2].map((i) => byte(kept[i]!)).join("")}00`;
+  }
 
   const rgb = [0, 1, 2].map((i) =>
     byte((x[i]! * x[3] * share + y[i]! * y[3] * (1 - share)) / alpha),

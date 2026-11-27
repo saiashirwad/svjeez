@@ -195,6 +195,28 @@ export type Effect =
       readonly blur: Animated<number>;
       readonly color: Animated<Color>;
       readonly opacity: Animated<number>;
+    }
+  /** Repaints the node's alpha with noise mapped through a color ramp: what a `noise()` fill lowers to. */
+  | {
+      readonly kind: "noise";
+      readonly frequency: Animated<Vec>;
+      readonly octaves: number;
+      readonly seed: number;
+      readonly type: "fractal" | "turbulence";
+      readonly stitch: boolean;
+      readonly ramp: readonly Stop[];
+    }
+  /** Lights the node's own alpha as a bump map, so it reads as raised. */
+  | {
+      readonly kind: "emboss";
+      /** Degrees clockwise from +x (y points down) toward the light. */
+      readonly azimuth: number;
+      /** Degrees up from the surface toward the light. */
+      readonly elevation: number;
+      readonly depth: number;
+      readonly radius: number;
+      readonly color: Color;
+      readonly specular: number;
     };
 
 export interface Source {

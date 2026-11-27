@@ -283,7 +283,19 @@ export const around = (
   return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
 };
 
-export type Origin = Place | Vec | "at" | { readonly frame: Vec };
+/**
+ * Where `rotate`, `scale`, and `skew` pivot.
+ * - a place name, such as `"center"` (the default) or `"topLeft"`, on the node's box
+ * - `[x, y]` measured from the box's top-left
+ * - `"at"` for the point its `at` places
+ * - `"own"` for the node's own `[0, 0]`, wherever its `offset` puts it
+ * - `{ own: [x, y] }` for a point in the node's own coordinates
+ * - `{ frame: [x, y] }` for a point in the parent's coordinates
+ */
+export type Origin = Place | Vec | "at" | "own" | { readonly own: Vec } | { readonly frame: Vec };
+
+const isOwnOrigin = (origin: Origin): origin is { readonly own: Vec } =>
+  typeof origin === "object" && origin !== null && !Array.isArray(origin) && "own" in origin;
 
 const isFrameOrigin = (origin: Origin): origin is { readonly frame: Vec } =>
   typeof origin === "object" && origin !== null && !Array.isArray(origin) && "frame" in origin;
@@ -298,6 +310,19 @@ export const originOf = (
   if (origin === undefined) return [box.x + box.width / 2, box.y + box.height / 2];
 
   if (origin === "at") return home();
+
+  if (origin === "own") return [0, 0];
+
+  if (isOwnOrigin(origin)) {
+    if (!isPoint(origin.own))
+      throw new SceneError(
+        `origin on ${names.named(key)} needs a finite own point [x, y], got ${JSON.stringify(origin.own)}.`,
+        undefined,
+        names.whereOf(key),
+      );
+
+    return origin.own;
+  }
 
   if (isArray(origin)) return [box.x + origin[0], box.y + origin[1]];
 
@@ -314,7 +339,7 @@ export const originOf = (
 
   if (!Object.hasOwn(PLACES, origin))
     throw new SceneError(
-      `origin on ${names.named(key)} takes a place, one of ${PLACE_LIST}, a point measured from its box's top-left, such as [20, 0], { frame: [x, y] } in its parent's coordinates, or "at" for the point its at places, got ${JSON.stringify(origin)}.`,
+      `origin on ${names.named(key)} takes a place, one of ${PLACE_LIST}, a point measured from its box's top-left, such as [20, 0], "own" for its own [0, 0] (where its offset puts it), { own: [x, y] } in its own coordinates, { frame: [x, y] } in its parent's coordinates, or "at" for the point its at places, got ${JSON.stringify(origin)}.`,
       undefined,
       names.whereOf(key),
     );
@@ -451,6 +476,19 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
       );
 
     if (!within) return byKey.get(key)!;
+
+    for (let step = 1; step <= within.path.length; step++) {
+      const part = `${key}/${within.path.slice(0, step).join("/")}`;
+      const sharing = names.sharing(part);
+
+      if (sharing)
+        throw new SceneError(
+          `${anchor.label} is ambiguous: lists in ${names.named(part.slice(0, part.lastIndexOf("/")))} each hold a part keyed "${within.path[step - 1]}". They are ${sharing.map((each) => `"${each.slice(key.length + 1)}"`).join(", ")}.`,
+          "Give the lists' items keys apart, as in key={`a-${i}`} and key={`b-${i}`}.",
+          owner.source && { source: owner.source },
+        );
+    }
+
     const found = byKey.get(`${key}/${within.path.join("/")}`);
 
     if (found) return found;

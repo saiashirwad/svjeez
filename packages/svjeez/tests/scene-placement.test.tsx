@@ -616,6 +616,66 @@ describe("origin is named on the box, as anchor is", () => {
     expect(turned["arm/bar"]).toEqual([98, 100, 4, 40]);
   });
 
+  test('"own" pivots around the node\'s own [0, 0], where its offset puts it', () => {
+    const scaled = boxes(() => (
+      <Group key="g" offset={[100, 100]} scale={2} origin="own">
+        <Shape key="r" geometry={rect(20, 20)} fill="#000000" />
+      </Group>
+    ));
+
+    expect(scaled["g/r"]).toEqual([100, 100, 40, 40]);
+
+    const turned = boxes(() => (
+      <Group key="arm" offset={[100, 100]} rotate={90} origin="own">
+        <Shape key="bar" geometry={rect(40, 4)} at={[0, -2]} fill="#000000" />
+      </Group>
+    ));
+
+    expect(turned["arm/bar"]).toEqual([98, 100, 4, 40]);
+  });
+
+  test('"own" follows an animated offset', () => {
+    const build = () => (
+      <Group
+        key="g"
+        offset={track<Vec>([0, 0]).to([100, 50], span(0, 2), ease.linear)}
+        scale={2}
+        origin="own"
+      >
+        <Shape key="r" geometry={rect(20, 20)} fill="#000000" />
+      </Group>
+    );
+
+    const model = made(build);
+
+    for (const [t, x, y] of [
+      [0, 0, 0],
+      [1, 50, 25],
+      [2, 100, 50],
+    ] as const) {
+      const box = boxesOf(model, t)["g/r"]!;
+
+      expect([box.x, box.y, box.width, box.height]).toEqual([x, y, 40, 40]);
+    }
+  });
+
+  test("{ own: [x, y] } pivots around a point in the node's own coordinates", () => {
+    const found = boxes(() => (
+      <Group key="g" offset={[100, 100]} scale={2} origin={{ own: [5, 5] }}>
+        <Shape key="r" geometry={rect(20, 20)} fill="#000000" />
+      </Group>
+    ));
+
+    expect(found["g/r"]).toEqual([95, 95, 40, 40]);
+    expect(() =>
+      made(() => (
+        <Group key="g" origin={{ own: [Number.NaN, 0] }}>
+          <Shape geometry={rect(20, 20)} fill="#000000" />
+        </Group>
+      )),
+    ).toThrow("needs a finite own point [x, y]");
+  });
+
   test("a turn around the center keeps a circle where it is", () => {
     const found = boxes(() => (
       <Shape key="dot" geometry={circle(5)} at={[20, 20]} rotate={180} fill="#000000" />
@@ -629,7 +689,7 @@ describe("origin is named on the box, as anchor is", () => {
       // @ts-expect-error: "middle" is not a place.
       made(() => <Shape key="s" geometry={rect(10, 10)} fill="#000000" origin="middle" />),
     ).toThrow(
-      'origin on <Shape> "s" takes a place, one of "top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right", a point measured from its box\'s top-left, such as [20, 0], { frame: [x, y] } in its parent\'s coordinates, or "at" for the point its at places, got "middle".',
+      'origin on <Shape> "s" takes a place, one of "top-left", "top", "top-right", "left", "center", "right", "bottom-left", "bottom", "bottom-right", a point measured from its box\'s top-left, such as [20, 0], "own" for its own [0, 0] (where its offset puts it), { own: [x, y] } in its own coordinates, { frame: [x, y] } in its parent\'s coordinates, or "at" for the point its at places, got "middle".',
     );
   });
 });
@@ -783,5 +843,35 @@ describe("errors say what to write", () => {
         <Arrow from={[0, 0]} to={[10, 10]} stroke={{ color: "#000000" }} anchor="center" />
       )),
     ).toThrow("<Arrow> is placed by its from and to, so it takes no anchor.");
+  });
+});
+
+describe("rect anchors at the top-left unless asked to center", () => {
+  const bounds = (build: () => SceneElement) => boxes(build)["s"];
+
+  test("top-left is the default, and center puts the origin in the middle", () => {
+    expect(bounds(() => <Shape key="s" geometry={rect(40, 20)} fill="#000000" />)).toEqual([
+      0, 0, 40, 20,
+    ]);
+    expect(
+      bounds(() => (
+        <Shape key="s" geometry={rect(40, 20, { anchor: "top-left" })} fill="#000000" />
+      )),
+    ).toEqual([0, 0, 40, 20]);
+    expect(
+      bounds(() => (
+        <Shape key="s" geometry={rect(40, 20, { anchor: "center", radius: 4 })} fill="#000000" />
+      )),
+    ).toEqual([-20, -10, 40, 20]);
+    expect(bounds(() => <Shape key="s" geometry={circle(5)} fill="#000000" />)).toEqual([
+      -5, -5, 10, 10,
+    ]);
+  });
+
+  test("a wrong anchor is told what to write", () => {
+    // @ts-expect-error: "middle" is not an anchor.
+    expect(() => rect(10, 10, { anchor: "middle" })).toThrow(
+      'rect() anchor takes "top-left" or "center", got "middle".',
+    );
   });
 });

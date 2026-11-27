@@ -74,14 +74,22 @@ export {
 
 export {
   linear,
+  noise,
+  none,
   pattern,
   radial,
+  type Noise,
+  type NoiseOptions,
+  type None,
+  type PaintLayer,
+  type Paints,
   type Pattern,
   type PatternOptions,
   type RadialFit,
+  type Stops,
 } from "./author/paint";
 
-export { adjust, blur, displace, shadow } from "./author/effects";
+export { adjust, blur, displace, emboss, shadow, type EmbossOptions } from "./author/effects";
 
 export { keyframes, track, type Anim, type Goal, type Keyframe, type Track } from "./author/track";
 

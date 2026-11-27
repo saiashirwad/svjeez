@@ -10,9 +10,9 @@ import {
   mixGeometry,
   outlineBoxOf,
 } from "../model/geometry";
-import { componentOf, identified, keyText, sourced, writtenAt } from "./identity";
+import { componentOf, identified, keyText, listOf, sourced, writtenAt } from "./identity";
 import { Names, quoted, wordsOf, type Named } from "./names";
-import { isArray } from "../model/guards";
+import { isArray, isNumber } from "../model/guards";
 import { SceneError, located } from "../model/scene-error";
 import { tagOf } from "../model/naming";
 import type {
@@ -37,7 +37,7 @@ import type {
   Vec,
 } from "../model/ir";
 import { atRest, isLane, pair } from "../model/lane";
-import { morphed, type MorphElement } from "./morph";
+import { type Taken, morphed, type MorphElement } from "./morph";
 import {
   flat,
   sceneElement,
@@ -108,6 +108,13 @@ import {
   isWrittenPattern,
   mixPaint,
   type Pattern,
+  isNoise,
+  isNone,
+  layersOfPaints,
+  standIn,
+  type Noise,
+  type PaintLayer,
+  type Paints,
 } from "./paint";
 import type { Effect as EffectProps } from "./effects";
 
@@ -177,6 +184,14 @@ const animated = <A, T>(
 };
 
 const colorOf = (ctx: Ctx, paint: Paint, where: string, timing: Timing, box?: Box): ModelPaint => {
+  if (isNoise(paint) || isNone(paint))
+    throw new SceneError(
+      `${where} has ${paint.kind === "noise" ? "a noise()" : "a none"} paint where it can't go: in a track, a <Run>, or the stroke of a <Text>.`,
+      paint.kind === "noise"
+        ? "Give noise() as the fill of a <Shape> or <Text>, a layer of a <Shape>'s fill or stroke, or a <Shape>'s stroke, and keep it still: animate its frequency instead."
+        : "Give none as a whole fill or stroke color, never in a track; fade a part out with opacity.",
+    );
+
   if (isWrittenPattern(paint)) return patternOf(ctx, paint, where, timing);
 
   return isWrittenGradient(paint)
@@ -340,7 +355,12 @@ const fillOpacityOf = (
 /** How far, in px, an anchor's point may move across a geometry's keys before the anchor no longer holds. */
 const DRIFT = 0.5;
 
-const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeNode => {
+const shape = (
+  ctx: Ctx,
+  props: ShapeProps,
+  key: string,
+  timing: Timing,
+): ShapeNode | GroupNode | undefined => {
   const where = ctx.notes.names.named(key);
 
   if (props.geometry === undefined)
@@ -348,6 +368,11 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
       `${where} has no geometry.`,
       "Give it one, such as geometry={rect(40, 20)}.",
     );
+  const fills = props.fill === undefined ? [] : layersOfPaints(props.fill);
+  const strokes = props.stroke === undefined ? [] : layersOfPaints(props.stroke.color);
+
+  if (fills.length === 0 && strokes.length === 0 && (props.fill ?? props.stroke) !== undefined)
+    return undefined;
 
   if (props.fill === undefined && props.stroke === undefined)
     throw new SceneError(
@@ -377,7 +402,14 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
       `${what} on ${where}`,
     );
 
-  const stroke = written && strokeOf(ctx, written, timing, where, outline);
+  const solid = (value: Anim<Paint>): Anim<Paint> => (isNoise(value) ? standIn(value) : value);
+
+  const strokeIn = (color: Anim<Paint> | undefined) =>
+    written && color !== undefined
+      ? strokeOf(ctx, { ...written, color: solid(color) }, timing, where, outline)
+      : undefined;
+
+  const stroke = strokeIn(strokes[0]?.paint);
   const fillOpacity = fillOpacityOf(props.fillOpacity, timing, where);
 
   if (props.draw !== undefined && props.trim !== undefined)
@@ -392,23 +424,112 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
       ? undefined
       : animated<Vec, Vec>(window, keep, timing, mixVec, `trim on ${where}`);
 
-  if (stroke?.dashOffset !== undefined && trim !== undefined)
-    throw new SceneError(
-      `${where} has both a draw or trim and a stroke dashOffset, and both drive the dash.`,
-      "Pick one: animate draw to draw the stroke on, or dashOffset to march its dashes.",
-    );
-
   const box = paintedBoxOf(rest, lookOf({ stroke, trim }));
+
+  const look = (fill: Anim<Paint> | undefined, color: Anim<Paint> | undefined) => {
+    const drawn =
+      color === undefined ? undefined : color === strokes[0]?.paint ? stroke : strokeIn(color);
+
+    const noisy = [fill, color].find(isNoise);
+
+    return {
+      kind: "shape" as const,
+      geometry,
+      ...(fill !== undefined && { fill: painted(solid(fill), "fill") }),
+      ...(fillOpacity !== undefined && fillOpacity !== 1 && { fillOpacity }),
+      ...(drawn && { stroke: drawn }),
+      ...(trim !== undefined && { trim }),
+      ...(noisy && { effects: [noiseOf(ctx, noisy, timing, where)] }),
+    };
+  };
+
+  const bare = (layer: PaintLayer) =>
+    (layer.blend === undefined || layer.blend === "normal") && layer.opacity === undefined;
+
+  const [fill] = fills;
+
+  if (
+    fills.length <= 1 &&
+    strokes.length <= 1 &&
+    [...fills, ...strokes].every(bare) &&
+    !(strokes.length === 1 && fill !== undefined && [fill.paint, strokes[0]!.paint].some(isNoise))
+  )
+    return {
+      ...base(ctx, props, box, key, timing, pinned(props.anchor, box, where)),
+      ...look(fill?.paint, strokes[0]?.paint),
+    };
+
+  const copy =
+    (side: "fill" | "stroke") =>
+    (layer: PaintLayer, i: number): ShapeNode => {
+      const what = `${side} layer ${i + 1} on ${where}`;
+
+      const opacity =
+        layer.opacity === undefined
+          ? 1
+          : animated(layer.opacity, keep, timing, mixNumber, `opacity of ${what}`);
+
+      if (!isLane(opacity) && !(opacity >= 0 && opacity <= 1))
+        throw new SceneError(`The opacity of ${what} needs a number from 0 to 1, got ${opacity}.`);
+
+      return {
+        key: `${key}#${side}${i + 1}`,
+        box,
+        at: [0, 0],
+        origin: [0, 0],
+        layers: opacity === 1 ? [] : [{ ...IDLE, opacity }],
+        effects: [],
+        ...(layer.blend !== undefined && layer.blend !== "normal" && { blend: layer.blend }),
+        ...(side === "fill" ? look(layer.paint, undefined) : look(undefined, layer.paint)),
+      };
+    };
+
+  const under = strokes.map(copy("stroke"));
+  const over = fills.map(copy("fill"));
 
   return {
     ...base(ctx, props, box, key, timing, pinned(props.anchor, box, where)),
-    kind: "shape",
-    geometry,
-    ...(props.fill !== undefined && { fill: painted(props.fill, "fill") }),
-    ...(fillOpacity !== undefined && fillOpacity !== 1 && { fillOpacity }),
-    ...(stroke && { stroke }),
-    ...(trim !== undefined && { trim }),
+    kind: "group",
+    children: written?.under ? [...under, ...over] : [...over, ...under],
   };
+};
+
+/** The noise filter a `noise()` paint lowers to: it repaints whatever the node draws with the ramp. */
+const noiseOf = (ctx: Ctx, paint: Noise, timing: Timing, where: string): Effect => {
+  const what = `noise frequency on ${where}`;
+  const frequency = animated<number | Vec, Vec>(paint.frequency, pair, timing, mixVec, what);
+  const values = isLane(frequency) ? frequency.keys.map((key) => key.value) : [frequency];
+
+  if (!values.flat().every((value) => value >= 0 && Number.isFinite(value)))
+    throw new SceneError(
+      `${what} needs numbers of 0 or more, got ${JSON.stringify(values)}.`,
+      "Noise frequency is cycles per unit: try 0.01 for a soft mottle.",
+    );
+  const { ramp } = paint;
+
+  return {
+    kind: "noise",
+    frequency,
+    octaves: paint.octaves,
+    seed: paint.seed,
+    type: paint.type,
+    stitch: paint.stitch,
+    ramp: ramp.map((stop, i) => {
+      const [offset, color] = isArray(stop) ? stop : [i / (ramp.length - 1), stop];
+
+      return { offset, color: solidOf(ctx, color, `the noise ramp on ${where}`) };
+    }),
+  };
+};
+
+const onePaint = (paints: Paints, where: string): Anim<Paint> => {
+  if (isArray(paints))
+    throw new SceneError(
+      `${where} has a layered stroke, which only a <Shape> takes.`,
+      "Give the <Text> one stroke paint, or stack two <Text>s in a <Group>.",
+    );
+
+  return paints;
 };
 
 const strokeOf = (
@@ -433,7 +554,7 @@ const strokeOf = (
   return {
     color: blendable(
       animated(
-        written.color,
+        onePaint(written.color, where),
         (value: Paint) => colorOf(ctx, value, where, timing, box),
         timing,
         mixPaint,
@@ -451,6 +572,45 @@ const strokeOf = (
     }),
     fixedWidth: written.fixedWidth ?? false,
   };
+};
+
+/** A <Text> with its `none` paints left out (all of it, when it paints nothing else) and a noise fill as a filter. */
+const paintedText = (
+  ctx: Ctx,
+  props: TextProps,
+  key: string,
+  timing: Timing,
+): SceneNode | undefined => {
+  const where = ctx.notes.names.named(key);
+  const { fill, stroke, ...rest } = props;
+  const lined = stroke && !isNone(stroke.color) ? stroke : undefined;
+
+  if (isNone(fill) && lined === undefined) return undefined;
+
+  if (fill === undefined && stroke !== undefined && lined === undefined) return undefined;
+
+  if (isArray(fill) || isArray(lined?.color))
+    throw new SceneError(
+      `${where} has a layered ${isArray(fill) ? "fill" : "stroke"}, which only a <Shape> takes.`,
+      "Give the <Text> one paint, or stack two <Text>s in a <Group> and blend the top one.",
+    );
+
+  const kept = {
+    ...rest,
+    ...(fill !== undefined && !isNone(fill) && { fill: isNoise(fill) ? standIn(fill) : fill }),
+    ...(lined && { stroke: lined }),
+  };
+
+  if (!isNoise(fill)) return text(ctx, kept, key, timing);
+
+  if (lined)
+    throw new SceneError(
+      `${where} has a noise() fill and a stroke, and the noise would paint over both.`,
+      "Draw the stroke as a second <Text> under it in a <Group>, or drop the stroke.",
+    );
+  const node = text(ctx, kept, key, timing);
+
+  return { ...node, effects: [noiseOf(ctx, fill, timing, where), ...node.effects] };
 };
 
 const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNode => {
@@ -884,12 +1044,6 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
 
   const stroke = props.stroke && strokeOf(ctx, props.stroke, timing, where, box);
 
-  if (stroke?.dashOffset !== undefined && trim !== undefined)
-    throw new SceneError(
-      `${where} has both a draw or trim and a stroke dashOffset, and both drive the dash.`,
-      "Pick one: animate draw to draw the stroke on, or dashOffset to march its dashes.",
-    );
-
   const drawn = strokedBox(box, stroke);
   const home = pinned(props.anchor, drawn, where, lines[0]?.at[1] ?? 0);
 
@@ -1093,7 +1247,7 @@ const lowerAll = (
   elements: readonly SceneElement[],
   timing: Timing,
   parent: string,
-  taken: Set<string> = new Set(),
+  taken: Taken = new Map(),
 ): SceneNode[] =>
   elements.flatMap((element): SceneNode[] => {
     const given = sceneElement(element, parent ? ctx.notes.names.named(parent) : "The scene");
@@ -1112,7 +1266,7 @@ const lowerAll = (
 
     if (given.type === "morph" && given.only !== undefined) {
       const states = given.states.map((state) => {
-        const names = new Set(taken);
+        const names: Taken = new Map(taken);
 
         return {
           nodes: arrangeState(lowerAll(ctx, state, timing, parent, names), ctx.notes),
@@ -1120,7 +1274,7 @@ const lowerAll = (
         };
       });
 
-      for (const { names } of states) for (const each of names) taken.add(each);
+      for (const { names } of states) for (const [each, list] of names) taken.set(each, list);
 
       return states[given.only]!.nodes;
     }
@@ -1150,8 +1304,16 @@ const lowerAll = (
     }
 
     const name = keyOf(given);
+    const list = listOf(given);
+    const earlier = name === undefined ? undefined : taken.get(name);
 
-    if (name !== undefined && taken.has(name))
+    // Two lists in one parent may both write a key: the later node is told apart by its list's place.
+    const apart =
+      list !== undefined && earlier !== undefined && earlier !== list
+        ? `${name}~${list}`
+        : undefined;
+
+    if (name !== undefined && taken.has(apart ?? name))
       throw new SceneError(
         `Two nodes are both keyed "${name}"${parent && ` inside ${ctx.notes.names.named(parent)}`}.`,
         "Give each a key of its own.",
@@ -1162,12 +1324,14 @@ const lowerAll = (
       throw new SceneError(`A key can't contain "/", got "${name}".`, "Join words with - or _.", {
         ...(writtenAt(given) && { source: writtenAt(given)! }),
       });
-    let own = name;
+    let own = apart ?? name;
 
     for (let index = taken.size; own === undefined; index++)
       if (!taken.has(`#${index}`)) own = `#${index}`;
-    taken.add(own);
+    taken.set(own, list);
     const key = parent ? `${parent}/${own}` : own;
+
+    if (apart !== undefined) ctx.notes.names.share(parent ? `${parent}/${name}` : name!, key);
     const entry = nameFor(ctx, given, name, parent);
 
     ctx.notes.names.set(key, entry);
@@ -1230,9 +1394,9 @@ const lowered = (
 
   switch (el.type) {
     case "shape":
-      return done(shape(ctx, el.props, key, timing));
+      return [shape(ctx, el.props, key, timing)].flatMap((node) => (node ? done(node) : []));
     case "text":
-      return done(text(ctx, el.props, key, timing));
+      return [paintedText(ctx, el.props, key, timing)].flatMap((node) => (node ? done(node) : []));
     case "picture":
       return done(picture(ctx, el.props, key, timing));
     case "group": {
@@ -1333,6 +1497,43 @@ const lengthOf = (
   return out;
 };
 
+const embossOf = (
+  ctx: Ctx,
+  effect: Extract<EffectProps, { kind: "emboss" }>,
+  where: string,
+): Effect => {
+  const { azimuth, elevation, depth, radius, specular } = effect;
+
+  const check = (value: number, name: string, ok: boolean, range: string) => {
+    if (!(ok && Number.isFinite(value)))
+      throw new SceneError(
+        `emboss ${name} on ${where} needs ${range}, got ${value}.`,
+        "emboss() takes plain numbers: emboss({ light: { azimuth: 225, elevation: 45 }, depth: 3 }).",
+      );
+  };
+
+  check(azimuth, "light azimuth", isNumber(azimuth), "a number of degrees");
+  check(
+    elevation,
+    "light elevation",
+    elevation > 0 && elevation <= 90,
+    "degrees above 0 and up to 90",
+  );
+  check(depth, "depth", depth >= 0, "a number of 0 or more");
+  check(radius, "radius", radius >= 0, "a number of 0 or more");
+  check(specular, "specular", specular >= 0, "a number of 0 or more");
+
+  return {
+    kind: "emboss",
+    azimuth,
+    elevation,
+    depth,
+    radius,
+    specular,
+    color: solidOf(ctx, effect.color, `emboss on ${where}`),
+  };
+};
+
 const effectOf = (ctx: Ctx, effect: EffectProps, timing: Timing, where: string): Effect => {
   if (effect.kind === "blur")
     return { kind: "blur", radius: lengthOf(effect.radius, timing, `blur on ${where}`) };
@@ -1375,9 +1576,11 @@ const effectOf = (ctx: Ctx, effect: EffectProps, timing: Timing, where: string):
     };
   }
 
+  if (effect.kind === "emboss") return embossOf(ctx, effect, where);
+
   if (effect.kind !== "shadow")
     throw new SceneError(
-      `effects on ${where} takes blur(), shadow(), adjust() and displace(), got ${JSON.stringify(effect)}.`,
+      `effects on ${where} takes blur(), shadow(), adjust(), displace() and emboss(), got ${JSON.stringify(effect)}.`,
     );
   const opacity = animated(effect.opacity, keep, timing, mixNumber, `shadow opacity on ${where}`);
 
@@ -1467,7 +1670,7 @@ const dressed = (
     ...node,
     ...(clip !== undefined && { clip: geometryOf(clip, timing, where, "clip") }),
     ...(mask && { mask }),
-    effects: effects.map((effect) => effectOf(ctx, effect, timing, where)),
+    effects: [...node.effects, ...effects.map((effect) => effectOf(ctx, effect, timing, where))],
     ...(blend !== undefined && blend !== "normal" && { blend }),
     ...(scheme !== undefined && { scheme }),
   };
@@ -1517,7 +1720,10 @@ const backdropOf = (
   key: string,
   timing: Timing,
 ): BackdropOf | undefined => {
-  if (fill === undefined && stroke === undefined) return undefined;
+  const painted = (paints: Paints | undefined) =>
+    paints !== undefined && layersOfPaints(paints).length > 0;
+
+  if (!painted(fill) && !painted(stroke?.color)) return undefined;
   const line = stroke === undefined ? 0 : restOf(stroke.width ?? 1);
 
   return (box) => ({
@@ -1535,7 +1741,7 @@ const backdropOf = (
       },
       `${key}/background`,
       timing,
-    ),
+    )!,
     authored: { backdrop: true },
   });
 };

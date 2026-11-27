@@ -15,6 +15,8 @@ export type Feature =
   | "shadow"
   | "adjust"
   | "displace"
+  | "noise"
+  | "emboss"
   | "softBlur"
   | "linearGradient"
   | "radialGradient"
@@ -34,6 +36,8 @@ export const FEATURES: Readonly<Record<Feature, string>> = {
   shadow: "a shadow",
   adjust: "a color adjustment",
   displace: "a noise displacement",
+  noise: "a noise paint",
+  emboss: "an emboss",
   softBlur: "a blur under 1.5 units",
   linearGradient: "a linear gradient",
   radialGradient: "a radial gradient",

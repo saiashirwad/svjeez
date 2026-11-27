@@ -3,6 +3,7 @@ import { lerpPoint } from "../model/curve";
 import { SceneError } from "../model/scene-error";
 import type {
   Animated,
+  Blend,
   Box,
   Color as ModelColor,
   Gradient as ModelGradient,
@@ -18,7 +19,8 @@ import { noMix, same, type Mix } from "../model/steps";
 import type { Child } from "./nodes";
 import type { Anim } from "./track";
 import type { Color, Paint } from "./values";
-import { isArray } from "../model/guards";
+import { isArray, isNumber, isString } from "../model/guards";
+import { hexBytes, hexOf, type Hex } from "../model/color";
 
 export type Stops = readonly Color[] | readonly (readonly [offset: number, color: Color])[];
 
@@ -163,6 +165,139 @@ export const pattern = ({ size, tile, offset = [0, 0], rotate = 0 }: PatternOpti
     throw new SceneError(`pattern() needs a finite rotate angle, got ${rotate}.`);
 
   return { kind: "pattern", size, tile, offset, rotate };
+};
+
+export interface Noise {
+  readonly kind: "noise";
+  readonly frequency: Anim<number> | Anim<Vec>;
+  readonly octaves: number;
+  readonly seed: number;
+  readonly type: "fractal" | "turbulence";
+  readonly ramp: Stops;
+  readonly stitch: boolean;
+}
+
+export interface NoiseOptions {
+  /**
+   * Noise cycles per unit, one number or `[fx, fy]` (around 0.005 is a soft mottle, 0.5 a fine grain). A track
+   * animates it.
+   */
+  readonly frequency: Anim<number> | Anim<Vec>;
+  /** Layers of finer noise, 1 or more (default 3). */
+  readonly octaves?: number;
+  /** Picks the noise; the same seed draws the same picture. */
+  readonly seed: number;
+  /** `"fractal"` (default) is a soft cloud; `"turbulence"` has sharp creases, like marble or fibre. */
+  readonly type?: "fractal" | "turbulence";
+  /**
+   * The colors noise intensity maps to, low to high, as colors spread evenly or `[offset, color]` pairs. Intensity
+   * gathers around 0.5, so the middle of the ramp covers most of the surface. Translucent colors make a texture to
+   * lay over another fill.
+   */
+  readonly ramp: Stops;
+  /** Smooths the noise to tile seamlessly at the edges of the node's box. */
+  readonly stitch?: boolean;
+}
+
+/** Leaves a part unpainted: a node whose fill and stroke are both `none` is left out of the scene. */
+export interface None {
+  readonly kind: "none";
+}
+
+/** One layer of a layered fill or stroke, painted over the layers before it. */
+export interface PaintLayer {
+  readonly paint: Anim<Paint>;
+  /** How it composites onto the layers under it. */
+  readonly blend?: "normal" | Blend;
+  readonly opacity?: Anim<number>;
+}
+
+/** What a `fill` or stroke `color` takes: one paint, or layers painted bottom to top. */
+export type Paints = Anim<Paint> | readonly (Anim<Paint> | PaintLayer)[];
+
+export const none: None = Object.freeze({ kind: "none" });
+
+const wholeAtLeast = (value: number, low: number): boolean =>
+  Number.isInteger(value) && value >= low;
+
+export const noise = ({
+  frequency,
+  octaves = 3,
+  seed,
+  type = "fractal",
+  ramp,
+  stitch = false,
+}: NoiseOptions): Noise => {
+  const still = isNumber(frequency) || isArray(frequency) ? frequency : undefined;
+
+  if (
+    still !== undefined &&
+    ![still].flat().every((value) => isNumber(value) && value >= 0 && Number.isFinite(value))
+  )
+    throw new SceneError(
+      `noise() needs a frequency of 0 or more, as one number or [fx, fy], got ${JSON.stringify(frequency)}.`,
+      "Try frequency: 0.01 for a soft mottle, or [0.9, 0.06] for fibres stretched along y.",
+    );
+
+  if (!wholeAtLeast(octaves, 1))
+    throw new SceneError(`noise() needs a whole number of 1 or more octaves, got ${octaves}.`);
+
+  if (!Number.isInteger(seed))
+    throw new SceneError(`noise() needs a whole-number seed, got ${seed}.`);
+
+  if (type !== "fractal" && type !== "turbulence")
+    throw new SceneError(
+      `noise() has type "${String(type)}", but a type is "fractal" or "turbulence".`,
+    );
+
+  if (!isArray(ramp))
+    throw new SceneError(
+      `noise() needs a ramp of colors, got ${JSON.stringify(ramp)}.`,
+      'Give it two colors or more, as in ramp: ["#0d2f63", "#1d58a8"].',
+    );
+
+  return { kind: "noise", frequency, octaves, seed, type, ramp: checked(ramp, "noise()"), stitch };
+};
+
+export const isNoise = (paint: unknown): paint is Noise =>
+  typeof paint === "object" && paint !== null && "kind" in paint && paint.kind === "noise";
+
+export const isNone = (paint: unknown): paint is None =>
+  typeof paint === "object" && paint !== null && "kind" in paint && paint.kind === "none";
+
+export const isPaintLayer = (paint: unknown): paint is PaintLayer =>
+  typeof paint === "object" && paint !== null && !isArray(paint) && "paint" in paint;
+
+/** The layers a fill or stroke color paints, bottom to top, with `none` layers left out. */
+export const layersOfPaints = (given: Paints): PaintLayer[] =>
+  (isArray(given) ? given : [given])
+    .map((each): PaintLayer => (isPaintLayer(each) ? each : { paint: each }))
+    .filter((layer) => !isNone(layer.paint));
+
+const opaque = (hex: Hex): Hex => {
+  const [r, g, b] = hexBytes(hexOf(hex, "noise()", true));
+
+  return `#${[r, g, b].map((byte) => byte.toString(16).padStart(2, "0")).join("")}`;
+};
+
+/**
+ * The solid color a noise fill paints under its filter: opaque, so the filter reads the node's whole shape, and the
+ * ramp color nearest its middle, so checks that read the fill see about what shows.
+ */
+export const standIn = ({ ramp }: Noise): Color => {
+  const placed = ramp.map((stop, i) =>
+    isArray(stop) ? stop : ([i / (ramp.length - 1), stop] as const),
+  );
+
+  const [, middle] = placed.reduce((best, each) =>
+    Math.abs(each[0] - 0.5) < Math.abs(best[0] - 0.5) ? each : best,
+  );
+
+  if (isString(middle)) return opaque(middle);
+
+  return hexBytes(middle.light)[3] === 255 && hexBytes(middle.dark)[3] === 255
+    ? middle
+    : opaque(middle.light);
 };
 
 const DEG = Math.PI / 180;

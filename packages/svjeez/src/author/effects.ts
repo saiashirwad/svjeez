@@ -24,6 +24,15 @@ export type Effect =
       readonly blur: Anim<number>;
       readonly color: Anim<Color>;
       readonly opacity: Anim<number>;
+    }
+  | {
+      readonly kind: "emboss";
+      readonly azimuth: number;
+      readonly elevation: number;
+      readonly depth: number;
+      readonly radius: number;
+      readonly color: Color;
+      readonly specular: number;
     };
 
 export const blur = (radius: Anim<number>): Effect => ({ kind: "blur", radius });
@@ -83,4 +92,37 @@ export const shadow = ({
   blur,
   color,
   opacity,
+});
+
+export interface EmbossOptions {
+  /**
+   * Where the light comes from: `azimuth` in degrees clockwise from +x (y points down; default 225, the top left) and
+   * `elevation` in degrees up from the surface (default 45).
+   */
+  readonly light?: { readonly azimuth?: number; readonly elevation?: number };
+  /** How high the raised surface stands, in units (default 3). Larger is a steeper, darker bevel. */
+  readonly depth?: number;
+  /** How far in from the edge the bevel rounds off, in units (default 1.5). */
+  readonly radius?: number;
+  /** The color of the light (default white). */
+  readonly color?: Color;
+  /** How bright the glossy highlight is, 0 for a matte surface (default 0.6). */
+  readonly specular?: number;
+}
+
+/** Lights the node's own shape as a bump map, so thread, glaze or a stamp reads as raised. */
+export const emboss = ({
+  light: { azimuth = 225, elevation = 45 } = {},
+  depth = 3,
+  radius = 1.5,
+  color = "#ffffff",
+  specular = 0.6,
+}: EmbossOptions = {}): Effect => ({
+  kind: "emboss",
+  azimuth,
+  elevation,
+  depth,
+  radius,
+  color,
+  specular,
 });

@@ -111,7 +111,9 @@ export const valuesOf = (node: SceneNode): Named[] => {
         { name: "displace scale", kind: "number", value: effect.scale },
         { name: "displace frequency", kind: "number", value: effect.frequency },
       );
-    else
+    else if (effect.kind === "noise")
+      out.push({ name: "noise frequency", kind: "vec", value: effect.frequency });
+    else if (effect.kind === "shadow")
       out.push(
         { name: "shadow offset", kind: "vec", value: effect.offset },
         { name: "shadow blur", kind: "number", value: effect.blur },

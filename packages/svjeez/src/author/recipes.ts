@@ -307,11 +307,11 @@ const structure = (outline: ReturnType<typeof outlineOf>): string =>
 /** The track type for what a sample returns: numbers, points or geometry. */
 export type Sampled<T> = T extends number ? number : T extends Vec ? Vec : Geometry;
 
-export function sampled<T extends number | Vec | Geometry>(
+const sampledTrack = <T extends number | Vec | Geometry>(
   sample: (t: Seconds) => T,
   window: Interval,
   options: SampledOptions,
-): Track<Sampled<T>> {
+): Track<Sampled<T>> => {
   const round = roundTo(options.precision, "sampled()");
   let shape: string | undefined;
 
@@ -359,4 +359,65 @@ export function sampled<T extends number | Vec | Geometry>(
 
   // SAFETY: every sample is a T, so every value of the track is a Sampled<T>.
   return out as Track<Sampled<T>>;
-}
+};
+
+/** A record of tracks, one per key, each typed by what that key's sample returns. */
+export type SampledAll<R extends Record<string, number | Vec | Geometry>> = {
+  readonly [K in keyof R]: Track<Sampled<R[K]>>;
+};
+
+/**
+ * Samples a function of time into a Track.
+ *
+ * Time is measured from the start of the window. The function's values are simplified with
+ * Ramer-Douglas-Peucker under `tolerance`, so smooth motion keeps few keyframes.
+ */
+export const sampled = Object.assign(sampledTrack, {
+  /**
+   * Samples several quantities that come from one computation (an IK solve, say), calling `sample` once per
+   * time and returning a Track per key.
+   *
+   * Policy: each key is simplified independently from the shared samples, so a gently moving key doesn't
+   * inherit the keyframes of a fast one. The tracks match what `sampled` gives for that key alone, and the
+   * output is never larger than one shared set of times. Geometry must keep the same shape per key.
+   */
+  all<R extends Record<string, number | Vec | Geometry>>(
+    sample: (t: Seconds) => R,
+    window: Interval,
+    options: SampledOptions,
+  ): SampledAll<R> {
+    const cache = new Map<Seconds, R>();
+
+    const at = (t: Seconds): R => {
+      let record = cache.get(t);
+
+      if (!record) cache.set(t, (record = sample(t)));
+
+      return record;
+    };
+
+    const keys = Object.keys(at(0));
+
+    const tracks: Record<string, ReturnType<typeof sampledTrack>> = {};
+
+    for (const key of keys) {
+      tracks[key] = sampledTrack(
+        (t) => {
+          const value = at(t)[key];
+
+          if (value === undefined)
+            throw new SceneError(
+              `sampled.all() returned no "${key}" at t=${t}; every sample needs every key.`,
+            );
+
+          return value;
+        },
+        window,
+        options,
+      );
+    }
+
+    // SAFETY: `tracks` has exactly the keys of R, each built from that key's values, which are R[K].
+    return tracks as SampledAll<R>;
+  },
+});

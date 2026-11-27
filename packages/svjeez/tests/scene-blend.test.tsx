@@ -132,7 +132,7 @@ describe("stroke dashOffset", () => {
     ).toThrow("has a dashOffset but no dash to slide");
   });
 
-  test("can't be combined with trim", () => {
+  test("combines with trim, which reveals the dashes through a mask", () => {
     expect(() =>
       made(() => (
         <Shape
@@ -141,7 +141,7 @@ describe("stroke dashOffset", () => {
           trim={[0, 0.5]}
         />
       )),
-    ).toThrow("both drive the dash");
+    ).not.toThrow();
   });
 
   test("morph blends the offset like the width, treating a missing one as 0", () => {

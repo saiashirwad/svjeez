@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { Group, Shape, circle, scene, type SceneElement } from "svjeez";
-import type { Model } from "svjeez/tools";
+import { Group, Shape, circle, h, morph, rect, ref, scene, span, type SceneElement } from "svjeez";
+import { isLane, type Model } from "svjeez/tools";
 
 const made = (build: () => SceneElement): Model.Scene =>
   scene({ size: [100, 40], duration: 1, title: "Keys" }, build);
@@ -56,5 +56,134 @@ describe("key", () => {
     const wrong = [{}, true, Number.NaN, null] as never[];
 
     for (const key of wrong) expect(() => bad(key)).toThrow("A key is a string or a number");
+  });
+
+  describe("lists", () => {
+    const dot = (key: number | string, x = 0) => (
+      <Shape key={key} geometry={rect(4, 4)} at={[x, 0]} fill="#000000" />
+    );
+
+    const two = (xs: number[], ys: number[], dx = 0) => (
+      <Group>
+        {xs.map((x) => dot(x, x * 10 + dx))}
+        {ys.map((y) => dot(y, y * 10 + 50 + dx))}
+      </Group>
+    );
+
+    const groupOf = (model: Model.Scene): Model.GroupNode => {
+      const [group] = model.root.children;
+
+      if (group?.kind !== "group") throw new Error("expected a group");
+
+      return group;
+    };
+
+    test("two lists in one parent can both key from 0", () => {
+      const model = made(() => two([0, 1], [0, 1]));
+
+      expect(keysOf(model)).toEqual(["0", "1", "0~1", "1~1"]);
+    });
+
+    test("keys stay as written when they don't collide", () => {
+      const model = made(() => two([0, 1], [2, 3]));
+
+      expect(keysOf(model)).toEqual(["0", "1", "2", "3"]);
+    });
+
+    test("a key repeated inside one list is still an error", () => {
+      expect(() => made(() => two([0, 0], [1]))).toThrow('Two nodes are both keyed "0"');
+      expect(() => made(() => two([1], [0, 0]))).toThrow('Two nodes are both keyed "0"');
+      expect(() => made(() => two([0], [0, 0]))).toThrow('Two nodes are both keyed "0"');
+    });
+
+    test("a key repeated between plain siblings, or a plain sibling and a list, is an error", () => {
+      expect(() =>
+        made(() => (
+          <Group>
+            {dot(0)}
+            {dot(0)}
+          </Group>
+        )),
+      ).toThrow('Two nodes are both keyed "0"');
+
+      expect(() =>
+        made(() => (
+          <Group>
+            {dot(0)}
+            {[0].map((k) => dot(k))}
+          </Group>
+        )),
+      ).toThrow('Two nodes are both keyed "0"');
+    });
+
+    test("a key unique in its parent is found by part() even in a later list", () => {
+      const box = ref();
+
+      const model = made(() => (
+        <Group>
+          <Group ref={box}>
+            {["agent"].map((k) => dot(k, 0))}
+            {["lint", "test"].map((k, i) => dot(k, 20 + i * 20))}
+          </Group>
+          <Shape key="pin" geometry={circle(1)} at={box.part("lint").center} fill="#000000" />
+        </Group>
+      ));
+
+      expect(keysOf(model)).toEqual(["#0", "pin"]);
+      // "lint" covers [20, 0] to [24, 4]; the pin's box starts at its center.
+      expect(model.root.children[1]!.at).toEqual([23, 3]);
+    });
+
+    test("part() of a key two lists share is ambiguous", () => {
+      const box = ref();
+
+      expect(() =>
+        made(() => (
+          <Group>
+            <Group ref={box}>
+              {[0, 1].map((k) => dot(k, k * 10))}
+              {[0].map((k) => dot(k, 50))}
+            </Group>
+            <Shape key="pin" geometry={circle(1)} at={box.part("0").center} fill="#000000" />
+          </Group>
+        )),
+      ).toThrow(
+        'ref().part("0").center is ambiguous: lists in <Group> each hold a part keyed "0". They are "0", "0~1".',
+      );
+    });
+
+    test("morph tweens two mapped lists in one parent by their keys", () => {
+      const model = made(() => morph(two([0, 1], [0, 1]), two([0, 1], [0, 1], 100), span(0, 1)));
+      const group = groupOf(model);
+
+      // One node per key, not an exit and an enter for each: the states matched.
+      expect(group.children.map((node) => node.key)).toEqual(["#0/0", "#0/1", "#0/0~1", "#0/1~1"]);
+
+      const ends = group.children.map((node) => {
+        if (!isLane(node.at)) throw new Error(`${node.key} doesn't move`);
+
+        return [node.at.keys[0].value[0], node.at.keys.at(-1)!.value[0]];
+      });
+
+      expect(ends).toEqual([
+        [0, 100],
+        [10, 110],
+        [50, 150],
+        [60, 160],
+      ]);
+    });
+
+    test("h() keeps keys as JSX does", () => {
+      const model = made(() =>
+        h(
+          Group,
+          null,
+          [0, 1].map((k) => h(Shape, { key: k, geometry: circle(2), fill: "#000000" })),
+          [0, 1].map((k) => h(Shape, { key: k, geometry: circle(2), fill: "#000000" })),
+        ),
+      );
+
+      expect(keysOf(model)).toEqual(["0", "1", "0~1", "1~1"]);
+    });
   });
 });

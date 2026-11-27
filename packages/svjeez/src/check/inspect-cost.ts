@@ -4,7 +4,7 @@ import { add, isGone, label, type Survey } from "./inspect-context";
 import { changesOf, seconds, units, valuesOf, type Stretch } from "./survey";
 
 /** What a filter reads: its own parameters. Anything else that moves under it makes it run again. */
-const PARAMETERS = /^(blur|adjust|displace|shadow)\b/;
+const PARAMETERS = /^(blur|adjust|displace|shadow|noise)\b/;
 
 /** What of a filtered node itself is redrawn through its filter (placing, fading and scaling it are not). */
 const OWN = new Set([

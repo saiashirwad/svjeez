@@ -14,7 +14,9 @@ import type { Effect } from "./effects";
 import type { TextContent } from "./count";
 import type { TextFitOptions } from "./text";
 import type { Geometry, Paint } from "./values";
+import type { Paints } from "./paint";
 import { isArray, isNumber, isObject, isString } from "../model/guards";
+import { inList } from "./identity";
 
 export { ref } from "./refs";
 
@@ -56,14 +58,15 @@ export interface Common {
 }
 
 export interface StrokeProps {
-  readonly color: Anim<Paint>;
+  /** One paint, or layers painted bottom to top (on a `<Shape>`); `none` leaves the stroke out. */
+  readonly color: Paints;
   readonly width?: Anim<number>;
   /** How an open end is finished: cut flat at the end point, rounded, or squared off half a width past it. */
   readonly cap?: "flat" | "round" | "square";
   /** How a corner is finished: a sharp point, rounded, or cut flat. */
   readonly join?: "sharp" | "round" | "flat";
   readonly dash?: readonly number[];
-  /** Slides the dash pattern along the stroke. Needs `dash`, and can't be combined with `draw` or `trim`. */
+  /** Slides the dash pattern along the stroke. Needs `dash`. Works with `draw` and `trim`, which reveal the dashed stroke through a mask. */
   readonly dashOffset?: Anim<number>;
   /** Keep the stroke's width when the node is scaled. */
   readonly fixedWidth?: boolean;
@@ -87,7 +90,8 @@ export interface Backdrop {
 
 export interface ShapeProps extends Common {
   readonly geometry: Anim<Geometry>;
-  readonly fill?: Anim<Paint>;
+  /** One paint, or layers painted bottom to top: `[gradient, { paint: noise(…), blend: "multiply" }]`. */
+  readonly fill?: Paints;
   /** Opacity of the fill alone (0 to 1), so one shape can draw its stroke first and fade in its fill after. */
   readonly fillOpacity?: Anim<number>;
   readonly stroke?: StrokeProps;
@@ -267,10 +271,22 @@ export const sceneElement = (
   );
 };
 
-export const flat = (child: Child): SceneElement[] => {
+/**
+ * Flattens children. When they hold several lists, as in `{a.map(…)}{b.map(…)}`, each element of a list remembers the
+ * list's place among its siblings. Keys stay as written, so `part(key)` finds them; the place only tells apart two
+ * lists that both key from 0.
+ */
+export const flat = (child: Child, list?: string): SceneElement[] => {
   if (!child || child === true) return [];
 
-  return isArray(child) ? child.flatMap(flat) : [child];
+  if (isArray(child))
+    return child.flatMap((each, index) =>
+      isArray(each)
+        ? flat(each, list === undefined ? `${index}` : `${list}.${index}`)
+        : flat(each, list),
+    );
+
+  return list === undefined ? [child] : [inList(child, list)];
 };
 
 export const Group = ({

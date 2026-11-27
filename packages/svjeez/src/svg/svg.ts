@@ -89,6 +89,8 @@ const supports: Readonly<Record<Feature, Support>> = {
   shadow: EXACT,
   adjust: EXACT,
   displace: EXACT,
+  noise: EXACT,
+  emboss: EXACT,
   softBlur: SOFT_BLUR,
   linearGradient: EXACT,
   radialGradient: EXACT,
@@ -1161,7 +1163,8 @@ const OPAQUE: Rgba = [1, 1, 1, 1];
 const dashedTrim = (node: SceneNode): GroupNode | undefined => {
   if (node.kind !== "shape" || !node.stroke?.dash || node.trim === undefined) return undefined;
 
-  if (!isLane(node.trim) && !isLane(node.geometry)) return undefined;
+  if (!isLane(node.trim) && !isLane(node.geometry) && node.stroke.dashOffset === undefined)
+    return undefined;
   const { kind: _, geometry, fill, fillOpacity, stroke, trim, clip, mask, ...base } = node;
 
   const still = {
@@ -1172,7 +1175,7 @@ const dashedTrim = (node: SceneNode): GroupNode | undefined => {
     effects: [],
   };
 
-  const { dash: _dash, ...solid } = stroke;
+  const { dash: _dash, dashOffset: _offset, ...solid } = stroke;
 
   const outline: GroupNode = {
     kind: "group",
