@@ -182,6 +182,22 @@ describe("text", () => {
   });
 });
 
+describe("baseline-center", () => {
+  const placed = (anchor: "baseline" | "baseline-center") =>
+    placements(
+      made(() => (
+        <Text key="t" font={mono} size={10} at={[30, 20]} anchor={anchor} fill="#000000">
+          Ab
+        </Text>
+      )),
+      0,
+    )[0]!.box;
+
+  test("places exactly as baseline", () => {
+    expect(placed("baseline-center")).toEqual(placed("baseline"));
+  });
+});
+
 describe("containers", () => {
   test("a row places each child's box in its slot, whatever its geometry", () => {
     const model = made(() => (

@@ -326,17 +326,26 @@ const geometryOf = (
   timing: Timing,
   where: string,
   what = "geometry",
+  rule?: ShapeProps["rule"],
 ): Animated<Outline> => {
-  if (isDerived(value)) return derivedOf(value, outlineOf, timing, `${what} on ${where}`);
+  const ruled = (given: Geometry): Outline => {
+    const outline = outlineOf(given);
 
-  if (!isTrack(value)) return outlineOf(value);
+    return rule !== undefined && outline.kind === "path" && outline.rule !== rule
+      ? { ...outline, rule }
+      : outline;
+  };
+
+  if (isDerived(value)) return derivedOf(value, ruled, timing, `${what} on ${where}`);
+
+  if (!isTrack(value)) return ruled(value);
   const { data } = readOf(value, timing, `${what} on ${where}`);
 
   const authored = [data.initial, ...data.steps.map((step) => step.values)].flatMap(
     (values): Geometry[] => (values.value === undefined ? [] : [values.value]),
   );
 
-  const blended = matched(authored.map(outlineOf), `${what} on ${where}`);
+  const blended = matched(authored.map(ruled), `${what} on ${where}`);
   const lowered = new Map(authored.map((given, i) => [given, blended[i]!]));
   const lane = mapped(data, "value", (given) => lowered.get(given)!);
 
@@ -384,7 +393,7 @@ const shape = (
       `${where} paints nothing: it has no fill and no stroke.`,
       "Give it a fill, as in fill={theme.text}, or a stroke, as in stroke={{ color: theme.text }}.",
     );
-  const geometry = geometryOf(props.geometry, timing, where);
+  const geometry = geometryOf(props.geometry, timing, where, "geometry", props.rule);
 
   if (props.anchor !== undefined && isLane(geometry)) {
     const points = geometry.keys.map((key) => pinned(props.anchor, outlineBoxOf(key.value), where));

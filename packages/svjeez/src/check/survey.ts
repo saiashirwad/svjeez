@@ -174,17 +174,37 @@ const keysOver = <T>(lane: Lane<T>, duration: Seconds): readonly Key<T>[] =>
 
 export type Stretch = readonly [from: Seconds, to: Seconds];
 
+const stretchOf = (a: Key<unknown>, b: Key<unknown>): Stretch | undefined =>
+  !b.via && same(a.value, b.value) ? undefined : isCut(b) ? [b.t, b.t] : [a.t, b.t];
+
 export const changesOf = (value: Animated<unknown>, duration: Seconds): Stretch[] => {
   if (!isLane(value)) return [];
-  const keys = keysOver(value, duration);
   const out: Stretch[] = [];
+  const push = (stretch: Stretch | undefined) => stretch && out.push(stretch);
+  const { period } = value;
 
-  for (let i = 1; i < keys.length; i++) {
-    const [a, b] = [keys[i - 1]!, keys[i]!];
+  if (period === undefined || !(period > 0)) {
+    for (let i = 1; i < value.keys.length; i++) push(stretchOf(value.keys[i - 1]!, value.keys[i]!));
 
-    if (!b.via && same(a.value, b.value)) continue;
-    out.push(isCut(b) ? [b.t, b.t] : [a.t, b.t]);
+    return out;
   }
+
+  // Unroll by hand: `unrolled` drops a key landing on the previous period's last, which is the jump back to the start.
+  let previous: Key<unknown> | undefined;
+
+  for (let start = 0; start < duration - 1e-6; start += period)
+    for (const key of value.keys) {
+      const t = start + key.t;
+
+      if (t > Math.min(duration, start + period) + 1e-6) continue;
+      const here = { ...key, t };
+
+      if (previous && key === value.keys[0]) {
+        if (!same(previous.value, key.value)) out.push([start, start]);
+      } else if (previous) push(stretchOf(previous, here));
+
+      previous = here;
+    }
 
   return out;
 };

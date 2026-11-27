@@ -63,7 +63,7 @@ export const colorText = (color: Color): CssColor =>
     ? `#${byte(color[0])}${byte(color[1])}${byte(color[2])}${color[3] < 1 ? byte(color[3]) : ""}`
     : `var(--${color.name})`;
 
-const nextId = (defs: Defs, base: string): string => {
+export const nextId = (defs: Defs, base: string): string => {
   const count = (defs.counts.get(base) ?? 0) + 1;
 
   defs.counts.set(base, count);

@@ -520,7 +520,7 @@ describe("the nine places", () => {
         </Text>
       )),
     ).toThrow(
-      `takes a place, one of ${nine}, or on a text "baseline-left", "baseline" or "baseline-right", or two fractions`,
+      `takes a place, one of ${nine}, or on a text "baseline-left", "baseline", "baseline-center" or "baseline-right", or two fractions`,
     );
   });
 });

@@ -95,6 +95,8 @@ export interface ShapeProps extends Common {
   /** Opacity of the fill alone (0 to 1), so one shape can draw its stroke first and fade in its fill after. */
   readonly fillOpacity?: Anim<number>;
   readonly stroke?: StrokeProps;
+  /** Fill rule of a compound path such as `merge(outer, inner)`: "evenodd" cuts holes where contours overlap. Default keeps the geometry's own rule ("nonzero"). */
+  readonly rule?: "nonzero" | "evenodd";
   /** How much of the outline is drawn, from 0 to 1: the same as `trim` of [0, draw]. Give draw or trim, not both. */
   readonly draw?: Anim<number>;
   /** The window of the outline that shows, [from, to] from 0 to 1. */

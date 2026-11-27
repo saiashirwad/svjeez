@@ -9,6 +9,7 @@ import { parseArgs } from "node:util";
 import { examine } from "./check/report";
 import { projectTypeProblems } from "./check/type-errors";
 import { costOf, type Cost } from "./svg/cost";
+import { BUDGET } from "./check/inspect-cost";
 import { checkPixels, formatPerf, measurePerf, renderFrames, type FrameTimes } from "./frames";
 import { isRecord, parse, type Json, type Param, type Schema, type Values } from "./params";
 import {
@@ -59,7 +60,7 @@ check reads the scene model and emits its SVG once, with no browser, and prints 
 file:line:column  code  severity: message, with what to change on a fix: line below, then the count and the animated
 lanes (css, or smil when a scene animates geometry, a filter or a gradient). --browser also measures the scene in
 headless Chromium. --at 0,1.5 also describes what is on screen at those times. --times 0,0.5 adds moments to sample.
---json prints { ok, file, scene?, problems, lanes, cost?, measured?, frames?, timeline? }, cost being { animations, repaint }. It exits 1 when any problem is an
+--json prints { ok, file, scene?, problems, lanes, cost?, measured?, frames?, timeline? }, cost being { animations, repaint, filters? }, filters the predicted filter raster a frame in millions of units² (21 fits a 60 fps frame). It exits 1 when any problem is an
 error, the scene failing to build included. With --browser and no --times the browser measures 0, seven times across
 the loop, just before the end, and the scene's keys.
 perf plays the scene in headless Chromium for --ms in each of --windows windows spread across its duration, and prints fps, p95 frame ms, dropped %,
@@ -880,7 +881,10 @@ const checkCommand = async (args: string[]): Promise<void> => {
       `${plural(by("error").length, "error")}, ${plural(by("warning").length, "warning")}, ${by("info").length} info${how}`,
     );
 
-    if (cost) console.log(`cost: ${plural(cost.animations, "animation")}, ${cost.repaint} repaint`);
+    if (cost)
+      console.log(
+        `cost: ${plural(cost.animations, "animation")}, ${cost.repaint} repaint${cost.filters === undefined ? "" : `, filters ${cost.filters}M of ${BUDGET / 1e6}M a frame`}`,
+      );
 
     if (model) {
       const names = namesOf(model);

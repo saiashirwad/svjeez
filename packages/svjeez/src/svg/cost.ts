@@ -3,6 +3,11 @@ export interface Cost {
   readonly animations: number;
   /** Area, in hundreds of square units, of filters redrawn every frame, for the share of the loop they are. */
   readonly repaint: number;
+  /**
+   * Filter raster a frame needs, sustained for half a second, in millions of units² of noise-equivalent work, as
+   * `check` predicts it from the scene model (21 fits a 60 fps frame in desktop Chrome). Absent when only the SVG is known.
+   */
+  readonly filters?: number;
 }
 
 interface Tag {

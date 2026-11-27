@@ -252,7 +252,7 @@ const stillTwin = (state: State, moving: Element): SvgNode => {
 
   if (!state.stills.includes(rule)) state.stills.push(rule);
   const plain = withoutSmil(moving);
-  const { id: _, ...attrs } = plain.attrs;
+  const { id, ...attrs } = plain.attrs;
 
   const classes = (name: string, own: AttrValue | undefined) =>
     [own, `${prefix}${name}`].filter(Boolean).join(" ");
@@ -263,7 +263,12 @@ const stillTwin = (state: State, moving: Element): SvgNode => {
       { ...moving, attrs: { ...moving.attrs, class: classes("dm", moving.attrs.class) } },
       {
         ...plain,
-        attrs: { ...attrs, class: classes("ds", attrs.class), display: "none" },
+        attrs: {
+          ...(id !== undefined && String(id).startsWith(`${prefix}g`) && { id: `${id}s` }),
+          ...attrs,
+          class: classes("ds", attrs.class),
+          display: "none",
+        },
       },
     ],
   };

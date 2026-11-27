@@ -7,6 +7,7 @@ import {
   circle,
   emboss,
   line,
+  merge,
   rect,
   scene,
   span,
@@ -253,4 +254,81 @@ describe("motion scale with origin", () => {
     expect(dot(scaled(true, { own: [200, 100] })).x).toBeCloseTo(200 + (195 - 200) * 1.05);
     expect(dot(scaled(true, [200, 100])).x).toBeCloseTo(-200 + (195 + 200) * 1.05);
   });
+});
+
+describe("shape rule", () => {
+  const ring = (rule?: "nonzero" | "evenodd") =>
+    emit([100, 100], () => (
+      <Shape
+        geometry={merge(circle(40), circle(20))}
+        offset={[50, 50]}
+        fill="#000000"
+        rule={rule}
+      />
+    ));
+
+  test("emits fill-rule only when asked", () => {
+    expect(ring()).not.toContain("fill-rule");
+    expect(ring("evenodd")).toContain('fill-rule="evenodd"');
+  });
+
+  test.if(browser)("evenodd cuts the inner circle out of the ring", async () => {
+    const evenodd = await shoot(ring("evenodd"));
+
+    expect(evenodd(50, 50)).toEqual([255, 255, 255]);
+    expect(evenodd(50, 20)).toEqual([0, 0, 0]);
+  });
+});
+
+describe("emboss under a mirrored ancestor", () => {
+  const flipped = (inner: SceneElement) => (
+    <Group offset={[150, 50]} scale={[-1, 1]} origin="own">
+      {inner}
+      <Shape key="speck" geometry={rect(2, 2)} offset={[-70, -45]} fill="#000000" />
+    </Group>
+  );
+
+  const plain = (inner: SceneElement) => <Group offset={[50, 50]}>{inner}</Group>;
+
+  const pair = (inner: SceneElement) => () => (
+    <Group>
+      {plain(inner)}
+      {flipped(inner)}
+    </Group>
+  );
+
+  const lit = (build: () => SceneElement) => async () => {
+    const at = await shoot(emit([200, 100], build));
+    const [a, b] = [at(50, 50), at(150, 50)];
+
+    expect(Math.max(...b)).toBeGreaterThan(100);
+
+    for (let i = 0; i < 3; i++) expect(Math.abs(b[i]! - a[i]!)).toBeLessThan(8);
+  };
+
+  const group = (
+    <Group key="lit" effects={[emboss({ depth: 4 })]}>
+      <Shape geometry={circle(30)} fill="#C08040" />
+    </Group>
+  );
+
+  const layered = (
+    <Shape
+      key="layered"
+      geometry={circle(30)}
+      fill={["#C08040", { paint: "#FFFFFF", effects: [emboss({ depth: 4 })] }]}
+    />
+  );
+
+  test("the filter mirrors back, with its region in the mirrored space", () => {
+    const out = emit([200, 100], pair(group));
+
+    expect(out).toMatch(
+      /<g transform="scale\(-1 1\)" filter="url\(#\w+\)">\s*<g transform="scale\(-1 1\)">/,
+    );
+  });
+
+  test.if(browser)("an embossed group inside a mirrored group is lit", lit(pair(group)));
+
+  test.if(browser)("an emboss paint layer inside a mirrored group is lit", lit(pair(layered)));
 });

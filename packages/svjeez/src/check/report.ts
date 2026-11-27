@@ -4,7 +4,7 @@ import type { Seconds } from "../model/time";
 import { costOf, type Cost } from "../svg/cost";
 import { svg } from "../svg/svg";
 import { embeddedFontsOf } from "../svg/validate";
-import { problemsOf } from "./inspect";
+import { surveyed } from "./inspect";
 import type { Problem } from "./inspect-context";
 
 export interface CheckOptions {
@@ -25,7 +25,7 @@ export const examine = (
   scene: Scene,
   times?: readonly Seconds[],
 ): Check & { readonly svg?: string } => {
-  const problems = problemsOf(scene, times);
+  const { problems, filters } = surveyed(scene, times);
   const lanes: LaneReport[] = [];
 
   if (problems.some((problem) => problem.code === "unsupported")) return { problems, lanes };
@@ -49,7 +49,7 @@ export const examine = (
   return {
     problems: [...problems, ...whole],
     lanes,
-    cost: costOf(svg.emit(scene)),
+    cost: { ...costOf(svg.emit(scene)), filters: Math.round(filters / 1e5) / 10 },
     svg: emitted,
   };
 };
