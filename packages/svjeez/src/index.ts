@@ -73,6 +73,16 @@ export {
 } from "./author/geometry";
 
 export {
+  blob,
+  brush,
+  limb,
+  scatter,
+  type BlobOptions,
+  type LimbOptions,
+  type ScatterOptions,
+} from "./author/draw";
+
+export {
   linear,
   noise,
   none,
