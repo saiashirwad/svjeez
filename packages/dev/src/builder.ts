@@ -1,4 +1,4 @@
-import type { Controls, Signals } from "@svjeez/live";
+import type { Controls, Files, Signals } from "@svjeez/live";
 import { Data, Effect, FileSystem, Path } from "effect";
 import { build, defaults, isScene, loadTypeGpu } from "svjeez/tools";
 import type { LaneReport, Scene, Schema, SvgBuild } from "svjeez/tools";
@@ -47,6 +47,32 @@ export const forget = (drop: (path: string) => boolean): void => {
   for (const key of Object.keys(require.cache)) if (drop(key)) delete require.cache[key];
 };
 
+/** What a build reads in place of the files on disk: the unsaved dependencies of a preview. */
+const overlay = new Map<string, string>();
+
+let plugged = false;
+
+const loaderOf = (path: string) =>
+  path.endsWith("x") ? (path.endsWith("jsx") ? "jsx" : "tsx") : path.endsWith("ts") ? "ts" : "js";
+
+/**
+ * Teaches Bun to read a file from the overlay when it has an entry there, and from disk otherwise: a plugin must
+ * answer for every module it filters. Registered once, the first time an overlay is needed, and never for node_modules.
+ */
+const plug = () => {
+  if (plugged) return;
+  plugged = true;
+  Bun.plugin({
+    name: "svjeez-dev-overlay",
+    setup: (build) => {
+      build.onLoad({ filter: /^(?!.*\/node_modules\/).*\.[cm]?[jt]sx?$/ }, async (args) => ({
+        contents: overlay.get(args.path) ?? (await Bun.file(args.path).text()),
+        loader: loaderOf(args.path),
+      }));
+    },
+  });
+};
+
 /** The marker in the name of the hidden copies a preview builds from, so a watcher can skip them. */
 export const DRAFT = ".svjeez-dev-";
 
@@ -69,11 +95,15 @@ const describeError = (thrown: Exported, draft: string, file: string, dir: strin
  * Imports a scene module and builds its default export, the way `svjeez svg --json` does, in this process. With
  * `text`, it builds that text in place of the file's: a hidden copy is written beside the file, so its relative
  * imports resolve, imported, and removed. The real file is never touched. Lanes say where they were written.
- * One build at a time: tracing sources is global.
+ * `others` are other files of the scene as they would read after an edit: they are served to the build in place of
+ * the disk's, and `drop` says which cached modules to forget before and after, so none keeps reading what it was
+ * built from. One build at a time: tracing sources is global.
  */
 export const buildScene = (
   file: string,
   text?: string,
+  others: Files = {},
+  drop?: (path: string) => boolean,
 ): Effect.Effect<Built, BuildFailed, FileSystem.FileSystem | Path.Path> =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
@@ -98,6 +128,15 @@ export const buildScene = (
 
     let controls: ControlsOf | undefined;
     const started = performance.now();
+    const served = Object.keys(others).length > 0 ? drop : undefined;
+
+    if (served) {
+      plug();
+      overlay.clear();
+
+      for (const [path, contents] of Object.entries(others)) overlay.set(path, contents);
+      forget(served);
+    }
 
     const built = yield* Effect.tryPromise({
       try: () =>
@@ -121,6 +160,13 @@ export const buildScene = (
       catch: (thrown) =>
         new BuildFailed({ message: describeError(thrown ?? undefined, target, file, dir) }),
     }).pipe(
+      Effect.ensuring(
+        Effect.sync(() => {
+          if (!served) return;
+          overlay.clear();
+          forget(served);
+        }),
+      ),
       Effect.ensuring(
         text === undefined
           ? Effect.void

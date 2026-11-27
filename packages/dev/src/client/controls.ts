@@ -18,6 +18,9 @@ const TITLES: Readonly<Record<GroupedControl["group"], string>> = {
   param: "Params",
   span: "Spans",
   prop: "Props",
+  field: "Fields",
+  chain: "Steps",
+  literal: "Literals",
 };
 
 const isNumber = (value: ControlValue): value is number => typeof value === "number";

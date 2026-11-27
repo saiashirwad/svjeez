@@ -2,6 +2,7 @@ import type { SyntaxNode } from "@lezer/common";
 import { parser as js } from "@lezer/javascript";
 import { Effect, Result } from "effect";
 import { InvalidValue, StaleSource } from "./errors.ts";
+import { canonical, isRelative, resolveRelative } from "./paths.ts";
 import { literalOf, parse } from "./source.ts";
 import { isNumber, isString } from "./text.ts";
 import type { Attribute, Edit, Files, Json, JsonObject } from "./types.ts";
@@ -14,10 +15,19 @@ import type { Attribute, Edit, Files, Json, JsonObject } from "./types.ts";
 
 const parser = js.configure({ dialect: "jsx ts" });
 
-export type SignalKind = "number" | "color" | "text" | "boolean" | "ease" | "span";
+export type SignalKind = "number" | "color" | "text" | "boolean" | "ease" | "span" | "vec";
 
-/** Where a signal came from: a top-level `const`, the scene's `params`, a `span(…)` call or a literal JSX prop. */
-export type Origin = "const" | "param" | "span" | "prop";
+/**
+ * Where a signal came from: a top-level `const`, the scene's `params`, a `span(…)` call, a literal JSX prop, a field
+ * of an object or list const, a literal anywhere else, or a step of a `track(…)` chain.
+ */
+export type Origin = "const" | "param" | "span" | "prop" | "literal" | "field" | "chain";
+
+/** Named: written with a name, or an id. Deep: a literal found anywhere else in the code. */
+export type Prominence = "named" | "deep";
+
+/** A point: `[x, y]`. */
+export type Point = readonly [number, number];
 
 /** A `span(start, over)` written with two number literals. */
 export interface Span {
@@ -25,7 +35,7 @@ export interface Span {
   readonly over: number;
 }
 
-export type SignalValue = number | string | boolean | Span;
+export type SignalValue = number | string | boolean | Span | Point;
 
 /** A literal in the source: its offsets in UTF-16 code units, and its text as written. */
 export interface Site {
@@ -44,6 +54,18 @@ export interface Hint {
   readonly step: number;
 }
 
+/** The literals a step of a track chain is written with, beside its span. */
+export interface Step {
+  /** The value the step goes to, when it is a number, a color or a string literal. */
+  readonly target?: Site;
+  /** The curve, when it is a literal `ease.x` or `ease.bezier(…)`. */
+  readonly ease?: Site;
+  /** Its place among the steps of its chain, from 0. */
+  readonly index: number;
+  /** The chain's name: the `const` it is bound to, else where it is written. */
+  readonly chain: string;
+}
+
 /** One value the source is written with. Plain JSON. */
 export interface Signal {
   readonly key: string;
@@ -51,8 +73,13 @@ export interface Signal {
   readonly value: SignalValue;
   readonly label: string;
   readonly origin: Origin;
-  /** One site, or two for a span: its start, then its length. */
+  readonly prominence: Prominence;
+  /** One site, or two for a span or a point: its start then its length, or x then y. */
   readonly sites: readonly Site[];
+  /** Every place the source reads a named signal, not counting where it is written. */
+  readonly uses?: readonly Site[];
+  /** For a step of a track chain: its target and curve literals, and where it is. */
+  readonly step?: Step;
   readonly file: string;
   /** The 1-based line of the first site. */
   readonly line: number;
@@ -79,6 +106,9 @@ export const isSpan = (value: ControlValue | undefined): value is Span =>
   typeof value === "object" && "start" in value && "over" in value;
 
 const isNum = (value: ControlValue | undefined): value is number => typeof value === "number";
+
+const isPoint = (value: ControlValue): value is Point =>
+  Array.isArray(value) && value.length === 2 && value.every(isNum);
 
 const isText = (value: ControlValue | undefined): value is string => typeof value === "string";
 
@@ -178,12 +208,12 @@ const fresh = (found: Found, key: string): string => {
   return unique;
 };
 
-type Draft = Omit<Signal, "label">;
+type Draft = Omit<Signal, "label"> & { readonly label?: string };
 
 const add = (found: Found, draft: Draft) => {
   const key = fresh(found, draft.key);
 
-  found.set(key, { ...draft, key, label: key });
+  found.set(key, { ...draft, key, label: draft.label ?? key });
 };
 
 const numberSignal = (
@@ -195,6 +225,7 @@ const numberSignal = (
   node: SyntaxNode,
   value: number,
   range?: Hint,
+  prominence: Prominence = "named",
 ) => {
   const site = siteOf(file, src, node);
 
@@ -203,6 +234,7 @@ const numberSignal = (
     kind: "number",
     value,
     origin,
+    prominence,
     sites: [site],
     file,
     line: lineOf(src, site.from),
@@ -285,6 +317,7 @@ const paramSignals = (found: Found, file: string, src: string, object: SyntaxNod
       kind,
       value: scalar.value,
       origin: "param",
+      prominence: "named",
       sites: [site],
       file,
       line: lineOf(src, site.from),
@@ -295,7 +328,14 @@ const paramSignals = (found: Found, file: string, src: string, object: SyntaxNod
 };
 
 /** A `span(0.2, 1.2)` of two number literals, as one signal with a site for each. False when it is not one. */
-const spanSignal = (found: Found, file: string, src: string, call: SyntaxNode, key: string) => {
+const spanSignal = (
+  found: Found,
+  file: string,
+  src: string,
+  call: SyntaxNode,
+  key: string,
+  prominence: Prominence,
+) => {
   const [startNode, overNode, extra] = itemsOf(call.getChild("ArgList"));
   const start = numberAt(src, startNode);
   const over = numberAt(src, overNode);
@@ -307,6 +347,7 @@ const spanSignal = (found: Found, file: string, src: string, call: SyntaxNode, k
     kind: "span",
     value: { start, over },
     origin: "span",
+    prominence,
     sites: [siteOf(file, src, startNode), siteOf(file, src, overNode)],
     file,
     line: lineOf(src, call.from),
@@ -331,7 +372,16 @@ const spanSignals = (found: Found, file: string, src: string, root: SyntaxNode) 
     if (ref.name !== "CallExpression" || calleeOf(src, ref.node) !== "span") return undefined;
     const call = ref.node;
 
-    spanSignal(found, file, src, call, bindingOf(src, call) ?? "span@" + lineOf(src, call.from));
+    const bound = bindingOf(src, call);
+
+    spanSignal(
+      found,
+      file,
+      src,
+      call,
+      bound ?? "span@" + lineOf(src, call.from),
+      bound === undefined ? "deep" : "named",
+    );
 
     return false;
   });
@@ -387,6 +437,7 @@ const propSignals = (found: Found, files: Files) => {
         kind,
         value,
         origin: "prop",
+        prominence: "named",
         sites: [site],
         file: site.file,
         line: lineOf(src, site.from),
@@ -395,75 +446,972 @@ const propSignals = (found: Found, files: Files) => {
     }
 };
 
+const textOf = (src: string, node: SyntaxNode | null | undefined): string =>
+  node ? src.slice(node.from, node.to) : "";
+
+const sameNode = (a: SyntaxNode | null | undefined, b: SyntaxNode | null | undefined): boolean =>
+  !!a && !!b && a.from === b.from && a.to === b.to;
+
+/** What a declaration is initialised with, without its parentheses or a trailing `as const` or `satisfies T`. */
+const unwrap = (node: SyntaxNode): SyntaxNode => {
+  if (node.name === "ParenthesizedExpression") {
+    const inner = itemsOf(node)[0];
+
+    return inner ? unwrap(inner) : node;
+  }
+
+  if (node.name === "BinaryExpression") {
+    for (let at = node.firstChild; at; at = at.nextSibling)
+      if (at.name === "as" || at.name === "satisfies")
+        return node.firstChild ? unwrap(node.firstChild) : node;
+  }
+
+  return node;
+};
+
+/** The 1-based line starts of a text, for finding a line and column without counting from the top each time. */
+const lineStarts = (src: string): number[] => {
+  const out = [0];
+
+  for (let at = src.indexOf("\n"); at !== -1; at = src.indexOf("\n", at + 1)) out.push(at + 1);
+
+  return out;
+};
+
+const lineAt = (starts: readonly number[], offset: number): number => {
+  let low = 0;
+  let high = starts.length - 1;
+
+  while (low < high) {
+    const mid = Math.ceil((low + high) / 2);
+
+    if ((starts[mid] ?? 0) <= offset) low = mid;
+    else high = mid - 1;
+  }
+
+  return low + 1;
+};
+
+/** The two number literals of a `[x, y]`, or undefined when the node is anything else. */
+const pairOf = (src: string, node: SyntaxNode): [SyntaxNode, SyntaxNode] | undefined => {
+  if (node.name !== "ArrayExpression") return undefined;
+  const [x, y, extra] = itemsOf(node);
+
+  return x && y && !extra && numberAt(src, x) !== undefined && numberAt(src, y) !== undefined
+    ? [x, y]
+    : undefined;
+};
+
+const rangeOfPair = (src: string, x: SyntaxNode, y: SyntaxNode): Hint => {
+  const a = guessRange(numberAt(src, x) ?? 0, textOf(src, x));
+  const b = guessRange(numberAt(src, y) ?? 0, textOf(src, y));
+
+  return {
+    min: Math.min(a.min, b.min),
+    max: Math.max(a.max, b.max),
+    step: Math.min(a.step, b.step),
+  };
+};
+
+/** A point written as two number literals, one signal with a site for each: x, then y. */
+const vecSignal = (
+  found: Found,
+  file: string,
+  src: string,
+  key: string,
+  origin: Origin,
+  [x, y]: readonly [SyntaxNode, SyntaxNode],
+  prominence: Prominence,
+  label?: string,
+) => {
+  add(found, {
+    key,
+    kind: "vec",
+    value: [numberAt(src, x) ?? 0, numberAt(src, y) ?? 0],
+    origin,
+    prominence,
+    sites: [siteOf(file, src, x), siteOf(file, src, y)],
+    file,
+    line: lineOf(src, x.from),
+    range: rangeOfPair(src, x, y),
+    ...(label !== undefined && { label }),
+  });
+};
+
+/** A literal a control can edit, as one signal. False when the node is not one. */
+const scalarSignal = (
+  found: Found,
+  file: string,
+  src: string,
+  key: string,
+  origin: Origin,
+  node: SyntaxNode,
+): boolean => {
+  const scalar = scalarOf(src, node);
+
+  if (!scalar) return false;
+
+  if (isNum(scalar.value)) {
+    numberSignal(found, file, src, key, origin, node, scalar.value);
+
+    return true;
+  }
+
+  const site = siteOf(file, src, node);
+
+  add(found, {
+    key,
+    kind: scalar.kind,
+    value: scalar.value,
+    origin,
+    prominence: "named",
+    sites: [site],
+    file,
+    line: lineOf(src, site.from),
+  });
+
+  return true;
+};
+
+/** The name a property is written with: `x`, `"x"`. Undefined for a computed one. */
+const keyText = (src: string, name: SyntaxNode): string | undefined =>
+  name.name === "PropertyDefinition" || name.name === "String"
+    ? textOf(src, name).replace(/^["']|["']$/g, "")
+    : undefined;
+
+/** The most items of a list that make a signal each, so a table of data is not a screen of controls. */
+const MAX_ITEMS = 32;
+
+/** The fields of an object, `WAVE.x`, and of an object inside it, `WAVE.size.width`: no deeper. */
+const fieldSignals = (
+  found: Found,
+  file: string,
+  src: string,
+  prefix: string,
+  object: SyntaxNode,
+  depth: number,
+) => {
+  for (let property = object.firstChild; property; property = property.nextSibling) {
+    const name = property.firstChild;
+    const last = property.lastChild;
+
+    if (property.name !== "Property" || !name || !last || sameNode(name, last)) continue;
+    const field = keyText(src, name);
+
+    if (field === undefined) continue;
+    const key = prefix + "." + field;
+    const value = unwrap(last);
+    const pair = pairOf(src, value);
+
+    if (pair) vecSignal(found, file, src, key, "field", pair, "named");
+    else if (value.name === "ObjectExpression" && depth < 1)
+      fieldSignals(found, file, src, key, value, depth + 1);
+    else scalarSignal(found, file, src, key, "field", value);
+  }
+};
+
+/** A top-level list: a point, a few numbers as `ORIGIN[0]`, or the literals of a longer list. */
+const listSignals = (found: Found, file: string, src: string, key: string, list: SyntaxNode) => {
+  const items = itemsOf(list);
+  const pair = pairOf(src, list);
+
+  if (pair) vecSignal(found, file, src, key, "const", pair, "named");
+
+  if (
+    items.length >= 2 &&
+    items.length <= 4 &&
+    items.every((item) => numberAt(src, item) !== undefined)
+  ) {
+    items.forEach((item, i) =>
+      numberSignal(found, file, src, key + "[" + i + "]", "const", item, numberAt(src, item) ?? 0),
+    );
+
+    return;
+  }
+
+  if (items.length > MAX_ITEMS) return;
+
+  items.forEach((item, i) => {
+    const value = unwrap(item);
+    const inner = pairOf(src, value);
+
+    if (inner) vecSignal(found, file, src, key + "[" + i + "]", "field", inner, "named");
+    else scalarSignal(found, file, src, key + "[" + i + "]", "field", value);
+  });
+};
+
 /**
- * Every value a scene is written with that a control can turn, in this order: the entry's top-level `const`s
- * (numbers, colors, strings, booleans, eases, and each number of a short array, as `SIZE[0]`), the entry's
- * `params` written with literals, every `span(…)` in the entry of two number literals, then the literal props of
- * elements with an id in any of the files. Keys are the names as written: `BRASS`, `speed`, `swing` for
- * `const swing = span(0, 2)`, `span@12` for one bound to nothing, `card.opacity`. Nothing runs.
+ * The signals one top-level `const` makes: a literal, a point or list, or the fields of an object. A
+ * `tokens({ light: {…}, dark: {…} })` makes `name.blue` for the light value and `name.dark.blue` for the dark.
+ */
+const constSignals = (found: Found, file: string, src: string, key: string, node: SyntaxNode) => {
+  const value = unwrap(node);
+
+  switch (value.name) {
+    case "ArrayExpression":
+      return listSignals(found, file, src, key, value);
+    case "ObjectExpression":
+      return fieldSignals(found, file, src, key, value, 0);
+    case "CallExpression": {
+      const object =
+        calleeOf(src, value) === "tokens" ? itemsOf(value.getChild("ArgList"))[0] : undefined;
+
+      if (object?.name !== "ObjectExpression")
+        return scalarSignal(found, file, src, key, "const", value);
+
+      for (let side = object.firstChild; side; side = side.nextSibling) {
+        const mode = side.firstChild ? keyText(src, side.firstChild) : undefined;
+        const inner = side.lastChild && unwrap(side.lastChild);
+
+        if (side.name === "Property" && inner?.name === "ObjectExpression")
+          if (mode === "light") fieldSignals(found, file, src, key, inner, 1);
+          else if (mode === "dark") fieldSignals(found, file, src, key + ".dark", inner, 1);
+      }
+
+      return undefined;
+    }
+
+    default:
+      return scalarSignal(found, file, src, key, "const", value);
+  }
+};
+
+/** The files discovery can read: by name, by canonical path, and each one's tree. */
+class Loaded {
+  readonly files: Files;
+  readonly #names = new Map<string, string>();
+  readonly #trees = new Map<string, SyntaxNode>();
+
+  constructor(files: Files) {
+    this.files = files;
+
+    for (const name of Object.keys(files)) this.#names.set(canonical(name), name);
+  }
+
+  tree(file: string): SyntaxNode {
+    const known = this.#trees.get(file);
+
+    if (known) return known;
+    const made = parser.parse(this.files[file] ?? "").topNode;
+
+    this.#trees.set(file, made);
+
+    return made;
+  }
+
+  /** The loaded file a relative import from `from` reaches. */
+  resolve(from: string, specifier: string): string | undefined {
+    if (!isRelative(specifier)) return undefined;
+    const path = resolveRelative((each) => this.#names.has(each), canonical(from), specifier);
+
+    return path === undefined ? undefined : this.#names.get(path);
+  }
+}
+
+interface Binding {
+  readonly local: string;
+  readonly imported: string;
+  readonly specifier: string;
+}
+
+const specifierOf = (src: string, statement: SyntaxNode): string => {
+  const string = statement.getChild("String");
+
+  return string ? textOf(src, string).slice(1, -1) : "";
+};
+
+/** Each name an `import { a, b as c } from "./x"` brings in: the name it has there, and the name it has here. */
+const bindingsOf = (src: string, root: SyntaxNode): Binding[] => {
+  const out: Binding[] = [];
+
+  for (let statement = root.firstChild; statement; statement = statement.nextSibling) {
+    const group = statement.name === "ImportDeclaration" ? statement.getChild("ImportGroup") : null;
+    const specifier = specifierOf(src, statement);
+    let imported: string | undefined;
+
+    for (let at = group?.firstChild; at; at = at.nextSibling)
+      if (at.name === "VariableName") imported = textOf(src, at);
+      else if (at.name === "VariableDefinition") {
+        out.push({ local: textOf(src, at), imported: imported ?? textOf(src, at), specifier });
+        imported = undefined;
+      }
+  }
+
+  return out;
+};
+
+/** The relative modules a file imports from, and the ones it only re-exports from, as written. */
+export interface Imports {
+  readonly imports: readonly string[];
+  readonly reexports: readonly string[];
+}
+
+export const importsOf = (src: string): Imports => {
+  const imports: string[] = [];
+  const reexports: string[] = [];
+
+  for (let at = parser.parse(src).topNode.firstChild; at; at = at.nextSibling) {
+    const specifier = at.getChild("from") ? specifierOf(src, at) : "";
+
+    if (!isRelative(specifier)) continue;
+    (at.name === "ImportDeclaration" ? imports : reexports).push(specifier);
+  }
+
+  return { imports, reexports };
+};
+
+interface Ref {
+  readonly file: string;
+  readonly name: string;
+}
+
+/** The `const` an exported name stands for, in the file that declares it, following `export { a } from` and `export *`. */
+const resolveExport = (loaded: Loaded, file: string, name: string, depth = 0): Ref | undefined => {
+  const src = loaded.files[file];
+
+  if (src === undefined || depth > 4) return undefined;
+  const root = loaded.tree(file);
+
+  if (declarations(src, root).some(([each]) => textOf(src, each) === name)) return { file, name };
+
+  for (let statement = root.firstChild; statement; statement = statement.nextSibling) {
+    const target = statement.getChild("from")
+      ? loaded.resolve(file, specifierOf(src, statement))
+      : undefined;
+
+    if (statement.name !== "ExportDeclaration" || !target) continue;
+    const group = statement.getChild("ExportGroup");
+
+    if (!group) {
+      const hit = resolveExport(loaded, target, name, depth + 1);
+
+      if (hit) return hit;
+      continue;
+    }
+
+    let original: string | undefined;
+
+    for (let at = group.firstChild; at; at = at.nextSibling) {
+      if (at.name !== "VariableName" && at.name !== "VariableDefinition") continue;
+      const given = textOf(src, at);
+      const alias = at.prevSibling?.name === "as";
+
+      if (alias && original !== undefined && given === name)
+        return resolveExport(loaded, target, original, depth + 1);
+
+      if (!alias && at.nextSibling?.name !== "as" && given === name)
+        return resolveExport(loaded, target, given, depth + 1);
+      original = given;
+    }
+  }
+
+  return undefined;
+};
+
+/** The signals of the consts the entry imports from the files it was loaded with, under the names it gives them. */
+const importedSignals = (
+  found: Found,
+  loaded: Loaded,
+  entry: string,
+  src: string,
+  root: SyntaxNode,
+  defs: Map<string, string>,
+) => {
+  for (const { local, imported, specifier } of bindingsOf(src, root)) {
+    const target = loaded.resolve(entry, specifier);
+    const ref = target ? resolveExport(loaded, target, imported) : undefined;
+    const from = ref && loaded.files[ref.file];
+
+    if (!ref || from === undefined) continue;
+
+    const declaration = declarations(from, loaded.tree(ref.file)).find(
+      ([name]) => textOf(from, name) === ref.name,
+    );
+
+    if (!declaration) continue;
+    defs.set(ref.file + "#" + ref.name, local);
+    constSignals(found, ref.file, from, local, declaration[1]);
+  }
+};
+
+/** Where an identifier is read: it, or the `.field` or `[0]` after it, for each signal made of that path. */
+const usesIn = (
+  found: Found,
+  loaded: Loaded,
+  file: string,
+  refs: ReadonlyMap<string, string>,
+  uses: Map<string, Site[]>,
+) => {
+  const src = loaded.files[file] ?? "";
+
+  const note = (key: string, node: SyntaxNode) => {
+    if (!found.has(key)) return;
+    const list = uses.get(key) ?? [];
+
+    if (!list.some((site) => site.file === file && site.from === node.from))
+      uses.set(key, [...list, siteOf(file, src, node)]);
+  };
+
+  loaded
+    .tree(file)
+    .cursor()
+    .iterate((ref) => {
+      if (ref.name !== "VariableName") return undefined;
+      const prefix = refs.get(src.slice(ref.from, ref.to));
+
+      if (prefix === undefined || ref.node.parent?.name === "ImportGroup") return undefined;
+      let node = ref.node;
+      let path = prefix;
+      let rest = "";
+
+      note(path, node);
+
+      for (let member = node.parent; member?.name === "MemberExpression"; member = node.parent) {
+        if (!sameNode(member.firstChild, node)) break;
+        const name = member.getChild("PropertyName");
+        const open = member.getChild("[");
+        const index = open?.nextSibling;
+
+        const segment = name
+          ? "." + textOf(src, name)
+          : index?.name === "Number"
+            ? "[" + textOf(src, index) + "]"
+            : undefined;
+
+        if (segment === undefined) break;
+        path += segment;
+        rest += segment;
+        note(path, member);
+        note(prefix + ".dark" + rest, member);
+        node = member;
+      }
+
+      return undefined;
+    });
+};
+
+/** The places each named signal is read: its identifier, or the member that reaches it, in every loaded file. */
+const withUses = (found: Found, loaded: Loaded, defs: ReadonlyMap<string, string>): Found => {
+  const uses = new Map<string, Site[]>();
+
+  for (const file of Object.keys(loaded.files)) {
+    const src = loaded.files[file] ?? "";
+    const root = loaded.tree(file);
+    const refs = new Map<string, string>();
+
+    for (const [name] of declarations(src, root)) {
+      const prefix = defs.get(file + "#" + textOf(src, name));
+
+      if (prefix !== undefined) refs.set(textOf(src, name), prefix);
+    }
+
+    for (const { local, imported, specifier } of bindingsOf(src, root)) {
+      const target = loaded.resolve(file, specifier);
+      const ref = target ? resolveExport(loaded, target, imported) : undefined;
+      const prefix = ref && defs.get(ref.file + "#" + ref.name);
+
+      if (prefix !== undefined) refs.set(local, prefix);
+    }
+
+    if (refs.size > 0) usesIn(found, loaded, file, refs, uses);
+  }
+
+  const out: Found = new Map();
+
+  for (const [key, signal] of found) {
+    const sites = uses.get(key);
+
+    out.set(key, sites && signal.prominence === "named" ? { ...signal, uses: sites } : signal);
+  }
+
+  return out;
+};
+
+/** What a chain does for each call it is made of, so a step can be told from a `loop` or a `map`. */
+interface Call {
+  readonly method: string;
+  readonly call: SyntaxNode;
+}
+
+/** The `.to()`, `.set()` and `.rewind()` calls written after a `track(…)`, in order. */
+interface Chain {
+  readonly top: SyntaxNode;
+  readonly calls: readonly Call[];
+}
+
+const chainOf = (src: string, start: SyntaxNode): Chain => {
+  const calls: Call[] = [];
+  let top = start;
+
+  for (;;) {
+    const member = top.parent;
+    const call = member?.parent;
+
+    if (
+      member?.name !== "MemberExpression" ||
+      call?.name !== "CallExpression" ||
+      !sameNode(member.firstChild, top) ||
+      !sameNode(call.firstChild, member)
+    )
+      break;
+    calls.push({ method: textOf(src, member.getChild("PropertyName")), call });
+    top = call;
+  }
+
+  return { top, calls };
+};
+
+/** The curve a step names with a literal: `ease.out` or `ease.bezier(…)`. */
+const easeNode = (src: string, node: SyntaxNode | undefined): SyntaxNode | undefined =>
+  node && literalOf(src, node)?.lit === "ease" ? node : undefined;
+
+/** The value a step goes to, when it is a number, a color or a string written out. */
+const targetNode = (src: string, node: SyntaxNode | undefined): SyntaxNode | undefined => {
+  const kind = node && scalarOf(src, node)?.kind;
+
+  return node && (kind === "number" || kind === "color" || kind === "text") ? node : undefined;
+};
+
+const rangeOfSpan = (start: number, over: number): Hint => ({
+  min: 0,
+  max: Math.max(2 * (start + over), 1),
+  step: 0.01,
+});
+
+/**
+ * A signal per step of a `track(…).to(v, span(a, b), ease.out).rewind(d)` and per frame of a `keyframes(…)`: a `to` or
+ * `set` with a literal span is a span with the literal sites of its target and curve beside it, a `rewind` is its
+ * duration, a frame is its time. A step with anything but literals for its time makes none.
+ */
+const chainSignals = (
+  found: Found,
+  file: string,
+  src: string,
+  root: SyntaxNode,
+  starts: readonly number[],
+) =>
+  root.cursor().iterate((ref) => {
+    const callee = ref.name === "CallExpression" ? calleeOf(src, ref.node) : "";
+
+    if (callee !== "track" && callee !== "keyframes") return undefined;
+    const { top, calls } = chainOf(src, ref.node);
+    const line = lineAt(starts, ref.from);
+    const bound = bindingOf(src, top);
+    const column = ref.from - (starts[line - 1] ?? 0) + 1;
+    const tag = bound === undefined ? "@" + line + ":" + column : "";
+    const chain = bound ?? pathOf(src, top).path;
+    const prominence: Prominence = bound === undefined ? "deep" : "named";
+    let index = 0;
+
+    const emit = (
+      key: string,
+      kind: SignalKind,
+      value: SignalValue,
+      sites: readonly SyntaxNode[],
+      target: SyntaxNode | undefined,
+      curve: SyntaxNode | undefined,
+      range: Hint,
+    ) => {
+      const [first] = sites;
+
+      if (!first) return;
+
+      add(found, {
+        key,
+        kind,
+        value,
+        origin: "chain",
+        prominence,
+        sites: sites.map((site) => siteOf(file, src, site)),
+        file,
+        line: lineAt(starts, first.from),
+        range,
+        step: {
+          index,
+          chain: chain + tag,
+          ...(target && { target: siteOf(file, src, target) }),
+          ...(curve && { ease: siteOf(file, src, curve) }),
+        },
+      });
+    };
+
+    if (callee === "keyframes") {
+      const frames = itemsOf(itemsOf(ref.node.getChild("ArgList"))[0] ?? null);
+
+      frames.forEach((frame, i) => {
+        const [time, value, curve] = itemsOf(frame);
+        const seconds = numberAt(src, time);
+
+        if (!time || seconds === undefined) return;
+        index = i;
+        emit(
+          chain + ".frame" + i + tag,
+          "number",
+          seconds,
+          [time],
+          targetNode(src, value),
+          easeNode(src, curve),
+          rangeOfSpan(seconds, 0),
+        );
+      });
+    }
+
+    for (const { method, call } of calls) {
+      const args = itemsOf(call.getChild("ArgList"));
+
+      if (method === "rewind") {
+        const [over, curve] = args;
+        const seconds = numberAt(src, over);
+
+        if (over && seconds !== undefined)
+          emit(
+            chain + ".step" + index + tag,
+            "number",
+            seconds,
+            [over],
+            undefined,
+            easeNode(src, curve),
+            rangeOfSpan(0, seconds),
+          );
+        index++;
+      } else if (method === "to" || method === "set") {
+        const [target, when, curve] = args;
+
+        const [startNode, overNode, extra] =
+          when?.name === "CallExpression" && calleeOf(src, when) === "span"
+            ? itemsOf(when.getChild("ArgList"))
+            : [];
+
+        const start = numberAt(src, startNode);
+        const over = numberAt(src, overNode);
+
+        if (startNode && overNode && !extra && start !== undefined && over !== undefined)
+          emit(
+            chain + ".step" + index + tag,
+            "span",
+            { start, over },
+            [startNode, overNode],
+            targetNode(src, target),
+            easeNode(src, curve),
+            rangeOfSpan(start, over),
+          );
+        index++;
+      }
+    }
+
+    return undefined;
+  });
+
+/** The names a call's arguments are known by, for a label: `circle(7)` sets a radius. */
+const ARGS = new Map<string, readonly string[]>([
+  ["circle", ["radius"]],
+  ["rect", ["width", "height"]],
+  ["ellipse", ["x radius", "y radius"]],
+  ["line", ["start", "end"]],
+  ["span", ["start", "length"]],
+]);
+
+interface Where {
+  /** Where the literal sits, as a name: `Shape.circle[0]`, `stroke.width`, `bellGeometry`. */
+  readonly path: string;
+  readonly label: string;
+}
+
+interface Segment {
+  readonly kind: "call" | "key" | "index";
+  readonly text: string;
+  readonly name: string;
+  readonly at: number;
+}
+
+/** The name of the element a JSX attribute is on. */
+const elementOf = (src: string, attribute: SyntaxNode): string => {
+  const tag = attribute.parent;
+
+  return textOf(src, tag?.getChild("JSXIdentifier")) || "element";
+};
+
+/**
+ * Where a literal sits, from the nearest named thing around it: a call it is an argument of, a property it is the
+ * value of, the JSX prop or the `const` it is inside. `circle(7)` on a `Shape` is `Shape.circle[0]`, a stroke's width
+ * `stroke.width`, and a number in the body of `const bell = …` is `bell`.
+ */
+const pathOf = (src: string, node: SyntaxNode): Where => {
+  const segments: Segment[] = [];
+  let element = "";
+  let attribute = "";
+  let named = "";
+
+  for (let at = node; at.parent && !element; at = at.parent) {
+    const parent = at.parent;
+
+    if (parent.name === "ArgList" && parent.parent) {
+      const name = /([\w$]+)\s*$/.exec(calleeOf(src, parent.parent))?.[1] ?? "call";
+      const index = itemsOf(parent).findIndex((item) => sameNode(item, at));
+
+      segments.push({ kind: "call", text: name + "[" + index + "]", name, at: index });
+    } else if (parent.name === "Property" && !sameNode(parent.firstChild, at)) {
+      const key = parent.firstChild ? keyText(src, parent.firstChild) : undefined;
+
+      if (key !== undefined) segments.push({ kind: "key", text: key, name: key, at: 0 });
+    } else if (parent.name === "ArrayExpression") {
+      const index = itemsOf(parent).findIndex((item) => sameNode(item, at));
+
+      segments.push({ kind: "index", text: "[" + index + "]", name: "", at: index });
+    } else if (parent.name === "JSXAttribute") {
+      attribute = textOf(src, parent.firstChild);
+      element = elementOf(src, parent);
+    } else if (parent.name === "VariableDeclaration" || parent.name === "FunctionDeclaration") {
+      named = textOf(src, parent.getChild("VariableDefinition")) || named;
+    } else if (parent.name === "JSXElement") {
+      element = textOf(src, parent.getChild("JSXOpenTag")?.getChild("JSXIdentifier")) || "element";
+    }
+  }
+
+  const near: Segment[] = [];
+
+  for (const segment of segments) {
+    near.push(segment);
+
+    if (segment.kind === "call") break;
+  }
+
+  const outer = near[near.length - 1];
+
+  const root = attribute
+    ? outer?.kind === "call"
+      ? element
+      : outer
+        ? attribute
+        : element + "." + attribute
+    : element || named;
+
+  const tail = [...near]
+    .reverse()
+    .map((s) => (s.kind === "index" ? s.text : "." + s.text))
+    .join("");
+
+  const path = (root + tail).replace(/^\./, "") || "literal";
+  const inner = near[0];
+  const above = near[1]?.text ?? root;
+  const arg = inner?.kind === "call" ? ARGS.get(inner.name)?.[inner.at] : undefined;
+
+  const label =
+    inner?.kind === "call"
+      ? inner.name + " " + (arg ?? "argument " + (inner.at + 1))
+      : inner?.kind === "key" && above
+        ? above + " " + inner.name
+        : inner === undefined && attribute
+          ? attribute + " of " + element
+          : "";
+
+  return { path, label: label || textOf(src, node) + " in " + (root || "the scene") };
+};
+
+const EASE_NAME = /^ease\.(?:linear|in|out|inOut|pop)$/;
+
+/** Operators that shift or mask bits, which a literal beside is a mask or a seed, not a size. */
+const BIT_OPS = /^(?:[&|^]|<<|>>>?)=?$/;
+
+const isBitwise = (src: string, node: SyntaxNode): boolean => {
+  for (let at = node.firstChild; at; at = at.nextSibling)
+    if ((at.name === "BitOp" || at.name === "UpdateOp") && BIT_OPS.test(textOf(src, at)))
+      return true;
+
+  return false;
+};
+
+const isTypeNode = (name: string): boolean =>
+  name.startsWith("Type") ||
+  name.endsWith("Type") ||
+  name === "ImportDeclaration" ||
+  name === "InterfaceDeclaration";
+
+/**
+ * Every literal not named by now, each as a deep signal: numbers (a negative one with its sign), hex colors, `ease.x`
+ * and `ease.bezier(…)` anywhere, and a pair of numbers as a point. Not in types or imports, not beside a bit
+ * operator, not as an index, not in `params` (those are declared once, above).
+ */
+const deepSignals = (
+  found: Found,
+  covered: Set<string>,
+  file: string,
+  src: string,
+  root: SyntaxNode,
+  starts: readonly number[],
+) => {
+  const skipped = new Set<string>();
+
+  const take = (node: SyntaxNode): boolean => {
+    const id = node.from + ":" + node.to;
+
+    if (covered.has(id)) return false;
+    covered.add(id);
+
+    return true;
+  };
+
+  const add1 = (
+    node: SyntaxNode,
+    kind: SignalKind,
+    value: SignalValue,
+    sites: readonly Site[],
+    range?: Hint,
+  ) => {
+    const line = lineAt(starts, node.from);
+    const column = node.from - (starts[line - 1] ?? 0) + 1;
+    const where = pathOf(src, node);
+
+    add(found, {
+      key: where.path + "@" + line + ":" + column,
+      kind,
+      value,
+      origin: "literal",
+      prominence: "deep",
+      sites,
+      file,
+      line,
+      label: where.label,
+      ...(range && { range }),
+    });
+  };
+
+  for (const [name, value] of declarations(src, root))
+    if (textOf(src, name) === "params") skipped.add(value.from + ":" + value.to);
+
+  root.cursor().iterate((ref) => {
+    const { name } = ref;
+
+    if (isTypeNode(name) || skipped.has(ref.from + ":" + ref.to)) return false;
+
+    switch (name) {
+      case "ExportDeclaration":
+        return ref.node.getChild("from") ? false : undefined;
+      case "BinaryExpression":
+      case "AssignmentExpression":
+        return isBitwise(src, ref.node) ? false : undefined;
+      case "MemberExpression": {
+        const node = ref.node;
+        const open = node.getChild("[");
+
+        if (open?.nextSibling) {
+          skipped.add(open.nextSibling.from + ":" + open.nextSibling.to);
+
+          return undefined;
+        }
+
+        if (!EASE_NAME.test(textOf(src, node))) return undefined;
+
+        if (take(node)) add1(node, "ease", textOf(src, node), [siteOf(file, src, node)]);
+
+        return false;
+      }
+
+      case "CallExpression": {
+        const node = ref.node;
+
+        if (calleeOf(src, node) !== "ease.bezier" || !literalOf(src, node)) return undefined;
+
+        if (take(node)) add1(node, "ease", textOf(src, node), [siteOf(file, src, node)]);
+
+        return false;
+      }
+
+      case "ArrayExpression": {
+        const node = ref.node;
+        const pair = pairOf(src, node);
+
+        if (!pair || covered.has(pair[0].from + ":" + pair[0].to)) return undefined;
+        const [x, y] = pair;
+
+        take(x);
+        take(y);
+        add1(
+          node,
+          "vec",
+          [numberAt(src, x) ?? 0, numberAt(src, y) ?? 0],
+          [siteOf(file, src, x), siteOf(file, src, y)],
+          rangeOfPair(src, x, y),
+        );
+
+        return false;
+      }
+
+      case "UnaryExpression":
+      case "Number": {
+        const node = ref.node;
+        const value = numberAt(src, node);
+
+        if (value === undefined) return undefined;
+        const site = siteOf(file, src, node);
+
+        if (take(node)) add1(node, "number", value, [site], guessRange(value, site.text));
+
+        return false;
+      }
+
+      case "String":
+      case "JSXAttributeValue": {
+        const body = src.slice(ref.from + 1, ref.to - 1);
+
+        if (!COLOR.test(body)) return false;
+        const node = ref.node;
+        const site = siteOf(file, src, node);
+
+        if (take(node))
+          add1(node, "color", body, [name === "String" ? site : { ...site, jsx: true }]);
+
+        return false;
+      }
+
+      default:
+        return undefined;
+    }
+  });
+};
+
+/**
+ * Every value a scene is written with that a control can turn. Named ones first, in this order: the entry's
+ * top-level `const`s (numbers, colors, strings, booleans, eases, a pair as a point, the numbers of a short array as
+ * `SIZE[0]`, the fields of an object as `WAVE.width`), the entry's `params` written with literals, every `span(…)` of two
+ * number literals, the literal props of elements with an id, the consts and fields the entry imports from files in
+ * `files` (`theme.blue`), and a signal for each step of a `track(…)` chain. Then the deep ones: every other number,
+ * hex color, ease and point in the entry. Keys are the names as written: `BRASS`, `speed`, `swing` for
+ * `const swing = span(0, 2)`, `span@12` for one bound to nothing, `card.opacity`, `Shape.circle[0]@56:28`. Nothing runs.
  */
 export const discover = (files: Files, entry: string): Signals => {
   const src = files[entry] ?? "";
-  const root = parser.parse(src).topNode;
+  const loaded = new Loaded(files);
+  const root = loaded.tree(entry);
   const found: Found = new Map();
-  const consts: Found = new Map();
+  const defs = new Map<string, string>();
+  const starts = lineStarts(src);
 
   for (const [name, value] of declarations(src, root)) {
-    const key = src.slice(name.from, name.to);
+    const key = textOf(src, name);
 
     if (key === "params" && value.name === "ObjectExpression") continue;
-    const items = value.name === "ArrayExpression" ? itemsOf(value) : [];
-
-    if (
-      items.length >= 2 &&
-      items.length <= 4 &&
-      items.every((item) => numberAt(src, item) !== undefined)
-    ) {
-      items.forEach((item, i) =>
-        numberSignal(
-          consts,
-          entry,
-          src,
-          key + "[" + i + "]",
-          "const",
-          item,
-          numberAt(src, item) ?? 0,
-        ),
-      );
-      continue;
-    }
-
-    const scalar = scalarOf(src, value);
-
-    if (!scalar) continue;
-
-    if (isNum(scalar.value)) {
-      numberSignal(consts, entry, src, key, "const", value, scalar.value);
-      continue;
-    }
-
-    const site = siteOf(entry, src, value);
-
-    add(consts, {
-      key,
-      kind: scalar.kind,
-      value: scalar.value,
-      origin: "const",
-      sites: [site],
-      file: entry,
-      line: lineOf(src, site.from),
-    });
+    defs.set(entry + "#" + key, key);
+    constSignals(found, entry, src, key, value);
   }
 
-  for (const [key, signal] of consts) found.set(key, signal);
-
   for (const [name, value] of declarations(src, root))
-    if (src.slice(name.from, name.to) === "params" && value.name === "ObjectExpression")
+    if (textOf(src, name) === "params" && value.name === "ObjectExpression")
       paramSignals(found, entry, src, value);
   spanSignals(found, entry, src, root);
   propSignals(found, files);
+  importedSignals(found, loaded, entry, src, root, defs);
+  chainSignals(found, entry, src, root, starts);
 
-  return Object.fromEntries(found);
+  const covered = new Set<string>();
+
+  for (const signal of found.values())
+    for (const site of [...signal.sites, signal.step?.target, signal.step?.ease])
+      if (site?.file === entry) covered.add(site.from + ":" + site.to);
+
+  deepSignals(found, covered, entry, src, root, starts);
+
+  return Object.fromEntries(withUses(found, loaded, defs));
 };
 
 /** A text change: the source between `from` and `to`, which read `was` when it was planned, becomes `text`. */
@@ -545,6 +1493,13 @@ export const write = (
             splice(second, formatNumber(value.over, second.text, 0.01)),
           ])
         : invalid(signal, "it takes { start, over }, two finite numbers");
+    case "vec":
+      return isPoint(value) && second && value.every(Number.isFinite)
+        ? Effect.succeed([
+            splice(site, formatNumber(value[0], site.text, signal.range?.step)),
+            splice(second, formatNumber(value[1], second.text, signal.range?.step)),
+          ])
+        : invalid(signal, "it takes [x, y], two finite numbers");
     case "boolean":
       return value === true || value === false
         ? Effect.succeed([splice(site, site.jsx ? "{" + value + "}" : String(value))])
@@ -588,6 +1543,120 @@ export const applySplices = (
     }
 
     return Effect.succeed(Object.fromEntries(out));
+  });
+
+const NAME = /^(?:[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*|[a-z][A-Za-z0-9]*)$/;
+
+const RESERVED = new Set(
+  "await break case catch class const continue debugger default delete do else enum export extends false finally for function if implements import in instanceof interface let new null package private protected public return static super switch this throw true try typeof var void while with yield undefined NaN Infinity".split(
+    " ",
+  ),
+);
+
+/** The node a signal is written as: its one site, or the array or call that holds its two. */
+const writtenAs = (src: string, signal: Signal): { from: number; to: number } | undefined => {
+  const [first, second] = signal.sites;
+
+  if (!first) return undefined;
+
+  if (signal.kind !== "vec" && signal.kind !== "span") return first;
+  let hit: { from: number; to: number } | undefined;
+
+  parser
+    .parse(src)
+    .topNode.cursor()
+    .iterate((ref) => {
+      if (hit || ref.to < first.to || ref.from > first.from) return false;
+      const wanted = signal.kind === "vec" ? "ArrayExpression" : "CallExpression";
+
+      if (ref.name !== wanted) return undefined;
+      const [x, y] = itemsOf(signal.kind === "vec" ? ref.node : ref.node.getChild("ArgList"));
+
+      if (x?.from === first.from && y?.from === second?.from) hit = { from: ref.from, to: ref.to };
+
+      return undefined;
+    });
+
+  return hit;
+};
+
+/**
+ * The edits that turn a deep literal into a named constant: the literal becomes `name`, and `const name = <literal>;`
+ * goes after the imports of its file (before the first statement when there are none). Fails with InvalidValue when
+ * the signal is already named or is a step of a chain, when `name` is not UPPER_SNAKE or camelCase, or when the file
+ * already uses it.
+ */
+export const extract = (
+  files: Files,
+  signal: Signal,
+  name: string,
+): Effect.Effect<readonly Splice[], InvalidValue> =>
+  Effect.suspend(() => {
+    const src = files[signal.file];
+    const place = src === undefined ? undefined : writtenAs(src, signal);
+
+    if (signal.origin === "chain" || signal.origin === "param")
+      return invalid(signal, "a " + signal.origin + " is edited where it is, not extracted");
+
+    if (signal.prominence === "named" && signal.origin !== "prop")
+      return invalid(signal, "it is already a named constant");
+
+    if (!NAME.test(name) || RESERVED.has(name))
+      return invalid(signal, name + " is not a name: use UPPER_SNAKE or camelCase");
+
+    if (src === undefined || !place || !signal.sites[0])
+      return invalid(signal, "it has no place in the source to extract from");
+    const root = parser.parse(src).topNode;
+    let taken = false;
+
+    root.cursor().iterate((ref) => {
+      if (
+        ["VariableDefinition", "VariableName", "TypeDefinition", "TypeName"].includes(ref.name) &&
+        src.slice(ref.from, ref.to) === name
+      )
+        taken = true;
+
+      return !taken;
+    });
+
+    if (taken) return invalid(signal, name + " is already declared in " + signal.file);
+    const literal = src.slice(place.from, place.to);
+    const jsx = signal.sites[0].jsx === true;
+    let after = -1;
+
+    for (let at = root.firstChild; at; at = at.nextSibling)
+      if (at.name === "ImportDeclaration") after = at.to;
+    const line = "const " + name + " = " + literal + ";\n";
+    const newline = src.indexOf("\n", after);
+
+    const start =
+      after === -1 ? (root.firstChild?.from ?? 0) : newline === -1 ? src.length : newline + 1;
+
+    const insert: Splice =
+      after === -1
+        ? { file: signal.file, from: start, to: start, was: "", text: line + "\n" }
+        : {
+            file: signal.file,
+            from: start,
+            to: start,
+            was: "",
+            text:
+              (newline === -1 ? "\n" : "") +
+              "\n" +
+              line +
+              (start >= src.length || src[start] === "\n" ? "" : "\n"),
+          };
+
+    return Effect.succeed([
+      {
+        file: signal.file,
+        from: place.from,
+        to: place.to,
+        was: literal,
+        text: jsx ? "{" + name + "}" : name,
+      },
+      insert,
+    ]);
   });
 
 /** Splices as `replaceFile` edits, one per file they change, for a `Session`. */
@@ -723,9 +1792,6 @@ export const valueOf = (control: Control, values: Values): ControlValue => {
   }
 };
 
-const isPoint = (value: ControlValue): value is readonly [number, number] =>
-  Array.isArray(value) && value.length === 2 && value.every(isNum);
-
 /** The signal values that make a control read `value`, by key. Only the signals it changes are listed. */
 export const assign = (control: Control, value: ControlValue, values: Values): Values => {
   switch (control.origin) {
@@ -743,7 +1809,7 @@ export const assign = (control: Control, value: ControlValue, values: Values): V
         ? { ...assign(control.x, value[0], values), ...assign(control.y, value[1], values) }
         : {};
     default:
-      return isPoint(value) ? {} : { [control.key]: value };
+      return isPoint(value) && control.kind !== "vec" ? {} : { [control.key]: value };
   }
 };
 
@@ -788,6 +1854,9 @@ export interface ControlView {
   readonly from: readonly string[];
   readonly sites: readonly Site[];
   readonly line?: number;
+  readonly prominence?: Prominence;
+  readonly uses?: readonly Site[];
+  readonly step?: Step;
   readonly x?: ControlView;
   readonly y?: ControlView;
 }
@@ -825,6 +1894,12 @@ export const view = (
       control.origin !== "pad" &&
       control.options && { options: control.options }),
     ...(control.origin !== "derived" && control.origin !== "pad" && { line: control.line }),
+    ...(control.origin !== "derived" &&
+      control.origin !== "pad" && {
+        prominence: control.prominence,
+        ...(control.uses && { uses: control.uses }),
+        ...(control.step && { step: control.step }),
+      }),
     ...(control.origin === "pad" && {
       x: view(key + ".x", control.x, signals, values),
       y: view(key + ".y", control.y, signals, values),

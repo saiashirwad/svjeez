@@ -2,7 +2,10 @@ import {
   EASES,
   applySplices,
   assign,
+  candidatesFor,
   discover,
+  extract,
+  importsOf,
   isSpan,
   valuesOf,
   view,
@@ -13,8 +16,10 @@ import type {
   ControlValue,
   ControlView,
   Controls,
+  Files,
   InvalidValue,
   Signals,
+  Splice,
   StaleSource,
 } from "@svjeez/live";
 import {
@@ -52,12 +57,17 @@ export const messageOf = (failure: Failure): string =>
     }),
   );
 
-/** One kept change: the whole file before and after, so undo restores exactly what was there. */
-export interface Entry {
-  readonly label: string;
+/** One file of a kept change: the whole file before and after, so undo restores exactly what was there. */
+export interface Change {
   readonly file: string;
   readonly before: string;
   readonly after: string;
+}
+
+/** One kept change: every file it wrote. A control that sets values in two files is one step to undo. */
+export interface Entry {
+  readonly label: string;
+  readonly changes: readonly Change[];
 }
 
 interface History {
@@ -69,6 +79,8 @@ interface History {
 interface Open {
   readonly file: string;
   readonly text: string;
+  /** The scene and the local files it imports, by path, as they were read. */
+  readonly files: Files;
   readonly signals: Signals;
   readonly controls: Controls;
   readonly controlsError?: string;
@@ -101,7 +113,7 @@ export interface LaneView {
   readonly spans: readonly LaneSpan[];
 }
 
-export type Group = "derived" | "const" | "param" | "span" | "prop";
+export type Group = "derived" | "const" | "field" | "param" | "span" | "prop" | "chain" | "literal";
 
 export interface GroupedControl extends ControlView {
   readonly group: Group;
@@ -156,7 +168,16 @@ export interface Variant {
 
 const refuse = (message: string) => Effect.fail(new Refused({ message }));
 
-const GROUPS: readonly Group[] = ["derived", "const", "param", "span", "prop"];
+const GROUPS: readonly Group[] = [
+  "derived",
+  "const",
+  "field",
+  "param",
+  "span",
+  "prop",
+  "chain",
+  "literal",
+];
 
 const groupOf = (control: Control): Group =>
   control.origin === "pad" || control.origin === "derived" ? "derived" : control.origin;
@@ -266,8 +287,9 @@ const viewsOf = (open: Open): GroupedControl[] => {
 };
 
 /** What the source says, rendered: the signals and controls it declares, and what it builds to. */
-const read = (file: string, text: string, built: Built | BuildFailed): Open => {
-  const signals = discover({ [file]: text }, file);
+const read = (file: string, text: string, built: Built | BuildFailed, others: Files): Open => {
+  const files = { ...others, [file]: text };
+  const signals = discover(files, file);
   const failed = built instanceof BuildFailed ? built : undefined;
   const made = built instanceof BuildFailed ? undefined : built;
   let controls: Controls = signals;
@@ -285,6 +307,7 @@ const read = (file: string, text: string, built: Built | BuildFailed): Open => {
   return {
     file,
     text,
+    files,
     signals,
     controls,
     ...(controlsError !== undefined && { controlsError }),
@@ -303,6 +326,8 @@ export interface WorkspaceShape {
     value: ControlValue,
   ) => Effect.Effect<Preview | { readonly stale: true }, Failure>;
   readonly commit: (key: string, value: ControlValue) => Effect.Effect<StateView, Failure>;
+  /** Turns a literal into a constant named `name`: both edits are one entry in the log. */
+  readonly extract: (key: string, name: string) => Effect.Effect<StateView, Failure>;
   readonly variants: (key: string) => Effect.Effect<readonly Variant[], Failure>;
   readonly undo: Effect.Effect<StateView, Failure>;
   readonly redo: Effect.Effect<StateView, Failure>;
@@ -339,12 +364,64 @@ const makeWorkspace = (
     let previews = 0;
     let sweeps = 0;
 
-    const built = (file: string, text?: string) =>
-      buildScene(file, text).pipe(
+    /** The modules a rebuild must read afresh: everything under the root but node_modules and svjeez itself, and the scene's own files. */
+    const dropping = (files: Files) => (key: string) =>
+      Object.hasOwn(files, key) ||
+      (key.startsWith(options.root + "/") &&
+        !key.includes("/node_modules/") &&
+        (options.keep === undefined || !key.startsWith(options.keep + "/")));
+
+    const built = (file: string, text?: string, others?: Files, files: Files = {}) =>
+      buildScene(file, text, others, dropping(files)).pipe(
         Effect.provideService(Path.Path, path),
         services,
         permit.withPermits(1),
       );
+
+    /** The local files a scene imports, one level, and what those re-export: `import { theme } from "../theme"` reads colors.ts. */
+    const localFiles = (file: string, text: string): Effect.Effect<Files> =>
+      Effect.gen(function* () {
+        const found: Record<string, string> = {};
+
+        const visit = (from: string, source: string, imports: boolean): Effect.Effect<void> =>
+          Effect.gen(function* () {
+            const listed = importsOf(source);
+
+            for (const specifier of imports
+              ? [...listed.imports, ...listed.reexports]
+              : listed.reexports) {
+              for (const candidate of candidatesFor(from, specifier)) {
+                if (candidate === file || Object.hasOwn(found, candidate)) break;
+
+                const contents = yield* fs
+                  .readFileString(candidate)
+                  .pipe(Effect.orElseSucceed(() => undefined));
+
+                if (contents === undefined) continue;
+                found[candidate] = contents;
+
+                if (Object.keys(found).length < 64) yield* visit(candidate, contents, false);
+                break;
+              }
+            }
+          });
+
+        yield* visit(file, text, true);
+
+        return found;
+      });
+
+    /** What a set of splices changes: the files that read differently after them, by path. */
+    const changesOf = (open: Open, splices: readonly Splice[]) =>
+      Effect.map(applySplices(open.files, splices), (next) =>
+        Object.fromEntries(
+          Object.entries(next).filter(([name, text]) => text !== open.files[name]),
+        ),
+      );
+
+    /** The files of a change other than the scene itself. */
+    const othersOf = (open: Open, changes: Files): Files =>
+      Object.fromEntries(Object.entries(changes).filter(([name]) => name !== open.file));
 
     const historyOf = (file: string) =>
       Effect.map(Ref.get(histories), (all) => all.get(file) ?? { entries: [], at: 0 });
@@ -377,7 +454,9 @@ const makeWorkspace = (
         controls: open ? viewsOf(open) : [],
         marks: open
           ? Object.values(open.signals).flatMap((signal) =>
-              signal.sites.map((site) => ({ key: signal.key, from: site.from, to: site.to })),
+              signal.sites.flatMap((site) =>
+                site.file === open.file ? [{ key: signal.key, from: site.from, to: site.to }] : [],
+              ),
             )
           : [],
         log: { labels: history.entries.map((entry) => entry.label), at: history.at },
@@ -397,8 +476,16 @@ const makeWorkspace = (
             ),
           );
 
+        const others = yield* localFiles(file, text);
         const result = yield* built(file, text).pipe(Effect.result);
-        const next = read(file, text, Result.isSuccess(result) ? result.success : result.failure);
+
+        const next = read(
+          file,
+          text,
+          Result.isSuccess(result) ? result.success : result.failure,
+          others,
+        );
+
         const before = yield* Ref.get(current);
         const kept = next.built ?? (before?.file === file ? before.built : undefined);
 
@@ -422,8 +509,8 @@ const makeWorkspace = (
         ? Effect.succeed(open.controls[key])
         : refuse("The scene has no control " + key + " now. It may have been renamed.");
 
-    /** The scene's text with a control set to `value`. */
-    const textWith = (open: Open, key: string, value: ControlValue) =>
+    /** The files a control set to `value` would change, by path, with the text each would have. */
+    const changesFor = (open: Open, key: string, value: ControlValue) =>
       Effect.gen(function* () {
         const control = yield* controlOf(open, key);
 
@@ -439,27 +526,41 @@ const makeWorkspace = (
         });
 
         const splices = yield* writeAll(open.signals, updates);
-        const files = yield* applySplices({ [open.file]: open.text }, splices);
 
-        return files[open.file] ?? open.text;
+        return yield* changesOf(open, splices);
       });
 
-    const keep = (open: Open, label: string, before: string, after: string) =>
+    const write = (file: string, text: string) =>
+      fs
+        .writeFileString(file, text)
+        .pipe(
+          Effect.mapError(
+            (error) => new Refused({ message: "Cannot write " + file + ": " + error.message }),
+          ),
+        );
+
+    /** Forgets what other modules loaded from a file that is not the scene, so the next build reads the new one. */
+    const refreshed = (open: Open, files: Files) => {
+      if (Object.keys(files).some((name) => name !== open.file)) forget(dropping(open.files));
+    };
+
+    const keep = (open: Open, label: string, changes: Files) =>
       Effect.gen(function* () {
-        yield* fs
-          .writeFileString(open.file, after)
-          .pipe(
-            Effect.mapError(
-              (error) =>
-                new Refused({ message: "Cannot write " + open.file + ": " + error.message }),
-            ),
-          );
+        for (const [file, after] of Object.entries(changes)) yield* write(file, after);
+        refreshed(open, changes);
         yield* Ref.update(histories, (all) => {
           const history = all.get(open.file) ?? { entries: [], at: 0 };
 
           const entries = [
             ...history.entries.slice(0, history.at),
-            { label, file: open.file, before, after },
+            {
+              label,
+              changes: Object.entries(changes).map(([file, after]) => ({
+                file,
+                before: open.files[file] ?? "",
+                after,
+              })),
+            },
           ];
 
           return new Map(all).set(open.file, { entries, at: entries.length });
@@ -480,19 +581,25 @@ const makeWorkspace = (
         const entry = history.entries[by === -1 ? history.at - 1 : history.at];
 
         if (!entry) return yield* refuse(by === -1 ? "Nothing to undo." : "Nothing to redo.");
-        const disk = yield* fs.readFileString(open.file).pipe(Effect.orElseSucceed(() => ""));
-        const expected = by === -1 ? entry.after : entry.before;
 
-        if (disk !== expected)
-          return yield* refuse(
-            path.basename(open.file) +
-              " changed on disk since that edit, so " +
-              (by === -1 ? "undo" : "redo") +
-              " would lose the change. Edit it by hand.",
-          );
-        yield* fs
-          .writeFileString(open.file, by === -1 ? entry.before : entry.after)
-          .pipe(Effect.mapError((error) => new Refused({ message: error.message })));
+        for (const change of entry.changes) {
+          const disk = yield* fs.readFileString(change.file).pipe(Effect.orElseSucceed(() => ""));
+
+          if (disk !== (by === -1 ? change.after : change.before))
+            return yield* refuse(
+              path.basename(change.file) +
+                " changed on disk since that edit, so " +
+                (by === -1 ? "undo" : "redo") +
+                " would lose the change. Edit it by hand.",
+            );
+        }
+
+        const restored = Object.fromEntries(
+          entry.changes.map((change) => [change.file, by === -1 ? change.before : change.after]),
+        );
+
+        for (const [file, text] of Object.entries(restored)) yield* write(file, text);
+        refreshed(open, restored);
         yield* Ref.update(histories, (all) =>
           new Map(all).set(open.file, { ...history, at: history.at + by }),
         );
@@ -539,13 +646,18 @@ const makeWorkspace = (
       preview: (key, value) =>
         Effect.gen(function* () {
           const open = yield* opened;
-          const text = yield* textWith(open, key, value);
+          const changes = yield* changesFor(open, key, value);
           const mine = ++previews;
 
           sweeps++;
           const started = performance.now();
 
-          const build = buildScene(open.file, text).pipe(
+          const build = buildScene(
+            open.file,
+            changes[open.file] ?? open.text,
+            othersOf(open, changes),
+            dropping(open.files),
+          ).pipe(
             Effect.provideService(Path.Path, path),
             services,
             Effect.map((made): Built | undefined => made),
@@ -556,7 +668,7 @@ const makeWorkspace = (
           );
 
           if (!made) return { stale: true } as const;
-          const signals = discover({ [open.file]: text }, open.file);
+          const signals = discover({ ...open.files, ...changes }, open.file);
 
           return {
             svg: made.svg,
@@ -569,20 +681,36 @@ const makeWorkspace = (
       commit: (key, value) =>
         Effect.gen(function* () {
           const open = yield* opened;
-          const text = yield* textWith(open, key, value);
+          const changes = yield* changesFor(open, key, value);
 
-          if (text !== open.text) {
+          if (Object.keys(changes).length > 0) {
             const control = yield* controlOf(open, key);
             const was = view(key, control, open.signals, valuesOf(open.signals)).value;
 
             yield* keep(
               open,
               (control.label || key) + ": " + shown(was) + " → " + shown(value),
-              open.text,
-              text,
+              changes,
             );
           }
 
+          yield* reload(open.file);
+
+          return yield* state;
+        }),
+      extract: (key, name) =>
+        Effect.gen(function* () {
+          const open = yield* opened;
+          const signal = Object.hasOwn(open.signals, key) ? open.signals[key] : undefined;
+
+          if (!signal) return yield* refuse("The scene has no literal " + key + " now.");
+          const splices = yield* extract(open.files, signal, name);
+
+          yield* keep(
+            open,
+            "extract " + name + " from " + signal.label,
+            yield* changesOf(open, splices),
+          );
           yield* reload(open.file);
 
           return yield* state;
@@ -602,8 +730,10 @@ const makeWorkspace = (
           return yield* Effect.forEach(values, (value) =>
             mine !== sweeps
               ? Effect.succeed<Variant>({ value, error: "superseded" })
-              : textWith(open, key, value).pipe(
-                  Effect.flatMap((text) => built(open.file, text)),
+              : changesFor(open, key, value).pipe(
+                  Effect.flatMap((changes) =>
+                    built(open.file, changes[open.file], othersOf(open, changes), open.files),
+                  ),
                   Effect.map((made): Variant => ({ value, svg: made.svg })),
                   Effect.catch((failure) =>
                     Effect.succeed<Variant>({ value, error: messageOf(failure) }),
@@ -620,22 +750,20 @@ const makeWorkspace = (
 
           if (!open) return;
 
-          const disk = yield* fs
-            .readFileString(open.file)
-            .pipe(Effect.orElseSucceed(() => open.text));
+          const unchanged = yield* Effect.forEach(Object.entries(open.files), ([file, text]) =>
+            Effect.map(
+              fs.readFileString(file).pipe(Effect.orElseSucceed(() => text)),
+              (disk) => disk === text,
+            ),
+          );
 
           if (
-            paths.every((changed) => changed === open.file) &&
-            disk === open.text &&
+            paths.every((changed) => Object.hasOwn(open.files, changed)) &&
+            unchanged.every(Boolean) &&
             open.error === undefined
           )
             return;
-          forget(
-            (key) =>
-              key.startsWith(options.root + "/") &&
-              !key.includes("/node_modules/") &&
-              (options.keep === undefined || !key.startsWith(options.keep + "/")),
-          );
+          forget(dropping(open.files));
           yield* reload(open.file).pipe(Effect.ignore);
         }),
     };

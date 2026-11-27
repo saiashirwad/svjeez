@@ -7,6 +7,7 @@ import {
   assign,
   derive,
   discover,
+  extract,
   guessRange,
   pad,
   valueOf,
@@ -15,7 +16,7 @@ import {
   write,
   writeAll,
 } from "../src/index.ts";
-import type { Files, Signal, SignalValue } from "../src/index.ts";
+import type { Files, Signal, SignalKind, SignalValue, Signals } from "../src/index.ts";
 
 const example = (name: string): Promise<Files> => {
   const path = new URL("../../../examples/" + name + "/index.tsx", import.meta.url).pathname;
@@ -23,6 +24,17 @@ const example = (name: string): Promise<Files> => {
   return Bun.file(path)
     .text()
     .then((text) => ({ [name + ".tsx"]: text }));
+};
+
+/** A scene with the local files it imports, keyed by path the way the dev server loads them. */
+const project = async (name: string, ...others: string[]): Promise<[Files, string]> => {
+  const root = new URL("../../../examples/", import.meta.url).pathname;
+  const entry = root + name + "/index.tsx";
+  const loaded = { [entry]: await Bun.file(entry).text() };
+
+  for (const other of others) loaded[root + other] = await Bun.file(root + other).text();
+
+  return [loaded, entry];
 };
 
 const SCENE = `import { Group, Shape, ease, param, rect, scene, span, track } from "svjeez";
@@ -65,6 +77,22 @@ const at = (key: string): Signal => {
   return signal;
 };
 
+const must = (found: Signals, key: string): Signal => {
+  const signal = found[key];
+
+  if (!signal) throw new Error("no signal " + key);
+
+  return signal;
+};
+
+const ofKind = (found: Signals, kind: SignalKind): Signal => {
+  const signal = Object.values(found).find((each) => each.kind === kind);
+
+  if (!signal) throw new Error("no " + kind + " signal");
+
+  return signal;
+};
+
 /** The file after writing one value. */
 const written = (signal: Signal, value: SignalValue, source: Files = files) =>
   Effect.runPromise(
@@ -73,7 +101,9 @@ const written = (signal: Signal, value: SignalValue, source: Files = files) =>
 
 describe("discover", () => {
   test("finds top-level constants first, then params, spans and props, in source order", () => {
-    expect(Object.keys(signals)).toEqual([
+    const named = Object.values(signals).filter((signal) => signal.prominence === "named");
+
+    expect(named.map((signal) => signal.key)).toEqual([
       "SIZE",
       "STAGGER",
       "DUR",
@@ -83,13 +113,13 @@ describe("discover", () => {
       "TITLE",
       "LOOP",
       "CURVE",
+      "ORIGIN",
       "ORIGIN[0]",
       "ORIGIN[1]",
       "speed",
       "shade",
       "mode",
       "swing",
-      "span@24",
       "box.fill",
       "box.opacity",
     ]);
@@ -144,7 +174,9 @@ describe("discover", () => {
     expect(found["BRASS"]).toMatchObject({ kind: "color", value: "#C39A52" });
     expect(found["ESCAPE[0]"]).toMatchObject({ kind: "number", value: 761 });
     expect(found["sine"]).toMatchObject({ kind: "ease", value: "ease.bezier(0.37, 0, 0.63, 1)" });
-    expect(Object.values(found).filter((s) => s.kind === "color")).toHaveLength(10);
+    expect(
+      Object.values(found).filter((s) => s.kind === "color" && s.origin === "const"),
+    ).toHaveLength(10);
   });
 
   test("reads the epicycles' sizes and its one literal span", async () => {
@@ -261,5 +293,436 @@ describe("derive and pad", () => {
     expect(() =>
       derive([signals["NOPE"]], { kind: "number", label: "gone", get: () => 0, set: () => [] }),
     ).toThrow("signal 1 is undefined");
+  });
+});
+
+describe("every literal", () => {
+  test("a literal nobody named is a deep signal, keyed by where it is written", () => {
+    const rect = at("Shape.rect[0]@24:27");
+
+    expect(rect).toMatchObject({
+      kind: "number",
+      value: 1,
+      origin: "literal",
+      prominence: "deep",
+      label: "rect width",
+      line: 24,
+    });
+    expect(rect.sites[0]?.text).toBe("1");
+    expect(at("scene[0].duration@21:54")).toMatchObject({ value: 4, prominence: "deep" });
+  });
+
+  test("never claims a site twice", async () => {
+    const [derived, entry] = await project("derived", "theme.ts", "colors.ts");
+
+    for (const [name, found] of [
+      ["scene", signals],
+      ["derived", discover(derived, entry)],
+    ] as const) {
+      const claimed = new Map<string, string>();
+
+      for (const signal of Object.values(found))
+        if (signal.prominence === "deep" && signal.origin === "literal")
+          for (const site of signal.sites) {
+            const id = site.file + ":" + site.from;
+
+            expect(claimed.get(id) ?? name + ":" + signal.key).toBe(name + ":" + signal.key);
+            claimed.set(id, signal.key);
+          }
+
+      const named = Object.values(found).flatMap((signal) =>
+        signal.prominence === "named"
+          ? signal.sites.map((site) => site.file + ":" + site.from)
+          : [],
+      );
+
+      expect(named.filter((id) => claimed.has(id))).toEqual([]);
+    }
+  });
+
+  test("a negative number is one literal with its sign, and a hex color in a prop is one too", () => {
+    const found = discover(
+      {
+        "a.tsx":
+          'const f = () => [offset(-3.5), 0x1f]; const g = <Group><Shape id="x" fill="#abc" /><Shape stroke="#AABBCCDD" opacity={0.2} /></Group>;',
+      },
+      "a.tsx",
+    );
+
+    const deep = Object.values(found).filter((signal) => signal.prominence === "deep");
+
+    expect(deep.map((signal) => [signal.kind, signal.value])).toEqual([
+      ["number", -3.5],
+      ["number", 31],
+      ["color", "#AABBCCDD"],
+      ["number", 0.2],
+    ]);
+    expect(found["x.fill"]).toMatchObject({ prominence: "named", origin: "prop" });
+  });
+
+  test("skips bit twiddling, indexes and types", () => {
+    const found = discover(
+      {
+        "a.ts": [
+          "type Pair = [number, 5];",
+          "let a = 0;",
+          "a = (a + 0x6d2b79f5) | 0;",
+          "a = (a >>> 15) ^ (a << 3);",
+          "a |= 8;",
+          "const t = [1, 2, 3, 4, 5, 6, 7, 8, 9][4 + 1];",
+          "const x = a as 7;",
+        ].join("\n"),
+      },
+      "a.ts",
+    );
+
+    expect(Object.values(found).map((signal) => signal.value)).toEqual([
+      0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+    ]);
+  });
+
+  test("reads every ease.x and ease.bezier anywhere in the entry", () => {
+    const found = discover(
+      { "a.ts": "const f = () => [ease.out, ease.bezier(0.2, 0, 0.8, 1), ease.spring(1)];" },
+      "a.ts",
+    );
+
+    expect(Object.values(found).map((signal) => [signal.kind, signal.value])).toEqual([
+      ["ease", "ease.out"],
+      ["ease", "ease.bezier(0.2, 0, 0.8, 1)"],
+      ["number", 1],
+    ]);
+  });
+
+  test("a literal pair in a prop or an argument is a point, with the x site first", async () => {
+    const found = discover(
+      {
+        "a.tsx":
+          "const s = <Shape at={[290, 262]} geometry={line([0, 0], [R, 0])} offset={[x, 4]} />;",
+      },
+      "a.tsx",
+    );
+
+    expect(found["Shape.at@1:22"]).toMatchObject({
+      kind: "vec",
+      value: [290, 262],
+      origin: "literal",
+      prominence: "deep",
+    });
+    expect(found["Shape.at@1:22"]?.sites.map((site) => site.text)).toEqual(["290", "262"]);
+    expect(
+      Object.values(found)
+        .filter((signal) => signal.kind === "vec")
+        .map((signal) => [signal.key.split("@")[0], signal.value]),
+    ).toEqual([
+      ["Shape.at", [290, 262]],
+      ["Shape.line[0]", [0, 0]],
+    ]);
+
+    const after = await written(must(found, "Shape.at@1:22"), [10, 20], {
+      "a.tsx": "const s = <Shape at={[290, 262]} />;",
+    });
+
+    expect(after).toBe("const s = <Shape at={[10, 20]} />;");
+  });
+});
+
+describe("object and array consts", () => {
+  test("derived's WAVE is a signal per field, named, with every place that reads it", async () => {
+    const [derived, entry] = await project("derived", "theme.ts", "colors.ts");
+    const found = discover(derived, entry);
+
+    expect(found["WAVE.x"]).toMatchObject({
+      kind: "number",
+      value: 290,
+      origin: "field",
+      prominence: "named",
+    });
+    expect(found["WAVE.width"]?.value).toBe(300);
+    expect(found["WAVE.width"]?.uses?.map((site) => site.text)).toEqual(
+      Array(5).fill("WAVE.width"),
+    );
+    expect(found["WAVE.x"]?.uses).toHaveLength(7);
+    expect(found["RADIUS"]?.uses?.every((site) => site.text === "RADIUS")).toBe(true);
+    expect(found["WAVE.x"]?.sites[0]?.from).toBe(derived[entry]?.indexOf("290"));
+  });
+
+  test("a pair const is a point and its two numbers, over the same sites", async () => {
+    const [derived, entry] = await project("derived", "theme.ts", "colors.ts");
+    const found = discover(derived, entry);
+    const center = found["CENTER"];
+
+    expect(center).toMatchObject({ kind: "vec", value: [140, 150], origin: "const" });
+    expect(center?.sites.map((site) => site.from)).toEqual([
+      found["CENTER[0]"]?.sites[0]?.from ?? -1,
+      found["CENTER[1]"]?.sites[0]?.from ?? -1,
+    ]);
+    expect(found["CENTER[0]"]).toMatchObject({ kind: "number", value: 140 });
+    expect(found["CENTER[0]"]?.uses).toHaveLength(1);
+  });
+
+  test("nested objects go one level, lists of more than two are NAME[i]", () => {
+    const found = discover(
+      {
+        "a.ts": [
+          'export const CFG = { a: 1, deep: { b: 2, c: { d: 3 } }, hue: "#abcdef", at: [4, 5] } as const;',
+          'const PALETTE = ["#111111", "#222222", "#333333", "#444444", "#555555"];',
+          "const BOX = [[0, 0], [10, 20]];",
+        ].join("\n"),
+      },
+      "a.ts",
+    );
+
+    expect(Object.keys(found)).toEqual([
+      "CFG.a",
+      "CFG.deep.b",
+      "CFG.hue",
+      "CFG.at",
+      "PALETTE[0]",
+      "PALETTE[1]",
+      "PALETTE[2]",
+      "PALETTE[3]",
+      "PALETTE[4]",
+      "BOX[0]",
+      "BOX[1]",
+      "CFG.deep.c.d@1:50",
+    ]);
+    expect(found["PALETTE[3]"]).toMatchObject({ kind: "color", origin: "field", value: "#444444" });
+    expect(found["BOX[1]"]).toMatchObject({ kind: "vec", value: [10, 20] });
+  });
+
+  test("writing a field changes only its literal", async () => {
+    const [derived, entry] = await project("derived", "theme.ts", "colors.ts");
+    const found = discover(derived, entry);
+
+    const after = await Effect.runPromise(
+      write(must(found, "WAVE.width"), 320).pipe(
+        Effect.flatMap((splices) => applySplices(derived, splices)),
+      ),
+    );
+
+    expect(after[entry]).toBe((derived[entry] ?? "").replace("width: 300", "width: 320"));
+  });
+});
+
+describe("across files", () => {
+  test("theme.blue is in colors.ts, found through theme.ts's re-export, with its uses", async () => {
+    const [derived, entry] = await project("derived", "theme.ts", "colors.ts");
+    const found = discover(derived, entry);
+    const colors = Object.keys(derived).find((name) => name.endsWith("/colors.ts")) ?? "";
+    const blue = found["theme.blue"];
+
+    expect(blue).toMatchObject({
+      kind: "color",
+      value: "#0A6CFF",
+      origin: "field",
+      prominence: "named",
+      file: colors,
+    });
+    expect(blue?.sites[0]?.file).toBe(colors);
+    expect(blue?.uses).toHaveLength(1);
+    expect(blue?.uses?.[0]).toMatchObject({ file: entry, text: "theme.blue" });
+    expect(found["theme.dark.blue"]).toMatchObject({ value: "#5EA0FF", file: colors });
+  });
+
+  test("a write to it lands in colors.ts and leaves the scene alone", async () => {
+    const [derived, entry] = await project("derived", "theme.ts", "colors.ts");
+    const blue = must(discover(derived, entry), "theme.blue");
+
+    const after = await Effect.runPromise(
+      write(blue, "#112233").pipe(Effect.flatMap((splices) => applySplices(derived, splices))),
+    );
+
+    expect(after[entry]).toBe(derived[entry]);
+    expect(after[blue.file]).toBe(
+      (derived[blue.file] ?? "").replace('blue: "#0A6CFF"', 'blue: "#112233"'),
+    );
+  });
+
+  test("an import that is not loaded makes nothing", async () => {
+    const [derived, entry] = await project("derived");
+
+    expect(Object.keys(discover(derived, entry)).some((key) => key.startsWith("theme."))).toBe(
+      false,
+    );
+  });
+});
+
+describe("motion chains", () => {
+  test("each step of a track is a span with its target and curve", async () => {
+    const [derived, entry] = await project("derived", "theme.ts", "colors.ts");
+    const found = discover(derived, entry);
+    const text = derived[entry] ?? "";
+
+    expect(found["theta.step0"]).toMatchObject({
+      kind: "span",
+      origin: "chain",
+      prominence: "named",
+      value: { start: 0.3, over: 2.6 },
+      step: { index: 0, chain: "theta" },
+    });
+    expect(found["theta.step0"]?.sites.map((site) => site.text)).toEqual(["0.3", "2.6"]);
+    expect(found["theta.step0"]?.step?.target?.text).toBe("360");
+    expect(found["theta.step0"]?.step?.target?.from).toBe(text.indexOf("360"));
+    expect(found["theta.step0"]?.step?.ease?.text).toBe("ease.inOut");
+    expect(found["theta.step1"]).toMatchObject({
+      kind: "number",
+      value: 1.2,
+      step: { index: 1, chain: "theta" },
+    });
+    expect(found["theta.step1"]?.step?.ease?.text).toBe("ease.inOut");
+  });
+
+  test("the pieces of a step are edited at their own sites", async () => {
+    const [derived, entry] = await project("derived", "theme.ts", "colors.ts");
+    const step = must(discover(derived, entry), "theta.step0");
+
+    const after = await Effect.runPromise(
+      write(step, { start: 0.5, over: 3 }).pipe(
+        Effect.flatMap((splices) => applySplices(derived, splices)),
+      ),
+    );
+
+    expect(after[entry]).toContain("to(360, span(0.5, 3), ease.inOut)");
+  });
+
+  test("a step with a time that is not a literal makes no chain signal, and its literals stay deep", () => {
+    const found = discover(
+      {
+        "a.ts": "const t = track(0).to(5, span(delay, 1), ease.out).to(7, span(2, 1));",
+      },
+      "a.ts",
+    );
+
+    expect(Object.keys(found).filter((key) => found[key]?.origin === "chain")).toEqual(["t.step1"]);
+    expect(found["t.step1"]?.step?.target?.text).toBe("7");
+    expect(
+      Object.values(found)
+        .filter((s) => s.prominence === "deep")
+        .map((s) => s.value),
+    ).toEqual([{ start: 2, over: 1 }, 0, 5, 1, "ease.out"]);
+  });
+
+  test("keyframes make a signal per frame time", () => {
+    const found = discover(
+      { "a.ts": "const k = keyframes([[0, 0], [0.4, -30, ease.out], [1, 0]]);" },
+      "a.ts",
+    );
+
+    expect(found["k.frame1"]).toMatchObject({
+      kind: "number",
+      value: 0.4,
+      origin: "chain",
+      step: { index: 1, chain: "k" },
+    });
+    expect(found["k.frame1"]?.step?.target?.text).toBe("-30");
+    expect(found["k.frame1"]?.step?.ease?.text).toBe("ease.out");
+  });
+});
+
+describe("real scenes", () => {
+  test("jellyfish: a factor inside bellGeometry, and the hex strings of its palettes", async () => {
+    const [jelly, entry] = await project("jellyfish");
+    const found = discover(jelly, entry);
+
+    const bell = Object.values(found).find(
+      (signal) => signal.value === 0.16 && signal.key.startsWith("bellGeometry@"),
+    );
+
+    expect(bell).toMatchObject({
+      prominence: "deep",
+      origin: "literal",
+      label: "0.16 in bellGeometry",
+    });
+    expect(found["HERO_PALETTE.outerTop"]).toMatchObject({ kind: "color", value: "#7CF7FF" });
+    expect(Object.values(found).some((s) => s.origin === "literal" && s.kind === "color")).toBe(
+      true,
+    );
+    expect(
+      Object.values(found).some((s) => s.sites.some((site) => site.text.startsWith("0x"))),
+    ).toBe(false);
+  });
+
+  test("escapement: the arguments of driven(escapePinion, 32, 110)", async () => {
+    const found = discover(await example("escapement"), "escapement.tsx");
+    const keys = Object.keys(found).filter((key) => key.startsWith("fourth.driven"));
+
+    expect(keys.map((key) => found[key]?.value)).toEqual([32, 110]);
+    expect(found[keys[0] ?? ""]).toMatchObject({ prominence: "deep", label: "driven argument 2" });
+  });
+
+  test("discovery of a 900-line scene takes well under 50 ms", async () => {
+    const [jelly, entry] = await project("jellyfish");
+
+    discover(jelly, entry);
+    const started = performance.now();
+
+    for (let i = 0; i < 5; i++) discover(jelly, entry);
+
+    expect((performance.now() - started) / 5).toBeLessThan(50);
+  });
+});
+
+describe("extract", () => {
+  const run = (source: Files, signal: Signal, name: string) =>
+    Effect.runPromise(
+      extract(source, signal, name).pipe(
+        Effect.flatMap((splices) => applySplices(source, splices)),
+      ),
+    );
+
+  test("a literal becomes a constant after the imports", async () => {
+    const circle = at("Shape.rect[0]@23:36");
+    const after = await run(files, circle, "BOX_WIDTH");
+    const text = after["scene.tsx"] ?? "";
+
+    expect(text).toContain('} from "svjeez";\n\nconst BOX_WIDTH = 40;\n\nconst SIZE = 1000;');
+    expect(text).toContain("geometry={rect(BOX_WIDTH, 30)}");
+    expect(discover(after, "scene.tsx")["BOX_WIDTH"]).toMatchObject({ value: 40, origin: "const" });
+  });
+
+  test("a point, a color in a prop and a span are taken whole", async () => {
+    const source: Files = {
+      "a.tsx":
+        'import { span } from "svjeez";\nconst s = <Shape at={[290, 262]} fill="#abc" draw={span(1, 2)} />;\n',
+    };
+
+    const found = discover(source, "a.tsx");
+    const vec = ofKind(found, "vec");
+    const color = ofKind(found, "color");
+    const call = ofKind(found, "span");
+
+    expect((await run(source, vec, "origin"))["a.tsx"]).toContain(
+      "const origin = [290, 262];\n\nconst s = <Shape at={origin}",
+    );
+    expect((await run(source, color, "TINT"))["a.tsx"]).toContain("fill={TINT}");
+    expect((await run(source, color, "TINT"))["a.tsx"]).toContain('const TINT = "#abc";');
+    expect((await run(source, call, "LONG"))["a.tsx"]).toContain("draw={LONG}");
+    expect((await run(source, call, "LONG"))["a.tsx"]).toContain("const LONG = span(1, 2);");
+  });
+
+  test("a file with no imports gets it before its first statement", async () => {
+    const source: Files = { "a.ts": "export const f = () => 5;\n" };
+    const found = discover(source, "a.ts");
+    const after = await run(source, must(found, Object.keys(found)[0] ?? ""), "FIVE");
+
+    expect(after["a.ts"]).toBe("const FIVE = 5;\n\nexport const f = () => FIVE;\n");
+  });
+
+  test("refuses a name that is taken, badly written, or a signal that is already named", async () => {
+    const circle = at("Shape.rect[0]@23:36");
+
+    for (const name of ["SIZE", "box", "bad name", "1ST", "class", "Mixed_Case", "Shape"])
+      if (name !== "box")
+        expect(Effect.runPromise(extract(files, circle, name))).rejects.toBeInstanceOf(
+          InvalidValue,
+        );
+    expect(Effect.runPromise(extract(files, at("SIZE"), "BIG"))).rejects.toBeInstanceOf(
+      InvalidValue,
+    );
+    expect(Effect.runPromise(extract(files, at("swing"), "BIG"))).rejects.toBeInstanceOf(
+      InvalidValue,
+    );
+    expect(Effect.runPromise(extract(files, circle, "box"))).resolves.toHaveLength(2);
   });
 });

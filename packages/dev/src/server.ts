@@ -17,6 +17,7 @@ const Value = Schema.Union([
 const SetBody = Schema.Struct({ key: Schema.String, value: Value });
 const KeyBody = Schema.Struct({ key: Schema.String });
 const OpenBody = Schema.Struct({ file: Schema.String });
+const ExtractBody = Schema.Struct({ key: Schema.String, name: Schema.String });
 
 const NO_STORE = { "cache-control": "no-store" };
 
@@ -85,6 +86,12 @@ export const app = (workspace: WorkspaceShape, page: string, client: string) => 
       "POST /api/commit",
       Effect.flatMap(body(SetBody), ({ key, value }) =>
         Effect.map(workspace.commit(key, value), (state) => json(state)),
+      ),
+    ],
+    [
+      "POST /api/extract",
+      Effect.flatMap(body(ExtractBody), ({ key, name }) =>
+        Effect.map(workspace.extract(key, name), (state) => json(state)),
       ),
     ],
     [

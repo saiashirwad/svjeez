@@ -17,8 +17,10 @@ export {
   assign,
   derive,
   discover,
+  extract,
   formatNumber,
   guessRange,
+  importsOf,
   isSpan,
   pad,
   sourcesOf,
@@ -40,6 +42,8 @@ export type {
   NumberControl,
   Origin,
   Pad,
+  Point,
+  Prominence,
   Signal,
   SignalKind,
   SignalValue,
@@ -47,8 +51,11 @@ export type {
   Site,
   Span,
   Splice,
+  Step,
   Values,
 } from "./signals.ts";
+
+export { candidatesFor } from "./paths.ts";
 
 export type { Hooks } from "./hooks.ts";
 
