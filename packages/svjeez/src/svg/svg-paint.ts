@@ -2,6 +2,7 @@ import type { Color as CssColor } from "../model/color";
 import type { ChannelValues } from "./channels";
 import type { Canvas, Lane as CssLane } from "./compile";
 import { num } from "../model/format";
+import { SceneError } from "../model/scene-error";
 import { animate, windowEnd } from "./smil";
 import { element, type Element, type SvgNode } from "./tree";
 import { contoursOf, outlineBoxOf, smilSafeWith } from "../model/geometry";
@@ -198,6 +199,24 @@ export const gradientUrl = (
           at("r", (g) => (g.kind === "radial" ? g.radius : 0), undefined),
         ];
 
+  const squash = (g: Gradient): number => (g.kind === "radial" ? (g.squash ?? 1) : 1);
+
+  if (isLane(paint) && first.kind === "radial") {
+    const [rest, ...more] = paint.keys.map((key) => key.value);
+
+    if (
+      more.some(
+        (g) =>
+          g.kind === "radial" &&
+          rest!.kind === "radial" &&
+          (squash(g) !== squash(rest!) || (squash(rest!) !== 1 && g.center[1] !== rest!.center[1])),
+      )
+    )
+      throw new SceneError(
+        `${where} changes its ellipse shape or its vertical center over time, and SVG can't animate that. Animate the center's x or the radius, or keep the ratio between radii fixed.`,
+      );
+  }
+
   const optional = new Set(["x1", "y1", "y2"]);
 
   const stops = first.stops.map((_, i) => {
@@ -225,6 +244,10 @@ export const gradientUrl = (
       {
         id: own,
         gradientUnits: "userSpaceOnUse",
+        ...(first.kind === "radial" &&
+          squash(first) !== 1 && {
+            gradientTransform: `matrix(1 0 0 ${num(squash(first))} 0 ${num((first.center[1] + shift[1]) * (1 - squash(first)))})`,
+          }),
         ...Object.fromEntries(
           points.flatMap(([name, written]): [string, string][] =>
             optional.has(name) && written.nodes.length === 0 && written.value === "0"

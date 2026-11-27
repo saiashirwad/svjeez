@@ -19,6 +19,7 @@ import { noMix, same, type Mix } from "../model/steps";
 import type { Child } from "./nodes";
 import type { Anim } from "./track";
 import type { Color, Paint } from "./values";
+import type { Effect } from "./effects";
 import { isArray, isNumber, isString } from "../model/guards";
 import { hexBytes, hexOf, type Hex } from "../model/color";
 
@@ -26,19 +27,22 @@ export type Stops = readonly Color[] | readonly (readonly [offset: number, color
 
 export type RadialFit = "cover" | "inside";
 
+export type RadialShape = "circle" | "ellipse";
+
 export type Gradient =
   | { readonly kind: "linear"; readonly from: Vec; readonly to: Vec; readonly stops: Stops }
   | { readonly kind: "linear"; readonly angle: number; readonly stops: Stops }
   | {
       readonly kind: "radial";
       readonly center: Vec;
-      readonly radius: number;
+      readonly radius: number | readonly [rx: number, ry: number];
       readonly stops: Stops;
     }
   | {
       readonly kind: "radial";
       readonly center: Place | Vec;
       readonly fit?: RadialFit;
+      readonly shape?: RadialShape;
       readonly stops: Stops;
     };
 
@@ -71,7 +75,8 @@ export interface LinearAcrossOptions {
 
 export interface RadialOptions {
   readonly center: Vec;
-  readonly radius: number;
+  /** A circle's radius, or `[rx, ry]` for an ellipse. */
+  readonly radius: number | readonly [rx: number, ry: number];
   readonly stops: Stops;
 }
 
@@ -80,6 +85,8 @@ export interface RadialAcrossOptions {
   readonly center?: Place | Vec;
   /** `"cover"` (default) reaches the farthest corner; `"inside"` reaches the nearest edge (inscribed circle). */
   readonly fit?: RadialFit;
+  /** `"circle"` (default), or `"ellipse"` to stretch to the box's aspect, with `fit` read per axis. */
+  readonly shape?: RadialShape;
   readonly stops: Stops;
 }
 
@@ -133,22 +140,37 @@ export const radial = Object.assign(
     if (!finite(center))
       throw new SceneError(`radial() needs a finite center, got [${center.join(", ")}].`);
 
-    if (!(radius > 0 && Number.isFinite(radius)))
-      throw new SceneError(`radial() needs a positive radius, got ${radius}.`);
+    const radii = isNumber(radius) ? [radius] : radius;
+
+    if (radii.length === 0 || radii.length > 2 || !radii.every((r) => r > 0 && Number.isFinite(r)))
+      throw new SceneError(
+        `radial() needs a positive radius, or [rx, ry] both positive, got ${isNumber(radius) ? radius : `[${radius.join(", ")}]`}.`,
+      );
 
     return { kind: "radial", center, radius, stops: checked(stops, "radial()") };
   },
   {
-    across: ({ center = "center", fit = "cover", stops }: RadialAcrossOptions): Gradient => {
+    across: ({
+      center = "center",
+      fit = "cover",
+      shape = "circle",
+      stops,
+    }: RadialAcrossOptions): Gradient => {
       if (isArray(center) && !finite(center))
         throw new SceneError(
           `radial.across() needs a finite fractional center, got [${center.join(", ")}].`,
+        );
+
+      if (shape !== "circle" && shape !== "ellipse")
+        throw new SceneError(
+          `radial.across() takes a shape of "circle" or "ellipse", got ${JSON.stringify(shape)}.`,
         );
 
       return {
         kind: "radial",
         center,
         fit,
+        ...(shape === "ellipse" && { shape }),
         stops: checked(stops, "radial.across()"),
       };
     },
@@ -175,6 +197,7 @@ export interface Noise {
   readonly type: "fractal" | "turbulence";
   readonly ramp: Stops;
   readonly stitch: boolean;
+  readonly rotate: number;
 }
 
 export interface NoiseOptions {
@@ -192,11 +215,17 @@ export interface NoiseOptions {
   /**
    * The colors noise intensity maps to, low to high, as colors spread evenly or `[offset, color]` pairs. Intensity
    * gathers around 0.5, so the middle of the ramp covers most of the surface. Translucent colors make a texture to
-   * lay over another fill.
+   * lay over another fill. Stops blend in sRGB, so colors ported from a raw `feTurbulence` (linearRGB by default)
+   * need converting.
    */
   readonly ramp: Stops;
   /** Smooths the noise to tile seamlessly at the edges of the node's box. */
   readonly stitch?: boolean;
+  /**
+   * Clockwise degrees to turn the noise field about the center of the node's box (default 0), so grain stretched
+   * with `frequency: [fx, fy]` can run along a limb. The node itself does not turn.
+   */
+  readonly rotate?: number;
 }
 
 /** Leaves a part unpainted: a node whose fill and stroke are both `none` is left out of the scene. */
@@ -210,6 +239,8 @@ export interface PaintLayer {
   /** How it composites onto the layers under it. */
   readonly blend?: "normal" | Blend;
   readonly opacity?: Anim<number>;
+  /** Effects on this layer alone, such as `emboss()` lighting a noise layer's relief. */
+  readonly effects?: readonly Effect[];
 }
 
 /** What a `fill` or stroke `color` takes: one paint, or layers painted bottom to top. */
@@ -227,6 +258,7 @@ export const noise = ({
   type = "fractal",
   ramp,
   stitch = false,
+  rotate = 0,
 }: NoiseOptions): Noise => {
   const still = isNumber(frequency) || isArray(frequency) ? frequency : undefined;
 
@@ -256,7 +288,21 @@ export const noise = ({
       'Give it two colors or more, as in ramp: ["#0d2f63", "#1d58a8"].',
     );
 
-  return { kind: "noise", frequency, octaves, seed, type, ramp: checked(ramp, "noise()"), stitch };
+  if (!isNumber(rotate) || !Number.isFinite(rotate))
+    throw new SceneError(
+      `noise() needs rotate as a finite number of degrees, got ${JSON.stringify(rotate)}.`,
+    );
+
+  return {
+    kind: "noise",
+    frequency,
+    octaves,
+    seed,
+    type,
+    ramp: checked(ramp, "noise()"),
+    stitch,
+    rotate,
+  };
 };
 
 export const isNoise = (paint: unknown): paint is Noise =>
@@ -356,13 +402,49 @@ export const gradientOf = (
     };
   }
 
-  if ("radius" in given)
-    return { kind: "radial", center: given.center, radius: given.radius, stops: pairs };
+  if ("radius" in given) {
+    const [rx, ry] = isNumber(given.radius) ? [given.radius, given.radius] : given.radius;
+
+    return {
+      kind: "radial",
+      center: given.center,
+      radius: rx,
+      ...(ry !== rx && { squash: ry / rx }),
+      stops: pairs,
+    };
+  }
+
   const area = measured("radial.across()");
 
   const center: Vec = isArray(given.center)
     ? [area.x + given.center[0] * area.width, area.y + given.center[1] * area.height]
     : placeIn(area, given.center, [0, 0], "radial.across()");
+
+  if (given.shape === "ellipse") {
+    const near = [
+      Math.min(center[0] - area.x, area.x + area.width - center[0]),
+      Math.min(center[1] - area.y, area.y + area.height - center[1]),
+    ] as const;
+
+    const far = [
+      Math.max(center[0] - area.x, area.x + area.width - center[0]),
+      Math.max(center[1] - area.y, area.y + area.height - center[1]),
+    ] as const;
+
+    const reach = given.fit === "inside" ? near : far;
+    const scale = given.fit === "inside" ? 1 : Math.SQRT2;
+
+    const rx = reach[0] > 0 ? reach[0] * scale : reach[1] * scale;
+    const ry = reach[1] > 0 ? reach[1] * scale : rx;
+
+    return {
+      kind: "radial",
+      center,
+      radius: rx,
+      ...(ry !== rx && { squash: ry / rx }),
+      stops: pairs,
+    };
+  }
 
   const inside = Math.min(
     center[0] - area.x,
@@ -469,6 +551,9 @@ export const mixPaint: Mix<ModelPaint> = (a, b, amount, where) => {
       kind: "radial",
       center: lerpPoint(a.center, b.center, amount),
       radius: a.radius + (b.radius - a.radius) * amount,
+      ...((a.squash !== undefined || b.squash !== undefined) && {
+        squash: (a.squash ?? 1) + ((b.squash ?? 1) - (a.squash ?? 1)) * amount,
+      }),
       stops,
     };
 

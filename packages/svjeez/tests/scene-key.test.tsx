@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { Group, Shape, circle, h, morph, rect, ref, scene, span, type SceneElement } from "svjeez";
-import { isLane, type Model } from "svjeez/tools";
+import { isLane, valueAt, type Model } from "svjeez/tools";
+import { blendNumber, blendVec } from "../src/model/sample";
 
 const made = (build: () => SceneElement): Model.Scene =>
   scene({ size: [100, 40], duration: 1, title: "Keys" }, build);
@@ -171,6 +172,86 @@ describe("key", () => {
         [50, 150],
         [60, 160],
       ]);
+    });
+
+    describe("morph keeps a list's node one node when another list drops its key", () => {
+      const xAt = (node: Model.SceneNode, t: number): number =>
+        valueAt(node.at, t, blendVec, node.key)[0];
+
+      const opacityAt = (node: Model.SceneNode, t: number): number =>
+        valueAt(node.layers[0]?.opacity ?? 1, t, blendNumber, node.key);
+
+      const byKey = (group: Model.GroupNode) =>
+        new Map(group.children.map((node) => [node.key, node]));
+
+      test("the second list's 0 tweens from where it was to where it goes", () => {
+        // Both lists hold 0 in the first state; only the second does in the last.
+        const model = made(() => morph(two([0, 1], [0]), two([1], [0], 100), span(0, 1)));
+        const nodes = byKey(groupOf(model));
+
+        expect([...nodes.keys()]).toEqual(["#0/0", "#0/1", "#0/0~1"]);
+
+        const second = nodes.get("#0/0~1")!;
+        const kept = nodes.get("#0/1")!;
+
+        expect(xAt(second, 0)).toBe(50);
+        expect(xAt(second, 1)).toBe(150);
+        // Midway it has moved as far as the first list's 1, which moves by the same 100: one tween, not a swap.
+        const moved = xAt(kept, 0.5) - 10;
+
+        expect(moved).toBeGreaterThan(0);
+        expect(moved).toBeLessThan(100);
+        expect(xAt(second, 0.5)).toBeCloseTo(50 + moved, 6);
+        expect(opacityAt(second, 0.5)).toBe(1);
+      });
+
+      test("the same holds when the first list gains the key instead", () => {
+        const model = made(() => morph(two([1], [0]), two([0, 1], [0], 100), span(0, 1)));
+        const nodes = byKey(groupOf(model));
+
+        // The second list wrote 0 first, so it keeps the key; the first list's 0 is told apart.
+        expect([...nodes.keys()]).toEqual(["#0/0~0", "#0/1", "#0/0"]);
+        const second = nodes.get("#0/0")!;
+
+        expect(xAt(second, 0)).toBe(50);
+        expect(xAt(second, 1)).toBe(150);
+        expect(opacityAt(second, 0.5)).toBe(1);
+        // The first list's 0 is new: it enters, at its own place.
+        const first = nodes.get("#0/0~0")!;
+
+        expect(opacityAt(first, 0)).toBe(0);
+        expect(opacityAt(first, 1)).toBe(1);
+        expect(xAt(first, 1)).toBe(100);
+      });
+
+      test("one list keeps its keys as written, even when its place moves", () => {
+        const model = made(() =>
+          morph(
+            <Group>{[0, 1].map((k) => dot(k, k * 10))}</Group>,
+            <Group>
+              {dot("title", 0)}
+              {[0, 1].map((k) => dot(k, k * 10 + 100))}
+            </Group>,
+            span(0, 1),
+          ),
+        );
+
+        const nodes = byKey(groupOf(model));
+
+        expect([...nodes.keys()]).toEqual(["#0/title", "#0/0", "#0/1"]);
+        expect(xAt(nodes.get("#0/1")!, 0)).toBe(10);
+        expect(xAt(nodes.get("#0/1")!, 1)).toBe(110);
+        expect(opacityAt(nodes.get("#0/1")!, 0.5)).toBe(1);
+      });
+
+      test("the first list's 0, which leaves, still exits", () => {
+        const model = made(() => morph(two([0, 1], [0]), two([1], [0], 100), span(0, 1)));
+        const first = byKey(groupOf(model)).get("#0/0")!;
+
+        expect(xAt(first, 0)).toBe(0);
+        expect(opacityAt(first, 0)).toBe(1);
+        expect(opacityAt(first, 1)).toBe(0);
+      });
     });
 
     test("h() keeps keys as JSX does", () => {

@@ -120,7 +120,10 @@ export type Gradient =
   | {
       readonly kind: "radial";
       readonly center: Vec;
+      /** The horizontal radius; a circle's radius when `squash` is absent. */
       readonly radius: number;
+      /** Vertical radius over horizontal radius for an ellipse; absent for a circle. */
+      readonly squash?: number;
       readonly stops: readonly Stop[];
     };
 

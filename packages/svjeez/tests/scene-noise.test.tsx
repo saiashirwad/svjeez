@@ -154,6 +154,57 @@ describe("noise()", () => {
   });
 });
 
+describe("noise rotate", () => {
+  const turn = (rotate: number) =>
+    noise({ frequency: 0.02, octaves: 2, seed: 7, rotate, ramp: ["#0D2F63", "#1D58A8"] });
+
+  test("turns the noise field about the box center, and the shape back, so only the noise turns", () => {
+    const out = sheet(turn(30));
+
+    expect(out).toMatch(
+      /<g transform="translate\(10 10\)" filter="url\(#[a-z0-9]+\)" style="transform-origin:30px 20px;rotate:30deg"><rect [^>]*style="transform-origin:20px 10px;rotate:-30deg"\/><\/g>/,
+    );
+  });
+
+  test("rotate 0 writes exactly what no rotate writes", () => {
+    expect(sheet(turn(0))).toBe(sheet(paper));
+  });
+
+  test("turns a noise layer and a noise <Text> fill the same way", () => {
+    const model = made(() => (
+      <Group>
+        <Shape key="part" geometry={rect(40, 20)} fill={["#FF0000", { paint: turn(45) }]} />
+        <Text key="word" font={mono} size={20} at={[10, 40]} fill={turn(-20)}>
+          Kraft
+        </Text>
+      </Group>
+    ));
+
+    const [part, word] = model.root.children;
+
+    expect(part?.kind === "group" && part.children[1]).toMatchObject({
+      key: "part#fill2",
+      effects: [],
+      children: [
+        { key: "part#fill2#noise", layers: [{ rotate: 45 }], effects: [{ kind: "noise" }] },
+      ],
+    });
+    expect(word).toMatchObject({
+      kind: "group",
+      children: [
+        {
+          layers: [{ rotate: -20 }],
+          children: [{ kind: "text", key: "word#grain", layers: [{ rotate: 20 }], effects: [] }],
+        },
+      ],
+    });
+  });
+
+  test("a bad rotate throws", () => {
+    expect(() => turn(Number.NaN)).toThrow(/noise\(\) needs rotate as a finite number of degrees/);
+  });
+});
+
 describe("layered fills", () => {
   const base = linear.across({ angle: 90, stops: ["#FF0000", "#0000FF"] });
 
@@ -219,6 +270,46 @@ describe("layered fills", () => {
 
     expect(sheet(["#FF0000"], { stroke: { color: ["#000000"] } })).toBe(one);
     expect(one).not.toContain("<g");
+  });
+
+  test("a layer's effects light that layer alone, after its noise", () => {
+    const model = made(() => (
+      <Shape
+        key="part"
+        geometry={rect(40, 20)}
+        fill={["#FF0000", { paint: paper, effects: [emboss({ depth: 1.8 })] }, "#00000020"]}
+      />
+    ));
+
+    const part = model.root.children[0]!;
+
+    expect(
+      part.kind === "group" && part.children.map((child) => child.effects.map((e) => e.kind)),
+    ).toEqual([[], ["noise", "emboss"], []]);
+    expect(emitted(model).match(/<filter /g)).toHaveLength(1);
+  });
+
+  test("effects on a single layer still split it off as a copy", () => {
+    const part = made(() => (
+      <Shape
+        key="part"
+        geometry={rect(40, 20)}
+        fill={[{ paint: "#FF0000", effects: [emboss()] }]}
+      />
+    )).root.children[0]!;
+
+    expect(part.kind === "group" && part.children[0]!.effects[0]!.kind).toBe("emboss");
+  });
+
+  test("layer effects that are not a list, or not effects, throw", () => {
+    expect(() =>
+      // @ts-expect-error effects is a list
+      sheet(["#000", { paint: "#fff", effects: emboss() }]),
+    ).toThrow(/effects of fill layer 2 .* need to be a list/);
+    expect(() =>
+      // @ts-expect-error not an effect
+      sheet(["#000", { paint: "#fff", effects: [{ kind: "glow" }] }]),
+    ).toThrow(/effects on fill layer 2 .* takes blur\(\)/);
   });
 
   test("a layered stroke on <Text> or a bad layer opacity says what to do", () => {

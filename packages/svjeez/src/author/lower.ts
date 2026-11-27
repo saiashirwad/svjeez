@@ -156,6 +156,11 @@ interface Ctx {
   readonly patterns: Map<Pattern, ModelPattern>;
   readonly reads: Map<object, Reading>;
   readonly clocks: Map<string, Clock>;
+  /**
+   * For a key that two lists in one parent write in a morph's states, the place of the list whose node keeps the key
+   * as written, by the key's full path. Set over all the states at once, so a node is named alike in each.
+   */
+  readonly owners: Map<string, string>;
 }
 
 const keep = <T>(value: T): T => value;
@@ -444,7 +449,9 @@ const shape = (
   };
 
   const bare = (layer: PaintLayer) =>
-    (layer.blend === undefined || layer.blend === "normal") && layer.opacity === undefined;
+    (layer.blend === undefined || layer.blend === "normal") &&
+    layer.opacity === undefined &&
+    layer.effects === undefined;
 
   const [fill] = fills;
 
@@ -454,14 +461,17 @@ const shape = (
     [...fills, ...strokes].every(bare) &&
     !(strokes.length === 1 && fill !== undefined && [fill.paint, strokes[0]!.paint].some(isNoise))
   )
-    return {
-      ...base(ctx, props, box, key, timing, pinned(props.anchor, box, where)),
-      ...look(fill?.paint, strokes[0]?.paint),
-    };
+    return turned(
+      {
+        ...base(ctx, props, box, key, timing, pinned(props.anchor, box, where)),
+        ...look(fill?.paint, strokes[0]?.paint),
+      },
+      [fill?.paint, strokes[0]?.paint].find(isNoise),
+    );
 
   const copy =
     (side: "fill" | "stroke") =>
-    (layer: PaintLayer, i: number): ShapeNode => {
+    (layer: PaintLayer, i: number): SceneNode => {
       const what = `${side} layer ${i + 1} on ${where}`;
 
       const opacity =
@@ -472,15 +482,30 @@ const shape = (
       if (!isLane(opacity) && !(opacity >= 0 && opacity <= 1))
         throw new SceneError(`The opacity of ${what} needs a number from 0 to 1, got ${opacity}.`);
 
+      if (layer.effects !== undefined && !isArray(layer.effects))
+        throw new SceneError(
+          `The effects of ${what} need to be a list, got ${JSON.stringify(layer.effects)}.`,
+          "Write effects: [emboss({ depth: 1.8 })].",
+        );
+      const drawn = side === "fill" ? look(layer.paint, undefined) : look(undefined, layer.paint);
+
       return {
-        key: `${key}#${side}${i + 1}`,
-        box,
-        at: [0, 0],
-        origin: [0, 0],
-        layers: opacity === 1 ? [] : [{ ...IDLE, opacity }],
-        effects: [],
+        ...turned(
+          {
+            key: `${key}#${side}${i + 1}`,
+            box,
+            at: [0, 0],
+            origin: [0, 0],
+            layers: opacity === 1 ? [] : [{ ...IDLE, opacity }],
+            ...drawn,
+            effects: [
+              ...(drawn.effects ?? []),
+              ...(layer.effects ?? []).map((effect) => effectOf(ctx, effect, timing, what)),
+            ],
+          },
+          layer.paint,
+        ),
         ...(layer.blend !== undefined && layer.blend !== "normal" && { blend: layer.blend }),
-        ...(side === "fill" ? look(layer.paint, undefined) : look(undefined, layer.paint)),
       };
     };
 
@@ -491,6 +516,46 @@ const shape = (
     ...base(ctx, props, box, key, timing, pinned(props.anchor, box, where)),
     kind: "group",
     children: written?.under ? [...under, ...over] : [...over, ...under],
+  };
+};
+
+/**
+ * A node whose first effect is a turned noise, drawn so only the noise turns: the filter sits on a group turned about
+ * the center of the node's box, around the node turned back. The node's place, motion and other effects stay outside;
+ * it carries no blend yet, which the caller adds to what this returns.
+ */
+const turned = <N extends SceneNode>(node: N, paint: Anim<Paint> | undefined): N | GroupNode => {
+  const rotate = isNoise(paint) ? paint.rotate : 0;
+  const [noise, ...after] = node.effects;
+
+  if (rotate === 0 || noise?.kind !== "noise") return node;
+  const { key, box, at, origin, layers } = node;
+  const center: Vec = [box.x + box.width / 2, box.y + box.height / 2];
+
+  const spun = (angle: number): Pick<SceneNode, "box" | "at" | "origin" | "layers"> => ({
+    box,
+    at: [0, 0],
+    origin: center,
+    layers: [{ ...IDLE, rotate: angle }],
+  });
+
+  return {
+    kind: "group",
+    key,
+    box,
+    at,
+    origin,
+    layers,
+    effects: after,
+    children: [
+      {
+        kind: "group",
+        key: `${key}#noise`,
+        ...spun(rotate),
+        effects: [noise],
+        children: [{ ...node, key: `${key}#grain`, ...spun(-rotate), effects: [] }],
+      },
+    ],
   };
 };
 
@@ -610,7 +675,7 @@ const paintedText = (
     );
   const node = text(ctx, kept, key, timing);
 
-  return { ...node, effects: [noiseOf(ctx, fill, timing, where), ...node.effects] };
+  return turned({ ...node, effects: [noiseOf(ctx, fill, timing, where), ...node.effects] }, fill);
 };
 
 const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNode => {
@@ -1264,6 +1329,8 @@ const lowerAll = (
       return given.clock ? nodes.map((node) => ({ ...node, clock: node.clock ?? named! })) : nodes;
     }
 
+    if (given.type === "morph") ownKeys(ctx, given.states, parent, taken);
+
     if (given.type === "morph" && given.only !== undefined) {
       const states = given.states.map((state) => {
         const names: Taken = new Map(taken);
@@ -1303,35 +1370,9 @@ const lowerAll = (
       return merged;
     }
 
-    const name = keyOf(given);
-    const list = listOf(given);
-    const earlier = name === undefined ? undefined : taken.get(name);
+    const { name, full, apart, key } = claim(ctx, given, taken, parent);
 
-    // Two lists in one parent may both write a key: the later node is told apart by its list's place.
-    const apart =
-      list !== undefined && earlier !== undefined && earlier !== list
-        ? `${name}~${list}`
-        : undefined;
-
-    if (name !== undefined && taken.has(apart ?? name))
-      throw new SceneError(
-        `Two nodes are both keyed "${name}"${parent && ` inside ${ctx.notes.names.named(parent)}`}.`,
-        "Give each a key of its own.",
-        { node: `"${name}"`, ...(writtenAt(given) && { source: writtenAt(given)! }) },
-      );
-
-    if (name?.includes("/"))
-      throw new SceneError(`A key can't contain "/", got "${name}".`, "Join words with - or _.", {
-        ...(writtenAt(given) && { source: writtenAt(given)! }),
-      });
-    let own = apart ?? name;
-
-    for (let index = taken.size; own === undefined; index++)
-      if (!taken.has(`#${index}`)) own = `#${index}`;
-    taken.set(own, list);
-    const key = parent ? `${parent}/${own}` : own;
-
-    if (apart !== undefined) ctx.notes.names.share(parent ? `${parent}/${name}` : name!, key);
+    if (apart) ctx.notes.names.share(full!, key);
     const entry = nameFor(ctx, given, name, parent);
 
     ctx.notes.names.set(key, entry);
@@ -1342,6 +1383,120 @@ const lowerAll = (
       throw error instanceof Error ? located(error, ctx.notes.names.whereOf(key)) : error;
     }
   });
+
+/** Takes the element's key in its parent: as written, or told apart by its list's place, or by position when unkeyed. */
+const claim = (ctx: Ctx, given: NodeElement, taken: Taken, parent: string) => {
+  const name = keyOf(given);
+  const list = listOf(given);
+  const full = name === undefined || !parent ? name : `${parent}/${name}`;
+
+  const earlier =
+    name === undefined ? undefined : taken.has(name) ? taken.get(name) : ctx.owners.get(full!);
+
+  // Two lists in one parent may both write a key: all but one are told apart by their list's place.
+  const apart =
+    list !== undefined && earlier !== undefined && earlier !== list ? `${name}~${list}` : undefined;
+
+  if (name !== undefined && taken.has(apart ?? name))
+    throw new SceneError(
+      `Two nodes are both keyed "${name}"${parent && ` inside ${ctx.notes.names.named(parent)}`}.`,
+      "Give each a key of its own.",
+      { node: `"${name}"`, ...(writtenAt(given) && { source: writtenAt(given)! }) },
+    );
+
+  if (name?.includes("/"))
+    throw new SceneError(`A key can't contain "/", got "${name}".`, "Join words with - or _.", {
+      ...(writtenAt(given) && { source: writtenAt(given)! }),
+    });
+  let own = apart ?? name;
+
+  for (let index = taken.size; own === undefined; index++)
+    if (!taken.has(`#${index}`)) own = `#${index}`;
+  taken.set(own, list);
+
+  return { name, list, full, apart: apart !== undefined, key: parent ? `${parent}/${own}` : own };
+};
+
+/** Every list place that writes each key in these elements, by the key's full path, in the order they come. */
+const claims = (
+  ctx: Ctx,
+  elements: readonly SceneElement[],
+  parent: string,
+  taken: Taken,
+  into: Map<string, string[]>,
+): void => {
+  for (const element of elements) {
+    const given = sceneElement(element, "The scene");
+
+    if (given.type === "fragment" || given.type === "sequence") {
+      claims(ctx, given.children, parent, taken, into);
+
+      continue;
+    }
+
+    if (given.type === "morph") {
+      for (const state of given.states) {
+        const used: Taken = new Map(taken);
+
+        claims(ctx, state, parent, used, into);
+
+        for (const [each, list] of used) taken.set(each, list);
+      }
+
+      continue;
+    }
+
+    const reflowed =
+      given.type === "group" && given.settle?.kind === "arrange" ? lifted(given) : undefined;
+
+    if (reflowed) {
+      claims(ctx, [reflowed], parent, taken, into);
+
+      continue;
+    }
+
+    const { full, list, key } = claim(ctx, given, taken, parent);
+
+    if (full !== undefined && list !== undefined) {
+      const lists = into.get(full) ?? [];
+
+      if (!lists.includes(list)) into.set(full, [...lists, list]);
+    }
+
+    if (given.type === "group") claims(ctx, given.children, key, new Map(), into);
+  }
+};
+
+/**
+ * Before a morph's states are lowered: when two lists write one key across them, even in different states, the first
+ * list keeps it in every state, so the node of a list is named alike in each and the states pair it with itself.
+ */
+const ownKeys = (
+  ctx: Ctx,
+  states: readonly (readonly SceneElement[])[],
+  parent: string,
+  taken: Taken,
+): void => {
+  try {
+    // A node told apart renames the keys under it, which can show more keys two lists share there.
+    for (let pass = 0; pass < 4; pass++) {
+      const into = new Map<string, string[]>();
+      let more = false;
+
+      for (const state of states) claims(ctx, state, parent, new Map(taken), into);
+
+      for (const [full, lists] of into)
+        if (lists.length > 1 && !ctx.owners.has(full)) {
+          ctx.owners.set(full, lists[0]!);
+          more = true;
+        }
+
+      if (!more) return;
+    }
+  } catch {
+    // Lowering the states reports what is wrong with them, where it is written.
+  }
+};
 
 const keyOf = (given: Extract<SceneElement, { readonly props: object }>): string | undefined => {
   const key = "key" in given.props ? given.props.key : undefined;
@@ -1888,6 +2043,7 @@ const lowerScene = (
     patterns: new Map(),
     reads: new Map(),
     clocks: new Map(),
+    owners: new Map(),
   };
 
   for (const token of Object.values(options.theme ?? {})) solidOf(ctx, token, "scene()");
