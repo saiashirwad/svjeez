@@ -43,7 +43,7 @@
       <stop offset="0.86" stop-color="#E4DFD6"/>
       <stop offset="1" stop-color="#B9B2A6"/>
     </linearGradient>
-    <radialGradient id="g2" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="345.6">
+    <radialGradient id="g2" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1 0 0 0.563 0 0)" cx="0" cy="0" r="614.4">
       <stop stop-color="#FFFDF8D9"/>
       <stop offset="1" stop-color="#FFFDF800"/>
     </radialGradient>
@@ -57,7 +57,7 @@
       <feComposite in="z0a1" in2="z0b1" operator="arithmetic" k2="1" k3="1" result="z0c1"/>
       <feComposite in="z0c1" in2="SourceGraphic" operator="in"/>
     </filter>
-    <radialGradient id="g3" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="540">
+    <radialGradient id="g3" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1 0 0 0.563 0 0)" cx="0" cy="0" r="960">
       <stop offset="0.6" stop-color="#1B160F00"/>
       <stop offset="1" stop-color="#1B160F73"/>
     </radialGradient>
@@ -107,7 +107,7 @@
       <stop offset="0.5" stop-color="#F6F2EA"/>
       <stop offset="1" stop-color="#D8D0C2"/>
     </radialGradient>
-    <filter id="f6" filterUnits="userSpaceOnUse" x="-101" y="-101" width="202" height="202" color-interpolation-filters="sRGB">
+    <filter id="f6" filterUnits="userSpaceOnUse" x="-33" y="-162" width="89" height="66" color-interpolation-filters="sRGB">
       <feTurbulence type="fractalNoise" numOctaves="3" seed="5" result="z0n" baseFrequency="0.09 0.7"/>
       <feFlood result="z0c0" flood-color="#ADAAA0"/>
       <feColorMatrix in="z0n" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3.33333 -0.66667" result="z0w1"/>
@@ -122,9 +122,6 @@
       <feComposite in="z0a2" in2="z0b2" operator="arithmetic" k2="1" k3="1" result="z0c2"/>
       <feComposite in="z0c2" in2="SourceGraphic" operator="in"/>
     </filter>
-    <clipPath id="c1">
-      <path d="M23.3 -104.4C25.067 -108.35 14.267 -111.417 11.3 -115.3C8.333 -119.183 6.25 -123.783 5.5 -127.7C4.75 -131.617 5.367 -135.5 6.8 -138.8C8.233 -142.1 11.683 -145.833 14.1 -147.5C16.517 -149.167 18.817 -148.3 21.3 -148.8C23.783 -149.3 27.717 -147.717 29 -150.5C30.283 -153.283 31.05 -162.717 29 -165.5C26.95 -168.283 20.883 -168.367 16.7 -167.2C12.517 -166.033 7.483 -162.5 3.9 -158.5C0.317 -154.5 -2.9 -148.567 -4.8 -143.2C-6.7 -137.833 -7.75 -132.05 -7.5 -126.3C-7.25 -120.55 -4.667 -114.483 -3.3 -108.7C-1.933 -102.917 -3.733 -92.317 0.7 -91.6C5.133 -90.883 21.533 -100.45 23.3 -104.4Z"/>
-    </clipPath>
     <linearGradient id="g11" gradientUnits="userSpaceOnUse" x1="-2" y1="-150" x2="16" y2="-110">
       <stop stop-color="#4A3F3300"/>
       <stop offset="0.5" stop-color="#4A3F3308"/>
@@ -134,6 +131,9 @@
       <stop stop-color="#FFFFFFB3"/>
       <stop offset="0.35" stop-color="#FFFFFF00"/>
     </linearGradient>
+    <clipPath id="c1">
+      <path d="M23.3 -104.4C25.067 -108.35 14.267 -111.417 11.3 -115.3C8.333 -119.183 6.25 -123.783 5.5 -127.7C4.75 -131.617 5.367 -135.5 6.8 -138.8C8.233 -142.1 11.683 -145.833 14.1 -147.5C16.517 -149.167 18.817 -148.3 21.3 -148.8C23.783 -149.3 27.717 -147.717 29 -150.5C30.283 -153.283 31.05 -162.717 29 -165.5C26.95 -168.283 20.883 -168.367 16.7 -167.2C12.517 -166.033 7.483 -162.5 3.9 -158.5C0.317 -154.5 -2.9 -148.567 -4.8 -143.2C-6.7 -137.833 -7.75 -132.05 -7.5 -126.3C-7.25 -120.55 -4.667 -114.483 -3.3 -108.7C-1.933 -102.917 -3.733 -92.317 0.7 -91.6C5.133 -90.883 21.533 -100.45 23.3 -104.4Z"/>
+    </clipPath>
     <radialGradient id="g13" gradientUnits="userSpaceOnUse" cx="-9.305" cy="-95.65" r="51.981">
       <stop stop-color="#FFFFFF"/>
       <stop offset="0.5" stop-color="#F6F2EA"/>
@@ -663,6 +663,21 @@
     <clipPath id="c5">
       <path d="M-2 -104C14 -104 28 -92 37 -74C36 -69 31 -68 28 -69C20 -78 6 -84 -10 -88Z"/>
     </clipPath>
+    <filter id="f11" filterUnits="userSpaceOnUse" x="-17" y="-116" width="62" height="60" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" numOctaves="3" seed="5" result="z0n" baseFrequency="0.09 0.7"/>
+      <feFlood result="z0c0" flood-color="#ADAAA0"/>
+      <feColorMatrix in="z0n" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3.33333 -0.66667" result="z0w1"/>
+      <feFlood result="z0f1" flood-color="#F0EDE5"/>
+      <feComposite in="z0f1" in2="z0w1" operator="in" result="z0a1"/>
+      <feComposite in="z0c0" in2="z0w1" operator="out" result="z0b1"/>
+      <feComposite in="z0a1" in2="z0b1" operator="arithmetic" k2="1" k3="1" result="z0c1"/>
+      <feColorMatrix in="z0n" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 8.33333 -4.16667" result="z0w2"/>
+      <feFlood result="z0f2" flood-color="#FFFFFF"/>
+      <feComposite in="z0f2" in2="z0w2" operator="in" result="z0a2"/>
+      <feComposite in="z0c1" in2="z0w2" operator="out" result="z0b2"/>
+      <feComposite in="z0a2" in2="z0b2" operator="arithmetic" k2="1" k3="1" result="z0c2"/>
+      <feComposite in="z0c2" in2="SourceGraphic" operator="in"/>
+    </filter>
     <linearGradient id="g111" gradientUnits="userSpaceOnUse" x1="10" y1="-104" x2="6" y2="-80">
       <stop stop-color="#4A3F3300"/>
       <stop offset="0.5" stop-color="#4A3F3308"/>
@@ -674,9 +689,9 @@
     </linearGradient>
   </defs>
   <rect width="1280" height="720" fill="url(#g1)"/>
-  <path d="M-4000 -4000L4000 -4000L4000 -4000L4000 4000L4000 4000L-4000 4000L-4000 4000L-4000 -4000Z" transform="translate(640 374.4)" fill="url(#g2)" style="transform-origin:640px 374.4px;scale:1.778 1"/>
+  <path d="M-4000 -4000L4000 -4000L4000 -4000L4000 4000L4000 4000L-4000 4000L-4000 4000L-4000 -4000Z" transform="translate(640 374.4)" fill="url(#g2)"/>
   <rect width="1280" height="720" fill="#958E81" filter="url(#f1)" opacity="0.35"/>
-  <path d="M-4000 -4000L4000 -4000L4000 -4000L4000 4000L4000 4000L-4000 4000L-4000 4000L-4000 -4000Z" transform="translate(640 360)" fill="url(#g3)" style="transform-origin:640px 360px;scale:1.778 1"/>
+  <path d="M-4000 -4000L4000 -4000L4000 -4000L4000 4000L4000 4000L-4000 4000L-4000 4000L-4000 -4000Z" transform="translate(640 360)" fill="url(#g3)"/>
   <ellipse cx="670" cy="642" rx="260" ry="14" fill="#2A2520" filter="url(#f2)" opacity="0.22"/>
   <ellipse cx="518" cy="640" rx="70" ry="4" fill="#1A1612" filter="url(#f3)" opacity="0.45"/>
   <ellipse cx="770" cy="640" rx="70" ry="4" fill="#1A1612" filter="url(#f4)" opacity="0.45"/>
@@ -759,8 +774,10 @@
     <path d="M-26 -84.8C-42 -84 -60 -82.8 -74 -81.6" fill="none" stroke="#FFFFFF59" stroke-width="0.25" stroke-linecap="round"/>
     <path d="M-32 -84.2C-47 -83 -63 -81.2 -76 -79.4" fill="none" stroke="#FFFFFF59" stroke-width="0.25" stroke-linecap="round"/>
     <path d="M23.3 -104.4C25.067 -108.35 14.267 -111.417 11.3 -115.3C8.333 -119.183 6.25 -123.783 5.5 -127.7C4.75 -131.617 5.367 -135.5 6.8 -138.8C8.233 -142.1 11.683 -145.833 14.1 -147.5C16.517 -149.167 18.817 -148.3 21.3 -148.8C23.783 -149.3 27.717 -147.717 29 -150.5C30.283 -153.283 31.05 -162.717 29 -165.5C26.95 -168.283 20.883 -168.367 16.7 -167.2C12.517 -166.033 7.483 -162.5 3.9 -158.5C0.317 -154.5 -2.9 -148.567 -4.8 -143.2C-6.7 -137.833 -7.75 -132.05 -7.5 -126.3C-7.25 -120.55 -4.667 -114.483 -3.3 -108.7C-1.933 -102.917 -3.733 -92.317 0.7 -91.6C5.133 -90.883 21.533 -100.45 23.3 -104.4Z" fill="url(#g10)" stroke="#A39887" stroke-width="0.3" stroke-linejoin="round"/>
-    <g clip-path="url(#c1)" opacity="0.22" style="mix-blend-mode:multiply">
-      <path d="M-100 -100L100 -100L100 -100L100 100L100 100L-100 100L-100 100L-100 -100Z" transform="translate(10 -90)" fill="#F0EDE5" filter="url(#f6)" style="transform-origin:10px -90px;rotate:-70deg"/>
+    <g opacity="0.22" style="mix-blend-mode:multiply">
+      <g filter="url(#f6)" style="transform-origin:11.365px -129.735px;rotate:-70deg">
+        <path d="M23.3 -104.4C25.067 -108.35 14.267 -111.417 11.3 -115.3C8.333 -119.183 6.25 -123.783 5.5 -127.7C4.75 -131.617 5.367 -135.5 6.8 -138.8C8.233 -142.1 11.683 -145.833 14.1 -147.5C16.517 -149.167 18.817 -148.3 21.3 -148.8C23.783 -149.3 27.717 -147.717 29 -150.5C30.283 -153.283 31.05 -162.717 29 -165.5C26.95 -168.283 20.883 -168.367 16.7 -167.2C12.517 -166.033 7.483 -162.5 3.9 -158.5C0.317 -154.5 -2.9 -148.567 -4.8 -143.2C-6.7 -137.833 -7.75 -132.05 -7.5 -126.3C-7.25 -120.55 -4.667 -114.483 -3.3 -108.7C-1.933 -102.917 -3.733 -92.317 0.7 -91.6C5.133 -90.883 21.533 -100.45 23.3 -104.4Z" fill="#F0EDE5" style="transform-origin:11.365px -129.735px;rotate:70deg"/>
+      </g>
     </g>
     <path d="M23.3 -104.4C25.067 -108.35 14.267 -111.417 11.3 -115.3C8.333 -119.183 6.25 -123.783 5.5 -127.7C4.75 -131.617 5.367 -135.5 6.8 -138.8C8.233 -142.1 11.683 -145.833 14.1 -147.5C16.517 -149.167 18.817 -148.3 21.3 -148.8C23.783 -149.3 27.717 -147.717 29 -150.5C30.283 -153.283 31.05 -162.717 29 -165.5C26.95 -168.283 20.883 -168.367 16.7 -167.2C12.517 -166.033 7.483 -162.5 3.9 -158.5C0.317 -154.5 -2.9 -148.567 -4.8 -143.2C-6.7 -137.833 -7.75 -132.05 -7.5 -126.3C-7.25 -120.55 -4.667 -114.483 -3.3 -108.7C-1.933 -102.917 -3.733 -92.317 0.7 -91.6C5.133 -90.883 21.533 -100.45 23.3 -104.4Z" fill="url(#g11)"/>
     <g clip-path="url(#c1)">
@@ -894,8 +911,10 @@
       <path d="M28.9 -77.3C28.3 -76 26.4 -75.2 25.2 -76.3C25 -77.9 26.7 -79 28.1 -78.8Z" fill="url(#g109)"/>
       <path d="M30.1 -75.8C29.3 -74.4 27.1 -73 25.8 -73.7C25.6 -75.1 27.7 -76.7 29.3 -77Z" fill="url(#g110)"/>
     </g>
-    <g clip-path="url(#c5)" opacity="0.22" style="mix-blend-mode:multiply">
-      <path d="M-100 -100L100 -100L100 -100L100 100L100 100L-100 100L-100 100L-100 -100Z" transform="translate(10 -90)" fill="#F0EDE5" filter="url(#f6)" style="transform-origin:10px -90px;rotate:38deg"/>
+    <g opacity="0.22" style="mix-blend-mode:multiply">
+      <g filter="url(#f11)" style="transform-origin:13.5px -86.326px;rotate:38deg">
+        <path d="M-2 -104C14 -104 28 -92 37 -74C36 -69 31 -68 28 -69C20 -78 6 -84 -10 -88Z" fill="#F0EDE5" style="transform-origin:13.5px -86.326px;rotate:-38deg"/>
+      </g>
     </g>
     <path d="M-2 -104C14 -104 28 -92 37 -74C36 -69 31 -68 28 -69C20 -78 6 -84 -10 -88Z" fill="url(#g111)"/>
     <g clip-path="url(#c5)">

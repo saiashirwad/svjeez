@@ -9,6 +9,7 @@ import {
   radial,
   rect,
   type Paint,
+  type PaintLayer,
   type SceneElement,
   type Stops,
   type Vec,
@@ -22,10 +23,7 @@ import { H, W } from "./kit";
  */
 const PANEL = { width: 640, height: 360 } as const;
 
-/**
- * An elliptical glow: a radial gradient `rx` by `ry` around `at`, painted over everything near it. `radial.across`
- * only draws circles, so the circle is stretched by the group's scale.
- */
+/** An elliptical glow: a radial gradient `rx` by `ry` around `at`, painted over everything near it. */
 const Glow = ({
   at,
   rx,
@@ -37,12 +35,11 @@ const Glow = ({
   readonly ry: number;
   readonly stops: Stops;
 }): SceneElement => (
-  <Group offset={at} scale={[rx / ry, 1]} origin="own">
-    <Shape
-      geometry={rect(8000, 8000, { anchor: "center" })}
-      fill={radial({ center: [0, 0], radius: ry, stops })}
-    />
-  </Group>
+  <Shape
+    offset={at}
+    geometry={rect(8000, 8000, { anchor: "center" })}
+    fill={radial({ center: [0, 0], radius: [rx, ry], stops })}
+  />
 );
 
 /** Cyanotype paper: mottled Prussian blue, fine vertical fibres, chalky bleach stains near the edges, a dark vignette. */
@@ -119,16 +116,18 @@ export const BlueprintPaper = (): SceneElement => (
  * Feather barbs: noise stretched along x into fine fibres, as a near-white multiply layer (white leaves the paint
  * alone, grey darkens it), with a warm cast in the darks.
  */
-export const featherGrain: Paint = noise({
-  frequency: [0.09, 0.7],
-  octaves: 3,
-  seed: 5,
-  ramp: [
-    [0.2, "#ADAAA0"],
-    [0.5, "#F0EDE5"],
-    [0.62, "#FFFFFF"],
-  ],
-});
+export const featherGrain = (rotate = 0): Paint =>
+  noise({
+    frequency: [0.09, 0.7],
+    octaves: 3,
+    seed: 5,
+    rotate,
+    ramp: [
+      [0.2, "#ADAAA0"],
+      [0.5, "#F0EDE5"],
+      [0.62, "#FFFFFF"],
+    ],
+  });
 
 /** A seamless studio sweep: warm grey wall, a lit patch behind the subject, a floor that falls into shadow. */
 export const StudioSweep = ({
@@ -244,40 +243,36 @@ export const LaidPaper = (): SceneElement => (
 /**
  * Cold-pressed paper tooth: noise whose own alpha is the height, lit from the top left so it stands up in relief.
  */
-const Tooth = ({ blend, opacity }: { readonly blend?: "multiply"; readonly opacity?: number }) => (
-  <Shape
-    geometry={rect(PANEL.width, PANEL.height)}
-    blend={blend}
-    opacity={opacity}
-    fill={noise({
-      frequency: 0.08,
-      octaves: 4,
-      seed: 8,
-      ramp: ["#FFFDF780", "#FFFDF7"],
-    })}
-    effects={[
-      emboss({
-        light: { azimuth: 225, elevation: 52 },
-        depth: 1.8,
-        radius: 0.5,
-        color: "#FFFDF7",
-        specular: 0,
-      }),
-    ]}
-  />
-);
+const tooth: PaintLayer = {
+  paint: noise({
+    frequency: 0.08,
+    octaves: 4,
+    seed: 8,
+    ramp: ["#FFFDF780", "#FFFDF7"],
+  }),
+  effects: [
+    emboss({
+      light: { azimuth: 225, elevation: 52 },
+      depth: 1.8,
+      radius: 0.5,
+      color: "#FFFDF7",
+      specular: 0,
+    }),
+  ],
+};
 
 /** Cold-pressed watercolor paper: the tooth lit in relief over warm white, washed back a little. */
 export const ColdPress = (): SceneElement => (
-  <Group>
-    <Shape geometry={rect(PANEL.width, PANEL.height)} fill="#F7F3EA" />
-    <Tooth />
-    <Shape geometry={rect(PANEL.width, PANEL.height)} fill="#F7F3EA" opacity={0.55} />
-  </Group>
+  <Shape
+    geometry={rect(PANEL.width, PANEL.height)}
+    fill={["#F7F3EA", tooth, { paint: "#F7F3EA", opacity: 0.55 }]}
+  />
 );
 
 /** The same tooth as a multiply layer over the paint, so pigment settles into the paper's dips. */
-export const Granulation = (): SceneElement => <Tooth blend="multiply" opacity={0.4} />;
+export const Granulation = (): SceneElement => (
+  <Shape geometry={rect(PANEL.width, PANEL.height)} fill={[tooth]} blend="multiply" opacity={0.4} />
+);
 
 /** Risograph stock: off-white with stray ink specks. */
 export const RisoPaper = (): SceneElement => (

@@ -11,7 +11,6 @@ import {
   ellipse,
   line,
   path,
-  rect,
   random,
   sampled,
   span,
@@ -34,8 +33,8 @@ import {
  * laid feathers, and highlights on the bill and the metal.
  */
 export interface Finish {
-  /** Fibre noise multiplied over plumage, cut to each part. Fibres should run along x. */
-  readonly grain: Paint;
+  /** Fibre noise multiplied over plumage, turned `rotate` degrees from fibres along x. */
+  readonly grain: (rotate: number) => Paint;
   readonly grainOpacity: number;
   /** Form-shadow color on the undersides. */
   readonly form: Color;
@@ -619,7 +618,7 @@ const NAIL = path()
   .curveTo([83, -138], [81, -139], [78.5, -139.5])
   .close();
 
-/** Fibre grain multiplied over one part, cut to its outline. A rotated grain runs its fibres along the limb. */
+/** Fibre grain multiplied over one part. A rotated grain runs its fibres along the limb. */
 const Grain = ({
   finish,
   part,
@@ -628,19 +627,14 @@ const Grain = ({
   readonly finish: Finish;
   readonly part: Geometry;
   readonly rotate?: number;
-}): SceneElement =>
-  rotate === 0 ? (
-    <Shape geometry={part} fill={finish.grain} blend="multiply" opacity={finish.grainOpacity} />
-  ) : (
-    <Group clip={part} blend="multiply" opacity={finish.grainOpacity}>
-      <Shape
-        geometry={rect(200, 200, { anchor: "center" })}
-        offset={[10, -90]}
-        rotate={rotate}
-        fill={finish.grain}
-      />
-    </Group>
-  );
+}): SceneElement => (
+  <Shape
+    geometry={part}
+    fill={finish.grain(rotate)}
+    blend="multiply"
+    opacity={finish.grainOpacity}
+  />
+);
 
 /** Shading that turns flat plumage into a volume: darker toward the underside, lit along the top edge. */
 const Form = ({
