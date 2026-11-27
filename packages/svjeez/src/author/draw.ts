@@ -35,12 +35,7 @@ const widthAt = (widths: readonly number[], share: number): number => {
   return widths[i]! + (widths[i + 1]! - widths[i]!) * (at - i);
 };
 
-/**
- * A filled stroke through `points` whose width changes along it: a neck, a limb, a tail, a branch, a tentacle.
- * `width` is one number, or widths spread evenly from start to end (`[8, 1]` tapers, `[3, 9, 3]` swells in the
- * middle). The ends are rounded. The outline always has the same number of points, so a brush can be sampled.
- */
-export const brush = (points: readonly Vec[], width: number | readonly number[]): Outline => {
+const brushed = (points: readonly Vec[], width: number | readonly number[]) => {
   if (points.length < 2)
     throw new SceneError(`brush() needs two points or more, got ${points.length}.`);
   finitePoints(points, "brush()");
@@ -51,12 +46,41 @@ export const brush = (points: readonly Vec[], width: number | readonly number[])
       `brush() needs widths of 0 or more, got ${JSON.stringify(width)}. Write [start, end] to taper.`,
     );
 
-  const center = spline(points);
+  return { center: spline(points), widths };
+};
+
+export interface BrushOptions {
+  /**
+   * How many centerline samples the outline uses (a whole number, 1 or more). Fewer is smaller and stiffer: an
+   * animated brush stores every outline point per keyframe. Default: 1 for a straight two-point brush, else
+   * `points * 6` between 12 and 48.
+   */
+  readonly samples?: number;
+}
+
+export interface BrushPlace {
+  /** The centerline point. */
+  readonly point: Vec;
+  /** The direction of the centerline there, in degrees. */
+  readonly angle: number;
+  /** The full width of the brush there. */
+  readonly width: number;
+}
+
+const brushOutline = (
+  points: readonly Vec[],
+  width: number | readonly number[],
+  { samples: wanted }: BrushOptions = {},
+): Outline => {
+  const { center, widths } = brushed(points, width);
+
+  if (wanted !== undefined && !(Number.isInteger(wanted) && wanted >= 1))
+    throw new SceneError(`brush() needs a whole number of samples of 1 or more, got ${wanted}.`);
   // A straight brush with a linear taper is exact from its two ends; curves and swells need samples between.
   const straight = points.length === 2 && widths.length <= 2;
-  const count = straight ? 1 : Math.min(48, Math.max(12, points.length * 6));
+  const count = wanted ?? (straight ? 1 : Math.min(48, Math.max(12, points.length * 6)));
 
-  const samples = Array.from({ length: count + 1 }, (_, i) => {
+  const rows = Array.from({ length: count + 1 }, (_, i) => {
     const share = i / count;
     const at = pointAt(center, share);
     const a = (at.angle * Math.PI) / 180;
@@ -70,7 +94,7 @@ export const brush = (points: readonly Vec[], width: number | readonly number[])
   });
 
   const side = (sign: number) =>
-    samples.map(({ at, dir, half }) =>
+    rows.map(({ at, dir, half }) =>
       point([at[0] - dir[1] * half * sign, at[1] + dir[0] * half * sign]),
     );
 
@@ -86,7 +110,7 @@ export const brush = (points: readonly Vec[], width: number | readonly number[])
    * `outward` is 1 at the end of the stroke and -1 at its start.
    */
   const cap = (index: number, outward: number, from: Vec): Cubic[] => {
-    const { at, dir, half } = samples[index]!;
+    const { at, dir, half } = rows[index]!;
     const d: Vec = [dir[0] * outward, dir[1] * outward];
     const n: Vec = [from[0] - at[0], from[1] - at[1]];
     const h = Math.hypot(n[0], n[1]) || 1;
@@ -129,6 +153,25 @@ export const brush = (points: readonly Vec[], width: number | readonly number[])
     rule: "nonzero",
   };
 };
+
+/**
+ * A filled stroke through `points` whose width changes along it: a neck, a limb, a tail, a branch, a tentacle.
+ * `width` is one number, or widths spread evenly from start to end (`[8, 1]` tapers, `[3, 9, 3]` swells in the
+ * middle). The ends are rounded. The outline's point count depends only on the inputs (and `samples`), never on
+ * where the points are, so a brush can be sampled. `brush.at(points, width, share)` reads the centerline point,
+ * angle and width `share` (0..1) of the way along, to attach something to it.
+ */
+export const brush = Object.assign(brushOutline, {
+  at: (points: readonly Vec[], width: number | readonly number[], share: number): BrushPlace => {
+    const { center, widths } = brushed(points, width);
+
+    if (!(share >= 0 && share <= 1))
+      throw new SceneError(`brush.at() needs a share from 0 to 1, got ${share}.`);
+    const at = pointAt(center, share);
+
+    return { point: at.point, angle: at.angle, width: widthAt(widths, share) };
+  },
+});
 
 export interface BlobOptions {
   /** 0 joins the points with straight lines, 0.5 (default) is smooth, 1 bulges. */
@@ -342,14 +385,10 @@ export interface ScatterOptions {
   readonly seed?: number | string;
 }
 
-/**
- * Copies of `shape` placed along `along` and merged into one geometry: leaves, feathers, scales, grass, spikes,
- * bricks. Draw `shape` at the origin, pointing along +x; each copy is turned to follow `along`.
- */
-export const scatter = (
+const copies = (
   shape: Geometry,
   { along, count, angle = 0, alternate = false, jitter = 0, seed = 0 }: ScatterOptions,
-): Outline => {
+): Outline[] => {
   if (!Number.isInteger(count) || count < 1)
     throw new SceneError(`scatter() needs a whole count of 1 or more, got ${count}.`);
 
@@ -358,16 +397,24 @@ export const scatter = (
   const next = random(seed);
   const wobble = () => (next() * 2 - 1) * jitter;
 
-  return merge(
-    ...Array.from({ length: count }, (_, i) => {
-      const share = Math.min(1, Math.max(0, (i + 0.5 + wobble() * 0.4) / count));
-      const at = pointAt(along, share);
-      const flip = alternate && i % 2 === 1;
-      const size = 1 + wobble() * 0.25;
-      const base = scaled(shape, flip ? [size, -size] : size);
-      const turn = at.angle + (flip ? -angle : angle) + wobble() * 20;
+  return Array.from({ length: count }, (_, i) => {
+    const share = Math.min(1, Math.max(0, (i + 0.5 + wobble() * 0.4) / count));
+    const at = pointAt(along, share);
+    const flip = alternate && i % 2 === 1;
+    const size = 1 + wobble() * 0.25;
+    const base = scaled(shape, flip ? [size, -size] : size);
+    const turn = at.angle + (flip ? -angle : angle) + wobble() * 20;
 
-      return moved(rotated(base, turn), at.point);
-    }),
-  );
+    return moved(rotated(base, turn), at.point);
+  });
 };
+
+/**
+ * Copies of `shape` placed along `along` and merged into one geometry: leaves, feathers, scales, grass, spikes,
+ * bricks. Draw `shape` at the origin, pointing along +x; each copy is turned to follow `along`.
+ * `scatter.each(shape, options)` returns the same copies unmerged, in order, so each can have its own fill or motion.
+ */
+export const scatter = Object.assign(
+  (shape: Geometry, options: ScatterOptions): Outline => merge(...copies(shape, options)),
+  { each: copies },
+);

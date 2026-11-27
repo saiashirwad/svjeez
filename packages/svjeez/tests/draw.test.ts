@@ -8,6 +8,9 @@ import {
   circle,
   limb,
   line,
+  merge,
+  polygon,
+  sampled,
   scatter,
   scene,
   span,
@@ -96,6 +99,62 @@ describe("brush", () => {
   });
 });
 
+describe("brush samples", () => {
+  const bend = (dy: number): Vec[] => [
+    [0, 0],
+    [50, dy],
+    [100, 0],
+  ];
+
+  test("sets the outline size, the same for any positions", () => {
+    const few = pointCount(brush(bend(40), 6, { samples: 4 }));
+    const many = pointCount(brush(bend(40), 6, { samples: 20 }));
+
+    expect(few).toBeLessThan(many);
+    expect(pointCount(brush(bend(-30), 6, { samples: 4 }))).toBe(few);
+    expect(pointCount(brush(bend(0), 6, { samples: 20 }))).toBe(many);
+    expect(pointCount(brush(bend(40), 6))).toBe(pointCount(brush(bend(10), 6)));
+  });
+
+  test("must be a whole number of 1 or more", () => {
+    expect(() => brush(bend(10), 6, { samples: 0 })).toThrow("samples");
+    expect(() => brush(bend(10), 6, { samples: 2.5 })).toThrow("samples");
+  });
+});
+
+describe("brush.at", () => {
+  const ends: Vec[] = [
+    [10, 20],
+    [110, 20],
+  ];
+
+  test("reads the endpoints, direction and width of a straight brush", () => {
+    const start = brush.at(ends, [8, 2], 0);
+    const end = brush.at(ends, [8, 2], 1);
+    const mid = brush.at(ends, [8, 2], 0.5);
+
+    expect(start.point).toEqual([10, 20]);
+    expect(end.point).toEqual([110, 20]);
+    expect(start.width).toBeCloseTo(8);
+    expect(end.width).toBeCloseTo(2);
+    expect(mid.width).toBeCloseTo(5);
+    expect(mid.point[0]).toBeCloseTo(60);
+    expect(mid.angle).toBeCloseTo(0);
+  });
+
+  test("follows a bent brush and refuses a share outside 0..1", () => {
+    const points: Vec[] = [
+      [0, 0],
+      [50, 40],
+      [100, 0],
+    ];
+
+    expect(brush.at(points, [3, 9, 3], 0.5).width).toBeCloseTo(9);
+    expect(brush.at(points, 4, 0.5).point[1]).toBeGreaterThan(20);
+    expect(() => brush.at(points, 4, 1.5)).toThrow("share");
+  });
+});
+
 describe("blob", () => {
   test("is a closed shape around its points", () => {
     const shape = blob(
@@ -181,6 +240,14 @@ describe("scatter", () => {
     expect(scatter(dot, options)).toEqual(scatter(dot, options));
   });
 
+  test("each returns the unmerged copies, which merge into scatter", () => {
+    const options = { along: circle(20), count: 6, jitter: 0.6, seed: "leaves" };
+    const copies = scatter.each(dot, options);
+
+    expect(copies.length).toBe(6);
+    expect(merge(...copies)).toEqual(scatter(dot, options));
+  });
+
   test("refuses a count below one and a jitter outside 0..1", () => {
     expect(() => scatter(dot, { along: line([0, 0], [1, 0]), count: 0 })).toThrow("count of 1");
     expect(() => scatter(dot, { along: line([0, 0], [1, 0]), count: 2, jitter: 2 })).toThrow(
@@ -244,5 +311,24 @@ describe("<Limb>", () => {
     for (const values of tracks)
       for (let i = 1; i < values.length; i++)
         expect(Math.abs(values[i]! - values[i - 1]!)).toBeLessThan(180);
+  });
+});
+
+describe("array forms and sampled defaults", () => {
+  test("polygon and line take one array of points as well", () => {
+    const a: Vec = [0, 0];
+    const b: Vec = [10, 0];
+    const c: Vec = [5, 8];
+
+    expect(polygon([a, b, c])).toEqual(polygon(a, b, c));
+    expect(line([a, b])).toEqual(line(a, b));
+    expect(line([a, b, c])).toEqual(line(a, b, c));
+  });
+
+  test("sampled works without options", () => {
+    const wave = (t: number) => Math.sin(t * 3) * 10;
+
+    expect(sampled(wave, span(0, 2))).toEqual(sampled(wave, span(0, 2), { tolerance: 0.25 }));
+    expect(sampled(wave, span(0, 2))).not.toEqual(sampled(wave, span(0, 2), { tolerance: 5 }));
   });
 });

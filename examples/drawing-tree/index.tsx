@@ -9,7 +9,6 @@ import {
   keyframes,
   line,
   polygon,
-  pointAt,
   random,
   scatter,
   scene,
@@ -65,7 +64,6 @@ const grow = (start: Vec, heading: number, length: number, width: number, level:
       : [[0, 0], end];
 
   const tip = width * 0.5;
-  const centre = spline(points);
   const kids: Bough[] = [];
 
   if (level < 3) {
@@ -82,8 +80,7 @@ const grow = (start: Vec, heading: number, length: number, width: number, level:
           ];
 
     for (const [share, turn] of forks) {
-      const at = pointAt(centre, share).point;
-      const here = width + (tip - width) * share;
+      const { point: at, width: here } = brush.at(points, [width, tip], share);
 
       const kid = grow(
         at,
@@ -119,7 +116,7 @@ const LEAVES = ["#6A994E", "#7BAA55", "#8DB660", "#A7C957"] as const;
 const Branch = ({ limb: b }: { limb: Bough }): SceneElement => (
   <Group offset={b.start} rotate={sway(b.level, 2.6 - b.level * 0.4)} origin={{ frame: [0, 0] }}>
     <Shape geometry={brush(b.points, b.widths)} fill="#5E4838" />
-    {b.level >= 1 && (
+    {b.level >= 1 && b.level < 3 && (
       <Shape
         geometry={scatter(LEAF, {
           along: spline(b.points),
@@ -132,6 +129,19 @@ const Branch = ({ limb: b }: { limb: Bough }): SceneElement => (
         fill={LEAVES[b.level]!}
       />
     )}
+    {b.level === 3 &&
+      scatter
+        .each(LEAF, {
+          along: spline(b.points),
+          count: 8,
+          angle: 52,
+          alternate: true,
+          jitter: 0.5,
+          seed: 30 + Math.round(b.points.at(-1)![0]),
+        })
+        .map((leaf, i) => (
+          <Shape key={i} geometry={leaf} fill={LEAVES[(i + Math.round(b.start[0])) % 2 ? 3 : 2]!} />
+        ))}
     {b.kids.map((kid, i) => (
       <Branch key={i} limb={kid} />
     ))}

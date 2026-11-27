@@ -5,6 +5,7 @@ import {
   blob,
   brush,
   circle,
+  polygon,
   ellipse,
   ease,
   enter,
@@ -25,7 +26,8 @@ const JOINTS = 4;
 const LENGTH = 165;
 const STEP = D / 10;
 
-const SUCKER = circle(1.9);
+// A diamond reads as a dot at this size and animates with a quarter of a circle's curves.
+const SUCKER = polygon([2.2, 0], [0, 2.2], [-2.2, 0], [0, -2.2]);
 
 /** Spine of tentacle `i` at time t: it fans outward and ripples as a wave that travels toward the tip. */
 const spineAt = (i: number, t: number): Vec[] => {
@@ -46,12 +48,18 @@ const spineAt = (i: number, t: number): Vec[] => {
   });
 };
 
-const sampling = { tolerance: 0.8, step: STEP };
+// Few samples keep every keyframe small; the wave is smooth enough that 6 along the arm still reads as one curve.
+const sampling = { tolerance: 1, step: STEP };
+const SAMPLES = 6;
 
 const Tentacle = ({ i }: { i: number }) => (
   <Group>
     <Shape
-      geometry={sampled((t) => brush(spineAt(i, t), [17, 2]), span(0, D), sampling)}
+      geometry={sampled(
+        (t) => brush(spineAt(i, t), [17, 2], { samples: SAMPLES }),
+        span(0, D),
+        sampling,
+      )}
       fill={i % 2 ? "#E0527A" : "#EA6A8B"}
     />
     <Shape
