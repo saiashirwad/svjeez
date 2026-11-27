@@ -8,6 +8,8 @@ export interface Scene {
   readonly desc?: string;
   readonly loop: boolean;
   readonly still?: Seconds;
+  /** Named moments, in seconds, that the CLI takes in place of a time. */
+  readonly markers?: Readonly<Record<string, Seconds>>;
   readonly tokens: Readonly<Record<string, TokenValue>>;
   readonly fonts: Readonly<Record<string, FontFamily>>;
   readonly root: GroupNode;

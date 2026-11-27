@@ -169,8 +169,8 @@ const across = (...sources: readonly string[]): Split => {
 
     if (keys === undefined)
       throw new SceneError(
-        "This <Code>'s source is not one of the sources given to tokens.across().",
-        "Pass every source the morph goes through, in order: by={tokens.across(before, after)}.",
+        "This <Code>'s source is not one of the sources given to codeTokens.across().",
+        "Pass every source the morph goes through, in order: by={codeTokens.across(before, after)}.",
       );
 
     return partsOf(code, tokens, keys);
@@ -180,9 +180,9 @@ const across = (...sources: readonly string[]): Split => {
 /**
  * One node per token (a word, a run of operator characters, or one other character), keyed by its text and
  * how many times that text came before it in the source (`let#0`, `let#1`…), so a morph moves tokens both sources share.
- * `tokens.across(a, b, …)` keys by a diff of the sources instead, so a rewrite that adds or drops a repeated token keeps the rest in place.
+ * `codeTokens.across(a, b, …)` keys by a diff of the sources instead, so a rewrite that adds or drops a repeated token keeps the rest in place.
  */
-export const tokens: Split & { readonly across: typeof across } = Object.assign(
+export const codeTokens: Split & { readonly across: typeof across } = Object.assign(
   (code: Highlighted): readonly CodePart[] => {
     const found = lex(code.map(textOf));
 

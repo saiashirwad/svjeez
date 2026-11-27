@@ -127,6 +127,20 @@ export const rootLength = (element: SceneElement): Seconds | undefined => {
   return ends.length === 0 ? undefined : Math.max(...ends);
 };
 
+/** How long an element plays, expanded the way `<Series>` expands its children: for a footer that spans a series, or a `still` before its end. */
+export const durationOf = (element: SceneElement): Seconds => {
+  const length = rootLength(expand(element));
+
+  if (length === undefined)
+    throw new SceneError(
+      "durationOf() has no length to give: the element holds no <Sequence> at its root.",
+      "Wrap it in <Sequence when={span(0, n)}>, or pass an element that has one.",
+      { ...(writtenAt(element) && { source: writtenAt(element)! }) },
+    );
+
+  return length;
+};
+
 const calls = new WeakMap<Call, SceneElement>();
 
 /** What JSX wrote, run top-down with the contexts and ids it was written under: no call, provide or series is left in it. */

@@ -463,3 +463,26 @@ test("svjeez check includes ambient declarations from the project's tsconfig", (
     rmSync(dir, { recursive: true, force: true });
   }
 }, 60_000);
+
+const markers = join(import.meta.dir, "fixtures/check/markers.tsx");
+
+test("svjeez check --at takes marker names mixed with numbers", () => {
+  const out = cli("check", markers, "--at", "handoff,2,outro").stdout.toString();
+  expect(out).toContain("at 1.5s:");
+  expect(out).toContain("at 2s:");
+  expect(out).toContain("at 3s:");
+});
+
+test("svjeez check --at with an unknown marker lists the scene's markers", () => {
+  const result = cli("check", markers, "--at", "handof");
+  expect(result.exitCode).toBe(1);
+  expect(result.stderr.toString()).toContain(
+    '--at has "handof", which is neither a number nor a marker of the scene. Known markers: handoff, outro.',
+  );
+});
+
+test("svjeez check --times with an unknown marker is an error too", () => {
+  const result = cli("check", markers, "--times", "nope,1");
+  expect(result.exitCode).toBe(1);
+  expect(result.stderr.toString()).toContain('--times has "nope"');
+});

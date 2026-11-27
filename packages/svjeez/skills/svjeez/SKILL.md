@@ -19,7 +19,7 @@ Follow these steps in order. A scene is **done** only when `svjeez check` report
 
 ## Mental model
 
-- **Scene contract:** `scene({ size: [w, h], title, desc?, duration?, theme?, loop?, still? }, (canvas) => tree)`. `size` (inline tuple `[w, h]` or `as [number, number]`) and `title` are required. `duration` must be `> 0` (or omitted when the root is a `<Sequence when={span(0, n)}>`). `canvas` is a `Bounds` (`x, y, width, height, size, center, rect`).
+- **Scene contract:** `scene({ size: [w, h], title, desc?, duration?, theme?, loop?, still?, markers? }, (canvas) => tree)`. `size` (inline tuple `[w, h]` or `as [number, number]`) and `title` are required. `duration` must be `> 0` (or omitted when the root is a `<Sequence when={span(0, n)}>`). `canvas` is a `Bounds` (`x, y, width, height, size, center, rect`).
 - **Nodes only:** Every element is a svjeez component (`Shape`, `Text`, `Run`, `Group`, `Picture`, `Arrow`, `Slot`, `Shader`, `Stack`, `Grid`, `Center`, `Align`, `Sequence`, `Series`). Text lives inside `<Text font size fill>`; inline styled spans use `<Run>` inside `<Text>`. Every `<Shape>` needs `fill` or `stroke`.
 - **Fonts are explicit:** There is no default or inherited font. Pass a `Font` or `FontFamily` (from `font()` or `@svjeez/fonts`) to every `<Text>`. Load every weight/italic you use; missing glyphs are a build error.
 - **Colors are hex or tokens:** Pass `#rgb`, `#rrggbb`, `#rrggbbaa`, or `tokens({ light, dark })` values (passed as `scene({ theme })` so light/dark CSS variables emit). Derive shades with `mix(a, b, share)` and `alpha(c, 0..1)`. Use `scheme="light" | "dark"` to show a node in one scheme only.
@@ -38,7 +38,7 @@ Timing is where most scene errors occur. Every span and track obeys strict clock
 - Every `span` is in seconds on the clock of its nearest enclosing `<Sequence>` (root clock = scene). Nested `<Sequence>` offsets add: `span(0.5, 1)` inside `<Sequence when={span(2, 6)}>` inside `<Sequence when={span(1, 3)}>` runs at `3.5s..4.5s`.
 - Nothing may run past its clock's end, and one `Track` instance cannot be read on two different clocks (build a track per clock with a helper function).
 - `<Sequence when={span(s, o)}>` shifts its children by `s` with length `o`; `<Sequence when={span(s)}>` (open span) runs to scene end. `<Sequence clock={clock("name", span(s, o))}>` plays on a page-driven clock (`svjeez/page`).
-- `<Series gap={g}>` plays children sequentially, starting each `g` seconds after the previous ends (negative `g` overlaps). Every direct child of `<Series>` must have a `<Sequence when={span(0, length)}>` at its root—always start at local `0`, since `<Series>` adds the offset.
+- `<Series gap={g}>` plays children sequentially, starting each `g` seconds after the previous ends (negative `g` overlaps). Every direct child of `<Series>` must have a `<Sequence when={span(0, length)}>` at its root—always start at local `0`, since `<Series>` adds the offset. `durationOf(element)` gives the length of an element such as a series, as in `<Sequence when={span(0, durationOf(series))}>` for a footer across it, or `still: durationOf(series) - 0.5`.
 
 ### `span` arithmetic
 
@@ -71,6 +71,7 @@ Read the span of a track's last step with `t.span`. Find when a track reaches a 
 - Compose motion layers with `motion={[layerA, cond && layerB]}` (falsy entries are skipped). Other layers: `ride(geometry, progressTrack, { turn? })`, `wiggle(amp, { seed, rate?, period?, curve? })`, and `sampled(fn, span, { tolerance })`.
 - `loop` defaults to `true`. Any node whose end state differs from `0s` warns `loop-seam`. For one-shot animations, set `loop: false`; for looping scenes, return every animated property to its `0s` state with `exit()` or `.rewind()`.
 - `still` sets the `prefers-reduced-motion: reduce` frame (defaults to 85% of `duration`, or `false` to disable). Pick a moment when the scene is readable and settled.
+- `markers: { handoff: 4.5 }` names moments (seconds, from 0 to `duration`). `frames --times` and `check --at/--times` take the names mixed with numbers, as in `--times handoff,10.5`; an unknown name lists the known ones.
 
 ### `morph` and `morph.between`
 

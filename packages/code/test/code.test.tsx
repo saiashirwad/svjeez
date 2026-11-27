@@ -4,15 +4,17 @@ import {
   Shape,
   font,
   morph,
+  rect,
   ref,
   scene,
   span,
+  track,
   type Bounds,
   type SceneElement,
 } from "svjeez";
 import { jsxDEV } from "svjeez/jsx-dev-runtime";
 import { SceneError, describe as describeScene, check, svg } from "svjeez/tools";
-import { Code, codeLayout, lines, tokens, ts, type CodeProps } from "../src/index.ts";
+import { Code, codeLayout, codeTokens, lines, ts, type CodeProps } from "../src/index.ts";
 import { tomorrow } from "../src/palettes.ts";
 import { fontFixture } from "../../../fixtures/fonts.ts";
 
@@ -216,13 +218,13 @@ describe("<Code> misuse", () => {
   });
 });
 
-describe("<Code by={tokens}>", () => {
+describe("<Code by={codeTokens}>", () => {
   const texts = (built: ReturnType<typeof made>, t: number) =>
     describeScene(built, [t]).frames[0]!.nodes.filter(({ kind }) => kind === "text");
 
   test("draws one text per token, keyed by its text and occurrence, set at its measured column", () => {
     const nodes = texts(
-      made(() => snippet({ key: "code", by: tokens })),
+      made(() => snippet({ key: "code", by: codeTokens })),
       0,
     );
 
@@ -252,14 +254,14 @@ describe("<Code by={tokens}>", () => {
       ).map(({ key }) => key);
 
     expect(keyed({ by: lines })).toEqual(keyed({}));
-    expect(thrown(() => snippet({ by: tokens, keys: ["a", "b", "c"] })).problem).toBe(
+    expect(thrown(() => snippet({ by: codeTokens, keys: ["a", "b", "c"] })).problem).toBe(
       "keys names lines, but this <Code> is split another way.",
     );
   });
 
   test("a morph moves the tokens both sources share, and fades the rest", () => {
     const states = ["const a = 1;", "let total = a + 1;"].map((source) =>
-      snippet({ key: "code", by: tokens, children: source }),
+      snippet({ key: "code", by: codeTokens, children: source }),
     );
 
     const out = made(() => morph.between(states, [span(1, 1)]), 3);
@@ -276,7 +278,7 @@ describe("<Code by={tokens}>", () => {
     expect(x(2.5, "code/const#0")).toBeUndefined();
   });
 
-  test("tokens.across keys by a diff, so dropping a line keeps the next one whole", () => {
+  test("codeTokens.across keys by a diff, so dropping a line keeps the next one whole", () => {
     const [before, after] = ["a = 1;\nb = 2;", "b = 2;"];
 
     const keysOf = (source: string, by: CodeProps["by"]) =>
@@ -285,18 +287,18 @@ describe("<Code by={tokens}>", () => {
         0,
       ).map(({ key }) => key);
 
-    const diffed = tokens.across(before, after);
+    const diffed = codeTokens.across(before, after);
 
-    expect(keysOf(before, diffed)).toEqual(keysOf(before, tokens));
-    expect(keysOf(after, tokens)).toEqual(["code/b#0", "code/=#0", "code/2#0", "code/;#0"]);
+    expect(keysOf(before, diffed)).toEqual(keysOf(before, codeTokens));
+    expect(keysOf(after, codeTokens)).toEqual(["code/b#0", "code/=#0", "code/2#0", "code/;#0"]);
     expect(keysOf(after, diffed)).toEqual(["code/b#0", "code/=#1", "code/2#0", "code/;#1"]);
     expect(thrown(() => snippet({ by: diffed, children: "g();" })).problem).toBe(
-      "This <Code>'s source is not one of the sources given to tokens.across().",
+      "This <Code>'s source is not one of the sources given to codeTokens.across().",
     );
   });
 
-  test("tokens.across pairs a token that moved out of order with its nearest twin", () => {
-    const diffed = tokens.across("f >>= fun key ->", "let key = f in");
+  test("codeTokens.across pairs a token that moved out of order with its nearest twin", () => {
+    const diffed = codeTokens.across("f >>= fun key ->", "let key = f in");
 
     const keys = texts(
       made(() => snippet({ key: "code", by: diffed, children: "let key = f in" })),
@@ -314,7 +316,7 @@ describe("<Code by={tokens}>", () => {
 
   test("typing still types every token in order", () => {
     const { timeline } = describeScene(
-      made(() => snippet({ key: "code", by: tokens, typing: span(0, 1) })),
+      made(() => snippet({ key: "code", by: codeTokens, typing: span(0, 1) })),
       [0],
     );
 
@@ -326,6 +328,59 @@ describe("<Code by={tokens}>", () => {
     expect(spans[0]![0]).toBeCloseTo(0);
     expect(spans.at(-1)![1]).toBeCloseTo(1);
     spans.slice(1).forEach((s, i) => expect(s[0]).toBeGreaterThanOrEqual(spans[i]![1] - 1e-9));
+  });
+});
+
+describe("<Code part>", () => {
+  const dimmed = (extra: Partial<CodeProps> = {}) =>
+    made(() =>
+      snippet({
+        key: "code",
+        by: codeTokens,
+        part: (p) => (p.key === "return#0" ? {} : { opacity: 0.3 }),
+        ...extra,
+      }),
+    );
+
+  test("styles the chosen parts only", () => {
+    const nodes = describeScene(dimmed(), [0]).frames[0]!.nodes;
+    const opacity = (key: string) => nodes.find((node) => node.key === `code/${key}`)!.opacity ?? 1;
+
+    expect(opacity("return#0")).toBe(1);
+    expect(opacity("const#0")).toBeCloseTo(0.3);
+    expect(opacity("a#1")).toBeCloseTo(0.3);
+  });
+
+  test("can animate, and composes with typing", () => {
+    const built = made(() =>
+      snippet({
+        key: "code",
+        typing: span(0, 1),
+        part: () => ({ opacity: track(1).to(0.2, span(1, 1)) }),
+      }),
+    );
+
+    const [, first] = describeScene(built, [0.5, 2]).frames[1]!.nodes;
+
+    expect(first!.opacity).toBeCloseTo(0.2);
+    expect(svg.emit(built)).toContain("opacity:0.2");
+  });
+
+  test("dims without tripping the low-contrast check that the same faint palette trips", () => {
+    const faint = { ...tomorrow, plain: "#EEEEEE", keyword: "#EEEEEE" } as const;
+
+    const problems = (props: Partial<CodeProps>) =>
+      check(
+        made(() => (
+          <Group>
+            <Shape key="back" geometry={rect(320, 120)} fill="#FFFFFF" />
+            {snippet({ key: "code", palette: faint, ...props })}
+          </Group>
+        )),
+      ).problems.map(({ code }) => code);
+
+    expect(problems({})).toContain("low-contrast");
+    expect(problems({ part: () => ({ opacity: 0.3 }) })).not.toContain("low-contrast");
   });
 });
 
@@ -350,6 +405,25 @@ describe("codeLayout()", () => {
     expect(layout.box(2).width).toBeCloseTo(mono.measure("  return a;", 16));
   });
 
+  test("anchor puts a point of the block's bounds at `at`", () => {
+    const top = codeLayout({ ...style, at: [100, 50], anchor: [0.5, 0] }, SOURCE);
+    const width = mono.measure("const a = 1;", 16);
+
+    expect(top.bounds.width).toBeCloseTo(width);
+    expect(top.bounds.height).toBe(3 * 32);
+    expect(top.origin[0]).toBeCloseTo(100 - width / 2);
+    expect(top.bounds.y).toBeCloseTo(50);
+    expect(top.box(0).y).toBeCloseTo(50);
+    expect(top.bounds.center[0]).toBeCloseTo(100);
+    expect(top.box(0).x).toBeCloseTo(top.origin[0]);
+
+    const middle = codeLayout({ ...style, at: [100, 50], anchor: [1, 0.5] }, SOURCE);
+
+    expect(middle.bounds.x + middle.bounds.width).toBeCloseTo(100);
+    expect(middle.bounds.y + middle.bounds.height / 2).toBeCloseTo(50);
+    expect(layout.origin).toEqual([10, 20]);
+  });
+
   test("find() boxes a substring, by occurrence", () => {
     expect(layout.find("a")).toEqual(layout.box(0, 6, 7));
     expect(layout.find("a", 1)).toEqual(layout.box(2, 9, 10));
@@ -357,7 +431,7 @@ describe("codeLayout()", () => {
   });
 
   test("the text's box sits inside its cell where <Code> draws it", () => {
-    const built = made(() => snippet({ key: "code", at: [10, 20], lineHeight: 2, by: tokens }));
+    const built = made(() => snippet({ key: "code", at: [10, 20], lineHeight: 2, by: codeTokens }));
 
     const node = describeScene(built, [0]).frames[0]!.nodes.find(
       ({ key }) => key === "code/return#0",

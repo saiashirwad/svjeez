@@ -4,7 +4,13 @@ import { SceneError, type Common, type FontValue } from "svjeez/tools";
 import { highlight, type Lang, type Piece } from "./highlight.ts";
 import { faceOf } from "./layout.ts";
 import type { Palette } from "./roles.ts";
-import { lines, type Split } from "./split.ts";
+import { lines, type CodePart, type Split } from "./split.ts";
+
+/** What `part` may set on one part's text: how it is drawn, not where it sits or what it is called. */
+export type PartStyle = Pick<
+  Common,
+  "opacity" | "scale" | "rotate" | "skew" | "origin" | "effects" | "blend"
+>;
 
 export interface CodeProps extends Common {
   readonly lang: Lang;
@@ -13,10 +19,15 @@ export interface CodeProps extends Common {
   readonly palette: Palette;
   readonly lineHeight?: number;
   readonly tabSize?: number;
-  /** How the code is cut into nodes and keyed: `lines` (the default), `tokens`, `tokens.across(a, b)` or your own split. */
+  /** How the code is cut into nodes and keyed: `lines` (the default), `codeTokens`, `codeTokens.across(a, b)` or your own split. */
   readonly by?: Split;
   /** Names the lines instead of `line-1`, `line-2`…, one per line, empty ones included. Only with `by={lines}`. */
   readonly keys?: readonly string[];
+  /**
+   * Styles one part of the code, the line or token `by` cut out: its result is spread onto that part's `<Text>`, and may be animated.
+   * Dim all but a few tokens with `part={(p) => focus.has(p.key) ? {} : { opacity: 0.3 }}`; it follows a part's key through a morph.
+   */
+  readonly part?: (part: CodePart) => PartStyle;
   readonly typing?: Span;
   readonly children: string;
 }
@@ -40,6 +51,7 @@ export const Code = ({
   tabSize,
   by = lines,
   keys,
+  part,
   typing,
   children,
   ...common
@@ -77,7 +89,9 @@ export const Code = ({
 
   return (
     <Group {...common}>
-      {parts.map(({ key, line, col, pieces, chars }) => {
+      {parts.map((own) => {
+        const { key, line, col, pieces, chars } = own;
+
         if (chars === 0) return null;
 
         const when = typing && {
@@ -95,6 +109,7 @@ export const Code = ({
         return (
           <Text
             key={keys?.[line] ?? key}
+            {...part?.(own)}
             font={font}
             size={size}
             fill={palette.plain}

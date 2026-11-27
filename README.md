@@ -72,6 +72,21 @@ export default scene(
   <sub><b>A curve draws, a dot pops in</b> · 1.5 KB · <a href="examples/readme/basic.tsx"><code>examples/readme/basic.tsx</code></a></sub>
 </p>
 
+## Developing against a local checkout
+
+```sh
+cd path/to/svjeez/packages/svjeez && bun link
+cd your-scene-project && bun link svjeez
+```
+
+`svjeez` then runs straight from the checkout's source (needs `bun`, no build). Imports resolve to source only under the `@svjeez/source` condition, so add it to `tsconfig.json`:
+
+```json
+{ "compilerOptions": { "customConditions": ["@svjeez/source"], "allowImportingTsExtensions": true } }
+```
+
+Run scenes that import `svjeez` directly with `bun --conditions @svjeez/source scene.ts`. Or build once with `bun run build:package` in `packages/svjeez` and skip the flags.
+
 ## JSX or plain `h()` calls
 
 `h(Component, props, ...children)` builds the same tree as JSX and emits the same SVG. `key` goes in the props, children come after them, and props are typed from the component.

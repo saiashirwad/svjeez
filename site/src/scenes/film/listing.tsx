@@ -1,4 +1,4 @@
-import { Code, tsx } from "@svjeez/code";
+import { Code, codeLayout, tsx } from "@svjeez/code";
 import {
   Shape,
   Text,
@@ -20,16 +20,17 @@ const LABEL = 40;
 const BLEED = 10;
 const LEADING = 1.5;
 
-/** Geist Mono's advance, as a share of the font size. */
-const ADVANCE = 0.6;
-
-/** The room every state of a listing takes at a font size: its label, and its longest and tallest code. */
+/** The room every state of a listing takes at a font size, from the code's own layout: its widest line, and the lowest cell's bottom below the label's top. */
 const panelOf = (states: readonly string[], size: number): Vec => {
-  const lines = states.map((source) => source.split("\n"));
-  const longest = Math.max(...lines.flat().map((text) => text.length));
-  const tallest = Math.max(...lines.map((rows) => rows.length));
+  const boxes = states.map(
+    (source) =>
+      codeLayout({ font: mono, size, lineHeight: LEADING, at: [0, LABEL] }, source).bounds,
+  );
 
-  return [longest * size * ADVANCE, LABEL + (tallest - 1) * size * LEADING + size];
+  return [
+    Math.max(...boxes.map(({ width }) => width)),
+    Math.max(...boxes.map(({ y, height }) => y + height)),
+  ];
 };
 
 /** A short name for a line's text: keys only take letters, digits, - and _. */
