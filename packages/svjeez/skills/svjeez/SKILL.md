@@ -109,7 +109,7 @@ Run `svjeez --help` for all flags. Every scene command accepts `[params]` (`--pa
 | `svjeez check <file>` | Static model + TS check (`--browser`, `--at 0,1.5`, `--times`, `--fail-on warning`, `--json`, `--color-scheme`) |
 | `svjeez frames <file>` | Render PNG frames (`--sheet`, `--count 6`, `--times 0,1`, `--scale 2`, `--out dir`, `--color-scheme`, `--background`) |
 | `svjeez svg <file>` | Emit self-contained SVG (`--out file.svg`, `--json`) |
-| `svjeez video <file>` | Encode MP4/WebM via `@svjeez/video` (`--out`, `--format`, `--fps`, `--loops`, `--quality`, `--scale`, `--background`; `--preview` for a fast fps 12, scale 1, low-quality render) |
+| `svjeez video <file>` | Encode MP4/WebM via `@svjeez/video` (`--out`, `--format`, `--fps`, `--loops`, `--quality`, `--workers`, `--scale`, `--background`; `--preview` for a fast fps 12, scale 1, low-quality render) |
 | `svjeez dev <file>` | Live-reloading preview server with scrubber (`--port 5173`, `--out`) |
 | `svjeez skill` | Print `SKILL.md` (`--install [--dir .claude/skills]`) |
 | `svjeez version` | Print installed version |

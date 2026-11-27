@@ -23,7 +23,12 @@ export interface SceneOptions {
   readonly executablePath?: string;
   /** The scene's length in seconds, when the caller knows it. Without it the length is read from the animations' periods, which can be shorter than the scene (a `duration: 8` scene whose tracks all `.loop(4)` measures 4s). */
   readonly duration?: Seconds;
+  /** How many tabs capture in parallel, each holding its own copy of the scene. Default 1. */
+  readonly pages?: number;
 }
+
+/** How `Scene.capture` encodes: full-compression PNG, a quicker PNG, or JPEG (no alpha). */
+export type CaptureEncoding = "png" | "fast-png" | "jpeg";
 
 export type FrameOptions = FrameTimes &
   SceneOptions & {
@@ -39,8 +44,11 @@ export interface Scene {
   readonly loops: boolean;
   readonly playbackRate: number;
   readonly colorScheme: ColorScheme;
-  capture(time: Seconds): Promise<Uint8Array>;
+  /** Captures the scene at `time`. With `pages` above 1, calls run in parallel, one per idle tab. */
+  capture(time: Seconds, encoding?: CaptureEncoding): Promise<Uint8Array>;
+  /** Runs in the first tab only. */
   evaluate<A, R>(fn: (arg: A) => R | Promise<R>, arg: A): Promise<R>;
+  /** Loads the script in the first tab only. */
   addScript(path: string): Promise<void>;
   close(): Promise<void>;
 }
@@ -178,7 +186,20 @@ const stage = async (
       ),
   );
 
-  const locator = page.locator("#stage");
+  const session = await page.context().newCDPSession(page);
+
+  await session.send("Emulation.setDefaultBackgroundColorOverride", {
+    color: { r: 0, g: 0, b: 0, a: 0 },
+  });
+
+  const box = await page.evaluate(() => {
+    const { x, y, width, height } = document.getElementById("stage")!.getBoundingClientRect();
+
+    return { x, y, width, height };
+  });
+
+  // The clip's scale is the device pixel ratio: CDP captures in CSS pixels otherwise.
+  const clip = { ...box, scale };
 
   return {
     width,
@@ -188,12 +209,19 @@ const stage = async (
     duration,
     loops,
     playbackRate,
-    capture: async (time) => {
+    capture: async (time, encoding = "png") => {
       await page.evaluate(seek, time);
 
-      return new Uint8Array(
-        await locator.screenshot({ animations: "allow", omitBackground: true }),
-      );
+      const { data } = await session.send("Page.captureScreenshot", {
+        format: encoding === "jpeg" ? "jpeg" : "png",
+        ...(encoding === "jpeg" && { quality: 92 }),
+        ...(encoding !== "png" && { optimizeForSpeed: true }),
+        clip,
+        captureBeyondViewport: false,
+        fromSurface: true,
+      });
+
+      return new Uint8Array(Buffer.from(data, "base64"));
     },
     // SAFETY: Playwright types the argument as Unboxed<A>, which is A itself for the plain data a Scene passes.
     evaluate: <A, R>(fn: (arg: A) => R | Promise<R>, arg: A) =>
@@ -204,16 +232,55 @@ const stage = async (
   };
 };
 
+const pooled = (
+  first: Omit<Scene, "close">,
+  ...rest: Omit<Scene, "close">[]
+): Omit<Scene, "close"> => {
+  const idle = [first, ...rest];
+  const waiting: ((page: Omit<Scene, "close">) => void)[] = [];
+
+  const take = () =>
+    idle.pop() ?? new Promise<Omit<Scene, "close">>((resolve) => waiting.push(resolve));
+
+  const give = (page: Omit<Scene, "close">) => {
+    const next = waiting.shift();
+
+    if (next) next(page);
+    else idle.push(page);
+  };
+
+  return {
+    ...first,
+    capture: async (time, encoding) => {
+      const page = await take();
+
+      try {
+        return await page.capture(time, encoding);
+      } finally {
+        give(page);
+      }
+    },
+  };
+};
+
 export const openScene = async (
   svg: string,
   options: SceneOptions = {},
   caller = "openScene()",
 ): Promise<Scene> => {
   const settings = resolve(caller, svg, options);
+  const pages = options.pages ?? 1;
+
+  if (!(Number.isInteger(pages) && pages > 0))
+    throw new Error(`${caller} needs a positive whole number of pages, got ${pages}.`);
   const browser = await launch(caller, options.executablePath);
 
   try {
-    return { ...(await stage(browser, svg, settings)), close: () => browser.close() };
+    const [first, ...rest] = await Promise.all(
+      Array.from({ length: pages }, () => stage(browser, svg, settings)),
+    );
+
+    return { ...pooled(first!, ...rest), close: () => browser.close() };
   } catch (error) {
     await browser.close();
     throw error;

@@ -18,6 +18,7 @@ npx playwright-core install chromium-headless-shell
 - **Format & codecs:**
   - `mp4` (default): `avc` (default), `hevc`, `vp9`, `av1`. No alpha channel.
   - `webm`: `vp9` (default), `vp8`, `av1`. Supports `--background transparent` (alpha).
+- **Parallel capture:** `--workers N` / `workers: N` (default 4) captures frames in N browser tabs at once. More is faster and uses more memory; frames still encode in order. Opaque videos capture as JPEG, transparent ones as PNG.
 - **Even dimensions:** Output pixels = `scene size × scale`, rounded **down** to even numbers (required by H.264).
 - **Theme selection:** `--color-scheme system | light | dark` picks which scheme renders (set it explicitly for dual-theme scenes so CI matches local output).
 - **CLI vs API input:** `svjeez video` accepts a `.tsx`/`.ts` scene or `.svg` file; `video(svg, opts)` in code takes an **SVG string** (`svg.emit(scene)` from `svjeez/tools`).
@@ -26,7 +27,7 @@ npx playwright-core install chromium-headless-shell
 
 | Surface | Signature / usage |
 |---|---|
-| CLI | `svjeez video <file> [--out scene.mp4] [--format mp4\|webm] [--fps 30] [--loops 1] [--quality low\|medium\|high] [--scale 2] [--preview] [--color-scheme system\|light\|dark] [--background css] [params]` |
+| CLI | `svjeez video <file> [--out scene.mp4] [--format mp4\|webm] [--fps 30] [--loops 1] [--quality low\|medium\|high] [--workers 4] [--scale 2] [--preview] [--color-scheme system\|light\|dark] [--background css] [params]` |
 | `@svjeez/video` | `video(svg: string, options?: VideoOptions): Promise<Video>` returning `{ bytes, mime, format, codec, playTime, frames, colorScheme }`. |
 
 ## Verified snippet
@@ -35,6 +36,7 @@ CLI:
 
 ```sh
 svjeez video scene.tsx --out scene.mp4 --fps 30 --color-scheme dark
+svjeez video scene.tsx --out big.mp4 --workers 8    # more tabs, faster, more memory
 svjeez video scene.tsx --out draft.mp4 --preview   # fps 12, scale 1, quality low; explicit flags win
 svjeez video scene.tsx --out scene.webm --background transparent --scale 2
 ```

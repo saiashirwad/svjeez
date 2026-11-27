@@ -37,7 +37,7 @@ const USAGE = `usage:
   svjeez dev <file> [--port 5173] [--out file.svg] [params]
   svjeez frames <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
   svjeez check <file> [--json | --format json|text] [--fail-on error|warning] [--browser] [--at 0,1.5] [--times 0,0.5,1] [--color-scheme system|light|dark] [params]
-  svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--scale 2] [--preview] [--color-scheme system|light|dark] [--background css] [params]
+  svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--workers 4] [--scale 2] [--preview] [--color-scheme system|light|dark] [--background css] [params]
   svjeez skill [--install [--dir .claude/skills]]
   svjeez version
 
@@ -51,6 +51,7 @@ dev serves a preview with a scrubber and a timeline, and rebuilds it when a file
 svg --json prints { svg, warnings, lanes }: the SVG, its warnings and every animated lane, in scene seconds.
 video encodes --loops loops of the scene, through @svjeez/video. Its format follows --out's extension, else mp4.
 --background transparent keeps alpha, in webm only.
+video --workers N captures frames in N browser tabs at once (default 4): more is faster and uses more memory.
 video --preview is a fast, small render for review loops: fps 12, scale 1, quality low. --fps, --scale and --quality still win over it.
 On Node, .tsx files load through tsx when it is installed.
 check reads the scene model and emits its SVG once, with no browser, and prints one problem per line,
@@ -406,6 +407,7 @@ type VideoFn = (
     fps?: number;
     loops?: number;
     quality?: string;
+    workers?: number;
     scale?: number;
     colorScheme?: string;
     background?: string;
@@ -455,6 +457,7 @@ const videoCommand = async (args: string[]): Promise<void> => {
       fps: { type: "string" },
       loops: { type: "string" },
       quality: { type: "string" },
+      workers: { type: "string" },
       scale: { type: "string" },
       preview: { type: "boolean" },
       "color-scheme": { type: "string" },
@@ -482,6 +485,7 @@ const videoCommand = async (args: string[]): Promise<void> => {
     fps: number("fps", values.fps) ?? (values.preview ? 12 : undefined),
     loops: number("loops", values.loops),
     quality: values.quality ?? (values.preview ? "low" : undefined),
+    workers: number("workers", values.workers),
     scale: number("scale", values.scale) ?? (values.preview ? 1 : undefined),
     colorScheme,
     background: values.background,

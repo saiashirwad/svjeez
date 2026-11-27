@@ -310,6 +310,35 @@ describe.if(browser)("renderFrames", () => {
     }
   });
 
+  test("capture() encodes as fast-png or jpeg, and a pool of pages captures the same pixels", async () => {
+    const opened = await openScene(fade, { colorScheme: "light", pages: 2 });
+
+    try {
+      const png = await opened.capture(1.5);
+      const fast = await opened.capture(1.5, "fast-png");
+      const jpeg = await opened.capture(1.5, "jpeg");
+
+      expect(pngSize(fast)).toEqual(pngSize(png));
+      expect([jpeg[0], jpeg[1]]).toEqual([0xff, 0xd8]);
+
+      const both = await Promise.all([
+        opened.capture(1.5),
+        opened.capture(1.5),
+        opened.capture(1.5),
+      ]);
+
+      for (const each of both) expect(same(each, png)).toBe(true);
+    } finally {
+      await opened.close();
+    }
+  });
+
+  test("openScene() rejects pages that are not a positive whole number", async () => {
+    expect(openScene(fade, { pages: 0 }, "video()")).rejects.toThrow(
+      "video() needs a positive whole number of pages, got 0.",
+    );
+  });
+
   test("openScene() rejects a bad scale under the caller's name, before launching", async () => {
     expect(openScene(fade, { scale: -1 }, "video()")).rejects.toThrow(
       "video() needs a positive, finite scale, got -1.",

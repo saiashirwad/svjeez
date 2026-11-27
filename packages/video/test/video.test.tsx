@@ -121,11 +121,22 @@ describe("video", () => {
     );
   });
 
+  test("workers capture in parallel and change nothing in the video", async () => {
+    const one = await video(slide, { format: "webm", fps: 12, workers: 1 });
+    const three = await video(slide, { format: "webm", fps: 12, workers: 3 });
+
+    expect(three).toMatchObject({ frames: one.frames, playTime: one.playTime });
+    expect(await read(three.bytes)).toMatchObject({ packets: 12, duration: 1 });
+  }, 30_000);
+
   test("bad options are rejected by name", async () => {
     await expect(video(slide, { fps: 0 })).rejects.toThrow(
       "video() needs a positive, finite fps, got 0.",
     );
     await expect(video(slide, { loops: 1.5 })).rejects.toThrow("loops, got 1.5.");
+    await expect(video(slide, { workers: 0 })).rejects.toThrow(
+      "video() needs a positive whole number of workers, got 0.",
+    );
     await expect(video(slide, { scale: 0 })).rejects.toThrow(
       "video() needs a positive, finite scale, got 0.",
     );
