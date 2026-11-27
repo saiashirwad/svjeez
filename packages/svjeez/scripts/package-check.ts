@@ -193,7 +193,7 @@ export { renderFrames };
             ChildProcess.make({
               cwd: quickstart,
               stdin: "ignore",
-            })`${process.execPath} node_modules/svjeez/package-dist/cli.js svg scene.tsx --out hello.svg`,
+            })`${process.execPath} node_modules/.bin/svjeez svg scene.tsx --out hello.svg`,
           );
 
           if (

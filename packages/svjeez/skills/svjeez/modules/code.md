@@ -22,13 +22,14 @@ npm install @svjeez/code @svjeez/fonts svjeez
   - `by={codeTokens}`: one `<Text>` per token keyed `text#occurrence`.
   - `by={codeTokens.across(a, b, ...)}`: keys tokens by LCS diff across every state the morph visits so shared tokens slide cleanly. Every rendered source must be in the `across(...)` list.
 - **Typing:** `typing={span(start, over)}` steps a character clip across lines. Prefer `by={lines}` with `typing` (cheap CSS); `by={codeTokens}` + `typing` emits many SMIL clips.
-- **Exact highlights with `codeLayout(style, source)`:** Pass the same `{ font, size, lineHeight, tabSize, at }` as `<Code>`. Use `.box(line, from?, to?)`, `.find(text, occurrence?)`, and `.point(line, col)` (0-based, after tab expansion) to place highlights, cursors, or arrows.
+- **Per-part style (`part`):** `part={(p) => focus.has(p.key) ? {} : { opacity: 0.3 }}` spreads `opacity`, `scale`, `rotate`, `skew`, `origin`, `effects`, `blend` onto that part's `<Text>`. Values can be tracks, so dimming animates; it follows keys through `morph()` and composes with `typing`. Dimmed text (alpha < 0.99) is skipped by the contrast check.
+- **Exact highlights with `codeLayout(style, source)`:** Pass the same `{ font, size, lineHeight, tabSize, at }` as `<Code>`; add `anchor: [fx, fy]` (fractions of the block's `bounds`) so `at` names where that point lands, e.g. `{ at: [W / 2, 100], anchor: [0.5, 0] }` centers the block, then pass `at={layout.origin}` to `<Code>`. `<Code>`'s own `anchor` uses its drawn bounds, which can differ slightly; use `origin` when highlights must line up. Use `.box(line, from?, to?)`, `.find(text, occurrence?)`, and `.point(line, col)` (0-based, after tab expansion) to place highlights, cursors, or arrows.
 
 ## API map
 
 | Entry | Exports |
 |---|---|
-| `@svjeez/code` | `<Code lang font size palette lineHeight? tabSize? by? keys? typing? ...Common>`, `lines`, `codeTokens` (`.across(...sources)`), `codeLayout(style, source)`, `highlight(source, lang, { tabSize? })`, `ROLES` |
+| `@svjeez/code` | `<Code lang font size palette lineHeight? tabSize? by? keys? part? typing? ...Common>`, `lines`, `codeTokens` (`.across(...sources)`), `codeLayout(style, source)` (returns `origin`, `bounds`, `lines`, `point`, `box`, `find`), `highlight(source, lang, { tabSize? })`, `ROLES` |
 | `@svjeez/code` grammars | `bash`, `css`, `diff`, `go`, `html`, `js`, `json`, `jsx`, `md`, `ocaml`, `python`, `rust`, `sql`, `ts`, `tsx`, `yaml` |
 | `@svjeez/code/palettes` | `palette(name, { light, dark })`, `tomorrow`, `solarized`, `gruvbox`, `rosePine` |
 

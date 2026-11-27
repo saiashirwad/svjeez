@@ -1,4 +1,4 @@
-export { Code, type CodeProps } from "./code.tsx";
+export { Code, type CodeProps, type PartStyle } from "./code.tsx";
 
 export { codeLayout, type CodeBox, type CodeLayout, type CodeStyle } from "./layout.ts";
 
