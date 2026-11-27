@@ -46,7 +46,7 @@ returning either.
 [params] is --params data.json and any number of --param key=value. They fill the module's exported \`params\` schema
 (built with param from svjeez), are checked against it, and are passed to the default export; a key left out keeps its default.
 --param sets one value that is not a list, and wins over the file.
-Times are scene seconds. Without --times, frames takes --count frames (default 6) across one loop, or from 0 to the end of a scene that plays once (loop: false).
+Times are scene seconds, or the names of the scene's markers (scene({ markers: { handoff: 4.5 } }), then --times handoff,10). Without --times, frames takes --count frames (default 6) across one loop, or from 0 to the end of a scene that plays once (loop: false).
 dev serves a preview with a scrubber and a timeline, and rebuilds it when a file beside it changes.
 svg --json prints { svg, warnings, lanes }: the SVG, its warnings and every animated lane, in scene seconds.
 video encodes --loops loops of the scene, through @svjeez/video. Its format follows --out's extension, else mp4.
@@ -282,7 +282,34 @@ const number = (flag: string, value: string | undefined): number | undefined => 
   return Number.isFinite(parsed) ? parsed : fail(`--${flag} needs a number, got "${value}".`);
 };
 
-const when = (times: string | undefined, count: string | undefined): FrameTimes => {
+type Markers = Readonly<Record<string, number>>;
+
+/** A time written as seconds, or as the name of one of the scene's markers. */
+const timeOf = (flag: string, text: string, markers: Markers): number | undefined => {
+  const name = text.trim();
+
+  if (Object.hasOwn(markers, name)) return markers[name];
+
+  if (name !== "" && Number.isNaN(Number(name))) {
+    const known = Object.keys(markers);
+
+    return fail(
+      `--${flag} has "${name}", which is neither a number nor a marker of the scene. ${
+        known.length === 0
+          ? "The scene has no markers; add them with scene({ markers: { name: seconds } })."
+          : `Known markers: ${known.join(", ")}.`
+      }`,
+    );
+  }
+
+  return undefined;
+};
+
+const when = (
+  times: string | undefined,
+  count: string | undefined,
+  markers: Markers = {},
+): FrameTimes => {
   if (times !== undefined && count !== undefined) fail("Pass --times or --count, not both.");
 
   if (times !== undefined)
@@ -292,7 +319,7 @@ const when = (times: string | undefined, count: string | undefined): FrameTimes 
         .map((time) =>
           time.trim() === ""
             ? fail(`--times has an empty entry: "${times}".`)
-            : number("times", time.trim())!,
+            : (timeOf("times", time, markers) ?? number("times", time.trim())!),
         ),
     };
   const frames = number("count", count) ?? 6;
@@ -490,7 +517,7 @@ const framesCommand = async (args: string[]): Promise<void> => {
   report(svg);
 
   const { duration, loops, colorScheme, frames, sheet } = await renderFrames(svg, {
-    ...when(values.times, values.count),
+    ...when(values.times, values.count, built.scene?.markers),
     duration: built.scene?.duration,
     scale: number("scale", values.scale),
     colorScheme: scheme,
@@ -566,9 +593,10 @@ const skillCommand = async (args: string[]): Promise<void> => {
 
 const CUES = 48;
 
-const parseTimes = (flag: string, text: string): number[] =>
+const parseTimes = (flag: string, text: string, markers: Markers = {}): number[] =>
   text.split(",").map((time) => {
-    const parsed = time.trim() === "" ? NaN : Number(time.trim());
+    const named = timeOf(flag, time, markers);
+    const parsed = named ?? (time.trim() === "" ? NaN : Number(time.trim()));
 
     return Number.isFinite(parsed) && parsed >= 0
       ? parsed
@@ -654,8 +682,8 @@ const checkCommand = async (args: string[]): Promise<void> => {
 
   const file = positionals[0] ?? fail(USAGE);
   const scheme = parseScheme(values["color-scheme"]);
-  const times = values.times === undefined ? undefined : parseTimes("times", values.times);
-  const at = values.at === undefined ? undefined : parseTimes("at", values.at);
+  let times: number[] | undefined;
+  let at: number[] | undefined;
   const found: Problem[] = [];
   let model: Scene | undefined;
   let svgText: string | undefined;
@@ -669,6 +697,10 @@ const checkCommand = async (args: string[]): Promise<void> => {
     const value = await loadValue(file, values, (message) => {
       throw new Error(message);
     });
+
+    const markers = isScene(value) ? value.markers : undefined;
+    times = values.times === undefined ? undefined : parseTimes("times", values.times, markers);
+    at = values.at === undefined ? undefined : parseTimes("at", values.at, markers);
 
     if (isScene(value)) {
       model = value;
@@ -807,7 +839,7 @@ const checkCommand = async (args: string[]): Promise<void> => {
     }
 
     if (described) console.log(`\n${described.text}`);
-    else if (at)
+    else if (values.at !== undefined)
       console.log(
         found.some((f) => f.code === "compile-error")
           ? "\n--at describes the scene once it builds; fix the compile error above first."

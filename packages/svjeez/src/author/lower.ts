@@ -133,6 +133,11 @@ export interface SceneOptions {
    * left out), or false to play the motion for them too.
    */
   readonly still?: Seconds | false;
+  /**
+   * Named moments, in seconds, that `svjeez frames --times` and `svjeez check --at` take in place of a number:
+   * `markers: { handoff: 4.5 }` makes `--times handoff,10` work.
+   */
+  readonly markers?: Readonly<Record<string, Seconds>>;
 }
 
 interface Ctx {
@@ -1661,6 +1666,13 @@ const lowerScene = (
   if (!(duration > 0 && duration < Infinity))
     throw new SceneError(`scene() needs a positive duration, got ${duration}.`);
 
+  for (const [name, time] of Object.entries(options.markers ?? {}))
+    if (!(Number.isFinite(time) && time >= 0 && time <= duration))
+      throw new SceneError(
+        `scene() needs the marker "${name}" at a time from 0 to the duration, ${duration}s, got ${String(time)}.`,
+        "Put each marker inside the scene, as in markers: { handoff: 4.5 }.",
+      );
+
   const ctx: Ctx = {
     tokens: new Map(),
     fonts: new FontBook(),
@@ -1708,6 +1720,7 @@ const lowerScene = (
     ...(options.desc !== undefined && { desc: options.desc }),
     loop: options.loop ?? true,
     ...(still !== undefined && { still }),
+    ...(options.markers && Object.keys(options.markers).length > 0 && { markers: options.markers }),
     tokens: Object.fromEntries(ctx.tokens),
     fonts: ctx.fonts.families(),
     root,

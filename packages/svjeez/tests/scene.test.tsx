@@ -542,3 +542,25 @@ describe("motion layers", () => {
     expect(model.root.children).toHaveLength(2);
   });
 });
+
+describe("scene markers", () => {
+  const marked = (markers: Record<string, number>, duration = 4) =>
+    scene({ size: [10, 10], duration, title: "Markers", markers }, () => (
+      <Shape geometry={rect(1, 1)} fill="#000000" />
+    ));
+
+  test("are kept on the scene for the CLI to read", () => {
+    expect(marked({ handoff: 1.5, end: 4 }).markers).toEqual({ handoff: 1.5, end: 4 });
+  });
+
+  test("are left off a scene that has none", () => {
+    expect(marked({}).markers).toBeUndefined();
+  });
+
+  test("a marker that is negative, past the duration or not finite is an error naming it", () => {
+    for (const time of [-1, 4.5, NaN, Infinity])
+      expect(() => marked({ bad: time })).toThrow(
+        `scene() needs the marker "bad" at a time from 0 to the duration, 4s, got ${time}.`,
+      );
+  });
+});

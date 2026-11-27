@@ -13,7 +13,7 @@ import {
   type Slots,
   type SceneElement,
 } from "svjeez";
-import { isLane, propsOf, SceneError, type Model } from "svjeez/tools";
+import { durationOf, isLane, propsOf, SceneError, type Model } from "svjeez/tools";
 
 const Tone = context("none");
 
@@ -207,5 +207,46 @@ describe("propsOf()", () => {
 
     expect(propsOf(el, Card)).toEqual({ size: 7 });
     expect(propsOf(el, Probe)).toBeUndefined();
+  });
+});
+
+describe("durationOf", () => {
+  test("a series with a gap is as long as its children and the gaps between them", () => {
+    const series = (
+      <Series gap={0.5}>
+        {beat(2, "a")}
+        {beat(3, "b")}
+      </Series>
+    );
+
+    expect(durationOf(series)).toBe(5.5);
+  });
+
+  test("a footer that spans a series ends with it, not after", () => {
+    const model = made(() => {
+      const series = (
+        <Series gap={1}>
+          {beat(2, "a")}
+          {beat(3, "b")}
+        </Series>
+      );
+
+      return (
+        <Group>
+          {series}
+          <Sequence when={span(0, durationOf(series))}>
+            <Shape key="footer" geometry={circle(1)} fill="#000000" />
+          </Sequence>
+        </Group>
+      );
+    });
+
+    expect(model.duration).toBe(6);
+  });
+
+  test("an element with no <Sequence> at its root has no length, and says so", () => {
+    expect(() => durationOf(<Shape geometry={circle(1)} fill="#000000" />)).toThrow(
+      "durationOf() has no length to give",
+    );
   });
 });
