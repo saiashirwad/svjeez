@@ -318,7 +318,7 @@ const report = (ctx: Ctx, slot: string, lane: CssLane): void => {
     const next = lane.keys[index + 1]!;
     const start = (isHold(key.ease) ? next.t : key.t) * scale;
 
-    return [{ start, over: Math.max(0, next.t * scale - start) }];
+    return [{ start, over: Math.max(0, next.t * scale - start), ease: key.ease ?? DEFAULT_EASE }];
   });
 
   if (spans.length === 0) return;

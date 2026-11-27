@@ -84,7 +84,7 @@ const arrayItems = (list: SyntaxNode): SyntaxNode[] | undefined => {
   return out;
 };
 
-interface Literal {
+export interface Literal {
   readonly value: Json;
   readonly lit: LiteralKind;
 }
@@ -99,7 +99,8 @@ const keyOf = (src: string, property: SyntaxNode): string | undefined => {
   return undefined;
 };
 
-const literalOf = (src: string, node: SyntaxNode): Literal | undefined => {
+/** The JSON value a literal expression is written as, or undefined when it is not one. */
+export const literalOf = (src: string, node: SyntaxNode): Literal | undefined => {
   switch (node.name) {
     case "String": {
       const value = unescape(textOf(src, node).slice(1, -1));

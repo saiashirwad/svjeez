@@ -123,7 +123,7 @@ const Revenue = ({ name, bars, change }: Quarter): SceneElement => (
   </Group>
 );
 
-const STEP = 2.6;
+const STEP = 4.17;
 
 export default scene(
   {

@@ -29,15 +29,16 @@ const joined = (from: string, relative: string): string | undefined => {
 export const isRelative = (name: string): boolean =>
   name.startsWith("./") || name.startsWith("../");
 
+/** The canonical paths a relative import from `from` may mean, in the order a module system tries them. */
+export const candidatesFor = (from: string, specifier: string): string[] => {
+  const base = joined(from, specifier);
+
+  return base === undefined ? [] : [base, ...EXTENSIONS.map((e) => base + e)];
+};
+
 /** The canonical path a relative import from `from` reaches, with or without its extension, or undefined when no file is there. */
 export const resolveRelative = (
   has: (path: string) => boolean,
   from: string,
   specifier: string,
-): string | undefined => {
-  const base = joined(from, specifier);
-
-  return base === undefined
-    ? undefined
-    : [base, ...EXTENSIONS.map((e) => base + e)].find((path) => has(path));
-};
+): string | undefined => candidatesFor(from, specifier).find((path) => has(path));

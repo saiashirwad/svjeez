@@ -20,7 +20,7 @@ export default scene(
       h(Shape, {
         geometry: path().moveTo([20, 100]).curveTo([60, 20], [140, 20], [180, 100]),
         stroke: { color: "#FF5FA8", width: 4 },
-        draw: track(0).to(1, span(0.2, 1.2)),
+        draw: track(0).to(1, span(0.58, 1.2)),
       }),
       h(Shape, {
         geometry: circle(8),

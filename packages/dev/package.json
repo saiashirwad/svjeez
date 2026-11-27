@@ -1,0 +1,27 @@
+{
+  "name": "@svjeez/dev",
+  "version": "0.8.0-next.4",
+  "private": true,
+  "description": "svjeez dev: open a scene, turn every constant it is written with, and watch the SVG answer. Each change you keep is a small edit to the scene file.",
+  "license": "MIT",
+  "bin": {
+    "svjeez-dev": "./src/main.ts"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "bun --conditions @svjeez/source src/main.ts",
+    "test": "bun test --timeout 30000 --conditions @svjeez/source",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@effect/platform-bun": "^4.1.4",
+    "@svjeez/live": "workspace:*",
+    "effect": "^4.1.4",
+    "svjeez": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "playwright-core": "^1.64.1",
+    "typescript": "latest"
+  }
+}

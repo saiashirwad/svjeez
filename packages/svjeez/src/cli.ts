@@ -29,6 +29,7 @@ import { isSceneError } from "./model/scene-error";
 import { hostOf } from "./host";
 import { isString } from "./model/guards";
 import { loadTypeGpu } from "./load-typegpu";
+import { build, type SvgBuild } from "./build";
 
 const host = hostOf();
 
@@ -336,38 +337,11 @@ const reportWarnings = (warnings: readonly string[]): void => {
 
 const report = (svg: string): void => reportWarnings(validateSvg(svg).warnings);
 
-interface SvgBuild {
-  readonly svg: string;
-  readonly warnings: readonly string[];
-  readonly lanes: readonly LaneReport[];
-  readonly duration?: number;
-  readonly loop?: boolean;
-}
-
-const loadBuild = async (file: string, flags: ParamFlags, sources = false): Promise<SvgBuild> => {
-  const diagnosed: string[] = [];
-  const lanes: LaneReport[] = [];
-
-  startTrace({ within: sources && !file.endsWith(".svg") ? sceneDir(file) : undefined });
-
-  try {
-    const built = await loadBuilt(
-      file,
-      flags,
-      (warning) => diagnosed.push(warning.message),
-      (lane) => lanes.push(lane),
-    );
-
-    return {
-      svg: built.svg,
-      warnings: [...diagnosed, ...validateSvg(built.svg).warnings],
-      lanes,
-      ...(built.scene && { duration: built.scene.duration, loop: built.scene.loop }),
-    };
-  } finally {
-    stopTrace();
-  }
-};
+const loadBuild = (file: string, flags: ParamFlags, sources = false): Promise<SvgBuild> =>
+  build(
+    () => loadValue(file, flags),
+    sources && !file.endsWith(".svg") ? sceneDir(file) : undefined,
+  );
 
 const svgCommand = async (args: string[]): Promise<void> => {
   const { values, positionals } = parseArgs({
