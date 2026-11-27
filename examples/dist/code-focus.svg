@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 260" width="560" height="260" role="img" aria-labelledby="t d" font-family="'JetBrains Mono'">
+  <title id="t">Code, one step at a time</title>
+  <desc id="d">Three lines of parser code sit centered on the stage. Each step lights the tokens it is about, dims the rest, and names them in a caption, while a bar under the captions fills across all three steps.</desc>
+  <style><![CDATA[
+svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--muted:#A1A1A6;--text:#E5E5EA;--red:#FF6961;--orange:#FF9F0A;--yellow:#FFD60A;--green:#32D74B;--cyan:#64D2FF;--blue:#5EA0FF;--magenta:#C58AFF;--tomorrow-keyword:#B294BB;--tomorrow-plain:#C5C8C6;--tomorrow-punctuation:#B4B7B4;--tomorrow-function:#81A2BE;--tomorrow-string:#B5BD68}
+@media (prefers-color-scheme:light){svg{--background:#FFFFFF;--surface:#F5F5F7;--raised:#E5E5EA;--border:#8E8E93;--muted:#6E6E73;--text:#1D1D1F;--red:#E5453B;--orange:#E8751A;--yellow:#E5A50A;--green:#2FA84F;--cyan:#1B9AAA;--blue:#0A6CFF;--magenta:#9B51E0;--tomorrow-keyword:#8959A8;--tomorrow-plain:#4D4D4C;--tomorrow-punctuation:#6D6F6D;--tomorrow-function:#416FAA;--tomorrow-string:#5C7200}}
+
+@font-face{font-family:'JetBrains Mono';src:url(data:font/ttf;base64,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) format('truetype');font-weight:400;font-style:normal}
+.a{animation-duration:4.8s;animation-iteration-count:1;animation-fill-mode:both;animation-timing-function:cubic-bezier(.23,1,.32,1);animation-delay:var(--t0,0s)}
+@keyframes k1{0%,29.167%{opacity:1}35.417%,62.5%,68.75%,100%{opacity:0.25}}
+.m1{animation-name:k1}
+@keyframes k2{0%,29.167%,68.75%,100%{opacity:0.25}35.417%,62.5%{opacity:1}}
+.m2{animation-name:k2}
+@keyframes k3{0%,29.167%,35.417%,62.5%{opacity:0.25}68.75%,100%{opacity:1}}
+.m3{animation-name:k3}
+@keyframes k4{0%,33.333%,100%{opacity:0}4.167%,29.167%{opacity:1}}
+.m4{animation-name:k4}
+@keyframes k5{0%,33.333%,66.667%,100%{opacity:0}37.5%,62.5%{opacity:1}}
+.m5{animation-name:k5}
+@keyframes k6{0%,66.667%,100%{opacity:0}70.833%,95.833%{opacity:1}}
+.m6{animation-name:k6}
+@keyframes k7{0%{scale:0 1}100%{scale:1 1}}
+.m7{animation-name:k7;animation-timing-function:linear}
+@media (prefers-reduced-motion:reduce){.a{animation-delay:-4.08s!important;animation-play-state:paused!important}}
+]]></style>
+  <rect width="560" height="260" fill="var(--background)"/>
+  <rect x="116.8" y="60" width="326.4" height="76.8" fill="var(--surface)"/>
+  <g transform="translate(116.8 62.24)" font-size="16" fill="var(--tomorrow-punctuation)">
+    <text y="16.32" fill="var(--tomorrow-keyword)" opacity="0.25">const</text>
+    <text x="57.6" y="16.32" fill="var(--tomorrow-plain)" opacity="0.25">word</text>
+    <text x="105.6" y="16.32" opacity="0.25">=</text>
+    <text x="124.8" y="16.32" fill="var(--tomorrow-function)" class="a m1">take_while1</text>
+    <text x="230.4" y="16.32" opacity="0.25">(</text>
+    <text x="240" y="16.32" fill="var(--tomorrow-plain)" class="a m1">isAlpha</text>
+    <text x="307.2" y="16.32" opacity="0.25">)</text>
+    <text x="316.8" y="16.32" opacity="0.25">;</text>
+    <text y="41.92" fill="var(--tomorrow-keyword)" opacity="0.25">const</text>
+    <text x="57.6" y="41.92" fill="var(--tomorrow-plain)" opacity="0.25">words</text>
+    <text x="115.2" y="41.92" opacity="0.25">=</text>
+    <text x="134.4" y="41.92" fill="var(--tomorrow-function)" class="a m2">many</text>
+    <text x="172.8" y="41.92" opacity="0.25">(</text>
+    <text x="182.4" y="41.92" fill="var(--tomorrow-plain)" class="a m2">word</text>
+    <text x="220.8" y="41.92" opacity="0.25">)</text>
+    <text x="230.4" y="41.92" opacity="0.25">;</text>
+    <text y="67.52" fill="var(--tomorrow-function)" class="a m3">parse</text>
+    <text x="48" y="67.52" opacity="0.25">(</text>
+    <text x="57.6" y="67.52" fill="var(--tomorrow-plain)" class="a m3">words</text>
+    <text x="105.6" y="67.52" opacity="0.25">,</text>
+    <text x="124.8" y="67.52" fill="var(--tomorrow-string)" opacity="0.25">"</text>
+    <text x="134.4" y="67.52" fill="var(--tomorrow-string)" opacity="0.25">hello</text>
+    <text x="192" y="67.52" fill="var(--tomorrow-string)" opacity="0.25">world</text>
+    <text x="240" y="67.52" fill="var(--tomorrow-string)" opacity="0.25">"</text>
+    <text x="249.6" y="67.52" opacity="0.25">)</text>
+    <text x="259.2" y="67.52" opacity="0.25">;</text>
+  </g>
+  <text x="182.5" y="184.68" font-size="13" fill="var(--muted)" class="a m4">take_while1 reads letters</text>
+  <text x="221.5" y="184.68" font-size="13" fill="var(--muted)" class="a m5">many repeats it</text>
+  <text x="229.3" y="184.68" font-size="13" fill="var(--muted)" class="a m6">parse runs it</text>
+  <rect x="40" y="226" width="480" height="4" fill="var(--raised)"/>
+  <rect x="40" y="226" width="480" height="4" fill="var(--blue)" style="transform-origin:40px 226px" class="a m7"/>
+</svg>

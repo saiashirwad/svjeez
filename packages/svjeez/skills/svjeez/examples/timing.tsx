@@ -19,6 +19,7 @@ import {
   track,
   wiggle,
 } from "svjeez";
+import { durationOf } from "svjeez/tools";
 
 const theme = tokens({
   light: {
@@ -46,6 +47,30 @@ const run = track(0).to(1, span(0.3, 1.5), ease.inOut);
 const [a, b, c] = span(0.2, 0.4).cascade(3, 0.15);
 const landed = timeAt(run, 1) ?? 1.8;
 
+/** A <Series> plays its children one after another, each on its own clock from 0. */
+const steps = (
+  <Series gap={0.2}>
+    <Sequence when={span(0, 1)}>
+      <Shape
+        key="s1"
+        geometry={circle(3)}
+        offset={[150, 26]}
+        fill={theme.cyan}
+        motion={exit(span(0.5, 0.3))}
+      />
+    </Sequence>
+    <Sequence when={span(0, 1.2)}>
+      <Shape
+        key="s2"
+        geometry={circle(3)}
+        offset={[165, 26]}
+        fill={theme.cyan}
+        motion={enter(span(0, 0.3))}
+      />
+    </Sequence>
+  </Series>
+);
+
 export default scene(
   {
     size: [200, 120],
@@ -54,6 +79,8 @@ export default scene(
     desc: "A dot rides a curve while bars cascade in, followed by a sequence and series.",
     theme,
     still: 3.5,
+    /** Names for review frames: `svjeez frames timing.tsx --times landed`. */
+    markers: { landed },
     loop: false,
   },
   (canvas) => (
@@ -95,26 +122,14 @@ export default scene(
           opacity={track(0).to(1, span(0, 0.3)).to(0, span(1, 0.4))}
         />
       </Sequence>
-      <Series gap={0.2}>
-        <Sequence when={span(0, 1)}>
-          <Shape
-            key="s1"
-            geometry={circle(3)}
-            offset={[150, 26]}
-            fill={theme.cyan}
-            motion={exit(span(0.5, 0.3))}
-          />
-        </Sequence>
-        <Sequence when={span(0, 1.2)}>
-          <Shape
-            key="s2"
-            geometry={circle(3)}
-            offset={[165, 26]}
-            fill={theme.cyan}
-            motion={enter(span(0, 0.3))}
-          />
-        </Sequence>
-      </Series>
+      {steps}
+      {/* Spans the whole series: durationOf reads its length, so a footer never needs a hand-summed total. */}
+      <Shape
+        key="footer"
+        geometry={path().moveTo([20, 114]).lineTo([180, 114])}
+        stroke={{ color: theme.border, width: 2 }}
+        draw={track(0).to(1, span(0, durationOf(steps)), ease.linear)}
+      />
     </Group>
   ),
 );
