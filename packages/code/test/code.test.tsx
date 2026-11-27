@@ -412,7 +412,8 @@ describe("codeLayout()", () => {
     expect(top.bounds.width).toBeCloseTo(width);
     expect(top.bounds.height).toBe(3 * 32);
     expect(top.origin[0]).toBeCloseTo(100 - width / 2);
-    expect(top.origin[1]).toBe(50);
+    expect(top.bounds.y).toBeCloseTo(50);
+    expect(top.box(0).y).toBeCloseTo(50);
     expect(top.bounds.center[0]).toBeCloseTo(100);
     expect(top.box(0).x).toBeCloseTo(top.origin[0]);
 
