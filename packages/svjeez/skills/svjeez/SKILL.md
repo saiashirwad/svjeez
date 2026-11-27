@@ -23,7 +23,7 @@ Follow these steps in order. A scene is **done** only when `svjeez check` report
 - **Nodes only:** Every element is a svjeez component (`Shape`, `Text`, `Run`, `Group`, `Picture`, `Arrow`, `Slot`, `Shader`, `Stack`, `Grid`, `Center`, `Align`, `Sequence`, `Series`). Text lives inside `<Text font size fill>`; inline styled spans use `<Run>` inside `<Text>`. Every `<Shape>` needs `fill` or `stroke`.
 - **Fonts are explicit:** There is no default or inherited font. Pass a `Font` or `FontFamily` (from `font()` or `@svjeez/fonts`) to every `<Text>`. Load every weight/italic you use; missing glyphs are a build error.
 - **Colors are hex or tokens:** Pass `#rgb`, `#rrggbb`, `#rrggbbaa`, or `tokens({ light, dark })` values (passed as `scene({ theme })` so light/dark CSS variables emit). Derive shades with `mix(a, b, share)` and `alpha(c, 0..1)`. Use `scheme="light" | "dark"` to show a node in one scheme only.
-- **Coordinates:** Top-left origin `[0, 0]`, y down. `offset` moves the node's own `[0, 0]` (for `circle(r)`, that is its center); `at` + `anchor` pins a point of its bounding box (`top-left`, `top`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom`, `bottom-right`; `<Text>` also accepts `baseline-*`). Use `at` or `offset`, never both.
+- **Coordinates:** Top-left origin `[0, 0]`, y down. `offset` moves the node's own `[0, 0]` (for `circle(r)`, that is its center); `at` + `anchor` pins a point of its bounding box (`top-left`, `top`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom`, `bottom-right`; `<Text>` also accepts `baseline-*`). Use `at` or `offset`, never both. `at` places the box, so a `<Code>` whose split drops its first column, or a group holding a caret at x=-6, shifts; use `offset` there.
 - **Layout containers:** `Stack` (`direction`, `gap`, `align`, `justify`, `padding`, `width`, `height`), `Grid` (`columns`, `gap`), `Center`, and `Align` (`to`, `place`, `inset`) place their children. Omit `at`/`offset` on children of a layout container; nudge a child with `motion={{ offset }}`. `Stack`, `Grid`, `Center`, and `Slot` accept backdrop props (`fill`, `stroke`, `radius`, `padding`); `<Group>` does not. `Fragment` flattens its children into the parent layout.
 - **Transforms, clips, and refs:** `rotate`, `scale`, `skew` pivot around `origin` (default `"center"` of the node's box; also a place name, `[x, y]` from box top-left, `{ frame: [x, y] }`, or `"at"`). `clip` and `mask` live in the node's own frame: center a circular clip with `moved(circle(r), own.center)`. `ref()` names a node so `Arrow` or `Align` can read settled anchors (`.center`, `.left`, `.right`, `.top`, `.bottom`, `.topLeft`, `.side(edge, t)`, `.part(key)`).
 - **Components and context:** Use plain functions `(props) => SceneElement` for typed props and pass `ref`/`motion` explicitly. Use `component({ name, props?, render })` when you need a minify-stable name or Standard Schema validation (without `props`, its JSX accepts only `children` and `id`). Share implicit values with `context(defaultValue)` (`<Ctx value={v}>` and `Ctx.read()`). Use `h(Component, props, ...children)` in plain `.ts` files without JSX.
@@ -75,7 +75,7 @@ Read the span of a track's last step with `t.span`. Find when a track reaches a 
 ### `morph` and `morph.between`
 
 - `morph(before, after, when, opts?)` and `morph.between(states, spans, opts?)` (`states.length - 1` sequential spans) blend between scene trees.
-- Give every node that arrives, leaves, or changes a stable `key`. Unkeyed sibling mismatches are a compile error. Options: `curve`, `enter`, `exit`, `stagger`.
+- Give every node that arrives, leaves, or changes a stable `key`. Unkeyed sibling mismatches are a compile error. Options: `curve`, `enter`, `exit`, `stagger`, `each`. `stagger` delays each changing part; `each` sets how long each part moves (with no `stagger`, the starts spread so the last part ends with the span).
 
 ## Core API surface (`svjeez`)
 
@@ -108,7 +108,7 @@ Run `svjeez --help` for all flags. Every scene command accepts `[params]` (`--pa
 | `svjeez check <file>` | Static model + TS check (`--browser`, `--at 0,1.5`, `--times`, `--fail-on warning`, `--json`, `--color-scheme`) |
 | `svjeez frames <file>` | Render PNG frames (`--sheet`, `--count 6`, `--times 0,1`, `--scale 2`, `--out dir`, `--color-scheme`, `--background`) |
 | `svjeez svg <file>` | Emit self-contained SVG (`--out file.svg`, `--json`) |
-| `svjeez video <file>` | Encode MP4/WebM via `@svjeez/video` (`--out`, `--format`, `--fps`, `--loops`, `--quality`, `--scale`, `--background`) |
+| `svjeez video <file>` | Encode MP4/WebM via `@svjeez/video` (`--out`, `--format`, `--fps`, `--loops`, `--quality`, `--scale`, `--background`; `--preview` for a fast fps 12, scale 1, low-quality render) |
 | `svjeez dev <file>` | Live-reloading preview server with scrubber (`--port 5173`, `--out`) |
 | `svjeez skill` | Print `SKILL.md` (`--install [--dir .claude/skills]`) |
 | `svjeez version` | Print installed version |

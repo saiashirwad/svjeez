@@ -386,13 +386,18 @@ export default scene(
         spring 0 → 1 → 0
       </Text>
 
-      <Row index={0} dot={theme.magenta} name="<Stack> offset" api="signal.map(v => [0, -24 * v])">
+      <Row
+        index={0}
+        dot={theme.magenta}
+        name="<Stack> offset"
+        api={`signal.map(v => [0, -${LIFT} * v])`}
+      >
         {offsetPreview}
       </Row>
       <Row index={1} dot={theme.cyan} name="morph" api="morph.between([grid, bars, grid])">
         {morphPreview}
       </Row>
-      <Row index={2} dot={theme.blue} name="<Arrow> ref" api="from={a.right} to={stage.left}">
+      <Row index={2} dot={theme.blue} name="<Arrow> ref" api="from={driver.right} to={stage.left}">
         {arrowPreview}
       </Row>
       <Row

@@ -142,7 +142,7 @@ export default scene(
     title: "How morph() matches keys",
     desc: "Two states of keyed tiles: A holds a, b and c; B holds b, c and d. Dashed lines match b and c across the states, so they tween position, size and color; a exists only in A, so it exits, and d exists only in B, so it enters. The tiles morph from A to B and back, and the exit and enter labels swap with the direction.",
     theme,
-    still: 2.1,
+    still: 3.2,
   },
   (canvas) => (
     <Group>

@@ -85,6 +85,54 @@ test("svjeez video rejects a --format that contradicts --out", () => {
   expect(result.stderr.toString()).toContain("--format webm doesn't match --out scene.mp4.");
 });
 
+/** A stand-in @svjeez/video that writes the options it got as the file's bytes. */
+const videoOptions = (...flags: string[]) => {
+  const dir = mkdtempSync(join(tmpdir(), "svjeez-preview-"));
+  const module = join(dir, "node_modules/@svjeez/video");
+  mkdirSync(module, { recursive: true });
+  writeFileSync(
+    join(module, "package.json"),
+    '{"name":"@svjeez/video","version":"0.0.0","main":"index.js"}',
+  );
+  writeFileSync(
+    join(module, "index.js"),
+    "exports.video = async (svg, o) => ({ bytes: new TextEncoder().encode(JSON.stringify(o)), codec: 'x', frames: 1, playTime: 1, colorScheme: 'light' });",
+  );
+  writeFileSync(join(dir, "package.json"), "{}");
+
+  const file = join(dir, "scene.svg");
+  writeFileSync(file, '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>');
+  const out = join(dir, "out.mp4");
+
+  const result = Bun.spawnSync(
+    [
+      process.execPath,
+      join(import.meta.dir, "../src/cli.ts"),
+      "video",
+      file,
+      "--out",
+      out,
+      ...flags,
+    ],
+    { cwd: dir },
+  );
+
+  expect(result.exitCode).toBe(0);
+
+  return JSON.parse(readFileSync(out, "utf8"));
+};
+
+test("svjeez video --preview defaults fps 12, scale 1 and quality low", () => {
+  const options = videoOptions("--preview");
+  expect(options).toMatchObject({ fps: 12, scale: 1, quality: "low" });
+  expect(videoOptions().fps).toBeUndefined();
+});
+
+test("svjeez video --fps, --scale and --quality win over --preview", () => {
+  const options = videoOptions("--preview", "--fps", "30", "--scale", "2", "--quality", "high");
+  expect(options).toMatchObject({ fps: 30, scale: 2, quality: "high" });
+});
+
 test("svjeez render is no longer a command", () => {
   const result = cli("render", "scene.svg");
   expect(result.exitCode).toBe(1);

@@ -88,4 +88,46 @@ describe("h", () => {
 
     expect(check).toBeFunction();
   });
+
+  test("requires what the component requires, as JSX does", () => {
+    const Needs = (_props: { readonly label: string }): SceneElement => h(Fragment);
+    const Wants = (_props: { readonly children: SceneElement }): SceneElement => h(Fragment);
+
+    const Many = (_props: { readonly children: readonly SceneElement[] }): SceneElement =>
+      h(Fragment);
+
+    const Free = (_props: { readonly tint?: string }): SceneElement => h(Fragment);
+    const dot = h(Shape, { geometry: circle(1), fill: "#000000" });
+
+    const check = (): SceneElement[] => [
+      // @ts-expect-error: Text's props are required
+      h(Text),
+      // @ts-expect-error: Shape's props cannot be null
+      h(Shape, null),
+      // @ts-expect-error: label is required
+      h(Needs),
+      // @ts-expect-error: label is required
+      h(Needs, null),
+      // @ts-expect-error: a child is required
+      h(Wants),
+      // @ts-expect-error: a child is required
+      h(Wants, null),
+      // @ts-expect-error: one child, not two
+      h(Wants, null, dot, dot),
+      // @ts-expect-error: at least one child
+      h(Many, null),
+      h(Needs, { label: "x" }),
+      h(Wants, null, dot),
+      h(Many, null, dot),
+      h(Many, null, dot, dot),
+      h(Many, null, [dot, dot]),
+      h(Free),
+      h(Free, null),
+      h(Free, { tint: "red" }),
+      h(Group),
+      h(Group, null, dot, dot),
+    ];
+
+    expect(check).toBeFunction();
+  });
 });

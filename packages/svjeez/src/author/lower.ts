@@ -1552,6 +1552,7 @@ const alike = (a: MorphElement, b: MorphElement): boolean =>
   ) &&
   same(a.options.curve ?? null, b.options.curve ?? null) &&
   a.options.stagger === b.options.stagger &&
+  a.options.each === b.options.each &&
   same(a.options.enter ?? null, b.options.enter ?? null) &&
   same(a.options.exit ?? null, b.options.exit ?? null);
 

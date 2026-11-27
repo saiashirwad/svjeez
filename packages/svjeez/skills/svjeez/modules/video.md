@@ -26,7 +26,7 @@ npx playwright-core install chromium-headless-shell
 
 | Surface | Signature / usage |
 |---|---|
-| CLI | `svjeez video <file> [--out scene.mp4] [--format mp4\|webm] [--fps 30] [--loops 1] [--quality low\|medium\|high] [--scale 2] [--color-scheme system\|light\|dark] [--background css] [params]` |
+| CLI | `svjeez video <file> [--out scene.mp4] [--format mp4\|webm] [--fps 30] [--loops 1] [--quality low\|medium\|high] [--scale 2] [--preview] [--color-scheme system\|light\|dark] [--background css] [params]` |
 | `@svjeez/video` | `video(svg: string, options?: VideoOptions): Promise<Video>` returning `{ bytes, mime, format, codec, playTime, frames, colorScheme }`. |
 
 ## Verified snippet
@@ -35,6 +35,7 @@ CLI:
 
 ```sh
 svjeez video scene.tsx --out scene.mp4 --fps 30 --color-scheme dark
+svjeez video scene.tsx --out draft.mp4 --preview   # fps 12, scale 1, quality low; explicit flags win
 svjeez video scene.tsx --out scene.webm --background transparent --scale 2
 ```
 

@@ -14,7 +14,7 @@ Effect.gen(function* () {
   const spawner = yield* ChildProcessSpawner.ChildProcessSpawner;
   const root = path.join(import.meta.dirname, "..");
 
-  const files = new Map<string, string>([
+  const entries = [
     ...(yield* fs.glob("*/index.tsx", { root })).map((file): [string, string] => [
       path.dirname(file),
       file,
@@ -25,7 +25,20 @@ Effect.gen(function* () {
         root,
       },
     )).map((file): [string, string] => [file.replace(/\.tsx?$/, ""), file]),
-  ]);
+  ];
+
+  const files = new Map<string, string>();
+
+  for (const [name, file] of entries) {
+    const clash = files.get(name);
+
+    if (clash !== undefined)
+      return yield* new ScriptError({
+        message: `${clash} and ${file} both build dist/${name}.svg. Rename one.`,
+      });
+
+    files.set(name, file);
+  }
 
   const examples = [...files.keys()].sort();
 
