@@ -1,5 +1,20 @@
 import { describe, expect, test } from "bun:test";
-import { blob, bounds, brush, circle, limb, line, scatter, type Vec } from "svjeez";
+import {
+  Limb,
+  Shape,
+  blob,
+  bounds,
+  brush,
+  circle,
+  limb,
+  line,
+  scatter,
+  scene,
+  span,
+  type Vec,
+} from "svjeez";
+import { boxesOf, type Model } from "svjeez/tools";
+import { isLane } from "../src/model/lane";
 
 const apart = (a: Vec, b: Vec): number => Math.hypot(a[0] - b[0], a[1] - b[1]);
 
@@ -171,5 +186,63 @@ describe("scatter", () => {
     expect(() => scatter(dot, { along: line([0, 0], [1, 0]), count: 2, jitter: 2 })).toThrow(
       "jitter",
     );
+  });
+});
+
+describe("<Limb>", () => {
+  const ROOT: Vec = [100, 100];
+  const BONES = [60, 50];
+
+  const around = (t: number): Vec => [
+    ROOT[0] + (70 + 25 * Math.cos(Math.PI * t)) * Math.cos((2 * Math.PI * t) / 4),
+    ROOT[1] + (70 + 25 * Math.cos(Math.PI * t)) * Math.sin((2 * Math.PI * t) / 4),
+  ];
+
+  const made = scene({ size: [300, 300], duration: 4, title: "Limb" }, () =>
+    Limb({
+      root: ROOT,
+      bones: BONES,
+      reach: around,
+      over: span(0, 4),
+      bend: -1,
+      bone: (length, index) =>
+        Shape({
+          key: `bone-${index}`,
+          geometry: line([0, 0], [length, 0]),
+          stroke: { color: "#000000" },
+        }),
+      joint: (index) =>
+        index === BONES.length
+          ? Shape({ key: "tip", geometry: circle(1), fill: "#FF0000" })
+          : undefined,
+    }),
+  );
+
+  const rotations = (node: Model.SceneNode): number[][] =>
+    node.kind === "group"
+      ? [
+          ...node.layers.flatMap((layer) =>
+            isLane(layer.rotate) ? [layer.rotate.keys.map((key) => key.value)] : [],
+          ),
+          ...node.children.flatMap(rotations),
+        ]
+      : [];
+
+  test("the tip lands on the target all the way round", () => {
+    for (const t of [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5]) {
+      const box = Object.entries(boxesOf(made, t)).find(([key]) => key.endsWith("/tip"))![1];
+
+      expect(apart([box.x + box.width / 2, box.y + box.height / 2], around(t))).toBeLessThan(1.5);
+    }
+  });
+
+  test("a target circling the root never makes an angle jump by a turn", () => {
+    const tracks = rotations(made.root);
+
+    expect(tracks.length).toBe(BONES.length);
+
+    for (const values of tracks)
+      for (let i = 1; i < values.length; i++)
+        expect(Math.abs(values[i]! - values[i - 1]!)).toBeLessThan(180);
   });
 });

@@ -75,10 +75,12 @@ export {
 export {
   blob,
   brush,
+  Limb,
   limb,
   scatter,
   type BlobOptions,
   type LimbOptions,
+  type LimbProps,
   type ScatterOptions,
 } from "./author/draw";
 

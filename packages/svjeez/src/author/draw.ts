@@ -3,6 +3,9 @@ import { SceneError } from "../model/scene-error";
 import { isArray } from "../model/guards";
 import { merge, pointAt, rotated, scaled, spline } from "./geometry";
 import { moved } from "./holes";
+import { Group, type Child, type SceneElement } from "./nodes";
+import { sampled } from "./recipes";
+import type { Interval } from "./span";
 import { random } from "./random";
 import type { Geometry } from "./values";
 
@@ -236,6 +239,93 @@ export const limb = (
   }
 
   return joints.map(point);
+};
+
+export interface LimbProps extends LimbOptions {
+  /** The fixed shoulder, where the first bone starts. */
+  readonly root: Vec;
+  /** Bone lengths, root first. */
+  readonly bones: readonly number[];
+  /** Where the tip should be at time `t`, on the enclosing clock. */
+  readonly reach: (t: number) => Vec;
+  /** The window `reach` is sampled over. */
+  readonly over: Interval;
+  /** Degrees an animated angle may be off by when keyframes are dropped (default 0.2). */
+  readonly tolerance?: number;
+  /** Seconds between samples (default: `sampled`'s own). */
+  readonly step?: number;
+  /** Draws bone `index` in its own frame: from [0, 0], pointing along +x, `length` long. */
+  readonly bone: (length: number, index: number) => Child;
+  /** Drawn at every joint, the root and the tip included, in the frame of the bone that ends there. */
+  readonly joint?: (index: number) => Child;
+}
+
+const DEG = 180 / Math.PI;
+
+/** `angle` plus whole turns, so it lies within half a turn of `near`. */
+const nearest = (angle: number, near: number): number =>
+  angle + 360 * Math.round((near - angle) / 360);
+
+/**
+ * A chain of bones that moves as nested rotations: each bone is drawn once, and each joint has one animated
+ * `rotate` track. Tiny next to `brush(limb(...))`, which stores every outline; use that for bending, organic shapes.
+ */
+export const Limb = ({
+  root,
+  bones,
+  reach,
+  over,
+  bend,
+  tolerance = 0.2,
+  step,
+  bone,
+  joint,
+}: LimbProps): SceneElement => {
+  const pose = (t: number): number[] => {
+    const joints = limb(root, bones, reach(t), bend === undefined ? {} : { bend });
+    let parent = 0;
+
+    return bones.map((_, i) => {
+      const [a, b] = [joints[i]!, joints[i + 1]!];
+      const world = Math.atan2(b[1] - a[1], b[0] - a[0]) * DEG;
+      const local = world - parent;
+      parent = world;
+
+      return local;
+    });
+  };
+
+  // Angles are unwrapped against a fine table walked from the start, so no two samples jump by a turn.
+  const rows = 512;
+  const table: number[][] = [];
+
+  for (let r = 0; r <= rows; r++) {
+    const row = pose(over.start + (over.over * r) / rows);
+    const before = table.at(-1);
+    table.push(before ? row.map((a, i) => nearest(a, before[i]!)) : row);
+  }
+
+  const angle = (index: number) => (t: number) => {
+    const at = Math.min(rows, Math.max(0, Math.round(((t - over.start) / over.over) * rows)));
+
+    return nearest(pose(t)[index]!, table[at]![index]!);
+  };
+
+  const chain = (index: number): SceneElement =>
+    Group({
+      rotate: sampled(angle(index), over, { tolerance, ...(step !== undefined && { step }) }),
+      origin: { frame: [0, 0] },
+      children: [
+        bone(bones[index]!, index),
+        joint?.(index),
+        Group({
+          offset: [bones[index]!, 0],
+          children: [index + 1 < bones.length ? chain(index + 1) : joint?.(index + 1)],
+        }),
+      ],
+    });
+
+  return Group({ offset: root, children: chain(0) });
 };
 
 export interface ScatterOptions {

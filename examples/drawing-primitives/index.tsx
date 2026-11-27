@@ -1,4 +1,4 @@
-/** A potted plant sways while a robot arm waters it, drawn with brush, blob, scatter and limb. */
+/** A potted plant sways while a robot arm waters it, drawn with brush, blob, scatter and <Limb>. */
 import {
   Group,
   Shape,
@@ -8,9 +8,8 @@ import {
   ease,
   enter,
   exit,
-  limb,
+  Limb,
   rect,
-  sampled,
   scatter,
   scene,
   span,
@@ -54,9 +53,6 @@ const reachAt = (t: number): Vec => {
   return [220 + 70 * u, 250 - 120 * u];
 };
 
-const arm = (t: number) => limb(SHOULDER, BONES, reachAt(t), { bend: -1 });
-const sample = { tolerance: 0.5, step: PERIOD / 64 };
-
 export default scene(
   { size: [640, 400], duration: PERIOD, title: "Robot arm watering a potted plant" },
   (canvas) => (
@@ -98,28 +94,28 @@ export default scene(
         fill="#C1663E"
       />
       <Shape geometry={rect(150, 18, { radius: 6 })} at={[245, 290]} fill="#A9512F" />
-      {[
-        [18, 12],
-        [12, 8],
-      ].map((widths, bone) => (
-        <Shape
-          key={`bone-${bone}`}
-          geometry={sampled(
-            (t) => brush(arm(t).slice(bone, bone + 2), widths),
-            span(0, PERIOD),
-            sample,
-          )}
-          fill="#3D5A80"
-        />
-      ))}
-      {[0, 1, 2].map((joint) => (
-        <Shape
-          key={`joint-${joint}`}
-          geometry={circle(joint === 2 ? 9 : 7)}
-          offset={sampled((t) => arm(t)[joint]!, span(0, PERIOD), sample)}
-          fill="#293241"
-        />
-      ))}
+      <Limb
+        root={SHOULDER}
+        bones={BONES}
+        reach={reachAt}
+        over={span(0, PERIOD)}
+        bend={-1}
+        tolerance={0.2}
+        step={PERIOD / 64}
+        bone={(length, index) => (
+          <Shape
+            geometry={brush(
+              [
+                [0, 0],
+                [length, 0],
+              ],
+              index === 0 ? [18, 12] : [12, 8],
+            )}
+            fill="#3D5A80"
+          />
+        )}
+        joint={(index) => <Shape geometry={circle(index === 2 ? 9 : 7)} fill="#293241" />}
+      />
       {[0, 1, 2].map((drop) => (
         <Shape
           key={`drop-${drop}`}
