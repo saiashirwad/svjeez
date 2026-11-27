@@ -20,7 +20,7 @@ import type {
 } from "../model/ir";
 import { isLane, mapLane } from "../model/lane";
 import { isColor } from "../model/painted";
-import { breaksOf, segmentAt, unrolled } from "../model/sample";
+import { breaksOf, segmentAt, wrapped } from "../model/sample";
 import { same } from "../model/steps";
 import { nodeName } from "../model/naming";
 import { walkScene } from "../model/walk";
@@ -170,7 +170,7 @@ export const textOf = (node: TextNode): string =>
     .trim();
 
 const keysOver = <T>(lane: Lane<T>, duration: Seconds): readonly Key<T>[] =>
-  lane.period === undefined ? lane.keys : unrolled(lane, duration);
+  wrapped(lane, duration);
 
 export type Stretch = readonly [from: Seconds, to: Seconds];
 

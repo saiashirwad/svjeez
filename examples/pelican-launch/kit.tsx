@@ -108,6 +108,8 @@ export interface Horizon {
   readonly at: (x: number) => { readonly point: Vec; readonly angle: number };
   /** The visible stretch of the circle, centered on its top, in its own frame (center at the origin). */
   readonly visible: (sweep: number) => Geometry;
+  /** The sweep, in degrees, that carries the circle past both screen edges: what a shared `horizon` arc draws. */
+  readonly reach: number;
 }
 
 export const horizon = (top: number, radius: number): Horizon => {
@@ -123,6 +125,7 @@ export const horizon = (top: number, radius: number): Horizon => {
       return { point: [x, center[1] + dy], angle: (Math.atan2(dx, -dy) * 180) / Math.PI };
     },
     visible: (sweep) => arc({ radius, start: -90 - sweep / 2, sweep }),
+    reach: (2 * Math.asin(Math.min(1, (W / 2 + 80) / radius)) * 180) / Math.PI,
   };
 };
 

@@ -250,8 +250,10 @@ const Limb = (): SceneElement => (
       stroke={{ color: alpha("#FFB04A", 0.55), width: 10 }}
       effects={[blur(7)]}
     />
+    {/* The shared horizon: the limb's bright edge, which morphs into the next shot's curve. */}
     <Shape
-      geometry={arc({ radius: R - 0.5, start: -90 - 22, sweep: 44 })}
+      key="horizon"
+      geometry={sun.visible(sun.reach)}
       stroke={{ color: "#FFE9B0", width: 1.6 }}
     />
   </Group>

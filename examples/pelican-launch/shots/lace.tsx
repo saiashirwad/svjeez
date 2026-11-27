@@ -375,6 +375,13 @@ export const Lace = (): SceneElement => (
       <Group effects={raised}>
         <Doily />
       </Group>
+      {/* The shared horizon: the doily's rim thread, kept out of the raised filter so it can morph. */}
+      <Shape
+        key="horizon"
+        geometry={doily.visible(doily.reach)}
+        offset={doily.center}
+        stroke={{ color: cream, width: 4 }}
+      />
       <Pair />
       <Caption when={[1.2, 4.8]} fill={cream} size={72} y={300}>
         Some days are delicate.

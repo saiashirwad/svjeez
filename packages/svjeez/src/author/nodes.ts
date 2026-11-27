@@ -17,6 +17,7 @@ import type { Geometry, Paint } from "./values";
 import type { Paints } from "./paint";
 import { isArray, isNumber, isObject, isString } from "../model/guards";
 import { inList } from "./identity";
+import { seamsOf, type Seams, type Share } from "./series-share";
 
 export { ref } from "./refs";
 
@@ -45,6 +46,12 @@ export interface Common {
   readonly skew?: Anim<number>;
   readonly opacity?: Anim<number>;
   readonly motion?: Layers;
+  /**
+   * Draws only what is inside this outline, in the node's own frame. A clip also sizes the node for layout, refs and `check`:
+   * it contributes its content box cut to the clip's bounds, so a long clipped trace in a `<Stack>` takes the clip's size, not its own.
+   * An animated clip counts as the union of its keyframes' bounds, so layout holds still while the clip moves.
+   * A clip written as a function of the node's own bounds cuts what it is given, so it sizes the node only as far as it shrinks it.
+   */
   readonly clip?: Anim<Geometry> | ((own: Bounds) => Anim<Geometry>);
   readonly mask?: Child | ((own: Bounds) => Child);
   readonly effects?: readonly Effect[];
@@ -213,7 +220,12 @@ export type SceneElement =
       readonly clock?: Clock;
       readonly children: readonly SceneElement[];
     }
-  | { readonly type: "fragment"; readonly children: readonly SceneElement[] }
+  | {
+      readonly type: "fragment";
+      readonly children: readonly SceneElement[];
+      /** Set on what a `<Series share>` expands to: each child is a `<Sequence>`, and the keyed nodes carry over. */
+      readonly seams?: Seams;
+    }
   | MorphElement
   | {
       readonly type: "call";
@@ -228,7 +240,12 @@ export type SceneElement =
       readonly value: {} | null | undefined;
       readonly children: readonly SceneElement[];
     }
-  | { readonly type: "series"; readonly gap: Seconds; readonly children: readonly SceneElement[] };
+  | {
+      readonly type: "series";
+      readonly gap: Seconds;
+      readonly share?: Seams;
+      readonly children: readonly SceneElement[];
+    };
 
 /** What JSX writes and expansion removes before a scene is lowered. */
 export type Authoring = Extract<SceneElement, { readonly type: "call" | "provide" | "series" }>;
@@ -346,12 +363,31 @@ export const Sequence = ({ when, clock, children }: SequenceProps): SceneElement
 export interface SeriesProps {
   /** Seconds between one child's end and the next one's start. Negative overlaps them, as a crossfade wants: `gap={-0.4}` starts each child 0.4s before the one before it ends. */
   readonly gap?: Seconds;
+  /**
+   * Keys of nodes that carry over from one child to the next, a shared-element transition: where two neighbours both
+   * draw a node with the key, both copies tween from the outgoing version to the incoming one over the seam (geometry,
+   * paint, stroke, transform, as `morph` blends), so the crossfade shows one node changing rather than two swapping.
+   * Each copy stays in its own groups, which may sit, scale or drift apart: the tween runs in scene space. The tween runs over the children's overlap (a negative `gap`); pass `{ keys, over }` to tween over `over` seconds
+   * centered on a seam that doesn't overlap, which otherwise snaps.
+   *
+   * @example
+   * <Series gap={-0.6} share="horizon">
+   *   <Sequence when={span(0, 4)}><Shape key="horizon" geometry={arc({ radius: 300, start: -100, sweep: 20 })} … /></Sequence>
+   *   <Sequence when={span(0, 4)}><Shape key="horizon" geometry={arc({ radius: 900, start: -95, sweep: 10 })} … /></Sequence>
+   * </Series>
+   */
+  readonly share?: Share;
   readonly children?: Child;
 }
 
 /** Plays its children one after another: each starts `gap` (default 0) after the one before it ends. Each needs a length, as a root of `<Sequence when={span(0, n)}>` gives it. */
-export const Series = ({ gap = 0, children }: SeriesProps): SceneElement => {
+export const Series = ({ gap = 0, share, children }: SeriesProps): SceneElement => {
   if (!Number.isFinite(gap)) throw new SceneError(`<Series> needs a finite gap, got ${gap}.`);
 
-  return { type: "series", gap, children: flat(children) };
+  return {
+    type: "series",
+    gap,
+    ...(share !== undefined && { share: seamsOf(share) }),
+    children: flat(children),
+  };
 };

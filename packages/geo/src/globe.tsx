@@ -36,6 +36,8 @@ import {
   dot,
   prepare,
   scale,
+  slerp,
+  coarsen,
   unit,
   vec,
   type Outline,
@@ -50,9 +52,21 @@ export interface Turn {
   readonly over: Span;
 }
 
+/** Where the globe sits on its canvas: its centre, in canvas px, and the canvas's size. */
+export interface Canvas {
+  readonly size: Vec;
+  readonly center: Vec;
+}
+
 export interface GlobeOptions extends ReadOptions {
   readonly radius: number;
   readonly facing: LonLat;
+  /** Degrees the whole globe leans on the screen, clockwise; its north then points up and to the right. */
+  readonly lean?: number;
+  /** Where the globe sits on the canvas, so outlines that never reach it are not emitted. */
+  readonly canvas?: Canvas;
+  /** With a canvas: the degrees an outline may stray where it never reaches the canvas. Default 3. */
+  readonly offscreen?: number;
   readonly turn?: Turn;
   readonly simplify?: number;
   readonly step?: number;
@@ -63,6 +77,26 @@ export interface Turning {
   readonly what: string;
   readonly radius: number;
   readonly pieces: readonly Anim<Geometry>[];
+  /** One name per piece, such as "land-30E-60E": what `svjeez check` calls it. */
+  readonly keys: readonly string[];
+}
+
+export interface RideOptions {
+  /** Also turn to the route's heading on the screen (degrees; 0 faces +x). */
+  readonly turn?: boolean;
+  /** The seconds to follow the globe over; the turn's own span by default. */
+  readonly over?: Span;
+  /** Reshapes the share of the route flown, 0 to 1: `(u) => u * u` starts slowly. Steady by default. */
+  readonly ease?: (share: number) => number;
+  /** The share of the radius, past the horizon, over which the rider fades out. Default 0.08. */
+  readonly fade?: number;
+}
+
+/** A motion layer: `<Group motion={earth.ride(…)}>`, in the globe's own space. */
+export interface Rider {
+  readonly offset: Anim<Vec>;
+  readonly rotate?: Anim<number>;
+  readonly opacity: Anim<number>;
 }
 
 export interface Riding {
@@ -90,6 +124,7 @@ export interface Globe {
   graticule(step?: number): Turning;
   circle(center: LonLat, degrees: number): Turning;
   route(from: LonLat, to: LonLat): Turning;
+  ride(from: LonLat, to: LonLat, progress: Span, options?: RideOptions): Rider;
   night(date: Dated): Turning;
   terminator(date: Dated): Turning;
   place(at: LonLat, options?: { readonly fade?: number }): Riding;
@@ -168,14 +203,31 @@ const disc = (r: number): Geometry => {
     .close();
 };
 
-const made = (what: string, radius: number, pieces: readonly Anim<Geometry>[]): Turning => ({
-  what,
-  radius,
-  pieces,
-});
+/** A piece and the box, [x0, y0, x1, y1] from the globe's centre, it reaches over the whole turn. */
+interface Fitted {
+  readonly geometry: Anim<Geometry>;
+  readonly reach: readonly [number, number, number, number];
+  readonly key: string;
+}
+
+const slug = (name: string) =>
+  name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+const lonName = (lon: number) => `${Math.abs(lon)}${lon < 0 ? "W" : lon > 0 ? "E" : ""}`;
 
 export function globe(data: GeoData, options: GlobeOptions): Globe {
-  const { simplify = 0.6, step = 6, tolerance = 1, turn } = options;
+  const {
+    simplify = 0.6,
+    step = 6,
+    tolerance = 1,
+    turn,
+    lean = 0,
+    canvas,
+    offscreen = 3,
+  } = options;
 
   const radius = positive(
     options.radius,
@@ -228,14 +280,67 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
     return found;
   };
 
-  const screen = (x: number, y: number): [number, number] => [radius * x, -radius * y];
+  const [lc, ls] = [Math.cos(lean * RAD), Math.sin(lean * RAD)];
+
+  const screen = (x: number, y: number): [number, number] => [
+    radius * (x * lc + y * ls),
+    radius * (x * ls - y * lc),
+  ];
+
+  const frame: readonly [number, number, number, number] | undefined = canvas && [
+    -canvas.center[0],
+    -canvas.center[1],
+    canvas.size[0] - canvas.center[0],
+    canvas.size[1] - canvas.center[1],
+  ];
+
+  const watching = times.filter((_, i) => i % 10 === 0 || i === times.length - 1);
+
+  const made = (what: string, pieces: readonly Fitted[]): Turning => {
+    const seen = pieces.filter(({ reach: [x0, y0, x1, y1] }) => {
+      if (!frame) return true;
+
+      return (
+        x1 > frame[0] + 0.5 && y1 > frame[1] + 0.5 && x0 < frame[2] - 0.5 && y0 < frame[3] - 0.5
+      );
+    });
+
+    return {
+      what,
+      radius,
+      pieces: seen.map((one) => one.geometry),
+      keys: seen.map((one) => one.key),
+    };
+  };
+
   const source = read(data, options, "globe()");
 
-  const fit = (sample: (t: number) => string): Anim<Geometry> => {
+  const fit = (sample: (t: number) => string, key: string, slack = 1): Fitted => {
     const frames = times.map(sample);
-
-    if (!turn) return path.parse(frames[0]!);
     const values = frames.map((d) => d.match(/-?[\d.]+/g)!.map(Number));
+    const box: [number, number, number, number] = [Infinity, Infinity, -Infinity, -Infinity];
+
+    for (const v of values)
+      for (let k = 0; k + 1 < v.length; k += 2) {
+        box[0] = Math.min(box[0], v[k]!);
+        box[1] = Math.min(box[1], v[k + 1]!);
+        box[2] = Math.max(box[2], v[k]!);
+        box[3] = Math.max(box[3], v[k + 1]!);
+      }
+
+    // Anything past the disc is clipped away, so only the part inside it can reach the canvas.
+    const reach: [number, number, number, number] = [
+      Math.max(box[0], -radius),
+      Math.max(box[1], -radius),
+      Math.min(box[2], radius),
+      Math.min(box[3], radius),
+    ];
+
+    return { geometry: fitted(frames, values, tolerance * slack), reach, key };
+  };
+
+  const fitted = (frames: string[], values: number[][], tolerance: number): Anim<Geometry> => {
+    if (!turn) return path.parse(frames[0]!);
 
     const room = values.map((v) =>
       Float64Array.from({ length: v.length >> 1 }, (_, k) =>
@@ -358,7 +463,7 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
     return screen((sx + reach * ux) * out, (sy + reach * uy) * out);
   };
 
-  const bands = (list: readonly Unit[]): Unit[][] => {
+  const bands = (list: readonly Unit[]): [number, Unit[]][] => {
     const found = new Map<number, Unit[]>();
 
     for (const one of list) {
@@ -367,11 +472,27 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
       found.set(band, [...(found.get(band) ?? []), one]);
     }
 
-    return [...found.keys()].sort((a, b) => a - b).map((band) => found.get(band)!);
+    return [...found.keys()].sort((a, b) => a - b).map((band) => [band, found.get(band)!]);
   };
 
-  const outline = (object: Outline, what: string): Turning => {
-    const list = prepare(object, simplify, step);
+  const seen = (p: Vec3): boolean =>
+    !frame ||
+    watching.some((t) => {
+      const v = view(t);
+
+      if (dot(p, v.toward) < -0.2) return false;
+      const [x, y] = screen(dot(p, v.right), dot(p, v.up));
+
+      return x > frame[0] - 80 && x < frame[2] + 80 && y > frame[1] - 80 && y < frame[3] + 80;
+    });
+
+  const outline = (object: Outline, what: string, name: string): Turning => {
+    const list = prepare(object, simplify, step).map((one) => ({
+      ...one,
+      strands: frame
+        ? one.strands.map((strand) => coarsen(strand, strand.points.map(seen), offscreen))
+        : one.strands,
+    }));
 
     if (list.length === 0)
       throw new SceneError(
@@ -380,7 +501,11 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
       );
     const hole = pivot(list.flatMap((one) => one.strands));
 
-    const pieces = bands(list).map((group) => {
+    const all = bands(list);
+
+    const pieces = all.map(([band, group]) => {
+      const lo = band * BAND - 180;
+      const key = all.length === 1 ? name : `${name}-${lonName(lo)}-${lonName(lo + BAND)}`;
       const strands = group.flatMap((one) => one.strands);
       const closed = strands.map((strand) => strand.closed);
 
@@ -394,7 +519,7 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
 
       const inside = group.some((one) => one.polygon && geoContains(one.polygon, [0, hole.lat]));
 
-      if (!inside) return fit((t) => rings(placed(t), closed));
+      if (!inside) return fit((t) => rings(placed(t), closed), key);
 
       const sign = Math.sign(
         placed(0).reduce((sum, ring, i) => sum + (closed[i] ? area(ring) : 0), 0),
@@ -410,10 +535,10 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
 
       const outer = Math.sign(area(octagon)) === sign ? octagon.reverse() : octagon;
 
-      return fit((t) => rings([...placed(t), outer], [...closed, true]));
+      return fit((t) => rings([...placed(t), outer], [...closed, true]), key);
     });
 
-    return made(what, radius, pieces);
+    return made(what, pieces);
   };
 
   const visible = (arc: Arc, v: View, count: number): [number, number][] => {
@@ -459,21 +584,42 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
     });
   };
 
-  const arcs = (list: readonly ((t: number) => Arc)[], what: string): Turning => {
-    const counts = list.map((arcAt) => {
+  const arcs = (
+    all: readonly ((t: number) => Arc)[],
+    what: string,
+    name: string,
+    slack = 1,
+  ): Turning => {
+    const counts = all.map((arcAt) => {
       const first = arcAt(0);
 
-      return Math.max(2, Math.ceil((first.end - first.start) / (3 * RAD)) + 1);
+      return Math.max(2, Math.ceil((first.end - first.start) / (step * RAD)) + 1);
     });
 
-    const open = list.map(() => false);
-
-    return made(what, radius, [
-      fit((t) =>
-        rings(
-          list.map((arcAt, i) => visible(arcAt(t), view(t), counts[i]!)),
-          open,
+    // A line that never comes near the canvas is not drawn.
+    const near = all.flatMap((arcAt, i) =>
+      !frame ||
+      watching.some((t) =>
+        visible(arcAt(t), view(t), counts[i]!).some(
+          ([x, y]) =>
+            x > frame[0] - 80 && x < frame[2] + 80 && y > frame[1] - 80 && y < frame[3] + 80,
         ),
+      )
+        ? [i]
+        : [],
+    );
+
+    if (near.length === 0) return made(what, []);
+
+    return made(what, [
+      fit(
+        (t) =>
+          rings(
+            near.map((i) => visible(all[i]!(t), view(t), counts[i]!)),
+            near.map(() => false),
+          ),
+        name,
+        slack,
       ),
     ]);
   };
@@ -503,7 +649,11 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
     name: one.name,
     properties: one.properties,
     get outline() {
-      return outline(one.feature, `the region ${JSON.stringify(one.name ?? one.id)}`);
+      return outline(
+        one.feature,
+        `the region ${JSON.stringify(one.name ?? one.id)}`,
+        slug(one.name ?? one.id),
+      );
     },
   }));
 
@@ -513,7 +663,7 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
     radius,
     sphere: disc(radius),
     get land() {
-      return outline(source.land, "the globe's land");
+      return outline(source.land, "the globe's land", "land");
     },
     get borders() {
       if (!source.borders)
@@ -522,11 +672,11 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
           "Load TopoJSON, such as world-atlas's countries-110m.json.",
         );
 
-      return outline(source.borders, "the globe's borders");
+      return outline(source.borders, "the globe's borders", "borders");
     },
     regions,
     region: find,
-    shape: (object) => outline(object, "shape()"),
+    shape: (object) => outline(object, "shape()", "shape"),
     graticule(every = 15) {
       positive(every, "graticule()", "Give the degrees between lines, such as 15.");
       const count = Math.round(180 / every);
@@ -554,13 +704,15 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
       return arcs(
         [...meridians, ...parallels].map((arc) => () => arc),
         "graticule()",
+        "graticule",
+        3,
       );
     },
     circle(at, degrees) {
       positive(degrees, "circle()", "Give the circle's radius in degrees, such as 10.");
       const arc = circleArc(vec(lonLat(at, "circle()")), degrees * RAD);
 
-      return arcs([() => arc], "circle()");
+      return arcs([() => arc], "circle()", "circle");
     },
     route(from, to) {
       const [a, b] = [vec(lonLat(from, "route()")), vec(lonLat(to, "route()"))];
@@ -579,12 +731,69 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
         end: angle(a, b),
       };
 
-      return arcs([() => arc], "route()");
+      return arcs([() => arc], "route()", "route");
+    },
+    ride(
+      from,
+      to,
+      progress,
+      { turn: heading = false, over: window, fade = 0.08, ease = (u: number) => u } = {},
+    ) {
+      const [a, b] = [vec(lonLat(from, "ride()")), vec(lonLat(to, "ride()"))];
+
+      if (angle(a, b) < 1e-9)
+        throw new SceneError(
+          `ride([${from.join(", ")}], [${to.join(", ")}]) starts where it ends.`,
+          "Give two different places.",
+        );
+
+      positive(fade, "ride()'s fade", "Give the share of the radius to fade over, such as 0.08.");
+      const span = window ?? turn?.over;
+
+      if (!span)
+        throw new SceneError(
+          "ride() on a globe that does not turn needs the seconds to follow, as over.",
+          "Write ride(from, to, progress, { over: span(0, 8) }).",
+        );
+
+      const share = (t: number) =>
+        Math.min(1, Math.max(0, ease((t - progress.start) / progress.over)));
+
+      const at = (s: number, t: number) => {
+        const [p, v] = [slerp(a, b, s), view(t)];
+
+        return screen(dot(p, v.right), dot(p, v.up));
+      };
+
+      const first = (() => {
+        const [x, y] = at(0.5, span.start);
+        const [x2, y2] = at(0.51, span.start);
+
+        return Math.atan2(y2 - y, x2 - x) / RAD;
+      })();
+
+      const course = (t: number) => {
+        const s = share(t);
+        const [x0, y0] = at(Math.max(0, s - 0.01), t);
+        const [x1, y1] = at(Math.min(1, s + 0.01), t);
+        const h = Math.atan2(y1 - y0, x1 - x0) / RAD;
+
+        return first + ((((h - first) % 360) + 540) % 360) - 180;
+      };
+
+      const shown = (t: number) =>
+        Math.min(1, Math.max(0, dot(slerp(a, b, share(t)), view(t).toward) / fade));
+
+      return {
+        offset: sampled((t) => at(share(t), t), span, { tolerance }),
+        ...(heading && { rotate: sampled(course, span, { tolerance: 0.5 }) }),
+        opacity: sampled(shown, span, { tolerance: 0.02 }),
+      };
     },
     terminator(date) {
       const dark = dated(date, "terminator()");
 
-      return arcs([(t) => circleArc(dark(t), Math.PI / 2)], "terminator()");
+      return arcs([(t) => circleArc(dark(t), Math.PI / 2)], "terminator()", "terminator");
     },
     night(date) {
       const dark = dated(date, "night()");
@@ -623,7 +832,7 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
         return rings([[...edge, ...rim]], [true]);
       };
 
-      return made("night()", radius, [fit(sample)]);
+      return made("night()", [fit(sample, "night")]);
     },
     place(at, { fade = 0.08 } = {}) {
       const p = vec(lonLat(at, "place()"));
@@ -667,7 +876,16 @@ export interface GlobeShapeProps extends Omit<ShapeProps, "geometry" | "clip"> {
   readonly of: Turning;
 }
 
-export const GlobeShape = ({ of, fill, stroke, trim, ...rest }: GlobeShapeProps): SceneElement => {
+export const GlobeShape = ({
+  of,
+  fill,
+  fillOpacity,
+  stroke,
+  rule,
+  draw,
+  trim,
+  ...rest
+}: GlobeShapeProps): SceneElement => {
   if (!of || !Array.isArray(of.pieces))
     throw new SceneError(
       `<GlobeShape> takes of={…} from a globe, such as of={earth.land}, got ${String(of)}.`,
@@ -680,16 +898,25 @@ export const GlobeShape = ({ of, fill, stroke, trim, ...rest }: GlobeShapeProps)
       "Give it fill or stroke.",
     );
 
+  if (draw !== undefined && trim !== undefined)
+    throw new SceneError(
+      `<GlobeShape> of ${of.what} has both draw and trim.`,
+      "Give draw or trim, not both: draw={x} is trim={[0, x]}.",
+    );
+
   const paint = {
     ...(fill !== undefined && { fill }),
+    ...(fillOpacity !== undefined && { fillOpacity }),
     ...(stroke !== undefined && { stroke }),
+    ...(rule !== undefined && { rule }),
+    ...(draw !== undefined && { draw }),
     ...(trim !== undefined && { trim }),
   };
 
   return (
     <Group {...rest} clip={circle(of.radius)}>
       {of.pieces.map((geometry, i) => (
-        <Shape key={String(i)} geometry={geometry} {...paint} />
+        <Shape key={of.keys[i]!} geometry={geometry} {...paint} />
       ))}
     </Group>
   );

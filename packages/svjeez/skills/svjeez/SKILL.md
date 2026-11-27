@@ -81,6 +81,7 @@ Read the span of a track's last step with `t.span`. Find when a track reaches a 
 
 - `morph(before, after, when, opts?)` and `morph.between(states, spans, opts?)` (`states.length - 1` sequential spans) blend between scene trees.
 - Give every node that arrives, leaves, or changes a stable `key`. Unkeyed sibling mismatches are a compile error. Keys are unique per parent, but two `.map()` lists in one parent may reuse a key (both `key={i}`), as in React; `ref().part(key)` finds a key as written, and throws when two lists share it. Options: `curve`, `enter`, `exit`, `stagger`, `each`. `stagger` delays each changing part; `each` sets how long each part moves (with no `stagger`, the starts spread so the last part ends with the span).
+- Shared elements across shots: `<Series gap={-0.6} share="horizon">` tweens the node keyed `horizon` in each child into the next child's over their overlap (geometry, paint, stroke, transform, as `morph` blends), so a crossfade shows one node changing: `<Series gap={-0.6} share="horizon"><Shot1/><Shot2/></Series>`, each shot drawing `<Shape key="horizon" … />`. Each copy may sit in its own groups, even moving ones: the tween runs in scene space. Both copies need the same kind, parts and stroke style; else a `SceneError`. With no overlap it snaps; `share={{ keys: "horizon", over: 0.5, curve }}` tweens over `over` seconds centered on the seam.
 
 ## Core API surface (`svjeez`)
 
@@ -100,7 +101,7 @@ Hover types for full option objects. Every value export of `svjeez`:
 Subpaths: `svjeez/tools` (`svg.emit`, `check`, `describe`, `RULES`, `SceneError`, `expand`, `propsOf`, `isScene`, `valueAt`, `boxesOf`), `svjeez/frames` (`renderFrames`, `openScene`, `checkPixels`, `costOf`, `validateSvg`), `svjeez/page` (`mount`, `player`, `scrolled`, `pointer`, `hovered`, `seen`, `restyle`, `seek`, `loopLength`), `svjeez/jsx-runtime`, `svjeez/typecheck`.
 
 Notes on specialized core features:
-- **`count` / `typed`:** Put `${count(track, { format: numeral({ decimals: 2 }) })}` and `{typed(stringTrack, { by: chars | words, caret })}` inside `<Text>`. When `caret: true` starts before the first keystroke, set `caret: { opacity: track(0).set(1, span(firstKeystroke)) }` to avoid `visible-at-zero`.
+- **`count` / `typed`:** Put `${count(track, { format: numeral({ decimals: 2, suffix: " km" }) })}` (`prefix`/`suffix` keep units with the number) and `{typed(stringTrack, { by: chars | words, caret })}` inside `<Text>`. When `caret: true` starts before the first keystroke, set `caret: { opacity: track(0).set(1, span(firstKeystroke)) }` to avoid `visible-at-zero`.
 - **`param`:** `export const params = { gap: param.number(40, { min: 10, max: 80 }) }` and default-export `(values) => scene(...)` (or read `defaults(params)`). Pass `--param key=value` or `--params file.json` on the CLI.
 - **`<Shader>`:** Needs `typegpu` + `unplugin-typegpu` and a page runner (`svjeez/page` `mount`); `svg`/`frames` render its fallback children.
 

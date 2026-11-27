@@ -405,6 +405,13 @@ export const Pottery = (): SceneElement => (
         stops={[alpha("#FFD9B0", 0.32), alpha("#FFD9B0", 0)]}
       />
     </Group>
+    {/* The shared horizon: a catch-light on the rim of the vase. */}
+    <Shape
+      key="horizon"
+      geometry={vase.visible(vase.reach)}
+      offset={vase.center}
+      stroke={{ color: "#E8B98A", width: 1.6 }}
+    />
     <Shape
       geometry={rect(W, H)}
       fill={radial.across({

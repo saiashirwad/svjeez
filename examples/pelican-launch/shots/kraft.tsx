@@ -315,6 +315,13 @@ export const Kraft = (): SceneElement => (
       <KraftPaper />
       <Hill />
       <HillGrain />
+      {/* The shared horizon: the grass line, drifting with the hill it edges; `share` tweens it in scene space. */}
+      <Shape
+        key="horizon"
+        geometry={ground.visible(ground.reach)}
+        offset={ground.center}
+        stroke={{ color: "#3C6A2C", width: 4 }}
+      />
       {riders.map((r) => (
         <Rider key={r.x} {...r} />
       ))}

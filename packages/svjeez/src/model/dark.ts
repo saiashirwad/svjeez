@@ -1,6 +1,6 @@
 import type { Animated, Scene, SceneNode } from "./ir";
 import { isLane } from "./lane";
-import { unrolled } from "./sample";
+import { wrapped } from "./sample";
 import { EPSILON, isHold, type Seconds } from "./time";
 
 export type Stretch = readonly [from: Seconds, to: Seconds];
@@ -25,7 +25,7 @@ export const merged = (stretches: readonly Stretch[]): Stretch[] => {
 /** When an opacity holds at 0, so nothing under it shows: sorted, merged stretches of the scene's `duration`. */
 export const darkOf = (opacity: Animated<number>, duration: Seconds): Stretch[] => {
   if (!isLane(opacity)) return opacity <= CLEAR ? [[0, duration]] : [];
-  const keys = opacity.period === undefined ? opacity.keys : unrolled(opacity, duration);
+  const keys = wrapped(opacity, duration);
   const [first, last] = [keys[0]!, keys.at(-1)!];
   const out: Stretch[] = [];
 

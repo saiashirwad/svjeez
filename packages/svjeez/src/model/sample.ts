@@ -319,6 +319,48 @@ const easedRun = (
   return keys;
 };
 
+/** A stretch of time whose values nobody sees, such as while the node they draw sits under an opacity of 0. */
+export type Idle = readonly [from: Seconds, to: Seconds];
+
+/**
+ * The period every lane in `values` repeats with, when each lane loops and one period is a whole number of each:
+ * anything read from them alone repeats with it too, so one period of samples says it all.
+ */
+export const commonPeriod = (values: readonly Animated<unknown>[]): Seconds | undefined => {
+  const lanes = values.filter((value) => isLane(value));
+
+  if (lanes.length === 0 || lanes.some((lane) => lane.period === undefined)) return undefined;
+  const period = Math.max(...lanes.map((lane) => lane.period!));
+
+  return lanes.every((lane) => {
+    const times = period / lane.period!;
+
+    return Math.abs(times - Math.round(times)) < 1e-6;
+  })
+    ? period
+    : undefined;
+};
+
+/** `breaks` cut at the edges of every idle stretch and not inside one, so each idle stretch is one run. */
+const breaksWith = (breaks: readonly Seconds[], idle: readonly Idle[]): Seconds[] => {
+  if (idle.length === 0) return [...breaks];
+  const [first, last] = [breaks[0]!, breaks.at(-1)!];
+
+  const within = (t: Seconds): boolean => idle.some(([a, b]) => t > a + EPSILON && t < b - EPSILON);
+
+  return [
+    ...breaks.filter((t) => t === first || t === last || !within(t)),
+    ...idle.flat().filter((t) => t > first + EPSILON && t < last - EPSILON),
+  ]
+    .sort((a, b) => a - b)
+    .filter((t, index, all) => index === 0 || t - all[index - 1]! > EPSILON);
+};
+
+/**
+ * Keys that follow `at` across `breaks` within `tolerance`. Through an `idle` stretch the keys hold the value at its
+ * start and jump to the true one at its end, since nothing there is seen: a node shown for 5 s of a 100 s scene
+ * samples its 5 s.
+ */
 export const follow = (
   at: (t: Seconds) => readonly number[],
   breaks: readonly Seconds[],
@@ -326,11 +368,13 @@ export const follow = (
   turns: readonly number[] = [],
   lanes: readonly Animated<unknown>[] = [],
   curves = false,
+  idle: readonly Idle[] = [],
 ): RunKey[] => {
-  const straight = keysOf(at, breaks, tolerance, turns, lanes, false);
+  const cut = breaksWith(breaks, idle);
+  const straight = keysOf(at, cut, tolerance, turns, lanes, false, idle);
 
   if (!curves) return straight;
-  const curved = keysOf(at, breaks, tolerance, turns, lanes, true);
+  const curved = keysOf(at, cut, tolerance, turns, lanes, true, idle);
 
   return curved.some((key) => key.via) && keyCost(curved) < keyCost(straight) ? curved : straight;
 };
@@ -342,6 +386,7 @@ const keysOf = (
   turns: readonly number[],
   lanes: readonly Animated<unknown>[],
   bends: boolean,
+  idle: readonly Idle[],
 ): RunKey[] => {
   const duration = breaks.at(-1)!;
   const nudge = duration * NUDGE;
@@ -363,11 +408,19 @@ const keysOf = (
   breaks.slice(1).forEach((end, index) => {
     const start = breaks[index]!;
     const final = index + 2 === breaks.length;
+    const unseen = idle.some(([a, b]) => start >= a - EPSILON && end <= b + EPSILON);
     const moves = written.length > 0 ? between(written, start, end) : { kind: "other" as const };
     const from = last;
     let run: RunKey[] | undefined;
 
-    if (moves.kind === "eased") {
+    if (unseen) {
+      const value = read(start);
+
+      run = [
+        { t: start, values: value },
+        { t: end, values: value, ease: ease.linear },
+      ];
+    } else if (moves.kind === "eased") {
       const inside = (t: Seconds) => read(!final && t >= end - EPSILON ? end - nudge : t);
 
       run = easedRun(inside, start, end, moves.curve, tolerance, bends);
@@ -481,6 +534,34 @@ export const unrolled = <T>(lane: Lane<T>, duration: Seconds): Key<T>[] => {
       const t = start + key.t;
 
       if (t > duration + EPSILON || (out.length > 0 && t <= out.at(-1)!.t + EPSILON)) continue;
+      out.push({ ...key, t });
+    }
+
+  return out;
+};
+
+/**
+ * A looping lane's keys over `duration`, like `unrolled`, but with the jump back at each wrap kept: where a cycle ends
+ * on one value and the next starts on another, a held key at the wrap says so. `unrolled` drops it, so a fade that
+ * loops from 1 down to 0 would read as 0 from its first wrap on.
+ */
+export const wrapped = <T>(lane: Lane<T>, duration: Seconds): Key<T>[] => {
+  if (lane.period === undefined) return [...lane.keys];
+  const out: Key<T>[] = [];
+
+  for (let start = 0; start < duration - EPSILON; start += lane.period)
+    for (const key of lane.keys) {
+      const t = start + key.t;
+      const last = out.at(-1);
+
+      if (t > duration + EPSILON) continue;
+
+      if (last && t <= last.t + EPSILON) {
+        if (key === lane.keys[0] && !same(last.value, key.value))
+          out.push({ ...key, t: last.t, ease: ease.hold });
+        continue;
+      }
+
       out.push({ ...key, t });
     }
 

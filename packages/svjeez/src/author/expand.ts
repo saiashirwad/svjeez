@@ -187,7 +187,11 @@ export const expand = (element: SceneElement): SceneElement => {
         return { type: "sequence", start, over, children: [body] };
       });
 
-      return sourced(element, { type: "fragment", children });
+      return sourced(element, {
+        type: "fragment",
+        children,
+        ...(element.share && { seams: element.share }),
+      });
     }
 
     case "fragment":

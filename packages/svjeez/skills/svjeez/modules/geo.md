@@ -26,8 +26,8 @@ npm install @svjeez/geo world-atlas svjeez
 | Export | Summary |
 |---|---|
 | `project(data, { size, projection?, fit?, tolerance?, object?, filter? })` | Returns `GeoMap`: `size`, `projection`, `land`, `borders`, `sphere`, `regions`, `region(key)`, `shape(geo)`, `point(lonLat)`, `route(a, b)`, `graticule(step?)`, `dots(step?)`. |
-| `globe(data, { radius, facing, turn?, simplify?, step?, tolerance?, object?, filter? })` | Returns `Globe`: `radius`, `sphere`, `land`, `borders`, `regions`, `region(key)`, `shape(geo)`, `graticule(step?)`, `circle(center, deg)`, `route(a, b)`, `night(dateOrFn)`, `terminator(dateOrFn)`, `place(at, { fade? })`, `facing(t)`, `locate(at, t)`. |
-| `<GlobeShape of fill? stroke? ... />` | Renders a `Turning` from `globe()`, clipped to the globe disc. |
+| `globe(data, { radius, facing, lean?, canvas?, turn?, simplify?, step?, tolerance?, object?, filter? })` | Returns `Globe`: `radius`, `sphere`, `land`, `borders`, `regions`, `region(key)`, `shape(geo)`, `graticule(step?)`, `circle(center, deg)`, `route(a, b)`, `ride(a, b, progress, { turn?, over?, ease?, fade? })`, `night(dateOrFn)`, `terminator(dateOrFn)`, `place(at, { fade? })`, `facing(t)`, `locate(at, t)`. |
+| `<GlobeShape of fill? stroke? draw? trim? ... />` | Renders a `Turning` from `globe()`, clipped to the globe disc. `draw`, `trim`, `fillOpacity` and `rule` go to the drawn shapes; the rest to the group. Pieces are keyed by name, such as `land-30E-60E`. |
 | `sun(date)`, `night(date)` | Subsolar `LonLat` and night-hemisphere GeoJSON `Polygon`. |
 
 ## Verified snippet
@@ -74,6 +74,8 @@ export default scene(
 
 ## Gotchas
 
+- Large globe whose centre is below the canvas, and `svjeez check` reports `off-canvas` on `land-…` pieces → give `globe()` `canvas: { size: [W, H], center }` (the globe's centre on the canvas): pieces that never reach it are not emitted. Use `lean` (degrees) instead of rotating the globe's group, so `place`, `locate` and `ride` follow it.
+- A pelican (or pin) riding a route over a turning globe → `<Group motion={earth.ride(from, to, span(1, 5), { turn: true })}>` inside the globe's offset group; draw the route with `draw={track(0).to(1, span(1, 5), ease.linear)}` on the same span. `progress` is a span, steady unless `ease: (u) => …` reshapes it. It fades out behind the horizon.
 - `undefined is not an object (evaluating 'box.x')` on `earth.land` → Pass `Turning` values from `globe()` to `<GlobeShape of={earth.land} ... />`, not `<Shape geometry>`.
 - `Two nodes are both keyed "356" inside <Group>` → `region.id` values are numeric strings (e.g. `"356"` for India) that collide with numeric loop keys; prefix keys (`key={`d${i}`}`, `key={`r${r.id}`}`).
 - `route(...) crosses the edge of the map` → Rotate the flat projection so both endpoints sit on one side: `geoNaturalEarth1().rotate([-150, 0])`.

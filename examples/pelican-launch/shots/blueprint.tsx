@@ -189,7 +189,7 @@ const Notes = (): SceneElement => (
     <Text font={mono} size={10} fill={faint} at={[48, 186]} letterSpacing={1.5}>
       DATUM +0.00 · PLUMB AT MIDSPAN
     </Text>
-    <Text font={mono} size={10} fill={faint} at={[W - 40, 40]} letterSpacing={1.5} anchor="right">
+    <Text font={mono} size={10} fill={faint} at={[48, 204]} letterSpacing={1.5}>
       R = 1500 · ARC 70°
     </Text>
     <Group offset={[W - 300, 630]}>
@@ -212,6 +212,13 @@ export const Blueprint = (): SceneElement => (
     <BlueprintPaper />
     <Construction />
     <Deck />
+    {/* The shared horizon: the same chalk line as the deck's top arc, outside the turning group and undrawn, so it can morph. */}
+    <Shape
+      key="horizon"
+      geometry={ground.visible(ground.reach)}
+      offset={ground.center}
+      stroke={{ color: chalk, width: 2.6 }}
+    />
     <Chalky seed={21} floor={0.35}>
       <Group offset={[cx, cy]}>
         <Group motion={ride(ground.visible(70), travel, { turn: true })}>

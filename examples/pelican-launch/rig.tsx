@@ -17,6 +17,7 @@ import {
   spline,
   track,
   type Geometry,
+  type Anim,
   type Color,
   type Paint,
   type SceneElement,
@@ -51,33 +52,33 @@ export interface Look {
   /** A lit, textured surface over the flat paint; undefined keeps the drawing flat. */
   readonly finish?: Finish;
   /** Outline of the bird and its details. */
-  readonly line: Paint;
+  readonly line: Anim<Paint>;
   readonly width: number;
   /** Plumage fill; undefined leaves the bird as line art. */
-  readonly body?: Paint;
+  readonly body?: Anim<Paint>;
   /** The folded wing; defaults to `body`. */
-  readonly wing?: Paint;
+  readonly wing?: Anim<Paint>;
   /** Black flight feathers trailing off the wing; defaults to `line`. */
-  readonly primaries?: Paint;
-  readonly beak?: Paint;
-  readonly pouch?: Paint;
+  readonly primaries?: Anim<Paint>;
+  readonly beak?: Anim<Paint>;
+  readonly pouch?: Anim<Paint>;
   /** Bare skin around the eye. */
-  readonly skin?: Paint;
+  readonly skin?: Anim<Paint>;
   /** Legs and webbed feet; defaults to `beak`, then `line`. */
-  readonly leg?: Paint;
+  readonly leg?: Anim<Paint>;
   /** Bike frame, bars and cranks. */
-  readonly frame: Paint;
-  readonly tyre: Paint;
+  readonly frame: Anim<Paint>;
+  readonly tyre: Anim<Paint>;
   /** Rims, spokes, chain. Defaults to `frame`. */
-  readonly metal?: Paint;
+  readonly metal?: Anim<Paint>;
   /** Feather rows, eye, spokes, chain; off for silhouettes. */
   readonly detail: boolean;
   /** Color of detail lines drawn over a dark body (black-figure pottery). Defaults to `line`. */
-  readonly incise?: Paint;
+  readonly incise?: Anim<Paint>;
   /** Brightness of the far leg and far crank, 1 unchanged. */
   readonly far?: number;
   /** A fine plumage texture laid over the body and neck. */
-  readonly plumage?: Paint;
+  readonly plumage?: Anim<Paint>;
   /** Soft shadow color the wings cast on the body; none when undefined. */
   readonly shade?: Color;
 }
@@ -144,6 +145,23 @@ const footAt = (turn: number): Geometry => {
     .close();
 };
 
+/** The angle at the knee, as a polyline arc of `radius` between the thigh and the shin (always the inside angle). */
+const kneeArcAt = (turn: number, radius = 11): Geometry => {
+  const ankle = ankleAt(turn);
+  const knee = kneeFor(ankle);
+  const a = Math.atan2(HIP[1] - knee[1], HIP[0] - knee[0]);
+  let sweep = Math.atan2(ankle[1] - knee[1], ankle[0] - knee[0]) - a;
+
+  sweep -= Math.round(sweep / (Math.PI * 2)) * Math.PI * 2;
+
+  const at = (u: number): Vec => round(add(knee, [radius * Math.cos(u), radius * Math.sin(u)]));
+  let arc = path().moveTo(at(a));
+
+  for (let i = 1; i <= 12; i += 1) arc = arc.lineTo(at(a + (sweep * i) / 12));
+
+  return arc;
+};
+
 const crankAt = (turn: number): Geometry => line(BB, round(pedalAt(turn)));
 
 /** The pedal body stays level while the crank turns. */
@@ -175,6 +193,11 @@ const pedalPose = (phase: number) =>
         foot: footAt(turn),
         crank: crankAt(turn),
         pedalBody: pedalBodyAt(turn),
+        knee: round(kneeFor(ankleAt(turn))),
+        ankle: round(ankleAt(turn)),
+        pedal: round(pedalAt(turn)),
+        reach: line(round(HIP), round(ankleAt(turn))),
+        kneeArc: kneeArcAt(turn),
       };
     },
     span(0, PEDAL),
@@ -192,7 +215,22 @@ const pedalled = (phase: number) => {
     foot: cached.foot.loop(PEDAL),
     crank: cached.crank.loop(PEDAL),
     pedalBody: cached.pedalBody.loop(PEDAL),
+    knee: cached.knee.loop(PEDAL),
+    ankle: cached.ankle.loop(PEDAL),
+    pedal: cached.pedal.loop(PEDAL),
+    reach: cached.reach.loop(PEDAL),
+    kneeArc: cached.kneeArc.loop(PEDAL),
   };
+};
+
+/**
+ * The pelican's moving joints in the bike's own frame (the same units and origin as `<Pelican>`), from the same IK
+ * solve as the leg, so a node offset by one stays on the bone. `hip` and `bb` don't move.
+ */
+export const joints = (phase = 0) => {
+  const { knee, ankle, pedal, reach, kneeArc, thigh, shin } = pedalled(phase);
+
+  return { hip: HIP, bb: BB, knee, ankle, pedal, reach, kneeArc, thigh, shin };
 };
 
 /** One turn per `period`, starting `from` degrees round. */

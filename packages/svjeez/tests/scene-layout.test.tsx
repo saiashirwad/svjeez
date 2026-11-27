@@ -12,6 +12,7 @@ import {
   Text,
   arc,
   circle,
+  line,
   ease,
   enter,
   morph,
@@ -23,7 +24,7 @@ import {
   type SceneElement,
 } from "svjeez";
 import type { StackProps } from "svjeez/tools";
-import { isLane, placements, svg, valueAt, type Model } from "svjeez/tools";
+import { boxesOf, isLane, placements, svg, valueAt, type Model } from "svjeez/tools";
 import { fontFixture } from "../../../fixtures/fonts";
 
 const mono = await font.load(fontFixture("SpaceMono-Regular"));
@@ -818,5 +819,47 @@ describe("arrows", () => {
     expect(keys[1]![0]).toBeCloseTo(1 + (8 * Math.cos(0.45)) / 100, 2);
     expect(tip(model, "link/head", 1.5)[0]).toBeCloseTo(50, 1);
     expect(tip(model, "link/head", 3)[0]).toBeCloseTo(100, 1);
+  });
+});
+
+describe("clip in layout", () => {
+  const trace = (clip: Parameters<typeof Group>[0]["clip"]) =>
+    made(() => (
+      <Stack key="card" gap={4}>
+        <Group key="spark" clip={clip}>
+          <Shape geometry={line([0, 0], [900, 40])} stroke={{ color: "#000", width: 1 }} />
+        </Group>
+        <Shape key="below" geometry={rect(20, 10)} fill="#000" />
+      </Stack>
+    ));
+
+  test("a static clip sizes the node, so the stack fits the clip", () => {
+    const model = trace(rect(96, 18));
+
+    expect(find(model, "card/spark").box).toEqual({ x: 0, y: 0, width: 96, height: 18 });
+    expect(find(model, "card").box.width).toBe(96);
+    expect(find(model, "card").box.height).toBe(18 + 4 + 10);
+    expect(placed(find(model, "card/below")).y).toBe(22);
+  });
+
+  test("a clip larger than the content leaves the box alone", () => {
+    const model = trace(rect(2000, 2000));
+
+    expect(find(model, "card/spark").box.width).toBeGreaterThanOrEqual(900);
+    expect(find(model, "card/spark").box.height).toBeLessThan(2000);
+  });
+
+  test("an animated clip takes the union of its keyframes", () => {
+    const model = trace(track(rect(50, 18)).to(rect(96, 18), span(0, 2)));
+
+    expect(find(model, "card/spark").box).toEqual({ x: 0, y: 0, width: 96, height: 18 });
+  });
+
+  test("refs and check boxes see the clipped box", () => {
+    const model = trace(rect(96, 18));
+    const boxes = boxesOf(model, 0);
+
+    expect(boxes[find(model, "card/spark").key]!.width).toBe(96);
+    expect(find(model, "card").box.width).toBe(96);
   });
 });

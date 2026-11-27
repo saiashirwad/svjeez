@@ -335,6 +335,13 @@ export const Watercolour = (): SceneElement => (
     <Sky />
     <Reserve />
     <Hill />
+    {/* The shared horizon: the green rim of the hill, outside the wobbling group so it can morph. */}
+    <Shape
+      key="horizon"
+      geometry={ground.visible(ground.reach)}
+      offset={ground.center}
+      stroke={{ color: alpha("#3C5F27", 0.55), width: 3 }}
+    />
     <Granulation />
     <Ripples />
     <Rider />

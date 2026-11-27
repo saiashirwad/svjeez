@@ -6,8 +6,18 @@ import type { Animated, Box, Layer, SceneNode, Source, Vec } from "../model/ir";
 import { atRest, isLane } from "../model/lane";
 import { isDerived } from "./derived";
 import { isAnchor, type Anchor, type ById, type Place, type Ref } from "./refs";
-import { mixGeometry } from "../model/geometry";
-import { blendNumber, blendVec, breaksOf, follow, laneFrom, valueAt } from "../model/sample";
+import { mixGeometry, outlineBoxOf } from "../model/geometry";
+import {
+  blendNumber,
+  blendVec,
+  breaksOf,
+  commonPeriod,
+  follow,
+  laneFrom,
+  valueAt,
+  type Idle,
+} from "../model/sample";
+import { hiddenOf } from "../model/dark";
 import { isTrack } from "./track";
 import { lookOf, paintedBoxOf } from "../model/painted";
 import { PLACE_LIST, PLACES, homed, homeOf, pinned, type TextAnchorPlace } from "./pin";
@@ -45,6 +55,8 @@ export type Connect = (
   ends: readonly Animated<Vec>[],
   children: readonly SceneNode[],
   duration: Seconds,
+  /** When the connector is not seen, so what it draws there may hold. */
+  idle: readonly Idle[],
 ) => SceneNode[];
 
 export type Settle =
@@ -284,6 +296,28 @@ export const around = (
 };
 
 /**
+ * What a node with a `clip` contributes to layout: its content box cut to the clip's bounds, in its own frame.
+ * An animated clip counts as the union of its keyframes' bounds, so layout never moves while it plays.
+ */
+export const clippedBox = (box: Box, clip: SceneNode["clip"]): Box => {
+  if (clip === undefined) return box;
+  const cuts = (isLane(clip) ? clip.keys.map((key) => key.value) : [clip]).map(outlineBoxOf);
+  const left = Math.min(...cuts.map((cut) => cut.x));
+  const top = Math.min(...cuts.map((cut) => cut.y));
+  const right = Math.max(...cuts.map((cut) => cut.x + cut.width));
+  const bottom = Math.max(...cuts.map((cut) => cut.y + cut.height));
+  const x = Math.max(box.x, left);
+  const y = Math.max(box.y, top);
+
+  return {
+    x,
+    y,
+    width: Math.max(0, Math.min(box.x + box.width, right) - x),
+    height: Math.max(0, Math.min(box.y + box.height, bottom) - y),
+  };
+};
+
+/**
  * Where `rotate`, `scale`, and `skew` pivot.
  * - a place name, such as `"center"` (the default) or `"topLeft"`, on the node's box
  * - `[x, y]` measured from the box's top-left
@@ -519,8 +553,10 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     let pivot: Vec | undefined;
 
     if (asked?.kind === "connect") {
+      const idle = idleOf(d);
+
       const ends = asked.ends.map((end, i) => {
-        if (isAnchor(end)) return resolve(end, d);
+        if (isAnchor(end)) return resolve(end, d, idle);
 
         if (!isPoint(end))
           throw new SceneError(
@@ -543,6 +579,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
           ends,
           d.children.map((child) => child.node),
           duration,
+          idle,
         )
         .map((child) => ({ ...draft(child, d, nodes), placing: 2, measuring: 2 }));
       d.children.forEach(index);
@@ -628,7 +665,7 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
       d.box =
         d.note?.arranged || d.node.authored?.count || d.node.authored?.frame
           ? d.node.box
-          : around(d.children);
+          : clippedBox(around(d.children), d.node.clip);
     }
 
     d.origin = originOf(
@@ -705,7 +742,15 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     return out;
   };
 
-  const resolve = (anchor: Anchor, frame: Draft): Animated<Vec> => {
+  /** When nothing `d` draws is seen: it, or a group around it, holds at opacity 0. */
+  const idleOf = (d: Draft): Idle[] =>
+    hiddenOf(
+      chain(d, undefined).map((each) => each.node),
+      duration,
+    );
+
+  /** The point `anchor` names, in `frame`'s space. `idle` is when only `frame` reads it and is not seen, so it may hold. */
+  const resolve = (anchor: Anchor, frame: Draft, idle: readonly Idle[] = []): Animated<Vec> => {
     const node = target(anchor);
 
     measure(node);
@@ -751,10 +796,21 @@ export const settle = <G extends SceneNode & { readonly kind: "group" }>(
     ];
 
     if (!moving.some(isLane)) return at(0);
+    const period = commonPeriod(moving);
+    const join = ([x, y]: readonly number[]): Vec => [x!, y!];
+
+    if (period !== undefined) {
+      const lane = laneFrom(
+        follow(at, breaksOf(moving, period), TOLERANCE, [], moving, true),
+        join,
+      );
+
+      return isLane(lane) ? { ...lane, period } : lane;
+    }
 
     return laneFrom(
-      follow(at, breaksOf(moving, duration), TOLERANCE, [], moving, true),
-      ([x, y]): Vec => [x!, y!],
+      follow(at, breaksOf(moving, duration), TOLERANCE, [], moving, true, idle),
+      join,
     );
   };
 
@@ -894,7 +950,10 @@ export const arrangeState = (list: readonly SceneNode[], into: Notes): SceneNode
     };
 
     if (asked?.kind !== "arrange") {
-      const box = node.authored?.count || node.authored?.frame ? node.box : around(children);
+      const box =
+        node.authored?.count || node.authored?.frame
+          ? node.box
+          : clippedBox(around(children), node.clip);
 
       return {
         ...node,

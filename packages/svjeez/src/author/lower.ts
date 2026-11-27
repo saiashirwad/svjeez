@@ -38,6 +38,8 @@ import type {
 } from "../model/ir";
 import { atRest, isLane, pair } from "../model/lane";
 import { type Taken, morphed, type MorphElement } from "./morph";
+import { shareAcross, type Played } from "./shared";
+import type { Seams } from "./series-share";
 import {
   flat,
   sceneElement,
@@ -59,6 +61,7 @@ import {
   noteId,
   noteResized,
   notes,
+  clippedBox,
   originOf,
   outsider,
   sameAnchors,
@@ -161,6 +164,14 @@ interface Ctx {
    * as written, by the key's full path. Set over all the states at once, so a node is named alike in each.
    */
   readonly owners: Map<string, string>;
+  /** Each `<Series share>`, by the keys of its children's top nodes: its seams are tweened once the scene is settled. */
+  readonly series: Series[];
+}
+
+interface Series {
+  readonly lists: readonly (readonly string[])[];
+  readonly played: readonly Played[];
+  readonly seams: Seams;
 }
 
 const keep = <T>(value: T): T => value;
@@ -1326,6 +1337,9 @@ const lowerAll = (
   elements.flatMap((element): SceneNode[] => {
     const given = sceneElement(element, parent ? ctx.notes.names.named(parent) : "The scene");
 
+    if (given.type === "fragment" && given.seams)
+      return lowerSeries(ctx, given, timing, parent, taken);
+
     if (given.type === "fragment") return lowerAll(ctx, given.children, timing, parent, taken);
 
     if (given.type === "sequence") {
@@ -1392,6 +1406,73 @@ const lowerAll = (
       throw error instanceof Error ? located(error, ctx.notes.names.whereOf(key)) : error;
     }
   });
+
+/** A `<Series share>`: its children lowered one by one, then its shared nodes tweened across the seams between them. */
+const lowerSeries = (
+  ctx: Ctx,
+  given: Extract<SceneElement, { readonly type: "fragment" }>,
+  timing: Timing,
+  parent: string,
+  taken: Taken,
+): SceneNode[] => {
+  if (timing.clock.named)
+    throw new SceneError(
+      `A <Series share> plays inside <Sequence clock="${timing.clock.named.name}">, and its tweens run on the scene's clock.`,
+      "Put the series on the scene's clock, or share inside each child with morph().",
+    );
+
+  const played = given.children.map((child) => {
+    if (child.type !== "sequence" || child.over === undefined)
+      throw new SceneError("A <Series share> child didn't expand to a <Sequence> of a set length.");
+
+    const start = timing.clock.offset + child.start;
+
+    return { start, end: start + child.over };
+  });
+
+  const lists = given.children.map((child) => lowerAll(ctx, [child], timing, parent, taken));
+
+  ctx.series.push({
+    lists: lists.map((list) => list.map((node) => node.key)),
+    played,
+    seams: given.seams!,
+  });
+
+  return lists.flat();
+};
+
+/** The tree with each node `swaps` has a node for, by key, swapped for it. */
+const swappedIn = (tree: GroupNode, swaps: ReadonlyMap<string, SceneNode>): GroupNode => {
+  const swapped = (node: SceneNode): SceneNode =>
+    swaps.get(node.key) ??
+    (node.kind === "group" ? { ...node, children: node.children.map(swapped) } : node);
+
+  return { ...tree, children: tree.children.map(swapped) };
+};
+
+/** Tweens the shared nodes of each `<Series share>` across its seams, in the settled tree, where every place is final. */
+const shared = (ctx: Ctx, root: GroupNode): GroupNode => {
+  let tree = root;
+
+  for (const { lists, played, seams } of ctx.series) {
+    const found = new Map<string, SceneNode>();
+
+    const index = (node: SceneNode): void => {
+      found.set(node.key, node);
+
+      if (node.kind === "group") node.children.forEach(index);
+    };
+
+    index(tree);
+    const children = lists.map((keys) => keys.map((key) => found.get(key)!));
+    const done = shareAcross(children, played, seams, sceneTiming(ctx), ctx.notes.names).flat();
+    const swaps = new Map(done.map((node) => [node.key, node]));
+
+    tree = swappedIn(tree, swaps);
+  }
+
+  return tree;
+};
 
 /** Takes the element's key in its parent: as written, or told apart by its list's place, or by position when unkeyed. */
 const claim = (ctx: Ctx, given: NodeElement, taken: Taken, parent: string) => {
@@ -1830,9 +1911,11 @@ const dressed = (
           timing,
         );
 
+  const lowered = clip === undefined ? undefined : geometryOf(clip, timing, where, "clip");
+
   return {
     ...node,
-    ...(clip !== undefined && { clip: geometryOf(clip, timing, where, "clip") }),
+    ...(lowered !== undefined && { clip: lowered, box: clippedBox(node.box, lowered) }),
     ...(mask && { mask }),
     effects: [...node.effects, ...effects.map((effect) => effectOf(ctx, effect, timing, where))],
     ...(blend !== undefined && blend !== "normal" && { blend }),
@@ -1984,7 +2067,7 @@ const checkSlots = (root: GroupNode): void => {
 };
 
 const isBare = (el: SceneElement): boolean =>
-  el.type === "fragment" ||
+  (el.type === "fragment" && el.seams === undefined) ||
   (el.type === "group" && Object.keys(el.props).length === 0 && el.settle === undefined);
 
 /**
@@ -2053,6 +2136,7 @@ const lowerScene = (
     reads: new Map(),
     clocks: new Map(),
     owners: new Map(),
+    series: [],
   };
 
   for (const token of Object.values(options.theme ?? {})) solidOf(ctx, token, "scene()");
@@ -2075,7 +2159,7 @@ const lowerScene = (
     children,
   };
 
-  const root = settle(drafted, ctx.notes, duration);
+  const root = shared(ctx, settle(drafted, ctx.notes, duration));
 
   checkSlots(root);
 

@@ -20,7 +20,7 @@ import {
   type SceneElement,
   type Vec,
 } from "svjeez";
-import { Caption, Chapter, H, W, ivory, slate } from "../kit";
+import { Caption, Chapter, H, W, horizon, ivory, slate } from "../kit";
 import { Pelican, type Look } from "../rig";
 
 export const OPEN = 5;
@@ -137,6 +137,9 @@ const points: readonly Vec[] = [
 
 const wavering = spline(points);
 
+/** The shared horizon: a near-flat arc on the pencil line's base, so it can morph into the next shot's curve. */
+const world = horizon(GROUND_Y, 40000);
+
 const pencil = [displace({ scale: 1.6, frequency: 0.9, seed: 12, octaves: 2 })];
 const LINE_SPAN = span(0.3, 1.5);
 const travel = track<Vec>([0, 0]).to([70, 0], span(1.4, OPEN - 2), ease.linear);
@@ -144,6 +147,14 @@ const travel = track<Vec>([0, 0]).to([70, 0], span(1.4, OPEN - 2), ease.linear);
 export const Open = (): SceneElement => (
   <Group>
     <Paper />
+    <Group motion={enter(span(0.9, 0.9), { curve: ease.inOut })}>
+      <Shape
+        key="horizon"
+        geometry={world.visible(world.reach)}
+        offset={world.center}
+        stroke={{ color: alpha(graphite, 0.85), width: 1.4 }}
+      />
+    </Group>
     <Group
       scale={track(1).to(1.05, span(0, OPEN), ease.linear)}
       origin={{ frame: [W / 2, GROUND_Y] }}
