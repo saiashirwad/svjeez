@@ -366,21 +366,21 @@ describe("<Code part>", () => {
     expect(svg.emit(built)).toContain("opacity:0.2");
   });
 
-  test("does not trip the low-contrast check", () => {
-    const model = made(() =>
-      Group({
-        children: [
-          Shape({ key: "back", geometry: rect(320, 120), fill: "#FFFFFF" }),
-          snippet({
-            key: "code",
-            palette: { ...tomorrow, plain: "#EEEEEE", keyword: "#EEEEEE" },
-            part: () => ({ opacity: 0.3 }),
-          }),
-        ],
-      }),
-    );
+  test("dims without tripping the low-contrast check that the same faint palette trips", () => {
+    const faint = { ...tomorrow, plain: "#EEEEEE", keyword: "#EEEEEE" } as const;
 
-    expect(check(model).problems.map(({ code }) => code)).not.toContain("low-contrast");
+    const problems = (props: Partial<CodeProps>) =>
+      check(
+        made(() => (
+          <Group>
+            <Shape key="back" geometry={rect(320, 120)} fill="#FFFFFF" />
+            {snippet({ key: "code", palette: faint, ...props })}
+          </Group>
+        )),
+      ).problems.map(({ code }) => code);
+
+    expect(problems({})).toContain("low-contrast");
+    expect(problems({ part: () => ({ opacity: 0.3 }) })).not.toContain("low-contrast");
   });
 });
 
