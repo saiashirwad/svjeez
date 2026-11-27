@@ -125,3 +125,33 @@ export const horizon = (top: number, radius: number): Horizon => {
     visible: (sweep) => arc({ radius, start: -90 - sweep / 2, sweep }),
   };
 };
+
+/**
+ * The chapter label every shot carries in its top-left corner, like a slide in a presentation: a roman numeral and
+ * the medium, in letter-spaced mono. It shows from 0.8 s to `length` − 0.8 s.
+ */
+export const Chapter = ({
+  numeral,
+  medium,
+  fill,
+  length,
+}: {
+  readonly numeral: string;
+  readonly medium: string;
+  readonly fill: Paint;
+  readonly length: number;
+}): SceneElement => (
+  <Text
+    font={mono}
+    size={12}
+    letterSpacing={2.4}
+    fill={fill}
+    at={[48, 58]}
+    motion={[
+      enter(span(0.8, 0.6), { curve: ease.out }),
+      exit(span(length - 1.4, 0.6), { curve: ease.inOut }),
+    ]}
+  >
+    {`${numeral} · ${medium.toUpperCase()}`}
+  </Text>
+);

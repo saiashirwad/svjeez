@@ -22,6 +22,23 @@ Each entry says what the film needed and what changed in svjeez. The example sce
 | 14 | Ramp color space was undocumented | The `ramp` JSDoc says stops blend in sRGB, unlike raw `feTurbulence` (linearRGB). |
 | 15 | Radial gradients were circles only; vignettes scaled a circle in a group | `radial({ radius: [rx, ry] })` and `radial.across({ shape: "ellipse" })`. |
 
-## Still open
+## Still open (found while building the film's shots)
 
+Bugs, worst first:
+
+- **Source Serif 4 isn't subset.** `<Text font={serif}>Hi</Text>` embeds ~259 KB of font, while JetBrains Mono subsets to ~1.5 KB. Every shot preview with a `Caption` lands at 300–580 KB because of it; the film pays it once.
+- **`emboss` goes dark inside a mirrored group.** `<Group scale={[-1, 1]} origin="own" effects={[emboss()]}>` lights the content as if from behind. The lace shot puts the emboss on an unflipped outer group.
+- **`blend` on a `Shape` inside a clipped `Group` doesn't blend with what's behind.** `<Group clip={...}><Shape blend="multiply" fill={noise(...)} /></Group>` comes out opaque; the blend has to sit on the clipped group.
+- **`motion={{ scale }}` with `origin` drifts.** `<Group origin={[W / 2, H / 2]} motion={{ scale: track(1.02).to(1.05, …), offset: … }}>` moved content ~20 px more than the scale explains, exposing the paper edge.
+- **`draw` starting at 0 leaves a dot.** Any stroked shape with `draw={track(0).to(1, …)}` shows a one-pixel dot at t = 0.
+
+Missing API:
+
+- **Animated blur.** `blur(track(3).to(0, …))` is a `moving-filter`, so "drawing comes into focus" means crossfading a blurred and a sharp copy, doubling the pelican's weight.
+- **Texture on a rotating shape.** A `noise()` fill inside a rotating group re-renders every frame, so the vase's clay, the sun's surface and the hills keep their texture still while the painted parts turn. A noise paint with `rotate` animatable in the shape's own frame (or a cached texture) would fix it.
+- **Pattern along a path.** `stroke={{ color: pattern(...) }}` tiles in straight space; the Greek key band bends each unit onto the arc by hand.
+- **Layered paints repeat geometry.** Each layer writes the whole path again instead of a `<use>`; on large `merge(...)` paths that doubles the bytes.
+- **Fill rule.** No `<Shape rule="evenodd">`; rings use `subtract(circle(a), circle(b))`.
+- **`<Text anchor="baseline-center">`** is rejected (only `baseline-left`, `baseline`, `baseline-right`).
+- **`typed()`** takes one style and one line: coloured code needs `<Code typing>`, and streamed multi-line text is one `<Text>` per line.
 - **Video can't render `<Shader>`.** Out of scope here (the film is SVG only).

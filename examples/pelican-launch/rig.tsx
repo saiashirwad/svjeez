@@ -195,17 +195,29 @@ const pedalled = (phase: number) => {
   };
 };
 
-const spin = (period: number) => track(0).to(360, span(0, period), ease.linear).loop(period);
+/** One turn per `period`, starting `from` degrees round. */
+const spin = (period: number, from = 0) =>
+  track(from)
+    .to(from + 360, span(0, period), ease.linear)
+    .loop(period);
 
 const SPOKES = 24;
 
-const Wheel = ({ at, look }: { readonly at: Vec; readonly look: Look }): SceneElement => {
+const Wheel = ({
+  at,
+  look,
+  phase,
+}: {
+  readonly at: Vec;
+  readonly look: Look;
+  readonly phase: number;
+}): SceneElement => {
   const metal = look.metal ?? look.frame;
 
   return (
     <Group offset={at}>
       {look.detail && (
-        <Group rotate={spin(PEDAL)} origin="own">
+        <Group rotate={spin(PEDAL, (phase * 180) / Math.PI)} origin="own">
           {Array.from({ length: SPOKES }, (_, i) => {
             const a = (i / SPOKES) * Math.PI * 2;
             const hub = (i % 2 === 0 ? 1 : -1) * 0.35;
@@ -703,7 +715,17 @@ const Feathers = ({
   </Group>
 );
 
-export const Pelican = ({ look }: { readonly look: Look }): SceneElement => {
+/**
+ * The pelican on its bike. `phase` (radians, default 0) starts the cranks and wheels that far round, so riders in a
+ * group don't pedal in lockstep.
+ */
+export const Pelican = ({
+  look,
+  phase = 0,
+}: {
+  readonly look: Look;
+  readonly phase?: number;
+}): SceneElement => {
   const ink = look.incise ?? look.line;
   const far = look.far ?? 0.72;
   const outline = { color: look.line, width: look.width, join: "round" as const };
@@ -715,15 +737,15 @@ export const Pelican = ({ look }: { readonly look: Look }): SceneElement => {
 
   return (
     <Group>
-      <Group effects={[adjust({ brightness: far })]}>
-        <Leg look={look} phase={Math.PI} />
-        <Crank look={look} phase={Math.PI} />
+      <Group effects={far === 1 ? undefined : [adjust({ brightness: far })]}>
+        <Leg look={look} phase={phase + Math.PI} />
+        <Crank look={look} phase={phase + Math.PI} />
       </Group>
-      <Wheel at={REAR} look={look} />
-      <Wheel at={FRONT} look={look} />
+      <Wheel at={REAR} look={look} phase={phase} />
+      <Wheel at={FRONT} look={look} phase={phase} />
       <Frame look={look} />
-      <Crank look={look} phase={0} />
-      <Leg look={look} phase={0} />
+      <Crank look={look} phase={phase} />
+      <Leg look={look} phase={phase} />
       <Shape geometry={TAIL} fill={look.primaries ?? look.body} stroke={outline} />
       {PRIMARIES.map((each, i) => (
         <Shape
