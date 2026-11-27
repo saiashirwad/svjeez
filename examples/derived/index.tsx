@@ -1,7 +1,7 @@
 import { Group, Shape, Text, circle, ease, line, rect, scene, span, track, type Vec } from "svjeez";
 import { mono, theme } from "../theme";
 
-const theta = track(0).to(360, span(0.3, 4), ease.inOut).rewind(1.2, ease.inOut);
+const theta = track(0).to(360, span(0.3, 2.6), ease.inOut).rewind(1.2, ease.inOut);
 
 const CENTER: Vec = [140, 150];
 const RADIUS = 90;

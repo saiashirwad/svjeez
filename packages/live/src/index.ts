@@ -10,6 +10,46 @@ export type { Allowlist, CompileOptions } from "./compile.ts";
 
 export { describe } from "./describe.ts";
 
+export {
+  EASES,
+  applySplices,
+  asEdits,
+  assign,
+  derive,
+  discover,
+  formatNumber,
+  guessRange,
+  isSpan,
+  pad,
+  sourcesOf,
+  valueOf,
+  valuesOf,
+  view,
+  write,
+  writeAll,
+} from "./signals.ts";
+
+export type {
+  Control,
+  ControlValue,
+  ControlView,
+  Controls,
+  DeriveOptions,
+  Derived,
+  Hint,
+  NumberControl,
+  Origin,
+  Pad,
+  Signal,
+  SignalKind,
+  SignalValue,
+  Signals,
+  Site,
+  Span,
+  Splice,
+  Values,
+} from "./signals.ts";
+
 export type { Hooks } from "./hooks.ts";
 
 export { defineEdit } from "./define-edit.ts";

@@ -1,4 +1,5 @@
 import type { Animated, Paint, Scene, SceneNode, Source, TextNode, TextRun } from "./ir";
+import type { Ease } from "./time";
 import { nodeName } from "./naming";
 import { SceneError } from "./scene-error";
 import { isCurved } from "./curve";
@@ -63,7 +64,12 @@ export interface LaneReport {
   readonly source?: Source;
   readonly lane: string;
   readonly backend: "css" | "smil";
-  readonly spans: readonly { readonly start: number; readonly over: number }[];
+  /** When each move starts, how long it lasts, and the curve it moves along. */
+  readonly spans: readonly {
+    readonly start: number;
+    readonly over: number;
+    readonly ease?: Ease;
+  }[];
   readonly period?: number;
 }
 

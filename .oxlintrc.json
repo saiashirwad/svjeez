@@ -54,6 +54,7 @@
         "packages/*/scripts/**",
         "packages/bin/test/**",
         "packages/live/**",
+        "packages/dev/**",
         "site/alchemy.run.ts"
       ],
       "rules": {
