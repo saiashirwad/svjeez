@@ -9,9 +9,10 @@
     "directory": "packages/svjeez"
   },
   "bin": {
-    "svjeez": "./package-dist/cli.js"
+    "svjeez": "./bin/svjeez.js"
   },
   "files": [
+    "bin",
     "package-dist",
     "skills"
   ],
