@@ -8,8 +8,10 @@ export interface CodeStyle {
   readonly size: number;
   readonly lineHeight?: number;
   readonly tabSize?: number;
-  /** The `<Code>`'s `at`, so the boxes come out in the coordinates it is placed in. Default [0, 0]. */
+  /** Where `anchor` of the block lands, so the boxes come out in the coordinates `<Code>` is placed in. Default [0, 0]. */
   readonly at?: Vec;
+  /** The point of the block's `bounds` that `at` names, as fractions of its width and height: [0.5, 0] centers it on `at` horizontally. Default [0, 0], the top-left. */
+  readonly anchor?: readonly [number, number];
 }
 
 /** A character range's cell: `at` is its top-left corner, `size` its width and height. */
@@ -27,6 +29,10 @@ export interface CodeBox {
 export interface CodeLayout {
   /** The source's lines, tabs expanded, as `<Code>` draws them. */
   readonly lines: readonly string[];
+  /** The block's top-left corner once `anchor` is applied: give it to `<Code>` as `at`. */
+  readonly origin: Vec;
+  /** The whole block: its widest line by every line's cell, at `origin`. */
+  readonly bounds: CodeBox;
   /** The top-left corner of column `col`'s cell on `line`. */
   point(line: number, col?: number): Vec;
   /** The cells of columns `from` up to (not including) `to` on `line`; the whole line by default. */
@@ -54,13 +60,17 @@ const boxOf = (x: number, y: number, width: number, height: number): CodeBox => 
  * with the font's real advances. Each line's cell is `lineHeight` × `size` tall, centered on its text, so cells tile with no gap.
  */
 export const codeLayout = (
-  { font, size, lineHeight = 1.5, tabSize = 2, at = [0, 0] }: CodeStyle,
+  { font, size, lineHeight = 1.5, tabSize = 2, at = [0, 0], anchor = [0, 0] }: CodeStyle,
   source: string,
 ): CodeLayout => {
   const lines = sourceLines(source, tabSize);
   const face = faceOf(font);
   const { ascent, descent } = face.metrics;
   const pitch = lineHeight * size;
+  const width = Math.max(0, ...lines.map((text) => face.measure(text, size)));
+  const height = lines.length * pitch;
+  const left = at[0] - anchor[0] * width;
+  const top = at[1] - anchor[1] * height;
   const lift = ((ascent + descent) * size - pitch) / 2;
 
   const checked = (line: number, col: number, where: string): string => {
@@ -84,7 +94,7 @@ export const codeLayout = (
   const point = (line: number, col = 0): Vec => {
     const text = checked(line, col, "point()");
 
-    return [at[0] + face.measure(text.slice(0, col), size), at[1] + line * pitch + lift];
+    return [left + face.measure(text.slice(0, col), size), top + line * pitch + lift];
   };
 
   const box = (line: number, from = 0, to?: number): CodeBox => {
@@ -129,5 +139,5 @@ export const codeLayout = (
     return box(hit[0], hit[1], hit[1] + text.length);
   };
 
-  return { lines, point, box, find };
+  return { lines, origin: [left, top], bounds: boxOf(left, top, width, height), point, box, find };
 };

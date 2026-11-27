@@ -4,9 +4,11 @@ import {
   Shape,
   font,
   morph,
+  rect,
   ref,
   scene,
   span,
+  track,
   type Bounds,
   type SceneElement,
 } from "svjeez";
@@ -329,6 +331,59 @@ describe("<Code by={codeTokens}>", () => {
   });
 });
 
+describe("<Code part>", () => {
+  const dimmed = (extra: Partial<CodeProps> = {}) =>
+    made(() =>
+      snippet({
+        key: "code",
+        by: codeTokens,
+        part: (p) => (p.key === "return#0" ? {} : { opacity: 0.3 }),
+        ...extra,
+      }),
+    );
+
+  test("styles the chosen parts only", () => {
+    const nodes = describeScene(dimmed(), [0]).frames[0]!.nodes;
+    const opacity = (key: string) => nodes.find((node) => node.key === `code/${key}`)!.opacity ?? 1;
+
+    expect(opacity("return#0")).toBe(1);
+    expect(opacity("const#0")).toBeCloseTo(0.3);
+    expect(opacity("a#1")).toBeCloseTo(0.3);
+  });
+
+  test("can animate, and composes with typing", () => {
+    const built = made(() =>
+      snippet({
+        key: "code",
+        typing: span(0, 1),
+        part: () => ({ opacity: track(1).to(0.2, span(1, 1)) }),
+      }),
+    );
+
+    const [, first] = describeScene(built, [0.5, 2]).frames[1]!.nodes;
+
+    expect(first!.opacity).toBeCloseTo(0.2);
+    expect(svg.emit(built)).toContain("opacity:0.2");
+  });
+
+  test("does not trip the low-contrast check", () => {
+    const model = made(() =>
+      Group({
+        children: [
+          Shape({ key: "back", geometry: rect(320, 120), fill: "#FFFFFF" }),
+          snippet({
+            key: "code",
+            palette: { ...tomorrow, plain: "#EEEEEE", keyword: "#EEEEEE" },
+            part: () => ({ opacity: 0.3 }),
+          }),
+        ],
+      }),
+    );
+
+    expect(check(model).problems.map(({ code }) => code)).not.toContain("low-contrast");
+  });
+});
+
 describe("codeLayout()", () => {
   const style = { font: mono, size: 16, lineHeight: 2, at: [10, 20] as const };
   const layout = codeLayout(style, SOURCE);
@@ -348,6 +403,24 @@ describe("codeLayout()", () => {
     expect(box.height).toBe(32);
     expect(box.center[1]).toBeCloseTo(20 + ((ascent + descent) * 16) / 2);
     expect(layout.box(2).width).toBeCloseTo(mono.measure("  return a;", 16));
+  });
+
+  test("anchor puts a point of the block's bounds at `at`", () => {
+    const top = codeLayout({ ...style, at: [100, 50], anchor: [0.5, 0] }, SOURCE);
+    const width = mono.measure("const a = 1;", 16);
+
+    expect(top.bounds.width).toBeCloseTo(width);
+    expect(top.bounds.height).toBe(3 * 32);
+    expect(top.origin[0]).toBeCloseTo(100 - width / 2);
+    expect(top.origin[1]).toBe(50);
+    expect(top.bounds.center[0]).toBeCloseTo(100);
+    expect(top.box(0).x).toBeCloseTo(top.origin[0]);
+
+    const middle = codeLayout({ ...style, at: [100, 50], anchor: [1, 0.5] }, SOURCE);
+
+    expect(middle.bounds.x + middle.bounds.width).toBeCloseTo(100);
+    expect(middle.bounds.y + middle.bounds.height / 2).toBeCloseTo(50);
+    expect(layout.origin).toEqual([10, 20]);
   });
 
   test("find() boxes a substring, by occurrence", () => {
