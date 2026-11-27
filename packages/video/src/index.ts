@@ -21,6 +21,8 @@ export type VideoOptions = SceneOptions & {
   readonly fps?: number;
   readonly loops?: number;
   readonly quality?: VideoQuality;
+  /** How many browser tabs capture frames in parallel. More is faster and uses more memory. Default 4. */
+  readonly workers?: number;
 } & (
     | { readonly format?: "mp4"; readonly codec?: VideoCodec<"mp4"> }
     | { readonly format: "webm"; readonly codec?: VideoCodec<"webm"> }
@@ -77,6 +79,10 @@ export const video = async (svg: string, options: VideoOptions = {}): Promise<Vi
 
   if (!isQuality(quality))
     throw new Error(`video() needs a quality of low, medium or high, got ${quality}.`);
+  const workers = options.workers ?? 4;
+
+  if (!(Number.isInteger(workers) && workers > 0))
+    throw new Error(`video() needs a positive whole number of workers, got ${workers}.`);
   const transparent = options.background === "transparent";
 
   if (transparent && !alpha)
@@ -84,7 +90,7 @@ export const video = async (svg: string, options: VideoOptions = {}): Promise<Vi
       `video() can't keep a transparent background in ${format}. Use format: "webm", or pass a background color.`,
     );
 
-  const scene = await openScene(svg, options, "video()");
+  const scene = await openScene(svg, { ...options, pages: workers }, "video()");
 
   try {
     if (!(scene.duration > 0))
@@ -94,10 +100,23 @@ export const video = async (svg: string, options: VideoOptions = {}): Promise<Vi
     const { playbackRate } = scene;
     const frames = Math.max(1, Math.round((scene.duration / playbackRate) * loops * fps));
     await scene.addScript(BUNDLE);
-    const first = await scene.capture(0);
-    const view = new DataView(first.buffer, first.byteOffset);
-    const width = view.getUint32(16) & ~1;
-    const height = view.getUint32(20) & ~1;
+    const encoding = transparent ? "fast-png" : "jpeg";
+    const type = transparent ? "image/png" : "image/jpeg";
+    const first = await scene.capture(0, encoding);
+
+    const measured = await scene.evaluate(
+      async (url) => {
+        const bitmap = await createImageBitmap(await (await fetch(url)).blob());
+        const { width, height } = bitmap;
+        bitmap.close();
+
+        return { width, height };
+      },
+      `data:${type};base64,${Buffer.from(first).toString("base64")}`,
+    );
+
+    const width = measured.width & ~1;
+    const height = measured.height & ~1;
 
     const supported = await scene.evaluate(
       ({ codec, width, height, fps, quality, transparent }) => {
@@ -144,15 +163,29 @@ export const video = async (svg: string, options: VideoOptions = {}): Promise<Vi
       { format, codec, fps, quality: QUALITIES[quality], transparent },
     );
 
+    // Captures run ahead of the encoder, which still takes the frames in order.
+    const pending: Promise<Uint8Array>[] = [];
+    let next = 0;
+
     for (let i = 0; i < frames; i++) {
-      const png =
-        i === 0 ? first : await scene.capture(((i / fps) * playbackRate) % scene.duration);
+      for (; next < frames && next < i + workers * 2; next++) {
+        const shot =
+          next === 0
+            ? Promise.resolve(first)
+            : scene.capture(((next / fps) * playbackRate) % scene.duration, encoding);
+
+        // A shot that fails before its turn is reported when it is awaited, not as unhandled.
+        shot.catch(() => {});
+        pending.push(shot);
+      }
+
+      const shot = await pending.shift()!;
 
       await scene.evaluate(
-        async ({ png, i, fps, width, height }) => {
+        async ({ shot, type, i, fps, width, height }) => {
           // SAFETY: runs in the page after the call above stored svjeezVideo.
           const page = globalThis as Page;
-          const blob = await (await fetch(`data:image/png;base64,${png}`)).blob();
+          const blob = await (await fetch(`data:${type};base64,${shot}`)).blob();
           const bitmap = await createImageBitmap(blob, 0, 0, width, height);
 
           const sample = new page.Mediabunny.VideoSample(bitmap, {
@@ -164,7 +197,7 @@ export const video = async (svg: string, options: VideoOptions = {}): Promise<Vi
           sample.close();
           bitmap.close();
         },
-        { png: Buffer.from(png).toString("base64"), i, fps, width, height },
+        { shot: Buffer.from(shot).toString("base64"), type, i, fps, width, height },
       );
     }
 
