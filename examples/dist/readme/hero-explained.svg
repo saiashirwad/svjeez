@@ -111,7 +111,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
   <rect x="300.5" y="26.5" width="396" height="56" rx="10" fill="var(--surface)" stroke="var(--raised)"/>
   <circle cx="318" cy="46" r="3.5" fill="var(--magenta)"/>
   <text x="328" y="50" font-size="12" fill="var(--text)">&lt;Stack&gt; offset</text>
-  <text x="314" y="68" font-size="11" fill="var(--muted)">signal.map(v =&gt; [0, -24 * v])</text>
+  <text x="314" y="68" font-size="11" fill="var(--muted)">signal.map(v =&gt; [0, -14 * v])</text>
   <rect x="576.5" y="34.5" width="112" height="40" rx="6" fill="var(--background)" stroke="var(--raised)"/>
   <rect x="612.5" y="54.5" width="40" height="14" rx="3" fill="none" stroke="var(--border)" stroke-dasharray="2 3"/>
   <rect width="40" height="14" rx="3" fill="var(--magenta)" class="a m10"/>
@@ -143,7 +143,7 @@ svg{--background:#090A0C;--surface:#18181B;--raised:#27272A;--border:#7C7C82;--m
   <rect x="300.5" y="158.5" width="396" height="56" rx="10" fill="var(--surface)" stroke="var(--raised)"/>
   <circle cx="318" cy="178" r="3.5" fill="var(--blue)"/>
   <text x="328" y="182" font-size="12" fill="var(--text)">&lt;Arrow&gt; ref</text>
-  <text x="314" y="200" font-size="11" fill="var(--muted)">from={a.right} to={stage.left}</text>
+  <text x="314" y="200" font-size="11" fill="var(--muted)">from={driver.right} to={stage.left}</text>
   <rect x="576.5" y="166.5" width="112" height="40" rx="6" fill="var(--background)" stroke="var(--raised)"/>
   <rect x="594.5" y="180.5" width="18" height="12" rx="3" fill="var(--raised)" stroke="var(--border)"/>
   <rect width="18" height="12" rx="3" fill="var(--magenta)" class="a m15"/>
