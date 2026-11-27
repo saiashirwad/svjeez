@@ -1,7 +1,18 @@
 import { Code, codeLayout, codeTokens, ts } from "@svjeez/code";
 import { tomorrow } from "@svjeez/code/palettes";
-import { Group, Sequence, Series, Shape, Text, ease, rect, scene, span, track } from "svjeez";
-import { durationOf } from "svjeez/tools";
+import {
+  Group,
+  Sequence,
+  Series,
+  Shape,
+  Text,
+  durationOf,
+  ease,
+  rect,
+  scene,
+  span,
+  track,
+} from "svjeez";
 import { mono, theme } from "../theme";
 
 const SIZE: readonly [number, number] = [560, 260];

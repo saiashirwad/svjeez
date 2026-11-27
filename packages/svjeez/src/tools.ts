@@ -1,4 +1,4 @@
-export { durationOf, expand, propsOf } from "./author/expand";
+export { expand, propsOf } from "./author/expand";
 
 export { svg, type SvgOptions } from "./svg/svg";
 

@@ -38,7 +38,7 @@ Timing is where most scene errors occur. Every span and track obeys strict clock
 - Every `span` is in seconds on the clock of its nearest enclosing `<Sequence>` (root clock = scene). Nested `<Sequence>` offsets add: `span(0.5, 1)` inside `<Sequence when={span(2, 6)}>` inside `<Sequence when={span(1, 3)}>` runs at `3.5s..4.5s`.
 - Nothing may run past its clock's end, and one `Track` instance cannot be read on two different clocks (build a track per clock with a helper function).
 - `<Sequence when={span(s, o)}>` shifts its children by `s` with length `o`; `<Sequence when={span(s)}>` (open span) runs to scene end. `<Sequence clock={clock("name", span(s, o))}>` plays on a page-driven clock (`svjeez/page`).
-- `<Series gap={g}>` plays children sequentially, starting each `g` seconds after the previous ends (negative `g` overlaps). Every direct child of `<Series>` must have a `<Sequence when={span(0, length)}>` at its root—always start at local `0`, since `<Series>` adds the offset. `durationOf(element)` (from `svjeez/tools`) gives the length of an element such as a series, as in `<Sequence when={span(0, durationOf(series))}>` for a footer across it, or `still: durationOf(series) - 0.5`.
+- `<Series gap={g}>` plays children sequentially, starting each `g` seconds after the previous ends (negative `g` overlaps). Every direct child of `<Series>` must have a `<Sequence when={span(0, length)}>` at its root—always start at local `0`, since `<Series>` adds the offset. `durationOf(element)` gives the length of an element such as a series, as in `<Sequence when={span(0, durationOf(series))}>` for a footer across it, or `still: durationOf(series) - 0.5`.
 
 ### `span` arithmetic
 

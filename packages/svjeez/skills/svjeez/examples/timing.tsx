@@ -5,6 +5,7 @@ import {
   Series,
   Shape,
   circle,
+  durationOf,
   ease,
   enter,
   exit,
@@ -19,7 +20,6 @@ import {
   track,
   wiggle,
 } from "svjeez";
-import { durationOf } from "svjeez/tools";
 
 const theme = tokens({
   light: {

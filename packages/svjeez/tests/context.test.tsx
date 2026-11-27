@@ -7,13 +7,14 @@ import {
   circle,
   component,
   context,
+  durationOf,
   scene,
   span,
   track,
   type Slots,
   type SceneElement,
 } from "svjeez";
-import { durationOf, isLane, propsOf, SceneError, type Model } from "svjeez/tools";
+import { isLane, propsOf, SceneError, type Model } from "svjeez/tools";
 
 const Tone = context("none");
 
