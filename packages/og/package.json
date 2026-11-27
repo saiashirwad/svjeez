@@ -1,6 +1,6 @@
 {
   "name": "@svjeez/og",
-  "version": "0.8.0-next.3",
+  "version": "0.8.0-next.4",
   "description": "Link-preview cards for svjeez: write an og:image as a scene, render it to a PNG, JPEG or WebP in headless Chromium.",
   "license": "MIT",
   "repository": {
