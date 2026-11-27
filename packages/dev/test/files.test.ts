@@ -55,7 +55,8 @@ describe("a scene that imports its constants", () => {
     expect(dot).toMatchObject({ group: "field", value: 24 });
     expect(dot?.sites[0]?.file).toBe(tokens);
     expect(dot?.uses).toHaveLength(1);
-    expect(view.marks.some((mark) => mark.key === "palette.dot")).toBe(false);
+    expect(view.marks.some((mark) => mark.key === "palette.dot" && !mark.use)).toBe(false);
+    expect(view.marks.filter((mark) => mark.key === "palette.dot" && mark.use)).toHaveLength(1);
     expect(view.marks.some((mark) => mark.key.startsWith("Shape.rect[0]"))).toBe(true);
   });
 

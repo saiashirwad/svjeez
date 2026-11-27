@@ -1,13 +1,18 @@
 import type { ControlValue, Span } from "@svjeez/live";
 import type { GroupedControl, Mark } from "../workspace.ts";
+import { hideCard, showCard } from "./card.ts";
+import type { CardHost } from "./card.ts";
 import { bezierOf, curveGlyph } from "./ease.ts";
 import { tokenize } from "./highlight.ts";
 import { el, escapeHtml, isBoolean, isNumber, isText } from "./dom.ts";
 
 /*
  * The scene's file as the control surface: every literal a signal is written with can be turned where it stands.
- * Drag a number sideways, click a color's swatch, click an ease's curve, click a boolean. The literal changes in
- * place while the picture follows; letting go writes it to the file.
+ * Drag a number sideways, click a color's swatch, click an ease's curve, click a boolean, drag a point's crosshair.
+ * The literal changes in place while the picture follows; letting go writes it to the file. A name the file reads a
+ * value through (a constant, a field, a theme color) turns that value where it is defined, even in another file.
+ * Named values are always marked; the many literals nothing names show only on the line under the pointer, or all
+ * at once while ⌥ is held.
  */
 
 export interface CodeHost {
@@ -20,13 +25,17 @@ export interface CodeHost {
   readonly pick: (control: GroupedControl, at: HTMLElement) => void;
   /** The pointer is over a literal, or left it. */
   readonly hover: (control: GroupedControl | undefined) => void;
+  /** Turn a literal into a constant of this name. */
+  readonly extract: (key: string, name: string) => void;
 }
 
 /** One literal in the file and the control that turns it, when the scene has one. */
-interface Literal extends Mark {
+interface Literal extends Omit<Mark, "use"> {
   readonly control?: GroupedControl;
-  /** Which of its control's sites this is: 0, or 1 for a span's length. */
+  /** Which of its control's sites this is: 0, or 1 for a span's length or a point's y. */
   readonly site: number;
+  /** A read of the control's name, not where its value is written. */
+  readonly use: boolean;
 }
 
 const literalsOf = (marks: readonly Mark[], controls: readonly GroupedControl[]): Literal[] => {
@@ -37,12 +46,20 @@ const literalsOf = (marks: readonly Mark[], controls: readonly GroupedControl[])
   );
 
   return [...marks]
-    .sort((a, b) => a.from - b.from)
+    .sort((a, b) => a.from - b.from || b.to - a.to)
     .map((mark) => {
       const control = byKey.get(mark.key);
-      const site = control?.sites.findIndex((each) => each.from === mark.from) ?? 0;
 
-      return { ...mark, site: Math.max(0, site), ...(control && { control }) };
+      const site = mark.use
+        ? 0
+        : (control?.sites.findIndex((each) => each.from === mark.from) ?? 0);
+
+      return {
+        ...mark,
+        site: Math.max(0, site),
+        use: mark.use === true,
+        ...(control && { control }),
+      };
     });
 };
 
@@ -98,14 +115,25 @@ const linesOf = (html: string): string[] => {
   return lines;
 };
 
+/** What a literal turns as: a point's numbers are numbers, and a name that reads a span or a text turns nothing. */
+const kindOf = (control: GroupedControl | undefined, use: boolean): string => {
+  if (!control) return "fixed";
+
+  if (control.kind === "vec") return use ? "fixed" : "number";
+
+  if (use && (control.kind === "span" || control.kind === "text")) return "fixed";
+
+  return control.kind;
+};
+
 const literalHtml = (
   text: string,
   tokens: readonly { from: number; to: number; tone: string }[],
   literal: Literal,
 ): string => {
-  const { control } = literal;
+  const { control, use } = literal;
   const inside = painted(text, tokens, literal.from, literal.to);
-  const kind = control?.kind ?? "fixed";
+  const kind = kindOf(control, use);
 
   const attrs =
     ' data-key="' +
@@ -114,9 +142,11 @@ const literalHtml = (
     literal.site +
     '" data-kind="' +
     kind +
+    '" data-prom="' +
+    (control?.prominence ?? "named") +
     '"';
 
-  return '<span class="lit"' + attrs + ">" + inside + "</span>";
+  return '<span class="' + (use ? "lit use" : "lit") + '"' + attrs + ">" + inside + "</span>";
 };
 
 /** The file, a row per line with its number, and every literal a control turns wrapped so it can be turned. */
@@ -159,23 +189,63 @@ export const renderSource = (
     "</div>";
 
   const byKey = new Map<string, GroupedControl>();
+  const index = new Map<string, HTMLElement[]>();
 
   for (const literal of literals) if (literal.control) byKey.set(literal.key, literal.control);
 
   for (const node of container.querySelectorAll<HTMLElement>(".lit")) {
-    const control = byKey.get(node.dataset["key"] ?? "");
+    const key = node.dataset["key"] ?? "";
+    const control = byKey.get(key);
+    const list = index.get(key);
+
+    if (list) list.push(node);
+    else index.set(key, [node]);
 
     if (control) decorate(node, control);
   }
+
+  shown.set(container, { index, text, hot: [] });
 };
+
+/** What a rendered pane knows about itself: its literals by key, its text, and the ones lit now. */
+interface Shown {
+  readonly index: Map<string, HTMLElement[]>;
+  readonly text: string;
+  hot: HTMLElement[];
+}
+
+const shown = new WeakMap<HTMLElement, Shown>();
+
+const isUse = (node: HTMLElement) => node.classList.contains("use");
 
 const SWATCH_TITLE = "Pick a color";
 const CURVE_TITLE = "Pick a curve";
+const CROSS_TITLE = "Drag: across moves x, up and down moves y";
 
-/** Adds a color's swatch or an ease's curve in front of its literal. */
+const SVG = "http://www.w3.org/2000/svg";
+
+/** A crosshair: four ticks round a dot. */
+const crossGlyph = (): SVGSVGElement => {
+  const svg = document.createElementNS(SVG, "svg");
+  const path = document.createElementNS(SVG, "path");
+
+  svg.setAttribute("viewBox", "0 0 10 10");
+  svg.setAttribute("width", "10");
+  svg.setAttribute("height", "10");
+  svg.setAttribute("class", "glyph");
+  path.setAttribute("d", "M5 .8V3M5 7V9.2M.8 5H3M7 5H9.2M5 5h0");
+  svg.append(path);
+
+  return svg;
+};
+
+/** Adds a color's swatch, an ease's curve or a point's crosshair in front of its literal. */
 const decorate = (node: HTMLElement, control: GroupedControl) => {
+  const deep = control.prominence === "deep" ? " deep" : "";
+  const use = isUse(node);
+
   if (control.kind === "color" && isText(control.value)) {
-    const swatch = el("button", "swatch");
+    const swatch = el("button", "swatch" + deep);
 
     swatch.type = "button";
     swatch.style.setProperty("--c", control.value);
@@ -186,7 +256,7 @@ const decorate = (node: HTMLElement, control: GroupedControl) => {
 
   if (control.kind === "ease" && isText(control.value)) {
     const curve = bezierOf(control.value);
-    const button = el("button", "curve");
+    const button = el("button", "curve" + deep);
 
     button.type = "button";
     button.title = CURVE_TITLE;
@@ -196,8 +266,20 @@ const decorate = (node: HTMLElement, control: GroupedControl) => {
     node.before(button);
   }
 
+  if (control.kind === "vec" && node.dataset["site"] === "0") {
+    const cross = el("button", "cross" + deep);
+
+    cross.type = "button";
+    cross.title = CROSS_TITLE;
+    cross.setAttribute("aria-label", "Move " + control.label);
+    cross.append(crossGlyph());
+    node.before(cross);
+  }
+
+  if (use || deep) return;
+
   node.title =
-    control.kind === "number" || control.kind === "span"
+    control.kind === "number" || control.kind === "span" || control.kind === "vec"
       ? control.label + " · drag sideways · ⌥ finer · ⇧ coarser"
       : control.kind === "boolean"
         ? control.label + " · click to flip"
@@ -223,7 +305,7 @@ const written = (value: number, was: string, step: number): string =>
 const isSpan = (value: ControlValue): value is Span =>
   typeof value === "object" && "start" in value;
 
-/** The number at one site of a control: the value, or a span's start or length. */
+/** The number at one site of a control: the value, a span's start or length, or a point's x or y. */
 const numberAt = (control: GroupedControl, site: number): number | undefined => {
   const { value } = control;
 
@@ -231,15 +313,59 @@ const numberAt = (control: GroupedControl, site: number): number | undefined => 
 
   if (isSpan(value)) return site === 1 ? value.over : value.start;
 
+  if (Array.isArray(value)) return value[site === 1 ? 1 : 0];
+
   return undefined;
 };
 
-const withNumber = (control: GroupedControl, site: number, next: number): ControlValue => {
-  const { value } = control;
-
+const withNumber = (value: ControlValue, site: number, next: number): ControlValue => {
   if (isSpan(value)) return site === 1 ? { ...value, over: next } : { ...value, start: next };
 
+  if (Array.isArray(value)) return site === 1 ? [value[0] ?? 0, next] : [next, value[1] ?? 0];
+
   return next;
+};
+
+/** One number a drag turns: where it started, how fast the pointer moves it, and which way. */
+interface Axis {
+  readonly site: number;
+  readonly from: number;
+  readonly was: string;
+  readonly step: number;
+  readonly rate: number;
+  readonly min: number;
+  readonly max: number;
+  readonly vertical: boolean;
+  value: number;
+  text: string;
+}
+
+const axisOf = (control: GroupedControl, site: number, vertical: boolean): Axis | undefined => {
+  const from = numberAt(control, site);
+
+  if (from === undefined) return undefined;
+  const was = control.sites[site]?.text ?? String(from);
+  const point = control.kind === "vec";
+  const guess = { min: 0, max: Math.max(point ? 10 : 1, Math.abs(from) * 2), step: 0.01 };
+  const range = control.range ?? guess;
+  const step = control.kind === "span" ? 0.01 : point ? 10 ** -decimalsOf(was) : range.step;
+
+  const rate = point
+    ? Math.max(step / 4, guess.max / 500)
+    : Math.max(step / 4, (range.max - range.min) / 240);
+
+  return {
+    site,
+    from,
+    was,
+    step,
+    rate,
+    min: range.min,
+    max: range.max,
+    vertical,
+    value: from,
+    text: was,
+  };
 };
 
 /** The floating readout over a literal while it is dragged: its name, its value and where it sits in its range. */
@@ -268,38 +394,117 @@ const showHud = (node: HTMLElement, name: string, value: string, fraction: numbe
 
 const hideHud = () => hud.classList.remove("on");
 
+/** Writes a literal's text in place, keeping its color and the quotes it was written with. */
+const setText = (lit: HTMLElement, text: string) => {
+  const tone = lit.childElementCount === 1 ? lit.firstElementChild : null;
+  const node = tone ?? lit;
+  const was = node.textContent ?? "";
+  const quote = /^["'`]/.exec(was)?.[0];
+
+  node.textContent = quote && !text.startsWith(quote) ? quote + text + quote : text;
+};
+
+/** Shows a value where it is written: every literal of the key at that site, never a name that reads it. */
+const paint = (container: HTMLElement, key: string, site: number, text: string) => {
+  for (const node of shown.get(container)?.index.get(key) ?? [])
+    if (!isUse(node) && node.dataset["site"] === String(site)) setText(node, text);
+};
+
 /** Wires the pane once; every render after reuses it, finding its control by the literal's key. */
 export const wireSource = (
   container: HTMLElement,
   controlOf: (key: string) => GroupedControl | undefined,
   host: CodeHost,
 ): void => {
+  const nodesOf = (key: string) => shown.get(container)?.index.get(key) ?? [];
+
+  const cardHost: CardHost = {
+    jump: (key) => {
+      const def = nodesOf(key).find((node) => !isUse(node));
+
+      if (def) flash(container, def);
+    },
+    name: host.extract,
+    taken: (name) =>
+      new RegExp("\\b" + name.replaceAll("$", "\\$") + "\\b").test(
+        shown.get(container)?.text ?? "",
+      ),
+    local: (key) => nodesOf(key).some((node) => !isUse(node)),
+  };
+
   const target = (event: Event) => {
     const node = event.target instanceof Element ? event.target : null;
     const lit = node?.closest<HTMLElement>(".lit");
-    const extra = node?.closest<HTMLElement>(".swatch, .curve");
+    const extra = node?.closest<HTMLElement>(".swatch, .curve, .cross");
 
     const owner =
       lit ?? (extra?.nextElementSibling instanceof HTMLElement ? extra.nextElementSibling : null);
 
     const control = owner ? controlOf(owner.dataset["key"] ?? "") : undefined;
 
-    return owner && control ? { lit: owner, control, extra } : undefined;
+    return owner && control ? { lit: owner, control, extra, use: isUse(owner) } : undefined;
+  };
+
+  let over: HTMLElement | undefined;
+  let dwell: number | undefined;
+
+  const stop = () => {
+    window.clearTimeout(dwell);
+    hideCard(true);
   };
 
   container.addEventListener("pointerover", (event) => {
+    if (container.classList.contains("scrubbing")) return;
     const found = target(event);
 
+    if (found?.lit === over) return;
+    over = found?.lit;
     host.hover(found?.control);
+    window.clearTimeout(dwell);
+
+    if (!found || !(found.use || found.control.prominence === "deep")) {
+      hideCard();
+
+      return;
+    }
+
+    dwell = window.setTimeout(
+      () => showCard(found.control, found.use, found.lit, cardHost, false),
+      found.use ? 280 : 650,
+    );
   });
 
-  container.addEventListener("pointerleave", () => host.hover(undefined));
+  container.addEventListener("pointerleave", () => {
+    over = undefined;
+    window.clearTimeout(dwell);
+    hideCard();
+    host.hover(undefined);
+  });
+
+  container.addEventListener("scroll", stop, { passive: true });
+
+  container.addEventListener("contextmenu", (event) => {
+    const found = target(event);
+
+    if (!found || found.control.prominence !== "deep") return;
+    event.preventDefault();
+    window.clearTimeout(dwell);
+    showCard(found.control, false, found.lit, cardHost, true);
+  });
+
+  const peek = (event: KeyboardEvent) => container.classList.toggle("reveal", event.altKey);
+
+  window.addEventListener("keydown", peek);
+  window.addEventListener("keyup", peek);
+  window.addEventListener("blur", () => container.classList.remove("reveal"));
 
   container.addEventListener("click", (event) => {
     const found = target(event);
 
     if (!found) return;
     const { control, lit, extra } = found;
+
+    if (extra?.classList.contains("cross")) return;
 
     if (extra || control.kind === "color" || control.kind === "ease") {
       host.pick(control, extra ?? lit);
@@ -308,7 +513,7 @@ export const wireSource = (
     }
 
     if (control.kind === "boolean" && isBoolean(control.value)) {
-      setText(lit, String(!control.value));
+      paint(container, control.key, 0, String(!control.value));
       host.commit(control.key, !control.value);
 
       return;
@@ -320,59 +525,101 @@ export const wireSource = (
   container.addEventListener("pointerdown", (down) => {
     const found = target(down);
 
-    if (!found || found.extra || down.button !== 0) return;
-    const { lit, control } = found;
-    const site = Number(lit.dataset["site"] ?? 0);
-    const from = numberAt(control, site);
+    if (!found || down.button !== 0) return;
+    const { lit, control, extra, use } = found;
+    const cross = extra?.classList.contains("cross") === true;
 
-    if (from === undefined) return;
-    down.preventDefault();
-    lit.setPointerCapture(down.pointerId);
-    const range = control.range ?? { min: 0, max: Math.max(1, Math.abs(from) * 2), step: 0.01 };
-    const step = control.kind === "span" ? 0.01 : range.step;
-    const rate = Math.max(step / 4, (range.max - range.min) / 240);
-    const was = lit.textContent ?? String(from);
-    const strict = control.origin === "param";
-    let value = from;
+    if (extra && !cross) return;
+    window.clearTimeout(dwell);
+    hideCard(true);
+    const site = Number(lit.dataset["site"] ?? 0);
+
+    const axes = cross
+      ? [axisOf(control, 0, false), axisOf(control, 1, true)]
+      : use && control.kind !== "number"
+        ? []
+        : [axisOf(control, site, false)];
+
+    if (axes.length === 0 || axes.some((axis) => !axis)) return;
+    const turning = axes.flatMap((axis) => (axis ? [axis] : []));
+    const grab = extra ?? lit;
+    const only = turning.length === 1 ? turning[0] : undefined;
+    const echoes = nodesOf(control.key).filter((node) => node !== lit);
     let moved = false;
+    let changed = false;
+    let value: ControlValue = control.value;
+
+    down.preventDefault();
+    grab.setPointerCapture(down.pointerId);
+
+    const name =
+      control.label +
+      (control.kind === "span"
+        ? site === 1
+          ? " · length"
+          : " · start"
+        : control.kind === "vec" && !cross
+          ? site === 1
+            ? " · y"
+            : " · x"
+          : "");
 
     const show = () =>
       showHud(
-        lit,
-        control.label + (control.kind === "span" ? (site === 1 ? " · length" : " · start") : ""),
-        lit.textContent ?? "",
-        control.kind === "span" ? undefined : (value - range.min) / (range.max - range.min || 1),
+        grab,
+        name,
+        turning.map((axis) => axis.text).join(", "),
+        only && control.kind !== "span" && control.kind !== "vec"
+          ? (only.value - only.min) / (only.max - only.min || 1)
+          : undefined,
       );
 
     const move = (event: PointerEvent) => {
       const dx = event.clientX - down.clientX;
+      const dy = event.clientY - down.clientY;
 
-      if (!moved && Math.abs(dx) < 3) return;
+      if (!moved && Math.hypot(cross ? dx : dx, cross ? dy : 0) < 3) return;
 
       if (!moved) {
         moved = true;
         host.dragging(true);
         container.classList.add("scrubbing");
-        lit.classList.add("dragging");
+        container.dataset["scrub"] = cross ? "xy" : "x";
+        grab.classList.add("dragging");
+
+        for (const node of echoes) node.classList.add("echo");
       }
 
       const factor = event.altKey ? 0.1 : event.shiftKey ? 10 : 1;
-      const fine = event.altKey ? step / 10 : step;
-      let next = snap(from + dx * rate * factor, fine);
+      let next = value;
+      let any = false;
 
-      if (strict) next = Math.min(range.max, Math.max(range.min, next));
+      for (const axis of turning) {
+        const fine = event.altKey ? axis.step / 10 : axis.step;
+        let to = snap(axis.from + (axis.vertical ? dy : dx) * axis.rate * factor, fine);
 
-      if (control.kind === "span") next = Math.max(site === 1 ? 0.01 : 0, next);
+        if (control.origin === "param") to = Math.min(axis.max, Math.max(axis.min, to));
 
-      if (next === value) return;
+        if (control.kind === "span") to = Math.max(axis.site === 1 ? 0.01 : 0, to);
+
+        if (to === axis.value) continue;
+        axis.value = to;
+        axis.text = written(to, axis.was, fine);
+        paint(container, control.key, axis.site, axis.text);
+        any = true;
+      }
+
+      if (!any) return;
+      changed = true;
+
+      for (const axis of turning) next = withNumber(next, axis.site, axis.value);
       value = next;
-      setText(lit, written(value, was, fine));
       show();
-      host.preview(control.key, withNumber(control, site, value));
+      host.preview(control.key, value);
     };
 
     const up = () => {
-      lit.removeEventListener("pointermove", move);
+      grab.removeEventListener("pointermove", move);
       hideHud();
 
       if (!moved) {
@@ -382,34 +629,25 @@ export const wireSource = (
       }
 
       container.classList.remove("scrubbing");
-      lit.classList.remove("dragging");
+      delete container.dataset["scrub"];
+      grab.classList.remove("dragging");
+
+      for (const node of echoes) node.classList.remove("echo");
       host.dragging(false);
 
-      if (value !== from) host.commit(control.key, withNumber(control, site, value));
+      if (changed) host.commit(control.key, value);
     };
 
-    lit.addEventListener("pointermove", move);
-    lit.addEventListener("pointerup", up, { once: true });
-    lit.addEventListener("pointercancel", up, { once: true });
+    grab.addEventListener("pointermove", move);
+    grab.addEventListener("pointerup", up, { once: true });
+    grab.addEventListener("pointercancel", up, { once: true });
   });
-};
-
-/** Writes a literal's text in place, keeping its color and the quotes it was written with. */
-const setText = (lit: HTMLElement, text: string) => {
-  const tone = lit.childElementCount === 1 ? lit.firstElementChild : null;
-  const node = tone ?? lit;
-  const was = node.textContent ?? "";
-  const quote = /^["'`]/.exec(was)?.[0];
-
-  node.textContent = quote && !text.startsWith(quote) ? quote + text + quote : text;
 };
 
 /** Sets what a literal shows while a picker previews a value, and its swatch or curve with it. */
 export const showLiteral = (container: HTMLElement, key: string, text: string): void => {
-  for (const lit of container.querySelectorAll<HTMLElement>(
-    '.lit[data-key="' + CSS.escape(key) + '"]',
-  )) {
-    setText(lit, text);
+  for (const lit of shown.get(container)?.index.get(key) ?? []) {
+    if (!isUse(lit)) setText(lit, text);
     const before = lit.previousElementSibling;
 
     if (before instanceof HTMLElement && before.classList.contains("swatch"))
@@ -423,7 +661,7 @@ export const showLiteral = (container: HTMLElement, key: string, text: string): 
   }
 };
 
-/** Scrolls the pane, and only the pane, so `node` sits in view. */
+/** Scrolls the pane, and only the pane, so the node sits in view. */
 const reveal = (container: HTMLElement, node: HTMLElement, center: boolean) => {
   const top = node.offsetTop;
   const margin = 48;
@@ -438,27 +676,40 @@ const reveal = (container: HTMLElement, node: HTMLElement, center: boolean) => {
     });
 };
 
+/** Scrolls to a literal and pulses it once. */
+const flash = (container: HTMLElement, node: HTMLElement) => {
+  const row = node.closest<HTMLElement>(".ln");
+
+  if (row) reveal(container, row, true);
+  node.classList.remove("flash");
+  void node.offsetWidth;
+  node.classList.add("flash");
+  node.addEventListener("animationend", () => node.classList.remove("flash"), { once: true });
+};
+
 /** Lights the literals of these signals, and their lines. */
 export const lightKeys = (
   container: HTMLElement,
   keys: readonly string[],
   scroll: boolean,
 ): void => {
-  let first: HTMLElement | undefined;
+  const here = shown.get(container);
 
-  for (const lit of container.querySelectorAll<HTMLElement>(".lit")) {
-    const on = keys.includes(lit.dataset["key"] ?? "");
+  if (!here) return;
 
-    lit.classList.toggle("hot", on);
-    first = first ?? (on ? lit : undefined);
+  for (const node of here.hot) {
+    node.classList.remove("hot");
+    node.closest(".ln")?.classList.remove("lit-line");
   }
 
-  for (const row of container.querySelectorAll<HTMLElement>(".ln.lit-line"))
-    row.classList.remove("lit-line");
+  here.hot = keys.flatMap((key) => here.index.get(key) ?? []);
 
-  for (const lit of container.querySelectorAll<HTMLElement>(".lit.hot"))
-    lit.closest(".ln")?.classList.add("lit-line");
+  for (const node of here.hot) {
+    node.classList.add("hot");
+    node.closest(".ln")?.classList.add("lit-line");
+  }
 
+  const first = here.hot.find((node) => !isUse(node)) ?? here.hot[0];
   const row = first?.closest<HTMLElement>(".ln");
 
   if (row && scroll) reveal(container, row, true);

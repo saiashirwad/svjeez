@@ -178,6 +178,40 @@ button:disabled { cursor: default; opacity: 0.4 }
 .lit[data-kind="color"]:hover, .lit[data-kind="ease"]:hover, .lit[data-kind="boolean"]:hover, .lit[data-kind="text"]:hover { background: var(--hover); box-shadow: 0 0 0 2px var(--hover) }
 .lit.hot { background: var(--scrub-soft); box-shadow: 0 0 0 2px var(--scrub-soft) }
 .code.scrubbing, .code.scrubbing * { cursor: ew-resize !important }
+.code.scrubbing[data-scrub="xy"], .code.scrubbing[data-scrub="xy"] * { cursor: move !important }
+.lit.use[data-kind="number"] { text-decoration-color: color-mix(in srgb, var(--scrub) 38%, transparent) }
+.lit.use[data-kind="number"]:hover { text-decoration-color: var(--scrub) }
+.lit.echo { background: var(--scrub-soft); box-shadow: 0 0 0 2px var(--scrub-soft) }
+.lit.flash { animation: flash 1.3s var(--ease) }
+@keyframes flash { 0%, 40% { background: var(--scrub-soft); box-shadow: 0 0 0 3px var(--scrub-soft) } 100% { background: transparent; box-shadow: 0 0 0 3px transparent } }
+.lit[data-prom="deep"] { text-decoration-color: transparent; transition: background var(--fast), box-shadow var(--fast), text-decoration-color var(--fast) }
+.ln:hover .lit[data-prom="deep"] { text-decoration-color: color-mix(in srgb, var(--scrub) 38%, transparent) }
+.code.reveal .lit[data-prom="deep"] { text-decoration-color: color-mix(in srgb, var(--scrub) 70%, transparent) }
+.ln .lit[data-prom="deep"]:hover, .ln .lit[data-prom="deep"].dragging { text-decoration-color: var(--scrub) }
+.swatch.deep { width: 9px; height: 9px; margin: 0 4px 0 1px; vertical-align: -0.5px; border-radius: 3px; opacity: 0.5; box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.1); transition: transform var(--fast) var(--ease), box-shadow var(--fast), opacity var(--fast) }
+.curve.deep, .cross.deep { opacity: 0.5; transition: opacity var(--fast), background var(--fast), box-shadow var(--fast) }
+.ln:hover .swatch.deep, .ln:hover .curve.deep, .ln:hover .cross.deep, .code.reveal .swatch.deep, .code.reveal .curve.deep, .code.reveal .cross.deep, .swatch.deep:hover, .curve.deep:hover, .cross.deep:hover { opacity: 1 }
+.cross { display: inline-grid; place-items: center; width: 14px; height: 14px; margin: 0 4px 0 1px; vertical-align: -2.5px; border-radius: 4px; background: var(--sunken); box-shadow: inset 0 0 0 1px var(--line); cursor: move; touch-action: none; user-select: none; transition: background var(--fast), box-shadow var(--fast) }
+.cross:hover, .cross.dragging { background: var(--scrub-soft); box-shadow: inset 0 0 0 1px var(--scrub) }
+.cross .glyph path { stroke: var(--scrub); stroke-width: 1.3 }
+
+.tip { position: fixed; z-index: 40; min-width: 188px; max-width: 300px; padding: 9px 11px; border-radius: 10px; background: var(--raised); box-shadow: var(--shadow-pop); display: grid; gap: 6px; font-size: 12px; opacity: 0; transform: translateY(-3px); pointer-events: none; transition: opacity var(--fast), transform var(--slow) var(--ease) }
+.tip.on { opacity: 1; transform: none; pointer-events: auto }
+.tip-head { display: flex; align-items: center; gap: 7px; min-width: 0 }
+.tip-head .swatch { margin: 0; flex: none; vertical-align: baseline; pointer-events: none }
+.tip-title { font: 600 12px var(--mono); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.tip-value { margin-left: auto; padding-left: 10px; font: 12px var(--mono); font-variant-numeric: tabular-nums; color: var(--text-3); white-space: nowrap }
+.tip-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 20px; color: var(--text-3); font-size: 11.5px }
+.tip-dim { white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.tip-link { margin: 0 -4px; padding: 1px 4px; border-radius: 4px; font: 11.5px var(--mono); color: var(--accent); transition: background var(--fast) }
+.tip-link:hover:not(:disabled) { background: var(--accent-soft) }
+.tip-link:disabled { color: var(--text-2); cursor: default }
+.tip-name { height: 22px; margin: -1px -5px -1px 0; padding: 0 8px; border-radius: 6px; font-size: 11.5px; font-weight: 500; color: var(--accent); transition: background var(--fast) }
+.tip-name:hover { background: var(--accent-soft) }
+.tip-input { height: 28px; border: 1px solid var(--line-strong); border-radius: 7px; background: var(--surface); padding: 0 9px; font: 12.5px var(--mono); transition: border-color var(--fast), box-shadow var(--fast) }
+.tip-input:focus { border-color: var(--accent-line); box-shadow: 0 0 0 3px var(--accent-soft) }
+.tip-input.bad { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft) }
+.tip-hint.bad { color: var(--danger) }
 .swatch { display: inline-block; width: 12px; height: 12px; margin: 0 5px 0 1px; vertical-align: -1.5px; border-radius: 3.5px; background: var(--c); box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.14); transition: transform var(--fast) var(--ease), box-shadow var(--fast) }
 .swatch:hover { transform: scale(1.18); box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.2), 0 0 0 2px var(--surface), 0 0 0 3px var(--line-strong) }
 .curve { display: inline-grid; place-items: center; width: 16px; height: 16px; margin: 0 4px 0 0; vertical-align: -3px; border-radius: 4px; background: var(--sunken); box-shadow: inset 0 0 0 1px var(--line); transition: background var(--fast), box-shadow var(--fast) }
@@ -202,6 +236,24 @@ button:disabled { cursor: default; opacity: 0.4 }
 #badge { position: absolute; top: 10px; right: 10px; display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 8px; border-radius: 999px; background: var(--raised); box-shadow: var(--shadow-pop); color: var(--text-2); font-size: 11.5px; opacity: 0; transform: translateY(-2px); transition: opacity var(--fast), transform var(--fast) var(--ease); pointer-events: none }
 #badge.on { opacity: 1; transform: none }
 #badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent) }
+.handles { position: absolute; inset: 0; z-index: 2; pointer-events: none }
+.rings { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible }
+.rings circle { fill: none; stroke: var(--accent-line); stroke-width: 1.25; stroke-dasharray: 3 3; opacity: 0; transition: opacity var(--fast) }
+.rings circle.on { opacity: 1 }
+.handle { position: absolute; width: 28px; height: 28px; margin: -14px 0 0 -14px; cursor: grab; touch-action: none; opacity: 0; transform: scale(0.6); pointer-events: none; transition: opacity var(--fast), transform var(--slow) var(--ease) }
+#stage:hover .handle, #stage.alt .handle, .handle.echo, .handle.dragging { opacity: 1; transform: none; pointer-events: auto }
+.handles.busy .handle:not(.dragging) { opacity: 0.35 }
+.handle::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px var(--accent), 0 1px 4px rgb(0 0 0 / 0.3); transition: transform var(--fast) var(--ease), box-shadow var(--fast), background var(--fast) }
+.handle.radius::before { inset: 9px }
+.handle:hover::before, .handle.echo::before { transform: scale(1.2); box-shadow: 0 0 0 2px var(--accent), 0 0 0 6px var(--accent-soft), 0 1px 4px rgb(0 0 0 / 0.3) }
+.handle.dragging { cursor: grabbing }
+.handle.dragging::before { transform: scale(1.2); background: var(--accent); box-shadow: 0 0 0 2px #fff, 0 0 0 5px var(--accent-line), 0 2px 8px rgb(0 0 0 / 0.3) }
+.handle.echo::after { content: ""; position: absolute; inset: 8px; border-radius: 50%; box-shadow: 0 0 0 2px var(--accent); animation: ripple 0.9s var(--ease) infinite }
+@keyframes ripple { to { transform: scale(2.6); opacity: 0 } }
+.tag { position: absolute; left: 50%; bottom: 100%; margin-bottom: -4px; transform: translate(-50%, 2px); display: inline-flex; gap: 6px; align-items: baseline; height: 20px; padding: 0 7px; line-height: 20px; border-radius: 6px; background: var(--raised); box-shadow: var(--shadow-pop); font: 11px var(--mono); white-space: nowrap; color: var(--text-3); opacity: 0; pointer-events: none; transition: opacity var(--fast), transform var(--fast) var(--ease) }
+.tag b { font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums }
+.handle.below .tag { bottom: auto; top: 100%; margin: -4px 0 0 }
+.handle:hover .tag, .handle.dragging .tag, .handle.echo .tag { opacity: 1; transform: translate(-50%, 0) }
 .stage-empty { color: var(--text-3); text-align: center; display: grid; gap: 4px; padding: 48px 0 }
 .stage-empty b { color: var(--text); font-weight: 500; font-size: 14px }
 
@@ -258,12 +310,30 @@ button:disabled { cursor: default; opacity: 0.4 }
 .bar svg { position: absolute; inset: 3px 3px; width: calc(100% - 6px); height: calc(100% - 6px); overflow: visible }
 .bar path { fill: none; stroke: var(--accent); stroke-width: 1.25; stroke-linecap: round; opacity: 0.9 }
 .row:hover .bar { background: color-mix(in srgb, var(--accent) 20%, transparent) }
-.bar.live { cursor: grab; background: color-mix(in srgb, var(--accent) 22%, transparent); box-shadow: inset 0 0 0 1px var(--accent-line) }
+.bar.live { z-index: 1; cursor: grab; background: color-mix(in srgb, var(--accent) 22%, transparent); box-shadow: inset 0 0 0 1px var(--accent-line) }
 .bar.live:hover { background: color-mix(in srgb, var(--accent) 30%, transparent) }
 .bar.moving { cursor: grabbing; box-shadow: inset 0 0 0 1.5px var(--accent), 0 2px 8px -2px var(--accent-line) }
-.grip { position: absolute; right: 0; top: 0; bottom: 0; width: 8px; cursor: ew-resize }
-.grip::after { content: ""; position: absolute; right: 2px; top: 3px; bottom: 3px; width: 2px; border-radius: 1px; background: var(--accent); opacity: 0; transition: opacity var(--fast) }
-.bar.live:hover .grip::after, .bar.stretching .grip::after { opacity: 0.8 }
+.bar.stretching { cursor: ew-resize; box-shadow: inset 0 0 0 1.5px var(--accent), 0 2px 8px -2px var(--accent-line) }
+.bar.curved:hover path { stroke-width: 1.75; opacity: 1 }
+.edge { position: absolute; top: 0; bottom: 0; width: min(6px, 30%); cursor: ew-resize; z-index: 1 }
+.edge.start { left: 0 }
+.edge.end { right: 0 }
+.edge::after { content: ""; position: absolute; top: 4px; bottom: 4px; width: 2px; border-radius: 1px; background: var(--accent); opacity: 0; transition: opacity var(--fast) }
+.edge.start::after { left: 1px }
+.edge.end::after { right: 1px }
+.bar.live:hover .edge::after, .bar.stretching .edge::after { opacity: 0.5 }
+.bar.live .edge:hover::after, .bar.stretching .edge::after { opacity: 1 }
+.goal { position: absolute; top: 50%; z-index: 1; transform: translate(6px, -50%); font: 10.5px/16px var(--mono); font-variant-numeric: tabular-nums; color: var(--text-3); white-space: nowrap; padding: 0 3px; margin: 0 -3px; border-radius: 4px; transition: color var(--fast), background var(--fast) }
+.goal.before { transform: translate(calc(-100% - 6px), -50%) }
+.goal.scrub { cursor: ew-resize; touch-action: none }
+.goal.scrub:hover, .goal.scrubbing { color: var(--scrub); background: var(--scrub-soft) }
+.goal.swatch { width: 9px; height: 9px; padding: 0; margin: 0; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1px var(--line-strong); transform: translate(6px, -50%) }
+.goal.swatch.before { transform: translate(calc(-100% - 6px), -50%) }
+.rows { position: relative }
+.guide { position: absolute; top: 0; bottom: 0; width: 1px; margin-left: -0.5px; background: var(--accent-line); opacity: 0; pointer-events: none; z-index: 1; transition: opacity var(--fast) }
+.guide.on { opacity: 1 }
+.bar-tip { position: fixed; z-index: 50; padding: 2px 7px; border-radius: 6px; background: var(--raised); box-shadow: var(--shadow-pop); color: var(--text); font: 11px/18px var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity var(--fast) }
+.bar-tip.on { opacity: 1 }
 .track.crowded .bar { background: color-mix(in srgb, var(--accent) 9%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent) }
 .row:hover .track.crowded .bar { background: color-mix(in srgb, var(--accent) 14%, transparent) }
 .more { color: var(--text-3); font-size: 12px; margin: 8px 0 0 6px }

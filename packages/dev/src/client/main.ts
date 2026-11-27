@@ -10,6 +10,8 @@ import { closePicker, pickColor, pickEase } from "./picker.ts";
 import type { PickerHost } from "./picker.ts";
 import { lightKeys, lightLine, renderSource, showLiteral, wireSource } from "./source.ts";
 import type { CodeHost } from "./source.ts";
+import { wireStage } from "./stage.ts";
+import type { Stage, StageHost } from "./stage.ts";
 import { renderTimeline, showTime } from "./timeline.ts";
 import type { TimelineHost } from "./timeline.ts";
 
@@ -92,6 +94,7 @@ const PAUSE =
   '<svg viewBox="0 0 12 12" aria-hidden="true"><rect x="2.5" y="1.5" width="2.5" height="9" rx="0.8"/><rect x="7" y="1.5" width="2.5" height="9" rx="0.8"/></svg>Pause';
 
 let current: SVGSVGElement | null = null;
+let handles: Stage | undefined;
 
 const showClock = () => {
   clock.textContent = time.toFixed(2) + "s";
@@ -151,6 +154,7 @@ toggle.addEventListener("click", () => (playing ? pause() : play()));
 const showSvg = (svg: string) => {
   current = mount(art, svg, STAGE_CSS);
   rate = Number(current?.getAttribute("data-playback-rate")) || 1;
+  handles?.sync();
 
   if (playing) play();
   else pause();
@@ -461,7 +465,7 @@ const render = (view: StateView) => {
       (view.lanes.length === 1 ? " lane" : " lanes") +
       (live ? " · " + live + " you can drag" : "")
     : "";
-  renderTimeline(timeline, view.lanes, view.source ?? "", duration, timelineHost);
+  renderTimeline(timeline, view.lanes, view.source ?? "", duration, view.controls, timelineHost);
 
   const text = view.source ?? "";
   const shownKey = (view.file ?? "") + "|" + text;
@@ -490,6 +494,7 @@ const render = (view: StateView) => {
     else closeInspector();
   }
 
+  handles?.show(view);
   showLog(view);
   showClock();
   void showStats(view);
@@ -576,6 +581,7 @@ const showPreview = (preview: Preview) => {
       preview.lanes,
       state.source ?? "",
       preview.duration ?? duration,
+      state.controls,
       timelineHost,
     );
 };
@@ -622,6 +628,15 @@ const commit = async (key: string, value: ControlValue) => {
   epoch++;
   setStatus("Writing…", "busy");
   answer(await api.commit(key, value));
+};
+
+/** Turns a literal into a constant: one edit to undo. */
+const extractIt = async (key: string, name: string) => {
+  queued = undefined;
+  gesture = undefined;
+  epoch++;
+  setStatus("Writing…", "busy");
+  answer(await api.extract(key, name));
 };
 
 let variantsAsked = 0;
@@ -829,20 +844,50 @@ const codeHost: CodeHost = {
     if (control.kind === "color") pickColor(at, control, palette(), pickerHost);
     else if (control.kind === "ease") pickEase(at, control, pickerHost);
   },
-  hover: (control) => lightKeys(source, control ? [control.key] : [], false),
+  hover: (control) => {
+    lightKeys(source, control ? [control.key] : [], false);
+    handles?.echo(control?.key);
+  },
+  extract: (key, name) => void extractIt(key, name),
 };
 
-wireSource(
-  source,
-  (key) => state?.controls.find((control) => control.key === key && control.group !== "derived"),
-  codeHost,
-);
+let indexed: { readonly of: StateView; readonly by: Map<string, GroupedControl> } | undefined;
+
+/** A control by key, from a map built once per state: the code pane asks on every pointer move. */
+const controlOf = (key: string) => {
+  if (state && indexed?.of !== state)
+    indexed = {
+      of: state,
+      by: new Map(
+        state.controls.flatMap((control) =>
+          control.group === "derived" ? [] : [[control.key, control] as const],
+        ),
+      ),
+    };
+
+  return indexed?.by.get(key);
+};
+
+wireSource(source, controlOf, codeHost);
+
+const stageHost: StageHost = {
+  preview,
+  commit: (key, value) => void commit(key, value),
+  dragging,
+  hover: (control) => lightKeys(source, control ? [control.key] : [], true),
+  select: (control) => showInspector(control, false),
+  revert: pickerHost.revert,
+};
+
+handles = wireStage(stage, () => current, stageHost);
 
 const timelineHost: TimelineHost = {
   jump,
   preview,
   commit: (key, value) => void commit(key, value),
   line: (line) => lightLine(source, line),
+  literals: (keys) => lightKeys(source, keys, false),
+  ease: (anchor, control) => pickEase(anchor, control, pickerHost),
   dragging,
 };
 

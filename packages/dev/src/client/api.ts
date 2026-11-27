@@ -40,6 +40,7 @@ export const api = {
   preview: (key: string, value: ControlValue) =>
     post<Preview | { readonly stale: true }>("/api/preview", { key, value }),
   commit: (key: string, value: ControlValue) => post<StateView>("/api/commit", { key, value }),
+  extract: (key: string, name: string) => post<StateView>("/api/extract", { key, name }),
   variants: (key: string) =>
     post<{ readonly variants: readonly Variant[] }>("/api/variants", { key }),
   undo: () => post<StateView>("/api/undo"),

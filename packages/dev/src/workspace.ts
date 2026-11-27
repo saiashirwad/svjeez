@@ -5,6 +5,7 @@ import {
   candidatesFor,
   discover,
   extract,
+  guessRange,
   importsOf,
   isSpan,
   valuesOf,
@@ -18,7 +19,9 @@ import type {
   Controls,
   Files,
   InvalidValue,
+  Signal,
   Signals,
+  Site,
   Splice,
   StaleSource,
 } from "@svjeez/live";
@@ -94,6 +97,7 @@ export interface LaneSpan {
   readonly over: number;
   /** The curve it moves along: a cubic bezier, a straight line, or steps. */
   readonly ease?: LaneEase;
+  /** The signal that writes this move: its chain step when the lane is one, else a span literal. */
   readonly signal?: string;
 }
 
@@ -123,6 +127,8 @@ export interface Mark {
   readonly key: string;
   readonly from: number;
   readonly to: number;
+  /** Where the source reads a named signal, rather than where it is written. */
+  readonly use?: true;
 }
 
 /** Everything the page draws, as JSON. */
@@ -184,42 +190,148 @@ const groupOf = (control: Control): Group =>
 
 const near = (a: number, b: number) => Math.abs(a - b) < 1e-6;
 
+const HEX = /^(["'])(#[0-9A-Fa-f]{3}|#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{8})\1$/;
+
+/** A chain step's target or curve literal as a signal of its own, so it can be written like any other. */
+const partOf = (owner: Signal, part: "target" | "ease", site: Site): Signal | undefined => {
+  const base = {
+    key: owner.key + "." + part,
+    origin: "chain",
+    prominence: "deep",
+    sites: [site],
+    file: site.file,
+    line: owner.line,
+  } as const;
+
+  const label =
+    (owner.step?.chain ?? owner.key) + " step " + ((owner.step?.index ?? 0) + 1) + " " + part;
+
+  if (part === "ease") return { ...base, kind: "ease", value: site.text, label };
+  const number = Number(site.text.replaceAll("_", ""));
+
+  if (site.text.trim() !== "" && Number.isFinite(number))
+    return { ...base, kind: "number", value: number, label, range: guessRange(number, site.text) };
+
+  const hex = HEX.exec(site.text)?.[2];
+
+  return hex ? { ...base, kind: "color", value: hex, label } : undefined;
+};
+
+/** The signals with each chain step's target and curve added: `theta.step0.target`, `theta.step0.ease`. */
+const withParts = (signals: Signals): Signals => {
+  const parts = Object.values(signals).flatMap((signal) =>
+    signal.step
+      ? [
+          signal.step.target && partOf(signal, "target", signal.step.target),
+          signal.step.ease && partOf(signal, "ease", signal.step.ease),
+        ].flatMap((part) => (part ? [part] : []))
+      : [],
+  );
+
+  return { ...signals, ...Object.fromEntries(parts.map((part) => [part.key, part])) };
+};
+
+/** A chain step is a time, not a keyframe's: those make no moves of their own. */
+const stepsOf = (signals: Signals): Map<string, Signal[]> => {
+  const chains = new Map<string, Signal[]>();
+
+  for (const signal of Object.values(signals))
+    if (signal.step && signal.origin === "chain" && !/\.frame\d+(?:@|$)/.test(signal.key))
+      chains.set(signal.step.chain, [...(chains.get(signal.step.chain) ?? []), signal]);
+
+  for (const steps of chains.values())
+    steps.sort((a, b) => (a.step?.index ?? 0) - (b.step?.index ?? 0));
+
+  return chains;
+};
+
 /**
- * A lane's spans, each with the span signal it was written with: one whose start and length are the span's, in the
- * file the lane was written in, the nearest one below the lane's line when several match.
+ * The step of a chain behind each move of a lane: the chain's steps in order, each one the next move that has its
+ * span's start and length (a `rewind` its length), so equal spans in different chains are told apart. A chain
+ * counts only when every one of its steps is found; the one that explains the most moves wins, the nearest to the
+ * lane's line when several do.
+ */
+const alignChain = (
+  lane: LaneReport,
+  chains: ReadonlyMap<string, readonly Signal[]>,
+): Map<number, string> => {
+  let best = new Map<number, string>();
+  let bestGap = Infinity;
+
+  for (const steps of chains.values()) {
+    const found = new Map<number, string>();
+    let from = 0;
+
+    if (lane.source && steps[0]?.file !== lane.source.file) continue;
+
+    for (const signal of steps) {
+      const at = lane.spans.findIndex((span, i) => i >= from && fits(signal, span));
+
+      if (at === -1) continue;
+      found.set(at, signal.key);
+      from = at + 1;
+    }
+
+    if (found.size < steps.length) continue;
+    const gap = Math.abs((steps[0]?.line ?? 0) - (lane.source?.line ?? 0));
+
+    if (found.size > best.size || (found.size === best.size && found.size > 0 && gap < bestGap)) {
+      best = found;
+      bestGap = gap;
+    }
+  }
+
+  return best;
+};
+
+const fits = (signal: Signal, span: { readonly start: number; readonly over: number }) =>
+  isSpan(signal.value)
+    ? near(signal.value.start, span.start) && near(signal.value.over, span.over)
+    : signal.kind === "number" && near(Number(signal.value), span.over);
+
+/**
+ * A lane's spans, each with the signal it was written with: its step of a chain when the lane is one, else a span
+ * literal with the span's start and length, in the file the lane was written in, nearest the lane's line.
  */
 const lanesOf = (lanes: readonly LaneReport[], signals: Signals): LaneView[] => {
   const spans = Object.values(signals).filter((signal) => signal.kind === "span");
+  const chains = stepsOf(signals);
 
-  return lanes.map((lane) => ({
-    key: lane.key,
-    lane: lane.lane,
-    backend: lane.backend,
-    ...(lane.source && { file: lane.source.file, line: lane.source.line }),
-    ...(lane.period !== undefined && { period: lane.period }),
-    spans: lane.spans.map((span) => {
-      const line = lane.source?.line ?? 0;
+  return lanes.map((lane) => {
+    const aligned = alignChain(lane, chains);
 
-      const matches = spans
-        .filter(
-          (signal) =>
-            isSpan(signal.value) &&
-            near(signal.value.start, span.start) &&
-            near(signal.value.over, span.over) &&
-            (lane.source === undefined || signal.file === lane.source.file),
-        )
-        .sort((a, b) => Math.abs(a.line - line) - Math.abs(b.line - line));
+    return {
+      key: lane.key,
+      lane: lane.lane,
+      backend: lane.backend,
+      ...(lane.source && { file: lane.source.file, line: lane.source.line }),
+      ...(lane.period !== undefined && { period: lane.period }),
+      spans: lane.spans.map((span, index) => {
+        const line = lane.source?.line ?? 0;
+        const step = aligned.get(index);
 
-      const signal = matches[0]?.key;
+        const matches = spans
+          .filter(
+            (signal) =>
+              signal.origin !== "chain" &&
+              isSpan(signal.value) &&
+              near(signal.value.start, span.start) &&
+              near(signal.value.over, span.over) &&
+              (lane.source === undefined || signal.file === lane.source.file),
+          )
+          .sort((a, b) => Math.abs(a.line - line) - Math.abs(b.line - line));
 
-      return {
-        start: span.start,
-        over: span.over,
-        ...(span.ease && { ease: span.ease }),
-        ...(signal !== undefined && { signal }),
-      };
-    }),
-  }));
+        const signal = step ?? matches[0]?.key;
+
+        return {
+          start: span.start,
+          over: span.over,
+          ...(span.ease && { ease: span.ease }),
+          ...(signal !== undefined && { signal }),
+        };
+      }),
+    };
+  });
 };
 
 const isNumberValue = (value: ControlValue): value is number => typeof value === "number";
@@ -289,7 +401,7 @@ const viewsOf = (open: Open): GroupedControl[] => {
 /** What the source says, rendered: the signals and controls it declares, and what it builds to. */
 const read = (file: string, text: string, built: Built | BuildFailed, others: Files): Open => {
   const files = { ...others, [file]: text };
-  const signals = discover(files, file);
+  const signals = withParts(discover(files, file));
   const failed = built instanceof BuildFailed ? built : undefined;
   const made = built instanceof BuildFailed ? undefined : built;
   let controls: Controls = signals;
@@ -453,11 +565,16 @@ const makeWorkspace = (
         lanes: made && open ? lanesOf(made.lanes, open.signals) : [],
         controls: open ? viewsOf(open) : [],
         marks: open
-          ? Object.values(open.signals).flatMap((signal) =>
-              signal.sites.flatMap((site) =>
+          ? Object.values(open.signals).flatMap((signal) => [
+              ...signal.sites.flatMap((site) =>
                 site.file === open.file ? [{ key: signal.key, from: site.from, to: site.to }] : [],
               ),
-            )
+              ...(signal.uses ?? []).flatMap((site) =>
+                site.file === open.file
+                  ? [{ key: signal.key, from: site.from, to: site.to, use: true as const }]
+                  : [],
+              ),
+            ])
           : [],
         log: { labels: history.entries.map((entry) => entry.label), at: history.at },
       };
