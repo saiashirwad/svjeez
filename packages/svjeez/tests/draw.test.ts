@@ -18,6 +18,7 @@ import {
 } from "svjeez";
 import { boxesOf, type Model } from "svjeez/tools";
 import { isLane } from "../src/model/lane";
+import { SceneError } from "../src/model/scene-error";
 
 const apart = (a: Vec, b: Vec): number => Math.hypot(a[0] - b[0], a[1] - b[1]);
 
@@ -420,5 +421,177 @@ describe("array forms and sampled defaults", () => {
 
     expect(sampled(wave, span(0, 2))).toEqual(sampled(wave, span(0, 2), { tolerance: 0.25 }));
     expect(sampled(wave, span(0, 2))).not.toEqual(sampled(wave, span(0, 2), { tolerance: 5 }));
+  });
+});
+
+describe("review findings", () => {
+  const signedArea = (outline: ReturnType<typeof scatter>): number[] =>
+    outline.kind === "path"
+      ? outline.contours.map((contour) => {
+          const ring = [contour.start, ...contour.curves.map((curve) => curve[2])];
+
+          return ring.reduce((sum, [x, y], i) => {
+            const [nx, ny] = ring[(i + 1) % ring.length]!;
+
+            return sum + (x * ny - nx * y) / 2;
+          }, 0);
+        })
+      : [];
+
+  test("<Limb> over a window that does not start at 0 reads reach at scene time and never jumps a turn", () => {
+    const root: Vec = [100, 100];
+
+    const around = (t: number): Vec => [
+      root[0] + (70 + 10 * Math.sin((t - 3) * 9)) * Math.cos((t - 3) * 2 * Math.PI * 1.2),
+      root[1] + (70 + 10 * Math.sin((t - 3) * 9)) * Math.sin((t - 3) * 2 * Math.PI * 1.2),
+    ];
+
+    const made = scene({ size: [300, 300], duration: 5, title: "Late limb" }, () =>
+      Limb({
+        root,
+        bones: [60, 50],
+        reach: around,
+        over: span(3, 1),
+        tolerance: 0.05,
+        step: 0.02,
+        bone: (length, index) =>
+          Shape({
+            key: `bone-${index}`,
+            geometry: line([0, 0], [length, 0]),
+            stroke: { color: "#000000" },
+          }),
+        joint: (index) =>
+          index === 2 ? Shape({ key: "tip", geometry: circle(1), fill: "#FF0000" }) : undefined,
+      }),
+    );
+
+    const rotates = (node: Model.SceneNode): number[][] =>
+      node.kind === "group"
+        ? [
+            ...node.layers.flatMap((layer) =>
+              isLane(layer.rotate) ? [layer.rotate.keys.map((key) => key.value)] : [],
+            ),
+            ...node.children.flatMap(rotates),
+          ]
+        : [];
+
+    for (const values of rotates(made.root))
+      for (let i = 1; i < values.length; i++)
+        expect(Math.abs(values[i]! - values[i - 1]!)).toBeLessThan(180);
+
+    for (const t of [3, 3.25, 3.5, 3.9, 4]) {
+      const box = Object.entries(boxesOf(made, t)).find(([key]) => key.endsWith("/tip"))![1];
+
+      expect(apart([box.x + box.width / 2, box.y + box.height / 2], around(t))).toBeLessThan(1.5);
+    }
+  });
+
+  test("scatter with alternate keeps one winding so overlapping copies do not cancel", () => {
+    const leaf = blob([
+      [0, -6],
+      [20, -3],
+      [20, 3],
+      [0, 6],
+    ]);
+
+    const areas = signedArea(
+      scatter(leaf, { along: line([0, 0], [60, 0]), count: 6, alternate: true, angle: 30 }),
+    );
+
+    expect(areas).toHaveLength(6);
+    expect(new Set(areas.map(Math.sign)).size).toBe(1);
+  });
+
+  test("limb keeps both bone lengths when the target is closer than the bones' difference", () => {
+    const [root, knee, tip] = limb([0, 0], [150, 50], [50, 0]);
+
+    expect(apart(root!, knee!)).toBeCloseTo(150, 1);
+    expect(apart(knee!, tip!)).toBeCloseTo(50, 1);
+  });
+
+  test("limb keeps every bone length with three bones and a target too close", () => {
+    const joints = limb([0, 0], [100, 20, 20], [10, 0]);
+
+    [100, 20, 20].forEach((length, i) =>
+      expect(apart(joints[i]!, joints[i + 1]!)).toBeCloseTo(length, 1),
+    );
+  });
+
+  test("a target exactly on the root folds the chain instead of straightening it", () => {
+    for (const bones of [
+      [30, 30],
+      [60, 50],
+      [20, 20, 20],
+    ]) {
+      const joints = limb([5, 5], bones, [5, 5]);
+
+      bones.forEach((length, i) =>
+        expect(apart(joints[i]!, joints[i + 1]!)).toBeCloseTo(length, 1),
+      );
+
+      if (bones.length === 2) expect(apart(joints.at(-1)!, [5, 5])).toBeLessThan(bones[0]!);
+      expect(joints.every((j) => j.every(Number.isFinite))).toBe(true);
+    }
+  });
+
+  test("limb.pose has no flick at the sample that lands on the root", () => {
+    const pose = limb.pose({
+      root: [100, 100],
+      bones: [60, 50],
+      reach: (t) => [100 + 40 * Math.abs(t - 1), 100],
+    });
+
+    const at = pose(1).angles;
+
+    for (const t of [0.98, 1.02]) {
+      pose(t).angles.forEach((angle, i) =>
+        expect(Math.abs(Math.sin(((angle - at[i]!) * Math.PI) / 360))).toBeLessThan(0.1),
+      );
+    }
+  });
+
+  test("aim without tip content throws a fix-it error", () => {
+    const attempt = () =>
+      Limb({
+        root: [0, 0],
+        bones: [10, 10],
+        reach: () => [10, 5],
+        aim: () => [50, 50],
+        over: span(0, 1),
+        bone: (length) =>
+          Shape({ geometry: line([0, 0], [length, 0]), stroke: { color: "#000000" } }),
+      });
+
+    expect(attempt).toThrow(SceneError);
+    expect(attempt).toThrow("aim");
+  });
+
+  test("brush.at takes samples and reads the centerline the outline uses", () => {
+    const points: Vec[] = [
+      [0, 0],
+      [50, 40],
+      [100, 0],
+    ];
+
+    expect(brush.at(points, 4, 0.5, { samples: 1 }).point[1]).toBeCloseTo(0, 0);
+    expect(bounds(brush(points, 4, { samples: 1 })).height).toBeLessThan(10);
+    expect(brush.at(points, 4, 0.5).point[1]).toBeGreaterThan(20);
+  });
+
+  test("line and polygon copy the array they are given", () => {
+    const list: Vec[] = [
+      [0, 0],
+      [10, 0],
+      [5, 8],
+    ];
+
+    const outline = polygon(list);
+    const open = line(list);
+
+    list.push([99, 99]);
+    list.shift();
+
+    expect(outline).toEqual(polygon([0, 0], [10, 0], [5, 8]));
+    expect(open).toEqual(line([0, 0], [10, 0], [5, 8]));
   });
 });

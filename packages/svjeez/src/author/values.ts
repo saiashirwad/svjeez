@@ -203,7 +203,7 @@ const pointList = (args: readonly Vec[] | readonly [readonly Vec[]]): readonly V
 
   // SAFETY: a lone first argument whose own first item is an array is a list of points, not a point.
   return args.length === 1 && isArray(first) && isArray(first[0])
-    ? (first as readonly Vec[])
+    ? [...(first as readonly Vec[])]
     : (args as readonly Vec[]);
 };
 

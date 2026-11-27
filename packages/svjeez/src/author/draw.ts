@@ -1,7 +1,7 @@
 import type { Cubic, Geometry as Outline, Vec } from "../model/ir";
 import { SceneError } from "../model/scene-error";
 import { isArray } from "../model/guards";
-import { merge, pointAt, rotated, scaled, spline } from "./geometry";
+import { merge, pointAt, reversed, rotated, scaled, spline } from "./geometry";
 import { moved } from "./holes";
 import { Group, type Child, type SceneElement } from "./nodes";
 import { sampled } from "./recipes";
@@ -67,18 +67,28 @@ export interface BrushPlace {
   readonly width: number;
 }
 
+/** How many centerline samples a brush uses: `wanted`, or the default for these points and widths. */
+const sampleCount = (
+  points: readonly Vec[],
+  widths: readonly number[],
+  wanted: number | undefined,
+  what: string,
+): number => {
+  if (wanted !== undefined && !(Number.isInteger(wanted) && wanted >= 1))
+    throw new SceneError(`${what} needs a whole number of samples of 1 or more, got ${wanted}.`);
+  // A straight brush with a linear taper is exact from its two ends; curves and swells need samples between.
+  const straight = points.length === 2 && widths.length <= 2;
+
+  return wanted ?? (straight ? 1 : Math.min(48, Math.max(12, points.length * 6)));
+};
+
 const brushOutline = (
   points: readonly Vec[],
   width: number | readonly number[],
   { samples: wanted }: BrushOptions = {},
 ): Outline => {
   const { center, widths } = brushed(points, width);
-
-  if (wanted !== undefined && !(Number.isInteger(wanted) && wanted >= 1))
-    throw new SceneError(`brush() needs a whole number of samples of 1 or more, got ${wanted}.`);
-  // A straight brush with a linear taper is exact from its two ends; curves and swells need samples between.
-  const straight = points.length === 2 && widths.length <= 2;
-  const count = wanted ?? (straight ? 1 : Math.min(48, Math.max(12, points.length * 6)));
+  const count = sampleCount(points, widths, wanted, "brush()");
 
   const rows = Array.from({ length: count + 1 }, (_, i) => {
     const share = i / count;
@@ -158,16 +168,29 @@ const brushOutline = (
  * A filled stroke through `points` whose width changes along it: a neck, a limb, a tail, a branch, a tentacle.
  * `width` is one number, or widths spread evenly from start to end (`[8, 1]` tapers, `[3, 9, 3]` swells in the
  * middle). The ends are rounded. The outline's point count depends only on the inputs (and `samples`), never on
- * where the points are, so a brush can be sampled. `brush.at(points, width, share)` reads the centerline point,
- * angle and width `share` (0..1) of the way along, to attach something to it.
+ * where the points are, so a brush can be sampled. `brush.at(points, width, share, { samples })` reads the centerline point,
+ * angle and width `share` (0..1) of the way along, to attach something to it. Pass the same `samples` as the brush so
+ * it reads the centerline the outline uses; without it, it matches brush's default.
  */
 export const brush = Object.assign(brushOutline, {
-  at: (points: readonly Vec[], width: number | readonly number[], share: number): BrushPlace => {
+  at: (
+    points: readonly Vec[],
+    width: number | readonly number[],
+    share: number,
+    { samples: wanted }: BrushOptions = {},
+  ): BrushPlace => {
     const { center, widths } = brushed(points, width);
 
     if (!(share >= 0 && share <= 1))
       throw new SceneError(`brush.at() needs a share from 0 to 1, got ${share}.`);
-    const at = pointAt(center, share);
+    const count = sampleCount(points, widths, wanted, "brush.at()");
+
+    // The outline follows a spline through its samples, so read that, not the exact curve between them.
+    const sampledCenter = spline(
+      Array.from({ length: count + 1 }, (_, i) => pointAt(center, i / count).point),
+    );
+
+    const at = pointAt(sampledCenter, share);
 
     return { point: at.point, angle: at.angle, width: widthAt(widths, share) };
   },
@@ -211,15 +234,17 @@ const keep = (from: Vec, to: Vec, length: number): Vec => {
 
 /**
  * The joints of a chain of bones from `root` with the given `lengths`, bent so its tip reaches `target` (or points at
- * it, straight, when it is too far). Returns `lengths.length + 1` points, root first: draw them with `brush`, `line`
+ * it, straight, when it is too far; folded, when it is too close, so every bone keeps its length). Returns `lengths.length + 1` points, root first: draw them with `brush`, `line`
  * or circles. Two bones solve exactly; more bones solve by FABRIK from a pose bowed toward `bend`.
  */
 const solveLimb = (
   root: Vec,
   lengths: readonly number[],
-  target: Vec,
+  aimed: Vec,
   { bend = 1 }: LimbOptions = {},
 ): Vec[] => {
+  let target = aimed;
+
   if (lengths.length === 0 || !lengths.every((l) => l > 0 && Number.isFinite(l)))
     throw new SceneError(
       `limb() needs one or more positive bone lengths, got ${JSON.stringify(lengths)}.`,
@@ -231,7 +256,7 @@ const solveLimb = (
   const total = lengths.reduce((a, b) => a + b, 0);
   const heading = Math.atan2(toward[1], toward[0]);
 
-  if (reach >= total || reach === 0) {
+  if (reach >= total) {
     const out: Vec[] = [root];
     let run = 0;
 
@@ -245,6 +270,24 @@ const solveLimb = (
 
   if (lengths.length === 2) {
     const [a, b] = [lengths[0]!, lengths[1]!];
+
+    // Too close to reach (or on the root): fold the second bone back along the heading, keeping both lengths.
+    if (reach < Math.abs(a - b) || reach === 0) {
+      const way = a >= b ? 1 : -1;
+
+      const knee: Vec = [
+        root[0] + Math.cos(heading) * a * way,
+        root[1] + Math.sin(heading) * a * way,
+      ];
+
+      const tip: Vec = [
+        knee[0] - Math.cos(heading) * b * way,
+        knee[1] - Math.sin(heading) * b * way,
+      ];
+
+      return [root, knee, tip].map(point);
+    }
+
     const cos = (a * a + reach * reach - b * b) / (2 * a * reach);
     const angle = heading + Math.acos(Math.max(-1, Math.min(1, cos))) * bend;
 
@@ -252,6 +295,9 @@ const solveLimb = (
 
     return [root, knee, target].map(point);
   }
+
+  // On the root the passes would collapse every joint onto it; a hair off keeps them apart and the tip as good as there.
+  if (reach === 0) target = [root[0] + 0.001, root[1]];
 
   // Start bowed toward `bend` so FABRIK settles on that side, then alternate passes until the tip lands.
   const joints: Vec[] = [root];
@@ -297,7 +343,10 @@ export interface LimbPoseProps extends LimbOptions {
 }
 
 export interface LimbProps extends LimbPoseProps {
-  /** The window `reach` is sampled over. */
+  /**
+   * The window `reach`, `root` and `aim` are sampled over. They receive scene time (`over.start` to
+   * `over.start + over.over`), the same `t` that `limb.pose` takes, so a window that starts late needs no offset.
+   */
   readonly over: Interval;
   /**
    * A world point the tip joint's content faces: its +x axis points at `aim(t)`, in the same frame as `root`.
@@ -310,7 +359,7 @@ export interface LimbProps extends LimbPoseProps {
   readonly step?: number;
   /** Draws bone `index` in its own frame: from [0, 0], pointing along +x, `length` long. */
   readonly bone: (length: number, index: number) => Child;
-  /** Drawn at every joint, the root and the tip included, in the frame of the bone that ends there. */
+  /** Drawn at every joint, the root and the tip included. Joint `i` is in the frame of the bone that starts there (it turns with that bone); the tip, `joint(bones.length)`, is in the last bone's frame. */
   readonly joint?: (index: number) => Child;
 }
 
@@ -338,7 +387,22 @@ const rootAt = (root: LimbPoseProps["root"], t: number): Vec => (fixed(root) ? r
 const pose =
   ({ root, bones, reach, bend }: LimbPoseProps): ((t: number) => LimbPose) =>
   (t) => {
-    const joints = solveLimb(rootAt(root, t), bones, reach(t), bend === undefined ? {} : { bend });
+    const from = rootAt(root, t);
+    let target = reach(t);
+
+    // A target exactly on the root has no direction: borrow the one the target is moving in, so the angles don't flick.
+    if (target[0] === from[0] && target[1] === from[1])
+      for (const dt of [1e-3, -1e-3]) {
+        const near = sub(reach(t + dt), rootAt(root, t + dt));
+        const n = hypot(near);
+
+        if (n > 0 && Number.isFinite(n)) {
+          target = [from[0] + (near[0] / n) * 1e-3, from[1] + (near[1] / n) * 1e-3];
+          break;
+        }
+      }
+
+    const joints = solveLimb(from, bones, target, bend === undefined ? {} : { bend });
 
     const angles = bones.map((_, i) => {
       const [a, b] = [joints[i]!, joints[i + 1]!];
@@ -385,16 +449,22 @@ export const Limb = (props: LimbProps): SceneElement => {
     table.push(before ? row.map((a, i) => nearest(a, before[i]!)) : row);
   }
 
-  const angle = (index: number) => (t: number) => {
-    const at = Math.min(rows, Math.max(0, Math.round(((t - over.start) / over.over) * rows)));
+  // `sampled` counts t from the start of its window; `reach`, `root` and `aim` read scene time, as `limb.pose` does.
+  const angle = (index: number) => (local: number) => {
+    const at = Math.min(rows, Math.max(0, Math.round((local / over.over) * rows)));
 
-    return nearest(rowAt(t)[index]!, table[at]![index]!);
+    return nearest(rowAt(over.start + local)[index]!, table[at]![index]!);
   };
 
   const tip = (): Child => {
     const content = joint?.(bones.length);
 
-    if (!aim || !content) return content;
+    if (!aim) return content;
+
+    if (!content)
+      throw new SceneError(
+        `<Limb> has an aim and nothing to turn: aim turns the tip joint's content, so return something from joint(${bones.length}) or drop aim.`,
+      );
 
     return Group({
       rotate: sampled(angle(bones.length), over, sampling),
@@ -418,7 +488,7 @@ export const Limb = (props: LimbProps): SceneElement => {
     });
 
   return Group({
-    offset: fixed(root) ? root : sampled(root, over, sampling),
+    offset: fixed(root) ? root : sampled((local) => root(over.start + local), over, sampling),
     children: chain(0),
   });
 };
@@ -454,7 +524,8 @@ const copies = (
     const at = pointAt(along, share);
     const flip = alternate && i % 2 === 1;
     const size = 1 + wobble() * 0.25;
-    const base = scaled(shape, flip ? [size, -size] : size);
+    // Mirroring reverses the winding; reverse it back so overlapping copies merge instead of cancelling.
+    const base = flip ? reversed(scaled(shape, [size, -size])) : scaled(shape, size);
     const turn = at.angle + (flip ? -angle : angle) + wobble() * 20;
 
     return moved(rotated(base, turn), at.point);

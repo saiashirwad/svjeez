@@ -79,6 +79,8 @@ export {
   limb,
   scatter,
   type BlobOptions,
+  type BrushOptions,
+  type BrushPlace,
   type LimbOptions,
   type LimbPose,
   type LimbPoseProps,
