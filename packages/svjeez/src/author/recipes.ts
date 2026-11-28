@@ -146,8 +146,10 @@ export const ride = (
 };
 
 export interface SampledOptions {
+  /** Seconds between samples (default 0.05). */
   readonly step?: Seconds;
-  readonly tolerance: number;
+  /** How far a dropped keyframe may be off, in scene units, degrees or whatever the samples are (default 0.25). */
+  readonly tolerance?: number;
   readonly precision?: number;
 }
 
@@ -232,10 +234,10 @@ const simplified = <T>(
   window: Interval,
   read: (t: Seconds) => T,
   points: (value: T, t: Seconds) => readonly (readonly number[])[],
-  options: { readonly step?: Seconds; readonly tolerance: number },
+  options: { readonly step?: Seconds; readonly tolerance?: number },
   what: string,
 ): Simplified<T> => {
-  const { step = 0.05, tolerance } = options;
+  const { step = 0.05, tolerance = 0.25 } = options;
   const { start: from, over: duration } = closed(window, what);
 
   if (!Number.isFinite(step) || step <= 0)
@@ -310,7 +312,7 @@ export type Sampled<T> = T extends number ? number : T extends Vec ? Vec : Geome
 const sampledTrack = <T extends number | Vec | Geometry>(
   sample: (t: Seconds) => T,
   window: Interval,
-  options: SampledOptions,
+  options: SampledOptions = {},
 ): Track<Sampled<T>> => {
   const round = roundTo(options.precision, "sampled()");
   let shape: string | undefined;
@@ -384,7 +386,7 @@ export const sampled = Object.assign(sampledTrack, {
   all<R extends Record<string, number | Vec | Geometry>>(
     sample: (t: Seconds) => R,
     window: Interval,
-    options: SampledOptions,
+    options: SampledOptions = {},
   ): SampledAll<R> {
     const cache = new Map<Seconds, R>();
 

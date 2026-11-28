@@ -197,8 +197,19 @@ export const arc = ({ radius, start = 0, sweep }: ArcOptions): Geometry => {
   return { kind: "arc", radius: positive(radius, "arc()"), start, sweep };
 };
 
-/** A straight line from one point to the next: two points, or an open line through more. */
-export const line = (...points: readonly Vec[]): Geometry => {
+/** The points of a call written either as separate points or as one array of points. */
+const pointList = (args: readonly Vec[] | readonly [readonly Vec[]]): readonly Vec[] => {
+  const [first] = args;
+
+  // SAFETY: a lone first argument whose own first item is an array is a list of points, not a point.
+  return args.length === 1 && isArray(first) && isArray(first[0])
+    ? [...(first as readonly Vec[])]
+    : (args as readonly Vec[]);
+};
+
+/** A straight line from one point to the next: two points, or an open line through more. Also takes one array. */
+export const line = (...args: readonly Vec[] | readonly [readonly Vec[]]): Geometry => {
+  const points = pointList(args);
   const [from, to, ...more] = points;
 
   if (!from || !to) throw new SceneError(`line() needs two points or more, got ${points.length}.`);
@@ -206,10 +217,10 @@ export const line = (...points: readonly Vec[]): Geometry => {
   return more.length === 0 ? { kind: "line", from, to } : { kind: "points", points, closed: false };
 };
 
-/** A closed outline with a corner at each point. */
-export const polygon = (...points: readonly Vec[]): Geometry => ({
+/** A closed outline with a corner at each point: `polygon(a, b, c)` or `polygon([a, b, c])`. */
+export const polygon = (...args: readonly Vec[] | readonly [readonly Vec[]]): Geometry => ({
   kind: "points",
-  points,
+  points: pointList(args),
   closed: true,
 });
 
