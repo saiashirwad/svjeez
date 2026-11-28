@@ -90,7 +90,18 @@ const folded = (findings: readonly Problem[], names: ReadonlyMap<string, string>
 const RANK: Readonly<Record<Severity, number>> = { error: 0, warning: 1, info: 2 };
 
 /** Every problem the model shows, as the SVG backend would draw it: errors first, then paint order. */
-export const problemsOf = (scene: Scene, sampled?: readonly Seconds[]): Problem[] => {
+export const problemsOf = (scene: Scene, sampled?: readonly Seconds[]): Problem[] =>
+  surveyed(scene, sampled).problems;
+
+/** The problems, and the filter raster a frame needs, sustained (units² of noise-equivalent; see inspect-cost). */
+export interface Surveyed {
+  readonly problems: Problem[];
+  /** The filter raster a frame needs, sustained, in units² of noise-equivalent work (see inspect-cost). */
+  readonly filters: number;
+}
+
+/** The problems, and the filter raster a frame needs. */
+export const surveyed = (scene: Scene, sampled?: readonly Seconds[]): Surveyed => {
   const entries = entriesOf(scene);
   const times = momentsOf(scene, sampled);
   const out: Problem[] = [];
@@ -113,7 +124,7 @@ export const problemsOf = (scene: Scene, sampled?: readonly Seconds[]): Problem[
   lowContrast(survey);
   loopSeam(survey);
   timing(survey);
-  movingFilter(survey);
+  const filters = movingFilter(survey);
   movingBox(survey);
   layoutOverlap(survey);
   wordCuts(survey);
@@ -121,7 +132,7 @@ export const problemsOf = (scene: Scene, sampled?: readonly Seconds[]): Problem[
 
   const order = new Map(entries.map((entry) => [entry.node.key, entry.order]));
 
-  return folded(out, namesOf(scene))
+  const problems = folded(out, namesOf(scene))
     .map((finding, index) => ({ finding, index }))
     .sort(
       (a, b) =>
@@ -130,4 +141,6 @@ export const problemsOf = (scene: Scene, sampled?: readonly Seconds[]): Problem[
         a.index - b.index,
     )
     .map(({ finding }) => finding);
+
+  return { problems, filters };
 };

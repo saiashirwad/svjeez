@@ -38,12 +38,13 @@ import type {
 import { curveLength, isCurved } from "../model/curve";
 import { placeOf } from "../model/scene-error";
 import { atRest, isLane, mapLane } from "../model/lane";
+import { culledOf } from "../model/dark";
 import { mixNumber, same } from "../model/steps";
 import { homed } from "../author/pin";
 import { growBox, lengthOf, onCircle, smilSafeWith } from "../model/geometry";
 import { blendable, isGradient } from "../author/paint";
 import { isColor } from "../model/painted";
-import { reachOf } from "../model/reach";
+import { placed, reachOf } from "../model/reach";
 import { walkScene } from "../model/walk";
 import {
   clipUrl,
@@ -52,6 +53,7 @@ import {
   filterUrl,
   gradientUrl,
   maskUrl,
+  nextId,
   pathId,
   patternUrl,
   working,
@@ -89,6 +91,8 @@ const supports: Readonly<Record<Feature, Support>> = {
   shadow: EXACT,
   adjust: EXACT,
   displace: EXACT,
+  noise: EXACT,
+  emboss: EXACT,
   softBlur: SOFT_BLUR,
   linearGradient: EXACT,
   radialGradient: EXACT,
@@ -118,6 +122,10 @@ interface Ctx {
   current?: SceneNode;
   /** The clock of the clocked sequence the node being emitted is in, if it is in one. */
   clock: ClockMark | undefined;
+  /** The signs of the scales of the groups around the node being emitted, as [x, y]: [-1, 1] is mirrored. */
+  flip: Vec;
+  /** The geometries more than one shape draws, by identity: how often, and the shared paths already written. */
+  readonly reuse: Map<object, { readonly count: number; readonly made: Map<string, string> }>;
 }
 
 const pt = ([x, y]: Vec): string => `${num(x)} ${num(y)}`;
@@ -167,6 +175,8 @@ interface Drawn {
   readonly placed: boolean;
   readonly scale?: Lane<Vec>;
   readonly offset?: Lane<Vec>;
+  /** What the element holds, for an element made of more than the node's own outline. */
+  readonly children?: readonly SvgNode[];
 }
 
 const moved = ([x, y]: Vec): Record<string, AttrValue> =>
@@ -753,6 +763,82 @@ const applyFillOpacity = (
   lanes.push(cssLane(ctx, "fill-opacity", value, (each) => ({ fillOpacity: each })));
 };
 
+/** The geometries that more than one paint layer (`key#fill1`, `key#stroke2`) of `nodes` and their descendants draws, by identity. */
+const reused = (nodes: readonly SceneNode[]): Ctx["reuse"] => {
+  const counts = new Map<object, number>();
+
+  const walk = (node: SceneNode): void => {
+    if (node.kind === "shape" && /#(fill|stroke)\d+$/.test(node.key))
+      counts.set(node.geometry, (counts.get(node.geometry) ?? 0) + 1);
+
+    if (node.kind === "group") node.children.forEach(walk);
+  };
+
+  nodes.forEach(walk);
+
+  return new Map(
+    [...counts].flatMap(([geometry, count]) =>
+      count > 1 ? [[geometry, { count, made: new Map<string, string>() }] as const] : [],
+    ),
+  );
+};
+
+/**
+ * A path that several shapes draw (the layers of a layered fill or stroke) is written once, in <defs>, with its
+ * geometry and any animation of it, and each shape draws a <use> of it that carries the paint, which it inherits.
+ * It stays as is when sharing would not be smaller or when the shape trims (pathLength is not inherited). A scene
+ * with a still twin of its animations gets the still of the shared path too (`{id}s`, which the compiler writes),
+ * and each shape then draws both, one of them hidden at a time.
+ */
+const shared = (ctx: Ctx, node: ShapeNode, drawn: Drawn, lanes: CssLane[]): Drawn => {
+  const entry = ctx.reuse.get(node.geometry);
+  const geometry = drawn.attrs.d ?? drawn.attrs.points;
+
+  if (
+    !entry ||
+    !["path", "polygon", "polyline"].includes(drawn.tag) ||
+    geometry === undefined ||
+    node.trim !== undefined
+  )
+    return drawn;
+  const moving = lanes.filter((lane) => lane.key === "d");
+  const motion = JSON.stringify(moving.map(({ keys, period }) => [keys, period]));
+  const rule = drawn.attrs["fill-rule"];
+  const sign = `${drawn.tag}${geometry}${motion}${String(rule ?? "")}`;
+  let id = entry.made.get(sign);
+
+  if (id === undefined) {
+    const size = String(geometry).length + (moving.length > 0 ? motion.length : 0);
+
+    if ((entry.count - 1) * size <= 40 + 22 * entry.count) return drawn;
+    id = nextId(ctx.defs, "g");
+    entry.made.set(sign, id);
+
+    ctx.defs.nodes.push({
+      ...element(drawn.tag, {
+        id,
+        ...(drawn.attrs.d !== undefined ? { d: geometry } : { points: geometry }),
+        ...(rule !== undefined && { "fill-rule": rule }),
+        ...(ctx.clock && clockAttrs(ctx.clock)),
+      }),
+      ...(moving.length > 0 && { lanes: moving }),
+    });
+  }
+
+  for (const lane of moving) lanes.splice(lanes.indexOf(lane), 1);
+  const { d: _, points: __, "fill-rule": ___, ...rest } = drawn.attrs;
+  const twinned = moving.length > 0 && ctx.scene.still !== undefined;
+
+  return twinned
+    ? {
+        ...drawn,
+        tag: "g",
+        attrs: rest,
+        children: [element("use", { href: `#${id}` }), element("use", { href: `#${id}s` })],
+      }
+    : { ...drawn, tag: "use", attrs: { href: `#${id}`, ...rest } };
+};
+
 const shapeElement = (
   ctx: Ctx,
   node: ShapeNode,
@@ -785,7 +871,7 @@ const shapeElement = (
   applyFillOpacity(ctx, node.fillOpacity, drawn.attrs, lanes);
   stroked(ctx, node, drawn.attrs, lanes, shift);
 
-  return drawn;
+  return routed === node ? shared(ctx, node, drawn, lanes) : drawn;
 };
 
 /** Whether a stroke around this geometry has a join where it starts. An animated geometry might, so it counts. */
@@ -1050,7 +1136,66 @@ interface Holder {
   readonly shift: Vec;
 }
 
-const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Drawn): void => {
+/**
+ * Whether a node's effects light it (emboss) while its own scale mirrors it. Chromium computes lighting
+ * filters in the filtered element's space and paints them black under a mirroring transform, so such a
+ * filter goes on a wrapper outside the node's transforms instead, where the light also keeps its direction.
+ */
+const litMirror = (node: SceneNode): boolean =>
+  working(node.effects).some((effect) => effect.kind === "emboss") &&
+  node.layers.some(({ scale }) =>
+    (isLane(scale) ? scale.keys.map((key) => key.value) : [scale]).some(([x, y]) => x < 0 || y < 0),
+  );
+
+/** The signs of a node's own scales, as [x, y]; an animated scale counts by its first key. */
+const flipOf = (node: SceneNode): Vec =>
+  node.layers.reduce<Vec>(
+    ([fx, fy], { scale }) => {
+      const [x, y] = isLane(scale) ? scale.keys[0]!.value : scale;
+
+      return [fx * (x < 0 ? -1 : 1), fy * (y < 0 ? -1 : 1)];
+    },
+    [1, 1],
+  );
+
+/**
+ * Puts an embossed node's filter on a shell outside its own transforms; see {@link litMirror}. Under mirrored
+ * groups (`flip`) the filter would still paint black, so it sits on a shell that mirrors back, with the content
+ * mirrored again inside it: the filter is computed unmirrored, and the content lands where it was.
+ */
+const litOutside = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, flip?: Vec): void => {
+  const effects = working(node.effects);
+  const reach = reachOf({ ...node, effects }, `the effects of "${node.key}"`);
+  const found = reach && placed(growBox(reach, 1), { ...node, at });
+
+  if (!found) return;
+  let region = found;
+
+  if (flip) {
+    const counter = `scale(${num(flip[0])} ${num(flip[1])})`;
+    const back = shell();
+
+    back.attrs.transform = counter;
+    shells.push(back);
+    region = {
+      ...found,
+      x: flip[0] < 0 ? -(found.x + found.width) : found.x,
+      y: flip[1] < 0 ? -(found.y + found.height) : found.y,
+    };
+    shells.push(shell());
+    shells.at(-1)!.attrs.transform = counter;
+  } else shells.push(shell());
+  shells.at(-1)!.attrs.filter = filterUrl(ctx.defs, effects, region, node.key);
+};
+
+const dressed = (
+  ctx: Ctx,
+  node: SceneNode,
+  shells: Shell[],
+  at: Vec,
+  drawn: Drawn,
+  filtered = true,
+): void => {
   const holder = (): Holder => {
     const current = shells.at(-1)!;
 
@@ -1088,7 +1233,7 @@ const dressed = (ctx: Ctx, node: SceneNode, shells: Shell[], at: Vec, drawn: Dra
 
   const effects = working(node.effects);
 
-  if (effects.length === 0) return;
+  if (!filtered || effects.length === 0) return;
   const reach = reachOf({ ...node, effects }, `the effects of "${node.key}"`);
 
   if (!reach) return;
@@ -1123,6 +1268,22 @@ const shaderScript = ({ wgsl }: ShaderMark): Element =>
  */
 const isolates = (children: readonly SceneNode[]): boolean =>
   children.some((child) => child.blend !== undefined);
+
+/**
+ * A group whose only child blends takes that blend itself. Isolated, the child would have nothing in
+ * its group to blend with, so `<Group clip><Shape blend="multiply" /></Group>` would paint as normal;
+ * on the group, the clipped child blends with what is behind it, as authors mean.
+ */
+const blendHoisted = (node: SceneNode): SceneNode => {
+  if (node.kind !== "group" || node.blend !== undefined || node.children.length !== 1) return node;
+  const [child] = node.children;
+
+  if (child!.blend === undefined) return node;
+  const { blend, ...plain } = child!;
+
+  // SAFETY: plain is child without its optional blend, so it is still the same kind of SceneNode.
+  return { ...node, blend, children: [plain as SceneNode] };
+};
 
 const lifted = (ctx: Ctx, node: SceneNode): SceneNode => {
   if (ctx.sources || node.kind !== "group" || node.children.length !== 1) return node;
@@ -1161,7 +1322,8 @@ const OPAQUE: Rgba = [1, 1, 1, 1];
 const dashedTrim = (node: SceneNode): GroupNode | undefined => {
   if (node.kind !== "shape" || !node.stroke?.dash || node.trim === undefined) return undefined;
 
-  if (!isLane(node.trim) && !isLane(node.geometry)) return undefined;
+  if (!isLane(node.trim) && !isLane(node.geometry) && node.stroke.dashOffset === undefined)
+    return undefined;
   const { kind: _, geometry, fill, fillOpacity, stroke, trim, clip, mask, ...base } = node;
 
   const still = {
@@ -1172,7 +1334,7 @@ const dashedTrim = (node: SceneNode): GroupNode | undefined => {
     effects: [],
   };
 
-  const { dash: _dash, ...solid } = stroke;
+  const { dash: _dash, dashOffset: _offset, ...solid } = stroke;
 
   const outline: GroupNode = {
     kind: "group",
@@ -1213,6 +1375,13 @@ const dashedTrim = (node: SceneNode): GroupNode | undefined => {
   };
 };
 
+const SMIL_TAGS: ReadonlySet<string> = new Set(["animate", "set", "animateTransform"]);
+
+const moves = (node: SvgNode): boolean =>
+  node.kind === "element"
+    ? (node.lanes?.length ?? 0) > 0 || SMIL_TAGS.has(node.tag) || node.children.some(moves)
+    : node.kind === "fragment" && node.children.some(moves);
+
 const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
   const [outer, outerClock] = [ctx.current, ctx.clock];
 
@@ -1228,7 +1397,7 @@ const emitNode = (ctx: Ctx, given: SceneNode): SvgNode => {
 };
 
 const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
-  const node = lifted(ctx, given);
+  const node = blendHoisted(lifted(ctx, given));
   const split = dashedTrim(node);
 
   if (split) return emitNode(ctx, split);
@@ -1242,11 +1411,24 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
   switch (node.kind) {
     case "group":
       drawn = { tag: "g", attrs: moved(at), placed: false };
-      children = node.children.map((child) => emitNode(ctx, child));
+      {
+        const outer = ctx.flip;
+        const [x, y] = flipOf(node);
+
+        ctx.flip = [outer[0] * x, outer[1] * y];
+
+        try {
+          children = node.children.map((child) => emitNode(ctx, child));
+        } finally {
+          ctx.flip = outer;
+        }
+      }
+
       break;
     case "shape": {
       if (node.fill === undefined || !hidesStroke(ctx, node)) {
         drawn = shapeElement(ctx, node, at, lanes);
+        children = [...(drawn.children ?? [])];
         break;
       }
 
@@ -1340,9 +1522,16 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
 
   if (drawn.offset) travel(ctx, shells, drawn.offset);
 
-  dressed(ctx, node, shells, at, drawn);
+  const [fx, fy] = ctx.flip;
+  const under = fx * fy < 0;
+  const lit = working(node.effects).some((effect) => effect.kind === "emboss");
+  const mirrorLit = litMirror(node) || (under && lit);
+
+  dressed(ctx, node, shells, at, drawn, !mirrorLit);
 
   for (const layer of [...foldLayers(node.layers)].reverse()) place(ctx, shells, layer, cuts);
+
+  if (mirrorLit) litOutside(ctx, node, shells, at, under ? ctx.flip : undefined);
 
   if (isLane(node.at)) travel(ctx, shells, node.at);
 
@@ -1409,9 +1598,16 @@ const emitOne = (ctx: Ctx, given: SceneNode): SvgNode => {
 
   const shown = node.scheme === undefined ? wrapped : schemed(ctx, node.scheme, wrapped);
 
-  const out = node.clock
+  const clocked = node.clock
     ? { ...shown, attrs: { ...shown.attrs, ...clockAttrs(node.clock) } }
     : shown;
+
+  const cull = culledOf(node, ctx.scene, {
+    moves: children.some(moves),
+    clocked: ctx.clock !== undefined,
+  });
+
+  const out = cull.length > 0 ? { ...clocked, cull } : clocked;
 
   if (ctx.sources)
     return {
@@ -1548,6 +1744,8 @@ export const svg: Backend<string, SvgOptions> = {
       reported: new Set(),
       schemes: new Set(),
       clock: undefined,
+      flip: [1, 1],
+      reuse: reused(options.sources ? [] : scene.root.children),
       around,
       defs: {
         scene,

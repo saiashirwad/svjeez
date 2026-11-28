@@ -107,6 +107,47 @@ const simplifyStrand = (points: readonly Vec3[], degrees: number): Vec3[] => {
   });
 };
 
+/** A strand with the points it needs only coarsely (`keep` false) simplified to `degrees`, and the others untouched. */
+export const coarsen = (strand: Strand, keep: readonly boolean[], degrees: number): Strand => {
+  const first = keep.indexOf(true);
+
+  if (first < 0) return { ...strand, points: simplifyStrand(strand.points, degrees) };
+  const start = strand.closed ? first : 0;
+  const points = [...strand.points.slice(start), ...strand.points.slice(0, start)];
+  const flags = [...keep.slice(start), ...keep.slice(0, start)];
+  const out: Vec3[] = [];
+  let i = 0;
+
+  while (i < points.length) {
+    if (flags[i]) {
+      out.push(points[i]!);
+      i++;
+      continue;
+    }
+
+    let j = i;
+
+    while (j < points.length && !flags[j]) j++;
+
+    const ends = [
+      out.at(-1),
+      ...points.slice(i, j),
+      j < points.length || strand.closed ? points[j % points.length] : undefined,
+    ];
+
+    const run = ends.filter((p): p is Vec3 => p !== undefined);
+    out.push(
+      ...simplifyStrand(run, degrees).slice(
+        out.length > 0 ? 1 : 0,
+        j < points.length || strand.closed ? -1 : undefined,
+      ),
+    );
+    i = j;
+  }
+
+  return { ...strand, points: out };
+};
+
 const densify = (points: readonly Vec3[], closed: boolean, degrees: number): Vec3[] => {
   const out: Vec3[] = [];
   const legs = closed ? points.length : points.length - 1;

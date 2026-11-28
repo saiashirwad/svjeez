@@ -15,6 +15,9 @@ import {
 } from "../font/usage";
 import { channelsAt, moving, type Key } from "./keys";
 import { animate, windowEnd } from "./smil";
+import type { Stretch } from "../model/dark";
+import { num } from "../model/format";
+import type { Seconds } from "../model/time";
 import { element, type AttrValue, type Element, type SvgNode } from "./tree";
 
 export interface Canvas {
@@ -63,7 +66,10 @@ const withoutSmil = ({ still, ...node }: Element): Element => ({
   ...node,
   attrs: { ...node.attrs, ...still },
   children: node.children
-    .filter((child) => !(child.kind === "element" && ["animate", "set"].includes(child.tag)))
+    .filter(
+      (child) =>
+        !(child.kind === "element" && ["animate", "set", "animateTransform"].includes(child.tag)),
+    )
     .map((child) => (child.kind === "element" ? withoutSmil(child) : child)),
 });
 
@@ -246,7 +252,7 @@ const stillTwin = (state: State, moving: Element): SvgNode => {
 
   if (!state.stills.includes(rule)) state.stills.push(rule);
   const plain = withoutSmil(moving);
-  const { id: _, ...attrs } = plain.attrs;
+  const { id, ...attrs } = plain.attrs;
 
   const classes = (name: string, own: AttrValue | undefined) =>
     [own, `${prefix}${name}`].filter(Boolean).join(" ");
@@ -257,10 +263,53 @@ const stillTwin = (state: State, moving: Element): SvgNode => {
       { ...moving, attrs: { ...moving.attrs, class: classes("dm", moving.attrs.class) } },
       {
         ...plain,
-        attrs: { ...attrs, class: classes("ds", attrs.class), display: "none" },
+        attrs: {
+          ...(id !== undefined && String(id).startsWith(`${prefix}g`) && { id: `${id}s` }),
+          ...attrs,
+          class: classes("ds", attrs.class),
+          display: "none",
+        },
       },
     ],
   };
+};
+
+/**
+ * Stops drawing `out` over `dark`: a discrete SMIL scale to 0, which browsers skip drawing, filters and all, while every
+ * animation inside keeps its time (display:none would restart the CSS ones in Safari and Firefox). It goes on the group
+ * itself when nothing else sets its transform, else on a group around it.
+ */
+const culled = (state: State, out: SvgNode, dark: readonly Stretch[], skews: boolean): SvgNode => {
+  const { duration, playbackRate, loop } = state.canvas;
+  const [start] = dark;
+
+  if (!start) return out;
+  const points: [Seconds, string][] = [[0, start[0] === 0 ? "0" : "1"]];
+
+  for (const [from, to] of dark) {
+    if (from > 0) points.push([from, "0"]);
+
+    if (to < duration) points.push([to, "1"]);
+  }
+
+  const toggle = element("animateTransform", {
+    attributeName: "transform",
+    type: "scale",
+    values: points.map(([, value]) => value).join(";"),
+    keyTimes: points.map(([t]) => num(t / duration, 5)).join(";"),
+    calcMode: "discrete",
+    dur: `${num(duration / playbackRate)}s`,
+    ...(loop ? { repeatCount: "indefinite" } : { fill: "freeze" }),
+  });
+
+  const own =
+    out.kind === "element" &&
+    out.tag === "g" &&
+    out.attrs.transform === undefined &&
+    !/(?:^|;)\s*transform\s*:/.test(String(out.attrs.style ?? "")) &&
+    !skews;
+
+  return own ? { ...out, children: [toggle, ...out.children] } : element("g", {}, [toggle, out]);
 };
 
 const veil = (shells: readonly Lane[][], veiled: boolean): Lane[][] =>
@@ -310,13 +359,25 @@ const walk = (
 
       const [first, ...rest] = shells;
 
-      if (!first) return el;
+      const done = (out: SvgNode) =>
+        node.cull
+          ? culled(
+              state,
+              out,
+              node.cull,
+              shells.flat().some((lane) => lane.key === "skew"),
+            )
+          : out;
+
+      if (!first) return done(el);
       const pivot = String(bare.attrs.style ?? "").match(/transform-(?:box|origin)\s*:[^;]*/g);
       const wrapper: Record<string, AttrValue> = pivot ? { style: pivot.join(";") } : {};
 
-      return rest.reduce<SvgNode>(
-        (inner, lanes) => emitShell(state, element("g", wrapper, [inner]), lanes),
-        emitShell(state, el, first),
+      return done(
+        rest.reduce<SvgNode>(
+          (inner, lanes) => emitShell(state, element("g", wrapper, [inner]), lanes),
+          emitShell(state, el, first),
+        ),
       );
     }
   }

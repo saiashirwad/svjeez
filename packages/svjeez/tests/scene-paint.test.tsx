@@ -102,7 +102,85 @@ describe("gradients", () => {
     expect(fill(round)).toMatchObject({ center: [0, 0], radius: 50 });
   });
 
+  test("an elliptical radial scales about its center, and a circle emits as before", () => {
+    const stops = ["#000000", "#FFFFFF"] as const;
+
+    const model = made(() => (
+      <Group>
+        <Shape
+          geometry={rect(200, 100)}
+          fill={radial({ center: [100, 40], radius: [80, 40], stops })}
+        />
+        <Shape
+          geometry={rect(200, 100)}
+          fill={radial({ center: [100, 40], radius: [40, 40], stops })}
+        />
+      </Group>
+    ));
+
+    const [ellipse, circle40] = model.root.children;
+    expect(ellipse?.kind === "shape" && ellipse.fill).toMatchObject({ radius: 80, squash: 0.5 });
+    expect(circle40?.kind === "shape" && circle40.fill).not.toHaveProperty("squash");
+    const out = emitted(model);
+    expect(out).toContain('cx="100" cy="40" r="80"');
+    expect(out).toContain('gradientTransform="matrix(1 0 0 0.5 0 20)"');
+    expect(count(out, "gradientTransform")).toBe(1);
+  });
+
+  test("an across ellipse stretches to the box: cover to the farthest corner, inside to the nearest edges", () => {
+    const stops = ["#000000", "#FFFFFF"] as const;
+
+    const [cover, inside, round] = made(() => (
+      <Group>
+        <Shape geometry={rect(200, 100)} fill={radial.across({ shape: "ellipse", stops })} />
+        <Shape
+          geometry={rect(200, 100)}
+          fill={radial.across({ shape: "ellipse", fit: "inside", stops })}
+        />
+        <Shape geometry={rect(200, 100)} fill={radial.across({ stops })} />
+      </Group>
+    )).root.children;
+
+    const fill = (node: Model.SceneNode | undefined) =>
+      node?.kind === "shape" ? node.fill : undefined;
+
+    expect(fill(cover)).toMatchObject({
+      center: [100, 50],
+      radius: 100 * Math.SQRT2,
+      squash: 0.5,
+    });
+    expect(fill(inside)).toMatchObject({ center: [100, 50], radius: 100, squash: 0.5 });
+    expect(fill(round)).toMatchObject({ center: [100, 50], radius: Math.hypot(100, 50) });
+    expect(fill(round)).not.toHaveProperty("squash");
+  });
+
+  test("a gradient that stays round has no transform", () => {
+    const out = emitted(
+      made(() => (
+        <Shape
+          geometry={rect(200, 100)}
+          fill={radial({ center: [10, 10], radius: [30, 30], stops: ["#000000", "#FFFFFF"] })}
+        />
+      )),
+    );
+
+    expect(out).toContain("<radialGradient");
+    expect(out).not.toContain("gradientTransform");
+  });
+
   test("a gradient is checked where it is written", () => {
+    const bad: [number, number][] = [
+      [0, 4],
+      [4, -1],
+      [4, NaN],
+      [Infinity, 4],
+    ];
+
+    for (const radius of bad)
+      expect(() => radial({ center: [0, 0], radius, stops: ["#000000", "#FFFFFF"] })).toThrow(
+        "positive radius",
+      );
+
     expect(() => linear({ from: [0, 0], to: [1, 0], stops: ["#000000"] })).toThrow(
       "two stops or more",
     );

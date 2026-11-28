@@ -38,6 +38,10 @@ export interface NumeralOptions {
   readonly separator?: string;
   readonly point?: string;
   readonly pad?: number;
+  /** Written before the number and its sign, as in `prefix: "$"` for "$1,200" and "$-3". */
+  readonly prefix?: string;
+  /** Written after the number, as in `suffix: " km"` for "12.84 km". */
+  readonly suffix?: string;
 }
 
 export interface Count {
@@ -80,7 +84,7 @@ export const rateOf = ({ rate }: Count, where: string): number => {
 
 /** The built-in format: rounded to `decimals`, thousands grouped, integer digits zero-padded to `pad`. */
 export const numeral = (options: NumeralOptions = {}): NumberFormat => {
-  const { decimals = 0, separator = ",", point = ".", pad = 1 } = options;
+  const { decimals = 0, separator = ",", point = ".", pad = 1, prefix = "", suffix = "" } = options;
 
   if (!whole(decimals, 0, 10))
     throw new SceneError(`numeral() takes decimals from 0 to 10, got ${decimals}.`);
@@ -111,7 +115,7 @@ export const numeral = (options: NumeralOptions = {}): NumberFormat => {
     const grouped = separator ? digits.replace(/\B(?=(\d{3})+$)/g, separator) : digits;
     const body = frac === undefined ? grouped : `${grouped}${point}${frac}`;
 
-    return value < 0 && /[1-9]/.test(body) ? `-${body}` : body;
+    return `${prefix}${value < 0 && /[1-9]/.test(body) ? `-${body}` : body}${suffix}`;
   };
 };
 

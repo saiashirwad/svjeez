@@ -415,26 +415,31 @@
     </g>
     <g style="mix-blend-mode:screen" fill="none" stroke-linecap="round">
       <g class="a m10">
+        <animateTransform attributeName="transform" type="scale" values="1;0" keyTimes="0;0.19625" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
         <path d="M292 392C272 296.133 258.667 218.8 252 160" stroke="#FFB85C" stroke-width="5.5" opacity="0.38" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
         <path d="M292 392C272 296.133 258.667 218.8 252 160" stroke="#FFE3A3" stroke-width="1.8" pathLength="1" stroke-dasharray="1 2" class="a m8"/>
         <path d="M292 392C272 296.133 258.667 218.8 252 160" stroke="#FFFFFF" stroke-width="2.8" pathLength="1" stroke-dasharray="1 2" class="a m9"/>
       </g>
       <g class="a m13">
+        <animateTransform attributeName="transform" type="scale" values="1;0" keyTimes="0;0.34" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
         <path d="M692 392C708 290.333 718.667 208.333 724 146" stroke="#FFB85C" stroke-width="5.5" opacity="0.38" pathLength="1" stroke-dasharray="1 2" class="a m11"/>
         <path d="M692 392C708 290.333 718.667 208.333 724 146" stroke="#FFE3A3" stroke-width="1.8" pathLength="1" stroke-dasharray="1 2" class="a m11"/>
         <path d="M692 392C708 290.333 718.667 208.333 724 146" stroke="#FFFFFF" stroke-width="2.8" pathLength="1" stroke-dasharray="1 2" class="a m12"/>
       </g>
       <g class="a m16">
+        <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.2625;0.49625" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
         <path d="M435 392C424.533 282.867 417.533 194.867 414 128" stroke="#FFB85C" stroke-width="5.5" opacity="0.38" pathLength="1" stroke-dasharray="1 2" class="a m14"/>
         <path d="M435 392C424.533 282.867 417.533 194.867 414 128" stroke="#FFE3A3" stroke-width="1.8" pathLength="1" stroke-dasharray="1 2" class="a m14"/>
         <path d="M435 392C424.533 282.867 417.533 194.867 414 128" stroke="#FFFFFF" stroke-width="2.8" pathLength="1" stroke-dasharray="1 2" class="a m15"/>
       </g>
       <g class="a m19">
+        <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.38125;0.6025" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
         <path d="M204 392C194 309.333 187.333 242.667 184 192" stroke="#FFB85C" stroke-width="5.5" opacity="0.38" pathLength="1" stroke-dasharray="1 2" class="a m17"/>
         <path d="M204 392C194 309.333 187.333 242.667 184 192" stroke="#FFE3A3" stroke-width="1.8" pathLength="1" stroke-dasharray="1 2" class="a m17"/>
         <path d="M204 392C194 309.333 187.333 242.667 184 192" stroke="#FFFFFF" stroke-width="2.8" pathLength="1" stroke-dasharray="1 2" class="a m18"/>
       </g>
       <g class="a m22">
+        <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.4125;0.6525" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
         <path d="M548 392C556 280.4 561.333 190.4 564 122" stroke="#FFB85C" stroke-width="5.5" opacity="0.38" pathLength="1" stroke-dasharray="1 2" class="a m20"/>
         <path d="M548 392C556 280.4 561.333 190.4 564 122" stroke="#FFE3A3" stroke-width="1.8" pathLength="1" stroke-dasharray="1 2" class="a m20"/>
         <path d="M548 392C556 280.4 561.333 190.4 564 122" stroke="#FFFFFF" stroke-width="2.8" pathLength="1" stroke-dasharray="1 2" class="a m21"/>
@@ -443,6 +448,7 @@
     <g style="mix-blend-mode:screen" fill="none">
       <g transform="translate(252 160)" fill="#FFF8DF">
         <g class="a m24" fill="none" stroke="#E8872E" stroke-width="6.5" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="scale" values="1;0" keyTimes="0;0.52113" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
           <path d="M0 0C0.6 1.7 2.6 6.4 3.8 10.4C5 14.4 6 19.2 6.9 24.2C7.8 29.1 8.5 34.4 9.1 40C9.6 45.5 10.1 51.3 10.4 57.2C10.8 63.2 11.1 69.3 11.3 75.6C11.5 81.8 11.7 88.2 11.8 94.7C12 101.2 12.1 107.9 12.1 114.6C12.2 121.3 12.3 131.5 12.3 134.9" stroke-width="6.8" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m23"/>
           <path d="M0 0C-2.4 -0.6 -10.2 -3.2 -14.7 -3.4C-19.1 -3.5 -23.3 -2.6 -26.7 -0.9C-30.1 0.9 -32.7 3.8 -35 7.2C-37.2 10.6 -38.9 14.9 -40.3 19.5C-41.7 24.1 -42.7 29.3 -43.6 34.7C-44.5 40.1 -45.1 46 -45.7 52C-46.2 58 -46.6 64.3 -46.9 70.7C-47.2 77.1 -47.5 87.1 -47.6 90.4" stroke-width="6.8" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m23"/>
           <path d="M0 0C3.4 -1.2 14.4 -5.7 20.7 -7C26.9 -8.2 32.8 -8.4 37.6 -7.4C42.3 -6.5 46 -4.2 49.2 -1.4C52.4 1.4 54.7 5.3 56.7 9.5C58.7 13.8 60.1 18.8 61.4 24C62.6 29.1 63.5 34.9 64.2 40.7C65 46.6 65.5 52.8 65.9 59.1C66.4 65.4 66.8 75.4 66.9 78.7" stroke="#F6A43C" stroke-width="6.8" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m23"/>
@@ -487,6 +493,7 @@
           <path d="M0 0C0.8 -0.9 3.5 -4.7 5 -5.5C6.6 -6.3 8 -6 9.2 -4.8C10.3 -3.5 11.2 -0.9 12 2.1C12.8 5.2 13.3 9.2 13.8 13.6C14.3 18 14.7 23.1 15 28.4C15.3 33.6 15.5 39.4 15.7 45.3C15.9 51.3 16 57.5 16.1 63.9C16.2 70.2 16.3 80.2 16.3 83.5" stroke="#FFD06B" stroke-width="6.2" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m23"/>
         </g>
         <g class="a m24" fill="none" stroke="#E8872E" stroke-width="2.1" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="scale" values="1;0" keyTimes="0;0.52113" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
           <path d="M0 0C0.6 1.7 2.6 6.4 3.8 10.4C5 14.4 6 19.2 6.9 24.2C7.8 29.1 8.5 34.4 9.1 40C9.6 45.5 10.1 51.3 10.4 57.2C10.8 63.2 11.1 69.3 11.3 75.6C11.5 81.8 11.7 88.2 11.8 94.7C12 101.2 12.1 107.9 12.1 114.6C12.2 121.3 12.3 131.5 12.3 134.9" stroke-width="2.2" pathLength="1" stroke-dasharray="1 2" class="a m23"/>
           <path d="M0 0C-2.4 -0.6 -10.2 -3.2 -14.7 -3.4C-19.1 -3.5 -23.3 -2.6 -26.7 -0.9C-30.1 0.9 -32.7 3.8 -35 7.2C-37.2 10.6 -38.9 14.9 -40.3 19.5C-41.7 24.1 -42.7 29.3 -43.6 34.7C-44.5 40.1 -45.1 46 -45.7 52C-46.2 58 -46.6 64.3 -46.9 70.7C-47.2 77.1 -47.5 87.1 -47.6 90.4" stroke-width="2.2" pathLength="1" stroke-dasharray="1 2" class="a m23"/>
           <path d="M0 0C3.4 -1.2 14.4 -5.7 20.7 -7C26.9 -8.2 32.8 -8.4 37.6 -7.4C42.3 -6.5 46 -4.2 49.2 -1.4C52.4 1.4 54.7 5.3 56.7 9.5C58.7 13.8 60.1 18.8 61.4 24C62.6 29.1 63.5 34.9 64.2 40.7C65 46.6 65.5 52.8 65.9 59.1C66.4 65.4 66.8 75.4 66.9 78.7" stroke="#F6A43C" stroke-width="2.2" pathLength="1" stroke-dasharray="1 2" class="a m23"/>
@@ -531,6 +538,7 @@
           <path d="M0 0C0.8 -0.9 3.5 -4.7 5 -5.5C6.6 -6.3 8 -6 9.2 -4.8C10.3 -3.5 11.2 -0.9 12 2.1C12.8 5.2 13.3 9.2 13.8 13.6C14.3 18 14.7 23.1 15 28.4C15.3 33.6 15.5 39.4 15.7 45.3C15.9 51.3 16 57.5 16.1 63.9C16.2 70.2 16.3 80.2 16.3 83.5" stroke="#FFD06B" stroke-width="2" opacity="0.8" pathLength="1" stroke-dasharray="1 2" class="a m23"/>
         </g>
         <g class="a m26" fill="none" stroke="#FFFDF6" stroke-width="1.6" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="scale" values="1;0" keyTimes="0;0.475" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
           <path d="M0 0C0.6 1.7 2.6 6.4 3.8 10.4C5 14.4 6 19.2 6.9 24.2C7.8 29.1 8.5 34.4 9.1 40C9.6 45.5 10.1 51.3 10.4 57.2C10.8 63.2 11.1 69.3 11.3 75.6C11.5 81.8 11.7 88.2 11.8 94.7C12 101.2 12.1 107.9 12.1 114.6C12.2 121.3 12.3 131.5 12.3 134.9" stroke-width="1.7" pathLength="1" stroke-dasharray="1 2" class="a m25"/>
           <path d="M0 0C-2.4 -0.6 -10.2 -3.2 -14.7 -3.4C-19.1 -3.5 -23.3 -2.6 -26.7 -0.9C-30.1 0.9 -32.7 3.8 -35 7.2C-37.2 10.6 -38.9 14.9 -40.3 19.5C-41.7 24.1 -42.7 29.3 -43.6 34.7C-44.5 40.1 -45.1 46 -45.7 52C-46.2 58 -46.6 64.3 -46.9 70.7C-47.2 77.1 -47.5 87.1 -47.6 90.4" stroke-width="1.7" pathLength="1" stroke-dasharray="1 2" class="a m25"/>
           <path d="M0 0C3.4 -1.2 14.4 -5.7 20.7 -7C26.9 -8.2 32.8 -8.4 37.6 -7.4C42.3 -6.5 46 -4.2 49.2 -1.4C52.4 1.4 54.7 5.3 56.7 9.5C58.7 13.8 60.1 18.8 61.4 24C62.6 29.1 63.5 34.9 64.2 40.7C65 46.6 65.5 52.8 65.9 59.1C66.4 65.4 66.8 75.4 66.9 78.7" stroke-width="1.7" pathLength="1" stroke-dasharray="1 2" class="a m25"/>
@@ -599,6 +607,7 @@
       </g>
       <g transform="translate(724 146)">
         <g class="a m32" stroke="#D8F6FF" stroke-width="6.8" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.2125;0.61275" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
           <path d="M0 0C-1.4 0.6 -5.7 2.1 -8.1 3.8C-10.6 5.4 -12.9 7.6 -14.7 10.1C-16.6 12.5 -18 15.3 -19.2 18.3C-20.5 21.2 -21.4 24.5 -22.1 27.9C-22.9 31.2 -23.4 34.8 -23.9 38.5C-24.4 42.1 -24.7 45.9 -25 49.8C-25.3 53.6 -25.5 57.6 -25.7 61.6C-25.8 65.7 -26 71.9 -26 73.9" stroke="#38BDF8" stroke-width="7.1" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m31"/>
           <path d="M0 0C1 -1.9 4.4 -8.6 6.3 -11.5C8.2 -14.5 9.9 -16.6 11.4 -17.6C12.8 -18.7 13.9 -18.6 14.9 -17.9C15.8 -17.3 16.5 -15.7 17.1 -13.8C17.7 -11.9 18.1 -9.3 18.5 -6.5C18.8 -3.8 19.1 -0.6 19.3 2.8C19.5 6.1 19.7 9.7 19.8 13.4C19.9 17.1 20 23 20.1 25" stroke-width="7.1" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m31"/>
           <path d="M0 0C0.6 2.9 2.6 11.8 3.7 17.7C4.8 23.6 5.9 29.8 6.7 35.4C7.5 41 8.2 46.2 8.7 51.3C9.3 56.4 9.7 61.1 10.1 65.8C10.4 70.5 10.7 75 10.9 79.5C11.1 84 11.2 88.3 11.4 92.7C11.5 97.1 11.6 101.3 11.7 105.7C11.7 110 11.8 116.4 11.8 118.6" stroke-width="7.1" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m31"/>
@@ -645,6 +654,7 @@
           <path d="M0 0C1 -0.8 4.2 -3.9 6.1 -4.8C7.9 -5.7 9.6 -5.9 11 -5.5C12.4 -5 13.4 -3.7 14.3 -2C15.3 -0.3 15.9 2 16.5 4.5C17.1 7.1 17.5 10.1 17.8 13.3C18.2 16.4 18.4 19.9 18.6 23.4C18.9 27 19 30.8 19.1 34.6C19.2 38.5 19.4 44.5 19.4 46.5" stroke="#38BDF8" stroke-width="6.5" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m31"/>
         </g>
         <g class="a m32" stroke="#D8F6FF" stroke-width="2.2" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.2125;0.61275" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
           <path d="M0 0C-1.4 0.6 -5.7 2.1 -8.1 3.8C-10.6 5.4 -12.9 7.6 -14.7 10.1C-16.6 12.5 -18 15.3 -19.2 18.3C-20.5 21.2 -21.4 24.5 -22.1 27.9C-22.9 31.2 -23.4 34.8 -23.9 38.5C-24.4 42.1 -24.7 45.9 -25 49.8C-25.3 53.6 -25.5 57.6 -25.7 61.6C-25.8 65.7 -26 71.9 -26 73.9" stroke="#38BDF8" stroke-width="2.3" pathLength="1" stroke-dasharray="1 2" class="a m31"/>
           <path d="M0 0C1 -1.9 4.4 -8.6 6.3 -11.5C8.2 -14.5 9.9 -16.6 11.4 -17.6C12.8 -18.7 13.9 -18.6 14.9 -17.9C15.8 -17.3 16.5 -15.7 17.1 -13.8C17.7 -11.9 18.1 -9.3 18.5 -6.5C18.8 -3.8 19.1 -0.6 19.3 2.8C19.5 6.1 19.7 9.7 19.8 13.4C19.9 17.1 20 23 20.1 25" stroke-width="2.3" pathLength="1" stroke-dasharray="1 2" class="a m31"/>
           <path d="M0 0C0.6 2.9 2.6 11.8 3.7 17.7C4.8 23.6 5.9 29.8 6.7 35.4C7.5 41 8.2 46.2 8.7 51.3C9.3 56.4 9.7 61.1 10.1 65.8C10.4 70.5 10.7 75 10.9 79.5C11.1 84 11.2 88.3 11.4 92.7C11.5 97.1 11.6 101.3 11.7 105.7C11.7 110 11.8 116.4 11.8 118.6" stroke-width="2.3" pathLength="1" stroke-dasharray="1 2" class="a m31"/>
@@ -691,6 +701,7 @@
           <path d="M0 0C1 -0.8 4.2 -3.9 6.1 -4.8C7.9 -5.7 9.6 -5.9 11 -5.5C12.4 -5 13.4 -3.7 14.3 -2C15.3 -0.3 15.9 2 16.5 4.5C17.1 7.1 17.5 10.1 17.8 13.3C18.2 16.4 18.4 19.9 18.6 23.4C18.9 27 19 30.8 19.1 34.6C19.2 38.5 19.4 44.5 19.4 46.5" stroke="#38BDF8" stroke-width="2.1" opacity="0.8" pathLength="1" stroke-dasharray="1 2" class="a m31"/>
         </g>
         <g class="a m34" stroke="#FFFDF6" stroke-width="1.7" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.2125;0.58125" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
           <path d="M0 0C-1.4 0.6 -5.7 2.1 -8.1 3.8C-10.6 5.4 -12.9 7.6 -14.7 10.1C-16.6 12.5 -18 15.3 -19.2 18.3C-20.5 21.2 -21.4 24.5 -22.1 27.9C-22.9 31.2 -23.4 34.8 -23.9 38.5C-24.4 42.1 -24.7 45.9 -25 49.8C-25.3 53.6 -25.5 57.6 -25.7 61.6C-25.8 65.7 -26 71.9 -26 73.9" stroke-width="1.8" pathLength="1" stroke-dasharray="1 2" class="a m33"/>
           <path d="M0 0C1 -1.9 4.4 -8.6 6.3 -11.5C8.2 -14.5 9.9 -16.6 11.4 -17.6C12.8 -18.7 13.9 -18.6 14.9 -17.9C15.8 -17.3 16.5 -15.7 17.1 -13.8C17.7 -11.9 18.1 -9.3 18.5 -6.5C18.8 -3.8 19.1 -0.6 19.3 2.8C19.5 6.1 19.7 9.7 19.8 13.4C19.9 17.1 20 23 20.1 25" stroke-width="1.8" pathLength="1" stroke-dasharray="1 2" class="a m33"/>
           <path d="M0 0C0.6 2.9 2.6 11.8 3.7 17.7C4.8 23.6 5.9 29.8 6.7 35.4C7.5 41 8.2 46.2 8.7 51.3C9.3 56.4 9.7 61.1 10.1 65.8C10.4 70.5 10.7 75 10.9 79.5C11.1 84 11.2 88.3 11.4 92.7C11.5 97.1 11.6 101.3 11.7 105.7C11.7 110 11.8 116.4 11.8 118.6" stroke-width="1.8" pathLength="1" stroke-dasharray="1 2" class="a m33"/>
@@ -737,6 +748,7 @@
           <path d="M0 0C1 -0.8 4.2 -3.9 6.1 -4.8C7.9 -5.7 9.6 -5.9 11 -5.5C12.4 -5 13.4 -3.7 14.3 -2C15.3 -0.3 15.9 2 16.5 4.5C17.1 7.1 17.5 10.1 17.8 13.3C18.2 16.4 18.4 19.9 18.6 23.4C18.9 27 19 30.8 19.1 34.6C19.2 38.5 19.4 44.5 19.4 46.5" stroke-width="1.6" opacity="0.8" pathLength="1" stroke-dasharray="1 2" class="a m33"/>
         </g>
         <g class="a m36" stroke="#FFFDF7" stroke-width="5.6" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.2125;0.54238" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
           <path d="M0 0C-0.7 -0.2 -2.9 -1.2 -4.2 -1.4C-5.6 -1.6 -6.9 -1.4 -8 -1C-9 -0.6 -9.9 0.2 -10.7 1.2C-11.5 2.1 -12.1 3.4 -12.7 4.8C-13.2 6.2 -13.6 7.8 -14 9.6C-14.3 11.3 -14.6 13.2 -14.9 15.2C-15.1 17.1 -15.3 19.2 -15.4 21.4C-15.6 23.5 -15.7 26.9 -15.8 28" stroke-width="5.9" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m35"/>
           <path d="M0 0C1.3 -0.5 5.5 -2.1 8 -2.7C10.5 -3.3 13 -3.6 15 -3.5C17 -3.5 18.7 -3 20.2 -2.2C21.7 -1.5 22.8 -0.4 23.9 0.8C24.9 2 25.7 3.5 26.3 5.2C27 6.8 27.5 8.6 28 10.5C28.5 12.4 28.8 14.4 29.1 16.5C29.4 18.6 29.7 21.9 29.8 23" stroke="#FFD0A8" stroke-width="5.9" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m35"/>
           <path d="M0 0C-0.9 1.8 -3.6 7 -5.2 10.6C-6.8 14.2 -8.4 18.1 -9.7 21.5C-11 25 -12.1 28.3 -13.1 31.5C-14 34.7 -14.8 37.7 -15.4 40.7C-16.1 43.6 -16.6 46.4 -17 49.2C-17.5 51.9 -17.8 54.6 -18.1 57.2C-18.4 59.9 -18.6 62.5 -18.8 65.1C-19 67.7 -19.2 71.5 -19.3 72.8" stroke="#FFD0A8" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m35"/>
@@ -759,6 +771,7 @@
           <path d="M0 0C0.4 -0.6 1.7 -2.7 2.5 -3.6C3.3 -4.4 4.1 -5 4.8 -5.1C5.4 -5.2 6 -4.9 6.4 -4.3C6.9 -3.8 7.3 -2.8 7.6 -1.7C7.9 -0.6 8.2 0.9 8.4 2.4C8.6 3.9 8.8 5.7 8.9 7.5C9.1 9.4 9.2 11.4 9.3 13.4C9.4 15.5 9.4 18.8 9.5 19.9" stroke-width="5.3" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m35"/>
         </g>
         <g class="a m36" stroke="#FFFDF7" stroke-width="1.8" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.2125;0.54238" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
           <path d="M0 0C-0.7 -0.2 -2.9 -1.2 -4.2 -1.4C-5.6 -1.6 -6.9 -1.4 -8 -1C-9 -0.6 -9.9 0.2 -10.7 1.2C-11.5 2.1 -12.1 3.4 -12.7 4.8C-13.2 6.2 -13.6 7.8 -14 9.6C-14.3 11.3 -14.6 13.2 -14.9 15.2C-15.1 17.1 -15.3 19.2 -15.4 21.4C-15.6 23.5 -15.7 26.9 -15.8 28" stroke-width="1.9" pathLength="1" stroke-dasharray="1 2" class="a m35"/>
           <path d="M0 0C1.3 -0.5 5.5 -2.1 8 -2.7C10.5 -3.3 13 -3.6 15 -3.5C17 -3.5 18.7 -3 20.2 -2.2C21.7 -1.5 22.8 -0.4 23.9 0.8C24.9 2 25.7 3.5 26.3 5.2C27 6.8 27.5 8.6 28 10.5C28.5 12.4 28.8 14.4 29.1 16.5C29.4 18.6 29.7 21.9 29.8 23" stroke="#FFD0A8" stroke-width="1.9" pathLength="1" stroke-dasharray="1 2" class="a m35"/>
           <path d="M0 0C-0.9 1.8 -3.6 7 -5.2 10.6C-6.8 14.2 -8.4 18.1 -9.7 21.5C-11 25 -12.1 28.3 -13.1 31.5C-14 34.7 -14.8 37.7 -15.4 40.7C-16.1 43.6 -16.6 46.4 -17 49.2C-17.5 51.9 -17.8 54.6 -18.1 57.2C-18.4 59.9 -18.6 62.5 -18.8 65.1C-19 67.7 -19.2 71.5 -19.3 72.8" stroke="#FFD0A8" pathLength="1" stroke-dasharray="1 2" class="a m35"/>
@@ -928,6 +941,7 @@
           <path d="M0 0C-1.2 -0.2 -5.2 -1.6 -7.4 -1.5C-9.6 -1.4 -11.7 -0.6 -13.4 0.7C-15.1 1.9 -16.3 3.9 -17.4 6.2C-18.5 8.4 -19.3 11.2 -20 14.2C-20.7 17.1 -21.1 20.5 -21.5 23.9C-21.9 27.3 -22.2 31 -22.5 34.8C-22.7 38.6 -22.9 42.5 -23 46.5C-23.2 50.5 -23.3 56.7 -23.3 58.8" stroke-width="1.6" opacity="0.8" pathLength="1" stroke-dasharray="1 2" class="a m40"/>
         </g>
         <g class="a m43" stroke="#FFF8E7" stroke-width="5.3" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.36875;0.69013" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
           <path d="M0 0C-0.5 -0.5 -2.1 -2.5 -3.1 -3.2C-4.1 -4 -5 -4.4 -5.8 -4.5C-6.6 -4.6 -7.3 -4.2 -7.8 -3.7C-8.4 -3.1 -8.9 -2.1 -9.3 -1C-9.7 0.1 -10 1.5 -10.3 3C-10.5 4.4 -10.7 6.2 -10.9 7.9C-11.1 9.7 -11.2 11.7 -11.3 13.7C-11.5 15.6 -11.6 18.8 -11.6 19.9" stroke-width="5.6" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m42"/>
           <path d="M0 0C1.5 0.3 6 1.1 8.8 2C11.6 2.9 14.3 4 16.6 5.2C18.8 6.5 20.7 7.9 22.3 9.5C24 11 25.3 12.8 26.4 14.5C27.6 16.3 28.4 18.2 29.2 20.2C30 22.1 30.6 24.2 31.1 26.3C31.6 28.3 32 30.5 32.3 32.7C32.7 34.9 33 38.3 33.1 39.4" stroke-width="5.6" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m42"/>
           <path d="M0 0C-1.4 1 -5.7 3.9 -8.2 6C-10.8 8.1 -13.4 10.5 -15.5 12.8C-17.6 15 -19.3 17.3 -20.9 19.6C-22.4 21.9 -23.6 24.2 -24.7 26.5C-25.8 28.8 -26.6 31.1 -27.3 33.4C-28 35.7 -28.6 38 -29.1 40.4C-29.6 42.7 -29.9 45 -30.2 47.4C-30.5 49.7 -30.8 53.2 -31 54.4" stroke="#FFD27D" stroke-width="5.6" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m42"/>
@@ -948,6 +962,7 @@
           <path d="M0 0C0.6 0.7 2.3 2.7 3.4 4.3C4.4 5.9 5.5 7.8 6.4 9.6C7.2 11.4 8 13.4 8.6 15.4C9.2 17.4 9.7 19.4 10.2 21.5C10.6 23.6 10.9 25.7 11.2 27.9C11.5 30 11.8 32.2 12 34.4C12.2 36.7 12.3 38.9 12.4 41.2C12.6 43.5 12.7 47 12.7 48.1" stroke="#FFD27D" stroke-width="5" opacity="0.2" pathLength="1" stroke-dasharray="1 2" class="a m42"/>
         </g>
         <g class="a m43" stroke="#FFF8E7" stroke-width="1.7" stroke-linecap="round">
+          <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.36875;0.69013" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
           <path d="M0 0C-0.5 -0.5 -2.1 -2.5 -3.1 -3.2C-4.1 -4 -5 -4.4 -5.8 -4.5C-6.6 -4.6 -7.3 -4.2 -7.8 -3.7C-8.4 -3.1 -8.9 -2.1 -9.3 -1C-9.7 0.1 -10 1.5 -10.3 3C-10.5 4.4 -10.7 6.2 -10.9 7.9C-11.1 9.7 -11.2 11.7 -11.3 13.7C-11.5 15.6 -11.6 18.8 -11.6 19.9" stroke-width="1.8" pathLength="1" stroke-dasharray="1 2" class="a m42"/>
           <path d="M0 0C1.5 0.3 6 1.1 8.8 2C11.6 2.9 14.3 4 16.6 5.2C18.8 6.5 20.7 7.9 22.3 9.5C24 11 25.3 12.8 26.4 14.5C27.6 16.3 28.4 18.2 29.2 20.2C30 22.1 30.6 24.2 31.1 26.3C31.6 28.3 32 30.5 32.3 32.7C32.7 34.9 33 38.3 33.1 39.4" stroke-width="1.8" pathLength="1" stroke-dasharray="1 2" class="a m42"/>
           <path d="M0 0C-1.4 1 -5.7 3.9 -8.2 6C-10.8 8.1 -13.4 10.5 -15.5 12.8C-17.6 15 -19.3 17.3 -20.9 19.6C-22.4 21.9 -23.6 24.2 -24.7 26.5C-25.8 28.8 -26.6 31.1 -27.3 33.4C-28 35.7 -28.6 38 -29.1 40.4C-29.6 42.7 -29.9 45 -30.2 47.4C-30.5 49.7 -30.8 53.2 -31 54.4" stroke="#FFD27D" stroke-width="1.8" pathLength="1" stroke-dasharray="1 2" class="a m42"/>
@@ -1655,6 +1670,7 @@
     </g>
     <g transform="translate(0 386)" clip-path="url(#c1)" style="mix-blend-mode:screen" fill="none">
       <g class="a m66">
+        <animateTransform attributeName="transform" type="scale" values="1;0" keyTimes="0;0.495" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
         <ellipse cx="252" cy="56" rx="165" ry="105" fill="url(#g15)"/>
         <line x1="221.2" y1="6.4" x2="242.3" y2="6.4" stroke="#FFF4DB" stroke-width="2.3" stroke-linecap="round" class="a m64"/>
         <line x1="257.5" y1="6.8" x2="283.9" y2="6.8" stroke="#FFF4DB" stroke-width="2.3" stroke-linecap="round" class="a m65"/>
@@ -1685,6 +1701,7 @@
         <line x1="246" y1="138.3" x2="268.8" y2="138.3" stroke="#FFC766" stroke-width="1.2" stroke-linecap="round" class="a m65"/>
       </g>
       <g class="a m67">
+        <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.2125;0.60125" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
         <ellipse cx="724" cy="56" rx="165" ry="105" fill="url(#g16)"/>
         <line x1="690.4" y1="5.2" x2="706.2" y2="5.2" stroke="#FFF4DB" stroke-width="2.3" stroke-linecap="round" class="a m64"/>
         <line x1="744.7" y1="5" x2="764.6" y2="5" stroke="#67D8FF" stroke-width="2.3" stroke-linecap="round" class="a m65"/>

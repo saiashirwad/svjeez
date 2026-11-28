@@ -263,6 +263,20 @@ const mayApply = (
     input = [u16(f, subtable + 2)];
     [backtrack] = list(subtable + 4);
     [lookahead] = list(subtable + 6 + 2 * backtrack.length);
+  } else if (tag === "GSUB" && lookup.type === 4 && format === 1 && !(lookup.flag & SKIPS)) {
+    // A ligature lookup (ccmp, dlig…) applies only where a whole ligature matches, not wherever
+    // its first glyph is covered: Source Serif's ccmp covers every lowercase letter.
+    return runs.some((run) =>
+      run.some(
+        (_, i) =>
+          ligate(
+            f,
+            subtable,
+            run.map((glyph) => ({ glyph, chars: "", advance: 0 })),
+            i,
+          ) > 0,
+      ),
+    );
   } else return meets(u16(f, subtable + 2));
 
   if (lookup.flag & SKIPS) return [...backtrack, ...input, ...lookahead].every(meets);

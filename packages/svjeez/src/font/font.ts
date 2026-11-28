@@ -292,8 +292,18 @@ export class Font {
     this.#ensure();
     const font = this.#sfnt;
 
-    if (!font || !this.subset || !font.tables.has("glyf"))
-      return this.#href === undefined ? undefined : { href: this.#href };
+    if (this.#href === undefined) return undefined;
+
+    if (!this.subset) return { href: this.#href };
+
+    if (!font)
+      return {
+        href: this.#href,
+        reason: `it is a ${this.#format!.toUpperCase()} file, whose tables are compressed`,
+      };
+
+    if (!font.tables.has("glyf"))
+      return { href: this.#href, reason: "its outlines are CFF, which subsetting does not read" };
 
     const key =
       [...new Set(texts.flatMap((text) => [...text]))].sort().join("") +

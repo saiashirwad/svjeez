@@ -10,9 +10,9 @@ import {
   mixGeometry,
   outlineBoxOf,
 } from "../model/geometry";
-import { componentOf, identified, keyText, sourced, writtenAt } from "./identity";
+import { componentOf, identified, keyText, listOf, sourced, writtenAt } from "./identity";
 import { Names, quoted, wordsOf, type Named } from "./names";
-import { isArray } from "../model/guards";
+import { isArray, isNumber } from "../model/guards";
 import { SceneError, located } from "../model/scene-error";
 import { tagOf } from "../model/naming";
 import type {
@@ -37,7 +37,9 @@ import type {
   Vec,
 } from "../model/ir";
 import { atRest, isLane, pair } from "../model/lane";
-import { morphed, type MorphElement } from "./morph";
+import { type Taken, morphed, type MorphElement } from "./morph";
+import { shareAcross, type Played } from "./shared";
+import type { Seams } from "./series-share";
 import {
   flat,
   sceneElement,
@@ -59,6 +61,7 @@ import {
   noteId,
   noteResized,
   notes,
+  clippedBox,
   originOf,
   outsider,
   sameAnchors,
@@ -108,6 +111,13 @@ import {
   isWrittenPattern,
   mixPaint,
   type Pattern,
+  isNoise,
+  isNone,
+  layersOfPaints,
+  standIn,
+  type Noise,
+  type PaintLayer,
+  type Paints,
 } from "./paint";
 import type { Effect as EffectProps } from "./effects";
 
@@ -149,6 +159,19 @@ interface Ctx {
   readonly patterns: Map<Pattern, ModelPattern>;
   readonly reads: Map<object, Reading>;
   readonly clocks: Map<string, Clock>;
+  /**
+   * For a key that two lists in one parent write in a morph's states, the place of the list whose node keeps the key
+   * as written, by the key's full path. Set over all the states at once, so a node is named alike in each.
+   */
+  readonly owners: Map<string, string>;
+  /** Each `<Series share>`, by the keys of its children's top nodes: its seams are tweened once the scene is settled. */
+  readonly series: Series[];
+}
+
+interface Series {
+  readonly lists: readonly (readonly string[])[];
+  readonly played: readonly Played[];
+  readonly seams: Seams;
 }
 
 const keep = <T>(value: T): T => value;
@@ -177,6 +200,14 @@ const animated = <A, T>(
 };
 
 const colorOf = (ctx: Ctx, paint: Paint, where: string, timing: Timing, box?: Box): ModelPaint => {
+  if (isNoise(paint) || isNone(paint))
+    throw new SceneError(
+      `${where} has ${paint.kind === "noise" ? "a noise()" : "a none"} paint where it can't go: in a track, a <Run>, or the stroke of a <Text>.`,
+      paint.kind === "noise"
+        ? "Give noise() as the fill of a <Shape> or <Text>, a layer of a <Shape>'s fill or stroke, or a <Shape>'s stroke, and keep it still: animate its frequency instead."
+        : "Give none as a whole fill or stroke color, never in a track; fade a part out with opacity.",
+    );
+
   if (isWrittenPattern(paint)) return patternOf(ctx, paint, where, timing);
 
   return isWrittenGradient(paint)
@@ -306,17 +337,26 @@ const geometryOf = (
   timing: Timing,
   where: string,
   what = "geometry",
+  rule?: ShapeProps["rule"],
 ): Animated<Outline> => {
-  if (isDerived(value)) return derivedOf(value, outlineOf, timing, `${what} on ${where}`);
+  const ruled = (given: Geometry): Outline => {
+    const outline = outlineOf(given);
 
-  if (!isTrack(value)) return outlineOf(value);
+    return rule !== undefined && outline.kind === "path" && outline.rule !== rule
+      ? { ...outline, rule }
+      : outline;
+  };
+
+  if (isDerived(value)) return derivedOf(value, ruled, timing, `${what} on ${where}`);
+
+  if (!isTrack(value)) return ruled(value);
   const { data } = readOf(value, timing, `${what} on ${where}`);
 
   const authored = [data.initial, ...data.steps.map((step) => step.values)].flatMap(
     (values): Geometry[] => (values.value === undefined ? [] : [values.value]),
   );
 
-  const blended = matched(authored.map(outlineOf), `${what} on ${where}`);
+  const blended = matched(authored.map(ruled), `${what} on ${where}`);
   const lowered = new Map(authored.map((given, i) => [given, blended[i]!]));
   const lane = mapped(data, "value", (given) => lowered.get(given)!);
 
@@ -340,7 +380,12 @@ const fillOpacityOf = (
 /** How far, in px, an anchor's point may move across a geometry's keys before the anchor no longer holds. */
 const DRIFT = 0.5;
 
-const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeNode => {
+const shape = (
+  ctx: Ctx,
+  props: ShapeProps,
+  key: string,
+  timing: Timing,
+): ShapeNode | GroupNode | undefined => {
   const where = ctx.notes.names.named(key);
 
   if (props.geometry === undefined)
@@ -348,13 +393,18 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
       `${where} has no geometry.`,
       "Give it one, such as geometry={rect(40, 20)}.",
     );
+  const fills = props.fill === undefined ? [] : layersOfPaints(props.fill);
+  const strokes = props.stroke === undefined ? [] : layersOfPaints(props.stroke.color);
+
+  if (fills.length === 0 && strokes.length === 0 && (props.fill ?? props.stroke) !== undefined)
+    return undefined;
 
   if (props.fill === undefined && props.stroke === undefined)
     throw new SceneError(
       `${where} paints nothing: it has no fill and no stroke.`,
       "Give it a fill, as in fill={theme.text}, or a stroke, as in stroke={{ color: theme.text }}.",
     );
-  const geometry = geometryOf(props.geometry, timing, where);
+  const geometry = geometryOf(props.geometry, timing, where, "geometry", props.rule);
 
   if (props.anchor !== undefined && isLane(geometry)) {
     const points = geometry.keys.map((key) => pinned(props.anchor, outlineBoxOf(key.value), where));
@@ -377,7 +427,14 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
       `${what} on ${where}`,
     );
 
-  const stroke = written && strokeOf(ctx, written, timing, where, outline);
+  const solid = (value: Anim<Paint>): Anim<Paint> => (isNoise(value) ? standIn(value) : value);
+
+  const strokeIn = (color: Anim<Paint> | undefined) =>
+    written && color !== undefined
+      ? strokeOf(ctx, { ...written, color: solid(color) }, timing, where, outline)
+      : undefined;
+
+  const stroke = strokeIn(strokes[0]?.paint);
   const fillOpacity = fillOpacityOf(props.fillOpacity, timing, where);
 
   if (props.draw !== undefined && props.trim !== undefined)
@@ -392,23 +449,172 @@ const shape = (ctx: Ctx, props: ShapeProps, key: string, timing: Timing): ShapeN
       ? undefined
       : animated<Vec, Vec>(window, keep, timing, mixVec, `trim on ${where}`);
 
-  if (stroke?.dashOffset !== undefined && trim !== undefined)
-    throw new SceneError(
-      `${where} has both a draw or trim and a stroke dashOffset, and both drive the dash.`,
-      "Pick one: animate draw to draw the stroke on, or dashOffset to march its dashes.",
+  const box = paintedBoxOf(rest, lookOf({ stroke, trim }));
+
+  const look = (fill: Anim<Paint> | undefined, color: Anim<Paint> | undefined) => {
+    const drawn =
+      color === undefined ? undefined : color === strokes[0]?.paint ? stroke : strokeIn(color);
+
+    const noisy = [fill, color].find(isNoise);
+
+    return {
+      kind: "shape" as const,
+      geometry,
+      ...(fill !== undefined && { fill: painted(solid(fill), "fill") }),
+      ...(fillOpacity !== undefined && fillOpacity !== 1 && { fillOpacity }),
+      ...(drawn && { stroke: drawn }),
+      ...(trim !== undefined && { trim }),
+      ...(noisy && { effects: [noiseOf(ctx, noisy, timing, where)] }),
+    };
+  };
+
+  const bare = (layer: PaintLayer) =>
+    (layer.blend === undefined || layer.blend === "normal") &&
+    layer.opacity === undefined &&
+    layer.effects === undefined;
+
+  const [fill] = fills;
+
+  if (
+    fills.length <= 1 &&
+    strokes.length <= 1 &&
+    [...fills, ...strokes].every(bare) &&
+    !(strokes.length === 1 && fill !== undefined && [fill.paint, strokes[0]!.paint].some(isNoise))
+  )
+    return turned(
+      {
+        ...base(ctx, props, box, key, timing, pinned(props.anchor, box, where)),
+        ...look(fill?.paint, strokes[0]?.paint),
+      },
+      [fill?.paint, strokes[0]?.paint].find(isNoise),
     );
 
-  const box = paintedBoxOf(rest, lookOf({ stroke, trim }));
+  const copy =
+    (side: "fill" | "stroke") =>
+    (layer: PaintLayer, i: number): SceneNode => {
+      const what = `${side} layer ${i + 1} on ${where}`;
+
+      const opacity =
+        layer.opacity === undefined
+          ? 1
+          : animated(layer.opacity, keep, timing, mixNumber, `opacity of ${what}`);
+
+      if (!isLane(opacity) && !(opacity >= 0 && opacity <= 1))
+        throw new SceneError(`The opacity of ${what} needs a number from 0 to 1, got ${opacity}.`);
+
+      if (layer.effects !== undefined && !isArray(layer.effects))
+        throw new SceneError(
+          `The effects of ${what} need to be a list, got ${JSON.stringify(layer.effects)}.`,
+          "Write effects: [emboss({ depth: 1.8 })].",
+        );
+      const drawn = side === "fill" ? look(layer.paint, undefined) : look(undefined, layer.paint);
+
+      return {
+        ...turned(
+          {
+            key: `${key}#${side}${i + 1}`,
+            box,
+            at: [0, 0],
+            origin: [0, 0],
+            layers: opacity === 1 ? [] : [{ ...IDLE, opacity }],
+            ...drawn,
+            effects: [
+              ...(drawn.effects ?? []),
+              ...(layer.effects ?? []).map((effect) => effectOf(ctx, effect, timing, what)),
+            ],
+          },
+          layer.paint,
+        ),
+        ...(layer.blend !== undefined && layer.blend !== "normal" && { blend: layer.blend }),
+      };
+    };
+
+  const under = strokes.map(copy("stroke"));
+  const over = fills.map(copy("fill"));
 
   return {
     ...base(ctx, props, box, key, timing, pinned(props.anchor, box, where)),
-    kind: "shape",
-    geometry,
-    ...(props.fill !== undefined && { fill: painted(props.fill, "fill") }),
-    ...(fillOpacity !== undefined && fillOpacity !== 1 && { fillOpacity }),
-    ...(stroke && { stroke }),
-    ...(trim !== undefined && { trim }),
+    kind: "group",
+    children: written?.under ? [...under, ...over] : [...over, ...under],
   };
+};
+
+/**
+ * A node whose first effect is a turned noise, drawn so only the noise turns: the filter sits on a group turned about
+ * the center of the node's box, around the node turned back. The node's place, motion and other effects stay outside;
+ * it carries no blend yet, which the caller adds to what this returns.
+ */
+const turned = <N extends SceneNode>(node: N, paint: Anim<Paint> | undefined): N | GroupNode => {
+  const rotate = isNoise(paint) ? paint.rotate : 0;
+  const [noise, ...after] = node.effects;
+
+  if (rotate === 0 || noise?.kind !== "noise") return node;
+  const { key, box, at, origin, layers } = node;
+  const center: Vec = [box.x + box.width / 2, box.y + box.height / 2];
+
+  const spun = (angle: number): Pick<SceneNode, "box" | "at" | "origin" | "layers"> => ({
+    box,
+    at: [0, 0],
+    origin: center,
+    layers: [{ ...IDLE, rotate: angle }],
+  });
+
+  return {
+    kind: "group",
+    key,
+    box,
+    at,
+    origin,
+    layers,
+    effects: after,
+    children: [
+      {
+        kind: "group",
+        key: `${key}#noise`,
+        ...spun(rotate),
+        effects: [noise],
+        children: [{ ...node, key: `${key}#grain`, ...spun(-rotate), effects: [] }],
+      },
+    ],
+  };
+};
+
+/** The noise filter a `noise()` paint lowers to: it repaints whatever the node draws with the ramp. */
+const noiseOf = (ctx: Ctx, paint: Noise, timing: Timing, where: string): Effect => {
+  const what = `noise frequency on ${where}`;
+  const frequency = animated<number | Vec, Vec>(paint.frequency, pair, timing, mixVec, what);
+  const values = isLane(frequency) ? frequency.keys.map((key) => key.value) : [frequency];
+
+  if (!values.flat().every((value) => value >= 0 && Number.isFinite(value)))
+    throw new SceneError(
+      `${what} needs numbers of 0 or more, got ${JSON.stringify(values)}.`,
+      "Noise frequency is cycles per unit: try 0.01 for a soft mottle.",
+    );
+  const { ramp } = paint;
+
+  return {
+    kind: "noise",
+    frequency,
+    octaves: paint.octaves,
+    seed: paint.seed,
+    type: paint.type,
+    stitch: paint.stitch,
+    ramp: ramp.map((stop, i) => {
+      const [offset, color] = isArray(stop) ? stop : [i / (ramp.length - 1), stop];
+
+      return { offset, color: solidOf(ctx, color, `the noise ramp on ${where}`) };
+    }),
+  };
+};
+
+const onePaint = (paints: Paints, where: string): Anim<Paint> => {
+  if (isArray(paints))
+    throw new SceneError(
+      `${where} has a layered stroke, which only a <Shape> takes.`,
+      "Give the <Text> one stroke paint, or stack two <Text>s in a <Group>.",
+    );
+
+  return paints;
 };
 
 const strokeOf = (
@@ -433,7 +639,7 @@ const strokeOf = (
   return {
     color: blendable(
       animated(
-        written.color,
+        onePaint(written.color, where),
         (value: Paint) => colorOf(ctx, value, where, timing, box),
         timing,
         mixPaint,
@@ -451,6 +657,45 @@ const strokeOf = (
     }),
     fixedWidth: written.fixedWidth ?? false,
   };
+};
+
+/** A <Text> with its `none` paints left out (all of it, when it paints nothing else) and a noise fill as a filter. */
+const paintedText = (
+  ctx: Ctx,
+  props: TextProps,
+  key: string,
+  timing: Timing,
+): SceneNode | undefined => {
+  const where = ctx.notes.names.named(key);
+  const { fill, stroke, ...rest } = props;
+  const lined = stroke && !isNone(stroke.color) ? stroke : undefined;
+
+  if (isNone(fill) && lined === undefined) return undefined;
+
+  if (fill === undefined && stroke !== undefined && lined === undefined) return undefined;
+
+  if (isArray(fill) || isArray(lined?.color))
+    throw new SceneError(
+      `${where} has a layered ${isArray(fill) ? "fill" : "stroke"}, which only a <Shape> takes.`,
+      "Give the <Text> one paint, or stack two <Text>s in a <Group> and blend the top one.",
+    );
+
+  const kept = {
+    ...rest,
+    ...(fill !== undefined && !isNone(fill) && { fill: isNoise(fill) ? standIn(fill) : fill }),
+    ...(lined && { stroke: lined }),
+  };
+
+  if (!isNoise(fill)) return text(ctx, kept, key, timing);
+
+  if (lined)
+    throw new SceneError(
+      `${where} has a noise() fill and a stroke, and the noise would paint over both.`,
+      "Draw the stroke as a second <Text> under it in a <Group>, or drop the stroke.",
+    );
+  const node = text(ctx, kept, key, timing);
+
+  return turned({ ...node, effects: [noiseOf(ctx, fill, timing, where), ...node.effects] }, fill);
 };
 
 const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNode => {
@@ -884,12 +1129,6 @@ const text = (ctx: Ctx, props: TextProps, key: string, timing: Timing): SceneNod
 
   const stroke = props.stroke && strokeOf(ctx, props.stroke, timing, where, box);
 
-  if (stroke?.dashOffset !== undefined && trim !== undefined)
-    throw new SceneError(
-      `${where} has both a draw or trim and a stroke dashOffset, and both drive the dash.`,
-      "Pick one: animate draw to draw the stroke on, or dashOffset to march its dashes.",
-    );
-
   const drawn = strokedBox(box, stroke);
   const home = pinned(props.anchor, drawn, where, lines[0]?.at[1] ?? 0);
 
@@ -1093,10 +1332,13 @@ const lowerAll = (
   elements: readonly SceneElement[],
   timing: Timing,
   parent: string,
-  taken: Set<string> = new Set(),
+  taken: Taken = new Map(),
 ): SceneNode[] =>
   elements.flatMap((element): SceneNode[] => {
     const given = sceneElement(element, parent ? ctx.notes.names.named(parent) : "The scene");
+
+    if (given.type === "fragment" && given.seams)
+      return lowerSeries(ctx, given, timing, parent, taken);
 
     if (given.type === "fragment") return lowerAll(ctx, given.children, timing, parent, taken);
 
@@ -1110,9 +1352,11 @@ const lowerAll = (
       return given.clock ? nodes.map((node) => ({ ...node, clock: node.clock ?? named! })) : nodes;
     }
 
+    if (given.type === "morph") ownKeys(ctx, given.states, parent, taken);
+
     if (given.type === "morph" && given.only !== undefined) {
       const states = given.states.map((state) => {
-        const names = new Set(taken);
+        const names: Taken = new Map(taken);
 
         return {
           nodes: arrangeState(lowerAll(ctx, state, timing, parent, names), ctx.notes),
@@ -1120,7 +1364,7 @@ const lowerAll = (
         };
       });
 
-      for (const { names } of states) for (const each of names) taken.add(each);
+      for (const { names } of states) for (const [each, list] of names) taken.set(each, list);
 
       return states[given.only]!.nodes;
     }
@@ -1149,25 +1393,9 @@ const lowerAll = (
       return merged;
     }
 
-    const name = keyOf(given);
+    const { name, full, apart, key } = claim(ctx, given, taken, parent);
 
-    if (name !== undefined && taken.has(name))
-      throw new SceneError(
-        `Two nodes are both keyed "${name}"${parent && ` inside ${ctx.notes.names.named(parent)}`}.`,
-        "Give each a key of its own.",
-        { node: `"${name}"`, ...(writtenAt(given) && { source: writtenAt(given)! }) },
-      );
-
-    if (name?.includes("/"))
-      throw new SceneError(`A key can't contain "/", got "${name}".`, "Join words with - or _.", {
-        ...(writtenAt(given) && { source: writtenAt(given)! }),
-      });
-    let own = name;
-
-    for (let index = taken.size; own === undefined; index++)
-      if (!taken.has(`#${index}`)) own = `#${index}`;
-    taken.add(own);
-    const key = parent ? `${parent}/${own}` : own;
+    if (apart) ctx.notes.names.share(full!, key);
     const entry = nameFor(ctx, given, name, parent);
 
     ctx.notes.names.set(key, entry);
@@ -1178,6 +1406,187 @@ const lowerAll = (
       throw error instanceof Error ? located(error, ctx.notes.names.whereOf(key)) : error;
     }
   });
+
+/** A `<Series share>`: its children lowered one by one, then its shared nodes tweened across the seams between them. */
+const lowerSeries = (
+  ctx: Ctx,
+  given: Extract<SceneElement, { readonly type: "fragment" }>,
+  timing: Timing,
+  parent: string,
+  taken: Taken,
+): SceneNode[] => {
+  if (timing.clock.named)
+    throw new SceneError(
+      `A <Series share> plays inside <Sequence clock="${timing.clock.named.name}">, and its tweens run on the scene's clock.`,
+      "Put the series on the scene's clock, or share inside each child with morph().",
+    );
+
+  const played = given.children.map((child) => {
+    if (child.type !== "sequence" || child.over === undefined)
+      throw new SceneError("A <Series share> child didn't expand to a <Sequence> of a set length.");
+
+    const start = timing.clock.offset + child.start;
+
+    return { start, end: start + child.over };
+  });
+
+  const lists = given.children.map((child) => lowerAll(ctx, [child], timing, parent, taken));
+
+  ctx.series.push({
+    lists: lists.map((list) => list.map((node) => node.key)),
+    played,
+    seams: given.seams!,
+  });
+
+  return lists.flat();
+};
+
+/** The tree with each node `swaps` has a node for, by key, swapped for it. */
+const swappedIn = (tree: GroupNode, swaps: ReadonlyMap<string, SceneNode>): GroupNode => {
+  const swapped = (node: SceneNode): SceneNode =>
+    swaps.get(node.key) ??
+    (node.kind === "group" ? { ...node, children: node.children.map(swapped) } : node);
+
+  return { ...tree, children: tree.children.map(swapped) };
+};
+
+/** Tweens the shared nodes of each `<Series share>` across its seams, in the settled tree, where every place is final. */
+const shared = (ctx: Ctx, root: GroupNode): GroupNode => {
+  let tree = root;
+
+  for (const { lists, played, seams } of ctx.series) {
+    const found = new Map<string, SceneNode>();
+
+    const index = (node: SceneNode): void => {
+      found.set(node.key, node);
+
+      if (node.kind === "group") node.children.forEach(index);
+    };
+
+    index(tree);
+    const children = lists.map((keys) => keys.map((key) => found.get(key)!));
+    const done = shareAcross(children, played, seams, sceneTiming(ctx), ctx.notes.names).flat();
+    const swaps = new Map(done.map((node) => [node.key, node]));
+
+    tree = swappedIn(tree, swaps);
+  }
+
+  return tree;
+};
+
+/** Takes the element's key in its parent: as written, or told apart by its list's place, or by position when unkeyed. */
+const claim = (ctx: Ctx, given: NodeElement, taken: Taken, parent: string) => {
+  const name = keyOf(given);
+  const list = listOf(given);
+  const full = name === undefined || !parent ? name : `${parent}/${name}`;
+
+  const earlier =
+    name === undefined ? undefined : taken.has(name) ? taken.get(name) : ctx.owners.get(full!);
+
+  // Two lists in one parent may both write a key: all but one are told apart by their list's place.
+  const apart =
+    list !== undefined && earlier !== undefined && earlier !== list ? `${name}~${list}` : undefined;
+
+  if (name !== undefined && taken.has(apart ?? name))
+    throw new SceneError(
+      `Two nodes are both keyed "${name}"${parent && ` inside ${ctx.notes.names.named(parent)}`}.`,
+      "Give each a key of its own.",
+      { node: `"${name}"`, ...(writtenAt(given) && { source: writtenAt(given)! }) },
+    );
+
+  if (name?.includes("/"))
+    throw new SceneError(`A key can't contain "/", got "${name}".`, "Join words with - or _.", {
+      ...(writtenAt(given) && { source: writtenAt(given)! }),
+    });
+  let own = apart ?? name;
+
+  for (let index = taken.size; own === undefined; index++)
+    if (!taken.has(`#${index}`)) own = `#${index}`;
+  taken.set(own, list);
+
+  return { name, list, full, apart: apart !== undefined, key: parent ? `${parent}/${own}` : own };
+};
+
+/** Every list place that writes each key in these elements, by the key's full path, in the order they come. */
+const claims = (
+  ctx: Ctx,
+  elements: readonly SceneElement[],
+  parent: string,
+  taken: Taken,
+  into: Map<string, string[]>,
+): void => {
+  for (const element of elements) {
+    const given = sceneElement(element, "The scene");
+
+    if (given.type === "fragment" || given.type === "sequence") {
+      claims(ctx, given.children, parent, taken, into);
+
+      continue;
+    }
+
+    if (given.type === "morph") {
+      for (const state of given.states) {
+        const used: Taken = new Map(taken);
+
+        claims(ctx, state, parent, used, into);
+
+        for (const [each, list] of used) taken.set(each, list);
+      }
+
+      continue;
+    }
+
+    const reflowed =
+      given.type === "group" && given.settle?.kind === "arrange" ? lifted(given) : undefined;
+
+    if (reflowed) {
+      claims(ctx, [reflowed], parent, taken, into);
+
+      continue;
+    }
+
+    const { full, list, key } = claim(ctx, given, taken, parent);
+
+    if (full !== undefined && list !== undefined) {
+      const lists = into.get(full) ?? [];
+
+      if (!lists.includes(list)) into.set(full, [...lists, list]);
+    }
+
+    if (given.type === "group") claims(ctx, given.children, key, new Map(), into);
+  }
+};
+
+/**
+ * Before a morph's states are lowered: when two lists write one key across them, even in different states, the first
+ * list keeps it in every state, so the node of a list is named alike in each and the states pair it with itself.
+ */
+const ownKeys = (
+  ctx: Ctx,
+  states: readonly (readonly SceneElement[])[],
+  parent: string,
+  taken: Taken,
+): void => {
+  try {
+    // A node told apart renames the keys under it, which can show more keys two lists share there.
+    for (let pass = 0; pass < 4; pass++) {
+      const into = new Map<string, string[]>();
+      let more = false;
+
+      for (const state of states) claims(ctx, state, parent, new Map(taken), into);
+
+      for (const [full, lists] of into)
+        if (lists.length > 1 && !ctx.owners.has(full)) {
+          ctx.owners.set(full, lists[0]!);
+          more = true;
+        }
+
+      if (!more) return;
+    }
+  } catch {
+    // Lowering the states reports what is wrong with them, where it is written.
+  }
+};
 
 const keyOf = (given: Extract<SceneElement, { readonly props: object }>): string | undefined => {
   const key = "key" in given.props ? given.props.key : undefined;
@@ -1230,9 +1639,9 @@ const lowered = (
 
   switch (el.type) {
     case "shape":
-      return done(shape(ctx, el.props, key, timing));
+      return [shape(ctx, el.props, key, timing)].flatMap((node) => (node ? done(node) : []));
     case "text":
-      return done(text(ctx, el.props, key, timing));
+      return [paintedText(ctx, el.props, key, timing)].flatMap((node) => (node ? done(node) : []));
     case "picture":
       return done(picture(ctx, el.props, key, timing));
     case "group": {
@@ -1333,6 +1742,43 @@ const lengthOf = (
   return out;
 };
 
+const embossOf = (
+  ctx: Ctx,
+  effect: Extract<EffectProps, { kind: "emboss" }>,
+  where: string,
+): Effect => {
+  const { azimuth, elevation, depth, radius, specular } = effect;
+
+  const check = (value: number, name: string, ok: boolean, range: string) => {
+    if (!(ok && Number.isFinite(value)))
+      throw new SceneError(
+        `emboss ${name} on ${where} needs ${range}, got ${value}.`,
+        "emboss() takes plain numbers: emboss({ light: { azimuth: 225, elevation: 45 }, depth: 3 }).",
+      );
+  };
+
+  check(azimuth, "light azimuth", isNumber(azimuth), "a number of degrees");
+  check(
+    elevation,
+    "light elevation",
+    elevation > 0 && elevation <= 90,
+    "degrees above 0 and up to 90",
+  );
+  check(depth, "depth", depth >= 0, "a number of 0 or more");
+  check(radius, "radius", radius >= 0, "a number of 0 or more");
+  check(specular, "specular", specular >= 0, "a number of 0 or more");
+
+  return {
+    kind: "emboss",
+    azimuth,
+    elevation,
+    depth,
+    radius,
+    specular,
+    color: solidOf(ctx, effect.color, `emboss on ${where}`),
+  };
+};
+
 const effectOf = (ctx: Ctx, effect: EffectProps, timing: Timing, where: string): Effect => {
   if (effect.kind === "blur")
     return { kind: "blur", radius: lengthOf(effect.radius, timing, `blur on ${where}`) };
@@ -1375,9 +1821,11 @@ const effectOf = (ctx: Ctx, effect: EffectProps, timing: Timing, where: string):
     };
   }
 
+  if (effect.kind === "emboss") return embossOf(ctx, effect, where);
+
   if (effect.kind !== "shadow")
     throw new SceneError(
-      `effects on ${where} takes blur(), shadow(), adjust() and displace(), got ${JSON.stringify(effect)}.`,
+      `effects on ${where} takes blur(), shadow(), adjust(), displace() and emboss(), got ${JSON.stringify(effect)}.`,
     );
   const opacity = animated(effect.opacity, keep, timing, mixNumber, `shadow opacity on ${where}`);
 
@@ -1463,11 +1911,13 @@ const dressed = (
           timing,
         );
 
+  const lowered = clip === undefined ? undefined : geometryOf(clip, timing, where, "clip");
+
   return {
     ...node,
-    ...(clip !== undefined && { clip: geometryOf(clip, timing, where, "clip") }),
+    ...(lowered !== undefined && { clip: lowered, box: clippedBox(node.box, lowered) }),
     ...(mask && { mask }),
-    effects: effects.map((effect) => effectOf(ctx, effect, timing, where)),
+    effects: [...node.effects, ...effects.map((effect) => effectOf(ctx, effect, timing, where))],
     ...(blend !== undefined && blend !== "normal" && { blend }),
     ...(scheme !== undefined && { scheme }),
   };
@@ -1517,7 +1967,10 @@ const backdropOf = (
   key: string,
   timing: Timing,
 ): BackdropOf | undefined => {
-  if (fill === undefined && stroke === undefined) return undefined;
+  const painted = (paints: Paints | undefined) =>
+    paints !== undefined && layersOfPaints(paints).length > 0;
+
+  if (!painted(fill) && !painted(stroke?.color)) return undefined;
   const line = stroke === undefined ? 0 : restOf(stroke.width ?? 1);
 
   return (box) => ({
@@ -1535,7 +1988,7 @@ const backdropOf = (
       },
       `${key}/background`,
       timing,
-    ),
+    )!,
     authored: { backdrop: true },
   });
 };
@@ -1614,7 +2067,7 @@ const checkSlots = (root: GroupNode): void => {
 };
 
 const isBare = (el: SceneElement): boolean =>
-  el.type === "fragment" ||
+  (el.type === "fragment" && el.seams === undefined) ||
   (el.type === "group" && Object.keys(el.props).length === 0 && el.settle === undefined);
 
 /**
@@ -1682,6 +2135,8 @@ const lowerScene = (
     patterns: new Map(),
     reads: new Map(),
     clocks: new Map(),
+    owners: new Map(),
+    series: [],
   };
 
   for (const token of Object.values(options.theme ?? {})) solidOf(ctx, token, "scene()");
@@ -1704,7 +2159,7 @@ const lowerScene = (
     children,
   };
 
-  const root = settle(drafted, ctx.notes, duration);
+  const root = shared(ctx, settle(drafted, ctx.notes, duration));
 
   checkSlots(root);
 

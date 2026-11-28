@@ -242,7 +242,26 @@ svjeez check scene.tsx           model only, no browser
   --browser                      check rendered boxes and contrast in Chromium
   --at 0,0.75,2.5                check layout at those times
 svjeez frames scene.tsx --sheet  PNG contact sheet
+svjeez perf scene.tsx            fps, dropped frames and the slowest stretch, in Chrome
 ```
+
+## Texture, not photorealism
+
+```tsx
+fill={[
+  "#F7F3EA",                                                         // paper
+  { paint: noise({ frequency: 0.6, seed: 4, ramp }), blend: "multiply" }, // grain
+  { paint: noise({ frequency: 0.08, seed: 8, ramp }), effects: [emboss()] }, // raised tooth
+]}
+```
+
+`noise()`, `emboss()`, layered fills and elliptical gradients paint material for a few hundred bytes. Browsers draw SVG filters on the CPU, though, so a textured layer redraws whenever something inside, under, or above it moves. Keep textured layers still and move plain shapes over them; `svjeez check` warns when a scene doesn't, and `svjeez perf` measures it. For photoreal or lit 3D motion, use `<Shader>` or render video.
+
+<p align="center">
+  <img src="examples/pelican-launch/renders/lab.svg" alt="One pedalling pelican in four finishes: studio, hand-tinted engraving, watercolour on cold-press paper, and a two-ink risograph" width="640">
+  <br>
+  <sub><b>One rig, four surfaces</b> · 151 KB · <a href="examples/pelican-launch/lab.tsx"><code>examples/pelican-launch/lab.tsx</code></a></sub>
+</p>
 
 ## Inside the compiled `.svg`
 

@@ -2,6 +2,7 @@ import type { Color as CssColor } from "../model/color";
 import type { ChannelValues } from "./channels";
 import type { Canvas, Lane as CssLane } from "./compile";
 import { num } from "../model/format";
+import { SceneError } from "../model/scene-error";
 import { animate, windowEnd } from "./smil";
 import { element, type Element, type SvgNode } from "./tree";
 import { contoursOf, outlineBoxOf, smilSafeWith } from "../model/geometry";
@@ -21,8 +22,9 @@ import type {
   Vec,
 } from "../model/ir";
 import { atRest, isLane, mapLane } from "../model/lane";
-import { blendNumber, valueAt } from "../model/sample";
-import { mixNumber, same } from "../model/steps";
+import { blendNumber, blendVec, valueAt } from "../model/sample";
+import { mixNumber, mixVec, same } from "../model/steps";
+import type { PathData } from "../model/paths";
 import { isArray } from "../model/guards";
 
 export interface Defs {
@@ -61,7 +63,7 @@ export const colorText = (color: Color): CssColor =>
     ? `#${byte(color[0])}${byte(color[1])}${byte(color[2])}${color[3] < 1 ? byte(color[3]) : ""}`
     : `var(--${color.name})`;
 
-const nextId = (defs: Defs, base: string): string => {
+export const nextId = (defs: Defs, base: string): string => {
   const count = (defs.counts.get(base) ?? 0) + 1;
 
   defs.counts.set(base, count);
@@ -197,6 +199,24 @@ export const gradientUrl = (
           at("r", (g) => (g.kind === "radial" ? g.radius : 0), undefined),
         ];
 
+  const squash = (g: Gradient): number => (g.kind === "radial" ? (g.squash ?? 1) : 1);
+
+  if (isLane(paint) && first.kind === "radial") {
+    const [rest, ...more] = paint.keys.map((key) => key.value);
+
+    if (
+      more.some(
+        (g) =>
+          g.kind === "radial" &&
+          rest!.kind === "radial" &&
+          (squash(g) !== squash(rest!) || (squash(rest!) !== 1 && g.center[1] !== rest!.center[1])),
+      )
+    )
+      throw new SceneError(
+        `${where} changes its ellipse shape or its vertical center over time, and SVG can't animate that. Animate the center's x or the radius, or keep the ratio between radii fixed.`,
+      );
+  }
+
   const optional = new Set(["x1", "y1", "y2"]);
 
   const stops = first.stops.map((_, i) => {
@@ -224,6 +244,10 @@ export const gradientUrl = (
       {
         id: own,
         gradientUnits: "userSpaceOnUse",
+        ...(first.kind === "radial" &&
+          squash(first) !== 1 && {
+            gradientTransform: `matrix(1 0 0 ${num(squash(first))} 0 ${num((first.center[1] + shift[1]) * (1 - squash(first)))})`,
+          }),
         ...Object.fromEntries(
           points.flatMap(([name, written]): [string, string][] =>
             optional.has(name) && written.nodes.length === 0 && written.value === "0"
@@ -349,6 +373,10 @@ const idle = (effect: Effect): boolean => {
         (!isLane(effect.opacity) && effect.opacity <= 0) ||
         (!isLane(effect.color) && isArray(effect.color) && effect.color[3] <= 0)
       );
+    case "noise":
+      return false;
+    case "emboss":
+      return effect.depth === 0 && effect.specular === 0;
   }
 };
 
@@ -407,7 +435,7 @@ const drawPrimitive = (primitive: Primitive, still: boolean, defs: Defs): SvgNod
 
 const primitivesOf = (
   defs: Defs,
-  effect: Exclude<Effect, { kind: "displace" }>,
+  effect: Exclude<Effect, { kind: "displace" | "noise" | "emboss" }>,
   where: string,
 ): Primitive[] => {
   const amount = (name: string, value: Animated<number>) =>
@@ -502,6 +530,207 @@ const primitivesOf = (
   }
 };
 
+const DIGITS = 5;
+
+const still = (value: string): Moving => ({ value, still: value, nodes: [] });
+
+/** A `baseFrequency`: one number when both axes match, else `fx fy`, animated as SMIL when it moves. */
+const frequencyOf = (defs: Defs, given: Animated<Vec>, where: string): Moving => {
+  const value = settled(given);
+  const text = ([fx, fy]: Vec): string => `${num(length(fx), DIGITS)} ${num(length(fy), DIGITS)}`;
+
+  if (!isLane(value))
+    return value[0] === value[1]
+      ? smil(defs, "baseFrequency", value[0], where, length)
+      : still(text(value));
+
+  if (value.keys.every((key) => key.value[0] === key.value[1]))
+    return smil(
+      defs,
+      "baseFrequency",
+      mapLane(value, ([fx]) => fx),
+      where,
+      length,
+    );
+  const held = text(valueAt(value, defs.scene.still ?? 0, blendVec));
+
+  const lane = defs.lane(
+    "baseFrequency",
+    smilSafeWith(value, mixVec, where),
+    // SAFETY: a smil lane writes its value as the attribute's text, and a pair is two numbers apart.
+    (each) => ({ d: text(each) as PathData }),
+    "smil",
+  );
+
+  const nodes = animate(defs.canvas, "baseFrequency", lane, () => nextId(defs, "s"));
+
+  return { value: windowEnd(nodes) ?? held, still: held, nodes };
+};
+
+/**
+ * Noise mapped through a color ramp, cut to the alpha of `input`. Each stop after the first is blended in as its own
+ * flood over the colors so far, weighted by how far the noise has climbed from the stop before it to this one, so
+ * light/dark tokens in the ramp stay live CSS colors.
+ */
+const noisePrimitives = (
+  defs: Defs,
+  effect: Extract<Effect, { kind: "noise" }>,
+  input: string,
+  id: string,
+  where: string,
+): Primitive[] => {
+  const noise = `${id}n`;
+  const [first, ...rest] = effect.ramp;
+
+  const out: Primitive[] = [
+    {
+      tag: "feTurbulence",
+      attrs: {
+        type: effect.type === "fractal" ? "fractalNoise" : "turbulence",
+        numOctaves: String(effect.octaves),
+        seed: String(effect.seed),
+        ...(effect.stitch && { stitchTiles: "stitch" }),
+        result: noise,
+      },
+      numbers: [["baseFrequency", frequencyOf(defs, effect.frequency, where)]],
+    },
+    { tag: "feFlood", attrs: { result: `${id}c0` }, numbers: [], flood: first!.color },
+  ];
+
+  rest.forEach((stop, i) => {
+    const from = effect.ramp[i]!.offset;
+    const slope = stop.offset > from ? 1 / (stop.offset - from) : 1e4;
+    const [weight, color, mine, kept] = ["w", "f", "a", "b"].map((part) => `${id}${part}${i + 1}`);
+
+    out.push(
+      {
+        tag: "feColorMatrix",
+        attrs: {
+          in: noise,
+          values: `0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ${num(slope, DIGITS)} ${num(-from * slope, DIGITS)}`,
+          result: weight!,
+        },
+        numbers: [],
+      },
+      { tag: "feFlood", attrs: { result: color! }, numbers: [], flood: stop.color },
+      {
+        tag: "feComposite",
+        attrs: { in: color!, in2: weight!, operator: "in", result: mine! },
+        numbers: [],
+      },
+      {
+        tag: "feComposite",
+        attrs: { in: `${id}c${i}`, in2: weight!, operator: "out", result: kept! },
+        numbers: [],
+      },
+      {
+        tag: "feComposite",
+        attrs: {
+          in: mine!,
+          in2: kept!,
+          operator: "arithmetic",
+          k2: "1",
+          k3: "1",
+          result: `${id}c${i + 1}`,
+        },
+        numbers: [],
+      },
+    );
+  });
+
+  out.push({
+    tag: "feComposite",
+    attrs: { in: `${id}c${rest.length}`, in2: input, operator: "in" },
+    numbers: [],
+  });
+
+  return out;
+};
+
+/**
+ * Lights the alpha of `input` as a height map: diffuse light shades its slopes (scaled so a flat face keeps its own
+ * color), a specular highlight glints on the slopes toward the light, and both stay inside its shape.
+ */
+const embossPrimitives = (
+  defs: Defs,
+  effect: Extract<Effect, { kind: "emboss" }>,
+  input: string,
+  id: string,
+  _where: string,
+): Primitive[] => {
+  const light: Primitive = {
+    tag: "feDistantLight",
+    attrs: { azimuth: num(effect.azimuth), elevation: num(effect.elevation) },
+    numbers: [],
+  };
+
+  const height = `${id}h`;
+  const lit = `${id}d`;
+  const shaded = `${id}s`;
+  const flat = Math.sin((effect.elevation * Math.PI) / 180);
+  const color = { "lighting-color": colorText(effect.color) };
+
+  const out: Primitive[] = [
+    {
+      tag: "feGaussianBlur",
+      attrs: { in: input, result: height },
+      numbers: [["stdDeviation", still(num(effect.radius))]],
+    },
+    {
+      tag: "feDiffuseLighting",
+      attrs: {
+        in: height,
+        surfaceScale: num(effect.depth),
+        diffuseConstant: num(1 / flat, DIGITS),
+        ...color,
+        result: lit,
+      },
+      numbers: [],
+      inside: [light],
+    },
+    {
+      tag: "feComposite",
+      attrs: {
+        in: lit,
+        in2: input,
+        operator: "arithmetic",
+        k1: "1",
+        ...(effect.specular > 0 && { result: shaded }),
+      },
+      numbers: [],
+    },
+  ];
+
+  if (effect.specular === 0) return out;
+
+  return [
+    ...out,
+    {
+      tag: "feSpecularLighting",
+      attrs: {
+        in: height,
+        surfaceScale: num(effect.depth),
+        specularConstant: num(effect.specular),
+        specularExponent: "20",
+        ...color,
+        result: `${id}g`,
+      },
+      numbers: [],
+      inside: [light],
+    },
+    {
+      tag: "feComposite",
+      attrs: { in: `${id}g`, in2: input, operator: "in", result: `${id}k` },
+      numbers: [],
+    },
+    {
+      tag: "feComposite",
+      attrs: { in: `${id}k`, in2: shaded, operator: "arithmetic", k2: "1", k3: "1" },
+      numbers: [],
+    },
+  ];
+};
+
 export const filterUrl = (
   defs: Defs,
   effects: readonly Effect[],
@@ -511,7 +740,28 @@ export const filterUrl = (
   const where = `the effects on "${key}"`;
   const primitives: Primitive[] = [];
 
+  /** Names what the primitives so far make, so a later one can read it again: the input of the next effect. */
+  const named = (): string => {
+    const before = primitives.pop();
+
+    if (before === undefined) return "SourceGraphic";
+    const input = before.attrs.result ?? `e${primitives.length}`;
+
+    primitives.push({ ...before, attrs: { ...before.attrs, result: input } });
+
+    return input;
+  };
+
   for (const effect of effects) {
+    if (effect.kind === "noise" || effect.kind === "emboss") {
+      const input = named();
+      const make = effect.kind === "noise" ? noisePrimitives : embossPrimitives;
+
+      // SAFETY: make is the builder for this very effect's kind.
+      primitives.push(...make(defs, effect as never, input, `z${primitives.length}`, where));
+      continue;
+    }
+
     if (effect.kind !== "displace") {
       primitives.push(...primitivesOf(defs, effect, where));
       continue;

@@ -14,7 +14,10 @@ import type { Effect } from "./effects";
 import type { TextContent } from "./count";
 import type { TextFitOptions } from "./text";
 import type { Geometry, Paint } from "./values";
+import type { Paints } from "./paint";
 import { isArray, isNumber, isObject, isString } from "../model/guards";
+import { inList } from "./identity";
+import { seamsOf, type Seams, type Share } from "./series-share";
 
 export { ref } from "./refs";
 
@@ -43,10 +46,16 @@ export interface Common {
   readonly skew?: Anim<number>;
   readonly opacity?: Anim<number>;
   readonly motion?: Layers;
+  /**
+   * Draws only what is inside this outline, in the node's own frame. A clip also sizes the node for layout, refs and `check`:
+   * it contributes its content box cut to the clip's bounds, so a long clipped trace in a `<Stack>` takes the clip's size, not its own.
+   * An animated clip counts as the union of its keyframes' bounds, so layout holds still while the clip moves.
+   * A clip written as a function of the node's own bounds cuts what it is given, so it sizes the node only as far as it shrinks it.
+   */
   readonly clip?: Anim<Geometry> | ((own: Bounds) => Anim<Geometry>);
   readonly mask?: Child | ((own: Bounds) => Child);
   readonly effects?: readonly Effect[];
-  /** How it composites onto its earlier siblings. A group whose children blend is isolated, so they blend only with each other. */
+  /** How it composites onto its earlier siblings. A group whose children blend is isolated, so they blend only with each other; a lone blending child (as under a `clip`) passes its blend to the group, so it blends with what is behind. */
   readonly blend?: "normal" | Blend;
   /**
    * Shows it only in this color scheme (the viewer's `prefers-color-scheme`); without it, it shows in both. It still
@@ -56,14 +65,15 @@ export interface Common {
 }
 
 export interface StrokeProps {
-  readonly color: Anim<Paint>;
+  /** One paint, or layers painted bottom to top (on a `<Shape>`); `none` leaves the stroke out. */
+  readonly color: Paints;
   readonly width?: Anim<number>;
   /** How an open end is finished: cut flat at the end point, rounded, or squared off half a width past it. */
   readonly cap?: "flat" | "round" | "square";
   /** How a corner is finished: a sharp point, rounded, or cut flat. */
   readonly join?: "sharp" | "round" | "flat";
   readonly dash?: readonly number[];
-  /** Slides the dash pattern along the stroke. Needs `dash`, and can't be combined with `draw` or `trim`. */
+  /** Slides the dash pattern along the stroke. Needs `dash`. Works with `draw` and `trim`, which reveal the dashed stroke through a mask. */
   readonly dashOffset?: Anim<number>;
   /** Keep the stroke's width when the node is scaled. */
   readonly fixedWidth?: boolean;
@@ -87,10 +97,13 @@ export interface Backdrop {
 
 export interface ShapeProps extends Common {
   readonly geometry: Anim<Geometry>;
-  readonly fill?: Anim<Paint>;
+  /** One paint, or layers painted bottom to top: `[gradient, { paint: noise(…), blend: "multiply" }]`. */
+  readonly fill?: Paints;
   /** Opacity of the fill alone (0 to 1), so one shape can draw its stroke first and fade in its fill after. */
   readonly fillOpacity?: Anim<number>;
   readonly stroke?: StrokeProps;
+  /** Fill rule of a compound path such as `merge(outer, inner)`: "evenodd" cuts holes where contours overlap. Default keeps the geometry's own rule ("nonzero"). */
+  readonly rule?: "nonzero" | "evenodd";
   /** How much of the outline is drawn, from 0 to 1: the same as `trim` of [0, draw]. Give draw or trim, not both. */
   readonly draw?: Anim<number>;
   /** The window of the outline that shows, [from, to] from 0 to 1. */
@@ -207,7 +220,12 @@ export type SceneElement =
       readonly clock?: Clock;
       readonly children: readonly SceneElement[];
     }
-  | { readonly type: "fragment"; readonly children: readonly SceneElement[] }
+  | {
+      readonly type: "fragment";
+      readonly children: readonly SceneElement[];
+      /** Set on what a `<Series share>` expands to: each child is a `<Sequence>`, and the keyed nodes carry over. */
+      readonly seams?: Seams;
+    }
   | MorphElement
   | {
       readonly type: "call";
@@ -222,7 +240,12 @@ export type SceneElement =
       readonly value: {} | null | undefined;
       readonly children: readonly SceneElement[];
     }
-  | { readonly type: "series"; readonly gap: Seconds; readonly children: readonly SceneElement[] };
+  | {
+      readonly type: "series";
+      readonly gap: Seconds;
+      readonly share?: Seams;
+      readonly children: readonly SceneElement[];
+    };
 
 /** What JSX writes and expansion removes before a scene is lowered. */
 export type Authoring = Extract<SceneElement, { readonly type: "call" | "provide" | "series" }>;
@@ -267,10 +290,22 @@ export const sceneElement = (
   );
 };
 
-export const flat = (child: Child): SceneElement[] => {
+/**
+ * Flattens children. When they hold several lists, as in `{a.map(…)}{b.map(…)}`, each element of a list remembers the
+ * list's place among its siblings. Keys stay as written, so `part(key)` finds them; the place only tells apart two
+ * lists that both key from 0.
+ */
+export const flat = (child: Child, list?: string): SceneElement[] => {
   if (!child || child === true) return [];
 
-  return isArray(child) ? child.flatMap(flat) : [child];
+  if (isArray(child))
+    return child.flatMap((each, index) =>
+      isArray(each)
+        ? flat(each, list === undefined ? `${index}` : `${list}.${index}`)
+        : flat(each, list),
+    );
+
+  return list === undefined ? [child] : [inList(child, list)];
 };
 
 export const Group = ({
@@ -328,12 +363,31 @@ export const Sequence = ({ when, clock, children }: SequenceProps): SceneElement
 export interface SeriesProps {
   /** Seconds between one child's end and the next one's start. Negative overlaps them, as a crossfade wants: `gap={-0.4}` starts each child 0.4s before the one before it ends. */
   readonly gap?: Seconds;
+  /**
+   * Keys of nodes that carry over from one child to the next, a shared-element transition: where two neighbours both
+   * draw a node with the key, both copies tween from the outgoing version to the incoming one over the seam (geometry,
+   * paint, stroke, transform, as `morph` blends), so the crossfade shows one node changing rather than two swapping.
+   * Each copy stays in its own groups, which may sit, scale or drift apart: the tween runs in scene space. The tween runs over the children's overlap (a negative `gap`); pass `{ keys, over }` to tween over `over` seconds
+   * centered on a seam that doesn't overlap, which otherwise snaps.
+   *
+   * @example
+   * <Series gap={-0.6} share="horizon">
+   *   <Sequence when={span(0, 4)}><Shape key="horizon" geometry={arc({ radius: 300, start: -100, sweep: 20 })} … /></Sequence>
+   *   <Sequence when={span(0, 4)}><Shape key="horizon" geometry={arc({ radius: 900, start: -95, sweep: 10 })} … /></Sequence>
+   * </Series>
+   */
+  readonly share?: Share;
   readonly children?: Child;
 }
 
 /** Plays its children one after another: each starts `gap` (default 0) after the one before it ends. Each needs a length, as a root of `<Sequence when={span(0, n)}>` gives it. */
-export const Series = ({ gap = 0, children }: SeriesProps): SceneElement => {
+export const Series = ({ gap = 0, share, children }: SeriesProps): SceneElement => {
   if (!Number.isFinite(gap)) throw new SceneError(`<Series> needs a finite gap, got ${gap}.`);
 
-  return { type: "series", gap, children: flat(children) };
+  return {
+    type: "series",
+    gap,
+    ...(share !== undefined && { share: seamsOf(share) }),
+    children: flat(children),
+  };
 };

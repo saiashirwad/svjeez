@@ -12,9 +12,14 @@ export type AnchorPlace = Place | readonly [across: number, down: number];
 /**
  * What `anchor` takes on a `<Text>`: an AnchorPlace ("top-left", "top", "top-right", "left", "center", "right",
  * "bottom-left", "bottom", "bottom-right", or `[across, down]`) or a point on the text's baseline: "baseline-left",
- * "baseline" (centered) or "baseline-right".
+ * "baseline" (centered; "baseline-center" is an alias) or "baseline-right".
  */
-export type TextAnchorPlace = AnchorPlace | "baseline-left" | "baseline" | "baseline-right";
+export type TextAnchorPlace =
+  | AnchorPlace
+  | "baseline-left"
+  | "baseline"
+  | "baseline-center"
+  | "baseline-right";
 
 export const PLACES = {
   "top-left": [0, 0],
@@ -35,6 +40,7 @@ export const PLACE_LIST = Object.keys(PLACES)
 const BASELINE = {
   "baseline-left": 0,
   baseline: 0.5,
+  "baseline-center": 0.5,
   "baseline-right": 1,
 } as const;
 
@@ -61,7 +67,7 @@ export const pinned = (
 
   if (!named && !isPoint(anchor) && along === undefined)
     throw new SceneError(
-      `anchor on ${where} takes a place, one of ${PLACE_LIST}${baseline === undefined ? "" : ', or on a text "baseline-left", "baseline" or "baseline-right"'}, or two fractions of the box such as [0.5, 1], got ${isName(anchor) ? `"${anchor}"` : JSON.stringify(anchor)}.`,
+      `anchor on ${where} takes a place, one of ${PLACE_LIST}${baseline === undefined ? "" : ', or on a text "baseline-left", "baseline", "baseline-center" or "baseline-right"'}, or two fractions of the box such as [0.5, 1], got ${isName(anchor) ? `"${anchor}"` : JSON.stringify(anchor)}.`,
     );
 
   if (along !== undefined && baseline === undefined)

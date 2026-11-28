@@ -4,7 +4,7 @@ import type { Animated, Key, Lane, Vec } from "../model/ir";
 import { isLane } from "../model/lane";
 import type { Anchor } from "./refs";
 import { breaksOf, follow, laneFrom, valueAt } from "../model/sample";
-import { laneOf, mixNumber, mixVec, type Mix, type Parts, type Timing } from "../model/steps";
+import { laneOf, mixNumber, mixVec, same, type Mix, type Parts, type Timing } from "../model/steps";
 import { isTrack, passageOf, readOf, type Anim, type Track } from "./track";
 import { Window, ramp, windowLane } from "./window";
 import { isNumber } from "../model/guards";
@@ -323,6 +323,21 @@ const sampledLane = <T>(
   return period === undefined || !isLane(lane) ? lane : { ...lane, period };
 };
 
+/** How long a lane moves for: from its first key that changes the value to its last, or its whole period. */
+const movesFor = (lane: Animated<Read>): Seconds => {
+  if (!isLane(lane)) return 0;
+
+  if (lane.period !== undefined) return lane.period;
+
+  const { keys } = lane;
+
+  const changes = keys.flatMap((key, i) =>
+    i > 0 && (key.via !== undefined || !same(key.value, keys[i - 1]!.value)) ? [i] : [],
+  );
+
+  return changes.length === 0 ? 0 : keys[changes.at(-1)!]!.t - keys[changes[0]! - 1]!.t;
+};
+
 const COLOR = /^\[0,0,0,0\]$|^\{"kind":"token","name":".*"\}$/;
 
 const steppedLane = <T>(
@@ -339,7 +354,12 @@ const steppedLane = <T>(
   const ids = values.map((value) => JSON.stringify(value));
   const changes = ids.flatMap((id, i) => (i > 0 && id !== ids[i - 1] ? [i] : []));
 
-  if (changes.length === 0 || changes.length > count / 8) return undefined;
+  // Steps are few next to the time the sources move in, not the whole scene: a ride across 7 s of a 70 s scene
+  // changes at every sample, so it is motion, not steps.
+  const active = Math.min(window, Math.max(0, ...lanes.map(movesFor)));
+
+  if (changes.length === 0 || changes.length > Math.max(2, Math.ceil(active * MEASURE)) / 8)
+    return undefined;
   const shape = flatten(values[0], where).shape;
 
   if (

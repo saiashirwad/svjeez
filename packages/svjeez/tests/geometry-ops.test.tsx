@@ -5,6 +5,7 @@ import {
   Shape,
   along,
   alpha,
+  mix,
   around,
   bounds,
   circle,
@@ -158,6 +159,18 @@ describe("alpha and random", () => {
 
     const out = svg.emit(model);
     expect(out).toContain("color-mix");
+  });
+
+  test("alpha 0 keeps the color, so a gradient to it fades instead of greying", () => {
+    expect(alpha("#FFFDF8", 0)).toBe("#fffdf800");
+    expect(alpha("#F00", 0)).toBe("#ff000000");
+    expect(mix("#00000000", "#00000000", 0.5)).toBe("#00000000");
+
+    const theme = tokens({ light: { ink: "#112233" }, dark: { ink: "#DDEEFF" } });
+    const clear = alpha(theme.ink, 0);
+
+    expect(clear.light).toBe("#11223300");
+    expect(clear.dark).toBe("#ddeeff00");
   });
 
   test("random(seed) produces a deterministic sequence in [0, 1)", () => {

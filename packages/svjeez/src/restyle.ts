@@ -21,6 +21,9 @@ const PAUSE = "*{animation-play-state:paused!important}";
 
 const HOLD = 0.001;
 
+/** The scale svjeez toggles to stop drawing a node while it is at opacity 0. It plays on the clock, so a timeline drops it. */
+const CULL = /<animateTransform\b[^>]*\stype="scale"[^>]*\/>/g;
+
 const activeDuration = (tag: string): Seconds => {
   const dur = parseFloat(/\sdur="([\d.]+)s"/.exec(tag)?.[1] ?? "");
   const repeats = parseFloat(/\srepeatCount="([\d.]+)"/.exec(tag)?.[1] ?? "");
@@ -145,6 +148,8 @@ export const restyle = (
     .filter(Boolean)
     .join("\n");
 
+  if (timeline !== undefined) out = out.replace(CULL, "");
+
   if (still) out = out.replaceAll(REDUCED_MOTION, "@media all{");
   else if (at || paused) {
     const loop = (at ?? 0) / rate;
@@ -157,7 +162,7 @@ export const restyle = (
     out = out.replace(WINDOWED, (_, tag: string, sets: string) =>
       windowedAt(tag, sets, loop % (parseFloat(attr(tag, "data-loop")) || Infinity), paused),
     );
-    out = out.replace(/<animate\b(?![^>]*\sbegin=)[^>]*>/g, (tag) => {
+    out = out.replace(/<animate(?:Transform)?\b(?![^>]*\sbegin=)[^>]*>/g, (tag) => {
       const runs = activeDuration(tag);
 
       const begin = paused
@@ -168,7 +173,7 @@ export const restyle = (
         ? ` end="${num(HOLD)}s"${/\sfill=/.test(tag) ? "" : ' fill="freeze"'}`
         : "";
 
-      return tag.replace(/^<animate\b/, `<animate begin="${num(begin)}s"${hold}`);
+      return tag.replace(/^<(animate(?:Transform)?)\b/, `<$1 begin="${num(begin)}s"${hold}`);
     });
 
     if (paused) out = out.replaceAll(REDUCED_MOTION, "@media not all{");

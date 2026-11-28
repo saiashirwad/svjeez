@@ -130,6 +130,12 @@ describe("format", () => {
     expect(as(-5, { pad: 3 })).toBe("-005");
   });
 
+  test("writes a prefix before the sign and a suffix after the number", () => {
+    expect(as(12.837, { decimals: 2, suffix: " km" })).toBe("12.84 km");
+    expect(as(-3, { prefix: "$" })).toBe("$-3");
+    expect(as(1200, { prefix: "$", suffix: "/mo" })).toBe("$1,200/mo");
+  });
+
   test("a format that can't be read says what it takes", () => {
     expect(() => numeral({ decimals: 1.5 })).toThrow(
       "numeral() takes decimals from 0 to 10, got 1.5.",

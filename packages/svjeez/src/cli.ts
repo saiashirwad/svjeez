@@ -9,7 +9,8 @@ import { parseArgs } from "node:util";
 import { examine } from "./check/report";
 import { projectTypeProblems } from "./check/type-errors";
 import { costOf, type Cost } from "./svg/cost";
-import { checkPixels, renderFrames, type FrameTimes } from "./frames";
+import { BUDGET } from "./check/inspect-cost";
+import { checkPixels, formatPerf, measurePerf, renderFrames, type FrameTimes } from "./frames";
 import { isRecord, parse, type Json, type Param, type Schema, type Values } from "./params";
 import {
   describe,
@@ -37,6 +38,7 @@ const USAGE = `usage:
   svjeez dev <file> [--port 5173] [--out file.svg] [params]
   svjeez frames <file> [--times 0,0.5,1 | --count 6] [--out frames/] [--sheet] [--columns 4 (implies --sheet)] [--scale 2] [--color-scheme system|light|dark] [--background css] [params]
   svjeez check <file> [--json | --format json|text] [--fail-on error|warning] [--browser] [--at 0,1.5] [--times 0,0.5,1] [--color-scheme system|light|dark] [params]
+  svjeez perf <file> [--ms 3000] [--windows 4] [--fail-under <fps>] [--json] [--color-scheme system|light|dark] [params]
   svjeez video <file> [--out scene.mp4] [--format mp4|webm] [--fps 30] [--loops 1] [--quality low|medium|high] [--workers 4] [--scale 2] [--preview] [--color-scheme system|light|dark] [--background css] [params]
   svjeez skill [--install [--dir .claude/skills]]
   svjeez version
@@ -58,9 +60,12 @@ check reads the scene model and emits its SVG once, with no browser, and prints 
 file:line:column  code  severity: message, with what to change on a fix: line below, then the count and the animated
 lanes (css, or smil when a scene animates geometry, a filter or a gradient). --browser also measures the scene in
 headless Chromium. --at 0,1.5 also describes what is on screen at those times. --times 0,0.5 adds moments to sample.
---json prints { ok, file, scene?, problems, lanes, cost?, measured?, frames?, timeline? }, cost being { animations, repaint }. It exits 1 when any problem is an
+--json prints { ok, file, scene?, problems, lanes, cost?, measured?, frames?, timeline? }, cost being { animations, repaint, filters? }, filters the predicted filter raster a frame in millions of units² (21 fits a 60 fps frame). It exits 1 when any problem is an
 error, the scene failing to build included. With --browser and no --times the browser measures 0, seven times across
 the loop, just before the end, and the scene's keys.
+perf plays the scene in headless Chromium for --ms in each of --windows windows spread across its duration, and prints fps, p95 frame ms, dropped %,
+animations per frame, main-thread ms/s (style, smil, paint), the worst task, sizes, and the slowest window with its time range. --fail-under 55 exits 1 when fps is below 55.
+--json prints the same as { fps, p95, dropped, main, style, smil, paint, worst, animations, duration, loops, size, windows, slowest }.
 skill prints the agent skill for writing svjeez scenes; --install copies it and its examples into <dir>/svjeez.${host.usage ? `\n\n${host.usage}` : ""}`;
 
 const SCHEMES = ["system", "light", "dark"] as const;
@@ -563,6 +568,54 @@ const framesCommand = async (args: string[]): Promise<void> => {
   );
 };
 
+const perfCommand = async (args: string[]): Promise<void> => {
+  const { values, positionals } = parseArgs({
+    args,
+    allowPositionals: true,
+    options: {
+      ms: { type: "string" },
+      windows: { type: "string" },
+      "fail-under": { type: "string" },
+      json: { type: "boolean" },
+      "color-scheme": { type: "string" },
+      ...PARAM_OPTIONS,
+    },
+  });
+
+  const file = positionals[0] ?? fail(USAGE);
+  const scheme = parseScheme(values["color-scheme"]);
+  const ms = number("ms", values.ms) ?? 3000;
+  const windows = number("windows", values.windows) ?? 4;
+  const under = number("fail-under", values["fail-under"]);
+
+  if (!(ms > 0)) fail(`--ms needs a positive number of milliseconds, got ${ms}.`);
+
+  if (!(Number.isInteger(windows) && windows > 0))
+    fail(`--windows needs a positive whole number, got ${windows}.`);
+
+  if (under !== undefined && !(under > 0)) fail(`--fail-under needs a positive fps, got ${under}.`);
+
+  const built = await loadBuilt(file, values);
+
+  if (!values.json) report(built.svg);
+
+  const result = await measurePerf(built.svg, {
+    ms,
+    windows,
+    colorScheme: scheme,
+    duration: built.scene?.duration,
+    loops: built.scene?.loop,
+  });
+
+  console.log(values.json ? JSON.stringify({ file, ...result }) : formatPerf(result));
+
+  if (under !== undefined && result.fps < under) {
+    if (!values.json)
+      console.error(`${file}: ${result.fps.toFixed(1)} fps is under --fail-under ${under}.`);
+    process.exit(1);
+  }
+};
+
 const SKILL = fileURLToPath(new URL("../skills/svjeez", import.meta.url));
 
 const skillCommand = async (args: string[]): Promise<void> => {
@@ -828,7 +881,10 @@ const checkCommand = async (args: string[]): Promise<void> => {
       `${plural(by("error").length, "error")}, ${plural(by("warning").length, "warning")}, ${by("info").length} info${how}`,
     );
 
-    if (cost) console.log(`cost: ${plural(cost.animations, "animation")}, ${cost.repaint} repaint`);
+    if (cost)
+      console.log(
+        `cost: ${plural(cost.animations, "animation")}, ${cost.repaint} repaint${cost.filters === undefined ? "" : `, filters ${cost.filters}M of ${BUDGET / 1e6}M a frame`}`,
+      );
 
     if (model) {
       const names = namesOf(model);
@@ -897,6 +953,7 @@ const COMMANDS = new Map([
   ["dev", devCommand],
   ["check", checkCommand],
   ["frames", framesCommand],
+  ["perf", perfCommand],
   ["video", videoCommand],
   ["skill", skillCommand],
   ["version", versionCommand],

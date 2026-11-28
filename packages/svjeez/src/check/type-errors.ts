@@ -18,7 +18,7 @@ const fixFor = (diagnostic: TS.Diagnostic, message: string, hint?: Hint): string
 
   if (
     message.includes("`#${string}`") ||
-    /Type 'string' is not assignable to type '[^']*\b(Paint|Color)\b/.test(message)
+    /Type 'string' is not assignable to type '[^']*\b(Paints?|Color)\b/.test(message)
   )
     return COLORS;
 

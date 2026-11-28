@@ -3,6 +3,11 @@ export interface Cost {
   readonly animations: number;
   /** Area, in hundreds of square units, of filters redrawn every frame, for the share of the loop they are. */
   readonly repaint: number;
+  /**
+   * Filter raster a frame needs, sustained for half a second, in millions of units² of noise-equivalent work, as
+   * `check` predicts it from the scene model (21 fits a 60 fps frame in desktop Chrome). Absent when only the SVG is known.
+   */
+  readonly filters?: number;
 }
 
 interface Tag {
@@ -65,8 +70,28 @@ export const costOf = (svg: string): Cost => {
       ? shareOf(tag.attrs)
       : classesOf(tag).reduce((sum, name) => sum + (counts.get(name) ?? 0), 0);
 
+  /** The share of the loop an element is drawn: a cull (a discrete scale to 0) stops what is inside it for the rest. */
+  const drawn = (tag: Tag): number => {
+    const cull = tag.children.find(
+      (child) =>
+        child.name === "animateTransform" &&
+        attr(child.attrs, "type") === "scale" &&
+        attr(child.attrs, "calcMode") === "discrete",
+    );
+
+    if (!cull) return 1;
+    const times = (attr(cull.attrs, "keyTimes") ?? "").split(";").map(Number);
+
+    return (attr(cull.attrs, "values") ?? "")
+      .split(";")
+      .reduce(
+        (sum, value, index) => sum + (value === "0" ? 0 : (times[index + 1] ?? 1) - times[index]!),
+        0,
+      );
+  };
+
   const total = (tag: Tag): number =>
-    own(tag) + tag.children.reduce((sum, child) => sum + total(child), 0);
+    own(tag) + drawn(tag) * tag.children.reduce((sum, child) => sum + total(child), 0);
 
   const root = treeOf(markup);
 
@@ -96,13 +121,16 @@ export const costOf = (svg: string): Cost => {
   visit(root);
 
   /** A filtered element that has something animated inside it redraws its filter every frame. */
-  const referenced = (tag: Tag): void => {
+  const referenced = (tag: Tag, shown = 1): void => {
     const links = `${attr(tag.attrs, "filter") ?? ""} ${/filter:\\s*url\\(#[^)]+\\)/.exec(attr(tag.attrs, "style") ?? "")?.[0] ?? ""}`;
     const from = /url\(#([^)]+)\)/.exec(links)?.[1];
     const found = from === undefined ? undefined : filters.get(from);
 
-    if (found && tag.children.some((child) => total(child) > 0)) found.share = 1;
-    tag.children.forEach(referenced);
+    const here = shown * drawn(tag);
+
+    if (found && tag.children.some((child) => total(child) > 0))
+      found.share = Math.max(found.share, here);
+    tag.children.forEach((child) => referenced(child, here));
   };
 
   referenced(root);

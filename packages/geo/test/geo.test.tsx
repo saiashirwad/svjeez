@@ -1,7 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { createRequire } from "node:module";
+import { geoContains } from "d3-geo";
 import type { FeatureCollection } from "geojson";
-import { Group, Shape, scene, span } from "svjeez";
+import { Group, Shape, scene, span, type Vec } from "svjeez";
+import { merge } from "topojson-client";
+import type { MultiPolygon, Polygon } from "topojson-specification";
 import { SceneError, isScene, svg } from "svjeez/tools";
 import {
   GlobeShape,
@@ -10,6 +13,8 @@ import {
   night,
   project,
   sun,
+  type Canvas,
+  type LonLat,
   type Topology,
 } from "../src/index.ts";
 
@@ -220,6 +225,199 @@ describe("globe", () => {
         )),
       ).problem,
     ).toBe("<GlobeShape> of the globe's land paints nothing: it has no fill and no stroke.");
+  });
+
+  test("culls outlines that never reach the canvas, and names the rest", () => {
+    const options = {
+      radius: 640,
+      facing: [-24, -4] satisfies [number, number],
+      lean: -72,
+      turn: { by: -36, over: span(0, 8) },
+    };
+
+    const all = globe(world, options).land;
+
+    const cut = globe(world, {
+      ...options,
+      canvas: { size: [1280, 720], center: [640, 1110] },
+    }).land;
+
+    expect(cut.pieces.length).toBeLessThan(all.pieces.length);
+    expect(cut.pieces.length).toBeGreaterThan(0);
+    expect(cut.keys).toHaveLength(cut.pieces.length);
+    expect(cut.keys.every((key) => key.startsWith("land-"))).toBe(true);
+    expect(new Set(cut.keys).size).toBe(cut.keys.length);
+  });
+
+  test("a canvas keeps lines and detail off the canvas out of a turning globe", () => {
+    const options = {
+      radius: 640,
+      facing: [-24, -4] satisfies [number, number],
+      lean: -72,
+      turn: { by: -24, over: span(0, 8) },
+    };
+
+    const weight = (t: { pieces: readonly unknown[] }) => JSON.stringify(t.pieces).length;
+
+    const far = globe(world, options);
+    const near = globe(world, { ...options, canvas: { size: [1280, 720], center: [640, 1110] } });
+
+    const wide = globe(world, {
+      ...options,
+      canvas: { size: [1280, 720], center: [640, 1110] },
+      tolerance: 4,
+    });
+
+    expect(weight(near.graticule(15))).toBeLessThan(weight(far.graticule(15)) / 2);
+    expect(weight(near.land)).toBeLessThan(weight(far.land));
+    expect(weight(wide.land)).toBeLessThan(weight(near.land));
+    expect(far.graticule(15).pieces).toHaveLength(1);
+  });
+
+  test("routes draw, trim and fillOpacity to the drawn shapes, not the group", () => {
+    const flight = turning.route([0, 0], [40, 40]);
+
+    const out = emit(
+      () => (
+        <Group offset={[200, 150]}>
+          <GlobeShape of={flight} stroke={{ color: "#F00", width: 2 }} draw={0.5} />
+        </Group>
+      ),
+      8,
+    );
+
+    expect(out).toContain("stroke-dasharray");
+
+    expect(
+      thrown(() =>
+        emit(
+          () => (
+            <Group>
+              <GlobeShape
+                of={flight}
+                stroke={{ color: "#F00", width: 2 }}
+                draw={0.5}
+                trim={[0, 1]}
+              />
+            </Group>
+          ),
+          8,
+        ),
+      ).problem,
+    ).toContain("both draw and trim");
+  });
+
+  test("a rider follows a route over the turning globe, and fades behind the horizon", () => {
+    const share = span(0, 4);
+    const rider = turning.ride([0, 20], [60, 20], share, { turn: true });
+
+    expect(rider.rotate).toBeDefined();
+    expect(turning.ride([0, 20], [60, 20], share).rotate).toBeUndefined();
+
+    const out = emit(
+      () => (
+        <Group offset={[200, 150]}>
+          <Group motion={rider}>
+            <Shape geometry={turning.sphere} fill="#F00" scale={0.02} />
+          </Group>
+        </Group>
+      ),
+      8,
+    );
+
+    expect(out).toContain("@keyframes");
+
+    const hidden = turning.ride([0, 20], [60, 20], span(0, 4), {
+      over: span(0, 8),
+      ease: (u) => u * u,
+    });
+
+    expect(hidden.opacity).toBeDefined();
+    expect(
+      thrown(() => globe(world, { radius: 10, facing: [0, 0] }).ride([0, 0], [9, 9], span(0, 1)))
+        .fix,
+    ).toContain("over");
+    expect(thrown(() => turning.ride([1, 1], [1, 1], share)).problem).toContain(
+      "starts where it ends",
+    );
+  });
+
+  test("land folded around a pole just behind the rim does not flood the face", () => {
+    const countries = world.objects.countries;
+
+    if (countries?.type !== "GeometryCollection") throw new Error("expected countries");
+
+    const land = merge(
+      world,
+      countries.geometries.filter(
+        (g): g is Polygon | MultiPolygon => g.type === "Polygon" || g.type === "MultiPolygon",
+      ),
+    );
+
+    const radius = 420;
+    const frame = (top: number): Canvas => ({ size: [1280, 720], center: [640, top] });
+
+    const cases: readonly { facing: LonLat; lean: number; canvas?: Canvas }[] = [
+      { facing: [16, 12], lean: 0 },
+      { facing: [16, 14], lean: 0, canvas: frame(680) },
+      { facing: [170, 20], lean: 0, canvas: frame(680) },
+      { facing: [16, -16], lean: 25, canvas: frame(40) },
+    ];
+
+    for (const { facing, lean, canvas } of cases) {
+      const earth = globe(world, {
+        radius,
+        facing,
+        lean,
+        simplify: 0.3,
+        ...(canvas && { canvas }),
+      });
+
+      const contours = earth.land.pieces.map((piece) => {
+        if (!("kind" in piece) || piece.kind !== "path") throw new Error("expected a still path");
+
+        return piece.contours.map((c) => [c.start, ...c.curves.map((curve) => curve.at(-1)!)]);
+      });
+
+      const winding = (ring: readonly Vec[], [px, py]: Vec) =>
+        ring.reduce((w, [x0, y0], i) => {
+          const [x1, y1] = ring[(i + 1) % ring.length]!;
+          const side = (x1 - x0) * (py - y0) - (px - x0) * (y1 - y0);
+
+          if (y0 <= py) return y1 > py && side > 0 ? w + 1 : w;
+
+          return y1 <= py && side < 0 ? w - 1 : w;
+        }, 0);
+
+      let [wrong, all] = [0, 0];
+
+      for (let lon = -180; lon < 180; lon += 4)
+        for (let lat = -88; lat <= 88; lat += 4) {
+          const { point, z } = earth.locate([lon, lat], 0);
+          const [x, y] = point;
+
+          if (z < 0.1) continue;
+
+          if (
+            canvas &&
+            (x + canvas.center[0] < 0 ||
+              x + canvas.center[0] > canvas.size[0] ||
+              y + canvas.center[1] < 0 ||
+              y + canvas.center[1] > canvas.size[1])
+          )
+            continue;
+
+          const drawn = contours.some(
+            (rings) => rings.reduce((w, ring) => w + winding(ring, point), 0) !== 0,
+          );
+
+          all++;
+
+          if (drawn !== geoContains(land, [lon, lat])) wrong++;
+        }
+
+      expect({ facing, share: wrong / all < 0.03 }).toEqual({ facing, share: true });
+    }
   });
 
   test("builds inside a scene", () => {

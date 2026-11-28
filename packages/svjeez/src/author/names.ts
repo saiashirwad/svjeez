@@ -13,9 +13,25 @@ export interface Named {
 /** What a scene calls its nodes, so an error can name the node and where it was written. One per scene. */
 export class Names {
   readonly #open = new Map<string, Named>();
+  readonly #shared = new Map<string, Set<string>>();
 
   set(key: string, named: Named): void {
     this.#open.set(key, named);
+  }
+
+  /** Notes that `also`, from another list in the same parent, was written with the key that ends `key`. */
+  share(key: string, also: string): void {
+    const known = this.#shared.get(key) ?? new Set([key]);
+
+    known.add(also);
+    this.#shared.set(key, known);
+  }
+
+  /** The keys of the nodes that lists in one parent both wrote as `key`, or undefined when one node has it. */
+  sharing(key: string): readonly string[] | undefined {
+    const known = this.#shared.get(key);
+
+    return known && [...known];
   }
 
   entryOf(key: string): Named | undefined {

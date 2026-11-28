@@ -4,7 +4,17 @@ import type { Animated, Geometry, Key, Lane, Layer, ShapeNode, Vec } from "../mo
 import { atRest, isLane } from "../model/lane";
 import type { Common, SceneElement, StrokeProps } from "./nodes";
 import type { Anchor } from "./refs";
-import { blendVec, breaksOf, follow, laneFrom, unrolled, valueAt } from "../model/sample";
+import {
+  blendVec,
+  breaksOf,
+  commonPeriod,
+  follow,
+  laneFrom as keyed,
+  wrapped,
+  valueAt,
+  type Idle,
+} from "../model/sample";
+import type { RunKey } from "./spring";
 import { ease } from "./spring";
 import type { Connect } from "./settle";
 import type { Anim } from "./track";
@@ -174,7 +184,7 @@ const laneOf = (
 
 const seenBy = (shown: Animated<number>, duration: Seconds): ((t: Seconds) => Seconds) => {
   if (!isLane(shown)) return (t) => t;
-  const keys = unrolled(shown, duration);
+  const keys = wrapped(shown, duration);
 
   const windows = keys.flatMap((key, i): (readonly [Seconds, Seconds])[] =>
     key.value > 0.5 ? [[i === 0 ? 0 : key.t, keys[i + 1]?.t ?? duration]] : [],
@@ -194,11 +204,12 @@ const steadyWhileHidden = (
   value: Animated<Vec>,
   seen: (t: Seconds) => Seconds,
   breaks: readonly Seconds[],
+  idle: readonly Idle[],
 ): Animated<Vec> => {
   if (!isLane(value)) return value;
 
-  const held = laneFrom(
-    follow((t) => valueAt(value, seen(t), blendVec), breaks, NEAR, [], [value], true),
+  const held = keyed(
+    follow((t) => valueAt(value, seen(t), blendVec), breaks, NEAR, [], [value], true, idle),
     ([x, y]): Vec => [x!, y!],
   );
 
@@ -222,7 +233,7 @@ interface Pose {
 
 const connect =
   (bend: number, size: number, inset: number): Connect =>
-  ([from, to], children, duration) => {
+  ([from, to], children, scene, unseen) => {
     // SAFETY: a connector's children are the shapes it lowered itself: its shaft, then its head when it has one.
     const [shaft, head] = children as readonly ShapeNode[];
     const trim = shaft!.trim ?? ([0, 1] as const);
@@ -296,21 +307,32 @@ const connect =
     }
 
     const ends = [from!, to!, trim];
+    // Ends that all loop draw an arrow that loops with them: one period of it says it all.
+    const period = commonPeriod(ends);
+    const duration = period ?? scene;
+    const idle = period === undefined ? unseen : [];
+
+    const looped = <T>(value: Animated<T>): Animated<T> =>
+      period !== undefined && isLane(value) ? { ...value, period } : value;
+
+    const laneFrom = <T>(keys: readonly RunKey[], join: (values: readonly number[]) => T) =>
+      looped(keyed(keys, join));
+
     const breaks = breaksOf(ends, duration);
-    const shown = laneOf(shownAt, breaks, duration);
+    const shown = looped(laneOf(shownAt, breaks, duration));
     const seen = seenBy(shown, duration);
     const posed = (t: Seconds): Pose => pose(seen(t));
 
-    const at = steadyWhileHidden(from!, seen, breaks);
+    const at = looped(steadyWhileHidden(from!, seen, breaks, idle));
 
-    const stretch = follow((t) => [posed(t).length], breaks, NEAR, [], ends);
+    const stretch = follow((t) => [posed(t).length], breaks, NEAR, [], ends, false, idle);
     const longest = Math.max(EPSILON, ...stretch.map((key) => key.values[0]!));
     const fixed = laneFrom(stretch, ([value]) => value!);
 
     const turning = Math.max(ANGLE, (NEAR / (inset + longest + size)) * DEG);
 
     const angle = laneFrom(
-      follow((t) => [posed(t).angle], breaks, turning, [0], ends),
+      follow((t) => [posed(t).angle], breaks, turning, [0], ends, false, idle),
       ([value]) => value!,
     );
 
@@ -333,6 +355,8 @@ const connect =
                 NEAR / longest,
                 [],
                 ends,
+                false,
+                idle,
               ),
               ([a, b]): Vec => [a!, b!],
             ),
@@ -350,11 +374,11 @@ const connect =
 
     const ride: Layer = {
       offset: laneFrom(
-        follow((t) => end(t)[0], breaks, NEAR, [], ends, true),
+        follow((t) => end(t)[0], breaks, NEAR, [], ends, true, idle),
         ([x, y]): Vec => [x!, y!],
       ),
       rotate: laneFrom(
-        follow((t) => [end(t)[1]], breaks, turning, [0], ends),
+        follow((t) => [end(t)[1]], breaks, turning, [0], ends, false, idle),
         ([value]) => value!,
       ),
       scale: [1, 1],

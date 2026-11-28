@@ -91,17 +91,17 @@ describe("moving-filter", () => {
       (problem) => problem.code === "moving-filter",
     );
 
-  test("a blur that changes is redrawn every frame, a warning when it covers a tenth of the canvas", () => {
+  test("a blur that changes is rastered again every frame, info while the frame has room for it", () => {
     const [problem, ...rest] = check(model).problems.filter(
       (each) => each.code === "moving-filter",
     );
 
     expect(rest).toEqual([]);
-    expect(problem).toMatchObject({ key: "glow", severity: "warning" });
+    expect(problem).toMatchObject({ key: "glow", severity: "info", times: [0, 2] });
     expect(problem!.message).toMatch(
-      /^<Shape> "glow" has a blur that is redrawn every frame from 0s to 2s over \d+×\d+ units \(\d+% of the canvas\): its blur changes\.$/,
+      /^<Shape> "glow" has a blur that is rastered again every frame from 0s to 2s over \d+×\d+ units \(\d+% of the canvas\): its blur changes\.$/,
     );
-    expect(problem!.fix).toContain("Keep the effect still");
+    expect(problem!.fix).toContain("Keep the effect's parameters still");
   });
 
   test("a small filter is only info", () => {
@@ -143,6 +143,8 @@ describe("cost", () => {
 
     expect(cost!.animations).toBeGreaterThan(0);
     expect(cost!.repaint).toBeGreaterThan(0);
+    // Millions of units²: one small blur rounds to 0.
+    expect(cost!.filters).toBe(0);
   });
 });
 
@@ -153,7 +155,9 @@ describe("svjeez check", () => {
   const file = join(import.meta.dir, "fixtures/check/lanes.tsx");
 
   test("prints the cost line", () => {
-    expect(cli(file).stdout.toString()).toMatch(/^cost: [\d.]+ animations?, [\d.]+ repaint$/m);
+    expect(cli(file).stdout.toString()).toMatch(
+      /^cost: [\d.]+ animations?, [\d.]+ repaint, filters [\d.]+M of 21M a frame$/m,
+    );
   });
 
   test("prints the lanes block with one line per SMIL lane", () => {

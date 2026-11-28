@@ -45,7 +45,9 @@ export interface TexMeasure extends TexBox {
   part(id: string): TexBox;
 }
 
-const PLACES: Readonly<Record<Place | "baseline-left" | "baseline" | "baseline-right", Vec>> = {
+const PLACES: Readonly<
+  Record<Place | "baseline-left" | "baseline" | "baseline-center" | "baseline-right", Vec>
+> = {
   "top-left": [0, 0],
   top: [0.5, 0],
   "top-right": [1, 0],
@@ -57,6 +59,7 @@ const PLACES: Readonly<Record<Place | "baseline-left" | "baseline" | "baseline-r
   "bottom-right": [1, 1],
   "baseline-left": [0, Number.NaN],
   baseline: [0.5, Number.NaN],
+  "baseline-center": [0.5, Number.NaN],
   "baseline-right": [1, Number.NaN],
 };
 

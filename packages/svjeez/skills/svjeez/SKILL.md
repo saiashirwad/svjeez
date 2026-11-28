@@ -16,16 +16,19 @@ Follow these steps in order. A scene is **done** only when `svjeez check` report
 3. **Check rendered pixels.** Run `svjeez check <file> --browser` to measure rendered text bounds, overlap, and contrast in headless Chromium.
 4. **Inspect frames.** Run `svjeez frames <file> --sheet --out <dir>` and view `<dir>/sheet.png`. Passing `check` verifies constraints, not composition or visual timing.
 5. **Emit the output.** Run `svjeez svg <file> --out scene.svg` (or `svjeez video <file> --out scene.mp4`).
+6. **Measure playback (optional, for long or heavy scenes).** Run `svjeez perf <file>` to play the scene in headless Chromium across its whole duration and report fps, p95 frame time, dropped frames, and the slowest stretch. `check` only predicts filter cost (see Performance); add `--fail-under 50` to gate on measured fps.
 
 ## Mental model
 
 - **Scene contract:** `scene({ size: [w, h], title, desc?, duration?, theme?, loop?, still?, markers? }, (canvas) => tree)`. `size` (inline tuple `[w, h]` or `as [number, number]`) and `title` are required. `duration` must be `> 0` (or omitted when the root is a `<Sequence when={span(0, n)}>`). `canvas` is a `Bounds` (`x, y, width, height, size, center, rect`).
-- **Nodes only:** Every element is a svjeez component (`Shape`, `Text`, `Run`, `Group`, `Picture`, `Arrow`, `Slot`, `Shader`, `Stack`, `Grid`, `Center`, `Align`, `Sequence`, `Series`). Text lives inside `<Text font size fill>`; inline styled spans use `<Run>` inside `<Text>`. Every `<Shape>` needs `fill` or `stroke`.
+- **Nodes only:** Every element is a svjeez component (`Shape`, `Text`, `Run`, `Group`, `Picture`, `Arrow`, `Slot`, `Shader`, `Stack`, `Grid`, `Center`, `Align`, `Sequence`, `Series`). Text lives inside `<Text font size fill>`; inline styled spans use `<Run>` inside `<Text>`. Every `<Shape>` needs `fill` or `stroke`; `rule="evenodd"` cuts holes in `merge(outer, inner)`.
 - **Fonts are explicit:** There is no default or inherited font. Pass a `Font` or `FontFamily` (from `font()` or `@svjeez/fonts`) to every `<Text>`. Load every weight/italic you use; missing glyphs are a build error.
 - **Colors are hex or tokens:** Pass `#rgb`, `#rrggbb`, `#rrggbbaa`, or `tokens({ light, dark })` values (passed as `scene({ theme })` so light/dark CSS variables emit). Derive shades with `mix(a, b, share)` and `alpha(c, 0..1)`. Use `scheme="light" | "dark"` to show a node in one scheme only.
-- **Coordinates:** Top-left origin `[0, 0]`, y down. `offset` moves the node's own `[0, 0]` (for `circle(r)`, that is its center); `at` + `anchor` pins a point of its bounding box (`top-left`, `top`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom`, `bottom-right`; `<Text>` also accepts `baseline-*`). Use `at` or `offset`, never both. `at` places the box, so a `<Code>` whose split drops its first column, or a group holding a caret at x=-6, shifts; use `offset` there.
+- **Textures, layers, `none`, relief:** `noise({ frequency, seed, ramp, octaves?, type?, stitch?, rotate? })` is a fill (on `<Shape>` and `<Text>`) or `<Shape>` stroke that maps noise through a color ramp (tokens work; animate `frequency` with a track). A `<Shape>` `fill` or stroke `color` also takes layers painted bottom to top: `fill={[gradient, { paint: noise(…), blend: "multiply", opacity: 0.4 }]}`; a layer's `effects` (e.g. `[emboss()]`) light that layer alone. `rotate` (degrees, about the box center) turns stretched grain like `frequency: [0.09, 0.7]` along a limb without turning the shape. A node painted `none` (fill and stroke) is left out of the scene; a `none` stroke drops just the stroke. `effects={[emboss({ light: { azimuth, elevation }, depth })]}` lights the node's own shape so it reads as raised.
+- **Gradients:** `linear({ from, to, stops })`, `radial({ center, radius, stops })`, and the box-relative `linear.across` / `radial.across`. `radius` may be `[rx, ry]` for an ellipse, and `radial.across({ shape: "ellipse" })` stretches to the node's box (vignettes), with `fit` read per axis. An ellipse's radius ratio and vertical center can't animate.
+- **Coordinates:** Top-left origin `[0, 0]`, y down. `offset` moves the node's own `[0, 0]` (for `circle(r)`, that is its center); `at` + `anchor` pins a point of its bounding box (`top-left`, `top`, `top-right`, `left`, `center`, `right`, `bottom-left`, `bottom`, `bottom-right`; `<Text>` also accepts `baseline-*` (`baseline-center` = `baseline`)). Use `at` or `offset`, never both. `at` places the box, so a `<Code>` whose split drops its first column, or a group holding a caret at x=-6, shifts; use `offset` there.
 - **Layout containers:** `Stack` (`direction`, `gap`, `align`, `justify`, `padding`, `width`, `height`), `Grid` (`columns`, `gap`), `Center`, and `Align` (`to`, `place`, `inset`) place their children. Omit `at`/`offset` on children of a layout container; nudge a child with `motion={{ offset }}`. `Stack`, `Grid`, `Center`, and `Slot` accept backdrop props (`fill`, `stroke`, `radius`, `padding`); `<Group>` does not. `Fragment` flattens its children into the parent layout.
-- **Transforms, clips, and refs:** `rotate`, `scale`, `skew` pivot around `origin` (default `"center"` of the node's box; also a place name, `[x, y]` from box top-left, `{ frame: [x, y] }`, or `"at"`). `clip` and `mask` live in the node's own frame: center a circular clip with `moved(circle(r), own.center)`. `ref()` names a node so `Arrow` or `Align` can read settled anchors (`.center`, `.left`, `.right`, `.top`, `.bottom`, `.topLeft`, `.side(edge, t)`, `.part(key)`).
+- **Transforms, clips, and refs:** `rotate`, `scale`, `skew` pivot around `origin` (default `"center"` of the node's box; also a place name, `[x, y]` from box top-left (so content bleeding past the frame moves it; pivot on a fixed point with `{ own: [x, y] }`), `"at"`, `"own"` for the node's own `[0, 0]` where its `offset` puts it, `{ own: [x, y] }` in the node's own coordinates, or `{ frame: [x, y] }` in the PARENT's coordinates, so `frame: [0, 0]` is the parent's corner, not the node's). `rect(w, h)` is top-left anchored (covers `[0, 0]` to `[w, h]`) unless `anchor: "center"`; `circle`/`ellipse` are always centered. `clip` and `mask` live in the node's own frame: center a circular clip with `moved(circle(r), own.center)`. `ref()` names a node so `Arrow` or `Align` can read settled anchors (`.center`, `.left`, `.right`, `.top`, `.bottom`, `.topLeft`, `.side(edge, t)`, `.part(key)`).
 - **Components and context:** Use plain functions `(props) => SceneElement` for typed props and pass `ref`/`motion` explicitly. Use `component({ name, props?, render })` when you need a minify-stable name or Standard Schema validation (without `props`, its JSX accepts only `children` and `id`). Share implicit values with `context(defaultValue)` (`<Ctx value={v}>` and `Ctx.read()`). Use `h(Component, props, ...children)` in plain `.ts` files without JSX.
 - **Geometry and determinism:** Geometry builders take plain numbers; animate geometry with `track(geomA).to(geomB, span)`. Use `random(seed)` (integer or string seed) for repeatable randomness.
 
@@ -68,15 +71,17 @@ Read the span of a track's last step with `t.span`. Find when a track reaches a 
 ### Visibility, `enter` / `exit`, and `loop` / `still`
 
 - Bare nodes are visible from `0s`. `enter(span, { from?, curve? })` merges over `{ opacity: 0 }` so the node starts hidden and enters over `span`. `exit(span, { to?, curve? })` hides it before the end.
-- Compose motion layers with `motion={[layerA, cond && layerB]}` (falsy entries are skipped). Other layers: `ride(geometry, progressTrack, { turn? })`, `wiggle(amp, { seed, rate?, period?, curve? })`, and `sampled(fn, span, { tolerance })`.
+- Compose motion layers with `motion={[layerA, cond && layerB]}` (falsy entries are skipped). Other layers: `ride(geometry, progressTrack, { turn? })`, `wiggle(amp, { seed, rate?, period?, curve? })`, and `sampled(fn, span, { tolerance })`; `sampled.all(fn, span, opts)` takes a record-returning fn, calls it once per time and returns a track per key (use it when limbs share one solve).
 - `loop` defaults to `true`. Any node whose end state differs from `0s` warns `loop-seam`. For one-shot animations, set `loop: false`; for looping scenes, return every animated property to its `0s` state with `exit()` or `.rewind()`.
 - `still` sets the `prefers-reduced-motion: reduce` frame (defaults to 85% of `duration`, or `false` to disable). Pick a moment when the scene is readable and settled.
+- A `<Group>` with moving content that holds at opacity 0 (a film's shot before its `enter()` and after its `exit()`) costs nothing while hidden, filters included, unless the `still` frame shows it; so fade finished shots out rather than covering them.
 - `markers: { handoff: 4.5 }` names moments (seconds, from 0 to `duration`). `frames --times` and `check --at/--times` take the names mixed with numbers, as in `--times handoff,10.5`; an unknown name lists the known ones.
 
 ### `morph` and `morph.between`
 
 - `morph(before, after, when, opts?)` and `morph.between(states, spans, opts?)` (`states.length - 1` sequential spans) blend between scene trees.
-- Give every node that arrives, leaves, or changes a stable `key`. Unkeyed sibling mismatches are a compile error. Options: `curve`, `enter`, `exit`, `stagger`, `each`. `stagger` delays each changing part; `each` sets how long each part moves (with no `stagger`, the starts spread so the last part ends with the span).
+- Give every node that arrives, leaves, or changes a stable `key`. Unkeyed sibling mismatches are a compile error. Keys are unique per parent, but two `.map()` lists in one parent may reuse a key (both `key={i}`), as in React; `ref().part(key)` finds a key as written, and throws when two lists share it. Options: `curve`, `enter`, `exit`, `stagger`, `each`. `stagger` delays each changing part; `each` sets how long each part moves (with no `stagger`, the starts spread so the last part ends with the span).
+- Shared elements across shots: `<Series gap={-0.6} share="horizon">` tweens the node keyed `horizon` in each child into the next child's over their overlap (geometry, paint, stroke, transform, as `morph` blends), so a crossfade shows one node changing: `<Series gap={-0.6} share="horizon"><Shot1/><Shot2/></Series>`, each shot drawing `<Shape key="horizon" … />`. Each copy may sit in its own groups, even moving ones: the tween runs in scene space. Both copies need the same kind, parts and stroke style; else a `SceneError`. With no overlap it snaps; `share={{ keys: "horizon", over: 0.5, curve }}` tweens over `over` seconds centered on the seam.
 
 ## Core API surface (`svjeez`)
 
@@ -89,14 +94,14 @@ Hover types for full option objects. Every value export of `svjeez`:
 | Components & state | `component`, `context`, `param`, `defaults`, `parse`, `random` |
 | Geometry builders | `rect`, `circle`, `ellipse`, `arc`, `line`, `polygon`, `path`, `spline` |
 | Geometry ops & measure | `moved`, `rotated`, `scaled`, `mirrored`, `merge`, `around`, `reversed`, `subtract`, `bounds`, `length`, `pointAt`, `along` |
-| Color, paint & effects | `tokens`, `mix`, `alpha`, `linear`, `radial`, `pattern`, `blur`, `shadow`, `adjust`, `displace` |
+| Color, paint & effects | `tokens`, `mix`, `alpha`, `linear`, `radial`, `pattern`, `noise`, `none`, `blur`, `shadow`, `adjust`, `displace`, `emboss` |
 | Time & motion | `span`, `clock`, `track`, `keyframes`, `ease`, `enter`, `exit`, `ride`, `sampled`, `wiggle`, `through`, `within`, `timeAt`, `Sequence`, `Series`, `morph` |
 | Text & fonts | `font`, `count`, `numeral`, `typed`, `chars`, `words` |
 
 Subpaths: `svjeez/tools` (`svg.emit`, `check`, `describe`, `RULES`, `SceneError`, `expand`, `propsOf`, `isScene`, `valueAt`, `boxesOf`), `svjeez/frames` (`renderFrames`, `openScene`, `checkPixels`, `costOf`, `validateSvg`), `svjeez/page` (`mount`, `player`, `scrolled`, `pointer`, `hovered`, `seen`, `restyle`, `seek`, `loopLength`), `svjeez/jsx-runtime`, `svjeez/typecheck`.
 
 Notes on specialized core features:
-- **`count` / `typed`:** Put `${count(track, { format: numeral({ decimals: 2 }) })}` and `{typed(stringTrack, { by: chars | words, caret })}` inside `<Text>`. When `caret: true` starts before the first keystroke, set `caret: { opacity: track(0).set(1, span(firstKeystroke)) }` to avoid `visible-at-zero`.
+- **`count` / `typed`:** Put `${count(track, { format: numeral({ decimals: 2, suffix: " km" }) })}` (`prefix`/`suffix` keep units with the number) and `{typed(stringTrack, { by: chars | words, caret })}` inside `<Text>`. When `caret: true` starts before the first keystroke, set `caret: { opacity: track(0).set(1, span(firstKeystroke)) }` to avoid `visible-at-zero`.
 - **`param`:** `export const params = { gap: param.number(40, { min: 10, max: 80 }) }` and default-export `(values) => scene(...)` (or read `defaults(params)`). Pass `--param key=value` or `--params file.json` on the CLI.
 - **`<Shader>`:** Needs `typegpu` + `unplugin-typegpu` and a page runner (`svjeez/page` `mount`); `svg`/`frames` render its fallback children.
 
@@ -108,11 +113,22 @@ Run `svjeez --help` for all flags. Every scene command accepts `[params]` (`--pa
 |---|---|
 | `svjeez check <file>` | Static model + TS check (`--browser`, `--at 0,1.5`, `--times`, `--fail-on warning`, `--json`, `--color-scheme`) |
 | `svjeez frames <file>` | Render PNG frames (`--sheet`, `--count 6`, `--times 0,1`, `--scale 2`, `--out dir`, `--color-scheme`, `--background`) |
+| `svjeez perf <file>` | Playback smoothness in headless Chromium: fps, p95 frame ms, dropped %, main-thread ms/s, slowest window (`--ms 3000`, `--windows 4`, `--fail-under <fps>`, `--json`, `--color-scheme`) |
 | `svjeez svg <file>` | Emit self-contained SVG (`--out file.svg`, `--json`) |
 | `svjeez video <file>` | Encode MP4/WebM via `@svjeez/video` (`--out`, `--format`, `--fps`, `--loops`, `--quality`, `--workers`, `--scale`, `--background`; `--preview` for a fast fps 12, scale 1, low-quality render) |
 | `svjeez dev <file>` | Live-reloading preview server with scrubber (`--port 5173`, `--out`) |
 | `svjeez skill` | Print `SKILL.md` (`--install [--dir .claude/skills]`) |
 | `svjeez version` | Print installed version |
+
+## Performance
+
+Filters (`effects`, `noise()` fills and texture layers) are the costly part of playback: Chromium rasters a filter again whenever it changes, and `noise`, `emboss` and turned (rotated) textures cost far more per pixel than `adjust`, `blur` or `shadow`. `check` predicts the work and warns (`moving-filter`) when a scene would drop frames:
+
+- **Keep filtered and textured layers still.** Move something unfiltered over them instead. A moving part inside a filter re-runs the whole filter; fake a shadow or lit edge on moving content with offset copies.
+- **Don't animate scale, rotate or skew on a group above a filter**: every filter under it is rastered again each frame. Move the transform below the filter, or keep the layer still. Moving (`offset`/`at`) and fading are free.
+- **Avoid full-frame motion over filtered layers** (rain, grain, a crossfade over a textured shot): the filters under it are rastered again where it repaints. Draw the motion under the filtered layer, use one moving layer instead of several, or let a textured shot fade out before the next fades in over it.
+- **Hidden groups are culled automatically**: a group held at opacity 0 for a second or more stops drawing, filters and all, so nothing to do there.
+- **Measure with `svjeez perf <file>`.** The prediction is calibrated on desktop Chrome; trust measured fps when they disagree.
 
 ## Check rule codes
 
@@ -129,13 +145,14 @@ Run `svjeez --help` for all flags. Every scene command accepts `[params]` (`--pa
 | `text-overflow` | Move text inside the canvas, shorten it, add `width` to wrap, or reduce `size`. |
 | `overlap` | Separate overlapping `<Text>` nodes (or opaque shapes covering text), or hide one while the other shows. |
 | `missing-glyph` | Switch to a font that contains the characters, or remove unsupported glyphs (no fallback font fills in). |
+| `whole-font` | Info only: the font embeds whole (size and reason in the message). Load a TTF with TrueType outlines, or pass `subset: false` to accept it. |
 | `low-contrast` | Pick theme tokens with sufficient contrast against the flat background in **both** light and dark schemes, or enlarge text. |
 | `loop-seam` | Set `loop: false` for one-shots, or return entering/moving nodes to their `0s` state with `exit()` / `.rewind()`. |
 | `visible-at-zero` | Start opacity/scale tracks hidden (use `enter()`), animate `fillOpacity` after `draw`, or gate `typed` caret opacity. |
 | `nothing-enters` | Info only: add `enter()` if the scene is meant to build up; ignore for pure-motion loops. |
 | `wasted-motion` | Start the track at its value when the node first becomes visible (or stop animating after it leaves). |
 | `static` | Animate at least one property within `duration` (`duration: 0` is rejected). |
-| `moving-filter` | Keep `effects` parameters static and animate the node's transform/opacity instead. |
+| `moving-filter` | A filter rastered again every frame. Warning when the predicted filter work passes what a 60 fps frame has room for (`cost: … filters NM of 21M`); the message names the cause. Keep filtered/textured layers still, move the transform below the filter, keep full-frame motion off filtered layers (see Performance). |
 | `moving-box` | Place the `<Group>` with `offset` instead of `at`/`anchor`, or keep moving children in an inner `<Group>`. |
 | `layout-overlap` | Increase `Stack`/`Grid` `gap` or reduce the child's `motion` offset/scale/rotation. |
 | `word-cut` | Widen `<Text width>` or reduce `size` so long words fit on one line. |

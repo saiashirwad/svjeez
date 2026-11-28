@@ -21,6 +21,7 @@ export const RULES = {
   "text-overflow": "Text past the canvas at rest, or a line wider than the width it wraps to.",
   overlap: "Two texts drawn over each other while both are fully shown.",
   "missing-glyph": "Characters the text's face has no glyph for.",
+  "whole-font": "A font embedded whole, because it could not be subset to the glyphs drawn.",
   "low-contrast": "Text or a thin line too close in color to the flat color behind it.",
   "loop-seam": "A looping scene jumps when it starts again.",
   "visible-at-zero": "Shown at 0s and cut straight back in, or filled while its stroke draws in.",

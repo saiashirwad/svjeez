@@ -93,7 +93,7 @@ const between = (
   if (each !== undefined && !(each > 0 && Number.isFinite(each)))
     throw new SceneError(`morph() needs an each of more than 0 seconds, got ${each}.`);
 
-  return { type: "morph", states: states.map(flat), spans, options };
+  return { type: "morph", states: states.map((state) => flat(state)), spans, options };
 };
 
 export const morph = Object.assign(
@@ -501,6 +501,9 @@ const absent = (effect: Effect): Effect => {
       return { ...effect, scale: 0 };
     case "shadow":
       return { ...effect, opacity: 0 };
+    case "noise":
+    case "emboss":
+      return effect;
   }
 };
 
@@ -581,6 +584,16 @@ const effectsOf = (plan: Plan, entry: Entry): Effect[] => {
           seed: effect.seed,
           octaves: effect.octaves,
         };
+      }
+
+      case "noise":
+      case "emboss": {
+        if (states.some((each) => !same(each, effect)))
+          throw new SceneError(
+            `morph() can't blend the ${effect.kind === "noise" ? "noise paint" : "emboss"} of ${plan.names.named(entry.key)}: it differs between states. Give every state the same one, or crossfade two nodes.`,
+          );
+
+        return effect;
       }
 
       case "shadow": {
@@ -992,7 +1005,7 @@ const build = (plan: Plan, entry: Entry): SceneNode => {
   return placedLike(node, rest);
 };
 
-const merge = (
+export const merge = (
   states: readonly (readonly SceneNode[])[],
   spans: readonly Interval[],
   timing: Timing,
@@ -1078,20 +1091,23 @@ const merge = (
   return top.map((entry) => build(plan, entry));
 };
 
+/** The keys the nodes lowered so far in one parent took, each with the place of the list it was written in, if any. */
+export type Taken = Map<string, string | undefined>;
+
 export const morphed = (
   element: MorphElement,
   timing: Timing,
-  taken: Set<string>,
+  taken: Taken,
   names: Names,
-  lower: (state: readonly SceneElement[], used: Set<string>) => SceneNode[],
+  lower: (state: readonly SceneElement[], used: Taken) => SceneNode[],
 ): SceneNode[] => {
   const states = element.states.map((state) => {
-    const used = new Set(taken);
+    const used: Taken = new Map(taken);
 
     return { nodes: lower(state, used), used };
   });
 
-  for (const { used } of states) for (const name of used) taken.add(name);
+  for (const { used } of states) for (const [name, list] of used) taken.set(name, list);
 
   return merge(
     states.map((state) => state.nodes),

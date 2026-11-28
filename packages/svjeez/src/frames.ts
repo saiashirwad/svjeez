@@ -2,11 +2,19 @@ import type { Seconds } from "./model/time";
 import { loopLength, seek } from "./page";
 import { rateOf } from "./svg/rate";
 import { systemColorScheme } from "./scheme";
-import { hostOf } from "./host";
+import { launch, size } from "./browser";
 
 export { costOf, type Cost } from "./svg/cost";
 
 export { validateSvg, type ValidationResult } from "./svg/validate";
+
+export {
+  measurePerf,
+  formatPerf,
+  type PerfOptions,
+  type PerfReport,
+  type PerfWindow,
+} from "./perf";
 
 export { checkPixels, type CheckOptions, type PixelReport } from "./check/check";
 
@@ -65,39 +73,6 @@ export interface Frames {
   readonly frames: readonly Frame[];
   readonly sheet?: Uint8Array;
 }
-
-const launch = async (caller: string, executablePath?: string) => {
-  const { chromium } = await import("playwright-core").catch(() => {
-    throw new Error(
-      `${caller} needs playwright-core. Install it with \`npm i -D playwright-core\`, then \`npx playwright-core install chromium-headless-shell\`.`,
-    );
-  });
-
-  try {
-    return await chromium.launch({ executablePath });
-  } catch (error) {
-    if (executablePath) throw error;
-
-    return chromium.launch({ channel: "chrome" }).catch(() => {
-      throw new Error(
-        `No Chromium to render with. Run \`${hostOf().installBrowser ?? "npx playwright-core install chromium-headless-shell"}\`, or pass executablePath.\n${error instanceof Error ? error.message : error}`,
-      );
-    });
-  }
-};
-
-const size = (caller: string, svg: string) => {
-  const root = /<svg\b[^>]*>/.exec(svg)?.[0] ?? "";
-  const width = parseFloat(/\swidth="([\d.]+)"/.exec(root)?.[1] ?? "");
-  const height = parseFloat(/\sheight="([\d.]+)"/.exec(root)?.[1] ?? "");
-
-  if (!(width > 0 && height > 0))
-    throw new Error(
-      `${caller} needs an <svg> root with numeric width and height, got ${width} by ${height}.`,
-    );
-
-  return { width, height };
-};
 
 const MAX_CAPTURE = 16000;
 const GAP = 12;
