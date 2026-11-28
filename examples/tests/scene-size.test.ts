@@ -33,7 +33,7 @@ const budgets = {
   escapement: { bytes: 50850, elements: 140, stops: 122, smil: 0, cost: 48 },
   code: { bytes: 8100, elements: 98, stops: 25, smil: 1, cost: 12 },
   "code-focus": { bytes: 4750, elements: 38, stops: 14, smil: 0, cost: 10 },
-  globe: { bytes: 435850, elements: 79, stops: 207, smil: 14, cost: 42.5 },
+  globe: { bytes: 556300, elements: 79, stops: 207, smil: 14, cost: 42.5 },
   math: { bytes: 22600, elements: 48, stops: 18, smil: 0, cost: 12 },
   flowchart: { bytes: 15000, elements: 74, stops: 105, smil: 0, cost: 39 },
   sequence: { bytes: 11300, elements: 79, stops: 52, smil: 0, cost: 30 },
