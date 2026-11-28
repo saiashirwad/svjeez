@@ -199,24 +199,28 @@
       <circle r="1.8" fill="#B4BCC8"/>
     </g>
     <g class="a m23" fill="#ECE9E2">
+      <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.125;0.26167" calcMode="discrete" dur="60s" repeatCount="indefinite"/>
       <line x1="172.72" y1="344.88" x2="264.107" y2="471.1" fill="none" stroke="#ECE9E2B3" stroke-width="0.84" pathLength="1" stroke-dasharray="1 2" class="a m22"/>
       <circle cx="264.107" cy="471.1" r="2.352"/>
       <text x="166" y="318" font-size="16.8">Barrel</text>
       <text x="166" y="338.16" font-size="13.44" fill="#96928A">54 teeth</text>
     </g>
     <g class="a m25" fill="#ECE9E2">
+      <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.135;0.27167" calcMode="discrete" dur="60s" repeatCount="indefinite"/>
       <line x1="476.72" y1="336.88" x2="528.821" y2="385.149" fill="none" stroke="#ECE9E2B3" stroke-width="0.84" pathLength="1" stroke-dasharray="1 2" class="a m24"/>
       <circle cx="528.821" cy="385.149" r="2.352"/>
       <text x="470" y="310" font-size="16.8">Centre wheel</text>
       <text x="470" y="330.16" font-size="13.44" fill="#96928A">48 teeth</text>
     </g>
     <g class="a m27" fill="#ECE9E2">
+      <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.29167;0.42833" calcMode="discrete" dur="60s" repeatCount="indefinite"/>
       <line x1="535.655" y1="781.872" x2="530.329" y2="744.551" fill="none" stroke="#ECE9E2B3" stroke-width="0.645" pathLength="1" stroke-dasharray="1 2" class="a m26"/>
       <circle cx="530.329" cy="744.551" r="1.806"/>
       <text x="446" y="786" font-size="12.9">Third wheel</text>
       <text x="446" y="801.48" font-size="10.32" fill="#96928A">48 teeth</text>
     </g>
     <g class="a m29" fill="#ECE9E2">
+      <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.30167;0.43833" calcMode="discrete" dur="60s" repeatCount="indefinite"/>
       <line x1="748.605" y1="755.872" x2="772.271" y2="632.94" fill="none" stroke="#ECE9E2B3" stroke-width="0.645" pathLength="1" stroke-dasharray="1 2" class="a m28"/>
       <circle cx="772.271" cy="632.94" r="1.806"/>
       <text x="753.12" y="760" font-size="12.9">Fourth wheel</text>
@@ -240,21 +244,25 @@
       <text x="864.48" y="512.6" font-size="8.4" fill="#96928A">1 turn in 6 s</text>
     </g>
     <g class="a m37" fill="#ECE9E2">
+      <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.60833;0.72833" calcMode="discrete" dur="60s" repeatCount="indefinite"/>
       <line x1="716.9" y1="398.848" x2="757" y2="360.718" fill="none" stroke="#ECE9E2B3" stroke-width="0.18" pathLength="1" stroke-dasharray="1 2" class="a m36"/>
       <circle cx="757" cy="360.718" r="0.504"/>
       <text x="707" y="400" font-size="3.6">Fork</text>
     </g>
     <g class="a m39" fill="#ECE9E2">
+      <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.61667;0.73667" calcMode="discrete" dur="60s" repeatCount="indefinite"/>
       <line x1="789.98" y1="398.848" x2="771.4" y2="375.718" fill="none" stroke="#ECE9E2B3" stroke-width="0.18" pathLength="1" stroke-dasharray="1 2" class="a m38"/>
       <circle cx="771.4" cy="375.718" r="0.504"/>
       <text x="791.24" y="400" font-size="3.6">Banking pin</text>
     </g>
     <g class="a m41" fill="#ECE9E2">
+      <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.74167;0.87833" calcMode="discrete" dur="60s" repeatCount="indefinite"/>
       <line x1="726.19" y1="384.656" x2="723.2" y2="409.673" fill="none" stroke="#ECE9E2B3" stroke-width="0.21" pathLength="1" stroke-dasharray="1 2" class="a m40"/>
       <circle cx="723.2" cy="409.673" r="0.588"/>
       <text x="697" y="386" font-size="4.2">Entry stone</text>
     </g>
     <g class="a m43" fill="#ECE9E2">
+      <animateTransform attributeName="transform" type="scale" values="0;1;0" keyTimes="0;0.75;0.88667" calcMode="discrete" dur="60s" repeatCount="indefinite"/>
       <line x1="798.33" y1="384.656" x2="804.176" y2="414.43" fill="none" stroke="#ECE9E2B3" stroke-width="0.21" pathLength="1" stroke-dasharray="1 2" class="a m42"/>
       <circle cx="804.176" cy="414.43" r="0.588"/>
       <text x="799.8" y="386" font-size="4.2">Exit stone</text>

@@ -3,7 +3,8 @@ import { costOf } from "./svg/cost";
 import { seek } from "./browser-seek";
 import { loopLength } from "./page";
 import { systemColorScheme } from "./scheme";
-import { launch, size, type ColorScheme } from "./frames";
+import { launch, size } from "./browser";
+import type { ColorScheme } from "./frames";
 
 export interface PerfOptions {
   /** How long each window plays, in milliseconds. Default 3000. */
