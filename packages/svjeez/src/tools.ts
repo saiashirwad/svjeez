@@ -144,3 +144,5 @@ export {
 export { componentMeta, isComponent, type ComponentMeta } from "./author/component";
 
 export { isStandardJsonSchema } from "./author/standard";
+
+export { easeAt } from "./model/ease-at";

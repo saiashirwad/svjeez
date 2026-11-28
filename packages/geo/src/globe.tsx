@@ -16,7 +16,7 @@ import {
   type Span,
   type Vec,
 } from "svjeez";
-import { SceneError, type ShapeProps } from "svjeez/tools";
+import { SceneError, easeAt, type Ease, type ShapeProps } from "svjeez/tools";
 import {
   finder,
   lonLat,
@@ -86,8 +86,8 @@ export interface RideOptions {
   readonly turn?: boolean;
   /** The seconds to follow the globe over; the turn's own span by default. */
   readonly over?: Span;
-  /** Reshapes the share of the route flown, 0 to 1: `(u) => u * u` starts slowly. Steady by default. */
-  readonly ease?: (share: number) => number;
+  /** Reshapes the share of the route flown, 0 to 1: `ease.inOut`, or a function such as `(u) => u * u`. Steady by default. */
+  readonly ease?: Ease | ((share: number) => number);
   /** The share of the radius, past the horizon, over which the rider fades out. Default 0.08. */
   readonly fade?: number;
 }
@@ -160,6 +160,9 @@ const REACH = 80;
 const SAMPLE = 0.05;
 
 const BAND = 30;
+
+/** The most, in radians, an edge folded out past the rim may swing around the globe. */
+const FOLD = 8 * RAD;
 
 const viewOf = ([lon, lat]: LonLat): View => {
   const [l, p] = [lon * RAD, lat * RAD];
@@ -463,6 +466,50 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
     return screen((sx + reach * ux) * out, (sy + reach * uy) * out);
   };
 
+  // The far side is folded out past the rim around the hole, so a short edge near the hole can
+  // swing far around the globe and its straight chord then cuts across the disc. Split edges
+  // until no chord past the rim sinks more than the tolerance into the disc, at any moment of
+  // the turn, and the same way at every moment so the frames still line up.
+  const fold = Math.min(FOLD, 2 * Math.acos(Math.max(0, 1 - tolerance / radius)));
+
+  const folded = (hole: Pivot) => {
+    const moments = times.map((t) => {
+      const v = view(t);
+      const s = hole.at(t);
+
+      return { v, h: [dot(s, v.right), dot(s, v.up)] as const };
+    });
+
+    const sweep = (a: Vec3, b: Vec3) =>
+      moments.reduce((most, { v, h }) => {
+        if (dot(a, v.toward) >= 0 && dot(b, v.toward) >= 0) return most;
+        const [ax, ay] = place(a, v, h);
+        const [bx, by] = place(b, v, h);
+
+        return Math.max(most, Math.abs(Math.atan2(ax * by - ay * bx, ax * bx + ay * by)));
+      }, 0);
+
+    const split = (a: Vec3, b: Vec3, depth: number, out: Vec3[]): void => {
+      if (depth < 16 && angle(a, b) > 1e-5 && sweep(a, b) > fold) {
+        const middle = slerp(a, b, 0.5);
+        split(a, middle, depth + 1, out);
+        split(middle, b, depth + 1, out);
+      } else out.push(b);
+    };
+
+    return (strand: Strand): Strand => {
+      const { points, closed } = strand;
+      const out: Vec3[] = [points[0]!];
+
+      for (let i = 1; i < points.length + (closed ? 1 : 0); i++)
+        split(points[i - 1]!, points[i % points.length]!, 0, out);
+
+      if (closed) out.pop();
+
+      return { points: out, closed };
+    };
+  };
+
   const bands = (list: readonly Unit[]): [number, Unit[]][] => {
     const found = new Map<number, Unit[]>();
 
@@ -500,13 +547,14 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
         "Pass GeoJSON with a line or a polygon larger than simplify.",
       );
     const hole = pivot(list.flatMap((one) => one.strands));
+    const fine = folded(hole);
 
     const all = bands(list);
 
     const pieces = all.map(([band, group]) => {
       const lo = band * BAND - 180;
       const key = all.length === 1 ? name : `${name}-${lonName(lo)}-${lonName(lo + BAND)}`;
-      const strands = group.flatMap((one) => one.strands);
+      const strands = group.flatMap((one) => one.strands).map(fine);
       const closed = strands.map((strand) => strand.closed);
 
       const placed = (t: number) => {
@@ -737,7 +785,7 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
       from,
       to,
       progress,
-      { turn: heading = false, over: window, fade = 0.08, ease = (u: number) => u } = {},
+      { turn: heading = false, over: window, fade = 0.08, ease: curve = (u: number) => u } = {},
     ) {
       const [a, b] = [vec(lonLat(from, "ride()")), vec(lonLat(to, "ride()"))];
 
@@ -756,8 +804,10 @@ export function globe(data: GeoData, options: GlobeOptions): Globe {
           "Write ride(from, to, progress, { over: span(0, 8) }).",
         );
 
+      const shape = curve instanceof Function ? curve : (u: number) => easeAt(curve, u);
+
       const share = (t: number) =>
-        Math.min(1, Math.max(0, ease((t - progress.start) / progress.over)));
+        Math.min(1, Math.max(0, shape((t - progress.start) / progress.over)));
 
       const at = (s: number, t: number) => {
         const [p, v] = [slerp(a, b, s), view(t)];

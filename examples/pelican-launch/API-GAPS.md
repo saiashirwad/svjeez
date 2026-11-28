@@ -56,3 +56,10 @@ Still open:
 - **No scrolling-window chart.** The odometer's cadence sparkline is a long polyline slid under a clip.
 - **Video can't render `<Shader>`.** Out of scope here (the film is SVG only).
 
+
+## Round 3: a believable globe
+
+| # | Gap | Fixed |
+|---|---|---|
+| 1 | A globe facing 10°–26° north or south flooded its whole face with land: a coast a few degrees from the pole folded behind the rim was placed 100°+ apart around the disc, and the straight chord between them cut across it | `globe()` splits far-side edges until each swings at most a few degrees around the centre (sized from `tolerance`), the same split in every frame of a turn. Regression test in `packages/geo/test/geo.test.tsx`. |
+| 2 | `earth.ride({ ease })` took only a function, unlike every other svjeez curve option | It takes `ease.*` curves too; `easeAt` is exported from `svjeez/tools` for companion packages. |

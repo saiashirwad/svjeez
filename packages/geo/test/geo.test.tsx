@@ -1,7 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { createRequire } from "node:module";
+import { geoContains } from "d3-geo";
 import type { FeatureCollection } from "geojson";
-import { Group, Shape, scene, span } from "svjeez";
+import { Group, Shape, scene, span, type Vec } from "svjeez";
+import { merge } from "topojson-client";
+import type { MultiPolygon, Polygon } from "topojson-specification";
 import { SceneError, isScene, svg } from "svjeez/tools";
 import {
   GlobeShape,
@@ -10,6 +13,8 @@ import {
   night,
   project,
   sun,
+  type Canvas,
+  type LonLat,
   type Topology,
 } from "../src/index.ts";
 
@@ -335,6 +340,84 @@ describe("globe", () => {
     expect(thrown(() => turning.ride([1, 1], [1, 1], share)).problem).toContain(
       "starts where it ends",
     );
+  });
+
+  test("land folded around a pole just behind the rim does not flood the face", () => {
+    const countries = world.objects.countries;
+
+    if (countries?.type !== "GeometryCollection") throw new Error("expected countries");
+
+    const land = merge(
+      world,
+      countries.geometries.filter(
+        (g): g is Polygon | MultiPolygon => g.type === "Polygon" || g.type === "MultiPolygon",
+      ),
+    );
+
+    const radius = 420;
+    const frame = (top: number): Canvas => ({ size: [1280, 720], center: [640, top] });
+
+    const cases: readonly { facing: LonLat; lean: number; canvas?: Canvas }[] = [
+      { facing: [16, 12], lean: 0 },
+      { facing: [16, 14], lean: 0, canvas: frame(680) },
+      { facing: [170, 20], lean: 0, canvas: frame(680) },
+      { facing: [16, -16], lean: 25, canvas: frame(40) },
+    ];
+
+    for (const { facing, lean, canvas } of cases) {
+      const earth = globe(world, {
+        radius,
+        facing,
+        lean,
+        simplify: 0.3,
+        ...(canvas && { canvas }),
+      });
+
+      const contours = earth.land.pieces.map((piece) => {
+        if (!("kind" in piece) || piece.kind !== "path") throw new Error("expected a still path");
+
+        return piece.contours.map((c) => [c.start, ...c.curves.map((curve) => curve.at(-1)!)]);
+      });
+
+      const winding = (ring: readonly Vec[], [px, py]: Vec) =>
+        ring.reduce((w, [x0, y0], i) => {
+          const [x1, y1] = ring[(i + 1) % ring.length]!;
+          const side = (x1 - x0) * (py - y0) - (px - x0) * (y1 - y0);
+
+          if (y0 <= py) return y1 > py && side > 0 ? w + 1 : w;
+
+          return y1 <= py && side < 0 ? w - 1 : w;
+        }, 0);
+
+      let [wrong, all] = [0, 0];
+
+      for (let lon = -180; lon < 180; lon += 4)
+        for (let lat = -88; lat <= 88; lat += 4) {
+          const { point, z } = earth.locate([lon, lat], 0);
+          const [x, y] = point;
+
+          if (z < 0.1) continue;
+
+          if (
+            canvas &&
+            (x + canvas.center[0] < 0 ||
+              x + canvas.center[0] > canvas.size[0] ||
+              y + canvas.center[1] < 0 ||
+              y + canvas.center[1] > canvas.size[1])
+          )
+            continue;
+
+          const drawn = contours.some(
+            (rings) => rings.reduce((w, ring) => w + winding(ring, point), 0) !== 0,
+          );
+
+          all++;
+
+          if (drawn !== geoContains(land, [lon, lat])) wrong++;
+        }
+
+      expect({ facing, share: wrong / all < 0.03 }).toEqual({ facing, share: true });
+    }
   });
 
   test("builds inside a scene", () => {
