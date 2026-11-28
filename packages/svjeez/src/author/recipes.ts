@@ -386,7 +386,7 @@ export const sampled = Object.assign(sampledTrack, {
   all<R extends Record<string, number | Vec | Geometry>>(
     sample: (t: Seconds) => R,
     window: Interval,
-    options: SampledOptions,
+    options: SampledOptions = {},
   ): SampledAll<R> {
     const cache = new Map<Seconds, R>();
 
